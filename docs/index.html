@@ -28,18 +28,14 @@
     .search-input:focus { outline: none; border-color: #3b82f6; background: white; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
     .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 18px; }
     
-    .quick-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-    .quick-tag { padding: 8px 14px; border-radius: 100px; border: 1px solid #e2e8f0; background: white; color: #475569; font-size: 13px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
-    .quick-tag:hover { background: #3b82f6; color: white; border-color: #3b82f6; transform: translateY(-1px); }
-    
-    .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; }
     .filter-btn { padding: 8px 14px; border-radius: 10px; border: 2px solid #e2e8f0; background: white; color: #475569; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
     .filter-btn:hover { border-color: #3b82f6; color: #3b82f6; }
     .filter-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
     .filter-count { background: rgba(0,0,0,0.08); padding: 2px 7px; border-radius: 100px; font-size: 11px; }
     .filter-btn.active .filter-count { background: rgba(255,255,255,0.25); }
     
-    .categories { display: flex; gap: 6px; flex-wrap: wrap; background: white; border-radius: 12px; padding: 12px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+    .categories { display: flex; gap: 6px; flex-wrap: wrap; }
     .cat-btn { padding: 8px 14px; border-radius: 8px; border: none; background: #f1f5f9; color: #475569; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
     .cat-btn:hover { background: #e2e8f0; }
     .cat-btn.active { background: #1e293b; color: white; }
@@ -115,24 +111,19 @@
         <span class="search-icon">🔍</span>
         <input type="text" class="search-input" id="searchInput" placeholder="Suche z.B. Kaffee, jö, gratis, BILLA...">
       </div>
-      <div class="quick-tags">
-        <button class="quick-tag" data-q="gratis">🆓 Gratis</button>
-        <button class="quick-tag" data-q="Kaffee">☕ Kaffee</button>
-        <button class="quick-tag" data-q="jö">🟡 jö</button>
-        <button class="quick-tag" data-q="BILLA">🛒 BILLA</button>
-        <button class="quick-tag" data-q="McDonald">🍔 McDonald's</button>
-        <button class="quick-tag" data-q="Geburtstag">🎂 Geburtstag</button>
-      </div>
-      <div class="filters">
+      
+      <!-- EINE Filterleiste für alles -->
+      <div class="filter-row">
         <button class="filter-btn active" data-type="all">Alle <span class="filter-count" id="cAll">0</span></button>
         <button class="filter-btn" data-type="gratis">🎁 Gratis <span class="filter-count" id="cGratis">0</span></button>
         <button class="filter-btn" data-type="rabatt">💰 Rabatt <span class="filter-count" id="cRabatt">0</span></button>
         <button class="filter-btn" data-type="cashback">💵 Cashback <span class="filter-count" id="cCashback">0</span></button>
         <button class="filter-btn" data-type="new">✨ Neu <span class="filter-count" id="cNew">0</span></button>
       </div>
+      
+      <!-- Kategorien direkt darunter -->
+      <div class="categories" id="categories"></div>
     </div>
-    
-    <div class="categories" id="categories"></div>
     
     <div class="results-bar">
       <span class="results-count" id="resultsCount">0 Deals</span>
@@ -336,10 +327,6 @@ function updateCounts() {
 // EVENTS
 // ============================================
 searchInput.oninput = e => { searchQuery = e.target.value; render(); };
-
-document.querySelectorAll('.quick-tag').forEach(tag => {
-  tag.onclick = () => { searchInput.value = tag.dataset.q; searchQuery = tag.dataset.q; render(); };
-});
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.onclick = () => {
