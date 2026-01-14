@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deal Finder Österreich - Gratis Kaffee, Freebies & Deals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+    
+    .container { max-width: 1200px; margin: 0 auto; padding: 32px 20px; }
+    
+    /* Header */
+    header { text-align: center; margin-bottom: 32px; }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(16, 185, 129, 0.15);
+      padding: 8px 18px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .badge-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.2); }
+    }
+    
+    .badge-text { font-size: 13px; color: #10b981; }
+    
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(32px, 7vw, 56px);
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 0%, #a5b4fc 50%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+    
+    .subtitle { color: rgba(255,255,255,0.6); font-size: 16px; }
+    
+    /* Status Bar */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 100px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+    }
+    
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+    
+    .status-dot.loading {
+      background: #f59e0b;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    
+    .status-dot.error { background: #ef4444; }
+    
+    .refresh-btn {
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    
+    .refresh-btn:hover { background: rgba(255,255,255,0.1); }
+    .refresh-btn.loading .refresh-icon { animation: spin 1s linear infinite; }
+    
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* Controls */
+    .controls { margin-bottom: 28px; }
+    
+    .filters-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    
+    .dropdown { position: relative; }
+    
+    .dropdown-btn {
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 180px;
+      transition: all 0.2s;
+    }
+    
+    .dropdown-btn:hover { background: rgba(255,255,255,0.1); }
+    .dropdown-arrow { margin-left: auto; opacity: 0.5; }
+    
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 8px;
+      background: rgba(20, 20, 40, 0.98);
+      backdrop-filter: blur(20px);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      overflow: hidden;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .dropdown-menu.active { display: block; }
+    
+    .dropdown-item {
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.2s;
+    }
+    
+    .dropdown-item:hover { background: rgba(99, 102, 241, 0.3); }
+    .dropdown-item.active { background: rgba(99, 102, 241, 0.2); }
+    
+    .dropdown-section {
+      padding: 10px 16px 6px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.4);
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .dropdown-section:first-child { border-top: none; }
+    
+    .filter-btn {
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    
+    .filter-btn:hover { transform: translateY(-2px); }
+    
+    .filter-btn.active {
+      border: 2px solid #10b981;
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      font-weight: 600;
+    }
+    
+    .filter-count {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-size: 12px;
+    }
+    
+    .filter-btn.active .filter-count { background: #10b981; color: #000; }
+    
+    /* Search */
+    .search-container {
+      position: relative;
+      max-width: 550px;
+      margin: 0 auto 20px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 16px 24px 16px 52px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      font-size: 16px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    
+    .search-input::placeholder { color: rgba(255,255,255,0.4); }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      opacity: 0.5;
+    }
+    
+    /* Quick Tags */
+    .quick-tags {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .quick-tag {
+      padding: 8px 14px;
+      border-radius: 100px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.8);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .quick-tag:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+    
+    /* Categories */
+    .categories {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+    
+    .category-btn {
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    
+    .category-btn:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.08);
+    }
+    
+    .category-btn.active {
+      border: 2px solid #6366f1;
+      background: rgba(99, 102, 241, 0.2);
+    }
+    
+    /* Results */
+    .results-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .results-count { font-size: 15px; color: rgba(255,255,255,0.6); }
+    .saved-count { font-size: 14px; color: #ec4899; }
+    
+    /* Deals Grid */
+    .deals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    
+    .deal-card {
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+      animation: slideUp 0.4s ease forwards;
+      opacity: 0;
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .deal-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    
+    .deal-accent {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    
+    .deal-accent.gratis { background: linear-gradient(90deg, #10b981, transparent); }
+    .deal-accent.rabatt { background: linear-gradient(90deg, #6366f1, transparent); }
+    .deal-accent.testabo { background: linear-gradient(90deg, #ec4899, transparent); }
+    .deal-accent.cashback { background: linear-gradient(90deg, #f59e0b, transparent); }
+    
+    .hot-badge {
+      position: absolute;
+      top: 14px; right: 14px;
+      background: linear-gradient(135deg, #f97316, #ef4444);
+      padding: 5px 12px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    
+    .new-badge {
+      position: absolute;
+      top: 14px; right: 14px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      padding: 5px 12px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    
+    .save-btn {
+      position: absolute;
+      right: 14px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      opacity: 0.4;
+      transition: all 0.2s;
+    }
+    
+    .save-btn:hover { transform: scale(1.2); }
+    .save-btn.saved { opacity: 1; }
+    
+    .type-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    
+    .type-badge.gratis { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .type-badge.rabatt { background: rgba(99, 102, 241, 0.2); color: #6366f1; }
+    .type-badge.testabo { background: rgba(236, 72, 153, 0.2); color: #ec4899; }
+    .type-badge.cashback { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    
+    .deal-brand {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    
+    .deal-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.3;
+      padding-right: 40px;
+    }
+    
+    .deal-description {
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      min-height: 42px;
+    }
+    
+    .deal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 12px;
+    }
+    
+    .deal-source {
+      color: rgba(255,255,255,0.4);
+      max-width: 55%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .deal-source a {
+      color: rgba(255,255,255,0.4);
+      text-decoration: none;
+    }
+    
+    .deal-source a:hover {
+      color: rgba(255,255,255,0.7);
+      text-decoration: underline;
+    }
+    
+    .deal-expires { color: rgba(255,255,255,0.3); }
+    
+    /* Empty & Loading States */
+    .empty-state, .loading-state {
+      text-align: center;
+      padding: 70px 20px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 24px;
+      border: 1px dashed rgba(255,255,255,0.1);
+    }
+    
+    .empty-state-icon, .loading-icon { font-size: 56px; margin-bottom: 16px; }
+    .loading-icon { animation: pulse 1.5s ease-in-out infinite; }
+    .empty-state-title { font-size: 20px; font-weight: 600; margin-bottom: 10px; }
+    .empty-state-text { color: rgba(255,255,255,0.5); font-size: 15px; }
+    
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 56px;
+      padding-top: 28px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .footer-update { color: rgba(255,255,255,0.5); font-size: 13px; margin-bottom: 8px; }
+    .footer-sources { color: rgba(255,255,255,0.25); font-size: 12px; margin-bottom: 8px; }
+    .footer-github { margin-top: 16px; }
+    .footer-github a {
+      color: rgba(255,255,255,0.4);
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .footer-github a:hover { color: #fff; }
+    
+    /* Responsive */
+    @media (max-width: 600px) {
+      .deals-grid { grid-template-columns: 1fr; }
+      .filters-row { flex-direction: column; align-items: stretch; }
+      .dropdown-btn, .filter-btn { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">
+        <span class="badge-dot"></span>
+        <span class="badge-text" id="dealsCount">Deals werden geladen...</span>
+      </div>
+      <h1>Deal Finder 🇦🇹</h1>
+      <p class="subtitle">Gratis Kaffee, Freebies & Deals - Automatisch aktualisiert!</p>
+    </header>
+    
+    <div class="status-bar">
+      <div class="status-item">
+        <span class="status-dot loading" id="statusDot"></span>
+        <span id="statusText">Lade Deals...</span>
+      </div>
+      <button class="refresh-btn" id="refreshBtn">
+        <span class="refresh-icon">🔄</span>
+        <span>Aktualisieren</span>
+      </button>
+    </div>
+    
+    <div class="controls">
+      <div class="filters-row">
+        <div class="dropdown">
+          <button class="dropdown-btn" id="locationBtn">
+            <span id="locationText">📍 Wien</span>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-menu" id="locationMenu">
+            <div class="dropdown-section">Österreich</div>
+            <button class="dropdown-item active" data-location="wien" data-country="at">🏛️ Wien</button>
+            <button class="dropdown-item" data-location="graz" data-country="at">🏰 Graz</button>
+            <button class="dropdown-item" data-location="linz" data-country="at">🏭 Linz</button>
+            <button class="dropdown-item" data-location="salzburg" data-country="at">🎻 Salzburg</button>
+            <button class="dropdown-item" data-location="innsbruck" data-country="at">🏔️ Innsbruck</button>
+            <button class="dropdown-item" data-location="at" data-country="at">🇦🇹 Ganz Österreich</button>
+            <div class="dropdown-section">Andere Länder</div>
+            <button class="dropdown-item" data-location="de" data-country="de">🇩🇪 Deutschland</button>
+            <button class="dropdown-item" data-location="ch" data-country="ch">🇨🇭 Schweiz</button>
+            <button class="dropdown-item" data-location="all" data-country="all">🌍 Alle Länder</button>
+          </div>
+        </div>
+        
+        <button class="filter-btn" id="freeFilter">
+          <span id="freeCheck">○</span>
+          <span>Nur 100% Gratis</span>
+          <span class="filter-count" id="freeCount">0</span>
+        </button>
+        
+        <button class="filter-btn" id="newFilter">
+          <span id="newCheck">○</span>
+          <span>Nur neue Deals</span>
+          <span class="filter-count" id="newCount">0</span>
+        </button>
+      </div>
+      
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Suche z.B. Kaffee, jö, IKEA, McDonald's...">
+      </div>
+      
+      <div class="quick-tags">
+        <button class="quick-tag" data-search="Kaffee">☕ Kaffee</button>
+        <button class="quick-tag" data-search="jö">🎁 jö Bonus</button>
+        <button class="quick-tag" data-search="gratis">🆓 Gratis</button>
+        <button class="quick-tag" data-search="IKEA">🪑 IKEA</button>
+        <button class="quick-tag" data-search="Geburtstag">🎂 Geburtstag</button>
+        <button class="quick-tag" data-search="Streaming">🎬 Streaming</button>
+      </div>
+    </div>
+    
+    <div class="categories" id="categories"></div>
+    
+    <div class="results-info">
+      <span class="results-count" id="resultsCount">0 Deals gefunden</span>
+      <span class="saved-count" id="savedCount"></span>
+    </div>
+    
+    <div id="mainContent">
+      <div class="loading-state" id="loadingState">
+        <div class="loading-icon">⏳</div>
+        <h3 class="empty-state-title">Deals werden geladen...</h3>
+        <p class="empty-state-text">Bitte warten</p>
+      </div>
+    </div>
+    
+    <div class="deals-grid" id="dealsGrid" style="display: none;"></div>
+    
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <div class="empty-state-icon">🔍</div>
+      <h3 class="empty-state-title">Keine Deals gefunden</h3>
+      <p class="empty-state-text">Versuche eine andere Suche oder Kategorie</p>
+    </div>
+    
+    <footer>
+      <p class="footer-update" id="footerUpdate">Zuletzt aktualisiert: --</p>
+      <p class="footer-sources">Quellen: Preisjäger, MyDealz, Preispirat • Alle Angaben ohne Gewähr</p>
+      <div class="footer-github">
+        <a href="https://github.com/DEIN-USERNAME/deal-finder" target="_blank">⭐ GitHub Repository</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // ============================================
+    // CONFIG - Passe diese URL an!
+    // ============================================
+    
+    // Option 1: GitHub Pages (kostenlos)
+    // Format: https://DEIN-USERNAME.github.io/deal-finder/deals.json
+    const DEALS_URL = './deals.json';
+    
+    // Option 2: Direkt von GitHub Raw (als Backup)
+    const DEALS_URL_BACKUP = 'https://raw.githubusercontent.com/DEIN-USERNAME/deal-finder/main/docs/deals.json';
+    
+    // ============================================
+    // STATE
+    // ============================================
+    let deals = [];
+    let lastUpdated = null;
+    let selectedLocation = "wien";
+    let selectedCountry = "at";
+    let selectedCategory = "all";
+    let searchQuery = "";
+    let onlyFree = false;
+    let onlyNew = false;
+    let savedDeals = JSON.parse(localStorage.getItem('savedDeals') || '[]');
+    
+    // ============================================
+    // DOM ELEMENTS
+    // ============================================
+    const dealsGrid = document.getElementById('dealsGrid');
+    const loadingState = document.getElementById('loadingState');
+    const emptyState = document.getElementById('emptyState');
+    const mainContent = document.getElementById('mainContent');
+    const resultsCount = document.getElementById('resultsCount');
+    const savedCount = document.getElementById('savedCount');
+    const freeCount = document.getElementById('freeCount');
+    const newCount = document.getElementById('newCount');
+    const freeCheck = document.getElementById('freeCheck');
+    const newCheck = document.getElementById('newCheck');
+    const searchInput = document.getElementById('searchInput');
+    const categoriesContainer = document.getElementById('categories');
+    const locationBtn = document.getElementById('locationBtn');
+    const locationMenu = document.getElementById('locationMenu');
+    const locationText = document.getElementById('locationText');
+    const freeFilter = document.getElementById('freeFilter');
+    const newFilter = document.getElementById('newFilter');
+    const dealsCountBadge = document.getElementById('dealsCount');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const footerUpdate = document.getElementById('footerUpdate');
+    const refreshBtn = document.getElementById('refreshBtn');
+    
+    // ============================================
+    // CATEGORIES
+    // ============================================
+    const categories = [
+      { id: "all", name: "Alle", emoji: "🎁" },
+      { id: "food", name: "Essen", emoji: "🍔" },
+      { id: "retail", name: "Shopping", emoji: "🛒" },
+      { id: "entertainment", name: "Entertainment", emoji: "🎬" },
+      { id: "beauty", name: "Beauty", emoji: "💄" },
+      { id: "fashion", name: "Fashion", emoji: "👗" },
+      { id: "events", name: "Events", emoji: "🎭" },
+      { id: "travel", name: "Reisen", emoji: "✈️" },
+      { id: "baby", name: "Baby", emoji: "👶" },
+      { id: "tech", name: "Tech", emoji: "📱" }
+    ];
+    
+    // ============================================
+    // FETCH DEALS
+    // ============================================
+    async function fetchDeals() {
+      statusDot.className = 'status-dot loading';
+      statusText.textContent = 'Lade Deals...';
+      
+      try {
+        let response = await fetch(DEALS_URL + '?t=' + Date.now());
+        
+        if (!response.ok) {
+          // Try backup URL
+          response = await fetch(DEALS_URL_BACKUP + '?t=' + Date.now());
+        }
+        
+        if (!response.ok) throw new Error('Deals nicht verfügbar');
+        
+        const data = await response.json();
+        deals = data.deals || [];
+        lastUpdated = data.lastUpdated ? new Date(data.lastUpdated) : new Date();
+        
+        statusDot.className = 'status-dot';
+        statusText.textContent = `${deals.length} Deals geladen`;
+        
+        // Update footer
+        footerUpdate.textContent = `Zuletzt aktualisiert: ${lastUpdated.toLocaleString('de-AT')}`;
+        
+        // Hide loading, show grid
+        mainContent.style.display = 'none';
+        dealsGrid.style.display = 'grid';
+        
+        renderDeals();
+      } catch (error) {
+        console.error('Error loading deals:', error);
+        statusDot.className = 'status-dot error';
+        statusText.textContent = 'Fehler beim Laden';
+        loadingState.innerHTML = `
+          <div class="empty-state-icon">❌</div>
+          <h3 class="empty-state-title">Deals konnten nicht geladen werden</h3>
+          <p class="empty-state-text">Bitte später erneut versuchen oder <a href="${DEALS_URL_BACKUP}" target="_blank" style="color: #6366f1;">direkt öffnen</a></p>
+        `;
+      }
+    }
+    
+    // ============================================
+    // RENDER FUNCTIONS
+    // ============================================
+    function renderCategories() {
+      categoriesContainer.innerHTML = categories.map(cat => `
+        <button class="category-btn ${selectedCategory === cat.id ? 'active' : ''}" data-category="${cat.id}">
+          <span>${cat.emoji}</span>
+          <span>${cat.name}</span>
+        </button>
+      `).join('');
+      
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedCategory = btn.dataset.category;
+          renderCategories();
+          renderDeals();
+        });
+      });
+    }
+    
+    function filterDeals() {
+      return deals.filter(deal => {
+        const cities = ['wien', 'graz', 'linz', 'salzburg', 'innsbruck'];
+        
+        if (selectedLocation === 'all') {
+          // Show all
+        } else if (cities.includes(selectedLocation)) {
+          if (deal.cities && deal.cities.length > 0) {
+            if (!deal.cities.includes(selectedLocation)) return false;
+          } else {
+            if (!deal.countries || !deal.countries.includes(selectedCountry)) return false;
+          }
+        } else {
+          if (!deal.countries || !deal.countries.includes(selectedLocation)) return false;
+        }
+        
+        if (selectedCategory !== 'all' && deal.category !== selectedCategory) return false;
+        
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          const searchIn = [
+            deal.brand || '',
+            deal.title || '',
+            deal.description || '',
+            ...(deal.tags || [])
+          ].join(' ').toLowerCase();
+          if (!searchIn.includes(query)) return false;
+        }
+        
+        if (onlyFree && deal.type !== 'gratis') return false;
+        if (onlyNew && !deal.isNew) return false;
+        
+        return true;
+      });
+    }
+    
+    function renderDeals() {
+      const filteredDeals = filterDeals();
+      const freeDeals = filteredDeals.filter(d => d.type === 'gratis');
+      const newDeals = filteredDeals.filter(d => d.isNew);
+      
+      resultsCount.textContent = `${filteredDeals.length} Deals gefunden`;
+      freeCount.textContent = freeDeals.length;
+      newCount.textContent = newDeals.length;
+      savedCount.textContent = savedDeals.length > 0 ? `❤️ ${savedDeals.length} gespeichert` : '';
+      
+      const locationNames = {
+        wien: 'Wien', graz: 'Graz', linz: 'Linz', salzburg: 'Salzburg', innsbruck: 'Innsbruck',
+        at: 'Österreich', de: 'Deutschland', ch: 'Schweiz', all: 'alle Länder'
+      };
+      dealsCountBadge.textContent = `${filteredDeals.length} Deals in ${locationNames[selectedLocation]}`;
+      
+      if (filteredDeals.length === 0) {
+        dealsGrid.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+      }
+      
+      emptyState.style.display = 'none';
+      dealsGrid.style.display = 'grid';
+      
+      dealsGrid.innerHTML = filteredDeals.map((deal, index) => {
+        const isSaved = savedDeals.includes(deal.id);
+        const saveTop = (deal.hot || deal.isNew) ? '52px' : '14px';
+        
+        const typeLabels = {
+          gratis: '🎁 GRATIS',
+          rabatt: '💰 RABATT',
+          testabo: '⏰ TESTABO',
+          cashback: '💵 CASHBACK'
+        };
+        
+        let badge = '';
+        if (deal.hot) {
+          badge = '<div class="hot-badge">🔥 HOT</div>';
+        } else if (deal.isNew) {
+          badge = '<div class="new-badge">✨ NEU</div>';
+        }
+        
+        const sourceLink = deal.url 
+          ? `<a href="${deal.url}" target="_blank" rel="noopener">${deal.source}</a>`
+          : deal.source;
+        
+        return `
+          <div class="deal-card" style="animation-delay: ${index * 0.03}s">
+            <div class="deal-accent ${deal.type || 'rabatt'}"></div>
+            ${badge}
+            <button class="save-btn ${isSaved ? 'saved' : ''}" style="top: ${saveTop}" data-id="${deal.id}">
+              ${isSaved ? '❤️' : '🤍'}
+            </button>
+            <div class="type-badge ${deal.type || 'rabatt'}">${typeLabels[deal.type] || '🎁 DEAL'}</div>
+            <div class="deal-brand">${deal.brand || 'Deal'}</div>
+            <h3 class="deal-title">${deal.title || ''}</h3>
+            <p class="deal-description">${deal.description || ''}</p>
+            <div class="deal-footer">
+              <span class="deal-source">📍 ${sourceLink}</span>
+              <span class="deal-expires">⏰ ${deal.expires || 'Begrenzt'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      // Save button listeners
+      document.querySelectorAll('.save-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          if (savedDeals.includes(id)) {
+            savedDeals = savedDeals.filter(i => i !== id);
+          } else {
+            savedDeals.push(id);
+          }
+          localStorage.setItem('savedDeals', JSON.stringify(savedDeals));
+          renderDeals();
+        });
+      });
+    }
+    
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+    
+    // Location dropdown
+    locationBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      locationMenu.classList.toggle('active');
+    });
+    
+    document.querySelectorAll('#locationMenu .dropdown-item').forEach(item => {
+      item.addEventListener('click', () => {
+        selectedLocation = item.dataset.location;
+        selectedCountry = item.dataset.country;
+        locationText.textContent = item.textContent.trim();
+        
+        document.querySelectorAll('#locationMenu .dropdown-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        locationMenu.classList.remove('active');
+        renderDeals();
+      });
+    });
+    
+    document.addEventListener('click', () => {
+      locationMenu.classList.remove('active');
+    });
+    
+    // Filters
+    freeFilter.addEventListener('click', () => {
+      onlyFree = !onlyFree;
+      freeFilter.classList.toggle('active', onlyFree);
+      freeCheck.textContent = onlyFree ? '✓' : '○';
+      renderDeals();
+    });
+    
+    newFilter.addEventListener('click', () => {
+      onlyNew = !onlyNew;
+      newFilter.classList.toggle('active', onlyNew);
+      newCheck.textContent = onlyNew ? '✓' : '○';
+      renderDeals();
+    });
+    
+    // Search
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderDeals();
+    });
+    
+    // Quick tags
+    document.querySelectorAll('.quick-tag').forEach(tag => {
+      tag.addEventListener('click', () => {
+        searchInput.value = tag.dataset.search;
+        searchQuery = tag.dataset.search;
+        renderDeals();
+      });
+    });
+    
+    // Refresh button
+    refreshBtn.addEventListener('click', () => {
+      refreshBtn.classList.add('loading');
+      fetchDeals().then(() => {
+        setTimeout(() => refreshBtn.classList.remove('loading'), 500);
+      });
+    });
+    
+    // ============================================
+    // INITIALIZE
+    // ============================================
+    renderCategories();
+    fetchDeals();
+    
+    // Auto-refresh every 10 minutes
+    setInterval(fetchDeals, 10 * 60 * 1000);
+  </script>
+</body>
+</html>
