@@ -1,400 +1,369 @@
-// deal-scraper.js
-// Dieses Script scraped Deal-Websites und speichert die Ergebnisse als JSON
+// deal-scraper-live.js
+// Scraped echte österreichische Quellen für aktuelle Deals
+// Läuft alle 2 Stunden via GitHub Actions
 
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
 
 // ============================================
-// CONFIGURATION
+// QUELLEN - Echte österreichische Websites
 // ============================================
 
 const SOURCES = [
   {
+    name: 'BILLA Aktionen',
+    url: 'https://www.billa.at/unsere-aktionen/aktionen',
+    type: 'html',
+    brand: 'BILLA',
+    logo: '🟠',
+    category: 'supermarkt'
+  },
+  {
+    name: 'Lidl Angebote',
+    url: 'https://www.lidl.at/c/billiger-montag/a10039437',
+    type: 'html',
+    brand: 'Lidl',
+    logo: '🔵',
+    category: 'supermarkt'
+  },
+  {
+    name: 'SPAR Aktionen',
+    url: 'https://www.spar.at/angebote',
+    type: 'html',
+    brand: 'SPAR',
+    logo: '🟢',
+    category: 'supermarkt'
+  },
+  {
+    name: 'HOFER Aktionen',
+    url: 'https://www.hofer.at/de/angebote.html',
+    type: 'html',
+    brand: 'HOFER',
+    logo: '🔴',
+    category: 'supermarkt'
+  },
+  {
+    name: 'OMV Aktionen',
+    url: 'https://www.omv.at/de',
+    type: 'html',
+    brand: 'OMV',
+    logo: '⛽',
+    category: 'kaffee'
+  },
+  {
+    name: 'McDonald\'s Österreich',
+    url: 'https://www.mcdonalds.at/produkte/aktionen',
+    type: 'html',
+    brand: "McDonald's",
+    logo: '🍟',
+    category: 'essen'
+  },
+  {
+    name: 'dm Angebote',
+    url: 'https://www.dm.at/angebote',
+    type: 'html',
+    brand: 'dm',
+    logo: '🧴',
+    category: 'drogerie'
+  },
+  {
+    name: 'BIPA Aktionen',
+    url: 'https://www.bipa.at/aktionen',
+    type: 'html',
+    brand: 'BIPA',
+    logo: '💄',
+    category: 'drogerie'
+  },
+  {
+    name: 'MediaMarkt Angebote',
+    url: 'https://www.mediamarkt.at/de/campaign/angebote.html',
+    type: 'html',
+    brand: 'MediaMarkt',
+    logo: '📺',
+    category: 'tech'
+  },
+  // RSS Feeds (einfacher zu parsen)
+  {
     name: 'Preisjäger',
-    url: 'https://www.preisjaeger.at/rss/alle',
+    url: 'https://www.preisjaeger.at/rss/freebies',
     type: 'rss',
-    country: 'at'
+    brand: 'Preisjäger',
+    logo: '🎁',
+    category: 'gratis'
   },
   {
-    name: 'MyDealz',
-    url: 'https://www.mydealz.de/rss/alle',
+    name: 'Preisjäger Gratis',
+    url: 'https://www.preisjaeger.at/rss/freebies?keywords=gratis',
     type: 'rss',
-    country: 'de'
+    brand: 'Preisjäger',
+    logo: '🆓',
+    category: 'gratis'
+  },
+  // WIEN NEWS & NEUERÖFFNUNGEN
+  {
+    name: 'Reddit Wien',
+    url: 'https://www.reddit.com/r/wien/.rss',
+    type: 'rss',
+    brand: 'Reddit r/wien',
+    logo: '🔴',
+    category: 'wien'
   },
   {
-    name: 'Preispirat',
-    url: 'https://www.preispirat.at/feed/',
+    name: 'Reddit Austria',
+    url: 'https://www.reddit.com/r/Austria/.rss',
     type: 'rss',
-    country: 'at'
+    brand: 'Reddit r/Austria',
+    logo: '🔴',
+    category: 'shopping'
   }
 ];
 
-// Basis-Deals die immer verfügbar sind
+// ============================================
+// BASIS DEALS - Immer verfügbar
+// ============================================
+
 const BASE_DEALS = [
-  {
-    id: "base-1",
-    brand: "jö Bonus Club",
-    title: "50% auf OMV VIVA Kaffee",
-    description: "Mit 75 Ös erhältst du 50% Rabatt auf alle VIVA-Kaffeespezialitäten an OMV Tankstellen.",
-    type: "rabatt",
-    source: "jö App / OMV",
-    url: "https://www.joe-club.at",
-    expires: "Unbegrenzt",
-    hot: true,
-    category: "food",
-    countries: ["at"],
-    tags: ["kaffee", "omv", "jö", "tankstelle"]
-  },
-  {
-    id: "base-2",
-    brand: "jö Bonus Club",
-    title: "Bis zu 20% Rabattsammler",
-    description: "Einmal pro Monat bis zu 20% auf einen gesamten Einkauf bei BILLA, BILLA PLUS, BIPA oder ZGONC.",
-    type: "rabatt",
-    source: "jö App",
-    url: "https://www.joe-club.at",
-    expires: "Monatlich",
-    hot: true,
-    category: "retail",
-    countries: ["at"],
-    tags: ["billa", "bipa", "jö", "einkauf", "supermarkt"]
-  },
-  {
-    id: "base-3",
-    brand: "IKEA Family",
-    title: "Gratis Kaffee oder Tee",
-    description: "Als IKEA Family Mitglied bekommst du kostenlosen Kaffee, Tee oder heiße Schokolade im Restaurant!",
-    type: "gratis",
-    source: "IKEA Restaurant",
-    url: "https://www.ikea.com/at/de/ikea-family/",
-    expires: "Unbegrenzt",
-    hot: true,
-    category: "food",
-    countries: ["at", "de", "ch"],
-    tags: ["kaffee", "ikea", "gratis", "tee", "restaurant"]
-  },
-  {
-    id: "base-4",
-    brand: "McDonald's",
-    title: "Gratis Kaffee oder Cola",
-    description: "Nach jedem Einkauf Feedback geben und Gratis-Getränk erhalten. Bis zu 5x pro Monat möglich!",
-    type: "gratis",
-    source: "mcdonalds.de/deinfeedback",
-    url: "https://www.mcdonalds.de/deinfeedback",
-    expires: "Unbegrenzt",
-    hot: true,
-    category: "food",
-    countries: ["at", "de", "ch"],
-    tags: ["kaffee", "cola", "mcdonalds", "gratis", "feedback"]
-  },
-  {
-    id: "base-5",
-    brand: "Starbucks",
-    title: "Gratis Geburtstagsgetränk",
-    description: "Bei Starbucks Rewards anmelden und am Geburtstag ein kostenloses Getränk nach Wahl erhalten.",
-    type: "gratis",
-    source: "Starbucks App",
-    url: "https://www.starbucks.at/de/rewards",
-    expires: "Unbegrenzt",
-    hot: true,
-    category: "food",
-    countries: ["at", "de", "ch"],
-    tags: ["kaffee", "starbucks", "geburtstag", "gratis"]
-  },
-  {
-    id: "base-6",
-    brand: "Lidl Plus",
-    title: "Wöchentliche Gratis-Coupons",
-    description: "Jede Woche neue exklusive Gutscheine in der App. Rabattsammler für bis zu 20% auf den Einkauf!",
-    type: "rabatt",
-    source: "Lidl Plus App",
-    url: "https://www.lidl.at/c/lidl-plus/s10012352",
-    expires: "Wöchentlich neu",
-    hot: true,
-    category: "retail",
-    countries: ["at", "de", "ch"],
-    tags: ["lidl", "supermarkt", "gutschein", "einkauf"]
-  },
-  {
-    id: "base-7",
-    brand: "Douglas",
-    title: "2 Gratis-Proben",
-    description: "Bei jeder Bestellung ab 10€ kannst du 2 Gratis-Proben im Warenkorb auswählen.",
-    type: "gratis",
-    source: "douglas.at",
-    url: "https://www.douglas.at",
-    expires: "Unbegrenzt",
-    hot: true,
-    category: "beauty",
-    countries: ["at", "de"],
-    tags: ["douglas", "parfum", "beauty", "probe", "gratis"]
-  },
-  {
-    id: "base-8",
-    brand: "Spotify",
-    title: "3 Monate Premium gratis",
-    description: "Neukunden erhalten 3 Monate Spotify Premium kostenlos. Danach 10,99€/Monat, jederzeit kündbar.",
-    type: "testabo",
-    source: "spotify.com",
-    url: "https://www.spotify.com/at/premium/",
-    expires: "Für Neukunden",
-    hot: true,
-    category: "entertainment",
-    countries: ["at", "de", "ch"],
-    tags: ["spotify", "musik", "streaming", "gratis"]
-  },
-  {
-    id: "base-9",
-    brand: "Amazon Prime",
-    title: "30 Tage gratis testen",
-    description: "Prime-Mitgliedschaft 30 Tage kostenlos testen. Inkl. Prime Video, schneller Versand und mehr.",
-    type: "testabo",
-    source: "amazon.at",
-    url: "https://www.amazon.de/prime",
-    expires: "Für Neukunden",
-    hot: true,
-    category: "entertainment",
-    countries: ["at", "de", "ch"],
-    tags: ["amazon", "prime", "video", "streaming"]
-  },
-  {
-    id: "base-10",
-    brand: "ÖBB",
-    title: "Gratis Fahrt am Geburtstag",
-    description: "Mit ÖBB Vorteilscard am Geburtstag kostenlos 2. Klasse in ganz Österreich fahren.",
-    type: "gratis",
-    source: "oebb.at",
-    url: "https://www.oebb.at",
-    expires: "Am Geburtstag",
-    hot: true,
-    category: "travel",
-    countries: ["at"],
-    tags: ["geburtstag", "öbb", "bahn", "zug", "gratis"]
-  },
-  {
-    id: "base-11",
-    brand: "Wien Museum",
-    title: "Gratis Eintritt unter 19",
-    description: "Für alle unter 19 Jahren ist der Eintritt ins Wien Museum am Karlsplatz gratis!",
-    type: "gratis",
-    source: "wienmuseum.at",
-    url: "https://www.wienmuseum.at",
-    expires: "Unbegrenzt",
-    hot: true,
-    category: "events",
-    countries: ["at"],
-    cities: ["wien"],
-    tags: ["wien", "museum", "gratis", "kultur", "jugend"]
-  },
-  {
-    id: "base-12",
-    brand: "Belvedere",
-    title: "Gratis Eintritt unter 19",
-    description: "Das Belvedere mit Klimts 'Der Kuss' ist für unter 19-Jährige gratis!",
-    type: "gratis",
-    source: "belvedere.at",
-    url: "https://www.belvedere.at",
-    expires: "Unbegrenzt",
-    hot: true,
-    category: "events",
-    countries: ["at"],
-    cities: ["wien"],
-    tags: ["wien", "museum", "gratis", "klimt", "kunst"]
-  },
-  {
-    id: "base-13",
-    brand: "Stadt Wien",
-    title: "Gratis Wickelrucksack",
-    description: "Für Wiener Familien: Gratis Wickelrucksack mit Inhalt bei MA11 oder Geburtsklinik abholen.",
-    type: "gratis",
-    source: "wien.gv.at",
-    url: "https://www.wien.gv.at",
-    expires: "Unbegrenzt",
-    hot: true,
-    category: "baby",
-    countries: ["at"],
-    cities: ["wien"],
-    tags: ["baby", "wien", "gratis", "familie"]
-  },
-  {
-    id: "base-14",
-    brand: "Donauturm Wien",
-    title: "Gratis am Geburtstag",
-    description: "Am Geburtstag (oder 4 Tage davor/danach) gratis auf den Donauturm inkl. Rutsche!",
-    type: "gratis",
-    source: "donauturm.at",
-    url: "https://www.donauturm.at",
-    expires: "Am Geburtstag ±4 Tage",
-    hot: false,
-    category: "events",
-    countries: ["at"],
-    cities: ["wien"],
-    tags: ["geburtstag", "wien", "gratis", "aussicht"]
-  },
-  {
-    id: "base-15",
-    brand: "Zalando",
-    title: "Gratis Versand & 100 Tage Retoure",
-    description: "Gratis Versand ab 24,90€ und 100 Tage kostenlose Rückgabe bei Zalando.",
-    type: "gratis",
-    source: "zalando.at",
-    url: "https://www.zalando.at",
-    expires: "Unbegrenzt",
-    hot: false,
-    category: "fashion",
-    countries: ["at", "de", "ch"],
-    tags: ["zalando", "mode", "versand", "gratis"]
-  }
+  // ========== NEU ENTDECKT - JÄNNER 2026 ==========
+  { id: "new-1", brand: "Haus der Geschichte", logo: "🏛️", title: "Gratis jeden Donnerstag 18-20 Uhr", description: "Ab 2026 jeden Donnerstagabend kostenloser Eintritt ins hdgö! Gesponsert von UNIQA.", type: "gratis", category: "wien", source: "hdgö", url: "https://www.hdgoe.at", expires: "Jeden Donnerstag", hot: true, isNew: true },
+  { id: "new-2", brand: "ÖBB Veganuary", logo: "🚂", title: "Vegan Vurstsemmel um €2,90", description: "Im Jänner: Vegane 'Feiner Extra' Vurstsemmel im Zug + Gewinnspiele mit Klimaticket!", type: "rabatt", category: "essen", source: "ÖBB", url: "https://www.oebb.at", expires: "Jänner 2026", hot: true, isNew: true },
+  { id: "new-3", brand: "Veganer Würstelstand", logo: "🌭", title: "Wiener Würstelstand komplett vegan", description: "Mike Lanner stellt seine 2 Würstelstände im Jänner komplett auf pflanzlich um!", type: "rabatt", category: "essen", source: "Veganuary Wien", url: "https://www.1000things.at", expires: "Jänner 2026", hot: true, isNew: true },
+  { id: "new-4", brand: "IKEA", logo: "🪑", title: "Neue Flexbullar Bällchen", description: "Neu im Veganuary: Flexbullar - Mischung aus Fleisch und pflanzlich im IKEA Restaurant.", type: "rabatt", category: "essen", source: "IKEA", url: "https://www.ikea.at", expires: "Jänner 2026", hot: false, isNew: true },
+  { id: "new-5", brand: "Vegane Gesellschaft", logo: "🥗", title: "Gratis Gewinnspiel Veganuary", description: "Jede vegane Speise in Wiener Gastro fotografieren & einreichen = Gewinnchance!", type: "gratis", category: "essen", source: "Vegane Gesellschaft", url: "https://www.vegan.at", expires: "Jänner 2026", hot: true, isNew: true },
+  { id: "new-6", brand: "Verein MUT", logo: "🥫", title: "Gratis Lebensmittel", description: "Gerettete Lebensmittel kostenlos im 4. Bezirk. Mo, Di, Do, Fr 10-15:30 Uhr mit MUT-Karte.", type: "gratis", category: "supermarkt", source: "Verein MUT", url: "https://verein-mut.eu", expires: "Unbegrenzt", hot: true, isNew: true },
+  { id: "new-7", brand: "Gastro.News", logo: "🍽️", title: "Wintergenusswoche", description: "Restaurant-Deals & Kostproben vom 2.-8.2.2026 in vielen Wiener Lokalen.", type: "rabatt", category: "essen", source: "Gastro.News", url: "https://www.gastro.news/deals", expires: "Februar 2026", hot: false, isNew: true },
+  { id: "new-8", brand: "Kübey", logo: "🥙", title: "Neueröffnung Anatolische Tapas", description: "Neues Restaurant mit anatolischen Tapas - Soft Opening Aktionen!", type: "rabatt", category: "essen", source: "Falter", url: "https://www.falter.at", expires: "Jänner 2026", hot: false, isNew: true },
+  { id: "new-9", brand: "Ciao Ragazzi", logo: "🍕", title: "Neapolitanische Pizza Seestadt", description: "Neue authentische Pizza in der Seestadt - 48h gereifter Teig, 500°C Ofen!", type: "rabatt", category: "essen", source: "1000things", url: "https://www.1000things.at", expires: "Neu eröffnet", hot: false, isNew: true },
+  { id: "new-10", brand: "Lanz Lamian", logo: "🍜", title: "Handgezogene Nudeln im 1. Bezirk", description: "Neues Lokal mit traditionellen chinesischen Lanzhou Nudeln - echtes Soulfood!", type: "rabatt", category: "essen", source: "Falter", url: "https://www.falter.at", expires: "Neu eröffnet", hot: false, isNew: true },
+  { id: "new-11", brand: "Hong Kong Cafe", logo: "🥡", title: "Günstiges Hong Kong Soulfood", description: "Neues Café mit günstigem Essen wie in den Cha Chaan Tengs - viele vegane Optionen!", type: "rabatt", category: "essen", source: "Falter", url: "https://www.falter.at", expires: "Neu eröffnet", hot: false, isNew: true },
+  { id: "new-12", brand: "Krawall Bar", logo: "🍸", title: "Neue Bar in Neubau", description: "3 Stockwerke: Deli für Sandwiches, Cocktailbar, Separee - neu in der Zollergasse!", type: "rabatt", category: "essen", source: "Falter", url: "https://www.falter.at", expires: "Neu eröffnet", hot: false, isNew: true },
+
+  // ========== JÖ BONUS CLUB ==========
+  { id: "joe-1", brand: "jö Bonus Club", logo: "🟡", title: "50% auf OMV VIVA Kaffee", description: "Mit 75 Ös 50% auf alle Kaffeespezialitäten bei OMV VIVA.", type: "rabatt", category: "kaffee", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", hot: true },
+  { id: "joe-2", brand: "jö Bonus Club", logo: "🟡", title: "OMV VIVA Winterdrink für 1 Ö", description: "Cinnamon Pumpkin Latte oder Blushed Toffee Latte für nur 1 Ö!", type: "gratis", category: "kaffee", source: "jö App", url: "https://www.joe-club.at", expires: "Winter 2026", hot: true },
+  { id: "joe-3", brand: "jö Bonus Club", logo: "🟡", title: "50% auf OMV Sandwich", description: "Mit 100 Ös 50% auf alle Sandwiches im VIVA Shop.", type: "rabatt", category: "essen", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", hot: false },
+  { id: "joe-4", brand: "jö Bonus Club", logo: "🟡", title: "20% Rabattsammler BILLA", description: "Jeden Monat bis zu 20% auf einen kompletten BILLA Einkauf.", type: "rabatt", category: "supermarkt", source: "jö App", url: "https://www.joe-club.at", expires: "Monatlich", hot: true },
+  { id: "joe-5", brand: "jö Bonus Club", logo: "🟡", title: "20% Rabattsammler BIPA", description: "Jeden Monat bis zu 20% auf einen kompletten BIPA Einkauf.", type: "rabatt", category: "drogerie", source: "jö App", url: "https://www.joe-club.at", expires: "Monatlich", hot: true },
+  { id: "joe-6", brand: "jö Bonus Club", logo: "🟡", title: "30% auf OMV TopWash", description: "Mit 150 Ös 30% auf alle TopWash Autowäschen.", type: "rabatt", category: "mobilität", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", hot: false },
+  { id: "joe-7", brand: "jö Bonus Club", logo: "🟡", title: "Ös sammeln bei BILLA", description: "1 Ö pro Euro Einkauf bei BILLA sammeln.", type: "cashback", category: "supermarkt", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", hot: false },
+  { id: "joe-8", brand: "jö Bonus Club", logo: "🟡", title: "Ös sammeln bei foodora", description: "Bei jeder foodora Bestellung Ös sammeln.", type: "cashback", category: "lieferung", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", hot: true },
+  { id: "joe-9", brand: "jö Bonus Club", logo: "🟡", title: "Ös sammeln bei LIBRO", description: "Bei LIBRO Bücher kaufen und Ös sammeln.", type: "cashback", category: "shopping", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", hot: false },
+  { id: "joe-10", brand: "jö Bonus Club", logo: "🟡", title: "Ös sammeln bei PAGRO", description: "Bei PAGRO Diskont Ös sammeln.", type: "cashback", category: "shopping", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", hot: false },
+
+  // SUPERMÄRKTE
+  { id: "billa-1", brand: "BILLA", logo: "🟠", title: "-25% Pickerl", description: "Jeden Donnerstag neue -25% Rabatt-Pickerl auf ausgewählte Produkte.", type: "rabatt", category: "supermarkt", source: "BILLA", url: "https://www.billa.at", expires: "Wöchentlich", hot: true },
+  { id: "billa-2", brand: "BILLA", logo: "🟠", title: "1+1 Gratis Aktionen", description: "Viele Produkte 1+1 Gratis bis 4.2.2026!", type: "gratis", category: "supermarkt", source: "BILLA", url: "https://www.billa.at", expires: "4.2.2026", hot: true },
+  { id: "lidl-1", brand: "Lidl", logo: "🔵", title: "Lidl Plus Coupons", description: "Wöchentlich neue Rabatt-Coupons in der Lidl Plus App.", type: "rabatt", category: "supermarkt", source: "Lidl Plus", url: "https://www.lidl.at", expires: "Wöchentlich", hot: true },
+  { id: "lidl-2", brand: "Lidl", logo: "🔵", title: "Lidl Plus Sofortgewinne", description: "Nach jedem Einkauf digitale Sofortgewinne erhalten!", type: "gratis", category: "supermarkt", source: "Lidl Plus", url: "https://www.lidl.at", expires: "Unbegrenzt", hot: false },
+  { id: "spar-1", brand: "SPAR", logo: "🟢", title: "SPAR Plus Karte", description: "Personalisierte Rabatte mit der SPAR Plus Karte.", type: "rabatt", category: "supermarkt", source: "SPAR", url: "https://www.spar.at", expires: "Unbegrenzt", hot: false },
+  { id: "hofer-1", brand: "HOFER", logo: "🔴", title: "Hofer App Coupons", description: "Exklusive Angebote in der Hofer App.", type: "rabatt", category: "supermarkt", source: "Hofer", url: "https://www.hofer.at", expires: "Wöchentlich", hot: false },
+
+  // KAFFEE & ESSEN
+  { id: "mcd-1", brand: "McDonald's", logo: "🍟", title: "Gratis Kaffee Feedback", description: "Nach Einkauf Feedback geben = Gratis Kaffee oder Cola. 5x/Monat!", type: "gratis", category: "kaffee", source: "McDonald's", url: "https://www.mcdonalds.at", expires: "5x/Monat", hot: true },
+  { id: "mcd-2", brand: "McDonald's", logo: "🍟", title: "App Gutscheine", description: "Wöchentlich neue Coupons in der McDonald's App.", type: "rabatt", category: "essen", source: "McDonald's App", url: "https://www.mcdonalds.at", expires: "Wöchentlich", hot: false },
+  { id: "sbux-1", brand: "Starbucks", logo: "☕", title: "Gratis Geburtstagsdrink", description: "Am Geburtstag ein Gratis-Getränk nach Wahl!", type: "gratis", category: "kaffee", source: "Starbucks", url: "https://www.starbucks.at", expires: "Am Geburtstag", hot: true },
+  { id: "sbux-2", brand: "Starbucks", logo: "☕", title: "150 Sterne = Gratis Drink", description: "Sterne sammeln, bei 150 gibt's ein Freigetränk.", type: "gratis", category: "kaffee", source: "Starbucks", url: "https://www.starbucks.at", expires: "Unbegrenzt", hot: false },
+  { id: "ikea-1", brand: "IKEA", logo: "🪑", title: "Gratis Kaffee Family", description: "IKEA Family: Unbegrenzt Gratis-Kaffee oder Tee im Restaurant!", type: "gratis", category: "kaffee", source: "IKEA", url: "https://www.ikea.at", expires: "Unbegrenzt", hot: true },
+  { id: "bk-1", brand: "Burger King", logo: "🍔", title: "App Coupons", description: "Exklusive Gutscheine in der Burger King App.", type: "rabatt", category: "essen", source: "Burger King", url: "https://www.burgerking.at", expires: "Wöchentlich", hot: false },
+  { id: "sub-1", brand: "Subway", logo: "🥪", title: "Subcard Gratis Cookie", description: "Bei Anmeldung einen Gratis-Cookie geschenkt.", type: "gratis", category: "essen", source: "Subway", url: "https://www.subway.at", expires: "Einmalig", hot: false },
+
+  // DROGERIE
+  { id: "dm-1", brand: "dm", logo: "🧴", title: "Babyclub Geschenk", description: "Gratis Greifring + Gutscheine bei dm Babyclub Anmeldung.", type: "gratis", category: "drogerie", source: "dm", url: "https://www.dm.at", expires: "Bei Anmeldung", hot: true },
+  { id: "dm-2", brand: "dm", logo: "🧴", title: "Glückskind Proben", description: "Gratis Babyproben für Schwangere.", type: "gratis", category: "drogerie", source: "dm", url: "https://www.dm.at", expires: "Bei Anmeldung", hot: false },
+  { id: "doug-1", brand: "Douglas", logo: "💜", title: "2 Gratis-Proben", description: "Bei jeder Bestellung ab €10 zwei kostenlose Beauty-Proben.", type: "gratis", category: "drogerie", source: "Douglas", url: "https://www.douglas.at", expires: "Unbegrenzt", hot: true },
+  { id: "doug-2", brand: "Douglas", logo: "💜", title: "Geburtstags-Überraschung", description: "Beauty Card Mitglieder erhalten Geburtstagsgeschenk.", type: "gratis", category: "drogerie", source: "Douglas", url: "https://www.douglas.at", expires: "Am Geburtstag", hot: false },
+
+  // WIEN SPEZIAL
+  { id: "wien-1", brand: "Wien Museum", logo: "🏛️", title: "Gratis unter 19", description: "Freier Eintritt für alle unter 19 Jahren.", type: "gratis", category: "wien", source: "Wien Museum", url: "https://www.wienmuseum.at", expires: "Unbegrenzt", hot: true },
+  { id: "wien-2", brand: "Belvedere", logo: "🖼️", title: "Gratis unter 19", description: "Klimts 'Der Kuss' kostenlos für unter 19-Jährige.", type: "gratis", category: "wien", source: "Belvedere", url: "https://www.belvedere.at", expires: "Unbegrenzt", hot: true },
+  { id: "wien-3", brand: "Albertina", logo: "🎨", title: "Gratis unter 19", description: "Weltberühmte Kunstsammlung gratis.", type: "gratis", category: "wien", source: "Albertina", url: "https://www.albertina.at", expires: "Unbegrenzt", hot: false },
+  { id: "wien-4", brand: "NHM Wien", logo: "🦕", title: "Gratis unter 19", description: "Naturhistorisches Museum kostenlos.", type: "gratis", category: "wien", source: "NHM", url: "https://www.nhm-wien.ac.at", expires: "Unbegrenzt", hot: false },
+  { id: "wien-5", brand: "KHM Wien", logo: "👑", title: "Gratis unter 19", description: "Kunsthistorisches Museum gratis.", type: "gratis", category: "wien", source: "KHM", url: "https://www.khm.at", expires: "Unbegrenzt", hot: false },
+  { id: "wien-6", brand: "Stadt Wien", logo: "👶", title: "Gratis Wickelrucksack", description: "Baby-Willkommenspaket für Wiener Familien.", type: "gratis", category: "wien", source: "Wien", url: "https://www.wien.gv.at", expires: "Bei Geburt", hot: true },
+  { id: "wien-7", brand: "Wiener Linien", logo: "🚇", title: "Gratis WLAN", description: "Kostenloses WLAN in allen U-Bahn-Stationen.", type: "gratis", category: "wien", source: "Wiener Linien", url: "https://www.wienerlinien.at", expires: "Unbegrenzt", hot: false },
+  { id: "wien-8", brand: "Büchereien Wien", logo: "📚", title: "Gratis unter 18", description: "Kostenlose Mitgliedschaft für unter 18-Jährige.", type: "gratis", category: "wien", source: "Büchereien Wien", url: "https://www.buechereien.wien.at", expires: "Unbegrenzt", hot: false },
+  { id: "wien-9", brand: "Donauturm", logo: "🗼", title: "Gratis Geburtstag", description: "Am Geburtstag (±4 Tage) gratis auf den Donauturm.", type: "gratis", category: "wien", source: "Donauturm", url: "https://www.donauturm.at", expires: "Geburtstag", hot: false },
+  { id: "wien-10", brand: "Prater", logo: "🎡", title: "Gratis Eintritt", description: "Der Wiener Prater ist kostenlos begehbar.", type: "gratis", category: "wien", source: "Prater", url: "https://www.praterwien.com", expires: "Unbegrenzt", hot: false },
+
+  // MOBILITÄT
+  { id: "obb-1", brand: "ÖBB", logo: "🚂", title: "Gratis Geburtstag", description: "Mit Vorteilscard am Geburtstag gratis 2. Klasse fahren.", type: "gratis", category: "mobilität", source: "ÖBB", url: "https://www.oebb.at", expires: "Geburtstag", hot: true },
+  { id: "obb-2", brand: "ÖBB", logo: "🚂", title: "Sparschiene ab €19", description: "Günstige Zugtickets bei früher Buchung.", type: "rabatt", category: "mobilität", source: "ÖBB", url: "https://www.oebb.at", expires: "Bei Buchung", hot: false },
+
+  // STREAMING
+  { id: "spot-1", brand: "Spotify", logo: "🎵", title: "3 Monate gratis", description: "Premium für Neukunden 3 Monate kostenlos.", type: "testabo", category: "streaming", source: "Spotify", url: "https://www.spotify.com", expires: "Neukunden", hot: true },
+  { id: "amz-1", brand: "Amazon Prime", logo: "📦", title: "30 Tage gratis", description: "Prime Video & schneller Versand kostenlos testen.", type: "testabo", category: "streaming", source: "Amazon", url: "https://www.amazon.de/prime", expires: "Neukunden", hot: true },
+  { id: "nflx-1", brand: "Netflix", logo: "🎬", title: "Werbefinanziert ab €4,99", description: "Günstigstes Netflix Abo mit Werbung.", type: "rabatt", category: "streaming", source: "Netflix", url: "https://www.netflix.com", expires: "Immer", hot: false },
+
+  // LIEFERSERVICES
+  { id: "food-1", brand: "foodora", logo: "🛵", title: "Neukunden Rabatt", description: "Rabatt auf erste Bestellungen für Neukunden.", type: "rabatt", category: "lieferung", source: "foodora", url: "https://www.foodora.at", expires: "Neukunden", hot: true },
+  { id: "mjam-1", brand: "Mjam", logo: "🍕", title: "Neukunden Rabatt", description: "Willkommensrabatt für Neukunden.", type: "rabatt", category: "lieferung", source: "Mjam", url: "https://www.mjam.at", expires: "Neukunden", hot: false },
+
+  // MODE
+  { id: "zal-1", brand: "Zalando", logo: "👟", title: "Gratis Versand", description: "Ab €24,90 kostenloser Versand.", type: "gratis", category: "mode", source: "Zalando", url: "https://www.zalando.at", expires: "Unbegrenzt", hot: false },
+  { id: "zal-2", brand: "Zalando", logo: "👟", title: "100 Tage Retoure", description: "100 Tage kostenlose Rückgabe.", type: "gratis", category: "mode", source: "Zalando", url: "https://www.zalando.at", expires: "Unbegrenzt", hot: false },
+  { id: "hm-1", brand: "H&M", logo: "👕", title: "10% Welcome", description: "10% Rabatt bei Newsletter-Anmeldung.", type: "rabatt", category: "mode", source: "H&M", url: "https://www.hm.com/at", expires: "Einmalig", hot: false },
+
+  // FINANZEN
+  { id: "n26-1", brand: "N26", logo: "📱", title: "Gratis Konto", description: "Kostenloses Online-Konto ohne Gebühren.", type: "gratis", category: "finanzen", source: "N26", url: "https://www.n26.com", expires: "Unbegrenzt", hot: true },
+  { id: "shoop-1", brand: "Shoop", logo: "💵", title: "Cashback", description: "Geld zurück beim Online-Shopping.", type: "cashback", category: "finanzen", source: "Shoop", url: "https://www.shoop.at", expires: "Unbegrenzt", hot: true }
 ];
 
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
 
-function fetch(url) {
+function fetch(url, timeout = 15000) {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http;
     
-    const request = client.get(url, {
+    const req = client.get(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; DealFinder/1.0)',
-        'Accept': 'application/rss+xml, application/xml, text/xml, */*'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'de-AT,de;q=0.9,en;q=0.8'
       },
-      timeout: 15000
-    }, (response) => {
-      // Handle redirects
-      if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-        fetch(response.headers.location).then(resolve).catch(reject);
+      timeout: timeout
+    }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        fetch(res.headers.location, timeout).then(resolve).catch(reject);
         return;
       }
       
-      if (response.statusCode !== 200) {
-        reject(new Error(`HTTP ${response.statusCode}`));
+      if (res.statusCode !== 200) {
+        reject(new Error(`HTTP ${res.statusCode}`));
         return;
       }
       
       let data = '';
-      response.on('data', chunk => data += chunk);
-      response.on('end', () => resolve(data));
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => resolve(data));
     });
     
-    request.on('error', reject);
-    request.on('timeout', () => {
-      request.destroy();
-      reject(new Error('Timeout'));
-    });
+    req.on('error', reject);
+    req.on('timeout', () => { req.destroy(); reject(new Error('Timeout')); });
   });
 }
 
-function parseRSS(xml, sourceName, country) {
+function parseRSS(xml, source) {
   const deals = [];
-  
-  // Simple XML parsing with regex (works for RSS feeds)
   const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
   let match;
   
   while ((match = itemRegex.exec(xml)) !== null) {
-    const itemXml = match[1];
+    const item = match[1];
     
-    const title = extractTag(itemXml, 'title');
-    const description = extractTag(itemXml, 'description');
-    const link = extractTag(itemXml, 'link');
-    const pubDate = extractTag(itemXml, 'pubDate');
+    const title = extractTag(item, 'title');
+    const description = extractTag(item, 'description');
+    const link = extractTag(item, 'link');
+    const pubDate = extractTag(item, 'pubDate');
     
     if (!title) continue;
     
-    // Determine deal type
-    let type = 'rabatt';
+    // Filter für Gratis/Freebies
     const lowerTitle = title.toLowerCase();
-    if (lowerTitle.includes('gratis') || lowerTitle.includes('kostenlos') || lowerTitle.includes('free') || lowerTitle.includes('geschenkt')) {
-      type = 'gratis';
-    } else if (lowerTitle.includes('cashback') || lowerTitle.includes('geld zurück')) {
-      type = 'cashback';
-    } else if (lowerTitle.includes('testabo') || lowerTitle.includes('probeabo') || lowerTitle.includes('testen')) {
-      type = 'testabo';
-    }
+    const lowerDesc = description.toLowerCase();
+    const isGratis = lowerTitle.includes('gratis') || lowerTitle.includes('kostenlos') || 
+                     lowerTitle.includes('free') || lowerTitle.includes('geschenkt') ||
+                     lowerDesc.includes('gratis') || lowerDesc.includes('kostenlos');
     
-    // Determine category
-    let category = 'retail';
-    if (/essen|food|kaffee|burger|pizza|restaurant|lieferando|mjam/i.test(lowerTitle)) {
-      category = 'food';
-    } else if (/netflix|spotify|disney|stream|gaming|playstation|xbox/i.test(lowerTitle)) {
-      category = 'entertainment';
-    } else if (/beauty|parfum|douglas|sephora|kosmetik/i.test(lowerTitle)) {
-      category = 'beauty';
-    } else if (/nike|adidas|zalando|mode|fashion|schuhe|kleidung/i.test(lowerTitle)) {
-      category = 'fashion';
-    } else if (/reise|flug|hotel|urlaub|bahn|zug/i.test(lowerTitle)) {
-      category = 'travel';
-    } else if (/tech|handy|laptop|tablet|smartphone/i.test(lowerTitle)) {
-      category = 'tech';
-    }
+    let type = 'rabatt';
+    if (isGratis) type = 'gratis';
+    else if (lowerTitle.includes('cashback')) type = 'cashback';
+    else if (lowerTitle.includes('testabo') || lowerTitle.includes('probe')) type = 'testabo';
     
-    // Check if hot deal
-    const hot = lowerTitle.includes('hot') || lowerTitle.includes('🔥') || lowerTitle.includes('top');
+    // Kategorie bestimmen
+    let category = 'shopping';
+    if (/kaffee|coffee|latte|cappuccino/i.test(lowerTitle)) category = 'kaffee';
+    else if (/billa|spar|lidl|hofer|penny|supermarkt/i.test(lowerTitle)) category = 'supermarkt';
+    else if (/burger|pizza|essen|food|mcdonald|restaurant/i.test(lowerTitle)) category = 'essen';
+    else if (/dm|bipa|douglas|beauty|kosmetik/i.test(lowerTitle)) category = 'drogerie';
+    else if (/netflix|spotify|disney|stream|gaming/i.test(lowerTitle)) category = 'streaming';
     
-    // Extract brand from title
-    let brand = sourceName;
+    // Brand extrahieren
+    let brand = source.brand;
     const brandMatch = title.match(/^([A-Za-zäöüÄÖÜß0-9&\-\.]+)[\s:]/);
-    if (brandMatch) {
-      brand = brandMatch[1];
-    }
+    if (brandMatch) brand = brandMatch[1];
     
-    // Clean description
+    // Description säubern
     let cleanDesc = description
-      .replace(/<[^>]*>/g, '') // Remove HTML
+      .replace(/<[^>]*>/g, '')
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
       .trim();
     
-    if (cleanDesc.length > 150) {
-      cleanDesc = cleanDesc.substring(0, 147) + '...';
-    }
+    if (cleanDesc.length > 150) cleanDesc = cleanDesc.substring(0, 147) + '...';
     
     deals.push({
-      id: `${sourceName.toLowerCase()}-${Date.now()}-${deals.length}`,
-      brand: brand.substring(0, 30),
+      id: `rss-${Date.now()}-${deals.length}`,
+      brand: brand.substring(0, 25),
+      logo: source.logo,
       title: title.substring(0, 80),
       description: cleanDesc || title,
       type,
-      source: sourceName,
+      category,
+      source: source.name,
       url: link || '',
       expires: 'Begrenzt',
-      hot,
-      category,
-      countries: country === 'at' ? ['at'] : country === 'de' ? ['de', 'at'] : [country],
-      tags: extractTags(title + ' ' + cleanDesc),
-      pubDate: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
-      isNew: true
+      hot: isGratis,
+      isNew: true,
+      pubDate: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString()
     });
   }
   
   return deals;
 }
 
-function extractTag(xml, tagName) {
-  // Try CDATA first
-  const cdataRegex = new RegExp(`<${tagName}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tagName}>`, 'i');
+function extractTag(xml, tag) {
+  const cdataRegex = new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`, 'i');
   const cdataMatch = xml.match(cdataRegex);
   if (cdataMatch) return cdataMatch[1].trim();
   
-  // Regular tag
-  const regex = new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\\/${tagName}>`, 'i');
+  const regex = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i');
   const match = xml.match(regex);
   return match ? match[1].trim() : '';
 }
 
-function extractTags(text) {
-  const keywords = text.toLowerCase()
-    .replace(/[^a-zäöüß0-9\s]/g, ' ')
-    .split(/\s+/)
-    .filter(w => w.length > 3 && w.length < 20);
+function extractDealsFromHTML(html, source) {
+  const deals = [];
   
-  return [...new Set(keywords)].slice(0, 10);
+  // Suche nach typischen Deal-Patterns in HTML
+  // Gratis/Kostenlos erwähnungen
+  const gratisPatterns = [
+    /gratis[^<]{0,100}/gi,
+    /kostenlos[^<]{0,100}/gi,
+    /0\s*€[^<]{0,50}/gi,
+    /geschenkt[^<]{0,100}/gi,
+    /1\+1\s*gratis/gi,
+    /free[^<]{0,50}/gi
+  ];
+  
+  gratisPatterns.forEach(pattern => {
+    let match;
+    while ((match = pattern.exec(html)) !== null) {
+      const context = match[0].replace(/<[^>]*>/g, '').trim();
+      if (context.length > 10 && context.length < 200) {
+        deals.push({
+          id: `html-${source.brand}-${Date.now()}-${deals.length}`,
+          brand: source.brand,
+          logo: source.logo,
+          title: `Aktion bei ${source.brand}`,
+          description: context.substring(0, 150),
+          type: 'gratis',
+          category: source.category,
+          source: source.name,
+          url: source.url,
+          expires: 'Begrenzt',
+          hot: true,
+          isNew: true,
+          pubDate: new Date().toISOString()
+        });
+      }
+    }
+  });
+  
+  return deals.slice(0, 5); // Max 5 pro Quelle
 }
 
 // ============================================
@@ -402,67 +371,80 @@ function extractTags(text) {
 // ============================================
 
 async function scrapeAllSources() {
-  console.log('🚀 Starting deal scraper...\n');
+  console.log('🚀 Starting Wien Deals Scraper...\n');
+  console.log(`📅 ${new Date().toLocaleString('de-AT')}\n`);
   
-  const allDeals = [...BASE_DEALS];
+  const scrapedDeals = [];
   const errors = [];
   
   for (const source of SOURCES) {
-    console.log(`📡 Fetching ${source.name}...`);
+    console.log(`📡 Scraping: ${source.name}...`);
     
     try {
-      const xml = await fetch(source.url);
-      const deals = parseRSS(xml, source.name, source.country);
+      const content = await fetch(source.url);
       
-      console.log(`   ✅ Found ${deals.length} deals\n`);
-      allDeals.push(...deals);
+      let deals = [];
+      if (source.type === 'rss') {
+        deals = parseRSS(content, source);
+      } else {
+        deals = extractDealsFromHTML(content, source);
+      }
+      
+      console.log(`   ✅ ${deals.length} Deals gefunden\n`);
+      scrapedDeals.push(...deals);
+      
     } catch (error) {
-      console.log(`   ❌ Error: ${error.message}\n`);
+      console.log(`   ❌ Fehler: ${error.message}\n`);
       errors.push({ source: source.name, error: error.message });
     }
   }
   
-  // Remove duplicates based on title similarity
+  // Kombiniere Basis-Deals + gescrapte Deals
+  const allDeals = [...BASE_DEALS, ...scrapedDeals];
+  
+  // Duplikate entfernen
   const uniqueDeals = [];
   const seenTitles = new Set();
   
   for (const deal of allDeals) {
-    const normalizedTitle = deal.title.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 30);
-    if (!seenTitles.has(normalizedTitle)) {
-      seenTitles.add(normalizedTitle);
+    const key = deal.title.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 30);
+    if (!seenTitles.has(key)) {
+      seenTitles.add(key);
       uniqueDeals.push(deal);
     }
   }
   
-  // Sort: hot deals first, then by date
+  // Sortieren: Hot zuerst, dann neue, dann nach Datum
   uniqueDeals.sort((a, b) => {
     if (a.hot && !b.hot) return -1;
     if (!a.hot && b.hot) return 1;
-    if (a.pubDate && b.pubDate) {
-      return new Date(b.pubDate) - new Date(a.pubDate);
-    }
+    if (a.isNew && !b.isNew) return -1;
+    if (!a.isNew && b.isNew) return 1;
     return 0;
   });
   
-  // Create output
+  // Output erstellen
   const output = {
     lastUpdated: new Date().toISOString(),
     totalDeals: uniqueDeals.length,
+    baseDeals: BASE_DEALS.length,
+    scrapedDeals: scrapedDeals.length,
     sources: SOURCES.map(s => s.name),
     errors,
     deals: uniqueDeals
   };
   
-  // Save to file
+  // Speichern
   fs.writeFileSync('deals.json', JSON.stringify(output, null, 2));
   
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log(`✅ Scraping complete!`);
-  console.log(`   📦 Total deals: ${uniqueDeals.length}`);
-  console.log(`   💾 Saved to: deals.json`);
-  console.log(`   ⏰ Time: ${new Date().toLocaleString('de-AT')}`);
+  console.log(`✅ Scraping abgeschlossen!`);
+  console.log(`   📦 Basis-Deals: ${BASE_DEALS.length}`);
+  console.log(`   🆕 Neue Deals: ${scrapedDeals.length}`);
+  console.log(`   📊 Gesamt: ${uniqueDeals.length}`);
+  console.log(`   💾 Gespeichert: deals.json`);
   if (errors.length > 0) {
-    console.log(`   ⚠️  Errors: ${errors.length}`);
+    console.log(`   ⚠️  Fehler: ${errors.length}`);
   }
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   
