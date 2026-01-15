@@ -555,10 +555,61 @@ async function scrapeAllSources() {
   const allDeals = [...BASE_DEALS, ...scrapedDeals];
   
   // FILTER: Entferne abgelaufene Deals
-  const today = new Date().toISOString().split('T')[0]; // "2026-01-15"
+  const now = new Date();
+  const today = now.toISOString().split('T')[0]; // "2026-01-16"
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1; // 1-12
+  
+  // Monate für Erkennung veralteter Deals
+  const oldMonths = ['januar', 'februar', 'märz', 'april', 'mai', 'juni', 
+                     'juli', 'august', 'september', 'oktober', 'november', 'dezember',
+                     'january', 'february', 'march', 'april', 'may', 'june',
+                     'july', 'august', 'september', 'october', 'november', 'december'];
+  
   const validDeals = allDeals.filter(deal => {
-    if (!deal.validUntil) return true; // Kein Ablaufdatum = immer gültig
-    return deal.validUntil >= today;
+    // 1. Prüfe validUntil Datum
+    if (deal.validUntil && deal.validUntil < today) {
+      return false;
+    }
+    
+    // 2. Prüfe auf alte Jahreszahlen im Titel/Description
+    const text = `${deal.title} ${deal.description}`.toLowerCase();
+    
+    // Entferne Deals mit alten Jahren (2024, 2025 etc.)
+    for (let year = 2020; year < currentYear; year++) {
+      if (text.includes(year.toString())) {
+        return false;
+      }
+    }
+    
+    // 3. Prüfe auf vergangene Monate im aktuellen Jahr
+    // z.B. "August 2025" wenn wir Januar 2026 haben
+    const yearInText = text.match(/20\d{2}/);
+    if (yearInText) {
+      const dealYear = parseInt(yearInText[0]);
+      if (dealYear < currentYear) {
+        return false; // Altes Jahr
+      }
+      if (dealYear === currentYear) {
+        // Prüfe ob Monat vergangen ist
+        for (let i = 0; i < currentMonth - 1; i++) {
+          if (text.includes(oldMonths[i]) || text.includes(oldMonths[i + 12])) {
+            return false; // Vergangener Monat
+          }
+        }
+      }
+    }
+    
+    // 4. Prüfe pubDate bei gescrapten Deals (max 7 Tage alt)
+    if (deal.pubDate) {
+      const pubDate = new Date(deal.pubDate);
+      const daysDiff = (now - pubDate) / (1000 * 60 * 60 * 24);
+      if (daysDiff > 7) {
+        return false; // Älter als 7 Tage
+      }
+    }
+    
+    return true;
   });
   
   console.log(`\n🗑️  ${allDeals.length - validDeals.length} abgelaufene Deals entfernt`);
