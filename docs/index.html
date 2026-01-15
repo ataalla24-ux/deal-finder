@@ -3,144 +3,314 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wien Deals - Live Gratis & Schnäppchen</title>
+  <title>FreeFinder - Gratis Deals Wien</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', -apple-system, sans-serif; background: #f8fafc; min-height: 100vh; color: #1e293b; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #f5f5f7; min-height: 100vh; color: #1a1a2e; }
     
-    header { text-align: center; padding: 28px 20px; background: white; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
-    .logo { font-size: 42px; margin-bottom: 8px; }
-    h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
-    .subtitle { color: #64748b; font-size: 15px; margin-bottom: 14px; }
+    /* Header mit Gradient */
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #e91e8c 100%);
+      padding: 20px 20px 24px;
+      color: white;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .logo { font-size: 24px; font-weight: 700; }
+    .header-icons { display: flex; gap: 12px; }
+    .header-icon {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .header-icon:hover { background: rgba(255,255,255,0.3); }
     
-    .status-bar { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
-    .status { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 100px; font-size: 13px; }
-    .status.live { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-    .status.info { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .location-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.15);
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+    }
+    .location-bar input {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 14px;
+      flex: 1;
+      outline: none;
+    }
+    .location-bar input::placeholder { color: rgba(255,255,255,0.7); }
     
-    .controls { background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
-    .search-box { position: relative; margin-bottom: 16px; }
-    .search-input { width: 100%; padding: 14px 18px 14px 48px; border-radius: 12px; border: 2px solid #e2e8f0; background: #f8fafc; font-size: 15px; font-family: inherit; transition: all 0.2s; }
-    .search-input:focus { outline: none; border-color: #3b82f6; background: white; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-    .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 18px; }
+    .container { max-width: 600px; margin: 0 auto; padding: 0; }
     
-    .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; }
-    .filter-btn { padding: 8px 14px; border-radius: 10px; border: 2px solid #e2e8f0; background: white; color: #475569; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
-    .filter-btn:hover { border-color: #3b82f6; color: #3b82f6; }
-    .filter-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
-    .filter-count { background: rgba(0,0,0,0.08); padding: 2px 7px; border-radius: 100px; font-size: 11px; }
-    .filter-btn.active .filter-count { background: rgba(255,255,255,0.25); }
+    /* Kategorien */
+    .categories-wrapper {
+      background: white;
+      padding: 16px 20px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .categories {
+      display: flex;
+      gap: 10px;
+      min-width: max-content;
+    }
+    .cat-btn {
+      padding: 10px 18px;
+      border-radius: 25px;
+      border: 2px solid #e8e8e8;
+      background: white;
+      color: #555;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .cat-btn:hover { border-color: #a855f7; color: #a855f7; }
+    .cat-btn.active {
+      background: linear-gradient(135deg, #667eea, #a855f7);
+      color: white;
+      border-color: transparent;
+    }
     
-    .categories { display: flex; gap: 6px; flex-wrap: wrap; }
-    .cat-btn { padding: 8px 14px; border-radius: 8px; border: none; background: #f1f5f9; color: #475569; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-    .cat-btn:hover { background: #e2e8f0; }
-    .cat-btn.active { background: #1e293b; color: white; }
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: white;
+      border-bottom: 1px solid #eee;
+    }
+    .tab {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: #888;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab:hover { color: #a855f7; }
+    .tab.active { color: #a855f7; border-bottom-color: #a855f7; }
     
-    .results-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 0 4px; }
-    .results-count { font-size: 14px; color: #64748b; }
-    .last-update { font-size: 12px; color: #94a3b8; }
+    /* Deal Cards */
+    .deals-list { padding: 12px; }
     
-    .deals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+    .deal-card {
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: all 0.2s;
+    }
+    .deal-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
     
-    .deal-card { background: white; border-radius: 14px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); position: relative; transition: all 0.25s; border: 2px solid transparent; }
-    .deal-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); border-color: #3b82f6; }
-    .deal-card.is-new { border-color: #22c55e; }
+    .deal-header {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+    .deal-logo {
+      width: 50px; height: 50px;
+      border-radius: 12px;
+      background: #f8f8f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .deal-info { flex: 1; }
+    .deal-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .deal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 2px;
+    }
+    .deal-brand {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+    .deal-desc {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.4;
+    }
     
-    .deal-badges { position: absolute; top: -8px; right: 14px; display: flex; gap: 6px; }
-    .badge { padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 700; color: white; }
-    .badge.hot { background: linear-gradient(135deg, #f97316, #ef4444); }
-    .badge.new { background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .deal-badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .deal-badge.gratis { background: #f0fdf4; color: #16a34a; }
+    .deal-badge.limited { background: #fef3c7; color: #d97706; }
+    .deal-badge.sample { background: #fce7f3; color: #db2777; }
+    .deal-badge.daily { background: #ede9fe; color: #7c3aed; }
+    .deal-badge.instore { background: #e0f2fe; color: #0284c7; }
+    .badge-check { color: #a855f7; }
     
-    .deal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-    .deal-brand { display: flex; align-items: center; gap: 10px; }
-    .brand-logo { width: 40px; height: 40px; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-    .brand-info h3 { font-size: 13px; font-weight: 600; }
-    .brand-info span { font-size: 11px; color: #94a3b8; }
+    .deal-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: #999;
+      margin-top: 8px;
+    }
+    .deal-meta span { display: flex; align-items: center; gap: 4px; }
     
-    .deal-type { padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
-    .deal-type.gratis { background: #dcfce7; color: #16a34a; }
-    .deal-type.rabatt { background: #dbeafe; color: #2563eb; }
-    .deal-type.cashback { background: #fef3c7; color: #d97706; }
-    .deal-type.testabo { background: #fce7f3; color: #db2777; }
+    .deal-footer {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .deal-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #667eea, #a855f7);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .deal-btn:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(168,85,247,0.3); }
+    .save-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      border: 2px solid #e8e8e8;
+      background: white;
+      color: #ccc;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .save-btn:hover { border-color: #a855f7; color: #a855f7; }
+    .save-btn.saved { background: #a855f7; border-color: #a855f7; color: white; }
     
-    .deal-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; line-height: 1.35; }
-    .deal-desc { font-size: 13px; color: #64748b; line-height: 1.45; margin-bottom: 14px; }
-    
-    .deal-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #f1f5f9; }
-    .deal-meta { font-size: 11px; color: #94a3b8; }
-    .deal-link { padding: 7px 14px; border-radius: 8px; background: #f1f5f9; color: #3b82f6; font-size: 12px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
-    .deal-link:hover { background: #3b82f6; color: white; }
-    
-    .empty-state { text-align: center; padding: 60px 20px; background: white; border-radius: 16px; }
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #888;
+    }
     .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
-    .empty-state h3 { font-size: 18px; margin-bottom: 6px; }
-    .empty-state p { color: #64748b; font-size: 14px; }
     
+    /* Loading */
     .loading { text-align: center; padding: 60px 20px; }
-    .spinner { width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid #e8e8e8;
+      border-top-color: #a855f7;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
     
-    footer { text-align: center; padding: 24px; color: #94a3b8; font-size: 12px; margin-top: 30px; }
-    footer a { color: #3b82f6; text-decoration: none; }
-    
-    @media (max-width: 640px) {
-      .deals-grid { grid-template-columns: 1fr; }
-      h1 { font-size: 24px; }
-      .status-bar { flex-direction: column; align-items: center; }
+    /* Status Badge */
+    .status-bar {
+      background: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #888;
+      border-bottom: 1px solid #eee;
     }
+    .status-live {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #16a34a;
+      font-weight: 500;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      background: #16a34a;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* Scrollbar */
+    .categories-wrapper::-webkit-scrollbar { height: 0; }
   </style>
 </head>
 <body>
+  <header>
+    <div class="container">
+      <div class="header-top">
+        <div class="logo">FreeFinder</div>
+        <div class="header-icons">
+          <div class="header-icon">🔔</div>
+          <div class="header-icon">👤</div>
+        </div>
+      </div>
+      <div class="location-bar">
+        <span>📍</span>
+        <input type="text" value="Wien, Österreich" readonly>
+        <span>📍</span>
+      </div>
+    </div>
+  </header>
+  
   <div class="container">
-    <header>
-      <div class="logo">🏙️</div>
-      <h1>Wien Deals</h1>
-      <p class="subtitle">Live Gratis, Freebies & Schnäppchen in Wien</p>
-      <div class="status-bar">
-        <div class="status live"><span class="status-dot"></span> <span id="statusText">Lädt...</span></div>
-        <div class="status info" id="updateStatus">⏰ --</div>
-      </div>
-    </header>
-    
-    <div class="controls">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="search-input" id="searchInput" placeholder="Suche z.B. Kaffee, jö, gratis, BILLA...">
-      </div>
-      
-      <!-- EINE Filterleiste für alles -->
-      <div class="filter-row">
-        <button class="filter-btn active" data-type="all">Alle <span class="filter-count" id="cAll">0</span></button>
-        <button class="filter-btn" data-type="gratis">🎁 Gratis <span class="filter-count" id="cGratis">0</span></button>
-        <button class="filter-btn" data-type="rabatt">💰 Rabatt <span class="filter-count" id="cRabatt">0</span></button>
-        <button class="filter-btn" data-type="cashback">💵 Cashback <span class="filter-count" id="cCashback">0</span></button>
-        <button class="filter-btn" data-type="new">✨ Neu <span class="filter-count" id="cNew">0</span></button>
-      </div>
-      
-      <!-- Kategorien direkt darunter -->
+    <div class="categories-wrapper">
       <div class="categories" id="categories"></div>
     </div>
     
-    <div class="results-bar">
-      <span class="results-count" id="resultsCount">0 Deals</span>
-      <span class="last-update" id="lastUpdate"></span>
+    <div class="tabs">
+      <div class="tab active" data-tab="all">In der Nähe</div>
+      <div class="tab" data-tab="saved">Gespeichert (<span id="savedCount">0</span>)</div>
+      <div class="tab" data-tab="used">Eingelöst</div>
     </div>
     
-    <div id="content">
+    <div class="status-bar">
+      <div class="status-live"><span class="status-dot"></span> <span id="statusText">Lädt...</span></div>
+      <div id="lastUpdate">--</div>
+    </div>
+    
+    <div class="deals-list" id="content">
       <div class="loading">
         <div class="spinner"></div>
         <p>Deals werden geladen...</p>
       </div>
     </div>
-    
-    <footer>
-      <p>Wien Deals • Automatisch aktualisiert alle 2 Stunden</p>
-      <p style="margin-top:6px;">Quellen: jö, BILLA, Lidl, SPAR, OMV, McDonald's, dm & mehr</p>
-    </footer>
   </div>
 
 <script>
@@ -148,30 +318,24 @@
 // CONFIG
 // ============================================
 const DEALS_URL = './deals.json';
-const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 Minuten
 
 // ============================================
 // STATE
 // ============================================
 let deals = [];
-let lastUpdated = null;
+let savedDeals = JSON.parse(localStorage.getItem('savedDeals') || '[]');
 let selectedCategory = 'all';
-let selectedType = 'all';
-let searchQuery = '';
+let selectedTab = 'all';
 
 const categories = [
   { id: 'all', name: 'Alle', emoji: '🎁' },
-  { id: 'kaffee', name: 'Kaffee', emoji: '☕' },
-  { id: 'supermarkt', name: 'Supermarkt', emoji: '🛒' },
   { id: 'essen', name: 'Essen', emoji: '🍔' },
-  { id: 'drogerie', name: 'Drogerie', emoji: '🧴' },
-  { id: 'wien', name: 'Wien', emoji: '🏛️' },
-  { id: 'streaming', name: 'Streaming', emoji: '🎬' },
-  { id: 'mode', name: 'Mode', emoji: '👗' },
-  { id: 'mobilität', name: 'Mobilität', emoji: '🚇' },
-  { id: 'lieferung', name: 'Lieferung', emoji: '🛵' },
+  { id: 'kaffee', name: 'Getränke', emoji: '☕' },
+  { id: 'drogerie', name: 'Beauty', emoji: '💄' },
+  { id: 'supermarkt', name: 'Supermarkt', emoji: '🛒' },
+  { id: 'wien', name: 'Kultur', emoji: '🏛️' },
   { id: 'shopping', name: 'Shopping', emoji: '🛍️' },
-  { id: 'finanzen', name: 'Finanzen', emoji: '💳' }
+  { id: 'streaming', name: 'Digital', emoji: '📱' }
 ];
 
 // ============================================
@@ -180,10 +344,8 @@ const categories = [
 const $ = id => document.getElementById(id);
 const content = $('content');
 const statusText = $('statusText');
-const updateStatus = $('updateStatus');
-const resultsCount = $('resultsCount');
 const lastUpdateEl = $('lastUpdate');
-const searchInput = $('searchInput');
+const savedCountEl = $('savedCount');
 const categoriesEl = $('categories');
 
 // ============================================
@@ -196,18 +358,13 @@ async function fetchDeals() {
     
     const data = await res.json();
     deals = data.deals || [];
-    lastUpdated = data.lastUpdated ? new Date(data.lastUpdated) : new Date();
     
     statusText.textContent = `${deals.length} Deals live`;
-    updateStatus.textContent = `⏰ ${lastUpdated.toLocaleTimeString('de-AT', {hour:'2-digit', minute:'2-digit'})}`;
-    lastUpdateEl.textContent = `Aktualisiert: ${lastUpdated.toLocaleString('de-AT')}`;
+    lastUpdateEl.textContent = new Date().toLocaleTimeString('de-AT', {hour:'2-digit', minute:'2-digit'});
     
     render();
   } catch (err) {
-    console.error('Fetch error:', err);
-    statusText.textContent = 'Offline - zeige Cache';
-    
-    // Fallback zu eingebetteten Deals
+    statusText.textContent = 'Offline';
     if (deals.length === 0) {
       deals = getEmbeddedDeals();
       render();
@@ -216,25 +373,22 @@ async function fetchDeals() {
 }
 
 // ============================================
-// EMBEDDED FALLBACK DEALS
+// EMBEDDED DEALS
 // ============================================
 function getEmbeddedDeals() {
   return [
-    // NEU ENTDECKT - JÄNNER 2026
-    { id: "new-1", brand: "Haus der Geschichte", logo: "🏛️", title: "Gratis jeden Donnerstag 18-20 Uhr", description: "Ab 2026 jeden Donnerstagabend kostenloser Eintritt ins hdgö!", type: "gratis", category: "wien", source: "hdgö", url: "https://www.hdgoe.at", expires: "Jeden Donnerstag", hot: true, isNew: true },
-    { id: "new-2", brand: "ÖBB Veganuary", logo: "🚂", title: "Vegan Vurstsemmel um €2,90", description: "Vegane Vurstsemmel im Zug + Gewinnspiele mit Klimaticket!", type: "rabatt", category: "essen", source: "ÖBB", url: "https://www.oebb.at", expires: "Jänner 2026", hot: true, isNew: true },
-    { id: "new-3", brand: "Veganer Würstelstand", logo: "🌭", title: "Würstelstand komplett vegan", description: "Mike Lanner stellt seine 2 Würstelstände im Jänner komplett auf pflanzlich um!", type: "rabatt", category: "essen", source: "Veganuary", url: "https://www.1000things.at", expires: "Jänner 2026", hot: true, isNew: true },
-    { id: "new-5", brand: "Vegane Gesellschaft", logo: "🥗", title: "Veganuary Gewinnspiel", description: "Vegane Speise in Wiener Gastro fotografieren & einreichen = Gewinnchance!", type: "gratis", category: "essen", source: "Vegane Gesellschaft", url: "https://www.vegan.at", expires: "Jänner 2026", hot: true, isNew: true },
-    { id: "new-6", brand: "Verein MUT", logo: "🥫", title: "Gratis Lebensmittel", description: "Gerettete Lebensmittel kostenlos im 4. Bezirk mit MUT-Karte.", type: "gratis", category: "supermarkt", source: "Verein MUT", url: "https://verein-mut.eu", expires: "Unbegrenzt", hot: true, isNew: true },
-    // JÖ BONUS
-    { id: "1", brand: "jö Bonus Club", logo: "🟡", title: "50% auf OMV VIVA Kaffee", description: "Mit 75 Ös 50% auf alle Kaffeespezialitäten bei OMV.", type: "rabatt", category: "kaffee", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", hot: true },
-    { id: "2", brand: "jö Bonus Club", logo: "🟡", title: "OMV VIVA Winterdrink für 1 Ö", description: "Cinnamon Pumpkin Latte oder Blushed Toffee Latte für nur 1 Ö!", type: "gratis", category: "kaffee", source: "jö App", url: "https://www.joe-club.at", expires: "Winter 2026", hot: true, isNew: true },
-    { id: "3", brand: "McDonald's", logo: "🍟", title: "Gratis Kaffee Feedback", description: "Nach Einkauf Feedback geben = Gratis Kaffee. 5x/Monat!", type: "gratis", category: "kaffee", source: "McDonald's", url: "https://www.mcdonalds.at", expires: "5x/Monat", hot: true },
-    { id: "4", brand: "IKEA", logo: "🪑", title: "Gratis Kaffee Family", description: "IKEA Family: Unbegrenzt Gratis-Kaffee oder Tee!", type: "gratis", category: "kaffee", source: "IKEA", url: "https://www.ikea.at", expires: "Unbegrenzt", hot: true },
-    { id: "5", brand: "BILLA", logo: "🟠", title: "1+1 Gratis Aktionen", description: "Viele Produkte 1+1 Gratis bis 4.2.2026!", type: "gratis", category: "supermarkt", source: "BILLA", url: "https://www.billa.at", expires: "4.2.2026", hot: true, isNew: true },
-    { id: "6", brand: "Wien Museum", logo: "🏛️", title: "Gratis unter 19", description: "Freier Eintritt für alle unter 19 Jahren.", type: "gratis", category: "wien", source: "Wien Museum", url: "https://www.wienmuseum.at", expires: "Unbegrenzt", hot: true },
-    { id: "7", brand: "Starbucks", logo: "☕", title: "Gratis Geburtstagsdrink", description: "Am Geburtstag ein Gratis-Getränk nach Wahl!", type: "gratis", category: "kaffee", source: "Starbucks", url: "https://www.starbucks.at", expires: "Am Geburtstag", hot: true },
-    { id: "8", brand: "Douglas", logo: "💜", title: "2 Gratis-Proben", description: "Bei jeder Bestellung ab €10 zwei kostenlose Beauty-Proben.", type: "gratis", category: "drogerie", source: "Douglas", url: "https://www.douglas.at", expires: "Unbegrenzt", hot: true }
+    { id: "1", brand: "Starbucks", logo: "☕", title: "Gratis Starbucks Getränk", description: "Registriere dich in der App und erhalte ein kostenloses Getränk deiner Wahl", type: "gratis", badge: "instore", category: "kaffee", source: "Starbucks App", url: "https://www.starbucks.at", expires: "31.01.2026", distance: "0.3 km", hot: true },
+    { id: "2", brand: "Vapiano", logo: "🍕", title: "Kostenlose Pizza-Slice", description: "Neueröffnung! Heute kostenlose Pizza für die ersten 100 Besucher", type: "gratis", badge: "limited", category: "essen", source: "Vapiano", url: "https://www.vapiano.at", expires: "Heute 18:00", distance: "1.2 km", hot: true, isNew: true },
+    { id: "3", brand: "Douglas", logo: "💄", title: "Gratis Gesichtscreme Probe", description: "Hole dir eine kostenlose Probe der neuen Feuchtigkeitscreme ab", type: "gratis", badge: "sample", category: "drogerie", source: "Douglas", url: "https://www.douglas.at", expires: "15.02.2026", distance: "0.8 km", hot: true },
+    { id: "4", brand: "Bubbleology", logo: "🧋", title: "Gratis Bubble Tea", description: "Happy Hour: 16-18 Uhr, gratis Small Bubble Tea bei Anmeldung", type: "gratis", badge: "daily", category: "kaffee", source: "Bubbleology", url: "https://www.bubbleology.at", expires: "Täglich", distance: "2.1 km", hot: true },
+    { id: "5", brand: "McDonald's", logo: "🍟", title: "Gratis Kaffee", description: "Feedback geben = Gratis Kaffee oder Cola. Bis zu 5x pro Monat!", type: "gratis", badge: "instore", category: "kaffee", source: "McDonald's App", url: "https://www.mcdonalds.at", expires: "5x/Monat", distance: "0.5 km", hot: true },
+    { id: "6", brand: "IKEA", logo: "🪑", title: "Gratis Kaffee & Tee", description: "IKEA Family Mitglieder: Unbegrenzt Gratis-Kaffee oder Tee im Restaurant", type: "gratis", badge: "instore", category: "kaffee", source: "IKEA Family", url: "https://www.ikea.at", expires: "Unbegrenzt", distance: "8.5 km", hot: true },
+    { id: "7", brand: "jö Bonus Club", logo: "🟡", title: "OMV Winterdrink 1 Ö", description: "Cinnamon Pumpkin Latte oder Blushed Toffee Latte für nur 1 Ö!", type: "gratis", badge: "limited", category: "kaffee", source: "jö App", url: "https://www.joe-club.at", expires: "Winter 2026", distance: "0.2 km", hot: true, isNew: true },
+    { id: "8", brand: "dm", logo: "🧴", title: "Gratis Babybox", description: "Für Schwangere: Kostenlose Box mit Babyprodukten bei dm Glückskind", type: "gratis", badge: "sample", category: "drogerie", source: "dm Glückskind", url: "https://www.dm.at", expires: "Bei Anmeldung", distance: "1.0 km", hot: true },
+    { id: "9", brand: "Haus der Geschichte", logo: "🏛️", title: "Gratis Eintritt Do 18-20h", description: "Ab 2026 jeden Donnerstagabend kostenloser Eintritt!", type: "gratis", badge: "daily", category: "wien", source: "hdgö", url: "https://www.hdgoe.at", expires: "Jeden Donnerstag", distance: "2.3 km", hot: true, isNew: true },
+    { id: "10", brand: "Wien Museum", logo: "🖼️", title: "Gratis unter 19", description: "Freier Eintritt für alle unter 19 Jahren", type: "gratis", badge: "instore", category: "wien", source: "Wien Museum", url: "https://www.wienmuseum.at", expires: "Unbegrenzt", distance: "1.8 km", hot: true },
+    { id: "11", brand: "BILLA", logo: "🛒", title: "1+1 Gratis Aktionen", description: "Viele Produkte diese Woche 1+1 Gratis!", type: "gratis", badge: "limited", category: "supermarkt", source: "BILLA", url: "https://www.billa.at", expires: "Diese Woche", distance: "0.4 km", hot: true, isNew: true },
+    { id: "12", brand: "Verein MUT", logo: "🥫", title: "Gratis Lebensmittel", description: "Gerettete Lebensmittel kostenlos im 4. Bezirk mit MUT-Karte", type: "gratis", badge: "daily", category: "supermarkt", source: "Verein MUT", url: "https://verein-mut.eu", expires: "Mo-Fr 10-15h", distance: "3.2 km", hot: true }
   ];
 }
 
@@ -244,7 +398,7 @@ function getEmbeddedDeals() {
 function render() {
   renderCategories();
   renderDeals();
-  updateCounts();
+  savedCountEl.textContent = savedDeals.length;
 }
 
 function renderCategories() {
@@ -258,81 +412,89 @@ function renderCategories() {
 }
 
 function filterDeals() {
-  return deals.filter(d => {
-    if (selectedCategory !== 'all' && d.category !== selectedCategory) return false;
-    if (selectedType === 'gratis' && d.type !== 'gratis') return false;
-    if (selectedType === 'rabatt' && d.type !== 'rabatt') return false;
-    if (selectedType === 'cashback' && d.type !== 'cashback' && d.type !== 'testabo') return false;
-    if (selectedType === 'new' && !d.isNew) return false;
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      const text = `${d.brand} ${d.title} ${d.description} ${d.source}`.toLowerCase();
-      if (!text.includes(q)) return false;
-    }
-    return true;
-  });
+  let filtered = deals;
+  
+  if (selectedTab === 'saved') {
+    filtered = deals.filter(d => savedDeals.includes(d.id));
+  } else if (selectedTab === 'used') {
+    filtered = [];
+  }
+  
+  if (selectedCategory !== 'all') {
+    filtered = filtered.filter(d => d.category === selectedCategory);
+  }
+  
+  return filtered;
 }
 
 function renderDeals() {
   const filtered = filterDeals();
-  resultsCount.textContent = `${filtered.length} Deals`;
   
   if (filtered.length === 0) {
     content.innerHTML = `
       <div class="empty-state">
         <div class="empty-state-icon">🔍</div>
         <h3>Keine Deals gefunden</h3>
-        <p>Versuche eine andere Suche oder Kategorie</p>
+        <p>Versuche eine andere Kategorie</p>
       </div>`;
     return;
   }
   
-  const types = { gratis: 'Gratis', rabatt: 'Rabatt', cashback: 'Cashback', testabo: 'Testabo' };
+  const badgeLabels = {
+    gratis: 'Gratis',
+    limited: 'Limited',
+    sample: 'Sample',
+    daily: 'Daily Deal',
+    instore: 'In-Store'
+  };
   
-  content.innerHTML = `<div class="deals-grid">${filtered.map(d => `
-    <div class="deal-card ${d.isNew ? 'is-new' : ''}">
-      <div class="deal-badges">
-        ${d.hot ? '<span class="badge hot">🔥 HOT</span>' : ''}
-        ${d.isNew ? '<span class="badge new">✨ NEU</span>' : ''}
-      </div>
+  content.innerHTML = filtered.map(d => `
+    <div class="deal-card">
       <div class="deal-header">
-        <div class="deal-brand">
-          <div class="brand-logo">${d.logo || '🎁'}</div>
-          <div class="brand-info">
-            <h3>${d.brand}</h3>
-            <span>${d.source}</span>
+        <div class="deal-logo">${d.logo || '🎁'}</div>
+        <div class="deal-info">
+          <div class="deal-title-row">
+            <div>
+              <div class="deal-title">${d.title}</div>
+              <div class="deal-brand">${d.brand}</div>
+            </div>
+            <div class="deal-badge ${d.badge || 'gratis'}">
+              ${badgeLabels[d.badge] || 'Gratis'} <span class="badge-check">✓</span>
+            </div>
+          </div>
+          <div class="deal-desc">${d.description}</div>
+          <div class="deal-meta">
+            <span>📍 ${d.distance || '?'}</span>
+            <span>🕐 ${d.expires || 'Begrenzt'}</span>
           </div>
         </div>
-        <span class="deal-type ${d.type}">${types[d.type] || 'Deal'}</span>
       </div>
-      <h4 class="deal-title">${d.title}</h4>
-      <p class="deal-desc">${d.description}</p>
       <div class="deal-footer">
-        <span class="deal-meta">⏰ ${d.expires || 'Begrenzt'}</span>
-        <a href="${d.url}" target="_blank" class="deal-link">Zum Deal →</a>
+        <button class="deal-btn" onclick="window.open('${d.url}', '_blank')">Jetzt holen</button>
+        <button class="save-btn ${savedDeals.includes(d.id) ? 'saved' : ''}" onclick="toggleSave('${d.id}')">☆</button>
       </div>
     </div>
-  `).join('')}</div>`;
+  `).join('');
 }
 
-function updateCounts() {
-  $('cAll').textContent = deals.length;
-  $('cGratis').textContent = deals.filter(d => d.type === 'gratis').length;
-  $('cRabatt').textContent = deals.filter(d => d.type === 'rabatt').length;
-  $('cCashback').textContent = deals.filter(d => d.type === 'cashback' || d.type === 'testabo').length;
-  $('cNew').textContent = deals.filter(d => d.isNew).length;
+function toggleSave(id) {
+  if (savedDeals.includes(id)) {
+    savedDeals = savedDeals.filter(x => x !== id);
+  } else {
+    savedDeals.push(id);
+  }
+  localStorage.setItem('savedDeals', JSON.stringify(savedDeals));
+  render();
 }
 
 // ============================================
-// EVENTS
+// TABS
 // ============================================
-searchInput.oninput = e => { searchQuery = e.target.value; render(); };
-
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.onclick = () => {
-    selectedType = btn.dataset.type;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => {
+    selectedTab = tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
     render();
   };
 });
@@ -341,7 +503,7 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 // INIT
 // ============================================
 fetchDeals();
-setInterval(fetchDeals, REFRESH_INTERVAL);
+setInterval(fetchDeals, 5 * 60 * 1000);
 </script>
 </body>
 </html>
