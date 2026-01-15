@@ -2,76 +2,115 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FreeFinder - Gratis Deals Wien</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FreeFinder Wien</title>
+  <meta name="theme-color" content="#e8f4f8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', -apple-system, sans-serif; background: #f5f5f7; min-height: 100vh; color: #1a1a2e; }
     
-    /* Header mit Gradient */
-    header {
-      background: linear-gradient(135deg, #667eea 0%, #e91e8c 100%);
-      padding: 20px 20px 24px;
-      color: white;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(180deg, #e8f4f8 0%, #d0e8f0 100%);
+      min-height: 100vh;
+      color: #1a1a2e;
     }
-    .header-top {
+    
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 16px;
+      padding-bottom: 100px;
+    }
+    
+    /* Suchleiste */
+    .search-box {
+      background: white;
+      border-radius: 16px;
+      padding: 14px 18px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       margin-bottom: 16px;
     }
-    .logo { font-size: 24px; font-weight: 700; }
-    .header-icons { display: flex; gap: 12px; }
-    .header-icon {
-      width: 40px; height: 40px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      transition: background 0.2s;
+    .search-box svg { color: #9ca3af; flex-shrink: 0; }
+    .search-box input {
+      border: none;
+      outline: none;
+      font-size: 16px;
+      width: 100%;
+      background: transparent;
+      color: #374151;
     }
-    .header-icon:hover { background: rgba(255,255,255,0.3); }
+    .search-box input::placeholder { color: #9ca3af; }
     
-    .location-bar {
+    /* Filter Section */
+    .filter-section {
+      background: white;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    
+    /* Type Filters (Alle, Gratis, Rabatt, etc.) */
+    .type-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .type-btn {
+      padding: 10px 16px;
+      border-radius: 25px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: rgba(255,255,255,0.15);
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 14px;
+      gap: 6px;
     }
-    .location-bar input {
-      background: none;
-      border: none;
+    .type-btn.primary {
+      background: #3b82f6;
       color: white;
-      font-size: 14px;
-      flex: 1;
-      outline: none;
     }
-    .location-bar input::placeholder { color: rgba(255,255,255,0.7); }
-    
-    .container { max-width: 600px; margin: 0 auto; padding: 0; }
-    
-    /* Kategorien */
-    .categories-wrapper {
-      background: white;
-      padding: 16px 20px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
+    .type-btn.secondary {
+      background: #f3f4f6;
+      color: #374151;
     }
-    .categories {
+    .type-btn.secondary:hover {
+      background: #e5e7eb;
+    }
+    .type-btn .count {
+      background: rgba(255,255,255,0.3);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+    .type-btn.secondary .count {
+      background: #e5e7eb;
+    }
+    
+    .divider {
+      height: 1px;
+      background: #e5e7eb;
+      margin: 12px 0;
+    }
+    
+    /* Category Filters */
+    .category-filters {
       display: flex;
-      gap: 10px;
-      min-width: max-content;
+      flex-wrap: wrap;
+      gap: 8px;
     }
     .cat-btn {
-      padding: 10px 18px;
+      padding: 10px 16px;
       border-radius: 25px;
-      border: 2px solid #e8e8e8;
-      background: white;
-      color: #555;
+      border: none;
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
@@ -79,431 +118,438 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      white-space: nowrap;
+      background: #f3f4f6;
+      color: #374151;
     }
-    .cat-btn:hover { border-color: #a855f7; color: #a855f7; }
+    .cat-btn:hover {
+      background: #e5e7eb;
+    }
     .cat-btn.active {
-      background: linear-gradient(135deg, #667eea, #a855f7);
+      background: #1f2937;
       color: white;
-      border-color: transparent;
     }
     
-    /* Tabs */
-    .tabs {
+    /* Deal Count Header */
+    .deals-header {
       display: flex;
-      background: white;
-      border-bottom: 1px solid #eee;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 0 4px;
     }
-    .tab {
-      flex: 1;
-      padding: 14px;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 500;
-      color: #888;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s;
+    .deals-count {
+      font-size: 16px;
+      font-weight: 600;
+      color: #374151;
     }
-    .tab:hover { color: #a855f7; }
-    .tab.active { color: #a855f7; border-bottom-color: #a855f7; }
+    .last-update {
+      font-size: 12px;
+      color: #9ca3af;
+    }
     
     /* Deal Cards */
-    .deals-list { padding: 12px; }
+    .deals-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
     
     .deal-card {
       background: white;
       border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 2px solid transparent;
       transition: all 0.2s;
     }
-    .deal-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .deal-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .deal-card.gratis {
+      border-color: #22c55e;
+    }
+    .deal-card.rabatt {
+      border-color: #22c55e;
+    }
+    .deal-card.hot {
+      border-color: #ef4444;
+    }
     
     .deal-header {
       display: flex;
-      gap: 14px;
+      justify-content: space-between;
+      align-items: flex-start;
       margin-bottom: 12px;
     }
-    .deal-logo {
-      width: 50px; height: 50px;
+    .deal-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      background: #f3f4f6;
       border-radius: 12px;
-      background: #f8f8f8;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 24px;
-      flex-shrink: 0;
     }
-    .deal-info { flex: 1; }
-    .deal-title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-    }
-    .deal-title {
+    .brand-info h3 {
       font-size: 16px;
       font-weight: 600;
-      color: #1a1a2e;
+      color: #1f2937;
       margin-bottom: 2px;
     }
-    .deal-brand {
+    .brand-info span {
       font-size: 13px;
-      color: #888;
-      margin-bottom: 6px;
-    }
-    .deal-desc {
-      font-size: 14px;
-      color: #555;
-      line-height: 1.4;
+      color: #9ca3af;
     }
     
-    .deal-badge {
+    .deal-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .badge {
       padding: 4px 10px;
-      border-radius: 20px;
+      border-radius: 6px;
       font-size: 11px;
-      font-weight: 600;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
     }
-    .deal-badge.gratis { background: #f0fdf4; color: #16a34a; }
-    .deal-badge.limited { background: #fef3c7; color: #d97706; }
-    .deal-badge.sample { background: #fce7f3; color: #db2777; }
-    .deal-badge.daily { background: #ede9fe; color: #7c3aed; }
-    .deal-badge.instore { background: #e0f2fe; color: #0284c7; }
-    .badge-check { color: #a855f7; }
+    .badge.hot {
+      background: #fecaca;
+      color: #dc2626;
+    }
+    .badge.neu {
+      background: #dbeafe;
+      color: #2563eb;
+    }
+    .badge.gratis {
+      background: #dcfce7;
+      color: #16a34a;
+      border: 1px solid #22c55e;
+    }
+    .badge.rabatt {
+      background: #fef3c7;
+      color: #d97706;
+      border: 1px solid #f59e0b;
+    }
+    .badge.cashback {
+      background: #f3e8ff;
+      color: #9333ea;
+      border: 1px solid #a855f7;
+    }
     
-    .deal-meta {
-      display: flex;
-      gap: 16px;
-      font-size: 12px;
-      color: #999;
-      margin-top: 8px;
+    .deal-content h4 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 6px;
+      line-height: 1.3;
     }
-    .deal-meta span { display: flex; align-items: center; gap: 4px; }
+    .deal-content p {
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
     
     .deal-footer {
       display: flex;
-      gap: 10px;
-      margin-top: 14px;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid #f3f4f6;
     }
-    .deal-btn {
-      flex: 1;
-      padding: 12px;
-      border-radius: 10px;
+    .deal-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    .deal-link {
+      padding: 8px 16px;
+      background: transparent;
+      color: #3b82f6;
       border: none;
-      background: linear-gradient(135deg, #667eea, #a855f7);
-      color: white;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
-    }
-    .deal-btn:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(168,85,247,0.3); }
-    .save-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      border: 2px solid #e8e8e8;
-      background: white;
-      color: #ccc;
-      font-size: 18px;
-      cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 4px;
       transition: all 0.2s;
+      text-decoration: none;
     }
-    .save-btn:hover { border-color: #a855f7; color: #a855f7; }
-    .save-btn.saved { background: #a855f7; border-color: #a855f7; color: white; }
+    .deal-link:hover {
+      color: #2563eb;
+    }
+    
+    /* Hot Badge Animation */
+    .badge.hot::before {
+      content: '🔥 ';
+    }
+    .badge.neu::before {
+      content: '✨ ';
+    }
     
     /* Empty State */
     .empty-state {
       text-align: center;
-      padding: 60px 20px;
-      color: #888;
+      padding: 48px 24px;
+      color: #9ca3af;
     }
-    .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
     
     /* Loading */
-    .loading { text-align: center; padding: 60px 20px; }
-    .spinner {
-      width: 40px; height: 40px;
-      border: 3px solid #e8e8e8;
-      border-top-color: #a855f7;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 16px;
+    .loading {
+      text-align: center;
+      padding: 32px;
+      color: #9ca3af;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    
-    /* Status Badge */
-    .status-bar {
-      background: white;
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      color: #888;
-      border-bottom: 1px solid #eee;
-    }
-    .status-live {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: #16a34a;
-      font-weight: 500;
-    }
-    .status-dot {
-      width: 8px; height: 8px;
-      background: #16a34a;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-    /* Scrollbar */
-    .categories-wrapper::-webkit-scrollbar { height: 0; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="container">
-      <div class="header-top">
-        <div class="logo">FreeFinder</div>
-        <div class="header-icons">
-          <div class="header-icon">🔔</div>
-          <div class="header-icon">👤</div>
-        </div>
-      </div>
-      <div class="location-bar">
-        <span>📍</span>
-        <input type="text" value="Wien, Österreich" readonly>
-        <span>📍</span>
-      </div>
-    </div>
-  </header>
-  
   <div class="container">
-    <div class="categories-wrapper">
-      <div class="categories" id="categories"></div>
+    <!-- Suchleiste -->
+    <div class="search-box">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Suche z.B. Kaffee, jö, gratis, BILLA...">
     </div>
     
-    <div class="tabs">
-      <div class="tab active" data-tab="all">In der Nähe</div>
-      <div class="tab" data-tab="saved">Gespeichert (<span id="savedCount">0</span>)</div>
-      <div class="tab" data-tab="used">Eingelöst</div>
-    </div>
-    
-    <div class="status-bar">
-      <div class="status-live"><span class="status-dot"></span> <span id="statusText">Lädt...</span></div>
-      <div id="lastUpdate">--</div>
-    </div>
-    
-    <div class="deals-list" id="content">
-      <div class="loading">
-        <div class="spinner"></div>
-        <p>Deals werden geladen...</p>
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <!-- Type Filters -->
+      <div class="type-filters" id="typeFilters">
+        <button class="type-btn primary active" data-type="alle">
+          Alle <span class="count" id="countAll">0</span>
+        </button>
+        <button class="type-btn secondary" data-type="gratis">
+          🎁 Gratis <span class="count" id="countGratis">0</span>
+        </button>
+        <button class="type-btn secondary" data-type="rabatt">
+          💰 Rabatt <span class="count" id="countRabatt">0</span>
+        </button>
+        <button class="type-btn secondary" data-type="cashback">
+          🤑 Cashback <span class="count" id="countCashback">0</span>
+        </button>
+        <button class="type-btn secondary" data-type="neu">
+          ✨ Neu <span class="count" id="countNeu">0</span>
+        </button>
       </div>
+      
+      <div class="divider"></div>
+      
+      <!-- Category Filters -->
+      <div class="category-filters" id="categoryFilters">
+        <button class="cat-btn active" data-cat="alle">🎁 Alle</button>
+        <button class="cat-btn" data-cat="kaffee">☕ Kaffee</button>
+        <button class="cat-btn" data-cat="supermarkt">🛒 Supermarkt</button>
+        <button class="cat-btn" data-cat="essen">🍔 Essen</button>
+        <button class="cat-btn" data-cat="drogerie">🧴 Drogerie</button>
+        <button class="cat-btn" data-cat="wien">🏛️ Wien</button>
+        <button class="cat-btn" data-cat="streaming">📺 Streaming</button>
+        <button class="cat-btn" data-cat="mode">👕 Mode</button>
+        <button class="cat-btn" data-cat="mobilität">🚌 Mobilität</button>
+        <button class="cat-btn" data-cat="lieferung">🛵 Lieferung</button>
+        <button class="cat-btn" data-cat="shopping">🛍️ Shopping</button>
+        <button class="cat-btn" data-cat="finanzen">💳 Finanzen</button>
+      </div>
+    </div>
+    
+    <!-- Deals Header -->
+    <div class="deals-header">
+      <span class="deals-count"><span id="dealCount">0</span> Deals</span>
+      <span class="last-update">Aktualisiert: <span id="lastUpdate">-</span></span>
+    </div>
+    
+    <!-- Deals Liste -->
+    <div class="deals-list" id="dealsList">
+      <div class="loading">⏳ Deals werden geladen...</div>
     </div>
   </div>
 
-<script>
-// ============================================
-// CONFIG
-// ============================================
-const DEALS_URL = './deals.json';
+  <script>
+    // State
+    let allDeals = [];
+    let currentType = 'alle';
+    let currentCategory = 'alle';
+    let searchQuery = '';
 
-// ============================================
-// STATE
-// ============================================
-let deals = [];
-let savedDeals = JSON.parse(localStorage.getItem('savedDeals') || '[]');
-let selectedCategory = 'all';
-let selectedTab = 'all';
-
-const categories = [
-  { id: 'all', name: 'Alle', emoji: '🎁' },
-  { id: 'essen', name: 'Essen', emoji: '🍔' },
-  { id: 'kaffee', name: 'Getränke', emoji: '☕' },
-  { id: 'drogerie', name: 'Beauty', emoji: '💄' },
-  { id: 'supermarkt', name: 'Supermarkt', emoji: '🛒' },
-  { id: 'wien', name: 'Kultur', emoji: '🏛️' },
-  { id: 'shopping', name: 'Shopping', emoji: '🛍️' },
-  { id: 'streaming', name: 'Digital', emoji: '📱' }
-];
-
-// ============================================
-// DOM
-// ============================================
-const $ = id => document.getElementById(id);
-const content = $('content');
-const statusText = $('statusText');
-const lastUpdateEl = $('lastUpdate');
-const savedCountEl = $('savedCount');
-const categoriesEl = $('categories');
-
-// ============================================
-// FETCH DEALS
-// ============================================
-async function fetchDeals() {
-  try {
-    const res = await fetch(DEALS_URL + '?t=' + Date.now());
-    if (!res.ok) throw new Error('Nicht verfügbar');
-    
-    const data = await res.json();
-    deals = data.deals || [];
-    
-    statusText.textContent = `${deals.length} Deals live`;
-    lastUpdateEl.textContent = new Date().toLocaleTimeString('de-AT', {hour:'2-digit', minute:'2-digit'});
-    
-    render();
-  } catch (err) {
-    statusText.textContent = 'Offline';
-    if (deals.length === 0) {
-      deals = getEmbeddedDeals();
-      render();
+    // Load Deals
+    async function loadDeals() {
+      try {
+        const response = await fetch('deals.json?t=' + Date.now());
+        const data = await response.json();
+        allDeals = data.deals || [];
+        
+        // Update counts
+        updateCounts();
+        
+        // Update timestamp
+        if (data.lastUpdated) {
+          const date = new Date(data.lastUpdated);
+          document.getElementById('lastUpdate').textContent = 
+            date.toLocaleDateString('de-AT') + ', ' + date.toLocaleTimeString('de-AT', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+        }
+        
+        renderDeals();
+      } catch (error) {
+        console.error('Error loading deals:', error);
+        document.getElementById('dealsList').innerHTML = `
+          <div class="empty-state">
+            <div class="icon">😕</div>
+            <p>Deals konnten nicht geladen werden</p>
+          </div>
+        `;
+      }
     }
-  }
-}
 
-// ============================================
-// EMBEDDED DEALS
-// ============================================
-function getEmbeddedDeals() {
-  return [
-    { id: "1", brand: "Starbucks", logo: "☕", title: "Gratis Starbucks Getränk", description: "Registriere dich in der App und erhalte ein kostenloses Getränk deiner Wahl", type: "gratis", badge: "instore", category: "kaffee", source: "Starbucks App", url: "https://www.starbucks.at", expires: "31.01.2026", distance: "0.3 km", hot: true },
-    { id: "2", brand: "Vapiano", logo: "🍕", title: "Kostenlose Pizza-Slice", description: "Neueröffnung! Heute kostenlose Pizza für die ersten 100 Besucher", type: "gratis", badge: "limited", category: "essen", source: "Vapiano", url: "https://www.vapiano.at", expires: "Heute 18:00", distance: "1.2 km", hot: true, isNew: true },
-    { id: "3", brand: "Douglas", logo: "💄", title: "Gratis Gesichtscreme Probe", description: "Hole dir eine kostenlose Probe der neuen Feuchtigkeitscreme ab", type: "gratis", badge: "sample", category: "drogerie", source: "Douglas", url: "https://www.douglas.at", expires: "15.02.2026", distance: "0.8 km", hot: true },
-    { id: "4", brand: "Bubbleology", logo: "🧋", title: "Gratis Bubble Tea", description: "Happy Hour: 16-18 Uhr, gratis Small Bubble Tea bei Anmeldung", type: "gratis", badge: "daily", category: "kaffee", source: "Bubbleology", url: "https://www.bubbleology.at", expires: "Täglich", distance: "2.1 km", hot: true },
-    { id: "5", brand: "McDonald's", logo: "🍟", title: "Gratis Kaffee", description: "Feedback geben = Gratis Kaffee oder Cola. Bis zu 5x pro Monat!", type: "gratis", badge: "instore", category: "kaffee", source: "McDonald's App", url: "https://www.mcdonalds.at", expires: "5x/Monat", distance: "0.5 km", hot: true },
-    { id: "6", brand: "IKEA", logo: "🪑", title: "Gratis Kaffee & Tee", description: "IKEA Family Mitglieder: Unbegrenzt Gratis-Kaffee oder Tee im Restaurant", type: "gratis", badge: "instore", category: "kaffee", source: "IKEA Family", url: "https://www.ikea.at", expires: "Unbegrenzt", distance: "8.5 km", hot: true },
-    { id: "7", brand: "jö Bonus Club", logo: "🟡", title: "OMV Winterdrink 1 Ö", description: "Cinnamon Pumpkin Latte oder Blushed Toffee Latte für nur 1 Ö!", type: "gratis", badge: "limited", category: "kaffee", source: "jö App", url: "https://www.joe-club.at", expires: "Winter 2026", distance: "0.2 km", hot: true, isNew: true },
-    { id: "8", brand: "dm", logo: "🧴", title: "Gratis Babybox", description: "Für Schwangere: Kostenlose Box mit Babyprodukten bei dm Glückskind", type: "gratis", badge: "sample", category: "drogerie", source: "dm Glückskind", url: "https://www.dm.at", expires: "Bei Anmeldung", distance: "1.0 km", hot: true },
-    { id: "9", brand: "Haus der Geschichte", logo: "🏛️", title: "Gratis Eintritt Do 18-20h", description: "Ab 2026 jeden Donnerstagabend kostenloser Eintritt!", type: "gratis", badge: "daily", category: "wien", source: "hdgö", url: "https://www.hdgoe.at", expires: "Jeden Donnerstag", distance: "2.3 km", hot: true, isNew: true },
-    { id: "10", brand: "Wien Museum", logo: "🖼️", title: "Gratis unter 19", description: "Freier Eintritt für alle unter 19 Jahren", type: "gratis", badge: "instore", category: "wien", source: "Wien Museum", url: "https://www.wienmuseum.at", expires: "Unbegrenzt", distance: "1.8 km", hot: true },
-    { id: "11", brand: "BILLA", logo: "🛒", title: "1+1 Gratis Aktionen", description: "Viele Produkte diese Woche 1+1 Gratis!", type: "gratis", badge: "limited", category: "supermarkt", source: "BILLA", url: "https://www.billa.at", expires: "Diese Woche", distance: "0.4 km", hot: true, isNew: true },
-    { id: "12", brand: "Verein MUT", logo: "🥫", title: "Gratis Lebensmittel", description: "Gerettete Lebensmittel kostenlos im 4. Bezirk mit MUT-Karte", type: "gratis", badge: "daily", category: "supermarkt", source: "Verein MUT", url: "https://verein-mut.eu", expires: "Mo-Fr 10-15h", distance: "3.2 km", hot: true }
-  ];
-}
+    // Update Counts
+    function updateCounts() {
+      document.getElementById('countAll').textContent = allDeals.length;
+      document.getElementById('countGratis').textContent = allDeals.filter(d => d.type === 'gratis').length;
+      document.getElementById('countRabatt').textContent = allDeals.filter(d => d.type === 'rabatt').length;
+      document.getElementById('countCashback').textContent = allDeals.filter(d => d.type === 'cashback').length;
+      document.getElementById('countNeu').textContent = allDeals.filter(d => d.isNew).length;
+    }
 
-// ============================================
-// RENDER
-// ============================================
-function render() {
-  renderCategories();
-  renderDeals();
-  savedCountEl.textContent = savedDeals.length;
-}
+    // Filter Deals
+    function filterDeals() {
+      let filtered = [...allDeals];
+      
+      // Type filter
+      if (currentType === 'gratis') {
+        filtered = filtered.filter(d => d.type === 'gratis');
+      } else if (currentType === 'rabatt') {
+        filtered = filtered.filter(d => d.type === 'rabatt');
+      } else if (currentType === 'cashback') {
+        filtered = filtered.filter(d => d.type === 'cashback');
+      } else if (currentType === 'neu') {
+        filtered = filtered.filter(d => d.isNew);
+      }
+      
+      // Category filter
+      if (currentCategory !== 'alle') {
+        filtered = filtered.filter(d => d.category === currentCategory);
+      }
+      
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(d => 
+          d.title?.toLowerCase().includes(query) ||
+          d.description?.toLowerCase().includes(query) ||
+          d.brand?.toLowerCase().includes(query)
+        );
+      }
+      
+      return filtered;
+    }
 
-function renderCategories() {
-  categoriesEl.innerHTML = categories.map(c => 
-    `<button class="cat-btn ${selectedCategory === c.id ? 'active' : ''}" data-cat="${c.id}">${c.emoji} ${c.name}</button>`
-  ).join('');
-  
-  categoriesEl.querySelectorAll('.cat-btn').forEach(btn => {
-    btn.onclick = () => { selectedCategory = btn.dataset.cat; render(); };
-  });
-}
-
-function filterDeals() {
-  let filtered = deals;
-  
-  if (selectedTab === 'saved') {
-    filtered = deals.filter(d => savedDeals.includes(d.id));
-  } else if (selectedTab === 'used') {
-    filtered = [];
-  }
-  
-  if (selectedCategory !== 'all') {
-    filtered = filtered.filter(d => d.category === selectedCategory);
-  }
-  
-  return filtered;
-}
-
-function renderDeals() {
-  const filtered = filterDeals();
-  
-  if (filtered.length === 0) {
-    content.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">🔍</div>
-        <h3>Keine Deals gefunden</h3>
-        <p>Versuche eine andere Kategorie</p>
-      </div>`;
-    return;
-  }
-  
-  const badgeLabels = {
-    gratis: 'Gratis',
-    limited: 'Limited',
-    sample: 'Sample',
-    daily: 'Daily Deal',
-    instore: 'In-Store'
-  };
-  
-  content.innerHTML = filtered.map(d => `
-    <div class="deal-card">
-      <div class="deal-header">
-        <div class="deal-logo">${d.logo || '🎁'}</div>
-        <div class="deal-info">
-          <div class="deal-title-row">
-            <div>
-              <div class="deal-title">${d.title}</div>
-              <div class="deal-brand">${d.brand}</div>
+    // Render Deals
+    function renderDeals() {
+      const filtered = filterDeals();
+      const container = document.getElementById('dealsList');
+      
+      document.getElementById('dealCount').textContent = filtered.length;
+      
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">🔍</div>
+            <p>Keine Deals gefunden</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = filtered.map(deal => {
+        const cardClass = deal.hot ? 'hot' : (deal.type === 'gratis' ? 'gratis' : 'rabatt');
+        const typeBadgeClass = deal.type === 'gratis' ? 'gratis' : (deal.type === 'cashback' ? 'cashback' : 'rabatt');
+        const typeBadgeText = deal.type === 'gratis' ? 'GRATIS' : (deal.type === 'cashback' ? 'CASHBACK' : 'RABATT');
+        
+        return `
+          <div class="deal-card ${cardClass}">
+            <div class="deal-header">
+              <div class="deal-brand">
+                <div class="brand-logo">${deal.logo || '🎁'}</div>
+                <div class="brand-info">
+                  <h3>${deal.brand || 'Deal'}</h3>
+                  <span>${deal.source || ''}</span>
+                </div>
+              </div>
+              <div class="deal-badges">
+                ${deal.hot ? '<span class="badge hot">HOT</span>' : ''}
+                ${deal.isNew ? '<span class="badge neu">NEU</span>' : ''}
+                <span class="badge ${typeBadgeClass}">${typeBadgeText}</span>
+              </div>
             </div>
-            <div class="deal-badge ${d.badge || 'gratis'}">
-              ${badgeLabels[d.badge] || 'Gratis'} <span class="badge-check">✓</span>
+            <div class="deal-content">
+              <h4>${deal.title || ''}</h4>
+              <p>${deal.description || ''}</p>
+            </div>
+            <div class="deal-footer">
+              <div class="deal-meta">
+                <span>⏰</span>
+                <span>${deal.expires || 'Unbegrenzt'}</span>
+              </div>
+              <a href="${deal.url || '#'}" target="_blank" class="deal-link">
+                Zum Deal →
+              </a>
             </div>
           </div>
-          <div class="deal-desc">${d.description}</div>
-          <div class="deal-meta">
-            <span>📍 ${d.distance || '?'}</span>
-            <span>🕐 ${d.expires || 'Begrenzt'}</span>
-          </div>
-        </div>
-      </div>
-      <div class="deal-footer">
-        <button class="deal-btn" onclick="window.open('${d.url}', '_blank')">Jetzt holen</button>
-        <button class="save-btn ${savedDeals.includes(d.id) ? 'saved' : ''}" onclick="toggleSave('${d.id}')">☆</button>
-      </div>
-    </div>
-  `).join('');
-}
+        `;
+      }).join('');
+    }
 
-function toggleSave(id) {
-  if (savedDeals.includes(id)) {
-    savedDeals = savedDeals.filter(x => x !== id);
-  } else {
-    savedDeals.push(id);
-  }
-  localStorage.setItem('savedDeals', JSON.stringify(savedDeals));
-  render();
-}
+    // Event Listeners
+    document.getElementById('typeFilters').addEventListener('click', (e) => {
+      const btn = e.target.closest('.type-btn');
+      if (!btn) return;
+      
+      document.querySelectorAll('.type-btn').forEach(b => {
+        b.classList.remove('active', 'primary');
+        b.classList.add('secondary');
+      });
+      btn.classList.add('active', 'primary');
+      btn.classList.remove('secondary');
+      
+      currentType = btn.dataset.type;
+      renderDeals();
+    });
 
-// ============================================
-// TABS
-// ============================================
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.onclick = () => {
-    selectedTab = tab.dataset.tab;
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    render();
-  };
-});
+    document.getElementById('categoryFilters').addEventListener('click', (e) => {
+      const btn = e.target.closest('.cat-btn');
+      if (!btn) return;
+      
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      currentCategory = btn.dataset.cat;
+      renderDeals();
+    });
 
-// ============================================
-// INIT
-// ============================================
-fetchDeals();
-setInterval(fetchDeals, 5 * 60 * 1000);
-</script>
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderDeals();
+    });
+
+    // Init
+    loadDeals();
+    
+    // Auto-refresh every 5 minutes
+    setInterval(loadDeals, 5 * 60 * 1000);
+  </script>
 </body>
 </html>
