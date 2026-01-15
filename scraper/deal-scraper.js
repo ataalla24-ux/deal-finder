@@ -136,11 +136,11 @@ const SOURCES = [
 
 const BASE_DEALS = [
   // ========== AKTUELL - JÄNNER 2026 ==========
-  { id: "hot-1", brand: "Egal Bruder Döner", logo: "🥙", title: "Gratis Döner bei Neueröffnung", description: "Mehmet Usta's neuer Imbiss auf der Favoritenstraße 76 - Gratis Döner bei Openings!", type: "gratis", badge: "limited", category: "essen", source: "Heute.at", url: "https://www.heute.at", expires: "Bei Neueröffnungen", distance: "Favoriten", hot: true, isNew: true },
-  { id: "hot-2", brand: "Haus der Geschichte", logo: "🏛️", title: "Gratis jeden Donnerstag 18-20h", description: "Ab 2026 jeden Donnerstagabend kostenloser Eintritt ins hdgö!", type: "gratis", badge: "daily", category: "wien", source: "Vienna.at", url: "https://www.hdgoe.at", expires: "Jeden Donnerstag", distance: "1. Bezirk", hot: true, isNew: true },
-  { id: "hot-3", brand: "ÖBB Veganuary", logo: "🚂", title: "Vegan Vurstsemmel €2,90", description: "Im Jänner: Vegane Vurstsemmel + Gewinnspiele mit Klimaticket!", type: "rabatt", badge: "limited", category: "essen", source: "1000things", url: "https://www.oebb.at", expires: "Jänner 2026", distance: "Hauptbahnhof", hot: true, isNew: true },
-  { id: "hot-4", brand: "Veganer Würstelstand", logo: "🌭", title: "Komplett veganer Würstelstand", description: "Mike Lanner: Pfeilgasse & U4 Spittelau - im Jänner nur pflanzlich!", type: "rabatt", badge: "limited", category: "essen", source: "1000things", url: "https://www.1000things.at", expires: "Jänner 2026", distance: "8./19. Bezirk", hot: true, isNew: true },
-  { id: "hot-5", brand: "Vegane Gesellschaft", logo: "🥗", title: "Veganuary Gewinnspiel", description: "Vegane Speise in Wiener Gastro fotografieren = Gewinnchance!", type: "gratis", badge: "limited", category: "essen", source: "Vegane Gesellschaft", url: "https://www.vegan.at", expires: "Jänner 2026", distance: "Wien", hot: true, isNew: true },
+  // Veganuary Deals (gültig bis 31.01.2026)
+  { id: "hot-2", brand: "Haus der Geschichte", logo: "🏛️", title: "Gratis jeden Donnerstag 18-20h", description: "Jeden Donnerstagabend kostenloser Eintritt ins hdgö!", type: "gratis", badge: "daily", category: "wien", source: "Vienna.at", url: "https://www.hdgoe.at", expires: "Jeden Donnerstag", distance: "1. Bezirk", hot: true, isNew: true, validUntil: "2099-12-31" },
+  { id: "hot-3", brand: "ÖBB Veganuary", logo: "🚂", title: "Vegan Vurstsemmel €2,90", description: "Im Jänner: Vegane Vurstsemmel + Gewinnspiele mit Klimaticket!", type: "rabatt", badge: "limited", category: "essen", source: "1000things", url: "https://www.oebb.at", expires: "Bis 31.01.2026", distance: "Hauptbahnhof", hot: true, isNew: true, validUntil: "2026-01-31" },
+  { id: "hot-4", brand: "Veganer Würstelstand", logo: "🌭", title: "Komplett veganer Würstelstand", description: "Mike Lanner: Pfeilgasse & U4 Spittelau - im Jänner nur pflanzlich!", type: "rabatt", badge: "limited", category: "essen", source: "1000things", url: "https://www.1000things.at", expires: "Bis 31.01.2026", distance: "8./19. Bezirk", hot: true, isNew: true, validUntil: "2026-01-31" },
+  { id: "hot-5", brand: "Vegane Gesellschaft", logo: "🥗", title: "Veganuary Gewinnspiel", description: "Vegane Speise in Wiener Gastro fotografieren = Gewinnchance!", type: "gratis", badge: "limited", category: "essen", source: "Vegane Gesellschaft", url: "https://www.vegan.at", expires: "Bis 31.01.2026", distance: "Wien", hot: true, isNew: true, validUntil: "2026-01-31" },
   
   // ========== GRATIS KAFFEE ==========
   { id: "kaffee-1", brand: "McDonald's", logo: "🍟", title: "Gratis Kaffee/Cola nach Feedback", description: "Nach jedem Einkauf Feedback geben = Gratis Getränk. Bis zu 5x pro Monat!", type: "gratis", badge: "daily", category: "kaffee", source: "McDonald's App", url: "https://www.mcdonalds.at", expires: "5x/Monat", distance: "Überall", hot: true },
@@ -447,11 +447,20 @@ async function scrapeAllSources() {
   // Kombiniere Basis + Gescrapte Deals
   const allDeals = [...BASE_DEALS, ...scrapedDeals];
   
+  // FILTER: Entferne abgelaufene Deals
+  const today = new Date().toISOString().split('T')[0]; // "2026-01-15"
+  const validDeals = allDeals.filter(deal => {
+    if (!deal.validUntil) return true; // Kein Ablaufdatum = immer gültig
+    return deal.validUntil >= today;
+  });
+  
+  console.log(`\n🗑️  ${allDeals.length - validDeals.length} abgelaufene Deals entfernt`);
+  
   // Entferne Duplikate
   const uniqueDeals = [];
   const seenTitles = new Set();
   
-  for (const deal of allDeals) {
+  for (const deal of validDeals) {
     const key = deal.title.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 25);
     if (!seenTitles.has(key)) {
       seenTitles.add(key);
