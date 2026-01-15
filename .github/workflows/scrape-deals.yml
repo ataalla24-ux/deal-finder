@@ -1,48 +1,35 @@
-name: Scrape Wien Deals
+name: Mega Scrape Wien Deals
 
 on:
-  # Alle 2 Stunden automatisch
   schedule:
-    - cron: '0 */2 * * *'
-  
-  # Manuell ausführen
+    - cron: '*/30 * * * *'  # Alle 30 Minuten
   workflow_dispatch:
-  
-  # Bei Push
   push:
     branches: [main]
-    paths:
-      - 'scraper/**'
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    
     permissions:
       contents: write
     
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v4
-      
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
       
-      - name: 🔍 Run Deal Scraper
-        run: node scraper/deal-scraper.js
+      - name: Run Mega Scraper
+        run: node scraper/power-scraper.js
         continue-on-error: true
       
-      - name: 📦 Move to docs
-        run: |
-          mkdir -p docs
-          mv deals.json docs/deals.json || true
+      - name: Move to docs
+        run: mv deals.json docs/deals.json 2>/dev/null || true
       
-      - name: 📤 Commit & Push
+      - name: Commit & Push
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add docs/deals.json || true
-          git diff --staged --quiet || git commit -m "🔄 Update Deals - $(date +'%Y-%m-%d %H:%M')"
-          git push || true
+          git config user.email "bot@github.com"
+          git config user.name "Deal Bot"
+          git add docs/deals.json
+          git diff --staged --quiet || git commit -m "🔄 $(date +'%H:%M') - $(cat docs/deals.json | grep -o '"totalDeals":[0-9]*' | grep -o '[0-9]*') Deals"
+          git push
