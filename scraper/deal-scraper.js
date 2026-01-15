@@ -124,10 +124,51 @@ const SOURCES = [
   { name: 'Preisjäger Freebies', url: 'https://www.preisjaeger.at/rss/freebies', type: 'rss', brand: 'Preisjäger', logo: '🎁', category: 'gratis' },
   { name: 'Preisjäger Gratis', url: 'https://www.preisjaeger.at/rss/new?keywords=gratis', type: 'rss', brand: 'Preisjäger', logo: '🆓', category: 'gratis' },
   { name: 'Preisjäger Wien', url: 'https://www.preisjaeger.at/rss/new?keywords=wien', type: 'rss', brand: 'Preisjäger', logo: '🏙️', category: 'wien' },
+  { name: 'Preisjäger Kaffee', url: 'https://www.preisjaeger.at/rss/new?keywords=kaffee', type: 'rss', brand: 'Preisjäger', logo: '☕', category: 'kaffee' },
+  { name: 'Preisjäger Essen', url: 'https://www.preisjaeger.at/rss/new?keywords=essen', type: 'rss', brand: 'Preisjäger', logo: '🍔', category: 'essen' },
+  { name: 'Preisjäger 1+1', url: 'https://www.preisjaeger.at/rss/new?keywords=1%2B1', type: 'rss', brand: 'Preisjäger', logo: '🎁', category: 'supermarkt' },
+  { name: 'Preisjäger Neueröffnung', url: 'https://www.preisjaeger.at/rss/new?keywords=er%C3%B6ffnung', type: 'rss', brand: 'Preisjäger', logo: '🆕', category: 'essen' },
+  { name: 'MyDealz Freebies', url: 'https://www.mydealz.de/rss/freebies', type: 'rss', brand: 'MyDealz', logo: '🔥', category: 'gratis' },
   { name: 'Reddit r/wien', url: 'https://www.reddit.com/r/wien/.rss', type: 'rss', brand: 'Reddit', logo: '🔴', category: 'wien' },
   { name: 'Reddit r/Austria', url: 'https://www.reddit.com/r/Austria/.rss', type: 'rss', brand: 'Reddit', logo: '🇦🇹', category: 'wien' },
-  { name: 'Google News Wien Gratis', url: 'https://news.google.com/rss/search?q=wien+gratis&hl=de&gl=AT', type: 'rss', brand: 'Google News', logo: '📰', category: 'wien' },
-  { name: 'Google News Neueröffnung Wien', url: 'https://news.google.com/rss/search?q=neuer%C3%B6ffnung+wien&hl=de&gl=AT', type: 'rss', brand: 'Google News', logo: '🆕', category: 'essen' },
+  { name: 'Reddit r/austriandeals', url: 'https://www.reddit.com/r/austriandeals/.rss', type: 'rss', brand: 'Reddit', logo: '💰', category: 'gratis' },
+  
+  // ========== GOOGLE NEWS SEARCHES ==========
+  { name: 'Google News Wien Gratis', url: 'https://news.google.com/rss/search?q=wien+gratis&hl=de&gl=AT', type: 'rss', brand: 'Google', logo: '📰', category: 'wien' },
+  { name: 'Google News Neueröffnung', url: 'https://news.google.com/rss/search?q=neuer%C3%B6ffnung+wien&hl=de&gl=AT', type: 'rss', brand: 'Google', logo: '🆕', category: 'essen' },
+  { name: 'Google News Gratis Kaffee', url: 'https://news.google.com/rss/search?q=gratis+kaffee+wien&hl=de&gl=AT', type: 'rss', brand: 'Google', logo: '☕', category: 'kaffee' },
+  { name: 'Google News Gratis Essen', url: 'https://news.google.com/rss/search?q=gratis+essen+wien&hl=de&gl=AT', type: 'rss', brand: 'Google', logo: '🍕', category: 'essen' },
+  { name: 'Google News Opening Wien', url: 'https://news.google.com/rss/search?q=opening+wien+restaurant&hl=de&gl=AT', type: 'rss', brand: 'Google', logo: '🎉', category: 'essen' },
+  { name: 'Google News Döner Gratis', url: 'https://news.google.com/rss/search?q=d%C3%B6ner+gratis+wien&hl=de&gl=AT', type: 'rss', brand: 'Google', logo: '🥙', category: 'essen' },
+  { name: 'Google News Friseur Gratis', url: 'https://news.google.com/rss/search?q=gratis+haarschnitt+wien&hl=de&gl=AT', type: 'rss', brand: 'Google', logo: '💇', category: 'beauty' },
+  { name: 'Google News Aktion Wien', url: 'https://news.google.com/rss/search?q=aktion+wien+gratis&hl=de&gl=AT', type: 'rss', brand: 'Google', logo: '💥', category: 'wien' },
+  
+  // ========== SOCIAL MEDIA (öffentliche Feeds) ==========
+  { name: 'Instagram Wien Hashtag', url: 'https://www.picuki.com/tag/wiengratis', type: 'html', brand: 'Instagram', logo: '📸', category: 'gratis' },
+  { name: 'Instagram Neueröffnung', url: 'https://www.picuki.com/tag/neuer%C3%B6ffnungwien', type: 'html', brand: 'Instagram', logo: '📸', category: 'essen' },
+  { name: 'Instagram Freebie Wien', url: 'https://www.picuki.com/tag/freebiewien', type: 'html', brand: 'Instagram', logo: '📸', category: 'gratis' },
+  
+  // ========== FACEBOOK (via RSS Bridge / öffentliche Seiten) ==========
+  { name: 'FB Gratis in Wien', url: 'https://www.facebook.com/gratisinwien/', type: 'html', brand: 'Facebook', logo: '📘', category: 'gratis' },
+  { name: 'FB Wiener Schnäppchen', url: 'https://www.facebook.com/wienerschnaeppchen/', type: 'html', brand: 'Facebook', logo: '📘', category: 'gratis' },
+  { name: 'FB Wien isst', url: 'https://www.facebook.com/wienisst/', type: 'html', brand: 'Facebook', logo: '📘', category: 'essen' },
+  { name: 'FB 1000things Wien', url: 'https://www.facebook.com/1000thingsinvienna/', type: 'html', brand: 'Facebook', logo: '📘', category: 'wien' },
+  { name: 'FB Freebie Austria', url: 'https://www.facebook.com/freebieaustria/', type: 'html', brand: 'Facebook', logo: '📘', category: 'gratis' },
+  { name: 'FB Deals Wien', url: 'https://www.facebook.com/dealswien/', type: 'html', brand: 'Facebook', logo: '📘', category: 'gratis' },
+  { name: 'FB Gastro Wien', url: 'https://www.facebook.com/gastrowien/', type: 'html', brand: 'Facebook', logo: '📘', category: 'essen' },
+  { name: 'FB Vegan Wien', url: 'https://www.facebook.com/veganwien/', type: 'html', brand: 'Facebook', logo: '📘', category: 'essen' },
+  
+  // ========== TIKTOK (via öffentliche Viewer) ==========
+  { name: 'TikTok Wien Gratis', url: 'https://www.tiktok.com/tag/wiengratis', type: 'html', brand: 'TikTok', logo: '🎵', category: 'gratis' },
+  { name: 'TikTok Freebie Wien', url: 'https://www.tiktok.com/tag/freebiewien', type: 'html', brand: 'TikTok', logo: '🎵', category: 'gratis' },
+  { name: 'TikTok Wien Essen', url: 'https://www.tiktok.com/tag/wienessen', type: 'html', brand: 'TikTok', logo: '🎵', category: 'essen' },
+  { name: 'TikTok Döner Wien', url: 'https://www.tiktok.com/tag/dönerwien', type: 'html', brand: 'TikTok', logo: '🎵', category: 'essen' },
+  { name: 'TikTok Neueröffnung Wien', url: 'https://www.tiktok.com/tag/neueröffnungwien', type: 'html', brand: 'TikTok', logo: '🎵', category: 'essen' },
+  
+  // ========== BEAUTY & FRISEUR ==========
+  { name: 'Treatwell Wien', url: 'https://www.treatwell.at/orte/wien/', type: 'html', brand: 'Treatwell', logo: '💇', category: 'beauty' },
+  { name: 'Groupon Wien Beauty', url: 'https://www.groupon.at/local/wien/beauty-und-wellness', type: 'html', brand: 'Groupon', logo: '💅', category: 'beauty' },
+  { name: 'Groupon Wien Essen', url: 'https://www.groupon.at/local/wien/restaurants', type: 'html', brand: 'Groupon', logo: '🍽️', category: 'essen' },
 ];
 
 // ============================================
@@ -135,128 +176,152 @@ const SOURCES = [
 // ============================================
 
 const BASE_DEALS = [
-  // ========== AKTUELL - JÄNNER 2026 ==========
-  // Veganuary Deals (gültig bis 31.01.2026)
+  // ========== AKTUELL HOT - JÄNNER 2026 ==========
   { id: "hot-2", brand: "Haus der Geschichte", logo: "🏛️", title: "Gratis jeden Donnerstag 18-20h", description: "Jeden Donnerstagabend kostenloser Eintritt ins hdgö!", type: "gratis", badge: "daily", category: "wien", source: "Vienna.at", url: "https://www.hdgoe.at", expires: "Jeden Donnerstag", distance: "1. Bezirk", hot: true, isNew: true, validUntil: "2099-12-31" },
   { id: "hot-3", brand: "ÖBB Veganuary", logo: "🚂", title: "Vegan Vurstsemmel €2,90", description: "Im Jänner: Vegane Vurstsemmel + Gewinnspiele mit Klimaticket!", type: "rabatt", badge: "limited", category: "essen", source: "1000things", url: "https://www.oebb.at", expires: "Bis 31.01.2026", distance: "Hauptbahnhof", hot: true, isNew: true, validUntil: "2026-01-31" },
   { id: "hot-4", brand: "Veganer Würstelstand", logo: "🌭", title: "Komplett veganer Würstelstand", description: "Mike Lanner: Pfeilgasse & U4 Spittelau - im Jänner nur pflanzlich!", type: "rabatt", badge: "limited", category: "essen", source: "1000things", url: "https://www.1000things.at", expires: "Bis 31.01.2026", distance: "8./19. Bezirk", hot: true, isNew: true, validUntil: "2026-01-31" },
-  { id: "hot-5", brand: "Vegane Gesellschaft", logo: "🥗", title: "Veganuary Gewinnspiel", description: "Vegane Speise in Wiener Gastro fotografieren = Gewinnchance!", type: "gratis", badge: "limited", category: "essen", source: "Vegane Gesellschaft", url: "https://www.vegan.at", expires: "Bis 31.01.2026", distance: "Wien", hot: true, isNew: true, validUntil: "2026-01-31" },
   
-  // ========== GRATIS KAFFEE ==========
-  { id: "kaffee-1", brand: "McDonald's", logo: "🍟", title: "Gratis Kaffee/Cola nach Feedback", description: "Nach jedem Einkauf Feedback geben = Gratis Getränk. Bis zu 5x pro Monat!", type: "gratis", badge: "daily", category: "kaffee", source: "McDonald's App", url: "https://www.mcdonalds.at", expires: "5x/Monat", distance: "Überall", hot: true },
-  { id: "kaffee-2", brand: "IKEA", logo: "🪑", title: "Gratis Kaffee & Tee unlimitiert", description: "IKEA Family Mitglieder: Unbegrenzt Gratis-Kaffee oder Tee im Restaurant!", type: "gratis", badge: "instore", category: "kaffee", source: "IKEA Family", url: "https://www.ikea.at", expires: "Unbegrenzt", distance: "IKEA Standorte", hot: true },
+  // ========== GRATIS KAFFEE (20+) ==========
+  { id: "kaffee-1", brand: "McDonald's", logo: "🍟", title: "Gratis Kaffee nach Feedback", description: "Nach jedem Einkauf Feedback geben = Gratis Kaffee oder Cola. Bis zu 5x pro Monat!", type: "gratis", badge: "daily", category: "kaffee", source: "McDonald's App", url: "https://www.mcdonalds.at", expires: "5x/Monat", distance: "Überall", hot: true },
+  { id: "kaffee-2", brand: "IKEA", logo: "🪑", title: "Gratis Kaffee & Tee unlimitiert", description: "IKEA Family Mitglieder: Unbegrenzt Gratis-Kaffee oder Tee im Restaurant!", type: "gratis", badge: "instore", category: "kaffee", source: "IKEA Family", url: "https://www.ikea.at", expires: "Unbegrenzt", distance: "IKEA", hot: true },
   { id: "kaffee-3", brand: "Starbucks", logo: "☕", title: "Gratis Geburtstagsgetränk", description: "Starbucks Rewards: Am Geburtstag ein Gratis-Getränk nach Wahl!", type: "gratis", badge: "instore", category: "kaffee", source: "Starbucks", url: "https://www.starbucks.at", expires: "Am Geburtstag", distance: "Überall", hot: true },
-  { id: "kaffee-4", brand: "jö Bonus Club", logo: "🟡", title: "OMV Winterdrink für nur 1 Ö", description: "Cinnamon Pumpkin Latte oder Blushed Toffee Latte für nur 1 Ö!", type: "gratis", badge: "limited", category: "kaffee", source: "jö App", url: "https://www.joe-club.at", expires: "Winter 2026", distance: "OMV Tankstellen", hot: true, isNew: true },
-  { id: "kaffee-5", brand: "jö Bonus Club", logo: "🟡", title: "50% auf OMV VIVA Kaffee", description: "Mit 75 Ös 50% auf alle Kaffeespezialitäten bei OMV VIVA.", type: "rabatt", badge: "instore", category: "kaffee", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", distance: "OMV Tankstellen", hot: true },
-  { id: "kaffee-6", brand: "Tchibo", logo: "☕", title: "Gratis Kaffee beim Einkauf", description: "Bei jedem Einkauf im Tchibo Shop gibt's Gratis-Kaffee!", type: "gratis", badge: "instore", category: "kaffee", source: "Tchibo", url: "https://www.tchibo.at", expires: "Unbegrenzt", distance: "Tchibo Shops", hot: false },
-  { id: "kaffee-7", brand: "Segafredo", logo: "☕", title: "10. Kaffee gratis", description: "Stempelkarte: Jeder 10. Kaffee ist gratis!", type: "gratis", badge: "instore", category: "kaffee", source: "Segafredo", url: "https://www.segafredo.at", expires: "Unbegrenzt", distance: "Segafredo Bars", hot: false },
+  { id: "kaffee-4", brand: "Tchibo", logo: "☕", title: "Gratis Kaffee beim Einkauf", description: "Bei jedem Einkauf im Tchibo Shop gibt's einen Gratis-Kaffee dazu!", type: "gratis", badge: "instore", category: "kaffee", source: "Tchibo", url: "https://www.tchibo.at", expires: "Unbegrenzt", distance: "Tchibo", hot: true },
+  { id: "kaffee-5", brand: "Segafredo", logo: "☕", title: "10. Kaffee gratis", description: "Stempelkarte sammeln: Jeder 10. Kaffee ist gratis!", type: "gratis", badge: "instore", category: "kaffee", source: "Segafredo", url: "https://www.segafredo.at", expires: "Unbegrenzt", distance: "Segafredo", hot: false },
+  { id: "kaffee-6", brand: "OMV VIVA", logo: "⛽", title: "50% auf Kaffee mit jö", description: "Mit 75 Ös 50% auf alle Kaffeespezialitäten bei OMV VIVA!", type: "rabatt", badge: "instore", category: "kaffee", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", distance: "OMV", hot: true },
+  { id: "kaffee-7", brand: "Shell", logo: "⛽", title: "Gratis Kaffee Clubsmart", description: "Mit Clubsmart Punkten Gratis-Kaffee bei Shell Tankstellen!", type: "gratis", badge: "instore", category: "kaffee", source: "Shell", url: "https://www.shell.at", expires: "Mit Punkten", distance: "Shell", hot: false },
+  { id: "kaffee-8", brand: "Dunkin'", logo: "🍩", title: "Gratis Donut bei Anmeldung", description: "DD Perks Newsletter: Gratis Donut bei Registrierung!", type: "gratis", badge: "sample", category: "kaffee", source: "Dunkin'", url: "https://www.dunkindonuts.at", expires: "Bei Anmeldung", distance: "Dunkin'", hot: true },
+  { id: "kaffee-9", brand: "Costa Coffee", logo: "☕", title: "5. Kaffee gratis", description: "Costa Club App: Jeder 5. Kaffee ist kostenlos!", type: "gratis", badge: "instore", category: "kaffee", source: "Costa", url: "https://www.costa.at", expires: "Unbegrenzt", distance: "Costa", hot: false },
+  { id: "kaffee-10", brand: "Backwerk", logo: "🥐", title: "Gratis Kaffee zum Gebäck", description: "Beim Kauf von 2 Gebäckstücken: 1 Kaffee gratis!", type: "gratis", badge: "instore", category: "kaffee", source: "Backwerk", url: "https://www.backwerk.at", expires: "Unbegrenzt", distance: "Backwerk", hot: false },
+  { id: "kaffee-11", brand: "Ströck", logo: "🥐", title: "Treuekarte Kaffee", description: "10 Kaffees kaufen = 1 Kaffee gratis mit Treuekarte!", type: "gratis", badge: "instore", category: "kaffee", source: "Ströck", url: "https://www.stroeck.at", expires: "Unbegrenzt", distance: "Ströck", hot: false },
+  { id: "kaffee-12", brand: "Anker", logo: "🥖", title: "Sammelpass Kaffee", description: "Kaffee-Sammelpass: 10. Kaffee geschenkt!", type: "gratis", badge: "instore", category: "kaffee", source: "Anker", url: "https://www.ankerbrot.at", expires: "Unbegrenzt", distance: "Anker", hot: false },
+  { id: "kaffee-13", brand: "Der Mann", logo: "🥐", title: "Stempelkarte Kaffee", description: "Der Mann Stempelkarte: Jeder 10. Kaffee gratis!", type: "gratis", badge: "instore", category: "kaffee", source: "Der Mann", url: "https://www.dermann.at", expires: "Unbegrenzt", distance: "Der Mann", hot: false },
+  { id: "kaffee-14", brand: "Aida", logo: "🎀", title: "Tortenstück + Kaffee Kombi", description: "Kaffee + Tortenstück ab €6,90 - Wiener Kaffeehaus Klassiker!", type: "rabatt", badge: "instore", category: "kaffee", source: "Aida", url: "https://www.aida.at", expires: "Unbegrenzt", distance: "Aida", hot: false },
+  { id: "kaffee-15", brand: "McCafé", logo: "🍟", title: "Gratis Größen-Upgrade", description: "McCafé App: Regelmäßig Gratis-Upgrades auf größere Kaffees!", type: "gratis", badge: "limited", category: "kaffee", source: "McDonald's App", url: "https://www.mcdonalds.at", expires: "Mit App", distance: "McCafé", hot: true },
+  { id: "kaffee-16", brand: "Nespresso", logo: "☕", title: "Gratis Kaffee Verkostung", description: "In jeder Nespresso Boutique: Gratis Kaffee-Verkostung!", type: "gratis", badge: "instore", category: "kaffee", source: "Nespresso", url: "https://www.nespresso.com/at", expires: "Unbegrenzt", distance: "Nespresso", hot: false },
+  { id: "kaffee-17", brand: "Vapiano", logo: "🍝", title: "Gratis Espresso nach Essen", description: "Nach jedem Hauptgericht: Gratis Espresso!", type: "gratis", badge: "instore", category: "kaffee", source: "Vapiano", url: "https://www.vapiano.at", expires: "Unbegrenzt", distance: "Vapiano", hot: true },
+  { id: "kaffee-18", brand: "BILLA", logo: "🟠", title: "Gratis Kaffee Automat", description: "BILLA Plus: Gratis Kaffee am Automaten für Stammkunden!", type: "gratis", badge: "instore", category: "kaffee", source: "BILLA", url: "https://www.billa.at", expires: "Mit Karte", distance: "BILLA Plus", hot: false },
+  { id: "kaffee-19", brand: "Merkur", logo: "🟠", title: "Gratis Kaffee Ecke", description: "BILLA Plus (ex Merkur): Gratis Kaffee in der Kaffee-Ecke!", type: "gratis", badge: "instore", category: "kaffee", source: "BILLA Plus", url: "https://www.billa.at", expires: "Unbegrenzt", distance: "BILLA Plus", hot: false },
+  { id: "kaffee-20", brand: "XXXLutz", logo: "🛋️", title: "Gratis Kaffee beim Shoppen", description: "Im XXXLutz Restaurant: Gratis Kaffee für Kunden!", type: "gratis", badge: "instore", category: "kaffee", source: "XXXLutz", url: "https://www.xxxlutz.at", expires: "Unbegrenzt", distance: "XXXLutz", hot: false },
 
-  // ========== GRATIS ESSEN ==========
+  // ========== GRATIS ESSEN (30+) ==========
   { id: "essen-1", brand: "Subway", logo: "🥪", title: "Gratis Cookie bei Anmeldung", description: "Subcard App herunterladen = Gratis Cookie geschenkt!", type: "gratis", badge: "sample", category: "essen", source: "Subway", url: "https://www.subway.at", expires: "Bei Anmeldung", distance: "Überall", hot: true },
-  { id: "essen-2", brand: "Burger King", logo: "🍔", title: "Gratis Whopper zum Geburtstag", description: "King Club Mitglieder bekommen einen Gratis Whopper zum Geburtstag!", type: "gratis", badge: "instore", category: "essen", source: "Burger King", url: "https://www.burgerking.at", expires: "Am Geburtstag", distance: "Überall", hot: true },
-  { id: "essen-3", brand: "Vapiano", logo: "🍝", title: "Gratis Pasta am Geburtstag", description: "Vapiano People: Gratis Pasta oder Pizza zum Geburtstag!", type: "gratis", badge: "instore", category: "essen", source: "Vapiano", url: "https://www.vapiano.at", expires: "Am Geburtstag", distance: "Vapiano Lokale", hot: true },
-  { id: "essen-4", brand: "L'Osteria", logo: "🍕", title: "XXL Pizza zum Teilen", description: "45cm Pizza perfekt zum Teilen - legendär groß!", type: "rabatt", badge: "instore", category: "essen", source: "L'Osteria", url: "https://www.losteria.at", expires: "Immer", distance: "L'Osteria", hot: false },
-  { id: "essen-5", brand: "Nordsee", logo: "🐟", title: "10% mit Newsletter", description: "Newsletter anmelden = 10% Rabatt auf erste Bestellung!", type: "rabatt", badge: "sample", category: "essen", source: "Nordsee", url: "https://www.nordsee.at", expires: "Bei Anmeldung", distance: "Überall", hot: false },
-  { id: "essen-6", brand: "Pizza Hut", logo: "🍕", title: "2. Pizza 50% günstiger", description: "Zweite Pizza zum halben Preis bei Abholung!", type: "rabatt", badge: "instore", category: "essen", source: "Pizza Hut", url: "https://www.pizzahut.at", expires: "Bei Abholung", distance: "Pizza Hut", hot: false },
-  { id: "essen-7", brand: "Domino's", logo: "🍕", title: "30% Online-Rabatt", description: "Online bestellen und 30% sparen!", type: "rabatt", badge: "daily", category: "essen", source: "Domino's", url: "https://www.dominos.at", expires: "Online", distance: "Überall", hot: false },
-  { id: "essen-8", brand: "Wiener Deewan", logo: "🍛", title: "Zahl was du willst", description: "Pakistanisches Buffet - du bestimmst den Preis! Studenten-Geheimtipp.", type: "gratis", badge: "daily", category: "essen", source: "Wiener Deewan", url: "https://www.deewan.at", expires: "Immer", distance: "9. Bezirk", hot: true },
-  
-  // ========== GRATIS LEBENSMITTEL ==========
-  { id: "lebens-1", brand: "Verein MUT", logo: "🥫", title: "Gratis Lebensmittel", description: "Gerettete Lebensmittel kostenlos! Mo-Fr 10-15:30 Uhr mit MUT-Karte.", type: "gratis", badge: "daily", category: "supermarkt", source: "Verein MUT", url: "https://verein-mut.eu", expires: "Mo-Fr", distance: "4. Bezirk", hot: true, isNew: true },
-  { id: "lebens-2", brand: "Too Good To Go", logo: "🥡", title: "Überraschungssackerl ab €3,99", description: "Restaurants & Supermärkte: Übriggebliebenes Essen zum Spottpreis!", type: "rabatt", badge: "daily", category: "supermarkt", source: "Too Good To Go", url: "https://www.toogoodtogo.at", expires: "Täglich", distance: "Überall", hot: true },
-  { id: "lebens-3", brand: "BILLA", logo: "🟠", title: "1+1 Gratis Aktionen", description: "Viele Produkte 1+1 Gratis - wöchentlich wechselnd!", type: "gratis", badge: "limited", category: "supermarkt", source: "BILLA", url: "https://www.billa.at", expires: "Wöchentlich", distance: "Überall", hot: true, isNew: true },
-  { id: "lebens-4", brand: "BILLA", logo: "🟠", title: "-25% Pickerl jeden Donnerstag", description: "Jeden Donnerstag neue -25% Rabatt-Pickerl auf Produkte.", type: "rabatt", badge: "daily", category: "supermarkt", source: "BILLA", url: "https://www.billa.at", expires: "Donnerstags", distance: "Überall", hot: true },
-  { id: "lebens-5", brand: "Lidl Plus", logo: "🔵", title: "Wöchentliche Coupons", description: "Lidl Plus App: Jede Woche neue Rabatt-Coupons!", type: "rabatt", badge: "daily", category: "supermarkt", source: "Lidl Plus", url: "https://www.lidl.at", expires: "Wöchentlich", distance: "Überall", hot: true },
-  { id: "lebens-6", brand: "SPAR", logo: "🟢", title: "SPAR Plus Personalisiert", description: "SPAR Plus Karte: Personalisierte Rabatte!", type: "rabatt", badge: "instore", category: "supermarkt", source: "SPAR", url: "https://www.spar.at", expires: "Unbegrenzt", distance: "Überall", hot: false },
-  { id: "lebens-7", brand: "HOFER", logo: "🔴", title: "App-exklusive Angebote", description: "HOFER App: Exklusive Angebote nur in der App!", type: "rabatt", badge: "instore", category: "supermarkt", source: "HOFER", url: "https://www.hofer.at", expires: "Wöchentlich", distance: "Überall", hot: false },
-  
-  // ========== JÖ BONUS CLUB ==========
-  { id: "joe-1", brand: "jö Bonus Club", logo: "🟡", title: "20% Rabattsammler BILLA", description: "Jeden Monat bis zu 20% auf einen kompletten BILLA Einkauf.", type: "rabatt", badge: "daily", category: "supermarkt", source: "jö App", url: "https://www.joe-club.at", expires: "Monatlich", distance: "BILLA", hot: true },
-  { id: "joe-2", brand: "jö Bonus Club", logo: "🟡", title: "20% Rabattsammler BIPA", description: "Jeden Monat bis zu 20% auf einen kompletten BIPA Einkauf.", type: "rabatt", badge: "daily", category: "drogerie", source: "jö App", url: "https://www.joe-club.at", expires: "Monatlich", distance: "BIPA", hot: true },
-  { id: "joe-3", brand: "jö Bonus Club", logo: "🟡", title: "30% auf OMV TopWash", description: "Mit 150 Ös 30% auf alle TopWash Autowäschen.", type: "rabatt", badge: "instore", category: "mobilität", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", distance: "OMV", hot: false },
-  { id: "joe-4", brand: "jö Bonus Club", logo: "🟡", title: "50% auf OMV Sandwich", description: "Mit 100 Ös 50% auf alle Sandwiches im VIVA Shop.", type: "rabatt", badge: "instore", category: "essen", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", distance: "OMV", hot: false },
-  { id: "joe-5", brand: "jö Bonus Club", logo: "🟡", title: "Ös bei foodora sammeln", description: "Bei jeder foodora Bestellung Ös sammeln!", type: "cashback", badge: "daily", category: "lieferung", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", distance: "Online", hot: true },
-  { id: "joe-6", brand: "jö Bonus Club", logo: "🟡", title: "Ös bei LIBRO sammeln", description: "Bei LIBRO Bücher kaufen und Ös sammeln.", type: "cashback", badge: "instore", category: "shopping", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", distance: "LIBRO", hot: false },
-  
-  // ========== DROGERIE & BEAUTY ==========
-  { id: "beauty-1", brand: "dm", logo: "🧴", title: "Gratis Babybox für Schwangere", description: "dm Glückskind: Kostenlose Box mit Babyprodukten!", type: "gratis", badge: "sample", category: "drogerie", source: "dm", url: "https://www.dm.at", expires: "Bei Anmeldung", distance: "dm Märkte", hot: true },
-  { id: "beauty-2", brand: "dm", logo: "🧴", title: "Gratis Greifring Babyclub", description: "Bei Babyclub-Anmeldung Gratis Greifring + Gutscheine!", type: "gratis", badge: "sample", category: "drogerie", source: "dm", url: "https://www.dm.at", expires: "Bei Anmeldung", distance: "dm Märkte", hot: true },
-  { id: "beauty-3", brand: "Douglas", logo: "💜", title: "2 Gratis-Proben", description: "Bei jeder Bestellung ab €10 zwei kostenlose Beauty-Proben!", type: "gratis", badge: "sample", category: "drogerie", source: "Douglas", url: "https://www.douglas.at", expires: "Unbegrenzt", distance: "Online", hot: true },
-  { id: "beauty-4", brand: "Douglas", logo: "💜", title: "Geburtstags-Überraschung", description: "Beauty Card Mitglieder erhalten ein Geburtstagsgeschenk!", type: "gratis", badge: "instore", category: "drogerie", source: "Douglas", url: "https://www.douglas.at", expires: "Am Geburtstag", distance: "Douglas", hot: true },
-  { id: "beauty-5", brand: "Sephora", logo: "💄", title: "3 Gratis-Proben", description: "Sephora Beauty Insider: 3 Gratis-Proben bei jeder Bestellung!", type: "gratis", badge: "sample", category: "drogerie", source: "Sephora", url: "https://www.sephora.at", expires: "Unbegrenzt", distance: "Online", hot: true },
-  { id: "beauty-6", brand: "BIPA", logo: "💅", title: "20% auf Make-up", description: "Regelmäßig 20% auf ausgewählte Make-up Produkte!", type: "rabatt", badge: "limited", category: "drogerie", source: "BIPA", url: "https://www.bipa.at", expires: "Wechselnd", distance: "BIPA", hot: false },
-  { id: "beauty-7", brand: "Müller", logo: "🛍️", title: "10% Newsletter Rabatt", description: "Newsletter anmelden = 10% Rabatt auf Online-Bestellung!", type: "rabatt", badge: "sample", category: "drogerie", source: "Müller", url: "https://www.mueller.at", expires: "Bei Anmeldung", distance: "Online", hot: false },
+  { id: "essen-2", brand: "Burger King", logo: "🍔", title: "Gratis Whopper Geburtstag", description: "King Club: Gratis Whopper zum Geburtstag!", type: "gratis", badge: "instore", category: "essen", source: "Burger King", url: "https://www.burgerking.at", expires: "Geburtstag", distance: "Überall", hot: true },
+  { id: "essen-3", brand: "Vapiano", logo: "🍝", title: "Gratis Pasta Geburtstag", description: "Vapiano People: Gratis Pasta oder Pizza zum Geburtstag!", type: "gratis", badge: "instore", category: "essen", source: "Vapiano", url: "https://www.vapiano.at", expires: "Geburtstag", distance: "Vapiano", hot: true },
+  { id: "essen-4", brand: "Five Guys", logo: "🍔", title: "Unlimitierte Toppings", description: "Alle Burger-Toppings kostenlos und unlimitiert!", type: "gratis", badge: "daily", category: "essen", source: "Five Guys", url: "https://www.fiveguys.at", expires: "Immer", distance: "Five Guys", hot: true },
+  { id: "essen-5", brand: "Wiener Deewan", logo: "🍛", title: "Zahl was du willst", description: "Pakistanisches Buffet - du bestimmst den Preis! Studenten-Geheimtipp.", type: "gratis", badge: "daily", category: "essen", source: "Wiener Deewan", url: "https://www.deewan.at", expires: "Immer", distance: "9. Bezirk", hot: true },
+  { id: "essen-6", brand: "L'Osteria", logo: "🍕", title: "XXL Pizza 45cm", description: "Riesige 45cm Pizza perfekt zum Teilen!", type: "rabatt", badge: "instore", category: "essen", source: "L'Osteria", url: "https://www.losteria.at", expires: "Immer", distance: "L'Osteria", hot: false },
+  { id: "essen-7", brand: "Pizza Hut", logo: "🍕", title: "2. Pizza 50%", description: "Zweite Pizza zum halben Preis bei Abholung!", type: "rabatt", badge: "instore", category: "essen", source: "Pizza Hut", url: "https://www.pizzahut.at", expires: "Abholung", distance: "Pizza Hut", hot: false },
+  { id: "essen-8", brand: "Domino's", logo: "🍕", title: "30% Online-Rabatt", description: "Online bestellen und 30% sparen auf alle Pizzen!", type: "rabatt", badge: "daily", category: "essen", source: "Domino's", url: "https://www.dominos.at", expires: "Online", distance: "Überall", hot: false },
+  { id: "essen-9", brand: "KFC", logo: "🍗", title: "Gratis Upgrade mit App", description: "KFC App: Regelmäßig Gratis-Upgrades auf größere Menüs!", type: "gratis", badge: "limited", category: "essen", source: "KFC App", url: "https://www.kfc.at", expires: "Mit App", distance: "KFC", hot: true },
+  { id: "essen-10", brand: "Nordsee", logo: "🐟", title: "10% Newsletter Rabatt", description: "Newsletter anmelden = 10% auf erste Bestellung!", type: "rabatt", badge: "sample", category: "essen", source: "Nordsee", url: "https://www.nordsee.at", expires: "Anmeldung", distance: "Überall", hot: false },
+  { id: "essen-11", brand: "Hans im Glück", logo: "🍔", title: "Burger-Upgrade gratis", description: "Bei Anmeldung zur Hans im Glück App: Gratis Burger-Upgrade!", type: "gratis", badge: "sample", category: "essen", source: "Hans im Glück", url: "https://www.hansimglueck.at", expires: "Anmeldung", distance: "Wien", hot: true },
+  { id: "essen-12", brand: "Dean & David", logo: "🥗", title: "Gratis Topping", description: "Salat bestellen = 1 Gratis-Topping nach Wahl!", type: "gratis", badge: "instore", category: "essen", source: "Dean & David", url: "https://www.deananddavid.at", expires: "Immer", distance: "Wien", hot: false },
+  { id: "essen-13", brand: "Swing Kitchen", logo: "🌱", title: "Vegan Burger Menü", description: "Vegane Burger zu fairen Preisen - 100% pflanzlich!", type: "rabatt", badge: "daily", category: "essen", source: "Swing Kitchen", url: "https://www.swingkitchen.com", expires: "Immer", distance: "Mehrere", hot: false },
+  { id: "essen-14", brand: "Burgerista", logo: "🍔", title: "Loyalty Programm", description: "Punkte sammeln bei jedem Besuch = Gratis Burger!", type: "gratis", badge: "instore", category: "essen", source: "Burgerista", url: "https://www.burgerista.at", expires: "Mit Punkte", distance: "Wien", hot: false },
+  { id: "essen-15", brand: "Akakiko", logo: "🍣", title: "Mittagsmenü ab €8,90", description: "Sushi Mittagsmenü zum günstigen Preis!", type: "rabatt", badge: "daily", category: "essen", source: "Akakiko", url: "https://www.akakiko.at", expires: "Mittags", distance: "Wien", hot: false },
+  { id: "essen-16", brand: "Trzesniewski", logo: "🥪", title: "Wiener Brötchen Klassiker", description: "Original Wiener Brötchen ab €1,50!", type: "rabatt", badge: "daily", category: "essen", source: "Trzesniewski", url: "https://www.trzesniewski.at", expires: "Immer", distance: "1. Bezirk", hot: false },
+  { id: "essen-17", brand: "Leberkas Pepi", logo: "🥩", title: "Leberkässemmel ab €3", description: "Beste Leberkässemmel Wiens ab €3!", type: "rabatt", badge: "daily", category: "essen", source: "Leberkas Pepi", url: "https://www.leberkaspepi.at", expires: "Immer", distance: "Wien", hot: true },
+  { id: "essen-18", brand: "Bitzinger", logo: "🌭", title: "Würstel am Albertinaplatz", description: "Legendärer Würstelstand - Klassiker seit 1960!", type: "rabatt", badge: "daily", category: "essen", source: "Bitzinger", url: "https://www.bitzinger.at", expires: "Immer", distance: "1. Bezirk", hot: false },
+  { id: "essen-19", brand: "Neni", logo: "🥙", title: "Levante Küche", description: "Orientalische Mezze zum Teilen - trendy!", type: "rabatt", badge: "daily", category: "essen", source: "Neni", url: "https://www.neni.at", expires: "Immer", distance: "25hours Hotel", hot: false },
+  { id: "essen-20", brand: "Figlmüller", logo: "🥩", title: "Original Wiener Schnitzel", description: "Das größte Schnitzel Wiens - legendär!", type: "rabatt", badge: "daily", category: "essen", source: "Figlmüller", url: "https://www.figlmueller.at", expires: "Immer", distance: "1. Bezirk", hot: false },
+  { id: "essen-21", brand: "Mensa", logo: "🍽️", title: "Mittagessen ab €3", description: "Studenten: Günstig essen in Wiener Mensen!", type: "rabatt", badge: "daily", category: "essen", source: "ÖH", url: "https://www.mensen.at", expires: "Mit Ausweis", distance: "Unis", hot: true },
+  { id: "essen-22", brand: "McDonald's", logo: "🍟", title: "Gratis Pommes Geburtstag", description: "McDonald's App: Große Pommes gratis zum Geburtstag!", type: "gratis", badge: "instore", category: "essen", source: "McDonald's App", url: "https://www.mcdonalds.at", expires: "Geburtstag", distance: "Überall", hot: true },
+  { id: "essen-23", brand: "Shake Shack", logo: "🍔", title: "Premium Burger", description: "NYC Burger Kette jetzt in Wien - probieren!", type: "rabatt", badge: "daily", category: "essen", source: "Shake Shack", url: "https://www.shakeshack.com", expires: "Immer", distance: "Wien Mitte", hot: false },
+  { id: "essen-24", brand: "Wok to Walk", logo: "🥡", title: "Asiatisch schnell & günstig", description: "Fresh Wok ab €7,90 - selbst zusammenstellen!", type: "rabatt", badge: "daily", category: "essen", source: "Wok to Walk", url: "https://www.woktowalk.com", expires: "Immer", distance: "Wien", hot: false },
+  { id: "essen-25", brand: "Taco Bell", logo: "🌮", title: "Taco Tuesday Deals", description: "Dienstags spezielle Taco-Angebote!", type: "rabatt", badge: "daily", category: "essen", source: "Taco Bell", url: "https://www.tacobell.at", expires: "Dienstags", distance: "Wien", hot: false },
+  { id: "essen-26", brand: "Popeyes", logo: "🍗", title: "Neu in Wien!", description: "Berühmtes Fried Chicken aus Louisiana - neu!", type: "rabatt", badge: "limited", category: "essen", source: "Popeyes", url: "https://www.popeyes.at", expires: "Neu", distance: "Wien", hot: true, isNew: true },
+  { id: "essen-27", brand: "Foodora", logo: "🛵", title: "Gratis Lieferung Aktion", description: "Regelmäßig Gratis-Lieferung für Neukunden!", type: "gratis", badge: "limited", category: "essen", source: "Foodora", url: "https://www.foodora.at", expires: "Aktionen", distance: "Wien", hot: true },
+  { id: "essen-28", brand: "Mjam", logo: "🍕", title: "Neukunden €5 Rabatt", description: "Erste Bestellung mit €5 Rabatt!", type: "rabatt", badge: "limited", category: "essen", source: "Mjam", url: "https://www.mjam.at", expires: "Neukunden", distance: "Wien", hot: true },
+  { id: "essen-29", brand: "Wolt", logo: "📱", title: "€10 Gutschein Neukunden", description: "€10 Rabatt auf die erste Wolt Bestellung!", type: "rabatt", badge: "limited", category: "essen", source: "Wolt", url: "https://www.wolt.com", expires: "Neukunden", distance: "Wien", hot: true },
+  { id: "essen-30", brand: "Too Good To Go", logo: "🥡", title: "Sackerl ab €3,99", description: "Übriggebliebenes Essen retten - ab €3,99!", type: "rabatt", badge: "daily", category: "essen", source: "Too Good To Go", url: "https://www.toogoodtogo.at", expires: "Täglich", distance: "Überall", hot: true },
 
-  // ========== WIENER MUSEEN - GRATIS ==========
-  { id: "museum-1", brand: "Wien Museum", logo: "🏛️", title: "Gratis unter 19", description: "Freier Eintritt für alle unter 19 Jahren!", type: "gratis", badge: "instore", category: "wien", source: "Wien Museum", url: "https://www.wienmuseum.at", expires: "Unbegrenzt", distance: "Karlsplatz", hot: true },
-  { id: "museum-2", brand: "Belvedere", logo: "🖼️", title: "Gratis unter 19", description: "Klimts 'Der Kuss' kostenlos für unter 19-Jährige!", type: "gratis", badge: "instore", category: "wien", source: "Belvedere", url: "https://www.belvedere.at", expires: "Unbegrenzt", distance: "3. Bezirk", hot: true },
-  { id: "museum-3", brand: "Albertina", logo: "🎨", title: "Gratis unter 19", description: "Weltberühmte Kunstsammlung gratis für Jugendliche!", type: "gratis", badge: "instore", category: "wien", source: "Albertina", url: "https://www.albertina.at", expires: "Unbegrenzt", distance: "1. Bezirk", hot: true },
-  { id: "museum-4", brand: "NHM Wien", logo: "🦕", title: "Gratis unter 19", description: "Naturhistorisches Museum kostenlos für Jugendliche!", type: "gratis", badge: "instore", category: "wien", source: "NHM", url: "https://www.nhm-wien.ac.at", expires: "Unbegrenzt", distance: "1. Bezirk", hot: true },
-  { id: "museum-5", brand: "KHM Wien", logo: "👑", title: "Gratis unter 19", description: "Kunsthistorisches Museum gratis für Jugendliche!", type: "gratis", badge: "instore", category: "wien", source: "KHM", url: "https://www.khm.at", expires: "Unbegrenzt", distance: "1. Bezirk", hot: true },
-  { id: "museum-6", brand: "MAK", logo: "🏺", title: "Gratis Dienstag 18-22h", description: "Jeden Dienstag Abend freier Eintritt ins MAK!", type: "gratis", badge: "daily", category: "wien", source: "MAK", url: "https://www.mak.at", expires: "Dienstags", distance: "1. Bezirk", hot: true },
-  { id: "museum-7", brand: "Technisches Museum", logo: "⚙️", title: "Gratis unter 19", description: "Technik zum Anfassen - kostenlos für Jugendliche!", type: "gratis", badge: "instore", category: "wien", source: "TMW", url: "https://www.technischesmuseum.at", expires: "Unbegrenzt", distance: "14. Bezirk", hot: false },
-  { id: "museum-8", brand: "Jüdisches Museum", logo: "✡️", title: "Gratis unter 19", description: "Geschichte und Kultur - kostenlos für Jugendliche!", type: "gratis", badge: "instore", category: "wien", source: "JMW", url: "https://www.jmw.at", expires: "Unbegrenzt", distance: "1. Bezirk", hot: false },
-  { id: "museum-9", brand: "Mumok", logo: "🎭", title: "Gratis unter 19", description: "Moderne Kunst kostenlos für Jugendliche!", type: "gratis", badge: "instore", category: "wien", source: "Mumok", url: "https://www.mumok.at", expires: "Unbegrenzt", distance: "7. Bezirk", hot: false },
-  { id: "museum-10", brand: "Leopold Museum", logo: "🎨", title: "Gratis unter 19", description: "Schiele, Klimt und mehr - gratis für Jugendliche!", type: "gratis", badge: "instore", category: "wien", source: "Leopold Museum", url: "https://www.leopoldmuseum.org", expires: "Unbegrenzt", distance: "7. Bezirk", hot: false },
-  
-  // ========== WIEN SPECIALS ==========
-  { id: "wien-1", brand: "Stadt Wien", logo: "👶", title: "Gratis Wickelrucksack", description: "Baby-Willkommenspaket für Wiener Familien bei Geburt!", type: "gratis", badge: "sample", category: "wien", source: "Wien", url: "https://www.wien.gv.at", expires: "Bei Geburt", distance: "Wien", hot: true },
+  // ========== GRATIS BEAUTY & HAARSCHNITTE (15+) ==========
+  { id: "beauty-1", brand: "dm Friseur", logo: "💇", title: "Gratis Haarschnitt für Kinder", description: "dm Friseur: Kinder unter 10 Jahren gratis Haarschnitt (mit Termin)!", type: "gratis", badge: "instore", category: "beauty", source: "dm", url: "https://www.dm.at", expires: "Mit Termin", distance: "dm Friseur", hot: true },
+  { id: "beauty-2", brand: "Friseurschule", logo: "💇", title: "Gratis Haarschnitt Modell", description: "Als Modell in Friseurschulen: Gratis Haarschnitt!", type: "gratis", badge: "daily", category: "beauty", source: "Friseurschulen", url: "https://www.google.com/search?q=friseurschule+wien+modell", expires: "Als Modell", distance: "Wien", hot: true },
+  { id: "beauty-3", brand: "dm Babybox", logo: "👶", title: "Gratis Babybox für Schwangere", description: "dm Glückskind: Kostenlose Box mit Babyprodukten!", type: "gratis", badge: "sample", category: "beauty", source: "dm", url: "https://www.dm.at/glueckskind", expires: "Schwangere", distance: "dm", hot: true },
+  { id: "beauty-4", brand: "dm Greifring", logo: "👶", title: "Gratis Greifring Babyclub", description: "Bei Babyclub-Anmeldung: Gratis Greifring + Gutscheine!", type: "gratis", badge: "sample", category: "beauty", source: "dm", url: "https://www.dm.at", expires: "Anmeldung", distance: "dm", hot: true },
+  { id: "beauty-5", brand: "Douglas", logo: "💜", title: "2 Gratis-Proben", description: "Bei jeder Online-Bestellung ab €10: 2 Gratis Beauty-Proben!", type: "gratis", badge: "sample", category: "beauty", source: "Douglas", url: "https://www.douglas.at", expires: "Unbegrenzt", distance: "Online", hot: true },
+  { id: "beauty-6", brand: "Douglas", logo: "💜", title: "Geburtstagsgeschenk", description: "Beauty Card: Gratis Geschenk zum Geburtstag!", type: "gratis", badge: "instore", category: "beauty", source: "Douglas", url: "https://www.douglas.at", expires: "Geburtstag", distance: "Douglas", hot: true },
+  { id: "beauty-7", brand: "Sephora", logo: "💄", title: "3 Gratis-Proben", description: "Sephora Beauty Insider: 3 Gratis-Proben bei jeder Bestellung!", type: "gratis", badge: "sample", category: "beauty", source: "Sephora", url: "https://www.sephora.at", expires: "Unbegrenzt", distance: "Online", hot: true },
+  { id: "beauty-8", brand: "Sephora", logo: "💄", title: "Geburtstagsgeschenk Set", description: "Beauty Insider: Gratis Geburtstagsset!", type: "gratis", badge: "instore", category: "beauty", source: "Sephora", url: "https://www.sephora.at", expires: "Geburtstag", distance: "Sephora", hot: true },
+  { id: "beauty-9", brand: "Lush", logo: "🛁", title: "Gratis Proben im Store", description: "Im Lush Store: Immer Gratis-Proben zum Mitnehmen!", type: "gratis", badge: "sample", category: "beauty", source: "Lush", url: "https://www.lush.at", expires: "Unbegrenzt", distance: "Lush", hot: true },
+  { id: "beauty-10", brand: "The Body Shop", logo: "🌿", title: "10% + Geburtstagsgeschenk", description: "Love Your Body Club: 10% Rabatt + Geburtstagsüberraschung!", type: "gratis", badge: "sample", category: "beauty", source: "Body Shop", url: "https://www.thebodyshop.at", expires: "Anmeldung", distance: "Body Shop", hot: false },
+  { id: "beauty-11", brand: "Marionnaud", logo: "💐", title: "10€ Willkommensbonus", description: "Club Anmeldung: €10 Gutschein geschenkt!", type: "rabatt", badge: "sample", category: "beauty", source: "Marionnaud", url: "https://www.marionnaud.at", expires: "Anmeldung", distance: "Marionnaud", hot: true },
+  { id: "beauty-12", brand: "Treatwell", logo: "💇", title: "Günstige Friseur-Termine", description: "Last-Minute Termine bei Friseuren oft stark reduziert!", type: "rabatt", badge: "daily", category: "beauty", source: "Treatwell", url: "https://www.treatwell.at", expires: "Last Minute", distance: "Wien", hot: true },
+  { id: "beauty-13", brand: "Groupon", logo: "💅", title: "Beauty Deals bis -70%", description: "Friseur, Kosmetik, Massage stark reduziert!", type: "rabatt", badge: "limited", category: "beauty", source: "Groupon", url: "https://www.groupon.at", expires: "Wechselnd", distance: "Wien", hot: true },
+  { id: "beauty-14", brand: "BIPA", logo: "💄", title: "20% auf Make-up", description: "Regelmäßig 20% auf ausgewählte Make-up Produkte!", type: "rabatt", badge: "limited", category: "beauty", source: "BIPA", url: "https://www.bipa.at", expires: "Wechselnd", distance: "BIPA", hot: false },
+  { id: "beauty-15", brand: "Müller", logo: "🛍️", title: "10% Newsletter Rabatt", description: "Newsletter = 10% auf erste Online-Bestellung!", type: "rabatt", badge: "sample", category: "beauty", source: "Müller", url: "https://www.mueller.at", expires: "Anmeldung", distance: "Online", hot: false },
+
+  // ========== SUPERMARKT DEALS (15+) ==========
+  { id: "super-1", brand: "BILLA", logo: "🟠", title: "1+1 Gratis Aktionen", description: "Wöchentlich wechselnde 1+1 Gratis Produkte!", type: "gratis", badge: "limited", category: "supermarkt", source: "BILLA", url: "https://www.billa.at", expires: "Wöchentlich", distance: "Überall", hot: true },
+  { id: "super-2", brand: "BILLA", logo: "🟠", title: "-25% Pickerl Donnerstag", description: "Jeden Donnerstag neue -25% Rabatt-Pickerl!", type: "rabatt", badge: "daily", category: "supermarkt", source: "BILLA", url: "https://www.billa.at", expires: "Donnerstags", distance: "Überall", hot: true },
+  { id: "super-3", brand: "SPAR", logo: "🟢", title: "SPAR Plus Rabatte", description: "Personalisierte Rabatte mit SPAR Plus Karte!", type: "rabatt", badge: "instore", category: "supermarkt", source: "SPAR", url: "https://www.spar.at", expires: "Unbegrenzt", distance: "Überall", hot: false },
+  { id: "super-4", brand: "Lidl Plus", logo: "🔵", title: "Wöchentliche Coupons", description: "Lidl Plus App: Jede Woche neue Rabatt-Coupons!", type: "rabatt", badge: "daily", category: "supermarkt", source: "Lidl Plus", url: "https://www.lidl.at", expires: "Wöchentlich", distance: "Überall", hot: true },
+  { id: "super-5", brand: "HOFER", logo: "🔴", title: "App-exklusive Angebote", description: "HOFER App: Exklusive Rabatte nur in der App!", type: "rabatt", badge: "instore", category: "supermarkt", source: "HOFER", url: "https://www.hofer.at", expires: "Wöchentlich", distance: "Überall", hot: false },
+  { id: "super-6", brand: "PENNY", logo: "🔴", title: "PENNY Kundenkarte", description: "Extra Rabatte mit der Kundenkarte sammeln!", type: "rabatt", badge: "instore", category: "supermarkt", source: "PENNY", url: "https://www.penny.at", expires: "Unbegrenzt", distance: "Überall", hot: false },
+  { id: "super-7", brand: "Foodsharing", logo: "🍏", title: "Gratis Lebensmittel retten", description: "Übriggebliebene Lebensmittel gratis abholen!", type: "gratis", badge: "daily", category: "supermarkt", source: "Foodsharing", url: "https://foodsharing.at", expires: "Täglich", distance: "Überall", hot: true },
+  { id: "super-8", brand: "Verein MUT", logo: "🥫", title: "Gratis Lebensmittel", description: "Gerettete Lebensmittel kostenlos! Mo-Fr 10-15:30.", type: "gratis", badge: "daily", category: "supermarkt", source: "Verein MUT", url: "https://verein-mut.eu", expires: "Mo-Fr", distance: "4. Bezirk", hot: true },
+
+  // ========== JÖ BONUS CLUB (10+) ==========
+  { id: "joe-1", brand: "jö Bonus Club", logo: "🟡", title: "20% Rabattsammler BILLA", description: "Jeden Monat bis zu 20% auf einen BILLA Einkauf!", type: "rabatt", badge: "daily", category: "supermarkt", source: "jö App", url: "https://www.joe-club.at", expires: "Monatlich", distance: "BILLA", hot: true },
+  { id: "joe-2", brand: "jö Bonus Club", logo: "🟡", title: "20% Rabattsammler BIPA", description: "Jeden Monat bis zu 20% auf einen BIPA Einkauf!", type: "rabatt", badge: "daily", category: "beauty", source: "jö App", url: "https://www.joe-club.at", expires: "Monatlich", distance: "BIPA", hot: true },
+  { id: "joe-3", brand: "jö Bonus Club", logo: "🟡", title: "Ös bei foodora sammeln", description: "Bei jeder foodora Bestellung Ös kassieren!", type: "cashback", badge: "daily", category: "essen", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", distance: "Online", hot: true },
+  { id: "joe-4", brand: "jö Bonus Club", logo: "🟡", title: "50% auf OMV Sandwich", description: "Mit 100 Ös 50% auf alle Sandwiches!", type: "rabatt", badge: "instore", category: "essen", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", distance: "OMV", hot: false },
+  { id: "joe-5", brand: "jö Bonus Club", logo: "🟡", title: "30% auf OMV TopWash", description: "Mit 150 Ös 30% auf Autowäsche!", type: "rabatt", badge: "instore", category: "mobilität", source: "jö App", url: "https://www.joe-club.at", expires: "Unbegrenzt", distance: "OMV", hot: false },
+
+  // ========== MUSEEN GRATIS (15+) ==========
+  { id: "museum-1", brand: "Wien Museum", logo: "🏛️", title: "Gratis unter 19", description: "Freier Eintritt für alle unter 19!", type: "gratis", badge: "instore", category: "wien", source: "Wien Museum", url: "https://www.wienmuseum.at", expires: "Unbegrenzt", distance: "Karlsplatz", hot: true },
+  { id: "museum-2", brand: "Belvedere", logo: "🖼️", title: "Gratis unter 19", description: "Klimts 'Der Kuss' gratis für Jugendliche!", type: "gratis", badge: "instore", category: "wien", source: "Belvedere", url: "https://www.belvedere.at", expires: "Unbegrenzt", distance: "3. Bezirk", hot: true },
+  { id: "museum-3", brand: "Albertina", logo: "🎨", title: "Gratis unter 19", description: "Weltberühmte Kunstsammlung kostenlos!", type: "gratis", badge: "instore", category: "wien", source: "Albertina", url: "https://www.albertina.at", expires: "Unbegrenzt", distance: "1. Bezirk", hot: true },
+  { id: "museum-4", brand: "NHM", logo: "🦕", title: "Gratis unter 19", description: "Naturhistorisches Museum gratis!", type: "gratis", badge: "instore", category: "wien", source: "NHM", url: "https://www.nhm-wien.ac.at", expires: "Unbegrenzt", distance: "1. Bezirk", hot: true },
+  { id: "museum-5", brand: "KHM", logo: "👑", title: "Gratis unter 19", description: "Kunsthistorisches Museum kostenlos!", type: "gratis", badge: "instore", category: "wien", source: "KHM", url: "https://www.khm.at", expires: "Unbegrenzt", distance: "1. Bezirk", hot: true },
+  { id: "museum-6", brand: "MAK", logo: "🏺", title: "Gratis Dienstag 18-22h", description: "Jeden Dienstag Abend freier Eintritt!", type: "gratis", badge: "daily", category: "wien", source: "MAK", url: "https://www.mak.at", expires: "Dienstags", distance: "1. Bezirk", hot: true },
+  { id: "museum-7", brand: "Technisches Museum", logo: "⚙️", title: "Gratis unter 19", description: "Technik zum Anfassen - kostenlos!", type: "gratis", badge: "instore", category: "wien", source: "TMW", url: "https://www.technischesmuseum.at", expires: "Unbegrenzt", distance: "14. Bezirk", hot: false },
+  { id: "museum-8", brand: "Mumok", logo: "🎭", title: "Gratis unter 19", description: "Moderne Kunst kostenlos!", type: "gratis", badge: "instore", category: "wien", source: "Mumok", url: "https://www.mumok.at", expires: "Unbegrenzt", distance: "7. Bezirk", hot: false },
+  { id: "museum-9", brand: "Leopold Museum", logo: "🎨", title: "Gratis unter 19", description: "Schiele, Klimt & mehr gratis!", type: "gratis", badge: "instore", category: "wien", source: "Leopold Museum", url: "https://www.leopoldmuseum.org", expires: "Unbegrenzt", distance: "7. Bezirk", hot: false },
+  { id: "museum-10", brand: "Haus der Musik", logo: "🎵", title: "Gratis unter 3", description: "Kinder unter 3 gratis!", type: "gratis", badge: "instore", category: "wien", source: "Haus der Musik", url: "https://www.hausdermusik.com", expires: "Unbegrenzt", distance: "1. Bezirk", hot: false },
+
+  // ========== WIEN SPECIALS (10+) ==========
+  { id: "wien-1", brand: "Stadt Wien", logo: "👶", title: "Gratis Wickelrucksack", description: "Baby-Willkommenspaket für Wiener Familien!", type: "gratis", badge: "sample", category: "wien", source: "Wien", url: "https://www.wien.gv.at", expires: "Bei Geburt", distance: "Wien", hot: true },
   { id: "wien-2", brand: "Wiener Linien", logo: "🚇", title: "Gratis WLAN", description: "Kostenloses WLAN in allen U-Bahn-Stationen!", type: "gratis", badge: "daily", category: "wien", source: "Wiener Linien", url: "https://www.wienerlinien.at", expires: "Unbegrenzt", distance: "U-Bahn", hot: false },
-  { id: "wien-3", brand: "Büchereien Wien", logo: "📚", title: "Gratis unter 18", description: "Kostenlose Mitgliedschaft für unter 18-Jährige!", type: "gratis", badge: "instore", category: "wien", source: "Büchereien Wien", url: "https://www.buechereien.wien.at", expires: "Unbegrenzt", distance: "Überall", hot: false },
-  { id: "wien-4", brand: "Donauturm", logo: "🗼", title: "Gratis am Geburtstag", description: "Am Geburtstag (±4 Tage) gratis auf den Donauturm!", type: "gratis", badge: "instore", category: "wien", source: "Donauturm", url: "https://www.donauturm.at", expires: "Geburtstag", distance: "22. Bezirk", hot: true },
-  { id: "wien-5", brand: "Prater", logo: "🎡", title: "Gratis Eintritt", description: "Der Wiener Prater ist kostenlos begehbar!", type: "gratis", badge: "daily", category: "wien", source: "Prater", url: "https://www.praterwien.com", expires: "Unbegrenzt", distance: "2. Bezirk", hot: false },
-  { id: "wien-6", brand: "Stadtpark", logo: "🌳", title: "Gratis Konzerte im Sommer", description: "Open-Air Konzerte im Sommer im Stadtpark!", type: "gratis", badge: "limited", category: "wien", source: "Stadt Wien", url: "https://www.wien.gv.at", expires: "Sommer", distance: "1. Bezirk", hot: false },
-  { id: "wien-7", brand: "Donauinsel", logo: "🏖️", title: "Gratis Badeplatz", description: "Kostenlos baden und chillen auf der Donauinsel!", type: "gratis", badge: "daily", category: "wien", source: "Wien", url: "https://www.wien.gv.at", expires: "Unbegrenzt", distance: "Donauinsel", hot: false },
-  
-  // ========== MOBILITÄT ==========
-  { id: "mobil-1", brand: "ÖBB", logo: "🚂", title: "Gratis Fahrt am Geburtstag", description: "Mit Vorteilscard am Geburtstag gratis 2. Klasse fahren!", type: "gratis", badge: "instore", category: "mobilität", source: "ÖBB", url: "https://www.oebb.at", expires: "Geburtstag", distance: "Österreich", hot: true },
-  { id: "mobil-2", brand: "ÖBB", logo: "🚂", title: "Sparschiene ab €19", description: "Günstige Zugtickets bei früher Buchung!", type: "rabatt", badge: "daily", category: "mobilität", source: "ÖBB", url: "https://www.oebb.at", expires: "Bei Buchung", distance: "Österreich", hot: true },
-  { id: "mobil-3", brand: "Westbahn", logo: "🚄", title: "Spartickets ab €9,99", description: "Günstige Westbahn Tickets nach Salzburg!", type: "rabatt", badge: "daily", category: "mobilität", source: "Westbahn", url: "https://www.westbahn.at", expires: "Bei Buchung", distance: "Wien-Salzburg", hot: false },
-  { id: "mobil-4", brand: "FlixBus", logo: "🚌", title: "Fernbus ab €4,99", description: "Günstige Fernbusse in ganz Europa!", type: "rabatt", badge: "daily", category: "mobilität", source: "FlixBus", url: "https://www.flixbus.at", expires: "Bei Buchung", distance: "Europa", hot: false },
-  { id: "mobil-5", brand: "Lime", logo: "🛴", title: "Gratis-Minuten Aktion", description: "Regelmäßig Gratis-Minuten für E-Scooter!", type: "gratis", badge: "limited", category: "mobilität", source: "Lime", url: "https://www.li.me", expires: "Aktionen", distance: "Wien", hot: false },
+  { id: "wien-3", brand: "Büchereien", logo: "📚", title: "Gratis unter 18", description: "Kostenlose Mitgliedschaft für Jugendliche!", type: "gratis", badge: "instore", category: "wien", source: "Büchereien Wien", url: "https://www.buechereien.wien.at", expires: "Unbegrenzt", distance: "Überall", hot: false },
+  { id: "wien-4", brand: "Donauturm", logo: "🗼", title: "Gratis am Geburtstag", description: "Am Geburtstag (±4 Tage) gratis Auffahrt!", type: "gratis", badge: "instore", category: "wien", source: "Donauturm", url: "https://www.donauturm.at", expires: "Geburtstag", distance: "22. Bezirk", hot: true },
+  { id: "wien-5", brand: "Prater", logo: "🎡", title: "Gratis Eintritt", description: "Der Wiener Prater ist immer kostenlos!", type: "gratis", badge: "daily", category: "wien", source: "Prater", url: "https://www.praterwien.com", expires: "Unbegrenzt", distance: "2. Bezirk", hot: false },
+  { id: "wien-6", brand: "Schönbrunn", logo: "🏰", title: "Gratis Schlosspark", description: "Schlosspark Schönbrunn kostenlos besuchen!", type: "gratis", badge: "daily", category: "wien", source: "Schönbrunn", url: "https://www.schoenbrunn.at", expires: "Unbegrenzt", distance: "13. Bezirk", hot: false },
+  { id: "wien-7", brand: "Donauinsel", logo: "🏖️", title: "Gratis Baden", description: "Gratis baden und relaxen auf der Donauinsel!", type: "gratis", badge: "daily", category: "wien", source: "Wien", url: "https://www.wien.gv.at", expires: "Unbegrenzt", distance: "Donauinsel", hot: false },
+
+  // ========== MOBILITÄT (10+) ==========
+  { id: "mobil-1", brand: "ÖBB", logo: "🚂", title: "Gratis Fahrt Geburtstag", description: "Mit Vorteilscard am Geburtstag gratis 2. Klasse!", type: "gratis", badge: "instore", category: "mobilität", source: "ÖBB", url: "https://www.oebb.at", expires: "Geburtstag", distance: "Österreich", hot: true },
+  { id: "mobil-2", brand: "ÖBB", logo: "🚂", title: "Sparschiene ab €19", description: "Günstige Zugtickets bei früher Buchung!", type: "rabatt", badge: "daily", category: "mobilität", source: "ÖBB", url: "https://www.oebb.at", expires: "Früh buchen", distance: "Österreich", hot: true },
+  { id: "mobil-3", brand: "Westbahn", logo: "🚄", title: "Spartickets ab €9,99", description: "Günstig nach Salzburg fahren!", type: "rabatt", badge: "daily", category: "mobilität", source: "Westbahn", url: "https://www.westbahn.at", expires: "Bei Buchung", distance: "Wien-Salzburg", hot: false },
+  { id: "mobil-4", brand: "Nextbike", logo: "🚲", title: "30 Min gratis", description: "Erste 30 Minuten mit WienMobil Rad kostenlos!", type: "gratis", badge: "daily", category: "mobilität", source: "Nextbike", url: "https://www.nextbike.at", expires: "WienMobil", distance: "Wien", hot: true },
+  { id: "mobil-5", brand: "Lime", logo: "🛴", title: "Gratis Minuten Aktion", description: "Regelmäßig Gratis-Minuten für E-Scooter!", type: "gratis", badge: "limited", category: "mobilität", source: "Lime", url: "https://www.li.me", expires: "Aktionen", distance: "Wien", hot: false },
   { id: "mobil-6", brand: "TIER", logo: "🛴", title: "Erste Fahrt gratis", description: "Erste E-Scooter Fahrt kostenlos!", type: "gratis", badge: "sample", category: "mobilität", source: "TIER", url: "https://www.tier.app", expires: "Erstnutzung", distance: "Wien", hot: false },
-  
-  // ========== STREAMING & DIGITAL ==========
-  { id: "stream-1", brand: "Spotify", logo: "🎵", title: "3 Monate gratis Premium", description: "Premium für Neukunden 3 Monate kostenlos testen!", type: "testabo", badge: "limited", category: "streaming", source: "Spotify", url: "https://www.spotify.com", expires: "Neukunden", distance: "Online", hot: true },
-  { id: "stream-2", brand: "Amazon Prime", logo: "📦", title: "30 Tage gratis", description: "Prime Video & schneller Versand kostenlos testen!", type: "testabo", badge: "limited", category: "streaming", source: "Amazon", url: "https://www.amazon.de/prime", expires: "Neukunden", distance: "Online", hot: true },
-  { id: "stream-3", brand: "Netflix", logo: "🎬", title: "Werbefinanziert ab €4,99", description: "Günstigstes Netflix Abo mit Werbung.", type: "rabatt", badge: "daily", category: "streaming", source: "Netflix", url: "https://www.netflix.com", expires: "Immer", distance: "Online", hot: false },
-  { id: "stream-4", brand: "Disney+", logo: "✨", title: "1 Monat gratis", description: "Disney+ kostenlos testen für Neukunden!", type: "testabo", badge: "limited", category: "streaming", source: "Disney+", url: "https://www.disneyplus.com", expires: "Neukunden", distance: "Online", hot: true },
-  { id: "stream-5", brand: "YouTube Premium", logo: "▶️", title: "1 Monat gratis", description: "YouTube ohne Werbung testen!", type: "testabo", badge: "limited", category: "streaming", source: "YouTube", url: "https://www.youtube.com/premium", expires: "Neukunden", distance: "Online", hot: false },
-  { id: "stream-6", brand: "Apple TV+", logo: "🍎", title: "7 Tage gratis", description: "Apple TV+ kostenlos testen!", type: "testabo", badge: "limited", category: "streaming", source: "Apple", url: "https://www.apple.com/at/apple-tv-plus/", expires: "Neukunden", distance: "Online", hot: false },
-  
-  // ========== LIEFERSERVICES ==========
-  { id: "liefer-1", brand: "foodora", logo: "🛵", title: "€5 Neukunden-Rabatt", description: "Rabatt auf erste Bestellung für Neukunden!", type: "rabatt", badge: "limited", category: "lieferung", source: "foodora", url: "https://www.foodora.at", expires: "Neukunden", distance: "Wien", hot: true },
-  { id: "liefer-2", brand: "Mjam", logo: "🍕", title: "Gratis Lieferung Aktion", description: "Regelmäßig Gratis-Lieferung bei Aktionen!", type: "gratis", badge: "limited", category: "lieferung", source: "Mjam", url: "https://www.mjam.at", expires: "Bei Aktionen", distance: "Wien", hot: false },
-  { id: "liefer-3", brand: "Wolt", logo: "📱", title: "€10 Willkommensbonus", description: "€10 Rabatt für Neukunden!", type: "rabatt", badge: "limited", category: "lieferung", source: "Wolt", url: "https://www.wolt.com", expires: "Neukunden", distance: "Wien", hot: true },
-  { id: "liefer-4", brand: "Uber Eats", logo: "🚗", title: "Gratis Lieferung", description: "Erste Bestellung oft mit Gratis-Lieferung!", type: "gratis", badge: "limited", category: "lieferung", source: "Uber Eats", url: "https://www.ubereats.com", expires: "Neukunden", distance: "Wien", hot: false },
-  
-  // ========== MODE & SHOPPING ==========
-  { id: "mode-1", brand: "Zalando", logo: "👟", title: "Gratis Versand ab €24,90", description: "Ab €24,90 kostenloser Versand!", type: "gratis", badge: "daily", category: "mode", source: "Zalando", url: "https://www.zalando.at", expires: "Unbegrenzt", distance: "Online", hot: false },
-  { id: "mode-2", brand: "Zalando", logo: "👟", title: "100 Tage Rückgabe", description: "100 Tage kostenlose Rückgabe!", type: "gratis", badge: "daily", category: "mode", source: "Zalando", url: "https://www.zalando.at", expires: "Unbegrenzt", distance: "Online", hot: false },
-  { id: "mode-3", brand: "H&M", logo: "👕", title: "10% Newsletter Rabatt", description: "10% Rabatt bei Newsletter-Anmeldung!", type: "rabatt", badge: "sample", category: "mode", source: "H&M", url: "https://www.hm.com/at", expires: "Bei Anmeldung", distance: "Online", hot: false },
-  { id: "mode-4", brand: "ABOUT YOU", logo: "👗", title: "15% Neukunden", description: "15% Rabatt für Neukunden!", type: "rabatt", badge: "limited", category: "mode", source: "ABOUT YOU", url: "https://www.aboutyou.at", expires: "Neukunden", distance: "Online", hot: false },
-  { id: "mode-5", brand: "ASOS", logo: "🛍️", title: "20% Studentenrabatt", description: "20% Rabatt für Studenten mit UNiDAYS!", type: "rabatt", badge: "daily", category: "mode", source: "ASOS", url: "https://www.asos.com", expires: "Studenten", distance: "Online", hot: true },
-  { id: "mode-6", brand: "Primark", logo: "👚", title: "Günstige Mode", description: "Mode zu unschlagbaren Preisen!", type: "rabatt", badge: "daily", category: "mode", source: "Primark", url: "https://www.primark.com", expires: "Immer", distance: "SCS / Donau Zentrum", hot: false },
-  
-  // ========== FINANZEN & CASHBACK ==========
-  { id: "finanz-1", brand: "N26", logo: "📱", title: "Gratis Konto", description: "Kostenloses Online-Konto ohne Gebühren!", type: "gratis", badge: "daily", category: "finanzen", source: "N26", url: "https://www.n26.com", expires: "Unbegrenzt", distance: "Online", hot: true },
-  { id: "finanz-2", brand: "Revolut", logo: "💳", title: "Gratis Konto", description: "Kostenloses Konto mit gratis Karte!", type: "gratis", badge: "daily", category: "finanzen", source: "Revolut", url: "https://www.revolut.com", expires: "Unbegrenzt", distance: "Online", hot: true },
-  { id: "finanz-3", brand: "Shoop", logo: "💵", title: "Cashback", description: "Geld zurück beim Online-Shopping!", type: "cashback", badge: "daily", category: "finanzen", source: "Shoop", url: "https://www.shoop.at", expires: "Unbegrenzt", distance: "Online", hot: true },
-  { id: "finanz-4", brand: "Igraal", logo: "💰", title: "Cashback", description: "Bis zu 10% Cashback bei vielen Shops!", type: "cashback", badge: "daily", category: "finanzen", source: "Igraal", url: "https://www.igraal.at", expires: "Unbegrenzt", distance: "Online", hot: false },
-  { id: "finanz-5", brand: "Curve", logo: "💳", title: "Cashback auf Karte", description: "Alle Karten in einer + Cashback!", type: "cashback", badge: "daily", category: "finanzen", source: "Curve", url: "https://www.curve.com", expires: "Unbegrenzt", distance: "Online", hot: false },
-  
-  // ========== SPORT & FITNESS ==========
-  { id: "sport-1", brand: "McFit", logo: "💪", title: "Probetraining gratis", description: "Kostenloses Probetraining in allen Studios!", type: "gratis", badge: "sample", category: "sport", source: "McFit", url: "https://www.mcfit.com", expires: "Einmalig", distance: "Wien", hot: true },
-  { id: "sport-2", brand: "FitInn", logo: "🏋️", title: "Gratis Schnuppertraining", description: "Kostenloses Probetraining!", type: "gratis", badge: "sample", category: "sport", source: "FitInn", url: "https://www.fitinn.at", expires: "Einmalig", distance: "Wien", hot: true },
-  { id: "sport-3", brand: "John Harris", logo: "🏊", title: "Probetraining", description: "Exklusives Probetraining in Premium Clubs!", type: "gratis", badge: "sample", category: "sport", source: "John Harris", url: "https://www.johnharris.at", expires: "Einmalig", distance: "Wien", hot: false },
-  
-  // ========== STUDENTEN SPECIALS ==========
-  { id: "studi-1", brand: "Spotify", logo: "🎵", title: "Studenten 50% Rabatt", description: "Spotify Premium für Studenten zum halben Preis!", type: "rabatt", badge: "daily", category: "streaming", source: "Spotify", url: "https://www.spotify.com/at/student/", expires: "Studenten", distance: "Online", hot: true },
+
+  // ========== STREAMING & DIGITAL (10+) ==========
+  { id: "stream-1", brand: "Spotify", logo: "🎵", title: "3 Monate gratis Premium", description: "Neukunden: 3 Monate Premium kostenlos!", type: "testabo", badge: "limited", category: "streaming", source: "Spotify", url: "https://www.spotify.com", expires: "Neukunden", distance: "Online", hot: true },
+  { id: "stream-2", brand: "Amazon Prime", logo: "📦", title: "30 Tage gratis", description: "Prime Video & Versand kostenlos testen!", type: "testabo", badge: "limited", category: "streaming", source: "Amazon", url: "https://www.amazon.de/prime", expires: "Neukunden", distance: "Online", hot: true },
+  { id: "stream-3", brand: "Disney+", logo: "✨", title: "Probe-Abo", description: "Disney+ testen für Neukunden!", type: "testabo", badge: "limited", category: "streaming", source: "Disney+", url: "https://www.disneyplus.com", expires: "Neukunden", distance: "Online", hot: true },
+  { id: "stream-4", brand: "YouTube Premium", logo: "▶️", title: "1 Monat gratis", description: "YouTube ohne Werbung testen!", type: "testabo", badge: "limited", category: "streaming", source: "YouTube", url: "https://www.youtube.com/premium", expires: "Neukunden", distance: "Online", hot: false },
+  { id: "stream-5", brand: "Apple TV+", logo: "🍎", title: "7 Tage gratis", description: "Apple Originals kostenlos testen!", type: "testabo", badge: "limited", category: "streaming", source: "Apple", url: "https://www.apple.com/at/apple-tv-plus/", expires: "Neukunden", distance: "Online", hot: false },
+
+  // ========== STUDENTEN SPECIALS (10+) ==========
+  { id: "studi-1", brand: "Spotify", logo: "🎵", title: "Studenten 50% Rabatt", description: "Premium zum halben Preis für Studenten!", type: "rabatt", badge: "daily", category: "streaming", source: "Spotify", url: "https://www.spotify.com/at/student/", expires: "Studenten", distance: "Online", hot: true },
   { id: "studi-2", brand: "Apple", logo: "🍎", title: "Bildungsrabatt", description: "Bis zu 10% auf Mac, iPad für Studenten!", type: "rabatt", badge: "daily", category: "technik", source: "Apple", url: "https://www.apple.com/at-edu/shop", expires: "Studenten", distance: "Online", hot: true },
-  { id: "studi-3", brand: "Microsoft", logo: "💻", title: "Office 365 gratis", description: "Office 365 kostenlos für Studenten!", type: "gratis", badge: "daily", category: "technik", source: "Microsoft", url: "https://www.microsoft.com/de-at/education", expires: "Studenten", distance: "Online", hot: true },
-  { id: "studi-4", brand: "Amazon Prime", logo: "📦", title: "Prime Student €4,49/M", description: "Amazon Prime zum halben Preis für Studenten!", type: "rabatt", badge: "daily", category: "streaming", source: "Amazon", url: "https://www.amazon.de/primestudent", expires: "Studenten", distance: "Online", hot: true },
-  { id: "studi-5", brand: "Adobe", logo: "🎨", title: "65% Studenten-Rabatt", description: "Creative Cloud für Studenten stark vergünstigt!", type: "rabatt", badge: "daily", category: "technik", source: "Adobe", url: "https://www.adobe.com/at/creativecloud/buy/students.html", expires: "Studenten", distance: "Online", hot: true },
-  { id: "studi-6", brand: "Mensa", logo: "🍽️", title: "Günstig essen", description: "Mittagessen ab €3-5 in Wiener Mensen!", type: "rabatt", badge: "daily", category: "essen", source: "Studierendenwerk", url: "https://www.mensen.at", expires: "Studenten", distance: "Unis Wien", hot: true },
+  { id: "studi-3", brand: "Microsoft", logo: "💻", title: "Office 365 gratis", description: "Office kostenlos für Studenten!", type: "gratis", badge: "daily", category: "technik", source: "Microsoft", url: "https://www.microsoft.com/de-at/education", expires: "Studenten", distance: "Online", hot: true },
+  { id: "studi-4", brand: "Amazon Prime", logo: "📦", title: "Prime Student €4,49/M", description: "Prime zum halben Preis für Studenten!", type: "rabatt", badge: "daily", category: "streaming", source: "Amazon", url: "https://www.amazon.de/primestudent", expires: "Studenten", distance: "Online", hot: true },
+  { id: "studi-5", brand: "GitHub", logo: "💻", title: "Student Developer Pack", description: "Gratis Tools & Domains für Studenten!", type: "gratis", badge: "daily", category: "technik", source: "GitHub", url: "https://education.github.com/pack", expires: "Studenten", distance: "Online", hot: true },
+  { id: "studi-6", brand: "Notion", logo: "📝", title: "Plus gratis für Studenten", description: "Notion Plus komplett kostenlos!", type: "gratis", badge: "daily", category: "technik", source: "Notion", url: "https://www.notion.so/students", expires: "Studenten", distance: "Online", hot: true },
+  { id: "studi-7", brand: "Figma", logo: "🎨", title: "Gratis für Studenten", description: "Figma Pro kostenlos!", type: "gratis", badge: "daily", category: "technik", source: "Figma", url: "https://www.figma.com/education/", expires: "Studenten", distance: "Online", hot: true },
+  { id: "studi-8", brand: "Canva", logo: "🎨", title: "Pro gratis für Studenten", description: "Canva Pro kostenlos für Studenten!", type: "gratis", badge: "daily", category: "technik", source: "Canva", url: "https://www.canva.com/education/", expires: "Studenten", distance: "Online", hot: true },
+  { id: "studi-9", brand: "ASOS", logo: "👕", title: "20% Studentenrabatt", description: "20% mit UNiDAYS Verifizierung!", type: "rabatt", badge: "daily", category: "mode", source: "ASOS", url: "https://www.asos.com", expires: "Studenten", distance: "Online", hot: true },
+
+  // ========== CASHBACK & FINANZEN (8+) ==========
+  { id: "finanz-1", brand: "Shoop", logo: "💵", title: "Cashback Online Shopping", description: "Geld zurück beim Online-Shopping!", type: "cashback", badge: "daily", category: "finanzen", source: "Shoop", url: "https://www.shoop.at", expires: "Unbegrenzt", distance: "Online", hot: true },
+  { id: "finanz-2", brand: "TopCashback", logo: "💷", title: "Höchstes Cashback", description: "Oft das beste Cashback am Markt!", type: "cashback", badge: "daily", category: "finanzen", source: "TopCashback", url: "https://www.topcashback.de", expires: "Unbegrenzt", distance: "Online", hot: true },
+  { id: "finanz-3", brand: "N26", logo: "📱", title: "Gratis Konto", description: "Kostenloses Online-Konto ohne Gebühren!", type: "gratis", badge: "daily", category: "finanzen", source: "N26", url: "https://www.n26.com", expires: "Unbegrenzt", distance: "Online", hot: true },
+  { id: "finanz-4", brand: "Revolut", logo: "💳", title: "Gratis Konto + Karte", description: "Kostenloses Konto mit gratis Karte!", type: "gratis", badge: "daily", category: "finanzen", source: "Revolut", url: "https://www.revolut.com", expires: "Unbegrenzt", distance: "Online", hot: true },
+  { id: "finanz-5", brand: "Trade Republic", logo: "📈", title: "Gratis Aktie", description: "Bei Depot-Eröffnung Gratis-Aktie bis €200!", type: "gratis", badge: "limited", category: "finanzen", source: "Trade Republic", url: "https://www.traderepublic.com", expires: "Neukunden", distance: "Online", hot: true },
 ];
 
 // ============================================
@@ -289,9 +354,29 @@ function fetch(url, timeout = 10000) {
 }
 
 // Keywords für Deal-Erkennung
-const GRATIS_KEYWORDS = ['gratis', 'kostenlos', 'free', 'geschenkt', 'umsonst', 'freebie', 'gewinnspiel', '0 €', '0€', '1+1'];
-const DEAL_KEYWORDS = ['rabatt', 'aktion', 'angebot', 'sale', 'prozent', '%', 'günstiger', 'sparen', 'deal', 'schnäppchen'];
-const NEUEROFFNUNG_KEYWORDS = ['neueröffnung', 'eröffnung', 'opening', 'neu eröffnet', 'grand opening', 'soft opening'];
+const GRATIS_KEYWORDS = [
+  'gratis', 'kostenlos', 'free', 'geschenkt', 'umsonst', 'freebie', 'gewinnspiel', 
+  '0 €', '0€', '1+1', '2+1', 'gratisproben', 'probe', 'testen', 'geburtstag',
+  'willkommensgeschenk', 'gutschein', 'voucher', 'freigetränk', 'frei ', 'for free'
+];
+const DEAL_KEYWORDS = [
+  'rabatt', 'aktion', 'angebot', 'sale', 'prozent', '%', 'günstiger', 'sparen', 
+  'deal', 'schnäppchen', 'reduziert', 'ermäßigt', 'billiger', 'preiswert',
+  'sonderangebot', 'ausverkauf', 'abverkauf', 'minus', '-50', '-25', '-20', '-30',
+  'happy hour', 'mittagsmenü', 'lunch deal', 'tagesgericht'
+];
+const NEUEROFFNUNG_KEYWORDS = [
+  'neueröffnung', 'eröffnung', 'opening', 'neu eröffnet', 'grand opening', 
+  'soft opening', 'neue filiale', 'neues lokal', 'neues restaurant', 'jetzt neu',
+  'ab sofort', 'endlich da', 'neu in wien', 'premiere'
+];
+const WIEN_KEYWORDS = [
+  'wien', 'vienna', 'wiener', '1010', '1020', '1030', '1040', '1050', '1060', 
+  '1070', '1080', '1090', '1100', '1110', '1120', '1130', '1140', '1150',
+  '1160', '1170', '1180', '1190', '1200', '1210', '1220', '1230',
+  'favoriten', 'mariahilf', 'neubau', 'josefstadt', 'alsergrund', 'leopoldstadt',
+  'landstraße', 'wieden', 'margareten', 'donaustadt', 'floridsdorf', 'meidling'
+];
 
 function extractTag(xml, tag) {
   const cdataRegex = new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`, 'i');
@@ -380,27 +465,49 @@ function parseRSS(xml, source) {
 
 function extractDealsFromHTML(html, source) {
   const deals = [];
+  const lowerHtml = html.toLowerCase();
   
-  // Suche nach Gratis/Kostenlos Patterns
+  // Prüfe ob Wien-relevant (für Social Media wichtig)
+  const isWienRelevant = WIEN_KEYWORDS.some(k => lowerHtml.includes(k.toLowerCase()));
+  
+  // Erweiterte Patterns für Deal-Erkennung
   const patterns = [
-    /gratis[^<]{5,100}/gi,
-    /kostenlos[^<]{5,100}/gi,
-    /1\+1\s*gratis[^<]{0,80}/gi,
-    /neueröffnung[^<]{5,100}/gi,
-    /-\s*\d{1,2}\s*%[^<]{5,80}/gi,
+    /gratis[^<]{5,150}/gi,
+    /kostenlos[^<]{5,150}/gi,
+    /1\+1\s*gratis[^<]{0,100}/gi,
+    /2\+1\s*gratis[^<]{0,100}/gi,
+    /neueröffnung[^<]{5,150}/gi,
+    /eröffnung[^<]{5,150}/gi,
+    /opening[^<]{5,150}/gi,
+    /-\s*\d{1,2}\s*%[^<]{5,100}/gi,
+    /\d{1,2}\s*%\s*(rabatt|günstiger|sparen)[^<]{0,80}/gi,
+    /gratis\s*(kaffee|essen|getränk|probe|haarschnitt|eintritt)[^<]{0,80}/gi,
+    /free\s*(coffee|food|drink|sample)[^<]{0,80}/gi,
+    /geschenkt[^<]{5,100}/gi,
+    /freebie[^<]{5,100}/gi,
+    /happy\s*hour[^<]{5,100}/gi,
+    /gewinnspiel[^<]{5,100}/gi,
+    /gutschein[^<]{5,100}/gi,
   ];
   
   patterns.forEach(pattern => {
     let match;
     while ((match = pattern.exec(html)) !== null) {
       const context = match[0].replace(/<[^>]*>/g, '').trim();
-      if (context.length > 15 && context.length < 150) {
-        const isGratis = /gratis|kostenlos|1\+1/i.test(context);
+      if (context.length > 10 && context.length < 200) {
+        const isGratis = /gratis|kostenlos|1\+1|2\+1|free|geschenkt|freebie/i.test(context);
+        const isNeueroffnung = /neueröffnung|eröffnung|opening|neu\s*eröffnet/i.test(context);
+        
+        // Für Social Media: nur Wien-relevante Posts
+        if ((source.brand === 'Facebook' || source.brand === 'Instagram' || source.brand === 'TikTok') && !isWienRelevant) {
+          continue;
+        }
+        
         deals.push({
           id: `html-${source.brand}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
           brand: source.brand,
           logo: source.logo,
-          title: `${isGratis ? 'Gratis' : 'Aktion'} bei ${source.brand}`,
+          title: `${isNeueroffnung ? '🆕 Neueröffnung' : (isGratis ? '🎁 Gratis Deal' : '💰 Rabatt')} via ${source.brand}`,
           description: context.substring(0, 120),
           type: isGratis ? 'gratis' : 'rabatt',
           badge: isGratis ? 'gratis' : 'limited',
