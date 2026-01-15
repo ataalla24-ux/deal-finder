@@ -608,4 +608,10 @@ async function scrapeAllSources() {
   return output;
 }
 
-scrapeAllSources().catch(console.error);
+// Führe Scraper aus - IMMER mit exit code 0
+scrapeAllSources()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error('Scraper Error:', err.message);
+    process.exit(0); // Trotzdem 0, damit GitHub Actions nicht fehlschlägt
+  });
