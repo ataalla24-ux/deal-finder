@@ -2,44 +2,102 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>FreeFinder Wien</title>
+  
+  <!-- PWA Meta Tags -->
   <meta name="theme-color" content="#e8f4f8">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FreeFinder">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Splash Screens für iPhone -->
+  <link rel="apple-touch-startup-image" href="icon-512.png">
+  
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    :root {
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+      --safe-left: env(safe-area-inset-left);
+      --safe-right: env(safe-area-inset-right);
+    }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
       background: linear-gradient(180deg, #e8f4f8 0%, #d0e8f0 100%);
       min-height: 100vh;
+      min-height: -webkit-fill-available;
       color: #1a1a2e;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+      padding-left: var(--safe-left);
+      padding-right: var(--safe-right);
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    html {
+      height: -webkit-fill-available;
     }
     
     .container {
       max-width: 500px;
       margin: 0 auto;
       padding: 16px;
-      padding-bottom: 100px;
+      padding-bottom: calc(100px + var(--safe-bottom));
+    }
+    
+    /* Install Banner */
+    .install-banner {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .install-banner.show { display: flex; }
+    .install-banner p { font-size: 14px; font-weight: 500; }
+    .install-banner button {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .install-close {
+      background: transparent !important;
+      color: white !important;
+      padding: 4px !important;
+      font-size: 18px !important;
     }
     
     /* Suchleiste */
     .search-box {
       background: white;
-      border-radius: 16px;
-      padding: 14px 18px;
+      border-radius: 14px;
+      padding: 14px 16px;
       display: flex;
       align-items: center;
       gap: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
       margin-bottom: 16px;
     }
-    .search-box svg { color: #9ca3af; flex-shrink: 0; }
+    .search-box svg { color: #9ca3af; flex-shrink: 0; width: 20px; height: 20px; }
     .search-box input {
       border: none;
       outline: none;
-      font-size: 16px;
+      font-size: 17px;
       width: 100%;
       background: transparent;
       color: #374151;
@@ -52,19 +110,19 @@
       border-radius: 20px;
       padding: 16px;
       margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
     
-    /* Type Filters (Alle, Gratis, Rabatt, etc.) */
+    /* Type Filters */
     .type-filters {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
     .type-btn {
-      padding: 10px 16px;
-      border-radius: 25px;
+      padding: 10px 14px;
+      border-radius: 20px;
       border: none;
       font-size: 14px;
       font-weight: 600;
@@ -73,6 +131,8 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      -webkit-touch-callout: none;
+      user-select: none;
     }
     .type-btn.primary {
       background: #3b82f6;
@@ -82,14 +142,13 @@
       background: #f3f4f6;
       color: #374151;
     }
-    .type-btn.secondary:hover {
-      background: #e5e7eb;
-    }
+    .type-btn:active { transform: scale(0.95); }
     .type-btn .count {
-      background: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.25);
       padding: 2px 8px;
-      border-radius: 12px;
+      border-radius: 10px;
       font-size: 12px;
+      font-weight: 700;
     }
     .type-btn.secondary .count {
       background: #e5e7eb;
@@ -98,7 +157,7 @@
     .divider {
       height: 1px;
       background: #e5e7eb;
-      margin: 12px 0;
+      margin: 14px 0;
     }
     
     /* Category Filters */
@@ -108,8 +167,8 @@
       gap: 8px;
     }
     .cat-btn {
-      padding: 10px 16px;
-      border-radius: 25px;
+      padding: 10px 14px;
+      border-radius: 20px;
       border: none;
       font-size: 14px;
       font-weight: 500;
@@ -120,16 +179,16 @@
       gap: 6px;
       background: #f3f4f6;
       color: #374151;
+      -webkit-touch-callout: none;
+      user-select: none;
     }
-    .cat-btn:hover {
-      background: #e5e7eb;
-    }
+    .cat-btn:active { transform: scale(0.95); }
     .cat-btn.active {
       background: #1f2937;
       color: white;
     }
     
-    /* Deal Count Header */
+    /* Deals Header */
     .deals-header {
       display: flex;
       justify-content: space-between;
@@ -138,7 +197,7 @@
       padding: 0 4px;
     }
     .deals-count {
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 600;
       color: #374151;
     }
@@ -158,20 +217,27 @@
       background: white;
       border-radius: 16px;
       padding: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
       border: 2px solid transparent;
       transition: all 0.2s;
+      -webkit-touch-callout: none;
     }
-    .deal-card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    .deal-card:active {
+      transform: scale(0.98);
     }
-    .deal-card.gratis {
+    .deal-card.type-gratis {
       border-color: #22c55e;
     }
-    .deal-card.rabatt {
-      border-color: #22c55e;
+    .deal-card.type-rabatt {
+      border-color: #f59e0b;
     }
-    .deal-card.hot {
+    .deal-card.type-cashback {
+      border-color: #a855f7;
+    }
+    .deal-card.type-testabo {
+      border-color: #3b82f6;
+    }
+    .deal-card.is-hot {
       border-color: #ef4444;
     }
     
@@ -189,12 +255,13 @@
     .brand-logo {
       width: 48px;
       height: 48px;
-      background: #f3f4f6;
+      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 26px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
     }
     .brand-info h3 {
       font-size: 16px;
@@ -209,15 +276,17 @@
     
     .deal-badges {
       display: flex;
-      gap: 6px;
+      gap: 5px;
       flex-wrap: wrap;
+      justify-content: flex-end;
     }
     .badge {
-      padding: 4px 10px;
+      padding: 4px 8px;
       border-radius: 6px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
     .badge.hot {
       background: #fecaca;
@@ -230,17 +299,18 @@
     .badge.gratis {
       background: #dcfce7;
       color: #16a34a;
-      border: 1px solid #22c55e;
     }
     .badge.rabatt {
       background: #fef3c7;
       color: #d97706;
-      border: 1px solid #f59e0b;
     }
     .badge.cashback {
       background: #f3e8ff;
       color: #9333ea;
-      border: 1px solid #a855f7;
+    }
+    .badge.testabo {
+      background: #dbeafe;
+      color: #2563eb;
     }
     
     .deal-content h4 {
@@ -272,10 +342,11 @@
       color: #9ca3af;
     }
     .deal-link {
-      padding: 8px 16px;
-      background: transparent;
-      color: #3b82f6;
+      padding: 10px 16px;
+      background: #3b82f6;
+      color: white;
       border: none;
+      border-radius: 10px;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
@@ -285,16 +356,9 @@
       transition: all 0.2s;
       text-decoration: none;
     }
-    .deal-link:hover {
-      color: #2563eb;
-    }
-    
-    /* Hot Badge Animation */
-    .badge.hot::before {
-      content: '🔥 ';
-    }
-    .badge.neu::before {
-      content: '✨ ';
+    .deal-link:active {
+      transform: scale(0.95);
+      background: #2563eb;
     }
     
     /* Empty State */
@@ -311,16 +375,51 @@
     /* Loading */
     .loading {
       text-align: center;
-      padding: 32px;
+      padding: 40px;
       color: #9ca3af;
+    }
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e5e7eb;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Pull to Refresh */
+    .pull-indicator {
+      text-align: center;
+      padding: 8px;
+      color: #9ca3af;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .pull-indicator.visible {
+      opacity: 1;
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Install Banner -->
+    <div class="install-banner" id="installBanner">
+      <p>📱 Als App installieren!</p>
+      <button onclick="showInstallInstructions()">Installieren</button>
+      <button class="install-close" onclick="hideInstallBanner()">×</button>
+    </div>
+    
+    <!-- Pull Indicator -->
+    <div class="pull-indicator" id="pullIndicator">↓ Ziehen zum Aktualisieren</div>
+    
     <!-- Suchleiste -->
     <div class="search-box">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="8"></circle>
         <path d="m21 21-4.35-4.35"></path>
       </svg>
@@ -329,9 +428,8 @@
     
     <!-- Filter Section -->
     <div class="filter-section">
-      <!-- Type Filters -->
       <div class="type-filters" id="typeFilters">
-        <button class="type-btn primary active" data-type="alle">
+        <button class="type-btn primary" data-type="alle">
           Alle <span class="count" id="countAll">0</span>
         </button>
         <button class="type-btn secondary" data-type="gratis">
@@ -350,7 +448,6 @@
       
       <div class="divider"></div>
       
-      <!-- Category Filters -->
       <div class="category-filters" id="categoryFilters">
         <button class="cat-btn active" data-cat="alle">🎁 Alle</button>
         <button class="cat-btn" data-cat="kaffee">☕ Kaffee</button>
@@ -375,7 +472,10 @@
     
     <!-- Deals Liste -->
     <div class="deals-list" id="dealsList">
-      <div class="loading">⏳ Deals werden geladen...</div>
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        Deals werden geladen...
+      </div>
     </div>
   </div>
 
@@ -393,19 +493,17 @@
         const data = await response.json();
         allDeals = data.deals || [];
         
-        // Update counts
         updateCounts();
         
-        // Update timestamp
         if (data.lastUpdated) {
           const date = new Date(data.lastUpdated);
           document.getElementById('lastUpdate').textContent = 
-            date.toLocaleDateString('de-AT') + ', ' + date.toLocaleTimeString('de-AT', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+            date.toLocaleDateString('de-AT') + ', ' + date.toLocaleTimeString('de-AT', {hour: '2-digit', minute: '2-digit'});
         }
         
         renderDeals();
       } catch (error) {
-        console.error('Error loading deals:', error);
+        console.error('Error:', error);
         document.getElementById('dealsList').innerHTML = `
           <div class="empty-state">
             <div class="icon">😕</div>
@@ -418,7 +516,7 @@
     // Update Counts
     function updateCounts() {
       document.getElementById('countAll').textContent = allDeals.length;
-      document.getElementById('countGratis').textContent = allDeals.filter(d => d.type === 'gratis').length;
+      document.getElementById('countGratis').textContent = allDeals.filter(d => d.type === 'gratis' || d.type === 'testabo').length;
       document.getElementById('countRabatt').textContent = allDeals.filter(d => d.type === 'rabatt').length;
       document.getElementById('countCashback').textContent = allDeals.filter(d => d.type === 'cashback').length;
       document.getElementById('countNeu').textContent = allDeals.filter(d => d.isNew).length;
@@ -428,9 +526,8 @@
     function filterDeals() {
       let filtered = [...allDeals];
       
-      // Type filter
       if (currentType === 'gratis') {
-        filtered = filtered.filter(d => d.type === 'gratis');
+        filtered = filtered.filter(d => d.type === 'gratis' || d.type === 'testabo');
       } else if (currentType === 'rabatt') {
         filtered = filtered.filter(d => d.type === 'rabatt');
       } else if (currentType === 'cashback') {
@@ -439,18 +536,16 @@
         filtered = filtered.filter(d => d.isNew);
       }
       
-      // Category filter
       if (currentCategory !== 'alle') {
         filtered = filtered.filter(d => d.category === currentCategory);
       }
       
-      // Search filter
       if (searchQuery) {
-        const query = searchQuery.toLowerCase();
+        const q = searchQuery.toLowerCase();
         filtered = filtered.filter(d => 
-          d.title?.toLowerCase().includes(query) ||
-          d.description?.toLowerCase().includes(query) ||
-          d.brand?.toLowerCase().includes(query)
+          d.title?.toLowerCase().includes(q) ||
+          d.description?.toLowerCase().includes(q) ||
+          d.brand?.toLowerCase().includes(q)
         );
       }
       
@@ -475,12 +570,17 @@
       }
       
       container.innerHTML = filtered.map(deal => {
-        const cardClass = deal.hot ? 'hot' : (deal.type === 'gratis' ? 'gratis' : 'rabatt');
-        const typeBadgeClass = deal.type === 'gratis' ? 'gratis' : (deal.type === 'cashback' ? 'cashback' : 'rabatt');
-        const typeBadgeText = deal.type === 'gratis' ? 'GRATIS' : (deal.type === 'cashback' ? 'CASHBACK' : 'RABATT');
+        const typeClass = `type-${deal.type || 'rabatt'}`;
+        const hotClass = deal.hot ? 'is-hot' : '';
+        const badgeType = deal.type === 'gratis' ? 'gratis' : 
+                         deal.type === 'cashback' ? 'cashback' : 
+                         deal.type === 'testabo' ? 'testabo' : 'rabatt';
+        const badgeText = deal.type === 'gratis' ? 'GRATIS' : 
+                         deal.type === 'cashback' ? 'CASHBACK' : 
+                         deal.type === 'testabo' ? 'TESTABO' : 'RABATT';
         
         return `
-          <div class="deal-card ${cardClass}">
+          <div class="deal-card ${typeClass} ${hotClass}">
             <div class="deal-header">
               <div class="deal-brand">
                 <div class="brand-logo">${deal.logo || '🎁'}</div>
@@ -490,9 +590,9 @@
                 </div>
               </div>
               <div class="deal-badges">
-                ${deal.hot ? '<span class="badge hot">HOT</span>' : ''}
-                ${deal.isNew ? '<span class="badge neu">NEU</span>' : ''}
-                <span class="badge ${typeBadgeClass}">${typeBadgeText}</span>
+                ${deal.hot ? '<span class="badge hot">🔥 HOT</span>' : ''}
+                ${deal.isNew ? '<span class="badge neu">✨ NEU</span>' : ''}
+                <span class="badge ${badgeType}">${badgeText}</span>
               </div>
             </div>
             <div class="deal-content">
@@ -504,7 +604,7 @@
                 <span>⏰</span>
                 <span>${deal.expires || 'Unbegrenzt'}</span>
               </div>
-              <a href="${deal.url || '#'}" target="_blank" class="deal-link">
+              <a href="${deal.url || '#'}" target="_blank" rel="noopener" class="deal-link">
                 Zum Deal →
               </a>
             </div>
@@ -519,10 +619,10 @@
       if (!btn) return;
       
       document.querySelectorAll('.type-btn').forEach(b => {
-        b.classList.remove('active', 'primary');
+        b.classList.remove('primary');
         b.classList.add('secondary');
       });
-      btn.classList.add('active', 'primary');
+      btn.classList.add('primary');
       btn.classList.remove('secondary');
       
       currentType = btn.dataset.type;
@@ -545,11 +645,36 @@
       renderDeals();
     });
 
+    // Install Banner Logic
+    function showInstallBanner() {
+      const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+      const dismissed = localStorage.getItem('installDismissed');
+      
+      if (!isStandalone && !dismissed && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        document.getElementById('installBanner').classList.add('show');
+      }
+    }
+
+    function hideInstallBanner() {
+      document.getElementById('installBanner').classList.remove('show');
+      localStorage.setItem('installDismissed', 'true');
+    }
+
+    function showInstallInstructions() {
+      alert('So installierst du FreeFinder:\n\n1. Tippe auf das Teilen-Symbol (□↑)\n2. Scrolle runter zu "Zum Home-Bildschirm"\n3. Tippe auf "Hinzufügen"\n\nFertig! 🎉');
+    }
+
     // Init
     loadDeals();
+    showInstallBanner();
     
-    // Auto-refresh every 5 minutes
+    // Auto-refresh
     setInterval(loadDeals, 5 * 60 * 1000);
+
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
   </script>
 </body>
 </html>
