@@ -176,14 +176,24 @@ const SOURCES = [
 // ============================================
 
 const BASE_DEALS = [
-  // ========== AKTUELL HOT - JÄNNER 2026 ==========
+  // ========== 🔥 TOP DEALS - DIE BESTEN ZUERST ==========
+  { id: "top-1", brand: "OMV VIVA", logo: "⛽", title: "Gratis Getränk für nur 1 Ö!", description: "Winterdrink (Cinnamon Latte oder Toffee Latte) für nur 1 jö Punkt! Fast geschenkt!", type: "gratis", badge: "limited", category: "kaffee", source: "jö App", url: "https://www.joe-club.at", expires: "Winter 2026", distance: "OMV Tankstellen", hot: true, isNew: true, priority: 1 },
+  { id: "top-2", brand: "IKEA", logo: "🪑", title: "Gratis Kaffee & Tee UNLIMITIERT", description: "IKEA Family Mitglieder: Unbegrenzt Gratis-Kaffee oder Tee! Einfach Karte zeigen.", type: "gratis", badge: "daily", category: "kaffee", source: "IKEA Family", url: "https://www.ikea.at", expires: "Unbegrenzt", distance: "IKEA Standorte", hot: true, priority: 1 },
+  { id: "top-3", brand: "Wiener Deewan", logo: "🍛", title: "Zahl was du willst!", description: "Pakistanisches Buffet - DU bestimmst den Preis! Auch €0 ist okay. Studenten-Geheimtipp!", type: "gratis", badge: "daily", category: "essen", source: "Wiener Deewan", url: "https://www.deewan.at", expires: "Täglich", distance: "9. Bezirk", hot: true, priority: 1 },
+  { id: "top-4", brand: "McDonald's", logo: "🍟", title: "5x Gratis Kaffee pro Monat", description: "Nach jedem Einkauf Feedback in der App = Gratis Kaffee oder Cola!", type: "gratis", badge: "daily", category: "kaffee", source: "McDonald's App", url: "https://www.mcdonalds.at", expires: "5x/Monat", distance: "Überall", hot: true, priority: 1 },
+  { id: "top-5", brand: "Verein MUT", logo: "🥫", title: "Gratis Lebensmittel abholen", description: "Gerettete Lebensmittel komplett kostenlos! Mo-Fr 10-15:30, keine Fragen.", type: "gratis", badge: "daily", category: "supermarkt", source: "Verein MUT", url: "https://verein-mut.eu", expires: "Mo-Fr", distance: "4. Bezirk", hot: true, priority: 1 },
+  { id: "top-6", brand: "Foodsharing", logo: "🍏", title: "Gratis Lebensmittel retten", description: "Übriggebliebene Lebensmittel von Supermärkten gratis abholen!", type: "gratis", badge: "daily", category: "supermarkt", source: "Foodsharing", url: "https://foodsharing.at", expires: "Täglich", distance: "Überall", hot: true, priority: 1 },
+  { id: "top-7", brand: "Too Good To Go", logo: "🥡", title: "Essen retten ab €3,99", description: "Überraschungssackerl von Restaurants & Bäckereien - Wert €12+ für nur €3,99!", type: "rabatt", badge: "daily", category: "essen", source: "Too Good To Go", url: "https://www.toogoodtogo.at", expires: "Täglich", distance: "Überall", hot: true, priority: 2 },
+  { id: "top-8", brand: "dm Friseur", logo: "💇", title: "Gratis Kinderhaarschnitt", description: "Kinder unter 10: Komplett gratis Haarschnitt beim dm Friseur!", type: "gratis", badge: "instore", category: "beauty", source: "dm", url: "https://www.dm.at", expires: "Mit Termin", distance: "dm Friseur", hot: true, priority: 1 },
+  
+  // ========== GRATIS MUSEEN (unter 19 Jahre) ==========
+  { id: "top-9", brand: "Alle Bundesmuseen", logo: "🏛️", title: "Gratis Eintritt unter 19!", description: "Belvedere, KHM, NHM, Albertina, Mumok, MAK - ALLE gratis für unter 19-Jährige!", type: "gratis", badge: "daily", category: "wien", source: "Bundesmuseen", url: "https://www.bundesmuseen.at", expires: "Unter 19", distance: "Wien", hot: true, priority: 1 },
+  
+  // ========== AKTUELL - JÄNNER 2026 ==========
   { id: "hot-2", brand: "Haus der Geschichte", logo: "🏛️", title: "Gratis jeden Donnerstag 18-20h", description: "Jeden Donnerstagabend kostenloser Eintritt ins hdgö!", type: "gratis", badge: "daily", category: "wien", source: "Vienna.at", url: "https://www.hdgoe.at", expires: "Jeden Donnerstag", distance: "1. Bezirk", hot: true, isNew: true, validUntil: "2099-12-31" },
   { id: "hot-3", brand: "ÖBB Veganuary", logo: "🚂", title: "Vegan Vurstsemmel €2,90", description: "Im Jänner: Vegane Vurstsemmel + Gewinnspiele mit Klimaticket!", type: "rabatt", badge: "limited", category: "essen", source: "1000things", url: "https://www.oebb.at", expires: "Bis 31.01.2026", distance: "Hauptbahnhof", hot: true, isNew: true, validUntil: "2026-01-31" },
-  { id: "hot-4", brand: "Veganer Würstelstand", logo: "🌭", title: "Komplett veganer Würstelstand", description: "Mike Lanner: Pfeilgasse & U4 Spittelau - im Jänner nur pflanzlich!", type: "rabatt", badge: "limited", category: "essen", source: "1000things", url: "https://www.1000things.at", expires: "Bis 31.01.2026", distance: "8./19. Bezirk", hot: true, isNew: true, validUntil: "2026-01-31" },
   
-  // ========== GRATIS KAFFEE (20+) ==========
-  { id: "kaffee-1", brand: "McDonald's", logo: "🍟", title: "Gratis Kaffee nach Feedback", description: "Nach jedem Einkauf Feedback geben = Gratis Kaffee oder Cola. Bis zu 5x pro Monat!", type: "gratis", badge: "daily", category: "kaffee", source: "McDonald's App", url: "https://www.mcdonalds.at", expires: "5x/Monat", distance: "Überall", hot: true },
-  { id: "kaffee-2", brand: "IKEA", logo: "🪑", title: "Gratis Kaffee & Tee unlimitiert", description: "IKEA Family Mitglieder: Unbegrenzt Gratis-Kaffee oder Tee im Restaurant!", type: "gratis", badge: "instore", category: "kaffee", source: "IKEA Family", url: "https://www.ikea.at", expires: "Unbegrenzt", distance: "IKEA", hot: true },
+  // ========== GRATIS KAFFEE ==========
   { id: "kaffee-3", brand: "Starbucks", logo: "☕", title: "Gratis Geburtstagsgetränk", description: "Starbucks Rewards: Am Geburtstag ein Gratis-Getränk nach Wahl!", type: "gratis", badge: "instore", category: "kaffee", source: "Starbucks", url: "https://www.starbucks.at", expires: "Am Geburtstag", distance: "Überall", hot: true },
   { id: "kaffee-4", brand: "Tchibo", logo: "☕", title: "Gratis Kaffee beim Einkauf", description: "Bei jedem Einkauf im Tchibo Shop gibt's einen Gratis-Kaffee dazu!", type: "gratis", badge: "instore", category: "kaffee", source: "Tchibo", url: "https://www.tchibo.at", expires: "Unbegrenzt", distance: "Tchibo", hot: true },
   { id: "kaffee-5", brand: "Segafredo", logo: "☕", title: "10. Kaffee gratis", description: "Stempelkarte sammeln: Jeder 10. Kaffee ist gratis!", type: "gratis", badge: "instore", category: "kaffee", source: "Segafredo", url: "https://www.segafredo.at", expires: "Unbegrenzt", distance: "Segafredo", hot: false },
@@ -626,12 +636,31 @@ async function scrapeAllSources() {
     }
   }
   
-  // Sortiere: Hot & Neu zuerst
+  // Sortiere: Priority > Gratis > Hot > Neu > Rest
   uniqueDeals.sort((a, b) => {
-    if (a.isNew && !b.isNew) return -1;
-    if (!a.isNew && b.isNew) return 1;
+    // 1. Priority (niedrigere Zahl = höher)
+    const prioA = a.priority || 99;
+    const prioB = b.priority || 99;
+    if (prioA !== prioB) return prioA - prioB;
+    
+    // 2. Echte Gratis-Deals (ohne viel Aufwand)
+    const isRealFreeA = a.type === 'gratis' && !a.expires?.includes('Geburtstag') && !a.expires?.includes('10.');
+    const isRealFreeB = b.type === 'gratis' && !b.expires?.includes('Geburtstag') && !b.expires?.includes('10.');
+    if (isRealFreeA && !isRealFreeB) return -1;
+    if (!isRealFreeA && isRealFreeB) return 1;
+    
+    // 3. Hot Deals
     if (a.hot && !b.hot) return -1;
     if (!a.hot && b.hot) return 1;
+    
+    // 4. Neue Deals
+    if (a.isNew && !b.isNew) return -1;
+    if (!a.isNew && b.isNew) return 1;
+    
+    // 5. Gratis vor Rabatt
+    if (a.type === 'gratis' && b.type !== 'gratis') return -1;
+    if (a.type !== 'gratis' && b.type === 'gratis') return 1;
+    
     return 0;
   });
   
