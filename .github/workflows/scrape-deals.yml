@@ -21,7 +21,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
       
       - uses: actions/setup-node@v4
         with:
@@ -34,34 +33,15 @@ jobs:
       - name: Move to docs
         run: mv deals.json docs/deals.json 2>/dev/null || true
       
-      - name: Commit & Push
-        run: |
-          git config user.email "bot@github.com"
-          git config user.name "Deal Bot"
-          git add docs/deals.json
-          
-          # Only proceed if there are changes
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          
-          # Commit changes
-          git commit -m "🔄 $(date +'%H:%M') - Deals Update"
-          
-          # Pull latest changes and rebase our commit on top
-          git pull --rebase origin main
-          
-          # Push with retry logic
-          for i in 1 2 3; do
-            if git push; then
-              echo "Successfully pushed changes"
-              exit 0
-            fi
-            echo "Push failed, attempt $i of 3"
-            git pull --rebase origin main
-            sleep 2
-          done
-          
-          # Final attempt with force-with-lease
-          git push --force-with-lease
+      - name: Commit & Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: '🔄 Deals Update - ${{ github.run_number }}'
+          file_pattern: 'docs/deals.json'
+          commit_user_name: Deal Bot
+          commit_user_email: bot@github.com
+          skip_dirty_check: false
+          skip_fetch: false
+          skip_checkout: false
+          disable_globbing: false
+          create_branch: false
