@@ -43,3 +43,5 @@ self.addEventListener('fetch', (e) => {
     );
   }
 });
+git pull --rebase origin main || true
+git push || git push --force-with-lease
