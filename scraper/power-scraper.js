@@ -397,6 +397,95 @@ function extractTag(xml, tag) {
   return match ? match[1].replace(/<[^>]*>/g, '').trim() : '';
 }
 
+// ============================================
+// INTELLIGENTE KATEGORISIERUNG
+// ============================================
+
+function detectCategory(text) {
+  const t = text.toLowerCase();
+  
+  // Technik - ZUERST prüfen damit Apple/iPhone nicht in andere Kategorien fallen
+  if (/iphone|ipad|macbook|apple\s?watch|airpod|samsung|galaxy|huawei|xiaomi|handy|smartphone|laptop|tablet|computer|pc|gaming|playstation|ps5|xbox|nintendo|switch|fernseher|tv|kopfhörer|headphone|monitor|drucker|kamera|gopro/i.test(t)) {
+    return 'technik';
+  }
+  
+  // Werkzeug/Baumarkt -> shopping (nicht essen!)
+  if (/pattex|klebeband|werkzeug|bohrer|schrauben|baumarkt|obi|hornbach|bauhaus|ikea|möbel|regal|lampe|tisch|stuhl|bett|couch|sofa/i.test(t)) {
+    return 'shopping';
+  }
+  
+  // Kaffee
+  if (/\bkaffee\b|coffee|latte|cappuccino|espresso|café|cafe|starbucks|mccafé|barista|melange/i.test(t)) {
+    return 'kaffee';
+  }
+  
+  // Essen - spezifische Food Keywords
+  if (/pizza|kebab|döner|burger|essen\s|restaurant|lokal|gastro|grill|sushi|pasta|schnitzel|würstel|bäcker|konditor|torte|kuchen|menü|buffet|brunch|frühstück|mittagessen|abendessen|wok|asia|mexikan|indisch|thai|vietn|lieferung|delivery|mjam|lieferando/i.test(t)) {
+    return 'essen';
+  }
+  
+  // Supermarkt
+  if (/billa|spar|interspar|lidl|hofer|penny|supermarkt|lebensmittel|unimarkt|merkur|nah.{0,3}frisch|aktion.*woche/i.test(t)) {
+    return 'supermarkt';
+  }
+  
+  // Beauty
+  if (/dm\s|bipa|douglas|sephora|beauty|kosmetik|friseur|frisör|haarschnitt|nagel|make.?up|parfum|parfüm|creme|shampoo|duschgel|körperpflege|hautpflege|salon|wellness|spa|massage|gesichtspflege/i.test(t)) {
+    return 'beauty';
+  }
+  
+  // Streaming
+  if (/netflix|spotify|disney\+|amazon\s?prime|youtube\s?premium|gaming|abo|subscription|stream|dazn|sky/i.test(t)) {
+    return 'streaming';
+  }
+  
+  // Mode
+  if (/h&m|zara|zalando|fashion|mode|kleidung|schuhe|sneaker|jacke|hose|shirt|kleid|textil|bekleidung|outfit|nike|adidas|puma|c&a|peek|primark/i.test(t)) {
+    return 'mode';
+  }
+  
+  // Mobilität
+  if (/wiener\s?linien|öbb|zug|bahn|bus\s|taxi|uber|bolt|scooter|e-scooter|rad|fahrrad|auto|tanken|tankstelle|omv|shell|bp|klimaticket|jahreskarte/i.test(t)) {
+    return 'mobilität';
+  }
+  
+  // Finanzen
+  if (/bank|konto|kreditkarte|versicherung|kredit|sparkasse|erste\s?bank|raiffeisen|bawag|n26|finanz|crypto|bitcoin/i.test(t)) {
+    return 'finanzen';
+  }
+  
+  // Wien (Kultur, Events)
+  if (/museum|ausstellung|kultur|theater|oper|konzert|event|wien\s|vienna|eintritt|kino|film|show|festival/i.test(t)) {
+    return 'wien';
+  }
+  
+  // Default: shopping für unbekannte Kategorien
+  return 'shopping';
+}
+
+// Prüfe ob Deal relevant ist für FreeFinder
+function isRelevantDeal(title, description) {
+  const text = (title + ' ' + description).toLowerCase();
+  
+  // Ausschließen: Reine Preisvergleiche ohne echten Deal
+  if (/preisvergleich.*\d{3,}€|mylem|idealo|geizhals/i.test(text)) {
+    if (!/gratis|kostenlos|geschenkt|1\+1|2\+1|50%|60%|70%|80%|90%/i.test(text)) {
+      return false;
+    }
+  }
+  
+  // Ausschließen: Sehr teure Produkte ohne echten Rabatt
+  const priceMatch = text.match(/(\d{3,4})[,.]?\d{0,2}\s*€/);
+  if (priceMatch) {
+    const price = parseInt(priceMatch[1]);
+    if (price > 300 && !/gratis|kostenlos|geschenkt|50%|60%|70%|80%|90%|stark reduziert/i.test(text)) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
 function parseRSS(xml, source) {
   const deals = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
@@ -422,19 +511,16 @@ function parseRSS(xml, source) {
     
     if (!isGratis && !isDeal && !isNeueroffnung) continue;
     
+    // Prüfe ob Deal wirklich relevant ist (keine teuren Preisvergleiche)
+    if (!isRelevantDeal(title, description || '')) continue;
+    
     // Bestimme Badge
     let badge = 'daily';
     if (isGratis) badge = 'gratis';
     else if (isNeueroffnung) badge = 'limited';
     
-    // Bestimme Kategorie
-    let category = 'wien';
-    if (/kaffee|coffee|latte|cappuccino/i.test(fullText)) category = 'kaffee';
-    else if (/pizza|kebab|döner|burger|essen|restaurant|lokal/i.test(fullText)) category = 'essen';
-    else if (/billa|spar|lidl|hofer|supermarkt|lebensmittel/i.test(fullText)) category = 'supermarkt';
-    else if (/dm|bipa|douglas|beauty|kosmetik/i.test(fullText)) category = 'drogerie';
-    else if (/netflix|spotify|disney|stream|gaming/i.test(fullText)) category = 'streaming';
-    else if (/museum|ausstellung|kultur|theater/i.test(fullText)) category = 'wien';
+    // Bestimme Kategorie mit intelligenter Erkennung
+    const category = detectCategory(fullText);
     
     // Extrahiere Brand
     let brand = source.brand;
@@ -513,6 +599,12 @@ function extractDealsFromHTML(html, source) {
           continue;
         }
         
+        // Prüfe ob Deal relevant ist (keine teuren Preisvergleiche)
+        if (!isRelevantDeal(context, '')) continue;
+        
+        // Intelligente Kategorisierung basierend auf Inhalt
+        const category = detectCategory(context);
+        
         deals.push({
           id: `html-${source.brand}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
           brand: source.brand,
@@ -521,7 +613,7 @@ function extractDealsFromHTML(html, source) {
           description: context.substring(0, 120),
           type: isGratis ? 'gratis' : 'rabatt',
           badge: isGratis ? 'gratis' : 'limited',
-          category: source.category,
+          category: category,
           source: source.name,
           url: source.url,
           expires: 'Begrenzt',
