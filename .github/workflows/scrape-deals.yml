@@ -15,6 +15,9 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -31,5 +34,6 @@ jobs:
           git config user.email "bot@github.com"
           git config user.name "Deal Bot"
           git add docs/deals.json
-          git diff --staged --quiet || git commit -m "🔄 $(date +'%H:%M') - $(cat docs/deals.json | grep -o '"totalDeals":[0-9]*' | grep -o '[0-9]*') Deals"
-          git push
+          git diff --staged --quiet || git commit -m "🔄 $(date +'%H:%M') - Deals Update"
+          git pull --rebase origin main || true
+          git push || git push --force-with-lease
