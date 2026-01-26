@@ -223,6 +223,23 @@ function fetchURL(url, timeout = 8000) {
 // RSS PARSER
 // ============================================
 
+// Bereinigt Text von HTML, Links und unerwünschten Zeichen
+function cleanText(text) {
+  if (!text) return '';
+  return text
+    .replace(/<a[^>]*>.*?<\/a>/gi, '')           // Entferne komplette <a> Tags mit Inhalt
+    .replace(/<[^>]*>/g, '')                      // Entferne alle anderen HTML-Tags
+    .replace(/&lt;a\s+href[^&]*&gt;/gi, '')      // Entferne escaped <a href...>
+    .replace(/&lt;[^&]*&gt;/g, '')               // Entferne alle escaped HTML-Tags
+    .replace(/https?:\/\/[^\s<>"]+/gi, '')       // Entferne alle URLs
+    .replace(/&nbsp;/g, ' ')                      // Ersetze &nbsp;
+    .replace(/&amp;/g, '&')                       // Ersetze &amp;
+    .replace(/&quot;/g, '"')                      // Ersetze &quot;
+    .replace(/&#\d+;/g, '')                       // Entferne HTML-Entities
+    .replace(/\s+/g, ' ')                         // Mehrfache Leerzeichen zusammenfassen
+    .trim();
+}
+
 function parseRSS(xml, source) {
   const deals = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
@@ -230,10 +247,17 @@ function parseRSS(xml, source) {
   
   while ((match = itemRegex.exec(xml)) !== null) {
     const item = match[1];
-    const title = (item.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/i) || [])[1] || '';
+    const titleRaw = (item.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/i) || [])[1] || '';
     const link = (item.match(/<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/link>/i) || [])[1] || '';
-    const desc = (item.match(/<description>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/description>/is) || [])[1] || '';
+    const descRaw = (item.match(/<description>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/description>/is) || [])[1] || '';
     const pubDate = (item.match(/<pubDate>(.*?)<\/pubDate>/i) || [])[1] || '';
+    
+    // Bereinige Title und Description
+    const title = cleanText(titleRaw);
+    const desc = cleanText(descRaw);
+    
+    // Überspringe wenn nach Bereinigung zu kurz
+    if (title.length < 10) continue;
     
     const text = `${title} ${desc}`.toLowerCase();
     const isGratis = GRATIS_KEYWORDS.some(k => text.includes(k));
@@ -246,12 +270,18 @@ function parseRSS(xml, source) {
       if (isFitness) category = 'fitness';
       if (isReisen) category = 'reisen';
       
+      // Erstelle eine saubere Beschreibung
+      let cleanDesc = desc.substring(0, 120);
+      if (cleanDesc.length < 20) {
+        cleanDesc = `Aktuelles Angebot: ${title}`;
+      }
+      
       deals.push({
         id: `rss-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
         brand: source.brand,
         logo: source.logo,
-        title: title.replace(/<[^>]*>/g, '').substring(0, 80),
-        description: desc.replace(/<[^>]*>/g, '').substring(0, 150),
+        title: title.substring(0, 80),
+        description: cleanDesc,
         type: isGratis ? 'gratis' : 'rabatt',
         category: category,
         source: source.name,
@@ -260,7 +290,8 @@ function parseRSS(xml, source) {
         distance: 'Wien',
         hot: isGratis,
         isNew: true,
-        pubDate: pubDate
+        pubDate: pubDate,
+        votes: 0
       });
     }
   }
