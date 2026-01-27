@@ -12,6 +12,48 @@ import fs from 'fs';
 // ============================================
 
 const SOURCES = [
+  // ========== WIEN EVENTS & KULTUR ==========
+  { name: 'Wien Events', url: 'https://events.wien.info/de/', type: 'html', brand: 'Wien Events', logo: '🎭', category: 'wien' },
+  { name: 'Wien Kulturkalender', url: 'https://www.wien.gv.at/kultur-freizeit/kalender.html', type: 'html', brand: 'Wien.gv.at', logo: '🏛️', category: 'wien' },
+  { name: 'Wien Konzerte', url: 'https://www.wien.gv.at/kultur-freizeit/musik.html', type: 'html', brand: 'Wien Musik', logo: '🎵', category: 'wien' },
+  { name: 'Rathausplatz Events', url: 'https://www.filmfestival-rathausplatz.at/', type: 'html', brand: 'Rathausplatz', logo: '🎬', category: 'wien' },
+  { name: 'Donauinselfest', url: 'https://donauinselfest.at/', type: 'html', brand: 'Donauinselfest', logo: '🎸', category: 'wien' },
+  { name: 'Museumsquartier', url: 'https://www.mqw.at/programm/', type: 'html', brand: 'MQ Wien', logo: '🏛️', category: 'wien' },
+  { name: 'Lange Nacht der Museen', url: 'https://langenacht.orf.at/', type: 'html', brand: 'ORF', logo: '🌙', category: 'wien' },
+  { name: 'Wien Straßenfeste', url: 'https://www.stadt-wien.at/freizeit/feste-maerkte.html', type: 'html', brand: 'Stadt Wien', logo: '🎪', category: 'wien' },
+  
+  // ========== FOODSHARING & LEBENSMITTEL RETTEN ==========
+  { name: 'Foodsharing Wien', url: 'https://foodsharing.at/', type: 'html', brand: 'Foodsharing', logo: '🍏', category: 'essen' },
+  { name: 'Foodsharing Fairteiler', url: 'https://foodsharing.at/karte', type: 'html', brand: 'Fairteiler', logo: '📍', category: 'essen' },
+  { name: 'Too Good To Go', url: 'https://www.toogoodtogo.com/at', type: 'html', brand: 'TGTG', logo: '🥡', category: 'essen' },
+  { name: 'Wiener Tafel', url: 'https://www.wienertafel.at/', type: 'html', brand: 'Wiener Tafel', logo: '🥫', category: 'essen' },
+  
+  // ========== GRATIS PROBEN & FREEBIES ==========
+  { name: 'Produkttester', url: 'https://www.produkttester.com/', type: 'html', brand: 'Produkttester', logo: '🎁', category: 'gratis' },
+  { name: 'Gratisproben', url: 'https://www.gratisproben.net/oesterreich/', type: 'html', brand: 'Gratisproben', logo: '🆓', category: 'gratis' },
+  { name: 'Sparhamster Gratis', url: 'https://www.sparhamster.at/gratis/', type: 'html', brand: 'Sparhamster', logo: '🐹', category: 'gratis' },
+  { name: 'Schnäppchenfee', url: 'https://www.schnaeppchenfee.at/?s=gratis', type: 'html', brand: 'Schnäppchenfee', logo: '🧚', category: 'gratis' },
+  
+  // ========== MESSEN & EVENTS MIT FREEBIES ==========
+  { name: 'Reed Messen Wien', url: 'https://www.messe.at/de/veranstaltungen/', type: 'html', brand: 'Messe Wien', logo: '🏢', category: 'wien' },
+  { name: 'Wiener Messen', url: 'https://www.wienermessen.at/', type: 'html', brand: 'Wiener Messen', logo: '📅', category: 'wien' },
+  { name: 'Vegan Planet', url: 'https://www.veganplanet.at/', type: 'html', brand: 'Vegan Planet', logo: '🌱', category: 'essen' },
+  
+  // ========== STORE ERÖFFNUNGEN ==========
+  { name: 'Google News Eröffnung Wien', url: 'https://news.google.com/rss/search?q=Wien+Er%C3%B6ffnung+Neuer%C3%B6ffnung+gratis&hl=de&gl=AT', type: 'rss', brand: 'Eröffnungen', logo: '🆕', category: 'shopping' },
+  { name: 'Google News Store Opening', url: 'https://news.google.com/rss/search?q=Wien+Store+Opening+Geschenke&hl=de&gl=AT', type: 'rss', brand: 'Openings', logo: '🎉', category: 'shopping' },
+  
+  // ========== ONLINE MARKTPLÄTZE ==========
+  { name: 'Willhaben Gratis', url: 'https://www.willhaben.at/iad/kaufen-und-verkaufen/gratis', type: 'html', brand: 'Willhaben', logo: '🏷️', category: 'shopping' },
+  { name: 'Facebook Marketplace', url: 'https://www.facebook.com/marketplace/wien/free/', type: 'html', brand: 'FB Marketplace', logo: '📘', category: 'shopping' },
+  { name: 'Shpock Gratis', url: 'https://www.shpock.com/at/q/gratis', type: 'html', brand: 'Shpock', logo: '📱', category: 'shopping' },
+  
+  // ========== SOCIAL MEDIA DEALS ==========
+  { name: 'Reddit Wien Gratis', url: 'https://www.reddit.com/r/wien/search.rss?q=gratis+OR+kostenlos&restrict_sr=on&sort=new', type: 'rss', brand: 'Reddit Wien', logo: '🔴', category: 'wien' },
+  { name: 'Google News Sampling Wien', url: 'https://news.google.com/rss/search?q=Wien+Sampling+Aktion+Promotion+gratis&hl=de&gl=AT', type: 'rss', brand: 'Promotions', logo: '🎁', category: 'gratis' },
+  { name: 'Google News Messe Wien Gratis', url: 'https://news.google.com/rss/search?q=Messe+Wien+gratis+Eintritt&hl=de&gl=AT', type: 'rss', brand: 'Messe News', logo: '🏢', category: 'wien' },
+  
+  // ========== ORIGINAL SOURCES ==========
   // NEWS & LIFESTYLE
   { name: 'Vienna.at', url: 'https://www.vienna.at/', type: 'html', brand: 'Vienna.at', logo: '📰', category: 'wien' },
   { name: 'MeinBezirk Wien', url: 'https://www.meinbezirk.at/wien', type: 'html', brand: 'MeinBezirk', logo: '📰', category: 'wien' },
@@ -104,6 +146,37 @@ const BASE_DEALS = [
   { id: "top-8", brand: "dm Friseur", logo: "💇", title: "Gratis Kinderhaarschnitt", description: "💇 Kinder unter 10: Komplett gratis Haarschnitt", type: "gratis", category: "beauty", source: "dm Friseurstudio", url: "https://www.dm.at/services/friseurstudio", expires: "Mit Termin", distance: "dm Friseurstudios Wien", hot: true, priority: 1, votes: 0 },
   { id: "top-9", brand: "Bundesmuseen", logo: "🏛️", title: "Gratis Eintritt unter 19!", description: "🆓 Belvedere, KHM, NHM, Albertina - ALLE gratis unter 19!", type: "gratis", category: "wien", source: "Bundesmuseen", url: "https://www.bundesmuseen.at/freier-eintritt/", expires: "Für unter 19", distance: "Alle Bundesmuseen", hot: true, priority: 1, votes: 0 },
   { id: "top-7", brand: "Too Good To Go", logo: "🥡", title: "Essen retten ab €3,99", description: "🍔 Überraschungssackerl - Wert €12+ für nur €3,99", type: "rabatt", category: "essen", source: "Too Good To Go App", url: "https://www.toogoodtogo.com/at", expires: "Täglich neu", distance: "500+ Partner Wien", hot: true, priority: 2, votes: 0 },
+
+  // ========== WIEN EVENTS & KULTUR - NEU! ==========
+  { id: "event-1", brand: "Film Festival Rathausplatz", logo: "🎬", title: "Gratis Open-Air Kino", description: "🎬 Jeden Sommer: Gratis Filme & Konzerte am Rathausplatz!", type: "gratis", category: "wien", source: "Wien Kultur", url: "https://www.filmfestival-rathausplatz.at/", expires: "Juli-September", distance: "Rathausplatz, 1010", hot: true, isNew: true, priority: 1, votes: 0 },
+  { id: "event-2", brand: "Donauinselfest", logo: "🎸", title: "Gratis Open-Air Festival", description: "🎸 Europas größtes Gratis-Musikfestival! 3 Tage, 0€!", type: "gratis", category: "wien", source: "Donauinselfest", url: "https://donauinselfest.at/", expires: "Juni 2026", distance: "Donauinsel", hot: true, isNew: true, priority: 1, votes: 0 },
+  { id: "event-3", brand: "Lange Nacht der Museen", logo: "🌙", title: "Alle Museen 1 Ticket", description: "🏛️ 1 Nacht, 100+ Museen, 1 günstiges Ticket!", type: "rabatt", category: "wien", source: "ORF", url: "https://langenacht.orf.at/", expires: "Oktober 2026", distance: "Ganz Wien", hot: true, votes: 0 },
+  { id: "event-4", brand: "Wiener Festwochen", logo: "🎭", title: "Gratis Eröffnung", description: "🎭 Gratis Eröffnungskonzert am Rathausplatz!", type: "gratis", category: "wien", source: "Festwochen", url: "https://www.festwochen.at/", expires: "Mai 2026", distance: "Rathausplatz, 1010", hot: true, votes: 0 },
+  { id: "event-5", brand: "Museumsquartier", logo: "🏛️", title: "Gratis Führungen", description: "🏛️ Regelmäßig kostenlose Führungen im MQ!", type: "gratis", category: "wien", source: "MQ Wien", url: "https://www.mqw.at/programm/", expires: "Laufend", distance: "Museumsquartier, 1070", hot: true, votes: 0 },
+  { id: "event-6", brand: "Wien Silvesterpfad", logo: "🎆", title: "Gratis Silvesterparty", description: "🎆 Gratis Open-Air Silvester in der Wiener Innenstadt!", type: "gratis", category: "wien", source: "Wien Tourismus", url: "https://www.wien.info/de/musik-buehne-events/silvester", expires: "31. Dezember", distance: "Innere Stadt, 1010", hot: true, votes: 0 },
+  { id: "event-7", brand: "Straßenfeste Wien", logo: "🎪", title: "Gratis Straßenfeste", description: "🎪 Bezirksfeste, Grätzlfeste - gratis Unterhaltung!", type: "gratis", category: "wien", source: "Stadt Wien", url: "https://www.wien.gv.at/freizeit/feste/", expires: "Ganzjährig", distance: "Verschiedene Bezirke", hot: true, votes: 0 },
+
+  // ========== FOODSHARING & LEBENSMITTEL - NEU! ==========
+  { id: "food-1", brand: "Foodsharing Fairteiler", logo: "📍", title: "Gratis Lebensmittel 24/7", description: "🍏 Offene Kühlschränke in ganz Wien - nimm was du brauchst!", type: "gratis", category: "essen", source: "Foodsharing", url: "https://foodsharing.at/karte", expires: "Immer offen", distance: "50+ Fairteiler Wien", hot: true, isNew: true, priority: 1, votes: 0 },
+  { id: "food-2", brand: "Wiener Tafel", logo: "🥫", title: "Gratis Lebensmittel", description: "🥫 Lebensmittelhilfe für Bedürftige - komplett kostenlos!", type: "gratis", category: "essen", source: "Wiener Tafel", url: "https://www.wienertafel.at/", expires: "Für Bedürftige", distance: "Wien", hot: true, votes: 0 },
+  { id: "food-3", brand: "SoMa Märkte", logo: "🛒", title: "Lebensmittel -70%", description: "🛒 Soziale Märkte: Lebensmittel bis 70% günstiger!", type: "rabatt", category: "supermarkt", source: "SoMa", url: "https://www.soma.or.at/", expires: "Mit SoMa-Ausweis", distance: "Mehrere Standorte", hot: true, votes: 0 },
+
+  // ========== GRATIS PROBEN & FREEBIES - NEU! ==========
+  { id: "freebie-1", brand: "dm Gratisproben", logo: "🧴", title: "Gratis Kosmetikproben", description: "🧴 Bei dm oft Gratisproben von Marken mitnehmen!", type: "gratis", category: "beauty", source: "dm", url: "https://www.dm.at/", expires: "Solange Vorrat", distance: "Alle dm Filialen", hot: true, isNew: true, votes: 0 },
+  { id: "freebie-2", brand: "Sephora Proben", logo: "💄", title: "3 Gratis Samples", description: "💄 Bei jeder Online-Bestellung 3 Luxusproben gratis!", type: "gratis", category: "beauty", source: "Sephora", url: "https://www.sephora.at/", expires: "Bei Bestellung", distance: "Online", hot: true, isNew: true, votes: 0 },
+  { id: "freebie-3", brand: "Douglas Proben", logo: "💋", title: "Gratis Parfumproben", description: "💋 In Douglas Filialen Parfumproben kostenlos!", type: "gratis", category: "beauty", source: "Douglas", url: "https://www.douglas.at/", expires: "Im Store", distance: "Douglas Filialen", hot: true, votes: 0 },
+  { id: "freebie-4", brand: "Nespresso", logo: "☕", title: "Gratis Kaffee Tasting", description: "☕ Kostenlose Kaffeeverkostung in jeder Boutique!", type: "gratis", category: "kaffee", source: "Nespresso", url: "https://www.nespresso.com/at/", expires: "Im Store", distance: "Nespresso Boutiquen", hot: true, votes: 0 },
+  { id: "freebie-5", brand: "Tchibo Proben", logo: "☕", title: "Gratis Kaffeeproben", description: "☕ Neue Sorten oft als Gratisproben!", type: "gratis", category: "kaffee", source: "Tchibo", url: "https://www.tchibo.at/", expires: "Bei Aktionen", distance: "Tchibo Filialen", hot: true, votes: 0 },
+
+  // ========== MESSEN & SAMPLING EVENTS - NEU! ==========
+  { id: "messe-1", brand: "Vegan Planet Messe", logo: "🌱", title: "Gratis Proben & Verkostung", description: "🌱 Veganmesse Wien: Hunderte Gratisproben!", type: "gratis", category: "essen", source: "Vegan Planet", url: "https://www.veganplanet.at/", expires: "Herbst 2026", distance: "MQ Wien", hot: true, isNew: true, votes: 0 },
+  { id: "messe-2", brand: "Ferien-Messe Wien", logo: "✈️", title: "Gratis Reise-Goodies", description: "✈️ Gratis Reiseführer, Proben und Gewinnspiele!", type: "gratis", category: "reisen", source: "Messe Wien", url: "https://www.ferien-messe.at/", expires: "Jänner 2026", distance: "Messe Wien", hot: true, votes: 0 },
+  { id: "messe-3", brand: "Sampling Aktionen", logo: "🎁", title: "Gratis Produktproben", description: "🎁 In Shopping-Centern oft Sampling-Aktionen!", type: "gratis", category: "shopping", source: "Promotions", url: "https://www.scs.at/", expires: "Laufend", distance: "SCS, Donauzentrum, etc.", hot: true, votes: 0 },
+
+  // ========== ONLINE MARKTPLÄTZE GRATIS - NEU! ==========
+  { id: "market-1", brand: "Willhaben Gratis", logo: "🆓", title: "Gratis Abzugeben", description: "🆓 Menschen verschenken Dinge - komplett gratis!", type: "gratis", category: "shopping", source: "Willhaben", url: "https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz?sfId=742f4164-fd4a-4176-8be1-b5a0c86e4030&rows=30&isNavigation=true&keyword=gratis", expires: "Täglich neu", distance: "Wien & Umgebung", hot: true, isNew: true, priority: 1, votes: 0 },
+  { id: "market-2", brand: "Facebook Marketplace", logo: "📘", title: "Gratis Artikel", description: "📘 Kostenlose Artikel in deiner Nähe!", type: "gratis", category: "shopping", source: "Facebook", url: "https://www.facebook.com/marketplace/category/free/", expires: "Täglich neu", distance: "Wien", hot: true, votes: 0 },
+  { id: "market-3", brand: "Shpock Gratis", logo: "📱", title: "Verschenkt Artikel", description: "📱 Gratis-Kategorie: Leute verschenken Sachen!", type: "gratis", category: "shopping", source: "Shpock", url: "https://www.shpock.com/", expires: "Täglich neu", distance: "Wien", hot: true, votes: 0 },
 
   // ========== FITNESS - NEU! ==========
   { id: "fitness-1", brand: "FitInn", logo: "💪", title: "1 Woche gratis trainieren", description: "🏋️ 7 Tage kostenloses Probetraining in allen Studios!", type: "gratis", category: "fitness", source: "FitInn", url: "https://www.fitinn.at/probetraining", expires: "Für Neukunden", distance: "20+ Studios Wien", hot: true, isNew: true, priority: 1, votes: 0 },
