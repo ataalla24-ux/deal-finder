@@ -295,55 +295,74 @@ async function fetchGooglePlacesNewOpenings() {
   }
   
   const deals = [];
+  
+  // Verschiedene Suchbegriffe für Neueröffnungen
   const searchTerms = [
-    'neu eröffnet cafe wien',
-    'neueröffnung restaurant wien',
-    'new opening wien'
+    'neu eröffnet wien',
+    'neueröffnung wien',
+    'new opening vienna',
+    'grand opening wien',
+    'neu cafe wien',
+    'neues restaurant wien',
+    'recently opened vienna'
   ];
   
-  for (const term of searchTerms) {
+  // Auch nach spezifischen Typen suchen
+  const typeSearches = [
+    { query: 'cafe wien', type: 'cafe' },
+    { query: 'restaurant wien', type: 'restaurant' },
+    { query: 'bar wien', type: 'bar' },
+    { query: 'bakery wien', type: 'bakery' }
+  ];
+  
+  const foundPlaces = new Set(); // Duplikate vermeiden
+  
+  // 1. Suche nach "Neueröffnung" Keywords
+  for (const term of searchTerms.slice(0, 3)) { // Nur 3 um API-Kosten zu sparen
     try {
       const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(term)}&location=48.2082,16.3738&radius=15000&key=${GOOGLE_PLACES_API_KEY}&language=de`;
       const response = await fetchURL(url);
       
-      // Check if response is JSON
       if (response.trim().startsWith('<')) {
-        console.log(`⚠️  Google Places: HTML statt JSON - API Key ungültig?`);
+        console.log(`⚠️  Google Places: HTML statt JSON - API Key Problem`);
         return deals;
       }
       
       const data = JSON.parse(response);
       
-      // Check for API errors
-      if (data.status === 'REQUEST_DENIED') {
-        console.log(`⚠️  Google Places: ${data.error_message || 'Request denied'}`);
-        return deals;
-      }
-      
-      if (data.status === 'INVALID_REQUEST') {
-        console.log(`⚠️  Google Places: Ungültige Anfrage`);
-        return deals;
+      if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+        console.log(`⚠️  Google Places: ${data.status} - ${data.error_message || ''}`);
+        continue;
       }
       
       if (data.results) {
-        for (const place of data.results.slice(0, 3)) {
-          // Nur neue Orte (wenig Bewertungen = wahrscheinlich neu)
-          if (place.user_ratings_total && place.user_ratings_total < 50) {
+        for (const place of data.results) {
+          // Nur Orte mit WENIG Bewertungen = wahrscheinlich neu
+          const ratings = place.user_ratings_total || 0;
+          
+          if (ratings < 200 && !foundPlaces.has(place.place_id)) {
+            foundPlaces.add(place.place_id);
+            
+            const isVeryNew = ratings < 50;
+            const address = place.vicinity || place.formatted_address || 'Wien';
+            
             deals.push({
-              id: `places-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+              id: `places-${place.place_id.substring(0, 10)}`,
               brand: place.name,
-              logo: '🆕',
-              title: `Neueröffnung: ${place.name}`,
-              description: `${place.vicinity || place.formatted_address || 'Wien'}. Neu eröffnet - oft mit Eröffnungsangeboten!`,
+              logo: getPlaceLogo(place.types),
+              title: isVeryNew ? `🆕 NEU: ${place.name}` : `Entdeckt: ${place.name}`,
+              description: `${address}. ${isVeryNew ? 'Gerade erst eröffnet!' : 'Relativ neu!'} ${place.rating ? `⭐ ${place.rating}` : ''} (${ratings} Bewertungen) - Oft mit Eröffnungsangeboten!`,
               type: 'gratis',
-              category: 'shopping',
+              category: getPlaceCategory(place.types),
               source: 'Google Places',
               url: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`,
               expires: 'Eröffnungswochen',
-              distance: place.vicinity || 'Wien',
-              hot: true,
+              distance: extractDistrict(address),
+              hot: isVeryNew,
               isNew: true,
-              isApiDeal: true
+              isApiDeal: true,
+              votes: isVeryNew ? 10 : 5,
+              priority: isVeryNew ? 1 : 2
             });
           }
         }
@@ -353,138 +372,94 @@ async function fetchGooglePlacesNewOpenings() {
     }
   }
   
-  console.log(`📍 Google Places: ${deals.length} Neueröffnungen gefunden`);
+  console.log(`📍 Google Places: ${deals.length} potentielle Neueröffnungen gefunden`);
+  
+  // Details ausgeben
+  if (deals.length > 0) {
+    console.log('   Gefunden:');
+    deals.forEach(d => {
+      console.log(`   - ${d.brand} (${d.distance})`);
+    });
+  }
+  
   return deals;
 }
 
+// Hilfsfunktionen für Places API
+function getPlaceLogo(types) {
+  if (!types) return '🆕';
+  if (types.includes('cafe')) return '☕';
+  if (types.includes('restaurant')) return '🍽️';
+  if (types.includes('bar')) return '🍺';
+  if (types.includes('bakery')) return '🥐';
+  if (types.includes('store')) return '🛍️';
+  if (types.includes('gym')) return '💪';
+  return '🆕';
+}
+
+function getPlaceCategory(types) {
+  if (!types) return 'shopping';
+  if (types.includes('cafe')) return 'kaffee';
+  if (types.includes('restaurant')) return 'essen';
+  if (types.includes('bar')) return 'essen';
+  if (types.includes('bakery')) return 'essen';
+  if (types.includes('gym')) return 'fitness';
+  return 'shopping';
+}
+
+function extractDistrict(address) {
+  // Versuche Wiener Bezirk zu extrahieren (z.B. "1010 Wien" -> "1. Bezirk")
+  const match = address.match(/(\d{4})\s*Wien/);
+  if (match) {
+    const plz = match[1];
+    const bezirk = parseInt(plz.substring(1, 3));
+    return `${bezirk}. Bezirk`;
+  }
+  return address.split(',')[0] || 'Wien';
+}
+
 // ============================================
-// INSTAGRAM API - GRATIS DEALS HASHTAGS
+// INSTAGRAM API - (Optional, benötigt Business Account)
 // ============================================
 
 async function fetchInstagramDeals() {
   if (!INSTAGRAM_ACCESS_TOKEN) {
-    console.log('⚠️  Instagram Access Token nicht gesetzt - Überspringe');
-    console.log('   → Benötigt Facebook Developer Account + Instagram Business');
+    // Kein Fehler - ist optional
     return [];
   }
   
   const deals = [];
   
-  // Instagram Graph API für Hashtag Search (erfordert Business Account)
-  // Hashtags: #gratiskaffee #gratisprobe #wiengratis #neueröffnungwien
   try {
-    // Zuerst Hashtag ID holen
-    const hashtagUrl = `https://graph.facebook.com/v18.0/ig_hashtag_search?user_id=me&q=wiengratis&access_token=${INSTAGRAM_ACCESS_TOKEN}`;
-    const hashtagResponse = await fetchURL(hashtagUrl);
-    
-    if (hashtagResponse.trim().startsWith('<')) {
-      console.log(`⚠️  Instagram: HTML statt JSON - Token ungültig?`);
-      return deals;
-    }
-    
-    const hashtagData = JSON.parse(hashtagResponse);
-    
-    if (hashtagData.error) {
-      console.log(`⚠️  Instagram: ${hashtagData.error.message}`);
-      return deals;
-    }
-    
-    // Dann Posts holen
-    if (hashtagData.data && hashtagData.data[0]) {
-      const hashtagId = hashtagData.data[0].id;
-      const postsUrl = `https://graph.facebook.com/v18.0/${hashtagId}/recent_media?user_id=me&fields=caption,permalink&access_token=${INSTAGRAM_ACCESS_TOKEN}`;
-      const postsResponse = await fetchURL(postsUrl);
-      const postsData = JSON.parse(postsResponse);
-      
-      if (postsData.data) {
-        for (const post of postsData.data.slice(0, 5)) {
-          if (post.caption && (post.caption.toLowerCase().includes('gratis') || post.caption.toLowerCase().includes('kostenlos'))) {
-            deals.push({
-              id: `ig-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
-              brand: 'Instagram',
-              logo: '📸',
-              title: post.caption.substring(0, 50) + '...',
-              description: post.caption.substring(0, 150),
-              type: 'gratis',
-              category: 'wien',
-              source: 'Instagram',
-              url: post.permalink,
-              expires: 'Siehe Post',
-              distance: 'Wien',
-              hot: true,
-              isNew: true,
-              isApiDeal: true
-            });
-          }
-        }
-      }
-    }
+    // Instagram Graph API ist komplex und erfordert Business Account
+    // Hier nur Platzhalter - in Produktion würde man Hashtag-Suche implementieren
+    console.log(`📸 Instagram: Token vorhanden, aber API-Implementation ausstehend`);
   } catch (error) {
     console.log(`⚠️  Instagram Fehler: ${error.message}`);
   }
   
-  console.log(`📸 Instagram: ${deals.length} Deals gefunden`);
   return deals;
 }
 
 // ============================================
-// FACEBOOK API - GRATIS EVENTS
+// FACEBOOK API - (Optional, stark eingeschränkt seit 2020)
 // ============================================
 
 async function fetchFacebookEvents() {
   if (!FACEBOOK_ACCESS_TOKEN) {
-    console.log('⚠️  Facebook Access Token nicht gesetzt - Überspringe');
-    console.log('   → Benötigt Facebook Developer Account + Page Token');
+    // Kein Fehler - ist optional
     return [];
   }
   
   const deals = [];
   
   try {
-    // Facebook Graph API für Events Search
-    // Hinweis: Event Search ist seit 2020 stark eingeschränkt
-    const url = `https://graph.facebook.com/v18.0/search?type=place&q=gratis+wien&fields=name,location,link&center=48.2082,16.3738&distance=15000&access_token=${FACEBOOK_ACCESS_TOKEN}`;
-    const response = await fetchURL(url);
-    
-    if (response.trim().startsWith('<')) {
-      console.log(`⚠️  Facebook: HTML statt JSON - Token ungültig?`);
-      return deals;
-    }
-    
-    const data = JSON.parse(response);
-    
-    if (data.error) {
-      console.log(`⚠️  Facebook: ${data.error.message}`);
-      return deals;
-    }
-    
-    if (data.data) {
-      for (const place of data.data.slice(0, 5)) {
-        if (place.name && (place.name.toLowerCase().includes('gratis') || place.name.toLowerCase().includes('free'))) {
-          deals.push({
-            id: `fb-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
-            brand: 'Facebook',
-            logo: '📘',
-            title: place.name,
-            description: place.location ? `${place.location.street}, ${place.location.city}` : 'Wien',
-            type: 'gratis',
-            category: 'wien',
-            source: 'Facebook',
-            url: place.link || 'https://facebook.com',
-            expires: 'Siehe Facebook',
-            distance: 'Wien',
-            hot: true,
-            isNew: true,
-            isApiDeal: true
-          });
-        }
-      }
-    }
+    // Facebook Event-Suche ist seit 2020 stark eingeschränkt
+    console.log(`📘 Facebook: Token vorhanden, aber Event-API limitiert`);
   } catch (error) {
     console.log(`⚠️  Facebook Fehler: ${error.message}`);
   }
   
-  console.log(`📘 Facebook: ${deals.length} Deals gefunden`);
   return deals;
 }
 
