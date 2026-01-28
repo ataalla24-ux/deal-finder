@@ -8,30 +8,128 @@
     <meta name="theme-color" content="#667eea">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 16px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 16px; padding-bottom: 100px; }
         .container { max-width: 600px; margin: 0 auto; }
         h1 { text-align: center; font-size: 28px; margin-bottom: 8px; }
         .subtitle { text-align: center; color: #666; margin-bottom: 16px; font-size: 14px; }
+        
+        /* STREAK BANNER */
+        .streak-banner { background: linear-gradient(135deg, #f59e0b, #ef4444); border-radius: 16px; padding: 16px; margin-bottom: 16px; color: white; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: transform 0.2s; }
+        .streak-banner:hover { transform: scale(1.02); }
+        .streak-fire { font-size: 40px; animation: firePulse 1s infinite; }
+        @keyframes firePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .streak-info { flex: 1; }
+        .streak-days { font-size: 24px; font-weight: 800; }
+        .streak-text { font-size: 13px; opacity: 0.9; }
+        .streak-reward { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 13px; }
+        
+        /* DEAL DES TAGES */
+        .daily-deal { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; padding: 20px; margin-bottom: 16px; color: white; position: relative; overflow: hidden; }
+        .daily-deal::before { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); animation: shimmer 3s infinite; }
+        @keyframes shimmer { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(180deg); } }
+        .daily-label { background: #fbbf24; color: #1f2937; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; margin-bottom: 12px; }
+        .daily-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .daily-desc { opacity: 0.9; margin-bottom: 12px; }
+        .daily-countdown { display: flex; gap: 8px; margin-top: 12px; }
+        .countdown-box { background: rgba(255,255,255,0.2); padding: 8px 12px; border-radius: 10px; text-align: center; }
+        .countdown-num { font-size: 20px; font-weight: 800; }
+        .countdown-label { font-size: 10px; opacity: 0.8; }
+        .daily-btn { background: white; color: #667eea; border: none; padding: 12px 24px; border-radius: 25px; font-weight: 700; cursor: pointer; margin-top: 12px; }
+        .daily-btn:hover { transform: scale(1.05); }
+        
+        /* SPAR-TRACKER */
+        .savings-card { background: linear-gradient(135deg, #10b981, #059669); border-radius: 16px; padding: 16px; margin-bottom: 16px; color: white; }
+        .savings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .savings-title { font-size: 14px; opacity: 0.9; }
+        .savings-amount { font-size: 32px; font-weight: 800; }
+        .savings-bar { background: rgba(255,255,255,0.3); height: 8px; border-radius: 4px; overflow: hidden; }
+        .savings-progress { background: white; height: 100%; border-radius: 4px; transition: width 0.5s; }
+        .savings-goal { display: flex; justify-content: space-between; font-size: 12px; margin-top: 8px; opacity: 0.8; }
+        
+        /* LEVEL BAR */
+        .level-bar { background: white; border-radius: 14px; padding: 12px 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 12px; }
+        .level-badge { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; }
+        .level-info { flex: 1; }
+        .level-name { font-weight: 600; font-size: 14px; color: #374151; }
+        .level-xp-bar { background: #e5e7eb; height: 6px; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+        .level-xp-fill { background: linear-gradient(90deg, #8b5cf6, #6366f1); height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .level-xp-text { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+        .xp-popup { position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white; padding: 12px 24px; border-radius: 30px; font-weight: 700; z-index: 1000; animation: xpFloat 1.5s forwards; pointer-events: none; }
+        @keyframes xpFloat { 0% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(-50px); } }
+        
+        /* CHALLENGE */
+        .challenge-card { background: white; border-radius: 14px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 2px solid #fbbf24; }
+        .challenge-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .challenge-icon { font-size: 28px; }
+        .challenge-title { font-weight: 700; color: #1f2937; }
+        .challenge-subtitle { font-size: 12px; color: #6b7280; }
+        .challenge-progress { display: flex; gap: 8px; margin-top: 12px; }
+        .challenge-dot { width: 32px; height: 32px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.3s; }
+        .challenge-dot.done { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .challenge-dot.current { background: #fbbf24; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0.4); } 50% { box-shadow: 0 0 0 10px rgba(251,191,36,0); } }
+        .challenge-reward { background: #fef3c7; padding: 10px; border-radius: 10px; margin-top: 12px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: #92400e; }
+        
+        /* SPIN BANNER */
+        .spin-banner { background: linear-gradient(135deg, #ec4899, #8b5cf6); border-radius: 16px; padding: 16px; margin-bottom: 16px; color: white; display: flex; align-items: center; gap: 16px; cursor: pointer; }
+        .spin-banner:hover { transform: scale(1.02); }
+        .spin-wheel { font-size: 36px; animation: spinSlow 10s linear infinite; }
+        @keyframes spinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .spin-info { flex: 1; }
+        .spin-title { font-weight: 700; font-size: 16px; }
+        .spin-text { font-size: 13px; opacity: 0.9; }
+        .spin-btn { background: white; color: #8b5cf6; padding: 10px 20px; border-radius: 25px; border: none; font-weight: 700; cursor: pointer; }
+        .spin-used { opacity: 0.6; cursor: not-allowed; }
+        
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.show { display: flex; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal { background: white; border-radius: 24px; padding: 24px; max-width: 340px; width: 100%; text-align: center; animation: slideUp 0.3s; position: relative; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .wheel-container { position: relative; width: 260px; height: 260px; margin: 20px auto; }
+        .wheel { width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(#ef4444 0deg 45deg, #f59e0b 45deg 90deg, #10b981 90deg 135deg, #3b82f6 135deg 180deg, #8b5cf6 180deg 225deg, #ec4899 225deg 270deg, #06b6d4 270deg 315deg, #84cc16 315deg 360deg); transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); box-shadow: 0 0 20px rgba(0,0,0,0.2); }
+        .wheel-pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 30px; z-index: 10; }
+        .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .spin-result { margin-top: 20px; padding: 16px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 12px; display: none; }
+        .spin-result.show { display: block; animation: bounceIn 0.5s; }
+        @keyframes bounceIn { 0% { transform: scale(0.5); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .spin-result-text { font-size: 18px; font-weight: 700; color: #92400e; }
+        .modal-btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 14px 32px; border-radius: 25px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 16px; }
+        .modal-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 24px; cursor: pointer; color: #9ca3af; }
+        
+        /* SECRET DEAL */
+        .secret-deal { background: linear-gradient(135deg, #1f2937, #374151); border-radius: 16px; padding: 16px; margin-bottom: 16px; color: white; position: relative; overflow: hidden; }
+        .secret-deal.locked::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px); }
+        .secret-header { display: flex; align-items: center; gap: 12px; }
+        .secret-icon { font-size: 32px; }
+        .secret-title { font-weight: 700; }
+        .secret-desc { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+        .secret-progress { margin-top: 12px; }
+        .secret-bar { background: rgba(255,255,255,0.2); height: 8px; border-radius: 4px; overflow: hidden; }
+        .secret-fill { background: linear-gradient(90deg, #fbbf24, #f59e0b); height: 100%; border-radius: 4px; transition: width 0.5s; }
+        .secret-text { font-size: 12px; margin-top: 6px; opacity: 0.7; }
+        .secret-unlocked { background: linear-gradient(135deg, #fbbf24, #f59e0b) !important; }
+        
+        /* UPDATE COUNTDOWN */
+        .update-countdown { background: white; border-radius: 14px; padding: 12px 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; color: #6b7280; }
+        .update-countdown span { color: #667eea; font-weight: 700; }
+        
+        /* SEARCH & FILTERS */
         .search-box { background: white; border-radius: 14px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin: 16px 0; position: relative; }
         .search-box input { flex: 1; border: none; outline: none; font-size: 16px; background: transparent; }
         .search-box svg { width: 20px; height: 20px; color: #999; }
         .search-box .clear-btn { background: #e5e7eb; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 12px; color: #666; }
         .search-box .clear-btn.show { display: flex; }
-        .search-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); margin-top: 8px; display: none; z-index: 200; overflow: hidden; max-height: 400px; overflow-y: auto; }
-        .search-dropdown.show { display: block; animation: slideDown 0.2s ease; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .search-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); margin-top: 8px; display: none; z-index: 200; overflow: hidden; }
+        .search-dropdown.show { display: block; }
         .search-section { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; }
-        .search-section:last-child { border-bottom: none; }
-        .search-section-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .search-item { padding: 10px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
-        .search-item:hover { background: #f1f5f9; }
-        .search-item-icon { font-size: 16px; }
-        .search-item-text { flex: 1; font-size: 14px; }
-        .search-item-meta { font-size: 12px; color: #94a3b8; }
+        .search-section-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; }
         .search-tag { display: inline-flex; align-items: center; gap: 4px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; margin: 4px; }
         .search-tag:hover { background: #e2e8f0; }
         .search-tag.trending { background: linear-gradient(135deg, #fef3c7, #fde68a); }
-        .filters { background: white; border-radius: 14px; padding: 12px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; transition: box-shadow 0.3s; }
+        .filters { background: white; border-radius: 14px; padding: 12px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; }
         .filters.scrolled { box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
         .filter-row { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0; scrollbar-width: none; }
         .filter-row::-webkit-scrollbar { display: none; }
@@ -40,6 +138,8 @@
         .filter-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
         .filter-count { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-size: 12px; }
         .filter-divider { height: 1px; background: #e5e7eb; margin: 8px 0; }
+        
+        /* DEAL CARDS */
         .deal-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 2px solid transparent; transition: all 0.2s; }
         .deal-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
         .deal-card.hot { border-color: #f59e0b; }
@@ -54,19 +154,14 @@
         .badge-rabatt { background: #fef3c7; color: #d97706; }
         .badge-hot { background: #fef2f2; color: #ef4444; }
         .badge-new { background: #e0e7ff; color: #4f46e5; }
-        .badge-code { background: #f3e8ff; color: #9333ea; }
         .deal-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6; }
         .deal-info { font-size: 12px; color: #9ca3af; }
         .deal-btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 10px 20px; border-radius: 25px; font-weight: 600; cursor: pointer; font-size: 14px; text-decoration: none; display: inline-block; }
-        .deal-btn:hover { transform: scale(1.05); }
         .vote-section { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
-        .vote-btn { background: #f3f4f6; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
+        .vote-btn { background: #f3f4f6; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 14px; }
         .vote-btn:hover { background: #e5e7eb; }
-        .vote-btn.up:hover { background: #dcfce7; }
-        .vote-btn.down:hover { background: #fee2e2; }
         .vote-count { font-weight: 600; min-width: 30px; text-align: center; }
-        .share-btn { background: #25D366; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 4px; }
-        .share-btn:hover { background: #128C7E; }
+        .share-btn { background: #25D366; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 14px; }
         .code-display { background: #faf5ff; border: 2px dashed #8b5cf6; border-radius: 8px; padding: 8px 12px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; }
         .code-text { font-family: monospace; font-weight: 700; color: #7c3aed; font-size: 14px; }
         .code-copy { background: #8b5cf6; color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
@@ -75,39 +170,122 @@
         .loading { text-align: center; padding: 40px; color: #666; }
         .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 24px; border-radius: 30px; font-weight: 600; z-index: 1000; animation: toastIn 0.3s ease; }
         @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
-        @media (max-width: 480px) { h1 { font-size: 24px; } .filter-btn { padding: 8px 12px; font-size: 13px; } }
+        
+        /* BOTTOM NAV */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 8px 16px; padding-bottom: max(8px, env(safe-area-inset-bottom)); display: flex; justify-content: space-around; box-shadow: 0 -2px 20px rgba(0,0,0,0.1); z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 16px; border-radius: 12px; cursor: pointer; }
+        .nav-item:hover, .nav-item.active { background: #f1f5f9; }
+        .nav-item.active { color: #667eea; }
+        .nav-icon { font-size: 20px; }
+        .nav-label { font-size: 10px; font-weight: 600; }
+        .nav-badge { position: absolute; top: -4px; right: -4px; background: #ef4444; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 700; }
     </style>
 </head>
 <body>
-        </header>
     <div class="container">
         <h1>🎁 FreeFinder Wien</h1>
-        <p class="subtitle">Täglich aktualisierte Gratis-Deals & Rabatte</p>
+        <p class="subtitle">Täglich neue Gratis-Deals & Rabatte</p>
+        
+        <div class="streak-banner" id="streakBanner">
+            <div class="streak-fire">🔥</div>
+            <div class="streak-info">
+                <div class="streak-days" id="streakDays">1 Tag Streak!</div>
+                <div class="streak-text">Komm morgen wieder für Bonus XP!</div>
+            </div>
+            <div class="streak-reward" id="streakReward">+10 XP</div>
+        </div>
+        
+        <div class="daily-deal" id="dailyDeal">
+            <div class="daily-label">⭐ DEAL DES TAGES</div>
+            <div class="daily-title" id="dailyTitle">Wird geladen...</div>
+            <div class="daily-desc" id="dailyDesc"></div>
+            <div class="daily-countdown">
+                <div class="countdown-box"><div class="countdown-num" id="countH">00</div><div class="countdown-label">Std</div></div>
+                <div class="countdown-box"><div class="countdown-num" id="countM">00</div><div class="countdown-label">Min</div></div>
+                <div class="countdown-box"><div class="countdown-num" id="countS">00</div><div class="countdown-label">Sek</div></div>
+            </div>
+            <button class="daily-btn" id="dailyBtn">Jetzt sichern →</button>
+        </div>
+        
+        <div class="savings-card">
+            <div class="savings-header">
+                <div class="savings-title">💰 Diese Woche gespart</div>
+                <div class="savings-amount" id="savingsAmount">€0</div>
+            </div>
+            <div class="savings-bar"><div class="savings-progress" id="savingsBar" style="width: 0%"></div></div>
+            <div class="savings-goal"><span>€0</span><span>Ziel: €50</span></div>
+        </div>
+        
+        <div class="level-bar">
+            <div class="level-badge" id="levelBadge">1</div>
+            <div class="level-info">
+                <div class="level-name" id="levelName">🌱 Schnäppchen-Anfänger</div>
+                <div class="level-xp-bar"><div class="level-xp-fill" id="levelXpFill" style="width: 0%"></div></div>
+                <div class="level-xp-text" id="levelXpText">0 / 100 XP</div>
+            </div>
+        </div>
+        
+        <div class="challenge-card" id="challengeCard">
+            <div class="challenge-header">
+                <div class="challenge-icon">🎯</div>
+                <div>
+                    <div class="challenge-title">Tägliche Challenge</div>
+                    <div class="challenge-subtitle">Schau dir 5 Deals an</div>
+                </div>
+            </div>
+            <div class="challenge-progress" id="challengeProgress">
+                <div class="challenge-dot current">1</div>
+                <div class="challenge-dot">2</div>
+                <div class="challenge-dot">3</div>
+                <div class="challenge-dot">4</div>
+                <div class="challenge-dot">5</div>
+            </div>
+            <div class="challenge-reward">🎁 Belohnung: <strong>+25 XP & Geheimer Deal</strong></div>
+        </div>
+        
+        <div class="spin-banner" id="spinBanner" onclick="openSpinModal()">
+            <div class="spin-wheel">🎡</div>
+            <div class="spin-info">
+                <div class="spin-title">Tägliches Glücksrad</div>
+                <div class="spin-text">Drehe und gewinne Boni!</div>
+            </div>
+            <button class="spin-btn" id="spinBtnSmall">Drehen!</button>
+        </div>
+        
+        <div class="secret-deal locked" id="secretDeal">
+            <div class="secret-header">
+                <div class="secret-icon">🔒</div>
+                <div>
+                    <div class="secret-title">Geheimer Deal</div>
+                    <div class="secret-desc">Schließe die Challenge ab!</div>
+                </div>
+            </div>
+            <div class="secret-progress">
+                <div class="secret-bar"><div class="secret-fill" id="secretFill" style="width: 0%"></div></div>
+                <div class="secret-text" id="secretText">0/5 Deals angesehen</div>
+            </div>
+        </div>
+        
+        <div class="update-countdown">🔄 Neue Deals in <span id="updateCountdown">30:00</span> Minuten</div>
         
         <div class="search-box" id="searchBox">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input type="text" id="searchInput" placeholder="Suche z.B. Kaffee, IKEA, gratis..." autocomplete="off">
+            <input type="text" id="searchInput" placeholder="Suche z.B. Kaffee, IKEA..." autocomplete="off">
             <button class="clear-btn" id="clearBtn" onclick="clearSearch(event)">✕</button>
             <div class="search-dropdown" id="searchDropdown">
-                <div class="search-section" id="recentSection" style="display:none">
-                    <div class="search-section-title">🕒 Letzte Suchen</div>
-                    <div id="recentSearches"></div>
-                </div>
                 <div class="search-section">
                     <div class="search-section-title">🔥 Beliebte Suchen</div>
-                    <div id="popularSearches">
+                    <div>
                         <span class="search-tag trending" onclick="searchFor('gratis kaffee')">☕ Gratis Kaffee</span>
                         <span class="search-tag trending" onclick="searchFor('fitness')">💪 Fitness</span>
                         <span class="search-tag" onclick="searchFor('mcdonalds')">🍟 McDonald's</span>
                         <span class="search-tag" onclick="searchFor('ikea')">🪑 IKEA</span>
-                        <span class="search-tag" onclick="searchFor('flug')">✈️ Flüge</span>
-                        <span class="search-tag" onclick="searchFor('rabattcode')">🏷️ Codes</span>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="filters">
+        <div class="filters" id="filters">
             <div class="filter-row" id="typeFilters">
                 <button class="filter-btn active" data-filter="alle">🎯 Alle <span class="filter-count" id="countAll">0</span></button>
                 <button class="filter-btn" data-filter="gratis">🎁 Gratis <span class="filter-count" id="countGratis">0</span></button>
@@ -119,21 +297,41 @@
                 <button class="filter-btn active" data-category="alle">🎯 Alle</button>
                 <button class="filter-btn" data-category="kaffee">☕ Kaffee</button>
                 <button class="filter-btn" data-category="essen">🍔 Essen</button>
-                <button class="filter-btn" data-category="supermarkt">🛒 Supermarkt</button>
                 <button class="filter-btn" data-category="fitness">💪 Fitness</button>
                 <button class="filter-btn" data-category="reisen">✈️ Reisen</button>
+                <button class="filter-btn" data-category="supermarkt">🛒 Supermarkt</button>
                 <button class="filter-btn" data-category="beauty">💇 Beauty</button>
                 <button class="filter-btn" data-category="technik">📱 Technik</button>
-                <button class="filter-btn" data-category="mode">👕 Mode</button>
                 <button class="filter-btn" data-category="streaming">📺 Streaming</button>
-                <button class="filter-btn" data-category="shopping">🛍️ Shopping</button>
                 <button class="filter-btn" data-category="wien">🏛️ Wien</button>
-                <button class="filter-btn" data-category="mobilität">🚇 Mobilität</button>
-                <button class="filter-btn" data-category="finanzen">💳 Finanzen</button>
             </div>
         </div>
         
         <div id="deals"><div class="loading">🔄 Lade Deals...</div></div>
+    </div>
+    
+    <div class="modal-overlay" id="spinModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeSpinModal()">×</button>
+            <h2>🎡 Tägliches Glücksrad</h2>
+            <p style="color: #6b7280; font-size: 14px; margin-top: 8px;">Drehe einmal täglich!</p>
+            <div class="wheel-container">
+                <div class="wheel-pointer">📍</div>
+                <div class="wheel" id="wheel"></div>
+                <div class="wheel-center">🎁</div>
+            </div>
+            <div class="spin-result" id="spinResult">
+                <div class="spin-result-text" id="spinResultText"></div>
+            </div>
+            <button class="modal-btn" id="spinBtn" onclick="spinWheel()">🎰 Drehen!</button>
+        </div>
+    </div>
+    
+    <div class="bottom-nav">
+        <div class="nav-item active"><div class="nav-icon">🏠</div><div class="nav-label">Deals</div></div>
+        <div class="nav-item" onclick="showStats()"><div class="nav-icon">📊</div><div class="nav-label">Stats</div></div>
+        <div class="nav-item" onclick="openSpinModal()"><div class="nav-icon">🎡</div><div class="nav-label">Drehen</div></div>
+        <div class="nav-item" onclick="showFavorites()" style="position:relative;"><div class="nav-icon">❤️</div><div class="nav-label">Favoriten</div><span class="nav-badge" id="favBadge" style="display:none;">0</span></div>
     </div>
 
     <script>
@@ -142,213 +340,256 @@
         let currentCategory = 'alle';
         let searchQuery = '';
         let votes = JSON.parse(localStorage.getItem('votes') || '{}');
-        let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
-
+        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        
+        let userData = JSON.parse(localStorage.getItem('userData') || JSON.stringify({
+            xp: 0, level: 1, streak: 0, lastVisit: null, dealsViewed: 0, todayViewed: 0,
+            todayDate: null, totalSavings: 0, spinUsedToday: false, spinDate: null,
+            challengeComplete: false, secretUnlocked: false
+        }));
+        
+        const LEVELS = [
+            { name: '🌱 Schnäppchen-Anfänger', xp: 0 },
+            { name: '🌿 Deal-Entdecker', xp: 100 },
+            { name: '🌳 Spar-Experte', xp: 300 },
+            { name: '⭐ Gratis-Jäger', xp: 600 },
+            { name: '🏆 Deal-Meister', xp: 1000 },
+            { name: '👑 Schnäppchen-König', xp: 1500 },
+            { name: '💎 Legendärer Sparer', xp: 2500 }
+        ];
+        
+        const SPIN_PRIZES = [
+            { text: '+10 XP', xp: 10 }, { text: '+25 XP', xp: 25 }, { text: '+50 XP', xp: 50 },
+            { text: '2x Streak!', special: 'streak' }, { text: '+100 XP!', xp: 100 },
+            { text: 'Secret Deal!', special: 'secret' }, { text: '+15 XP', xp: 15 }, { text: '+30 XP', xp: 30 }
+        ];
+        
+        function init() {
+            checkStreak();
+            updateLevelUI();
+            updateSavingsUI();
+            checkChallenge();
+            checkSpin();
+            startCountdowns();
+            loadDeals();
+            updateFavBadge();
+        }
+        
+        function checkStreak() {
+            const today = new Date().toDateString();
+            if (userData.lastVisit !== today) {
+                const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+                if (userData.lastVisit === yesterday.toDateString()) {
+                    userData.streak++;
+                    addXP(Math.min(10 + userData.streak * 5, 50), '🔥 Streak Tag ' + userData.streak + '!');
+                } else if (userData.lastVisit) {
+                    userData.streak = 1;
+                    addXP(10, '👋 Willkommen zurück!');
+                } else {
+                    userData.streak = 1;
+                    addXP(10, '🎉 Erster Besuch!');
+                }
+                userData.lastVisit = today;
+                userData.todayViewed = 0;
+                userData.todayDate = today;
+                userData.challengeComplete = false;
+                saveUserData();
+            }
+            document.getElementById('streakDays').textContent = userData.streak + ' Tag' + (userData.streak > 1 ? 'e' : '') + ' Streak!';
+            document.getElementById('streakReward').textContent = '+' + Math.min(10 + userData.streak * 5, 50) + ' XP';
+        }
+        
+        function addXP(amount, reason) {
+            userData.xp += amount;
+            for (let i = LEVELS.length - 1; i >= 0; i--) {
+                if (userData.xp >= LEVELS[i].xp && userData.level < i + 1) {
+                    userData.level = i + 1;
+                    showToast('🎉 Level Up! ' + LEVELS[i].name);
+                    break;
+                }
+            }
+            saveUserData();
+            updateLevelUI();
+            showXPPopup('+' + amount + ' XP');
+            if (reason) showToast(reason);
+        }
+        
+        function updateLevelUI() {
+            const level = LEVELS[userData.level - 1] || LEVELS[0];
+            const nextLevel = LEVELS[userData.level] || level;
+            const progress = Math.min(((userData.xp - level.xp) / (nextLevel.xp - level.xp)) * 100, 100);
+            document.getElementById('levelBadge').textContent = userData.level;
+            document.getElementById('levelName').textContent = level.name;
+            document.getElementById('levelXpFill').style.width = progress + '%';
+            document.getElementById('levelXpText').textContent = userData.xp + ' / ' + nextLevel.xp + ' XP';
+        }
+        
+        function showXPPopup(text) {
+            const popup = document.createElement('div');
+            popup.className = 'xp-popup';
+            popup.textContent = text;
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 1500);
+        }
+        
+        function updateSavingsUI() {
+            document.getElementById('savingsAmount').textContent = '€' + userData.totalSavings;
+            document.getElementById('savingsBar').style.width = Math.min((userData.totalSavings / 50) * 100, 100) + '%';
+        }
+        
+        function trackDealView() {
+            const today = new Date().toDateString();
+            if (userData.todayDate !== today) { userData.todayViewed = 0; userData.todayDate = today; userData.challengeComplete = false; }
+            userData.todayViewed++;
+            userData.dealsViewed++;
+            saveUserData();
+            updateChallengeUI();
+            if (userData.todayViewed >= 5 && !userData.challengeComplete) {
+                userData.challengeComplete = true;
+                userData.secretUnlocked = true;
+                saveUserData();
+                addXP(25, '🎯 Challenge geschafft!');
+                unlockSecret();
+            }
+        }
+        
+        function checkChallenge() { updateChallengeUI(); }
+        
+        function updateChallengeUI() {
+            const dots = document.querySelectorAll('.challenge-dot');
+            const viewed = Math.min(userData.todayViewed, 5);
+            dots.forEach((dot, i) => {
+                dot.classList.remove('done', 'current');
+                if (i < viewed) { dot.classList.add('done'); dot.textContent = '✓'; }
+                else if (i === viewed) { dot.classList.add('current'); dot.textContent = i + 1; }
+                else { dot.textContent = i + 1; }
+            });
+            document.getElementById('secretFill').style.width = (viewed / 5) * 100 + '%';
+            document.getElementById('secretText').textContent = viewed + '/5 Deals angesehen';
+            if (userData.secretUnlocked) unlockSecret();
+        }
+        
+        function unlockSecret() {
+            const sd = document.getElementById('secretDeal');
+            sd.classList.remove('locked');
+            sd.classList.add('secret-unlocked');
+            sd.innerHTML = '<div class="secret-header"><div class="secret-icon">🎁</div><div><div class="secret-title">GEHEIMER DEAL!</div><div class="secret-desc">McDonald\'s: Gratis McFlurry!</div></div></div><button class="daily-btn" style="margin-top:12px;width:100%" onclick="window.open(\'https://www.mcdonalds.at/app\')">Einlösen →</button>';
+        }
+        
+        function checkSpin() {
+            const today = new Date().toDateString();
+            if (userData.spinDate !== today) { userData.spinUsedToday = false; userData.spinDate = today; saveUserData(); }
+            if (userData.spinUsedToday) {
+                document.getElementById('spinBtnSmall').textContent = '✓ Gedreht';
+                document.getElementById('spinBtnSmall').classList.add('spin-used');
+                document.getElementById('spinBtn').disabled = true;
+                document.getElementById('spinBtn').textContent = 'Morgen wieder!';
+            }
+        }
+        
+        function openSpinModal() { document.getElementById('spinModal').classList.add('show'); }
+        function closeSpinModal() { document.getElementById('spinModal').classList.remove('show'); }
+        
+        function spinWheel() {
+            if (userData.spinUsedToday) return;
+            const wheel = document.getElementById('wheel');
+            const btn = document.getElementById('spinBtn');
+            btn.disabled = true;
+            const prizeIndex = Math.floor(Math.random() * SPIN_PRIZES.length);
+            const prize = SPIN_PRIZES[prizeIndex];
+            wheel.style.transform = 'rotate(' + (1800 + prizeIndex * 45 + Math.random() * 40) + 'deg)';
+            setTimeout(() => {
+                document.getElementById('spinResult').classList.add('show');
+                document.getElementById('spinResultText').textContent = '🎉 ' + prize.text;
+                if (prize.xp) addXP(prize.xp, '🎡 ' + prize.text);
+                else if (prize.special === 'secret') { userData.secretUnlocked = true; saveUserData(); unlockSecret(); showToast('🎁 Secret Deal!'); }
+                else if (prize.special === 'streak') addXP(userData.streak * 10, '🔥 2x Streak!');
+                userData.spinUsedToday = true; saveUserData();
+                btn.textContent = 'Morgen wieder!';
+                document.getElementById('spinBtnSmall').textContent = '✓ Gedreht';
+                document.getElementById('spinBtnSmall').classList.add('spin-used');
+            }, 4000);
+        }
+        
+        function startCountdowns() {
+            setInterval(() => {
+                const now = new Date(), midnight = new Date(now); midnight.setHours(24, 0, 0, 0);
+                const diff = midnight - now;
+                document.getElementById('countH').textContent = String(Math.floor(diff / 3600000)).padStart(2, '0');
+                document.getElementById('countM').textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+                document.getElementById('countS').textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+            }, 1000);
+            let um = 29, us = 59;
+            setInterval(() => {
+                us--; if (us < 0) { us = 59; um--; }
+                if (um < 0) { um = 29; showToast('🔄 Aktualisiert!'); loadDeals(); }
+                document.getElementById('updateCountdown').textContent = um + ':' + String(us).padStart(2, '0');
+            }, 1000);
+        }
+        
         async function loadDeals() {
             try {
                 const res = await fetch('deals.json?t=' + Date.now());
                 const data = await res.json();
                 allDeals = data.deals.map(d => ({ ...d, votes: votes[d.id] || d.votes || 0 }));
-                updateCounts();
-                renderDeals();
-            } catch (e) {
-                document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">😕</div><p>Deals konnten nicht geladen werden</p></div>';
-            }
+                updateCounts(); renderDeals(); setDailyDeal();
+            } catch (e) { document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">😕</div><p>Fehler</p></div>'; }
         }
-
+        
+        function setDailyDeal() {
+            const deal = allDeals.filter(d => d.type === 'gratis')[new Date().getDate() % allDeals.filter(d => d.type === 'gratis').length] || allDeals[0];
+            document.getElementById('dailyTitle').textContent = deal.logo + ' ' + deal.brand + ': ' + deal.title;
+            document.getElementById('dailyDesc').textContent = deal.description;
+            document.getElementById('dailyBtn').onclick = () => { window.open(deal.url, '_blank'); userData.totalSavings += 5; saveUserData(); updateSavingsUI(); trackDealView(); };
+        }
+        
         function updateCounts() {
             document.getElementById('countAll').textContent = allDeals.length;
             document.getElementById('countGratis').textContent = allDeals.filter(d => d.type === 'gratis').length;
             document.getElementById('countRabatt').textContent = allDeals.filter(d => d.type === 'rabatt' || d.type === 'testabo').length;
             document.getElementById('countCodes').textContent = allDeals.filter(d => d.category === 'codes' || d.code).length;
         }
-
+        
         function filterDeals() {
             let deals = [...allDeals];
-            if (searchQuery) {
-                const q = searchQuery.toLowerCase();
-                deals = deals.filter(d => 
-                    d.title.toLowerCase().includes(q) || 
-                    d.brand.toLowerCase().includes(q) || 
-                    d.description.toLowerCase().includes(q) ||
-                    d.category.toLowerCase().includes(q)
-                );
-            }
+            if (searchQuery) { const q = searchQuery.toLowerCase(); deals = deals.filter(d => d.title.toLowerCase().includes(q) || d.brand.toLowerCase().includes(q) || d.description.toLowerCase().includes(q)); }
             if (currentFilter !== 'alle') {
                 if (currentFilter === 'codes') deals = deals.filter(d => d.category === 'codes' || d.code);
                 else if (currentFilter === 'rabatt') deals = deals.filter(d => d.type === 'rabatt' || d.type === 'testabo');
                 else deals = deals.filter(d => d.type === currentFilter);
             }
-            if (currentCategory !== 'alle') {
-                deals = deals.filter(d => d.category === currentCategory);
-            }
+            if (currentCategory !== 'alle') deals = deals.filter(d => d.category === currentCategory);
             return deals;
         }
-
+        
         function renderDeals() {
             const deals = filterDeals();
-            const container = document.getElementById('deals');
-            
-            if (deals.length === 0) {
-                container.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><p>Keine Deals gefunden</p></div>';
-                return;
-            }
-            
-            container.innerHTML = deals.map(d => `
-                <div class="deal-card ${d.hot ? 'hot' : ''}">
-                    <div class="deal-header">
-                        <span class="deal-logo">${d.logo}</span>
-                        <div>
-                            <div class="deal-brand">${d.brand}</div>
-                            <div class="deal-title">${d.title}</div>
-                        </div>
-                    </div>
-                    <div class="deal-desc">${d.description}</div>
-                    ${d.code ? `<div class="code-display"><span class="code-text">${d.code}</span><button class="code-copy" onclick="copyCode('${d.code}')">Kopieren</button></div>` : ''}
-                    <div class="deal-meta">
-                        <span class="badge badge-${d.type}">${d.type === 'gratis' ? '🎁 GRATIS' : d.type === 'testabo' ? '🆓 Testabo' : '💰 Rabatt'}</span>
-                        ${d.hot ? '<span class="badge badge-hot">🔥 Hot</span>' : ''}
-                        ${d.isNew ? '<span class="badge badge-new">✨ Neu</span>' : ''}
-                        ${d.code ? '<span class="badge badge-code">🏷️ Code</span>' : ''}
-                    </div>
-                    <div class="deal-footer">
-                        <div class="deal-info">📍 ${d.distance} • ⏰ ${d.expires}</div>
-                        <a href="${d.url}" target="_blank" class="deal-btn">Zum Deal →</a>
-                    </div>
-                    <div class="vote-section">
-                        <button class="vote-btn up" onclick="vote('${d.id}', 1)">👍</button>
-                        <span class="vote-count">${d.votes}</span>
-                        <button class="vote-btn down" onclick="vote('${d.id}', -1)">👎</button>
-                        <button class="share-btn" onclick="shareDeal('${d.title.replace(/'/g, "\\'")}', '${d.url}')">📤 Teilen</button>
-                    </div>
-                </div>
-            `).join('');
+            if (deals.length === 0) { document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><p>Keine Deals</p></div>'; return; }
+            document.getElementById('deals').innerHTML = deals.map(d => '<div class="deal-card ' + (d.hot ? 'hot' : '') + '" onclick="trackDealView()"><div class="deal-header"><span class="deal-logo">' + d.logo + '</span><div><div class="deal-brand">' + d.brand + '</div><div class="deal-title">' + d.title + '</div></div></div><div class="deal-desc">' + d.description + '</div>' + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="code-copy" onclick="copyCode(\'' + d.code + '\',event)">Kopieren</button></div>' : '') + '<div class="deal-meta"><span class="badge badge-' + d.type + '">' + (d.type === 'gratis' ? '🎁 GRATIS' : d.type === 'testabo' ? '🆓 Testabo' : '💰 Rabatt') + '</span>' + (d.hot ? '<span class="badge badge-hot">🔥 Hot</span>' : '') + (d.isNew ? '<span class="badge badge-new">✨ Neu</span>' : '') + '</div><div class="deal-footer"><div class="deal-info">📍 ' + d.distance + ' • ⏰ ' + d.expires + '</div><a href="' + d.url + '" target="_blank" class="deal-btn" onclick="onDealClick(event)">Zum Deal →</a></div><div class="vote-section"><button class="vote-btn" onclick="vote(\'' + d.id + '\',1,event)">👍</button><span class="vote-count">' + d.votes + '</span><button class="vote-btn" onclick="vote(\'' + d.id + '\',-1,event)">👎</button><button class="share-btn" onclick="shareDeal(\'' + d.title.replace(/'/g, "\\'") + '\',\'' + d.url + '\',event)">📤</button><button class="vote-btn" onclick="toggleFav(\'' + d.id + '\',event)" style="margin-left:auto">' + (favorites.includes(d.id) ? '❤️' : '🤍') + '</button></div></div>').join('');
         }
-
-        function vote(id, delta) {
-            votes[id] = (votes[id] || 0) + delta;
-            localStorage.setItem('votes', JSON.stringify(votes));
-            const deal = allDeals.find(d => d.id === id);
-            if (deal) deal.votes = votes[id];
-            renderDeals();
-            showToast(delta > 0 ? '👍 Danke!' : '👎 Notiert!');
-        }
-
-        function copyCode(code) {
-            navigator.clipboard.writeText(code);
-            showToast('📋 Code kopiert!');
-        }
-
-        function shareDeal(title, url) {
-            const text = `🎁 Deal Tipp: ${title}\n👉 ${url}\n📱 Mehr auf FreeFinder Wien!`;
-            if (navigator.share) {
-                navigator.share({ title: 'FreeFinder Deal', text, url });
-            } else {
-                window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-            }
-        }
-
-        function showToast(msg) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
-        }
-
-        function searchFor(query) {
-            document.getElementById('searchInput').value = query;
-            searchQuery = query;
-            saveSearch(query);
-            document.getElementById('searchDropdown').classList.remove('show');
-            document.getElementById('clearBtn').classList.add('show');
-            renderDeals();
-        }
-
-        function clearSearch(e) {
-            if (e) e.stopPropagation();
-            document.getElementById('searchInput').value = '';
-            searchQuery = '';
-            document.getElementById('clearBtn').classList.remove('show');
-            renderDeals();
-        }
-
-        function saveSearch(query) {
-            if (!query || query.length < 2) return;
-            recentSearches = recentSearches.filter(s => s.toLowerCase() !== query.toLowerCase());
-            recentSearches.unshift(query);
-            recentSearches = recentSearches.slice(0, 5);
-            localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
-        }
-
-        function renderRecentSearches() {
-            const section = document.getElementById('recentSection');
-            const container = document.getElementById('recentSearches');
-            if (recentSearches.length === 0) { section.style.display = 'none'; return; }
-            section.style.display = 'block';
-            container.innerHTML = recentSearches.map(s => `<div class="search-item" onclick="searchFor('${s}')"><span class="search-item-icon">🕒</span><span class="search-item-text">${s}</span></div>`).join('');
-        }
-
-        // Event Listeners
-        const searchInput = document.getElementById('searchInput');
-        const searchDropdown = document.getElementById('searchDropdown');
-        const clearBtn = document.getElementById('clearBtn');
-
-        searchInput.addEventListener('focus', () => {
-            renderRecentSearches();
-            searchDropdown.classList.add('show');
-        });
-
-        searchInput.addEventListener('input', e => {
-            searchQuery = e.target.value;
-            clearBtn.classList.toggle('show', searchQuery.length > 0);
-            renderDeals();
-        });
-
-        searchInput.addEventListener('keydown', e => {
-            if (e.key === 'Enter' && searchQuery) {
-                saveSearch(searchQuery);
-                searchDropdown.classList.remove('show');
-            }
-            if (e.key === 'Escape') {
-                searchDropdown.classList.remove('show');
-                searchInput.blur();
-            }
-        });
-
-        document.addEventListener('click', e => {
-            if (!document.getElementById('searchBox').contains(e.target)) {
-                searchDropdown.classList.remove('show');
-            }
-        });
-
-        document.getElementById('typeFilters').addEventListener('click', e => {
-            if (e.target.classList.contains('filter-btn')) {
-                document.querySelectorAll('#typeFilters .filter-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                currentFilter = e.target.dataset.filter;
-                renderDeals();
-            }
-        });
-
-        document.getElementById('categoryFilters').addEventListener('click', e => {
-            if (e.target.classList.contains('filter-btn')) {
-                document.querySelectorAll('#categoryFilters .filter-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                currentCategory = e.target.dataset.category;
-                renderDeals();
-            }
-        });
-
-        window.addEventListener('scroll', () => {
-            document.querySelector('.filters').classList.toggle('scrolled', window.scrollY > 100);
-        }, { passive: true });
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-
-        loadDeals();
+        
+        function onDealClick(e) { e.stopPropagation(); userData.totalSavings += Math.floor(Math.random() * 5) + 1; saveUserData(); updateSavingsUI(); addXP(2, null); }
+        function vote(id, delta, e) { e.stopPropagation(); votes[id] = (votes[id] || 0) + delta; localStorage.setItem('votes', JSON.stringify(votes)); const deal = allDeals.find(d => d.id === id); if (deal) deal.votes = votes[id]; renderDeals(); addXP(1, null); showToast(delta > 0 ? '👍 Danke!' : '👎 Notiert!'); }
+        function copyCode(code, e) { e.stopPropagation(); navigator.clipboard.writeText(code); addXP(3, null); showToast('📋 Code kopiert!'); }
+        function shareDeal(title, url, e) { e.stopPropagation(); const text = '🎁 Deal: ' + title + '\n👉 ' + url; if (navigator.share) navigator.share({ title: 'Deal', text, url }); else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank'); addXP(5, '📤 Geteilt!'); }
+        function toggleFav(id, e) { e.stopPropagation(); if (favorites.includes(id)) { favorites = favorites.filter(f => f !== id); showToast('💔 Entfernt'); } else { favorites.push(id); showToast('❤️ Favorit!'); addXP(2, null); } localStorage.setItem('favorites', JSON.stringify(favorites)); updateFavBadge(); renderDeals(); }
+        function updateFavBadge() { const b = document.getElementById('favBadge'); if (favorites.length > 0) { b.style.display = 'block'; b.textContent = favorites.length; } else { b.style.display = 'none'; } }
+        function showFavorites() { const fav = allDeals.filter(d => favorites.includes(d.id)); document.getElementById('deals').innerHTML = fav.length ? fav.map(d => '<div class="deal-card"><div class="deal-header"><span class="deal-logo">' + d.logo + '</span><div><div class="deal-brand">' + d.brand + '</div><div class="deal-title">' + d.title + '</div></div></div><a href="' + d.url + '" target="_blank" class="deal-btn" style="width:100%;text-align:center;margin-top:10px">Zum Deal →</a></div>').join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>Keine Favoriten</p></div>'; showToast('❤️ Favoriten'); }
+        function showStats() { const level = LEVELS[userData.level - 1]; document.getElementById('deals').innerHTML = '<div style="background:white;border-radius:16px;padding:20px;text-align:center"><h2 style="margin-bottom:20px">📊 Deine Stats</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#667eea">' + userData.xp + '</div><div style="font-size:12px;color:#6b7280">XP</div></div><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#f59e0b">' + userData.streak + '</div><div style="font-size:12px;color:#6b7280">Streak</div></div><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#10b981">€' + userData.totalSavings + '</div><div style="font-size:12px;color:#6b7280">Gespart</div></div><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#8b5cf6">' + userData.dealsViewed + '</div><div style="font-size:12px;color:#6b7280">Deals</div></div></div><div style="margin-top:20px;padding:16px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:12px;color:white"><div style="font-size:14px;opacity:0.9">Dein Level</div><div style="font-size:20px;font-weight:700">' + level.name + '</div></div><button onclick="renderDeals()" class="daily-btn" style="margin-top:16px">← Zurück</button></div>'; }
+        function showToast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2000); }
+        function searchFor(query) { document.getElementById('searchInput').value = query; searchQuery = query; document.getElementById('searchDropdown').classList.remove('show'); document.getElementById('clearBtn').classList.add('show'); renderDeals(); }
+        function clearSearch(e) { e.stopPropagation(); document.getElementById('searchInput').value = ''; searchQuery = ''; document.getElementById('clearBtn').classList.remove('show'); renderDeals(); }
+        function saveUserData() { localStorage.setItem('userData', JSON.stringify(userData)); }
+        
+        document.getElementById('searchInput').addEventListener('focus', () => document.getElementById('searchDropdown').classList.add('show'));
+        document.getElementById('searchInput').addEventListener('input', e => { searchQuery = e.target.value; document.getElementById('clearBtn').classList.toggle('show', searchQuery.length > 0); renderDeals(); });
+        document.addEventListener('click', e => { if (!document.getElementById('searchBox').contains(e.target)) document.getElementById('searchDropdown').classList.remove('show'); });
+        document.getElementById('typeFilters').addEventListener('click', e => { if (e.target.classList.contains('filter-btn')) { document.querySelectorAll('#typeFilters .filter-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); currentFilter = e.target.dataset.filter; renderDeals(); } });
+        document.getElementById('categoryFilters').addEventListener('click', e => { if (e.target.classList.contains('filter-btn')) { document.querySelectorAll('#categoryFilters .filter-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); currentCategory = e.target.dataset.category; renderDeals(); } });
+        window.addEventListener('scroll', () => document.getElementById('filters').classList.toggle('scrolled', window.scrollY > 100), { passive: true });
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+        
+        init();
     </script>
 </body>
 </html>
