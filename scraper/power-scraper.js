@@ -289,34 +289,52 @@ function fetchURL(url, timeout = 10000) {
 
 async function fetchGooglePlacesNewOpenings() {
   if (!GOOGLE_PLACES_API_KEY) {
-    console.log('⚠️  Google Places API Key nicht gesetzt');
+    console.log('⚠️  Google Places API Key nicht gesetzt - Überspringe');
+    console.log('   → Füge GOOGLE_PLACES_API_KEY als GitHub Secret hinzu');
     return [];
   }
   
   const deals = [];
   const searchTerms = [
-    'new cafe vienna',
-    'new restaurant vienna',
-    'grand opening vienna',
-    'neu eröffnet wien'
+    'neu eröffnet cafe wien',
+    'neueröffnung restaurant wien',
+    'new opening wien'
   ];
   
   for (const term of searchTerms) {
     try {
       const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(term)}&location=48.2082,16.3738&radius=15000&key=${GOOGLE_PLACES_API_KEY}&language=de`;
       const response = await fetchURL(url);
+      
+      // Check if response is JSON
+      if (response.trim().startsWith('<')) {
+        console.log(`⚠️  Google Places: HTML statt JSON - API Key ungültig?`);
+        return deals;
+      }
+      
       const data = JSON.parse(response);
+      
+      // Check for API errors
+      if (data.status === 'REQUEST_DENIED') {
+        console.log(`⚠️  Google Places: ${data.error_message || 'Request denied'}`);
+        return deals;
+      }
+      
+      if (data.status === 'INVALID_REQUEST') {
+        console.log(`⚠️  Google Places: Ungültige Anfrage`);
+        return deals;
+      }
       
       if (data.results) {
         for (const place of data.results.slice(0, 3)) {
-          // Nur neue Orte (wenig Bewertungen = neu)
-          if (place.user_ratings_total < 50) {
+          // Nur neue Orte (wenig Bewertungen = wahrscheinlich neu)
+          if (place.user_ratings_total && place.user_ratings_total < 50) {
             deals.push({
               id: `places-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
               brand: place.name,
               logo: '🆕',
               title: `Neueröffnung: ${place.name}`,
-              description: `${place.vicinity || place.formatted_address}. Neu eröffnet - oft mit Eröffnungsangeboten!`,
+              description: `${place.vicinity || place.formatted_address || 'Wien'}. Neu eröffnet - oft mit Eröffnungsangeboten!`,
               type: 'gratis',
               category: 'shopping',
               source: 'Google Places',
@@ -331,7 +349,7 @@ async function fetchGooglePlacesNewOpenings() {
         }
       }
     } catch (error) {
-      console.log(`⚠️  Google Places Error: ${error.message}`);
+      console.log(`⚠️  Google Places Fehler: ${error.message}`);
     }
   }
   
@@ -345,15 +363,65 @@ async function fetchGooglePlacesNewOpenings() {
 
 async function fetchInstagramDeals() {
   if (!INSTAGRAM_ACCESS_TOKEN) {
-    console.log('⚠️  Instagram Access Token nicht gesetzt');
+    console.log('⚠️  Instagram Access Token nicht gesetzt - Überspringe');
+    console.log('   → Benötigt Facebook Developer Account + Instagram Business');
     return [];
   }
   
   const deals = [];
-  const hashtags = ['gratiskaffee', 'gratisprobe', 'wiengratis', 'neueröffnungwien', 'freebiealert'];
   
-  // Instagram Graph API erfordert Business Account
-  // Hier wäre die Implementation für hashtag search
+  // Instagram Graph API für Hashtag Search (erfordert Business Account)
+  // Hashtags: #gratiskaffee #gratisprobe #wiengratis #neueröffnungwien
+  try {
+    // Zuerst Hashtag ID holen
+    const hashtagUrl = `https://graph.facebook.com/v18.0/ig_hashtag_search?user_id=me&q=wiengratis&access_token=${INSTAGRAM_ACCESS_TOKEN}`;
+    const hashtagResponse = await fetchURL(hashtagUrl);
+    
+    if (hashtagResponse.trim().startsWith('<')) {
+      console.log(`⚠️  Instagram: HTML statt JSON - Token ungültig?`);
+      return deals;
+    }
+    
+    const hashtagData = JSON.parse(hashtagResponse);
+    
+    if (hashtagData.error) {
+      console.log(`⚠️  Instagram: ${hashtagData.error.message}`);
+      return deals;
+    }
+    
+    // Dann Posts holen
+    if (hashtagData.data && hashtagData.data[0]) {
+      const hashtagId = hashtagData.data[0].id;
+      const postsUrl = `https://graph.facebook.com/v18.0/${hashtagId}/recent_media?user_id=me&fields=caption,permalink&access_token=${INSTAGRAM_ACCESS_TOKEN}`;
+      const postsResponse = await fetchURL(postsUrl);
+      const postsData = JSON.parse(postsResponse);
+      
+      if (postsData.data) {
+        for (const post of postsData.data.slice(0, 5)) {
+          if (post.caption && (post.caption.toLowerCase().includes('gratis') || post.caption.toLowerCase().includes('kostenlos'))) {
+            deals.push({
+              id: `ig-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+              brand: 'Instagram',
+              logo: '📸',
+              title: post.caption.substring(0, 50) + '...',
+              description: post.caption.substring(0, 150),
+              type: 'gratis',
+              category: 'wien',
+              source: 'Instagram',
+              url: post.permalink,
+              expires: 'Siehe Post',
+              distance: 'Wien',
+              hot: true,
+              isNew: true,
+              isApiDeal: true
+            });
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.log(`⚠️  Instagram Fehler: ${error.message}`);
+  }
   
   console.log(`📸 Instagram: ${deals.length} Deals gefunden`);
   return deals;
@@ -365,32 +433,45 @@ async function fetchInstagramDeals() {
 
 async function fetchFacebookEvents() {
   if (!FACEBOOK_ACCESS_TOKEN) {
-    console.log('⚠️  Facebook Access Token nicht gesetzt');
+    console.log('⚠️  Facebook Access Token nicht gesetzt - Überspringe');
+    console.log('   → Benötigt Facebook Developer Account + Page Token');
     return [];
   }
   
   const deals = [];
   
   try {
-    // Facebook Graph API für Events in Wien
-    const url = `https://graph.facebook.com/v18.0/search?type=event&q=gratis%20wien&access_token=${FACEBOOK_ACCESS_TOKEN}`;
+    // Facebook Graph API für Events Search
+    // Hinweis: Event Search ist seit 2020 stark eingeschränkt
+    const url = `https://graph.facebook.com/v18.0/search?type=place&q=gratis+wien&fields=name,location,link&center=48.2082,16.3738&distance=15000&access_token=${FACEBOOK_ACCESS_TOKEN}`;
     const response = await fetchURL(url);
+    
+    if (response.trim().startsWith('<')) {
+      console.log(`⚠️  Facebook: HTML statt JSON - Token ungültig?`);
+      return deals;
+    }
+    
     const data = JSON.parse(response);
     
+    if (data.error) {
+      console.log(`⚠️  Facebook: ${data.error.message}`);
+      return deals;
+    }
+    
     if (data.data) {
-      for (const event of data.data.slice(0, 5)) {
-        if (event.name.toLowerCase().includes('gratis') || event.name.toLowerCase().includes('kostenlos')) {
+      for (const place of data.data.slice(0, 5)) {
+        if (place.name && (place.name.toLowerCase().includes('gratis') || place.name.toLowerCase().includes('free'))) {
           deals.push({
-            id: `fb-${event.id}`,
-            brand: 'Facebook Event',
-            logo: '📅',
-            title: event.name,
-            description: event.description ? event.description.substring(0, 150) + '...' : 'Gratis Event in Wien!',
+            id: `fb-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+            brand: 'Facebook',
+            logo: '📘',
+            title: place.name,
+            description: place.location ? `${place.location.street}, ${place.location.city}` : 'Wien',
             type: 'gratis',
             category: 'wien',
             source: 'Facebook',
-            url: `https://www.facebook.com/events/${event.id}`,
-            expires: event.start_time || 'Siehe Event',
+            url: place.link || 'https://facebook.com',
+            expires: 'Siehe Facebook',
             distance: 'Wien',
             hot: true,
             isNew: true,
@@ -400,10 +481,10 @@ async function fetchFacebookEvents() {
       }
     }
   } catch (error) {
-    console.log(`⚠️  Facebook API Error: ${error.message}`);
+    console.log(`⚠️  Facebook Fehler: ${error.message}`);
   }
   
-  console.log(`📘 Facebook: ${deals.length} Events gefunden`);
+  console.log(`📘 Facebook: ${deals.length} Deals gefunden`);
   return deals;
 }
 
@@ -567,6 +648,27 @@ async function scrapeAllSources() {
   console.log(`   💪 Fitness: ${uniqueDeals.filter(d => d.category === 'fitness').length}`);
   console.log(`   🆓 Gratis: ${uniqueDeals.filter(d => d.type === 'gratis').length}`);
   console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+  
+  // API Setup Hilfe
+  if (!GOOGLE_PLACES_API_KEY && !INSTAGRAM_ACCESS_TOKEN && !FACEBOOK_ACCESS_TOKEN) {
+    console.log(`\n💡 API SETUP ANLEITUNG:`);
+    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+    console.log(`\n📍 GOOGLE PLACES API (empfohlen!):`);
+    console.log(`   1. https://console.cloud.google.com/`);
+    console.log(`   2. Neues Projekt erstellen`);
+    console.log(`   3. "Places API" aktivieren`);
+    console.log(`   4. API Key erstellen unter "Credentials"`);
+    console.log(`   5. In GitHub → Settings → Secrets → New:`);
+    console.log(`      Name: GOOGLE_PLACES_API_KEY`);
+    console.log(`      Value: [dein-api-key]`);
+    console.log(`\n📸 INSTAGRAM (optional, komplex):`);
+    console.log(`   → Benötigt Business Account + Facebook Developer App`);
+    console.log(`   → https://developers.facebook.com/docs/instagram-api/`);
+    console.log(`\n📘 FACEBOOK (optional, eingeschränkt):`);
+    console.log(`   → Event-Suche seit 2020 stark limitiert`);
+    console.log(`   → https://developers.facebook.com/`);
+    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+  }
 }
 
 scrapeAllSources()
