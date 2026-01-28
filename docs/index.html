@@ -203,6 +203,69 @@
         
         /* NO COMMENTS */
         .no-content { text-align: center; padding: 20px; color: #9ca3af; font-size: 13px; }
+        
+        /* ADD DEAL FLOATING BUTTON */
+        .fab-add { position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-size: 28px; cursor: pointer; box-shadow: 0 4px 20px rgba(16,185,129,0.4); z-index: 90; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .fab-add:hover { transform: scale(1.1); box-shadow: 0 6px 30px rgba(16,185,129,0.5); }
+        .fab-add:active { transform: scale(0.95); }
+        .fab-tooltip { position: absolute; right: 70px; background: #1f2937; color: white; padding: 8px 12px; border-radius: 8px; font-size: 12px; white-space: nowrap; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .fab-add:hover .fab-tooltip { opacity: 1; }
+        
+        /* LINK SUBMIT MODAL */
+        .link-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 600; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .link-modal.show { display: flex; animation: fadeIn 0.3s; }
+        .link-modal-content { background: white; border-radius: 24px; padding: 24px; max-width: 400px; width: 100%; animation: slideUp 0.3s; }
+        .link-modal-header { text-align: center; margin-bottom: 20px; }
+        .link-modal-icon { font-size: 48px; margin-bottom: 12px; }
+        .link-modal-title { font-size: 20px; font-weight: 800; color: #1f2937; }
+        .link-modal-subtitle { font-size: 14px; color: #6b7280; margin-top: 4px; }
+        
+        .link-input-section { margin: 20px 0; }
+        .link-input { width: 100%; border: 2px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; font-size: 15px; outline: none; transition: all 0.2s; }
+        .link-input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+        .link-input::placeholder { color: #9ca3af; }
+        .link-paste-btn { width: 100%; margin-top: 8px; background: #f1f5f9; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 12px; color: #64748b; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .link-paste-btn:hover { background: #e2e8f0; border-color: #94a3b8; }
+        
+        .link-preview { margin: 20px 0; padding: 16px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 12px; display: none; }
+        .link-preview.show { display: block; animation: slideDown 0.3s; }
+        .link-preview-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .link-preview-logo { font-size: 32px; }
+        .link-preview-brand { font-weight: 700; color: #166534; }
+        .link-preview-title { font-size: 15px; color: #14532d; margin-bottom: 4px; }
+        .link-preview-type { display: inline-block; background: #16a34a; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+        
+        .link-reward-preview { background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 12px; padding: 16px; margin: 16px 0; text-align: center; }
+        .link-reward-amount { font-size: 32px; font-weight: 800; color: #92400e; }
+        .link-reward-text { font-size: 13px; color: #a16207; }
+        
+        .link-submit-btn { width: 100%; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .link-submit-btn:hover { transform: scale(1.02); }
+        .link-submit-btn:disabled { background: #9ca3af; cursor: not-allowed; transform: none; }
+        
+        .link-modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 28px; cursor: pointer; color: white; }
+        
+        /* SUCCESS ANIMATION */
+        .success-animation { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(16,185,129,0.95); z-index: 700; display: none; align-items: center; justify-content: center; flex-direction: column; color: white; }
+        .success-animation.show { display: flex; animation: fadeIn 0.3s; }
+        .success-icon { font-size: 80px; animation: bounceIn 0.5s; }
+        .success-title { font-size: 28px; font-weight: 800; margin-top: 20px; }
+        .success-xp { font-size: 48px; font-weight: 800; margin-top: 12px; animation: pulse 1s infinite; }
+        .success-subtitle { font-size: 16px; opacity: 0.9; margin-top: 8px; }
+        .success-bonus { background: rgba(255,255,255,0.2); padding: 12px 24px; border-radius: 30px; margin-top: 20px; font-weight: 600; }
+        @keyframes bounceIn { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        
+        /* USER DEALS BADGE */
+        .user-deal-badge { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; margin-left: 8px; }
+        
+        /* LEADERBOARD TEASER */
+        .leaderboard-teaser { background: linear-gradient(135deg, #8b5cf6, #6366f1); border-radius: 16px; padding: 16px; margin-bottom: 16px; color: white; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .leaderboard-teaser:hover { transform: scale(1.02); }
+        .leaderboard-icon { font-size: 32px; }
+        .leaderboard-info { flex: 1; }
+        .leaderboard-title { font-weight: 700; }
+        .leaderboard-text { font-size: 13px; opacity: 0.9; }
+        .leaderboard-rank { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-weight: 700; }
         .deal-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
         .deal-logo { font-size: 32px; }
         .deal-brand { font-weight: 600; color: #374151; font-size: 14px; }
@@ -388,10 +451,62 @@
     </div>
     
     <div class="bottom-nav">
-        <div class="nav-item active"><div class="nav-icon">🏠</div><div class="nav-label">Deals</div></div>
+        <div class="nav-item active" onclick="showHome()"><div class="nav-icon">🏠</div><div class="nav-label">Deals</div></div>
         <div class="nav-item" onclick="showStats()"><div class="nav-icon">📊</div><div class="nav-label">Stats</div></div>
         <div class="nav-item" onclick="openSpinModal()"><div class="nav-icon">🎡</div><div class="nav-label">Drehen</div></div>
         <div class="nav-item" onclick="showFavorites()" style="position:relative;"><div class="nav-icon">❤️</div><div class="nav-label">Favoriten</div><span class="nav-badge" id="favBadge" style="display:none;">0</span></div>
+    </div>
+    
+    <!-- FAB ADD DEAL BUTTON -->
+    <button class="fab-add" onclick="openLinkModal()">
+        +
+        <span class="fab-tooltip">🔗 Deal-Link einfügen</span>
+    </button>
+    
+    <!-- LINK SUBMIT MODAL -->
+    <div class="link-modal" id="linkModal">
+        <button class="link-modal-close" onclick="closeLinkModal()">×</button>
+        <div class="link-modal-content">
+            <div class="link-modal-header">
+                <div class="link-modal-icon">🔗</div>
+                <div class="link-modal-title">Deal-Link teilen</div>
+                <div class="link-modal-subtitle">Hast du einen Gratis-Deal entdeckt? Teile ihn mit der Community!</div>
+            </div>
+            
+            <div class="link-input-section">
+                <input type="url" class="link-input" id="linkInput" placeholder="https://beispiel.at/gratis-angebot..." oninput="previewLink()">
+                <button class="link-paste-btn" onclick="pasteFromClipboard()">
+                    📋 Aus Zwischenablage einfügen
+                </button>
+            </div>
+            
+            <div class="link-preview" id="linkPreview">
+                <div class="link-preview-header">
+                    <span class="link-preview-logo" id="previewLogo">🎁</span>
+                    <span class="link-preview-brand" id="previewBrand">Wird erkannt...</span>
+                </div>
+                <div class="link-preview-title" id="previewTitle">Deal wird analysiert...</div>
+                <span class="link-preview-type" id="previewType">GRATIS</span>
+            </div>
+            
+            <div class="link-reward-preview">
+                <div class="link-reward-amount">+100 XP</div>
+                <div class="link-reward-text">🎁 Belohnung für deinen Beitrag zur Community!</div>
+            </div>
+            
+            <button class="link-submit-btn" id="linkSubmitBtn" onclick="submitDealLink()" disabled>
+                🚀 Deal einreichen
+            </button>
+        </div>
+    </div>
+    
+    <!-- SUCCESS ANIMATION -->
+    <div class="success-animation" id="successAnimation">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">DEAL EINGEREICHT!</div>
+        <div class="success-xp">+100 XP</div>
+        <div class="success-subtitle">Danke für deinen Beitrag!</div>
+        <div class="success-bonus">🏆 Du bist jetzt Deal-Hunter Rang #<span id="userRank">42</span></div>
     </div>
 
     <script>
@@ -405,6 +520,54 @@
         let userTips = JSON.parse(localStorage.getItem('userTips') || '{}');
         let ratings = JSON.parse(localStorage.getItem('ratings') || '{}');
         let userRatings = JSON.parse(localStorage.getItem('userRatings') || '{}');
+        let userDeals = JSON.parse(localStorage.getItem('userDeals') || '[]');
+        let submittedLinks = JSON.parse(localStorage.getItem('submittedLinks') || '[]');
+        
+        // Bekannte Marken für Link-Erkennung
+        const KNOWN_BRANDS = {
+            'mcdonalds': { name: "McDonald's", logo: '🍟', category: 'essen' },
+            'burgerking': { name: 'Burger King', logo: '🍔', category: 'essen' },
+            'ikea': { name: 'IKEA', logo: '🪑', category: 'shopping' },
+            'billa': { name: 'BILLA', logo: '🛒', category: 'supermarkt' },
+            'spar': { name: 'SPAR', logo: '🛒', category: 'supermarkt' },
+            'hofer': { name: 'HOFER', logo: '🛒', category: 'supermarkt' },
+            'lidl': { name: 'Lidl', logo: '🛒', category: 'supermarkt' },
+            'dm': { name: 'dm', logo: '💇', category: 'beauty' },
+            'müller': { name: 'Müller', logo: '💄', category: 'beauty' },
+            'mediamarkt': { name: 'MediaMarkt', logo: '📺', category: 'technik' },
+            'saturn': { name: 'Saturn', logo: '📺', category: 'technik' },
+            'amazon': { name: 'Amazon', logo: '📦', category: 'shopping' },
+            'zalando': { name: 'Zalando', logo: '👟', category: 'mode' },
+            'aboutyou': { name: 'ABOUT YOU', logo: '👗', category: 'mode' },
+            'hm': { name: 'H&M', logo: '👕', category: 'mode' },
+            'starbucks': { name: 'Starbucks', logo: '☕', category: 'kaffee' },
+            'tchibo': { name: 'Tchibo', logo: '☕', category: 'kaffee' },
+            'nespresso': { name: 'Nespresso', logo: '☕', category: 'kaffee' },
+            'netflix': { name: 'Netflix', logo: '📺', category: 'streaming' },
+            'spotify': { name: 'Spotify', logo: '🎵', category: 'streaming' },
+            'fitinn': { name: 'FitInn', logo: '💪', category: 'fitness' },
+            'mcfit': { name: 'McFIT', logo: '💪', category: 'fitness' },
+            'ryanair': { name: 'Ryanair', logo: '✈️', category: 'reisen' },
+            'wizz': { name: 'Wizz Air', logo: '✈️', category: 'reisen' },
+            'oebb': { name: 'ÖBB', logo: '🚂', category: 'reisen' },
+            'mjam': { name: 'Mjam', logo: '🛵', category: 'essen' },
+            'lieferando': { name: 'Lieferando', logo: '🛵', category: 'essen' },
+            'uber': { name: 'Uber Eats', logo: '🍔', category: 'essen' },
+            'kfc': { name: 'KFC', logo: '🍗', category: 'essen' },
+            'subway': { name: 'Subway', logo: '🥪', category: 'essen' },
+            'dominos': { name: "Domino's", logo: '🍕', category: 'essen' },
+            'nordsee': { name: 'NORDSEE', logo: '🐟', category: 'essen' },
+            'vapiano': { name: 'Vapiano', logo: '🍝', category: 'essen' },
+            'dougla': { name: 'Douglas', logo: '💋', category: 'beauty' },
+            'sephora': { name: 'Sephora', logo: '💄', category: 'beauty' },
+            'apple': { name: 'Apple', logo: '🍎', category: 'technik' },
+            'samsung': { name: 'Samsung', logo: '📱', category: 'technik' },
+            'a1': { name: 'A1', logo: '📶', category: 'technik' },
+            'magenta': { name: 'Magenta', logo: '📱', category: 'technik' },
+            'drei': { name: 'Drei', logo: '📱', category: 'technik' },
+            'booking': { name: 'Booking.com', logo: '🏨', category: 'reisen' },
+            'airbnb': { name: 'Airbnb', logo: '🏠', category: 'reisen' },
+        };
         
         // Vordefinierte Community-Tipps
         const defaultTips = {
@@ -629,7 +792,10 @@
             try {
                 const res = await fetch('deals.json?t=' + Date.now());
                 const data = await res.json();
-                allDeals = data.deals.map(d => ({ ...d, votes: votes[d.id] || d.votes || 0 }));
+                // Kombiniere User-Deals mit Base-Deals (User-Deals zuerst)
+                const baseDeals = data.deals.map(d => ({ ...d, votes: votes[d.id] || d.votes || 0 }));
+                const userDealsWithVotes = userDeals.map(d => ({ ...d, votes: votes[d.id] || d.votes || 0 }));
+                allDeals = [...userDealsWithVotes, ...baseDeals];
                 updateCounts(); renderDeals(); setDailyDeal();
             } catch (e) { document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">😕</div><p>Fehler</p></div>'; }
         }
@@ -672,7 +838,7 @@
                 
                 return '<div class="deal-card ' + (d.hot ? 'hot' : '') + '" id="deal-' + d.id + '"><div class="deal-header" onclick="trackDealView()"><span class="deal-logo">' + d.logo + '</span><div><div class="deal-brand">' + d.brand + '</div><div class="deal-title">' + d.title + '</div></div></div><div class="deal-desc">' + d.description + '</div>' + 
                 (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="code-copy" onclick="copyCode(\'' + d.code + '\',event)">Kopieren</button></div>' : '') + 
-                '<div class="deal-meta"><span class="badge badge-' + d.type + '">' + (d.type === 'gratis' ? '🎁 GRATIS' : d.type === 'testabo' ? '🆓 Testabo' : '💰 Rabatt') + '</span>' + (d.hot ? '<span class="badge badge-hot">🔥 Hot</span>' : '') + (d.isNew ? '<span class="badge badge-new">✨ Neu</span>' : '') + '</div>' +
+                '<div class="deal-meta"><span class="badge badge-' + d.type + '">' + (d.type === 'gratis' ? '🎁 GRATIS' : d.type === 'testabo' ? '🆓 Testabo' : '💰 Rabatt') + '</span>' + (d.hot ? '<span class="badge badge-hot">🔥 Hot</span>' : '') + (d.isNew ? '<span class="badge badge-new">✨ Neu</span>' : '') + (d.isUserSubmitted ? '<span class="user-deal-badge">👤 Community</span>' : '') + '</div>' +
                 '<div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary"><span class="rating-avg">' + avgRating + '</span> (' + dealRating.count + ' Bewertungen)</span></div>' +
                 '<div class="deal-footer"><div class="deal-info">📍 ' + d.distance + ' • ⏰ ' + d.expires + '</div><a href="' + d.url + '" target="_blank" class="deal-btn" onclick="onDealClick(event)">Zum Deal →</a></div>' +
                 '<div class="vote-section"><button class="vote-btn" onclick="vote(\'' + d.id + '\',1,event)">👍</button><span class="vote-count">' + d.votes + '</span><button class="vote-btn" onclick="vote(\'' + d.id + '\',-1,event)">👎</button><button class="share-btn" onclick="shareDeal(\'' + d.id + '\',event)">📤</button><button class="vote-btn" onclick="toggleFav(\'' + d.id + '\',event)" style="margin-left:auto">' + (favorites.includes(d.id) ? '❤️' : '🤍') + '</button></div>' +
@@ -827,11 +993,193 @@
         function toggleFav(id, e) { e.stopPropagation(); if (favorites.includes(id)) { favorites = favorites.filter(f => f !== id); showToast('💔 Entfernt'); } else { favorites.push(id); showToast('❤️ Favorit!'); addXP(2, null); } localStorage.setItem('favorites', JSON.stringify(favorites)); updateFavBadge(); renderDeals(); }
         function updateFavBadge() { const b = document.getElementById('favBadge'); if (favorites.length > 0) { b.style.display = 'block'; b.textContent = favorites.length; } else { b.style.display = 'none'; } }
         function showFavorites() { const fav = allDeals.filter(d => favorites.includes(d.id)); document.getElementById('deals').innerHTML = fav.length ? fav.map(d => '<div class="deal-card"><div class="deal-header"><span class="deal-logo">' + d.logo + '</span><div><div class="deal-brand">' + d.brand + '</div><div class="deal-title">' + d.title + '</div></div></div><a href="' + d.url + '" target="_blank" class="deal-btn" style="width:100%;text-align:center;margin-top:10px">Zum Deal →</a></div>').join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>Keine Favoriten</p></div>'; showToast('❤️ Favoriten'); }
-        function showStats() { const level = LEVELS[userData.level - 1]; document.getElementById('deals').innerHTML = '<div style="background:white;border-radius:16px;padding:20px;text-align:center"><h2 style="margin-bottom:20px">📊 Deine Stats</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#667eea">' + userData.xp + '</div><div style="font-size:12px;color:#6b7280">XP</div></div><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#f59e0b">' + userData.streak + '</div><div style="font-size:12px;color:#6b7280">Streak</div></div><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#10b981">€' + userData.totalSavings + '</div><div style="font-size:12px;color:#6b7280">Gespart</div></div><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#8b5cf6">' + userData.dealsViewed + '</div><div style="font-size:12px;color:#6b7280">Deals</div></div></div><div style="margin-top:20px;padding:16px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:12px;color:white"><div style="font-size:14px;opacity:0.9">Dein Level</div><div style="font-size:20px;font-weight:700">' + level.name + '</div></div><button onclick="renderDeals()" class="daily-btn" style="margin-top:16px">← Zurück</button></div>'; }
+        function showStats() { const level = LEVELS[userData.level - 1]; document.getElementById('deals').innerHTML = '<div style="background:white;border-radius:16px;padding:20px;text-align:center"><h2 style="margin-bottom:20px">📊 Deine Stats</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#667eea">' + userData.xp + '</div><div style="font-size:12px;color:#6b7280">XP</div></div><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#f59e0b">' + userData.streak + '</div><div style="font-size:12px;color:#6b7280">Streak</div></div><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#10b981">' + (userData.dealsSubmitted || 0) + '</div><div style="font-size:12px;color:#6b7280">Deals geteilt</div></div><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#8b5cf6">' + userData.dealsViewed + '</div><div style="font-size:12px;color:#6b7280">Deals angesehen</div></div></div><div style="margin-top:20px;padding:16px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:12px;color:white"><div style="font-size:14px;opacity:0.9">Dein Level</div><div style="font-size:20px;font-weight:700">' + level.name + '</div></div>' + (userData.dealsSubmitted > 0 ? '<div style="margin-top:16px;padding:16px;background:linear-gradient(135deg,#10b981,#059669);border-radius:12px;color:white"><div style="font-size:14px;opacity:0.9">🏆 Deal-Hunter Rang</div><div style="font-size:24px;font-weight:700">#' + Math.max(1, 100 - (userData.dealsSubmitted || 1) * 3 - userData.level * 5) + '</div></div>' : '') + '<button onclick="showHome()" class="daily-btn" style="margin-top:16px">← Zurück</button></div>'; }
         function showToast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2000); }
         function searchFor(query) { document.getElementById('searchInput').value = query; searchQuery = query; document.getElementById('searchDropdown').classList.remove('show'); document.getElementById('clearBtn').classList.add('show'); renderDeals(); }
         function clearSearch(e) { e.stopPropagation(); document.getElementById('searchInput').value = ''; searchQuery = ''; document.getElementById('clearBtn').classList.remove('show'); renderDeals(); }
         function saveUserData() { localStorage.setItem('userData', JSON.stringify(userData)); }
+        function showHome() { renderDeals(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelector('.nav-item').classList.add('active'); }
+        
+        // ===== LINK SUBMIT SYSTEM =====
+        let currentLinkData = null;
+        
+        function openLinkModal() {
+            document.getElementById('linkModal').classList.add('show');
+            document.getElementById('linkInput').value = '';
+            document.getElementById('linkPreview').classList.remove('show');
+            document.getElementById('linkSubmitBtn').disabled = true;
+            currentLinkData = null;
+        }
+        
+        function closeLinkModal() {
+            document.getElementById('linkModal').classList.remove('show');
+        }
+        
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('linkInput').value = text;
+                previewLink();
+            } catch (e) {
+                showToast('📋 Bitte manuell einfügen (Ctrl+V)');
+            }
+        }
+        
+        function previewLink() {
+            const input = document.getElementById('linkInput').value.trim();
+            const preview = document.getElementById('linkPreview');
+            const submitBtn = document.getElementById('linkSubmitBtn');
+            
+            if (!input || !input.includes('.')) {
+                preview.classList.remove('show');
+                submitBtn.disabled = true;
+                currentLinkData = null;
+                return;
+            }
+            
+            // Check if already submitted
+            if (submittedLinks.includes(input)) {
+                showToast('⚠️ Dieser Link wurde bereits eingereicht!');
+                submitBtn.disabled = true;
+                return;
+            }
+            
+            // Parse the URL
+            const linkData = parseDealLink(input);
+            currentLinkData = linkData;
+            
+            // Update preview
+            document.getElementById('previewLogo').textContent = linkData.logo;
+            document.getElementById('previewBrand').textContent = linkData.brand;
+            document.getElementById('previewTitle').textContent = linkData.title;
+            document.getElementById('previewType').textContent = linkData.type.toUpperCase();
+            
+            preview.classList.add('show');
+            submitBtn.disabled = false;
+        }
+        
+        function parseDealLink(url) {
+            const urlLower = url.toLowerCase();
+            
+            // Find matching brand
+            let brand = { name: 'Unbekannt', logo: '🎁', category: 'shopping' };
+            for (const [key, value] of Object.entries(KNOWN_BRANDS)) {
+                if (urlLower.includes(key)) {
+                    brand = value;
+                    break;
+                }
+            }
+            
+            // Detect deal type from URL keywords
+            let type = 'rabatt';
+            let title = 'Neuer Deal';
+            
+            const gratisKeywords = ['gratis', 'kostenlos', 'free', 'geschenk', 'umsonst', 'freebie', '0-euro', '0euro'];
+            const rabattKeywords = ['rabatt', 'sale', 'prozent', 'aktion', 'angebot', 'deal', 'sparen', 'reduziert', 'gutschein', 'code', 'coupon'];
+            
+            if (gratisKeywords.some(k => urlLower.includes(k))) {
+                type = 'gratis';
+                title = 'Gratis-Angebot entdeckt!';
+            } else if (rabattKeywords.some(k => urlLower.includes(k))) {
+                type = 'rabatt';
+                title = 'Rabatt-Deal entdeckt!';
+            }
+            
+            // Try to extract more info from URL path
+            const pathMatch = url.match(/\/([^\/\?]+)(?:\?|$)/);
+            if (pathMatch) {
+                const pathPart = pathMatch[1].replace(/[-_]/g, ' ').replace(/\.(html|php|aspx)/i, '');
+                if (pathPart.length > 3 && pathPart.length < 50) {
+                    title = pathPart.charAt(0).toUpperCase() + pathPart.slice(1);
+                }
+            }
+            
+            return {
+                url: url,
+                brand: brand.name,
+                logo: brand.logo,
+                category: brand.category,
+                type: type,
+                title: title,
+                id: 'user-' + Date.now()
+            };
+        }
+        
+        function submitDealLink() {
+            if (!currentLinkData) return;
+            
+            // Save the link as submitted
+            submittedLinks.push(currentLinkData.url);
+            localStorage.setItem('submittedLinks', JSON.stringify(submittedLinks));
+            
+            // Create new deal
+            const newDeal = {
+                id: currentLinkData.id,
+                brand: currentLinkData.brand,
+                logo: currentLinkData.logo,
+                title: currentLinkData.title,
+                description: '📱 Von der Community entdeckt! Überprüfe den Deal auf der Website.',
+                type: currentLinkData.type,
+                category: currentLinkData.category,
+                source: 'Community',
+                url: currentLinkData.url,
+                expires: 'Siehe Website',
+                distance: 'Online',
+                hot: true,
+                isNew: true,
+                isUserSubmitted: true,
+                submittedAt: Date.now(),
+                votes: 5
+            };
+            
+            // Add to user deals
+            userDeals.unshift(newDeal);
+            localStorage.setItem('userDeals', JSON.stringify(userDeals));
+            
+            // Update stats
+            userData.dealsSubmitted = (userData.dealsSubmitted || 0) + 1;
+            saveUserData();
+            
+            // Close modal
+            closeLinkModal();
+            
+            // Show success animation
+            showSuccessAnimation();
+            
+            // Reload deals
+            setTimeout(() => {
+                loadDeals();
+            }, 500);
+        }
+        
+        function showSuccessAnimation() {
+            const animation = document.getElementById('successAnimation');
+            const rank = Math.max(1, 100 - (userData.dealsSubmitted || 1) * 3 - userData.level * 5);
+            document.getElementById('userRank').textContent = rank;
+            
+            animation.classList.add('show');
+            
+            // Add XP with delay for effect
+            setTimeout(() => {
+                addXP(100, '🎉 Deal eingereicht! Mega Belohnung!');
+            }, 500);
+            
+            // Check for bonus
+            if ((userData.dealsSubmitted || 0) === 1) {
+                setTimeout(() => {
+                    addXP(50, '🏆 Erster Deal eingereicht! Bonus!');
+                }, 1500);
+            } else if ((userData.dealsSubmitted || 0) % 5 === 0) {
+                setTimeout(() => {
+                    addXP(25, '🎯 ' + userData.dealsSubmitted + ' Deals eingereicht! Bonus!');
+                }, 1500);
+            }
+            
+            // Hide after delay
+            setTimeout(() => {
+                animation.classList.remove('show');
+            }, 3500);
+        }
         
         document.getElementById('searchInput').addEventListener('focus', () => document.getElementById('searchDropdown').classList.add('show'));
         document.getElementById('searchInput').addEventListener('input', e => { searchQuery = e.target.value; document.getElementById('clearBtn').classList.toggle('show', searchQuery.length > 0); renderDeals(); });
