@@ -144,6 +144,65 @@
         .deal-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
         .deal-card.hot { border-color: #f59e0b; }
         @keyframes highlightDeal { 0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.06); } 25%, 75% { box-shadow: 0 0 0 4px #667eea, 0 8px 25px rgba(102,126,234,0.4); } }
+        
+        /* COMMUNITY SECTION */
+        .community-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6; }
+        .community-toggle { background: #f8fafc; border: none; padding: 10px 16px; border-radius: 10px; width: 100%; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 14px; color: #64748b; }
+        .community-toggle:hover { background: #f1f5f9; }
+        .community-toggle .count { background: #667eea; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+        .community-content { display: none; margin-top: 12px; }
+        .community-content.show { display: block; animation: slideDown 0.3s ease; }
+        
+        /* TIPS */
+        .tips-section { margin-bottom: 16px; }
+        .tips-title { font-size: 13px; font-weight: 700; color: #374151; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .tip-card { background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 12px; border-radius: 10px; margin-bottom: 8px; }
+        .tip-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .tip-avatar { width: 24px; height: 24px; border-radius: 50%; background: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .tip-user { font-size: 12px; font-weight: 600; color: #92400e; }
+        .tip-badge { background: #f59e0b; color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px; font-weight: 600; }
+        .tip-text { font-size: 13px; color: #78350f; line-height: 1.4; }
+        .tip-helpful { display: flex; align-items: center; gap: 12px; margin-top: 8px; font-size: 12px; color: #92400e; }
+        .tip-helpful button { background: none; border: none; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px; color: #92400e; }
+        .tip-helpful button:hover { color: #78350f; }
+        
+        /* STAR RATING */
+        .star-rating { display: flex; align-items: center; gap: 4px; margin: 8px 0; }
+        .star { font-size: 20px; cursor: pointer; color: #e5e7eb; transition: color 0.2s; }
+        .star.filled { color: #fbbf24; }
+        .star:hover { transform: scale(1.2); }
+        .rating-summary { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6b7280; }
+        .rating-avg { font-weight: 700; color: #f59e0b; }
+        
+        /* COMMENTS */
+        .comments-section { margin-top: 12px; }
+        .comments-title { font-size: 13px; font-weight: 700; color: #374151; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .comment-card { background: #f8fafc; padding: 12px; border-radius: 10px; margin-bottom: 8px; }
+        .comment-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .comment-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600; }
+        .comment-user { font-size: 12px; font-weight: 600; color: #374151; }
+        .comment-time { font-size: 11px; color: #9ca3af; }
+        .comment-text { font-size: 13px; color: #4b5563; line-height: 1.4; }
+        .comment-actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+        .comment-actions button { background: none; border: none; cursor: pointer; font-size: 12px; color: #6b7280; display: flex; align-items: center; gap: 4px; }
+        .comment-actions button:hover { color: #374151; }
+        
+        /* ADD COMMENT/TIP */
+        .add-input-section { margin-top: 12px; }
+        .add-input-row { display: flex; gap: 8px; }
+        .add-input { flex: 1; border: 2px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; font-size: 14px; outline: none; }
+        .add-input:focus { border-color: #667eea; }
+        .add-btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .add-btn:hover { transform: scale(1.05); }
+        .input-tabs { display: flex; gap: 8px; margin-bottom: 8px; }
+        .input-tab { background: #f1f5f9; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; }
+        .input-tab.active { background: #667eea; color: white; }
+        
+        /* VERIFIED BADGE */
+        .verified-badge { background: #10b981; color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 2px; }
+        
+        /* NO COMMENTS */
+        .no-content { text-align: center; padding: 20px; color: #9ca3af; font-size: 13px; }
         .deal-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
         .deal-logo { font-size: 32px; }
         .deal-brand { font-weight: 600; color: #374151; font-size: 14px; }
@@ -342,6 +401,44 @@
         let searchQuery = '';
         let votes = JSON.parse(localStorage.getItem('votes') || '{}');
         let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        let comments = JSON.parse(localStorage.getItem('comments') || '{}');
+        let userTips = JSON.parse(localStorage.getItem('userTips') || '{}');
+        let ratings = JSON.parse(localStorage.getItem('ratings') || '{}');
+        let userRatings = JSON.parse(localStorage.getItem('userRatings') || '{}');
+        
+        // Vordefinierte Community-Tipps
+        const defaultTips = {
+            'top-1': [
+                { id: 't1', user: 'SparFuchs22', text: '☝️ Zuerst jö App öffnen, dann an der Kassa den Barcode scannen lassen BEVOR du bezahlst!', avatar: '🦊', verified: true, badge: 'Top Tipp', helpful: 47 },
+                { id: 't2', user: 'WienDeals', text: 'Funktioniert bei allen OMV VIVA Tankstellen in Wien. Am besten morgens, da ist die Auswahl größer!', avatar: '🎯', helpful: 23 }
+            ],
+            'top-2': [
+                { id: 't3', user: 'IKEAFan', text: '💡 IKEA Family Karte in der App vorzeigen. Gilt für Filterkaffee UND Tee - unbegrenzt nachfüllen!', avatar: '☕', verified: true, badge: 'Experte', helpful: 89 },
+                { id: 't4', user: 'KaffeeLiebe', text: 'Im Restaurant UND im Bistro einlösbar. Tipp: Nach 15 Uhr ist weniger los!', avatar: '😊', helpful: 34 }
+            ],
+            'top-3': [
+                { id: 't5', user: 'FoodieWien', text: '🍛 Einfach hingehen, Buffet nehmen, und am Ende zahlen was du willst. Minimum gibt es nicht!', avatar: '🍽️', verified: true, helpful: 56 },
+                { id: 't6', user: 'StudentLife', text: 'Perfekt für Studenten! Ich zahle meist 5-7€ und werde super satt. Sehr leckeres Curry!', avatar: '📚', helpful: 41 }
+            ],
+            'top-4': [
+                { id: 't7', user: 'McFreak', text: '📱 In der McDonalds App auf "Feedback" gehen, Kassenbon-Code eingeben, Gratis-Kaffee in 2 Min!', avatar: '🍟', verified: true, badge: 'Pro Tipp', helpful: 112 },
+                { id: 't8', user: 'KaffeeJunkie', text: 'Geht 5x pro Monat! Ich nutze es jeden Montag für den Wochenstart ☕', avatar: '☕', helpful: 67 }
+            ],
+            'fitness-1': [
+                { id: 't9', user: 'FitGirl23', text: '💪 Online Termin buchen, Ausweis mitbringen. Handtuch wird gestellt!', avatar: '🏋️', verified: true, helpful: 38 },
+                { id: 't10', user: 'GymBro', text: 'Tipp: Gleich fragen ob sie aktuell Aktionen haben - oft gibt es Rabatt wenn man direkt abschließt', avatar: '💪', helpful: 29 }
+            ],
+            'reisen-1': [
+                { id: 't11', user: 'TravelHacker', text: '✈️ Newsletter abonnieren für Flash Sales! Die besten Deals kommen Dienstag & Donnerstag', avatar: '🌍', verified: true, badge: 'Reise-Experte', helpful: 94 },
+                { id: 't12', user: 'BudgetTravel', text: 'Flexibel beim Datum sein und "günstigster Monat" wählen. Wien-Barcelona für 9,99€ gebucht!', avatar: '✈️', helpful: 78 }
+            ],
+            'event-1': [
+                { id: 't13', user: 'WienKultur', text: '🎬 Früh kommen (ab 18 Uhr) für gute Plätze! Decke und Snacks mitnehmen. Eintritt komplett GRATIS!', avatar: '🎭', verified: true, helpful: 156 }
+            ],
+            'event-2': [
+                { id: 't14', user: 'FestivalFan', text: '🎸 U-Bahn Linie U1 bis Donauinsel. Alle 3 Bühnen gratis! Getränke vor Ort kaufen oder eigene mitnehmen.', avatar: '🎵', verified: true, badge: 'Festival-Pro', helpful: 203 }
+            ]
+        };
         
         let userData = JSON.parse(localStorage.getItem('userData') || JSON.stringify({
             xp: 0, level: 1, streak: 0, lastVisit: null, dealsViewed: 0, todayViewed: 0,
@@ -566,8 +663,137 @@
         function renderDeals() {
             const deals = filterDeals();
             if (deals.length === 0) { document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><p>Keine Deals</p></div>'; return; }
-            document.getElementById('deals').innerHTML = deals.map(d => '<div class="deal-card ' + (d.hot ? 'hot' : '') + '" id="deal-' + d.id + '" onclick="trackDealView()"><div class="deal-header"><span class="deal-logo">' + d.logo + '</span><div><div class="deal-brand">' + d.brand + '</div><div class="deal-title">' + d.title + '</div></div></div><div class="deal-desc">' + d.description + '</div>' + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="code-copy" onclick="copyCode(\'' + d.code + '\',event)">Kopieren</button></div>' : '') + '<div class="deal-meta"><span class="badge badge-' + d.type + '">' + (d.type === 'gratis' ? '🎁 GRATIS' : d.type === 'testabo' ? '🆓 Testabo' : '💰 Rabatt') + '</span>' + (d.hot ? '<span class="badge badge-hot">🔥 Hot</span>' : '') + (d.isNew ? '<span class="badge badge-new">✨ Neu</span>' : '') + '</div><div class="deal-footer"><div class="deal-info">📍 ' + d.distance + ' • ⏰ ' + d.expires + '</div><a href="' + d.url + '" target="_blank" class="deal-btn" onclick="onDealClick(event)">Zum Deal →</a></div><div class="vote-section"><button class="vote-btn" onclick="vote(\'' + d.id + '\',1,event)">👍</button><span class="vote-count">' + d.votes + '</span><button class="vote-btn" onclick="vote(\'' + d.id + '\',-1,event)">👎</button><button class="share-btn" onclick="shareDeal(\'' + d.id + '\',event)">📤</button><button class="vote-btn" onclick="toggleFav(\'' + d.id + '\',event)" style="margin-left:auto">' + (favorites.includes(d.id) ? '❤️' : '🤍') + '</button></div></div>').join('');
+            document.getElementById('deals').innerHTML = deals.map(d => {
+                const dealComments = comments[d.id] || [];
+                const dealTips = [...(defaultTips[d.id] || []), ...(userTips[d.id] || [])];
+                const dealRating = ratings[d.id] || { total: 0, count: 0 };
+                const avgRating = dealRating.count > 0 ? (dealRating.total / dealRating.count).toFixed(1) : '0';
+                const totalCommunity = dealComments.length + dealTips.length;
+                
+                return '<div class="deal-card ' + (d.hot ? 'hot' : '') + '" id="deal-' + d.id + '"><div class="deal-header" onclick="trackDealView()"><span class="deal-logo">' + d.logo + '</span><div><div class="deal-brand">' + d.brand + '</div><div class="deal-title">' + d.title + '</div></div></div><div class="deal-desc">' + d.description + '</div>' + 
+                (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="code-copy" onclick="copyCode(\'' + d.code + '\',event)">Kopieren</button></div>' : '') + 
+                '<div class="deal-meta"><span class="badge badge-' + d.type + '">' + (d.type === 'gratis' ? '🎁 GRATIS' : d.type === 'testabo' ? '🆓 Testabo' : '💰 Rabatt') + '</span>' + (d.hot ? '<span class="badge badge-hot">🔥 Hot</span>' : '') + (d.isNew ? '<span class="badge badge-new">✨ Neu</span>' : '') + '</div>' +
+                '<div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary"><span class="rating-avg">' + avgRating + '</span> (' + dealRating.count + ' Bewertungen)</span></div>' +
+                '<div class="deal-footer"><div class="deal-info">📍 ' + d.distance + ' • ⏰ ' + d.expires + '</div><a href="' + d.url + '" target="_blank" class="deal-btn" onclick="onDealClick(event)">Zum Deal →</a></div>' +
+                '<div class="vote-section"><button class="vote-btn" onclick="vote(\'' + d.id + '\',1,event)">👍</button><span class="vote-count">' + d.votes + '</span><button class="vote-btn" onclick="vote(\'' + d.id + '\',-1,event)">👎</button><button class="share-btn" onclick="shareDeal(\'' + d.id + '\',event)">📤</button><button class="vote-btn" onclick="toggleFav(\'' + d.id + '\',event)" style="margin-left:auto">' + (favorites.includes(d.id) ? '❤️' : '🤍') + '</button></div>' +
+                '<div class="community-section"><button class="community-toggle" onclick="toggleCommunity(\'' + d.id + '\')"><span>💬 Community & Tipps</span><span class="count">' + totalCommunity + '</span></button>' +
+                '<div class="community-content" id="community-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
+            }).join('');
             checkDeepLink();
+        }
+        
+        function renderStars(dealId) {
+            const userRating = userRatings[dealId] || 0;
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                stars += '<span class="star ' + (i <= userRating ? 'filled' : '') + '" onclick="rateDeal(\'' + dealId + '\',' + i + ',event)">★</span>';
+            }
+            return stars;
+        }
+        
+        function renderCommunityContent(dealId, tips, comments) {
+            let html = '<div class="tips-section"><div class="tips-title">💡 Einlösungs-Tipps</div>';
+            if (tips.length > 0) {
+                tips.forEach(tip => {
+                    html += '<div class="tip-card"><div class="tip-header"><div class="tip-avatar">' + (tip.avatar || '👤') + '</div><span class="tip-user">' + tip.user + '</span>' + (tip.verified ? '<span class="verified-badge">✓ Verifiziert</span>' : '') + (tip.badge ? '<span class="tip-badge">' + tip.badge + '</span>' : '') + '</div><div class="tip-text">' + tip.text + '</div><div class="tip-helpful"><button onclick="markHelpful(\'' + dealId + '\',\'' + tip.id + '\',event)">👍 Hilfreich (' + (tip.helpful || 0) + ')</button></div></div>';
+                });
+            } else {
+                html += '<div class="no-content">Noch keine Tipps. Teile deinen ersten!</div>';
+            }
+            html += '</div>';
+            
+            html += '<div class="comments-section"><div class="comments-title">💬 Kommentare (' + comments.length + ')</div>';
+            if (comments.length > 0) {
+                comments.slice(-5).forEach(c => {
+                    html += '<div class="comment-card"><div class="comment-header"><div class="comment-avatar">' + (c.user ? c.user[0].toUpperCase() : 'A') + '</div><span class="comment-user">' + c.user + '</span><span class="comment-time">' + timeAgo(c.time) + '</span></div><div class="comment-text">' + c.text + '</div><div class="comment-actions"><button onclick="likeComment(\'' + dealId + '\',\'' + c.id + '\',event)">👍 ' + (c.likes || 0) + '</button></div></div>';
+                });
+            } else {
+                html += '<div class="no-content">Noch keine Kommentare. Sei der Erste!</div>';
+            }
+            html += '</div>';
+            
+            html += '<div class="add-input-section"><div class="input-tabs"><button class="input-tab active" onclick="switchInputTab(\'' + dealId + '\',\'comment\',this)">💬 Kommentar</button><button class="input-tab" onclick="switchInputTab(\'' + dealId + '\',\'tip\',this)">💡 Tipp</button></div><div class="add-input-row"><input type="text" class="add-input" id="input-' + dealId + '" placeholder="Schreibe einen Kommentar..." data-type="comment"><button class="add-btn" onclick="submitInput(\'' + dealId + '\')">Senden</button></div></div>';
+            
+            return html;
+        }
+        
+        function toggleCommunity(dealId) {
+            const content = document.getElementById('community-' + dealId);
+            content.classList.toggle('show');
+        }
+        
+        function switchInputTab(dealId, type, btn) {
+            const input = document.getElementById('input-' + dealId);
+            input.dataset.type = type;
+            input.placeholder = type === 'tip' ? 'Teile einen Einlösungs-Tipp...' : 'Schreibe einen Kommentar...';
+            btn.parentElement.querySelectorAll('.input-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+        }
+        
+        function submitInput(dealId) {
+            const input = document.getElementById('input-' + dealId);
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const type = input.dataset.type || 'comment';
+            const userName = 'Du';
+            const id = Date.now().toString();
+            
+            if (type === 'tip') {
+                if (!userTips[dealId]) userTips[dealId] = [];
+                userTips[dealId].push({ id, user: userName, text, avatar: '😊', helpful: 0 });
+                localStorage.setItem('userTips', JSON.stringify(userTips));
+                addXP(10, '💡 Tipp geteilt!');
+            } else {
+                if (!comments[dealId]) comments[dealId] = [];
+                comments[dealId].push({ id, user: userName, text, time: Date.now(), likes: 0 });
+                localStorage.setItem('comments', JSON.stringify(comments));
+                addXP(5, '💬 Kommentar gepostet!');
+            }
+            
+            input.value = '';
+            renderDeals();
+            document.getElementById('community-' + dealId).classList.add('show');
+        }
+        
+        function rateDeal(dealId, stars, e) {
+            e.stopPropagation();
+            userRatings[dealId] = stars;
+            if (!ratings[dealId]) ratings[dealId] = { total: 0, count: 0 };
+            ratings[dealId].total += stars;
+            ratings[dealId].count += 1;
+            localStorage.setItem('userRatings', JSON.stringify(userRatings));
+            localStorage.setItem('ratings', JSON.stringify(ratings));
+            addXP(3, '⭐ Bewertung abgegeben!');
+            renderDeals();
+        }
+        
+        function markHelpful(dealId, tipId, e) {
+            e.stopPropagation();
+            const tips = [...(defaultTips[dealId] || []), ...(userTips[dealId] || [])];
+            const tip = tips.find(t => t.id === tipId);
+            if (tip) { tip.helpful = (tip.helpful || 0) + 1; }
+            localStorage.setItem('userTips', JSON.stringify(userTips));
+            showToast('👍 Als hilfreich markiert!');
+            renderDeals();
+            document.getElementById('community-' + dealId).classList.add('show');
+        }
+        
+        function likeComment(dealId, commentId, e) {
+            e.stopPropagation();
+            const comment = comments[dealId]?.find(c => c.id === commentId);
+            if (comment) { comment.likes = (comment.likes || 0) + 1; }
+            localStorage.setItem('comments', JSON.stringify(comments));
+            renderDeals();
+            document.getElementById('community-' + dealId).classList.add('show');
+        }
+        
+        function timeAgo(timestamp) {
+            const seconds = Math.floor((Date.now() - timestamp) / 1000);
+            if (seconds < 60) return 'gerade eben';
+            if (seconds < 3600) return Math.floor(seconds / 60) + ' Min';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + ' Std';
+            return Math.floor(seconds / 86400) + ' Tage';
         }
         
         function onDealClick(e) { e.stopPropagation(); userData.totalSavings += Math.floor(Math.random() * 5) + 1; saveUserData(); updateSavingsUI(); addXP(2, null); }
