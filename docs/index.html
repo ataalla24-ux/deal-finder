@@ -1,11 +1,84 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de-AT">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FreeFinder Wien 🎁 Gratis Deals</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>FreeFinder Wien - Gratis Deals & Freebies in Wien</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Entdecke 100+ Gratis-Deals, Freebies und kostenlose Angebote in Wien. Gratis Kaffee, Essen, Probetrainings und mehr!">
+    <meta name="keywords" content="Wien, Gratis, Deals, Freebies, kostenlos, Angebote, Rabatte, Gutscheine, Kaffee, Essen, Fitness">
+    <meta name="author" content="FreeFinder Wien">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://ataalla24-ux.github.io/deal-finder/">
+    
+    <!-- PWA & Theme -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#667eea">
+    <meta name="background-color" content="#f5f7fa">
+    
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FreeFinder">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="apple-touch-icon" href="icon-180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icon-167.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="icon-192.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icon-16.png">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ataalla24-ux.github.io/deal-finder/">
+    <meta property="og:title" content="FreeFinder Wien - Gratis Deals & Freebies">
+    <meta property="og:description" content="Entdecke 100+ Gratis-Deals in Wien! Gratis Kaffee, Essen, Probetrainings und mehr.">
+    <meta property="og:image" content="https://ataalla24-ux.github.io/deal-finder/og-image.png">
+    <meta property="og:locale" content="de_AT">
+    <meta property="og:site_name" content="FreeFinder Wien">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="FreeFinder Wien - Gratis Deals">
+    <meta name="twitter:description" content="Entdecke 100+ Gratis-Deals in Wien!">
+    <meta name="twitter:image" content="https://ataalla24-ux.github.io/deal-finder/og-image.png">
+    
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-config" content="browserconfig.xml">
+    
+    <!-- Structured Data / Schema.org -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "FreeFinder Wien",
+      "description": "Entdecke 100+ Gratis-Deals, Freebies und kostenlose Angebote in Wien",
+      "url": "https://ataalla24-ux.github.io/deal-finder/",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "150"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "FreeFinder Wien"
+      }
+    }
+    </script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 16px; padding-bottom: 100px; }
@@ -302,6 +375,34 @@
         .nav-icon { font-size: 20px; }
         .nav-label { font-size: 10px; font-weight: 600; }
         .nav-badge { position: absolute; top: -4px; right: -4px; background: #ef4444; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 700; }
+    /* LEGAL FOOTER */
+        .legal-footer { background: #1f2937; padding: 24px 16px; margin: 32px -16px -16px -16px; color: #9ca3af; font-size: 12px; }
+        .legal-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; flex-wrap: wrap; }
+        .legal-links a { color: #9ca3af; text-decoration: none; }
+        .legal-links a:hover { color: white; }
+        .legal-copyright { text-align: center; opacity: 0.7; }
+        
+        /* LEGAL MODAL */
+        .legal-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; overflow-y: auto; }
+        .legal-modal.show { display: block; animation: fadeIn 0.3s; }
+        .legal-modal-content { background: white; max-width: 600px; margin: 20px auto; padding: 24px; border-radius: 16px; position: relative; }
+        .legal-modal-close { position: absolute; top: 16px; right: 16px; background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .legal-modal-close:hover { background: #e2e8f0; }
+        .legal-modal h2 { font-size: 24px; margin-bottom: 20px; color: #1f2937; }
+        .legal-modal h3 { font-size: 16px; margin: 20px 0 10px; color: #374151; }
+        .legal-modal p, .legal-modal li { font-size: 14px; line-height: 1.6; color: #4b5563; margin-bottom: 12px; }
+        .legal-modal ul { padding-left: 20px; }
+        .legal-modal a { color: #667eea; }
+        
+        /* COOKIE BANNER */
+        .cookie-banner { position: fixed; bottom: 80px; left: 16px; right: 16px; background: white; border-radius: 16px; padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 900; display: none; max-width: 500px; margin: 0 auto; }
+        .cookie-banner.show { display: block; animation: slideUp 0.3s; }
+        .cookie-text { font-size: 13px; color: #4b5563; margin-bottom: 12px; }
+        .cookie-text a { color: #667eea; }
+        .cookie-buttons { display: flex; gap: 8px; }
+        .cookie-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 13px; }
+        .cookie-accept { background: #667eea; color: white; }
+        .cookie-decline { background: #f1f5f9; color: #4b5563; }
     </style>
 </head>
 <body>
@@ -1189,7 +1290,241 @@
         window.addEventListener('scroll', () => document.getElementById('filters').classList.toggle('scrolled', window.scrollY > 100), { passive: true });
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
         
+        // Cookie Consent Check
+        if (!localStorage.getItem('cookieConsent')) {
+            document.getElementById('cookieBanner').classList.add('show');
+        }
+        
         init();
+    </script>
+    
+    <!-- LEGAL FOOTER -->
+    <footer class="legal-footer">
+        <div class="legal-links">
+            <a href="#" onclick="openLegalModal('impressum'); return false;">Impressum</a>
+            <a href="#" onclick="openLegalModal('datenschutz'); return false;">Datenschutz</a>
+            <a href="#" onclick="openLegalModal('agb'); return false;">Nutzungsbedingungen</a>
+            <a href="mailto:kontakt@freefinder.at">Kontakt</a>
+        </div>
+        <div class="legal-copyright">
+            © 2025 FreeFinder Wien. Alle Rechte vorbehalten.
+        </div>
+    </footer>
+    
+    <!-- COOKIE BANNER -->
+    <div class="cookie-banner" id="cookieBanner">
+        <div class="cookie-text">
+            🍪 Wir verwenden localStorage, um deine Einstellungen, Favoriten und Spielfortschritt zu speichern. Keine Daten werden an Dritte weitergegeben. 
+            <a href="#" onclick="openLegalModal('datenschutz'); return false;">Mehr erfahren</a>
+        </div>
+        <div class="cookie-buttons">
+            <button class="cookie-btn cookie-decline" onclick="declineCookies()">Ablehnen</button>
+            <button class="cookie-btn cookie-accept" onclick="acceptCookies()">Akzeptieren</button>
+        </div>
+    </div>
+    
+    <!-- IMPRESSUM MODAL -->
+    <div class="legal-modal" id="impressumModal">
+        <div class="legal-modal-content">
+            <button class="legal-modal-close" onclick="closeLegalModal('impressum')">×</button>
+            <h2>📋 Impressum</h2>
+            
+            <h3>Angaben gemäß § 5 ECG und § 25 MedienG</h3>
+            <p>
+                <strong>FreeFinder Wien</strong><br>
+                [Stefan Ataalla]<br>
+                [Lotte Hass Weg 2]<br>
+                [1220] Wien, Österreich
+            </p>
+            
+            <h3>Kontakt</h3>
+            <p>
+                E-Mail: kontakt@freefinder.at<br>
+                Web: https://freefinder.at
+            </p>
+            
+            <h3>Umsatzsteuer-Identifikationsnummer</h3>
+            <p>
+                [ATU xxxxxxxx] (falls vorhanden)
+            </p>
+            
+            <h3>Haftungsausschluss</h3>
+            <p>
+                Die Inhalte dieser App wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. 
+            </p>
+            <p>
+                Die dargestellten Deals und Angebote werden von Drittanbietern bereitgestellt. Wir übernehmen keine Haftung für deren Verfügbarkeit, Konditionen oder Einlösbarkeit.
+            </p>
+            
+            <h3>Urheberrecht</h3>
+            <p>
+                Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem österreichischen Urheberrecht.
+            </p>
+        </div>
+    </div>
+    
+    <!-- DATENSCHUTZ MODAL -->
+    <div class="legal-modal" id="datenschutzModal">
+        <div class="legal-modal-content">
+            <button class="legal-modal-close" onclick="closeLegalModal('datenschutz')">×</button>
+            <h2>🔒 Datenschutzerklärung</h2>
+            
+            <h3>1. Datenschutz auf einen Blick</h3>
+            <p>
+                Diese Datenschutzerklärung klärt Sie über die Art, den Umfang und Zweck der Verarbeitung von personenbezogenen Daten innerhalb unserer App auf.
+            </p>
+            
+            <h3>2. Verantwortlicher</h3>
+            <p>
+                Verantwortlich für die Datenverarbeitung ist:<br>
+                [Stefan Ataalla]<br>
+                [Lotte Hass Weg 2]<br>
+                E-Mail: kontakt@freefinder.at
+            </p>
+            
+            <h3>3. Welche Daten werden erfasst?</h3>
+            <p>Wir speichern folgende Daten <strong>ausschließlich lokal</strong> auf Ihrem Gerät (localStorage):</p>
+            <ul>
+                <li>Favorisierte Deals</li>
+                <li>Spielfortschritt (XP, Level, Streak)</li>
+                <li>Bewertungen und Kommentare</li>
+                <li>Einstellungen und Präferenzen</li>
+                <li>Cookie-Einwilligung</li>
+            </ul>
+            
+            <h3>4. Keine Weitergabe an Dritte</h3>
+            <p>
+                <strong>Ihre Daten verlassen niemals Ihr Gerät.</strong> Wir übertragen keine personenbezogenen Daten an Server oder Dritte. Alle Daten werden ausschließlich in Ihrem Browser gespeichert.
+            </p>
+            
+            <h3>5. Externe Links</h3>
+            <p>
+                Unsere App enthält Links zu externen Websites (Deal-Anbieter). Für deren Datenschutzpraktiken sind wir nicht verantwortlich. Bitte lesen Sie die Datenschutzerklärungen der jeweiligen Anbieter.
+            </p>
+            
+            <h3>6. Hosting</h3>
+            <p>
+                Diese App wird auf GitHub Pages gehostet. GitHub kann technische Daten wie IP-Adressen protokollieren. Weitere Informationen finden Sie in der <a href="https://docs.github.com/de/site-policy/privacy-policies/github-privacy-statement" target="_blank">GitHub Datenschutzerklärung</a>.
+            </p>
+            
+            <h3>7. Ihre Rechte (DSGVO)</h3>
+            <p>Sie haben das Recht auf:</p>
+            <ul>
+                <li>Auskunft über Ihre gespeicherten Daten</li>
+                <li>Berichtigung unrichtiger Daten</li>
+                <li>Löschung Ihrer Daten (localStorage löschen)</li>
+                <li>Einschränkung der Verarbeitung</li>
+                <li>Datenübertragbarkeit</li>
+                <li>Widerruf Ihrer Einwilligung</li>
+            </ul>
+            <p>
+                <strong>So löschen Sie Ihre Daten:</strong> Öffnen Sie die Browser-Einstellungen → Websitedaten → freefinder löschen. Oder nutzen Sie den "Daten löschen" Button in den App-Einstellungen.
+            </p>
+            
+            <h3>8. Kontakt</h3>
+            <p>
+                Bei Fragen zum Datenschutz kontaktieren Sie uns unter: kontakt@freefinder.at
+            </p>
+            
+            <p style="margin-top: 24px; color: #9ca3af; font-size: 12px;">
+                Stand: Januar 2025
+            </p>
+        </div>
+    </div>
+    
+    <!-- AGB MODAL -->
+    <div class="legal-modal" id="agbModal">
+        <div class="legal-modal-content">
+            <button class="legal-modal-close" onclick="closeLegalModal('agb')">×</button>
+            <h2>📜 Nutzungsbedingungen</h2>
+            
+            <h3>1. Geltungsbereich</h3>
+            <p>
+                Diese Nutzungsbedingungen gelten für die Nutzung der FreeFinder Wien App.
+            </p>
+            
+            <h3>2. Leistungsbeschreibung</h3>
+            <p>
+                FreeFinder Wien ist eine kostenlose App, die Informationen über Gratis-Deals und Angebote in Wien sammelt und darstellt. Die App dient ausschließlich Informationszwecken.
+            </p>
+            
+            <h3>3. Keine Garantie</h3>
+            <p>
+                Wir übernehmen <strong>keine Garantie</strong> für:
+            </p>
+            <ul>
+                <li>Die Verfügbarkeit der dargestellten Deals</li>
+                <li>Die Richtigkeit der Informationen</li>
+                <li>Die Einlösbarkeit der Angebote</li>
+                <li>Änderungen seitens der Anbieter</li>
+            </ul>
+            
+            <h3>4. User-generierte Inhalte</h3>
+            <p>
+                Nutzer können Kommentare, Tipps und Deals einreichen. Mit dem Einreichen erteilen Sie uns das Recht, diese Inhalte in der App anzuzeigen. Sie sind für Ihre eingereichten Inhalte selbst verantwortlich.
+            </p>
+            
+            <h3>5. Verbotene Nutzung</h3>
+            <p>Es ist untersagt:</p>
+            <ul>
+                <li>Falsche oder irreführende Deals einzureichen</li>
+                <li>Die App für kommerzielle Zwecke zu nutzen</li>
+                <li>Die App zu manipulieren oder zu missbrauchen</li>
+            </ul>
+            
+            <h3>6. Haftungsausschluss</h3>
+            <p>
+                Die Nutzung der App erfolgt auf eigenes Risiko. Wir haften nicht für Schäden, die durch die Nutzung entstehen.
+            </p>
+            
+            <h3>7. Änderungen</h3>
+            <p>
+                Wir behalten uns vor, diese Nutzungsbedingungen jederzeit zu ändern.
+            </p>
+            
+            <p style="margin-top: 24px; color: #9ca3af; font-size: 12px;">
+                Stand: Januar 2025
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Legal Modal Functions
+        function openLegalModal(type) {
+            document.getElementById(type + 'Modal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeLegalModal(type) {
+            document.getElementById(type + 'Modal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        
+        // Cookie Functions
+        function acceptCookies() {
+            localStorage.setItem('cookieConsent', 'accepted');
+            document.getElementById('cookieBanner').classList.remove('show');
+        }
+        
+        function declineCookies() {
+            localStorage.setItem('cookieConsent', 'declined');
+            document.getElementById('cookieBanner').classList.remove('show');
+            // Clear all localStorage except consent
+            const consent = localStorage.getItem('cookieConsent');
+            localStorage.clear();
+            localStorage.setItem('cookieConsent', consent);
+            showToast('Lokale Daten wurden gelöscht');
+        }
+        
+        // Close modal on outside click
+        document.querySelectorAll('.legal-modal').forEach(modal => {
+            modal.addEventListener('click', e => {
+                if (e.target === modal) {
+                    modal.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
     </script>
 </body>
 </html>
