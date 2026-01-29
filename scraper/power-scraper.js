@@ -41,12 +41,6 @@ const SOURCES = [
   // ========== MARKTPLÄTZE ==========
   { name: 'Shpock Gratis', url: 'https://www.shpock.com/at/q/gratis', type: 'html', brand: 'Shpock', logo: '📱', category: 'shopping' },
   
-  // ========== NEWS & LIFESTYLE ==========
-  { name: 'Vienna.at', url: 'https://www.vienna.at/', type: 'html', brand: 'Vienna.at', logo: '📰', category: 'wien' },
-  { name: 'MeinBezirk Wien', url: 'https://www.meinbezirk.at/wien', type: 'html', brand: 'MeinBezirk', logo: '📰', category: 'wien' },
-  { name: 'Kurier Wien', url: 'https://kurier.at/chronik/wien', type: 'html', brand: 'Kurier', logo: '📰', category: 'wien' },
-  { name: 'Stadtbekannt', url: 'https://www.stadtbekannt.at/', type: 'html', brand: 'Stadtbekannt', logo: '🏙️', category: 'wien' },
-  
   // ========== SUPERMÄRKTE ==========
   { name: 'Lidl Angebote', url: 'https://www.lidl.at/c/billiger-montag/a10006065', type: 'html', brand: 'Lidl', logo: '🛒', category: 'supermarkt' },
   { name: 'HOFER Aktionen', url: 'https://www.hofer.at/de/angebote.html', type: 'html', brand: 'HOFER', logo: '🛒', category: 'supermarkt' },
@@ -94,10 +88,10 @@ const SOURCES = [
 const BASE_DEALS = [
   // ⭐ GRATIS KAFFEE - TOP PRIORITY
   {
-    id: 'top-1', brand: 'IKEA', logo: '☕', title: 'GRATIS Kaffee UNLIMITIERT',
-    description: 'IKEA Family Mitglieder: Unbegrenzt Gratis-Kaffee im Restaurant! Täglich, keine Limits.',
-    type: 'gratis', category: 'kaffee', source: 'IKEA', url: 'https://www.ikea.com/at/de/ikea-family/',
-    expires: 'Unbegrenzt', distance: 'IKEA Standorte', hot: true, isNew: false, priority: 1, votes: 234
+     id: 'top-1', brand: 'OMV VIVA', logo: '⛽', title: 'GRATIS Getränk für 1 jö Punkt',
+    description: 'Bei OMV VIVA: Heißgetränk oder Softdrink für nur 1 jö Punkt! Inkl. Kaffee, Tee, Cola.',
+    type: 'gratis', category: 'kaffee', source: 'jö Bonus Club', url: 'https://www.jo-club.at/',
+    expires: 'Dauerhaft', distance: 'OMV Tankstellen', hot: true, isNew: false, priority: 1, votes: 156
   },
   {
     id: 'top-2', brand: "McDonald's", logo: '☕', title: 'GRATIS Kaffee - 5x/Monat',
@@ -106,10 +100,10 @@ const BASE_DEALS = [
     expires: 'Monatlich', distance: 'Alle Filialen', hot: true, isNew: false, priority: 1, votes: 189
   },
   {
-    id: 'top-3', brand: 'OMV VIVA', logo: '⛽', title: 'GRATIS Getränk für 1 jö Punkt',
-    description: 'Bei OMV VIVA: Heißgetränk oder Softdrink für nur 1 jö Punkt! Inkl. Kaffee, Tee, Cola.',
-    type: 'gratis', category: 'kaffee', source: 'jö Bonus Club', url: 'https://www.jo-club.at/',
-    expires: 'Dauerhaft', distance: 'OMV Tankstellen', hot: true, isNew: false, priority: 1, votes: 156
+   id: 'top-3', brand: 'IKEA', logo: '☕', title: 'GRATIS Kaffee UNLIMITIERT',
+    description: 'IKEA Family Mitglieder: Unbegrenzt Gratis-Kaffee im Restaurant! Täglich, keine Limits.',
+    type: 'gratis', category: 'kaffee', source: 'IKEA', url: 'https://www.ikea.com/at/de/ikea-family/',
+    expires: 'Unbegrenzt', distance: 'IKEA Standorte', hot: true, isNew: false, priority: 1, votes: 234
   },
 
   // ⭐ GRATIS ESSEN - TOP PRIORITY
