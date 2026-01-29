@@ -1,9 +1,12 @@
-const CACHE_NAME = 'freefinder-v2';
+const CACHE_NAME = 'freefinder-v3';
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
-  './icon-192.svg'
+  './icon-192.svg',
+  './icon-512.svg',
+  './icon-maskable.svg',
+  './og-image.svg'
 ];
 
 self.addEventListener('install', event => {
@@ -30,7 +33,7 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Always fetch deals.json from network
+  // Always fetch deals.json from network for fresh data
   if (event.request.url.includes('deals.json')) {
     event.respondWith(
       fetch(event.request)
