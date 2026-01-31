@@ -627,10 +627,14 @@
             const level = LEVELS[userData.level - 1] || LEVELS[0];
             const nextLevel = LEVELS[userData.level] || level;
             const progress = Math.min(((userData.xp - level.xp) / (nextLevel.xp - level.xp)) * 100, 100);
-            document.getElementById('levelBadge').textContent = userData.level;
-            document.getElementById('levelName').textContent = level.name;
-            document.getElementById('levelXpFill').style.width = progress + '%';
-            document.getElementById('levelXpText').textContent = userData.xp + ' / ' + nextLevel.xp + ' XP';
+            const lb = document.getElementById('levelBadge');
+            const ln = document.getElementById('levelName');
+            const lf = document.getElementById('levelXpFill');
+            const lt = document.getElementById('levelXpText');
+            if (lb) lb.textContent = userData.level;
+            if (ln) ln.textContent = level.name;
+            if (lf) lf.style.width = progress + '%';
+            if (lt) lt.textContent = userData.xp + ' / ' + nextLevel.xp + ' XP';
         }
         
         function showXPPopup(text) {
@@ -673,13 +677,16 @@
                 else if (i === viewed) { dot.classList.add('current'); dot.textContent = i + 1; }
                 else { dot.textContent = i + 1; }
             });
-            document.getElementById('secretFill').style.width = (viewed / 5) * 100 + '%';
-            document.getElementById('secretText').textContent = viewed + '/5 Deals angesehen';
+            const sf = document.getElementById('secretFill');
+            const st = document.getElementById('secretText');
+            if (sf) sf.style.width = (viewed / 5) * 100 + '%';
+            if (st) st.textContent = viewed + '/5 Deals angesehen';
             if (userData.secretUnlocked) unlockSecret();
         }
         
         function unlockSecret() {
             const sd = document.getElementById('secretDeal');
+            if (!sd) return;
             sd.classList.remove('locked');
             sd.classList.add('secret-unlocked');
             sd.innerHTML = '<div class="secret-header"><div class="secret-icon">🎁</div><div><div class="secret-title">GEHEIMER DEAL!</div><div class="secret-desc">McDonald\'s: Gratis McFlurry!</div></div></div><button class="daily-btn" style="margin-top:12px;width:100%" onclick="window.open(\'https://www.mcdonalds.at/app\')">Einlösen →</button>';
@@ -689,10 +696,10 @@
             const today = new Date().toDateString();
             if (userData.spinDate !== today) { userData.spinUsedToday = false; userData.spinDate = today; saveUserData(); }
             if (userData.spinUsedToday) {
-                document.getElementById('spinBtnSmall').textContent = '✓ Gedreht';
-                document.getElementById('spinBtnSmall').classList.add('spin-used');
-                document.getElementById('spinBtn').disabled = true;
-                document.getElementById('spinBtn').textContent = 'Morgen wieder!';
+                const sbs = document.getElementById('spinBtnSmall');
+                const sb = document.getElementById('spinBtn');
+                if (sbs) { sbs.textContent = '✓ Gedreht'; sbs.classList.add('spin-used'); }
+                if (sb) { sb.disabled = true; sb.textContent = 'Morgen wieder!'; }
             }
         }
         
@@ -724,15 +731,19 @@
             setInterval(() => {
                 const now = new Date(), midnight = new Date(now); midnight.setHours(24, 0, 0, 0);
                 const diff = midnight - now;
-                document.getElementById('countH').textContent = String(Math.floor(diff / 3600000)).padStart(2, '0');
-                document.getElementById('countM').textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-                document.getElementById('countS').textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+                const ch = document.getElementById('countH');
+                const cm = document.getElementById('countM');
+                const cs = document.getElementById('countS');
+                if (ch) ch.textContent = String(Math.floor(diff / 3600000)).padStart(2, '0');
+                if (cm) cm.textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+                if (cs) cs.textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
             }, 1000);
             let um = 29, us = 59;
             setInterval(() => {
                 us--; if (us < 0) { us = 59; um--; }
                 if (um < 0) { um = 29; showToast('🔄 Aktualisiert!'); loadDeals(); }
-                document.getElementById('updateCountdown').textContent = um + ':' + String(us).padStart(2, '0');
+                const uc = document.getElementById('updateCountdown');
+                if (uc) uc.textContent = um + ':' + String(us).padStart(2, '0');
             }, 1000);
         }
         
