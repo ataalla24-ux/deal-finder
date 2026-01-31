@@ -339,58 +339,6 @@
             <div class="savings-goal"><span>€0</span><span>Ziel: €50</span></div>
         </div>
         
-        <div class="level-bar">
-            <div class="level-badge" id="levelBadge">1</div>
-            <div class="level-info">
-                <div class="level-name" id="levelName">🌱 Schnäppchen-Anfänger</div>
-                <div class="level-xp-bar"><div class="level-xp-fill" id="levelXpFill" style="width: 0%"></div></div>
-                <div class="level-xp-text" id="levelXpText">0 / 100 XP</div>
-            </div>
-        </div>
-        
-        <div class="challenge-card" id="challengeCard">
-            <div class="challenge-header">
-                <div class="challenge-icon">🎯</div>
-                <div>
-                    <div class="challenge-title">Tägliche Challenge</div>
-                    <div class="challenge-subtitle">Schau dir 5 Deals an</div>
-                </div>
-            </div>
-            <div class="challenge-progress" id="challengeProgress">
-                <div class="challenge-dot current">1</div>
-                <div class="challenge-dot">2</div>
-                <div class="challenge-dot">3</div>
-                <div class="challenge-dot">4</div>
-                <div class="challenge-dot">5</div>
-            </div>
-            <div class="challenge-reward">🎁 Belohnung: <strong>+25 XP & Geheimer Deal</strong></div>
-        </div>
-        
-        <div class="spin-banner" id="spinBanner" onclick="openSpinModal()">
-            <div class="spin-wheel">🎡</div>
-            <div class="spin-info">
-                <div class="spin-title">Tägliches Glücksrad</div>
-                <div class="spin-text">Drehe und gewinne Boni!</div>
-            </div>
-            <button class="spin-btn" id="spinBtnSmall">Drehen!</button>
-        </div>
-        
-        <div class="secret-deal locked" id="secretDeal">
-            <div class="secret-header">
-                <div class="secret-icon">🔒</div>
-                <div>
-                    <div class="secret-title">Geheimer Deal</div>
-                    <div class="secret-desc">Schließe die Challenge ab!</div>
-                </div>
-            </div>
-            <div class="secret-progress">
-                <div class="secret-bar"><div class="secret-fill" id="secretFill" style="width: 0%"></div></div>
-                <div class="secret-text" id="secretText">0/5 Deals angesehen</div>
-            </div>
-        </div>
-        
-        <div class="update-countdown">🔄 Neue Deals in <span id="updateCountdown">30:00</span> Minuten</div>
-        
         <div class="search-box" id="searchBox">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input type="text" id="searchInput" placeholder="Suche z.B. Kaffee, IKEA..." autocomplete="off">
@@ -452,8 +400,8 @@
     
     <div class="bottom-nav">
         <div class="nav-item active" onclick="showHome()"><div class="nav-icon">🏠</div><div class="nav-label">Deals</div></div>
+        <div class="nav-item" onclick="showSecretDeals()"><div class="nav-icon">🔮</div><div class="nav-label">Geheim</div></div>
         <div class="nav-item" onclick="showStats()"><div class="nav-icon">📊</div><div class="nav-label">Stats</div></div>
-        <div class="nav-item" onclick="openSpinModal()"><div class="nav-icon">🎡</div><div class="nav-label">Drehen</div></div>
         <div class="nav-item" onclick="showFavorites()" style="position:relative;"><div class="nav-icon">❤️</div><div class="nav-label">Favoriten</div><span class="nav-badge" id="favBadge" style="display:none;">0</span></div>
     </div>
     
@@ -992,13 +940,209 @@
         }
         function toggleFav(id, e) { e.stopPropagation(); if (favorites.includes(id)) { favorites = favorites.filter(f => f !== id); showToast('💔 Entfernt'); } else { favorites.push(id); showToast('❤️ Favorit!'); addXP(2, null); } localStorage.setItem('favorites', JSON.stringify(favorites)); updateFavBadge(); renderDeals(); }
         function updateFavBadge() { const b = document.getElementById('favBadge'); if (favorites.length > 0) { b.style.display = 'block'; b.textContent = favorites.length; } else { b.style.display = 'none'; } }
-        function showFavorites() { const fav = allDeals.filter(d => favorites.includes(d.id)); document.getElementById('deals').innerHTML = fav.length ? fav.map(d => '<div class="deal-card"><div class="deal-header"><span class="deal-logo">' + d.logo + '</span><div><div class="deal-brand">' + d.brand + '</div><div class="deal-title">' + d.title + '</div></div></div><a href="' + d.url + '" target="_blank" class="deal-btn" style="width:100%;text-align:center;margin-top:10px">Zum Deal →</a></div>').join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>Keine Favoriten</p></div>'; showToast('❤️ Favoriten'); }
-        function showStats() { const level = LEVELS[userData.level - 1]; document.getElementById('deals').innerHTML = '<div style="background:white;border-radius:16px;padding:20px;text-align:center"><h2 style="margin-bottom:20px">📊 Deine Stats</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#667eea">' + userData.xp + '</div><div style="font-size:12px;color:#6b7280">XP</div></div><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#f59e0b">' + userData.streak + '</div><div style="font-size:12px;color:#6b7280">Streak</div></div><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#10b981">' + (userData.dealsSubmitted || 0) + '</div><div style="font-size:12px;color:#6b7280">Deals geteilt</div></div><div style="background:#f1f5f9;padding:16px;border-radius:12px"><div style="font-size:28px;font-weight:800;color:#8b5cf6">' + userData.dealsViewed + '</div><div style="font-size:12px;color:#6b7280">Deals angesehen</div></div></div><div style="margin-top:20px;padding:16px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:12px;color:white"><div style="font-size:14px;opacity:0.9">Dein Level</div><div style="font-size:20px;font-weight:700">' + level.name + '</div></div>' + (userData.dealsSubmitted > 0 ? '<div style="margin-top:16px;padding:16px;background:linear-gradient(135deg,#10b981,#059669);border-radius:12px;color:white"><div style="font-size:14px;opacity:0.9">🏆 Deal-Hunter Rang</div><div style="font-size:24px;font-weight:700">#' + Math.max(1, 100 - (userData.dealsSubmitted || 1) * 3 - userData.level * 5) + '</div></div>' : '') + '<button onclick="showHome()" class="daily-btn" style="margin-top:16px">← Zurück</button></div>'; }
+        function showFavorites() { 
+            hideHeaderElements();
+            const fav = allDeals.filter(d => favorites.includes(d.id)); 
+            document.getElementById('deals').innerHTML = fav.length ? fav.map(d => '<div class="deal-card"><div class="deal-header"><span class="deal-logo">' + d.logo + '</span><div><div class="deal-brand">' + d.brand + '</div><div class="deal-title">' + d.title + '</div></div></div><a href="' + d.url + '" target="_blank" class="deal-btn" style="width:100%;text-align:center;margin-top:10px">Zum Deal →</a></div>').join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>Keine Favoriten</p><p style="font-size:13px;color:#999;margin-top:8px">Tippe auf ❤️ bei einem Deal</p></div>'; 
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); 
+            document.querySelectorAll('.nav-item')[3].classList.add('active');
+        }
+        
+        function showStats() {
+            hideHeaderElements();
+            const level = LEVELS[userData.level - 1];
+            const nextLevel = LEVELS[userData.level] || LEVELS[LEVELS.length - 1];
+            const xpProgress = Math.min(100, ((userData.xp - (LEVELS[userData.level - 1]?.xp || 0)) / (nextLevel.xp - (LEVELS[userData.level - 1]?.xp || 0))) * 100);
+            
+            document.getElementById('deals').innerHTML = `
+                <div style="padding:4px 0;">
+                    <!-- Header -->
+                    <div style="text-align:center;margin-bottom:16px">
+                        <div style="font-size:32px">📊</div>
+                        <h2 style="font-size:22px;margin:8px 0 4px">Deine Stats</h2>
+                        <p style="color:#6b7280;font-size:14px">Dein Fortschritt auf einen Blick</p>
+                    </div>
+                    
+                    <!-- Level Card -->
+                    <div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:16px;padding:20px;color:white;margin-bottom:16px">
+                        <div style="display:flex;align-items:center;gap:16px">
+                            <div style="background:rgba(255,255,255,0.2);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800">${userData.level}</div>
+                            <div style="flex:1">
+                                <div style="font-size:11px;opacity:0.8;text-transform:uppercase">Aktuelles Level</div>
+                                <div style="font-size:20px;font-weight:700">${level.name}</div>
+                                <div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin:10px 0 6px;overflow:hidden">
+                                    <div style="background:white;height:100%;width:${xpProgress}%;border-radius:4px"></div>
+                                </div>
+                                <div style="font-size:13px;opacity:0.9">${userData.xp} / ${nextLevel.xp} XP bis Level ${userData.level + 1}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Grid -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+                        <div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+                            <div style="font-size:36px;font-weight:800;color:#667eea">${userData.xp}</div>
+                            <div style="font-size:13px;color:#6b7280;margin-top:4px">XP gesamt</div>
+                        </div>
+                        <div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+                            <div style="font-size:36px;font-weight:800;color:#f59e0b">🔥 ${userData.streak}</div>
+                            <div style="font-size:13px;color:#6b7280;margin-top:4px">Tage Streak</div>
+                        </div>
+                        <div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+                            <div style="font-size:36px;font-weight:800;color:#8b5cf6">${userData.dealsViewed}</div>
+                            <div style="font-size:13px;color:#6b7280;margin-top:4px">Deals angesehen</div>
+                        </div>
+                        <div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+                            <div style="font-size:36px;font-weight:800;color:#10b981">${userData.dealsSubmitted || 0}</div>
+                            <div style="font-size:13px;color:#6b7280;margin-top:4px">Deals geteilt</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Savings -->
+                    <div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white;margin-bottom:16px">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div>
+                                <div style="font-size:13px;opacity:0.9">💰 Gespart diese Woche</div>
+                                <div style="font-size:32px;font-weight:800;margin-top:4px">€${userData.savings || 0}</div>
+                            </div>
+                            <div style="text-align:right">
+                                <div style="font-size:13px;opacity:0.9">Ziel</div>
+                                <div style="font-size:20px;font-weight:700">€50</div>
+                            </div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin-top:12px;overflow:hidden">
+                            <div style="background:white;height:100%;width:${Math.min(100, ((userData.savings || 0) / 50) * 100)}%;border-radius:4px"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Achievements Preview -->
+                    <div style="background:white;border-radius:16px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+                        <div style="font-weight:700;margin-bottom:12px">🏆 Erfolge</div>
+                        <div style="display:flex;gap:12px;overflow-x:auto;padding:4px 0">
+                            <div style="text-align:center;min-width:70px">
+                                <div style="font-size:32px;${userData.streak >= 7 ? '' : 'filter:grayscale(1);opacity:0.5'}">🔥</div>
+                                <div style="font-size:11px;color:#6b7280;margin-top:4px">7 Tage Streak</div>
+                            </div>
+                            <div style="text-align:center;min-width:70px">
+                                <div style="font-size:32px;${userData.dealsViewed >= 50 ? '' : 'filter:grayscale(1);opacity:0.5'}">👀</div>
+                                <div style="font-size:11px;color:#6b7280;margin-top:4px">50 Deals</div>
+                            </div>
+                            <div style="text-align:center;min-width:70px">
+                                <div style="font-size:32px;${userData.dealsSubmitted >= 5 ? '' : 'filter:grayscale(1);opacity:0.5'}">🔗</div>
+                                <div style="font-size:11px;color:#6b7280;margin-top:4px">5 geteilt</div>
+                            </div>
+                            <div style="text-align:center;min-width:70px">
+                                <div style="font-size:32px;${userData.level >= 5 ? '' : 'filter:grayscale(1);opacity:0.5'}">⭐</div>
+                                <div style="font-size:11px;color:#6b7280;margin-top:4px">Level 5</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.nav-item')[2].classList.add('active');
+        }
+        
+        function showSecretDeals() {
+            hideHeaderElements();
+            const level = LEVELS[userData.level - 1];
+            const nextLevel = LEVELS[userData.level] || LEVELS[LEVELS.length - 1];
+            const xpProgress = Math.min(100, ((userData.xp - (LEVELS[userData.level - 1]?.xp || 0)) / (nextLevel.xp - (LEVELS[userData.level - 1]?.xp || 0))) * 100);
+            const canSpin = !userData.lastSpin || new Date().toDateString() !== new Date(userData.lastSpin).toDateString();
+            const challengeDone = userData.dealsViewed >= 5;
+            
+            document.getElementById('deals').innerHTML = `
+                <div style="padding:4px 0;">
+                    <!-- Header -->
+                    <div style="text-align:center;margin-bottom:16px">
+                        <div style="font-size:32px">🔮</div>
+                        <h2 style="font-size:22px;margin:8px 0 4px">Geheime Deals</h2>
+                        <p style="color:#6b7280;font-size:14px">Challenges & Bonus-Rewards</p>
+                    </div>
+                    
+                    <!-- Tägliche Challenge -->
+                    <div style="background:white;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border:2px solid ${challengeDone ? '#10b981' : '#fbbf24'}">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                            <span style="font-size:32px">${challengeDone ? '✅' : '🎯'}</span>
+                            <div>
+                                <div style="font-weight:700;font-size:16px">${challengeDone ? 'Challenge abgeschlossen!' : 'Tägliche Challenge'}</div>
+                                <div style="font-size:13px;color:#6b7280">Schau dir 5 Deals an</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-bottom:12px">
+                            ${[1,2,3,4,5].map(i => `<div style="flex:1;height:8px;border-radius:4px;background:${userData.dealsViewed >= i ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb'}"></div>`).join('')}
+                        </div>
+                        <div style="font-size:13px;color:#6b7280;text-align:center">${Math.min(userData.dealsViewed, 5)} / 5 Deals angesehen</div>
+                        ${challengeDone ? '<div style="background:#d1fae5;color:#065f46;padding:10px;border-radius:10px;margin-top:12px;text-align:center;font-weight:600">🎁 +25 XP erhalten!</div>' : '<div style="background:#fef3c7;padding:10px;border-radius:10px;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:#92400e">🎁 Belohnung: <strong>+25 XP</strong></div>'}
+                    </div>
+                    
+                    <!-- Glücksrad -->
+                    <div style="background:linear-gradient(135deg,#ec4899,#8b5cf6);border-radius:16px;padding:20px;color:white;margin-bottom:16px;text-align:center;cursor:pointer" onclick="openSpinModal()">
+                        <div style="font-size:48px;margin-bottom:8px;${canSpin ? 'animation:spinSlow 10s linear infinite' : ''}">🎡</div>
+                        <div style="font-size:18px;font-weight:700">Tägliches Glücksrad</div>
+                        <div style="font-size:14px;opacity:0.9;margin:8px 0">Drehe und gewinne Bonus-XP!</div>
+                        <button style="background:white;color:#8b5cf6;border:none;padding:12px 32px;border-radius:25px;font-weight:700;font-size:16px;cursor:pointer;margin-top:8px;${canSpin ? '' : 'opacity:0.7'}">
+                            ${canSpin ? '🎰 Jetzt drehen!' : '✅ Heute gedreht'}
+                        </button>
+                    </div>
+                    
+                    <!-- Geheimer Deal (Entdecker) -->
+                    <div style="background:linear-gradient(135deg,${challengeDone ? '#fbbf24,#f59e0b' : '#1f2937,#374151'});border-radius:16px;padding:20px;color:white;margin-bottom:16px">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                            <span style="font-size:32px">${challengeDone ? '🎁' : '🔒'}</span>
+                            <div>
+                                <div style="font-size:18px;font-weight:700">${challengeDone ? 'Geheimer Deal freigeschaltet!' : 'Geheimer Deal'}</div>
+                                <div style="font-size:13px;opacity:0.9">${challengeDone ? 'Exklusiv für dich!' : 'Schließe die Challenge ab!'}</div>
+                            </div>
+                        </div>
+                        ${challengeDone ? `
+                            <div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:16px;margin-top:12px">
+                                <div style="font-weight:700;margin-bottom:8px">🏆 IKEA Family Geheim-Tipp</div>
+                                <div style="font-size:14px;opacity:0.9;margin-bottom:12px">Gratis Softeis für Kinder jeden Samstag!</div>
+                                <a href="https://www.ikea.com/at/de/ikea-family/" target="_blank" style="display:inline-block;background:white;color:#f59e0b;padding:10px 20px;border-radius:20px;text-decoration:none;font-weight:700;font-size:14px">Mehr erfahren →</a>
+                            </div>
+                        ` : `
+                            <div style="background:rgba(255,255,255,0.1);height:8px;border-radius:4px;overflow:hidden;margin-top:8px">
+                                <div style="background:linear-gradient(90deg,#fbbf24,#f59e0b);height:100%;width:${(userData.dealsViewed/5)*100}%;border-radius:4px"></div>
+                            </div>
+                            <div style="font-size:12px;margin-top:8px;opacity:0.7">${userData.dealsViewed}/5 Deals angesehen</div>
+                        `}
+                    </div>
+                    
+                    <!-- Deal einreichen -->
+                    <div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white;text-align:center;cursor:pointer" onclick="openLinkModal()">
+                        <div style="font-size:36px;margin-bottom:8px">🔗</div>
+                        <div style="font-size:18px;font-weight:700">Deal einreichen</div>
+                        <div style="font-size:14px;opacity:0.9;margin-top:4px">Teile Deals und erhalte +100 XP!</div>
+                    </div>
+                </div>
+            `;
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.nav-item')[1].classList.add('active');
+        }
         function showToast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2000); }
         function searchFor(query) { document.getElementById('searchInput').value = query; searchQuery = query; document.getElementById('searchDropdown').classList.remove('show'); document.getElementById('clearBtn').classList.add('show'); renderDeals(); }
         function clearSearch(e) { e.stopPropagation(); document.getElementById('searchInput').value = ''; searchQuery = ''; document.getElementById('clearBtn').classList.remove('show'); renderDeals(); }
         function saveUserData() { localStorage.setItem('userData', JSON.stringify(userData)); }
-        function showHome() { renderDeals(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelector('.nav-item').classList.add('active'); }
+        function showHome() { 
+            // Zeige Header-Elemente nur auf Deals-Seite
+            document.getElementById('streakBanner').style.display = 'flex';
+            document.getElementById('dailyDeal').style.display = 'block';
+            document.querySelector('.savings-card').style.display = 'block';
+            document.getElementById('searchBox').style.display = 'flex';
+            document.getElementById('filters').style.display = 'block';
+            renderDeals(); 
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); 
+            document.querySelector('.nav-item').classList.add('active'); 
+        }
+        
+        function hideHeaderElements() {
+            document.getElementById('streakBanner').style.display = 'none';
+            document.getElementById('dailyDeal').style.display = 'none';
+            document.querySelector('.savings-card').style.display = 'none';
+            document.getElementById('searchBox').style.display = 'none';
+            document.getElementById('filters').style.display = 'none';
+        }
         
         // ===== LINK SUBMIT SYSTEM =====
         let currentLinkData = null;
