@@ -89,21 +89,39 @@ const BASE_DEALS = [
   // ⭐ GRATIS KAFFEE - TOP PRIORITY
   {
      id: 'top-1', brand: 'OMV VIVA', logo: '⛽', title: 'GRATIS Getränk für 1 jö Punkt',
-    description: 'Bei OMV VIVA: Heißgetränk oder Softdrink für nur 1 jö Punkt! Inkl. Kaffee, Tee, Cola.',
+    description: 'Bei OMV VIVA: Heißgetränk oder Softdrink für nur 1 jö Punkt! Inkl. Kaffee, Tee, Cola. Einfach jö App scannen!',
     type: 'gratis', category: 'kaffee', source: 'jö Bonus Club', url: 'https://www.jo-club.at/',
-    expires: 'Dauerhaft', distance: 'OMV Tankstellen', hot: true, isNew: false, priority: 1, votes: 156
+    expires: 'Dauerhaft', distance: '200+ OMV Stationen', hot: true, isNew: false, priority: 1, votes: 847
   },
   {
     id: 'top-2', brand: "McDonald's", logo: '☕', title: 'GRATIS Kaffee - 5x/Monat',
-    description: 'McCafé Bonusclub: Jeden Monat 5 gratis Kaffees! Einfach App downloaden und Stempel sammeln.',
+    description: 'McCafé Bonusclub: Jeden Monat 5 gratis Kaffees! Einfach App downloaden und nach Einkauf Feedback geben.',
     type: 'gratis', category: 'kaffee', source: "McDonald's App", url: 'https://www.mcdonalds.at/app',
-    expires: 'Monatlich', distance: 'Alle Filialen', hot: true, isNew: false, priority: 1, votes: 189
+    expires: 'Monatlich 5 Stück', distance: '50+ Filialen Wien', hot: true, isNew: false, priority: 1, votes: 623
   },
   {
    id: 'top-3', brand: 'IKEA', logo: '☕', title: 'GRATIS Kaffee UNLIMITIERT',
-    description: 'IKEA Family Mitglieder: Unbegrenzt Gratis-Kaffee im Restaurant! Täglich, keine Limits.',
-    type: 'gratis', category: 'kaffee', source: 'IKEA', url: 'https://www.ikea.com/at/de/ikea-family/',
-    expires: 'Unbegrenzt', distance: 'IKEA Standorte', hot: true, isNew: false, priority: 1, votes: 234
+    description: 'IKEA Family Mitglieder: Unbegrenzt Gratis-Kaffee & Tee im Restaurant! Täglich, keine Limits. Family Card ist gratis.',
+    type: 'gratis', category: 'kaffee', source: 'IKEA Family', url: 'https://www.ikea.com/at/de/ikea-family/',
+    expires: 'Unbegrenzt', distance: 'IKEA Wien Nord & Vösendorf', hot: true, isNew: false, priority: 1, votes: 1203
+  },
+  {
+    id: 'top-3b', brand: 'Tchibo', logo: '☕', title: 'GRATIS Kaffee bei jedem Einkauf',
+    description: 'In jeder Tchibo Filiale: Kauf irgendetwas und bekomme einen frisch gebrühten Kaffee gratis dazu!',
+    type: 'gratis', category: 'kaffee', source: 'Tchibo', url: 'https://www.tchibo.at/',
+    expires: 'Dauerhaft', distance: '30+ Filialen Wien', hot: false, isNew: false, priority: 1, votes: 312
+  },
+  {
+    id: 'top-3c', brand: 'Nespresso', logo: '☕', title: 'GRATIS Kaffee-Verkostung',
+    description: 'In jeder Nespresso Boutique: Gratis Kaffee probieren! Keine Kaufpflicht, einfach reingehen und genießen.',
+    type: 'gratis', category: 'kaffee', source: 'Nespresso', url: 'https://www.nespresso.com/at/',
+    expires: 'Jederzeit', distance: 'Nespresso Boutiquen Wien', hot: false, isNew: false, priority: 2, votes: 178
+  },
+  {
+    id: 'top-3d', brand: 'Starbucks', logo: '☕', title: 'GRATIS Getränk am Geburtstag',
+    description: 'Starbucks Rewards Mitglieder: Am Geburtstag jedes Getränk gratis – auch die teuersten! Anmeldung kostenlos.',
+    type: 'gratis', category: 'kaffee', source: 'Starbucks Rewards', url: 'https://www.starbucks.at/',
+    expires: 'Am Geburtstag', distance: '15+ Starbucks Wien', hot: false, isNew: false, priority: 2, votes: 412
   },
 
   // ⭐ GRATIS ESSEN - TOP PRIORITY
@@ -126,12 +144,29 @@ const BASE_DEALS = [
     expires: 'Dauerhaft', distance: 'Ganz Wien', hot: true, isNew: false, priority: 1, votes: 201
   },
 
-  // ⭐ GRATIS BEI NEUERÖFFNUNG (dynamisch ergänzt durch APIs)
   {
-    id: 'neu-1', brand: 'Neueröffnungen', logo: '🎉', title: 'Gratis bei Store-Openings',
-    description: 'Folge uns für aktuelle Neueröffnungen! Oft gibt es Gratis-Proben, Kaffee, oder Geschenke.',
-    type: 'gratis', category: 'shopping', source: 'FreeFinder', url: '#',
-    expires: 'Siehe App', distance: 'Wien', hot: true, isNew: true, priority: 1, votes: 0
+    id: 'top-4b', brand: "McDonald's", logo: '🍟', title: 'GRATIS Cheeseburger bei App-Download',
+    description: "McDonald's App neu installieren = Gratis Cheeseburger als Willkommensgeschenk! Für Neukunden.",
+    type: 'gratis', category: 'essen', source: "McDonald's App", url: 'https://www.mcdonalds.at/app',
+    expires: 'Für Neukunden', distance: 'Alle Filialen', hot: true, isNew: false, priority: 1, votes: 534
+  },
+  {
+    id: 'top-4c', brand: 'Burger King', logo: '🍔', title: 'GRATIS Whopper am Geburtstag',
+    description: 'Burger King App: Am Geburtstag bekommst du einen Gratis-Whopper! Einfach Geburtsdatum in der App hinterlegen.',
+    type: 'gratis', category: 'essen', source: 'Burger King App', url: 'https://www.burgerking.at/',
+    expires: 'Am Geburtstag', distance: 'Alle Filialen Wien', hot: false, isNew: false, priority: 2, votes: 389
+  },
+  {
+    id: 'top-4d', brand: 'Wiener Tafel', logo: '🥫', title: 'GRATIS Lebensmittel abholen',
+    description: 'Gerettete Lebensmittel kostenlos bei sozialen Ausgabestellen in ganz Wien. Für Bedürftige.',
+    type: 'gratis', category: 'essen', source: 'Wiener Tafel', url: 'https://www.wienertafel.at/',
+    expires: 'Dauerhaft', distance: 'Ausgabestellen Wien', hot: false, isNew: false, priority: 2, votes: 234
+  },
+  {
+    id: 'top-4e', brand: 'Uni Mensen', logo: '🎓', title: 'Warme Mahlzeit ab 2,20€',
+    description: 'Alle Wiener Uni-Mensen: Vollwertige Mahlzeit für Studenten ab 2,20€. Günstiger geht Mittagessen nicht!',
+    type: 'rabatt', category: 'essen', source: 'Mensen Wien', url: 'https://www.mensen.at/',
+    expires: 'Mit Studentenausweis', distance: '20+ Mensen Wien', hot: false, isNew: false, priority: 2, votes: 456
   },
 
   // ⭐ GRATIS PROBEN
@@ -192,6 +227,38 @@ const BASE_DEALS = [
     description: 'Büchereien Wien: Gratis Mitgliedschaft für alle unter 18! Bücher, DVDs, Spiele ausleihen.',
     type: 'gratis', category: 'wien', source: 'Büchereien Wien', url: 'https://buechereien.wien.gv.at/',
     expires: 'Dauerhaft', distance: 'Ganz Wien', hot: false, isNew: false, priority: 2, votes: 123
+  },
+
+  // ⭐ WIEN SPECIALS
+  {
+    id: 'wien-1', brand: 'Wiener Eistraum', logo: '⛸️', title: 'Eislaufen am Rathausplatz',
+    description: '9000m² Eisfläche vor dem Rathaus! Eintritt GRATIS, Leihschuhe ab 7€. Jänner bis März.',
+    type: 'gratis', category: 'wien', source: 'Stadt Wien', url: 'https://www.wienereistraum.com/',
+    expires: 'Jänner-März', distance: 'Rathausplatz', hot: true, isNew: false, priority: 1, votes: 567
+  },
+  {
+    id: 'wien-2', brand: 'Wiener Rathaus', logo: '🏛️', title: 'GRATIS Rathausführungen',
+    description: 'Mo, Mi, Fr um 13:00: Kostenlose Führung durch das Wiener Rathaus. Ohne Anmeldung!',
+    type: 'gratis', category: 'wien', source: 'Stadt Wien', url: 'https://www.wien.gv.at/politik/rathaus/fuehrung.html',
+    expires: 'Mo/Mi/Fr 13:00', distance: 'Rathaus, 1. Bezirk', hot: false, isNew: false, priority: 2, votes: 156
+  },
+  {
+    id: 'wien-3', brand: 'WienMobil Rad', logo: '🚴', title: 'Erste 30 Min GRATIS Radfahren',
+    description: 'WienMobil Rad: Erste 30 Minuten jeder Fahrt kostenlos! Über 200 Stationen in Wien.',
+    type: 'gratis', category: 'wien', source: 'Wiener Linien', url: 'https://www.wienerlinien.at/wienmobil-rad',
+    expires: 'Unbegrenzt', distance: '200+ Stationen Wien', hot: false, isNew: false, priority: 2, votes: 345
+  },
+  {
+    id: 'wien-4', brand: 'Wiener Linien', logo: '🚇', title: 'Ganz Wien für 1€/Tag',
+    description: 'Klimaticket Wien: 365€/Jahr = 1€ pro Tag für alle U-Bahnen, Busse, Straßenbahnen!',
+    type: 'rabatt', category: 'wien', source: 'Wiener Linien', url: 'https://www.wienerlinien.at/',
+    expires: 'Jahresticket', distance: 'Ganz Wien', hot: true, isNew: false, priority: 1, votes: 2345
+  },
+  {
+    id: 'wien-5', brand: 'Wiener Staatsoper', logo: '🎭', title: 'Stehplätze ab nur 3€',
+    description: 'Staatsoper, Volksoper, Burgtheater: Weltklasse-Kultur ab 3€! Stehplätze 80 Min vor Beginn.',
+    type: 'rabatt', category: 'wien', source: 'Bundestheater', url: 'https://www.wiener-staatsoper.at/',
+    expires: 'Dauerhaft', distance: 'Staatsoper, 1. Bezirk', hot: true, isNew: false, priority: 2, votes: 678
   },
 
   // ⭐ REISEN DEALS
@@ -333,6 +400,20 @@ async function fetchGooglePlacesNewOpenings() {
         for (const place of data.results) {
           // Nur Orte mit WENIG Bewertungen = wahrscheinlich neu
           const ratings = place.user_ratings_total || 0;
+          const types = place.types || [];
+          const name = (place.name || '').toLowerCase();
+          const addr = (place.vicinity || place.formatted_address || '').toLowerCase();
+          const combined = name + ' ' + addr;
+          
+          // ❌ BLACKLIST: Apartments, Hotels, Airbnbs rausfiltern
+          const blacklist = ['apartment', 'airbnb', 'studio', 'ferienwohnung', 'hotel', 'hostel', 'residence', 'stay', 'booking', 'immobilie', 'wohnung', 'schlafzimmer', 'badezimmer', 'furnished', 'klimaanlage', 'brand-new', 'brand new', 'luxuriös', 'übernachtung'];
+          if (blacklist.some(b => combined.includes(b))) continue;
+          
+          // ❌ Nur echte Gastro/Shops
+          const validTypes = ['restaurant', 'cafe', 'bar', 'bakery', 'store', 'food', 'meal_delivery', 'meal_takeaway'];
+          const lodgingTypes = ['lodging', 'real_estate_agency'];
+          if (lodgingTypes.some(t => types.includes(t))) continue;
+          if (!types.some(t => validTypes.includes(t)) && ratings < 5) continue;
           
           if (ratings < 200 && !foundPlaces.has(place.place_id)) {
             foundPlaces.add(place.place_id);
@@ -510,25 +591,44 @@ function extractDealsFromHTML(html, source) {
   const deals = [];
   const text = html.toLowerCase();
   
-  const isGratis = GRATIS_KEYWORDS.some(k => text.includes(k));
-  const isDeal = DEAL_KEYWORDS.some(k => text.includes(k));
+  // Versuche echte Deal-Texte aus dem HTML zu extrahieren
+  // Suche nach Textblöcken die Gratis/Deal Keywords enthalten
+  const stripped = html.replace(/<script[\s\S]*?<\/script>/gi, '')
+                       .replace(/<style[\s\S]*?<\/style>/gi, '')
+                       .replace(/<[^>]+>/g, ' ')
+                       .replace(/\s+/g, ' ');
   
-  if (isGratis || isDeal) {
-    deals.push({
-      id: `html-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
-      brand: source.brand,
-      logo: source.logo,
-      title: `Aktuelle Angebote bei ${source.brand}`,
-      description: `Jetzt aktuelle ${isGratis ? 'Gratis-' : ''}Deals bei ${source.brand} entdecken!`,
-      type: isGratis ? 'gratis' : 'rabatt',
-      category: source.category,
-      source: source.name,
-      url: source.url,
-      expires: 'Siehe Website',
-      distance: 'Wien',
-      hot: false,
-      isNew: true
-    });
+  // Suche nach Sätzen mit Keywords
+  const sentences = stripped.split(/[.!?\n]/).filter(s => s.trim().length > 20 && s.trim().length < 200);
+  
+  for (const sentence of sentences) {
+    const lower = sentence.toLowerCase();
+    const isGratis = GRATIS_KEYWORDS.some(k => lower.includes(k));
+    
+    if (isGratis) {
+      // Nur echte Gratis-Deals, keine generischen Platzhalter
+      const title = sentence.trim().substring(0, 60);
+      if (title.length > 15) {
+        deals.push({
+          id: `html-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+          brand: source.brand,
+          logo: source.logo,
+          title: title,
+          description: sentence.trim().substring(0, 150),
+          type: 'gratis',
+          category: source.category,
+          source: source.name,
+          url: source.url,
+          expires: 'Siehe Website',
+          distance: 'Wien',
+          hot: false,
+          isNew: true,
+          priority: 3,
+          votes: 0
+        });
+        break; // Maximal 1 Deal pro Quelle (vermeidet Spam)
+      }
+    }
   }
   
   return deals;
