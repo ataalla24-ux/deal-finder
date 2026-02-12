@@ -25,10 +25,13 @@ class IntegratedFreeFinder {
     console.log('🚀 Integrated freeFinder starting...');
     console.log('📅', new Date().toLocaleString('de-AT'));
 
-    // 1. Start with premium curated deals
+    // 1. Load existing power-scraped deals first
+    this.loadPowerScrapedDeals();
+
+    // 2. Add premium curated deals on top
     this.addPremiumDeals();
 
-    // 2. Scrape additional deals from key sources
+    // 3. Scrape additional deals from key sources
     await this.scrapeLiveDeals();
 
     // 3. Validate and filter all deals
@@ -43,21 +46,48 @@ class IntegratedFreeFinder {
     this.printStats();
   }
 
+  loadPowerScrapedDeals() {
+    console.log('📂 Loading power-scraped deals...');
+    try {
+      // Power scraper saves to root deals.json, docs/deals.json is our output
+      const sourcePath = fs.existsSync('deals.json') ? 'deals.json' : 'docs/deals.json';
+      const raw = fs.readFileSync(sourcePath, 'utf8');
+      const data = JSON.parse(raw);
+      if (data.deals && data.deals.length > 0) {
+        this.allDeals = data.deals.map(d => ({
+          ...d,
+          isPremium: false,
+          qualityScore: this.calculateQualityScore(d)
+        }));
+        this.stats.scraped = this.allDeals.length;
+        console.log(`✅ Loaded ${this.allDeals.length} power-scraped deals`);
+      }
+    } catch (e) {
+      console.log('⚠️ No existing deals.json found, starting fresh');
+    }
+  }
+
   addPremiumDeals() {
     console.log('💎 Adding premium curated deals...');
     
     const compliantDeals = PREMIUM_VIENNA_DEALS.filter(isAppStoreCompliant);
     
-    // Add premium flag and quality scores
-    this.allDeals = compliantDeals.map(deal => ({
-      ...deal,
-      isPremium: true,
-      source: deal.source + ' (Premium)',
-      lastVerified: new Date().toISOString(),
-      qualityScore: this.calculateQualityScore(deal)
-    }));
-
-    this.stats.premium = this.allDeals.length;
+    // Add premium deals on top (avoid duplicates by id)
+    const existingIds = new Set(this.allDeals.map(d => d.id));
+    let added = 0;
+    for (const deal of compliantDeals) {
+      if (!existingIds.has(deal.id)) {
+        this.allDeals.unshift({
+          ...deal,
+          isPremium: true,
+          source: deal.source + ' (Premium)',
+          lastVerified: new Date().toISOString(),
+          qualityScore: this.calculateQualityScore(deal)
+        });
+        added++;
+      }
+    }
+    this.stats.premium = added;
     console.log(`✅ Added ${this.stats.premium} premium deals`);
   }
 
