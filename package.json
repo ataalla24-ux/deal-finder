@@ -7,7 +7,11 @@
     "scrape": "node scraper/power-scraper.js",
     "firecrawl": "node scraper/firecrawl-scraper.js",
     "enhance": "node scraper/enhanced-deal-finder.js",
-    "quality": "node scraper/vienna-quality-finder.js"
+    "quality": "node scraper/vienna-quality-finder.js",
+    "premium": "node scraper/vienna-premium-deals.js",
+    "integrated": "node scraper/integrated-scraper.js",
+    "build": "npm run integrated",
+    "deploy": "npm run build && echo 'App Store deployment ready!'"
   },
   "author": "FreeFinder",
   "license": "MIT",
