@@ -37,7 +37,7 @@ jobs:
         run: |
           git config user.email "bot@github.com"
           git config user.name "Deal Bot"
-          git add docs/deals.json
+          git add -A
           git diff --staged --quiet || git commit -m "🔄 $(date +'%H:%M') - Deals Update"
-          git pull --rebase origin main || true
+          git pull --rebase origin main || git rebase --abort
           git push || true
