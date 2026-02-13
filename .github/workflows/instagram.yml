@@ -1,0 +1,38 @@
+name: 📸 Instagram Deal Scraper
+
+on:
+  schedule:
+    # 2x pro Woche: Montag und Donnerstag um 10:00 UTC (12:00 Wien)
+    - cron: '0 10 * * 1'   # Montag
+    - cron: '0 10 * * 4'   # Donnerstag
+  workflow_dispatch:         # Manuell auslösen
+
+jobs:
+  instagram-scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📸 Instagram Scraper ausführen
+        env:
+          APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+        run: node scraper/instagram-scraper.js
+
+      - name: 📤 Änderungen pushen
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/deals.json docs/deals-review.json 2>/dev/null || true
+          DEAL_COUNT=$(cat docs/deals.json | python3 -c "import sys, json; print(json.load(sys.stdin)['totalDeals'])" 2>/dev/null || echo "?")
+          TIMESTAMP=$(date -u +"%H:%M")
+          git diff --staged --quiet || git commit -m "📸 ${TIMESTAMP} - Instagram Deals Update (${DEAL_COUNT} total)"
+          git push || echo "Nichts zu pushen"
