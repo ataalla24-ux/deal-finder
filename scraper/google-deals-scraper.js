@@ -335,7 +335,7 @@ function createDeal(place, search, websiteDeals, reviewDeals, details) {
   }
 
   // Preis im Titel wenn verfÃ¼gbar
-  if (websiteDeals.price && websiteDeals.price <= 5 && !isGratis) {
+  if (websiteDeals.price && websiteDeals.price <= 2 && !isGratis) {
     title = `Ab â‚¬${websiteDeals.price}: ${place.name}`.substring(0, 70);
   }
 
@@ -454,17 +454,24 @@ async function main() {
           }
         }
 
-        // âœ… DEAL VALIDIERUNG: Mindestens eine Quelle muss einen Deal bestÃ¤tigen
-        const hasConfirmedDeal = websiteDeals.hasDeals || reviewDeals.found;
+        // ✅ STRENGE DEAL VALIDIERUNG
+        // Nur echte Gratis-Deals oder extrem günstig (≤€2)
+        // Keine "Entdeckt" Platzhalter!
+        
+        const isRealGratis = websiteDeals.hasGratis && websiteDeals.hasProduct && websiteDeals.dealText.length > 10;
+        const isReallyCheap = websiteDeals.price !== null && websiteDeals.price <= 2 && websiteDeals.hasProduct;
+        const isReviewConfirmedGratis = reviewDeals.found && reviewDeals.isGratis;
+        const isRealAktion = websiteDeals.hasAktion && websiteDeals.hasProduct && websiteDeals.dealText.length > 10;
+        
+        const isValidDeal = isRealGratis || isReallyCheap || isReviewConfirmedGratis || isRealAktion;
 
-        // FÃ¼r Gratis-Suchen: Auch Places die gut zum Suchbegriff passen akzeptieren
-        const isStrongMatch = search.dealType === 'gratis' &&
-          GRATIS_KEYWORDS.some(k => (name + ' ' + (details?.editorial_summary?.overview || '')).toLowerCase().includes(k));
-
-        if (hasConfirmedDeal || isStrongMatch) {
+        if (isValidDeal) {
           const deal = createDeal(place, search, websiteDeals, reviewDeals, details);
           allDeals.push(deal);
-          console.log(`   âœ… DEAL: ${deal.logo} ${deal.title}`);
+          const reason = isRealGratis ? 'GRATIS' : isReallyCheap ? `€${websiteDeals.price}` : isReviewConfirmedGratis ? 'Review-bestätigt' : 'Aktion';
+          console.log(`   ✅ DEAL (${reason}): ${deal.logo} ${deal.title}`);
+        } else {
+          console.log(`   ⏭️  ${place.name} - kein bestätigter Gratis/Billig-Deal`);
         }
 
         // Kleine Pause zwischen API calls
