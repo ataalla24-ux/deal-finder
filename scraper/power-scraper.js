@@ -705,8 +705,7 @@ async function scrapeAllSources() {
     deals: uniqueDeals
   };
   
-  fs.writeFileSync('deals.json', JSON.stringify(output, null, 2));
-  
+fs.writeFileSync('docs/deals.json', JSON.stringify(output, null, 2));  
   console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
   console.log(`✅ Scraping abgeschlossen!`);
   console.log(`   📦 Basis-Deals: ${BASE_DEALS.length}`);
