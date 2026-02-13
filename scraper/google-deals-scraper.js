@@ -95,15 +95,18 @@ const BLACKLIST = [
 // HTTP FETCHER
 // ============================================
 
-function fetchURL(url, timeout = 10000) {
+function fetchURL(url, timeout = 10000, isApi = false) {
   return new Promise((resolve, reject) => {
     const protocol = url.startsWith('https') ? https : http;
+    const headers = isApi ? {
+      'Accept': 'application/json'
+    } : {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'de-AT,de;q=0.9,en;q=0.8'
+    };
     const req = protocol.get(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'de-AT,de;q=0.9,en;q=0.8'
-      },
+      headers,
       timeout
     }, res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
@@ -125,7 +128,7 @@ function fetchURL(url, timeout = 10000) {
 async function searchGooglePlaces(query) {
   const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&location=48.2082,16.3738&radius=15000&key=${GOOGLE_PLACES_API_KEY}&language=de`;
 
-  const response = await fetchURL(url);
+  const response = await fetchURL(url, 10000, true);
 
   if (response.trim().startsWith('<')) {
     throw new Error('HTML statt JSON - API Key Problem');
@@ -147,7 +150,7 @@ async function searchGooglePlaces(query) {
 async function getPlaceDetails(placeId) {
   const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,website,formatted_phone_number,opening_hours,editorial_summary,reviews&key=${GOOGLE_PLACES_API_KEY}&language=de`;
 
-  const response = await fetchURL(url);
+  const response = await fetchURL(url, 10000, true);
   const data = JSON.parse(response);
 
   if (data.status === 'OK' && data.result) {
