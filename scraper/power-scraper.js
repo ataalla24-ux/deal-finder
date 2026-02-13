@@ -668,8 +668,7 @@ async function scrapeAllSources() {
   // 2. API Quellen (wenn Keys vorhanden)
   console.log('\n📡 API-Quellen werden abgefragt...\n');
   
-  const placesDeals = await fetchGooglePlacesNewOpenings();
-  const instagramDeals = await fetchInstagramDeals();
+const placesDeals = []; // Google Deals jetzt in eigenem Script  const instagramDeals = await fetchInstagramDeals();
   const facebookDeals = await fetchFacebookEvents();
   
   scrapedDeals.push(...placesDeals, ...instagramDeals, ...facebookDeals);
