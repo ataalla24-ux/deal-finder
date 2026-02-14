@@ -25,13 +25,13 @@ if (!APIFY_API_TOKEN) {
 // ============================================
 
 const CONFIG = {
-  maxDealsPerRun: 5,
+  maxDealsPerRun: 10,       // Mehr Deals pro Run (war 5)
   minScore: 50,
   reviewMinScore: 35,
-  maxAgeDays: 7,
+  maxAgeDays: 10,            // 10 Tage statt 7 (mehr Posts erwischen)
   maxHashtags: 25,
-  postsPerHashtag: 30,
-  dealExpiryDays: 7,
+  postsPerHashtag: 50,       // Mehr Posts pro Hashtag (war 30)
+  dealExpiryDays: 10,        // Deals 10 Tage behalten
 };
 
 // ============================================
@@ -39,20 +39,42 @@ const CONFIG = {
 // ============================================
 
 const HASHTAGS = [
+  // Direkte Gratis-Hashtags (höchste Yield)
   'gratiswien',
   'wiengratis',
   'kostenloswien',
   'freebiewien',
   'gratisessen',
+  'gratisinoesterreich',
+  // Food & Drinks
   'wienisst',
   'streetfoodwien',
   'foodiewien',
+  'kaffeewien',
+  'pizzawien',
+  'kebabwien',
+  'wienfrühstück',
+  // Neueröffnungen (oft Gratis-Aktionen)
   'neueröffnungwien',
   'newinvienna',
-  'kebabwien',
-  'pizzawien',
-  'kaffeewien',
-  'wienfrühstück',
+  'grandopeningvienna',
+  // Events & Kultur (oft komplett gratis!)
+  'eventswien',
+  'wienevents',
+  'gratisfestival',
+  'openairwien',
+  'flohmarktwien',
+  // Proben & Samples
+  'produkttest',
+  'gratisproben',
+  'testenwien',
+  // Fitness & Wellness
+  'gratissportwien',
+  'outdoorwien',
+  // Familien & Kinder (viel Gratis!)
+  'familienwien',
+  'kinderwien',
+  'gratiskinderwien',
 ];
 
 // ============================================
@@ -63,8 +85,22 @@ const GRATIS_KEYWORDS = [
   'gratis', 'kostenlos', 'free', 'geschenkt', 'umsonst',
   'verschenken', 'freebie', 'for free', 'auf uns', 'aufs haus',
   'wir laden ein', 'einladung', 'wir spendieren', 'spendieren',
-  'geht auf uns', 'gratis dazu', 'on the house',
-  '0€', '0 €', 'null euro',
+  'geht auf uns', 'on the house',
+  '0€', '0 €', 'null euro', 'freier eintritt', 'eintritt frei',
+];
+
+// FAKE-GRATIS: Klingt gratis, aber man muss was kaufen!
+const FAKE_GRATIS_KEYWORDS = [
+  'gratis dazu', 'dazu gratis', 'gratis zu jed', 'gratis bei kauf',
+  'gratis bei bestellung', 'gratis ab bestellwert', 'gratis ab €',
+  'gratis ab einem', 'gratis wenn du', 'gratis beim kauf',
+  'gratis lieferung', 'gratis versand', 'free delivery', 'free shipping',
+  'free with purchase', 'free with any', 'free when you buy',
+  'bei jeder bestellung', 'zu jedem hauptgericht', 'zu jeder pizza',
+  'zu jedem menü', 'ab einem einkauf', 'ab bestellwert',
+  'ab einem bestellwert', 'mindestbestellwert',
+  'ab €', 'ab 10€', 'ab 15€', 'ab 20€', 'ab 25€', 'ab 30€',
+  'bei abnahme von', 'beim kauf von', 'wenn du bestellst',
 ];
 
 const PREIS_KEYWORDS = [
@@ -107,12 +143,32 @@ const FOOD_KEYWORDS = [
 ];
 
 const NON_FOOD_KEYWORDS = [
+  // Fitness & Beauty
   'haarschnitt', 'haircut', 'friseur', 'barber',
   'training', 'probetraining', 'fitness', 'yoga',
-  'probe', 'sample', 'goodie bag', 'goodiebag',
-  'geschenk', 'gift', 'merch', 't-shirt',
   'massage', 'beauty', 'kosmetik', 'maniküre',
-  'tattoo', 'piercing', 'workshop', 'kurs',
+  // Proben & Samples
+  'probe', 'sample', 'goodie bag', 'goodiebag',
+  'produktprobe', 'gratisproben', 'testen', 'produkttest',
+  'geschenk', 'gift', 'merch', 't-shirt', 'goodies',
+  // Events & Kultur
+  'festival', 'konzert', 'concert', 'open air', 'openair',
+  'ausstellung', 'exhibition', 'museum', 'galerie', 'gallery',
+  'lesung', 'vortrag', 'führung', 'tour', 'stadtführung',
+  'kino', 'cinema', 'film', 'screening',
+  'theater', 'performance', 'show',
+  'flohmarkt', 'markt', 'market', 'bazar',
+  // Workshops & Kurse
+  'workshop', 'kurs', 'class', 'seminar',
+  'schnupperkurs', 'probelektion', 'schnuppern',
+  // Kinder & Familie
+  'kinderfest', 'spielplatz', 'basteln', 'kinderworkshop',
+  'familientag', 'kindertag', 'spielefest',
+  // Sport & Outdoor
+  'lauftreff', 'wanderung', 'radtour', 'outdoor',
+  'sportfest', 'turnier', 'open training',
+  // Tattoo & Piercing
+  'tattoo', 'piercing',
 ];
 
 const WIEN_KEYWORDS = [
@@ -181,6 +237,14 @@ function validateDeal(post) {
   const hasGoodPrice = preisMatches.length > 0;
   const hasAktion = aktionMatches.length > 0;
 
+  // ⚠️ FAKE-GRATIS CHECK: "gratis dazu", "gratis bei Kauf" = NICHT echt gratis!
+  const fakeGratisMatches = FAKE_GRATIS_KEYWORDS.filter(k => caption.includes(k));
+  const isFakeGratis = fakeGratisMatches.length > 0;
+
+  // Wenn "gratis" nur fake-gratis ist, downgrade zu Aktion
+  const isTrulyGratis = isGratis && !isFakeGratis;
+  const isConditionalGratis = isGratis && isFakeGratis;
+
   if (!isGratis && !hasGoodPrice && !hasAktion)
     return { valid: false, reason: 'no_deal_type' };
 
@@ -197,11 +261,14 @@ function validateDeal(post) {
   if (!WIEN_KEYWORDS.some(k => allText.includes(k)))
     return { valid: false, reason: 'not_vienna' };
 
-  // QUALITY SCORE
+  // QUALITY SCORE - Echt gratis wird stark bevorzugt!
   let score = 0;
-  if (isGratis) score += 30;
-  else if (hasGoodPrice) score += 25;
-  else if (hasAktion) score += 20;
+
+  // Deal-Klarheit (max 40) - ECHT GRATIS = höchster Score
+  if (isTrulyGratis) score += 35;          // Echt kostenlos = Jackpot
+  else if (isConditionalGratis) score += 15; // "Gratis dazu" = nur ein Rabatt
+  else if (hasGoodPrice) score += 20;
+  else if (hasAktion) score += 18;
   if (gratisMatches.length + preisMatches.length + aktionMatches.length >= 2) score += 5;
 
   if (hasFood) score += 15;
@@ -226,7 +293,7 @@ function validateDeal(post) {
   return {
     valid: score >= CONFIG.minScore,
     review: score >= CONFIG.reviewMinScore && score < CONFIG.minScore,
-    score, isGratis, hasGoodPrice, hasAktion, hasFood, hasNonFood,
+    score, isGratis: isTrulyGratis, isConditionalGratis, hasGoodPrice, hasAktion, hasFood, hasNonFood,
     foodMatches, nonFoodMatches,
     reason: score >= CONFIG.minScore ? 'approved' : (score >= CONFIG.reviewMinScore ? 'review' : 'low_score'),
   };
@@ -260,6 +327,23 @@ function findBestProduct(lower) {
     ['pommes', 'Pommes'], ['hot dog', 'Hot Dog'],
     ['haarschnitt', 'Haarschnitt'], ['probetraining', 'Probetraining'],
     ['massage', 'Massage'], ['yoga', 'Yoga-Stunde'], ['workshop', 'Workshop'],
+    // Events & Kultur
+    ['festival', 'Festival'], ['konzert', 'Konzert'], ['concert', 'Konzert'],
+    ['open air', 'Open-Air Event'], ['openair', 'Open-Air Event'],
+    ['ausstellung', 'Ausstellung'], ['exhibition', 'Ausstellung'],
+    ['museum', 'Museum'], ['galerie', 'Galerie'],
+    ['lesung', 'Lesung'], ['vortrag', 'Vortrag'],
+    ['führung', 'Führung'], ['stadtführung', 'Stadtführung'],
+    ['kino', 'Kino'], ['screening', 'Filmvorführung'],
+    ['theater', 'Theater'], ['flohmarkt', 'Flohmarkt'],
+    // Kinder
+    ['kinderfest', 'Kinderfest'], ['spielefest', 'Spielefest'],
+    ['basteln', 'Bastel-Workshop'], ['kinderworkshop', 'Kinderworkshop'],
+    // Sport
+    ['lauftreff', 'Lauftreff'], ['wanderung', 'Wanderung'],
+    ['radtour', 'Radtour'], ['sportfest', 'Sportfest'],
+    // Proben
+    ['produkttest', 'Produkttest'], ['schnupperkurs', 'Schnupperkurs'],
   ];
 
   for (const [kw, label] of products) {
@@ -273,6 +357,7 @@ function generateTitle(post, validation) {
   const lower = caption.toLowerCase();
   const product = findBestProduct(lower);
 
+  // ECHT GRATIS - bekommt "GRATIS" Prefix
   if (validation.isGratis) {
     if (lower.includes('neueröffnung') || lower.includes('eröffnung') || lower.includes('opening'))
       return `GRATIS ${product} - Neueröffnung`;
@@ -280,11 +365,18 @@ function generateTitle(post, validation) {
       return `GRATIS ${product} am Geburtstag`;
     if (lower.includes('1+1') || lower.includes('2 für 1'))
       return `GRATIS ${product} - 1+1 Aktion`;
-    if (lower.includes('gratis dazu') || lower.includes('dazu gratis'))
-      return `GRATIS ${product} dazu`;
     if (lower.includes('spendieren') || lower.includes('auf uns') || lower.includes('aufs haus'))
       return `GRATIS ${product} aufs Haus`;
+    if (lower.includes('eintritt frei') || lower.includes('freier eintritt'))
+      return `GRATIS Eintritt - ${product}`;
+    if (lower.includes('festival') || lower.includes('open air'))
+      return `GRATIS ${product}`;
     return `GRATIS ${product}`;
+  }
+
+  // FAKE GRATIS - "Zugabe bei Kauf", nicht "GRATIS"
+  if (validation.isConditionalGratis) {
+    return `${product} gratis dazu (bei Kauf)`;
   }
 
   if (validation.hasAktion) {
@@ -425,6 +517,20 @@ function categorize(caption, validation) {
   if (lower.includes('training') || lower.includes('fitness') || lower.includes('yoga')) return { category: 'fitness', logo: '💪' };
   if (lower.includes('friseur') || lower.includes('barber') || lower.includes('haarschnitt')) return { category: 'beauty', logo: '💈' };
   if (lower.includes('beauty') || lower.includes('kosmetik')) return { category: 'beauty', logo: '💄' };
+  // Events & Kultur
+  if (lower.includes('festival') || lower.includes('open air') || lower.includes('openair')) return { category: 'events', logo: '🎪' };
+  if (lower.includes('konzert') || lower.includes('concert') || lower.includes('live musik')) return { category: 'events', logo: '🎵' };
+  if (lower.includes('museum') || lower.includes('ausstellung') || lower.includes('galerie')) return { category: 'kultur', logo: '🏛️' };
+  if (lower.includes('kino') || lower.includes('film') || lower.includes('screening')) return { category: 'kultur', logo: '🎬' };
+  if (lower.includes('theater') || lower.includes('lesung') || lower.includes('vortrag')) return { category: 'kultur', logo: '🎭' };
+  if (lower.includes('führung') || lower.includes('tour') || lower.includes('stadtführung')) return { category: 'kultur', logo: '🚶' };
+  if (lower.includes('flohmarkt') || lower.includes('markt') || lower.includes('bazar')) return { category: 'shopping', logo: '🛍️' };
+  // Kinder & Familie
+  if (lower.includes('kinder') || lower.includes('familie') || lower.includes('spielefest') || lower.includes('basteln')) return { category: 'familie', logo: '👨‍👩‍👧‍👦' };
+  // Sport & Outdoor
+  if (lower.includes('lauftreff') || lower.includes('wanderung') || lower.includes('radtour') || lower.includes('sportfest')) return { category: 'sport', logo: '🏃' };
+  // Proben & Samples
+  if (lower.includes('produkttest') || lower.includes('probe') || lower.includes('sample') || lower.includes('goodie')) return { category: 'proben', logo: '🎁' };
 
   if (validation.hasFood) return { category: 'essen', logo: '🍽️' };
   return { category: 'shopping', logo: '🎁' };
@@ -446,7 +552,7 @@ function createDeal(post, validation) {
   return {
     id: `ig-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
     brand, logo, title, description,
-    type: validation.isGratis ? 'gratis' : 'rabatt',
+    type: validation.isGratis ? 'gratis' : (validation.isConditionalGratis ? 'rabatt' : 'rabatt'),
     category,
     source: `Instagram @${post.ownerUsername || 'unknown'}`,
     url: post.url || `https://www.instagram.com/p/${post.shortCode || ''}`,
@@ -589,7 +695,8 @@ async function main() {
     if (result.valid) {
       const deal = createDeal(post, result);
       approvedDeals.push(deal);
-      console.log(`   ✅ ${deal.logo} ${deal.title} [Score: ${result.score}]`);
+      const freeTag = result.isGratis ? '🆓 ECHT GRATIS' : (result.isConditionalGratis ? '⚠️ Gratis bei Kauf' : '💰 Rabatt');
+      console.log(`   ✅ ${deal.logo} ${deal.title} [Score: ${result.score}] ${freeTag}`);
       console.log(`      → ${deal.brand} | ${deal.distance}`);
     } else if (result.review) {
       reviewDeals.push(createDeal(post, result));
