@@ -930,7 +930,7 @@
             e.stopPropagation(); 
             const deal = allDeals.find(d => d.id === id);
             if (!deal) return;
-            const appUrl = 'https://ataalla24-ux.github.io/deal-finder/?deal=' + id; 
+            const appUrl = 'https://apps.apple.com/at/app/id6758958213?deal=' + id; 
             const text = '🎁 ' + deal.brand + ': ' + deal.title + '\n\n' + deal.description + '\n\n📱 Direkt in der App öffnen:\n' + appUrl; 
             if (navigator.share) navigator.share({ title: 'FreeFinder Deal', text: text }); 
             else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank'); 
@@ -1156,3 +1156,25 @@
     </script>
 </body>
 </html>
+<script>
+// Auto-redirect to App Store if opened on iOS and no app
+(function() {
+    const userAgent = navigator.userAgent || '';
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+    const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+    
+    // Check if URL has deal parameter and we're on iOS
+    const params = new URLSearchParams(window.location.search);
+    const dealId = params.get('deal');
+    
+    if (isIOS && dealId && isSafari) {
+        // Delay slightly to check if app is installed (Universal Link fails)
+        setTimeout(function() {
+            // If page is still visible after 500ms, redirect to App Store
+            if (!document.hidden) {
+                window.location.replace('https://apps.apple.com/at/app/id6758958213?deal=' + dealId);
+            }
+        }, 500);
+    }
+})();
+</script>
