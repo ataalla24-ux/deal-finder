@@ -22,6 +22,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: 📦 Install Dependencies
+        run: npm install
+
       - name: 📸 Instagram Scraper v3 ausführen
         env:
           APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
