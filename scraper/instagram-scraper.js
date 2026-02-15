@@ -68,30 +68,46 @@ function matchKeywords(text, keywords) {
 // ============================================
 
 const HASHTAGS = [
-  // === TIER 1: Direkte Gratis/Eröffnungs-Hashtags ===
-  'gratiswien',              // ✅ bestätigt - direkter Wien+Gratis Treffer
-  'neueröffnung',            // ✅ bestätigt - Gratis-Aktionen bei Openings
-  'eröffnung',               // ✅ bestätigt
-  // === TIER 2: Deal-Hashtags ===
-  'aktionwien',              // ✅ bestätigt
-  'kostenlos',               // ✅ bestätigt (Wien-Filter in Caption)
-  'gratisprobe',             // ✅ bestätigt
-  'geschenk',                // ✅ bestätigt
-  'produkttest',             // ✅ bestätigt
-  'freebie',                 // ✅ bestätigt
-  // === TIER 3: Wien-Food (was kleine Läden wirklich nutzen) ===
-  'dönerwien',               // ✅ bestätigt
-  'kebapwien',               // ✅ bestätigt
-  'kebabwien',               // ✅ Alternative Schreibweise!
-  'döner',                   // ✅ Minimax: "sehr aktiv"
-  'kebap',                   // ✅ bestätigt
-  'kaffeewien',              // ✅ Kaffee-Deals Wien
-  'pizzawien',               // ✅ Pizza-Shops Eröffnungen
-  'streetfoodwien',          // ✅ Kleine Läden nutzen das
-  'wienessen',               // ✅ Wien Food allgemein
-  'wienfood',                // ✅
-  'viennafood',              // ✅
-  // NOTE: Türkische Hashtags (#açılış, #bedava) ENTFERNT - zu viele False Positives aus der Türkei!
+  // === TIER 1: Wien + Gratis/Free Kombinationen (ChatGPT empfohlen!) ===
+  'wien',
+  'vienna',
+  'gratis',
+  'kostenlos',
+  'freeevent',
+  // === TIER 2: Neueröffnungen (viele Gratis-Aktionen!) ===
+  'neueröffnung',
+  'eröffnung',
+  'openingvienna',
+  'softopening',
+  'verkostung',
+  // === TIER 3: Wien Food & Gastro (ChatGPT Top!) ===
+  'wienfood',
+  'viennafood',
+  'wiengastro',
+  'wienrestaurant',
+  'wiencafe',
+  'wienbar',
+  // === TIER 4: Kultur & Events ===
+  'wienkultur',
+  'wienausgehen',
+  'wienfreizeit',
+  'wienparty',
+  'wienfestival',
+  'viennalife',
+  'viennacity',
+  // === TIER 5: Studenten (oft Gratisaktionen!) ===
+  'studentenwien',
+  // === TIER 6: Wiener Bezirke (PLZ) ===
+  'dönerwien',
+  'kebapwien',
+  'kebabwien',
+  'kaffeewien',
+  // === TIER 7: Wiener Lokal-Geschäft ===
+  'gratiswien',
+  'aktionwien',
+  'wienevents',
+  'viennaevents',
+  // NOTE: Türkische Hashtags (#açılış, #bedava) - nur mit Wien-Bezug!
 ];
 
 // ============================================
