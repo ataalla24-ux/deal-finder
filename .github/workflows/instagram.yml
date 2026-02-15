@@ -22,10 +22,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: 📸 Instagram Scraper ausführen
+      - name: 📸 Instagram Scraper v3 ausführen
         env:
           APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
-        run: node scraper/instagram-scraper.js
+        run: node scraper/instagram-scraper-v3.js
 
       - name: 📤 Änderungen pushen
         run: |
