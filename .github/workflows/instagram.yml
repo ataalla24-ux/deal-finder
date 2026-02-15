@@ -2,8 +2,9 @@ name: 📸 Instagram Deal Scraper
 
 on:
   schedule:
-    # Täglich um 12:00 Wien = 11:00 UTC
-    - cron: '0 11 * * *'
+    # 2x täglich um 08:00 und 16:00 Wien = 07:00 und 15:00 UTC
+    - cron: '0 7 * * *'
+    - cron: '0 15 * * *'
   workflow_dispatch:
 
 jobs:
