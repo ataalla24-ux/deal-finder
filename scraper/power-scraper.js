@@ -704,7 +704,7 @@ const placesDeals = []; // Google Deals jetzt in eigenem Script  const instagram
     deals: uniqueDeals
   };
   
-fs.writeFileSync('docs/deals.json', JSON.stringify(output, null, 2));  
+fs.writeFileSync('deals-pending.json', JSON.stringify(output, null, 2));  
   console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
   console.log(`✅ Scraping abgeschlossen!`);
   console.log(`   📦 Basis-Deals: ${BASE_DEALS.length}`);

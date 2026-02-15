@@ -1,6 +1,6 @@
 // ============================================
-// 📱 SLACK NOTIFY - Sendet Deals an Slack
-// Jeder Deal = eigene Thread-Nachricht
+// 📱 SLACK NOTIFY - Sendet ALLE Deals an Slack
+// Liest: deals-pending-*.json (power, instagram, firecrawl, google)
 // ============================================
 
 import fs from 'fs';
@@ -47,122 +47,113 @@ async function slackPost(message, threadTs = null) {
     return null;
   }
   
-  return data.ts; // Thread timestamp
-}
-
-async function slackReact(channelId, messageTs, emoji = 'white_check_mark') {
-  if (!SLACK_BOT_TOKEN) return;
-
-  await fetch('https://slack.com/api/reactions.add', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      channel: channelId,
-      timestamp: messageTs,
-      name: emoji,
-    }),
-  });
+  return data.ts;
 }
 
 // ============================================
-// Main: Send Deals to Slack
+// Helper: Load pending deals from file
+// ============================================
+
+function loadPendingDeals(source) {
+  const filePath = `docs/deals-pending-${source}.json`;
+  try {
+    if (fs.existsSync(filePath)) {
+      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      return data.deals || data || [];
+    }
+  } catch (e) {
+    console.log(`⚠️  ${source} load error: ${e.message}`);
+  }
+  return [];
+}
+
+// ============================================
+// Helper: Format deal for Slack
+// ============================================
+
+function formatDeal(deal, index, source) {
+  const emoji = {
+    power: '⚡',
+    instagram: '📸',
+    firecrawl: '🔥',
+    google: '📍',
+  }[source] || '🎯';
+
+  const typeEmoji = deal.type === 'gratis' ? '🆓' : '💰';
+  const title = deal.title || deal.brand || 'Deal';
+  const brand = deal.brand || 'Unknown';
+  const desc = deal.description ? `\n_${deal.description.substring(0, 80)}_` : '';
+  const url = deal.url || '';
+  
+  return `${index}. ${typeEmoji} *${title.substring(0, 50)}*\n${desc}\n${emoji} ${brand} ${url ? `• <${url}|Link>` : ''}`;
+}
+
+// ============================================
+// Main: Send ALL pending deals to Slack
 // ============================================
 
 async function main() {
-  console.log('📱 SLACK NOTIFY');
+  console.log('📱 SLACK NOTIFY - ALL SOURCES');
   console.log('='.repeat(40));
 
   if (!SLACK_BOT_TOKEN || !SLACK_CHANNEL_ID) {
     console.log('⚠️  SLACK_BOT_TOKEN oder SLACK_CHANNEL_ID fehlt');
-    console.log('   Bitte als GitHub Secrets setzen!');
     process.exit(0);
   }
 
-  // Load deals
-  const dealsPath = path.join(__dirname, '..', 'docs', 'deals.json');
-  let deals = [];
+  // Load all pending deals
+  const sources = ['power', 'instagram', 'firecrawl', 'google'];
+  let allDeals = [];
   
-  if (fs.existsSync(dealsPath)) {
-    const data = JSON.parse(fs.readFileSync(dealsPath, 'utf-8'));
-    deals = data.deals || [];
+  for (const source of sources) {
+    const deals = loadPendingDeals(source);
+    console.log(`📂 ${source}: ${deals.length} Deals`);
+    allDeals = allDeals.concat(deals.map(d => ({...d, _source: source})));
   }
 
-  // Filter: Instagram deals only, sorted by qualityScore
-  const igDeals = deals
-    .filter(d => d.isInstagramDeal)
-    .sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0));
-
-  if (igDeals.length === 0) {
-    console.log('📭 Keine Instagram Deals gefunden');
+  if (allDeals.length === 0) {
+    console.log('📭 Keine Pending Deals gefunden');
     process.exit(0);
   }
 
-  console.log(`📸 ${igDeals.length} Instagram Deals gefunden`);
-
-  // Count by type
-  const gratis = igDeals.filter(d => d.title?.toLowerCase().includes('gratis') || d.type === 'gratis');
-  const rabatt = igDeals.filter(d => d.type === 'preis' || d.type === 'aktion');
-  const gewinnspiel = igDeals.filter(d => d.title?.toLowerCase().includes('gewinn') || d.title?.toLowerCase().includes('verlos'));
-
-  // Send summary
-  const today = new Date().toLocaleDateString('de-AT', { 
-    day: '2-digit', month: '2-digit', year: 'numeric' 
+  // Sort: Gratis first, then by score
+  allDeals.sort((a, b) => {
+    if (a.type === 'gratis' && b.type !== 'gratis') return -1;
+    if (a.type !== 'gratis' && b.type === 'gratis') return 1;
+    return (b.qualityScore || 0) - (a.qualityScore || 0);
   });
 
-  const summary = `📸 *FreeFinder Wien — ${igDeals.length} Deals gefunden*
-📅 ${today}
+  // Count by type
+  const gratisCount = allDeals.filter(d => d.type === 'gratis').length;
+  const otherCount = allDeals.length - gratisCount;
 
-🆓 ${gratis.length}x Gratis
-💰 ${rabatt.length}x Rabatt
-🎰 ${gewinnspiel.length}x Gewinnspiel
+  console.log(`📊 Total: ${allDeals.length} (${gratisCount} gratis, ${otherCount} andere)`);
 
-_Reagiere mit ✅ auf Deals die live gehen sollen!_`;
+  // Send main message
+  const mainMsg = await slackPost(
+    `🎯 *FreeFinder Wien* — ${allDeals.length} Deals zum Review\n` +
+    `🆓 ${gratisCount}x Gratis • 💰 ${otherCount}x Other\n` +
+    `_Reagiere mit ✅ um zu genehmigen_`
+  );
 
-  console.log('📤 Sende Summary...');
-  const mainTs = await slackPost(summary);
-  
-  if (!mainTs) {
-    console.log('❌ Konnte Slack Nachricht nicht senden');
+  if (!mainMsg) {
+    console.log('❌ Konnte Hauptnachricht nicht senden');
     process.exit(1);
   }
 
-  console.log(`📝 Thread erstellt: ${mainTs}`);
-
   // Send each deal as thread reply
-  console.log('📤 Sende Deals als Thread...');
-  
-  let sent = 0;
-  for (let i = 0; i < igDeals.length; i++) {
-    const deal = igDeals[i];
+  console.log('📤 Sende Deals...');
+  for (let i = 0; i < allDeals.length; i++) {
+    const deal = allDeals[i];
+    const msg = formatDeal(deal, i + 1, deal._source);
+    await slackPost(msg, mainMsg);
     
-    const emoji = deal.title?.toLowerCase().includes('gratis') ? '🆓' : '💰';
-    const number = i + 1;
-    
-    const dealText = `${number}. ${emoji} *${deal.title?.substring(0, 50)}*
-_${deal.brand || 'Unknown'}_
-📍 ${deal.distance || 'Wien'} | Score: ${deal.qualityScore || '?'}
-🔗 ${deal.url || ''}`;
-
-    const ts = await slackPost(dealText, mainTs);
-    
-    if (ts) {
-      sent++;
-      // Add reaction to each deal
-      await slackReact(SLACK_CHANNEL_ID, ts, 'white_check_mark');
-      console.log(`   ${number}. ✅ ${deal.brand}`);
-    }
-
-    // Rate limit
-    if (i % 10 === 0) {
-      await new Promise(r => setTimeout(r, 1000));
+    if ((i + 1) % 10 === 0) {
+      console.log(`   ${i + 1}/${allDeals.length}...`);
     }
   }
 
-  console.log(`\n✅ Fertig! ${sent} Deals an Slack gesendet`);
-  console.log(`📝 Thread: https://slack.com/archives/${SLACK_CHANNEL_ID}/${mainTs.replace('.', '')}`);
+  console.log(`✅ ${allDeals.length} Deals an Slack gesendet!`);
 }
 
 main()

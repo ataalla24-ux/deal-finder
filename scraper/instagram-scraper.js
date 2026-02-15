@@ -963,7 +963,7 @@ async function main() {
   console.log(`📅 ${new Date().toLocaleString('de-AT')}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-  const dealsPath = 'docs/deals.json';
+  const dealsPath = 'deals-pending.json';
   if (fs.existsSync(dealsPath)) {
     fs.copyFileSync(dealsPath, 'docs/deals.backup.json');
     console.log('💾 Backup erstellt\n');
