@@ -22,34 +22,49 @@ if (!APIFY_API_TOKEN) {
 // ============================================
 
 async function callApifyActor(actorId, input) {
-  // Start the actor
-  const startRes = await fetch(`https://api.apify.com/v2/acts/${actorId}/runs?token=${APIFY_API_TOKEN}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...input, waitForFinish: 120 })
-  });
-  
-  const startData = await startRes.json();
-  const runId = startData.data.id;
-  
-  console.log(`    → Run started: ${runId}`);
-  
-  // Wait for completion
-  let status = 'RUNNING';
-  while (status === 'RUNNING' || status === 'READY') {
-    await new Promise(r => setTimeout(r, 5000));
-    const statusRes = await fetch(`https://api.apify.com/v2/acts/${actorId}/runs/${runId}?token=${APIFY_API_TOKEN}`);
-    const statusData = await statusRes.json();
-    status = statusData.data.status;
-    console.log(`    → Status: ${status}`);
+  try {
+    // Start the actor
+    const startRes = await fetch(`https://api.apify.com/v2/acts/${actorId}/runs?token=${APIFY_API_TOKEN}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...input, waitForFinish: 120 })
+    });
+    
+    if (!startRes.ok) {
+      console.log(`    → API Error: ${startRes.status}`);
+      return [];
+    }
+    
+    const startData = await startRes.json();
+    
+    if (!startData.data) {
+      console.log(`    → No data returned`);
+      return [];
+    }
+    
+    const runId = startData.data.id;
+    console.log(`    → Run started: ${runId}`);
+    
+    // Wait for completion
+    let status = 'RUNNING';
+    while (status === 'RUNNING' || status === 'READY') {
+      await new Promise(r => setTimeout(r, 5000));
+      const statusRes = await fetch(`https://api.apify.com/v2/acts/${actorId}/runs/${runId}?token=${APIFY_API_TOKEN}`);
+      const statusData = await statusRes.json();
+      status = statusData.data?.status || 'FAILED';
+      console.log(`    → Status: ${status}`);
+    }
+    
+    // Get results
+    const datasetId = startData.data.defaultDatasetId;
+    const resultsRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${APIFY_API_TOKEN}&limit=500`);
+    const items = await resultsRes.json();
+    
+    return items || [];
+  } catch (e) {
+    console.log(`    → Exception: ${e.message}`);
+    return [];
   }
-  
-  // Get results
-  const datasetId = startData.data.defaultDatasetId;
-  const resultsRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${APIFY_API_TOKEN}&limit=500`);
-  const items = await resultsRes.json();
-  
-  return items;
 }
 
 // ============================================
