@@ -261,13 +261,14 @@ async function main() {
     try {
       console.log(`  #${hashtag}...`);
       
+      // Hashtag scraper
       const input = {
-        hashtag: hashtag,
-        resultsLimit: CONFIG.postsPerHashtag,
-        proxyConfiguration: { useApifyProxy: true },
+        hashtags: [hashtag],
+        resultsPerHashtag: CONFIG.postsPerHashtag,
+        searchType: 'posts',
       };
       
-      const posts = await callApifyActor('apify/instagram-scraper', input);
+      const posts = await callApifyActor('apify~instagram-hashtag-scraper', input);
       
       if (posts && posts.length > 0) {
         console.log(`    → ${posts.length} posts`);
@@ -288,13 +289,14 @@ async function main() {
     try {
       console.log(`  @${account}...`);
       
+      // Account scraper
       const input = {
-        username: account,
-        resultsLimit: CONFIG.postsPerAccount,
-        proxyConfiguration: { useApifyProxy: true },
+        usernames: [account],
+        resultsPerAccount: CONFIG.postsPerAccount,
+        searchType: 'posts',
       };
       
-      const posts = await callApifyActor('apify/instagram-scraper', input);
+      const posts = await callApifyActor('apify~instagram-post-scraper', input);
       
       if (posts && posts.length > 0) {
         console.log(`    → ${posts.length} posts`);
