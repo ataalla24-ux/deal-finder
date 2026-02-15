@@ -68,84 +68,92 @@ function matchKeywords(text, keywords) {
 // ============================================
 
 const HASHTAGS = [
-  // === TIER 1: Wien + Gratis Kombinationen (funktionieren!) ===
-  'gratiswien',              // ✅ Wien + Gratis
-  'aktionwien',              // ✅ Wien + Aktion
-  'kostenloswien',           // ✅ Wien + Kostenlos
-  'gratisfürdich',          // NEU
-  'wiengratis',             // NEU
-  // === TIER 2: Neueröffnungen (viele Gratis-Aktionen!) ===
-  'neueröffnung',            // ✅
-  'neueröffnungwien',       // ✅ Wien + Eröffnung
-  'eröffnung',               // ✅
-  'softopening',             // ✅
-  'gratiseroeffnung',       // NEU
-  // === TIER 3: Wien Food & Gastro (ChatGPT Top!) ===
-  'wienfood',                // ✅
-  'viennafood',              // ✅
-  'wiengastro',              // ✅
-  'wienrestaurant',          // ✅
-  'wiencafe',                // ✅
-  'wienbar',                 // ✅
-  'streetfoodwien',         // ✅
-  'wienstreetfood',         // NEU
-  'wienfoodie',             // NEU
-  'foodblogwien',           // NEU
-  // === TIER 4: Döner/Kebab Wien (funktioniert!) ===
-  'dönerwien',               // ✅
-  'kebapwien',               // ✅
-  'kebabwien',               // ✅
-  'döner',                   // ✅
-  'kebap',                   // ✅
-  'bedava',                  // ✅ Türkisch für gratis
-  'ücretsiz',               // ✅ Türkisch für gratis
-  'dönerliebe',             // NEU
-  // === TIER 5: Kaffee Wien ===
-  'kaffeewien',              // ✅
-  'coffeeinvienna',          // ✅
-  'gratismitkaffee',        // NEU
-  // === TIER 6: Kultur & Events ===
-  'wienkultur',              // ✅
-  'wienevents',              // ✅
-  'viennaevents',            // ✅
-  'wienfreizeit',           // ✅
-  'wiennightlife',          // NEU
-  // === TIER 7: Studenten (oft Gratisaktionen!) ===
-  'studentenwien',           // ✅
-  'universityvienna',        // NEU
-  // === TIER 8: Wiener PLZ Bezirke ===
-  '1020wien',               // ✅ Leopoldstadt
-  '1100wien',               // ✅ Favoriten
-  '1150wien',               // ✅ Rudolfsheim-Fünfhaus
-  '1010wien',               // NEU Innere Stadt
-  '1030wien',               // NEU Landstraße
-  '1040wien',               // NEU Wieden
-  '1050wien',               // NEU Margareten
-  '1060wien',               // NEU Mariahilf
-  '1070wien',               // NEU Neubau
-  '1080wien',               // NEU Josefstadt
-  '1090wien',               // NEU Alsergrund
-  '1110wien',               // NEU Simmering
-  '1120wien',               // NEU Meidling
-  '1130wien',               // NEU Hietzing
-  '1140wien',               // NEU Penzing
-  '1160wien',               // NEU Ottakring
-  '1170wien',               // NEU Hernals
-  '1180wien',               // NEU Währing
-  '1190wien',               // NEU Döbling
-  '1200wien',               // NEU Brigittenau
-  '1210wien',               // NEU Floridsdorf
-  '1220wien',               // NEU Donau City
-  // === TIER 9: Generic Deals (筛选后) ===
-  'gratisessen',            // NEU
-  'kostenlosessen',         // NEU
-  'aktionessen',            // NEU
-  'dealswien',              // NEU
-  'sparenhotel',            // NEU
-  // === TIER 10: International (English) ===
-  'freevienna',             // NEU
-  'viennadeals',           // NEU
-  'viennafree',            // NEU
+  // === TIER 1: Wien + Gratis (MOST IMPORTANT!) ===
+  'gratiswien',              // ✅
+  'aktionwien',              // ✅
+  'kostenloswien',           // ✅
+  'gratisfürdich',          
+  'wiengratis',             
+  'gratismitwien',          // NEU
+  'wienaktion',             // NEU
+  // === TIER 2: Neueröffnungen (Hot!) ===
+  'neueröffnung',            
+  'neueröffnungwien',       
+  'eröffnung',               
+  'softopening',             
+  'gratiseroeffnung',       
+  'gratiseroeffnungwien',  // NEU
+  // === TIER 3: Food & Gastro Wien ===
+  'wienfood',                
+  'viennafood',              
+  'wiengastro',              
+  'wienrestaurant',          
+  'wiencafe',               
+  'wienbar',                 
+  'streetfoodwien',         
+  'wienstreetfood',         
+  'wienfoodie',             
+  'foodblogwien',           
+  'wienfoodblog',           // NEU
+  'wien eats',              // NEU
+  'viennafoodie',          // NEU
+  // === TIER 4: Döner/Kebab (Wien ist Kebab-Hauptstadt!) ===
+  'dönerwien',               
+  'kebapwien',               
+  'kebabwien',               
+  'döner',                   
+  'kebap',                   
+  'bedava',                  
+  'ücretsiz',               
+  'dönerliebe',             
+  'dönerwien1010',          // NEU
+  'kebabwien',              
+  // === TIER 5: Coffee & Frühstück ===
+  'kaffeewien',              
+  'coffeeinvienna',          
+  'gratismitkaffee',        
+  'frühstückwien',          // NEU
+  'brunchwien',             // NEU
+  'kaffeegutschein',        // NEU
+  // === TIER 6: Events & Kultur ===
+  'wienkultur',              
+  'wienevents',              
+  'viennaevents',            
+  'wienfreizeit',           
+  'wiennightlife',          
+  'wienconcert',             // NEU
+  'wienfestival',            // NEU
+  'freeeventvienna',        // NEU
+  // === TIER 7: Studenten (Budget!) ===
+  'studentenwien',           
+  'universityvienna',        
+  'studentenaktion',         // NEU
+  'budgetwien',             // NEU
+  // === TIER 8: Alle Wiener Bezirke ===
+  '1010wien', '1020wien', '1030wien', '1040wien', '1050wien',
+  '1060wien', '1070wien', '1080wien', '1090wien', '1100wien',
+  '1110wien', '1120wien', '1130wien', '1140wien', '1150wien',
+  '1160wien', '1170wien', '1180wien', '1190wien', '1200wien',
+  '1210wien', '1220wien', '1230wien',
+  // === TIER 9: Generic Deals ===
+  'gratisessen',            
+  'kostenlosessen',         
+  'aktionessen',            
+  'dealswien',              
+  'sparenhotel',            
+  'gutscheinwien',          // NEU
+  'rabatwien',              // NEU
+  // === TIER 10: International ===
+  'freevienna',             
+  'viennadeals',           
+  'viennafree',            
+  'viennafoodguide',        // NEU
+  'viennainsider',          // NEU
+  // === TIER 11: Special Categories ===
+  'wienliefert',            // NEU - Delivery
+  'takeawaywien',           // NEU
+  'lieferandoaktion',       // NEU
+  'foodpandaaktion',        // NEU
 ];
 
 // ============================================
