@@ -393,16 +393,18 @@ function validateDeal(post) {
   if (!hasFood && !hasNonFood)
     return { valid: false, reason: 'no_product' };
 
-  // CHECK 3: Wien - STRENG!
-  // Nur Posts MIT explizitem Wien-Bezug werden akzeptiert!
+  // CHECK 3: Wien - Balance zwischen Strenge und Nutzbarkeit
+  // Akzeptiere Posts die Wien explizit ODER einen Wiener PLZ/Bezirk haben
   const isTrustedWienAccount = WIEN_TRUSTED_ACCOUNTS.has((post.ownerUsername || '').toLowerCase());
   
-  // Explizite Wien-Keywords MÜSSEN im Text ODER Location stehen
-  const hasWienLocation = WIEN_KEYWORDS.some(k => matchesKeyword(allText, k));
-  const hasLocationField = location && location.length > 2;
+  // Prüfe auf explizites Wien im Text
+  const hasWienKeyword = WIEN_KEYWORDS.some(k => matchesKeyword(allText, k));
   
-  // Entweder: Trusted Account ODER explizites Wien im Text/Location
-  if (!isTrustedWienAccount && !hasWienLocation) {
+  // Prüfe auf Wiener PLZ (1010-1230) im Text oder Location
+  const hasWienPLZ = allText.match(/\b(1[0-2][0-9]0)\b/);
+  
+  // Akzeptiere wenn: Trusted Account ODER Wien-Keyword ODER PLZ
+  if (!isTrustedWienAccount && !hasWienKeyword && !hasWienPLZ) {
     return { valid: false, reason: 'not_vienna' };
   }
 
