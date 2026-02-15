@@ -3,13 +3,54 @@
 // Focus: Only REAL free deals in Vienna
 // ============================================
 
-import Apify from 'apify';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const APIFY_API_TOKEN = process.env.APIFY_API_TOKEN || '';
+
+if (!APIFY_API_TOKEN) {
+  console.log('⚠️  APIFY_API_TOKEN nicht gesetzt - Instagram Scraper übersprungen');
+  process.exit(0);
+}
+
+// ============================================
+// Simple Apify API calls (without SDK)
+// ============================================
+
+async function callApifyActor(actorId, input) {
+  // Start the actor
+  const startRes = await fetch(`https://api.apify.com/v2/acts/${actorId}/runs?token=${APIFY_API_TOKEN}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...input, waitForFinish: 120 })
+  });
+  
+  const startData = await startRes.json();
+  const runId = startData.data.id;
+  
+  console.log(`    → Run started: ${runId}`);
+  
+  // Wait for completion
+  let status = 'RUNNING';
+  while (status === 'RUNNING' || status === 'READY') {
+    await new Promise(r => setTimeout(r, 5000));
+    const statusRes = await fetch(`https://api.apify.com/v2/acts/${actorId}/runs/${runId}?token=${APIFY_API_TOKEN}`);
+    const statusData = await statusRes.json();
+    status = statusData.data.status;
+    console.log(`    → Status: ${status}`);
+  }
+  
+  // Get results
+  const datasetId = startData.data.defaultDatasetId;
+  const resultsRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${APIFY_API_TOKEN}&limit=500`);
+  const items = await resultsRes.json();
+  
+  return items;
+}
 
 // ============================================
 const CONFIG = {
@@ -211,15 +252,9 @@ async function main() {
         proxyConfiguration: { useApifyProxy: true },
       };
       
-      const dataset = await Apify.call('apify/instagram-scraper', input, {
-        waitFor: 5000,
-      });
+      const posts = await callApifyActor('apify/instagram-scraper', input);
       
-      const posts = dataset.defaultDatasetId 
-        ? (await Apify.dataset(dataset.defaultDatasetId).list()).items 
-        : [];
-      
-      if (posts.length > 0) {
+      if (posts && posts.length > 0) {
         console.log(`    → ${posts.length} posts`);
         allPosts.push(...posts);
       }
@@ -244,15 +279,9 @@ async function main() {
         proxyConfiguration: { useApifyProxy: true },
       };
       
-      const dataset = await Apify.call('apify/instagram-scraper', input, {
-        waitFor: 5000,
-      });
+      const posts = await callApifyActor('apify/instagram-scraper', input);
       
-      const posts = dataset.defaultDatasetId 
-        ? (await Apify.dataset(dataset.defaultDatasetId).list()).items 
-        : [];
-      
-      if (posts.length > 0) {
+      if (posts && posts.length > 0) {
         console.log(`    → ${posts.length} posts`);
         allPosts.push(...posts);
       }
@@ -419,5 +448,8 @@ async function main() {
 // ESM export
 export { main };
 
-// Run
-Apify.main(main);
+// Run directly (not via Apify.main which only works in Apify cloud)
+main().catch(err => {
+  console.error('Scraper failed:', err);
+  process.exit(1);
+});
