@@ -25,14 +25,14 @@ if (!APIFY_API_TOKEN) {
 // ============================================
 
 const CONFIG = {
-  maxDealsPerRun: 15,       // Mehr Deals da 2 Quellen (Hashtags + Accounts)
-  minScore: 50,
-  reviewMinScore: 35,
-  maxAgeDays: 7,             // 7 Tage (täglich scrapen = reicht locker)
-  maxHashtags: 25,
-  postsPerHashtag: 30,       // 30 statt 50 (täglich statt 4x/Woche → gleiches Gesamtvolumen)
+  maxDealsPerRun: 20,       // Mehr Deals
+  minScore: 45,             // Etwas lower für mehr Ergebnisse
+  reviewMinScore: 30,       // Review auch lower
+  maxAgeDays: 7,             // 7 Tage
+  maxHashtags: 30,
+  postsPerHashtag: 40,       // Mehr Posts
   dealExpiryDays: 10,        // Deals 10 Tage behalten
-  maxDealsPerBrand: 2,       // Max 2 Deals pro Brand pro Run
+  maxDealsPerBrand: 2,       // Max 2 Deals pro Brand
 };
 
 // ============================================
@@ -89,8 +89,13 @@ const HASHTAGS = [
   'pizzawien',               // ✅ Pizza-Shops Eröffnungen
   'streetfoodwien',          // ✅ Kleine Läden nutzen das
   'wienessen',               // ✅ Wien Food allgemein
+  'wienfood',                // ✅
+  'viennafood',              // ✅
   // === TIER 4: Türkisch (Wien-Kebab-Szene) ===
   'açılış',                  // = Neueröffnung auf Türkisch
+  'bedava',                  // = gratis
+  // === TIER 5: Weitere ===
+  'wien', 'vienna',         // als Fallback
 ];
 
 // ============================================
@@ -421,6 +426,9 @@ function validateDeal(post) {
   if (hasFood) score += 15;
   if (hasNonFood) score += 10;
   if (foodMatches.length >= 2) score += 5;
+
+  // ERÖFFNUNG BONUS - Gratis bei Neueröffnung ist besonders wertvoll!
+  if (searchText.match(/eröffnung|neueröffnung|opening|açılış/i)) score += 10;
 
   if (location && WIEN_KEYWORDS.some(k => matchesKeyword(location, k))) score += 15;
   if (isTrustedWienAccount) score += 10;  // Trusted Wien-Account Bonus
