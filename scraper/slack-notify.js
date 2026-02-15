@@ -117,7 +117,7 @@ async function main() {
 
 🆓 ${gratis.length}x Gratis
 💰 ${rabatt.length}x Rabatt
-🎰 ${gewinispiel.length}x Gewinnspiel
+🎰 ${gewinnspiel.length}x Gewinnspiel
 
 _Reagiere mit ✅ auf Deals die live gehen sollen!_`;
 
