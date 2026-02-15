@@ -175,10 +175,19 @@ async function main() {
   // Find messages with ✅ reaction
   console.log('🔍 Suche ✅ Reaktionen...');
   
+  // Check if main message has ✅ - if yes, approve ALL deals!
+  const mainHasCheck = mainMsg.reactions?.some(r => r.name === 'white_check_mark');
+  
   let approvedCount = 0;
   const approvedDeals = [];
-
-  for (let i = 1; i < threadMessages.length; i++) {
+  
+  if (mainHasCheck) {
+    // ✅ on main message = approve ALL deals in thread
+    console.log('✅ ✅ auf Hauptnachricht - genehmige ALLE Deals!');
+    approvedDeals.push(...igDeals);
+    approvedCount = igDeals.length;
+  } else {
+    for (let i = 1; i < threadMessages.length; i++) {
     const msg = threadMessages[i];
     const reactions = await getReactions(SLACK_CHANNEL_ID, msg.ts);
     
@@ -200,6 +209,7 @@ async function main() {
         }
       }
     }
+  }
   }
 
   if (approvedCount === 0) {
