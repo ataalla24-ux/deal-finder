@@ -68,46 +68,43 @@ function matchKeywords(text, keywords) {
 // ============================================
 
 const HASHTAGS = [
-  // === TIER 1: Wien + Gratis/Free Kombinationen (ChatGPT empfohlen!) ===
-  'wien',
-  'vienna',
-  'gratis',
-  'kostenlos',
-  'freeevent',
+  // === TIER 1: Wien + Gratis Kombinationen (funktionieren!) ===
+  'gratiswien',              // ✅ Wien + Gratis
+  'aktionwien',              // ✅ Wien + Aktion
+  'kostenloswien',           // ✅ Wien + Kostenlos
   // === TIER 2: Neueröffnungen (viele Gratis-Aktionen!) ===
-  'neueröffnung',
-  'eröffnung',
-  'openingvienna',
-  'softopening',
-  'verkostung',
+  'neueröffnung',            // ✅
+  'neueröffnungwien',       // ✅ Wien + Eröffnung
+  'eröffnung',               // ✅
+  'softopening',             // ✅
   // === TIER 3: Wien Food & Gastro (ChatGPT Top!) ===
-  'wienfood',
-  'viennafood',
-  'wiengastro',
-  'wienrestaurant',
-  'wiencafe',
-  'wienbar',
-  // === TIER 4: Kultur & Events ===
-  'wienkultur',
-  'wienausgehen',
-  'wienfreizeit',
-  'wienparty',
-  'wienfestival',
-  'viennalife',
-  'viennacity',
-  // === TIER 5: Studenten (oft Gratisaktionen!) ===
-  'studentenwien',
-  // === TIER 6: Wiener Bezirke (PLZ) ===
-  'dönerwien',
-  'kebapwien',
-  'kebabwien',
-  'kaffeewien',
-  // === TIER 7: Wiener Lokal-Geschäft ===
-  'gratiswien',
-  'aktionwien',
-  'wienevents',
-  'viennaevents',
-  // NOTE: Türkische Hashtags (#açılış, #bedava) - nur mit Wien-Bezug!
+  'wienfood',                // ✅
+  'viennafood',              // ✅
+  'wiengastro',              // ✅
+  'wienrestaurant',          // ✅
+  'wiencafe',                // ✅
+  'wienbar',                 // ✅
+  'streetfoodwien',         // ✅
+  // === TIER 4: Döner/Kebab Wien (funktioniert!) ===
+  'dönerwien',               // ✅
+  'kebapwien',               // ✅
+  'kebabwien',               // ✅
+  'döner',                   // ✅
+  'kebap',                   // ✅
+  // === TIER 5: Kaffee Wien ===
+  'kaffeewien',              // ✅
+  'coffeeinvienna',          // ✅
+  // === TIER 6: Kultur & Events ===
+  'wienkultur',              // ✅
+  'wienevents',              // ✅
+  'viennaevents',            // ✅
+  'wienfreizeit',           // ✅
+  // === TIER 7: Studenten (oft Gratisaktionen!) ===
+  'studentenwien',           // ✅
+  // === TIER 8: Wiener PLZ Bezirke ===
+  '1020wien',               // ✅ Leopoldstadt
+  '1100wien',               // ✅ Favoriten
+  '1150wien',               // ✅ Rudolfsheim-Fünfhaus
 ];
 
 // ============================================
