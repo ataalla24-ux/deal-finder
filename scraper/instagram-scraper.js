@@ -292,6 +292,8 @@ const EXPIRED_KEYWORDS = [
   'war gestern', 'ist vorbei', 'leider ausverkauft', 'leider vorbei',
   'bereits vergriffen', 'sold out', 'ausverkauft', 'nicht mehr verfügbar',
   'abgelaufen', 'expired', 'letzte woche', 'letzten monat',
+  'war letztes jahr', '2023 war', '2024 war', 'gültig bis 2024',
+  'war heute', 'schon vorbei', 'leider schon', 'nur heute',
 ];
 
 // ============================================
@@ -357,6 +359,16 @@ function validateDeal(post) {
   const hashtagCount = (caption.match(/#/g) || []).length;
   if (hashtagCount > CONFIG.maxHashtags)
     return { valid: false, reason: 'too_many_hashtags' };
+
+  // CHECK: Alte Deals ablehnen (2023, 2024 etc. - wir sind 2026!)
+  const currentYear = new Date().getFullYear();
+  const captionYearMatch = post.caption?.match(/\b(2020|2021|2022|2023|2024)\b/);
+  if (captionYearMatch) {
+    const year = parseInt(captionYearMatch[1]);
+    if (year < currentYear - 1) {
+      return { valid: false, reason: 'old_post_year' };
+    }
+  }
 
   if (post.timestamp) {
     const daysDiff = (Date.now() - new Date(post.timestamp).getTime()) / (1000 * 60 * 60 * 24);
