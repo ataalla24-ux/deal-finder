@@ -3,9 +3,13 @@
 // Focus: Only REAL free deals in Vienna
 // ============================================
 
-const Apify = require('apify');
-const fs = require('fs');
-const path = require('path');
+import Apify from 'apify';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ============================================
 const CONFIG = {
@@ -412,8 +416,8 @@ async function main() {
   console.log(`   Approved: ${approvedDeals.length}`);
 }
 
-module.exports = { main };
+// ESM export
+export { main };
 
-if (require.main === module) {
-  Apify.main(main);
-}
+// Run
+Apify.main(main);
