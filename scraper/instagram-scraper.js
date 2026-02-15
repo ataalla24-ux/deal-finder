@@ -136,7 +136,8 @@ const GRATIS_KEYWORDS = [
   'gratisprobe', 'produkttest',
   // Englische Keywords
   'free stuff', 'free sample',
-  // NOTE: Türkische Keywords entfernt - zu viele False Positives!
+  // Türkische Keywords (Wiener Kebab-Szene - mit Wien-Bezug!)
+  'bedava', 'ücretsiz',
 ];
 
 // Gewinnspiele sind KEINE Gratis-Deals - separat behandeln!
