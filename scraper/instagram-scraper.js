@@ -25,14 +25,14 @@ if (!APIFY_API_TOKEN) {
 // ============================================
 
 const CONFIG = {
-  maxDealsPerRun: 20,       // Mehr Deals
-  minScore: 45,             // Etwas lower für mehr Ergebnisse
-  reviewMinScore: 30,       // Review auch lower
-  maxAgeDays: 7,             // 7 Tage
-  maxHashtags: 30,
-  postsPerHashtag: 40,       // Mehr Posts
-  dealExpiryDays: 10,        // Deals 10 Tage behalten
-  maxDealsPerBrand: 2,       // Max 2 Deals pro Brand
+  maxDealsPerRun: 300,       // Alles durchlassen für Slack-Auswahl
+  minScore: 1,               // ALLES durchlassen - Slack filtert
+  reviewMinScore: 1,
+  maxAgeDays: 7,
+  maxHashtags: 40,
+  postsPerHashtag: 50,
+  dealExpiryDays: 10,
+  maxDealsPerBrand: 50,     // Mehr pro Brand erlauben
 };
 
 // ============================================

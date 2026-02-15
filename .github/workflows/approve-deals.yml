@@ -1,13 +1,13 @@
-name: 📸 Instagram Deal Scraper
+name: ✅ Approve Deals from Slack
 
 on:
   schedule:
-    # Täglich um 12:00 Wien = 11:00 UTC
-    - cron: '0 11 * * *'
+    # Täglich um 16:00 Wien = 15:00 UTC
+    - cron: '0 15 * * *'
   workflow_dispatch:
 
 jobs:
-  scrape-and-notify:
+  approve-deals:
     runs-on: ubuntu-latest
     
     steps:
@@ -24,25 +24,18 @@ jobs:
       - name: 📦 Install Dependencies
         run: npm install
 
-      - name: 📸 Scrape Instagram Deals
-        env:
-          APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
-        run: node scraper/instagram-scraper.js
-
-      - name: 📱 Send to Slack
-        if: success()
+      - name: ✅ Read Slack ✅ Reactions & Approve
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
-        run: node scraper/slack-notify.js
+        run: node scraper/slack-approve.js
 
-      - name: 📤 Push Changes
-        if: success()
+      - name: 📤 Push Approved Deals
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add docs/deals.json docs/deals-review.json 2>/dev/null || true
+          git add docs/deals.json 2>/dev/null || true
           DEAL_COUNT=$(cat docs/deals.json | python3 -c "import sys, json; print(json.load(sys.stdin)['totalDeals'])" 2>/dev/null || echo "?")
           TIMESTAMP=$(date -u +"%H:%M")
-          git diff --staged --quiet || git commit -m "📸 ${TIMESTAMP} - Instagram Deals (${DEAL_COUNT} total)"
+          git diff --staged --quiet || git commit -m "✅ ${TIMESTAMP} - Genehmigte Deals (${DEAL_COUNT} total)"
           git push || echo "Nichts zu pushen"
