@@ -161,17 +161,6 @@ async function main() {
     console.log('⚠️  Konnte Thread-Replies nicht laden');
   }
 
-  // Load original deals
-  const dealsPath = path.join(__dirname, '..', 'docs', 'deals.json');
-  let allDeals = [];
-  
-  if (fs.existsSync(dealsPath)) {
-    const data = JSON.parse(fs.readFileSync(dealsPath, 'utf-8'));
-    allDeals = data.deals || [];
-  }
-
-  const igDeals = allDeals.filter(d => d.isInstagramDeal);
-
   // Find messages with ✅ reaction
   console.log('🔍 Suche ✅ Reaktionen...');
   
@@ -182,11 +171,46 @@ async function main() {
   const approvedDeals = [];
   
   if (mainHasCheck) {
-    // ✅ on main message = approve ALL deals in thread
-    console.log('✅ ✅ auf Hauptnachricht - genehmige ALLE Deals!');
-    approvedDeals.push(...igDeals);
-    approvedCount = igDeals.length;
+    // ✅ on main message = extract ALL deals from thread
+    console.log('✅ ✅ auf Hauptnachricht - genehmige ALLE Deals aus Thread!');
+    
+    // Parse deals from thread messages (skip first = main message)
+    for (let i = 1; i < threadMessages.length; i++) {
+      const msg = threadMessages[i];
+      const text = msg.text || '';
+      
+      // Parse: "16. :free: *GRATIS Pizza - 1+1 Aktion*\n_Oma Haus Imbiss &amp..."
+      const match = text.match(/^\d+\.\s+.*?\*([^*]+)\*/);
+      if (match) {
+        const title = match[1].replace(/[:*#]/g, '').trim();
+        const brandMatch = text.match(/\_(.+?)&/);
+        const brand = brandMatch ? brandMatch[1].replace(/[^a-zA-ZäöüÄÖÜß\s]/g, '').trim() : 'Unknown';
+        
+        approvedDeals.push({
+          id: `ig-approved-${Date.now()}-${i}`,
+          brand: brand.substring(0, 30),
+          title: title.substring(0, 50),
+          description: 'Genehmigt via Slack ✅',
+          type: 'gratis',
+          category: 'food',
+          source: 'Instagram',
+          url: 'https://instagram.com',
+          expires: 'Unbekannt',
+          distance: 'Wien',
+          hot: false,
+          isNew: true,
+          isInstagramDeal: true,
+          priority: 5,
+          votes: 1,
+          qualityScore: 50,
+          pubDate: new Date().toISOString(),
+        });
+        approvedCount++;
+      }
+    }
+    console.log(`   → ${approvedCount} Deals aus Thread extrahiert`);
   } else {
+    // Only approve individual deals with ✅
     for (let i = 1; i < threadMessages.length; i++) {
     const msg = threadMessages[i];
     const reactions = await getReactions(SLACK_CHANNEL_ID, msg.ts);
@@ -196,17 +220,35 @@ async function main() {
     );
 
     if (hasCheck) {
-      // Extract deal number from message
-      const match = msg.text?.match(/^(\d+)\./);
+      // Parse deal from message text
+      const text = msg.text || '';
+      const match = text.match(/^\d+\.\s+.*?\*([^*]+)\*/);
       if (match) {
-        const dealIndex = parseInt(match[1]) - 1;
-        const deal = igDeals[dealIndex];
+        const title = match[1].replace(/[:*#]/g, '').trim();
+        const brandMatch = text.match(/\_(.+?)&/);
+        const brand = brandMatch ? brandMatch[1].replace(/[^a-zA-ZäöüÄÖÜß\s]/g, '').trim() : 'Unknown';
         
-        if (deal) {
-          console.log(`   ✅ Deal ${match[1]}: ${deal.brand} - ${deal.title?.substring(0, 30)}`);
-          approvedDeals.push(deal);
-          approvedCount++;
-        }
+        approvedDeals.push({
+          id: `ig-approved-${Date.now()}-${i}`,
+          brand: brand.substring(0, 30),
+          title: title.substring(0, 50),
+          description: 'Genehmigt via Slack ✅',
+          type: 'gratis',
+          category: 'food',
+          source: 'Instagram',
+          url: 'https://instagram.com',
+          expires: 'Unbekannt',
+          distance: 'Wien',
+          hot: false,
+          isNew: true,
+          isInstagramDeal: true,
+          priority: 5,
+          votes: 1,
+          qualityScore: 50,
+          pubDate: new Date().toISOString(),
+        });
+        approvedCount++;
+        console.log(`   ✅ ${brand}: ${title.substring(0, 30)}`);
       }
     }
   }
