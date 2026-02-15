@@ -271,6 +271,16 @@ const SPAM_KEYWORDS = [
   'onlyfans', 'link in bio kaufen', 'shop now', 'swipe up',
   'affiliate', 'provision', 'nebenjob', 'homeoffice job',
   'dm me', 'dm uns', 'schreib uns eine dm',
+  // ❌ GEWINNSPIEL - NICHT das selbe wie gratis!
+  'zu gewinnen', 'zu gewinen', 'ihr könnt gewinnen', ' könnt ihr gewinnen',
+  'verlosen wir', 'wir verlosen', 'verlost', 'verlosung',
+  'giveaway', 'gewinnspiel',
+  // ❌ WERBUNG / SPONSORED - kein echter Deal!
+  'werbung', 'anzeige', 'sponsored', 'powered by', 'in cooperation',
+  'pr cooperation', 'paid partnership', 'ad', 'advertisement',
+  'in partnerschaft', 'kooperation', 'pr', 'gifted', 'free gifted',
+  // ❌ Gewinnspiel braucht Action (nicht passiv)
+  'taggt', 'markiert', 'folgt uns', 'like den post',
 ];
 
 const EXPIRED_KEYWORDS = [
@@ -362,19 +372,25 @@ function validateDeal(post) {
   const hasAktion = aktionMatches.length > 0;
   const isGewinnspiel = gewinnspielMatches.length > 0;
 
+  // ❌ GEWINNSPIEL SOFORT REJECTEN - kein "Deal"!
+  // User will ECHTE Gratis-Dinge, nicht "tagge 3 Freunde um zu gewinnen"
+  if (isGewinnspiel && !isGratis) {
+    return { valid: false, reason: 'gewinnspiel_not_gratis' };
+  }
+
   // Track ob Deal nur durch Bildtext gefunden wurde
-  const captionOnly = matchKeywords(caption, [...GRATIS_KEYWORDS, ...PREIS_KEYWORDS, ...AKTION_KEYWORDS, ...GEWINNSPIEL_KEYWORDS]);
-  const foundViaImageText = captionOnly.length === 0 && (isGratis || hasGoodPrice || hasAktion || isGewinnspiel);
+  const captionOnly = matchKeywords(caption, [...GRATIS_KEYWORDS, ...PREIS_KEYWORDS, ...AKTION_KEYWORDS]);
+  const foundViaImageText = captionOnly.length === 0 && (isGratis || hasGoodPrice || hasAktion);
 
   // ⚠️ FAKE-GRATIS CHECK: "gratis dazu", "gratis bei Kauf" = NICHT echt gratis!
   const fakeGratisMatches = matchKeywords(searchText, FAKE_GRATIS_KEYWORDS);
   const isFakeGratis = fakeGratisMatches.length > 0;
 
   // Wenn "gratis" nur fake-gratis ist, downgrade zu Aktion
-  const isTrulyGratis = isGratis && !isFakeGratis && !isGewinnspiel; // Gewinnspiel ≠ Gratis!
+  const isTrulyGratis = isGratis && !isFakeGratis;
   const isConditionalGratis = isGratis && isFakeGratis;
 
-  if (!isGratis && !hasGoodPrice && !hasAktion && !isGewinnspiel)
+  if (!isGratis && !hasGoodPrice && !hasAktion)
     return { valid: false, reason: 'no_deal_type' };
 
   // CHECK 2: Produkt (suche auch in Bildtext!)
@@ -400,7 +416,6 @@ function validateDeal(post) {
   else if (isConditionalGratis) score += 15; // "Gratis dazu" = nur ein Rabatt
   else if (hasGoodPrice) score += 20;
   else if (hasAktion) score += 18;
-  else if (isGewinnspiel) score += 10;      // Gewinnspiel = niedrigster Deal-Score (Lotterie, nicht sicher)
   if (gratisMatches.length + preisMatches.length + aktionMatches.length >= 2) score += 5;
 
   if (hasFood) score += 15;
@@ -436,7 +451,7 @@ function validateDeal(post) {
   return {
     valid: score >= CONFIG.minScore,
     review: score >= CONFIG.reviewMinScore && score < CONFIG.minScore,
-    score, isGratis: isTrulyGratis, isConditionalGratis, isGewinnspiel,
+    score, isGratis: isTrulyGratis, isConditionalGratis,
     hasGoodPrice, hasAktion, hasFood, hasNonFood,
     foodMatches, nonFoodMatches, foundViaImageText,
     imageText: imageText || null,
@@ -523,11 +538,6 @@ function generateTitle(post, validation) {
   // FAKE GRATIS - "Zugabe bei Kauf", nicht "GRATIS"
   if (validation.isConditionalGratis) {
     return `${product} gratis dazu (bei Kauf)`;
-  }
-
-  // GEWINNSPIEL - klar als Verlosung kennzeichnen
-  if (validation.isGewinnspiel) {
-    return `🎰 ${product} zu gewinnen (Gewinnspiel)`;
   }
 
   if (validation.hasAktion) {
@@ -710,15 +720,15 @@ function createDeal(post, validation) {
   return {
     id: `ig-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
     brand, logo, title, description,
-    type: validation.isGratis ? 'gratis' : (validation.isGewinnspiel ? 'gewinnspiel' : (validation.isConditionalGratis ? 'rabatt' : 'rabatt')),
+    type: validation.isGratis ? 'gratis' : (validation.isConditionalGratis ? 'rabatt' : 'rabatt'),
     category,
     source: `Instagram @${post.ownerUsername || 'unknown'}`,
     url: post.url || `https://www.instagram.com/p/${post.shortCode || ''}`,
-    expires: validation.isGewinnspiel ? 'Teilnahme nötig' : 'Begrenzt',
+    expires: 'Begrenzt',
     distance: location,
     hot: validation.isGratis && likes > 50,
     isNew: true, isInstagramDeal: true,
-    priority: validation.isGratis ? 2 : (validation.isGewinnspiel ? 4 : 3),
+    priority: validation.isGratis ? 2 : 3,
     votes: Math.min(Math.round(likes / 10), 50),
     qualityScore: validation.score,
     pubDate: post.timestamp || new Date().toISOString(),
