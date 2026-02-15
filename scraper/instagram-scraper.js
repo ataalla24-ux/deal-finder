@@ -72,11 +72,14 @@ const HASHTAGS = [
   'gratiswien',              // ✅ Wien + Gratis
   'aktionwien',              // ✅ Wien + Aktion
   'kostenloswien',           // ✅ Wien + Kostenlos
+  'gratisfürdich',          // NEU
+  'wiengratis',             // NEU
   // === TIER 2: Neueröffnungen (viele Gratis-Aktionen!) ===
   'neueröffnung',            // ✅
   'neueröffnungwien',       // ✅ Wien + Eröffnung
   'eröffnung',               // ✅
   'softopening',             // ✅
+  'gratiseroeffnung',       // NEU
   // === TIER 3: Wien Food & Gastro (ChatGPT Top!) ===
   'wienfood',                // ✅
   'viennafood',              // ✅
@@ -85,26 +88,64 @@ const HASHTAGS = [
   'wiencafe',                // ✅
   'wienbar',                 // ✅
   'streetfoodwien',         // ✅
+  'wienstreetfood',         // NEU
+  'wienfoodie',             // NEU
+  'foodblogwien',           // NEU
   // === TIER 4: Döner/Kebab Wien (funktioniert!) ===
   'dönerwien',               // ✅
   'kebapwien',               // ✅
   'kebabwien',               // ✅
   'döner',                   // ✅
   'kebap',                   // ✅
+  'bedava',                  // ✅ Türkisch für gratis
+  'ücretsiz',               // ✅ Türkisch für gratis
+  'dönerliebe',             // NEU
   // === TIER 5: Kaffee Wien ===
   'kaffeewien',              // ✅
   'coffeeinvienna',          // ✅
+  'gratismitkaffee',        // NEU
   // === TIER 6: Kultur & Events ===
   'wienkultur',              // ✅
   'wienevents',              // ✅
   'viennaevents',            // ✅
   'wienfreizeit',           // ✅
+  'wiennightlife',          // NEU
   // === TIER 7: Studenten (oft Gratisaktionen!) ===
   'studentenwien',           // ✅
+  'universityvienna',        // NEU
   // === TIER 8: Wiener PLZ Bezirke ===
   '1020wien',               // ✅ Leopoldstadt
   '1100wien',               // ✅ Favoriten
   '1150wien',               // ✅ Rudolfsheim-Fünfhaus
+  '1010wien',               // NEU Innere Stadt
+  '1030wien',               // NEU Landstraße
+  '1040wien',               // NEU Wieden
+  '1050wien',               // NEU Margareten
+  '1060wien',               // NEU Mariahilf
+  '1070wien',               // NEU Neubau
+  '1080wien',               // NEU Josefstadt
+  '1090wien',               // NEU Alsergrund
+  '1110wien',               // NEU Simmering
+  '1120wien',               // NEU Meidling
+  '1130wien',               // NEU Hietzing
+  '1140wien',               // NEU Penzing
+  '1160wien',               // NEU Ottakring
+  '1170wien',               // NEU Hernals
+  '1180wien',               // NEU Währing
+  '1190wien',               // NEU Döbling
+  '1200wien',               // NEU Brigittenau
+  '1210wien',               // NEU Floridsdorf
+  '1220wien',               // NEU Donau City
+  // === TIER 9: Generic Deals (筛选后) ===
+  'gratisessen',            // NEU
+  'kostenlosessen',         // NEU
+  'aktionessen',            // NEU
+  'dealswien',              // NEU
+  'sparenhotel',            // NEU
+  // === TIER 10: International (English) ===
+  'freevienna',             // NEU
+  'viennadeals',           // NEU
+  'viennafree',            // NEU
 ];
 
 // ============================================
