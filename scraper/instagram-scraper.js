@@ -91,11 +91,7 @@ const HASHTAGS = [
   'wienessen',               // ✅ Wien Food allgemein
   'wienfood',                // ✅
   'viennafood',              // ✅
-  // === TIER 4: Türkisch (Wien-Kebab-Szene) ===
-  'açılış',                  // = Neueröffnung auf Türkisch
-  'bedava',                  // = gratis
-  // === TIER 5: Weitere ===
-  'wien', 'vienna',         // als Fallback
+  // NOTE: Türkische Hashtags (#açılış, #bedava) ENTFERNT - zu viele False Positives aus der Türkei!
 ];
 
 // ============================================
@@ -140,11 +136,7 @@ const GRATIS_KEYWORDS = [
   'gratisprobe', 'produkttest',
   // Englische Keywords
   'free stuff', 'free sample',
-  // Türkische Keywords (Wien-Kebab-Szene!)
-  'bedava',                  // = gratis
-  'ücretsiz',                // = kostenlos
-  'ikram',                   // = "geht auf uns" / Einladung
-  'hediye',                  // = Geschenk
+  // NOTE: Türkische Keywords entfernt - zu viele False Positives!
 ];
 
 // Gewinnspiele sind KEINE Gratis-Deals - separat behandeln!
@@ -188,10 +180,7 @@ const AKTION_KEYWORDS = [
   'eröffnungsangebot', 'neueröffnung',
   'aktion', 'nur heute', 'nur solange', 'begrenzt',
   'schnäppchen', 'vorrat reicht',
-  // Türkische Keywords (Wien-Kebab-Szene!)
-  'açılış',                  // = Neueröffnung
-  'kampanya',                // = Aktion/Kampagne
-  'indirim',                 // = Rabatt
+  // NOTE: Türkische Keywords entfernt - zu viele False Positives!
 ];
 
 const FOOD_KEYWORDS = [
@@ -213,10 +202,7 @@ const FOOD_KEYWORDS = [
   'margherita', 'marinara', 'calzone', 'focaccia',
   'hummus', 'shawarma', 'poke', 'açai', 'acai',
   'bagel', 'pretzel', 'brezel',
-  // Türkische Food-Keywords (Wien-Kebab-Szene!)
-  'lahmacun', 'pide', 'dürüm', 'adana', 'iskender',
-  'çorba', 'börek', 'baklava', 'künefe', 'lokma',
-  'tantuni', 'köfte', 'kofte', 'simit', 'çay',
+  // NOTE: Türkische Food-Keywords entfernt - zu viele False Positives aus Türkei!
 ];
 
 const NON_FOOD_KEYWORDS = [
@@ -407,11 +393,18 @@ function validateDeal(post) {
   if (!hasFood && !hasNonFood)
     return { valid: false, reason: 'no_product' };
 
-  // CHECK 3: Wien
-  // CHECK 3: Wien - trusted accounts überspringen den Check
+  // CHECK 3: Wien - STRENG!
+  // Nur Posts MIT explizitem Wien-Bezug werden akzeptiert!
   const isTrustedWienAccount = WIEN_TRUSTED_ACCOUNTS.has((post.ownerUsername || '').toLowerCase());
-  if (!isTrustedWienAccount && !WIEN_KEYWORDS.some(k => matchesKeyword(allText, k)))
+  
+  // Explizite Wien-Keywords MÜSSEN im Text ODER Location stehen
+  const hasWienLocation = WIEN_KEYWORDS.some(k => matchesKeyword(allText, k));
+  const hasLocationField = location && location.length > 2;
+  
+  // Entweder: Trusted Account ODER explizites Wien im Text/Location
+  if (!isTrustedWienAccount && !hasWienLocation) {
     return { valid: false, reason: 'not_vienna' };
+  }
 
   // QUALITY SCORE - Echt gratis wird stark bevorzugt!
   let score = 0;
