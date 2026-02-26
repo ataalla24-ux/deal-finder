@@ -1,0 +1,56 @@
+name: "Firecrawl Daily Sync + Slack"
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # 07:00 Vienna winter / 08:00 summer
+  workflow_dispatch:
+
+jobs:
+  scrape-and-notify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Firecrawl Gastro
+        env:
+          FIRECRAWL_API_KEY1: ${{ secrets.FIRECRAWL_API_KEY1 }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+        run: node scraper/firecrawl-gastro2.js
+
+      - name: Run Firecrawl Food
+        env:
+          FIRECRAWL_API_KEY2: ${{ secrets.FIRECRAWL_API_KEY2 }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+        run: node scraper/firecrawl-food3.js
+
+      - name: Run Firecrawl Consumables
+        env:
+          FIRECRAWL_API_KEY3: ${{ secrets.FIRECRAWL_API_KEY3 }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+        run: node scraper/firecrawl-consumables.js
+
+      - name: Filter alte Deals
+        run: node scraper/filter-old-deals.js
+
+      - name: Send Daily Digest to Slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+        run: node scraper/slack-notify.js
+
+      - name: Commit deal updates
+        run: |
+          git config user.name "Deal Bot"
+          git config user.email "bot@freefinder.wien"
+          git add docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-all.json docs/sent-deal-ids.json 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "Daily firecrawl sync $(date +%Y-%m-%d)"
+          git push

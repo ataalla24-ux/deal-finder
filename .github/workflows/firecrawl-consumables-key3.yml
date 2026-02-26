@@ -1,8 +1,6 @@
 name: "Firecrawl Consumables Only - Key 3"
 
 on:
-  schedule:
-    - cron: '0 9 * * *'
   workflow_dispatch:
 
 jobs:
@@ -22,7 +20,8 @@ jobs:
 
       - name: Run Consumables Scraper
         env:
-          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY3 }}
+          FIRECRAWL_API_KEY3: ${{ secrets.FIRECRAWL_API_KEY3 }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: node scraper/firecrawl-consumables.js
 
       - name: Filter alte Deals

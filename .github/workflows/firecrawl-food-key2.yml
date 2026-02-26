@@ -1,8 +1,6 @@
 name: "Firecrawl Food Only - Key 2"
 
 on:
-  schedule:
-    - cron: '0 8 * * *'
   workflow_dispatch:
 
 jobs:
@@ -22,7 +20,8 @@ jobs:
 
       - name: Run Food Scraper
         env:
-          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY2 }}
+          FIRECRAWL_API_KEY2: ${{ secrets.FIRECRAWL_API_KEY2 }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: node scraper/firecrawl-food3.js
 
       - name: Filter alte Deals

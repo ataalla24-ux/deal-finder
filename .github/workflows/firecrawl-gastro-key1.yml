@@ -1,8 +1,6 @@
 name: "Firecrawl Gastro Only - Key 1"
 
 on:
-  schedule:
-    - cron: '0 7 * * *'
   workflow_dispatch:
 
 jobs:
@@ -22,6 +20,7 @@ jobs:
 
       - name: Run Gastro Scraper
         env:
+          FIRECRAWL_API_KEY1: ${{ secrets.FIRECRAWL_API_KEY1 }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: node scraper/firecrawl-gastro2.js
 

@@ -7,11 +7,11 @@ import Firecrawl from '@mendable/firecrawl-js';
 import { z } from 'zod';
 import fs from 'fs';
 
-const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;
+const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY1 || process.env.FIRECRAWL_API_KEY;
 
 if (!FIRECRAWL_API_KEY) {
-  console.error('❌ FIRECRAWL_API_KEY nicht gesetzt!');
-  process.exit(0);
+  console.error('❌ FIRECRAWL_API_KEY1 oder FIRECRAWL_API_KEY nicht gesetzt!');
+  process.exit(1);
 }
 
 const firecrawl = new Firecrawl({ apiKey: FIRECRAWL_API_KEY });
@@ -175,8 +175,8 @@ async function main() {
   console.log(`   📦 Deals: ${allDeals.length}`);
   
     // Deduplizierung nach URL
-    const seenUrls = new Set();
-    const dedupedDeals = allDeals.filter(d => { const url = (d.url || '').trim(); if (!url || seenUrls.has(url)) return false; seenUrls.add(url); return true; });
+    const dedupeUrls = new Set();
+    const dedupedDeals = allDeals.filter(d => { const url = (d.url || '').trim(); if (!url || dedupeUrls.has(url)) return false; dedupeUrls.add(url); return true; });
     console.log(`🔄 ${allDeals.length - dedupedDeals.length} URL-Duplikate entfernt`);
     const finalDeals = dedupedDeals.slice(0, 100);
   
