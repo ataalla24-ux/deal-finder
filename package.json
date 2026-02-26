@@ -12,11 +12,13 @@
     "google-deals": "node scraper/google-deals-scraper.js",
     "gutscheine": "node scraper/gutscheine-scraper.js",
     "instagram": "node scraper/instagram-web-scraper.js",
+    "instagram:check": "node scripts/check-instagram-auth.mjs",
     "filter-old": "node scraper/filter-old-deals.js",
     "slack-notify": "node scraper/slack-notify.js",
     "slack-approve": "node scraper/slack-approve.js",
     "smart-summary": "node scraper/smart-summary.js",
     "scrape-all": "npm run scrape && npm run firecrawl-consumables && npm run gastro2 && npm run food3 && npm run google-deals && npm run gutscheine && npm run instagram && npm run filter-old && npm run slack-notify",
+    "sync:fresh": "npm run scrape-all && npm run ios:shot",
     "ios:install": "playwright install webkit",
     "ios:shot": "node scripts/ios-screenshot.mjs"
   },

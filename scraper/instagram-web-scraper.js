@@ -39,6 +39,14 @@ const INSTAGRAM_ACCOUNTS = [
   'wienmalanders',
 ];
 
+const SEARCH_QUERIES = [
+  'site:instagram.com/reel wien gratis',
+  'site:instagram.com/p wien rabatt',
+  'site:instagram.com/reel vienna deal',
+  'site:instagram.com/p wien food deal',
+  'site:instagram.com/reel neuoeffnung wien',
+];
+
 const WIEN_KEYWORDS = [
   'wien', 'vienna', 'innere stadt', 'mariahilf', 'leopoldstadt', 'ottakring',
   'favoriten', 'neubau', 'währing', 'floridsdorf', 'donaustadt', '1010', '1020', '1030',
@@ -60,6 +68,11 @@ const FOOD_KEYWORDS = [
 const SHOPPING_KEYWORDS = [
   'shop', 'store', 'fashion', 'beauty', 'fitness', 'gym', 'ticket', 'museum', 'kino',
   'event', 'club', 'bar', 'spa', 'wellness', 'reise', 'hotel',
+];
+
+const EVENT_KEYWORDS = [
+  'konzert', 'event', 'party', 'festival', 'kino', 'theater', 'show',
+  'livemusik', 'live musik', 'drinks', 'opening party',
 ];
 
 function loadEnvFile() {
@@ -122,6 +135,7 @@ function containsKeyword(text, keywords) {
 
 function detectCategory(text) {
   const lower = cleanText(text).toLowerCase();
+  if (EVENT_KEYWORDS.some((k) => lower.includes(k))) return 'events';
   if (FOOD_KEYWORDS.some((k) => lower.includes(k))) return 'essen';
   if (lower.includes('coffee') || lower.includes('kaffee')) return 'kaffee';
   if (lower.includes('fitness') || lower.includes('gym')) return 'fitness';
@@ -169,6 +183,18 @@ function parseDateFromPage({ ldDate, ogDescription, fallbackNow = Date.now() }) 
     return new Date(`${yyyy}-${mm}-${dd}T12:00:00Z`).toISOString();
   }
 
+  const dmyNoYear = text.match(/(\d{1,2})\.(\d{1,2})(?!\.)/);
+  if (dmyNoYear) {
+    const mm = String(dmyNoYear[2]).padStart(2, '0');
+    const dd = String(dmyNoYear[1]).padStart(2, '0');
+    const now = new Date(fallbackNow);
+    let candidate = new Date(`${now.getFullYear()}-${mm}-${dd}T12:00:00Z`);
+    if (candidate.getTime() - fallbackNow > 30 * 24 * 60 * 60 * 1000) {
+      candidate = new Date(`${now.getFullYear() - 1}-${mm}-${dd}T12:00:00Z`);
+    }
+    if (!Number.isNaN(candidate.getTime())) return candidate.toISOString();
+  }
+
   return new Date(fallbackNow).toISOString();
 }
 
@@ -187,6 +213,22 @@ function extractPostUrls(html) {
   return [...urls];
 }
 
+function normalizeInstagramPostUrl(rawUrl) {
+  const text = cleanText(rawUrl);
+  if (!text) return '';
+  try {
+    const decoded = decodeURIComponent(text);
+    const directMatch = decoded.match(/https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel)\/[A-Za-z0-9_-]+\/?/i);
+    if (!directMatch) return '';
+    const u = new URL(directMatch[0]);
+    const parts = u.pathname.split('/').filter(Boolean);
+    if (parts.length < 2) return '';
+    return `https://www.instagram.com/${parts[0]}/${parts[1]}/`;
+  } catch {
+    return '';
+  }
+}
+
 function toMirrorUrl(url) {
   return `https://r.jina.ai/http://${url.replace(/^https?:\/\//, '')}`;
 }
@@ -199,6 +241,28 @@ async function fetchMirrorText(url) {
   } catch {
     return '';
   }
+}
+
+async function discoverLinksViaDuckDuckGo() {
+  const links = new Set();
+  for (const query of SEARCH_QUERIES) {
+    try {
+      const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+      const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      if (!response.ok) continue;
+      const html = await response.text();
+
+      const hrefMatches = html.match(/href="([^"]+)"/g) || [];
+      for (const hrefToken of hrefMatches) {
+        const raw = hrefToken.replace(/^href="/, '').replace(/"$/, '');
+        const normalized = normalizeInstagramPostUrl(raw);
+        if (normalized) links.add(normalized);
+      }
+    } catch {
+      // ignore one query failure
+    }
+  }
+  return [...links];
 }
 
 function buildSources() {
@@ -225,6 +289,21 @@ function fallbackBrandFromUrl(url) {
   } catch {
     return 'Instagram';
   }
+}
+
+function deriveBrand(data, postUrl) {
+  const ldAuthor = cleanText(data.ldAuthor);
+  if (ldAuthor) return ldAuthor;
+
+  const ogTitle = cleanText(data.ogTitle);
+  const titleMatch = ogTitle.match(/^(.+?)\s+auf Instagram[:]?/i);
+  if (titleMatch && titleMatch[1]) return titleMatch[1].replace(/^@/, '').trim();
+
+  const desc = cleanText(data.ogDescription);
+  const atMatch = desc.match(/@([A-Za-z0-9._]+)/);
+  if (atMatch) return atMatch[1];
+
+  return fallbackBrandFromUrl(postUrl);
 }
 
 async function scrapeInstagram() {
@@ -306,6 +385,18 @@ async function scrapeInstagram() {
       }
     }
 
+    if (candidatePosts.size === 0) {
+      const discovered = await discoverLinksViaDuckDuckGo();
+      for (const postUrl of discovered) {
+        candidatePosts.set(postUrl, {
+          url: postUrl,
+          sourceKey: 'search:duckduckgo',
+          accountHint: false,
+        });
+      }
+      console.log(`🌐 duckduckgo fallback links: ${discovered.length}`);
+    }
+
     const postsToVisit = [...candidatePosts.values()].slice(0, 220);
     const deals = [];
 
@@ -375,7 +466,7 @@ async function scrapeInstagram() {
         const score = scorePost({ text: combinedText, accountHint: post.accountHint });
         if (score < 55) continue;
 
-        const brand = cleanText(data.ldAuthor) || fallbackBrandFromUrl(post.url);
+        const brand = deriveBrand(data, post.url);
         const titleBase = cleanText(data.ogTitle || data.ldCaption || 'Instagram Deal');
         const title = titleBase.length > 80 ? `${titleBase.slice(0, 77)}...` : titleBase;
 
