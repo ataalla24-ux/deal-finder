@@ -719,15 +719,11 @@
         <button class="toggle-sw on" id="alarmSecret" onclick="toggleAlarm(this)"></button>
       </div>
       <div class="alarm-toggle">
-        <span class="alarm-toggle-label">⛪ Gemeinde</span>
-        <button class="toggle-sw" id="alarmGemeinde" onclick="toggleAlarm(this)"></button>
-      </div>
-      <div class="alarm-toggle">
         <span class="alarm-toggle-label">🕊️ Gottesdienste</span>
         <button class="toggle-sw" id="alarmGottesdienste" onclick="toggleAlarm(this)"></button>
       </div>
       <div class="alarm-toggle">
-        <span class="alarm-toggle-label">🎭 Events</span>
+        <span class="alarm-toggle-label">✝️ Christliche Events</span>
         <button class="toggle-sw on" id="alarmEvents" onclick="toggleAlarm(this)"></button>
       </div>
     </div>
@@ -811,6 +807,7 @@
                 <button class="filter-btn active" data-filter="alle">🎯 Alle <span class="filter-count" id="countAll">0</span></button>
                 <button class="filter-btn" data-filter="gratis">🎁 Gratis <span class="filter-count" id="countGratis">0</span></button>
                 <button class="filter-btn" data-filter="rabatt">💰 Rabatt <span class="filter-count" id="countRabatt">0</span></button>
+                <button class="filter-btn" data-filter="gewinnspiel">🎉 Gewinnspiel <span class="filter-count" id="countGewinnspiel">0</span></button>
                 <button class="filter-btn" data-filter="codes">🏷️ Codes <span class="filter-count" id="countCodes">0</span></button>
             </div>
             <div class="filter-divider"></div>
@@ -825,9 +822,8 @@
                 <button class="filter-btn" data-category="technik">📱 Technik</button>
                 <button class="filter-btn" data-category="streaming">📺 Streaming</button>
                 <button class="filter-btn" data-category="wien">🏛️ Wien</button>
-                <button class="filter-btn" data-category="gemeinde">⛪ Gemeinde</button>
                 <button class="filter-btn" data-category="gottesdienste">🕊️ Gottesdienste</button>
-                <button class="filter-btn" data-category="events">🎭 Events</button>
+                <button class="filter-btn" data-category="events">✝️ Christliche Events</button>
                 <button class="filter-btn" data-category="gratis">🎁 Gratis</button>
                 <button class="filter-btn" data-category="shopping">🛍️ Shopping</button>
                 <button class="filter-btn" data-category="kultur">🏛️ Kultur</button>
@@ -927,6 +923,47 @@
         let userRatings = JSON.parse(localStorage.getItem('userRatings') || '{}');
         let userDeals = JSON.parse(localStorage.getItem('userDeals') || '[]');
         let submittedLinks = JSON.parse(localStorage.getItem('submittedLinks') || '[]');
+
+        const CHRISTIAN_EVENT_KEYWORDS = [
+            'kirche', 'gemeinde', 'pfarre', 'pfarr', 'gottesdienst', 'messe', 'anbetung',
+            'bibel', 'jesus', 'christ', 'christlich', 'evangelisch', 'katholisch', 'freikirche',
+            'jugendgottesdienst', 'lobpreis', 'andacht', 'segnung', 'christlicher event'
+        ];
+        const SERVICE_TIME_KEYWORDS = [
+            'gottesdienst', 'messe', 'uhr', 'sonntag', 'samstag', 'werktag', 'hl. messe', 'liturgie'
+        ];
+
+        function isChristianContent(deal) {
+            const text = ((deal.title || '') + ' ' + (deal.description || '') + ' ' + (deal.source || '') + ' ' + (deal.distance || '')).toLowerCase();
+            return CHRISTIAN_EVENT_KEYWORDS.some((k) => text.includes(k));
+        }
+
+        function hasServiceTimeContext(deal) {
+            const text = ((deal.title || '') + ' ' + (deal.description || '') + ' ' + (deal.expires || '')).toLowerCase();
+            return SERVICE_TIME_KEYWORDS.some((k) => text.includes(k));
+        }
+
+        function isGewinnspielDeal(deal) {
+            const text = ((deal.title || '') + ' ' + (deal.description || '') + ' ' + (deal.type || '') + ' ' + (deal.category || '')).toLowerCase();
+            return /gewinnspiel|verlosen|verlosung|gewinne|zu gewinnen|giveaway/.test(text);
+        }
+
+        function normalizeCategoryForApp(rawCategory, deal) {
+            const cat = (rawCategory || '').toLowerCase().trim();
+            if (cat === 'gemeinde') return 'kirche';
+            if (cat === 'gottesdienste' || hasServiceTimeContext(deal)) return 'gottesdienste';
+            if (cat === 'kirche' || cat === 'church' || cat === 'christlich') return 'kirche';
+            if (cat === 'events') return isChristianContent(deal) ? 'events' : 'kultur';
+            if (!cat && isChristianContent(deal)) return hasServiceTimeContext(deal) ? 'gottesdienste' : 'kirche';
+            return cat || 'wien';
+        }
+
+        function normalizeDealForApp(deal) {
+            const out = { ...deal };
+            out.category = normalizeCategoryForApp(out.category, out);
+            if (out.category === 'events' && !isChristianContent(out)) out.category = 'kultur';
+            return out;
+        }
         
         // Bekannte Marken für Link-Erkennung
         const KNOWN_BRANDS = {
@@ -1257,9 +1294,9 @@
             // Load main deals.json
             const res = await fetch('deals.json?t=' + Date.now());
             const data = await res.json();
-            const baseDeals = data.deals.map(d => ({ ...d, votes: votes[d.id] || d.votes || 0 }));
+            const baseDeals = data.deals.map(d => normalizeDealForApp({ ...d, votes: votes[d.id] || d.votes || 0 }));
             // Kombiniere User-Deals mit genehmigten Base-Deals (nur Slack-approved)
-            const userDealsWithVotes = userDeals.map(d => ({ ...d, votes: votes[d.id] || d.votes || 0 }));
+            const userDealsWithVotes = userDeals.map(d => normalizeDealForApp({ ...d, votes: votes[d.id] || d.votes || 0 }));
             allDeals = [...userDealsWithVotes, ...baseDeals];
             if (data.lastUpdated) {
                 const dt = new Date(data.lastUpdated);
@@ -1313,6 +1350,7 @@
             document.getElementById('countAll').textContent = allDeals.length;
             document.getElementById('countGratis').textContent = allDeals.filter(d => d.type === 'gratis').length;
             document.getElementById('countRabatt').textContent = allDeals.filter(d => d.type === 'rabatt' || d.type === 'testabo').length;
+            document.getElementById('countGewinnspiel').textContent = allDeals.filter(d => isGewinnspielDeal(d)).length;
             document.getElementById('countCodes').textContent = allDeals.filter(d => d.category === 'codes' || d.code).length;
         }
         
@@ -1322,7 +1360,13 @@
         const q = searchQuery.toLowerCase();
         deals = deals.filter(d => (d.title || '').toLowerCase().includes(q) || (d.brand || '').toLowerCase().includes(q) || (d.description || '').toLowerCase().includes(q));
       }
-      if (currentFilter === 'codes') {
+      if (currentFilter === 'gratis') {
+        deals = deals.filter(d => d.type === 'gratis');
+      } else if (currentFilter === 'rabatt') {
+        deals = deals.filter(d => d.type === 'rabatt' || d.type === 'testabo' || d.type === 'bogo');
+      } else if (currentFilter === 'gewinnspiel') {
+        deals = deals.filter(d => isGewinnspielDeal(d));
+      } else if (currentFilter === 'codes') {
         deals = deals.filter(d => d.category === 'codes' || d.code);
       }
       if (currentCategory !== 'alle') {
@@ -1367,7 +1411,7 @@
         
     function renderDeals() {
         const deals = filterDeals();
-        const savingsMap = {kaffee:3.5,essen:8,supermarkt:5,fitness:15,streaming:10,shopping:12,wien:6,kultur:8,beauty:10,technik:20,codes:5,reisen:30,gratis:5,events:10,kirche:0,gemeinde:0,gottesdienste:0,mobilität:5,wohnen:10,supermarkt:5};
+        const savingsMap = {kaffee:3.5,essen:8,supermarkt:5,fitness:15,streaming:10,shopping:12,wien:6,kultur:8,beauty:10,technik:20,codes:5,reisen:30,gratis:5,events:10,kirche:0,gottesdienste:0,mobilität:5,wohnen:10,supermarkt:5};
         if (!deals.length) {
             document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">\uD83D\uDD0D</div><p>Keine Deals gefunden</p></div>';
             return;
@@ -1402,7 +1446,7 @@
             // Format date/time from expires field
             const _hasDate = _expires && !/^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend)/i.test(_expires);
             const _dateDisplay = _hasDate ? _expires : '';
-            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + (_isExp ? ' expiring-soon' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')"><span class="deal-logo">' + (d.logo || '\uD83C\uDFAF') + '</span><div><div class="deal-brand">' + (_company || _brand) + '</div><div class="deal-title">' + _cleanTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + (_address || _loc) + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_pubMs && _ageH > 48 ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div>' + (_isExp ? '<div class="card-countdown warning"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">Läuft in ' + (_hLeft < 24 ? _hLeft + ' Std.' : Math.floor(_hLeft/24) + ' Tagen') + ' ab</span></div>' : '') : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + '<div class="deal-meta"><span class="badge ' + (d.type === 'gratis' ? 'badge-gratis' : d.type === 'testabo' ? 'badge-new' : 'badge-rabatt') + '">' + (d.type === 'gratis' ? '\uD83C\uDF81 GRATIS' : d.type === 'testabo' ? '\uD83C\uDD93 Testabo' : '\uD83D\uDCB0 Rabatt') + '</span>' + (_isExp && _hLeft > 0 ? '<span class="badge badge-expiry' + (_hLeft < 24 ? ' urgent' : '') + '">\u23F0 Läuft ab in ' + (_hLeft < 24 ? _hLeft + 'h' : Math.floor(_hLeft/24) + 'd') + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isNew ? '<span class="badge new">\u2728 Neu</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row"><button class="action-btn deal-link-btn" onclick="window.open(\'' + d.url + '\', \'_blank\')">' + '<span class="btn-icon">\uD83D\uDD17</span>' + (d.category === 'gottesdienste' ? 'Gottesdienst' : d.category === 'gemeinde' ? 'Zur Gemeinde' : d.category === 'events' ? 'Mehr Info' : 'Zum Deal') + '</button></div><div class="vote-section"><button class="action-btn vote-btn" onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
+            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + (_isExp ? ' expiring-soon' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')"><span class="deal-logo">' + (d.logo || '\uD83C\uDFAF') + '</span><div><div class="deal-brand">' + (_company || _brand) + '</div><div class="deal-title">' + _cleanTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + (_address || _loc) + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_pubMs && _ageH > 48 ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div>' + (_isExp ? '<div class="card-countdown warning"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">Läuft in ' + (_hLeft < 24 ? _hLeft + ' Std.' : Math.floor(_hLeft/24) + ' Tagen') + ' ab</span></div>' : '') : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + '<div class="deal-meta"><span class="badge ' + (d.type === 'gratis' ? 'badge-gratis' : d.type === 'testabo' ? 'badge-new' : 'badge-rabatt') + '">' + (d.type === 'gratis' ? '\uD83C\uDF81 GRATIS' : d.type === 'testabo' ? '\uD83C\uDD93 Testabo' : '\uD83D\uDCB0 Rabatt') + '</span>' + (_isExp && _hLeft > 0 ? '<span class="badge badge-expiry' + (_hLeft < 24 ? ' urgent' : '') + '">\u23F0 Läuft ab in ' + (_hLeft < 24 ? _hLeft + 'h' : Math.floor(_hLeft/24) + 'd') + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isNew ? '<span class="badge new">\u2728 Neu</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row"><button class="action-btn deal-link-btn" onclick="window.open(\'' + d.url + '\', \'_blank\')">' + '<span class="btn-icon">\uD83D\uDD17</span>' + (d.category === 'gottesdienste' ? 'Zeiten ansehen' : d.category === 'events' ? 'Event ansehen' : d.category === 'kirche' ? 'Zur Kirche' : 'Zum Deal') + '</button></div><div class="vote-section"><button class="action-btn vote-btn" onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
         }).join('');
 
         checkDeepLink();
@@ -1771,8 +1815,22 @@
         document.getElementById('searchInput').addEventListener('focus', () => document.getElementById('searchDropdown').classList.add('show'));
         document.getElementById('searchInput').addEventListener('input', e => { searchQuery = e.target.value; document.getElementById('clearBtn').classList.toggle('show', searchQuery.length > 0); renderDeals(); });
         document.addEventListener('click', e => { if (!document.getElementById('searchBox').contains(e.target)) document.getElementById('searchDropdown').classList.remove('show'); });
-        document.getElementById('typeFilters').addEventListener('click', e => { if (e.target.classList.contains('filter-btn')) { document.querySelectorAll('#typeFilters .filter-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); currentFilter = e.target.dataset.filter; renderDeals(); } });
-        document.getElementById('categoryFilters').addEventListener('click', e => { if (e.target.classList.contains('filter-btn')) { document.querySelectorAll('#categoryFilters .filter-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); currentCategory = e.target.dataset.category; renderDeals(); } });
+        document.getElementById('typeFilters').addEventListener('click', e => {
+            const btn = e.target.closest('.filter-btn');
+            if (!btn) return;
+            document.querySelectorAll('#typeFilters .filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderDeals();
+        });
+        document.getElementById('categoryFilters').addEventListener('click', e => {
+            const btn = e.target.closest('.filter-btn');
+            if (!btn) return;
+            document.querySelectorAll('#categoryFilters .filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCategory = btn.dataset.category;
+            renderDeals();
+        });
         window.addEventListener('scroll', () => document.getElementById('filters').classList.toggle('scrolled', window.scrollY > 100), { passive: true });
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
         
@@ -1796,11 +1854,11 @@
     isPro: false,
     referralCode: null,
     referralCount: 0,
-    alarms: { kaffee: true, essen: true, supermarkt: false, fitness: false, secret: true, gemeinde: false, gottesdienste: false, events: true },
+    alarms: { kaffee: true, essen: true, supermarkt: false, fitness: false, secret: true, gottesdienste: false, events: true, kirche: false },
     selectedRadius: 0,
     userLat: null,
     userLng: null,
-    savingsByCategory: { kaffee: 0, essen: 0, supermarkt: 0, fitness: 0, streaming: 0, gemeinde: 0, gottesdienste: 0, events: 0 },
+    savingsByCategory: { kaffee: 0, essen: 0, supermarkt: 0, fitness: 0, streaming: 0, gottesdienste: 0, events: 0, kirche: 0 },
     monthlySavings: [0,0,0,0,0,0,0,0,0,0,0,0]
   }));
 
@@ -2098,8 +2156,8 @@
       if (rows[2]) { const topEl = rows[2].querySelector('.compare-val'); if (topEl) topEl.textContent = '31 Deals \u00B7 \u20AC147'; }
     }
     function updateAlarmSwitches() {
-      const alarms = proData.alarms || {kaffee:true,essen:true,supermarkt:false,fitness:false,secret:true,gemeinde:false,gottesdienste:false,events:true};
-      const map = {alarmKaffee:'kaffee',alarmEssen:'essen',alarmSupermarkt:'supermarkt',alarmFitness:'fitness',alarmSecret:'secret',alarmGemeinde:'gemeinde',alarmGottesdienste:'gottesdienste',alarmEvents:'events'};
+      const alarms = proData.alarms || {kaffee:true,essen:true,supermarkt:false,fitness:false,secret:true,gottesdienste:false,events:true,kirche:false};
+      const map = {alarmKaffee:'kaffee',alarmEssen:'essen',alarmSupermarkt:'supermarkt',alarmFitness:'fitness',alarmSecret:'secret',alarmGottesdienste:'gottesdienste',alarmEvents:'events'};
       Object.entries(map).forEach(([id, cat]) => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.toggle('on', !!alarms[cat]);
@@ -2107,7 +2165,7 @@
     }
 
     function toggleAlarm(btn) {
-      const catMap = {alarmKaffee:'kaffee',alarmEssen:'essen',alarmSupermarkt:'supermarkt',alarmFitness:'fitness',alarmEvents:'events',alarmGratis:'gratis',alarmGemeinde:'gemeinde',alarmGottesdienste:'gottesdienste',alarmKirche:'kirche'};
+      const catMap = {alarmKaffee:'kaffee',alarmEssen:'essen',alarmSupermarkt:'supermarkt',alarmFitness:'fitness',alarmEvents:'events',alarmGratis:'gratis',alarmGottesdienste:'gottesdienste',alarmKirche:'kirche'};
       const cat = catMap[btn.id];
       if (!cat) return;
       const isOn = btn.classList.contains('on');
@@ -2158,12 +2216,12 @@
         try {
           const resp = await fetch('deals.json?t=' + Date.now());
           const data = await resp.json();
-          const catDeals = (data.deals || []).filter(d => d.category === cat);
+          const catDeals = (data.deals || []).map(normalizeDealForApp).filter(d => d.category === cat);
           const known = lastKnownDeals[cat] || new Set();
           const newDeals = catDeals.filter(d => !known.has(d.id || d.title));
           if (newDeals.length > 0) {
             // Neue Deals gefunden!
-            const catNames = {kaffee:'\u2615 Kaffee',essen:'\uD83C\uDF54 Essen',supermarkt:'\uD83D\uDED2 Supermarkt',fitness:'\uD83D\uDCAA Fitness',events:'\uD83C\uDFAD Events',gratis:'\uD83C\uDF81 Gratis',gemeinde:'\u26EA Gemeinde',gottesdienste:'\uD83D\uDD4A\uFE0F Gottesdienste',kirche:'\u26EA Kirche'};
+            const catNames = {kaffee:'\u2615 Kaffee',essen:'\uD83C\uDF54 Essen',supermarkt:'\uD83D\uDED2 Supermarkt',fitness:'\uD83D\uDCAA Fitness',events:'✝️ Christliche Events',gratis:'\uD83C\uDF81 Gratis',gottesdienste:'\uD83D\uDD4A\uFE0F Gottesdienst-Zeiten',kirche:'\u26EA Kirche'};
             const catName = catNames[cat] || cat;
             // Browser Notification
             if ('Notification' in window && Notification.permission === 'granted') {

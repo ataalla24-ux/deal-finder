@@ -111,7 +111,7 @@ function getCategory(deal) {
   // Source-basierte Kategorie
   const source = (deal.source || '').toLowerCase();
   if (source.includes('kirchen') || source.includes('kirche')) return 'kirche';
-  if (source.includes('gemeinde')) return 'gemeinde';
+  if (source.includes('gemeinde')) return 'kirche';
   if (source.includes('gottesdienst')) return 'gottesdienste';
   
   // Text-basierte Kategorie
