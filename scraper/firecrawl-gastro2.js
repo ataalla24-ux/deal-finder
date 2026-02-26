@@ -15,6 +15,14 @@ if (!FIRECRAWL_API_KEY) {
 }
 
 const firecrawl = new Firecrawl({ apiKey: FIRECRAWL_API_KEY });
+const FIRECRAWL_STEP_TIMEOUT_MS = 120000;
+
+async function runAgentWithTimeout(payload) {
+  return Promise.race([
+    firecrawl.agent(payload),
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`timeout after ${FIRECRAWL_STEP_TIMEOUT_MS}ms`)), FIRECRAWL_STEP_TIMEOUT_MS)),
+  ]);
+}
 
 // ============================================
 // SEITEN
@@ -134,7 +142,7 @@ async function main() {
     console.log(`   [${i + 1}/${SCRAPE_URLS.length}] ${source}...`);
     
     try {
-      const result = await firecrawl.agent({
+      const result = await runAgentWithTimeout({
           url: url,
         prompt: PROMPT,
         schema: gastroSchema,
