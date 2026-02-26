@@ -9,12 +9,12 @@ const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-instagram.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
 const CONFIG = {
-  maxDealsPerRun: 40,
+  maxDealsPerRun: 90,
   maxAgeDays: 14,
-  perSourceLinksLimit: 60,
-  maxPostsToVisit: 140,
-  postLoadTimeoutMs: 12000,
-  sourceScrollRounds: 6,
+  perSourceLinksLimit: 120,
+  maxPostsToVisit: 180,
+  postLoadTimeoutMs: 7000,
+  sourceScrollRounds: 10,
   sourceScrollStepPx: 2600,
 };
 
@@ -24,6 +24,20 @@ const HASHTAGS = [
   'wiendeals',
   'wienaktion',
   'wienrabatt',
+  'wiengastro',
+  'wienessen',
+  'wienrestaurants',
+  'wienkaffee',
+  'wiencafe',
+  'wienbrunch',
+  'wienevent',
+  'wienfooddeals',
+  'wienkostenlos',
+  'gratisessenwien',
+  'freestuffwien',
+  'schnäppchenwien',
+  'neueröffnungwien',
+  'neueroeffnungwien',
   'freebieswien',
   'foodiewien',
   'wienfood',
@@ -47,6 +61,11 @@ const SEARCH_QUERIES = [
   'site:instagram.com/reel vienna deal',
   'site:instagram.com/p wien food deal',
   'site:instagram.com/reel neuoeffnung wien',
+  'site:instagram.com/reel wien brunch gratis',
+  'site:instagram.com/p wien restaurant angebot',
+  'site:instagram.com/reel wien kaffee gratis',
+  'site:instagram.com/p vienna opening offer',
+  'site:instagram.com/reel wien event gratis',
 ];
 
 const WIEN_KEYWORDS = [
@@ -153,6 +172,13 @@ function cleanText(value) {
 function containsKeyword(text, keywords) {
   const lower = cleanText(text).toLowerCase();
   return keywords.some((k) => lower.includes(k));
+}
+
+function isWienRelevant(text, sourceKey, postUrl, brand) {
+  const combined = [cleanText(text), cleanText(sourceKey), cleanText(postUrl), cleanText(brand)].join(' ').toLowerCase();
+  if (containsKeyword(combined, WIEN_KEYWORDS)) return true;
+  if (combined.includes('wien') || combined.includes('vienna')) return true;
+  return false;
 }
 
 function detectCategory(text) {
@@ -572,6 +598,8 @@ async function scrapeInstagram() {
         if (score < 55) continue;
 
         const brand = deriveBrand(data, post.url);
+        if (!isWienRelevant(combinedText, post.sourceKey, post.url, brand)) continue;
+
         const titleBase = cleanText(data.ogTitle || data.ldCaption || 'Instagram Deal');
         const title = titleBase.length > 80 ? `${titleBase.slice(0, 77)}...` : titleBase;
 
