@@ -335,31 +335,10 @@ async function main() {
   // Get bot's own user ID so we can ignore bot reactions
   const botUserId = await getBotUserId();
               console.log(`🤖 Bot User ID: ${botUserId || 'unknown'}`);
-
-  const messages = await getMessages(SLACK_CHANNEL_ID, 200);
-              console.log(`📨 ${messages.length} Nachrichten gefunden`);
-
+  
   // Load ALL pending deals from ALL deals-pending-*.json files
   const docsDir = path.join(__dirname, '..', 'docs');
               let pendingDeals = [];
-
-    // FIX: Also load thread replies (deals are posted as thread replies by slack-notify)
-    let allMessages = [...messages];
-    for (const msg of messages) {
-          if (msg.reply_count && msg.reply_count > 0) {
-                  try {
-                            const rRes = await fetch(`https://slack.com/api/conversations.replies?channel=${SLACK_CHANNEL_ID}&ts=${msg.ts}&limit=200`, { headers: { 'Authorization': `Bearer ${SLACK_BOT_TOKEN}` } });
-                            const rData = await rRes.json();
-                            if (rData.ok && rData.messages) {
-                                        const replies = rData.messages.slice(1);
-                                        allMessages = allMessages.concat(replies);
-                                        console.log(`  Thread ${msg.ts}: ${replies.length} replies loaded`);
-                            }
-                            await new Promise(r => setTimeout(r, 300));
-                  } catch(e) { console.log(`  Thread error: ${e.message}`); }
-          }
-    }
-    console.log(`Total: ${allMessages.length} messages (inkl. Thread-Replies)`);
 
   try {
                   const files = fs.readdirSync(docsDir);
@@ -388,7 +367,53 @@ async function main() {
               const approvedTimestamps = new Set();
               const usedPendingDealIds = new Set();
 
-  for (const message of allMessages) {
+  // Fast path: only check reactions for pending deals that were actually posted to Slack.
+  // This avoids scanning thousands of old channel messages and hitting rate limits.
+  const pendingByTs = new Map();
+              for (const d of pendingDeals) {
+                              if (d.slackTs && !pendingByTs.has(d.slackTs)) pendingByTs.set(d.slackTs, d);
+              }
+
+  if (pendingByTs.size > 0) {
+                  console.log(`🎯 Targeted mode: prüfe ${pendingByTs.size} pending slackTs`);
+                  let checked = 0;
+                  for (const [messageTs, pendingDeal] of pendingByTs.entries()) {
+                                const reactions = await getReactions(SLACK_CHANNEL_ID, messageTs);
+                                const isHumanApproved = hasHumanCheckmark(reactions, botUserId);
+                                if (!isHumanApproved) continue;
+                                if (approvedTimestamps.has(messageTs)) continue;
+                                approvedTimestamps.add(messageTs);
+
+                                const enriched = { ...pendingDeal, slackTs: messageTs };
+                                enriched.qualityScore = computeQualityScore(enriched);
+                                approvedDeals.push(enriched);
+                                usedPendingDealIds.add(pendingDeal.id);
+
+                                checked++;
+                                if (checked % 25 === 0) console.log(`  ✅ geprüft: ${checked}/${pendingByTs.size}`);
+                                await new Promise(r => setTimeout(r, 150));
+                  }
+  } else {
+                  // Fallback: broad scan (legacy mode)
+                  const messages = await getMessages(SLACK_CHANNEL_ID, 200);
+                  console.log(`📨 ${messages.length} Nachrichten gefunden`);
+                  let allMessages = [...messages];
+                  for (const msg of messages) {
+                                if (msg.reply_count && msg.reply_count > 0) {
+                                              try {
+                                                                  const rRes = await fetch(`https://slack.com/api/conversations.replies?channel=${SLACK_CHANNEL_ID}&ts=${msg.ts}&limit=200`, { headers: { 'Authorization': `Bearer ${SLACK_BOT_TOKEN}` } });
+                                                                  const rData = await rRes.json();
+                                                                  if (rData.ok && rData.messages) {
+                                                                                  const replies = rData.messages.slice(1);
+                                                                                  allMessages = allMessages.concat(replies);
+                                                                  }
+                                                                  await new Promise(r => setTimeout(r, 300));
+                                              } catch(e) { console.log(`  Thread error: ${e.message}`); }
+                                }
+                  }
+                  console.log(`Total: ${allMessages.length} messages (inkl. Thread-Replies)`);
+
+                  for (const message of allMessages) {
                   const messageTs = message.ts;
                   const text = message.text || '';
 
@@ -497,8 +522,9 @@ async function main() {
                                   approvedDeals.push(deal);
                 }
 
-                // Small delay between API calls
-                await new Promise(r => setTimeout(r, 200));
+                                // Small delay between API calls
+                                await new Promise(r => setTimeout(r, 200));
+                  }
   }
 
   console.log(`✅ ${approvedDeals.length} Deals approved`);
