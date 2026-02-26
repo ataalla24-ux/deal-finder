@@ -53,7 +53,7 @@ async function run() {
       await page.waitForTimeout(1200);
       await page.screenshot({
         path: path.join(OUT_DIR, `${profile.name}-home.png`),
-        fullPage: true,
+        fullPage: false,
       });
       await context.close();
     }

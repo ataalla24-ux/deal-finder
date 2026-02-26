@@ -34,6 +34,7 @@ const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 const CUTOFF_DATE = Date.now() - TWO_WEEKS_MS;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 function ensureObject(value, fallback = {}) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
@@ -112,6 +113,44 @@ function inferExpires(deal) {
   const raw = deal.expires || deal.end_date || deal.validity_date || '';
   const iso = toIsoDate(raw);
   return iso || cleanText(raw) || '';
+}
+
+function parseLooseExpiry(text) {
+  const value = cleanText(text);
+  if (!value) return null;
+  const lower = value.toLowerCase();
+
+  if (
+    lower.includes('unknown') ||
+    lower.includes('unbekannt') ||
+    lower.includes('ongoing') ||
+    lower.includes('laufend') ||
+    lower.includes('siehe') ||
+    lower.includes('website') ||
+    lower.includes('webseite')
+  ) {
+    return null;
+  }
+
+  const direct = new Date(value);
+  if (!Number.isNaN(direct.getTime())) return direct.getTime();
+
+  const matchYmd = value.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (matchYmd) {
+    const ts = Date.parse(`${matchYmd[1]}-${matchYmd[2]}-${matchYmd[3]}T23:59:59`);
+    if (!Number.isNaN(ts)) return ts;
+  }
+
+  const matchDmy = value.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (matchDmy) {
+    const yyyy = matchDmy[3].length === 2 ? `20${matchDmy[3]}` : matchDmy[3];
+    const mm = String(matchDmy[2]).padStart(2, '0');
+    const dd = String(matchDmy[1]).padStart(2, '0');
+    const ts = Date.parse(`${yyyy}-${mm}-${dd}T23:59:59`);
+    if (!Number.isNaN(ts)) return ts;
+  }
+
+  return null;
 }
 
 function stableId(seed) {
@@ -205,6 +244,12 @@ function isRecent(deal) {
   return pubMs >= CUTOFF_DATE;
 }
 
+function isNotExpired(deal) {
+  const expiryMs = parseLooseExpiry(deal.expires);
+  if (!expiryMs) return true;
+  return expiryMs + DAY_MS >= Date.now();
+}
+
 function formatDate(value) {
   if (!value) return 'k.A.';
   const d = new Date(value);
@@ -283,7 +328,7 @@ async function main() {
 
   const sentIds = loadSentIds();
   const unseenDeals = pendingDeals.filter((deal) => !sentIds[deal.id]);
-  const freshDeals = unseenDeals.filter(isRecent).filter((deal) => deal.url);
+  const freshDeals = unseenDeals.filter(isRecent).filter(isNotExpired).filter((deal) => deal.url);
 
   console.log(`📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, fresh+valid URL: ${freshDeals.length}`);
 

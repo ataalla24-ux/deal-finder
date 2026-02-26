@@ -1261,6 +1261,13 @@
             // Kombiniere User-Deals mit genehmigten Base-Deals (nur Slack-approved)
             const userDealsWithVotes = userDeals.map(d => ({ ...d, votes: votes[d.id] || d.votes || 0 }));
             allDeals = [...userDealsWithVotes, ...baseDeals];
+            if (data.lastUpdated) {
+                const dt = new Date(data.lastUpdated);
+                if (!Number.isNaN(dt.getTime())) {
+                    const sub = document.querySelector('.subtitle');
+                    if (sub) sub.textContent = 'Nur geprüfte Deals • Stand: ' + dt.toLocaleString('de-AT');
+                }
+            }
             updateCounts(); renderDeals(); setDailyDeal();
         } catch (e) {
             document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">\uD83D\uDE15</div><p>Fehler</p></div>';
@@ -1313,7 +1320,7 @@
       let deals = allDeals;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        deals = deals.filter(d => d.title.toLowerCase().includes(q) || d.brand.toLowerCase().includes(q) || (d.description||'').toLowerCase().includes(q));
+        deals = deals.filter(d => (d.title || '').toLowerCase().includes(q) || (d.brand || '').toLowerCase().includes(q) || (d.description || '').toLowerCase().includes(q));
       }
       if (currentFilter === 'codes') {
         deals = deals.filter(d => d.category === 'codes' || d.code);
@@ -1349,6 +1356,12 @@
           return km <= radius;
         });
       }
+      deals.sort((a, b) => {
+        const aPub = a.pubDate ? Date.parse(a.pubDate) : 0;
+        const bPub = b.pubDate ? Date.parse(b.pubDate) : 0;
+        if ((bPub || 0) !== (aPub || 0)) return (bPub || 0) - (aPub || 0);
+        return (b.qualityScore || 0) - (a.qualityScore || 0);
+      });
       return deals;
     }
         
