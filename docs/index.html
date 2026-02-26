@@ -1393,7 +1393,7 @@
         function updateCounts() {
             document.getElementById('countAll').textContent = allDeals.length;
             document.getElementById('countGratis').textContent = allDeals.filter(d => d.type === 'gratis').length;
-            document.getElementById('countRabatt').textContent = allDeals.filter(d => d.type === 'rabatt' || d.type === 'testabo').length;
+            document.getElementById('countRabatt').textContent = allDeals.filter(d => d.type === 'rabatt' || d.type === 'testabo' || d.type === 'bogo').length;
             document.getElementById('countGewinnspiel').textContent = allDeals.filter(d => isGewinnspielDeal(d)).length;
             document.getElementById('countCodes').textContent = allDeals.filter(d => d.category === 'codes' || d.code).length;
         }
@@ -1593,7 +1593,7 @@
             
             input.value = '';
             renderDeals();
-            document.getElementById('community-' + dealId).classList.add('show');
+            document.getElementById('comm-' + dealId).classList.add('show');
         }
         
         function rateDeal(dealId, stars, e) {
@@ -1616,7 +1616,7 @@
             localStorage.setItem('userTips', JSON.stringify(userTips));
             showToast('👍 Als hilfreich markiert!');
             renderDeals();
-            document.getElementById('community-' + dealId).classList.add('show');
+            document.getElementById('comm-' + dealId).classList.add('show');
         }
         
         function likeComment(dealId, commentId, e) {
@@ -1625,7 +1625,7 @@
             if (comment) { comment.likes = (comment.likes || 0) + 1; }
             localStorage.setItem('comments', JSON.stringify(comments));
             renderDeals();
-            document.getElementById('community-' + dealId).classList.add('show');
+            document.getElementById('comm-' + dealId).classList.add('show');
         }
         
         function timeAgo(timestamp) {
