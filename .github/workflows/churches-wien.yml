@@ -1,0 +1,32 @@
+name: "⛪ Churches Wien Scraper"
+
+on:
+  schedule:
+    - cron: '0 7 * * *'  # Täglich 07:00 Uhr
+  workflow_dispatch:
+
+jobs:
+  churches:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: deal-finder
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Church Scraper
+        working-directory: deal-finder
+        run: python3 wien_deals/church_scraper.py
+
+      - name: Commit deals
+        working-directory: deal-finder
+        run: |
+          git config user.name "Deal Bot"
+          git config user.email "bot@freefinder.wien"
+          git add docs/deals-pending-church-*.json
+          git diff --staged --quiet || git commit -m "Churches Wien $(date +%Y-%m-%d)"
+          git push

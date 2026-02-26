@@ -1,0 +1,76 @@
+name: Vienna Deals Collector
+
+on:
+  schedule:
+    # Daily at 8 AM Vienna time (7 UTC)
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+    inputs:
+      manual_run:
+        description: 'Manual run'
+        required: false
+        default: 'true'
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests playwright
+          playwright install chromium --with-deps
+      
+      - name: Collect Deals
+        id: collect
+        run: |
+          python scripts/collect_deals.py
+        env:
+          INSTAGRAM_SESSION: ${{ secrets.INSTAGRAM_SESSION }}
+      
+      - name: Generate Deal Report
+        run: |
+          python scripts/generate_report.py
+      
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update Vienna deals - ${{ github.sha }}"
+          file_pattern: "*.json *.md"
+      
+      - name: Send to Slack for Approval
+        if: success()
+        run: |
+          python scripts/notify_slack.py send deals.json
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      
+      - name: Report Status
+        if: failure()
+        run: |
+          echo "Deal collection failed"
+
+  approve-and-publish:
+    needs: collect
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Approve and Publish
+        run: |
+          # Load approved deals (manually via Slack or here)
+          python scripts/notify_slack.py publish approved_deals.json
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

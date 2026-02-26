@@ -1,0 +1,41 @@
+name: ✅ Approve Deals from Slack
+
+on:
+  schedule:
+            # Daily at 12:00 noon Vienna = 11:00 UTC
+            - cron: '0 12 * * *' # 13:00 Vienna time (12:00 UTC)
+  workflow_dispatch:
+
+jobs:
+  approve-deals:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 Install Dependencies
+        run: npm install
+
+      - name: ✅ Read Slack ✅ Reactions & Approve
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+        run: node scraper/slack-approve.js
+
+      - name: 📤 Push Approved Deals
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/deals.json 2>/dev/null || true
+          DEAL_COUNT=$(cat docs/deals.json | python3 -c "import sys, json; print(json.load(sys.stdin)['totalDeals'])" 2>/dev/null || echo "?")
+          TIMESTAMP=$(date -u +"%H:%M")
+          git diff --staged --quiet || git commit -m "✅ ${TIMESTAMP} - Genehmigte Deals (${DEAL_COUNT} total)"
+          git push || echo "Nichts zu pushen"

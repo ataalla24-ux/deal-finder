@@ -1,0 +1,37 @@
+name: "Firecrawl Food Only - Key 2"
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  food:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Food Scraper
+        env:
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY2 }}
+        run: node scraper/firecrawl-food3.js
+
+      - name: Filter alte Deals
+        run: node scraper/filter-old-deals.js
+
+      - name: Commit deals
+        run: |
+          git config user.name "Deal Bot"
+          git config user.email "bot@freefinder.wien"
+          git add docs/deals-pending-food3.json
+          git diff --staged --quiet || git commit -m "Food3 deals $(date +%Y-%m-%d)"
+          git push

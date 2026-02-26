@@ -1,0 +1,38 @@
+name: 🌐 Wien Deals Web Scraper
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Täglich 06:00 Wien
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install playwright
+          playwright install chromium
+      
+      - name: Run Web Scraper
+        run: python web_deals_finder.py
+      
+      - name: Save deals
+        run: |
+          if [ -f deals.json ]; then
+            cp deals.json docs/deals-pending-web.json
+          fi
+      
+      - name: Send to Slack
+        if: success()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+        run: node ../deal-finder/scraper/slack-notify.js

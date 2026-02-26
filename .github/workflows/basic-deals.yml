@@ -1,0 +1,34 @@
+name: "📌 Basic Deals Scraper"
+
+on:
+  schedule:
+    - cron: '0 5 * * *'  # Täglich 05:00 Uhr
+  workflow_dispatch:
+
+jobs:
+  basic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: deal-finder
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Basic Scraper
+        working-directory: deal-finder
+        run: node scraper/basic-scraper.js
+
+      - name: Commit deals
+        working-directory: deal-finder
+        run: |
+          git config user.name "Deal Bot"
+          git config user.email "bot@freefinder.wien"
+          git add docs/deals-pending-basic1.json
+          git diff --staged --quiet || git commit -m "Basic Deals $(date +%Y-%m-%d)"
+          git push

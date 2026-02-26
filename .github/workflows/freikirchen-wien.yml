@@ -1,0 +1,32 @@
+name: "Freikirchen Wien"
+
+on:
+  schedule:
+    - cron: '0 8 * * 0'  # Sonntag 8:00 Uhr
+  workflow_dispatch:
+
+jobs:
+  freikirchen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: deal-finder
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Freikirchen Scraper
+        working-directory: deal-finder
+        run: python3 wien_deals/freikirchen_scraper.py
+
+      - name: Commit deals
+        working-directory: deal-finder
+        run: |
+          git config user.name "Deal Bot"
+          git config user.email "bot@freefinder.wien"
+          git add docs/deals-pending-freikirchen.json
+          git diff --staged --quiet || git commit -m "Freikirchen Wien $(date +%Y-%m-%d)"
+          git push

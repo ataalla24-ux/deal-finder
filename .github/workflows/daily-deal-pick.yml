@@ -1,0 +1,39 @@
+name: "Daily Deal Pick"
+# Runs at 13:30 Vienna (12:30 UTC) – 30 min AFTER approve at 13:00
+# Reply to the Slack digest thread with "deal 3" or just "3" to pick Deal des Tages
+
+on:
+  schedule:
+    - cron: '30 12 * * *'
+  workflow_dispatch:
+
+jobs:
+  pick-daily-deal:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Pick Deal des Tages from Slack reply
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+        run: node scraper/set-daily-deal.js
+
+      - name: Commit deal-of-the-day.json and deals.json
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/deal-of-the-day.json docs/deals.json
+          git diff --staged --quiet || git commit -m "🏆 Deal des Tages gesetzt"
+          git push || echo "Nothing to push"
