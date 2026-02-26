@@ -5,6 +5,7 @@
 // ============================================
 
 import https from 'https';
+import http from 'http';
 import fs from 'fs';
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY || '';
@@ -111,7 +112,7 @@ function fetchJSON(url, timeout = 10000) {
 
 function fetchHTML(url, timeout = 8000) {
   return new Promise((resolve, reject) => {
-    const protocol = url.startsWith('https') ? https : require('http');
+    const protocol = url.startsWith('https') ? https : http;
     const req = protocol.get(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',

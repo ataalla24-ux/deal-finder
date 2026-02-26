@@ -374,7 +374,7 @@ function parseDeals(html) {
     if (RELEVANT_CATEGORIES[brandLower]) qualityScore += 10;
 
     deals.push({
-      id: dealId('gs', shopName || shopSlug, deal.title || '', deal.url || ''),
+      id: dealId('gs', brand, title, url),
       brand: brand,
       logo: logo,
       title: title,
@@ -431,8 +431,8 @@ function parseDeals(html) {
 
       const slug2 = saleBrand.toLowerCase().replace(/[^a-z0-9äöüß]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
-      deals.push({
-        id: dealId('gs', slug2, deal.title || deal.code || '', deal.affiliateUrl || deal.url || ''),
+    deals.push({
+        id: dealId('gs', saleBrand, matched, `https://www.gutscheine.at/${slug2}`),
         brand: saleBrand,
         logo: logo2,
         title: matched,

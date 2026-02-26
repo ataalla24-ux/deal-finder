@@ -30,10 +30,10 @@ jobs:
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
         run: node scraper/set-daily-deal.js
 
-      - name: Commit deal-of-the-day.json and deals.json
+      - name: Commit deal-of-the-day.json
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add docs/deal-of-the-day.json docs/deals.json
+          git add docs/deal-of-the-day.json
           git diff --staged --quiet || git commit -m "🏆 Deal des Tages gesetzt"
           git push || echo "Nothing to push"

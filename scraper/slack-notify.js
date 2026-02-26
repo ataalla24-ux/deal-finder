@@ -238,6 +238,17 @@ function saveSentIds(sentIds) {
   fs.writeFileSync(SENT_IDS_PATH, JSON.stringify(sentIds, null, 2));
 }
 
+function loadPendingQueue() {
+  if (!fs.existsSync(PENDING_ALL_PATH)) return [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(PENDING_ALL_PATH, 'utf-8'));
+    const deals = ensureArray(parsed.deals);
+    return deals.map((d) => normalizeDeal(d, cleanText(d.source) || 'queue'));
+  } catch {
+    return [];
+  }
+}
+
 function isRecent(deal) {
   const pubMs = new Date(deal.pubDate).getTime();
   if (!Number.isFinite(pubMs)) return true;
@@ -314,6 +325,25 @@ function writePendingAll(deals) {
   fs.writeFileSync(PENDING_ALL_PATH, JSON.stringify(payload, null, 2));
 }
 
+function queueKey(deal) {
+  return cleanText(deal.slackTs) || cleanText(deal.id) || normalizeUrl(deal.url);
+}
+
+function mergePendingQueue(existingDeals, newPostedDeals) {
+  const byKey = new Map();
+  for (const deal of existingDeals) {
+    const key = queueKey(deal);
+    if (!key) continue;
+    byKey.set(key, deal);
+  }
+  for (const deal of newPostedDeals) {
+    const key = queueKey(deal);
+    if (!key) continue;
+    byKey.set(key, deal);
+  }
+  return [...byKey.values()];
+}
+
 async function main() {
   console.log('📱 SLACK NOTIFY - APPROVAL PIPELINE');
   console.log('========================================');
@@ -375,9 +405,12 @@ async function main() {
   }
 
   saveSentIds(sentIds);
-  writePendingAll(postedDeals);
+  const existingQueue = loadPendingQueue();
+  const mergedQueue = mergePendingQueue(existingQueue, postedDeals);
+  writePendingAll(mergedQueue);
 
   console.log(`✅ ${postedDeals.length} Deals an Slack gesendet`);
+  console.log(`🗂️ pending queue size: ${mergedQueue.length}`);
   console.log(`💾 saved: ${path.relative(ROOT, PENDING_ALL_PATH)}`);
 }
 

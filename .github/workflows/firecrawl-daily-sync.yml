@@ -38,6 +38,11 @@ jobs:
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: node scraper/firecrawl-consumables.js
 
+      - name: Run Instagram Scraper
+        env:
+          INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
+        run: node scraper/instagram-web-scraper.js
+
       - name: Filter alte Deals
         run: node scraper/filter-old-deals.js
 
@@ -51,6 +56,6 @@ jobs:
         run: |
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
-          git add docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-all.json docs/sent-deal-ids.json 2>/dev/null || true
+          git add docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-instagram.json docs/deals-pending-all.json docs/sent-deal-ids.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Daily firecrawl sync $(date +%Y-%m-%d)"
           git push

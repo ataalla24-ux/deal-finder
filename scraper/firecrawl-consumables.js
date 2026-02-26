@@ -181,13 +181,19 @@ function parseGermanDate(str) {
 }
 
 function isExpiredDeal(deal) {
-  const twoWeeksAgo = new Date(Date.now() - 14*24*60*60*1000);
+  const now = new Date();
   const fields = [deal.validity_date, deal.end_date, deal.expires].filter(Boolean);
   for (const f of fields) {
     const d = parseGermanDate(f);
-    if (d && d < twoWeeksAgo) return true;
+    if (d && d < now) return true;
   }
   return false;
+}
+
+function isNotTooOld(dateObj) {
+  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return true;
+  const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+  return dateObj.getTime() >= twoWeeksAgo;
 }
 
 // ============================================
@@ -249,17 +255,24 @@ async function main() {
           
           for (const d of data.deals) {
             const isFood = (d.category || '').toLowerCase().includes('food');
+            const sourceUrl = d.source_url || '';
+            if (!sourceUrl) continue;
+            const validityDate = parseGermanDate(d.validity_date || '');
+            if (!isNotTooOld(validityDate)) continue;
+            const brand = d.company_name || source;
+            const title = d.item_given_away?.substring(0, 80) || 'Deal';
+            const pubDate = validityDate ? validityDate.toISOString() : new Date().toISOString();
             
             allDeals.push({
-              id: dealId('cs', d.company_name || d.brand || '', d.item_given_away || '', d.source_url || ''),
-              brand: d.company_name || source,
-              title: d.item_given_away?.substring(0, 80) || 'Deal',
+              id: dealId('cs', brand, title, sourceUrl),
+              brand,
+              title,
               logo: getEmoji({ title: d.item_given_away, description: d.deal_description, category: d.category }),
               description: d.deal_description || d.item_given_away || '',
               type: 'gratis',
               category: getCategory({ title: d.item_given_away, description: d.deal_description }),
               source: 'Firecrawl Consumables',
-              url: d.source_url || '',
+              url: sourceUrl,
               expires: (d.validity_date || '') + (d.validity_time ? ' ' + d.validity_time : ''),
               distance: d.company_name ? (d.company_name + (d.full_address ? ', ' + d.full_address : d.location ? ', ' + d.location : ', Wien')) : (d.full_address || d.location || 'Wien'),
               hot: true,
@@ -267,7 +280,7 @@ async function main() {
               priority: isFood ? 3 : 5,
               votes: 1,
               qualityScore: 60,
-              pubDate: new Date().toISOString(),
+              pubDate,
             });
           }
         } else {

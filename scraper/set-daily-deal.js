@@ -150,11 +150,9 @@ function saveDealOfTheDay(deal) {
 }
 
 // ============================================
-// Step 5: Ensure the picked deal is in deals.json
-// If the deal was approved it's already there.
-// If not, inject it so the app can always display it.
+// Step 5: Ensure the picked deal is approved (exists in deals.json)
 // ============================================
-function ensureDealInDealsJson(deal) {
+function isDealApproved(deal) {
     const dealsPath = path.join(__dirname, '..', 'docs', 'deals.json');
 
   let dealsData = { deals: [], totalDeals: 0, lastUpdated: new Date().toISOString() };
@@ -174,36 +172,12 @@ function ensureDealInDealsJson(deal) {
         (d.url && deal.url && d.url === deal.url)
                               );
 
-  if (exists) {
-        console.log('Deal already in deals.json - no injection needed');
-        return false;
+  if (!exists) {
+    console.log('Picked deal is not approved yet. Skipping daily deal update.');
+    return false;
   }
 
-  // Inject the deal at the top with a flag
-  const injected = {
-        id: deal.id || `daily-${Date.now()}`,
-        title: deal.title,
-        description: deal.description,
-        brand: deal.brand,
-        url: deal.url || '',
-        logo: deal.logo || '🎯',
-        category: deal.category || 'wien',
-        type: deal.type || 'gratis',
-        distance: deal.distance || 'Wien',
-        source: deal.source || deal._source || 'daily-pick',
-        pubDate: deal.pubDate || new Date().toISOString(),
-        qualityScore: deal.qualityScore || 80,
-        isDailyDeal: true
-  };
-
-  deals.unshift(injected);
-    dealsData.deals = deals;
-    dealsData.totalDeals = deals.length;
-    dealsData.lastUpdated = new Date().toISOString();
-
-  fs.writeFileSync(dealsPath, JSON.stringify(dealsData, null, 2));
-    console.log('Injected daily deal into deals.json (' + deals.length + ' total deals)');
-    return true;
+  return true;
 }
 
 // ============================================
@@ -244,8 +218,11 @@ async function main() {
 
   console.log(`Deal #${pickNumber}: ${deal.brand} - ${deal.title}`);
 
+  if (!isDealApproved(deal)) {
+    process.exit(0);
+  }
+
   saveDealOfTheDay(deal);
-    ensureDealInDealsJson(deal);
 
   console.log('Done!');
 }

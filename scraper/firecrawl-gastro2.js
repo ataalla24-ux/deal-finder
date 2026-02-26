@@ -97,6 +97,25 @@ function dealId(prefix, brand, title, url) {
   return prefix + '-' + stableHash(key);
 }
 
+function parseGermanDate(str) {
+  if (!str || typeof str !== 'string') return null;
+  const s = str.trim();
+  let m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0));
+  m = s.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (m) {
+    const year = m[3].length === 2 ? Number(`20${m[3]}`) : Number(m[3]);
+    return new Date(Date.UTC(year, Number(m[2]) - 1, Number(m[1]), 12, 0, 0));
+  }
+  return null;
+}
+
+function isNotTooOld(dateObj) {
+  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return true;
+  const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+  return dateObj.getTime() >= twoWeeksAgo;
+}
+
 async function main() {
   console.log('🍕🔥 FIRECRAWL GASTRO AGENT #2');
   console.log('='.repeat(40));
@@ -139,14 +158,20 @@ async function main() {
             
             if (postUrl && seenUrls.has(postUrl)) continue;
             if (postUrl) seenUrls.add(postUrl);
+            if (!postUrl) continue;
             
             const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
+            const validityDate = parseGermanDate(d.validity_date || '');
+            if (!isNotTooOld(validityDate)) continue;
+            const brand = d.brand_or_store || source;
+            const title = d.item_given_away?.substring(0, 60) || 'Gastro Deal';
+            const pubDate = validityDate ? validityDate.toISOString() : new Date().toISOString();
             
             allDeals.push({
-              id: dealId('g2', d.brand || d.store || '', d.title || d.was || '', d.url || d.source_url || ''),
-              brand: d.brand_or_store || source,
-              title: d.item_given_away?.substring(0, 60) || 'Gastro Deal',
-                      description: `${d.item_given_away} – ${d.location}`.trim(),
+              id: dealId('g2', brand, title, postUrl),
+              brand,
+              title,
+              description: `${d.item_given_away} – ${d.location}`.trim(),
               type: isGratis ? 'gratis' : 'rabatt',
               category: 'essen',
               source: 'Firecrawl Gastro #2',
@@ -158,7 +183,7 @@ async function main() {
               priority: isGratis ? 2 : 3,
               votes: 1,
               qualityScore: 65,
-              pubDate: new Date().toISOString(),
+              pubDate,
             });
           }
         }

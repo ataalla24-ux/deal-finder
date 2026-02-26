@@ -155,13 +155,19 @@ function parseGermanDate(str) {
 }
 
 function isExpiredDeal(deal) {
-  const twoWeeksAgo = new Date(Date.now() - 14*24*60*60*1000);
+  const now = new Date();
   const fields = [deal.validity_date, deal.end_date, deal.expires].filter(Boolean);
   for (const f of fields) {
     const d = parseGermanDate(f);
-    if (d && d < twoWeeksAgo) return true;
+    if (d && d < now) return true;
   }
   return false;
+}
+
+function isNotTooOld(dateObj) {
+  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return true;
+  const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+  return dateObj.getTime() >= twoWeeksAgo;
 }
 
 // ============================================
@@ -214,14 +220,20 @@ async function main() {
               continue;
             }
             if (sourceUrl) seenUrls.add(sourceUrl);
+            if (!sourceUrl) continue;
             
             const isGratis = /gratis|kostenlos|free|0€|0 €|umsonst/i.test(d.offer_type || d.description || '');
             const isBogo = /bogo|buy one|get one|2 for/i.test(d.description || '');
+            const inferredDate = parseGermanDate(d.start_date || d.end_date || '');
+            if (!isNotTooOld(inferredDate)) continue;
+            const brand = d.platform_source || source;
+            const title = d.offer_type?.substring(0, 60) || 'Food Deal';
+            const pubDate = inferredDate ? inferredDate.toISOString() : new Date().toISOString();
             
             allDeals.push({
-              id: dealId('food3', source, d.was, d.source_url),
-              brand: d.platform_source || source,
-              title: d.offer_type?.substring(0, 60) || 'Food Deal',
+              id: dealId('food3', brand, title, sourceUrl),
+              brand,
+              title,
               logo: getEmoji({ title: d.offer_type, description: d.description, category: 'essen' }),
               description: d.description || `${d.offer_type} - ${d.location}`,
               type: isGratis ? 'gratis' : (isBogo ? 'bogo' : 'rabatt'),
@@ -235,7 +247,7 @@ async function main() {
               priority: isGratis ? 2 : 4,
               votes: 1,
               qualityScore: 65,
-              pubDate: new Date().toISOString(),
+              pubDate,
             });
           }
         } else {

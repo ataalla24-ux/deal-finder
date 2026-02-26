@@ -271,7 +271,10 @@ async function main() {
   for (let i = 0; i < pendingDeals.length; i += 1) {
     const deal = pendingDeals[i];
     const msg = messageByTs.get(deal.slackTs);
-    const reactions = msg && Array.isArray(msg.reactions) ? msg.reactions : [];
+    let reactions = msg && Array.isArray(msg.reactions) ? msg.reactions : [];
+    if (reactions.length === 0 && deal.slackTs) {
+      reactions = await getReactions(deal.slackTs);
+    }
     const ok = hasHumanApproval(reactions, botUserId);
 
     if (ok) {

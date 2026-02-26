@@ -9,12 +9,12 @@ const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-instagram.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
 const CONFIG = {
-  maxDealsPerRun: 90,
+  maxDealsPerRun: 140,
   maxAgeDays: 14,
-  perSourceLinksLimit: 120,
-  maxPostsToVisit: 180,
+  perSourceLinksLimit: 280,
+  maxPostsToVisit: 520,
   postLoadTimeoutMs: 7000,
-  sourceScrollRounds: 10,
+  sourceScrollRounds: 18,
   sourceScrollStepPx: 2600,
 };
 
@@ -43,7 +43,17 @@ const HASHTAGS = [
   'wienfood',
   'kaffeewien',
   'eroeffnungwien',
-  'neueroeffnungwien',
+  'gratisdoenerwien',
+  'gratisdönerwien',
+  'doenerwien',
+  'dönerwien',
+  'wienimbiss',
+  'wienstreetfood',
+  'wienkebab',
+  'freefoodvienna',
+  'wienfreefood',
+  'wienopening',
+  'viennafreebies',
 ];
 
 const INSTAGRAM_ACCOUNTS = [
@@ -53,6 +63,11 @@ const INSTAGRAM_ACCOUNTS = [
   'viennafoodstories',
   'vienna.go',
   'wienmalanders',
+  '1000things',
+  'viennaeats',
+  'wienmitte',
+  'wienerbezirksblatt',
+  'wienliebe',
 ];
 
 const SEARCH_QUERIES = [
@@ -371,13 +386,13 @@ async function discoverLinksViaDuckDuckGo() {
 }
 
 function buildSources() {
-  const hashtagSources = HASHTAGS.map((tag) => ({
+  const hashtagSources = [...new Set(HASHTAGS)].map((tag) => ({
     kind: 'hashtag',
     key: `tag:${tag}`,
     url: `https://www.instagram.com/explore/tags/${tag}/`,
   }));
 
-  const accountSources = INSTAGRAM_ACCOUNTS.map((username) => ({
+  const accountSources = [...new Set(INSTAGRAM_ACCOUNTS)].map((username) => ({
     kind: 'account',
     key: `acct:${username}`,
     url: `https://www.instagram.com/${username}/`,
