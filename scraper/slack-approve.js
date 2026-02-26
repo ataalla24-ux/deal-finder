@@ -358,6 +358,7 @@ async function main() {
 
   const approvedDeals = [];
               const approvedTimestamps = new Set();
+              const usedPendingDealIds = new Set();
 
   for (const message of allMessages) {
                   const messageTs = message.ts;
@@ -378,14 +379,16 @@ async function main() {
                 const messageUrl = extractUrl(text);
                   const messageBrand = extractBrand(text, '').toLowerCase();
 
+                const availableDeals = pendingDeals.filter(d => !usedPendingDealIds.has(d.id));
+
                 // Strategy 1: Match by slackTs (if available)
-                let matchedDeal = pendingDeals.find(d => d.slackTs && d.slackTs === messageTs);
+                let matchedDeal = availableDeals.find(d => d.slackTs && d.slackTs === messageTs);
 
                 // Strategy 2: Match by URL
                 if (!matchedDeal && messageUrl) {
                                   try {
                                                       const parsedUrl = new URL(messageUrl);
-                                                      matchedDeal = pendingDeals.find(d => d.url && d.url.includes(parsedUrl.pathname));
+                                                      matchedDeal = availableDeals.find(d => d.url && d.url.includes(parsedUrl.pathname));
                                   } catch(e) {
                                                       // Invalid URL, skip this strategy
                                   }
@@ -393,7 +396,7 @@ async function main() {
 
                 // Strategy 3: Match by brand in title/description
                 if (!matchedDeal && messageBrand && messageBrand !== 'wien deals') {
-                                  matchedDeal = pendingDeals.find(d => {
+                                  matchedDeal = availableDeals.find(d => {
                                                       const dealBrand = (d.brand || '').toLowerCase();
                                                       return dealBrand.includes(messageBrand) || messageBrand.includes(dealBrand);
                                   });
@@ -404,7 +407,7 @@ async function main() {
                                   const titleMatch = text.match(/\*([^*]+)\*/);
                                   if (titleMatch) {
                                                       const titleKeyword = titleMatch[1].toLowerCase().substring(0, 20);
-                                                      matchedDeal = pendingDeals.find(d => {
+                                                      matchedDeal = availableDeals.find(d => {
                                                                             const dealTitle = (d.title || '').toLowerCase();
                                                                             const dealBrand = (d.brand || '').toLowerCase();
                                                                             return dealTitle.includes(titleKeyword) || dealBrand.includes(titleKeyword);
@@ -430,9 +433,11 @@ async function main() {
                                         type,
                                         distance: location,
                                         logo,
+                                        slackTs: messageTs,
                     };
                                   enriched.qualityScore = computeQualityScore(enriched);
                                   approvedDeals.push(enriched);
+                                  usedPendingDealIds.add(matchedDeal.id);
                 } else {
                                   const url = extractUrl(text);
                                   const brand = extractBrand(text, '');
@@ -477,7 +482,7 @@ async function main() {
 
   const seen = new Set();
               const uniqueDeals = approvedDeals.filter(d => {
-                              const key = d.slackTs || d.url || d.title;
+                              const key = d.id || d.slackTs || d.url || d.title;
                               if (seen.has(key)) return false;
                               seen.add(key);
                               return true;
