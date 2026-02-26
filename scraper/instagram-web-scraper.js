@@ -8,7 +8,7 @@ const ROOT = path.join(__dirname, '..');
 const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-instagram.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
-const CONFIG = {
+const DEFAULT_CONFIG = {
   maxDealsPerRun: 140,
   maxAgeDays: 14,
   perSourceLinksLimit: 280,
@@ -17,6 +17,7 @@ const CONFIG = {
   sourceScrollRounds: 18,
   sourceScrollStepPx: 2600,
 };
+let CONFIG = { ...DEFAULT_CONFIG };
 
 const HASHTAGS = [
   'gratiswien',
@@ -126,6 +127,20 @@ function loadEnvFile() {
     }
     if (!(key in process.env)) process.env[key] = value;
   }
+}
+
+function buildConfig() {
+  const toNum = (v, fallback) => {
+    const n = Number(v);
+    return Number.isFinite(n) && n > 0 ? n : fallback;
+  };
+  return {
+    ...DEFAULT_CONFIG,
+    maxDealsPerRun: toNum(process.env.IG_MAX_DEALS, DEFAULT_CONFIG.maxDealsPerRun),
+    perSourceLinksLimit: toNum(process.env.IG_PER_SOURCE_LINKS, DEFAULT_CONFIG.perSourceLinksLimit),
+    maxPostsToVisit: toNum(process.env.IG_MAX_POSTS_VISIT, DEFAULT_CONFIG.maxPostsToVisit),
+    sourceScrollRounds: toNum(process.env.IG_SCROLL_ROUNDS, DEFAULT_CONFIG.sourceScrollRounds),
+  };
 }
 
 function loadCookieHints() {
@@ -333,6 +348,37 @@ async function collectLinksFromDom(page) {
   }
 }
 
+function extractShortcodesFromText(text) {
+  const urls = new Set();
+  if (!text) return urls;
+  const patterns = [
+    /"shortcode"\s*:\s*"([A-Za-z0-9_-]{5,})"/g,
+    /"code"\s*:\s*"([A-Za-z0-9_-]{5,})"/g,
+    /\/(?:p|reel)\/([A-Za-z0-9_-]{5,})\//g,
+  ];
+  for (const re of patterns) {
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      urls.add(`https://www.instagram.com/p/${m[1]}/`);
+      urls.add(`https://www.instagram.com/reel/${m[1]}/`);
+    }
+  }
+  return urls;
+}
+
+async function collectLinksFromScripts(page) {
+  try {
+    const scriptContents = await page.$$eval('script', (nodes) => nodes.map((n) => n.textContent || '').filter(Boolean));
+    const urls = new Set();
+    for (const content of scriptContents.slice(0, 40)) {
+      for (const url of extractShortcodesFromText(content)) urls.add(url);
+    }
+    return [...urls];
+  } catch {
+    return [];
+  }
+}
+
 async function dismissInstagramOverlays(page) {
   const labels = [
     'Nur erforderliche Cookies erlauben',
@@ -406,6 +452,26 @@ async function discoverLinksViaDuckDuckGo() {
   return [...links];
 }
 
+async function discoverLinksForSourceViaDuckDuckGo(source) {
+  const links = new Set();
+  const q = source.kind === 'account'
+    ? `site:instagram.com (${source.url.replace(/https?:\/\//, '').replace(/\/$/, '')}) (p OR reel)`
+    : `site:instagram.com/explore/tags/${source.key.replace('tag:', '')} (p OR reel)`;
+  try {
+    const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`;
+    const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    if (!response.ok) return [];
+    const html = await response.text();
+    const hrefMatches = html.match(/href="([^"]+)"/g) || [];
+    for (const hrefToken of hrefMatches) {
+      const raw = hrefToken.replace(/^href="/, '').replace(/"$/, '');
+      const normalized = normalizeInstagramPostUrl(raw);
+      if (normalized) links.add(normalized);
+    }
+  } catch {}
+  return [...links];
+}
+
 function buildSources() {
   const hashtagSources = [...new Set(HASHTAGS)].map((tag) => ({
     kind: 'hashtag',
@@ -447,10 +513,21 @@ function deriveBrand(data, postUrl) {
   return fallbackBrandFromUrl(postUrl);
 }
 
+function loadPreviousDeals() {
+  if (!fs.existsSync(OUTPUT_PATH)) return [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(OUTPUT_PATH, 'utf-8'));
+    return Array.isArray(parsed.deals) ? parsed.deals : [];
+  } catch {
+    return [];
+  }
+}
+
 async function scrapeInstagram() {
   console.log('📸 INSTAGRAM SCRAPER - current deals mode');
   console.log('========================================');
   loadEnvFile();
+  CONFIG = buildConfig();
 
   let browser;
   try {
@@ -512,8 +589,9 @@ async function scrapeInstagram() {
           const beforeCount = sourceLinks.size;
 
           const domUrls = await collectLinksFromDom(page);
+          const scriptUrls = await collectLinksFromScripts(page);
           const html = await page.content();
-          for (const u of [...domUrls, ...extractPostUrls(html)]) {
+          for (const u of [...domUrls, ...scriptUrls, ...extractPostUrls(html)]) {
             sourceLinks.add(u);
           }
 
@@ -540,13 +618,19 @@ async function scrapeInstagram() {
             await page.waitForTimeout(1800);
             await dismissInstagramOverlays(page);
             const reelsDom = await collectLinksFromDom(page);
+            const reelsScript = await collectLinksFromScripts(page);
             const reelsHtml = await page.content();
-            postUrls = [...new Set([...postUrls, ...reelsDom, ...extractPostUrls(reelsHtml)])].slice(0, CONFIG.perSourceLinksLimit);
+            postUrls = [...new Set([...postUrls, ...reelsDom, ...reelsScript, ...extractPostUrls(reelsHtml)])].slice(0, CONFIG.perSourceLinksLimit);
           } catch {}
         }
         if (postUrls.length === 0) {
           const mirrorText = await fetchMirrorText(source.url);
-          postUrls = [...new Set([...postUrls, ...extractPostUrls(mirrorText)])].slice(0, CONFIG.perSourceLinksLimit);
+          const mirrorShortcodes = [...extractShortcodesFromText(mirrorText)];
+          postUrls = [...new Set([...postUrls, ...extractPostUrls(mirrorText), ...mirrorShortcodes])].slice(0, CONFIG.perSourceLinksLimit);
+        }
+        if (postUrls.length < 8) {
+          const sourceDiscovered = await discoverLinksForSourceViaDuckDuckGo(source);
+          postUrls = [...new Set([...postUrls, ...sourceDiscovered])].slice(0, CONFIG.perSourceLinksLimit);
         }
         console.log(`   ↳ links found: ${postUrls.length}`);
 
@@ -687,6 +771,15 @@ async function scrapeInstagram() {
       const key = `${deal.url}|${deal.brand}|${deal.title.toLowerCase()}`;
       if (!dedup.has(key) || dedup.get(key).qualityScore < deal.qualityScore) {
         dedup.set(key, deal);
+      }
+    }
+
+    const previousDeals = loadPreviousDeals();
+    for (const oldDeal of previousDeals) {
+      const oldDate = Date.parse(oldDeal?.pubDate || '');
+      if (!Number.isNaN(oldDate) && isFresh(new Date(oldDate).toISOString())) {
+        const key = `${oldDeal.url}|${oldDeal.brand}|${String(oldDeal.title || '').toLowerCase()}`;
+        if (!dedup.has(key)) dedup.set(key, oldDeal);
       }
     }
 
