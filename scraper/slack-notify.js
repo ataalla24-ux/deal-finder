@@ -1,244 +1,342 @@
-// ============================================
-// 📱 SLACK NOTIFY - Sendet ALLE Deals an Slack
-// Liest: deals-pending-*.json (power, firecrawl, twitter, telegram, google, gutcheine)
-// ============================================
 import fs from 'fs';
-import { fileURLToPath } from 'url';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const ROOT = path.join(__dirname, '..');
+const DOCS_DIR = path.join(ROOT, 'docs');
+const SENT_IDS_PATH = path.join(DOCS_DIR, 'sent-deal-ids.json');
+const PENDING_ALL_PATH = path.join(DOCS_DIR, 'deals-pending-all.json');
+const ENV_PATH = path.join(ROOT, '.env');
+
+function loadEnvFile() {
+  if (!fs.existsSync(ENV_PATH)) return;
+  const lines = fs.readFileSync(ENV_PATH, 'utf-8').split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const idx = trimmed.indexOf('=');
+    if (idx <= 0) continue;
+    const key = trimmed.slice(0, idx).trim();
+    let value = trimmed.slice(idx + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (!(key in process.env)) process.env[key] = value;
+  }
+}
+
+loadEnvFile();
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 
-
-// Max-Alter: Deals älter als 2 Wochen werden NICHT an Slack gesendet
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
-const CUTOFF_DATE = new Date(Date.now() - TWO_WEEKS_MS);
-// ============================================
-// Helper: Send Message to Slack
-// ============================================
-async function slackPost(message, threadTs = null) {
-  if (!SLACK_BOT_TOKEN || !SLACK_CHANNEL_ID) {
-    console.log('⚠️ Slack nicht konfiguriert - überspringe');
-    return null;
+const CUTOFF_DATE = Date.now() - TWO_WEEKS_MS;
+
+function ensureObject(value, fallback = {}) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
+}
+
+function ensureArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function cleanText(value) {
+  if (!value) return '';
+  return String(value)
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeUrl(url) {
+  const text = cleanText(url);
+  if (!text) return '';
+  if (!/^https?:\/\//i.test(text)) return '';
+  return text;
+}
+
+function toIsoDate(value) {
+  if (!value) return '';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toISOString();
+}
+
+function inferBrand(deal, sourceKey) {
+  const brand = cleanText(deal.brand);
+  if (brand) return brand;
+  const title = cleanText(deal.title);
+  if (title.includes(' - ')) return title.split(' - ')[0].trim();
+  if (title.includes(':')) return title.split(':')[0].trim();
+  return sourceKey;
+}
+
+function inferTitle(deal, brand) {
+  const title = cleanText(deal.title);
+  if (title) return title;
+  const desc = cleanText(deal.description);
+  if (desc) return desc.slice(0, 80);
+  return `${brand} Deal`;
+}
+
+function inferType(deal) {
+  const t = cleanText(deal.type).toLowerCase();
+  if (['gratis', 'rabatt', 'testabo', 'bogo'].includes(t)) return t;
+  return 'rabatt';
+}
+
+function inferCategory(deal) {
+  const c = cleanText(deal.category).toLowerCase();
+  return c || 'wien';
+}
+
+function inferLogo(deal, type) {
+  const logo = cleanText(deal.logo);
+  if (logo) return logo;
+  if (type === 'gratis') return '🎁';
+  return '🎯';
+}
+
+function inferDistance(deal) {
+  const distance = cleanText(deal.distance || deal.location || deal.ort);
+  return distance || 'Wien';
+}
+
+function inferExpires(deal) {
+  const raw = deal.expires || deal.end_date || deal.validity_date || '';
+  const iso = toIsoDate(raw);
+  return iso || cleanText(raw) || '';
+}
+
+function stableId(seed) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
   }
-  const payload = {
-    channel: SLACK_CHANNEL_ID,
-    text: message,
+  return hash.toString(36);
+}
+
+function normalizeDeal(rawDeal, sourceKey) {
+  const deal = ensureObject(rawDeal);
+  const brand = inferBrand(deal, sourceKey);
+  const title = inferTitle(deal, brand);
+  const url = normalizeUrl(deal.url);
+  const pubDate = toIsoDate(deal.pubDate) || new Date().toISOString();
+  const idSeed = `${sourceKey}|${deal.id || ''}|${url}|${title}|${pubDate}`;
+  const id = cleanText(deal.id) || `${sourceKey}-${stableId(idSeed)}`;
+  const type = inferType(deal);
+
+  return {
+    id,
+    brand,
+    title,
+    description: cleanText(deal.description),
+    url,
+    category: inferCategory(deal),
+    type,
+    logo: inferLogo(deal, type),
+    distance: inferDistance(deal),
+    pubDate,
+    expires: inferExpires(deal),
+    source: cleanText(deal.source) || sourceKey,
+    qualityScore: Number(deal.qualityScore) || 0,
+    hot: Boolean(deal.hot),
+    isNew: true,
+    votes: Number(deal.votes) || 1,
+    priority: Number(deal.priority) || 3,
   };
-  if (threadTs) {
-    payload.thread_ts = threadTs;
-  }
-  const response = await fetch('https://slack.com/api/chat.postMessage', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-  const data = await response.json();
-  if (!data.ok) {
-    console.log(`❌ Slack Error: ${data.error}`);
-    return null;
-  }
-  return data.ts;
 }
 
-// ============================================
-// Helper: Add reaction to message (so bot can see its own ✅)
-// ============================================
-async function slackAddReaction(channelId, messageTs, emoji = 'white_check_mark') {
-  if (!SLACK_BOT_TOKEN) return false;
-  
-  const response = await fetch('https://slack.com/api/reactions.add', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      channel: channelId,
-      timestamp: messageTs,
-      name: emoji,
-    }),
+function getPendingFiles() {
+  const files = fs.readdirSync(DOCS_DIR);
+  return files.filter((file) => {
+    if (!file.startsWith('deals-pending-') || !file.endsWith('.json')) return false;
+    if (file === 'deals-pending-merged.json') return false;
+    if (file === 'deals-pending-all.json') return false;
+    return true;
   });
-  const data = await response.json();
-  if (!data.ok && data.error !== 'already_reacted') {
-    console.log(`   ⚠️ Reaction error: ${data.error}`);
-    return false;
-  }
-  return true;
 }
 
-// ============================================
-// Helper: Load pending deals from file
-// ============================================
-function loadPendingDeals(source) {
-  const filePath = `docs/deals-pending-${source}.json`;
-  try {
-    if (fs.existsSync(filePath)) {
-      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-      return data.deals || data || [];
+function loadPendingDeals() {
+  const files = getPendingFiles();
+  const deals = [];
+  console.log(`📂 Found ${files.length} pending deal files`);
+
+  for (const file of files) {
+    const sourceKey = file.replace(/^deals-pending-/, '').replace(/\.json$/, '');
+    const filePath = path.join(DOCS_DIR, file);
+    try {
+      const parsed = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      const items = ensureArray(parsed.deals || parsed);
+      const normalized = items.map((d) => normalizeDeal(d, sourceKey));
+      console.log(`  - ${file}: ${normalized.length} deals`);
+      deals.push(...normalized);
+    } catch (error) {
+      console.log(`  ⚠️ Error reading ${file}: ${error.message}`);
     }
-  } catch (e) {
-    console.log(`⚠️ ${source} load error: ${e.message}`);
   }
-  return [];
+
+  return deals;
 }
 
-// ============================================
-// Helper: Format deal for Slack
-// ============================================
-function formatDeal(deal, index, source) {
-  const emoji = {
-    power: '⚡', firecrawl: '🔥', firecrawl2: '☕', firecrawl3: '🍔',
-    super: '🚀', scrapy: '🕷️', web: '🌐', merged: '🔄',
-    food3: '🍔', basic1: '🎯', gastro2: '🍕', twitter: '🐦',
-    telegram: '💬', google: '📍', gutscheine: '🏷️',
-    instagram: '📷',
-    'church-gottesdienste': '🕊️', 'church-gemeinde': '⛪', 'church-events': '🎄',
-  }[source] || '🎯';
-
-  const typeEmoji = deal.type === 'gratis' ? '🆓' : '💰';
-  const title = deal.title || deal.brand || 'Deal';
-  const brand = deal.brand || 'Unknown';
-  const desc = deal.description ? `\n_${deal.description.substring(0, 80)}_` : '';
-  const url = deal.url || '';
-  return `${index}. ${typeEmoji} *${title.substring(0, 50)}*${desc}\n${emoji} ${brand} ${url ? `• <${url}|Link>` : ''}`;
-}
-
-// ============================================
-// ANTI-SPAM: Bereits gesendete Deal-IDs laden
-// ============================================
 function loadSentIds() {
-  const sentPath = path.join(__dirname, '..', 'docs', 'sent-deal-ids.json');
-  if (!fs.existsSync(sentPath)) return {};
+  if (!fs.existsSync(SENT_IDS_PATH)) return {};
   try {
-    const data = JSON.parse(fs.readFileSync(sentPath, 'utf-8'));
-    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const fresh = {};
-    for (const [id, ts] of Object.entries(data)) {
-      if (ts > cutoff) fresh[id] = ts;
-    }
-    return fresh;
-  } catch(e) {
+    const parsed = JSON.parse(fs.readFileSync(SENT_IDS_PATH, 'utf-8'));
+    return ensureObject(parsed);
+  } catch {
     return {};
   }
 }
 
 function saveSentIds(sentIds) {
-  const sentPath = path.join(__dirname, '..', 'docs', 'sent-deal-ids.json');
-  fs.writeFileSync(sentPath, JSON.stringify(sentIds, null, 2));
+  fs.writeFileSync(SENT_IDS_PATH, JSON.stringify(sentIds, null, 2));
+}
+
+function isRecent(deal) {
+  const pubMs = new Date(deal.pubDate).getTime();
+  if (!Number.isFinite(pubMs)) return true;
+  return pubMs >= CUTOFF_DATE;
+}
+
+function formatDate(value) {
+  if (!value) return 'k.A.';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString('de-AT');
+}
+
+function buildSlackMessage(deal, index) {
+  const link = deal.url ? `<${deal.url}|Zum Angebot>` : 'Kein Link';
+  const desc = deal.description ? `\n📝 ${deal.description.slice(0, 180)}` : '';
+  return [
+    `*${index}. ${deal.title}*`,
+    `🏷️ Marke/Restaurant: ${deal.brand || 'k.A.'}`,
+    `📍 Ort: ${deal.distance || 'Wien'}`,
+    `📅 Angebotsdatum: ${formatDate(deal.pubDate)}`,
+    `⏳ Gültig bis: ${deal.expires ? formatDate(deal.expires) : 'k.A.'}`,
+    `🧭 Kategorie: ${deal.category} | Typ: ${deal.type}`,
+    `🔗 Direktlink: ${link}`,
+    `🆔 Deal-ID: ${deal.id}`,
+    desc,
+    '_Mit ✅ freigeben_',
+  ].join('\n');
+}
+
+async function sleep(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function postSlackMessage(text, threadTs = null, attempt = 0) {
+  const payload = { channel: SLACK_CHANNEL_ID, text };
+  if (threadTs) payload.thread_ts = threadTs;
+
+  const response = await fetch('https://slack.com/api/chat.postMessage', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${SLACK_BOT_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+  if (data.ok) return data.ts;
+
+  if (data.error === 'ratelimited' && attempt < 5) {
+    const retryMs = (Number(data.retry_after) || 2) * 1000;
+    console.log(`  ⏳ Rate limited, waiting ${retryMs}ms...`);
+    await sleep(retryMs);
+    return postSlackMessage(text, threadTs, attempt + 1);
+  }
+
+  console.log(`❌ Slack post failed: ${data.error || 'unknown_error'}`);
+  return null;
+}
+
+function writePendingAll(deals) {
+  const payload = {
+    deals,
+    totalDeals: deals.length,
+    updatedAt: new Date().toISOString(),
+  };
+  fs.writeFileSync(PENDING_ALL_PATH, JSON.stringify(payload, null, 2));
 }
 
 async function main() {
-  console.log('📱 SLACK NOTIFY - ALL SOURCES');
-  console.log('='.repeat(40));
+  console.log('📱 SLACK NOTIFY - APPROVAL PIPELINE');
+  console.log('========================================');
 
   if (!SLACK_BOT_TOKEN || !SLACK_CHANNEL_ID) {
-    console.log('⚠️ SLACK_BOT_TOKEN oder SLACK_CHANNEL_ID fehlt');
-    process.exit(0);
+    console.log('❌ SLACK_BOT_TOKEN oder SLACK_CHANNEL_ID fehlt (ENV oder .env)');
+    process.exit(1);
   }
 
-  const sources = ['power', 'basic1', 'gastro2', 'food3', 'twitter', 'telegram', 'firecrawl', 'firecrawl2', 'google', 'gutscheine', 'events', 'super', 'scrapy', 'web', 'instagram', 'church-gottesdienste', 'church-gemeinde', 'church-events'];
-  let allDeals = [];
-  for (const source of sources) {
-    const deals = loadPendingDeals(source);
-    console.log(`📂 ${source}: ${deals.length} Deals`);
-    allDeals = allDeals.concat(deals.map(d => ({...d, _source: source})));
-  }
-
-  if (allDeals.length === 0) {
-    console.log('📭 Keine Pending Deals gefunden');
-    process.exit(0);
-  }
+  const pendingDeals = loadPendingDeals();
+  console.log(`📋 Total pending deals loaded: ${pendingDeals.length}`);
 
   const sentIds = loadSentIds();
-  // Filter 1: Bereits an Slack gesendete Deals rausfiltern
-  const unseenDeals = allDeals.filter(d => !sentIds[d.id]);
-  
-  // Filter 2: Deals älter als 2 Wochen rausfiltern
-  const newDeals = unseenDeals.filter(d => {
-    const pubDate = d.pubDate ? new Date(d.pubDate) : null;
-    if (pubDate && pubDate < CUTOFF_DATE) {
-      console.log(`  \u274C Zu alt (\u00FC2W): \"${d.title || d.brand || 'Unbekannt'}\" vom \${pubDate.toLocaleDateString('de-AT')}`);
-      return false;
-    }
-    // Deals ohne pubDate: prüfe validity_date, end_date, expires
-    const dateFields = [d.validity_date, d.end_date, d.expires].filter(Boolean);
-    for (const field of dateFields) {
-      const parsed = new Date(field);
-      if (!isNaN(parsed) && parsed < CUTOFF_DATE) {
-        console.log(`  \u274C Abgelaufen: "\${d.title || 'Unbekannt'}" (\${field})`);
-        return false;
-      }
-    }
-    return true;
-  })
-  console.log(`\uD83D\uDCEC ${allDeals.length} deals geladen, ${unseenDeals.length} ungesehen, ${unseenDeals.length - newDeals.length} zu alt entfernt, ${newDeals.length} frisch f\u00FCr Slack`);
+  const unseenDeals = pendingDeals.filter((deal) => !sentIds[deal.id]);
+  const freshDeals = unseenDeals.filter(isRecent).filter((deal) => deal.url);
 
-  if (newDeals.length === 0) {
-    console.log('📭 Keine neuen Deals für Slack nach Filterung');
-    process.exit(0);
+  console.log(`📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, fresh+valid URL: ${freshDeals.length}`);
+
+  if (freshDeals.length === 0) {
+    console.log('✅ Keine neuen Deals für Slack');
+    return;
   }
 
-  newDeals.sort((a, b) => {
-    if (a.type === 'gratis' && b.type !== 'gratis') return -1;
-    if (a.type !== 'gratis' && b.type === 'gratis') return 1;
-    return (b.qualityScore || 0) - (a.qualityScore || 0);
+  freshDeals.sort((a, b) => {
+    if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
+      return (b.qualityScore || 0) - (a.qualityScore || 0);
+    }
+    return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
   });
 
-  const gratisCount = newDeals.filter(d => d.type === 'gratis').length;
-  const otherCount = newDeals.length - gratisCount;
-  console.log(`📊 Total: ${newDeals.length} (${gratisCount} gratis, ${otherCount} andere)`);
-
-  const mainMsg = await slackPost(
-    `🎯 *FreeFinder Wien* — ${newDeals.length} Deals zum Review\n` +
-    `🆓 ${gratisCount}x Gratis • 💰 ${otherCount}x Other\n` +
-    `_Reagiere mit ✅ um zu genehmigen_`
+  const freeCount = freshDeals.filter((d) => d.type === 'gratis').length;
+  const headerTs = await postSlackMessage(
+    `🎯 *FreeFinder Wien* — ${freshDeals.length} neue Deals\n` +
+    `🆓 ${freeCount} gratis | 💰 ${freshDeals.length - freeCount} rabatt/test\n` +
+    `_Jeden Deal mit ✅ bestätigen, dann erscheint er in der iOS-App._`
   );
 
-  if (!mainMsg) {
-    console.log('❌ Konnte Hauptnachricht nicht senden');
+  if (!headerTs) {
+    console.log('❌ Konnte Header-Nachricht nicht senden');
     process.exit(1);
   }
 
-  console.log('📤 Sende Deals...');
-  for (let i = 0; i < newDeals.length; i++) {
-    const deal = newDeals[i];
-    const msg = formatDeal(deal, i + 1, deal._source);
-    const msgTs = await slackPost(msg, mainMsg);
-    if (msgTs) { 
-      deal.slackTs = msgTs;
-    }
-    if (i < newDeals.length - 1) {
-      await new Promise(r => setTimeout(r, 2000));
-    }
-    if ((i + 1) % 10 === 0) {
-      console.log(` ${i + 1}/${newDeals.length}...`);
-    }
-  }
+  const postedDeals = [];
+  for (let i = 0; i < freshDeals.length; i += 1) {
+    const deal = freshDeals[i];
+    const text = buildSlackMessage(deal, i + 1);
+    const ts = await postSlackMessage(text, headerTs);
+    if (!ts) continue;
 
-  const sentDeals = newDeals.filter(d => d.slackTs);
-  for (const deal of sentDeals) {
+    deal.slackTs = ts;
+    deal.slackThreadTs = headerTs;
+    postedDeals.push(deal);
     sentIds[deal.id] = Date.now();
+
+    if ((i + 1) % 10 === 0) {
+      console.log(`  ✅ posted ${i + 1}/${freshDeals.length}`);
+    }
+    await sleep(600);
   }
 
-      // FIX: deals-pending-all.json schreiben damit approve-deals.js matchen kann
-      const pendingAllPath = path.join(__dirname, '..', 'docs', 'deals-pending-all.json');
-      const dealsWithTs = sentDeals;
-      fs.writeFileSync(pendingAllPath, JSON.stringify({ deals: dealsWithTs, totalDeals: dealsWithTs.length }, null, 2));
-      console.log(`💾 ${dealsWithTs.length} Deals mit slackTs in deals-pending-all.json gespeichert`);
   saveSentIds(sentIds);
-  console.log(`💾 ${Object.keys(sentIds).length} gesendete Deal-IDs gespeichert`);
-  console.log(`✅ ${sentDeals.length} Deals an Slack gesendet!`);
+  writePendingAll(postedDeals);
+
+  console.log(`✅ ${postedDeals.length} Deals an Slack gesendet`);
+  console.log(`💾 saved: ${path.relative(ROOT, PENDING_ALL_PATH)}`);
 }
 
-main()
-  .catch(err => {
-    console.error('Error:', err.message);
-    process.exit(1);
-  });
+main().catch((error) => {
+  console.error('❌ slack-notify failed:', error.message);
+  process.exit(1);
+});
