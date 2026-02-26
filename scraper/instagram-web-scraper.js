@@ -11,9 +11,9 @@ const ENV_PATH = path.join(ROOT, '.env');
 const CONFIG = {
   maxDealsPerRun: 40,
   maxAgeDays: 7,
-  perSourceLinksLimit: 40,
-  perSourcePostsToVisit: 14,
-  postLoadTimeoutMs: 25000,
+  perSourceLinksLimit: 24,
+  maxPostsToVisit: 80,
+  postLoadTimeoutMs: 12000,
 };
 
 const HASHTAGS = [
@@ -102,15 +102,35 @@ function loadCookieHints() {
   const cookieFile = cleanText(process.env.INSTAGRAM_COOKIES_FILE);
   if (cookieFile && fs.existsSync(cookieFile)) {
     const raw = fs.readFileSync(cookieFile, 'utf-8');
-    const parts = raw.split(/[\n;\r]+/);
-    for (const part of parts) {
-      const trimmed = part.trim();
+    const lines = raw.split(/\r?\n/);
+    for (const line of lines) {
+      const trimmed = line.trim();
       if (!trimmed || trimmed.startsWith('#')) continue;
-      const eq = trimmed.indexOf('=');
-      if (eq <= 0) continue;
-      const name = trimmed.slice(0, eq).trim();
-      const value = trimmed.slice(eq + 1).trim();
-      if (name && value) hints.push({ name, value });
+
+      // TSV export format (common from browser extensions):
+      // name, value, domain, path, expires, ...
+      if (line.includes('\t')) {
+        const cols = line.split('\t').map((c) => c.trim());
+        if (cols.length >= 2) {
+          const name = cols[0];
+          const value = cols[1];
+          const domain = cols[2] || '.instagram.com';
+          if (/^[A-Za-z0-9_.-]+$/.test(name) && value) {
+            hints.push({ name, value, domain });
+            continue;
+          }
+        }
+      }
+
+      // key=value; key2=value2 format
+      const parts = trimmed.split(';').map((p) => p.trim()).filter(Boolean);
+      for (const part of parts) {
+        const eq = part.indexOf('=');
+        if (eq <= 0) continue;
+        const name = part.slice(0, eq).trim();
+        const value = part.slice(eq + 1).trim();
+        if (name && value) hints.push({ name, value, domain: '.instagram.com' });
+      }
     }
   }
 
@@ -211,6 +231,33 @@ function extractPostUrls(html) {
   const matches = html.match(re) || [];
   for (const m of matches) urls.add(m);
   return [...urls];
+}
+
+function normalizePostHref(href) {
+  const raw = cleanText(href);
+  if (!raw) return '';
+  if (raw.startsWith('/p/') || raw.startsWith('/reel/')) {
+    const parts = raw.split('/').filter(Boolean);
+    if (parts.length >= 2) return `https://www.instagram.com/${parts[0]}/${parts[1]}/`;
+  }
+  if (/^https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel)\//i.test(raw)) {
+    return normalizeInstagramPostUrl(raw);
+  }
+  return '';
+}
+
+async function collectLinksFromDom(page) {
+  try {
+    const hrefs = await page.$$eval('a[href]', (nodes) => nodes.map((n) => n.getAttribute('href') || '').filter(Boolean));
+    const urls = new Set();
+    for (const href of hrefs) {
+      const normalized = normalizePostHref(href);
+      if (normalized) urls.add(normalized);
+    }
+    return [...urls];
+  } catch {
+    return [];
+  }
 }
 
 function normalizeInstagramPostUrl(rawUrl) {
@@ -337,7 +384,7 @@ async function scrapeInstagram() {
         cookieHints.map((c) => ({
           name: c.name,
           value: c.value,
-          domain: '.instagram.com',
+          domain: c.domain || '.instagram.com',
           path: '/',
           secure: true,
           httpOnly: c.name === 'sessionid',
@@ -362,12 +409,15 @@ async function scrapeInstagram() {
         console.log(`🔎 Source ${source.key}`);
         await page.goto(source.url, { waitUntil: 'domcontentloaded', timeout: 25000 });
         await page.waitForTimeout(2500);
+        await page.mouse.wheel(0, 2200);
+        await page.waitForTimeout(1200);
 
+        const domUrls = await collectLinksFromDom(page);
         const html = await page.content();
-        let postUrls = extractPostUrls(html).slice(0, CONFIG.perSourceLinksLimit);
+        let postUrls = [...new Set([...domUrls, ...extractPostUrls(html)])].slice(0, CONFIG.perSourceLinksLimit);
         if (postUrls.length === 0) {
           const mirrorText = await fetchMirrorText(source.url);
-          postUrls = extractPostUrls(mirrorText).slice(0, CONFIG.perSourceLinksLimit);
+          postUrls = [...new Set([...postUrls, ...extractPostUrls(mirrorText)])].slice(0, CONFIG.perSourceLinksLimit);
         }
         console.log(`   ↳ links found: ${postUrls.length}`);
 
@@ -397,7 +447,7 @@ async function scrapeInstagram() {
       console.log(`🌐 duckduckgo fallback links: ${discovered.length}`);
     }
 
-    const postsToVisit = [...candidatePosts.values()].slice(0, 220);
+    const postsToVisit = [...candidatePosts.values()].slice(0, CONFIG.maxPostsToVisit);
     const deals = [];
 
     for (let i = 0; i < postsToVisit.length; i += 1) {
