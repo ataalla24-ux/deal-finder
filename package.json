@@ -15,12 +15,17 @@
     "slack-notify": "node scraper/slack-notify.js",
     "slack-approve": "node scraper/slack-approve.js",
     "smart-summary": "node scraper/smart-summary.js",
-    "scrape-all": "npm run scrape && npm run firecrawl-consumables && npm run gastro2 && npm run food3 && npm run google-deals && npm run gutscheine && npm run instagram && npm run slack-notify"
+    "scrape-all": "npm run scrape && npm run firecrawl-consumables && npm run gastro2 && npm run food3 && npm run google-deals && npm run gutscheine && npm run instagram && npm run slack-notify",
+    "ios:install": "playwright install webkit",
+    "ios:shot": "node scripts/ios-screenshot.mjs"
   },
   "author": "FreeFinder",
   "license": "MIT",
   "dependencies": {
     "@mendable/firecrawl-js": "^4.12.1",
     "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.58.2"
   }
 }
