@@ -723,7 +723,7 @@
         <button class="toggle-sw" id="alarmGottesdienste" onclick="toggleAlarm(this)"></button>
       </div>
       <div class="alarm-toggle">
-        <span class="alarm-toggle-label">✝️ Christliche Events</span>
+        <span class="alarm-toggle-label">✝️ Community-Events</span>
         <button class="toggle-sw on" id="alarmEvents" onclick="toggleAlarm(this)"></button>
       </div>
     </div>
@@ -823,7 +823,7 @@
                 <button class="filter-btn" data-category="streaming">📺 Streaming</button>
                 <button class="filter-btn" data-category="wien">🏛️ Wien</button>
                 <button class="filter-btn" data-category="gottesdienste">🕊️ Gottesdienste</button>
-                <button class="filter-btn" data-category="events">✝️ Christliche Events</button>
+                <button class="filter-btn" data-category="events">✝️ Community-Events</button>
                 <button class="filter-btn" data-category="gratis">🎁 Gratis</button>
                 <button class="filter-btn" data-category="shopping">🛍️ Shopping</button>
                 <button class="filter-btn" data-category="kultur">🏛️ Kultur</button>
@@ -927,7 +927,9 @@
         const CHRISTIAN_EVENT_KEYWORDS = [
             'kirche', 'gemeinde', 'pfarre', 'pfarr', 'gottesdienst', 'messe', 'anbetung',
             'bibel', 'jesus', 'christ', 'christlich', 'evangelisch', 'katholisch', 'freikirche',
-            'jugendgottesdienst', 'lobpreis', 'andacht', 'segnung', 'christlicher event'
+            'jugendgottesdienst', 'lobpreis', 'andacht', 'segnung', 'christlicher event',
+            'worship', 'worship abend', 'himmelsstürmer', 'himmelsstuermer',
+            'essensverteilung', 'lebensmittelausgabe', 'food sharing', 'charity dinner'
         ];
         const SERVICE_TIME_KEYWORDS = [
             'gottesdienst', 'messe', 'uhr', 'sonntag', 'samstag', 'werktag', 'hl. messe', 'liturgie'
@@ -2221,7 +2223,7 @@
           const newDeals = catDeals.filter(d => !known.has(d.id || d.title));
           if (newDeals.length > 0) {
             // Neue Deals gefunden!
-            const catNames = {kaffee:'\u2615 Kaffee',essen:'\uD83C\uDF54 Essen',supermarkt:'\uD83D\uDED2 Supermarkt',fitness:'\uD83D\uDCAA Fitness',events:'✝️ Christliche Events',gratis:'\uD83C\uDF81 Gratis',gottesdienste:'\uD83D\uDD4A\uFE0F Gottesdienst-Zeiten',kirche:'\u26EA Kirche'};
+            const catNames = {kaffee:'\u2615 Kaffee',essen:'\uD83C\uDF54 Essen',supermarkt:'\uD83D\uDED2 Supermarkt',fitness:'\uD83D\uDCAA Fitness',events:'✝️ Community-Events',gratis:'\uD83C\uDF81 Gratis',gottesdienste:'\uD83D\uDD4A\uFE0F Gottesdienst-Zeiten',kirche:'\u26EA Kirche'};
             const catName = catNames[cat] || cat;
             // Browser Notification
             if ('Notification' in window && Notification.permission === 'granted') {
