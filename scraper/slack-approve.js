@@ -231,7 +231,7 @@ async function getMessages(channelId, limit = 200) {
               return data.messages || [];
 }
 
-async function getReactions(channelId, messageTs) {
+async function getReactions(channelId, messageTs, attempt = 0) {
               try {
                               const response = await fetch(
                                                 `https://slack.com/api/reactions.get?channel=${channelId}&timestamp=${messageTs}`,
@@ -249,6 +249,9 @@ async function getReactions(channelId, messageTs) {
                                                 const waitTime = parseInt(data.retry_after || 2) * 1000;
                                                 console.log(`  ⏳ Rate limited, waiting ${waitTime}ms...`);
                                                 await new Promise(r => setTimeout(r, waitTime));
+                                                if (attempt < 3) {
+                                                              return getReactions(channelId, messageTs, attempt + 1);
+                                                }
                               }
               } catch(e) {
                               console.log(`  ⚠️ Error getting reactions: ${e.message}`);
@@ -417,8 +420,9 @@ async function main() {
                   const messageTs = message.ts;
                   const text = message.text || '';
 
-                // Fetch reactions for this message
-                const reactions = await getReactions(SLACK_CHANNEL_ID, messageTs);
+                // Prefer reactions already included in message payload to avoid
+                // thousands of extra API calls and Slack rate limits.
+                const reactions = Array.isArray(message.reactions) ? message.reactions : [];
 
                 // FIX: Only count ✅ from HUMAN users, not from the bot itself
                 const isHumanApproved = hasHumanCheckmark(reactions, botUserId);
