@@ -161,6 +161,10 @@
         .deal-card.hot { border-color: #f59e0b; }
         .deal-card.expiring-soon { border-color: #ef4444 !important; animation: pulse-red 2s infinite; }
         .deal-card.expiring-soon::before { background: linear-gradient(90deg, #ef4444, #f97316) !important; }
+        .deal-card.expiring-mid { border-color: #f59e0b !important; box-shadow: 0 6px 24px rgba(245, 158, 11, 0.25); }
+        .deal-card.expiring-mid::before { background: linear-gradient(90deg, #f59e0b, #fbbf24) !important; }
+        .deal-card.expiring-ok { border-color: #10b981 !important; box-shadow: 0 6px 24px rgba(16, 185, 129, 0.2); }
+        .deal-card.expiring-ok::before { background: linear-gradient(90deg, #10b981, #34d399) !important; }
         @keyframes pulse-red { 0%,100% { box-shadow: 0 2px 8px rgba(239,68,68,0.2); } 50% { box-shadow: 0 4px 20px rgba(239,68,68,0.45); } }
         .deal-card.expiring-soon { border-color: #ef4444 !important; background: linear-gradient(135deg, #fff 85%, #fff1f1 100%); animation: pulse-red 2s infinite; }
         .deal-card.expiring-soon::before { background: linear-gradient(90deg, #ef4444, #f97316) !important; }
@@ -950,6 +954,32 @@
             return /gewinnspiel|verlosen|verlosung|gewinne|zu gewinnen|giveaway/.test(text);
         }
 
+        function parseExpiryToMs(raw) {
+            if (!raw) return null;
+            const text = String(raw).trim().toLowerCase();
+            if (!text || /^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend|ongoing)/.test(text)) return null;
+
+            const direct = Date.parse(raw);
+            if (!Number.isNaN(direct)) return direct;
+
+            let m = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (m) return Date.parse(`${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}T23:59:59`);
+
+            m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+            if (m) {
+                const y = m[3].length === 2 ? `20${m[3]}` : m[3];
+                return Date.parse(`${y}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}T23:59:59`);
+            }
+
+            m = text.match(/(\d{1,2})\.(\d{1,2})\./);
+            if (m) {
+                const y = new Date().getFullYear();
+                return Date.parse(`${y}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}T23:59:59`);
+            }
+
+            return null;
+        }
+
         function normalizeCategoryForApp(rawCategory, deal) {
             const cat = (rawCategory || '').toLowerCase().trim();
             if (cat === 'gemeinde') return 'kirche';
@@ -1429,12 +1459,13 @@
             const redeemed = proData.isPro && proData.redeemedDeals && proData.redeemedDeals[d.id];
             const savingsVal = savingsMap[d.category] || 5;
             const redeemBtn = proData.isPro ? '<button class="btn redeem-btn ' + (redeemed ? 'redeemed' : '') + '" onclick="redeemDeal(\'' + d.id + '\',\'' + d.category + '\',' + savingsVal + ', event)">' + (redeemed ? '\u2705 Eingelöst' : '\uD83C\uDF81 Einlösen (' + savingsVal.toFixed(2) + '€)') + '</button>' : '';
-            const _pubMs = d.pubDate ? new Date(d.pubDate).getTime() : 0;
-            const _ageH = _pubMs ? (Date.now() - _pubMs) / 3600000 : 999;
-            const _isExp = _ageH > 240 && _ageH < 336;
-            const _hLeft = Math.max(0, Math.floor(336 - _ageH));
-            const _ePct = Math.max(0, Math.min(100, Math.round((336 - _ageH) / 336 * 100)));
-            const _eClr = _hLeft < 24 ? 'red' : _hLeft < 72 ? 'orange' : 'green';
+            const _expiryMs = parseExpiryToMs(d.expires);
+            const _hasExpiry = Number.isFinite(_expiryMs);
+            const _hLeft = _hasExpiry ? Math.max(0, Math.ceil((_expiryMs - Date.now()) / 3600000)) : null;
+            const _ePct = _hasExpiry ? Math.max(2, Math.min(100, Math.round((_hLeft / 336) * 100))) : 100;
+            const _eClr = !_hasExpiry ? 'green' : _hLeft <= 24 ? 'red' : _hLeft <= 72 ? 'orange' : 'green';
+            const _expClass = !_hasExpiry ? '' : _hLeft <= 24 ? ' expiring-soon' : _hLeft <= 72 ? ' expiring-mid' : ' expiring-ok';
+            const _isExp = _hasExpiry && _hLeft > 0 && _hLeft <= 72;
             // --- Professional info extraction ---
             const _loc = d.distance || '';
             const _expires = d.expires || '';
@@ -1448,7 +1479,7 @@
             // Format date/time from expires field
             const _hasDate = _expires && !/^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend)/i.test(_expires);
             const _dateDisplay = _hasDate ? _expires : '';
-            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + (_isExp ? ' expiring-soon' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')"><span class="deal-logo">' + (d.logo || '\uD83C\uDFAF') + '</span><div><div class="deal-brand">' + (_company || _brand) + '</div><div class="deal-title">' + _cleanTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + (_address || _loc) + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_pubMs && _ageH > 48 ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div>' + (_isExp ? '<div class="card-countdown warning"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">Läuft in ' + (_hLeft < 24 ? _hLeft + ' Std.' : Math.floor(_hLeft/24) + ' Tagen') + ' ab</span></div>' : '') : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + '<div class="deal-meta"><span class="badge ' + (d.type === 'gratis' ? 'badge-gratis' : d.type === 'testabo' ? 'badge-new' : 'badge-rabatt') + '">' + (d.type === 'gratis' ? '\uD83C\uDF81 GRATIS' : d.type === 'testabo' ? '\uD83C\uDD93 Testabo' : '\uD83D\uDCB0 Rabatt') + '</span>' + (_isExp && _hLeft > 0 ? '<span class="badge badge-expiry' + (_hLeft < 24 ? ' urgent' : '') + '">\u23F0 Läuft ab in ' + (_hLeft < 24 ? _hLeft + 'h' : Math.floor(_hLeft/24) + 'd') + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isNew ? '<span class="badge new">\u2728 Neu</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row"><button class="action-btn deal-link-btn" onclick="window.open(\'' + d.url + '\', \'_blank\')">' + '<span class="btn-icon">\uD83D\uDD17</span>' + (d.category === 'gottesdienste' ? 'Zeiten ansehen' : d.category === 'events' ? 'Event ansehen' : d.category === 'kirche' ? 'Zur Kirche' : 'Zum Deal') + '</button></div><div class="vote-section"><button class="action-btn vote-btn" onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
+            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + _expClass + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')"><span class="deal-logo">' + (d.logo || '\uD83C\uDFAF') + '</span><div><div class="deal-brand">' + (_company || _brand) + '</div><div class="deal-title">' + _cleanTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + (_address || _loc) + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_hasExpiry ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div><div class="card-countdown ' + (_hLeft <= 24 ? 'warning' : 'ok') + '"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">' + (_hLeft <= 24 ? 'Läuft in ' + Math.max(1, _hLeft) + ' Std. ab' : 'Läuft in ' + Math.max(1, Math.floor(_hLeft / 24)) + ' Tagen ab') + '</span></div>' : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + '<div class="deal-meta"><span class="badge ' + (d.type === 'gratis' ? 'badge-gratis' : d.type === 'testabo' ? 'badge-new' : 'badge-rabatt') + '">' + (d.type === 'gratis' ? '\uD83C\uDF81 GRATIS' : d.type === 'testabo' ? '\uD83C\uDD93 Testabo' : '\uD83D\uDCB0 Rabatt') + '</span>' + (_isExp && _hLeft > 0 ? '<span class="badge badge-expiry' + (_hLeft < 24 ? ' urgent' : '') + '">\u23F0 Läuft ab in ' + (_hLeft < 24 ? _hLeft + 'h' : Math.floor(_hLeft/24) + 'd') + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isNew ? '<span class="badge new">\u2728 Neu</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row"><button class="action-btn deal-link-btn" onclick="window.open(\'' + d.url + '\', \'_blank\')">' + '<span class="btn-icon">\uD83D\uDD17</span>' + (d.category === 'gottesdienste' ? 'Zeiten ansehen' : d.category === 'events' ? 'Event ansehen' : d.category === 'kirche' ? 'Zur Kirche' : 'Zum Deal') + '</button></div><div class="vote-section"><button class="action-btn vote-btn" onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
         }).join('');
 
         checkDeepLink();

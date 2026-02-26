@@ -15,6 +15,9 @@ const docsDir = path.join(__dirname, '..', 'docs');
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 const NOW = new Date();
 const TWO_WEEKS_AGO = new Date(NOW.getTime() - TWO_WEEKS_MS);
+const MAX_URL_EXPIRY_CHECKS = 40;
+const URL_CHECK_TIMEOUT_MS = 7000;
+const URL_CHECK_UA = 'Mozilla/5.0 (compatible; FreeFinderBot/1.0; +https://freefinder.wien)';
 
 // ============================================
 // Deutsche Datumsformate parsen
@@ -95,6 +98,70 @@ function parseGermanDate(str) {
   return null;
 }
 
+function isVagueExpiry(str) {
+  if (!str || typeof str !== 'string') return true;
+  const s = str.trim().toLowerCase();
+  if (!s) return true;
+  return /^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend|täglich|monatlich|solange|unknown|ongoing|k\.a\.?)/i.test(s);
+}
+
+function extractExpiryDateFromHtml(html) {
+  if (!html) return null;
+  const text = html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const phrases = [
+    /(?:gültig\s*bis|einlösbar\s*bis|aktion\s*bis|angebot\s*bis|läuft\s*bis|nur\s*bis|endet\s*am|ends?\s*(?:on)?|until)\s*[:\-]?\s*([^.!,;\n]{4,70})/gi,
+  ];
+
+  for (const re of phrases) {
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const candidate = m[1].trim();
+      const parsed = parseGermanDate(candidate);
+      if (parsed) return parsed;
+    }
+  }
+
+  const dateLike = text.match(/\b\d{1,2}\.\d{1,2}\.\d{2,4}\b|\b\d{4}-\d{1,2}-\d{1,2}\b|\b\d{1,2}\.\s*(?:jänner|januar|februar|märz|april|mai|juni|juli|august|september|oktober|november|dezember)\s*\d{0,4}\b/gi) || [];
+  for (const token of dateLike.slice(0, 20)) {
+    const parsed = parseGermanDate(token);
+    if (parsed) return parsed;
+  }
+
+  return null;
+}
+
+async function fetchExpiryFromUrl(url) {
+  if (!url || typeof url !== 'string' || !/^https?:\/\//i.test(url)) return null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), URL_CHECK_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'user-agent': URL_CHECK_UA,
+        'accept': 'text/html,application/xhtml+xml',
+      },
+      redirect: 'follow',
+      signal: controller.signal,
+    });
+    if (!res.ok) return null;
+    const ctype = (res.headers.get('content-type') || '').toLowerCase();
+    if (!ctype.includes('text/html') && !ctype.includes('application/xhtml+xml')) return null;
+    const html = await res.text();
+    return extractExpiryDateFromHtml(html);
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // ============================================
 // Deal-Alter prüfen
 // ============================================
@@ -152,6 +219,9 @@ async function main() {
   let totalBefore = 0;
   let totalAfter = 0;
   let totalRemoved = 0;
+  let urlChecksUsed = 0;
+  let urlExpiryHits = 0;
+  const urlExpiryCache = new Map();
 
   for (const file of files) {
     const filePath = path.join(docsDir, file);
@@ -165,6 +235,20 @@ async function main() {
       const removedDeals = [];
 
       for (const deal of deals) {
+        if (isVagueExpiry(deal.expires) && deal.url && urlChecksUsed < MAX_URL_EXPIRY_CHECKS) {
+          let parsedDate = urlExpiryCache.get(deal.url);
+          if (parsedDate === undefined) {
+            parsedDate = await fetchExpiryFromUrl(deal.url);
+            urlExpiryCache.set(deal.url, parsedDate || null);
+            urlChecksUsed += 1;
+          }
+          if (parsedDate instanceof Date && !Number.isNaN(parsedDate.getTime())) {
+            deal.expires = parsedDate.toISOString();
+            deal.expiresDetectedFromUrl = true;
+            urlExpiryHits += 1;
+          }
+        }
+
         const check = isExpiredOrOld(deal);
         if (check.expired) {
           removedDeals.push({ title: deal.title || deal.brand || '?', reason: check.reason });
@@ -197,6 +281,7 @@ async function main() {
   }
 
   console.log();
+  console.log(`🔎 URL-Expiry checks: ${urlChecksUsed}/${MAX_URL_EXPIRY_CHECKS}, Treffer: ${urlExpiryHits}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log(`📊 GESAMT: ${totalBefore} → ${totalAfter} Deals (${totalRemoved} entfernt)`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
