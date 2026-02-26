@@ -10,7 +10,7 @@ const ENV_PATH = path.join(ROOT, '.env');
 
 const CONFIG = {
   maxDealsPerRun: 40,
-  maxAgeDays: 7,
+  maxAgeDays: 14,
   perSourceLinksLimit: 60,
   maxPostsToVisit: 140,
   postLoadTimeoutMs: 12000,
@@ -187,7 +187,31 @@ function stableId(seed) {
   return hash.toString(36);
 }
 
-function parseDateFromPage({ ldDate, ogDescription, fallbackNow = Date.now() }) {
+function parseRelativeAgeToDate(text, nowMs = Date.now()) {
+  const raw = cleanText(text).toLowerCase();
+  if (!raw) return null;
+
+  const match = raw.match(/(?:edited\s*•\s*)?(\d+)\s*([dhwmy])/i);
+  if (!match) return null;
+
+  const n = Number(match[1]);
+  const unit = match[2].toLowerCase();
+  if (!Number.isFinite(n) || n < 0) return null;
+
+  const msPerUnit = {
+    d: 24 * 60 * 60 * 1000,
+    h: 60 * 60 * 1000,
+    w: 7 * 24 * 60 * 60 * 1000,
+    m: 30 * 24 * 60 * 60 * 1000,
+    y: 365 * 24 * 60 * 60 * 1000,
+  };
+  const ms = msPerUnit[unit];
+  if (!ms) return null;
+
+  return new Date(nowMs - n * ms).toISOString();
+}
+
+function parseDateFromPage({ ldDate, ogDescription, fullText, fallbackNow = Date.now() }) {
   if (ldDate) {
     const ts = Date.parse(ldDate);
     if (!Number.isNaN(ts)) return new Date(ts).toISOString();
@@ -217,7 +241,13 @@ function parseDateFromPage({ ldDate, ogDescription, fallbackNow = Date.now() }) 
     if (!Number.isNaN(candidate.getTime())) return candidate.toISOString();
   }
 
-  return new Date(fallbackNow).toISOString();
+  const relFromOg = parseRelativeAgeToDate(ogDescription, fallbackNow);
+  if (relFromOg) return relFromOg;
+
+  const relFromText = parseRelativeAgeToDate(fullText, fallbackNow);
+  if (relFromText) return relFromText;
+
+  return null;
 }
 
 function isFresh(isoDate) {
@@ -533,8 +563,9 @@ async function scrapeInstagram() {
         const pubDateIso = parseDateFromPage({
           ldDate: data.ldDate,
           ogDescription: data.ogDescription,
+          fullText: combinedText,
         });
-
+        if (!pubDateIso) continue;
         if (!isFresh(pubDateIso)) continue;
 
         const score = scorePost({ text: combinedText, accountHint: post.accountHint });
@@ -583,6 +614,7 @@ async function scrapeInstagram() {
     }
 
     const uniqueDeals = [...dedup.values()]
+      .filter((d) => d.pubDate && isFresh(d.pubDate))
       .sort((a, b) => {
         if (b.qualityScore !== a.qualityScore) return b.qualityScore - a.qualityScore;
         return Date.parse(b.pubDate) - Date.parse(a.pubDate);
