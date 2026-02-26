@@ -14,6 +14,26 @@ import path from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+function loadEnvFile() {
+              const envPath = path.join(__dirname, '..', '.env');
+              if (!fs.existsSync(envPath)) return;
+              const lines = fs.readFileSync(envPath, 'utf-8').split(/\r?\n/);
+              for (const line of lines) {
+                              const trimmed = line.trim();
+                              if (!trimmed || trimmed.startsWith('#')) continue;
+                              const eq = trimmed.indexOf('=');
+                              if (eq <= 0) continue;
+                              const key = trimmed.slice(0, eq).trim();
+                              let value = trimmed.slice(eq + 1).trim();
+                              if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+                                                value = value.slice(1, -1);
+                              }
+                              if (!(key in process.env)) process.env[key] = value;
+              }
+}
+
+loadEnvFile();
+
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 
@@ -204,7 +224,10 @@ async function getMessages(channelId, limit = 200) {
                           }
                             );
               const data = await response.json();
-              if (!data.ok) return [];
+              if (!data.ok) {
+                              console.log(`❌ Slack conversations.history error: ${data.error || 'unknown'}`);
+                              return [];
+              }
               return data.messages || [];
 }
 
@@ -303,6 +326,11 @@ function updateDealsJson(approvedDeals) {
 // ============================================
 async function main() {
               console.log('🔍 Lade Slack-Nachrichten...');
+
+  if (!SLACK_BOT_TOKEN || !SLACK_CHANNEL_ID) {
+                  console.log('❌ SLACK_BOT_TOKEN oder SLACK_CHANNEL_ID fehlt (ENV oder .env)');
+                  process.exit(1);
+  }
 
   // Get bot's own user ID so we can ignore bot reactions
   const botUserId = await getBotUserId();
