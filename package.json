@@ -5,17 +5,17 @@
   "type": "module",
   "scripts": {
     "scrape": "node scraper/power-scraper.js",
-    "firecrawl": "node scraper/firecrawl-scraper.js",
+    "firecrawl": "node scraper/firecrawl-consumables.js",
     "firecrawl-consumables": "node scraper/firecrawl-consumables.js",
+    "gastro2": "node scraper/firecrawl-gastro2.js",
     "food3": "node scraper/firecrawl-food3.js",
     "google-deals": "node scraper/google-deals-scraper.js",
     "gutscheine": "node scraper/gutscheine-scraper.js",
-    "twitter": "node scraper/twitter-scraper.js",
-    "telegram": "node scraper/telegram-scraper.js",
+    "instagram": "node scraper/instagram-web-scraper.js",
     "slack-notify": "node scraper/slack-notify.js",
     "slack-approve": "node scraper/slack-approve.js",
     "smart-summary": "node scraper/smart-summary.js",
-    "scrape-all": "npm run scrape && npm run firecrawl && npm run food3 && npm run google-deals && npm run gutscheine && npm run twitter && npm run telegram && npm run slack-notify"
+    "scrape-all": "npm run scrape && npm run firecrawl-consumables && npm run gastro2 && npm run food3 && npm run google-deals && npm run gutscheine && npm run instagram && npm run slack-notify"
   },
   "author": "FreeFinder",
   "license": "MIT",
