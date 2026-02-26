@@ -300,7 +300,7 @@ function isFresh(isoDate) {
 
 function extractPostUrls(html) {
   const urls = new Set();
-  const re = /https:\/\/www\.instagram\.com\/(?:p|reel)\/[A-Za-z0-9_-]+\//g;
+  const re = /https:\/\/(?:www\.)?instagram\.com\/(?:p|reel)\/[A-Za-z0-9_-]+\//g;
   const matches = html.match(re) || [];
   for (const m of matches) urls.add(m);
   return [...urls];
@@ -331,6 +331,27 @@ async function collectLinksFromDom(page) {
   } catch {
     return [];
   }
+}
+
+async function dismissInstagramOverlays(page) {
+  const labels = [
+    'Nur erforderliche Cookies erlauben',
+    'Allow essential cookies',
+    'Jetzt nicht',
+    'Not now',
+    'Ablehnen',
+    'Decline optional cookies',
+  ];
+  for (const label of labels) {
+    try {
+      const locator = page.getByRole('button', { name: label }).first();
+      if (await locator.isVisible({ timeout: 300 })) {
+        await locator.click({ timeout: 500 });
+        await page.waitForTimeout(200);
+      }
+    } catch {}
+  }
+  try { await page.keyboard.press('Escape'); } catch {}
 }
 
 function normalizeInstagramPostUrl(rawUrl) {
@@ -482,6 +503,7 @@ async function scrapeInstagram() {
         console.log(`🔎 Source ${source.key}`);
         await page.goto(source.url, { waitUntil: 'domcontentloaded', timeout: 25000 });
         await page.waitForTimeout(2500);
+        await dismissInstagramOverlays(page);
 
         const sourceLinks = new Set();
         let stagnantRounds = 0;
@@ -507,9 +529,21 @@ async function scrapeInstagram() {
 
           await page.mouse.wheel(0, CONFIG.sourceScrollStepPx);
           await page.waitForTimeout(900);
+          await dismissInstagramOverlays(page);
         }
 
         let postUrls = [...sourceLinks].slice(0, CONFIG.perSourceLinksLimit);
+        if (postUrls.length === 0 && source.kind === 'account') {
+          const reelsUrl = source.url.endsWith('/') ? `${source.url}reels/` : `${source.url}/reels/`;
+          try {
+            await page.goto(reelsUrl, { waitUntil: 'domcontentloaded', timeout: 25000 });
+            await page.waitForTimeout(1800);
+            await dismissInstagramOverlays(page);
+            const reelsDom = await collectLinksFromDom(page);
+            const reelsHtml = await page.content();
+            postUrls = [...new Set([...postUrls, ...reelsDom, ...extractPostUrls(reelsHtml)])].slice(0, CONFIG.perSourceLinksLimit);
+          } catch {}
+        }
         if (postUrls.length === 0) {
           const mirrorText = await fetchMirrorText(source.url);
           postUrls = [...new Set([...postUrls, ...extractPostUrls(mirrorText)])].slice(0, CONFIG.perSourceLinksLimit);
@@ -530,17 +564,17 @@ async function scrapeInstagram() {
       }
     }
 
-    if (candidatePosts.size === 0) {
-      const discovered = await discoverLinksViaDuckDuckGo();
-      for (const postUrl of discovered) {
+    const discovered = await discoverLinksViaDuckDuckGo();
+    for (const postUrl of discovered) {
+      if (!candidatePosts.has(postUrl)) {
         candidatePosts.set(postUrl, {
           url: postUrl,
           sourceKey: 'search:duckduckgo',
           accountHint: false,
         });
       }
-      console.log(`🌐 duckduckgo fallback links: ${discovered.length}`);
     }
+    console.log(`🌐 duckduckgo discovered: ${discovered.length}, total candidates: ${candidatePosts.size}`);
 
     const postsToVisit = [...candidatePosts.values()].slice(0, CONFIG.maxPostsToVisit);
     const deals = [];
