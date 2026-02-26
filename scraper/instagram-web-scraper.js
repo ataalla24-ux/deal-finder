@@ -11,9 +11,11 @@ const ENV_PATH = path.join(ROOT, '.env');
 const CONFIG = {
   maxDealsPerRun: 40,
   maxAgeDays: 7,
-  perSourceLinksLimit: 24,
-  maxPostsToVisit: 80,
+  perSourceLinksLimit: 60,
+  maxPostsToVisit: 140,
   postLoadTimeoutMs: 12000,
+  sourceScrollRounds: 6,
+  sourceScrollStepPx: 2600,
 };
 
 const HASHTAGS = [
@@ -409,12 +411,34 @@ async function scrapeInstagram() {
         console.log(`🔎 Source ${source.key}`);
         await page.goto(source.url, { waitUntil: 'domcontentloaded', timeout: 25000 });
         await page.waitForTimeout(2500);
-        await page.mouse.wheel(0, 2200);
-        await page.waitForTimeout(1200);
 
-        const domUrls = await collectLinksFromDom(page);
-        const html = await page.content();
-        let postUrls = [...new Set([...domUrls, ...extractPostUrls(html)])].slice(0, CONFIG.perSourceLinksLimit);
+        const sourceLinks = new Set();
+        let stagnantRounds = 0;
+
+        for (let round = 0; round < CONFIG.sourceScrollRounds; round += 1) {
+          const beforeCount = sourceLinks.size;
+
+          const domUrls = await collectLinksFromDom(page);
+          const html = await page.content();
+          for (const u of [...domUrls, ...extractPostUrls(html)]) {
+            sourceLinks.add(u);
+          }
+
+          if (sourceLinks.size >= CONFIG.perSourceLinksLimit) break;
+
+          if (sourceLinks.size === beforeCount) {
+            stagnantRounds += 1;
+          } else {
+            stagnantRounds = 0;
+          }
+
+          if (stagnantRounds >= 2) break;
+
+          await page.mouse.wheel(0, CONFIG.sourceScrollStepPx);
+          await page.waitForTimeout(900);
+        }
+
+        let postUrls = [...sourceLinks].slice(0, CONFIG.perSourceLinksLimit);
         if (postUrls.length === 0) {
           const mirrorText = await fetchMirrorText(source.url);
           postUrls = [...new Set([...postUrls, ...extractPostUrls(mirrorText)])].slice(0, CONFIG.perSourceLinksLimit);
