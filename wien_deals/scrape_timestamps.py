@@ -6,14 +6,16 @@ Instagram Scraper - Extrahiert alle Posts mit Zeitstempeln
 import asyncio
 from playwright.async_api import async_playwright
 import re
+import os
 
 async def scrape_with_timestamps(hashtag):
     """Scraped alle Posts mit Zeitstempeln"""
     
     print(f"\n📱 Scanne #{hashtag}...")
+    headless = os.getenv("PLAYWRIGHT_HEADLESS", "1").lower() not in ("0", "false", "no")
     
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=headless)
         page = await browser.new_page()
         
         await page.goto(f"https://www.instagram.com/explore/tags/{hashtag}/")

@@ -8,7 +8,6 @@ import json
 import os
 import re
 from datetime import datetime
-from playwright.async_api import async_playwright
 
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'docs')
 
