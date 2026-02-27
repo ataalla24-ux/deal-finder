@@ -80,5 +80,5 @@ jobs:
             exit 0
           fi
           git commit -m "Daily firecrawl sync $(date +%Y-%m-%d)"
-          git pull --rebase origin main
+          git pull --rebase --autostash origin main
           git push origin HEAD:main
