@@ -165,11 +165,20 @@ function normalizeDeal(rawDeal, sourceKey) {
   const deal = ensureObject(rawDeal);
   const brand = inferBrand(deal, sourceKey);
   const title = inferTitle(deal, brand);
-  const url = normalizeUrl(deal.url);
+  const rawUrl = normalizeUrl(deal.url);
+  const rawDistance = cleanText(deal.distance || deal.location || deal.ort);
+  const rawExpires = cleanText(deal.expires || deal.end_date || deal.validity_date || '');
+  const rawSource = cleanText(deal.source);
+  const url = rawUrl;
   const pubDate = toIsoDate(deal.pubDate) || new Date().toISOString();
   const idSeed = `${sourceKey}|${deal.id || ''}|${url}|${title}|${pubDate}`;
   const id = cleanText(deal.id) || `${sourceKey}-${stableId(idSeed)}`;
   const type = inferType(deal);
+  const missingFields = [];
+  if (!rawUrl) missingFields.push('Ziel-URL');
+  if (!rawDistance) missingFields.push('Ort');
+  if (!rawExpires) missingFields.push('Ablauf');
+  if (!rawSource) missingFields.push('Quelle');
 
   return {
     id,
@@ -189,6 +198,7 @@ function normalizeDeal(rawDeal, sourceKey) {
     isNew: true,
     votes: Number(deal.votes) || 1,
     priority: Number(deal.priority) || 3,
+    missingFields,
   };
 }
 
@@ -269,8 +279,11 @@ function formatDate(value) {
 }
 
 function buildSlackMessage(deal, index) {
-  const link = deal.url ? `<${deal.url}|Zum Angebot>` : 'Kein Link';
+  const link = deal.url ? `<${deal.url}|Zum Angebot>` : '⚠️ FEHLT';
   const desc = deal.description ? `\n📝 ${deal.description.slice(0, 180)}` : '';
+  const missingNote = Array.isArray(deal.missingFields) && deal.missingFields.length > 0
+    ? `\n⚠️ FEHLT: ${deal.missingFields.join(', ')}`
+    : '';
   return [
     `*${index}. ${deal.title}*`,
     `🏷️ Marke/Restaurant: ${deal.brand || 'k.A.'}`,
@@ -280,6 +293,7 @@ function buildSlackMessage(deal, index) {
     `🧭 Kategorie: ${deal.category} | Typ: ${deal.type}`,
     `🔗 Direktlink: ${link}`,
     `🆔 Deal-ID: ${deal.id}`,
+    missingNote,
     desc,
     '_Mit ✅ freigeben_',
   ].join('\n');
@@ -358,9 +372,9 @@ async function main() {
 
   const sentIds = loadSentIds();
   const unseenDeals = pendingDeals.filter((deal) => !sentIds[deal.id]);
-  const freshDeals = unseenDeals.filter(isRecent).filter(isNotExpired).filter((deal) => deal.url);
+  const freshDeals = unseenDeals.filter(isRecent).filter(isNotExpired);
 
-  console.log(`📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, fresh+valid URL: ${freshDeals.length}`);
+  console.log(`📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, fresh: ${freshDeals.length}`);
 
   if (freshDeals.length === 0) {
     console.log('✅ Keine neuen Deals für Slack');
