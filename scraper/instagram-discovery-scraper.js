@@ -18,8 +18,10 @@ const DEFAULT_CONFIG = {
   maxPostsToVisit: 850,
   maxRelatedAccounts: 140,
   maxSourcesTotal: 230,
-  sourceScrollRounds: 22,
+  sourceScrollRounds: 45,
   sourceScrollStepPx: 2600,
+  sourceScrollWaitMs: 5000,
+  sourceStagnationRounds: 10,
   perSourceLinksLimit: 340,
   postLoadTimeoutMs: 8000,
   sourceDelayMs: 650,
@@ -233,6 +235,8 @@ function buildConfig() {
     maxRelatedAccounts: toNum(process.env.IG_MAX_RELATED_ACCOUNTS, DEFAULT_CONFIG.maxRelatedAccounts),
     maxSourcesTotal: toNum(process.env.IG_MAX_SOURCES_TOTAL, DEFAULT_CONFIG.maxSourcesTotal),
     sourceScrollRounds: toNum(process.env.IG_SCROLL_ROUNDS, DEFAULT_CONFIG.sourceScrollRounds),
+    sourceScrollWaitMs: toNum(process.env.IG_SCROLL_WAIT_MS, DEFAULT_CONFIG.sourceScrollWaitMs),
+    sourceStagnationRounds: toNum(process.env.IG_STAGNATION_ROUNDS, DEFAULT_CONFIG.sourceStagnationRounds),
     perSourceLinksLimit: toNum(process.env.IG_PER_SOURCE_LINKS, DEFAULT_CONFIG.perSourceLinksLimit),
     minDealScore: toNum(process.env.IG_MIN_SCORE, DEFAULT_CONFIG.minDealScore),
     maxDealsPerInstagramAccount: toNum(process.env.IG_MAX_DEALS_PER_ACCOUNT, DEFAULT_CONFIG.maxDealsPerInstagramAccount),
@@ -852,10 +856,10 @@ async function scrapeInstagramDiscovery() {
 
           if (sourceLinks.size === before) stagnant += 1;
           else stagnant = 0;
-          if (stagnant >= 2) break;
+          if (stagnant >= CONFIG.sourceStagnationRounds) break;
 
           await page.mouse.wheel(0, CONFIG.sourceScrollStepPx);
-          await page.waitForTimeout(850);
+          await page.waitForTimeout(CONFIG.sourceScrollWaitMs);
           await dismissInstagramOverlays(page);
         }
 
