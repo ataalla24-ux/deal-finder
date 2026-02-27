@@ -6,6 +6,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-instagram.json');
+const SOURCE_STATS_PATH = path.join(ROOT, 'docs', 'instagram-source-stats.json');
+const DISCOVERY_REPORT_PATH = path.join(ROOT, 'docs', 'instagram-discovery-report.json');
 const ARTIFACTS_DIR = path.join(ROOT, 'artifacts');
 const CANDIDATE_LOG_PATH = path.join(ARTIFACTS_DIR, 'instagram-discovery-candidates.json');
 const ENV_PATH = path.join(ROOT, '.env');
@@ -86,6 +88,27 @@ const SEED_ACCOUNTS = [
   'wienerlinien',
   'wienmuseum',
   'wienxtra',
+  'wienereats',
+  'wienfoodspots',
+  'viennarestaurants',
+  'viennafoodguide',
+  'wienfoodscene',
+  'wienfoodblogger',
+  'vienna.coffee',
+  'viennablog',
+  'viennaevents',
+  'eventswien',
+  'vienna_city',
+  'wiencity',
+  'wienrestaurantguide',
+  'viennanow',
+  'wienheute',
+  'wiengratisdeals',
+  'wiengastroguide',
+  'wienstreetfood',
+  'wienkebap',
+  'wienpizza',
+  'wienburger',
 ];
 
 const EXTRA_SEARCH_QUERIES = [
@@ -213,6 +236,40 @@ function stableId(seed) {
   let hash = 0;
   for (let i = 0; i < seed.length; i += 1) hash = (hash * 33 + seed.charCodeAt(i)) >>> 0;
   return hash.toString(36);
+}
+
+function loadSourceStats() {
+  if (!fs.existsSync(SOURCE_STATS_PATH)) return {};
+  try {
+    const parsed = JSON.parse(fs.readFileSync(SOURCE_STATS_PATH, 'utf-8'));
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function sourcePerformanceScore(stat) {
+  if (!stat) return 0;
+  const runs = Number(stat.runs || 0);
+  const hits = Number(stat.acceptedDeals || 0);
+  const links = Number(stat.totalLinks || 0);
+  if (runs <= 0) return 0;
+  const hitRate = hits / runs;
+  const linksPerRun = links / runs;
+  return hitRate * 100 + Math.min(linksPerRun / 4, 20);
+}
+
+function shouldSkipWeakSource(source, stat) {
+  if (!stat) return false;
+  if (source.kind === 'account') return false;
+  const runs = Number(stat.runs || 0);
+  const hits = Number(stat.acceptedDeals || 0);
+  const links = Number(stat.totalLinks || 0);
+  if (runs < 7) return false;
+  if (hits === 0) return true;
+  const hitRate = hits / runs;
+  const linksPerRun = links / runs;
+  return hitRate < 0.25 && linksPerRun < 10;
 }
 
 function normalizeInstagramPostUrl(rawUrl) {
@@ -432,7 +489,7 @@ function scoreDeal({ text, sourceHits, sourceKinds, accountHint, relatedHint }) 
   return Math.max(0, Math.min(100, Math.round(score)));
 }
 
-function buildSources() {
+function buildSources(sourceStats) {
   const hashtags = [...new Set(SEED_HASHTAGS)].map((tag) => ({
     kind: 'hashtag',
     key: `tag:${tag}`,
@@ -447,7 +504,15 @@ function buildSources() {
     priority: 3,
   }));
 
-  return [...accounts, ...hashtags];
+  const combined = [...accounts, ...hashtags]
+    .filter((source) => !shouldSkipWeakSource(source, sourceStats[source.key]))
+    .sort((a, b) => {
+      const aScore = sourcePerformanceScore(sourceStats[a.key]) + a.priority * 15;
+      const bScore = sourcePerformanceScore(sourceStats[b.key]) + b.priority * 15;
+      return bScore - aScore;
+    });
+
+  return combined;
 }
 
 function buildCookieHints() {
@@ -609,6 +674,14 @@ function loadPreviousDeals() {
   }
 }
 
+function saveSourceStats(sourceStats, runSummary) {
+  fs.writeFileSync(SOURCE_STATS_PATH, JSON.stringify({
+    updatedAt: new Date().toISOString(),
+    ...runSummary,
+    sources: sourceStats,
+  }, null, 2));
+}
+
 function mergeDeals(newDeals, oldDeals) {
   const map = new Map();
   for (const deal of [...newDeals, ...oldDeals]) {
@@ -634,6 +707,7 @@ async function scrapeInstagramDiscovery() {
 
   loadEnvFile();
   CONFIG = buildConfig();
+  const sourceStats = loadSourceStats();
 
   let browser;
   try {
@@ -674,10 +748,24 @@ async function scrapeInstagramDiscovery() {
       Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
     });
 
-    const sourcesQueue = buildSources();
+    const sourcesQueue = buildSources(sourceStats);
     const processedSourceKeys = new Set();
     const relatedCandidates = new Map();
     const candidatePosts = new Map();
+    const sourceRunStats = new Map();
+
+    function ensureSourceRunStat(key) {
+      if (!sourceRunStats.has(key)) {
+        sourceRunStats.set(key, {
+          runs: 0,
+          links: 0,
+          acceptedDeals: 0,
+          kind: '',
+          lastSeenAt: '',
+        });
+      }
+      return sourceRunStats.get(key);
+    }
 
     function pushCandidate(postUrl, source) {
       const normalized = normalizeInstagramPostUrl(postUrl);
@@ -705,6 +793,10 @@ async function scrapeInstagramDiscovery() {
       const source = sourcesQueue.shift();
       if (!source || processedSourceKeys.has(source.key)) continue;
       processedSourceKeys.add(source.key);
+      const runStat = ensureSourceRunStat(source.key);
+      runStat.runs += 1;
+      runStat.kind = source.kind;
+      runStat.lastSeenAt = new Date().toISOString();
 
       try {
         console.log(`🔎 source ${source.key}`);
@@ -750,6 +842,7 @@ async function scrapeInstagramDiscovery() {
         }
 
         console.log(`   ↳ links: ${links.length}`);
+        runStat.links += links.length;
         for (const u of links) pushCandidate(u, source);
 
         if ((source.kind === 'account' || source.kind === 'related-account') && relatedUsernames.size > 0) {
@@ -935,6 +1028,11 @@ async function scrapeInstagramDiscovery() {
           sourceHits: candidate.sourceHits,
           reviewTier: score >= 84 ? 'high' : score >= 70 ? 'medium' : 'low',
         });
+        for (const ref of candidate.sourceRefs) {
+          const stat = ensureSourceRunStat(ref);
+          stat.acceptedDeals += 1;
+          if (!stat.lastSeenAt) stat.lastSeenAt = new Date().toISOString();
+        }
       } catch {
         // ignore inaccessible post
       }
@@ -960,9 +1058,56 @@ async function scrapeInstagramDiscovery() {
       },
     };
 
+    const persistedStats = { ...sourceStats };
+    for (const [key, runStat] of sourceRunStats.entries()) {
+      const prev = persistedStats[key] || {};
+      persistedStats[key] = {
+        kind: runStat.kind || prev.kind || '',
+        runs: Number(prev.runs || 0) + Number(runStat.runs || 0),
+        totalLinks: Number(prev.totalLinks || 0) + Number(runStat.links || 0),
+        acceptedDeals: Number(prev.acceptedDeals || 0) + Number(runStat.acceptedDeals || 0),
+        lastSeenAt: runStat.lastSeenAt || prev.lastSeenAt || '',
+      };
+    }
+
+    const topSources = Object.entries(persistedStats)
+      .map(([key, stat]) => ({
+        key,
+        kind: stat.kind || '',
+        runs: Number(stat.runs || 0),
+        acceptedDeals: Number(stat.acceptedDeals || 0),
+        totalLinks: Number(stat.totalLinks || 0),
+        performance: Math.round(sourcePerformanceScore(stat) * 100) / 100,
+      }))
+      .sort((a, b) => b.performance - a.performance)
+      .slice(0, 30);
+
+    saveSourceStats(persistedStats, {
+      runMeta: {
+        visitedSources: processedSourceKeys.size,
+        totalCandidates: candidatePosts.size,
+        visitedPosts: postsToVisit.length,
+        scrapedDealsRaw: deals.length,
+        savedDeals: finalDeals.length,
+      },
+      topSources,
+    });
+
+    fs.writeFileSync(DISCOVERY_REPORT_PATH, JSON.stringify({
+      updatedAt: new Date().toISOString(),
+      visitedSources: processedSourceKeys.size,
+      totalCandidates: candidatePosts.size,
+      visitedPosts: postsToVisit.length,
+      rawDeals: deals.length,
+      savedDeals: finalDeals.length,
+      topSources,
+    }, null, 2));
+
     fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
     console.log(`✅ saved ${finalDeals.length} deals → ${OUTPUT_PATH}`);
     console.log(`🧾 candidates snapshot → ${CANDIDATE_LOG_PATH}`);
+    console.log(`📊 source stats → ${SOURCE_STATS_PATH}`);
+    console.log(`📈 discovery report → ${DISCOVERY_REPORT_PATH}`);
 
     await browser.close();
     return payload;
