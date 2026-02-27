@@ -35,7 +35,7 @@ const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 const CUTOFF_DATE = Date.now() - TWO_WEEKS_MS;
 const DAY_MS = 24 * 60 * 60 * 1000;
-const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime']);
+const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp']);
 
 function ensureObject(value, fallback = {}) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;

@@ -18,7 +18,7 @@ const TWO_WEEKS_AGO = new Date(NOW.getTime() - TWO_WEEKS_MS);
 const MAX_URL_EXPIRY_CHECKS = 40;
 const URL_CHECK_TIMEOUT_MS = 7000;
 const URL_CHECK_UA = 'Mozilla/5.0 (compatible; FreeFinderBot/1.0; +https://freefinder.wien)';
-const TRUSTED_IG_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime']);
+const TRUSTED_IG_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp']);
 
 // ============================================
 // Deutsche Datumsformate parsen

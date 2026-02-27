@@ -355,7 +355,7 @@ function parseRelativeAgeToDate(text, nowMs = Date.now()) {
   return new Date(nowMs - n * ms).toISOString();
 }
 
-function parseDateFromPage({ ldDate, timeDateTime, ogDescription, fullText, fallbackNow = Date.now() }) {
+function parseDateFromPage({ ldDate, timeDateTime, igScriptTimestamp, ogDescription, fullText, fallbackNow = Date.now() }) {
   // Only accept trusted publication signals. Do not infer dates from generic caption text
   // because that often represents offer validity, not post publish time.
   if (ldDate) {
@@ -366,6 +366,14 @@ function parseDateFromPage({ ldDate, timeDateTime, ogDescription, fullText, fall
   if (timeDateTime) {
     const ts = Date.parse(timeDateTime);
     if (!Number.isNaN(ts)) return { iso: new Date(ts).toISOString(), source: 'timeDatetime' };
+  }
+
+  if (igScriptTimestamp) {
+    const ts = Number(igScriptTimestamp);
+    if (Number.isFinite(ts) && ts > 0) {
+      const ms = ts > 1e12 ? ts : ts * 1000;
+      return { iso: new Date(ms).toISOString(), source: 'igScriptTimestamp' };
+    }
   }
 
   return null;
@@ -887,7 +895,7 @@ async function scrapeInstagramDiscovery() {
           if (sourcesQueue.find((s) => s.key === key)) continue;
           if (sourcesQueue.length + processedSourceKeys.size >= CONFIG.maxSourcesTotal) break;
 
-          const accountLooksWien = username.includes('wien') || username.includes('vienna') || meta.hits >= 2;
+          const accountLooksWien = username.includes('wien') || username.includes('vienna');
           if (!accountLooksWien) continue;
 
           sourcesQueue.push({
@@ -941,6 +949,7 @@ async function scrapeInstagramDiscovery() {
           const result = {
             ldDate: '',
             timeDateTime: '',
+            igScriptTimestamp: 0,
             ldCaption: '',
             ldAuthor: '',
             ogTitle: '',
@@ -967,6 +976,25 @@ async function scrapeInstagramDiscovery() {
           if (ogDescription?.content) result.ogDescription = ogDescription.content;
           const timeEl = document.querySelector('time[datetime]');
           if (timeEl?.getAttribute('datetime')) result.timeDateTime = timeEl.getAttribute('datetime') || '';
+
+          // Fallback: parse post timestamp from embedded JSON/script payloads.
+          // Instagram frequently exposes `taken_at_timestamp` / `created_at`.
+          const scriptTexts = Array.from(document.querySelectorAll('script'))
+            .map((n) => n.textContent || '')
+            .filter(Boolean)
+            .slice(0, 120);
+          for (const text of scriptTexts) {
+            const taken = text.match(/"taken_at_timestamp"\s*:\s*(\d{9,13})/);
+            if (taken) {
+              result.igScriptTimestamp = Number(taken[1]);
+              break;
+            }
+            const created = text.match(/"created_at"\s*:\s*(\d{9,13})/);
+            if (created) {
+              result.igScriptTimestamp = Number(created[1]);
+              break;
+            }
+          }
 
           return result;
         });
@@ -995,6 +1023,7 @@ async function scrapeInstagramDiscovery() {
         const pubDateMeta = parseDateFromPage({
           ldDate: data.ldDate,
           timeDateTime: data.timeDateTime,
+          igScriptTimestamp: data.igScriptTimestamp,
           ogDescription: data.ogDescription,
           fullText: combinedText,
         });
