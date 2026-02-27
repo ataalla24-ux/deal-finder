@@ -57,10 +57,11 @@ jobs:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
           IG_MAX_AGE_DAYS: 14
           IG_MAX_DEALS: 180
-          IG_MAX_POSTS_VISIT: 850
-          IG_MAX_RELATED_ACCOUNTS: 140
-          IG_SCROLL_ROUNDS: 22
-          IG_PER_SOURCE_LINKS: 340
+          IG_MAX_POSTS_VISIT: 1400
+          IG_MAX_RELATED_ACCOUNTS: 180
+          IG_MAX_SOURCES_TOTAL: 300
+          IG_SCROLL_ROUNDS: 30
+          IG_PER_SOURCE_LINKS: 500
           IG_MIN_SCORE: 60
           IG_MAX_DEALS_PER_ACCOUNT: 4
         run: node scraper/instagram-discovery-scraper.js

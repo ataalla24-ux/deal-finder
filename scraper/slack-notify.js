@@ -154,6 +154,21 @@ function parseLooseExpiry(text) {
   return null;
 }
 
+function extractRelativeAgeDays(text) {
+  const t = cleanText(text).toLowerCase();
+  if (!t) return null;
+  const m = t.match(/(\d+)\s*(weeks?|wochen|days?|tage|months?|monate|years?|jahre?n?|y|w|d|m)\b/i);
+  if (!m) return null;
+  const n = Number(m[1]);
+  if (!Number.isFinite(n) || n < 0) return null;
+  const unit = m[2].toLowerCase();
+  if (unit.startsWith('w') || unit.includes('woch')) return n * 7;
+  if (unit.startsWith('d') || unit.includes('tag')) return n;
+  if (unit.startsWith('m') || unit.includes('monat')) return n * 30;
+  if (unit.startsWith('y') || unit.includes('jahr') || unit.includes('year')) return n * 365;
+  return null;
+}
+
 function stableId(seed) {
   let hash = 0;
   for (let i = 0; i < seed.length; i += 1) {
@@ -280,6 +295,13 @@ function isNotExpired(deal) {
   return expiryMs + DAY_MS >= Date.now();
 }
 
+function hasOldAgeSignal(deal) {
+  const haystack = `${deal.title || ''} ${deal.description || ''} ${deal.expires || ''}`;
+  const ageDays = extractRelativeAgeDays(haystack);
+  if (!Number.isFinite(ageDays)) return false;
+  return ageDays > 14;
+}
+
 function formatDate(value) {
   if (!value) return 'k.A.';
   const d = new Date(value);
@@ -384,6 +406,7 @@ async function main() {
   const freshDeals = unseenDeals
     .filter(isRecent)
     .filter(hasTrustedInstagramDate)
+    .filter((d) => !hasOldAgeSignal(d))
     .filter(isNotExpired);
 
   console.log(`📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, fresh: ${freshDeals.length}`);
