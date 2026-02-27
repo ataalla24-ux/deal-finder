@@ -224,9 +224,10 @@ function toNum(v, fallback) {
 }
 
 function buildConfig() {
+  const requestedMaxAgeDays = toNum(process.env.IG_MAX_AGE_DAYS, DEFAULT_CONFIG.maxAgeDays);
   return {
     ...DEFAULT_CONFIG,
-    maxAgeDays: toNum(process.env.IG_MAX_AGE_DAYS, DEFAULT_CONFIG.maxAgeDays),
+    maxAgeDays: Math.min(14, requestedMaxAgeDays),
     maxDealsPerRun: toNum(process.env.IG_MAX_DEALS, DEFAULT_CONFIG.maxDealsPerRun),
     maxPostsToVisit: toNum(process.env.IG_MAX_POSTS_VISIT, DEFAULT_CONFIG.maxPostsToVisit),
     maxRelatedAccounts: toNum(process.env.IG_MAX_RELATED_ACCOUNTS, DEFAULT_CONFIG.maxRelatedAccounts),
