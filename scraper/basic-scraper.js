@@ -58,6 +58,7 @@ const SOURCES = [
 ];
 
 const DEAL_REGEX = /gratis|free|kostenlos|rabatt|aktion|angebot|sale|deal|gutschein|eintritt|ermäßigung|sparen|[1-9]\d?%|[1-9]\s?€/i;
+const EXPIRES_HINT_REGEX = /(gültig\s*bis|aktion\s*bis|angebot\s*bis|nur\s*bis|bis)\s*:?/i;
 
 function stableHash(str) {
   let hash = 5381;
@@ -70,6 +71,31 @@ function stableHash(str) {
 
 function dealId(source, content) {
   return `basic-${stableHash(`${source}|${content}`)}`;
+}
+
+function parseDateFromText(text) {
+  const value = String(text || '').toLowerCase();
+  let m = value.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 23, 59, 59);
+
+  m = value.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (m) {
+    const year = m[3].length === 2 ? Number(`20${m[3]}`) : Number(m[3]);
+    return new Date(year, Number(m[2]) - 1, Number(m[1]), 23, 59, 59);
+  }
+
+  m = value.match(/(\d{1,2})\.(\d{1,2})\./);
+  if (m) {
+    return new Date(new Date().getFullYear(), Number(m[2]) - 1, Number(m[1]), 23, 59, 59);
+  }
+
+  return null;
+}
+
+function findExpiryForContent(content) {
+  const c = String(content || '');
+  if (!EXPIRES_HINT_REGEX.test(c)) return null;
+  return parseDateFromText(c);
 }
 
 // ============================================
@@ -128,6 +154,9 @@ function extractDeals(html, source) {
         
         const isGratis = content.match(/gratis|free|kostenlos|0€/i);
         
+        const expiresDate = findExpiryForContent(content);
+        if (expiresDate && expiresDate.getTime() < Date.now()) continue;
+
         deals.push({
           id: dealId(source.name, content),
           brand: source.brand,
@@ -138,7 +167,7 @@ function extractDeals(html, source) {
           category: source.category,
           source: source.name,
           url: source.url,
-          expires: 'Siehe Webseite',
+          expires: expiresDate ? expiresDate.toISOString() : 'Siehe Webseite',
           distance: 'Wien',
           hot: content.match(/gratis|free/i) ? true : false,
           isNew: true,
