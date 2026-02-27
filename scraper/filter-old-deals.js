@@ -18,6 +18,7 @@ const TWO_WEEKS_AGO = new Date(NOW.getTime() - TWO_WEEKS_MS);
 const MAX_URL_EXPIRY_CHECKS = 40;
 const URL_CHECK_TIMEOUT_MS = 7000;
 const URL_CHECK_UA = 'Mozilla/5.0 (compatible; FreeFinderBot/1.0; +https://freefinder.wien)';
+const TRUSTED_IG_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime']);
 
 // ============================================
 // Deutsche Datumsformate parsen
@@ -169,8 +170,8 @@ async function fetchExpiryFromUrl(url) {
 function isExpiredOrOld(deal) {
   const sourceText = String(deal.source || '').toLowerCase();
   const isInstagramDeal = sourceText.includes('instagram');
-  if (isInstagramDeal && !deal.pubDateSource) {
-    return { expired: true, reason: 'Instagram-Deal ohne verifizierte pubDateSource' };
+  if (isInstagramDeal && !TRUSTED_IG_PUBDATE_SOURCES.has(String(deal.pubDateSource || ''))) {
+    return { expired: true, reason: 'Instagram-Deal ohne vertrauenswürdige pubDateSource' };
   }
 
   const dateFields = [

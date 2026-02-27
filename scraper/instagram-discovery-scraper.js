@@ -367,12 +367,6 @@ function parseDateFromPage({ ldDate, timeDateTime, ogDescription, fullText, fall
     if (!Number.isNaN(ts)) return { iso: new Date(ts).toISOString(), source: 'timeDatetime' };
   }
 
-  const relFromOg = parseRelativeAgeToDate(ogDescription, fallbackNow);
-  if (relFromOg) return { iso: relFromOg, source: 'relativeAgeOg' };
-
-  const relFromText = parseRelativeAgeToDate(fullText, fallbackNow);
-  if (relFromText) return { iso: relFromText, source: 'relativeAgeText' };
-
   return null;
 }
 
