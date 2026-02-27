@@ -35,6 +35,7 @@ const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 const CUTOFF_DATE = Date.now() - TWO_WEEKS_MS;
 const DAY_MS = 24 * 60 * 60 * 1000;
+const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'relativeAgeOg', 'relativeAgeText']);
 
 function ensureObject(value, fallback = {}) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
@@ -170,8 +171,9 @@ function normalizeDeal(rawDeal, sourceKey) {
   const rawExpires = cleanText(deal.expires || deal.end_date || deal.validity_date || '');
   const rawSource = cleanText(deal.source);
   const url = rawUrl;
-  const pubDate = toIsoDate(deal.pubDate) || new Date().toISOString();
-  const idSeed = `${sourceKey}|${deal.id || ''}|${url}|${title}|${pubDate}`;
+  const pubDate = toIsoDate(deal.pubDate);
+  const pubDateSource = cleanText(deal.pubDateSource);
+  const idSeed = `${sourceKey}|${deal.id || ''}|${url}|${title}|${pubDate || ''}`;
   const id = cleanText(deal.id) || `${sourceKey}-${stableId(idSeed)}`;
   const type = inferType(deal);
   const missingFields = [];
@@ -191,6 +193,7 @@ function normalizeDeal(rawDeal, sourceKey) {
     logo: inferLogo(deal, type),
     distance: inferDistance(deal),
     pubDate,
+    pubDateSource,
     expires: inferExpires(deal),
     source: cleanText(deal.source) || sourceKey,
     qualityScore: Number(deal.qualityScore) || 0,
@@ -261,8 +264,14 @@ function loadPendingQueue() {
 
 function isRecent(deal) {
   const pubMs = new Date(deal.pubDate).getTime();
-  if (!Number.isFinite(pubMs)) return true;
+  if (!Number.isFinite(pubMs)) return false;
   return pubMs >= CUTOFF_DATE;
+}
+
+function hasTrustedInstagramDate(deal) {
+  const source = cleanText(deal.source).toLowerCase();
+  if (!source.includes('instagram')) return true;
+  return TRUSTED_PUBDATE_SOURCES.has(cleanText(deal.pubDateSource));
 }
 
 function isNotExpired(deal) {
@@ -372,7 +381,10 @@ async function main() {
 
   const sentIds = loadSentIds();
   const unseenDeals = pendingDeals.filter((deal) => !sentIds[deal.id]);
-  const freshDeals = unseenDeals.filter(isRecent).filter(isNotExpired);
+  const freshDeals = unseenDeals
+    .filter(isRecent)
+    .filter(hasTrustedInstagramDate)
+    .filter(isNotExpired);
 
   console.log(`📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, fresh: ${freshDeals.length}`);
 
