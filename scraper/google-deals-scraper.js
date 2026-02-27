@@ -11,6 +11,10 @@ import fs from 'fs';
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY || '';
 const OUTPUT_PATH = 'docs/deals-pending-google.json';
 const MAX_DEAL_AGE_DAYS = 14;
+const MAX_API_CALLS = 30;
+const MAX_RESULTS_PER_SEARCH = 7;
+const MAX_DEALS_OUTPUT = 16;
+const MIN_QUALITY_SCORE = 46;
 
 if (!GOOGLE_PLACES_API_KEY) {
   console.log('⚠️  GOOGLE_PLACES_API_KEY nicht gesetzt');
@@ -35,6 +39,14 @@ const DEAL_SEARCHES = [
   { query: 'eröffnungsangebot gratis wien', category: 'essen', logo: '🆕' },
   { query: 'gratis probetraining wien', category: 'fitness', logo: '💪' },
   { query: '1+1 gratis wien essen', category: 'essen', logo: '🎁' },
+  { query: 'gratis brunch wien aktion', category: 'essen', logo: '🥐' },
+  { query: 'neueröffnung gratis wien restaurant', category: 'essen', logo: '🆕' },
+  { query: 'happy hour 1+1 wien', category: 'essen', logo: '🍹' },
+  { query: 'gratis dessert wien', category: 'essen', logo: '🍰' },
+  { query: 'gratis pizza slice wien', category: 'essen', logo: '🍕' },
+  { query: 'gratis tasting wien cafe', category: 'kaffee', logo: '☕' },
+  { query: 'opening offer wien free', category: 'essen', logo: '🆕' },
+  { query: 'free coffee vienna opening', category: 'kaffee', logo: '☕' },
 ];
 
 // ============================================
@@ -77,6 +89,28 @@ const FALSE_POSITIVE_PATTERNS = [
   /gratis versand/i,
   /gratis lieferung/i,
   /zustellung .* gratis/i,
+  /kostenlose rückgabe/i,
+  /free cancellation/i,
+  /job/i,
+  /stellenanzeige/i,
+  /gebraucht/i,
+];
+
+const EXPIRED_PATTERNS = [
+  /abgelaufen/i,
+  /vorbei/i,
+  /ended/i,
+  /ausverkauft/i,
+  /nicht mehr gültig/i,
+];
+
+const VIENNA_HINTS = [
+  /\bwien\b/i,
+  /\bvienna\b/i,
+  /\b1\d{3}\s*wien\b/i,
+  /\b10[1-9]0\b/i,
+  /\b11[0-9]0\b/i,
+  /\b12[0-3]0\b/i,
 ];
 
 // Blacklist Orte
@@ -153,6 +187,60 @@ function isReviewRecentUnix(tsSec) {
   return ageMs >= 0 && ageMs <= MAX_DEAL_AGE_DAYS * 24 * 60 * 60 * 1000;
 }
 
+function normalizeText(value) {
+  return (value || '')
+    .toString()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function containsVienna(value) {
+  const text = normalizeText(value);
+  if (!text) return false;
+  return VIENNA_HINTS.some((p) => p.test(text));
+}
+
+function extractPriceFromText(value) {
+  const text = normalizeText(value).toLowerCase();
+  if (!text) return null;
+
+  const direct = text.match(/(?:um|für|nur|ab)?\s*€\s*(\d+[.,]?\d*)|(\d+[.,]?\d*)\s*€|(\d+[.,]?\d*)\s*euro/);
+  const candidate = direct ? (direct[1] || direct[2] || direct[3]) : null;
+  if (!candidate) return null;
+  const num = Number(candidate.replace(',', '.'));
+  if (!Number.isFinite(num)) return null;
+  return num;
+}
+
+function extractExpiryText(value) {
+  const text = normalizeText(value);
+  if (!text) return '';
+  const m = text.match(/(bis|gültig bis|nur bis|until)\s+([^.,;]{4,40})/i);
+  if (!m) return '';
+  return `${m[1]} ${m[2]}`.trim();
+}
+
+function isClearlyExpired(value) {
+  const text = normalizeText(value).toLowerCase();
+  if (!text) return false;
+  return EXPIRED_PATTERNS.some((p) => p.test(text));
+}
+
+function buildQualityScore({ isGratis, isCheap, hasStrongPattern, hasPrice, hasWebsite, hasReview, recentReview, userRatingsTotal, inVienna }) {
+  let score = 0;
+  if (isGratis) score += 40;
+  else if (isCheap) score += 24;
+  if (hasStrongPattern) score += 20;
+  if (hasPrice) score += 10;
+  if (hasWebsite) score += 8;
+  if (hasReview && recentReview) score += 16;
+  if (inVienna) score += 10;
+
+  const votesBoost = Math.min(Number(userRatingsTotal || 0), 150) / 10;
+  score += votesBoost;
+  return Math.round(score);
+}
+
 // ============================================
 // Google Places Text Search
 // ============================================
@@ -185,38 +273,33 @@ async function scrapeForRealDeals(websiteUrl) {
       .replace(/<[^>]+>/g, ' ')
       .replace(/&nbsp;/gi, ' ')
       .replace(/\s+/g, ' ')
-      .toLowerCase();
-
-    // Check gegen false positives
-    for (const fp of FALSE_POSITIVE_PATTERNS) {
-      // Wir zählen false positives, aber brechen nicht ab
-    }
+      .trim();
+    const textLc = text.toLowerCase();
 
     // Suche nach starken Deal-Patterns
     for (const pattern of STRONG_DEAL_PATTERNS) {
-      const match = text.match(pattern);
+      const match = textLc.match(pattern);
       if (match) {
         // Prüfe ob es ein false positive ist
-        const context = text.substring(Math.max(0, match.index - 50), match.index + match[0].length + 50);
+        const context = textLc.substring(Math.max(0, match.index - 80), match.index + match[0].length + 120);
         const isFalsePositive = FALSE_POSITIVE_PATTERNS.some(fp => fp.test(context));
-        if (!isFalsePositive) {
+        if (!isFalsePositive && !isClearlyExpired(context)) {
           // Extrahiere den Satz
-          const start = text.lastIndexOf('.', match.index) + 1;
-          const end = text.indexOf('.', match.index + match[0].length);
-          const sentence = text.substring(start, end > 0 ? end : start + 120).trim();
-          
-          // Preis extrahieren
-          const priceMatch = context.match(/(\d+[.,]?\d*)\s*€|€\s*(\d+[.,]?\d*)/);
-          const price = priceMatch ? parseFloat((priceMatch[1] || priceMatch[2]).replace(',', '.')) : null;
-          
+          const start = textLc.lastIndexOf('.', match.index) + 1;
+          const end = textLc.indexOf('.', match.index + match[0].length);
+          const sentence = text.substring(start, end > 0 ? end : start + 180).trim();
+          const price = extractPriceFromText(context) ?? extractPriceFromText(sentence);
           const isGratis = /gratis|kostenlos|free|geschenkt|umsonst/.test(match[0]);
-          
+          const expires = extractExpiryText(sentence) || extractExpiryText(context);
+
           return {
             found: true,
-            dealText: sentence.substring(0, 120),
-            price: price,
-            isGratis: isGratis,
-            isCheap: price !== null && price <= 3
+            dealText: sentence.substring(0, 160),
+            price,
+            isGratis,
+            isCheap: price !== null && price <= 3,
+            expires,
+            evidence: 'website',
           };
         }
       }
@@ -234,11 +317,14 @@ async function scrapeForRealDeals(websiteUrl) {
 
 function checkReviewsForDeals(reviews) {
   if (!reviews || !Array.isArray(reviews)) return { found: false };
+  let best = null;
 
   for (const review of reviews) {
     if (!isReviewRecentUnix(review.time)) continue;
-    
+
     const text = (review.text || '').toLowerCase();
+    if (!text || text.length < 20) continue;
+    if (isClearlyExpired(text)) continue;
 
     for (const pattern of STRONG_DEAL_PATTERNS) {
       const match = text.match(pattern);
@@ -250,19 +336,36 @@ function checkReviewsForDeals(reviews) {
           const end = text.indexOf('.', match.index + match[0].length);
           const sentence = text.substring(start, end > 0 ? end : start + 120).trim();
           const isGratis = /gratis|kostenlos|free|geschenkt|umsonst/.test(match[0]);
-          return {
+          const price = extractPriceFromText(context) ?? extractPriceFromText(sentence);
+          const expires = extractExpiryText(sentence) || extractExpiryText(context);
+          const candidate = {
             found: true,
             dealText: sentence.substring(0, 120),
             isGratis,
+            isCheap: price !== null && price <= 3,
+            price,
+            expires,
             reviewTime: review.time,
             pubDate: new Date(review.time * 1000).toISOString(),
+            evidence: 'review',
           };
+          if (!best) {
+            best = candidate;
+            continue;
+          }
+          if (candidate.isGratis && !best.isGratis) {
+            best = candidate;
+            continue;
+          }
+          if ((candidate.isCheap && !best.isCheap) || (candidate.reviewTime > best.reviewTime)) {
+            best = candidate;
+          }
         }
       }
     }
   }
 
-  return { found: false };
+  return best || { found: false };
 }
 
 // ============================================
@@ -302,15 +405,15 @@ async function main() {
   console.log('🎯 NUR echte Gratis-Deals & extrem günstige Angebote!\n');
 
   const allDeals = [];
-  const seenPlaces = new Set();
+  const seenPlaceIds = new Set();
+  const seenDealSeeds = new Set();
   let apiCalls = 0;
-  const MAX_API_CALLS = 25;
 
   // Rotiere Suchen nach Wochentag
   const dayOfWeek = new Date().getDay();
   const offset = (dayOfWeek * 4) % DEAL_SEARCHES.length;
   const activeSearches = [];
-  for (let i = 0; i < 8 && i < DEAL_SEARCHES.length; i++) {
+  for (let i = 0; i < 10 && i < DEAL_SEARCHES.length; i++) {
     activeSearches.push(DEAL_SEARCHES[(offset + i) % DEAL_SEARCHES.length]);
   }
 
@@ -334,9 +437,9 @@ async function main() {
 
       console.log(`   → ${places.length} Orte, prüfe auf echte Deals...`);
 
-      for (const place of places.slice(0, 5)) {
-        if (seenPlaces.has(place.place_id)) continue;
-        
+      for (const place of places.slice(0, MAX_RESULTS_PER_SEARCH)) {
+        if (seenPlaceIds.has(place.place_id)) continue;
+
         const name = (place.name || '').toLowerCase();
         const addr = (place.vicinity || place.formatted_address || '').toLowerCase();
         
@@ -344,18 +447,22 @@ async function main() {
         if (BLACKLIST.some(b => (name + ' ' + addr).includes(b))) continue;
         const types = place.types || [];
         if (['lodging', 'real_estate_agency'].some(t => types.includes(t))) continue;
+        const inVienna = containsVienna(place.vicinity || place.formatted_address || '');
+        if (!inVienna) continue;
 
-        seenPlaces.add(place.place_id);
+        seenPlaceIds.add(place.place_id);
 
         // Details holen
         let websiteDeal = { found: false };
         let reviewDeal = { found: false };
+        let websiteUrl = '';
 
         if (apiCalls < MAX_API_CALLS) {
           apiCalls++;
           const details = await getPlaceDetails(place.place_id);
 
           if (details?.website) {
+            websiteUrl = details.website;
             websiteDeal = await scrapeForRealDeals(details.website);
           }
           if (details?.reviews) {
@@ -363,39 +470,59 @@ async function main() {
           }
         }
 
-        // ✅ STRENGE VALIDIERUNG:
-        // Für Google nur frische, review-basierte Deals zulassen (<=14 Tage).
+        // Streng: nur Deals mit frischer Review-Evidenz.
         if (!reviewDeal.found) continue;
+        if (isClearlyExpired(reviewDeal.dealText)) continue;
 
-        const dealSource = reviewDeal;
-        const isGratis = dealSource.isGratis || false;
-        const isCheap = websiteDeal.found && websiteDeal.isCheap;
+        const dealSource = reviewDeal.found ? reviewDeal : websiteDeal;
+        const isGratis = Boolean(reviewDeal.isGratis || websiteDeal.isGratis);
+        const cheapPrice = reviewDeal.price ?? websiteDeal.price ?? null;
+        const isCheap = Boolean((reviewDeal.isCheap || websiteDeal.isCheap) && cheapPrice !== null && cheapPrice <= 3);
+        const hasStrongPattern = Boolean(reviewDeal.found || websiteDeal.found);
+        const qualityScore = buildQualityScore({
+          isGratis,
+          isCheap,
+          hasStrongPattern,
+          hasPrice: cheapPrice !== null,
+          hasWebsite: Boolean(websiteUrl),
+          hasReview: Boolean(reviewDeal.found),
+          recentReview: Boolean(reviewDeal.reviewTime),
+          userRatingsTotal: place.user_ratings_total,
+          inVienna,
+        });
+        if (qualityScore < MIN_QUALITY_SCORE) continue;
+
         const address = place.vicinity || place.formatted_address || 'Wien';
         const district = extractDistrict(address);
         const logo = getLogo(place.name, place.types, search.logo);
+        const targetUrl = websiteUrl || `https://www.google.com/maps/place/?q=place_id:${place.place_id}`;
 
         let title = '';
         if (isGratis) {
           title = `GRATIS: ${dealSource.dealText || place.name}`;
-        } else if (isCheap && websiteDeal.price) {
-          title = `Ab €${websiteDeal.price}: ${dealSource.dealText || place.name}`;
+        } else if (isCheap && cheapPrice !== null) {
+          title = `Ab €${cheapPrice}: ${dealSource.dealText || place.name}`;
         } else {
           title = `DEAL: ${dealSource.dealText || place.name}`;
         }
         title = title.substring(0, 70);
+        const dedupeSeed = `${place.name}|${title}|${address}`;
+        const dedupeKey = stableHash(dedupeSeed);
+        if (seenDealSeeds.has(dedupeKey)) continue;
+        seenDealSeeds.add(dedupeKey);
 
         const deal = {
-          id: dealId('gd', place.name || '', title, `google:${place.place_id}`),
+          id: dealId('gd', place.name || '', title, `google:${place.place_id}:${dedupeKey}`),
           brand: place.name,
           logo: logo,
           title: title,
-          description: `${place.name} (${district}): ${(dealSource.dealText || '').substring(0, 100)}`,
+          description: `${place.name} (${district}): ${(dealSource.dealText || '').substring(0, 120)}`,
           type: isGratis ? 'gratis' : 'rabatt',
           badge: isGratis ? 'gratis' : 'limited',
           category: search.category,
           source: 'Google Deals',
-          url: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`,
-          expires: 'Siehe Website',
+          url: targetUrl,
+          expires: reviewDeal.expires || websiteDeal.expires || 'Siehe Website',
           distance: district,
           hot: isGratis,
           isNew: true,
@@ -403,10 +530,17 @@ async function main() {
           priority: isGratis ? 2 : 3,
           votes: Math.min(Math.round((place.user_ratings_total || 0) / 20), 30),
           pubDate: reviewDeal.pubDate,
+          qualityScore,
+          dealDate: reviewDeal.pubDate,
+          address,
+          mapsUrl: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`,
+          website: websiteUrl,
+          rating: Number(place.rating || 0),
+          evidence: reviewDeal.evidence || websiteDeal.evidence || 'review',
         };
 
         allDeals.push(deal);
-        console.log(`   ✅ DEAL: ${logo} ${title}`);
+        console.log(`   ✅ DEAL [${qualityScore}]: ${logo} ${title}`);
 
         await new Promise(r => setTimeout(r, 200));
       }
@@ -415,12 +549,19 @@ async function main() {
     }
   }
 
-  const finalDeals = allDeals.slice(0, 10);
+  const finalDeals = allDeals
+    .sort((a, b) => {
+      if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
+        return (b.qualityScore || 0) - (a.qualityScore || 0);
+      }
+      return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
+    })
+    .slice(0, MAX_DEALS_OUTPUT);
 
   console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('📊 ERGEBNIS:');
   console.log(`   🔍 Suchen:           ${activeSearches.length}`);
-  console.log(`   📍 Orte geprüft:     ${seenPlaces.size}`);
+  console.log(`   📍 Orte geprüft:     ${seenPlaceIds.size}`);
   console.log(`   ✅ Echte Deals:      ${finalDeals.length}`);
   console.log(`   📡 API Calls:        ${apiCalls}/${MAX_API_CALLS}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
