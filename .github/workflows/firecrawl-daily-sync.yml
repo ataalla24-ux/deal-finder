@@ -68,6 +68,9 @@ jobs:
           IG_MAX_DEALS_PER_ACCOUNT: 4
         run: node scraper/instagram-discovery-scraper.js
 
+      - name: Run jö Scraper
+        run: node scraper/joe-scraper.js
+
       - name: Filter alte Deals
         run: node scraper/filter-old-deals.js
 
@@ -81,7 +84,7 @@ jobs:
         run: |
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
-          git add docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-instagram.json docs/deals-pending-all.json docs/sent-deal-ids.json docs/instagram-source-stats.json docs/instagram-discovery-report.json 2>/dev/null || true
+          git add docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-instagram.json docs/deals-pending-joe.json docs/deals-pending-all.json docs/sent-deal-ids.json docs/instagram-source-stats.json docs/instagram-discovery-report.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
