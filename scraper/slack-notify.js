@@ -169,6 +169,33 @@ function extractRelativeAgeDays(text) {
   return null;
 }
 
+function parseDateCandidatesFromText(text) {
+  const t = cleanText(text);
+  if (!t) return [];
+  const out = [];
+
+  const ymdMatches = [...t.matchAll(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/g)];
+  for (const m of ymdMatches) {
+    const yyyy = Number(m[1]);
+    const mm = Number(m[2]);
+    const dd = Number(m[3]);
+    const d = new Date(Date.UTC(yyyy, mm - 1, dd, 12, 0, 0));
+    if (!Number.isNaN(d.getTime())) out.push(d.getTime());
+  }
+
+  const dmyMatches = [...t.matchAll(/\b(\d{1,2})\.(\d{1,2})\.(\d{2,4})\b/g)];
+  for (const m of dmyMatches) {
+    const dd = Number(m[1]);
+    const mm = Number(m[2]);
+    const yyRaw = String(m[3]);
+    const yyyy = yyRaw.length === 2 ? Number(`20${yyRaw}`) : Number(yyRaw);
+    const d = new Date(Date.UTC(yyyy, mm - 1, dd, 12, 0, 0));
+    if (!Number.isNaN(d.getTime())) out.push(d.getTime());
+  }
+
+  return out;
+}
+
 function stableId(seed) {
   let hash = 0;
   for (let i = 0; i < seed.length; i += 1) {
@@ -188,7 +215,7 @@ function normalizeDeal(rawDeal, sourceKey) {
   const url = rawUrl;
   const pubDate = toIsoDate(deal.pubDate);
   const pubDateSource = cleanText(deal.pubDateSource);
-  const idSeed = `${sourceKey}|${deal.id || ''}|${url}|${title}|${pubDate || ''}`;
+  const idSeed = `${sourceKey}|${deal.id || ''}|${url}|${title}`;
   const id = cleanText(deal.id) || `${sourceKey}-${stableId(idSeed)}`;
   const type = inferType(deal);
   const missingFields = [];
@@ -302,6 +329,14 @@ function hasOldAgeSignal(deal) {
   return ageDays > 14;
 }
 
+function hasStaleExplicitDateSignal(deal) {
+  const bundle = `${deal.title || ''} ${deal.description || ''} ${deal.expires || ''}`;
+  const dates = parseDateCandidatesFromText(bundle);
+  if (dates.length === 0) return false;
+  const newest = Math.max(...dates);
+  return newest < CUTOFF_DATE;
+}
+
 function formatDate(value) {
   if (!value) return 'k.A.';
   const d = new Date(value);
@@ -407,6 +442,7 @@ async function main() {
     .filter(isRecent)
     .filter(hasTrustedInstagramDate)
     .filter((d) => !hasOldAgeSignal(d))
+    .filter((d) => !hasStaleExplicitDateSignal(d))
     .filter(isNotExpired);
 
   console.log(`📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, fresh: ${freshDeals.length}`);
