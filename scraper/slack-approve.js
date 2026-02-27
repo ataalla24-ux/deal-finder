@@ -70,8 +70,19 @@ function normalizeDeal(raw) {
   const brand = cleanText(deal.brand) || 'Wien Deals';
   const title = cleanText(deal.title) || `${brand} Deal`;
   const description = cleanText(deal.description);
-  const url = normalizeUrl(deal.url) || 'https://www.wien.gv.at';
+  const url = normalizeUrl(deal.url);
   const pubDate = toIsoDate(deal.pubDate) || new Date().toISOString();
+  const approvedAt = toIsoDate(deal.approvedAt) || new Date().toISOString();
+  const rawMissing = Array.isArray(deal.missingFields) ? deal.missingFields : [];
+  const missingFields = [];
+  if (!url) missingFields.push('Ziel-URL');
+  if (!cleanText(deal.distance || deal.location || deal.ort)) missingFields.push('Ort');
+  if (!cleanText(deal.expires || deal.end_date || deal.validity_date || '')) missingFields.push('Ablauf');
+  if (!cleanText(deal.source)) missingFields.push('Quelle');
+  for (const item of rawMissing) {
+    const t = cleanText(item);
+    if (t && !missingFields.includes(t)) missingFields.push(t);
+  }
 
   return {
     id: cleanText(deal.id) || `slack-${cleanText(deal.slackTs)}`,
@@ -93,7 +104,8 @@ function normalizeDeal(raw) {
     isNew: Boolean(deal.isNew),
     slackTs: cleanText(deal.slackTs),
     slackThreadTs: cleanText(deal.slackThreadTs),
-    approvedAt: new Date().toISOString(),
+    approvedAt,
+    missingFields,
   };
 }
 
@@ -192,27 +204,26 @@ function hasHumanApproval(reactions, botUserId) {
 }
 
 function mergeApprovedDeals(existingDeals, newlyApproved) {
-  const byId = new Map();
-
-  for (const deal of existingDeals) {
-    const key = deal.id || deal.url;
+  const merged = [...existingDeals];
+  const indexByKey = new Map();
+  for (let i = 0; i < merged.length; i += 1) {
+    const key = merged[i].id || merged[i].url;
     if (!key) continue;
-    byId.set(key, deal);
+    indexByKey.set(key, i);
   }
 
   for (const deal of newlyApproved) {
     const key = deal.id || deal.url;
     if (!key) continue;
-    byId.set(key, deal);
+    const existingIndex = indexByKey.get(key);
+    if (Number.isInteger(existingIndex)) {
+      merged[existingIndex] = { ...merged[existingIndex], ...deal };
+    } else {
+      indexByKey.set(key, merged.length);
+      merged.push(deal);
+    }
   }
 
-  const merged = [...byId.values()];
-  merged.sort((a, b) => {
-    if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
-      return (b.qualityScore || 0) - (a.qualityScore || 0);
-    }
-    return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
-  });
   return merged;
 }
 
