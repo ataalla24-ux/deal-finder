@@ -24,6 +24,7 @@ const DEFAULT_CONFIG = {
   postLoadTimeoutMs: 8000,
   sourceDelayMs: 650,
   minDealScore: 60,
+  maxDealsPerInstagramAccount: 4,
 };
 let CONFIG = { ...DEFAULT_CONFIG };
 
@@ -138,6 +139,9 @@ const WIEN_KEYWORDS = [
   '1010', '1020', '1030', '1040', '1050', '1060', '1070', '1080', '1090',
   '1100', '1110', '1120', '1130', '1140', '1150', '1160', '1170', '1180', '1190',
   '1200', '1210', '1220', '1230',
+  'vösendorf', 'voesendorf', 'schwechat', 'klosterneuburg', 'brunn am gebirge',
+  'perchtoldsdorf', 'mödling', 'moedling', 'purkersdorf', 'gerasdorf', 'korneuburg',
+  'guntramsdorf', 'neusiedl', 'baden bei wien',
 ];
 
 const DEAL_KEYWORDS = [
@@ -229,6 +233,7 @@ function buildConfig() {
     sourceScrollRounds: toNum(process.env.IG_SCROLL_ROUNDS, DEFAULT_CONFIG.sourceScrollRounds),
     perSourceLinksLimit: toNum(process.env.IG_PER_SOURCE_LINKS, DEFAULT_CONFIG.perSourceLinksLimit),
     minDealScore: toNum(process.env.IG_MIN_SCORE, DEFAULT_CONFIG.minDealScore),
+    maxDealsPerInstagramAccount: toNum(process.env.IG_MAX_DEALS_PER_ACCOUNT, DEFAULT_CONFIG.maxDealsPerInstagramAccount),
   };
 }
 
@@ -467,6 +472,8 @@ function scoreDeal({ text, sourceHits, sourceKinds, accountHint, relatedHint }) 
   const freebieHits = keywordHits(lower, FREEBIE_KEYWORDS);
   const wienHits = keywordHits(lower, WIEN_KEYWORDS);
   const foodHits = keywordHits(lower, FOOD_KEYWORDS);
+  const isFoodDrinkDeal = foodHits > 0 || /drink|cocktail|coffee|kaffee|brunch|restaurant/.test(lower);
+  const isFreeSignal = /gratis|kostenlos|free|freebie|geschenkt|0 ?€|1\+1|2 for 1|bogo/.test(lower);
 
   let score = 0;
   score += Math.min(dealHits * 9, 36);
@@ -484,9 +491,25 @@ function scoreDeal({ text, sourceHits, sourceKinds, accountHint, relatedHint }) 
   if (lower.includes('nur heute') || lower.includes('only today')) score += 8;
   if (lower.includes('neueröffnung') || lower.includes('neueroeffnung') || lower.includes('opening')) score += 7;
   if (lower.includes('gewinnspiel') || lower.includes('verlosung')) score += 5;
+  if (isFoodDrinkDeal) score += 8;
+  if (isFoodDrinkDeal && isFreeSignal) score += 18;
 
   if (isExpiredByText(lower)) score -= 50;
   return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+function extractAccountKeyFromDeal(deal) {
+  const brand = cleanText(deal.brand).toLowerCase().replace(/^@/, '');
+  if (brand && /^[a-z0-9._-]{2,40}$/.test(brand)) return brand;
+  try {
+    const u = new URL(deal.url || '');
+    const p = u.pathname.split('/').filter(Boolean);
+    if (p.length >= 2) {
+      const maybe = cleanText(p[0]).toLowerCase();
+      if (maybe && /^[a-z0-9._-]{2,40}$/.test(maybe)) return maybe;
+    }
+  } catch {}
+  return 'unknown';
 }
 
 function buildSources(sourceStats) {
@@ -691,14 +714,29 @@ function mergeDeals(newDeals, oldDeals) {
     }
   }
 
-  return [...map.values()]
+  const sorted = [...map.values()]
     .filter((d) => d.pubDate && isFresh(d.pubDate))
     .filter((d) => !isExpiryInPast(d.expires))
     .sort((a, b) => {
+      const aFoodFree = /essen|restaurant|pizza|burger|kebab|kaffee|coffee|drink|brunch|food/i.test(`${a.title || ''} ${a.description || ''}`) && /gratis|kostenlos|free|freebie|geschenkt|0 ?€|1\+1|bogo/i.test(`${a.title || ''} ${a.description || ''}`);
+      const bFoodFree = /essen|restaurant|pizza|burger|kebab|kaffee|coffee|drink|brunch|food/i.test(`${b.title || ''} ${b.description || ''}`) && /gratis|kostenlos|free|freebie|geschenkt|0 ?€|1\+1|bogo/i.test(`${b.title || ''} ${b.description || ''}`);
+      if (aFoodFree !== bFoodFree) return bFoodFree ? 1 : -1;
       if ((b.qualityScore || 0) !== (a.qualityScore || 0)) return (b.qualityScore || 0) - (a.qualityScore || 0);
       return Date.parse(b.pubDate) - Date.parse(a.pubDate);
-    })
-    .slice(0, CONFIG.maxDealsPerRun);
+    });
+
+  const accountCap = Math.max(1, CONFIG.maxDealsPerInstagramAccount || 4);
+  const accountCounts = new Map();
+  const balanced = [];
+  for (const deal of sorted) {
+    const accountKey = extractAccountKeyFromDeal(deal);
+    const count = accountCounts.get(accountKey) || 0;
+    if (count >= accountCap) continue;
+    accountCounts.set(accountKey, count + 1);
+    balanced.push(deal);
+    if (balanced.length >= CONFIG.maxDealsPerRun) break;
+  }
+  return balanced;
 }
 
 async function scrapeInstagramDiscovery() {
