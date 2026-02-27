@@ -75,5 +75,10 @@ jobs:
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
           git add docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-instagram.json docs/deals-pending-all.json docs/sent-deal-ids.json docs/instagram-source-stats.json docs/instagram-discovery-report.json 2>/dev/null || true
-          git diff --staged --quiet || git commit -m "Daily firecrawl sync $(date +%Y-%m-%d)"
-          git push
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Daily firecrawl sync $(date +%Y-%m-%d)"
+          git pull --rebase origin main
+          git push origin HEAD:main

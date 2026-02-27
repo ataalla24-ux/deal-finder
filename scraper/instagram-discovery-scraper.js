@@ -1109,14 +1109,17 @@ async function scrapeInstagramDiscovery() {
     }
 
     const topSources = Object.entries(persistedStats)
-      .map(([key, stat]) => ({
-        key,
-        kind: stat.kind || '',
-        runs: Number(stat.runs || 0),
-        acceptedDeals: Number(stat.acceptedDeals || 0),
-        totalLinks: Number(stat.totalLinks || 0),
-        performance: Math.round(sourcePerformanceScore(stat) * 100) / 100,
-      }))
+      .map(([key, stat]) => {
+        const safeStat = (stat && typeof stat === 'object') ? stat : {};
+        return {
+          key,
+          kind: safeStat.kind || '',
+          runs: Number(safeStat.runs || 0),
+          acceptedDeals: Number(safeStat.acceptedDeals || 0),
+          totalLinks: Number(safeStat.totalLinks || 0),
+          performance: Math.round(sourcePerformanceScore(safeStat) * 100) / 100,
+        };
+      })
       .sort((a, b) => b.performance - a.performance)
       .slice(0, 30);
 
