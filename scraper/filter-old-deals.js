@@ -167,6 +167,12 @@ async function fetchExpiryFromUrl(url) {
 // ============================================
 
 function isExpiredOrOld(deal) {
+  const sourceText = String(deal.source || '').toLowerCase();
+  const isInstagramDeal = sourceText.includes('instagram');
+  if (isInstagramDeal && !deal.pubDateSource) {
+    return { expired: true, reason: 'Instagram-Deal ohne verifizierte pubDateSource' };
+  }
+
   const dateFields = [
     deal.validity_date,
     deal.end_date,

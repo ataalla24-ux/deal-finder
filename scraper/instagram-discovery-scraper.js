@@ -353,41 +353,24 @@ function parseRelativeAgeToDate(text, nowMs = Date.now()) {
   return new Date(nowMs - n * ms).toISOString();
 }
 
-function parseDateFromPage({ ldDate, ogDescription, fullText, fallbackNow = Date.now() }) {
+function parseDateFromPage({ ldDate, timeDateTime, ogDescription, fullText, fallbackNow = Date.now() }) {
+  // Only accept trusted publication signals. Do not infer dates from generic caption text
+  // because that often represents offer validity, not post publish time.
   if (ldDate) {
     const ts = Date.parse(ldDate);
-    if (!Number.isNaN(ts)) return new Date(ts).toISOString();
+    if (!Number.isNaN(ts)) return { iso: new Date(ts).toISOString(), source: 'ldDate' };
   }
 
-  const text = cleanText(ogDescription);
-  const ymd = text.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if (ymd) return new Date(`${ymd[1]}-${ymd[2]}-${ymd[3]}T12:00:00Z`).toISOString();
-
-  const dmy = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
-  if (dmy) {
-    const yyyy = dmy[3].length === 2 ? `20${dmy[3]}` : dmy[3];
-    const mm = String(dmy[2]).padStart(2, '0');
-    const dd = String(dmy[1]).padStart(2, '0');
-    return new Date(`${yyyy}-${mm}-${dd}T12:00:00Z`).toISOString();
-  }
-
-  const dmyNoYear = text.match(/(\d{1,2})\.(\d{1,2})(?!\.)/);
-  if (dmyNoYear) {
-    const mm = String(dmyNoYear[2]).padStart(2, '0');
-    const dd = String(dmyNoYear[1]).padStart(2, '0');
-    const now = new Date(fallbackNow);
-    let candidate = new Date(`${now.getFullYear()}-${mm}-${dd}T12:00:00Z`);
-    if (candidate.getTime() - fallbackNow > 30 * 24 * 60 * 60 * 1000) {
-      candidate = new Date(`${now.getFullYear() - 1}-${mm}-${dd}T12:00:00Z`);
-    }
-    if (!Number.isNaN(candidate.getTime())) return candidate.toISOString();
+  if (timeDateTime) {
+    const ts = Date.parse(timeDateTime);
+    if (!Number.isNaN(ts)) return { iso: new Date(ts).toISOString(), source: 'timeDatetime' };
   }
 
   const relFromOg = parseRelativeAgeToDate(ogDescription, fallbackNow);
-  if (relFromOg) return relFromOg;
+  if (relFromOg) return { iso: relFromOg, source: 'relativeAgeOg' };
 
   const relFromText = parseRelativeAgeToDate(fullText, fallbackNow);
-  if (relFromText) return relFromText;
+  if (relFromText) return { iso: relFromText, source: 'relativeAgeText' };
 
   return null;
 }
@@ -961,6 +944,7 @@ async function scrapeInstagramDiscovery() {
         let data = await page.evaluate(() => {
           const result = {
             ldDate: '',
+            timeDateTime: '',
             ldCaption: '',
             ldAuthor: '',
             ogTitle: '',
@@ -985,6 +969,8 @@ async function scrapeInstagramDiscovery() {
           const ogDescription = document.querySelector('meta[property="og:description"]');
           if (ogTitle?.content) result.ogTitle = ogTitle.content;
           if (ogDescription?.content) result.ogDescription = ogDescription.content;
+          const timeEl = document.querySelector('time[datetime]');
+          if (timeEl?.getAttribute('datetime')) result.timeDateTime = timeEl.getAttribute('datetime') || '';
 
           return result;
         });
@@ -1010,12 +996,14 @@ async function scrapeInstagramDiscovery() {
 
         if (!combinedText) continue;
 
-        const pubDateIso = parseDateFromPage({
+        const pubDateMeta = parseDateFromPage({
           ldDate: data.ldDate,
+          timeDateTime: data.timeDateTime,
           ogDescription: data.ogDescription,
           fullText: combinedText,
         });
-        if (!pubDateIso || !isFresh(pubDateIso)) continue;
+        if (!pubDateMeta || !pubDateMeta.iso || !isFresh(pubDateMeta.iso)) continue;
+        const pubDateIso = pubDateMeta.iso;
 
         if (isExpiredByText(combinedText)) continue;
 
@@ -1062,6 +1050,7 @@ async function scrapeInstagramDiscovery() {
           votes: 1,
           qualityScore: score,
           pubDate: pubDateIso,
+          pubDateSource: pubDateMeta.source || '',
           discoveredBy: [...candidate.sourceKinds].join(','),
           sourceHits: candidate.sourceHits,
           reviewTier: score >= 84 ? 'high' : score >= 70 ? 'medium' : 'low',
