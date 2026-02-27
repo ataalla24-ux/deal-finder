@@ -9,6 +9,8 @@ import http from 'http';
 import fs from 'fs';
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY || '';
+const OUTPUT_PATH = 'docs/deals-pending-google.json';
+const MAX_DEAL_AGE_DAYS = 14;
 
 if (!GOOGLE_PLACES_API_KEY) {
   console.log('⚠️  GOOGLE_PLACES_API_KEY nicht gesetzt');
@@ -132,6 +134,25 @@ function fetchHTML(url, timeout = 8000) {
   });
 }
 
+function stableHash(str) {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i += 1) {
+    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
+    hash >>>= 0;
+  }
+  return hash.toString(36);
+}
+
+function dealId(prefix, brand, title, url) {
+  return `${prefix}-${stableHash(`${brand}|${title}|${url}`)}`;
+}
+
+function isReviewRecentUnix(tsSec) {
+  if (!Number.isFinite(tsSec)) return false;
+  const ageMs = Date.now() - tsSec * 1000;
+  return ageMs >= 0 && ageMs <= MAX_DEAL_AGE_DAYS * 24 * 60 * 60 * 1000;
+}
+
 // ============================================
 // Google Places Text Search
 // ============================================
@@ -214,11 +235,8 @@ async function scrapeForRealDeals(websiteUrl) {
 function checkReviewsForDeals(reviews) {
   if (!reviews || !Array.isArray(reviews)) return { found: false };
 
-  // Nur Reviews der letzten 6 Monate berücksichtigen
-  const sixMonthsAgo = Date.now() / 1000 - (180 * 24 * 3600);
-
   for (const review of reviews) {
-    if (review.time && review.time < sixMonthsAgo) continue;
+    if (!isReviewRecentUnix(review.time)) continue;
     
     const text = (review.text || '').toLowerCase();
 
@@ -232,7 +250,13 @@ function checkReviewsForDeals(reviews) {
           const end = text.indexOf('.', match.index + match[0].length);
           const sentence = text.substring(start, end > 0 ? end : start + 120).trim();
           const isGratis = /gratis|kostenlos|free|geschenkt|umsonst/.test(match[0]);
-          return { found: true, dealText: sentence.substring(0, 120), isGratis };
+          return {
+            found: true,
+            dealText: sentence.substring(0, 120),
+            isGratis,
+            reviewTime: review.time,
+            pubDate: new Date(review.time * 1000).toISOString(),
+          };
         }
       }
     }
@@ -276,11 +300,6 @@ async function main() {
   console.log(`📅 ${new Date().toLocaleString('de-AT')}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('🎯 NUR echte Gratis-Deals & extrem günstige Angebote!\n');
-
-  const dealsPath = 'docs/deals.json';
-  if (fs.existsSync(dealsPath)) {
-    fs.copyFileSync(dealsPath, 'docs/deals.backup.json');
-  }
 
   const allDeals = [];
   const seenPlaces = new Set();
@@ -344,10 +363,11 @@ async function main() {
           }
         }
 
-        // ✅ STRENGE VALIDIERUNG: Nur wenn ein STRONG_DEAL_PATTERN matched
-        if (!websiteDeal.found && !reviewDeal.found) continue;
+        // ✅ STRENGE VALIDIERUNG:
+        // Für Google nur frische, review-basierte Deals zulassen (<=14 Tage).
+        if (!reviewDeal.found) continue;
 
-        const dealSource = websiteDeal.found ? websiteDeal : reviewDeal;
+        const dealSource = reviewDeal;
         const isGratis = dealSource.isGratis || false;
         const isCheap = websiteDeal.found && websiteDeal.isCheap;
         const address = place.vicinity || place.formatted_address || 'Wien';
@@ -365,7 +385,7 @@ async function main() {
         title = title.substring(0, 70);
 
         const deal = {
-          id: `gd-${place.place_id.substring(0, 10)}-${Date.now().toString(36)}`,
+          id: dealId('gd', place.name || '', title, `google:${place.place_id}`),
           brand: place.name,
           logo: logo,
           title: title,
@@ -382,7 +402,7 @@ async function main() {
           isGoogleDeal: true,
           priority: isGratis ? 2 : 3,
           votes: Math.min(Math.round((place.user_ratings_total || 0) / 20), 30),
-          pubDate: new Date().toISOString()
+          pubDate: reviewDeal.pubDate,
         };
 
         allDeals.push(deal);
@@ -405,64 +425,14 @@ async function main() {
   console.log(`   📡 API Calls:        ${apiCalls}/${MAX_API_CALLS}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-  // Merge in deals.json
-  if (fs.existsSync(dealsPath)) {
-    try {
-      const existing = JSON.parse(fs.readFileSync(dealsPath, 'utf8'));
-
-      // Alle alten Google-Deals entfernen
-      existing.deals = existing.deals.filter(d => {
-        if (d.id?.startsWith('places-')) return false;
-        if (d.source === 'Google Places') return false;
-        if (d.isGoogleDeal) return false;
-        return true;
-      });
-
-      // Neue echte Deals hinzufügen
-      if (finalDeals.length > 0) {
-        const existingTitles = new Set(
-          existing.deals.map(d => d.title.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 25))
-        );
-
-        let added = 0;
-        for (const deal of finalDeals) {
-          const key = deal.title.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 25);
-          if (!existingTitles.has(key)) {
-            existing.deals.push(deal);
-            existingTitles.add(key);
-            added++;
-          }
-        }
-        console.log(`✅ ${added} neue echte Deals eingefügt`);
-      } else {
-        console.log('ℹ️  Keine neuen Deals gefunden — alte Google-Deals entfernt');
-      }
-
-      // Sortieren
-      existing.deals.sort((a, b) => {
-        if ((a.priority || 99) !== (b.priority || 99)) return (a.priority || 99) - (b.priority || 99);
-        if (a.hot && !b.hot) return -1;
-        if (!a.hot && b.hot) return 1;
-        return 0;
-      });
-
-      existing.totalDeals = existing.deals.length;
-      existing.lastUpdated = new Date().toISOString();
-
-      fs.writeFileSync(dealsPath, JSON.stringify(existing, null, 2));
-      console.log(`📊 Gesamt: ${existing.totalDeals} Deals`);
-    } catch (e) {
-      console.log(`❌ Merge fehlgeschlagen: ${e.message}`);
-      if (fs.existsSync('docs/deals.backup.json')) {
-        fs.copyFileSync('docs/deals.backup.json', dealsPath);
-        console.log('🔄 Backup wiederhergestellt');
-      }
-    }
-  }
-
-  if (fs.existsSync('docs/deals.backup.json')) {
-    fs.unlinkSync('docs/deals.backup.json');
-  }
+  const payload = {
+    lastUpdated: new Date().toISOString(),
+    source: 'google-deals-v3',
+    totalDeals: finalDeals.length,
+    deals: finalDeals,
+  };
+  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
+  console.log(`💾 ${finalDeals.length} Deals → ${OUTPUT_PATH}`);
 
   console.log('\n✅ Google Deals Scraper V3 abgeschlossen!');
 }
@@ -471,8 +441,5 @@ main()
   .then(() => process.exit(0))
   .catch(err => {
     console.error('Fatal:', err.message);
-    if (fs.existsSync('docs/deals.backup.json') && fs.existsSync('docs/deals.json')) {
-      fs.copyFileSync('docs/deals.backup.json', 'docs/deals.json');
-    }
     process.exit(0);
   });
