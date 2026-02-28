@@ -1435,7 +1435,16 @@
             }
         } catch(e) { /* fall through to auto */ }
         // Fallback: auto-rotate based on date
-        const deal = allDeals.filter(d => d.type === 'gratis')[new Date().getDate() % allDeals.filter(d => d.type === 'gratis').length] || allDeals[0];
+        const gratisDeals = allDeals.filter(d => d.type === 'gratis');
+        const deal = gratisDeals.length
+          ? gratisDeals[new Date().getDate() % gratisDeals.length]
+          : allDeals[0];
+        if (!deal) {
+          document.getElementById('dailyTitle').textContent = '🎁 Deal des Tages';
+          document.getElementById('dailyDesc').textContent = 'Bald verfügbar';
+          document.getElementById('dailyBtn').onclick = null;
+          return;
+        }
         const _loc2 = deal.distance || '';
         const _company2 = _loc2.match(/^([^,]+)/) ? _loc2.match(/^([^,]+)/)[1].trim() : '';
         const _brand2 = _company2 || deal.brand || '';
@@ -1473,23 +1482,12 @@
       if (currentCategory !== 'alle') {
         deals = deals.filter(d => d.category === currentCategory);
       }
-      // GPS-basierter Standort-Filter (PRO)
+      // GPS-basierter Standort-Filter (PRO) - echte Koordinaten, kein Bezirk-Ratespiel
       const radius = proData.selectedRadius || 0;
       if (radius > 0 && proData.userLat && proData.userLng) {
         deals = deals.filter(d => {
           if (!d.lat || !d.lng) {
-            // Deals ohne Koordinaten: Bezirk-basierter Fallback
-            const dist = (d.distance || '').toLowerCase();
-            if (!dist || dist === 'wien' || dist.includes('ganz wien') || dist.includes('online')) return true;
-            const bzMatch = dist.match(/1(\d{2})0/);
-            if (bzMatch) {
-              const bz = parseInt(bzMatch[0]);
-              if (radius <= 0.5) return bz === 1010;
-              if (radius <= 1) return bz >= 1010 && bz <= 1090;
-              if (radius <= 2) return bz >= 1010 && bz <= 1120;
-              return true;
-            }
-            return radius >= 5;
+            return false;
           }
           // Haversine-Distanzberechnung
           const R = 6371;
@@ -1984,8 +1982,9 @@
     selectedRadius: 0,
     userLat: null,
     userLng: null,
+    userLocationUpdatedAt: 0,
     savingsByCategory: { kaffee: 0, essen: 0, supermarkt: 0, fitness: 0, streaming: 0, gottesdienste: 0, events: 0, kirche: 0 },
-    monthlySavings: [0,0,0,0,0,0,0,0,0,0,0,0]
+    monthlySavings: {}
   }));
 
   function generateReferralCode() {
@@ -2290,8 +2289,61 @@
       });
     }
 
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = atob(base64);
+      return Uint8Array.from([...rawData].map((ch) => ch.charCodeAt(0)));
+    }
+
+    async function loadPushConfig() {
+      if (window.__pushConfigLoaded) return window.__pushConfig || null;
+      window.__pushConfigLoaded = true;
+      try {
+        const res = await fetch('push-config.json?t=' + Date.now());
+        if (!res.ok) return null;
+        const cfg = await res.json();
+        const enabled = !!(cfg && cfg.enabled && cfg.vapidPublicKey && cfg.subscribeEndpoint);
+        window.__pushConfig = enabled ? cfg : null;
+        return window.__pushConfig;
+      } catch {
+        window.__pushConfig = null;
+        return null;
+      }
+    }
+
+    async function ensurePushSubscription() {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+      const cfg = await loadPushConfig();
+      if (!cfg) return false;
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(cfg.vapidPublicKey)
+          });
+        }
+        await fetch(cfg.subscribeEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subscription: sub,
+            platform: navigator.platform || '',
+            userAgent: navigator.userAgent || '',
+            alarms: proData.alarms || {}
+          })
+        });
+        return true;
+      } catch (err) {
+        console.warn('Push subscription failed:', err);
+        return false;
+      }
+    }
+
     function toggleAlarm(btn) {
-      const catMap = {alarmKaffee:'kaffee',alarmEssen:'essen',alarmSupermarkt:'supermarkt',alarmFitness:'fitness',alarmEvents:'events',alarmGratis:'gratis',alarmGottesdienste:'gottesdienste',alarmKirche:'kirche'};
+      const catMap = {alarmKaffee:'kaffee',alarmEssen:'essen',alarmSupermarkt:'supermarkt',alarmFitness:'fitness',alarmSecret:'secret',alarmEvents:'events',alarmGratis:'gratis',alarmGottesdienste:'gottesdienste',alarmKirche:'kirche'};
       const cat = catMap[btn.id];
       if (!cat) return;
       const isOn = btn.classList.contains('on');
@@ -2302,9 +2354,10 @@
       if (!isOn) {
         // Alarm aktivieren - Notification Permission anfragen
         if ('Notification' in window && Notification.permission === 'default') {
-          Notification.requestPermission().then(p => {
+          Notification.requestPermission().then(async (p) => {
             if (p === 'granted') {
               showToast('\uD83D\uDD14 Deal-Alarm f\u00FCr ' + cat + ' aktiviert!');
+              await ensurePushSubscription();
               startDealAlarmPolling(cat);
             } else {
               showToast('\u26A0\uFE0F Bitte Benachrichtigungen im Browser erlauben!');
@@ -2312,6 +2365,7 @@
           });
         } else if ('Notification' in window && Notification.permission === 'granted') {
           showToast('\uD83D\uDD14 Deal-Alarm f\u00FCr ' + cat + ' aktiviert!');
+          ensurePushSubscription();
           startDealAlarmPolling(cat);
         } else {
           showToast('\uD83D\uDD14 Deal-Alarm aktiviert! (In-App Benachrichtigung)');
@@ -2378,33 +2432,57 @@
           if (active) startDealAlarmPolling(cat);
         });
       }
+      if ('Notification' in window && Notification.permission === 'granted') {
+        ensurePushSubscription();
+      }
     }
 
-  function setRadius(btn, km) {
+  function refreshUserLocation(forceRefresh = false) {
+    return new Promise((resolve) => {
+      if (!('geolocation' in navigator)) {
+        resolve(false);
+        return;
+      }
+      const ageMs = Date.now() - (proData.userLocationUpdatedAt || 0);
+      if (!forceRefresh && proData.userLat && proData.userLng && ageMs < 10 * 60 * 1000) {
+        resolve(true);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          proData.userLat = pos.coords.latitude;
+          proData.userLng = pos.coords.longitude;
+          proData.userLocationUpdatedAt = Date.now();
+          saveProData();
+          resolve(true);
+        },
+        () => resolve(false),
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+      );
+    });
+  }
+
+  async function setRadius(btn, km) {
     document.querySelectorAll('.radius-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     proData.selectedRadius = km;
     saveProData();
     // GPS-Standort holen wenn Radius > 0
-    if (km > 0 && 'geolocation' in navigator) {
-      if (!proData.userLat || !proData.userLng) {
-        showToast('\uD83D\uDCCD Standort wird ermittelt...');
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            proData.userLat = pos.coords.latitude;
-            proData.userLng = pos.coords.longitude;
-            saveProData();
-            showToast('\uD83D\uDCCD Standort gefunden! Zeige Deals innerhalb ' + km + ' km');
-            renderDeals();
-          },
-          (err) => {
-            showToast('\u26A0\uFE0F Standort nicht verf\u00FCgbar. Bezirk-Filter aktiv.');
-            renderDeals();
-          },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-        );
-        return;
+    if (km > 0) {
+      showToast('\uD83D\uDCCD Standort wird ermittelt...');
+      const ok = await refreshUserLocation(true);
+      if (ok) {
+        showToast('\uD83D\uDCCD Standort gefunden! Zeige Deals innerhalb ' + km + ' km');
+      } else {
+        showToast('\u26A0\uFE0F Kein GPS-Standort. Nahe-Filter deaktiviert.');
+        proData.selectedRadius = 0;
+        saveProData();
+        document.querySelectorAll('.radius-btn').forEach(b => b.classList.remove('active'));
+        const allBtn = Array.from(document.querySelectorAll('.radius-btn')).find((b) => (b.textContent || '').toLowerCase().includes('alle'));
+        if (allBtn) allBtn.classList.add('active');
       }
+      renderDeals();
+      return;
     }
     showToast(km === 0 ? '\uD83C\uDFE0 Alle Deals werden angezeigt' : '\uD83D\uDCCD Zeige Deals innerhalb ' + km + ' km');
     renderDeals();

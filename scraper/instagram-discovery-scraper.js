@@ -71,6 +71,26 @@ const SEED_HASHTAGS = [
   'wienvoucher',
   'wiengewinnspiel',
   'wiencoupon',
+  'gratiskaffeewien',
+  'freecoffeewien',
+  'gratisdrinkwien',
+  'freedrinkvienna',
+  'gratiseiswien',
+  'freeicecreamvienna',
+  'wienfreecoffee',
+  'wienfreedrink',
+  'wienfreegift',
+  'wienfreebie',
+  'wienopenings',
+  'wieneroeffnung',
+  'wienneueroeffnung',
+  'openingwien',
+  'grandopeningwien',
+  'wiengrandopening',
+  'wientestaktion',
+  'gratisprobe',
+  'freefoodwien',
+  'samplewien',
 ];
 
 const SEED_ACCOUNTS = [
@@ -125,6 +145,16 @@ const EXTRA_SEARCH_QUERIES = [
   'site:instagram.com/p vienna opening offer',
   'site:instagram.com/reel wien freebie',
   'site:instagram.com/p wien gratis essen',
+  'site:instagram.com/reel wien gratis kaffee',
+  'site:instagram.com/p wien gratis drink',
+  'site:instagram.com/reel wien neueröffnung angebot',
+  'site:instagram.com/p wien opening free',
+  'site:instagram.com/reel vienna free coffee',
+  'site:instagram.com/p vienna free drink',
+  'site:instagram.com/reel wien gratis eis',
+  'site:instagram.com/p wien geschenk aktion',
+  'site:instagram.com/reel wien gratis probe',
+  'site:instagram.com/p wien 1+1 restaurant',
 ];
 
 const RESERVED_IG_PATHS = new Set([
@@ -152,12 +182,38 @@ const DEAL_KEYWORDS = [
   'promocode', 'code', '1+1', '2for1', '2 for 1', 'buy one get one', 'bogo',
   'happy hour', 'eröffnung', 'neueroeffnung', 'neueröffnung', 'special', 'limited',
   'nur heute', 'nur morgen', 'only today', 'only this week',
+  'free sample', 'gratisprobe', 'probe', 'geschenk', 'gift', 'opening deal', 'opening offer',
+  'grand opening', 'soft opening', 'launch', 'welcome gift', 'opening special',
 ];
 
 const FREEBIE_KEYWORDS = [
   'gratis', 'kostenlos', 'for free', 'freebie', 'geschenkt', '0€', '0 euro',
   'umsonst', 'free coffee', 'free food', 'gratis essen', 'gratis kaffee',
   'gratis döner', 'gratis doener', 'gratis burger', 'gratis pizza', 'gratis dessert',
+  'gratis drink', 'free drink', 'gratis eis', 'free ice cream', 'gratis probe',
+  'free sample', 'welcome gift', 'gratis geschenk', 'geschenkaktion',
+];
+
+const PROMO_KEYWORDS = [
+  'aktion', 'angebot', 'deal', 'special', 'promo', 'promotion', 'opening deal',
+  'opening offer', 'eröffnungsangebot', 'eroeffnungsangebot', 'eröffnungsaktion',
+  'eroeffnungsaktion', 'soft opening', 'grand opening', 'launch special',
+  '1+1', '2for1', '2 for 1', 'bogo', 'happy hour', 'voucher', 'coupon', 'gutschein',
+];
+
+const GIFT_KEYWORDS = [
+  'geschenk', 'gift', 'welcome gift', 'goodie', 'goodiebag', 'goodie bag',
+  'giveaway gift', 'gratis geschenk', 'geschenkaktion', 'free gift',
+];
+
+const DRINK_KEYWORDS = [
+  'drink', 'cocktail', 'spritz', 'coffee', 'kaffee', 'espresso', 'matcha',
+  'latte', 'smoothie', 'bubble tea', 'tee', 'bier', 'beer', 'wein', 'wine',
+];
+
+const OPENING_KEYWORDS = [
+  'neueröffnung', 'neueroeffnung', 'opening', 'grand opening', 'soft opening',
+  'eröffnung', 'eroeffnung', 'coming soon', 'launch',
 ];
 
 const FOOD_KEYWORDS = [
@@ -432,6 +488,7 @@ function detectCategory(text) {
   const lower = cleanText(text).toLowerCase();
   if (EVENT_KEYWORDS.some((k) => lower.includes(k))) return 'events';
   if (FOOD_KEYWORDS.some((k) => lower.includes(k))) return 'essen';
+  if (DRINK_KEYWORDS.some((k) => lower.includes(k))) return 'essen';
   if (lower.includes('coffee') || lower.includes('kaffee')) return 'kaffee';
   if (lower.includes('fitness') || lower.includes('gym')) return 'fitness';
   return 'wien';
@@ -461,16 +518,27 @@ function scoreDeal({ text, sourceHits, sourceKinds, accountHint, relatedHint }) 
   const lower = cleanText(text).toLowerCase();
   const dealHits = keywordHits(lower, DEAL_KEYWORDS);
   const freebieHits = keywordHits(lower, FREEBIE_KEYWORDS);
+  const promoHits = keywordHits(lower, PROMO_KEYWORDS);
+  const giftHits = keywordHits(lower, GIFT_KEYWORDS);
+  const drinkHits = keywordHits(lower, DRINK_KEYWORDS);
+  const openingHits = keywordHits(lower, OPENING_KEYWORDS);
   const wienHits = keywordHits(lower, WIEN_KEYWORDS);
   const foodHits = keywordHits(lower, FOOD_KEYWORDS);
-  const isFoodDrinkDeal = foodHits > 0 || /drink|cocktail|coffee|kaffee|brunch|restaurant/.test(lower);
-  const isFreeSignal = /gratis|kostenlos|free|freebie|geschenkt|0 ?€|1\+1|2 for 1|bogo/.test(lower);
+  const isFoodDrinkDeal = foodHits > 0 || drinkHits > 0 || /drink|cocktail|coffee|kaffee|brunch|restaurant/.test(lower);
+  const isFreeSignal = /gratis|kostenlos|free|freebie|geschenkt|0 ?€|1\+1|2 for 1|bogo|free sample|gratisprobe|welcome gift/.test(lower);
+  const isGiveaway = lower.includes('gewinnspiel') || lower.includes('verlosung');
+  const isRealPromo = promoHits > 0 || openingHits > 0;
+  const isGiftish = giftHits > 0;
 
   let score = 0;
   score += Math.min(dealHits * 9, 36);
   score += Math.min(freebieHits * 13, 32);
+  score += Math.min(promoHits * 8, 24);
+  score += Math.min(giftHits * 10, 20);
   score += Math.min(wienHits * 11, 33);
   score += Math.min(foodHits * 4, 12);
+  score += Math.min(drinkHits * 5, 12);
+  score += Math.min(openingHits * 9, 18);
   score += Math.min(sourceHits * 8, 20);
 
   if (sourceKinds.has('hashtag')) score += 6;
@@ -481,9 +549,12 @@ function scoreDeal({ text, sourceHits, sourceKinds, accountHint, relatedHint }) 
 
   if (lower.includes('nur heute') || lower.includes('only today')) score += 8;
   if (lower.includes('neueröffnung') || lower.includes('neueroeffnung') || lower.includes('opening')) score += 7;
-  if (lower.includes('gewinnspiel') || lower.includes('verlosung')) score += 5;
+  if (isGiveaway) score += 4;
   if (isFoodDrinkDeal) score += 8;
   if (isFoodDrinkDeal && isFreeSignal) score += 18;
+  if (isRealPromo && isFoodDrinkDeal) score += 12;
+  if (isGiftish && isRealPromo) score += 8;
+  if (isGiveaway && !isFreeSignal && !isRealPromo) score -= 10;
 
   if (isExpiredByText(lower)) score -= 50;
   return Math.max(0, Math.min(100, Math.round(score)));
@@ -705,13 +776,18 @@ function mergeDeals(newDeals, oldDeals) {
     }
   }
 
-  const sorted = [...map.values()]
-    .filter((d) => d.pubDate && isFresh(d.pubDate))
-    .filter((d) => !isExpiryInPast(d.expires))
-    .sort((a, b) => {
-      const aFoodFree = /essen|restaurant|pizza|burger|kebab|kaffee|coffee|drink|brunch|food/i.test(`${a.title || ''} ${a.description || ''}`) && /gratis|kostenlos|free|freebie|geschenkt|0 ?€|1\+1|bogo/i.test(`${a.title || ''} ${a.description || ''}`);
-      const bFoodFree = /essen|restaurant|pizza|burger|kebab|kaffee|coffee|drink|brunch|food/i.test(`${b.title || ''} ${b.description || ''}`) && /gratis|kostenlos|free|freebie|geschenkt|0 ?€|1\+1|bogo/i.test(`${b.title || ''} ${b.description || ''}`);
+    const sorted = [...map.values()]
+      .filter((d) => d.pubDate && isFresh(d.pubDate))
+      .filter((d) => !isExpiryInPast(d.expires))
+      .sort((a, b) => {
+      const aText = `${a.title || ''} ${a.description || ''}`;
+      const bText = `${b.title || ''} ${b.description || ''}`;
+      const aFoodFree = /essen|restaurant|pizza|burger|kebab|kaffee|coffee|drink|brunch|food|cocktail|eis/i.test(aText) && /gratis|kostenlos|free|freebie|geschenkt|0 ?€|1\+1|bogo|gratisprobe|free sample|welcome gift/i.test(aText);
+      const bFoodFree = /essen|restaurant|pizza|burger|kebab|kaffee|coffee|drink|brunch|food|cocktail|eis/i.test(bText) && /gratis|kostenlos|free|freebie|geschenkt|0 ?€|1\+1|bogo|gratisprobe|free sample|welcome gift/i.test(bText);
+      const aOpeningPromo = /neueröffnung|neueroeffnung|opening|eröffnung|eroeffnung|opening deal|opening offer|eröffnungsangebot|eroeffnungsangebot/i.test(aText);
+      const bOpeningPromo = /neueröffnung|neueroeffnung|opening|eröffnung|eroeffnung|opening deal|opening offer|eröffnungsangebot|eroeffnungsangebot/i.test(bText);
       if (aFoodFree !== bFoodFree) return bFoodFree ? 1 : -1;
+      if (aOpeningPromo !== bOpeningPromo) return bOpeningPromo ? 1 : -1;
       if ((b.qualityScore || 0) !== (a.qualityScore || 0)) return (b.qualityScore || 0) - (a.qualityScore || 0);
       return Date.parse(b.pubDate) - Date.parse(a.pubDate);
     });
