@@ -104,20 +104,27 @@ def create_deals(data_list, category, logo, has_times=False):
         url = item.get('url', 'https://www.wien.gv.at')
         times = item.get('times', '')
         description = item.get('description', '')
-        
-        if has_times and times:
-            title = f"⏰ {times}"
-            desc = f"📍 {name}\n🕐 {times}"
+
+        if category == 'gemeinde':
+            title = f"{name}"
+            desc = f"⛪ Christliche Gemeinde in Wien\n📍 {name}\n🔗 Webseite & Infos"
+            expires = 'Regelmäßig'
+        elif has_times and times:
+            title = f"{name} Gottesdienst"
+            desc = f"⛪ {name}\n🕐 Gottesdienst: {times}\n📍 Wien\n🔗 Zeiten auf Webseite prüfen"
+            expires = times
         elif description:
-            title = description
-            desc = f"📍 {name}\n{description}"
+            title = f"{name}"
+            desc = f"✝️ Christliches Event in Wien\n📍 {name}\n📝 {description}"
+            expires = 'Aktuelle Termine auf Webseite'
         else:
-            title = f"⭐ Gemeinde"
+            title = f"{name}"
             desc = f"📍 {name} - Wien"
-        
+            expires = 'Regelmäßig'
+
         deals.append({
             'id': f'{category}-{i}-{datetime.now().strftime("%Y%m%d")}',
-            'brand': name[:30],
+            'brand': name,
             'logo': logo,
             'title': title,
             'description': desc,
@@ -125,7 +132,7 @@ def create_deals(data_list, category, logo, has_times=False):
             'category': category,
             'source': 'Kirchen Verzeichnis',
             'url': url,
-            'expires': times if has_times else 'Regelmäßig',
+            'expires': expires,
             'distance': 'Wien',
             'hot': False,
             'isNew': True,

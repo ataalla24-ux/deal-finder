@@ -67,10 +67,10 @@ def scrape_all():
         
         deals.append({
             'id': f'freikirche-{i}-{datetime.now().strftime("%Y%m%d")}',
-            'brand': name[:30],
+            'brand': name,
             'logo': emoji,
-            'title': f"🕐 {times}",
-            'description': f"📍 {name}\n🕐 {times}",
+            'title': f"{name} Gottesdienst",
+            'description': f"⛪ {name}\n🕐 Gottesdienst: {times}\n📍 Wien\n🔗 Webseite & aktuelle Infos",
             'type': 'gratis',
             'category': 'freikirche' if is_freechurch else 'kirche',
             'source': 'Freikirchen Wien',
