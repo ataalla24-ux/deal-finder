@@ -3,7 +3,6 @@ name: "Firecrawl Daily Sync + Slack"
 on:
   schedule:
     - cron: '0 9 * * *' # After Firecrawl stagger: 10:00 Vienna winter / 11:00 summer
-    - cron: '0 19 * * *' # After Firecrawl stagger: 20:00 Vienna winter / 21:00 summer
   workflow_dispatch:
 
 concurrency:
