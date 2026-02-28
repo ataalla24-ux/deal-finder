@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { cleanText, extractDealsFromThreadMessages } from './slack-digest-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,17 +39,6 @@ function ensureObject(value, fallback = {}) {
 
 function ensureArray(value) {
   return Array.isArray(value) ? value : [];
-}
-
-function cleanText(value) {
-  if (!value) return '';
-  return String(value)
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\s+/g, ' ')
-    .trim();
 }
 
 function normalizeUrl(url) {
@@ -160,6 +150,25 @@ async function getBotUserId() {
   return data.user_id || '';
 }
 
+async function findLatestDigestThreadTs() {
+  const query = new URLSearchParams({
+    channel: SLACK_CHANNEL_ID,
+    limit: '20',
+  });
+  const data = await slackApi(`https://slack.com/api/conversations.history?${query.toString()}`);
+  if (!data.ok) return '';
+
+  const messages = ensureArray(data.messages);
+  const today = new Date().toDateString();
+  const match = messages.find((msg) => {
+    const text = cleanText(msg?.text);
+    if (!text.includes('FreeFinder Wien')) return false;
+    const msgDate = new Date(parseFloat(msg.ts || '0') * 1000).toDateString();
+    return msgDate === today;
+  });
+  return cleanText(match?.ts);
+}
+
 async function getThreadMessages(threadTs) {
   let cursor = '';
   const messages = [];
@@ -253,27 +262,30 @@ async function main() {
     process.exit(1);
   }
 
-  const pendingDeals = loadPendingDeals();
-  console.log(`📋 Pending posted deals with slackTs: ${pendingDeals.length}`);
-
-  if (pendingDeals.length === 0) {
-    console.log('✅ Keine offenen Slack-Deals zum Prüfen');
+  const botUserId = await getBotUserId();
+  console.log(`🤖 Bot User ID: ${botUserId || 'unknown'}`);
+  const latestThreadTs = await findLatestDigestThreadTs();
+  if (!latestThreadTs) {
+    console.log('ℹ️ Kein heutiger Digest-Thread gefunden');
     return;
   }
 
-  const botUserId = await getBotUserId();
-  console.log(`🤖 Bot User ID: ${botUserId || 'unknown'}`);
+  const threadMessages = await getThreadMessages(latestThreadTs);
+  console.log(`🧵 loaded latest digest ${latestThreadTs}: ${threadMessages.length} messages`);
+
+  const parsedDeals = extractDealsFromThreadMessages(threadMessages);
+  const pendingDeals = parsedDeals.length > 0 ? parsedDeals : loadPendingDeals().filter((d) => d.slackThreadTs === latestThreadTs);
+  console.log(`📋 Pending posted deals for latest digest: ${pendingDeals.length}`);
+
+  if (pendingDeals.length === 0) {
+    console.log('✅ Keine offenen Slack-Deals zum Prüfen');
+    savePendingRemaining([]);
+    return;
+  }
 
   const messageByTs = new Map();
-  const threadTsSet = new Set(pendingDeals.map((d) => d.slackThreadTs).filter(Boolean));
-
-  for (const threadTs of threadTsSet) {
-    const threadMessages = await getThreadMessages(threadTs);
-    for (const msg of threadMessages) {
-      if (msg?.ts) messageByTs.set(String(msg.ts), msg);
-    }
-    console.log(`🧵 loaded thread ${threadTs}: ${threadMessages.length} messages`);
-    await sleep(350);
+  for (const msg of threadMessages) {
+    if (msg?.ts) messageByTs.set(String(msg.ts), msg);
   }
 
   const approved = [];

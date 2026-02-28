@@ -6,6 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { cleanText, extractDealsFromThreadMessages } from './slack-digest-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,54 +74,32 @@ async function findYourPick(threadTs) {
     return null;
 }
 
-// ============================================
-// Step 3: Load deals - use deals-pending-all.json first (same order as Slack)
-// Falls back to individual pending files with ALL sources matching slack-notify
-// ============================================
-function loadAllPendingDeals() {
-    // Primary: deals-pending-all.json has the exact same order as Slack messages
-  const allPath = path.join(__dirname, '..', 'docs', 'deals-pending-all.json');
-    try {
-          if (fs.existsSync(allPath)) {
-                  const data = JSON.parse(fs.readFileSync(allPath, 'utf-8'));
-                  const deals = data.deals || [];
-                  if (deals.length > 0) {
-                            console.log(`Loaded ${deals.length} deals from deals-pending-all.json (Slack order)`);
-                            return deals;
-                  }
-          }
-    } catch(e) {
-          console.log('Could not load deals-pending-all.json:', e.message);
+async function getThreadMessages(threadTs) {
+    const res = await fetch(
+          `https://slack.com/api/conversations.replies?channel=${SLACK_CHANNEL_ID}&ts=${threadTs}&limit=200`,
+      { headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}` } }
+        );
+    const data = await res.json();
+    if (!data.ok) {
+          console.log('Error fetching replies:', data.error);
+          return [];
     }
 
-  // Fallback: load from individual files – ALL sources matching slack-notify.js
-  const sources = [
-        'power', 'basic1', 'gastro2', 'food3', 'twitter', 'telegram',
-        'firecrawl', 'firecrawl2', 'google', 'gutscheine', 'events',
-        'super', 'scrapy', 'web', 'instagram'
-      ];
-    let allDeals = [];
+    return Array.isArray(data.messages) ? data.messages : [];
+}
 
-  for (const source of sources) {
-        const filePath = path.join(__dirname, '..', 'docs', `deals-pending-${source}.json`);
-        try {
-                if (fs.existsSync(filePath)) {
-                          const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-                          const deals = data.deals || data || [];
-                          allDeals = allDeals.concat(deals.map(d => ({ ...d, _source: source })));
-                }
-        } catch (e) { /* skip */ }
-  }
+async function getBotUserId() {
+    const res = await fetch('https://slack.com/api/auth.test', {
+      headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}` }
+    });
+    const data = await res.json();
+    return data.ok ? (data.user_id || '') : '';
+}
 
-  // Sort the same way slack-notify.js does (gratis first, then by quality)
-  allDeals.sort((a, b) => {
-        if (a.type === 'gratis' && b.type !== 'gratis') return -1;
-        if (a.type !== 'gratis' && b.type === 'gratis') return 1;
-        return (b.qualityScore || 0) - (a.qualityScore || 0);
-  });
-
-  console.log(`Loaded ${allDeals.length} deals from ${sources.length} individual sources (fallback)`);
-    return allDeals;
+function hasHumanApproval(message, botUserId) {
+    const reactions = Array.isArray(message?.reactions) ? message.reactions : [];
+    const checks = reactions.filter((r) => ['white_check_mark', 'heavy_check_mark', 'check'].includes(r.name));
+    return checks.some((reaction) => Array.isArray(reaction.users) && reaction.users.some((user) => user && user !== botUserId));
 }
 
 // ============================================
@@ -180,6 +159,10 @@ function isDealApproved(deal) {
   return true;
 }
 
+function isDealApprovedBySlack(message, botUserId) {
+    return hasHumanApproval(message, botUserId);
+}
+
 // ============================================
 // Main
 // ============================================
@@ -203,9 +186,10 @@ async function main() {
           process.exit(0);
     }
 
-  const deals = loadAllPendingDeals();
+  const threadMessages = await getThreadMessages(threadTs);
+  const deals = extractDealsFromThreadMessages(threadMessages);
     if (deals.length === 0) {
-          console.log('No pending deals found');
+          console.log('No digest deals found');
           process.exit(0);
     }
 
@@ -218,7 +202,11 @@ async function main() {
 
   console.log(`Deal #${pickNumber}: ${deal.brand} - ${deal.title}`);
 
-  if (!isDealApproved(deal)) {
+  const botUserId = await getBotUserId();
+  const pickedMessage = threadMessages.find((msg) => cleanText(msg?.ts) === cleanText(deal.slackTs));
+  const approvedBySlack = isDealApprovedBySlack(pickedMessage, botUserId);
+
+  if (!approvedBySlack && !isDealApproved(deal)) {
     process.exit(0);
   }
 
