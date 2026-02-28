@@ -19,6 +19,58 @@ function cleanText(value) {
     .trim();
 }
 
+function flattenSlackNode(node, parts) {
+  if (!node) return;
+  if (Array.isArray(node)) {
+    for (const item of node) flattenSlackNode(item, parts);
+    return;
+  }
+  if (typeof node === 'string') {
+    const text = cleanText(node);
+    if (text) parts.push(text);
+    return;
+  }
+  if (typeof node !== 'object') return;
+
+  if (node.type === 'text' || node.type === 'plain_text' || node.type === 'mrkdwn') {
+    const text = cleanText(node.text);
+    if (text) parts.push(text);
+  } else if (node.type === 'link') {
+    const url = cleanText(node.url);
+    const text = cleanText(node.text);
+    if (url) parts.push(text ? `<${url}|${text}>` : `<${url}>`);
+  } else if (node.type === 'emoji') {
+    const name = cleanText(node.name);
+    if (name) parts.push(`:${name}:`);
+  }
+
+  if (Array.isArray(node.elements)) {
+    flattenSlackNode(node.elements, parts);
+    parts.push('\n');
+  }
+  if (Array.isArray(node.fields)) {
+    flattenSlackNode(node.fields, parts);
+    parts.push('\n');
+  }
+  if (Array.isArray(node.blocks)) {
+    flattenSlackNode(node.blocks, parts);
+    parts.push('\n');
+  }
+  if (node.text && typeof node.text === 'object') {
+    flattenSlackNode(node.text, parts);
+    parts.push('\n');
+  }
+}
+
+function extractSlackMessageText(message) {
+  const direct = String(message?.text || '');
+  if (direct.includes('Deal-ID:')) return direct;
+
+  const parts = [];
+  flattenSlackNode(message?.blocks || [], parts);
+  return parts.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
 function parseSlackLink(raw) {
   const text = String(raw || '').trim();
   const match = text.match(/^<([^|>]+)(?:\|[^>]+)?>$/);
@@ -51,13 +103,13 @@ function parseDisplayDate(value) {
 }
 
 function parseDigestDealMessage(message, fallbackIndex = 0) {
-  const text = String(message?.text || '');
-  if (!text.includes('🆔 Deal-ID:')) return null;
+  const text = extractSlackMessageText(message);
+  if (!text.includes('Deal-ID:')) return null;
 
   const lines = text.split('\n').map((line) => line.trim()).filter(Boolean);
   if (lines.length === 0) return null;
 
-  const titleMatch = lines[0].match(/^\*(\d+)\.\s+(.+?)\*$/);
+  const titleMatch = lines[0].match(/^\*?(\d+)\.\s+(.+?)\*?$/);
   const order = titleMatch ? Number(titleMatch[1]) : fallbackIndex + 1;
   const title = cleanText(titleMatch ? titleMatch[2] : lines[0].replace(/^\*/, '').replace(/\*$/, ''));
 
@@ -73,36 +125,37 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
   let missingFields = [];
 
   for (const line of lines.slice(1)) {
-    if (line.startsWith('🏷️ Marke/Restaurant:')) {
-      brand = cleanText(line.slice('🏷️ Marke/Restaurant:'.length));
-    } else if (line.startsWith('📍 Ort:')) {
-      distance = cleanText(line.slice('📍 Ort:'.length)) || 'Wien';
-    } else if (line.startsWith('📅 Angebotsdatum:')) {
-      pubDate = parseDisplayDate(line.slice('📅 Angebotsdatum:'.length));
-    } else if (line.startsWith('⏳ Gültig bis:')) {
-      expires = cleanText(line.slice('⏳ Gültig bis:'.length));
-    } else if (line.startsWith('🧭 Kategorie:')) {
-      const detail = cleanText(line.slice('🧭 Kategorie:'.length));
-      const parts = detail.split('|').map((part) => cleanText(part));
-      for (const part of parts) {
+    const plain = line.replace(/^[^\w<]*\s*/, '');
+    if (plain.startsWith('Marke/Restaurant:')) {
+      brand = cleanText(plain.slice('Marke/Restaurant:'.length));
+    } else if (plain.startsWith('Ort:')) {
+      distance = cleanText(plain.slice('Ort:'.length)) || 'Wien';
+    } else if (plain.startsWith('Angebotsdatum:')) {
+      pubDate = parseDisplayDate(plain.slice('Angebotsdatum:'.length));
+    } else if (plain.startsWith('Gültig bis:')) {
+      expires = cleanText(plain.slice('Gültig bis:'.length));
+    } else if (plain.startsWith('Kategorie:')) {
+      const detail = cleanText(plain.slice('Kategorie:'.length));
+      const detailParts = detail.split('|').map((part) => cleanText(part));
+      for (const part of detailParts) {
         if (part.toLowerCase().startsWith('typ:')) {
           type = cleanText(part.slice(4)).toLowerCase() || type;
         } else if (part) {
           category = part.toLowerCase();
         }
       }
-    } else if (line.startsWith('🔗 Direktlink:')) {
-      url = parseSlackLink(line.slice('🔗 Direktlink:'.length).trim());
-    } else if (line.startsWith('🆔 Deal-ID:')) {
-      id = cleanText(line.slice('🆔 Deal-ID:'.length));
-    } else if (line.startsWith('⚠️ FEHLT:')) {
-      missingFields = line
-        .slice('⚠️ FEHLT:'.length)
+    } else if (plain.startsWith('Direktlink:')) {
+      url = parseSlackLink(plain.slice('Direktlink:'.length).trim());
+    } else if (plain.startsWith('Deal-ID:')) {
+      id = cleanText(plain.slice('Deal-ID:'.length));
+    } else if (plain.startsWith('FEHLT:')) {
+      missingFields = plain
+        .slice('FEHLT:'.length)
         .split(',')
         .map((item) => cleanText(item))
         .filter(Boolean);
-    } else if (line.startsWith('📝 ')) {
-      description = cleanText(line.slice(2));
+    } else if (plain.startsWith('📝 ') || plain.startsWith('Beschreibung:')) {
+      description = cleanText(plain.replace(/^📝\s*/, '').replace(/^Beschreibung:\s*/, ''));
     }
   }
 
@@ -169,5 +222,6 @@ function extractDealsFromThreadMessages(messages) {
 export {
   cleanText,
   extractDealsFromThreadMessages,
+  extractSlackMessageText,
   parseDigestDealMessage,
 };
