@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { cleanText, extractDealsFromThreadMessages } from './slack-digest-utils.js';
+import { cleanText, extractDealsFromThreadMessages, extractSlackMessageText } from './slack-digest-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -278,6 +278,12 @@ async function main() {
   console.log(`📋 Pending posted deals for latest digest: ${pendingDeals.length}`);
 
   if (pendingDeals.length === 0) {
+    const sample = threadMessages.find((msg) => cleanText(msg?.ts) !== latestThreadTs);
+    if (sample) {
+      console.log('🧪 sample digest message text:', JSON.stringify(extractSlackMessageText(sample).slice(0, 1000)));
+      console.log('🧪 sample digest message keys:', Object.keys(sample).slice(0, 20).join(','));
+      console.log('🧪 sample digest has blocks:', Array.isArray(sample.blocks), 'blockCount:', Array.isArray(sample.blocks) ? sample.blocks.length : 0);
+    }
     console.log('✅ Keine offenen Slack-Deals zum Prüfen');
     savePendingRemaining([]);
     return;

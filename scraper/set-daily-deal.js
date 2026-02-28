@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { cleanText, extractDealsFromThreadMessages } from './slack-digest-utils.js';
+import { cleanText, extractDealsFromThreadMessages, extractSlackMessageText } from './slack-digest-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -189,6 +189,12 @@ async function main() {
   const threadMessages = await getThreadMessages(threadTs);
   const deals = extractDealsFromThreadMessages(threadMessages);
     if (deals.length === 0) {
+          const sample = threadMessages.find((msg) => cleanText(msg?.ts) !== cleanText(threadTs));
+          if (sample) {
+                  console.log('Sample digest message text:', JSON.stringify(extractSlackMessageText(sample).slice(0, 1000)));
+                  console.log('Sample digest message keys:', Object.keys(sample).slice(0, 20).join(','));
+                  console.log('Sample digest has blocks:', Array.isArray(sample.blocks), 'blockCount:', Array.isArray(sample.blocks) ? sample.blocks.length : 0);
+          }
           console.log('No digest deals found');
           process.exit(0);
     }
