@@ -102,6 +102,14 @@ function parseDisplayDate(value) {
   return Number.isNaN(date.getTime()) ? '' : date.toISOString();
 }
 
+function normalizeDigestLine(line) {
+  return String(line || '')
+    .replace(/^_+|_+$/g, '')
+    .replace(/^(?::[a-z0-9_+-]+:\s*)+/i, '')
+    .replace(/^[^\w<]*\s*/, '')
+    .trim();
+}
+
 function parseDigestDealMessage(message, fallbackIndex = 0) {
   const text = extractSlackMessageText(message);
   if (!text.includes('Deal-ID:')) return null;
@@ -125,7 +133,7 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
   let missingFields = [];
 
   for (const line of lines.slice(1)) {
-    const plain = line.replace(/^[^\w<]*\s*/, '');
+    const plain = normalizeDigestLine(line);
     if (plain.startsWith('Marke/Restaurant:')) {
       brand = cleanText(plain.slice('Marke/Restaurant:'.length));
     } else if (plain.startsWith('Ort:')) {
@@ -156,6 +164,10 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
         .filter(Boolean);
     } else if (plain.startsWith('📝 ') || plain.startsWith('Beschreibung:')) {
       description = cleanText(plain.replace(/^📝\s*/, '').replace(/^Beschreibung:\s*/, ''));
+    } else if (plain.startsWith('Mit ') && plain.includes('freigeben')) {
+      continue;
+    } else if (plain.startsWith('memo:')) {
+      description = cleanText(plain.slice('memo:'.length));
     }
   }
 
