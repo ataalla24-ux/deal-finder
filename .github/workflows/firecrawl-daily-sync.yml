@@ -2,8 +2,8 @@ name: "Firecrawl Daily Sync + Slack"
 
 on:
   schedule:
-    - cron: '0 6 * * *' # Morning run: 07:00 Vienna winter / 08:00 summer
-    - cron: '0 16 * * *' # Evening run: 17:00 Vienna winter / 18:00 summer
+    - cron: '0 9 * * *' # After Firecrawl stagger: 10:00 Vienna winter / 11:00 summer
+    - cron: '0 19 * * *' # After Firecrawl stagger: 20:00 Vienna winter / 21:00 summer
   workflow_dispatch:
 
 concurrency:
@@ -33,24 +33,6 @@ jobs:
       - name: Verify Playwright Chromium
         run: |
           node -e "const { chromium } = require('playwright'); (async()=>{const b=await chromium.launch({headless:true}); await b.close(); console.log('playwright-ok');})().catch(e=>{console.error(e); process.exit(1);});"
-
-      - name: Run Firecrawl Gastro
-        env:
-          FIRECRAWL_API_KEY1: ${{ secrets.FIRECRAWL_API_KEY1 }}
-          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
-        run: node scraper/firecrawl-gastro2.js
-
-      - name: Run Firecrawl Food
-        env:
-          FIRECRAWL_API_KEY2: ${{ secrets.FIRECRAWL_API_KEY2 }}
-          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
-        run: node scraper/firecrawl-food3.js
-
-      - name: Run Firecrawl Consumables
-        env:
-          FIRECRAWL_API_KEY3: ${{ secrets.FIRECRAWL_API_KEY3 }}
-          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
-        run: node scraper/firecrawl-consumables.js
 
       - name: Run Instagram Discovery Scraper
         env:

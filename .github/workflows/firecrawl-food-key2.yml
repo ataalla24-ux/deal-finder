@@ -1,7 +1,14 @@
 name: "Firecrawl Food Only - Key 2"
 
 on:
+  schedule:
+    - cron: '0 7 * * *' # Start stagger 2: 08:00 Vienna winter / 09:00 summer
+    - cron: '0 17 * * *' # Start stagger 2: 18:00 Vienna winter / 19:00 summer
   workflow_dispatch:
+
+concurrency:
+  group: firecrawl-food-key2
+  cancel-in-progress: false
 
 jobs:
   food:
@@ -16,7 +23,7 @@ jobs:
           node-version: '22'
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run Food Scraper
         env:
@@ -32,5 +39,17 @@ jobs:
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
           git add docs/deals-pending-food3.json
-          git diff --staged --quiet || git commit -m "Food3 deals $(date +%Y-%m-%d)"
-          git push
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Food3 deals $(date +%Y-%m-%d)"
+          if ! git pull --rebase --autostash origin main; then
+            echo "⚠️ Rebase conflict on generated files. Skipping push for this run."
+            git rebase --abort || true
+            exit 0
+          fi
+          if ! git push origin HEAD:main; then
+            echo "⚠️ Push failed (branch moved). Skipping push for this run."
+            exit 0
+          fi
