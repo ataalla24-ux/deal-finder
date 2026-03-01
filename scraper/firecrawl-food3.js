@@ -15,24 +15,14 @@ if (!FIRECRAWL_API_KEY) {
 }
 
 const firecrawl = new Firecrawl({ apiKey: FIRECRAWL_API_KEY });
-const FIRECRAWL_STEP_TIMEOUT_MS = 120000;
-const INSTAGRAM_TIMEOUT_MS = 45000;
-const MAX_CONSECUTIVE_TIMEOUTS = 3;
 
-async function runAgentWithTimeout(payload, timeoutMs = FIRECRAWL_STEP_TIMEOUT_MS) {
-  return Promise.race([
-    firecrawl.agent(payload),
-    new Promise((_, reject) => setTimeout(() => reject(new Error(`timeout after ${timeoutMs}ms`)), timeoutMs)),
-  ]);
+async function runAgent(payload) {
+  return firecrawl.agent(payload);
 }
 
 function isRateOrCreditError(message) {
   const m = (message || '').toLowerCase();
   return m.includes('insufficient credits') || m.includes('rate limit exceeded');
-}
-
-function isTimeoutError(message) {
-  return (message || '').toLowerCase().includes('timeout after');
 }
 
 function isInstagramUrl(url) {
@@ -205,7 +195,6 @@ async function main() {
 
   const allDeals = [];
   const seenUrls = new Set();
-  let consecutiveTimeouts = 0;
   
   console.log(`🔍 Scrape ${SCRAPE_URLS.length} Seiten (Instagram & TikTok)...`);
   
@@ -216,14 +205,12 @@ async function main() {
     console.log(`   [${i + 1}/${SCRAPE_URLS.length}] ${source}...`);
     
     try {
-      const timeoutMs = isInstagramUrl(url) ? INSTAGRAM_TIMEOUT_MS : FIRECRAWL_STEP_TIMEOUT_MS;
-      const result = await runAgentWithTimeout({
+      const result = await runAgent({
         url: url,
         prompt: PROMPT,
         schema: foodSchema,
         model: 'spark-1-pro',
-      }, timeoutMs);
-      consecutiveTimeouts = 0;
+      });
       
       if (result && result.data) {
         let data = result.data;
@@ -285,15 +272,6 @@ async function main() {
       if (isRateOrCreditError(e.message)) {
         console.log('      → Stoppe Run frühzeitig wegen API-Limit/Credits');
         break;
-      }
-      if (isTimeoutError(e.message)) {
-        consecutiveTimeouts += 1;
-        if (consecutiveTimeouts >= MAX_CONSECUTIVE_TIMEOUTS) {
-          console.log('      → Zu viele Timeouts in Folge, stoppe Run frühzeitig');
-          break;
-        }
-      } else {
-        consecutiveTimeouts = 0;
       }
     }
     
