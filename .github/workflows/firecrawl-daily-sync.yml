@@ -2,7 +2,7 @@ name: "Firecrawl Daily Sync + Slack"
 
 on:
   schedule:
-    - cron: '0 6 * * *' # Parallel daily sync: 07:00 Vienna winter / 08:00 summer
+    - cron: '0 9 * * *' # Run after all 3 Firecrawl jobs: 10:00 Vienna winter / 11:00 summer
   workflow_dispatch:
 
 concurrency:
@@ -65,7 +65,7 @@ jobs:
         run: |
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
-          git add docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-instagram.json docs/deals-pending-joe.json docs/deals-pending-all.json docs/sent-deal-ids.json docs/instagram-source-stats.json docs/instagram-discovery-report.json 2>/dev/null || true
+          git add docs/deals-pending-instagram.json docs/deals-pending-joe.json docs/deals-pending-all.json docs/sent-deal-ids.json docs/instagram-source-stats.json docs/instagram-discovery-report.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
