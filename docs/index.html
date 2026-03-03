@@ -1006,7 +1006,7 @@
         }
 
         const EXPIRED_VISIBILITY_MS = 24 * 60 * 60 * 1000;
-        const UNKNOWN_EXPIRY_MAX_AGE_MS = 48 * 60 * 60 * 1000;
+        const UNKNOWN_EXPIRY_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
         function getDealBaseTimestampMs(deal) {
             const candidates = [deal.approvedAt, deal.dealDate, deal.pubDate, deal.submittedAt];
