@@ -259,7 +259,7 @@
         .no-content { text-align: center; padding: 20px; color: #9ca3af; font-size: 13px; }
         
         /* ADD DEAL FLOATING BUTTON */
-        .fab-add { position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-size: 28px; cursor: pointer; box-shadow: 0 4px 20px rgba(16,185,129,0.4); z-index: 90; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .fab-add { position: fixed; bottom: max(96px, calc(96px + env(safe-area-inset-bottom))); right: 20px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-size: 28px; cursor: pointer; box-shadow: 0 4px 20px rgba(16,185,129,0.4); z-index: 90; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
         .fab-add:hover { transform: scale(1.1); box-shadow: 0 6px 30px rgba(16,185,129,0.5); }
         .fab-add:active { transform: scale(0.95); }
         .fab-tooltip { position: absolute; right: 70px; background: #1f2937; color: white; padding: 8px 12px; border-radius: 8px; font-size: 12px; white-space: nowrap; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
