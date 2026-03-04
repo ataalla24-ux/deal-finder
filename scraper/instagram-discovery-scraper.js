@@ -29,6 +29,7 @@ const DEFAULT_CONFIG = {
   maxDealsPerInstagramAccount: 4,
 };
 let CONFIG = { ...DEFAULT_CONFIG };
+const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp']);
 
 const SEED_HASHTAGS = [
   'gratiswien',
@@ -413,6 +414,76 @@ function parseRelativeAgeToDate(text, nowMs = Date.now()) {
   const ms = msPerUnit[unit];
   if (!ms) return null;
   return new Date(nowMs - n * ms).toISOString();
+}
+
+function extractRelativeAgeDays(text) {
+  const raw = cleanText(text).toLowerCase();
+  if (!raw) return null;
+
+  const wordMatch = raw.match(/(\d+)\s*(hours?|stunden|days?|tage|weeks?|wochen|months?|monate|years?|jahre?n?)\b/i);
+  if (wordMatch) {
+    const n = Number(wordMatch[1]);
+    const unit = wordMatch[2].toLowerCase();
+    if (!Number.isFinite(n) || n < 0) return null;
+    if (unit.startsWith('hour') || unit.includes('stund')) return 0;
+    if (unit.startsWith('day') || unit.includes('tag')) return n;
+    if (unit.startsWith('week') || unit.includes('woch')) return n * 7;
+    if (unit.startsWith('month') || unit.includes('monat')) return n * 30;
+    if (unit.startsWith('year') || unit.includes('jahr')) return n * 365;
+  }
+
+  const compactMatch = raw.match(/(?:edited\s*•\s*)?(\d+)\s*([dhwmy])\b/i);
+  if (compactMatch) {
+    const n = Number(compactMatch[1]);
+    const unit = compactMatch[2].toLowerCase();
+    if (!Number.isFinite(n) || n < 0) return null;
+    if (unit === 'h') return 0;
+    if (unit === 'd') return n;
+    if (unit === 'w') return n * 7;
+    if (unit === 'm') return n * 30;
+    if (unit === 'y') return n * 365;
+  }
+
+  return null;
+}
+
+function parseDateCandidatesFromText(text) {
+  const t = cleanText(text);
+  if (!t) return [];
+  const out = [];
+
+  const ymdMatches = [...t.matchAll(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/g)];
+  for (const m of ymdMatches) {
+    const yyyy = Number(m[1]);
+    const mm = Number(m[2]);
+    const dd = Number(m[3]);
+    const d = new Date(Date.UTC(yyyy, mm - 1, dd, 12, 0, 0));
+    if (!Number.isNaN(d.getTime())) out.push(d.getTime());
+  }
+
+  const dmyMatches = [...t.matchAll(/\b(\d{1,2})\.(\d{1,2})\.(\d{2,4})\b/g)];
+  for (const m of dmyMatches) {
+    const dd = Number(m[1]);
+    const mm = Number(m[2]);
+    const yyRaw = String(m[3]);
+    const yyyy = yyRaw.length === 2 ? Number(`20${yyRaw}`) : Number(yyRaw);
+    const d = new Date(Date.UTC(yyyy, mm - 1, dd, 12, 0, 0));
+    if (!Number.isNaN(d.getTime())) out.push(d.getTime());
+  }
+
+  return out;
+}
+
+function textSignalsPostTooOld(text) {
+  const relativeAgeDays = extractRelativeAgeDays(text);
+  if (relativeAgeDays !== null && relativeAgeDays > CONFIG.maxAgeDays) return true;
+
+  const candidateDates = parseDateCandidatesFromText(text);
+  if (candidateDates.length === 0) return false;
+
+  const freshCutoff = Date.now() - CONFIG.maxAgeDays * 24 * 60 * 60 * 1000;
+  const recentCandidates = candidateDates.filter((ts) => ts >= freshCutoff && ts <= Date.now() + 24 * 60 * 60 * 1000);
+  return recentCandidates.length === 0;
 }
 
 function parseDateFromPage({ ldDate, timeDateTime, igScriptTimestamp, ogDescription, fullText, fallbackNow = Date.now() }) {
@@ -1107,10 +1178,12 @@ async function scrapeInstagramDiscovery() {
           ogDescription: data.ogDescription,
           fullText: combinedText,
         });
-        if (!pubDateMeta || !pubDateMeta.iso || !isFresh(pubDateMeta.iso)) continue;
+        if (!pubDateMeta || !pubDateMeta.iso || !TRUSTED_PUBDATE_SOURCES.has(pubDateMeta.source)) continue;
+        if (!isFresh(pubDateMeta.iso)) continue;
         const pubDateIso = pubDateMeta.iso;
 
         if (isExpiredByText(combinedText)) continue;
+        if (textSignalsPostTooOld(combinedText)) continue;
 
         const isWien = containsKeyword(combinedText, WIEN_KEYWORDS)
           || [...candidate.sourceRefs].some((k) => k.includes('wien') || k.includes('vienna'));
