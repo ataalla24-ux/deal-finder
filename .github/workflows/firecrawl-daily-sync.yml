@@ -1,8 +1,8 @@
-name: "Firecrawl Daily Sync + Slack"
+name: "Firecrawl Daily Sync"
 
 on:
   schedule:
-    - cron: '0 9 * * *' # Run after all 3 Firecrawl jobs: 10:00 Vienna winter / 11:00 summer
+    - cron: '0 4 * * *' # Start early so Instagram/jö can finish before 11:00 Vienna digest
   workflow_dispatch:
 
 concurrency:
@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  scrape-and-notify:
+  scrape-and-prepare:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -55,22 +55,16 @@ jobs:
       - name: Filter alte Deals
         run: node scraper/filter-old-deals.js
 
-      - name: Send Daily Digest to Slack
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
-        run: node scraper/slack-notify.js
-
       - name: Commit deal updates
         run: |
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
-          git add docs/deals-pending-instagram.json docs/deals-pending-joe.json docs/deals-pending-all.json docs/sent-deal-ids.json docs/instagram-source-stats.json docs/instagram-discovery-report.json 2>/dev/null || true
+          git add docs/deals-pending-instagram.json docs/deals-pending-joe.json docs/instagram-source-stats.json docs/instagram-discovery-report.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
           fi
-          git commit -m "Daily firecrawl sync $(date +%Y-%m-%d)"
+          git commit -m "Daily sync sources $(date +%Y-%m-%d)"
           if ! git pull --rebase --autostash origin main; then
             echo "⚠️ Rebase conflict on generated files. Skipping push for this run."
             git rebase --abort || true

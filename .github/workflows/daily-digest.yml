@@ -1,13 +1,21 @@
 name: "Daily Deal Digest"
 # Runs once per day at 11:00 Vienna time (10:00 UTC)
-# All scrapers finish by 09:00 - this collects everything and sends ONE Slack message
+# Collects the finished Firecrawl + Instagram/jö pending files and sends ONE Slack digest
 
 on:
+  schedule:
+    - cron: '0 10 * * *' # 11:00 Vienna winter / 12:00 summer
   workflow_dispatch:
+
+concurrency:
+  group: daily-deal-digest
+  cancel-in-progress: false
 
 jobs:
   send-digest:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -15,13 +23,33 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       - name: Send Daily Digest to Slack
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
         run: node scraper/slack-notify.js
+
+      - name: Commit digest state
+        run: |
+          git config user.name "Deal Bot"
+          git config user.email "bot@freefinder.wien"
+          git add docs/deals-pending-all.json docs/sent-deal-ids.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Daily digest state $(date +%Y-%m-%d)"
+          if ! git pull --rebase --autostash origin main; then
+            echo "⚠️ Rebase conflict on generated files. Skipping push for this run."
+            git rebase --abort || true
+            exit 0
+          fi
+          if ! git push origin HEAD:main; then
+            echo "⚠️ Push failed (branch moved). Skipping push for this run."
+            exit 0
+          fi
