@@ -96,6 +96,13 @@ async function getBotUserId() {
     return data.ok ? (data.user_id || '') : '';
 }
 
+function findPickedDeal(deals, pickNumber) {
+  const exactMatch = deals.find((deal) => Number(deal?.order) === Number(pickNumber));
+  if (exactMatch) return exactMatch;
+
+  return null;
+}
+
 function hasHumanApproval(message, botUserId) {
     const reactions = Array.isArray(message?.reactions) ? message.reactions : [];
     const checks = reactions.filter((r) => ['white_check_mark', 'heavy_check_mark', 'check'].includes(r.name));
@@ -199,14 +206,14 @@ async function main() {
           process.exit(0);
     }
 
-  // pickNumber is 1-based (as shown in Slack)
-  const deal = deals[pickNumber - 1];
+  const deal = findPickedDeal(deals, pickNumber);
     if (!deal) {
-          console.log(`Pick #${pickNumber} out of range (only ${deals.length} deals)`);
+          const maxOrder = deals.reduce((max, current) => Math.max(max, Number(current?.order) || 0), 0);
+          console.log(`Pick #${pickNumber} not found in digest numbering (parsed deals: ${deals.length}, max order: ${maxOrder})`);
           process.exit(0);
     }
 
-  console.log(`Deal #${pickNumber}: ${deal.brand} - ${deal.title}`);
+  console.log(`Deal #${deal.order}: ${deal.brand} - ${deal.title}`);
 
   const botUserId = await getBotUserId();
   const pickedMessage = threadMessages.find((msg) => cleanText(msg?.ts) === cleanText(deal.slackTs));
