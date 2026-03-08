@@ -1046,9 +1046,115 @@
             return lower.length <= 4;
         }
 
-        function getDisplayBrand(deal) {
+        const SOURCE_LIKE_BRANDS_APP = [
+            /^preisjaeger$/i,
+            /^wien deals$/i,
+            /^instagram$/i,
+            /^tiktok$/i,
+            /^slack digest$/i,
+            /^restaurant \(wien\)$/i,
+            /^gemeinde$/i,
+            /^kirche$/i
+        ];
+
+        const GENERIC_APP_LOGOS = new Set(['🎁', '🎯', '🎉', '🔁', '📸', '🎵']);
+
+        const APP_BRAND_RULES = [
+            { pattern: /\bmcdonald'?s?\b|\bmccafe\b/i, name: "McDonald's", logo: '🍟' },
+            { pattern: /\bburger king\b/i, name: 'Burger King', logo: '🍔' },
+            { pattern: /\bstarbucks\b/i, name: 'Starbucks', logo: '☕' },
+            { pattern: /\btchibo\b/i, name: 'Tchibo', logo: '☕' },
+            { pattern: /\bnespresso\b/i, name: 'Nespresso', logo: '☕' },
+            { pattern: /\bintimissimi\b/i, name: 'Intimissimi', logo: '🧦' },
+            { pattern: /\bbipa\b/i, name: 'BIPA', logo: '💄' },
+            { pattern: /\bdm\b/i, name: 'dm', logo: '🧴' },
+            { pattern: /\bm[üu]ller\b/i, name: 'Muller', logo: '💋' },
+            { pattern: /\bspar\b/i, name: 'SPAR', logo: '🛒' },
+            { pattern: /\bbilla\b/i, name: 'BILLA', logo: '🛒' },
+            { pattern: /\bhofer\b/i, name: 'HOFER', logo: '🛒' },
+            { pattern: /\blidl\b/i, name: 'Lidl', logo: '🛒' },
+            { pattern: /\bikea\b/i, name: 'IKEA', logo: '🪑' },
+            { pattern: /\brooni\b/i, name: 'Rooni Restaurant', logo: '🍽️' },
+            { pattern: /\bomv\b/i, name: 'OMV', logo: '⛽' },
+            { pattern: /\bj[öo]o\b|\bj[öo]e\b/i, name: 'joo', logo: '🎁' },
+            { pattern: /\bwolt\b/i, name: 'Wolt', logo: '🛵' },
+            { pattern: /\blieferando\b/i, name: 'Lieferando', logo: '🛵' },
+            { pattern: /\buber eats\b/i, name: 'Uber Eats', logo: '🛵' },
+            { pattern: /\ball4golf\b/i, name: 'ALL4GOLF', logo: '⛳' },
+            { pattern: /\bspee\b/i, name: 'Spee', logo: '🧺' },
+            { pattern: /\bwiener deewan\b/i, name: 'Wiener Deewan', logo: '🍛' },
+            { pattern: /\btoo good to go\b/i, name: 'Too Good To Go', logo: '🥡' },
+            { pattern: /\bwiener linien\b/i, name: 'Wiener Linien', logo: '🚇' },
+            { pattern: /\bheiling eismacher\b/i, name: 'Heiling EISMACHER', logo: '🍨' },
+            { pattern: /\bwestfield\b/i, name: 'Westfield Club', logo: '🛍️' }
+        ];
+
+        function isSourceLikeBrandForApp(value) {
+            const text = cleanUiNoiseText(value);
+            if (!text) return true;
+            return SOURCE_LIKE_BRANDS_APP.some((pattern) => pattern.test(text));
+        }
+
+        function findKnownBrandForApp() {
+            const signal = cleanUiNoiseText(Array.from(arguments).filter(Boolean).join(' ')).toLowerCase();
+            return APP_BRAND_RULES.find((rule) => rule.pattern.test(signal)) || null;
+        }
+
+        function inferPreferredBrandForApp(deal) {
             const explicitBrand = cleanUiNoiseText(deal.brand || '');
-            if (explicitBrand && !isLikelyGenericLocation(explicitBrand)) return explicitBrand;
+            if (explicitBrand && !isSourceLikeBrandForApp(explicitBrand) && !isLikelyGenericLocation(explicitBrand)) return explicitBrand;
+
+            const title = cleanUiNoiseText(deal.title || '');
+            const bracketBrand = title.match(/^\[([^\]]{2,40})\]/);
+            if (bracketBrand) return cleanUiNoiseText(bracketBrand[1]);
+
+            const known = findKnownBrandForApp(title, deal.description, deal.distance, deal.url, explicitBrand);
+            if (known) return known.name;
+
+            const beiBrand = title.match(/\bbei\s+([A-Za-z0-9À-ÿ&' .-]{2,60})$/i);
+            if (beiBrand) {
+                const candidate = cleanUiNoiseText(beiBrand[1]);
+                if (candidate && !isSourceLikeBrandForApp(candidate) && !isLikelyGenericLocation(candidate)) return candidate;
+            }
+
+            const distance = cleanUiNoiseText(deal.distance || '');
+            const distanceLead = cleanUiNoiseText(distance.split(',')[0] || '');
+            if (distanceLead && !isLikelyGenericLocation(distanceLead) && !/\b(straße|strasse|gasse|platz|weg|ring|allee|bezirk)\b/i.test(distanceLead)) {
+                return distanceLead;
+            }
+
+            return explicitBrand || '';
+        }
+
+        function inferLogoForApp(deal, brand) {
+            const known = findKnownBrandForApp(brand, deal.title, deal.description, deal.distance, deal.url);
+            if (known) return known.logo;
+
+            const category = cleanUiNoiseText(deal.category || '').toLowerCase();
+            const type = cleanUiNoiseText(deal.type || '').toLowerCase();
+            if (category === 'kaffee') return '☕';
+            if (category === 'essen') return '🍽️';
+            if (category === 'supermarkt') return '🛒';
+            if (category === 'fitness') return '💪';
+            if (category === 'reisen') return '✈️';
+            if (category === 'kultur') return '🎭';
+            if (category === 'beauty') return '💄';
+            if (category === 'technik') return '📱';
+            if (category === 'kirche') return '⛪';
+            if (category === 'gottesdienste') return '🕊️';
+            if (category === 'events') return '🎫';
+            if (type === 'gewinnspiel') return '🎉';
+            if (type === 'bogo') return '🔁';
+            if (type === 'gratis') return '🎁';
+            return '🎯';
+        }
+
+        function getDisplayBrand(deal) {
+            const preferredBrand = inferPreferredBrandForApp(deal);
+            if (preferredBrand) return preferredBrand;
+
+            const explicitBrand = cleanUiNoiseText(deal.brand || '');
+            if (explicitBrand && !isLikelyGenericLocation(explicitBrand) && !isSourceLikeBrandForApp(explicitBrand)) return explicitBrand;
 
             const location = cleanUiNoiseText(deal.distance || '');
             if (location && !isLikelyGenericLocation(location) && !(/,/.test(location) || /^\d{4}\s+wien/i.test(location))) {
@@ -1390,6 +1496,11 @@
             out.type = inferDealTypeForApp(out);
             out.category = normalizeCategoryForApp(out.category, out);
             if (out.category === 'events' && !isChristianContent(out)) out.category = 'kultur';
+            const preferredBrand = inferPreferredBrandForApp(out);
+            if (preferredBrand) out.brand = preferredBrand;
+            if (!out.logo || GENERIC_APP_LOGOS.has(out.logo)) {
+                out.logo = inferLogoForApp(out, out.brand);
+            }
             const missing = Array.isArray(out.missingFields) ? [...out.missingFields] : [];
             if (!out.url) missing.push('Ziel-URL');
             if (!(out.distance || '').trim()) missing.push('Ort');

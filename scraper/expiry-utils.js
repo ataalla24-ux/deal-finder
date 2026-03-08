@@ -15,6 +15,25 @@ const MONTH_MAP = {
   'dezember': 11, 'december': 11, 'dez': 11, 'dec': 11,
 };
 
+const URL_EXPIRY_BLOCK_HOSTS = new Set([
+  'instagram.com',
+  'www.instagram.com',
+  'tiktok.com',
+  'www.tiktok.com',
+  'preisjaeger.at',
+  'www.preisjaeger.at',
+  'gutscheine.at',
+  'www.gutscheine.at',
+  'facebook.com',
+  'www.facebook.com',
+  'x.com',
+  'www.x.com',
+  'twitter.com',
+  'www.twitter.com',
+  'slack.com',
+  'www.slack.com',
+]);
+
 function cleanText(value) {
   if (!value) return '';
   return String(value).replace(/\s+/g, ' ').trim();
@@ -33,6 +52,30 @@ export function isVagueExpiry(value) {
   if (!text) return true;
   return /^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend|ongoing|k\.a\.?|tbd|coming soon|bei eröffnung|bei eroeffnung|regelm[aä]ßig|regelmaessig)/i.test(text)
     || /(siehe details|siehe website|siehe webseite|check website|not specified|unknown unknown)/i.test(text);
+}
+
+function isRecurringChurchLikeExpiry(value) {
+  const text = cleanText(value).toLowerCase();
+  if (!text) return false;
+  return /^(regelm[aä]ßig|regelmaessig|zeiten auf webseite pr[üu]fen|aktuelle termine auf webseite|so \d{1,2}:\d{2} uhr|jeden\b|jeden sonntag\b|jeden dienstag\b|jeden mittwoch\b|jeden donnerstag\b|jeden freitag\b|jeden samstag\b)/i.test(text);
+}
+
+export function shouldSkipUrlExpiryLookup(deal = {}, url = '', raw = '') {
+  if (!url || typeof url !== 'string') return true;
+
+  try {
+    const parsedUrl = new URL(url);
+    if (URL_EXPIRY_BLOCK_HOSTS.has(parsedUrl.hostname.toLowerCase())) return true;
+  } catch {
+    return true;
+  }
+
+  const category = cleanText(deal.category || '').toLowerCase();
+  if (category === 'kirche' || category === 'gottesdienste') return true;
+  if ((category === 'events' || category === 'gemeinde') && isRecurringChurchLikeExpiry(raw)) return true;
+
+  if (isRecurringChurchLikeExpiry(raw)) return true;
+  return false;
 }
 
 function parseIsoLike(text) {
@@ -255,6 +298,7 @@ export async function normalizeDealExpiry(deal, options = {}) {
     allowUrlLookup &&
     url &&
     /^https?:\/\//i.test(url) &&
+    !shouldSkipUrlExpiryLookup(deal, url, raw) &&
     (
       !parsed ||
       parsed.precision !== 'day' ||

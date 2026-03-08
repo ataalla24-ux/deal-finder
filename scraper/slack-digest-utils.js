@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { isGenericJunkDeal, normalizeDealRecord } from './deal-normalization-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -225,21 +226,14 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
     type,
   ]);
 
-  return {
+  const normalized = normalizeDealRecord({
     id,
     title: title || `${brand || 'Deal'} Deal`,
-    brand: brand || 'Wien Deals',
+    brand,
     description,
     url,
     category: normalizedCategory,
     type,
-    logo: type === 'gratis'
-      ? '🎁'
-      : type === 'gewinnspiel'
-        ? '🎉'
-        : type === 'bogo'
-          ? '🔁'
-          : '🎯',
     distance,
     source: 'Slack Digest',
     expires,
@@ -254,7 +248,10 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
     approvedAt: '',
     missingFields,
     order,
-  };
+  });
+
+  if (isGenericJunkDeal(normalized)) return null;
+  return normalized;
 }
 
 function readPendingQueue() {
