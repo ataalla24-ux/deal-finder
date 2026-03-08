@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { cleanText, extractDealsFromThreadMessages, extractSlackMessageText } from './slack-digest-utils.js';
+import { isVagueExpiry, normalizeDealExpiry, parseExpiryDetails } from './expiry-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,6 +33,7 @@ loadEnvFile();
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
+const MAX_APPROVAL_URL_EXPIRY_CHECKS = Number(process.env.MAX_APPROVAL_URL_EXPIRY_CHECKS || 50);
 
 function ensureObject(value, fallback = {}) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
@@ -86,6 +88,10 @@ function normalizeDeal(raw) {
     distance: cleanText(deal.distance || deal.location || deal.ort) || 'Wien',
     source: cleanText(deal.source) || 'Slack Approved',
     expires: cleanText(deal.expires),
+    expiresOriginal: cleanText(deal.expiresOriginal || deal.expires),
+    expiresPrecision: cleanText(deal.expiresPrecision),
+    expiresSource: cleanText(deal.expiresSource),
+    expiresDetectedFromUrl: Boolean(deal.expiresDetectedFromUrl),
     pubDate,
     qualityScore: Number(deal.qualityScore) || 0,
     votes: Number(deal.votes) || 1,
@@ -97,6 +103,35 @@ function normalizeDeal(raw) {
     approvedAt,
     missingFields,
   };
+}
+
+async function normalizeApprovedDealExpiries(approvedDeals) {
+  const now = new Date();
+  const urlCache = new Map();
+  let urlChecksUsed = 0;
+  let urlExpiryHits = 0;
+
+  for (const deal of approvedDeals) {
+    const rawExpiry = cleanText(deal.expires);
+    const parsedExpiry = parseExpiryDetails(rawExpiry, { now });
+    const wantsUrlLookup = Boolean(
+      deal.url &&
+      (!rawExpiry || isVagueExpiry(rawExpiry) || !parsedExpiry || parsedExpiry.precision !== 'day')
+    );
+    const cached = deal.url ? urlCache.has(deal.url) : false;
+    const allowUrlLookup = wantsUrlLookup && (cached || urlChecksUsed < MAX_APPROVAL_URL_EXPIRY_CHECKS);
+
+    const beforeCacheSize = urlCache.size;
+    await normalizeDealExpiry(deal, { now, urlCache, allowUrlLookup });
+    if (allowUrlLookup && deal.url && !cached && urlCache.size > beforeCacheSize) {
+      urlChecksUsed += 1;
+    }
+    if (deal.expiresDetectedFromUrl) {
+      urlExpiryHits += 1;
+    }
+  }
+
+  return { urlChecksUsed, urlExpiryHits };
 }
 
 function loadJson(filePath, fallback) {
@@ -327,6 +362,9 @@ async function main() {
     console.log('ℹ️ Keine neuen approvals gefunden, deals.json bleibt unverändert');
     return;
   }
+
+  const expiryNormalization = await normalizeApprovedDealExpiries(approved);
+  console.log(`🔎 approval expiry checks: ${expiryNormalization.urlChecksUsed}/${MAX_APPROVAL_URL_EXPIRY_CHECKS}, Treffer: ${expiryNormalization.urlExpiryHits}`);
 
   const existingApproved = loadExistingApprovedDeals();
   const mergedApproved = mergeApprovedDeals(existingApproved, approved);
