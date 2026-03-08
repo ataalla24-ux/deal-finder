@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { normalizeCategoryForScraper } from './category-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -212,13 +213,7 @@ function isWienRelevant(text, sourceKey, postUrl, brand) {
 }
 
 function detectCategory(text) {
-  const lower = cleanText(text).toLowerCase();
-  if (EVENT_KEYWORDS.some((k) => lower.includes(k))) return 'events';
-  if (FOOD_KEYWORDS.some((k) => lower.includes(k))) return 'essen';
-  if (lower.includes('coffee') || lower.includes('kaffee')) return 'kaffee';
-  if (lower.includes('fitness') || lower.includes('gym')) return 'fitness';
-  if (SHOPPING_KEYWORDS.some((k) => lower.includes(k))) return 'shopping';
-  return 'wien';
+  return normalizeCategoryForScraper('', [text]);
 }
 
 function detectType(text) {

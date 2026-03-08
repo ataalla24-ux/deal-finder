@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { normalizeCategoryForScraper } from './category-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -173,13 +174,22 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
 
   if (!id) return null;
 
+  const normalizedCategory = normalizeCategoryForScraper(category, [
+    title,
+    brand,
+    description,
+    distance,
+    url,
+    type,
+  ]);
+
   return {
     id,
     title: title || `${brand || 'Deal'} Deal`,
     brand: brand || 'Wien Deals',
     description,
     url,
-    category,
+    category: normalizedCategory,
     type,
     logo: type === 'gratis' ? '🎁' : '🎯',
     distance,

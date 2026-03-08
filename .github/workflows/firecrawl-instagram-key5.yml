@@ -1,0 +1,54 @@
+name: "Firecrawl Instagram Gastro - Key 5"
+
+on:
+  schedule:
+    - cron: '0 4 * * *' # Start stagger 4: 05:00 Vienna winter / 06:00 summer
+  workflow_dispatch:
+
+concurrency:
+  group: firecrawl-instagram-key5
+  cancel-in-progress: false
+
+jobs:
+  instagram-gastro:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Instagram Gastro Scraper
+        env:
+          FIRECRAWL_API_KEY5: ${{ secrets.FIRECRAWL_API_KEY5 }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+        run: node scraper/firecrawl-instagram-gastro5.js
+
+      - name: Filter alte Deals
+        run: node scraper/filter-old-deals.js
+
+      - name: Commit deals
+        run: |
+          git config user.name "Deal Bot"
+          git config user.email "bot@freefinder.wien"
+          git add docs/deals-pending-firecrawl5.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Firecrawl5 deals $(date +%Y-%m-%d)"
+          if ! git pull --rebase --autostash origin main; then
+            echo "⚠️ Rebase conflict on generated files. Skipping push for this run."
+            git rebase --abort || true
+            exit 0
+          fi
+          if ! git push origin HEAD:main; then
+            echo "⚠️ Push failed (branch moved). Skipping push for this run."
+            exit 0
+          fi

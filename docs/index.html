@@ -344,6 +344,9 @@
         .badge-new { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; }
         .badge-expiry { background: linear-gradient(135deg, #ef4444, #f97316); color: white; font-weight: 800; box-shadow: 0 2px 8px rgba(239,68,68,0.4); }
         .badge-expiry.urgent { animation: blink-badge 1s infinite; }
+        .badge-expiry.today { background: linear-gradient(135deg, #dc2626, #ef4444); box-shadow: 0 3px 10px rgba(220,38,38,0.5); }
+        .badge-expiry.warn { background: linear-gradient(135deg, #f97316, #f59e0b); box-shadow: 0 3px 10px rgba(245,158,11,0.45); }
+        .badge-expiry.safe { background: linear-gradient(135deg, #0ea5e9, #3b82f6); box-shadow: 0 3px 10px rgba(59,130,246,0.4); }
         @keyframes blink-badge { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
         .deal-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6; }
         .deal-info { font-size: 12px; color: #9ca3af; }
@@ -541,6 +544,7 @@
         /* CARD EXPIRY COUNTDOWN */
         .card-countdown { display: flex; align-items: center; gap: 6px; margin: 10px 0 4px; font-size: 13px; font-weight: 600; }
         .card-countdown.warning { color: #ef4444; }
+        .card-countdown.warn { color: #f97316; }
         .card-countdown.ok { color: #6b7280; }
         .card-countdown-icon { font-size: 15px; }
         .card-countdown-time { font-variant-numeric: tabular-nums; }
@@ -1005,6 +1009,85 @@
             return null;
         }
 
+        function formatDateAT(ms) {
+            if (!Number.isFinite(ms)) return '';
+            try {
+                return new Date(ms).toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            } catch {
+                return '';
+            }
+        }
+
+        function getExpiryPresentation(rawExpiry) {
+            const expiryMs = parseExpiryToMs(rawExpiry);
+            if (!Number.isFinite(expiryMs)) {
+                return { hasExpiry: false };
+            }
+
+            const now = Date.now();
+            const msLeft = expiryMs - now;
+            const hoursLeft = Math.max(0, Math.ceil(msLeft / 3600000));
+            const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
+            const dateLabel = formatDateAT(expiryMs);
+
+            const today = new Date();
+            const endDate = new Date(expiryMs);
+            const isToday = today.toDateString() === endDate.toDateString();
+
+            let cardClass = ' expiring-ok';
+            let barColor = 'green';
+            let badgeClass = 'safe';
+            let countdownClass = 'ok';
+            let badgeText = `📅 Gültig bis ${dateLabel}`;
+            let countdownText = `Gültig bis ${dateLabel}`;
+
+            if (msLeft <= 0 || isToday) {
+                cardClass = ' expiring-soon';
+                barColor = 'red';
+                badgeClass = 'today urgent';
+                countdownClass = 'warning';
+                badgeText = '🚨 Nur heute gültig';
+                countdownText = '⏳ Läuft heute ab';
+            } else if (hoursLeft <= 24) {
+                cardClass = ' expiring-soon';
+                barColor = 'red';
+                badgeClass = 'urgent';
+                countdownClass = 'warning';
+                badgeText = `⚠️ Nur noch ${hoursLeft}h gültig`;
+                countdownText = `Läuft in ${hoursLeft} Std. ab`;
+            } else if (daysLeft <= 3) {
+                cardClass = ' expiring-mid';
+                barColor = 'orange';
+                badgeClass = 'warn';
+                countdownClass = 'warn';
+                badgeText = `⚠️ Noch ${daysLeft} Tage gültig`;
+                countdownText = `Läuft in ${daysLeft} Tagen ab`;
+            } else if (daysLeft <= 7) {
+                cardClass = ' expiring-mid';
+                barColor = 'orange';
+                badgeClass = 'warn';
+                countdownClass = 'warn';
+                badgeText = `🕒 Noch ${daysLeft} Tage gültig`;
+                countdownText = `Gültig bis ${dateLabel}`;
+            }
+
+            const pct = Math.max(2, Math.min(100, Math.round((Math.min(daysLeft, 21) / 21) * 100)));
+            return {
+                hasExpiry: true,
+                expiryMs,
+                hoursLeft,
+                daysLeft,
+                dateLabel,
+                cardClass,
+                barColor,
+                badgeClass,
+                badgeText,
+                countdownClass,
+                countdownText,
+                barPct: pct
+            };
+        }
+
         const EXPIRED_VISIBILITY_MS = 24 * 60 * 60 * 1000;
         const UNKNOWN_EXPIRY_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -1045,14 +1128,134 @@
             return foodDrink && freeSignal;
         }
 
+        const CATEGORY_ALIASES = {
+            church: 'kirche',
+            christlich: 'kirche',
+            christlichevents: 'events',
+            gemeinde: 'kirche',
+            restaurant: 'essen',
+            gastro: 'essen',
+            food: 'essen',
+            cafe: 'kaffee',
+            'café': 'kaffee',
+            coffee: 'kaffee',
+            supermarket: 'supermarkt',
+            market: 'supermarkt',
+            lebensmittel: 'supermarkt',
+            drogerie: 'beauty',
+            kosmetik: 'beauty',
+            fashion: 'shopping',
+            mode: 'shopping',
+            tech: 'technik',
+            elektronik: 'technik',
+            stream: 'streaming',
+            culture: 'kultur',
+            museum: 'kultur',
+            festival: 'kultur',
+            travel: 'reisen',
+            urlaub: 'reisen',
+            transport: 'reisen'
+        };
+
+        const WEAK_APP_CATEGORIES = new Set(['', 'wien', 'gratis', 'shopping']);
+
+        const CATEGORY_HINTS = {
+            kaffee: [
+                'kaffee', 'coffee', 'cafe', 'café', 'espresso', 'latte', 'cappuccino',
+                'starbucks', 'tchibo', 'nespresso', 'mccafe'
+            ],
+            essen: [
+                'restaurant', 'essen', 'food', 'pizza', 'burger', 'kebab', 'kebap', 'döner',
+                'doener', 'falafel', 'wrap', 'brunch', 'buffet', 'snack', 'cocktail',
+                'drink', 'mittag', 'menü', 'menue', 'mcdonald', 'burger king', 'subway',
+                'domino', 'kfc', 'vapiano', 'lieferando', 'mjam', 'uber eats'
+            ],
+            supermarkt: [
+                'supermarkt', 'lebensmittel', 'einkauf', 'gutscheinheft', 'jö', 'joe',
+                'spar', 'billa', 'hofer', 'lidl', 'penny',
+                'libro', 'unimarkt', 'adeg'
+            ],
+            fitness: [
+                'fitness', 'gym', 'workout', 'probetraining', 'studio', 'fitinn', 'mcfit',
+                'clever fit', 'john harris', 'crossfit', 'yoga'
+            ],
+            reisen: [
+                'flug', 'flight', 'hotel', 'reise', 'urlaub', 'wizz', 'ryanair', 'oebb',
+                'öbb', 'bahn', 'rail', 'ticket', 'klimaticket', 'airbnb', 'booking'
+            ],
+            kultur: [
+                'museum', 'ausstellung', 'kino', 'theater', 'konzert', 'festival',
+                'vernissage', 'lesung', 'kunst', 'kabarett', 'oper'
+            ],
+            streaming: [
+                'spotify', 'netflix', 'disney+', 'prime video', 'youtube premium', 'deezer',
+                'streaming', 'hörbuch', 'hoerbuch', 'podcast'
+            ],
+            technik: [
+                'iphone', 'ipad', 'macbook', 'airpods', 'apple', 'samsung', 'playstation',
+                'xbox', 'smartphone', 'tablet', 'laptop', 'mediamarkt', 'saturn', 'a1',
+                'magenta', 'drei'
+            ],
+            beauty: [
+                'parfum', 'make-up', 'kosmetik', 'beauty', 'pflege', 'sephora', 'douglas',
+                'dm', 'bipa', 'müller', 'mueller', 'friseur'
+            ],
+            shopping: [
+                'gutschein', 'rabattcode', 'coupon', 'sale', 'shop', 'shopping', 'amazon',
+                'zalando', 'about you', 'ikea', 'möbel', 'moebel'
+            ]
+        };
+
+        function getCategorySignalText(deal) {
+            return [
+                deal.brand,
+                deal.source,
+                deal.title,
+                deal.description,
+                deal.distance,
+                deal.url,
+                deal.type,
+                deal.category
+            ].filter(Boolean).join(' ').toLowerCase();
+        }
+
+        function inferCategoryFromContent(deal) {
+            const text = getCategorySignalText(deal);
+
+            if (isChristianContent(deal)) {
+                return hasServiceTimeContext(deal) ? 'gottesdienste' : 'kirche';
+            }
+
+            if (CATEGORY_HINTS.kaffee.some((token) => text.includes(token))) return 'kaffee';
+            if (CATEGORY_HINTS.essen.some((token) => text.includes(token))) return 'essen';
+            if (CATEGORY_HINTS.supermarkt.some((token) => text.includes(token))) return 'supermarkt';
+            if (CATEGORY_HINTS.fitness.some((token) => text.includes(token))) return 'fitness';
+            if (CATEGORY_HINTS.reisen.some((token) => text.includes(token))) return 'reisen';
+            if (CATEGORY_HINTS.kultur.some((token) => text.includes(token))) return 'kultur';
+            if (CATEGORY_HINTS.streaming.some((token) => text.includes(token))) return 'streaming';
+            if (CATEGORY_HINTS.technik.some((token) => text.includes(token))) return 'technik';
+            if (CATEGORY_HINTS.beauty.some((token) => text.includes(token))) return 'beauty';
+            if (CATEGORY_HINTS.shopping.some((token) => text.includes(token))) return 'shopping';
+
+            return null;
+        }
+
         function normalizeCategoryForApp(rawCategory, deal) {
-            const cat = (rawCategory || '').toLowerCase().trim();
-            if (cat === 'gemeinde') return 'kirche';
-            if (cat === 'gottesdienste' || hasServiceTimeContext(deal)) return 'gottesdienste';
-            if (cat === 'kirche' || cat === 'church' || cat === 'christlich') return 'kirche';
-            if (cat === 'events') return isChristianContent(deal) ? 'events' : 'kultur';
+            const originalCat = (rawCategory || '').toLowerCase().trim();
+            const cat = CATEGORY_ALIASES[originalCat] || originalCat;
+            const inferred = inferCategoryFromContent({ ...deal, category: cat });
+
+            if (cat === 'gottesdienste' || (hasServiceTimeContext(deal) && isChristianContent(deal))) return 'gottesdienste';
+            if (cat === 'kirche') return 'kirche';
+            if (cat === 'events') return isChristianContent(deal) ? 'events' : (inferred || 'kultur');
             if (!cat && isChristianContent(deal)) return hasServiceTimeContext(deal) ? 'gottesdienste' : 'kirche';
-            return cat || 'wien';
+
+            if (WEAK_APP_CATEGORIES.has(cat) && inferred) return inferred;
+
+            if (cat === 'shopping' && inferred && inferred !== 'shopping') return inferred;
+            if (cat === 'wien' && inferred) return inferred;
+
+            return cat || inferred || 'wien';
         }
 
         function normalizeDealForApp(deal) {
@@ -1538,14 +1741,12 @@
             const redeemed = proData.isPro && proData.redeemedDeals && proData.redeemedDeals[d.id];
             const savingsVal = savingsMap[d.category] || 5;
             const redeemBtn = proData.isPro ? '<button class="btn redeem-btn ' + (redeemed ? 'redeemed' : '') + '" onclick="redeemDeal(\'' + d.id + '\',\'' + d.category + '\',' + savingsVal + ', event)">' + (redeemed ? '\u2705 Eingelöst' : '\uD83C\uDF81 Einlösen (' + savingsVal.toFixed(2) + '€)') + '</button>' : '';
-            const _expiryMs = parseExpiryToMs(d.expires);
-            const _hasExpiry = Number.isFinite(_expiryMs);
-            const _hLeftRaw = _hasExpiry ? Math.ceil((_expiryMs - Date.now()) / 3600000) : null;
-            const _hLeft = _hasExpiry ? Math.max(0, _hLeftRaw) : null;
-            const _ePct = _hasExpiry ? Math.max(2, Math.min(100, Math.round((_hLeft / 336) * 100))) : 100;
-            const _eClr = !_hasExpiry ? 'green' : _hLeft <= 24 ? 'red' : _hLeft <= 72 ? 'orange' : 'green';
-            const _expClass = !_hasExpiry ? '' : _hLeft <= 24 ? ' expiring-soon' : _hLeft <= 72 ? ' expiring-mid' : ' expiring-ok';
-            const _isExp = _hasExpiry && _hLeft > 0 && _hLeft <= 72;
+            const _expiry = getExpiryPresentation(d.expires);
+            const _hasExpiry = _expiry.hasExpiry;
+            const _expClass = _hasExpiry ? _expiry.cardClass : '';
+            const _ePct = _hasExpiry ? _expiry.barPct : 100;
+            const _eClr = _hasExpiry ? _expiry.barColor : 'green';
+            const _isExp = _hasExpiry;
             const _isExpiredVisible = d._lifecycle && d._lifecycle.state === 'expired-visible';
             // --- Professional info extraction ---
             const _loc = d.distance || '';
@@ -1561,11 +1762,11 @@
             const _address = _loc.includes(',') ? _loc.substring(_loc.indexOf(',') + 1).trim() : _loc;
             // Format date/time from expires field
             const _hasDate = _expires && !/^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend)/i.test(_expires);
-            const _dateDisplay = _hasDate ? _expires : '';
+            const _dateDisplay = _hasExpiry ? _expiry.dateLabel : (_hasDate ? _expires : '');
             const _hasTargetUrl = !!(d.url && String(d.url).trim());
             const _defaultBtnLabel = d.category === 'gottesdienste' ? 'Zeiten ansehen' : d.category === 'events' ? 'Event ansehen' : d.category === 'kirche' ? 'Zur Kirche' : 'Zum Deal';
             const _dealBtn = '<button class="action-btn deal-link-btn' + (_hasTargetUrl ? '' : ' disabled') + '" ' + (_hasTargetUrl ? '' : 'disabled ') + 'onclick="openDealUrl(\'' + d.id + '\', event)">' + '<span class="btn-icon">\uD83D\uDD17</span>' + (_hasTargetUrl ? _defaultBtnLabel : 'Link folgt') + '</button>';
-            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + _expClass + (_isExpiredVisible ? ' expired-visible' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')"><span class="deal-logo">' + (d.logo || '\uD83C\uDFAF') + '</span><div><div class="deal-brand">' + (_company || _brand) + '</div><div class="deal-title">' + _formattedTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + (_address || _loc) + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_hasExpiry && !_isExpiredVisible ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div><div class="card-countdown ' + (_hLeft <= 24 ? 'warning' : 'ok') + '"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">' + (_hLeft <= 24 ? 'Läuft in ' + Math.max(1, _hLeft) + ' Std. ab' : 'Läuft in ' + Math.max(1, Math.floor(_hLeft / 24)) + ' Tagen ab') + '</span></div>' : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + '<div class="deal-meta"><span class="badge ' + (d.type === 'gratis' ? 'badge-gratis' : d.type === 'testabo' ? 'badge-new' : 'badge-rabatt') + '">' + (d.type === 'gratis' ? '\uD83C\uDF81 GRATIS' : d.type === 'testabo' ? '\uD83C\uDD93 Testabo' : '\uD83D\uDCB0 Rabatt') + '</span>' + (_isExpiredVisible ? '<span class="badge badge-expiry urgent">\u26A0\uFE0F Bereits abgelaufen</span>' : '') + (_isExp && _hLeft > 0 ? '<span class="badge badge-expiry' + (_hLeft < 24 ? ' urgent' : '') + '">\u23F0 Läuft ab in ' + (_hLeft < 24 ? _hLeft + 'h' : Math.floor(_hLeft/24) + 'd') + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isNew ? '<span class="badge new">\u2728 Neu</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row">' + _dealBtn + '</div><div class="vote-section"><button class="action-btn vote-btn" onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
+            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + _expClass + (_isExpiredVisible ? ' expired-visible' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')"><span class="deal-logo">' + (d.logo || '\uD83C\uDFAF') + '</span><div><div class="deal-brand">' + (_company || _brand) + '</div><div class="deal-title">' + _formattedTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + (_address || _loc) + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_hasExpiry && !_isExpiredVisible ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div><div class="card-countdown ' + _expiry.countdownClass + '"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">' + _expiry.countdownText + '</span></div>' : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + '<div class="deal-meta"><span class="badge ' + (d.type === 'gratis' ? 'badge-gratis' : d.type === 'testabo' ? 'badge-new' : 'badge-rabatt') + '">' + (d.type === 'gratis' ? '\uD83C\uDF81 GRATIS' : d.type === 'testabo' ? '\uD83C\uDD93 Testabo' : '\uD83D\uDCB0 Rabatt') + '</span>' + (_isExpiredVisible ? '<span class="badge badge-expiry urgent">\u26A0\uFE0F Bereits abgelaufen</span>' : '') + (_isExp ? '<span class="badge badge-expiry ' + _expiry.badgeClass + '">' + _expiry.badgeText + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isNew ? '<span class="badge new">\u2728 Neu</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row">' + _dealBtn + '</div><div class="vote-section"><button class="action-btn vote-btn" onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
         }).join('');
 
         checkDeepLink();
