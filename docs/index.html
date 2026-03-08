@@ -983,6 +983,94 @@
             return /gewinnspiel|verlosen|verlosung|gewinne|zu gewinnen|giveaway/.test(text);
         }
 
+        function getDealSignalText(deal) {
+            return [
+                deal.title,
+                deal.brand,
+                deal.description,
+                deal.distance,
+                deal.url,
+                deal.type,
+                deal.category,
+                deal.source
+            ].filter(Boolean).join(' ').toLowerCase();
+        }
+
+        function isRabattDeal(deal) {
+            const text = getDealSignalText(deal);
+            if (isGewinnspielDeal(deal)) return false;
+            if (/\b(1\+1|2\+1|3\+3|4\+2)\b/.test(text)) return false;
+            if (/\b(gratis|kostenlos|freebie|kostenfrei|free sample|probetraining gratis)\b/.test(text)) return false;
+            return /\b(rabatt|discount|vergünstigt|verguenstigt|gutschein|coupon|voucher|-%|prozent|sparen|sale|aktionen?preis)\b/.test(text);
+        }
+
+        function inferDealTypeForApp(deal) {
+            const current = String(deal.type || '').toLowerCase().trim();
+            const text = getDealSignalText(deal);
+
+            if (isGewinnspielDeal(deal)) return 'gewinnspiel';
+            if (/\b(1\+1|2\+1|3\+3|4\+2|buy one get one|bogo)\b/.test(text)) return 'bogo';
+            if (isRabattDeal(deal)) return 'rabatt';
+            if (/\b(testabo|probeabo|probemonat|kostenlos testen)\b/.test(text)) return 'testabo';
+            if (/\b(gratis|kostenlos|freebie|kostenfrei|gratisessen|gratiskostprobe|probetraining gratis|gratis kaffe|gratis pizza|gratis burger|gratis wrap)\b/.test(text)) return 'gratis';
+
+            return current || 'rabatt';
+        }
+
+        function cleanUiNoiseText(value) {
+            let text = String(value || '')
+                .replace(/:[a-z_+-]+:/gi, ' ')
+                .replace(/\*/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            const junkPatterns = [
+                /alle anzeigen/gi,
+                /kategorien/gi,
+                /\bapp\b/gi,
+                /\bap\b/gi
+            ];
+            junkPatterns.forEach((pattern) => {
+                text = text.replace(pattern, ' ');
+            });
+            return text.replace(/\s+/g, ' ').replace(/^[,:\-–\s]+|[,:\-–\s]+$/g, '').trim();
+        }
+
+        function isLikelyGenericLocation(value) {
+            const text = String(value || '').trim();
+            if (!text) return true;
+            const lower = text.toLowerCase();
+            if (/^(wien|vienna|online|österreich|osterreich|ganz wien|restaurant \(wien\)|gemeinde|kirche)$/i.test(text)) return true;
+            if (/^\d{4}\s+wien/i.test(text)) return false;
+            if (/,/.test(text) || /\b(straße|strasse|gasse|platz|weg|ring|allee|bezirk|plaza)\b/i.test(text)) return false;
+            return lower.length <= 4;
+        }
+
+        function getDisplayBrand(deal) {
+            const explicitBrand = cleanUiNoiseText(deal.brand || '');
+            if (explicitBrand && !isLikelyGenericLocation(explicitBrand)) return explicitBrand;
+
+            const location = cleanUiNoiseText(deal.distance || '');
+            if (location && !isLikelyGenericLocation(location) && !(/,/.test(location) || /^\d{4}\s+wien/i.test(location))) {
+                return location;
+            }
+
+            if (deal.category === 'kirche' || deal.category === 'gottesdienste' || deal.category === 'events') {
+                const title = cleanUiNoiseText(deal.title || '');
+                const churchPrefix = title.match(/^([^:,-]{4,60}?)(?:\s+(gottesdienste|events))?$/i);
+                if (churchPrefix) return churchPrefix[1].trim();
+            }
+
+            return explicitBrand || 'Wien';
+        }
+
+        function getDisplayLocation(deal) {
+            const location = cleanUiNoiseText(deal.distance || '');
+            if (!location) return '';
+            if (isLikelyGenericLocation(location) && deal.category !== 'kirche' && deal.category !== 'gottesdienste' && deal.category !== 'events') return '';
+            return location;
+        }
+
         function parseExpiryToMs(raw) {
             if (!raw) return null;
             const text = String(raw).trim().toLowerCase();
@@ -1260,6 +1348,10 @@
 
         function normalizeDealForApp(deal) {
             const out = { ...deal };
+            out.title = cleanUiNoiseText(out.title || '');
+            out.description = cleanUiNoiseText(out.description || '');
+            out.brand = cleanUiNoiseText(out.brand || '');
+            out.type = inferDealTypeForApp(out);
             out.category = normalizeCategoryForApp(out.category, out);
             if (out.category === 'events' && !isChristianContent(out)) out.category = 'kultur';
             const missing = Array.isArray(out.missingFields) ? [...out.missingFields] : [];
@@ -1619,7 +1711,7 @@
         
         async function setDailyDeal() {
         // Helper to clean Slack formatting
-        function cleanText(t) { return (t || '').replace(/:[a-z_]+:/g, '').replace(/\*/g, '').trim(); }
+        function cleanText(t) { return cleanUiNoiseText(t); }
         // Try to load manually picked deal from deal-of-the-day.json
         try {
             const today = new Date().toISOString().split('T')[0];
@@ -1629,12 +1721,12 @@
                 if (picked.date === today && picked.dealId) {
                     // Find the deal in allDeals by id
                     const deal = allDeals.find(d => d.id === picked.dealId) || picked;
-                    const _loc = deal.distance || picked.distance || '';
-                    const _company = _loc.match(/^([^,]+)/) ? _loc.match(/^([^,]+)/)[1].trim() : '';
-                    const _brand = _company || deal.brand || picked.brand || '';
+                    const dealForDisplay = deal.distance || deal.brand ? deal : picked;
+                    const _loc = getDisplayLocation(dealForDisplay);
+                    const _brand = getDisplayBrand(dealForDisplay);
                     const _title = cleanText(deal.title || picked.title);
                     const _desc = cleanText(deal.description || picked.description || '');
-                    document.getElementById('dailyTitle').textContent = (deal.logo || picked.logo || '') + ' ' + _brand + ': ' + _title;
+                    document.getElementById('dailyTitle').textContent = (deal.logo || picked.logo || '') + ' ' + (_brand ? (_brand + ': ') : '') + _title;
                     document.getElementById('dailyDesc').textContent = _desc + (_loc ? ' — ' + _loc : '');
                     document.getElementById('dailyBtn').onclick = () => { window.open(deal.url || picked.url, '_blank'); userData.totalSavings += 5; saveUserData(); updateSavingsUI(); trackDealView(); };
                     return;
@@ -1652,12 +1744,11 @@
           document.getElementById('dailyBtn').onclick = null;
           return;
         }
-        const _loc2 = deal.distance || '';
-        const _company2 = _loc2.match(/^([^,]+)/) ? _loc2.match(/^([^,]+)/)[1].trim() : '';
-        const _brand2 = _company2 || deal.brand || '';
+        const _loc2 = getDisplayLocation(deal);
+        const _brand2 = getDisplayBrand(deal);
         const _title2 = cleanText(deal.title);
         const _desc2 = cleanText(deal.description);
-        document.getElementById('dailyTitle').textContent = (deal.logo || '') + ' ' + _brand2 + ': ' + _title2;
+        document.getElementById('dailyTitle').textContent = (deal.logo || '') + ' ' + (_brand2 ? (_brand2 + ': ') : '') + _title2;
         document.getElementById('dailyDesc').textContent = _desc2 + (_loc2 ? ' — ' + _loc2 : '');
         document.getElementById('dailyBtn').onclick = () => { window.open(deal.url, '_blank'); userData.totalSavings += 5; saveUserData(); updateSavingsUI(); trackDealView(); };
     }
@@ -1665,7 +1756,7 @@
             document.getElementById('countAll').textContent = allDeals.length;
             document.getElementById('countGratis').textContent = allDeals.filter(d => d.type === 'gratis').length;
             document.getElementById('countRabatt').textContent = allDeals.filter(d => d.type === 'rabatt' || d.type === 'testabo' || d.type === 'bogo').length;
-            document.getElementById('countGewinnspiel').textContent = allDeals.filter(d => isGewinnspielDeal(d)).length;
+            document.getElementById('countGewinnspiel').textContent = allDeals.filter(d => d.type === 'gewinnspiel' || isGewinnspielDeal(d)).length;
             document.getElementById('countCodes').textContent = allDeals.filter(d => d.category === 'codes' || d.code).length;
         }
         
@@ -1682,7 +1773,7 @@
       } else if (currentFilter === 'rabatt') {
         deals = deals.filter(d => d.type === 'rabatt' || d.type === 'testabo' || d.type === 'bogo');
       } else if (currentFilter === 'gewinnspiel') {
-        deals = deals.filter(d => isGewinnspielDeal(d));
+        deals = deals.filter(d => d.type === 'gewinnspiel' || isGewinnspielDeal(d));
       } else if (currentFilter === 'codes') {
         deals = deals.filter(d => d.category === 'codes' || d.code);
       }
@@ -1736,7 +1827,7 @@
             const dealRating = ratings[d.id] || { total: 0, count: 0 };
             const avgRating = dealRating.count ? (dealRating.total / dealRating.count).toFixed(1) : '\u2013';
             const totalCommunity = dealComments.length + (Array.isArray(dealTips) ? dealTips.length : 0);
-            const typeBadge = d.type === 'gratis' ? '<span class="deal-type-badge gratis">GRATIS</span>' : d.type === 'testabo' ? '<span class="deal-type-badge testabo">TESTABO</span>' : d.type === 'rabatt' ? '<span class="deal-type-badge rabatt">RABATT</span>' : d.type === 'bogo' ? '<span class="deal-type-badge bogo">1+1</span>' : '';
+            const typeBadge = d.type === 'gratis' ? '<span class="deal-type-badge gratis">GRATIS</span>' : d.type === 'testabo' ? '<span class="deal-type-badge testabo">TESTABO</span>' : d.type === 'rabatt' ? '<span class="deal-type-badge rabatt">RABATT</span>' : d.type === 'bogo' ? '<span class="deal-type-badge bogo">1+1</span>' : d.type === 'gewinnspiel' ? '<span class="deal-type-badge rabatt">GEWINNSPIEL</span>' : '';
             const newBadge = d.isNew ? '<span class="deal-type-badge neu">NEU</span>' : '';
             const redeemed = proData.isPro && proData.redeemedDeals && proData.redeemedDeals[d.id];
             const savingsVal = savingsMap[d.category] || 5;
@@ -1749,24 +1840,22 @@
             const _isExp = _hasExpiry;
             const _isExpiredVisible = d._lifecycle && d._lifecycle.state === 'expired-visible';
             // --- Professional info extraction ---
-            const _loc = d.distance || '';
+            const _loc = getDisplayLocation(d);
             const _expires = d.expires || '';
-            const _brand = d.brand || '';
-                        const _cleanTitle = (d.title || 'Deal').replace(/\*/g, '').replace(/:[a-z_]+:/g, '').replace(/^[\s:]+|[\s:]+$/g, '').trim();
+            const _brand = getDisplayBrand(d);
+                        const _cleanTitle = cleanUiNoiseText(d.title || 'Deal');
                             const _titleParts = _cleanTitle.match(/^([^,]+),\s*(.+)$/);
                             const _formattedTitle = _titleParts ? _titleParts[1] + '<span class="deal-title-sub">' + _titleParts[2] + '</span>' : _cleanTitle;
-                        const _cleanDesc = (d.description || '').replace(/\*/g, '').replace(/:[a-z_]+:/g, '').replace(/^[\s:]+|[\s:]+$/g, '').trim();
-            // Extract company/restaurant from distance or brand
-            const _companyMatch = _loc.match(/^([^,]+)/);
-            const _company = _companyMatch ? _companyMatch[1].trim() : '';
-            const _address = _loc.includes(',') ? _loc.substring(_loc.indexOf(',') + 1).trim() : _loc;
+                        const _cleanDesc = cleanUiNoiseText(d.description || '');
             // Format date/time from expires field
             const _hasDate = _expires && !/^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend)/i.test(_expires);
             const _dateDisplay = _hasExpiry ? _expiry.dateLabel : (_hasDate ? _expires : '');
             const _hasTargetUrl = !!(d.url && String(d.url).trim());
             const _defaultBtnLabel = d.category === 'gottesdienste' ? 'Zeiten ansehen' : d.category === 'events' ? 'Event ansehen' : d.category === 'kirche' ? 'Zur Kirche' : 'Zum Deal';
             const _dealBtn = '<button class="action-btn deal-link-btn' + (_hasTargetUrl ? '' : ' disabled') + '" ' + (_hasTargetUrl ? '' : 'disabled ') + 'onclick="openDealUrl(\'' + d.id + '\', event)">' + '<span class="btn-icon">\uD83D\uDD17</span>' + (_hasTargetUrl ? _defaultBtnLabel : 'Link folgt') + '</button>';
-            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + _expClass + (_isExpiredVisible ? ' expired-visible' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')"><span class="deal-logo">' + (d.logo || '\uD83C\uDFAF') + '</span><div><div class="deal-brand">' + (_company || _brand) + '</div><div class="deal-title">' + _formattedTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + (_address || _loc) + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_hasExpiry && !_isExpiredVisible ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div><div class="card-countdown ' + _expiry.countdownClass + '"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">' + _expiry.countdownText + '</span></div>' : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + '<div class="deal-meta"><span class="badge ' + (d.type === 'gratis' ? 'badge-gratis' : d.type === 'testabo' ? 'badge-new' : 'badge-rabatt') + '">' + (d.type === 'gratis' ? '\uD83C\uDF81 GRATIS' : d.type === 'testabo' ? '\uD83C\uDD93 Testabo' : '\uD83D\uDCB0 Rabatt') + '</span>' + (_isExpiredVisible ? '<span class="badge badge-expiry urgent">\u26A0\uFE0F Bereits abgelaufen</span>' : '') + (_isExp ? '<span class="badge badge-expiry ' + _expiry.badgeClass + '">' + _expiry.badgeText + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isNew ? '<span class="badge new">\u2728 Neu</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row">' + _dealBtn + '</div><div class="vote-section"><button class="action-btn vote-btn" onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
+            const _typeBadgeClass = d.type === 'gratis' ? 'badge-gratis' : d.type === 'testabo' ? 'badge-new' : 'badge-rabatt';
+            const _typeBadgeText = d.type === 'gratis' ? '\uD83C\uDF81 GRATIS' : d.type === 'testabo' ? '\uD83C\uDD93 Testabo' : d.type === 'gewinnspiel' ? '\uD83C\uDF89 Gewinnspiel' : d.type === 'bogo' ? '\uD83D\uDD01 1+1' : '\uD83D\uDCB0 Rabatt';
+            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + _expClass + (_isExpiredVisible ? ' expired-visible' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')"><span class="deal-logo">' + (d.logo || '\uD83C\uDFAF') + '</span><div><div class="deal-brand">' + _brand + '</div><div class="deal-title">' + _formattedTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + _loc + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_hasExpiry && !_isExpiredVisible ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div><div class="card-countdown ' + _expiry.countdownClass + '"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">' + _expiry.countdownText + '</span></div>' : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + '<div class="deal-meta"><span class="badge ' + _typeBadgeClass + '">' + _typeBadgeText + '</span>' + (_isExpiredVisible ? '<span class="badge badge-expiry urgent">\u26A0\uFE0F Bereits abgelaufen</span>' : '') + (_isExp ? '<span class="badge badge-expiry ' + _expiry.badgeClass + '">' + _expiry.badgeText + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isNew ? '<span class="badge new">\u2728 Neu</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row">' + _dealBtn + '</div><div class="vote-section"><button class="action-btn vote-btn" onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
         }).join('');
 
         checkDeepLink();

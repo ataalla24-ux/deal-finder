@@ -20,6 +20,37 @@ function cleanText(value) {
     .trim();
 }
 
+function getDigestSignalText(parts = []) {
+  return parts
+    .filter(Boolean)
+    .map((part) => cleanText(part).toLowerCase())
+    .join(' ');
+}
+
+function inferDigestType({ title = '', brand = '', description = '', category = '', type = '', distance = '', url = '', expires = '' }) {
+  const signal = getDigestSignalText([title, brand, description, category, type, distance, url, expires]);
+
+  if (/(gewinnspiel|giveaway|verlose?n|verlosung|zu gewinnen|gewinnchance|quiz|teilnehmen\s+und\s+gewinnen)/i.test(signal)) {
+    return 'gewinnspiel';
+  }
+
+  if (/(1\s*[+:xX]\s*1|1plus1|buy\s*one\s*get\s*one|bogo|zwei\s+zum\s+preis\s+von\s+einem)/i.test(signal)) {
+    return 'bogo';
+  }
+
+  const hasGratis = /(gratis|kostenlos|free\b|umsonst|geschenkt|kostenfreie?r?|for free)/i.test(signal);
+  const hasRabatt = /(rabatt|discount|-%|\d+\s?%|vergünstigt|reduziert|gutschein|coupon|bonus|aktionspreis|spart|sparen)/i.test(signal);
+  const hasTestabo = /(testabo|probeabo|gratis\s+testen|kostenlos\s+testen|probemonat|kostenloser?\s+monat)/i.test(signal);
+
+  if (hasTestabo) return 'testabo';
+  if (hasRabatt && !hasGratis) return 'rabatt';
+  if (hasGratis) return 'gratis';
+
+  const normalized = cleanText(type).toLowerCase();
+  if (normalized) return normalized;
+  return 'rabatt';
+}
+
 function flattenSlackNode(node, parts) {
   if (!node) return;
   if (Array.isArray(node)) {
@@ -174,6 +205,17 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
 
   if (!id) return null;
 
+  type = inferDigestType({
+    title,
+    brand,
+    description,
+    category,
+    type,
+    distance,
+    url,
+    expires,
+  });
+
   const normalizedCategory = normalizeCategoryForScraper(category, [
     title,
     brand,
@@ -191,7 +233,13 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
     url,
     category: normalizedCategory,
     type,
-    logo: type === 'gratis' ? '🎁' : '🎯',
+    logo: type === 'gratis'
+      ? '🎁'
+      : type === 'gewinnspiel'
+        ? '🎉'
+        : type === 'bogo'
+          ? '🔁'
+          : '🎯',
     distance,
     source: 'Slack Digest',
     expires,
