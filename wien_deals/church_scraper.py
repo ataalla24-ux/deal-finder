@@ -388,7 +388,7 @@ def scrape_source(source: Source) -> tuple[list[dict], list[dict], list[dict]]:
             f"📝 {' | '.join(description_lines[:3])}"
         ),
         url=source.homepage,
-        expires="Regelmäßig",
+        expires="",
         priority=2,
     )
 
@@ -414,7 +414,7 @@ def scrape_source(source: Source) -> tuple[list[dict], list[dict], list[dict]]:
                     f"🕐 {' | '.join(service_parts)}"
                 ),
                 url=gottesdienst_url,
-                expires="Zeiten auf Webseite prüfen",
+                expires="",
                 priority=1,
             )
         )
@@ -440,7 +440,7 @@ def scrape_source(source: Source) -> tuple[list[dict], list[dict], list[dict]]:
                     f"📝 {' | '.join(event_matches[:3])}"
                 ),
                 url=event_url,
-                expires="Aktuelle Termine auf Webseite",
+                expires="",
                 priority=2,
             )
         )

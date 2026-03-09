@@ -34,6 +34,10 @@ const REMOVE_IDS = new Set([
   'gottesdienste-0-20260308',
 ]);
 
+const LEGACY_CHURCH_ID_PATTERNS = [
+  /^(hillsong-vienna|cig-wien|icf-wien|jesuszentrum)-(kirche|gottesdienste|events)-20260308$/i,
+];
+
 function cleanText(value) {
   if (!value) return '';
   return String(value).replace(/\s+/g, ' ').trim();
@@ -44,7 +48,7 @@ function getChurchCuratedIds(churchDeals) {
 }
 
 function shouldDropLegacyChurchDeal(deal) {
-  return REMOVE_IDS.has(deal.id);
+  return REMOVE_IDS.has(deal.id) || LEGACY_CHURCH_ID_PATTERNS.some((pattern) => pattern.test(String(deal?.id || '')));
 }
 
 function fixPubDateFromSlackTs(deal, now) {
