@@ -186,7 +186,9 @@
         
         /* DEAL HEADER */
         .deal-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
-        .deal-logo { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+        .deal-logo { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; overflow: hidden; }
+        .deal-logo-img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; background: #fff; }
+        .deal-logo-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 24px; }
         .deal-brand { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 600; color: #667eea; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
         .deal-title { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 700; font-size: 20px; color: #1e293b; line-height: 1.25; letter-spacing: -0.4px; background: linear-gradient(135deg, #1e293b 0%, #475569 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
                 .deal-title-sub { display: block; font-weight: 500; font-size: 13px; color: #94a3b8; letter-spacing: 0; margin-top: 2px; background: none; -webkit-background-clip: unset; -webkit-text-fill-color: #94a3b8; background-clip: unset; }
@@ -321,7 +323,7 @@
         .leaderboard-text { font-size: 13px; opacity: 0.9; }
         .leaderboard-rank { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-weight: 700; }
         .deal-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
-        .deal-logo { font-size: 32px; }
+        .deal-logo-fallback { font-size: 32px; }
         .deal-brand { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 600; color: #475569; font-size: 13px; letter-spacing: 0.4px; text-transform: uppercase; }
         .deal-title {
             font-weight: 900;
@@ -339,6 +341,7 @@
         .deal-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
         .badge { padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; letter-spacing: 0.2px; }
         .badge-gratis { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 2px 6px rgba(16,185,129,0.35); }
+        .badge-freebie { background: linear-gradient(135deg, #06b6d4, #0ea5e9); color: white; box-shadow: 0 2px 6px rgba(14,165,233,0.35); }
         .badge-rabatt { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; box-shadow: 0 2px 6px rgba(245,158,11,0.35); }
         .badge-hot { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
         .badge-new { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; }
@@ -998,9 +1001,17 @@
         function isRabattDeal(deal) {
             const text = getDealSignalText(deal);
             if (isGewinnspielDeal(deal)) return false;
+            if (isFreebieDeal(deal)) return false;
             if (/\b(1\+1|2\+1|3\+3|4\+2)\b/.test(text)) return false;
-            if (/\b(gratis|kostenlos|freebie|kostenfrei|free sample|probetraining gratis)\b/.test(text)) return false;
+            if (/\b(gratis|kostenlos|kostenfrei|free sample|probetraining gratis)\b/.test(text)) return false;
             return /\b(rabatt|discount|vergünstig(?:t|te|ten|ter|tes)?|verguenstig(?:t|te|ten|ter|tes)?|gutschein|coupon|voucher|-%|prozent|sparen|sale|aktionen?preis)\b/.test(text);
+        }
+
+        function isFreebieDeal(deal) {
+            const text = getDealSignalText(deal);
+            if (isGewinnspielDeal(deal)) return false;
+            if (/\b(1\+1|2\+1|3\+3|4\+2|buy one get one|bogo)\b/.test(text)) return false;
+            return /\b(freebie|willkommensgeschenk|welcome gift|welcome bonus|goodie bag|gratis[- ]?beigabe|gratis dazu|2 go bons|app-vorteil|bonusclub-vorteil)\b/.test(text);
         }
 
         function inferDealTypeForApp(deal) {
@@ -1009,9 +1020,10 @@
 
             if (isGewinnspielDeal(deal)) return 'gewinnspiel';
             if (/\b(1\+1|2\+1|3\+3|4\+2|buy one get one|bogo)\b/.test(text)) return 'bogo';
+            if (isFreebieDeal(deal)) return 'freebie';
             if (isRabattDeal(deal)) return 'rabatt';
             if (/\b(testabo|probeabo|probemonat|kostenlos testen)\b/.test(text)) return 'testabo';
-            if (/\b(gratis|kostenlos|freebie|kostenfrei|gratisessen|gratiskostprobe|probetraining gratis|gratis kaffe|gratis pizza|gratis burger|gratis wrap)\b/.test(text)) return 'gratis';
+            if (/\b(gratis|kostenlos|kostenfrei|gratisessen|gratiskostprobe|probetraining gratis|gratis kaffe|gratis pizza|gratis burger|gratis wrap)\b/.test(text)) return 'gratis';
 
             return current || 'rabatt';
         }
@@ -1056,7 +1068,7 @@
             /^kirche$/i
         ];
 
-        const GENERIC_APP_LOGOS = new Set(['🎁', '🎯', '🎉', '🔁', '📸', '🎵']);
+        const GENERIC_APP_LOGOS = new Set(['🎁', '🎯', '🎉', '🔁', '✨', '📸', '🎵']);
 
         const APP_BRAND_RULES = [
             { pattern: /\bmcdonald'?s?\b|\bmccafe\b/i, name: "McDonald's", logo: '🍟' },
@@ -1157,7 +1169,7 @@
 
         function inferLogoForApp(deal, brand) {
             const known = findKnownBrandForApp(brand, deal.title, deal.description, deal.distance, deal.url);
-            if (known) return known.logo;
+            if (known && !isSourceLikeBrandForApp(known.name || '')) return known.logo;
 
             const category = cleanUiNoiseText(deal.category || '').toLowerCase();
             const type = cleanUiNoiseText(deal.type || '').toLowerCase();
@@ -1196,8 +1208,24 @@
             if (category === 'events') return '🎫';
             if (type === 'gewinnspiel') return '🎉';
             if (type === 'bogo') return '🔁';
+            if (type === 'freebie') return '✨';
             if (type === 'gratis') return '🎁';
             return '🎯';
+        }
+
+        function getBrandInitialsForApp(brand) {
+            const cleaned = cleanUiNoiseText(brand || '')
+                .replace(/[^\p{L}\p{N}\s&+\-]/gu, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            if (!cleaned || isSourceLikeBrandForApp(cleaned) || isLikelyGenericLocation(cleaned)) return '';
+
+            if (/^[A-Z0-9&+\-]{2,5}$/.test(cleaned)) return cleaned.slice(0, 4);
+
+            const parts = cleaned.split(' ').filter(Boolean);
+            if (!parts.length) return '';
+            if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+            return (parts[0][0] + parts[1][0]).toUpperCase();
         }
 
         function getDisplayBrand(deal) {
@@ -1228,16 +1256,78 @@
             return location;
         }
 
-        function parseExpiryToMs(raw) {
-            if (!raw) return null;
-            const text = String(raw).trim().toLowerCase();
-            if (!text || /^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend|ongoing)/.test(text)) return null;
+        function sanitizeExpiryTextForApp(value) {
+            const raw = cleanUiNoiseText(value || '');
+            if (!raw) return '';
+            if (/^\d{4}-\d{2}-\d{2}t/i.test(raw)) return raw;
 
-            const direct = Date.parse(raw);
+            let text = raw
+                .replace(/\bunknown\b/gi, ' ')
+                .replace(/\bnot specified\b/gi, ' ')
+                .replace(/\bsiehe details\b/gi, ' ')
+                .replace(/\bsee details\b/gi, ' ')
+                .replace(/\bsiehe website\b/gi, ' ')
+                .replace(/\bsiehe webseite\b/gi, ' ')
+                .replace(/\bwebsite prüfen\b/gi, ' ')
+                .replace(/\bdetails auf instagram\b/gi, ' ')
+                .replace(/\bdetails auf facebook\b/gi, ' ')
+                .replace(/\blink in bio\b/gi, ' ')
+                .replace(/\bregular hours\b/gi, ' ')
+                .replace(/\bvia neotaste\b/gi, ' ')
+                .replace(/\bongoing\b/gi, ' ')
+                .replace(/\blaufend\b/gi, ' ')
+                .replace(/\bregelm[aä](?:ß|ss)ig\b/gi, ' ')
+                .replace(/\btäglich\b/gi, ' ')
+                .replace(/\bmonatlich\b/gi, ' ')
+                .replace(/\btankstellen-öffnungszeiten\b/gi, ' ')
+                .replace(/\bnach geschäftszeiten\b/gi, ' ')
+                .replace(/\bvariiert\b/gi, ' ')
+                .replace(/\bevent-zeiten\b/gi, ' ')
+                .replace(/\brestaurantöffnung\b/gi, ' ')
+                .replace(/\bzu den öffnungszeiten des museums\b/gi, ' ')
+                .replace(/\bseason opening\b/gi, ' ')
+                .replace(/\bbei eröffnung\b/gi, ' ')
+                .replace(/\bwährend [a-zäöüß ]*öffnungszeiten\b/gi, ' ')
+                .replace(/\bbei eröffnung\b/gi, ' ')
+                .replace(/\böffnungszeiten\b/gi, ' ')
+                .replace(/\bopening hours\b/gi, ' ')
+                .replace(/\bopening\b/gi, ' ')
+                .replace(/\bclosing\b/gi, ' ')
+                .replace(/\bopen daily\b/gi, ' ')
+                .replace(/\bvalid during museum hours\b/gi, ' ')
+                .replace(/\bbis auf weiteres\b/gi, ' ')
+                .replace(/\bsolange der vorrat reicht\b/gi, ' ')
+                .replace(/\bwhile stocks last\b/gi, ' ')
+                .replace(/\bimmer\b/gi, ' ')
+                .trim()
+                .replace(/\s+/g, ' ')
+                .replace(/^[,;:.\-–\s]+|[,;:.\-–\s]+$/g, '');
+
+            if (!text) return '';
+            if (/^(jeden\s+(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag))( \d{1,2}:\d{2})?$/i.test(text)) return text;
+            if (/^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend|ongoing|n\/a|na|bei eröffnung|laufende aktion)$/i.test(text)) return '';
+            if (/^(m[aä]rz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+\d{4}$/i.test(text)) return text;
+            if (/^(bis|ab|am|um|von|bis zu)$/i.test(text)) return '';
+            if (!/\d/.test(text) && !/\b(jeden|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\b/i.test(text)) return '';
+            return text;
+        }
+
+        function parseExpiryToMs(raw) {
+            const sanitized = sanitizeExpiryTextForApp(raw);
+            if (!sanitized) return null;
+            const text = sanitized.toLowerCase();
+
+            const direct = Date.parse(sanitized);
             if (!Number.isNaN(direct)) return direct;
 
             let m = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
             if (m) return Date.parse(`${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}T23:59:59`);
+
+            m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+            if (m) {
+                const y = m[6].length === 2 ? `20${m[6]}` : m[6];
+                return Date.parse(`${y}-${String(m[5]).padStart(2, '0')}-${String(m[4]).padStart(2, '0')}T23:59:59`);
+            }
 
             m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
             if (m) {
@@ -1249,6 +1339,26 @@
             if (m) {
                 const y = new Date().getFullYear();
                 return Date.parse(`${y}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}T23:59:59`);
+            }
+
+            const monthMap = {
+                januar: 1, februar: 2, 'märz': 3, maerz: 3, april: 4, mai: 5, juni: 6,
+                juli: 7, august: 8, september: 9, oktober: 10, november: 11, dezember: 12,
+            };
+
+            m = text.match(/(\d{1,2})\.\s*(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s*(\d{4})?/i);
+            if (m) {
+                const year = m[3] ? Number(m[3]) : new Date().getFullYear();
+                const month = monthMap[m[2]];
+                return Date.parse(`${year}-${String(month).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}T23:59:59`);
+            }
+
+            m = text.match(/(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+(\d{4})/i);
+            if (m) {
+                const year = Number(m[2]);
+                const month = monthMap[m[1]];
+                const lastDay = new Date(year, month, 0).getDate();
+                return Date.parse(`${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}T23:59:59`);
             }
 
             return null;
@@ -1273,12 +1383,12 @@
         }
 
         function getExpiryPresentation(deal) {
-            const rawExpiry = deal && deal.expires ? deal.expires : '';
-            const rawDisplay = cleanUiNoiseText((deal && (deal.expiresOriginal || deal.expires)) || '');
+            const rawExpiry = deal && deal.expires ? sanitizeExpiryTextForApp(deal.expires) : '';
+            const rawDisplay = sanitizeExpiryTextForApp((deal && (deal.expiresOriginal || deal.expires)) || '');
             const precision = (deal && deal.expiresPrecision) || '';
             const expiryMs = parseExpiryToMs(rawExpiry);
             if (!Number.isFinite(expiryMs)) {
-                return { hasExpiry: false, infoLabel: rawDisplay, precision: precision || 'unknown' };
+                return { hasExpiry: false, infoLabel: rawDisplay || '', precision: precision || 'unknown' };
             }
 
             if (precision === 'month') {
@@ -1544,7 +1654,7 @@
             const brand = cleanUiNoiseText(deal.brand || '');
             const title = cleanUiNoiseText(deal.title || '');
             const distance = cleanUiNoiseText(deal.distance || '');
-            const expires = cleanUiNoiseText(deal.expires || '');
+            const expires = sanitizeExpiryTextForApp(deal.expires || deal.expiresOriginal || '');
 
             if (brand && title && !title.toLowerCase().includes(brand.toLowerCase())) bits.push(brand);
             if (title) bits.push(title);
@@ -1554,11 +1664,55 @@
             return cleanUiNoiseText(bits.join(' | '));
         }
 
+        function getDealLogoUrlForApp(deal, brand) {
+            if (deal.logoUrl && !isSourceLikeHostForApp(extractHostFromUrlForApp(deal.logoUrl))) return deal.logoUrl;
+            const preferredBrand = cleanUiNoiseText(brand || inferPreferredBrandForApp(deal) || '');
+            const known = findKnownBrandForApp(preferredBrand, deal.title, deal.description, deal.distance, deal.url);
+            if (known && known.domain && !isSourceLikeBrandForApp(known.name || '')) {
+                return buildLogoUrlForApp(known.domain);
+            }
+
+            const candidateHosts = [
+                extractHostFromUrlForApp(deal.url),
+                extractHostFromUrlForApp(deal.post_url),
+                extractHostFromUrlForApp(deal.image),
+                extractHostFromUrlForApp(deal.imageUrl),
+            ].filter(Boolean);
+
+            for (const host of candidateHosts) {
+                if (!isSourceLikeHostForApp(host)) return buildLogoUrlForApp(host);
+            }
+
+            const combined = [
+                preferredBrand,
+                deal.title,
+                deal.description,
+                deal.distance,
+            ].filter(Boolean).join(' ').toLowerCase();
+
+            for (const [key, value] of Object.entries(KNOWN_BRANDS)) {
+                if (isSourceLikeBrandForApp(value.name || key)) continue;
+                if (combined.includes(key) && value.domain) return buildLogoUrlForApp(value.domain);
+            }
+
+            return '';
+        }
+
+        function renderDealLogo(deal) {
+            const brand = inferPreferredBrandForApp(deal) || deal.brand || '';
+            const fallback = getBrandInitialsForApp(brand) || inferLogoForApp(deal, brand) || deal.logo || '🎯';
+            const logoUrl = deal.logoUrl || getDealLogoUrlForApp(deal, brand);
+            const img = logoUrl ? `<img class="deal-logo-img" src="${logoUrl}" alt="" loading="lazy" referrerpolicy="no-referrer" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'">` : '';
+            return `<span class="deal-logo"><span class="deal-logo-fallback">${fallback}</span>${img}</span>`;
+        }
+
         function normalizeDealForApp(deal) {
             const out = { ...deal };
             out.title = cleanUiNoiseText(out.title || '');
             out.description = cleanUiNoiseText(out.description || '');
             out.brand = cleanUiNoiseText(out.brand || '');
+            out.expires = sanitizeExpiryTextForApp(out.expires || out.expiresOriginal || '');
+            out.expiresOriginal = sanitizeExpiryTextForApp(out.expiresOriginal || out.expires || '');
             out.type = inferDealTypeForApp(out);
             out.category = normalizeCategoryForApp(out.category, out);
             if (out.category === 'events' && !isChristianContent(out)) out.category = 'kultur';
@@ -1568,52 +1722,75 @@
             if (!out.logo || GENERIC_APP_LOGOS.has(out.logo)) {
                 out.logo = inferLogoForApp(out, out.brand);
             }
+            out.logoUrl = getDealLogoUrlForApp(out, out.brand);
             const missing = Array.isArray(out.missingFields) ? [...out.missingFields] : [];
             if (!out.url) missing.push('Ziel-URL');
             if (!(out.distance || '').trim()) missing.push('Ort');
-            if (!(out.expires || '').trim()) missing.push('Ablauf');
+            if (!sanitizeExpiryTextForApp(out.expires || out.expiresOriginal || '')) missing.push('Ablauf');
             if (!(out.source || '').trim()) missing.push('Quelle');
             out.missingFields = [...new Set(missing)];
             return out;
         }
         
         // Bekannte Marken für Link-Erkennung
+        const SOURCE_LIKE_HOSTS_FOR_APP = [/(^|\.)instagram\.com$/i,/(^|\.)tiktok\.com$/i,/(^|\.)facebook\.com$/i,/(^|\.)x\.com$/i,/(^|\.)twitter\.com$/i,/(^|\.)slack\.com$/i,/(^|\.)preisjaeger\./i];
+
+        function extractHostFromUrlForApp(url) {
+            try {
+                return new URL(String(url)).hostname.toLowerCase().replace(/^www\./, '');
+            } catch {
+                return '';
+            }
+        }
+
+        function isSourceLikeHostForApp(host) {
+            if (!host) return true;
+            return SOURCE_LIKE_HOSTS_FOR_APP.some(pattern => pattern.test(host));
+        }
+
+        function buildLogoUrlForApp(host) {
+            if (!host || isSourceLikeHostForApp(host)) return '';
+            return `https://www.google.com/s2/favicons?sz=128&domain_url=https://${host}`;
+        }
+
         const KNOWN_BRANDS = {
-            'mcdonalds': { name: "McDonald's", logo: '🍟', category: 'essen' },
-            'burgerking': { name: 'Burger King', logo: '🍔', category: 'essen' },
-            'ikea': { name: 'IKEA', logo: '🪑', category: 'shopping' },
-            'billa': { name: 'BILLA', logo: '🛒', category: 'supermarkt' },
-            'spar': { name: 'SPAR', logo: '🛒', category: 'supermarkt' },
-            'hofer': { name: 'HOFER', logo: '🛒', category: 'supermarkt' },
-            'lidl': { name: 'Lidl', logo: '🛒', category: 'supermarkt' },
-            'dm': { name: 'dm', logo: '💇', category: 'beauty' },
-            'müller': { name: 'Müller', logo: '💄', category: 'beauty' },
-            'mediamarkt': { name: 'MediaMarkt', logo: '📺', category: 'technik' },
-            'saturn': { name: 'Saturn', logo: '📺', category: 'technik' },
-            'amazon': { name: 'Amazon', logo: '📦', category: 'shopping' },
-            'zalando': { name: 'Zalando', logo: '👟', category: 'mode' },
-            'aboutyou': { name: 'ABOUT YOU', logo: '👗', category: 'mode' },
-            'hm': { name: 'H&M', logo: '👕', category: 'mode' },
-            'starbucks': { name: 'Starbucks', logo: '☕', category: 'kaffee' },
-            'tchibo': { name: 'Tchibo', logo: '☕', category: 'kaffee' },
-            'nespresso': { name: 'Nespresso', logo: '☕', category: 'kaffee' },
-            'netflix': { name: 'Netflix', logo: '📺', category: 'streaming' },
-            'spotify': { name: 'Spotify', logo: '🎵', category: 'streaming' },
-            'fitinn': { name: 'FitInn', logo: '💪', category: 'fitness' },
-            'mcfit': { name: 'McFIT', logo: '💪', category: 'fitness' },
-            'ryanair': { name: 'Ryanair', logo: '✈️', category: 'reisen' },
-            'wizz': { name: 'Wizz Air', logo: '✈️', category: 'reisen' },
-            'oebb': { name: 'ÖBB', logo: '🚂', category: 'reisen' },
-            'mjam': { name: 'Mjam', logo: '🛵', category: 'essen' },
-            'lieferando': { name: 'Lieferando', logo: '🛵', category: 'essen' },
-            'uber': { name: 'Uber Eats', logo: '🍔', category: 'essen' },
-            'kfc': { name: 'KFC', logo: '🍗', category: 'essen' },
-            'subway': { name: 'Subway', logo: '🥪', category: 'essen' },
-            'dominos': { name: "Domino's", logo: '🍕', category: 'essen' },
-            'nordsee': { name: 'NORDSEE', logo: '🐟', category: 'essen' },
-            'vapiano': { name: 'Vapiano', logo: '🍝', category: 'essen' },
-            'dougla': { name: 'Douglas', logo: '💋', category: 'beauty' },
-            'sephora': { name: 'Sephora', logo: '💄', category: 'beauty' },
+            'mcdonalds': { name: "McDonald's", logo: '🍟', category: 'essen', domain: 'mcdonalds.at' },
+            'burgerking': { name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at' },
+            'ikea': { name: 'IKEA', logo: '🪑', category: 'shopping', domain: 'ikea.com' },
+            'billa': { name: 'BILLA', logo: '🛒', category: 'supermarkt', domain: 'billa.at' },
+            'spar': { name: 'SPAR', logo: '🛒', category: 'supermarkt', domain: 'spar.at' },
+            'hofer': { name: 'HOFER', logo: '🛒', category: 'supermarkt', domain: 'hofer.at' },
+            'lidl': { name: 'Lidl', logo: '🛒', category: 'supermarkt', domain: 'lidl.at' },
+            'dm': { name: 'dm', logo: '💇', category: 'beauty', domain: 'dm.at' },
+            'müller': { name: 'Müller', logo: '💄', category: 'beauty', domain: 'mueller.at' },
+            'mueller': { name: 'Müller', logo: '💄', category: 'beauty', domain: 'mueller.at' },
+            'mediamarkt': { name: 'MediaMarkt', logo: '📺', category: 'technik', domain: 'mediamarkt.at' },
+            'saturn': { name: 'Saturn', logo: '📺', category: 'technik', domain: 'saturn.at' },
+            'amazon': { name: 'Amazon', logo: '📦', category: 'shopping', domain: 'amazon.de' },
+            'zalando': { name: 'Zalando', logo: '👟', category: 'mode', domain: 'zalando.at' },
+            'aboutyou': { name: 'ABOUT YOU', logo: '👗', category: 'mode', domain: 'aboutyou.at' },
+            'hm': { name: 'H&M', logo: '👕', category: 'mode', domain: 'hm.com' },
+            'starbucks': { name: 'Starbucks', logo: '☕', category: 'kaffee', domain: 'starbucks.at' },
+            'tchibo': { name: 'Tchibo', logo: '☕', category: 'kaffee', domain: 'tchibo.at' },
+            'nespresso': { name: 'Nespresso', logo: '☕', category: 'kaffee', domain: 'nespresso.com' },
+            'netflix': { name: 'Netflix', logo: '📺', category: 'streaming', domain: 'netflix.com' },
+            'spotify': { name: 'Spotify', logo: '🎵', category: 'streaming', domain: 'spotify.com' },
+            'fitinn': { name: 'FitInn', logo: '💪', category: 'fitness', domain: 'fitinn.at' },
+            'mcfit': { name: 'McFIT', logo: '💪', category: 'fitness', domain: 'mcfit.com' },
+            'ryanair': { name: 'Ryanair', logo: '✈️', category: 'reisen', domain: 'ryanair.com' },
+            'wizz': { name: 'Wizz Air', logo: '✈️', category: 'reisen', domain: 'wizzair.com' },
+            'oebb': { name: 'ÖBB', logo: '🚂', category: 'reisen', domain: 'oebb.at' },
+            'mjam': { name: 'Mjam', logo: '🛵', category: 'essen', domain: 'foodora.at' },
+            'lieferando': { name: 'Lieferando', logo: '🛵', category: 'essen', domain: 'lieferando.at' },
+            'uber': { name: 'Uber Eats', logo: '🍔', category: 'essen', domain: 'ubereats.com' },
+            'kfc': { name: 'KFC', logo: '🍗', category: 'essen', domain: 'kfc.co.at' },
+            'subway': { name: 'Subway', logo: '🥪', category: 'essen', domain: 'subway.com' },
+            'dominos': { name: "Domino's", logo: '🍕', category: 'essen', domain: 'dominos.at' },
+            'nordsee': { name: 'NORDSEE', logo: '🐟', category: 'essen', domain: 'nordsee.com' },
+            'vapiano': { name: 'Vapiano', logo: '🍝', category: 'essen', domain: 'vapiano.com' },
+            'dougla': { name: 'Douglas', logo: '💋', category: 'beauty', domain: 'douglas.at' },
+            'douglas': { name: 'Douglas', logo: '💋', category: 'beauty', domain: 'douglas.at' },
+            'sephora': { name: 'Sephora', logo: '💄', category: 'beauty', domain: 'sephora.de' },
             'apple': { name: 'Apple', logo: '🍎', category: 'technik' },
             'samsung': { name: 'Samsung', logo: '📱', category: 'technik' },
             'a1': { name: 'A1', logo: '📶', category: 'technik' },
@@ -1621,6 +1798,19 @@
             'drei': { name: 'Drei', logo: '📱', category: 'technik' },
             'booking': { name: 'Booking.com', logo: '🏨', category: 'reisen' },
             'airbnb': { name: 'Airbnb', logo: '🏠', category: 'reisen' },
+            'omv': { name: 'OMV', logo: '⛽', category: 'shopping', domain: 'omv.at' },
+            'joe': { name: 'joo', logo: '💳', category: 'supermarkt', domain: 'joe-club.at' },
+            'joo': { name: 'joo', logo: '💳', category: 'supermarkt', domain: 'joe-club.at' },
+            'shell': { name: 'Shell', logo: '⛽', category: 'shopping', domain: 'shell.at' },
+            'westfield': { name: 'Westfield', logo: '🛍️', category: 'shopping', domain: 'westfield.com' },
+            'hillsong': { name: 'Hillsong', logo: '⛪', category: 'kirche', domain: 'hillsong.com' },
+            'jesuszentrum': { name: 'JesusZentrum', logo: '⛪', category: 'kirche', domain: 'jesuszentrum.at' },
+            'icf wien': { name: 'ICF Wien', logo: '⛪', category: 'kirche', domain: 'icf-wien.at' },
+            'cig wien': { name: 'CIG Wien', logo: '⛪', category: 'kirche', domain: 'cigwien.at' },
+            'leopoldauer alm': { name: 'Leopoldauer Alm', logo: '🍽️', category: 'essen', domain: 'leopoldaueralm.at' },
+            'visitingvienna': { name: 'Visiting Vienna', logo: '☕', category: 'kultur', domain: 'visitingvienna.com' },
+            'onb': { name: 'Österreichische Nationalbibliothek', logo: '🏛️', category: 'kultur', domain: 'onb.ac.at' },
+            'botanischer garten': { name: 'Botanischer Garten', logo: '🌿', category: 'kultur', domain: 'botanischergarten.univie.ac.at' },
         };
         
         // Vordefinierte Community-Tipps
@@ -1926,19 +2116,28 @@
         async function setDailyDeal() {
         // Helper to clean Slack formatting
         function cleanText(t) { return cleanUiNoiseText(t); }
+        function getViennaToday() {
+            return new Intl.DateTimeFormat('en-CA', {
+                timeZone: 'Europe/Vienna',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+            }).format(new Date());
+        }
         // Try to load manually picked deal from deal-of-the-day.json
         try {
-            const today = new Date().toISOString().split('T')[0];
+            const today = getViennaToday();
             const res = await fetch('deal-of-the-day.json?t=' + Date.now());
             if (res.ok) {
                 const picked = await res.json();
                 if (picked.date === today && picked.dealId) {
                     // Find the deal in allDeals by id
-                    const deal = allDeals.find(d => d.id === picked.dealId) || picked;
-                    const dealForDisplay = deal.distance || deal.brand ? deal : picked;
+                    const rawDeal = allDeals.find(d => d.id === picked.dealId) || picked;
+                    const deal = normalizeDealForApp(rawDeal);
+                    const dealForDisplay = deal.distance || deal.brand ? deal : normalizeDealForApp(picked);
                     const _loc = getDisplayLocation(dealForDisplay);
                     const _brand = getDisplayBrand(dealForDisplay);
-                    const _title = cleanText(deal.title || picked.title);
+                    const _title = cleanText(deal.title || picked.title).replace(/\b(alle anzeigen|kategorien|app)\b/gi, '').replace(/\s+/g, ' ').trim();
                     const _desc = cleanText(deal.description || picked.description || '');
                     document.getElementById('dailyTitle').textContent = (deal.logo || picked.logo || '') + ' ' + (_brand ? (_brand + ': ') : '') + _title;
                     document.getElementById('dailyDesc').textContent = _desc + (_loc ? ' — ' + _loc : '');
@@ -1948,14 +2147,14 @@
             }
         } catch(e) { /* fall through to auto */ }
         // Fallback: auto-rotate based on date
-        const gratisDeals = allDeals.filter(d => d.type === 'gratis');
+        const gratisDeals = allDeals.filter(d => d.type === 'gratis' || d.type === 'freebie');
         const deal = gratisDeals.length
           ? gratisDeals[new Date().getDate() % gratisDeals.length]
           : allDeals[0];
         if (!deal) {
           document.getElementById('dailyTitle').textContent = '🎁 Deal des Tages';
           document.getElementById('dailyDesc').textContent = 'Bald verfügbar';
-          document.getElementById('dailyBtn').onclick = null;
+          document.getElementById('dailyBtn').onclick = () => {};
           return;
         }
         const _loc2 = getDisplayLocation(deal);
@@ -1968,7 +2167,7 @@
     }
         function updateCounts() {
             document.getElementById('countAll').textContent = allDeals.length;
-            document.getElementById('countGratis').textContent = allDeals.filter(d => d.type === 'gratis').length;
+            document.getElementById('countGratis').textContent = allDeals.filter(d => d.type === 'gratis' || d.type === 'freebie').length;
             document.getElementById('countRabatt').textContent = allDeals.filter(d => d.type === 'rabatt' || d.type === 'testabo' || d.type === 'bogo').length;
             document.getElementById('countGewinnspiel').textContent = allDeals.filter(d => d.type === 'gewinnspiel' || isGewinnspielDeal(d)).length;
             document.getElementById('countCodes').textContent = allDeals.filter(d => d.category === 'codes' || d.code).length;
@@ -1983,7 +2182,7 @@
         deals = deals.filter(d => (d.title || '').toLowerCase().includes(q) || (d.brand || '').toLowerCase().includes(q) || (d.description || '').toLowerCase().includes(q));
       }
       if (currentFilter === 'gratis') {
-        deals = deals.filter(d => d.type === 'gratis');
+        deals = deals.filter(d => d.type === 'gratis' || d.type === 'freebie');
       } else if (currentFilter === 'rabatt') {
         deals = deals.filter(d => d.type === 'rabatt' || d.type === 'testabo' || d.type === 'bogo');
       } else if (currentFilter === 'gewinnspiel') {
@@ -2012,13 +2211,20 @@
         });
       }
       deals.sort((a, b) => {
-        const aFocus = isFoodDrinkFreebie(a) ? 1 : 0;
-        const bFocus = isFoodDrinkFreebie(b) ? 1 : 0;
-        if (bFocus !== aFocus) return bFocus - aFocus;
-
         const aExpiredVisible = a._lifecycle?.state === 'expired-visible' ? 1 : 0;
         const bExpiredVisible = b._lifecycle?.state === 'expired-visible' ? 1 : 0;
         if (aExpiredVisible !== bExpiredVisible) return aExpiredVisible - bExpiredVisible;
+
+        const aExpiry = parseExpiryToMs(a.expires || a.expiresOriginal);
+        const bExpiry = parseExpiryToMs(b.expires || b.expiresOriginal);
+        const aHasExpiry = Number.isFinite(aExpiry) ? 1 : 0;
+        const bHasExpiry = Number.isFinite(bExpiry) ? 1 : 0;
+        if (aHasExpiry !== bHasExpiry) return bHasExpiry - aHasExpiry;
+        if (aHasExpiry && bHasExpiry && aExpiry !== bExpiry) return aExpiry - bExpiry;
+
+        const aFocus = isFoodDrinkFreebie(a) ? 1 : 0;
+        const bFocus = isFoodDrinkFreebie(b) ? 1 : 0;
+        if (bFocus !== aFocus) return bFocus - aFocus;
 
         const aPub = a.pubDate ? Date.parse(a.pubDate) : 0;
         const bPub = b.pubDate ? Date.parse(b.pubDate) : 0;
@@ -2067,9 +2273,9 @@
             const _hasTargetUrl = !!(d.url && String(d.url).trim());
             const _defaultBtnLabel = d.category === 'gottesdienste' ? 'Zeiten ansehen' : d.category === 'events' ? 'Event ansehen' : d.category === 'kirche' ? 'Zur Kirche' : 'Zum Deal';
             const _dealBtn = '<button class="action-btn deal-link-btn' + (_hasTargetUrl ? '' : ' disabled') + '" ' + (_hasTargetUrl ? '' : 'disabled ') + 'onclick="openDealUrl(\'' + d.id + '\', event)">' + '<span class="btn-icon">\uD83D\uDD17</span>' + (_hasTargetUrl ? _defaultBtnLabel : 'Link folgt') + '</button>';
-            const _typeBadgeClass = d.type === 'gratis' ? 'badge-gratis' : d.type === 'testabo' ? 'badge-new' : 'badge-rabatt';
-            const _typeBadgeText = d.type === 'gratis' ? '\uD83C\uDF81 GRATIS' : d.type === 'testabo' ? '\uD83C\uDD93 Testabo' : d.type === 'gewinnspiel' ? '\uD83C\uDF89 Gewinnspiel' : d.type === 'bogo' ? '\uD83D\uDD01 1+1' : '\uD83D\uDCB0 Rabatt';
-            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + _expClass + (_isExpiredVisible ? ' expired-visible' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')"><span class="deal-logo">' + (d.logo || '\uD83C\uDFAF') + '</span><div><div class="deal-brand">' + _brand + '</div><div class="deal-title">' + _formattedTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + _loc + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_hasExpiry && _expiry.showUrgency && !_isExpiredVisible ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div><div class="card-countdown ' + _expiry.countdownClass + '"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">' + _expiry.countdownText + '</span></div>' : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + '<div class="deal-meta"><span class="badge ' + _typeBadgeClass + '">' + _typeBadgeText + '</span>' + (_isExpiredVisible ? '<span class="badge badge-expiry urgent">\u26A0\uFE0F Bereits abgelaufen</span>' : '') + (_isExp ? '<span class="badge badge-expiry ' + _expiry.badgeClass + '">' + _expiry.badgeText + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isNew ? '<span class="badge new">\u2728 Neu</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row">' + _dealBtn + '</div><div class="vote-section"><button class="action-btn vote-btn" onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
+            const _typeBadgeClass = d.type === 'gratis' ? 'badge-gratis' : d.type === 'freebie' ? 'badge-freebie' : d.type === 'testabo' ? 'badge-new' : 'badge-rabatt';
+            const _typeBadgeText = d.type === 'gratis' ? '\uD83C\uDF81 GRATIS' : d.type === 'freebie' ? '\u2728 Freebie' : d.type === 'testabo' ? '\uD83C\uDD93 Testabo' : d.type === 'gewinnspiel' ? '\uD83C\uDF89 Gewinnspiel' : d.type === 'bogo' ? '\uD83D\uDD01 1+1' : '\uD83D\uDCB0 Rabatt';
+            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + _expClass + (_isExpiredVisible ? ' expired-visible' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')">' + renderDealLogo(d) + '<div><div class="deal-brand">' + _brand + '</div><div class="deal-title">' + _formattedTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + _loc + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_hasExpiry && _expiry.showUrgency && !_isExpiredVisible ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div><div class="card-countdown ' + _expiry.countdownClass + '"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">' + _expiry.countdownText + '</span></div>' : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + '<div class="deal-meta"><span class="badge ' + _typeBadgeClass + '">' + _typeBadgeText + '</span>' + (_isExpiredVisible ? '<span class="badge badge-expiry urgent">\u26A0\uFE0F Bereits abgelaufen</span>' : '') + (_isExp ? '<span class="badge badge-expiry ' + _expiry.badgeClass + '">' + _expiry.badgeText + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isNew ? '<span class="badge new">\u2728 Neu</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row">' + _dealBtn + '</div><div class="vote-section"><button class="action-btn vote-btn" onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
         }).join('');
 
         checkDeepLink();
@@ -2255,7 +2461,7 @@
         }
         function toggleFav(id, e) { e.stopPropagation(); if (favorites.includes(id)) { favorites = favorites.filter(f => f !== id); showToast('💔 Entfernt'); } else { favorites.push(id); showToast('❤️ Favorit!'); addXP(2, null); } localStorage.setItem('favorites', JSON.stringify(favorites)); updateFavBadge(); renderDeals(); }
         function updateFavBadge() { const b = document.getElementById('favBadge'); if (favorites.length > 0) { b.style.display = 'block'; b.textContent = favorites.length; } else { b.style.display = 'none'; } }
-        function showFavorites() { hideHeaderElements(); const fav = allDeals.filter(d => favorites.includes(d.id)); document.getElementById('deals').innerHTML = fav.length ? fav.map(d => '<div class="deal-card"><div class="deal-header"><span class="deal-logo">' + (d.logo || inferLogoForApp(d, d.brand)) + '</span><div><div class="deal-brand">' + d.brand + '</div><div class="deal-title">' + d.title + '</div></div></div><a href="' + d.url + '" target="_blank" class="deal-btn" style="width:100%;text-align:center;margin-top:10px">Zum Deal →</a></div>').join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>Keine Favoriten</p><p style="font-size:13px;color:#999;margin-top:8px">Tippe ❤️ bei einem Deal</p></div>'; document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[3].classList.add('active'); }
+        function showFavorites() { hideHeaderElements(); const fav = allDeals.filter(d => favorites.includes(d.id)).map(normalizeDealForApp); document.getElementById('deals').innerHTML = fav.length ? fav.map(d => '<div class="deal-card"><div class="deal-header">' + renderDealLogo(d) + '<div><div class="deal-brand">' + getDisplayBrand(d) + '</div><div class="deal-title">' + cleanText(d.title) + '</div></div></div><a href="' + d.url + '" target="_blank" class="deal-btn" style="width:100%;text-align:center;margin-top:10px">Zum Deal →</a></div>').join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>Keine Favoriten</p><p style="font-size:13px;color:#999;margin-top:8px">Tippe ❤️ bei einem Deal</p></div>'; document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[3].classList.add('active'); }
         function showStats() { hideHeaderElements(); const level = LEVELS[userData.level - 1]; const nextLevel = LEVELS[userData.level] || LEVELS[LEVELS.length - 1]; const xpProgress = Math.min(100, ((userData.xp - (LEVELS[userData.level - 1]?.xp || 0)) / (nextLevel.xp - (LEVELS[userData.level - 1]?.xp || 0))) * 100); document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">Deine Stats</h2></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;align-items:center;gap:16px"><div style="background:rgba(255,255,255,0.2);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800">' + userData.level + '</div><div style="flex:1"><div style="font-size:11px;opacity:0.8">LEVEL</div><div style="font-size:20px;font-weight:700">' + level.name + '</div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin:10px 0 6px;overflow:hidden"><div style="background:white;height:100%;width:' + xpProgress + '%;border-radius:4px"></div></div><div style="font-size:13px;opacity:0.9">' + userData.xp + ' / ' + nextLevel.xp + ' XP</div></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#667eea">' + userData.xp + '</div><div style="font-size:13px;color:#6b7280">XP gesamt</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#f59e0b">🔥 ' + userData.streak + '</div><div style="font-size:13px;color:#6b7280">Tage Streak</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#8b5cf6">' + userData.dealsViewed + '</div><div style="font-size:13px;color:#6b7280">Deals angesehen</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#10b981">' + (userData.dealsSubmitted || 0) + '</div><div style="font-size:13px;color:#6b7280">Deals geteilt</div></div></div><div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;opacity:0.9">💰 Gespart</div><div style="font-size:32px;font-weight:800;margin-top:4px">€' + (userData.savings || 0) + '</div></div><div style="text-align:right"><div style="font-size:13px;opacity:0.9">Ziel</div><div style="font-size:20px;font-weight:700">€50</div></div></div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin-top:12px;overflow:hidden"><div style="background:white;height:100%;width:' + Math.min(100, ((userData.savings || 0) / 50) * 100) + '%;border-radius:4px"></div></div></div></div>'; document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[2].classList.add('active'); }
         function showSecretDeals() { hideHeaderElements(); const canSpin = !userData.lastSpin || new Date().toDateString() !== new Date(userData.lastSpin).toDateString(); const challengeDone = userData.dealsViewed >= 5; document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">🔮</div><h2 style="font-size:22px;margin:8px 0 4px">Geheime Deals</h2><p style="color:#6b7280;font-size:14px">Challenges & Bonus</p></div><div style="background:white;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border:2px solid ' + (challengeDone ? '#10b981' : '#fbbf24') + '"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span style="font-size:32px">' + (challengeDone ? '✅' : '🎯') + '</span><div><div style="font-weight:700;font-size:16px">' + (challengeDone ? 'Challenge geschafft!' : 'Tägliche Challenge') + '</div><div style="font-size:13px;color:#6b7280">Schau dir 5 Deals an</div></div></div><div style="display:flex;gap:8px;margin-bottom:12px"><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 1 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 2 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 3 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 4 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 5 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div></div><div style="font-size:13px;color:#6b7280;text-align:center">' + Math.min(userData.dealsViewed, 5) + '/5 Deals</div>' + (challengeDone ? '<div style="background:#d1fae5;color:#065f46;padding:10px;border-radius:10px;margin-top:12px;text-align:center;font-weight:600">🎁 +25 XP!</div>' : '<div style="background:#fef3c7;padding:10px;border-radius:10px;margin-top:12px;text-align:center;font-size:13px;color:#92400e">🎁 +25 XP Belohnung</div>') + '</div><div style="background:linear-gradient(135deg,#ec4899,#8b5cf6);border-radius:16px;padding:20px;color:white;margin-bottom:16px;text-align:center;cursor:pointer" onclick="openSpinModal()"><div style="font-size:48px;margin-bottom:8px">🎡</div><div style="font-size:18px;font-weight:700">Tägliches Glücksrad</div><div style="font-size:14px;opacity:0.9;margin:8px 0">Drehe und gewinne XP!</div><button style="background:white;color:#8b5cf6;border:none;padding:12px 32px;border-radius:25px;font-weight:700;font-size:16px;cursor:pointer;margin-top:8px">' + (canSpin ? '🎰 Drehen!' : '✅ Gedreht') + '</button></div><div style="background:linear-gradient(135deg,' + (challengeDone ? '#fbbf24,#f59e0b' : '#1f2937,#374151') + ');border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;align-items:center;gap:12px"><span style="font-size:32px">' + (challengeDone ? '🎁' : '🔒') + '</span><div><div style="font-size:18px;font-weight:700">' + (challengeDone ? 'Geheimer Deal!' : 'Geheimer Deal') + '</div><div style="font-size:13px;opacity:0.9">' + (challengeDone ? 'IKEA: Gratis Softeis!' : 'Challenge abschließen') + '</div></div></div></div><div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white;text-align:center;cursor:pointer" onclick="openLinkModal()"><div style="font-size:36px;margin-bottom:8px">🔗</div><div style="font-size:18px;font-weight:700">Deal einreichen</div><div style="font-size:14px;opacity:0.9;margin-top:4px">+100 XP!</div></div></div>'; document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[1].classList.add('active'); }
         function showToast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2000); }
@@ -2509,6 +2715,176 @@
     localStorage.setItem('proData', JSON.stringify(proData));
   }
 
+  function getReferralLandingUrl(refCode) {
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.hash = '';
+    url.searchParams.set('ref', refCode);
+    return url.toString();
+  }
+
+  function getPendingClaimStorageKey(code) {
+    return 'pending_referral_claim_' + code;
+  }
+
+  function getPendingClaim(code) {
+    try {
+      return JSON.parse(localStorage.getItem(getPendingClaimStorageKey(code)) || 'null');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setPendingClaim(code, payload) {
+    localStorage.setItem(getPendingClaimStorageKey(code), JSON.stringify(payload));
+  }
+
+  function clearPendingClaim(code) {
+    localStorage.removeItem(getPendingClaimStorageKey(code));
+  }
+
+  async function loadRuntimeConfig() {
+    if (window.__runtimeConfigLoaded) return window.__runtimeConfig || {};
+    window.__runtimeConfigLoaded = true;
+    try {
+      const res = await fetch('push-config.json?t=' + Date.now());
+      if (!res.ok) {
+        window.__runtimeConfig = {};
+        return window.__runtimeConfig;
+      }
+      const cfg = await res.json();
+      window.__runtimeConfig = cfg || {};
+      return window.__runtimeConfig;
+    } catch {
+      window.__runtimeConfig = {};
+      return window.__runtimeConfig;
+    }
+  }
+
+  async function getReferralApiBase() {
+    const cfg = await loadRuntimeConfig();
+    if (!cfg || !cfg.referralEnabled || !cfg.referralApiBase) return '';
+    return String(cfg.referralApiBase).replace(/\/+$/, '');
+  }
+
+  async function referralApi(path, options = {}) {
+    const base = await getReferralApiBase();
+    if (!base) return null;
+    const res = await fetch(base + path, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      },
+      ...options
+    });
+    let body = null;
+    try {
+      body = await res.json();
+    } catch (e) {
+      body = null;
+    }
+    if (!res.ok) {
+      throw new Error((body && body.error) || ('Referral API failed: ' + res.status));
+    }
+    return body;
+  }
+
+  async function ensureReferralCodeRegistered() {
+    const code = generateReferralCode();
+    const base = await getReferralApiBase();
+    if (!base) return null;
+    try {
+      return await referralApi('/api/referrals/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          code,
+          inviterDeviceId: getDeviceId()
+        })
+      });
+    } catch (err) {
+      console.warn('Referral register failed:', err);
+      return null;
+    }
+  }
+
+  async function fetchReferralStatus(code) {
+    const base = await getReferralApiBase();
+    if (!base) return { installsCount: getDownloadCount(code), eligibleForPro: getDownloadCount(code) >= 2, fallback: true };
+    try {
+      const result = await referralApi('/api/referrals/status?code=' + encodeURIComponent(code));
+      if (result && typeof result.installsCount === 'number') {
+        proData.referralCount = result.installsCount;
+        saveProData();
+      }
+      return result;
+    } catch (err) {
+      console.warn('Referral status failed:', err);
+      return { installsCount: getDownloadCount(code), eligibleForPro: getDownloadCount(code) >= 2, fallback: true };
+    }
+  }
+
+  async function startReferralClaim(refCode) {
+    const base = await getReferralApiBase();
+    if (!base) {
+      localStorage.setItem('pending_' + refCode, '1');
+      return { fallback: true };
+    }
+    try {
+      const result = await referralApi('/api/referrals/claim/start', {
+        method: 'POST',
+        body: JSON.stringify({
+          code: refCode,
+          visitorId: getDeviceId(),
+          userAgent: navigator.userAgent || '',
+          source: 'landing'
+        })
+      });
+      if (result && result.claimToken) {
+        setPendingClaim(refCode, {
+          claimToken: result.claimToken,
+          startedAt: Date.now()
+        });
+      }
+      return result;
+    } catch (err) {
+      console.warn('Referral claim start failed:', err);
+      localStorage.setItem('pending_' + refCode, '1');
+      return { fallback: true, error: err.message || String(err) };
+    }
+  }
+
+  async function completeReferralClaim(refCode, installSource = 'manual-confirm') {
+    const base = await getReferralApiBase();
+    if (!base) {
+      confirmDownload(refCode);
+      return { completed: true, fallback: true, installsCount: getDownloadCount(refCode) };
+    }
+    const pending = getPendingClaim(refCode);
+    if (!pending || !pending.claimToken) {
+      return null;
+    }
+    try {
+      const result = await referralApi('/api/referrals/claim/complete', {
+        method: 'POST',
+        body: JSON.stringify({
+          code: refCode,
+          claimToken: pending.claimToken,
+          visitorId: getDeviceId(),
+          userAgent: navigator.userAgent || '',
+          installSource
+        })
+      });
+      if (result && (result.completed || result.alreadyClaimed)) {
+        clearPendingClaim(refCode);
+        localStorage.removeItem('pending_' + refCode);
+      }
+      return result;
+    } catch (err) {
+      console.warn('Referral claim complete failed:', err);
+      return { completed: false, error: err.message || String(err) };
+    }
+  }
+
   // ── App Download Tracking ─────────────────────────────────────────
   // Jeder bestätigte Download wird in localStorage gespeichert.
   // Key: "dl_FF-XXXXX"  → JSON array of confirmed download timestamps
@@ -2543,10 +2919,11 @@
     return id;
   }
 
-  function checkReferralProgress() {
+  async function checkReferralProgress() {
     const code = proData.referralCode;
     if (!code) return 0;
-    return getDownloadCount(code);
+    const status = await fetchReferralStatus(code);
+    return status && typeof status.installsCount === 'number' ? status.installsCount : 0;
   }
 
   // ── App Store Campaign URL ────────────────────────────────────────
@@ -2564,7 +2941,7 @@
 
   // ── Landing Page for Referred Users ──────────────────────────────
   // When ?ref=CODE is in URL (without downloaded=1), show download prompt
-  function checkIncomingReferral() {
+  async function checkIncomingReferral() {
     const params = new URLSearchParams(window.location.search);
     const refCode = params.get('ref');
     const downloaded = params.get('downloaded');
@@ -2574,8 +2951,10 @@
 
     // A: Confirmed download – came back from App Store
     if (downloaded === '1' && refCode !== myCode) {
-      confirmDownload(refCode);
-      showToast('📱 App-Download bestätigt! Danke!');
+      const result = await completeReferralClaim(refCode, 'return-link');
+      if (result && (result.completed || result.alreadyClaimed || result.fallback)) {
+        showToast('📱 App-Download bestätigt! Danke!');
+      }
       // Clean URL
       const cleanUrl = window.location.pathname;
       window.history.replaceState({}, '', cleanUrl);
@@ -2606,9 +2985,10 @@
     document.body.prepend(banner);
   }
 
-  function handleAppDownload(refCode) {
-    // 1. Mark as pending download
+  async function handleAppDownload(refCode) {
+    // 1. Start central claim before opening the store
     localStorage.setItem('pending_' + refCode, '1');
+    await startReferralClaim(refCode);
     // 2. Open App Store
     const appStoreUrl = getAppStoreDownloadUrl(refCode);
     window.open(appStoreUrl, '_blank');
@@ -2619,18 +2999,22 @@
       banner.innerHTML = `
         <div style="font-size:15px;font-weight:700">⏳ App Store geöffnet...</div>
         <div style="font-size:13px;opacity:0.9;margin-top:4px">Lade FreeFinder herunter und öffne die App einmal</div>
-        <div style="font-size:12px;opacity:0.8;margin-top:8px">Beim ersten Start wird der Download automatisch bestätigt ✓</div>
+        <div style="font-size:12px;opacity:0.8;margin-top:8px">Nach dem Installieren diese Seite wieder öffnen und unten bestätigen</div>
         <button onclick="manualConfirmDownload('${refCode}')" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.5);color:white;padding:8px 20px;border-radius:20px;font-size:12px;cursor:pointer;margin-top:12px">
-          ✓ Ich habe die App bereits
+          ✓ Ich habe die App installiert
         </button>
       `;
     }
     showToast('📱 App Store geöffnet!');
   }
 
-  function manualConfirmDownload(refCode) {
-    // Manual confirmation (for users who already have the app or for testing)
-    confirmDownload(refCode);
+  async function manualConfirmDownload(refCode) {
+    // Manual confirmation after install/open
+    const result = await completeReferralClaim(refCode, 'manual-confirm');
+    if (!result || (!result.completed && !result.alreadyClaimed && !result.fallback)) {
+      showToast('⚠️ Bestätigung fehlgeschlagen. Bitte später erneut versuchen.');
+      return;
+    }
     const banner = document.getElementById('refLandingBanner');
     if (banner) {
       banner.innerHTML = `<div style="font-size:16px;font-weight:800;padding:8px">✅ Download bestätigt! Danke! 🎉</div>`;
@@ -2640,13 +3024,14 @@
   }
 
   // ── Referral Modal ────────────────────────────────────────────────
-  function openReferralModal() {
+  async function openReferralModal() {
     const modal = document.getElementById('referralModal');
     const code = generateReferralCode();
-    const dlCount = checkReferralProgress();
+    await ensureReferralCodeRegistered();
+    const dlCount = await checkReferralProgress();
     
     // Update modal content
-    const refUrl = getAppStoreDownloadUrl(code);
+    const refUrl = getReferralLandingUrl(code);
     document.getElementById('referralLinkDisplay').textContent = refUrl;
     document.getElementById('referralCount').textContent = dlCount;
     document.getElementById('referralProgressFill').style.width = Math.min(dlCount / 2 * 100, 100) + '%';
@@ -2687,17 +3072,19 @@
     document.getElementById('referralModal').classList.remove('show');
   }
 
-  function shareReferralWhatsApp() {
+  async function shareReferralWhatsApp() {
     const code = generateReferralCode();
-    const link = getAppStoreDownloadUrl(code);
-    const text = '📱 Hey! Ich nutze FreeFinder Wien für gratis Deals in Wien!\n\n👑 Lade die App herunter und hilf mir PRO zu werden – komplett kostenlos für uns beide!\n\n👉 ' + link + '\n\n☕ Gratis Kaffee, 🍔 Essen & mehr!';
+    await ensureReferralCodeRegistered();
+    const link = getReferralLandingUrl(code);
+    const text = '📱 Hey! Ich nutze FreeFinder Wien für gratis Deals in Wien!\n\n👑 Öffne meinen Link, lade die App herunter und bestätige den Installationsschritt – dann werde ich kostenlos PRO.\n\n👉 ' + link + '\n\n☕ Gratis Kaffee, 🍔 Essen & mehr!';
     window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
     showToast('📤 WhatsApp geöffnet!');
   }
 
-  function copyReferralLink() {
+  async function copyReferralLink() {
     const code = generateReferralCode();
-    const link = getAppStoreDownloadUrl(code);
+    await ensureReferralCodeRegistered();
+    const link = getReferralLandingUrl(code);
     navigator.clipboard.writeText(link).then(() => {
       showToast('📋 Einladungslink kopiert!');
     }).catch(() => {
@@ -2807,19 +3194,10 @@
     }
 
     async function loadPushConfig() {
-      if (window.__pushConfigLoaded) return window.__pushConfig || null;
-      window.__pushConfigLoaded = true;
-      try {
-        const res = await fetch('push-config.json?t=' + Date.now());
-        if (!res.ok) return null;
-        const cfg = await res.json();
-        const enabled = !!(cfg && cfg.enabled && cfg.vapidPublicKey && cfg.subscribeEndpoint);
-        window.__pushConfig = enabled ? cfg : null;
-        return window.__pushConfig;
-      } catch {
-        window.__pushConfig = null;
-        return null;
-      }
+      const cfg = await loadRuntimeConfig();
+      const enabled = !!(cfg && cfg.enabled && cfg.vapidPublicKey && cfg.subscribeEndpoint);
+      window.__pushConfig = enabled ? cfg : null;
+      return window.__pushConfig;
     }
 
     async function ensurePushSubscription() {
@@ -2999,14 +3377,15 @@
   }
 
   // ── Pro Init ──────────────────────────────────────────────────────
-    function initProSystem() {
+    async function initProSystem() {
       generateReferralCode();
       if (!proData.redeemedDeals) proData.redeemedDeals = {};
       if (!proData.savingsByCategory) proData.savingsByCategory = {kaffee:0,essen:0,supermarkt:0,fitness:0,streaming:0};
       if (!proData.monthlySavings) proData.monthlySavings = {};
       saveProData();
-      checkIncomingReferral();
-      const dlCount = checkReferralProgress();
+      await ensureReferralCodeRegistered();
+      await checkIncomingReferral();
+      const dlCount = await checkReferralProgress();
       if (dlCount >= 2 && !proData.isPro) { proData.isPro = true; saveProData(); }
       updateProUI();
       initAlarmPolling();
