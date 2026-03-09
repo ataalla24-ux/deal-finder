@@ -3,7 +3,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { normalizeDealExpiry, shouldSkipUrlExpiryLookup } from './expiry-utils.js';
-import { isGenericJunkDeal, normalizeDealRecord } from './deal-normalization-utils.js';
+import {
+  isExpiredDealRecord,
+  isFalsePositiveFreeDeal,
+  isGenericJunkDeal,
+  normalizeDealRecord,
+  sanitizeExpiryText,
+} from './deal-normalization-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -112,8 +118,11 @@ async function main() {
     deal = resetUnsafeUrlExpiry(deal);
     deal = normalizeDealRecord(deal);
     await normalizeDealExpiry(deal, { now, allowUrlLookup: true, urlCache });
+    deal.expires = sanitizeExpiryText(deal.expires);
 
     if (isGenericJunkDeal(deal)) continue;
+    if (isFalsePositiveFreeDeal(deal)) continue;
+    if (isExpiredDealRecord(deal, now)) continue;
     if (!deal.id || seenIds.has(deal.id)) continue;
 
     seenIds.add(deal.id);
@@ -123,6 +132,9 @@ async function main() {
   for (const churchDeal of churchDeals) {
     const normalizedChurchDeal = normalizeDealRecord({ ...churchDeal });
     await normalizeDealExpiry(normalizedChurchDeal, { now, allowUrlLookup: true, urlCache });
+    normalizedChurchDeal.expires = sanitizeExpiryText(normalizedChurchDeal.expires);
+    if (isFalsePositiveFreeDeal(normalizedChurchDeal)) continue;
+    if (isExpiredDealRecord(normalizedChurchDeal, now)) continue;
     if (!normalizedChurchDeal.id || seenIds.has(normalizedChurchDeal.id)) continue;
     seenIds.add(normalizedChurchDeal.id);
     remaining.push(normalizedChurchDeal);

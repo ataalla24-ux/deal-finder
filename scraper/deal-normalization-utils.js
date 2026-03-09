@@ -4,6 +4,8 @@ const BRAND_RULES = [
   { key: 'starbucks', name: 'Starbucks', logo: '☕', category: 'kaffee' },
   { key: 'tchibo', name: 'Tchibo', logo: '☕', category: 'kaffee' },
   { key: 'nespresso', name: 'Nespresso', logo: '☕', category: 'kaffee' },
+  { key: 'sephora', name: 'SEPHORA', logo: '💄', category: 'beauty' },
+  { key: 'thalia', name: 'Thalia', logo: '📚', category: 'shopping' },
   { key: 'intimissimi', name: 'Intimissimi', logo: '🧦', category: 'shopping' },
   { key: 'bipa', name: 'BIPA', logo: '💄', category: 'beauty' },
   { key: 'dm', name: 'dm', logo: '🧴', category: 'beauty' },
@@ -14,10 +16,40 @@ const BRAND_RULES = [
   { key: 'hofer', name: 'HOFER', logo: '🛒', category: 'supermarkt' },
   { key: 'lidl', name: 'Lidl', logo: '🛒', category: 'supermarkt' },
   { key: 'ikea', name: 'IKEA', logo: '🪑', category: 'shopping' },
-  { key: 'rooni', name: 'Rooni Restaurant', logo: '🍽️', category: 'essen' },
+  { key: 'botanischer garten', name: 'Botanischer Garten der Universität Wien', logo: '🌿', category: 'kultur' },
+  { key: 'shell', name: 'Shell Österreich', logo: '⛽', category: 'kaffee' },
+  { key: 'european street food festival', name: 'European Street Food Festival', logo: '🌮', category: 'essen' },
+  { key: 'vienna coffee festival', name: 'Vienna Coffee Festival', logo: '☕', category: 'kaffee' },
+  { key: 'rooni', name: 'Rooni Restaurant', logo: '🍜', category: 'essen' },
+  { key: 'leopoldauer alm', name: 'Leopoldauer Alm', logo: '🍖', category: 'essen' },
+  { key: 'jala falafel', name: 'Jala Falafel', logo: '🧆', category: 'essen' },
+  { key: 'burgallio', name: 'Burgallio', logo: '🍔', category: 'essen' },
+  { key: 'cavallo', name: 'Cavallo Vienna', logo: '🍝', category: 'essen' },
+  { key: 'tybah', name: 'Tybah Pizzeria-Ristorante', logo: '🍕', category: 'essen' },
+  { key: 'eismacher', name: 'Der Eismacher', logo: '🍨', category: 'essen' },
+  { key: 'ben & jerry', name: "Ben & Jerry's", logo: '🍦', category: 'essen' },
+  { key: 'donauturm', name: 'Donauturm', logo: '🗼', category: 'kultur' },
+  { key: 'genuss-festival', name: 'Genuss-Festival Wien', logo: '🧀', category: 'essen' },
+  { key: 'momax', name: 'mömax Restaurant', logo: '🛋️', category: 'essen' },
+  { key: 'mömax', name: 'mömax Restaurant', logo: '🛋️', category: 'essen' },
+  { key: 'vapiano', name: 'Vapiano', logo: '🍝', category: 'essen' },
+  { key: 'grill heaven', name: 'Grill Heaven Wien', logo: '🔥', category: 'essen' },
+  { key: 'ori fusion', name: 'Ori Fusion Kitchen', logo: '🥢', category: 'essen' },
+  { key: 'das lugeck', name: 'Das Lugeck', logo: '🍽️', category: 'essen' },
+  { key: 'whatseat', name: 'WhatsEat', logo: '🍽️', category: 'essen' },
+  { key: 'coffee u-boot', name: 'Coffee U-Boot 1060', logo: '☕', category: 'kaffee' },
+  { key: 'wolke pizza', name: 'WOLKE Pizza', logo: '🍕', category: 'essen' },
+  { key: 'makotoya', name: 'Ramen Makotoya', logo: '🍜', category: 'essen' },
+  { key: 'crepes', name: "Mama's Crêpes & Shakes", logo: '🥞', category: 'essen' },
+  { key: 'crêpes', name: "Mama's Crêpes & Shakes", logo: '🥞', category: 'essen' },
+  { key: 'rafas', name: 'RAFAS', logo: '🥐', category: 'essen' },
+  { key: 'chasen brew', name: 'Chasen Brew', logo: '🍵', category: 'kaffee' },
+  { key: 'wiener eistraum', name: 'Wiener Eistraum', logo: '⛸️', category: 'events' },
+  { key: 'peter hahn', name: 'Peter Hahn', logo: '👗', category: 'shopping' },
+  { key: 'pneus online', name: 'Pneus Online', logo: '🛞', category: 'shopping' },
   { key: 'omv', name: 'OMV', logo: '⛽', category: 'shopping' },
-  { key: 'joe', name: 'joo', logo: '🎁', category: 'supermarkt' },
-  { key: 'joo', name: 'joo', logo: '🎁', category: 'supermarkt' },
+  { key: 'joe', name: 'joo', logo: '💳', category: 'supermarkt' },
+  { key: 'joo', name: 'joo', logo: '💳', category: 'supermarkt' },
   { key: 'wolt', name: 'Wolt', logo: '🛵', category: 'essen' },
   { key: 'lieferando', name: 'Lieferando', logo: '🛵', category: 'essen' },
   { key: 'uber eats', name: 'Uber Eats', logo: '🛵', category: 'essen' },
@@ -157,10 +189,22 @@ function inferLogo(deal = {}, brand = '') {
   const known = findBrandRule(combined);
   if (known && !known.source) return known.logo;
 
+  const signal = normalizeAscii(combined);
   const type = cleanUiNoiseText(deal.type || '').toLowerCase();
   const category = cleanUiNoiseText(deal.category || '').toLowerCase();
+  if (/(pizza)/.test(signal)) return '🍕';
+  if (/(burger)/.test(signal)) return '🍔';
+  if (/(kebab|doner|döner|falafel|wrap)/.test(signal)) return '🌯';
+  if (/(ramen|noodle)/.test(signal)) return '🍜';
+  if (/(crepe|crepes|crêpe|crêpes|waffel|shake)/.test(signal)) return '🥞';
+  if (/(croissant|brioche|pastry|bakery)/.test(signal)) return '🥐';
+  if (/(ice cream|eis|gelato|cone)/.test(signal)) return '🍦';
+  if (/(kaffee|coffee|espresso|latte|matcha|tea)/.test(signal)) return '☕';
+  if (/(ticket|festival|museum|concert|ausstellung|show)/.test(signal)) return '🎫';
+  if (/(garten|botanisch|park)/.test(signal)) return '🌿';
+  if (/(book|buch|thalia)/.test(signal)) return '📚';
   if (category === 'kaffee') return '☕';
-  if (category === 'essen') return '🍽️';
+  if (category === 'essen') return '🍴';
   if (category === 'supermarkt') return '🛒';
   if (category === 'fitness') return '💪';
   if (category === 'reisen') return '✈️';
@@ -183,18 +227,17 @@ function inferPreferredType(deal = {}) {
     deal.brand,
     deal.distance,
     deal.url,
-    deal.type,
   ].filter(Boolean).join(' ')).toLowerCase();
 
   if (/\b(gewinnspiel|giveaway|verlosen|zu gewinnen|chance auf|gl[üu]cksrad)\b/i.test(combined)) {
     return 'gewinnspiel';
   }
 
-  if (/\b(1\+1|2for1|2 for 1|buy one get one|bogo|4 f[üu]r 3|3\+3|4\+2|mix&match|2x .+ \+ 1 gratis)\b/i.test(combined)) {
+  if (/\b(1\+1|2for1|2 for 1|2f[üu]r1|2 f[üu]r 1|buy one get one|bogo|4 f[üu]r 3|3\+3|4\+2|mix&match|2x .+ \+ 1 gratis)\b/i.test(combined)) {
     return 'bogo';
   }
 
-  if (/\b(rabatt|discount|gutschein|voucher|verg[üu]nstig|bonus|sale|aktion)\b/i.test(combined) || /(^|[^0-9])\d{1,2}\s?%/.test(combined)) {
+  if (/\b(rabatt|discount|gutschein|voucher|verg[üu]nstig(?:t|te|ten|ter|tes)?|bonus|sale|aktion)\b/i.test(combined) || /(^|[^0-9])\d{1,2}\s?%/.test(combined)) {
     if (!/\b(gratis|kostenlos|free entry|eintritt frei|ohne kaufzwang)\b/i.test(combined)) {
       return 'rabatt';
     }
@@ -216,9 +259,72 @@ function isGenericJunkDeal(deal = {}) {
   return false;
 }
 
+function buildFallbackDescription(deal = {}) {
+  const title = cleanUiNoiseText(deal.title || '');
+  const brand = cleanUiNoiseText(deal.brand || '');
+  const location = cleanUiNoiseText(deal.distance || deal.location || '');
+  const type = cleanUiNoiseText(deal.type || '').toLowerCase();
+  const category = cleanUiNoiseText(deal.category || '').toLowerCase();
+
+  if (/gratis/i.test(title) || type === 'gratis') {
+    return [title, location].filter(Boolean).join(' in ');
+  }
+  if (type === 'bogo') {
+    return [title, '1+1 bzw. Kombi-Aktion', location].filter(Boolean).join(' • ');
+  }
+  if (type === 'rabatt') {
+    return [title, location].filter(Boolean).join(' • ');
+  }
+  if (type === 'gewinnspiel') {
+    return [title, 'Gewinnspiel', location].filter(Boolean).join(' • ');
+  }
+  return [brand, title, location, category].filter(Boolean).join(' • ');
+}
+
+function sanitizeExpiryText(value) {
+  const raw = cleanUiNoiseText(value || '');
+  if (!raw) return '';
+  if (/^\d{4}-\d{2}-\d{2}t/i.test(raw)) return raw;
+
+  let text = raw
+    .replace(/\bunknown\b/gi, ' ')
+    .replace(/\bnot specified\b/gi, ' ')
+    .replace(/\bsiehe details\b/gi, ' ')
+    .replace(/\bsee details\b/gi, ' ')
+    .replace(/\bsiehe website\b/gi, ' ')
+    .replace(/\bregular hours\b/gi, ' ')
+    .replace(/\bw[aä]hrend [a-zäöüß ]*öffnungszeiten\b/gi, ' ')
+    .replace(/\bvia neotaste\b/gi, ' ')
+    .replace(/\bongoing\b/gi, ' ')
+    .replace(/\blaufende? aktion\b/gi, ' ')
+    .replace(/\blaufend\b/gi, ' ')
+    .replace(/\bnicht angegeben\b/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/^[,:\-–\s]+|[,:\-–\s]+$/g, '')
+    .trim();
+
+  if (!text || /^(regelm[aä]ßig|t[aä]glich|jeden sonntag|jeden dienstag|monatlich)$/i.test(text)) return '';
+  return text;
+}
+
+function isExpiredDealRecord(deal = {}, now = new Date()) {
+  const expires = cleanText(deal.expires || '');
+  if (!expires) return false;
+  const parsed = Date.parse(expires);
+  if (!Number.isNaN(parsed)) return parsed < now.getTime();
+  return false;
+}
+
+function isFalsePositiveFreeDeal(deal = {}) {
+  const signal = normalizeAscii([deal.title, deal.description, deal.brand].filter(Boolean).join(' '));
+  if (/eintritt kostenpflichtig/.test(signal)) return true;
+  if (/kinder bis 12 gratis/.test(signal)) return true;
+  return false;
+}
+
 function normalizeDealRecord(deal = {}) {
   const title = cleanUiNoiseText(deal.title || '');
-  const description = cleanUiNoiseText(deal.description || '');
+  let description = cleanUiNoiseText(deal.description || '');
   const brand = inferPreferredBrand({ ...deal, title, description });
   const type = inferPreferredType({ ...deal, title, description, brand });
   const known = findBrandRule([brand, title, description, deal.distance, deal.url].filter(Boolean).join(' '));
@@ -226,6 +332,10 @@ function normalizeDealRecord(deal = {}) {
   const category = known?.category && (GENERIC_CATEGORIES.has(currentCategory) || (currentCategory === 'shopping' && known.category !== 'shopping'))
     ? known.category
     : currentCategory;
+  const sanitizedExpires = sanitizeExpiryText(deal.expires);
+  if (!description) {
+    description = buildFallbackDescription({ ...deal, title, brand, type, category });
+  }
   return {
     ...deal,
     title,
@@ -233,18 +343,23 @@ function normalizeDealRecord(deal = {}) {
     brand: brand || cleanUiNoiseText(deal.brand || ''),
     type: type || cleanUiNoiseText(deal.type || '').toLowerCase(),
     category: category || currentCategory,
+    expires: sanitizedExpires,
     logo: inferLogo({ ...deal, title, description, type, category }, brand),
   };
 }
 
 export {
+  buildFallbackDescription,
   cleanText,
   cleanUiNoiseText,
   inferPreferredBrand,
   inferLogo,
   isSourceLikeBrand,
   isGenericJunkDeal,
+  isExpiredDealRecord,
+  isFalsePositiveFreeDeal,
   normalizeDealRecord,
   isLikelyGenericLocation,
   inferPreferredType,
+  sanitizeExpiryText,
 };
