@@ -101,7 +101,8 @@ SOURCES = [
         name="ICF Wien",
         homepage="https://www.icf-wien.at",
         aliases=["International Christian Fellowship Wien"],
-        known_location="Wien",
+        known_location="1070 Wien",
+        known_address="Lerchenfelder Straße 35, 1070 Wien",
         extra_paths=["/de/gottesdienste/", "/de/events/", "/de/anschluss-finden/"],
     ),
     Source(
@@ -127,6 +128,27 @@ SOURCES = [
 
 def log(message: str) -> None:
     print(message)
+
+
+def build_logo_url(homepage: str) -> str:
+    parsed = urllib.parse.urlparse(homepage)
+    origin = f"{parsed.scheme}://{parsed.netloc}" if parsed.scheme and parsed.netloc else homepage
+    return f"https://www.google.com/s2/favicons?sz=128&domain_url={urllib.parse.quote(origin, safe=':/')}"
+
+
+def normalize_expiry(value: str) -> str:
+    text = " ".join(str(value or "").split()).strip()
+    if not text:
+        return ""
+    if re.search(r"\b(zeiten? auf webseite prüfen|aktuelle termine auf webseite|siehe details|regelmäßig|regelmaessig|ongoing|not specified)\b", text, re.IGNORECASE):
+        return ""
+    if re.search(r"\b\d{1,2}[.:]\d{2}\b", text):
+        return text
+    if re.search(r"\b\d{1,2}\.\d{1,2}\.\d{2,4}\b", text):
+        return text
+    if re.search(r"\b(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\b", text, re.IGNORECASE):
+        return text
+    return ""
 
 
 def fetch_url(url: str) -> str:
@@ -239,19 +261,23 @@ def build_deal(
     priority: int,
 ) -> dict:
     now = datetime.now().isoformat()
+    normalized_expires = normalize_expiry(expires)
+    location = source.known_address or source.known_location
     return {
         "id": f"{source.slug}-{kind}-{datetime.now().strftime('%Y%m%d')}",
         "brand": source.name,
         "logo": "⛪" if kind == "kirche" else ("🕊️" if kind == "gottesdienste" else "🎉"),
+        "logoUrl": build_logo_url(source.homepage),
         "title": title,
         "description": description,
         "type": "gratis",
         "category": kind,
         "source": "Freikirchen Wien",
         "url": url,
-        "expires": expires,
-        "address": source.known_address or source.known_location,
-        "distance": source.known_location,
+        "expires": normalized_expires,
+        "address": location,
+        "distance": location,
+        "location": location,
         "hot": False,
         "isNew": True,
         "priority": priority,

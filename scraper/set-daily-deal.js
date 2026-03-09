@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { cleanText, extractDealsFromThreadMessages, extractSlackMessageText } from './slack-digest-utils.js';
+import { normalizeDealRecord } from './deal-normalization-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -115,18 +116,20 @@ function hasHumanApproval(message, botUserId) {
 function saveDealOfTheDay(deal) {
     const outputPath = path.join(__dirname, '..', 'docs', 'deal-of-the-day.json');
     const today = new Date().toISOString().split('T')[0];
+    const normalized = normalizeDealRecord(deal);
 
   const output = {
         date: today,
-        dealId: deal.id,
-        brand: deal.brand,
-        title: deal.title,
-        description: deal.description,
-        logo: deal.logo || '🎯',
-        url: deal.url,
-        type: deal.type,
-        category: deal.category || 'wien',
-        distance: deal.distance || 'Wien',
+        dealId: normalized.id,
+        brand: normalized.brand,
+        title: normalized.title,
+        description: normalized.description,
+        logo: normalized.logo || '🎯',
+        logoUrl: normalized.logoUrl || '',
+        url: normalized.url,
+        type: normalized.type,
+        category: normalized.category || 'wien',
+        distance: normalized.distance || 'Wien',
         manualPick: true,
         pickedAt: new Date().toISOString()
   };

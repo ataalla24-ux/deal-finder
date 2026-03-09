@@ -1,23 +1,23 @@
 const BRAND_RULES = [
-  { key: 'mcdonald', name: "McDonald's", logo: '🍟', category: 'essen' },
-  { key: 'burger king', name: 'Burger King', logo: '🍔', category: 'essen' },
-  { key: 'starbucks', name: 'Starbucks', logo: '☕', category: 'kaffee' },
-  { key: 'tchibo', name: 'Tchibo', logo: '☕', category: 'kaffee' },
-  { key: 'nespresso', name: 'Nespresso', logo: '☕', category: 'kaffee' },
-  { key: 'sephora', name: 'SEPHORA', logo: '💄', category: 'beauty' },
-  { key: 'thalia', name: 'Thalia', logo: '📚', category: 'shopping' },
-  { key: 'intimissimi', name: 'Intimissimi', logo: '🧦', category: 'shopping' },
-  { key: 'bipa', name: 'BIPA', logo: '💄', category: 'beauty' },
-  { key: 'dm', name: 'dm', logo: '🧴', category: 'beauty' },
-  { key: 'muller', name: 'Muller', logo: '💋', category: 'beauty' },
-  { key: 'mueller', name: 'Muller', logo: '💋', category: 'beauty' },
-  { key: 'spar', name: 'SPAR', logo: '🛒', category: 'supermarkt' },
-  { key: 'billa', name: 'BILLA', logo: '🛒', category: 'supermarkt' },
-  { key: 'hofer', name: 'HOFER', logo: '🛒', category: 'supermarkt' },
-  { key: 'lidl', name: 'Lidl', logo: '🛒', category: 'supermarkt' },
-  { key: 'ikea', name: 'IKEA', logo: '🪑', category: 'shopping' },
+  { key: 'mcdonald', name: "McDonald's", logo: '🍟', category: 'essen', domain: 'mcdonalds.at' },
+  { key: 'burger king', name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at' },
+  { key: 'starbucks', name: 'Starbucks', logo: '☕', category: 'kaffee', domain: 'starbucks.com' },
+  { key: 'tchibo', name: 'Tchibo', logo: '☕', category: 'kaffee', domain: 'tchibo.at' },
+  { key: 'nespresso', name: 'Nespresso', logo: '☕', category: 'kaffee', domain: 'nespresso.com' },
+  { key: 'sephora', name: 'SEPHORA', logo: '💄', category: 'beauty', domain: 'sephora.at' },
+  { key: 'thalia', name: 'Thalia', logo: '📚', category: 'shopping', domain: 'thalia.at' },
+  { key: 'intimissimi', name: 'Intimissimi', logo: '🧦', category: 'shopping', domain: 'intimissimi.com' },
+  { key: 'bipa', name: 'BIPA', logo: '💄', category: 'beauty', domain: 'bipa.at' },
+  { key: 'dm', name: 'dm', logo: '🧴', category: 'beauty', domain: 'dm.at' },
+  { key: 'muller', name: 'Muller', logo: '💋', category: 'beauty', domain: 'mueller.at' },
+  { key: 'mueller', name: 'Muller', logo: '💋', category: 'beauty', domain: 'mueller.at' },
+  { key: 'spar', name: 'SPAR', logo: '🛒', category: 'supermarkt', domain: 'spar.at' },
+  { key: 'billa', name: 'BILLA', logo: '🛒', category: 'supermarkt', domain: 'billa.at' },
+  { key: 'hofer', name: 'HOFER', logo: '🛒', category: 'supermarkt', domain: 'hofer.at' },
+  { key: 'lidl', name: 'Lidl', logo: '🛒', category: 'supermarkt', domain: 'lidl.at' },
+  { key: 'ikea', name: 'IKEA', logo: '🪑', category: 'shopping', domain: 'ikea.com' },
   { key: 'botanischer garten', name: 'Botanischer Garten der Universität Wien', logo: '🌿', category: 'kultur' },
-  { key: 'shell', name: 'Shell Österreich', logo: '⛽', category: 'kaffee' },
+  { key: 'shell', name: 'Shell Österreich', logo: '⛽', category: 'kaffee', domain: 'shell.at' },
   { key: 'european street food festival', name: 'European Street Food Festival', logo: '🌮', category: 'essen' },
   { key: 'vienna coffee festival', name: 'Vienna Coffee Festival', logo: '☕', category: 'kaffee' },
   { key: 'rooni', name: 'Rooni Restaurant', logo: '🍜', category: 'essen' },
@@ -47,13 +47,13 @@ const BRAND_RULES = [
   { key: 'wiener eistraum', name: 'Wiener Eistraum', logo: '⛸️', category: 'events' },
   { key: 'peter hahn', name: 'Peter Hahn', logo: '👗', category: 'shopping' },
   { key: 'pneus online', name: 'Pneus Online', logo: '🛞', category: 'shopping' },
-  { key: 'omv', name: 'OMV', logo: '⛽', category: 'shopping' },
-  { key: 'joe', name: 'joo', logo: '💳', category: 'supermarkt' },
-  { key: 'joo', name: 'joo', logo: '💳', category: 'supermarkt' },
-  { key: 'wolt', name: 'Wolt', logo: '🛵', category: 'essen' },
-  { key: 'lieferando', name: 'Lieferando', logo: '🛵', category: 'essen' },
-  { key: 'uber eats', name: 'Uber Eats', logo: '🛵', category: 'essen' },
-  { key: 'all4golf', name: 'ALL4GOLF', logo: '⛳', category: 'shopping' },
+  { key: 'omv', name: 'OMV', logo: '⛽', category: 'shopping', domain: 'omv.at' },
+  { key: 'joe', name: 'joo', logo: '💳', category: 'supermarkt', domain: 'joe-club.at' },
+  { key: 'joo', name: 'joo', logo: '💳', category: 'supermarkt', domain: 'joe-club.at' },
+  { key: 'wolt', name: 'Wolt', logo: '🛵', category: 'essen', domain: 'wolt.com' },
+  { key: 'lieferando', name: 'Lieferando', logo: '🛵', category: 'essen', domain: 'lieferando.at' },
+  { key: 'uber eats', name: 'Uber Eats', logo: '🛵', category: 'essen', domain: 'ubereats.com' },
+  { key: 'all4golf', name: 'ALL4GOLF', logo: '⛳', category: 'shopping', domain: 'all4golf.de' },
   { key: 'spee', name: 'Spee', logo: '🧺', category: 'shopping' },
   { key: 'preisjaeger', name: 'Preisjaeger', logo: '🎯', category: 'shopping', source: true },
   { key: 'wien deals', name: 'Wien Deals', logo: '🎯', category: 'shopping', source: true },
@@ -82,6 +82,16 @@ const GENERIC_TITLES = [
 ];
 
 const GENERIC_CATEGORIES = new Set(['', 'wien', 'gratis', 'shopping']);
+
+const SOURCE_LIKE_HOSTS = [
+  /(^|\.)instagram\.com$/i,
+  /(^|\.)tiktok\.com$/i,
+  /(^|\.)facebook\.com$/i,
+  /(^|\.)x\.com$/i,
+  /(^|\.)twitter\.com$/i,
+  /(^|\.)slack\.com$/i,
+  /(^|\.)preisjaeger\./i,
+];
 
 function cleanText(value) {
   if (!value) return '';
@@ -119,6 +129,25 @@ function normalizeAscii(value) {
 function findBrandRule(signal) {
   const normalized = normalizeAscii(signal);
   return BRAND_RULES.find((rule) => normalized.includes(rule.key));
+}
+
+function extractHostFromUrl(url) {
+  try {
+    const host = new URL(String(url)).hostname.toLowerCase().replace(/^www\./, '');
+    return host;
+  } catch {
+    return '';
+  }
+}
+
+function isSourceLikeHost(host) {
+  if (!host) return true;
+  return SOURCE_LIKE_HOSTS.some((pattern) => pattern.test(host));
+}
+
+function buildLogoUrl(host) {
+  if (!host || isSourceLikeHost(host)) return '';
+  return `https://www.google.com/s2/favicons?sz=128&domain_url=https://${host}`;
 }
 
 function isLikelyGenericLocation(value) {
@@ -182,6 +211,19 @@ function inferPreferredBrand(deal = {}) {
   return explicitBrand || '';
 }
 
+function inferLogoUrl(deal = {}, brand = '') {
+  const combined = [brand, deal.title, deal.description, deal.distance, deal.url, deal.post_url, deal.source]
+    .filter(Boolean)
+    .join(' ');
+  const known = findBrandRule(combined);
+  if (known?.domain) return buildLogoUrl(known.domain);
+
+  const directHost = extractHostFromUrl(deal.logoUrl || deal.image || deal.imageUrl || deal.url || deal.post_url);
+  if (directHost && !isSourceLikeHost(directHost)) return buildLogoUrl(directHost);
+
+  return '';
+}
+
 function inferLogo(deal = {}, brand = '') {
   const combined = [brand, deal.title, deal.description, deal.distance, deal.url, deal.category, deal.type]
     .filter(Boolean)
@@ -216,6 +258,7 @@ function inferLogo(deal = {}, brand = '') {
   if (category === 'events') return '🎫';
   if (type === 'gewinnspiel') return '🎉';
   if (type === 'bogo') return '🔁';
+  if (type === 'freebie') return '✨';
   if (type === 'gratis') return '🎁';
   return '🎯';
 }
@@ -237,13 +280,17 @@ function inferPreferredType(deal = {}) {
     return 'bogo';
   }
 
-  if (/\b(rabatt|discount|gutschein|voucher|verg[üu]nstig(?:t|te|ten|ter|tes)?|bonus|sale|aktion)\b/i.test(combined) || /(^|[^0-9])\d{1,2}\s?%/.test(combined)) {
+  if (/\b(freebie|willkommensgeschenk|welcome gift|welcome bonus|goodie bag|gratis[- ]?beigabe|gratis dazu|2 go bons|app-vorteil|bonusclub-vorteil)\b/i.test(combined)) {
+    return 'freebie';
+  }
+
+  if (/\b(rabatt|discount|gutschein|voucher|verg[üu]nstig(?:t|te|ten|ter|tes)?|sale|aktion)\b/i.test(combined) || /(^|[^0-9])\d{1,2}\s?%/.test(combined)) {
     if (!/\b(gratis|kostenlos|free entry|eintritt frei|ohne kaufzwang)\b/i.test(combined)) {
       return 'rabatt';
     }
   }
 
-  if (/\b(gratis|kostenlos|free|freebie|ohne kaufzwang|eintritt frei|pay what you want|welcome gift)\b/i.test(combined)) {
+  if (/\b(gratis|kostenlos|free|ohne kaufzwang|eintritt frei|pay what you want)\b/i.test(combined)) {
     return 'gratis';
   }
 
@@ -274,6 +321,9 @@ function buildFallbackDescription(deal = {}) {
   }
   if (type === 'rabatt') {
     return [title, location].filter(Boolean).join(' • ');
+  }
+  if (type === 'freebie') {
+    return [title, 'Bonus/Freebie', location].filter(Boolean).join(' • ');
   }
   if (type === 'gewinnspiel') {
     return [title, 'Gewinnspiel', location].filter(Boolean).join(' • ');
@@ -327,7 +377,7 @@ function normalizeDealRecord(deal = {}) {
   let description = cleanUiNoiseText(deal.description || '');
   const brand = inferPreferredBrand({ ...deal, title, description });
   const type = inferPreferredType({ ...deal, title, description, brand });
-  const known = findBrandRule([brand, title, description, deal.distance, deal.url].filter(Boolean).join(' '));
+  const known = findBrandRule([brand, title, description, deal.distance, deal.url, deal.post_url].filter(Boolean).join(' '));
   const currentCategory = cleanUiNoiseText(deal.category || '').toLowerCase();
   const category = known?.category && (GENERIC_CATEGORIES.has(currentCategory) || (currentCategory === 'shopping' && known.category !== 'shopping'))
     ? known.category
@@ -345,6 +395,7 @@ function normalizeDealRecord(deal = {}) {
     category: category || currentCategory,
     expires: sanitizedExpires,
     logo: inferLogo({ ...deal, title, description, type, category }, brand),
+    logoUrl: inferLogoUrl({ ...deal, title, description, type, category }, brand),
   };
 }
 
@@ -354,6 +405,7 @@ export {
   cleanUiNoiseText,
   inferPreferredBrand,
   inferLogo,
+  inferLogoUrl,
   isSourceLikeBrand,
   isGenericJunkDeal,
   isExpiredDealRecord,
