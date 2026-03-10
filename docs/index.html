@@ -950,7 +950,8 @@
         let searchQuery = '';
         let votes = JSON.parse(localStorage.getItem('votes') || '{}');
         let votedDeals = JSON.parse(localStorage.getItem('votedDeals') || '[]');
-        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        let favorites = sanitizeFavoriteIds(JSON.parse(localStorage.getItem('favorites') || '[]'));
+        localStorage.setItem('favorites', JSON.stringify(favorites));
         let currentView = 'home';
         let comments = JSON.parse(localStorage.getItem('comments') || '{}');
         let userTips = JSON.parse(localStorage.getItem('userTips') || '{}');
@@ -2253,9 +2254,22 @@
       return deals;
     }
         
+    function sanitizeFavoriteIds(list) {
+        if (!Array.isArray(list)) return [];
+        return [...new Set(list.filter(id => typeof id === 'string' && id.trim().length > 0))];
+    }
+
+    function saveFavorites() {
+        favorites = sanitizeFavoriteIds(favorites);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+    }
+
     function renderDeals() {
         if (currentView === 'favorites') {
-            const fav = allDeals.filter(d => favorites.includes(d.id)).map(normalizeDealForApp);
+            const favoriteIds = new Set(sanitizeFavoriteIds(favorites));
+            const fav = allDeals
+                .filter(d => d && typeof d.id === 'string' && favoriteIds.has(d.id))
+                .map(normalizeDealForApp);
             document.getElementById('deals').innerHTML = fav.length ? fav.map(d => '<div class="deal-card"><div class="deal-header">' + renderDealLogo(d) + '<div><div class="deal-brand">' + getDisplayBrand(d) + '</div><div class="deal-title">' + cleanText(d.title) + '</div></div></div><a href="' + d.url + '" target="_blank" class="deal-btn" style="width:100%;text-align:center;margin-top:10px">Zum Deal →</a></div>').join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>Keine Favoriten</p><p style="font-size:13px;color:#999;margin-top:8px">Tippe ❤️ bei einem Deal</p></div>';
             return;
         }
@@ -2483,7 +2497,7 @@
                 }, 500);
             }
         }
-        function toggleFav(id, e) { e.stopPropagation(); if (favorites.includes(id)) { favorites = favorites.filter(f => f !== id); showToast('💔 Entfernt'); } else { favorites.push(id); showToast('❤️ Favorit!'); addXP(2, null); } localStorage.setItem('favorites', JSON.stringify(favorites)); updateFavBadge(); renderDeals(); }
+        function toggleFav(id, e) { e.stopPropagation(); if (typeof id !== 'string' || !id.trim()) { showToast('⚠️ Favorit konnte nicht gespeichert werden'); return; } if (favorites.includes(id)) { favorites = favorites.filter(f => f !== id); showToast('💔 Entfernt'); } else { favorites.push(id); showToast('❤️ Favorit!'); addXP(2, null); } saveFavorites(); updateFavBadge(); renderDeals(); }
         function updateFavBadge() { const b = document.getElementById('favBadge'); if (favorites.length > 0) { b.style.display = 'block'; b.textContent = favorites.length; } else { b.style.display = 'none'; } }
         function scrollToTopContent() {
             const scrollTarget = () => {
