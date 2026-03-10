@@ -30,8 +30,6 @@
         }
         .container { max-width: 600px; margin: 0 auto; }
         h1 { text-align: center; font-size: 28px; margin-bottom: 8px; }
-        .subtitle { text-align: center; color: #666; margin-bottom: 16px; font-size: 14px; }
-        
         /* STREAK BANNER */
         .streak-banner { background: linear-gradient(135deg, #f59e0b, #ef4444); border-radius: 16px; padding: 16px; margin-bottom: 16px; color: white; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: transform 0.2s; }
         .streak-banner:hover { transform: scale(1.02); }
@@ -571,9 +569,6 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎁 FreeFinder Wien</h1>
-        <p class="subtitle">Täglich neue Gratis-Deals & Rabatte</p>
-        
         <div class="streak-banner" id="streakBanner">
             <div class="streak-fire">🔥</div>
             <div class="streak-info">
@@ -2131,13 +2126,6 @@
             // Kombiniere User-Deals mit genehmigten Base-Deals (nur Slack-approved)
             const userDealsWithVotes = userDeals.map(d => normalizeDealForApp({ ...d, votes: votes[d.id] || d.votes || 0 }));
             allDeals = [...userDealsWithVotes, ...baseDeals];
-            if (data.lastUpdated) {
-                const dt = new Date(data.lastUpdated);
-                if (!Number.isNaN(dt.getTime())) {
-                    const sub = document.querySelector('.subtitle');
-                    if (sub) sub.textContent = 'Nur geprüfte Deals • Stand: ' + dt.toLocaleString('de-AT');
-                }
-            }
             updateCounts(); renderDeals(); setDailyDeal();
         } catch (e) {
             document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">\uD83D\uDE15</div><p>Fehler</p></div>';
