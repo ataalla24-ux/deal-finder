@@ -212,6 +212,7 @@ function normalizeDeal(rawDeal, sourceKey) {
   const rawDistance = cleanText(deal.distance || deal.location || deal.ort);
   const rawExpires = cleanText(deal.expires || deal.end_date || deal.validity_date || '');
   const rawSource = cleanText(deal.source);
+  const originSource = cleanText(deal.originSource) || rawSource || sourceKey;
   const url = rawUrl;
   const pubDate = toIsoDate(deal.pubDate);
   const pubDateSource = cleanText(deal.pubDateSource);
@@ -238,6 +239,7 @@ function normalizeDeal(rawDeal, sourceKey) {
     pubDateSource,
     expires: inferExpires(deal),
     source: cleanText(deal.source) || sourceKey,
+    originSource,
     qualityScore: Number(deal.qualityScore) || 0,
     hot: Boolean(deal.hot),
     isNew: true,
@@ -357,6 +359,7 @@ function buildSlackMessage(deal, index) {
     `📅 Angebotsdatum: ${formatDate(deal.pubDate)}`,
     `⏳ Gültig bis: ${deal.expires ? formatDate(deal.expires) : 'k.A.'}`,
     `🧭 Kategorie: ${deal.category} | Typ: ${deal.type}`,
+    `🧩 Ursprung intern: ${deal.originSource || deal.source || 'k.A.'}`,
     `🔗 Direktlink: ${link}`,
     `🆔 Deal-ID: ${deal.id}`,
     missingNote,

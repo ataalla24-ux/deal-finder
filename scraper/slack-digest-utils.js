@@ -162,6 +162,7 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
   let type = 'rabatt';
   let url = '';
   let id = '';
+  let originSource = '';
   let description = '';
   let missingFields = [];
 
@@ -185,6 +186,8 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
           category = part.toLowerCase();
         }
       }
+    } else if (plain.startsWith('Ursprung intern:')) {
+      originSource = cleanText(plain.slice('Ursprung intern:'.length));
     } else if (plain.startsWith('Direktlink:')) {
       url = parseSlackLink(plain.slice('Direktlink:'.length).trim());
     } else if (plain.startsWith('Deal-ID:')) {
@@ -236,6 +239,7 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
     type,
     distance,
     source: 'Slack Digest',
+    originSource,
     expires,
     pubDate: pubDate || new Date(parseFloat(message.ts || '0') * 1000).toISOString(),
     qualityScore: 0,
@@ -249,6 +253,8 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
     missingFields,
     order,
   });
+
+  normalized.originSource = cleanText(normalized.originSource || originSource);
 
   if (isGenericJunkDeal(normalized)) return null;
   return normalized;

@@ -87,6 +87,7 @@ function normalizeDeal(raw) {
     logo: cleanText(deal.logo) || '🎯',
     distance: cleanText(deal.distance || deal.location || deal.ort) || 'Wien',
     source: cleanText(deal.source) || 'Slack Approved',
+    originSource: cleanText(deal.originSource) || cleanText(deal.source) || 'Slack Approved',
     expires: cleanText(deal.expires),
     expiresOriginal: cleanText(deal.expiresOriginal || deal.expires),
     expiresPrecision: cleanText(deal.expiresPrecision),
