@@ -1417,10 +1417,17 @@
             const hoursLeft = Math.max(0, Math.ceil(msLeft / 3600000));
             const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
             const dateLabel = formatDateAT(expiryMs);
+            const signalText = [rawDisplay, rawExpiry, deal?.title || '', deal?.description || '', deal?.category || '', deal?.type || '']
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
 
             const today = new Date();
             const endDate = new Date(expiryMs);
             const isToday = today.toDateString() === endDate.toDateString();
+            const hasExplicitEndSignal = /\b(bis|gültig bis|gueltig bis|läuft ab|laeuft ab|endet|endet am|letzter tag|nur noch|deadline|frist|einlösbar bis|einloesbar bis|aktion bis|noch \d+ tage gültig|noch \d+h gültig)\b/.test(signalText);
+            const isSingleDayCategory = /(^| )(events?|gottesdienste|kirche)( |$)/.test(signalText);
+            const looksLikeSingleDay = precision === 'day' && !hasExplicitEndSignal && (isSingleDayCategory || /\b(gültig am|gueltig am|am \d{1,2}[./-]\d{1,2}|am \d{1,2}\.\s*[a-zäöü]+|heute|morgen|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(signalText));
 
             let cardClass = ' expiring-ok';
             let barColor = 'green';
@@ -1429,7 +1436,27 @@
             let badgeText = `📅 Gültig bis ${dateLabel}`;
             let countdownText = `Gültig bis ${dateLabel}`;
 
-            if (msLeft <= 0 || isToday) {
+            if (looksLikeSingleDay) {
+                cardClass = daysLeft <= 3 ? ' expiring-mid' : ' expiring-ok';
+                barColor = daysLeft <= 3 ? 'orange' : 'green';
+                badgeClass = daysLeft <= 3 ? 'warn' : 'safe';
+                countdownClass = daysLeft <= 3 ? 'warn' : 'ok';
+
+                if (msLeft <= 0 || isToday) {
+                    cardClass = ' expiring-soon';
+                    barColor = 'red';
+                    badgeClass = 'today urgent';
+                    countdownClass = 'warning';
+                    badgeText = '📍 Gültig heute';
+                    countdownText = 'Heute gültig';
+                } else if (daysLeft === 1) {
+                    badgeText = '📍 Gültig morgen';
+                    countdownText = `Gültig am ${dateLabel}`;
+                } else {
+                    badgeText = `📍 In ${daysLeft} Tagen gültig`;
+                    countdownText = `Gültig am ${dateLabel}`;
+                }
+            } else if (msLeft <= 0 || isToday) {
                 cardClass = ' expiring-soon';
                 barColor = 'red';
                 badgeClass = 'today urgent';
