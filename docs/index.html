@@ -1816,6 +1816,46 @@
             return cleanUiNoiseText(bits.join(' | '));
         }
 
+        function slugifyDealPart(value) {
+            return String(value || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '')
+                .slice(0, 48);
+        }
+
+        function getStableDealId(deal) {
+            const existingId = String(deal.id || '').trim();
+            if (existingId) return existingId;
+
+            const rawKey = [
+                deal.url,
+                deal.title,
+                deal.brand,
+                deal.description,
+                deal.category,
+                deal.expires,
+                deal.pubDate,
+                deal.approvedAt
+            ].filter(Boolean).join('|');
+
+            let hash = 0;
+            for (let i = 0; i < rawKey.length; i += 1) {
+                hash = ((hash << 5) - hash) + rawKey.charCodeAt(i);
+                hash |= 0;
+            }
+
+            const prefix = [
+                slugifyDealPart(deal.brand),
+                slugifyDealPart(deal.title),
+                slugifyDealPart(deal.category)
+            ].filter(Boolean).slice(0, 3).join('-') || 'deal';
+
+            return `${prefix}-${Math.abs(hash)}`;
+        }
+
         function getDealLogoUrlForApp(deal, brand) {
             if (deal.logoUrl && !isSourceLikeHostForApp(extractHostFromUrlForApp(deal.logoUrl))) return deal.logoUrl;
             const preferredBrand = cleanUiNoiseText(brand || inferPreferredBrandForApp(deal) || '');
@@ -1860,6 +1900,7 @@
 
         function normalizeDealForApp(deal) {
             const out = { ...deal };
+            out.id = getStableDealId(out);
             out.title = cleanUiNoiseText(out.title || '');
             out.description = cleanUiNoiseText(out.description || '');
             out.brand = cleanUiNoiseText(out.brand || '');
@@ -2393,8 +2434,8 @@
         if (currentView === 'favorites') {
             const favoriteIds = new Set(sanitizeFavoriteIds(favorites));
             const fav = allDeals
-                .filter(d => d && typeof d.id === 'string' && favoriteIds.has(d.id))
-                .map(normalizeDealForApp);
+                .map(normalizeDealForApp)
+                .filter(d => favoriteIds.has(d.id));
             document.getElementById('deals').innerHTML = fav.length ? fav.map(d => '<div class="deal-card"><div class="deal-header">' + renderDealLogo(d) + '<div><div class="deal-brand">' + getDisplayBrand(d) + '</div><div class="deal-title">' + cleanText(d.title) + '</div></div></div><a href="' + d.url + '" target="_blank" class="deal-btn" style="width:100%;text-align:center;margin-top:10px">Zum Deal →</a></div>').join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>Keine Favoriten</p><p style="font-size:13px;color:#999;margin-top:8px">Tippe ❤️ bei einem Deal</p></div>';
             return;
         }
