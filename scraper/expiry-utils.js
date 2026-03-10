@@ -50,14 +50,56 @@ function endOfUtcMonth(year, monthIndex) {
 export function isVagueExpiry(value) {
   const text = cleanText(value).toLowerCase();
   if (!text) return true;
-  return /^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend|ongoing|k\.a\.?|tbd|coming soon|bei eröffnung|bei eroeffnung|regelm[aä]ßig|regelmaessig)/i.test(text)
-    || /(siehe details|siehe website|siehe webseite|check website|not specified|unknown unknown)/i.test(text);
+  return /^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend|ongoing|k\.a\.?|tbd|coming soon|bei eröffnung|bei eroeffnung|regelm[aä]ßig|regelmaessig|immer|permanent\b|frühjahr\b|fruehjahr\b|season opening\b)/i.test(text)
+    || /(siehe details|siehe website|siehe webseite|check website|not specified|unknown unknown|zeiten auf webseite pr[üu]fen|aktuelle termine auf webseite|\(neotaste deal\)|\(7 days rolling\)|g[üu]ltig 2 tage vor oder nach dem geburtstag)/i.test(text)
+    || isScheduleOnlyExpiry(text)
+    || isPartOfDayExpiry(text);
 }
 
 function isRecurringChurchLikeExpiry(value) {
   const text = cleanText(value).toLowerCase();
   if (!text) return false;
   return /^(regelm[aä]ßig|regelmaessig|zeiten auf webseite pr[üu]fen|aktuelle termine auf webseite|so \d{1,2}:\d{2} uhr|jeden\b|jeden sonntag\b|jeden dienstag\b|jeden mittwoch\b|jeden donnerstag\b|jeden freitag\b|jeden samstag\b)/i.test(text);
+}
+
+function isScheduleOnlyExpiry(value) {
+  const text = cleanText(value).toLowerCase();
+  if (!text) return false;
+  const hasExplicitDate =
+    /\b\d{1,2}\.\d{1,2}\.(?:\d{2,4})?\b/.test(text) ||
+    /\b\d{1,2}\.\s*[-–]\s*\d{1,2}\.\d{1,2}\.\d{4}\b/.test(text) ||
+    /\b(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+\d{4}\b/.test(text) ||
+    /\b\d{1,2}\.?\s+(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\b/.test(text);
+  if (hasExplicitDate) return false;
+  return /^(mo|di|mi|do|fr|sa|so|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)/i.test(text)
+    || /\b(mo|di|mi|do|fr|sa|so)(?:\s*[-–&/]\s*(mo|di|mi|do|fr|sa|so))+/i.test(text)
+    || /\b\d{1,2}:\d{2}\s*(?:uhr)?\b/i.test(text) && !/\b(bis|endet|gültig|gueltig|läuft|laeuft|nur heute|morgen)\b/i.test(text);
+}
+
+function isPartOfDayExpiry(value) {
+  const text = cleanText(value).toLowerCase();
+  if (!text) return false;
+  return /\b(vormittag|nachmittag|abend|morgens|mittags|abends)\b/i.test(text);
+}
+
+function isChurchDomain(hostname = '') {
+  const host = hostname.toLowerCase();
+  return [
+    'hillsong.com',
+    'www.hillsong.com',
+    'cigwien.at',
+    'www.cigwien.at',
+    'icf-wien.at',
+    'www.icf-wien.at',
+    'jesuszentrum.at',
+    'www.jesuszentrum.at',
+    'cgw.at',
+    'www.cgw.at',
+    'fcgwien.at',
+    'www.fcgwien.at',
+    'feg.at',
+    'www.feg.at',
+  ].includes(host);
 }
 
 export function shouldSkipUrlExpiryLookup(deal = {}, url = '', raw = '') {
@@ -203,6 +245,35 @@ function parseMonthOnly(text, now) {
   };
 }
 
+function stripScheduleSuffix(text) {
+  return cleanText(text)
+    .replace(/\s+(während öffnungszeiten|regelmäßige?n? zeiten|regular hours|nicht angegeben|not specified|siehe details|see details)$/i, '')
+    .replace(/\s+(mo|di|mi|do|fr|sa|so)(?:\s*[-–&/]\s*(mo|di|mi|do|fr|sa|so))+\s*,?\s*\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}.*$/i, '')
+    .replace(/\s+(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\s*\d{1,2}:\d{2}.*$/i, '')
+    .replace(/\s+(fr|sa|so|mo|di|mi|do)\s+\d{1,2}:\d{2}.*$/i, '')
+    .trim();
+}
+
+function isolateLeadingExpiryToken(text) {
+  const normalized = stripScheduleSuffix(text);
+  const patterns = [
+    /^(\d{1,2}\.\s*[-–]\s*\d{1,2}\.\d{1,2}\.\d{4})\b/i,
+    /^(\d{1,2}\.\d{1,2}\.\d{4}\s*[-–]\s*\d{1,2}\.\d{1,2}\.\d{4})\b/i,
+    /^(\d{1,2}\.\d{1,2}\.\s*[-–]\s*\d{1,2}\.\d{1,2}\.\d{4})\b/i,
+    /^((?:j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+\d{4})\b/i,
+    /^(\d{1,2}\.\d{1,2}\.\d{2,4})\b/i,
+    /^(\d{1,2}\.\d{1,2}\.)\b/i,
+    /^(\d{1,2}\.?\s+(?:j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)(?:\s+\d{4})?)\b/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = normalized.match(pattern);
+    if (match) return cleanText(match[1]);
+  }
+
+  return normalized;
+}
+
 export function parseExpiryDetails(value, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const text = cleanText(value);
@@ -210,10 +281,9 @@ export function parseExpiryDetails(value, options = {}) {
 
   if (isVagueExpiry(text)) return null;
 
-  const withoutPrefixes = text
-    .replace(/^(gültig\s*bis|einlösbar\s*bis|aktion\s*bis|angebot\s*bis|läuft\s*bis|nur\s*bis|endet\s*am|bis)\s*[:\-]?\s*/i, '')
-    .replace(/\s+(während öffnungszeiten|regelmäßige?n? zeiten|regular hours|nicht angegeben|not specified|siehe details|see details)$/i, '')
-    .trim();
+  const withoutPrefixes = isolateLeadingExpiryToken(
+    text.replace(/^(gültig\s*bis|einlösbar\s*bis|aktion\s*bis|angebot\s*bis|läuft\s*bis|nur\s*bis|endet\s*am|bis)\s*[:\-]?\s*/i, '')
+  );
 
   return (
     parseIsoLike(withoutPrefixes) ||
@@ -225,15 +295,45 @@ export function parseExpiryDetails(value, options = {}) {
   );
 }
 
+function extractWestfieldExpiry(text, now) {
+  const range = text.match(/\b\d{1,2}\s+[A-Za-zäöüÄÖÜ]+\s+\d{4}\s*[—-]\s*(\d{1,2}\s+[A-Za-zäöüÄÖÜ]+\s+\d{4})\b/);
+  if (!range) return null;
+  const parsed = parseExpiryDetails(range[1], { now });
+  return parsed?.date ? { ...parsed, source: 'url' } : null;
+}
+
+function extractNeotasteExpiry(text) {
+  if (/90\s*days?|7\s*days?\s*rolling|rolling validity|neotaste deal/i.test(text)) {
+    return null;
+  }
+  return null;
+}
+
 export function extractExpiryDateFromHtml(html, options = {}) {
   if (!html) return null;
   const now = options.now instanceof Date ? options.now : new Date();
+  const hostname = cleanText(options.hostname || '').toLowerCase();
   const text = String(html)
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+
+  if (hostname.includes('westfield.com')) {
+    const westfield = extractWestfieldExpiry(text, now);
+    if (westfield) return westfield;
+  }
+
+  if (hostname.includes('neotaste.com')) {
+    const neotaste = extractNeotasteExpiry(text);
+    if (neotaste) return neotaste;
+    return null;
+  }
+
+  if (isChurchDomain(hostname)) {
+    return null;
+  }
 
   const phrases = [
     /(?:gültig\s*bis|einlösbar\s*bis|aktion\s*bis|angebot\s*bis|läuft\s*bis|nur\s*bis|endet\s*am|ends?\s*(?:on)?|until)\s*[:\-]?\s*([^.!,;\n]{4,90})/gi,
@@ -258,6 +358,12 @@ export function extractExpiryDateFromHtml(html, options = {}) {
 
 export async function fetchExpiryFromUrl(url, options = {}) {
   if (!url || typeof url !== 'string' || !/^https?:\/\//i.test(url)) return null;
+  let hostname = '';
+  try {
+    hostname = new URL(url).hostname;
+  } catch {
+    hostname = '';
+  }
   const timeoutMs = Number(options.timeoutMs || process.env.URL_CHECK_TIMEOUT_MS || 7000);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -275,7 +381,7 @@ export async function fetchExpiryFromUrl(url, options = {}) {
     const ctype = (res.headers.get('content-type') || '').toLowerCase();
     if (!ctype.includes('text/html') && !ctype.includes('application/xhtml+xml')) return null;
     const html = await res.text();
-    return extractExpiryDateFromHtml(html, options);
+    return extractExpiryDateFromHtml(html, { ...options, hostname });
   } catch {
     return null;
   } finally {
@@ -286,7 +392,13 @@ export async function fetchExpiryFromUrl(url, options = {}) {
 export async function normalizeDealExpiry(deal, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const allowUrlLookup = options.allowUrlLookup !== false;
-  const raw = cleanText(deal.expires || deal.end_date || deal.validity_date || '');
+  const raw = cleanText(
+    deal.expires ||
+    deal.expiresOriginal ||
+    deal.end_date ||
+    deal.validity_date ||
+    ''
+  );
   const url = cleanText(deal.url);
 
   if (raw) {
@@ -329,8 +441,8 @@ export async function normalizeDealExpiry(deal, options = {}) {
     return deal;
   }
 
-  deal.expires = raw;
-  deal.expiresPrecision = raw ? 'unknown' : '';
-  deal.expiresSource = raw ? 'raw' : '';
+  deal.expires = '';
+  deal.expiresPrecision = '';
+  deal.expiresSource = '';
   return deal;
 }

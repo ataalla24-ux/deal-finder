@@ -35,7 +35,7 @@ function loadDeals() {
 }
 
 function wantsUrlLookup(deal, now) {
-  const rawExpiry = String(deal.expires || '').trim();
+  const rawExpiry = String(deal.expires || deal.expiresOriginal || '').trim();
   const parsedExpiry = parseExpiryDetails(rawExpiry, { now });
   return Boolean(
     deal.url &&

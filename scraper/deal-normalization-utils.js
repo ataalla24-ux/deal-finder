@@ -349,11 +349,24 @@ function sanitizeExpiryText(value) {
     .replace(/\blaufende? aktion\b/gi, ' ')
     .replace(/\blaufend\b/gi, ' ')
     .replace(/\bnicht angegeben\b/gi, ' ')
+    .replace(/\bzeiten auf webseite prüfen\b/gi, ' ')
+    .replace(/\baktuelle termine auf webseite\b/gi, ' ')
+    .replace(/\bsiehe webseite\b/gi, ' ')
+    .replace(/\bimmer\b/gi, ' ')
+    .replace(/\bpermanent nach vereinbarung\b/gi, ' ')
+    .replace(/\bfrühjahr 20\d{2}\b/gi, ' ')
+    .replace(/\bfruehjahr 20\d{2}\b/gi, ' ')
+    .replace(/\bseason opening 20\d{2}\b/gi, ' ')
+    .replace(/\(neotaste deal\)/gi, ' ')
+    .replace(/\(7 days rolling\)/gi, ' ')
+    .replace(/\bgültig 2 tage vor oder nach dem geburtstag\b/gi, ' ')
     .replace(/\s+/g, ' ')
     .replace(/^[,:\-–\s]+|[,:\-–\s]+$/g, '')
     .trim();
 
   if (!text || /^(regelm[aä]ßig|t[aä]glich|jeden sonntag|jeden dienstag|monatlich)$/i.test(text)) return '';
+  if (/^(mo|di|mi|do|fr|sa|so|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)/i.test(text)) return '';
+  if (/\b(vormittag|nachmittag|abend|morgens|mittags|abends)\b/i.test(text)) return '';
   return text;
 }
 
