@@ -28,6 +28,14 @@
             padding-bottom: max(100px, calc(100px + env(safe-area-inset-bottom)));
             padding-left: max(16px, env(safe-area-inset-left));
         }
+        button, .nav-item, .filter-btn, .search-tag, .fab-add, .pro-banner, .radius-btn, .toggle-sw, .toggle-btn, .action-btn {
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+        }
+        .is-pressed {
+            transform: scale(0.97);
+            filter: brightness(0.98);
+        }
         .container { max-width: 600px; margin: 0 auto; }
         h1 { text-align: center; font-size: 28px; margin-bottom: 8px; }
         /* STREAK BANNER */
@@ -959,6 +967,123 @@
         let userRatings = JSON.parse(localStorage.getItem('userRatings') || '{}');
         let userDeals = JSON.parse(localStorage.getItem('userDeals') || '[]');
         let submittedLinks = JSON.parse(localStorage.getItem('submittedLinks') || '[]');
+        const feedbackState = { audioContext: null, lastHapticAt: 0, lastToneAt: 0 };
+        const FEEDBACK_PRESS_SELECTOR = 'button, .nav-item, .filter-btn, .search-tag, .fab-add, .pro-banner, .radius-btn, .toggle-sw, .toggle-btn, .action-btn';
+        const FEEDBACK_HAPTICS = {
+            tap: [8],
+            soft: [6],
+            medium: [12],
+            success: [10, 30, 16],
+            warning: [18, 40, 18],
+            error: [24, 45, 24]
+        };
+
+        function getAudioContext() {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return null;
+            if (!feedbackState.audioContext) {
+                feedbackState.audioContext = new Ctx();
+            }
+            return feedbackState.audioContext;
+        }
+
+        async function unlockAudioFeedback() {
+            const ctx = getAudioContext();
+            if (!ctx) return null;
+            if (ctx.state === 'suspended') {
+                try {
+                    await ctx.resume();
+                } catch (error) {
+                    return null;
+                }
+            }
+            return ctx;
+        }
+
+        function triggerHaptic(kind = 'tap') {
+            if (!navigator.vibrate) return;
+            const now = Date.now();
+            const minGap = kind === 'tap' || kind === 'soft' ? 45 : 120;
+            if (now - feedbackState.lastHapticAt < minGap) return;
+            feedbackState.lastHapticAt = now;
+            navigator.vibrate(FEEDBACK_HAPTICS[kind] || FEEDBACK_HAPTICS.tap);
+        }
+
+        function playTone(kind = 'soft') {
+            const presets = {
+                soft: [{ frequency: 440, duration: 0.035, type: 'sine', gain: 0.012 }],
+                success: [
+                    { frequency: 660, duration: 0.05, type: 'sine', gain: 0.02, delay: 0 },
+                    { frequency: 880, duration: 0.08, type: 'sine', gain: 0.024, delay: 0.045 }
+                ],
+                warning: [{ frequency: 380, duration: 0.09, type: 'triangle', gain: 0.018 }],
+                error: [{ frequency: 220, duration: 0.12, type: 'sawtooth', gain: 0.016 }]
+            };
+            const notes = presets[kind];
+            if (!notes) return;
+            const now = Date.now();
+            if (now - feedbackState.lastToneAt < 140) return;
+            feedbackState.lastToneAt = now;
+            unlockAudioFeedback().then((ctx) => {
+                if (!ctx) return;
+                const startAt = ctx.currentTime + 0.005;
+                notes.forEach((note) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = note.type;
+                    osc.frequency.value = note.frequency;
+                    gain.gain.setValueAtTime(0.0001, startAt + (note.delay || 0));
+                    gain.gain.exponentialRampToValueAtTime(note.gain, startAt + (note.delay || 0) + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + (note.delay || 0) + note.duration);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(startAt + (note.delay || 0));
+                    osc.stop(startAt + (note.delay || 0) + note.duration + 0.02);
+                });
+            }).catch(() => {});
+        }
+
+        function emitFeedback(kind = 'tap', options = {}) {
+            const sound = options.sound === true;
+            const hapticKind = kind === 'success' || kind === 'warning' || kind === 'error' ? kind : (kind === 'medium' ? 'medium' : 'tap');
+            triggerHaptic(hapticKind);
+            if (sound) {
+                playTone(kind === 'success' || kind === 'warning' || kind === 'error' ? kind : 'soft');
+            }
+        }
+
+        function classifyToastFeedback(message) {
+            const text = String(message || '').toLowerCase();
+            if (!text) return { kind: 'soft', sound: false };
+            if (/fehler|fehlgeschlagen|⚠️|konnte nicht|kein gps|deaktiviert|bald ergänzt/.test(text)) {
+                return { kind: 'warning', sound: true };
+            }
+            if (/bereits gevotet|nicht gespeichert/.test(text)) {
+                return { kind: 'error', sound: true };
+            }
+            if (/favorit|kopiert|geteilt|bestätigt|freigeschaltet|eingereicht|stimme gezählt|gespart|gefunden|geöffnet|alarm .*aktiviert|level up|bonus/.test(text)) {
+                return { kind: 'success', sound: true };
+            }
+            return { kind: 'soft', sound: false };
+        }
+
+        function setupInteractionFeedback() {
+            const clearPressedState = () => {
+                document.querySelectorAll('.is-pressed').forEach((el) => el.classList.remove('is-pressed'));
+            };
+
+            document.addEventListener('pointerdown', (event) => {
+                const target = event.target.closest(FEEDBACK_PRESS_SELECTOR);
+                if (!target) return;
+                target.classList.add('is-pressed');
+                unlockAudioFeedback();
+                emitFeedback(target.matches('.nav-item, .filter-btn, .radius-btn, .toggle-sw') ? 'medium' : 'tap');
+            }, { passive: true });
+
+            document.addEventListener('pointerup', clearPressedState, { passive: true });
+            document.addEventListener('pointercancel', clearPressedState, { passive: true });
+            document.addEventListener('pointerleave', clearPressedState, { passive: true });
+        }
 
         const CHRISTIAN_EVENT_KEYWORDS = [
             'kirche', 'gemeinde', 'pfarre', 'pfarr', 'gottesdienst', 'messe', 'anbetung',
@@ -2518,7 +2643,15 @@
         function showFavorites() { currentView = 'favorites'; hideHeaderElements(); renderDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[3].classList.add('active'); }
         function showStats() { currentView = 'stats'; hideHeaderElements(); const level = LEVELS[userData.level - 1]; const nextLevel = LEVELS[userData.level] || LEVELS[LEVELS.length - 1]; const xpProgress = Math.min(100, ((userData.xp - (LEVELS[userData.level - 1]?.xp || 0)) / (nextLevel.xp - (LEVELS[userData.level - 1]?.xp || 0))) * 100); document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">Deine Stats</h2></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;align-items:center;gap:16px"><div style="background:rgba(255,255,255,0.2);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800">' + userData.level + '</div><div style="flex:1"><div style="font-size:11px;opacity:0.8">LEVEL</div><div style="font-size:20px;font-weight:700">' + level.name + '</div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin:10px 0 6px;overflow:hidden"><div style="background:white;height:100%;width:' + xpProgress + '%;border-radius:4px"></div></div><div style="font-size:13px;opacity:0.9">' + userData.xp + ' / ' + nextLevel.xp + ' XP</div></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#667eea">' + userData.xp + '</div><div style="font-size:13px;color:#6b7280">XP gesamt</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#f59e0b">🔥 ' + userData.streak + '</div><div style="font-size:13px;color:#6b7280">Tage Streak</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#8b5cf6">' + userData.dealsViewed + '</div><div style="font-size:13px;color:#6b7280">Deals angesehen</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#10b981">' + (userData.dealsSubmitted || 0) + '</div><div style="font-size:13px;color:#6b7280">Deals geteilt</div></div></div><div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;opacity:0.9">💰 Gespart</div><div style="font-size:32px;font-weight:800;margin-top:4px">€' + (userData.savings || 0) + '</div></div><div style="text-align:right"><div style="font-size:13px;opacity:0.9">Ziel</div><div style="font-size:20px;font-weight:700">€50</div></div></div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin-top:12px;overflow:hidden"><div style="background:white;height:100%;width:' + Math.min(100, ((userData.savings || 0) / 50) * 100) + '%;border-radius:4px"></div></div></div></div>'; scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[2].classList.add('active'); }
         function showSecretDeals() { currentView = 'secret'; hideHeaderElements(); const canSpin = !userData.lastSpin || new Date().toDateString() !== new Date(userData.lastSpin).toDateString(); const challengeDone = userData.dealsViewed >= 5; document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">🔮</div><h2 style="font-size:22px;margin:8px 0 4px">Geheime Deals</h2><p style="color:#6b7280;font-size:14px">Challenges & Bonus</p></div><div style="background:white;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border:2px solid ' + (challengeDone ? '#10b981' : '#fbbf24') + '"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span style="font-size:32px">' + (challengeDone ? '✅' : '🎯') + '</span><div><div style="font-weight:700;font-size:16px">' + (challengeDone ? 'Challenge geschafft!' : 'Tägliche Challenge') + '</div><div style="font-size:13px;color:#6b7280">Schau dir 5 Deals an</div></div></div><div style="display:flex;gap:8px;margin-bottom:12px"><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 1 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 2 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 3 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 4 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 5 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div></div><div style="font-size:13px;color:#6b7280;text-align:center">' + Math.min(userData.dealsViewed, 5) + '/5 Deals</div>' + (challengeDone ? '<div style="background:#d1fae5;color:#065f46;padding:10px;border-radius:10px;margin-top:12px;text-align:center;font-weight:600">🎁 +25 XP!</div>' : '<div style="background:#fef3c7;padding:10px;border-radius:10px;margin-top:12px;text-align:center;font-size:13px;color:#92400e">🎁 +25 XP Belohnung</div>') + '</div><div style="background:linear-gradient(135deg,#ec4899,#8b5cf6);border-radius:16px;padding:20px;color:white;margin-bottom:16px;text-align:center;cursor:pointer" onclick="openSpinModal()"><div style="font-size:48px;margin-bottom:8px">🎡</div><div style="font-size:18px;font-weight:700">Tägliches Glücksrad</div><div style="font-size:14px;opacity:0.9;margin:8px 0">Drehe und gewinne XP!</div><button style="background:white;color:#8b5cf6;border:none;padding:12px 32px;border-radius:25px;font-weight:700;font-size:16px;cursor:pointer;margin-top:8px">' + (canSpin ? '🎰 Drehen!' : '✅ Gedreht') + '</button></div><div style="background:linear-gradient(135deg,' + (challengeDone ? '#fbbf24,#f59e0b' : '#1f2937,#374151') + ');border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;align-items:center;gap:12px"><span style="font-size:32px">' + (challengeDone ? '🎁' : '🔒') + '</span><div><div style="font-size:18px;font-weight:700">' + (challengeDone ? 'Geheimer Deal!' : 'Geheimer Deal') + '</div><div style="font-size:13px;opacity:0.9">' + (challengeDone ? 'IKEA: Gratis Softeis!' : 'Challenge abschließen') + '</div></div></div></div><div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white;text-align:center;cursor:pointer" onclick="openLinkModal()"><div style="font-size:36px;margin-bottom:8px">🔗</div><div style="font-size:18px;font-weight:700">Deal einreichen</div><div style="font-size:14px;opacity:0.9;margin-top:4px">+100 XP!</div></div></div>'; scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[1].classList.add('active'); }
-        function showToast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2000); }
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            const feedback = classifyToastFeedback(msg);
+            emitFeedback(feedback.kind, { sound: feedback.sound });
+            setTimeout(() => t.remove(), 2000);
+        }
         function searchFor(query) { document.getElementById('searchInput').value = query; searchQuery = query; document.getElementById('searchDropdown').classList.remove('show'); document.getElementById('clearBtn').classList.add('show'); renderDeals(); }
         function clearSearch(e) { e.stopPropagation(); document.getElementById('searchInput').value = ''; searchQuery = ''; document.getElementById('clearBtn').classList.remove('show'); renderDeals(); }
         function saveUserData() { localStorage.setItem('userData', JSON.stringify(userData)); }
@@ -2728,6 +2861,7 @@
             scrollToTopContent();
         });
         window.addEventListener('scroll', () => document.getElementById('filters').classList.toggle('scrolled', window.scrollY > 100), { passive: true });
+        setupInteractionFeedback();
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
         
         init();
