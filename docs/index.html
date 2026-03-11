@@ -1382,6 +1382,118 @@
             return location;
         }
 
+        const VIENNA_POSTAL_COORDS = {
+            '1010': { lat: 48.2082, lng: 16.3738 }, '1020': { lat: 48.2188, lng: 16.4022 },
+            '1030': { lat: 48.1951, lng: 16.3962 }, '1040': { lat: 48.1914, lng: 16.3707 },
+            '1050': { lat: 48.1864, lng: 16.3538 }, '1060': { lat: 48.1966, lng: 16.3479 },
+            '1070': { lat: 48.2035, lng: 16.3442 }, '1080': { lat: 48.2104, lng: 16.3516 },
+            '1090': { lat: 48.2222, lng: 16.3583 }, '1100': { lat: 48.1742, lng: 16.3738 },
+            '1110': { lat: 48.1702, lng: 16.4207 }, '1120': { lat: 48.1749, lng: 16.3265 },
+            '1130': { lat: 48.1495, lng: 16.2855 }, '1140': { lat: 48.1993, lng: 16.2761 },
+            '1150': { lat: 48.1956, lng: 16.3264 }, '1160': { lat: 48.2110, lng: 16.3036 },
+            '1170': { lat: 48.2353, lng: 16.3165 }, '1180': { lat: 48.2350, lng: 16.3450 },
+            '1190': { lat: 48.2522, lng: 16.3410 }, '1200': { lat: 48.2397, lng: 16.3776 },
+            '1210': { lat: 48.2797, lng: 16.4121 }, '1220': { lat: 48.2324, lng: 16.4516 },
+            '1230': { lat: 48.1454, lng: 16.2973 }
+        };
+
+        const VIENNA_DISTRICT_COORDS = {
+            favoriten: VIENNA_POSTAL_COORDS['1100'],
+            simmering: VIENNA_POSTAL_COORDS['1110'],
+            meidling: VIENNA_POSTAL_COORDS['1120'],
+            hietzing: VIENNA_POSTAL_COORDS['1130'],
+            penzing: VIENNA_POSTAL_COORDS['1140'],
+            funfhaus: VIENNA_POSTAL_COORDS['1150'],
+            fünfhaus: VIENNA_POSTAL_COORDS['1150'],
+            ottakring: VIENNA_POSTAL_COORDS['1160'],
+            hernals: VIENNA_POSTAL_COORDS['1170'],
+            wahring: VIENNA_POSTAL_COORDS['1180'],
+            währing: VIENNA_POSTAL_COORDS['1180'],
+            dobling: VIENNA_POSTAL_COORDS['1190'],
+            döbling: VIENNA_POSTAL_COORDS['1190'],
+            brigittenau: VIENNA_POSTAL_COORDS['1200'],
+            floridsdorf: VIENNA_POSTAL_COORDS['1210'],
+            donaustadt: VIENNA_POSTAL_COORDS['1220'],
+            liesing: VIENNA_POSTAL_COORDS['1230'],
+            neubau: VIENNA_POSTAL_COORDS['1070'],
+            josefstadt: VIENNA_POSTAL_COORDS['1080'],
+            alsergrund: VIENNA_POSTAL_COORDS['1090'],
+            mariahilf: VIENNA_POSTAL_COORDS['1060'],
+            margareten: VIENNA_POSTAL_COORDS['1050'],
+            wieden: VIENNA_POSTAL_COORDS['1040'],
+            landstrasse: VIENNA_POSTAL_COORDS['1030'],
+            landstraße: VIENNA_POSTAL_COORDS['1030'],
+            leopoldstadt: VIENNA_POSTAL_COORDS['1020'],
+            innere stadt: VIENNA_POSTAL_COORDS['1010']
+        };
+
+        const PLACE_COORDS = {
+            'wiener neustadt': { lat: 47.8150, lng: 16.2430, area: 'outside-vienna' },
+            'vösendorf': { lat: 48.1210, lng: 16.3382, area: 'outside-vienna' },
+            'voesendorf': { lat: 48.1210, lng: 16.3382, area: 'outside-vienna' },
+            'fischapark': { lat: 47.8327, lng: 16.2385, area: 'outside-vienna' },
+            'wien nord': { lat: 48.3083, lng: 16.4477, area: 'vienna-edge' },
+            'donau zentrum': { lat: 48.2427, lng: 16.4330, area: 'vienna-edge' }
+        };
+
+        function haversineDistanceKm(lat1, lng1, lat2, lng2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        }
+
+        function isUserInVienna(lat, lng) {
+            return Number.isFinite(lat) && Number.isFinite(lng) &&
+                lat >= 48.10 && lat <= 48.33 && lng >= 16.18 && lng <= 16.58;
+        }
+
+        function getDealGeoHint(deal) {
+            const lat = Number(deal && deal.lat);
+            const lng = Number(deal && deal.lng);
+            if (Number.isFinite(lat) && Number.isFinite(lng)) {
+                return { kind: 'point', lat, lng, source: 'deal' };
+            }
+
+            const signal = cleanUiNoiseText([
+                deal && deal.distance,
+                deal && deal.description,
+                deal && deal.title,
+                deal && deal.brand
+            ].filter(Boolean).join(' ')).toLowerCase();
+            if (!signal) return null;
+
+            const postalMatch = signal.match(/\b(10[1-9]0|1[12][0-9]0)\b/);
+            if (postalMatch && VIENNA_POSTAL_COORDS[postalMatch[1]]) {
+                return { kind: 'point', ...VIENNA_POSTAL_COORDS[postalMatch[1]], source: 'postal' };
+            }
+
+            for (const [district, coords] of Object.entries(VIENNA_DISTRICT_COORDS)) {
+                if (signal.includes(district)) {
+                    return { kind: 'point', ...coords, source: 'district' };
+                }
+            }
+
+            for (const [place, coords] of Object.entries(PLACE_COORDS)) {
+                if (signal.includes(place)) {
+                    return { kind: 'point', lat: coords.lat, lng: coords.lng, source: coords.area };
+                }
+            }
+
+            if (/\b(alle .*filialen.*wien|ganz wien|wienweit|wien-weit|verschiedene standorte.*wien|diverse .*standorte.*wien|in ganz wien|wiener standorte|alle .*standorte.*wien)\b/.test(signal)) {
+                return { kind: 'citywide-vienna', source: 'citywide' };
+            }
+
+            if (/\b(in|bei)\s+wien\b/.test(signal) || /\bstandorte in wien\b/.test(signal)) {
+                return { kind: 'citywide-vienna', source: 'vienna-generic' };
+            }
+
+            return null;
+        }
+
         function sanitizeExpiryTextForApp(value) {
             const raw = cleanUiNoiseText(value || '');
             if (!raw) return '';
@@ -2818,21 +2930,29 @@
       // GPS-basierter Standort-Filter (PRO) - echte Koordinaten, kein Bezirk-Ratespiel
       const radius = proData.selectedRadius || 0;
       if (radius > 0 && proData.userLat && proData.userLng) {
-        deals = deals.filter(d => {
-          if (!d.lat || !d.lng) {
-            return false;
-          }
-          // Haversine-Distanzberechnung
-          const R = 6371;
-          const dLat = (d.lat - proData.userLat) * Math.PI / 180;
-          const dLng = (d.lng - proData.userLng) * Math.PI / 180;
-          const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(proData.userLat * Math.PI / 180) * Math.cos(d.lat * Math.PI / 180) * Math.sin(dLng/2) * Math.sin(dLng/2);
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-          const km = R * c;
-          return km <= radius;
-        });
+        deals = deals
+          .map(d => {
+            const geo = getDealGeoHint(d);
+            if (!geo) return { ...d, _distanceKm: null, _geoKind: 'unknown' };
+            if (geo.kind === 'citywide-vienna') {
+              return { ...d, _distanceKm: 0, _geoKind: geo.kind };
+            }
+            return {
+              ...d,
+              _distanceKm: haversineDistanceKm(proData.userLat, proData.userLng, geo.lat, geo.lng),
+              _geoKind: geo.kind
+            };
+          })
+          .filter(d => {
+            if (d._geoKind === 'citywide-vienna') return isUserInVienna(proData.userLat, proData.userLng);
+            return Number.isFinite(d._distanceKm) && d._distanceKm <= radius;
+          });
       }
       deals.sort((a, b) => {
+        const aDist = Number.isFinite(a._distanceKm) ? a._distanceKm : Number.POSITIVE_INFINITY;
+        const bDist = Number.isFinite(b._distanceKm) ? b._distanceKm : Number.POSITIVE_INFINITY;
+        if (radius > 0 && aDist !== bDist) return aDist - bDist;
+
         const aExpiredVisible = a._lifecycle?.state === 'expired-visible' ? 1 : 0;
         const bExpiredVisible = b._lifecycle?.state === 'expired-visible' ? 1 : 0;
         if (aExpiredVisible !== bExpiredVisible) return aExpiredVisible - bExpiredVisible;
