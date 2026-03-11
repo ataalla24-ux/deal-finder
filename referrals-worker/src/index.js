@@ -7,6 +7,7 @@ const JSON_HEADERS = {
 };
 
 const MIN_CONFIRM_DELAY_MS = 15 * 1000;
+const textEncoder = new TextEncoder();
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
@@ -41,6 +42,178 @@ function pendingKey(code, visitorId) {
 
 function apnsTokenKey(token) {
   return `push:apns:${token}`;
+}
+
+function toBase64Url(input) {
+  let bytes;
+  if (typeof input === 'string') {
+    bytes = textEncoder.encode(input);
+  } else if (input instanceof Uint8Array) {
+    bytes = input;
+  } else if (input instanceof ArrayBuffer) {
+    bytes = new Uint8Array(input);
+  } else {
+    bytes = textEncoder.encode(String(input || ''));
+  }
+
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function pemToArrayBuffer(pem) {
+  const normalized = String(pem || '')
+    .replace(/\\n/g, '\n')
+    .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+    .replace(/-----END PRIVATE KEY-----/g, '')
+    .replace(/\s+/g, '');
+
+  if (!normalized) return null;
+
+  const binary = atob(normalized);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+function derToJose(signature, size = 32) {
+  const bytes = new Uint8Array(signature);
+  if (bytes[0] !== 0x30) return bytes;
+
+  let offset = 2;
+  if (bytes[1] & 0x80) {
+    offset = 2 + (bytes[1] & 0x7f);
+  }
+
+  if (bytes[offset] !== 0x02) throw new Error('Invalid DER signature');
+  const rLength = bytes[offset + 1];
+  const rStart = offset + 2;
+  const r = bytes.slice(rStart, rStart + rLength);
+
+  const sMarker = rStart + rLength;
+  if (bytes[sMarker] !== 0x02) throw new Error('Invalid DER signature');
+  const sLength = bytes[sMarker + 1];
+  const sStart = sMarker + 2;
+  const s = bytes.slice(sStart, sStart + sLength);
+
+  const jose = new Uint8Array(size * 2);
+  jose.set(r.slice(-size), size - Math.min(size, r.length));
+  jose.set(s.slice(-size), (size * 2) - Math.min(size, s.length));
+  return jose;
+}
+
+async function buildApnsJwt(env) {
+  const teamId = String(env.APNS_TEAM_ID || '').trim();
+  const keyId = String(env.APNS_KEY_ID || '').trim();
+  const privateKeyPem = String(env.APNS_PRIVATE_KEY || '').trim();
+
+  if (!teamId || !keyId || !privateKeyPem) {
+    throw new Error('APNS credentials are incomplete');
+  }
+
+  const privateKeyData = pemToArrayBuffer(privateKeyPem);
+  if (!privateKeyData) throw new Error('APNS private key is invalid');
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8',
+    privateKeyData,
+    { name: 'ECDSA', namedCurve: 'P-256' },
+    false,
+    ['sign'],
+  );
+
+  const header = toBase64Url(JSON.stringify({ alg: 'ES256', kid: keyId }));
+  const payload = toBase64Url(JSON.stringify({
+    iss: teamId,
+    iat: Math.floor(Date.now() / 1000),
+  }));
+  const signingInput = `${header}.${payload}`;
+  const signature = await crypto.subtle.sign(
+    { name: 'ECDSA', hash: 'SHA-256' },
+    cryptoKey,
+    textEncoder.encode(signingInput),
+  );
+
+  return `${signingInput}.${toBase64Url(derToJose(signature))}`;
+}
+
+function requireAdmin(request, env) {
+  const expected = String(env.ADMIN_API_TOKEN || '').trim();
+  if (!expected) return false;
+  const authHeader = request.headers.get('authorization') || '';
+  const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  const direct = request.headers.get('x-admin-token') || '';
+  return bearer === expected || direct === expected;
+}
+
+function buildApnsBody(body) {
+  const aps = {
+    sound: typeof body?.sound === 'string' && body.sound.trim() ? body.sound.trim() : 'default',
+  };
+
+  const title = String(body?.title || '').trim();
+  const message = String(body?.body || '').trim();
+  if (title || message) {
+    aps.alert = {};
+    if (title) aps.alert.title = title;
+    if (message) aps.alert.body = message;
+  }
+
+  if (Number.isFinite(body?.badge)) {
+    aps.badge = Math.max(0, Number(body.badge));
+  }
+
+  return {
+    aps,
+    dealId: String(body?.dealId || '').trim() || undefined,
+    url: String(body?.url || '').trim() || undefined,
+    type: String(body?.type || 'deal').trim(),
+    data: body?.data && typeof body.data === 'object' ? body.data : undefined,
+  };
+}
+
+async function sendApnsPush(env, payload) {
+  const token = normalizePushToken(payload?.token);
+  if (!token) throw new Error('Invalid APNS token');
+
+  const bundleId = String(payload?.bundleId || env.APNS_BUNDLE_ID || '').trim();
+  if (!bundleId) throw new Error('Missing APNS bundle id');
+
+  const jwt = await buildApnsJwt(env);
+  const host = String(env.APNS_USE_SANDBOX || '').trim().toLowerCase() === 'true'
+    ? 'https://api.sandbox.push.apple.com'
+    : 'https://api.push.apple.com';
+
+  const body = buildApnsBody(payload);
+  const response = await fetch(`${host}/3/device/${token}`, {
+    method: 'POST',
+    headers: {
+      authorization: `bearer ${jwt}`,
+      'apns-topic': bundleId,
+      'apns-push-type': String(payload?.pushType || 'alert'),
+      'apns-priority': String(payload?.priority || '10'),
+      'apns-expiration': String(payload?.expiration || '0'),
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  let errorBody = null;
+  try {
+    errorBody = await response.json();
+  } catch {
+    errorBody = null;
+  }
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    apnsId: response.headers.get('apns-id') || '',
+    reason: errorBody?.reason || '',
+    timestamp: errorBody?.timestamp || null,
+  };
 }
 
 async function getJsonKV(env, key) {
@@ -148,6 +321,24 @@ export default {
         bundleId,
         lastSeenAt: record.lastSeenAt
       });
+    }
+
+    if (path === '/api/push/apns/send' && request.method === 'POST') {
+      if (!requireAdmin(request, env)) {
+        return invalid('Unauthorized', 401);
+      }
+
+      const body = await readBody(request);
+      if (!body || typeof body !== 'object') {
+        return invalid('Missing push payload');
+      }
+
+      try {
+        const result = await sendApnsPush(env, body);
+        return json(result, result.ok ? 200 : 502);
+      } catch (error) {
+        return invalid(error?.message || 'APNS send failed', 500);
+      }
     }
 
     if (path === '/api/referrals/status' && request.method === 'GET') {

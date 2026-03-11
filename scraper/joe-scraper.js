@@ -35,6 +35,13 @@ const SOURCES = [
     source: 'jö Bonus Club',
     distance: 'OMV Stationen Wien',
   },
+  {
+    key: 'bipa-actions',
+    url: 'https://www.bipa.at/aktionen/',
+    brand: 'BIPA',
+    source: 'BIPA Aktionen',
+    distance: 'BIPA Filialen Wien / Online',
+  },
 ];
 
 function stableHash(str) {
@@ -132,6 +139,21 @@ function sentence(text) {
 
 function makeDescription(parts) {
   return parts.map(sentence).filter(Boolean).join(' ');
+}
+
+function decodeJsonString(value) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  try {
+    return JSON.parse(`"${text.replace(/"/g, '\\"')}"`);
+  } catch {
+    return text
+      .replace(/\\u002F/g, '/')
+      .replace(/\\u003C/g, '<')
+      .replace(/\\u003E/g, '>')
+      .replace(/\\u0026/g, '&')
+      .replace(/\\"/g, '"');
+  }
 }
 
 function inferType(...parts) {
@@ -505,6 +527,47 @@ async function extractOmvJoePage(page, source) {
   return deals;
 }
 
+async function extractBipaActionsPage(page, source) {
+  const html = await page.content();
+  const deals = [];
+
+  const promoMatch = html.match(
+    /"promoBars":\{.*?"general":\{"text":"((?:\\.|[^"\\])*)","link":"((?:\\.|[^"\\])*)"/s,
+  );
+
+  if (promoMatch) {
+    const promoText = cleanText(decodeJsonString(promoMatch[1]));
+    const promoLink = decodeJsonString(promoMatch[2]);
+    const codeMatch = promoText.match(/\bcode[:\s]*([A-Z0-9-]{4,20})\b/i);
+    const title = promoText
+      .replace(/\s*❤️\s*/g, ' ')
+      .replace(/\s*registriert mit code[:\s]*[A-Z0-9-]{4,20}\b/i, '')
+      .trim();
+
+    const deal = buildDeal({
+      prefix: 'bipa',
+      title: title ? `BIPA: ${title}` : 'BIPA Aktion im Online Shop',
+      description: makeDescription([
+        promoText,
+        codeMatch ? `Aktionscode: ${codeMatch[1].toUpperCase()}.` : '',
+        'Direkt aus der aktuellen BIPA Aktionsleiste im Online Shop erkannt.',
+      ]),
+      brand: 'BIPA',
+      source: source.source,
+      url: promoLink ? new URL(promoLink, source.url).toString() : source.url,
+      expires: 'Kurzfristig wechselnd',
+      distance: source.distance,
+      category: 'beauty',
+      type: inferType(promoText, title, 'BIPA Aktionen'),
+      qualityScore: 84,
+    });
+
+    if (deal) deals.push(deal);
+  }
+
+  return deals;
+}
+
 function dedupeDeals(deals) {
   const deduped = [];
   const seen = new Set();
@@ -543,6 +606,8 @@ async function main() {
           deals = await extractJoeBenefitsPage(page, source);
         } else if (source.key === 'omv-joe') {
           deals = await extractOmvJoePage(page, source);
+        } else if (source.key === 'bipa-actions') {
+          deals = await extractBipaActionsPage(page, source);
         }
 
         console.log(`   ↳ ${deals.length} jö Deals`);

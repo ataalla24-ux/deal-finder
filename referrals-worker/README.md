@@ -22,6 +22,8 @@ This is still not an Apple-verified install callback. It is the strongest web-co
 - `GET /api/referrals/status?code=FF-XXXXXX`
 - `POST /api/referrals/claim/start`
 - `POST /api/referrals/claim/complete`
+- `POST /api/push/apns/register`
+- `POST /api/push/apns/send`
 - `GET /health`
 
 ## Required Cloudflare setup
@@ -35,6 +37,31 @@ This is still not an Apple-verified install callback. It is the strongest web-co
 {
   "referralEnabled": true,
   "referralApiBase": "https://freefinder-referrals.YOUR_SUBDOMAIN.workers.dev"
+}
+```
+
+## APNS setup
+
+For real iPhone push notifications, add these Worker secrets:
+
+- `ADMIN_API_TOKEN`
+- `APNS_TEAM_ID`
+- `APNS_KEY_ID`
+- `APNS_PRIVATE_KEY`
+- `APNS_BUNDLE_ID`
+- optional: `APNS_USE_SANDBOX=true`
+
+`/api/push/apns/send` is intentionally protected with `Authorization: Bearer <ADMIN_API_TOKEN>` or `x-admin-token`.
+
+Example payload:
+
+```json
+{
+  "token": "apns_device_token_hex",
+  "title": "Neuer Deal",
+  "body": "Gratis Kaffee heute in Wien",
+  "dealId": "deal_123",
+  "url": "freefinder://deal/deal_123"
 }
 ```
 

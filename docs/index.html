@@ -3488,7 +3488,13 @@
       return result;
     } catch (err) {
       console.warn('Referral status failed:', err);
-      return { installsCount: getDownloadCount(code), eligibleForPro: getDownloadCount(code) >= 2, fallback: true };
+      return {
+        installsCount: Number(proData.referralCount || 0),
+        eligibleForPro: false,
+        fallback: false,
+        unavailable: true,
+        error: err.message || String(err)
+      };
     }
   }
 
@@ -3517,8 +3523,7 @@
       return result;
     } catch (err) {
       console.warn('Referral claim start failed:', err);
-      localStorage.setItem('pending_' + refCode, '1');
-      return { fallback: true, error: err.message || String(err) };
+      return { fallback: false, error: err.message || String(err) };
     }
   }
 
@@ -3550,7 +3555,11 @@
       return result;
     } catch (err) {
       console.warn('Referral claim complete failed:', err);
-      return { completed: false, error: err.message || String(err) };
+      return {
+        completed: false,
+        fallback: false,
+        error: err.message || String(err)
+      };
     }
   }
 
@@ -3657,7 +3666,12 @@
   async function handleAppDownload(refCode) {
     // 1. Start central claim before opening the store
     localStorage.setItem('pending_' + refCode, '1');
-    await startReferralClaim(refCode);
+    const claimStart = await startReferralClaim(refCode);
+    if (claimStart && claimStart.error && !claimStart.fallback) {
+      localStorage.removeItem('pending_' + refCode);
+      showToast('⚠️ Einladung gerade nicht verfügbar.');
+      return;
+    }
     // 2. Open App Store
     const appStoreUrl = getAppStoreDownloadUrl(refCode);
     window.open(appStoreUrl, '_blank');
