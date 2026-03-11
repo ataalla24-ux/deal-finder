@@ -22,6 +22,11 @@ function normalizeId(value) {
   return /^[a-zA-Z0-9_-]{8,128}$/.test(id) ? id : '';
 }
 
+function normalizePushToken(value) {
+  const token = String(value || '').trim().toLowerCase();
+  return /^[a-f0-9]{32,256}$/.test(token) ? token : '';
+}
+
 function codeKey(code) {
   return `referral:code:${code}`;
 }
@@ -32,6 +37,10 @@ function claimKey(token) {
 
 function pendingKey(code, visitorId) {
   return `referral:pending:${code}:${visitorId}`;
+}
+
+function apnsTokenKey(token) {
+  return `push:apns:${token}`;
 }
 
 async function getJsonKV(env, key) {
@@ -106,6 +115,39 @@ export default {
       const record = normalizeRecord(existing, code, inviterDeviceId);
       await putJsonKV(env, codeKey(code), record);
       return json({ ok: true, ...sanitizeInstallSummary(record) });
+    }
+
+    if (path === '/api/push/apns/register' && request.method === 'POST') {
+      const body = await readBody(request);
+      const token = normalizePushToken(body?.token);
+      const bundleId = String(body?.bundleId || '').trim();
+      const platform = String(body?.platform || '').trim().toLowerCase();
+      const appVersion = String(body?.appVersion || '').trim().slice(0, 64);
+      const build = String(body?.build || '').trim().slice(0, 64);
+
+      if (platform !== 'ios') return invalid('Only iOS APNS tokens are supported here');
+      if (!token) return invalid('Invalid APNS token');
+      if (!bundleId) return invalid('Missing bundle id');
+
+      const existing = await getJsonKV(env, apnsTokenKey(token));
+      const record = {
+        token,
+        platform: 'ios',
+        bundleId,
+        appVersion,
+        build,
+        lastSeenAt: Date.now(),
+        createdAt: existing?.createdAt || Date.now()
+      };
+
+      await putJsonKV(env, apnsTokenKey(token), record);
+      return json({
+        ok: true,
+        registered: true,
+        platform: 'ios',
+        bundleId,
+        lastSeenAt: record.lastSeenAt
+      });
     }
 
     if (path === '/api/referrals/status' && request.method === 'GET') {
