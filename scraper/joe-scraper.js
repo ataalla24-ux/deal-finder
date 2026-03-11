@@ -9,6 +9,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-joe.json');
+const DEFAULT_JOE_STORAGE_STATE = path.join(ROOT, '.secrets', 'joe.storage-state.json');
+const JOE_STORAGE_STATE = process.env.JOE_STORAGE_STATE || DEFAULT_JOE_STORAGE_STATE;
+const JOE_PRIVATE_BENEFITS_URL = 'https://www.joe-club.at/vorteile';
 
 const USER_AGENT = 'Mozilla/5.0 (compatible; FreeFinderBot/1.0; +https://freefinder.wien)';
 const TODAY = new Date();
@@ -51,6 +54,14 @@ function stableHash(str) {
     hash >>>= 0;
   }
   return hash.toString(36);
+}
+
+function hasFile(filePath) {
+  try {
+    return fs.existsSync(filePath);
+  } catch {
+    return false;
+  }
 }
 
 function dealId(prefix, title, url) {
@@ -213,15 +224,22 @@ function buildDeal({
 }
 
 async function openPage(browser, url) {
-  const page = await browser.newPage({
-    userAgent: USER_AGENT,
-    locale: 'de-AT',
-  });
+  const page = await browser.newPage({ userAgent: USER_AGENT, locale: 'de-AT' });
   await page.goto(url, {
     waitUntil: 'domcontentloaded',
     timeout: 90000,
   });
   await page.waitForTimeout(1500);
+  return page;
+}
+
+async function openPageInContext(context, url, extra = {}) {
+  const page = await context.newPage();
+  await page.goto(url, {
+    waitUntil: extra.waitUntil || 'domcontentloaded',
+    timeout: extra.timeout || 90000,
+  });
+  await page.waitForTimeout(extra.delayMs || 1500);
   return page;
 }
 
@@ -595,6 +613,103 @@ async function extractBipaJoePage(page, source) {
   return deals.filter(Boolean);
 }
 
+async function extractLoggedInJoeBenefitsPage(page) {
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(2000);
+
+  const pageData = await page.evaluate(() => {
+    const loginSignals = [
+      'anmelden',
+      'passwort',
+      'login',
+      'einloggen',
+      'registrieren',
+    ];
+    const bodyText = (document.body?.innerText || '').trim();
+    const bodyLower = bodyText.toLowerCase();
+    const requiresLogin = loginSignals.some((signal) => bodyLower.includes(signal));
+
+    const candidates = Array.from(document.querySelectorAll('a[href], button, article, section, div'))
+      .map((node) => {
+        const text = (node.innerText || '').trim();
+        if (!text || text.length < 24 || text.length > 700) return null;
+        const rect = node.getBoundingClientRect();
+        if (rect.width < 180 || rect.height < 60) return null;
+        const href = node.tagName === 'A' ? node.href : node.querySelector('a[href]')?.href || '';
+        const score =
+          (/einlösen|aktivieren|vorteil|bonus|rabatt|gratis|coupon|bon/i.test(text) ? 3 : 0) +
+          (/omv|bipa|viva|kaffee|box|frühlingsbox/i.test(text) ? 4 : 0) +
+          (/ös|€|euro|%|prozent/i.test(text) ? 2 : 0);
+        return { text, href, score };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 40);
+
+    return {
+      bodyText,
+      requiresLogin,
+      url: location.href,
+      candidates,
+    };
+  });
+
+  if (pageData.requiresLogin || /\/login\b/i.test(pageData.url)) {
+    console.log('   ↳ jö Vorteile weiterhin hinter Login, kein nutzbarer auth state');
+    return [];
+  }
+
+  const deals = [];
+  const seenTexts = new Set();
+  for (const item of pageData.candidates) {
+    const text = cleanText(item.text);
+    if (!text || seenTexts.has(text)) continue;
+    seenTexts.add(text);
+
+    const lower = text.toLowerCase();
+    if (!/(rabatt|gratis|bonus|einlösen|aktivieren|ös|€|euro|%|prozent)/i.test(lower)) continue;
+
+    let title = '';
+    let brand = 'jö Bonus Club';
+    let category = 'shopping';
+    let type = inferType(text);
+
+    if (/omv|viva/i.test(lower)) {
+      brand = /viva/i.test(lower) ? 'OMV VIVA' : 'OMV';
+      category = /kaffee|sandwich|snack/i.test(lower) ? 'essen' : 'reisen';
+    } else if (/bipa/i.test(lower)) {
+      brand = 'BIPA';
+      category = 'beauty';
+    }
+
+    const lines = text.split(/\n+/).map((line) => cleanText(line)).filter(Boolean);
+    title = lines.find((line) => /gratis|rabatt|bonus|box|kaffee|sandwich|top ?wash|maxxmotion|frühlingsbox/i.test(line)) || lines[0] || '';
+    if (!title) continue;
+
+    const url = item.href || pageData.url || JOE_PRIVATE_BENEFITS_URL;
+    const deal = buildDeal({
+      prefix: 'joe-auth',
+      title,
+      description: makeDescription([
+        text,
+        'Direkt aus dem eingeloggten jö Vorteile-Bereich erkannt.',
+      ]),
+      brand,
+      source: 'jö Bonus Club (auth)',
+      url,
+      expires: '',
+      distance: brand === 'BIPA' ? 'BIPA Filialen Wien' : brand.startsWith('OMV') ? 'OMV Stationen Wien' : 'Wien',
+      category,
+      type,
+      badge: 'jö+',
+      qualityScore: 88,
+    });
+    if (deal) deals.push(deal);
+  }
+
+  return dedupeDeals(deals);
+}
+
 function dedupeDeals(deals) {
   const deduped = [];
   const seen = new Set();
@@ -620,6 +735,12 @@ async function main() {
 
   try {
     const allDeals = [];
+    const authStateAvailable = hasFile(JOE_STORAGE_STATE);
+    if (authStateAvailable) {
+      console.log(`🔐 jö auth state gefunden: ${JOE_STORAGE_STATE}`);
+    } else {
+      console.log(`ℹ️  kein jö auth state gefunden (${JOE_STORAGE_STATE})`);
+    }
 
     for (const source of SOURCES) {
       console.log(`🔎 ${source.url}`);
@@ -641,6 +762,27 @@ async function main() {
         allDeals.push(...deals);
       } finally {
         await page.close();
+      }
+    }
+
+    if (authStateAvailable) {
+      const authContext = await browser.newContext({
+        userAgent: USER_AGENT,
+        locale: 'de-AT',
+        storageState: JOE_STORAGE_STATE,
+      });
+      try {
+        console.log(`🔎 ${JOE_PRIVATE_BENEFITS_URL} (auth)`);
+        const page = await openPageInContext(authContext, JOE_PRIVATE_BENEFITS_URL);
+        try {
+          const deals = await extractLoggedInJoeBenefitsPage(page);
+          console.log(`   ↳ ${deals.length} jö Auth-Deals`);
+          allDeals.push(...deals);
+        } finally {
+          await page.close();
+        }
+      } finally {
+        await authContext.close();
       }
     }
 
