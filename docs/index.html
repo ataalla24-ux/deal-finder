@@ -1552,6 +1552,7 @@
             const endDate = new Date(expiryMs);
             const isToday = today.toDateString() === endDate.toDateString();
             const hasExplicitEndSignal = /\b(bis|gültig bis|gueltig bis|läuft ab|laeuft ab|endet|endet am|letzter tag|nur noch|deadline|frist|einlösbar bis|einloesbar bis|aktion bis|noch \d+ tage gültig|noch \d+h gültig)\b/.test(signalText);
+            const hasExplicitStartSignal = /\b(ab|gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am|launch am|opening)\b/.test(signalText);
             const isSingleDayCategory = /(^| )(events?|gottesdienste|kirche)( |$)/.test(signalText);
             const looksLikeSingleDay = precision === 'day' && !hasExplicitEndSignal && (isSingleDayCategory || /\b(gültig am|gueltig am|am \d{1,2}[./-]\d{1,2}|am \d{1,2}\.\s*[a-zäöü]+|heute|morgen|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(signalText));
 
@@ -1562,7 +1563,19 @@
             let badgeText = `📅 Gültig bis ${dateLabel}`;
             let countdownText = `Gültig bis ${dateLabel}`;
 
-            if (looksLikeSingleDay) {
+            if (hasExplicitStartSignal && msLeft > 0) {
+                cardClass = daysLeft <= 3 ? ' expiring-mid' : ' expiring-ok';
+                barColor = daysLeft <= 3 ? 'orange' : 'green';
+                badgeClass = daysLeft <= 3 ? 'warn' : 'safe';
+                countdownClass = daysLeft <= 3 ? 'warn' : 'ok';
+
+                if (daysLeft === 1) {
+                    badgeText = '📍 Gültig morgen';
+                } else {
+                    badgeText = `📍 In ${daysLeft} Tagen gültig`;
+                }
+                countdownText = `Gültig ab ${dateLabel}`;
+            } else if (looksLikeSingleDay) {
                 cardClass = daysLeft <= 3 ? ' expiring-mid' : ' expiring-ok';
                 barColor = daysLeft <= 3 ? 'orange' : 'green';
                 badgeClass = daysLeft <= 3 ? 'warn' : 'safe';
