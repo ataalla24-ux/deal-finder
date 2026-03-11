@@ -1558,27 +1558,138 @@
             );
         }
 
+        function parseExpiryWindowForApp(rawText, precision) {
+            const raw = sanitizeExpiryTextForApp(rawText || '');
+            if (!raw) return { kind: 'unknown', raw: '' };
+            const text = raw.toLowerCase();
+            const monthMap = {
+                januar: 1, februar: 2, 'märz': 3, maerz: 3, april: 4, mai: 5, juni: 6,
+                juli: 7, august: 8, september: 9, oktober: 10, november: 11, dezember: 12,
+            };
+            const buildEndOfDayMs = (year, month, day) => Date.parse(`${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T23:59:59`);
+
+            if (hasRecurringOrApproximateExpiryText(raw)) {
+                return { kind: 'recurring', raw };
+            }
+
+            let m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+            if (m) {
+                const startYear = m[3].length === 2 ? `20${m[3]}` : m[3];
+                const endYear = m[6].length === 2 ? `20${m[6]}` : m[6];
+                return {
+                    kind: 'range',
+                    raw,
+                    startMs: buildEndOfDayMs(startYear, m[2], m[1]),
+                    endMs: buildEndOfDayMs(endYear, m[5], m[4]),
+                };
+            }
+
+            m = text.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s*[-–]\s*(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+            if (m) {
+                const startYear = m[3].length === 2 ? `20${m[3]}` : m[3];
+                const endYear = m[6].length === 2 ? `20${m[6]}` : m[6];
+                return {
+                    kind: 'range',
+                    raw,
+                    startMs: buildEndOfDayMs(startYear, m[2], m[1]),
+                    endMs: buildEndOfDayMs(endYear, m[5], m[4]),
+                };
+            }
+
+            m = text.match(/(anfang|mitte|ende)\s+(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+(\d{4})/i);
+            if (m) {
+                const year = Number(m[3]);
+                const month = monthMap[m[2]];
+                const startDay = m[1] === 'anfang' ? 1 : m[1] === 'mitte' ? 10 : 20;
+                const endDay = m[1] === 'anfang' ? 10 : m[1] === 'mitte' ? 20 : new Date(year, month, 0).getDate();
+                return {
+                    kind: 'approx-range',
+                    raw,
+                    startMs: buildEndOfDayMs(year, month, startDay),
+                    endMs: buildEndOfDayMs(year, month, endDay),
+                };
+            }
+
+            m = text.match(/(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+(\d{4})/i);
+            if (m) {
+                const year = Number(m[2]);
+                const month = monthMap[m[1]];
+                return {
+                    kind: 'month',
+                    raw,
+                    startMs: buildEndOfDayMs(year, month, 1),
+                    endMs: buildEndOfDayMs(year, month, new Date(year, month, 0).getDate()),
+                };
+            }
+
+            const hasStartSignal = /\b(ab|gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am)\b/.test(text);
+
+            m = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (m) {
+                return {
+                    kind: hasStartSignal ? 'start' : 'single',
+                    raw,
+                    startMs: buildEndOfDayMs(m[1], m[2], m[3]),
+                };
+            }
+
+            m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+            if (m) {
+                const year = m[3].length === 2 ? `20${m[3]}` : m[3];
+                return {
+                    kind: hasStartSignal ? 'start' : 'single',
+                    raw,
+                    startMs: buildEndOfDayMs(year, m[2], m[1]),
+                };
+            }
+
+            m = text.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+            if (m) {
+                const year = m[3].length === 2 ? `20${m[3]}` : m[3];
+                return {
+                    kind: hasStartSignal ? 'start' : 'single',
+                    raw,
+                    startMs: buildEndOfDayMs(year, m[2], m[1]),
+                };
+            }
+
+            if (precision === 'month') {
+                const ms = parseExpiryToMs(raw);
+                if (Number.isFinite(ms)) {
+                    return { kind: 'month', raw, startMs: ms, endMs: ms };
+                }
+            }
+
+            const ms = parseExpiryToMs(raw);
+            if (Number.isFinite(ms)) {
+                return { kind: 'end', raw, endMs: ms };
+            }
+
+            return { kind: 'unknown', raw };
+        }
+
         function getExpiryPresentation(deal) {
             const rawExpiry = deal && deal.expires ? sanitizeExpiryTextForApp(deal.expires) : '';
             const rawDisplay = sanitizeExpiryTextForApp((deal && (deal.expiresOriginal || deal.expires)) || '');
             const precision = (deal && deal.expiresPrecision) || '';
-            if (hasRecurringOrApproximateExpiryText(rawDisplay)) {
+            const parsedWindow = parseExpiryWindowForApp(rawDisplay || rawExpiry, precision);
+            if (parsedWindow.kind === 'recurring' || parsedWindow.kind === 'approx-range') {
                 return {
                     hasExpiry: false,
-                    infoLabel: rawDisplay,
+                    infoLabel: parsedWindow.raw || rawDisplay,
                     precision: precision || 'recurring'
                 };
             }
-            const expiryMs = parseExpiryToMs(rawExpiry);
-            if (!Number.isFinite(expiryMs)) {
-                return { hasExpiry: false, infoLabel: rawDisplay || '', precision: precision || 'unknown' };
-            }
 
-            if (precision === 'month') {
-                const monthLabel = rawDisplay || formatMonthAT(expiryMs);
+            const now = Date.now();
+            const toDays = (ms) => Math.max(0, Math.ceil((ms - now) / 86400000));
+            const toHours = (ms) => Math.max(0, Math.ceil((ms - now) / 3600000));
+
+            if (parsedWindow.kind === 'month' && Number.isFinite(parsedWindow.endMs)) {
+                const monthLabel = rawDisplay || formatMonthAT(parsedWindow.endMs);
                 return {
                     hasExpiry: true,
-                    expiryMs,
+                    expiryMs: parsedWindow.endMs,
                     daysLeft: null,
                     hoursLeft: null,
                     dateLabel: monthLabel,
@@ -1595,7 +1706,135 @@
                 };
             }
 
-            const now = Date.now();
+            if ((parsedWindow.kind === 'single' || parsedWindow.kind === 'start') && Number.isFinite(parsedWindow.startMs)) {
+                const targetMs = parsedWindow.startMs;
+                const daysLeft = toDays(targetMs);
+                const hoursLeft = toHours(targetMs);
+                const dateLabel = formatDateAT(targetMs);
+                const isToday = new Date().toDateString() === new Date(targetMs).toDateString();
+                const isStart = parsedWindow.kind === 'start';
+                let badgeText = isStart ? `📅 Gültig ab ${dateLabel}` : `📅 Gültig am ${dateLabel}`;
+                let countdownText = isStart ? `Gültig ab ${dateLabel}` : `Gültig am ${dateLabel}`;
+                let badgeClass = 'safe';
+                let countdownClass = 'ok';
+                let cardClass = ' expiring-ok';
+                let barColor = 'green';
+
+                if (targetMs > now) {
+                    if (hoursLeft <= 24) {
+                        badgeClass = 'warn';
+                        countdownClass = 'warn';
+                        cardClass = ' expiring-mid';
+                        barColor = 'orange';
+                        badgeText = daysLeft === 1 ? '📍 Gültig morgen' : `📍 In ${daysLeft} Tagen gültig`;
+                    } else {
+                        badgeText = daysLeft === 1 ? '📍 Gültig morgen' : `📍 In ${daysLeft} Tagen gültig`;
+                    }
+                } else if (isToday) {
+                    badgeClass = 'today urgent';
+                    countdownClass = 'warning';
+                    cardClass = ' expiring-soon';
+                    barColor = 'red';
+                    badgeText = isStart ? '📍 Startet heute' : '📍 Gültig heute';
+                    countdownText = isStart ? `Startet am ${dateLabel}` : 'Heute gültig';
+                }
+
+                return {
+                    hasExpiry: true,
+                    expiryMs: targetMs,
+                    daysLeft,
+                    hoursLeft,
+                    dateLabel,
+                    infoLabel: parsedWindow.raw || dateLabel,
+                    precision: 'day',
+                    showUrgency: true,
+                    cardClass,
+                    barColor,
+                    badgeClass,
+                    badgeText,
+                    countdownClass,
+                    countdownText,
+                    barPct: Math.max(2, Math.min(100, Math.round((Math.min(daysLeft || 1, 21) / 21) * 100)))
+                };
+            }
+
+            if (parsedWindow.kind === 'range' && Number.isFinite(parsedWindow.startMs) && Number.isFinite(parsedWindow.endMs)) {
+                const startLabel = formatDateAT(parsedWindow.startMs);
+                const endLabel = formatDateAT(parsedWindow.endMs);
+                if (now < parsedWindow.startMs) {
+                    const daysLeft = toDays(parsedWindow.startMs);
+                    return {
+                        hasExpiry: true,
+                        expiryMs: parsedWindow.endMs,
+                        daysLeft,
+                        hoursLeft: toHours(parsedWindow.startMs),
+                        dateLabel: endLabel,
+                        infoLabel: parsedWindow.raw || `${startLabel} - ${endLabel}`,
+                        precision: 'range',
+                        showUrgency: true,
+                        cardClass: daysLeft <= 3 ? ' expiring-mid' : ' expiring-ok',
+                        barColor: daysLeft <= 3 ? 'orange' : 'green',
+                        badgeClass: daysLeft <= 3 ? 'warn' : 'safe',
+                        badgeText: daysLeft === 1 ? '📍 Gültig morgen' : `📍 In ${daysLeft} Tagen gültig`,
+                        countdownClass: daysLeft <= 3 ? 'warn' : 'ok',
+                        countdownText: `Gültig von ${startLabel} bis ${endLabel}`,
+                        barPct: Math.max(2, Math.min(100, Math.round((Math.min(daysLeft, 21) / 21) * 100)))
+                    };
+                }
+                const msLeft = parsedWindow.endMs - now;
+                const hoursLeft = Math.max(0, Math.ceil(msLeft / 3600000));
+                const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
+                let badgeText = `📅 Gültig bis ${endLabel}`;
+                let countdownText = `Gültig bis ${endLabel}`;
+                let badgeClass = 'safe';
+                let countdownClass = 'ok';
+                let cardClass = ' expiring-ok';
+                let barColor = 'green';
+                if (msLeft <= 0) {
+                    badgeText = '🚨 Bereits abgelaufen';
+                    countdownText = `War gültig bis ${endLabel}`;
+                    badgeClass = 'today urgent';
+                    countdownClass = 'warning';
+                    cardClass = ' expiring-soon';
+                    barColor = 'red';
+                } else if (hoursLeft <= 24) {
+                    badgeText = `⚠️ Nur noch ${hoursLeft}h gültig`;
+                    countdownText = `Läuft in ${hoursLeft} Std. ab`;
+                    badgeClass = 'urgent';
+                    countdownClass = 'warning';
+                    cardClass = ' expiring-soon';
+                    barColor = 'red';
+                } else if (daysLeft <= 7) {
+                    badgeText = `🕒 Noch ${daysLeft} Tage gültig`;
+                    countdownText = `Gültig bis ${endLabel}`;
+                    badgeClass = 'warn';
+                    countdownClass = 'warn';
+                    cardClass = ' expiring-mid';
+                    barColor = 'orange';
+                }
+                return {
+                    hasExpiry: true,
+                    expiryMs: parsedWindow.endMs,
+                    daysLeft,
+                    hoursLeft,
+                    dateLabel: endLabel,
+                    infoLabel: parsedWindow.raw || `${startLabel} - ${endLabel}`,
+                    precision: 'range',
+                    showUrgency: true,
+                    cardClass,
+                    barColor,
+                    badgeClass,
+                    badgeText,
+                    countdownClass,
+                    countdownText,
+                    barPct: Math.max(2, Math.min(100, Math.round((Math.min(daysLeft || 1, 21) / 21) * 100)))
+                };
+            }
+
+            const expiryMs = parseExpiryToMs(rawExpiry);
+            if (!Number.isFinite(expiryMs)) {
+                return { hasExpiry: false, infoLabel: rawDisplay || '', precision: precision || 'unknown' };
+            }
             const msLeft = expiryMs - now;
             const hoursLeft = Math.max(0, Math.ceil(msLeft / 3600000));
             const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
