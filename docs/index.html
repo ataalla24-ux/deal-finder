@@ -1630,9 +1630,10 @@
             m = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
             if (m) {
                 return {
-                    kind: hasStartSignal ? 'start' : 'single',
+                    kind: hasStartSignal ? 'start' : (hasEndSignal ? 'end' : 'single'),
                     raw,
-                    startMs: buildEndOfDayMs(m[1], m[2], m[3]),
+                    startMs: hasStartSignal ? buildEndOfDayMs(m[1], m[2], m[3]) : undefined,
+                    endMs: !hasStartSignal ? buildEndOfDayMs(m[1], m[2], m[3]) : undefined,
                 };
             }
 
@@ -1640,9 +1641,10 @@
             if (m) {
                 const year = m[3].length === 2 ? `20${m[3]}` : m[3];
                 return {
-                    kind: hasStartSignal ? 'start' : 'single',
+                    kind: hasStartSignal ? 'start' : (hasEndSignal ? 'end' : 'single'),
                     raw,
-                    startMs: buildEndOfDayMs(year, m[2], m[1]),
+                    startMs: hasStartSignal ? buildEndOfDayMs(year, m[2], m[1]) : undefined,
+                    endMs: !hasStartSignal ? buildEndOfDayMs(year, m[2], m[1]) : undefined,
                 };
             }
 
@@ -1650,9 +1652,10 @@
             if (m) {
                 const year = m[3].length === 2 ? `20${m[3]}` : m[3];
                 return {
-                    kind: hasStartSignal ? 'start' : 'single',
+                    kind: hasStartSignal ? 'start' : (hasEndSignal ? 'end' : 'single'),
                     raw,
-                    startMs: buildEndOfDayMs(year, m[2], m[1]),
+                    startMs: hasStartSignal ? buildEndOfDayMs(year, m[2], m[1]) : undefined,
+                    endMs: !hasStartSignal ? buildEndOfDayMs(year, m[2], m[1]) : undefined,
                 };
             }
 
