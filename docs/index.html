@@ -328,6 +328,29 @@
         .leaderboard-title { font-weight: 700; }
         .leaderboard-text { font-size: 13px; opacity: 0.9; }
         .leaderboard-rank { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-weight: 700; }
+        .discovery-page-header { text-align: center; margin-bottom: 18px; }
+        .discovery-page-icon { font-size: 32px; }
+        .discovery-page-title { font-size: 22px; margin: 8px 0 4px; }
+        .discovery-page-subtitle { color: #6b7280; font-size: 14px; }
+        .discovery-section { margin-bottom: 18px; }
+        .discovery-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .discovery-section-title { font-size: 17px; font-weight: 800; color: #111827; }
+        .discovery-section-subtitle { font-size: 12px; color: #6b7280; }
+        .discovery-list { display: grid; gap: 12px; }
+        .discovery-card { background: white; border-radius: 18px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border: 1px solid rgba(15,23,42,0.05); }
+        .discovery-topline { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+        .discovery-copy { flex: 1; min-width: 0; }
+        .discovery-kicker { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #eef2ff; color: #4338ca; font-size: 11px; font-weight: 800; margin-bottom: 8px; }
+        .discovery-title { font-family: 'Bricolage Grotesque', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 20px; font-weight: 900; line-height: 1.15; color: #0f172a; letter-spacing: -0.3px; margin-bottom: 4px; }
+        .discovery-brand { font-size: 12px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .discovery-snippet { font-size: 14px; color: #475569; line-height: 1.45; margin-bottom: 12px; }
+        .discovery-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .discovery-chip { display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 999px; background: #f8fafc; color: #334155; font-size: 12px; font-weight: 700; }
+        .discovery-actions { display: flex; gap: 8px; }
+        .discovery-actions .action-btn { flex: 1; }
+        .discovery-actions .fav-btn,
+        .discovery-actions .vote-btn { flex: 0 0 auto; min-width: 56px; }
+        .discovery-empty { background: white; border-radius: 16px; padding: 18px; color: #64748b; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .deal-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
         .deal-logo-fallback { font-size: 32px; }
         .deal-brand { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 600; color: #475569; font-size: 13px; letter-spacing: 0.4px; text-transform: uppercase; }
@@ -895,7 +918,7 @@
     
     <div class="bottom-nav">
         <div class="nav-item active" onclick="showHome()"><div class="nav-icon">🏠</div><div class="nav-label">Deals</div></div>
-        <div class="nav-item" onclick="showSecretDeals()"><div class="nav-icon">🔮</div><div class="nav-label">Geheim</div></div>
+        <div class="nav-item" onclick="showSecretDeals()"><div class="nav-icon">✨</div><div class="nav-label">Für dich</div></div>
         <div class="nav-item" onclick="showStats()"><div class="nav-icon">📊</div><div class="nav-label">Stats</div></div>
         <div class="nav-item" onclick="showFavorites()" style="position:relative;"><div class="nav-icon">❤️</div><div class="nav-label">Favoriten</div><span class="nav-badge" id="favBadge" style="display:none;">0</span></div>
     </div>
@@ -1424,7 +1447,7 @@
             landstrasse: VIENNA_POSTAL_COORDS['1030'],
             landstraße: VIENNA_POSTAL_COORDS['1030'],
             leopoldstadt: VIENNA_POSTAL_COORDS['1020'],
-            innere stadt: VIENNA_POSTAL_COORDS['1010']
+            'innere stadt': VIENNA_POSTAL_COORDS['1010']
         };
 
         const PLACE_COORDS = {
@@ -3003,6 +3026,135 @@
         return [...new Set(list.filter(id => typeof id === 'string' && id.trim().length > 0))];
     }
 
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function escapeJsString(value) {
+        return String(value || '')
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'");
+    }
+
+    function getDiscoveryDeals() {
+        const discoveryDeals = allDeals
+            .map(normalizeDealForApp)
+            .filter(d => d && d.id && (!d._lifecycle || d._lifecycle.state !== 'expired-hidden'));
+        const curated = discoveryDeals.filter((deal) => !['kirche', 'gottesdienste'].includes(deal.category));
+        return curated.length >= 8 ? curated : discoveryDeals;
+    }
+
+    function getInterestWeights(discoveryDeals) {
+        const weights = {};
+        const bump = (category, amount) => {
+            if (!category) return;
+            weights[category] = (weights[category] || 0) + amount;
+        };
+
+        sanitizeFavoriteIds(favorites).forEach((id) => {
+            const deal = discoveryDeals.find(d => d.id === id);
+            if (deal) bump(deal.category, 3);
+        });
+
+        Object.values(proData.redeemedDeals || {}).forEach((entry) => bump(entry && entry.category, 2));
+        return weights;
+    }
+
+    function getWeeklyCandidates(discoveryDeals) {
+        const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        const recent = discoveryDeals.filter((deal) => getDealBaseTimestampMs(deal) >= weekAgo);
+        return recent.length >= 3 ? recent : discoveryDeals;
+    }
+
+    function getRecommendedDeals(discoveryDeals) {
+        const weights = getInterestWeights(discoveryDeals);
+        const scored = discoveryDeals.map((deal) => {
+            let score = 0;
+            score += weights[deal.category] || 0;
+            score += favorites.includes(deal.id) ? 1.5 : 0;
+            score += deal.hot ? 1.25 : 0;
+            score += deal.isNew ? 0.75 : 0;
+            score += Math.min(4, (deal.votes || 0) / 50);
+            if (deal.type === 'gratis') score += 0.8;
+            score += Math.max(0, 2 - ((Date.now() - getDealBaseTimestampMs(deal)) / (1000 * 60 * 60 * 24 * 7)));
+            return { deal, score };
+        });
+        return scored
+            .sort((a, b) => b.score - a.score || (b.deal.votes || 0) - (a.deal.votes || 0))
+            .map(item => item.deal)
+            .slice(0, 4);
+    }
+
+    function getTopVotedDeals(discoveryDeals) {
+        return getWeeklyCandidates(discoveryDeals)
+            .slice()
+            .sort((a, b) => (b.votes || 0) - (a.votes || 0) || getDealBaseTimestampMs(b) - getDealBaseTimestampMs(a))
+            .slice(0, 4);
+    }
+
+    function getTrendingDeals(discoveryDeals) {
+        return discoveryDeals
+            .slice()
+            .sort((a, b) => {
+                const aScore = (a.hot ? 4 : 0) + (a.isNew ? 3 : 0) + Math.min(5, (a.votes || 0) / 40) + Math.max(0, 3 - ((Date.now() - getDealBaseTimestampMs(a)) / (1000 * 60 * 60 * 24 * 3)));
+                const bScore = (b.hot ? 4 : 0) + (b.isNew ? 3 : 0) + Math.min(5, (b.votes || 0) / 40) + Math.max(0, 3 - ((Date.now() - getDealBaseTimestampMs(b)) / (1000 * 60 * 60 * 24 * 3)));
+                return bScore - aScore || (b.votes || 0) - (a.votes || 0);
+            })
+            .slice(0, 4);
+    }
+
+    function renderDiscoveryCard(deal, kicker) {
+        const brand = escapeHtml(getDisplayBrand(deal));
+        const title = escapeHtml(cleanUiNoiseText(deal.title || 'Deal'));
+        const snippet = escapeHtml(cleanUiNoiseText(deal.description || ''));
+        const location = escapeHtml(getDisplayLocation(deal) || 'Wien');
+        const expiry = getExpiryPresentation(deal);
+        const dateLabel = escapeHtml(expiry.infoLabel || deal.expiresOriginal || deal.expires || 'Zeitlich begrenzt');
+        const dealId = escapeJsString(deal.id);
+        const voteCount = Number(deal.votes || 0);
+        const favIcon = favorites.includes(deal.id) ? '❤️' : '🤍';
+        const voteDisabled = votedDeals.includes(deal.id) ? ' disabled' : '';
+        const hasLink = !!(deal.url && String(deal.url).trim());
+        const defaultBtnLabel = deal.category === 'gottesdienste' ? 'Zeiten' : deal.category === 'events' ? 'Event' : 'Zum Deal';
+
+        return '<div class="discovery-card">' +
+            '<div class="discovery-topline">' +
+                renderDealLogo(deal) +
+                '<div class="discovery-copy">' +
+                    (kicker ? '<div class="discovery-kicker">' + escapeHtml(kicker) + '</div>' : '') +
+                    '<div class="discovery-brand">' + brand + '</div>' +
+                    '<div class="discovery-title">' + title + '</div>' +
+                '</div>' +
+            '</div>' +
+            (snippet ? '<div class="discovery-snippet">' + snippet + '</div>' : '') +
+            '<div class="discovery-meta">' +
+                '<span class="discovery-chip">📍 ' + location + '</span>' +
+                '<span class="discovery-chip">📅 ' + dateLabel + '</span>' +
+                '<span class="discovery-chip">🔥 ' + voteCount + ' Votes</span>' +
+            '</div>' +
+            '<div class="discovery-actions">' +
+                '<button class="action-btn vote-btn' + (votedDeals.includes(deal.id) ? ' is-voted' : '') + '"' + voteDisabled + ' onclick="vote(\'' + dealId + '\', 1, event)"><span class="vote-count">' + voteCount + '</span> 🔥</button>' +
+                '<button class="action-btn deal-link-btn' + (hasLink ? '' : ' disabled') + '" ' + (hasLink ? '' : 'disabled ') + 'onclick="trackDealView(); openDealUrl(\'' + dealId + '\', event)">' + defaultBtnLabel + '</button>' +
+                '<button class="action-btn fav-btn" onclick="toggleFav(\'' + dealId + '\', event)">' + favIcon + '</button>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function renderDiscoverySection(title, subtitle, deals, kickerBuilder) {
+        if (!deals.length) {
+            return '<section class="discovery-section"><div class="discovery-section-head"><div><div class="discovery-section-title">' + escapeHtml(title) + '</div><div class="discovery-section-subtitle">' + escapeHtml(subtitle) + '</div></div></div><div class="discovery-empty">Noch keine passenden Deals gefunden.</div></section>';
+        }
+        return '<section class="discovery-section">' +
+            '<div class="discovery-section-head"><div><div class="discovery-section-title">' + escapeHtml(title) + '</div><div class="discovery-section-subtitle">' + escapeHtml(subtitle) + '</div></div></div>' +
+            '<div class="discovery-list">' + deals.map((deal, index) => renderDiscoveryCard(deal, typeof kickerBuilder === 'function' ? kickerBuilder(deal, index) : '')).join('') + '</div>' +
+        '</section>';
+    }
+
     function saveFavorites() {
         favorites = sanitizeFavoriteIds(favorites);
         localStorage.setItem('favorites', JSON.stringify(favorites));
@@ -3270,7 +3422,29 @@
         }
         function showFavorites() { currentView = 'favorites'; hideHeaderElements(); renderDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[3].classList.add('active'); }
         function showStats() { currentView = 'stats'; hideHeaderElements(); const level = LEVELS[userData.level - 1]; const nextLevel = LEVELS[userData.level] || LEVELS[LEVELS.length - 1]; const xpProgress = Math.min(100, ((userData.xp - (LEVELS[userData.level - 1]?.xp || 0)) / (nextLevel.xp - (LEVELS[userData.level - 1]?.xp || 0))) * 100); document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">Deine Stats</h2></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;align-items:center;gap:16px"><div style="background:rgba(255,255,255,0.2);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800">' + userData.level + '</div><div style="flex:1"><div style="font-size:11px;opacity:0.8">LEVEL</div><div style="font-size:20px;font-weight:700">' + level.name + '</div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin:10px 0 6px;overflow:hidden"><div style="background:white;height:100%;width:' + xpProgress + '%;border-radius:4px"></div></div><div style="font-size:13px;opacity:0.9">' + userData.xp + ' / ' + nextLevel.xp + ' XP</div></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#667eea">' + userData.xp + '</div><div style="font-size:13px;color:#6b7280">XP gesamt</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#f59e0b">🔥 ' + userData.streak + '</div><div style="font-size:13px;color:#6b7280">Tage Streak</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#8b5cf6">' + userData.dealsViewed + '</div><div style="font-size:13px;color:#6b7280">Deals angesehen</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#10b981">' + (userData.dealsSubmitted || 0) + '</div><div style="font-size:13px;color:#6b7280">Deals geteilt</div></div></div><div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;opacity:0.9">💰 Gespart</div><div style="font-size:32px;font-weight:800;margin-top:4px">€' + (userData.savings || 0) + '</div></div><div style="text-align:right"><div style="font-size:13px;opacity:0.9">Ziel</div><div style="font-size:20px;font-weight:700">€50</div></div></div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin-top:12px;overflow:hidden"><div style="background:white;height:100%;width:' + Math.min(100, ((userData.savings || 0) / 50) * 100) + '%;border-radius:4px"></div></div></div></div>'; scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[2].classList.add('active'); }
-        function showSecretDeals() { currentView = 'secret'; hideHeaderElements(); const canSpin = !userData.lastSpin || new Date().toDateString() !== new Date(userData.lastSpin).toDateString(); const challengeDone = userData.dealsViewed >= 5; document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">🔮</div><h2 style="font-size:22px;margin:8px 0 4px">Geheime Deals</h2><p style="color:#6b7280;font-size:14px">Challenges & Bonus</p></div><div style="background:white;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border:2px solid ' + (challengeDone ? '#10b981' : '#fbbf24') + '"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span style="font-size:32px">' + (challengeDone ? '✅' : '🎯') + '</span><div><div style="font-weight:700;font-size:16px">' + (challengeDone ? 'Challenge geschafft!' : 'Tägliche Challenge') + '</div><div style="font-size:13px;color:#6b7280">Schau dir 5 Deals an</div></div></div><div style="display:flex;gap:8px;margin-bottom:12px"><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 1 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 2 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 3 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 4 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div><div style="flex:1;height:8px;border-radius:4px;background:' + (userData.dealsViewed >= 5 ? 'linear-gradient(135deg,#10b981,#059669)' : '#e5e7eb') + '"></div></div><div style="font-size:13px;color:#6b7280;text-align:center">' + Math.min(userData.dealsViewed, 5) + '/5 Deals</div>' + (challengeDone ? '<div style="background:#d1fae5;color:#065f46;padding:10px;border-radius:10px;margin-top:12px;text-align:center;font-weight:600">🎁 +25 XP!</div>' : '<div style="background:#fef3c7;padding:10px;border-radius:10px;margin-top:12px;text-align:center;font-size:13px;color:#92400e">🎁 +25 XP Belohnung</div>') + '</div><div style="background:linear-gradient(135deg,#ec4899,#8b5cf6);border-radius:16px;padding:20px;color:white;margin-bottom:16px;text-align:center;cursor:pointer" onclick="openSpinModal()"><div style="font-size:48px;margin-bottom:8px">🎡</div><div style="font-size:18px;font-weight:700">Tägliches Glücksrad</div><div style="font-size:14px;opacity:0.9;margin:8px 0">Drehe und gewinne XP!</div><button style="background:white;color:#8b5cf6;border:none;padding:12px 32px;border-radius:25px;font-weight:700;font-size:16px;cursor:pointer;margin-top:8px">' + (canSpin ? '🎰 Drehen!' : '✅ Gedreht') + '</button></div><div style="background:linear-gradient(135deg,' + (challengeDone ? '#fbbf24,#f59e0b' : '#1f2937,#374151') + ');border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;align-items:center;gap:12px"><span style="font-size:32px">' + (challengeDone ? '🎁' : '🔒') + '</span><div><div style="font-size:18px;font-weight:700">' + (challengeDone ? 'Geheimer Deal!' : 'Geheimer Deal') + '</div><div style="font-size:13px;opacity:0.9">' + (challengeDone ? 'IKEA: Gratis Softeis!' : 'Challenge abschließen') + '</div></div></div></div><div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white;text-align:center;cursor:pointer" onclick="openLinkModal()"><div style="font-size:36px;margin-bottom:8px">🔗</div><div style="font-size:18px;font-weight:700">Deal einreichen</div><div style="font-size:14px;opacity:0.9;margin-top:4px">+100 XP!</div></div></div>'; scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[1].classList.add('active'); }
+        function showSecretDeals() {
+            currentView = 'secret';
+            hideHeaderElements();
+
+            const discoveryDeals = getDiscoveryDeals();
+            const recommended = getRecommendedDeals(discoveryDeals);
+            const topVoted = getTopVotedDeals(discoveryDeals);
+            const trending = getTrendingDeals(discoveryDeals);
+
+            const intro = '<div class="discovery-page-header"><div class="discovery-page-icon">✨</div><h2 class="discovery-page-title">Für dich</h2><p class="discovery-page-subtitle">Smarte Empfehlungen, starke Community-Votes und was gerade heiß läuft.</p></div>';
+            const recommendedSection = renderDiscoverySection('Für dich empfohlen', 'Basierend auf deinen Favoriten, Einlösungen und starken Gratis-Deals.', recommended, (deal) => {
+                const cat = deal.category || 'wien';
+                return cat === 'gratis' ? 'Passt zu Gratis-Deals' : 'Passt zu deinen Interessen';
+            });
+            const topVotedSection = renderDiscoverySection('Meist gevotet diese Woche', 'Die Community-Sieger aus den neuesten und stärksten Deals.', topVoted, (_, index) => index === 0 ? 'Community-Favorit' : 'Viele Stimmen');
+            const trendingSection = renderDiscoverySection('Trendend gerade', 'Hot, neu oder gerade besonders stark geklickt.', trending, (deal) => deal.hot ? 'Gerade heiß' : (deal.isNew ? 'Frisch entdeckt' : 'Im Aufwind'));
+            const submitCta = '<div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:18px;padding:20px;color:white;text-align:center;cursor:pointer" onclick="openLinkModal()"><div style="font-size:34px;margin-bottom:8px">🔗</div><div style="font-size:18px;font-weight:700">Deal einreichen</div><div style="font-size:14px;opacity:0.9;margin-top:4px">Gute Funde direkt mit der Community teilen</div></div>';
+
+            document.getElementById('deals').innerHTML = '<div style="padding:4px 0">' + intro + recommendedSection + topVotedSection + trendingSection + submitCta + '</div>';
+            scrollToTopContent();
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.nav-item')[1].classList.add('active');
+        }
         function showToast(msg) {
             const t = document.createElement('div');
             t.className = 'toast';
