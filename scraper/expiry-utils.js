@@ -39,6 +39,25 @@ function cleanText(value) {
   return String(value).replace(/\s+/g, ' ').trim();
 }
 
+function clearStructuredExpiryFields(deal) {
+  delete deal.expiryKind;
+  delete deal.expiryDisplayText;
+  delete deal.validOn;
+  delete deal.validFrom;
+  delete deal.validUntil;
+  delete deal.dateConfidence;
+}
+
+function toIsoDateString(year, month, day) {
+  return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
+function isoDateFromMs(ms) {
+  if (!Number.isFinite(ms)) return '';
+  const date = new Date(ms);
+  return toIsoDateString(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
+}
+
 function endOfUtcDay(year, monthIndex, day) {
   return new Date(Date.UTC(year, monthIndex, day, 23, 59, 59, 999));
 }
@@ -295,6 +314,136 @@ export function parseExpiryDetails(value, options = {}) {
   );
 }
 
+export function parseExpiryShape(value, options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date();
+  const raw = cleanText(value);
+  if (!raw) return { kind: 'unknown', raw: '' };
+
+  const text = raw.toLowerCase();
+  const monthPattern = '(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)';
+  const explicitDateMatches = text.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?)\b/g) || [];
+  const uniqueExplicitDates = new Set(explicitDateMatches);
+  const hasSingleExplicitDate = uniqueExplicitDates.size === 1;
+  const hasDateRange = /\b\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\s*[-–]\s*\d{1,2}[./-]\d{1,2}/.test(text);
+  const hasTimeOnlyEndSignal = /\bbis\s+\d{1,2}:\d{2}\b/.test(text);
+  const monthMap = {
+    januar: 1, februar: 2, 'märz': 3, maerz: 3, april: 4, mai: 5, juni: 6,
+    juli: 7, august: 8, september: 9, oktober: 10, november: 11, dezember: 12,
+  };
+
+  const buildIso = (year, month, day) => toIsoDateString(Number(year), Number(month), Number(day));
+
+  if (isVagueExpiry(raw) || isRecurringChurchLikeExpiry(raw)) {
+    return { kind: 'recurring', raw, confidence: 'low' };
+  }
+
+  if (/\bjeden\s+(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(text) ||
+      /\bwöchentlich\b|\bwoechentlich\b|\bmonatlich\b|\bregelmäßig\b|\bregelm[aä](?:ß|ss)ig\b/.test(text) ||
+      /\bsolange vorrat reicht\b|\bsolange der vorrat reicht\b|\btba\b|\bvariiert\b/.test(text)) {
+    return { kind: 'recurring', raw, confidence: 'low' };
+  }
+
+  let m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (m) {
+    const startYear = m[3].length === 2 ? `20${m[3]}` : m[3];
+    const endYear = m[6].length === 2 ? `20${m[6]}` : m[6];
+    return {
+      kind: 'range',
+      raw,
+      validFrom: buildIso(startYear, m[2], m[1]),
+      validUntil: buildIso(endYear, m[5], m[4]),
+      confidence: 'high',
+    };
+  }
+
+  m = text.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s*[-–]\s*(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if (m) {
+    const startYear = m[3].length === 2 ? `20${m[3]}` : m[3];
+    const endYear = m[6].length === 2 ? `20${m[6]}` : m[6];
+    return {
+      kind: 'range',
+      raw,
+      validFrom: buildIso(startYear, m[2], m[1]),
+      validUntil: buildIso(endYear, m[5], m[4]),
+      confidence: 'high',
+    };
+  }
+
+  m = text.match(/(anfang|mitte|ende)\s+(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+(\d{4})/i);
+  if (m) {
+    const year = Number(m[3]);
+    const month = monthMap[m[2]];
+    const startDay = m[1] === 'anfang' ? 1 : m[1] === 'mitte' ? 10 : 20;
+    const endDay = m[1] === 'anfang' ? 10 : m[1] === 'mitte' ? 20 : new Date(year, month, 0).getDate();
+    return {
+      kind: 'approx-range',
+      raw,
+      validFrom: buildIso(year, month, startDay),
+      validUntil: buildIso(year, month, endDay),
+      confidence: 'medium',
+    };
+  }
+
+  const hasNamedDay = new RegExp(`\\b\\d{1,2}\\.?(?:\\s+|\\.)${monthPattern}\\b`, 'i').test(text);
+  if (!hasNamedDay && !hasSingleExplicitDate) {
+    m = text.match(new RegExp(`${monthPattern}\\s+(\\d{4})`, 'i'));
+  } else {
+    m = null;
+  }
+  if (m) {
+    const year = Number(m[2]);
+    const month = monthMap[m[1]];
+    return {
+      kind: 'month',
+      raw,
+      validFrom: buildIso(year, month, 1),
+      validUntil: buildIso(year, month, new Date(year, month, 0).getDate()),
+      confidence: 'medium',
+    };
+  }
+
+  const hasStrongEndSignal = /\b(gültig bis|gueltig bis|endet|endet am|letzter tag|deadline|frist|einlösbar bis|einloesbar bis|aktion bis|läuft bis|laeuft bis|nur bis|bis)\b/.test(text);
+  const hasEndSignal = hasStrongEndSignal || (/\bbis\b/.test(text) && (!hasSingleExplicitDate || hasDateRange || !hasTimeOnlyEndSignal));
+  const hasRealStartSignal = /\b(gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am)\b/.test(text);
+  const hasTimeOnlyStartSignal = /\bab\s+\d{1,2}:\d{2}\b/.test(text);
+  const hasStartSignal = !hasEndSignal && (hasRealStartSignal || hasTimeOnlyStartSignal);
+  const hasSingleDayTimeWindow = hasSingleExplicitDate && hasTimeOnlyEndSignal;
+
+  const directTokenMatch =
+    raw.match(/\b\d{4}-\d{1,2}-\d{1,2}\b/) ||
+    raw.match(/\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/) ||
+    raw.match(/\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/) ||
+    raw.match(new RegExp(`\\b\\d{1,2}\\.?(?:\\s+|\\.)${monthPattern}(?:\\s+\\d{4})?\\b`, 'i'));
+
+  const parsed = parseExpiryDetails(directTokenMatch ? directTokenMatch[0] : raw, { now });
+  const parsedIso = parsed?.date ? isoDateFromMs(parsed.date.getTime()) : '';
+  if (!parsedIso) {
+    return { kind: 'unknown', raw, confidence: 'low' };
+  }
+
+  if (hasStartSignal) {
+    return { kind: 'start', raw, validFrom: parsedIso, confidence: 'high' };
+  }
+  if (hasSingleDayTimeWindow) {
+    return { kind: 'single', raw, validOn: parsedIso, confidence: 'high' };
+  }
+  if (hasEndSignal) {
+    return { kind: 'end', raw, validUntil: parsedIso, confidence: 'high' };
+  }
+  return { kind: 'single', raw, validOn: parsedIso, confidence: 'high' };
+}
+
+function applyStructuredExpiryFields(deal, value, options = {}) {
+  clearStructuredExpiryFields(deal);
+  const shape = parseExpiryShape(value, options);
+  deal.expiryKind = shape.kind || 'unknown';
+  deal.expiryDisplayText = shape.raw || cleanText(value);
+  if (shape.validOn) deal.validOn = shape.validOn;
+  if (shape.validFrom) deal.validFrom = shape.validFrom;
+  if (shape.validUntil) deal.validUntil = shape.validUntil;
+  if (shape.confidence) deal.dateConfidence = shape.confidence;
+}
+
 function extractWestfieldExpiry(text, now) {
   const range = text.match(/\b\d{1,2}\s+[A-Za-zäöüÄÖÜ]+\s+\d{4}\s*[—-]\s*(\d{1,2}\s+[A-Za-zäöüÄÖÜ]+\s+\d{4})\b/);
   if (!range) return null;
@@ -430,6 +579,7 @@ export async function normalizeDealExpiry(deal, options = {}) {
       deal.expiresPrecision = fetched.precision || 'day';
       deal.expiresSource = fetched.source || 'url';
       deal.expiresDetectedFromUrl = true;
+      applyStructuredExpiryFields(deal, deal.expiresOriginal || raw || deal.expires, { now });
       return deal;
     }
   }
@@ -438,11 +588,13 @@ export async function normalizeDealExpiry(deal, options = {}) {
     deal.expires = parsed.date.toISOString();
     deal.expiresPrecision = parsed.precision || 'day';
     deal.expiresSource = parsed.source || 'text';
+    applyStructuredExpiryFields(deal, deal.expiresOriginal || raw || deal.expires, { now });
     return deal;
   }
 
   deal.expires = '';
   deal.expiresPrecision = '';
   deal.expiresSource = '';
+  applyStructuredExpiryFields(deal, deal.expiresOriginal || raw || '', { now });
   return deal;
 }
