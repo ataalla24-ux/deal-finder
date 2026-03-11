@@ -1764,6 +1764,68 @@
                 };
             }
 
+            if (parsedWindow.kind === 'end' && Number.isFinite(parsedWindow.endMs)) {
+                const targetMs = parsedWindow.endMs;
+                const msLeft = targetMs - now;
+                const hoursLeft = Math.max(0, Math.ceil(msLeft / 3600000));
+                const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
+                const dateLabel = formatDateAT(targetMs);
+                let badgeText = `📅 Gültig bis ${dateLabel}`;
+                let countdownText = `Gültig bis ${dateLabel}`;
+                let badgeClass = 'safe';
+                let countdownClass = 'ok';
+                let cardClass = ' expiring-ok';
+                let barColor = 'green';
+
+                if (msLeft <= 0) {
+                    badgeText = '🚨 Nur heute gültig';
+                    countdownText = '⏳ Läuft heute ab';
+                    badgeClass = 'today urgent';
+                    countdownClass = 'warning';
+                    cardClass = ' expiring-soon';
+                    barColor = 'red';
+                } else if (hoursLeft <= 24) {
+                    badgeText = `⚠️ Nur noch ${hoursLeft}h gültig`;
+                    countdownText = `Läuft in ${hoursLeft} Std. ab`;
+                    badgeClass = 'urgent';
+                    countdownClass = 'warning';
+                    cardClass = ' expiring-soon';
+                    barColor = 'red';
+                } else if (daysLeft <= 3) {
+                    badgeText = `⚠️ Noch ${daysLeft} Tage gültig`;
+                    countdownText = `Läuft in ${daysLeft} Tagen ab`;
+                    badgeClass = 'warn';
+                    countdownClass = 'warn';
+                    cardClass = ' expiring-mid';
+                    barColor = 'orange';
+                } else if (daysLeft <= 7) {
+                    badgeText = `🕒 Noch ${daysLeft} Tage gültig`;
+                    countdownText = `Gültig bis ${dateLabel}`;
+                    badgeClass = 'warn';
+                    countdownClass = 'warn';
+                    cardClass = ' expiring-mid';
+                    barColor = 'orange';
+                }
+
+                return {
+                    hasExpiry: true,
+                    expiryMs: targetMs,
+                    daysLeft,
+                    hoursLeft,
+                    dateLabel,
+                    infoLabel: parsedWindow.raw || dateLabel,
+                    precision: 'end',
+                    showUrgency: true,
+                    cardClass,
+                    barColor,
+                    badgeClass,
+                    badgeText,
+                    countdownClass,
+                    countdownText,
+                    barPct: Math.max(2, Math.min(100, Math.round((Math.min(daysLeft || 1, 21) / 21) * 100)))
+                };
+            }
+
             if (parsedWindow.kind === 'range' && Number.isFinite(parsedWindow.startMs) && Number.isFinite(parsedWindow.endMs)) {
                 const startLabel = formatDateAT(parsedWindow.startMs);
                 const endLabel = formatDateAT(parsedWindow.endMs);
