@@ -1622,7 +1622,10 @@
                 };
             }
 
-            const hasStartSignal = /\b(ab|gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am)\b/.test(text);
+            const hasEndSignal = /\b(bis|gültig bis|gueltig bis|läuft ab|laeuft ab|endet|endet am|letzter tag|deadline|frist|einlösbar bis|einloesbar bis|aktion bis)\b/.test(text);
+            const hasRealStartSignal = /\b(gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am)\b/.test(text);
+            const hasTimeOnlyStartSignal = /\bab\s+\d{1,2}:\d{2}\b/.test(text);
+            const hasStartSignal = !hasEndSignal && (hasRealStartSignal || hasTimeOnlyStartSignal);
 
             m = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
             if (m) {
