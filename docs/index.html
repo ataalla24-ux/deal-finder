@@ -1562,6 +1562,10 @@
             const raw = sanitizeExpiryTextForApp(rawText || '');
             if (!raw) return { kind: 'unknown', raw: '' };
             const text = raw.toLowerCase();
+            const explicitDateMatches = text.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?)\b/g) || [];
+            const hasSingleExplicitDate = new Set(explicitDateMatches).size === 1;
+            const hasDateRange = /\b\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\s*[-–]\s*\d{1,2}[./-]\d{1,2}/.test(text);
+            const hasTimeOnlyEndSignal = /\bbis\s+\d{1,2}:\d{2}\b/.test(text);
             const monthMap = {
                 januar: 1, februar: 2, 'märz': 3, maerz: 3, april: 4, mai: 5, juni: 6,
                 juli: 7, august: 8, september: 9, oktober: 10, november: 11, dezember: 12,
@@ -1622,7 +1626,8 @@
                 };
             }
 
-            const hasEndSignal = /\b(bis|gültig bis|gueltig bis|läuft ab|laeuft ab|endet|endet am|letzter tag|deadline|frist|einlösbar bis|einloesbar bis|aktion bis)\b/.test(text);
+            const hasStrongEndSignal = /\b(gültig bis|gueltig bis|läuft ab|laeuft ab|endet|endet am|letzter tag|deadline|frist|einlösbar bis|einloesbar bis|aktion bis)\b/.test(text);
+            const hasEndSignal = hasStrongEndSignal || (/\bbis\b/.test(text) && (!hasSingleExplicitDate || hasDateRange || !hasTimeOnlyEndSignal));
             const hasRealStartSignal = /\b(gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am)\b/.test(text);
             const hasTimeOnlyStartSignal = /\bab\s+\d{1,2}:\d{2}\b/.test(text);
             const hasStartSignal = !hasEndSignal && (hasRealStartSignal || hasTimeOnlyStartSignal);
@@ -1805,6 +1810,9 @@
                     countdownClass = 'warn';
                     cardClass = ' expiring-mid';
                     barColor = 'orange';
+                } else {
+                    badgeText = `📍 In ${daysLeft} Tagen endet`;
+                    countdownText = `Gültig bis ${dateLabel}`;
                 }
 
                 return {
