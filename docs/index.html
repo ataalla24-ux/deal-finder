@@ -1584,7 +1584,10 @@
             const hasExplicitEndSignal = /\b(bis|gültig bis|gueltig bis|läuft ab|laeuft ab|endet|endet am|letzter tag|nur noch|deadline|frist|einlösbar bis|einloesbar bis|aktion bis|noch \d+ tage gültig|noch \d+h gültig)\b/.test(signalText);
             const hasExplicitStartSignal = /\b(ab|gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am|launch am|opening)\b/.test(signalText);
             const isSingleDayCategory = /(^| )(events?|gottesdienste|kirche)( |$)/.test(signalText);
-            const looksLikeSingleDay = precision === 'day' && !hasExplicitEndSignal && (isSingleDayCategory || /\b(gültig am|gueltig am|am \d{1,2}[./-]\d{1,2}|am \d{1,2}\.\s*[a-zäöü]+|heute|morgen|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(signalText));
+            const explicitDateMatches = signalText.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?)\b/g) || [];
+            const hasSingleExplicitDate = new Set(explicitDateMatches).size === 1;
+            const hasSingleDayTimeWindow = hasSingleExplicitDate && /\bbis\s+\d{1,2}:\d{2}\b/.test(signalText);
+            const looksLikeSingleDay = precision === 'day' && ((!hasExplicitEndSignal || hasSingleDayTimeWindow) && (isSingleDayCategory || /\b(gültig am|gueltig am|am \d{1,2}[./-]\d{1,2}|am \d{1,2}\.\s*[a-zäöü]+|heute|morgen|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(signalText) || hasSingleDayTimeWindow));
 
             let cardClass = ' expiring-ok';
             let barColor = 'green';
@@ -1948,8 +1951,23 @@
             out.title = cleanUiNoiseText(out.title || '');
             out.description = cleanUiNoiseText(out.description || '');
             out.brand = cleanUiNoiseText(out.brand || '');
-            out.expires = sanitizeExpiryTextForApp(out.expires || out.expiresOriginal || '');
-            out.expiresOriginal = sanitizeExpiryTextForApp(out.expiresOriginal || out.expires || '');
+            const rawExpires = sanitizeExpiryTextForApp(out.expires || '');
+            const rawExpiresOriginal = sanitizeExpiryTextForApp(out.expiresOriginal || '');
+            const originalLooksSpecific = /(\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?|\d{4}-\d{2}-\d{2}|\bbis\b|\bam\b|\bab\b|\d{1,2}:\d{2})/i.test(rawExpiresOriginal);
+            const originalMs = parseExpiryToMs(rawExpiresOriginal);
+            const detectedMs = parseExpiryToMs(rawExpires);
+            const shouldPreferOriginalExpiry =
+                !!rawExpiresOriginal &&
+                originalLooksSpecific &&
+                Number.isFinite(originalMs) &&
+                (
+                    !rawExpires ||
+                    !Number.isFinite(detectedMs) ||
+                    out.expiresDetectedFromUrl === true ||
+                    Math.abs(originalMs - detectedMs) > 36 * 3600000
+                );
+            out.expires = shouldPreferOriginalExpiry ? rawExpiresOriginal : (rawExpires || rawExpiresOriginal);
+            out.expiresOriginal = rawExpiresOriginal || out.expires;
             out.type = inferDealTypeForApp(out);
             out.category = normalizeCategoryForApp(out.category, out);
             if (out.category === 'events' && !isChristianContent(out)) out.category = 'kultur';
