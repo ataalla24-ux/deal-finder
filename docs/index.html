@@ -1614,7 +1614,8 @@
             const explicitDateMatches = signalText.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?)\b/g) || [];
             const hasSingleExplicitDate = new Set(explicitDateMatches).size === 1;
             const hasSingleDayTimeWindow = hasSingleExplicitDate && /\bbis\s+\d{1,2}:\d{2}\b/.test(signalText);
-            const looksLikeSingleDay = precision === 'day' && ((!hasExplicitEndSignal || hasSingleDayTimeWindow) && (isSingleDayCategory || /\b(gültig am|gueltig am|am \d{1,2}[./-]\d{1,2}|am \d{1,2}\.\s*[a-zäöü]+|heute|morgen|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(signalText) || hasSingleDayTimeWindow));
+            const hasBareSingleDate = hasSingleExplicitDate && !/\b\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\s*[-–]\s*\d{1,2}[./-]\d{1,2}/.test(signalText);
+            const looksLikeSingleDay = precision === 'day' && ((!hasExplicitEndSignal || hasSingleDayTimeWindow) && (isSingleDayCategory || /\b(gültig am|gueltig am|am \d{1,2}[./-]\d{1,2}|am \d{1,2}\.\s*[a-zäöü]+|heute|morgen|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(signalText) || hasSingleDayTimeWindow || hasBareSingleDate));
 
             let cardClass = ' expiring-ok';
             let barColor = 'green';
