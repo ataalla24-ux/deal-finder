@@ -1,4 +1,4 @@
-const CACHE_NAME = 'freefinder-v4';
+const CACHE_NAME = 'freefinder-v3';
 const urlsToCache = [
   './',
   './index.html',
@@ -9,17 +9,6 @@ const urlsToCache = [
   './og-image.svg',
   './push-config.json'
 ];
-
-function getCanonicalDataCacheKey(requestUrl) {
-  const url = new URL(requestUrl);
-  if (url.pathname.endsWith('/deals.json')) {
-    return new URL('./deals.json', self.location.href).toString();
-  }
-  if (url.pathname.endsWith('/deal-of-the-day.json')) {
-    return new URL('./deal-of-the-day.json', self.location.href).toString();
-  }
-  return null;
-}
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -45,26 +34,18 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Always fetch live JSON data, but cache it under a stable key so
-  // timestamped requests still have an offline fallback on iPhone/PWA.
-  const canonicalKey = getCanonicalDataCacheKey(event.request.url);
-  if (canonicalKey) {
+  // Always fetch deals.json from network for fresh data
+  if (event.request.url.includes('deals.json')) {
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          if (response && response.ok) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(canonicalKey, responseClone);
-            });
-          }
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseClone);
+          });
           return response;
         })
-        .catch(async () => {
-          const cached = await caches.match(canonicalKey);
-          if (cached) return cached;
-          return caches.match(event.request, { ignoreSearch: true });
-        })
+        .catch(() => caches.match(event.request))
     );
     return;
   }
