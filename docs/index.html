@@ -1546,10 +1546,29 @@
             }
         }
 
+        function hasRecurringOrApproximateExpiryText(rawText) {
+            const text = sanitizeExpiryTextForApp(rawText || '').toLowerCase();
+            if (!text) return false;
+            return (
+                /\bjeden\s+(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(text) ||
+                /\bwöchentlich\b|\bwoechentlich\b|\bmonatlich\b|\bregelmäßig\b|\bregelm[aä](?:ß|ss)ig\b/.test(text) ||
+                /\banfang\b|\bmitte\b|\bende\b/.test(text) ||
+                /\bab\s+(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+\d{4}\b/.test(text) ||
+                /\bsolange vorrat reicht\b|\bsolange der vorrat reicht\b|\btba\b|\bvariiert\b/.test(text)
+            );
+        }
+
         function getExpiryPresentation(deal) {
             const rawExpiry = deal && deal.expires ? sanitizeExpiryTextForApp(deal.expires) : '';
             const rawDisplay = sanitizeExpiryTextForApp((deal && (deal.expiresOriginal || deal.expires)) || '');
             const precision = (deal && deal.expiresPrecision) || '';
+            if (hasRecurringOrApproximateExpiryText(rawDisplay)) {
+                return {
+                    hasExpiry: false,
+                    infoLabel: rawDisplay,
+                    precision: precision || 'recurring'
+                };
+            }
             const expiryMs = parseExpiryToMs(rawExpiry);
             if (!Number.isFinite(expiryMs)) {
                 return { hasExpiry: false, infoLabel: rawDisplay || '', precision: precision || 'unknown' };
