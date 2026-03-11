@@ -2686,6 +2686,8 @@
             todayDate: null, totalSavings: 0, spinUsedToday: false, spinDate: null,
             challengeComplete: false, secretUnlocked: false
         }));
+        if (!Array.isArray(userData.viewHistory)) userData.viewHistory = [];
+        if (!userData.discoveryProfile || typeof userData.discoveryProfile !== 'object') userData.discoveryProfile = {};
         
         const LEVELS = [
             { name: '🌱 Schnäppchen-Anfänger', xp: 0 },
@@ -2780,11 +2782,16 @@
             document.getElementById('savingsBar').style.width = Math.min((userData.totalSavings / 50) * 100, 100) + '%';
         }
         
-        function trackDealView() {
+        function trackDealView(dealId) {
             const today = new Date().toDateString();
             if (userData.todayDate !== today) { userData.todayViewed = 0; userData.todayDate = today; userData.challengeComplete = false; }
             userData.todayViewed++;
             userData.dealsViewed++;
+            if (dealId && typeof dealId === 'string') {
+                if (!Array.isArray(userData.viewHistory)) userData.viewHistory = [];
+                userData.viewHistory.push({ dealId, at: Date.now() });
+                pruneViewHistory();
+            }
             saveUserData();
             updateChallengeUI();
             if (userData.todayViewed >= 5 && !userData.challengeComplete) {
@@ -3049,20 +3056,107 @@
         return curated.length >= 8 ? curated : discoveryDeals;
     }
 
-    function getInterestWeights(discoveryDeals) {
-        const weights = {};
-        const bump = (category, amount) => {
-            if (!category) return;
-            weights[category] = (weights[category] || 0) + amount;
+    function pruneViewHistory() {
+        if (!Array.isArray(userData.viewHistory)) userData.viewHistory = [];
+        const cutoff = Date.now() - (45 * 24 * 60 * 60 * 1000);
+        userData.viewHistory = userData.viewHistory
+            .filter((entry) => entry && entry.dealId && Number(entry.at) >= cutoff)
+            .slice(-120);
+    }
+
+    function buildDiscoveryProfile(discoveryDeals) {
+        pruneViewHistory();
+        const dealMap = new Map(discoveryDeals.map((deal) => [deal.id, deal]));
+        const profile = {
+            categories: {},
+            brands: {},
+            types: {},
+            seenIds: new Set(),
+            recentIds: new Set(),
+        };
+        const addWeight = (bucket, key, amount) => {
+            if (!key) return;
+            bucket[key] = (bucket[key] || 0) + amount;
+        };
+        const scoreInteraction = (deal, amount, markRecent) => {
+            if (!deal) return;
+            addWeight(profile.categories, deal.category, amount);
+            addWeight(profile.brands, getDisplayBrand(deal), amount * 0.9);
+            addWeight(profile.types, deal.type, amount * 0.7);
+            profile.seenIds.add(deal.id);
+            if (markRecent) profile.recentIds.add(deal.id);
         };
 
         sanitizeFavoriteIds(favorites).forEach((id) => {
-            const deal = discoveryDeals.find(d => d.id === id);
-            if (deal) bump(deal.category, 3);
+            const deal = dealMap.get(id);
+            scoreInteraction(deal, 4.5, true);
         });
 
-        Object.values(proData.redeemedDeals || {}).forEach((entry) => bump(entry && entry.category, 2));
-        return weights;
+        votedDeals.forEach((id) => {
+            const deal = dealMap.get(id);
+            scoreInteraction(deal, 3, true);
+        });
+
+        Object.keys(proData.redeemedDeals || {}).forEach((id) => {
+            const deal = dealMap.get(id);
+            if (deal) {
+                scoreInteraction(deal, 5, true);
+            } else {
+                const entry = proData.redeemedDeals[id];
+                addWeight(profile.categories, entry && entry.category, 4);
+            }
+        });
+
+        userData.viewHistory.forEach((entry) => {
+            const deal = dealMap.get(entry.dealId);
+            if (!deal) return;
+            const ageDays = Math.max(0, (Date.now() - Number(entry.at || 0)) / (1000 * 60 * 60 * 24));
+            const freshnessWeight = Math.max(0.35, 1.8 - (ageDays / 14));
+            scoreInteraction(deal, freshnessWeight, ageDays <= 10);
+        });
+
+        const searchText = String(searchQuery || '').trim().toLowerCase();
+        if (searchText) {
+            discoveryDeals.forEach((deal) => {
+                const haystack = [deal.title, deal.description, deal.category, deal.type, getDisplayBrand(deal)].filter(Boolean).join(' ').toLowerCase();
+                if (haystack.includes(searchText)) {
+                    scoreInteraction(deal, 2.2, true);
+                }
+            });
+        }
+
+        userData.discoveryProfile = {
+            categories: profile.categories,
+            brands: profile.brands,
+            types: profile.types,
+            updatedAt: Date.now()
+        };
+        return profile;
+    }
+
+    function getDistancePreferenceScore(deal) {
+        const radius = Number(proData.selectedRadius || 0);
+        if (!(radius > 0) || !proData.userLat || !proData.userLng) return 0;
+        const geo = getDealGeoHint(deal);
+        if (!geo) return 0;
+        if (geo.kind === 'citywide-vienna') return isUserInVienna(proData.userLat, proData.userLng) ? 1.5 : 0;
+        if (typeof geo.lat !== 'number' || typeof geo.lng !== 'number') return 0;
+        const distanceKm = haversineDistanceKm(proData.userLat, proData.userLng, geo.lat, geo.lng);
+        if (!Number.isFinite(distanceKm)) return 0;
+        if (distanceKm > radius) return -3;
+        return Math.max(0.5, 2.8 - (distanceKm / Math.max(radius, 1)) * 2.4);
+    }
+
+    function getFreshnessScore(deal) {
+        const ageDays = Math.max(0, (Date.now() - getDealBaseTimestampMs(deal)) / (1000 * 60 * 60 * 24));
+        return Math.max(0, 3 - (ageDays / 3));
+    }
+
+    function getSocialProofScore(deal) {
+        const commentsCount = (comments[deal.id] || []).length;
+        const tipsCount = (userTips[deal.id] || []).length + (defaultTips[deal.id] || []).length;
+        const ratingsCount = (ratings[deal.id] && ratings[deal.id].count) || 0;
+        return Math.min(4.5, (deal.votes || 0) / 35) + Math.min(1.5, commentsCount * 0.2) + Math.min(1.2, ratingsCount * 0.15) + Math.min(1, tipsCount * 0.08);
     }
 
     function getWeeklyCandidates(discoveryDeals) {
@@ -3072,22 +3166,56 @@
     }
 
     function getRecommendedDeals(discoveryDeals) {
-        const weights = getInterestWeights(discoveryDeals);
+        const profile = buildDiscoveryProfile(discoveryDeals);
+        const usedCategories = new Set();
         const scored = discoveryDeals.map((deal) => {
+            const brand = getDisplayBrand(deal);
             let score = 0;
-            score += weights[deal.category] || 0;
-            score += favorites.includes(deal.id) ? 1.5 : 0;
-            score += deal.hot ? 1.25 : 0;
-            score += deal.isNew ? 0.75 : 0;
-            score += Math.min(4, (deal.votes || 0) / 50);
-            if (deal.type === 'gratis') score += 0.8;
-            score += Math.max(0, 2 - ((Date.now() - getDealBaseTimestampMs(deal)) / (1000 * 60 * 60 * 24 * 7)));
+            score += (profile.categories[deal.category] || 0) * 1.45;
+            score += (profile.brands[brand] || 0) * 1.2;
+            score += (profile.types[deal.type] || 0) * 0.9;
+            score += getDistancePreferenceScore(deal);
+            score += getFreshnessScore(deal);
+            score += getSocialProofScore(deal) * 0.7;
+            score += deal.hot ? 1.5 : 0;
+            score += deal.isNew ? 1.1 : 0;
+            score += deal.type === 'gratis' ? 0.9 : 0;
+            if (profile.recentIds.has(deal.id)) score -= 1.25;
+            if (profile.seenIds.has(deal.id)) score -= 0.35;
             return { deal, score };
         });
         return scored
             .sort((a, b) => b.score - a.score || (b.deal.votes || 0) - (a.deal.votes || 0))
-            .map(item => item.deal)
-            .slice(0, 4);
+            .reduce((acc, item) => {
+                if (acc.length >= 4) return acc;
+                const category = item.deal.category || 'wien';
+                if (usedCategories.has(category) && acc.length < 2) {
+                    acc.push(item.deal);
+                    return acc;
+                }
+                if (!usedCategories.has(category) || acc.length >= 2) {
+                    usedCategories.add(category);
+                    acc.push(item.deal);
+                }
+                return acc;
+            }, []);
+    }
+
+    function getRecommendationReason(deal) {
+        const brand = getDisplayBrand(deal);
+        const profile = userData.discoveryProfile || {};
+        const categoryWeight = (profile.categories && profile.categories[deal.category]) || 0;
+        const brandWeight = (profile.brands && profile.brands[brand]) || 0;
+        const typeWeight = (profile.types && profile.types[deal.type]) || 0;
+        if (brandWeight >= 4) return 'Du magst diese Marke';
+        if (categoryWeight >= 4) return 'Passt zu deinen Lieblingskategorien';
+        if (typeWeight >= 3 && deal.type === 'gratis') return 'Du reagierst oft auf Gratis-Deals';
+        if (Number(proData.selectedRadius || 0) > 0) {
+            const geo = getDealGeoHint(deal);
+            if (geo) return 'Passt zu deinem Standort';
+        }
+        if (deal.hot) return 'Gerade stark gefragt';
+        return 'Passt zu deinem Profil';
     }
 
     function getTopVotedDeals(discoveryDeals) {
@@ -3139,7 +3267,7 @@
             '</div>' +
             '<div class="discovery-actions">' +
                 '<button class="action-btn vote-btn' + (votedDeals.includes(deal.id) ? ' is-voted' : '') + '"' + voteDisabled + ' onclick="vote(\'' + dealId + '\', 1, event)"><span class="vote-count">' + voteCount + '</span> 🔥</button>' +
-                '<button class="action-btn deal-link-btn' + (hasLink ? '' : ' disabled') + '" ' + (hasLink ? '' : 'disabled ') + 'onclick="trackDealView(); openDealUrl(\'' + dealId + '\', event)">' + defaultBtnLabel + '</button>' +
+                '<button class="action-btn deal-link-btn' + (hasLink ? '' : ' disabled') + '" ' + (hasLink ? '' : 'disabled ') + 'onclick="trackDealView(\'' + dealId + '\'); openDealUrl(\'' + dealId + '\', event)">' + defaultBtnLabel + '</button>' +
                 '<button class="action-btn fav-btn" onclick="toggleFav(\'' + dealId + '\', event)">' + favIcon + '</button>' +
             '</div>' +
         '</div>';
@@ -3432,10 +3560,7 @@
             const trending = getTrendingDeals(discoveryDeals);
 
             const intro = '<div class="discovery-page-header"><div class="discovery-page-icon">✨</div><h2 class="discovery-page-title">Für dich</h2><p class="discovery-page-subtitle">Smarte Empfehlungen, starke Community-Votes und was gerade heiß läuft.</p></div>';
-            const recommendedSection = renderDiscoverySection('Für dich empfohlen', 'Basierend auf deinen Favoriten, Einlösungen und starken Gratis-Deals.', recommended, (deal) => {
-                const cat = deal.category || 'wien';
-                return cat === 'gratis' ? 'Passt zu Gratis-Deals' : 'Passt zu deinen Interessen';
-            });
+            const recommendedSection = renderDiscoverySection('Für dich empfohlen', 'Basierend auf deinen Favoriten, Einlösungen, Views und deiner Nähe.', recommended, (deal) => getRecommendationReason(deal));
             const topVotedSection = renderDiscoverySection('Meist gevotet diese Woche', 'Die Community-Sieger aus den neuesten und stärksten Deals.', topVoted, (_, index) => index === 0 ? 'Community-Favorit' : 'Viele Stimmen');
             const trendingSection = renderDiscoverySection('Trendend gerade', 'Hot, neu oder gerade besonders stark geklickt.', trending, (deal) => deal.hot ? 'Gerade heiß' : (deal.isNew ? 'Frisch entdeckt' : 'Im Aufwind'));
             const submitCta = '<div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:18px;padding:20px;color:white;text-align:center;cursor:pointer" onclick="openLinkModal()"><div style="font-size:34px;margin-bottom:8px">🔗</div><div style="font-size:18px;font-weight:700">Deal einreichen</div><div style="font-size:14px;opacity:0.9;margin-top:4px">Gute Funde direkt mit der Community teilen</div></div>';
