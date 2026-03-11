@@ -2436,7 +2436,7 @@
             const fav = allDeals
                 .map(normalizeDealForApp)
                 .filter(d => favoriteIds.has(d.id));
-            document.getElementById('deals').innerHTML = fav.length ? fav.map(d => '<div class="deal-card"><div class="deal-header">' + renderDealLogo(d) + '<div><div class="deal-brand">' + getDisplayBrand(d) + '</div><div class="deal-title">' + cleanText(d.title) + '</div></div></div><a href="' + d.url + '" target="_blank" class="deal-btn" style="width:100%;text-align:center;margin-top:10px">Zum Deal →</a></div>').join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>Keine Favoriten</p><p style="font-size:13px;color:#999;margin-top:8px">Tippe ❤️ bei einem Deal</p></div>';
+            document.getElementById('deals').innerHTML = fav.length ? fav.map(d => '<div class="deal-card"><div class="deal-header">' + renderDealLogo(d) + '<div><div class="deal-brand">' + getDisplayBrand(d) + '</div><div class="deal-title">' + cleanUiNoiseText(d.title) + '</div></div></div><a href="' + d.url + '" target="_blank" class="deal-btn" style="width:100%;text-align:center;margin-top:10px">Zum Deal →</a></div>').join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>Keine Favoriten</p><p style="font-size:13px;color:#999;margin-top:8px">Tippe ❤️ bei einem Deal</p></div>';
             return;
         }
         const deals = filterDeals();
