@@ -326,6 +326,11 @@ export function parseExpiryShape(value, options = {}) {
   const hasSingleExplicitDate = uniqueExplicitDates.size === 1;
   const hasDateRange = /\b\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\s*[-–]\s*\d{1,2}[./-]\d{1,2}/.test(text);
   const hasTimeOnlyEndSignal = /\bbis\s+\d{1,2}:\d{2}\b/.test(text);
+  const hasSingleDaySignal =
+    /\b(gültig am|gueltig am|nur heute|heute|morgen)\b/.test(text) ||
+    /\bam\s+\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\b/.test(text) ||
+    /\bam\s+\d{1,2}\.?\s+(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\b/.test(text) ||
+    /\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(text);
   const monthMap = {
     januar: 1, februar: 2, 'märz': 3, maerz: 3, april: 4, mai: 5, juni: 6,
     juli: 7, august: 8, september: 9, oktober: 10, november: 11, dezember: 12,
@@ -430,7 +435,13 @@ export function parseExpiryShape(value, options = {}) {
   if (hasEndSignal) {
     return { kind: 'end', raw, validUntil: parsedIso, confidence: 'high' };
   }
-  return { kind: 'single', raw, validOn: parsedIso, confidence: 'high' };
+  if (hasSingleDaySignal) {
+    return { kind: 'single', raw, validOn: parsedIso, confidence: 'medium' };
+  }
+  if (hasSingleExplicitDate) {
+    return { kind: 'end', raw, validUntil: parsedIso, confidence: 'medium' };
+  }
+  return { kind: 'end', raw, validUntil: parsedIso, confidence: 'low' };
 }
 
 function applyStructuredExpiryFields(deal, value, options = {}) {

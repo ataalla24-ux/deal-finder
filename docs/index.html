@@ -1590,6 +1590,11 @@
             const hasSingleExplicitDate = new Set(explicitDateMatches).size === 1;
             const hasDateRange = /\b\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\s*[-–]\s*\d{1,2}[./-]\d{1,2}/.test(text);
             const hasTimeOnlyEndSignal = /\bbis\s+\d{1,2}:\d{2}\b/.test(text);
+            const hasSingleDaySignal =
+                /\b(gültig am|gueltig am|nur heute|heute|morgen)\b/.test(text) ||
+                /\bam\s+\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\b/.test(text) ||
+                /\bam\s+\d{1,2}\.?\s+(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\b/.test(text) ||
+                /\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(text);
             const monthMap = {
                 januar: 1, februar: 2, 'märz': 3, maerz: 3, april: 4, mai: 5, juni: 6,
                 juli: 7, august: 8, september: 9, oktober: 10, november: 11, dezember: 12,
@@ -1658,33 +1663,36 @@
 
             m = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
             if (m) {
+                const resolvedKind = hasStartSignal ? 'start' : (hasEndSignal ? 'end' : (hasSingleDaySignal || hasTimeOnlyEndSignal ? 'single' : 'end'));
                 return {
-                    kind: hasStartSignal ? 'start' : (hasEndSignal ? 'end' : 'single'),
+                    kind: resolvedKind,
                     raw,
-                    startMs: hasStartSignal ? buildEndOfDayMs(m[1], m[2], m[3]) : undefined,
-                    endMs: !hasStartSignal ? buildEndOfDayMs(m[1], m[2], m[3]) : undefined,
+                    startMs: resolvedKind === 'start' || resolvedKind === 'single' ? buildEndOfDayMs(m[1], m[2], m[3]) : undefined,
+                    endMs: resolvedKind === 'end' ? buildEndOfDayMs(m[1], m[2], m[3]) : undefined,
                 };
             }
 
             m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
             if (m) {
                 const year = m[3].length === 2 ? `20${m[3]}` : m[3];
+                const resolvedKind = hasStartSignal ? 'start' : (hasEndSignal ? 'end' : (hasSingleDaySignal || hasTimeOnlyEndSignal ? 'single' : 'end'));
                 return {
-                    kind: hasStartSignal ? 'start' : (hasEndSignal ? 'end' : 'single'),
+                    kind: resolvedKind,
                     raw,
-                    startMs: hasStartSignal ? buildEndOfDayMs(year, m[2], m[1]) : undefined,
-                    endMs: !hasStartSignal ? buildEndOfDayMs(year, m[2], m[1]) : undefined,
+                    startMs: resolvedKind === 'start' || resolvedKind === 'single' ? buildEndOfDayMs(year, m[2], m[1]) : undefined,
+                    endMs: resolvedKind === 'end' ? buildEndOfDayMs(year, m[2], m[1]) : undefined,
                 };
             }
 
             m = text.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
             if (m) {
                 const year = m[3].length === 2 ? `20${m[3]}` : m[3];
+                const resolvedKind = hasStartSignal ? 'start' : (hasEndSignal ? 'end' : (hasSingleDaySignal || hasTimeOnlyEndSignal ? 'single' : 'end'));
                 return {
-                    kind: hasStartSignal ? 'start' : (hasEndSignal ? 'end' : 'single'),
+                    kind: resolvedKind,
                     raw,
-                    startMs: hasStartSignal ? buildEndOfDayMs(year, m[2], m[1]) : undefined,
-                    endMs: !hasStartSignal ? buildEndOfDayMs(year, m[2], m[1]) : undefined,
+                    startMs: resolvedKind === 'start' || resolvedKind === 'single' ? buildEndOfDayMs(year, m[2], m[1]) : undefined,
+                    endMs: resolvedKind === 'end' ? buildEndOfDayMs(year, m[2], m[1]) : undefined,
                 };
             }
 
@@ -1953,8 +1961,7 @@
             const explicitDateMatches = signalText.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?)\b/g) || [];
             const hasSingleExplicitDate = new Set(explicitDateMatches).size === 1;
             const hasSingleDayTimeWindow = hasSingleExplicitDate && /\bbis\s+\d{1,2}:\d{2}\b/.test(signalText);
-            const hasBareSingleDate = hasSingleExplicitDate && !/\b\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\s*[-–]\s*\d{1,2}[./-]\d{1,2}/.test(signalText);
-            const looksLikeSingleDay = precision === 'day' && ((!hasExplicitEndSignal || hasSingleDayTimeWindow) && (isSingleDayCategory || /\b(gültig am|gueltig am|am \d{1,2}[./-]\d{1,2}|am \d{1,2}\.\s*[a-zäöü]+|heute|morgen|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(signalText) || hasSingleDayTimeWindow || hasBareSingleDate));
+            const looksLikeSingleDay = precision === 'day' && ((!hasExplicitEndSignal || hasSingleDayTimeWindow) && (isSingleDayCategory || /\b(gültig am|gueltig am|am \d{1,2}[./-]\d{1,2}|am \d{1,2}\.\s*[a-zäöü]+|heute|morgen|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(signalText) || hasSingleDayTimeWindow));
 
             let cardClass = ' expiring-ok';
             let barColor = 'green';
