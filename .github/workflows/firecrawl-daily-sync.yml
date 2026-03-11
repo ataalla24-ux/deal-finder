@@ -33,6 +33,11 @@ jobs:
         run: |
           node -e "const { chromium } = require('playwright'); (async()=>{const b=await chromium.launch({headless:true}); await b.close(); console.log('playwright-ok');})().catch(e=>{console.error(e); process.exit(1);});"
 
+      - name: Load jö Auth State
+        env:
+          JOE_STORAGE_STATE_B64: ${{ secrets.JOE_STORAGE_STATE_B64 }}
+        run: node scripts/load-joe-auth-state.mjs
+
       - name: Run Instagram Discovery Scraper
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
