@@ -30,17 +30,17 @@ const SOURCES = [
   },
   {
     key: 'omv-joe',
-    url: 'https://www.omv.at/de/markenpartner/joe-partner',
+    url: 'https://www.joe-club.at/partner/omv',
     brand: 'OMV VIVA',
     source: 'jö Bonus Club',
     distance: 'OMV Stationen Wien',
   },
   {
-    key: 'bipa-actions',
-    url: 'https://www.bipa.at/aktionen/',
+    key: 'bipa-joe',
+    url: 'https://www.joe-club.at/partner/bipa',
     brand: 'BIPA',
-    source: 'BIPA Aktionen',
-    distance: 'BIPA Filialen Wien / Online',
+    source: 'jö Bonus Club',
+    distance: 'BIPA Filialen Wien',
   },
 ];
 
@@ -223,6 +223,18 @@ async function openPage(browser, url) {
   });
   await page.waitForTimeout(1500);
   return page;
+}
+
+async function acceptJoeCookies(page) {
+  try {
+    const button = page.getByRole('button', { name: 'Einverstanden', exact: true });
+    if (await button.isVisible({ timeout: 1500 })) {
+      await button.click();
+      await page.waitForTimeout(1200);
+    }
+  } catch {
+    // Cookie banner is not always present.
+  }
 }
 
 async function extractActionsPage(page, source) {
@@ -420,13 +432,21 @@ async function extractJoeBenefitsPage(page, source) {
 }
 
 async function extractOmvJoePage(page, source) {
+  await acceptJoeCookies(page);
+  await page.waitForTimeout(1200);
   const pageData = await page.evaluate(() => {
+    const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5'))
+      .map((node) => (node.textContent || '').trim())
+      .filter(Boolean);
+    const listItems = Array.from(document.querySelectorAll('li'))
+      .map((node) => (node.textContent || '').trim())
+      .filter(Boolean);
     const text = document.body.innerText || '';
     const links = Array.from(document.querySelectorAll('a[href]')).map((link) => ({
       text: (link.innerText || '').trim(),
       href: link.href,
     }));
-    return { text, links };
+    return { text, links, headings, listItems };
   });
 
   const text = cleanText(pageData.text);
@@ -463,17 +483,17 @@ async function extractOmvJoePage(page, source) {
     if (deal) deals.push(deal);
   };
 
-  if (/1 Ö pro Liter/i.test(text) && /MaxxMotion/i.test(text)) {
+  if (/3 Cent pro Liter Rabatt/i.test(text) && /MaxxMotion/i.test(text)) {
     addOmvDeal({
-      title: 'OMV MaxxMotion: 1 Ö pro Liter',
+      title: 'OMV MaxxMotion: 3 Cent pro Liter Rabatt',
       description: makeDescription([
-        'Bei OMV gibt es für MaxxMotion Performance Fuels einen jö Vorteil mit 1 Ö pro Liter.',
-        'Einlösung laut OMV an teilnehmenden Stationen an der Kassa.',
+        'Über jö gibt es bei OMV 3 Cent pro Liter Rabatt auf OMV MaxxMotion Performance Fuels.',
+        'Laut jö Partnerseite gültig für eine Tankmenge von 100 Litern pro Einlösung.',
       ]),
       brand: 'OMV MaxxMotion',
       category: 'reisen',
       type: 'rabatt',
-      url: source.url,
+      url: findLink(/teilnehmenden OMV Stationen|OMV Webseite/i, source.url),
       qualityScore: 83,
     });
   }
@@ -488,7 +508,7 @@ async function extractOmvJoePage(page, source) {
       brand: 'OMV VIVA',
       category: 'kaffee',
       type: 'rabatt',
-      url: findLink(/viva-kaffee/i),
+      url: findLink(/OMV Webseite|teilnehmenden OMV Stationen/i),
       qualityScore: 86,
     });
   }
@@ -503,7 +523,7 @@ async function extractOmvJoePage(page, source) {
       brand: 'OMV VIVA',
       category: 'essen',
       type: 'rabatt',
-      url: findLink(/viva-gastro/i),
+      url: findLink(/OMV Webseite|teilnehmenden OMV Stationen/i),
       qualityScore: 85,
     });
   }
@@ -518,7 +538,7 @@ async function extractOmvJoePage(page, source) {
       brand: 'OMV TopWash',
       category: 'reisen',
       type: 'rabatt',
-      url: findLink(/topwash/i),
+      url: findLink(/OMV Webseite|teilnehmenden OMV Stationen/i),
       distance: 'OMV TopWash Wien',
       qualityScore: 78,
     });
@@ -527,45 +547,52 @@ async function extractOmvJoePage(page, source) {
   return deals;
 }
 
-async function extractBipaActionsPage(page, source) {
-  const html = await page.content();
+async function extractBipaJoePage(page, source) {
+  await acceptJoeCookies(page);
+  await page.waitForTimeout(1200);
+  const text = cleanText(await page.locator('body').innerText());
   const deals = [];
+  const actionLink = 'https://www.bipa.at/cp/joe-bonusclub';
 
-  const promoMatch = html.match(
-    /"promoBars":\{.*?"general":\{"text":"((?:\\.|[^"\\])*)","link":"((?:\\.|[^"\\])*)"/s,
-  );
-
-  if (promoMatch) {
-    const promoText = cleanText(decodeJsonString(promoMatch[1]));
-    const promoLink = decodeJsonString(promoMatch[2]);
-    const codeMatch = promoText.match(/\bcode[:\s]*([A-Z0-9-]{4,20})\b/i);
-    const title = promoText
-      .replace(/\s*❤️\s*/g, ' ')
-      .replace(/\s*registriert mit code[:\s]*[A-Z0-9-]{4,20}\b/i, '')
-      .trim();
-
-    const deal = buildDeal({
-      prefix: 'bipa',
-      title: title ? `BIPA: ${title}` : 'BIPA Aktion im Online Shop',
+  if (/Bis zu -20% Rabatt/i.test(text) && /Rabattsammler/i.test(text)) {
+    deals.push(buildDeal({
+      prefix: 'joe-bipa',
+      title: 'BIPA jö Rabattsammler: bis zu -20%',
       description: makeDescription([
-        promoText,
-        codeMatch ? `Aktionscode: ${codeMatch[1].toUpperCase()}.` : '',
-        'Direkt aus der aktuellen BIPA Aktionsleiste im Online Shop erkannt.',
+        'Laut jö Partnerseite ist der BIPA jö Rabattsammler einmal pro Monat bei einem Einkauf einlösbar.',
+        'Es sind bis zu -20% Rabatt auf den Einkauf möglich.',
       ]),
       brand: 'BIPA',
       source: source.source,
-      url: promoLink ? new URL(promoLink, source.url).toString() : source.url,
-      expires: 'Kurzfristig wechselnd',
+      url: actionLink,
+      expires: 'Monatlich',
       distance: source.distance,
       category: 'beauty',
-      type: inferType(promoText, title, 'BIPA Aktionen'),
-      qualityScore: 84,
-    });
-
-    if (deal) deals.push(deal);
+      type: 'rabatt',
+      qualityScore: 82,
+    }));
   }
 
-  return deals;
+  if (/100 Ös/i.test(text) && /1 Euro/i.test(text) && /Einkaufsbonus/i.test(text)) {
+    deals.push(buildDeal({
+      prefix: 'joe-bipa',
+      title: 'BIPA jö Einkaufsbonus: 100 Ös = 1€',
+      description: makeDescription([
+        'Auf der jö Partnerseite wird der BIPA Einkaufsbonus als direkter Kassarabatt beschrieben.',
+        'Für 100 Ös reduziert sich die Rechnung um 1 Euro.',
+      ]),
+      brand: 'BIPA',
+      source: source.source,
+      url: actionLink,
+      expires: 'Regelmäßig',
+      distance: source.distance,
+      category: 'beauty',
+      type: 'rabatt',
+      qualityScore: 78,
+    }));
+  }
+
+  return deals.filter(Boolean);
 }
 
 function dedupeDeals(deals) {
@@ -606,8 +633,8 @@ async function main() {
           deals = await extractJoeBenefitsPage(page, source);
         } else if (source.key === 'omv-joe') {
           deals = await extractOmvJoePage(page, source);
-        } else if (source.key === 'bipa-actions') {
-          deals = await extractBipaActionsPage(page, source);
+        } else if (source.key === 'bipa-joe') {
+          deals = await extractBipaJoePage(page, source);
         }
 
         console.log(`   ↳ ${deals.length} jö Deals`);
