@@ -2,7 +2,7 @@ const JSON_HEADERS = {
   'content-type': 'application/json; charset=utf-8',
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET,POST,OPTIONS',
-  'access-control-allow-headers': 'content-type',
+  'access-control-allow-headers': 'content-type,authorization,x-admin-token',
   'cache-control': 'no-store'
 };
 
@@ -42,6 +42,12 @@ function pendingKey(code, visitorId) {
 
 function apnsTokenKey(token) {
   return `push:apns:${token}`;
+}
+
+function maskPushToken(token) {
+  const value = String(token || '').trim();
+  if (value.length <= 12) return value;
+  return `${value.slice(0, 6)}…${value.slice(-6)}`;
 }
 
 function toBase64Url(input) {
@@ -224,6 +230,20 @@ async function putJsonKV(env, key, value) {
   await env.REFERRAL_KV.put(key, JSON.stringify(value));
 }
 
+async function listApnsTokens(env, limit = 20) {
+  const listed = await env.REFERRAL_KV.list({ prefix: 'push:apns:', limit });
+  const keys = Array.isArray(listed?.keys) ? listed.keys : [];
+  const records = [];
+
+  for (const entry of keys) {
+    const record = await getJsonKV(env, entry.name);
+    if (record) records.push(record);
+  }
+
+  records.sort((a, b) => Number(b?.lastSeenAt || 0) - Number(a?.lastSeenAt || 0));
+  return records;
+}
+
 function normalizeRecord(record, code, inviterDeviceId) {
   return {
     code,
@@ -339,6 +359,39 @@ export default {
       } catch (error) {
         return invalid(error?.message || 'APNS send failed', 500);
       }
+    }
+
+    if (path === '/api/push/apns/status' && request.method === 'GET') {
+      if (!requireAdmin(request, env)) {
+        return invalid('Unauthorized', 401);
+      }
+
+      const records = await listApnsTokens(env, 25);
+      const bundleId = String(env.APNS_BUNDLE_ID || '').trim();
+      const credentialsReady = Boolean(
+        String(env.ADMIN_API_TOKEN || '').trim() &&
+        String(env.APNS_TEAM_ID || '').trim() &&
+        String(env.APNS_KEY_ID || '').trim() &&
+        String(env.APNS_PRIVATE_KEY || '').trim() &&
+        bundleId
+      );
+
+      return json({
+        ok: true,
+        credentialsReady,
+        bundleId,
+        sandbox: String(env.APNS_USE_SANDBOX || '').trim().toLowerCase() === 'true',
+        registeredTokens: records.length,
+        latest: records.map((record) => ({
+          platform: record.platform || 'ios',
+          bundleId: record.bundleId || '',
+          appVersion: record.appVersion || '',
+          build: record.build || '',
+          lastSeenAt: record.lastSeenAt || null,
+          createdAt: record.createdAt || null,
+          tokenMasked: maskPushToken(record.token),
+        })),
+      });
     }
 
     if (path === '/api/referrals/status' && request.method === 'GET') {

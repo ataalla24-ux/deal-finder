@@ -24,6 +24,7 @@ This is still not an Apple-verified install callback. It is the strongest web-co
 - `POST /api/referrals/claim/complete`
 - `POST /api/push/apns/register`
 - `POST /api/push/apns/send`
+- `GET /api/push/apns/status`
 - `GET /health`
 
 ## Required Cloudflare setup
@@ -64,6 +65,31 @@ Example payload:
   "url": "freefinder://deal/deal_123"
 }
 ```
+
+Admin status check:
+
+```bash
+curl -H "Authorization: Bearer $ADMIN_API_TOKEN" \
+  https://freefinder-referrals.YOUR_SUBDOMAIN.workers.dev/api/push/apns/status
+```
+
+Send a test push from local terminal:
+
+```bash
+cd referrals-worker
+PUSH_API_BASE="https://freefinder-referrals.YOUR_SUBDOMAIN.workers.dev" \
+ADMIN_API_TOKEN="..." \
+APNS_DEVICE_TOKEN="ios_device_token_hex" \
+node scripts/test-apns-push.mjs
+```
+
+Recommended rollout order:
+
+1. Deploy the worker with all APNS secrets set.
+2. Install a fresh iPhone build and open the app once.
+3. Check `/api/push/apns/status` and confirm at least one registered token appears.
+4. Send one manual test push with `test-apns-push.mjs`.
+5. Only after that wire automatic deal-triggered push sends.
 
 ## Notes
 
