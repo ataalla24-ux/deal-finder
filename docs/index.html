@@ -165,47 +165,220 @@
         .filter-divider { height: 1px; background: #e5e7eb; margin: 8px 0; }
         
         /* DEAL CARDS */
-        .deal-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 2px solid transparent; transition: all 0.2s; position: relative; overflow: hidden; }
-        .deal-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        .deal-card.hot { border-color: #f59e0b; }
-        .deal-card.expiring-soon { border-width: 3px; border-color: #ef4444 !important; animation: pulse-red 2s infinite; }
-        .deal-card.expiring-soon::before { background: linear-gradient(90deg, #ef4444, #f97316) !important; }
-        .deal-card.expiring-mid { border-width: 3px; border-color: #f59e0b !important; box-shadow: 0 6px 24px rgba(245, 158, 11, 0.25); }
-        .deal-card.expiring-mid::before { background: linear-gradient(90deg, #f59e0b, #fbbf24) !important; }
-        .deal-card.expiring-ok { border-width: 3px; border-color: #10b981 !important; box-shadow: 0 6px 24px rgba(16, 185, 129, 0.2); }
-        .deal-card.expiring-ok::before { background: linear-gradient(90deg, #10b981, #34d399) !important; }
-        @keyframes pulse-red { 0%,100% { box-shadow: 0 2px 8px rgba(239,68,68,0.2); } 50% { box-shadow: 0 4px 20px rgba(239,68,68,0.45); } }
-        .deal-card.expiring-soon { border-color: #ef4444 !important; background: linear-gradient(135deg, #fff 85%, #fff1f1 100%); animation: pulse-red 2s infinite; }
-        .deal-card.expiring-soon::before { background: linear-gradient(90deg, #ef4444, #f97316) !important; }
-        .deal-card.expired-visible { border-color: #9ca3af !important; background: linear-gradient(135deg, #ffffff 80%, #f3f4f6 100%); opacity: 0.94; }
-        .deal-card.expired-visible::before { background: linear-gradient(90deg, #6b7280, #9ca3af) !important; }
-        @keyframes pulse-red { 0%,100% { box-shadow: 0 2px 8px rgba(239,68,68,0.2); } 50% { box-shadow: 0 4px 20px rgba(239,68,68,0.5); } }
-        .deal-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #667eea, #764ba2); }
-        
-        /* TYPE BADGES */
-        .deal-type-badge { position: absolute; top: 12px; right: 12px; padding: 5px 11px; border-radius: 999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.3px; color: white; box-shadow: 0 4px 10px rgba(15, 23, 42, 0.22); }
-        .deal-type-badge.gratis { background: linear-gradient(135deg, #10b981, #059669); }
-        .deal-type-badge.rabatt { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .deal-type-badge.bogo { background: linear-gradient(135deg, #0ea5e9, #2563eb); }
-        .deal-type-badge.testabo { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
-        .deal-type-badge.neu { background: linear-gradient(135deg, #3b82f6, #2563eb); right: 88px; }
-        
-        /* DEAL HEADER */
-        .deal-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
-        .deal-logo { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; overflow: hidden; }
-        .deal-logo-img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; background: #fff; }
-        .deal-logo-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        .deal-brand { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 600; color: #667eea; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-        .deal-title { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 700; font-size: 20px; color: #1e293b; line-height: 1.25; letter-spacing: -0.4px; background: linear-gradient(135deg, #1e293b 0%, #475569 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-                .deal-title-sub { display: block; font-weight: 500; font-size: 13px; color: #94a3b8; letter-spacing: 0; margin-top: 2px; background: none; -webkit-background-clip: unset; -webkit-text-fill-color: #94a3b8; background-clip: unset; }
-        .deal-desc { font-size: 14px; color: #6b7280; line-height: 1.5; margin-bottom: 12px; }
-            .deal-info-section { background: #f8fafc; border-radius: 12px; padding: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
-            .deal-info-row { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; font-size: 13px; color: #374151; line-height: 1.4; }
-            .deal-info-row + .deal-info-row { border-top: 1px solid #e2e8f0; }
-            .deal-info-icon { flex-shrink: 0; width: 20px; text-align: center; font-size: 14px; }
-            .deal-info-text { flex: 1; word-break: break-word; }
-            .deal-type-badge.rabatt { background: linear-gradient(135deg, #f59e0b, #d97706); }
-            .deal-type-badge.bogo { background: linear-gradient(135deg, #0ea5e9, #2563eb); }
+        .deal-card {
+            position: relative;
+            background: #fffcf9;
+            border-radius: 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 3px 12px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity .35s ease, transform .35s cubic-bezier(.22,1,.36,1);
+        }
+        .deal-card.deal-in { opacity: 1; transform: translateY(0); }
+        .deal-card.expiring-soon { box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 3px 12px rgba(0,0,0,0.05), 0 0 0 2px #fecaca; }
+        .deal-card.expired-visible { opacity: 0.9; filter: saturate(0.75); }
+        .deal-edge { position: absolute; top: 0; left: 0; bottom: 0; width: 4px; }
+        .deal-body { padding: 14px 14px 0 18px; }
+        .deal-card:hover { transform: translateY(-2px); }
+
+        .deal-header { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+        .deal-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 2px solid;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+        }
+        .deal-logo-img { width: 28px; height: 28px; object-fit: contain; }
+        .deal-logo-fallback {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bricolage Grotesque', serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: #64748b;
+        }
+        .deal-head-main { flex: 1; min-width: 0; }
+        .deal-head-top { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-bottom: 3px; }
+        .deal-brand { font-weight: 800; color: #8c8279; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; }
+        .deal-type-badge {
+            font-size: 9px;
+            font-weight: 800;
+            color: white;
+            padding: 2px 7px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .deal-type-badge.gratis { background: #059669; }
+        .deal-type-badge.rabatt { background: #ea580c; }
+        .deal-type-badge.bogo { background: #7c3aed; }
+        .deal-type-badge.testabo { background: #4f46e5; }
+        .deal-type-badge.neu {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+        }
+        .pill-hot { font-size: 11px; animation: bob 2s ease-in-out infinite; }
+        @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+        .deal-title { font-family: 'Bricolage Grotesque', serif; font-size: 20px; font-weight: 800; color: #1a1715; line-height: 1.16; letter-spacing: -0.55px; margin: 0 0 3px; text-wrap: balance; }
+        .deal-meta-inline { font-size: 11px; color: #8c8279; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+        .deal-stars { color: #eab308; letter-spacing: -1px; font-size: 10px; }
+        .deal-rating-num { color: #8c8279; letter-spacing: 0; font-weight: 600; margin-left: 2px; font-size: 11px; }
+        .deal-sep { color: #d4cfc9; }
+        .deal-value-box {
+            flex-shrink: 0;
+            text-align: center;
+            background: linear-gradient(145deg, #fefce8, #fef9c3);
+            border: 1px solid #fde68a;
+            border-radius: 12px;
+            padding: 6px 10px;
+            min-width: 56px;
+        }
+        .deal-value-number {
+            display: block;
+            font-family: 'Bricolage Grotesque', serif;
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.5px;
+        }
+        .deal-value-label {
+            display: block;
+            font-size: 8px;
+            font-weight: 700;
+            color: #ca8a04;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-top: 1px;
+        }
+
+        .deal-desc-toggle {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            width: 100%;
+            background: #f9f6f2;
+            border: 1px solid rgba(0,0,0,0.04);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            text-align: left;
+            font-family: inherit;
+        }
+        .deal-desc-toggle:hover { background: #f5f1ec; }
+        .deal-desc-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+        .deal-desc-text {
+            flex: 1;
+            font-size: 12.5px;
+            line-height: 1.45;
+            color: #5c5650;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .deal-desc-text.open { -webkit-line-clamp: unset; }
+        .deal-desc-chevron {
+            font-size: 16px;
+            color: #8c8279;
+            flex-shrink: 0;
+            font-weight: 700;
+            transform: rotate(90deg);
+            transition: transform .2s;
+            margin-top: -1px;
+        }
+        .deal-desc-chevron.open { transform: rotate(-90deg); }
+
+        .deal-footer-top { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 14px; }
+        .deal-exp-col { flex: 1; min-width: 0; }
+        .expiry-bar { height: 4px; border-radius: 2px; background: #ede8e3; overflow: hidden; margin-bottom: 5px; }
+        .expiry-bar-fill { height: 100%; border-radius: 2px; transition: width .8s cubic-bezier(.22,1,.36,1); }
+        .expiry-bar-fill.red { background: #ef4444; }
+        .expiry-bar-fill.orange { background: #f59e0b; }
+        .expiry-bar-fill.green { background: #22c55e; }
+        .expiry-bar-fill.pulse { animation: expiryPulse 1.5s ease-in-out infinite; }
+        @keyframes expiryPulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+        .card-countdown {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+        .card-countdown-icon-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .card-countdown-icon-dot.blink { animation: countdownBlink 1.2s ease-in-out infinite; }
+        @keyframes countdownBlink { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+        .deal-link-btn {
+            flex-shrink: 0;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 13px;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            letter-spacing: .2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            min-width: 134px;
+            box-shadow: 0 3px 12px rgba(0,0,0,.1);
+            transition: transform .12s, box-shadow .15s;
+            position: relative;
+            overflow: hidden;
+        }
+        .deal-link-btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(255,255,255,.15) 0%,transparent 50%); pointer-events: none; }
+        .deal-link-btn:active { transform: scale(.97); }
+        .deal-link-btn.disabled, .deal-link-btn:disabled { background: #9ca3af !important; box-shadow: none; cursor: not-allowed; }
+        .cta-arrow { font-size: 15px; opacity: .8; }
+
+        .perf { display: flex; align-items: center; height: 16px; overflow: visible; }
+        .notch { width: 16px; height: 16px; border-radius: 50%; background: #f5f0eb; flex-shrink: 0; z-index: 2; box-shadow: inset 0 1px 3px rgba(0,0,0,.05); }
+        .notch-l { margin-left: -8px; }
+        .notch-r { margin-right: -8px; }
+        .perf-line { flex: 1; border-top: 2px dashed #e0dbd5; }
+
+        .vote-section { display: flex; gap: 0; }
+        .vote-section button { border: none; cursor: pointer; }
+        .action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 10px 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #8c8279;
+            cursor: pointer;
+            font-family: inherit;
+            background: transparent;
+            transition: all .12s;
+            border-right: 1px solid rgba(0,0,0,.04);
+        }
+        .action-btn:last-child { border-right: none; }
+        .action-btn:hover { background: rgba(0,0,0,.02); color: #1a1715; }
+        .action-btn:active { transform: scale(.94); }
+        .vote-btn.is-voted, .vote-btn:disabled { color: #d97706 !important; background: rgba(245,158,11,.06) !important; cursor: not-allowed; }
+        .fav-btn.active { color: #e11d48 !important; background: rgba(225,29,72,.04) !important; }
+        .vote-count { font-weight: 700; min-width: 18px; text-align: center; }
+        .btn-icon { font-size: 16px; }
         
         /* COMMUNITY SECTION */
         .community-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6; }
@@ -235,6 +408,17 @@
         .star:hover { transform: scale(1.2); }
         .rating-summary { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6b7280; }
         .rating-avg { font-weight: 700; color: #f59e0b; }
+        .deal-perforation { position: relative; display: flex; align-items: center; gap: 10px; margin: 14px -18px 14px; }
+        .deal-perforation::before, .deal-perforation::after { content: ''; width: 24px; height: 24px; border-radius: 999px; background: #d8dee8; box-shadow: inset 0 1px 4px rgba(15,23,42,0.12); }
+        .deal-perforation-line { flex: 1; border-top: 2px dashed #d9dee8; }
+        .deal-benefit { display: flex; align-items: stretch; gap: 14px; margin: 0 -18px; padding: 0 18px 16px; }
+        .deal-benefit-copy { min-width: 112px; display: flex; flex-direction: column; justify-content: center; }
+        .deal-benefit-label { font-size: 11px; font-weight: 800; letter-spacing: 0.9px; text-transform: uppercase; color: #9a8c7d; margin-bottom: 4px; }
+        .deal-benefit-value { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 25px; line-height: 1.02; letter-spacing: -1px; font-weight: 800; color: #0f9f67; }
+        .deal-benefit-value.benefit-text { font-size: 20px; line-height: 1.08; letter-spacing: -0.5px; color: #7c3aed; }
+        .deal-benefit-meta { font-size: 11px; color: #94a3b8; margin-top: 5px; }
+        .deal-benefit .deal-link-btn { min-height: 82px; border-radius: 18px; font-size: 16px; font-weight: 800; box-shadow: 0 10px 22px rgba(16,185,129,0.22); }
+        .deal-benefit .deal-link-btn .btn-icon { font-size: 18px; }
         
         /* COMMENTS */
         .comments-section { margin-top: 12px; }
@@ -332,11 +516,12 @@
         .deal-logo-fallback { font-size: 32px; }
         .deal-brand { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 600; color: #475569; font-size: 13px; letter-spacing: 0.4px; text-transform: uppercase; }
         .deal-title {
-            font-weight: 900;
-            font-size: 22px;
-            color: #0f172a;
-            line-height: 1.15;
-            letter-spacing: -0.35px;
+            font-family: 'Bricolage Grotesque', serif;
+            font-weight: 800;
+            font-size: 21px;
+            color: #1a1715;
+            line-height: 1.16;
+            letter-spacing: -0.55px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -1890,12 +2075,13 @@
             return '';
         }
 
-        function renderDealLogo(deal) {
+        function renderDealLogo(deal, palette) {
             const brand = inferPreferredBrandForApp(deal) || deal.brand || '';
             const fallback = getBrandInitialsForApp(brand) || inferLogoForApp(deal, brand) || deal.logo || '🎯';
             const logoUrl = deal.logoUrl || getDealLogoUrlForApp(deal, brand);
             const img = logoUrl ? `<img class="deal-logo-img" src="${logoUrl}" alt="" loading="lazy" referrerpolicy="no-referrer" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'">` : '';
-            return `<span class="deal-logo"><span class="deal-logo-fallback">${fallback}</span>${img}</span>`;
+            const style = palette ? ` style="border-color:${palette.mid};background:${palette.light}"` : '';
+            return `<span class="deal-logo"${style}><span class="deal-logo-fallback">${fallback}</span>${img}</span>`;
         }
 
         function normalizeDealForApp(deal) {
@@ -2430,6 +2616,82 @@
         localStorage.setItem('favorites', JSON.stringify(favorites));
     }
 
+    function getDealBenefitDisplay(deal, savingsMap) {
+        const title = cleanUiNoiseText(deal.title || '');
+        const description = cleanUiNoiseText(deal.description || '');
+        const combined = (title + ' ' + description).trim();
+        const moneyMatch = combined.match(/(\d+(?:[.,]\d+)?)\s*€/);
+        if (moneyMatch) {
+            return {
+                label: 'Du sparst',
+                value: '€' + moneyMatch[1].replace('.', ','),
+                valueClass: 'money'
+            };
+        }
+
+        const lower = combined.toLowerCase();
+        const percentMatch = lower.match(/(\d{1,2})\s*%/);
+        const euroEstimate = savingsMap[deal.category] || 0;
+        const isFreeDeal = /(gratis|kostenlos|freier eintritt|freebie)/i.test(combined) || deal.type === 'gratis';
+
+        if (isFreeDeal && euroEstimate > 0) {
+            return {
+                label: 'Du sparst',
+                value: '€' + euroEstimate.toFixed(2).replace('.', ','),
+                valueClass: 'money'
+            };
+        }
+
+        if (percentMatch) {
+            return {
+                label: 'Dein Vorteil',
+                value: 'Bis zu ' + percentMatch[1] + '%',
+                valueClass: 'benefit-text'
+            };
+        }
+
+        if (deal.type === 'bogo' || /(1\+1|2 für 1|3\+3)/i.test(combined)) {
+            return {
+                label: 'Dein Vorteil',
+                value: '1+1 Deal',
+                valueClass: 'benefit-text'
+            };
+        }
+
+        if (deal.type === 'testabo') {
+            return {
+                label: 'Dein Vorteil',
+                value: 'Gratis testen',
+                valueClass: 'benefit-text'
+            };
+        }
+
+        return {
+            label: 'Dein Vorteil',
+            value: deal.type === 'rabatt' ? 'Rabatt sichern' : 'Deal sichern',
+            valueClass: 'benefit-text'
+        };
+    }
+
+    function getDealCardPalette(type) {
+        const palettes = {
+            gratis: { accent: '#059669', light: '#ecfdf5', mid: '#a7f3d0', label: 'GRATIS' },
+            bogo: { accent: '#7c3aed', light: '#f5f3ff', mid: '#c4b5fd', label: '1+1' },
+            rabatt: { accent: '#ea580c', light: '#fff7ed', mid: '#fed7aa', label: 'RABATT' },
+            testabo: { accent: '#4f46e5', light: '#eef2ff', mid: '#c7d2fe', label: 'TESTABO' },
+            gewinnspiel: { accent: '#db2777', light: '#fdf2f8', mid: '#fbcfe8', label: 'GEWINN' }
+        };
+        return palettes[type] || palettes.gratis;
+    }
+
+    function toggleDealDesc(id) {
+        const text = document.getElementById('deal-desc-text-' + id);
+        const icon = document.getElementById('deal-desc-chevron-' + id);
+        if (!text || !icon) return;
+        text.classList.toggle('open');
+        icon.classList.toggle('open');
+    }
+
     function renderDeals() {
         if (currentView === 'favorites') {
             const favoriteIds = new Set(sanitizeFavoriteIds(favorites));
@@ -2467,19 +2729,22 @@
             const _loc = getDisplayLocation(d);
             const _expires = d.expires || '';
             const _brand = getDisplayBrand(d);
-                        const _cleanTitle = cleanUiNoiseText(d.title || 'Deal');
-                            const _titleParts = _cleanTitle.match(/^([^,]+),\s*(.+)$/);
-                            const _formattedTitle = _titleParts ? _titleParts[1] + '<span class="deal-title-sub">' + _titleParts[2] + '</span>' : _cleanTitle;
-                        const _cleanDesc = cleanUiNoiseText(d.description || '');
+            const _cleanTitle = cleanUiNoiseText(d.title || 'Deal');
+            const _cleanDesc = cleanUiNoiseText(d.description || '');
             // Format date/time from expires field
             const _hasDate = _expires && !/^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend)/i.test(_expires);
             const _dateDisplay = _hasExpiry ? _expiry.infoLabel : (_expiry.infoLabel || (_hasDate ? _expires : ''));
             const _hasTargetUrl = !!(d.url && String(d.url).trim());
             const _defaultBtnLabel = d.category === 'gottesdienste' ? 'Zeiten ansehen' : d.category === 'events' ? 'Event ansehen' : d.category === 'kirche' ? 'Zur Kirche' : 'Zum Deal';
             const _dealBtn = '<button class="action-btn deal-link-btn' + (_hasTargetUrl ? '' : ' disabled') + '" ' + (_hasTargetUrl ? '' : 'disabled ') + 'onclick="openDealUrl(\'' + d.id + '\', event)">' + '<span class="btn-icon">\uD83D\uDD17</span>' + (_hasTargetUrl ? _defaultBtnLabel : 'Link folgt') + '</button>';
-            const _typeBadgeClass = d.type === 'gratis' ? 'badge-gratis' : d.type === 'freebie' ? 'badge-freebie' : d.type === 'testabo' ? 'badge-new' : 'badge-rabatt';
-            const _typeBadgeText = d.type === 'gratis' ? '\uD83C\uDF81 GRATIS' : d.type === 'freebie' ? '\u2728 Freebie' : d.type === 'testabo' ? '\uD83C\uDD93 Testabo' : d.type === 'gewinnspiel' ? '\uD83C\uDF89 Gewinnspiel' : d.type === 'bogo' ? '\uD83D\uDD01 1+1' : '\uD83D\uDCB0 Rabatt';
-            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + _expClass + (_isExpiredVisible ? ' expired-visible' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')">' + renderDealLogo(d) + '<div><div class="deal-brand">' + _brand + '</div><div class="deal-title">' + _formattedTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + _loc + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_hasExpiry && _expiry.showUrgency && !_isExpiredVisible ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div><div class="card-countdown ' + _expiry.countdownClass + '"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">' + _expiry.countdownText + '</span></div>' : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + '<div class="deal-meta"><span class="badge ' + _typeBadgeClass + '">' + _typeBadgeText + '</span>' + (_isExpiredVisible ? '<span class="badge badge-expiry urgent">\u26A0\uFE0F Bereits abgelaufen</span>' : '') + (_isExp ? '<span class="badge badge-expiry ' + _expiry.badgeClass + '">' + _expiry.badgeText + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isNew ? '<span class="badge new">\u2728 Neu</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row">' + _dealBtn + '</div><div class="vote-section"><button class="action-btn vote-btn ' + (votedDeals.includes(d.id) ? 'is-voted' : '') + '" ' + (votedDeals.includes(d.id) ? 'disabled ' : '') + 'onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
+            const _topBadges = typeBadge + newBadge;
+            const _metaBadges = '<div class="deal-meta">' +
+                (_isExpiredVisible ? '<span class="badge badge-expiry urgent">\u26A0\uFE0F Bereits abgelaufen</span>' : '') +
+                (_isExp ? '<span class="badge badge-expiry ' + _expiry.badgeClass + '">' + _expiry.badgeText + '</span>' : '') +
+                (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') +
+                (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') +
+                '</div>';
+            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + _expClass + (_isExpiredVisible ? ' expired-visible' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + _topBadges + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')">' + renderDealLogo(d) + '<div><div class="deal-brand">' + _brand + '</div><div class="deal-title">' + _cleanTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + _loc + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_hasExpiry && _expiry.showUrgency && !_isExpiredVisible ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div><div class="card-countdown ' + _expiry.countdownClass + '"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">' + _expiry.countdownText + '</span></div>' : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + _metaBadges + '<div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row">' + _dealBtn + '</div><div class="vote-section"><button class="action-btn vote-btn ' + (votedDeals.includes(d.id) ? 'is-voted' : '') + '" ' + (votedDeals.includes(d.id) ? 'disabled ' : '') + 'onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
         }).join('');
 
         checkDeepLink();
