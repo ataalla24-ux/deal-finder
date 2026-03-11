@@ -1442,29 +1442,51 @@
             const sanitized = sanitizeExpiryTextForApp(raw);
             if (!sanitized) return null;
             const text = sanitized.toLowerCase();
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const buildEndOfDayMs = (year, month, day) => Date.parse(`${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T23:59:59`);
 
-            const direct = Date.parse(sanitized);
-            if (!Number.isNaN(direct)) return direct;
+            let m = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})t(\d{1,2}):(\d{2})(?::(\d{2}))?/i);
+            if (m) {
+                return Date.parse(`${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}T${String(m[4]).padStart(2, '0')}:${m[5]}:${m[6] || '00'}`);
+            }
 
-            let m = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
-            if (m) return Date.parse(`${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}T23:59:59`);
+            m = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (m) return buildEndOfDayMs(m[1], m[2], m[3]);
 
             m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
             if (m) {
                 const y = m[6].length === 2 ? `20${m[6]}` : m[6];
-                return Date.parse(`${y}-${String(m[5]).padStart(2, '0')}-${String(m[4]).padStart(2, '0')}T23:59:59`);
+                return buildEndOfDayMs(y, m[5], m[4]);
+            }
+
+            m = text.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s*[-–]\s*(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+            if (m) {
+                const y = m[6].length === 2 ? `20${m[6]}` : m[6];
+                return buildEndOfDayMs(y, m[5], m[4]);
             }
 
             m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
             if (m) {
                 const y = m[3].length === 2 ? `20${m[3]}` : m[3];
-                return Date.parse(`${y}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}T23:59:59`);
+                return buildEndOfDayMs(y, m[2], m[1]);
+            }
+
+            m = text.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+            if (m) {
+                const y = m[3].length === 2 ? `20${m[3]}` : m[3];
+                return buildEndOfDayMs(y, m[2], m[1]);
             }
 
             m = text.match(/(\d{1,2})\.(\d{1,2})\./);
             if (m) {
-                const y = new Date().getFullYear();
-                return Date.parse(`${y}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}T23:59:59`);
+                let year = currentYear;
+                let parsed = buildEndOfDayMs(year, m[2], m[1]);
+                if (Number.isFinite(parsed) && parsed < (Date.now() - 7 * 86400000)) {
+                    year += 1;
+                    parsed = buildEndOfDayMs(year, m[2], m[1]);
+                }
+                return parsed;
             }
 
             const monthMap = {
@@ -1474,9 +1496,14 @@
 
             m = text.match(/(\d{1,2})\.\s*(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s*(\d{4})?/i);
             if (m) {
-                const year = m[3] ? Number(m[3]) : new Date().getFullYear();
+                let year = m[3] ? Number(m[3]) : currentYear;
                 const month = monthMap[m[2]];
-                return Date.parse(`${year}-${String(month).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}T23:59:59`);
+                let parsed = buildEndOfDayMs(year, month, m[1]);
+                if (!m[3] && Number.isFinite(parsed) && parsed < (Date.now() - 7 * 86400000)) {
+                    year += 1;
+                    parsed = buildEndOfDayMs(year, month, m[1]);
+                }
+                return parsed;
             }
 
             m = text.match(/(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+(\d{4})/i);
@@ -1484,8 +1511,11 @@
                 const year = Number(m[2]);
                 const month = monthMap[m[1]];
                 const lastDay = new Date(year, month, 0).getDate();
-                return Date.parse(`${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}T23:59:59`);
+                return buildEndOfDayMs(year, month, lastDay);
             }
+
+            const direct = Date.parse(sanitized);
+            if (!Number.isNaN(direct)) return direct;
 
             return null;
         }
