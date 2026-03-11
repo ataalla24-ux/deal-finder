@@ -1494,6 +1494,14 @@
                 juli: 7, august: 8, september: 9, oktober: 10, november: 11, dezember: 12,
             };
 
+            m = text.match(/(anfang|mitte|ende)\s+(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+(\d{4})/i);
+            if (m) {
+                const year = Number(m[3]);
+                const month = monthMap[m[2]];
+                const day = m[1] === 'anfang' ? 5 : m[1] === 'mitte' ? 15 : new Date(year, month, 0).getDate();
+                return buildEndOfDayMs(year, month, day);
+            }
+
             m = text.match(/(\d{1,2})\.\s*(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s*(\d{4})?/i);
             if (m) {
                 let year = m[3] ? Number(m[3]) : currentYear;
@@ -1953,18 +1961,18 @@
             out.brand = cleanUiNoiseText(out.brand || '');
             const rawExpires = sanitizeExpiryTextForApp(out.expires || '');
             const rawExpiresOriginal = sanitizeExpiryTextForApp(out.expiresOriginal || '');
-            const originalLooksSpecific = /(\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?|\d{4}-\d{2}-\d{2}|\bbis\b|\bam\b|\bab\b|\d{1,2}:\d{2})/i.test(rawExpiresOriginal);
+            const originalLooksSpecific = /(\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?|\d{4}-\d{2}-\d{2}|\bbis\b|\bam\b|\bab\b|\bvon\b|\bstartet\b|\bjeden\b|\banfang\b|\bmitte\b|\bende\b|\bmonat\b|\d{1,2}:\d{2}|januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)/i.test(rawExpiresOriginal);
             const originalMs = parseExpiryToMs(rawExpiresOriginal);
             const detectedMs = parseExpiryToMs(rawExpires);
             const shouldPreferOriginalExpiry =
                 !!rawExpiresOriginal &&
                 originalLooksSpecific &&
-                Number.isFinite(originalMs) &&
                 (
                     !rawExpires ||
                     !Number.isFinite(detectedMs) ||
+                    !Number.isFinite(originalMs) ||
                     out.expiresDetectedFromUrl === true ||
-                    Math.abs(originalMs - detectedMs) > 36 * 3600000
+                    (Number.isFinite(originalMs) && Math.abs(originalMs - detectedMs) > 36 * 3600000)
                 );
             out.expires = shouldPreferOriginalExpiry ? rawExpiresOriginal : (rawExpires || rawExpiresOriginal);
             out.expiresOriginal = rawExpiresOriginal || out.expires;
