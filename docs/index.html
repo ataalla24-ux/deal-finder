@@ -1694,19 +1694,29 @@
             );
         }
 
-        function parseExpiryWindowForApp(rawText, precision) {
+        function parseExpiryWindowForApp(rawText, precision, deal) {
             const raw = sanitizeExpiryTextForApp(rawText || '');
             if (!raw) return { kind: 'unknown', raw: '' };
             const text = raw.toLowerCase();
-            const explicitDateMatches = text.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?)\b/g) || [];
+            const contextText = sanitizeExpiryTextForApp([
+                deal?.title || '',
+                deal?.description || '',
+                deal?.category || '',
+                deal?.type || ''
+            ].filter(Boolean).join(' ')).toLowerCase();
+            const signalText = [text, contextText].filter(Boolean).join(' ');
+            const explicitDateMatches = text.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[./]\d{1,2}(?:[./-]\d{2,4})?|\d{1,2}-\d{1,2}-\d{2,4})\b/g) || [];
             const hasSingleExplicitDate = new Set(explicitDateMatches).size === 1;
             const hasDateRange = /\b\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\s*[-–]\s*\d{1,2}[./-]\d{1,2}/.test(text);
             const hasTimeOnlyEndSignal = /\bbis\s+\d{1,2}:\d{2}\b/.test(text);
+            const hasEventishSignal =
+                /\b(eröffnung|eroeffnung|opening|launch|after work|event|brunch|verkostung|tasting|festival)\b/.test(signalText) ||
+                /\(\s*\d+\s*(stunde|stunden|hour|hours|tag|tage)\b/.test(signalText);
             const hasSingleDaySignal =
-                /\b(gültig am|gueltig am|nur heute|heute|morgen)\b/.test(text) ||
-                /\bam\s+\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\b/.test(text) ||
-                /\bam\s+\d{1,2}\.?\s+(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\b/.test(text) ||
-                /\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(text);
+                /\b(gültig am|gueltig am|nur heute|heute|morgen)\b/.test(signalText) ||
+                /\bam\s+\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\b/.test(signalText) ||
+                /\bam\s+\d{1,2}\.?\s+(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\b/.test(signalText) ||
+                /\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(signalText);
             const monthMap = {
                 januar: 1, februar: 2, 'märz': 3, maerz: 3, april: 4, mai: 5, juni: 6,
                 juli: 7, august: 8, september: 9, oktober: 10, november: 11, dezember: 12,
@@ -1741,6 +1751,17 @@
                 };
             }
 
+            m = text.match(/(\d{1,2})\.\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+            if (m) {
+                const year = m[4].length === 2 ? `20${m[4]}` : m[4];
+                return {
+                    kind: 'range',
+                    raw,
+                    startMs: buildEndOfDayMs(year, m[3], m[1]),
+                    endMs: buildEndOfDayMs(year, m[3], m[2]),
+                };
+            }
+
             m = text.match(/(anfang|mitte|ende)\s+(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+(\d{4})/i);
             if (m) {
                 const year = Number(m[3]);
@@ -1767,15 +1788,16 @@
                 };
             }
 
-            const hasStrongEndSignal = /\b(gültig bis|gueltig bis|läuft ab|laeuft ab|endet|endet am|letzter tag|deadline|frist|einlösbar bis|einloesbar bis|aktion bis)\b/.test(text);
+            const hasStrongEndSignal = /\b(gültig bis|gueltig bis|läuft ab|laeuft ab|endet|endet am|letzter tag|deadline|frist|einlösbar bis|einloesbar bis|aktion bis|nur bis|bis)\b/.test(signalText);
             const hasEndSignal = hasStrongEndSignal || (/\bbis\b/.test(text) && (!hasSingleExplicitDate || hasDateRange || !hasTimeOnlyEndSignal));
-            const hasRealStartSignal = /\b(gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am)\b/.test(text);
-            const hasTimeOnlyStartSignal = /\bab\s+\d{1,2}:\d{2}\b/.test(text);
+            const hasRealStartSignal = /\b(gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am)\b/.test(signalText);
+            const hasTimeOnlyStartSignal = /\bab\s+\d{1,2}:\d{2}\b/.test(signalText);
             const hasStartSignal = !hasEndSignal && (hasRealStartSignal || hasTimeOnlyStartSignal);
+            const hasSingleDateEventSignal = hasSingleExplicitDate && hasEventishSignal && !hasStrongEndSignal && !hasRealStartSignal;
 
             m = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
             if (m) {
-                const resolvedKind = hasStartSignal ? 'start' : (hasEndSignal ? 'end' : (hasSingleDaySignal || hasTimeOnlyEndSignal ? 'single' : 'end'));
+                const resolvedKind = hasStartSignal ? 'start' : (hasEndSignal ? 'end' : (hasSingleDaySignal || hasTimeOnlyEndSignal || hasSingleDateEventSignal ? 'single' : 'end'));
                 return {
                     kind: resolvedKind,
                     raw,
@@ -1787,7 +1809,7 @@
             m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
             if (m) {
                 const year = m[3].length === 2 ? `20${m[3]}` : m[3];
-                const resolvedKind = hasStartSignal ? 'start' : (hasEndSignal ? 'end' : (hasSingleDaySignal || hasTimeOnlyEndSignal ? 'single' : 'end'));
+                const resolvedKind = hasStartSignal ? 'start' : (hasEndSignal ? 'end' : (hasSingleDaySignal || hasTimeOnlyEndSignal || hasSingleDateEventSignal ? 'single' : 'end'));
                 return {
                     kind: resolvedKind,
                     raw,
@@ -1799,7 +1821,7 @@
             m = text.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
             if (m) {
                 const year = m[3].length === 2 ? `20${m[3]}` : m[3];
-                const resolvedKind = hasStartSignal ? 'start' : (hasEndSignal ? 'end' : (hasSingleDaySignal || hasTimeOnlyEndSignal ? 'single' : 'end'));
+                const resolvedKind = hasStartSignal ? 'start' : (hasEndSignal ? 'end' : (hasSingleDaySignal || hasTimeOnlyEndSignal || hasSingleDateEventSignal ? 'single' : 'end'));
                 return {
                     kind: resolvedKind,
                     raw,
@@ -1827,7 +1849,7 @@
             const rawExpiry = deal && deal.expires ? sanitizeExpiryTextForApp(deal.expires) : '';
             const rawDisplay = sanitizeExpiryTextForApp((deal && (deal.expiresOriginal || deal.expires)) || '');
             const precision = (deal && deal.expiresPrecision) || '';
-            const parsedWindow = parseStructuredExpiryForApp(deal) || parseExpiryWindowForApp(rawDisplay || rawExpiry, precision);
+            const parsedWindow = parseStructuredExpiryForApp(deal) || parseExpiryWindowForApp(rawDisplay || rawExpiry, precision, deal);
             if (parsedWindow.kind === 'recurring' || parsedWindow.kind === 'approx-range') {
                 return {
                     hasExpiry: false,
@@ -2070,7 +2092,7 @@
             const hasExplicitEndSignal = /\b(bis|gültig bis|gueltig bis|läuft ab|laeuft ab|endet|endet am|letzter tag|nur noch|deadline|frist|einlösbar bis|einloesbar bis|aktion bis|noch \d+ tage gültig|noch \d+h gültig)\b/.test(signalText);
             const hasExplicitStartSignal = /\b(ab|gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am|launch am|opening)\b/.test(signalText);
             const isSingleDayCategory = /(^| )(events?|gottesdienste|kirche)( |$)/.test(signalText);
-            const explicitDateMatches = signalText.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?)\b/g) || [];
+            const explicitDateMatches = signalText.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[./]\d{1,2}(?:[./-]\d{2,4})?|\d{1,2}-\d{1,2}-\d{2,4})\b/g) || [];
             const hasSingleExplicitDate = new Set(explicitDateMatches).size === 1;
             const hasSingleDayTimeWindow = hasSingleExplicitDate && /\bbis\s+\d{1,2}:\d{2}\b/.test(signalText);
             const looksLikeSingleDay = precision === 'day' && ((!hasExplicitEndSignal || hasSingleDayTimeWindow) && (isSingleDayCategory || /\b(gültig am|gueltig am|am \d{1,2}[./-]\d{1,2}|am \d{1,2}\.\s*[a-zäöü]+|heute|morgen|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(signalText) || hasSingleDayTimeWindow));

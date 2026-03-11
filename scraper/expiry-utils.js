@@ -319,18 +319,23 @@ export function parseExpiryShape(value, options = {}) {
   const raw = cleanText(value);
   if (!raw) return { kind: 'unknown', raw: '' };
 
+  const contextText = cleanText(options.contextText || '');
   const text = raw.toLowerCase();
+  const signalText = [raw, contextText].filter(Boolean).join(' ').toLowerCase();
   const monthPattern = '(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)';
-  const explicitDateMatches = text.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?)\b/g) || [];
+  const explicitDateMatches = text.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[./]\d{1,2}(?:[./-]\d{2,4})?|\d{1,2}-\d{1,2}-\d{2,4})\b/g) || [];
   const uniqueExplicitDates = new Set(explicitDateMatches);
   const hasSingleExplicitDate = uniqueExplicitDates.size === 1;
   const hasDateRange = /\b\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\s*[-–]\s*\d{1,2}[./-]\d{1,2}/.test(text);
   const hasTimeOnlyEndSignal = /\bbis\s+\d{1,2}:\d{2}\b/.test(text);
+  const hasEventishSignal =
+    /\b(eröffnung|eroeffnung|opening|launch|after work|event|brunch|verkostung|tasting|festival)\b/.test(signalText) ||
+    /\(\s*\d+\s*(stunde|stunden|hour|hours|tag|tage)\b/.test(signalText);
   const hasSingleDaySignal =
-    /\b(gültig am|gueltig am|nur heute|heute|morgen)\b/.test(text) ||
-    /\bam\s+\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\b/.test(text) ||
-    /\bam\s+\d{1,2}\.?\s+(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\b/.test(text) ||
-    /\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(text);
+    /\b(gültig am|gueltig am|nur heute|heute|morgen)\b/.test(signalText) ||
+    /\bam\s+\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\b/.test(signalText) ||
+    /\bam\s+\d{1,2}\.?\s+(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\b/.test(signalText) ||
+    /\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(signalText);
   const monthMap = {
     januar: 1, februar: 2, 'märz': 3, maerz: 3, april: 4, mai: 5, juni: 6,
     juli: 7, august: 8, september: 9, oktober: 10, november: 11, dezember: 12,
@@ -374,6 +379,18 @@ export function parseExpiryShape(value, options = {}) {
     };
   }
 
+  m = text.match(/(\d{1,2})\.\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (m) {
+    const year = m[4].length === 2 ? `20${m[4]}` : m[4];
+    return {
+      kind: 'range',
+      raw,
+      validFrom: buildIso(year, m[3], m[1]),
+      validUntil: buildIso(year, m[3], m[2]),
+      confidence: 'high',
+    };
+  }
+
   m = text.match(/(anfang|mitte|ende)\s+(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+(\d{4})/i);
   if (m) {
     const year = Number(m[3]);
@@ -407,12 +424,13 @@ export function parseExpiryShape(value, options = {}) {
     };
   }
 
-  const hasStrongEndSignal = /\b(gültig bis|gueltig bis|endet|endet am|letzter tag|deadline|frist|einlösbar bis|einloesbar bis|aktion bis|läuft bis|laeuft bis|nur bis|bis)\b/.test(text);
+  const hasStrongEndSignal = /\b(gültig bis|gueltig bis|endet|endet am|letzter tag|deadline|frist|einlösbar bis|einloesbar bis|aktion bis|läuft bis|laeuft bis|nur bis|bis)\b/.test(signalText);
   const hasEndSignal = hasStrongEndSignal || (/\bbis\b/.test(text) && (!hasSingleExplicitDate || hasDateRange || !hasTimeOnlyEndSignal));
-  const hasRealStartSignal = /\b(gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am)\b/.test(text);
-  const hasTimeOnlyStartSignal = /\bab\s+\d{1,2}:\d{2}\b/.test(text);
+  const hasRealStartSignal = /\b(gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am)\b/.test(signalText);
+  const hasTimeOnlyStartSignal = /\bab\s+\d{1,2}:\d{2}\b/.test(signalText);
   const hasStartSignal = !hasEndSignal && (hasRealStartSignal || hasTimeOnlyStartSignal);
   const hasSingleDayTimeWindow = hasSingleExplicitDate && hasTimeOnlyEndSignal;
+  const hasSingleDateEventSignal = hasSingleExplicitDate && hasEventishSignal && !hasStrongEndSignal && !hasRealStartSignal;
 
   const directTokenMatch =
     raw.match(/\b\d{4}-\d{1,2}-\d{1,2}\b/) ||
@@ -438,6 +456,9 @@ export function parseExpiryShape(value, options = {}) {
   if (hasSingleDaySignal) {
     return { kind: 'single', raw, validOn: parsedIso, confidence: 'medium' };
   }
+  if (hasSingleDateEventSignal) {
+    return { kind: 'single', raw, validOn: parsedIso, confidence: 'medium' };
+  }
   if (hasSingleExplicitDate) {
     return { kind: 'end', raw, validUntil: parsedIso, confidence: 'medium' };
   }
@@ -446,7 +467,14 @@ export function parseExpiryShape(value, options = {}) {
 
 function applyStructuredExpiryFields(deal, value, options = {}) {
   clearStructuredExpiryFields(deal);
-  const shape = parseExpiryShape(value, options);
+  const contextText = [
+    options.contextText,
+    deal?.title,
+    deal?.description,
+    deal?.category,
+    deal?.type,
+  ].filter(Boolean).join(' ');
+  const shape = parseExpiryShape(value, { ...options, contextText });
   deal.expiryKind = shape.kind || 'unknown';
   deal.expiryDisplayText = shape.raw || cleanText(value);
   if (shape.validOn) deal.validOn = shape.validOn;
