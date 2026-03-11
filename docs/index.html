@@ -3092,18 +3092,29 @@
         }
         function toggleFav(id, e) { e.stopPropagation(); if (typeof id !== 'string' || !id.trim()) { showToast('⚠️ Favorit konnte nicht gespeichert werden'); return; } if (favorites.includes(id)) { favorites = favorites.filter(f => f !== id); showToast('💔 Entfernt'); } else { favorites.push(id); showToast('❤️ Favorit!'); addXP(2, null); } saveFavorites(); updateFavBadge(); renderDeals(); }
         function updateFavBadge() { const b = document.getElementById('favBadge'); if (favorites.length > 0) { b.style.display = 'block'; b.textContent = favorites.length; } else { b.style.display = 'none'; } }
+        function getStickyDealsOffset() {
+            const filters = document.getElementById('filters');
+            if (!filters || filters.style.display === 'none') return 12;
+            const rect = filters.getBoundingClientRect();
+            const styles = window.getComputedStyle(filters);
+            const stickyTop = parseFloat(styles.top) || 0;
+            const extraGap = 12;
+            return Math.max(12, stickyTop + rect.height + extraGap);
+        }
+        function scrollElementFullyIntoView(el) {
+            if (!el) return false;
+            const rect = el.getBoundingClientRect();
+            const absoluteTop = window.scrollY + rect.top;
+            const targetTop = Math.max(0, absoluteTop - getStickyDealsOffset());
+            window.scrollTo({ top: targetTop, behavior: 'smooth' });
+            return true;
+        }
         function scrollToTopContent() {
             const scrollTarget = () => {
                 const firstDeal = document.querySelector('#deals .deal-card');
-                if (firstDeal) {
-                    firstDeal.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    return;
-                }
+                if (scrollElementFullyIntoView(firstDeal)) return;
                 const dealsContainer = document.getElementById('deals');
-                if (dealsContainer) {
-                    dealsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    return;
-                }
+                if (scrollElementFullyIntoView(dealsContainer)) return;
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
             requestAnimationFrame(scrollTarget);

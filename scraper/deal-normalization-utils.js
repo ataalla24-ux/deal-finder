@@ -334,7 +334,7 @@ function buildFallbackDescription(deal = {}) {
 function sanitizeExpiryText(value) {
   const raw = cleanUiNoiseText(value || '');
   if (!raw) return '';
-  if (/^\d{4}-\d{2}-\d{2}t/i.test(raw)) return raw;
+  if (/^\d{4}-\d{2}-\d{2}t/i.test(raw) || /^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw;
 
   let text = raw
     .replace(/\bunknown\b/gi, ' ')
@@ -380,8 +380,12 @@ function isExpiredDealRecord(deal = {}, now = new Date()) {
 
 function isFalsePositiveFreeDeal(deal = {}) {
   const signal = normalizeAscii([deal.title, deal.description, deal.brand].filter(Boolean).join(' '));
+  const category = cleanUiNoiseText(deal.category || '').toLowerCase();
   if (/eintritt kostenpflichtig/.test(signal)) return true;
   if (/kinder bis 12 gratis/.test(signal)) return true;
+  if (/\b(museum|museen|ausstellung|vernissage|galerie|fuehrung|fuhrung|tour)\b/.test(signal)) return true;
+  if (/\beintritt\b/.test(signal) && !/\b(gottesdienst|kirche|gemeinde)\b/.test(signal)) return true;
+  if (/(kultur|events?|gratis|wien)/.test(category) && /\b(fuehrung|fuhrung|tour|museum|ausstellung)\b/.test(signal)) return true;
   return false;
 }
 
