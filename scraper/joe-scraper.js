@@ -223,6 +223,89 @@ function buildDeal({
   };
 }
 
+function cleanJoeAuthText(value) {
+  return cleanText(value)
+    .replace(/\bnoch\s+\d+\s+(tage|tag|stunden|stunde|std\.?|h)\b/gi, '')
+    .replace(/\b\d+\s+ös\s+einlösen\b/gi, '')
+    .replace(/\beinlösen\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function normalizeJoeAuthTitle(text, brand) {
+  const cleaned = cleanJoeAuthText(text)
+    .replace(/^BIPA\s+/i, '')
+    .replace(/^OMV\s+/i, '')
+    .replace(/^-\s*/, '')
+    .replace(/\s*\.\.\.\s*/g, ' ')
+    .trim();
+
+  if (!cleaned) return '';
+
+  if (/frühlings-bonusbox/i.test(cleaned)) {
+    return 'Frühlings-Bonusbox für 250 Ös';
+  }
+  if (/deine bipa marken/i.test(cleaned)) {
+    return 'Deine BIPA Marken im März und April für 50 Ös';
+  }
+  if (/viva kaffeespezialität/i.test(cleaned)) {
+    return '50% auf eine VIVA Kaffeespezialität für 75 Ös';
+  }
+  if (/viva sandwich/i.test(cleaned)) {
+    return '50% auf ein VIVA Sandwich für 100 Ös';
+  }
+  if (/top wash/i.test(cleaned)) {
+    return '30% auf die beste OMV Top Wash Autowäsche für 150 Ös';
+  }
+  if (/scheibenklar/i.test(cleaned)) {
+    return '-15% beim Kauf von zwei OMV Scheibenklar mit jö Karte';
+  }
+  if (/leifheit superduster floor/i.test(cleaned)) {
+    return 'LEIFHEIT Superduster Floor mit jö Karte';
+  }
+  if (/leifheit bodenwischer profi xl/i.test(cleaned)) {
+    return 'LEIFHEIT Bodenwischer Profi XL mit jö Karte';
+  }
+  if (/leifheit superduster xl/i.test(cleaned)) {
+    return 'LEIFHEIT Superduster XL mit jö Karte';
+  }
+  if (/leifheit set combi clean/i.test(cleaned)) {
+    return 'LEIFHEIT Set Combi Clean mit Fensterwischer mit jö Karte';
+  }
+  if (/leifheit superduster statt/i.test(cleaned)) {
+    return 'LEIFHEIT Superduster mit jö Karte';
+  }
+
+  if (brand === 'BIPA' && !/^BIPA\b/i.test(cleaned) && !/deine bipa marken/i.test(cleaned)) {
+    return `BIPA ${cleaned}`.trim();
+  }
+  if ((brand === 'OMV' || brand === 'OMV VIVA') && !/^OMV\b/i.test(cleaned) && !/^50% auf/i.test(cleaned) && !/^-15%/.test(cleaned) && !/^30%/.test(cleaned)) {
+    return `OMV ${cleaned}`.trim();
+  }
+  return cleaned;
+}
+
+function extractJoeAuthExpiry(text) {
+  const raw = cleanText(text);
+  if (!raw) return '';
+  let match = raw.match(/\bnoch\s+(\d+)\s+tage\b/i);
+  if (match) return `Noch ${match[1]} Tage`;
+  match = raw.match(/\bnoch\s+(\d+)\s+(stunden|stunde)\b/i);
+  if (match) return `Noch ${match[1]} Std.`;
+  match = raw.match(/\bnoch\s+(\d+)\s*h\b/i);
+  if (match) return `Noch ${match[1]} Std.`;
+  return '';
+}
+
+function looksLikeRelevantJoeAuthOffer(text) {
+  const value = cleanJoeAuthText(text).toLowerCase();
+  if (!value) return false;
+  if (!/(omv|bipa)/.test(value)) return false;
+  if (!/(gratis|bonusbox|kaffee|sandwich|top wash|scheibenklar|marken|leifheit|rabatt|%|ös|euro)/.test(value)) return false;
+  if (/übersicht deiner persönlichen|vorteile funktionen|radio jö|partner radio|bonuswelt|vorteilsbons sichern/.test(value)) return false;
+  return true;
+}
+
 async function openPage(browser, url) {
   const page = await browser.newPage({ userAgent: USER_AGENT, locale: 'de-AT' });
   await page.goto(url, {
@@ -660,14 +743,13 @@ async function extractLoggedInJoeBenefitsPage(page) {
   }
 
   const deals = [];
-  const seenTexts = new Set();
+  const seenTitles = new Set();
   for (const item of pageData.candidates) {
     const text = cleanText(item.text);
-    if (!text || seenTexts.has(text)) continue;
-    seenTexts.add(text);
+    if (!text) continue;
 
     const lower = text.toLowerCase();
-    if (!/(rabatt|gratis|bonus|einlösen|aktivieren|ös|€|euro|%|prozent)/i.test(lower)) continue;
+    if (!looksLikeRelevantJoeAuthOffer(text)) continue;
 
     let title = '';
     let brand = 'jö Bonus Club';
@@ -680,24 +762,29 @@ async function extractLoggedInJoeBenefitsPage(page) {
     } else if (/bipa/i.test(lower)) {
       brand = 'BIPA';
       category = 'beauty';
+    } else {
+      continue;
     }
 
-    const lines = text.split(/\n+/).map((line) => cleanText(line)).filter(Boolean);
-    title = lines.find((line) => /gratis|rabatt|bonus|box|kaffee|sandwich|top ?wash|maxxmotion|frühlingsbox/i.test(line)) || lines[0] || '';
+    const expiry = extractJoeAuthExpiry(text);
+    title = normalizeJoeAuthTitle(text, brand);
     if (!title) continue;
+    const dedupeKey = `${brand}|${title}`.toLowerCase();
+    if (seenTitles.has(dedupeKey)) continue;
+    seenTitles.add(dedupeKey);
 
     const url = item.href || pageData.url || JOE_PRIVATE_BENEFITS_URL;
     const deal = buildDeal({
       prefix: 'joe-auth',
       title,
       description: makeDescription([
-        text,
+        cleanJoeAuthText(text),
         'Direkt aus dem eingeloggten jö Vorteile-Bereich erkannt.',
       ]),
       brand,
       source: 'jö Bonus Club (auth)',
       url,
-      expires: '',
+      expires: expiry,
       distance: brand === 'BIPA' ? 'BIPA Filialen Wien' : brand.startsWith('OMV') ? 'OMV Stationen Wien' : 'Wien',
       category,
       type,
