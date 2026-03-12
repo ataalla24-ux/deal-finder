@@ -14,8 +14,10 @@ const __dirname = path.dirname(__filename);
 const docsDir = path.join(__dirname, '..', 'docs');
 
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const NOW = new Date();
 const TWO_WEEKS_AGO = new Date(NOW.getTime() - TWO_WEEKS_MS);
+const SEVEN_DAYS_AGO = new Date(NOW.getTime() - SEVEN_DAYS_MS);
 const MAX_URL_EXPIRY_CHECKS = 40;
 const TRUSTED_IG_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp']);
 
@@ -26,8 +28,25 @@ const TRUSTED_IG_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptT
 function isExpiredOrOld(deal) {
   const sourceText = String(deal.source || '').toLowerCase();
   const isInstagramDeal = sourceText.includes('instagram');
+  const isStrictRecentSocialDeal =
+    sourceText.includes('firecrawl food #3') ||
+    sourceText.includes('firecrawl consumables');
   if (isInstagramDeal && !TRUSTED_IG_PUBDATE_SOURCES.has(String(deal.pubDateSource || ''))) {
     return { expired: true, reason: 'Instagram-Deal ohne vertrauenswürdige pubDateSource' };
+  }
+
+  if (isStrictRecentSocialDeal) {
+    const url = String(deal.url || '').toLowerCase();
+    if (!(url.includes('instagram.com') || url.includes('tiktok.com'))) {
+      return { expired: true, reason: 'Key-2/Key-3 Deal ohne Instagram- oder TikTok-URL' };
+    }
+    if (!deal.pubDate) {
+      return { expired: true, reason: 'Key-2/Key-3 Deal ohne pubDate' };
+    }
+    const pub = new Date(deal.pubDate);
+    if (isNaN(pub) || pub < SEVEN_DAYS_AGO) {
+      return { expired: true, reason: `pubDate "${deal.pubDate}" ist älter als 7 Tage oder ungültig` };
+    }
   }
 
   const dateFields = [
@@ -46,7 +65,7 @@ function isExpiredOrOld(deal) {
 
   // pubDate-Check: Auch wenn Scraper Date.now() setzen,
   // filtere alles raus was definitiv älter als 2 Wochen ist
-  if (deal.pubDate) {
+  if (deal.pubDate && !isStrictRecentSocialDeal) {
     const pub = new Date(deal.pubDate);
     if (!isNaN(pub) && pub < TWO_WEEKS_AGO) {
       return { expired: true, reason: `pubDate "${deal.pubDate}" → ${pub.toLocaleDateString('de-AT')} ist älter als 2 Wochen` };

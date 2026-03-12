@@ -29,6 +29,14 @@ function isInstagramUrl(url) {
   return (url || '').includes('instagram.com');
 }
 
+function isTikTokUrl(url) {
+  return (url || '').includes('tiktok.com');
+}
+
+function isAllowedSocialUrl(url) {
+  return isInstagramUrl(url) || isTikTokUrl(url);
+}
+
 // ============================================
 // SEITEN - Fokus auf Food/Coffee/Consumables
 // ============================================
@@ -50,22 +58,13 @@ const SCRAPE_URLS = [
   'https://www.instagram.com/explore/tags/wienaktion/',
   'https://www.instagram.com/explore/tags/wiengratis/',
   'https://www.instagram.com/explore/tags/wienkostenlos/',
-  
-  // Twitter/X - Wiener Deals
-  'https://x.com/gratiswien',
-  'https://x.com/wiendeals',
-  'https://x.com/wiengratis',
-  
-  // Gastro
-  'https://www.falstaff.at/',
-  'https://www.diegourmet.at/',
-  'https://www.restaurant-radar.at/',
-  'https://www.meinbezirk.at/',
-  
-  // Deals
-  'https://www.gutscheine.at/',
-  'https://www.preisjaeger.at/',
-  'https://www.gratisproben.net/oesterreich/',
+  // TikTok - Coffee & Food Wien
+  'https://www.tiktok.com/tag/gratiswien',
+  'https://www.tiktok.com/tag/wienfood',
+  'https://www.tiktok.com/tag/kaffeewien',
+  'https://www.tiktok.com/tag/foodiewien',
+  'https://www.tiktok.com/tag/eröffnungwien',
+  'https://www.tiktok.com/tag/neueröffnungwien',
 ];
 
 // ============================================
@@ -87,6 +86,8 @@ const consumablesSchema = z.object({
     validity_date_citation: z.string().optional(),
     validity_time: z.string().describe("The time(s) when the deal is valid (e.g. '10:00-14:00' or 'ab 11:00')"),
     validity_time_citation: z.string().optional(),
+    post_date: z.string().describe("The publication date of the Instagram or TikTok post"),
+    post_date_citation: z.string().optional(),
     deal_description: z.string().describe("A short, clear description of the deal in 1-2 sentences in German"),
     deal_description_citation: z.string().optional(),
     source_url: z.string().describe("The direct URL to the specific Instagram post or blog article"),
@@ -99,14 +100,14 @@ const consumablesSchema = z.object({
 // ============================================
 
 const TODAY = new Date().toLocaleDateString('de-AT');
-const CUTOFF = new Date(Date.now() - 14*24*60*60*1000).toLocaleDateString('de-AT');
+const CUTOFF = new Date(Date.now() - 7*24*60*60*1000).toLocaleDateString('de-AT');
 
 const PROMPT = `Heute ist ${TODAY}.
-WICHTIG: Ignoriere ALLE Posts und Angebote die älter als 14 Tage sind. Nur Deals die nach dem ${CUTOFF} gepostet wurden.
+WICHTIG: Ignoriere ALLE Posts und Angebote die älter als 7 Tage sind. Nur Deals die nach dem ${CUTOFF} gepostet wurden.
 
 Extrahiere mindestens 50-100 aktuelle und zukünftige kostenlose Deals und Freebies in Wien für die nächsten 3 Monate.
 
-Suche primär auf Instagram nach Beiträgen zu Gratis-Aktionen, Neueröffnungen und Werbegeschenken.
+Suche ausschließlich auf Instagram und TikTok nach Beiträgen zu Gratis-Aktionen, Neueröffnungen und Werbegeschenken.
 
 Setze den Fokus stark auf 'Consumables', insbesondere:
 - Kostenlosen Kaffee
@@ -114,7 +115,7 @@ Setze den Fokus stark auf 'Consumables', insbesondere:
 - Gratis-Essen bei Neueröffnungen
 - Gastronomie-Aktionen
 
-Ergänze die Instagram-Funde durch relevante Wiener Lifestyle-Blogs und Event-Seiten.
+Verwende keine Blogs, News-Seiten, Deal-Portale oder sonstige Websites. Quelle dürfen nur Instagram- oder TikTok-Posts sein.
 
 Für JEDEN Deal erfasse ALLE folgenden Informationen so vollständig wie möglich:
 - item_given_away: Was genau wird verschenkt? (z.B. 'Gratis Döner', '1+1 Açaí Bowl')
@@ -124,10 +125,11 @@ Für JEDEN Deal erfasse ALLE folgenden Informationen so vollständig wie möglic
 - location: Kurzname oder Bezirk (z.B. '1010 Wien' oder 'Hernals')
 - validity_date: Genaues Datum (z.B. '15.03.2026')
 - validity_time: Genaue Uhrzeit (z.B. '10:00-14:00')
+- post_date: Veröffentlichungsdatum des Social-Media-Posts
 - deal_description: Kurze Beschreibung auf Deutsch in 1-2 Sätzen
-- source_url: Die direkte URL zum Instagram-Post oder Blog-Beitrag
+- source_url: Die direkte URL zum Instagram- oder TikTok-Post
 
-WICHTIG: Gib bei jedem Feld die Information so genau und vollständig wie möglich an. Wenn keine genaue Adresse verfügbar ist, gib den Bezirk oder die Gegend an.`;
+WICHTIG: Gib bei jedem Feld die Information so genau und vollständig wie möglich an. Wenn keine genaue Adresse verfügbar ist, gib den Bezirk oder die Gegend an. Wenn kein belastbares post_date erkennbar ist, lasse den Deal weg.`;
 
 // ============================================
 // EMOJI-FUNKTION
@@ -205,8 +207,8 @@ function isExpiredDeal(deal) {
 
 function isNotTooOld(dateObj) {
   if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return true;
-  const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
-  return dateObj.getTime() >= twoWeeksAgo;
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  return dateObj.getTime() >= sevenDaysAgo;
 }
 
 // ============================================
@@ -270,11 +272,12 @@ async function main() {
             const isFood = (d.category || '').toLowerCase().includes('food');
             const sourceUrl = d.source_url || '';
             if (!sourceUrl) continue;
-            const validityDate = parseGermanDate(d.validity_date || '');
-            if (!isNotTooOld(validityDate)) continue;
+            if (!isAllowedSocialUrl(sourceUrl)) continue;
+            const postDate = parseGermanDate(d.post_date || '');
+            if (!postDate || !isNotTooOld(postDate)) continue;
             const brand = d.company_name || source;
             const title = d.item_given_away?.substring(0, 80) || 'Deal';
-            const pubDate = validityDate ? validityDate.toISOString() : new Date().toISOString();
+            const pubDate = postDate.toISOString();
             
             allDeals.push({
               id: dealId('cs', brand, title, sourceUrl),
@@ -294,6 +297,8 @@ async function main() {
               votes: 1,
               qualityScore: 60,
               pubDate,
+              postDate: d.post_date || '',
+              sourcePlatform: isTikTokUrl(sourceUrl) ? 'tiktok' : 'instagram',
             });
           }
         } else {

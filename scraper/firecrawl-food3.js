@@ -29,6 +29,14 @@ function isInstagramUrl(url) {
   return (url || '').includes('instagram.com');
 }
 
+function isTikTokUrl(url) {
+  return (url || '').includes('tiktok.com');
+}
+
+function isAllowedSocialUrl(url) {
+  return isInstagramUrl(url) || isTikTokUrl(url);
+}
+
 // ============================================
 // STABILE DEAL-ID (Hash statt Date.now/random)
 // ============================================
@@ -53,6 +61,9 @@ const SCRAPE_URLS = [
   'https://www.instagram.com/explore/tags/gratiswien/',
   'https://www.instagram.com/explore/tags/wienfood/',
   'https://www.instagram.com/explore/tags/kaffeewien/',
+  'https://www.tiktok.com/tag/gratiswien',
+  'https://www.tiktok.com/tag/wienfood',
+  'https://www.tiktok.com/tag/kaffeewien',
 ];
 
 // ============================================
@@ -71,6 +82,8 @@ const foodSchema = z.object({
     location_citation: z.string().optional(),
     platform_source: z.string(),
     platform_source_citation: z.string().optional(),
+    post_date: z.string(),
+    post_date_citation: z.string().optional(),
     start_date: z.string(),
     start_date_citation: z.string().optional(),
     end_date: z.string(),
@@ -85,10 +98,10 @@ const foodSchema = z.object({
 // ============================================
 
 const TODAY = new Date().toLocaleDateString('de-AT');
-const CUTOFF = new Date(Date.now() - 14*24*60*60*1000).toLocaleDateString('de-AT');
+const CUTOFF = new Date(Date.now() - 7*24*60*60*1000).toLocaleDateString('de-AT');
 
 const PROMPT = `Heute ist ${TODAY}.
-WICHTIG: Ignoriere ALLE Posts und Angebote die älter als 14 Tage sind. Nur Deals die nach dem ${CUTOFF} gepostet wurden.
+WICHTIG: Ignoriere ALLE Posts und Angebote die älter als 7 Tage sind. Nur Deals die nach dem ${CUTOFF} gepostet wurden.
 
 Extrahiere aktuelle und zukünftige Angebote für kostenlose oder stark vergünstigte Speisen und Getränke in Wien von Instagram und TikTok. Berücksichtige:
 1. Kostenlose Angebote (Neueröffnungen, Treueaktionen, Story-Deals)
@@ -99,7 +112,11 @@ Schließe Angebote aus, die bereits abgelaufen sind.
 
 Suche systematisch nach verschiedenen Kategorien (z.B. Cafés, Streetfood, Restaurants, Bars).
 
+WICHTIG: Nutze ausschließlich Instagram- und TikTok-Posts als Quelle. Keine Blogs, News-Seiten, Deal-Portale oder sonstige Websites.
+
 WICHTIG: Jede 'source_url' darf nur genau einmal in der Liste vorkommen. Entferne alle Duplikate basierend auf der URL, auch wenn dadurch die Gesamtzahl von 100 Deals nicht erreicht wird.
+
+Erfasse 'post_date' als Veröffentlichungsdatum des Instagram- oder TikTok-Posts. Wenn kein belastbares Veröffentlichungsdatum erkennbar ist, lasse den Deal weg.
 
 Gib alle Ergebnisse in einer einzigen Liste aus.`;
 
@@ -179,8 +196,8 @@ function isExpiredDeal(deal) {
 
 function isNotTooOld(dateObj) {
   if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return true;
-  const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
-  return dateObj.getTime() >= twoWeeksAgo;
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  return dateObj.getTime() >= sevenDaysAgo;
 }
 
 // ============================================
@@ -226,6 +243,7 @@ async function main() {
           
           for (const d of data.food_and_drink_offers) {
             const sourceUrl = d.source_url || '';
+            if (!isAllowedSocialUrl(sourceUrl)) continue;
             
             // Skip duplicates
             if (sourceUrl && seenUrls.has(sourceUrl)) {
@@ -237,11 +255,11 @@ async function main() {
             
             const isGratis = /gratis|kostenlos|free|0€|0 €|umsonst/i.test(d.offer_type || d.description || '');
             const isBogo = /bogo|buy one|get one|2 for/i.test(d.description || '');
-            const inferredDate = parseGermanDate(d.start_date || d.end_date || '');
-            if (!isNotTooOld(inferredDate)) continue;
+            const postDate = parseGermanDate(d.post_date || '');
+            if (!postDate || !isNotTooOld(postDate)) continue;
             const brand = d.platform_source || source;
             const title = d.offer_type?.substring(0, 60) || 'Food Deal';
-            const pubDate = inferredDate ? inferredDate.toISOString() : new Date().toISOString();
+            const pubDate = postDate.toISOString();
             
             allDeals.push({
               id: dealId('food3', brand, title, sourceUrl),
@@ -261,6 +279,8 @@ async function main() {
               votes: 1,
               qualityScore: 65,
               pubDate,
+              postDate: d.post_date || '',
+              sourcePlatform: isTikTokUrl(sourceUrl) ? 'tiktok' : 'instagram',
             });
           }
         } else {
