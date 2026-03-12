@@ -1209,7 +1209,9 @@
             /^slack digest$/i,
             /^restaurant \(wien\)$/i,
             /^gemeinde$/i,
-            /^kirche$/i
+            /^kirche$/i,
+            /^1000things$/i,
+            /^heute$/i
         ];
 
         const GENERIC_APP_LOGOS = new Set(['🎁', '🎯', '🎉', '🔁', '✨', '📸', '🎵']);
@@ -1271,6 +1273,7 @@
             { pattern: /\btoo good to go\b/i, name: 'Too Good To Go', logo: '🥡' },
             { pattern: /\bwiener linien\b/i, name: 'Wiener Linien', logo: '🚇' },
             { pattern: /\bheiling eismacher\b/i, name: 'Heiling EISMACHER', logo: '🍨' },
+            { pattern: /\bnordsee\b/i, name: 'NORDSEE', logo: '🐟' },
             { pattern: /\bwestfield\b/i, name: 'Westfield Club', logo: '🛍️' }
         ];
 
@@ -2434,7 +2437,7 @@
             const preferredBrand = cleanUiNoiseText(brand || inferPreferredBrandForApp(deal) || '');
             const known = findKnownBrandForApp(preferredBrand, deal.title, deal.description, deal.distance, deal.url);
             if (known && known.domain && !isSourceLikeBrandForApp(known.name || '')) {
-                return buildLogoUrlForApp(known.domain);
+                return buildLogoUrlForApp(known.domain, { allowSourceLike: true });
             }
 
             const candidateHosts = [
@@ -2457,7 +2460,7 @@
 
             for (const [key, value] of Object.entries(KNOWN_BRANDS)) {
                 if (isSourceLikeBrandForApp(value.name || key)) continue;
-                if (combined.includes(key) && value.domain) return buildLogoUrlForApp(value.domain);
+                if (combined.includes(key) && value.domain) return buildLogoUrlForApp(value.domain, { allowSourceLike: true });
             }
 
             return '';
@@ -2514,7 +2517,23 @@
         }
         
         // Bekannte Marken für Link-Erkennung
-        const SOURCE_LIKE_HOSTS_FOR_APP = [/(^|\.)instagram\.com$/i,/(^|\.)tiktok\.com$/i,/(^|\.)facebook\.com$/i,/(^|\.)x\.com$/i,/(^|\.)twitter\.com$/i,/(^|\.)slack\.com$/i,/(^|\.)preisjaeger\./i];
+        const SOURCE_LIKE_HOSTS_FOR_APP = [
+            /(^|\.)instagram\.com$/i,
+            /(^|\.)tiktok\.com$/i,
+            /(^|\.)facebook\.com$/i,
+            /(^|\.)x\.com$/i,
+            /(^|\.)twitter\.com$/i,
+            /(^|\.)slack\.com$/i,
+            /(^|\.)preisjaeger\./i,
+            /(^|\.)1000thingsmagazine\.com$/i,
+            /(^|\.)1000things\.at$/i,
+            /(^|\.)heute\.at$/i,
+            /(^|\.)vienna\.at$/i,
+            /(^|\.)falstaff\./i,
+            /(^|\.)events\.at$/i,
+            /(^|\.)viennawurstelstand\.com$/i,
+            /(^|\.)restauranttester\./i,
+        ];
 
         function extractHostFromUrlForApp(url) {
             try {
@@ -2529,8 +2548,8 @@
             return SOURCE_LIKE_HOSTS_FOR_APP.some(pattern => pattern.test(host));
         }
 
-        function buildLogoUrlForApp(host) {
-            if (!host || isSourceLikeHostForApp(host)) return '';
+        function buildLogoUrlForApp(host, { allowSourceLike = false } = {}) {
+            if (!host || (!allowSourceLike && isSourceLikeHostForApp(host))) return '';
             return `https://www.google.com/s2/favicons?sz=128&domain_url=https://${host}`;
         }
 
@@ -2567,6 +2586,8 @@
             'kfc': { name: 'KFC', logo: '🍗', category: 'essen', domain: 'kfc.co.at' },
             'subway': { name: 'Subway', logo: '🥪', category: 'essen', domain: 'subway.com' },
             'dominos': { name: "Domino's", logo: '🍕', category: 'essen', domain: 'dominos.at' },
+            'ben & jerry': { name: "Ben & Jerry's", logo: '🍦', category: 'essen', domain: 'benjerry.at' },
+            'ben & jerrys': { name: "Ben & Jerry's", logo: '🍦', category: 'essen', domain: 'benjerry.at' },
             'nordsee': { name: 'NORDSEE', logo: '🐟', category: 'essen', domain: 'nordsee.com' },
             'vapiano': { name: 'Vapiano', logo: '🍝', category: 'essen', domain: 'vapiano.com' },
             'dougla': { name: 'Douglas', logo: '💋', category: 'beauty', domain: 'douglas.at' },

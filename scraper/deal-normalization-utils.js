@@ -27,7 +27,8 @@ const BRAND_RULES = [
   { key: 'cavallo', name: 'Cavallo Vienna', logo: '🍝', category: 'essen' },
   { key: 'tybah', name: 'Tybah Pizzeria-Ristorante', logo: '🍕', category: 'essen' },
   { key: 'eismacher', name: 'Der Eismacher', logo: '🍨', category: 'essen' },
-  { key: 'ben & jerry', name: "Ben & Jerry's", logo: '🍦', category: 'essen' },
+  { key: 'ben & jerry', name: "Ben & Jerry's", logo: '🍦', category: 'essen', domain: 'benjerry.at' },
+  { key: 'nordsee', name: 'NORDSEE', logo: '🐟', category: 'essen', domain: 'nordsee.com' },
   { key: 'donauturm', name: 'Donauturm', logo: '🗼', category: 'kultur' },
   { key: 'genuss-festival', name: 'Genuss-Festival Wien', logo: '🧀', category: 'essen' },
   { key: 'momax', name: 'mömax Restaurant', logo: '🛋️', category: 'essen' },
@@ -55,6 +56,7 @@ const BRAND_RULES = [
   { key: 'uber eats', name: 'Uber Eats', logo: '🛵', category: 'essen', domain: 'ubereats.com' },
   { key: 'all4golf', name: 'ALL4GOLF', logo: '⛳', category: 'shopping', domain: 'all4golf.de' },
   { key: 'spee', name: 'Spee', logo: '🧺', category: 'shopping' },
+  { key: 'westfield', name: 'Westfield Club', logo: '🛍️', category: 'shopping', domain: 'westfield.com' },
   { key: 'preisjaeger', name: 'Preisjaeger', logo: '🎯', category: 'shopping', source: true },
   { key: 'wien deals', name: 'Wien Deals', logo: '🎯', category: 'shopping', source: true },
   { key: 'instagram', name: 'Instagram', logo: '📸', category: 'shopping', source: true },
@@ -91,6 +93,14 @@ const SOURCE_LIKE_HOSTS = [
   /(^|\.)twitter\.com$/i,
   /(^|\.)slack\.com$/i,
   /(^|\.)preisjaeger\./i,
+  /(^|\.)1000thingsmagazine\.com$/i,
+  /(^|\.)1000things\.at$/i,
+  /(^|\.)heute\.at$/i,
+  /(^|\.)vienna\.at$/i,
+  /(^|\.)falstaff\./i,
+  /(^|\.)events\.at$/i,
+  /(^|\.)viennawurstelstand\.com$/i,
+  /(^|\.)restauranttester\./i,
 ];
 
 function cleanText(value) {
@@ -128,7 +138,12 @@ function normalizeAscii(value) {
 
 function findBrandRule(signal) {
   const normalized = normalizeAscii(signal);
-  return BRAND_RULES.find((rule) => normalized.includes(rule.key));
+  const escapedWordMatch = (key) => {
+    const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+    return new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`, 'i');
+  };
+  return BRAND_RULES.find((rule) => escapedWordMatch(rule.key).test(normalized))
+    || BRAND_RULES.find((rule) => normalized.includes(rule.key));
 }
 
 function extractHostFromUrl(url) {
@@ -145,8 +160,8 @@ function isSourceLikeHost(host) {
   return SOURCE_LIKE_HOSTS.some((pattern) => pattern.test(host));
 }
 
-function buildLogoUrl(host) {
-  if (!host || isSourceLikeHost(host)) return '';
+function buildLogoUrl(host, { allowSourceLike = false } = {}) {
+  if (!host || (!allowSourceLike && isSourceLikeHost(host))) return '';
   return `https://www.google.com/s2/favicons?sz=128&domain_url=https://${host}`;
 }
 
@@ -216,7 +231,7 @@ function inferLogoUrl(deal = {}, brand = '') {
     .filter(Boolean)
     .join(' ');
   const known = findBrandRule(combined);
-  if (known?.domain) return buildLogoUrl(known.domain);
+  if (known?.domain) return buildLogoUrl(known.domain, { allowSourceLike: true });
 
   const directHost = extractHostFromUrl(deal.logoUrl || deal.image || deal.imageUrl || deal.url || deal.post_url);
   if (directHost && !isSourceLikeHost(directHost)) return buildLogoUrl(directHost);
