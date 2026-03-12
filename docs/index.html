@@ -2777,9 +2777,52 @@
             setTimeout(() => popup.remove(), 1500);
         }
         
+        function getStartOfWeek(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = (day === 0 ? -6 : 1) - day;
+            d.setDate(d.getDate() + diff);
+            d.setHours(0, 0, 0, 0);
+            return d;
+        }
+
+        function getProSavingsSummary() {
+            const redeemedDeals = proData.redeemedDeals || {};
+            const startOfWeek = getStartOfWeek(new Date());
+            let weekTotal = 0;
+            let lifetimeTotal = 0;
+
+            Object.values(redeemedDeals).forEach((entry) => {
+                const savings = Number(entry?.savings) || 0;
+                lifetimeTotal += savings;
+                if (!entry?.date) return;
+                const redeemedAt = new Date(entry.date);
+                if (!Number.isNaN(redeemedAt.getTime()) && redeemedAt >= startOfWeek) {
+                    weekTotal += savings;
+                }
+            });
+
+            return { weekTotal, lifetimeTotal };
+        }
+
         function updateSavingsUI() {
-            document.getElementById('savingsAmount').textContent = '€' + userData.totalSavings;
-            document.getElementById('savingsBar').style.width = Math.min((userData.totalSavings / 50) * 100, 100) + '%';
+            const amountEl = document.getElementById('savingsAmount');
+            const barEl = document.getElementById('savingsBar');
+            const titleEl = document.querySelector('#savingsCard .savings-title');
+            if (!amountEl || !barEl) return;
+
+            let displaySavings = Number(userData.totalSavings) || 0;
+            let title = '💰 Diese Woche gespart';
+
+            if (proData.isPro) {
+                const summary = getProSavingsSummary();
+                displaySavings = summary.weekTotal;
+                title = '💰 Diese Woche eingelöst';
+            }
+
+            amountEl.textContent = '€' + displaySavings.toFixed(0);
+            barEl.style.width = Math.min((displaySavings / 50) * 100, 100) + '%';
+            if (titleEl) titleEl.textContent = title;
         }
         
         function trackDealView(dealId) {
@@ -2927,7 +2970,7 @@
                     const _desc = cleanText(deal.description || picked.description || '');
                     document.getElementById('dailyTitle').textContent = (deal.logo || picked.logo || '') + ' ' + (_brand ? (_brand + ': ') : '') + _title;
                     document.getElementById('dailyDesc').textContent = _desc + (_loc ? ' — ' + _loc : '');
-                    document.getElementById('dailyBtn').onclick = () => { window.open(deal.url || picked.url, '_blank'); userData.totalSavings += 5; saveUserData(); updateSavingsUI(); trackDealView(); };
+                    document.getElementById('dailyBtn').onclick = () => { window.open(deal.url || picked.url, '_blank'); trackDealView(deal.id || picked.dealId); };
                     return;
                 }
             }
@@ -2949,7 +2992,7 @@
         const _desc2 = cleanText(deal.description);
         document.getElementById('dailyTitle').textContent = (deal.logo || '') + ' ' + (_brand2 ? (_brand2 + ': ') : '') + _title2;
         document.getElementById('dailyDesc').textContent = _desc2 + (_loc2 ? ' — ' + _loc2 : '');
-        document.getElementById('dailyBtn').onclick = () => { window.open(deal.url, '_blank'); userData.totalSavings += 5; saveUserData(); updateSavingsUI(); trackDealView(); };
+        document.getElementById('dailyBtn').onclick = () => { window.open(deal.url, '_blank'); trackDealView(deal.id); };
     }
         function updateCounts() {
             document.getElementById('countAll').textContent = allDeals.length;
@@ -3313,7 +3356,7 @@
             const newBadge = d.isNew ? '<span class="deal-type-badge neu">NEU</span>' : '';
             const redeemed = proData.isPro && proData.redeemedDeals && proData.redeemedDeals[d.id];
             const savingsVal = savingsMap[d.category] || 5;
-            const redeemBtn = proData.isPro ? '<button class="btn redeem-btn ' + (redeemed ? 'redeemed' : '') + '" onclick="redeemDeal(\'' + d.id + '\',\'' + d.category + '\',' + savingsVal + ', event)">' + (redeemed ? '\u2705 Eingelöst' : '\uD83C\uDF81 Einlösen (' + savingsVal.toFixed(2) + '€)') + '</button>' : '';
+            const redeemBtn = proData.isPro ? '<button class="btn redeem-btn ' + (redeemed ? 'redeemed' : '') + '" onclick="redeemDeal(\'' + d.id + '\',\'' + d.category + '\',' + savingsVal + ', event)">' + (redeemed ? '\u2705 Als eingel\u00F6st markiert' : '\uD83D\uDCB0 Als eingel\u00F6st markieren (' + savingsVal.toFixed(2) + '€)') + '</button>' : '';
             const _expiry = getExpiryPresentation(d);
             const _hasExpiry = _expiry.hasExpiry;
             const _expClass = _hasExpiry ? _expiry.cardClass : '';
@@ -3344,6 +3387,8 @@
       if (e) e.stopPropagation();
       if (!proData.isPro) return;
       if (!proData.redeemedDeals) proData.redeemedDeals = {};
+      if (!proData.savingsByCategory) proData.savingsByCategory = {};
+      if (!proData.monthlySavings) proData.monthlySavings = {};
       const now = new Date();
       const monthKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
       if (proData.redeemedDeals[dealId]) {
@@ -3360,6 +3405,7 @@
         showToast('\uD83D\uDCB0 +' + savings + '\u20AC gespart! Super!');
       }
       saveProData();
+      updateSavingsUI();
       updateSavingsProCard();
       updateYearOverview();
       updateCompareCard();
@@ -3491,7 +3537,7 @@
             return Math.floor(seconds / 86400) + ' Tage';
         }
         
-        function onDealClick(e) { e.stopPropagation(); userData.totalSavings += Math.floor(Math.random() * 5) + 1; saveUserData(); updateSavingsUI(); addXP(2, null); }
+        function onDealClick(e) { e.stopPropagation(); addXP(2, null); }
         function vote(id, delta, e) { e.stopPropagation(); if (delta > 0 && votedDeals.includes(id)) { showToast('🔥 Bereits gevotet'); return; } if (delta > 0) { votedDeals.push(id); localStorage.setItem('votedDeals', JSON.stringify(votedDeals)); } votes[id] = (votes[id] || 0) + delta; localStorage.setItem('votes', JSON.stringify(votes)); const deal = allDeals.find(d => d.id === id); if (deal) deal.votes = votes[id]; renderDeals(); addXP(1, null); showToast(delta > 0 ? '🔥 Stimme gezählt' : '👎 Notiert!'); }
         function copyCode(code, e) { e.stopPropagation(); navigator.clipboard.writeText(code); addXP(3, null); showToast('📋 Code kopiert!'); }
         function shareDeal(id, e) { 
@@ -4519,6 +4565,7 @@
       const dlCount = await checkReferralProgress();
       if (dlCount >= 2 && !proData.isPro) { proData.isPro = true; saveProData(); }
       updateProUI();
+      updateSavingsUI();
       initAlarmPolling();
     }
 
