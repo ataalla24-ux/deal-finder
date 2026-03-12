@@ -4675,7 +4675,10 @@
     function getDailyDealIdentity(payload) {
       if (!payload) return '';
       return [
+        payload.dealId || '',
         payload.pickedDealId || '',
+        payload.pickedAt || '',
+        payload.date || '',
         payload.title || payload.dailyTitle || payload.dailyDealTitle || '',
         payload.url || ''
       ].filter(Boolean).join('|');
