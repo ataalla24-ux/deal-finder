@@ -63,13 +63,22 @@
         .daily-btn:hover { transform: scale(1.05); }
         
         /* SPAR-TRACKER */
-        .savings-card { background: linear-gradient(135deg, #10b981, #059669); border-radius: 16px; padding: 16px; margin-bottom: 16px; color: white; }
+        .savings-card { background: linear-gradient(135deg, #10b981, #059669); border-radius: 16px; padding: 16px; margin-bottom: 16px; color: white; position: relative; overflow: hidden; }
         .savings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .savings-title { font-size: 14px; opacity: 0.9; }
         .savings-amount { font-size: 32px; font-weight: 800; }
         .savings-bar { background: rgba(255,255,255,0.3); height: 8px; border-radius: 4px; overflow: hidden; }
         .savings-progress { background: white; height: 100%; border-radius: 4px; transition: width 0.5s; }
         .savings-goal { display: flex; justify-content: space-between; font-size: 12px; margin-top: 8px; opacity: 0.8; }
+        .savings-lock { display: none; margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+        .savings-lock-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+        .savings-lock-subtitle { font-size: 12px; opacity: 0.9; }
+        .savings-card.locked { cursor: pointer; }
+        .savings-card.locked::after { content: '🔒'; position: absolute; top: 14px; right: 16px; font-size: 22px; }
+        .savings-card.locked .savings-amount,
+        .savings-card.locked .savings-bar,
+        .savings-card.locked .savings-goal { opacity: 0.3; }
+        .savings-card.locked .savings-lock { display: block; }
         
         /* LEVEL BAR */
         .level-bar { background: white; border-radius: 14px; padding: 12px 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 12px; }
@@ -629,6 +638,10 @@
             </div>
             <div class="savings-bar"><div class="savings-progress" id="savingsBar" style="width: 0%"></div></div>
             <div class="savings-goal"><span>€0</span><span>Ziel: €50</span></div>
+            <div class="savings-lock" id="savingsLock">
+                <div class="savings-lock-title">Nur für PRO Mitglieder</div>
+                <div class="savings-lock-subtitle">Schalte den Spar-Tracker frei und sieh deine echten Einlösungen.</div>
+            </div>
         </div>
         
         
@@ -2809,7 +2822,8 @@
             const amountEl = document.getElementById('savingsAmount');
             const barEl = document.getElementById('savingsBar');
             const titleEl = document.querySelector('#savingsCard .savings-title');
-            if (!amountEl || !barEl) return;
+            const cardEl = document.getElementById('savingsCard');
+            if (!amountEl || !barEl || !cardEl) return;
 
             let displaySavings = Number(userData.totalSavings) || 0;
             let title = '💰 Diese Woche gespart';
@@ -2818,10 +2832,21 @@
                 const summary = getProSavingsSummary();
                 displaySavings = summary.weekTotal;
                 title = '💰 Diese Woche eingelöst';
+                cardEl.classList.remove('locked');
+                cardEl.onclick = null;
+                cardEl.removeAttribute('role');
+                cardEl.removeAttribute('tabindex');
+                amountEl.textContent = '€' + displaySavings.toFixed(0);
+                barEl.style.width = Math.min((displaySavings / 50) * 100, 100) + '%';
+            } else {
+                cardEl.classList.add('locked');
+                cardEl.onclick = function () { openReferralModal(); };
+                cardEl.setAttribute('role', 'button');
+                cardEl.setAttribute('tabindex', '0');
+                amountEl.textContent = '🔒';
+                barEl.style.width = '0%';
             }
 
-            amountEl.textContent = '€' + displaySavings.toFixed(0);
-            barEl.style.width = Math.min((displaySavings / 50) * 100, 100) + '%';
             if (titleEl) titleEl.textContent = title;
         }
         
