@@ -3326,6 +3326,108 @@
         '</section>';
     }
 
+    const CATEGORY_SAVINGS_FALLBACK = {
+        kaffee: 3.5,
+        essen: 8,
+        supermarkt: 5,
+        fitness: 15,
+        streaming: 10,
+        shopping: 12,
+        wien: 6,
+        kultur: 8,
+        beauty: 10,
+        technik: 20,
+        codes: 5,
+        reisen: 30,
+        gratis: 5,
+        events: 10,
+        kirche: 0,
+        gottesdienste: 0,
+        mobilität: 5,
+        wohnen: 10
+    };
+
+    const BRAND_SAVINGS_HINTS = {
+        starbucks: 5.5,
+        shell: 3.5,
+        omv: 3.5,
+        mcdonalds: 3.5,
+        mccafe: 3.5,
+        burger: 8,
+        burgerking: 8,
+        vapiano: 10,
+        ikea: 4.2,
+        bipa: 8,
+        spar: 6,
+        billa: 5,
+        cleverfit: 15
+    };
+
+    function roundSavingsValue(value) {
+        return Math.max(0, Math.round(value * 2) / 2);
+    }
+
+    function getDealSavingsEstimate(deal) {
+        const title = String(deal?.title || '').toLowerCase();
+        const description = String(deal?.description || '').toLowerCase();
+        const brand = String(deal?.brand || '').toLowerCase();
+        const text = [title, description, brand].filter(Boolean).join(' ');
+        const categoryFallback = CATEGORY_SAVINGS_FALLBACK[deal?.category] ?? CATEGORY_SAVINGS_FALLBACK.gratis;
+
+        const euroMatch = text.match(/(?:€\s*|eur\s*)(\d{1,3}(?:[.,]\d{1,2})?)/i) || text.match(/(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:€|eur)/i);
+        if (euroMatch) {
+            const exactValue = Number(euroMatch[1].replace(',', '.'));
+            if (Number.isFinite(exactValue) && exactValue > 0 && exactValue <= 250) {
+                return { value: roundSavingsValue(exactValue), source: 'exact' };
+            }
+        }
+
+        let derivedValue = null;
+
+        if (/1\s*\+\s*1|zweite[rsn]?\s+(?:pizza|burger|wrap|sandwich|gericht|produkt|artikel)?\s*gratis|buy\s*one\s*get\s*one|bogo/.test(text) || deal?.type === 'bogo') {
+            if (/pizza/.test(text)) derivedValue = 10;
+            else if (/burger|whopper/.test(text)) derivedValue = 8;
+            else if (/wrap|falafel|sandwich/.test(text)) derivedValue = 7;
+            else if (/kaffee|latte|cappuccino|tee/.test(text)) derivedValue = 4;
+            else derivedValue = Math.max(categoryFallback, 8);
+        } else if (/gratis|kostenlos|free\b|geschenkt|for follower/.test(text) || deal?.type === 'gratis') {
+            if (/kaffee|cappuccino|latte|espresso|tee/.test(text)) derivedValue = 3.5;
+            else if (/pizza/.test(text)) derivedValue = 10;
+            else if (/burger|whopper/.test(text)) derivedValue = 8;
+            else if (/wrap|falafel|sandwich/.test(text)) derivedValue = 7;
+            else if (/getränk|drink|smoothie|limonade/.test(text)) derivedValue = 4.5;
+            else if (/eintritt|ticket|museum|führung/.test(text)) derivedValue = 0;
+            else if (/training|fitness|probetraining|gym/.test(text)) derivedValue = 15;
+            else if (/box|bonusbox|frühlingsbox|beauty/.test(text)) derivedValue = 8;
+            else if (/lebensmittel|essen|gericht/.test(text)) derivedValue = 8;
+        }
+
+        if (derivedValue == null && /(\d{1,2})\s*%/.test(text)) {
+            const percent = Number((text.match(/(\d{1,2})\s*%/) || [])[1]);
+            if (Number.isFinite(percent) && percent > 0) {
+                if (/kaffee|cappuccino|latte|espresso|tee/.test(text)) derivedValue = 4 * (percent / 100);
+                else if (/pizza/.test(text)) derivedValue = 10 * (percent / 100);
+                else if (/burger|wrap|falafel|sandwich|essen|gericht/.test(text)) derivedValue = 8 * (percent / 100);
+                else if (/wäsche|top wash|tank|scheibenklar|shop/.test(text)) derivedValue = 6 * (percent / 100);
+            }
+        }
+
+        if (derivedValue == null) {
+            for (const [key, value] of Object.entries(BRAND_SAVINGS_HINTS)) {
+                if (brand.includes(key) || title.includes(key)) {
+                    derivedValue = value;
+                    break;
+                }
+            }
+        }
+
+        if (derivedValue != null) {
+            return { value: roundSavingsValue(Math.max(derivedValue, 0)), source: 'derived' };
+        }
+
+        return { value: roundSavingsValue(categoryFallback), source: 'fallback' };
+    }
+
     function saveFavorites() {
         favorites = sanitizeFavoriteIds(favorites);
         localStorage.setItem('favorites', JSON.stringify(favorites));
@@ -3341,7 +3443,6 @@
             return;
         }
         const deals = filterDeals();
-        const savingsMap = {kaffee:3.5,essen:8,supermarkt:5,fitness:15,streaming:10,shopping:12,wien:6,kultur:8,beauty:10,technik:20,codes:5,reisen:30,gratis:5,events:10,kirche:0,gottesdienste:0,mobilität:5,wohnen:10,supermarkt:5};
         if (!deals.length) {
             document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">\uD83D\uDD0D</div><p>Keine Deals gefunden</p></div>';
             return;
@@ -3355,7 +3456,7 @@
             const typeBadge = d.type === 'gratis' ? '<span class="deal-type-badge gratis">GRATIS</span>' : d.type === 'testabo' ? '<span class="deal-type-badge testabo">TESTABO</span>' : d.type === 'rabatt' ? '<span class="deal-type-badge rabatt">RABATT</span>' : d.type === 'bogo' ? '<span class="deal-type-badge bogo">1+1</span>' : d.type === 'gewinnspiel' ? '<span class="deal-type-badge rabatt">GEWINNSPIEL</span>' : '';
             const newBadge = d.isNew ? '<span class="deal-type-badge neu">NEU</span>' : '';
             const redeemed = proData.isPro && proData.redeemedDeals && proData.redeemedDeals[d.id];
-            const savingsVal = savingsMap[d.category] || 5;
+            const savingsVal = getDealSavingsEstimate(d).value;
             const redeemBtn = proData.isPro ? '<button class="btn redeem-btn ' + (redeemed ? 'redeemed' : '') + '" onclick="redeemDeal(\'' + d.id + '\',\'' + d.category + '\',' + savingsVal + ', event)">' + (redeemed ? '\u2705 Als eingel\u00F6st markiert' : '\uD83D\uDCB0 Als eingel\u00F6st markieren (' + savingsVal.toFixed(2) + '€)') + '</button>' : '';
             const _expiry = getExpiryPresentation(d);
             const _hasExpiry = _expiry.hasExpiry;
