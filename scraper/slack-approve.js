@@ -50,6 +50,146 @@ function normalizeUrl(url) {
   return text;
 }
 
+function normalizeLooseText(value) {
+  return cleanText(String(value || ''))
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/discount/g, 'rabatt')
+    .replace(/\bfree\b/g, 'gratis')
+    .replace(/all you can eat/g, 'brunch')
+    .replace(/2for1/g, '1+1')
+    .replace(/buy one get one/g, '1+1')
+    .replace(/[^a-z0-9%+ ]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeBrandSignature(value) {
+  return normalizeLooseText(value)
+    .replace(/\b(restaurant|osterreich|austria|wien|vienna|gmbh|cafe|café|food|store|stores|official)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getCanonicalUrlBrandKey(deal) {
+  const brand = normalizeBrandSignature(deal?.brand);
+  const url = normalizeUrl(deal?.url).toLowerCase();
+  if (!brand || !url) return '';
+  return `${brand}|${url}`;
+}
+
+function isSocialDeal(deal) {
+  const url = normalizeUrl(deal?.url).toLowerCase();
+  return url.includes('instagram.com/') || url.includes('tiktok.com/');
+}
+
+function getSemanticOfferKey(deal) {
+  if (!isSocialDeal(deal)) return '';
+
+  const brand = normalizeBrandSignature(deal?.brand);
+  const title = normalizeLooseText(deal?.title);
+  if (!brand || !title) return '';
+
+  const percentMatch = title.match(/(\d+)\s*%/);
+  if (percentMatch && /rabatt/.test(title)) {
+    return `${brand}|${percentMatch[1]}%|rabatt`;
+  }
+  if (/1\s*\+\s*1|bogo/.test(title) && /pizza/.test(title)) {
+    return `${brand}|1+1|pizza`;
+  }
+  if (/brunch/.test(title)) {
+    return `${brand}|brunch`;
+  }
+  if (/gratis/.test(title) && /kaffee/.test(title)) {
+    return `${brand}|gratis|kaffee`;
+  }
+  if (/gratis/.test(title) && /drink|getr[aä]nk|cola|limonade/.test(title)) {
+    return `${brand}|gratis|drink`;
+  }
+  if (/gratis/.test(title) && /falafel|wrap|sandwich|burger|speisen|essen|gerichte|men[uü]/.test(title)) {
+    return `${brand}|gratis|food`;
+  }
+
+  return '';
+}
+
+function dealRecencyScore(deal) {
+  const approvedAt = Date.parse(cleanText(deal?.approvedAt) || '');
+  if (!Number.isNaN(approvedAt)) return approvedAt;
+  const pubDate = Date.parse(cleanText(deal?.pubDate) || '');
+  if (!Number.isNaN(pubDate)) return pubDate;
+  return 0;
+}
+
+function pickBetterDeal(current, candidate) {
+  const currentRecency = dealRecencyScore(current);
+  const candidateRecency = dealRecencyScore(candidate);
+  if (candidateRecency !== currentRecency) {
+    return candidateRecency > currentRecency ? candidate : current;
+  }
+
+  const currentQuality = Number(current?.qualityScore) || 0;
+  const candidateQuality = Number(candidate?.qualityScore) || 0;
+  if (candidateQuality !== currentQuality) {
+    return candidateQuality > currentQuality ? candidate : current;
+  }
+
+  const currentVotes = Number(current?.votes) || 0;
+  const candidateVotes = Number(candidate?.votes) || 0;
+  if (candidateVotes !== currentVotes) {
+    return candidateVotes > currentVotes ? candidate : current;
+  }
+
+  const currentDescription = cleanText(current?.description).length;
+  const candidateDescription = cleanText(candidate?.description).length;
+  if (candidateDescription !== currentDescription) {
+    return candidateDescription > currentDescription ? candidate : current;
+  }
+
+  return candidate;
+}
+
+function dedupeApprovedDeals(deals) {
+  const byBrandUrl = new Map();
+  const bySemanticKey = new Map();
+  const deduped = [];
+
+  for (const deal of deals) {
+    let existingIndex = -1;
+
+    const brandUrlKey = getCanonicalUrlBrandKey(deal);
+    if (brandUrlKey && byBrandUrl.has(brandUrlKey)) {
+      existingIndex = byBrandUrl.get(brandUrlKey);
+    }
+
+    const semanticKey = existingIndex === -1 ? getSemanticOfferKey(deal) : '';
+    if (semanticKey && bySemanticKey.has(semanticKey)) {
+      existingIndex = bySemanticKey.get(semanticKey);
+    }
+
+    if (existingIndex >= 0) {
+      const merged = pickBetterDeal(deduped[existingIndex], { ...deduped[existingIndex], ...deal });
+      deduped[existingIndex] = merged;
+
+      const mergedBrandUrlKey = getCanonicalUrlBrandKey(merged);
+      if (mergedBrandUrlKey) byBrandUrl.set(mergedBrandUrlKey, existingIndex);
+
+      const mergedSemanticKey = getSemanticOfferKey(merged);
+      if (mergedSemanticKey) bySemanticKey.set(mergedSemanticKey, existingIndex);
+      continue;
+    }
+
+    const index = deduped.length;
+    deduped.push(deal);
+    if (brandUrlKey) byBrandUrl.set(brandUrlKey, index);
+    const newSemanticKey = getSemanticOfferKey(deal);
+    if (newSemanticKey) bySemanticKey.set(newSemanticKey, index);
+  }
+
+  return deduped;
+}
+
 function toIsoDate(value) {
   if (!value) return '';
   const d = new Date(value);
@@ -278,24 +418,24 @@ function mergeApprovedDeals(existingDeals, newlyApproved) {
 
   const indexByKey = new Map();
   for (let i = 0; i < merged.length; i += 1) {
-    const key = merged[i].id || merged[i].url;
+    const key = getCanonicalUrlBrandKey(merged[i]) || merged[i].id || merged[i].url;
     if (!key) continue;
     indexByKey.set(key, i);
   }
 
   for (const deal of newlyApproved) {
-    const key = deal.id || deal.url;
+    const key = getCanonicalUrlBrandKey(deal) || deal.id || deal.url;
     if (!key) continue;
     const existingIndex = indexByKey.get(key);
     if (Number.isInteger(existingIndex)) {
-      merged[existingIndex] = { ...merged[existingIndex], ...deal };
+      merged[existingIndex] = pickBetterDeal(merged[existingIndex], { ...merged[existingIndex], ...deal });
     } else {
       indexByKey.set(key, merged.length);
       merged.push(deal);
     }
   }
 
-  return merged;
+  return dedupeApprovedDeals(merged);
 }
 
 function saveDealsJson(deals) {
