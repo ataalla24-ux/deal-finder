@@ -248,8 +248,34 @@ function hasHumanApproval(reactions, botUserId) {
   return false;
 }
 
+function getChurchReplacementScope(deal) {
+  const category = cleanText(deal?.category).toLowerCase();
+  const source = `${cleanText(deal?.source)} ${cleanText(deal?.originSource)}`.toLowerCase();
+  const fromChurchSource = source.includes('freikirchen wien');
+
+  if (category === 'gottesdienste') return 'church-services';
+  if (category === 'events' && fromChurchSource) return 'church-events';
+  if (['kirche', 'freikirche', 'gemeinde'].includes(category) || (fromChurchSource && category === '')) {
+    return 'church-community';
+  }
+
+  if (fromChurchSource && category === 'events') return 'church-events';
+  if (fromChurchSource) return 'church-community';
+  return '';
+}
+
 function mergeApprovedDeals(existingDeals, newlyApproved) {
-  const merged = [...existingDeals];
+  const replacementScopes = new Set(
+    newlyApproved
+      .map(getChurchReplacementScope)
+      .filter(Boolean)
+  );
+
+  const merged = existingDeals.filter((deal) => {
+    const scope = getChurchReplacementScope(deal);
+    return !scope || !replacementScopes.has(scope);
+  });
+
   const indexByKey = new Map();
   for (let i = 0; i < merged.length; i += 1) {
     const key = merged[i].id || merged[i].url;
