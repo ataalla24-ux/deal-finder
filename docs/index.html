@@ -3408,8 +3408,27 @@
                 if (/kaffee|cappuccino|latte|espresso|tee/.test(text)) derivedValue = 4 * (percent / 100);
                 else if (/pizza/.test(text)) derivedValue = 10 * (percent / 100);
                 else if (/burger|wrap|falafel|sandwich|essen|gericht/.test(text)) derivedValue = 8 * (percent / 100);
-                else if (/wäsche|top wash|tank|scheibenklar|shop/.test(text)) derivedValue = 6 * (percent / 100);
+                else if (/top\s*wash|autowäsche|car\s*wash|wäsche/.test(text)) derivedValue = 20 * (percent / 100);
+                else if (/scheibenklar|motoröl|shop/.test(text)) derivedValue = 10 * (percent / 100);
+                else if (/beauty|kosmetik|parfum|pflege|make.?up|produkt/.test(text)) derivedValue = 25 * (percent / 100);
             }
+        }
+
+        if (derivedValue == null) {
+            const centPerLiterMatch = text.match(/(\d{1,2})\s*cent\s*(?:pro|\/)\s*liter/i) || text.match(/(\d{1,2})\s*c\s*(?:pro|\/)\s*l/i);
+            if (centPerLiterMatch) {
+                const cents = Number(centPerLiterMatch[1]);
+                if (Number.isFinite(cents) && cents > 0) {
+                    // Approximate a typical 40L fill-up for station discounts.
+                    derivedValue = (cents / 100) * 40;
+                }
+            }
+        }
+
+        if (derivedValue == null) {
+            if (/top\s*wash|autowäsche|car\s*wash/.test(text)) derivedValue = 8;
+            else if (/scheibenklar/.test(text)) derivedValue = 3;
+            else if (/beauty|kosmetik|parfum|pflege|make.?up/.test(text) && /bipa/.test(brand + ' ' + title)) derivedValue = 7;
         }
 
         if (derivedValue == null) {
