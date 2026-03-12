@@ -651,16 +651,15 @@
       <div class="pro-crown">👑</div>
       <div>
         <div class="pro-banner-title">Werde PRO – Kostenlos!</div>
-        <div class="pro-banner-sub">2 Freunde laden die App herunter → du bekommst PRO gratis!</div>
+        <div class="pro-banner-sub">2 bestätigte Einladungen → Deal-Alarme, Standortfilter und dein smarter Spartracker.</div>
       </div>
     </div>
     <div class="pro-features-list">
-      <div class="pro-feature-item">🔒 Spar-Tracker Pro</div>
+      <div class="pro-feature-item">🔒 Deal des Tages Alarm</div>
+      <div class="pro-feature-item">🔒 Personalisierte Alerts</div>
       <div class="pro-feature-item">🔒 Standort-Filter</div>
-      <div class="pro-feature-item">🔒 Top 5 Kategorien</div>
-      <div class="pro-feature-item">🔒 Jahresübersicht</div>
-      <div class="pro-feature-item">🔒 User-Vergleich</div>
-      <div class="pro-feature-item">🔒 Deal-Alarm 🔔</div>
+      <div class="pro-feature-item">🔒 Spartracker & Jahresübersicht</div>
+      <div class="pro-feature-item">🔒 Smarteres Für dich</div>
     </div>
     <button class="pro-unlock-btn">🚀 Jetzt PRO werden – Gratis!</button>
   </div>
@@ -737,32 +736,32 @@
     </div>
   </div>
 
-  <!-- USER VERGLEICH (nur für PRO) -->
+  <!-- FÜR DICH PRO BOOST (nur für PRO) -->
   <div class="compare-card pro-feature-section" id="compareCard" style="display:none">
-    <div class="compare-card-header">📈 Vergleich mit anderen <span class="pro-badge">👑 PRO</span></div>
+    <div class="compare-card-header">✨ Für dich PRO <span class="pro-badge">👑 PRO</span></div>
     <div class="compare-row you">
-      <span class="compare-avatar">😊</span>
+      <span class="compare-avatar">❤️</span>
       <div class="compare-info">
-        <div class="compare-name">Du</div>
-        <div class="compare-stat">Deals genutzt diesen Monat</div>
+        <div class="compare-name">Lieblingssignale</div>
+        <div class="compare-stat">Favoriten, Marken und Klicks, die dein Feed lernt</div>
       </div>
-      <div class="compare-val" id="compareYou">0</div>
+      <div class="compare-val" id="compareYou">0 Signale</div>
     </div>
     <div class="compare-row avg">
-      <span class="compare-avatar">👥</span>
+      <span class="compare-avatar">📍</span>
       <div class="compare-info">
-        <div class="compare-name">Ø Wien-User</div>
-        <div class="compare-stat">Deals pro Monat</div>
+        <div class="compare-name">Standort</div>
+        <div class="compare-stat">Deals in deiner Nähe werden stärker gewichtet</div>
       </div>
-      <div class="compare-val">12</div>
+      <div class="compare-val" id="compareRadius">Aus</div>
     </div>
     <div class="compare-row top">
-      <span class="compare-avatar">🏆</span>
+      <span class="compare-avatar">🔥</span>
       <div class="compare-info">
-        <div class="compare-name">Top-Sparer Wien</div>
-        <div class="compare-stat">Deals pro Monat</div>
+        <div class="compare-name">Frische Priorität</div>
+        <div class="compare-stat">Neue, starke und relevante Deals landen zuerst bei dir</div>
       </div>
-      <div class="compare-val">47</div>
+      <div class="compare-val" id="compareFreshness">Aktiv</div>
     </div>
   </div>
 
@@ -771,38 +770,22 @@
     <div class="deal-alarm-header">
       <div class="deal-alarm-icon">🔔</div>
       <div>
-        <div class="deal-alarm-title">Deal-Alarm <span class="pro-badge">👑 PRO</span></div>
-        <div class="deal-alarm-sub">Erhalte Benachrichtigungen bei neuen Deals</div>
+        <div class="deal-alarm-title">PRO Alerts <span class="pro-badge">👑 PRO</span></div>
+        <div class="deal-alarm-sub">Deal des Tages, persönliche Treffer und Hinweise in deiner Nähe.</div>
       </div>
     </div>
     <div class="alarm-toggles">
       <div class="alarm-toggle">
-        <span class="alarm-toggle-label">☕ Gratis Kaffee</span>
-        <button class="toggle-sw on" id="alarmKaffee" onclick="toggleAlarm(this)"></button>
+        <span class="alarm-toggle-label">⭐ Deal des Tages erneuert</span>
+        <button class="toggle-sw on" id="alarmDailyDeal" onclick="toggleAlarm(this)"></button>
       </div>
       <div class="alarm-toggle">
-        <span class="alarm-toggle-label">🍔 Gratis Essen</span>
-        <button class="toggle-sw on" id="alarmEssen" onclick="toggleAlarm(this)"></button>
+        <span class="alarm-toggle-label">🧠 Personalisierte Alerts</span>
+        <button class="toggle-sw on" id="alarmPersonalized" onclick="toggleAlarm(this)"></button>
       </div>
       <div class="alarm-toggle">
-        <span class="alarm-toggle-label">🛒 Supermarkt-Deals</span>
-        <button class="toggle-sw" id="alarmSupermarkt" onclick="toggleAlarm(this)"></button>
-      </div>
-      <div class="alarm-toggle">
-        <span class="alarm-toggle-label">💪 Fitness & Sport</span>
-        <button class="toggle-sw" id="alarmFitness" onclick="toggleAlarm(this)"></button>
-      </div>
-      <div class="alarm-toggle">
-        <span class="alarm-toggle-label">🎉 Geheime Deals</span>
-        <button class="toggle-sw on" id="alarmSecret" onclick="toggleAlarm(this)"></button>
-      </div>
-      <div class="alarm-toggle">
-        <span class="alarm-toggle-label">🕊️ Gottesdienste</span>
-        <button class="toggle-sw" id="alarmGottesdienste" onclick="toggleAlarm(this)"></button>
-      </div>
-      <div class="alarm-toggle">
-        <span class="alarm-toggle-label">✝️ Community-Events</span>
-        <button class="toggle-sw on" id="alarmEvents" onclick="toggleAlarm(this)"></button>
+        <span class="alarm-toggle-label">📍 Neue Deals in deiner Nähe</span>
+        <button class="toggle-sw" id="alarmNearby" onclick="toggleAlarm(this)"></button>
       </div>
     </div>
   </div>
@@ -814,30 +797,30 @@
       <div class="referral-header">
         <span class="referral-crown">👑</span>
         <div class="referral-title">Werde PRO – Kostenlos!</div>
-        <div class="referral-subtitle">Teile FreeFinder mit <strong>2 Freunden</strong> – sobald beide die App downloaden, wirst du PRO!</div>
+        <div class="referral-subtitle">Teile FreeFinder mit <strong>2 Freunden</strong> – sobald beide deine Einladung bestätigen, schaltest du PRO mit Alerts, Standortfilter und Spartracker frei.</div>
       </div>
       <div class="referral-steps">
         <div class="referral-step" id="refStep1">
           <div class="referral-step-num">1</div>
-          <div class="referral-step-text">Freund 1 hat die App heruntergeladen</div>
+          <div class="referral-step-text">Freund 1 hat deine Einladung bestätigt</div>
           <div class="referral-step-status" id="refStatus1">⏳</div>
         </div>
         <div class="referral-step" id="refStep2">
           <div class="referral-step-num">2</div>
-          <div class="referral-step-text">Freund 2 hat die App heruntergeladen</div>
+          <div class="referral-step-text">Freund 2 hat deine Einladung bestätigt</div>
           <div class="referral-step-status" id="refStatus2">⏳</div>
         </div>
       </div>
       <div class="referral-progress-section">
-        <div class="referral-progress-text">App-Downloads bestätigt</div>
+        <div class="referral-progress-text">Bestätigte Einladungen</div>
         <div class="referral-progress-bar">
           <div class="referral-progress-fill" id="referralProgressFill" style="width:0%"></div>
         </div>
         <div class="referral-count-big" id="referralCount">0</div>
-        <div class="referral-count-label">von 2 App-Downloads bestätigt</div>
+        <div class="referral-count-label">von 2 Einladungen bestätigt</div>
       </div>
       <div class="referral-link-box">
-        <div class="referral-link-label">🔗 Freunde öffnen diesen Link und laden die App:</div>
+        <div class="referral-link-label">🔗 Freunde öffnen diesen Link und bestätigen darüber die App:</div>
         <div class="referral-link-url" id="referralLinkDisplay">https://freefinder.wien/?ref=DEIN_CODE</div>
       </div>
       <div class="referral-share-btns">
@@ -853,12 +836,11 @@
     <div class="pro-unlock-title">DU BIST JETZT PRO!</div>
     <div class="pro-unlock-sub">Alle PRO-Features wurden freigeschaltet!<br>Danke, dass du FreeFinder mit deinen Freunden teilst! 🎉</div>
     <div class="pro-features-unlocked">
-      <div class="pro-feature-box">💰 Spar-Tracker Pro</div>
+      <div class="pro-feature-box">⭐ Deal des Tages Alarm</div>
+      <div class="pro-feature-box">🧠 Personalisierte Alerts</div>
       <div class="pro-feature-box">📍 Standort-Filter</div>
-      <div class="pro-feature-box">🏆 Top 5 Kategorien</div>
-      <div class="pro-feature-box">📊 Jahresübersicht</div>
-      <div class="pro-feature-box">📈 User-Vergleich</div>
-      <div class="pro-feature-box">🔔 Deal-Alarm</div>
+      <div class="pro-feature-box">💰 Spartracker & Jahresübersicht</div>
+      <div class="pro-feature-box">✨ Smarteres Für dich</div>
     </div>
     <button class="pro-close-btn" onclick="closeProAnimation()">🚀 Los geht's!</button>
   </div>
@@ -2824,11 +2806,12 @@
             const titleEl = document.querySelector('#savingsCard .savings-title');
             const cardEl = document.getElementById('savingsCard');
             if (!amountEl || !barEl || !cardEl) return;
+            const isProMember = typeof proData !== 'undefined' && !!proData.isPro;
 
             let displaySavings = Number(userData.totalSavings) || 0;
             let title = '💰 Diese Woche gespart';
 
-            if (proData.isPro) {
+            if (isProMember) {
                 const summary = getProSavingsSummary();
                 displaySavings = summary.weekTotal;
                 title = '💰 Diese Woche eingelöst';
@@ -3233,7 +3216,21 @@
         return recent.length >= 3 ? recent : discoveryDeals;
     }
 
+    function getBaseRecommendedDeals(discoveryDeals) {
+        return discoveryDeals
+            .slice()
+            .sort((a, b) => {
+                const aScore = getFreshnessScore(a) + getSocialProofScore(a) * 0.65 + (a.hot ? 1.4 : 0) + (a.isNew ? 1.1 : 0) + (a.type === 'gratis' ? 0.8 : 0);
+                const bScore = getFreshnessScore(b) + getSocialProofScore(b) * 0.65 + (b.hot ? 1.4 : 0) + (b.isNew ? 1.1 : 0) + (b.type === 'gratis' ? 0.8 : 0);
+                return bScore - aScore || (b.votes || 0) - (a.votes || 0);
+            })
+            .slice(0, 4);
+    }
+
     function getRecommendedDeals(discoveryDeals) {
+        if (!proData.isPro) {
+            return getBaseRecommendedDeals(discoveryDeals);
+        }
         const profile = buildDiscoveryProfile(discoveryDeals);
         const usedCategories = new Set();
         const scored = discoveryDeals.map((deal) => {
@@ -3270,6 +3267,12 @@
     }
 
     function getRecommendationReason(deal) {
+        if (!proData.isPro) {
+            if (deal.hot) return 'Gerade stark gefragt';
+            if (deal.isNew) return 'Frisch entdeckt';
+            if (deal.type === 'gratis') return 'Beliebter Gratis-Deal';
+            return 'Beliebt in Wien';
+        }
         const brand = getDisplayBrand(deal);
         const profile = userData.discoveryProfile || {};
         const categoryWeight = (profile.categories && profile.categories[deal.category]) || 0;
@@ -3740,7 +3743,30 @@
             requestAnimationFrame(scrollTarget);
         }
         function showFavorites() { currentView = 'favorites'; hideHeaderElements(); renderDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[3].classList.add('active'); }
-        function showStats() { currentView = 'stats'; hideHeaderElements(); if (!proData.isPro) { document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">Stats sind PRO</h2><p style="color:#6b7280;font-size:14px">Schalte deine persönlichen Zahlen, Sparverläufe und Deep Stats frei.</p></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:18px;padding:22px;color:white;margin-bottom:16px"><div style="font-size:18px;font-weight:800;margin-bottom:10px">Was du mit PRO siehst</div><div style="display:grid;gap:8px;font-size:14px;opacity:0.95"><div>📈 Punkte und Level im Detail</div><div>🔥 Deals angesehen und Einlösungen</div><div>💰 Sparverlauf pro Monat</div><div>🧠 Bessere Empfehlungen & Standort-Filter</div></div><button style="margin-top:16px;width:100%;background:white;color:#5b21b6;border:none;border-radius:14px;padding:14px 16px;font-size:15px;font-weight:800;cursor:pointer" onclick="openReferralModal()">👑 PRO gratis freischalten</button></div></div>'; scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[2].classList.add('active'); return; } const level = LEVELS[userData.level - 1]; const nextLevel = LEVELS[userData.level] || LEVELS[LEVELS.length - 1]; const xpProgress = Math.min(100, ((userData.xp - (LEVELS[userData.level - 1]?.xp || 0)) / (nextLevel.xp - (LEVELS[userData.level - 1]?.xp || 0))) * 100); document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">Deine Stats</h2></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;align-items:center;gap:16px"><div style="background:rgba(255,255,255,0.2);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800">' + userData.level + '</div><div style="flex:1"><div style="font-size:11px;opacity:0.8">LEVEL</div><div style="font-size:20px;font-weight:700">' + level.name + '</div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin:10px 0 6px;overflow:hidden"><div style="background:white;height:100%;width:' + xpProgress + '%;border-radius:4px"></div></div><div style="font-size:13px;opacity:0.9">' + userData.xp + ' / ' + nextLevel.xp + ' Punkte</div></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#667eea">' + userData.xp + '</div><div style="font-size:13px;color:#6b7280">Punkte gesamt</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#f59e0b">🔥 ' + userData.streak + '</div><div style="font-size:13px;color:#6b7280">Tage Streak</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#8b5cf6">' + userData.dealsViewed + '</div><div style="font-size:13px;color:#6b7280">Deals angesehen</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#10b981">' + (userData.dealsSubmitted || 0) + '</div><div style="font-size:13px;color:#6b7280">Deals geteilt</div></div></div><div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;opacity:0.9">💰 Gespart</div><div style="font-size:32px;font-weight:800;margin-top:4px">€' + (userData.savings || 0) + '</div></div><div style="text-align:right"><div style="font-size:13px;opacity:0.9">Ziel</div><div style="font-size:20px;font-weight:700">€50</div></div></div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin-top:12px;overflow:hidden"><div style="background:white;height:100%;width:' + Math.min(100, ((userData.savings || 0) / 50) * 100) + '%;border-radius:4px"></div></div></div></div>'; scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[2].classList.add('active'); }
+        function showStats() {
+            currentView = 'stats';
+            hideHeaderElements();
+            if (!proData.isPro) {
+                document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">Stats sind PRO</h2><p style="color:#6b7280;font-size:14px">Schalte deinen Spartracker, die Jahresübersicht und persönliche Zahlen frei.</p></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:18px;padding:22px;color:white;margin-bottom:16px"><div style="font-size:18px;font-weight:800;margin-bottom:10px">Was du mit PRO siehst</div><div style="display:grid;gap:8px;font-size:14px;opacity:0.95"><div>💰 Ersparnis diese Woche, diesen Monat und dieses Jahr</div><div>🗓️ Jahresübersicht deiner Einlösungen</div><div>📈 Punkte, Streaks und genutzte Deals</div><div>🧠 Smartere Empfehlungen & Standortfilter</div></div><button style="margin-top:16px;width:100%;background:white;color:#5b21b6;border:none;border-radius:14px;padding:14px 16px;font-size:15px;font-weight:800;cursor:pointer" onclick="openReferralModal()">👑 PRO gratis freischalten</button></div></div>';
+                scrollToTopContent();
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.querySelectorAll('.nav-item')[2].classList.add('active');
+                return;
+            }
+            const level = LEVELS[userData.level - 1];
+            const nextLevel = LEVELS[userData.level] || LEVELS[LEVELS.length - 1];
+            const xpProgress = Math.min(100, ((userData.xp - (LEVELS[userData.level - 1]?.xp || 0)) / (nextLevel.xp - (LEVELS[userData.level - 1]?.xp || 0))) * 100);
+            const now = new Date();
+            const monthKey = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            const monthSavings = Number((proData.monthlySavings && proData.monthlySavings[monthKey]) || 0);
+            const yearSavings = Object.entries(proData.monthlySavings || {})
+                .filter(([key]) => key.startsWith(String(now.getFullYear())))
+                .reduce((sum, [, value]) => sum + Number(value || 0), 0);
+            document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">Deine Stats</h2><p style="color:#6b7280;font-size:14px">Alles auf Basis deiner markierten Einlösungen und deiner Nutzung.</p></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;align-items:center;gap:16px"><div style="background:rgba(255,255,255,0.2);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800">' + userData.level + '</div><div style="flex:1"><div style="font-size:11px;opacity:0.8">LEVEL</div><div style="font-size:20px;font-weight:700">' + level.name + '</div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin:10px 0 6px;overflow:hidden"><div style="background:white;height:100%;width:' + xpProgress + '%;border-radius:4px"></div></div><div style="font-size:13px;opacity:0.9">' + userData.xp + ' / ' + nextLevel.xp + ' Punkte</div></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#667eea">' + userData.xp + '</div><div style="font-size:13px;color:#6b7280">Punkte gesamt</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#f59e0b">🔥 ' + userData.streak + '</div><div style="font-size:13px;color:#6b7280">Tage Streak</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#8b5cf6">' + userData.dealsViewed + '</div><div style="font-size:13px;color:#6b7280">Deals angesehen</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#10b981">' + Object.keys(proData.redeemedDeals || {}).length + '</div><div style="font-size:13px;color:#6b7280">Als eingelöst markiert</div></div></div><div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;opacity:0.9">💰 Diesen Monat gespart</div><div style="font-size:32px;font-weight:800;margin-top:4px">€' + monthSavings.toFixed(2).replace('.', ',') + '</div><div style="font-size:12px;opacity:0.85;margin-top:4px">Jahr gesamt: €' + yearSavings.toFixed(2).replace('.', ',') + '</div></div><div style="text-align:right"><div style="font-size:13px;opacity:0.9">Ziel</div><div style="font-size:20px;font-weight:700">€50</div></div></div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin-top:12px;overflow:hidden"><div style="background:white;height:100%;width:' + Math.min(100, (monthSavings / 50) * 100) + '%;border-radius:4px"></div></div></div></div>';
+            scrollToTopContent();
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.nav-item')[2].classList.add('active');
+        }
         function showSecretDeals() {
             currentView = 'secret';
             hideHeaderElements();
@@ -3750,13 +3776,14 @@
             const topVoted = getTopVotedDeals(discoveryDeals);
             const trending = getTrendingDeals(discoveryDeals);
 
-            const intro = '<div class="discovery-page-header"><div class="discovery-page-icon">✨</div><h2 class="discovery-page-title">Für dich</h2><p class="discovery-page-subtitle">Smarte Empfehlungen, starke Community-Votes und was gerade heiß läuft.</p></div>';
-            const recommendedSection = renderDiscoverySection('Für dich empfohlen', 'Basierend auf deinen Favoriten, Einlösungen, Views und deiner Nähe.', recommended, (deal) => getRecommendationReason(deal));
+            const intro = '<div class="discovery-page-header"><div class="discovery-page-icon">✨</div><h2 class="discovery-page-title">Für dich</h2><p class="discovery-page-subtitle">' + (proData.isPro ? 'Smarte Empfehlungen auf Basis deiner Favoriten, Einlösungen, Ansichten und deiner Nähe.' : 'Beliebte Empfehlungen, starke Community-Votes und was gerade heiß läuft.') + '</p></div>';
+            const proBoostCard = proData.isPro ? '' : '<div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:18px;padding:18px;color:white;margin-bottom:16px" onclick="openReferralModal()"><div style="font-size:17px;font-weight:800;margin-bottom:6px">👑 PRO macht Für dich deutlich smarter</div><div style="font-size:14px;opacity:0.95;line-height:1.45">Mit PRO lernt dein Feed aus Favoriten, Einlösungen, Marken, Standort und persönlichen Alerts.</div><button style="margin-top:14px;background:white;color:#5b21b6;border:none;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:800;cursor:pointer;width:100%">PRO gratis freischalten</button></div>';
+            const recommendedSection = renderDiscoverySection('Für dich empfohlen', proData.isPro ? 'Basierend auf deinen Favoriten, Einlösungen, Ansichten und deiner Nähe.' : 'Eine starke Vorschau aus frischen, beliebten und relevanten Deals.', recommended, (deal) => getRecommendationReason(deal));
             const topVotedSection = renderDiscoverySection('Meist gevotet diese Woche', 'Die Community-Sieger aus den neuesten und stärksten Deals.', topVoted, (_, index) => index === 0 ? 'Community-Favorit' : 'Viele Stimmen');
-            const trendingSection = renderDiscoverySection('Trendend gerade', 'Hot, neu oder gerade besonders stark geklickt.', trending, (deal) => deal.hot ? 'Gerade heiß' : (deal.isNew ? 'Frisch entdeckt' : 'Im Aufwind'));
+            const trendingSection = renderDiscoverySection('Trendet gerade', 'Hot, neu oder gerade besonders stark geklickt.', trending, (deal) => deal.hot ? 'Gerade heiß' : (deal.isNew ? 'Frisch entdeckt' : 'Im Aufwind'));
             const submitCta = '<div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:18px;padding:20px;color:white;text-align:center;cursor:pointer" onclick="openLinkModal()"><div style="font-size:34px;margin-bottom:8px">🔗</div><div style="font-size:18px;font-weight:700">Deal einreichen</div><div style="font-size:14px;opacity:0.9;margin-top:4px">Gute Funde direkt mit der Community teilen</div></div>';
 
-            document.getElementById('deals').innerHTML = '<div style="padding:4px 0">' + intro + recommendedSection + topVotedSection + trendingSection + submitCta + '</div>';
+            document.getElementById('deals').innerHTML = '<div style="padding:4px 0">' + intro + proBoostCard + recommendedSection + topVotedSection + trendingSection + submitCta + '</div>';
             scrollToTopContent();
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelectorAll('.nav-item')[1].classList.add('active');
@@ -3981,8 +4008,6 @@
         window.addEventListener('scroll', () => document.getElementById('filters').classList.toggle('scrolled', window.scrollY > 100), { passive: true });
         setupInteractionFeedback();
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-        
-        init();
     
 
   // ===== PRO MEMBERSHIP SYSTEM (v2 – App Download Tracking) =====
@@ -4002,7 +4027,7 @@
     isPro: false,
     referralCode: null,
     referralCount: 0,
-    alarms: { kaffee: true, essen: true, supermarkt: false, fitness: false, secret: true, gottesdienste: false, events: true, kirche: false },
+    alarms: { dailyDeal: true, personalized: true, nearby: false },
     selectedRadius: 0,
     userLat: null,
     userLng: null,
@@ -4021,6 +4046,26 @@
 
   function saveProData() {
     localStorage.setItem('proData', JSON.stringify(proData));
+  }
+
+  function migrateProAlerts() {
+    const legacy = proData.alarms || {};
+    const hasModernKeys = Object.prototype.hasOwnProperty.call(legacy, 'dailyDeal') || Object.prototype.hasOwnProperty.call(legacy, 'personalized') || Object.prototype.hasOwnProperty.call(legacy, 'nearby');
+    if (!hasModernKeys) {
+      proData.alarms = {
+        dailyDeal: true,
+        personalized: !!(legacy.kaffee || legacy.essen || legacy.secret || legacy.events),
+        nearby: !!(legacy.supermarkt || legacy.fitness || Number(proData.selectedRadius || 0) > 0)
+      };
+      saveProData();
+      return;
+    }
+    proData.alarms = {
+      dailyDeal: legacy.dailyDeal !== false,
+      personalized: legacy.personalized !== false,
+      nearby: !!legacy.nearby
+    };
+    saveProData();
   }
 
   function getReferralLandingUrl(refCode) {
@@ -4398,7 +4443,7 @@
     const code = generateReferralCode();
     await ensureReferralCodeRegistered();
     const link = getReferralLandingUrl(code);
-    const text = '📱 Hey! Ich nutze FreeFinder Wien für gratis Deals in Wien!\n\n👑 Öffne meinen Link, lade die App herunter und bestätige den Installationsschritt – dann werde ich kostenlos PRO.\n\n👉 ' + link + '\n\n☕ Gratis Kaffee, 🍔 Essen & mehr!';
+    const text = '📱 Hey! Ich nutze FreeFinder Wien für gratis Deals in Wien!\n\n👑 Öffne meinen Link und bestätige die App über meine Einladung – damit schalte ich kostenlos PRO mit Deal-Alarmen, Standortfilter und Spartracker frei.\n\n👉 ' + link + '\n\n☕ Gratis Kaffee, 🍔 Essen & mehr!';
     window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
     showToast('📤 WhatsApp geöffnet!');
   }
@@ -4435,11 +4480,16 @@
     if (proActiveBadge) proActiveBadge.style.display = isPro ? 'flex' : 'none';
     const proSections = document.querySelectorAll('.pro-feature-section');
     proSections.forEach(s => { s.style.display = isPro ? 'block' : 'none'; });
+    if (!isPro) {
+      Object.values(alarmIntervals).forEach((intervalId) => clearInterval(intervalId));
+      alarmIntervals = {};
+    }
     if (isPro) {
       updateSavingsProCard();
       updateYearOverview();
       updateCompareCard();
       updateAlarmSwitches();
+      initAlarmPolling();
     }
   }
 
@@ -4488,20 +4538,29 @@
       if (ytv) ytv.textContent = '\u20AC' + yearTotal.toFixed(2).replace('.',',');
     }
     function updateCompareCard() {
-      const el = document.getElementById('compareYou');
-      if (!el) return;
-      const redeemedCount = Object.keys(proData.redeemedDeals || {}).length;
-      const now = new Date();
-      const monthKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-      const monthSavings = (proData.monthlySavings && proData.monthlySavings[monthKey]) || 0;
-      el.textContent = redeemedCount + ' Deals \u00B7 \u20AC' + monthSavings.toFixed(0);
-      const rows = document.querySelectorAll('#compareCard .compare-row');
-      if (rows[1]) { const avgEl = rows[1].querySelector('.compare-val'); if (avgEl) avgEl.textContent = '8 Deals \u00B7 \u20AC34'; }
-      if (rows[2]) { const topEl = rows[2].querySelector('.compare-val'); if (topEl) topEl.textContent = '31 Deals \u00B7 \u20AC147'; }
+      const signalEl = document.getElementById('compareYou');
+      if (!signalEl) return;
+      const profile = buildDiscoveryProfile(getDiscoveryDeals());
+      const signalCount =
+        Object.keys(profile.categories || {}).length +
+        Object.keys(profile.brands || {}).length +
+        Object.keys(profile.types || {}).length;
+      signalEl.textContent = signalCount + ' Signale';
+      const radiusEl = document.getElementById('compareRadius');
+      if (radiusEl) {
+        const radius = Number(proData.selectedRadius || 0);
+        radiusEl.textContent = radius > 0 ? radius + ' km aktiv' : 'Aus';
+      }
+      const freshnessEl = document.getElementById('compareFreshness');
+      if (freshnessEl) {
+        const discoveryDeals = getDiscoveryDeals();
+        const freshDeals = discoveryDeals.filter((deal) => getFreshnessScore(deal) > 1.2).length;
+        freshnessEl.textContent = freshDeals + ' frische Deals';
+      }
     }
     function updateAlarmSwitches() {
-      const alarms = proData.alarms || {kaffee:true,essen:true,supermarkt:false,fitness:false,secret:true,gottesdienste:false,events:true,kirche:false};
-      const map = {alarmKaffee:'kaffee',alarmEssen:'essen',alarmSupermarkt:'supermarkt',alarmFitness:'fitness',alarmSecret:'secret',alarmGottesdienste:'gottesdienste',alarmEvents:'events'};
+      const alarms = proData.alarms || { dailyDeal: true, personalized: true, nearby: false };
+      const map = {alarmDailyDeal:'dailyDeal',alarmPersonalized:'personalized',alarmNearby:'nearby'};
       Object.entries(map).forEach(([id, cat]) => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.toggle('on', !!alarms[cat]);
@@ -4553,90 +4612,187 @@
     }
 
     function toggleAlarm(btn) {
-      const catMap = {alarmKaffee:'kaffee',alarmEssen:'essen',alarmSupermarkt:'supermarkt',alarmFitness:'fitness',alarmSecret:'secret',alarmEvents:'events',alarmGratis:'gratis',alarmGottesdienste:'gottesdienste',alarmKirche:'kirche'};
-      const cat = catMap[btn.id];
-      if (!cat) return;
+      const catMap = {
+        alarmDailyDeal: { key: 'dailyDeal', label: 'Deal des Tages Alarm' },
+        alarmPersonalized: { key: 'personalized', label: 'personalisierte Alerts' },
+        alarmNearby: { key: 'nearby', label: 'Deals in deiner Nähe' }
+      };
+      const alarmCfg = catMap[btn.id];
+      if (!alarmCfg) return;
       const isOn = btn.classList.contains('on');
       btn.classList.toggle('on', !isOn);
-      if (!proData.alarms) proData.alarms = {};
-      proData.alarms[cat] = !isOn;
+      if (!proData.alarms) proData.alarms = { dailyDeal: true, personalized: true, nearby: false };
+      proData.alarms[alarmCfg.key] = !isOn;
       saveProData();
       if (!isOn) {
-        // Alarm aktivieren - Notification Permission anfragen
         if ('Notification' in window && Notification.permission === 'default') {
           Notification.requestPermission().then(async (p) => {
             if (p === 'granted') {
-              showToast('\uD83D\uDD14 Deal-Alarm f\u00FCr ' + cat + ' aktiviert!');
+              showToast('\uD83D\uDD14 ' + alarmCfg.label + ' aktiviert!');
               await ensurePushSubscription();
-              startDealAlarmPolling(cat);
+              startDealAlarmPolling(alarmCfg.key);
             } else {
               showToast('\u26A0\uFE0F Bitte Benachrichtigungen im Browser erlauben!');
             }
           });
         } else if ('Notification' in window && Notification.permission === 'granted') {
-          showToast('\uD83D\uDD14 Deal-Alarm f\u00FCr ' + cat + ' aktiviert!');
+          showToast('\uD83D\uDD14 ' + alarmCfg.label + ' aktiviert!');
           ensurePushSubscription();
-          startDealAlarmPolling(cat);
+          startDealAlarmPolling(alarmCfg.key);
         } else {
-          showToast('\uD83D\uDD14 Deal-Alarm aktiviert! (In-App Benachrichtigung)');
-          startDealAlarmPolling(cat);
+          showToast('\uD83D\uDD14 ' + alarmCfg.label + ' aktiviert!');
+          startDealAlarmPolling(alarmCfg.key);
         }
       } else {
-        showToast('\uD83D\uDD15 Deal-Alarm f\u00FCr ' + cat + ' deaktiviert');
+        showToast('\uD83D\uDD15 ' + alarmCfg.label + ' deaktiviert');
       }
     }
 
-    // Deal-Alarm: Polling-System das regelm\u00E4\u00DFig nach neuen Deals sucht
-    let lastKnownDeals = {};
+    let lastKnownAlertDealIds = new Set();
+    let lastKnownDailyDealKey = '';
     let alarmIntervals = {};
 
-    function startDealAlarmPolling(cat) {
-      if (alarmIntervals[cat]) return; // bereits aktiv
-      // Aktuelle Deals dieser Kategorie speichern
-      const currentDeals = allDeals.filter(d => d.category === cat);
-      lastKnownDeals[cat] = new Set(currentDeals.map(d => d.id || d.title));
+    function getAlertDealKey(deal) {
+      return String(deal && (deal.id || deal.title || deal.url || ''));
+    }
 
-      // Alle 5 Minuten nach neuen Deals checken
-      alarmIntervals[cat] = setInterval(async () => {
-        if (!proData.alarms || !proData.alarms[cat]) {
-          clearInterval(alarmIntervals[cat]);
-          delete alarmIntervals[cat];
+    function seedAlertCaches() {
+      lastKnownAlertDealIds = new Set(getDiscoveryDeals().map(getAlertDealKey).filter(Boolean));
+    }
+
+    function showAlertNotification(title, body, tag) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, {
+          body,
+          icon: '/deal-finder/icon-192.png',
+          tag,
+          renotify: true
+        });
+      }
+      showToast(body);
+    }
+
+    function getDailyDealIdentity(payload) {
+      if (!payload) return '';
+      return [
+        payload.pickedDealId || '',
+        payload.title || payload.dailyTitle || payload.dailyDealTitle || '',
+        payload.url || ''
+      ].filter(Boolean).join('|');
+    }
+
+    async function pollDailyDealAlert() {
+      try {
+        const res = await fetch('deal-of-the-day.json?t=' + Date.now());
+        const payload = await res.json();
+        const identity = getDailyDealIdentity(payload);
+        if (!identity) return;
+        if (!lastKnownDailyDealKey) {
+          lastKnownDailyDealKey = identity;
           return;
         }
+        if (identity !== lastKnownDailyDealKey) {
+          lastKnownDailyDealKey = identity;
+          const nextTitle = payload.title || payload.dailyTitle || 'Deal des Tages';
+          showAlertNotification('⭐ Deal des Tages erneuert', 'Neuer Deal des Tages: ' + nextTitle, 'deal-alarm-daily');
+        }
+      } catch(e) { /* ignore */ }
+    }
+
+    function getPersonalizedAlertScore(deal) {
+      const discoveryDeals = getDiscoveryDeals();
+      const profile = buildDiscoveryProfile(discoveryDeals);
+      const brand = getDisplayBrand(deal);
+      let score = 0;
+      score += (profile.categories[deal.category] || 0) * 1.45;
+      score += (profile.brands[brand] || 0) * 1.2;
+      score += (profile.types[deal.type] || 0) * 0.9;
+      score += getDistancePreferenceScore(deal);
+      score += getFreshnessScore(deal);
+      score += getSocialProofScore(deal) * 0.45;
+      score += deal.hot ? 1.2 : 0;
+      score += deal.isNew ? 0.9 : 0;
+      if (favorites.includes(deal.id)) score += 3;
+      return score;
+    }
+
+    function isNearbyAlertDeal(deal) {
+      const radius = Number(proData.selectedRadius || 0);
+      if (!(radius > 0) || !proData.userLat || !proData.userLng) return false;
+      const geo = getDealGeoHint(deal);
+      if (!geo) return false;
+      if (geo.kind === 'citywide-vienna') return isUserInVienna(proData.userLat, proData.userLng);
+      if (typeof geo.lat !== 'number' || typeof geo.lng !== 'number') return false;
+      const distanceKm = haversineDistanceKm(proData.userLat, proData.userLng, geo.lat, geo.lng);
+      return Number.isFinite(distanceKm) && distanceKm <= radius;
+    }
+
+    async function pollNewDealAlerts() {
         try {
           const resp = await fetch('deals.json?t=' + Date.now());
           const data = await resp.json();
-          const catDeals = (data.deals || []).map(normalizeDealForApp).filter(d => d.category === cat);
-          const known = lastKnownDeals[cat] || new Set();
-          const newDeals = catDeals.filter(d => !known.has(d.id || d.title));
-          if (newDeals.length > 0) {
-            // Neue Deals gefunden!
-            const catNames = {kaffee:'\u2615 Kaffee',essen:'\uD83C\uDF54 Essen',supermarkt:'\uD83D\uDED2 Supermarkt',fitness:'\uD83D\uDCAA Fitness',events:'✝️ Community-Events',gratis:'\uD83C\uDF81 Gratis',gottesdienste:'\uD83D\uDD4A\uFE0F Gottesdienst-Zeiten',kirche:'\u26EA Kirche'};
-            const catName = catNames[cat] || cat;
-            // Browser Notification
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification('\uD83C\uDF81 FreeFinder Wien \u2013 ' + newDeals.length + ' neue ' + catName + ' Deals!', {
-                body: newDeals[0].title + (newDeals.length > 1 ? ' + ' + (newDeals.length-1) + ' weitere' : ''),
-                icon: '/deal-finder/icon-192.png',
-                tag: 'deal-alarm-' + cat,
-                renotify: true
-              });
+          const normalizedDeals = (data.deals || [])
+            .map(normalizeDealForApp)
+            .filter(d => d && d.id && (!d._lifecycle || d._lifecycle.state !== 'expired-hidden'));
+          const nextKnownIds = new Set(normalizedDeals.map(getAlertDealKey).filter(Boolean));
+          const newDeals = normalizedDeals.filter(d => !lastKnownAlertDealIds.has(getAlertDealKey(d)));
+          lastKnownAlertDealIds = nextKnownIds;
+          if (!newDeals.length) return;
+
+          if (proData.alarms && proData.alarms.personalized) {
+            const personalizedMatches = newDeals.filter((deal) => getPersonalizedAlertScore(deal) >= 5.5);
+            if (personalizedMatches.length) {
+              showAlertNotification('🧠 Neue Empfehlungen für dich', personalizedMatches[0].title + (personalizedMatches.length > 1 ? ' + ' + (personalizedMatches.length - 1) + ' weitere' : ''), 'deal-alarm-personalized');
             }
-            // In-App Toast
-            showToast('\uD83D\uDD14 ' + newDeals.length + ' neue ' + catName + ' Deals!');
-            // Deals aktualisieren
-            for (const d of catDeals) { known.add(d.id || d.title); }
-            lastKnownDeals[cat] = known;
-            // App-Deals neu laden
-            allDeals = data.deals || [];
-            renderDeals();
           }
+
+          if (proData.alarms && proData.alarms.nearby) {
+            const nearbyMatches = newDeals.filter(isNearbyAlertDeal);
+            if (nearbyMatches.length) {
+              showAlertNotification('📍 Neue Deals in deiner Nähe', nearbyMatches[0].title + (nearbyMatches.length > 1 ? ' + ' + (nearbyMatches.length - 1) + ' weitere' : ''), 'deal-alarm-nearby');
+            }
+          }
+
+          allDeals = data.deals || [];
+          renderDeals();
         } catch(e) { /* ignore fetch errors */ }
-      }, 300000); // 5 Minuten
+    }
+
+    function startDealAlarmPolling(kind) {
+      const intervalKey = (kind === 'personalized' || kind === 'nearby') ? 'discovery' : kind;
+      if (alarmIntervals[intervalKey]) return;
+      const runner = async () => {
+        if (!proData.isPro || !proData.alarms) {
+          clearInterval(alarmIntervals[intervalKey]);
+          delete alarmIntervals[intervalKey];
+          return;
+        }
+        if (intervalKey === 'dailyDeal' && !proData.alarms.dailyDeal) {
+          clearInterval(alarmIntervals[intervalKey]);
+          delete alarmIntervals[intervalKey];
+          return;
+        }
+        if (intervalKey === 'discovery' && !proData.alarms.personalized && !proData.alarms.nearby) {
+          clearInterval(alarmIntervals[intervalKey]);
+          delete alarmIntervals[intervalKey];
+          return;
+        }
+        if (intervalKey === 'dailyDeal') {
+          await pollDailyDealAlert();
+          return;
+        }
+        if (intervalKey === 'discovery') {
+          await pollNewDealAlerts();
+        }
+      };
+      runner();
+      alarmIntervals[intervalKey] = setInterval(runner, 300000);
     }
 
     // Beim Start alle aktiven Alarme starten
     function initAlarmPolling() {
+      if (!proData.isPro) return;
+      seedAlertCaches();
       if (proData.alarms) {
         Object.entries(proData.alarms).forEach(([cat, active]) => {
           if (active) startDealAlarmPolling(cat);
@@ -4699,8 +4855,9 @@
   }
 
   // ── Pro Init ──────────────────────────────────────────────────────
-    async function initProSystem() {
+  async function initProSystem() {
       generateReferralCode();
+      migrateProAlerts();
       if (!proData.redeemedDeals) proData.redeemedDeals = {};
       if (!proData.savingsByCategory) proData.savingsByCategory = {kaffee:0,essen:0,supermarkt:0,fitness:0,streaming:0};
       if (!proData.monthlySavings) proData.monthlySavings = {};
@@ -4723,6 +4880,7 @@
     }
   };
 
+  init();
   setTimeout(initProSystem, 100);
 
 </script>
