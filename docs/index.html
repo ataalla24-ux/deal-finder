@@ -50,6 +50,12 @@
         
         /* DEAL DES TAGES */
         .daily-deal { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; padding: 20px; margin-bottom: 16px; color: white; position: relative; overflow: hidden; }
+        .daily-deal.theme-gratis,
+        .daily-deal.theme-freebie { background: linear-gradient(135deg, #10b981, #059669); }
+        .daily-deal.theme-rabatt,
+        .daily-deal.theme-gewinnspiel { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .daily-deal.theme-bogo { background: linear-gradient(135deg, #0ea5e9, #2563eb); }
+        .daily-deal.theme-testabo { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
         .daily-deal::before { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); animation: shimmer 3s infinite; }
         @keyframes shimmer { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(180deg); } }
         .daily-label { background: #fbbf24; color: #1f2937; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; margin-bottom: 12px; }
@@ -2997,6 +3003,7 @@
                     const _brand = getDisplayBrand(dealForDisplay);
                     const _title = cleanText(deal.title || picked.title).replace(/\b(alle anzeigen|kategorien|app)\b/gi, '').replace(/\s+/g, ' ').trim();
                     const _desc = cleanText(deal.description || picked.description || '');
+                    applyDailyDealTheme(dealForDisplay.type || deal.type || picked.type);
                     document.getElementById('dailyTitle').textContent = (deal.logo || picked.logo || '') + ' ' + (_brand ? (_brand + ': ') : '') + _title;
                     document.getElementById('dailyDesc').textContent = _desc + (_loc ? ' — ' + _loc : '');
                     document.getElementById('dailyBtn').onclick = () => { window.open(deal.url || picked.url, '_blank'); trackDealView(deal.id || picked.dealId); };
@@ -3010,6 +3017,7 @@
           ? gratisDeals[new Date().getDate() % gratisDeals.length]
           : allDeals[0];
         if (!deal) {
+          applyDailyDealTheme('');
           document.getElementById('dailyTitle').textContent = '🎁 Deal des Tages';
           document.getElementById('dailyDesc').textContent = 'Bald verfügbar';
           document.getElementById('dailyBtn').onclick = () => {};
@@ -3019,10 +3027,20 @@
         const _brand2 = getDisplayBrand(deal);
         const _title2 = cleanText(deal.title);
         const _desc2 = cleanText(deal.description);
+        applyDailyDealTheme(deal.type);
         document.getElementById('dailyTitle').textContent = (deal.logo || '') + ' ' + (_brand2 ? (_brand2 + ': ') : '') + _title2;
         document.getElementById('dailyDesc').textContent = _desc2 + (_loc2 ? ' — ' + _loc2 : '');
         document.getElementById('dailyBtn').onclick = () => { window.open(deal.url, '_blank'); trackDealView(deal.id); };
     }
+        function applyDailyDealTheme(type) {
+            const dailyDealEl = document.getElementById('dailyDeal');
+            if (!dailyDealEl) return;
+            dailyDealEl.classList.remove('theme-gratis', 'theme-freebie', 'theme-rabatt', 'theme-gewinnspiel', 'theme-bogo', 'theme-testabo');
+            const safeType = String(type || '').toLowerCase();
+            if (['gratis', 'freebie', 'rabatt', 'gewinnspiel', 'bogo', 'testabo'].includes(safeType)) {
+                dailyDealEl.classList.add('theme-' + safeType);
+            }
+        }
         function updateCounts() {
             document.getElementById('countAll').textContent = allDeals.length;
             document.getElementById('countGratis').textContent = allDeals.filter(d => d.type === 'gratis' || d.type === 'freebie').length;
