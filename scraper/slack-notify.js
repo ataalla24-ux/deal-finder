@@ -63,6 +63,26 @@ function normalizeUrl(url) {
   return text;
 }
 
+function stableDealSignature(deal) {
+  const normalizedUrl = normalizeUrl(deal?.url)
+    .toLowerCase()
+    .replace(/^https?:\/\//, '')
+    .replace(/\/+$/, '');
+  const title = cleanText(deal?.title)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const brand = cleanText(deal?.brand)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const type = cleanText(deal?.type).toLowerCase();
+
+  return [normalizedUrl, brand, title, type].filter(Boolean).join('|');
+}
+
 function toIsoDate(value) {
   if (!value) return '';
   const d = new Date(value);
@@ -306,6 +326,26 @@ function loadPendingQueue() {
   }
 }
 
+function buildSeenSignatureMap(sentIds, pendingQueue) {
+  const seen = new Map();
+
+  for (const [key, value] of Object.entries(sentIds)) {
+    if (key.startsWith('sig:')) {
+      seen.set(key.slice(4), Number(value) || Date.now());
+    }
+  }
+
+  for (const deal of pendingQueue) {
+    if (!deal?.slackTs) continue;
+    const signature = stableDealSignature(deal);
+    if (!signature) continue;
+    const postedAt = deal.slackTs ? Number.parseFloat(deal.slackTs) * 1000 : Date.now();
+    seen.set(signature, Number.isFinite(postedAt) ? postedAt : Date.now());
+  }
+
+  return seen;
+}
+
 function isRecent(deal) {
   const pubMs = new Date(deal.pubDate).getTime();
   if (!Number.isFinite(pubMs)) return false;
@@ -440,7 +480,14 @@ async function main() {
   console.log(`📋 Total pending deals loaded: ${pendingDeals.length}`);
 
   const sentIds = loadSentIds();
-  const unseenDeals = pendingDeals.filter((deal) => !sentIds[deal.id]);
+  const existingQueue = loadPendingQueue();
+  const seenSignatures = buildSeenSignatureMap(sentIds, existingQueue);
+  const unseenDeals = pendingDeals.filter((deal) => {
+    if (sentIds[deal.id]) return false;
+    const signature = stableDealSignature(deal);
+    if (!signature) return true;
+    return !seenSignatures.has(signature);
+  });
   const freshDeals = unseenDeals
     .filter(isRecent)
     .filter(hasTrustedInstagramDate)
@@ -492,8 +539,14 @@ async function main() {
     await sleep(600);
   }
 
+  for (const deal of postedDeals) {
+    const signature = stableDealSignature(deal);
+    if (signature) {
+      sentIds[`sig:${signature}`] = Date.now();
+    }
+  }
+
   saveSentIds(sentIds);
-  const existingQueue = loadPendingQueue();
   const mergedQueue = mergePendingQueue(existingQueue, postedDeals);
   writePendingAll(mergedQueue);
 
