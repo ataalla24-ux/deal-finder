@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { isVagueExpiry, normalizeDealExpiry, parseExpiryDetails } from './expiry-utils.js';
+import { normalizeDealExpiry, shouldVerifyExpiryAgainstUrl } from './expiry-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,12 +35,7 @@ function loadDeals() {
 }
 
 function wantsUrlLookup(deal, now) {
-  const rawExpiry = String(deal.expires || deal.expiresOriginal || '').trim();
-  const parsedExpiry = parseExpiryDetails(rawExpiry, { now });
-  return Boolean(
-    deal.url &&
-    (!rawExpiry || isVagueExpiry(rawExpiry) || !parsedExpiry || parsedExpiry.precision !== 'day')
-  );
+  return shouldVerifyExpiryAgainstUrl(deal, { now });
 }
 
 async function main() {

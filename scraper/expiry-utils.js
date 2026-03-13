@@ -39,6 +39,13 @@ function cleanText(value) {
   return String(value).replace(/\s+/g, ' ').trim();
 }
 
+function confidenceRank(confidence) {
+  if (confidence === 'high') return 3;
+  if (confidence === 'medium') return 2;
+  if (confidence === 'low') return 1;
+  return 0;
+}
+
 function clearStructuredExpiryFields(deal) {
   delete deal.expiryKind;
   delete deal.expiryDisplayText;
@@ -137,6 +144,34 @@ export function shouldSkipUrlExpiryLookup(deal = {}, url = '', raw = '') {
 
   if (isRecurringChurchLikeExpiry(raw)) return true;
   return false;
+}
+
+export function shouldVerifyExpiryAgainstUrl(deal = {}, options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date();
+  const raw = cleanText(
+    deal.expires ||
+    deal.expiresOriginal ||
+    deal.end_date ||
+    deal.validity_date ||
+    ''
+  );
+  const url = cleanText(deal.url);
+  if (!url || !/^https?:\/\//i.test(url)) return false;
+  if (shouldSkipUrlExpiryLookup(deal, url, raw)) return false;
+  if (!raw) return true;
+  if (isVagueExpiry(raw)) return true;
+
+  const parsed = parseExpiryDetails(raw, { now });
+  if (!parsed?.date || parsed.precision !== 'day') return true;
+
+  const contextText = [
+    deal?.title,
+    deal?.description,
+    deal?.category,
+    deal?.type,
+  ].filter(Boolean).join(' ');
+  const shape = parseExpiryShape(raw, { now, contextText });
+  return confidenceRank(shape.confidence) < 3 || shape.kind === 'unknown';
 }
 
 function parseIsoLike(text) {
@@ -523,22 +558,51 @@ export function extractExpiryDateFromHtml(html, options = {}) {
     return null;
   }
 
-  const phrases = [
-    /(?:gültig\s*bis|einlösbar\s*bis|aktion\s*bis|angebot\s*bis|läuft\s*bis|nur\s*bis|endet\s*am|ends?\s*(?:on)?|until)\s*[:\-]?\s*([^.!,;\n]{4,90})/gi,
+  const phrasePatterns = [
+    {
+      kind: 'end',
+      label: 'gültig bis',
+      regex: /(?:gültig\s*bis|einlösbar\s*bis|aktion\s*bis|angebot\s*bis|läuft\s*bis|laeuft\s*bis|nur\s*bis|endet\s*am|end(?:s|et)?\s*(?:on)?|until)\s*[:\-]?\s*([^.!,;\n]{4,90})/gi,
+    },
+    {
+      kind: 'single',
+      label: 'gültig am',
+      regex: /(?:gültig\s*am|einlösbar\s*am|aktion\s*am|angebot\s*am|nur\s*am|event\s*am|opening\s*on)\s*[:\-]?\s*([^.!,;\n]{4,90})/gi,
+    },
+    {
+      kind: 'start',
+      label: 'gültig ab',
+      regex: /(?:gültig\s*ab|einlösbar\s*ab|aktion\s*ab|angebot\s*ab|verfügbar\s*ab|verfuegbar\s*ab|startet\s*(?:am|ab)?|available\s*from)\s*[:\-]?\s*([^.!,;\n]{4,90})/gi,
+    },
   ];
 
-  for (const re of phrases) {
+  for (const pattern of phrasePatterns) {
     let m;
-    while ((m = re.exec(text)) !== null) {
+    while ((m = pattern.regex.exec(text)) !== null) {
       const parsed = parseExpiryDetails(m[1], { now });
-      if (parsed?.date) return { ...parsed, source: 'url' };
+      if (parsed?.date) {
+        return {
+          ...parsed,
+          source: 'url',
+          rawText: cleanText(m[1]),
+          shapeText: `${pattern.label} ${cleanText(m[1])}`,
+          kindHint: pattern.kind,
+        };
+      }
     }
   }
 
   const broadMatches = text.match(/\b\d{4}-\d{1,2}-\d{1,2}\b|\b\d{1,2}\.\d{1,2}\.\d{2,4}\b|\b\d{1,2}\.\s*(?:j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s*\d{0,4}\b|\b(?:j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+\d{4}\b/gi) || [];
   for (const token of broadMatches.slice(0, 25)) {
     const parsed = parseExpiryDetails(token, { now });
-    if (parsed?.date) return { ...parsed, source: 'url' };
+    if (parsed?.date) {
+      return {
+        ...parsed,
+        source: 'url',
+        rawText: cleanText(token),
+        shapeText: cleanText(token),
+      };
+    }
   }
 
   return null;
@@ -594,17 +658,7 @@ export async function normalizeDealExpiry(deal, options = {}) {
   }
 
   const parsed = parseExpiryDetails(raw, { now });
-  const shouldCheckUrl = Boolean(
-    allowUrlLookup &&
-    url &&
-    /^https?:\/\//i.test(url) &&
-    !shouldSkipUrlExpiryLookup(deal, url, raw) &&
-    (
-      !parsed ||
-      parsed.precision !== 'day' ||
-      isVagueExpiry(raw)
-    )
-  );
+  const shouldCheckUrl = Boolean(allowUrlLookup && shouldVerifyExpiryAgainstUrl(deal, { now }));
 
   if (shouldCheckUrl) {
     const cache = options.urlCache;
@@ -618,7 +672,31 @@ export async function normalizeDealExpiry(deal, options = {}) {
       deal.expiresPrecision = fetched.precision || 'day';
       deal.expiresSource = fetched.source || 'url';
       deal.expiresDetectedFromUrl = true;
-      applyStructuredExpiryFields(deal, deal.expiresOriginal || raw || deal.expires, { now });
+      const contextText = [
+        deal?.title,
+        deal?.description,
+        deal?.category,
+        deal?.type,
+      ].filter(Boolean).join(' ');
+      const rawShape = parseExpiryShape(deal.expiresOriginal || raw || '', { now, contextText });
+      const fetchedShapeSource = cleanText(fetched.shapeText || fetched.rawText || isoDateFromMs(fetched.date.getTime()));
+      const fetchedShape = parseExpiryShape(fetchedShapeSource, { now, contextText });
+      const useFetchedStructure =
+        !parsed?.date ||
+        isVagueExpiry(raw) ||
+        rawShape.kind === 'unknown' ||
+        confidenceRank(fetchedShape.confidence) > confidenceRank(rawShape.confidence) ||
+        Boolean(fetched.kindHint) ||
+        fetchedShape.kind !== rawShape.kind;
+      applyStructuredExpiryFields(
+        deal,
+        useFetchedStructure ? fetchedShapeSource : (deal.expiresOriginal || raw || deal.expires),
+        { now, contextText }
+      );
+      if (useFetchedStructure) {
+        deal.expiryDisplayText = fetchedShapeSource;
+        deal.dateConfidence = fetchedShape.confidence || deal.dateConfidence || 'medium';
+      }
       return deal;
     }
   }

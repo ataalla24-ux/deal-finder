@@ -7,7 +7,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { isVagueExpiry, normalizeDealExpiry, parseExpiryDetails } from './expiry-utils.js';
+import { normalizeDealExpiry, parseExpiryDetails, shouldVerifyExpiryAgainstUrl } from './expiry-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,7 +18,7 @@ const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const NOW = new Date();
 const TWO_WEEKS_AGO = new Date(NOW.getTime() - TWO_WEEKS_MS);
 const SEVEN_DAYS_AGO = new Date(NOW.getTime() - SEVEN_DAYS_MS);
-const MAX_URL_EXPIRY_CHECKS = 40;
+const MAX_URL_EXPIRY_CHECKS = 120;
 const TRUSTED_IG_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp']);
 
 // ============================================
@@ -119,15 +119,7 @@ async function main() {
 
       for (const deal of deals) {
         const rawExpiry = String(deal.expires || deal.end_date || deal.validity_date || '').trim();
-        const parsedExpiry = parseExpiryDetails(rawExpiry, { now: NOW });
-        const wantsUrlLookup = Boolean(
-          deal.url &&
-          (
-            isVagueExpiry(rawExpiry) ||
-            !parsedExpiry?.date ||
-            parsedExpiry.precision !== 'day'
-          )
-        );
+        const wantsUrlLookup = shouldVerifyExpiryAgainstUrl(deal, { now: NOW });
         const cacheHadUrl = deal.url ? urlExpiryCache.has(deal.url) : false;
         const allowUrlLookup = wantsUrlLookup && (cacheHadUrl || urlChecksUsed < MAX_URL_EXPIRY_CHECKS);
         const hadUrlExpiry = Boolean(deal.expiresDetectedFromUrl);
