@@ -612,6 +612,29 @@
         .expiry-bar-fill.red { background: linear-gradient(90deg, #ef4444, #f97316); animation: pulse-bar 1s infinite; }
         @keyframes pulse-bar { 0%,100%{opacity:1} 50%{opacity:0.6} }
         .card-countdown { font-size: 12px; font-weight: 700; color: #ef4444; margin: 0 0 8px; }
+        .admin-fab { position: fixed; left: 18px; bottom: 92px; z-index: 920; width: 52px; height: 52px; border-radius: 50%; border: none; background: linear-gradient(135deg, #111827, #374151); color: white; font-size: 22px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.28); display: none; align-items: center; justify-content: center; }
+        .admin-fab.show { display: inline-flex; }
+        .deal-admin-btn { position: absolute; top: 12px; left: 12px; border: none; border-radius: 999px; background: rgba(17,24,39,0.92); color: white; font-size: 11px; font-weight: 800; padding: 6px 10px; z-index: 3; box-shadow: 0 8px 18px rgba(15,23,42,0.22); }
+        .admin-modal-content { text-align: left; max-width: 420px; }
+        .admin-modal-title { font-size: 22px; font-weight: 800; color: #111827; margin-bottom: 6px; }
+        .admin-modal-subtitle { font-size: 13px; color: #6b7280; margin-bottom: 18px; line-height: 1.5; }
+        .admin-form-grid { display: grid; gap: 10px; }
+        .admin-form-label { font-size: 12px; font-weight: 800; color: #374151; text-transform: uppercase; letter-spacing: 0.03em; }
+        .admin-form-input, .admin-form-select, .admin-form-textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 14px; padding: 12px 14px; font-size: 14px; color: #111827; background: #fff; font-family: inherit; }
+        .admin-form-textarea { min-height: 110px; resize: vertical; }
+        .admin-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .admin-form-hint { font-size: 12px; color: #6b7280; margin-top: 4px; line-height: 1.4; }
+        .admin-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+        .admin-save-btn, .admin-secondary-btn, .admin-danger-btn { border: none; border-radius: 14px; padding: 13px 14px; font-weight: 800; font-size: 14px; cursor: pointer; font-family: inherit; }
+        .admin-save-btn { background: linear-gradient(135deg, #111827, #374151); color: white; grid-column: span 2; }
+        .admin-secondary-btn { background: #eef2ff; color: #4338ca; }
+        .admin-danger-btn { background: #fef2f2; color: #b91c1c; }
+        .admin-token-status { font-size: 12px; color: #6b7280; margin-top: 8px; }
+        .admin-inline-checkbox { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #111827; font-weight: 600; padding: 6px 2px; }
+        @media (max-width: 420px) {
+          .admin-actions, .admin-form-row { grid-template-columns: 1fr; }
+          .admin-save-btn { grid-column: span 1; }
+        }
 </style>
 </head>
 <body>
@@ -976,6 +999,77 @@
         <div class="success-bonus">🏆 Du bist jetzt Deal-Hunter Rang #<span id="userRank">42</span></div>
     </div>
 
+    <button class="admin-fab" id="adminFab" onclick="openAdminAccess()">🛠️</button>
+
+    <div class="modal-overlay" id="adminDealModal">
+        <div class="modal admin-modal-content">
+            <button class="modal-close" onclick="closeAdminDealModal()">×</button>
+            <div class="admin-modal-title">Deal bearbeiten</div>
+            <div class="admin-modal-subtitle" id="adminModalDealMeta">Korrigiere Text, Datum, Reihenfolge oder setze den Deal direkt als Deal des Tages.</div>
+            <div class="admin-form-grid">
+                <div>
+                    <div class="admin-form-label">Titel</div>
+                    <input class="admin-form-input" id="adminTitleInput" type="text" placeholder="Titel korrigieren">
+                </div>
+                <div>
+                    <div class="admin-form-label">Marke</div>
+                    <input class="admin-form-input" id="adminBrandInput" type="text" placeholder="z. B. Starbucks">
+                </div>
+                <div>
+                    <div class="admin-form-label">Beschreibung</div>
+                    <textarea class="admin-form-textarea" id="adminDescriptionInput" placeholder="Kurzbeschreibung korrigieren"></textarea>
+                </div>
+                <div>
+                    <div class="admin-form-label">Ort</div>
+                    <input class="admin-form-input" id="adminDistanceInput" type="text" placeholder="z. B. Wien, 1010">
+                </div>
+                <div class="admin-form-row">
+                    <div>
+                        <div class="admin-form-label">Gültigkeitstyp</div>
+                        <select class="admin-form-select" id="adminExpiryKindInput">
+                            <option value="">Automatisch</option>
+                            <option value="single">Gültig am</option>
+                            <option value="end">Gültig bis</option>
+                            <option value="start">Gültig ab</option>
+                            <option value="range">Zeitraum</option>
+                            <option value="month">Monat</option>
+                            <option value="recurring">Regelmäßig</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="admin-form-label">Pin-Priorität</div>
+                        <input class="admin-form-input" id="adminPinnedRankInput" type="number" min="0" max="999" step="1" placeholder="0">
+                    </div>
+                </div>
+                <div class="admin-form-row">
+                    <div>
+                        <div class="admin-form-label">Start / Datum</div>
+                        <input class="admin-form-input" id="adminStartDateInput" type="date">
+                    </div>
+                    <div>
+                        <div class="admin-form-label">Ende</div>
+                        <input class="admin-form-input" id="adminEndDateInput" type="date">
+                    </div>
+                </div>
+                <div>
+                    <div class="admin-form-label">Anzeigetext Datum</div>
+                    <input class="admin-form-input" id="adminExpiryDisplayInput" type="text" placeholder="z. B. Gültig bis 31.03.2026">
+                    <div class="admin-form-hint">Wenn leer, baut die App den Text aus dem Typ und den Datumsfeldern selbst.</div>
+                </div>
+                <label class="admin-inline-checkbox">
+                    <input type="checkbox" id="adminHiddenInput">
+                    Deal ausblenden
+                </label>
+            </div>
+            <div class="admin-actions">
+                <button class="admin-secondary-btn" onclick="setSelectedDealAsDailyDeal()">⭐ Deal des Tages</button>
+                <button class="admin-danger-btn" onclick="toggleSelectedDealHidden()"><span id="adminHideBtnLabel">🗑️ Ausblenden</span></button>
+                <button class="admin-save-btn" onclick="saveAdminDeal()">Speichern</button>
+            </div>
+            <div class="admin-token-status" id="adminTokenStatus">Admin-Modus aktiv.</div>
+        </div>
+    </div>
+
     <script>
         let allDeals = [];
         let currentFilter = 'alle';
@@ -992,6 +1086,9 @@
         let userRatings = JSON.parse(localStorage.getItem('userRatings') || '{}');
         let userDeals = JSON.parse(localStorage.getItem('userDeals') || '[]');
         let submittedLinks = JSON.parse(localStorage.getItem('submittedLinks') || '[]');
+        let dealOverridesById = {};
+        let dailyDealOverride = null;
+        let currentAdminDealId = '';
         const feedbackState = { audioContext: null, lastHapticAt: 0, lastToneAt: 0 };
         const FEEDBACK_PRESS_SELECTOR = 'button, .nav-item, .filter-btn, .search-tag, .fab-add, .pro-banner, .radius-btn, .toggle-sw, .toggle-btn, .action-btn';
         const FEEDBACK_HAPTICS = {
@@ -1002,6 +1099,8 @@
             warning: [18, 40, 18],
             error: [24, 45, 24]
         };
+        const ADMIN_TOKEN_KEY = 'freefinder_admin_token';
+        const ADMIN_QUERY_ENABLED = new URLSearchParams(window.location.search).get('admin') === '1';
 
         function getAudioContext() {
             const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -2736,6 +2835,7 @@
             startCountdowns();
             loadDeals();
             updateFavBadge();
+            updateAdminUiVisibility();
         }
         
         function checkStreak() {
@@ -2970,8 +3070,9 @@
             const baseDeals = data.deals.map(d => normalizeDealForApp({ ...d, votes: votes[d.id] || d.votes || 0 }));
             // Kombiniere User-Deals mit genehmigten Base-Deals (nur Slack-approved)
             const userDealsWithVotes = userDeals.map(d => normalizeDealForApp({ ...d, votes: votes[d.id] || d.votes || 0 }));
-            allDeals = [...userDealsWithVotes, ...baseDeals];
-            updateCounts(); renderDeals(); setDailyDeal();
+            await fetchDealOverrideState();
+            allDeals = applyDealOverridesToList([...userDealsWithVotes, ...baseDeals]);
+            updateCounts(); renderDeals(); setDailyDeal(); updateAdminUiVisibility();
         } catch (e) {
             document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">\uD83D\uDE15</div><p>Fehler</p></div>';
         }
@@ -2987,6 +3088,20 @@
                 month: '2-digit',
                 day: '2-digit',
             }).format(new Date());
+        }
+        if (dailyDealOverride && dailyDealOverride.dealId) {
+            const overridden = allDeals.find(d => d.id === dailyDealOverride.dealId);
+            if (overridden) {
+                const _locOverride = getDisplayLocation(overridden);
+                const _brandOverride = getDisplayBrand(overridden);
+                const _titleOverride = cleanText(overridden.title).replace(/\b(alle anzeigen|kategorien|app)\b/gi, '').replace(/\s+/g, ' ').trim();
+                const _descOverride = cleanText(overridden.description || '');
+                applyDailyDealTheme(overridden.type);
+                document.getElementById('dailyTitle').textContent = (overridden.logo || '') + ' ' + (_brandOverride ? (_brandOverride + ': ') : '') + _titleOverride;
+                document.getElementById('dailyDesc').textContent = _descOverride + (_locOverride ? ' — ' + _locOverride : '');
+                document.getElementById('dailyBtn').onclick = () => { window.open(overridden.url, '_blank'); trackDealView(overridden.id); };
+                return;
+            }
         }
         // Try to load manually picked deal from deal-of-the-day.json
         try {
@@ -3091,6 +3206,10 @@
           });
       }
       deals.sort((a, b) => {
+        const aPinned = Number(a.pinnedRank || 0);
+        const bPinned = Number(b.pinnedRank || 0);
+        if (aPinned !== bPinned) return bPinned - aPinned;
+
         const aDist = Number.isFinite(a._distanceKm) ? a._distanceKm : Number.POSITIVE_INFINITY;
         const bDist = Number.isFinite(b._distanceKm) ? b._distanceKm : Number.POSITIVE_INFINITY;
         if (radius > 0 && aDist !== bDist) return aDist - bDist;
@@ -3555,6 +3674,7 @@
             const _loc = getDisplayLocation(d);
             const _expires = d.expires || '';
             const _brand = getDisplayBrand(d);
+                        const adminBtn = isAdminUiEnabled() ? '<button class="deal-admin-btn" onclick="event.stopPropagation(); openAdminEditor(\'' + d.id + '\')">✏️ Bearbeiten</button>' : '';
                         const _cleanTitle = cleanUiNoiseText(d.title || 'Deal');
                             const _titleParts = _cleanTitle.match(/^([^,]+),\s*(.+)$/);
                             const _formattedTitle = _titleParts ? _titleParts[1] + '<span class="deal-title-sub">' + _titleParts[2] + '</span>' : _cleanTitle;
@@ -3565,7 +3685,7 @@
             const _hasTargetUrl = !!(d.url && String(d.url).trim());
             const _defaultBtnLabel = d.category === 'gottesdienste' ? 'Zeiten ansehen' : d.category === 'events' ? 'Event ansehen' : d.category === 'kirche' ? 'Zur Kirche' : 'Zum Deal';
             const _dealBtn = '<button class="action-btn deal-link-btn' + (_hasTargetUrl ? '' : ' disabled') + '" ' + (_hasTargetUrl ? '' : 'disabled ') + 'onclick="openDealUrl(\'' + d.id + '\', event)">' + '<span class="btn-icon">\uD83D\uDD17</span>' + (_hasTargetUrl ? _defaultBtnLabel : 'Link folgt') + '</button>';
-            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + _expClass + (_isExpiredVisible ? ' expired-visible' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')">' + renderDealLogo(d) + '<div><div class="deal-brand">' + _brand + '</div><div class="deal-title">' + _formattedTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + _loc + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_hasExpiry && _expiry.showUrgency && !_isExpiredVisible ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div><div class="card-countdown ' + _expiry.countdownClass + '"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">' + _expiry.countdownText + '</span></div>' : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + '<div class="deal-meta">' + (_isExpiredVisible ? '<span class="badge badge-expiry urgent">\u26A0\uFE0F Bereits abgelaufen</span>' : '') + (_isExp ? '<span class="badge badge-expiry ' + _expiry.badgeClass + '">' + _expiry.badgeText + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row">' + _dealBtn + '</div><div class="vote-section"><button class="action-btn vote-btn ' + (votedDeals.includes(d.id) ? 'is-voted' : '') + '" ' + (votedDeals.includes(d.id) ? 'disabled ' : '') + 'onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
+            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + _expClass + (_isExpiredVisible ? ' expired-visible' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + adminBtn + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')">' + renderDealLogo(d) + '<div><div class="deal-brand">' + _brand + '</div><div class="deal-title">' + _formattedTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + _loc + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_hasExpiry && _expiry.showUrgency && !_isExpiredVisible ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div><div class="card-countdown ' + _expiry.countdownClass + '"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">' + _expiry.countdownText + '</span></div>' : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">Kopieren</button></div>' : '') + '<div class="deal-meta">' + (_isExpiredVisible ? '<span class="badge badge-expiry urgent">\u26A0\uFE0F Bereits abgelaufen</span>' : '') + (_isExp ? '<span class="badge badge-expiry ' + _expiry.badgeClass + '">' + _expiry.badgeText + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' Bewertungen</span></div><div class="action-row">' + _dealBtn + '</div><div class="vote-section"><button class="action-btn vote-btn ' + (votedDeals.includes(d.id) ? 'is-voted' : '') + '" ' + (votedDeals.includes(d.id) ? 'disabled ' : '') + 'onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>Teilen</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC Community Tipps</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
         }).join('');
 
         checkDeepLink();
@@ -4179,6 +4299,221 @@
       throw new Error((body && body.error) || ('Referral API failed: ' + res.status));
     }
     return body;
+  }
+
+  function getAdminToken() {
+    return localStorage.getItem(ADMIN_TOKEN_KEY) || '';
+  }
+
+  function setAdminToken(token) {
+    localStorage.setItem(ADMIN_TOKEN_KEY, String(token || '').trim());
+  }
+
+  function clearAdminToken() {
+    localStorage.removeItem(ADMIN_TOKEN_KEY);
+  }
+
+  function isAdminUiEnabled() {
+    return ADMIN_QUERY_ENABLED || !!getAdminToken();
+  }
+
+  async function adminDealApi(path, options = {}) {
+    const base = await getReferralApiBase();
+    if (!base) throw new Error('Admin-Backend ist aktuell nicht erreichbar.');
+    const token = getAdminToken();
+    if (!token) throw new Error('Admin-Token fehlt.');
+    const res = await fetch(base + path, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        ...(options.headers || {})
+      },
+      ...options
+    });
+    let body = null;
+    try {
+      body = await res.json();
+    } catch (e) {
+      body = null;
+    }
+    if (!res.ok) {
+      throw new Error((body && body.error) || ('Admin API failed: ' + res.status));
+    }
+    return body;
+  }
+
+  async function fetchDealOverrideState() {
+    dealOverridesById = {};
+    dailyDealOverride = null;
+    try {
+      const base = await getReferralApiBase();
+      if (!base) return;
+      const res = await fetch(base + '/api/deals/state?t=' + Date.now());
+      if (!res.ok) return;
+      const data = await res.json();
+      const overrides = Array.isArray(data && data.overrides) ? data.overrides : [];
+      overrides.forEach((item) => {
+        if (item && item.dealId) dealOverridesById[item.dealId] = item;
+      });
+      if (data && data.dailyDeal && data.dailyDeal.dealId) {
+        dailyDealOverride = data.dailyDeal;
+      }
+    } catch (e) {
+      console.warn('Deal override state unavailable:', e);
+    }
+  }
+
+  function applyDealOverride(deal) {
+    if (!deal || !deal.id) return deal;
+    const override = dealOverridesById[deal.id];
+    if (!override) return deal;
+    const merged = { ...deal };
+    if (override.title) merged.title = override.title;
+    if (override.brand) merged.brand = override.brand;
+    if (override.description) merged.description = override.description;
+    if (override.distance) merged.distance = override.distance;
+    if (override.expiryKind) merged.expiryKind = override.expiryKind;
+    if (override.validOn) merged.validOn = override.validOn;
+    if (override.validFrom) merged.validFrom = override.validFrom;
+    if (override.validUntil) merged.validUntil = override.validUntil;
+    if (override.expiryDisplayText) merged.expiryDisplayText = override.expiryDisplayText;
+    if (typeof override.pinnedRank === 'number') merged.pinnedRank = override.pinnedRank;
+    merged.hidden = !!override.hidden;
+    merged._manualOverride = true;
+    return normalizeDealForApp(merged);
+  }
+
+  function applyDealOverridesToList(list) {
+    return (Array.isArray(list) ? list : [])
+      .map(applyDealOverride)
+      .filter(d => d && !d.hidden);
+  }
+
+  function updateAdminUiVisibility() {
+    const fab = document.getElementById('adminFab');
+    if (!fab) return;
+    fab.classList.toggle('show', isAdminUiEnabled());
+  }
+
+  async function openAdminAccess() {
+    const existingToken = getAdminToken();
+    if (!existingToken) {
+      const entered = window.prompt('Admin-Token eingeben');
+      if (!entered) return;
+      setAdminToken(entered);
+    }
+    try {
+      await adminDealApi('/api/deals/admin/check');
+      updateAdminUiVisibility();
+      renderDeals();
+      showToast('🛠️ Admin-Modus aktiv');
+    } catch (e) {
+      clearAdminToken();
+      updateAdminUiVisibility();
+      showToast('🚫 Admin-Token ungültig');
+    }
+  }
+
+  function closeAdminDealModal() {
+    document.getElementById('adminDealModal').classList.remove('show');
+    currentAdminDealId = '';
+  }
+
+  function findDealById(dealId) {
+    return (allDeals || []).find(d => d.id === dealId) || null;
+  }
+
+  function populateAdminModalFromDeal(deal) {
+    const override = dealOverridesById[deal.id] || {};
+    document.getElementById('adminTitleInput').value = override.title || deal.title || '';
+    document.getElementById('adminBrandInput').value = override.brand || deal.brand || '';
+    document.getElementById('adminDescriptionInput').value = override.description || deal.description || '';
+    document.getElementById('adminDistanceInput').value = override.distance || deal.distance || '';
+    document.getElementById('adminExpiryKindInput').value = override.expiryKind || deal.expiryKind || '';
+    document.getElementById('adminPinnedRankInput').value = String(override.pinnedRank ?? deal.pinnedRank ?? '');
+    document.getElementById('adminStartDateInput').value = override.validOn || override.validFrom || deal.validOn || deal.validFrom || '';
+    document.getElementById('adminEndDateInput').value = override.validUntil || deal.validUntil || '';
+    document.getElementById('adminExpiryDisplayInput').value = override.expiryDisplayText || deal.expiryDisplayText || '';
+    document.getElementById('adminHiddenInput').checked = !!override.hidden;
+    document.getElementById('adminModalDealMeta').textContent = (deal.brand || 'Deal') + ' • ' + (deal.id || '');
+    document.getElementById('adminHideBtnLabel').textContent = (override.hidden || deal.hidden) ? 'Deal wieder anzeigen' : 'Deal ausblenden';
+    const isDaily = dailyDealOverride && dailyDealOverride.dealId === deal.id;
+    document.getElementById('adminTokenStatus').textContent = isDaily ? 'Aktuell als Deal des Tages gesetzt' : 'Admin-Override aktiv nach dem Speichern.';
+  }
+
+  function openAdminEditor(dealId) {
+    if (!isAdminUiEnabled()) return;
+    const deal = findDealById(dealId);
+    if (!deal) {
+      showToast('⚠️ Deal nicht gefunden');
+      return;
+    }
+    currentAdminDealId = dealId;
+    populateAdminModalFromDeal(deal);
+    document.getElementById('adminDealModal').classList.add('show');
+  }
+
+  async function saveAdminDeal() {
+    if (!currentAdminDealId) return;
+    const startDate = document.getElementById('adminStartDateInput').value || '';
+    const endDate = document.getElementById('adminEndDateInput').value || '';
+    const expiryKind = document.getElementById('adminExpiryKindInput').value || '';
+    const payload = {
+      dealId: currentAdminDealId,
+      title: document.getElementById('adminTitleInput').value,
+      brand: document.getElementById('adminBrandInput').value,
+      description: document.getElementById('adminDescriptionInput').value,
+      distance: document.getElementById('adminDistanceInput').value,
+      expiryKind: expiryKind || null,
+      validOn: expiryKind === 'single' ? startDate : null,
+      validFrom: expiryKind !== 'single' ? startDate : null,
+      validUntil: endDate || null,
+      expiryDisplayText: document.getElementById('adminExpiryDisplayInput').value,
+      pinnedRank: document.getElementById('adminPinnedRankInput').value,
+      hidden: document.getElementById('adminHiddenInput').checked
+    };
+    try {
+      await adminDealApi('/api/deals/admin/override', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      await fetchDealOverrideState();
+      allDeals = applyDealOverridesToList(allDeals);
+      updateCounts();
+      renderDeals();
+      await setDailyDeal();
+      const updatedDeal = findDealById(currentAdminDealId) || { id: currentAdminDealId, brand: 'Deal' };
+      populateAdminModalFromDeal(updatedDeal);
+      showToast('✅ Deal gespeichert');
+    } catch (e) {
+      showToast('❌ ' + (e.message || 'Speichern fehlgeschlagen'));
+    }
+  }
+
+  async function setSelectedDealAsDailyDeal() {
+    if (!currentAdminDealId) return;
+    try {
+      const data = await adminDealApi('/api/deals/admin/daily-deal', {
+        method: 'POST',
+        body: JSON.stringify({ dealId: currentAdminDealId })
+      });
+      dailyDealOverride = (data && data.dailyDeal) || { dealId: currentAdminDealId };
+      await setDailyDeal();
+      const updatedDeal = findDealById(currentAdminDealId) || { id: currentAdminDealId, brand: 'Deal' };
+      populateAdminModalFromDeal(updatedDeal);
+      showToast('⭐ Deal des Tages gesetzt');
+    } catch (e) {
+      showToast('❌ ' + (e.message || 'Deal des Tages fehlgeschlagen'));
+    }
+  }
+
+  async function toggleSelectedDealHidden() {
+    if (!currentAdminDealId) return;
+    const deal = findDealById(currentAdminDealId) || { id: currentAdminDealId };
+    const currentHidden = !!((dealOverridesById[currentAdminDealId] && dealOverridesById[currentAdminDealId].hidden) || deal.hidden);
+    document.getElementById('adminHiddenInput').checked = !currentHidden;
+    await saveAdminDeal();
+    if (!findDealById(currentAdminDealId)) closeAdminDealModal();
   }
 
   async function ensureReferralCodeRegistered() {

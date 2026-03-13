@@ -23,6 +23,11 @@ function normalizeId(value) {
   return /^[a-zA-Z0-9_-]{8,128}$/.test(id) ? id : '';
 }
 
+function normalizeDealId(value) {
+  const id = String(value || '').trim();
+  return /^[a-zA-Z0-9:_-]{1,256}$/.test(id) ? id : '';
+}
+
 function normalizePushToken(value) {
   const token = String(value || '').trim().toLowerCase();
   return /^[a-f0-9]{32,256}$/.test(token) ? token : '';
@@ -42,6 +47,14 @@ function pendingKey(code, visitorId) {
 
 function apnsTokenKey(token) {
   return `push:apns:${token}`;
+}
+
+function dealOverrideKey(dealId) {
+  return `deal:override:${dealId}`;
+}
+
+function dealDailyKey() {
+  return 'deal:daily';
 }
 
 function maskPushToken(token) {
@@ -244,6 +257,96 @@ async function listApnsTokens(env, limit = 20) {
   return records;
 }
 
+async function listDealOverrides(env, limit = 500) {
+  const listed = await env.REFERRAL_KV.list({ prefix: 'deal:override:', limit });
+  const keys = Array.isArray(listed?.keys) ? listed.keys : [];
+  const records = [];
+
+  for (const entry of keys) {
+    const record = await getJsonKV(env, entry.name);
+    if (record && record.dealId) records.push(record);
+  }
+
+  records.sort((a, b) => {
+    const aPinned = Number.isFinite(a?.pinnedRank) ? Number(a.pinnedRank) : 0;
+    const bPinned = Number.isFinite(b?.pinnedRank) ? Number(b.pinnedRank) : 0;
+    if (aPinned !== bPinned) return bPinned - aPinned;
+    return Number(b?.updatedAt || 0) - Number(a?.updatedAt || 0);
+  });
+
+  return records;
+}
+
+function sanitizePublicDealOverride(record) {
+  if (!record || !record.dealId) return null;
+  return {
+    dealId: record.dealId,
+    hidden: Boolean(record.hidden),
+    pinnedRank: Number.isFinite(record.pinnedRank) ? Number(record.pinnedRank) : 0,
+    title: typeof record.title === 'string' ? record.title : '',
+    description: typeof record.description === 'string' ? record.description : '',
+    brand: typeof record.brand === 'string' ? record.brand : '',
+    distance: typeof record.distance === 'string' ? record.distance : '',
+    expires: typeof record.expires === 'string' ? record.expires : '',
+    expiresOriginal: typeof record.expiresOriginal === 'string' ? record.expiresOriginal : '',
+    expiryKind: typeof record.expiryKind === 'string' ? record.expiryKind : '',
+    validOn: typeof record.validOn === 'string' ? record.validOn : '',
+    validFrom: typeof record.validFrom === 'string' ? record.validFrom : '',
+    validUntil: typeof record.validUntil === 'string' ? record.validUntil : '',
+    expiryDisplayText: typeof record.expiryDisplayText === 'string' ? record.expiryDisplayText : '',
+    updatedAt: Number(record.updatedAt || 0) || null,
+  };
+}
+
+function sanitizePublicDailyDeal(record) {
+  if (!record || !record.dealId) return null;
+  return {
+    dealId: record.dealId,
+    updatedAt: Number(record.updatedAt || 0) || null,
+    note: typeof record.note === 'string' ? record.note : '',
+  };
+}
+
+function normalizePinnedRank(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 0;
+  return Math.max(0, Math.min(999, Math.round(parsed)));
+}
+
+function cleanShortText(value, max = 240) {
+  return String(value || '').trim().replace(/\s+/g, ' ').slice(0, max);
+}
+
+function cleanLongText(value, max = 2500) {
+  return String(value || '').trim().replace(/\s+/g, ' ').slice(0, max);
+}
+
+function normalizeDealOverrideInput(body, existing = null) {
+  const dealId = normalizeDealId(body?.dealId || existing?.dealId);
+  if (!dealId) return null;
+
+  const next = {
+    dealId,
+    hidden: body?.hidden === true,
+    pinnedRank: normalizePinnedRank(body?.pinnedRank),
+    title: cleanShortText(body?.title, 240),
+    description: cleanLongText(body?.description, 2500),
+    brand: cleanShortText(body?.brand, 120),
+    distance: cleanShortText(body?.distance, 200),
+    expires: cleanShortText(body?.expires, 120),
+    expiresOriginal: cleanShortText(body?.expiresOriginal, 180),
+    expiryKind: cleanShortText(body?.expiryKind, 40).toLowerCase(),
+    validOn: cleanShortText(body?.validOn, 32),
+    validFrom: cleanShortText(body?.validFrom, 32),
+    validUntil: cleanShortText(body?.validUntil, 32),
+    expiryDisplayText: cleanShortText(body?.expiryDisplayText, 180),
+    updatedAt: Date.now(),
+    createdAt: existing?.createdAt || Date.now(),
+  };
+
+  return next;
+}
+
 function normalizeRecord(record, code, inviterDeviceId) {
   return {
     code,
@@ -392,6 +495,59 @@ export default {
           tokenMasked: maskPushToken(record.token),
         })),
       });
+    }
+
+    if (path === '/api/deals/state' && request.method === 'GET') {
+      const overrides = await listDealOverrides(env, 500);
+      const dailyDeal = await getJsonKV(env, dealDailyKey());
+      return json({
+        ok: true,
+        overrides: overrides.map(sanitizePublicDealOverride).filter(Boolean),
+        dailyDeal: sanitizePublicDailyDeal(dailyDeal),
+      });
+    }
+
+    if (path === '/api/deals/admin/check' && request.method === 'GET') {
+      if (!requireAdmin(request, env)) {
+        return invalid('Unauthorized', 401);
+      }
+      return json({ ok: true, admin: true });
+    }
+
+    if (path === '/api/deals/admin/override' && request.method === 'POST') {
+      if (!requireAdmin(request, env)) {
+        return invalid('Unauthorized', 401);
+      }
+
+      const body = await readBody(request);
+      const dealId = normalizeDealId(body?.dealId);
+      if (!dealId) return invalid('Invalid deal id');
+
+      const existing = await getJsonKV(env, dealOverrideKey(dealId));
+      const next = normalizeDealOverrideInput(body, existing);
+      if (!next) return invalid('Invalid deal override');
+
+      await putJsonKV(env, dealOverrideKey(dealId), next);
+      return json({ ok: true, override: sanitizePublicDealOverride(next) });
+    }
+
+    if (path === '/api/deals/admin/daily-deal' && request.method === 'POST') {
+      if (!requireAdmin(request, env)) {
+        return invalid('Unauthorized', 401);
+      }
+
+      const body = await readBody(request);
+      const dealId = normalizeDealId(body?.dealId);
+      if (!dealId) return invalid('Invalid deal id');
+
+      const record = {
+        dealId,
+        note: cleanShortText(body?.note, 180),
+        updatedAt: Date.now(),
+      };
+
+      await putJsonKV(env, dealDailyKey(), record);
+      return json({ ok: true, dailyDeal: sanitizePublicDailyDeal(record) });
     }
 
     if (path === '/api/referrals/status' && request.method === 'GET') {
