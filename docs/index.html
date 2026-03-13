@@ -1100,7 +1100,12 @@
             error: [24, 45, 24]
         };
         const ADMIN_TOKEN_KEY = 'freefinder_admin_token';
+        const ADMIN_UNLOCK_KEY = 'freefinder_admin_unlocked';
         const ADMIN_QUERY_ENABLED = new URLSearchParams(window.location.search).get('admin') === '1';
+        const ADMIN_HIDDEN_TAP_TARGET = 5;
+        const ADMIN_HIDDEN_TAP_WINDOW_MS = 2200;
+        let adminHiddenTapCount = 0;
+        let adminHiddenTapTimer = null;
 
         function getAudioContext() {
             const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -2827,6 +2832,7 @@
         ];
         
         function init() {
+            bindHiddenAdminEntry();
             checkStreak();
             updateLevelUI();
             updateSavingsUI();
@@ -4305,6 +4311,10 @@
     return localStorage.getItem(ADMIN_TOKEN_KEY) || '';
   }
 
+  function isAdminUnlocked() {
+    return ADMIN_QUERY_ENABLED || localStorage.getItem(ADMIN_UNLOCK_KEY) === '1';
+  }
+
   function setAdminToken(token) {
     localStorage.setItem(ADMIN_TOKEN_KEY, String(token || '').trim());
   }
@@ -4314,7 +4324,48 @@
   }
 
   function isAdminUiEnabled() {
-    return ADMIN_QUERY_ENABLED || !!getAdminToken();
+    return isAdminUnlocked();
+  }
+
+  function unlockAdminUi() {
+    localStorage.setItem(ADMIN_UNLOCK_KEY, '1');
+    updateAdminUiVisibility();
+  }
+
+  function resetHiddenAdminTapState() {
+    adminHiddenTapCount = 0;
+    if (adminHiddenTapTimer) {
+      clearTimeout(adminHiddenTapTimer);
+      adminHiddenTapTimer = null;
+    }
+  }
+
+  async function triggerHiddenAdminAccess() {
+    resetHiddenAdminTapState();
+    unlockAdminUi();
+    showToast('🛠️ Admin-Zugang freigeschaltet');
+    await openAdminAccess();
+  }
+
+  function registerHiddenAdminTap() {
+    adminHiddenTapCount += 1;
+    if (adminHiddenTapTimer) clearTimeout(adminHiddenTapTimer);
+    if (adminHiddenTapCount >= ADMIN_HIDDEN_TAP_TARGET) {
+      triggerHiddenAdminAccess();
+      return;
+    }
+    adminHiddenTapTimer = setTimeout(() => {
+      resetHiddenAdminTapState();
+    }, ADMIN_HIDDEN_TAP_WINDOW_MS);
+  }
+
+  function bindHiddenAdminEntry() {
+    const hiddenTarget = document.querySelector('.daily-label');
+    if (!hiddenTarget || hiddenTarget.dataset.adminBound === '1') return;
+    hiddenTarget.dataset.adminBound = '1';
+    hiddenTarget.addEventListener('click', () => {
+      registerHiddenAdminTap();
+    });
   }
 
   async function adminDealApi(path, options = {}) {
@@ -4404,6 +4455,7 @@
     }
     try {
       await adminDealApi('/api/deals/admin/check');
+      unlockAdminUi();
       updateAdminUiVisibility();
       renderDeals();
       showToast('🛠️ Admin-Modus aktiv');
