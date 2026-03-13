@@ -29,6 +29,7 @@ function isExpiredOrOld(deal) {
   const sourceText = String(deal.source || '').toLowerCase();
   const isInstagramDeal = sourceText.includes('instagram');
   const isStrictRecentSocialDeal =
+    sourceText.includes('firecrawl gastro #2') ||
     sourceText.includes('firecrawl food #3') ||
     sourceText.includes('firecrawl consumables');
   if (isInstagramDeal && !TRUSTED_IG_PUBDATE_SOURCES.has(String(deal.pubDateSource || ''))) {

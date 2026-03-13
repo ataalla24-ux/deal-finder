@@ -30,8 +30,9 @@ const SCRAPE_URLS = [
   'https://www.instagram.com/explore/tags/wienesse/',
   'https://www.instagram.com/explore/tags/aktionwien/',
   'https://www.instagram.com/explore/tags/schnäppchenwien/',
-  'https://www.1000things.at/',
-  'https://www.meinbezirk.at/',
+  'https://www.tiktok.com/tag/gratiswien',
+  'https://www.tiktok.com/tag/wienfood',
+  'https://www.tiktok.com/tag/wienessen',
 ];
 
 function isRateOrCreditError(message) {
@@ -43,6 +44,32 @@ function isInstagramUrl(url) {
   return (url || '').includes('instagram.com');
 }
 
+function isTikTokUrl(url) {
+  return (url || '').includes('tiktok.com');
+}
+
+function isAllowedSocialUrl(url) {
+  return isInstagramUrl(url) || isTikTokUrl(url);
+}
+
+function normalizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function looksLikeViennaDeal(value) {
+  const text = normalizeText(value);
+  if (!text) return false;
+  return text.includes('wien') || text.includes('vienna') || /\b1\d{3}\b/.test(text);
+}
+
+function looksLikeOffer(text) {
+  const value = normalizeText(text);
+  return /gratis|kostenlos|free|0 ?€|1\+1|2 ?for ?1|rabatt|aktion|angebot|deal|gutschein|happy hour|eröffnung|%\b|minus \d+/.test(value);
+}
+
 // ============================================
 // SCHEMA
 // ============================================
@@ -51,12 +78,14 @@ const gastroSchema = z.object({
   deals: z.array(z.object({
     category: z.string(),
     category_citation: z.string().optional(),
-        brand_or_store: z.string(),
-        brand_or_store_citation: z.string().optional(),
+    brand_or_store: z.string(),
+    brand_or_store_citation: z.string().optional(),
     item_given_away: z.string(),
     item_given_away_citation: z.string().optional(),
     location: z.string(),
     location_citation: z.string().optional(),
+    post_date: z.string(),
+    post_date_citation: z.string().optional(),
     validity_date: z.string(),
     validity_date_citation: z.string().optional(),
     validity_time: z.string(),
@@ -70,7 +99,13 @@ const gastroSchema = z.object({
 // PROMPT
 // ============================================
 
-const PROMPT = `Extrahiere aktuelle und zukünftige Deals in Wien mit höchster Priorität auf Gastronomie-Angebote (Essen & Trinken).
+const TODAY = new Date().toLocaleDateString('de-AT');
+const CUTOFF = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString('de-AT');
+
+const PROMPT = `Heute ist ${TODAY}.
+Ignoriere ALLE Posts, die vor dem ${CUTOFF} veröffentlicht wurden.
+
+Extrahiere aktuelle und zukünftige Deals in Wien mit höchster Priorität auf Gastronomie-Angebote (Essen & Trinken).
 
 Suche gezielt nach:
 - Starken Rabatten wie Mahlzeiten unter €3
@@ -79,15 +114,21 @@ Suche gezielt nach:
 - Neueröffnungen mit Gratis-Aktionen
 - Starke Rabatte allgemein
 
-Suche primär auf Instagram nach den ersten 50-100 Deals und ergänze diese durch Funde aus dem restlichen Web (z.B. 1000things, meinbezirk.at).
+WICHTIG:
+- Nutze ausschließlich Instagram- und TikTok-Posts als Quelle
+- Keine Blogs, News-Seiten oder Deal-Portale
+- Nur echte Angebote oder Aktionen, keine allgemeinen Restaurant-Vorstellungen
+- Nur Wien oder klar Wien-nahe Standorte
+- Wenn das Veröffentlichungsdatum des Posts nicht belastbar erkennbar ist, lasse den Deal weg
 
 Erfasse für jeden Deal:
-  – Den genauen Namen des Restaurants/Geschäfts/Unternehmens (brand_or_store – NICHT die Website-Domain!)
+– Den genauen Namen des Restaurants/Geschäfts/Unternehmens (brand_or_store – NICHT die Website-Domain!)
 - Kategorie
 - Was genau verschenkt/rabattiert wird
 - Den Standort
+- Das Veröffentlichungsdatum des Posts als post_date
 - Datum und Uhrzeit der Gültigkeit
-- Die direkte URL zum ursprünglichen Post oder Web-Beitrag`;
+- Die direkte URL zum ursprünglichen Social-Post`;
 
 // ============================================
 // MAIN
@@ -113,20 +154,36 @@ function dealId(prefix, brand, title, url) {
 function parseGermanDate(str) {
   if (!str || typeof str !== 'string') return null;
   const s = str.trim();
-  let m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  let m = s.match(/vor\s+(\d+)\s+tag/i);
+  if (m) {
+    const d = new Date();
+    d.setDate(d.getDate() - Number(m[1]));
+    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
+  }
+  m = s.match(/(\d+)\s+d(?:ays?)?\s+ago/i);
+  if (m) {
+    const d = new Date();
+    d.setDate(d.getDate() - Number(m[1]));
+    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
+  }
+  m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
   if (m) return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0));
   m = s.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
   if (m) {
     const year = m[3].length === 2 ? Number(`20${m[3]}`) : Number(m[3]);
     return new Date(Date.UTC(year, Number(m[2]) - 1, Number(m[1]), 12, 0, 0));
   }
+  m = s.match(/(\d{1,2})\.(\d{1,2})\./);
+  if (m) {
+    return new Date(Date.UTC(new Date().getFullYear(), Number(m[2]) - 1, Number(m[1]), 12, 0, 0));
+  }
   return null;
 }
 
 function isNotTooOld(dateObj) {
-  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return true;
-  const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
-  return dateObj.getTime() >= twoWeeksAgo;
+  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return false;
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  return dateObj.getTime() >= sevenDaysAgo;
 }
 
 async function main() {
@@ -168,17 +225,19 @@ async function main() {
           
           for (const d of data.deals) {
             const postUrl = d.post_url || '';
-            
             if (postUrl && seenUrls.has(postUrl)) continue;
             if (postUrl) seenUrls.add(postUrl);
             if (!postUrl) continue;
+            if (!isAllowedSocialUrl(postUrl)) continue;
+            if (!looksLikeOffer(`${d.item_given_away || ''} ${d.category || ''}`)) continue;
+            if (!looksLikeViennaDeal(`${d.location || ''} ${d.item_given_away || ''}`)) continue;
             
             const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
-            const validityDate = parseGermanDate(d.validity_date || '');
-            if (!isNotTooOld(validityDate)) continue;
+            const postDate = parseGermanDate(d.post_date || '');
+            if (!isNotTooOld(postDate)) continue;
             const brand = d.brand_or_store || source;
             const title = d.item_given_away?.substring(0, 60) || 'Gastro Deal';
-            const pubDate = validityDate ? validityDate.toISOString() : new Date().toISOString();
+            const pubDate = postDate.toISOString();
             
             allDeals.push({
               id: dealId('g2', brand, title, postUrl),
@@ -197,6 +256,7 @@ async function main() {
               votes: 1,
               qualityScore: 65,
               pubDate,
+              pubDateSource: isInstagramUrl(postUrl) ? 'igScriptTimestamp' : 'socialPostDate',
             });
           }
         }

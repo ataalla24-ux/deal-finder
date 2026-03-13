@@ -37,6 +37,24 @@ function isAllowedSocialUrl(url) {
   return isInstagramUrl(url) || isTikTokUrl(url);
 }
 
+function normalizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function looksLikeViennaDeal(value) {
+  const text = normalizeText(value);
+  if (!text) return false;
+  return text.includes('wien') || text.includes('vienna') || /\b1\d{3}\b/.test(text);
+}
+
+function looksLikeOffer(text) {
+  const value = normalizeText(text);
+  return /gratis|kostenlos|free|0 ?€|1\+1|bogo|buy one|get one|rabatt|aktion|angebot|deal|gutschein|happy hour|eröffnung|%\b|minus \d+/.test(value);
+}
+
 // ============================================
 // STABILE DEAL-ID (Hash statt Date.now/random)
 // ============================================
@@ -175,7 +193,19 @@ function parseGermanDate(str) {
   if (!str || typeof str !== 'string') return null;
   str = str.trim();
   if (/^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend)/i.test(str)) return null;
-  let m = str.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  let m = str.match(/vor\s+(\d+)\s+tag/i);
+  if (m) {
+    const d = new Date();
+    d.setDate(d.getDate() - Number(m[1]));
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+  m = str.match(/(\d+)\s+d(?:ays?)?\s+ago/i);
+  if (m) {
+    const d = new Date();
+    d.setDate(d.getDate() - Number(m[1]));
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+  m = str.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
   if (m) return new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
   m = str.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
   if (m) return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
@@ -252,6 +282,8 @@ async function main() {
             }
             if (sourceUrl) seenUrls.add(sourceUrl);
             if (!sourceUrl) continue;
+            if (!looksLikeOffer(`${d.offer_type || ''} ${d.description || ''} ${d.discount_value || ''}`)) continue;
+            if (!looksLikeViennaDeal(`${d.location || ''} ${d.description || ''}`)) continue;
             
             const isGratis = /gratis|kostenlos|free|0€|0 €|umsonst/i.test(d.offer_type || d.description || '');
             const isBogo = /bogo|buy one|get one|2 for/i.test(d.description || '');

@@ -79,8 +79,38 @@ function stableDealSignature(deal) {
     .replace(/\s+/g, ' ')
     .trim();
   const type = cleanText(deal?.type).toLowerCase();
+  const distance = cleanText(deal?.distance || deal?.location || deal?.ort)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-  return [normalizedUrl, brand, title, type].filter(Boolean).join('|');
+  return [normalizedUrl, brand, title, type, distance].filter(Boolean).join('|');
+}
+
+function alternateDealSignature(deal) {
+  const title = cleanText(deal?.title)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const brand = cleanText(deal?.brand)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const type = cleanText(deal?.type).toLowerCase();
+  const distance = cleanText(deal?.distance || deal?.location || deal?.ort)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return [brand, title, type, distance].filter(Boolean).join('|');
+}
+
+function getDealSignatureVariants(deal) {
+  return [stableDealSignature(deal), alternateDealSignature(deal)].filter(Boolean);
 }
 
 function toIsoDate(value) {
@@ -337,10 +367,10 @@ function buildSeenSignatureMap(sentIds, pendingQueue) {
 
   for (const deal of pendingQueue) {
     if (!deal?.slackTs) continue;
-    const signature = stableDealSignature(deal);
-    if (!signature) continue;
     const postedAt = deal.slackTs ? Number.parseFloat(deal.slackTs) * 1000 : Date.now();
-    seen.set(signature, Number.isFinite(postedAt) ? postedAt : Date.now());
+    for (const signature of getDealSignatureVariants(deal)) {
+      seen.set(signature, Number.isFinite(postedAt) ? postedAt : Date.now());
+    }
   }
 
   return seen;
@@ -484,9 +514,9 @@ async function main() {
   const seenSignatures = buildSeenSignatureMap(sentIds, existingQueue);
   const unseenDeals = pendingDeals.filter((deal) => {
     if (sentIds[deal.id]) return false;
-    const signature = stableDealSignature(deal);
-    if (!signature) return true;
-    return !seenSignatures.has(signature);
+    const signatures = getDealSignatureVariants(deal);
+    if (signatures.length === 0) return true;
+    return !signatures.some((signature) => seenSignatures.has(signature));
   });
   const freshDeals = unseenDeals
     .filter(isRecent)
@@ -540,8 +570,7 @@ async function main() {
   }
 
   for (const deal of postedDeals) {
-    const signature = stableDealSignature(deal);
-    if (signature) {
+    for (const signature of getDealSignatureVariants(deal)) {
       sentIds[`sig:${signature}`] = Date.now();
     }
   }
