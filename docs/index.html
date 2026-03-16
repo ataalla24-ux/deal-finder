@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>FreeFinder Wien 🎁 Gratis Deals</title>
+    <title>FreeFinder 🎁 Gratis Deals</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#667eea">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icon-192.svg">
+    <meta name="theme-color" content="#f59e0b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="FreeFinder Wien">
+    <meta name="apple-mobile-web-app-title" content="FreeFinder">
     <meta name="format-detection" content="telephone=no">
     <!-- Smart App Banner - zeigt "Im App Store öffnen" Banner auf iOS Safari -->
     <meta name="apple-itunes-app" content="app-id=6758958213">
@@ -3853,14 +3855,36 @@
         function onDealClick(e) { e.stopPropagation(); addXP(2, null); }
         function vote(id, delta, e) { e.stopPropagation(); if (delta > 0 && votedDeals.includes(id)) { showToast('🔥 Bereits gevotet'); return; } if (delta > 0) { votedDeals.push(id); localStorage.setItem('votedDeals', JSON.stringify(votedDeals)); } votes[id] = (votes[id] || 0) + delta; localStorage.setItem('votes', JSON.stringify(votes)); const deal = allDeals.find(d => d.id === id); if (deal) deal.votes = votes[id]; renderDeals(); addXP(1, null); showToast(delta > 0 ? '🔥 Stimme gezählt' : '👎 Notiert!'); }
         function copyCode(code, e) { e.stopPropagation(); navigator.clipboard.writeText(code); addXP(3, null); showToast('📋 Code kopiert!'); }
-        function shareDeal(id, e) { 
+        async function buildDealShareUrl(dealId) {
+            const code = generateReferralCode();
+            await ensureReferralCodeRegistered();
+            const base = await getReferralApiBase();
+            if (base) {
+                return base + '/r/' + encodeURIComponent(code) + '?deal=' + encodeURIComponent(dealId);
+            }
+            const url = new URL(window.location.href);
+            url.search = '';
+            url.hash = '';
+            url.searchParams.set('deal', dealId);
+            url.searchParams.set('ref', code);
+            return url.toString();
+        }
+
+        async function shareDeal(id, e) { 
             e.stopPropagation(); 
             const deal = allDeals.find(d => d.id === id);
             if (!deal) return;
-            const appUrl = 'https://apps.apple.com/at/app/id6758958213?deal=' + id; 
-            const text = '🎁 ' + deal.brand + ': ' + deal.title + '\n\n' + deal.description + '\n\n📱 Direkt in der App öffnen:\n' + appUrl; 
-            if (navigator.share) navigator.share({ title: 'FreeFinder Deal', text: text }); 
-            else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank'); 
+            const shareUrl = await buildDealShareUrl(id);
+            const brand = deal.brand || 'FreeFinder Deal';
+            const title = deal.title || 'Neuer Deal';
+            const description = deal.description || 'Schau dir diesen Deal in FreeFinder an.';
+            const text = '🎁 ' + brand + ': ' + title + '\n\n' + description + '\n\n📱 Öffne diesen Deal oder lade die App über meinen Link:\n' + shareUrl;
+            if (navigator.share) {
+                await navigator.share({ title: brand + ' bei FreeFinder', text, url: shareUrl }).catch(() => {});
+            } else {
+                const shareWindow = window.open('', '_blank', 'noopener');
+                openExternalUrlFromGesture('https://wa.me/?text=' + encodeURIComponent(text), shareWindow);
+            }
             addXP(5, '📤 Geteilt!'); 
         }
         function checkDeepLink() {
@@ -4233,12 +4257,28 @@
     saveProData();
   }
 
-  function getReferralLandingUrl(refCode) {
+  async function getReferralLandingUrl(refCode) {
+    const base = await getReferralApiBase();
+    if (base) {
+      return base + '/r/' + encodeURIComponent(refCode);
+    }
     const url = new URL(window.location.href);
     url.search = '';
     url.hash = '';
     url.searchParams.set('ref', refCode);
     return url.toString();
+  }
+
+  function openExternalUrlFromGesture(url, existingWindow) {
+    if (existingWindow && !existingWindow.closed) {
+      existingWindow.location.href = url;
+      return existingWindow;
+    }
+    const opened = window.open(url, '_blank', 'noopener');
+    if (!opened) {
+      window.location.href = url;
+    }
+    return opened;
   }
 
   function getPendingClaimStorageKey(code) {
@@ -4720,9 +4760,6 @@
   // We use the ct (campaign token) = referral code
   function getAppStoreDownloadUrl(refCode) {
     // Campaign link – Apple tracks ct= param in App Store Connect
-    // After first launch, the web app URL is opened via Universal Link
-    // The URL that gets opened: https://freefinder.wien/?ref=CODE&downloaded=1
-    const returnUrl = encodeURIComponent('https://ataalla24-ux.github.io/deal-finder/?ref=' + refCode + '&downloaded=1');
     // Primary: Direct App Store link with campaign tracking
     return 'https://apps.apple.com/at/app/id6758958213?pt=&ct=ref_' + refCode + '&mt=8';
   }
@@ -4774,17 +4811,21 @@
   }
 
   async function handleAppDownload(refCode) {
+    const appStoreWindow = window.open('', '_blank', 'noopener');
     // 1. Start central claim before opening the store
     localStorage.setItem('pending_' + refCode, '1');
     const claimStart = await startReferralClaim(refCode);
     if (claimStart && claimStart.error && !claimStart.fallback) {
+      if (appStoreWindow && !appStoreWindow.closed) {
+        appStoreWindow.close();
+      }
       localStorage.removeItem('pending_' + refCode);
       showToast('⚠️ Einladung gerade nicht verfügbar.');
       return;
     }
     // 2. Open App Store
     const appStoreUrl = getAppStoreDownloadUrl(refCode);
-    window.open(appStoreUrl, '_blank');
+    openExternalUrlFromGesture(appStoreUrl, appStoreWindow);
     // 3. Also track via redirect method: after app opens, it should return to app with ?downloaded=1
     // Show pending feedback
     const banner = document.getElementById('refLandingBanner');
@@ -4824,7 +4865,7 @@
     const dlCount = await checkReferralProgress();
     
     // Update modal content
-    const refUrl = getReferralLandingUrl(code);
+    const refUrl = await getReferralLandingUrl(code);
     document.getElementById('referralLinkDisplay').textContent = refUrl;
     document.getElementById('referralCount').textContent = dlCount;
     document.getElementById('referralProgressFill').style.width = Math.min(dlCount / 2 * 100, 100) + '%';
@@ -4868,16 +4909,17 @@
   async function shareReferralWhatsApp() {
     const code = generateReferralCode();
     await ensureReferralCodeRegistered();
-    const link = getReferralLandingUrl(code);
-    const text = '📱 Hey! Ich nutze FreeFinder Wien für gratis Deals in Wien!\n\n👑 Öffne meinen Link und bestätige die App über meine Einladung – damit schalte ich kostenlos PRO mit Deal-Alarmen, Standortfilter und Spartracker frei.\n\n👉 ' + link + '\n\n☕ Gratis Kaffee, 🍔 Essen & mehr!';
-    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    const shareWindow = window.open('', '_blank', 'noopener');
+    const link = await getReferralLandingUrl(code);
+    const text = '📱 Hey! Ich nutze FreeFinder für gratis Deals in Wien!\n\n👑 Öffne meinen Link und bestätige die App über meine Einladung – damit schalte ich kostenlos PRO mit Deal-Alarmen, Standortfilter und Spartracker frei.\n\n👉 ' + link + '\n\n☕ Gratis Kaffee, 🍔 Essen & mehr!';
+    openExternalUrlFromGesture('https://wa.me/?text=' + encodeURIComponent(text), shareWindow);
     showToast('📤 WhatsApp geöffnet!');
   }
 
   async function copyReferralLink() {
     const code = generateReferralCode();
     await ensureReferralCodeRegistered();
-    const link = getReferralLandingUrl(code);
+    const link = await getReferralLandingUrl(code);
     navigator.clipboard.writeText(link).then(() => {
       showToast('📋 Einladungslink kopiert!');
     }).catch(() => {
@@ -5325,13 +5367,19 @@
     // Check if URL has deal parameter and we're on iOS
     const params = new URLSearchParams(window.location.search);
     const dealId = params.get('deal');
+    const refCode = params.get('ref');
     
     if (isIOS && dealId && isSafari) {
         // Delay slightly to check if app is installed (Universal Link fails)
         setTimeout(function() {
             // If page is still visible after 500ms, redirect to App Store
             if (!document.hidden) {
-                window.location.replace('https://apps.apple.com/at/app/id6758958213?deal=' + dealId);
+                const appStoreUrl = new URL('https://apps.apple.com/at/app/id6758958213');
+                appStoreUrl.searchParams.set('deal', dealId);
+                if (refCode) {
+                    appStoreUrl.searchParams.set('ct', 'ref_' + refCode);
+                }
+                window.location.replace(appStoreUrl.toString());
             }
         }, 500);
     }

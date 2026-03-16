@@ -8,6 +8,7 @@ const JSON_HEADERS = {
 
 const MIN_CONFIRM_DELAY_MS = 15 * 1000;
 const textEncoder = new TextEncoder();
+const APP_STORE_APP_ID = '6758958213';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
@@ -379,6 +380,353 @@ function invalid(message, status = 400) {
   return json({ ok: false, error: message }, status);
 }
 
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderReferralLanding(code, requestUrl) {
+  const dealIdRaw = requestUrl.searchParams.get('deal');
+  const dealId = normalizeDealId(dealIdRaw);
+  const safeCode = escapeHtml(code);
+  const appStoreUrl = `https://apps.apple.com/at/app/id${APP_STORE_APP_ID}?ct=${encodeURIComponent(`ref_${code}`)}&mt=8`;
+  const minDelaySeconds = Math.ceil(MIN_CONFIRM_DELAY_MS / 1000);
+  const continueUrl = dealId
+    ? `https://ataalla24-ux.github.io/deal-finder/?deal=${encodeURIComponent(dealId)}`
+    : 'https://ataalla24-ux.github.io/deal-finder/';
+  const safeDealHint = dealId ? '<p>Dein Freund hat dir einen konkreten Deal geschickt. Nach der Bestaetigung kannst du ihn direkt in FreeFinder ansehen.</p>' : '';
+  const continueButtonHtml = dealId
+    ? '<button id="continueBtn" class="button secondary" style="display:none">Zum geteilten Deal</button>'
+    : '';
+
+  const html = `<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FreeFinder Einladung</title>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #312e81 0%, #111827 45%, #030712 100%);
+      color: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(17, 24, 39, 0.92);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 28px;
+      padding: 28px 22px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+    }
+    .eyebrow {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(251,191,36,0.15);
+      color: #fde68a;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    h1 { margin: 14px 0 10px; font-size: 30px; line-height: 1.05; }
+    p { margin: 0 0 14px; color: #d1d5db; line-height: 1.5; }
+    .steps {
+      margin: 20px 0;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.05);
+    }
+    .steps div { margin: 0 0 10px; font-size: 14px; }
+    .steps div:last-child { margin-bottom: 0; }
+    .button {
+      width: 100%;
+      border: 0;
+      border-radius: 16px;
+      padding: 16px 18px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    .button:active { transform: scale(0.98); }
+    .button.primary {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: white;
+      box-shadow: 0 14px 34px rgba(239, 68, 68, 0.35);
+    }
+    .button.secondary {
+      margin-top: 10px;
+      background: rgba(255,255,255,0.08);
+      color: #f9fafb;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .button[disabled] { opacity: 0.65; cursor: wait; }
+    .status {
+      margin-top: 16px;
+      min-height: 48px;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      background: rgba(255,255,255,0.06);
+      color: #e5e7eb;
+    }
+    .status.success { background: rgba(16,185,129,0.16); color: #d1fae5; }
+    .status.error { background: rgba(239,68,68,0.18); color: #fee2e2; }
+    .fineprint {
+      margin-top: 14px;
+      font-size: 12px;
+      color: #9ca3af;
+      text-align: center;
+    }
+    .code {
+      color: #fde68a;
+      font-weight: 800;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="eyebrow">FreeFinder Einladung</div>
+    <h1>Hilf deinem Freund zu FreeFinder PRO</h1>
+    <p>Installiere die App ueber diese Einladung. Wenn du danach hier bestaetigst, wird die Einladung automatisch gutgeschrieben.</p>
+    ${safeDealHint}
+    <div class="steps">
+      <div>1. Tippe auf <strong>"App kostenlos laden"</strong>.</div>
+      <div>2. Installiere FreeFinder im App Store.</div>
+      <div>3. Komm wieder auf diese Seite zurueck. Wir bestaetigen die Einladung dann automatisch oder per Knopfdruck.</div>
+    </div>
+    <button id="downloadBtn" class="button primary">App kostenlos laden</button>
+    <button id="confirmBtn" class="button secondary">Ich habe die App installiert</button>
+    ${continueButtonHtml}
+    <div id="status" class="status">Einladungscode: <span class="code">${safeCode}</span></div>
+    <div class="fineprint">Hinweis: Die Bestaetigung funktioniert auf demselben Geraet und Browser, in dem du den Link geoeffnet hast. Warte nach dem App-Store-Wechsel kurz ${minDelaySeconds} Sekunden.</div>
+  </main>
+  <script>
+    const code = ${JSON.stringify(code)};
+    const appStoreUrl = ${JSON.stringify(appStoreUrl)};
+    const minConfirmDelayMs = ${JSON.stringify(MIN_CONFIRM_DELAY_MS)};
+    const continueUrl = ${JSON.stringify(continueUrl)};
+    const clipboardPrefix = 'FREEFINDER_REFERRAL:';
+    const claimKey = 'ff_referral_claim_' + code;
+    const visitorIdKey = 'ff_referral_visitor_id';
+    const statusEl = document.getElementById('status');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const continueBtn = document.getElementById('continueBtn');
+
+    function setStatus(message, kind) {
+      statusEl.textContent = message;
+      statusEl.className = 'status' + (kind ? ' ' + kind : '');
+    }
+
+    function showContinueButton() {
+      if (!continueBtn) return;
+      continueBtn.style.display = 'block';
+    }
+
+    function getVisitorId() {
+      let value = localStorage.getItem(visitorIdKey);
+      if (!value) {
+        value = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+        localStorage.setItem(visitorIdKey, value);
+      }
+      return value;
+    }
+
+    function getStoredClaim() {
+      try {
+        return JSON.parse(localStorage.getItem(claimKey) || 'null');
+      } catch {
+        return null;
+      }
+    }
+
+    function setStoredClaim(payload) {
+      localStorage.setItem(claimKey, JSON.stringify(payload));
+    }
+
+    function clearStoredClaim() {
+      localStorage.removeItem(claimKey);
+    }
+
+    async function api(path, options) {
+      const res = await fetch(path, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(body && body.error ? body.error : 'Request failed');
+      }
+      return body;
+    }
+
+    async function startClaim() {
+      const existing = getStoredClaim();
+      if (existing && existing.claimToken) return existing;
+      const result = await api('/api/referrals/claim/start', {
+        method: 'POST',
+        body: JSON.stringify({
+          code,
+          visitorId: getVisitorId(),
+          userAgent: navigator.userAgent || '',
+          source: 'worker-landing'
+        })
+      });
+      if (result.alreadyClaimed) {
+        setStatus('Diese Einladung wurde auf diesem Geraet bereits bestaetigt.', 'success');
+        return result;
+      }
+      if (result.claimToken) {
+        const payload = {
+          claimToken: result.claimToken,
+          startedAt: result.startedAt || Date.now(),
+          visitorId: getVisitorId(),
+          code,
+          dealId: ${JSON.stringify(dealId || '')}
+        };
+        setStoredClaim(payload);
+        return payload;
+      }
+      return result;
+    }
+
+    async function writeReferralPayloadToClipboard(payload) {
+      if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+        return false;
+      }
+      const serialized = clipboardPrefix + JSON.stringify({
+        code: payload.code || code,
+        claimToken: payload.claimToken,
+        visitorId: payload.visitorId || getVisitorId(),
+        startedAt: payload.startedAt || Date.now(),
+        dealId: payload.dealId || ${JSON.stringify(dealId || '')}
+      });
+      try {
+        await navigator.clipboard.writeText(serialized);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    async function completeClaim(source) {
+      const claim = getStoredClaim();
+      if (!claim || !claim.claimToken) {
+        setStatus('Bitte zuerst auf "App kostenlos laden" tippen.', 'error');
+        return null;
+      }
+      const elapsed = Date.now() - Number(claim.startedAt || 0);
+      if (elapsed < minConfirmDelayMs) {
+        const waitSeconds = Math.ceil((minConfirmDelayMs - elapsed) / 1000);
+        setStatus('Bitte noch ' + waitSeconds + ' Sek. warten und dann erneut bestaetigen.', 'error');
+        return null;
+      }
+      const result = await api('/api/referrals/claim/complete', {
+        method: 'POST',
+        body: JSON.stringify({
+          code,
+          claimToken: claim.claimToken,
+          visitorId: getVisitorId(),
+          userAgent: navigator.userAgent || '',
+          installSource: source
+        })
+      });
+      if (result.completed || result.alreadyClaimed || typeof result.installs === 'number') {
+        clearStoredClaim();
+        const installs = typeof result.installs === 'number' ? result.installs : 0;
+        setStatus('Danke! Die Einladung wurde bestaetigt. Aktueller Stand: ' + installs + ' bestaetigte Einladung(en).', 'success');
+        showContinueButton();
+      }
+      return result;
+    }
+
+    async function handleDownload() {
+      downloadBtn.disabled = true;
+      try {
+        const claim = await startClaim();
+        const clipboardReady = claim && claim.claimToken ? await writeReferralPayloadToClipboard(claim) : false;
+        if (clipboardReady) {
+          setStatus('App Store wird geoeffnet. FreeFinder kann die Einladung beim ersten Start jetzt automatisch bestaetigen.', '');
+        } else {
+          setStatus('App Store wird geoeffnet. Wenn die automatische Erkennung nicht klappt, komm bitte wieder auf diese Seite zurueck und bestaetige hier.', '');
+        }
+        window.location.href = appStoreUrl;
+      } catch (error) {
+        setStatus(error.message || 'Einladung konnte nicht gestartet werden.', 'error');
+      } finally {
+        window.setTimeout(() => {
+          downloadBtn.disabled = false;
+        }, 1200);
+      }
+    }
+
+    async function tryAutoComplete() {
+      const claim = getStoredClaim();
+      if (!claim || !claim.claimToken) return;
+      if (Date.now() - Number(claim.startedAt || 0) < minConfirmDelayMs) return;
+      try {
+        await completeClaim('auto-return');
+      } catch (error) {
+        setStatus(error.message || 'Automatische Bestaetigung fehlgeschlagen.', 'error');
+      }
+    }
+
+    downloadBtn.addEventListener('click', handleDownload);
+    confirmBtn.addEventListener('click', async () => {
+      confirmBtn.disabled = true;
+      try {
+        await completeClaim('manual-confirm');
+      } catch (error) {
+        setStatus(error.message || 'Bestaetigung fehlgeschlagen.', 'error');
+      } finally {
+        window.setTimeout(() => {
+          confirmBtn.disabled = false;
+        }, 800);
+      }
+    });
+    if (continueBtn) {
+      continueBtn.addEventListener('click', () => {
+        window.location.href = continueUrl;
+      });
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') tryAutoComplete();
+    });
+    window.addEventListener('pageshow', () => { tryAutoComplete(); });
+    window.addEventListener('focus', () => { tryAutoComplete(); });
+    tryAutoComplete();
+  </script>
+</body>
+</html>`;
+
+  return new Response(html, {
+    status: 200,
+    headers: {
+      'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'no-store'
+    }
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -390,6 +738,12 @@ export default {
 
     if (path === '/health') {
       return json({ ok: true, service: 'freefinder-referrals' });
+    }
+
+    if (request.method === 'GET' && path.startsWith('/r/')) {
+      const code = normalizeCode(decodeURIComponent(path.slice(3)));
+      if (!code) return invalid('Invalid referral code', 404);
+      return renderReferralLanding(code, url);
     }
 
     if (!env.REFERRAL_KV) {
