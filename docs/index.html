@@ -566,21 +566,6 @@
   .year-total-label { font-size: 14px; opacity: 0.9; }
   .year-total-val { font-size: 28px; font-weight: 800; }
 
-  /* USER VERGLEICH */
-  .compare-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .compare-card-header { font-weight: 700; font-size: 16px; color: #1f2937; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  .compare-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 12px; border-radius: 10px; }
-  .compare-row.you { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
-  .compare-row.avg { background: #f1f5f9; }
-  .compare-row.top { background: linear-gradient(135deg, #fef3c7, #fde68a); }
-  .compare-avatar { font-size: 24px; }
-  .compare-info { flex: 1; }
-  .compare-name { font-size: 13px; font-weight: 700; color: #374151; }
-  .compare-stat { font-size: 12px; color: #6b7280; }
-  .compare-val { font-size: 20px; font-weight: 800; color: #7c3aed; }
-  .compare-row.avg .compare-val { color: #6b7280; }
-  .compare-row.top .compare-val { color: #d97706; }
-
   /* DEAL ALARM */
   .deal-alarm-card { background: linear-gradient(135deg, #ec4899, #8b5cf6); border-radius: 16px; padding: 16px; margin-bottom: 16px; color: white; }
   .deal-alarm-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
@@ -823,35 +808,6 @@
     <div class="year-total-box">
       <div class="year-total-label">💰 Gespart in 2026</div>
       <div class="year-total-val" id="yearTotalVal">€0</div>
-    </div>
-  </div>
-
-  <!-- FÜR DICH PRO BOOST (nur für PRO) -->
-  <div class="compare-card pro-feature-section" id="compareCard" style="display:none">
-    <div class="compare-card-header">✨ Für dich PRO <span class="pro-badge">👑 PRO</span></div>
-    <div class="compare-row you">
-      <span class="compare-avatar">❤️</span>
-      <div class="compare-info">
-        <div class="compare-name">Lieblingssignale</div>
-        <div class="compare-stat">Favoriten, Marken und Klicks, die dein Feed lernt</div>
-      </div>
-      <div class="compare-val" id="compareYou">0 Signale</div>
-    </div>
-    <div class="compare-row avg">
-      <span class="compare-avatar">📍</span>
-      <div class="compare-info">
-        <div class="compare-name">Standort</div>
-        <div class="compare-stat">Deals in deiner Nähe werden stärker gewichtet</div>
-      </div>
-      <div class="compare-val" id="compareRadius">Aus</div>
-    </div>
-    <div class="compare-row top">
-      <span class="compare-avatar">🔥</span>
-      <div class="compare-info">
-        <div class="compare-name">Frische Priorität</div>
-        <div class="compare-stat">Neue, starke und relevante Deals landen zuerst bei dir</div>
-      </div>
-      <div class="compare-val" id="compareFreshness">Aktiv</div>
     </div>
   </div>
 
@@ -4861,11 +4817,10 @@
             savingsProCard: 'block',
             locationFilterBar: 'block',
             yearOverview: 'block',
-            compareCard: 'block',
             dealAlarmCard: 'block',
             filters: 'block'
         };
-        const PRO_HOME_SECTION_IDS = new Set(['proActiveBadge', 'savingsProCard', 'locationFilterBar', 'yearOverview', 'compareCard', 'dealAlarmCard']);
+        const PRO_HOME_SECTION_IDS = new Set(['proActiveBadge', 'savingsProCard', 'locationFilterBar', 'yearOverview', 'dealAlarmCard']);
         function updateHomeSectionVisibility() {
             const isHome = currentView === 'home';
             const isForYou = currentView === 'secret';
@@ -5929,7 +5884,6 @@
     if (isPro) {
       updateSavingsProCard();
       updateYearOverview();
-      updateCompareCard();
       updateAlarmSwitches();
       initAlarmPolling();
     }
@@ -5979,27 +5933,6 @@
       const yearTotal = Object.entries(proData.monthlySavings||{}).filter(([k]) => k.startsWith(year+'')).reduce((s,[,v]) => s+v, 0);
       const ytv = document.getElementById('yearTotalVal');
       if (ytv) ytv.textContent = '\u20AC' + yearTotal.toFixed(2).replace('.',',');
-    }
-    function updateCompareCard() {
-      const signalEl = document.getElementById('compareYou');
-      if (!signalEl) return;
-      const profile = buildDiscoveryProfile(getDiscoveryDeals());
-      const signalCount =
-        Object.keys(profile.categories || {}).length +
-        Object.keys(profile.brands || {}).length +
-        Object.keys(profile.types || {}).length;
-      signalEl.textContent = signalCount + ' Signale';
-      const radiusEl = document.getElementById('compareRadius');
-      if (radiusEl) {
-        const radius = Number(proData.selectedRadius || 0);
-        radiusEl.textContent = radius > 0 ? radius + ' km aktiv' : 'Aus';
-      }
-      const freshnessEl = document.getElementById('compareFreshness');
-      if (freshnessEl) {
-        const discoveryDeals = getDiscoveryDeals();
-        const freshDeals = discoveryDeals.filter((deal) => getFreshnessScore(deal) > 1.2).length;
-        freshnessEl.textContent = freshDeals + ' frische Deals';
-      }
     }
     function updateAlarmSwitches() {
       const alarms = proData.alarms || { dailyDeal: true, personalized: true, nearby: false };
