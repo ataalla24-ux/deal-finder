@@ -81,6 +81,8 @@
         .daily-deal.for-you-featured .featured-lock-title { font-size: 15px; margin-bottom: 4px; }
         .daily-deal.for-you-featured .featured-lock-subtitle { font-size: 12px; margin-bottom: 10px; }
         .daily-deal.for-you-featured .featured-lock-btn { padding: 10px 14px; font-size: 12px; }
+        .daily-deal.for-you-featured .featured-lock.single-cta .featured-lock-btn { display: none; }
+        .daily-deal.for-you-featured .featured-lock.single-cta .featured-lock-subtitle { margin-bottom: 0; }
         .daily-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
         .daily-desc { opacity: 0.9; margin-bottom: 12px; }
         .daily-countdown { display: flex; gap: 8px; margin-top: 12px; }
@@ -3959,6 +3961,7 @@
                 const lock = document.getElementById(lockId);
                 if (!card || !lock) return;
                 card.classList.toggle('featured-locked', isLocked);
+                lock.classList.toggle('single-cta', isForYou && isLocked);
                 lock.style.display = (isForYou && isLocked) ? 'flex' : 'none';
             });
         }
