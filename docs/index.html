@@ -4040,13 +4040,43 @@
             document.getElementById('countCodes').textContent = allDeals.filter(d => d.category === 'codes' || d.code).length;
         }
         
+    function normalizeSearchText(value) {
+      return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ß/g, 'ss')
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim();
+    }
+
+    function dealMatchesSearch(deal, query) {
+      const normalizedQuery = normalizeSearchText(query);
+      if (!normalizedQuery) return true;
+
+      const haystack = normalizeSearchText([
+        deal.title,
+        deal.brand,
+        deal.description,
+        deal.category,
+        deal.type,
+        deal.source,
+        deal.distance,
+        deal.location,
+        deal.expires,
+      ].filter(Boolean).join(' '));
+
+      if (!haystack) return false;
+      const terms = normalizedQuery.split(' ').filter(Boolean);
+      return terms.every((term) => haystack.includes(term));
+    }
+
     function filterDeals() {
       let deals = allDeals
         .map((d) => ({ ...d, _lifecycle: getDealLifecycle(d) }))
         .filter((d) => d._lifecycle.state !== 'hidden');
       if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        deals = deals.filter(d => (d.title || '').toLowerCase().includes(q) || (d.brand || '').toLowerCase().includes(q) || (d.description || '').toLowerCase().includes(q));
+        deals = deals.filter((deal) => dealMatchesSearch(deal, searchQuery));
       }
       if (currentFilter === 'gratis') {
         deals = deals.filter(d => d.type === 'gratis' || d.type === 'freebie');
