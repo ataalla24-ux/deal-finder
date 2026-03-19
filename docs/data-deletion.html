@@ -3,17 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Datenlöschung - FreeFinder Wien</title>
+  <title>Data Deletion - FreeFinder</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 760px; margin: 0 auto; padding: 32px 20px; background: #f8fafc; color: #1f2937; line-height: 1.6; }
+    .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .lang-switch { display: flex; gap: 10px; margin-bottom: 20px; }
+    .lang-switch button { border: none; border-radius: 999px; padding: 10px 16px; font-weight: 700; cursor: pointer; background: #e5e7eb; }
+    .lang-switch button.active { background: linear-gradient(135deg, #111827, #374151); color: #fff; }
+    h1, h2 { margin-bottom: 12px; }
+    p { margin-bottom: 14px; }
+    a { color: #667eea; }
+  </style>
 </head>
 <body>
-  <h1>Datenlöschung</h1>
-  
-  <h2>So löschen Sie Ihre Daten</h2>
-  <p>Um die Löschung Ihrer Daten zu beantragen, senden Sie eine Email an:</p>
-  <p><strong>dermarollerdesign@gmail.com</strong></p>
-  
-  <p>mit dem Betreff "Datenlöschung" und wir werden Ihre Daten innerhalb von 30 Tagen löschen.</p>
-  
-  <p>Stand: 16.02.2026</p>
+  <div class="lang-switch">
+    <button id="langDe" onclick="setLanguage('de')">Deutsch</button>
+    <button id="langEn" onclick="setLanguage('en')">English</button>
+  </div>
+  <div class="card">
+    <h1 id="title"></h1>
+    <h2 id="subtitle"></h2>
+    <p id="body1"></p>
+    <p><strong>dermarollerdesign@gmail.com</strong></p>
+    <p id="body2"></p>
+    <p id="updated"></p>
+    <p><a href="/" id="backLink"></a></p>
+  </div>
+  <script>
+    const I18N = {
+      de: {
+        title: 'Datenlöschung',
+        subtitle: 'So löschen Sie Ihre Daten',
+        body1: 'Um die Löschung Ihrer Daten zu beantragen, senden Sie eine Email an:',
+        body2: 'mit dem Betreff "Datenlöschung" und wir werden Ihre Daten innerhalb von 30 Tagen löschen.',
+        updated: 'Stand: 16.02.2026',
+        backLink: '← Zurück zur App'
+      },
+      en: {
+        title: 'Data deletion',
+        subtitle: 'How to delete your data',
+        body1: 'To request deletion of your data, send an email to:',
+        body2: 'with the subject line "Data deletion" and we will delete your data within 30 days.',
+        updated: 'Updated: 2026-02-16',
+        backLink: '← Back to app'
+      }
+    };
+    function setLanguage(lang) {
+      const copy = I18N[lang] || I18N.de;
+      localStorage.setItem('freefinder_language', lang);
+      document.documentElement.lang = lang;
+      document.getElementById('langDe').classList.toggle('active', lang === 'de');
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+      Object.entries(copy).forEach(([key, value]) => {
+        const el = document.getElementById(key);
+        if (el) el.innerHTML = value;
+      });
+    }
+    const saved = localStorage.getItem('freefinder_language');
+    const detected = navigator.language && navigator.language.toLowerCase().startsWith('en') ? 'en' : 'de';
+    setLanguage(saved || detected);
+  </script>
 </body>
 </html>

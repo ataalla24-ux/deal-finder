@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datenschutzerklärung - FreeFinder Wien</title>
+    <title>Privacy Policy - FreeFinder</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1f2937; line-height: 1.6; }
@@ -20,87 +20,168 @@
         .contact { background: #f0fdf4; border: 2px solid #10b981; }
         .footer { text-align: center; margin-top: 40px; color: #9ca3af; font-size: 14px; }
         a { color: #667eea; }
+        .lang-switch { display: flex; justify-content: center; gap: 10px; margin-bottom: 24px; }
+        .lang-switch button { border: none; border-radius: 999px; padding: 10px 16px; font-weight: 700; cursor: pointer; background: #e5e7eb; color: #111827; }
+        .lang-switch button.active { background: linear-gradient(135deg, #111827, #374151); color: #fff; }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="lang-switch">
+            <button id="langDe" onclick="setLanguage('de')">Deutsch</button>
+            <button id="langEn" onclick="setLanguage('en')">English</button>
+        </div>
+
         <div class="header">
-            <h1>🎁 FreeFinder Wien</h1>
-            <p>Datenschutzerklärung / Privacy Policy</p>
+            <h1>🎁 FreeFinder</h1>
+            <p id="pageSubtitle"></p>
         </div>
 
         <div class="card highlight">
-            <h2>🔒 Zusammenfassung</h2>
-            <p><strong>FreeFinder Wien respektiert deine Privatsphäre.</strong> Wir sammeln keine personenbezogenen Daten und geben keine Informationen an Dritte weiter.</p>
+            <h2 id="summaryTitle"></h2>
+            <p id="summaryBody"></p>
         </div>
 
         <div class="card">
-            <h2>📱 1. Verantwortlicher</h2>
+            <h2 id="controllerTitle"></h2>
             <p><strong>Stefan Ataalla</strong></p>
-            <p>Lotte Hass Weg 2<br>1220 Wien, Österreich</p>
-            <p>E-Mail: <a href="mailto:stefan.ataalla@example.com">Kontakt über App</a></p>
+            <p id="addressBlock"></p>
+            <p><span id="emailLabel"></span> <a href="mailto:stefan.ataalla@example.com" id="emailValue"></a></p>
         </div>
 
         <div class="card">
-            <h2>📊 2. Welche Daten werden gespeichert?</h2>
-            <p>FreeFinder Wien speichert <strong>ausschließlich lokal auf deinem Gerät</strong>:</p>
-            <ul>
-                <li>Deine Favoriten (gespeicherte Deals)</li>
-                <li>Spielfortschritt (XP, Level, Streak)</li>
-                <li>Einstellungen und Präferenzen</li>
-            </ul>
-            <p style="margin-top: 12px;"><strong>Diese Daten verlassen niemals dein Gerät.</strong></p>
+            <h2 id="localDataTitle"></h2>
+            <p id="localIntro"></p>
+            <ul id="localList"></ul>
+            <p style="margin-top: 12px;"><strong id="localOutro"></strong></p>
         </div>
 
         <div class="card">
-            <h2>🚫 3. Was wir NICHT sammeln</h2>
-            <ul>
-                <li>Keine persönlichen Daten (Name, E-Mail, Telefon)</li>
-                <li>Keine Standortdaten</li>
-                <li>Keine Nutzungsstatistiken oder Analytics</li>
-                <li>Keine Werbe-IDs oder Tracking</li>
-                <li>Keine Daten werden an Server übertragen</li>
-            </ul>
+            <h2 id="notCollectedTitle"></h2>
+            <ul id="notCollectedList"></ul>
         </div>
 
         <div class="card">
-            <h2>🌐 4. Externe Links</h2>
-            <p>Die App enthält Links zu externen Websites (Deal-Anbieter wie IKEA, McDonald's, etc.). Für deren Datenschutzpraktiken sind die jeweiligen Anbieter verantwortlich.</p>
+            <h2 id="externalLinksTitle"></h2>
+            <p id="externalLinksBody"></p>
         </div>
 
         <div class="card">
-            <h2>🍪 5. Cookies & Tracking</h2>
-            <p>FreeFinder Wien verwendet <strong>keine Cookies</strong> und <strong>kein Tracking</strong>. Es gibt keine Verbindung zu Analytics-Diensten wie Google Analytics, Facebook oder anderen.</p>
+            <h2 id="cookiesTitle"></h2>
+            <p id="cookiesBody"></p>
         </div>
 
         <div class="card">
-            <h2>👶 6. Kinder</h2>
-            <p>Die App ist für alle Altersgruppen geeignet. Wir sammeln keine Daten von Kindern oder anderen Nutzern.</p>
+            <h2 id="childrenTitle"></h2>
+            <p id="childrenBody"></p>
         </div>
 
         <div class="card">
-            <h2>🔄 7. Änderungen</h2>
-            <p>Bei Änderungen dieser Datenschutzerklärung wird das Datum unten aktualisiert. Die aktuelle Version ist immer unter dieser URL verfügbar.</p>
+            <h2 id="changesTitle"></h2>
+            <p id="changesBody"></p>
         </div>
 
         <div class="card">
-            <h2>🇪🇺 8. DSGVO-Rechte</h2>
-            <p>Da wir keine personenbezogenen Daten speichern, gibt es keine Daten zum Einsehen, Korrigieren oder Löschen. Alle App-Daten können jederzeit durch Deinstallation der App vollständig entfernt werden.</p>
+            <h2 id="rightsTitle"></h2>
+            <p id="rightsBody"></p>
         </div>
 
         <div class="card contact">
-            <h2>📧 9. Kontakt</h2>
-            <p>Bei Fragen zur Datenschutzerklärung:</p>
-            <p><strong>Stefan Ataalla</strong><br>
-            Lotte Hass Weg 2, 1220 Wien<br>
-            Österreich</p>
+            <h2 id="contactTitle"></h2>
+            <p id="contactBody"></p>
+            <p><strong>Stefan Ataalla</strong><br><span id="contactAddress"></span></p>
         </div>
 
         <div class="footer">
-            <p>Stand: Januar 2026</p>
-            <p style="margin-top: 8px;">© 2026 FreeFinder Wien. Alle Rechte vorbehalten.</p>
-            <p style="margin-top: 16px;"><a href="/">← Zurück zur App</a></p>
+            <p id="updatedText"></p>
+            <p style="margin-top: 8px;" id="copyrightText"></p>
+            <p style="margin-top: 16px;"><a href="/" id="backLink"></a></p>
         </div>
     </div>
+
+    <script>
+        const I18N = {
+            de: {
+                pageSubtitle: 'Datenschutzerklärung / Privacy Policy',
+                summaryTitle: '🔒 Zusammenfassung',
+                summaryBody: '<strong>FreeFinder respektiert deine Privatsphäre.</strong> Wir sammeln keine personenbezogenen Daten und geben keine Informationen an Dritte weiter.',
+                controllerTitle: '📱 1. Verantwortlicher',
+                addressBlock: 'Lotte Hass Weg 2<br>1220 Wien, Österreich',
+                emailLabel: 'E-Mail:',
+                emailValue: 'Kontakt über App',
+                localDataTitle: '📊 2. Welche Daten werden gespeichert?',
+                localIntro: 'FreeFinder speichert <strong>ausschließlich lokal auf deinem Gerät</strong>:',
+                localList: ['Deine Favoriten (gespeicherte Deals)', 'Spielfortschritt (XP, Level, Streak)', 'Einstellungen und Präferenzen'],
+                localOutro: 'Diese Daten verlassen niemals dein Gerät.',
+                notCollectedTitle: '🚫 3. Was wir NICHT sammeln',
+                notCollectedList: ['Keine persönlichen Daten (Name, E-Mail, Telefon)', 'Keine Standortdaten', 'Keine Nutzungsstatistiken oder Analytics', 'Keine Werbe-IDs oder Tracking', 'Keine Daten werden an Server übertragen'],
+                externalLinksTitle: '🌐 4. Externe Links',
+                externalLinksBody: 'Die App enthält Links zu externen Websites (Deal-Anbieter wie IKEA, McDonald\\'s, etc.). Für deren Datenschutzpraktiken sind die jeweiligen Anbieter verantwortlich.',
+                cookiesTitle: '🍪 5. Cookies & Tracking',
+                cookiesBody: 'FreeFinder verwendet <strong>keine Cookies</strong> und <strong>kein Tracking</strong>. Es gibt keine Verbindung zu Analytics-Diensten wie Google Analytics, Facebook oder anderen.',
+                childrenTitle: '👶 6. Kinder',
+                childrenBody: 'Die App ist für alle Altersgruppen geeignet. Wir sammeln keine Daten von Kindern oder anderen Nutzern.',
+                changesTitle: '🔄 7. Änderungen',
+                changesBody: 'Bei Änderungen dieser Datenschutzerklärung wird das Datum unten aktualisiert. Die aktuelle Version ist immer unter dieser URL verfügbar.',
+                rightsTitle: '🇪🇺 8. DSGVO-Rechte',
+                rightsBody: 'Da wir keine personenbezogenen Daten speichern, gibt es keine Daten zum Einsehen, Korrigieren oder Löschen. Alle App-Daten können jederzeit durch Deinstallation der App vollständig entfernt werden.',
+                contactTitle: '📧 9. Kontakt',
+                contactBody: 'Bei Fragen zur Datenschutzerklärung:',
+                contactAddress: 'Lotte Hass Weg 2, 1220 Wien<br>Österreich',
+                updatedText: 'Stand: Januar 2026',
+                copyrightText: '© 2026 FreeFinder. Alle Rechte vorbehalten.',
+                backLink: '← Zurück zur App'
+            },
+            en: {
+                pageSubtitle: 'Privacy Policy',
+                summaryTitle: '🔒 Summary',
+                summaryBody: '<strong>FreeFinder respects your privacy.</strong> We do not collect personal data and we do not share information with third parties.',
+                controllerTitle: '📱 1. Controller',
+                addressBlock: 'Lotte Hass Weg 2<br>1220 Vienna, Austria',
+                emailLabel: 'Email:',
+                emailValue: 'Contact via app',
+                localDataTitle: '📊 2. What data is stored?',
+                localIntro: 'FreeFinder stores the following <strong>only locally on your device</strong>:',
+                localList: ['Your favorites (saved deals)', 'Game progress (XP, level, streak)', 'Settings and preferences'],
+                localOutro: 'This data never leaves your device.',
+                notCollectedTitle: '🚫 3. What we do NOT collect',
+                notCollectedList: ['No personal data (name, email, phone)', 'No location data', 'No usage analytics or statistics', 'No ad IDs or tracking', 'No data is transmitted to servers'],
+                externalLinksTitle: '🌐 4. External links',
+                externalLinksBody: 'The app contains links to external websites (deal providers such as IKEA, McDonald\\'s, etc.). Those providers are responsible for their own privacy practices.',
+                cookiesTitle: '🍪 5. Cookies & Tracking',
+                cookiesBody: 'FreeFinder uses <strong>no cookies</strong> and <strong>no tracking</strong>. There is no connection to analytics services such as Google Analytics, Facebook or others.',
+                childrenTitle: '👶 6. Children',
+                childrenBody: 'The app is suitable for all age groups. We do not collect data from children or other users.',
+                changesTitle: '🔄 7. Changes',
+                changesBody: 'If this privacy policy changes, the date below will be updated. The current version is always available at this URL.',
+                rightsTitle: '🇪🇺 8. GDPR rights',
+                rightsBody: 'Since we do not store personal data, there is no personal data to access, correct or delete. All app data can be completely removed at any time by uninstalling the app.',
+                contactTitle: '📧 9. Contact',
+                contactBody: 'If you have questions about this privacy policy:',
+                contactAddress: 'Lotte Hass Weg 2, 1220 Vienna<br>Austria',
+                updatedText: 'Updated: January 2026',
+                copyrightText: '© 2026 FreeFinder. All rights reserved.',
+                backLink: '← Back to app'
+            }
+        };
+
+        function setLanguage(lang) {
+            const copy = I18N[lang] || I18N.de;
+            localStorage.setItem('freefinder_language', lang);
+            document.documentElement.lang = lang;
+            document.getElementById('langDe').classList.toggle('active', lang === 'de');
+            document.getElementById('langEn').classList.toggle('active', lang === 'en');
+            Object.entries(copy).forEach(([key, value]) => {
+                const el = document.getElementById(key);
+                if (!el) return;
+                if (Array.isArray(value)) el.innerHTML = value.map((item) => `<li>${item}</li>`).join('');
+                else el.innerHTML = value;
+            });
+        }
+
+        const saved = localStorage.getItem('freefinder_language');
+        const detected = navigator.language && navigator.language.toLowerCase().startsWith('en') ? 'en' : 'de';
+        setLanguage(saved || detected);
+    </script>
 </body>
 </html>

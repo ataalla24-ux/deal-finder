@@ -3,24 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nutzungsbedingungen - FreeFinder Wien</title>
+  <title>Terms - FreeFinder</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 760px; margin: 0 auto; padding: 32px 20px; background: #f8fafc; color: #1f2937; line-height: 1.6; }
+    .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .lang-switch { display: flex; gap: 10px; margin-bottom: 20px; }
+    .lang-switch button { border: none; border-radius: 999px; padding: 10px 16px; font-weight: 700; cursor: pointer; background: #e5e7eb; }
+    .lang-switch button.active { background: linear-gradient(135deg, #111827, #374151); color: #fff; }
+    h1, h2 { margin-bottom: 12px; }
+    p { margin-bottom: 14px; }
+    a { color: #667eea; }
+  </style>
 </head>
 <body>
-  <h1>Nutzungsbedingungen</h1>
-  <p><strong>FreeFinder Wien</strong> ist eine App, die kostenlose Deals und Angebote in Wien sammelt.</p>
-  
-  <h2>1. Nutzung</h2>
-  <p>Die App ist kostenlos und dient der Informationsbeschaffung über kostenlose Angebote in Wien.</p>
-  
-  <h2>2. Keine Garantie</h2>
-  <p>Wir übernehmen keine Garantie für die Aktualität, Richtigkeit oder Vollständigkeit der angezeigten Deals.</p>
-  
-  <h2>3. Keine Haftung</h2>
-  <p>Für Schäden, die durch die Nutzung der App entstehen, übernehmen wir keine Haftung.</p>
-  
-  <h2>4. Urheberrecht</h2>
-  <p>Alle Inhalte gehören den jeweiligen Eigentümern.</p>
-  
-  <p>Stand: 16.02.2026</p>
+  <div class="lang-switch">
+    <button id="langDe" onclick="setLanguage('de')">Deutsch</button>
+    <button id="langEn" onclick="setLanguage('en')">English</button>
+  </div>
+  <div class="card">
+    <h1 id="title"></h1>
+    <p id="intro"></p>
+    <h2 id="useTitle"></h2>
+    <p id="useBody"></p>
+    <h2 id="warrantyTitle"></h2>
+    <p id="warrantyBody"></p>
+    <h2 id="liabilityTitle"></h2>
+    <p id="liabilityBody"></p>
+    <h2 id="copyrightTitle"></h2>
+    <p id="copyrightBody"></p>
+    <p id="updated"></p>
+    <p><a href="/" id="backLink"></a></p>
+  </div>
+  <script>
+    const I18N = {
+      de: {
+        title: 'Nutzungsbedingungen',
+        intro: '<strong>FreeFinder</strong> ist eine App, die kostenlose Deals und Angebote in Wien sammelt.',
+        useTitle: '1. Nutzung',
+        useBody: 'Die App ist kostenlos und dient der Informationsbeschaffung über kostenlose Angebote in Wien.',
+        warrantyTitle: '2. Keine Garantie',
+        warrantyBody: 'Wir übernehmen keine Garantie für die Aktualität, Richtigkeit oder Vollständigkeit der angezeigten Deals.',
+        liabilityTitle: '3. Keine Haftung',
+        liabilityBody: 'Für Schäden, die durch die Nutzung der App entstehen, übernehmen wir keine Haftung.',
+        copyrightTitle: '4. Urheberrecht',
+        copyrightBody: 'Alle Inhalte gehören den jeweiligen Eigentümern.',
+        updated: 'Stand: 16.02.2026',
+        backLink: '← Zurück zur App'
+      },
+      en: {
+        title: 'Terms of Use',
+        intro: '<strong>FreeFinder</strong> is an app that collects free deals and offers in Vienna.',
+        useTitle: '1. Use',
+        useBody: 'The app is free and is intended to help users discover free offers in Vienna.',
+        warrantyTitle: '2. No warranty',
+        warrantyBody: 'We do not guarantee the timeliness, accuracy or completeness of the displayed deals.',
+        liabilityTitle: '3. No liability',
+        liabilityBody: 'We accept no liability for damages resulting from use of the app.',
+        copyrightTitle: '4. Copyright',
+        copyrightBody: 'All content belongs to its respective owners.',
+        updated: 'Updated: 2026-02-16',
+        backLink: '← Back to app'
+      }
+    };
+    function setLanguage(lang) {
+      const copy = I18N[lang] || I18N.de;
+      localStorage.setItem('freefinder_language', lang);
+      document.documentElement.lang = lang;
+      document.getElementById('langDe').classList.toggle('active', lang === 'de');
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+      Object.entries(copy).forEach(([key, value]) => {
+        const el = document.getElementById(key);
+        if (el) el.innerHTML = value;
+      });
+    }
+    const saved = localStorage.getItem('freefinder_language');
+    const detected = navigator.language && navigator.language.toLowerCase().startsWith('en') ? 'en' : 'de';
+    setLanguage(saved || detected);
+  </script>
 </body>
 </html>
