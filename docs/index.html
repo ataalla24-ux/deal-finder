@@ -3239,7 +3239,8 @@
 
         function renderDealLogo(deal) {
             const brand = inferPreferredBrandForApp(deal) || deal.brand || '';
-            const fallback = getBrandInitialsForApp(brand) || inferLogoForApp(deal, brand) || deal.logo || '🎯';
+            const semanticFallback = inferLogoForApp(deal, brand);
+            const fallback = (semanticFallback && semanticFallback !== '🎯' ? semanticFallback : '') || getBrandInitialsForApp(brand) || semanticFallback || deal.logo || '🎯';
             const logoUrl = deal.logoUrl || getDealLogoUrlForApp(deal, brand);
             const img = logoUrl ? `<img class="deal-logo-img" src="${logoUrl}" alt="" loading="lazy" referrerpolicy="no-referrer" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'">` : '';
             return `<span class="deal-logo"><span class="deal-logo-fallback">${fallback}</span>${img}</span>`;
