@@ -61,6 +61,9 @@
         .daily-deal::before { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); animation: shimmer 3s infinite; }
         @keyframes shimmer { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(180deg); } }
         .daily-label { background: #fbbf24; color: #1f2937; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; margin-bottom: 12px; }
+        .featured-deal-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+        .featured-deal-header .daily-label { margin-bottom: 0; }
+        .featured-deal-meta { font-size: 12px; font-weight: 700; letter-spacing: 0.2px; color: rgba(255,255,255,0.82); margin-top: 10px; }
         .daily-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
         .daily-desc { opacity: 0.9; margin-bottom: 12px; }
         .daily-countdown { display: flex; gap: 8px; margin-top: 12px; }
@@ -661,6 +664,28 @@
             </div>
             <button class="daily-btn" id="dailyBtn">Jetzt sichern →</button>
         </div>
+
+        <div class="daily-deal pro-feature-section" id="weeklyDeal" style="display:none">
+            <div class="featured-deal-header">
+                <div class="daily-label" id="weeklyLabel">🔥 DEAL DER WOCHE</div>
+                <span class="pro-badge">👑 PRO</span>
+            </div>
+            <div class="daily-title" id="weeklyTitle">Wird geladen...</div>
+            <div class="daily-desc" id="weeklyDesc"></div>
+            <div class="featured-deal-meta" id="weeklyMeta"></div>
+            <button class="daily-btn" id="weeklyBtn">Top Deal öffnen →</button>
+        </div>
+
+        <div class="daily-deal pro-feature-section" id="monthlyDeal" style="display:none">
+            <div class="featured-deal-header">
+                <div class="daily-label" id="monthlyLabel">🏆 DEAL DES MONATS</div>
+                <span class="pro-badge">👑 PRO</span>
+            </div>
+            <div class="daily-title" id="monthlyTitle">Wird geladen...</div>
+            <div class="daily-desc" id="monthlyDesc"></div>
+            <div class="featured-deal-meta" id="monthlyMeta"></div>
+            <button class="daily-btn" id="monthlyBtn">Top Deal öffnen →</button>
+        </div>
         
         <div class="savings-card" id="savingsCard">
             <div class="savings-header">
@@ -1123,6 +1148,20 @@
                 dailyLoading: 'Wird geladen...',
                 dailyFallback: '🎁 Deal des Tages',
                 dailyButton: 'Jetzt sichern →',
+                weeklyLabel: '🔥 DEAL DER WOCHE',
+                weeklyLoading: 'Wird geladen...',
+                weeklyFallback: '🔥 Deal der Woche',
+                weeklyButton: 'Top Deal öffnen →',
+                weeklyMeta: 'Stärkster Community-Pick der letzten 7 Tage',
+                monthlyLabel: '🏆 DEAL DES MONATS',
+                monthlyLoading: 'Wird geladen...',
+                monthlyFallback: '🏆 Deal des Monats',
+                monthlyButton: 'Top Deal öffnen →',
+                monthlyMeta: 'Bester Community-Pick der letzten 30 Tage',
+                featuredVotes: '{count} Votes',
+                featuredFresh: 'Heute entdeckt',
+                featuredDaysAgo: 'Vor {count} Tagen entdeckt',
+                featuredSoon: 'Bald verfügbar',
                 savedThisWeek: '💰 Diese Woche gespart',
                 redeemedThisWeek: '💰 Diese Woche eingelöst',
                 savingsGoal: 'Ziel: €50',
@@ -1327,6 +1366,20 @@
                 dailyLoading: 'Loading...',
                 dailyFallback: '🎁 Deal of the day',
                 dailyButton: 'Claim now →',
+                weeklyLabel: '🔥 DEAL OF THE WEEK',
+                weeklyLoading: 'Loading...',
+                weeklyFallback: '🔥 Deal of the week',
+                weeklyButton: 'Open top deal →',
+                weeklyMeta: 'Strongest community pick from the last 7 days',
+                monthlyLabel: '🏆 DEAL OF THE MONTH',
+                monthlyLoading: 'Loading...',
+                monthlyFallback: '🏆 Deal of the month',
+                monthlyButton: 'Open top deal →',
+                monthlyMeta: 'Best community pick from the last 30 days',
+                featuredVotes: '{count} votes',
+                featuredFresh: 'Discovered today',
+                featuredDaysAgo: 'Discovered {count} days ago',
+                featuredSoon: 'Available soon',
                 savedThisWeek: '💰 Saved this week',
                 redeemedThisWeek: '💰 Redeemed this week',
                 savingsGoal: 'Goal: €50',
@@ -1558,10 +1611,20 @@
                 if (el) el.innerHTML = value;
             };
 
-            setText('.daily-label', t('dailyLabel'));
+            setText('#dailyDeal .daily-label', t('dailyLabel'));
             setText('#dailyBtn', t('dailyButton'));
             if (document.getElementById('dailyTitle')?.textContent === 'Wird geladen...' || document.getElementById('dailyTitle')?.textContent === 'Loading...') {
                 setText('#dailyTitle', t('dailyLoading'));
+            }
+            setText('#weeklyLabel', t('weeklyLabel'));
+            setText('#weeklyBtn', t('weeklyButton'));
+            if (document.getElementById('weeklyTitle')?.textContent === 'Wird geladen...' || document.getElementById('weeklyTitle')?.textContent === 'Loading...') {
+                setText('#weeklyTitle', t('weeklyLoading'));
+            }
+            setText('#monthlyLabel', t('monthlyLabel'));
+            setText('#monthlyBtn', t('monthlyButton'));
+            if (document.getElementById('monthlyTitle')?.textContent === 'Wird geladen...' || document.getElementById('monthlyTitle')?.textContent === 'Loading...') {
+                setText('#monthlyTitle', t('monthlyLoading'));
             }
             setText('#streakBanner .streak-text', currentLanguage === 'en' ? 'Come back tomorrow for bonus XP!' : 'Komm morgen wieder für Bonus XP!');
             setText('#savingsCard .savings-goal span:last-child', t('savingsGoal'));
@@ -1806,7 +1869,8 @@
             'bibel', 'jesus', 'christ', 'christlich', 'evangelisch', 'katholisch', 'freikirche',
             'jugendgottesdienst', 'lobpreis', 'andacht', 'segnung', 'christlicher event',
             'worship', 'worship abend', 'himmelsstürmer', 'himmelsstuermer',
-            'essensverteilung', 'lebensmittelausgabe', 'food sharing', 'charity dinner'
+            'essensverteilung', 'lebensmittelausgabe', 'food sharing', 'charity dinner',
+            'icf', 'hillsong', 'jesuszentrum', 'cig wien', 'alpha kurs'
         ];
         const SERVICE_TIME_KEYWORDS = [
             'gottesdienst', 'messe', 'uhr', 'sonntag', 'samstag', 'werktag', 'hl. messe', 'liturgie'
@@ -3691,7 +3755,11 @@
             const userDealsWithVotes = userDeals.map(d => normalizeDealForApp({ ...d, votes: votes[d.id] || d.votes || 0 }));
             await fetchDealOverrideState();
             allDeals = applyDealOverridesToList([...userDealsWithVotes, ...baseDeals]);
-            updateCounts(); renderDeals(); setDailyDeal(); updateAdminUiVisibility();
+            updateCounts();
+            renderDeals();
+            await setDailyDeal();
+            setFeaturedHomeDeals();
+            updateAdminUiVisibility();
         } catch (e) {
             document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">\uD83D\uDE15</div><p>Fehler</p></div>';
         }
@@ -3774,6 +3842,103 @@
             if (['gratis', 'freebie', 'rabatt', 'gewinnspiel', 'bogo', 'testabo'].includes(safeType)) {
                 dailyDealEl.classList.add('theme-' + safeType);
             }
+        }
+        function applyFeaturedDealTheme(containerId, type) {
+            const dealEl = document.getElementById(containerId);
+            if (!dealEl) return;
+            dealEl.classList.remove('theme-gratis', 'theme-freebie', 'theme-rabatt', 'theme-gewinnspiel', 'theme-bogo', 'theme-testabo');
+            const safeType = String(type || '').toLowerCase();
+            if (['gratis', 'freebie', 'rabatt', 'gewinnspiel', 'bogo', 'testabo'].includes(safeType)) {
+                dealEl.classList.add('theme-' + safeType);
+            }
+        }
+        function getFeaturedDealsPool(maxAgeDays) {
+            const cutoff = Date.now() - (maxAgeDays * 24 * 60 * 60 * 1000);
+            return allDeals
+                .map((raw) => normalizeDealForApp(raw))
+                .filter((deal) => {
+                    if (!deal || !deal.id) return false;
+                    if (['kirche', 'gottesdienste', 'events'].includes(String(deal.category || '').toLowerCase())) return false;
+                    if (isChristianContent(deal)) return false;
+                    const lifecycle = getDealLifecycle(deal);
+                    if (lifecycle.state !== 'active') return false;
+                    return getDealBaseTimestampMs(deal) >= cutoff;
+                });
+        }
+        function getFeaturedDealScore(deal, maxAgeDays) {
+            const ageDays = Math.max(0, (Date.now() - getDealBaseTimestampMs(deal)) / (1000 * 60 * 60 * 24));
+            const freshness = Math.max(0, 5 - (ageDays / Math.max(2, maxAgeDays / 4)));
+            const social = Math.min(6, (deal.votes || 0) / 12) + Math.min(2.4, getSocialProofScore(deal));
+            const typeBoost = (deal.type === 'gratis' || deal.type === 'freebie') ? 1.7 : ((deal.type === 'rabatt' || deal.type === 'bogo' || deal.type === 'testabo') ? 1 : 0.5);
+            const priorityBoost = Math.min(4, Number(deal.pinnedRank || 0));
+            const qualityBoost = Math.min(2, Number(deal.qualityScore || 0) / 60);
+            return freshness + social + typeBoost + priorityBoost + qualityBoost + (deal.hot ? 1.7 : 0) + (deal.isNew ? 1.1 : 0);
+        }
+        function pickFeaturedDeal(maxAgeDays) {
+            const candidates = getFeaturedDealsPool(maxAgeDays);
+            if (!candidates.length) return null;
+            return candidates
+                .slice()
+                .sort((a, b) => {
+                    const scoreDiff = getFeaturedDealScore(b, maxAgeDays) - getFeaturedDealScore(a, maxAgeDays);
+                    if (Math.abs(scoreDiff) > 0.001) return scoreDiff;
+                    return (b.votes || 0) - (a.votes || 0) || getDealBaseTimestampMs(b) - getDealBaseTimestampMs(a) || String(a.id).localeCompare(String(b.id));
+                })[0];
+        }
+        function renderFeaturedDealCard(config) {
+            const deal = config.deal;
+            const titleEl = document.getElementById(config.titleId);
+            const descEl = document.getElementById(config.descId);
+            const metaEl = document.getElementById(config.metaId);
+            const btnEl = document.getElementById(config.buttonId);
+            if (!titleEl || !descEl || !metaEl || !btnEl) return;
+            if (!deal) {
+                applyFeaturedDealTheme(config.containerId, '');
+                titleEl.textContent = t(config.fallbackTitleKey);
+                descEl.textContent = t('featuredSoon');
+                metaEl.textContent = t(config.metaKey);
+                btnEl.onclick = () => {};
+                return;
+            }
+            const brand = getDisplayBrand(deal);
+            const location = getDisplayLocation(deal);
+            const rawTitle = cleanUiNoiseText(deal.title || '').replace(/\b(alle anzeigen|kategorien|app)\b/gi, '').replace(/\s+/g, ' ').trim();
+            const rawDesc = cleanUiNoiseText(deal.description || '').trim();
+            const ageDays = Math.max(0, Math.floor((Date.now() - getDealBaseTimestampMs(deal)) / (1000 * 60 * 60 * 24)));
+            const metaBits = [t(config.metaKey)];
+            if (deal.votes > 0) metaBits.push(tf('featuredVotes', { count: deal.votes }));
+            metaBits.push(ageDays <= 0 ? t('featuredFresh') : tf('featuredDaysAgo', { count: ageDays }));
+            applyFeaturedDealTheme(config.containerId, deal.type);
+            titleEl.textContent = (deal.logo || '') + ' ' + (brand ? (brand + ': ') : '') + (rawTitle || t(config.fallbackTitleKey));
+            descEl.textContent = rawDesc ? (rawDesc + (location ? ' — ' + location : '')) : (location || t('featuredSoon'));
+            metaEl.textContent = metaBits.join(' • ');
+            btnEl.onclick = () => {
+                if (deal.url) window.open(deal.url, '_blank');
+                trackDealView(deal.id);
+            };
+        }
+        function setFeaturedHomeDeals() {
+            renderFeaturedDealCard({
+                containerId: 'weeklyDeal',
+                titleId: 'weeklyTitle',
+                descId: 'weeklyDesc',
+                metaId: 'weeklyMeta',
+                buttonId: 'weeklyBtn',
+                deal: pickFeaturedDeal(7),
+                fallbackTitleKey: 'weeklyFallback',
+                metaKey: 'weeklyMeta'
+            });
+            renderFeaturedDealCard({
+                containerId: 'monthlyDeal',
+                titleId: 'monthlyTitle',
+                descId: 'monthlyDesc',
+                metaId: 'monthlyMeta',
+                buttonId: 'monthlyBtn',
+                deal: pickFeaturedDeal(30),
+                fallbackTitleKey: 'monthlyFallback',
+                metaKey: 'monthlyMeta'
+            });
+            updateHomeSectionVisibility();
         }
         function updateCounts() {
             document.getElementById('countAll').textContent = allDeals.length;
@@ -4602,8 +4767,37 @@
         function searchFor(query) { document.getElementById('searchInput').value = query; searchQuery = query; document.getElementById('searchDropdown').classList.remove('show'); document.getElementById('clearBtn').classList.add('show'); renderDeals(); }
         function clearSearch(e) { e.stopPropagation(); document.getElementById('searchInput').value = ''; searchQuery = ''; document.getElementById('clearBtn').classList.remove('show'); renderDeals(); }
         function saveUserData() { localStorage.setItem('userData', JSON.stringify(userData)); }
-        function showHome() { currentView = 'home'; document.getElementById('streakBanner').style.display = 'flex'; document.getElementById('dailyDeal').style.display = 'block'; document.getElementById('savingsCard').style.display = 'block'; document.getElementById('searchBox').style.display = 'flex'; document.getElementById('filters').style.display = 'block'; renderDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelector('.nav-item').classList.add('active'); }
-        function hideHeaderElements() { document.getElementById('streakBanner').style.display = 'none'; document.getElementById('dailyDeal').style.display = 'none'; document.getElementById('savingsCard').style.display = 'none'; document.getElementById('searchBox').style.display = 'none'; document.getElementById('filters').style.display = 'none'; }
+        const HOME_SECTION_DISPLAY = {
+            streakBanner: 'flex',
+            dailyDeal: 'block',
+            weeklyDeal: 'block',
+            monthlyDeal: 'block',
+            savingsCard: 'block',
+            proBanner: 'block',
+            proActiveBadge: 'flex',
+            savingsProCard: 'block',
+            locationFilterBar: 'block',
+            yearOverview: 'block',
+            compareCard: 'block',
+            dealAlarmCard: 'block',
+            searchBox: 'flex',
+            filters: 'block'
+        };
+        const PRO_HOME_SECTION_IDS = new Set(['weeklyDeal', 'monthlyDeal', 'proActiveBadge', 'savingsProCard', 'locationFilterBar', 'yearOverview', 'compareCard', 'dealAlarmCard']);
+        function updateHomeSectionVisibility() {
+            const isHome = currentView === 'home';
+            Object.entries(HOME_SECTION_DISPLAY).forEach(([id, displayValue]) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const requiresPro = PRO_HOME_SECTION_IDS.has(id);
+                const shouldShow = isHome && (!requiresPro || proData.isPro);
+                el.style.display = shouldShow ? displayValue : 'none';
+            });
+            const proBanner = document.getElementById('proBanner');
+            if (proBanner) proBanner.style.display = (isHome && !proData.isPro) ? 'block' : 'none';
+        }
+        function showHome() { currentView = 'home'; updateHomeSectionVisibility(); renderDeals(); setFeaturedHomeDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelector('.nav-item').classList.add('active'); }
+        function hideHeaderElements() { updateHomeSectionVisibility(); }
         
         // ===== LINK SUBMIT SYSTEM =====
         let currentLinkData = null;
@@ -5555,12 +5749,7 @@
 
   function updateProUI() {
     const isPro = proData.isPro;
-    const proBanner = document.getElementById('proBanner');
-    const proActiveBadge = document.getElementById('proActiveBadge');
-    if (proBanner) proBanner.style.display = isPro ? 'none' : 'block';
-    if (proActiveBadge) proActiveBadge.style.display = isPro ? 'flex' : 'none';
-    const proSections = document.querySelectorAll('.pro-feature-section');
-    proSections.forEach(s => { s.style.display = isPro ? 'block' : 'none'; });
+    updateHomeSectionVisibility();
     if (!isPro) {
       Object.values(alarmIntervals).forEach((intervalId) => clearInterval(intervalId));
       alarmIntervals = {};
@@ -5572,6 +5761,7 @@
       updateAlarmSwitches();
       initAlarmPolling();
     }
+    setFeaturedHomeDeals();
   }
 
     function updateSavingsProCard() {
