@@ -19,7 +19,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { height: 100%; -webkit-text-size-adjust: 100%; }
+        html { height: 100%; -webkit-text-size-adjust: 100%; overscroll-behavior-y: none; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -30,6 +30,8 @@
             padding-bottom: calc(100px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px));
             padding-left: max(16px, env(safe-area-inset-left));
             overflow-x: hidden;
+            overscroll-behavior-y: none;
+            position: relative;
         }
         button, .nav-item, .filter-btn, .search-tag, .fab-add, .pro-banner, .radius-btn, .toggle-sw, .toggle-btn, .action-btn {
             -webkit-tap-highlight-color: transparent;
@@ -477,7 +479,7 @@
         @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         
         /* BOTTOM NAV */
-        .bottom-nav { position: fixed; left: 0; right: 0; bottom: var(--ff-bottom-viewport-offset, 0px); background: white; padding: 8px 16px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); display: flex; justify-content: space-around; box-shadow: 0 -2px 20px rgba(0,0,0,0.1); z-index: 100; transform: translateZ(0); -webkit-transform: translateZ(0); will-change: bottom; }
+        .bottom-nav { position: fixed; left: 0; right: 0; bottom: var(--ff-bottom-viewport-offset, 0px); background: white; padding: 8px 16px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); display: flex; justify-content: space-around; box-shadow: 0 -2px 20px rgba(0,0,0,0.1); z-index: 100; transform: translate3d(0,0,0); -webkit-transform: translate3d(0,0,0); will-change: bottom; backface-visibility: hidden; -webkit-backface-visibility: hidden; contain: layout style paint; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 16px; border-radius: 12px; cursor: pointer; }
         .nav-item:hover, .nav-item.active { background: #f1f5f9; }
         .nav-item.active { color: #667eea; }
