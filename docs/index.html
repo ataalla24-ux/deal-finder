@@ -5337,6 +5337,8 @@
     if (override.validFrom) merged.validFrom = override.validFrom;
     if (override.validUntil) merged.validUntil = override.validUntil;
     if (override.expiryDisplayText) merged.expiryDisplayText = override.expiryDisplayText;
+    if (override.expires) merged.expires = override.expires;
+    if (override.expiresOriginal) merged.expiresOriginal = override.expiresOriginal;
     if (typeof override.pinnedRank === 'number') merged.pinnedRank = override.pinnedRank;
     merged.hidden = !!override.hidden;
     merged._manualOverride = true;
@@ -5414,11 +5416,55 @@
     document.getElementById('adminDealModal').classList.add('show');
   }
 
+  function formatAdminIsoDateLabel(isoDate) {
+    if (!isoDate || !/^\d{4}-\d{2}-\d{2}$/.test(String(isoDate))) return '';
+    const [year, month, day] = String(isoDate).split('-');
+    return `${day}.${month}.${year}`;
+  }
+
+  function inferAdminExpiryKind(rawKind, startDate, endDate) {
+    const kind = String(rawKind || '').trim().toLowerCase();
+    if (kind) return kind;
+    if (startDate && endDate) return startDate === endDate ? 'single' : 'range';
+    if (startDate) return 'start';
+    if (endDate) return 'end';
+    return '';
+  }
+
+  function buildAdminExpiryText(kind, startDate, endDate, customText) {
+    const trimmedCustom = cleanUiNoiseText(customText || '');
+    if (trimmedCustom) return trimmedCustom;
+    const startLabel = formatAdminIsoDateLabel(startDate);
+    const endLabel = formatAdminIsoDateLabel(endDate);
+    switch (kind) {
+      case 'single':
+        return startLabel ? `Gültig am ${startLabel}` : '';
+      case 'start':
+        return startLabel ? `Gültig ab ${startLabel}` : '';
+      case 'end':
+        return endLabel ? `Gültig bis ${endLabel}` : '';
+      case 'range':
+        if (startLabel && endLabel) return `${startLabel} - ${endLabel}`;
+        return endLabel || startLabel || '';
+      case 'month':
+      case 'approx-range':
+        return endLabel || startLabel || '';
+      default:
+        return endLabel || startLabel || '';
+    }
+  }
+
   async function saveAdminDeal() {
     if (!currentAdminDealId) return;
     const startDate = document.getElementById('adminStartDateInput').value || '';
     const endDate = document.getElementById('adminEndDateInput').value || '';
-    const expiryKind = document.getElementById('adminExpiryKindInput').value || '';
+    const expiryKind = inferAdminExpiryKind(document.getElementById('adminExpiryKindInput').value || '', startDate, endDate);
+    const expiryDisplayText = buildAdminExpiryText(
+      expiryKind,
+      startDate,
+      endDate,
+      document.getElementById('adminExpiryDisplayInput').value
+    );
     const payload = {
       dealId: currentAdminDealId,
       title: document.getElementById('adminTitleInput').value,
@@ -5427,9 +5473,11 @@
       distance: document.getElementById('adminDistanceInput').value,
       expiryKind: expiryKind || null,
       validOn: expiryKind === 'single' ? startDate : null,
-      validFrom: expiryKind !== 'single' ? startDate : null,
+      validFrom: (expiryKind && expiryKind !== 'single' && expiryKind !== 'end') ? startDate : null,
       validUntil: endDate || null,
-      expiryDisplayText: document.getElementById('adminExpiryDisplayInput').value,
+      expiryDisplayText,
+      expires: expiryDisplayText,
+      expiresOriginal: expiryDisplayText,
       pinnedRank: document.getElementById('adminPinnedRankInput').value,
       hidden: document.getElementById('adminHiddenInput').checked
     };
