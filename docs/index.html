@@ -64,6 +64,12 @@
         .featured-deal-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
         .featured-deal-header .daily-label { margin-bottom: 0; }
         .featured-deal-meta { font-size: 12px; font-weight: 700; letter-spacing: 0.2px; color: rgba(255,255,255,0.82); margin-top: 10px; }
+        .daily-deal.featured-locked > :not(.featured-lock) { filter: blur(3px); opacity: 0.35; pointer-events: none; user-select: none; }
+        .featured-lock { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; z-index: 3; background: linear-gradient(135deg, rgba(17,24,39,0.4), rgba(88,28,135,0.55)); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+        .featured-lock-content { max-width: 280px; text-align: center; }
+        .featured-lock-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+        .featured-lock-subtitle { font-size: 13px; line-height: 1.45; opacity: 0.95; margin-bottom: 14px; }
+        .featured-lock-btn { background: white; color: #5b21b6; border: none; border-radius: 999px; padding: 12px 18px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.22); }
         .daily-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
         .daily-desc { opacity: 0.9; margin-bottom: 12px; }
         .daily-countdown { display: flex; gap: 8px; margin-top: 12px; }
@@ -674,6 +680,13 @@
             <div class="daily-desc" id="weeklyDesc"></div>
             <div class="featured-deal-meta" id="weeklyMeta"></div>
             <button class="daily-btn" id="weeklyBtn">Top Deal öffnen →</button>
+            <div class="featured-lock" id="weeklyLock" onclick="openReferralModal()">
+                <div class="featured-lock-content">
+                    <div class="featured-lock-title" id="weeklyLockTitle">👑 Nur für PRO</div>
+                    <div class="featured-lock-subtitle" id="weeklyLockSubtitle">Schalte Deal der Woche mit 2 bestätigten Einladungen frei.</div>
+                    <button class="featured-lock-btn" id="weeklyLockBtn" onclick="event.stopPropagation(); openReferralModal()">👑 PRO gratis freischalten</button>
+                </div>
+            </div>
         </div>
 
         <div class="daily-deal pro-feature-section" id="monthlyDeal" style="display:none">
@@ -685,6 +698,13 @@
             <div class="daily-desc" id="monthlyDesc"></div>
             <div class="featured-deal-meta" id="monthlyMeta"></div>
             <button class="daily-btn" id="monthlyBtn">Top Deal öffnen →</button>
+            <div class="featured-lock" id="monthlyLock" onclick="openReferralModal()">
+                <div class="featured-lock-content">
+                    <div class="featured-lock-title" id="monthlyLockTitle">👑 Nur für PRO</div>
+                    <div class="featured-lock-subtitle" id="monthlyLockSubtitle">Schalte Deal des Monats mit 2 bestätigten Einladungen frei.</div>
+                    <button class="featured-lock-btn" id="monthlyLockBtn" onclick="event.stopPropagation(); openReferralModal()">👑 PRO gratis freischalten</button>
+                </div>
+            </div>
         </div>
         
         <div class="savings-card" id="savingsCard">
@@ -1158,6 +1178,10 @@
                 monthlyFallback: '🏆 Deal des Monats',
                 monthlyButton: 'Top Deal öffnen →',
                 monthlyMeta: 'Bester Community-Pick der letzten 30 Tage',
+                featuredLockTitle: '👑 Nur für PRO',
+                featuredWeekLockSub: 'Schalte Deal der Woche mit 2 bestätigten Einladungen frei.',
+                featuredMonthLockSub: 'Schalte Deal des Monats mit 2 bestätigten Einladungen frei.',
+                featuredLockButton: '👑 PRO gratis freischalten',
                 featuredVotes: '{count} Votes',
                 featuredFresh: 'Heute entdeckt',
                 featuredDaysAgo: 'Vor {count} Tagen entdeckt',
@@ -1376,6 +1400,10 @@
                 monthlyFallback: '🏆 Deal of the month',
                 monthlyButton: 'Open top deal →',
                 monthlyMeta: 'Best community pick from the last 30 days',
+                featuredLockTitle: '👑 PRO only',
+                featuredWeekLockSub: 'Unlock deal of the week with 2 confirmed invites.',
+                featuredMonthLockSub: 'Unlock deal of the month with 2 confirmed invites.',
+                featuredLockButton: '👑 Unlock PRO for free',
                 featuredVotes: '{count} votes',
                 featuredFresh: 'Discovered today',
                 featuredDaysAgo: 'Discovered {count} days ago',
@@ -1626,6 +1654,12 @@
             if (document.getElementById('monthlyTitle')?.textContent === 'Wird geladen...' || document.getElementById('monthlyTitle')?.textContent === 'Loading...') {
                 setText('#monthlyTitle', t('monthlyLoading'));
             }
+            setText('#weeklyLockTitle', t('featuredLockTitle'));
+            setText('#weeklyLockSubtitle', t('featuredWeekLockSub'));
+            setText('#weeklyLockBtn', t('featuredLockButton'));
+            setText('#monthlyLockTitle', t('featuredLockTitle'));
+            setText('#monthlyLockSubtitle', t('featuredMonthLockSub'));
+            setText('#monthlyLockBtn', t('featuredLockButton'));
             setText('#streakBanner .streak-text', currentLanguage === 'en' ? 'Come back tomorrow for bonus XP!' : 'Komm morgen wieder für Bonus XP!');
             setText('#savingsCard .savings-goal span:last-child', t('savingsGoal'));
             setText('#savingsLock .savings-lock-title', t('savingsLockTitle'));
@@ -3938,7 +3972,22 @@
                 fallbackTitleKey: 'monthlyFallback',
                 metaKey: 'monthlyMeta'
             });
+            updateFeaturedLockState();
             updateHomeSectionVisibility();
+        }
+        function updateFeaturedLockState() {
+            const isLocked = !proData.isPro;
+            const isHome = currentView === 'home';
+            [
+                ['weeklyDeal', 'weeklyLock'],
+                ['monthlyDeal', 'monthlyLock']
+            ].forEach(([cardId, lockId]) => {
+                const card = document.getElementById(cardId);
+                const lock = document.getElementById(lockId);
+                if (!card || !lock) return;
+                card.classList.toggle('featured-locked', isLocked);
+                lock.style.display = (isHome && isLocked) ? 'flex' : 'none';
+            });
         }
         function updateCounts() {
             document.getElementById('countAll').textContent = allDeals.length;
@@ -4783,7 +4832,7 @@
             searchBox: 'flex',
             filters: 'block'
         };
-        const PRO_HOME_SECTION_IDS = new Set(['weeklyDeal', 'monthlyDeal', 'proActiveBadge', 'savingsProCard', 'locationFilterBar', 'yearOverview', 'compareCard', 'dealAlarmCard']);
+        const PRO_HOME_SECTION_IDS = new Set(['proActiveBadge', 'savingsProCard', 'locationFilterBar', 'yearOverview', 'compareCard', 'dealAlarmCard']);
         function updateHomeSectionVisibility() {
             const isHome = currentView === 'home';
             Object.entries(HOME_SECTION_DISPLAY).forEach(([id, displayValue]) => {
@@ -4795,6 +4844,7 @@
             });
             const proBanner = document.getElementById('proBanner');
             if (proBanner) proBanner.style.display = (isHome && !proData.isPro) ? 'block' : 'none';
+            updateFeaturedLockState();
         }
         function showHome() { currentView = 'home'; updateHomeSectionVisibility(); renderDeals(); setFeaturedHomeDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelector('.nav-item').classList.add('active'); }
         function hideHeaderElements() { updateHomeSectionVisibility(); }
