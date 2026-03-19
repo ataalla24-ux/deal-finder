@@ -70,6 +70,20 @@
         .featured-lock-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
         .featured-lock-subtitle { font-size: 13px; line-height: 1.45; opacity: 0.95; margin-bottom: 14px; }
         .featured-lock-btn { background: white; color: #5b21b6; border: none; border-radius: 999px; padding: 12px 18px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.22); }
+        .for-you-featured-wrap { margin-bottom: 18px; }
+        .for-you-featured-intro { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+        .for-you-featured-title { font-size: 18px; font-weight: 900; color: #0f172a; letter-spacing: -0.3px; }
+        .for-you-featured-subtitle { font-size: 13px; color: #64748b; margin-top: 4px; line-height: 1.45; }
+        .for-you-featured-grid { display: grid; gap: 12px; }
+        .daily-deal.for-you-featured { background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); color: #0f172a; border: 1px solid rgba(148,163,184,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.08); }
+        .daily-deal.for-you-featured::before { background: linear-gradient(90deg, rgba(99,102,241,0.9), rgba(14,165,233,0.9)); top: 0; right: 0; width: 100%; height: 4px; animation: none; }
+        .daily-deal.for-you-featured .daily-label { background: #e0e7ff; color: #3730a3; }
+        .daily-deal.for-you-featured .daily-title { color: #0f172a; font-size: 20px; margin-bottom: 6px; }
+        .daily-deal.for-you-featured .daily-desc { color: #475569; margin-bottom: 10px; }
+        .daily-deal.for-you-featured .featured-deal-meta { color: #64748b; margin-top: 0; }
+        .daily-deal.for-you-featured .daily-btn { background: linear-gradient(135deg, #111827, #334155); color: white; box-shadow: 0 10px 22px rgba(15,23,42,0.16); }
+        .daily-deal.for-you-featured .featured-lock { background: linear-gradient(135deg, rgba(15,23,42,0.58), rgba(67,56,202,0.52)); }
+        .daily-deal.for-you-featured .pro-badge { align-self: flex-start; }
         .daily-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
         .daily-desc { opacity: 0.9; margin-bottom: 12px; }
         .daily-countdown { display: flex; gap: 8px; margin-top: 12px; }
@@ -670,6 +684,8 @@
             </div>
             <button class="daily-btn" id="dailyBtn">Jetzt sichern →</button>
         </div>
+
+        <div id="featuredDealsHomeAnchor" style="display:none"></div>
 
         <div class="daily-deal pro-feature-section" id="weeklyDeal" style="display:none">
             <div class="featured-deal-header">
@@ -3952,6 +3968,7 @@
             };
         }
         function setFeaturedHomeDeals() {
+            syncFeaturedDealPlacement();
             renderFeaturedDealCard({
                 containerId: 'weeklyDeal',
                 titleId: 'weeklyTitle',
@@ -3974,6 +3991,26 @@
             });
             updateFeaturedLockState();
             updateHomeSectionVisibility();
+        }
+        function syncFeaturedDealPlacement() {
+            const weeklyDeal = document.getElementById('weeklyDeal');
+            const monthlyDeal = document.getElementById('monthlyDeal');
+            const homeAnchor = document.getElementById('featuredDealsHomeAnchor');
+            const forYouMount = document.getElementById('forYouFeaturedMount');
+            if (!weeklyDeal || !monthlyDeal || !homeAnchor) return;
+            const placeIntoForYou = currentView === 'secret' && !!forYouMount;
+            [weeklyDeal, monthlyDeal].forEach((card) => {
+                card.classList.toggle('for-you-featured', placeIntoForYou);
+            });
+            if (placeIntoForYou) {
+                forYouMount.appendChild(weeklyDeal);
+                forYouMount.appendChild(monthlyDeal);
+            } else {
+                const parent = homeAnchor.parentNode;
+                if (!parent) return;
+                parent.insertBefore(weeklyDeal, homeAnchor.nextSibling);
+                parent.insertBefore(monthlyDeal, weeklyDeal.nextSibling);
+            }
         }
         function updateFeaturedLockState() {
             const isLocked = !proData.isPro;
@@ -4795,12 +4832,13 @@
 
             const intro = '<div class="discovery-page-header"><div class="discovery-page-icon">✨</div><h2 class="discovery-page-title">' + t('forYouTitle') + '</h2><p class="discovery-page-subtitle">' + (proData.isPro ? t('forYouSubPro') : t('forYouSubFree')) + '</p></div>';
             const proBoostCard = proData.isPro ? '' : '<div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:18px;padding:18px;color:white;margin-bottom:16px" onclick="openReferralModal()"><div style="font-size:17px;font-weight:800;margin-bottom:6px">' + t('forYouProBoostTitle') + '</div><div style="font-size:14px;opacity:0.95;line-height:1.45">' + t('forYouProBoostSub') + '</div><button style="margin-top:14px;background:white;color:#5b21b6;border:none;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:800;cursor:pointer;width:100%">' + t('unlockProFree') + '</button></div>';
+            const featuredIntro = '<div class="for-you-featured-wrap"><div class="for-you-featured-intro"><div><div class="for-you-featured-title">' + (currentLanguage === 'en' ? 'Premium picks' : 'Premium Picks') + '</div><div class="for-you-featured-subtitle">' + (currentLanguage === 'en' ? 'The strongest week and month picks in one calmer view.' : 'Die stärksten Picks der Woche und des Monats in einer ruhigeren Ansicht.') + '</div></div><span class="pro-badge">👑 PRO</span></div><div class="for-you-featured-grid" id="forYouFeaturedMount"></div></div>';
             const recommendedSection = renderDiscoverySection(t('forYouRecommended'), proData.isPro ? t('forYouRecommendedSubPro') : t('forYouRecommendedSubFree'), recommended, (deal) => getRecommendationReason(deal));
             const topVotedSection = renderDiscoverySection(t('forYouTopVoted'), t('forYouTopVotedSub'), topVoted, (_, index) => index === 0 ? (currentLanguage === 'en' ? 'Community favorite' : 'Community-Favorit') : (currentLanguage === 'en' ? 'Lots of votes' : 'Viele Stimmen'));
             const trendingSection = renderDiscoverySection(t('forYouTrending'), t('forYouTrendingSub'), trending, (deal) => deal.hot ? (currentLanguage === 'en' ? 'Hot right now' : 'Gerade heiß') : (deal.isNew ? (currentLanguage === 'en' ? 'Freshly discovered' : 'Frisch entdeckt') : (currentLanguage === 'en' ? 'Gaining momentum' : 'Im Aufwind')));
             const submitCta = '<div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:18px;padding:20px;color:white;text-align:center;cursor:pointer" onclick="openLinkModal()"><div style="font-size:34px;margin-bottom:8px">🔗</div><div style="font-size:18px;font-weight:700">' + t('submitDeal') + '</div><div style="font-size:14px;opacity:0.9;margin-top:4px">' + t('submitDealSub') + '</div></div>';
 
-            document.getElementById('deals').innerHTML = '<div style="padding:4px 0">' + intro + proBoostCard + recommendedSection + topVotedSection + trendingSection + submitCta + '</div>';
+            document.getElementById('deals').innerHTML = '<div style="padding:4px 0">' + intro + featuredIntro + proBoostCard + recommendedSection + topVotedSection + trendingSection + submitCta + '</div>';
             setFeaturedHomeDeals();
             scrollToTopContent();
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
