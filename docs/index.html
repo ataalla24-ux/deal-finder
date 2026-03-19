@@ -27,8 +27,9 @@
             min-height: 100dvh;
             padding-top: max(16px, env(safe-area-inset-top));
             padding-right: max(16px, env(safe-area-inset-right));
-            padding-bottom: max(100px, calc(100px + env(safe-area-inset-bottom)));
+            padding-bottom: calc(100px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px));
             padding-left: max(16px, env(safe-area-inset-left));
+            overflow-x: hidden;
         }
         button, .nav-item, .filter-btn, .search-tag, .fab-add, .pro-banner, .radius-btn, .toggle-sw, .toggle-btn, .action-btn {
             -webkit-tap-highlight-color: transparent;
@@ -40,16 +41,6 @@
         }
         .container { max-width: 600px; margin: 0 auto; }
         h1 { text-align: center; font-size: 28px; margin-bottom: 8px; }
-        /* STREAK BANNER */
-        .streak-banner { background: linear-gradient(135deg, #f59e0b, #ef4444); border-radius: 16px; padding: 16px; margin-bottom: 16px; color: white; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: transform 0.2s; }
-        .streak-banner:hover { transform: scale(1.02); }
-        .streak-fire { font-size: 40px; animation: firePulse 1s infinite; }
-        @keyframes firePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        .streak-info { flex: 1; }
-        .streak-days { font-size: 24px; font-weight: 800; }
-        .streak-text { font-size: 13px; opacity: 0.9; }
-        .streak-reward { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 13px; }
-        
         /* DEAL DES TAGES */
         .daily-deal { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; padding: 20px; margin-bottom: 16px; color: white; position: relative; overflow: hidden; }
         .daily-deal.theme-gratis,
@@ -313,7 +304,7 @@
         .no-content { text-align: center; padding: 20px; color: #9ca3af; font-size: 13px; }
         
         /* ADD DEAL FLOATING BUTTON */
-        .fab-add { position: fixed; bottom: max(96px, calc(96px + env(safe-area-inset-bottom))); right: 20px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-size: 28px; cursor: pointer; box-shadow: 0 4px 20px rgba(16,185,129,0.4); z-index: 90; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .fab-add { position: fixed; bottom: calc(96px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px)); right: 20px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-size: 28px; cursor: pointer; box-shadow: 0 4px 20px rgba(16,185,129,0.4); z-index: 90; display: flex; align-items: center; justify-content: center; transition: all 0.3s; transform: translateZ(0); -webkit-transform: translateZ(0); }
         .fab-add:hover { transform: scale(1.1); box-shadow: 0 6px 30px rgba(16,185,129,0.5); }
         .fab-add:active { transform: scale(0.95); }
         .fab-tooltip { position: absolute; right: 70px; background: #1f2937; color: white; padding: 8px 12px; border-radius: 8px; font-size: 12px; white-space: nowrap; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
@@ -480,11 +471,11 @@
         .empty { text-align: center; padding: 60px 20px; color: #666; }
         .empty-icon { font-size: 48px; margin-bottom: 12px; }
         .loading { text-align: center; padding: 40px; color: #666; }
-        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 24px; border-radius: 30px; font-weight: 600; z-index: 1000; animation: toastIn 0.3s ease; }
+        .toast { position: fixed; bottom: calc(80px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px)); left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 24px; border-radius: 30px; font-weight: 600; z-index: 1000; animation: toastIn 0.3s ease; }
         @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         
         /* BOTTOM NAV */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 8px 16px; padding-bottom: max(8px, env(safe-area-inset-bottom)); display: flex; justify-content: space-around; box-shadow: 0 -2px 20px rgba(0,0,0,0.1); z-index: 100; }
+        .bottom-nav { position: fixed; left: 0; right: 0; bottom: var(--ff-bottom-viewport-offset, 0px); background: white; padding: 8px 16px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); display: flex; justify-content: space-around; box-shadow: 0 -2px 20px rgba(0,0,0,0.1); z-index: 100; transform: translateZ(0); -webkit-transform: translateZ(0); will-change: bottom; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 16px; border-radius: 12px; cursor: pointer; }
         .nav-item:hover, .nav-item.active { background: #f1f5f9; }
         .nav-item.active { color: #667eea; }
@@ -643,7 +634,7 @@
         .expiry-bar-fill.red { background: linear-gradient(90deg, #ef4444, #f97316); animation: pulse-bar 1s infinite; }
         @keyframes pulse-bar { 0%,100%{opacity:1} 50%{opacity:0.6} }
         .card-countdown { font-size: 12px; font-weight: 700; color: #ef4444; margin: 0 0 8px; }
-        .admin-fab { position: fixed; left: 18px; bottom: 92px; z-index: 920; width: 52px; height: 52px; border-radius: 50%; border: none; background: linear-gradient(135deg, #111827, #374151); color: white; font-size: 22px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.28); display: none; align-items: center; justify-content: center; }
+        .admin-fab { position: fixed; left: 18px; bottom: calc(92px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px)); z-index: 920; width: 52px; height: 52px; border-radius: 50%; border: none; background: linear-gradient(135deg, #111827, #374151); color: white; font-size: 22px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.28); display: none; align-items: center; justify-content: center; transform: translateZ(0); -webkit-transform: translateZ(0); }
         .admin-fab.show { display: inline-flex; }
         .deal-admin-btn { position: absolute; top: 12px; left: 12px; border: none; border-radius: 999px; background: rgba(17,24,39,0.92); color: white; font-size: 11px; font-weight: 800; padding: 6px 10px; z-index: 3; box-shadow: 0 8px 18px rgba(15,23,42,0.22); }
         .admin-modal-content { text-align: left; max-width: 420px; }
@@ -670,15 +661,6 @@
 </head>
 <body>
     <div class="container">
-        <div class="streak-banner" id="streakBanner">
-            <div class="streak-fire">🔥</div>
-            <div class="streak-info">
-                <div class="streak-days" id="streakDays">1 Tag Streak!</div>
-                <div class="streak-text">Komm morgen wieder für Bonus XP!</div>
-            </div>
-            <div class="streak-reward" id="streakReward">+10 XP</div>
-        </div>
-        
         <div class="daily-deal" id="dailyDeal">
             <div class="daily-label">⭐ DEAL DES TAGES</div>
             <div class="daily-title" id="dailyTitle">Wird geladen...</div>
@@ -943,23 +925,6 @@
     <button class="pro-close-btn" onclick="closeProAnimation()">🚀 Los geht's!</button>
   </div>
 
-<div class="search-box" id="searchBox">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input type="text" id="searchInput" placeholder="Suche z.B. Kaffee, IKEA..." autocomplete="off">
-            <button class="clear-btn" id="clearBtn" onclick="clearSearch(event)">✕</button>
-            <div class="search-dropdown" id="searchDropdown">
-                <div class="search-section">
-                    <div class="search-section-title">🔥 Beliebte Suchen</div>
-                    <div>
-                        <span class="search-tag trending" onclick="searchFor('gratis kaffee')">☕ Gratis Kaffee</span>
-                        <span class="search-tag trending" onclick="searchFor('fitness')">💪 Fitness</span>
-                        <span class="search-tag" onclick="searchFor('mcdonalds')">🍟 McDonald's</span>
-                        <span class="search-tag" onclick="searchFor('ikea')">🪑 IKEA</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
         <div class="filters" id="filters">
             <div class="filter-row" id="typeFilters">
                 <button class="filter-btn active" data-filter="alle">🎯 Alle <span class="filter-count" id="countAll">0</span></button>
@@ -1143,7 +1108,6 @@
         let allDeals = [];
         let currentFilter = 'alle';
         let currentCategory = 'alle';
-        let searchQuery = '';
         let votes = JSON.parse(localStorage.getItem('votes') || '{}');
         let votedDeals = JSON.parse(localStorage.getItem('votedDeals') || '[]');
         let favorites = sanitizeFavoriteIds(JSON.parse(localStorage.getItem('favorites') || '[]'));
@@ -1682,7 +1646,6 @@
             setText('#monthlyLockTitle', t('featuredLockTitle'));
             setText('#monthlyLockSubtitle', t('featuredMonthLockSub'));
             setText('#monthlyLockBtn', t('featuredLockButton'));
-            setText('#streakBanner .streak-text', currentLanguage === 'en' ? 'Come back tomorrow for bonus XP!' : 'Komm morgen wieder für Bonus XP!');
             setText('#savingsCard .savings-goal span:last-child', t('savingsGoal'));
             setText('#savingsLock .savings-lock-title', t('savingsLockTitle'));
             setText('#savingsLock .savings-lock-subtitle', t('savingsLockSubtitle'));
@@ -1729,11 +1692,6 @@
             setText('#proUnlockAnim .pro-unlock-title', t('proAnimTitle'));
             setHtml('#proUnlockAnim .pro-unlock-sub', t('proAnimSub'));
             setText('#proUnlockAnim .pro-close-btn', t('proAnimClose'));
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) searchInput.placeholder = t('searchPlaceholder');
-            setText('#searchDropdown .search-section-title', t('popularSearches'));
-            document.querySelectorAll('#searchDropdown .search-tag')[0] && (document.querySelectorAll('#searchDropdown .search-tag')[0].textContent = t('tagCoffee'));
-            document.querySelectorAll('#searchDropdown .search-tag')[1] && (document.querySelectorAll('#searchDropdown .search-tag')[1].textContent = t('tagFitness'));
             const typeButtons = document.querySelectorAll('#typeFilters .filter-btn');
             if (typeButtons[0]) typeButtons[0].innerHTML = t('filterAll') + ' <span class="filter-count" id="countAll">' + (document.getElementById('countAll')?.textContent || '0') + '</span>';
             if (typeButtons[1]) typeButtons[1].innerHTML = t('filterGratis') + ' <span class="filter-count" id="countGratis">' + (document.getElementById('countGratis')?.textContent || '0') + '</span>';
@@ -3538,7 +3496,7 @@
         };
         
         let userData = JSON.parse(localStorage.getItem('userData') || JSON.stringify({
-            xp: 0, level: 1, streak: 0, lastVisit: null, dealsViewed: 0, todayViewed: 0,
+            xp: 0, level: 1, dealsViewed: 0, todayViewed: 0,
             todayDate: null, totalSavings: 0, spinUsedToday: false, spinDate: null,
             challengeComplete: false, secretUnlocked: false
         }));
@@ -3557,14 +3515,13 @@
         
         const SPIN_PRIZES = [
             { text: '+10 XP', xp: 10 }, { text: '+25 XP', xp: 25 }, { text: '+50 XP', xp: 50 },
-            { text: '2x Streak!', special: 'streak' }, { text: '+100 XP!', xp: 100 },
+            { text: '+100 XP!', xp: 100 },
             { text: 'Secret Deal!', special: 'secret' }, { text: '+15 XP', xp: 15 }, { text: '+30 XP', xp: 30 }
         ];
         
         function init() {
             applyLanguage();
             bindHiddenAdminEntry();
-            checkStreak();
             updateLevelUI();
             updateSavingsUI();
             checkChallenge();
@@ -3573,32 +3530,6 @@
             loadDeals();
             updateFavBadge();
             updateAdminUiVisibility();
-        }
-        
-        function checkStreak() {
-            const today = new Date().toDateString();
-            if (userData.lastVisit !== today) {
-                const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-                if (userData.lastVisit === yesterday.toDateString()) {
-                    userData.streak++;
-                    addXP(Math.min(10 + userData.streak * 5, 50), '🔥 Streak Tag ' + userData.streak + '!');
-                } else if (userData.lastVisit) {
-                    userData.streak = 1;
-                    addXP(10, '👋 Willkommen zurück!');
-                } else {
-                    userData.streak = 1;
-                    addXP(10, '🎉 Erster Besuch!');
-                }
-                userData.lastVisit = today;
-                userData.todayViewed = 0;
-                userData.todayDate = today;
-                userData.challengeComplete = false;
-                saveUserData();
-            }
-            document.getElementById('streakDays').textContent = currentLanguage === 'en'
-                ? userData.streak + ' day' + (userData.streak > 1 ? 's' : '') + ' streak!'
-                : userData.streak + ' Tag' + (userData.streak > 1 ? 'e' : '') + ' Streak!';
-            document.getElementById('streakReward').textContent = '+' + Math.min(10 + userData.streak * 5, 50) + ' XP';
         }
         
         function addXP(amount, reason) {
@@ -3773,7 +3704,6 @@
                 document.getElementById('spinResultText').textContent = '🎉 ' + prize.text;
                 if (prize.xp) addXP(prize.xp, '🎡 ' + prize.text);
                 else if (prize.special === 'secret') { userData.secretUnlocked = true; saveUserData(); unlockSecret(); showToast('🎁 Secret Deal!'); }
-                else if (prize.special === 'streak') addXP(userData.streak * 10, '🔥 2x Streak!');
                 userData.spinUsedToday = true; saveUserData();
                 btn.textContent = 'Morgen wieder!';
                 document.getElementById('spinBtnSmall').textContent = '✓ Gedreht';
@@ -4075,9 +4005,6 @@
       let deals = allDeals
         .map((d) => ({ ...d, _lifecycle: getDealLifecycle(d) }))
         .filter((d) => d._lifecycle.state !== 'hidden');
-      if (searchQuery) {
-        deals = deals.filter((deal) => dealMatchesSearch(deal, searchQuery));
-      }
       if (currentFilter === 'gratis') {
         deals = deals.filter(d => d.type === 'gratis' || d.type === 'freebie');
       } else if (currentFilter === 'rabatt') {
@@ -4229,16 +4156,6 @@
             const freshnessWeight = Math.max(0.35, 1.8 - (ageDays / 14));
             scoreInteraction(deal, freshnessWeight, ageDays <= 10);
         });
-
-        const searchText = String(searchQuery || '').trim().toLowerCase();
-        if (searchText) {
-            discoveryDeals.forEach((deal) => {
-                const haystack = [deal.title, deal.description, deal.category, deal.type, getDisplayBrand(deal)].filter(Boolean).join(' ').toLowerCase();
-                if (haystack.includes(searchText)) {
-                    scoreInteraction(deal, 2.2, true);
-                }
-            });
-        }
 
         userData.discoveryProfile = {
             categories: profile.categories,
@@ -4852,7 +4769,7 @@
             const yearSavings = Object.entries(proData.monthlySavings || {})
                 .filter(([key]) => key.startsWith(String(now.getFullYear())))
                 .reduce((sum, [, value]) => sum + Number(value || 0), 0);
-            document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">' + t('yourStats') + '</h2><p style="color:#6b7280;font-size:14px">' + t('yourStatsSub') + '</p></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;align-items:center;gap:16px"><div style="background:rgba(255,255,255,0.2);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800">' + userData.level + '</div><div style="flex:1"><div style="font-size:11px;opacity:0.8">LEVEL</div><div style="font-size:20px;font-weight:700">' + level.name + '</div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin:10px 0 6px;overflow:hidden"><div style="background:white;height:100%;width:' + xpProgress + '%;border-radius:4px"></div></div><div style="font-size:13px;opacity:0.9">' + userData.xp + ' / ' + nextLevel.xp + ' XP</div></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#667eea">' + userData.xp + '</div><div style="font-size:13px;color:#6b7280">' + t('totalPoints') + '</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#f59e0b">🔥 ' + userData.streak + '</div><div style="font-size:13px;color:#6b7280">' + t('streakDays') + '</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#8b5cf6">' + userData.dealsViewed + '</div><div style="font-size:13px;color:#6b7280">' + t('dealsViewed') + '</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#10b981">' + Object.keys(proData.redeemedDeals || {}).length + '</div><div style="font-size:13px;color:#6b7280">' + t('redeemedMarked') + '</div></div></div><div style="background:linear-gradient(135deg,#14b8a6,#0f766e);border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div><div style="font-size:13px;opacity:0.9">' + t('redeemedThisWeek') + '</div><div style="font-size:32px;font-weight:800;margin-top:4px">€' + weeklySavings.toFixed(2).replace('.', ',') + '</div><div style="font-size:12px;opacity:0.85;margin-top:4px">' + t('redeemedMarked') + ': ' + Object.keys(proData.redeemedDeals || {}).length + '</div></div><div style="text-align:right"><div style="font-size:13px;opacity:0.9">' + t('goal') + '</div><div style="font-size:20px;font-weight:700">€50</div></div></div><div style="background:rgba(255,255,255,0.28);height:8px;border-radius:4px;margin-top:12px;overflow:hidden"><div style="background:white;height:100%;width:' + Math.min(100, (weeklySavings / 50) * 100) + '%;border-radius:4px"></div></div></div><div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;opacity:0.9">' + t('savedThisMonth') + '</div><div style="font-size:32px;font-weight:800;margin-top:4px">€' + monthSavings.toFixed(2).replace('.', ',') + '</div><div style="font-size:12px;opacity:0.85;margin-top:4px">' + t('yearTotal') + ': €' + yearSavings.toFixed(2).replace('.', ',') + '</div></div><div style="text-align:right"><div style="font-size:13px;opacity:0.9">' + t('goal') + '</div><div style="font-size:20px;font-weight:700">€50</div></div></div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin-top:12px;overflow:hidden"><div style="background:white;height:100%;width:' + Math.min(100, (monthSavings / 50) * 100) + '%;border-radius:4px"></div></div></div></div>';
+            document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">' + t('yourStats') + '</h2><p style="color:#6b7280;font-size:14px">' + t('yourStatsSub') + '</p></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;align-items:center;gap:16px"><div style="background:rgba(255,255,255,0.2);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800">' + userData.level + '</div><div style="flex:1"><div style="font-size:11px;opacity:0.8">LEVEL</div><div style="font-size:20px;font-weight:700">' + level.name + '</div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin:10px 0 6px;overflow:hidden"><div style="background:white;height:100%;width:' + xpProgress + '%;border-radius:4px"></div></div><div style="font-size:13px;opacity:0.9">' + userData.xp + ' / ' + nextLevel.xp + ' XP</div></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#667eea">' + userData.xp + '</div><div style="font-size:13px;color:#6b7280">' + t('totalPoints') + '</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#8b5cf6">' + userData.dealsViewed + '</div><div style="font-size:13px;color:#6b7280">' + t('dealsViewed') + '</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#10b981">' + Object.keys(proData.redeemedDeals || {}).length + '</div><div style="font-size:13px;color:#6b7280">' + t('redeemedMarked') + '</div></div></div><div style="background:linear-gradient(135deg,#14b8a6,#0f766e);border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div><div style="font-size:13px;opacity:0.9">' + t('redeemedThisWeek') + '</div><div style="font-size:32px;font-weight:800;margin-top:4px">€' + weeklySavings.toFixed(2).replace('.', ',') + '</div><div style="font-size:12px;opacity:0.85;margin-top:4px">' + t('redeemedMarked') + ': ' + Object.keys(proData.redeemedDeals || {}).length + '</div></div><div style="text-align:right"><div style="font-size:13px;opacity:0.9">' + t('goal') + '</div><div style="font-size:20px;font-weight:700">€50</div></div></div><div style="background:rgba(255,255,255,0.28);height:8px;border-radius:4px;margin-top:12px;overflow:hidden"><div style="background:white;height:100%;width:' + Math.min(100, (weeklySavings / 50) * 100) + '%;border-radius:4px"></div></div></div><div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;opacity:0.9">' + t('savedThisMonth') + '</div><div style="font-size:32px;font-weight:800;margin-top:4px">€' + monthSavings.toFixed(2).replace('.', ',') + '</div><div style="font-size:12px;opacity:0.85;margin-top:4px">' + t('yearTotal') + ': €' + yearSavings.toFixed(2).replace('.', ',') + '</div></div><div style="text-align:right"><div style="font-size:13px;opacity:0.9">' + t('goal') + '</div><div style="font-size:20px;font-weight:700">€50</div></div></div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin-top:12px;overflow:hidden"><div style="background:white;height:100%;width:' + Math.min(100, (monthSavings / 50) * 100) + '%;border-radius:4px"></div></div></div></div>';
             scrollToTopContent();
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelectorAll('.nav-item')[2].classList.add('active');
@@ -4889,11 +4806,8 @@
             emitFeedback(feedback.kind, { sound: feedback.sound });
             setTimeout(() => t.remove(), 2000);
         }
-        function searchFor(query) { document.getElementById('searchInput').value = query; searchQuery = query; document.getElementById('searchDropdown').classList.remove('show'); document.getElementById('clearBtn').classList.add('show'); renderDeals(); }
-        function clearSearch(e) { e.stopPropagation(); document.getElementById('searchInput').value = ''; searchQuery = ''; document.getElementById('clearBtn').classList.remove('show'); renderDeals(); }
         function saveUserData() { localStorage.setItem('userData', JSON.stringify(userData)); }
         const HOME_SECTION_DISPLAY = {
-            streakBanner: 'flex',
             dailyDeal: 'block',
             weeklyDeal: 'block',
             monthlyDeal: 'block',
@@ -4905,7 +4819,6 @@
             yearOverview: 'block',
             compareCard: 'block',
             dealAlarmCard: 'block',
-            searchBox: 'flex',
             filters: 'block'
         };
         const PRO_HOME_SECTION_IDS = new Set(['proActiveBadge', 'savingsProCard', 'locationFilterBar', 'yearOverview', 'compareCard', 'dealAlarmCard']);
@@ -5109,9 +5022,6 @@
             }, 3500);
         }
         
-        document.getElementById('searchInput').addEventListener('focus', () => document.getElementById('searchDropdown').classList.add('show'));
-        document.getElementById('searchInput').addEventListener('input', e => { searchQuery = e.target.value; document.getElementById('clearBtn').classList.toggle('show', searchQuery.length > 0); renderDeals(); });
-        document.addEventListener('click', e => { if (!document.getElementById('searchBox').contains(e.target)) document.getElementById('searchDropdown').classList.remove('show'); });
         document.getElementById('typeFilters').addEventListener('click', e => {
             const btn = e.target.closest('.filter-btn');
             if (!btn) return;
@@ -5131,6 +5041,13 @@
             scrollToTopContent();
         });
         window.addEventListener('scroll', () => document.getElementById('filters').classList.toggle('scrolled', window.scrollY > 100), { passive: true });
+        updateViewportBottomOffset();
+        window.addEventListener('resize', updateViewportBottomOffset, { passive: true });
+        window.addEventListener('orientationchange', updateViewportBottomOffset, { passive: true });
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', updateViewportBottomOffset, { passive: true });
+            window.visualViewport.addEventListener('scroll', updateViewportBottomOffset, { passive: true });
+        }
         setupInteractionFeedback();
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
     
@@ -5171,6 +5088,17 @@
 
   function saveProData() {
     localStorage.setItem('proData', JSON.stringify(proData));
+  }
+
+  function updateViewportBottomOffset() {
+    const vv = window.visualViewport;
+    let offset = 0;
+    if (vv) {
+      const layoutHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+      const visibleBottom = vv.offsetTop + vv.height;
+      offset = Math.max(0, Math.round(layoutHeight - visibleBottom));
+    }
+    document.documentElement.style.setProperty('--ff-bottom-viewport-offset', offset + 'px');
   }
 
   function migrateProAlerts() {
