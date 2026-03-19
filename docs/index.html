@@ -659,6 +659,7 @@
         .admin-secondary-btn { background: #eef2ff; color: #4338ca; }
         .admin-danger-btn { background: #fef2f2; color: #b91c1c; }
         .admin-token-status { font-size: 12px; color: #6b7280; margin-top: 8px; }
+        .admin-pro-toggle { width: 100%; margin-top: 10px; }
         .admin-inline-checkbox { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #111827; font-weight: 600; padding: 6px 2px; }
         @media (max-width: 420px) {
           .admin-actions, .admin-form-row { grid-template-columns: 1fr; }
@@ -1108,6 +1109,7 @@
                 <button class="admin-save-btn" onclick="saveAdminDeal()">Speichern</button>
             </div>
             <div class="admin-token-status" id="adminTokenStatus">Admin-Modus aktiv.</div>
+            <button class="admin-secondary-btn admin-pro-toggle" id="adminProToggleBtn" onclick="toggleAdminProMode()">👑 PRO testen aktivieren</button>
         </div>
     </div>
 
@@ -1285,6 +1287,8 @@
                 adminDailyDeal: '⭐ Deal des Tages',
                 adminSave: 'Speichern',
                 adminStatus: 'Admin-Modus aktiv.',
+                adminProEnable: '👑 PRO testen aktivieren',
+                adminProDisable: '👑 PRO Test beenden',
                 statsLockedTitle: 'Stats sind PRO',
                 statsLockedSub: 'Schalte deinen Spartracker, die Jahresübersicht und persönliche Zahlen frei.',
                 statsLockedListTitle: 'Was du mit PRO siehst',
@@ -1507,6 +1511,8 @@
                 adminDailyDeal: '⭐ Deal of the day',
                 adminSave: 'Save',
                 adminStatus: 'Admin mode active.',
+                adminProEnable: '👑 Enable PRO test mode',
+                adminProDisable: '👑 Disable PRO test mode',
                 statsLockedTitle: 'Stats are PRO',
                 statsLockedSub: 'Unlock your savings tracker, yearly overview and personal numbers.',
                 statsLockedListTitle: 'What PRO unlocks',
@@ -1776,6 +1782,7 @@
             document.querySelector('#adminDealModal .admin-secondary-btn') && (document.querySelector('#adminDealModal .admin-secondary-btn').textContent = t('adminDailyDeal'));
             document.querySelector('#adminDealModal .admin-save-btn') && (document.querySelector('#adminDealModal .admin-save-btn').textContent = t('adminSave'));
             setText('#adminTokenStatus', t('adminStatus'));
+            updateAdminProToggleUi();
             updateSavingsUI();
         }
 
@@ -5399,6 +5406,12 @@
     currentAdminDealId = '';
   }
 
+  function updateAdminProToggleUi() {
+    const btn = document.getElementById('adminProToggleBtn');
+    if (!btn) return;
+    btn.textContent = proData.isPro ? t('adminProDisable') : t('adminProEnable');
+  }
+
   function findDealById(dealId) {
     return (allDeals || []).find(d => d.id === dealId) || null;
   }
@@ -5431,6 +5444,23 @@
     currentAdminDealId = dealId;
     populateAdminModalFromDeal(deal);
     document.getElementById('adminDealModal').classList.add('show');
+  }
+
+  function toggleAdminProMode() {
+    proData.isPro = !proData.isPro;
+    saveProData();
+    if (!proData.isPro) {
+      closeProAnimation();
+    }
+    updateAdminProToggleUi();
+    updateProUI();
+    if (currentView === 'stats') showStats();
+    else if (currentView === 'favorites') showFavorites();
+    else if (currentView === 'secret') showSecretDeals();
+    else showHome();
+    showToast(proData.isPro
+      ? (currentLanguage === 'en' ? '👑 PRO test mode enabled' : '👑 PRO-Test aktiviert')
+      : (currentLanguage === 'en' ? '👑 PRO test mode disabled' : '👑 PRO-Test beendet'));
   }
 
   function formatAdminIsoDateLabel(isoDate) {
