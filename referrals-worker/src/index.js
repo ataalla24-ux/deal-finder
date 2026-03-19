@@ -408,7 +408,7 @@ function renderReferralLanding(code, requestUrl) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FreeFinder Einladung</title>
+  <title>FreeFinder im App Store oeffnen</title>
   <style>
     :root { color-scheme: light; }
     * { box-sizing: border-box; }
@@ -416,47 +416,84 @@ function renderReferralLanding(code, requestUrl) {
       margin: 0;
       min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #312e81 0%, #111827 45%, #030712 100%);
-      color: #f9fafb;
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.18), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.14), transparent 30%),
+        linear-gradient(180deg, #f8fafc 0%, #eef6ff 100%);
+      color: #0f172a;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 18px;
     }
     .card {
       width: 100%;
       max-width: 420px;
-      background: rgba(17, 24, 39, 0.92);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 28px;
-      padding: 28px 22px;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 30px;
+      padding: 26px 22px 22px;
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+      backdrop-filter: blur(16px);
     }
     .eyebrow {
       display: inline-flex;
       padding: 6px 10px;
       border-radius: 999px;
-      background: rgba(251,191,36,0.15);
-      color: #fde68a;
+      background: rgba(15, 23, 42, 0.06);
+      color: #0f172a;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
     }
-    h1 { margin: 14px 0 10px; font-size: 30px; line-height: 1.05; }
-    p { margin: 0 0 14px; color: #d1d5db; line-height: 1.5; }
-    .steps {
-      margin: 20px 0;
-      padding: 16px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.05);
+    h1 {
+      margin: 16px 0 10px;
+      font-size: 32px;
+      line-height: 1.02;
+      letter-spacing: -0.04em;
     }
-    .steps div { margin: 0 0 10px; font-size: 14px; }
-    .steps div:last-child { margin-bottom: 0; }
+    p { margin: 0 0 14px; color: #475569; line-height: 1.5; }
+    .hero {
+      margin: 18px 0 20px;
+      padding: 18px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(241,245,249,0.9));
+      border: 1px solid rgba(148, 163, 184, 0.16);
+    }
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(14, 165, 233, 0.18);
+      border-top-color: #0ea5e9;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    .hero-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #0369a1;
+      font-weight: 700;
+    }
+    .hero strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 17px;
+      color: #0f172a;
+    }
+    .hero p {
+      margin: 0;
+      color: #475569;
+      font-size: 14px;
+    }
     .button {
       width: 100%;
       border: 0;
-      border-radius: 16px;
+      border-radius: 18px;
       padding: 16px 18px;
       font-size: 16px;
       font-weight: 800;
@@ -465,58 +502,66 @@ function renderReferralLanding(code, requestUrl) {
     }
     .button:active { transform: scale(0.98); }
     .button.primary {
-      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      background: linear-gradient(135deg, #0ea5e9, #22c55e);
       color: white;
-      box-shadow: 0 14px 34px rgba(239, 68, 68, 0.35);
+      box-shadow: 0 14px 34px rgba(14, 165, 233, 0.24);
     }
     .button.secondary {
       margin-top: 10px;
-      background: rgba(255,255,255,0.08);
-      color: #f9fafb;
-      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.72);
+      color: #0f172a;
+      border: 1px solid rgba(148, 163, 184, 0.22);
     }
     .button[disabled] { opacity: 0.65; cursor: wait; }
     .status {
       margin-top: 16px;
       min-height: 48px;
-      border-radius: 16px;
+      border-radius: 18px;
       padding: 14px;
       font-size: 14px;
       line-height: 1.5;
-      background: rgba(255,255,255,0.06);
-      color: #e5e7eb;
+      background: rgba(255,255,255,0.72);
+      color: #334155;
+      border: 1px solid rgba(148, 163, 184, 0.18);
     }
-    .status.success { background: rgba(16,185,129,0.16); color: #d1fae5; }
-    .status.error { background: rgba(239,68,68,0.18); color: #fee2e2; }
+    .status.success { background: rgba(16,185,129,0.12); color: #166534; }
+    .status.error { background: rgba(239,68,68,0.12); color: #991b1b; }
     .fineprint {
       margin-top: 14px;
       font-size: 12px;
-      color: #9ca3af;
+      color: #64748b;
       text-align: center;
     }
     .code {
-      color: #fde68a;
+      color: #0369a1;
       font-weight: 800;
       word-break: break-word;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
   <main class="card">
-    <div class="eyebrow">FreeFinder Einladung</div>
-    <h1>Hilf deinem Freund zu FreeFinder PRO</h1>
-    <p>Installiere die App ueber diese Einladung. Wenn du danach hier bestaetigst, wird die Einladung automatisch gutgeschrieben.</p>
-    ${safeDealHint}
-    <div class="steps">
-      <div>1. Tippe auf <strong>"App kostenlos laden"</strong>.</div>
-      <div>2. Installiere FreeFinder im App Store.</div>
-      <div>3. Komm wieder auf diese Seite zurueck. Wir bestaetigen die Einladung dann automatisch oder per Knopfdruck.</div>
+    <div class="eyebrow">FreeFinder</div>
+    <h1>FreeFinder im App Store oeffnen</h1>
+    <p>Du wirst automatisch weitergeleitet. Falls nichts passiert, tippe einfach auf den Button.</p>
+    <div class="hero">
+      <div class="hero-row">
+        <div class="spinner" aria-hidden="true"></div>
+        <span>Weiterleitung wird vorbereitet</span>
+      </div>
+      <strong>Kostenlos laden und danach einmal starten.</strong>
+      <p>Die Einladung wird im Hintergrund fuer deinen Freund gutgeschrieben.</p>
     </div>
-    <button id="downloadBtn" class="button primary">App kostenlos laden</button>
+    ${safeDealHint}
+    <button id="downloadBtn" class="button primary">Im App Store oeffnen</button>
     <button id="confirmBtn" class="button secondary">Ich habe die App installiert</button>
     ${continueButtonHtml}
     <div id="status" class="status">Einladungscode: <span class="code">${safeCode}</span></div>
-    <div class="fineprint">Hinweis: Die Bestaetigung funktioniert auf demselben Geraet und Browser, in dem du den Link geoeffnet hast. Warte nach dem App-Store-Wechsel kurz ${minDelaySeconds} Sekunden.</div>
+    <div class="fineprint">Falls du nach dem Download nicht automatisch zurueckkommst, oeffne FreeFinder einmal und tippe hier spaeter auf "Ich habe die App installiert".</div>
   </main>
   <script>
     const code = ${JSON.stringify(code)};
@@ -530,6 +575,7 @@ function renderReferralLanding(code, requestUrl) {
     const downloadBtn = document.getElementById('downloadBtn');
     const confirmBtn = document.getElementById('confirmBtn');
     const continueBtn = document.getElementById('continueBtn');
+    let autoOpenTriggered = false;
 
     function setStatus(message, kind) {
       statusEl.textContent = message;
@@ -630,7 +676,7 @@ function renderReferralLanding(code, requestUrl) {
     async function completeClaim(source) {
       const claim = getStoredClaim();
       if (!claim || !claim.claimToken) {
-        setStatus('Bitte zuerst auf "App kostenlos laden" tippen.', 'error');
+        setStatus('Bitte zuerst auf "Im App Store oeffnen" tippen.', 'error');
         return null;
       }
       const elapsed = Date.now() - Number(claim.startedAt || 0);
@@ -659,14 +705,15 @@ function renderReferralLanding(code, requestUrl) {
     }
 
     async function handleDownload() {
+      if (downloadBtn.disabled) return;
       downloadBtn.disabled = true;
       try {
         const claim = await startClaim();
         const clipboardReady = claim && claim.claimToken ? await writeReferralPayloadToClipboard(claim) : false;
         if (clipboardReady) {
-          setStatus('App Store wird geoeffnet. FreeFinder kann die Einladung beim ersten Start jetzt automatisch bestaetigen.', '');
+          setStatus('App Store wird geoeffnet. FreeFinder kann die Einladung beim ersten Start automatisch bestaetigen.', '');
         } else {
-          setStatus('App Store wird geoeffnet. Wenn die automatische Erkennung nicht klappt, komm bitte wieder auf diese Seite zurueck und bestaetige hier.', '');
+          setStatus('App Store wird geoeffnet. Falls die automatische Erkennung nicht klappt, kannst du spaeter hier bestaetigen.', '');
         }
         window.location.href = appStoreUrl;
       } catch (error) {
@@ -707,6 +754,12 @@ function renderReferralLanding(code, requestUrl) {
         window.location.href = continueUrl;
       });
     }
+
+    window.setTimeout(() => {
+      if (autoOpenTriggered) return;
+      autoOpenTriggered = true;
+      handleDownload();
+    }, 850);
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') tryAutoComplete();
