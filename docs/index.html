@@ -1106,8 +1106,476 @@
         const ADMIN_QUERY_ENABLED = new URLSearchParams(window.location.search).get('admin') === '1';
         const ADMIN_HIDDEN_TAP_TARGET = 5;
         const ADMIN_HIDDEN_TAP_WINDOW_MS = 2200;
+        const APP_LANGUAGE_KEY = 'freefinder_language';
         let adminHiddenTapCount = 0;
         let adminHiddenTapTimer = null;
+        let currentLanguage = localStorage.getItem(APP_LANGUAGE_KEY) || 'de';
+        if (!['de', 'en'].includes(currentLanguage)) currentLanguage = 'de';
+
+        const I18N = {
+            de: {
+                languageName: 'Deutsch',
+                settingsTitle: 'Sprache',
+                settingsSubtitle: 'Stelle FreeFinder auf Deutsch oder Englisch um.',
+                languageGerman: 'Deutsch',
+                languageEnglish: 'Englisch',
+                dailyLabel: '⭐ DEAL DES TAGES',
+                dailyLoading: 'Wird geladen...',
+                dailyFallback: '🎁 Deal des Tages',
+                dailyButton: 'Jetzt sichern →',
+                savedThisWeek: '💰 Diese Woche gespart',
+                redeemedThisWeek: '💰 Diese Woche eingelöst',
+                savingsGoal: 'Ziel: €50',
+                savingsLockTitle: 'Nur für PRO Mitglieder',
+                savingsLockSubtitle: 'Schalte den Spar-Tracker frei und sieh deine echten Einlösungen.',
+                proBannerTitle: 'Werde PRO – Kostenlos!',
+                proBannerSub: '2 bestätigte Einladungen → Deal-Alarme, Standortfilter und dein smarter Spartracker.',
+                proFeature1: '🔒 Deal des Tages Alarm',
+                proFeature2: '🔒 Personalisierte Alerts',
+                proFeature3: '🔒 Standort-Filter',
+                proFeature4: '🔒 Spartracker & Jahresübersicht',
+                proFeature5: '🔒 Smarteres Für dich',
+                proUnlockButton: '🚀 Jetzt PRO werden – Gratis!',
+                proActiveText: 'Du bist PRO-Mitglied!',
+                savingsProTitle: '💰 Spar-Tracker PRO',
+                savingsProYearText: 'diesen Monat gespart',
+                topSavingsCategories: '🏆 Top 5 Spar-Kategorien',
+                nearbyTitle: 'In deiner Nähe',
+                allRadius: 'Alle',
+                yearOverviewTitle: '📊 Jahresübersicht Ersparnis',
+                yearSaved: '💰 Gespart in 2026',
+                compareTitle: '✨ Für dich PRO',
+                compareSignalsName: 'Lieblingssignale',
+                compareSignalsStat: 'Favoriten, Marken und Klicks, die dein Feed lernt',
+                compareLocationName: 'Standort',
+                compareLocationStat: 'Deals in deiner Nähe werden stärker gewichtet',
+                compareFreshnessName: 'Frische Priorität',
+                compareFreshnessStat: 'Neue, starke und relevante Deals landen zuerst bei dir',
+                compareRadiusOff: 'Aus',
+                compareFreshnessActive: 'Aktiv',
+                alertsTitle: 'PRO Alerts',
+                alertsSub: 'Deal des Tages, persönliche Treffer und Hinweise in deiner Nähe.',
+                alertDaily: '⭐ Deal des Tages erneuert',
+                alertPersonalized: '🧠 Personalisierte Alerts',
+                alertNearby: '📍 Neue Deals in deiner Nähe',
+                referralTitle: 'Werde PRO – Kostenlos!',
+                referralSubtitle: 'Teile FreeFinder mit <strong>2 Freunden</strong> – sobald beide deine Einladung bestätigen, schaltest du PRO mit Alerts, Standortfilter und Spartracker frei.',
+                referralStep1: 'Freund 1 hat deine Einladung bestätigt',
+                referralStep2: 'Freund 2 hat deine Einladung bestätigt',
+                referralConfirmed: 'Bestätigte Einladungen',
+                referralCountLabel: 'von 2 Einladungen bestätigt',
+                referralLinkLabel: '🔗 Freunde öffnen diesen Link und bestätigen darüber die App:',
+                referralWhatsApp: '📤 WhatsApp teilen',
+                referralCopy: '📋 Kopieren',
+                proAnimTitle: 'DU BIST JETZT PRO!',
+                proAnimSub: 'Alle PRO-Features wurden freigeschaltet!<br>Danke, dass du FreeFinder mit deinen Freunden teilst! 🎉',
+                proAnimClose: "🚀 Los geht's!",
+                searchPlaceholder: 'Suche z.B. Kaffee, IKEA...',
+                popularSearches: '🔥 Beliebte Suchen',
+                tagCoffee: '☕ Gratis Kaffee',
+                tagFitness: '💪 Fitness',
+                categoryCoffee: '☕ Kaffee',
+                categoryFood: '🍔 Essen',
+                categoryShopping: '🛍️ Shopping',
+                categoryLeisure: '🎉 Freizeit',
+                filterAll: '🎯 Alle',
+                filterGratis: '🎁 Gratis',
+                filterDiscount: '💰 Rabatt',
+                filterGiveaway: '🎉 Gewinnspiel',
+                filterCodes: '🏷️ Codes',
+                navDeals: 'Deals',
+                navForYou: 'Für dich',
+                navStats: 'Stats',
+                navFavorites: 'Favoriten',
+                fabTooltip: '🔗 Deal-Link einfügen',
+                favoritesEmptyTitle: 'Keine Favoriten',
+                favoritesEmptyHint: 'Tippe ❤️ bei einem Deal',
+                noDealsFound: 'Keine Deals gefunden',
+                openDeal: 'Zum Deal',
+                validLimited: 'Zeitlich begrenzt',
+                linkModalTitle: 'Deal-Link teilen',
+                linkModalSub: 'Hast du einen Gratis-Deal entdeckt? Teile ihn mit der Community!',
+                linkInputPlaceholder: 'https://beispiel.at/gratis-angebot...',
+                linkPaste: '📋 Aus Zwischenablage einfügen',
+                linkRecognizing: 'Wird erkannt...',
+                linkAnalyzing: 'Deal wird analysiert...',
+                linkRewardText: '🎁 Belohnung für deinen Beitrag zur Community!',
+                linkSubmit: '🚀 Deal einreichen',
+                successTitle: 'DEAL EINGEREICHT!',
+                successSub: 'Danke für deinen Beitrag!',
+                successBonus: '🏆 Du bist jetzt Deal-Hunter Rang #',
+                adminTitle: 'Deal bearbeiten',
+                adminSubtitle: 'Korrigiere Text, Datum, Reihenfolge oder setze den Deal direkt als Deal des Tages.',
+                adminFieldTitle: 'Titel',
+                adminFieldBrand: 'Marke',
+                adminFieldDescription: 'Beschreibung',
+                adminFieldLocation: 'Ort',
+                adminFieldExpiryType: 'Gültigkeitstyp',
+                adminFieldPinned: 'Pin-Priorität',
+                adminFieldStart: 'Start / Datum',
+                adminFieldEnd: 'Ende',
+                adminFieldDisplay: 'Anzeigetext Datum',
+                adminHintDisplay: 'Wenn leer, baut die App den Text aus dem Typ und den Datumsfeldern selbst.',
+                adminHidden: 'Deal ausblenden',
+                adminDailyDeal: '⭐ Deal des Tages',
+                adminSave: 'Speichern',
+                adminStatus: 'Admin-Modus aktiv.',
+                statsLockedTitle: 'Stats sind PRO',
+                statsLockedSub: 'Schalte deinen Spartracker, die Jahresübersicht und persönliche Zahlen frei.',
+                statsLockedListTitle: 'Was du mit PRO siehst',
+                statsLockedItem1: '💰 Ersparnis diese Woche, diesen Monat und dieses Jahr',
+                statsLockedItem2: '🗓️ Jahresübersicht deiner Einlösungen',
+                statsLockedItem3: '📈 Punkte, Streaks und genutzte Deals',
+                statsLockedItem4: '🧠 Smartere Empfehlungen & Standortfilter',
+                unlockProFree: '👑 PRO gratis freischalten',
+                yourStats: 'Deine Stats',
+                yourStatsSub: 'Alles auf Basis deiner markierten Einlösungen und deiner Nutzung.',
+                totalPoints: 'Punkte gesamt',
+                streakDays: 'Tage Streak',
+                dealsViewed: 'Deals angesehen',
+                redeemedMarked: 'Als eingelöst markiert',
+                savedThisMonth: '💰 Diesen Monat gespart',
+                yearTotal: 'Jahr gesamt',
+                goal: 'Ziel',
+                forYouTitle: 'Für dich',
+                forYouSubPro: 'Smarte Empfehlungen auf Basis deiner Favoriten, Einlösungen, Ansichten und deiner Nähe.',
+                forYouSubFree: 'Beliebte Empfehlungen, starke Community-Votes und was gerade heiß läuft.',
+                forYouProBoostTitle: '👑 PRO macht Für dich deutlich smarter',
+                forYouProBoostSub: 'Mit PRO lernt dein Feed aus Favoriten, Einlösungen, Marken, Standort und persönlichen Alerts.',
+                forYouRecommended: 'Für dich empfohlen',
+                forYouRecommendedSubPro: 'Basierend auf deinen Favoriten, Einlösungen, Ansichten und deiner Nähe.',
+                forYouRecommendedSubFree: 'Eine starke Vorschau aus frischen, beliebten und relevanten Deals.',
+                forYouTopVoted: 'Meist gevotet diese Woche',
+                forYouTopVotedSub: 'Die Community-Sieger aus den neuesten und stärksten Deals.',
+                forYouTrending: 'Trendet gerade',
+                forYouTrendingSub: 'Hot, neu oder gerade besonders stark geklickt.',
+                submitDeal: 'Deal einreichen',
+                submitDealSub: 'Gute Funde direkt mit der Community teilen',
+                voteLabel: 'Votes',
+                eventLabel: 'Event',
+                timesLabel: 'Zeiten',
+                recommendationStrongDemand: 'Gerade stark gefragt',
+                recommendationFresh: 'Frisch entdeckt',
+                recommendationPopularFree: 'Beliebter Gratis-Deal',
+                recommendationPopularVienna: 'Beliebt in Wien',
+                recommendationBrand: 'Du magst diese Marke',
+                recommendationCategory: 'Passt zu deinen Lieblingskategorien',
+                recommendationFreebies: 'Du reagierst oft auf Gratis-Deals',
+                recommendationLocation: 'Passt zu deinem Standort',
+                recommendationProfile: 'Passt zu deinem Profil',
+                referralWhatsappText: '📱 Hey! Ich nutze FreeFinder für gratis Deals in Wien!\n\n👑 Öffne meinen Link und bestätige die App über meine Einladung – damit schalte ich kostenlos PRO mit Deal-Alarmen, Standortfilter und Spartracker frei.\n\n👉 {link}\n\n☕ Gratis Kaffee, 🍔 Essen & mehr!',
+                referralWhatsappOpened: '📤 WhatsApp geöffnet!',
+                referralLinkCopied: '📋 Einladungslink kopiert!',
+                locating: '📍 Standort wird ermittelt...',
+                locationFound: '📍 Standort gefunden! Zeige Deals innerhalb {km} km',
+                locationMissing: '⚠️ Kein GPS-Standort. Nahe-Filter deaktiviert.',
+                showAllDeals: '🏠 Alle Deals werden angezeigt',
+                showDealsWithin: '📍 Zeige Deals innerhalb {km} km'
+            },
+            en: {
+                languageName: 'English',
+                settingsTitle: 'Language',
+                settingsSubtitle: 'Switch FreeFinder between German and English.',
+                languageGerman: 'German',
+                languageEnglish: 'English',
+                dailyLabel: '⭐ DEAL OF THE DAY',
+                dailyLoading: 'Loading...',
+                dailyFallback: '🎁 Deal of the day',
+                dailyButton: 'Claim now →',
+                savedThisWeek: '💰 Saved this week',
+                redeemedThisWeek: '💰 Redeemed this week',
+                savingsGoal: 'Goal: €50',
+                savingsLockTitle: 'PRO members only',
+                savingsLockSubtitle: 'Unlock the savings tracker and see your real redemptions.',
+                proBannerTitle: 'Go PRO for free!',
+                proBannerSub: '2 confirmed invites → deal alerts, location filters and your smart savings tracker.',
+                proFeature1: '🔒 Deal of the day alert',
+                proFeature2: '🔒 Personalized alerts',
+                proFeature3: '🔒 Location filter',
+                proFeature4: '🔒 Savings tracker & yearly overview',
+                proFeature5: '🔒 Smarter For You',
+                proUnlockButton: '🚀 Unlock PRO for free!',
+                proActiveText: 'You are a PRO member!',
+                savingsProTitle: '💰 PRO savings tracker',
+                savingsProYearText: 'saved this month',
+                topSavingsCategories: '🏆 Top 5 savings categories',
+                nearbyTitle: 'Nearby',
+                allRadius: 'All',
+                yearOverviewTitle: '📊 Yearly savings overview',
+                yearSaved: '💰 Saved in 2026',
+                compareTitle: '✨ PRO For You',
+                compareSignalsName: 'Favorite signals',
+                compareSignalsStat: 'Favorites, brands and taps your feed learns from',
+                compareLocationName: 'Location',
+                compareLocationStat: 'Deals near you are weighted more strongly',
+                compareFreshnessName: 'Freshness priority',
+                compareFreshnessStat: 'New, strong and relevant deals show up first',
+                compareRadiusOff: 'Off',
+                compareFreshnessActive: 'Active',
+                alertsTitle: 'PRO Alerts',
+                alertsSub: 'Deal of the day, personal matches and nearby finds.',
+                alertDaily: '⭐ Deal of the day refreshed',
+                alertPersonalized: '🧠 Personalized alerts',
+                alertNearby: '📍 New deals near you',
+                referralTitle: 'Go PRO for free!',
+                referralSubtitle: 'Share FreeFinder with <strong>2 friends</strong> – once both confirm your invite, you unlock PRO with alerts, location filters and the savings tracker.',
+                referralStep1: 'Friend 1 confirmed your invite',
+                referralStep2: 'Friend 2 confirmed your invite',
+                referralConfirmed: 'Confirmed invites',
+                referralCountLabel: 'of 2 invites confirmed',
+                referralLinkLabel: '🔗 Friends open this link and confirm the app through it:',
+                referralWhatsApp: '📤 Share on WhatsApp',
+                referralCopy: '📋 Copy',
+                proAnimTitle: 'YOU ARE NOW PRO!',
+                proAnimSub: 'All PRO features have been unlocked!<br>Thanks for sharing FreeFinder with your friends! 🎉',
+                proAnimClose: "🚀 Let's go!",
+                searchPlaceholder: 'Search e.g. coffee, IKEA...',
+                popularSearches: '🔥 Popular searches',
+                tagCoffee: '☕ Free coffee',
+                tagFitness: '💪 Fitness',
+                categoryCoffee: '☕ Coffee',
+                categoryFood: '🍔 Food',
+                categoryShopping: '🛍️ Shopping',
+                categoryLeisure: '🎉 Leisure',
+                filterAll: '🎯 All',
+                filterGratis: '🎁 Free',
+                filterDiscount: '💰 Discount',
+                filterGiveaway: '🎉 Giveaway',
+                filterCodes: '🏷️ Codes',
+                navDeals: 'Deals',
+                navForYou: 'For You',
+                navStats: 'Stats',
+                navFavorites: 'Favorites',
+                fabTooltip: '🔗 Paste deal link',
+                favoritesEmptyTitle: 'No favorites yet',
+                favoritesEmptyHint: 'Tap ❤️ on a deal',
+                noDealsFound: 'No deals found',
+                openDeal: 'Open deal',
+                validLimited: 'Limited time',
+                linkModalTitle: 'Share a deal link',
+                linkModalSub: 'Found a free deal? Share it with the community!',
+                linkInputPlaceholder: 'https://example.com/free-offer...',
+                linkPaste: '📋 Paste from clipboard',
+                linkRecognizing: 'Recognizing...',
+                linkAnalyzing: 'Analyzing deal...',
+                linkRewardText: '🎁 Reward for helping the community!',
+                linkSubmit: '🚀 Submit deal',
+                successTitle: 'DEAL SUBMITTED!',
+                successSub: 'Thanks for your contribution!',
+                successBonus: '🏆 You are now Deal Hunter rank #',
+                adminTitle: 'Edit deal',
+                adminSubtitle: 'Fix text, dates and ranking or set this deal as the deal of the day.',
+                adminFieldTitle: 'Title',
+                adminFieldBrand: 'Brand',
+                adminFieldDescription: 'Description',
+                adminFieldLocation: 'Location',
+                adminFieldExpiryType: 'Validity type',
+                adminFieldPinned: 'Pin priority',
+                adminFieldStart: 'Start / date',
+                adminFieldEnd: 'End',
+                adminFieldDisplay: 'Date display text',
+                adminHintDisplay: 'If empty, the app builds the text from the type and date fields automatically.',
+                adminHidden: 'Hide deal',
+                adminDailyDeal: '⭐ Deal of the day',
+                adminSave: 'Save',
+                adminStatus: 'Admin mode active.',
+                statsLockedTitle: 'Stats are PRO',
+                statsLockedSub: 'Unlock your savings tracker, yearly overview and personal numbers.',
+                statsLockedListTitle: 'What PRO unlocks',
+                statsLockedItem1: '💰 Savings this week, month and year',
+                statsLockedItem2: '🗓️ Yearly overview of your redemptions',
+                statsLockedItem3: '📈 Points, streaks and redeemed deals',
+                statsLockedItem4: '🧠 Smarter recommendations & location filters',
+                unlockProFree: '👑 Unlock PRO for free',
+                yourStats: 'Your stats',
+                yourStatsSub: 'Based on your marked redemptions and app usage.',
+                totalPoints: 'Total points',
+                streakDays: 'Streak days',
+                dealsViewed: 'Deals viewed',
+                redeemedMarked: 'Marked as redeemed',
+                savedThisMonth: '💰 Saved this month',
+                yearTotal: 'Year total',
+                goal: 'Goal',
+                forYouTitle: 'For You',
+                forYouSubPro: 'Smart recommendations based on your favorites, redemptions, views and proximity.',
+                forYouSubFree: 'Popular recommendations, strong community votes and what is trending now.',
+                forYouProBoostTitle: '👑 PRO makes For You much smarter',
+                forYouProBoostSub: 'With PRO, your feed learns from favorites, redemptions, brands, location and personal alerts.',
+                forYouRecommended: 'Recommended for you',
+                forYouRecommendedSubPro: 'Based on your favorites, redemptions, views and proximity.',
+                forYouRecommendedSubFree: 'A strong preview of fresh, popular and relevant deals.',
+                forYouTopVoted: 'Most upvoted this week',
+                forYouTopVotedSub: 'Community winners from the newest and strongest deals.',
+                forYouTrending: 'Trending now',
+                forYouTrendingSub: 'Hot, new or getting lots of attention right now.',
+                submitDeal: 'Submit a deal',
+                submitDealSub: 'Share great finds directly with the community',
+                voteLabel: 'votes',
+                eventLabel: 'Event',
+                timesLabel: 'Times',
+                recommendationStrongDemand: 'High demand right now',
+                recommendationFresh: 'Freshly discovered',
+                recommendationPopularFree: 'Popular free deal',
+                recommendationPopularVienna: 'Popular in Vienna',
+                recommendationBrand: 'You like this brand',
+                recommendationCategory: 'Matches your favorite categories',
+                recommendationFreebies: 'You often react to free deals',
+                recommendationLocation: 'Matches your location',
+                recommendationProfile: 'Matches your profile',
+                referralWhatsappText: '📱 Hey! I use FreeFinder for free deals in Vienna!\n\n👑 Open my link and confirm the app through my invite so I can unlock PRO for free with deal alerts, location filters and the savings tracker.\n\n👉 {link}\n\n☕ Free coffee, 🍔 food & more!',
+                referralWhatsappOpened: '📤 WhatsApp opened!',
+                referralLinkCopied: '📋 Invite link copied!',
+                locating: '📍 Detecting your location...',
+                locationFound: '📍 Location found! Showing deals within {km} km',
+                locationMissing: '⚠️ No GPS location. Nearby filter disabled.',
+                showAllDeals: '🏠 Showing all deals',
+                showDealsWithin: '📍 Showing deals within {km} km'
+            }
+        };
+
+        function t(key) {
+            const table = I18N[currentLanguage] || I18N.de;
+            return table[key] || I18N.de[key] || key;
+        }
+
+        function tf(key, vars = {}) {
+            return Object.entries(vars).reduce((text, [name, value]) => text.replaceAll('{' + name + '}', String(value)), t(key));
+        }
+
+        function setLanguage(lang) {
+            if (!I18N[lang]) return;
+            currentLanguage = lang;
+            localStorage.setItem(APP_LANGUAGE_KEY, lang);
+            applyLanguage();
+            if (currentView === 'stats') showStats();
+            else if (currentView === 'secret') showSecretDeals();
+            else if (currentView === 'favorites') showFavorites();
+            else showHome();
+        }
+
+        function renderLanguageSettingsCard() {
+            return '<div style="background:white;border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div><div style="font-size:17px;font-weight:800;color:#111827">' + t('settingsTitle') + '</div><div style="font-size:13px;color:#6b7280;margin-top:4px">' + t('settingsSubtitle') + '</div></div><div style="font-size:22px">🌐</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px"><button onclick="setLanguage(\'de\')" style="border:none;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:800;cursor:pointer;background:' + (currentLanguage === 'de' ? 'linear-gradient(135deg,#111827,#374151)' : '#f3f4f6') + ';color:' + (currentLanguage === 'de' ? '#fff' : '#111827') + '">🇩🇪 ' + t('languageGerman') + '</button><button onclick="setLanguage(\'en\')" style="border:none;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:800;cursor:pointer;background:' + (currentLanguage === 'en' ? 'linear-gradient(135deg,#111827,#374151)' : '#f3f4f6') + ';color:' + (currentLanguage === 'en' ? '#fff' : '#111827') + '">🇬🇧 ' + t('languageEnglish') + '</button></div></div>';
+        }
+
+        function applyLanguage() {
+            document.documentElement.lang = currentLanguage;
+            const setText = (selector, value) => {
+                const el = document.querySelector(selector);
+                if (el) el.textContent = value;
+            };
+            const setHtml = (selector, value) => {
+                const el = document.querySelector(selector);
+                if (el) el.innerHTML = value;
+            };
+
+            setText('.daily-label', t('dailyLabel'));
+            setText('#dailyBtn', t('dailyButton'));
+            if (document.getElementById('dailyTitle')?.textContent === 'Wird geladen...' || document.getElementById('dailyTitle')?.textContent === 'Loading...') {
+                setText('#dailyTitle', t('dailyLoading'));
+            }
+            setText('#streakBanner .streak-text', currentLanguage === 'en' ? 'Come back tomorrow for bonus XP!' : 'Komm morgen wieder für Bonus XP!');
+            setText('#savingsCard .savings-goal span:last-child', t('savingsGoal'));
+            setText('#savingsLock .savings-lock-title', t('savingsLockTitle'));
+            setText('#savingsLock .savings-lock-subtitle', t('savingsLockSubtitle'));
+            setText('#proBanner .pro-banner-title', t('proBannerTitle'));
+            setText('#proBanner .pro-banner-sub', t('proBannerSub'));
+            document.querySelectorAll('#proBanner .pro-feature-item')[0] && (document.querySelectorAll('#proBanner .pro-feature-item')[0].textContent = t('proFeature1'));
+            document.querySelectorAll('#proBanner .pro-feature-item')[1] && (document.querySelectorAll('#proBanner .pro-feature-item')[1].textContent = t('proFeature2'));
+            document.querySelectorAll('#proBanner .pro-feature-item')[2] && (document.querySelectorAll('#proBanner .pro-feature-item')[2].textContent = t('proFeature3'));
+            document.querySelectorAll('#proBanner .pro-feature-item')[3] && (document.querySelectorAll('#proBanner .pro-feature-item')[3].textContent = t('proFeature4'));
+            document.querySelectorAll('#proBanner .pro-feature-item')[4] && (document.querySelectorAll('#proBanner .pro-feature-item')[4].textContent = t('proFeature5'));
+            setText('#proBanner .pro-unlock-btn', t('proUnlockButton'));
+            setText('#proActiveBadge .pro-active-text', t('proActiveText'));
+            setHtml('#savingsProCard .savings-pro-title', t('savingsProTitle') + ' <span class="pro-badge">👑 PRO</span>');
+            setText('#proSavingsYearText', t('savingsProYearText'));
+            setText('#savingsProCard .savings-cat-title', t('topSavingsCategories'));
+            setHtml('#locationFilterBar .location-filter-title', t('nearbyTitle') + ' <span class="pro-badge">👑 PRO</span>');
+            const radiusButtons = document.querySelectorAll('#locationFilterBar .radius-btn');
+            if (radiusButtons[4]) radiusButtons[4].textContent = t('allRadius');
+            setHtml('#yearOverview .year-overview-header', t('yearOverviewTitle') + ' <span class="pro-badge">👑 PRO</span>');
+            setText('#yearOverview .year-total-label', t('yearSaved'));
+            setHtml('#compareCard .compare-card-header', t('compareTitle') + ' <span class="pro-badge">👑 PRO</span>');
+            setText('#compareCard .compare-row.you .compare-name', t('compareSignalsName'));
+            setText('#compareCard .compare-row.you .compare-stat', t('compareSignalsStat'));
+            setText('#compareCard .compare-row.avg .compare-name', t('compareLocationName'));
+            setText('#compareCard .compare-row.avg .compare-stat', t('compareLocationStat'));
+            setText('#compareCard .compare-row.top .compare-name', t('compareFreshnessName'));
+            setText('#compareCard .compare-row.top .compare-stat', t('compareFreshnessStat'));
+            setText('#compareRadius', t('compareRadiusOff'));
+            setText('#compareFreshness', t('compareFreshnessActive'));
+            setHtml('#dealAlarmCard .deal-alarm-title', t('alertsTitle') + ' <span class="pro-badge">👑 PRO</span>');
+            setText('#dealAlarmCard .deal-alarm-sub', t('alertsSub'));
+            document.querySelectorAll('#dealAlarmCard .alarm-toggle-label')[0] && (document.querySelectorAll('#dealAlarmCard .alarm-toggle-label')[0].textContent = t('alertDaily'));
+            document.querySelectorAll('#dealAlarmCard .alarm-toggle-label')[1] && (document.querySelectorAll('#dealAlarmCard .alarm-toggle-label')[1].textContent = t('alertPersonalized'));
+            document.querySelectorAll('#dealAlarmCard .alarm-toggle-label')[2] && (document.querySelectorAll('#dealAlarmCard .alarm-toggle-label')[2].textContent = t('alertNearby'));
+            setText('#referralModal .referral-title', t('referralTitle'));
+            setHtml('#referralModal .referral-subtitle', t('referralSubtitle'));
+            document.querySelectorAll('#referralModal .referral-step-text')[0] && (document.querySelectorAll('#referralModal .referral-step-text')[0].textContent = t('referralStep1'));
+            document.querySelectorAll('#referralModal .referral-step-text')[1] && (document.querySelectorAll('#referralModal .referral-step-text')[1].textContent = t('referralStep2'));
+            setText('#referralModal .referral-progress-text', t('referralConfirmed'));
+            setText('#referralModal .referral-count-label', t('referralCountLabel'));
+            setText('#referralModal .referral-link-label', t('referralLinkLabel'));
+            document.querySelectorAll('#referralModal .referral-share-btns button')[0] && (document.querySelectorAll('#referralModal .referral-share-btns button')[0].textContent = t('referralWhatsApp'));
+            document.querySelectorAll('#referralModal .referral-share-btns button')[1] && (document.querySelectorAll('#referralModal .referral-share-btns button')[1].textContent = t('referralCopy'));
+            setText('#proUnlockAnim .pro-unlock-title', t('proAnimTitle'));
+            setHtml('#proUnlockAnim .pro-unlock-sub', t('proAnimSub'));
+            setText('#proUnlockAnim .pro-close-btn', t('proAnimClose'));
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.placeholder = t('searchPlaceholder');
+            setText('#searchDropdown .search-section-title', t('popularSearches'));
+            document.querySelectorAll('#searchDropdown .search-tag')[0] && (document.querySelectorAll('#searchDropdown .search-tag')[0].textContent = t('tagCoffee'));
+            document.querySelectorAll('#searchDropdown .search-tag')[1] && (document.querySelectorAll('#searchDropdown .search-tag')[1].textContent = t('tagFitness'));
+            const typeButtons = document.querySelectorAll('#typeFilters .filter-btn');
+            if (typeButtons[0]) typeButtons[0].innerHTML = t('filterAll') + ' <span class="filter-count" id="countAll">' + (document.getElementById('countAll')?.textContent || '0') + '</span>';
+            if (typeButtons[1]) typeButtons[1].innerHTML = t('filterGratis') + ' <span class="filter-count" id="countGratis">' + (document.getElementById('countGratis')?.textContent || '0') + '</span>';
+            if (typeButtons[2]) typeButtons[2].innerHTML = t('filterDiscount') + ' <span class="filter-count" id="countRabatt">' + (document.getElementById('countRabatt')?.textContent || '0') + '</span>';
+            if (typeButtons[3]) typeButtons[3].innerHTML = t('filterGiveaway') + ' <span class="filter-count" id="countGewinnspiel">' + (document.getElementById('countGewinnspiel')?.textContent || '0') + '</span>';
+            if (typeButtons[4]) typeButtons[4].innerHTML = t('filterCodes') + ' <span class="filter-count" id="countCodes">' + (document.getElementById('countCodes')?.textContent || '0') + '</span>';
+            const categoryButtons = document.querySelectorAll('#categoryFilters .filter-btn');
+            if (categoryButtons[0]) categoryButtons[0].textContent = t('filterAll');
+            if (categoryButtons[1]) categoryButtons[1].textContent = t('categoryCoffee');
+            if (categoryButtons[2]) categoryButtons[2].textContent = t('categoryFood');
+            if (categoryButtons[3]) categoryButtons[3].textContent = t('categoryShopping');
+            if (categoryButtons[4]) categoryButtons[4].textContent = t('categoryLeisure');
+            const navLabels = document.querySelectorAll('.bottom-nav .nav-label');
+            if (navLabels[0]) navLabels[0].textContent = t('navDeals');
+            if (navLabels[1]) navLabels[1].textContent = t('navForYou');
+            if (navLabels[2]) navLabels[2].textContent = t('navStats');
+            if (navLabels[3]) navLabels[3].textContent = t('navFavorites');
+            setText('.fab-tooltip', t('fabTooltip'));
+            setText('#linkModal .link-modal-title', t('linkModalTitle'));
+            setText('#linkModal .link-modal-subtitle', t('linkModalSub'));
+            const linkInput = document.getElementById('linkInput');
+            if (linkInput) linkInput.placeholder = t('linkInputPlaceholder');
+            setText('#linkModal .link-paste-btn', t('linkPaste'));
+            setText('#previewBrand', t('linkRecognizing'));
+            setText('#previewTitle', t('linkAnalyzing'));
+            setText('#linkModal .link-reward-text', t('linkRewardText'));
+            setText('#linkSubmitBtn', t('linkSubmit'));
+            setText('#successAnimation .success-title', t('successTitle'));
+            setText('#successAnimation .success-subtitle', t('successSub'));
+            const successBonus = document.querySelector('#successAnimation .success-bonus');
+            if (successBonus) successBonus.childNodes[0].textContent = t('successBonus');
+            setText('#adminDealModal .admin-modal-title', t('adminTitle'));
+            setText('#adminModalDealMeta', t('adminSubtitle'));
+            const adminLabels = document.querySelectorAll('#adminDealModal .admin-form-label');
+            if (adminLabels[0]) adminLabels[0].textContent = t('adminFieldTitle');
+            if (adminLabels[1]) adminLabels[1].textContent = t('adminFieldBrand');
+            if (adminLabels[2]) adminLabels[2].textContent = t('adminFieldDescription');
+            if (adminLabels[3]) adminLabels[3].textContent = t('adminFieldLocation');
+            if (adminLabels[4]) adminLabels[4].textContent = t('adminFieldExpiryType');
+            if (adminLabels[5]) adminLabels[5].textContent = t('adminFieldPinned');
+            if (adminLabels[6]) adminLabels[6].textContent = t('adminFieldStart');
+            if (adminLabels[7]) adminLabels[7].textContent = t('adminFieldEnd');
+            if (adminLabels[8]) adminLabels[8].textContent = t('adminFieldDisplay');
+            setText('#adminDealModal .admin-form-hint', t('adminHintDisplay'));
+            const adminCheckbox = document.querySelector('#adminDealModal .admin-inline-checkbox');
+            if (adminCheckbox && adminCheckbox.lastChild) adminCheckbox.lastChild.textContent = ' ' + t('adminHidden');
+            document.querySelector('#adminDealModal .admin-secondary-btn') && (document.querySelector('#adminDealModal .admin-secondary-btn').textContent = t('adminDailyDeal'));
+            document.querySelector('#adminDealModal .admin-save-btn') && (document.querySelector('#adminDealModal .admin-save-btn').textContent = t('adminSave'));
+            setText('#adminTokenStatus', t('adminStatus'));
+            updateSavingsUI();
+        }
 
         function getAudioContext() {
             const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -1994,6 +2462,29 @@
             const now = Date.now();
             const toDays = (ms) => Math.max(0, Math.ceil((ms - now) / 86400000));
             const toHours = (ms) => Math.max(0, Math.ceil((ms - now) / 3600000));
+            const expiryText = {
+                validInMonth: (monthLabel) => currentLanguage === 'en' ? `Valid in ${monthLabel}` : `Gültig im ${monthLabel}`,
+                validFrom: (dateLabel) => currentLanguage === 'en' ? `Valid from ${dateLabel}` : `Gültig ab ${dateLabel}`,
+                validOn: (dateLabel) => currentLanguage === 'en' ? `Valid on ${dateLabel}` : `Gültig am ${dateLabel}`,
+                validTomorrow: () => currentLanguage === 'en' ? '📍 Valid tomorrow' : '📍 Gültig morgen',
+                validInDays: (days) => currentLanguage === 'en' ? `📍 Valid in ${days} days` : `📍 In ${days} Tagen gültig`,
+                startsToday: () => currentLanguage === 'en' ? '📍 Starts today' : '📍 Startet heute',
+                validToday: () => currentLanguage === 'en' ? '📍 Valid today' : '📍 Gültig heute',
+                todayText: () => currentLanguage === 'en' ? 'Valid today' : 'Heute gültig',
+                startsOn: (dateLabel) => currentLanguage === 'en' ? `Starts on ${dateLabel}` : `Startet am ${dateLabel}`,
+                validUntil: (dateLabel) => currentLanguage === 'en' ? `Valid until ${dateLabel}` : `Gültig bis ${dateLabel}`,
+                onlyToday: () => currentLanguage === 'en' ? '🚨 Valid today only' : '🚨 Nur heute gültig',
+                endsToday: () => currentLanguage === 'en' ? '⏳ Ends today' : '⏳ Läuft heute ab',
+                validForHours: (hours) => currentLanguage === 'en' ? `⚠️ Valid for ${hours}h more` : `⚠️ Nur noch ${hours}h gültig`,
+                endsInHours: (hours) => currentLanguage === 'en' ? `Ends in ${hours} hrs` : `Läuft in ${hours} Std. ab`,
+                validForDays: (days) => currentLanguage === 'en' ? `⚠️ Valid for ${days} more days` : `⚠️ Noch ${days} Tage gültig`,
+                validForDaysSoft: (days) => currentLanguage === 'en' ? `🕒 Valid for ${days} more days` : `🕒 Noch ${days} Tage gültig`,
+                endsInDays: (days) => currentLanguage === 'en' ? `Ends in ${days} days` : `Läuft in ${days} Tagen ab`,
+                endingInDays: (days) => currentLanguage === 'en' ? `📍 Ends in ${days} days` : `📍 In ${days} Tagen endet`,
+                validFromTo: (startLabel, endLabel) => currentLanguage === 'en' ? `Valid from ${startLabel} to ${endLabel}` : `Gültig von ${startLabel} bis ${endLabel}`,
+                expiredAlready: () => currentLanguage === 'en' ? '🚨 Already expired' : '🚨 Bereits abgelaufen',
+                wasValidUntil: (dateLabel) => currentLanguage === 'en' ? `Was valid until ${dateLabel}` : `War gültig bis ${dateLabel}`
+            };
 
             if (parsedWindow.kind === 'month' && Number.isFinite(parsedWindow.endMs)) {
                 const monthLabel = rawDisplay || formatMonthAT(parsedWindow.endMs);
@@ -2009,9 +2500,9 @@
                     cardClass: ' expiring-ok',
                     barColor: 'green',
                     badgeClass: 'safe',
-                    badgeText: `📅 Gültig im ${monthLabel}`,
+                    badgeText: `📅 ${expiryText.validInMonth(monthLabel)}`,
                     countdownClass: 'ok',
-                    countdownText: `Gültig im ${monthLabel}`,
+                    countdownText: expiryText.validInMonth(monthLabel),
                     barPct: 100
                 };
             }
@@ -2023,8 +2514,8 @@
                 const dateLabel = formatDateAT(targetMs);
                 const isToday = new Date().toDateString() === new Date(targetMs).toDateString();
                 const isStart = parsedWindow.kind === 'start';
-                let badgeText = isStart ? `📅 Gültig ab ${dateLabel}` : `📅 Gültig am ${dateLabel}`;
-                let countdownText = isStart ? `Gültig ab ${dateLabel}` : `Gültig am ${dateLabel}`;
+                let badgeText = isStart ? `📅 ${expiryText.validFrom(dateLabel)}` : `📅 ${expiryText.validOn(dateLabel)}`;
+                let countdownText = isStart ? expiryText.validFrom(dateLabel) : expiryText.validOn(dateLabel);
                 let badgeClass = 'safe';
                 let countdownClass = 'ok';
                 let cardClass = ' expiring-ok';
@@ -2036,17 +2527,17 @@
                         countdownClass = 'warn';
                         cardClass = ' expiring-mid';
                         barColor = 'orange';
-                        badgeText = daysLeft === 1 ? '📍 Gültig morgen' : `📍 In ${daysLeft} Tagen gültig`;
+                        badgeText = daysLeft === 1 ? expiryText.validTomorrow() : expiryText.validInDays(daysLeft);
                     } else {
-                        badgeText = daysLeft === 1 ? '📍 Gültig morgen' : `📍 In ${daysLeft} Tagen gültig`;
+                        badgeText = daysLeft === 1 ? expiryText.validTomorrow() : expiryText.validInDays(daysLeft);
                     }
                 } else if (isToday) {
                     badgeClass = 'today urgent';
                     countdownClass = 'warning';
                     cardClass = ' expiring-soon';
                     barColor = 'red';
-                    badgeText = isStart ? '📍 Startet heute' : '📍 Gültig heute';
-                    countdownText = isStart ? `Startet am ${dateLabel}` : 'Heute gültig';
+                    badgeText = isStart ? expiryText.startsToday() : expiryText.validToday();
+                    countdownText = isStart ? expiryText.startsOn(dateLabel) : expiryText.todayText();
                 }
 
                 return {
@@ -2074,44 +2565,44 @@
                 const hoursLeft = Math.max(0, Math.ceil(msLeft / 3600000));
                 const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
                 const dateLabel = formatDateAT(targetMs);
-                let badgeText = `📅 Gültig bis ${dateLabel}`;
-                let countdownText = `Gültig bis ${dateLabel}`;
+                let badgeText = `📅 ${expiryText.validUntil(dateLabel)}`;
+                let countdownText = expiryText.validUntil(dateLabel);
                 let badgeClass = 'safe';
                 let countdownClass = 'ok';
                 let cardClass = ' expiring-ok';
                 let barColor = 'green';
 
                 if (msLeft <= 0) {
-                    badgeText = '🚨 Nur heute gültig';
-                    countdownText = '⏳ Läuft heute ab';
+                    badgeText = expiryText.onlyToday();
+                    countdownText = expiryText.endsToday();
                     badgeClass = 'today urgent';
                     countdownClass = 'warning';
                     cardClass = ' expiring-soon';
                     barColor = 'red';
                 } else if (hoursLeft <= 24) {
-                    badgeText = `⚠️ Nur noch ${hoursLeft}h gültig`;
-                    countdownText = `Läuft in ${hoursLeft} Std. ab`;
+                    badgeText = expiryText.validForHours(hoursLeft);
+                    countdownText = expiryText.endsInHours(hoursLeft);
                     badgeClass = 'urgent';
                     countdownClass = 'warning';
                     cardClass = ' expiring-soon';
                     barColor = 'red';
                 } else if (daysLeft <= 3) {
-                    badgeText = `⚠️ Noch ${daysLeft} Tage gültig`;
-                    countdownText = `Läuft in ${daysLeft} Tagen ab`;
+                    badgeText = expiryText.validForDays(daysLeft);
+                    countdownText = expiryText.endsInDays(daysLeft);
                     badgeClass = 'warn';
                     countdownClass = 'warn';
                     cardClass = ' expiring-mid';
                     barColor = 'orange';
                 } else if (daysLeft <= 7) {
-                    badgeText = `🕒 Noch ${daysLeft} Tage gültig`;
-                    countdownText = `Gültig bis ${dateLabel}`;
+                    badgeText = expiryText.validForDaysSoft(daysLeft);
+                    countdownText = expiryText.validUntil(dateLabel);
                     badgeClass = 'warn';
                     countdownClass = 'warn';
                     cardClass = ' expiring-mid';
                     barColor = 'orange';
                 } else {
-                    badgeText = `📍 In ${daysLeft} Tagen endet`;
-                    countdownText = `Gültig bis ${dateLabel}`;
+                    badgeText = expiryText.endingInDays(daysLeft);
+                    countdownText = expiryText.validUntil(dateLabel);
                 }
 
                 return {
@@ -2150,38 +2641,38 @@
                         cardClass: daysLeft <= 3 ? ' expiring-mid' : ' expiring-ok',
                         barColor: daysLeft <= 3 ? 'orange' : 'green',
                         badgeClass: daysLeft <= 3 ? 'warn' : 'safe',
-                        badgeText: daysLeft === 1 ? '📍 Gültig morgen' : `📍 In ${daysLeft} Tagen gültig`,
+                        badgeText: daysLeft === 1 ? expiryText.validTomorrow() : expiryText.validInDays(daysLeft),
                         countdownClass: daysLeft <= 3 ? 'warn' : 'ok',
-                        countdownText: `Gültig von ${startLabel} bis ${endLabel}`,
+                        countdownText: expiryText.validFromTo(startLabel, endLabel),
                         barPct: Math.max(2, Math.min(100, Math.round((Math.min(daysLeft, 21) / 21) * 100)))
                     };
                 }
                 const msLeft = parsedWindow.endMs - now;
                 const hoursLeft = Math.max(0, Math.ceil(msLeft / 3600000));
                 const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
-                let badgeText = `📅 Gültig bis ${endLabel}`;
-                let countdownText = `Gültig bis ${endLabel}`;
+                let badgeText = `📅 ${expiryText.validUntil(endLabel)}`;
+                let countdownText = expiryText.validUntil(endLabel);
                 let badgeClass = 'safe';
                 let countdownClass = 'ok';
                 let cardClass = ' expiring-ok';
                 let barColor = 'green';
                 if (msLeft <= 0) {
-                    badgeText = '🚨 Bereits abgelaufen';
-                    countdownText = `War gültig bis ${endLabel}`;
+                    badgeText = expiryText.expiredAlready();
+                    countdownText = expiryText.wasValidUntil(endLabel);
                     badgeClass = 'today urgent';
                     countdownClass = 'warning';
                     cardClass = ' expiring-soon';
                     barColor = 'red';
                 } else if (hoursLeft <= 24) {
-                    badgeText = `⚠️ Nur noch ${hoursLeft}h gültig`;
-                    countdownText = `Läuft in ${hoursLeft} Std. ab`;
+                    badgeText = expiryText.validForHours(hoursLeft);
+                    countdownText = expiryText.endsInHours(hoursLeft);
                     badgeClass = 'urgent';
                     countdownClass = 'warning';
                     cardClass = ' expiring-soon';
                     barColor = 'red';
                 } else if (daysLeft <= 7) {
-                    badgeText = `🕒 Noch ${daysLeft} Tage gültig`;
-                    countdownText = `Gültig bis ${endLabel}`;
+                    badgeText = expiryText.validForDaysSoft(daysLeft);
+                    countdownText = expiryText.validUntil(endLabel);
                     badgeClass = 'warn';
                     countdownClass = 'warn';
                     cardClass = ' expiring-mid';
@@ -2234,8 +2725,8 @@
             let barColor = 'green';
             let badgeClass = 'safe';
             let countdownClass = 'ok';
-            let badgeText = `📅 Gültig bis ${dateLabel}`;
-            let countdownText = `Gültig bis ${dateLabel}`;
+            let badgeText = `📅 ${expiryText.validUntil(dateLabel)}`;
+            let countdownText = expiryText.validUntil(dateLabel);
 
             if (hasExplicitStartSignal && msLeft > 0) {
                 cardClass = daysLeft <= 3 ? ' expiring-mid' : ' expiring-ok';
@@ -2244,11 +2735,11 @@
                 countdownClass = daysLeft <= 3 ? 'warn' : 'ok';
 
                 if (daysLeft === 1) {
-                    badgeText = '📍 Gültig morgen';
+                    badgeText = expiryText.validTomorrow();
                 } else {
-                    badgeText = `📍 In ${daysLeft} Tagen gültig`;
+                    badgeText = expiryText.validInDays(daysLeft);
                 }
-                countdownText = `Gültig ab ${dateLabel}`;
+                countdownText = expiryText.validFrom(dateLabel);
             } else if (looksLikeSingleDay) {
                 cardClass = daysLeft <= 3 ? ' expiring-mid' : ' expiring-ok';
                 barColor = daysLeft <= 3 ? 'orange' : 'green';
@@ -2260,43 +2751,43 @@
                     barColor = 'red';
                     badgeClass = 'today urgent';
                     countdownClass = 'warning';
-                    badgeText = '📍 Gültig heute';
-                    countdownText = 'Heute gültig';
+                    badgeText = expiryText.validToday();
+                    countdownText = expiryText.todayText();
                 } else if (daysLeft === 1) {
-                    badgeText = '📍 Gültig morgen';
-                    countdownText = `Gültig am ${dateLabel}`;
+                    badgeText = expiryText.validTomorrow();
+                    countdownText = expiryText.validOn(dateLabel);
                 } else {
-                    badgeText = `📍 In ${daysLeft} Tagen gültig`;
-                    countdownText = `Gültig am ${dateLabel}`;
+                    badgeText = expiryText.validInDays(daysLeft);
+                    countdownText = expiryText.validOn(dateLabel);
                 }
             } else if (msLeft <= 0 || isToday) {
                 cardClass = ' expiring-soon';
                 barColor = 'red';
                 badgeClass = 'today urgent';
                 countdownClass = 'warning';
-                badgeText = '🚨 Nur heute gültig';
-                countdownText = '⏳ Läuft heute ab';
+                badgeText = expiryText.onlyToday();
+                countdownText = expiryText.endsToday();
             } else if (hoursLeft <= 24) {
                 cardClass = ' expiring-soon';
                 barColor = 'red';
                 badgeClass = 'urgent';
                 countdownClass = 'warning';
-                badgeText = `⚠️ Nur noch ${hoursLeft}h gültig`;
-                countdownText = `Läuft in ${hoursLeft} Std. ab`;
+                badgeText = expiryText.validForHours(hoursLeft);
+                countdownText = expiryText.endsInHours(hoursLeft);
             } else if (daysLeft <= 3) {
                 cardClass = ' expiring-mid';
                 barColor = 'orange';
                 badgeClass = 'warn';
                 countdownClass = 'warn';
-                badgeText = `⚠️ Noch ${daysLeft} Tage gültig`;
-                countdownText = `Läuft in ${daysLeft} Tagen ab`;
+                badgeText = expiryText.validForDays(daysLeft);
+                countdownText = expiryText.endsInDays(daysLeft);
             } else if (daysLeft <= 7) {
                 cardClass = ' expiring-mid';
                 barColor = 'orange';
                 badgeClass = 'warn';
                 countdownClass = 'warn';
-                badgeText = `🕒 Noch ${daysLeft} Tage gültig`;
-                countdownText = `Gültig bis ${dateLabel}`;
+                badgeText = expiryText.validForDaysSoft(daysLeft);
+                countdownText = expiryText.validUntil(dateLabel);
             }
 
             const pct = Math.max(2, Math.min(100, Math.round((Math.min(daysLeft, 21) / 21) * 100)));
@@ -2834,6 +3325,7 @@
         ];
         
         function init() {
+            applyLanguage();
             bindHiddenAdminEntry();
             checkStreak();
             updateLevelUI();
@@ -2866,7 +3358,9 @@
                 userData.challengeComplete = false;
                 saveUserData();
             }
-            document.getElementById('streakDays').textContent = userData.streak + ' Tag' + (userData.streak > 1 ? 'e' : '') + ' Streak!';
+            document.getElementById('streakDays').textContent = currentLanguage === 'en'
+                ? userData.streak + ' day' + (userData.streak > 1 ? 's' : '') + ' streak!'
+                : userData.streak + ' Tag' + (userData.streak > 1 ? 'e' : '') + ' Streak!';
             document.getElementById('streakReward').textContent = '+' + Math.min(10 + userData.streak * 5, 50) + ' XP';
         }
         
@@ -2944,12 +3438,12 @@
             const isProMember = typeof proData !== 'undefined' && !!proData.isPro;
 
             let displaySavings = Number(userData.totalSavings) || 0;
-            let title = '💰 Diese Woche gespart';
+            let title = t('savedThisWeek');
 
             if (isProMember) {
                 const summary = getProSavingsSummary();
                 displaySavings = summary.weekTotal;
-                title = '💰 Diese Woche eingelöst';
+                title = t('redeemedThisWeek');
                 cardEl.classList.remove('locked');
                 cardEl.onclick = null;
                 cardEl.removeAttribute('role');
@@ -3003,7 +3497,7 @@
             const sf = document.getElementById('secretFill');
             const st = document.getElementById('secretText');
             if (sf) sf.style.width = (viewed / 5) * 100 + '%';
-            if (st) st.textContent = viewed + '/5 Deals angesehen';
+            if (st) st.textContent = currentLanguage === 'en' ? viewed + '/5 deals viewed' : viewed + '/5 Deals angesehen';
             if (userData.secretUnlocked) unlockSecret();
         }
         
@@ -3141,8 +3635,8 @@
           : allDeals[0];
         if (!deal) {
           applyDailyDealTheme('');
-          document.getElementById('dailyTitle').textContent = '🎁 Deal des Tages';
-          document.getElementById('dailyDesc').textContent = 'Bald verfügbar';
+          document.getElementById('dailyTitle').textContent = t('dailyFallback');
+          document.getElementById('dailyDesc').textContent = currentLanguage === 'en' ? 'Available soon' : 'Bald verfügbar';
           document.getElementById('dailyBtn').onclick = () => {};
           return;
         }
@@ -3434,25 +3928,25 @@
 
     function getRecommendationReason(deal) {
         if (!proData.isPro) {
-            if (deal.hot) return 'Gerade stark gefragt';
-            if (deal.isNew) return 'Frisch entdeckt';
-            if (deal.type === 'gratis') return 'Beliebter Gratis-Deal';
-            return 'Beliebt in Wien';
+            if (deal.hot) return t('recommendationStrongDemand');
+            if (deal.isNew) return t('recommendationFresh');
+            if (deal.type === 'gratis') return t('recommendationPopularFree');
+            return t('recommendationPopularVienna');
         }
         const brand = getDisplayBrand(deal);
         const profile = userData.discoveryProfile || {};
         const categoryWeight = (profile.categories && profile.categories[deal.category]) || 0;
         const brandWeight = (profile.brands && profile.brands[brand]) || 0;
         const typeWeight = (profile.types && profile.types[deal.type]) || 0;
-        if (brandWeight >= 4) return 'Du magst diese Marke';
-        if (categoryWeight >= 4) return 'Passt zu deinen Lieblingskategorien';
-        if (typeWeight >= 3 && deal.type === 'gratis') return 'Du reagierst oft auf Gratis-Deals';
+        if (brandWeight >= 4) return t('recommendationBrand');
+        if (categoryWeight >= 4) return t('recommendationCategory');
+        if (typeWeight >= 3 && deal.type === 'gratis') return t('recommendationFreebies');
         if (Number(proData.selectedRadius || 0) > 0) {
             const geo = getDealGeoHint(deal);
-            if (geo) return 'Passt zu deinem Standort';
+            if (geo) return t('recommendationLocation');
         }
-        if (deal.hot) return 'Gerade stark gefragt';
-        return 'Passt zu deinem Profil';
+        if (deal.hot) return t('recommendationStrongDemand');
+        return t('recommendationProfile');
     }
 
     function getTopVotedDeals(discoveryDeals) {
@@ -3479,13 +3973,13 @@
         const snippet = escapeHtml(cleanUiNoiseText(deal.description || ''));
         const location = escapeHtml(getDisplayLocation(deal) || 'Wien');
         const expiry = getExpiryPresentation(deal);
-        const dateLabel = escapeHtml(expiry.infoLabel || deal.expiresOriginal || deal.expires || 'Zeitlich begrenzt');
+        const dateLabel = escapeHtml(expiry.infoLabel || deal.expiresOriginal || deal.expires || t('validLimited'));
         const dealId = escapeJsString(deal.id);
         const voteCount = Number(deal.votes || 0);
         const favIcon = favorites.includes(deal.id) ? '❤️' : '🤍';
         const voteDisabled = votedDeals.includes(deal.id) ? ' disabled' : '';
         const hasLink = !!(deal.url && String(deal.url).trim());
-        const defaultBtnLabel = deal.category === 'gottesdienste' ? 'Zeiten' : deal.category === 'events' ? 'Event' : 'Zum Deal';
+        const defaultBtnLabel = deal.category === 'gottesdienste' ? t('timesLabel') : deal.category === 'events' ? t('eventLabel') : t('openDeal');
 
         return '<div class="discovery-card">' +
             '<div class="discovery-topline">' +
@@ -3500,7 +3994,7 @@
             '<div class="discovery-meta">' +
                 '<span class="discovery-chip">📍 ' + location + '</span>' +
                 '<span class="discovery-chip">📅 ' + dateLabel + '</span>' +
-                '<span class="discovery-chip">🔥 ' + voteCount + ' Votes</span>' +
+                '<span class="discovery-chip">🔥 ' + voteCount + ' ' + t('voteLabel') + '</span>' +
             '</div>' +
             '<div class="discovery-actions">' +
                 '<button class="action-btn vote-btn' + (votedDeals.includes(deal.id) ? ' is-voted' : '') + '"' + voteDisabled + ' onclick="vote(\'' + dealId + '\', 1, event)"><span class="vote-count">' + voteCount + '</span> 🔥</button>' +
@@ -3652,12 +4146,12 @@
             const fav = allDeals
                 .map(normalizeDealForApp)
                 .filter(d => favoriteIds.has(d.id));
-            document.getElementById('deals').innerHTML = fav.length ? fav.map(d => '<div class="deal-card"><div class="deal-header">' + renderDealLogo(d) + '<div><div class="deal-brand">' + getDisplayBrand(d) + '</div><div class="deal-title">' + cleanUiNoiseText(d.title) + '</div></div></div><a href="' + d.url + '" target="_blank" class="deal-btn" style="width:100%;text-align:center;margin-top:10px">Zum Deal →</a></div>').join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>Keine Favoriten</p><p style="font-size:13px;color:#999;margin-top:8px">Tippe ❤️ bei einem Deal</p></div>';
+            document.getElementById('deals').innerHTML = fav.length ? fav.map(d => '<div class="deal-card"><div class="deal-header">' + renderDealLogo(d) + '<div><div class="deal-brand">' + getDisplayBrand(d) + '</div><div class="deal-title">' + cleanUiNoiseText(d.title) + '</div></div></div><a href="' + d.url + '" target="_blank" class="deal-btn" style="width:100%;text-align:center;margin-top:10px">' + t('openDeal') + ' →</a></div>').join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>' + t('favoritesEmptyTitle') + '</p><p style="font-size:13px;color:#999;margin-top:8px">' + t('favoritesEmptyHint') + '</p></div>';
             return;
         }
         const deals = filterDeals();
         if (!deals.length) {
-            document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">\uD83D\uDD0D</div><p>Keine Deals gefunden</p></div>';
+            document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">\uD83D\uDD0D</div><p>' + t('noDealsFound') + '</p></div>';
             return;
         }
         document.getElementById('deals').innerHTML = deals.map(d => {
@@ -3936,7 +4430,7 @@
             currentView = 'stats';
             hideHeaderElements();
             if (!proData.isPro) {
-                document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">Stats sind PRO</h2><p style="color:#6b7280;font-size:14px">Schalte deinen Spartracker, die Jahresübersicht und persönliche Zahlen frei.</p></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:18px;padding:22px;color:white;margin-bottom:16px"><div style="font-size:18px;font-weight:800;margin-bottom:10px">Was du mit PRO siehst</div><div style="display:grid;gap:8px;font-size:14px;opacity:0.95"><div>💰 Ersparnis diese Woche, diesen Monat und dieses Jahr</div><div>🗓️ Jahresübersicht deiner Einlösungen</div><div>📈 Punkte, Streaks und genutzte Deals</div><div>🧠 Smartere Empfehlungen & Standortfilter</div></div><button style="margin-top:16px;width:100%;background:white;color:#5b21b6;border:none;border-radius:14px;padding:14px 16px;font-size:15px;font-weight:800;cursor:pointer" onclick="openReferralModal()">👑 PRO gratis freischalten</button></div></div>';
+                document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">' + t('statsLockedTitle') + '</h2><p style="color:#6b7280;font-size:14px">' + t('statsLockedSub') + '</p></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:18px;padding:22px;color:white;margin-bottom:16px"><div style="font-size:18px;font-weight:800;margin-bottom:10px">' + t('statsLockedListTitle') + '</div><div style="display:grid;gap:8px;font-size:14px;opacity:0.95"><div>' + t('statsLockedItem1') + '</div><div>' + t('statsLockedItem2') + '</div><div>' + t('statsLockedItem3') + '</div><div>' + t('statsLockedItem4') + '</div></div><button style="margin-top:16px;width:100%;background:white;color:#5b21b6;border:none;border-radius:14px;padding:14px 16px;font-size:15px;font-weight:800;cursor:pointer" onclick="openReferralModal()">' + t('unlockProFree') + '</button></div></div>';
                 scrollToTopContent();
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
                 document.querySelectorAll('.nav-item')[2].classList.add('active');
@@ -3951,7 +4445,7 @@
             const yearSavings = Object.entries(proData.monthlySavings || {})
                 .filter(([key]) => key.startsWith(String(now.getFullYear())))
                 .reduce((sum, [, value]) => sum + Number(value || 0), 0);
-            document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">Deine Stats</h2><p style="color:#6b7280;font-size:14px">Alles auf Basis deiner markierten Einlösungen und deiner Nutzung.</p></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;align-items:center;gap:16px"><div style="background:rgba(255,255,255,0.2);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800">' + userData.level + '</div><div style="flex:1"><div style="font-size:11px;opacity:0.8">LEVEL</div><div style="font-size:20px;font-weight:700">' + level.name + '</div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin:10px 0 6px;overflow:hidden"><div style="background:white;height:100%;width:' + xpProgress + '%;border-radius:4px"></div></div><div style="font-size:13px;opacity:0.9">' + userData.xp + ' / ' + nextLevel.xp + ' Punkte</div></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#667eea">' + userData.xp + '</div><div style="font-size:13px;color:#6b7280">Punkte gesamt</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#f59e0b">🔥 ' + userData.streak + '</div><div style="font-size:13px;color:#6b7280">Tage Streak</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#8b5cf6">' + userData.dealsViewed + '</div><div style="font-size:13px;color:#6b7280">Deals angesehen</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#10b981">' + Object.keys(proData.redeemedDeals || {}).length + '</div><div style="font-size:13px;color:#6b7280">Als eingelöst markiert</div></div></div><div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;opacity:0.9">💰 Diesen Monat gespart</div><div style="font-size:32px;font-weight:800;margin-top:4px">€' + monthSavings.toFixed(2).replace('.', ',') + '</div><div style="font-size:12px;opacity:0.85;margin-top:4px">Jahr gesamt: €' + yearSavings.toFixed(2).replace('.', ',') + '</div></div><div style="text-align:right"><div style="font-size:13px;opacity:0.9">Ziel</div><div style="font-size:20px;font-weight:700">€50</div></div></div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin-top:12px;overflow:hidden"><div style="background:white;height:100%;width:' + Math.min(100, (monthSavings / 50) * 100) + '%;border-radius:4px"></div></div></div></div>';
+            document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">' + t('yourStats') + '</h2><p style="color:#6b7280;font-size:14px">' + t('yourStatsSub') + '</p></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:16px;padding:20px;color:white;margin-bottom:16px"><div style="display:flex;align-items:center;gap:16px"><div style="background:rgba(255,255,255,0.2);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800">' + userData.level + '</div><div style="flex:1"><div style="font-size:11px;opacity:0.8">LEVEL</div><div style="font-size:20px;font-weight:700">' + level.name + '</div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin:10px 0 6px;overflow:hidden"><div style="background:white;height:100%;width:' + xpProgress + '%;border-radius:4px"></div></div><div style="font-size:13px;opacity:0.9">' + userData.xp + ' / ' + nextLevel.xp + ' XP</div></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#667eea">' + userData.xp + '</div><div style="font-size:13px;color:#6b7280">' + t('totalPoints') + '</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#f59e0b">🔥 ' + userData.streak + '</div><div style="font-size:13px;color:#6b7280">' + t('streakDays') + '</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#8b5cf6">' + userData.dealsViewed + '</div><div style="font-size:13px;color:#6b7280">' + t('dealsViewed') + '</div></div><div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06)"><div style="font-size:36px;font-weight:800;color:#10b981">' + Object.keys(proData.redeemedDeals || {}).length + '</div><div style="font-size:13px;color:#6b7280">' + t('redeemedMarked') + '</div></div></div><div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;padding:20px;color:white"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;opacity:0.9">' + t('savedThisMonth') + '</div><div style="font-size:32px;font-weight:800;margin-top:4px">€' + monthSavings.toFixed(2).replace('.', ',') + '</div><div style="font-size:12px;opacity:0.85;margin-top:4px">' + t('yearTotal') + ': €' + yearSavings.toFixed(2).replace('.', ',') + '</div></div><div style="text-align:right"><div style="font-size:13px;opacity:0.9">' + t('goal') + '</div><div style="font-size:20px;font-weight:700">€50</div></div></div><div style="background:rgba(255,255,255,0.3);height:8px;border-radius:4px;margin-top:12px;overflow:hidden"><div style="background:white;height:100%;width:' + Math.min(100, (monthSavings / 50) * 100) + '%;border-radius:4px"></div></div></div></div>';
             scrollToTopContent();
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelectorAll('.nav-item')[2].classList.add('active');
@@ -3965,12 +4459,12 @@
             const topVoted = getTopVotedDeals(discoveryDeals);
             const trending = getTrendingDeals(discoveryDeals);
 
-            const intro = '<div class="discovery-page-header"><div class="discovery-page-icon">✨</div><h2 class="discovery-page-title">Für dich</h2><p class="discovery-page-subtitle">' + (proData.isPro ? 'Smarte Empfehlungen auf Basis deiner Favoriten, Einlösungen, Ansichten und deiner Nähe.' : 'Beliebte Empfehlungen, starke Community-Votes und was gerade heiß läuft.') + '</p></div>';
-            const proBoostCard = proData.isPro ? '' : '<div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:18px;padding:18px;color:white;margin-bottom:16px" onclick="openReferralModal()"><div style="font-size:17px;font-weight:800;margin-bottom:6px">👑 PRO macht Für dich deutlich smarter</div><div style="font-size:14px;opacity:0.95;line-height:1.45">Mit PRO lernt dein Feed aus Favoriten, Einlösungen, Marken, Standort und persönlichen Alerts.</div><button style="margin-top:14px;background:white;color:#5b21b6;border:none;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:800;cursor:pointer;width:100%">PRO gratis freischalten</button></div>';
-            const recommendedSection = renderDiscoverySection('Für dich empfohlen', proData.isPro ? 'Basierend auf deinen Favoriten, Einlösungen, Ansichten und deiner Nähe.' : 'Eine starke Vorschau aus frischen, beliebten und relevanten Deals.', recommended, (deal) => getRecommendationReason(deal));
-            const topVotedSection = renderDiscoverySection('Meist gevotet diese Woche', 'Die Community-Sieger aus den neuesten und stärksten Deals.', topVoted, (_, index) => index === 0 ? 'Community-Favorit' : 'Viele Stimmen');
-            const trendingSection = renderDiscoverySection('Trendet gerade', 'Hot, neu oder gerade besonders stark geklickt.', trending, (deal) => deal.hot ? 'Gerade heiß' : (deal.isNew ? 'Frisch entdeckt' : 'Im Aufwind'));
-            const submitCta = '<div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:18px;padding:20px;color:white;text-align:center;cursor:pointer" onclick="openLinkModal()"><div style="font-size:34px;margin-bottom:8px">🔗</div><div style="font-size:18px;font-weight:700">Deal einreichen</div><div style="font-size:14px;opacity:0.9;margin-top:4px">Gute Funde direkt mit der Community teilen</div></div>';
+            const intro = '<div class="discovery-page-header"><div class="discovery-page-icon">✨</div><h2 class="discovery-page-title">' + t('forYouTitle') + '</h2><p class="discovery-page-subtitle">' + (proData.isPro ? t('forYouSubPro') : t('forYouSubFree')) + '</p></div>';
+            const proBoostCard = proData.isPro ? '' : '<div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:18px;padding:18px;color:white;margin-bottom:16px" onclick="openReferralModal()"><div style="font-size:17px;font-weight:800;margin-bottom:6px">' + t('forYouProBoostTitle') + '</div><div style="font-size:14px;opacity:0.95;line-height:1.45">' + t('forYouProBoostSub') + '</div><button style="margin-top:14px;background:white;color:#5b21b6;border:none;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:800;cursor:pointer;width:100%">' + t('unlockProFree') + '</button></div>';
+            const recommendedSection = renderDiscoverySection(t('forYouRecommended'), proData.isPro ? t('forYouRecommendedSubPro') : t('forYouRecommendedSubFree'), recommended, (deal) => getRecommendationReason(deal));
+            const topVotedSection = renderDiscoverySection(t('forYouTopVoted'), t('forYouTopVotedSub'), topVoted, (_, index) => index === 0 ? (currentLanguage === 'en' ? 'Community favorite' : 'Community-Favorit') : (currentLanguage === 'en' ? 'Lots of votes' : 'Viele Stimmen'));
+            const trendingSection = renderDiscoverySection(t('forYouTrending'), t('forYouTrendingSub'), trending, (deal) => deal.hot ? (currentLanguage === 'en' ? 'Hot right now' : 'Gerade heiß') : (deal.isNew ? (currentLanguage === 'en' ? 'Freshly discovered' : 'Frisch entdeckt') : (currentLanguage === 'en' ? 'Gaining momentum' : 'Im Aufwind')));
+            const submitCta = '<div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:18px;padding:20px;color:white;text-align:center;cursor:pointer" onclick="openLinkModal()"><div style="font-size:34px;margin-bottom:8px">🔗</div><div style="font-size:18px;font-weight:700">' + t('submitDeal') + '</div><div style="font-size:14px;opacity:0.9;margin-top:4px">' + t('submitDealSub') + '</div></div>';
 
             document.getElementById('deals').innerHTML = '<div style="padding:4px 0">' + intro + proBoostCard + recommendedSection + topVotedSection + trendingSection + submitCta + '</div>';
             scrollToTopContent();
@@ -4489,7 +4983,7 @@
   async function openAdminAccess() {
     const existingToken = getAdminToken();
     if (!existingToken) {
-      const entered = window.prompt('Admin-Token eingeben');
+      const entered = window.prompt(currentLanguage === 'en' ? 'Enter admin token' : 'Admin-Token eingeben');
       if (!entered) return;
       setAdminToken(entered);
     }
@@ -4498,11 +4992,11 @@
       unlockAdminUi();
       updateAdminUiVisibility();
       renderDeals();
-      showToast('🛠️ Admin-Modus aktiv');
+      showToast(currentLanguage === 'en' ? '🛠️ Admin mode active' : '🛠️ Admin-Modus aktiv');
     } catch (e) {
       clearAdminToken();
       updateAdminUiVisibility();
-      showToast('🚫 Admin-Token ungültig');
+      showToast(currentLanguage === 'en' ? '🚫 Invalid admin token' : '🚫 Admin-Token ungültig');
     }
   }
 
@@ -4911,9 +5405,9 @@
     await ensureReferralCodeRegistered();
     const shareWindow = window.open('', '_blank', 'noopener');
     const link = await getReferralLandingUrl(code);
-    const text = '📱 Hey! Ich nutze FreeFinder für gratis Deals in Wien!\n\n👑 Öffne meinen Link und bestätige die App über meine Einladung – damit schalte ich kostenlos PRO mit Deal-Alarmen, Standortfilter und Spartracker frei.\n\n👉 ' + link + '\n\n☕ Gratis Kaffee, 🍔 Essen & mehr!';
+    const text = tf('referralWhatsappText', { link });
     openExternalUrlFromGesture('https://wa.me/?text=' + encodeURIComponent(text), shareWindow);
-    showToast('📤 WhatsApp geöffnet!');
+    showToast(t('referralWhatsappOpened'));
   }
 
   async function copyReferralLink() {
@@ -4921,7 +5415,7 @@
     await ensureReferralCodeRegistered();
     const link = await getReferralLandingUrl(code);
     navigator.clipboard.writeText(link).then(() => {
-      showToast('📋 Einladungslink kopiert!');
+      showToast(t('referralLinkCopied'));
     }).catch(() => {
       showToast('Link: ' + link);
     });
@@ -5306,12 +5800,12 @@
     saveProData();
     // GPS-Standort holen wenn Radius > 0
     if (km > 0) {
-      showToast('\uD83D\uDCCD Standort wird ermittelt...');
+      showToast(t('locating'));
       const ok = await refreshUserLocation(true);
       if (ok) {
-        showToast('\uD83D\uDCCD Standort gefunden! Zeige Deals innerhalb ' + km + ' km');
+        showToast(tf('locationFound', { km }));
       } else {
-        showToast('\u26A0\uFE0F Kein GPS-Standort. Nahe-Filter deaktiviert.');
+        showToast(t('locationMissing'));
         proData.selectedRadius = 0;
         saveProData();
         document.querySelectorAll('.radius-btn').forEach(b => b.classList.remove('active'));
@@ -5321,7 +5815,7 @@
       renderDeals();
       return;
     }
-    showToast(km === 0 ? '\uD83C\uDFE0 Alle Deals werden angezeigt' : '\uD83D\uDCCD Zeige Deals innerhalb ' + km + ' km');
+    showToast(km === 0 ? t('showAllDeals') : tf('showDealsWithin', { km }));
     renderDeals();
   }
 
