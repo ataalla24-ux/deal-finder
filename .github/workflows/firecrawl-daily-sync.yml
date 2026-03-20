@@ -41,7 +41,8 @@ jobs:
       - name: Run Instagram Discovery Scraper
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
-          IG_MAX_AGE_DAYS: 14
+          INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
+          IG_MAX_AGE_DAYS: 7
           IG_MAX_DEALS: 180
           IG_MAX_POSTS_VISIT: 1400
           IG_MAX_RELATED_ACCOUNTS: 180
@@ -52,7 +53,28 @@ jobs:
           IG_PER_SOURCE_LINKS: 500
           IG_MIN_SCORE: 60
           IG_MAX_DEALS_PER_ACCOUNT: 4
-        run: node scraper/instagram-discovery-scraper.js
+        run: |
+          node - <<'NODE'
+          const session = String(process.env.INSTAGRAM_SESSIONID || '').trim();
+          const rawCookies = String(process.env.INSTAGRAM_COOKIES || '').trim();
+          const cookieParts = rawCookies
+            ? rawCookies.split(';').map((p) => p.trim()).filter(Boolean)
+            : [];
+          const cookieNames = cookieParts
+            .map((part) => {
+              const eq = part.indexOf('=');
+              return eq > 0 ? part.slice(0, eq).trim() : '';
+            })
+            .filter(Boolean);
+
+          console.log(`DEBUG INSTAGRAM_SESSIONID set: ${session ? 'yes' : 'no'}`);
+          console.log(`DEBUG INSTAGRAM_COOKIES length: ${rawCookies.length}`);
+          console.log(`DEBUG INSTAGRAM_COOKIES parts: ${cookieParts.length}`);
+          console.log(`DEBUG INSTAGRAM_COOKIES names: ${cookieNames.join(',') || '(none)'}`);
+          NODE
+          node scraper/instagram-web-scraper.js
+          node scraper/instagram-discovery-scraper.js
+          node scraper/merge-instagram-pending.js
 
       - name: Run jö Scraper
         run: node scraper/joe-scraper.js
@@ -64,7 +86,7 @@ jobs:
         run: |
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
-          git add docs/deals-pending-instagram.json docs/deals-pending-joe.json docs/instagram-source-stats.json docs/instagram-discovery-report.json 2>/dev/null || true
+          git add docs/deals-pending-instagram.json docs/deals-pending-instagram-web.json docs/deals-pending-instagram-discovery.json docs/deals-pending-joe.json docs/instagram-source-stats.json docs/instagram-discovery-report.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
