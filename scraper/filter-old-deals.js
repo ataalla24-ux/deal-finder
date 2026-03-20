@@ -21,6 +21,27 @@ const SEVEN_DAYS_AGO = new Date(NOW.getTime() - SEVEN_DAYS_MS);
 const MAX_URL_EXPIRY_CHECKS = 120;
 const TRUSTED_IG_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate']);
 
+function normalizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isViennaDeal(deal) {
+  const haystack = [
+    deal.distance,
+    deal.location,
+    deal.description,
+    deal.title,
+    deal.brand,
+  ]
+    .map(normalizeText)
+    .join(' ');
+
+  return haystack.includes('wien') || haystack.includes('vienna') || /\b1\d{3}\b/.test(haystack);
+}
+
 // ============================================
 // Deal-Alter prüfen
 // ============================================
@@ -31,23 +52,34 @@ function isExpiredOrOld(deal) {
   const isStrictRecentSocialDeal =
     sourceText.includes('firecrawl gastro #2') ||
     sourceText.includes('firecrawl food #3') ||
-    sourceText.includes('firecrawl consumables');
-  if (isInstagramDeal && !TRUSTED_IG_PUBDATE_SOURCES.has(String(deal.pubDateSource || ''))) {
+    sourceText.includes('firecrawl consumables') ||
+    sourceText.includes('firecrawl instagram direct #4') ||
+    sourceText.includes('firecrawl instagram gastro #5');
+  const usesTrustedInstagramPubDate = TRUSTED_IG_PUBDATE_SOURCES.has(String(deal.pubDateSource || ''));
+
+  if (isInstagramDeal && !isStrictRecentSocialDeal && !usesTrustedInstagramPubDate) {
     return { expired: true, reason: 'Instagram-Deal ohne vertrauenswürdige pubDateSource' };
   }
 
   if (isStrictRecentSocialDeal) {
     const url = String(deal.url || '').toLowerCase();
     if (!(url.includes('instagram.com') || url.includes('tiktok.com'))) {
-      return { expired: true, reason: 'Key-2/Key-3 Deal ohne Instagram- oder TikTok-URL' };
+      return { expired: true, reason: 'Firecrawl Social Deal ohne Instagram- oder TikTok-URL' };
     }
     if (!deal.pubDate) {
-      return { expired: true, reason: 'Key-2/Key-3 Deal ohne pubDate' };
+      return { expired: true, reason: 'Firecrawl Social Deal ohne pubDate' };
     }
     const pub = new Date(deal.pubDate);
     if (isNaN(pub) || pub < SEVEN_DAYS_AGO) {
       return { expired: true, reason: `pubDate "${deal.pubDate}" ist älter als 7 Tage oder ungültig` };
     }
+    if (!isViennaDeal(deal)) {
+      return { expired: true, reason: 'Firecrawl Social Deal ohne klaren Wien-Bezug' };
+    }
+  }
+
+  if (isStrictRecentSocialDeal) {
+    return { expired: false };
   }
 
   const dateFields = [

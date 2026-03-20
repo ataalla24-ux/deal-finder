@@ -33,7 +33,9 @@ const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const CUTOFF_DATE = Date.now() - TWO_WEEKS_MS;
+const RECENT_SOCIAL_CUTOFF_DATE = Date.now() - SEVEN_DAYS_MS;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate']);
 
@@ -54,6 +56,31 @@ function cleanText(value) {
     .replace(/&#39;/g, "'")
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function isStrictRecentSocialDeal(deal) {
+  const source = cleanText(deal?.source).toLowerCase();
+  return source.includes('firecrawl gastro #2') ||
+    source.includes('firecrawl food #3') ||
+    source.includes('firecrawl consumables') ||
+    source.includes('firecrawl instagram direct #4') ||
+    source.includes('firecrawl instagram gastro #5');
+}
+
+function isViennaDeal(deal) {
+  const haystack = [
+    deal?.distance,
+    deal?.location,
+    deal?.ort,
+    deal?.description,
+    deal?.title,
+    deal?.brand,
+  ]
+    .map(cleanText)
+    .join(' ')
+    .toLowerCase();
+
+  return haystack.includes('wien') || haystack.includes('vienna') || /\b1\d{3}\b/.test(haystack);
 }
 
 function normalizeUrl(url) {
@@ -381,22 +408,26 @@ function buildSeenSignatureMap(sentIds, pendingQueue) {
 function isRecent(deal) {
   const pubMs = new Date(deal.pubDate).getTime();
   if (!Number.isFinite(pubMs)) return false;
+  if (isStrictRecentSocialDeal(deal)) return pubMs >= RECENT_SOCIAL_CUTOFF_DATE;
   return pubMs >= CUTOFF_DATE;
 }
 
 function hasTrustedInstagramDate(deal) {
   const source = cleanText(deal.source).toLowerCase();
+  if (isStrictRecentSocialDeal(deal)) return true;
   if (!source.includes('instagram')) return true;
   return TRUSTED_PUBDATE_SOURCES.has(cleanText(deal.pubDateSource));
 }
 
 function isNotExpired(deal) {
+  if (isStrictRecentSocialDeal(deal)) return true;
   const expiryMs = parseLooseExpiry(deal.expires);
   if (!expiryMs) return true;
   return expiryMs + DAY_MS >= Date.now();
 }
 
 function hasOldAgeSignal(deal) {
+  if (isStrictRecentSocialDeal(deal)) return false;
   const haystack = `${deal.title || ''} ${deal.description || ''} ${deal.expires || ''}`;
   const ageDays = extractRelativeAgeDays(haystack);
   if (!Number.isFinite(ageDays)) return false;
@@ -404,6 +435,7 @@ function hasOldAgeSignal(deal) {
 }
 
 function hasStaleExplicitDateSignal(deal) {
+  if (isStrictRecentSocialDeal(deal)) return false;
   const bundle = `${deal.title || ''} ${deal.description || ''} ${deal.expires || ''}`;
   const dates = parseDateCandidatesFromText(bundle);
   if (dates.length === 0) return false;
@@ -523,6 +555,7 @@ async function main() {
   const freshDeals = unseenDeals
     .filter(isRecent)
     .filter(hasTrustedInstagramDate)
+    .filter((d) => !isStrictRecentSocialDeal(d) || isViennaDeal(d))
     .filter((d) => !hasOldAgeSignal(d))
     .filter((d) => !hasStaleExplicitDateSignal(d))
     .filter(isNotExpired);
