@@ -19,7 +19,7 @@ const NOW = new Date();
 const TWO_WEEKS_AGO = new Date(NOW.getTime() - TWO_WEEKS_MS);
 const SEVEN_DAYS_AGO = new Date(NOW.getTime() - SEVEN_DAYS_MS);
 const MAX_URL_EXPIRY_CHECKS = 120;
-const TRUSTED_IG_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp']);
+const TRUSTED_IG_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate']);
 
 // ============================================
 // Deal-Alter prüfen
@@ -92,7 +92,12 @@ async function main() {
     process.exit(0);
   }
 
-  const files = fs.readdirSync(docsDir).filter(f => f.startsWith('deals-pending-') && f.endsWith('.json'));
+  const files = fs.readdirSync(docsDir).filter((f) => {
+    if (!f.startsWith('deals-pending-') || !f.endsWith('.json')) return false;
+    if (f === 'deals-pending-instagram-web.json') return false;
+    if (f === 'deals-pending-instagram-discovery.json') return false;
+    return true;
+  });
 
   if (files.length === 0) {
     console.log('📭 Keine pending Deal-Dateien gefunden');
