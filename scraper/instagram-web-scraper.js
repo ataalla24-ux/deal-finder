@@ -6,17 +6,19 @@ import { normalizeCategoryForScraper } from './category-utils.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
-const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-instagram.json');
+const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-instagram-web.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
 const DEFAULT_CONFIG = {
   maxDealsPerRun: 140,
-  maxAgeDays: 14,
+  maxAgeDays: 7,
   perSourceLinksLimit: 280,
   maxPostsToVisit: 520,
   postLoadTimeoutMs: 7000,
   sourceScrollRounds: 18,
   sourceScrollStepPx: 2600,
+  sourceScrollWaitMs: 2200,
+  sourceStagnationRounds: 6,
 };
 let CONFIG = { ...DEFAULT_CONFIG };
 
@@ -135,12 +137,16 @@ function buildConfig() {
     const n = Number(v);
     return Number.isFinite(n) && n > 0 ? n : fallback;
   };
+  const requestedMaxAgeDays = toNum(process.env.IG_MAX_AGE_DAYS, DEFAULT_CONFIG.maxAgeDays);
   return {
     ...DEFAULT_CONFIG,
+    maxAgeDays: Math.min(7, requestedMaxAgeDays),
     maxDealsPerRun: toNum(process.env.IG_MAX_DEALS, DEFAULT_CONFIG.maxDealsPerRun),
     perSourceLinksLimit: toNum(process.env.IG_PER_SOURCE_LINKS, DEFAULT_CONFIG.perSourceLinksLimit),
     maxPostsToVisit: toNum(process.env.IG_MAX_POSTS_VISIT, DEFAULT_CONFIG.maxPostsToVisit),
     sourceScrollRounds: toNum(process.env.IG_SCROLL_ROUNDS, DEFAULT_CONFIG.sourceScrollRounds),
+    sourceScrollWaitMs: toNum(process.env.IG_SCROLL_WAIT_MS, DEFAULT_CONFIG.sourceScrollWaitMs),
+    sourceStagnationRounds: toNum(process.env.IG_STAGNATION_ROUNDS, DEFAULT_CONFIG.sourceStagnationRounds),
   };
 }
 
@@ -149,6 +155,18 @@ function loadCookieHints() {
   const sessionId = cleanText(process.env.INSTAGRAM_SESSIONID);
   if (sessionId) {
     hints.push({ name: 'sessionid', value: sessionId });
+  }
+
+  const rawCookies = cleanText(process.env.INSTAGRAM_COOKIES);
+  if (rawCookies) {
+    const parts = rawCookies.split(';').map((p) => p.trim()).filter(Boolean);
+    for (const part of parts) {
+      const eq = part.indexOf('=');
+      if (eq <= 0) continue;
+      const name = part.slice(0, eq).trim();
+      const value = part.slice(eq + 1).trim();
+      if (name && value) hints.push({ name, value, domain: '.instagram.com' });
+    }
   }
 
   const cookieFile = cleanText(process.env.INSTAGRAM_COOKIES_FILE);
@@ -598,10 +616,10 @@ async function scrapeInstagram() {
             stagnantRounds = 0;
           }
 
-          if (stagnantRounds >= 2) break;
+          if (stagnantRounds >= CONFIG.sourceStagnationRounds) break;
 
           await page.mouse.wheel(0, CONFIG.sourceScrollStepPx);
-          await page.waitForTimeout(900);
+          await page.waitForTimeout(CONFIG.sourceScrollWaitMs);
           await dismissInstagramOverlays(page);
         }
 
