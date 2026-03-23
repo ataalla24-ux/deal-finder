@@ -6137,8 +6137,10 @@
         try {
           const resp = await fetch('deals.json?t=' + Date.now());
           const data = await resp.json();
-          const normalizedDeals = (data.deals || [])
-            .map(normalizeDealForApp)
+          const baseDeals = (data.deals || [])
+            .map((d) => normalizeDealForApp({ ...d, votes: votes[d.id] || d.votes || 0 }));
+          await fetchDealOverrideState();
+          const normalizedDeals = applyDealOverridesToList(baseDeals)
             .filter(d => d && d.id && (!d._lifecycle || d._lifecycle.state !== 'expired-hidden'));
           const nextKnownIds = new Set(normalizedDeals.map(getAlertDealKey).filter(Boolean));
           const newDeals = normalizedDeals.filter(d => !lastKnownAlertDealIds.has(getAlertDealKey(d)));
@@ -6159,7 +6161,7 @@
             }
           }
 
-          allDeals = data.deals || [];
+          allDeals = normalizedDeals;
           renderDeals();
         } catch(e) { /* ignore fetch errors */ }
     }
