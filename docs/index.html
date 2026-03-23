@@ -5530,11 +5530,7 @@
         method: 'POST',
         body: JSON.stringify(payload)
       });
-      await fetchDealOverrideState();
-      allDeals = applyDealOverridesToList(allDeals);
-      updateCounts();
-      renderDeals();
-      await setDailyDeal();
+      await loadDeals();
       const updatedDeal = findDealById(currentAdminDealId) || { id: currentAdminDealId, brand: 'Deal' };
       populateAdminModalFromDeal(updatedDeal);
       showToast('✅ Deal gespeichert');
