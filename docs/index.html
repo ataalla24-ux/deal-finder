@@ -1071,6 +1071,7 @@
             </div>
             <div class="admin-token-status" id="adminTokenStatus">Admin-Modus aktiv.</div>
             <button class="admin-secondary-btn admin-pro-toggle" id="adminProToggleBtn" onclick="toggleAdminProMode()">👑 PRO testen aktivieren</button>
+            <button class="admin-danger-btn" id="adminExitBtn" onclick="exitAdminMode()">Admin-Modus beenden</button>
         </div>
     </div>
 
@@ -5262,6 +5263,11 @@
     updateAdminUiVisibility();
   }
 
+  function lockAdminUi() {
+    localStorage.removeItem(ADMIN_UNLOCK_KEY);
+    updateAdminUiVisibility();
+  }
+
   function resetHiddenAdminTapState() {
     adminHiddenTapCount = 0;
     if (adminHiddenTapTimer) {
@@ -5401,6 +5407,14 @@
   function closeAdminDealModal() {
     document.getElementById('adminDealModal').classList.remove('show');
     currentAdminDealId = '';
+  }
+
+  function exitAdminMode() {
+    clearAdminToken();
+    lockAdminUi();
+    closeAdminDealModal();
+    renderDeals();
+    showToast(currentLanguage === 'en' ? '🛠️ Admin mode ended' : '🛠️ Admin-Modus beendet');
   }
 
   function updateAdminProToggleUi() {
