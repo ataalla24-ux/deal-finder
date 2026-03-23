@@ -3715,7 +3715,7 @@
         async function loadDeals() {
         try {
             // Load main deals.json
-            const res = await fetch('deals.json?t=' + Date.now());
+            const res = await fetch('deals.json?t=' + Date.now(), { cache: 'no-store' });
             const data = await res.json();
             const baseDeals = data.deals.map(d => normalizeDealForApp({ ...d, votes: votes[d.id] || d.votes || 0 }));
             // Kombiniere User-Deals mit genehmigten Base-Deals (nur Slack-approved)
@@ -3731,6 +3731,18 @@
             document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">\uD83D\uDE15</div><p>Fehler</p></div>';
         }
     }
+
+        let lastForegroundSyncAt = 0;
+        async function syncDealsOnForeground() {
+            const now = Date.now();
+            if (now - lastForegroundSyncAt < 5000) return;
+            lastForegroundSyncAt = now;
+            try {
+                await loadDeals();
+            } catch (e) {
+                console.warn('Foreground deal sync failed:', e);
+            }
+        }
         
         async function setDailyDeal() {
         // Helper to clean Slack formatting
@@ -5384,7 +5396,7 @@
     try {
       const base = await getReferralApiBase();
       if (!base) return;
-      const res = await fetch(base + '/api/deals/state?t=' + Date.now());
+      const res = await fetch(base + '/api/deals/state?t=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) return;
       const data = await res.json();
       const overrides = Array.isArray(data && data.overrides) ? data.overrides : [];
@@ -6201,7 +6213,7 @@
 
     async function pollNewDealAlerts() {
         try {
-          const resp = await fetch('deals.json?t=' + Date.now());
+          const resp = await fetch('deals.json?t=' + Date.now(), { cache: 'no-store' });
           const data = await resp.json();
           const baseDeals = (data.deals || [])
             .map((d) => normalizeDealForApp({ ...d, votes: votes[d.id] || d.votes || 0 }));
@@ -6394,4 +6406,10 @@
                 renderDeals();
             }
         }, 60000);
+
+        window.addEventListener('pageshow', () => { syncDealsOnForeground(); });
+        window.addEventListener('focus', () => { syncDealsOnForeground(); });
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) syncDealsOnForeground();
+        });
 </script>
