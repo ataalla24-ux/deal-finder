@@ -1110,6 +1110,8 @@
         const ADMIN_HIDDEN_TAP_WINDOW_MS = 2200;
         const APP_LANGUAGE_KEY = 'freefinder_language';
         const DEAL_OVERRIDE_CACHE_KEY = 'freefinder_deal_override_state_v1';
+        const APP_SHELL_VERSION_KEY = 'freefinder_app_shell_version';
+        const APP_SHELL_VERSION = '2026-03-23-hidden-sync-v1';
         let adminHiddenTapCount = 0;
         let adminHiddenTapTimer = null;
         let currentLanguage = localStorage.getItem(APP_LANGUAGE_KEY) || 'de';
@@ -5077,11 +5079,41 @@
             window.visualViewport.addEventListener('scroll', updateViewportBottomOffset, { passive: true });
         }
         setupInteractionFeedback();
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then((registration) => {
+
+        async function ensureFreshAppShell() {
+            if (!('serviceWorker' in navigator) || !('caches' in window)) return false;
+            const lastVersion = localStorage.getItem(APP_SHELL_VERSION_KEY) || '';
+            if (lastVersion === APP_SHELL_VERSION) return false;
+            try {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(registrations.map((registration) => registration.unregister()));
+                const cacheNames = await caches.keys();
+                await Promise.all(
+                    cacheNames
+                        .filter((name) => /^freefinder-/i.test(name))
+                        .map((name) => caches.delete(name))
+                );
+                localStorage.setItem(APP_SHELL_VERSION_KEY, APP_SHELL_VERSION);
+                return true;
+            } catch (e) {
+                console.warn('App shell refresh failed:', e);
+                return false;
+            }
+        }
+
+        (async () => {
+            const forcedRefresh = await ensureFreshAppShell();
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').then((registration) => {
                 registration.update().catch(() => {});
             }).catch(() => {});
-        }
+            }
+            if (forcedRefresh) {
+                const refreshUrl = new URL(window.location.href);
+                refreshUrl.searchParams.set('appv', APP_SHELL_VERSION);
+                window.location.replace(refreshUrl.toString());
+            }
+        })();
     
 
   // ===== PRO MEMBERSHIP SYSTEM (v2 – App Download Tracking) =====
