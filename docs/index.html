@@ -1109,6 +1109,7 @@
         const ADMIN_HIDDEN_TAP_TARGET = 5;
         const ADMIN_HIDDEN_TAP_WINDOW_MS = 2200;
         const APP_LANGUAGE_KEY = 'freefinder_language';
+        const DEAL_OVERRIDE_CACHE_KEY = 'freefinder_deal_override_state_v1';
         let adminHiddenTapCount = 0;
         let adminHiddenTapTimer = null;
         let currentLanguage = localStorage.getItem(APP_LANGUAGE_KEY) || 'de';
@@ -5337,18 +5338,37 @@
     dealOverridesById = {};
     dailyDealOverride = null;
     try {
+      const cached = JSON.parse(localStorage.getItem(DEAL_OVERRIDE_CACHE_KEY) || 'null');
+      const cachedOverrides = Array.isArray(cached && cached.overrides) ? cached.overrides : [];
+      cachedOverrides.forEach((item) => {
+        if (item && item.dealId) dealOverridesById[item.dealId] = item;
+      });
+      if (cached && cached.dailyDeal && cached.dailyDeal.dealId) {
+        dailyDealOverride = cached.dailyDeal;
+      }
+    } catch (e) {
+      localStorage.removeItem(DEAL_OVERRIDE_CACHE_KEY);
+    }
+    try {
       const base = await getReferralApiBase();
       if (!base) return;
       const res = await fetch(base + '/api/deals/state?t=' + Date.now());
       if (!res.ok) return;
       const data = await res.json();
       const overrides = Array.isArray(data && data.overrides) ? data.overrides : [];
+      dealOverridesById = {};
       overrides.forEach((item) => {
         if (item && item.dealId) dealOverridesById[item.dealId] = item;
       });
+      dailyDealOverride = null;
       if (data && data.dailyDeal && data.dailyDeal.dealId) {
         dailyDealOverride = data.dailyDeal;
       }
+      localStorage.setItem(DEAL_OVERRIDE_CACHE_KEY, JSON.stringify({
+        updatedAt: Date.now(),
+        overrides,
+        dailyDeal: dailyDealOverride
+      }));
     } catch (e) {
       console.warn('Deal override state unavailable:', e);
     }
