@@ -1,4 +1,4 @@
-const CACHE_NAME = 'freefinder-v3';
+const CACHE_NAME = 'freefinder-v4';
 const urlsToCache = [
   './',
   './index.html',
@@ -34,19 +34,29 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Always fetch deals.json from network for fresh data
-  if (event.request.url.includes('deals.json')) {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseClone);
-          });
-          return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
+  const requestUrl = new URL(event.request.url);
+  const isDealsJson = requestUrl.pathname.endsWith('/deals.json') || requestUrl.pathname.endsWith('deals.json');
+  const isNetworkFirstDocument =
+    event.request.mode === 'navigate' ||
+    requestUrl.pathname.endsWith('/deal-finder/') ||
+    requestUrl.pathname.endsWith('/index.html') ||
+    requestUrl.pathname.endsWith('push-config.json');
+
+  async function networkFirst() {
+    try {
+      const response = await fetch(event.request);
+      const responseClone = response.clone();
+      caches.open(CACHE_NAME).then(cache => {
+        cache.put(event.request, responseClone);
+      });
+      return response;
+    } catch {
+      return caches.match(event.request);
+    }
+  }
+
+  if (isDealsJson || isNetworkFirstDocument) {
+    event.respondWith(networkFirst());
     return;
   }
   
@@ -62,10 +72,10 @@ self.addEventListener('push', event => {
   try {
     payload = event.data ? event.data.json() : {};
   } catch {
-    payload = { title: 'FreeFinder Wien', body: event.data ? event.data.text() : 'Neuer Deal verfügbar' };
+    payload = { title: 'FreeFinder', body: event.data ? event.data.text() : 'Neuer Deal verfügbar' };
   }
 
-  const title = payload.title || '🎁 FreeFinder Wien';
+  const title = payload.title || '🎁 FreeFinder';
   const options = {
     body: payload.body || 'Neue Deals warten auf dich',
     icon: payload.icon || './icon-192.svg',

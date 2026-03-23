@@ -5076,7 +5076,11 @@
             window.visualViewport.addEventListener('scroll', updateViewportBottomOffset, { passive: true });
         }
         setupInteractionFeedback();
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then((registration) => {
+                registration.update().catch(() => {});
+            }).catch(() => {});
+        }
     
 
   // ===== PRO MEMBERSHIP SYSTEM (v2 – App Download Tracking) =====
