@@ -28,6 +28,7 @@ jobs:
         env:
           FIRECRAWL_API_KEY4: ${{ secrets.FIRECRAWL_API_KEY4 }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          FC4_MAX_AGE_DAYS: 3
         run: node scraper/firecrawl-instagram-direct4.js
 
       - name: Filter alte Deals

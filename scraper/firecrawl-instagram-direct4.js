@@ -8,6 +8,10 @@ import { z } from 'zod';
 import fs from 'fs';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY4 || process.env.FIRECRAWL_API_KEY;
+const MAX_POST_AGE_DAYS = (() => {
+  const parsed = Number(process.env.FC4_MAX_AGE_DAYS || 3);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 3;
+})();
 
 if (!FIRECRAWL_API_KEY) {
   console.error('❌ FIRECRAWL_API_KEY4 oder FIRECRAWL_API_KEY nicht gesetzt!');
@@ -24,6 +28,8 @@ const offerSchema = z.object({
     product_type_citation: z.string().optional(),
     location: z.string(),
     location_citation: z.string().optional(),
+    post_date: z.string().describe('The publish date of the Instagram post.'),
+    post_date_citation: z.string().optional(),
     times: z.string(),
     times_citation: z.string().optional(),
     participation_conditions: z.string(),
@@ -70,15 +76,59 @@ function inferType(offerDetails, participationConditions) {
 
 function inferCategory(productType, offerDetails) {
   const haystack = `${productType} ${offerDetails}`.toLowerCase();
-  if (/(kaffee|coffee|espresso|latte|cappuccino|tee|matcha|drink|getränk|smoothie|saft)/i.test(haystack)) {
+  if (/(kaffee|coffee|espresso|latte|cappuccino|tee|matcha|drink|getränk|smoothie|saft|bubble tea|cocktail|spritz|beer|bier|wein|wine)/i.test(haystack)) {
     return 'kaffee';
   }
   return 'essen';
 }
 
+function parseGermanDate(str) {
+  if (!str || typeof str !== 'string') return null;
+  const s = str.trim();
+  let m = s.match(/vor\s+(\d+)\s+tag/i);
+  if (m) {
+    const d = new Date();
+    d.setDate(d.getDate() - Number(m[1]));
+    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
+  }
+  m = s.match(/(\d+)\s+d(?:ays?)?\s+ago/i);
+  if (m) {
+    const d = new Date();
+    d.setDate(d.getDate() - Number(m[1]));
+    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
+  }
+  m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0));
+  m = s.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (m) {
+    const year = m[3].length === 2 ? Number(`20${m[3]}`) : Number(m[3]);
+    return new Date(Date.UTC(year, Number(m[2]) - 1, Number(m[1]), 12, 0, 0));
+  }
+  return null;
+}
+
+function isNotTooOld(dateObj) {
+  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return false;
+  const cutoff = Date.now() - MAX_POST_AGE_DAYS * 24 * 60 * 60 * 1000;
+  return dateObj.getTime() >= cutoff;
+}
+
+function isKey4Relevant(productType, offerDetails, participationConditions) {
+  const haystack = `${productType} ${offerDetails} ${participationConditions}`.toLowerCase();
+  const directSignals = /(kaffee|coffee|espresso|latte|cappuccino|matcha|tee|drink|getränk|smoothie|saft|bubble tea|cocktail|spritz|bier|beer|wein|wine|dessert|croissant|pastry|donut|cookie|cake|eis|gelato|ice cream|bakery|brunch|breakfast|frühstück|fruehstueck)/i.test(haystack);
+  const promoSignals = /(opening|neueröffnung|neueroeffnung|eröffnung|eroeffnung|launch|soft opening|grand opening|welcome gift|goodie|gratisprobe|free sample|tasting|verkostung|app[- ]?bonus|download.*app|nur heute|only today|first \d+|erste[nr]? \d+|solange.*vorrat)/i.test(haystack);
+  const freebieSignals = /(gratis|kostenlos|free|freebie|geschenkt|0 ?€|1\+1|2\s*für\s*1|2 for 1|bogo)/i.test(haystack);
+  const heavyMealOnly = /(döner|doener|kebab|kebap|pizza|burger|sushi|restaurant deal|mittagessen|hauptspeise|meal deal)/i.test(haystack)
+    && !directSignals
+    && !promoSignals;
+
+  if (heavyMealOnly) return false;
+  return directSignals || (promoSignals && freebieSignals);
+}
+
 async function runAgent() {
   return firecrawl.agent({
-    prompt: "Extrahiere aktuelle Angebote für kostenloses Essen und Getränke in Wien von Instagram, die maximal 7 Tage alt sind. Schließe Gewinnspiele (Giveaways) strikt aus. Konzentriere dich auf Direktangebote (z.B. 'Gratis-Kostprobe'), 1+1 Gratis-Aktionen (Kaufzwang), Neueröffnungen mit Gratis-Specials und zeitlich begrenzte Events. Erfasse Anbietername, Produktart, Standort, Uhrzeiten, Teilnahmebedingungen sowie das konkrete Angebot. Erfasse zwingend den direkten Link zum Instagram-Post im Feld 'post_url'. Es dürfen nur Instagram-Links (instagram.com/p/... oder instagram.com/reel/...) aufgenommen werden; ignoriere Angebote von anderen Plattformen.",
+    prompt: `Extrahiere aktuelle Wiener Instagram-Angebote, die maximal ${MAX_POST_AGE_DAYS} Tage alt sind. \n\nFokus von Key 4:\n- Coffee-, Drink-, Dessert-, Bakery- und Brunch-Freebies\n- Neueröffnungen mit Welcome Gift, Gratisprobe oder App-Bonus\n- kurzfristige Promo-Posts wie 'nur heute', 'erste 50 Kunden', 'solange der Vorrat reicht'\n- leichte Consumables und kleine Treats statt klassischer großer Gastro-Deals\n\nWICHTIG:\n- Nutze nur Instagram als Quelle.\n- Nur direkte Instagram-Post- oder Reel-URLs.\n- Schließe Gewinnspiele strikt aus.\n- Nur Wien.\n- Erfasse zwingend das Veröffentlichungsdatum im Feld 'post_date'. Wenn das Datum nicht belastbar erkennbar ist oder älter als ${MAX_POST_AGE_DAYS} Tage ist, lasse den Deal weg.\n- Priorisiere Coffee/Drink/Dessert/Openings/App-Freebies stärker als klassische Restaurantdeals.\n- Erfasse Anbietername, Produktart, Standort, Uhrzeiten, Teilnahmebedingungen, Angebotsdetails und den direkten Post-Link.`,
     schema: offerSchema,
     model: 'spark-1-pro',
   });
@@ -101,16 +151,20 @@ async function main() {
     const provider = normalizeText(offer.provider_name);
     const productType = normalizeText(offer.product_type);
     const location = normalizeText(offer.location) || 'Wien';
+    const postDateRaw = normalizeText(offer.post_date);
     const times = normalizeText(offer.times);
     const participation = normalizeText(offer.participation_conditions);
     const details = normalizeText(offer.offer_details);
     const postUrl = normalizeText(offer.post_url);
-    const combinedText = `${provider} ${productType} ${location} ${times} ${participation} ${details}`;
+    const combinedText = `${provider} ${productType} ${location} ${postDateRaw} ${times} ${participation} ${details}`;
+    const postDate = parseGermanDate(postDateRaw);
 
     if (!postUrl || !isInstagramPostUrl(postUrl)) continue;
     if (seenUrls.has(postUrl)) continue;
     if (looksLikeGiveaway(combinedText)) continue;
     if (!/wien|vienna/i.test(location) && !/wien|vienna/i.test(combinedText)) continue;
+    if (!postDate || !isNotTooOld(postDate)) continue;
+    if (!isKey4Relevant(productType, details, participation)) continue;
 
     seenUrls.add(postUrl);
 
@@ -142,7 +196,8 @@ async function main() {
       priority: type === 'gratis' ? 2 : 3,
       votes: 1,
       qualityScore: 78,
-      pubDate: new Date().toISOString(),
+      pubDate: postDate.toISOString(),
+      pubDateSource: 'socialPostDate',
     });
   }
 
