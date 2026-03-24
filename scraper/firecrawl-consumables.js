@@ -1,6 +1,6 @@
 // ============================================
-// 🔥 FIRECRAWL CONSUMABLES AGENT - Food & Coffee Focus
-// Speziell für kostenloses Essen, Getränke, Coffee
+// 🔥 FIRECRAWL KEY 3 - VERIFIED INSTAGRAM FREEBIES
+// Fokus: Heute/Gestern, Wien, Gratis oder 1+1, deutschsprachig
 // ============================================
 
 import Firecrawl from '@mendable/firecrawl-js';
@@ -8,6 +8,10 @@ import { z } from 'zod';
 import fs from 'fs';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY3 || process.env.FIRECRAWL_API_KEY;
+const MAX_POST_AGE_DAYS = (() => {
+  const parsed = Number(process.env.FC3_MAX_AGE_DAYS || 2);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 2;
+})();
 
 if (!FIRECRAWL_API_KEY) {
   console.error('❌ FIRECRAWL_API_KEY3 oder FIRECRAWL_API_KEY nicht gesetzt!');
@@ -16,342 +20,205 @@ if (!FIRECRAWL_API_KEY) {
 
 const firecrawl = new Firecrawl({ apiKey: FIRECRAWL_API_KEY });
 
-async function runAgent(payload) {
-  return firecrawl.agent(payload);
-}
-
-function isRateOrCreditError(message) {
-  const m = (message || '').toLowerCase();
-  return m.includes('insufficient credits') || m.includes('rate limit exceeded');
-}
-
-function isInstagramUrl(url) {
-  return (url || '').includes('instagram.com');
-}
-
-// ============================================
-// SEITEN - Fokus auf Food/Coffee/Consumables
-// ============================================
-
-const SCRAPE_URLS = [
-  // Instagram - Coffee & Food Wien
-  'https://www.instagram.com/explore/tags/gratiswien/',
-  'https://www.instagram.com/explore/tags/wienfood/',
-  'https://www.instagram.com/explore/tags/kaffeewien/',
-  'https://www.instagram.com/explore/tags/coffeevienna/',
-  'https://www.instagram.com/explore/tags/freecoffeeVienna/',
-  'https://www.instagram.com/explore/tags/gratisessenwien/',
-  'https://www.instagram.com/explore/tags/eröffnungwien/',
-  'https://www.instagram.com/explore/tags/neueröffnungwien/',
-  'https://www.instagram.com/explore/tags/wiengratis/',
-  'https://www.instagram.com/explore/tags/foodiewien/',
-  'https://www.instagram.com/explore/tags/wiendeals/',
-  'https://www.instagram.com/explore/tags/wienrabatt/',
-  'https://www.instagram.com/explore/tags/wienaktion/',
-  'https://www.instagram.com/explore/tags/wiengratis/',
-  'https://www.instagram.com/explore/tags/wienkostenlos/',
-  
-  // Twitter/X - Wiener Deals
-  'https://x.com/gratiswien',
-  'https://x.com/wiendeals',
-  'https://x.com/wiengratis',
-  
-  // Gastro
-  'https://www.falstaff.at/',
-  'https://www.diegourmet.at/',
-  'https://www.restaurant-radar.at/',
-  'https://www.meinbezirk.at/',
-  
-  // Deals
-  'https://www.gutscheine.at/',
-  'https://www.preisjaeger.at/',
-  'https://www.gratisproben.net/oesterreich/',
-];
-
-// ============================================
-// SCHEMA - Mit source_url Pflichtfeld
-// ============================================
-
-const consumablesSchema = z.object({
-  deals: z.array(z.object({
-    item_given_away: z.string().describe("What exactly is being given away or offered for free (e.g. 'Gratis Döner', 'Free Coffee')"),
-    company_name: z.string().describe("The name of the company, restaurant, or brand offering the deal"),
-    company_name_citation: z.string().optional(),
-    full_address: z.string().describe("The complete street address with postal code and city (e.g. 'Hernalser Gürtel 43, 1170 Wien')"),
-    full_address_citation: z.string().optional(),
-    category: z.string().describe("Category: Food, Coffee, Drink, Dessert, Beauty, Shopping, Event, or General"),
-    category_citation: z.string().optional(),
-    location: z.string().describe("Short location name or area (e.g. 'OAKBERRY Wien' or '1010 Wien')"),
+const key3Schema = z.object({
+  posts: z.array(z.object({
+    validity_period: z.string().describe('Date and time range the offer is valid for'),
+    validity_period_citation: z.string().optional(),
+    location: z.string().describe('Exact location of the event/restaurant in Vienna'),
     location_citation: z.string().optional(),
-    validity_date: z.string().describe("The date(s) when the deal is valid (e.g. '15.03.2026' or '15.-20.03.2026')"),
-    validity_date_citation: z.string().optional(),
-    validity_time: z.string().describe("The time(s) when the deal is valid (e.g. '10:00-14:00' or 'ab 11:00')"),
-    validity_time_citation: z.string().optional(),
-    deal_description: z.string().describe("A short, clear description of the deal in 1-2 sentences in German"),
-    deal_description_citation: z.string().optional(),
-    source_url: z.string().describe("The direct URL to the specific Instagram post or blog article"),
-    source_url_citation: z.string().optional(),
-  })),
-});
+    food_and_drinks: z.string().describe('Type of food and drinks offered'),
+    food_and_drinks_citation: z.string().optional(),
+    original_post_url: z.string().describe('URL of the original Instagram post'),
+    original_post_url_citation: z.string().optional(),
+    post_timestamp: z.string().describe("The relative or absolute publication time like 'vor 5 Stunden'"),
+    post_timestamp_citation: z.string().optional(),
+    offer_type: z.string().describe('The specific type of deal found in the post'),
+    offer_type_citation: z.string().optional(),
+  })).default([]),
+}).describe('Instagram Posts about verified free food and BOGO deals in Vienna from today or yesterday');
 
-// ============================================
-// PROMPT
-// ============================================
-
-const TODAY = new Date().toLocaleDateString('de-AT');
-const CUTOFF = new Date(Date.now() - 14*24*60*60*1000).toLocaleDateString('de-AT');
-
-const PROMPT = `Heute ist ${TODAY}.
-WICHTIG: Ignoriere ALLE Posts und Angebote die älter als 14 Tage sind. Nur Deals die nach dem ${CUTOFF} gepostet wurden.
-
-Extrahiere mindestens 50-100 aktuelle und zukünftige kostenlose Deals und Freebies in Wien für die nächsten 3 Monate.
-
-Suche primär auf Instagram nach Beiträgen zu Gratis-Aktionen, Neueröffnungen und Werbegeschenken.
-
-Setze den Fokus stark auf 'Consumables', insbesondere:
-- Kostenlosen Kaffee
-- Food-Samples
-- Gratis-Essen bei Neueröffnungen
-- Gastronomie-Aktionen
-
-Ergänze die Instagram-Funde durch relevante Wiener Lifestyle-Blogs und Event-Seiten.
-
-Für JEDEN Deal erfasse ALLE folgenden Informationen so vollständig wie möglich:
-- item_given_away: Was genau wird verschenkt? (z.B. 'Gratis Döner', '1+1 Açaí Bowl')
-- company_name: Name des Unternehmens/Restaurants/Cafés (z.B. 'OAKBERRY', 'BE HALAL')
-- full_address: Vollständige Adresse mit PLZ und Stadt (z.B. 'Maysedergasse 2, 1010 Wien')
-- category: Kategorie (Food, Coffee, Drink, Dessert, Beauty, Shopping, Event, General)
-- location: Kurzname oder Bezirk (z.B. '1010 Wien' oder 'Hernals')
-- validity_date: Genaues Datum (z.B. '15.03.2026')
-- validity_time: Genaue Uhrzeit (z.B. '10:00-14:00')
-- deal_description: Kurze Beschreibung auf Deutsch in 1-2 Sätzen
-- source_url: Die direkte URL zum Instagram-Post oder Blog-Beitrag
-
-WICHTIG: Gib bei jedem Feld die Information so genau und vollständig wie möglich an. Wenn keine genaue Adresse verfügbar ist, gib den Bezirk oder die Gegend an.`;
-
-// ============================================
-// EMOJI-FUNKTION
-// ============================================
-function getEmoji(deal) {
-  const text = `${deal.title || ''} ${deal.description || ''} ${deal.item_given_away || ''} ${deal.category || ''}`.toLowerCase();
-  const emojiMap = [
-    [/kaffee|coffee|latte/, '☕'], [/pizza/, '🍕'], [/burger/, '🍔'], [/kebab|döner|falafel/, '🥙'],
-    [/sushi/, '🍣'], [/eis|gelato/, '🍦'], [/bier|beer/, '🍺'], [/wein|wine/, '🍷'],
-    [/cocktail|drink/, '🍸'], [/restaurant|essen|food/, '🍽️'], [/gratis|free|kostenlos/, '🎁'],
-    [/fitness|gym/, '💪'], [/kino|film|konzert/, '🎬'], [/museum|kultur/, '🏛️'],
-    [/eintritt/, '🎟️'], [/gutschein|rabatt|sale/, '🏷️'], [/shop|shopping/, '🛍️'],
-    [/supermarkt/, '🛒'], [/beauty|kosmetik/, '💄'], [/tech|handy/, '📱'],
-  ];
-  for (const [regex, emoji] of emojiMap) if (regex.test(text)) return emoji;
-  return '🎯';
+function normalizeText(value) {
+  return (value || '').toString().replace(/\s+/g, ' ').trim();
 }
 
-function getCategory(deal) {
-  // Source-basierte Kategorie
-  const source = (deal.source || '').toLowerCase();
-  if (source.includes('kirchen') || source.includes('kirche')) return 'kirche';
-  if (source.includes('gemeinde')) return 'kirche';
-  if (source.includes('gottesdienst')) return 'gottesdienste';
-  
-  // Text-basierte Kategorie
-  const text = `${deal.title || ''} ${deal.description || ''} ${deal.item_given_away || ''}`.toLowerCase();
-  const map = [
-    [/kaffee|coffee|latte/, 'kaffee'],
-    [/pizza|burger|kebab|döner|falafel|sushi|eis|restaurant|imbiss|bier|wein|cocktail|food|meal|essen/, 'essen'],
-    [/gratis|free|kostenlos/, 'gratis'],
-    [/fitness|gym|workout|sport/, 'fitness'],
-    [/kino|film|konzert|event|eintritt|ticket/, 'events'],
-    [/museum|ausstellung|kultur/, 'kultur'],
-    [/gutschein|rabatt|sale|shopping|shop/, 'shopping'],
-    [/supermarkt/, 'supermarkt'],
-    [/beauty|kosmetik|parfum|dm|bipa/, 'beauty'],
-    [/tech|handy|laptop|elektronik/, 'technik'],
-    [/streaming|netflix|spotify/, 'streaming'],
-    [/möbel|wohnung/, 'wohnen'],
-    [/fahrrad|rad/, 'mobilität'],
-    [/zug|bahn|öbb/, 'mobilität'],
-    [/flug|hotel|urlaub/, 'reisen'],
-    [/wien|vienna/, 'wien'],
-  ];
-  for (const [regex, cat] of map) if (regex.test(text)) return cat;
-  return 'essen';
-}
-
-// ============================================
-// DATUM-FILTER: Abgelaufene Deals rausfiltern
-// ============================================
-function parseGermanDate(str) {
-  if (!str || typeof str !== 'string') return null;
-  str = str.trim();
-  if (/^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend)/i.test(str)) return null;
-  let m = str.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
-  if (m) return new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
-  m = str.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-  if (m) return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
-  m = str.match(/(\d{1,2})\.(\d{1,2})\./);
-  if (m) return new Date(new Date().getFullYear(), parseInt(m[2])-1, parseInt(m[1]));
-  return null;
-}
-
-function isExpiredDeal(deal) {
-  const now = new Date();
-  const fields = [deal.validity_date, deal.end_date, deal.expires].filter(Boolean);
-  for (const f of fields) {
-    const d = parseGermanDate(f);
-    if (d && d < now) return true;
-  }
-  return false;
-}
-
-function isNotTooOld(dateObj) {
-  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return true;
-  const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
-  return dateObj.getTime() >= twoWeeksAgo;
-}
-
-// ============================================
-// MAIN
-// ============================================
-
-
-// ============================================
-// STABILE DEAL-ID (Hash statt Date.now/random)
-// ============================================
 function stableHash(str) {
   let hash = 5381;
-  for (let i = 0; i < str.length; i++) {
+  for (let i = 0; i < str.length; i += 1) {
     hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
     hash = hash >>> 0;
   }
   return hash.toString(36);
 }
-function dealId(prefix, brand, title, url) {
-  const key = (brand || '') + '|' + (title || '') + '|' + (url || '');
-  return prefix + '-' + stableHash(key);
+
+function dealId(brand, title, url) {
+  return `fc3-${stableHash(`${brand}|${title}|${url}`)}`;
+}
+
+function isInstagramPostUrl(url) {
+  return /^https?:\/\/(www\.)?instagram\.com\/(p|reel)\//i.test(normalizeText(url));
+}
+
+function looksLikeGiveaway(text) {
+  return /(gewinnspiel|giveaway|verlosen|zu gewinnen|markiere.*freund|tagge.*freund|kommentiere.*gewinnen|like.*comment)/i.test(text);
+}
+
+function hasRequiredOfferSignal(text) {
+  return /(gratis|kostenlos|1\s*\+\s*1|2\s*für\s*1|2\s*for\s*1|bogo)/i.test(text);
+}
+
+function looksLikePureRestaurantIntro(text) {
+  return /(neueröffnung|neueroeffnung|eröffnung|eroeffnung|opening)/i.test(text)
+    && !hasRequiredOfferSignal(text);
+}
+
+function isViennaRelevant(text) {
+  return /(wien|vienna|1010|1020|1030|1040|1050|1060|1070|1080|1090|1100|1110|1120|1130|1140|1150|1160|1170|1180|1190|1200|1210|1220|1230)/i.test(text);
+}
+
+function parsePostTimestamp(raw) {
+  const text = normalizeText(raw).toLowerCase();
+  if (!text) return null;
+
+  let match = text.match(/vor\s+(\d+)\s+stund/i);
+  if (match) {
+    const d = new Date();
+    d.setHours(d.getHours() - Number(match[1]));
+    return d;
+  }
+
+  match = text.match(/(\d+)\s*h(?:ours?)?\s+ago/i);
+  if (match) {
+    const d = new Date();
+    d.setHours(d.getHours() - Number(match[1]));
+    return d;
+  }
+
+  match = text.match(/vor\s+(\d+)\s+tag/i);
+  if (match) {
+    const d = new Date();
+    d.setDate(d.getDate() - Number(match[1]));
+    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
+  }
+
+  match = text.match(/(\d+)\s+d(?:ays?)?\s+ago/i);
+  if (match) {
+    const d = new Date();
+    d.setDate(d.getDate() - Number(match[1]));
+    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
+  }
+
+  match = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (match) return new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12, 0, 0));
+
+  match = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (match) {
+    const year = match[3].length === 2 ? Number(`20${match[3]}`) : Number(match[3]);
+    return new Date(Date.UTC(year, Number(match[2]) - 1, Number(match[1]), 12, 0, 0));
+  }
+
+  return null;
+}
+
+function isFresh(dateObj) {
+  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return false;
+  const cutoff = Date.now() - MAX_POST_AGE_DAYS * 24 * 60 * 60 * 1000;
+  return dateObj.getTime() >= cutoff;
+}
+
+function inferType(offerType) {
+  return /(1\s*\+\s*1|2\s*für\s*1|2\s*for\s*1|bogo)/i.test(offerType) ? 'bogo' : 'gratis';
+}
+
+function inferCategory(foodAndDrinks, offerType) {
+  const haystack = `${foodAndDrinks} ${offerType}`.toLowerCase();
+  if (/(kaffee|coffee|espresso|latte|cappuccino|tee|matcha|drink|cocktail|smoothie|bubble tea|bier|beer|wein|wine)/i.test(haystack)) {
+    return 'kaffee';
+  }
+  return 'essen';
 }
 
 async function main() {
-  console.log('🔥 FIRECRAWL CONSUMABLES AGENT');
-  console.log('='.repeat(40));
+  console.log('🔥 FIRECRAWL KEY 3 - VERIFIED INSTAGRAM FREEBIES');
+  console.log('='.repeat(52));
   console.log(`📅 ${new Date().toLocaleString('de-AT')}`);
   console.log();
 
-  const allDeals = [];
-  
-  console.log(`🔍 Scrape ${SCRAPE_URLS.length} Seiten (Consumables Focus)...`);
-  
-  for (let i = 0; i < SCRAPE_URLS.length; i++) {
-    const url = SCRAPE_URLS[i];
-    const source = new URL(url).hostname.replace('www.', '');
-    
-    console.log(`   [${i + 1}/${SCRAPE_URLS.length}] ${source}...`);
-    
-    try {
-      const result = await runAgent({
-        url: url,
-        prompt: PROMPT,
-        schema: consumablesSchema,
-        model: 'spark-1-pro',
-      });
-      
-      if (result && result.data) {
-        let data = result.data;
-        
-        if (typeof data === 'string') {
-          try {
-            data = JSON.parse(data);
-          } catch (e) {}
-        }
-        
-        if (data && data.deals && Array.isArray(data.deals)) {
-          console.log(`      → ${data.deals.length} Deals gefunden`);
-          
-          for (const d of data.deals) {
-            const isFood = (d.category || '').toLowerCase().includes('food');
-            const sourceUrl = d.source_url || '';
-            if (!sourceUrl) continue;
-            const validityDate = parseGermanDate(d.validity_date || '');
-            if (!isNotTooOld(validityDate)) continue;
-            const brand = d.company_name || source;
-            const title = d.item_given_away?.substring(0, 80) || 'Deal';
-            const pubDate = validityDate ? validityDate.toISOString() : new Date().toISOString();
-            
-            allDeals.push({
-              id: dealId('cs', brand, title, sourceUrl),
-              brand,
-              title,
-              logo: getEmoji({ title: d.item_given_away, description: d.deal_description, category: d.category }),
-              description: d.deal_description || d.item_given_away || '',
-              type: 'gratis',
-              category: getCategory({ title: d.item_given_away, description: d.deal_description }),
-              source: 'Firecrawl Consumables',
-              url: sourceUrl,
-              expires: (d.validity_date || '') + (d.validity_time ? ' ' + d.validity_time : ''),
-              distance: d.company_name ? (d.company_name + (d.full_address ? ', ' + d.full_address : d.location ? ', ' + d.location : ', Wien')) : (d.full_address || d.location || 'Wien'),
-              hot: true,
-              isNew: true,
-              priority: isFood ? 3 : 5,
-              votes: 1,
-              qualityScore: 60,
-              pubDate,
-            });
-          }
-        } else {
-          console.log(`      → Keine strukturierten Deals`);
-        }
-      }
-    } catch (e) {
-      console.log(`      → Error: ${e.message}`);
-      if (isRateOrCreditError(e.message)) {
-        console.log('      → Stoppe Run frühzeitig wegen API-Limit/Credits');
-        break;
-      }
-    }
-    
-    await new Promise(r => setTimeout(r, 2000));
+  const result = await firecrawl.agent({
+    prompt: `Extrahiere mindestens 30 Instagram-Posts aus Wien, die HEUTE oder GESTERN veröffentlicht wurden. WICHTIG: Es werden NUR Beiträge extrahiert, die ein konkretes Gratis-Angebot oder eine 1+1 Gratis-Aktion (BOGO) enthalten. Reine Restaurant-Vorstellungen oder Neueröffnungen OHNE spezifisches Eröffnungsangebot sind auszuschließen. Der Beitrag MUSS zwingend eines der Schlagworte 'Gratis', 'Kostenlos' oder '1+1' enthalten. Berücksichtige nur deutschsprachige Beiträge. Schließe Gewinnspiele und Verlosungen (Giveaways) explizit aus. Suche gezielt nach Kombinationen wie 'Wien Gratis Pizza', 'Wien Kostenlos Döner', 'Wien 1+1 Kaffee' etc. Erfasse für jeden Post den Gültigkeitszeitraum, den genauen Standort, die Art der Speisen/Getränke, die URL des Original-Posts sowie den Veröffentlichungszeitpunkt. Wenn der Post älter als ${MAX_POST_AGE_DAYS} Tage ist oder der Veröffentlichungszeitpunkt nicht belastbar erkennbar ist, lasse ihn weg.`,
+    schema: key3Schema,
+    model: 'spark-1-mini',
+  });
+
+  const rawPosts = result?.data?.posts || [];
+  const deals = [];
+  const seenUrls = new Set();
+
+  console.log(`🔍 Agent returned ${rawPosts.length} Rohposts`);
+
+  for (const post of rawPosts) {
+    const validityPeriod = normalizeText(post.validity_period);
+    const location = normalizeText(post.location) || 'Wien';
+    const foodAndDrinks = normalizeText(post.food_and_drinks);
+    const originalPostUrl = normalizeText(post.original_post_url);
+    const postTimestampRaw = normalizeText(post.post_timestamp);
+    const offerType = normalizeText(post.offer_type);
+    const combinedText = `${validityPeriod} ${location} ${foodAndDrinks} ${postTimestampRaw} ${offerType}`;
+    const postDate = parsePostTimestamp(postTimestampRaw);
+
+    if (!originalPostUrl || !isInstagramPostUrl(originalPostUrl)) continue;
+    if (seenUrls.has(originalPostUrl)) continue;
+    if (!isFresh(postDate)) continue;
+    if (!isViennaRelevant(`${location} ${combinedText}`)) continue;
+    if (!hasRequiredOfferSignal(`${foodAndDrinks} ${offerType}`)) continue;
+    if (looksLikeGiveaway(combinedText)) continue;
+    if (looksLikePureRestaurantIntro(combinedText)) continue;
+
+    seenUrls.add(originalPostUrl);
+
+    const brand = location.split(',')[0] || 'Instagram Wien';
+    const titleCore = offerType || foodAndDrinks || 'Instagram Freebie';
+    const title = `${brand}: ${titleCore}`.slice(0, 140);
+    const type = inferType(offerType);
+    const category = inferCategory(foodAndDrinks, offerType);
+
+    deals.push({
+      id: dealId(brand, title, originalPostUrl),
+      brand,
+      title,
+      description: [foodAndDrinks, offerType, location].filter(Boolean).join(' | '),
+      type,
+      category,
+      source: 'Firecrawl Key 3 - Consumables',
+      url: originalPostUrl,
+      expires: validityPeriod || 'Kurzfristig / siehe Post',
+      distance: location,
+      hot: true,
+      isNew: true,
+      priority: type === 'gratis' ? 1 : 2,
+      votes: 1,
+      qualityScore: type === 'gratis' ? 84 : 78,
+      pubDate: postDate.toISOString(),
+      pubDateSource: 'socialPostDate',
+    });
   }
 
-  console.log();
-  console.log('📊 ERGEBNIS:');
-  console.log(`   🔍 Seiten: ${SCRAPE_URLS.length}`);
-  console.log(`   📦 Deals: ${allDeals.length}`);
-  
-  // Filter abgelaufene Deals
-  const beforeFilter = allDeals.length;
-  const filteredDeals = allDeals.filter(d => !isExpiredDeal(d));
-  console.log(`🗑️ ${beforeFilter - filteredDeals.length} abgelaufene Deals entfernt`);
+  console.log(`✅ Final: ${deals.length} Deals`);
 
-    // Deduplizierung nach URL
-    const seenUrls = new Set();
-    const dedupedDeals = filteredDeals.filter(d => {
-          const url = (d.url || '').trim();
-          if (!url || seenUrls.has(url)) return false;
-          seenUrls.add(url);
-          return true;
-    });
-    console.log(`🔄 ${filteredDeals.length - dedupedDeals.length} URL-Duplikate entfernt`);
-
-    const finalDeals = dedupedDeals.slice(0, 150);
-  
-  console.log(`   ✅ Final: ${finalDeals.length}`);
-  console.log('='.repeat(40));
-  
-  // Write to separate file
-  const outputPath = 'docs/deals-pending-firecrawl2.json';
   const output = {
     lastUpdated: new Date().toISOString(),
-    source: 'firecrawl-consumables',
-    totalDeals: finalDeals.length,
-    deals: finalDeals,
+    source: 'firecrawl3',
+    totalDeals: deals.length,
+    deals,
   };
-  
+
+  const outputPath = 'docs/deals-pending-firecrawl2.json';
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
-  console.log(`💾 ${finalDeals.length} Deals → ${outputPath}`);
+  console.log(`💾 ${deals.length} Deals → ${outputPath}`);
 }
 
 main()
   .then(() => process.exit(0))
-  .catch(err => {
+  .catch((err) => {
     console.error('Error:', err.message);
     process.exit(1);
   });

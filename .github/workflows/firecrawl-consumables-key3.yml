@@ -28,6 +28,7 @@ jobs:
         env:
           FIRECRAWL_API_KEY3: ${{ secrets.FIRECRAWL_API_KEY3 }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          FC3_MAX_AGE_DAYS: 2
         run: node scraper/firecrawl-consumables.js
 
       - name: Filter alte Deals
