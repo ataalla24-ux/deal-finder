@@ -8,6 +8,10 @@ import { z } from 'zod';
 import fs from 'fs';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY5 || process.env.FIRECRAWL_API_KEY;
+const MAX_POST_AGE_DAYS = (() => {
+  const parsed = Number(process.env.FC5_MAX_AGE_DAYS || 1);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+})();
 
 if (!FIRECRAWL_API_KEY) {
   console.error('❌ FIRECRAWL_API_KEY5 oder FIRECRAWL_API_KEY nicht gesetzt!');
@@ -22,6 +26,8 @@ const offerSchema = z.object({
     restaurant_name_citation: z.string().optional(),
     post_url: z.string().describe('The direct URL to the Instagram post.'),
     post_url_citation: z.string().optional(),
+    post_date: z.string().describe('The publish date of the Instagram post.'),
+    post_date_citation: z.string().optional(),
     offer_description: z.string(),
     offer_description_citation: z.string().optional(),
     offer_type: z.string(),
@@ -85,6 +91,37 @@ function inferCategory(description) {
   return 'essen';
 }
 
+function parseGermanDate(str) {
+  if (!str || typeof str !== 'string') return null;
+  const s = str.trim();
+  let m = s.match(/vor\s+(\d+)\s+tag/i);
+  if (m) {
+    const d = new Date();
+    d.setDate(d.getDate() - Number(m[1]));
+    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
+  }
+  m = s.match(/(\d+)\s+d(?:ays?)?\s+ago/i);
+  if (m) {
+    const d = new Date();
+    d.setDate(d.getDate() - Number(m[1]));
+    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
+  }
+  m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0));
+  m = s.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (m) {
+    const year = m[3].length === 2 ? Number(`20${m[3]}`) : Number(m[3]);
+    return new Date(Date.UTC(year, Number(m[2]) - 1, Number(m[1]), 12, 0, 0));
+  }
+  return null;
+}
+
+function isNotTooOld(dateObj) {
+  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return false;
+  const cutoff = Date.now() - MAX_POST_AGE_DAYS * 24 * 60 * 60 * 1000;
+  return dateObj.getTime() >= cutoff;
+}
+
 async function main() {
   console.log('📸🍽️ FIRECRAWL INSTAGRAM GASTRO AGENT #5');
   console.log('='.repeat(48));
@@ -92,7 +129,7 @@ async function main() {
   console.log();
 
   const result = await firecrawl.agent({
-    prompt: "Extrahiere mindestens 30 aktuelle Angebote für kostenlose Speisen und Getränke in der Wiener Gastronomie AUSSCHLIEẞLICH aus Instagram-Posts der letzten 7 Tage. \n\nPriorisierung:\n1. Höchste Priorität: Komplett kostenlose Angebote ohne Kaufzwang.\n2. Zweite Priorität: 'Buy One Get One Free' (1+1 gratis) Aktionen.\n3. Dritte Priorität: Gratis-Beigaben (z.B. kostenloser Kaffee zum Hauptgericht oder Vorteile für App-Nutzer).\n\nRegeln:\n- Nutze NUR Instagram als Quelle. Schließe Facebook, Preisjäger, Neotaste oder andere Webseiten explizit aus.\n- Schließe Gewinnspiele (Giveaways) explizit aus.\n- Nur Angebote in Wien.\n- Extrahiere nur Angebote, deren 'valid_until' in der Zukunft liegt oder nicht genannt wird.\n- Vermeide Duplikate.\n- Nutze Suchbegriffe wie 'gratis', 'kostenlos', 'free', '1+1' in Verbindung mit 'Wien' auf Instagram.",
+    prompt: `Extrahiere mindestens 30 aktuelle Angebote für kostenlose Speisen und Getränke in der Wiener Gastronomie AUSSCHLIEẞLICH aus Instagram-Posts der letzten ${MAX_POST_AGE_DAYS} Tage. \n\nPriorisierung:\n1. Höchste Priorität: Komplett kostenlose Angebote ohne Kaufzwang.\n2. Zweite Priorität: 'Buy One Get One Free' (1+1 gratis) Aktionen.\n3. Dritte Priorität: Gratis-Beigaben (z.B. kostenloser Kaffee zum Hauptgericht oder Vorteile für App-Nutzer).\n\nRegeln:\n- Nutze NUR Instagram als Quelle. Schließe Facebook, Preisjäger, Neotaste oder andere Webseiten explizit aus.\n- Schließe Gewinnspiele (Giveaways) explizit aus.\n- Nur Angebote in Wien.\n- Erfasse zwingend das Veröffentlichungsdatum des Instagram-Posts im Feld 'post_date'. Wenn das Datum nicht belastbar erkennbar ist oder älter als ${MAX_POST_AGE_DAYS} Tage ist, lasse den Deal weg.\n- Extrahiere nur Angebote, deren 'valid_until' in der Zukunft liegt oder nicht genannt wird.\n- Vermeide Duplikate.\n- Nutze Suchbegriffe wie 'gratis', 'kostenlos', 'free', '1+1' in Verbindung mit 'Wien' auf Instagram.`,
     schema: offerSchema,
     model: 'spark-1-mini',
   });
@@ -110,12 +147,15 @@ async function main() {
     const offerType = normalizeText(offer.offer_type);
     const location = normalizeText(offer.location) || 'Wien';
     const validUntil = normalizeValidUntil(offer.valid_until);
-    const combinedText = `${restaurant} ${description} ${offerType} ${location} ${validUntil}`;
+    const postDateRaw = normalizeText(offer.post_date);
+    const combinedText = `${restaurant} ${description} ${offerType} ${location} ${validUntil} ${postDateRaw}`;
+    const postDate = parseGermanDate(postDateRaw);
 
     if (!postUrl || !isInstagramPostUrl(postUrl)) continue;
     if (seenUrls.has(postUrl)) continue;
     if (looksLikeGiveaway(combinedText)) continue;
     if (!/wien|vienna/i.test(location) && !/wien|vienna/i.test(combinedText)) continue;
+    if (!postDate || !isNotTooOld(postDate)) continue;
 
     seenUrls.add(postUrl);
 
@@ -140,7 +180,8 @@ async function main() {
       priority: type === 'gratis' ? 1 : 2,
       votes: 1,
       qualityScore: 80,
-      pubDate: new Date().toISOString(),
+      pubDate: postDate.toISOString(),
+      pubDateSource: 'socialPostDate',
     });
   }
 

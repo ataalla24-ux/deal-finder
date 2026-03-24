@@ -492,23 +492,47 @@ async function discoverLinksViaDuckDuckGo() {
   return [...links];
 }
 
+function buildDuckDuckGoQueriesForSource(source) {
+  if (source.kind === 'account') {
+    const profileUrl = source.url.replace(/\/$/, '');
+    return [
+      `site:instagram.com (${profileUrl}) (p OR reel)`,
+      `site:instagram.com/p ${source.key.replace('acct:', '')}`,
+      `site:instagram.com/reel ${source.key.replace('acct:', '')}`,
+    ];
+  }
+
+  const tag = source.key.replace('tag:', '');
+  return [
+    `site:instagram.com/p "#${tag}"`,
+    `site:instagram.com/reel "#${tag}"`,
+    `site:instagram.com/p ${tag}`,
+    `site:instagram.com/reel ${tag}`,
+    `site:instagram.com/p ${tag} gratis`,
+    `site:instagram.com/reel ${tag} gratis`,
+    `site:instagram.com/p ${tag} kostenlos`,
+    `site:instagram.com/reel ${tag} kostenlos`,
+  ];
+}
+
 async function discoverLinksForSourceViaDuckDuckGo(source) {
   const links = new Set();
-  const q = source.kind === 'account'
-    ? `site:instagram.com (${source.url.replace(/https?:\/\//, '').replace(/\/$/, '')}) (p OR reel)`
-    : `site:instagram.com/explore/tags/${source.key.replace('tag:', '')} (p OR reel)`;
-  try {
-    const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`;
-    const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-    if (!response.ok) return [];
-    const html = await response.text();
-    const hrefMatches = html.match(/href="([^"]+)"/g) || [];
-    for (const hrefToken of hrefMatches) {
-      const raw = hrefToken.replace(/^href="/, '').replace(/"$/, '');
-      const normalized = normalizeInstagramPostUrl(raw);
-      if (normalized) links.add(normalized);
-    }
-  } catch {}
+  const queries = buildDuckDuckGoQueriesForSource(source);
+  for (const query of queries) {
+    try {
+      const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+      const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      if (!response.ok) continue;
+      const html = await response.text();
+      const hrefMatches = html.match(/href="([^"]+)"/g) || [];
+      for (const hrefToken of hrefMatches) {
+        const raw = hrefToken.replace(/^href="/, '').replace(/"$/, '');
+        const normalized = normalizeInstagramPostUrl(raw);
+        if (normalized) links.add(normalized);
+      }
+      if (links.size >= CONFIG.perSourceLinksLimit) break;
+    } catch {}
+  }
   return [...links];
 }
 
@@ -668,7 +692,7 @@ async function scrapeInstagram() {
           const mirrorShortcodes = [...extractShortcodesFromText(mirrorText)];
           postUrls = [...new Set([...postUrls, ...extractPostUrls(mirrorText), ...mirrorShortcodes])].slice(0, CONFIG.perSourceLinksLimit);
         }
-        if (postUrls.length < 8) {
+        if (postUrls.length < 16) {
           const sourceDiscovered = await discoverLinksForSourceViaDuckDuckGo(source);
           postUrls = [...new Set([...postUrls, ...sourceDiscovered])].slice(0, CONFIG.perSourceLinksLimit);
         }
