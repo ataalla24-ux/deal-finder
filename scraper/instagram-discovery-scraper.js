@@ -6,7 +6,7 @@ import { normalizeCategoryForScraper } from './category-utils.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
-const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-instagram.json');
+const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-instagram-discovery.json');
 const SOURCE_STATS_PATH = path.join(ROOT, 'docs', 'instagram-source-stats.json');
 const DISCOVERY_REPORT_PATH = path.join(ROOT, 'docs', 'instagram-discovery-report.json');
 const ARTIFACTS_DIR = path.join(ROOT, 'artifacts');
@@ -14,7 +14,7 @@ const CANDIDATE_LOG_PATH = path.join(ARTIFACTS_DIR, 'instagram-discovery-candida
 const ENV_PATH = path.join(ROOT, '.env');
 
 const DEFAULT_CONFIG = {
-  maxAgeDays: 14,
+  maxAgeDays: 1,
   maxDealsPerRun: 180,
   maxPostsToVisit: 850,
   maxRelatedAccounts: 140,
@@ -34,85 +34,40 @@ const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTime
 
 const SEED_HASHTAGS = [
   'gratiswien',
-  'wiengratis',
-  'wiendeals',
-  'wienaktion',
-  'wienrabatt',
   'wiengastro',
   'wienessen',
   'wienrestaurants',
   'wienkaffee',
   'wienbrunch',
-  'wienkostenlos',
   'gratisessenwien',
-  'schnäppchenwien',
   'neueröffnungwien',
   'neueroeffnungwien',
-  'freebieswien',
   'wienfood',
   'kaffeewien',
   'wienimbiss',
   'wienstreetfood',
   'wienkebab',
-  'wienopening',
-  'viennafreebies',
   'freefoodvienna',
-  'dönerwien',
-  'doenerwien',
   'gratisdoenerwien',
   'gratisdönerwien',
   'gratisburgerwien',
   'gratispizza',
-  'wiengratisfutter',
-  'wiencafedeal',
-  'wienfooddeal',
-  'wienoffers',
-  'wienrestaurantdeal',
-  'wieneventgratis',
-  'wiengeschenk',
-  'wienvoucher',
-  'wiengewinnspiel',
-  'wiencoupon',
   'gratiskaffeewien',
   'freecoffeewien',
   'gratisdrinkwien',
   'freedrinkvienna',
   'gratiseiswien',
   'freeicecreamvienna',
-  'wienfreecoffee',
-  'wienfreedrink',
-  'wienfreegift',
-  'wienfreebie',
-  'wienopenings',
   'wieneroeffnung',
-  'wienneueroeffnung',
   'openingwien',
-  'grandopeningwien',
-  'wiengrandopening',
-  'wientestaktion',
-  'gratisprobe',
-  'freefoodwien',
-  'samplewien',
 ];
 
 const SEED_ACCOUNTS = [
-  '1000thingsinvienna',
   'viennawurstelstand',
   'viennafoodstories',
   'viennaeats',
-  'wienmalanders',
-  'wienmitte',
-  'wienliebe',
-  'wien.info',
-  'wienerbezirksblatt',
-  '1000things',
-  'vienna.go',
   'wienfoodguide',
   'viennafoodblog',
-  'wiendeals',
-  'wienerlinien',
-  'wienmuseum',
-  'wienxtra',
   'wienereats',
   'wienfoodspots',
   'viennarestaurants',
@@ -120,14 +75,7 @@ const SEED_ACCOUNTS = [
   'wienfoodscene',
   'wienfoodblogger',
   'vienna.coffee',
-  'viennablog',
-  'viennaevents',
-  'eventswien',
-  'vienna_city',
-  'wiencity',
   'wienrestaurantguide',
-  'viennanow',
-  'wienheute',
   'wiengratisdeals',
   'wiengastroguide',
   'wienstreetfood',
@@ -137,25 +85,16 @@ const SEED_ACCOUNTS = [
 ];
 
 const EXTRA_SEARCH_QUERIES = [
-  'site:instagram.com/reel wien gratis',
-  'site:instagram.com/p wien gutscheincode',
+  'site:instagram.com/reel wien gratis essen',
+  'site:instagram.com/p wien gratis essen',
   'site:instagram.com/reel vienna free food',
   'site:instagram.com/p wien neueröffnung gratis',
-  'site:instagram.com/reel wien 1+1',
   'site:instagram.com/p wien kaffee gratis',
-  'site:instagram.com/reel wien restaurant angebot',
-  'site:instagram.com/p vienna opening offer',
-  'site:instagram.com/reel wien freebie',
-  'site:instagram.com/p wien gratis essen',
   'site:instagram.com/reel wien gratis kaffee',
   'site:instagram.com/p wien gratis drink',
-  'site:instagram.com/reel wien neueröffnung angebot',
-  'site:instagram.com/p wien opening free',
   'site:instagram.com/reel vienna free coffee',
   'site:instagram.com/p vienna free drink',
   'site:instagram.com/reel wien gratis eis',
-  'site:instagram.com/p wien geschenk aktion',
-  'site:instagram.com/reel wien gratis probe',
   'site:instagram.com/p wien 1+1 restaurant',
 ];
 
@@ -233,6 +172,8 @@ const EXPIRED_KEYWORDS = [
   'abgelaufen', 'vorbei', 'ended', 'expired', 'ausverkauft', 'nicht mehr gültig',
   'not valid anymore', 'beendet',
 ];
+
+const GIVEAWAY_KEYWORDS = ['gewinnspiel', 'verlosung', 'giveaway'];
 
 function loadEnvFile() {
   if (!fs.existsSync(ENV_PATH)) return;
@@ -572,6 +513,22 @@ function detectType(text) {
   return 'rabatt';
 }
 
+function isFoodDrinkRelevant(text) {
+  const lower = cleanText(text).toLowerCase();
+  return keywordHits(lower, FOOD_KEYWORDS) > 0 || keywordHits(lower, DRINK_KEYWORDS) > 0;
+}
+
+function hasFreebieOrPromoSignal(text) {
+  const lower = cleanText(text).toLowerCase();
+  return keywordHits(lower, FREEBIE_KEYWORDS) > 0 || keywordHits(lower, PROMO_KEYWORDS) > 0;
+}
+
+function isGiveawayOnly(text) {
+  const lower = cleanText(text).toLowerCase();
+  return GIVEAWAY_KEYWORDS.some((k) => lower.includes(k))
+    && !hasFreebieOrPromoSignal(lower);
+}
+
 function inferLogo(category, text) {
   const lower = cleanText(text).toLowerCase();
   if (lower.includes('kebab') || lower.includes('kebap') || lower.includes('döner') || lower.includes('doener')) return '🥙';
@@ -597,7 +554,7 @@ function scoreDeal({ text, sourceHits, sourceKinds, accountHint, relatedHint }) 
   const foodHits = keywordHits(lower, FOOD_KEYWORDS);
   const isFoodDrinkDeal = foodHits > 0 || drinkHits > 0 || /drink|cocktail|coffee|kaffee|brunch|restaurant/.test(lower);
   const isFreeSignal = /gratis|kostenlos|free|freebie|geschenkt|0 ?€|1\+1|2 for 1|bogo|free sample|gratisprobe|welcome gift/.test(lower);
-  const isGiveaway = lower.includes('gewinnspiel') || lower.includes('verlosung');
+  const isGiveaway = GIVEAWAY_KEYWORDS.some((k) => lower.includes(k));
   const isRealPromo = promoHits > 0 || openingHits > 0;
   const isGiftish = giftHits > 0;
 
@@ -1184,13 +1141,16 @@ async function scrapeInstagramDiscovery() {
 
         if (isExpiredByText(combinedText)) continue;
         if (textSignalsPostTooOld(combinedText)) continue;
+        if (isGiveawayOnly(combinedText)) continue;
 
         const isWien = containsKeyword(combinedText, WIEN_KEYWORDS)
           || [...candidate.sourceRefs].some((k) => k.includes('wien') || k.includes('vienna'));
         if (!isWien) continue;
+        if (!isFoodDrinkRelevant(combinedText)) continue;
 
         const dealSignal = containsKeyword(combinedText, DEAL_KEYWORDS);
         if (!dealSignal) continue;
+        if (!hasFreebieOrPromoSignal(combinedText)) continue;
 
         const score = scoreDeal({
           text: combinedText,

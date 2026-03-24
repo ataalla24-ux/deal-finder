@@ -11,7 +11,7 @@ const ENV_PATH = path.join(ROOT, '.env');
 
 const DEFAULT_CONFIG = {
   maxDealsPerRun: 140,
-  maxAgeDays: 7,
+  maxAgeDays: 1,
   perSourceLinksLimit: 280,
   maxPostsToVisit: 520,
   postLoadTimeoutMs: 7000,
@@ -24,67 +24,63 @@ let CONFIG = { ...DEFAULT_CONFIG };
 
 const HASHTAGS = [
   'gratiswien',
-  'wiengratis',
-  'wiendeals',
-  'wienaktion',
-  'wienrabatt',
   'wiengastro',
   'wienessen',
   'wienrestaurants',
   'wienkaffee',
-  'wiencafe',
   'wienbrunch',
-  'wienevent',
-  'wienfooddeals',
-  'wienkostenlos',
   'gratisessenwien',
-  'freestuffwien',
-  'schnäppchenwien',
   'neueröffnungwien',
   'neueroeffnungwien',
-  'freebieswien',
   'foodiewien',
   'wienfood',
   'kaffeewien',
-  'eroeffnungwien',
   'gratisdoenerwien',
   'gratisdönerwien',
-  'doenerwien',
-  'dönerwien',
   'wienimbiss',
   'wienstreetfood',
   'wienkebab',
   'freefoodvienna',
-  'wienfreefood',
-  'wienopening',
-  'viennafreebies',
+  'gratiskaffeewien',
+  'freecoffeewien',
+  'gratisdrinkwien',
+  'freedrinkvienna',
+  'gratiseiswien',
+  'freeicecreamvienna',
+  'gratisburgerwien',
+  'gratispizza',
 ];
 
 const INSTAGRAM_ACCOUNTS = [
-  '1000thingsinvienna',
-  'wien.info',
   'viennawurstelstand',
   'viennafoodstories',
-  'vienna.go',
-  'wienmalanders',
-  '1000things',
   'viennaeats',
-  'wienmitte',
-  'wienerbezirksblatt',
-  'wienliebe',
+  'wienereats',
+  'wienfoodspots',
+  'viennarestaurants',
+  'wienfoodscene',
+  'wienfoodblogger',
+  'vienna.coffee',
+  'wiengastroguide',
+  'wienstreetfood',
+  'wienpizza',
+  'wienburger',
+  'wienkebap',
 ];
 
 const SEARCH_QUERIES = [
-  'site:instagram.com/reel wien gratis',
-  'site:instagram.com/p wien rabatt',
-  'site:instagram.com/reel vienna deal',
-  'site:instagram.com/p wien food deal',
-  'site:instagram.com/reel neuoeffnung wien',
-  'site:instagram.com/reel wien brunch gratis',
-  'site:instagram.com/p wien restaurant angebot',
-  'site:instagram.com/reel wien kaffee gratis',
-  'site:instagram.com/p vienna opening offer',
-  'site:instagram.com/reel wien event gratis',
+  'site:instagram.com/reel wien gratis essen',
+  'site:instagram.com/p wien gratis essen',
+  'site:instagram.com/reel wien gratis kaffee',
+  'site:instagram.com/p wien gratis kaffee',
+  'site:instagram.com/reel wien gratis drink',
+  'site:instagram.com/p wien gratis drink',
+  'site:instagram.com/reel vienna free food',
+  'site:instagram.com/p vienna free food',
+  'site:instagram.com/reel vienna free coffee',
+  'site:instagram.com/p vienna free drink',
+  'site:instagram.com/reel wien neueröffnung gratis',
+  'site:instagram.com/p wien 1+1 restaurant',
 ];
 
 const WIEN_KEYWORDS = [
@@ -97,13 +93,27 @@ const WIEN_KEYWORDS = [
 const DEAL_KEYWORDS = [
   'gratis', 'kostenlos', 'free', 'freebie', '0€', '0 €', 'rabatt', 'discount', 'aktion',
   'angebot', 'deal', 'gutschein', 'coupon', 'voucher', '1+1', '2for1', '2 for 1',
-  'happy hour', 'gewinnspiel', 'verlosung', 'eröffnung', 'neueröffnung', 'special',
+  'happy hour', 'eröffnung', 'neueröffnung', 'special',
 ];
 
 const FOOD_KEYWORDS = [
   'restaurant', 'pizza', 'burger', 'sushi', 'cafe', 'café', 'brunch', 'coffee', 'kaffee',
   'croissant', 'frühstück', 'mittag', 'abendessen', 'essen', 'drink', 'cocktail',
 ];
+
+const FREEBIE_KEYWORDS = [
+  'gratis', 'kostenlos', 'free', 'freebie', 'geschenkt', '0€', '0 €', 'free coffee',
+  'free food', 'gratis essen', 'gratis kaffee', 'gratis drink', 'gratis burger',
+  'gratis pizza', 'gratis döner', 'gratis doener', 'free drink',
+];
+
+const PROMO_KEYWORDS = [
+  '1+1', '2for1', '2 for 1', 'bogo', 'happy hour', 'rabatt', 'discount',
+  'aktion', 'angebot', 'deal', 'coupon', 'voucher', 'gutschein',
+  'opening offer', 'opening deal', 'eröffnungsangebot', 'eroeffnungsangebot',
+];
+
+const GIVEAWAY_KEYWORDS = ['gewinnspiel', 'verlosung', 'giveaway'];
 
 const SHOPPING_KEYWORDS = [
   'shop', 'store', 'fashion', 'beauty', 'fitness', 'gym', 'ticket', 'museum', 'kino',
@@ -223,6 +233,21 @@ function containsKeyword(text, keywords) {
   return keywords.some((k) => lower.includes(k));
 }
 
+function isFoodDrinkRelevant(text) {
+  return containsKeyword(text, FOOD_KEYWORDS);
+}
+
+function hasFreebieOrPromoSignal(text) {
+  return containsKeyword(text, FREEBIE_KEYWORDS) || containsKeyword(text, PROMO_KEYWORDS);
+}
+
+function isGiveawayOnly(text) {
+  const lower = cleanText(text).toLowerCase();
+  return GIVEAWAY_KEYWORDS.some((k) => lower.includes(k))
+    && !containsKeyword(lower, FREEBIE_KEYWORDS)
+    && !containsKeyword(lower, PROMO_KEYWORDS);
+}
+
 function isWienRelevant(text, sourceKey, postUrl, brand) {
   const combined = [cleanText(text), cleanText(sourceKey), cleanText(postUrl), cleanText(brand)].join(' ').toLowerCase();
   if (containsKeyword(combined, WIEN_KEYWORDS)) return true;
@@ -247,6 +272,8 @@ function scorePost({ text, accountHint }) {
   if (containsKeyword(text, WIEN_KEYWORDS)) score += 30;
   if (accountHint) score += 10;
   if (containsKeyword(text, FOOD_KEYWORDS)) score += 10;
+  if (containsKeyword(text, FREEBIE_KEYWORDS)) score += 14;
+  if (containsKeyword(text, PROMO_KEYWORDS)) score += 10;
   return Math.min(100, score);
 }
 
@@ -323,7 +350,7 @@ function isFresh(isoDate) {
   const ts = Date.parse(isoDate);
   if (Number.isNaN(ts)) return false;
   const ageMs = Date.now() - ts;
-  return ageMs <= CONFIG.maxAgeDays * 24 * 60 * 60 * 1000;
+  return ageMs >= 0 && ageMs <= CONFIG.maxAgeDays * 24 * 60 * 60 * 1000;
 }
 
 function extractPostUrls(html) {
@@ -739,6 +766,9 @@ async function scrapeInstagram() {
         });
         if (!pubDateIso) continue;
         if (!isFresh(pubDateIso)) continue;
+        if (isGiveawayOnly(combinedText)) continue;
+        if (!isFoodDrinkRelevant(combinedText)) continue;
+        if (!hasFreebieOrPromoSignal(combinedText)) continue;
 
         const score = scorePost({ text: combinedText, accountHint: post.accountHint });
         if (score < 55) continue;

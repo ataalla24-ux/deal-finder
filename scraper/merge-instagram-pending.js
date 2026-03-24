@@ -41,6 +41,8 @@ function writePayload(payload) {
 }
 
 function mergeDeals() {
+  const hasWebFile = fs.existsSync(WEB_PATH);
+  const hasDiscoveryFile = fs.existsSync(DISCOVERY_PATH);
   const existingMergedDeals = readExistingMergedDeals();
   const webDeals = readDeals(WEB_PATH).map((deal) => ({
     ...deal,
@@ -51,7 +53,7 @@ function mergeDeals() {
     originSource: deal.originSource || deal.source || 'instagram-discovery-engine',
   }));
 
-  if (webDeals.length === 0 && discoveryDeals.length === 0) {
+  if (!hasWebFile && !hasDiscoveryFile) {
     const fallbackPayload = {
       lastUpdated: new Date().toISOString(),
       source: 'instagram-merged',

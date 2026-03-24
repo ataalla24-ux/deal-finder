@@ -42,7 +42,7 @@ jobs:
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
           INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
-          IG_MAX_AGE_DAYS: 7
+          IG_MAX_AGE_DAYS: 1
           IG_MAX_DEALS: 180
           IG_MAX_POSTS_VISIT: 1800
           IG_MAX_RELATED_ACCOUNTS: 180
@@ -72,6 +72,12 @@ jobs:
           console.log(`DEBUG INSTAGRAM_COOKIES parts: ${cookieParts.length}`);
           console.log(`DEBUG INSTAGRAM_COOKIES names: ${cookieNames.join(',') || '(none)'}`);
           NODE
+          COOKIE_FILE="$RUNNER_TEMP/instagram-cookies.txt"
+          printf '%s\n' "$INSTAGRAM_COOKIES" > "$COOKIE_FILE"
+          if [ -n "$INSTAGRAM_SESSIONID" ] && ! grep -q 'sessionid=' "$COOKIE_FILE"; then
+            printf '; sessionid=%s\n' "$INSTAGRAM_SESSIONID" >> "$COOKIE_FILE"
+          fi
+          export INSTAGRAM_COOKIES_FILE="$COOKIE_FILE"
           node scraper/instagram-web-scraper.js
           node scraper/instagram-discovery-scraper.js
           node scraper/merge-instagram-pending.js
