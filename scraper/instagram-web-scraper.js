@@ -552,6 +552,36 @@ function buildSources() {
   return [...hashtagSources, ...accountSources];
 }
 
+async function createInstagramPageSession(browser, cookieHints) {
+  const context = await browser.newContext({
+    viewport: { width: 1366, height: 900 },
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    locale: 'de-AT',
+    timezoneId: 'Europe/Vienna',
+  });
+
+  if (cookieHints.length > 0) {
+    await context.addCookies(
+      cookieHints.map((c) => ({
+        name: c.name,
+        value: c.value,
+        domain: c.domain || '.instagram.com',
+        path: '/',
+        secure: true,
+        httpOnly: c.name === 'sessionid',
+        sameSite: 'Lax',
+      }))
+    );
+  }
+
+  const page = await context.newPage();
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+  });
+
+  return { context, page };
+}
+
 function fallbackBrandFromUrl(url) {
   try {
     const u = new URL(url);
@@ -606,45 +636,25 @@ async function scrapeInstagram() {
       ],
     });
 
-    const context = await browser.newContext({
-      viewport: { width: 1366, height: 900 },
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-      locale: 'de-AT',
-      timezoneId: 'Europe/Vienna',
-    });
-
     const cookieHints = loadCookieHints();
     if (cookieHints.length > 0) {
-      await context.addCookies(
-        cookieHints.map((c) => ({
-          name: c.name,
-          value: c.value,
-          domain: c.domain || '.instagram.com',
-          path: '/',
-          secure: true,
-          httpOnly: c.name === 'sessionid',
-          sameSite: 'Lax',
-        }))
-      );
       console.log(`🍪 loaded ${cookieHints.length} Instagram cookies`);
     } else {
       console.log('ℹ️ no Instagram auth cookies found; public pages may return login wall');
     }
 
-    const page = await context.newPage();
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-    });
-
     const sources = buildSources();
     const candidatePosts = new Map();
 
     for (const source of sources) {
+      let sourceContext;
+      let sourcePage;
       try {
+        ({ context: sourceContext, page: sourcePage } = await createInstagramPageSession(browser, cookieHints));
         console.log(`🔎 Source ${source.key}`);
-        await page.goto(source.url, { waitUntil: 'domcontentloaded', timeout: 25000 });
-        await page.waitForTimeout(2500);
-        await dismissInstagramOverlays(page);
+        await sourcePage.goto(source.url, { waitUntil: 'domcontentloaded', timeout: 25000 });
+        await sourcePage.waitForTimeout(2500);
+        await dismissInstagramOverlays(sourcePage);
 
         const sourceLinks = new Set();
         let stagnantRounds = 0;
@@ -652,9 +662,9 @@ async function scrapeInstagram() {
         for (let round = 0; round < CONFIG.sourceScrollRounds; round += 1) {
           const beforeCount = sourceLinks.size;
 
-          const domUrls = await collectLinksFromDom(page);
-          const scriptUrls = await collectLinksFromScripts(page);
-          const html = await page.content();
+          const domUrls = await collectLinksFromDom(sourcePage);
+          const scriptUrls = await collectLinksFromScripts(sourcePage);
+          const html = await sourcePage.content();
           for (const u of [...domUrls, ...scriptUrls, ...extractPostUrls(html)]) {
             sourceLinks.add(u);
           }
@@ -669,21 +679,21 @@ async function scrapeInstagram() {
 
           if (stagnantRounds >= CONFIG.sourceStagnationRounds) break;
 
-          await page.mouse.wheel(0, CONFIG.sourceScrollStepPx);
-          await page.waitForTimeout(CONFIG.sourceScrollWaitMs);
-          await dismissInstagramOverlays(page);
+          await sourcePage.mouse.wheel(0, CONFIG.sourceScrollStepPx);
+          await sourcePage.waitForTimeout(CONFIG.sourceScrollWaitMs);
+          await dismissInstagramOverlays(sourcePage);
         }
 
         let postUrls = [...sourceLinks].slice(0, CONFIG.perSourceLinksLimit);
         if (postUrls.length === 0 && source.kind === 'account') {
           const reelsUrl = source.url.endsWith('/') ? `${source.url}reels/` : `${source.url}/reels/`;
           try {
-            await page.goto(reelsUrl, { waitUntil: 'domcontentloaded', timeout: 25000 });
-            await page.waitForTimeout(1800);
-            await dismissInstagramOverlays(page);
-            const reelsDom = await collectLinksFromDom(page);
-            const reelsScript = await collectLinksFromScripts(page);
-            const reelsHtml = await page.content();
+            await sourcePage.goto(reelsUrl, { waitUntil: 'domcontentloaded', timeout: 25000 });
+            await sourcePage.waitForTimeout(1800);
+            await dismissInstagramOverlays(sourcePage);
+            const reelsDom = await collectLinksFromDom(sourcePage);
+            const reelsScript = await collectLinksFromScripts(sourcePage);
+            const reelsHtml = await sourcePage.content();
             postUrls = [...new Set([...postUrls, ...reelsDom, ...reelsScript, ...extractPostUrls(reelsHtml)])].slice(0, CONFIG.perSourceLinksLimit);
           } catch {}
         }
@@ -709,6 +719,9 @@ async function scrapeInstagram() {
         }
       } catch (error) {
         console.log(`   ⚠️ source failed: ${error.message}`);
+      } finally {
+        if (sourcePage) await sourcePage.close().catch(() => {});
+        if (sourceContext) await sourceContext.close().catch(() => {});
       }
     }
 
@@ -726,111 +739,117 @@ async function scrapeInstagram() {
 
     const postsToVisit = [...candidatePosts.values()].slice(0, CONFIG.maxPostsToVisit);
     const deals = [];
+    const { context: postContext, page } = await createInstagramPageSession(browser, cookieHints);
 
-    for (let i = 0; i < postsToVisit.length; i += 1) {
-      const post = postsToVisit[i];
-      try {
-        await page.goto(post.url, { waitUntil: 'domcontentloaded', timeout: CONFIG.postLoadTimeoutMs });
-        await page.waitForTimeout(1200);
+    try {
+      for (let i = 0; i < postsToVisit.length; i += 1) {
+        const post = postsToVisit[i];
+        try {
+          await page.goto(post.url, { waitUntil: 'domcontentloaded', timeout: CONFIG.postLoadTimeoutMs });
+          await page.waitForTimeout(1200);
 
-        let data = await page.evaluate(() => {
-          const result = {
-            ldDate: '',
-            ldCaption: '',
-            ldAuthor: '',
-            ogTitle: '',
-            ogDescription: '',
-            text: document.body ? document.body.innerText : '',
+          let data = await page.evaluate(() => {
+            const result = {
+              ldDate: '',
+              ldCaption: '',
+              ldAuthor: '',
+              ogTitle: '',
+              ogDescription: '',
+              text: document.body ? document.body.innerText : '',
+            };
+
+            for (const script of document.querySelectorAll('script[type="application/ld+json"]')) {
+              try {
+                const parsed = JSON.parse(script.textContent || '{}');
+                const obj = Array.isArray(parsed) ? parsed[0] : parsed;
+                if (!obj || typeof obj !== 'object') continue;
+                if (obj.datePublished && !result.ldDate) result.ldDate = String(obj.datePublished);
+                if (obj.caption && !result.ldCaption) result.ldCaption = String(obj.caption);
+                if (obj.author && typeof obj.author === 'object' && obj.author.name && !result.ldAuthor) {
+                  result.ldAuthor = String(obj.author.name);
+                }
+              } catch {}
+            }
+
+            const ogTitle = document.querySelector('meta[property="og:title"]');
+            const ogDescription = document.querySelector('meta[property="og:description"]');
+            if (ogTitle?.content) result.ogTitle = ogTitle.content;
+            if (ogDescription?.content) result.ogDescription = ogDescription.content;
+
+            return result;
+          });
+
+          if (!data.ldCaption && !data.ogDescription) {
+            const mirrorText = await fetchMirrorText(post.url);
+            if (mirrorText) {
+              const firstLines = mirrorText.split('\n').slice(0, 40).join(' ');
+              data = {
+                ...data,
+                ogDescription: data.ogDescription || firstLines,
+                text: `${data.text || ''} ${mirrorText.slice(0, 3000)}`,
+              };
+            }
+          }
+
+          const combinedText = cleanText([
+            data.ldCaption,
+            data.ogTitle,
+            data.ogDescription,
+            data.text.slice(0, 2000),
+          ].join(' '));
+
+          const pubDateIso = parseDateFromPage({
+            ldDate: data.ldDate,
+            ogDescription: data.ogDescription,
+            fullText: combinedText,
+          });
+          if (!pubDateIso) continue;
+          if (!isFresh(pubDateIso)) continue;
+          if (isGiveawayOnly(combinedText)) continue;
+          if (!isFoodDrinkRelevant(combinedText)) continue;
+          if (!hasFreebieOrPromoSignal(combinedText)) continue;
+
+          const score = scorePost({ text: combinedText, accountHint: post.accountHint });
+          if (score < 55) continue;
+
+          const brand = deriveBrand(data, post.url);
+          if (!isWienRelevant(combinedText, post.sourceKey, post.url, brand)) continue;
+
+          const titleBase = cleanText(data.ogTitle || data.ldCaption || 'Instagram Deal');
+          const title = titleBase.length > 80 ? `${titleBase.slice(0, 77)}...` : titleBase;
+
+          const deal = {
+            id: `ig-${stableId(`${post.url}|${pubDateIso}`)}`,
+            brand,
+            title,
+            logo: detectCategory(combinedText) === 'essen' ? '🍔' : '📷',
+            description: combinedText.slice(0, 180),
+            type: detectType(combinedText),
+            category: detectCategory(combinedText),
+            source: 'Instagram',
+            url: post.url,
+            expires: 'Unbekannt',
+            distance: containsKeyword(combinedText, WIEN_KEYWORDS) ? 'Wien' : 'Online',
+            hot: score >= 80,
+            isNew: true,
+            priority: Math.max(1, Math.round(score / 12)),
+            votes: 1,
+            qualityScore: score,
+            pubDate: pubDateIso,
           };
 
-          for (const script of document.querySelectorAll('script[type="application/ld+json"]')) {
-            try {
-              const parsed = JSON.parse(script.textContent || '{}');
-              const obj = Array.isArray(parsed) ? parsed[0] : parsed;
-              if (!obj || typeof obj !== 'object') continue;
-              if (obj.datePublished && !result.ldDate) result.ldDate = String(obj.datePublished);
-              if (obj.caption && !result.ldCaption) result.ldCaption = String(obj.caption);
-              if (obj.author && typeof obj.author === 'object' && obj.author.name && !result.ldAuthor) {
-                result.ldAuthor = String(obj.author.name);
-              }
-            } catch {}
-          }
-
-          const ogTitle = document.querySelector('meta[property="og:title"]');
-          const ogDescription = document.querySelector('meta[property="og:description"]');
-          if (ogTitle?.content) result.ogTitle = ogTitle.content;
-          if (ogDescription?.content) result.ogDescription = ogDescription.content;
-
-          return result;
-        });
-
-        if (!data.ldCaption && !data.ogDescription) {
-          const mirrorText = await fetchMirrorText(post.url);
-          if (mirrorText) {
-            const firstLines = mirrorText.split('\n').slice(0, 40).join(' ');
-            data = {
-              ...data,
-              ogDescription: data.ogDescription || firstLines,
-              text: `${data.text || ''} ${mirrorText.slice(0, 3000)}`,
-            };
-          }
+          deals.push(deal);
+        } catch {
+          // skip inaccessible posts
         }
 
-        const combinedText = cleanText([
-          data.ldCaption,
-          data.ogTitle,
-          data.ogDescription,
-          data.text.slice(0, 2000),
-        ].join(' '));
-
-        const pubDateIso = parseDateFromPage({
-          ldDate: data.ldDate,
-          ogDescription: data.ogDescription,
-          fullText: combinedText,
-        });
-        if (!pubDateIso) continue;
-        if (!isFresh(pubDateIso)) continue;
-        if (isGiveawayOnly(combinedText)) continue;
-        if (!isFoodDrinkRelevant(combinedText)) continue;
-        if (!hasFreebieOrPromoSignal(combinedText)) continue;
-
-        const score = scorePost({ text: combinedText, accountHint: post.accountHint });
-        if (score < 55) continue;
-
-        const brand = deriveBrand(data, post.url);
-        if (!isWienRelevant(combinedText, post.sourceKey, post.url, brand)) continue;
-
-        const titleBase = cleanText(data.ogTitle || data.ldCaption || 'Instagram Deal');
-        const title = titleBase.length > 80 ? `${titleBase.slice(0, 77)}...` : titleBase;
-
-        const deal = {
-          id: `ig-${stableId(`${post.url}|${pubDateIso}`)}`,
-          brand,
-          title,
-          logo: detectCategory(combinedText) === 'essen' ? '🍔' : '📷',
-          description: combinedText.slice(0, 180),
-          type: detectType(combinedText),
-          category: detectCategory(combinedText),
-          source: 'Instagram',
-          url: post.url,
-          expires: 'Unbekannt',
-          distance: containsKeyword(combinedText, WIEN_KEYWORDS) ? 'Wien' : 'Online',
-          hot: score >= 80,
-          isNew: true,
-          priority: Math.max(1, Math.round(score / 12)),
-          votes: 1,
-          qualityScore: score,
-          pubDate: pubDateIso,
-        };
-
-        deals.push(deal);
-      } catch {
-        // skip inaccessible posts
+        if ((i + 1) % 25 === 0) {
+          console.log(`   ✅ checked posts: ${i + 1}/${postsToVisit.length}`);
+        }
       }
-
-      if ((i + 1) % 25 === 0) {
-        console.log(`   ✅ checked posts: ${i + 1}/${postsToVisit.length}`);
-      }
+    } finally {
+      await page.close().catch(() => {});
+      await postContext.close().catch(() => {});
     }
 
     const dedup = new Map();
