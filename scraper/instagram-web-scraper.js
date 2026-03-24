@@ -7,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-instagram-web.json');
+const WEB_REPORT_PATH = path.join(ROOT, 'docs', 'instagram-web-report.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
 const DEFAULT_CONFIG = {
@@ -283,6 +284,25 @@ function stableId(seed) {
   return hash.toString(36);
 }
 
+function createRejectionCounters() {
+  return {
+    navigationError: 0,
+    noPubDate: 0,
+    stale: 0,
+    giveaway: 0,
+    notFoodDrink: 0,
+    noPromoSignal: 0,
+    lowScore: 0,
+    notWien: 0,
+  };
+}
+
+function writeWebReport(report) {
+  try {
+    fs.writeFileSync(WEB_REPORT_PATH, JSON.stringify(report, null, 2));
+  } catch {}
+}
+
 function parseRelativeAgeToDate(text, nowMs = Date.now()) {
   const raw = cleanText(text).toLowerCase();
   if (!raw) return null;
@@ -400,7 +420,6 @@ function extractShortcodesFromText(text) {
     let m;
     while ((m = re.exec(text)) !== null) {
       urls.add(`https://www.instagram.com/p/${m[1]}/`);
-      urls.add(`https://www.instagram.com/reel/${m[1]}/`);
     }
   }
   return urls;
@@ -623,6 +642,34 @@ async function scrapeInstagram() {
   loadEnvFile();
   CONFIG = buildConfig();
 
+  const report = {
+    lastUpdated: '',
+    source: 'instagram-web',
+    config: {
+      maxAgeDays: CONFIG.maxAgeDays,
+      perSourceLinksLimit: CONFIG.perSourceLinksLimit,
+      maxPostsToVisit: CONFIG.maxPostsToVisit,
+      sourceScrollRounds: CONFIG.sourceScrollRounds,
+      sourceScrollWaitMs: CONFIG.sourceScrollWaitMs,
+      sourceStagnationRounds: CONFIG.sourceStagnationRounds,
+    },
+    totals: {
+      sourcesProcessed: 0,
+      candidatePosts: 0,
+      postsVisited: 0,
+      acceptedBeforeDedup: 0,
+      uniqueDeals: 0,
+      reusedPreviousDeals: 0,
+      rejectionReasons: createRejectionCounters(),
+    },
+    sourceSummaries: [],
+    samples: {
+      candidateUrls: [],
+      acceptedUrls: [],
+    },
+    error: '',
+  };
+
   let browser;
   try {
     const { chromium } = await import('playwright');
@@ -649,6 +696,17 @@ async function scrapeInstagram() {
     for (const source of sources) {
       let sourceContext;
       let sourcePage;
+      const sourceSummary = {
+        key: source.key,
+        kind: source.kind,
+        domLinks: 0,
+        scriptLinks: 0,
+        htmlLinks: 0,
+        reelsFallbackLinks: 0,
+        mirrorFallbackLinks: 0,
+        duckduckgoLinks: 0,
+        linksFound: 0,
+      };
       try {
         ({ context: sourceContext, page: sourcePage } = await createInstagramPageSession(browser, cookieHints));
         console.log(`🔎 Source ${source.key}`);
@@ -665,7 +723,11 @@ async function scrapeInstagram() {
           const domUrls = await collectLinksFromDom(sourcePage);
           const scriptUrls = await collectLinksFromScripts(sourcePage);
           const html = await sourcePage.content();
-          for (const u of [...domUrls, ...scriptUrls, ...extractPostUrls(html)]) {
+          const htmlUrls = extractPostUrls(html);
+          sourceSummary.domLinks += domUrls.length;
+          sourceSummary.scriptLinks += scriptUrls.length;
+          sourceSummary.htmlLinks += htmlUrls.length;
+          for (const u of [...domUrls, ...scriptUrls, ...htmlUrls]) {
             sourceLinks.add(u);
           }
 
@@ -694,18 +756,24 @@ async function scrapeInstagram() {
             const reelsDom = await collectLinksFromDom(sourcePage);
             const reelsScript = await collectLinksFromScripts(sourcePage);
             const reelsHtml = await sourcePage.content();
-            postUrls = [...new Set([...postUrls, ...reelsDom, ...reelsScript, ...extractPostUrls(reelsHtml)])].slice(0, CONFIG.perSourceLinksLimit);
+            const reelsHtmlUrls = extractPostUrls(reelsHtml);
+            sourceSummary.reelsFallbackLinks += reelsDom.length + reelsScript.length + reelsHtmlUrls.length;
+            postUrls = [...new Set([...postUrls, ...reelsDom, ...reelsScript, ...reelsHtmlUrls])].slice(0, CONFIG.perSourceLinksLimit);
           } catch {}
         }
         if (postUrls.length === 0) {
           const mirrorText = await fetchMirrorText(source.url);
           const mirrorShortcodes = [...extractShortcodesFromText(mirrorText)];
-          postUrls = [...new Set([...postUrls, ...extractPostUrls(mirrorText), ...mirrorShortcodes])].slice(0, CONFIG.perSourceLinksLimit);
+          const mirrorUrls = extractPostUrls(mirrorText);
+          sourceSummary.mirrorFallbackLinks += mirrorUrls.length + mirrorShortcodes.length;
+          postUrls = [...new Set([...postUrls, ...mirrorUrls, ...mirrorShortcodes])].slice(0, CONFIG.perSourceLinksLimit);
         }
         if (postUrls.length < 16) {
           const sourceDiscovered = await discoverLinksForSourceViaDuckDuckGo(source);
+          sourceSummary.duckduckgoLinks += sourceDiscovered.length;
           postUrls = [...new Set([...postUrls, ...sourceDiscovered])].slice(0, CONFIG.perSourceLinksLimit);
         }
+        sourceSummary.linksFound = postUrls.length;
         console.log(`   ↳ links found: ${postUrls.length}`);
 
         for (const postUrl of postUrls) {
@@ -719,7 +787,9 @@ async function scrapeInstagram() {
         }
       } catch (error) {
         console.log(`   ⚠️ source failed: ${error.message}`);
+        sourceSummary.error = error.message;
       } finally {
+        report.sourceSummaries.push(sourceSummary);
         if (sourcePage) await sourcePage.close().catch(() => {});
         if (sourceContext) await sourceContext.close().catch(() => {});
       }
@@ -736,6 +806,9 @@ async function scrapeInstagram() {
       }
     }
     console.log(`🌐 duckduckgo discovered: ${discovered.length}, total candidates: ${candidatePosts.size}`);
+    report.totals.sourcesProcessed = report.sourceSummaries.length;
+    report.totals.candidatePosts = candidatePosts.size;
+    report.samples.candidateUrls = [...candidatePosts.keys()].slice(0, 20);
 
     const postsToVisit = [...candidatePosts.values()].slice(0, CONFIG.maxPostsToVisit);
     const deals = [];
@@ -745,6 +818,7 @@ async function scrapeInstagram() {
       for (let i = 0; i < postsToVisit.length; i += 1) {
         const post = postsToVisit[i];
         try {
+          report.totals.postsVisited += 1;
           await page.goto(post.url, { waitUntil: 'domcontentloaded', timeout: CONFIG.postLoadTimeoutMs });
           await page.waitForTimeout(1200);
 
@@ -803,17 +877,38 @@ async function scrapeInstagram() {
             ogDescription: data.ogDescription,
             fullText: combinedText,
           });
-          if (!pubDateIso) continue;
-          if (!isFresh(pubDateIso)) continue;
-          if (isGiveawayOnly(combinedText)) continue;
-          if (!isFoodDrinkRelevant(combinedText)) continue;
-          if (!hasFreebieOrPromoSignal(combinedText)) continue;
+          if (!pubDateIso) {
+            report.totals.rejectionReasons.noPubDate += 1;
+            continue;
+          }
+          if (!isFresh(pubDateIso)) {
+            report.totals.rejectionReasons.stale += 1;
+            continue;
+          }
+          if (isGiveawayOnly(combinedText)) {
+            report.totals.rejectionReasons.giveaway += 1;
+            continue;
+          }
+          if (!isFoodDrinkRelevant(combinedText)) {
+            report.totals.rejectionReasons.notFoodDrink += 1;
+            continue;
+          }
+          if (!hasFreebieOrPromoSignal(combinedText)) {
+            report.totals.rejectionReasons.noPromoSignal += 1;
+            continue;
+          }
 
           const score = scorePost({ text: combinedText, accountHint: post.accountHint });
-          if (score < 55) continue;
+          if (score < 55) {
+            report.totals.rejectionReasons.lowScore += 1;
+            continue;
+          }
 
           const brand = deriveBrand(data, post.url);
-          if (!isWienRelevant(combinedText, post.sourceKey, post.url, brand)) continue;
+          if (!isWienRelevant(combinedText, post.sourceKey, post.url, brand)) {
+            report.totals.rejectionReasons.notWien += 1;
+            continue;
+          }
 
           const titleBase = cleanText(data.ogTitle || data.ldCaption || 'Instagram Deal');
           const title = titleBase.length > 80 ? `${titleBase.slice(0, 77)}...` : titleBase;
@@ -839,8 +934,9 @@ async function scrapeInstagram() {
           };
 
           deals.push(deal);
+          if (report.samples.acceptedUrls.length < 20) report.samples.acceptedUrls.push(post.url);
         } catch {
-          // skip inaccessible posts
+          report.totals.rejectionReasons.navigationError += 1;
         }
 
         if ((i + 1) % 25 === 0) {
@@ -853,6 +949,7 @@ async function scrapeInstagram() {
     }
 
     const dedup = new Map();
+    report.totals.acceptedBeforeDedup = deals.length;
     for (const deal of deals) {
       const key = `${deal.url}|${deal.brand}|${deal.title.toLowerCase()}`;
       if (!dedup.has(key) || dedup.get(key).qualityScore < deal.qualityScore) {
@@ -865,7 +962,10 @@ async function scrapeInstagram() {
       const oldDate = Date.parse(oldDeal?.pubDate || '');
       if (!Number.isNaN(oldDate) && isFresh(new Date(oldDate).toISOString())) {
         const key = `${oldDeal.url}|${oldDeal.brand}|${String(oldDeal.title || '').toLowerCase()}`;
-        if (!dedup.has(key)) dedup.set(key, oldDeal);
+        if (!dedup.has(key)) {
+          dedup.set(key, oldDeal);
+          report.totals.reusedPreviousDeals += 1;
+        }
       }
     }
 
@@ -883,9 +983,13 @@ async function scrapeInstagram() {
       totalDeals: uniqueDeals.length,
       deals: uniqueDeals,
     };
+    report.lastUpdated = payload.lastUpdated;
+    report.totals.uniqueDeals = uniqueDeals.length;
 
     fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
+    writeWebReport(report);
     console.log(`✅ saved ${uniqueDeals.length} deals → ${OUTPUT_PATH}`);
+    console.log(`📈 web report → ${WEB_REPORT_PATH}`);
 
     await browser.close();
     return payload;
@@ -899,7 +1003,10 @@ async function scrapeInstagram() {
       totalDeals: 0,
       deals: [],
     };
+    report.lastUpdated = fallback.lastUpdated;
+    report.error = error.message;
     fs.writeFileSync(OUTPUT_PATH, JSON.stringify(fallback, null, 2));
+    writeWebReport(report);
     return fallback;
   }
 }
