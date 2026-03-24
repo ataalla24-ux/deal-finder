@@ -121,10 +121,10 @@ const DEAL_KEYWORDS = [
   'gratis', 'kostenlos', 'for free', 'free', 'freebie', '0€', '0 €', '0 euro', 'geschenkt',
   'rabatt', 'discount', 'aktion', 'angebot', 'deal', 'gutschein', 'coupon', 'voucher',
   'promocode', 'code', '1+1', '2for1', '2 for 1', 'buy one get one', 'bogo',
-  'happy hour', 'eröffnung', 'neueroeffnung', 'neueröffnung', 'special', 'limited',
+  'happy hour', 'eröffnung', 'neueroeffnung', 'neueröffnung', 'limited',
   'nur heute', 'nur morgen', 'only today', 'only this week',
   'free sample', 'gratisprobe', 'probe', 'geschenk', 'gift', 'opening deal', 'opening offer',
-  'grand opening', 'soft opening', 'launch', 'welcome gift', 'opening special',
+  'grand opening', 'soft opening', 'launch', 'welcome gift',
 ];
 
 const FREEBIE_KEYWORDS = [
@@ -136,7 +136,7 @@ const FREEBIE_KEYWORDS = [
 ];
 
 const PROMO_KEYWORDS = [
-  'aktion', 'angebot', 'deal', 'special', 'promo', 'promotion', 'opening deal',
+  'aktion', 'angebot', 'deal', 'promo', 'promotion', 'opening deal',
   'opening offer', 'eröffnungsangebot', 'eroeffnungsangebot', 'eröffnungsaktion',
   'eroeffnungsaktion', 'soft opening', 'grand opening', 'launch special',
   '1+1', '2for1', '2 for 1', 'bogo', 'happy hour', 'voucher', 'coupon', 'gutschein',
@@ -664,6 +664,232 @@ function buildCookieHints() {
   return hints;
 }
 
+function buildCookieHeader() {
+  const parts = [];
+  const seen = new Set();
+  for (const hint of buildCookieHints()) {
+    const name = cleanText(hint?.name);
+    const value = cleanText(hint?.value);
+    if (!name || !value) continue;
+    const key = `${name}=${value}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    parts.push(key);
+  }
+  return parts.join('; ');
+}
+
+function buildInstagramApiHeaders(cookieHeader, referer = 'https://www.instagram.com/') {
+  return {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Cookie': cookieHeader,
+    'X-IG-App-ID': '936619743392459',
+    'X-Requested-With': 'XMLHttpRequest',
+    Referer: referer,
+  };
+}
+
+async function fetchInstagramProfile(username, cookieHeader) {
+  if (!username || !cookieHeader) return null;
+  try {
+    const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
+    const response = await fetch(url, { headers: buildInstagramApiHeaders(cookieHeader) });
+    if (!response.ok) return null;
+    const parsed = await response.json();
+    return parsed?.data?.user || null;
+  } catch {
+    return null;
+  }
+}
+
+function extractCaptionFromNode(node) {
+  const edges = Array.isArray(node?.edge_media_to_caption?.edges) ? node.edge_media_to_caption.edges : [];
+  return edges.map((edge) => cleanText(edge?.node?.text)).filter(Boolean).join(' ');
+}
+
+function buildInstagramPostUrl(node) {
+  const shortcode = cleanText(node?.shortcode);
+  if (!shortcode) return '';
+  const pathKind = node?.is_video || node?.__typename === 'GraphVideo' ? 'reel' : 'p';
+  return `https://www.instagram.com/${pathKind}/${shortcode}/`;
+}
+
+async function collectDealsFromAccountApi(sourceStats) {
+  const cookieHeader = buildCookieHeader();
+  if (!cookieHeader) {
+    console.log('ℹ️ account API path skipped: no Instagram cookies available');
+    return null;
+  }
+
+  const sourceRunStats = new Map();
+  const candidateSnapshot = [];
+  const deals = [];
+  const seenSourceKeys = new Set();
+  const seenUsernames = new Set();
+  const seenUrls = new Set();
+  const queue = [...new Set(SEED_ACCOUNTS)]
+    .map((username) => ({
+      kind: 'account-api',
+      key: `acct:${username}`,
+      username,
+      priority: 3,
+    }))
+    .filter((source) => !shouldSkipWeakSource(source, sourceStats[source.key]));
+
+  function ensureSourceRunStat(key, kind) {
+    if (!sourceRunStats.has(key)) {
+      sourceRunStats.set(key, {
+        runs: 0,
+        links: 0,
+        acceptedDeals: 0,
+        kind: kind || '',
+        lastSeenAt: '',
+      });
+    }
+    return sourceRunStats.get(key);
+  }
+
+  while (queue.length > 0 && seenSourceKeys.size < CONFIG.maxSourcesTotal) {
+    const source = queue.shift();
+    if (!source || seenSourceKeys.has(source.key)) continue;
+    seenSourceKeys.add(source.key);
+    seenUsernames.add(source.username);
+
+    const runStat = ensureSourceRunStat(source.key, source.kind);
+    runStat.runs += 1;
+    runStat.kind = source.kind;
+    runStat.lastSeenAt = new Date().toISOString();
+
+    const user = await fetchInstagramProfile(source.username, cookieHeader);
+    if (!user) continue;
+
+    const timelineEdges = Array.isArray(user.edge_owner_to_timeline_media?.edges)
+      ? user.edge_owner_to_timeline_media.edges
+      : [];
+    runStat.links += timelineEdges.length;
+
+    const relatedEdges = Array.isArray(user.edge_related_profiles?.edges)
+      ? user.edge_related_profiles.edges
+      : [];
+    for (const edge of relatedEdges) {
+      const username = cleanText(edge?.node?.username || edge?.node?.user?.username);
+      if (!username || seenUsernames.has(username)) continue;
+      if (!/wien|vienna/i.test(username)) continue;
+      if (queue.length + seenSourceKeys.size >= CONFIG.maxSourcesTotal) break;
+      seenUsernames.add(username);
+      queue.push({
+        kind: 'related-account-api',
+        key: `related:${username}`,
+        username,
+        priority: 1,
+      });
+    }
+
+    for (const edge of timelineEdges) {
+      const node = edge?.node;
+      const postUrl = buildInstagramPostUrl(node);
+      if (!postUrl) continue;
+
+      const pubDateMs = Number(node?.taken_at_timestamp || 0) * 1000;
+      if (!Number.isFinite(pubDateMs) || pubDateMs <= 0) continue;
+      const pubDateIso = new Date(pubDateMs).toISOString();
+
+      const caption = extractCaptionFromNode(node);
+      const locationName = cleanText(node?.location?.name);
+      const combinedText = cleanText([
+        caption,
+        user?.full_name,
+        user?.username,
+        locationName,
+        user?.biography,
+      ].join(' '));
+
+      candidateSnapshot.push({
+        url: postUrl,
+        sourceHits: 1,
+        sourceKinds: [source.kind],
+        refs: [source.key],
+        accountHint: true,
+        relatedHint: source.kind === 'related-account-api',
+      });
+
+      if (!isFresh(pubDateIso)) continue;
+      if (!combinedText) continue;
+      if (isExpiredByText(combinedText)) continue;
+      if (textSignalsPostTooOld(combinedText)) continue;
+      if (isGiveawayOnly(combinedText)) continue;
+
+      const isWien = containsKeyword(`${combinedText} ${locationName}`, WIEN_KEYWORDS)
+        || /wien|vienna/i.test(cleanText(user?.username))
+        || /wien|vienna/i.test(cleanText(user?.full_name));
+      if (!isWien) continue;
+      if (!isFoodDrinkRelevant(combinedText)) continue;
+      if (!containsKeyword(combinedText, DEAL_KEYWORDS)) continue;
+      if (!hasFreebieOrPromoSignal(combinedText)) continue;
+
+      const sourceKinds = new Set([source.kind]);
+      const score = scoreDeal({
+        text: combinedText,
+        sourceHits: 1,
+        sourceKinds,
+        accountHint: true,
+        relatedHint: source.kind === 'related-account-api',
+      });
+      if (score < CONFIG.minDealScore) continue;
+
+      const expiry = parseExpiryFromText(combinedText);
+      if (expiry && isExpiryInPast(expiry)) continue;
+      if (seenUrls.has(postUrl)) continue;
+      seenUrls.add(postUrl);
+
+      const category = detectCategory(combinedText, {
+        accountHint: user?.username,
+        relatedHint: source.kind,
+        sourceHits: 1,
+      });
+      const type = detectType(combinedText);
+      const brand = cleanText(user?.username || user?.full_name || 'Instagram');
+      const titleSource = cleanText(caption || user?.full_name || user?.username || 'Instagram Deal');
+      const title = titleSource.length > 88 ? `${titleSource.slice(0, 85)}...` : titleSource;
+
+      deals.push({
+        id: `igx-${stableId(`${postUrl}|${pubDateIso}|${brand}`)}`,
+        brand,
+        title,
+        logo: inferLogo(category, combinedText),
+        description: combinedText.slice(0, 220),
+        type,
+        category,
+        source: 'Instagram Discovery',
+        url: postUrl,
+        expires: expiry || 'Unbekannt',
+        distance: locationName || 'Wien',
+        hot: score >= 84,
+        isNew: true,
+        priority: Math.max(1, Math.round(score / 10)),
+        votes: 1,
+        qualityScore: score,
+        pubDate: pubDateIso,
+        pubDateSource: 'profileTimeline',
+        discoveredBy: `${source.kind},profile-api`,
+        sourceHits: 1,
+        reviewTier: score >= 84 ? 'high' : score >= 70 ? 'medium' : 'low',
+      });
+      runStat.acceptedDeals += 1;
+    }
+  }
+
+  return {
+    deals,
+    sourceRunStats,
+    candidateSnapshot,
+    visitedSources: seenSourceKeys.size,
+    totalCandidates: candidateSnapshot.length,
+    visitedPosts: candidateSnapshot.length,
+    mode: 'account-api',
+  };
+}
+
 async function dismissInstagramOverlays(page) {
   const labels = [
     'Nur erforderliche Cookies erlauben',
@@ -834,6 +1060,101 @@ function mergeDeals(newDeals, oldDeals) {
   return balanced;
 }
 
+function finalizeDiscoveryRun({
+  sourceStats,
+  sourceRunStats,
+  candidateSnapshot,
+  visitedSources,
+  totalCandidates,
+  visitedPosts,
+  rawDeals,
+  mode,
+}) {
+  const previousDeals = loadPreviousDeals();
+  const finalDeals = mergeDeals(rawDeals, previousDeals);
+
+  ensureArtifactsDir();
+  fs.writeFileSync(CANDIDATE_LOG_PATH, JSON.stringify({
+    updatedAt: new Date().toISOString(),
+    sourceCount: visitedSources,
+    totalCandidates,
+    candidates: candidateSnapshot,
+    mode,
+  }, null, 2));
+
+  const persistedStats = { ...sourceStats };
+  for (const [key, runStat] of sourceRunStats.entries()) {
+    const prev = persistedStats[key] || {};
+    persistedStats[key] = {
+      kind: runStat.kind || prev.kind || '',
+      runs: Number(prev.runs || 0) + Number(runStat.runs || 0),
+      totalLinks: Number(prev.totalLinks || 0) + Number(runStat.links || 0),
+      acceptedDeals: Number(prev.acceptedDeals || 0) + Number(runStat.acceptedDeals || 0),
+      lastSeenAt: runStat.lastSeenAt || prev.lastSeenAt || '',
+    };
+  }
+
+  const topSources = Object.entries(persistedStats)
+    .map(([key, stat]) => {
+      const safeStat = (stat && typeof stat === 'object') ? stat : {};
+      return {
+        key,
+        kind: safeStat.kind || '',
+        runs: Number(safeStat.runs || 0),
+        acceptedDeals: Number(safeStat.acceptedDeals || 0),
+        totalLinks: Number(safeStat.totalLinks || 0),
+        performance: Math.round(sourcePerformanceScore(safeStat) * 100) / 100,
+      };
+    })
+    .sort((a, b) => b.performance - a.performance)
+    .slice(0, 30);
+
+  saveSourceStats(persistedStats, {
+    runMeta: {
+      mode,
+      visitedSources,
+      totalCandidates,
+      visitedPosts,
+      scrapedDealsRaw: rawDeals.length,
+      savedDeals: finalDeals.length,
+    },
+    topSources,
+  });
+
+  fs.writeFileSync(DISCOVERY_REPORT_PATH, JSON.stringify({
+    updatedAt: new Date().toISOString(),
+    mode,
+    visitedSources,
+    totalCandidates,
+    visitedPosts,
+    rawDeals: rawDeals.length,
+    savedDeals: finalDeals.length,
+    topSources,
+  }, null, 2));
+
+  const payload = {
+    lastUpdated: new Date().toISOString(),
+    source: 'instagram-discovery-engine',
+    totalDeals: finalDeals.length,
+    deals: finalDeals,
+    meta: {
+      mode,
+      visitedSources,
+      totalCandidates,
+      visitedPosts,
+      scrapedDealsRaw: rawDeals.length,
+    },
+  };
+
+  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
+  console.log(`✅ saved ${finalDeals.length} deals → ${OUTPUT_PATH}`);
+  console.log(`🧾 candidates snapshot → ${CANDIDATE_LOG_PATH}`);
+  console.log(`📊 source stats → ${SOURCE_STATS_PATH}`);
+  console.log(`📈 discovery report → ${DISCOVERY_REPORT_PATH}`);
+
+  return payload;
+}
+
 async function scrapeInstagramDiscovery() {
   console.log('📸 INSTAGRAM DISCOVERY ENGINE');
   console.log('========================================');
@@ -841,6 +1162,24 @@ async function scrapeInstagramDiscovery() {
   loadEnvFile();
   CONFIG = buildConfig();
   const sourceStats = loadSourceStats();
+
+  const apiResult = await collectDealsFromAccountApi(sourceStats);
+  if (apiResult && apiResult.deals.length > 0) {
+    console.log(`🧠 account API discovery: sources=${apiResult.visitedSources}, candidates=${apiResult.totalCandidates}, rawDeals=${apiResult.deals.length}`);
+    return finalizeDiscoveryRun({
+      sourceStats,
+      sourceRunStats: apiResult.sourceRunStats,
+      candidateSnapshot: apiResult.candidateSnapshot,
+      visitedSources: apiResult.visitedSources,
+      totalCandidates: apiResult.totalCandidates,
+      visitedPosts: apiResult.visitedPosts,
+      rawDeals: apiResult.deals,
+      mode: apiResult.mode,
+    });
+  }
+  if (apiResult) {
+    console.log('ℹ️ account API path produced 0 deals; falling back to browser discovery');
+  }
 
   let browser;
   try {
@@ -1021,7 +1360,6 @@ async function scrapeInstagramDiscovery() {
       pushCandidate(postUrl, { kind: 'search', key: 'search:duckduckgo' });
     }
 
-    ensureArtifactsDir();
     const candidateSnapshot = [...candidatePosts.values()].map((c) => ({
       url: c.url,
       sourceHits: c.sourceHits,
@@ -1030,13 +1368,6 @@ async function scrapeInstagramDiscovery() {
       accountHint: c.accountHint,
       relatedHint: c.relatedHint,
     }));
-    fs.writeFileSync(CANDIDATE_LOG_PATH, JSON.stringify({
-      updatedAt: new Date().toISOString(),
-      sourceCount: processedSourceKeys.size,
-      relatedAccountCandidates: relatedCandidates.size,
-      totalCandidates: candidateSnapshot.length,
-      candidates: candidateSnapshot,
-    }, null, 2));
 
     const postsToVisit = [...candidatePosts.values()]
       .sort((a, b) => b.sourceHits - a.sourceHits)
@@ -1207,75 +1538,16 @@ async function scrapeInstagramDiscovery() {
       }
     }
 
-    const previousDeals = loadPreviousDeals();
-    const finalDeals = mergeDeals(deals, previousDeals);
-
-    const payload = {
-      lastUpdated: new Date().toISOString(),
-      source: 'instagram-discovery-engine',
-      totalDeals: finalDeals.length,
-      deals: finalDeals,
-      meta: {
-        visitedSources: processedSourceKeys.size,
-        totalCandidates: candidatePosts.size,
-        visitedPosts: postsToVisit.length,
-        scrapedDealsRaw: deals.length,
-      },
-    };
-
-    const persistedStats = { ...sourceStats };
-    for (const [key, runStat] of sourceRunStats.entries()) {
-      const prev = persistedStats[key] || {};
-      persistedStats[key] = {
-        kind: runStat.kind || prev.kind || '',
-        runs: Number(prev.runs || 0) + Number(runStat.runs || 0),
-        totalLinks: Number(prev.totalLinks || 0) + Number(runStat.links || 0),
-        acceptedDeals: Number(prev.acceptedDeals || 0) + Number(runStat.acceptedDeals || 0),
-        lastSeenAt: runStat.lastSeenAt || prev.lastSeenAt || '',
-      };
-    }
-
-    const topSources = Object.entries(persistedStats)
-      .map(([key, stat]) => {
-        const safeStat = (stat && typeof stat === 'object') ? stat : {};
-        return {
-          key,
-          kind: safeStat.kind || '',
-          runs: Number(safeStat.runs || 0),
-          acceptedDeals: Number(safeStat.acceptedDeals || 0),
-          totalLinks: Number(safeStat.totalLinks || 0),
-          performance: Math.round(sourcePerformanceScore(safeStat) * 100) / 100,
-        };
-      })
-      .sort((a, b) => b.performance - a.performance)
-      .slice(0, 30);
-
-    saveSourceStats(persistedStats, {
-      runMeta: {
-        visitedSources: processedSourceKeys.size,
-        totalCandidates: candidatePosts.size,
-        visitedPosts: postsToVisit.length,
-        scrapedDealsRaw: deals.length,
-        savedDeals: finalDeals.length,
-      },
-      topSources,
-    });
-
-    fs.writeFileSync(DISCOVERY_REPORT_PATH, JSON.stringify({
-      updatedAt: new Date().toISOString(),
+    const payload = finalizeDiscoveryRun({
+      sourceStats,
+      sourceRunStats,
+      candidateSnapshot,
       visitedSources: processedSourceKeys.size,
       totalCandidates: candidatePosts.size,
       visitedPosts: postsToVisit.length,
-      rawDeals: deals.length,
-      savedDeals: finalDeals.length,
-      topSources,
-    }, null, 2));
-
-    fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
-    console.log(`✅ saved ${finalDeals.length} deals → ${OUTPUT_PATH}`);
-    console.log(`🧾 candidates snapshot → ${CANDIDATE_LOG_PATH}`);
-    console.log(`📊 source stats → ${SOURCE_STATS_PATH}`);
-    console.log(`📈 discovery report → ${DISCOVERY_REPORT_PATH}`);
+      rawDeals: deals,
+      mode: 'browser-fallback',
+    });
 
     await browser.close();
     return payload;

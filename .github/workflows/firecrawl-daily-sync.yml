@@ -2,7 +2,7 @@ name: "Firecrawl Daily Sync"
 
 on:
   schedule:
-    - cron: '30 6 * * *' # Start after Instagram Firecrawl runs but before the 11:00 Vienna digest
+    - cron: '0 4 * * *' # Start early so Instagram/jö can finish before 11:00 Vienna digest
   workflow_dispatch:
 
 concurrency:

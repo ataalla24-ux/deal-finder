@@ -9,8 +9,6 @@ const DOCS_DIR = path.join(ROOT, 'docs');
 
 const WEB_PATH = path.join(DOCS_DIR, 'deals-pending-instagram-web.json');
 const DISCOVERY_PATH = path.join(DOCS_DIR, 'deals-pending-instagram-discovery.json');
-const FIRECRAWL4_PATH = path.join(DOCS_DIR, 'deals-pending-firecrawl4.json');
-const FIRECRAWL5_PATH = path.join(DOCS_DIR, 'deals-pending-firecrawl5.json');
 const MERGED_PATH = path.join(DOCS_DIR, 'deals-pending-instagram.json');
 
 function readPayload(filePath) {
@@ -45,15 +43,17 @@ function writePayload(payload) {
 function mergeDeals() {
   const hasWebFile = fs.existsSync(WEB_PATH);
   const hasDiscoveryFile = fs.existsSync(DISCOVERY_PATH);
-  const hasFirecrawl4File = fs.existsSync(FIRECRAWL4_PATH);
-  const hasFirecrawl5File = fs.existsSync(FIRECRAWL5_PATH);
-  const existingMergedDeals = readExistingMergedDeals().filter((deal) => isFreshByPubDate(deal));
-  const webDeals = prepareSourceDeals(WEB_PATH, 'instagram-web');
-  const discoveryDeals = prepareSourceDeals(DISCOVERY_PATH, 'instagram-discovery-engine');
-  const firecrawl4Deals = prepareSourceDeals(FIRECRAWL4_PATH, 'firecrawl-key4-instagram-direct');
-  const firecrawl5Deals = prepareSourceDeals(FIRECRAWL5_PATH, 'firecrawl-key5-instagram-gastro');
+  const existingMergedDeals = readExistingMergedDeals();
+  const webDeals = readDeals(WEB_PATH).map((deal) => ({
+    ...deal,
+    originSource: deal.originSource || deal.source || 'instagram-web',
+  }));
+  const discoveryDeals = readDeals(DISCOVERY_PATH).map((deal) => ({
+    ...deal,
+    originSource: deal.originSource || deal.source || 'instagram-discovery-engine',
+  }));
 
-  if (!hasWebFile && !hasDiscoveryFile && !hasFirecrawl4File && !hasFirecrawl5File) {
+  if (!hasWebFile && !hasDiscoveryFile) {
     const fallbackPayload = {
       lastUpdated: new Date().toISOString(),
       source: 'instagram-merged',
@@ -62,8 +62,6 @@ function mergeDeals() {
         sources: {
           web: 0,
           discovery: 0,
-          firecrawl4: 0,
-          firecrawl5: 0,
           merged: existingMergedDeals.length,
         },
         note: 'No fresh Instagram source files found; kept existing merged payload.',
@@ -75,7 +73,7 @@ function mergeDeals() {
     return [];
   }
 
-  return { webDeals, discoveryDeals, firecrawl4Deals, firecrawl5Deals };
+  return { webDeals, discoveryDeals, existingMergedDeals };
 }
 
 function normalizeUrl(url) {
@@ -111,27 +109,6 @@ function getQualityScore(deal) {
   return Number(deal?.qualityScore) || 0;
 }
 
-function getMaxAgeDays() {
-  const configured = Number(process.env.IG_MAX_AGE_DAYS);
-  return Number.isFinite(configured) && configured > 0 ? configured : 1;
-}
-
-function isFreshByPubDate(deal) {
-  const ts = getPubDateMs(deal);
-  if (!ts) return false;
-  const ageMs = Date.now() - ts;
-  return ageMs >= 0 && ageMs <= getMaxAgeDays() * 24 * 60 * 60 * 1000;
-}
-
-function prepareSourceDeals(filePath, fallbackSource) {
-  return readDeals(filePath)
-    .filter((deal) => isFreshByPubDate(deal))
-    .map((deal) => ({
-      ...deal,
-      originSource: deal.originSource || deal.source || fallbackSource,
-    }));
-}
-
 function chooseBetterDeal(a, b) {
   const aScore = getQualityScore(a);
   const bScore = getQualityScore(b);
@@ -151,10 +128,10 @@ function chooseBetterDeal(a, b) {
 function runMerge() {
   const inputs = mergeDeals();
   if (!inputs || Array.isArray(inputs)) return;
-  const { webDeals, discoveryDeals, firecrawl4Deals, firecrawl5Deals } = inputs;
+  const { webDeals, discoveryDeals } = inputs;
 
   const merged = new Map();
-  for (const deal of [...firecrawl5Deals, ...firecrawl4Deals, ...discoveryDeals, ...webDeals]) {
+  for (const deal of [...discoveryDeals, ...webDeals]) {
     const key = getSignature(deal);
     if (!key) continue;
     if (!merged.has(key)) {
@@ -183,8 +160,6 @@ function runMerge() {
       sources: {
         web: webDeals.length,
         discovery: discoveryDeals.length,
-        firecrawl4: firecrawl4Deals.length,
-        firecrawl5: firecrawl5Deals.length,
         merged: deals.length,
       },
     },
@@ -193,7 +168,7 @@ function runMerge() {
 
   writePayload(payload);
   console.log(`✅ merged Instagram deals → ${MERGED_PATH}`);
-  console.log(`   web: ${webDeals.length}, discovery: ${discoveryDeals.length}, key4: ${firecrawl4Deals.length}, key5: ${firecrawl5Deals.length}, merged: ${deals.length}`);
+  console.log(`   web: ${webDeals.length}, discovery: ${discoveryDeals.length}, merged: ${deals.length}`);
 }
 
 runMerge();

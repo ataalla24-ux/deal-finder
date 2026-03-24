@@ -93,7 +93,7 @@ const WIEN_KEYWORDS = [
 const DEAL_KEYWORDS = [
   'gratis', 'kostenlos', 'free', 'freebie', '0€', '0 €', 'rabatt', 'discount', 'aktion',
   'angebot', 'deal', 'gutschein', 'coupon', 'voucher', '1+1', '2for1', '2 for 1',
-  'happy hour', 'eröffnung', 'neueröffnung', 'special',
+  'happy hour', 'eröffnung', 'neueröffnung',
 ];
 
 const FOOD_KEYWORDS = [
