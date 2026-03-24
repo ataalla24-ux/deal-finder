@@ -209,6 +209,27 @@ function containsKeyword(text, keywords) {
   return keywords.some((k) => t.includes(k));
 }
 
+function looksLikeDiscoveryAccount({ username = '', fullName = '', biography = '', hitCount = 1 } = {}) {
+  const accountText = cleanText([username, fullName, biography].join(' '));
+  if (!accountText) return false;
+
+  if (containsKeyword(accountText, WIEN_KEYWORDS)) return true;
+
+  const merchantishKeywords = [
+    'cafe', 'café', 'coffee', 'kaffee', 'espresso', 'matcha', 'bar', 'bistro', 'brunch',
+    'restaurant', 'pizza', 'burger', 'kebab', 'kebap', 'döner', 'doener', 'sushi',
+    'falafel', 'bakery', 'croissant', 'dessert', 'donut', 'ice cream', 'icecream', 'eis',
+    'bubble tea', 'spritz', 'cocktail', 'drink',
+  ];
+  if (containsKeyword(accountText, merchantishKeywords)) return true;
+
+  if (hitCount >= 2 && (containsKeyword(accountText, FOOD_KEYWORDS) || containsKeyword(accountText, DRINK_KEYWORDS))) {
+    return true;
+  }
+
+  return false;
+}
+
 function keywordHits(text, keywords) {
   const t = cleanText(text).toLowerCase();
   if (!t) return 0;
@@ -773,8 +794,10 @@ async function collectDealsFromAccountApi(sourceStats) {
       : [];
     for (const edge of relatedEdges) {
       const username = cleanText(edge?.node?.username || edge?.node?.user?.username);
+      const fullName = cleanText(edge?.node?.full_name || edge?.node?.user?.full_name);
+      const biography = cleanText(edge?.node?.biography || edge?.node?.user?.biography);
       if (!username || seenUsernames.has(username)) continue;
-      if (!/wien|vienna/i.test(username)) continue;
+      if (!looksLikeDiscoveryAccount({ username, fullName, biography })) continue;
       if (queue.length + seenSourceKeys.size >= CONFIG.maxSourcesTotal) break;
       seenUsernames.add(username);
       queue.push({
@@ -816,7 +839,6 @@ async function collectDealsFromAccountApi(sourceStats) {
       if (!isFresh(pubDateIso)) continue;
       if (!combinedText) continue;
       if (isExpiredByText(combinedText)) continue;
-      if (textSignalsPostTooOld(combinedText)) continue;
       if (isGiveawayOnly(combinedText)) continue;
 
       const isWien = containsKeyword(`${combinedText} ${locationName}`, WIEN_KEYWORDS)
@@ -1342,8 +1364,7 @@ async function scrapeInstagramDiscovery() {
           if (sourcesQueue.find((s) => s.key === key)) continue;
           if (sourcesQueue.length + processedSourceKeys.size >= CONFIG.maxSourcesTotal) break;
 
-          const accountLooksWien = username.includes('wien') || username.includes('vienna');
-          if (!accountLooksWien) continue;
+          if (!looksLikeDiscoveryAccount({ username, hitCount: meta.hits })) continue;
 
           sourcesQueue.push({
             kind: 'related-account',
@@ -1471,7 +1492,6 @@ async function scrapeInstagramDiscovery() {
         const pubDateIso = pubDateMeta.iso;
 
         if (isExpiredByText(combinedText)) continue;
-        if (textSignalsPostTooOld(combinedText)) continue;
         if (isGiveawayOnly(combinedText)) continue;
 
         const isWien = containsKeyword(combinedText, WIEN_KEYWORDS)
