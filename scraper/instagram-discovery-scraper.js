@@ -345,15 +345,15 @@ function extractShortcodesFromText(text) {
   const urls = new Set();
   if (!text) return urls;
   const patterns = [
-    /"shortcode"\s*:\s*"([A-Za-z0-9_-]{5,})"/g,
-    /"code"\s*:\s*"([A-Za-z0-9_-]{5,})"/g,
-    /\/(?:p|reel)\/([A-Za-z0-9_-]{5,})\//g,
+    /"shortcode"\s*:\s*"([A-Za-z0-9_-]{8,})"/g,
+    /"code"\s*:\s*"([A-Za-z0-9_-]{8,})"/g,
+    /\/(?:p|reel)\/([A-Za-z0-9_-]{8,})\//g,
   ];
   for (const re of patterns) {
     let m;
     while ((m = re.exec(text)) !== null) {
+      if (/^[a-z]{2}_[A-Z]{2}$/i.test(m[1])) continue;
       urls.add(`https://www.instagram.com/p/${m[1]}/`);
-      urls.add(`https://www.instagram.com/reel/${m[1]}/`);
     }
   }
   return urls;
@@ -1306,11 +1306,7 @@ async function scrapeInstagramDiscovery() {
           const before = sourceLinks.size;
 
           const domUrls = await collectLinksFromDom(page);
-          const scripts = await page.$$eval('script', (nodes) => nodes.map((n) => n.textContent || '').filter(Boolean));
           for (const u of domUrls) sourceLinks.add(u);
-          for (const scriptText of scripts.slice(0, 50)) {
-            for (const u of extractShortcodesFromText(scriptText)) sourceLinks.add(normalizeInstagramPostUrl(u));
-          }
 
           if (source.kind === 'account' || source.kind === 'related-account') {
             const users = await collectRelatedAccountsFromDom(page);
@@ -1331,8 +1327,7 @@ async function scrapeInstagramDiscovery() {
         let links = [...sourceLinks].filter(Boolean).slice(0, CONFIG.perSourceLinksLimit);
         if (links.length < 6) {
           const mirror = await fetchMirrorText(source.url);
-          const mirrorLinks = [...extractShortcodesFromText(mirror)].map((u) => normalizeInstagramPostUrl(u)).filter(Boolean);
-          links = [...new Set([...links, ...extractPostUrls(mirror), ...mirrorLinks])].slice(0, CONFIG.perSourceLinksLimit);
+          links = [...new Set([...links, ...extractPostUrls(mirror)])].slice(0, CONFIG.perSourceLinksLimit);
         }
 
         console.log(`   ↳ links: ${links.length}`);

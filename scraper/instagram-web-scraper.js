@@ -412,13 +412,14 @@ function extractShortcodesFromText(text) {
   const urls = new Set();
   if (!text) return urls;
   const patterns = [
-    /"shortcode"\s*:\s*"([A-Za-z0-9_-]{5,})"/g,
-    /"code"\s*:\s*"([A-Za-z0-9_-]{5,})"/g,
-    /\/(?:p|reel)\/([A-Za-z0-9_-]{5,})\//g,
+    /"shortcode"\s*:\s*"([A-Za-z0-9_-]{8,})"/g,
+    /"code"\s*:\s*"([A-Za-z0-9_-]{8,})"/g,
+    /\/(?:p|reel)\/([A-Za-z0-9_-]{8,})\//g,
   ];
   for (const re of patterns) {
     let m;
     while ((m = re.exec(text)) !== null) {
+      if (/^[a-z]{2}_[A-Z]{2}$/i.test(m[1])) continue;
       urls.add(`https://www.instagram.com/p/${m[1]}/`);
     }
   }
@@ -721,13 +722,11 @@ async function scrapeInstagram() {
           const beforeCount = sourceLinks.size;
 
           const domUrls = await collectLinksFromDom(sourcePage);
-          const scriptUrls = await collectLinksFromScripts(sourcePage);
           const html = await sourcePage.content();
           const htmlUrls = extractPostUrls(html);
           sourceSummary.domLinks += domUrls.length;
-          sourceSummary.scriptLinks += scriptUrls.length;
           sourceSummary.htmlLinks += htmlUrls.length;
-          for (const u of [...domUrls, ...scriptUrls, ...htmlUrls]) {
+          for (const u of [...domUrls, ...htmlUrls]) {
             sourceLinks.add(u);
           }
 
@@ -754,19 +753,17 @@ async function scrapeInstagram() {
             await sourcePage.waitForTimeout(1800);
             await dismissInstagramOverlays(sourcePage);
             const reelsDom = await collectLinksFromDom(sourcePage);
-            const reelsScript = await collectLinksFromScripts(sourcePage);
             const reelsHtml = await sourcePage.content();
             const reelsHtmlUrls = extractPostUrls(reelsHtml);
-            sourceSummary.reelsFallbackLinks += reelsDom.length + reelsScript.length + reelsHtmlUrls.length;
-            postUrls = [...new Set([...postUrls, ...reelsDom, ...reelsScript, ...reelsHtmlUrls])].slice(0, CONFIG.perSourceLinksLimit);
+            sourceSummary.reelsFallbackLinks += reelsDom.length + reelsHtmlUrls.length;
+            postUrls = [...new Set([...postUrls, ...reelsDom, ...reelsHtmlUrls])].slice(0, CONFIG.perSourceLinksLimit);
           } catch {}
         }
         if (postUrls.length === 0) {
           const mirrorText = await fetchMirrorText(source.url);
-          const mirrorShortcodes = [...extractShortcodesFromText(mirrorText)];
           const mirrorUrls = extractPostUrls(mirrorText);
-          sourceSummary.mirrorFallbackLinks += mirrorUrls.length + mirrorShortcodes.length;
-          postUrls = [...new Set([...postUrls, ...mirrorUrls, ...mirrorShortcodes])].slice(0, CONFIG.perSourceLinksLimit);
+          sourceSummary.mirrorFallbackLinks += mirrorUrls.length;
+          postUrls = [...new Set([...postUrls, ...mirrorUrls])].slice(0, CONFIG.perSourceLinksLimit);
         }
         if (postUrls.length < 16) {
           const sourceDiscovered = await discoverLinksForSourceViaDuckDuckGo(source);
