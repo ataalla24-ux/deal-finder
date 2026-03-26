@@ -944,10 +944,10 @@
     </div>
     
     <div class="bottom-nav">
-        <button type="button" class="nav-item active" onclick="activateBottomNav(event, 'home')" onpointerup="activateBottomNav(event, 'home')"><div class="nav-icon">🏠</div><div class="nav-label">Deals</div></button>
-        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'secret')" onpointerup="activateBottomNav(event, 'secret')"><div class="nav-icon">✨</div><div class="nav-label">Für dich</div></button>
-        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'stats')" onpointerup="activateBottomNav(event, 'stats')"><div class="nav-icon">📊</div><div class="nav-label">Stats</div></button>
-        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'favorites')" onpointerup="activateBottomNav(event, 'favorites')" style="position:relative;"><div class="nav-icon">❤️</div><div class="nav-label">Favoriten</div><span class="nav-badge" id="favBadge" style="display:none;">0</span></button>
+        <button type="button" class="nav-item active" onclick="activateBottomNav(event, 'home')" onpointerdown="activateBottomNav(event, 'home')" ontouchstart="activateBottomNav(event, 'home')"><div class="nav-icon">🏠</div><div class="nav-label">Deals</div></button>
+        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'secret')" onpointerdown="activateBottomNav(event, 'secret')" ontouchstart="activateBottomNav(event, 'secret')"><div class="nav-icon">✨</div><div class="nav-label">Für dich</div></button>
+        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'stats')" onpointerdown="activateBottomNav(event, 'stats')" ontouchstart="activateBottomNav(event, 'stats')"><div class="nav-icon">📊</div><div class="nav-label">Stats</div></button>
+        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'favorites')" onpointerdown="activateBottomNav(event, 'favorites')" ontouchstart="activateBottomNav(event, 'favorites')" style="position:relative;"><div class="nav-icon">❤️</div><div class="nav-label">Favoriten</div><span class="nav-badge" id="favBadge" style="display:none;">0</span></button>
     </div>
     
     <!-- FAB ADD DEAL BUTTON -->
@@ -4757,11 +4757,12 @@
         }
         function activateBottomNav(event, view) {
             if (event) {
-                event.preventDefault();
+                if (typeof event.button === 'number' && event.button !== 0) return;
+                if (event.cancelable) event.preventDefault();
                 event.stopPropagation();
             }
             const now = Date.now();
-            if (lastBottomNavActivation.view === view && (now - lastBottomNavActivation.ts) < 350) return;
+            if (lastBottomNavActivation.view === view && (now - lastBottomNavActivation.ts) < 450) return;
             lastBottomNavActivation = { view, ts: now };
             if (view === 'home') showHome();
             else if (view === 'secret') showSecretDeals();
