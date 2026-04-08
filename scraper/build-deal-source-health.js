@@ -263,6 +263,16 @@ function buildPrecisionScore(stats) {
   return Math.max(0, Math.min(100, Math.round(score)));
 }
 
+function buildSourceWeightScore(stats) {
+  if (stats.totalDeals === 0) return 0;
+  const score =
+    stats.healthScore * 0.28 +
+    stats.missionFitScore * 0.32 +
+    stats.coverageScore * 0.2 +
+    stats.precisionScore * 0.2;
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
 async function main() {
   const now = Date.now();
   const allPendingFiles = fs.readdirSync(DOCS_DIR)
@@ -415,6 +425,10 @@ async function main() {
     source.precisionScore = buildPrecisionScore(source);
   }
 
+  for (const source of sources) {
+    source.sourceWeightScore = buildSourceWeightScore(source);
+  }
+
   sources.sort((a, b) => b.healthScore - a.healthScore || b.totalDeals - a.totalDeals || a.sourceKey.localeCompare(b.sourceKey));
 
   const uniqueCandidates = candidates.filter((candidate) => (signatureMap.get(candidate.signature)?.count || 0) === 1).length;
@@ -483,6 +497,15 @@ async function main() {
           sourceKey: source.sourceKey,
           sourceLabel: source.sourceLabel,
           precisionScore: source.precisionScore,
+          totalDeals: source.totalDeals,
+        })),
+      topWeightedSources: [...sources]
+        .sort((a, b) => b.sourceWeightScore - a.sourceWeightScore || b.healthScore - a.healthScore)
+        .slice(0, 5)
+        .map((source) => ({
+          sourceKey: source.sourceKey,
+          sourceLabel: source.sourceLabel,
+          sourceWeightScore: source.sourceWeightScore,
           totalDeals: source.totalDeals,
         })),
       topSourcesToFix: recommendations,

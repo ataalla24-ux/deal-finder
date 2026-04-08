@@ -119,7 +119,7 @@ Deliverables:
 - [x] taeglicher Merchant-Bootstrap fuer Daily Sync
 - [ ] ehrlicher Daily-Sync-Diagnosepfad fuer Kandidaten, besuchte Posts und Ablehnungsgruende
 - [x] Coverage- und Precision-Scores im taeglichen Report
-- [ ] Source-Weighting-Logik aus den taeglichen Reports ableiten
+- [x] Source-Weighting-Logik aus den taeglichen Reports ableiten
 
 ## Phase 2: Instagram-System stabilisieren
 
