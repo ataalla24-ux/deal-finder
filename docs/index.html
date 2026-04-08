@@ -478,14 +478,14 @@
         .empty { text-align: center; padding: 60px 20px; color: #666; }
         .empty-icon { font-size: 48px; margin-bottom: 12px; }
         .loading { text-align: center; padding: 40px; color: #666; }
-        .toast { position: fixed; bottom: calc(96px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px)); left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 24px; border-radius: 30px; font-weight: 600; z-index: 1000; animation: toastIn 0.3s ease; }
+        .toast { position: fixed; bottom: calc(88px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px)); left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 24px; border-radius: 30px; font-weight: 600; z-index: 1000; animation: toastIn 0.3s ease; }
         @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         
         /* BOTTOM NAV */
         .bottom-nav {
             position: fixed;
             left: 50%;
-            bottom: calc(10px + var(--ff-bottom-viewport-offset, 0px));
+            bottom: calc(8px + var(--ff-bottom-viewport-offset, 0px));
             transform: translate3d(-50%, 0, 0);
             -webkit-transform: translate3d(-50%, 0, 0);
             width: min(560px, calc(100% - 28px));
@@ -494,13 +494,13 @@
             -webkit-backdrop-filter: blur(18px);
             border: 1px solid rgba(148, 163, 184, 0.22);
             border-radius: 999px;
-            padding: 7px;
-            padding-bottom: calc(7px + env(safe-area-inset-bottom));
+            padding: 5px;
+            padding-bottom: calc(5px + env(safe-area-inset-bottom));
             display: flex;
             justify-content: space-between;
             align-items: stretch;
-            gap: 4px;
-            box-shadow: 0 14px 34px rgba(15,23,42,0.15), 0 4px 12px rgba(148,163,184,0.12);
+            gap: 3px;
+            box-shadow: 0 12px 28px rgba(15,23,42,0.13), 0 3px 10px rgba(148,163,184,0.1);
             z-index: 100;
             will-change: bottom;
             backface-visibility: hidden;
@@ -515,9 +515,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 3px;
-            min-height: 54px;
-            padding: 8px 9px;
+            gap: 2px;
+            min-height: 46px;
+            padding: 6px 7px;
             border-radius: 999px;
             cursor: pointer;
             border: none;
@@ -533,14 +533,14 @@
         .nav-item.active {
             background: linear-gradient(135deg, #4f8ef7 0%, #2f74e7 100%);
             color: white;
-            box-shadow: 0 8px 18px rgba(47,116,231,0.28);
+            box-shadow: 0 6px 14px rgba(47,116,231,0.24);
         }
         .nav-item.active .nav-icon,
         .nav-item.active .nav-label { color: white; }
-        .nav-icon { font-size: 17px; line-height: 1; transition: color 0.18s ease, transform 0.18s ease; }
-        .nav-label { font-size: 9px; font-weight: 700; line-height: 1.05; letter-spacing: -0.01em; color: inherit; white-space: nowrap; }
+        .nav-icon { font-size: 16px; line-height: 1; transition: color 0.18s ease, transform 0.18s ease; }
+        .nav-label { font-size: 8px; font-weight: 700; line-height: 1; letter-spacing: -0.01em; color: inherit; white-space: nowrap; }
         .nav-item.active .nav-icon { transform: translateY(-1px); }
-        .nav-badge { position: absolute; top: 4px; right: 8px; background: #ef4444; color: white; font-size: 10px; padding: 2px 6px; border-radius: 999px; font-weight: 800; box-shadow: 0 4px 10px rgba(239,68,68,0.32); }
+        .nav-badge { position: absolute; top: 2px; right: 6px; background: #ef4444; color: white; font-size: 9px; padding: 2px 5px; border-radius: 999px; font-weight: 800; box-shadow: 0 4px 10px rgba(239,68,68,0.32); }
     
   /* ===== PRO MEMBERSHIP SYSTEM ===== */
   .pro-banner { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #8b5cf6 100%); border-radius: 16px; padding: 16px; margin-bottom: 16px; color: white; cursor: pointer; position: relative; overflow: hidden; }
