@@ -906,11 +906,11 @@ export default {
 
     if (path === '/api/deals/state' && request.method === 'GET') {
       const overrides = await listDealOverrides(env, 500);
-      const dailyDeal = await getJsonKV(env, dealDailyKey());
+      const dailyDeal = normalizeDailyDealRecord(await getJsonKV(env, dealDailyKey()));
       return json({
         ok: true,
         overrides: overrides.map(sanitizePublicDealOverride).filter(Boolean),
-        dailyDeal: sanitizePublicDailyDeal(dailyDeal),
+        dailyDeal: isCurrentDailyDealRecord(dailyDeal) ? sanitizePublicDailyDeal(dailyDeal) : null,
       });
     }
 
@@ -951,6 +951,7 @@ export default {
         dealId,
         note: cleanShortText(body?.note, 180),
         updatedAt: Date.now(),
+        date: getViennaDayKey(),
       };
 
       await putJsonKV(env, dealDailyKey(), record);

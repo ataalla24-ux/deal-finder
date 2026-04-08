@@ -14,6 +14,18 @@ const __dirname = path.dirname(__filename);
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
+const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Vienna',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+});
+
+function getViennaDayKey(input = Date.now()) {
+    const date = input instanceof Date ? input : new Date(input || Date.now());
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+    return VIENNA_DAY_FORMATTER.format(date);
+}
 
 // ============================================
 // Step 1: Find today's digest thread
@@ -30,9 +42,9 @@ async function findTodaysThread() {
     }
 
   // Find today's FreeFinder digest message
-  const today = new Date().toDateString();
+  const today = getViennaDayKey();
     const thread = data.messages.find(m => {
-          const msgDate = new Date(parseFloat(m.ts) * 1000).toDateString();
+          const msgDate = getViennaDayKey(parseFloat(m.ts) * 1000);
           return msgDate === today && m.text && m.text.includes('FreeFinder Wien');
     });
 
@@ -115,7 +127,7 @@ function hasHumanApproval(message, botUserId) {
 // ============================================
 function saveDealOfTheDay(deal) {
     const outputPath = path.join(__dirname, '..', 'docs', 'deal-of-the-day.json');
-    const today = new Date().toISOString().split('T')[0];
+    const today = getViennaDayKey();
     const normalized = normalizeDealRecord(deal);
 
   const output = {

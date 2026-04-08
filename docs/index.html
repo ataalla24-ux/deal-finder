@@ -1092,6 +1092,12 @@
         let submittedLinks = JSON.parse(localStorage.getItem('submittedLinks') || '[]');
         let dealOverridesById = {};
         let dailyDealOverride = null;
+        const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Europe/Vienna',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        });
         let currentAdminDealId = '';
         const feedbackState = { audioContext: null, lastHapticAt: 0, lastToneAt: 0 };
         const FEEDBACK_PRESS_SELECTOR = 'button, .nav-item, .filter-btn, .search-tag, .fab-add, .pro-banner, .radius-btn, .toggle-sw, .toggle-btn, .action-btn';
@@ -1112,6 +1118,28 @@
         const DEAL_OVERRIDE_CACHE_KEY = 'freefinder_deal_override_state_v1';
         const APP_SHELL_VERSION_KEY = 'freefinder_app_shell_version';
         const APP_SHELL_VERSION = '2026-03-23-hidden-sync-v1';
+        function getViennaDayKey(input = Date.now()) {
+            const date = input instanceof Date ? input : new Date(input || Date.now());
+            if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+            return VIENNA_DAY_FORMATTER.format(date);
+        }
+        function normalizeDailyDealRecord(record) {
+            if (!record || !record.dealId) return null;
+            const updatedAt = Number(record.updatedAt || 0) || null;
+            const explicitDate = typeof record.date === 'string' ? record.date.trim() : '';
+            let date = explicitDate;
+            if (!date && updatedAt) date = getViennaDayKey(updatedAt);
+            if (!date && typeof record.pickedAt === 'string') date = getViennaDayKey(record.pickedAt);
+            return {
+                ...record,
+                updatedAt,
+                date: date || '',
+            };
+        }
+        function isCurrentDailyDealRecord(record) {
+            const normalized = normalizeDailyDealRecord(record);
+            return !!(normalized && normalized.dealId && normalized.date === getViennaDayKey());
+        }
         let adminHiddenTapCount = 0;
         let adminHiddenTapTimer = null;
         let currentLanguage = localStorage.getItem(APP_LANGUAGE_KEY) || 'de';
@@ -3749,16 +3777,11 @@
         async function setDailyDeal() {
         // Helper to clean Slack formatting
         function cleanText(t) { return cleanUiNoiseText(t); }
-        function getViennaToday() {
-            return new Intl.DateTimeFormat('en-CA', {
-                timeZone: 'Europe/Vienna',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-            }).format(new Date());
-        }
-        if (dailyDealOverride && dailyDealOverride.dealId) {
-            const overridden = allDeals.find(d => d.id === dailyDealOverride.dealId);
+        const activeDailyDealOverride = isCurrentDailyDealRecord(dailyDealOverride)
+            ? normalizeDailyDealRecord(dailyDealOverride)
+            : null;
+        if (activeDailyDealOverride && activeDailyDealOverride.dealId) {
+            const overridden = allDeals.find(d => d.id === activeDailyDealOverride.dealId);
             if (overridden) {
                 const _locOverride = getDisplayLocation(overridden);
                 const _brandOverride = getDisplayBrand(overridden);
@@ -3773,11 +3796,11 @@
         }
         // Try to load manually picked deal from deal-of-the-day.json
         try {
-            const today = getViennaToday();
+            const today = getViennaDayKey();
             const res = await fetch('deal-of-the-day.json?t=' + Date.now());
             if (res.ok) {
-                const picked = await res.json();
-                if (picked.date === today && picked.dealId) {
+                const picked = normalizeDailyDealRecord(await res.json());
+                if (picked && picked.date === today && picked.dealId) {
                     // Find the deal in allDeals by id
                     const rawDeal = allDeals.find(d => d.id === picked.dealId) || picked;
                     const deal = normalizeDealForApp(rawDeal);
@@ -3796,8 +3819,9 @@
         } catch(e) { /* fall through to auto */ }
         // Fallback: auto-rotate based on date
         const gratisDeals = allDeals.filter(d => d.type === 'gratis' || d.type === 'freebie');
+        const viennaDay = Number((getViennaDayKey().split('-')[2] || '').trim()) || new Date().getDate();
         const deal = gratisDeals.length
-          ? gratisDeals[new Date().getDate() % gratisDeals.length]
+          ? gratisDeals[viennaDay % gratisDeals.length]
           : allDeals[0];
         if (!deal) {
           applyDailyDealTheme('');
@@ -5398,8 +5422,9 @@
       cachedOverrides.forEach((item) => {
         if (item && item.dealId) dealOverridesById[item.dealId] = item;
       });
-      if (cached && cached.dailyDeal && cached.dailyDeal.dealId) {
-        dailyDealOverride = cached.dailyDeal;
+      const cachedDailyDeal = normalizeDailyDealRecord(cached && cached.dailyDeal);
+      if (isCurrentDailyDealRecord(cachedDailyDeal)) {
+        dailyDealOverride = cachedDailyDeal;
       }
     } catch (e) {
       localStorage.removeItem(DEAL_OVERRIDE_CACHE_KEY);
@@ -5416,8 +5441,9 @@
         if (item && item.dealId) dealOverridesById[item.dealId] = item;
       });
       dailyDealOverride = null;
-      if (data && data.dailyDeal && data.dailyDeal.dealId) {
-        dailyDealOverride = data.dailyDeal;
+      const freshDailyDeal = normalizeDailyDealRecord(data && data.dailyDeal);
+      if (isCurrentDailyDealRecord(freshDailyDeal)) {
+        dailyDealOverride = freshDailyDeal;
       }
       localStorage.setItem(DEAL_OVERRIDE_CACHE_KEY, JSON.stringify({
         updatedAt: Date.now(),
@@ -5520,7 +5546,7 @@
     document.getElementById('adminHiddenInput').checked = !!override.hidden;
     document.getElementById('adminModalDealMeta').textContent = (deal.brand || 'Deal') + ' • ' + (deal.id || '');
     document.getElementById('adminHideBtnLabel').textContent = (override.hidden || deal.hidden) ? 'Deal wieder anzeigen' : 'Deal ausblenden';
-    const isDaily = dailyDealOverride && dailyDealOverride.dealId === deal.id;
+    const isDaily = isCurrentDailyDealRecord(dailyDealOverride) && dailyDealOverride.dealId === deal.id;
     document.getElementById('adminTokenStatus').textContent = isDaily ? 'Aktuell als Deal des Tages gesetzt' : 'Admin-Override aktiv nach dem Speichern.';
   }
 
@@ -5639,7 +5665,11 @@
         method: 'POST',
         body: JSON.stringify({ dealId: currentAdminDealId })
       });
-      dailyDealOverride = (data && data.dailyDeal) || { dealId: currentAdminDealId };
+      dailyDealOverride = normalizeDailyDealRecord((data && data.dailyDeal) || {
+        dealId: currentAdminDealId,
+        updatedAt: Date.now(),
+        date: getViennaDayKey()
+      });
       await setDailyDeal();
       const updatedDeal = findDealById(currentAdminDealId) || { id: currentAdminDealId, brand: 'Deal' };
       populateAdminModalFromDeal(updatedDeal);
