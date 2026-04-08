@@ -330,105 +330,6 @@ function createRejectionCounters() {
   };
 }
 
-async function fetchInstagramJsonInBrowser(page, url, referer) {
-  if (!page || !url) return null;
-  try {
-    const response = await page.context().request.get(url, {
-      headers: {
-        'X-IG-App-ID': '936619743392459',
-        'X-Requested-With': 'XMLHttpRequest',
-        Accept: '*/*',
-        Referer: referer,
-      },
-      failOnStatusCode: false,
-    });
-    if (!response.ok()) return null;
-    const text = await response.text();
-    if (!text) return null;
-    return JSON.parse(text);
-  } catch {
-    try {
-      const result = await page.evaluate(async ({ url, referer }) => {
-        try {
-          const response = await fetch(url, {
-            method: 'GET',
-            credentials: 'include',
-            referrer: referer,
-            headers: {
-              'X-IG-App-ID': '936619743392459',
-              'X-Requested-With': 'XMLHttpRequest',
-              Accept: '*/*',
-            },
-          });
-          const text = await response.text();
-          return { ok: response.ok, status: response.status, text };
-        } catch (error) {
-          return { ok: false, status: 0, text: '', error: String(error?.message || error || '') };
-        }
-      }, { url, referer });
-
-      if (!result?.ok || !result?.text) return null;
-      return JSON.parse(result.text);
-    } catch {
-      return null;
-    }
-  }
-}
-
-function buildInstagramPostUrlFromNode(node) {
-  const shortcode = cleanText(node?.shortcode);
-  if (!shortcode) return '';
-  const pathKind = node?.is_video || node?.__typename === 'GraphVideo' ? 'reel' : 'p';
-  return `https://www.instagram.com/${pathKind}/${shortcode}/`;
-}
-
-function extractLinksFromTimelineEdges(edges) {
-  const links = new Set();
-  for (const edge of Array.isArray(edges) ? edges : []) {
-    const node = edge?.node || edge;
-    const shortcode = cleanText(node?.shortcode || node?.code);
-    if (!shortcode) continue;
-    const isVideo = Boolean(node?.is_video) || node?.media_type === 2 || node?.__typename === 'GraphVideo';
-    const kind = isVideo ? 'reel' : 'p';
-    links.add(`https://www.instagram.com/${kind}/${shortcode}/`);
-    if (links.size >= CONFIG.perSourceLinksLimit) break;
-  }
-  return [...links];
-}
-
-async function fetchAccountTimelineLinks(page, username) {
-  const normalized = normalizeUsername(username);
-  if (!page || !normalized) return [];
-  try {
-    const referer = `https://www.instagram.com/${encodeURIComponent(normalized)}/`;
-    const urls = [
-      `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(normalized)}`,
-      `https://www.instagram.com/${encodeURIComponent(normalized)}/?__a=1&__d=dis`,
-    ];
-    for (const url of urls) {
-      const parsed = await fetchInstagramJsonInBrowser(page, url, referer);
-      const edges =
-        parsed?.data?.user?.edge_owner_to_timeline_media?.edges
-        || parsed?.graphql?.user?.edge_owner_to_timeline_media?.edges
-        || parsed?.items
-        || [];
-      const links = extractLinksFromTimelineEdges(edges);
-      if (links.length > 0) return links;
-    }
-    return [];
-  } catch {
-    return [];
-  }
-}
-
-function collectLinksFromAccountHtml(html) {
-  try {
-    return [...extractShortcodesFromText(html)];
-  } catch {
-    return [];
-  }
-}
-
 function writeWebReport(report) {
   try {
     fs.writeFileSync(WEB_REPORT_PATH, JSON.stringify(report, null, 2));
@@ -706,7 +607,6 @@ function buildSources() {
       kind: 'account',
       key: `acct:${account.username}`,
       url: `https://www.instagram.com/${account.username}/`,
-      username: account.username,
       priority: 3 + priorityBoost,
     });
   }
@@ -718,7 +618,6 @@ function buildSources() {
       kind: 'account',
       key: `acct:${normalized}`,
       url: `https://www.instagram.com/${normalized}/`,
-      username: normalized,
       priority: 2,
     });
   }
@@ -865,8 +764,6 @@ async function scrapeInstagram() {
         key: source.key,
         kind: source.kind,
         domLinks: 0,
-        htmlShortcodeLinks: 0,
-        accountApiLinks: 0,
         scriptLinks: 0,
         htmlLinks: 0,
         reelsFallbackLinks: 0,
@@ -895,11 +792,9 @@ async function scrapeInstagram() {
           const domUrls = await collectLinksFromDom(sourcePage);
           const html = await sourcePage.content();
           const htmlUrls = extractPostUrls(html);
-          const htmlShortcodeUrls = source.kind === 'account' ? collectLinksFromAccountHtml(html) : [];
           sourceSummary.domLinks += domUrls.length;
           sourceSummary.htmlLinks += htmlUrls.length;
-          sourceSummary.htmlShortcodeLinks += htmlShortcodeUrls.length;
-          for (const u of [...domUrls, ...htmlUrls, ...htmlShortcodeUrls]) {
+          for (const u of [...domUrls, ...htmlUrls]) {
             sourceLinks.add(u);
           }
 
@@ -932,11 +827,6 @@ async function scrapeInstagram() {
             postUrls = [...new Set([...postUrls, ...reelsDom, ...reelsHtmlUrls])].slice(0, CONFIG.perSourceLinksLimit);
           } catch {}
         }
-        if (postUrls.length < 10 && source.kind === 'account') {
-          const apiLinks = await fetchAccountTimelineLinks(sourcePage, source.username || source.key.replace(/^acct:/, ''));
-          sourceSummary.accountApiLinks += apiLinks.length;
-          postUrls = [...new Set([...postUrls, ...apiLinks])].slice(0, CONFIG.perSourceLinksLimit);
-        }
         if (postUrls.length === 0) {
           const mirrorText = await fetchMirrorText(source.url);
           const mirrorUrls = extractPostUrls(mirrorText);
@@ -950,11 +840,6 @@ async function scrapeInstagram() {
         }
         sourceSummary.linksFound = postUrls.length;
         console.log(`   ↳ links found: ${postUrls.length}`);
-        if (source.kind === 'account') {
-          console.log(
-            `     account stats: dom=${sourceSummary.domLinks} html=${sourceSummary.htmlLinks} shortcode=${sourceSummary.htmlShortcodeLinks} api=${sourceSummary.accountApiLinks} ddg=${sourceSummary.duckduckgoLinks}`
-          );
-        }
 
         for (const postUrl of postUrls) {
           if (!candidatePosts.has(postUrl)) {

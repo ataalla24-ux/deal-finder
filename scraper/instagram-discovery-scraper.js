@@ -810,86 +810,10 @@ function buildInstagramApiHeaders(cookieHeader, referer = 'https://www.instagram
   };
 }
 
-async function createInstagramApiSession() {
-  const cookieHints = buildCookieHints();
-  if (cookieHints.length === 0) return null;
-
-  const { chromium } = await import('playwright');
-  const browser = await chromium.launch({
-    headless: true,
-    args: ['--disable-blink-features=AutomationControlled', '--no-sandbox', '--disable-dev-shm-usage'],
-  });
-
-  const context = await browser.newContext({
-    viewport: { width: 1366, height: 900 },
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-    locale: 'de-AT',
-    timezoneId: 'Europe/Vienna',
-  });
-
-  await context.addCookies(
-    cookieHints.map((c) => ({
-      name: c.name,
-      value: c.value,
-      domain: c.domain || '.instagram.com',
-      path: '/',
-      secure: true,
-      httpOnly: c.name === 'sessionid',
-      sameSite: 'Lax',
-    }))
-  );
-
-  const page = await context.newPage();
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-  });
-
-  try {
-    await page.goto('https://www.instagram.com/', { waitUntil: 'domcontentloaded', timeout: 25000 });
-    await page.waitForTimeout(1200);
-    await dismissInstagramOverlays(page);
-  } catch {}
-
-  return { browser, context, page, cookieCount: cookieHints.length };
-}
-
-async function fetchInstagramJsonInBrowser(page, url, referer = 'https://www.instagram.com/') {
-  if (!page) return null;
-  try {
-    const result = await page.evaluate(async ({ url, referer }) => {
-      try {
-        const response = await fetch(url, {
-          method: 'GET',
-          credentials: 'include',
-          referrer: referer,
-          headers: {
-            'X-IG-App-ID': '936619743392459',
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': '*/*',
-          },
-        });
-        const text = await response.text();
-        return { ok: response.ok, status: response.status, text };
-      } catch (error) {
-        return { ok: false, status: 0, text: '', error: String(error?.message || error || '') };
-      }
-    }, { url, referer });
-
-    if (!result?.ok || !result?.text) return null;
-    return JSON.parse(result.text);
-  } catch {
-    return null;
-  }
-}
-
-async function fetchInstagramProfile(username, cookieHeader, apiPage = null) {
-  if (!username || (!cookieHeader && !apiPage)) return null;
+async function fetchInstagramProfile(username, cookieHeader) {
+  if (!username || !cookieHeader) return null;
   try {
     const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
-    if (apiPage) {
-      const parsed = await fetchInstagramJsonInBrowser(apiPage, url, `https://www.instagram.com/${encodeURIComponent(username)}/`);
-      return parsed?.data?.user || null;
-    }
     const response = await fetch(url, { headers: buildInstagramApiHeaders(cookieHeader, `https://www.instagram.com/${encodeURIComponent(username)}/`) });
     if (!response.ok) return null;
     const parsed = await response.json();
@@ -899,25 +823,10 @@ async function fetchInstagramProfile(username, cookieHeader, apiPage = null) {
   }
 }
 
-async function fetchInstagramAccountSearch(query, cookieHeader, apiPage = null) {
-  if (!query || (!cookieHeader && !apiPage)) return [];
+async function fetchInstagramAccountSearch(query, cookieHeader) {
+  if (!query || !cookieHeader) return [];
   try {
     const url = `https://www.instagram.com/web/search/topsearch/?context=blended&query=${encodeURIComponent(query)}`;
-    if (apiPage) {
-      const parsed = await fetchInstagramJsonInBrowser(apiPage, url, 'https://www.instagram.com/explore/');
-      const users = Array.isArray(parsed?.users) ? parsed.users : [];
-      return users
-        .map((entry) => entry?.user || entry)
-        .filter(Boolean)
-        .map((user) => ({
-          username: cleanText(user?.username),
-          fullName: cleanText(user?.full_name),
-          biography: cleanText(user?.biography),
-          isVerified: Boolean(user?.is_verified),
-          isPrivate: Boolean(user?.is_private),
-        }))
-        .filter((user) => user.username && !user.isPrivate);
-    }
     const response = await fetch(url, { headers: buildInstagramApiHeaders(cookieHeader, 'https://www.instagram.com/explore/') });
     if (!response.ok) return [];
     const parsed = await response.json();
@@ -957,16 +866,6 @@ async function collectDealsFromAccountApi(sourceStats) {
     return null;
   }
 
-  let apiSession = null;
-  try {
-    apiSession = await createInstagramApiSession();
-    if (apiSession?.cookieCount) {
-      console.log(`🍪 account API browser session ready with ${apiSession.cookieCount} cookies`);
-    }
-  } catch (error) {
-    console.log(`ℹ️ account API browser session failed: ${error.message}`);
-  }
-
   const sourceRunStats = new Map();
   const candidateSnapshot = [];
   const deals = [];
@@ -988,7 +887,7 @@ async function collectDealsFromAccountApi(sourceStats) {
   }
 
   for (const query of ACCOUNT_SEARCH_QUERIES) {
-    const results = await fetchInstagramAccountSearch(query, cookieHeader, apiSession?.page || null);
+    const results = await fetchInstagramAccountSearch(query, cookieHeader);
     console.log(`🔎 account search "${query}" → ${results.length} profiles`);
     for (const account of results) {
       const username = cleanText(account?.username).toLowerCase();
@@ -1056,7 +955,7 @@ async function collectDealsFromAccountApi(sourceStats) {
     runStat.kind = source.kind;
     runStat.lastSeenAt = new Date().toISOString();
 
-    const user = await fetchInstagramProfile(source.username, cookieHeader, apiSession?.page || null);
+    const user = await fetchInstagramProfile(source.username, cookieHeader);
     if (!user) continue;
 
     const timelineEdges = Array.isArray(user.edge_owner_to_timeline_media?.edges)
@@ -1176,12 +1075,6 @@ async function collectDealsFromAccountApi(sourceStats) {
       runStat.acceptedDeals += 1;
     }
   }
-
-  try {
-    await apiSession?.page?.close?.();
-    await apiSession?.context?.close?.();
-    await apiSession?.browser?.close?.();
-  } catch {}
 
   return {
     deals,
