@@ -135,7 +135,7 @@ Deliverables:
 - [ ] Key 4 klar auf Coffee/Openings/Freebies
 - [ ] Key 5 klar auf harte Gastro-Promos
 - [ ] tote Fallbacks reduzieren oder entfernen
-- [ ] unproduktive Hashtags aus dem Kernpfad entfernen
+- [x] unproduktive Hashtags aus dem Kernpfad entfernen
 
 ## Phase 3: Candidate Engine
 

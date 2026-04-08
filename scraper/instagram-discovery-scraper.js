@@ -716,6 +716,14 @@ function loadMerchantRegistryAccounts() {
   }
 }
 
+function countAccountishCandidates(candidatePosts) {
+  let count = 0;
+  for (const candidate of candidatePosts.values()) {
+    if (candidate?.accountHint || candidate?.relatedHint) count += 1;
+  }
+  return count;
+}
+
 function getSeedAccounts() {
   const ordered = [];
   const seen = new Set();
@@ -1414,6 +1422,7 @@ async function scrapeInstagramDiscovery() {
     const relatedCandidates = new Map();
     const candidatePosts = new Map();
     const sourceRunStats = new Map();
+    const accountCandidateThreshold = Math.max(24, Math.min(120, Math.floor(CONFIG.maxPostsToVisit * 0.4)));
 
     function ensureSourceRunStat(key) {
       if (!sourceRunStats.has(key)) {
@@ -1453,6 +1462,9 @@ async function scrapeInstagramDiscovery() {
     while (sourcesQueue.length > 0 && processedSourceKeys.size < CONFIG.maxSourcesTotal) {
       const source = sourcesQueue.shift();
       if (!source || processedSourceKeys.has(source.key)) continue;
+      if (source.kind === 'hashtag' && countAccountishCandidates(candidatePosts) >= accountCandidateThreshold) {
+        continue;
+      }
       processedSourceKeys.add(source.key);
       const runStat = ensureSourceRunStat(source.key);
       runStat.runs += 1;

@@ -626,6 +626,14 @@ function buildSources() {
     .sort((a, b) => (b.priority || 0) - (a.priority || 0) || a.key.localeCompare(b.key));
 }
 
+function countAccountCandidates(candidatePosts) {
+  let count = 0;
+  for (const candidate of candidatePosts.values()) {
+    if (candidate?.accountHint) count += 1;
+  }
+  return count;
+}
+
 async function createInstagramPageSession(browser, cookieHints) {
   const context = await browser.newContext({
     viewport: { width: 1366, height: 900 },
@@ -747,6 +755,7 @@ async function scrapeInstagram() {
 
     const sources = buildSources();
     const candidatePosts = new Map();
+    const accountCandidateThreshold = Math.max(18, Math.min(90, Math.floor(CONFIG.maxPostsToVisit * 0.35)));
 
     for (const source of sources) {
       let sourceContext;
@@ -762,6 +771,11 @@ async function scrapeInstagram() {
         duckduckgoLinks: 0,
         linksFound: 0,
       };
+      if (source.kind === 'hashtag' && countAccountCandidates(candidatePosts) >= accountCandidateThreshold) {
+        sourceSummary.skipped = 'enough-account-candidates';
+        report.sourceSummaries.push(sourceSummary);
+        continue;
+      }
       try {
         ({ context: sourceContext, page: sourcePage } = await createInstagramPageSession(browser, cookieHints));
         console.log(`🔎 Source ${source.key}`);
