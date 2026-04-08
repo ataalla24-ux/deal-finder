@@ -98,6 +98,26 @@ const EXTRA_SEARCH_QUERIES = [
   'site:instagram.com/p wien 1+1 restaurant',
 ];
 
+const ACCOUNT_SEARCH_QUERIES = [
+  'gratis wien',
+  'wien gratis',
+  'wien gastro',
+  'wien restaurant',
+  'wien kaffee',
+  'wien coffee',
+  'wien pizza',
+  'wien burger',
+  'wien kebab',
+  'wien döner',
+  'wien brunch',
+  'wien eis',
+  'vienna coffee',
+  'vienna food',
+  'vienna brunch',
+  'neueröffnung wien cafe',
+  'neueröffnung wien restaurant',
+];
+
 const RESERVED_IG_PATHS = new Set([
   'explore', 'accounts', 'about', 'developer', 'legal', 'privacy', 'api', 'reel', 'p',
   'stories', 'direct', 'reels', 'tv', 'challenge', 'directory', 'topics', 'emails',
@@ -273,7 +293,25 @@ function loadSourceStats() {
   if (!fs.existsSync(SOURCE_STATS_PATH)) return {};
   try {
     const parsed = JSON.parse(fs.readFileSync(SOURCE_STATS_PATH, 'utf-8'));
-    return parsed && typeof parsed === 'object' ? parsed : {};
+    const sourceStats = parsed?.sources && typeof parsed.sources === 'object' ? parsed.sources : parsed;
+    if (!sourceStats || typeof sourceStats !== 'object') return {};
+    const cleaned = {};
+    for (const [key, value] of Object.entries(sourceStats)) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+      const runs = Number(value.runs || 0);
+      const totalLinks = Number(value.totalLinks || 0);
+      const acceptedDeals = Number(value.acceptedDeals || 0);
+      const kind = cleanText(value.kind || '');
+      if (!kind && !runs && !totalLinks && !acceptedDeals) continue;
+      cleaned[key] = {
+        kind,
+        runs,
+        totalLinks,
+        acceptedDeals,
+        lastSeenAt: cleanText(value.lastSeenAt || ''),
+      };
+    }
+    return cleaned;
   } catch {
     return {};
   }
@@ -714,12 +752,36 @@ async function fetchInstagramProfile(username, cookieHeader) {
   if (!username || !cookieHeader) return null;
   try {
     const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
-    const response = await fetch(url, { headers: buildInstagramApiHeaders(cookieHeader) });
+    const response = await fetch(url, { headers: buildInstagramApiHeaders(cookieHeader, `https://www.instagram.com/${encodeURIComponent(username)}/`) });
     if (!response.ok) return null;
     const parsed = await response.json();
     return parsed?.data?.user || null;
   } catch {
     return null;
+  }
+}
+
+async function fetchInstagramAccountSearch(query, cookieHeader) {
+  if (!query || !cookieHeader) return [];
+  try {
+    const url = `https://www.instagram.com/web/search/topsearch/?context=blended&query=${encodeURIComponent(query)}`;
+    const response = await fetch(url, { headers: buildInstagramApiHeaders(cookieHeader, 'https://www.instagram.com/explore/') });
+    if (!response.ok) return [];
+    const parsed = await response.json();
+    const users = Array.isArray(parsed?.users) ? parsed.users : [];
+    return users
+      .map((entry) => entry?.user || entry)
+      .filter(Boolean)
+      .map((user) => ({
+        username: cleanText(user?.username),
+        fullName: cleanText(user?.full_name),
+        biography: cleanText(user?.biography),
+        isVerified: Boolean(user?.is_verified),
+        isPrivate: Boolean(user?.is_private),
+      }))
+      .filter((user) => user.username && !user.isPrivate);
+  } catch {
+    return [];
   }
 }
 
@@ -748,12 +810,54 @@ async function collectDealsFromAccountApi(sourceStats) {
   const seenSourceKeys = new Set();
   const seenUsernames = new Set();
   const seenUrls = new Set();
-  const queue = [...new Set(SEED_ACCOUNTS)]
-    .map((username) => ({
+  const seedAccounts = new Map();
+  for (const username of [...new Set(SEED_ACCOUNTS)]) {
+    seedAccounts.set(username, {
       kind: 'account-api',
       key: `acct:${username}`,
       username,
       priority: 3,
+      discoveredBy: ['seed-account'],
+    });
+  }
+
+  for (const query of ACCOUNT_SEARCH_QUERIES) {
+    const results = await fetchInstagramAccountSearch(query, cookieHeader);
+    console.log(`🔎 account search "${query}" → ${results.length} profiles`);
+    for (const account of results) {
+      const username = cleanText(account?.username).toLowerCase();
+      if (!username) continue;
+      if (!looksLikeDiscoveryAccount({
+        username,
+        fullName: account?.fullName,
+        biography: account?.biography,
+        hitCount: seedAccounts.has(username) ? 2 : 1,
+      })) {
+        continue;
+      }
+      const existing = seedAccounts.get(username) || {
+        kind: 'search-account-api',
+        key: `acct:${username}`,
+        username,
+        priority: 2,
+        discoveredBy: [],
+      };
+      existing.discoveredBy = [...new Set([...(existing.discoveredBy || []), `search:${query}`])];
+      if (account?.isVerified) existing.priority = Math.max(existing.priority || 1, 3);
+      seedAccounts.set(username, existing);
+    }
+  }
+
+  console.log(`🧠 account API seed queue: ${seedAccounts.size} accounts`);
+
+  const queue = [...seedAccounts.values()]
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0) || a.username.localeCompare(b.username))
+    .map((username) => ({
+      kind: username.kind,
+      key: username.key,
+      username: username.username,
+      priority: username.priority,
+      discoveredBy: username.discoveredBy || [],
     }))
     .filter((source) => !shouldSkipWeakSource(source, sourceStats[source.key]));
 
@@ -834,6 +938,7 @@ async function collectDealsFromAccountApi(sourceStats) {
         refs: [source.key],
         accountHint: true,
         relatedHint: source.kind === 'related-account-api',
+        discoveredBy: source.discoveredBy || [],
       });
 
       if (!isFresh(pubDateIso)) continue;
@@ -893,7 +998,7 @@ async function collectDealsFromAccountApi(sourceStats) {
         qualityScore: score,
         pubDate: pubDateIso,
         pubDateSource: 'profileTimeline',
-        discoveredBy: `${source.kind},profile-api`,
+        discoveredBy: [...new Set([source.kind, 'profile-api', ...(source.discoveredBy || [])])].join(','),
         sourceHits: 1,
         reviewTier: score >= 84 ? 'high' : score >= 70 ? 'medium' : 'low',
       });
