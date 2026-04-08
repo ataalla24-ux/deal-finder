@@ -509,6 +509,64 @@ function normalizeInstagramPostUrl(rawUrl) {
   }
 }
 
+async function fetchInstagramJsonInBrowser(page, url, referer) {
+  if (!page || !url) return null;
+  try {
+    const result = await page.evaluate(async ({ url, referer }) => {
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          credentials: 'include',
+          referrer: referer,
+          headers: {
+            'X-IG-App-ID': '936619743392459',
+            'X-Requested-With': 'XMLHttpRequest',
+            Accept: '*/*',
+          },
+        });
+        const text = await response.text();
+        return { ok: response.ok, status: response.status, text };
+      } catch (error) {
+        return { ok: false, status: 0, text: '', error: String(error?.message || error || '') };
+      }
+    }, { url, referer });
+
+    if (!result?.ok || !result?.text) return null;
+    return JSON.parse(result.text);
+  } catch {
+    return null;
+  }
+}
+
+function buildInstagramPostUrlFromNode(node) {
+  const shortcode = cleanText(node?.shortcode);
+  if (!shortcode) return '';
+  const pathKind = node?.is_video || node?.__typename === 'GraphVideo' ? 'reel' : 'p';
+  return `https://www.instagram.com/${pathKind}/${shortcode}/`;
+}
+
+async function fetchAccountTimelineLinks(page, username) {
+  const normalized = normalizeUsername(username);
+  if (!page || !normalized) return [];
+  try {
+    const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(normalized)}`;
+    const parsed = await fetchInstagramJsonInBrowser(page, url, `https://www.instagram.com/${encodeURIComponent(normalized)}/`);
+    const user = parsed?.data?.user;
+    const edges = Array.isArray(user?.edge_owner_to_timeline_media?.edges)
+      ? user.edge_owner_to_timeline_media.edges
+      : [];
+    const links = new Set();
+    for (const edge of edges) {
+      const postUrl = buildInstagramPostUrlFromNode(edge?.node);
+      if (postUrl) links.add(postUrl);
+      if (links.size >= CONFIG.perSourceLinksLimit) break;
+    }
+    return [...links];
+  } catch {
+    return [];
+  }
+}
+
 function toMirrorUrl(url) {
   return `https://r.jina.ai/http://${url.replace(/^https?:\/\//, '')}`;
 }
@@ -607,6 +665,7 @@ function buildSources() {
       kind: 'account',
       key: `acct:${account.username}`,
       url: `https://www.instagram.com/${account.username}/`,
+      username: account.username,
       priority: 3 + priorityBoost,
     });
   }
@@ -618,6 +677,7 @@ function buildSources() {
       kind: 'account',
       key: `acct:${normalized}`,
       url: `https://www.instagram.com/${normalized}/`,
+      username: normalized,
       priority: 2,
     });
   }
@@ -764,6 +824,7 @@ async function scrapeInstagram() {
         key: source.key,
         kind: source.kind,
         domLinks: 0,
+        accountApiLinks: 0,
         scriptLinks: 0,
         htmlLinks: 0,
         reelsFallbackLinks: 0,
@@ -826,6 +887,11 @@ async function scrapeInstagram() {
             sourceSummary.reelsFallbackLinks += reelsDom.length + reelsHtmlUrls.length;
             postUrls = [...new Set([...postUrls, ...reelsDom, ...reelsHtmlUrls])].slice(0, CONFIG.perSourceLinksLimit);
           } catch {}
+        }
+        if (postUrls.length < 10 && source.kind === 'account') {
+          const apiLinks = await fetchAccountTimelineLinks(sourcePage, source.username || source.key.replace(/^acct:/, ''));
+          sourceSummary.accountApiLinks += apiLinks.length;
+          postUrls = [...new Set([...postUrls, ...apiLinks])].slice(0, CONFIG.perSourceLinksLimit);
         }
         if (postUrls.length === 0) {
           const mirrorText = await fetchMirrorText(source.url);
