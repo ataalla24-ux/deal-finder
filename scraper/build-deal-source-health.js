@@ -237,6 +237,32 @@ function buildMissionFitScore(stats) {
   return Math.max(0, Math.min(100, Math.round(score)));
 }
 
+function buildCoverageScore(stats, maxima) {
+  if (stats.totalDeals === 0) return 0;
+  const totalShare = maxima.maxTotalDeals > 0 ? stats.totalDeals / maxima.maxTotalDeals : 0;
+  const uniqueShare = maxima.maxUniqueDeals > 0 ? stats.uniqueDeals / maxima.maxUniqueDeals : 0;
+  const freshShare = maxima.maxFresh1dCount > 0 ? stats.fresh1dCount / maxima.maxFresh1dCount : 0;
+  const relevanceRate = (stats.viennaRate + stats.foodDrinkRate + stats.promoRate) / 3;
+  const score =
+    totalShare * 38 +
+    uniqueShare * 24 +
+    freshShare * 23 +
+    relevanceRate * 15;
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+function buildPrecisionScore(stats) {
+  if (stats.totalDeals === 0) return 0;
+  const score =
+    stats.viennaRate * 28 +
+    stats.foodDrinkRate * 24 +
+    stats.promoRate * 22 +
+    stats.fresh1dRate * 12 +
+    (1 - stats.duplicateRate) * 8 +
+    (1 - stats.missingUrlRate) * 6;
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
 async function main() {
   const now = Date.now();
   const allPendingFiles = fs.readdirSync(DOCS_DIR)
@@ -376,7 +402,20 @@ async function main() {
     delete normalized.types;
     delete normalized.totalQualityScore;
     return normalized;
-  }).sort((a, b) => b.healthScore - a.healthScore || b.totalDeals - a.totalDeals || a.sourceKey.localeCompare(b.sourceKey));
+  });
+
+  const maxima = sources.reduce((acc, source) => ({
+    maxTotalDeals: Math.max(acc.maxTotalDeals, source.totalDeals),
+    maxUniqueDeals: Math.max(acc.maxUniqueDeals, source.uniqueDeals),
+    maxFresh1dCount: Math.max(acc.maxFresh1dCount, source.fresh1dCount),
+  }), { maxTotalDeals: 0, maxUniqueDeals: 0, maxFresh1dCount: 0 });
+
+  for (const source of sources) {
+    source.coverageScore = buildCoverageScore(source, maxima);
+    source.precisionScore = buildPrecisionScore(source);
+  }
+
+  sources.sort((a, b) => b.healthScore - a.healthScore || b.totalDeals - a.totalDeals || a.sourceKey.localeCompare(b.sourceKey));
 
   const uniqueCandidates = candidates.filter((candidate) => (signatureMap.get(candidate.signature)?.count || 0) === 1).length;
   const duplicateClusters = [...signatureMap.values()].filter((entry) => entry.count > 1).length;
@@ -425,6 +464,25 @@ async function main() {
           sourceKey: source.sourceKey,
           sourceLabel: source.sourceLabel,
           missionFitScore: source.missionFitScore,
+          totalDeals: source.totalDeals,
+        })),
+      topCoverageSources: [...sources]
+        .sort((a, b) => b.coverageScore - a.coverageScore || b.totalDeals - a.totalDeals)
+        .slice(0, 5)
+        .map((source) => ({
+          sourceKey: source.sourceKey,
+          sourceLabel: source.sourceLabel,
+          coverageScore: source.coverageScore,
+          totalDeals: source.totalDeals,
+          fresh1dCount: source.fresh1dCount,
+        })),
+      topPrecisionSources: [...sources]
+        .sort((a, b) => b.precisionScore - a.precisionScore || b.missionFitScore - a.missionFitScore)
+        .slice(0, 5)
+        .map((source) => ({
+          sourceKey: source.sourceKey,
+          sourceLabel: source.sourceLabel,
+          precisionScore: source.precisionScore,
           totalDeals: source.totalDeals,
         })),
       topSourcesToFix: recommendations,

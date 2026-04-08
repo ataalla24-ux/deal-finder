@@ -118,7 +118,7 @@ Deliverables:
 - [x] `instagram-merchant-registry.json`
 - [x] taeglicher Merchant-Bootstrap fuer Daily Sync
 - [ ] ehrlicher Daily-Sync-Diagnosepfad fuer Kandidaten, besuchte Posts und Ablehnungsgruende
-- [ ] Coverage- und Precision-Scores im taeglichen Report
+- [x] Coverage- und Precision-Scores im taeglichen Report
 - [ ] Source-Weighting-Logik aus den taeglichen Reports ableiten
 
 ## Phase 2: Instagram-System stabilisieren
