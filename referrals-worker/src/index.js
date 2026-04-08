@@ -9,6 +9,12 @@ const JSON_HEADERS = {
 const MIN_CONFIRM_DELAY_MS = 15 * 1000;
 const textEncoder = new TextEncoder();
 const APP_STORE_APP_ID = '6758958213';
+const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Europe/Vienna',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
@@ -56,6 +62,29 @@ function dealOverrideKey(dealId) {
 
 function dealDailyKey() {
   return 'deal:daily';
+}
+
+function getViennaDayKey(input = Date.now()) {
+  const date = input instanceof Date ? input : new Date(input || Date.now());
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+  return VIENNA_DAY_FORMATTER.format(date);
+}
+
+function normalizeDailyDealRecord(record) {
+  if (!record || !record.dealId) return null;
+  const updatedAt = Number(record.updatedAt || 0) || null;
+  const explicitDate = typeof record.date === 'string' ? record.date.trim() : '';
+  const date = explicitDate || (updatedAt ? getViennaDayKey(updatedAt) : '');
+  return {
+    ...record,
+    updatedAt,
+    date,
+  };
+}
+
+function isCurrentDailyDealRecord(record) {
+  const normalized = normalizeDailyDealRecord(record);
+  return Boolean(normalized && normalized.dealId && normalized.date === getViennaDayKey());
 }
 
 function maskPushToken(token) {
@@ -300,11 +329,13 @@ function sanitizePublicDealOverride(record) {
 }
 
 function sanitizePublicDailyDeal(record) {
-  if (!record || !record.dealId) return null;
+  const normalized = normalizeDailyDealRecord(record);
+  if (!normalized || !normalized.dealId) return null;
   return {
-    dealId: record.dealId,
-    updatedAt: Number(record.updatedAt || 0) || null,
-    note: typeof record.note === 'string' ? record.note : '',
+    dealId: normalized.dealId,
+    updatedAt: normalized.updatedAt,
+    date: normalized.date || '',
+    note: typeof normalized.note === 'string' ? normalized.note : '',
   };
 }
 
