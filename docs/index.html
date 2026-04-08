@@ -271,12 +271,12 @@
         .deal-card::before { content: ''; position: absolute; top: 0; left: 18px; right: 18px; height: 2px; background: linear-gradient(90deg, rgba(245,154,61,0.88), rgba(255,186,98,0.32)); }
         
         /* TYPE BADGES */
-        .deal-type-badge { position: absolute; top: 16px; left: 18px; padding: 5px 10px; border-radius: 999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: white; box-shadow: none; }
-        .deal-type-badge.gratis { background: linear-gradient(135deg, #10b981, #059669); }
-        .deal-type-badge.rabatt { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .deal-type-badge.bogo { background: linear-gradient(135deg, #0ea5e9, #2563eb); }
-        .deal-type-badge.testabo { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
-        .deal-type-badge.neu { background: linear-gradient(135deg, #1f2937, #111827); left: 84px; }
+        .deal-type-badge { position: absolute; top: 16px; left: 18px; padding: 5px 10px; border-radius: 999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #31291f; box-shadow: none; border: 1px solid rgba(62, 52, 40, 0.08); }
+        .deal-type-badge.gratis { background: #eef7f1; color: #2e6a4f; }
+        .deal-type-badge.rabatt { background: #fbf4e8; color: #9a6422; }
+        .deal-type-badge.bogo { background: #edf4fb; color: #355f88; }
+        .deal-type-badge.testabo { background: #f4f0fa; color: #66558d; }
+        .deal-type-badge.neu { background: #f4f4f5; color: #3f3f46; left: 84px; }
         
         /* DEAL HEADER */
         .deal-header { display: flex; align-items: flex-start; gap: 14px; margin-top: 18px; margin-bottom: 10px; }
@@ -292,14 +292,14 @@
             .deal-info-row + .deal-info-row { border-top: 1px solid #efe7dc; }
             .deal-info-icon { flex-shrink: 0; width: 20px; text-align: center; font-size: 14px; }
             .deal-info-text { flex: 1; word-break: break-word; }
-            .deal-type-badge.rabatt { background: linear-gradient(135deg, #f59e0b, #d97706); }
-            .deal-type-badge.bogo { background: linear-gradient(135deg, #0ea5e9, #2563eb); }
+            .deal-type-badge.rabatt { background: #fbf4e8; color: #9a6422; }
+            .deal-type-badge.bogo { background: #edf4fb; color: #355f88; }
         
         /* COMMUNITY SECTION */
-        .community-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1ece6; }
-        .community-toggle { background: #f8fafc; border: none; padding: 10px 16px; border-radius: 10px; width: 100%; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 14px; color: #64748b; }
-        .community-toggle:hover { background: #f1f5f9; }
-        .community-toggle .count { background: #667eea; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+        .community-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3efe8; }
+        .community-toggle { background: #fbf9f6; border: 1px solid #efe7dc; padding: 10px 14px; border-radius: 12px; width: 100%; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 13px; color: #7b6f61; }
+        .community-toggle:hover { background: #f6f2eb; }
+        .community-toggle .count { background: #ece8e1; color: #6c6257; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
         .community-content { display: none; margin-top: 12px; }
         .community-content.show { display: block; animation: slideDown 0.3s ease; }
         
@@ -463,12 +463,11 @@
         .badge-rabatt { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; box-shadow: 0 2px 6px rgba(245,158,11,0.35); }
         .badge-hot { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
         .badge-new { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; }
-        .badge-expiry { background: linear-gradient(135deg, #ef4444, #f97316); color: white; font-weight: 800; box-shadow: 0 2px 8px rgba(239,68,68,0.4); }
-        .badge-expiry.urgent { animation: blink-badge 1s infinite; }
-        .badge-expiry.today { background: linear-gradient(135deg, #dc2626, #ef4444); box-shadow: 0 3px 10px rgba(220,38,38,0.5); }
-        .badge-expiry.warn { background: linear-gradient(135deg, #f97316, #f59e0b); box-shadow: 0 3px 10px rgba(245,158,11,0.45); }
-        .badge-expiry.safe { background: linear-gradient(135deg, #0ea5e9, #3b82f6); box-shadow: 0 3px 10px rgba(59,130,246,0.4); }
-        @keyframes blink-badge { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .badge-expiry { background: #fbefec; color: #b45538; font-weight: 800; box-shadow: none; border: 1px solid #f5d4ca; }
+        .badge-expiry.urgent { animation: none; }
+        .badge-expiry.today { background: #f9ebe8; color: #aa4b33; border-color: #efcec4; }
+        .badge-expiry.warn { background: #fbf4e8; color: #a06d2a; border-color: #f1deba; }
+        .badge-expiry.safe { background: #eff5fb; color: #4a6b88; border-color: #d9e5f1; }
         .deal-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6; }
         .deal-info { font-size: 12px; color: #9ca3af; }
         .action-row { display: flex; gap: 8px; margin-top: 12px; }
@@ -522,7 +521,7 @@
         .empty { text-align: center; padding: 60px 20px; color: #666; }
         .empty-icon { font-size: 48px; margin-bottom: 12px; }
         .loading { text-align: center; padding: 40px; color: #666; }
-        .toast { position: fixed; bottom: calc(78px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px)); left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #3b3128, #55483b); color: white; padding: 12px 22px; border-radius: 999px; font-weight: 700; z-index: 1000; animation: toastIn 0.3s ease; box-shadow: 0 12px 22px rgba(15,23,42,0.16); }
+        .toast { position: fixed; bottom: calc(78px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px)); left: 50%; transform: translateX(-50%); background: rgba(27, 26, 24, 0.94); color: white; padding: 12px 22px; border-radius: 999px; font-weight: 700; z-index: 1000; animation: toastIn 0.3s ease; box-shadow: 0 12px 22px rgba(15,23,42,0.14); }
         @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         
         /* BOTTOM NAV */
@@ -533,10 +532,10 @@
             transform: translate3d(-50%, 0, 0);
             -webkit-transform: translate3d(-50%, 0, 0);
             width: min(540px, calc(100% - 24px));
-            background: rgba(255,255,255,0.97);
+            background: rgba(255,255,255,0.95);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(148, 163, 184, 0.22);
+            border: 1px solid rgba(15, 23, 42, 0.06);
             border-radius: 999px;
             padding: 3px;
             padding-bottom: 3px;
@@ -544,7 +543,7 @@
             justify-content: space-between;
             align-items: stretch;
             gap: 1px;
-            box-shadow: 0 10px 22px rgba(15,23,42,0.08), 0 2px 8px rgba(148,163,184,0.07);
+            box-shadow: 0 8px 18px rgba(15,23,42,0.05), 0 1px 4px rgba(15,23,42,0.04);
             z-index: 100;
             will-change: bottom;
             backface-visibility: hidden;
@@ -566,23 +565,24 @@
             cursor: pointer;
             border: none;
             background: transparent;
-            color: #74675d;
+            color: #8d8d92;
             appearance: none;
             -webkit-appearance: none;
             touch-action: manipulation;
             -webkit-user-select: none;
             user-select: none;
         }
-        .nav-item:hover { background: rgba(248,243,237,0.96); }
+        .nav-item:hover { background: rgba(244, 244, 245, 0.98); }
         .nav-item.active {
-            background: linear-gradient(135deg, #f79b3d 0%, #ef7d2f 100%);
-            color: white;
-            box-shadow: 0 8px 16px rgba(239,125,47,0.22);
+            background: #f3f4f6;
+            color: #111827;
+            box-shadow: inset 0 0 0 1px rgba(17,24,39,0.04);
         }
         .nav-item.active .nav-icon,
-        .nav-item.active .nav-label { color: white; }
-        .nav-icon { font-size: 19px; line-height: 1; transition: color 0.18s ease, transform 0.18s ease; }
-        .nav-label { font-size: 7px; font-weight: 700; line-height: 0.95; letter-spacing: -0.01em; color: inherit; white-space: nowrap; }
+        .nav-item.active .nav-label { color: #111827; }
+        .nav-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; color: currentColor; transition: color 0.18s ease, transform 0.18s ease; }
+        .nav-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+        .nav-label { font-size: 7px; font-weight: 700; line-height: 0.95; letter-spacing: -0.01em; color: inherit; white-space: nowrap; opacity: 0.92; }
         .nav-item.active .nav-icon { transform: translateY(-1px); }
         .nav-badge { position: absolute; top: 2px; right: 5px; background: #ef4444; color: white; font-size: 8px; padding: 1px 5px; border-radius: 999px; font-weight: 800; box-shadow: 0 4px 10px rgba(239,68,68,0.28); }
     
@@ -1037,10 +1037,10 @@
     </div>
     
     <div class="bottom-nav">
-        <button type="button" class="nav-item active" onclick="activateBottomNav(event, 'home')" onpointerdown="activateBottomNav(event, 'home')" ontouchstart="activateBottomNav(event, 'home')"><div class="nav-icon">🏠</div><div class="nav-label">Deals</div></button>
-        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'secret')" onpointerdown="activateBottomNav(event, 'secret')" ontouchstart="activateBottomNav(event, 'secret')"><div class="nav-icon">✨</div><div class="nav-label">Für dich</div></button>
-        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'stats')" onpointerdown="activateBottomNav(event, 'stats')" ontouchstart="activateBottomNav(event, 'stats')"><div class="nav-icon">📊</div><div class="nav-label">Stats</div></button>
-        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'favorites')" onpointerdown="activateBottomNav(event, 'favorites')" ontouchstart="activateBottomNav(event, 'favorites')" style="position:relative;"><div class="nav-icon">❤️</div><div class="nav-label">Favoriten</div><span class="nav-badge" id="favBadge" style="display:none;">0</span></button>
+        <button type="button" class="nav-item active" onclick="activateBottomNav(event, 'home')" onpointerdown="activateBottomNav(event, 'home')" ontouchstart="activateBottomNav(event, 'home')"><div class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9.5V20h13V9.5"></path></svg></div><div class="nav-label">Deals</div></button>
+        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'secret')" onpointerdown="activateBottomNav(event, 'secret')" ontouchstart="activateBottomNav(event, 'secret')"><div class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v5"></path><path d="M12 16v5"></path><path d="m4.9 4.9 3.5 3.5"></path><path d="m15.6 15.6 3.5 3.5"></path><path d="M3 12h5"></path><path d="M16 12h5"></path><path d="m4.9 19.1 3.5-3.5"></path><path d="m15.6 8.4 3.5-3.5"></path><circle cx="12" cy="12" r="2.5"></circle></svg></div><div class="nav-label">Für dich</div></button>
+        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'stats')" onpointerdown="activateBottomNav(event, 'stats')" ontouchstart="activateBottomNav(event, 'stats')"><div class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V9"></path><path d="M10 20V4"></path><path d="M16 20v-7"></path><path d="M22 20V6"></path></svg></div><div class="nav-label">Stats</div></button>
+        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'favorites')" onpointerdown="activateBottomNav(event, 'favorites')" ontouchstart="activateBottomNav(event, 'favorites')" style="position:relative;"><div class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20.5s-7-4.4-7-10.1C5 7.4 6.9 5.5 9.4 5.5c1.4 0 2.2.5 2.6 1 .4-.5 1.2-1 2.6-1C17.1 5.5 19 7.4 19 10.4c0 5.7-7 10.1-7 10.1Z"></path></svg></div><div class="nav-label">Favoriten</div><span class="nav-badge" id="favBadge" style="display:none;">0</span></button>
     </div>
     
     <!-- FAB ADD DEAL BUTTON -->
