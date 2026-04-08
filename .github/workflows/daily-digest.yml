@@ -28,6 +28,9 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Build Deal Source Health
+        run: node scraper/build-deal-source-health.js
+
       - name: Send Daily Digest to Slack
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -38,7 +41,7 @@ jobs:
         run: |
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
-          git add docs/deals-pending-all.json docs/sent-deal-ids.json 2>/dev/null || true
+          git add docs/deals-pending-all.json docs/sent-deal-ids.json docs/deal-candidates-index.json docs/deal-source-health.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
