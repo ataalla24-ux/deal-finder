@@ -537,12 +537,11 @@
             -webkit-backdrop-filter: blur(18px);
             border: 1px solid rgba(15, 23, 42, 0.06);
             border-radius: 999px;
-            padding: 3px;
-            padding-bottom: 3px;
+            padding: 4px 10px;
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
             align-items: stretch;
-            gap: 1px;
+            gap: 0;
             box-shadow: 0 8px 18px rgba(15,23,42,0.05), 0 1px 4px rgba(15,23,42,0.04);
             z-index: 100;
             will-change: bottom;
@@ -555,13 +554,11 @@
             flex: 1 1 0;
             min-width: 0;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 0;
-            min-height: 40px;
-            padding: 4px 6px;
-            border-radius: 999px;
+            min-height: 46px;
+            padding: 8px 4px;
+            border-radius: 18px;
             cursor: pointer;
             border: none;
             background: transparent;
@@ -572,19 +569,46 @@
             -webkit-user-select: none;
             user-select: none;
         }
-        .nav-item:hover { background: rgba(244, 244, 245, 0.98); }
+        .nav-item:hover { background: transparent; }
         .nav-item.active {
-            background: #f3f4f6;
-            color: #111827;
-            box-shadow: inset 0 0 0 1px rgba(17,24,39,0.04);
+            background: transparent;
+            color: #111111;
+            box-shadow: none;
         }
-        .nav-item.active .nav-icon,
-        .nav-item.active .nav-label { color: #111827; }
-        .nav-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: currentColor; transition: color 0.18s ease, transform 0.18s ease; }
-        .nav-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-        .nav-label { font-size: 7px; font-weight: 700; line-height: 0.95; letter-spacing: -0.01em; color: inherit; white-space: nowrap; opacity: 0.92; }
-        .nav-item.active .nav-icon { transform: translateY(-1px); }
-        .nav-badge { position: absolute; top: 2px; right: 5px; background: #ef4444; color: white; font-size: 8px; padding: 1px 5px; border-radius: 999px; font-weight: 800; box-shadow: 0 4px 10px rgba(239,68,68,0.28); }
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: currentColor;
+            transition: color 0.18s ease, transform 0.18s ease;
+        }
+        .nav-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .nav-icon .icon-filled { display: none; fill: currentColor; stroke: none; }
+        .nav-item.active .nav-icon { transform: translateY(-0.5px); }
+        .nav-item.active .nav-icon .icon-outline { display: none; }
+        .nav-item.active .nav-icon .icon-filled { display: block; }
+        .nav-label {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        .nav-badge { position: absolute; top: 4px; right: 10px; background: #ef4444; color: white; font-size: 9px; padding: 1px 5px; border-radius: 999px; font-weight: 800; box-shadow: 0 4px 10px rgba(239,68,68,0.24); }
     
   /* ===== PRO MEMBERSHIP SYSTEM ===== */
   .pro-banner { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #8b5cf6 100%); border-radius: 16px; padding: 16px; margin-bottom: 16px; color: white; cursor: pointer; position: relative; overflow: hidden; }
@@ -1037,10 +1061,10 @@
     </div>
     
     <div class="bottom-nav">
-        <button type="button" class="nav-item active" onclick="activateBottomNav(event, 'home')" onpointerdown="activateBottomNav(event, 'home')" ontouchstart="activateBottomNav(event, 'home')"><div class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9.5V20h13V9.5"></path></svg></div><div class="nav-label">Deals</div></button>
-        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'secret')" onpointerdown="activateBottomNav(event, 'secret')" ontouchstart="activateBottomNav(event, 'secret')"><div class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v5"></path><path d="M12 16v5"></path><path d="m4.9 4.9 3.5 3.5"></path><path d="m15.6 15.6 3.5 3.5"></path><path d="M3 12h5"></path><path d="M16 12h5"></path><path d="m4.9 19.1 3.5-3.5"></path><path d="m15.6 8.4 3.5-3.5"></path><circle cx="12" cy="12" r="2.5"></circle></svg></div><div class="nav-label">Für dich</div></button>
-        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'stats')" onpointerdown="activateBottomNav(event, 'stats')" ontouchstart="activateBottomNav(event, 'stats')"><div class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V9"></path><path d="M10 20V4"></path><path d="M16 20v-7"></path><path d="M22 20V6"></path></svg></div><div class="nav-label">Stats</div></button>
-        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'favorites')" onpointerdown="activateBottomNav(event, 'favorites')" ontouchstart="activateBottomNav(event, 'favorites')" style="position:relative;"><div class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20.5s-7-4.4-7-10.1C5 7.4 6.9 5.5 9.4 5.5c1.4 0 2.2.5 2.6 1 .4-.5 1.2-1 2.6-1C17.1 5.5 19 7.4 19 10.4c0 5.7-7 10.1-7 10.1Z"></path></svg></div><div class="nav-label">Favoriten</div><span class="nav-badge" id="favBadge" style="display:none;">0</span></button>
+        <button type="button" class="nav-item active" onclick="activateBottomNav(event, 'home')" onpointerdown="activateBottomNav(event, 'home')" ontouchstart="activateBottomNav(event, 'home')" aria-label="Deals"><div class="nav-icon" aria-hidden="true"><svg class="icon-outline" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9.5V20h13V9.5"></path></svg><svg class="icon-filled" viewBox="0 0 24 24"><path d="M12 3.4 3.8 10.3c-.2.2-.3.4-.3.6V20a1 1 0 0 0 1 1h5.5v-6.1h4V21H19.5a1 1 0 0 0 1-1v-9.1c0-.2-.1-.5-.3-.6L12 3.4Z"></path></svg></div><div class="nav-label">Deals</div></button>
+        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'secret')" onpointerdown="activateBottomNav(event, 'secret')" ontouchstart="activateBottomNav(event, 'secret')" aria-label="Für dich"><div class="nav-icon" aria-hidden="true"><svg class="icon-outline" viewBox="0 0 24 24"><path d="M12 3v4"></path><path d="M12 17v4"></path><path d="m5.6 5.6 2.8 2.8"></path><path d="m15.6 15.6 2.8 2.8"></path><path d="M3 12h4"></path><path d="M17 12h4"></path><path d="m5.6 18.4 2.8-2.8"></path><path d="m15.6 8.4 2.8-2.8"></path><circle cx="12" cy="12" r="2.6"></circle></svg><svg class="icon-filled" viewBox="0 0 24 24"><path d="M12 2.8 14 9l6.2 3-6.2 3-2 6.2-2-6.2-6.2-3 6.2-3L12 2.8Z"></path></svg></div><div class="nav-label">Für dich</div></button>
+        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'stats')" onpointerdown="activateBottomNav(event, 'stats')" ontouchstart="activateBottomNav(event, 'stats')" aria-label="Stats"><div class="nav-icon" aria-hidden="true"><svg class="icon-outline" viewBox="0 0 24 24"><path d="M3 20h18"></path><path d="M5 20V10"></path><path d="M11 20V4"></path><path d="M17 20v-7"></path></svg><svg class="icon-filled" viewBox="0 0 24 24"><rect x="4" y="10" width="3.4" height="10" rx="1.2"></rect><rect x="10.3" y="4" width="3.4" height="16" rx="1.2"></rect><rect x="16.6" y="12" width="3.4" height="8" rx="1.2"></rect></svg></div><div class="nav-label">Stats</div></button>
+        <button type="button" class="nav-item" onclick="activateBottomNav(event, 'favorites')" onpointerdown="activateBottomNav(event, 'favorites')" ontouchstart="activateBottomNav(event, 'favorites')" style="position:relative;" aria-label="Favoriten"><div class="nav-icon" aria-hidden="true"><svg class="icon-outline" viewBox="0 0 24 24"><path d="M12 20.5s-7-4.4-7-10.1C5 7.4 6.9 5.5 9.4 5.5c1.4 0 2.2.5 2.6 1 .4-.5 1.2-1 2.6-1C17.1 5.5 19 7.4 19 10.4c0 5.7-7 10.1-7 10.1Z"></path></svg><svg class="icon-filled" viewBox="0 0 24 24"><path d="M12 20.7c-.2 0-.4-.1-.6-.2-1-.7-6.6-4.8-6.6-10.1 0-3.1 2-5.2 4.8-5.2 1.2 0 2.1.4 2.8 1.1.7-.7 1.6-1.1 2.8-1.1 2.8 0 4.8 2.1 4.8 5.2 0 5.3-5.6 9.4-6.6 10.1-.2.1-.4.2-.6.2Z"></path></svg></div><div class="nav-label">Favoriten</div><span class="nav-badge" id="favBadge" style="display:none;">0</span></button>
     </div>
     
     <!-- FAB ADD DEAL BUTTON -->
