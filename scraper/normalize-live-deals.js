@@ -40,6 +40,7 @@ const LEGACY_CHURCH_ID_PATTERNS = [
 ];
 
 const MAX_LIVE_URL_HEALTH_CHECKS = Number(process.env.MAX_LIVE_URL_HEALTH_CHECKS || 180);
+const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REFRESHES || 120);
 
 function cleanText(value) {
   if (!value) return '';
@@ -119,6 +120,9 @@ async function main() {
   const removed = [];
   let linkChecksUsed = 0;
   let brokenLinkRemovals = 0;
+  let expiryUrlChecksUsed = 0;
+  let urlVerifiedExpiryHits = 0;
+  let expiredByVerifiedDateRemovals = 0;
 
   function markRemoved(deal, reason) {
     removed.push({
@@ -161,7 +165,35 @@ async function main() {
     deal = fixPubDateFromSlackTs(deal, now);
     deal = resetUnsafeUrlExpiry(deal);
     deal = normalizeDealRecord(deal);
-    await normalizeDealExpiry(deal, { now, allowUrlLookup: true, urlCache });
+    const rawExpiry = cleanText(
+      deal.expiresOriginal ||
+      deal.expires ||
+      deal.end_date ||
+      deal.validity_date ||
+      ''
+    );
+    const expiryCacheHit = deal.url ? urlCache.has(deal.url) : false;
+    const allowExpiryUrlLookup = Boolean(
+      deal.url &&
+      !shouldSkipUrlExpiryLookup(deal, deal.url || '', rawExpiry) &&
+      (expiryCacheHit || expiryUrlChecksUsed < MAX_LIVE_URL_EXPIRY_REFRESHES)
+    );
+    const expiryCacheSizeBefore = urlCache.size;
+    const hadUrlDerivedExpiry = Boolean(deal.expiresDetectedFromUrl);
+
+    await normalizeDealExpiry(deal, {
+      now,
+      allowUrlLookup: allowExpiryUrlLookup,
+      forceUrlLookup: true,
+      urlCache,
+    });
+
+    if (allowExpiryUrlLookup && deal.url && !expiryCacheHit && urlCache.size > expiryCacheSizeBefore) {
+      expiryUrlChecksUsed += 1;
+    }
+    if (!hadUrlDerivedExpiry && deal.expiresDetectedFromUrl) {
+      urlVerifiedExpiryHits += 1;
+    }
     deal.expires = sanitizeExpiryText(deal.expires);
 
     const health = await verifyDealUrl(deal);
@@ -180,7 +212,12 @@ async function main() {
       continue;
     }
     if (isExpiredDealRecord(deal, now)) {
-      markRemoved(deal, 'Deal abgelaufen');
+      if (deal.expiresDetectedFromUrl || deal.expiresSource === 'url') {
+        expiredByVerifiedDateRemovals += 1;
+        markRemoved(deal, 'Deal laut Zielseite abgelaufen');
+      } else {
+        markRemoved(deal, 'Deal abgelaufen');
+      }
       continue;
     }
     if (!deal.id) {
@@ -198,14 +235,47 @@ async function main() {
 
   for (const churchDeal of churchDeals) {
     const normalizedChurchDeal = normalizeDealRecord({ ...churchDeal });
-    await normalizeDealExpiry(normalizedChurchDeal, { now, allowUrlLookup: true, urlCache });
+    const churchRawExpiry = cleanText(
+      normalizedChurchDeal.expiresOriginal ||
+      normalizedChurchDeal.expires ||
+      normalizedChurchDeal.end_date ||
+      normalizedChurchDeal.validity_date ||
+      ''
+    );
+    const churchExpiryCacheHit = normalizedChurchDeal.url ? urlCache.has(normalizedChurchDeal.url) : false;
+    const churchAllowExpiryUrlLookup = Boolean(
+      normalizedChurchDeal.url &&
+      !shouldSkipUrlExpiryLookup(normalizedChurchDeal, normalizedChurchDeal.url || '', churchRawExpiry) &&
+      (churchExpiryCacheHit || expiryUrlChecksUsed < MAX_LIVE_URL_EXPIRY_REFRESHES)
+    );
+    const churchExpiryCacheSizeBefore = urlCache.size;
+    const churchHadUrlDerivedExpiry = Boolean(normalizedChurchDeal.expiresDetectedFromUrl);
+
+    await normalizeDealExpiry(normalizedChurchDeal, {
+      now,
+      allowUrlLookup: churchAllowExpiryUrlLookup,
+      forceUrlLookup: true,
+      urlCache,
+    });
+
+    if (churchAllowExpiryUrlLookup && normalizedChurchDeal.url && !churchExpiryCacheHit && urlCache.size > churchExpiryCacheSizeBefore) {
+      expiryUrlChecksUsed += 1;
+    }
+    if (!churchHadUrlDerivedExpiry && normalizedChurchDeal.expiresDetectedFromUrl) {
+      urlVerifiedExpiryHits += 1;
+    }
     normalizedChurchDeal.expires = sanitizeExpiryText(normalizedChurchDeal.expires);
     if (isFalsePositiveFreeDeal(normalizedChurchDeal)) {
       markRemoved(normalizedChurchDeal, 'False Positive Church Deal');
       continue;
     }
     if (isExpiredDealRecord(normalizedChurchDeal, now)) {
-      markRemoved(normalizedChurchDeal, 'Kirchen-/Event-Deal abgelaufen');
+      if (normalizedChurchDeal.expiresDetectedFromUrl || normalizedChurchDeal.expiresSource === 'url') {
+        expiredByVerifiedDateRemovals += 1;
+        markRemoved(normalizedChurchDeal, 'Kirchen-/Event-Deal laut Zielseite abgelaufen');
+      } else {
+        markRemoved(normalizedChurchDeal, 'Kirchen-/Event-Deal abgelaufen');
+      }
       continue;
     }
     if (!normalizedChurchDeal.id) {
@@ -242,8 +312,12 @@ async function main() {
     totalAfter: remaining.length,
     removedCount: removed.length,
     brokenLinkRemovals,
+    expiredByVerifiedDateRemovals,
     linkChecksUsed,
     maxLinkChecks: MAX_LIVE_URL_HEALTH_CHECKS,
+    expiryUrlChecksUsed,
+    maxExpiryUrlChecks: MAX_LIVE_URL_EXPIRY_REFRESHES,
+    urlVerifiedExpiryHits,
     removalReasons,
     removed: removed.slice(0, 200),
   }, null, 2) + '\n', 'utf8');
@@ -252,6 +326,8 @@ async function main() {
   console.log(`Removed deals: ${removed.length}`);
   console.log(`Broken link removals: ${brokenLinkRemovals}`);
   console.log(`Link health checks: ${linkChecksUsed}/${MAX_LIVE_URL_HEALTH_CHECKS}`);
+  console.log(`Expiry refresh checks: ${expiryUrlChecksUsed}/${MAX_LIVE_URL_EXPIRY_REFRESHES}`);
+  console.log(`Expiry dates refreshed from URL: ${urlVerifiedExpiryHits}`);
 }
 
 main().catch((error) => {

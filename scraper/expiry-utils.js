@@ -764,6 +764,7 @@ export async function inspectDealUrlHealth(url, options = {}) {
 export async function normalizeDealExpiry(deal, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const allowUrlLookup = options.allowUrlLookup !== false;
+  const forceUrlLookup = options.forceUrlLookup === true;
   const raw = cleanText(
     deal.expires ||
     deal.expiresOriginal ||
@@ -778,7 +779,15 @@ export async function normalizeDealExpiry(deal, options = {}) {
   }
 
   const parsed = parseExpiryDetails(raw, { now });
-  const shouldCheckUrl = Boolean(allowUrlLookup && shouldVerifyExpiryAgainstUrl(deal, { now }));
+  const shouldCheckUrl = Boolean(
+    allowUrlLookup &&
+    url &&
+    (
+      forceUrlLookup
+        ? !shouldSkipUrlExpiryLookup(deal, url, raw)
+        : shouldVerifyExpiryAgainstUrl(deal, { now })
+    )
+  );
 
   if (shouldCheckUrl) {
     const cache = options.urlCache;

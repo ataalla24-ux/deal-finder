@@ -29,6 +29,7 @@ jobs:
       - name: Validate Live Deals
         env:
           MAX_LIVE_URL_HEALTH_CHECKS: 180
+          MAX_LIVE_URL_EXPIRY_REFRESHES: 120
           URL_CHECK_TIMEOUT_MS: 7000
         run: node scraper/normalize-live-deals.js
 
