@@ -695,22 +695,50 @@ function buildSources(sourceStats) {
   return combined;
 }
 
-function loadMerchantRegistryUsernames() {
+function loadMerchantRegistryAccounts() {
   if (!fs.existsSync(MERCHANT_REGISTRY_PATH)) return [];
   try {
     const parsed = JSON.parse(fs.readFileSync(MERCHANT_REGISTRY_PATH, 'utf-8'));
     const accounts = Array.isArray(parsed?.accounts) ? parsed.accounts : [];
     return accounts
       .filter((account) => Number(account?.confidence || 0) >= 40)
-      .map((account) => normalizeUsername(account?.username))
-      .filter(Boolean);
+      .map((account) => ({
+        username: normalizeUsername(account?.username),
+        confidence: Number(account?.confidence || 0),
+        priorityScore: Number(account?.priorityScore || 0),
+        missionHits: Number(account?.missionHits || 0),
+        fresh1dHits: Number(account?.fresh1dHits || 0),
+      }))
+      .filter((account) => account.username)
+      .sort((a, b) => b.priorityScore - a.priorityScore || b.confidence - a.confidence || a.username.localeCompare(b.username));
   } catch {
     return [];
   }
 }
 
 function getSeedAccounts() {
-  return [...new Set([...SEED_ACCOUNTS, ...loadMerchantRegistryUsernames()])];
+  const ordered = [];
+  const seen = new Set();
+  for (const account of loadMerchantRegistryAccounts()) {
+    if (seen.has(account.username)) continue;
+    seen.add(account.username);
+    ordered.push(account.username);
+  }
+  for (const username of SEED_ACCOUNTS) {
+    const normalized = normalizeUsername(username);
+    if (!normalized || seen.has(normalized)) continue;
+    seen.add(normalized);
+    ordered.push(normalized);
+  }
+  return ordered;
+}
+
+function merchantRegistryPriorityMap() {
+  const map = new Map();
+  for (const account of loadMerchantRegistryAccounts()) {
+    map.set(account.username, account);
+  }
+  return map;
 }
 
 function buildCookieHints() {
@@ -837,12 +865,15 @@ async function collectDealsFromAccountApi(sourceStats) {
   const seenUsernames = new Set();
   const seenUrls = new Set();
   const seedAccounts = new Map();
+  const merchantPriorities = merchantRegistryPriorityMap();
   for (const username of getSeedAccounts()) {
+    const merchant = merchantPriorities.get(username);
+    const priorityBoost = merchant ? Math.max(0, Math.min(3, Math.floor((merchant.priorityScore || merchant.confidence || 0) / 25))) : 0;
     seedAccounts.set(username, {
       kind: 'account-api',
       key: `acct:${username}`,
       username,
-      priority: 3,
+      priority: 3 + priorityBoost,
       discoveredBy: ['seed-account'],
     });
   }
@@ -870,6 +901,11 @@ async function collectDealsFromAccountApi(sourceStats) {
       };
       existing.discoveredBy = [...new Set([...(existing.discoveredBy || []), `search:${query}`])];
       if (account?.isVerified) existing.priority = Math.max(existing.priority || 1, 3);
+      const merchant = merchantPriorities.get(username);
+      if (merchant) {
+        const priorityBoost = Math.max(0, Math.min(3, Math.floor((merchant.priorityScore || merchant.confidence || 0) / 25)));
+        existing.priority = Math.max(existing.priority || 1, 2 + priorityBoost);
+      }
       seedAccounts.set(username, existing);
     }
   }

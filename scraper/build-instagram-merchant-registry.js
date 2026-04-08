@@ -47,6 +47,8 @@ const INPUT_FILES = [
   'deals-pending-instagram-web.json',
 ];
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 function normalizeUsername(value) {
   const text = cleanText(value).toLowerCase().replace(/^@/, '').trim();
   if (!text || RESERVED_IG_PATHS.has(text)) return '';
@@ -74,6 +76,13 @@ function hasKeyword(text, keywords) {
   return keywords.some((keyword) => lower.includes(keyword));
 }
 
+function parseTimestamp(value) {
+  const text = cleanText(value);
+  if (!text) return null;
+  const ts = Date.parse(text);
+  return Number.isFinite(ts) ? ts : null;
+}
+
 function loadDeals(filePath) {
   if (!fs.existsSync(filePath)) return [];
   try {
@@ -95,6 +104,10 @@ function ensureEntry(registry, username) {
       foodDrinkHits: 0,
       promoHits: 0,
       viennaHits: 0,
+      fresh1dHits: 0,
+      fresh7dHits: 0,
+      missionHits: 0,
+      totalQualityScore: 0,
       categories: new Map(),
       types: new Map(),
       files: new Set(),
@@ -121,6 +134,21 @@ function scoreEntry(entry) {
   return Math.max(0, Math.min(100, Math.round(countScore + liveScore + promoScore + foodScore + viennaScore)));
 }
 
+function priorityScore(entry) {
+  if (!entry.occurrences) return 0;
+  const fresh1dRate = entry.fresh1dHits / entry.occurrences;
+  const missionRate = entry.missionHits / entry.occurrences;
+  const liveRate = entry.liveOccurrences / entry.occurrences;
+  const qualityAverage = entry.totalQualityScore > 0 ? entry.totalQualityScore / entry.occurrences : 0;
+  const score =
+    scoreEntry(entry) * 0.42 +
+    missionRate * 26 +
+    fresh1dRate * 18 +
+    liveRate * 8 +
+    Math.min(qualityAverage, 100) * 0.06;
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
 function compactCounts(map, limit = 4) {
   return [...map.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
@@ -130,6 +158,7 @@ function compactCounts(map, limit = 4) {
 
 function main() {
   const registry = new Map();
+  const now = Date.now();
 
   for (const fileName of INPUT_FILES) {
     const filePath = path.join(DOCS_DIR, fileName);
@@ -156,10 +185,18 @@ function main() {
         .join(' ');
 
       if (hasKeyword(haystack, FOOD_DRINK_KEYWORDS)) entry.foodDrinkHits += 1;
-      if (hasKeyword(haystack, PROMO_KEYWORDS) || ['gratis', 'bogo', 'freebie'].includes(cleanUiNoiseText(deal?.type || '').toLowerCase())) {
+      const promoHit = hasKeyword(haystack, PROMO_KEYWORDS) || ['gratis', 'bogo', 'freebie'].includes(cleanUiNoiseText(deal?.type || '').toLowerCase());
+      if (promoHit) {
         entry.promoHits += 1;
       }
-      if (hasKeyword(haystack, WIEN_KEYWORDS)) entry.viennaHits += 1;
+      const viennaHit = hasKeyword(haystack, WIEN_KEYWORDS);
+      if (viennaHit) entry.viennaHits += 1;
+
+      const pubTs = parseTimestamp(deal?.pubDate);
+      if (pubTs && now - pubTs <= DAY_MS) entry.fresh1dHits += 1;
+      if (pubTs && now - pubTs <= 7 * DAY_MS) entry.fresh7dHits += 1;
+      if (viennaHit && promoHit && hasKeyword(haystack, FOOD_DRINK_KEYWORDS)) entry.missionHits += 1;
+      entry.totalQualityScore += Number.isFinite(Number(deal?.qualityScore)) ? Number(deal.qualityScore) : 0;
 
       incrementMap(entry.categories, deal?.category);
       incrementMap(entry.types, deal?.type);
@@ -170,12 +207,17 @@ function main() {
     .map((entry) => ({
       username: entry.username,
       confidence: scoreEntry(entry),
+      priorityScore: priorityScore(entry),
       occurrences: entry.occurrences,
       liveOccurrences: entry.liveOccurrences,
       pendingOccurrences: entry.pendingOccurrences,
       foodDrinkHits: entry.foodDrinkHits,
       promoHits: entry.promoHits,
       viennaHits: entry.viennaHits,
+      fresh1dHits: entry.fresh1dHits,
+      fresh7dHits: entry.fresh7dHits,
+      missionHits: entry.missionHits,
+      averageQualityScore: entry.occurrences > 0 ? Math.round((entry.totalQualityScore / entry.occurrences) * 10) / 10 : 0,
       sourceFiles: [...entry.files].sort(),
       sourceLabels: [...entry.sourceLabels].sort(),
       topCategories: compactCounts(entry.categories),
@@ -184,7 +226,7 @@ function main() {
       sampleUrls: [...entry.sampleUrls].slice(0, 3),
     }))
     .filter((entry) => entry.confidence >= 30)
-    .sort((a, b) => b.confidence - a.confidence || b.occurrences - a.occurrences || a.username.localeCompare(b.username));
+    .sort((a, b) => b.priorityScore - a.priorityScore || b.confidence - a.confidence || b.occurrences - a.occurrences || a.username.localeCompare(b.username));
 
   const payload = {
     generatedAt: new Date().toISOString(),

@@ -243,15 +243,20 @@ function normalizeUsername(value) {
   return username;
 }
 
-function loadMerchantRegistryUsernames() {
+function loadMerchantRegistryAccounts() {
   if (!fs.existsSync(MERCHANT_REGISTRY_PATH)) return [];
   try {
     const parsed = JSON.parse(fs.readFileSync(MERCHANT_REGISTRY_PATH, 'utf-8'));
     const accounts = Array.isArray(parsed?.accounts) ? parsed.accounts : [];
     return accounts
       .filter((account) => Number(account?.confidence || 0) >= 40)
-      .map((account) => normalizeUsername(account?.username))
-      .filter(Boolean);
+      .map((account) => ({
+        username: normalizeUsername(account?.username),
+        confidence: Number(account?.confidence || 0),
+        priorityScore: Number(account?.priorityScore || 0),
+      }))
+      .filter((account) => account.username)
+      .sort((a, b) => b.priorityScore - a.priorityScore || b.confidence - a.confidence || a.username.localeCompare(b.username));
   } catch {
     return [];
   }
@@ -589,15 +594,36 @@ function buildSources() {
     kind: 'hashtag',
     key: `tag:${tag}`,
     url: `https://www.instagram.com/explore/tags/${tag}/`,
+    priority: 1,
   }));
 
-  const accountSources = [...new Set([...INSTAGRAM_ACCOUNTS, ...loadMerchantRegistryUsernames()])].map((username) => ({
-    kind: 'account',
-    key: `acct:${username}`,
-    url: `https://www.instagram.com/${username}/`,
-  }));
+  const accountSources = [];
+  const seenAccounts = new Set();
+  for (const account of loadMerchantRegistryAccounts()) {
+    if (seenAccounts.has(account.username)) continue;
+    seenAccounts.add(account.username);
+    const priorityBoost = Math.max(0, Math.min(3, Math.floor((account.priorityScore || account.confidence || 0) / 25)));
+    accountSources.push({
+      kind: 'account',
+      key: `acct:${account.username}`,
+      url: `https://www.instagram.com/${account.username}/`,
+      priority: 3 + priorityBoost,
+    });
+  }
+  for (const username of INSTAGRAM_ACCOUNTS) {
+    const normalized = normalizeUsername(username);
+    if (!normalized || seenAccounts.has(normalized)) continue;
+    seenAccounts.add(normalized);
+    accountSources.push({
+      kind: 'account',
+      key: `acct:${normalized}`,
+      url: `https://www.instagram.com/${normalized}/`,
+      priority: 2,
+    });
+  }
 
-  return [...hashtagSources, ...accountSources];
+  return [...accountSources, ...hashtagSources]
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0) || a.key.localeCompare(b.key));
 }
 
 async function createInstagramPageSession(browser, cookieHints) {

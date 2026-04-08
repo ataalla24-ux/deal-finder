@@ -130,8 +130,8 @@ Deliverables:
 - [x] Daily Sync account-first statt hashtag-first
 - [x] Merchant-Account-Graph aus echten Wiener Deal-Accounts
 - [x] Search-basierte Instagram-Account-Discovery
-- [ ] Merchant-Registry aus Live- und Pending-Deals weiter fuettern
-- [ ] Account-Priorisierung nach echter Deal-Leistung
+- [x] Merchant-Registry aus Live- und Pending-Deals weiter fuettern
+- [x] Account-Priorisierung nach echter Deal-Leistung
 - [ ] Key 4 klar auf Coffee/Openings/Freebies
 - [ ] Key 5 klar auf harte Gastro-Promos
 - [ ] tote Fallbacks reduzieren oder entfernen
