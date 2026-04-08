@@ -57,6 +57,16 @@ const BRAND_RULES = [
   { key: 'all4golf', name: 'ALL4GOLF', logo: '⛳', category: 'shopping', domain: 'all4golf.de' },
   { key: 'spee', name: 'Spee', logo: '🧺', category: 'shopping' },
   { key: 'westfield', name: 'Westfield Club', logo: '🛍️', category: 'shopping', domain: 'westfield.com' },
+  { key: 'ryanair', name: 'Ryanair', logo: '✈️', category: 'reisen', domain: 'ryanair.com' },
+  { key: 'wizz air', name: 'Wizz Air', logo: '✈️', category: 'reisen', domain: 'wizzair.com' },
+  { key: 'wizz', name: 'Wizz Air', logo: '✈️', category: 'reisen', domain: 'wizzair.com' },
+  { key: 'oebb', name: 'ÖBB', logo: '🚂', category: 'reisen', domain: 'oebb.at' },
+  { key: 'öbb', name: 'ÖBB', logo: '🚂', category: 'reisen', domain: 'oebb.at' },
+  { key: 'flixbus', name: 'FlixBus', logo: '🚌', category: 'reisen', domain: 'flixbus.at' },
+  { key: 'booking', name: 'Booking.com', logo: '🏨', category: 'reisen', domain: 'booking.com' },
+  { key: 'airbnb', name: 'Airbnb', logo: '🏠', category: 'reisen', domain: 'airbnb.com' },
+  { key: 'expedia', name: 'Expedia', logo: '✈️', category: 'reisen', domain: 'expedia.at' },
+  { key: 'tui', name: 'TUI', logo: '✈️', category: 'reisen', domain: 'tui.at' },
   { key: 'preisjaeger', name: 'Preisjaeger', logo: '🎯', category: 'shopping', source: true },
   { key: 'wien deals', name: 'Wien Deals', logo: '🎯', category: 'shopping', source: true },
   { key: 'instagram', name: 'Instagram', logo: '📸', category: 'shopping', source: true },
@@ -84,6 +94,7 @@ const GENERIC_TITLES = [
 ];
 
 const GENERIC_CATEGORIES = new Set(['', 'wien', 'gratis', 'shopping']);
+const TRAVEL_SIGNAL_PATTERN = /\b(flug|flight|hotel|reise|urlaub|trip|ryanair|wizz|wizzair|oebb|obb|flixbus|booking|airbnb|sparschiene|bahnticket|railjet|zugticket)\b/i;
 
 const SOURCE_LIKE_HOSTS = [
   /(^|\.)instagram\.com$/i,
@@ -411,9 +422,16 @@ function normalizeDealRecord(deal = {}) {
   const type = inferPreferredType({ ...deal, title, description, brand });
   const known = findBrandRule([brand, title, description, deal.distance, deal.url, deal.post_url].filter(Boolean).join(' '));
   const currentCategory = cleanUiNoiseText(deal.category || '').toLowerCase();
-  const category = known?.category && (GENERIC_CATEGORIES.has(currentCategory) || (currentCategory === 'shopping' && known.category !== 'shopping'))
+  const categorySignal = [brand, title, description, deal.distance, deal.url, deal.post_url, currentCategory].filter(Boolean).join(' ');
+  const hasTravelSignal = TRAVEL_SIGNAL_PATTERN.test(normalizeAscii(categorySignal));
+  let category = known?.category && (GENERIC_CATEGORIES.has(currentCategory) || (currentCategory === 'shopping' && known.category !== 'shopping'))
     ? known.category
     : currentCategory;
+
+  if ((currentCategory === 'freizeit' || GENERIC_CATEGORIES.has(currentCategory)) && hasTravelSignal) {
+    category = 'reisen';
+  }
+
   const sanitizedExpires = sanitizeExpiryText(deal.expires);
   if (!description) {
     description = buildFallbackDescription({ ...deal, title, brand, type, category });

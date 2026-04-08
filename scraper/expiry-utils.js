@@ -34,6 +34,24 @@ const URL_EXPIRY_BLOCK_HOSTS = new Set([
   'www.slack.com',
 ]);
 
+const DEAD_LINK_PATTERNS = [
+  { pattern: /\b404\b/, reason: '404-Seite' },
+  { pattern: /page not found/i, reason: 'Seite nicht gefunden' },
+  { pattern: /seite nicht gefunden/i, reason: 'Seite nicht gefunden' },
+  { pattern: /page isn['’]t available/i, reason: 'Seite nicht verfügbar' },
+  { pattern: /sorry,\s*this page isn['’]t available/i, reason: 'Seite nicht verfügbar' },
+  { pattern: /content isn['’]t available/i, reason: 'Inhalt nicht verfügbar' },
+  { pattern: /not available anymore/i, reason: 'Inhalt nicht mehr verfügbar' },
+  { pattern: /nicht mehr verf[üu]gbar/i, reason: 'Inhalt nicht mehr verfügbar' },
+  { pattern: /post is unavailable/i, reason: 'Beitrag nicht verfügbar' },
+  { pattern: /video currently unavailable/i, reason: 'Video nicht verfügbar' },
+  { pattern: /couldn['’]t find this (page|account)/i, reason: 'Seite oder Account nicht gefunden' },
+  { pattern: /angebot abgelaufen/i, reason: 'Angebot abgelaufen' },
+  { pattern: /offer expired/i, reason: 'Angebot abgelaufen' },
+  { pattern: /aktion beendet/i, reason: 'Aktion beendet' },
+  { pattern: /deal (has )?ended/i, reason: 'Deal beendet' },
+];
+
 function cleanText(value) {
   if (!value) return '';
   return String(value).replace(/\s+/g, ' ').trim();
@@ -636,6 +654,108 @@ export async function fetchExpiryFromUrl(url, options = {}) {
     return extractExpiryDateFromHtml(html, { ...options, hostname });
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function detectDeadLinkReason(html, options = {}) {
+  const text = String(html || '')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 20000);
+
+  if (!text) return '';
+
+  const hostname = cleanText(options.hostname || '').toLowerCase();
+  const lowered = text.toLowerCase();
+
+  if ((hostname.includes('instagram.com') || hostname.includes('tiktok.com')) && /log in|anmelden|sign up|registrieren/.test(lowered)) {
+    return '';
+  }
+
+  for (const entry of DEAD_LINK_PATTERNS) {
+    if (entry.pattern.test(text)) return entry.reason;
+  }
+
+  return '';
+}
+
+export async function inspectDealUrlHealth(url, options = {}) {
+  if (!url || typeof url !== 'string' || !/^https?:\/\//i.test(url)) {
+    return { invalid: true, reason: 'Ungültige Ziel-URL' };
+  }
+
+  const timeoutMs = Number(options.timeoutMs || process.env.URL_CHECK_TIMEOUT_MS || 7000);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'user-agent': URL_CHECK_UA,
+        accept: 'text/html,application/xhtml+xml,*/*',
+      },
+      redirect: 'follow',
+      signal: controller.signal,
+    });
+
+    const finalUrl = response.url || url;
+    const status = Number(response.status || 0);
+    const contentType = cleanText(response.headers.get('content-type') || '').toLowerCase();
+
+    if (!response.ok) {
+      return {
+        invalid: true,
+        reason: `HTTP ${status}`,
+        status,
+        finalUrl,
+      };
+    }
+
+    if (!contentType.includes('text/html') && !contentType.includes('application/xhtml+xml')) {
+      return {
+        invalid: false,
+        status,
+        finalUrl,
+        checkedAt: new Date().toISOString(),
+      };
+    }
+
+    const html = await response.text();
+    const hostname = (() => {
+      try {
+        return new URL(finalUrl).hostname;
+      } catch {
+        return '';
+      }
+    })();
+    const deadReason = detectDeadLinkReason(html, { hostname });
+
+    if (deadReason) {
+      return {
+        invalid: true,
+        reason: deadReason,
+        status,
+        finalUrl,
+      };
+    }
+
+    return {
+      invalid: false,
+      status,
+      finalUrl,
+      checkedAt: new Date().toISOString(),
+    };
+  } catch {
+    return {
+      invalid: false,
+      transientError: true,
+    };
   } finally {
     clearTimeout(timer);
   }

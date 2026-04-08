@@ -3230,6 +3230,8 @@
 
             if (WEAK_APP_CATEGORIES.has(cat) && inferred) return inferred;
 
+            if (cat === 'freizeit' && inferred === 'reisen') return 'reisen';
+
             if (cat === 'shopping' && inferred && inferred !== 'shopping') return inferred;
 
             return cat || inferred || 'kultur';

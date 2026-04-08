@@ -2,7 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { normalizeDealExpiry, shouldSkipUrlExpiryLookup } from './expiry-utils.js';
+import { inspectDealUrlHealth, normalizeDealExpiry, shouldSkipUrlExpiryLookup } from './expiry-utils.js';
 import {
   isExpiredDealRecord,
   isFalsePositiveFreeDeal,
@@ -15,6 +15,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
 const DEALS_PATH = path.join(ROOT, 'docs', 'deals.json');
+const VALIDATION_REPORT_PATH = path.join(ROOT, 'docs', 'live-deal-validation-report.json');
 const CHURCH_FILES = [
   path.join(ROOT, 'docs', 'deals-pending-church-gemeinde.json'),
   path.join(ROOT, 'docs', 'deals-pending-church-gottesdienste.json'),
@@ -37,6 +38,8 @@ const REMOVE_IDS = new Set([
 const LEGACY_CHURCH_ID_PATTERNS = [
   /^(hillsong-vienna|cig-wien|icf-wien|jesuszentrum)-(kirche|gottesdienste|events)-20260308$/i,
 ];
+
+const MAX_LIVE_URL_HEALTH_CHECKS = Number(process.env.MAX_LIVE_URL_HEALTH_CHECKS || 180);
 
 function cleanText(value) {
   if (!value) return '';
@@ -105,17 +108,54 @@ async function loadCuratedChurchDeals() {
 async function main() {
   const now = new Date();
   const urlCache = new Map();
+  const linkHealthCache = new Map();
   const dealsDoc = await readJson(DEALS_PATH);
+  const totalBefore = Array.isArray(dealsDoc.deals) ? dealsDoc.deals.length : 0;
   const churchDeals = await loadCuratedChurchDeals();
   const curatedChurchIds = getChurchCuratedIds(churchDeals);
 
   const remaining = [];
   const seenIds = new Set();
+  const removed = [];
+  let linkChecksUsed = 0;
+  let brokenLinkRemovals = 0;
+
+  function markRemoved(deal, reason) {
+    removed.push({
+      id: deal?.id || '',
+      title: cleanText(deal?.title || deal?.brand || '?'),
+      category: cleanText(deal?.category || ''),
+      url: cleanText(deal?.url || ''),
+      reason,
+    });
+  }
+
+  async function verifyDealUrl(deal) {
+    const url = cleanText(deal?.url || '');
+    if (!url || !/^https?:\/\//i.test(url)) return null;
+    const cached = linkHealthCache.has(url);
+    if (!cached && linkChecksUsed >= MAX_LIVE_URL_HEALTH_CHECKS) {
+      return null;
+    }
+    let result = linkHealthCache.get(url);
+    if (!cached) {
+      result = await inspectDealUrlHealth(url, { timeoutMs: process.env.URL_CHECK_TIMEOUT_MS });
+      linkHealthCache.set(url, result);
+      linkChecksUsed += 1;
+    }
+    return result || null;
+  }
 
   for (const original of dealsDoc.deals || []) {
     if (!original || typeof original !== 'object') continue;
-    if (shouldDropLegacyChurchDeal(original)) continue;
-    if (curatedChurchIds.has(original.id)) continue;
+    if (shouldDropLegacyChurchDeal(original)) {
+      markRemoved(original, 'Legacy-Kircheneintrag entfernt');
+      continue;
+    }
+    if (curatedChurchIds.has(original.id)) {
+      markRemoved(original, 'Wird durch kuratierten Kirche-/Event-Eintrag ersetzt');
+      continue;
+    }
 
     let deal = { ...original };
     deal = fixPubDateFromSlackTs(deal, now);
@@ -124,10 +164,33 @@ async function main() {
     await normalizeDealExpiry(deal, { now, allowUrlLookup: true, urlCache });
     deal.expires = sanitizeExpiryText(deal.expires);
 
-    if (isGenericJunkDeal(deal)) continue;
-    if (isFalsePositiveFreeDeal(deal)) continue;
-    if (isExpiredDealRecord(deal, now)) continue;
-    if (!deal.id || seenIds.has(deal.id)) continue;
+    const health = await verifyDealUrl(deal);
+    if (health?.invalid) {
+      brokenLinkRemovals += 1;
+      markRemoved(deal, `Ziellink ungültig: ${health.reason}`);
+      continue;
+    }
+
+    if (isGenericJunkDeal(deal)) {
+      markRemoved(deal, 'Generischer Junk-Deal');
+      continue;
+    }
+    if (isFalsePositiveFreeDeal(deal)) {
+      markRemoved(deal, 'False Positive Free Deal');
+      continue;
+    }
+    if (isExpiredDealRecord(deal, now)) {
+      markRemoved(deal, 'Deal abgelaufen');
+      continue;
+    }
+    if (!deal.id) {
+      markRemoved(deal, 'Deal ohne ID');
+      continue;
+    }
+    if (seenIds.has(deal.id)) {
+      markRemoved(deal, 'Doppelte Deal-ID');
+      continue;
+    }
 
     seenIds.add(deal.id);
     remaining.push(deal);
@@ -137,9 +200,22 @@ async function main() {
     const normalizedChurchDeal = normalizeDealRecord({ ...churchDeal });
     await normalizeDealExpiry(normalizedChurchDeal, { now, allowUrlLookup: true, urlCache });
     normalizedChurchDeal.expires = sanitizeExpiryText(normalizedChurchDeal.expires);
-    if (isFalsePositiveFreeDeal(normalizedChurchDeal)) continue;
-    if (isExpiredDealRecord(normalizedChurchDeal, now)) continue;
-    if (!normalizedChurchDeal.id || seenIds.has(normalizedChurchDeal.id)) continue;
+    if (isFalsePositiveFreeDeal(normalizedChurchDeal)) {
+      markRemoved(normalizedChurchDeal, 'False Positive Church Deal');
+      continue;
+    }
+    if (isExpiredDealRecord(normalizedChurchDeal, now)) {
+      markRemoved(normalizedChurchDeal, 'Kirchen-/Event-Deal abgelaufen');
+      continue;
+    }
+    if (!normalizedChurchDeal.id) {
+      markRemoved(normalizedChurchDeal, 'Kirchen-/Event-Deal ohne ID');
+      continue;
+    }
+    if (seenIds.has(normalizedChurchDeal.id)) {
+      markRemoved(normalizedChurchDeal, 'Doppelte Kirchen-/Event-ID');
+      continue;
+    }
     seenIds.add(normalizedChurchDeal.id);
     remaining.push(normalizedChurchDeal);
   }
@@ -154,8 +230,28 @@ async function main() {
   dealsDoc.totalDeals = remaining.length;
   dealsDoc.lastUpdated = now.toISOString();
 
+  const removalReasons = removed.reduce((acc, entry) => {
+    acc[entry.reason] = (acc[entry.reason] || 0) + 1;
+    return acc;
+  }, {});
+
   await writeFile(DEALS_PATH, JSON.stringify(dealsDoc, null, 2) + '\n', 'utf8');
+  await writeFile(VALIDATION_REPORT_PATH, JSON.stringify({
+    checkedAt: now.toISOString(),
+    totalBefore,
+    totalAfter: remaining.length,
+    removedCount: removed.length,
+    brokenLinkRemovals,
+    linkChecksUsed,
+    maxLinkChecks: MAX_LIVE_URL_HEALTH_CHECKS,
+    removalReasons,
+    removed: removed.slice(0, 200),
+  }, null, 2) + '\n', 'utf8');
+
   console.log(`Normalized live deals: ${remaining.length}`);
+  console.log(`Removed deals: ${removed.length}`);
+  console.log(`Broken link removals: ${brokenLinkRemovals}`);
+  console.log(`Link health checks: ${linkChecksUsed}/${MAX_LIVE_URL_HEALTH_CHECKS}`);
 }
 
 main().catch((error) => {

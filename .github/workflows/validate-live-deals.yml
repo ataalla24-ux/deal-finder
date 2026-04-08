@@ -1,0 +1,53 @@
+name: "Validate Live Deals"
+
+on:
+  schedule:
+    - cron: '30 8 * * *' # 09:30 Vienna winter / 10:30 Vienna summer
+  workflow_dispatch:
+
+concurrency:
+  group: validate-live-deals
+  cancel-in-progress: false
+
+jobs:
+  validate-live-deals:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Validate Live Deals
+        env:
+          MAX_LIVE_URL_HEALTH_CHECKS: 180
+          URL_CHECK_TIMEOUT_MS: 7000
+        run: node scraper/normalize-live-deals.js
+
+      - name: Commit validated live deals
+        run: |
+          git config user.name "Deal Bot"
+          git config user.email "bot@freefinder.wien"
+          git add docs/deals.json docs/live-deal-validation-report.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Validate live deals $(date +%Y-%m-%d)"
+          if ! git pull --rebase --autostash origin main; then
+            echo "⚠️ Rebase conflict on generated files. Skipping push for this run."
+            git rebase --abort || true
+            exit 0
+          fi
+          if ! git push origin HEAD:main; then
+            echo "⚠️ Push failed (branch moved). Skipping push for this run."
+            exit 0
+          fi
