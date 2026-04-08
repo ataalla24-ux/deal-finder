@@ -485,7 +485,7 @@
         .bottom-nav {
             position: fixed;
             left: 50%;
-            bottom: calc(6px + var(--ff-bottom-viewport-offset, 0px));
+            bottom: calc(6px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px));
             transform: translate3d(-50%, 0, 0);
             -webkit-transform: translate3d(-50%, 0, 0);
             width: min(540px, calc(100% - 30px));
@@ -495,7 +495,7 @@
             border: 1px solid rgba(148, 163, 184, 0.22);
             border-radius: 999px;
             padding: 3px;
-            padding-bottom: calc(3px + env(safe-area-inset-bottom));
+            padding-bottom: 3px;
             display: flex;
             justify-content: space-between;
             align-items: stretch;
