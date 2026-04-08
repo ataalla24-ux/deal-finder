@@ -333,29 +333,45 @@ function createRejectionCounters() {
 async function fetchInstagramJsonInBrowser(page, url, referer) {
   if (!page || !url) return null;
   try {
-    const result = await page.evaluate(async ({ url, referer }) => {
-      try {
-        const response = await fetch(url, {
-          method: 'GET',
-          credentials: 'include',
-          referrer: referer,
-          headers: {
-            'X-IG-App-ID': '936619743392459',
-            'X-Requested-With': 'XMLHttpRequest',
-            Accept: '*/*',
-          },
-        });
-        const text = await response.text();
-        return { ok: response.ok, status: response.status, text };
-      } catch (error) {
-        return { ok: false, status: 0, text: '', error: String(error?.message || error || '') };
-      }
-    }, { url, referer });
-
-    if (!result?.ok || !result?.text) return null;
-    return JSON.parse(result.text);
+    const response = await page.context().request.get(url, {
+      headers: {
+        'X-IG-App-ID': '936619743392459',
+        'X-Requested-With': 'XMLHttpRequest',
+        Accept: '*/*',
+        Referer: referer,
+      },
+      failOnStatusCode: false,
+    });
+    if (!response.ok()) return null;
+    const text = await response.text();
+    if (!text) return null;
+    return JSON.parse(text);
   } catch {
-    return null;
+    try {
+      const result = await page.evaluate(async ({ url, referer }) => {
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            credentials: 'include',
+            referrer: referer,
+            headers: {
+              'X-IG-App-ID': '936619743392459',
+              'X-Requested-With': 'XMLHttpRequest',
+              Accept: '*/*',
+            },
+          });
+          const text = await response.text();
+          return { ok: response.ok, status: response.status, text };
+        } catch (error) {
+          return { ok: false, status: 0, text: '', error: String(error?.message || error || '') };
+        }
+      }, { url, referer });
+
+      if (!result?.ok || !result?.text) return null;
+      return JSON.parse(result.text);
+    } catch {
+      return null;
+    }
   }
 }
 
@@ -366,23 +382,48 @@ function buildInstagramPostUrlFromNode(node) {
   return `https://www.instagram.com/${pathKind}/${shortcode}/`;
 }
 
+function extractLinksFromTimelineEdges(edges) {
+  const links = new Set();
+  for (const edge of Array.isArray(edges) ? edges : []) {
+    const node = edge?.node || edge;
+    const shortcode = cleanText(node?.shortcode || node?.code);
+    if (!shortcode) continue;
+    const isVideo = Boolean(node?.is_video) || node?.media_type === 2 || node?.__typename === 'GraphVideo';
+    const kind = isVideo ? 'reel' : 'p';
+    links.add(`https://www.instagram.com/${kind}/${shortcode}/`);
+    if (links.size >= CONFIG.perSourceLinksLimit) break;
+  }
+  return [...links];
+}
+
 async function fetchAccountTimelineLinks(page, username) {
   const normalized = normalizeUsername(username);
   if (!page || !normalized) return [];
   try {
-    const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(normalized)}`;
-    const parsed = await fetchInstagramJsonInBrowser(page, url, `https://www.instagram.com/${encodeURIComponent(normalized)}/`);
-    const user = parsed?.data?.user;
-    const edges = Array.isArray(user?.edge_owner_to_timeline_media?.edges)
-      ? user.edge_owner_to_timeline_media.edges
-      : [];
-    const links = new Set();
-    for (const edge of edges) {
-      const postUrl = buildInstagramPostUrlFromNode(edge?.node);
-      if (postUrl) links.add(postUrl);
-      if (links.size >= CONFIG.perSourceLinksLimit) break;
+    const referer = `https://www.instagram.com/${encodeURIComponent(normalized)}/`;
+    const urls = [
+      `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(normalized)}`,
+      `https://www.instagram.com/${encodeURIComponent(normalized)}/?__a=1&__d=dis`,
+    ];
+    for (const url of urls) {
+      const parsed = await fetchInstagramJsonInBrowser(page, url, referer);
+      const edges =
+        parsed?.data?.user?.edge_owner_to_timeline_media?.edges
+        || parsed?.graphql?.user?.edge_owner_to_timeline_media?.edges
+        || parsed?.items
+        || [];
+      const links = extractLinksFromTimelineEdges(edges);
+      if (links.length > 0) return links;
     }
-    return [...links];
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+function collectLinksFromAccountHtml(html) {
+  try {
+    return [...extractShortcodesFromText(html)];
   } catch {
     return [];
   }
@@ -824,6 +865,7 @@ async function scrapeInstagram() {
         key: source.key,
         kind: source.kind,
         domLinks: 0,
+        htmlShortcodeLinks: 0,
         accountApiLinks: 0,
         scriptLinks: 0,
         htmlLinks: 0,
@@ -853,9 +895,11 @@ async function scrapeInstagram() {
           const domUrls = await collectLinksFromDom(sourcePage);
           const html = await sourcePage.content();
           const htmlUrls = extractPostUrls(html);
+          const htmlShortcodeUrls = source.kind === 'account' ? collectLinksFromAccountHtml(html) : [];
           sourceSummary.domLinks += domUrls.length;
           sourceSummary.htmlLinks += htmlUrls.length;
-          for (const u of [...domUrls, ...htmlUrls]) {
+          sourceSummary.htmlShortcodeLinks += htmlShortcodeUrls.length;
+          for (const u of [...domUrls, ...htmlUrls, ...htmlShortcodeUrls]) {
             sourceLinks.add(u);
           }
 
@@ -906,6 +950,11 @@ async function scrapeInstagram() {
         }
         sourceSummary.linksFound = postUrls.length;
         console.log(`   ↳ links found: ${postUrls.length}`);
+        if (source.kind === 'account') {
+          console.log(
+            `     account stats: dom=${sourceSummary.domLinks} html=${sourceSummary.htmlLinks} shortcode=${sourceSummary.htmlShortcodeLinks} api=${sourceSummary.accountApiLinks} ddg=${sourceSummary.duckduckgoLinks}`
+          );
+        }
 
         for (const postUrl of postUrls) {
           if (!candidatePosts.has(postUrl)) {
