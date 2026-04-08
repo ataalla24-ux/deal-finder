@@ -1277,8 +1277,16 @@
                 tagFitness: '💪 Fitness',
                 categoryCoffee: '☕ Kaffee',
                 categoryFood: '🍔 Essen',
-                categoryShopping: '🛍️ Shopping',
-                categoryLeisure: '🎉 Freizeit',
+                categoryFitness: '💪 Fitness',
+                categoryTravel: '✈️ Reisen',
+                categorySupermarket: '🛒 Supermarkt',
+                categoryBeauty: '💇 Beauty',
+                categoryTech: '📱 Technik',
+                categoryStreaming: '📺 Streaming',
+                categoryCulture: '🏛️ Kultur',
+                categoryServices: '🕊️ Gottesdienste',
+                categoryCommunityEvents: '✝️ Community-Events',
+                categoryChurch: '⛪ Kirche',
                 filterAll: '🎯 Alle',
                 filterGratis: '🎁 Gratis',
                 filterDiscount: '💰 Rabatt',
@@ -1502,8 +1510,16 @@
                 tagFitness: '💪 Fitness',
                 categoryCoffee: '☕ Coffee',
                 categoryFood: '🍔 Food',
-                categoryShopping: '🛍️ Shopping',
-                categoryLeisure: '🎉 Leisure',
+                categoryFitness: '💪 Fitness',
+                categoryTravel: '✈️ Travel',
+                categorySupermarket: '🛒 Grocery',
+                categoryBeauty: '💇 Beauty',
+                categoryTech: '📱 Tech',
+                categoryStreaming: '📺 Streaming',
+                categoryCulture: '🏛️ Culture',
+                categoryServices: '🕊️ Services',
+                categoryCommunityEvents: '✝️ Community Events',
+                categoryChurch: '⛪ Church',
                 filterAll: '🎯 All',
                 filterGratis: '🎁 Free',
                 filterDiscount: '💰 Discount',
@@ -1757,11 +1773,25 @@
             if (typeButtons[3]) typeButtons[3].innerHTML = t('filterGiveaway') + ' <span class="filter-count" id="countGewinnspiel">' + (document.getElementById('countGewinnspiel')?.textContent || '0') + '</span>';
             if (typeButtons[4]) typeButtons[4].innerHTML = t('filterCodes') + ' <span class="filter-count" id="countCodes">' + (document.getElementById('countCodes')?.textContent || '0') + '</span>';
             const categoryButtons = document.querySelectorAll('#categoryFilters .filter-btn');
-            if (categoryButtons[0]) categoryButtons[0].textContent = t('filterAll');
-            if (categoryButtons[1]) categoryButtons[1].textContent = t('categoryCoffee');
-            if (categoryButtons[2]) categoryButtons[2].textContent = t('categoryFood');
-            if (categoryButtons[3]) categoryButtons[3].textContent = t('categoryShopping');
-            if (categoryButtons[4]) categoryButtons[4].textContent = t('categoryLeisure');
+            const categoryButtonLabels = {
+                alle: 'filterAll',
+                kaffee: 'categoryCoffee',
+                essen: 'categoryFood',
+                fitness: 'categoryFitness',
+                reisen: 'categoryTravel',
+                supermarkt: 'categorySupermarket',
+                beauty: 'categoryBeauty',
+                technik: 'categoryTech',
+                streaming: 'categoryStreaming',
+                kultur: 'categoryCulture',
+                gottesdienste: 'categoryServices',
+                events: 'categoryCommunityEvents',
+                kirche: 'categoryChurch',
+            };
+            categoryButtons.forEach((button) => {
+                const key = categoryButtonLabels[button.dataset.category];
+                if (key) button.textContent = t(key);
+            });
             const navLabels = document.querySelectorAll('.bottom-nav .nav-label');
             if (navLabels[0]) navLabels[0].textContent = t('navDeals');
             if (navLabels[1]) navLabels[1].textContent = t('navForYou');
@@ -2149,11 +2179,15 @@
         }
 
         function inferLogoForApp(deal, brand) {
+            const category = cleanUiNoiseText(deal.category || '').toLowerCase();
+            const type = cleanUiNoiseText(deal.type || '').toLowerCase();
+            if (category === 'kirche') return '⛪';
+            if (category === 'gottesdienste') return '🕊️';
+            if (category === 'events') return '🎫';
+
             const known = findKnownBrandForApp(brand, deal.title, deal.description, deal.distance, deal.url);
             if (known && !isSourceLikeBrandForApp(known.name || '')) return known.logo;
 
-            const category = cleanUiNoiseText(deal.category || '').toLowerCase();
-            const type = cleanUiNoiseText(deal.type || '').toLowerCase();
             const haystack = cleanUiNoiseText([
                 brand,
                 deal.title,
@@ -3293,7 +3327,11 @@
         }
 
         function getDealLogoUrlForApp(deal, brand) {
-            if (deal.logoUrl && !isSourceLikeHostForApp(extractHostFromUrlForApp(deal.logoUrl))) return deal.logoUrl;
+            const category = cleanUiNoiseText(deal.category || '').toLowerCase();
+            const existingLogoHost = extractHostFromUrlForApp(deal.logoUrl);
+            const isGenericGoogleFavicon = existingLogoHost === 'google.com' && /\/s2\/favicons/i.test(String(deal.logoUrl || ''));
+            if (category === 'kirche' || category === 'gottesdienste' || category === 'events') return '';
+            if (deal.logoUrl && !isGenericGoogleFavicon && !isSourceLikeHostForApp(existingLogoHost)) return deal.logoUrl;
             const preferredBrand = cleanUiNoiseText(brand || inferPreferredBrandForApp(deal) || '');
             const known = findKnownBrandForApp(preferredBrand, deal.title, deal.description, deal.distance, deal.url);
             if (known && known.domain && !isSourceLikeBrandForApp(known.name || '')) {
