@@ -4584,7 +4584,7 @@
                 applyDailyDealTheme(overridden.type);
                 document.getElementById('dailyTitle').textContent = (overridden.logo || '') + ' ' + (_brandOverride ? (_brandOverride + ': ') : '') + _titleOverride;
                 document.getElementById('dailyDesc').textContent = _descOverride + (_locOverride ? ' — ' + _locOverride : '');
-                document.getElementById('dailyBtn').onclick = () => { window.open(overridden.url, '_blank'); trackDealView(overridden.id); };
+                document.getElementById('dailyBtn').onclick = () => { window.open(normalizeExternalUrl(overridden.url), '_blank'); trackDealView(overridden.id); };
                 return;
             }
         }
@@ -4606,7 +4606,7 @@
                     applyDailyDealTheme(dealForDisplay.type || deal.type || picked.type);
                     document.getElementById('dailyTitle').textContent = (deal.logo || picked.logo || '') + ' ' + (_brand ? (_brand + ': ') : '') + _title;
                     document.getElementById('dailyDesc').textContent = _desc + (_loc ? ' — ' + _loc : '');
-                    document.getElementById('dailyBtn').onclick = () => { window.open(deal.url || picked.url, '_blank'); trackDealView(deal.id || picked.dealId); };
+                    document.getElementById('dailyBtn').onclick = () => { window.open(normalizeExternalUrl(deal.url || picked.url), '_blank'); trackDealView(deal.id || picked.dealId); };
                     return;
                 }
             }
@@ -4631,7 +4631,7 @@
         applyDailyDealTheme(deal.type);
         document.getElementById('dailyTitle').textContent = (deal.logo || '') + ' ' + (_brand2 ? (_brand2 + ': ') : '') + _title2;
         document.getElementById('dailyDesc').textContent = _desc2 + (_loc2 ? ' — ' + _loc2 : '');
-        document.getElementById('dailyBtn').onclick = () => { window.open(deal.url, '_blank'); trackDealView(deal.id); };
+        document.getElementById('dailyBtn').onclick = () => { window.open(normalizeExternalUrl(deal.url), '_blank'); trackDealView(deal.id); };
     }
         function applyDailyDealTheme(type) {
             const dailyDealEl = document.getElementById('dailyDeal');
@@ -4712,7 +4712,7 @@
             descEl.textContent = rawDesc ? (rawDesc + (location ? ' — ' + location : '')) : (location || t('featuredSoon'));
             metaEl.textContent = metaBits.join(' • ');
             btnEl.onclick = () => {
-                if (deal.url) window.open(deal.url, '_blank');
+                if (deal.url) window.open(normalizeExternalUrl(deal.url), '_blank');
                 trackDealView(deal.id);
             };
         }
@@ -5519,10 +5519,19 @@
             renderDeals();
         }
 
+        function normalizeExternalUrl(url) {
+            const text = String(url || '')
+                .replace(/&amp;/gi, '&')
+                .replace(/&quot;/gi, '"')
+                .replace(/&#39;/gi, "'")
+                .trim();
+            return text;
+        }
+
         function openDealUrl(dealId, e) {
             if (e) e.stopPropagation();
             const deal = allDeals.find((d) => d.id === dealId);
-            const target = deal && deal.url ? String(deal.url).trim() : '';
+            const target = deal && deal.url ? normalizeExternalUrl(deal.url) : '';
             if (!target) {
                 showToast(t('linkSoon'));
                 return;

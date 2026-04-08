@@ -44,7 +44,33 @@ const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REF
 
 function cleanText(value) {
   if (!value) return '';
-  return String(value).replace(/\s+/g, ' ').trim();
+  return String(value)
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeTargetUrl(value) {
+  const text = cleanText(value);
+  if (!text) return '';
+  return text;
+}
+
+function normalizeUrlForCompare(value) {
+  const text = normalizeTargetUrl(value);
+  if (!text) return '';
+  try {
+    const parsed = new URL(text);
+    if (parsed.pathname !== '/' && parsed.pathname.endsWith('/')) {
+      parsed.pathname = parsed.pathname.slice(0, -1);
+    }
+    parsed.hash = '';
+    return parsed.toString();
+  } catch {
+    return text.replace(/\/+$/, '');
+  }
 }
 
 function getChurchCuratedIds(churchDeals) {
@@ -162,6 +188,7 @@ async function main() {
     }
 
     let deal = { ...original };
+    deal.url = normalizeTargetUrl(deal.url);
     deal = fixPubDateFromSlackTs(deal, now);
     deal = resetUnsafeUrlExpiry(deal);
     deal = normalizeDealRecord(deal);
@@ -201,6 +228,13 @@ async function main() {
       brokenLinkRemovals += 1;
       markRemoved(deal, `Ziellink ungültig: ${health.reason}`);
       continue;
+    }
+    if (health?.finalUrl) {
+      const currentUrl = normalizeUrlForCompare(deal.url);
+      const finalUrl = normalizeUrlForCompare(health.finalUrl);
+      if (finalUrl && finalUrl !== currentUrl) {
+        deal.url = health.finalUrl;
+      }
     }
 
     if (isGenericJunkDeal(deal)) {
