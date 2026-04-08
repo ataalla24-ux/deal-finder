@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-instagram-web.json');
 const WEB_REPORT_PATH = path.join(ROOT, 'docs', 'instagram-web-report.json');
+const MERCHANT_REGISTRY_PATH = path.join(ROOT, 'docs', 'instagram-merchant-registry.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
 const DEFAULT_CONFIG = {
@@ -68,6 +69,12 @@ const INSTAGRAM_ACCOUNTS = [
   'wienburger',
   'wienkebap',
 ];
+
+const RESERVED_IG_PATHS = new Set([
+  'explore', 'accounts', 'about', 'developer', 'legal', 'privacy', 'api', 'reel', 'p',
+  'stories', 'direct', 'reels', 'tv', 'challenge', 'directory', 'topics', 'emails',
+  'download', 'press', 'jobs', 'threads', 'create', 'login', 'signup',
+]);
 
 const SEARCH_QUERIES = [
   'site:instagram.com/reel wien gratis essen',
@@ -227,6 +234,27 @@ function cleanText(value) {
     .replace(/&#39;/g, "'")
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function normalizeUsername(value) {
+  const username = cleanText(value).toLowerCase().replace(/^@/, '').trim();
+  if (!username || RESERVED_IG_PATHS.has(username)) return '';
+  if (!/^[a-z0-9._]{2,40}$/.test(username)) return '';
+  return username;
+}
+
+function loadMerchantRegistryUsernames() {
+  if (!fs.existsSync(MERCHANT_REGISTRY_PATH)) return [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(MERCHANT_REGISTRY_PATH, 'utf-8'));
+    const accounts = Array.isArray(parsed?.accounts) ? parsed.accounts : [];
+    return accounts
+      .filter((account) => Number(account?.confidence || 0) >= 40)
+      .map((account) => normalizeUsername(account?.username))
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
 }
 
 function containsKeyword(text, keywords) {
@@ -563,7 +591,7 @@ function buildSources() {
     url: `https://www.instagram.com/explore/tags/${tag}/`,
   }));
 
-  const accountSources = [...new Set(INSTAGRAM_ACCOUNTS)].map((username) => ({
+  const accountSources = [...new Set([...INSTAGRAM_ACCOUNTS, ...loadMerchantRegistryUsernames()])].map((username) => ({
     kind: 'account',
     key: `acct:${username}`,
     url: `https://www.instagram.com/${username}/`,

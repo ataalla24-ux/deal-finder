@@ -9,6 +9,7 @@ const ROOT = path.join(__dirname, '..');
 const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-instagram-discovery.json');
 const SOURCE_STATS_PATH = path.join(ROOT, 'docs', 'instagram-source-stats.json');
 const DISCOVERY_REPORT_PATH = path.join(ROOT, 'docs', 'instagram-discovery-report.json');
+const MERCHANT_REGISTRY_PATH = path.join(ROOT, 'docs', 'instagram-merchant-registry.json');
 const ARTIFACTS_DIR = path.join(ROOT, 'artifacts');
 const CANDIDATE_LOG_PATH = path.join(ARTIFACTS_DIR, 'instagram-discovery-candidates.json');
 const ENV_PATH = path.join(ROOT, '.env');
@@ -371,6 +372,13 @@ function normalizeAccountFromHref(rawHref) {
   return username;
 }
 
+function normalizeUsername(value) {
+  const username = cleanText(value).toLowerCase().replace(/^@/, '').trim();
+  if (!username || RESERVED_IG_PATHS.has(username)) return '';
+  if (!/^[a-z0-9._]{2,40}$/.test(username)) return '';
+  return username;
+}
+
 function extractPostUrls(html) {
   const urls = new Set();
   const re = /https:\/\/(?:www\.)?instagram\.com\/(?:p|reel)\/[A-Za-z0-9_-]+\//g;
@@ -669,7 +677,7 @@ function buildSources(sourceStats) {
     priority: 2,
   }));
 
-  const accounts = [...new Set(SEED_ACCOUNTS)].map((username) => ({
+  const accounts = [...new Set(getSeedAccounts())].map((username) => ({
     kind: 'account',
     key: `acct:${username}`,
     url: `https://www.instagram.com/${username}/`,
@@ -685,6 +693,24 @@ function buildSources(sourceStats) {
     });
 
   return combined;
+}
+
+function loadMerchantRegistryUsernames() {
+  if (!fs.existsSync(MERCHANT_REGISTRY_PATH)) return [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(MERCHANT_REGISTRY_PATH, 'utf-8'));
+    const accounts = Array.isArray(parsed?.accounts) ? parsed.accounts : [];
+    return accounts
+      .filter((account) => Number(account?.confidence || 0) >= 40)
+      .map((account) => normalizeUsername(account?.username))
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function getSeedAccounts() {
+  return [...new Set([...SEED_ACCOUNTS, ...loadMerchantRegistryUsernames()])];
 }
 
 function buildCookieHints() {
@@ -811,7 +837,7 @@ async function collectDealsFromAccountApi(sourceStats) {
   const seenUsernames = new Set();
   const seenUrls = new Set();
   const seedAccounts = new Map();
-  for (const username of [...new Set(SEED_ACCOUNTS)]) {
+  for (const username of getSeedAccounts()) {
     seedAccounts.set(username, {
       kind: 'account-api',
       key: `acct:${username}`,

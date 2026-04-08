@@ -38,6 +38,9 @@ jobs:
           JOE_STORAGE_STATE_B64: ${{ secrets.JOE_STORAGE_STATE_B64 }}
         run: node scripts/load-joe-auth-state.mjs
 
+      - name: Build Instagram Merchant Registry
+        run: node scraper/build-instagram-merchant-registry.js
+
       - name: Run Instagram Discovery Scraper
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
@@ -92,7 +95,7 @@ jobs:
         run: |
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
-          git add docs/deals-pending-instagram.json docs/deals-pending-instagram-web.json docs/deals-pending-instagram-discovery.json docs/deals-pending-joe.json docs/instagram-source-stats.json docs/instagram-discovery-report.json docs/instagram-web-report.json 2>/dev/null || true
+          git add docs/deals-pending-instagram.json docs/deals-pending-instagram-web.json docs/deals-pending-instagram-discovery.json docs/deals-pending-joe.json docs/instagram-source-stats.json docs/instagram-discovery-report.json docs/instagram-web-report.json docs/instagram-merchant-registry.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
