@@ -965,12 +965,10 @@
                 <button class="filter-btn" data-category="beauty">💇 Beauty</button>
                 <button class="filter-btn" data-category="technik">📱 Technik</button>
                 <button class="filter-btn" data-category="streaming">📺 Streaming</button>
-                <button class="filter-btn" data-category="wien">🏛️ Wien</button>
+                <button class="filter-btn" data-category="kultur">🏛️ Kultur</button>
                 <button class="filter-btn" data-category="gottesdienste">🕊️ Gottesdienste</button>
                 <button class="filter-btn" data-category="events">✝️ Community-Events</button>
                 <button class="filter-btn" data-category="gratis">🎁 Gratis</button>
-                <button class="filter-btn" data-category="shopping">🛍️ Shopping</button>
-                <button class="filter-btn" data-category="kultur">🏛️ Kultur</button>
                 <button class="filter-btn" data-category="kirche">⛪ Kirche</button>
             </div>
         </div>
@@ -3128,6 +3126,8 @@
             tech: 'technik',
             elektronik: 'technik',
             stream: 'streaming',
+            wien: 'kultur',
+            vienna: 'kultur',
             culture: 'kultur',
             museum: 'kultur',
             festival: 'kultur',
@@ -3136,7 +3136,7 @@
             transport: 'reisen'
         };
 
-        const WEAK_APP_CATEGORIES = new Set(['', 'wien', 'gratis', 'shopping']);
+        const WEAK_APP_CATEGORIES = new Set(['', 'gratis', 'shopping']);
 
         const CATEGORY_HINTS = {
             kaffee: [
@@ -3232,9 +3232,8 @@
             if (WEAK_APP_CATEGORIES.has(cat) && inferred) return inferred;
 
             if (cat === 'shopping' && inferred && inferred !== 'shopping') return inferred;
-            if (cat === 'wien' && inferred) return inferred;
 
-            return cat || inferred || 'wien';
+            return cat || inferred || 'kultur';
         }
 
         function buildFallbackDescriptionForApp(deal) {
@@ -4425,7 +4424,6 @@
         fitness: 15,
         streaming: 10,
         shopping: 12,
-        wien: 6,
         kultur: 8,
         beauty: 10,
         technik: 20,
