@@ -772,10 +772,585 @@
           .admin-save-btn { grid-column: span 1; }
           .admin-modal-content { max-height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding: 20px 16px 18px; }
         }
+
+        /* ===== LOVABLE IPHONE REDESIGN ===== */
+        :root {
+            --ff-app-bg: #fbf8f3;
+            --ff-surface: #ffffff;
+            --ff-surface-soft: #fffaf4;
+            --ff-card-border: #efe7dc;
+            --ff-text: #2c2824;
+            --ff-muted: #8c8074;
+            --ff-soft-muted: #b5a99d;
+            --ff-accent: #f59a36;
+            --ff-accent-strong: #ef8530;
+            --ff-accent-soft: #fff0df;
+            --ff-success: #56c39a;
+            --ff-shadow: 0 12px 28px rgba(34, 29, 24, 0.06);
+        }
+        html,
+        body {
+            background: linear-gradient(180deg, #fffdf9 0%, var(--ff-app-bg) 100%);
+        }
+        body {
+            color: var(--ff-text);
+            padding-bottom: calc(108px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px));
+        }
+        .container {
+            max-width: 440px;
+        }
+        .streak-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            background: linear-gradient(135deg, var(--ff-accent-strong), var(--ff-accent));
+            color: #fffdf7;
+            border-radius: 18px;
+            padding: 13px 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 14px 30px rgba(240, 138, 53, 0.18);
+        }
+        .streak-copy {
+            min-width: 0;
+        }
+        .streak-title {
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        .streak-subtitle {
+            margin-top: 3px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.88);
+            line-height: 1.35;
+        }
+        .streak-reward {
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.18);
+            color: white;
+            border-radius: 999px;
+            padding: 9px 13px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.01em;
+        }
+        .daily-deal#dailyDeal {
+            background: linear-gradient(135deg, #f6993a 0%, #f59a36 60%, #ffad49 100%);
+            border-radius: 22px;
+            padding: 16px 18px 18px;
+            box-shadow: 0 18px 34px rgba(242, 145, 49, 0.18);
+            margin-bottom: 14px;
+        }
+        .daily-deal#dailyDeal.theme-gratis,
+        .daily-deal#dailyDeal.theme-freebie,
+        .daily-deal#dailyDeal.theme-rabatt,
+        .daily-deal#dailyDeal.theme-gewinnspiel,
+        .daily-deal#dailyDeal.theme-bogo,
+        .daily-deal#dailyDeal.theme-testabo {
+            background: linear-gradient(135deg, #f6993a 0%, #f59a36 60%, #ffad49 100%);
+            box-shadow: 0 18px 34px rgba(242, 145, 49, 0.18);
+        }
+        .daily-deal#dailyDeal::before {
+            inset: auto -12% -36% auto;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.14), rgba(255,255,255,0) 72%);
+        }
+        #dailyDeal .daily-label {
+            background: rgba(255,255,255,0.15);
+            padding: 5px 10px;
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+        #dailyDeal .daily-title {
+            max-width: 92%;
+            font-size: 16px;
+            line-height: 1.2;
+            letter-spacing: -0.03em;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        #dailyDeal .daily-desc {
+            max-width: 92%;
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        #dailyDeal .daily-countdown {
+            gap: 10px;
+            margin-top: 0;
+        }
+        #dailyDeal .countdown-box {
+            min-width: 54px;
+            border-radius: 14px;
+            padding: 8px 9px;
+            background: rgba(255,255,255,0.18);
+        }
+        #dailyDeal .countdown-num {
+            font-size: 24px;
+        }
+        #dailyDeal .countdown-label {
+            font-size: 9px;
+        }
+        #dailyDeal .daily-btn {
+            margin-top: 16px;
+            min-height: 46px;
+            padding: 11px 18px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.18);
+            color: white;
+            border: none;
+            box-shadow: none;
+        }
+        #savingsCard.savings-card {
+            background: var(--ff-surface);
+            border: 1px solid var(--ff-card-border);
+            border-radius: 20px;
+            padding: 15px 18px 14px;
+            box-shadow: var(--ff-shadow);
+            margin-bottom: 16px;
+            position: relative;
+        }
+        #savingsCard .savings-title {
+            font-size: 14px;
+            color: #3b342d;
+            font-weight: 800;
+        }
+        #savingsCard .savings-amount {
+            font-size: 28px;
+            color: #2c2824;
+        }
+        #savingsCard .savings-amount:empty {
+            display: none;
+        }
+        #savingsCard .savings-header {
+            align-items: flex-start;
+        }
+        #savingsCard .savings-bar {
+            background: #efeae3;
+            height: 7px;
+        }
+        #savingsCard .savings-progress {
+            background: linear-gradient(90deg, #f39a35, #ffc56d);
+        }
+        #savingsCard .savings-goal {
+            margin-top: 10px;
+            color: #998d80;
+        }
+        #savingsCard .savings-lock {
+            display: none !important;
+        }
+        #savingsCard.locked::after {
+            content: '🔒';
+            font-size: 18px;
+            top: 14px;
+            right: 16px;
+        }
+        .filters {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            margin-bottom: 14px;
+            position: static;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+        #typeFilters,
+        .filter-divider {
+            display: none;
+        }
+        #categoryFilters {
+            gap: 8px;
+            padding: 2px 0;
+        }
+        #categoryFilters .filter-btn {
+            background: rgba(255,255,255,0.96);
+            border: 1px solid var(--ff-card-border);
+            border-radius: 999px;
+            padding: 8px 13px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--ff-muted);
+            box-shadow: 0 3px 10px rgba(28, 24, 19, 0.035);
+        }
+        #categoryFilters .filter-btn.active {
+            background: #2d2926;
+            border-color: #2d2926;
+            color: white;
+            box-shadow: none;
+        }
+        .search-box {
+            background: rgba(255,255,255,0.96);
+            border: 1px solid var(--ff-card-border);
+            box-shadow: var(--ff-shadow);
+            border-radius: 18px;
+        }
+        .deal-card {
+            background: var(--ff-surface);
+            border-radius: 22px;
+            border: 1px solid var(--ff-card-border);
+            box-shadow: var(--ff-shadow);
+            padding: 16px 18px 14px;
+            margin-bottom: 14px;
+        }
+        .deal-card::before,
+        .deal-card.hot::before,
+        .deal-card.expiring-soon::before,
+        .deal-card.expiring-mid::before,
+        .deal-card.expiring-ok::before,
+        .deal-card.expired-visible::before {
+            display: none;
+        }
+        .deal-card.hot,
+        .deal-card.expiring-soon,
+        .deal-card.expiring-mid,
+        .deal-card.expiring-ok,
+        .deal-card.expired-visible {
+            border-width: 1px !important;
+            background: var(--ff-surface) !important;
+            box-shadow: var(--ff-shadow) !important;
+        }
+        .deal-card-topline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .deal-badge-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+            flex-wrap: wrap;
+        }
+        .deal-type-badge {
+            position: static;
+            top: auto;
+            left: auto;
+            box-shadow: none;
+            border: none;
+            padding: 5px 9px;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+        }
+        .deal-type-badge.neu {
+            left: auto;
+            background: #2a2724;
+            color: white;
+        }
+        .deal-rating-top {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            color: #d6d0c8;
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+        .deal-rating-star {
+            line-height: 1;
+        }
+        .deal-rating-star.filled {
+            color: #b7aea5;
+        }
+        .deal-header {
+            margin-top: 0;
+            margin-bottom: 10px;
+            gap: 12px;
+        }
+        .deal-logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            border-color: #ece5db;
+            background: linear-gradient(180deg, #fcfaf7 0%, #f2ede7 100%);
+        }
+        .deal-copy {
+            min-width: 0;
+            flex: 1;
+        }
+        .deal-brand {
+            margin-bottom: 5px;
+            font-size: 11px;
+            color: #8e8478;
+            letter-spacing: 0.08em;
+        }
+        .deal-title {
+            font-size: 17px;
+            line-height: 1.18;
+            color: var(--ff-text);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .deal-summary {
+            margin-top: 7px;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #7a7064;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .deal-info-section {
+            background: #fcf9f4;
+            border: 1px solid #f1e9de;
+            border-radius: 16px;
+            padding: 11px 13px;
+            margin-bottom: 10px;
+        }
+        .deal-info-row {
+            padding: 6px 0;
+            font-size: 13px;
+            color: #64584c;
+            gap: 8px;
+        }
+        .deal-info-row + .deal-info-row {
+            border-top: 1px solid #f1e9de;
+        }
+        .deal-info-icon {
+            width: 16px;
+            color: #b09d8b;
+            font-size: 12px;
+        }
+        .deal-meta {
+            margin: 0 0 10px;
+        }
+        .badge-expiry {
+            background: #fff0e8;
+            color: #e17650;
+            border: none;
+            padding: 6px 10px;
+            font-size: 11px;
+            box-shadow: none;
+        }
+        .badge-expiry.today,
+        .badge-expiry.warn,
+        .badge-expiry.safe {
+            background: #fff0e8;
+            color: #e17650;
+            border: none;
+        }
+        .expiry-bar,
+        .card-countdown {
+            display: none !important;
+        }
+        .code-display {
+            background: #f9f4ff;
+            border: 1px dashed #d7c5ff;
+            margin: 0 0 12px;
+        }
+        .deal-footer-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-top: 1px solid #f4eee6;
+            padding-top: 12px;
+            margin-top: 8px;
+        }
+        .deal-inline-actions,
+        .deal-primary-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .deal-primary-actions {
+            margin-left: auto;
+        }
+        .deal-inline-action,
+        .deal-favorite-inline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            border: none;
+            background: transparent;
+            color: #8a8177;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 0;
+            min-height: 0;
+            box-shadow: none;
+            flex: 0 0 auto;
+        }
+        .deal-inline-action svg,
+        .deal-favorite-inline svg,
+        .deal-meta-icon svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .deal-favorite-inline.is-active {
+            color: #d26e90;
+        }
+        .deal-favorite-inline.is-active svg {
+            fill: currentColor;
+            stroke: currentColor;
+        }
+        .deal-favorite-inline {
+            display: none;
+        }
+        .deal-link-inline {
+            border: none;
+            background: transparent;
+            color: var(--ff-accent-strong);
+            font-size: 13px;
+            font-weight: 800;
+            padding: 0;
+            min-height: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .deal-link-inline.disabled,
+        .deal-link-inline:disabled {
+            color: #b6ada4;
+            cursor: not-allowed;
+        }
+        .deal-redeem-inline-wrap {
+            margin-top: 10px;
+        }
+        .deal-redeem-inline-wrap .redeem-btn {
+            border: 1px solid #eee5da;
+            background: #fcfaf7;
+            color: #74695d;
+        }
+        .community-section {
+            margin-top: 12px;
+            padding-top: 0;
+            border-top: none;
+        }
+        .community-section .toggle-btn {
+            display: none;
+        }
+        .community-content {
+            margin-top: 0;
+            background: #fcfaf7;
+            border: 1px solid #f1e9de;
+            border-radius: 16px;
+            padding: 14px;
+        }
+        .star-rating {
+            display: none;
+        }
+        .vote-section,
+        .action-row {
+            display: none;
+        }
+        .fab-add {
+            display: none;
+        }
+        .pro-banner {
+            display: none !important;
+        }
+        .bottom-nav {
+            bottom: calc(10px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px));
+            width: min(540px, calc(100% - 26px));
+            background: rgba(255,255,255,0.94);
+            border: 1px solid rgba(233, 224, 212, 0.95);
+            border-radius: 24px;
+            padding: 7px 10px 8px;
+            justify-content: space-between;
+            gap: 4px;
+            box-shadow: 0 16px 36px rgba(34, 29, 24, 0.09);
+        }
+        .nav-item {
+            flex-direction: column;
+            gap: 3px;
+            min-height: 50px;
+            border-radius: 16px;
+            padding: 4px;
+            color: #a29588;
+        }
+        .nav-item.active {
+            background: transparent;
+            color: var(--ff-accent-strong);
+        }
+        .nav-icon {
+            width: 22px;
+            height: 22px;
+        }
+        .nav-icon svg {
+            width: 22px;
+            height: 22px;
+            stroke-width: 1.9;
+        }
+        .nav-item.active .nav-icon .icon-outline {
+            display: none;
+        }
+        .nav-item.active .nav-icon .icon-filled {
+            display: block;
+            fill: currentColor;
+        }
+        .nav-label {
+            position: static;
+            width: auto;
+            height: auto;
+            padding: 0;
+            margin: 0;
+            overflow: visible;
+            clip: auto;
+            white-space: nowrap;
+            border: 0;
+            color: inherit;
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1.1;
+            opacity: 0.95;
+        }
+        .nav-badge {
+            top: 2px;
+            right: 8px;
+            font-size: 9px;
+        }
+        @media (max-width: 420px) {
+            .daily-deal#dailyDeal,
+            #savingsCard.savings-card,
+            .deal-card {
+                border-radius: 20px;
+            }
+            .deal-title {
+                font-size: 16px;
+            }
+            .streak-banner {
+                padding: 13px 14px;
+            }
+            #dailyDeal .daily-title {
+                font-size: 15px;
+            }
+            #dailyDeal .daily-desc {
+                font-size: 11px;
+            }
+        }
 </style>
 </head>
 <body>
     <div class="container">
+        <div class="streak-banner" id="streakBanner">
+            <div class="streak-copy">
+                <div class="streak-title" id="streakTitle">1 Tag Streak!</div>
+                <div class="streak-subtitle" id="streakSubtitle">Komm morgen wieder für Bonus XP!</div>
+            </div>
+            <div class="streak-reward" id="streakReward">+15 XP</div>
+        </div>
+
         <div class="daily-deal" id="dailyDeal">
             <div class="daily-label">⭐ DEAL DES TAGES</div>
             <div class="daily-title" id="dailyTitle">Wird geladen...</div>
@@ -1804,6 +2379,7 @@
             setText('#proSavingsYearText', t('savingsProYearText'));
             setText('#savingsProCard .savings-cat-title', t('topSavingsCategories'));
             setHtml('#locationFilterBar .location-filter-title', t('nearbyTitle') + ' <span class="pro-badge">👑 PRO</span>');
+            updateStreakBanner();
             const radiusButtons = document.querySelectorAll('#locationFilterBar .radius-btn');
             if (radiusButtons[4]) radiusButtons[4].textContent = t('allRadius');
             setHtml('#yearOverview .year-overview-header', t('yearOverviewTitle') + ' <span class="pro-badge">👑 PRO</span>');
@@ -3792,11 +4368,53 @@
                 cardEl.onclick = function () { openReferralModal(); };
                 cardEl.setAttribute('role', 'button');
                 cardEl.setAttribute('tabindex', '0');
-                amountEl.textContent = '🔒';
+                amountEl.textContent = '';
                 barEl.style.width = '0%';
             }
 
             if (titleEl) titleEl.textContent = title;
+            updateStreakBanner();
+        }
+
+        function getLocalDayKey(dateLike) {
+            const value = new Date(dateLike);
+            if (Number.isNaN(value.getTime())) return '';
+            value.setHours(0, 0, 0, 0);
+            const year = value.getFullYear();
+            const month = String(value.getMonth() + 1).padStart(2, '0');
+            const day = String(value.getDate()).padStart(2, '0');
+            return year + '-' + month + '-' + day;
+        }
+
+        function getViewingStreakDays() {
+            pruneViewHistory();
+            const seenDays = new Set((userData.viewHistory || []).map((entry) => getLocalDayKey(entry.at)).filter(Boolean));
+            if (userData.todayViewed > 0) seenDays.add(getLocalDayKey(Date.now()));
+            let streak = 0;
+            const cursor = new Date();
+            cursor.setHours(0, 0, 0, 0);
+            while (seenDays.has(getLocalDayKey(cursor))) {
+                streak += 1;
+                cursor.setDate(cursor.getDate() - 1);
+            }
+            return streak;
+        }
+
+        function updateStreakBanner() {
+            const titleEl = document.getElementById('streakTitle');
+            const subtitleEl = document.getElementById('streakSubtitle');
+            const rewardEl = document.getElementById('streakReward');
+            if (!titleEl || !subtitleEl || !rewardEl) return;
+            const streakDays = Math.max(1, getViewingStreakDays() || (userData.todayViewed > 0 ? 1 : 1));
+            const reward = Math.min(50, 10 + (streakDays * 5));
+            if (currentLanguage === 'en') {
+                titleEl.textContent = streakDays + ' Day Streak!';
+                subtitleEl.textContent = streakDays > 1 ? 'Come back tomorrow and keep the streak alive.' : 'Come back tomorrow for bonus XP!';
+            } else {
+                titleEl.textContent = streakDays + ' Tag' + (streakDays === 1 ? '' : 'e') + ' Streak!';
+                subtitleEl.textContent = streakDays > 1 ? 'Komm morgen wieder und halte deine Serie am Leben!' : 'Komm morgen wieder für Bonus XP!';
+            }
+            rewardEl.textContent = '+' + reward + ' XP';
         }
         
         function trackDealView(dealId) {
@@ -4649,13 +5267,94 @@
         localStorage.setItem('favorites', JSON.stringify(favorites));
     }
 
+    const DEAL_CARD_SVG_ICONS = {
+        location: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 17s4.2-4.8 4.2-8A4.2 4.2 0 1 0 5.8 9c0 3.2 4.2 8 4.2 8Z"></path><circle cx="10" cy="9" r="1.5"></circle></svg>',
+        calendar: '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.5" y="5.5" width="13" height="11" rx="2"></rect><path d="M6.5 3.5v4"></path><path d="M13.5 3.5v4"></path><path d="M3.5 8.5h13"></path></svg>',
+        repeat: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 6h8.5l-2-2"></path><path d="M16 14H7.5l2 2"></path><path d="M13 4l-2.5 2.5"></path><path d="M7 16l2.5-2.5"></path></svg>',
+        comment: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5.5h12a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 16 14.5H9l-3.5 2v-2H4A1.5 1.5 0 0 1 2.5 13V7A1.5 1.5 0 0 1 4 5.5Z"></path></svg>',
+        share: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 4.5h4.5V9"></path><path d="M15.5 4.5 8.5 11.5"></path><path d="M5.5 6.5h3"></path><path d="M5.5 9.5v5a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-3"></path></svg>',
+        heart: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 16.5s-5.5-3.5-5.5-8.1c0-2.3 1.5-3.9 3.6-3.9 1 0 1.8.4 2.4 1 .6-.6 1.4-1 2.4-1 2.1 0 3.6 1.6 3.6 3.9 0 4.6-5.5 8.1-5.5 8.1Z"></path></svg>'
+    };
+
+    function dealCardIcon(name) {
+        return DEAL_CARD_SVG_ICONS[name] || '';
+    }
+
+    function renderRatingPreview(rating) {
+        const average = rating && rating.count ? (rating.total / rating.count) : 0;
+        let stars = '';
+        for (let i = 1; i <= 5; i += 1) {
+            stars += '<span class="deal-rating-star' + (average >= i - 0.35 ? ' filled' : '') + '">★</span>';
+        }
+        return stars;
+    }
+
+    function renderDealCard(deal) {
+        const d = normalizeDealForApp(deal);
+        const dealComments = comments[d.id] || [];
+        const dealTips = [...(defaultTips[d.id] || []), ...(userTips[d.id] || [])];
+        const dealRating = ratings[d.id] || { total: 0, count: 0 };
+        const totalCommunity = dealComments.length + (Array.isArray(dealTips) ? dealTips.length : 0);
+        const typeBadge = d.type === 'gratis' ? '<span class="deal-type-badge gratis">GRATIS</span>' : d.type === 'testabo' ? '<span class="deal-type-badge testabo">TESTABO</span>' : d.type === 'rabatt' ? '<span class="deal-type-badge rabatt">RABATT</span>' : d.type === 'bogo' ? '<span class="deal-type-badge bogo">1+1</span>' : d.type === 'gewinnspiel' ? '<span class="deal-type-badge rabatt">GEWINNSPIEL</span>' : '';
+        const newBadge = d.isNew ? '<span class="deal-type-badge neu">NEU</span>' : '';
+        const redeemed = proData.isPro && proData.redeemedDeals && proData.redeemedDeals[d.id];
+        const savingsVal = getDealSavingsEstimate(d).value;
+        const redeemBtn = proData.isPro ? '<button class="redeem-btn ' + (redeemed ? 'redeemed' : '') + '" onclick="redeemDeal(\'' + d.id + '\',\'' + d.category + '\',' + savingsVal + ', event)">' + (redeemed ? '✓ ' + t('redeemedMarked') : '💰 ' + t('redeemedMarked')) + '</button>' : '';
+        const expiry = getExpiryPresentation(d);
+        const hasExpiry = expiry.hasExpiry;
+        const expClass = hasExpiry ? expiry.cardClass : '';
+        const isExpiredVisible = d._lifecycle && d._lifecycle.state === 'expired-visible';
+        const location = getDisplayLocation(d);
+        const expires = d.expires || '';
+        const brand = getDisplayBrand(d);
+        const adminBtn = isAdminUiEnabled() ? '<button class="deal-admin-btn" onclick="event.stopPropagation(); openAdminEditor(\'' + d.id + '\')">✏️ Bearbeiten</button>' : '';
+        const cleanTitle = cleanUiNoiseText(d.title || 'Deal');
+        const titleParts = cleanTitle.match(/^([^,]+),\s*(.+)$/);
+        const formattedTitle = titleParts ? titleParts[1] + '<span class="deal-title-sub">' + titleParts[2] + '</span>' : cleanTitle;
+        const cleanDesc = cleanUiNoiseText(d.description || '');
+        const dateDisplay = hasExpiry ? expiry.infoLabel : (expiry.infoLabel || (expires && !/^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend)/i.test(expires) ? expires : ''));
+        const hasTargetUrl = !!(d.url && String(d.url).trim());
+        const defaultBtnLabel = d.category === 'gottesdienste' ? t('openTimes') : d.category === 'events' ? t('openEvent') : d.category === 'kirche' ? t('openChurch') : t('openDeal');
+        const voteDisabled = votedDeals.includes(d.id);
+        const favoriteActive = favorites.includes(d.id);
+        const dealMetaBadges = [
+            isExpiredVisible ? '<span class="badge badge-expiry urgent">⚠️ ' + t('expiredAlready') + '</span>' : '',
+            !isExpiredVisible && hasExpiry ? '<span class="badge badge-expiry ' + expiry.badgeClass + '">' + expiry.badgeText + '</span>' : '',
+        ].filter(Boolean).join('');
+
+        return '<div class="deal-card ' + (d.hot ? 'hot' : '') + ' ' + expClass + (isExpiredVisible ? ' expired-visible' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance || '').toLowerCase() + '">' +
+            adminBtn +
+            '<div class="deal-card-topline"><div class="deal-badge-row">' + typeBadge + newBadge + '</div><div class="deal-rating-top">' + renderRatingPreview(dealRating) + '</div></div>' +
+            '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')">' + renderDealLogo(d) + '<div class="deal-copy"><div class="deal-brand">' + brand + '</div><div class="deal-title">' + formattedTitle + '</div>' + (cleanDesc ? '<div class="deal-summary">' + cleanDesc + '</div>' : '') + '</div></div>' +
+            '<div class="deal-info-section">' +
+                (location ? '<div class="deal-info-row"><span class="deal-info-icon deal-meta-icon">' + dealCardIcon('location') + '</span><span class="deal-info-text">' + location + '</span></div>' : '') +
+                (dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon deal-meta-icon">' + dealCardIcon('calendar') + '</span><span class="deal-info-text">' + dateDisplay + '</span></div>' : '') +
+            '</div>' +
+            (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">' + t('copyText') + '</button></div>' : '') +
+            (dealMetaBadges ? '<div class="deal-meta">' + dealMetaBadges + '</div>' : '') +
+            '<div class="deal-footer-bar">' +
+                '<div class="deal-inline-actions">' +
+                    '<button class="deal-inline-action' + (voteDisabled ? ' is-voted' : '') + '"' + (voteDisabled ? ' disabled ' : ' ') + 'onclick="vote(\'' + d.id + '\', 1, event)"><span class="deal-meta-icon">' + dealCardIcon('repeat') + '</span><span>' + (d.votes || 0) + '</span></button>' +
+                    '<button class="deal-inline-action" onclick="toggleCommunity(\'' + d.id + '\')"><span class="deal-meta-icon">' + dealCardIcon('comment') + '</span><span>' + totalCommunity + '</span></button>' +
+                    '<button class="deal-inline-action" onclick="shareDeal(\'' + d.id + '\', event)"><span class="deal-meta-icon">' + dealCardIcon('share') + '</span></button>' +
+                '</div>' +
+                '<div class="deal-primary-actions">' +
+                    '<button class="deal-favorite-inline' + (favoriteActive ? ' is-active' : '') + '" onclick="toggleFav(\'' + d.id + '\', event)"><span class="deal-meta-icon">' + dealCardIcon('heart') + '</span></button>' +
+                    '<button class="deal-link-inline' + (hasTargetUrl ? '' : ' disabled') + '" ' + (hasTargetUrl ? '' : 'disabled ') + 'onclick="openDealUrl(\'' + d.id + '\', event)">' + (hasTargetUrl ? (defaultBtnLabel + ' ↗') : t('linkComingSoon')) + '</button>' +
+                '</div>' +
+            '</div>' +
+            (redeemBtn ? '<div class="deal-redeem-inline-wrap">' + redeemBtn + '</div>' : '') +
+            '<div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>💬 ' + t('communityTips') + '</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div>' +
+        '</div>';
+    }
+
     function renderDeals() {
         if (currentView === 'favorites') {
             const favoriteIds = new Set(sanitizeFavoriteIds(favorites));
             const fav = allDeals
                 .map(normalizeDealForApp)
                 .filter(d => favoriteIds.has(d.id));
-            document.getElementById('deals').innerHTML = fav.length ? fav.map(d => '<div class="deal-card"><div class="deal-header">' + renderDealLogo(d) + '<div><div class="deal-brand">' + getDisplayBrand(d) + '</div><div class="deal-title">' + cleanUiNoiseText(d.title) + '</div></div></div><a href="' + d.url + '" target="_blank" class="deal-btn" style="width:100%;text-align:center;margin-top:10px">' + t('openDeal') + ' →</a></div>').join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>' + t('favoritesEmptyTitle') + '</p><p style="font-size:13px;color:#999;margin-top:8px">' + t('favoritesEmptyHint') + '</p></div>';
+            document.getElementById('deals').innerHTML = fav.length ? fav.map(renderDealCard).join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>' + t('favoritesEmptyTitle') + '</p><p style="font-size:13px;color:#999;margin-top:8px">' + t('favoritesEmptyHint') + '</p></div>';
             return;
         }
         const deals = filterDeals();
@@ -4663,41 +5362,7 @@
             document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">\uD83D\uDD0D</div><p>' + t('noDealsFound') + '</p></div>';
             return;
         }
-        document.getElementById('deals').innerHTML = deals.map(d => {
-            const dealComments = comments[d.id] || [];
-            const dealTips = [...(defaultTips[d.id] || []), ...(userTips[d.id] || [])];
-            const dealRating = ratings[d.id] || { total: 0, count: 0 };
-            const avgRating = dealRating.count ? (dealRating.total / dealRating.count).toFixed(1) : '\u2013';
-            const totalCommunity = dealComments.length + (Array.isArray(dealTips) ? dealTips.length : 0);
-            const typeBadge = d.type === 'gratis' ? '<span class="deal-type-badge gratis">GRATIS</span>' : d.type === 'testabo' ? '<span class="deal-type-badge testabo">TESTABO</span>' : d.type === 'rabatt' ? '<span class="deal-type-badge rabatt">RABATT</span>' : d.type === 'bogo' ? '<span class="deal-type-badge bogo">1+1</span>' : d.type === 'gewinnspiel' ? '<span class="deal-type-badge rabatt">GEWINNSPIEL</span>' : '';
-            const newBadge = d.isNew ? '<span class="deal-type-badge neu">NEU</span>' : '';
-            const redeemed = proData.isPro && proData.redeemedDeals && proData.redeemedDeals[d.id];
-            const savingsVal = getDealSavingsEstimate(d).value;
-            const redeemBtn = proData.isPro ? '<button class="btn redeem-btn ' + (redeemed ? 'redeemed' : '') + '" onclick="redeemDeal(\'' + d.id + '\',\'' + d.category + '\',' + savingsVal + ', event)">' + (redeemed ? '\u2705 Als eingel\u00F6st markiert' : '\uD83D\uDCB0 Als eingel\u00F6st markieren (' + savingsVal.toFixed(2) + '€)') + '</button>' : '';
-            const _expiry = getExpiryPresentation(d);
-            const _hasExpiry = _expiry.hasExpiry;
-            const _expClass = _hasExpiry ? _expiry.cardClass : '';
-            const _ePct = _hasExpiry ? _expiry.barPct : 100;
-            const _eClr = _hasExpiry ? _expiry.barColor : 'green';
-            const _isExp = _hasExpiry;
-            const _isExpiredVisible = d._lifecycle && d._lifecycle.state === 'expired-visible';
-            // --- Professional info extraction ---
-            const _loc = getDisplayLocation(d);
-            const _expires = d.expires || '';
-            const _brand = getDisplayBrand(d);
-                        const adminBtn = isAdminUiEnabled() ? '<button class="deal-admin-btn" onclick="event.stopPropagation(); openAdminEditor(\'' + d.id + '\')">✏️ Bearbeiten</button>' : '';
-                        const _cleanTitle = cleanUiNoiseText(d.title || 'Deal');
-                            const _titleParts = _cleanTitle.match(/^([^,]+),\s*(.+)$/);
-                            const _formattedTitle = _titleParts ? _titleParts[1] + '<span class="deal-title-sub">' + _titleParts[2] + '</span>' : _cleanTitle;
-                        const _cleanDesc = cleanUiNoiseText(d.description || '');
-            // Format date/time from expires field
-            const _hasDate = _expires && !/^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend)/i.test(_expires);
-            const _dateDisplay = _hasExpiry ? _expiry.infoLabel : (_expiry.infoLabel || (_hasDate ? _expires : ''));
-            const _hasTargetUrl = !!(d.url && String(d.url).trim());
-            const _defaultBtnLabel = d.category === 'gottesdienste' ? t('openTimes') : d.category === 'events' ? t('openEvent') : d.category === 'kirche' ? t('openChurch') : t('openDeal');
-            const _dealBtn = '<button class="action-btn deal-link-btn' + (_hasTargetUrl ? '' : ' disabled') + '" ' + (_hasTargetUrl ? '' : 'disabled ') + 'onclick="openDealUrl(\'' + d.id + '\', event)">' + '<span class="btn-icon">\uD83D\uDD17</span>' + (_hasTargetUrl ? _defaultBtnLabel : t('linkComingSoon')) + '</button>';
-            return '<div class="deal-card ' + (d.hot ? 'hot' : '') + _expClass + (_isExpiredVisible ? ' expired-visible' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance||'').toLowerCase() + '">' + typeBadge + newBadge + adminBtn + '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')">' + renderDealLogo(d) + '<div><div class="deal-brand">' + _brand + '</div><div class="deal-title">' + _formattedTitle + '</div></div></div>' + '<div class="deal-info-section">' + (_cleanDesc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCB</span><span class="deal-info-text">' + _cleanDesc + '</span></div>' : '') + (_loc ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCCD</span><span class="deal-info-text">' + _loc + '</span></div>' : '') + (_dateDisplay ? '<div class="deal-info-row"><span class="deal-info-icon">\uD83D\uDCC5</span><span class="deal-info-text">' + _dateDisplay + '</span></div>' : '') + '</div>' + (_hasExpiry && _expiry.showUrgency && !_isExpiredVisible ? '<div class="expiry-bar"><div class="expiry-bar-fill ' + _eClr + '" style="width:' + _ePct + '%"></div></div><div class="card-countdown ' + _expiry.countdownClass + '"><span class="card-countdown-icon">\u23F0</span><span class="card-countdown-time">' + _expiry.countdownText + '</span></div>' : '') + (d.code ? '<div class="code-display"><span class="code-text">' + d.code + '</span><button class="copy-btn" onclick="copyCode(event)">' + t('copyText') + '</button></div>' : '') + '<div class="deal-meta">' + (_isExpiredVisible ? '<span class="badge badge-expiry urgent">\u26A0\uFE0F ' + t('expiredAlready') + '</span>' : '') + (_isExp ? '<span class="badge badge-expiry ' + _expiry.badgeClass + '">' + _expiry.badgeText + '</span>' : '') + (d.hot ? '<span class="badge hot">\uD83D\uDD25 Hot</span>' : '') + (d.isUserSubmitted ? '<span class="badge user">\uD83D\uDC65 Community</span>' : '') + '</div><div class="star-rating" data-id="' + d.id + '">' + renderStars(d.id) + '<span class="rating-summary">' + avgRating + ' \u00B7 ' + dealRating.count + ' ' + t('ratingsLabel') + '</span></div><div class="action-row">' + _dealBtn + '</div>' + (redeemBtn ? '<div style="margin:8px 0 2px">' + redeemBtn + '</div>' : '') + '<div class="vote-section"><button class="action-btn vote-btn ' + (votedDeals.includes(d.id) ? 'is-voted' : '') + '" ' + (votedDeals.includes(d.id) ? 'disabled ' : '') + 'onclick="vote(\'' + d.id + '\', 1, event)"><span class="vote-count">' + d.votes + '</span> <span class="btn-icon">\uD83D\uDD25</span></button><button class="action-btn share-btn" onclick="shareDeal(\'' + d.id + '\', event)"><span class="btn-icon">\uD83D\uDCE4</span>' + t('shareText') + '</button><button class="action-btn fav-btn" onclick="toggleFav(\'' + d.id + '\', event)">' + (favorites.includes(d.id) ? '<span class="btn-icon">\u2764\uFE0F</span>' : '<span class="btn-icon">\uD83E\uDD0D</span>') + '</button></div><div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>\uD83D\uDCAC ' + t('communityTips') + '</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div></div>';
-        }).join('');
+        document.getElementById('deals').innerHTML = deals.map(renderDealCard).join('');
 
         checkDeepLink();
     }
@@ -5064,12 +5729,12 @@
                 const requiresPro = PRO_HOME_SECTION_IDS.has(id);
                 let shouldShow = isHome && (!requiresPro || proData.isPro);
                 if (id === 'weeklyDeal' || id === 'monthlyDeal') shouldShow = isForYou;
-                if (id === 'savingsCard') shouldShow = false;
+                if (id === 'savingsCard') shouldShow = isHome;
                 if (id === 'savingsProCard' || id === 'yearOverview' || id === 'dealAlarmCard') shouldShow = false;
                 el.style.display = shouldShow ? displayValue : 'none';
             });
             const proBanner = document.getElementById('proBanner');
-            if (proBanner) proBanner.style.display = (isHome && !proData.isPro) ? 'block' : 'none';
+            if (proBanner) proBanner.style.display = 'none';
             updateFeaturedLockState();
         }
         function showHome() { restoreFeaturedDealsToHome(); restoreRelocatedSectionsToHome(); currentView = 'home'; updateHomeSectionVisibility(); renderDeals(); setFeaturedHomeDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelector('.nav-item').classList.add('active'); }
