@@ -1050,18 +1050,28 @@
             color: white;
         }
         .deal-rating-top {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 2px;
             color: #d6d0c8;
             font-size: 11px;
             flex-shrink: 0;
+            border: none;
+            background: transparent;
+            padding: 0;
+            cursor: pointer;
         }
         .deal-rating-star {
             line-height: 1;
         }
         .deal-rating-star.filled {
             color: #b7aea5;
+        }
+        .deal-rating-count {
+            margin-left: 4px;
+            color: #b9afa4;
+            font-size: 11px;
+            font-weight: 700;
         }
         .deal-header {
             margin-top: 0;
@@ -1186,6 +1196,17 @@
             box-shadow: none;
             flex: 0 0 auto;
         }
+        .deal-inline-action.share-action {
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #f8f4ee;
+            color: #74695d;
+        }
+        .deal-inline-action.share-action .deal-meta-icon svg {
+            width: 16px;
+            height: 16px;
+        }
         .deal-inline-action svg,
         .deal-favorite-inline svg,
         .deal-meta-icon svg {
@@ -1246,9 +1267,6 @@
             border: 1px solid #f1e9de;
             border-radius: 16px;
             padding: 14px;
-        }
-        .star-rating {
-            display: none;
         }
         .vote-section,
         .action-row {
@@ -5289,6 +5307,13 @@
         return stars;
     }
 
+    function renderRatingEntry(dealId) {
+        const rating = ratings[dealId] || { total: 0, count: 0 };
+        const average = rating.count ? (rating.total / rating.count) : 0;
+        const averageText = rating.count ? average.toFixed(1).replace('.', ',') : '0,0';
+        return '<div class="rating-section"><div class="tips-title">⭐ ' + t('ratingsLabel') + '</div><div class="star-rating">' + renderStars(dealId) + '</div><div class="rating-summary"><span class="rating-avg">' + averageText + '</span><span>(' + rating.count + ')</span></div></div>';
+    }
+
     function renderDealCard(deal) {
         const d = normalizeDealForApp(deal);
         const dealComments = comments[d.id] || [];
@@ -5324,7 +5349,7 @@
 
         return '<div class="deal-card ' + (d.hot ? 'hot' : '') + ' ' + expClass + (isExpiredVisible ? ' expired-visible' : '') + '" id="deal-' + d.id + '" data-category="' + d.category + '" data-distance="' + (d.distance || '').toLowerCase() + '">' +
             adminBtn +
-            '<div class="deal-card-topline"><div class="deal-badge-row">' + typeBadge + newBadge + '</div><div class="deal-rating-top">' + renderRatingPreview(dealRating) + '</div></div>' +
+            '<div class="deal-card-topline"><div class="deal-badge-row">' + typeBadge + newBadge + '</div><button class="deal-rating-top" onclick="openRatingPanel(\'' + d.id + '\', event)" aria-label="' + escapeHtml(t('ratingsLabel')) + '">' + renderRatingPreview(dealRating) + '<span class="deal-rating-count">' + dealRating.count + '</span></button></div>' +
             '<div class="deal-header" onclick="trackDealView(\'' + d.id + '\')">' + renderDealLogo(d) + '<div class="deal-copy"><div class="deal-brand">' + brand + '</div><div class="deal-title">' + formattedTitle + '</div>' + (cleanDesc ? '<div class="deal-summary">' + cleanDesc + '</div>' : '') + '</div></div>' +
             '<div class="deal-info-section">' +
                 (location ? '<div class="deal-info-row"><span class="deal-info-icon deal-meta-icon">' + dealCardIcon('location') + '</span><span class="deal-info-text">' + location + '</span></div>' : '') +
@@ -5336,7 +5361,7 @@
                 '<div class="deal-inline-actions">' +
                     '<button class="deal-inline-action' + (voteDisabled ? ' is-voted' : '') + '"' + (voteDisabled ? ' disabled ' : ' ') + 'onclick="vote(\'' + d.id + '\', 1, event)"><span class="deal-meta-icon">' + dealCardIcon('repeat') + '</span><span>' + (d.votes || 0) + '</span></button>' +
                     '<button class="deal-inline-action" onclick="toggleCommunity(\'' + d.id + '\')"><span class="deal-meta-icon">' + dealCardIcon('comment') + '</span><span>' + totalCommunity + '</span></button>' +
-                    '<button class="deal-inline-action" onclick="shareDeal(\'' + d.id + '\', event)"><span class="deal-meta-icon">' + dealCardIcon('share') + '</span></button>' +
+                    '<button class="deal-inline-action share-action" onclick="shareDeal(\'' + d.id + '\', event)"><span class="deal-meta-icon">' + dealCardIcon('share') + '</span><span>' + t('shareText') + '</span></button>' +
                 '</div>' +
                 '<div class="deal-primary-actions">' +
                     '<button class="deal-favorite-inline' + (favoriteActive ? ' is-active' : '') + '" onclick="toggleFav(\'' + d.id + '\', event)"><span class="deal-meta-icon">' + dealCardIcon('heart') + '</span></button>' +
@@ -5405,7 +5430,8 @@
         }
         
         function renderCommunityContent(dealId, tips, comments) {
-            let html = '<div class="tips-section"><div class="tips-title">💡 ' + t('tipsTitle') + '</div>';
+            let html = renderRatingEntry(dealId);
+            html += '<div class="tips-section"><div class="tips-title">💡 ' + t('tipsTitle') + '</div>';
             if (tips.length > 0) {
                 tips.forEach(tip => {
                     html += '<div class="tip-card"><div class="tip-header"><div class="tip-avatar">' + (tip.avatar || '👤') + '</div><span class="tip-user">' + tip.user + '</span>' + (tip.verified ? '<span class="verified-badge">✓ Verifiziert</span>' : '') + (tip.badge ? '<span class="tip-badge">' + tip.badge + '</span>' : '') + '</div><div class="tip-text">' + tip.text + '</div><div class="tip-helpful"><button onclick="markHelpful(\'' + dealId + '\',\'' + tip.id + '\',event)">👍 ' + (currentLanguage === 'en' ? 'Helpful' : 'Hilfreich') + ' (' + (tip.helpful || 0) + ')</button></div></div>';
@@ -5432,7 +5458,19 @@
         
         function toggleCommunity(dealId) {
             const content = document.getElementById('comm-' + dealId);
+            if (!content) return;
             content.classList.toggle('show');
+        }
+
+        function openRatingPanel(dealId, e) {
+            if (e) e.stopPropagation();
+            const content = document.getElementById('comm-' + dealId);
+            if (!content) return;
+            content.classList.add('show');
+            const card = document.getElementById('deal-' + dealId);
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
         
         function switchInputTab(dealId, type, btn) {
