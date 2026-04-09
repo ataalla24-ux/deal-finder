@@ -122,6 +122,16 @@ function localizeFreeText(value = '') {
     .replace(/\bfree\b/gi, 'gratis');
 }
 
+function collapseRepeatedBrandLocation(value = '', brand = '', location = '') {
+  const text = cleanText(value);
+  if (!text) return '';
+  const normalizedBrand = cleanUiNoiseText(brand).toLowerCase();
+  const normalizedLocation = cleanUiNoiseText(location).toLowerCase();
+  if (!normalizedBrand || normalizedBrand !== normalizedLocation) return text;
+  const escaped = brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp(`\\bbei\\s+${escaped}\\s+in\\s+${escaped}\\b`, 'i'), `bei ${brand}`);
+}
+
 function buildSocialTitleFallback(deal) {
   const brand = cleanUiNoiseText(deal.brand || '');
   if (!brand) return '';
@@ -129,6 +139,40 @@ function buildSocialTitleFallback(deal) {
   if (deal.type === 'bogo') return `1+1 bei ${brand}`;
   if (deal.type === 'rabatt') return `${brand}: Rabatt`;
   return brand;
+}
+
+function detectOfferLabel(text = '') {
+  const signal = cleanText(text).toLowerCase();
+  if (/(eis|gelato|ice cream|cone)/.test(signal)) return 'Eis';
+  if (/(kaffee|coffee|espresso|latte|cappuccino|matcha)/.test(signal)) return 'Kaffee';
+  if (/(pizza)/.test(signal)) return 'Pizza';
+  if (/(burger)/.test(signal)) return 'Burger';
+  if (/(döner|doener|kebab)/.test(signal)) return 'Döner';
+  if (/(sushi)/.test(signal)) return 'Sushi';
+  if (/(drink|cocktail|getränk|getraenk)/.test(signal)) return 'Getränk';
+  if (/(croissant|krapfen|brioche|pastry)/.test(signal)) return 'Gebäck';
+  if (/(popcorn)/.test(signal)) return 'Popcorn';
+  return '';
+}
+
+function buildNaturalSocialDescription(deal, socialDescription = '') {
+  const brand = cleanUiNoiseText(deal.brand || '');
+  const location = cleanUiNoiseText(deal.distance || '');
+  const locationDistinct = location && location.toLowerCase() !== brand.toLowerCase() ? location : '';
+  const offerLabel = detectOfferLabel(`${deal.title || ''} ${socialDescription || ''}`);
+  if (deal.type === 'gratis') {
+    if (offerLabel && brand && locationDistinct) return `Gratis ${offerLabel} bei ${brand} in ${locationDistinct}`;
+    if (offerLabel && brand) return `Gratis ${offerLabel} bei ${brand}`;
+    if (brand && locationDistinct) return `Gratis bei ${brand} in ${locationDistinct}`;
+  }
+  if (deal.type === 'bogo') {
+    if (offerLabel && brand && locationDistinct) return `1+1 ${offerLabel} bei ${brand} in ${locationDistinct}`;
+    if (brand && locationDistinct) return `1+1 Angebot bei ${brand} in ${locationDistinct}`;
+  }
+  if (deal.type === 'rabatt' && brand && locationDistinct && /^grand opening discount$/i.test(cleanUiNoiseText(deal.title || ''))) {
+    return `Grand Opening Rabatt bei ${brand} in ${locationDistinct}`;
+  }
+  return '';
 }
 
 function normalizeSocialDeal(deal) {
@@ -166,12 +210,13 @@ function normalizeSocialDeal(deal) {
       category: next.category,
       type: next.type,
     });
-    next.description = socialDescription || fallbackDescription || localizeFreeText(next.description);
+    next.description = buildNaturalSocialDescription(next, socialDescription) || socialDescription || fallbackDescription || localizeFreeText(next.description);
   } else if (socialDescription && /(?:auf|on)\s+(?:instagram|tiktok)\s*:/i.test(next.description || '')) {
-    next.description = socialDescription;
+    next.description = buildNaturalSocialDescription(next, socialDescription) || socialDescription;
   } else {
-    next.description = localizeFreeText(next.description);
+    next.description = buildNaturalSocialDescription(next, socialDescription) || localizeFreeText(next.description);
   }
+  next.description = collapseRepeatedBrandLocation(next.description, next.brand, next.distance);
 
   if (isWeakTitle(next.title)) {
     const fallbackTitle = buildSocialTitleFallback(next);
