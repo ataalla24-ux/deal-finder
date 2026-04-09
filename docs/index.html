@@ -1411,7 +1411,7 @@
         </div>
         
   <!-- PRO BANNER (shown when not PRO) -->
-  <div class="pro-banner" id="proBanner" onclick="openReferralModal()" style="display:none">
+  <div class="pro-banner" id="proBanner" onclick="openReferralModal()">
     <div class="pro-banner-header">
       <div class="pro-crown">👑</div>
       <div>
@@ -4262,6 +4262,7 @@
         
         function init() {
             applyLanguage();
+            updateHomeSectionVisibility();
             bindHiddenAdminEntry();
             updateLevelUI();
             updateSavingsUI();
