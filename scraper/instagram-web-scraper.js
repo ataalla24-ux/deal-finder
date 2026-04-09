@@ -54,20 +54,17 @@ const HASHTAGS = [
 ];
 
 const INSTAGRAM_ACCOUNTS = [
-  'viennawurstelstand',
-  'viennafoodstories',
-  'viennaeats',
-  'wienereats',
-  'wienfoodspots',
-  'viennarestaurants',
-  'wienfoodscene',
-  'wienfoodblogger',
+  'ciosgrill',
+  'corner_xvi',
+  'assal.burger',
+  'cafe_wirr',
+  'pizzeriapummaro',
+  'mangalet.at',
   'vienna.coffee',
-  'wiengastroguide',
-  'wienstreetfood',
-  'wienpizza',
-  'wienburger',
-  'wienkebap',
+  'viennaeats',
+  'viennafoodstories',
+  'viennarestaurants',
+  'viennawurstelstand',
 ];
 
 const RESERVED_IG_PATHS = new Set([

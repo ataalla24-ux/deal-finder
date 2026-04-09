@@ -64,25 +64,17 @@ const SEED_HASHTAGS = [
 ];
 
 const SEED_ACCOUNTS = [
-  'viennawurstelstand',
-  'viennafoodstories',
-  'viennaeats',
-  'wienfoodguide',
-  'viennafoodblog',
-  'wienereats',
-  'wienfoodspots',
-  'viennarestaurants',
-  'viennafoodguide',
-  'wienfoodscene',
-  'wienfoodblogger',
+  'ciosgrill',
+  'corner_xvi',
+  'assal.burger',
+  'cafe_wirr',
+  'pizzeriapummaro',
+  'mangalet.at',
   'vienna.coffee',
-  'wienrestaurantguide',
-  'wiengratisdeals',
-  'wiengastroguide',
-  'wienstreetfood',
-  'wienkebap',
-  'wienpizza',
-  'wienburger',
+  'viennaeats',
+  'viennafoodstories',
+  'viennarestaurants',
+  'viennawurstelstand',
 ];
 
 const EXTRA_SEARCH_QUERIES = [
