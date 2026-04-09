@@ -4561,11 +4561,7 @@
             }
         } catch(e) { /* fall through to auto */ }
         // Fallback: auto-rotate based on date
-        const gratisDeals = allDeals.filter(d => d.type === 'gratis' || d.type === 'freebie');
-        const viennaDay = Number((getViennaDayKey().split('-')[2] || '').trim()) || new Date().getDate();
-        const deal = gratisDeals.length
-          ? gratisDeals[viennaDay % gratisDeals.length]
-          : allDeals[0];
+        const deal = pickDailyDeal() || allDeals[0];
         if (!deal) {
           applyDailyDealTheme('');
           document.getElementById('dailyTitle').textContent = t('dailyFallback');
@@ -4600,18 +4596,43 @@
                 dealEl.classList.add('theme-' + safeType);
             }
         }
-        function getFeaturedDealsPool(maxAgeDays) {
+        function getFeaturedDealsPool(maxAgeDays, options = {}) {
+            const excluded = new Set(Array.isArray(options.excludeIds) ? options.excludeIds.filter(Boolean) : []);
             const cutoff = Date.now() - (maxAgeDays * 24 * 60 * 60 * 1000);
             return allDeals
                 .map((raw) => normalizeDealForApp(raw))
                 .filter((deal) => {
                     if (!deal || !deal.id) return false;
+                    if (excluded.has(deal.id)) return false;
                     if (['kirche', 'gottesdienste', 'events'].includes(String(deal.category || '').toLowerCase())) return false;
                     if (isChristianContent(deal)) return false;
                     const lifecycle = getDealLifecycle(deal);
                     if (lifecycle.state !== 'active') return false;
                     return getDealBaseTimestampMs(deal) >= cutoff;
                 });
+        }
+        function getDailyDealScore(deal) {
+            const ageDays = Math.max(0, (Date.now() - getDealBaseTimestampMs(deal)) / (1000 * 60 * 60 * 24));
+            const freshness = Math.max(0, 7 - ageDays * 1.35);
+            const social = Math.min(5.5, (deal.votes || 0) / 10) + Math.min(2.2, getSocialProofScore(deal) * 0.8);
+            const qualityBoost = Math.min(2.5, Number(deal.qualityScore || 0) / 40);
+            const typeBoost = (deal.type === 'gratis' || deal.type === 'freebie') ? 3.5 : ((deal.type === 'bogo' || deal.type === 'rabatt') ? 1.4 : 0.4);
+            const missionBoost = isFoodDrinkFreebie(deal) ? 6 : (/reisen|flug|ryanair|wizz|oebb|hotel/i.test(getDealSignalText(deal)) ? 1.8 : 0);
+            const pinnedBoost = Math.min(4, Number(deal.pinnedRank || 0));
+            return freshness + social + qualityBoost + typeBoost + missionBoost + pinnedBoost + (deal.hot ? 1.5 : 0) + (deal.isNew ? 1.25 : 0);
+        }
+        function pickDailyDeal() {
+            const broadCandidates = getFeaturedDealsPool(21);
+            if (!broadCandidates.length) return null;
+            const missionFitCandidates = broadCandidates.filter((deal) => isFoodDrinkFreebie(deal) || deal.category === 'reisen');
+            const source = missionFitCandidates.length ? missionFitCandidates : broadCandidates;
+            return source
+                .slice()
+                .sort((a, b) => {
+                    const scoreDiff = getDailyDealScore(b) - getDailyDealScore(a);
+                    if (Math.abs(scoreDiff) > 0.001) return scoreDiff;
+                    return (b.votes || 0) - (a.votes || 0) || getDealBaseTimestampMs(b) - getDealBaseTimestampMs(a) || String(a.id).localeCompare(String(b.id));
+                })[0];
         }
         function getFeaturedDealScore(deal, maxAgeDays) {
             const ageDays = Math.max(0, (Date.now() - getDealBaseTimestampMs(deal)) / (1000 * 60 * 60 * 24));
@@ -4622,8 +4643,8 @@
             const qualityBoost = Math.min(2, Number(deal.qualityScore || 0) / 60);
             return freshness + social + typeBoost + priorityBoost + qualityBoost + (deal.hot ? 1.7 : 0) + (deal.isNew ? 1.1 : 0);
         }
-        function pickFeaturedDeal(maxAgeDays) {
-            const candidates = getFeaturedDealsPool(maxAgeDays);
+        function pickFeaturedDeal(maxAgeDays, options = {}) {
+            const candidates = getFeaturedDealsPool(maxAgeDays, options);
             if (!candidates.length) return null;
             return candidates
                 .slice()
@@ -4667,13 +4688,15 @@
         }
         function setFeaturedHomeDeals() {
             syncFeaturedDealPlacement();
+            const weeklyDeal = pickFeaturedDeal(7);
+            const monthlyDeal = pickFeaturedDeal(30, { excludeIds: weeklyDeal ? [weeklyDeal.id] : [] });
             renderFeaturedDealCard({
                 containerId: 'weeklyDeal',
                 titleId: 'weeklyTitle',
                 descId: 'weeklyDesc',
                 metaId: 'weeklyMeta',
                 buttonId: 'weeklyBtn',
-                deal: pickFeaturedDeal(7),
+                deal: weeklyDeal,
                 fallbackTitleKey: 'weeklyFallback',
                 metaKey: 'weeklyMeta'
             });
@@ -4683,7 +4706,7 @@
                 descId: 'monthlyDesc',
                 metaId: 'monthlyMeta',
                 buttonId: 'monthlyBtn',
-                deal: pickFeaturedDeal(30),
+                deal: monthlyDeal,
                 fallbackTitleKey: 'monthlyFallback',
                 metaKey: 'monthlyMeta'
             });
