@@ -49,6 +49,7 @@ const GENERIC_DESCRIPTION_PATTERN = /^(free|gratis|rabatt|discount|deal|angebot|
 const FOOD_SIGNAL_PATTERN = /\b(eis\w*|ice cream|gelato|kaffee\w*|coffee|cafe|café|pizza\w*|burger\w*|döner\w*|doener\w*|kebab\w*|sushi|ramen|brunch|croissant|drink|drinks|getränk\w*|getraenk\w*|cocktail\w*|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein\w*|vino|fleisch\w*|meat|steak|bbq|grill\w*|bäckerei|backerei|bakery|krapfen\w*)\b/i;
 const COFFEE_SIGNAL_PATTERN = /\b(kaffee|coffee|espresso|latte|cappuccino|cafe|café)\b/i;
 const SOURCE_PREFIX_PATTERN = /\s+(?:auf|on)\s+(?:instagram|tiktok)\s*:\s*/i;
+const WEAK_TITLE_PATTERN = /^(free|gratis|deal|angebot|aktion|promo|special|event|instagram|tiktok|new|neu)$/i;
 
 function hasUsefulWords(text) {
   const words = cleanText(text).split(/\s+/).filter(Boolean);
@@ -57,6 +58,18 @@ function hasUsefulWords(text) {
 
 function isSocialUrl(url = '') {
   return /instagram\.com|tiktok\.com/i.test(cleanText(url));
+}
+
+function normalizeSocialPostKey(url = '') {
+  const text = cleanText(url).toLowerCase();
+  if (!isSocialUrl(text)) return '';
+  return text.replace(/\/+$/, '/');
+}
+
+function looksAddressLike(value = '') {
+  const text = cleanUiNoiseText(value).toLowerCase();
+  if (!text) return false;
+  return /\d/.test(text) || /(gasse|straße|strasse|platz|weg|allee)\b/i.test(text);
 }
 
 function isSourceLikeBrandValue(value = '') {
@@ -139,6 +152,90 @@ function buildSocialTitleFallback(deal) {
   if (deal.type === 'bogo') return `1+1 bei ${brand}`;
   if (deal.type === 'rabatt') return `${brand}: Rabatt`;
   return brand;
+}
+
+function scoreNormalizedDeal(deal) {
+  let score = 0;
+  const brand = cleanUiNoiseText(deal.brand || '');
+  const title = cleanUiNoiseText(deal.title || '');
+  const description = cleanUiNoiseText(deal.description || '');
+  const category = cleanUiNoiseText(deal.category || '').toLowerCase();
+  const pubDateSource = cleanUiNoiseText(deal.pubDateSource || '');
+
+  if (brand && !isSourceLikeBrandValue(brand)) score += 12;
+  if (brand && !looksAddressLike(brand)) score += 8;
+  if (title && !WEAK_TITLE_PATTERN.test(title)) score += 10;
+  if (hasUsefulWords(description)) score += 8;
+  if (FOOD_SIGNAL_PATTERN.test(`${title} ${description}`)) score += 10;
+  if (category === 'essen' || category === 'kaffee') score += 8;
+  if (pubDateSource) score += 4;
+  score += Math.min(description.length, 160) / 40;
+  score += Math.min(title.length, 100) / 30;
+
+  if (isSourceLikeBrandValue(brand)) score -= 12;
+  if (looksAddressLike(brand)) score -= 8;
+  if (WEAK_TITLE_PATTERN.test(title)) score -= 8;
+  if (category === 'kultur' || category === 'events' || category === 'reisen') score -= 6;
+
+  return score;
+}
+
+function pickBetterNormalizedDeal(current, candidate) {
+  const currentScore = scoreNormalizedDeal(current);
+  const candidateScore = scoreNormalizedDeal(candidate);
+  if (candidateScore !== currentScore) {
+    return candidateScore > currentScore ? candidate : current;
+  }
+
+  const currentPubDate = Date.parse(cleanText(current.pubDate || '')) || 0;
+  const candidatePubDate = Date.parse(cleanText(candidate.pubDate || '')) || 0;
+  if (candidatePubDate !== currentPubDate) {
+    return candidatePubDate > currentPubDate ? candidate : current;
+  }
+
+  const currentApproved = Date.parse(cleanText(current.approvedAt || '')) || 0;
+  const candidateApproved = Date.parse(cleanText(candidate.approvedAt || '')) || 0;
+  if (candidateApproved !== currentApproved) {
+    return candidateApproved > currentApproved ? candidate : current;
+  }
+
+  return candidate;
+}
+
+function dedupeNormalizedLiveDeals(deals) {
+  const deduped = [];
+  const byId = new Map();
+  const bySocialPost = new Map();
+
+  for (const deal of deals) {
+    let existingIndex = -1;
+    const socialPostKey = normalizeSocialPostKey(deal.url || '');
+    if (socialPostKey && bySocialPost.has(socialPostKey)) {
+      existingIndex = bySocialPost.get(socialPostKey);
+    }
+
+    const id = cleanText(deal.id || '');
+    if (existingIndex === -1 && id && byId.has(id)) {
+      existingIndex = byId.get(id);
+    }
+
+    if (existingIndex >= 0) {
+      const merged = pickBetterNormalizedDeal(deduped[existingIndex], deal);
+      deduped[existingIndex] = merged;
+      const mergedId = cleanText(merged.id || '');
+      const mergedSocialPostKey = normalizeSocialPostKey(merged.url || '');
+      if (mergedId) byId.set(mergedId, existingIndex);
+      if (mergedSocialPostKey) bySocialPost.set(mergedSocialPostKey, existingIndex);
+      continue;
+    }
+
+    const nextIndex = deduped.length;
+    deduped.push(deal);
+    if (id) byId.set(id, nextIndex);
+    if (socialPostKey) bySocialPost.set(socialPostKey, nextIndex);
+  }
+
+  return deduped;
 }
 
 function detectOfferLabel(text = '') {
@@ -435,6 +532,7 @@ async function main() {
   let contentEnrichments = 0;
   let socialPubDateSourceFixes = 0;
   let socialPolishFixes = 0;
+  let duplicateCollapses = 0;
 
   function markRemoved(deal, reason) {
     removed.push({
@@ -648,14 +746,17 @@ async function main() {
     remaining.push(normalizedChurchDeal);
   }
 
-  remaining.sort((a, b) => {
+  const dedupedRemaining = dedupeNormalizedLiveDeals(remaining);
+  duplicateCollapses = remaining.length - dedupedRemaining.length;
+
+  dedupedRemaining.sort((a, b) => {
     const aTime = Date.parse(a.pubDate || '') || 0;
     const bTime = Date.parse(b.pubDate || '') || 0;
     return bTime - aTime;
   });
 
-  dealsDoc.deals = remaining;
-  dealsDoc.totalDeals = remaining.length;
+  dealsDoc.deals = dedupedRemaining;
+  dealsDoc.totalDeals = dedupedRemaining.length;
   dealsDoc.lastUpdated = now.toISOString();
 
   const removalReasons = removed.reduce((acc, entry) => {
@@ -667,8 +768,9 @@ async function main() {
   await writeFile(VALIDATION_REPORT_PATH, JSON.stringify({
     checkedAt: now.toISOString(),
     totalBefore,
-    totalAfter: remaining.length,
+    totalAfter: dedupedRemaining.length,
     removedCount: removed.length,
+    duplicateCollapses,
     brokenLinkRemovals,
     expiredByVerifiedDateRemovals,
     socialPubDateSourceFixes,
@@ -684,8 +786,9 @@ async function main() {
     removed: removed.slice(0, 200),
   }, null, 2) + '\n', 'utf8');
 
-  console.log(`Normalized live deals: ${remaining.length}`);
+  console.log(`Normalized live deals: ${dedupedRemaining.length}`);
   console.log(`Removed deals: ${removed.length}`);
+  console.log(`Duplicate collapses: ${duplicateCollapses}`);
   console.log(`Broken link removals: ${brokenLinkRemovals}`);
   console.log(`Social pubDateSource fixes applied: ${socialPubDateSourceFixes}`);
   console.log(`Link health checks: ${linkChecksUsed}/${MAX_LIVE_URL_HEALTH_CHECKS}`);

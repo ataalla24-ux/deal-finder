@@ -84,6 +84,12 @@ function isSocialDeal(deal) {
   return url.includes('instagram.com/') || url.includes('tiktok.com/');
 }
 
+function getCanonicalSocialPostKey(deal) {
+  if (!isSocialDeal(deal)) return '';
+  const url = normalizeUrl(deal?.url).toLowerCase();
+  return url || '';
+}
+
 function getSemanticOfferKey(deal) {
   if (!isSocialDeal(deal)) return '';
 
@@ -152,13 +158,19 @@ function pickBetterDeal(current, candidate) {
 
 function dedupeApprovedDeals(deals) {
   const byBrandUrl = new Map();
+  const bySocialPost = new Map();
   const bySemanticKey = new Map();
   const deduped = [];
 
   for (const deal of deals) {
     let existingIndex = -1;
 
-    const brandUrlKey = getCanonicalUrlBrandKey(deal);
+    const socialPostKey = getCanonicalSocialPostKey(deal);
+    if (socialPostKey && bySocialPost.has(socialPostKey)) {
+      existingIndex = bySocialPost.get(socialPostKey);
+    }
+
+    const brandUrlKey = existingIndex === -1 ? getCanonicalUrlBrandKey(deal) : '';
     if (brandUrlKey && byBrandUrl.has(brandUrlKey)) {
       existingIndex = byBrandUrl.get(brandUrlKey);
     }
@@ -172,6 +184,9 @@ function dedupeApprovedDeals(deals) {
       const merged = pickBetterDeal(deduped[existingIndex], { ...deduped[existingIndex], ...deal });
       deduped[existingIndex] = merged;
 
+      const mergedSocialPostKey = getCanonicalSocialPostKey(merged);
+      if (mergedSocialPostKey) bySocialPost.set(mergedSocialPostKey, existingIndex);
+
       const mergedBrandUrlKey = getCanonicalUrlBrandKey(merged);
       if (mergedBrandUrlKey) byBrandUrl.set(mergedBrandUrlKey, existingIndex);
 
@@ -182,6 +197,7 @@ function dedupeApprovedDeals(deals) {
 
     const index = deduped.length;
     deduped.push(deal);
+    if (socialPostKey) bySocialPost.set(socialPostKey, index);
     if (brandUrlKey) byBrandUrl.set(brandUrlKey, index);
     const newSemanticKey = getSemanticOfferKey(deal);
     if (newSemanticKey) bySemanticKey.set(newSemanticKey, index);
@@ -418,19 +434,43 @@ function mergeApprovedDeals(existingDeals, newlyApproved) {
 
   const indexByKey = new Map();
   for (let i = 0; i < merged.length; i += 1) {
-    const key = getCanonicalUrlBrandKey(merged[i]) || merged[i].id || merged[i].url;
-    if (!key) continue;
-    indexByKey.set(key, i);
+    const keys = [
+      getCanonicalSocialPostKey(merged[i]),
+      getCanonicalUrlBrandKey(merged[i]),
+      merged[i].id,
+      merged[i].url,
+    ].filter(Boolean);
+    for (const key of keys) {
+      indexByKey.set(key, i);
+    }
   }
 
   for (const deal of newlyApproved) {
-    const key = getCanonicalUrlBrandKey(deal) || deal.id || deal.url;
-    if (!key) continue;
-    const existingIndex = indexByKey.get(key);
+    const keys = [
+      getCanonicalSocialPostKey(deal),
+      getCanonicalUrlBrandKey(deal),
+      deal.id,
+      deal.url,
+    ].filter(Boolean);
+    if (keys.length === 0) continue;
+    const existingIndex = keys
+      .map((key) => indexByKey.get(key))
+      .find((value) => Number.isInteger(value));
     if (Number.isInteger(existingIndex)) {
       merged[existingIndex] = pickBetterDeal(merged[existingIndex], { ...merged[existingIndex], ...deal });
+      const mergedDeal = merged[existingIndex];
+      for (const key of [
+        getCanonicalSocialPostKey(mergedDeal),
+        getCanonicalUrlBrandKey(mergedDeal),
+        mergedDeal.id,
+        mergedDeal.url,
+      ].filter(Boolean)) {
+        indexByKey.set(key, existingIndex);
+      }
     } else {
-      indexByKey.set(key, merged.length);
+      for (const key of keys) {
+        indexByKey.set(key, merged.length);
+      }
       merged.push(deal);
     }
   }
