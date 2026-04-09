@@ -31,7 +31,7 @@ const DEFAULT_CONFIG = {
   maxDealsPerInstagramAccount: 4,
 };
 let CONFIG = { ...DEFAULT_CONFIG };
-const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp']);
+const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'profileTimeline']);
 
 const SEED_HASHTAGS = [
   'gratiswien',
@@ -1064,6 +1064,11 @@ async function collectDealsFromAccountApi(sourceStats, page) {
         user?.biography,
       ].join(' '));
 
+      if (!isFresh(pubDateIso)) continue;
+      if (!combinedText) continue;
+      if (isExpiredByText(combinedText)) continue;
+      if (isGiveawayOnly(combinedText)) continue;
+
       candidateSnapshot.push({
         url: postUrl,
         sourceHits: 1,
@@ -1072,12 +1077,9 @@ async function collectDealsFromAccountApi(sourceStats, page) {
         accountHint: true,
         relatedHint: source.kind === 'related-account-api',
         discoveredBy: source.discoveredBy || [],
+        pubDate: pubDateIso,
+        pubDateSource: 'profileTimeline',
       });
-
-      if (!isFresh(pubDateIso)) continue;
-      if (!combinedText) continue;
-      if (isExpiredByText(combinedText)) continue;
-      if (isGiveawayOnly(combinedText)) continue;
 
       const isWien = containsKeyword(`${combinedText} ${locationName}`, WIEN_KEYWORDS)
         || /wien|vienna/i.test(cleanText(user?.username))
@@ -1423,6 +1425,8 @@ function restoreCandidateMapFromSnapshot(candidateSnapshot) {
   for (const candidate of candidateSnapshot || []) {
     const url = normalizeInstagramPostUrl(candidate?.url);
     if (!url) continue;
+    const pubDate = cleanText(candidate?.pubDate);
+    const pubDateSource = cleanText(candidate?.pubDateSource);
     candidatePosts.set(url, {
       url,
       sourceHits: Number(candidate?.sourceHits || 0),
@@ -1430,6 +1434,8 @@ function restoreCandidateMapFromSnapshot(candidateSnapshot) {
       sourceRefs: new Set(Array.isArray(candidate?.refs) ? candidate.refs : []),
       accountHint: Boolean(candidate?.accountHint),
       relatedHint: Boolean(candidate?.relatedHint),
+      pubDate: pubDate || '',
+      pubDateSource: pubDateSource || '',
     });
   }
   return candidatePosts;
@@ -1543,6 +1549,8 @@ async function scrapeInstagramDiscovery() {
           sourceRefs: new Set(),
           accountHint: false,
           relatedHint: false,
+          pubDate: '',
+          pubDateSource: '',
         });
       }
       const c = candidatePosts.get(normalized);
@@ -1669,10 +1677,18 @@ async function scrapeInstagramDiscovery() {
       refs: [...c.sourceRefs].slice(0, 20),
       accountHint: c.accountHint,
       relatedHint: c.relatedHint,
+      pubDate: c.pubDate || '',
+      pubDateSource: c.pubDateSource || '',
     }));
 
     const postsToVisit = [...candidatePosts.values()]
-      .sort((a, b) => b.sourceHits - a.sourceHits)
+      .filter((candidate) => !candidate.pubDate || isFresh(candidate.pubDate))
+      .sort((a, b) => {
+        const aFresh = a.pubDate && isFresh(a.pubDate) ? 1 : 0;
+        const bFresh = b.pubDate && isFresh(b.pubDate) ? 1 : 0;
+        if (bFresh !== aFresh) return bFresh - aFresh;
+        return b.sourceHits - a.sourceHits;
+      })
       .slice(0, CONFIG.maxPostsToVisit);
     const extractionRejectionReasons = createRejectionCounters();
 
@@ -1684,6 +1700,11 @@ async function scrapeInstagramDiscovery() {
     for (let i = 0; i < postsToVisit.length; i += 1) {
       const candidate = postsToVisit[i];
       try {
+        if (candidate.pubDate && !isFresh(candidate.pubDate)) {
+          extractionRejectionReasons.stale += 1;
+          continue;
+        }
+
         await page.goto(candidate.url, { waitUntil: 'domcontentloaded', timeout: CONFIG.postLoadTimeoutMs });
         await page.waitForTimeout(1150);
 
@@ -1765,13 +1786,22 @@ async function scrapeInstagramDiscovery() {
           continue;
         }
 
-        const pubDateMeta = parseDateFromPage({
+        let pubDateMeta = parseDateFromPage({
           ldDate: data.ldDate,
           timeDateTime: data.timeDateTime,
           igScriptTimestamp: data.igScriptTimestamp,
           ogDescription: data.ogDescription,
           fullText: combinedText,
         });
+        if ((!pubDateMeta || !pubDateMeta.iso || !TRUSTED_PUBDATE_SOURCES.has(pubDateMeta.source))
+          && candidate.pubDate
+          && candidate.pubDateSource
+          && TRUSTED_PUBDATE_SOURCES.has(candidate.pubDateSource)) {
+          pubDateMeta = {
+            iso: candidate.pubDate,
+            source: candidate.pubDateSource,
+          };
+        }
         if (!pubDateMeta || !pubDateMeta.iso || !TRUSTED_PUBDATE_SOURCES.has(pubDateMeta.source)) {
           extractionRejectionReasons.noPubDate += 1;
           continue;
