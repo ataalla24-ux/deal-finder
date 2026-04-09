@@ -1419,20 +1419,6 @@
             </div>
         </div>
         
-        <div class="savings-card" id="savingsCard">
-            <div class="savings-header">
-                <div class="savings-title">💰 Diese Woche gespart</div>
-                <div class="savings-amount" id="savingsAmount">€0</div>
-            </div>
-            <div class="savings-bar"><div class="savings-progress" id="savingsBar" style="width: 0%"></div></div>
-            <div class="savings-goal"><span>€0</span><span>Ziel: €50</span></div>
-            <div class="savings-lock" id="savingsLock">
-                <div class="savings-lock-title">Nur für PRO Mitglieder</div>
-                <div class="savings-lock-subtitle">Schalte den Spar-Tracker frei und sieh deine echten Einlösungen.</div>
-            </div>
-        </div>
-        
-        
   <!-- PRO BANNER (shown when not PRO) -->
   <div class="pro-banner" id="proBanner" onclick="openReferralModal()" style="display:none">
     <div class="pro-banner-header">
@@ -5740,7 +5726,6 @@
             dailyDeal: 'block',
             weeklyDeal: 'block',
             monthlyDeal: 'block',
-            savingsCard: 'block',
             proBanner: 'block',
             proActiveBadge: 'flex',
             savingsProCard: 'block',
@@ -5776,7 +5761,6 @@
                 const requiresPro = PRO_HOME_SECTION_IDS.has(id);
                 let shouldShow = isHome && (!requiresPro || proData.isPro);
                 if (id === 'weeklyDeal' || id === 'monthlyDeal') shouldShow = isForYou;
-                if (id === 'savingsCard') shouldShow = isHome;
                 if (id === 'savingsProCard' || id === 'yearOverview' || id === 'dealAlarmCard') shouldShow = false;
                 el.style.display = shouldShow ? displayValue : 'none';
             });
