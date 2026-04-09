@@ -259,6 +259,10 @@ function loadMerchantRegistryAccounts() {
   }
 }
 
+function shouldUseMerchantRegistrySeeds() {
+  return cleanText(process.env.IG_USE_MERCHANT_REGISTRY) === '1';
+}
+
 function containsKeyword(text, keywords) {
   const lower = cleanText(text).toLowerCase();
   return keywords.some((k) => lower.includes(k));
@@ -667,18 +671,6 @@ function buildSources() {
 
   const accountSources = [];
   const seenAccounts = new Set();
-  for (const account of loadMerchantRegistryAccounts()) {
-    if (seenAccounts.has(account.username)) continue;
-    seenAccounts.add(account.username);
-    const priorityBoost = Math.max(0, Math.min(3, Math.floor((account.priorityScore || account.confidence || 0) / 25)));
-    accountSources.push({
-      kind: 'account',
-      key: `acct:${account.username}`,
-      url: `https://www.instagram.com/${account.username}/`,
-      username: account.username,
-      priority: 3 + priorityBoost,
-    });
-  }
   for (const username of INSTAGRAM_ACCOUNTS) {
     const normalized = normalizeUsername(username);
     if (!normalized || seenAccounts.has(normalized)) continue;
@@ -688,8 +680,22 @@ function buildSources() {
       key: `acct:${normalized}`,
       url: `https://www.instagram.com/${normalized}/`,
       username: normalized,
-      priority: 2,
+      priority: 3,
     });
+  }
+  if (shouldUseMerchantRegistrySeeds()) {
+    for (const account of loadMerchantRegistryAccounts()) {
+      if (seenAccounts.has(account.username)) continue;
+      seenAccounts.add(account.username);
+      const priorityBoost = Math.max(0, Math.min(2, Math.floor((account.priorityScore || account.confidence || 0) / 35)));
+      accountSources.push({
+        kind: 'account',
+        key: `acct:${account.username}`,
+        url: `https://www.instagram.com/${account.username}/`,
+        username: account.username,
+        priority: 1 + priorityBoost,
+      });
+    }
   }
 
   return [...accountSources, ...hashtagSources]

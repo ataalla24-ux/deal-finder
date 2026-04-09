@@ -691,6 +691,10 @@ function buildSources(sourceStats) {
   return combined;
 }
 
+function shouldUseMerchantRegistrySeeds() {
+  return cleanText(process.env.IG_USE_MERCHANT_REGISTRY) === '1';
+}
+
 function loadMerchantRegistryAccounts() {
   if (!fs.existsSync(MERCHANT_REGISTRY_PATH)) return [];
   try {
@@ -723,22 +727,25 @@ function countAccountishCandidates(candidatePosts) {
 function getSeedAccounts() {
   const ordered = [];
   const seen = new Set();
-  for (const account of loadMerchantRegistryAccounts()) {
-    if (seen.has(account.username)) continue;
-    seen.add(account.username);
-    ordered.push(account.username);
-  }
   for (const username of SEED_ACCOUNTS) {
     const normalized = normalizeUsername(username);
     if (!normalized || seen.has(normalized)) continue;
     seen.add(normalized);
     ordered.push(normalized);
   }
+  if (shouldUseMerchantRegistrySeeds()) {
+    for (const account of loadMerchantRegistryAccounts()) {
+      if (seen.has(account.username)) continue;
+      seen.add(account.username);
+      ordered.push(account.username);
+    }
+  }
   return ordered;
 }
 
 function merchantRegistryPriorityMap() {
   const map = new Map();
+  if (!shouldUseMerchantRegistrySeeds()) return map;
   for (const account of loadMerchantRegistryAccounts()) {
     map.set(account.username, account);
   }
