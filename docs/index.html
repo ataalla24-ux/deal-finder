@@ -5763,12 +5763,12 @@
                 if (!el) return;
                 const requiresPro = PRO_HOME_SECTION_IDS.has(id);
                 let shouldShow = isHome && (!requiresPro || proData.isPro);
+                if (id === 'proBanner') shouldShow = isHome && !proData.isPro;
+                if (id === 'proActiveBadge') shouldShow = isHome && proData.isPro;
                 if (id === 'weeklyDeal' || id === 'monthlyDeal') shouldShow = isForYou;
                 if (id === 'savingsProCard' || id === 'yearOverview' || id === 'dealAlarmCard') shouldShow = false;
                 el.style.display = shouldShow ? displayValue : 'none';
             });
-            const proBanner = document.getElementById('proBanner');
-            if (proBanner) proBanner.style.display = 'none';
             updateFeaturedLockState();
         }
         function showHome() { restoreFeaturedDealsToHome(); restoreRelocatedSectionsToHome(); currentView = 'home'; updateHomeSectionVisibility(); renderDeals(); setFeaturedHomeDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelector('.nav-item').classList.add('active'); }
