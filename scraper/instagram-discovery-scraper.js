@@ -605,6 +605,22 @@ function inferLogo(category, text) {
   return '📷';
 }
 
+function createRejectionCounters() {
+  return {
+    navigationError: 0,
+    noContent: 0,
+    noPubDate: 0,
+    stale: 0,
+    expired: 0,
+    giveaway: 0,
+    notWien: 0,
+    notFoodDrink: 0,
+    noDealSignal: 0,
+    noPromoSignal: 0,
+    lowScore: 0,
+  };
+}
+
 function scoreDeal({ text, sourceHits, sourceKinds, accountHint, relatedHint }) {
   const lower = cleanText(text).toLowerCase();
   const dealHits = keywordHits(lower, DEAL_KEYWORDS);
@@ -1313,6 +1329,7 @@ function finalizeDiscoveryRun({
   visitedPosts,
   rawDeals,
   mode,
+  rejectionReasons = createRejectionCounters(),
 }) {
   const previousDeals = loadPreviousDeals();
   const finalDeals = mergeDeals(rawDeals, previousDeals);
@@ -1373,6 +1390,7 @@ function finalizeDiscoveryRun({
     visitedPosts,
     rawDeals: rawDeals.length,
     savedDeals: finalDeals.length,
+    rejectionReasons,
     topSources,
   }, null, 2));
 
@@ -1387,6 +1405,7 @@ function finalizeDiscoveryRun({
       totalCandidates,
       visitedPosts,
       scrapedDealsRaw: rawDeals.length,
+      rejectionReasons,
     },
   };
 
@@ -1480,6 +1499,7 @@ async function scrapeInstagramDiscovery() {
         visitedPosts: apiResult.visitedPosts,
         rawDeals: apiResult.deals,
         mode: apiResult.mode,
+        rejectionReasons: apiResult.rejectionReasons || createRejectionCounters(),
       });
     }
     const sourcesQueue = buildSources(sourceStats);
@@ -1654,6 +1674,7 @@ async function scrapeInstagramDiscovery() {
     const postsToVisit = [...candidatePosts.values()]
       .sort((a, b) => b.sourceHits - a.sourceHits)
       .slice(0, CONFIG.maxPostsToVisit);
+    const extractionRejectionReasons = createRejectionCounters();
 
     console.log(`🧠 discovery done: sources=${processedSourceKeys.size}, candidates=${candidatePosts.size}, visiting=${postsToVisit.length}`);
 
@@ -1739,7 +1760,10 @@ async function scrapeInstagramDiscovery() {
           data.text.slice(0, 2200),
         ].join(' '));
 
-        if (!combinedText) continue;
+        if (!combinedText) {
+          extractionRejectionReasons.noContent += 1;
+          continue;
+        }
 
         const pubDateMeta = parseDateFromPage({
           ldDate: data.ldDate,
@@ -1748,21 +1772,45 @@ async function scrapeInstagramDiscovery() {
           ogDescription: data.ogDescription,
           fullText: combinedText,
         });
-        if (!pubDateMeta || !pubDateMeta.iso || !TRUSTED_PUBDATE_SOURCES.has(pubDateMeta.source)) continue;
-        if (!isFresh(pubDateMeta.iso)) continue;
+        if (!pubDateMeta || !pubDateMeta.iso || !TRUSTED_PUBDATE_SOURCES.has(pubDateMeta.source)) {
+          extractionRejectionReasons.noPubDate += 1;
+          continue;
+        }
+        if (!isFresh(pubDateMeta.iso)) {
+          extractionRejectionReasons.stale += 1;
+          continue;
+        }
         const pubDateIso = pubDateMeta.iso;
 
-        if (isExpiredByText(combinedText)) continue;
-        if (isGiveawayOnly(combinedText)) continue;
+        if (isExpiredByText(combinedText)) {
+          extractionRejectionReasons.expired += 1;
+          continue;
+        }
+        if (isGiveawayOnly(combinedText)) {
+          extractionRejectionReasons.giveaway += 1;
+          continue;
+        }
 
         const isWien = containsKeyword(combinedText, WIEN_KEYWORDS)
           || [...candidate.sourceRefs].some((k) => k.includes('wien') || k.includes('vienna'));
-        if (!isWien) continue;
-        if (!isFoodDrinkRelevant(combinedText)) continue;
+        if (!isWien) {
+          extractionRejectionReasons.notWien += 1;
+          continue;
+        }
+        if (!isFoodDrinkRelevant(combinedText)) {
+          extractionRejectionReasons.notFoodDrink += 1;
+          continue;
+        }
 
         const dealSignal = containsKeyword(combinedText, DEAL_KEYWORDS);
-        if (!dealSignal) continue;
-        if (!hasFreebieOrPromoSignal(combinedText)) continue;
+        if (!dealSignal) {
+          extractionRejectionReasons.noDealSignal += 1;
+          continue;
+        }
+        if (!hasFreebieOrPromoSignal(combinedText)) {
+          extractionRejectionReasons.noPromoSignal += 1;
+          continue;
+        }
 
         const score = scoreDeal({
           text: combinedText,
@@ -1771,10 +1819,16 @@ async function scrapeInstagramDiscovery() {
           accountHint: candidate.accountHint,
           relatedHint: candidate.relatedHint,
         });
-        if (score < CONFIG.minDealScore) continue;
+        if (score < CONFIG.minDealScore) {
+          extractionRejectionReasons.lowScore += 1;
+          continue;
+        }
 
         const expiry = parseExpiryFromText(combinedText);
-        if (expiry && isExpiryInPast(expiry)) continue;
+        if (expiry && isExpiryInPast(expiry)) {
+          extractionRejectionReasons.expired += 1;
+          continue;
+        }
 
         const category = detectCategory(combinedText);
         const type = detectType(combinedText);
@@ -1811,7 +1865,7 @@ async function scrapeInstagramDiscovery() {
           if (!stat.lastSeenAt) stat.lastSeenAt = new Date().toISOString();
         }
       } catch {
-        // ignore inaccessible post
+        extractionRejectionReasons.navigationError += 1;
       }
 
       if ((i + 1) % 30 === 0) {
@@ -1828,6 +1882,7 @@ async function scrapeInstagramDiscovery() {
       visitedPosts: postsToVisit.length,
       rawDeals: deals,
       mode: discoveryMode,
+      rejectionReasons: extractionRejectionReasons,
     });
 
     await browser.close();
