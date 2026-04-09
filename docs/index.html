@@ -4525,6 +4525,7 @@
             renderDeals();
             await setDailyDeal();
             setFeaturedHomeDeals();
+            updateHomeSectionVisibility();
             updateAdminUiVisibility();
         } catch (e) {
             document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">\uD83D\uDE15</div><p>Fehler</p></div>';
