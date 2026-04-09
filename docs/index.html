@@ -416,10 +416,23 @@
         .leaderboard-title { font-weight: 700; }
         .leaderboard-text { font-size: 13px; opacity: 0.9; }
         .leaderboard-rank { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-weight: 700; }
-        .discovery-page-header { text-align: center; margin-bottom: 18px; }
-        .discovery-page-icon { font-size: 32px; }
-        .discovery-page-title { font-size: 22px; margin: 8px 0 4px; }
-        .discovery-page-subtitle { color: #6b7280; font-size: 14px; }
+        .discovery-page-header { text-align: left; margin-bottom: 16px; }
+        .discovery-page-icon { font-size: 22px; }
+        .discovery-page-title { font-size: 24px; margin: 6px 0 4px; letter-spacing: -0.03em; }
+        .discovery-page-subtitle { color: #7a7064; font-size: 13px; line-height: 1.45; max-width: 32ch; }
+        .discovery-page-kicker { font-size: 11px; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: #a18567; }
+        .premium-note-card { background: linear-gradient(180deg, #fffdf9 0%, #fff6eb 100%); border: 1px solid #efe2cf; border-radius: 20px; padding: 18px; margin-bottom: 14px; box-shadow: 0 10px 24px rgba(34, 29, 24, 0.05); cursor: pointer; }
+        .premium-note-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #ba7a32; margin-bottom: 8px; }
+        .premium-note-title { font-size: 18px; line-height: 1.2; font-weight: 800; color: #201a17; letter-spacing: -0.03em; }
+        .premium-note-copy { margin-top: 6px; font-size: 14px; line-height: 1.5; color: #746b63; }
+        .premium-note-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .premium-note-chip { background: white; border: 1px solid #eadfd2; border-radius: 999px; padding: 7px 10px; font-size: 12px; font-weight: 700; color: #5f564d; }
+        .premium-note-btn { margin-top: 16px; width: 100%; min-height: 46px; border: none; border-radius: 16px; background: linear-gradient(135deg, #f59a36, #ef8530); color: white; font-size: 15px; font-weight: 800; box-shadow: 0 10px 22px rgba(239, 133, 48, 0.18); }
+        .premium-discovery-shell { display: grid; gap: 14px; margin: 18px 0; }
+        .premium-discovery-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+        .premium-discovery-title { font-size: 18px; font-weight: 800; letter-spacing: -0.03em; color: #201a17; }
+        .premium-discovery-subtitle { margin-top: 4px; font-size: 13px; line-height: 1.45; color: #746b63; max-width: 36ch; }
+        .premium-discovery-shell .for-you-featured-wrap { margin-bottom: 0; }
         .discovery-section { margin-bottom: 18px; }
         .discovery-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
         .discovery-section-title { font-size: 17px; font-weight: 800; color: #111827; }
@@ -629,35 +642,48 @@
   .pro-active-text { font-size: 13px; font-weight: 700; color: #92400e; }
 
   /* PRO REFERRAL MODAL */
-  .referral-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 800; display: none; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; }
+  .referral-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(26,20,14,0.56); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); z-index: 800; display: none; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; }
   .referral-modal.show { display: flex; animation: fadeIn 0.3s; }
-  .referral-modal-content { background: white; border-radius: 24px; padding: 24px; max-width: 360px; width: 100%; animation: slideUp 0.3s; position: relative; }
-  .referral-header { text-align: center; margin-bottom: 20px; }
-  .referral-crown { font-size: 56px; display: block; margin-bottom: 8px; }
-  .referral-title { font-size: 22px; font-weight: 800; color: #1f2937; }
-  .referral-subtitle { font-size: 14px; color: #6b7280; margin-top: 6px; line-height: 1.5; }
-  .referral-steps { margin: 20px 0; }
-  .referral-step { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
-  .referral-step.done { background: #d1fae5; }
-  .referral-step.pending { background: #f1f5f9; }
+  .referral-modal-content { background: #fffdfa; border-radius: 28px; padding: 22px; max-width: 360px; width: 100%; animation: slideUp 0.3s; position: relative; border: 1px solid #efe2d2; box-shadow: 0 24px 64px rgba(31, 24, 18, 0.16); }
+  .referral-header { text-align: left; margin-bottom: 18px; }
+  .referral-crown { font-size: 40px; display: block; margin-bottom: 10px; }
+  .referral-title { font-size: 24px; font-weight: 800; color: #201a17; letter-spacing: -0.03em; }
+  .referral-subtitle { font-size: 14px; color: #746b63; margin-top: 8px; line-height: 1.55; }
+  .referral-steps { margin: 18px 0 14px; display: grid; gap: 10px; }
+  .referral-step { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; margin-bottom: 0; border: 1px solid #ece2d6; }
+  .referral-step.done { background: #eef9f3; }
+  .referral-step.pending { background: #faf7f2; }
   .referral-step-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
   .referral-step.done .referral-step-num { background: #10b981; color: white; }
-  .referral-step.pending .referral-step-num { background: #e5e7eb; color: #6b7280; }
-  .referral-step-text { flex: 1; font-size: 14px; font-weight: 600; color: #374151; }
+  .referral-step.pending .referral-step-num { background: #eee6db; color: #7d6f61; }
+  .referral-step-text { flex: 1; font-size: 14px; font-weight: 700; color: #39312a; }
   .referral-step-status { font-size: 18px; }
-  .referral-progress-section { background: #f8fafc; border-radius: 12px; padding: 16px; margin: 16px 0; text-align: center; }
-  .referral-progress-text { font-size: 13px; color: #6b7280; margin-bottom: 8px; }
-  .referral-progress-bar { background: #e5e7eb; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+  .referral-progress-section { background: #faf6f0; border-radius: 18px; padding: 16px; margin: 16px 0; text-align: left; border: 1px solid #eee1d1; }
+  .referral-progress-text { font-size: 13px; color: #7a7064; margin-bottom: 10px; font-weight: 700; }
+  .referral-progress-bar { background: #ece3d8; height: 10px; border-radius: 999px; overflow: hidden; margin-bottom: 10px; }
   .referral-progress-fill { background: linear-gradient(90deg, #10b981, #059669); height: 100%; border-radius: 6px; transition: width 0.5s; }
-  .referral-count-big { font-size: 32px; font-weight: 800; color: #10b981; }
-  .referral-count-label { font-size: 13px; color: #6b7280; }
-  .referral-link-box { background: #f1f5f9; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 14px; margin: 16px 0; text-align: center; }
-  .referral-link-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
-  .referral-link-url { font-size: 12px; font-weight: 700; color: #667eea; word-break: break-all; }
-  .referral-share-btns { display: flex; gap: 8px; margin-top: 12px; }
-  .ref-wa-btn { flex: 1; background: #25D366; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; }
-  .ref-copy-btn { background: #667eea; color: white; border: none; padding: 12px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; }
-  .referral-modal-close { position: absolute; top: 16px; right: 16px; background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 18px; color: #374151; display: flex; align-items: center; justify-content: center; }
+  .referral-count-big { font-size: 30px; font-weight: 800; color: #201a17; }
+  .referral-count-label { font-size: 13px; color: #7a7064; }
+  .referral-link-box { background: #fffdfa; border: 1px solid #ece2d7; border-radius: 18px; padding: 14px; margin: 16px 0; text-align: left; }
+  .referral-link-label { font-size: 12px; color: #8d8175; margin-bottom: 8px; font-weight: 700; }
+  .referral-link-url { font-size: 12px; font-weight: 700; color: #5f4b8b; word-break: break-all; line-height: 1.5; }
+  .referral-share-btns { display: grid; gap: 8px; margin-top: 12px; }
+  .referral-modal-close { position: absolute; top: 16px; right: 16px; background: #f7f1e8; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 18px; color: #65594d; display: flex; align-items: center; justify-content: center; }
+  .ref-wa-btn { width: 100%; min-height: 48px; border: none; border-radius: 16px; background: linear-gradient(135deg, #f59a36, #ef8530); color: white; font-size: 15px; font-weight: 800; box-shadow: 0 12px 26px rgba(239, 133, 48, 0.18); }
+  .ref-copy-btn { width: 100%; min-height: 44px; border: none; background: transparent; color: #5f564d; font-size: 14px; font-weight: 700; }
+  .stats-locked-shell { padding: 4px 0; }
+  .stats-locked-head { margin-bottom: 14px; }
+  .stats-locked-kicker { font-size: 11px; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: #a18567; }
+  .stats-locked-title { font-size: 24px; margin: 6px 0 4px; letter-spacing: -0.03em; color: #201a17; }
+  .stats-locked-sub { color: #746b63; font-size: 13px; line-height: 1.5; max-width: 34ch; }
+  .stats-preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .stats-preview-item { background: #fffdfa; border: 1px solid #eadfd2; border-radius: 18px; padding: 16px; box-shadow: 0 10px 24px rgba(34, 29, 24, 0.05); }
+  .stats-preview-value { font-size: 27px; font-weight: 800; letter-spacing: -0.04em; color: #201a17; }
+  .stats-preview-label { margin-top: 6px; font-size: 12px; line-height: 1.45; color: #7a7064; }
+  .stats-upgrade-card { background: linear-gradient(180deg, #fffdf9 0%, #fff4e7 100%); border: 1px solid #efdfcb; border-radius: 22px; padding: 18px; box-shadow: 0 12px 30px rgba(34, 29, 24, 0.06); }
+  .stats-upgrade-title { font-size: 18px; font-weight: 800; color: #201a17; letter-spacing: -0.03em; }
+  .stats-upgrade-list { display: grid; gap: 8px; margin-top: 12px; font-size: 14px; color: #5f564d; }
+  .stats-upgrade-button { margin-top: 16px; width: 100%; min-height: 46px; border: none; border-radius: 16px; background: linear-gradient(135deg, #f59a36, #ef8530); color: white; font-size: 15px; font-weight: 800; box-shadow: 0 12px 26px rgba(239, 133, 48, 0.18); }
 
   /* SPAR-TRACKER PRO */
   .savings-pro-card { background: linear-gradient(135deg, #7c3aed, #6366f1); border-radius: 16px; padding: 20px; margin-bottom: 16px; color: white; }
@@ -1879,14 +1905,14 @@
                 alertPersonalized: '🧠 Personalisierte Alerts',
                 alertNearby: '📍 Neue Deals in deiner Nähe',
                 referralTitle: 'Werde PRO – Kostenlos!',
-                referralSubtitle: 'Teile FreeFinder mit <strong>2 Freunden</strong> – sobald beide deine Einladung bestätigen, schaltest du PRO mit Alerts, Standortfilter und Spartracker frei.',
+                referralSubtitle: 'Lade <strong>2 Freunde</strong> ein und schalte FreeFinder PRO kostenlos frei. Danach bekommst du Alerts, Standortfilter und die stärksten Picks zuerst.',
                 referralStep1: 'Freund 1 hat deine Einladung bestätigt',
                 referralStep2: 'Freund 2 hat deine Einladung bestätigt',
                 referralConfirmed: 'Bestätigte Einladungen',
                 referralCountLabel: 'von 2 Einladungen bestätigt',
-                referralLinkLabel: '🔗 Freunde öffnen diesen Link und bestätigen darüber die App:',
-                referralWhatsApp: '📤 WhatsApp teilen',
-                referralCopy: '📋 Kopieren',
+                referralLinkLabel: 'Dein Einladungslink',
+                referralWhatsApp: 'Per WhatsApp einladen',
+                referralCopy: 'Link kopieren',
                 proAnimTitle: 'DU BIST JETZT PRO!',
                 proAnimSub: 'Alle PRO-Features wurden freigeschaltet!<br>Danke, dass du FreeFinder mit deinen Freunden teilst! 🎉',
                 proAnimClose: "🚀 Los geht's!",
@@ -1979,8 +2005,8 @@
                 forYouTitle: 'Für dich',
                 forYouSubPro: 'Smarte Empfehlungen auf Basis deiner Favoriten, Einlösungen, Ansichten und deiner Nähe.',
                 forYouSubFree: 'Beliebte Empfehlungen, starke Community-Votes und was gerade heiß läuft.',
-                forYouProBoostTitle: '👑 PRO macht Für dich deutlich smarter',
-                forYouProBoostSub: 'Mit PRO lernt dein Feed aus Favoriten, Einlösungen, Marken, Standort und persönlichen Alerts.',
+                forYouProBoostTitle: 'PRO macht Für dich klar relevanter',
+                forYouProBoostSub: 'Mehr Signal, weniger Suchen: Alerts, Standortfilter und stärkere Picks an einem Ort.',
                 forYouRecommended: 'Für dich empfohlen',
                 forYouRecommendedSubPro: 'Basierend auf deinen Favoriten, Einlösungen, Ansichten und deiner Nähe.',
                 forYouRecommendedSubFree: 'Eine starke Vorschau aus frischen, beliebten und relevanten Deals.',
@@ -2112,14 +2138,14 @@
                 alertPersonalized: '🧠 Personalized alerts',
                 alertNearby: '📍 New deals near you',
                 referralTitle: 'Go PRO for free!',
-                referralSubtitle: 'Share FreeFinder with <strong>2 friends</strong> – once both confirm your invite, you unlock PRO with alerts, location filters and the savings tracker.',
+                referralSubtitle: 'Invite <strong>2 friends</strong> and unlock FreeFinder PRO for free. You get alerts, location filters, and the strongest picks first.',
                 referralStep1: 'Friend 1 confirmed your invite',
                 referralStep2: 'Friend 2 confirmed your invite',
                 referralConfirmed: 'Confirmed invites',
                 referralCountLabel: 'of 2 invites confirmed',
-                referralLinkLabel: '🔗 Friends open this link and confirm the app through it:',
-                referralWhatsApp: '📤 Share on WhatsApp',
-                referralCopy: '📋 Copy',
+                referralLinkLabel: 'Your invite link',
+                referralWhatsApp: 'Invite via WhatsApp',
+                referralCopy: 'Copy link',
                 proAnimTitle: 'YOU ARE NOW PRO!',
                 proAnimSub: 'All PRO features have been unlocked!<br>Thanks for sharing FreeFinder with your friends! 🎉',
                 proAnimClose: "🚀 Let's go!",
@@ -2212,8 +2238,8 @@
                 forYouTitle: 'For You',
                 forYouSubPro: 'Smart recommendations based on your favorites, redemptions, views and proximity.',
                 forYouSubFree: 'Popular recommendations, strong community votes and what is trending now.',
-                forYouProBoostTitle: '👑 PRO makes For You much smarter',
-                forYouProBoostSub: 'With PRO, your feed learns from favorites, redemptions, brands, location and personal alerts.',
+                forYouProBoostTitle: 'PRO makes For You much more relevant',
+                forYouProBoostSub: 'More signal, less digging: alerts, location filters, and stronger picks in one place.',
                 forYouRecommended: 'Recommended for you',
                 forYouRecommendedSubPro: 'Based on your favorites, redemptions, views and proximity.',
                 forYouRecommendedSubFree: 'A strong preview of fresh, popular and relevant deals.',
@@ -5641,7 +5667,14 @@
             currentView = 'stats';
             hideHeaderElements();
             if (!proData.isPro) {
-                document.getElementById('deals').innerHTML = '<div style="padding:4px 0"><div style="text-align:center;margin-bottom:16px"><div style="font-size:32px">📊</div><h2 style="font-size:22px;margin:8px 0 4px">' + t('statsLockedTitle') + '</h2><p style="color:#6b7280;font-size:14px">' + t('statsLockedSub') + '</p></div><div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:18px;padding:22px;color:white;margin-bottom:16px"><div style="font-size:18px;font-weight:800;margin-bottom:10px">' + t('statsLockedListTitle') + '</div><div style="display:grid;gap:8px;font-size:14px;opacity:0.95"><div>' + t('statsLockedItem1') + '</div><div>' + t('statsLockedItem2') + '</div><div>' + t('statsLockedItem3') + '</div><div>' + t('statsLockedItem4') + '</div></div><button style="margin-top:16px;width:100%;background:white;color:#5b21b6;border:none;border-radius:14px;padding:14px 16px;font-size:15px;font-weight:800;cursor:pointer" onclick="openReferralModal()">' + t('unlockProFree') + '</button></div></div>';
+                document.getElementById('deals').innerHTML = '<div class="stats-locked-shell">' +
+                    '<div class="stats-locked-head"><div class="stats-locked-kicker">Stats</div><h2 class="stats-locked-title">' + t('statsLockedTitle') + '</h2><p class="stats-locked-sub">' + t('statsLockedSub') + '</p></div>' +
+                    '<div class="stats-preview-grid">' +
+                        '<div class="stats-preview-item"><div class="stats-preview-value">€42</div><div class="stats-preview-label">' + t('savedThisMonth') + '</div></div>' +
+                        '<div class="stats-preview-item"><div class="stats-preview-value">17</div><div class="stats-preview-label">' + t('redeemedMarked') + '</div></div>' +
+                    '</div>' +
+                    '<div class="stats-upgrade-card"><div class="stats-upgrade-title">' + t('statsLockedListTitle') + '</div><div class="stats-upgrade-list"><div>' + t('statsLockedItem1') + '</div><div>' + t('statsLockedItem2') + '</div><div>' + t('statsLockedItem3') + '</div><div>' + t('statsLockedItem4') + '</div></div><button class="stats-upgrade-button" onclick="openReferralModal()">' + t('unlockProFree') + '</button></div>' +
+                '</div>';
                 scrollToTopContent();
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
                 document.querySelectorAll('.nav-item')[2].classList.add('active');
@@ -5683,15 +5716,18 @@
             const topVoted = getTopVotedDeals(discoveryDeals);
             const trending = getTrendingDeals(discoveryDeals);
 
-            const intro = '<div class="discovery-page-header"><div class="discovery-page-icon">✨</div><h2 class="discovery-page-title">' + t('forYouTitle') + '</h2><p class="discovery-page-subtitle">' + (proData.isPro ? t('forYouSubPro') : t('forYouSubFree')) + '</p></div>';
-            const proBoostCard = proData.isPro ? '' : '<div style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:18px;padding:18px;color:white;margin-bottom:16px" onclick="openReferralModal()"><div style="font-size:17px;font-weight:800;margin-bottom:6px">' + t('forYouProBoostTitle') + '</div><div style="font-size:14px;opacity:0.95;line-height:1.45">' + t('forYouProBoostSub') + '</div><button style="margin-top:14px;background:white;color:#5b21b6;border:none;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:800;cursor:pointer;width:100%">' + t('unlockProFree') + '</button></div>';
-            const featuredIntro = '<div class="for-you-featured-wrap"><div class="for-you-featured-intro"><div><div class="for-you-featured-title">' + (currentLanguage === 'en' ? 'Premium picks' : 'Premium Picks') + '</div><div class="for-you-featured-subtitle">' + (currentLanguage === 'en' ? 'The strongest week and month picks in one calmer view.' : 'Die stärksten Picks der Woche und des Monats in einer ruhigeren Ansicht.') + '</div></div><span class="pro-badge">👑 PRO</span></div><div class="for-you-featured-grid" id="forYouFeaturedMount"></div></div>';
+            const intro = '<div class="discovery-page-header"><div class="discovery-page-kicker">' + (currentLanguage === 'en' ? 'For You' : 'Für dich') + '</div><h2 class="discovery-page-title">' + t('forYouTitle') + '</h2><p class="discovery-page-subtitle">' + (proData.isPro ? t('forYouSubPro') : t('forYouSubFree')) + '</p></div>';
+            const proBoostChips = currentLanguage === 'en'
+                ? '<span class="premium-note-chip">Alerts</span><span class="premium-note-chip">Location</span><span class="premium-note-chip">Top picks</span>'
+                : '<span class="premium-note-chip">Alerts</span><span class="premium-note-chip">Standort</span><span class="premium-note-chip">Top Picks</span>';
+            const proBoostCard = proData.isPro ? '' : '<div class="premium-note-card" onclick="openReferralModal()"><div class="premium-note-eyebrow">PRO</div><div class="premium-note-title">' + t('forYouProBoostTitle') + '</div><div class="premium-note-copy">' + t('forYouProBoostSub') + '</div><div class="premium-note-chips">' + proBoostChips + '</div><button class="premium-note-btn">' + t('unlockProFree') + '</button></div>';
+            const featuredIntro = '<div class="for-you-featured-wrap"><div class="premium-discovery-head"><div><div class="premium-discovery-title">' + (currentLanguage === 'en' ? 'Premium picks' : 'Premium Picks') + '</div><div class="premium-discovery-subtitle">' + (currentLanguage === 'en' ? 'Week and month highlights stay together here, calmer and easier to scan.' : 'Hier liegen Wochen- und Monatshighlights zusammen, ruhiger und leichter zu scannen.') + '</div></div><span class="pro-badge">👑 PRO</span></div><div class="for-you-featured-grid" id="forYouFeaturedMount"></div></div>';
             const recommendedSection = renderDiscoverySection(t('forYouRecommended'), proData.isPro ? t('forYouRecommendedSubPro') : t('forYouRecommendedSubFree'), recommended, (deal) => getRecommendationReason(deal));
             const topVotedSection = renderDiscoverySection(t('forYouTopVoted'), t('forYouTopVotedSub'), topVoted, (_, index) => index === 0 ? (currentLanguage === 'en' ? 'Community favorite' : 'Community-Favorit') : (currentLanguage === 'en' ? 'Lots of votes' : 'Viele Stimmen'));
             const trendingSection = renderDiscoverySection(t('forYouTrending'), t('forYouTrendingSub'), trending, (deal) => deal.hot ? (currentLanguage === 'en' ? 'Hot right now' : 'Gerade heiß') : (deal.isNew ? (currentLanguage === 'en' ? 'Freshly discovered' : 'Frisch entdeckt') : (currentLanguage === 'en' ? 'Gaining momentum' : 'Im Aufwind')));
             const submitCta = '<div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:18px;padding:20px;color:white;text-align:center;cursor:pointer" onclick="openLinkModal()"><div style="font-size:34px;margin-bottom:8px">🔗</div><div style="font-size:18px;font-weight:700">' + t('submitDeal') + '</div><div style="font-size:14px;opacity:0.9;margin-top:4px">' + t('submitDealSub') + '</div></div>';
 
-            document.getElementById('deals').innerHTML = '<div style="padding:4px 0">' + intro + featuredIntro + '<div id="forYouAlertsMount" style="display:grid;gap:16px;margin-bottom:16px"></div>' + proBoostCard + recommendedSection + topVotedSection + trendingSection + submitCta + '</div>';
+            document.getElementById('deals').innerHTML = '<div style="padding:4px 0">' + intro + recommendedSection + topVotedSection + trendingSection + '<div class="premium-discovery-shell">' + proBoostCard + '<div id="forYouAlertsMount" style="display:grid;gap:16px"></div>' + featuredIntro + '</div>' + submitCta + '</div>';
             mountSectionInto('dealAlarmCard', 'forYouAlertsMount', 'block');
             setFeaturedHomeDeals();
             scrollToTopContent();
