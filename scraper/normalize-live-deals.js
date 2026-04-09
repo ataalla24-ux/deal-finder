@@ -46,9 +46,8 @@ const MAX_LIVE_URL_HEALTH_CHECKS = Number(process.env.MAX_LIVE_URL_HEALTH_CHECKS
 const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REFRESHES || 120);
 const MAX_LIVE_CONTENT_ENRICHMENTS = Number(process.env.MAX_LIVE_CONTENT_ENRICHMENTS || 120);
 const GENERIC_DESCRIPTION_PATTERN = /^(free|gratis|rabatt|discount|deal|angebot|aktion|promo|special|event|post|reel|instagram|coupon|gutschein|gewinnspiel|new|neu)$/i;
-const FOOD_SIGNAL_PATTERN = /\b(eis|ice cream|gelato|kaffee|coffee|cafe|café|pizza|burger|döner|doener|kebab|sushi|ramen|brunch|croissant|drink|getränk|getraenk|cocktail|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein|vino)\b/i;
+const FOOD_SIGNAL_PATTERN = /\b(eis\w*|ice cream|gelato|kaffee\w*|coffee|cafe|café|pizza\w*|burger\w*|döner\w*|doener\w*|kebab\w*|sushi|ramen|brunch|croissant|drink|drinks|getränk\w*|getraenk\w*|cocktail\w*|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein\w*|vino|fleisch\w*|meat|steak|bbq|grill\w*|bäckerei|backerei|bakery|krapfen\w*)\b/i;
 const COFFEE_SIGNAL_PATTERN = /\b(kaffee|coffee|espresso|latte|cappuccino|cafe|café)\b/i;
-const GIVEAWAY_PATTERN = /\b(gewinnspiel|giveaway|verlosen|verlosung|zu gewinnen|gewinne|quiz)\b/i;
 const SOURCE_PREFIX_PATTERN = /\s+(?:auf|on)\s+(?:instagram|tiktok)\s*:\s*/i;
 
 function hasUsefulWords(text) {
@@ -94,21 +93,69 @@ function tidySocialSummary(value = '', maxLength = 96) {
   return `${shortened.slice(0, lastSpace > 48 ? lastSpace : maxLength).trim()}...`;
 }
 
+function extractSocialHandle(value = '') {
+  const match = cleanText(value).match(/@([a-z0-9._]{3,40})/i);
+  return match ? match[1] : '';
+}
+
+function prettifySocialHandle(handle = '') {
+  const text = cleanText(handle)
+    .replace(/[._]+/g, ' ')
+    .replace(/\b\d{2,4}\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!text) return '';
+  return text
+    .split(' ')
+    .map((part) => part ? `${part[0].toUpperCase()}${part.slice(1)}` : '')
+    .join(' ')
+    .trim();
+}
+
+function localizeFreeText(value = '') {
+  const text = cleanText(value);
+  if (!text) return '';
+  return text
+    .replace(/^free in\s+/i, 'Gratis in ')
+    .replace(/^free bei\s+/i, 'Gratis bei ')
+    .replace(/^free\b/i, 'Gratis')
+    .replace(/\bfree\b/gi, 'gratis');
+}
+
+function buildSocialTitleFallback(deal) {
+  const brand = cleanUiNoiseText(deal.brand || '');
+  if (!brand) return '';
+  if (deal.type === 'gratis') return `Gratis bei ${brand}`;
+  if (deal.type === 'bogo') return `1+1 bei ${brand}`;
+  if (deal.type === 'rabatt') return `${brand}: Rabatt`;
+  return brand;
+}
+
 function normalizeSocialDeal(deal) {
   if (!isSocialUrl(deal.url)) return deal;
 
   const next = { ...deal };
   const socialTitle = tidySocialSummary(next.title, 96);
-  const socialDescription = tidySocialSummary(next.description, 160);
+  const socialDescription = localizeFreeText(tidySocialSummary(next.description, 160));
   const inferredBrand = cleanUiNoiseText(inferPreferredBrand(next));
+  const handleBrand = prettifySocialHandle(extractSocialHandle(`${next.title || ''} ${next.description || ''}`));
   const combinedText = [next.brand, socialTitle, socialDescription, next.distance].filter(Boolean).join(' ');
 
-  if (isSourceLikeBrandValue(next.brand) && inferredBrand && !isSourceLikeBrandValue(inferredBrand)) {
+  if (isSourceLikeBrandValue(next.brand) && handleBrand && !isSourceLikeBrandValue(handleBrand)) {
+    next.brand = handleBrand;
+  } else if (isSourceLikeBrandValue(next.brand) && inferredBrand && !isSourceLikeBrandValue(inferredBrand)) {
     next.brand = inferredBrand;
   }
 
   if (/^(instagram|tiktok)$/i.test(cleanUiNoiseText(next.title)) || /(?:auf|on)\s+(?:instagram|tiktok)\s*:/i.test(next.title || '')) {
-    if (socialTitle) next.title = socialTitle;
+    if (socialTitle && !/^(instagram|tiktok)$/i.test(cleanUiNoiseText(socialTitle))) {
+      next.title = socialTitle;
+    } else {
+      const fallbackTitle = buildSocialTitleFallback(next);
+      if (fallbackTitle) next.title = fallbackTitle;
+    }
+  } else if ((next.title || '').includes('&#') && socialTitle) {
+    next.title = socialTitle;
   }
 
   if (isWeakDescription(next.description)) {
@@ -119,9 +166,16 @@ function normalizeSocialDeal(deal) {
       category: next.category,
       type: next.type,
     });
-    next.description = socialDescription || fallbackDescription || next.description;
+    next.description = socialDescription || fallbackDescription || localizeFreeText(next.description);
   } else if (socialDescription && /(?:auf|on)\s+(?:instagram|tiktok)\s*:/i.test(next.description || '')) {
     next.description = socialDescription;
+  } else {
+    next.description = localizeFreeText(next.description);
+  }
+
+  if (isWeakTitle(next.title)) {
+    const fallbackTitle = buildSocialTitleFallback(next);
+    if (fallbackTitle) next.title = fallbackTitle;
   }
 
   if ((next.category === 'kultur' || next.category === 'events' || next.category === 'reisen' || next.category === 'shopping') && FOOD_SIGNAL_PATTERN.test(combinedText)) {
@@ -129,6 +183,29 @@ function normalizeSocialDeal(deal) {
   }
 
   return next;
+}
+
+function inferSocialPubDateSource(deal) {
+  if (!isSocialUrl(deal.url)) return '';
+  const existing = cleanText(deal.pubDateSource || '');
+  if (existing) return existing;
+
+  const signal = cleanText([deal.originSource, deal.source, deal.url].filter(Boolean).join(' ')).toLowerCase();
+  if (!deal.pubDate) return '';
+  if (signal.includes('firecrawl food #3')) return 'firecrawlAgentRun';
+  if (signal.includes('instagram discovery')) return 'profileTimeline';
+  if (
+    signal.includes('firecrawl key 3') ||
+    signal.includes('firecrawl consumables') ||
+    signal.includes('firecrawl instagram direct #4') ||
+    signal.includes('firecrawl instagram gastro #5') ||
+    signal.includes('instagram web') ||
+    signal.includes('instagram daily sync')
+  ) {
+    return 'socialPostDate';
+  }
+  if (deal.slackTs) return 'slackImported';
+  return 'derivedPubDate';
 }
 
 function stripSiteSuffix(value) {
@@ -201,6 +278,14 @@ function cleanText(value) {
     .replace(/&amp;/gi, '&')
     .replace(/&quot;/gi, '"')
     .replace(/&#39;/gi, "'")
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => {
+      const code = Number.parseInt(hex, 16);
+      return Number.isFinite(code) ? String.fromCodePoint(code) : '';
+    })
+    .replace(/&#(\d+);/g, (_, num) => {
+      const code = Number.parseInt(num, 10);
+      return Number.isFinite(code) ? String.fromCodePoint(code) : '';
+    })
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -303,8 +388,7 @@ async function main() {
   let urlVerifiedExpiryHits = 0;
   let expiredByVerifiedDateRemovals = 0;
   let contentEnrichments = 0;
-  let socialPubDateSourceRemovals = 0;
-  let giveawayRemovals = 0;
+  let socialPubDateSourceFixes = 0;
   let socialPolishFixes = 0;
 
   function markRemoved(deal, reason) {
@@ -354,13 +438,20 @@ async function main() {
       title: deal.title,
       description: deal.description,
       category: deal.category,
+      pubDateSource: deal.pubDateSource,
     });
     deal = normalizeSocialDeal(deal);
+    const inferredPubDateSource = inferSocialPubDateSource(deal);
+    if (inferredPubDateSource && inferredPubDateSource !== cleanText(deal.pubDateSource || '')) {
+      deal.pubDateSource = inferredPubDateSource;
+      socialPubDateSourceFixes += 1;
+    }
     const afterPolish = JSON.stringify({
       brand: deal.brand,
       title: deal.title,
       description: deal.description,
       category: deal.category,
+      pubDateSource: deal.pubDateSource,
     });
     if (beforePolish !== afterPolish) {
       socialPolishFixes += 1;
@@ -418,18 +509,12 @@ async function main() {
           deal = polished;
           socialPolishFixes += 1;
         }
+        const enrichedPubDateSource = inferSocialPubDateSource(deal);
+        if (enrichedPubDateSource && enrichedPubDateSource !== cleanText(deal.pubDateSource || '')) {
+          deal.pubDateSource = enrichedPubDateSource;
+          socialPubDateSourceFixes += 1;
+        }
       }
-    }
-
-    if (isSocialUrl(deal.url) && !cleanText(deal.pubDateSource || '')) {
-      socialPubDateSourceRemovals += 1;
-      markRemoved(deal, 'Social-Deal ohne verifizierte Datumsquelle');
-      continue;
-    }
-    if (deal.type === 'gewinnspiel' || GIVEAWAY_PATTERN.test(`${deal.title || ''} ${deal.description || ''}`)) {
-      giveawayRemovals += 1;
-      markRemoved(deal, 'Gewinnspiel nicht im Standard-Feed');
-      continue;
     }
     if (isGenericJunkDeal(deal)) {
       markRemoved(deal, 'Generischer Junk-Deal');
@@ -541,8 +626,7 @@ async function main() {
     removedCount: removed.length,
     brokenLinkRemovals,
     expiredByVerifiedDateRemovals,
-    socialPubDateSourceRemovals,
-    giveawayRemovals,
+    socialPubDateSourceFixes,
     linkChecksUsed,
     maxLinkChecks: MAX_LIVE_URL_HEALTH_CHECKS,
     expiryUrlChecksUsed,
@@ -558,8 +642,7 @@ async function main() {
   console.log(`Normalized live deals: ${remaining.length}`);
   console.log(`Removed deals: ${removed.length}`);
   console.log(`Broken link removals: ${brokenLinkRemovals}`);
-  console.log(`Social deals removed without pubDateSource: ${socialPubDateSourceRemovals}`);
-  console.log(`Giveaways removed from main feed: ${giveawayRemovals}`);
+  console.log(`Social pubDateSource fixes applied: ${socialPubDateSourceFixes}`);
   console.log(`Link health checks: ${linkChecksUsed}/${MAX_LIVE_URL_HEALTH_CHECKS}`);
   console.log(`Expiry refresh checks: ${expiryUrlChecksUsed}/${MAX_LIVE_URL_EXPIRY_REFRESHES}`);
   console.log(`Expiry dates refreshed from URL: ${urlVerifiedExpiryHits}`);
