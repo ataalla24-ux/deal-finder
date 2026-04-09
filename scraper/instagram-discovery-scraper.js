@@ -323,14 +323,18 @@ function sourcePerformanceScore(stat) {
 
 function shouldSkipWeakSource(source, stat) {
   if (!stat) return false;
-  if (source.kind === 'account') return false;
   const runs = Number(stat.runs || 0);
   const hits = Number(stat.acceptedDeals || 0);
   const links = Number(stat.totalLinks || 0);
+  const linksPerRun = runs > 0 ? links / runs : 0;
+  if (source.kind === 'account' || source.kind === 'account-api') {
+    if (runs < 8) return false;
+    if (hits > 0) return false;
+    return linksPerRun < 3;
+  }
   if (runs < 7) return false;
   if (hits === 0) return true;
   const hitRate = hits / runs;
-  const linksPerRun = links / runs;
   return hitRate < 0.25 && linksPerRun < 10;
 }
 
@@ -802,6 +806,35 @@ function buildInstagramApiHeaders(cookieHeader, referer = 'https://www.instagram
   };
 }
 
+async function fetchInstagramJsonInBrowser(page, url, referer) {
+  if (!page || !url) return null;
+  try {
+    const result = await page.evaluate(async ({ url, referer }) => {
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          credentials: 'include',
+          referrer: referer,
+          headers: {
+            'X-IG-App-ID': '936619743392459',
+            'X-Requested-With': 'XMLHttpRequest',
+            Accept: '*/*',
+          },
+        });
+        const text = await response.text();
+        return { ok: response.ok, status: response.status, text };
+      } catch (error) {
+        return { ok: false, status: 0, text: '', error: String(error?.message || error || '') };
+      }
+    }, { url, referer });
+
+    if (!result?.ok || !result?.text) return null;
+    return JSON.parse(result.text);
+  } catch {
+    return null;
+  }
+}
+
 async function fetchInstagramProfile(username, cookieHeader) {
   if (!username || !cookieHeader) return null;
   try {
@@ -809,6 +842,17 @@ async function fetchInstagramProfile(username, cookieHeader) {
     const response = await fetch(url, { headers: buildInstagramApiHeaders(cookieHeader, `https://www.instagram.com/${encodeURIComponent(username)}/`) });
     if (!response.ok) return null;
     const parsed = await response.json();
+    return parsed?.data?.user || null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchInstagramProfileInBrowser(page, username) {
+  if (!page || !username) return null;
+  try {
+    const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
+    const parsed = await fetchInstagramJsonInBrowser(page, url, `https://www.instagram.com/${encodeURIComponent(username)}/`);
     return parsed?.data?.user || null;
   } catch {
     return null;
@@ -828,11 +872,13 @@ function extractAccountUsernameFromSource(source) {
   return '';
 }
 
-async function fetchAccountTimelineLinksFromApi(username, cookieHeader) {
+async function fetchAccountTimelineLinksFromApi(username, cookieHeader, page = null) {
   const normalized = cleanText(username).toLowerCase();
-  if (!normalized || !cookieHeader) return [];
+  if (!normalized) return [];
   try {
-    const user = await fetchInstagramProfile(normalized, cookieHeader);
+    const user = page
+      ? await fetchInstagramProfileInBrowser(page, normalized)
+      : await fetchInstagramProfile(normalized, cookieHeader);
     const edges = Array.isArray(user?.edge_owner_to_timeline_media?.edges)
       ? user.edge_owner_to_timeline_media.edges
       : [];
@@ -884,10 +930,9 @@ function buildInstagramPostUrl(node) {
   return `https://www.instagram.com/${pathKind}/${shortcode}/`;
 }
 
-async function collectDealsFromAccountApi(sourceStats) {
-  const cookieHeader = buildCookieHeader();
-  if (!cookieHeader) {
-    console.log('ℹ️ account API path skipped: no Instagram cookies available');
+async function collectDealsFromAccountApi(sourceStats, page) {
+  if (!page) {
+    console.log('ℹ️ account API path skipped: no browser page available');
     return null;
   }
 
@@ -909,38 +954,6 @@ async function collectDealsFromAccountApi(sourceStats) {
       priority: 3 + priorityBoost,
       discoveredBy: ['seed-account'],
     });
-  }
-
-  for (const query of ACCOUNT_SEARCH_QUERIES) {
-    const results = await fetchInstagramAccountSearch(query, cookieHeader);
-    console.log(`🔎 account search "${query}" → ${results.length} profiles`);
-    for (const account of results) {
-      const username = cleanText(account?.username).toLowerCase();
-      if (!username) continue;
-      if (!looksLikeDiscoveryAccount({
-        username,
-        fullName: account?.fullName,
-        biography: account?.biography,
-        hitCount: seedAccounts.has(username) ? 2 : 1,
-      })) {
-        continue;
-      }
-      const existing = seedAccounts.get(username) || {
-        kind: 'search-account-api',
-        key: `acct:${username}`,
-        username,
-        priority: 2,
-        discoveredBy: [],
-      };
-      existing.discoveredBy = [...new Set([...(existing.discoveredBy || []), `search:${query}`])];
-      if (account?.isVerified) existing.priority = Math.max(existing.priority || 1, 3);
-      const merchant = merchantPriorities.get(username);
-      if (merchant) {
-        const priorityBoost = Math.max(0, Math.min(3, Math.floor((merchant.priorityScore || merchant.confidence || 0) / 25)));
-        existing.priority = Math.max(existing.priority || 1, 2 + priorityBoost);
-      }
-      seedAccounts.set(username, existing);
-    }
   }
 
   console.log(`🧠 account API seed queue: ${seedAccounts.size} accounts`);
@@ -980,12 +993,14 @@ async function collectDealsFromAccountApi(sourceStats) {
     runStat.kind = source.kind;
     runStat.lastSeenAt = new Date().toISOString();
 
-    const user = await fetchInstagramProfile(source.username, cookieHeader);
+    console.log(`🔎 api source ${source.key}`);
+    const user = await fetchInstagramProfileInBrowser(page, source.username);
     if (!user) continue;
 
     const timelineEdges = Array.isArray(user.edge_owner_to_timeline_media?.edges)
       ? user.edge_owner_to_timeline_media.edges
       : [];
+    console.log(`   ↳ timeline links: ${timelineEdges.length}`);
     runStat.links += timelineEdges.length;
 
     const relatedEdges = Array.isArray(user.edge_related_profiles?.edges)
@@ -1385,24 +1400,6 @@ async function scrapeInstagramDiscovery() {
   CONFIG = buildConfig();
   const sourceStats = loadSourceStats();
 
-  const apiResult = await collectDealsFromAccountApi(sourceStats);
-  if (apiResult && apiResult.deals.length > 0) {
-    console.log(`🧠 account API discovery: sources=${apiResult.visitedSources}, candidates=${apiResult.totalCandidates}, rawDeals=${apiResult.deals.length}`);
-    return finalizeDiscoveryRun({
-      sourceStats,
-      sourceRunStats: apiResult.sourceRunStats,
-      candidateSnapshot: apiResult.candidateSnapshot,
-      visitedSources: apiResult.visitedSources,
-      totalCandidates: apiResult.totalCandidates,
-      visitedPosts: apiResult.visitedPosts,
-      rawDeals: apiResult.deals,
-      mode: apiResult.mode,
-    });
-  }
-  if (apiResult) {
-    console.log('ℹ️ account API path produced 0 deals; falling back to browser discovery');
-  }
-
   let browser;
   try {
     const { chromium } = await import('playwright');
@@ -1442,6 +1439,28 @@ async function scrapeInstagramDiscovery() {
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
     });
+
+    await page.goto('https://www.instagram.com/', { waitUntil: 'domcontentloaded', timeout: 25000 });
+    await page.waitForTimeout(1800);
+    await dismissInstagramOverlays(page);
+
+    const apiResult = await collectDealsFromAccountApi(sourceStats, page);
+    if (apiResult && apiResult.deals.length > 0) {
+      console.log(`🧠 account API discovery: sources=${apiResult.visitedSources}, candidates=${apiResult.totalCandidates}, rawDeals=${apiResult.deals.length}`);
+      return finalizeDiscoveryRun({
+        sourceStats,
+        sourceRunStats: apiResult.sourceRunStats,
+        candidateSnapshot: apiResult.candidateSnapshot,
+        visitedSources: apiResult.visitedSources,
+        totalCandidates: apiResult.totalCandidates,
+        visitedPosts: apiResult.visitedPosts,
+        rawDeals: apiResult.deals,
+        mode: apiResult.mode,
+      });
+    }
+    if (apiResult) {
+      console.log('ℹ️ account API path produced 0 deals; falling back to browser discovery');
+    }
 
     const sourcesQueue = buildSources(sourceStats);
     const processedSourceKeys = new Set();
@@ -1532,7 +1551,7 @@ async function scrapeInstagramDiscovery() {
         let links = [...sourceLinks].filter(Boolean).slice(0, CONFIG.perSourceLinksLimit);
         if (links.length < 10 && (source.kind === 'account' || source.kind === 'related-account')) {
           const username = extractAccountUsernameFromSource(source);
-          const apiLinks = await fetchAccountTimelineLinksFromApi(username, cookieHeader);
+          const apiLinks = await fetchAccountTimelineLinksFromApi(username, cookieHeader, page);
           if (apiLinks.length > 0) {
             links = [...new Set([...links, ...apiLinks])].slice(0, CONFIG.perSourceLinksLimit);
           }
