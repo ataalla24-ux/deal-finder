@@ -1,6 +1,6 @@
 // ============================================
-// 🍔🔥 FIRECRAWL FOOD & DRINK AGENT #3
-// Spezialisiert auf Food & Drink Deals von Instagram & TikTok
+// 🍔🔥 FIRECRAWL FOOD AGENT #2
+// Fokus: Instagram-Angebote für Essen & Getränke in Wien
 // ============================================
 
 import Firecrawl from '@mendable/firecrawl-js';
@@ -16,306 +16,163 @@ if (!FIRECRAWL_API_KEY) {
 
 const firecrawl = new Firecrawl({ apiKey: FIRECRAWL_API_KEY });
 
-async function runAgent(payload) {
-  return firecrawl.agent(payload);
+const schema = z.object({
+  offers: z.array(z.object({
+    provider_name: z.string(),
+    provider_name_citation: z.string().optional(),
+    product_type: z.string(),
+    product_type_citation: z.string().optional(),
+    location: z.string(),
+    location_citation: z.string().optional(),
+    times: z.string(),
+    times_citation: z.string().optional(),
+    participation_conditions: z.string(),
+    participation_conditions_citation: z.string().optional(),
+    offer_type: z.string(),
+    offer_type_citation: z.string().optional(),
+    post_url: z.string(),
+    post_url_citation: z.string().optional(),
+  })).default([]),
+});
+
+function normalizeText(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
 }
 
-function isRateOrCreditError(message) {
-  const m = (message || '').toLowerCase();
-  return m.includes('insufficient credits') || m.includes('rate limit exceeded');
-}
-
-function isInstagramUrl(url) {
-  return (url || '').includes('instagram.com');
-}
-
-// ============================================
-// STABILE DEAL-ID (Hash statt Date.now/random)
-// ============================================
 function stableHash(str) {
   let hash = 5381;
-  for (let i = 0; i < str.length; i++) {
+  for (let i = 0; i < str.length; i += 1) {
     hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
-    hash = hash >>> 0;
+    hash >>>= 0;
   }
   return hash.toString(36);
 }
+
 function dealId(prefix, brand, title, url) {
-  const key = (brand || '') + '|' + (title || '') + '|' + (url || '');
-  return prefix + '-' + stableHash(key);
+  return `${prefix}-${stableHash(`${brand}|${title}|${url}`)}`;
 }
 
-// ============================================
-// SEITEN - Instagram & TikTok
-// ============================================
-
-const SCRAPE_URLS = [
-  'https://www.instagram.com/explore/tags/gratiswien/',
-  'https://www.instagram.com/explore/tags/wienfood/',
-  'https://www.instagram.com/explore/tags/kaffeewien/',
-];
-
-// ============================================
-// SCHEMA
-// ============================================
-
-const foodSchema = z.object({
-  food_and_drink_offers: z.array(z.object({
-    offer_type: z.string(),
-    offer_type_citation: z.string().optional(),
-    description: z.string(),
-    description_citation: z.string().optional(),
-    discount_value: z.string(),
-    discount_value_citation: z.string().optional(),
-    location: z.string(),
-    location_citation: z.string().optional(),
-    platform_source: z.string(),
-    platform_source_citation: z.string().optional(),
-    start_date: z.string(),
-    start_date_citation: z.string().optional(),
-    end_date: z.string(),
-    end_date_citation: z.string().optional(),
-    source_url: z.string(),
-    source_url_citation: z.string().optional(),
-  })),
-});
-
-// ============================================
-// PROMPT
-// ============================================
-
-const TODAY = new Date().toLocaleDateString('de-AT');
-const CUTOFF = new Date(Date.now() - 14*24*60*60*1000).toLocaleDateString('de-AT');
-
-const PROMPT = `Heute ist ${TODAY}.
-WICHTIG: Ignoriere ALLE Posts und Angebote die älter als 14 Tage sind. Nur Deals die nach dem ${CUTOFF} gepostet wurden.
-
-Extrahiere aktuelle und zukünftige Angebote für kostenlose oder stark vergünstigte Speisen und Getränke in Wien von Instagram und TikTok. Berücksichtige:
-1. Kostenlose Angebote (Neueröffnungen, Treueaktionen, Story-Deals)
-2. 'Buy One Get One Free' (BOGO) Aktionen
-3. Rabatte von mindestens 30%
-
-Schließe Angebote aus, die bereits abgelaufen sind.
-
-Suche systematisch nach verschiedenen Kategorien (z.B. Cafés, Streetfood, Restaurants, Bars).
-
-WICHTIG: Jede 'source_url' darf nur genau einmal in der Liste vorkommen. Entferne alle Duplikate basierend auf der URL, auch wenn dadurch die Gesamtzahl von 100 Deals nicht erreicht wird.
-
-Gib alle Ergebnisse in einer einzigen Liste aus.`;
-
-// ============================================
-// EMOJI-FUNKTION
-// ============================================
-function getEmoji(deal) {
-  const text = `${deal.title || ''} ${deal.description || ''} ${deal.offer_type || ''} ${deal.category || ''}`.toLowerCase();
-  const emojiMap = [
-    [/kaffee|coffee|latte/, '☕'], [/pizza/, '🍕'], [/burger/, '🍔'], [/kebab|döner|falafel/, '🥙'],
-    [/sushi/, '🍣'], [/eis|gelato/, '🍦'], [/bier|beer/, '🍺'], [/wein|wine/, '🍷'],
-    [/cocktail|drink/, '🍸'], [/restaurant|essen|food/, '🍽️'], [/gratis|free|kostenlos/, '🎁'],
-    [/fitness|gym/, '💪'], [/kino|film|konzert/, '🎬'], [/museum|kultur/, '🏛️'],
-    [/eintritt/, '🎟️'], [/gutschein|rabatt|sale/, '🏷️'], [/shop|shopping/, '🛍️'],
-    [/supermarkt/, '🛒'], [/beauty|kosmetik/, '💄'], [/tech|handy/, '📱'],
-  ];
-  for (const [regex, emoji] of emojiMap) if (regex.test(text)) return emoji;
-  return '🎯';
+function isInstagramPostUrl(url) {
+  return /^https?:\/\/(www\.)?instagram\.com\/(p|reel)\//i.test(normalizeText(url));
 }
 
-function getCategory(deal) {
-  // Source-basierte Kategorie
-  const source = (deal.source || '').toLowerCase();
-  if (source.includes('kirchen') || source.includes('kirche')) return 'kirche';
-  if (source.includes('gemeinde')) return 'kirche';
-  if (source.includes('gottesdienst')) return 'gottesdienste';
-  
-  // Text-basierte Kategorie
-  const text = `${deal.title || ''} ${deal.description || ''} ${deal.offer_type || ''}`.toLowerCase();
-  const map = [
-    [/kaffee|coffee|latte/, 'kaffee'],
-    [/pizza|burger|kebab|döner|falafel|sushi|eis|restaurant|imbiss|bier|wein|cocktail|food|meal|essen/, 'essen'],
-    [/gratis|free|kostenlos/, 'gratis'],
-    [/fitness|gym|workout|sport/, 'fitness'],
-    [/kino|film|konzert|event|eintritt|ticket/, 'events'],
-    [/museum|ausstellung|kultur/, 'kultur'],
-    [/gutschein|rabatt|sale|shopping|shop/, 'shopping'],
-    [/supermarkt/, 'supermarkt'],
-    [/beauty|kosmetik|parfum|dm|bipa/, 'beauty'],
-    [/tech|handy|laptop|elektronik/, 'technik'],
-    [/streaming|netflix|spotify/, 'streaming'],
-    [/möbel|wohnung/, 'wohnen'],
-    [/fahrrad|rad/, 'mobilität'],
-    [/zug|bahn|öbb/, 'mobilität'],
-    [/flug|hotel|urlaub/, 'reisen'],
-    [/wien|vienna/, 'wien'],
-  ];
-  for (const [regex, cat] of map) if (regex.test(text)) return cat;
+function looksVienna(text) {
+  return /(wien|vienna|\b10\d{2}\b|\b11\d{2}\b|\b12\d{2}\b)/i.test(text);
+}
+
+function inferType(offerType, details) {
+  const haystack = `${normalizeText(offerType)} ${normalizeText(details)}`;
+  if (/(gewinnspiel|giveaway|verlosung|zu gewinnen|tagge|markiere|kommentiere.*gewinn)/i.test(haystack)) {
+    return 'event';
+  }
+  if (/(1\s*\+\s*1|2\s*für\s*1|2 for 1|buy one get one|bogo)/i.test(haystack)) {
+    return 'bogo';
+  }
+  if (/(gratis|kostenlos|free|umsonst|0 ?€)/i.test(haystack)) {
+    return 'gratis';
+  }
+  return 'rabatt';
+}
+
+function inferCategory(productType, details) {
+  const haystack = `${normalizeText(productType)} ${normalizeText(details)}`;
+  if (/(kaffee|coffee|espresso|latte|cappuccino|tee|matcha|drink|getränk|getraenk|smoothie|saft|cocktail|spritz|bier|beer|wein|wine)/i.test(haystack)) {
+    return 'kaffee';
+  }
   return 'essen';
 }
 
-// ============================================
-// DATUM-FILTER: Abgelaufene Deals rausfiltern
-// ============================================
-function parseGermanDate(str) {
-  if (!str || typeof str !== 'string') return null;
-  str = str.trim();
-  if (/^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend)/i.test(str)) return null;
-  let m = str.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
-  if (m) return new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
-  m = str.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-  if (m) return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
-  m = str.match(/(\d{1,2})\.(\d{1,2})\./);
-  if (m) return new Date(new Date().getFullYear(), parseInt(m[2])-1, parseInt(m[1]));
-  return null;
+function getEmoji(category, type, text) {
+  if (type === 'bogo') return '1+1';
+  if (type === 'event') return '🎉';
+  if (category === 'kaffee') return '☕';
+  if (/pizza/i.test(text)) return '🍕';
+  if (/burger/i.test(text)) return '🍔';
+  if (/kebab|döner|doener|falafel/i.test(text)) return '🥙';
+  if (/eis|gelato/i.test(text)) return '🍦';
+  return type === 'gratis' ? '🎁' : '🍽️';
 }
-
-function isExpiredDeal(deal) {
-  const now = new Date();
-  const fields = [deal.validity_date, deal.end_date, deal.expires].filter(Boolean);
-  for (const f of fields) {
-    const d = parseGermanDate(f);
-    if (d && d < now) return true;
-  }
-  return false;
-}
-
-function isNotTooOld(dateObj) {
-  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return true;
-  const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
-  return dateObj.getTime() >= twoWeeksAgo;
-}
-
-// ============================================
-// MAIN
-// ============================================
 
 async function main() {
-  console.log('🍔🔥 FIRECRAWL FOOD & DRINK AGENT #3');
+  console.log('🍔🔥 FIRECRAWL FOOD AGENT #2');
   console.log('='.repeat(40));
   console.log(`📅 ${new Date().toLocaleString('de-AT')}`);
   console.log();
 
-  const allDeals = [];
+  const result = await firecrawl.agent({
+    prompt: "Extrahiere aktuelle Angebote für kostenloses Essen und Getränke in Wien von Instagram, die maximal 7 Tage alt sind. Suche über relevante Hashtags und schließe sowohl Direktangebote als auch Gewinnspiele und 1+1 Gratis-Aktionen (Kaufzwang) ein. Erfasse Anbietername, Produktart, Standort, Uhrzeiten, Teilnahmebedingungen sowie die Unterscheidung zwischen Gewinnspiel und Direktangebot. Erfasse zwingend den direkten Link zum Instagram-Post im Feld 'post_url'. Es dürfen nur Instagram-Links (instagram.com/p/... oder instagram.com/reel/...) aufgenommen werden; ignoriere Angebote von anderen Plattformen wie TikTok oder News-Websites.",
+    schema,
+    model: 'spark-1-pro',
+  });
+
+  const rawOffers = result?.data?.offers || [];
+  console.log(`📦 Rohangebote: ${rawOffers.length}`);
+
   const seenUrls = new Set();
-  
-  console.log(`🔍 Scrape ${SCRAPE_URLS.length} Seiten (Instagram & TikTok)...`);
-  
-  for (let i = 0; i < SCRAPE_URLS.length; i++) {
-    const url = SCRAPE_URLS[i];
-    const source = new URL(url).hostname.replace('www.', '');
-    
-    console.log(`   [${i + 1}/${SCRAPE_URLS.length}] ${source}...`);
-    
-    try {
-      const result = await runAgent({
-        url: url,
-        prompt: PROMPT,
-        schema: foodSchema,
-        model: 'spark-1-pro',
-      });
-      
-      if (result && result.data) {
-        let data = result.data;
-        
-        if (typeof data === 'string') {
-          try {
-            data = JSON.parse(data);
-          } catch (e) {}
-        }
-        
-        if (data && data.food_and_drink_offers && Array.isArray(data.food_and_drink_offers)) {
-          console.log(`      → ${data.food_and_drink_offers.length} Angebote gefunden`);
-          
-          for (const d of data.food_and_drink_offers) {
-            const sourceUrl = d.source_url || '';
-            
-            // Skip duplicates
-            if (sourceUrl && seenUrls.has(sourceUrl)) {
-              console.log(`      → Duplikat übersprungen: ${sourceUrl.substring(0, 30)}...`);
-              continue;
-            }
-            if (sourceUrl) seenUrls.add(sourceUrl);
-            if (!sourceUrl) continue;
-            
-            const isGratis = /gratis|kostenlos|free|0€|0 €|umsonst/i.test(d.offer_type || d.description || '');
-            const isBogo = /bogo|buy one|get one|2 for/i.test(d.description || '');
-            const inferredDate = parseGermanDate(d.start_date || d.end_date || '');
-            if (!isNotTooOld(inferredDate)) continue;
-            const brand = d.platform_source || source;
-            const title = d.offer_type?.substring(0, 60) || 'Food Deal';
-            const pubDate = inferredDate ? inferredDate.toISOString() : new Date().toISOString();
-            
-            allDeals.push({
-              id: dealId('food3', brand, title, sourceUrl),
-              brand,
-              title,
-              logo: getEmoji({ title: d.offer_type, description: d.description, category: 'essen' }),
-              description: d.description || `${d.offer_type} - ${d.location}`,
-              type: isGratis ? 'gratis' : (isBogo ? 'bogo' : 'rabatt'),
-              category: getCategory({ title: d.offer_type, description: d.description }),
-              source: 'Firecrawl Food #3',
-              url: sourceUrl,
-              expires: d.end_date || 'Unbekannt',
-              distance: d.location || 'Wien',
-              hot: true,
-              isNew: true,
-              priority: isGratis ? 2 : 4,
-              votes: 1,
-              qualityScore: 65,
-              pubDate,
-            });
-          }
-        } else {
-          console.log(`      → Keine strukturierten Angebote`);
-        }
-      }
-    } catch (e) {
-      console.log(`      → Error: ${e.message}`);
-      if (isRateOrCreditError(e.message)) {
-        console.log('      → Stoppe Run frühzeitig wegen API-Limit/Credits');
-        break;
-      }
-    }
-    
-    await new Promise(r => setTimeout(r, 2000));
+  const deals = [];
+
+  for (const offer of rawOffers) {
+    const providerName = normalizeText(offer.provider_name) || 'Instagram';
+    const productType = normalizeText(offer.product_type);
+    const location = normalizeText(offer.location) || 'Wien';
+    const times = normalizeText(offer.times);
+    const conditions = normalizeText(offer.participation_conditions);
+    const offerTypeText = normalizeText(offer.offer_type);
+    const postUrl = normalizeText(offer.post_url);
+    const combined = `${providerName} ${productType} ${location} ${times} ${conditions} ${offerTypeText}`;
+
+    if (!postUrl || !isInstagramPostUrl(postUrl)) continue;
+    if (seenUrls.has(postUrl)) continue;
+    if (!looksVienna(combined)) continue;
+
+    seenUrls.add(postUrl);
+
+    const type = inferType(offerTypeText, `${productType} ${conditions}`);
+    const category = inferCategory(productType, `${offerTypeText} ${conditions}`);
+    const titleCore = productType || offerTypeText || 'Instagram-Angebot';
+    const title = `${providerName}: ${titleCore}`.slice(0, 140);
+    const description = [offerTypeText, productType, location, times, conditions]
+      .filter(Boolean)
+      .join(' | ')
+      .slice(0, 400);
+
+    deals.push({
+      id: dealId('food3', providerName, title, postUrl),
+      brand: providerName,
+      title,
+      logo: getEmoji(category, type, `${title} ${description}`),
+      description: description || `${providerName} | ${location}`,
+      type,
+      category,
+      source: 'Firecrawl Food #2',
+      url: postUrl,
+      expires: times || 'Siehe Post',
+      distance: location,
+      hot: type === 'gratis' || type === 'bogo',
+      isNew: true,
+      priority: type === 'gratis' ? 2 : type === 'bogo' ? 3 : 4,
+      votes: 1,
+      qualityScore: type === 'gratis' ? 72 : type === 'bogo' ? 70 : 58,
+      pubDate: new Date().toISOString(),
+      pubDateSource: 'firecrawlAgentRun',
+    });
   }
 
-  console.log();
-  console.log('📊 ERGEBNIS:');
-  console.log(`   🔍 Seiten: ${SCRAPE_URLS.length}`);
-  console.log(`   📦 Deals: ${allDeals.length}`);
-  
-  // Filter abgelaufene Deals
-  const beforeFilter = allDeals.length;
-  const filteredDeals = allDeals.filter(d => !isExpiredDeal(d));
-  console.log(`🗑️ ${beforeFilter - filteredDeals.length} abgelaufene Deals entfernt`);
-
-// Deduplizierung nach URL
-    const dedupeUrls = new Set();
-    const dedupedDeals = filteredDeals.filter(d => {
-          const url = (d.url || '').trim();
-          if (!url || dedupeUrls.has(url)) return false;
-          dedupeUrls.add(url);
-          return true;
-    });
-    console.log(`🔄 ${filteredDeals.length - dedupedDeals.length} URL-Duplikate entfernt`);
-        const finalDeals = dedupedDeals.slice(0, 100);
-    console.log(`  ✅ Final: ${finalDeals.length}`);
-    console.log('='.repeat(40));
-  // Write to file
-  const outputPath = 'docs/deals-pending-food3.json';
   const output = {
     lastUpdated: new Date().toISOString(),
     source: 'firecrawl-food3',
-    totalDeals: finalDeals.length,
-    deals: finalDeals,
+    totalDeals: deals.length,
+    deals,
   };
-  
-  fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
-  console.log(`💾 ${finalDeals.length} Deals → ${outputPath}`);
+
+  fs.writeFileSync('docs/deals-pending-food3.json', JSON.stringify(output, null, 2));
+  console.log(`✅ Final: ${deals.length} Deals`);
+  console.log('💾 Deals → docs/deals-pending-food3.json');
 }
 
 main()
   .then(() => process.exit(0))
-  .catch(err => {
+  .catch((err) => {
     console.error('Error:', err.message);
     process.exit(1);
   });
