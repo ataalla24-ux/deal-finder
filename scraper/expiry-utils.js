@@ -684,6 +684,65 @@ function detectDeadLinkReason(html, options = {}) {
   return '';
 }
 
+function decodeHtmlEntities(value) {
+  return String(value || '')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&apos;/gi, "'")
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&#x2F;/gi, '/')
+    .replace(/&#x27;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>');
+}
+
+function cleanHtmlText(value) {
+  return decodeHtmlEntities(String(value || ''))
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractTitleFromHtml(html) {
+  const match = String(html || '').match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  return cleanHtmlText(match?.[1] || '');
+}
+
+function extractMetaTagContent(html, attrName, attrValue) {
+  const tags = String(html || '').match(/<meta\b[^>]*>/gi) || [];
+  const attrPattern = new RegExp(`${attrName}\\s*=\\s*["']${attrValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["']`, 'i');
+  for (const tag of tags) {
+    if (!attrPattern.test(tag)) continue;
+    const contentMatch = tag.match(/content\s*=\s*["']([^"']+)["']/i);
+    if (contentMatch?.[1]) return cleanHtmlText(contentMatch[1]);
+  }
+  return '';
+}
+
+function extractFirstHeading(html) {
+  const match = String(html || '').match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
+  return cleanHtmlText(match?.[1] || '');
+}
+
+function extractDealPageHints(html) {
+  const description =
+    extractMetaTagContent(html, 'property', 'og:description') ||
+    extractMetaTagContent(html, 'name', 'description') ||
+    extractMetaTagContent(html, 'name', 'twitter:description');
+
+  const title =
+    extractMetaTagContent(html, 'property', 'og:title') ||
+    extractMetaTagContent(html, 'name', 'twitter:title') ||
+    extractTitleFromHtml(html) ||
+    extractFirstHeading(html);
+
+  return {
+    title: cleanHtmlText(title),
+    description: cleanHtmlText(description),
+  };
+}
+
 export async function inspectDealUrlHealth(url, options = {}) {
   if (!url || typeof url !== 'string' || !/^https?:\/\//i.test(url)) {
     return { invalid: true, reason: 'Ungültige Ziel-URL' };
@@ -745,10 +804,13 @@ export async function inspectDealUrlHealth(url, options = {}) {
       };
     }
 
+    const contentHints = extractDealPageHints(html);
+
     return {
       invalid: false,
       status,
       finalUrl,
+      contentHints,
       checkedAt: new Date().toISOString(),
     };
   } catch {

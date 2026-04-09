@@ -41,6 +41,77 @@ const LEGACY_CHURCH_ID_PATTERNS = [
 
 const MAX_LIVE_URL_HEALTH_CHECKS = Number(process.env.MAX_LIVE_URL_HEALTH_CHECKS || 180);
 const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REFRESHES || 120);
+const MAX_LIVE_CONTENT_ENRICHMENTS = Number(process.env.MAX_LIVE_CONTENT_ENRICHMENTS || 120);
+const GENERIC_DESCRIPTION_PATTERN = /^(free|gratis|rabatt|discount|deal|angebot|aktion|promo|special|event|post|reel|instagram|coupon|gutschein|gewinnspiel|new|neu)$/i;
+
+function hasUsefulWords(text) {
+  const words = cleanText(text).split(/\s+/).filter(Boolean);
+  return words.length >= 3;
+}
+
+function stripSiteSuffix(value) {
+  const text = cleanText(value);
+  if (!text) return '';
+  return text
+    .replace(/\s+[|·•-]\s+(instagram|facebook|tiktok|x|twitter|threads)$/i, '')
+    .replace(/\s+[|·•-]\s+[^|·•-]{0,24}$/i, (suffix) => /\b(wien|vienna|gratis|free|deal|angebot|aktion|rezept|news|blog)\b/i.test(suffix) ? suffix : '')
+    .trim();
+}
+
+function isWeakDescription(value) {
+  const text = cleanText(value);
+  if (!text) return true;
+  if (GENERIC_DESCRIPTION_PATTERN.test(text)) return true;
+  if (text.length <= 16 && !hasUsefulWords(text)) return true;
+  if (/^(instagram|freefinder)\s*\/\s*(free|gratis|deal|angebot)$/i.test(text)) return true;
+  return false;
+}
+
+function isWeakTitle(value) {
+  const text = cleanText(value);
+  if (!text) return true;
+  if (GENERIC_DESCRIPTION_PATTERN.test(text)) return true;
+  return text.length <= 12 && !hasUsefulWords(text);
+}
+
+function normalizeHintText(value, maxLength = 180) {
+  const text = stripSiteSuffix(value)
+    .replace(/\b(jetzt|heute|aktuell|neu)\b/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  const shortened = text.slice(0, maxLength);
+  const lastSpace = shortened.lastIndexOf(' ');
+  return `${shortened.slice(0, lastSpace > 80 ? lastSpace : maxLength).trim()}...`;
+}
+
+function maybeEnrichDealCopy(deal, contentHints = {}) {
+  const hintTitle = normalizeHintText(contentHints.title || '', 120);
+  const hintDescription = normalizeHintText(contentHints.description || '', 180);
+  let changed = false;
+
+  if (isWeakDescription(deal.description)) {
+    const candidateDescription = [hintDescription, hintTitle]
+      .find((candidate) => candidate && !GENERIC_DESCRIPTION_PATTERN.test(candidate) && candidate.toLowerCase() !== cleanText(deal.description).toLowerCase());
+    if (candidateDescription) {
+      deal.description = candidateDescription;
+      changed = true;
+    }
+  }
+
+  if (isWeakTitle(deal.title)) {
+    const candidateTitle = [hintTitle, hintDescription]
+      .map((candidate) => normalizeHintText(candidate, 96))
+      .find((candidate) => candidate && !GENERIC_DESCRIPTION_PATTERN.test(candidate) && candidate.toLowerCase() !== cleanText(deal.title).toLowerCase());
+    if (candidateTitle) {
+      deal.title = candidateTitle;
+      changed = true;
+    }
+  }
+
+  return changed;
+}
 
 function cleanText(value) {
   if (!value) return '';
@@ -149,6 +220,7 @@ async function main() {
   let expiryUrlChecksUsed = 0;
   let urlVerifiedExpiryHits = 0;
   let expiredByVerifiedDateRemovals = 0;
+  let contentEnrichments = 0;
 
   function markRemoved(deal, reason) {
     removed.push({
@@ -234,6 +306,12 @@ async function main() {
       const finalUrl = normalizeUrlForCompare(health.finalUrl);
       if (finalUrl && finalUrl !== currentUrl) {
         deal.url = health.finalUrl;
+      }
+    }
+    if (health?.contentHints && contentEnrichments < MAX_LIVE_CONTENT_ENRICHMENTS) {
+      const enriched = maybeEnrichDealCopy(deal, health.contentHints);
+      if (enriched) {
+        contentEnrichments += 1;
       }
     }
 
@@ -352,6 +430,8 @@ async function main() {
     expiryUrlChecksUsed,
     maxExpiryUrlChecks: MAX_LIVE_URL_EXPIRY_REFRESHES,
     urlVerifiedExpiryHits,
+    contentEnrichments,
+    maxContentEnrichments: MAX_LIVE_CONTENT_ENRICHMENTS,
     removalReasons,
     removed: removed.slice(0, 200),
   }, null, 2) + '\n', 'utf8');
@@ -362,6 +442,7 @@ async function main() {
   console.log(`Link health checks: ${linkChecksUsed}/${MAX_LIVE_URL_HEALTH_CHECKS}`);
   console.log(`Expiry refresh checks: ${expiryUrlChecksUsed}/${MAX_LIVE_URL_EXPIRY_REFRESHES}`);
   console.log(`Expiry dates refreshed from URL: ${urlVerifiedExpiryHits}`);
+  console.log(`Descriptions enriched from target pages: ${contentEnrichments}/${MAX_LIVE_CONTENT_ENRICHMENTS}`);
 }
 
 main().catch((error) => {
