@@ -823,6 +823,39 @@ async function fetchInstagramProfile(username, cookieHeader) {
   }
 }
 
+function extractAccountUsernameFromSource(source) {
+  if (!source) return '';
+  if (source.kind === 'account' && typeof source.url === 'string') {
+    const parts = source.url.split('/').filter(Boolean);
+    return cleanText(parts[parts.length - 1]);
+  }
+  if (typeof source.key === 'string') {
+    const match = source.key.match(/^(?:acct|related):(.+)$/);
+    if (match) return cleanText(match[1]);
+  }
+  return '';
+}
+
+async function fetchAccountTimelineLinksFromApi(username, cookieHeader) {
+  const normalized = cleanText(username).toLowerCase();
+  if (!normalized || !cookieHeader) return [];
+  try {
+    const user = await fetchInstagramProfile(normalized, cookieHeader);
+    const edges = Array.isArray(user?.edge_owner_to_timeline_media?.edges)
+      ? user.edge_owner_to_timeline_media.edges
+      : [];
+    const links = new Set();
+    for (const edge of edges) {
+      const postUrl = buildInstagramPostUrl(edge?.node);
+      if (postUrl) links.add(postUrl);
+      if (links.size >= CONFIG.perSourceLinksLimit) break;
+    }
+    return [...links];
+  } catch {
+    return [];
+  }
+}
+
 async function fetchInstagramAccountSearch(query, cookieHeader) {
   if (!query || !cookieHeader) return [];
   try {
@@ -1387,6 +1420,7 @@ async function scrapeInstagramDiscovery() {
       args: ['--disable-blink-features=AutomationControlled', '--no-sandbox', '--disable-dev-shm-usage'],
     });
 
+    const cookieHeader = buildCookieHeader();
     const context = await browser.newContext({
       viewport: { width: 1366, height: 900 },
       userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -1504,6 +1538,13 @@ async function scrapeInstagramDiscovery() {
         }
 
         let links = [...sourceLinks].filter(Boolean).slice(0, CONFIG.perSourceLinksLimit);
+        if (links.length < 10 && (source.kind === 'account' || source.kind === 'related-account')) {
+          const username = extractAccountUsernameFromSource(source);
+          const apiLinks = await fetchAccountTimelineLinksFromApi(username, cookieHeader);
+          if (apiLinks.length > 0) {
+            links = [...new Set([...links, ...apiLinks])].slice(0, CONFIG.perSourceLinksLimit);
+          }
+        }
         if (links.length < 6) {
           const mirror = await fetchMirrorText(source.url);
           links = [...new Set([...links, ...extractPostUrls(mirror)])].slice(0, CONFIG.perSourceLinksLimit);
