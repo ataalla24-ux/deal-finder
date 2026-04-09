@@ -611,15 +611,17 @@
         .nav-badge { position: absolute; top: 4px; right: 10px; background: #ef4444; color: white; font-size: 9px; padding: 1px 5px; border-radius: 999px; font-weight: 800; box-shadow: 0 4px 10px rgba(239,68,68,0.24); }
     
   /* ===== PRO MEMBERSHIP SYSTEM ===== */
-  .pro-banner { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #8b5cf6 100%); border-radius: 16px; padding: 16px; margin-bottom: 16px; color: white; cursor: pointer; position: relative; overflow: hidden; }
-  .pro-banner::before { content: ''; position: absolute; top: -50%; right: -20%; width: 60%; height: 200%; background: rgba(255,255,255,0.08); transform: rotate(15deg); pointer-events: none; }
-  .pro-banner-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-  .pro-crown { font-size: 36px; }
-  .pro-banner-title { font-size: 20px; font-weight: 800; }
-  .pro-banner-sub { font-size: 13px; opacity: 0.9; }
-  .pro-features-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
-  .pro-feature-item { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 8px 10px; font-size: 12px; display: flex; align-items: center; gap: 6px; font-weight: 600; }
-  .pro-unlock-btn { width: 100%; background: white; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; color: #7c3aed; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .pro-banner { background: linear-gradient(135deg, #ff834f 0%, #ff6b57 46%, #ff5f79 100%); border-radius: 22px; padding: 18px; margin-bottom: 18px; color: white; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 18px 34px rgba(251, 104, 84, 0.24); }
+  .pro-banner::before { content: ''; position: absolute; inset: auto -10% -35% auto; width: 180px; height: 180px; background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 68%); pointer-events: none; }
+  .pro-banner::after { content: ''; position: absolute; inset: 0; border-radius: 22px; border: 1px solid rgba(255,255,255,0.18); pointer-events: none; }
+  .pro-banner-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; position: relative; z-index: 1; }
+  .pro-crown { font-size: 34px; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12); flex-shrink: 0; }
+  .pro-banner-kicker { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.84; margin-bottom: 4px; }
+  .pro-banner-title { font-size: 24px; line-height: 1.05; font-weight: 900; margin-bottom: 6px; }
+  .pro-banner-sub { font-size: 13px; line-height: 1.45; opacity: 0.92; max-width: 280px; }
+  .pro-features-list { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin: 14px 0 16px; position: relative; z-index: 1; }
+  .pro-feature-item { background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.16); border-radius: 14px; padding: 11px 12px; font-size: 12px; line-height: 1.3; display: flex; align-items: center; gap: 7px; font-weight: 700; box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); min-height: 48px; }
+  .pro-unlock-btn { width: 100%; background: white; border: none; padding: 14px 16px; border-radius: 14px; font-weight: 900; font-size: 15px; cursor: pointer; color: #ef5f52; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 10px 18px rgba(120, 36, 22, 0.14); position: relative; z-index: 1; }
   .pro-unlock-btn:hover { transform: scale(1.02); }
   .pro-badge { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
   .pro-active-badge { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; margin-left: auto; }
@@ -1424,6 +1426,7 @@
     <div class="pro-banner-header">
       <div class="pro-crown">👑</div>
       <div>
+        <div class="pro-banner-kicker">FreeFinder PRO</div>
         <div class="pro-banner-title">Werde PRO – Kostenlos!</div>
         <div class="pro-banner-sub">2 bestätigte Einladungen → Deal-Alarme, Standortfilter und dein smarter Spartracker.</div>
       </div>
@@ -1876,14 +1879,14 @@
                 savingsGoal: 'Ziel: €50',
                 savingsLockTitle: 'Nur für PRO Mitglieder',
                 savingsLockSubtitle: 'Schalte den Spar-Tracker frei und sieh deine echten Einlösungen.',
-                proBannerTitle: 'Werde PRO – Kostenlos!',
-                proBannerSub: '2 bestätigte Einladungen → Deal-Alarme, Standortfilter und dein smarter Spartracker.',
-                proFeature1: '🔒 Deal des Tages Alarm',
-                proFeature2: '🔒 Personalisierte Alerts',
-                proFeature3: '🔒 Standort-Filter',
-                proFeature4: '🔒 Spartracker & Jahresübersicht',
-                proFeature5: '🔒 Smarteres Für dich',
-                proUnlockButton: '🚀 Jetzt PRO werden – Gratis!',
+                proBannerTitle: 'Werde PRO kostenlos',
+                proBannerSub: '2 bestätigte Einladungen reichen und du schaltest die stärksten Vorteile direkt frei.',
+                proFeature1: '⭐ Deal des Tages zuerst',
+                proFeature2: '🧠 Personalisierte Alerts',
+                proFeature3: '📍 Standort-Filter',
+                proFeature4: '💰 Spartracker & Jahresübersicht',
+                proFeature5: '✨ Smarteres Für dich',
+                proUnlockButton: 'PRO gratis freischalten',
                 proActiveText: 'Du bist PRO-Mitglied!',
                 savingsProTitle: '💰 Spar-Tracker PRO',
                 savingsProYearText: 'diesen Monat gespart',
@@ -2109,14 +2112,14 @@
                 savingsGoal: 'Goal: €50',
                 savingsLockTitle: 'PRO members only',
                 savingsLockSubtitle: 'Unlock the savings tracker and see your real redemptions.',
-                proBannerTitle: 'Go PRO for free!',
-                proBannerSub: '2 confirmed invites → deal alerts, location filters and your smart savings tracker.',
-                proFeature1: '🔒 Deal of the day alert',
-                proFeature2: '🔒 Personalized alerts',
-                proFeature3: '🔒 Location filter',
-                proFeature4: '🔒 Savings tracker & yearly overview',
-                proFeature5: '🔒 Smarter For You',
-                proUnlockButton: '🚀 Unlock PRO for free!',
+                proBannerTitle: 'Unlock PRO for free',
+                proBannerSub: 'Two confirmed invites are enough to unlock the strongest features right away.',
+                proFeature1: '⭐ Deal of the day first',
+                proFeature2: '🧠 Personalized alerts',
+                proFeature3: '📍 Location filter',
+                proFeature4: '💰 Savings tracker & yearly overview',
+                proFeature5: '✨ Smarter For You',
+                proUnlockButton: 'Unlock PRO for free',
                 proActiveText: 'You are a PRO member!',
                 savingsProTitle: '💰 PRO savings tracker',
                 savingsProYearText: 'saved this month',
