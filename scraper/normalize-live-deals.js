@@ -4,6 +4,9 @@ import { fileURLToPath } from 'node:url';
 
 import { inspectDealUrlHealth, normalizeDealExpiry, shouldSkipUrlExpiryLookup } from './expiry-utils.js';
 import {
+  buildFallbackDescription,
+  cleanUiNoiseText,
+  inferPreferredBrand,
   isExpiredDealRecord,
   isFalsePositiveFreeDeal,
   isGenericJunkDeal,
@@ -43,10 +46,89 @@ const MAX_LIVE_URL_HEALTH_CHECKS = Number(process.env.MAX_LIVE_URL_HEALTH_CHECKS
 const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REFRESHES || 120);
 const MAX_LIVE_CONTENT_ENRICHMENTS = Number(process.env.MAX_LIVE_CONTENT_ENRICHMENTS || 120);
 const GENERIC_DESCRIPTION_PATTERN = /^(free|gratis|rabatt|discount|deal|angebot|aktion|promo|special|event|post|reel|instagram|coupon|gutschein|gewinnspiel|new|neu)$/i;
+const FOOD_SIGNAL_PATTERN = /\b(eis|ice cream|gelato|kaffee|coffee|cafe|café|pizza|burger|döner|doener|kebab|sushi|ramen|brunch|croissant|drink|getränk|getraenk|cocktail|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein|vino)\b/i;
+const COFFEE_SIGNAL_PATTERN = /\b(kaffee|coffee|espresso|latte|cappuccino|cafe|café)\b/i;
+const GIVEAWAY_PATTERN = /\b(gewinnspiel|giveaway|verlosen|verlosung|zu gewinnen|gewinne|quiz)\b/i;
+const SOURCE_PREFIX_PATTERN = /\s+(?:auf|on)\s+(?:instagram|tiktok)\s*:\s*/i;
 
 function hasUsefulWords(text) {
   const words = cleanText(text).split(/\s+/).filter(Boolean);
   return words.length >= 3;
+}
+
+function isSocialUrl(url = '') {
+  return /instagram\.com|tiktok\.com/i.test(cleanText(url));
+}
+
+function isSourceLikeBrandValue(value = '') {
+  return /^(instagram|tiktok|social media)$/i.test(cleanUiNoiseText(value));
+}
+
+function stripQuotedWrapper(value = '') {
+  const text = cleanText(value);
+  return text.replace(/^["'“”]+|["'“”]+$/g, '').trim();
+}
+
+function extractSocialSnippet(value = '') {
+  const text = cleanText(value);
+  if (!text) return '';
+  const parts = text.split(SOURCE_PREFIX_PATTERN);
+  const candidate = parts.length > 1 ? parts.slice(1).join(' ') : text;
+  return stripQuotedWrapper(candidate)
+    .replace(/@\S+/g, ' ')
+    .replace(/[•·|]/g, ' ')
+    .replace(/\b(?:\p{Extended_Pictographic}|\uFE0F)\b/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function tidySocialSummary(value = '', maxLength = 96) {
+  const text = extractSocialSnippet(value)
+    .replace(/\s*-\s*$/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  const shortened = text.slice(0, maxLength);
+  const lastSpace = shortened.lastIndexOf(' ');
+  return `${shortened.slice(0, lastSpace > 48 ? lastSpace : maxLength).trim()}...`;
+}
+
+function normalizeSocialDeal(deal) {
+  if (!isSocialUrl(deal.url)) return deal;
+
+  const next = { ...deal };
+  const socialTitle = tidySocialSummary(next.title, 96);
+  const socialDescription = tidySocialSummary(next.description, 160);
+  const inferredBrand = cleanUiNoiseText(inferPreferredBrand(next));
+  const combinedText = [next.brand, socialTitle, socialDescription, next.distance].filter(Boolean).join(' ');
+
+  if (isSourceLikeBrandValue(next.brand) && inferredBrand && !isSourceLikeBrandValue(inferredBrand)) {
+    next.brand = inferredBrand;
+  }
+
+  if (/^(instagram|tiktok)$/i.test(cleanUiNoiseText(next.title)) || /(?:auf|on)\s+(?:instagram|tiktok)\s*:/i.test(next.title || '')) {
+    if (socialTitle) next.title = socialTitle;
+  }
+
+  if (isWeakDescription(next.description)) {
+    const fallbackDescription = buildFallbackDescription({
+      ...next,
+      brand: next.brand,
+      title: next.title,
+      category: next.category,
+      type: next.type,
+    });
+    next.description = socialDescription || fallbackDescription || next.description;
+  } else if (socialDescription && /(?:auf|on)\s+(?:instagram|tiktok)\s*:/i.test(next.description || '')) {
+    next.description = socialDescription;
+  }
+
+  if ((next.category === 'kultur' || next.category === 'events' || next.category === 'reisen' || next.category === 'shopping') && FOOD_SIGNAL_PATTERN.test(combinedText)) {
+    next.category = COFFEE_SIGNAL_PATTERN.test(combinedText) ? 'kaffee' : 'essen';
+  }
+
+  return next;
 }
 
 function stripSiteSuffix(value) {
@@ -221,6 +303,9 @@ async function main() {
   let urlVerifiedExpiryHits = 0;
   let expiredByVerifiedDateRemovals = 0;
   let contentEnrichments = 0;
+  let socialPubDateSourceRemovals = 0;
+  let giveawayRemovals = 0;
+  let socialPolishFixes = 0;
 
   function markRemoved(deal, reason) {
     removed.push({
@@ -264,6 +349,22 @@ async function main() {
     deal = fixPubDateFromSlackTs(deal, now);
     deal = resetUnsafeUrlExpiry(deal);
     deal = normalizeDealRecord(deal);
+    const beforePolish = JSON.stringify({
+      brand: deal.brand,
+      title: deal.title,
+      description: deal.description,
+      category: deal.category,
+    });
+    deal = normalizeSocialDeal(deal);
+    const afterPolish = JSON.stringify({
+      brand: deal.brand,
+      title: deal.title,
+      description: deal.description,
+      category: deal.category,
+    });
+    if (beforePolish !== afterPolish) {
+      socialPolishFixes += 1;
+    }
     const rawExpiry = cleanText(
       deal.expiresOriginal ||
       deal.expires ||
@@ -312,9 +413,24 @@ async function main() {
       const enriched = maybeEnrichDealCopy(deal, health.contentHints);
       if (enriched) {
         contentEnrichments += 1;
+        const polished = normalizeSocialDeal(deal);
+        if (JSON.stringify(polished) !== JSON.stringify(deal)) {
+          deal = polished;
+          socialPolishFixes += 1;
+        }
       }
     }
 
+    if (isSocialUrl(deal.url) && !cleanText(deal.pubDateSource || '')) {
+      socialPubDateSourceRemovals += 1;
+      markRemoved(deal, 'Social-Deal ohne verifizierte Datumsquelle');
+      continue;
+    }
+    if (deal.type === 'gewinnspiel' || GIVEAWAY_PATTERN.test(`${deal.title || ''} ${deal.description || ''}`)) {
+      giveawayRemovals += 1;
+      markRemoved(deal, 'Gewinnspiel nicht im Standard-Feed');
+      continue;
+    }
     if (isGenericJunkDeal(deal)) {
       markRemoved(deal, 'Generischer Junk-Deal');
       continue;
@@ -425,6 +541,8 @@ async function main() {
     removedCount: removed.length,
     brokenLinkRemovals,
     expiredByVerifiedDateRemovals,
+    socialPubDateSourceRemovals,
+    giveawayRemovals,
     linkChecksUsed,
     maxLinkChecks: MAX_LIVE_URL_HEALTH_CHECKS,
     expiryUrlChecksUsed,
@@ -432,6 +550,7 @@ async function main() {
     urlVerifiedExpiryHits,
     contentEnrichments,
     maxContentEnrichments: MAX_LIVE_CONTENT_ENRICHMENTS,
+    socialPolishFixes,
     removalReasons,
     removed: removed.slice(0, 200),
   }, null, 2) + '\n', 'utf8');
@@ -439,10 +558,13 @@ async function main() {
   console.log(`Normalized live deals: ${remaining.length}`);
   console.log(`Removed deals: ${removed.length}`);
   console.log(`Broken link removals: ${brokenLinkRemovals}`);
+  console.log(`Social deals removed without pubDateSource: ${socialPubDateSourceRemovals}`);
+  console.log(`Giveaways removed from main feed: ${giveawayRemovals}`);
   console.log(`Link health checks: ${linkChecksUsed}/${MAX_LIVE_URL_HEALTH_CHECKS}`);
   console.log(`Expiry refresh checks: ${expiryUrlChecksUsed}/${MAX_LIVE_URL_EXPIRY_REFRESHES}`);
   console.log(`Expiry dates refreshed from URL: ${urlVerifiedExpiryHits}`);
   console.log(`Descriptions enriched from target pages: ${contentEnrichments}/${MAX_LIVE_CONTENT_ENRICHMENTS}`);
+  console.log(`Social polish fixes applied: ${socialPolishFixes}`);
 }
 
 main().catch((error) => {
