@@ -1392,6 +1392,23 @@ function finalizeDiscoveryRun({
   return payload;
 }
 
+function restoreCandidateMapFromSnapshot(candidateSnapshot) {
+  const candidatePosts = new Map();
+  for (const candidate of candidateSnapshot || []) {
+    const url = normalizeInstagramPostUrl(candidate?.url);
+    if (!url) continue;
+    candidatePosts.set(url, {
+      url,
+      sourceHits: Number(candidate?.sourceHits || 0),
+      sourceKinds: new Set(Array.isArray(candidate?.sourceKinds) ? candidate.sourceKinds : []),
+      sourceRefs: new Set(Array.isArray(candidate?.refs) ? candidate.refs : []),
+      accountHint: Boolean(candidate?.accountHint),
+      relatedHint: Boolean(candidate?.relatedHint),
+    });
+  }
+  return candidatePosts;
+}
+
 async function scrapeInstagramDiscovery() {
   console.log('📸 INSTAGRAM DISCOVERY ENGINE');
   console.log('========================================');
@@ -1458,16 +1475,22 @@ async function scrapeInstagramDiscovery() {
         mode: apiResult.mode,
       });
     }
-    if (apiResult) {
-      console.log('ℹ️ account API path produced 0 deals; falling back to browser discovery');
-    }
-
     const sourcesQueue = buildSources(sourceStats);
     const processedSourceKeys = new Set();
     const relatedCandidates = new Map();
-    const candidatePosts = new Map();
-    const sourceRunStats = new Map();
+    let candidatePosts = new Map();
+    let sourceRunStats = new Map();
     const accountCandidateThreshold = Math.max(24, Math.min(120, Math.floor(CONFIG.maxPostsToVisit * 0.4)));
+    let discoveryMode = 'browser-fallback';
+
+    if (apiResult?.totalCandidates > 0) {
+      candidatePosts = restoreCandidateMapFromSnapshot(apiResult.candidateSnapshot);
+      sourceRunStats = new Map(apiResult.sourceRunStats);
+      discoveryMode = 'account-api-candidates';
+      console.log(`ℹ️ account API path produced 0 raw deals, but kept ${candidatePosts.size} candidate posts for extraction`);
+    } else if (apiResult) {
+      console.log('ℹ️ account API path produced 0 deals; falling back to browser discovery');
+    }
 
     function ensureSourceRunStat(key) {
       if (!sourceRunStats.has(key)) {
@@ -1503,108 +1526,113 @@ async function scrapeInstagramDiscovery() {
       if (source.kind === 'related-account') c.relatedHint = true;
     }
 
-    // DISCOVERY PHASE
-    while (sourcesQueue.length > 0 && processedSourceKeys.size < CONFIG.maxSourcesTotal) {
-      const source = sourcesQueue.shift();
-      if (!source || processedSourceKeys.has(source.key)) continue;
-      if (source.kind === 'hashtag' && countAccountishCandidates(candidatePosts) >= accountCandidateThreshold) {
-        continue;
-      }
-      processedSourceKeys.add(source.key);
-      const runStat = ensureSourceRunStat(source.key);
-      runStat.runs += 1;
-      runStat.kind = source.kind;
-      runStat.lastSeenAt = new Date().toISOString();
+    if (candidatePosts.size === 0) {
+      // DISCOVERY PHASE
+      while (sourcesQueue.length > 0 && processedSourceKeys.size < CONFIG.maxSourcesTotal) {
+        const source = sourcesQueue.shift();
+        if (!source || processedSourceKeys.has(source.key)) continue;
+        if (source.kind === 'hashtag' && countAccountishCandidates(candidatePosts) >= accountCandidateThreshold) {
+          continue;
+        }
+        processedSourceKeys.add(source.key);
+        const runStat = ensureSourceRunStat(source.key);
+        runStat.runs += 1;
+        runStat.kind = source.kind;
+        runStat.lastSeenAt = new Date().toISOString();
 
-      try {
-        console.log(`🔎 source ${source.key}`);
-        await page.goto(source.url, { waitUntil: 'domcontentloaded', timeout: 26000 });
-        await page.waitForTimeout(2200);
-        await dismissInstagramOverlays(page);
-
-        const sourceLinks = new Set();
-        const relatedUsernames = new Set();
-        let stagnant = 0;
-
-        for (let round = 0; round < CONFIG.sourceScrollRounds; round += 1) {
-          const before = sourceLinks.size;
-
-          const domUrls = await collectLinksFromDom(page);
-          for (const u of domUrls) sourceLinks.add(u);
-
-          if (source.kind === 'account' || source.kind === 'related-account') {
-            const users = await collectRelatedAccountsFromDom(page);
-            for (const u of users) relatedUsernames.add(u);
-          }
-
-          if (sourceLinks.size >= CONFIG.perSourceLinksLimit) break;
-
-          if (sourceLinks.size === before) stagnant += 1;
-          else stagnant = 0;
-          if (stagnant >= CONFIG.sourceStagnationRounds) break;
-
-          await page.mouse.wheel(0, CONFIG.sourceScrollStepPx);
-          await page.waitForTimeout(CONFIG.sourceScrollWaitMs);
+        try {
+          console.log(`🔎 source ${source.key}`);
+          await page.goto(source.url, { waitUntil: 'domcontentloaded', timeout: 26000 });
+          await page.waitForTimeout(2200);
           await dismissInstagramOverlays(page);
+
+          const sourceLinks = new Set();
+          const relatedUsernames = new Set();
+          let stagnant = 0;
+
+          for (let round = 0; round < CONFIG.sourceScrollRounds; round += 1) {
+            const before = sourceLinks.size;
+
+            const domUrls = await collectLinksFromDom(page);
+            for (const u of domUrls) sourceLinks.add(u);
+
+            if (source.kind === 'account' || source.kind === 'related-account') {
+              const users = await collectRelatedAccountsFromDom(page);
+              for (const u of users) relatedUsernames.add(u);
+            }
+
+            if (sourceLinks.size >= CONFIG.perSourceLinksLimit) break;
+
+            if (sourceLinks.size === before) stagnant += 1;
+            else stagnant = 0;
+            if (stagnant >= CONFIG.sourceStagnationRounds) break;
+
+            await page.mouse.wheel(0, CONFIG.sourceScrollStepPx);
+            await page.waitForTimeout(CONFIG.sourceScrollWaitMs);
+            await dismissInstagramOverlays(page);
+          }
+
+          let links = [...sourceLinks].filter(Boolean).slice(0, CONFIG.perSourceLinksLimit);
+          if (links.length < 10 && (source.kind === 'account' || source.kind === 'related-account')) {
+            const username = extractAccountUsernameFromSource(source);
+            const apiLinks = await fetchAccountTimelineLinksFromApi(username, cookieHeader, page);
+            if (apiLinks.length > 0) {
+              links = [...new Set([...links, ...apiLinks])].slice(0, CONFIG.perSourceLinksLimit);
+            }
+          }
+          if (links.length < 6) {
+            const mirror = await fetchMirrorText(source.url);
+            links = [...new Set([...links, ...extractPostUrls(mirror)])].slice(0, CONFIG.perSourceLinksLimit);
+          }
+
+          console.log(`   ↳ links: ${links.length}`);
+          runStat.links += links.length;
+          for (const u of links) pushCandidate(u, source);
+
+          if ((source.kind === 'account' || source.kind === 'related-account') && relatedUsernames.size > 0) {
+            for (const username of relatedUsernames) {
+              const hit = relatedCandidates.get(username) || { hits: 0, via: new Set() };
+              hit.hits += 1;
+              hit.via.add(source.key);
+              relatedCandidates.set(username, hit);
+            }
+          }
+
+          await page.waitForTimeout(CONFIG.sourceDelayMs);
+        } catch (error) {
+          console.log(`   ⚠️ source failed: ${error.message}`);
         }
 
-        let links = [...sourceLinks].filter(Boolean).slice(0, CONFIG.perSourceLinksLimit);
-        if (links.length < 10 && (source.kind === 'account' || source.kind === 'related-account')) {
-          const username = extractAccountUsernameFromSource(source);
-          const apiLinks = await fetchAccountTimelineLinksFromApi(username, cookieHeader, page);
-          if (apiLinks.length > 0) {
-            links = [...new Set([...links, ...apiLinks])].slice(0, CONFIG.perSourceLinksLimit);
+        if (relatedCandidates.size > 0 && sourcesQueue.length < CONFIG.maxSourcesTotal) {
+          const sortedRelated = [...relatedCandidates.entries()]
+            .sort((a, b) => b[1].hits - a[1].hits)
+            .slice(0, CONFIG.maxRelatedAccounts);
+
+          for (const [username, meta] of sortedRelated) {
+            const key = `related:${username}`;
+            if (processedSourceKeys.has(key)) continue;
+            if (sourcesQueue.find((s) => s.key === key)) continue;
+            if (sourcesQueue.length + processedSourceKeys.size >= CONFIG.maxSourcesTotal) break;
+
+            if (!looksLikeDiscoveryAccount({ username, hitCount: meta.hits })) continue;
+
+            sourcesQueue.push({
+              kind: 'related-account',
+              key,
+              url: `https://www.instagram.com/${username}/`,
+              priority: 1,
+            });
           }
         }
-        if (links.length < 6) {
-          const mirror = await fetchMirrorText(source.url);
-          links = [...new Set([...links, ...extractPostUrls(mirror)])].slice(0, CONFIG.perSourceLinksLimit);
-        }
-
-        console.log(`   ↳ links: ${links.length}`);
-        runStat.links += links.length;
-        for (const u of links) pushCandidate(u, source);
-
-        if ((source.kind === 'account' || source.kind === 'related-account') && relatedUsernames.size > 0) {
-          for (const username of relatedUsernames) {
-            const hit = relatedCandidates.get(username) || { hits: 0, via: new Set() };
-            hit.hits += 1;
-            hit.via.add(source.key);
-            relatedCandidates.set(username, hit);
-          }
-        }
-
-        await page.waitForTimeout(CONFIG.sourceDelayMs);
-      } catch (error) {
-        console.log(`   ⚠️ source failed: ${error.message}`);
       }
 
-      if (relatedCandidates.size > 0 && sourcesQueue.length < CONFIG.maxSourcesTotal) {
-        const sortedRelated = [...relatedCandidates.entries()]
-          .sort((a, b) => b[1].hits - a[1].hits)
-          .slice(0, CONFIG.maxRelatedAccounts);
-
-        for (const [username, meta] of sortedRelated) {
-          const key = `related:${username}`;
-          if (processedSourceKeys.has(key)) continue;
-          if (sourcesQueue.find((s) => s.key === key)) continue;
-          if (sourcesQueue.length + processedSourceKeys.size >= CONFIG.maxSourcesTotal) break;
-
-          if (!looksLikeDiscoveryAccount({ username, hitCount: meta.hits })) continue;
-
-          sourcesQueue.push({
-            kind: 'related-account',
-            key,
-            url: `https://www.instagram.com/${username}/`,
-            priority: 1,
-          });
-        }
+      const discoveredViaSearch = await discoverLinksViaDuckDuckGo();
+      for (const postUrl of discoveredViaSearch) {
+        pushCandidate(postUrl, { kind: 'search', key: 'search:duckduckgo' });
       }
-    }
-
-    const discoveredViaSearch = await discoverLinksViaDuckDuckGo();
-    for (const postUrl of discoveredViaSearch) {
-      pushCandidate(postUrl, { kind: 'search', key: 'search:duckduckgo' });
+    } else {
+      for (const key of sourceRunStats.keys()) processedSourceKeys.add(key);
+      console.log(`🧠 using ${candidatePosts.size} account-api candidates for extraction`);
     }
 
     const candidateSnapshot = [...candidatePosts.values()].map((c) => ({
@@ -1792,7 +1820,7 @@ async function scrapeInstagramDiscovery() {
       totalCandidates: candidatePosts.size,
       visitedPosts: postsToVisit.length,
       rawDeals: deals,
-      mode: 'browser-fallback',
+      mode: discoveryMode,
     });
 
     await browser.close();

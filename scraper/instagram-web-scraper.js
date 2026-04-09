@@ -357,22 +357,35 @@ function parseRelativeAgeToDate(text, nowMs = Date.now()) {
   return new Date(nowMs - n * ms).toISOString();
 }
 
-function parseDateFromPage({ ldDate, ogDescription, fullText, fallbackNow = Date.now() }) {
+function parseDateFromPage({ ldDate, timeDateTime, igScriptTimestamp, ogDescription, fullText, fallbackNow = Date.now() }) {
   if (ldDate) {
     const ts = Date.parse(ldDate);
-    if (!Number.isNaN(ts)) return new Date(ts).toISOString();
+    if (!Number.isNaN(ts)) return { iso: new Date(ts).toISOString(), source: 'ldDate' };
+  }
+
+  if (timeDateTime) {
+    const ts = Date.parse(timeDateTime);
+    if (!Number.isNaN(ts)) return { iso: new Date(ts).toISOString(), source: 'timeDatetime' };
+  }
+
+  if (igScriptTimestamp) {
+    const ts = Number(igScriptTimestamp);
+    if (Number.isFinite(ts) && ts > 0) {
+      const ms = ts > 1e12 ? ts : ts * 1000;
+      return { iso: new Date(ms).toISOString(), source: 'igScriptTimestamp' };
+    }
   }
 
   const text = cleanText(ogDescription);
   const ymd = text.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if (ymd) return new Date(`${ymd[1]}-${ymd[2]}-${ymd[3]}T12:00:00Z`).toISOString();
+  if (ymd) return { iso: new Date(`${ymd[1]}-${ymd[2]}-${ymd[3]}T12:00:00Z`).toISOString(), source: 'ogDescriptionDate' };
 
   const dmy = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
   if (dmy) {
     const yyyy = dmy[3].length === 2 ? `20${dmy[3]}` : dmy[3];
     const mm = String(dmy[2]).padStart(2, '0');
     const dd = String(dmy[1]).padStart(2, '0');
-    return new Date(`${yyyy}-${mm}-${dd}T12:00:00Z`).toISOString();
+    return { iso: new Date(`${yyyy}-${mm}-${dd}T12:00:00Z`).toISOString(), source: 'ogDescriptionDate' };
   }
 
   const dmyNoYear = text.match(/(\d{1,2})\.(\d{1,2})(?!\.)/);
@@ -384,14 +397,14 @@ function parseDateFromPage({ ldDate, ogDescription, fullText, fallbackNow = Date
     if (candidate.getTime() - fallbackNow > 30 * 24 * 60 * 60 * 1000) {
       candidate = new Date(`${now.getFullYear() - 1}-${mm}-${dd}T12:00:00Z`);
     }
-    if (!Number.isNaN(candidate.getTime())) return candidate.toISOString();
+    if (!Number.isNaN(candidate.getTime())) return { iso: candidate.toISOString(), source: 'ogDescriptionDate' };
   }
 
   const relFromOg = parseRelativeAgeToDate(ogDescription, fallbackNow);
-  if (relFromOg) return relFromOg;
+  if (relFromOg) return { iso: relFromOg, source: 'relativeAge' };
 
   const relFromText = parseRelativeAgeToDate(fullText, fallbackNow);
-  if (relFromText) return relFromText;
+  if (relFromText) return { iso: relFromText, source: 'relativeAge' };
 
   return null;
 }
@@ -957,6 +970,8 @@ async function scrapeInstagram() {
               ldAuthor: '',
               ogTitle: '',
               ogDescription: '',
+              timeDateTime: '',
+              igScriptTimestamp: 0,
               text: document.body ? document.body.innerText : '',
             };
 
@@ -977,6 +992,26 @@ async function scrapeInstagram() {
             const ogDescription = document.querySelector('meta[property="og:description"]');
             if (ogTitle?.content) result.ogTitle = ogTitle.content;
             if (ogDescription?.content) result.ogDescription = ogDescription.content;
+
+            const timeEl = document.querySelector('time[datetime]');
+            if (timeEl?.getAttribute('datetime')) result.timeDateTime = timeEl.getAttribute('datetime') || '';
+
+            const scriptTexts = Array.from(document.querySelectorAll('script'))
+              .map((n) => n.textContent || '')
+              .filter(Boolean)
+              .slice(0, 120);
+            for (const text of scriptTexts) {
+              const taken = text.match(/"taken_at_timestamp"\s*:\s*(\d{9,13})/);
+              if (taken) {
+                result.igScriptTimestamp = Number(taken[1]);
+                break;
+              }
+              const created = text.match(/"created_at"\s*:\s*(\d{9,13})/);
+              if (created) {
+                result.igScriptTimestamp = Number(created[1]);
+                break;
+              }
+            }
 
             return result;
           });
@@ -1000,15 +1035,18 @@ async function scrapeInstagram() {
             data.text.slice(0, 2000),
           ].join(' '));
 
-          const pubDateIso = parseDateFromPage({
+          const pubDateMeta = parseDateFromPage({
             ldDate: data.ldDate,
+            timeDateTime: data.timeDateTime,
+            igScriptTimestamp: data.igScriptTimestamp,
             ogDescription: data.ogDescription,
             fullText: combinedText,
           });
-          if (!pubDateIso) {
+          if (!pubDateMeta?.iso) {
             report.totals.rejectionReasons.noPubDate += 1;
             continue;
           }
+          const pubDateIso = pubDateMeta.iso;
           if (!isFresh(pubDateIso)) {
             report.totals.rejectionReasons.stale += 1;
             continue;
@@ -1059,6 +1097,7 @@ async function scrapeInstagram() {
             votes: 1,
             qualityScore: score,
             pubDate: pubDateIso,
+            pubDateSource: pubDateMeta.source || '',
           };
 
           deals.push(deal);
