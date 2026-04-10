@@ -32,10 +32,9 @@ loadEnvFile();
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 
-const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-const CUTOFF_DATE = Date.now() - TWO_WEEKS_MS;
-const RECENT_SOCIAL_CUTOFF_DATE = Date.now() - SEVEN_DAYS_MS;
+const CUTOFF_DATE = Date.now() - SEVEN_DAYS_MS;
+const RECENT_SOCIAL_CUTOFF_DATE = CUTOFF_DATE;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate']);
 
@@ -412,6 +411,24 @@ function isRecent(deal) {
   return pubMs >= CUTOFF_DATE;
 }
 
+function isNeoTasteDeal(deal) {
+  const haystack = [
+    deal?.brand,
+    deal?.title,
+    deal?.description,
+    deal?.url,
+    deal?.source,
+    deal?.originSource,
+    deal?.distance,
+    deal?.expires,
+  ]
+    .map(cleanText)
+    .join(' ')
+    .toLowerCase();
+
+  return haystack.includes('neotaste');
+}
+
 function hasTrustedInstagramDate(deal) {
   const source = cleanText(deal.source).toLowerCase();
   if (isStrictRecentSocialDeal(deal)) return true;
@@ -431,7 +448,7 @@ function hasOldAgeSignal(deal) {
   const haystack = `${deal.title || ''} ${deal.description || ''} ${deal.expires || ''}`;
   const ageDays = extractRelativeAgeDays(haystack);
   if (!Number.isFinite(ageDays)) return false;
-  return ageDays > 14;
+  return ageDays > 7;
 }
 
 function hasStaleExplicitDateSignal(deal) {
@@ -552,7 +569,9 @@ async function main() {
     if (signatures.length === 0) return true;
     return !signatures.some((signature) => seenSignatures.has(signature));
   });
+  const neotasteExcluded = unseenDeals.filter(isNeoTasteDeal).length;
   const freshDeals = unseenDeals
+    .filter((d) => !isNeoTasteDeal(d))
     .filter(isRecent)
     .filter(hasTrustedInstagramDate)
     .filter((d) => !isStrictRecentSocialDeal(d) || isViennaDeal(d))
@@ -560,7 +579,7 @@ async function main() {
     .filter((d) => !hasStaleExplicitDateSignal(d))
     .filter(isNotExpired);
 
-  console.log(`📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, fresh: ${freshDeals.length}`);
+  console.log(`📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, neotasteExcluded: ${neotasteExcluded}, fresh: ${freshDeals.length}`);
 
   if (freshDeals.length === 0) {
     console.log('✅ Keine neuen Deals für Slack');
