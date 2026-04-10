@@ -1787,6 +1787,7 @@
         let dailyDealOverride = null;
         let weeklyDealOverride = null;
         let activeHomeDailyDealId = '';
+        let activeHomeWeeklyDealId = '';
         const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
             timeZone: 'Europe/Vienna',
             year: 'numeric',
@@ -4580,9 +4581,9 @@
             await fetchDealOverrideState();
             allDeals = applyDealOverridesToList([...userDealsWithVotes, ...baseDeals]);
             updateCounts();
-            renderDeals();
             await setDailyDeal();
             setFeaturedHomeDeals();
+            renderDeals();
             updateHomeSectionVisibility();
             updateAdminUiVisibility();
         } catch (e) {
@@ -4781,6 +4782,7 @@
         }
         function setFeaturedHomeDeals() {
             syncFeaturedDealPlacement();
+            activeHomeWeeklyDealId = '';
             const excludedIds = [activeHomeDailyDealId].filter(Boolean);
             const activeWeeklyDealOverride = isCurrentWeeklyDealRecord(weeklyDealOverride)
                 ? normalizeWeeklyDealRecord(weeklyDealOverride)
@@ -4793,6 +4795,7 @@
             if (!weeklyDeal) {
                 weeklyDeal = pickFeaturedDeal(7, { excludeIds: excludedIds });
             }
+            activeHomeWeeklyDealId = weeklyDeal?.id || '';
             const monthlyDeal = pickFeaturedDeal(30, { excludeIds: [...excludedIds, weeklyDeal ? weeklyDeal.id : ''].filter(Boolean) });
             renderFeaturedDealCard({
                 containerId: 'weeklyDeal',
@@ -4906,6 +4909,12 @@
       let deals = allDeals
         .map((d) => ({ ...d, _lifecycle: getDealLifecycle(d) }))
         .filter((d) => d._lifecycle.state !== 'hidden');
+      if (currentView === 'home') {
+        const featuredIds = new Set([activeHomeDailyDealId, activeHomeWeeklyDealId].filter(Boolean));
+        if (featuredIds.size) {
+          deals = deals.filter((d) => !featuredIds.has(d.id));
+        }
+      }
       if (currentFilter === 'gratis') {
         deals = deals.filter(d => d.type === 'gratis' || d.type === 'freebie');
       } else if (currentFilter === 'rabatt') {
@@ -5868,7 +5877,7 @@
             });
             updateFeaturedLockState();
         }
-        function showHome() { restoreFeaturedDealsToHome(); restoreRelocatedSectionsToHome(); currentView = 'home'; updateHomeSectionVisibility(); renderDeals(); setFeaturedHomeDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelector('.nav-item').classList.add('active'); }
+        function showHome() { restoreFeaturedDealsToHome(); restoreRelocatedSectionsToHome(); currentView = 'home'; updateHomeSectionVisibility(); setFeaturedHomeDeals(); renderDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelector('.nav-item').classList.add('active'); }
         function hideHeaderElements() { updateHomeSectionVisibility(); }
         
         // ===== LINK SUBMIT SYSTEM =====
@@ -6647,6 +6656,8 @@
         date: getViennaDayKey()
       });
       await setDailyDeal();
+      setFeaturedHomeDeals();
+      renderDeals();
       const updatedDeal = findDealById(currentAdminDealId) || { id: currentAdminDealId, brand: 'Deal' };
       populateAdminModalFromDeal(updatedDeal);
       showToast('⭐ Deal des Tages gesetzt');
