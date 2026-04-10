@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { inspectDealUrlHealth } from './expiry-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,6 +38,23 @@ const CUTOFF_DATE = Date.now() - SEVEN_DAYS_MS;
 const RECENT_SOCIAL_CUTOFF_DATE = CUTOFF_DATE;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate', 'profileTimeline']);
+const SOCIAL_FRESHNESS_TIMEOUT_MS = Number(process.env.SOCIAL_FRESHNESS_TIMEOUT_MS || 8000);
+const MAX_SOCIAL_FRESHNESS_CHECKS = Number(process.env.MAX_SOCIAL_FRESHNESS_CHECKS || 60);
+const SOCIAL_FRESHNESS_CONCURRENCY = Math.max(1, Number(process.env.SOCIAL_FRESHNESS_CONCURRENCY || 6));
+const MONTH_MAP = {
+  'jänner': 0, 'januar': 0, 'january': 0, 'jan': 0,
+  'februar': 1, 'february': 1, 'feb': 1,
+  'märz': 2, 'maerz': 2, 'march': 2, 'mar': 2, 'mär': 2,
+  'april': 3, 'apr': 3,
+  'mai': 4, 'may': 4,
+  'juni': 5, 'june': 5, 'jun': 5,
+  'juli': 6, 'july': 6, 'jul': 6,
+  'august': 7, 'aug': 7,
+  'september': 8, 'sep': 8, 'sept': 8,
+  'oktober': 9, 'october': 9, 'okt': 9, 'oct': 9,
+  'november': 10, 'nov': 10,
+  'dezember': 11, 'december': 11, 'dez': 11, 'dec': 11,
+};
 
 function ensureObject(value, fallback = {}) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
@@ -272,6 +290,105 @@ function parseDateCandidatesFromText(text) {
   return out;
 }
 
+function parseNamedDateCandidatesFromText(text, now = new Date()) {
+  const t = cleanText(text);
+  if (!t) return [];
+  const out = [];
+  const monthPattern = '(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|april|may|june|july|august|september|october|november|december)';
+
+  const dayMonthYearRegex = new RegExp(`\\b(\\d{1,2})\\.?\\s+${monthPattern}\\s*(\\d{4})?\\b`, 'gi');
+  for (const match of t.matchAll(dayMonthYearRegex)) {
+    const day = Number(match[1]);
+    const month = MONTH_MAP[String(match[2] || '').toLowerCase()];
+    const year = match[3] ? Number(match[3]) : now.getUTCFullYear();
+    if (month === undefined || !Number.isFinite(day) || !Number.isFinite(year)) continue;
+    const date = new Date(Date.UTC(year, month, day, 12, 0, 0));
+    if (!Number.isNaN(date.getTime())) out.push(date.getTime());
+  }
+
+  const monthDayYearRegex = new RegExp(`\\b${monthPattern}\\s+(\\d{1,2}),?\\s*(\\d{4})?\\b`, 'gi');
+  for (const match of t.matchAll(monthDayYearRegex)) {
+    const month = MONTH_MAP[String(match[1] || '').toLowerCase()];
+    const day = Number(match[2]);
+    const year = match[3] ? Number(match[3]) : now.getUTCFullYear();
+    if (month === undefined || !Number.isFinite(day) || !Number.isFinite(year)) continue;
+    const date = new Date(Date.UTC(year, month, day, 12, 0, 0));
+    if (!Number.isNaN(date.getTime())) out.push(date.getTime());
+  }
+
+  return out;
+}
+
+function isSocialUrl(url) {
+  return /https?:\/\/(?:www\.)?(instagram|tiktok)\.com\//i.test(cleanText(url));
+}
+
+function extractSocialHintTimestamp(text, nowMs = Date.now()) {
+  const directDates = parseDateCandidatesFromText(text);
+  const namedDates = parseNamedDateCandidatesFromText(text, new Date(nowMs));
+  const explicitDates = [...directDates, ...namedDates];
+  if (explicitDates.length > 0) return Math.max(...explicitDates);
+
+  const ageDays = extractRelativeAgeDays(text);
+  if (Number.isFinite(ageDays)) return nowMs - (ageDays * DAY_MS);
+
+  return null;
+}
+
+function getEffectivePubTimestamp(deal) {
+  const verified = Date.parse(cleanText(deal?.verifiedTargetPubDate || ''));
+  if (Number.isFinite(verified)) return verified;
+  return Date.parse(cleanText(deal?.pubDate || ''));
+}
+
+async function enrichSocialFreshness(deals) {
+  const candidates = deals
+    .filter((deal) => isSocialUrl(deal?.url))
+    .slice(0, MAX_SOCIAL_FRESHNESS_CHECKS);
+
+  const stats = {
+    candidates: candidates.length,
+    checked: 0,
+    verifiedFromTargetUrl: 0,
+    noUsableTargetDate: 0,
+    invalidUrl: 0,
+    transientErrors: 0,
+  };
+
+  for (let i = 0; i < candidates.length; i += SOCIAL_FRESHNESS_CONCURRENCY) {
+    const batch = candidates.slice(i, i + SOCIAL_FRESHNESS_CONCURRENCY);
+    await Promise.all(batch.map(async (deal) => {
+      stats.checked += 1;
+      const health = await inspectDealUrlHealth(deal.url, { timeoutMs: SOCIAL_FRESHNESS_TIMEOUT_MS });
+      if (health?.invalid) {
+        stats.invalidUrl += 1;
+        return;
+      }
+      if (health?.transientError) {
+        stats.transientErrors += 1;
+        return;
+      }
+
+      const hintText = [
+        health?.contentHints?.description,
+        health?.contentHints?.title,
+      ].map(cleanText).filter(Boolean).join(' ');
+
+      const derivedTs = extractSocialHintTimestamp(hintText, Date.now());
+      if (!Number.isFinite(derivedTs)) {
+        stats.noUsableTargetDate += 1;
+        return;
+      }
+
+      deal.verifiedTargetPubDate = new Date(derivedTs).toISOString();
+      deal.verifiedTargetPubDateSource = 'targetUrlHints';
+      stats.verifiedFromTargetUrl += 1;
+    }));
+  }
+
+  return stats;
+}
+
 function stableId(seed) {
   let hash = 0;
   for (let i = 0; i < seed.length; i += 1) {
@@ -405,7 +522,7 @@ function buildSeenSignatureMap(sentIds, pendingQueue) {
 }
 
 function isRecent(deal) {
-  const pubMs = new Date(deal.pubDate).getTime();
+  const pubMs = getEffectivePubTimestamp(deal);
   if (!Number.isFinite(pubMs)) return false;
   if (isStrictRecentSocialDeal(deal)) return pubMs >= RECENT_SOCIAL_CUTOFF_DATE;
   return pubMs >= CUTOFF_DATE;
@@ -430,6 +547,7 @@ function isNeoTasteDeal(deal) {
 }
 
 function hasTrustedInstagramDate(deal) {
+  if (cleanText(deal?.verifiedTargetPubDateSource) === 'targetUrlHints') return true;
   const source = cleanText(deal.source).toLowerCase();
   if (isStrictRecentSocialDeal(deal)) return true;
   if (!source.includes('instagram')) return true;
@@ -569,6 +687,7 @@ async function main() {
     if (signatures.length === 0) return true;
     return !signatures.some((signature) => seenSignatures.has(signature));
   });
+  const socialFreshnessStats = await enrichSocialFreshness(unseenDeals);
   const neotasteExcluded = unseenDeals.filter(isNeoTasteDeal).length;
   const freshDeals = unseenDeals
     .filter((d) => !isNeoTasteDeal(d))
@@ -579,7 +698,14 @@ async function main() {
     .filter((d) => !hasStaleExplicitDateSignal(d))
     .filter(isNotExpired);
 
-  console.log(`📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, neotasteExcluded: ${neotasteExcluded}, fresh: ${freshDeals.length}`);
+  console.log(
+    `📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, neotasteExcluded: ${neotasteExcluded}, fresh: ${freshDeals.length}`
+  );
+  console.log(
+    `🧭 Social freshness checks: ${socialFreshnessStats.checked}/${socialFreshnessStats.candidates}, ` +
+    `verified: ${socialFreshnessStats.verifiedFromTargetUrl}, ` +
+    `noDate: ${socialFreshnessStats.noUsableTargetDate}, invalid: ${socialFreshnessStats.invalidUrl}, transient: ${socialFreshnessStats.transientErrors}`
+  );
 
   if (freshDeals.length === 0) {
     console.log('✅ Keine neuen Deals für Slack');
