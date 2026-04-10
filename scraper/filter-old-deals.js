@@ -94,6 +94,27 @@ function parseDateCandidatesFromText(text) {
   return out;
 }
 
+function parseAnchoredPostDateCandidatesFromText(text) {
+  const t = cleanText(text);
+  if (!t) return [];
+  const out = [];
+  const monthPattern = '(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|april|may|june|july|august|september|october|november|december)';
+
+  const anchoredNamedRegex = new RegExp(`\\b(?:on|am|posted\\s+on)\\s+(${monthPattern}\\s+\\d{1,2},?\\s*\\d{4}|\\d{1,2}\\.?\\s+${monthPattern}\\s*\\d{4})\\b`, 'gi');
+  for (const match of t.matchAll(anchoredNamedRegex)) {
+    const candidates = parseDateCandidatesFromText(match[1]);
+    for (const ts of candidates) out.push(ts);
+  }
+
+  const anchoredNumericRegex = /\b(?:on|am|posted\s+on)\s+(\d{1,2}\.\d{1,2}\.\d{2,4})\b/gi;
+  for (const match of t.matchAll(anchoredNumericRegex)) {
+    const candidates = parseDateCandidatesFromText(match[1]);
+    for (const ts of candidates) out.push(ts);
+  }
+
+  return out;
+}
+
 function extractRelativeAgeDays(text) {
   const normalized = cleanText(text).toLowerCase();
   if (!normalized) return null;
@@ -110,7 +131,12 @@ function extractRelativeAgeDays(text) {
 }
 
 function extractSocialHintTimestamp(text, nowMs = Date.now()) {
-  const explicitDates = parseDateCandidatesFromText(text);
+  const anchoredDates = parseAnchoredPostDateCandidatesFromText(text)
+    .filter((ts) => Number.isFinite(ts) && ts <= nowMs + SEVEN_DAYS_MS);
+  if (anchoredDates.length > 0) return Math.max(...anchoredDates);
+
+  const explicitDates = parseDateCandidatesFromText(text)
+    .filter((ts) => Number.isFinite(ts) && ts <= nowMs + SEVEN_DAYS_MS);
   if (explicitDates.length > 0) return Math.max(...explicitDates);
 
   const ageDays = extractRelativeAgeDays(text);

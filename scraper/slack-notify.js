@@ -319,14 +319,41 @@ function parseNamedDateCandidatesFromText(text, now = new Date()) {
   return out;
 }
 
+function parseAnchoredPostDateCandidatesFromText(text, now = new Date()) {
+  const t = cleanText(text);
+  if (!t) return [];
+  const out = [];
+  const monthPattern = '(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|april|may|june|july|august|september|october|november|december)';
+
+  const anchoredNamedRegex = new RegExp(`\\b(?:on|am|posted\\s+on)\\s+(${monthPattern}\\s+\\d{1,2},?\\s*\\d{4}|\\d{1,2}\\.?\\s+${monthPattern}\\s*\\d{4})\\b`, 'gi');
+  for (const match of t.matchAll(anchoredNamedRegex)) {
+    const candidates = parseNamedDateCandidatesFromText(match[1], now);
+    for (const ts of candidates) out.push(ts);
+  }
+
+  const anchoredNumericRegex = /\b(?:on|am|posted\s+on)\s+(\d{1,2}\.\d{1,2}\.\d{2,4})\b/gi;
+  for (const match of t.matchAll(anchoredNumericRegex)) {
+    const candidates = parseDateCandidatesFromText(match[1]);
+    for (const ts of candidates) out.push(ts);
+  }
+
+  return out;
+}
+
 function isSocialUrl(url) {
   return /https?:\/\/(?:www\.)?(instagram|tiktok)\.com\//i.test(cleanText(url));
 }
 
 function extractSocialHintTimestamp(text, nowMs = Date.now()) {
+  const now = new Date(nowMs);
+  const anchoredDates = parseAnchoredPostDateCandidatesFromText(text, now)
+    .filter((ts) => Number.isFinite(ts) && ts <= nowMs + DAY_MS);
+  if (anchoredDates.length > 0) return Math.max(...anchoredDates);
+
   const directDates = parseDateCandidatesFromText(text);
-  const namedDates = parseNamedDateCandidatesFromText(text, new Date(nowMs));
-  const explicitDates = [...directDates, ...namedDates];
+  const namedDates = parseNamedDateCandidatesFromText(text, now);
+  const explicitDates = [...directDates, ...namedDates]
+    .filter((ts) => Number.isFinite(ts) && ts <= nowMs + DAY_MS);
   if (explicitDates.length > 0) return Math.max(...explicitDates);
 
   const ageDays = extractRelativeAgeDays(text);
