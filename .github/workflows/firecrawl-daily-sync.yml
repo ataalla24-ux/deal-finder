@@ -41,21 +41,17 @@ jobs:
       - name: Build Instagram Merchant Registry
         run: node scraper/build-instagram-merchant-registry.js
 
-      - name: Run Instagram Discovery Scraper
+      - name: Run Instagram Daily Sync
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
           INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
-          IG_MAX_AGE_DAYS: 1
-          IG_MAX_DEALS: 120
-          IG_MAX_POSTS_VISIT: 260
-          IG_MAX_RELATED_ACCOUNTS: 70
-          IG_MAX_SOURCES_TOTAL: 90
-          IG_SCROLL_ROUNDS: 18
-          IG_SCROLL_WAIT_MS: 2200
-          IG_STAGNATION_ROUNDS: 6
-          IG_PER_SOURCE_LINKS: 180
-          IG_MIN_SCORE: 60
-          IG_MAX_DEALS_PER_ACCOUNT: 4
+          IG_MAX_AGE_DAYS: 7
+          IG_MAX_DEALS: 40
+          IG_MAX_SOURCES_TOTAL: 24
+          IG_MAX_TIMELINE_POSTS: 18
+          IG_MAX_REGISTRY_ACCOUNTS: 12
+          IG_MIN_SCORE: 58
+          IG_MAX_DEALS_PER_ACCOUNT: 3
         run: |
           node - <<'NODE'
           const session = String(process.env.INSTAGRAM_SESSIONID || '').trim();
@@ -81,9 +77,7 @@ jobs:
             printf '; sessionid=%s\n' "$INSTAGRAM_SESSIONID" >> "$COOKIE_FILE"
           fi
           export INSTAGRAM_COOKIES_FILE="$COOKIE_FILE"
-          node scraper/instagram-web-scraper.js
-          node scraper/instagram-discovery-scraper.js
-          node scraper/merge-instagram-pending.js
+          node scraper/instagram-daily-sync.js
 
       - name: Run jö Scraper
         run: node scraper/joe-scraper.js
