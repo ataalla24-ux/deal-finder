@@ -1785,6 +1785,7 @@
         let submittedLinks = JSON.parse(localStorage.getItem('submittedLinks') || '[]');
         let dealOverridesById = {};
         let dailyDealOverride = null;
+        let weeklyDealOverride = null;
         let activeHomeDailyDealId = '';
         const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
             timeZone: 'Europe/Vienna',
@@ -1812,10 +1813,34 @@
         const DEAL_OVERRIDE_CACHE_KEY = 'freefinder_deal_override_state_v1';
         const APP_SHELL_VERSION_KEY = 'freefinder_app_shell_version';
         const APP_SHELL_VERSION = '2026-03-23-hidden-sync-v1';
+        function pad2(value) {
+            return String(value).padStart(2, '0');
+        }
         function getViennaDayKey(input = Date.now()) {
             const date = input instanceof Date ? input : new Date(input || Date.now());
             if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
             return VIENNA_DAY_FORMATTER.format(date);
+        }
+        function getViennaWeekKey(input = Date.now()) {
+            const date = input instanceof Date ? input : new Date(input || Date.now());
+            if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+            const parts = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'Europe/Vienna',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                weekday: 'short'
+            }).formatToParts(date);
+            const partMap = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+            const year = Number(partMap.year || 0);
+            const month = Number(partMap.month || 0);
+            const day = Number(partMap.day || 0);
+            const weekday = String(partMap.weekday || '');
+            const weekdayOffset = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 }[weekday];
+            if (!year || !month || !day || typeof weekdayOffset !== 'number') return '';
+            const monday = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+            monday.setUTCDate(monday.getUTCDate() - weekdayOffset);
+            return `${monday.getUTCFullYear()}-${pad2(monday.getUTCMonth() + 1)}-${pad2(monday.getUTCDate())}`;
         }
         function normalizeDailyDealRecord(record) {
             if (!record || !record.dealId) return null;
@@ -1830,9 +1855,26 @@
                 date: date || '',
             };
         }
+        function normalizeWeeklyDealRecord(record) {
+            if (!record || !record.dealId) return null;
+            const updatedAt = Number(record.updatedAt || 0) || null;
+            let week = typeof record.week === 'string' ? record.week.trim() : '';
+            if (!week && typeof record.date === 'string') week = record.date.trim();
+            if (!week && updatedAt) week = getViennaWeekKey(updatedAt);
+            if (!week && typeof record.pickedAt === 'string') week = getViennaWeekKey(record.pickedAt);
+            return {
+                ...record,
+                updatedAt,
+                week: week || '',
+            };
+        }
         function isCurrentDailyDealRecord(record) {
             const normalized = normalizeDailyDealRecord(record);
             return !!(normalized && normalized.dealId && normalized.date === getViennaDayKey());
+        }
+        function isCurrentWeeklyDealRecord(record) {
+            const normalized = normalizeWeeklyDealRecord(record);
+            return !!(normalized && normalized.dealId && normalized.week === getViennaWeekKey());
         }
         let adminHiddenTapCount = 0;
         let adminHiddenTapTimer = null;
@@ -4740,7 +4782,17 @@
         function setFeaturedHomeDeals() {
             syncFeaturedDealPlacement();
             const excludedIds = [activeHomeDailyDealId].filter(Boolean);
-            const weeklyDeal = pickFeaturedDeal(7, { excludeIds: excludedIds });
+            const activeWeeklyDealOverride = isCurrentWeeklyDealRecord(weeklyDealOverride)
+                ? normalizeWeeklyDealRecord(weeklyDealOverride)
+                : null;
+            let weeklyDeal = null;
+            if (activeWeeklyDealOverride && activeWeeklyDealOverride.dealId && !excludedIds.includes(activeWeeklyDealOverride.dealId)) {
+                const overridden = allDeals.find((d) => d.id === activeWeeklyDealOverride.dealId);
+                weeklyDeal = normalizeDealForApp(overridden || activeWeeklyDealOverride);
+            }
+            if (!weeklyDeal) {
+                weeklyDeal = pickFeaturedDeal(7, { excludeIds: excludedIds });
+            }
             const monthlyDeal = pickFeaturedDeal(30, { excludeIds: [...excludedIds, weeklyDeal ? weeklyDeal.id : ''].filter(Boolean) });
             renderFeaturedDealCard({
                 containerId: 'weeklyDeal',
@@ -6317,6 +6369,7 @@
   async function fetchDealOverrideState() {
     dealOverridesById = {};
     dailyDealOverride = null;
+    weeklyDealOverride = null;
     try {
       const cached = JSON.parse(localStorage.getItem(DEAL_OVERRIDE_CACHE_KEY) || 'null');
       const cachedOverrides = Array.isArray(cached && cached.overrides) ? cached.overrides : [];
@@ -6327,32 +6380,54 @@
       if (isCurrentDailyDealRecord(cachedDailyDeal)) {
         dailyDealOverride = cachedDailyDeal;
       }
+      const cachedWeeklyDeal = normalizeWeeklyDealRecord(cached && cached.weeklyDeal);
+      if (isCurrentWeeklyDealRecord(cachedWeeklyDeal)) {
+        weeklyDealOverride = cachedWeeklyDeal;
+      }
     } catch (e) {
       localStorage.removeItem(DEAL_OVERRIDE_CACHE_KEY);
     }
     try {
       const base = await getReferralApiBase();
-      if (!base) return;
-      const res = await fetch(base + '/api/deals/state?t=' + Date.now(), { cache: 'no-store' });
-      if (!res.ok) return;
-      const data = await res.json();
-      const overrides = Array.isArray(data && data.overrides) ? data.overrides : [];
-      dealOverridesById = {};
-      overrides.forEach((item) => {
-        if (item && item.dealId) dealOverridesById[item.dealId] = item;
-      });
-      dailyDealOverride = null;
-      const freshDailyDeal = normalizeDailyDealRecord(data && data.dailyDeal);
-      if (isCurrentDailyDealRecord(freshDailyDeal)) {
-        dailyDealOverride = freshDailyDeal;
+      if (base) {
+        const res = await fetch(base + '/api/deals/state?t=' + Date.now(), { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          const overrides = Array.isArray(data && data.overrides) ? data.overrides : [];
+          dealOverridesById = {};
+          overrides.forEach((item) => {
+            if (item && item.dealId) dealOverridesById[item.dealId] = item;
+          });
+          dailyDealOverride = null;
+          const freshDailyDeal = normalizeDailyDealRecord(data && data.dailyDeal);
+          if (isCurrentDailyDealRecord(freshDailyDeal)) {
+            dailyDealOverride = freshDailyDeal;
+          }
+        }
       }
-      localStorage.setItem(DEAL_OVERRIDE_CACHE_KEY, JSON.stringify({
-        updatedAt: Date.now(),
-        overrides,
-        dailyDeal: dailyDealOverride
-      }));
     } catch (e) {
       console.warn('Deal override state unavailable:', e);
+    }
+    try {
+      const res = await fetch('deal-of-the-week.json?t=' + Date.now(), { cache: 'no-store' });
+      if (res.ok) {
+        const data = normalizeWeeklyDealRecord(await res.json());
+        if (isCurrentWeeklyDealRecord(data)) {
+          weeklyDealOverride = data;
+        }
+      }
+    } catch (e) {
+      console.warn('Weekly deal override unavailable:', e);
+    }
+    try {
+      localStorage.setItem(DEAL_OVERRIDE_CACHE_KEY, JSON.stringify({
+        updatedAt: Date.now(),
+        overrides: Object.values(dealOverridesById),
+        dailyDeal: dailyDealOverride,
+        weeklyDeal: weeklyDealOverride
+      }));
+    } catch (e) {
+      console.warn('Could not cache deal override state:', e);
     }
   }
 

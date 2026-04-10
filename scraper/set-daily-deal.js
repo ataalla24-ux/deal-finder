@@ -1,6 +1,7 @@
 // ============================================
-// SET DAILY DEAL - Reads your Slack reply and sets Deal des Tages
-// How to use: reply to the daily digest thread with "deal 3" or just "3"
+// SET FEATURED DEALS - Reads your Slack replies and sets:
+// - Deal des Tages via "deal 3" or just "3"
+// - Deal der Woche via "woche 3" / "week 3"
 // Runs at 13:30 Vienna (12:30 UTC), AFTER approve workflow at 13:00
 // ============================================
 import fs from 'fs';
@@ -25,6 +26,28 @@ function getViennaDayKey(input = Date.now()) {
     const date = input instanceof Date ? input : new Date(input || Date.now());
     if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
     return VIENNA_DAY_FORMATTER.format(date);
+}
+
+function getViennaWeekKey(input = Date.now()) {
+    const date = input instanceof Date ? input : new Date(input || Date.now());
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Europe/Vienna',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        weekday: 'short',
+    }).formatToParts(date);
+    const partMap = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+    const year = Number(partMap.year || 0);
+    const month = Number(partMap.month || 0);
+    const day = Number(partMap.day || 0);
+    const weekday = String(partMap.weekday || '');
+    const weekdayOffset = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 }[weekday];
+    if (!year || !month || !day || typeof weekdayOffset !== 'number') return '';
+    const monday = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+    monday.setUTCDate(monday.getUTCDate() - weekdayOffset);
+    return `${monday.getUTCFullYear()}-${String(monday.getUTCMonth() + 1).padStart(2, '0')}-${String(monday.getUTCDate()).padStart(2, '0')}`;
 }
 
 // ============================================
@@ -58,9 +81,26 @@ async function findTodaysThread() {
 }
 
 // ============================================
-// Step 2: Read replies in thread, find your pick
+// Step 2: Read replies in thread, find your picks
 // ============================================
-async function findYourPick(threadTs) {
+function parsePickCommand(rawText) {
+    const text = cleanText(rawText).toLowerCase();
+    if (!text) return null;
+
+    let match = text.match(/^(?:deal(?:\s+der)?\s+woche|woche|week|weekly)\s*#?\s*(\d+)$/);
+    if (match) {
+        return { kind: 'weekly', number: parseInt(match[1], 10) };
+    }
+
+    match = text.match(/^(?:deal(?:\s+des)?\s+tages|daily|today|heute|deal\s*#?\s*|#\s*)?(\d+)$/);
+    if (match) {
+        return { kind: 'daily', number: parseInt(match[1], 10) };
+    }
+
+    return null;
+}
+
+async function findYourPicks(threadTs) {
     const res = await fetch(
           `https://slack.com/api/conversations.replies?channel=${SLACK_CHANNEL_ID}&ts=${threadTs}`,
       { headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}` } }
@@ -71,20 +111,24 @@ async function findYourPick(threadTs) {
           return null;
     }
 
-  // Go through replies (skip the first message which is the bot's own digest)
-  // Look for messages like "deal 3", "3", "deal3", "#3"
+  // Go through replies newest-first (skip the first message which is the bot's own digest)
+  // Daily: "deal 3", "3"
+  // Weekly: "woche 3", "week 3"
+  const picks = { daily: null, weekly: null };
   for (const msg of data.messages.slice(1).reverse()) {
-        const text = (msg.text || '').trim().toLowerCase();
-        const match = text.match(/^(?:deal\s*#?\s*|#\s*)?(\d+)$/);
-        if (match) {
-                const num = parseInt(match[1]);
-                console.log('Found your pick:', num, 'from message:', msg.text);
-                return num;
+        const parsed = parsePickCommand(msg.text || '');
+        if (!parsed) continue;
+        if (!picks[parsed.kind]) {
+            picks[parsed.kind] = parsed.number;
+            console.log(`Found ${parsed.kind} pick:`, parsed.number, 'from message:', msg.text);
         }
+        if (picks.daily && picks.weekly) break;
   }
 
-  console.log('No pick found in thread replies');
-    return null;
+  if (!picks.daily && !picks.weekly) {
+      console.log('No picks found in thread replies');
+  }
+    return picks;
 }
 
 async function getThreadMessages(threadTs) {
@@ -123,7 +167,7 @@ function hasHumanApproval(message, botUserId) {
 }
 
 // ============================================
-// Step 4: Write deal-of-the-day.json
+// Step 4: Write featured deal files
 // ============================================
 function saveDealOfTheDay(deal) {
     const outputPath = path.join(__dirname, '..', 'docs', 'deal-of-the-day.json');
@@ -148,6 +192,31 @@ function saveDealOfTheDay(deal) {
 
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
     console.log('Saved deal-of-the-day.json:', deal.brand, '-', deal.title);
+}
+
+function saveDealOfTheWeek(deal) {
+    const outputPath = path.join(__dirname, '..', 'docs', 'deal-of-the-week.json');
+    const week = getViennaWeekKey();
+    const normalized = normalizeDealRecord(deal);
+
+    const output = {
+        week,
+        dealId: normalized.id,
+        brand: normalized.brand,
+        title: normalized.title,
+        description: normalized.description,
+        logo: normalized.logo || '🔥',
+        logoUrl: normalized.logoUrl || '',
+        url: normalized.url,
+        type: normalized.type,
+        category: normalized.category || 'wien',
+        distance: normalized.distance || 'Wien',
+        manualPick: true,
+        pickedAt: new Date().toISOString()
+    };
+
+    fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
+    console.log('Saved deal-of-the-week.json:', deal.brand, '-', deal.title);
 }
 
 // ============================================
@@ -189,7 +258,7 @@ function isDealApprovedBySlack(message, botUserId) {
 // Main
 // ============================================
 async function main() {
-    console.log('SET DAILY DEAL');
+    console.log('SET FEATURED DEALS');
     console.log('='.repeat(40));
 
   if (!SLACK_BOT_TOKEN || !SLACK_CHANNEL_ID) {
@@ -202,9 +271,9 @@ async function main() {
           process.exit(0);
     }
 
-  const pickNumber = await findYourPick(threadTs);
-    if (!pickNumber) {
-          console.log('No pick found - Deal des Tages will use automatic rotation today');
+  const picks = await findYourPicks(threadTs);
+    if (!picks.daily && !picks.weekly) {
+          console.log('No picks found - featured deals stay on automatic selection');
           process.exit(0);
     }
 
@@ -221,24 +290,38 @@ async function main() {
           process.exit(0);
     }
 
-  const deal = findPickedDeal(deals, pickNumber);
-    if (!deal) {
-          const maxOrder = deals.reduce((max, current) => Math.max(max, Number(current?.order) || 0), 0);
-          console.log(`Pick #${pickNumber} not found in digest numbering (parsed deals: ${deals.length}, max order: ${maxOrder})`);
-          process.exit(0);
-    }
-
-  console.log(`Deal #${deal.order}: ${deal.brand} - ${deal.title}`);
-
   const botUserId = await getBotUserId();
-  const pickedMessage = threadMessages.find((msg) => cleanText(msg?.ts) === cleanText(deal.slackTs));
-  const approvedBySlack = isDealApprovedBySlack(pickedMessage, botUserId);
+  const maxOrder = deals.reduce((max, current) => Math.max(max, Number(current?.order) || 0), 0);
 
-  if (!approvedBySlack && !isDealApproved(deal)) {
-    process.exit(0);
+  function maybePersistPick(kind, pickNumber) {
+    if (!pickNumber) return false;
+    const deal = findPickedDeal(deals, pickNumber);
+    if (!deal) {
+      console.log(`${kind} pick #${pickNumber} not found in digest numbering (parsed deals: ${deals.length}, max order: ${maxOrder})`);
+      return false;
+    }
+    console.log(`${kind} deal #${deal.order}: ${deal.brand} - ${deal.title}`);
+    const pickedMessage = threadMessages.find((msg) => cleanText(msg?.ts) === cleanText(deal.slackTs));
+    const approvedBySlack = isDealApprovedBySlack(pickedMessage, botUserId);
+    if (!approvedBySlack && !isDealApproved(deal)) {
+      console.log(`${kind} pick is not approved yet, skipping`);
+      return false;
+    }
+    if (kind === 'daily') {
+      saveDealOfTheDay(deal);
+    } else if (kind === 'weekly') {
+      saveDealOfTheWeek(deal);
+    }
+    return true;
   }
 
-  saveDealOfTheDay(deal);
+  const savedDaily = maybePersistPick('daily', picks.daily);
+  const savedWeekly = maybePersistPick('weekly', picks.weekly);
+
+  if (!savedDaily && !savedWeekly) {
+    console.log('No featured deal files updated');
+    process.exit(0);
+  }
 
   console.log('Done!');
 }

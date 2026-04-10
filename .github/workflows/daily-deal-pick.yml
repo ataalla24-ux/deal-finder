@@ -1,6 +1,8 @@
-name: "Daily Deal Pick"
+name: "Featured Deal Picks"
 # Runs at 13:30 Vienna (12:30 UTC) – 30 min AFTER approve at 13:00
-# Reply to the Slack digest thread with "deal 3" or just "3" to pick Deal des Tages
+# Reply to the Slack digest thread with:
+# - "deal 3" or "3" for Deal des Tages
+# - "woche 3" / "week 3" for Deal der Woche
 
 on:
   schedule:
@@ -24,16 +26,16 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Pick Deal des Tages from Slack reply
+      - name: Pick featured deals from Slack replies
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
         run: node scraper/set-daily-deal.js
 
-      - name: Commit deal-of-the-day.json
+      - name: Commit featured deal files
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add docs/deal-of-the-day.json
-          git diff --staged --quiet || git commit -m "🏆 Deal des Tages gesetzt"
+          git add docs/deal-of-the-day.json docs/deal-of-the-week.json
+          git diff --staged --quiet || git commit -m "🏆 Featured deals gesetzt"
           git push || echo "Nothing to push"
