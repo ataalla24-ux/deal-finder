@@ -37,7 +37,7 @@ const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const CUTOFF_DATE = Date.now() - SEVEN_DAYS_MS;
 const RECENT_SOCIAL_CUTOFF_DATE = CUTOFF_DATE;
 const DAY_MS = 24 * 60 * 60 * 1000;
-const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate', 'profileTimeline']);
+const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate', 'profileTimeline', 'targetUrlHints']);
 const SOCIAL_FRESHNESS_TIMEOUT_MS = Number(process.env.SOCIAL_FRESHNESS_TIMEOUT_MS || 8000);
 const MAX_SOCIAL_FRESHNESS_CHECKS = Number(process.env.MAX_SOCIAL_FRESHNESS_CHECKS || 60);
 const SOCIAL_FRESHNESS_CONCURRENCY = Math.max(1, Number(process.env.SOCIAL_FRESHNESS_CONCURRENCY || 6));
@@ -562,6 +562,7 @@ function isNotExpired(deal) {
 }
 
 function hasOldAgeSignal(deal) {
+  if (cleanText(deal?.verifiedTargetPubDateSource) === 'targetUrlHints') return false;
   if (isStrictRecentSocialDeal(deal)) return false;
   const haystack = `${deal.title || ''} ${deal.description || ''} ${deal.expires || ''}`;
   const ageDays = extractRelativeAgeDays(haystack);
@@ -570,6 +571,7 @@ function hasOldAgeSignal(deal) {
 }
 
 function hasStaleExplicitDateSignal(deal) {
+  if (cleanText(deal?.verifiedTargetPubDateSource) === 'targetUrlHints') return false;
   if (isStrictRecentSocialDeal(deal)) return false;
   const bundle = `${deal.title || ''} ${deal.description || ''} ${deal.expires || ''}`;
   const dates = parseDateCandidatesFromText(bundle);

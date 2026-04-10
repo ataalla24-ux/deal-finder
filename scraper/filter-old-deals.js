@@ -7,7 +7,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { normalizeDealExpiry, parseExpiryDetails, shouldVerifyExpiryAgainstUrl } from './expiry-utils.js';
+import { inspectDealUrlHealth, normalizeDealExpiry, parseExpiryDetails, shouldVerifyExpiryAgainstUrl } from './expiry-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,13 +19,143 @@ const NOW = new Date();
 const TWO_WEEKS_AGO = new Date(NOW.getTime() - TWO_WEEKS_MS);
 const SEVEN_DAYS_AGO = new Date(NOW.getTime() - SEVEN_DAYS_MS);
 const MAX_URL_EXPIRY_CHECKS = 120;
-const TRUSTED_IG_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate', 'profileTimeline']);
+const MAX_SOCIAL_PUBDATE_CHECKS = Number(process.env.MAX_FILTER_SOCIAL_PUBDATE_CHECKS || 80);
+const SOCIAL_PUBDATE_TIMEOUT_MS = Number(process.env.SOCIAL_FRESHNESS_TIMEOUT_MS || 8000);
+const TRUSTED_IG_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate', 'profileTimeline', 'targetUrlHints']);
+const MONTH_MAP = {
+  'jänner': 0, 'januar': 0, 'january': 0, 'jan': 0,
+  'februar': 1, 'february': 1, 'feb': 1,
+  'märz': 2, 'maerz': 2, 'march': 2, 'mar': 2, 'mär': 2,
+  'april': 3, 'apr': 3,
+  'mai': 4, 'may': 4,
+  'juni': 5, 'june': 5, 'jun': 5,
+  'juli': 6, 'july': 6, 'jul': 6,
+  'august': 7, 'aug': 7,
+  'september': 8, 'sep': 8, 'sept': 8,
+  'oktober': 9, 'october': 9, 'okt': 9, 'oct': 9,
+  'november': 10, 'nov': 10,
+  'dezember': 11, 'december': 11, 'dez': 11, 'dec': 11,
+};
 
 function normalizeText(value) {
   return String(value || '')
     .toLowerCase()
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function cleanText(value) {
+  return String(value || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isSocialUrl(url = '') {
+  return /https?:\/\/(?:www\.)?(instagram|tiktok)\.com\//i.test(cleanText(url));
+}
+
+function parseDateCandidatesFromText(text) {
+  const t = cleanText(text);
+  if (!t) return [];
+  const out = [];
+
+  for (const match of t.matchAll(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/g)) {
+    const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12, 0, 0));
+    if (!Number.isNaN(date.getTime())) out.push(date.getTime());
+  }
+
+  for (const match of t.matchAll(/\b(\d{1,2})\.(\d{1,2})\.(\d{2,4})\b/g)) {
+    const year = String(match[3]).length === 2 ? Number(`20${match[3]}`) : Number(match[3]);
+    const date = new Date(Date.UTC(year, Number(match[2]) - 1, Number(match[1]), 12, 0, 0));
+    if (!Number.isNaN(date.getTime())) out.push(date.getTime());
+  }
+
+  const monthPattern = '(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|april|may|june|july|august|september|october|november|december)';
+  const dayMonthYearRegex = new RegExp(`\\b(\\d{1,2})\\.?\\s+${monthPattern}\\s*(\\d{4})?\\b`, 'gi');
+  for (const match of t.matchAll(dayMonthYearRegex)) {
+    const month = MONTH_MAP[String(match[2] || '').toLowerCase()];
+    const year = match[3] ? Number(match[3]) : NOW.getUTCFullYear();
+    const date = new Date(Date.UTC(year, month, Number(match[1]), 12, 0, 0));
+    if (month !== undefined && !Number.isNaN(date.getTime())) out.push(date.getTime());
+  }
+
+  const monthDayYearRegex = new RegExp(`\\b${monthPattern}\\s+(\\d{1,2}),?\\s*(\\d{4})?\\b`, 'gi');
+  for (const match of t.matchAll(monthDayYearRegex)) {
+    const month = MONTH_MAP[String(match[1] || '').toLowerCase()];
+    const year = match[3] ? Number(match[3]) : NOW.getUTCFullYear();
+    const date = new Date(Date.UTC(year, month, Number(match[2]), 12, 0, 0));
+    if (month !== undefined && !Number.isNaN(date.getTime())) out.push(date.getTime());
+  }
+
+  return out;
+}
+
+function extractRelativeAgeDays(text) {
+  const normalized = cleanText(text).toLowerCase();
+  if (!normalized) return null;
+  const match = normalized.match(/(\d+)\s*(weeks?|wochen|days?|tage|months?|monate|years?|jahre?n?|y|w|d|m)\b/i);
+  if (!match) return null;
+  const amount = Number(match[1]);
+  if (!Number.isFinite(amount) || amount < 0) return null;
+  const unit = match[2].toLowerCase();
+  if (unit.startsWith('w') || unit.includes('woch')) return amount * 7;
+  if (unit.startsWith('d') || unit.includes('tag')) return amount;
+  if (unit.startsWith('m') || unit.includes('monat')) return amount * 30;
+  if (unit.startsWith('y') || unit.includes('jahr') || unit.includes('year')) return amount * 365;
+  return null;
+}
+
+function extractSocialHintTimestamp(text, nowMs = Date.now()) {
+  const explicitDates = parseDateCandidatesFromText(text);
+  if (explicitDates.length > 0) return Math.max(...explicitDates);
+
+  const ageDays = extractRelativeAgeDays(text);
+  if (Number.isFinite(ageDays)) return nowMs - ageDays * SEVEN_DAYS_MS / 7;
+
+  return null;
+}
+
+function getEffectivePubDateValue(deal = {}) {
+  return cleanText(deal.verifiedTargetPubDate || deal.pubDate || '');
+}
+
+async function enrichSocialTargetPubDate(deal, cache) {
+  if (!isSocialUrl(deal?.url)) return false;
+  const url = cleanText(deal.url);
+  if (!url) return false;
+
+  let cached = cache.get(url);
+  if (cached === undefined) {
+    const health = await inspectDealUrlHealth(url, { timeoutMs: SOCIAL_PUBDATE_TIMEOUT_MS });
+    const hintText = [
+      health?.contentHints?.description,
+      health?.contentHints?.title,
+    ].map(cleanText).filter(Boolean).join(' ');
+    const ts = extractSocialHintTimestamp(hintText, Date.now());
+    cached = Number.isFinite(ts) ? { iso: new Date(ts).toISOString(), source: 'targetUrlHints' } : null;
+    cache.set(url, cached);
+  }
+
+  if (!cached?.iso) return false;
+
+  deal.verifiedTargetPubDate = cached.iso;
+  deal.verifiedTargetPubDateSource = cached.source;
+  const currentPubDate = Date.parse(cleanText(deal.pubDate || ''));
+  const verifiedPubDate = Date.parse(cached.iso);
+  if (
+    !Number.isFinite(currentPubDate) ||
+    currentPubDate < SEVEN_DAYS_AGO.getTime() ||
+    Math.abs(currentPubDate - verifiedPubDate) > 1000 * 60 * 60 * 24 * 3
+  ) {
+    deal.pubDate = cached.iso;
+    deal.pubDateSource = cached.source;
+  }
+
+  return true;
 }
 
 function isViennaDeal(deal) {
@@ -55,7 +185,8 @@ function isExpiredOrOld(deal) {
     sourceText.includes('firecrawl consumables') ||
     sourceText.includes('firecrawl instagram direct #4') ||
     sourceText.includes('firecrawl instagram gastro #5');
-  const usesTrustedInstagramPubDate = TRUSTED_IG_PUBDATE_SOURCES.has(String(deal.pubDateSource || ''));
+  const effectivePubDateSource = String(deal.verifiedTargetPubDateSource || deal.pubDateSource || '');
+  const usesTrustedInstagramPubDate = TRUSTED_IG_PUBDATE_SOURCES.has(effectivePubDateSource);
 
   if (isInstagramDeal && !isStrictRecentSocialDeal && !usesTrustedInstagramPubDate) {
     return { expired: true, reason: 'Instagram-Deal ohne vertrauenswürdige pubDateSource' };
@@ -66,12 +197,13 @@ function isExpiredOrOld(deal) {
     if (!(url.includes('instagram.com') || url.includes('tiktok.com'))) {
       return { expired: true, reason: 'Firecrawl Social Deal ohne Instagram- oder TikTok-URL' };
     }
-    if (!deal.pubDate) {
+    const effectivePubDate = getEffectivePubDateValue(deal);
+    if (!effectivePubDate) {
       return { expired: true, reason: 'Firecrawl Social Deal ohne pubDate' };
     }
-    const pub = new Date(deal.pubDate);
+    const pub = new Date(effectivePubDate);
     if (isNaN(pub) || pub < SEVEN_DAYS_AGO) {
-      return { expired: true, reason: `pubDate "${deal.pubDate}" ist älter als 7 Tage oder ungültig` };
+      return { expired: true, reason: `pubDate "${effectivePubDate}" ist älter als 7 Tage oder ungültig` };
     }
     if (!isViennaDeal(deal)) {
       return { expired: true, reason: 'Firecrawl Social Deal ohne klaren Wien-Bezug' };
@@ -98,10 +230,11 @@ function isExpiredOrOld(deal) {
 
   // pubDate-Check: Auch wenn Scraper Date.now() setzen,
   // filtere alles raus was definitiv älter als 2 Wochen ist
-  if (deal.pubDate && !isStrictRecentSocialDeal) {
-    const pub = new Date(deal.pubDate);
+  const effectivePubDate = getEffectivePubDateValue(deal);
+  if (effectivePubDate && !isStrictRecentSocialDeal) {
+    const pub = new Date(effectivePubDate);
     if (!isNaN(pub) && pub < TWO_WEEKS_AGO) {
-      return { expired: true, reason: `pubDate "${deal.pubDate}" → ${pub.toLocaleDateString('de-AT')} ist älter als 2 Wochen` };
+      return { expired: true, reason: `pubDate "${effectivePubDate}" → ${pub.toLocaleDateString('de-AT')} ist älter als 2 Wochen` };
     }
   }
 
@@ -142,6 +275,9 @@ async function main() {
   let urlChecksUsed = 0;
   let urlExpiryHits = 0;
   const urlExpiryCache = new Map();
+  const socialPubDateCache = new Map();
+  let socialPubDateChecksUsed = 0;
+  let socialPubDateHits = 0;
 
   for (const file of files) {
     const filePath = path.join(docsDir, file);
@@ -172,6 +308,13 @@ async function main() {
         }
         if (!hadUrlExpiry && deal.expiresDetectedFromUrl) {
           urlExpiryHits += 1;
+        }
+
+        if (isSocialUrl(deal.url) && socialPubDateChecksUsed < MAX_SOCIAL_PUBDATE_CHECKS) {
+          socialPubDateChecksUsed += 1;
+          if (await enrichSocialTargetPubDate(deal, socialPubDateCache)) {
+            socialPubDateHits += 1;
+          }
         }
 
         const check = isExpiredOrOld(deal);
@@ -207,6 +350,7 @@ async function main() {
 
   console.log();
   console.log(`🔎 URL-Expiry checks: ${urlChecksUsed}/${MAX_URL_EXPIRY_CHECKS}, Treffer: ${urlExpiryHits}`);
+  console.log(`🧭 Social pubDate checks: ${socialPubDateChecksUsed}/${MAX_SOCIAL_PUBDATE_CHECKS}, Treffer: ${socialPubDateHits}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log(`📊 GESAMT: ${totalBefore} → ${totalAfter} Deals (${totalRemoved} entfernt)`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
