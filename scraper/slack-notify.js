@@ -36,7 +36,7 @@ const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const CUTOFF_DATE = Date.now() - SEVEN_DAYS_MS;
 const RECENT_SOCIAL_CUTOFF_DATE = CUTOFF_DATE;
 const DAY_MS = 24 * 60 * 60 * 1000;
-const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate']);
+const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate', 'profileTimeline']);
 
 function ensureObject(value, fallback = {}) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;

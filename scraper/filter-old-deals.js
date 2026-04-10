@@ -19,7 +19,7 @@ const NOW = new Date();
 const TWO_WEEKS_AGO = new Date(NOW.getTime() - TWO_WEEKS_MS);
 const SEVEN_DAYS_AGO = new Date(NOW.getTime() - SEVEN_DAYS_MS);
 const MAX_URL_EXPIRY_CHECKS = 120;
-const TRUSTED_IG_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate']);
+const TRUSTED_IG_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate', 'profileTimeline']);
 
 function normalizeText(value) {
   return String(value || '')
