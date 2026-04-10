@@ -47,6 +47,7 @@ const LEGACY_CHURCH_ID_PATTERNS = [
 const MAX_LIVE_URL_HEALTH_CHECKS = Number(process.env.MAX_LIVE_URL_HEALTH_CHECKS || 180);
 const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REFRESHES || 120);
 const MAX_LIVE_CONTENT_ENRICHMENTS = Number(process.env.MAX_LIVE_CONTENT_ENRICHMENTS || 120);
+const MAX_OPAQUE_SOCIAL_AGE_DAYS = Number(process.env.MAX_LIVE_OPAQUE_SOCIAL_AGE_DAYS || 14);
 const GENERIC_DESCRIPTION_PATTERN = /^(free|gratis|rabatt|discount|deal|angebot|aktion|promo|special|event|post|reel|instagram|coupon|gutschein|gewinnspiel|new|neu)$/i;
 const FOOD_SIGNAL_PATTERN = /\b(eis\w*|ice cream|gelato|kaffee\w*|coffee|cafe|café|pizza\w*|burger\w*|döner\w*|doener\w*|kebab\w*|sushi|ramen|brunch|croissant|drink|drinks|getränk\w*|getraenk\w*|cocktail\w*|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein\w*|vino|fleisch\w*|meat|steak|bbq|grill\w*|bäckerei|backerei|bakery|krapfen\w*)\b/i;
 const COFFEE_SIGNAL_PATTERN = /\b(kaffee|coffee|espresso|latte|cappuccino|cafe|café)\b/i;
@@ -352,6 +353,22 @@ function inferSocialPubDateSource(deal) {
   return 'derivedPubDate';
 }
 
+function isOpaqueSocialShellHealth(health, url = '') {
+  if (!isSocialUrl(url)) return false;
+  const title = cleanUiNoiseText(health?.contentHints?.title || '').toLowerCase();
+  const description = cleanUiNoiseText(health?.contentHints?.description || '');
+  if (description) return false;
+  return title === 'instagram' || title === 'tiktok make your day' || title === 'tiktok - make your day';
+}
+
+function shouldDropOpaqueSocialShellDeal(deal, health, now) {
+  if (!isOpaqueSocialShellHealth(health, health?.finalUrl || deal?.url || '')) return false;
+  const pubDateMs = Date.parse(cleanText(deal?.pubDate || ''));
+  if (!Number.isFinite(pubDateMs)) return true;
+  const ageDays = (now.getTime() - pubDateMs) / (1000 * 60 * 60 * 24);
+  return ageDays >= MAX_OPAQUE_SOCIAL_AGE_DAYS;
+}
+
 function stripSiteSuffix(value) {
   const text = cleanText(value);
   if (!text) return '';
@@ -644,6 +661,7 @@ async function main() {
   const removed = [];
   let linkChecksUsed = 0;
   let brokenLinkRemovals = 0;
+  let opaqueSocialShellRemovals = 0;
   let expiryUrlChecksUsed = 0;
   let urlVerifiedExpiryHits = 0;
   let expiredByVerifiedDateRemovals = 0;
@@ -767,6 +785,12 @@ async function main() {
       if (finalUrl && finalUrl !== currentUrl) {
         deal.url = health.finalUrl;
       }
+    }
+    if (shouldDropOpaqueSocialShellDeal(deal, health, now)) {
+      brokenLinkRemovals += 1;
+      opaqueSocialShellRemovals += 1;
+      markRemoved(deal, 'Social-Post nicht mehr öffentlich verifizierbar');
+      continue;
     }
     if (health?.contentHints && contentEnrichments < MAX_LIVE_CONTENT_ENRICHMENTS) {
       const enriched = maybeEnrichDealCopy(deal, health.contentHints);
@@ -897,6 +921,7 @@ async function main() {
     removedCount: removed.length,
     duplicateCollapses,
     brokenLinkRemovals,
+    opaqueSocialShellRemovals,
     expiredByVerifiedDateRemovals,
     socialPubDateSourceFixes,
     linkChecksUsed,
@@ -915,6 +940,7 @@ async function main() {
   console.log(`Removed deals: ${removed.length}`);
   console.log(`Duplicate collapses: ${duplicateCollapses}`);
   console.log(`Broken link removals: ${brokenLinkRemovals}`);
+  console.log(`Opaque social shell removals: ${opaqueSocialShellRemovals}`);
   console.log(`Social pubDateSource fixes applied: ${socialPubDateSourceFixes}`);
   console.log(`Link health checks: ${linkChecksUsed}/${MAX_LIVE_URL_HEALTH_CHECKS}`);
   console.log(`Expiry refresh checks: ${expiryUrlChecksUsed}/${MAX_LIVE_URL_EXPIRY_REFRESHES}`);
