@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>FreeFinder 🎁 Gratis Deals</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icon-192.svg" type="image/svg+xml">
@@ -6214,6 +6214,24 @@
             window.visualViewport.addEventListener('scroll', updateViewportBottomOffset, { passive: true });
         }
         setupInteractionFeedback();
+        disableIOSViewportZoom();
+
+        function disableIOSViewportZoom() {
+            const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            if (!isIOSDevice) return;
+            ['gesturestart', 'gesturechange', 'gestureend'].forEach((eventName) => {
+                document.addEventListener(eventName, (event) => event.preventDefault(), { passive: false });
+            });
+            document.addEventListener('touchmove', (event) => {
+                if (event.touches && event.touches.length > 1) event.preventDefault();
+            }, { passive: false });
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', (event) => {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) event.preventDefault();
+                lastTouchEnd = now;
+            }, { passive: false });
+        }
 
         async function ensureFreshAppShell() {
             if (!('serviceWorker' in navigator) || !('caches' in window)) return false;
