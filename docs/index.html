@@ -1396,6 +1396,13 @@
                 <div class="countdown-box"><div class="countdown-num" id="countS">00</div><div class="countdown-label">Sek</div></div>
             </div>
             <button class="daily-btn" id="dailyBtn">Jetzt sichern →</button>
+            <div class="featured-lock" id="dailyLock" onclick="openReferralModal()">
+                <div class="featured-lock-content">
+                    <div class="featured-lock-title" id="dailyLockTitle">👑 Nur für PRO</div>
+                    <div class="featured-lock-subtitle" id="dailyLockSubtitle">Der stärkste Deal des Tages ist für PRO reserviert.</div>
+                    <button class="featured-lock-btn" id="dailyLockBtn" onclick="event.stopPropagation(); openReferralModal()">👑 PRO gratis freischalten</button>
+                </div>
+            </div>
         </div>
 
         <div id="featuredDealsHomeAnchor" style="display:none"></div>
@@ -1403,19 +1410,11 @@
         <div class="daily-deal pro-feature-section" id="weeklyDeal" style="display:none">
             <div class="featured-deal-header">
                 <div class="daily-label" id="weeklyLabel">🔥 DEAL DER WOCHE</div>
-                <span class="pro-badge">👑 PRO</span>
             </div>
             <div class="daily-title" id="weeklyTitle">Wird geladen...</div>
             <div class="daily-desc" id="weeklyDesc"></div>
             <div class="featured-deal-meta" id="weeklyMeta"></div>
             <button class="daily-btn" id="weeklyBtn">Top Deal öffnen →</button>
-            <div class="featured-lock" id="weeklyLock" onclick="openReferralModal()">
-                <div class="featured-lock-content">
-                    <div class="featured-lock-title" id="weeklyLockTitle">👑 Nur für PRO</div>
-                    <div class="featured-lock-subtitle" id="weeklyLockSubtitle">Schalte Deal der Woche mit 2 bestätigten Einladungen frei.</div>
-                    <button class="featured-lock-btn" id="weeklyLockBtn" onclick="event.stopPropagation(); openReferralModal()">👑 PRO gratis freischalten</button>
-                </div>
-            </div>
         </div>
 
         <div class="daily-deal pro-feature-section" id="monthlyDeal" style="display:none">
@@ -1786,6 +1785,7 @@
         let submittedLinks = JSON.parse(localStorage.getItem('submittedLinks') || '[]');
         let dealOverridesById = {};
         let dailyDealOverride = null;
+        let activeHomeDailyDealId = '';
         const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
             timeZone: 'Europe/Vienna',
             year: 'numeric',
@@ -1851,11 +1851,14 @@
                 dailyLoading: 'Wird geladen...',
                 dailyFallback: '🎁 Deal des Tages',
                 dailyButton: 'Jetzt sichern →',
+                dailyLockTitle: '👑 Nur für PRO',
+                dailyLockSubtitle: 'Der stärkste Deal des Tages ist für PRO reserviert.',
+                dailyLockButton: '👑 PRO gratis freischalten',
                 weeklyLabel: '🔥 DEAL DER WOCHE',
                 weeklyLoading: 'Wird geladen...',
                 weeklyFallback: '🔥 Deal der Woche',
                 weeklyButton: 'Top Deal öffnen →',
-                weeklyMeta: 'Stärkster Community-Pick der letzten 7 Tage',
+                weeklyMeta: 'Kostenlos für alle diese Woche',
                 monthlyLabel: '🏆 DEAL DES MONATS',
                 monthlyLoading: 'Wird geladen...',
                 monthlyFallback: '🏆 Deal des Monats',
@@ -1877,6 +1880,7 @@
                 proBannerTitle: 'Werde PRO kostenlos',
                 proBannerSub: '2 bestätigte Einladungen reichen und du schaltest die stärksten Vorteile direkt frei.',
                 proFeature1: '⭐ Deal des Tages zuerst',
+                proFeature6: '🔔 Deal Alarm',
                 proFeature2: '🧠 Personalisierte Alerts',
                 proFeature3: '📍 Standort-Filter',
                 proFeature4: '💰 Spartracker & Jahresübersicht',
@@ -2005,6 +2009,9 @@
                 forYouTitle: 'Für dich',
                 forYouSubPro: 'Smarte Empfehlungen auf Basis deiner Favoriten, Einlösungen, Ansichten und deiner Nähe.',
                 forYouSubFree: 'Beliebte Empfehlungen, starke Community-Votes und was gerade heiß läuft.',
+                forYouProCardEyebrow: 'PRO',
+                forYouProCardTitle: 'Mehr Wien mit PRO',
+                forYouProCardSub: 'Deal des Tages, Deal-Alarm, Standort-Filter, Spartracker, Jahresübersicht und smarte Picks an einem Ort.',
                 forYouProBoostTitle: 'PRO macht Für dich klar relevanter',
                 forYouProBoostSub: 'Mehr Signal, weniger Suchen: Alerts, Standortfilter und stärkere Picks an einem Ort.',
                 forYouRecommended: 'Für dich empfohlen',
@@ -2084,11 +2091,14 @@
                 dailyLoading: 'Loading...',
                 dailyFallback: '🎁 Deal of the day',
                 dailyButton: 'Claim now →',
+                dailyLockTitle: '👑 PRO only',
+                dailyLockSubtitle: 'The strongest deal of the day is reserved for PRO.',
+                dailyLockButton: '👑 Unlock PRO for free',
                 weeklyLabel: '🔥 DEAL OF THE WEEK',
                 weeklyLoading: 'Loading...',
                 weeklyFallback: '🔥 Deal of the week',
                 weeklyButton: 'Open top deal →',
-                weeklyMeta: 'Strongest community pick from the last 7 days',
+                weeklyMeta: 'Free for everyone this week',
                 monthlyLabel: '🏆 DEAL OF THE MONTH',
                 monthlyLoading: 'Loading...',
                 monthlyFallback: '🏆 Deal of the month',
@@ -2110,6 +2120,7 @@
                 proBannerTitle: 'Unlock PRO for free',
                 proBannerSub: 'Two confirmed invites are enough to unlock the strongest features right away.',
                 proFeature1: '⭐ Deal of the day first',
+                proFeature6: '🔔 Deal alerts',
                 proFeature2: '🧠 Personalized alerts',
                 proFeature3: '📍 Location filter',
                 proFeature4: '💰 Savings tracker & yearly overview',
@@ -2238,6 +2249,9 @@
                 forYouTitle: 'For You',
                 forYouSubPro: 'Smart recommendations based on your favorites, redemptions, views and proximity.',
                 forYouSubFree: 'Popular recommendations, strong community votes and what is trending now.',
+                forYouProCardEyebrow: 'PRO',
+                forYouProCardTitle: 'Get more from Vienna with PRO',
+                forYouProCardSub: 'Deal of the day, deal alerts, location filter, savings tracker, yearly overview and smarter picks in one place.',
                 forYouProBoostTitle: 'PRO makes For You much more relevant',
                 forYouProBoostSub: 'More signal, less digging: alerts, location filters, and stronger picks in one place.',
                 forYouRecommended: 'Recommended for you',
@@ -2346,6 +2360,9 @@
 
             setText('#dailyDeal .daily-label', t('dailyLabel'));
             setText('#dailyBtn', t('dailyButton'));
+            setText('#dailyLockTitle', t('dailyLockTitle'));
+            setText('#dailyLockSubtitle', t('dailyLockSubtitle'));
+            setText('#dailyLockBtn', t('dailyLockButton'));
             if (document.getElementById('dailyTitle')?.textContent === 'Wird geladen...' || document.getElementById('dailyTitle')?.textContent === 'Loading...') {
                 setText('#dailyTitle', t('dailyLoading'));
             }
@@ -4546,6 +4563,7 @@
         async function setDailyDeal() {
         // Helper to clean Slack formatting
         function cleanText(t) { return cleanUiNoiseText(t); }
+        activeHomeDailyDealId = '';
         const activeDailyDealOverride = isCurrentDailyDealRecord(dailyDealOverride)
             ? normalizeDailyDealRecord(dailyDealOverride)
             : null;
@@ -4560,6 +4578,8 @@
                 document.getElementById('dailyTitle').textContent = (overridden.logo || '') + ' ' + (_brandOverride ? (_brandOverride + ': ') : '') + _titleOverride;
                 document.getElementById('dailyDesc').textContent = _descOverride + (_locOverride ? ' — ' + _locOverride : '');
                 document.getElementById('dailyBtn').onclick = () => { window.open(normalizeExternalUrl(overridden.url), '_blank'); trackDealView(overridden.id); };
+                activeHomeDailyDealId = overridden.id || '';
+                updateFeaturedLockState();
                 return;
             }
         }
@@ -4582,6 +4602,8 @@
                     document.getElementById('dailyTitle').textContent = (deal.logo || picked.logo || '') + ' ' + (_brand ? (_brand + ': ') : '') + _title;
                     document.getElementById('dailyDesc').textContent = _desc + (_loc ? ' — ' + _loc : '');
                     document.getElementById('dailyBtn').onclick = () => { window.open(normalizeExternalUrl(deal.url || picked.url), '_blank'); trackDealView(deal.id || picked.dealId); };
+                    activeHomeDailyDealId = deal.id || picked.dealId || '';
+                    updateFeaturedLockState();
                     return;
                 }
             }
@@ -4593,6 +4615,7 @@
           document.getElementById('dailyTitle').textContent = t('dailyFallback');
           document.getElementById('dailyDesc').textContent = currentLanguage === 'en' ? 'Available soon' : 'Bald verfügbar';
           document.getElementById('dailyBtn').onclick = () => {};
+          updateFeaturedLockState();
           return;
         }
         const _loc2 = getDisplayLocation(deal);
@@ -4603,6 +4626,8 @@
         document.getElementById('dailyTitle').textContent = (deal.logo || '') + ' ' + (_brand2 ? (_brand2 + ': ') : '') + _title2;
         document.getElementById('dailyDesc').textContent = _desc2 + (_loc2 ? ' — ' + _loc2 : '');
         document.getElementById('dailyBtn').onclick = () => { window.open(normalizeExternalUrl(deal.url), '_blank'); trackDealView(deal.id); };
+        activeHomeDailyDealId = deal.id || '';
+        updateFeaturedLockState();
     }
         function applyDailyDealTheme(type) {
             const dailyDealEl = document.getElementById('dailyDeal');
@@ -4714,8 +4739,9 @@
         }
         function setFeaturedHomeDeals() {
             syncFeaturedDealPlacement();
-            const weeklyDeal = pickFeaturedDeal(7);
-            const monthlyDeal = pickFeaturedDeal(30, { excludeIds: weeklyDeal ? [weeklyDeal.id] : [] });
+            const excludedIds = [activeHomeDailyDealId].filter(Boolean);
+            const weeklyDeal = pickFeaturedDeal(7, { excludeIds });
+            const monthlyDeal = pickFeaturedDeal(30, { excludeIds: [...excludedIds, weeklyDeal ? weeklyDeal.id : ''].filter(Boolean) });
             renderFeaturedDealCard({
                 containerId: 'weeklyDeal',
                 titleId: 'weeklyTitle',
@@ -4771,19 +4797,19 @@
             }
         }
         function updateFeaturedLockState() {
-            const isLocked = !proData.isPro;
-            const isForYou = currentView === 'secret';
-            [
-                ['weeklyDeal', 'weeklyLock'],
-                ['monthlyDeal', 'monthlyLock']
-            ].forEach(([cardId, lockId]) => {
-                const card = document.getElementById(cardId);
-                const lock = document.getElementById(lockId);
-                if (!card || !lock) return;
-                card.classList.toggle('featured-locked', isLocked);
-                lock.classList.toggle('single-cta', isForYou && isLocked);
-                lock.style.display = (isForYou && isLocked) ? 'flex' : 'none';
-            });
+            const dailyCard = document.getElementById('dailyDeal');
+            const dailyLock = document.getElementById('dailyLock');
+            const shouldLockDaily = currentView === 'home' && !proData.isPro;
+            if (dailyCard && dailyLock) {
+                dailyCard.classList.toggle('featured-locked', shouldLockDaily);
+                dailyLock.style.display = shouldLockDaily ? 'flex' : 'none';
+            }
+            const monthlyCard = document.getElementById('monthlyDeal');
+            const monthlyLock = document.getElementById('monthlyLock');
+            if (monthlyCard && monthlyLock) {
+                monthlyCard.classList.remove('featured-locked');
+                monthlyLock.style.display = 'none';
+            }
         }
         function updateCounts() {
             document.getElementById('countAll').textContent = allDeals.length;
@@ -5717,18 +5743,19 @@
             const trending = getTrendingDeals(discoveryDeals);
 
             const intro = '<div class="discovery-page-header"><div class="discovery-page-kicker">' + (currentLanguage === 'en' ? 'For You' : 'Für dich') + '</div><h2 class="discovery-page-title">' + t('forYouTitle') + '</h2><p class="discovery-page-subtitle">' + (proData.isPro ? t('forYouSubPro') : t('forYouSubFree')) + '</p></div>';
-            const proBoostChips = currentLanguage === 'en'
-                ? '<span class="premium-note-chip">Alerts</span><span class="premium-note-chip">Location</span><span class="premium-note-chip">Top picks</span>'
-                : '<span class="premium-note-chip">Alerts</span><span class="premium-note-chip">Standort</span><span class="premium-note-chip">Top Picks</span>';
-            const proBoostCard = proData.isPro ? '' : '<div class="premium-note-card" onclick="openReferralModal()"><div class="premium-note-eyebrow">PRO</div><div class="premium-note-title">' + t('forYouProBoostTitle') + '</div><div class="premium-note-copy">' + t('forYouProBoostSub') + '</div><div class="premium-note-chips">' + proBoostChips + '</div><button class="premium-note-btn">' + t('unlockProFree') + '</button></div>';
-            const featuredIntro = '<div class="for-you-featured-wrap"><div class="premium-discovery-head"><div><div class="premium-discovery-title">' + (currentLanguage === 'en' ? 'Premium picks' : 'Premium Picks') + '</div><div class="premium-discovery-subtitle">' + (currentLanguage === 'en' ? 'Week and month highlights stay together here, calmer and easier to scan.' : 'Hier liegen Wochen- und Monatshighlights zusammen, ruhiger und leichter zu scannen.') + '</div></div><span class="pro-badge">👑 PRO</span></div><div class="for-you-featured-grid" id="forYouFeaturedMount"></div></div>';
+            const proFeatureItems = [t('proFeature1'), t('proFeature6'), t('proFeature2'), t('proFeature3'), t('proFeature4'), t('proFeature5')]
+                .map((label) => '<span class="premium-note-chip">' + label + '</span>')
+                .join('');
+            const proBoostCard = proData.isPro
+                ? '<div id="forYouAlertsMount" style="display:grid;gap:16px"></div>'
+                : '<div class="premium-note-card" onclick="openReferralModal()"><div class="premium-note-eyebrow">' + t('forYouProCardEyebrow') + '</div><div class="premium-note-title">' + t('forYouProCardTitle') + '</div><div class="premium-note-copy">' + t('forYouProCardSub') + '</div><div class="premium-note-chips">' + proFeatureItems + '</div><button class="premium-note-btn">' + t('unlockProFree') + '</button></div>';
             const recommendedSection = renderDiscoverySection(t('forYouRecommended'), proData.isPro ? t('forYouRecommendedSubPro') : t('forYouRecommendedSubFree'), recommended, (deal) => getRecommendationReason(deal));
             const topVotedSection = renderDiscoverySection(t('forYouTopVoted'), t('forYouTopVotedSub'), topVoted, (_, index) => index === 0 ? (currentLanguage === 'en' ? 'Community favorite' : 'Community-Favorit') : (currentLanguage === 'en' ? 'Lots of votes' : 'Viele Stimmen'));
             const trendingSection = renderDiscoverySection(t('forYouTrending'), t('forYouTrendingSub'), trending, (deal) => deal.hot ? (currentLanguage === 'en' ? 'Hot right now' : 'Gerade heiß') : (deal.isNew ? (currentLanguage === 'en' ? 'Freshly discovered' : 'Frisch entdeckt') : (currentLanguage === 'en' ? 'Gaining momentum' : 'Im Aufwind')));
             const submitCta = '<div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:18px;padding:20px;color:white;text-align:center;cursor:pointer" onclick="openLinkModal()"><div style="font-size:34px;margin-bottom:8px">🔗</div><div style="font-size:18px;font-weight:700">' + t('submitDeal') + '</div><div style="font-size:14px;opacity:0.9;margin-top:4px">' + t('submitDealSub') + '</div></div>';
 
-            document.getElementById('deals').innerHTML = '<div style="padding:4px 0">' + intro + recommendedSection + topVotedSection + trendingSection + '<div class="premium-discovery-shell">' + proBoostCard + '<div id="forYouAlertsMount" style="display:grid;gap:16px"></div>' + featuredIntro + '</div>' + submitCta + '</div>';
-            mountSectionInto('dealAlarmCard', 'forYouAlertsMount', 'block');
+            document.getElementById('deals').innerHTML = '<div style="padding:4px 0">' + intro + recommendedSection + topVotedSection + trendingSection + '<div class="premium-discovery-shell">' + proBoostCard + '</div>' + submitCta + '</div>';
+            if (proData.isPro) mountSectionInto('dealAlarmCard', 'forYouAlertsMount', 'block');
             setFeaturedHomeDeals();
             scrollToTopContent();
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -5782,7 +5809,8 @@
                 const requiresPro = PRO_HOME_SECTION_IDS.has(id);
                 let shouldShow = isHome && (!requiresPro || proData.isPro);
                 if (id === 'proActiveBadge') shouldShow = isHome && proData.isPro;
-                if (id === 'weeklyDeal' || id === 'monthlyDeal') shouldShow = isForYou;
+                if (id === 'weeklyDeal') shouldShow = isHome;
+                if (id === 'monthlyDeal') shouldShow = false;
                 if (id === 'savingsProCard' || id === 'yearOverview' || id === 'dealAlarmCard') shouldShow = false;
                 el.style.display = shouldShow ? displayValue : 'none';
             });
