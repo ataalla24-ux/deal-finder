@@ -41,6 +41,10 @@ const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTime
 const SOCIAL_FRESHNESS_TIMEOUT_MS = Number(process.env.SOCIAL_FRESHNESS_TIMEOUT_MS || 8000);
 const MAX_SOCIAL_FRESHNESS_CHECKS = Number(process.env.MAX_SOCIAL_FRESHNESS_CHECKS || 60);
 const SOCIAL_FRESHNESS_CONCURRENCY = Math.max(1, Number(process.env.SOCIAL_FRESHNESS_CONCURRENCY || 6));
+const PENDING_FILE_NAMES = String(process.env.PENDING_FILE_NAMES || '')
+  .split(',')
+  .map((value) => cleanText(value))
+  .filter(Boolean);
 const MONTH_MAP = {
   'jänner': 0, 'januar': 0, 'january': 0, 'jan': 0,
   'februar': 1, 'february': 1, 'feb': 1,
@@ -447,6 +451,7 @@ function normalizeDeal(rawDeal, sourceKey) {
 
   return {
     id,
+    submissionId: cleanText(deal.submissionId).replace(/^community:/, ''),
     brand,
     title,
     description: cleanText(deal.description),
@@ -471,7 +476,7 @@ function normalizeDeal(rawDeal, sourceKey) {
 
 function getPendingFiles() {
   const files = fs.readdirSync(DOCS_DIR);
-  return files.filter((file) => {
+  const discovered = files.filter((file) => {
     if (!file.startsWith('deals-pending-') || !file.endsWith('.json')) return false;
     if (file === 'deals-pending-merged.json') return false;
     if (file === 'deals-pending-all.json') return false;
@@ -479,6 +484,8 @@ function getPendingFiles() {
     if (file === 'deals-pending-instagram-discovery.json') return false;
     return true;
   });
+  if (PENDING_FILE_NAMES.length === 0) return discovered;
+  return discovered.filter((file) => PENDING_FILE_NAMES.includes(file));
 }
 
 function loadPendingDeals() {

@@ -64,6 +64,10 @@ function dealDailyKey() {
   return 'deal:daily';
 }
 
+function dealSubmissionKey(id) {
+  return `deal:submission:${id}`;
+}
+
 function getViennaDayKey(input = Date.now()) {
   const date = input instanceof Date ? input : new Date(input || Date.now());
   if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
@@ -80,6 +84,25 @@ function normalizeDailyDealRecord(record) {
     updatedAt,
     date,
   };
+}
+
+function normalizeSubmissionUrl(value) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  try {
+    const url = new URL(text);
+    if (!['http:', 'https:'].includes(url.protocol)) return '';
+    url.hash = '';
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
+function normalizeSubmissionStatus(value) {
+  const status = String(value || '').trim().toLowerCase();
+  if (['pending', 'queued', 'approved', 'rejected'].includes(status)) return status;
+  return 'pending';
 }
 
 function isCurrentDailyDealRecord(record) {
@@ -197,6 +220,15 @@ function requireAdmin(request, env) {
   return bearer === expected || direct === expected;
 }
 
+function requireCommunitySync(request, env) {
+  const expected = String(env.COMMUNITY_SYNC_TOKEN || '').trim();
+  if (!expected) return false;
+  const authHeader = request.headers.get('authorization') || '';
+  const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  const direct = request.headers.get('x-community-token') || '';
+  return bearer === expected || direct === expected;
+}
+
 function buildApnsBody(body) {
   const aps = {
     sound: typeof body?.sound === 'string' && body.sound.trim() ? body.sound.trim() : 'default',
@@ -307,6 +339,46 @@ async function listDealOverrides(env, limit = 500) {
   return records;
 }
 
+async function listCommunitySubmissions(env, options = {}) {
+  const limit = Math.max(1, Math.min(200, Number(options.limit || 100)));
+  const statuses = new Set(
+    (Array.isArray(options.statuses) ? options.statuses : [options.statuses || 'pending'])
+      .map(normalizeSubmissionStatus)
+      .filter(Boolean)
+  );
+  const listed = await env.REFERRAL_KV.list({ prefix: 'deal:submission:', limit });
+  const keys = Array.isArray(listed?.keys) ? listed.keys : [];
+  const records = [];
+
+  for (const entry of keys) {
+    const record = await getJsonKV(env, entry.name);
+    if (!record || !record.id) continue;
+    if (statuses.size > 0 && !statuses.has(normalizeSubmissionStatus(record.status))) continue;
+    records.push(record);
+  }
+
+  records.sort((a, b) => Number(b?.submittedAt || b?.createdAt || 0) - Number(a?.submittedAt || a?.createdAt || 0));
+  return records.slice(0, limit);
+}
+
+async function findExistingSubmissionByUrl(env, targetUrl) {
+  const normalizedUrl = normalizeSubmissionUrl(targetUrl);
+  if (!normalizedUrl) return null;
+
+  const listed = await env.REFERRAL_KV.list({ prefix: 'deal:submission:', limit: 200 });
+  const keys = Array.isArray(listed?.keys) ? listed.keys : [];
+
+  for (const entry of keys) {
+    const record = await getJsonKV(env, entry.name);
+    if (!record || !record.id) continue;
+    if (normalizeSubmissionUrl(record.url) !== normalizedUrl) continue;
+    const status = normalizeSubmissionStatus(record.status);
+    if (status === 'pending' || status === 'queued') return record;
+  }
+
+  return null;
+}
+
 function sanitizePublicDealOverride(record) {
   if (!record || !record.dealId) return null;
   return {
@@ -339,6 +411,24 @@ function sanitizePublicDailyDeal(record) {
   };
 }
 
+function sanitizePublicCommunitySubmission(record) {
+  if (!record || !record.id) return null;
+  return {
+    id: record.id,
+    url: normalizeSubmissionUrl(record.url),
+    brand: cleanShortText(record.brand, 120),
+    logo: cleanShortText(record.logo, 16),
+    title: cleanShortText(record.title, 240),
+    category: cleanShortText(record.category, 80).toLowerCase(),
+    type: cleanShortText(record.type, 40).toLowerCase(),
+    status: normalizeSubmissionStatus(record.status),
+    submittedAt: Number(record.submittedAt || record.createdAt || 0) || null,
+    postedAt: Number(record.postedAt || 0) || null,
+    reviewedAt: Number(record.reviewedAt || 0) || null,
+    submittedFrom: cleanShortText(record.submittedFrom, 64),
+  };
+}
+
 function normalizePinnedRank(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return 0;
@@ -351,6 +441,30 @@ function cleanShortText(value, max = 240) {
 
 function cleanLongText(value, max = 2500) {
   return String(value || '').trim().replace(/\s+/g, ' ').slice(0, max);
+}
+
+function normalizeCommunitySubmissionInput(body, request) {
+  const url = normalizeSubmissionUrl(body?.url);
+  if (!url) return null;
+
+  return {
+    id: crypto.randomUUID(),
+    url,
+    brand: cleanShortText(body?.brand, 120),
+    logo: cleanShortText(body?.logo, 16),
+    title: cleanShortText(body?.title, 240),
+    category: cleanShortText(body?.category, 80).toLowerCase() || 'wien',
+    type: cleanShortText(body?.type, 40).toLowerCase() || 'rabatt',
+    status: 'pending',
+    submittedAt: Date.now(),
+    createdAt: Date.now(),
+    postedAt: 0,
+    reviewedAt: 0,
+    submittedFrom: cleanShortText(body?.submittedFrom, 64) || 'web-app',
+    language: cleanShortText(body?.language, 12).toLowerCase(),
+    userAgent: cleanLongText(body?.userAgent || request.headers.get('user-agent'), 512),
+    ipHint: cleanShortText(request.headers.get('cf-connecting-ip'), 64),
+  };
 }
 
 function normalizeDealOverrideInput(body, existing = null) {
@@ -943,6 +1057,73 @@ export default {
         overrides: overrides.map(sanitizePublicDealOverride).filter(Boolean),
         dailyDeal: isCurrentDailyDealRecord(dailyDeal) ? sanitizePublicDailyDeal(dailyDeal) : null,
       });
+    }
+
+    if (path === '/api/deals/submissions' && request.method === 'POST') {
+      const body = await readBody(request);
+      const submission = normalizeCommunitySubmissionInput(body, request);
+      if (!submission) return invalid('Invalid deal submission');
+
+      const existing = await findExistingSubmissionByUrl(env, submission.url);
+      if (existing) {
+        return json({
+          ok: true,
+          alreadyQueued: true,
+          submission: sanitizePublicCommunitySubmission(existing),
+        });
+      }
+
+      await putJsonKV(env, dealSubmissionKey(submission.id), submission);
+      return json({
+        ok: true,
+        submission: sanitizePublicCommunitySubmission(submission),
+      }, 201);
+    }
+
+    if (path === '/api/deals/submissions/admin/pending' && request.method === 'GET') {
+      if (!requireCommunitySync(request, env) && !requireAdmin(request, env)) {
+        return invalid('Unauthorized', 401);
+      }
+
+      const limit = Math.max(1, Math.min(200, Number(url.searchParams.get('limit') || 100)));
+      const statuses = String(url.searchParams.get('status') || 'pending')
+        .split(',')
+        .map((value) => normalizeSubmissionStatus(value))
+        .filter(Boolean);
+      const submissions = await listCommunitySubmissions(env, { limit, statuses });
+
+      return json({
+        ok: true,
+        submissions: submissions.map(sanitizePublicCommunitySubmission).filter(Boolean),
+      });
+    }
+
+    if (path === '/api/deals/submissions/admin/mark-posted' && request.method === 'POST') {
+      if (!requireCommunitySync(request, env) && !requireAdmin(request, env)) {
+        return invalid('Unauthorized', 401);
+      }
+
+      const body = await readBody(request);
+      const ids = Array.isArray(body?.ids)
+        ? body.ids.map((value) => cleanShortText(value, 80)).filter(Boolean)
+        : [];
+      if (ids.length === 0) return invalid('Missing submission ids');
+
+      let updated = 0;
+      for (const id of ids) {
+        const existing = await getJsonKV(env, dealSubmissionKey(id));
+        if (!existing || !existing.id) continue;
+        const next = {
+          ...existing,
+          status: 'queued',
+          postedAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        await putJsonKV(env, dealSubmissionKey(id), next);
+        updated += 1;
+      }
+
+      return json({ ok: true, updated });
     }
 
     if (path === '/api/deals/admin/check' && request.method === 'GET') {

@@ -1,0 +1,65 @@
+name: "Community Deal Intake"
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: community-deal-intake
+  cancel-in-progress: false
+
+jobs:
+  intake:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Fetch community submissions
+        env:
+          COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
+        run: node scraper/fetch-community-submissions.js
+
+      - name: Send community submissions to Slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          PENDING_FILE_NAMES: deals-pending-community.json
+        run: node scraper/slack-notify.js
+
+      - name: Mark community submissions as queued
+        env:
+          COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
+        run: node scraper/ack-community-submissions.js
+
+      - name: Commit queue state
+        run: |
+          git config user.name "Deal Bot"
+          git config user.email "bot@freefinder.wien"
+          git add docs/deals-pending-community.json docs/deals-pending-all.json docs/sent-deal-ids.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Community intake state $(date +%Y-%m-%d-%H%M)"
+          if ! git pull --rebase --autostash origin main; then
+            echo "⚠️ Rebase conflict on generated files. Skipping push for this run."
+            git rebase --abort || true
+            exit 0
+          fi
+          if ! git push origin HEAD:main; then
+            echo "⚠️ Push failed (branch moved). Skipping push for this run."
+            exit 0
+          fi

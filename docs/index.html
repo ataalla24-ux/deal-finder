@@ -1449,7 +1449,7 @@
             display: none;
         }
         .fab-add {
-            display: none;
+            display: flex;
         }
         .pro-banner {
             display: none !important;
@@ -2167,11 +2167,14 @@
                 linkPaste: '📋 Aus Zwischenablage einfügen',
                 linkRecognizing: 'Wird erkannt...',
                 linkAnalyzing: 'Deal wird analysiert...',
-                linkRewardText: '🎁 Belohnung für deinen Beitrag zur Community!',
+                linkRewardText: '🎁 Gute Funde landen erst nach kurzer Prüfung live in der App.',
                 linkSubmit: '🚀 Deal einreichen',
                 successTitle: 'DEAL EINGEREICHT!',
-                successSub: 'Danke für deinen Beitrag!',
+                successSub: 'Dein Link landet jetzt zuerst bei FreeFinder zur Prüfung.',
                 successBonus: '🏆 Du bist jetzt Deal-Hunter Rang #',
+                submitQueued: '✅ Deal ist jetzt in der Prüfung und landet erst nach Freigabe live.',
+                submitDuplicateQueued: '✅ Dieser Deal ist schon in der Prüfung.',
+                submitFailed: '⚠️ Deal konnte gerade nicht eingereicht werden.',
                 adminTitle: 'Deal bearbeiten',
                 adminSubtitle: 'Korrigiere Text, Datum, Reihenfolge oder setze den Deal direkt als Deal des Tages.',
                 adminFieldTitle: 'Titel',
@@ -2407,11 +2410,14 @@
                 linkPaste: '📋 Paste from clipboard',
                 linkRecognizing: 'Recognizing...',
                 linkAnalyzing: 'Analyzing deal...',
-                linkRewardText: '🎁 Reward for helping the community!',
+                linkRewardText: '🎁 Great finds go live only after a short review first.',
                 linkSubmit: '🚀 Submit deal',
                 successTitle: 'DEAL SUBMITTED!',
-                successSub: 'Thanks for your contribution!',
+                successSub: 'Your link now goes into FreeFinder review first.',
                 successBonus: '🏆 You are now Deal Hunter rank #',
+                submitQueued: '✅ Deal is now in review and will go live only after approval.',
+                submitDuplicateQueued: '✅ This deal is already in review.',
+                submitFailed: '⚠️ Deal could not be submitted right now.',
                 adminTitle: 'Edit deal',
                 adminSubtitle: 'Fix text, dates and ranking or set this deal as the deal of the day.',
                 adminFieldTitle: 'Title',
@@ -6221,51 +6227,49 @@
             };
         }
         
-        function submitDealLink() {
+        async function submitDealLink() {
             if (!currentLinkData) return;
-            
-            // Save the link as submitted
-            submittedLinks.push(currentLinkData.url);
-            localStorage.setItem('submittedLinks', JSON.stringify(submittedLinks));
-            
-            // Create new deal
-            const newDeal = {
-                id: currentLinkData.id,
-                brand: currentLinkData.brand,
-                logo: currentLinkData.logo,
-                title: currentLinkData.title,
-                description: '📱 Von der Community entdeckt! Überprüfe den Deal auf der Website.',
-                type: currentLinkData.type,
-                category: currentLinkData.category,
-                source: 'Community',
-                url: currentLinkData.url,
-                expires: 'Siehe Website',
-                distance: 'Online',
-                hot: true,
-                isNew: true,
-                isUserSubmitted: true,
-                submittedAt: Date.now(),
-                votes: 5
-            };
-            
-            // Add to user deals
-            userDeals.unshift(newDeal);
-            localStorage.setItem('userDeals', JSON.stringify(userDeals));
-            
-            // Update stats
-            userData.dealsSubmitted = (userData.dealsSubmitted || 0) + 1;
-            saveUserData();
-            
-            // Close modal
-            closeLinkModal();
-            
-            // Show success animation
-            showSuccessAnimation();
-            
-            // Reload deals
-            setTimeout(() => {
-                loadDeals();
-            }, 500);
+
+            const submitBtn = document.getElementById('linkSubmitBtn');
+            if (submitBtn.dataset.loading === '1') return;
+
+            submitBtn.dataset.loading = '1';
+            submitBtn.disabled = true;
+
+            try {
+                const result = await referralApi('/api/deals/submissions', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        url: currentLinkData.url,
+                        brand: currentLinkData.brand,
+                        logo: currentLinkData.logo,
+                        title: currentLinkData.title,
+                        category: currentLinkData.category,
+                        type: currentLinkData.type,
+                        submittedFrom: 'web-app',
+                        language: currentLanguage,
+                        userAgent: navigator.userAgent || ''
+                    })
+                });
+
+                if (!submittedLinks.includes(currentLinkData.url)) {
+                    submittedLinks.push(currentLinkData.url);
+                    localStorage.setItem('submittedLinks', JSON.stringify(submittedLinks));
+                }
+
+                userData.dealsSubmitted = (userData.dealsSubmitted || 0) + 1;
+                saveUserData();
+
+                closeLinkModal();
+                showSuccessAnimation();
+                showToast(result && result.alreadyQueued ? t('submitDuplicateQueued') : t('submitQueued'));
+            } catch (error) {
+                const message = error && error.message ? error.message : t('submitFailed');
+                showToast(message);
+            } finally {
+                submitBtn.dataset.loading = '0';
+                submitBtn.disabled = !currentLinkData;
+            }
         }
         
         function showSuccessAnimation() {

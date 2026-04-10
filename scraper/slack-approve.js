@@ -234,6 +234,7 @@ function normalizeDeal(raw) {
 
   return {
     id: cleanText(deal.id) || `slack-${cleanText(deal.slackTs)}`,
+    submissionId: cleanText(deal.submissionId).replace(/^community:/, ''),
     brand,
     title,
     description,
@@ -342,23 +343,22 @@ async function getBotUserId() {
   return data.user_id || '';
 }
 
-async function findLatestDigestThreadTs() {
+async function findRecentDigestThreadTs() {
   const query = new URLSearchParams({
     channel: SLACK_CHANNEL_ID,
-    limit: '20',
+    limit: '50',
   });
   const data = await slackApi(`https://slack.com/api/conversations.history?${query.toString()}`);
-  if (!data.ok) return '';
+  if (!data.ok) return [];
 
   const messages = ensureArray(data.messages);
   const today = new Date().toDateString();
-  const match = messages.find((msg) => {
+  return messages.filter((msg) => {
     const text = cleanText(msg?.text);
     if (!text.includes('FreeFinder Wien')) return false;
     const msgDate = new Date(parseFloat(msg.ts || '0') * 1000).toDateString();
     return msgDate === today;
-  });
-  return cleanText(match?.ts);
+  }).map((msg) => cleanText(msg?.ts)).filter(Boolean);
 }
 
 async function getThreadMessages(threadTs) {
@@ -506,21 +506,52 @@ async function main() {
 
   const botUserId = await getBotUserId();
   console.log(`🤖 Bot User ID: ${botUserId || 'unknown'}`);
-  const latestThreadTs = await findLatestDigestThreadTs();
-  if (!latestThreadTs) {
-    console.log('ℹ️ Kein heutiger Digest-Thread gefunden');
+  const queuedDeals = loadPendingDeals();
+  const queueThreadTs = [...new Set(queuedDeals.map((deal) => cleanText(deal.slackThreadTs)).filter(Boolean))];
+  const recentThreadTs = await findRecentDigestThreadTs();
+  const threadCandidates = [...new Set([...queueThreadTs, ...recentThreadTs])].filter(Boolean);
+
+  if (threadCandidates.length === 0) {
+    console.log('ℹ️ Kein offener Digest- oder Community-Thread gefunden');
     return;
   }
 
-  const threadMessages = await getThreadMessages(latestThreadTs);
-  console.log(`🧵 loaded latest digest ${latestThreadTs}: ${threadMessages.length} messages`);
+  const threadMessagesByThread = new Map();
+  const messageByTs = new Map();
+  const pendingDeals = [];
 
-  const parsedDeals = extractDealsFromThreadMessages(threadMessages);
-  const pendingDeals = parsedDeals.length > 0 ? parsedDeals : loadPendingDeals().filter((d) => d.slackThreadTs === latestThreadTs);
-  console.log(`📋 Pending posted deals for latest digest: ${pendingDeals.length}`);
+  for (const threadTs of threadCandidates) {
+    const threadMessages = await getThreadMessages(threadTs);
+    threadMessagesByThread.set(threadTs, threadMessages);
+    console.log(`🧵 loaded digest thread ${threadTs}: ${threadMessages.length} messages`);
 
-  if (pendingDeals.length === 0) {
-    const sample = threadMessages.find((msg) => cleanText(msg?.ts) !== latestThreadTs);
+    for (const msg of threadMessages) {
+      if (msg?.ts) messageByTs.set(String(msg.ts), msg);
+    }
+
+    const parsedDeals = extractDealsFromThreadMessages(threadMessages);
+    const queueDealsForThread = queuedDeals.filter((deal) => cleanText(deal.slackThreadTs) === threadTs);
+    if (parsedDeals.length > 0) {
+      pendingDeals.push(...parsedDeals);
+    } else {
+      pendingDeals.push(...queueDealsForThread);
+    }
+  }
+
+  const dedupedPendingDeals = [];
+  const seenPendingKeys = new Set();
+  for (const deal of pendingDeals) {
+    const key = cleanText(deal.slackTs) || cleanText(deal.id);
+    if (!key || seenPendingKeys.has(key)) continue;
+    seenPendingKeys.add(key);
+    dedupedPendingDeals.push(deal);
+  }
+
+  console.log(`📋 Pending posted deals across ${threadCandidates.length} thread(s): ${dedupedPendingDeals.length}`);
+
+  if (dedupedPendingDeals.length === 0) {
+    const sampleThread = threadMessagesByThread.get(threadCandidates[0]) || [];
+    const sample = sampleThread.find((msg) => cleanText(msg?.ts) !== threadCandidates[0]);
     if (sample) {
       console.log('🧪 sample digest message text:', JSON.stringify(extractSlackMessageText(sample).slice(0, 1000)));
       console.log('🧪 sample digest message keys:', Object.keys(sample).slice(0, 20).join(','));
@@ -531,16 +562,11 @@ async function main() {
     return;
   }
 
-  const messageByTs = new Map();
-  for (const msg of threadMessages) {
-    if (msg?.ts) messageByTs.set(String(msg.ts), msg);
-  }
-
   const approved = [];
   const unapproved = [];
 
-  for (let i = 0; i < pendingDeals.length; i += 1) {
-    const deal = pendingDeals[i];
+  for (let i = 0; i < dedupedPendingDeals.length; i += 1) {
+    const deal = dedupedPendingDeals[i];
     const msg = messageByTs.get(deal.slackTs);
     let reactions = msg && Array.isArray(msg.reactions) ? msg.reactions : [];
     if (reactions.length === 0 && deal.slackTs) {
@@ -555,7 +581,7 @@ async function main() {
     }
 
     if ((i + 1) % 25 === 0) {
-      console.log(`  ✅ checked ${i + 1}/${pendingDeals.length}`);
+      console.log(`  ✅ checked ${i + 1}/${dedupedPendingDeals.length}`);
     }
 
     await sleep(200);
