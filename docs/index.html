@@ -4740,7 +4740,7 @@
         function setFeaturedHomeDeals() {
             syncFeaturedDealPlacement();
             const excludedIds = [activeHomeDailyDealId].filter(Boolean);
-            const weeklyDeal = pickFeaturedDeal(7, { excludeIds });
+            const weeklyDeal = pickFeaturedDeal(7, { excludeIds: excludedIds });
             const monthlyDeal = pickFeaturedDeal(30, { excludeIds: [...excludedIds, weeklyDeal ? weeklyDeal.id : ''].filter(Boolean) });
             renderFeaturedDealCard({
                 containerId: 'weeklyDeal',
