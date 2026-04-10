@@ -331,6 +331,32 @@ function buildCookieHints() {
   return hints;
 }
 
+function buildCookieHeader() {
+  const parts = [];
+  const seen = new Set();
+  for (const hint of buildCookieHints()) {
+    const name = cleanText(hint?.name);
+    const value = cleanText(hint?.value);
+    if (!name || !value) continue;
+    const pair = `${name}=${value}`;
+    if (seen.has(pair)) continue;
+    seen.add(pair);
+    parts.push(pair);
+  }
+  return parts.join('; ');
+}
+
+function buildInstagramApiHeaders(cookieHeader, referer = 'https://www.instagram.com/') {
+  return {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    Cookie: cookieHeader,
+    'X-IG-App-ID': '936619743392459',
+    'X-Requested-With': 'XMLHttpRequest',
+    Referer: referer,
+    Accept: '*/*',
+  };
+}
+
 async function dismissInstagramOverlays(page) {
   const labels = [
     'Nur erforderliche Cookies erlauben',
@@ -390,6 +416,249 @@ async function fetchInstagramProfileInBrowser(page, username) {
   } catch {
     return null;
   }
+}
+
+async function fetchInstagramProfileDirect(username, cookieHeader) {
+  if (!username || !cookieHeader) return null;
+  try {
+    const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
+    const response = await fetch(url, {
+      headers: buildInstagramApiHeaders(cookieHeader, `https://www.instagram.com/${encodeURIComponent(username)}/`),
+    });
+    if (!response.ok) return null;
+    const parsed = await response.json();
+    return parsed?.data?.user || null;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeInstagramPostUrl(rawUrl) {
+  const text = cleanText(rawUrl);
+  if (!text) return '';
+  try {
+    const decoded = decodeURIComponent(text);
+    const directMatch = decoded.match(/https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel)\/[A-Za-z0-9_-]+\/?/i);
+    if (!directMatch) return '';
+    const u = new URL(directMatch[0]);
+    const parts = u.pathname.split('/').filter(Boolean);
+    if (parts.length < 2) return '';
+    return `https://www.instagram.com/${parts[0]}/${parts[1]}/`;
+  } catch {
+    return '';
+  }
+}
+
+function normalizePostHref(href) {
+  const raw = cleanText(href);
+  if (!raw) return '';
+  if (raw.startsWith('/p/') || raw.startsWith('/reel/')) {
+    const parts = raw.split('/').filter(Boolean);
+    if (parts.length >= 2) return `https://www.instagram.com/${parts[0]}/${parts[1]}/`;
+  }
+  if (/^https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel)\//i.test(raw)) {
+    return normalizeInstagramPostUrl(raw);
+  }
+  return '';
+}
+
+function extractPostUrls(html) {
+  const urls = new Set();
+  const re = /https:\/\/(?:www\.)?instagram\.com\/(?:p|reel)\/[A-Za-z0-9_-]+\//g;
+  const matches = html.match(re) || [];
+  for (const match of matches) urls.add(match);
+  return [...urls];
+}
+
+function extractShortcodesFromText(text) {
+  const urls = new Set();
+  if (!text) return urls;
+  const patterns = [
+    /"shortcode"\s*:\s*"([A-Za-z0-9_-]{8,})"/g,
+    /"code"\s*:\s*"([A-Za-z0-9_-]{8,})"/g,
+    /\/(?:p|reel)\/([A-Za-z0-9_-]{8,})\//g,
+  ];
+  for (const re of patterns) {
+    let match;
+    while ((match = re.exec(text)) !== null) {
+      if (/^[a-z]{2}_[A-Z]{2}$/i.test(match[1])) continue;
+      urls.add(`https://www.instagram.com/p/${match[1]}/`);
+    }
+  }
+  return urls;
+}
+
+async function collectLinksFromDom(page) {
+  try {
+    const hrefs = await page.$$eval('a[href]', (nodes) => nodes.map((n) => n.getAttribute('href') || '').filter(Boolean));
+    const urls = new Set();
+    for (const href of hrefs) {
+      const normalized = normalizePostHref(href);
+      if (normalized) urls.add(normalized);
+    }
+    return [...urls];
+  } catch {
+    return [];
+  }
+}
+
+async function collectLinksFromScripts(page) {
+  try {
+    const scriptContents = await page.$$eval('script', (nodes) => nodes.map((n) => n.textContent || '').filter(Boolean));
+    const urls = new Set();
+    for (const content of scriptContents.slice(0, 60)) {
+      for (const url of extractShortcodesFromText(content)) urls.add(url);
+    }
+    return [...urls];
+  } catch {
+    return [];
+  }
+}
+
+function parseRelativeAgeToDate(text, nowMs = Date.now()) {
+  const raw = cleanText(text).toLowerCase();
+  if (!raw) return null;
+
+  const match = raw.match(/(?:edited\s*•\s*)?(\d+)\s*([dhwmy])/i);
+  if (!match) return null;
+
+  const n = Number(match[1]);
+  const unit = match[2].toLowerCase();
+  if (!Number.isFinite(n) || n < 0) return null;
+
+  const msPerUnit = {
+    d: 24 * 60 * 60 * 1000,
+    h: 60 * 60 * 1000,
+    w: 7 * 24 * 60 * 60 * 1000,
+    m: 30 * 24 * 60 * 60 * 1000,
+    y: 365 * 24 * 60 * 60 * 1000,
+  };
+  const ms = msPerUnit[unit];
+  if (!ms) return null;
+
+  return new Date(nowMs - n * ms).toISOString();
+}
+
+function parseDateFromPage({ ldDate, timeDateTime, igScriptTimestamp, ogDescription, fullText, fallbackNow = Date.now() }) {
+  if (ldDate) {
+    const ts = Date.parse(ldDate);
+    if (!Number.isNaN(ts)) return { iso: new Date(ts).toISOString(), source: 'ldDate' };
+  }
+
+  if (timeDateTime) {
+    const ts = Date.parse(timeDateTime);
+    if (!Number.isNaN(ts)) return { iso: new Date(ts).toISOString(), source: 'timeDatetime' };
+  }
+
+  if (igScriptTimestamp) {
+    const ts = Number(igScriptTimestamp);
+    if (Number.isFinite(ts) && ts > 0) {
+      const ms = ts > 1e12 ? ts : ts * 1000;
+      return { iso: new Date(ms).toISOString(), source: 'igScriptTimestamp' };
+    }
+  }
+
+  const text = cleanText(ogDescription);
+  const ymd = text.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (ymd) return { iso: new Date(`${ymd[1]}-${ymd[2]}-${ymd[3]}T12:00:00Z`).toISOString(), source: 'ogDescriptionDate' };
+
+  const dmy = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (dmy) {
+    const yyyy = dmy[3].length === 2 ? `20${dmy[3]}` : dmy[3];
+    const mm = String(dmy[2]).padStart(2, '0');
+    const dd = String(dmy[1]).padStart(2, '0');
+    return { iso: new Date(`${yyyy}-${mm}-${dd}T12:00:00Z`).toISOString(), source: 'ogDescriptionDate' };
+  }
+
+  const dmyNoYear = text.match(/(\d{1,2})\.(\d{1,2})(?!\.)/);
+  if (dmyNoYear) {
+    const mm = String(dmyNoYear[2]).padStart(2, '0');
+    const dd = String(dmyNoYear[1]).padStart(2, '0');
+    const now = new Date(fallbackNow);
+    let candidate = new Date(`${now.getFullYear()}-${mm}-${dd}T12:00:00Z`);
+    if (candidate.getTime() - fallbackNow > 30 * 24 * 60 * 60 * 1000) {
+      candidate = new Date(`${now.getFullYear() - 1}-${mm}-${dd}T12:00:00Z`);
+    }
+    if (!Number.isNaN(candidate.getTime())) return { iso: candidate.toISOString(), source: 'ogDescriptionDate' };
+  }
+
+  const relFromOg = parseRelativeAgeToDate(ogDescription, fallbackNow);
+  if (relFromOg) return { iso: relFromOg, source: 'relativeAge' };
+
+  const relFromText = parseRelativeAgeToDate(fullText, fallbackNow);
+  if (relFromText) return { iso: relFromText, source: 'relativeAge' };
+
+  return null;
+}
+
+function deriveBrandFromPostData(data, postUrl) {
+  const ldAuthor = cleanText(data.ldAuthor);
+  if (ldAuthor) return ldAuthor;
+
+  const ogTitle = cleanText(data.ogTitle);
+  const titleMatch = ogTitle.match(/^(.+?)\s+auf Instagram[:]?/i);
+  if (titleMatch && titleMatch[1]) return titleMatch[1].replace(/^@/, '').trim();
+
+  const desc = cleanText(data.ogDescription);
+  const atMatch = desc.match(/@([A-Za-z0-9._]+)/);
+  if (atMatch) return prettifyUsername(atMatch[1]);
+
+  try {
+    const parsed = new URL(postUrl);
+    const parts = parsed.pathname.split('/').filter(Boolean);
+    return parts[0] || 'Instagram';
+  } catch {
+    return 'Instagram';
+  }
+}
+
+function toMirrorUrl(url) {
+  return `https://r.jina.ai/http://${url.replace(/^https?:\/\//, '')}`;
+}
+
+async function fetchMirrorText(url) {
+  try {
+    const response = await fetch(toMirrorUrl(url), { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    if (!response.ok) return '';
+    return await response.text();
+  } catch {
+    return '';
+  }
+}
+
+async function collectProfileFallbackLinks(page, username) {
+  const normalized = normalizeUsername(username);
+  if (!page || !normalized) return [];
+  const links = new Set();
+
+  const collectOnCurrentPage = async () => {
+    const domUrls = await collectLinksFromDom(page);
+    const scriptUrls = await collectLinksFromScripts(page);
+    const html = await page.content();
+    const htmlUrls = extractPostUrls(html);
+    for (const url of [...domUrls, ...scriptUrls, ...htmlUrls]) {
+      links.add(normalizeInstagramPostUrl(url));
+      if (links.size >= CONFIG.maxTimelinePostsPerAccount) break;
+    }
+  };
+
+  try {
+    await page.goto(`https://www.instagram.com/${normalized}/`, { waitUntil: 'domcontentloaded', timeout: 25000 });
+    await page.waitForTimeout(1400);
+    await dismissInstagramOverlays(page);
+    await collectOnCurrentPage();
+  } catch {}
+
+  if (links.size < 4) {
+    try {
+      await page.goto(`https://www.instagram.com/${normalized}/reels/`, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      await page.waitForTimeout(1200);
+      await dismissInstagramOverlays(page);
+      await collectOnCurrentPage();
+    } catch {}
+  }
+
+  return [...links].filter(Boolean).slice(0, CONFIG.maxTimelinePostsPerAccount);
 }
 
 function buildInstagramPostUrl(node) {
@@ -637,6 +906,274 @@ function formatCandidateSnapshot(candidate) {
   };
 }
 
+function buildDealFromCandidate({
+  postUrl,
+  pubDateIso,
+  pubDateSource,
+  combinedText,
+  brand,
+  locationName,
+  rawTitle,
+  source,
+  sourcePerformance,
+  rejectionReasons,
+  seenUrls,
+  accountDealCounts,
+}) {
+  if (!pubDateIso) {
+    rejectionReasons.noPubDate += 1;
+    return null;
+  }
+  if (!isFresh(pubDateIso)) {
+    rejectionReasons.stale += 1;
+    return null;
+  }
+  if (!combinedText) {
+    rejectionReasons.noContent += 1;
+    return null;
+  }
+  if (isExpiredByText(combinedText)) {
+    rejectionReasons.expired += 1;
+    return null;
+  }
+  if (isGiveawayOnly(combinedText)) {
+    rejectionReasons.giveaway += 1;
+    return null;
+  }
+
+  const isWien = containsKeyword(`${combinedText} ${locationName}`, WIEN_KEYWORDS)
+    || /wien|vienna/i.test(cleanText(source?.username))
+    || /wien|vienna/i.test(cleanText(brand));
+  if (!isWien) {
+    rejectionReasons.notWien += 1;
+    return null;
+  }
+  if (!isFoodDrinkRelevant(combinedText)) {
+    rejectionReasons.notFoodDrink += 1;
+    return null;
+  }
+  if (!containsKeyword(combinedText, DEAL_KEYWORDS)) {
+    rejectionReasons.noDealSignal += 1;
+    return null;
+  }
+  if (!hasFreebieOrPromoSignal(combinedText)) {
+    rejectionReasons.noPromoSignal += 1;
+    return null;
+  }
+
+  const score = scoreDeal({
+    text: combinedText,
+    sourcePerformance,
+    sourceType: source?.sourceType || '',
+  });
+  if (score < CONFIG.minDealScore) {
+    rejectionReasons.lowScore += 1;
+    return null;
+  }
+
+  const expiry = parseExpiryFromText(combinedText);
+  if (expiry && isExpiryInPast(expiry)) {
+    rejectionReasons.expired += 1;
+    return null;
+  }
+  if (seenUrls.has(postUrl)) {
+    rejectionReasons.duplicateUrl += 1;
+    return null;
+  }
+
+  const accountCount = accountDealCounts.get(source.username) || 0;
+  if (accountCount >= CONFIG.maxDealsPerAccount) {
+    rejectionReasons.accountCap += 1;
+    return null;
+  }
+
+  const type = detectType(combinedText);
+  const category = detectCategory(combinedText, {
+    accountHint: source.username,
+    sourceKey: source.key,
+  });
+  const title = limitTitle(cleanText(rawTitle) || buildFallbackTitle({ type, brand, text: combinedText }));
+  const description = buildDealDescription({
+    type,
+    brand,
+    text: combinedText,
+    location: locationName || 'Wien',
+  });
+
+  const deal = {
+    id: `igd-${stableId(`${postUrl}|${pubDateIso}|${brand}`)}`,
+    brand,
+    title,
+    logo: inferLogo(category, combinedText),
+    description,
+    type,
+    category,
+    source: 'Instagram Daily Sync',
+    originSource: 'Instagram Daily Sync v2',
+    url: postUrl,
+    expires: expiry || 'Unbekannt',
+    distance: locationName || 'Wien',
+    hot: score >= 84,
+    isNew: true,
+    priority: Math.max(1, Math.round(score / 10)),
+    votes: 1,
+    qualityScore: score,
+    pubDate: pubDateIso,
+    pubDateSource: pubDateSource || TRUSTED_PUBDATE_SOURCE,
+    discoveredBy: source.sourceType,
+    sourceHits: 1,
+    reviewTier: score >= 84 ? 'high' : score >= 70 ? 'medium' : 'low',
+  };
+
+  seenUrls.add(postUrl);
+  accountDealCounts.set(source.username, accountCount + 1);
+
+  return {
+    deal,
+    candidate: formatCandidateSnapshot({
+      url: postUrl,
+      pubDate: pubDateIso,
+      pubDateSource: pubDateSource || TRUSTED_PUBDATE_SOURCE,
+      sourceKey: source.key,
+      sourceType: source.sourceType,
+      score,
+      brand,
+      category,
+      type,
+      distance: locationName || 'Wien',
+    }),
+  };
+}
+
+async function buildDealFromPostPage(page, source, postUrl, sourcePerformance, rejectionReasons, seenUrls, accountDealCounts) {
+  try {
+    await page.goto(postUrl, { waitUntil: 'domcontentloaded', timeout: 12000 });
+    await page.waitForTimeout(900);
+
+    let data = await page.evaluate(() => {
+      const result = {
+        ldDate: '',
+        ldCaption: '',
+        ldAuthor: '',
+        ogTitle: '',
+        ogDescription: '',
+        timeDateTime: '',
+        igScriptTimestamp: 0,
+        locationName: '',
+        text: document.body ? document.body.innerText : '',
+      };
+
+      for (const script of document.querySelectorAll('script[type="application/ld+json"]')) {
+        try {
+          const parsed = JSON.parse(script.textContent || '{}');
+          const obj = Array.isArray(parsed) ? parsed[0] : parsed;
+          if (!obj || typeof obj !== 'object') continue;
+          if (obj.datePublished && !result.ldDate) result.ldDate = String(obj.datePublished);
+          if (obj.caption && !result.ldCaption) result.ldCaption = String(obj.caption);
+          if (obj.author && typeof obj.author === 'object' && obj.author.name && !result.ldAuthor) {
+            result.ldAuthor = String(obj.author.name);
+          }
+        } catch {}
+      }
+
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      const ogDescription = document.querySelector('meta[property="og:description"]');
+      if (ogTitle?.content) result.ogTitle = ogTitle.content;
+      if (ogDescription?.content) result.ogDescription = ogDescription.content;
+
+      const timeEl = document.querySelector('time[datetime]');
+      if (timeEl?.getAttribute('datetime')) result.timeDateTime = timeEl.getAttribute('datetime') || '';
+
+      const locationLink = document.querySelector('a[href*="/explore/locations/"]');
+      if (locationLink?.textContent) result.locationName = locationLink.textContent;
+
+      const scriptTexts = Array.from(document.querySelectorAll('script'))
+        .map((n) => n.textContent || '')
+        .filter(Boolean)
+        .slice(0, 120);
+      for (const text of scriptTexts) {
+        const taken = text.match(/"taken_at_timestamp"\s*:\s*(\d{9,13})/);
+        if (taken) {
+          result.igScriptTimestamp = Number(taken[1]);
+          break;
+        }
+        const created = text.match(/"created_at"\s*:\s*(\d{9,13})/);
+        if (created) {
+          result.igScriptTimestamp = Number(created[1]);
+          break;
+        }
+      }
+
+      return result;
+    });
+
+    if (!data.ldCaption && !data.ogDescription) {
+      const mirrorText = await fetchMirrorText(postUrl);
+      if (mirrorText) {
+        const firstLines = mirrorText.split('\n').slice(0, 40).join(' ');
+        data = {
+          ...data,
+          ogDescription: data.ogDescription || firstLines,
+          text: `${data.text || ''} ${mirrorText.slice(0, 3000)}`,
+        };
+      }
+    }
+
+    const combinedText = cleanText([
+      data.ldCaption,
+      data.ogTitle,
+      data.ogDescription,
+      data.text.slice(0, 2000),
+    ].join(' '));
+
+    const pubDateMeta = parseDateFromPage({
+      ldDate: data.ldDate,
+      timeDateTime: data.timeDateTime,
+      igScriptTimestamp: data.igScriptTimestamp,
+      ogDescription: data.ogDescription,
+      fullText: combinedText,
+    });
+
+    const brand = cleanText(deriveBrandFromPostData(data, postUrl)) || prettifyUsername(source.username) || 'Instagram';
+    const locationName = cleanText(data.locationName) || 'Wien';
+
+    return buildDealFromCandidate({
+      postUrl,
+      pubDateIso: pubDateMeta?.iso || '',
+      pubDateSource: pubDateMeta?.source || '',
+      combinedText,
+      brand,
+      locationName,
+      source,
+      sourcePerformance,
+      rejectionReasons,
+      seenUrls,
+      accountDealCounts,
+    });
+  } catch {
+    rejectionReasons.noContent += 1;
+    return null;
+  }
+}
+
+async function fetchInstagramProfileWithFallbacks(page, username, cookieHeader) {
+  const normalized = normalizeUsername(username);
+  if (!normalized) return { user: null, strategy: 'invalid' };
+
+  const direct = await fetchInstagramProfileDirect(normalized, cookieHeader);
+  if (direct) return { user: direct, strategy: 'direct-api', fallbackLinks: [] };
+
+  const browser = await fetchInstagramProfileInBrowser(page, normalized);
+  if (browser) return { user: browser, strategy: 'browser-api', fallbackLinks: [] };
+
+  const fallbackLinks = await collectProfileFallbackLinks(page, normalized);
+  if (fallbackLinks.length > 0) {
+    return { user: null, strategy: 'profile-dom', fallbackLinks };
+  }
+
+  return { user: null, strategy: 'none', fallbackLinks: [] };
+}
+
 function writeJson(filePath, payload) {
   fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
 }
@@ -652,6 +1189,8 @@ async function main() {
   const acceptedDeals = [];
   const seenUrls = new Set();
   const accountDealCounts = new Map();
+  let totalCandidates = 0;
+  let visitedPosts = 0;
 
   let browser;
   try {
@@ -669,6 +1208,13 @@ async function main() {
     });
 
     const cookieHints = buildCookieHints();
+    const cookieHeader = buildCookieHeader();
+    const profileStrategyCounts = {
+      directApi: 0,
+      browserApi: 0,
+      profileDom: 0,
+      none: 0,
+    };
     if (cookieHints.length > 0) {
       await context.addCookies(
         cookieHints.map((cookie) => ({
@@ -712,170 +1258,126 @@ async function main() {
       stat.lastSeenAt = new Date().toISOString();
       runStats.set(source.key, stat);
 
-      console.log(`🔎 timeline source ${source.key}`);
-      const user = await fetchInstagramProfileInBrowser(page, source.username);
-      if (!user) {
+      const sourcePerformance = sourcePerformanceScore(sourceStats[source.key]);
+      const profileResult = await fetchInstagramProfileWithFallbacks(page, source.username, cookieHeader);
+      if (profileResult.strategy === 'direct-api') profileStrategyCounts.directApi += 1;
+      else if (profileResult.strategy === 'browser-api') profileStrategyCounts.browserApi += 1;
+      else if (profileResult.strategy === 'profile-dom') profileStrategyCounts.profileDom += 1;
+      else profileStrategyCounts.none += 1;
+
+      console.log(`🔎 timeline source ${source.key} (${profileResult.strategy || 'none'})`);
+
+      if (profileResult.user) {
+        const user = profileResult.user;
+        let timelineEdges = Array.isArray(user.edge_owner_to_timeline_media?.edges)
+          ? user.edge_owner_to_timeline_media.edges
+          : [];
+
+        if (timelineEdges.length === 0) {
+          const fallbackLinks = await collectProfileFallbackLinks(page, source.username);
+          if (fallbackLinks.length === 0) {
+            rejectionReasons.noTimeline += 1;
+          } else {
+            profileStrategyCounts.profileDom += 1;
+            stat.links += fallbackLinks.length;
+            totalCandidates += fallbackLinks.length;
+            console.log(`   ↳ fallback links after empty timeline: ${fallbackLinks.length}`);
+
+            for (const postUrl of fallbackLinks.slice(0, CONFIG.maxTimelinePostsPerAccount)) {
+              visitedPosts += 1;
+              const built = await buildDealFromPostPage(
+                page,
+                source,
+                postUrl,
+                sourcePerformance,
+                rejectionReasons,
+                seenUrls,
+                accountDealCounts
+              );
+              if (!built) continue;
+              stat.acceptedDeals += 1;
+              acceptedDeals.push(built.deal);
+              candidateSnapshot.push(built.candidate);
+              if (acceptedDeals.length >= CONFIG.maxDealsPerRun) break;
+            }
+          }
+        }
+
+        if (timelineEdges.length > 0 && acceptedDeals.length < CONFIG.maxDealsPerRun) {
+          const slicedEdges = timelineEdges.slice(0, CONFIG.maxTimelinePostsPerAccount);
+          stat.links += slicedEdges.length;
+          totalCandidates += slicedEdges.length;
+          console.log(`   ↳ timeline links: ${slicedEdges.length}`);
+
+          for (const edge of slicedEdges) {
+            visitedPosts += 1;
+            const node = edge?.node;
+            const postUrl = buildInstagramPostUrl(node);
+            if (!postUrl) {
+              rejectionReasons.noPostUrl += 1;
+              continue;
+            }
+
+            const pubDateMs = Number(node?.taken_at_timestamp || 0) * 1000;
+            const pubDateIso = Number.isFinite(pubDateMs) && pubDateMs > 0 ? new Date(pubDateMs).toISOString() : '';
+            const caption = extractCaptionFromNode(node);
+            const locationName = cleanText(node?.location?.name);
+            const brand = deriveBrandFromUser(user);
+            const combinedText = cleanText([
+              caption,
+              locationName,
+              user?.full_name,
+              user?.username,
+              user?.biography,
+            ].join(' '));
+
+            const built = buildDealFromCandidate({
+              postUrl,
+              pubDateIso,
+              pubDateSource: TRUSTED_PUBDATE_SOURCE,
+              combinedText,
+              brand,
+              locationName,
+              rawTitle: caption,
+              source,
+              sourcePerformance,
+              rejectionReasons,
+              seenUrls,
+              accountDealCounts,
+            });
+            if (!built) continue;
+
+            stat.acceptedDeals += 1;
+            acceptedDeals.push(built.deal);
+            candidateSnapshot.push(built.candidate);
+            if (acceptedDeals.length >= CONFIG.maxDealsPerRun) break;
+          }
+        }
+      } else if (profileResult.fallbackLinks.length > 0) {
+        const fallbackLinks = profileResult.fallbackLinks.slice(0, CONFIG.maxTimelinePostsPerAccount);
+        stat.links += fallbackLinks.length;
+        totalCandidates += fallbackLinks.length;
+        console.log(`   ↳ profile fallback links: ${fallbackLinks.length}`);
+
+        for (const postUrl of fallbackLinks) {
+          visitedPosts += 1;
+          const built = await buildDealFromPostPage(
+            page,
+            source,
+            postUrl,
+            sourcePerformance,
+            rejectionReasons,
+            seenUrls,
+            accountDealCounts
+          );
+          if (!built) continue;
+          stat.acceptedDeals += 1;
+          acceptedDeals.push(built.deal);
+          candidateSnapshot.push(built.candidate);
+          if (acceptedDeals.length >= CONFIG.maxDealsPerRun) break;
+        }
+      } else {
         rejectionReasons.noProfile += 1;
-        continue;
-      }
-
-      const timelineEdges = Array.isArray(user.edge_owner_to_timeline_media?.edges)
-        ? user.edge_owner_to_timeline_media.edges
-        : [];
-      if (timelineEdges.length === 0) {
-        rejectionReasons.noTimeline += 1;
-        continue;
-      }
-
-      stat.links += timelineEdges.length;
-      console.log(`   ↳ timeline links: ${timelineEdges.length}`);
-
-      for (const edge of timelineEdges.slice(0, CONFIG.maxTimelinePostsPerAccount)) {
-        const node = edge?.node;
-        const postUrl = buildInstagramPostUrl(node);
-        if (!postUrl) {
-          rejectionReasons.noPostUrl += 1;
-          continue;
-        }
-
-        const pubDateMs = Number(node?.taken_at_timestamp || 0) * 1000;
-        if (!Number.isFinite(pubDateMs) || pubDateMs <= 0) {
-          rejectionReasons.noPubDate += 1;
-          continue;
-        }
-        const pubDateIso = new Date(pubDateMs).toISOString();
-        if (!isFresh(pubDateIso)) {
-          rejectionReasons.stale += 1;
-          continue;
-        }
-
-        const caption = extractCaptionFromNode(node);
-        const locationName = cleanText(node?.location?.name);
-        const brand = deriveBrandFromUser(user);
-        const combinedText = cleanText([
-          caption,
-          locationName,
-          user?.full_name,
-          user?.username,
-          user?.biography,
-        ].join(' '));
-
-        if (!combinedText) {
-          rejectionReasons.noContent += 1;
-          continue;
-        }
-        if (isExpiredByText(combinedText)) {
-          rejectionReasons.expired += 1;
-          continue;
-        }
-        if (isGiveawayOnly(combinedText)) {
-          rejectionReasons.giveaway += 1;
-          continue;
-        }
-
-        const isWien = containsKeyword(`${combinedText} ${locationName}`, WIEN_KEYWORDS)
-          || /wien|vienna/i.test(cleanText(user?.username))
-          || /wien|vienna/i.test(cleanText(user?.full_name));
-        if (!isWien) {
-          rejectionReasons.notWien += 1;
-          continue;
-        }
-        if (!isFoodDrinkRelevant(combinedText)) {
-          rejectionReasons.notFoodDrink += 1;
-          continue;
-        }
-        if (!containsKeyword(combinedText, DEAL_KEYWORDS)) {
-          rejectionReasons.noDealSignal += 1;
-          continue;
-        }
-        if (!hasFreebieOrPromoSignal(combinedText)) {
-          rejectionReasons.noPromoSignal += 1;
-          continue;
-        }
-
-        const score = scoreDeal({
-          text: combinedText,
-          sourcePerformance: sourcePerformanceScore(sourceStats[source.key]),
-          sourceType: source.sourceType,
-        });
-        if (score < CONFIG.minDealScore) {
-          rejectionReasons.lowScore += 1;
-          continue;
-        }
-
-        const expiry = parseExpiryFromText(combinedText);
-        if (expiry && isExpiryInPast(expiry)) {
-          rejectionReasons.expired += 1;
-          continue;
-        }
-        if (seenUrls.has(postUrl)) {
-          rejectionReasons.duplicateUrl += 1;
-          continue;
-        }
-
-        const accountCount = accountDealCounts.get(source.username) || 0;
-        if (accountCount >= CONFIG.maxDealsPerAccount) {
-          rejectionReasons.accountCap += 1;
-          continue;
-        }
-
-        const type = detectType(combinedText);
-        const category = detectCategory(combinedText, {
-          accountHint: source.username,
-          sourceKey: source.key,
-        });
-        const rawTitle = cleanText(caption || '');
-        const title = limitTitle(rawTitle || buildFallbackTitle({ type, brand, text: combinedText }));
-        const description = buildDealDescription({
-          type,
-          brand,
-          text: combinedText,
-          location: locationName || 'Wien',
-        });
-
-        const deal = {
-          id: `igd-${stableId(`${postUrl}|${pubDateIso}|${brand}`)}`,
-          brand,
-          title,
-          logo: inferLogo(category, combinedText),
-          description,
-          type,
-          category,
-          source: 'Instagram Daily Sync',
-          originSource: 'Instagram Daily Sync v2',
-          url: postUrl,
-          expires: expiry || 'Unbekannt',
-          distance: locationName || 'Wien',
-          hot: score >= 84,
-          isNew: true,
-          priority: Math.max(1, Math.round(score / 10)),
-          votes: 1,
-          qualityScore: score,
-          pubDate: pubDateIso,
-          pubDateSource: TRUSTED_PUBDATE_SOURCE,
-          discoveredBy: source.sourceType,
-          sourceHits: 1,
-          reviewTier: score >= 84 ? 'high' : score >= 70 ? 'medium' : 'low',
-        };
-
-        seenUrls.add(postUrl);
-        accountDealCounts.set(source.username, accountCount + 1);
-        stat.acceptedDeals += 1;
-        acceptedDeals.push(deal);
-        candidateSnapshot.push(formatCandidateSnapshot({
-          url: postUrl,
-          pubDate: pubDateIso,
-          pubDateSource: TRUSTED_PUBDATE_SOURCE,
-          sourceKey: source.key,
-          sourceType: source.sourceType,
-          score,
-          brand,
-          category,
-          type,
-          distance: locationName || 'Wien',
-        }));
-
-        if (acceptedDeals.length >= CONFIG.maxDealsPerRun) break;
       }
 
       if (acceptedDeals.length >= CONFIG.maxDealsPerRun) break;
@@ -920,9 +1422,10 @@ async function main() {
       meta: {
         mode: 'timeline-api-v2',
         visitedSources: sourceQueue.length,
-        totalCandidates: candidateSnapshot.length,
-        visitedPosts: candidateSnapshot.length,
+        totalCandidates,
+        visitedPosts,
         scrapedDealsRaw: acceptedDeals.length,
+        profileStrategies: profileStrategyCounts,
         rejectionReasons,
       },
     };
@@ -960,9 +1463,10 @@ async function main() {
       updatedAt: new Date().toISOString(),
       mode: 'timeline-api-v2',
       visitedSources: sourceQueue.length,
-      totalCandidates: candidateSnapshot.length,
-      visitedPosts: candidateSnapshot.length,
+      totalCandidates,
+      visitedPosts,
       savedDeals: finalDeals.length,
+      profileStrategies: profileStrategyCounts,
       rejectionReasons,
       topSources,
       candidates: candidateSnapshot.slice(0, 200),
@@ -978,10 +1482,11 @@ async function main() {
       runMeta: {
         mode: 'timeline-api-v2',
         visitedSources: sourceQueue.length,
-        totalCandidates: candidateSnapshot.length,
-        visitedPosts: candidateSnapshot.length,
+        totalCandidates,
+        visitedPosts,
         scrapedDealsRaw: acceptedDeals.length,
         savedDeals: finalDeals.length,
+        profileStrategies: profileStrategyCounts,
       },
       topSources,
       sources: persistedStats,
