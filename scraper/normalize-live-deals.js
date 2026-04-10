@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -17,8 +17,10 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
-const DEALS_PATH = path.join(ROOT, 'docs', 'deals.json');
-const VALIDATION_REPORT_PATH = path.join(ROOT, 'docs', 'live-deal-validation-report.json');
+const DOCS_DIR = path.join(ROOT, 'docs');
+const DEALS_PATH = path.join(DOCS_DIR, 'deals.json');
+const VALIDATION_REPORT_PATH = path.join(DOCS_DIR, 'live-deal-validation-report.json');
+const DEAL_CANDIDATES_INDEX_PATH = path.join(DOCS_DIR, 'deal-candidates-index.json');
 const CHURCH_FILES = [
   path.join(ROOT, 'docs', 'deals-pending-church-gemeinde.json'),
   path.join(ROOT, 'docs', 'deals-pending-church-gottesdienste.json'),
@@ -414,6 +416,84 @@ function maybeEnrichDealCopy(deal, contentHints = {}) {
   return changed;
 }
 
+function isGenericCategory(value = '') {
+  return new Set(['', 'wien', 'gratis', 'shopping', 'kultur', 'events', 'reisen']).has(cleanUiNoiseText(value).toLowerCase());
+}
+
+function collectBundleDeals(bundle) {
+  if (Array.isArray(bundle)) return bundle;
+  if (Array.isArray(bundle?.deals)) return bundle.deals;
+  if (Array.isArray(bundle?.candidates)) return bundle.candidates;
+  return [];
+}
+
+function buildSupplementalUrl(rawDeal = {}) {
+  return normalizeTargetUrl(rawDeal.url || rawDeal.postUrl || rawDeal.post_url || rawDeal.link || '');
+}
+
+function mergeSupplementalSocialDeal(deal, supplementalDeal) {
+  if (!supplementalDeal) return deal;
+
+  const next = { ...deal };
+  let changed = false;
+  const currentScore = scoreNormalizedDeal(deal);
+  const supplementalScore = scoreNormalizedDeal(supplementalDeal);
+  const currentBrand = cleanUiNoiseText(next.brand || '');
+  const currentTitle = cleanUiNoiseText(next.title || '');
+  const currentDescription = cleanUiNoiseText(next.description || '');
+  const currentCategory = cleanUiNoiseText(next.category || '').toLowerCase();
+
+  const assignIfBetter = (key, value, predicate = true) => {
+    const text = cleanText(value);
+    if (!predicate || !text) return;
+    if (cleanText(next[key] || '') === text) return;
+    next[key] = value;
+    changed = true;
+  };
+
+  assignIfBetter(
+    'brand',
+    supplementalDeal.brand,
+    !currentBrand || isSourceLikeBrandValue(currentBrand) || looksAddressLike(currentBrand),
+  );
+
+  assignIfBetter(
+    'title',
+    supplementalDeal.title,
+    isWeakTitle(next.title) || /bei instagram$/i.test(currentTitle) || supplementalScore > currentScore + 6,
+  );
+
+  assignIfBetter(
+    'description',
+    supplementalDeal.description,
+    isWeakDescription(next.description) || /bei instagram\b/i.test(currentDescription) || supplementalScore > currentScore + 6,
+  );
+
+  assignIfBetter(
+    'category',
+    supplementalDeal.category,
+    isGenericCategory(currentCategory) || ((supplementalDeal.category === 'essen' || supplementalDeal.category === 'kaffee') && FOOD_SIGNAL_PATTERN.test(`${next.title} ${next.description} ${supplementalDeal.title} ${supplementalDeal.description}`)),
+  );
+
+  assignIfBetter(
+    'distance',
+    supplementalDeal.distance,
+    !cleanText(next.distance || '') || cleanText(next.distance || '').toLowerCase().startsWith('wien'),
+  );
+
+  assignIfBetter('type', supplementalDeal.type, !cleanText(next.type || ''));
+  assignIfBetter('pubDate', supplementalDeal.pubDate, !cleanText(next.pubDate || ''));
+  assignIfBetter('pubDateSource', supplementalDeal.pubDateSource, !cleanText(next.pubDateSource || ''));
+  assignIfBetter('expires', supplementalDeal.expires, !cleanText(next.expires || ''));
+  assignIfBetter('expiresOriginal', supplementalDeal.expiresOriginal, !cleanText(next.expiresOriginal || ''));
+  assignIfBetter('expiresPrecision', supplementalDeal.expiresPrecision, !cleanText(next.expiresPrecision || ''));
+  assignIfBetter('expiresSource', supplementalDeal.expiresSource, !cleanText(next.expiresSource || ''));
+  assignIfBetter('expiryKind', supplementalDeal.expiryKind, !cleanText(next.expiryKind || ''));
+  assignIfBetter('validUntil', supplementalDeal.validUntil, !cleanText(next.validUntil || ''));
+
+  return changed ? next : deal;
+}
+
 function cleanText(value) {
   if (!value) return '';
   return String(value)
@@ -512,11 +592,49 @@ async function loadCuratedChurchDeals() {
   return bundles.flatMap((bundle) => Array.isArray(bundle?.deals) ? bundle.deals : []);
 }
 
+async function loadSupplementalSocialIndex() {
+  const supplementalByUrl = new Map();
+  const pendingFiles = (await readdir(DOCS_DIR))
+    .filter((name) => /^deals-pending-.*\.json$/i.test(name))
+    .map((name) => path.join(DOCS_DIR, name));
+  const sourceFiles = [DEAL_CANDIDATES_INDEX_PATH, ...pendingFiles];
+
+  for (const filePath of sourceFiles) {
+    let bundle;
+    try {
+      bundle = await readJson(filePath);
+    } catch {
+      continue;
+    }
+
+    for (const rawDeal of collectBundleDeals(bundle)) {
+      const url = buildSupplementalUrl(rawDeal);
+      const socialPostKey = normalizeSocialPostKey(url);
+      if (!socialPostKey) continue;
+
+      let candidate = normalizeDealRecord({ ...rawDeal, url });
+      candidate = normalizeSocialDeal(candidate);
+      const inferredPubDateSource = inferSocialPubDateSource(candidate);
+      if (inferredPubDateSource && !cleanText(candidate.pubDateSource || '')) {
+        candidate.pubDateSource = inferredPubDateSource;
+      }
+
+      const existing = supplementalByUrl.get(socialPostKey);
+      if (!existing || pickBetterNormalizedDeal(existing, candidate) === candidate) {
+        supplementalByUrl.set(socialPostKey, candidate);
+      }
+    }
+  }
+
+  return supplementalByUrl;
+}
+
 async function main() {
   const now = new Date();
   const urlCache = new Map();
   const linkHealthCache = new Map();
   const dealsDoc = await readJson(DEALS_PATH);
+  const supplementalSocialByUrl = await loadSupplementalSocialIndex();
   const totalBefore = Array.isArray(dealsDoc.deals) ? dealsDoc.deals.length : 0;
   const churchDeals = await loadCuratedChurchDeals();
   const curatedChurchIds = getChurchCuratedIds(churchDeals);
@@ -576,6 +694,13 @@ async function main() {
     deal = fixPubDateFromSlackTs(deal, now);
     deal = resetUnsafeUrlExpiry(deal);
     deal = normalizeDealRecord(deal);
+    const supplementalSocial = supplementalSocialByUrl.get(normalizeSocialPostKey(deal.url || ''));
+    if (supplementalSocial) {
+      const mergedSocial = mergeSupplementalSocialDeal(deal, supplementalSocial);
+      if (mergedSocial !== deal) {
+        deal = normalizeDealRecord(mergedSocial);
+      }
+    }
     const beforePolish = JSON.stringify({
       brand: deal.brand,
       title: deal.title,

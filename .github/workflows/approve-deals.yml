@@ -29,11 +29,18 @@ jobs:
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
         run: node scraper/slack-approve.js
 
+      - name: 🧼 Normalize Live Deals After Approvals
+        env:
+          MAX_LIVE_URL_HEALTH_CHECKS: '90'
+          MAX_LIVE_URL_EXPIRY_REFRESHES: '60'
+          MAX_LIVE_CONTENT_ENRICHMENTS: '40'
+        run: node scraper/normalize-live-deals.js
+
       - name: 📤 Push Approved Deals
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add docs/deals.json docs/deals-pending-all.json 2>/dev/null || true
+          git add docs/deals.json docs/deals-pending-all.json docs/live-deal-validation-report.json 2>/dev/null || true
           DEAL_COUNT=$(cat docs/deals.json | python3 -c "import sys, json; print(json.load(sys.stdin)['totalDeals'])" 2>/dev/null || echo "?")
           TIMESTAMP=$(date -u +"%H:%M")
           git diff --staged --quiet || git commit -m "✅ ${TIMESTAMP} - Genehmigte Deals (${DEAL_COUNT} total)"
