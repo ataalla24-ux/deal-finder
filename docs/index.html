@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>FreeFinder 🎁 Gratis Deals</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="icon-192.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="icon-192.svg">
     <meta name="theme-color" content="#f59e0b">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1291,7 +1291,10 @@
             stroke: currentColor;
         }
         .deal-favorite-inline {
-            display: none;
+            display: inline-flex;
+            min-width: 32px;
+            min-height: 32px;
+            border-radius: 999px;
         }
         .deal-link-inline {
             border: none;
@@ -2855,6 +2858,20 @@
             );
 
             return locationAlreadyPresent ? cleanText : (cleanText + ' — ' + cleanLocation);
+        }
+
+        function formatUiDateLabel(value) {
+            const raw = sanitizeExpiryTextForApp(value || '');
+            if (!raw) return '';
+            if (/^\d{4}-\d{2}-\d{2}T/i.test(raw)) {
+                const ms = Date.parse(raw);
+                return Number.isFinite(ms) ? formatDateAT(ms) : raw;
+            }
+            if (/^\d{4}-\d{2}-\d{2}$/i.test(raw)) {
+                const ms = Date.parse(raw + 'T00:00:00');
+                return Number.isFinite(ms) ? formatDateAT(ms) : raw;
+            }
+            return raw;
         }
 
         function isLikelyGenericLocation(value) {
@@ -4710,6 +4727,33 @@
         async function setDailyDeal() {
         // Helper to clean Slack formatting
         function cleanText(t) { return cleanUiNoiseText(t); }
+        function applyDailyDealDisplay(rawDeal, fallbackUrl) {
+            if (!rawDeal) return false;
+            const deal = normalizeDealForApp(rawDeal);
+            const location = getDisplayLocation(deal);
+            const brand = getDisplayBrand(deal);
+            const rawTitle = cleanText(deal.title || '').replace(/\b(alle anzeigen|kategorien|app)\b/gi, '').replace(/\s+/g, ' ').trim();
+            const rawDesc = cleanText(deal.description || '');
+            const compactTitle = truncateUiCopy(stripLeadingBrandFromText(rawTitle, brand) || rawTitle || t('dailyFallback'), 96);
+            const compactDesc = truncateUiCopy(stripLeadingBrandFromText(rawDesc, brand), location ? 118 : 132);
+            const comparableBrand = normalizeUiCompareText(brand);
+            const comparableTitle = normalizeUiCompareText(compactTitle);
+            const titleNeedsBrandPrefix = !!(brand && compactTitle && comparableTitle && comparableBrand && comparableTitle !== comparableBrand && !comparableTitle.startsWith(comparableBrand + ' '));
+
+            applyDailyDealTheme(deal.type);
+            document.getElementById('dailyTitle').textContent = [
+                deal.logo || '',
+                titleNeedsBrandPrefix ? (brand + ': ' + compactTitle) : (compactTitle || brand || t('dailyFallback'))
+            ].filter(Boolean).join(' ').trim();
+            document.getElementById('dailyDesc').textContent = compactDesc ? appendLocationIfMissing(compactDesc, location) : (location || t('featuredSoon'));
+            document.getElementById('dailyBtn').onclick = () => {
+                if (deal.url || fallbackUrl) window.open(normalizeExternalUrl(deal.url || fallbackUrl), '_blank');
+                trackDealView(deal.id);
+            };
+            activeHomeDailyDealId = deal.id || '';
+            updateFeaturedLockState();
+            return true;
+        }
         activeHomeDailyDealId = '';
         const activeDailyDealOverride = isCurrentDailyDealRecord(dailyDealOverride)
             ? normalizeDailyDealRecord(dailyDealOverride)
@@ -4717,16 +4761,7 @@
         if (activeDailyDealOverride && activeDailyDealOverride.dealId) {
             const overridden = allDeals.find(d => d.id === activeDailyDealOverride.dealId);
             if (overridden) {
-                const _locOverride = getDisplayLocation(overridden);
-                const _brandOverride = getDisplayBrand(overridden);
-                const _titleOverride = cleanText(overridden.title).replace(/\b(alle anzeigen|kategorien|app)\b/gi, '').replace(/\s+/g, ' ').trim();
-                const _descOverride = cleanText(overridden.description || '');
-                applyDailyDealTheme(overridden.type);
-                document.getElementById('dailyTitle').textContent = (overridden.logo || '') + ' ' + (_brandOverride ? (_brandOverride + ': ') : '') + _titleOverride;
-                document.getElementById('dailyDesc').textContent = _descOverride + (_locOverride ? ' — ' + _locOverride : '');
-                document.getElementById('dailyBtn').onclick = () => { window.open(normalizeExternalUrl(overridden.url), '_blank'); trackDealView(overridden.id); };
-                activeHomeDailyDealId = overridden.id || '';
-                updateFeaturedLockState();
+                applyDailyDealDisplay(overridden);
                 return;
             }
         }
@@ -4739,18 +4774,7 @@
                 if (picked && picked.date === today && picked.dealId) {
                     // Find the deal in allDeals by id
                     const rawDeal = allDeals.find(d => d.id === picked.dealId) || picked;
-                    const deal = normalizeDealForApp(rawDeal);
-                    const dealForDisplay = deal.distance || deal.brand ? deal : normalizeDealForApp(picked);
-                    const _loc = getDisplayLocation(dealForDisplay);
-                    const _brand = getDisplayBrand(dealForDisplay);
-                    const _title = cleanText(deal.title || picked.title).replace(/\b(alle anzeigen|kategorien|app)\b/gi, '').replace(/\s+/g, ' ').trim();
-                    const _desc = cleanText(deal.description || picked.description || '');
-                    applyDailyDealTheme(dealForDisplay.type || deal.type || picked.type);
-                    document.getElementById('dailyTitle').textContent = (deal.logo || picked.logo || '') + ' ' + (_brand ? (_brand + ': ') : '') + _title;
-                    document.getElementById('dailyDesc').textContent = _desc + (_loc ? ' — ' + _loc : '');
-                    document.getElementById('dailyBtn').onclick = () => { window.open(normalizeExternalUrl(deal.url || picked.url), '_blank'); trackDealView(deal.id || picked.dealId); };
-                    activeHomeDailyDealId = deal.id || picked.dealId || '';
-                    updateFeaturedLockState();
+                    applyDailyDealDisplay(rawDeal, picked.url);
                     return;
                 }
             }
@@ -4765,16 +4789,7 @@
           updateFeaturedLockState();
           return;
         }
-        const _loc2 = getDisplayLocation(deal);
-        const _brand2 = getDisplayBrand(deal);
-        const _title2 = cleanText(deal.title);
-        const _desc2 = cleanText(deal.description);
-        applyDailyDealTheme(deal.type);
-        document.getElementById('dailyTitle').textContent = (deal.logo || '') + ' ' + (_brand2 ? (_brand2 + ': ') : '') + _title2;
-        document.getElementById('dailyDesc').textContent = _desc2 + (_loc2 ? ' — ' + _loc2 : '');
-        document.getElementById('dailyBtn').onclick = () => { window.open(normalizeExternalUrl(deal.url), '_blank'); trackDealView(deal.id); };
-        activeHomeDailyDealId = deal.id || '';
-        updateFeaturedLockState();
+        applyDailyDealDisplay(deal);
     }
         function applyDailyDealTheme(type) {
             const dailyDealEl = document.getElementById('dailyDeal');
@@ -4873,15 +4888,12 @@
             const rawDesc = cleanUiNoiseText(deal.description || '').trim();
             const compactTitle = truncateUiCopy(stripLeadingBrandFromText(rawTitle, brand) || rawTitle || t(config.fallbackTitleKey), 92);
             const compactDesc = truncateUiCopy(stripLeadingBrandFromText(rawDesc, brand), location ? 110 : 126);
-            const comparableBrand = normalizeUiCompareText(brand);
-            const comparableTitle = normalizeUiCompareText(compactTitle);
-            const titleNeedsBrandPrefix = !!(brand && compactTitle && comparableTitle && comparableBrand && comparableTitle !== comparableBrand && !comparableTitle.startsWith(comparableBrand + ' '));
             const ageDays = Math.max(0, Math.floor((Date.now() - getDealBaseTimestampMs(deal)) / (1000 * 60 * 60 * 24)));
             const metaBits = [t(config.metaKey)];
             if (deal.votes > 0) metaBits.push(tf('featuredVotes', { count: deal.votes }));
             metaBits.push(ageDays <= 0 ? t('featuredFresh') : tf('featuredDaysAgo', { count: ageDays }));
             applyFeaturedDealTheme(config.containerId, deal.type);
-            titleEl.textContent = [deal.logo || '', titleNeedsBrandPrefix ? (brand + ': ' + compactTitle) : (compactTitle || brand || t(config.fallbackTitleKey))].filter(Boolean).join(' ').trim();
+            titleEl.textContent = [deal.logo || '', compactTitle || brand || t(config.fallbackTitleKey)].filter(Boolean).join(' ').trim();
             descEl.textContent = compactDesc ? appendLocationIfMissing(compactDesc, location) : (location || t('featuredSoon'));
             metaEl.textContent = metaBits.join(' • ');
             btnEl.onclick = () => {
@@ -5113,8 +5125,8 @@
         const discoveryDeals = allDeals
             .map(normalizeDealForApp)
             .filter(d => d && d.id && (!d._lifecycle || d._lifecycle.state !== 'expired-hidden'));
-        const curated = discoveryDeals.filter((deal) => !['kirche', 'gottesdienste'].includes(deal.category));
-        return curated.length >= 8 ? curated : discoveryDeals;
+        const curated = discoveryDeals.filter((deal) => !['kirche', 'gottesdienste'].includes(deal.category) && deal.type !== 'gewinnspiel');
+        return curated.length ? curated : discoveryDeals.filter((deal) => deal.type !== 'gewinnspiel');
     }
 
     function pruneViewHistory() {
@@ -5309,11 +5321,11 @@
 
     function renderDiscoveryCard(deal, kicker) {
         const brand = escapeHtml(getDisplayBrand(deal));
-        const title = escapeHtml(cleanUiNoiseText(deal.title || 'Deal'));
-        const snippet = escapeHtml(cleanUiNoiseText(deal.description || ''));
+        const title = escapeHtml(truncateUiCopy(stripLeadingBrandFromText(cleanUiNoiseText(deal.title || 'Deal'), getDisplayBrand(deal)) || cleanUiNoiseText(deal.title || 'Deal'), 88));
+        const snippet = escapeHtml(truncateUiCopy(stripLeadingBrandFromText(cleanUiNoiseText(deal.description || ''), getDisplayBrand(deal)), 106));
         const location = escapeHtml(getDisplayLocation(deal) || 'Wien');
         const expiry = getExpiryPresentation(deal);
-        const dateLabel = escapeHtml(expiry.infoLabel || deal.expiresOriginal || deal.expires || t('validLimited'));
+        const dateLabel = escapeHtml(formatUiDateLabel(expiry.infoLabel || deal.expiresOriginal || deal.expires || t('validLimited')));
         const dealId = escapeJsString(deal.id);
         const voteCount = Number(deal.votes || 0);
         const favIcon = favorites.includes(deal.id) ? '❤️' : '🤍';
@@ -5535,11 +5547,12 @@
         const safeSummary = escapeHtml(cleanDesc);
         const safeLocation = escapeHtml(location);
         const dateDisplay = hasExpiry ? expiry.infoLabel : (expiry.infoLabel || (expires && !/^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend)/i.test(expires) ? expires : ''));
-        const safeDateDisplay = escapeHtml(dateDisplay);
+        const safeDateDisplay = escapeHtml(formatUiDateLabel(dateDisplay));
         const hasTargetUrl = !!(d.url && String(d.url).trim());
         const defaultBtnLabel = d.category === 'gottesdienste' ? t('openTimes') : d.category === 'events' ? t('openEvent') : d.category === 'kirche' ? t('openChurch') : t('openDeal');
         const voteDisabled = votedDeals.includes(d.id);
         const favoriteActive = favorites.includes(d.id);
+        const favoriteLabel = escapeHtml(favoriteActive ? (currentLanguage === 'en' ? 'Remove favorite' : 'Favorit entfernen') : (currentLanguage === 'en' ? 'Save favorite' : 'Als Favorit speichern'));
         const dealMetaBadges = [
             isExpiredVisible ? '<span class="badge badge-expiry urgent">⚠️ ' + t('expiredAlready') + '</span>' : '',
             !isExpiredVisible && hasExpiry ? '<span class="badge badge-expiry ' + expiry.badgeClass + '">' + expiry.badgeText + '</span>' : '',
@@ -5562,7 +5575,7 @@
                     '<button class="deal-inline-action share-action" onclick="shareDeal(\'' + d.id + '\', event)"><span class="deal-meta-icon">' + dealCardIcon('share') + '</span><span>' + t('shareText') + '</span></button>' +
                 '</div>' +
                 '<div class="deal-primary-actions">' +
-                    '<button class="deal-favorite-inline' + (favoriteActive ? ' is-active' : '') + '" onclick="toggleFav(\'' + d.id + '\', event)"><span class="deal-meta-icon">' + dealCardIcon('heart') + '</span></button>' +
+                    '<button class="deal-favorite-inline' + (favoriteActive ? ' is-active' : '') + '" aria-label="' + favoriteLabel + '" title="' + favoriteLabel + '" onclick="toggleFav(\'' + d.id + '\', event)"><span class="deal-meta-icon">' + dealCardIcon('heart') + '</span></button>' +
                     '<button class="deal-link-inline' + (hasTargetUrl ? '' : ' disabled') + '" ' + (hasTargetUrl ? '' : 'disabled ') + 'onclick="openDealUrl(\'' + d.id + '\', event)">' + (hasTargetUrl ? (defaultBtnLabel + ' ↗') : t('linkComingSoon')) + '</button>' +
                 '</div>' +
             '</div>' +
