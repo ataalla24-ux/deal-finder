@@ -93,6 +93,8 @@
         .daily-deal.featured-locked > :not(.featured-lock) { filter: blur(3px); opacity: 0.35; pointer-events: none; user-select: none; }
         .featured-lock { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; z-index: 3; background: linear-gradient(135deg, rgba(17,24,39,0.4), rgba(88,28,135,0.55)); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
         .featured-lock-content { max-width: 280px; text-align: center; }
+        .featured-lock-kicker { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 999px; background: rgba(255,255,255,0.16); color: rgba(255,255,255,0.96); font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+        .featured-lock-deal { font-family: 'Bricolage Grotesque', 'Plus Jakarta Sans', sans-serif; font-size: 30px; font-weight: 800; line-height: 0.98; letter-spacing: -0.045em; margin-top: 6px; }
         .featured-lock-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
         .featured-lock-subtitle { font-size: 13px; line-height: 1.45; opacity: 0.95; margin-bottom: 14px; }
         .featured-lock-btn { background: white; color: #5b21b6; border: none; border-radius: 999px; padding: 12px 18px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.22); }
@@ -399,7 +401,7 @@
         .no-content { text-align: center; padding: 20px; color: #9ca3af; font-size: 13px; }
         
         /* ADD DEAL FLOATING BUTTON */
-        .fab-add { position: fixed; bottom: calc(68px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px)); right: 18px; width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #41c889, #1fa165); color: white; border: 2px solid rgba(255,255,255,0.9); font-size: 24px; cursor: pointer; box-shadow: 0 10px 20px rgba(34, 165, 102, 0.2); z-index: 90; display: flex; align-items: center; justify-content: center; transition: all 0.3s; transform: translateZ(0); -webkit-transform: translateZ(0); }
+        .fab-add { position: fixed; bottom: calc(86px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px)); right: 18px; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #41c889, #1fa165); color: white; border: 2px solid rgba(255,255,255,0.9); font-size: 24px; cursor: pointer; box-shadow: 0 10px 20px rgba(34, 165, 102, 0.2); z-index: 90; display: flex; align-items: center; justify-content: center; transition: transform 0.24s ease, opacity 0.24s ease, box-shadow 0.24s ease; transform: translate3d(0, 0, 0); -webkit-transform: translate3d(0, 0, 0); }
         .fab-add:hover { transform: scale(1.08); box-shadow: 0 6px 26px rgba(16,185,129,0.34); }
         .fab-add:active { transform: scale(0.95); }
         .fab-tooltip { position: absolute; right: 70px; background: #1f2937; color: white; padding: 8px 12px; border-radius: 8px; font-size: 12px; white-space: nowrap; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
@@ -601,10 +603,21 @@
             gap: 0;
             box-shadow: 0 8px 18px rgba(15,23,42,0.05), 0 1px 4px rgba(15,23,42,0.04);
             z-index: 100;
-            will-change: bottom;
+            will-change: transform, opacity;
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
             contain: layout style paint;
+            transition: transform 0.24s ease, opacity 0.24s ease;
+        }
+        body.nav-chrome-hidden .bottom-nav {
+            transform: translate3d(-50%, calc(116% + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px)), 0);
+            opacity: 0;
+            pointer-events: none;
+        }
+        body.nav-chrome-hidden .fab-add {
+            transform: translate3d(0, calc(96px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px)), 0);
+            opacity: 0;
+            pointer-events: none;
         }
         .nav-item {
             position: relative;
@@ -910,7 +923,7 @@
         .daily-deal#dailyDeal.theme-gewinnspiel,
         .daily-deal#dailyDeal.theme-bogo,
         .daily-deal#dailyDeal.theme-testabo {
-            background: linear-gradient(135deg, #f6993a 0%, #f59a36 60%, #ffad49 100%);
+            background: linear-gradient(135deg, #ff8f34 0%, #f59a36 58%, #ffb95a 100%);
             box-shadow: 0 18px 34px rgba(242, 145, 49, 0.18);
         }
         .daily-deal#dailyDeal::before {
@@ -928,6 +941,40 @@
             letter-spacing: 0.12em;
             margin-bottom: 10px;
             box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+        }
+        #dailyDeal.featured-locked > :not(.featured-lock) {
+            filter: blur(2px);
+            opacity: 0.34;
+        }
+        #dailyDeal .featured-lock {
+            background: linear-gradient(180deg, rgba(255, 151, 58, 0.18) 0%, rgba(185, 86, 55, 0.28) 100%);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            align-items: flex-end;
+        }
+        #dailyDeal .featured-lock-content {
+            width: 100%;
+            max-width: none;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 2px 2px 4px;
+        }
+        #dailyDeal .featured-lock-kicker {
+            background: rgba(255,255,255,0.2);
+        }
+        #dailyDeal .featured-lock-deal {
+            color: rgba(255,255,255,0.98);
+        }
+        #dailyDeal .featured-lock-subtitle {
+            max-width: 255px;
+            margin-bottom: 12px;
+        }
+        #dailyDeal .featured-lock-btn {
+            color: #8b3f1a;
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
         }
         #dailyDeal .daily-title {
             max-width: 92%;
@@ -1450,6 +1497,7 @@
         }
         .fab-add {
             display: flex;
+            bottom: calc(96px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px));
         }
         .pro-banner {
             display: none !important;
@@ -1556,8 +1604,9 @@
             <button class="daily-btn" id="dailyBtn">Jetzt sichern →</button>
             <div class="featured-lock" id="dailyLock" onclick="openReferralModal()">
                 <div class="featured-lock-content">
-                    <div class="featured-lock-kicker" id="dailyLockKicker">⭐ DEAL DES TAGES</div>
-                    <div class="featured-lock-title" id="dailyLockTitle">👑 Nur für PRO</div>
+                    <div class="featured-lock-kicker" id="dailyLockKicker">👑 PRO</div>
+                    <div class="featured-lock-deal" id="dailyLockDeal">DEAL DES TAGES</div>
+                    <div class="featured-lock-title" id="dailyLockTitle">Nur für PRO</div>
                     <div class="featured-lock-subtitle" id="dailyLockSubtitle">Der stärkste Deal des Tages ist für PRO reserviert.</div>
                     <button class="featured-lock-btn" id="dailyLockBtn" onclick="event.stopPropagation(); openReferralModal()">👑 PRO gratis freischalten</button>
                 </div>
@@ -2053,7 +2102,9 @@
                 dailyLoading: 'Wird geladen...',
                 dailyFallback: '🎁 Deal des Tages',
                 dailyButton: 'Jetzt sichern →',
-                dailyLockTitle: '👑 Nur für PRO',
+                dailyLockKicker: '👑 PRO',
+                dailyLockDeal: 'DEAL DES TAGES',
+                dailyLockTitle: 'Nur für PRO',
                 dailyLockSubtitle: 'Der stärkste Deal des Tages ist für PRO reserviert.',
                 dailyLockButton: '👑 PRO gratis freischalten',
                 weeklyLabel: '🔥 DEAL DER WOCHE',
@@ -2070,6 +2121,7 @@
                 featuredWeekLockSub: 'Schalte Deal der Woche mit 2 bestätigten Einladungen frei.',
                 featuredMonthLockSub: 'Schalte Deal des Monats mit 2 bestätigten Einladungen frei.',
                 featuredLockButton: '👑 PRO gratis freischalten',
+                dailyLockSubtitle: 'Der stärkste Deal des Tages ist für PRO reserviert.',
                 featuredVotes: '{count} Votes',
                 featuredFresh: 'Heute entdeckt',
                 featuredDaysAgo: 'Vor {count} Tagen entdeckt',
@@ -2296,7 +2348,9 @@
                 dailyLoading: 'Loading...',
                 dailyFallback: '🎁 Deal of the day',
                 dailyButton: 'Claim now →',
-                dailyLockTitle: '👑 PRO only',
+                dailyLockKicker: '👑 PRO',
+                dailyLockDeal: 'DEAL OF THE DAY',
+                dailyLockTitle: 'PRO only',
                 dailyLockSubtitle: 'The strongest deal of the day is reserved for PRO.',
                 dailyLockButton: '👑 Unlock PRO for free',
                 weeklyLabel: '🔥 DEAL OF THE WEEK',
@@ -2313,6 +2367,7 @@
                 featuredWeekLockSub: 'Unlock deal of the week with 2 confirmed invites.',
                 featuredMonthLockSub: 'Unlock deal of the month with 2 confirmed invites.',
                 featuredLockButton: '👑 Unlock PRO for free',
+                dailyLockSubtitle: 'Today’s strongest deal is reserved for PRO.',
                 featuredVotes: '{count} votes',
                 featuredFresh: 'Discovered today',
                 featuredDaysAgo: 'Discovered {count} days ago',
@@ -2568,7 +2623,8 @@
 
             setText('#dailyDeal .daily-label', t('dailyLabel'));
             setText('#dailyBtn', t('dailyButton'));
-            setText('#dailyLockKicker', t('dailyLabel'));
+            setText('#dailyLockKicker', t('dailyLockKicker'));
+            setText('#dailyLockDeal', t('dailyLockDeal'));
             setText('#dailyLockTitle', t('dailyLockTitle'));
             setText('#dailyLockSubtitle', t('dailyLockSubtitle'));
             setText('#dailyLockBtn', t('dailyLockButton'));
@@ -4868,6 +4924,7 @@
             };
             activeHomeDailyDealId = deal.id || '';
             updateFeaturedLockState();
+            updateDailyDealLockState();
             return true;
         }
         activeHomeDailyDealId = '';
@@ -4902,7 +4959,7 @@
           document.getElementById('dailyTitle').textContent = t('dailyFallback');
           document.getElementById('dailyDesc').textContent = currentLanguage === 'en' ? 'Available soon' : 'Bald verfügbar';
           document.getElementById('dailyBtn').onclick = () => {};
-          updateFeaturedLockState();
+          updateDailyDealLockState();
           return;
         }
         applyDailyDealDisplay(deal);
@@ -5056,6 +5113,14 @@
             });
             updateFeaturedLockState();
             updateHomeSectionVisibility();
+        }
+        function updateDailyDealLockState() {
+            const dailyDealEl = document.getElementById('dailyDeal');
+            const dailyLockEl = document.getElementById('dailyLock');
+            if (!dailyDealEl || !dailyLockEl) return;
+            const isLocked = !proData.isPro;
+            dailyDealEl.classList.toggle('featured-locked', isLocked);
+            dailyLockEl.style.display = isLocked ? 'flex' : 'none';
         }
         function restoreFeaturedDealsToHome() {
             const weeklyDeal = document.getElementById('weeklyDeal');
@@ -5989,8 +6054,9 @@
             else if (view === 'stats') showStats();
             else if (view === 'favorites') showFavorites();
         }
-        function showFavorites() { restoreFeaturedDealsToHome(); restoreRelocatedSectionsToHome(); currentView = 'favorites'; hideHeaderElements(); renderDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[3].classList.add('active'); }
+        function showFavorites() { setBottomChromeHidden(false); restoreFeaturedDealsToHome(); restoreRelocatedSectionsToHome(); currentView = 'favorites'; hideHeaderElements(); renderDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelectorAll('.nav-item')[3].classList.add('active'); }
         function showStats() {
+            setBottomChromeHidden(false);
             restoreFeaturedDealsToHome();
             restoreRelocatedSectionsToHome();
             currentView = 'stats';
@@ -6035,6 +6101,7 @@
             document.querySelectorAll('.nav-item')[2].classList.add('active');
         }
         function showSecretDeals() {
+            setBottomChromeHidden(false);
             restoreFeaturedDealsToHome();
             restoreRelocatedSectionsToHome();
             currentView = 'secret';
@@ -6118,14 +6185,16 @@
                 el.style.display = shouldShow ? displayValue : 'none';
             });
             updateFeaturedLockState();
+            updateDailyDealLockState();
         }
-        function showHome() { restoreFeaturedDealsToHome(); restoreRelocatedSectionsToHome(); currentView = 'home'; updateHomeSectionVisibility(); setFeaturedHomeDeals(); renderDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelector('.nav-item').classList.add('active'); }
+        function showHome() { setBottomChromeHidden(false); restoreFeaturedDealsToHome(); restoreRelocatedSectionsToHome(); currentView = 'home'; updateHomeSectionVisibility(); setFeaturedHomeDeals(); renderDeals(); scrollToTopContent(); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.querySelector('.nav-item').classList.add('active'); }
         function hideHeaderElements() { updateHomeSectionVisibility(); }
         
         // ===== LINK SUBMIT SYSTEM =====
         let currentLinkData = null;
         
         function openLinkModal() {
+            setBottomChromeHidden(false);
             document.getElementById('linkModal').classList.add('show');
             document.getElementById('linkInput').value = '';
             document.getElementById('linkPreview').classList.remove('show');
@@ -6300,6 +6369,35 @@
                 animation.classList.remove('show');
             }, 3500);
         }
+
+        let bottomChromeHidden = false;
+        let lastChromeScrollY = Math.max(0, window.scrollY || 0);
+        function setBottomChromeHidden(hidden) {
+            const next = Boolean(hidden);
+            if (bottomChromeHidden === next) return;
+            bottomChromeHidden = next;
+            document.body.classList.toggle('nav-chrome-hidden', next);
+        }
+        function handleBottomChromeScroll() {
+            const y = Math.max(0, window.scrollY || 0);
+            const filtersEl = document.getElementById('filters');
+            if (filtersEl) filtersEl.classList.toggle('scrolled', y > 100);
+
+            const delta = y - lastChromeScrollY;
+            if (y <= 24) {
+                setBottomChromeHidden(false);
+                lastChromeScrollY = y;
+                return;
+            }
+            if (Math.abs(delta) < 10) return;
+
+            if (delta > 0 && y > 120) {
+                setBottomChromeHidden(true);
+            } else if (delta < 0) {
+                setBottomChromeHidden(false);
+            }
+            lastChromeScrollY = y;
+        }
         
         document.getElementById('typeFilters').addEventListener('click', e => {
             const btn = e.target.closest('.filter-btn');
@@ -6319,8 +6417,9 @@
             renderDeals();
             scrollToTopContent();
         });
-        window.addEventListener('scroll', () => document.getElementById('filters').classList.toggle('scrolled', window.scrollY > 100), { passive: true });
+        window.addEventListener('scroll', handleBottomChromeScroll, { passive: true });
         updateViewportBottomOffset();
+        setBottomChromeHidden(false);
         window.addEventListener('resize', updateViewportBottomOffset, { passive: true });
         window.addEventListener('orientationchange', updateViewportBottomOffset, { passive: true });
         if (window.visualViewport) {
@@ -7184,6 +7283,7 @@
 
   // ── Referral Modal ────────────────────────────────────────────────
   async function openReferralModal() {
+    setBottomChromeHidden(false);
     const modal = document.getElementById('referralModal');
     const code = generateReferralCode();
     await ensureReferralCodeRegistered();
