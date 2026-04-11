@@ -3046,6 +3046,65 @@
             return raw;
         }
 
+        function isAddressLikeTitleSnippet(value) {
+            const text = cleanUiNoiseText(value || '');
+            if (!text) return false;
+            if (/^\d{4}\s+wien/i.test(text)) return true;
+            if (/,?\s*\d{4}\s+wien/i.test(text)) return true;
+            if (/\b(straße|strasse|gasse|platz|weg|ring|allee)\b/i.test(text)) return true;
+            return false;
+        }
+
+        function getChurchCategoryTitle(deal, brand) {
+            const category = cleanUiNoiseText(deal.category || '').toLowerCase();
+            if (!['kirche', 'gottesdienste', 'events'].includes(category)) {
+                return cleanUiNoiseText(deal.title || 'Deal');
+            }
+
+            const rawTitle = stripLeadingBrandFromText(deal.title || '', brand);
+            const genericTitle = rawTitle
+                .replace(/\b(gottesdienste?|events?|kirche)\b/gi, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            if (genericTitle && genericTitle.length >= 4) return genericTitle;
+
+            const desc = String(deal.description || '')
+                .replace(/[⛪🕊️🎉🎫🙏]/g, ' ')
+                .replace(/📍[^|🕐📝]*/g, ' ')
+                .replace(/[🕐📝]/g, '|')
+                .replace(/\s+/g, ' ');
+            const normalizedBrand = cleanUiNoiseText(brand);
+            const parts = desc
+                .split('|')
+                .map((part) => stripLeadingBrandFromText(part, normalizedBrand))
+                .map((part) => cleanUiNoiseText(part))
+                .filter(Boolean)
+                .filter((part) => !isLikelyGenericLocation(part))
+                .filter((part) => !isAddressLikeTitleSnippet(part))
+                .filter((part) => normalizeUiCompareText(part) !== normalizeUiCompareText(normalizedBrand));
+
+            const genericChurchPattern = /^(gottesdienste?|gottesdienstzeiten( und informationen)?|events?|eventkalender|kirche|kirche in deiner nähe)$/i;
+            if (category === 'gottesdienste') {
+                const timed = parts.find((part) => /\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|\d{1,2}:\d{2}|uhr|neu hier|live)\b/i.test(part) && !genericChurchPattern.test(part));
+                if (timed) return timed;
+                const meaningful = parts.find((part) => !genericChurchPattern.test(part));
+                if (meaningful) return meaningful;
+                return currentLanguage === 'en' ? 'Service times & info' : 'Gottesdienstzeiten & Infos';
+            }
+
+            if (category === 'events') {
+                const eventish = parts.find((part) => /\b(community|communities|kleingruppen|hangouts|life groups|termine|event|events|treffen)\b/i.test(part) && !genericChurchPattern.test(part));
+                if (eventish) return eventish;
+                const meaningful = parts.find((part) => !genericChurchPattern.test(part));
+                if (meaningful) return meaningful;
+                return currentLanguage === 'en' ? 'Community & events' : 'Community & Events';
+            }
+
+            const meaningful = parts.find((part) => !genericChurchPattern.test(part));
+            if (meaningful) return meaningful;
+            return currentLanguage === 'en' ? 'Church info' : 'Kirche & Infos';
+        }
+
         function isLikelyGenericLocation(value) {
             const text = String(value || '').trim();
             if (!text) return true;
@@ -5502,7 +5561,7 @@
 
     function renderDiscoveryCard(deal, kicker) {
         const brand = escapeHtml(getDisplayBrand(deal));
-        const title = escapeHtml(truncateUiCopy(stripLeadingBrandFromText(cleanUiNoiseText(deal.title || 'Deal'), getDisplayBrand(deal)) || cleanUiNoiseText(deal.title || 'Deal'), 88));
+        const title = escapeHtml(truncateUiCopy(getChurchCategoryTitle(deal, getDisplayBrand(deal)) || stripLeadingBrandFromText(cleanUiNoiseText(deal.title || 'Deal'), getDisplayBrand(deal)) || cleanUiNoiseText(deal.title || 'Deal'), 88));
         const snippet = escapeHtml(truncateUiCopy(stripLeadingBrandFromText(cleanUiNoiseText(deal.description || ''), getDisplayBrand(deal)), 106));
         const location = escapeHtml(getDisplayLocation(deal) || 'Wien');
         const expiry = getExpiryPresentation(deal);
@@ -5720,7 +5779,7 @@
         const expires = d.expires || '';
         const brand = getDisplayBrand(d);
         const adminBtn = isAdminUiEnabled() ? '<button class="deal-admin-btn" onclick="event.stopPropagation(); openAdminEditor(\'' + d.id + '\')">✏️ Bearbeiten</button>' : '';
-        const cleanTitle = cleanUiNoiseText(d.title || 'Deal');
+        const cleanTitle = getChurchCategoryTitle(d, brand) || cleanUiNoiseText(d.title || 'Deal');
         const displayTitle = truncateUiCopy(stripLeadingBrandFromText(cleanTitle, brand) || cleanTitle, 94);
         const formattedTitle = escapeHtml(displayTitle || cleanTitle || 'Deal');
         const cleanDesc = truncateUiCopy(stripLeadingBrandFromText(cleanUiNoiseText(d.description || ''), brand), 112);
