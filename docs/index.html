@@ -7812,6 +7812,58 @@
 </body>
 </html>
 <script>
+        (function() {
+            const userAgent = navigator.userAgent || '';
+            const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+            if (!isIOS) return;
+
+            const params = new URLSearchParams(window.location.search);
+            const dealId = params.get('deal');
+            const refCode = params.get('ref');
+            const appShellVersion = params.get('appv');
+            if (!dealId || appShellVersion) return;
+
+            const deepLinkUrl = new URL('freefinder://deal');
+            deepLinkUrl.searchParams.set('deal', dealId);
+            if (refCode) {
+                deepLinkUrl.searchParams.set('ref', refCode);
+            }
+
+            let fallbackHandled = false;
+            const cleanup = function() {
+                document.removeEventListener('visibilitychange', onVisibilityChange);
+                window.removeEventListener('pagehide', markHandled);
+                window.removeEventListener('blur', markHandled);
+            };
+            const markHandled = function() {
+                fallbackHandled = true;
+                cleanup();
+            };
+            const onVisibilityChange = function() {
+                if (document.hidden) {
+                    markHandled();
+                }
+            };
+
+            document.addEventListener('visibilitychange', onVisibilityChange);
+            window.addEventListener('pagehide', markHandled);
+            window.addEventListener('blur', markHandled);
+
+            window.setTimeout(function() {
+                window.location.href = deepLinkUrl.toString();
+            }, 120);
+
+            window.setTimeout(function() {
+                if (fallbackHandled || document.hidden) return;
+                cleanup();
+                const appStoreUrl = new URL('https://apps.apple.com/at/app/id6758958213');
+                if (refCode) {
+                    appStoreUrl.searchParams.set('ct', 'ref_' + refCode);
+                }
+                window.location.replace(appStoreUrl.toString());
+            }, 1400);
+        })();
+
         // ⏰ Live re-render countdown every 60s to keep expiry info fresh
         setInterval(function() {
             if (typeof renderDeals === 'function') {
