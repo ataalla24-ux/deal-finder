@@ -6024,13 +6024,7 @@
         async function buildDealShareUrl(dealId) {
             const code = generateReferralCode();
             await ensureReferralCodeRegistered();
-            const base = await getReferralApiBase();
-            if (base) {
-                return base + '/r/' + encodeURIComponent(code) + '?deal=' + encodeURIComponent(dealId);
-            }
-            const url = new URL(window.location.href);
-            url.search = '';
-            url.hash = '';
+            const url = new URL('https://ataalla24-ux.github.io/deal-finder/');
             url.searchParams.set('deal', dealId);
             url.searchParams.set('ref', code);
             return url.toString();
@@ -7818,33 +7812,6 @@
 </body>
 </html>
 <script>
-// Auto-redirect to App Store if opened on iOS and no app
-(function() {
-    const userAgent = navigator.userAgent || '';
-    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
-    const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
-    
-    // Check if URL has deal parameter and we're on iOS
-    const params = new URLSearchParams(window.location.search);
-    const dealId = params.get('deal');
-    const refCode = params.get('ref');
-    
-    if (isIOS && dealId && isSafari) {
-        // Delay slightly to check if app is installed (Universal Link fails)
-        setTimeout(function() {
-            // If page is still visible after 500ms, redirect to App Store
-            if (!document.hidden) {
-                const appStoreUrl = new URL('https://apps.apple.com/at/app/id6758958213');
-                appStoreUrl.searchParams.set('deal', dealId);
-                if (refCode) {
-                    appStoreUrl.searchParams.set('ct', 'ref_' + refCode);
-                }
-                window.location.replace(appStoreUrl.toString());
-            }
-        }, 500);
-    }
-})();
-
         // ⏰ Live re-render countdown every 60s to keep expiry info fresh
         setInterval(function() {
             if (typeof renderDeals === 'function') {
