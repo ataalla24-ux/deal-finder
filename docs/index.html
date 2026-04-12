@@ -6040,15 +6040,13 @@
             e.stopPropagation(); 
             const deal = allDeals.find(d => d.id === id);
             if (!deal) return;
-            const targetUrl = deal && deal.url ? normalizeExternalUrl(deal.url) : '';
-            const fallbackAppUrl = await buildDealShareUrl(id);
-            const shareUrl = targetUrl || fallbackAppUrl;
+            const shareUrl = await buildDealShareUrl(id);
             const brand = deal.brand || 'FreeFinder Deal';
             const title = deal.title || (currentLanguage === 'en' ? 'New deal' : 'Neuer Deal');
             const description = deal.description || (currentLanguage === 'en' ? 'Check out this deal in FreeFinder.' : 'Schau dir diesen Deal in FreeFinder an.');
             const text = currentLanguage === 'en'
-                ? '🎁 ' + brand + ': ' + title + '\n\n' + description + '\n\n🔗 Deal link:\n' + shareUrl + '\n\nFound via FreeFinder.'
-                : '🎁 ' + brand + ': ' + title + '\n\n' + description + '\n\n🔗 Deal-Link:\n' + shareUrl + '\n\nGefunden mit FreeFinder.';
+                ? '🎁 ' + brand + ': ' + title + '\n\n' + description + '\n\n📱 Open this deal in FreeFinder:\n' + shareUrl
+                : '🎁 ' + brand + ': ' + title + '\n\n' + description + '\n\n📱 Öffne diesen Deal in FreeFinder:\n' + shareUrl;
             if (navigator.share) {
                 await navigator.share({ title: brand + ' bei FreeFinder', text, url: shareUrl }).catch(() => {});
             } else {
