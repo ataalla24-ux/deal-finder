@@ -7823,12 +7823,6 @@
             const appShellVersion = params.get('appv');
             if (!dealId || appShellVersion) return;
 
-            const deepLinkUrl = new URL('freefinder://deal');
-            deepLinkUrl.searchParams.set('deal', dealId);
-            if (refCode) {
-                deepLinkUrl.searchParams.set('ref', refCode);
-            }
-
             let fallbackHandled = false;
             const cleanup = function() {
                 document.removeEventListener('visibilitychange', onVisibilityChange);
@@ -7848,10 +7842,6 @@
             document.addEventListener('visibilitychange', onVisibilityChange);
             window.addEventListener('pagehide', markHandled);
             window.addEventListener('blur', markHandled);
-
-            window.setTimeout(function() {
-                window.location.href = deepLinkUrl.toString();
-            }, 120);
 
             window.setTimeout(function() {
                 if (fallbackHandled || document.hidden) return;
