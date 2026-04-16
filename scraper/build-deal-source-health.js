@@ -36,6 +36,7 @@ const SOURCE_LABEL_OVERRIDES = {
   'instagram-web': 'Daily Sync Instagram Web',
   joe: 'jö Bonus Club',
   power: 'Power Scraper',
+  'vienna-promo-radar': 'Vienna Promo Radar',
 };
 
 const FOOD_DRINK_CATEGORIES = new Set(['essen', 'kaffee', 'supermarkt']);

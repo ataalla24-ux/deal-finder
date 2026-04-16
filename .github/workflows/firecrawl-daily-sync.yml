@@ -82,11 +82,14 @@ jobs:
       - name: Run jö Scraper
         run: node scraper/joe-scraper.js
 
+      - name: Run Vienna Promo Radar
+        run: node scraper/vienna-promo-radar.js
+
       - name: Commit deal updates
         run: |
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
-          git add docs/deals-pending-instagram.json docs/deals-pending-instagram-web.json docs/deals-pending-instagram-discovery.json docs/deals-pending-joe.json docs/instagram-source-stats.json docs/instagram-discovery-report.json docs/instagram-web-report.json docs/instagram-merchant-registry.json 2>/dev/null || true
+          git add docs/deals-pending-instagram.json docs/deals-pending-instagram-web.json docs/deals-pending-instagram-discovery.json docs/deals-pending-joe.json docs/deals-pending-vienna-promo-radar.json docs/instagram-source-stats.json docs/instagram-discovery-report.json docs/instagram-web-report.json docs/instagram-merchant-registry.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
