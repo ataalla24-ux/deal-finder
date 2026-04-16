@@ -28,11 +28,8 @@ jobs:
         env:
           FIRECRAWL_API_KEY5: ${{ secrets.FIRECRAWL_API_KEY5 }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
-          FC5_MAX_AGE_DAYS: 1
+          FC5_MAX_AGE_DAYS: 365
         run: node scraper/firecrawl-instagram-gastro5.js
-
-      - name: Filter alte Deals
-        run: node scraper/filter-old-deals.js
 
       - name: Commit deals
         run: |

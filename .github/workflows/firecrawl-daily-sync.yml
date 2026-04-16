@@ -45,13 +45,13 @@ jobs:
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
           INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
-          IG_MAX_AGE_DAYS: 7
-          IG_MAX_DEALS: 40
-          IG_MAX_SOURCES_TOTAL: 24
-          IG_MAX_TIMELINE_POSTS: 18
-          IG_MAX_REGISTRY_ACCOUNTS: 12
-          IG_MIN_SCORE: 58
-          IG_MAX_DEALS_PER_ACCOUNT: 3
+          IG_MAX_AGE_DAYS: 365
+          IG_MAX_DEALS: 500
+          IG_MAX_SOURCES_TOTAL: 120
+          IG_MAX_TIMELINE_POSTS: 80
+          IG_MAX_REGISTRY_ACCOUNTS: 120
+          IG_MIN_SCORE: 0
+          IG_MAX_DEALS_PER_ACCOUNT: 120
         run: |
           node - <<'NODE'
           const session = String(process.env.INSTAGRAM_SESSIONID || '').trim();
@@ -81,9 +81,6 @@ jobs:
 
       - name: Run jö Scraper
         run: node scraper/joe-scraper.js
-
-      - name: Filter alte Deals
-        run: node scraper/filter-old-deals.js
 
       - name: Commit deal updates
         run: |

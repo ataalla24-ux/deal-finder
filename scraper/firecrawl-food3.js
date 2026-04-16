@@ -108,7 +108,6 @@ async function main() {
   const rawOffers = result?.data?.offers || [];
   console.log(`📦 Rohangebote: ${rawOffers.length}`);
 
-  const seenUrls = new Set();
   const deals = [];
 
   for (const offer of rawOffers) {
@@ -122,10 +121,7 @@ async function main() {
     const combined = `${providerName} ${productType} ${location} ${times} ${conditions} ${offerTypeText}`;
 
     if (!postUrl || !isInstagramPostUrl(postUrl)) continue;
-    if (seenUrls.has(postUrl)) continue;
     if (!looksVienna(combined)) continue;
-
-    seenUrls.add(postUrl);
 
     const type = inferType(offerTypeText, `${productType} ${conditions}`);
     const category = inferCategory(productType, `${offerTypeText} ${conditions}`);

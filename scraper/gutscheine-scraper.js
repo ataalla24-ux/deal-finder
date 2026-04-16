@@ -289,11 +289,6 @@ function parseDeals(html) {
     }
     if (amount > 95 && unit === '%') continue; // Probably fake
 
-    // Deduplicate
-    const dedupeKey = `${brand.toLowerCase()}-${amount}${unit}`;
-    if (seenDeals.has(dedupeKey)) continue;
-    seenDeals.add(dedupeKey);
-
     // Find closest expiry date (within 500 chars after the match)
     let expires = 'Siehe Website';
     for (const [idx, date] of expiryMap) {
@@ -415,10 +410,6 @@ function parseDeals(html) {
       );
       if (!isKnown) continue; // Nur bekannte Marken für diese Deals
 
-      const dedupeKey2 = `gratis-${saleBrandLower}`;
-      if (seenDeals.has(dedupeKey2)) continue;
-      seenDeals.add(dedupeKey2);
-
       const matched = m[0].trim().substring(0, 60);
       let cat2 = 'shopping', logo2 = '🏷️';
       for (const [key, val] of Object.entries(RELEVANT_CATEGORIES)) {
@@ -503,28 +494,16 @@ async function main() {
     }
   }
 
-  // Deduplicate across pages
-  const unique = [];
-  const seen = new Set();
-  for (const deal of allDeals) {
-    const key = `${deal.brand.toLowerCase()}-${deal.title.substring(0, 20).toLowerCase()}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      unique.push(deal);
-    }
-  }
-
   // Sort by quality score
-  unique.sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0));
-
-  // Limit to top 100 deals (more for Slack selection)
-  const finalDeals = unique.slice(0, 100);
+  const finalDeals = allDeals
+    .slice()
+    .sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0));
 
   console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('📊 ERGEBNIS:');
   console.log(`   🔍 Seiten gescraped:   ${PAGES_TO_SCRAPE.length}`);
   console.log(`   📦 Deals extrahiert:   ${allDeals.length}`);
-  console.log(`   ✅ Nach Filter:        ${finalDeals.length}`);
+  console.log(`   ✅ Ohne Dedupe/Top100: ${finalDeals.length}`);
   if (finalDeals.length > 0) {
     console.log(`   🏆 Bester Deal:        ${finalDeals[0].title}`);
   }

@@ -136,7 +136,6 @@ async function main() {
 
   const rawOffers = result?.data?.offers || [];
   const deals = [];
-  const seenUrls = new Set();
 
   console.log(`🔍 Agent returned ${rawOffers.length} Rohangebote`);
 
@@ -152,12 +151,9 @@ async function main() {
     const postDate = parseGermanDate(postDateRaw);
 
     if (!postUrl || !isInstagramPostUrl(postUrl)) continue;
-    if (seenUrls.has(postUrl)) continue;
-    if (looksLikeGiveaway(combinedText)) continue;
-    if (!/wien|vienna/i.test(location) && !/wien|vienna/i.test(combinedText)) continue;
-    if (!postDate || !isNotTooOld(postDate)) continue;
-
-    seenUrls.add(postUrl);
+    const pubDate = postDate instanceof Date && !Number.isNaN(postDate.getTime())
+      ? postDate.toISOString()
+      : new Date().toISOString();
 
     const type = inferType(offerType, description);
     const category = inferCategory(`${offerType} ${description}`);
@@ -180,7 +176,7 @@ async function main() {
       priority: type === 'gratis' ? 1 : 2,
       votes: 1,
       qualityScore: 80,
-      pubDate: postDate.toISOString(),
+      pubDate,
       pubDateSource: 'socialPostDate',
     });
   }

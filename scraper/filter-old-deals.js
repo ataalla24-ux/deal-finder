@@ -272,10 +272,10 @@ function isExpiredOrOld(deal) {
 // ============================================
 
 async function main() {
-  console.log('🗑️  FILTER OLD DEALS');
+  console.log('🗑️  FILTER OLD DEALS (BYPASS)');
   console.log('='.repeat(40));
   console.log(`📅 Heute: ${NOW.toLocaleDateString('de-AT')}`);
-  console.log(`📅 Ablaufdatum-Filter: expires/validity < heute, pubDate-Filter: < ${TWO_WEEKS_AGO.toLocaleDateString('de-AT')}`);
+  console.log('📭 Nachfilterung deaktiviert - alle Pending-Deals bleiben erhalten');
   console.log();
 
   if (!fs.existsSync(docsDir)) {
@@ -285,8 +285,7 @@ async function main() {
 
   const files = fs.readdirSync(docsDir).filter((f) => {
     if (!f.startsWith('deals-pending-') || !f.endsWith('.json')) return false;
-    if (f === 'deals-pending-instagram-web.json') return false;
-    if (f === 'deals-pending-instagram-discovery.json') return false;
+    if (f === 'deals-pending-all.json') return false;
     return true;
   });
 
@@ -297,88 +296,37 @@ async function main() {
 
   let totalBefore = 0;
   let totalAfter = 0;
-  let totalRemoved = 0;
-  let urlChecksUsed = 0;
-  let urlExpiryHits = 0;
-  const urlExpiryCache = new Map();
-  const socialPubDateCache = new Map();
-  let socialPubDateChecksUsed = 0;
-  let socialPubDateHits = 0;
 
   for (const file of files) {
     const filePath = path.join(docsDir, file);
     try {
       const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-      const deals = data.deals || [];
+      const deals = Array.isArray(data?.deals) ? data.deals : Array.isArray(data) ? data : [];
       const before = deals.length;
       totalBefore += before;
+      totalAfter += before;
 
-      const freshDeals = [];
-      const removedDeals = [];
+      const payload = Array.isArray(data)
+        ? deals
+        : {
+            ...data,
+            deals,
+            totalDeals: deals.length,
+            filteredAt: NOW.toISOString(),
+            removedCount: 0,
+            filterBypassed: true,
+          };
 
-      for (const deal of deals) {
-        const rawExpiry = String(deal.expires || deal.end_date || deal.validity_date || '').trim();
-        const wantsUrlLookup = shouldVerifyExpiryAgainstUrl(deal, { now: NOW });
-        const cacheHadUrl = deal.url ? urlExpiryCache.has(deal.url) : false;
-        const allowUrlLookup = wantsUrlLookup && (cacheHadUrl || urlChecksUsed < MAX_URL_EXPIRY_CHECKS);
-        const hadUrlExpiry = Boolean(deal.expiresDetectedFromUrl);
-
-        await normalizeDealExpiry(deal, {
-          now: NOW,
-          urlCache: urlExpiryCache,
-          allowUrlLookup,
-        });
-
-        if (allowUrlLookup && deal.url && !cacheHadUrl && urlExpiryCache.has(deal.url)) {
-          urlChecksUsed += 1;
-        }
-        if (!hadUrlExpiry && deal.expiresDetectedFromUrl) {
-          urlExpiryHits += 1;
-        }
-
-        if (isSocialUrl(deal.url) && socialPubDateChecksUsed < MAX_SOCIAL_PUBDATE_CHECKS) {
-          socialPubDateChecksUsed += 1;
-          if (await enrichSocialTargetPubDate(deal, socialPubDateCache)) {
-            socialPubDateHits += 1;
-          }
-        }
-
-        const check = isExpiredOrOld(deal);
-        if (check.expired) {
-          removedDeals.push({ title: deal.title || deal.brand || '?', reason: check.reason });
-        } else {
-          freshDeals.push(deal);
-        }
-      }
-
-      const removed = before - freshDeals.length;
-      totalRemoved += removed;
-      totalAfter += freshDeals.length;
-
-      // Update file
-      data.deals = freshDeals;
-      data.totalDeals = freshDeals.length;
-      data.filteredAt = NOW.toISOString();
-      data.removedCount = removed;
-      fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-
-      console.log(`📂 ${file}: ${before} → ${freshDeals.length} (${removed} entfernt)`);
-      for (const r of removedDeals.slice(0, 5)) {
-        console.log(`   🗑️  ${r.title.substring(0, 40)} — ${r.reason}`);
-      }
-      if (removedDeals.length > 5) {
-        console.log(`   ... und ${removedDeals.length - 5} weitere`);
-      }
+      fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
+      console.log(`📂 ${file}: ${before} → ${deals.length} (0 entfernt, bypass aktiv)`);
     } catch (e) {
       console.log(`❌ ${file}: ${e.message}`);
     }
   }
 
   console.log();
-  console.log(`🔎 URL-Expiry checks: ${urlChecksUsed}/${MAX_URL_EXPIRY_CHECKS}, Treffer: ${urlExpiryHits}`);
-  console.log(`🧭 Social pubDate checks: ${socialPubDateChecksUsed}/${MAX_SOCIAL_PUBDATE_CHECKS}, Treffer: ${socialPubDateHits}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log(`📊 GESAMT: ${totalBefore} → ${totalAfter} Deals (${totalRemoved} entfernt)`);
+  console.log(`📊 GESAMT: ${totalBefore} → ${totalAfter} Deals (0 entfernt)`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 }
 

@@ -976,16 +976,7 @@ function buildDealFromCandidate({
     rejectionReasons.expired += 1;
     return null;
   }
-  if (seenUrls.has(postUrl)) {
-    rejectionReasons.duplicateUrl += 1;
-    return null;
-  }
-
   const accountCount = accountDealCounts.get(source.username) || 0;
-  if (accountCount >= CONFIG.maxDealsPerAccount) {
-    rejectionReasons.accountCap += 1;
-    return null;
-  }
 
   const type = detectType(combinedText);
   const category = detectCategory(combinedText, {
@@ -1025,7 +1016,6 @@ function buildDealFromCandidate({
     reviewTier: score >= 84 ? 'high' : score >= 70 ? 'medium' : 'low',
   };
 
-  seenUrls.add(postUrl);
   accountDealCounts.set(source.username, accountCount + 1);
 
   return {
@@ -1293,17 +1283,16 @@ async function main() {
                 rejectionReasons,
                 seenUrls,
                 accountDealCounts
-              );
+            );
               if (!built) continue;
               stat.acceptedDeals += 1;
               acceptedDeals.push(built.deal);
               candidateSnapshot.push(built.candidate);
-              if (acceptedDeals.length >= CONFIG.maxDealsPerRun) break;
             }
           }
         }
 
-        if (timelineEdges.length > 0 && acceptedDeals.length < CONFIG.maxDealsPerRun) {
+        if (timelineEdges.length > 0) {
           const slicedEdges = timelineEdges.slice(0, CONFIG.maxTimelinePostsPerAccount);
           stat.links += slicedEdges.length;
           totalCandidates += slicedEdges.length;
@@ -1350,7 +1339,6 @@ async function main() {
             stat.acceptedDeals += 1;
             acceptedDeals.push(built.deal);
             candidateSnapshot.push(built.candidate);
-            if (acceptedDeals.length >= CONFIG.maxDealsPerRun) break;
           }
         }
       } else if (profileResult.fallbackLinks.length > 0) {
@@ -1374,13 +1362,10 @@ async function main() {
           stat.acceptedDeals += 1;
           acceptedDeals.push(built.deal);
           candidateSnapshot.push(built.candidate);
-          if (acceptedDeals.length >= CONFIG.maxDealsPerRun) break;
         }
       } else {
         rejectionReasons.noProfile += 1;
       }
-
-      if (acceptedDeals.length >= CONFIG.maxDealsPerRun) break;
     }
 
     const finalDeals = acceptedDeals

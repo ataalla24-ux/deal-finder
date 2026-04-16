@@ -743,7 +743,6 @@ async function extractLoggedInJoeBenefitsPage(page) {
   }
 
   const deals = [];
-  const seenTitles = new Set();
   for (const item of pageData.candidates) {
     const text = cleanText(item.text);
     if (!text) continue;
@@ -769,9 +768,6 @@ async function extractLoggedInJoeBenefitsPage(page) {
     const expiry = extractJoeAuthExpiry(text);
     title = normalizeJoeAuthTitle(text, brand);
     if (!title) continue;
-    const dedupeKey = `${brand}|${title}`.toLowerCase();
-    if (seenTitles.has(dedupeKey)) continue;
-    seenTitles.add(dedupeKey);
 
     const url = item.href || pageData.url || JOE_PRIVATE_BENEFITS_URL;
     const deal = buildDeal({
@@ -798,18 +794,7 @@ async function extractLoggedInJoeBenefitsPage(page) {
 }
 
 function dedupeDeals(deals) {
-  const deduped = [];
-  const seen = new Set();
-
-  for (const deal of deals) {
-    if (!deal) continue;
-    const key = `${deal.title}|${deal.url}`.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    deduped.push(deal);
-  }
-
-  return deduped;
+  return deals.filter(Boolean);
 }
 
 async function main() {

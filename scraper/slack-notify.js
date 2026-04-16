@@ -475,17 +475,11 @@ function normalizeDeal(rawDeal, sourceKey) {
 }
 
 function getPendingFiles() {
-  const files = fs.readdirSync(DOCS_DIR);
-  const discovered = files.filter((file) => {
+  return fs.readdirSync(DOCS_DIR).filter((file) => {
     if (!file.startsWith('deals-pending-') || !file.endsWith('.json')) return false;
-    if (file === 'deals-pending-merged.json') return false;
     if (file === 'deals-pending-all.json') return false;
-    if (file === 'deals-pending-instagram-web.json') return false;
-    if (file === 'deals-pending-instagram-discovery.json') return false;
     return true;
   });
-  if (PENDING_FILE_NAMES.length === 0) return discovered;
-  return discovered.filter((file) => PENDING_FILE_NAMES.includes(file));
 }
 
 function loadPendingDeals() {
@@ -714,52 +708,28 @@ async function main() {
   const pendingDeals = loadPendingDeals();
   console.log(`📋 Total pending deals loaded: ${pendingDeals.length}`);
 
-  const sentIds = loadSentIds();
   const existingQueue = loadPendingQueue();
-  const seenSignatures = buildSeenSignatureMap(sentIds, existingQueue);
-  const unseenDeals = pendingDeals.filter((deal) => {
-    if (sentIds[deal.id]) return false;
-    const signatures = getDealSignatureVariants(deal);
-    if (signatures.length === 0) return true;
-    return !signatures.some((signature) => seenSignatures.has(signature));
-  });
-  const socialFreshnessStats = await enrichSocialFreshness(unseenDeals);
-  const neotasteExcluded = unseenDeals.filter(isNeoTasteDeal).length;
-  const freshDeals = unseenDeals
-    .filter((d) => !isNeoTasteDeal(d))
-    .filter(isRecent)
-    .filter(hasTrustedInstagramDate)
-    .filter((d) => !isStrictRecentSocialDeal(d) || isViennaDeal(d))
-    .filter((d) => !hasOldAgeSignal(d))
-    .filter((d) => !hasStaleExplicitDateSignal(d))
-    .filter(isNotExpired);
+  const dealsToPost = pendingDeals;
 
-  console.log(
-    `📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, neotasteExcluded: ${neotasteExcluded}, fresh: ${freshDeals.length}`
-  );
-  console.log(
-    `🧭 Social freshness checks: ${socialFreshnessStats.checked}/${socialFreshnessStats.candidates}, ` +
-    `verified: ${socialFreshnessStats.verifiedFromTargetUrl}, ` +
-    `noDate: ${socialFreshnessStats.noUsableTargetDate}, invalid: ${socialFreshnessStats.invalidUrl}, transient: ${socialFreshnessStats.transientErrors}`
-  );
+  console.log(`📨 Pending: ${pendingDeals.length}, toPost: ${dealsToPost.length}`);
 
-  if (freshDeals.length === 0) {
+  if (dealsToPost.length === 0) {
     console.log('✅ Keine neuen Deals für Slack');
     return;
   }
 
-  freshDeals.sort((a, b) => {
+  dealsToPost.sort((a, b) => {
     if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
       return (b.qualityScore || 0) - (a.qualityScore || 0);
     }
     return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
   });
 
-  const freeCount = freshDeals.filter((d) => d.type === 'gratis').length;
+  const freeCount = dealsToPost.filter((d) => d.type === 'gratis').length;
   const headerTs = await postSlackMessage(
-    `🎯 *FreeFinder Wien* — ${freshDeals.length} neue Deals\n` +
-    `🆓 ${freeCount} gratis | 💰 ${freshDeals.length - freeCount} rabatt/test\n` +
-    `_Jeden Deal mit ✅ bestätigen, dann erscheint er in der iOS-App._`
+    `🎯 *FreeFinder Wien* — ${dealsToPost.length} Pending-Deals aus allen Scrapern\n` +
+    `🆓 ${freeCount} gratis | 💰 ${dealsToPost.length - freeCount} rabatt/test\n` +
+    `_Ungefilterter Slack-Durchlauf ohne Seen-/Dedupe-/Freshness-Blocker._`
   );
 
   if (!headerTs) {
@@ -768,8 +738,8 @@ async function main() {
   }
 
   const postedDeals = [];
-  for (let i = 0; i < freshDeals.length; i += 1) {
-    const deal = freshDeals[i];
+  for (let i = 0; i < dealsToPost.length; i += 1) {
+    const deal = dealsToPost[i];
     const text = buildSlackMessage(deal, i + 1);
     const ts = await postSlackMessage(text, headerTs);
     if (!ts) continue;
@@ -777,21 +747,13 @@ async function main() {
     deal.slackTs = ts;
     deal.slackThreadTs = headerTs;
     postedDeals.push(deal);
-    sentIds[deal.id] = Date.now();
 
     if ((i + 1) % 10 === 0) {
-      console.log(`  ✅ posted ${i + 1}/${freshDeals.length}`);
+      console.log(`  ✅ posted ${i + 1}/${dealsToPost.length}`);
     }
     await sleep(600);
   }
 
-  for (const deal of postedDeals) {
-    for (const signature of getDealSignatureVariants(deal)) {
-      sentIds[`sig:${signature}`] = Date.now();
-    }
-  }
-
-  saveSentIds(sentIds);
   const mergedQueue = mergePendingQueue(existingQueue, postedDeals);
   writePendingAll(mergedQueue);
 

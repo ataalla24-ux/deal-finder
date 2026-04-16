@@ -136,7 +136,6 @@ async function main() {
   console.log();
 
   const allDeals = [];
-  const seenUrls = new Set();
   
   console.log(`🔍 Scrape ${SCRAPE_URLS.length} Seiten (Gastro Focus)...`);
   
@@ -169,13 +168,10 @@ async function main() {
           for (const d of data.deals) {
             const postUrl = d.post_url || '';
             
-            if (postUrl && seenUrls.has(postUrl)) continue;
-            if (postUrl) seenUrls.add(postUrl);
             if (!postUrl) continue;
             
             const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
             const validityDate = parseGermanDate(d.validity_date || '');
-            if (!isNotTooOld(validityDate)) continue;
             const brand = d.brand_or_store || source;
             const title = d.item_given_away?.substring(0, 60) || 'Gastro Deal';
             const pubDate = validityDate ? validityDate.toISOString() : new Date().toISOString();
@@ -215,12 +211,8 @@ async function main() {
   console.log();
   console.log('📊 ERGEBNIS:');
   console.log(`   📦 Deals: ${allDeals.length}`);
-  
-    // Deduplizierung nach URL
-    const dedupeUrls = new Set();
-    const dedupedDeals = allDeals.filter(d => { const url = (d.url || '').trim(); if (!url || dedupeUrls.has(url)) return false; dedupeUrls.add(url); return true; });
-    console.log(`🔄 ${allDeals.length - dedupedDeals.length} URL-Duplikate entfernt`);
-    const finalDeals = dedupedDeals.slice(0, 100);
+  console.log('🔄 URL-Dedupe deaktiviert');
+  const finalDeals = allDeals;
   
   const outputPath = 'docs/deals-pending-gastro2.json';
   const output = {

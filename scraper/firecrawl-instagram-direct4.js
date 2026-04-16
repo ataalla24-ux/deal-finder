@@ -208,7 +208,6 @@ async function main() {
   console.log();
 
   const allDeals = [];
-  const seenUrls = new Set();
 
   console.log(`🔍 Scrape ${SOURCE_URLS.length} Instagram-Quellen...`);
 
@@ -234,14 +233,9 @@ async function main() {
         const postDate = parseFlexibleDate(postDateRaw);
 
         if (!postUrl || !isInstagramPostUrl(postUrl)) continue;
-        if (seenUrls.has(postUrl)) continue;
-        if (looksLikeGiveaway(combinedText)) continue;
-        if (!isCurrentlyValid) continue;
-        if (!isViennaRelevant(combinedText)) continue;
-        if (!isRelevantOffer(combinedText)) continue;
-        if (!postDate || !isFreshPost(postDate)) continue;
-
-        seenUrls.add(postUrl);
+        const pubDate = postDate instanceof Date && !Number.isNaN(postDate.getTime())
+          ? postDate.toISOString()
+          : new Date().toISOString();
 
         const type = inferType(offerType, offerDescription);
         const category = inferCategory(offerType, offerDescription);
@@ -263,7 +257,7 @@ async function main() {
           priority: type === 'gratis' ? 2 : type === 'bogo' ? 3 : 4,
           votes: 1,
           qualityScore: type === 'gratis' ? 84 : type === 'bogo' ? 78 : 70,
-          pubDate: postDate.toISOString(),
+          pubDate,
           pubDateSource: 'socialPostDate',
         });
       }
@@ -272,25 +266,16 @@ async function main() {
     }
   }
 
-  const deduped = [];
-  const seenKeys = new Set();
-  for (const deal of allDeals) {
-    const key = `${deal.url}|${deal.brand}|${deal.title.toLowerCase()}`;
-    if (seenKeys.has(key)) continue;
-    seenKeys.add(key);
-    deduped.push(deal);
-  }
-
   const output = {
     lastUpdated: new Date().toISOString(),
     source: 'firecrawl4',
-    totalDeals: deduped.length,
-    deals: deduped,
+    totalDeals: allDeals.length,
+    deals: allDeals,
   };
 
   fs.writeFileSync('docs/deals-pending-firecrawl4.json', JSON.stringify(output, null, 2));
-  console.log(`✅ Final: ${deduped.length} Deals`);
-  console.log(`💾 ${deduped.length} Deals → docs/deals-pending-firecrawl4.json`);
+  console.log(`✅ Final: ${allDeals.length} Deals`);
+  console.log(`💾 ${allDeals.length} Deals → docs/deals-pending-firecrawl4.json`);
 }
 
 main()

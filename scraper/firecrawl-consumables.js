@@ -151,7 +151,6 @@ async function main() {
 
   const rawPosts = result?.data?.posts || [];
   const deals = [];
-  const seenUrls = new Set();
 
   console.log(`🔍 Agent returned ${rawPosts.length} Rohposts`);
 
@@ -166,20 +165,15 @@ async function main() {
     const postDate = parsePostTimestamp(postTimestampRaw);
 
     if (!originalPostUrl || !isInstagramPostUrl(originalPostUrl)) continue;
-    if (seenUrls.has(originalPostUrl)) continue;
-    if (!isFresh(postDate)) continue;
-    if (!isViennaRelevant(`${location} ${combinedText}`)) continue;
-    if (!hasRequiredOfferSignal(`${foodAndDrinks} ${offerType}`)) continue;
-    if (looksLikeGiveaway(combinedText)) continue;
-    if (looksLikePureRestaurantIntro(combinedText)) continue;
-
-    seenUrls.add(originalPostUrl);
 
     const brand = location.split(',')[0] || 'Instagram Wien';
     const titleCore = offerType || foodAndDrinks || 'Instagram Freebie';
     const title = `${brand}: ${titleCore}`.slice(0, 140);
     const type = inferType(offerType);
     const category = inferCategory(foodAndDrinks, offerType);
+    const pubDate = postDate instanceof Date && !Number.isNaN(postDate.getTime())
+      ? postDate.toISOString()
+      : new Date().toISOString();
 
     deals.push({
       id: dealId(brand, title, originalPostUrl),
@@ -197,7 +191,7 @@ async function main() {
       priority: type === 'gratis' ? 1 : 2,
       votes: 1,
       qualityScore: type === 'gratis' ? 84 : 78,
-      pubDate: postDate.toISOString(),
+      pubDate,
       pubDateSource: 'socialPostDate',
     });
   }
