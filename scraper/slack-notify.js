@@ -50,7 +50,7 @@ const SLACK_POST_DELAY_MS = Math.max(1000, Number(process.env.SLACK_POST_DELAY_M
 const SLACK_MAX_DEALS_PER_MESSAGE = Math.max(1, Number(process.env.SLACK_MAX_DEALS_PER_MESSAGE || 12));
 const SLACK_MAX_MESSAGE_CHARS = Math.max(2000, Number(process.env.SLACK_MAX_MESSAGE_CHARS || 12000));
 const SAME_DAY_SIG_RETENTION_DAYS = Math.max(1, Number(process.env.SAME_DAY_SIG_RETENTION_DAYS || 3));
-const SAME_DAY_ONLY_PENDING_SOURCES = new Set(['flights']);
+const SAME_DAY_ONLY_PENDING_SOURCES = new Set(['flights', 'power']);
 const PENDING_FILE_NAMES = String(process.env.PENDING_FILE_NAMES || '')
   .split(',')
   .map((value) => cleanText(value))

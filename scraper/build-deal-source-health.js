@@ -20,7 +20,6 @@ const EXCLUDED_PENDING_FILES = new Set([
 ]);
 
 const SOURCE_LABEL_OVERRIDES = {
-  basic1: 'Basic Deals Scraper',
   events: 'Kirchen Events',
   firecrawl2: 'Firecrawl Key 3 - Consumables',
   firecrawl4: 'Firecrawl Key 4 - Instagram Direct',

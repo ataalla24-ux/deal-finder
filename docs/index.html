@@ -1997,11 +1997,11 @@
         let userTips = JSON.parse(localStorage.getItem('userTips') || '{}');
         let ratings = JSON.parse(localStorage.getItem('ratings') || '{}');
         let userRatings = JSON.parse(localStorage.getItem('userRatings') || '{}');
-        let userDeals = JSON.parse(localStorage.getItem('userDeals') || '[]');
         let submittedLinks = JSON.parse(localStorage.getItem('submittedLinks') || '[]');
         let dealOverridesById = {};
         let dailyDealOverride = null;
         let weeklyDealOverride = null;
+        localStorage.removeItem('userDeals');
         let activeHomeDailyDealId = '';
         let activeHomeWeeklyDealId = '';
         const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
@@ -4991,10 +4991,8 @@
             const res = await fetch('deals.json?t=' + Date.now(), { cache: 'no-store' });
             const data = await res.json();
             const baseDeals = data.deals.map(d => normalizeDealForApp({ ...d, votes: votes[d.id] || d.votes || 0 }));
-            // Kombiniere User-Deals mit genehmigten Base-Deals (nur Slack-approved)
-            const userDealsWithVotes = userDeals.map(d => normalizeDealForApp({ ...d, votes: votes[d.id] || d.votes || 0 }));
             await fetchDealOverrideState();
-            allDeals = applyDealOverridesToList([...userDealsWithVotes, ...baseDeals]);
+            allDeals = applyDealOverridesToList(baseDeals);
             updateCounts();
             await setDailyDeal();
             setFeaturedHomeDeals();
@@ -6174,7 +6172,32 @@
             }
             addXP(5, t('shared')); 
         }
+        function normalizeLaunchView(rawView) {
+            const view = String(rawView || '').trim().toLowerCase();
+            if (view === 'deals') return 'home';
+            if (['home', 'favorites', 'stats', 'secret', 'spin'].includes(view)) return view;
+            return '';
+        }
+        function applyLaunchViewFromQuery() {
+            if (window.launchViewHandled) return;
+            const params = new URLSearchParams(window.location.search);
+            const launchView = normalizeLaunchView(params.get('view'));
+            if (!launchView) return;
+            window.launchViewHandled = true;
+            setTimeout(() => {
+                if (launchView === 'favorites') showFavorites();
+                else if (launchView === 'stats') showStats();
+                else if (launchView === 'secret') showSecretDeals();
+                else if (launchView === 'spin') {
+                    if (currentView !== 'home') showHome();
+                    openSpinModal();
+                } else if (currentView !== 'home') {
+                    showHome();
+                }
+            }, 0);
+        }
         function checkDeepLink() {
+            applyLaunchViewFromQuery();
             const params = new URLSearchParams(window.location.search);
             const dealId = params.get('deal');
             if (dealId && !window.deepLinkHandled) {
@@ -7707,9 +7730,10 @@
 
     function showAlertNotification(title, body, tag) {
       if ('Notification' in window && Notification.permission === 'granted') {
+        const iconUrl = new URL('icon-192.svg', window.location.href).href;
         new Notification(title, {
           body,
-          icon: '/deal-finder/icon-192.png',
+          icon: iconUrl,
           tag,
           renotify: true
         });

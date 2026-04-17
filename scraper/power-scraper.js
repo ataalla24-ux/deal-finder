@@ -4,14 +4,25 @@ import '../sentry/instrument.mjs';
 // Für aktuelle Deals in Wien
 // ============================================
 
+import crypto from 'crypto';
 import https from 'https';
 import http from 'http';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import {
+  cleanUiNoiseText,
+  isFalsePositiveFreeDeal,
+  isGenericJunkDeal,
+  normalizeDealRecord,
+} from './deal-normalization-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const INCLUDE_BASE_DEALS = String(process.env.POWER_INCLUDE_BASE_DEALS || '1') !== '0';
+const MAX_DEALS_PER_SOURCE = Math.max(1, Number(process.env.POWER_MAX_DEALS_PER_SOURCE || (INCLUDE_BASE_DEALS ? 8 : 2)));
+const MAX_TOTAL_DEALS = Math.max(1, Number(process.env.POWER_MAX_TOTAL_DEALS || (INCLUDE_BASE_DEALS ? 72 : 24)));
+const MIN_QUALITY_SCORE = Math.max(0, Number(process.env.POWER_MIN_QUALITY_SCORE || (INCLUDE_BASE_DEALS ? 38 : 46)));
 
 // ============================================
 // STATISCHE BASIS-DEALS (Dauerhaft gültig)
@@ -154,7 +165,7 @@ const BASE_DEALS = [
 
   // 🛒 SUPERMÄRKTE
   {
-    id: 'super-1', brand: 'Lidl', logo: '🛒', logo: '🛒', title: 'Wochenangebote',
+    id: 'super-1', brand: 'Lidl', logo: '🛒', title: 'Wochenangebote',
     description: 'Lidl Wien: Aktuelle Wochenangebote jeden Montag!',
     type: 'rabatt', category: 'supermarkt', source: 'Lidl', url: 'https://www.lidl.at/',
     expires: 'Wöchentlich', distance: 'Filialen Wien', hot: true, isNew: true, priority: 2, votes: 234
@@ -188,7 +199,7 @@ const BASE_DEALS = [
 
   // 🎬 EVENTS (AKTUELL)
   {
-    id: 'event-1', brand: 'P动作', logo: '🎬', title: 'Gratis Film Vorschau',
+    id: 'event-1', brand: 'Filmfest Wien', logo: '🎬', title: 'Gratis Film Vorschau',
     description: 'Filmfestivals & Preview-Vorführungen - oft kostenlos!',
     type: 'gratis', category: 'kultur', source: 'Wien Events', url: 'https://events.wien.info/de/',
     expires: 'laufend', distance: 'Wien', hot: true, isNew: true, priority: 2, votes: 234
@@ -345,18 +356,122 @@ const SOURCES = [
   { name: 'Schloss Schönbrunn', url: 'https://www.schoenbrunn.at/', type: 'html', brand: 'Schönbrunn', logo: '🏰', category: 'freizeit' },
 ];
 
+const DISABLED_SOURCE_NAMES = new Set([
+  'Wien Kulturkalender',
+  'Lidl Angebote',
+  "McDonald's",
+  'clever fit',
+  'ÖBB Sparschiene',
+  'Vapiano',
+  'Penny',
+  'Merkur',
+  'BIPA',
+  'Anpflanzl',
+  'Biquadri',
+  'Caffè Latte',
+  'Gravis',
+  'Hamster',
+  'Toy City',
+  'Mayersche',
+  'Gratiscode',
+  'TMI Rent',
+  'Diana Bad',
+  'Kombibad',
+  'Haus des Meeres',
+  'Subway',
+  'Brot',
+  'Bubbles',
+  'Backwerk',
+  'C&A',
+  'Kika',
+  'Bares',
+  'La pura',
+]);
+
+const ACTIVE_SOURCES = SOURCES.filter((source) => !DISABLED_SOURCE_NAMES.has(source.name));
+
 // ============================================
 // HELPER: Fetch HTML
 // ============================================
 function fetchHTML(url) {
   return new Promise((resolve, reject) => {
     const protocol = url.startsWith('https') ? https : http;
-    protocol.get(url, { timeout: 10000 }, (res) => {
+    protocol.get(url, {
+      timeout: 10000,
+      headers: {
+        'user-agent': 'FreeFinder Power Scraper/5.1 (+https://github.com/ataalla24-ux/deal-finder)',
+        'accept-language': 'de-AT,de;q=0.9,en;q=0.8'
+      }
+    }, (res) => {
+      if (res.statusCode && res.statusCode >= 400) {
+        reject(new Error(`HTTP ${res.statusCode}`));
+        res.resume();
+        return;
+      }
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => resolve(data));
     }).on('error', reject).setTimeout(10000, () => reject(new Error('Timeout')));
   });
+}
+
+function stableDealId(parts) {
+  const hash = crypto.createHash('sha1').update(parts.filter(Boolean).join('|')).digest('hex').slice(0, 12);
+  return `power-${hash}`;
+}
+
+function resolveDealUrl(rawUrl, sourceUrl) {
+  const value = cleanUiNoiseText(rawUrl);
+  if (!value || /^javascript:/i.test(value)) return '';
+  try {
+    return new URL(value, sourceUrl).toString();
+  } catch {
+    return '';
+  }
+}
+
+function buildQualityScore(title, source) {
+  const text = cleanUiNoiseText(title).toLowerCase();
+  let score = 26;
+  if (/(gratis|kostenlos|free|1\+1|bogo|geschenk)/i.test(text)) score += 28;
+  else if (/(rabatt|sale|aktion|angebot|deal|coupon|gutschein|voucher|%|€)/i.test(text)) score += 16;
+  if (['essen', 'kaffee', 'supermarkt', 'fitness', 'kultur'].includes(source.category)) score += 10;
+  if (text.length >= 18 && text.length <= 84) score += 8;
+  if (/(lieferung|versand)/i.test(text)) score -= 24;
+  if (/(überblick|jetzt entdecken|sommer|winter|urlaubsangebote)/i.test(text)) score -= 20;
+  if (source.category === 'technik') score -= 10;
+  if (source.category === 'reisen') score -= 6;
+  return Math.max(20, Math.min(86, score));
+}
+
+function normalizePowerDeal(deal, sourceLabel) {
+  const normalized = normalizeDealRecord({
+    ...deal,
+    source: deal.source || sourceLabel,
+    qualityScore: Number(deal.qualityScore || 0),
+    pubDate: deal.pubDate || new Date().toISOString()
+  });
+
+  return {
+    ...normalized,
+    id: deal.id || stableDealId([normalized.brand, normalized.title, normalized.url, normalized.source]),
+    source: deal.source || sourceLabel,
+    qualityScore: Number(normalized.qualityScore || deal.qualityScore || 42),
+    votes: Number(normalized.votes || deal.votes || 1),
+    priority: Number(deal.priority || 3),
+    pubDate: deal.pubDate || new Date().toISOString()
+  };
+}
+
+function isUsefulPowerDeal(deal) {
+  const title = cleanUiNoiseText(deal.title || '');
+  if (title.length < 12) return false;
+  if (deal.category === 'reisen') return false;
+  if (/(lieferung|versand|überblick|jetzt entdecken|urlaubsangebote)/i.test(title)) return false;
+  if (Number(deal.qualityScore || 0) < MIN_QUALITY_SCORE) return false;
+  if (isGenericJunkDeal(deal)) return false;
+  if (isFalsePositiveFreeDeal(deal)) return false;
+  return true;
 }
 
 // ============================================
@@ -369,14 +484,13 @@ function extractDealsFromHTML(html, source) {
   const linkRegex = /<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/gi;
   let match;
   while ((match = linkRegex.exec(html)) !== null) {
-    const url = match[1];
-    const text = match[2].trim();
+    const url = resolveDealUrl(match[1], source.url);
+    const text = cleanUiNoiseText(match[2]);
     
-    if (text.length > 10 && !url.includes('javascript') && !url.includes('cookie')) {
+    if (text.length > 10 && url && !url.includes('cookie')) {
       // Only include if it looks like a deal
       if (text.match(/gratis|rabatt|aktion|angebot|sale|deal|free|günstig|€|%/i)) {
-        deals.push({
-          id: `ps-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        const candidate = normalizePowerDeal({
           brand: source.brand,
           logo: source.logo,
           title: text.substring(0, 80),
@@ -391,14 +505,19 @@ function extractDealsFromHTML(html, source) {
           isNew: true,
           priority: 3,
           votes: 1,
-          qualityScore: 30,
+          qualityScore: buildQualityScore(text, source),
           pubDate: new Date().toISOString()
-        });
+        }, source.name);
+
+        if (!isUsefulPowerDeal(candidate)) continue;
+        deals.push(candidate);
       }
     }
   }
   
-  return deals.slice(0, 10); // Max 10 deals per source
+  return deals
+    .sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0))
+    .slice(0, MAX_DEALS_PER_SOURCE);
 }
 
 // ============================================
@@ -409,14 +528,18 @@ async function main() {
   console.log('📅', new Date().toLocaleDateString('de-AT'));
   console.log('='.repeat(40));
   
-  console.log(`📊 ${BASE_DEALS.length} Basis-Deals geladen`);
+  if (INCLUDE_BASE_DEALS) {
+    console.log(`📊 ${BASE_DEALS.length} Basis-Deals geladen`);
+  } else {
+    console.log('📊 Daily-Modus ohne statische Basis-Deals');
+  }
   
   // Scrape dynamic sources
-  console.log(`\n📡 Scraping ${SOURCES.length} Quellen...\n`);
+  console.log(`\n📡 Scraping ${ACTIVE_SOURCES.length} Quellen...\n`);
   
   const scrapedDeals = [];
   
-  for (const source of SOURCES) {
+  for (const source of ACTIVE_SOURCES) {
     try {
       console.log(`🌐 ${source.name}...`);
       const html = await fetchHTML(source.url);
@@ -428,45 +551,61 @@ async function main() {
     }
   }
   
+  const normalizedBaseDeals = INCLUDE_BASE_DEALS
+    ? BASE_DEALS
+        .map((deal) => normalizePowerDeal({
+          ...deal,
+          qualityScore: Number(deal.qualityScore || 72),
+          pubDate: deal.pubDate || new Date().toISOString()
+        }, 'power-scraper-v5'))
+        .filter(isUsefulPowerDeal)
+    : [];
+
   // Combine base + scraped
-  const allDeals = [...BASE_DEALS, ...scrapedDeals];
+  const allDeals = [...normalizedBaseDeals, ...scrapedDeals];
   
   // Remove duplicates
   const uniqueDeals = [];
   const seen = new Set();
   for (const deal of allDeals) {
-    const key = (deal.title || '').toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 30);
+    const key = stableDealId([deal.brand, deal.title, deal.url, deal.source]);
     if (!seen.has(key)) {
       seen.add(key);
-      uniqueDeals.push(deal);
+      uniqueDeals.push({ ...deal, id: deal.id || key });
     }
   }
   
-  // Sort: gratis first, then hot, then priority
+  // Sort: freebies first, then hot, then quality, then priority
   uniqueDeals.sort((a, b) => {
     if (a.type === 'gratis' && b.type !== 'gratis') return -1;
     if (a.type !== 'gratis' && b.type === 'gratis') return 1;
     if (a.hot && !b.hot) return -1;
     if (!a.hot && b.hot) return 1;
+    if ((b.qualityScore || 0) !== (a.qualityScore || 0)) return (b.qualityScore || 0) - (a.qualityScore || 0);
     return (a.priority || 99) - (b.priority || 99);
   });
+
+  const finalDeals = uniqueDeals.slice(0, MAX_TOTAL_DEALS);
   
   // Output
   const output = {
     lastUpdated: new Date().toISOString(),
     source: 'power-scraper-v5',
-    totalDeals: uniqueDeals.length,
-    deals: uniqueDeals
+    totalDeals: finalDeals.length,
+    deals: finalDeals
   };
   
   const outputPath = path.join(__dirname, '..', 'docs', 'deals-pending-power.json');
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
   
   console.log('\n' + '='.repeat(40));
-  console.log(`✅ ${uniqueDeals.length} Deals gespeichert`);
+  console.log(`✅ ${finalDeals.length} Deals gespeichert`);
   console.log(`📁 ${outputPath}`);
-  console.log(`🔥 ${uniqueDeals.filter(d => d.hot).length} Hot Deals`);
-  console.log(`🆓 ${uniqueDeals.filter(d => d.type === 'gratis').length} Gratis Deals`);
+  console.log(`🔥 ${finalDeals.filter(d => d.hot).length} Hot Deals`);
+  console.log(`🆓 ${finalDeals.filter(d => d.type === 'gratis').length} Gratis Deals`);
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error('❌ power-scraper fehlgeschlagen:', error);
+  process.exit(1);
+});
