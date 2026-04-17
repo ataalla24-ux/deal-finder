@@ -1,3 +1,4 @@
+import '../sentry/instrument.mjs';
 // ============================================
 // 📸🍽️ FIRECRAWL INSTAGRAM GASTRO AGENT #5
 // Fokus: mindestens 30 aktuelle Wiener Gastro-Angebote nur aus Instagram

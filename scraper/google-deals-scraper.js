@@ -1,3 +1,4 @@
+import '../sentry/instrument.mjs';
 // ============================================
 // FREEFINDER WIEN - GOOGLE DEALS SCRAPER V3
 // NUR echte Gratis-Deals & extrem günstige Angebote

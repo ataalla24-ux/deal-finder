@@ -1,3 +1,4 @@
+import '../sentry/instrument.mjs';
 // ============================================
 // 📸🔥 FIRECRAWL INSTAGRAM DIRECT AGENT #4
 // Fokus: kostenlose Speisen/Getränke in Wien aus konkreten Instagram-Quellen

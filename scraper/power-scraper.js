@@ -1,3 +1,4 @@
+import '../sentry/instrument.mjs';
 // ============================================
 // FREEFINDER WIEN - POWER SCRAPER V5 (AKTUALISIERT)
 // Für aktuelle Deals in Wien

@@ -1,3 +1,4 @@
+import '../sentry/instrument.mjs';
 // ============================================
 // SET FEATURED DEALS - Reads your Slack replies and sets:
 // - Deal des Tages via "deal 3" or just "3"

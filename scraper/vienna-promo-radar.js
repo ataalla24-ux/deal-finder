@@ -1,3 +1,4 @@
+import '../sentry/instrument.mjs';
 import fs from 'fs';
 import {
   cleanText,

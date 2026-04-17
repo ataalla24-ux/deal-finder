@@ -1,3 +1,4 @@
+import '../sentry/instrument.mjs';
 // ============================================
 // SMART ZUSAMMENFASSUNG FÜR DEALS
 // 100% Kostenlos - Keine API nötig!

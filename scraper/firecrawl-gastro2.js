@@ -1,3 +1,4 @@
+import '../sentry/instrument.mjs';
 // ============================================
 // 🍕🔥 FIRECRAWL GASTRO AGENT #2
 // Fokus: Gastronomie - Mahlzeiten unter €3, 50%+ Rabatt, Döner €1,99

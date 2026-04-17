@@ -1,3 +1,4 @@
+import '../sentry/instrument.mjs';
 // ============================================
 // FREEFINDER WIEN - GUTSCHEINE.AT SCRAPER
 // Scraped aktuelle Gutscheine & Rabattcodes

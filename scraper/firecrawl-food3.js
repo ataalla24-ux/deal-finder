@@ -1,3 +1,4 @@
+import '../sentry/instrument.mjs';
 // ============================================
 // 🍔🔥 FIRECRAWL FOOD AGENT #2
 // Fokus: Instagram-Angebote für Essen & Getränke in Wien

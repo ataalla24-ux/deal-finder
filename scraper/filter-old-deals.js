@@ -1,3 +1,4 @@
+import '../sentry/instrument.mjs';
 // ============================================
 // 🗑️ FILTER OLD DEALS - Post-Processing
 // Entfernt abgelaufene/alte Deals aus allen pending files

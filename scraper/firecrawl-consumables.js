@@ -1,3 +1,4 @@
+import '../sentry/instrument.mjs';
 // ============================================
 // 🔥 FIRECRAWL KEY 3 - VERIFIED INSTAGRAM FREEBIES
 // Fokus: Heute/Gestern, Wien, Gratis oder 1+1, deutschsprachig

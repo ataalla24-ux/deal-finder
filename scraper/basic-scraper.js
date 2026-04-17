@@ -1,3 +1,4 @@
+import '../sentry/instrument.mjs';
 // ============================================
 // BASIC SCRAPER - Special Deals & Events
 // Scraped einmalige Aktionen, Events, Neueröffnungen
