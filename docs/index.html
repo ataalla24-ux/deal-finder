@@ -328,9 +328,14 @@
         
         /* DEAL HEADER */
         .deal-header { display: flex; align-items: flex-start; gap: 14px; margin-top: 24px; margin-bottom: 10px; }
-        .deal-logo { width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(180deg, #f7f4ef 0%, #efede8 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; overflow: hidden; border: 1px solid rgba(226,232,240,0.7); }
-        .deal-logo-img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; background: #fff; }
-        .deal-logo-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Bricolage Grotesque', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 24px; font-weight: 800; }
+        .deal-logo { width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; overflow: hidden; border: 1px solid rgba(226,232,240,0.7); box-shadow: inset 0 1px 0 rgba(255,255,255,0.9); }
+        .deal-logo::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.45); pointer-events: none; }
+        .deal-logo-img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; background: #fff; position: relative; z-index: 1; }
+        .deal-logo-img-favicon { object-fit: contain; padding: 6px; background: transparent; }
+        .deal-logo-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Bricolage Grotesque', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 800; background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); color: #9a3412; transition: opacity 160ms ease, transform 160ms ease; }
+        .deal-logo-fallback.is-emoji { font-size: 24px; }
+        .deal-logo-fallback.is-initials { font-size: 17px; letter-spacing: -0.04em; }
+        .deal-logo.has-image .deal-logo-fallback { background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); color: rgba(71,85,105,0.22); transform: none; }
         .deal-brand { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 700; color: #8b7a69; font-size: 11px; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 4px; }
         .deal-title { font-family: 'Bricolage Grotesque', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 800; font-size: 20px; color: #1b1a18; line-height: 1.14; letter-spacing: -0.04em; background: none; -webkit-background-clip: initial; -webkit-text-fill-color: initial; background-clip: initial; }
                 .deal-title-sub { display: block; font-weight: 500; font-size: 13px; color: #94a3b8; letter-spacing: 0; margin-top: 2px; background: none; -webkit-background-clip: unset; -webkit-text-fill-color: #94a3b8; background-clip: unset; }
@@ -501,7 +506,8 @@
         .discovery-actions .vote-btn { flex: 0 0 auto; min-width: 56px; }
         .discovery-empty { background: white; border-radius: 16px; padding: 18px; color: #64748b; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .deal-header { display: flex; align-items: flex-start; gap: 14px; margin-top: 18px; margin-bottom: 10px; }
-        .deal-logo-fallback { font-size: 32px; }
+        .deal-logo-fallback.is-emoji { font-size: 30px; }
+        .deal-logo-fallback.is-initials { font-size: 17px; }
         .deal-brand { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 700; color: #8b7a69; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; }
         .deal-title {
             font-family: 'Bricolage Grotesque', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -3166,6 +3172,7 @@
             { pattern: /\bm[oö]max\b/i, name: 'mömax Restaurant', logo: '🛋️' },
             { pattern: /\bvapiano\b/i, name: 'Vapiano', logo: '🍝' },
             { pattern: /\bgrill heaven\b/i, name: 'Grill Heaven Wien', logo: '🔥' },
+            { pattern: /\bgigafit\b/i, name: 'GigaFit', logo: '💪' },
             { pattern: /\bori fusion\b/i, name: 'Ori Fusion Kitchen', logo: '🥢' },
             { pattern: /\bdas lugeck\b/i, name: 'Das Lugeck', logo: '🍽️' },
             { pattern: /\bwhatseat\b/i, name: 'WhatsEat', logo: '🍽️' },
@@ -3176,6 +3183,7 @@
             { pattern: /\brafas\b/i, name: 'RAFAS', logo: '🥐' },
             { pattern: /\bchasen brew\b/i, name: 'Chasen Brew', logo: '🍵' },
             { pattern: /\bwiener eistraum\b/i, name: 'Wiener Eistraum', logo: '⛸️' },
+            { pattern: /\bdonauinselfest\b/i, name: 'Donauinselfest', logo: '🎸', preferFallback: true },
             { pattern: /\bpeter hahn\b/i, name: 'Peter Hahn', logo: '👗' },
             { pattern: /\bpneus online\b/i, name: 'Pneus Online', logo: '🛞' },
             { pattern: /\bomv\b/i, name: 'OMV', logo: '⛽' },
@@ -3202,6 +3210,56 @@
         function findKnownBrandForApp() {
             const signal = cleanUiNoiseText(Array.from(arguments).filter(Boolean).join(' ')).toLowerCase();
             return APP_BRAND_RULES.find((rule) => rule.pattern.test(signal)) || null;
+        }
+
+        function normalizeLogoKeyForApp(value) {
+            return cleanUiNoiseText(value || '')
+                .normalize('NFKD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .replace(/&/g, 'and')
+                .replace(/[^a-z0-9]+/g, '');
+        }
+
+        function findKnownBrandMetaForApp(brand, deal) {
+            const matched = findKnownBrandForApp(brand, deal?.title, deal?.description, deal?.distance, deal?.url, deal?.source);
+            if (matched) return matched;
+            const key = normalizeLogoKeyForApp(brand);
+            return key ? (KNOWN_BRANDS[key] || null) : null;
+        }
+
+        function isGoogleFaviconUrlForApp(url) {
+            return /https?:\/\/(?:www\.)?google\.com\/s2\/favicons/i.test(String(url || ''));
+        }
+
+        function getLogoHostKeyForApp(host) {
+            const parts = cleanUiNoiseText(String(host || '').replace(/^www\./i, '')).split('.').filter(Boolean);
+            if (!parts.length) return '';
+            const root = parts.length > 1 ? parts[parts.length - 2] : parts[0];
+            return normalizeLogoKeyForApp(root);
+        }
+
+        function brandMatchesHostForApp(brand, host) {
+            const brandKey = normalizeLogoKeyForApp(brand);
+            const hostKey = getLogoHostKeyForApp(host);
+            if (!brandKey || !hostKey) return false;
+            return brandKey === hostKey || brandKey.includes(hostKey) || hostKey.includes(brandKey);
+        }
+
+        function shouldUseHostLogoForApp(deal, brand, host, known = null) {
+            if (!host || isSourceLikeHostForApp(host)) return false;
+            if (known?.preferFallback || isSourceLikeBrandForApp(known?.name || '')) return false;
+            return !!known?.domain;
+        }
+
+        function shouldUseLogoImageForApp(deal, brand, logoUrl, known = null) {
+            if (!logoUrl) return false;
+            const host = extractHostFromUrlForApp(logoUrl);
+            if (!host) return false;
+            if (!isGoogleFaviconUrlForApp(logoUrl)) {
+                return !isSourceLikeHostForApp(host) || brandMatchesHostForApp(brand, host);
+            }
+            return shouldUseHostLogoForApp(deal, brand, host, known);
         }
 
         function inferPreferredBrandForApp(deal) {
@@ -4379,14 +4437,14 @@
         }
 
         function getDealLogoUrlForApp(deal, brand) {
-            const category = cleanUiNoiseText(deal.category || '').toLowerCase();
-            const existingLogoHost = extractHostFromUrlForApp(deal.logoUrl);
-            const isGenericGoogleFavicon = existingLogoHost === 'google.com' && /\/s2\/favicons/i.test(String(deal.logoUrl || ''));
-            if (category === 'kirche' || category === 'gottesdienste' || category === 'events') return '';
-            if (deal.logoUrl && !isGenericGoogleFavicon && !isSourceLikeHostForApp(existingLogoHost)) return deal.logoUrl;
             const preferredBrand = cleanUiNoiseText(brand || inferPreferredBrandForApp(deal) || '');
-            const known = findKnownBrandForApp(preferredBrand, deal.title, deal.description, deal.distance, deal.url);
-            if (known && known.domain && !isSourceLikeBrandForApp(known.name || '')) {
+            const known = findKnownBrandMetaForApp(preferredBrand, deal);
+
+            if (deal.logoUrl && shouldUseLogoImageForApp(deal, preferredBrand, deal.logoUrl, known)) {
+                return deal.logoUrl;
+            }
+
+            if (known && known.domain && !known.preferFallback && !isSourceLikeBrandForApp(known.name || '')) {
                 return buildLogoUrlForApp(known.domain, { allowSourceLike: true });
             }
 
@@ -4398,7 +4456,7 @@
             ].filter(Boolean);
 
             for (const host of candidateHosts) {
-                if (!isSourceLikeHostForApp(host)) return buildLogoUrlForApp(host);
+                if (shouldUseHostLogoForApp(deal, preferredBrand, host, known)) return buildLogoUrlForApp(host);
             }
 
             const combined = [
@@ -4410,7 +4468,7 @@
 
             for (const [key, value] of Object.entries(KNOWN_BRANDS)) {
                 if (isSourceLikeBrandForApp(value.name || key)) continue;
-                if (combined.includes(key) && value.domain) return buildLogoUrlForApp(value.domain, { allowSourceLike: true });
+                if (combined.includes(key) && value.domain && !value.preferFallback) return buildLogoUrlForApp(value.domain, { allowSourceLike: true });
             }
 
             return '';
@@ -4420,9 +4478,10 @@
             const brand = inferPreferredBrandForApp(deal) || deal.brand || '';
             const semanticFallback = inferLogoForApp(deal, brand);
             const fallback = (semanticFallback && semanticFallback !== '🎯' ? semanticFallback : '') || getBrandInitialsForApp(brand) || semanticFallback || deal.logo || '🎯';
-            const logoUrl = deal.logoUrl || getDealLogoUrlForApp(deal, brand);
-            const img = logoUrl ? `<img class="deal-logo-img" src="${logoUrl}" alt="" loading="lazy" referrerpolicy="no-referrer" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'">` : '';
-            return `<span class="deal-logo"><span class="deal-logo-fallback">${fallback}</span>${img}</span>`;
+            const logoUrl = getDealLogoUrlForApp(deal, brand);
+            const fallbackClass = /[\p{L}\p{N}]/u.test(fallback) ? 'is-initials' : 'is-emoji';
+            const img = logoUrl ? `<img class="deal-logo-img${isGoogleFaviconUrlForApp(logoUrl) ? ' deal-logo-img-favicon' : ''}" src="${logoUrl}" alt="" loading="lazy" referrerpolicy="no-referrer" onload="this.parentElement.classList.add('has-image')" onerror="this.remove()">` : '';
+            return `<span class="deal-logo"><span class="deal-logo-fallback ${fallbackClass}">${escapeHtml(fallback)}</span>${img}</span>`;
         }
 
         function normalizeDealForApp(deal) {
@@ -4524,6 +4583,7 @@
             'starbucks': { name: 'Starbucks', logo: '☕', category: 'kaffee', domain: 'starbucks.at' },
             'tchibo': { name: 'Tchibo', logo: '☕', category: 'kaffee', domain: 'tchibo.at' },
             'nespresso': { name: 'Nespresso', logo: '☕', category: 'kaffee', domain: 'nespresso.com' },
+            'gigafit': { name: 'GigaFit', logo: '💪', category: 'fitness' },
             'netflix': { name: 'Netflix', logo: '📺', category: 'streaming', domain: 'netflix.com' },
             'spotify': { name: 'Spotify', logo: '🎵', category: 'streaming', domain: 'spotify.com' },
             'fitinn': { name: 'FitInn', logo: '💪', category: 'fitness', domain: 'fitinn.at' },
@@ -4560,6 +4620,7 @@
             'jesuszentrum': { name: 'JesusZentrum', logo: '⛪', category: 'kirche', domain: 'jesuszentrum.at' },
             'icf wien': { name: 'ICF Wien', logo: '⛪', category: 'kirche', domain: 'icf-wien.at' },
             'cig wien': { name: 'CIG Wien', logo: '⛪', category: 'kirche', domain: 'cigwien.at' },
+            'donauinselfest': { name: 'Donauinselfest', logo: '🎸', category: 'kultur', preferFallback: true },
             'leopoldauer alm': { name: 'Leopoldauer Alm', logo: '🍽️', category: 'essen', domain: 'leopoldaueralm.at' },
             'visitingvienna': { name: 'Visiting Vienna', logo: '☕', category: 'kultur', domain: 'visitingvienna.com' },
             'onb': { name: 'Österreichische Nationalbibliothek', logo: '🏛️', category: 'kultur', domain: 'onb.ac.at' },

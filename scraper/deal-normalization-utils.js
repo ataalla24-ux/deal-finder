@@ -35,6 +35,7 @@ const BRAND_RULES = [
   { key: 'mömax', name: 'mömax Restaurant', logo: '🛋️', category: 'essen' },
   { key: 'vapiano', name: 'Vapiano', logo: '🍝', category: 'essen' },
   { key: 'grill heaven', name: 'Grill Heaven Wien', logo: '🔥', category: 'essen' },
+  { key: 'gigafit', name: 'GigaFit', logo: '💪', category: 'fitness' },
   { key: 'ori fusion', name: 'Ori Fusion Kitchen', logo: '🥢', category: 'essen' },
   { key: 'das lugeck', name: 'Das Lugeck', logo: '🍽️', category: 'essen' },
   { key: 'whatseat', name: 'WhatsEat', logo: '🍽️', category: 'essen' },
@@ -46,6 +47,7 @@ const BRAND_RULES = [
   { key: 'rafas', name: 'RAFAS', logo: '🥐', category: 'essen' },
   { key: 'chasen brew', name: 'Chasen Brew', logo: '🍵', category: 'kaffee' },
   { key: 'wiener eistraum', name: 'Wiener Eistraum', logo: '⛸️', category: 'events' },
+  { key: 'donauinselfest', name: 'Donauinselfest', logo: '🎸', category: 'kultur', preferFallback: true },
   { key: 'peter hahn', name: 'Peter Hahn', logo: '👗', category: 'shopping' },
   { key: 'pneus online', name: 'Pneus Online', logo: '🛞', category: 'shopping' },
   { key: 'omv', name: 'OMV', logo: '⛽', category: 'shopping', domain: 'omv.at' },
@@ -176,6 +178,49 @@ function buildLogoUrl(host, { allowSourceLike = false } = {}) {
   return `https://www.google.com/s2/favicons?sz=128&domain_url=https://${host}`;
 }
 
+function normalizeBrandKey(value) {
+  return cleanUiNoiseText(value)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '');
+}
+
+function isGoogleFaviconUrl(url) {
+  return /https?:\/\/(?:www\.)?google\.com\/s2\/favicons/i.test(String(url || ''));
+}
+
+function getHostKey(host) {
+  const parts = cleanUiNoiseText(String(host || '').replace(/^www\./i, '')).split('.').filter(Boolean);
+  if (!parts.length) return '';
+  const root = parts.length > 1 ? parts[parts.length - 2] : parts[0];
+  return normalizeBrandKey(root);
+}
+
+function brandMatchesHost(brand, host) {
+  const brandKey = normalizeBrandKey(brand);
+  const hostKey = getHostKey(host);
+  if (!brandKey || !hostKey) return false;
+  return brandKey === hostKey || brandKey.includes(hostKey) || hostKey.includes(brandKey);
+}
+
+function shouldUseHostLogo(deal = {}, brand = '', host = '', known = null) {
+  if (!host || isSourceLikeHost(host)) return false;
+  if (known?.preferFallback || known?.source) return false;
+  return !!known?.domain;
+}
+
+function shouldUseLogoImage(deal = {}, brand = '', logoUrl = '', known = null) {
+  if (!logoUrl) return false;
+  const host = extractHostFromUrl(logoUrl);
+  if (!host) return false;
+  if (!isGoogleFaviconUrl(logoUrl)) {
+    return !isSourceLikeHost(host) || brandMatchesHost(brand || known?.name || '', host);
+  }
+  return shouldUseHostLogo(deal, brand, host, known);
+}
+
 function isLikelyGenericLocation(value) {
   const text = cleanUiNoiseText(value);
   if (!text) return true;
@@ -242,10 +287,11 @@ function inferLogoUrl(deal = {}, brand = '') {
     .filter(Boolean)
     .join(' ');
   const known = findBrandRule(combined);
-  if (known?.domain) return buildLogoUrl(known.domain, { allowSourceLike: true });
+  if (deal.logoUrl && shouldUseLogoImage(deal, brand, deal.logoUrl, known)) return deal.logoUrl;
+  if (known?.domain && !known?.preferFallback) return buildLogoUrl(known.domain, { allowSourceLike: true });
 
-  const directHost = extractHostFromUrl(deal.logoUrl || deal.image || deal.imageUrl || deal.url || deal.post_url);
-  if (directHost && !isSourceLikeHost(directHost)) return buildLogoUrl(directHost);
+  const directHost = extractHostFromUrl(deal.image || deal.imageUrl || deal.url || deal.post_url);
+  if (shouldUseHostLogo(deal, brand, directHost, known)) return buildLogoUrl(directHost);
 
   return '';
 }
