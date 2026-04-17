@@ -32,6 +32,7 @@ loadEnvFile();
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
+const VIENNA_TIME_ZONE = 'Europe/Vienna';
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const CUTOFF_DATE = Date.now() - SEVEN_DAYS_MS;
@@ -41,6 +42,10 @@ const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTime
 const SOCIAL_FRESHNESS_TIMEOUT_MS = Number(process.env.SOCIAL_FRESHNESS_TIMEOUT_MS || 8000);
 const MAX_SOCIAL_FRESHNESS_CHECKS = Number(process.env.MAX_SOCIAL_FRESHNESS_CHECKS || 60);
 const SOCIAL_FRESHNESS_CONCURRENCY = Math.max(1, Number(process.env.SOCIAL_FRESHNESS_CONCURRENCY || 6));
+const SLACK_POST_DELAY_MS = Math.max(1000, Number(process.env.SLACK_POST_DELAY_MS || 1500));
+const SLACK_MAX_DEALS_PER_MESSAGE = Math.max(1, Number(process.env.SLACK_MAX_DEALS_PER_MESSAGE || 8));
+const SLACK_MAX_MESSAGE_CHARS = Math.max(2000, Number(process.env.SLACK_MAX_MESSAGE_CHARS || 12000));
+const SAME_DAY_SIG_RETENTION_DAYS = Math.max(1, Number(process.env.SAME_DAY_SIG_RETENTION_DAYS || 3));
 const PENDING_FILE_NAMES = String(process.env.PENDING_FILE_NAMES || '')
   .split(',')
   .map((value) => cleanText(value))
@@ -428,6 +433,37 @@ function stableId(seed) {
   return hash.toString(36);
 }
 
+function getViennaDayKey(value = Date.now()) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: VIENNA_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date(value));
+
+  const year = parts.find((part) => part.type === 'year')?.value || '0000';
+  const month = parts.find((part) => part.type === 'month')?.value || '00';
+  const day = parts.find((part) => part.type === 'day')?.value || '00';
+  return `${year}-${month}-${day}`;
+}
+
+function getPostingKeys(deal) {
+  const keys = new Set(getDealSignatureVariants(deal));
+  const id = cleanText(deal?.id);
+  const url = normalizeUrl(deal?.url);
+  if (id) keys.add(`id:${id}`);
+  if (url) keys.add(`url:${url.toLowerCase()}`);
+  return [...keys];
+}
+
+function getDigestFingerprint(deals) {
+  const keys = deals
+    .flatMap((deal) => getPostingKeys(deal))
+    .filter(Boolean)
+    .sort();
+  return stableId(keys.join('||'));
+}
+
 function normalizeDeal(rawDeal, sourceKey) {
   const deal = ensureObject(rawDeal);
   const brand = inferBrand(deal, sourceKey);
@@ -471,6 +507,8 @@ function normalizeDeal(rawDeal, sourceKey) {
     votes: Number(deal.votes) || 1,
     priority: Number(deal.priority) || 3,
     missingFields,
+    slackTs: cleanText(deal.slackTs),
+    slackThreadTs: cleanText(deal.slackThreadTs),
   };
 }
 
@@ -547,6 +585,62 @@ function buildSeenSignatureMap(sentIds, pendingQueue) {
   }
 
   return seen;
+}
+
+function buildPostedTodaySignatureSet(sentIds, pendingQueue, dayKey) {
+  const posted = new Set();
+  const prefix = `daySig:${dayKey}:`;
+
+  for (const key of Object.keys(sentIds)) {
+    if (key.startsWith(prefix)) posted.add(key.slice(prefix.length));
+  }
+
+  for (const deal of pendingQueue) {
+    const slackTs = Number.parseFloat(cleanText(deal?.slackTs));
+    if (!Number.isFinite(slackTs)) continue;
+    const postedAtMs = slackTs * 1000;
+    if (getViennaDayKey(postedAtMs) !== dayKey) continue;
+    for (const key of getPostingKeys(deal)) posted.add(key);
+  }
+
+  return posted;
+}
+
+function filterDealsForSlack(deals, postedTodayKeys) {
+  const seen = new Set(postedTodayKeys);
+  const kept = [];
+  let skippedSameDay = 0;
+
+  for (const deal of deals) {
+    const postingKeys = getPostingKeys(deal);
+    if (postingKeys.length > 0 && postingKeys.some((key) => seen.has(key))) {
+      skippedSameDay += 1;
+      continue;
+    }
+
+    for (const key of postingKeys) seen.add(key);
+    kept.push(deal);
+  }
+
+  return { kept, skippedSameDay };
+}
+
+function pruneSentIds(sentIds) {
+  const cutoffDay = getViennaDayKey(Date.now() - (SAME_DAY_SIG_RETENTION_DAYS * DAY_MS));
+  for (const key of Object.keys(sentIds)) {
+    if (!key.startsWith('daySig:')) continue;
+    const [, dayKey] = key.split(':');
+    if (dayKey && dayKey < cutoffDay) delete sentIds[key];
+  }
+}
+
+function markDealsPosted(sentIds, deals, dayKey, postedAtMs) {
+  for (const deal of deals) {
+    for (const key of getPostingKeys(deal)) {
+      sentIds[`sig:${key}`] = postedAtMs;
+      sentIds[`daySig:${dayKey}:${key}`] = postedAtMs;
+    }
+  }
 }
 
 function isRecent(deal) {
@@ -637,6 +731,61 @@ function buildSlackMessage(deal, index) {
   ].join('\n');
 }
 
+function buildSlackChunkMessages(deals) {
+  const chunks = [];
+  let currentEntries = [];
+  let currentDeals = [];
+  let currentLength = 0;
+  let currentStartIndex = 0;
+
+  for (let i = 0; i < deals.length; i += 1) {
+    const entry = buildSlackMessage(deals[i], i + 1);
+    const projectedStart = currentDeals.length === 0 ? i + 1 : currentStartIndex + 1;
+    const projectedEnd = currentDeals.length === 0 ? i + 1 : i + 1;
+    const chunkHeader = `*Deals ${projectedStart}-${projectedEnd} von ${deals.length}*`;
+    const separatorLength = currentEntries.length === 0 ? 0 : 2;
+    const estimatedLength = chunkHeader.length + 2 + currentLength + separatorLength + entry.length;
+
+    if (
+      currentEntries.length > 0 &&
+      (currentEntries.length >= SLACK_MAX_DEALS_PER_MESSAGE || estimatedLength > SLACK_MAX_MESSAGE_CHARS)
+    ) {
+      chunks.push({
+        entries: currentEntries,
+        deals: currentDeals,
+        startIndex: currentStartIndex,
+      });
+      currentEntries = [];
+      currentDeals = [];
+      currentLength = 0;
+    }
+
+    if (currentDeals.length === 0) currentStartIndex = i;
+    currentEntries.push(entry);
+    currentDeals.push(deals[i]);
+    currentLength += entry.length + (currentEntries.length > 1 ? 2 : 0);
+  }
+
+  if (currentEntries.length > 0) {
+    chunks.push({
+      entries: currentEntries,
+      deals: currentDeals,
+      startIndex: currentStartIndex,
+    });
+  }
+  return chunks;
+}
+
+function buildSlackChunkText(chunk, chunkIndex, totalChunks, totalDeals) {
+  const start = chunk.startIndex + 1;
+  const end = start + chunk.entries.length - 1;
+  return [
+    `*Deals ${start}-${end} von ${totalDeals}*`,
+    `_Teil ${chunkIndex + 1}/${totalChunks}_`,
+    chunk.entries.join('\n\n'),
+  ].join('\n\n');
+}
+
 async function sleep(ms) {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -654,13 +803,27 @@ async function postSlackMessage(text, threadTs = null, attempt = 0) {
     body: JSON.stringify(payload),
   });
 
-  const data = await response.json();
+  if (response.status === 429 && attempt < 8) {
+    const retryMs = (Number(response.headers.get('retry-after')) || 2) * 1000;
+    console.log(`  ⏳ HTTP 429 from Slack, waiting ${retryMs}ms...`);
+    await sleep(retryMs + 250);
+    return postSlackMessage(text, threadTs, attempt + 1);
+  }
+
+  const raw = await response.text();
+  let data = {};
+  try {
+    data = raw ? JSON.parse(raw) : {};
+  } catch {
+    data = { ok: false, error: raw || `http_${response.status}` };
+  }
+
   if (data.ok) return data.ts;
 
-  if (data.error === 'ratelimited' && attempt < 5) {
+  if (data.error === 'ratelimited' && attempt < 8) {
     const retryMs = (Number(data.retry_after) || 2) * 1000;
     console.log(`  ⏳ Rate limited, waiting ${retryMs}ms...`);
-    await sleep(retryMs);
+    await sleep(retryMs + 250);
     return postSlackMessage(text, threadTs, attempt + 1);
   }
 
@@ -678,7 +841,7 @@ function writePendingAll(deals) {
 }
 
 function queueKey(deal) {
-  return cleanText(deal.slackTs) || cleanText(deal.id) || normalizeUrl(deal.url);
+  return cleanText(deal.id) || normalizeUrl(deal.url) || cleanText(deal.slackTs);
 }
 
 function mergePendingQueue(existingDeals, newPostedDeals) {
@@ -706,30 +869,45 @@ async function main() {
   }
 
   const pendingDeals = loadPendingDeals();
+  const sentIds = loadSentIds();
   console.log(`📋 Total pending deals loaded: ${pendingDeals.length}`);
 
   const existingQueue = loadPendingQueue();
-  const dealsToPost = pendingDeals;
+  const dayKey = getViennaDayKey();
 
-  console.log(`📨 Pending: ${pendingDeals.length}, toPost: ${dealsToPost.length}`);
-
-  if (dealsToPost.length === 0) {
-    console.log('✅ Keine neuen Deals für Slack');
-    return;
-  }
-
-  dealsToPost.sort((a, b) => {
+  pendingDeals.sort((a, b) => {
     if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
       return (b.qualityScore || 0) - (a.qualityScore || 0);
     }
     return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
   });
 
+  const postedTodayKeys = buildPostedTodaySignatureSet(sentIds, existingQueue, dayKey);
+  const { kept: dealsToPost, skippedSameDay } = filterDealsForSlack(pendingDeals, postedTodayKeys);
+  const digestFingerprint = getDigestFingerprint(dealsToPost);
+
+  console.log(`📨 Pending: ${pendingDeals.length}, toPost: ${dealsToPost.length}, skippedSameDay: ${skippedSameDay}`);
+
+  if (dealsToPost.length === 0) {
+    console.log('✅ Keine neuen Deals für Slack');
+    return;
+  }
+
+  if (
+    cleanText(sentIds['meta:lastDigestDay']) === dayKey &&
+    cleanText(sentIds['meta:lastDigestFingerprint']) === digestFingerprint
+  ) {
+    console.log('✅ Identischer Digest wurde heute bereits an Slack gesendet');
+    return;
+  }
+
+  const chunks = buildSlackChunkMessages(dealsToPost);
   const freeCount = dealsToPost.filter((d) => d.type === 'gratis').length;
   const headerTs = await postSlackMessage(
     `🎯 *FreeFinder Wien* — ${dealsToPost.length} Pending-Deals aus allen Scrapern\n` +
     `🆓 ${freeCount} gratis | 💰 ${dealsToPost.length - freeCount} rabatt/test\n` +
-    `_Ungefilterter Slack-Durchlauf ohne Seen-/Dedupe-/Freshness-Blocker._`
+    `🧵 ${Math.max(1, chunks.length)} Thread-Blöcke\n` +
+    `_Ungefilterter Slack-Durchlauf ohne Seen-/Freshness-Blocker. Slack-Dedupe nur für gleiche Deals am selben Tag._`
   );
 
   if (!headerTs) {
@@ -738,23 +916,32 @@ async function main() {
   }
 
   const postedDeals = [];
-  for (let i = 0; i < dealsToPost.length; i += 1) {
-    const deal = dealsToPost[i];
-    const text = buildSlackMessage(deal, i + 1);
+  for (let i = 0; i < chunks.length; i += 1) {
+    const chunk = chunks[i];
+    const text = buildSlackChunkText(chunk, i, chunks.length, dealsToPost.length);
     const ts = await postSlackMessage(text, headerTs);
     if (!ts) continue;
 
-    deal.slackTs = ts;
-    deal.slackThreadTs = headerTs;
-    postedDeals.push(deal);
-
-    if ((i + 1) % 10 === 0) {
-      console.log(`  ✅ posted ${i + 1}/${dealsToPost.length}`);
+    for (const deal of chunk.deals) {
+      deal.slackTs = ts;
+      deal.slackThreadTs = headerTs;
+      postedDeals.push(deal);
     }
-    await sleep(600);
+
+    console.log(`  ✅ posted chunk ${i + 1}/${chunks.length} (${postedDeals.length}/${dealsToPost.length} deals)`);
+    await sleep(SLACK_POST_DELAY_MS);
   }
 
   const mergedQueue = mergePendingQueue(existingQueue, postedDeals);
+  const postedAtMs = Date.now();
+  markDealsPosted(sentIds, postedDeals, dayKey, postedAtMs);
+  if (postedDeals.length === dealsToPost.length) {
+    sentIds['meta:lastDigestDay'] = dayKey;
+    sentIds['meta:lastDigestFingerprint'] = digestFingerprint;
+    sentIds['meta:lastDigestPostedAt'] = postedAtMs;
+  }
+  pruneSentIds(sentIds);
+  saveSentIds(sentIds);
   writePendingAll(mergedQueue);
 
   console.log(`✅ ${postedDeals.length} Deals an Slack gesendet`);
