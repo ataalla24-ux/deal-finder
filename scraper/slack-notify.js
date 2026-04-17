@@ -42,6 +42,9 @@ const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTime
 const SOCIAL_FRESHNESS_TIMEOUT_MS = Number(process.env.SOCIAL_FRESHNESS_TIMEOUT_MS || 8000);
 const MAX_SOCIAL_FRESHNESS_CHECKS = Number(process.env.MAX_SOCIAL_FRESHNESS_CHECKS || 60);
 const SOCIAL_FRESHNESS_CONCURRENCY = Math.max(1, Number(process.env.SOCIAL_FRESHNESS_CONCURRENCY || 6));
+const TARGET_LINK_VERIFY_TIMEOUT_MS = Number(process.env.TARGET_LINK_VERIFY_TIMEOUT_MS || process.env.URL_CHECK_TIMEOUT_MS || 7000);
+const MAX_TARGET_LINK_CHECKS = Number(process.env.MAX_TARGET_LINK_CHECKS || 400);
+const TARGET_LINK_VERIFY_CONCURRENCY = Math.max(1, Number(process.env.TARGET_LINK_VERIFY_CONCURRENCY || 8));
 const SLACK_POST_DELAY_MS = Math.max(1000, Number(process.env.SLACK_POST_DELAY_MS || 1500));
 const SLACK_MAX_DEALS_PER_MESSAGE = Math.max(1, Number(process.env.SLACK_MAX_DEALS_PER_MESSAGE || 12));
 const SLACK_MAX_MESSAGE_CHARS = Math.max(2000, Number(process.env.SLACK_MAX_MESSAGE_CHARS || 12000));
@@ -376,6 +379,177 @@ function getEffectivePubTimestamp(deal) {
   const verified = Date.parse(cleanText(deal?.verifiedTargetPubDate || ''));
   if (Number.isFinite(verified)) return verified;
   return Date.parse(cleanText(deal?.pubDate || ''));
+}
+
+function snapshotDateFields(deal) {
+  return JSON.stringify({
+    pubDate: cleanText(deal?.pubDate),
+    verifiedTargetPubDate: cleanText(deal?.verifiedTargetPubDate),
+    expires: cleanText(deal?.expires),
+    expiresSource: cleanText(deal?.expiresSource),
+    expiryKind: cleanText(deal?.expiryKind),
+    validOn: cleanText(deal?.validOn),
+    validFrom: cleanText(deal?.validFrom),
+    validUntil: cleanText(deal?.validUntil),
+  });
+}
+
+function shouldReplacePubDateWithVerified(deal, verifiedIso) {
+  const verifiedTs = Date.parse(cleanText(verifiedIso));
+  if (!Number.isFinite(verifiedTs)) return false;
+
+  const currentTs = Date.parse(cleanText(deal?.pubDate || deal?.verifiedTargetPubDate || ''));
+  if (!Number.isFinite(currentTs)) return true;
+  if (currentTs > Date.now() + (2 * DAY_MS)) return true;
+
+  const currentSource = cleanText(deal?.pubDateSource);
+  if (isSocialUrl(deal?.url) && !TRUSTED_PUBDATE_SOURCES.has(currentSource)) return true;
+
+  return Math.abs(currentTs - verifiedTs) > DAY_MS;
+}
+
+function applyStructuredTargetDate(deal, dateHints) {
+  const validOn = cleanText(dateHints?.validOn);
+  const validFrom = cleanText(dateHints?.validFrom);
+  const validUntil = cleanText(dateHints?.validUntil);
+  if (!validOn && !validFrom && !validUntil) return false;
+
+  delete deal.validOn;
+  delete deal.validFrom;
+  delete deal.validUntil;
+
+  if (validOn) deal.validOn = validOn;
+  if (validFrom) deal.validFrom = validFrom;
+  if (validUntil) deal.validUntil = validUntil;
+
+  deal.expiryKind = cleanText(dateHints?.targetDateKind) || deal.expiryKind || (validOn ? 'single' : (validFrom && validUntil ? 'range' : (validFrom ? 'start' : 'end')));
+  deal.expiryDisplayText = cleanText(dateHints?.targetDateRaw || deal.expiryDisplayText || deal.expires || '');
+  deal.expiresSource = cleanText(dateHints?.targetDateSource || 'url');
+  deal.expiresDetectedFromUrl = true;
+  deal.dateConfidence = 'high';
+  deal.targetLinkDateVerified = true;
+  deal.targetLinkDateSource = cleanText(dateHints?.targetDateSource || 'url');
+  deal.targetLinkDateRaw = cleanText(dateHints?.targetDateRaw || '');
+
+  if (validUntil) {
+    deal.expires = validUntil;
+  } else if (validOn) {
+    deal.expires = validOn;
+  } else if (validFrom) {
+    deal.expires = validFrom;
+  }
+
+  return true;
+}
+
+function applyTargetHealthToDeal(deal, health) {
+  const before = snapshotDateFields(deal);
+  const stats = {
+    invalid: false,
+    transientError: false,
+    correctedDate: false,
+    correctedPubDate: false,
+    verifiedDate: false,
+  };
+
+  if (health?.finalUrl) {
+    const finalUrl = normalizeUrl(health.finalUrl);
+    if (finalUrl) deal.url = finalUrl;
+  }
+
+  if (health?.invalid) {
+    deal.targetLinkStatus = 'invalid';
+    deal.targetLinkNote = cleanText(health.reason || 'ungültig');
+    stats.invalid = true;
+    return stats;
+  }
+
+  if (health?.transientError) {
+    deal.targetLinkStatus = 'transient-error';
+    deal.targetLinkNote = 'temporär nicht prüfbar';
+    stats.transientError = true;
+    return stats;
+  }
+
+  deal.targetLinkStatus = 'checked';
+  delete deal.targetLinkNote;
+
+  if (isSocialUrl(deal?.url)) {
+    const hintText = [
+      health?.contentHints?.description,
+      health?.contentHints?.title,
+    ].map(cleanText).filter(Boolean).join(' ');
+    const derivedTs = extractSocialHintTimestamp(hintText, Date.now());
+    if (Number.isFinite(derivedTs)) {
+      const verifiedIso = new Date(derivedTs).toISOString();
+      if (shouldReplacePubDateWithVerified(deal, verifiedIso)) {
+        deal.verifiedTargetPubDate = verifiedIso;
+        deal.verifiedTargetPubDateSource = 'targetUrlHints';
+        stats.correctedPubDate = true;
+      }
+    }
+  }
+
+  const dateHints = ensureObject(health?.dateHints);
+  const verifiedPublicationDate = cleanText(dateHints.publicationDate);
+  if (verifiedPublicationDate && shouldReplacePubDateWithVerified(deal, verifiedPublicationDate)) {
+    deal.verifiedTargetPubDate = verifiedPublicationDate;
+    deal.verifiedTargetPubDateSource = cleanText(dateHints.publicationDateSource || 'targetPage');
+    stats.correctedPubDate = true;
+  }
+
+  if (applyStructuredTargetDate(deal, dateHints)) {
+    stats.verifiedDate = true;
+  }
+
+  const after = snapshotDateFields(deal);
+  if (before !== after) {
+    deal.targetLinkDateCorrected = true;
+    stats.correctedDate = true;
+  }
+
+  return stats;
+}
+
+async function verifyTargetLinkDates(deals) {
+  const byUrl = new Map();
+  for (const deal of deals) {
+    const url = normalizeUrl(deal?.url);
+    if (!url) continue;
+    const bucket = byUrl.get(url) || [];
+    bucket.push(deal);
+    byUrl.set(url, bucket);
+  }
+
+  const urls = [...byUrl.keys()].slice(0, MAX_TARGET_LINK_CHECKS);
+  const stats = {
+    urls: urls.length,
+    checked: 0,
+    invalid: 0,
+    transientErrors: 0,
+    correctedDates: 0,
+    correctedPubDates: 0,
+    verifiedDates: 0,
+  };
+
+  for (let i = 0; i < urls.length; i += TARGET_LINK_VERIFY_CONCURRENCY) {
+    const batch = urls.slice(i, i + TARGET_LINK_VERIFY_CONCURRENCY);
+    await Promise.all(batch.map(async (url) => {
+      const health = await inspectDealUrlHealth(url, { timeoutMs: TARGET_LINK_VERIFY_TIMEOUT_MS });
+      stats.checked += 1;
+      const linkedDeals = byUrl.get(url) || [];
+      for (const deal of linkedDeals) {
+        const result = applyTargetHealthToDeal(deal, health);
+        if (result.invalid) stats.invalid += 1;
+        if (result.transientError) stats.transientErrors += 1;
+        if (result.correctedDate) stats.correctedDates += 1;
+        if (result.correctedPubDate) stats.correctedPubDates += 1;
+        if (result.verifiedDate) stats.verifiedDates += 1;
+      }
+    }));
+  }
+
+  return stats;
 }
 
 async function enrichSocialFreshness(deals) {
@@ -728,6 +902,39 @@ function formatDate(value) {
   return d.toLocaleDateString('de-AT');
 }
 
+function buildSlackDateLines(deal) {
+  const sourceDate = cleanText(deal?.verifiedTargetPubDate || deal?.pubDate);
+  const lines = [
+    `📰 Quellendatum: ${sourceDate ? formatDate(sourceDate) : 'k.A.'}`,
+  ];
+
+  const validOn = cleanText(deal?.validOn);
+  const validFrom = cleanText(deal?.validFrom);
+  const validUntil = cleanText(deal?.validUntil);
+
+  if (validOn) {
+    lines.push(`📅 Deal-Datum: ${formatDate(validOn)}`);
+  } else if (validFrom && validUntil) {
+    lines.push(`📅 Deal-Zeitraum: ${formatDate(validFrom)} bis ${formatDate(validUntil)}`);
+  } else if (validFrom) {
+    lines.push(`📅 Start: ${formatDate(validFrom)}`);
+  } else {
+    lines.push(`⏳ Gültig bis: ${deal.expires ? formatDate(deal.expires) : 'k.A.'}`);
+  }
+
+  if (cleanText(deal?.targetLinkStatus) === 'invalid') {
+    lines.push(`⚠️ Ziellink-Prüfung: ${cleanText(deal?.targetLinkNote || 'ungültig')}`);
+  } else if (cleanText(deal?.targetLinkStatus) === 'transient-error') {
+    lines.push('⚠️ Ziellink-Prüfung: temporär nicht prüfbar');
+  } else if (deal?.targetLinkDateCorrected) {
+    lines.push('🔎 Ziellink geprüft: Datum korrigiert');
+  } else if (deal?.targetLinkDateVerified || cleanText(deal?.verifiedTargetPubDate)) {
+    lines.push('🔎 Ziellink geprüft');
+  }
+
+  return lines;
+}
+
 function buildSlackMessage(deal, index) {
   const link = deal.url ? `<${deal.url}|Zum Angebot>` : '⚠️ FEHLT';
   const desc = deal.description ? `\n📝 ${deal.description.slice(0, 180)}` : '';
@@ -738,8 +945,7 @@ function buildSlackMessage(deal, index) {
     `*${index}. ${deal.title}*`,
     `🏷️ Marke/Restaurant: ${deal.brand || 'k.A.'}`,
     `📍 Ort: ${deal.distance || 'Wien'}`,
-    `📅 Angebotsdatum: ${formatDate(deal.pubDate)}`,
-    `⏳ Gültig bis: ${deal.expires ? formatDate(deal.expires) : 'k.A.'}`,
+    ...buildSlackDateLines(deal),
     `🧭 Kategorie: ${deal.category} | Typ: ${deal.type}`,
     `🧩 Ursprung intern: ${deal.originSource || deal.source || 'k.A.'}`,
     `🔗 Direktlink: ${link}`,
@@ -903,7 +1109,6 @@ async function main() {
 
   const postedTodayKeys = buildPostedTodaySignatureSet(sentIds, existingQueue, dayKey);
   const { kept: dealsToPost, skippedSameDay, skippedStaleSource } = filterDealsForSlack(pendingDeals, postedTodayKeys, dayKey);
-  const digestFingerprint = getDigestFingerprint(dealsToPost);
 
   console.log(`📨 Pending: ${pendingDeals.length}, toPost: ${dealsToPost.length}, skippedSameDay: ${skippedSameDay}, skippedStaleSource: ${skippedStaleSource}`);
 
@@ -911,6 +1116,24 @@ async function main() {
     console.log('✅ Keine neuen Deals für Slack');
     return;
   }
+
+  const targetVerificationStats = await verifyTargetLinkDates(dealsToPost);
+  console.log(
+    `🔎 Ziellinks geprüft: ${targetVerificationStats.checked}/${targetVerificationStats.urls} URLs, ` +
+    `${targetVerificationStats.correctedDates} Datums-Korrekturen, ` +
+    `${targetVerificationStats.correctedPubDates} Quellendatum-Korrekturen, ` +
+    `${targetVerificationStats.invalid} ungültige Links, ` +
+    `${targetVerificationStats.transientErrors} temporäre Fehler`
+  );
+
+  dealsToPost.sort((a, b) => {
+    if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
+      return (b.qualityScore || 0) - (a.qualityScore || 0);
+    }
+    return getEffectivePubTimestamp(b) - getEffectivePubTimestamp(a);
+  });
+
+  const digestFingerprint = getDigestFingerprint(dealsToPost);
 
   if (
     cleanText(sentIds['meta:lastDigestDay']) === dayKey &&

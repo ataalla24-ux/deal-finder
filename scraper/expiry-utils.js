@@ -1,4 +1,5 @@
 const URL_CHECK_UA = 'Mozilla/5.0 (compatible; FreeFinderBot/1.0; +https://freefinder.wien)';
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const MONTH_MAP = {
   'jänner': 0, 'januar': 0, 'january': 0, 'jan': 0,
@@ -720,6 +721,372 @@ function extractMetaTagContent(html, attrName, attrValue) {
   return '';
 }
 
+function extractMetaTagContents(html, attrName, attrValue) {
+  const tags = String(html || '').match(/<meta\b[^>]*>/gi) || [];
+  const escaped = attrValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const attrPattern = new RegExp(`${attrName}\\s*=\\s*["']${escaped}["']`, 'i');
+  const values = [];
+  for (const tag of tags) {
+    if (!attrPattern.test(tag)) continue;
+    const contentMatch = tag.match(/content\s*=\s*["']([^"']+)["']/i);
+    if (contentMatch?.[1]) values.push(cleanHtmlText(contentMatch[1]));
+  }
+  return values.filter(Boolean);
+}
+
+function extractTagAttribute(tag, attribute) {
+  const escaped = attribute.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = String(tag || '').match(new RegExp(`${escaped}\\s*=\\s*["']([^"']+)["']`, 'i'));
+  return cleanHtmlText(match?.[1] || '');
+}
+
+function extractTimeDatetimeCandidates(html) {
+  const tags = String(html || '').match(/<time\b[^>]*>/gi) || [];
+  return tags
+    .map((tag) => extractTagAttribute(tag, 'datetime'))
+    .filter(Boolean)
+    .map((value) => ({ value, source: 'timeDatetime', priority: 70 }));
+}
+
+function parseJsonLdPayload(payload) {
+  const text = String(payload || '')
+    .trim()
+    .replace(/^\s*<!--/, '')
+    .replace(/-->\s*$/, '')
+    .replace(/^\s*<!\[CDATA\[/, '')
+    .replace(/\]\]>\s*$/, '');
+
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+function collectJsonLdDateCandidates(node, candidates = []) {
+  if (!node || typeof node !== 'object') return candidates;
+  if (Array.isArray(node)) {
+    for (const item of node) collectJsonLdDateCandidates(item, candidates);
+    return candidates;
+  }
+
+  for (const [key, value] of Object.entries(node)) {
+    const lowerKey = key.toLowerCase();
+    if (typeof value === 'string') {
+      if (lowerKey === 'datepublished') {
+        candidates.push({ value, source: 'ldDatePublished', priority: 100, kind: 'publication' });
+      } else if (lowerKey === 'datecreated') {
+        candidates.push({ value, source: 'ldDateCreated', priority: 90, kind: 'publication' });
+      } else if (lowerKey === 'uploaddate') {
+        candidates.push({ value, source: 'ldUploadDate', priority: 88, kind: 'publication' });
+      } else if (lowerKey === 'datemodified') {
+        candidates.push({ value, source: 'ldDateModified', priority: 72, kind: 'publication' });
+      } else if (lowerKey === 'startdate') {
+        candidates.push({ value, source: 'ldStartDate', priority: 95, kind: 'target-start' });
+      } else if (lowerKey === 'enddate') {
+        candidates.push({ value, source: 'ldEndDate', priority: 94, kind: 'target-end' });
+      } else if (lowerKey === 'validthrough') {
+        candidates.push({ value, source: 'ldValidThrough', priority: 97, kind: 'target-end' });
+      }
+    }
+    collectJsonLdDateCandidates(value, candidates);
+  }
+
+  return candidates;
+}
+
+function extractJsonLdDateCandidates(html) {
+  const scripts = String(html || '').match(/<script\b[^>]*type\s*=\s*["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi) || [];
+  const candidates = [];
+
+  for (const script of scripts) {
+    const payloadMatch = script.match(/<script\b[^>]*>([\s\S]*?)<\/script>/i);
+    const parsed = parseJsonLdPayload(payloadMatch?.[1] || '');
+    if (!parsed) continue;
+    collectJsonLdDateCandidates(parsed, candidates);
+  }
+
+  return candidates;
+}
+
+function normalizeDateCandidate(candidate, options = {}) {
+  const raw = cleanText(candidate?.value || '');
+  if (!raw) return null;
+  const ts = Date.parse(raw);
+  if (!Number.isFinite(ts)) return null;
+  const nowMs = options.now instanceof Date ? options.now.getTime() : Date.now();
+  const maxFutureMs = Number(options.maxFutureMs || DAY_MS);
+  if (ts > nowMs + maxFutureMs) return null;
+  return {
+    ...candidate,
+    raw,
+    ts,
+    iso: new Date(ts).toISOString(),
+  };
+}
+
+function pickBestDateCandidate(candidates, options = {}) {
+  const preferLatest = options.preferLatest === true;
+  const normalized = candidates
+    .map((candidate) => normalizeDateCandidate(candidate, options))
+    .filter(Boolean);
+
+  normalized.sort((a, b) => {
+    const priorityDiff = Number(b.priority || 0) - Number(a.priority || 0);
+    if (priorityDiff !== 0) return priorityDiff;
+    return preferLatest ? b.ts - a.ts : a.ts - b.ts;
+  });
+
+  return normalized[0] || null;
+}
+
+function buildStructuredTargetDateHint(input = {}, options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date();
+  const targetDateSource = cleanText(input.source || 'url');
+  const targetDateRaw = cleanText(input.rawText || input.date || '');
+  const targetDateKind = cleanText(input.kind || '');
+  const validOn = cleanText(input.validOn || '');
+  const validFrom = cleanText(input.validFrom || '');
+  const validUntil = cleanText(input.validUntil || '');
+
+  if (validOn || validFrom || validUntil) {
+    return {
+      targetDateSource,
+      targetDateRaw,
+      targetDateKind: targetDateKind || (validOn ? 'single' : (validFrom && validUntil ? 'range' : (validFrom ? 'start' : 'end'))),
+      validOn,
+      validFrom,
+      validUntil,
+    };
+  }
+
+  let parsed = parseExpiryDetails(targetDateRaw, { now });
+  if (!parsed && cleanText(input.date || '')) {
+    parsed = parseExpiryDetails(cleanText(input.date), { now });
+  }
+  const parsedIso = parsed?.date ? isoDateFromMs(parsed.date.getTime()) : '';
+  if (!parsedIso) return null;
+
+  const shape = parseExpiryShape(targetDateRaw || parsedIso, { now });
+  return {
+    targetDateSource,
+    targetDateRaw: targetDateRaw || parsedIso,
+    targetDateKind: cleanText(shape.kind || targetDateKind || 'end'),
+    validOn: cleanText(shape.validOn || (targetDateKind === 'single' ? parsedIso : '')),
+    validFrom: cleanText(shape.validFrom || (targetDateKind === 'start' ? parsedIso : '')),
+    validUntil: cleanText(shape.validUntil || (!shape.validOn && !shape.validFrom ? parsedIso : '')),
+  };
+}
+
+function detectFocusedDateContextHint(text, options = {}) {
+  const raw = cleanText(text);
+  if (!raw) return null;
+  const now = options.now instanceof Date ? options.now : new Date();
+  const monthPattern = '(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|april|may|june|july|august|september|october|november|december)';
+
+  let match = raw.match(new RegExp(`\\b(?:von|from)\\s+(\\d{1,2})\\.?\\s*(?:bis|to|[-–])\\s*(\\d{1,2})\\.?\\s+${monthPattern}\\s*(\\d{4})?\\b`, 'i'));
+  if (match) {
+    const month = MONTH_MAP[String(match[3] || '').toLowerCase()];
+    const year = match[4] ? Number(match[4]) : now.getUTCFullYear();
+    if (month !== undefined) {
+      return buildStructuredTargetDateHint({
+        source: 'focusedContext',
+        rawText: cleanText(match[0]),
+        kind: 'range',
+        validFrom: toIsoDateString(year, month + 1, Number(match[1])),
+        validUntil: toIsoDateString(year, month + 1, Number(match[2])),
+      }, { now });
+    }
+  }
+
+  match = raw.match(new RegExp(`\\b(?:am|on)\\s+(\\d{1,2})\\.?\\s+${monthPattern}\\s*(\\d{4})?\\b`, 'i'));
+  if (match) {
+    const month = MONTH_MAP[String(match[2] || '').toLowerCase()];
+    const year = match[3] ? Number(match[3]) : now.getUTCFullYear();
+    if (month !== undefined) {
+      return buildStructuredTargetDateHint({
+        source: 'focusedContext',
+        rawText: cleanText(match[0]),
+        kind: 'single',
+        date: toIsoDateString(year, month + 1, Number(match[1])),
+      }, { now });
+    }
+  }
+
+  return null;
+}
+
+function extractContextPublicationDate(text, options = {}) {
+  const raw = cleanText(text);
+  if (!raw) return null;
+  const now = options.now instanceof Date ? options.now : new Date();
+  const monthPattern = '(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|april|may|june|july|august|september|october|november|december)';
+  const patterns = [
+    new RegExp(`\\b(?:on|am|posted\\s+on)\\s+(${monthPattern}\\s+\\d{1,2},?\\s*\\d{4}|\\d{1,2}\\.\\d{1,2}\\.\\d{2,4}|\\d{1,2}\\.?\\s+${monthPattern}\\s*\\d{4})\\b`, 'i'),
+  ];
+
+  for (const pattern of patterns) {
+    const match = raw.match(pattern);
+    const token = cleanText(match?.[1] || '');
+    if (!token) continue;
+    const parsed = parseExpiryDetails(token, { now });
+    if (parsed?.date) {
+      return {
+        value: parsed.date.toISOString(),
+        source: 'contextPublished',
+        priority: 112,
+      };
+    }
+  }
+
+  return null;
+}
+
+function alignTargetHintWithPublicationYear(targetDateHint, publicationIso) {
+  if (!targetDateHint || !publicationIso) return targetDateHint;
+  const publicationDate = new Date(publicationIso);
+  if (Number.isNaN(publicationDate.getTime())) return targetDateHint;
+
+  const raw = cleanText(targetDateHint.targetDateRaw);
+  const publicationYear = publicationDate.getUTCFullYear();
+  const fields = ['validOn', 'validFrom', 'validUntil'];
+  const fieldValues = fields.map((field) => cleanText(targetDateHint[field])).filter(Boolean);
+  if (fieldValues.length === 0) return targetDateHint;
+
+  const rawContainsPublicationYear = raw.includes(String(publicationYear));
+  const allCurrentYears = fieldValues.map((value) => Number(String(value).slice(0, 4))).filter(Number.isFinite);
+  if (!rawContainsPublicationYear || allCurrentYears.some((year) => year === publicationYear)) {
+    return targetDateHint;
+  }
+
+  const publicationMonth = publicationDate.getUTCMonth() + 1;
+  const publicationDay = publicationDate.getUTCDate();
+  const alignIso = (value) => {
+    const match = cleanText(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return cleanText(value);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const year = month < publicationMonth || (month === publicationMonth && day + 1 < publicationDay)
+      ? publicationYear + 1
+      : publicationYear;
+    return toIsoDateString(year, month, day);
+  };
+
+  return {
+    ...targetDateHint,
+    validOn: cleanText(targetDateHint.validOn) ? alignIso(targetDateHint.validOn) : '',
+    validFrom: cleanText(targetDateHint.validFrom) ? alignIso(targetDateHint.validFrom) : '',
+    validUntil: cleanText(targetDateHint.validUntil) ? alignIso(targetDateHint.validUntil) : '',
+  };
+}
+
+export function extractTargetPageDateHints(html, options = {}) {
+  if (!html) return {};
+  const now = options.now instanceof Date ? options.now : new Date();
+  const pageHints = extractDealPageHints(html);
+  const contextPublicationCandidate = extractContextPublicationDate(
+    cleanText([pageHints.description, pageHints.title].filter(Boolean).join(' ')),
+    { now }
+  );
+
+  const publicationCandidates = [
+    ...extractMetaTagContents(html, 'property', 'article:published_time').map((value) => ({ value, source: 'articlePublished', priority: 110 })),
+    ...extractMetaTagContents(html, 'property', 'og:published_time').map((value) => ({ value, source: 'ogPublishedTime', priority: 108 })),
+    ...extractMetaTagContents(html, 'name', 'parsely-pub-date').map((value) => ({ value, source: 'parselyPubDate', priority: 106 })),
+    ...extractMetaTagContents(html, 'itemprop', 'datePublished').map((value) => ({ value, source: 'itempropDatePublished', priority: 104 })),
+    ...extractMetaTagContents(html, 'itemprop', 'dateCreated').map((value) => ({ value, source: 'itempropDateCreated', priority: 100 })),
+    ...extractMetaTagContents(html, 'property', 'article:modified_time').map((value) => ({ value, source: 'articleModified', priority: 78 })),
+    ...extractMetaTagContents(html, 'property', 'og:updated_time').map((value) => ({ value, source: 'ogUpdatedTime', priority: 74 })),
+    ...extractTimeDatetimeCandidates(html),
+  ];
+  if (contextPublicationCandidate) publicationCandidates.push(contextPublicationCandidate);
+
+  const jsonLdCandidates = extractJsonLdDateCandidates(html);
+  for (const candidate of jsonLdCandidates) {
+    if (candidate.kind === 'publication') publicationCandidates.push(candidate);
+  }
+
+  const publication = pickBestDateCandidate(publicationCandidates, {
+    now,
+    maxFutureMs: 2 * DAY_MS,
+    preferLatest: false,
+  });
+
+  let targetDateHint = null;
+  const focusedDateContext = cleanText([pageHints.description, pageHints.title].filter(Boolean).join(' '));
+  const focusedContextHint = detectFocusedDateContextHint(focusedDateContext, { now });
+  const focusedShape = focusedDateContext
+    ? parseExpiryShape(focusedDateContext, { now, contextText: pageHints.title })
+    : { kind: 'unknown' };
+  const hintHtml = [pageHints.title, pageHints.description]
+    .filter(Boolean)
+    .map((value) => `<p>${value}</p>`)
+    .join('');
+
+  if (focusedContextHint) {
+    targetDateHint = focusedContextHint;
+  }
+
+  const htmlHint = extractExpiryDateFromHtml(hintHtml || html, options) || extractExpiryDateFromHtml(html, options);
+  if (!targetDateHint && htmlHint?.date) {
+    const shouldUseFocusedContext = ['single', 'range', 'start', 'end', 'month', 'approx-range'].includes(cleanText(focusedShape.kind));
+    targetDateHint = buildStructuredTargetDateHint({
+      source: htmlHint.source || 'url',
+      rawText: cleanText(
+        (shouldUseFocusedContext && focusedDateContext)
+          ? focusedDateContext
+          : (htmlHint.shapeText || htmlHint.rawText || isoDateFromMs(htmlHint.date.getTime()))
+      ),
+      kind: cleanText(htmlHint.kindHint || focusedShape.kind || ''),
+      date: htmlHint.date.toISOString(),
+    }, { now });
+  }
+
+  if (!targetDateHint) {
+    const jsonLdStarts = jsonLdCandidates.filter((candidate) => candidate.kind === 'target-start');
+    const jsonLdEnds = jsonLdCandidates.filter((candidate) => candidate.kind === 'target-end');
+    const bestStart = pickBestDateCandidate(jsonLdStarts, { now, maxFutureMs: 365 * DAY_MS, preferLatest: false });
+    const bestEnd = pickBestDateCandidate(jsonLdEnds, { now, maxFutureMs: 365 * DAY_MS, preferLatest: true });
+
+    if (bestStart && bestEnd) {
+      targetDateHint = buildStructuredTargetDateHint({
+        source: `${bestStart.source}+${bestEnd.source}`,
+        rawText: `${bestStart.raw} – ${bestEnd.raw}`,
+        kind: 'range',
+        validFrom: isoDateFromMs(bestStart.ts),
+        validUntil: isoDateFromMs(bestEnd.ts),
+      }, { now });
+    } else if (bestEnd) {
+      targetDateHint = buildStructuredTargetDateHint({
+        source: bestEnd.source,
+        rawText: bestEnd.raw,
+        kind: 'end',
+        date: bestEnd.iso,
+      }, { now });
+    } else if (bestStart) {
+      targetDateHint = buildStructuredTargetDateHint({
+        source: bestStart.source,
+        rawText: bestStart.raw,
+        kind: 'single',
+        date: bestStart.iso,
+      }, { now });
+    }
+  }
+
+  const hostname = cleanText(options.hostname || '').toLowerCase();
+  if (hostname.includes('instagram.com') || hostname.includes('tiktok.com') || hostname.includes('facebook.com')) {
+    targetDateHint = alignTargetHintWithPublicationYear(targetDateHint, cleanText(publication?.iso || ''));
+  }
+
+  return {
+    publicationDate: cleanText(publication?.iso || ''),
+    publicationDateSource: cleanText(publication?.source || ''),
+    ...(targetDateHint || {}),
+  };
+}
+
 function extractFirstHeading(html) {
   const match = String(html || '').match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
   return cleanHtmlText(match?.[1] || '');
@@ -805,12 +1172,14 @@ export async function inspectDealUrlHealth(url, options = {}) {
     }
 
     const contentHints = extractDealPageHints(html);
+    const dateHints = extractTargetPageDateHints(html, { ...options, hostname });
 
     return {
       invalid: false,
       status,
       finalUrl,
       contentHints,
+      dateHints,
       checkedAt: new Date().toISOString(),
     };
   } catch {
