@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-04-17T08:36:59.944Z",
+  "generatedAt": "2026-04-17T10:54:19.039Z",
   "summary": {
     "filesConsidered": 24,
-    "totalCandidates": 357,
-    "uniqueCandidates": 351,
+    "totalCandidates": 358,
+    "uniqueCandidates": 352,
     "duplicateClusters": 3,
     "topHealthySources": [
       {
@@ -172,15 +172,6 @@
     ],
     "topSourcesToFix": [
       {
-        "sourceKey": "community",
-        "sourceLabel": "community",
-        "healthScore": 0,
-        "issues": [
-          "liefert aktuell 0 Deals"
-        ],
-        "sampleTitles": []
-      },
-      {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "healthScore": 0,
@@ -219,6 +210,15 @@
       {
         "sourceKey": "telegram",
         "sourceLabel": "telegram",
+        "healthScore": 0,
+        "issues": [
+          "liefert aktuell 0 Deals"
+        ],
+        "sampleTitles": []
+      },
+      {
+        "sourceKey": "twitter",
+        "sourceLabel": "twitter",
         "healthScore": 0,
         "issues": [
           "liefert aktuell 0 Deals"
@@ -997,56 +997,6 @@
       "sourceWeightScore": 55
     },
     {
-      "sourceKey": "flights",
-      "file": "deals-pending-flights.json",
-      "sourceLabel": "Flights Vienna",
-      "totalDeals": 13,
-      "uniqueDeals": 13,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 13,
-      "fresh7dCount": 13,
-      "viennaCount": 13,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Hin & zurück nach Dubrovnik ab €29.98",
-        "Hin & zurück nach Stockholm ab €36.98",
-        "Hin & zurück nach Larnaca ab €37.98"
-      ],
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 77.5,
-      "topCategories": [
-        {
-          "value": "reisen",
-          "count": 13
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 13
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 37,
-      "coverageScore": 28,
-      "precisionScore": 54,
-      "sourceWeightScore": 46
-    },
-    {
       "sourceKey": "power",
       "file": "deals-pending-power.json",
       "sourceLabel": "Power Scraper",
@@ -1125,6 +1075,105 @@
       "sourceWeightScore": 55
     },
     {
+      "sourceKey": "community",
+      "file": "deals-pending-community.json",
+      "sourceLabel": "Community Submission",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 1,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Neuer Deal"
+      ],
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 0,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 58,
+      "missionFitScore": 50,
+      "coverageScore": 7,
+      "precisionScore": 48,
+      "sourceWeightScore": 43
+    },
+    {
+      "sourceKey": "flights",
+      "file": "deals-pending-flights.json",
+      "sourceLabel": "Flights Vienna",
+      "totalDeals": 13,
+      "uniqueDeals": 13,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 13,
+      "viennaCount": 13,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Hin & zurück nach Dubrovnik ab €29.98",
+        "Hin & zurück nach Stockholm ab €36.98",
+        "Hin & zurück nach Larnaca ab €37.98"
+      ],
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 77.5,
+      "topCategories": [
+        {
+          "value": "reisen",
+          "count": 13
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 13
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 50,
+      "missionFitScore": 15,
+      "coverageScore": 20,
+      "precisionScore": 42,
+      "sourceWeightScore": 31
+    },
+    {
       "sourceKey": "gutscheine",
       "file": "deals-pending-gutscheine.json",
       "sourceLabel": "Gutscheine.at",
@@ -1174,41 +1223,6 @@
       "coverageScore": 7,
       "precisionScore": 26,
       "sourceWeightScore": 20
-    },
-    {
-      "sourceKey": "community",
-      "file": "deals-pending-community.json",
-      "sourceLabel": "community",
-      "totalDeals": 0,
-      "uniqueDeals": 0,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [],
-      "uniqueRate": 0,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 0,
-      "topCategories": [],
-      "topTypes": [],
-      "issues": [
-        "liefert aktuell 0 Deals"
-      ],
-      "healthScore": 0,
-      "missionFitScore": 0,
-      "coverageScore": 0,
-      "precisionScore": 0,
-      "sourceWeightScore": 0
     },
     {
       "sourceKey": "firecrawl2",
