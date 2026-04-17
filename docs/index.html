@@ -5372,6 +5372,7 @@
             return Number.isFinite(d._distanceKm) && d._distanceKm <= radius;
           });
       }
+      deals = deals.map((d) => ({ ...d, _homeRankScore: getHomeFeedRankingScore(d) }));
       deals.sort((a, b) => {
         const aPinned = Number(a.pinnedRank || 0);
         const bPinned = Number(b.pinnedRank || 0);
@@ -5385,6 +5386,9 @@
         const bExpiredVisible = b._lifecycle?.state === 'expired-visible' ? 1 : 0;
         if (aExpiredVisible !== bExpiredVisible) return aExpiredVisible - bExpiredVisible;
 
+        const scoreDiff = (b._homeRankScore || 0) - (a._homeRankScore || 0);
+        if (Math.abs(scoreDiff) > 0.001) return scoreDiff;
+
         const aExpiry = parseExpiryToMs(a.expires || a.expiresOriginal);
         const bExpiry = parseExpiryToMs(b.expires || b.expiresOriginal);
         const aHasExpiry = Number.isFinite(aExpiry) ? 1 : 0;
@@ -5392,14 +5396,11 @@
         if (aHasExpiry !== bHasExpiry) return bHasExpiry - aHasExpiry;
         if (aHasExpiry && bHasExpiry && aExpiry !== bExpiry) return aExpiry - bExpiry;
 
-        const aFocus = isFoodDrinkFreebie(a) ? 1 : 0;
-        const bFocus = isFoodDrinkFreebie(b) ? 1 : 0;
-        if (bFocus !== aFocus) return bFocus - aFocus;
-
         const aPub = a.pubDate ? Date.parse(a.pubDate) : 0;
         const bPub = b.pubDate ? Date.parse(b.pubDate) : 0;
         if ((bPub || 0) !== (aPub || 0)) return (bPub || 0) - (aPub || 0);
-        return (b.qualityScore || 0) - (a.qualityScore || 0);
+        if ((b.votes || 0) !== (a.votes || 0)) return (b.votes || 0) - (a.votes || 0);
+        return (b.qualityScore || 0) - (a.qualityScore || 0) || String(a.id).localeCompare(String(b.id));
       });
       return deals;
     }
@@ -5516,6 +5517,67 @@
     function getFreshnessScore(deal) {
         const ageDays = Math.max(0, (Date.now() - getDealBaseTimestampMs(deal)) / (1000 * 60 * 60 * 24));
         return Math.max(0, 3 - (ageDays / 3));
+    }
+
+    function isTravelDeal(deal) {
+        if (String(deal.category || '').toLowerCase() === 'reisen') return true;
+        return /\b(flug|flight|hotel|reise|urlaub|trip|wizz|ryanair|oebb|öbb|booking|airbnb|railjet|bahn|zugticket|sparschiene)\b/i.test(getDealSignalText(deal));
+    }
+
+    function getHomeCategoryPriorityScore(deal) {
+        const category = String(deal.category || '').toLowerCase();
+        if (category === 'kaffee') return 8;
+        if (category === 'essen') return 7;
+        if (category === 'supermarkt') return 2.2;
+        if (category === 'fitness') return 1.5;
+        if (category === 'reisen') return -4.5;
+
+        let score = 0;
+        if (isFoodDrinkFreebie(deal)) score += 3.5;
+        if (isTravelDeal(deal)) score -= 2.5;
+        return score;
+    }
+
+    function getFutureDistancePenaltyScore(deal) {
+        const expiryMs = parseExpiryToMs(deal.expires || deal.expiresOriginal);
+        if (!Number.isFinite(expiryMs)) return 0;
+
+        const daysUntilExpiry = (expiryMs - Date.now()) / (1000 * 60 * 60 * 24);
+        if (daysUntilExpiry < -1) return -6;
+        if (daysUntilExpiry <= 2) return 4.5;
+        if (daysUntilExpiry <= 7) return 3.2;
+        if (daysUntilExpiry <= 21) return 1.6;
+        if (daysUntilExpiry <= 45) return 0.4;
+        if (daysUntilExpiry <= 90) return -1.8;
+        if (daysUntilExpiry <= 180) return -4;
+        return -6;
+    }
+
+    function getPositiveCommunityScore(deal) {
+        const voteScore = Math.min(5, Number(deal.votes || 0) / 6);
+        const rating = ratings[deal.id] || { total: 0, count: 0 };
+        const averageRating = rating.count ? (rating.total / rating.count) : 0;
+        const ratingScore = rating.count
+            ? (Math.max(0, averageRating - 3.5) * 2.4) + Math.min(1.8, rating.count * 0.18)
+            : 0;
+        const commentsCount = (comments[deal.id] || []).length;
+        const tipsCount = (userTips[deal.id] || []).length + (defaultTips[deal.id] || []).length;
+        const conversationScore = Math.min(1.8, commentsCount * 0.18) + Math.min(1, tipsCount * 0.1);
+        return voteScore + ratingScore + conversationScore + (deal.hot ? 1.4 : 0);
+    }
+
+    function getHomeFeedRankingScore(deal) {
+        const ageDays = Math.max(0, (Date.now() - getDealBaseTimestampMs(deal)) / (1000 * 60 * 60 * 24));
+        const freshness = Math.max(0, 9 - (ageDays * 0.6));
+        const categoryPriority = getHomeCategoryPriorityScore(deal);
+        const futureDistancePenalty = getFutureDistancePenaltyScore(deal);
+        const community = getPositiveCommunityScore(deal);
+        const qualityBoost = Math.min(2.5, Number(deal.qualityScore || 0) / 35);
+        const typeBoost = (deal.type === 'gratis' || deal.type === 'freebie')
+            ? 2.4
+            : ((deal.type === 'bogo' || deal.type === 'rabatt') ? 1.2 : 0.4);
+        const newnessBoost = deal.isNew ? 1.5 : 0;
+        return freshness + categoryPriority + futureDistancePenalty + community + qualityBoost + typeBoost + newnessBoost;
     }
 
     function getSocialProofScore(deal) {
