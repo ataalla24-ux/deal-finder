@@ -46,6 +46,7 @@ const SLACK_POST_DELAY_MS = Math.max(1000, Number(process.env.SLACK_POST_DELAY_M
 const SLACK_MAX_DEALS_PER_MESSAGE = Math.max(1, Number(process.env.SLACK_MAX_DEALS_PER_MESSAGE || 12));
 const SLACK_MAX_MESSAGE_CHARS = Math.max(2000, Number(process.env.SLACK_MAX_MESSAGE_CHARS || 12000));
 const SAME_DAY_SIG_RETENTION_DAYS = Math.max(1, Number(process.env.SAME_DAY_SIG_RETENTION_DAYS || 3));
+const SAME_DAY_ONLY_PENDING_SOURCES = new Set(['flights']);
 const PENDING_FILE_NAMES = String(process.env.PENDING_FILE_NAMES || '')
   .split(',')
   .map((value) => cleanText(value))
@@ -464,8 +465,9 @@ function getDigestFingerprint(deals) {
   return stableId(keys.join('||'));
 }
 
-function normalizeDeal(rawDeal, sourceKey) {
+function normalizeDeal(rawDeal, sourceKey, options = {}) {
   const deal = ensureObject(rawDeal);
+  const fileUpdatedAt = cleanText(options.fileUpdatedAt || deal.sourceFileUpdatedAt);
   const brand = inferBrand(deal, sourceKey);
   const title = inferTitle(deal, brand);
   const rawUrl = normalizeUrl(deal.url);
@@ -507,6 +509,8 @@ function normalizeDeal(rawDeal, sourceKey) {
     votes: Number(deal.votes) || 1,
     priority: Number(deal.priority) || 3,
     missingFields,
+    sourceKey,
+    sourceFileUpdatedAt: fileUpdatedAt,
     slackTs: cleanText(deal.slackTs),
     slackThreadTs: cleanText(deal.slackThreadTs),
   };
@@ -531,7 +535,8 @@ function loadPendingDeals() {
     try {
       const parsed = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
       const items = ensureArray(parsed.deals || parsed);
-      const normalized = items.map((d) => normalizeDeal(d, sourceKey));
+      const fileUpdatedAt = fs.statSync(filePath).mtime.toISOString();
+      const normalized = items.map((d) => normalizeDeal(d, sourceKey, { fileUpdatedAt }));
       console.log(`  - ${file}: ${normalized.length} deals`);
       deals.push(...normalized);
     } catch (error) {
@@ -561,7 +566,7 @@ function loadPendingQueue() {
   try {
     const parsed = JSON.parse(fs.readFileSync(PENDING_ALL_PATH, 'utf-8'));
     const deals = ensureArray(parsed.deals);
-    return deals.map((d) => normalizeDeal(d, cleanText(d.source) || 'queue'));
+    return deals.map((d) => normalizeDeal(d, cleanText(d.sourceKey) || cleanText(d.source) || 'queue'));
   } catch {
     return [];
   }
@@ -606,12 +611,26 @@ function buildPostedTodaySignatureSet(sentIds, pendingQueue, dayKey) {
   return posted;
 }
 
-function filterDealsForSlack(deals, postedTodayKeys) {
+function shouldSkipStalePendingDeal(deal, dayKey) {
+  const sourceKey = cleanText(deal?.sourceKey).toLowerCase();
+  if (!SAME_DAY_ONLY_PENDING_SOURCES.has(sourceKey)) return false;
+  const updatedAt = cleanText(deal?.sourceFileUpdatedAt);
+  if (!updatedAt) return false;
+  return getViennaDayKey(updatedAt) !== dayKey;
+}
+
+function filterDealsForSlack(deals, postedTodayKeys, dayKey) {
   const seen = new Set(postedTodayKeys);
   const kept = [];
   let skippedSameDay = 0;
+  let skippedStaleSource = 0;
 
   for (const deal of deals) {
+    if (shouldSkipStalePendingDeal(deal, dayKey)) {
+      skippedStaleSource += 1;
+      continue;
+    }
+
     const postingKeys = getPostingKeys(deal);
     if (postingKeys.length > 0 && postingKeys.some((key) => seen.has(key))) {
       skippedSameDay += 1;
@@ -622,7 +641,7 @@ function filterDealsForSlack(deals, postedTodayKeys) {
     kept.push(deal);
   }
 
-  return { kept, skippedSameDay };
+  return { kept, skippedSameDay, skippedStaleSource };
 }
 
 function pruneSentIds(sentIds) {
@@ -883,10 +902,10 @@ async function main() {
   });
 
   const postedTodayKeys = buildPostedTodaySignatureSet(sentIds, existingQueue, dayKey);
-  const { kept: dealsToPost, skippedSameDay } = filterDealsForSlack(pendingDeals, postedTodayKeys);
+  const { kept: dealsToPost, skippedSameDay, skippedStaleSource } = filterDealsForSlack(pendingDeals, postedTodayKeys, dayKey);
   const digestFingerprint = getDigestFingerprint(dealsToPost);
 
-  console.log(`📨 Pending: ${pendingDeals.length}, toPost: ${dealsToPost.length}, skippedSameDay: ${skippedSameDay}`);
+  console.log(`📨 Pending: ${pendingDeals.length}, toPost: ${dealsToPost.length}, skippedSameDay: ${skippedSameDay}, skippedStaleSource: ${skippedStaleSource}`);
 
   if (dealsToPost.length === 0) {
     console.log('✅ Keine neuen Deals für Slack');
