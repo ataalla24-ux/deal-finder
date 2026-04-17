@@ -1,11 +1,19 @@
 name: "Daily Deal Digest"
 # Runs once per day at 11:00 Vienna time (10:00 UTC)
-# Collects the finished Firecrawl + Instagram/jö pending files and sends ONE Slack digest
+# and also immediately after the final scheduled scraper workflow finishes.
+# Collects the finished pending files and sends ONE Slack digest.
 
 on:
   schedule:
     - cron: '0 10 * * *' # 11:00 Vienna winter / 12:00 summer
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "Flights Vienna Scraper"
+    types:
+      - completed
+    branches:
+      - main
 
 concurrency:
   group: daily-deal-digest
@@ -13,6 +21,7 @@ concurrency:
 
 jobs:
   send-digest:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
