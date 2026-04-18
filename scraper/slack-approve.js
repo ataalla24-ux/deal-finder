@@ -259,6 +259,7 @@ function normalizeDeal(raw) {
     isNew: Boolean(deal.isNew),
     slackTs: cleanText(deal.slackTs),
     slackThreadTs: cleanText(deal.slackThreadTs),
+    slackPostFormatVersion: cleanText(deal.slackPostFormatVersion),
     approvedAt,
     missingFields,
   };

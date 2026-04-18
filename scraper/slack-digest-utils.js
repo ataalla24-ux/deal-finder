@@ -172,8 +172,17 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
       brand = cleanText(plain.slice('Marke/Restaurant:'.length));
     } else if (plain.startsWith('Ort:')) {
       distance = cleanText(plain.slice('Ort:'.length)) || 'Wien';
-    } else if (plain.startsWith('Angebotsdatum:')) {
-      pubDate = parseDisplayDate(plain.slice('Angebotsdatum:'.length));
+    } else if (plain.startsWith('Angebotsdatum:') || plain.startsWith('Quellendatum:')) {
+      const label = plain.startsWith('Angebotsdatum:') ? 'Angebotsdatum:' : 'Quellendatum:';
+      pubDate = parseDisplayDate(plain.slice(label.length));
+    } else if (plain.startsWith('Deal-Datum:')) {
+      pubDate = parseDisplayDate(plain.slice('Deal-Datum:'.length));
+    } else if (plain.startsWith('Deal-Zeitraum:')) {
+      const period = cleanText(plain.slice('Deal-Zeitraum:'.length));
+      const [, untilPart = ''] = period.split(/\bbis\b/i);
+      expires = cleanText(untilPart || period);
+    } else if (plain.startsWith('Start:')) {
+      pubDate = parseDisplayDate(plain.slice('Start:'.length));
     } else if (plain.startsWith('Gültig bis:')) {
       expires = cleanText(plain.slice('Gültig bis:'.length));
     } else if (plain.startsWith('Kategorie:')) {
@@ -186,8 +195,9 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
           category = part.toLowerCase();
         }
       }
-    } else if (plain.startsWith('Ursprung intern:')) {
-      originSource = cleanText(plain.slice('Ursprung intern:'.length));
+    } else if (plain.startsWith('Ursprung intern:') || plain.startsWith('Quelle intern:')) {
+      const label = plain.startsWith('Ursprung intern:') ? 'Ursprung intern:' : 'Quelle intern:';
+      originSource = cleanText(plain.slice(label.length));
     } else if (plain.startsWith('Direktlink:')) {
       url = parseSlackLink(plain.slice('Direktlink:'.length).trim());
     } else if (plain.startsWith('Deal-ID:')) {

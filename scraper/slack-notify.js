@@ -47,7 +47,11 @@ const TARGET_LINK_VERIFY_TIMEOUT_MS = Number(process.env.TARGET_LINK_VERIFY_TIME
 const MAX_TARGET_LINK_CHECKS = Number(process.env.MAX_TARGET_LINK_CHECKS || 400);
 const TARGET_LINK_VERIFY_CONCURRENCY = Math.max(1, Number(process.env.TARGET_LINK_VERIFY_CONCURRENCY || 8));
 const SLACK_POST_DELAY_MS = Math.max(1000, Number(process.env.SLACK_POST_DELAY_MS || 1500));
-const SLACK_MAX_DEALS_PER_MESSAGE = Math.max(1, Number(process.env.SLACK_MAX_DEALS_PER_MESSAGE || 12));
+const SLACK_POST_FORMAT_VERSION = 'v2-single-reply';
+const SLACK_ONE_DEAL_PER_MESSAGE = String(process.env.SLACK_ONE_DEAL_PER_MESSAGE || '1') !== '0';
+const SLACK_MAX_DEALS_PER_MESSAGE = SLACK_ONE_DEAL_PER_MESSAGE
+  ? 1
+  : Math.max(1, Number(process.env.SLACK_MAX_DEALS_PER_MESSAGE || 12));
 const SLACK_MAX_MESSAGE_CHARS = Math.max(2000, Number(process.env.SLACK_MAX_MESSAGE_CHARS || 12000));
 const SAME_DAY_SIG_RETENTION_DAYS = Math.max(1, Number(process.env.SAME_DAY_SIG_RETENTION_DAYS || 3));
 const SAME_DAY_ONLY_PENDING_SOURCES = new Set(['flights', 'power']);
@@ -624,12 +628,13 @@ function getViennaDayKey(value = Date.now()) {
 }
 
 function getPostingKeys(deal) {
+  const postFormatVersion = cleanText(deal?.slackPostFormatVersion) || (cleanText(deal?.slackTs) ? 'v1' : SLACK_POST_FORMAT_VERSION);
   const keys = new Set(getDealSignatureVariants(deal));
   const id = cleanText(deal?.id);
   const url = normalizeUrl(deal?.url);
   if (id) keys.add(`id:${id}`);
   if (url) keys.add(`url:${url.toLowerCase()}`);
-  return [...keys];
+  return [...keys].map((key) => `${postFormatVersion}:${key}`);
 }
 
 function getDigestFingerprint(deals) {
@@ -637,7 +642,7 @@ function getDigestFingerprint(deals) {
     .flatMap((deal) => getPostingKeys(deal))
     .filter(Boolean)
     .sort();
-  return stableId(keys.join('||'));
+  return stableId([SLACK_POST_FORMAT_VERSION, ...keys].join('||'));
 }
 
 function normalizeDeal(rawDeal, sourceKey, options = {}) {
@@ -688,6 +693,7 @@ function normalizeDeal(rawDeal, sourceKey, options = {}) {
     sourceFileUpdatedAt: fileUpdatedAt,
     slackTs: cleanText(deal.slackTs),
     slackThreadTs: cleanText(deal.slackThreadTs),
+    slackPostFormatVersion: cleanText(deal.slackPostFormatVersion),
   };
 }
 
@@ -938,22 +944,22 @@ function buildSlackDateLines(deal) {
 
 function buildSlackMessage(deal, index) {
   const link = deal.url ? `<${deal.url}|Zum Angebot>` : '⚠️ FEHLT';
-  const desc = deal.description ? `\n📝 ${deal.description.slice(0, 180)}` : '';
+  const desc = deal.description ? `\n📝 ${deal.description.slice(0, 140)}` : '';
   const missingNote = Array.isArray(deal.missingFields) && deal.missingFields.length > 0
     ? `\n⚠️ FEHLT: ${deal.missingFields.join(', ')}`
     : '';
   return [
-    `*${index}. ${deal.title}*`,
+    `*${deal.title}*`,
+    `🆔 Deal-ID: ${deal.id}`,
     `🏷️ Marke/Restaurant: ${deal.brand || 'k.A.'}`,
     `📍 Ort: ${deal.distance || 'Wien'}`,
     ...buildSlackDateLines(deal),
     `🧭 Kategorie: ${deal.category} | Typ: ${deal.type}`,
-    `🧩 Ursprung intern: ${deal.originSource || deal.source || 'k.A.'}`,
+    `🧩 Quelle intern: ${deal.originSource || deal.source || 'k.A.'}`,
     `🔗 Direktlink: ${link}`,
-    `🆔 Deal-ID: ${deal.id}`,
     missingNote,
     desc,
-    '_Mit ✅ freigeben_',
+    `_Mit ✅ auf dieser Nachricht freigeben${index ? ` · #${index}` : ''}_`,
   ].join('\n');
 }
 
@@ -1003,6 +1009,9 @@ function buildSlackChunkMessages(deals) {
 }
 
 function buildSlackChunkText(chunk, chunkIndex, totalChunks, totalDeals) {
+  if (chunk.entries.length === 1) {
+    return chunk.entries[0];
+  }
   const start = chunk.startIndex + 1;
   const end = start + chunk.entries.length - 1;
   return [
@@ -1149,8 +1158,8 @@ async function main() {
   const headerTs = await postSlackMessage(
     `🎯 *FreeFinder Wien* — ${dealsToPost.length} Pending-Deals aus allen Scrapern\n` +
     `🆓 ${freeCount} gratis | 💰 ${dealsToPost.length - freeCount} rabatt/test\n` +
-    `🧵 ${Math.max(1, chunks.length)} Thread-Blöcke\n` +
-    `_Ungefilterter Slack-Durchlauf ohne Seen-/Freshness-Blocker. Slack-Dedupe nur für gleiche Deals am selben Tag._`
+    `💬 ${dealsToPost.length} Antworten · 1 Deal pro Antwort\n` +
+    `_Mit ✅ immer direkt auf der einzelnen Deal-Antwort freigeben._`
   );
 
   if (!headerTs) {
@@ -1168,10 +1177,11 @@ async function main() {
     for (const deal of chunk.deals) {
       deal.slackTs = ts;
       deal.slackThreadTs = headerTs;
+      deal.slackPostFormatVersion = SLACK_POST_FORMAT_VERSION;
       postedDeals.push(deal);
     }
 
-    console.log(`  ✅ posted chunk ${i + 1}/${chunks.length} (${postedDeals.length}/${dealsToPost.length} deals)`);
+    console.log(`  ✅ posted reply ${i + 1}/${chunks.length} (${postedDeals.length}/${dealsToPost.length} deals)`);
     await sleep(SLACK_POST_DELAY_MS);
   }
 
