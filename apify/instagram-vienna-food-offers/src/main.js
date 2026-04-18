@@ -605,6 +605,26 @@ function buildCookieObjects(input) {
   return cookies;
 }
 
+async function getContextCookieDiagnostics(page) {
+  try {
+    const cookies = await page.context().cookies('https://www.instagram.com/');
+    const names = cookies.map((cookie) => cookie.name).filter(Boolean).sort();
+    return {
+      cookieCount: cookies.length,
+      cookieNames: names.slice(0, 20),
+      hasSessionCookie: names.includes('sessionid'),
+      hasCsrfCookie: names.includes('csrftoken'),
+    };
+  } catch {
+    return {
+      cookieCount: 0,
+      cookieNames: [],
+      hasSessionCookie: false,
+      hasCsrfCookie: false,
+    };
+  }
+}
+
 await Actor.main(async () => {
   const rawInput = await Actor.getInput() || {};
   const input = {
@@ -616,6 +636,12 @@ await Actor.main(async () => {
 
   const now = new Date();
   const cookieObjects = buildCookieObjects(input);
+  const inputCookieDiagnostics = {
+    providedCookieCount: cookieObjects.length,
+    providedCookieNames: cookieObjects.map((cookie) => cookie.name).filter(Boolean).sort().slice(0, 20),
+    hasProvidedSessionCookie: cookieObjects.some((cookie) => cookie.name === 'sessionid'),
+    hasProvidedCsrfCookie: cookieObjects.some((cookie) => cookie.name === 'csrftoken'),
+  };
   const requestQueue = await RequestQueue.open();
   const sourceStats = {};
   const seenPostUrls = new Set();
@@ -668,6 +694,7 @@ await Actor.main(async () => {
       await acceptCookiesIfPresent(page);
 
       if (request.userData.label === 'SOURCE') {
+        const contextCookieDiagnostics = await getContextCookieDiagnostics(page);
         const { postUrls, diagnostic } = await collectSourceLinks(page, input.maxPostsPerSource);
         const freshPostUrls = postUrls.filter((url) => !seenPostUrls.has(url)).slice(0, Math.max(0, input.maxPostsToInspect - queuedPostCount));
         freshPostUrls.forEach((url) => seenPostUrls.add(url));
@@ -677,6 +704,10 @@ await Actor.main(async () => {
         sourceStats[request.url].state = diagnostic.state;
         sourceStats[request.url].title = diagnostic.title;
         sourceStats[request.url].attemptCount = diagnostic.attemptCount;
+        sourceStats[request.url].cookieCount = contextCookieDiagnostics.cookieCount;
+        sourceStats[request.url].cookieNames = contextCookieDiagnostics.cookieNames;
+        sourceStats[request.url].hasSessionCookie = contextCookieDiagnostics.hasSessionCookie;
+        sourceStats[request.url].hasCsrfCookie = contextCookieDiagnostics.hasCsrfCookie;
 
         if (freshPostUrls.length) {
           await currentCrawler.addRequests(
@@ -750,6 +781,7 @@ await Actor.main(async () => {
     acceptedDeals: acceptedUrls.size,
     inspectedPosts: Object.values(sourceStats).reduce((sum, entry) => sum + entry.visited, 0),
     queuedPosts: queuedPostCount,
+    inputCookieDiagnostics,
     sources: sourceStats,
     rejectReasons,
   };
