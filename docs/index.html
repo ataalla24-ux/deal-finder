@@ -5522,6 +5522,12 @@
         return /\b(flug|flight|hotel|reise|urlaub|trip|wizz|ryanair|oebb|öbb|booking|airbnb|railjet|bahn|zugticket|sparschiene)\b/i.test(getDealSignalText(deal));
     }
 
+    function isChurchDeal(deal) {
+        const category = String(deal.category || '').toLowerCase();
+        if (category === 'kirche' || category === 'gottesdienste') return true;
+        return /\b(gottesdienst|gottesdienste|kirche|freikirche|church|worship|messe|predigt|gemeinde)\b/i.test(getDealSignalText(deal));
+    }
+
     function getHomeCategoryPriorityScore(deal) {
         const category = String(deal.category || '').toLowerCase();
         if (category === 'kaffee') return 8;
@@ -5529,10 +5535,13 @@
         if (category === 'supermarkt') return 2.2;
         if (category === 'fitness') return 1.5;
         if (category === 'reisen') return -4.5;
+        if (category === 'kirche') return -9.5;
+        if (category === 'gottesdienste') return -11;
 
         let score = 0;
         if (isFoodDrinkFreebie(deal)) score += 3.5;
         if (isTravelDeal(deal)) score -= 2.5;
+        if (isChurchDeal(deal)) score -= 4.5;
         return score;
     }
 
