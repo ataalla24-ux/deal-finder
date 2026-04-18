@@ -1,4 +1,4 @@
-const CACHE_NAME = 'freefinder-v4';
+const CACHE_NAME = 'freefinder-v5';
 const urlsToCache = [
   './',
   './index.html',
