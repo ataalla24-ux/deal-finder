@@ -313,29 +313,85 @@ function acceptCookiesIfPresent(page) {
   );
 }
 
-async function collectSourceLinks(page, maxPostsPerSource) {
-  for (let i = 0; i < 8; i += 1) {
-    await page.evaluate(() => window.scrollBy(0, window.innerHeight * 2));
-    await page.waitForTimeout(900);
-  }
-
-  const hrefs = await page.evaluate(() => {
-    const links = [...document.querySelectorAll('a[href]')];
-    return links.map((link) => link.getAttribute('href')).filter(Boolean);
-  });
-
+function extractPostUrls(values, maxPostsPerSource) {
   const unique = [];
   const seen = new Set();
-  for (const href of hrefs) {
-    const normalized = href.startsWith('http') ? href : `https://www.instagram.com${href}`;
-    const postUrl = uniquePostUrl(normalized);
+  for (const value of values) {
+    const postUrl = uniquePostUrl(value);
     if (!postUrl || seen.has(postUrl)) continue;
     seen.add(postUrl);
     unique.push(postUrl);
     if (unique.length >= maxPostsPerSource) break;
   }
-
   return unique;
+}
+
+async function collectSourceLinks(page, maxPostsPerSource) {
+  let lastDiagnostic = {
+    state: 'empty',
+    title: '',
+    bodySample: '',
+    linkCount: 0,
+    attemptCount: 0,
+  };
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    if (attempt > 1) {
+      await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
+      await acceptCookiesIfPresent(page);
+    }
+
+    try {
+      await page.waitForSelector('a[href*="/p/"], a[href*="/reel/"], main', { timeout: 4000 });
+    } catch {
+      // Instagram often renders a shell first; continue with timed waits below.
+    }
+
+    await page.waitForTimeout(2500);
+
+    for (let i = 0; i < 8; i += 1) {
+      await page.evaluate(() => window.scrollBy(0, window.innerHeight * 2));
+      await page.waitForTimeout(900);
+    }
+
+    const [snapshot, html] = await Promise.all([
+      page.evaluate(() => {
+        const links = [...document.querySelectorAll('a[href]')].map((link) => link.getAttribute('href')).filter(Boolean);
+        return {
+          title: document.title || '',
+          bodyText: document.body?.innerText?.slice(0, 2000) || '',
+          hrefs: links,
+          linkCount: links.length,
+        };
+      }),
+      page.content(),
+    ]);
+
+    const htmlMatches = [...html.matchAll(/https:\/\/www\.instagram\.com\/(?:[^"'?\s<>]+\/)?(?:p|reel)\/[^"'?#\s<>]+\/?|\/(?:[^"'?\s<>]+\/)?(?:p|reel)\/[^"'?#\s<>]+\/?/gi)].map((match) => match[0]);
+    const hrefCandidates = snapshot.hrefs.map((href) => (href.startsWith('http') ? href : `https://www.instagram.com${href}`));
+    const postUrls = extractPostUrls([...hrefCandidates, ...htmlMatches], maxPostsPerSource);
+
+    const diagnosticText = normalizeText(`${snapshot.title} ${snapshot.bodyText}`).toLowerCase();
+    const isErrorPage = diagnosticText.includes('something went wrong')
+      || diagnosticText.includes("page couldn't load")
+      || diagnosticText.includes('etwas ist schiefgelaufen')
+      || diagnosticText.includes('seite konnte nicht geladen werden');
+    const isLoginWall = diagnosticText.includes('log in') && diagnosticText.includes('sign up');
+
+    lastDiagnostic = {
+      state: postUrls.length ? 'ok' : isErrorPage ? 'errorPage' : isLoginWall ? 'loginWall' : 'noPostLinks',
+      title: snapshot.title,
+      bodySample: snapshot.bodyText.slice(0, 400),
+      linkCount: snapshot.linkCount,
+      attemptCount: attempt,
+    };
+
+    if (postUrls.length) {
+      return { postUrls, diagnostic: lastDiagnostic };
+    }
+  }
+
+  return { postUrls: [], diagnostic: lastDiagnostic };
 }
 
 function parseLdJson(rawScripts) {
@@ -612,12 +668,15 @@ await Actor.main(async () => {
       await acceptCookiesIfPresent(page);
 
       if (request.userData.label === 'SOURCE') {
-        const postUrls = await collectSourceLinks(page, input.maxPostsPerSource);
+        const { postUrls, diagnostic } = await collectSourceLinks(page, input.maxPostsPerSource);
         const freshPostUrls = postUrls.filter((url) => !seenPostUrls.has(url)).slice(0, Math.max(0, input.maxPostsToInspect - queuedPostCount));
         freshPostUrls.forEach((url) => seenPostUrls.add(url));
 
         queuedPostCount += freshPostUrls.length;
         sourceStats[request.url].queued = freshPostUrls.length;
+        sourceStats[request.url].state = diagnostic.state;
+        sourceStats[request.url].title = diagnostic.title;
+        sourceStats[request.url].attemptCount = diagnostic.attemptCount;
 
         if (freshPostUrls.length) {
           await currentCrawler.addRequests(
@@ -634,7 +693,12 @@ await Actor.main(async () => {
           );
         }
 
-        log.info(`Collected ${freshPostUrls.length} post URLs from ${request.url}`);
+        if (!freshPostUrls.length) {
+          rejectReasons[`source:${diagnostic.state}`] = (rejectReasons[`source:${diagnostic.state}`] || 0) + 1;
+          log.warning(`Collected 0 post URLs from ${request.url} [${diagnostic.state}] ${diagnostic.title || diagnostic.bodySample}`);
+        } else {
+          log.info(`Collected ${freshPostUrls.length} post URLs from ${request.url}`);
+        }
         return;
       }
 
