@@ -510,12 +510,20 @@ async function main() {
   console.log(`🤖 Bot User ID: ${botUserId || 'unknown'}`);
   const queuedDeals = loadPendingDeals();
   const queueThreadTs = [...new Set(queuedDeals.map((deal) => cleanText(deal.slackThreadTs)).filter(Boolean))];
-  const recentThreadTs = await findRecentDigestThreadTs();
-  const threadCandidates = [...new Set([...queueThreadTs, ...recentThreadTs])].filter(Boolean);
+  const recentThreadTs = queueThreadTs.length === 0 ? await findRecentDigestThreadTs() : [];
+  const threadCandidates = queueThreadTs.length > 0
+    ? queueThreadTs
+    : [...new Set(recentThreadTs)].filter(Boolean);
 
   if (threadCandidates.length === 0) {
     console.log('ℹ️ Kein offener Digest- oder Community-Thread gefunden');
     return;
+  }
+
+  if (queueThreadTs.length > 0) {
+    console.log(`🧭 using queued thread state only: ${queueThreadTs.length} thread(s)`);
+  } else {
+    console.log(`🧭 using recent digest discovery fallback: ${threadCandidates.length} thread(s)`);
   }
 
   const threadMessagesByThread = new Map();
