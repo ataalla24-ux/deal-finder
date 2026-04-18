@@ -578,7 +578,8 @@ async function main() {
   const headerTs = await postSlackMessage(
     `🎯 *FreeFinder Wien* — ${freshDeals.length} neue Deals\n` +
     `🆓 ${freeCount} gratis | 💰 ${freshDeals.length - freeCount} rabatt/test\n` +
-    `_Jeden Deal mit ✅ bestätigen, dann erscheint er in der iOS-App._`
+    `_Jeden Deal mit ✅ bestätigen, dann erscheint er in der iOS-App._\n` +
+    `_Bearbeiten vor Freigabe: z. B. edit 3 titel: Gratis Matcha | ort: Neubaugasse 12, 1070 Wien | ablauf: 20.04.2026_`
   );
 
   if (!headerTs) {

@@ -44,6 +44,171 @@ function ensureArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
+function normalizeEditKey(value) {
+  return cleanText(value)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '');
+}
+
+function parseFlexibleDateInput(value, mode = 'datetime') {
+  const raw = cleanText(value);
+  if (!raw) return '';
+
+  const direct = new Date(raw);
+  if (!Number.isNaN(direct.getTime())) {
+    if (mode === 'expiry') {
+      const d = new Date(direct);
+      d.setHours(23, 59, 59, 999);
+      return d.toISOString();
+    }
+    return direct.toISOString();
+  }
+
+  const dmY = raw.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2}|\d{4})$/);
+  if (dmY) {
+    const day = Number(dmY[1]);
+    const month = Number(dmY[2]);
+    const year = Number(dmY[3].length === 2 ? `20${dmY[3]}` : dmY[3]);
+    const isoBase = `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const iso = mode === 'expiry' ? `${isoBase}T23:59:59.999` : `${isoBase}T12:00:00.000`;
+    const parsed = new Date(iso);
+    if (!Number.isNaN(parsed.getTime())) return parsed.toISOString();
+  }
+
+  return '';
+}
+
+function normalizeEditFieldName(value) {
+  const key = normalizeEditKey(value);
+  if (!key) return '';
+
+  const fieldMap = new Map([
+    [['titel', 'title', 'headline', 'ueberschrift'], 'title'],
+    [['brand', 'marke', 'restaurant', 'restaurantname', 'anbieter'], 'brand'],
+    [['ort', 'location', 'distance', 'adresse', 'bezirk'], 'distance'],
+    [['beschreibung', 'description', 'desc', 'memo', 'text'], 'description'],
+    [['link', 'url', 'direktlink', 'posturl', 'zielurl'], 'url'],
+    [['kategorie', 'category'], 'category'],
+    [['typ', 'type', 'dealtyp', 'angebotstyp'], 'type'],
+    [['logo', 'emoji', 'icon'], 'logo'],
+    [['datum', 'pubdate', 'postdate', 'angebotsdatum'], 'pubDate'],
+    [['ablauf', 'expires', 'gueltigbis', 'gultigbis', 'validuntil', 'enddatum'], 'expires'],
+    [['quelle', 'source'], 'source'],
+  ]);
+
+  for (const [keys, target] of fieldMap.entries()) {
+    if (keys.includes(key)) return target;
+  }
+  return '';
+}
+
+function normalizeEditedFieldValue(field, value) {
+  const raw = cleanText(value);
+  if (!raw) return '';
+
+  if (field === 'pubDate') {
+    return parseFlexibleDateInput(raw, 'datetime') || raw;
+  }
+
+  if (field === 'expires') {
+    return parseFlexibleDateInput(raw, 'expiry') || raw;
+  }
+
+  if (field === 'category' || field === 'type') {
+    return raw.toLowerCase();
+  }
+
+  return raw;
+}
+
+function parseSlackEditCommand(messageText) {
+  const text = cleanText(messageText);
+  if (!text) return null;
+
+  const match = text.match(/^edit(?:iere)?\s+([^\s|;]+)\s+([\s\S]+)$/i);
+  if (!match) return null;
+
+  const target = cleanText(match[1]);
+  const body = cleanText(match[2]);
+  if (!target || !body) return null;
+
+  const changes = {};
+  const segments = body.split(/\s*(?:\||;|\n)\s*/).filter(Boolean);
+  for (const segment of segments) {
+    const fieldMatch = segment.match(/^([^:]+):\s*(.+)$/);
+    if (!fieldMatch) continue;
+    const field = normalizeEditFieldName(fieldMatch[1]);
+    const value = normalizeEditedFieldValue(field, fieldMatch[2]);
+    if (!field || !value) continue;
+    changes[field] = value;
+  }
+
+  if (Object.keys(changes).length === 0) return null;
+  return { target, changes };
+}
+
+function findDealIndexByEditTarget(deals, target) {
+  const normalizedTarget = cleanText(target);
+  if (!normalizedTarget) return -1;
+
+  const numericTarget = Number(normalizedTarget);
+  if (Number.isInteger(numericTarget)) {
+    const byOrder = deals.findIndex((deal, index) => Number(deal?.order || index + 1) === numericTarget);
+    if (byOrder >= 0) return byOrder;
+  }
+
+  const lowered = normalizedTarget.toLowerCase();
+  return deals.findIndex((deal) => {
+    return lowered === cleanText(deal?.id).toLowerCase() ||
+      lowered === cleanText(deal?.slackTs).toLowerCase() ||
+      lowered === cleanText(deal?.submissionId).toLowerCase();
+  });
+}
+
+function applyEditChangesToDeal(deal, changes, message) {
+  const next = { ...deal };
+  for (const [field, value] of Object.entries(changes)) {
+    next[field] = value;
+  }
+
+  next.editedInSlack = true;
+  next.slackEditedAt = new Date().toISOString();
+  next.slackEditedFields = [...new Set([...(ensureArray(deal?.slackEditedFields)), ...Object.keys(changes)])];
+  next.lastSlackEditTs = cleanText(message?.ts);
+  return next;
+}
+
+function applySlackEdits(deals, threadMessages) {
+  const editedDeals = deals.map((deal, index) => ({
+    ...deal,
+    order: Number(deal?.order || index + 1),
+  }));
+  const unresolvedTargets = [];
+  let appliedCount = 0;
+
+  for (const message of threadMessages) {
+    const parsed = parseSlackEditCommand(extractSlackMessageText(message));
+    if (!parsed) continue;
+
+    const targetIndex = findDealIndexByEditTarget(editedDeals, parsed.target);
+    if (targetIndex < 0) {
+      unresolvedTargets.push(parsed.target);
+      continue;
+    }
+
+    editedDeals[targetIndex] = applyEditChangesToDeal(editedDeals[targetIndex], parsed.changes, message);
+    appliedCount += 1;
+  }
+
+  return {
+    deals: editedDeals,
+    appliedCount,
+    unresolvedTargets: [...new Set(unresolvedTargets)],
+  };
+}
+
 function normalizeUrl(url) {
   const text = cleanText(url);
   if (!text) return '';
@@ -529,6 +694,8 @@ async function main() {
   const threadMessagesByThread = new Map();
   const messageByTs = new Map();
   const pendingDeals = [];
+  let appliedEditCount = 0;
+  const unresolvedEditTargets = [];
 
   for (const threadTs of threadCandidates) {
     const threadMessages = await getThreadMessages(threadTs);
@@ -541,11 +708,11 @@ async function main() {
 
     const parsedDeals = extractDealsFromThreadMessages(threadMessages);
     const queueDealsForThread = queuedDeals.filter((deal) => cleanText(deal.slackThreadTs) === threadTs);
-    if (parsedDeals.length > 0) {
-      pendingDeals.push(...parsedDeals);
-    } else {
-      pendingDeals.push(...queueDealsForThread);
-    }
+    const basePendingDeals = parsedDeals.length > 0 ? parsedDeals : queueDealsForThread;
+    const editResult = applySlackEdits(basePendingDeals, threadMessages);
+    pendingDeals.push(...editResult.deals);
+    appliedEditCount += editResult.appliedCount;
+    unresolvedEditTargets.push(...editResult.unresolvedTargets);
   }
 
   const dedupedPendingDeals = [];
@@ -558,6 +725,10 @@ async function main() {
   }
 
   console.log(`📋 Pending posted deals across ${threadCandidates.length} thread(s): ${dedupedPendingDeals.length}`);
+  console.log(`✏️ Slack edits applied: ${appliedEditCount}`);
+  if (unresolvedEditTargets.length > 0) {
+    console.log(`⚠️ Unresolved edit targets: ${[...new Set(unresolvedEditTargets)].join(', ')}`);
+  }
 
   if (dedupedPendingDeals.length === 0) {
     const sampleThread = threadMessagesByThread.get(threadCandidates[0]) || [];
