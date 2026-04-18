@@ -1,0 +1,100 @@
+{
+  "title": "Instagram Vienna food offers input",
+  "description": "Find active or upcoming free food, free drink, and BOGO offers on Instagram posts in Vienna.",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "seedAccounts": {
+      "title": "Seed accounts",
+      "type": "array",
+      "description": "Instagram account handles to crawl as source pages.",
+      "prefill": [
+        "viennaeats",
+        "viennafoodstories",
+        "viennarestaurants",
+        "vienna.coffee",
+        "viennawurstelstand",
+        "ciosgrill",
+        "corner_xvi",
+        "assal.burger",
+        "cafe_wirr",
+        "mangalet.at"
+      ],
+      "editor": "stringList"
+    },
+    "seedHashtags": {
+      "title": "Seed hashtags",
+      "type": "array",
+      "description": "Instagram hashtag pages to crawl for candidate post links.",
+      "prefill": [
+        "gratiswien",
+        "wiengastro",
+        "wienessen",
+        "wienkaffee",
+        "gratisessenwien",
+        "gratiskaffeewien",
+        "gratisdrinkwien",
+        "gratisburgerwien",
+        "gratispizza",
+        "wienstreetfood",
+        "freefoodvienna",
+        "freedrinkvienna"
+      ],
+      "editor": "stringList"
+    },
+    "maxPostsPerSource": {
+      "title": "Max posts per source",
+      "type": "integer",
+      "description": "Maximum number of Instagram post URLs to collect from each source page.",
+      "default": 40,
+      "minimum": 1
+    },
+    "maxPostsToInspect": {
+      "title": "Max posts to inspect",
+      "type": "integer",
+      "description": "Global cap for Instagram post pages opened during a run.",
+      "default": 120,
+      "minimum": 1
+    },
+    "maxAgeDaysWithoutExplicitValidity": {
+      "title": "Max age without explicit validity",
+      "type": "integer",
+      "description": "If a post does not mention an explicit end date, keep it only when the post itself is newer than this many days.",
+      "default": 10,
+      "minimum": 1
+    },
+    "maxFutureValidityDays": {
+      "title": "Max future validity days",
+      "type": "integer",
+      "description": "Reject posts whose explicit validity end date is implausibly far in the future.",
+      "default": 120,
+      "minimum": 1
+    },
+    "cookieString": {
+      "title": "Instagram cookies",
+      "type": "string",
+      "description": "Optional cookie header string copied from a logged-in browser session. Helps if Instagram limits anonymous access.",
+      "editor": "textfield",
+      "isSecret": true
+    },
+    "sessionId": {
+      "title": "Instagram sessionid",
+      "type": "string",
+      "description": "Optional Instagram sessionid cookie value.",
+      "editor": "textfield",
+      "isSecret": true
+    },
+    "proxyConfiguration": {
+      "title": "Proxy configuration",
+      "type": "object",
+      "description": "Apify proxy settings for the crawler.",
+      "editor": "proxy"
+    },
+    "debugMode": {
+      "title": "Debug mode",
+      "type": "boolean",
+      "description": "Store extra debug fields such as full page text samples and rejection reasons.",
+      "default": false
+    }
+  }
+}

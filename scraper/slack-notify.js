@@ -1,8 +1,6 @@
-import '../sentry/instrument.mjs';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { inspectDealUrlHealth } from './expiry-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,46 +31,13 @@ loadEnvFile();
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
-const VIENNA_TIME_ZONE = 'Europe/Vienna';
 
+const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-const CUTOFF_DATE = Date.now() - SEVEN_DAYS_MS;
-const RECENT_SOCIAL_CUTOFF_DATE = CUTOFF_DATE;
+const CUTOFF_DATE = Date.now() - TWO_WEEKS_MS;
+const RECENT_SOCIAL_CUTOFF_DATE = Date.now() - SEVEN_DAYS_MS;
 const DAY_MS = 24 * 60 * 60 * 1000;
-const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate', 'profileTimeline', 'targetUrlHints']);
-const SOCIAL_FRESHNESS_TIMEOUT_MS = Number(process.env.SOCIAL_FRESHNESS_TIMEOUT_MS || 8000);
-const MAX_SOCIAL_FRESHNESS_CHECKS = Number(process.env.MAX_SOCIAL_FRESHNESS_CHECKS || 60);
-const SOCIAL_FRESHNESS_CONCURRENCY = Math.max(1, Number(process.env.SOCIAL_FRESHNESS_CONCURRENCY || 6));
-const TARGET_LINK_VERIFY_TIMEOUT_MS = Number(process.env.TARGET_LINK_VERIFY_TIMEOUT_MS || process.env.URL_CHECK_TIMEOUT_MS || 7000);
-const MAX_TARGET_LINK_CHECKS = Number(process.env.MAX_TARGET_LINK_CHECKS || 400);
-const TARGET_LINK_VERIFY_CONCURRENCY = Math.max(1, Number(process.env.TARGET_LINK_VERIFY_CONCURRENCY || 8));
-const SLACK_POST_DELAY_MS = Math.max(1000, Number(process.env.SLACK_POST_DELAY_MS || 1500));
-const SLACK_POST_FORMAT_VERSION = 'v2-single-reply';
-const SLACK_ONE_DEAL_PER_MESSAGE = String(process.env.SLACK_ONE_DEAL_PER_MESSAGE || '1') !== '0';
-const SLACK_MAX_DEALS_PER_MESSAGE = SLACK_ONE_DEAL_PER_MESSAGE
-  ? 1
-  : Math.max(1, Number(process.env.SLACK_MAX_DEALS_PER_MESSAGE || 12));
-const SLACK_MAX_MESSAGE_CHARS = Math.max(2000, Number(process.env.SLACK_MAX_MESSAGE_CHARS || 12000));
-const SAME_DAY_SIG_RETENTION_DAYS = Math.max(1, Number(process.env.SAME_DAY_SIG_RETENTION_DAYS || 3));
-const SAME_DAY_ONLY_PENDING_SOURCES = new Set(['flights', 'power']);
-const PENDING_FILE_NAMES = String(process.env.PENDING_FILE_NAMES || '')
-  .split(',')
-  .map((value) => cleanText(value))
-  .filter(Boolean);
-const MONTH_MAP = {
-  'jänner': 0, 'januar': 0, 'january': 0, 'jan': 0,
-  'februar': 1, 'february': 1, 'feb': 1,
-  'märz': 2, 'maerz': 2, 'march': 2, 'mar': 2, 'mär': 2,
-  'april': 3, 'apr': 3,
-  'mai': 4, 'may': 4,
-  'juni': 5, 'june': 5, 'jun': 5,
-  'juli': 6, 'july': 6, 'jul': 6,
-  'august': 7, 'aug': 7,
-  'september': 8, 'sep': 8, 'sept': 8,
-  'oktober': 9, 'october': 9, 'okt': 9, 'oct': 9,
-  'november': 10, 'nov': 10,
-  'dezember': 11, 'december': 11, 'dez': 11, 'dec': 11,
-};
+const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate', 'apifyPostMetadata']);
 
 function ensureObject(value, fallback = {}) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
@@ -308,303 +273,6 @@ function parseDateCandidatesFromText(text) {
   return out;
 }
 
-function parseNamedDateCandidatesFromText(text, now = new Date()) {
-  const t = cleanText(text);
-  if (!t) return [];
-  const out = [];
-  const monthPattern = '(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|april|may|june|july|august|september|october|november|december)';
-
-  const dayMonthYearRegex = new RegExp(`\\b(\\d{1,2})\\.?\\s+${monthPattern}\\s*(\\d{4})?\\b`, 'gi');
-  for (const match of t.matchAll(dayMonthYearRegex)) {
-    const day = Number(match[1]);
-    const month = MONTH_MAP[String(match[2] || '').toLowerCase()];
-    const year = match[3] ? Number(match[3]) : now.getUTCFullYear();
-    if (month === undefined || !Number.isFinite(day) || !Number.isFinite(year)) continue;
-    const date = new Date(Date.UTC(year, month, day, 12, 0, 0));
-    if (!Number.isNaN(date.getTime())) out.push(date.getTime());
-  }
-
-  const monthDayYearRegex = new RegExp(`\\b${monthPattern}\\s+(\\d{1,2}),?\\s*(\\d{4})?\\b`, 'gi');
-  for (const match of t.matchAll(monthDayYearRegex)) {
-    const month = MONTH_MAP[String(match[1] || '').toLowerCase()];
-    const day = Number(match[2]);
-    const year = match[3] ? Number(match[3]) : now.getUTCFullYear();
-    if (month === undefined || !Number.isFinite(day) || !Number.isFinite(year)) continue;
-    const date = new Date(Date.UTC(year, month, day, 12, 0, 0));
-    if (!Number.isNaN(date.getTime())) out.push(date.getTime());
-  }
-
-  return out;
-}
-
-function parseAnchoredPostDateCandidatesFromText(text, now = new Date()) {
-  const t = cleanText(text);
-  if (!t) return [];
-  const out = [];
-  const monthPattern = '(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|april|may|june|july|august|september|october|november|december)';
-
-  const anchoredNamedRegex = new RegExp(`\\b(?:on|am|posted\\s+on)\\s+(${monthPattern}\\s+\\d{1,2},?\\s*\\d{4}|\\d{1,2}\\.?\\s+${monthPattern}\\s*\\d{4})\\b`, 'gi');
-  for (const match of t.matchAll(anchoredNamedRegex)) {
-    const candidates = parseNamedDateCandidatesFromText(match[1], now);
-    for (const ts of candidates) out.push(ts);
-  }
-
-  const anchoredNumericRegex = /\b(?:on|am|posted\s+on)\s+(\d{1,2}\.\d{1,2}\.\d{2,4})\b/gi;
-  for (const match of t.matchAll(anchoredNumericRegex)) {
-    const candidates = parseDateCandidatesFromText(match[1]);
-    for (const ts of candidates) out.push(ts);
-  }
-
-  return out;
-}
-
-function isSocialUrl(url) {
-  return /https?:\/\/(?:www\.)?(instagram|tiktok)\.com\//i.test(cleanText(url));
-}
-
-function extractSocialHintTimestamp(text, nowMs = Date.now()) {
-  const now = new Date(nowMs);
-  const anchoredDates = parseAnchoredPostDateCandidatesFromText(text, now)
-    .filter((ts) => Number.isFinite(ts) && ts <= nowMs + DAY_MS);
-  if (anchoredDates.length > 0) return Math.max(...anchoredDates);
-
-  const directDates = parseDateCandidatesFromText(text);
-  const namedDates = parseNamedDateCandidatesFromText(text, now);
-  const explicitDates = [...directDates, ...namedDates]
-    .filter((ts) => Number.isFinite(ts) && ts <= nowMs + DAY_MS);
-  if (explicitDates.length > 0) return Math.max(...explicitDates);
-
-  const ageDays = extractRelativeAgeDays(text);
-  if (Number.isFinite(ageDays)) return nowMs - (ageDays * DAY_MS);
-
-  return null;
-}
-
-function getEffectivePubTimestamp(deal) {
-  const verified = Date.parse(cleanText(deal?.verifiedTargetPubDate || ''));
-  if (Number.isFinite(verified)) return verified;
-  return Date.parse(cleanText(deal?.pubDate || ''));
-}
-
-function snapshotDateFields(deal) {
-  return JSON.stringify({
-    pubDate: cleanText(deal?.pubDate),
-    verifiedTargetPubDate: cleanText(deal?.verifiedTargetPubDate),
-    expires: cleanText(deal?.expires),
-    expiresSource: cleanText(deal?.expiresSource),
-    expiryKind: cleanText(deal?.expiryKind),
-    validOn: cleanText(deal?.validOn),
-    validFrom: cleanText(deal?.validFrom),
-    validUntil: cleanText(deal?.validUntil),
-  });
-}
-
-function shouldReplacePubDateWithVerified(deal, verifiedIso) {
-  const verifiedTs = Date.parse(cleanText(verifiedIso));
-  if (!Number.isFinite(verifiedTs)) return false;
-
-  const currentTs = Date.parse(cleanText(deal?.pubDate || deal?.verifiedTargetPubDate || ''));
-  if (!Number.isFinite(currentTs)) return true;
-  if (currentTs > Date.now() + (2 * DAY_MS)) return true;
-
-  const currentSource = cleanText(deal?.pubDateSource);
-  if (isSocialUrl(deal?.url) && !TRUSTED_PUBDATE_SOURCES.has(currentSource)) return true;
-
-  return Math.abs(currentTs - verifiedTs) > DAY_MS;
-}
-
-function applyStructuredTargetDate(deal, dateHints) {
-  const validOn = cleanText(dateHints?.validOn);
-  const validFrom = cleanText(dateHints?.validFrom);
-  const validUntil = cleanText(dateHints?.validUntil);
-  if (!validOn && !validFrom && !validUntil) return false;
-
-  delete deal.validOn;
-  delete deal.validFrom;
-  delete deal.validUntil;
-
-  if (validOn) deal.validOn = validOn;
-  if (validFrom) deal.validFrom = validFrom;
-  if (validUntil) deal.validUntil = validUntil;
-
-  deal.expiryKind = cleanText(dateHints?.targetDateKind) || deal.expiryKind || (validOn ? 'single' : (validFrom && validUntil ? 'range' : (validFrom ? 'start' : 'end')));
-  deal.expiryDisplayText = cleanText(dateHints?.targetDateRaw || deal.expiryDisplayText || deal.expires || '');
-  deal.expiresSource = cleanText(dateHints?.targetDateSource || 'url');
-  deal.expiresDetectedFromUrl = true;
-  deal.dateConfidence = 'high';
-  deal.targetLinkDateVerified = true;
-  deal.targetLinkDateSource = cleanText(dateHints?.targetDateSource || 'url');
-  deal.targetLinkDateRaw = cleanText(dateHints?.targetDateRaw || '');
-
-  if (validUntil) {
-    deal.expires = validUntil;
-  } else if (validOn) {
-    deal.expires = validOn;
-  } else if (validFrom) {
-    deal.expires = validFrom;
-  }
-
-  return true;
-}
-
-function applyTargetHealthToDeal(deal, health) {
-  const before = snapshotDateFields(deal);
-  const stats = {
-    invalid: false,
-    transientError: false,
-    correctedDate: false,
-    correctedPubDate: false,
-    verifiedDate: false,
-  };
-
-  if (health?.finalUrl) {
-    const finalUrl = normalizeUrl(health.finalUrl);
-    if (finalUrl) deal.url = finalUrl;
-  }
-
-  if (health?.invalid) {
-    deal.targetLinkStatus = 'invalid';
-    deal.targetLinkNote = cleanText(health.reason || 'ungültig');
-    stats.invalid = true;
-    return stats;
-  }
-
-  if (health?.transientError) {
-    deal.targetLinkStatus = 'transient-error';
-    deal.targetLinkNote = 'temporär nicht prüfbar';
-    stats.transientError = true;
-    return stats;
-  }
-
-  deal.targetLinkStatus = 'checked';
-  delete deal.targetLinkNote;
-
-  if (isSocialUrl(deal?.url)) {
-    const hintText = [
-      health?.contentHints?.description,
-      health?.contentHints?.title,
-    ].map(cleanText).filter(Boolean).join(' ');
-    const derivedTs = extractSocialHintTimestamp(hintText, Date.now());
-    if (Number.isFinite(derivedTs)) {
-      const verifiedIso = new Date(derivedTs).toISOString();
-      if (shouldReplacePubDateWithVerified(deal, verifiedIso)) {
-        deal.verifiedTargetPubDate = verifiedIso;
-        deal.verifiedTargetPubDateSource = 'targetUrlHints';
-        stats.correctedPubDate = true;
-      }
-    }
-  }
-
-  const dateHints = ensureObject(health?.dateHints);
-  const verifiedPublicationDate = cleanText(dateHints.publicationDate);
-  if (verifiedPublicationDate && shouldReplacePubDateWithVerified(deal, verifiedPublicationDate)) {
-    deal.verifiedTargetPubDate = verifiedPublicationDate;
-    deal.verifiedTargetPubDateSource = cleanText(dateHints.publicationDateSource || 'targetPage');
-    stats.correctedPubDate = true;
-  }
-
-  if (applyStructuredTargetDate(deal, dateHints)) {
-    stats.verifiedDate = true;
-  }
-
-  const after = snapshotDateFields(deal);
-  if (before !== after) {
-    deal.targetLinkDateCorrected = true;
-    stats.correctedDate = true;
-  }
-
-  return stats;
-}
-
-async function verifyTargetLinkDates(deals) {
-  const byUrl = new Map();
-  for (const deal of deals) {
-    const url = normalizeUrl(deal?.url);
-    if (!url) continue;
-    const bucket = byUrl.get(url) || [];
-    bucket.push(deal);
-    byUrl.set(url, bucket);
-  }
-
-  const urls = [...byUrl.keys()].slice(0, MAX_TARGET_LINK_CHECKS);
-  const stats = {
-    urls: urls.length,
-    checked: 0,
-    invalid: 0,
-    transientErrors: 0,
-    correctedDates: 0,
-    correctedPubDates: 0,
-    verifiedDates: 0,
-  };
-
-  for (let i = 0; i < urls.length; i += TARGET_LINK_VERIFY_CONCURRENCY) {
-    const batch = urls.slice(i, i + TARGET_LINK_VERIFY_CONCURRENCY);
-    await Promise.all(batch.map(async (url) => {
-      const health = await inspectDealUrlHealth(url, { timeoutMs: TARGET_LINK_VERIFY_TIMEOUT_MS });
-      stats.checked += 1;
-      const linkedDeals = byUrl.get(url) || [];
-      for (const deal of linkedDeals) {
-        const result = applyTargetHealthToDeal(deal, health);
-        if (result.invalid) stats.invalid += 1;
-        if (result.transientError) stats.transientErrors += 1;
-        if (result.correctedDate) stats.correctedDates += 1;
-        if (result.correctedPubDate) stats.correctedPubDates += 1;
-        if (result.verifiedDate) stats.verifiedDates += 1;
-      }
-    }));
-  }
-
-  return stats;
-}
-
-async function enrichSocialFreshness(deals) {
-  const candidates = deals
-    .filter((deal) => isSocialUrl(deal?.url))
-    .slice(0, MAX_SOCIAL_FRESHNESS_CHECKS);
-
-  const stats = {
-    candidates: candidates.length,
-    checked: 0,
-    verifiedFromTargetUrl: 0,
-    noUsableTargetDate: 0,
-    invalidUrl: 0,
-    transientErrors: 0,
-  };
-
-  for (let i = 0; i < candidates.length; i += SOCIAL_FRESHNESS_CONCURRENCY) {
-    const batch = candidates.slice(i, i + SOCIAL_FRESHNESS_CONCURRENCY);
-    await Promise.all(batch.map(async (deal) => {
-      stats.checked += 1;
-      const health = await inspectDealUrlHealth(deal.url, { timeoutMs: SOCIAL_FRESHNESS_TIMEOUT_MS });
-      if (health?.invalid) {
-        stats.invalidUrl += 1;
-        return;
-      }
-      if (health?.transientError) {
-        stats.transientErrors += 1;
-        return;
-      }
-
-      const hintText = [
-        health?.contentHints?.description,
-        health?.contentHints?.title,
-      ].map(cleanText).filter(Boolean).join(' ');
-
-      const derivedTs = extractSocialHintTimestamp(hintText, Date.now());
-      if (!Number.isFinite(derivedTs)) {
-        stats.noUsableTargetDate += 1;
-        return;
-      }
-
-      deal.verifiedTargetPubDate = new Date(derivedTs).toISOString();
-      deal.verifiedTargetPubDateSource = 'targetUrlHints';
-      stats.verifiedFromTargetUrl += 1;
-    }));
-  }
-
-  return stats;
-}
-
 function stableId(seed) {
   let hash = 0;
   for (let i = 0; i < seed.length; i += 1) {
@@ -613,41 +281,8 @@ function stableId(seed) {
   return hash.toString(36);
 }
 
-function getViennaDayKey(value = Date.now()) {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: VIENNA_TIME_ZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(new Date(value));
-
-  const year = parts.find((part) => part.type === 'year')?.value || '0000';
-  const month = parts.find((part) => part.type === 'month')?.value || '00';
-  const day = parts.find((part) => part.type === 'day')?.value || '00';
-  return `${year}-${month}-${day}`;
-}
-
-function getPostingKeys(deal) {
-  const postFormatVersion = cleanText(deal?.slackPostFormatVersion) || (cleanText(deal?.slackTs) ? 'v1' : SLACK_POST_FORMAT_VERSION);
-  const keys = new Set(getDealSignatureVariants(deal));
-  const id = cleanText(deal?.id);
-  const url = normalizeUrl(deal?.url);
-  if (id) keys.add(`id:${id}`);
-  if (url) keys.add(`url:${url.toLowerCase()}`);
-  return [...keys].map((key) => `${postFormatVersion}:${key}`);
-}
-
-function getDigestFingerprint(deals) {
-  const keys = deals
-    .flatMap((deal) => getPostingKeys(deal))
-    .filter(Boolean)
-    .sort();
-  return stableId([SLACK_POST_FORMAT_VERSION, ...keys].join('||'));
-}
-
-function normalizeDeal(rawDeal, sourceKey, options = {}) {
+function normalizeDeal(rawDeal, sourceKey) {
   const deal = ensureObject(rawDeal);
-  const fileUpdatedAt = cleanText(options.fileUpdatedAt || deal.sourceFileUpdatedAt);
   const brand = inferBrand(deal, sourceKey);
   const title = inferTitle(deal, brand);
   const rawUrl = normalizeUrl(deal.url);
@@ -669,7 +304,6 @@ function normalizeDeal(rawDeal, sourceKey, options = {}) {
 
   return {
     id,
-    submissionId: cleanText(deal.submissionId).replace(/^community:/, ''),
     brand,
     title,
     description: cleanText(deal.description),
@@ -689,18 +323,17 @@ function normalizeDeal(rawDeal, sourceKey, options = {}) {
     votes: Number(deal.votes) || 1,
     priority: Number(deal.priority) || 3,
     missingFields,
-    sourceKey,
-    sourceFileUpdatedAt: fileUpdatedAt,
-    slackTs: cleanText(deal.slackTs),
-    slackThreadTs: cleanText(deal.slackThreadTs),
-    slackPostFormatVersion: cleanText(deal.slackPostFormatVersion),
   };
 }
 
 function getPendingFiles() {
-  return fs.readdirSync(DOCS_DIR).filter((file) => {
+  const files = fs.readdirSync(DOCS_DIR);
+  return files.filter((file) => {
     if (!file.startsWith('deals-pending-') || !file.endsWith('.json')) return false;
+    if (file === 'deals-pending-merged.json') return false;
     if (file === 'deals-pending-all.json') return false;
+    if (file === 'deals-pending-instagram-web.json') return false;
+    if (file === 'deals-pending-instagram-discovery.json') return false;
     return true;
   });
 }
@@ -716,8 +349,7 @@ function loadPendingDeals() {
     try {
       const parsed = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
       const items = ensureArray(parsed.deals || parsed);
-      const fileUpdatedAt = fs.statSync(filePath).mtime.toISOString();
-      const normalized = items.map((d) => normalizeDeal(d, sourceKey, { fileUpdatedAt }));
+      const normalized = items.map((d) => normalizeDeal(d, sourceKey));
       console.log(`  - ${file}: ${normalized.length} deals`);
       deals.push(...normalized);
     } catch (error) {
@@ -747,7 +379,7 @@ function loadPendingQueue() {
   try {
     const parsed = JSON.parse(fs.readFileSync(PENDING_ALL_PATH, 'utf-8'));
     const deals = ensureArray(parsed.deals);
-    return deals.map((d) => normalizeDeal(d, cleanText(d.sourceKey) || cleanText(d.source) || 'queue'));
+    return deals.map((d) => normalizeDeal(d, cleanText(d.source) || 'queue'));
   } catch {
     return [];
   }
@@ -773,103 +405,14 @@ function buildSeenSignatureMap(sentIds, pendingQueue) {
   return seen;
 }
 
-function buildPostedTodaySignatureSet(sentIds, pendingQueue, dayKey) {
-  const posted = new Set();
-  const prefix = `daySig:${dayKey}:`;
-
-  for (const key of Object.keys(sentIds)) {
-    if (key.startsWith(prefix)) posted.add(key.slice(prefix.length));
-  }
-
-  for (const deal of pendingQueue) {
-    const slackTs = Number.parseFloat(cleanText(deal?.slackTs));
-    if (!Number.isFinite(slackTs)) continue;
-    const postedAtMs = slackTs * 1000;
-    if (getViennaDayKey(postedAtMs) !== dayKey) continue;
-    for (const key of getPostingKeys(deal)) posted.add(key);
-  }
-
-  return posted;
-}
-
-function shouldSkipStalePendingDeal(deal, dayKey) {
-  const sourceKey = cleanText(deal?.sourceKey).toLowerCase();
-  if (!SAME_DAY_ONLY_PENDING_SOURCES.has(sourceKey)) return false;
-  const updatedAt = cleanText(deal?.sourceFileUpdatedAt);
-  if (!updatedAt) return false;
-  return getViennaDayKey(updatedAt) !== dayKey;
-}
-
-function filterDealsForSlack(deals, postedTodayKeys, dayKey) {
-  const seen = new Set(postedTodayKeys);
-  const kept = [];
-  let skippedSameDay = 0;
-  let skippedStaleSource = 0;
-
-  for (const deal of deals) {
-    if (shouldSkipStalePendingDeal(deal, dayKey)) {
-      skippedStaleSource += 1;
-      continue;
-    }
-
-    const postingKeys = getPostingKeys(deal);
-    if (postingKeys.length > 0 && postingKeys.some((key) => seen.has(key))) {
-      skippedSameDay += 1;
-      continue;
-    }
-
-    for (const key of postingKeys) seen.add(key);
-    kept.push(deal);
-  }
-
-  return { kept, skippedSameDay, skippedStaleSource };
-}
-
-function pruneSentIds(sentIds) {
-  const cutoffDay = getViennaDayKey(Date.now() - (SAME_DAY_SIG_RETENTION_DAYS * DAY_MS));
-  for (const key of Object.keys(sentIds)) {
-    if (!key.startsWith('daySig:')) continue;
-    const [, dayKey] = key.split(':');
-    if (dayKey && dayKey < cutoffDay) delete sentIds[key];
-  }
-}
-
-function markDealsPosted(sentIds, deals, dayKey, postedAtMs) {
-  for (const deal of deals) {
-    for (const key of getPostingKeys(deal)) {
-      sentIds[`sig:${key}`] = postedAtMs;
-      sentIds[`daySig:${dayKey}:${key}`] = postedAtMs;
-    }
-  }
-}
-
 function isRecent(deal) {
-  const pubMs = getEffectivePubTimestamp(deal);
+  const pubMs = new Date(deal.pubDate).getTime();
   if (!Number.isFinite(pubMs)) return false;
   if (isStrictRecentSocialDeal(deal)) return pubMs >= RECENT_SOCIAL_CUTOFF_DATE;
   return pubMs >= CUTOFF_DATE;
 }
 
-function isNeoTasteDeal(deal) {
-  const haystack = [
-    deal?.brand,
-    deal?.title,
-    deal?.description,
-    deal?.url,
-    deal?.source,
-    deal?.originSource,
-    deal?.distance,
-    deal?.expires,
-  ]
-    .map(cleanText)
-    .join(' ')
-    .toLowerCase();
-
-  return haystack.includes('neotaste');
-}
-
 function hasTrustedInstagramDate(deal) {
-  if (cleanText(deal?.verifiedTargetPubDateSource) === 'targetUrlHints') return true;
   const source = cleanText(deal.source).toLowerCase();
   if (isStrictRecentSocialDeal(deal)) return true;
   if (!source.includes('instagram')) return true;
@@ -884,16 +427,14 @@ function isNotExpired(deal) {
 }
 
 function hasOldAgeSignal(deal) {
-  if (cleanText(deal?.verifiedTargetPubDateSource) === 'targetUrlHints') return false;
   if (isStrictRecentSocialDeal(deal)) return false;
   const haystack = `${deal.title || ''} ${deal.description || ''} ${deal.expires || ''}`;
   const ageDays = extractRelativeAgeDays(haystack);
   if (!Number.isFinite(ageDays)) return false;
-  return ageDays > 7;
+  return ageDays > 14;
 }
 
 function hasStaleExplicitDateSignal(deal) {
-  if (cleanText(deal?.verifiedTargetPubDateSource) === 'targetUrlHints') return false;
   if (isStrictRecentSocialDeal(deal)) return false;
   const bundle = `${deal.title || ''} ${deal.description || ''} ${deal.expires || ''}`;
   const dates = parseDateCandidatesFromText(bundle);
@@ -909,116 +450,26 @@ function formatDate(value) {
   return d.toLocaleDateString('de-AT');
 }
 
-function buildSlackDateLines(deal) {
-  const sourceDate = cleanText(deal?.verifiedTargetPubDate || deal?.pubDate);
-  const lines = [
-    `📰 Quellendatum: ${sourceDate ? formatDate(sourceDate) : 'k.A.'}`,
-  ];
-
-  const validOn = cleanText(deal?.validOn);
-  const validFrom = cleanText(deal?.validFrom);
-  const validUntil = cleanText(deal?.validUntil);
-
-  if (validOn) {
-    lines.push(`📅 Deal-Datum: ${formatDate(validOn)}`);
-  } else if (validFrom && validUntil) {
-    lines.push(`📅 Deal-Zeitraum: ${formatDate(validFrom)} bis ${formatDate(validUntil)}`);
-  } else if (validFrom) {
-    lines.push(`📅 Start: ${formatDate(validFrom)}`);
-  } else {
-    lines.push(`⏳ Gültig bis: ${deal.expires ? formatDate(deal.expires) : 'k.A.'}`);
-  }
-
-  if (cleanText(deal?.targetLinkStatus) === 'invalid') {
-    lines.push(`⚠️ Ziellink-Prüfung: ${cleanText(deal?.targetLinkNote || 'ungültig')}`);
-  } else if (cleanText(deal?.targetLinkStatus) === 'transient-error') {
-    lines.push('⚠️ Ziellink-Prüfung: temporär nicht prüfbar');
-  } else if (deal?.targetLinkDateCorrected) {
-    lines.push('🔎 Ziellink geprüft: Datum korrigiert');
-  } else if (deal?.targetLinkDateVerified || cleanText(deal?.verifiedTargetPubDate)) {
-    lines.push('🔎 Ziellink geprüft');
-  }
-
-  return lines;
-}
-
 function buildSlackMessage(deal, index) {
   const link = deal.url ? `<${deal.url}|Zum Angebot>` : '⚠️ FEHLT';
-  const desc = deal.description ? `\n📝 ${deal.description.slice(0, 140)}` : '';
+  const desc = deal.description ? `\n📝 ${deal.description.slice(0, 180)}` : '';
   const missingNote = Array.isArray(deal.missingFields) && deal.missingFields.length > 0
     ? `\n⚠️ FEHLT: ${deal.missingFields.join(', ')}`
     : '';
   return [
-    `*${deal.title}*`,
-    `🆔 Deal-ID: ${deal.id}`,
+    `*${index}. ${deal.title}*`,
     `🏷️ Marke/Restaurant: ${deal.brand || 'k.A.'}`,
     `📍 Ort: ${deal.distance || 'Wien'}`,
-    ...buildSlackDateLines(deal),
+    `📅 Angebotsdatum: ${formatDate(deal.pubDate)}`,
+    `⏳ Gültig bis: ${deal.expires ? formatDate(deal.expires) : 'k.A.'}`,
     `🧭 Kategorie: ${deal.category} | Typ: ${deal.type}`,
-    `🧩 Quelle intern: ${deal.originSource || deal.source || 'k.A.'}`,
+    `🧩 Ursprung intern: ${deal.originSource || deal.source || 'k.A.'}`,
     `🔗 Direktlink: ${link}`,
+    `🆔 Deal-ID: ${deal.id}`,
     missingNote,
     desc,
-    `_Mit ✅ auf dieser Nachricht freigeben${index ? ` · #${index}` : ''}_`,
+    '_Mit ✅ freigeben_',
   ].join('\n');
-}
-
-function buildSlackChunkMessages(deals) {
-  const chunks = [];
-  let currentEntries = [];
-  let currentDeals = [];
-  let currentLength = 0;
-  let currentStartIndex = 0;
-
-  for (let i = 0; i < deals.length; i += 1) {
-    const entry = buildSlackMessage(deals[i], i + 1);
-    const projectedStart = currentDeals.length === 0 ? i + 1 : currentStartIndex + 1;
-    const projectedEnd = currentDeals.length === 0 ? i + 1 : i + 1;
-    const chunkHeader = `*Deals ${projectedStart}-${projectedEnd} von ${deals.length}*`;
-    const separatorLength = currentEntries.length === 0 ? 0 : 2;
-    const estimatedLength = chunkHeader.length + 2 + currentLength + separatorLength + entry.length;
-
-    if (
-      currentEntries.length > 0 &&
-      (currentEntries.length >= SLACK_MAX_DEALS_PER_MESSAGE || estimatedLength > SLACK_MAX_MESSAGE_CHARS)
-    ) {
-      chunks.push({
-        entries: currentEntries,
-        deals: currentDeals,
-        startIndex: currentStartIndex,
-      });
-      currentEntries = [];
-      currentDeals = [];
-      currentLength = 0;
-    }
-
-    if (currentDeals.length === 0) currentStartIndex = i;
-    currentEntries.push(entry);
-    currentDeals.push(deals[i]);
-    currentLength += entry.length + (currentEntries.length > 1 ? 2 : 0);
-  }
-
-  if (currentEntries.length > 0) {
-    chunks.push({
-      entries: currentEntries,
-      deals: currentDeals,
-      startIndex: currentStartIndex,
-    });
-  }
-  return chunks;
-}
-
-function buildSlackChunkText(chunk, chunkIndex, totalChunks, totalDeals) {
-  if (chunk.entries.length === 1) {
-    return chunk.entries[0];
-  }
-  const start = chunk.startIndex + 1;
-  const end = start + chunk.entries.length - 1;
-  return [
-    `*Deals ${start}-${end} von ${totalDeals}*`,
-    `_Teil ${chunkIndex + 1}/${totalChunks}_`,
-    chunk.entries.join('\n\n'),
-  ].join('\n\n');
 }
 
 async function sleep(ms) {
@@ -1038,27 +489,13 @@ async function postSlackMessage(text, threadTs = null, attempt = 0) {
     body: JSON.stringify(payload),
   });
 
-  if (response.status === 429 && attempt < 8) {
-    const retryMs = (Number(response.headers.get('retry-after')) || 2) * 1000;
-    console.log(`  ⏳ HTTP 429 from Slack, waiting ${retryMs}ms...`);
-    await sleep(retryMs + 250);
-    return postSlackMessage(text, threadTs, attempt + 1);
-  }
-
-  const raw = await response.text();
-  let data = {};
-  try {
-    data = raw ? JSON.parse(raw) : {};
-  } catch {
-    data = { ok: false, error: raw || `http_${response.status}` };
-  }
-
+  const data = await response.json();
   if (data.ok) return data.ts;
 
-  if (data.error === 'ratelimited' && attempt < 8) {
+  if (data.error === 'ratelimited' && attempt < 5) {
     const retryMs = (Number(data.retry_after) || 2) * 1000;
     console.log(`  ⏳ Rate limited, waiting ${retryMs}ms...`);
-    await sleep(retryMs + 250);
+    await sleep(retryMs);
     return postSlackMessage(text, threadTs, attempt + 1);
   }
 
@@ -1076,7 +513,7 @@ function writePendingAll(deals) {
 }
 
 function queueKey(deal) {
-  return cleanText(deal.id) || normalizeUrl(deal.url) || cleanText(deal.slackTs);
+  return cleanText(deal.slackTs) || cleanText(deal.id) || normalizeUrl(deal.url);
 }
 
 function mergePendingQueue(existingDeals, newPostedDeals) {
@@ -1104,62 +541,44 @@ async function main() {
   }
 
   const pendingDeals = loadPendingDeals();
-  const sentIds = loadSentIds();
   console.log(`📋 Total pending deals loaded: ${pendingDeals.length}`);
 
+  const sentIds = loadSentIds();
   const existingQueue = loadPendingQueue();
-  const dayKey = getViennaDayKey();
+  const seenSignatures = buildSeenSignatureMap(sentIds, existingQueue);
+  const unseenDeals = pendingDeals.filter((deal) => {
+    if (sentIds[deal.id]) return false;
+    const signatures = getDealSignatureVariants(deal);
+    if (signatures.length === 0) return true;
+    return !signatures.some((signature) => seenSignatures.has(signature));
+  });
+  const freshDeals = unseenDeals
+    .filter(isRecent)
+    .filter(hasTrustedInstagramDate)
+    .filter((d) => !isStrictRecentSocialDeal(d) || isViennaDeal(d))
+    .filter((d) => !hasOldAgeSignal(d))
+    .filter((d) => !hasStaleExplicitDateSignal(d))
+    .filter(isNotExpired);
 
-  pendingDeals.sort((a, b) => {
+  console.log(`📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, fresh: ${freshDeals.length}`);
+
+  if (freshDeals.length === 0) {
+    console.log('✅ Keine neuen Deals für Slack');
+    return;
+  }
+
+  freshDeals.sort((a, b) => {
     if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
       return (b.qualityScore || 0) - (a.qualityScore || 0);
     }
     return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
   });
 
-  const postedTodayKeys = buildPostedTodaySignatureSet(sentIds, existingQueue, dayKey);
-  const { kept: dealsToPost, skippedSameDay, skippedStaleSource } = filterDealsForSlack(pendingDeals, postedTodayKeys, dayKey);
-
-  console.log(`📨 Pending: ${pendingDeals.length}, toPost: ${dealsToPost.length}, skippedSameDay: ${skippedSameDay}, skippedStaleSource: ${skippedStaleSource}`);
-
-  if (dealsToPost.length === 0) {
-    console.log('✅ Keine neuen Deals für Slack');
-    return;
-  }
-
-  const targetVerificationStats = await verifyTargetLinkDates(dealsToPost);
-  console.log(
-    `🔎 Ziellinks geprüft: ${targetVerificationStats.checked}/${targetVerificationStats.urls} URLs, ` +
-    `${targetVerificationStats.correctedDates} Datums-Korrekturen, ` +
-    `${targetVerificationStats.correctedPubDates} Quellendatum-Korrekturen, ` +
-    `${targetVerificationStats.invalid} ungültige Links, ` +
-    `${targetVerificationStats.transientErrors} temporäre Fehler`
-  );
-
-  dealsToPost.sort((a, b) => {
-    if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
-      return (b.qualityScore || 0) - (a.qualityScore || 0);
-    }
-    return getEffectivePubTimestamp(b) - getEffectivePubTimestamp(a);
-  });
-
-  const digestFingerprint = getDigestFingerprint(dealsToPost);
-
-  if (
-    cleanText(sentIds['meta:lastDigestDay']) === dayKey &&
-    cleanText(sentIds['meta:lastDigestFingerprint']) === digestFingerprint
-  ) {
-    console.log('✅ Identischer Digest wurde heute bereits an Slack gesendet');
-    return;
-  }
-
-  const chunks = buildSlackChunkMessages(dealsToPost);
-  const freeCount = dealsToPost.filter((d) => d.type === 'gratis').length;
+  const freeCount = freshDeals.filter((d) => d.type === 'gratis').length;
   const headerTs = await postSlackMessage(
-    `🎯 *FreeFinder Wien* — ${dealsToPost.length} Pending-Deals aus allen Scrapern\n` +
-    `🆓 ${freeCount} gratis | 💰 ${dealsToPost.length - freeCount} rabatt/test\n` +
-    `💬 ${dealsToPost.length} Antworten · 1 Deal pro Antwort\n` +
-    `_Mit ✅ immer direkt auf der einzelnen Deal-Antwort freigeben._`
+    `🎯 *FreeFinder Wien* — ${freshDeals.length} neue Deals\n` +
+    `🆓 ${freeCount} gratis | 💰 ${freshDeals.length - freeCount} rabatt/test\n` +
+    `_Jeden Deal mit ✅ bestätigen, dann erscheint er in der iOS-App._`
   );
 
   if (!headerTs) {
@@ -1168,33 +587,31 @@ async function main() {
   }
 
   const postedDeals = [];
-  for (let i = 0; i < chunks.length; i += 1) {
-    const chunk = chunks[i];
-    const text = buildSlackChunkText(chunk, i, chunks.length, dealsToPost.length);
+  for (let i = 0; i < freshDeals.length; i += 1) {
+    const deal = freshDeals[i];
+    const text = buildSlackMessage(deal, i + 1);
     const ts = await postSlackMessage(text, headerTs);
     if (!ts) continue;
 
-    for (const deal of chunk.deals) {
-      deal.slackTs = ts;
-      deal.slackThreadTs = headerTs;
-      deal.slackPostFormatVersion = SLACK_POST_FORMAT_VERSION;
-      postedDeals.push(deal);
+    deal.slackTs = ts;
+    deal.slackThreadTs = headerTs;
+    postedDeals.push(deal);
+    sentIds[deal.id] = Date.now();
+
+    if ((i + 1) % 10 === 0) {
+      console.log(`  ✅ posted ${i + 1}/${freshDeals.length}`);
     }
-
-    console.log(`  ✅ posted reply ${i + 1}/${chunks.length} (${postedDeals.length}/${dealsToPost.length} deals)`);
-    await sleep(SLACK_POST_DELAY_MS);
+    await sleep(600);
   }
 
-  const mergedQueue = mergePendingQueue(existingQueue, postedDeals);
-  const postedAtMs = Date.now();
-  markDealsPosted(sentIds, postedDeals, dayKey, postedAtMs);
-  if (postedDeals.length === dealsToPost.length) {
-    sentIds['meta:lastDigestDay'] = dayKey;
-    sentIds['meta:lastDigestFingerprint'] = digestFingerprint;
-    sentIds['meta:lastDigestPostedAt'] = postedAtMs;
+  for (const deal of postedDeals) {
+    for (const signature of getDealSignatureVariants(deal)) {
+      sentIds[`sig:${signature}`] = Date.now();
+    }
   }
-  pruneSentIds(sentIds);
+
   saveSentIds(sentIds);
+  const mergedQueue = mergePendingQueue(existingQueue, postedDeals);
   writePendingAll(mergedQueue);
 
   console.log(`✅ ${postedDeals.length} Deals an Slack gesendet`);
