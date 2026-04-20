@@ -28,5 +28,17 @@ jobs:
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
           git add docs/deals-pending-freikirchen.json
-          git diff --staged --quiet || git commit -m "Freikirchen Wien $(date +%Y-%m-%d)"
-          git push
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Freikirchen Wien $(date +%Y-%m-%d)"
+          if ! git pull --rebase --autostash origin main; then
+            echo "⚠️ Rebase conflict on generated files. Skipping push for this run."
+            git rebase --abort || true
+            exit 0
+          fi
+          if ! git push origin HEAD:main; then
+            echo "⚠️ Push failed (branch moved). Skipping push for this run."
+            exit 0
+          fi
