@@ -294,13 +294,11 @@ async function main() {
   const summary = await getSummaryRecord(finishedRun.defaultKeyValueStoreId);
 
   const acceptedItems = Array.isArray(datasetItems)
-    ? datasetItems.filter((item) => item && item.accepted !== false)
+    ? datasetItems.filter((item) => item)
     : [];
-  const normalizedDeals = dedupeDeals(
-    acceptedItems
-      .map(normalizeApifyItem)
-      .filter(Boolean),
-  );
+  const normalizedDeals = acceptedItems
+    .map(normalizeApifyItem)
+    .filter(Boolean);
 
   const payload = {
     lastUpdated: new Date().toISOString(),

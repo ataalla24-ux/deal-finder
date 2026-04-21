@@ -322,23 +322,6 @@ function sourcePerformanceScore(stat) {
   return hitRate * 100 + Math.min(linksPerRun / 4, 20);
 }
 
-function shouldSkipWeakSource(source, stat) {
-  if (!stat) return false;
-  const runs = Number(stat.runs || 0);
-  const hits = Number(stat.acceptedDeals || 0);
-  const links = Number(stat.totalLinks || 0);
-  const linksPerRun = runs > 0 ? links / runs : 0;
-  if (source.kind === 'account' || source.kind === 'account-api') {
-    if (runs < 8) return false;
-    if (hits > 0) return false;
-    return linksPerRun < 3;
-  }
-  if (runs < 7) return false;
-  if (hits === 0) return true;
-  const hitRate = hits / runs;
-  return hitRate < 0.25 && linksPerRun < 10;
-}
-
 function normalizeInstagramPostUrl(rawUrl) {
   const text = cleanText(rawUrl);
   if (!text) return '';
@@ -698,7 +681,6 @@ function buildSources(sourceStats) {
   }));
 
   const combined = [...accounts, ...hashtags]
-    .filter((source) => !shouldSkipWeakSource(source, sourceStats[source.key]))
     .sort((a, b) => {
       const aScore = sourcePerformanceScore(sourceStats[a.key]) + a.priority * 15;
       const bScore = sourcePerformanceScore(sourceStats[b.key]) + b.priority * 15;
@@ -718,7 +700,6 @@ function loadMerchantRegistryAccounts() {
     const parsed = JSON.parse(fs.readFileSync(MERCHANT_REGISTRY_PATH, 'utf-8'));
     const accounts = Array.isArray(parsed?.accounts) ? parsed.accounts : [];
     return accounts
-      .filter((account) => Number(account?.confidence || 0) >= 40)
       .map((account) => ({
         username: normalizeUsername(account?.username),
         confidence: Number(account?.confidence || 0),
@@ -990,8 +971,7 @@ async function collectDealsFromAccountApi(sourceStats, page) {
       username: username.username,
       priority: username.priority,
       discoveredBy: username.discoveredBy || [],
-    }))
-    .filter((source) => !shouldSkipWeakSource(source, sourceStats[source.key]));
+    }));
 
   function ensureSourceRunStat(key, kind) {
     if (!sourceRunStats.has(key)) {
@@ -1065,10 +1045,7 @@ async function collectDealsFromAccountApi(sourceStats, page) {
         user?.biography,
       ].join(' '));
 
-      if (!isFresh(pubDateIso)) continue;
       if (!combinedText) continue;
-      if (isExpiredByText(combinedText)) continue;
-      if (isGiveawayOnly(combinedText)) continue;
 
       candidateSnapshot.push({
         url: postUrl,
@@ -1082,14 +1059,6 @@ async function collectDealsFromAccountApi(sourceStats, page) {
         pubDateSource: 'profileTimeline',
       });
 
-      const isWien = containsKeyword(`${combinedText} ${locationName}`, WIEN_KEYWORDS)
-        || /wien|vienna/i.test(cleanText(user?.username))
-        || /wien|vienna/i.test(cleanText(user?.full_name));
-      if (!isWien) continue;
-      if (!isFoodDrinkRelevant(combinedText)) continue;
-      if (!containsKeyword(combinedText, DEAL_KEYWORDS)) continue;
-      if (!hasFreebieOrPromoSignal(combinedText)) continue;
-
       const sourceKinds = new Set([source.kind]);
       const score = scoreDeal({
         text: combinedText,
@@ -1098,10 +1067,8 @@ async function collectDealsFromAccountApi(sourceStats, page) {
         accountHint: true,
         relatedHint: source.kind === 'related-account-api',
       });
-      if (score < CONFIG.minDealScore) continue;
 
       const expiry = parseExpiryFromText(combinedText);
-      if (expiry && isExpiryInPast(expiry)) continue;
       if (seenUrls.has(postUrl)) continue;
       seenUrls.add(postUrl);
 
@@ -1285,17 +1252,7 @@ function saveSourceStats(sourceStats, runSummary) {
 }
 
 function mergeDeals(newDeals, oldDeals) {
-  const map = new Map();
-  for (const deal of [...newDeals, ...oldDeals]) {
-    const key = `${deal.url}|${deal.brand}|${String(deal.title || '').toLowerCase()}`;
-    if (!map.has(key) || (map.get(key).qualityScore || 0) < (deal.qualityScore || 0)) {
-      map.set(key, deal);
-    }
-  }
-
-    const sorted = [...map.values()]
-      .filter((d) => d.pubDate && isFresh(d.pubDate))
-      .filter((d) => !isExpiryInPast(d.expires))
+  const sorted = [...newDeals, ...oldDeals]
       .sort((a, b) => {
       const aText = `${a.title || ''} ${a.description || ''}`;
       const bText = `${b.title || ''} ${b.description || ''}`;
@@ -1308,19 +1265,7 @@ function mergeDeals(newDeals, oldDeals) {
       if ((b.qualityScore || 0) !== (a.qualityScore || 0)) return (b.qualityScore || 0) - (a.qualityScore || 0);
       return Date.parse(b.pubDate) - Date.parse(a.pubDate);
     });
-
-  const accountCap = Math.max(1, CONFIG.maxDealsPerInstagramAccount || 4);
-  const accountCounts = new Map();
-  const balanced = [];
-  for (const deal of sorted) {
-    const accountKey = extractAccountKeyFromDeal(deal);
-    const count = accountCounts.get(accountKey) || 0;
-    if (count >= accountCap) continue;
-    accountCounts.set(accountKey, count + 1);
-    balanced.push(deal);
-    if (balanced.length >= CONFIG.maxDealsPerRun) break;
-  }
-  return balanced;
+  return sorted;
 }
 
 function finalizeDiscoveryRun({
@@ -1683,14 +1628,12 @@ async function scrapeInstagramDiscovery() {
     }));
 
     const postsToVisit = [...candidatePosts.values()]
-      .filter((candidate) => !candidate.pubDate || isFresh(candidate.pubDate))
       .sort((a, b) => {
         const aFresh = a.pubDate && isFresh(a.pubDate) ? 1 : 0;
         const bFresh = b.pubDate && isFresh(b.pubDate) ? 1 : 0;
         if (bFresh !== aFresh) return bFresh - aFresh;
         return b.sourceHits - a.sourceHits;
-      })
-      .slice(0, CONFIG.maxPostsToVisit);
+      });
     const extractionRejectionReasons = createRejectionCounters();
 
     console.log(`🧠 discovery done: sources=${processedSourceKeys.size}, candidates=${candidatePosts.size}, visiting=${postsToVisit.length}`);
@@ -1701,11 +1644,6 @@ async function scrapeInstagramDiscovery() {
     for (let i = 0; i < postsToVisit.length; i += 1) {
       const candidate = postsToVisit[i];
       try {
-        if (candidate.pubDate && !isFresh(candidate.pubDate)) {
-          extractionRejectionReasons.stale += 1;
-          continue;
-        }
-
         await page.goto(candidate.url, { waitUntil: 'domcontentloaded', timeout: CONFIG.postLoadTimeoutMs });
         await page.waitForTimeout(1150);
 
@@ -1803,45 +1741,7 @@ async function scrapeInstagramDiscovery() {
             source: candidate.pubDateSource,
           };
         }
-        if (!pubDateMeta || !pubDateMeta.iso || !TRUSTED_PUBDATE_SOURCES.has(pubDateMeta.source)) {
-          extractionRejectionReasons.noPubDate += 1;
-          continue;
-        }
-        if (!isFresh(pubDateMeta.iso)) {
-          extractionRejectionReasons.stale += 1;
-          continue;
-        }
-        const pubDateIso = pubDateMeta.iso;
-
-        if (isExpiredByText(combinedText)) {
-          extractionRejectionReasons.expired += 1;
-          continue;
-        }
-        if (isGiveawayOnly(combinedText)) {
-          extractionRejectionReasons.giveaway += 1;
-          continue;
-        }
-
-        const isWien = containsKeyword(combinedText, WIEN_KEYWORDS)
-          || [...candidate.sourceRefs].some((k) => k.includes('wien') || k.includes('vienna'));
-        if (!isWien) {
-          extractionRejectionReasons.notWien += 1;
-          continue;
-        }
-        if (!isFoodDrinkRelevant(combinedText)) {
-          extractionRejectionReasons.notFoodDrink += 1;
-          continue;
-        }
-
-        const dealSignal = containsKeyword(combinedText, DEAL_KEYWORDS);
-        if (!dealSignal) {
-          extractionRejectionReasons.noDealSignal += 1;
-          continue;
-        }
-        if (!hasFreebieOrPromoSignal(combinedText)) {
-          extractionRejectionReasons.noPromoSignal += 1;
-          continue;
-        }
+        const pubDateIso = pubDateMeta?.iso || candidate.pubDate || new Date().toISOString();
 
         const score = scoreDeal({
           text: combinedText,
@@ -1850,16 +1750,8 @@ async function scrapeInstagramDiscovery() {
           accountHint: candidate.accountHint,
           relatedHint: candidate.relatedHint,
         });
-        if (score < CONFIG.minDealScore) {
-          extractionRejectionReasons.lowScore += 1;
-          continue;
-        }
 
         const expiry = parseExpiryFromText(combinedText);
-        if (expiry && isExpiryInPast(expiry)) {
-          extractionRejectionReasons.expired += 1;
-          continue;
-        }
 
         const category = detectCategory(combinedText);
         const type = detectType(combinedText);

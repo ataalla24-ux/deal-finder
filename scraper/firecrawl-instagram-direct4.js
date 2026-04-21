@@ -1,7 +1,7 @@
 import '../sentry/instrument.mjs';
 // ============================================
 // 📸🔥 FIRECRAWL INSTAGRAM DIRECT AGENT #4
-// Fokus: kostenlose Speisen/Getränke in Wien aus konkreten Instagram-Quellen
+// Breiter Intake aus konkreten Instagram-Quellen
 // ============================================
 
 import Firecrawl from '@mendable/firecrawl-js';
@@ -183,20 +183,16 @@ async function runAgent(url) {
   const today = new Date().toLocaleDateString('de-AT', { timeZone: 'Europe/Vienna' });
   return firecrawl.agent({
     url,
-    prompt: `Extrahiere aktuelle Angebote für kostenlose Speisen und Getränke in der Wiener Gastronomie AUSSCHLIEẞLICH aus Instagram-Posts der letzten ${MAX_POST_AGE_DAYS} Tage.
+    prompt: `Extrahiere Angebots-Posts rund um Speisen und Getränke aus dieser Instagram-Quelle.
 
 Heute ist ${today} in Wien.
 
 Regeln:
 - Nutze nur Inhalte, die von dieser konkreten Instagram-Quelle erreichbar sind.
 - Nur Instagram-Posts oder Reels.
-- Nur Angebote in Wien.
-- Gewinnspiele und Giveaways strikt ausschließen.
-- Bevorzuge gratis, kostenlos, free, 1+1, Verkostungen, Welcome Gifts, Gratisproben.
-- Wenn ein Post-Datum nicht belastbar erkennbar ist oder älter als ${MAX_POST_AGE_DAYS} Tage ist, lasse ihn weg.
-- Wenn ein Angebot eindeutig abgelaufen ist, lasse es weg.
-- Vermeide Duplikate.
-- Gib lieber weniger, aber saubere Einträge zurück.`,
+- Schließe Kandidaten nicht wegen Alter, Wien-Bezug, Giveaway-Charakter oder unklarem Ablauf aus.
+- Gib lieber zu viele Kandidaten zurück als zu wenige.
+- Liefere für jeden Kandidaten nach Möglichkeit Post-URL, Post-Datum, Beschreibung, Typ, Ablauf und Standort.`,
     schema: offerSchema,
     model: 'spark-1-pro',
   });

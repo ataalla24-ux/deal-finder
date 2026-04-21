@@ -1,7 +1,7 @@
 import '../sentry/instrument.mjs';
 // ============================================
 // 🍔🔥 FIRECRAWL FOOD AGENT #2
-// Fokus: Instagram-Angebote für Essen & Getränke in Wien
+// Breiter Intake für Instagram-Angebote zu Essen & Getränken
 // ============================================
 
 import Firecrawl from '@mendable/firecrawl-js';
@@ -101,7 +101,7 @@ async function main() {
   console.log();
 
   const result = await firecrawl.agent({
-    prompt: "Extrahiere aktuelle Angebote für kostenloses Essen und Getränke in Wien von Instagram, die maximal 7 Tage alt sind. Suche über relevante Hashtags und schließe sowohl Direktangebote als auch Gewinnspiele und 1+1 Gratis-Aktionen (Kaufzwang) ein. Erfasse Anbietername, Produktart, Standort, Uhrzeiten, Teilnahmebedingungen sowie die Unterscheidung zwischen Gewinnspiel und Direktangebot. Erfasse zwingend den direkten Link zum Instagram-Post im Feld 'post_url'. Es dürfen nur Instagram-Links (instagram.com/p/... oder instagram.com/reel/...) aufgenommen werden; ignoriere Angebote von anderen Plattformen wie TikTok oder News-Websites.",
+    prompt: "Extrahiere Instagram-Angebote rund um Essen und Getränke. Schließe Kandidaten nicht wegen Alter, Wien-Bezug oder Deal-Typ aus. Erfasse Anbietername, Produktart, Standort, Uhrzeiten, Teilnahmebedingungen und den direkten Link zum Instagram-Post im Feld 'post_url'. Wenn Details unklar sind, liefere trotzdem den Kandidaten mit den verfügbaren Angaben.",
     schema,
     model: 'spark-1-pro',
   });
@@ -122,7 +122,6 @@ async function main() {
     const combined = `${providerName} ${productType} ${location} ${times} ${conditions} ${offerTypeText}`;
 
     if (!postUrl || !isInstagramPostUrl(postUrl)) continue;
-    if (!looksVienna(combined)) continue;
 
     const type = inferType(offerTypeText, `${productType} ${conditions}`);
     const category = inferCategory(productType, `${offerTypeText} ${conditions}`);
@@ -144,7 +143,7 @@ async function main() {
       source: 'Firecrawl Food #2',
       url: postUrl,
       expires: times || 'Siehe Post',
-      distance: location,
+      distance: location || 'Ort unklar',
       hot: type === 'gratis' || type === 'bogo',
       isNew: true,
       priority: type === 'gratis' ? 2 : type === 'bogo' ? 3 : 4,

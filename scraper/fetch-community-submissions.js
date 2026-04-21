@@ -122,8 +122,7 @@ async function main() {
 
   const submissions = ensureArray(body.submissions);
   const deals = submissions
-    .map(normalizeSubmissionDeal)
-    .filter((deal) => deal.submissionId && deal.url);
+    .map(normalizeSubmissionDeal);
 
   const payload = {
     deals,

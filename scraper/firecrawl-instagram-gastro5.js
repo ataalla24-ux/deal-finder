@@ -1,7 +1,7 @@
 import '../sentry/instrument.mjs';
 // ============================================
 // 📸🍽️ FIRECRAWL INSTAGRAM GASTRO AGENT #5
-// Fokus: mindestens 30 aktuelle Wiener Gastro-Angebote nur aus Instagram
+// Breiter Intake für Gastro-Angebote aus Instagram
 // ============================================
 
 import Firecrawl from '@mendable/firecrawl-js';
@@ -38,7 +38,7 @@ const offerSchema = z.object({
     location: z.string().optional(),
     location_citation: z.string().optional(),
   })).default([]),
-}).describe('Information about free food and drinks offers in Viennese gastronomy exclusively from Instagram');
+}).describe('Information about gastro offers from Instagram posts');
 
 function stableHash(str) {
   let hash = 5381;
@@ -130,7 +130,7 @@ async function main() {
   console.log();
 
   const result = await firecrawl.agent({
-    prompt: `Extrahiere mindestens 30 aktuelle Angebote für kostenlose Speisen und Getränke in der Wiener Gastronomie AUSSCHLIEẞLICH aus Instagram-Posts der letzten ${MAX_POST_AGE_DAYS} Tage. \n\nPriorisierung:\n1. Höchste Priorität: Komplett kostenlose Angebote ohne Kaufzwang.\n2. Zweite Priorität: 'Buy One Get One Free' (1+1 gratis) Aktionen.\n3. Dritte Priorität: Gratis-Beigaben (z.B. kostenloser Kaffee zum Hauptgericht oder Vorteile für App-Nutzer).\n\nRegeln:\n- Nutze NUR Instagram als Quelle. Schließe Facebook, Preisjäger, Neotaste oder andere Webseiten explizit aus.\n- Schließe Gewinnspiele (Giveaways) explizit aus.\n- Nur Angebote in Wien.\n- Erfasse zwingend das Veröffentlichungsdatum des Instagram-Posts im Feld 'post_date'. Wenn das Datum nicht belastbar erkennbar ist oder älter als ${MAX_POST_AGE_DAYS} Tage ist, lasse den Deal weg.\n- Extrahiere nur Angebote, deren 'valid_until' in der Zukunft liegt oder nicht genannt wird.\n- Vermeide Duplikate.\n- Nutze Suchbegriffe wie 'gratis', 'kostenlos', 'free', '1+1' in Verbindung mit 'Wien' auf Instagram.`,
+    prompt: `Extrahiere möglichst viele Gastro-Angebote aus Instagram-Posts. Schließe Kandidaten nicht wegen Alter, Standort, Giveaway-Charakter, unklarem Veröffentlichungsdatum oder unklarem Ablauf aus. Nutze nur Instagram als Quelle und gib für jeden Kandidaten nach Möglichkeit Restaurantname, Post-URL, Post-Datum, Beschreibung, Angebotstyp, Ablauf und Standort zurück. Im Zweifel lieber den Kandidaten trotzdem aufnehmen.`,
     schema: offerSchema,
     model: 'spark-1-mini',
   });

@@ -247,7 +247,6 @@ function loadMerchantRegistryAccounts() {
     const parsed = JSON.parse(fs.readFileSync(MERCHANT_REGISTRY_PATH, 'utf-8'));
     const accounts = Array.isArray(parsed?.accounts) ? parsed.accounts : [];
     return accounts
-      .filter((account) => Number(account?.confidence || 0) >= 40)
       .map((account) => ({
         username: normalizeUsername(account?.username),
         confidence: Number(account?.confidence || 0),
@@ -958,7 +957,7 @@ async function scrapeInstagram() {
     report.totals.candidatePosts = candidatePosts.size;
     report.samples.candidateUrls = [...candidatePosts.keys()].slice(0, 20);
 
-    const postsToVisit = [...candidatePosts.values()].slice(0, CONFIG.maxPostsToVisit);
+    const postsToVisit = [...candidatePosts.values()];
     const deals = [];
     const { context: postContext, page } = await createInstagramPageSession(browser, cookieHints);
 
@@ -1049,39 +1048,11 @@ async function scrapeInstagram() {
             ogDescription: data.ogDescription,
             fullText: combinedText,
           });
-          if (!pubDateMeta?.iso) {
-            report.totals.rejectionReasons.noPubDate += 1;
-            continue;
-          }
-          const pubDateIso = pubDateMeta.iso;
-          if (!isFresh(pubDateIso)) {
-            report.totals.rejectionReasons.stale += 1;
-            continue;
-          }
-          if (isGiveawayOnly(combinedText)) {
-            report.totals.rejectionReasons.giveaway += 1;
-            continue;
-          }
-          if (!isFoodDrinkRelevant(combinedText)) {
-            report.totals.rejectionReasons.notFoodDrink += 1;
-            continue;
-          }
-          if (!hasFreebieOrPromoSignal(combinedText)) {
-            report.totals.rejectionReasons.noPromoSignal += 1;
-            continue;
-          }
+          const pubDateIso = pubDateMeta?.iso || new Date().toISOString();
 
           const score = scorePost({ text: combinedText, accountHint: post.accountHint });
-          if (score < 55) {
-            report.totals.rejectionReasons.lowScore += 1;
-            continue;
-          }
 
           const brand = deriveBrand(data, post.url);
-          if (!isWienRelevant(combinedText, post.sourceKey, post.url, brand)) {
-            report.totals.rejectionReasons.notWien += 1;
-            continue;
-          }
 
           const titleBase = cleanText(data.ogTitle || data.ldCaption || 'Instagram Deal');
           const title = titleBase.length > 80 ? `${titleBase.slice(0, 77)}...` : titleBase;
@@ -1122,34 +1093,13 @@ async function scrapeInstagram() {
       await postContext.close().catch(() => {});
     }
 
-    const dedup = new Map();
     report.totals.acceptedBeforeDedup = deals.length;
-    for (const deal of deals) {
-      const key = `${deal.url}|${deal.brand}|${deal.title.toLowerCase()}`;
-      if (!dedup.has(key) || dedup.get(key).qualityScore < deal.qualityScore) {
-        dedup.set(key, deal);
-      }
-    }
 
-    const previousDeals = loadPreviousDeals();
-    for (const oldDeal of previousDeals) {
-      const oldDate = Date.parse(oldDeal?.pubDate || '');
-      if (!Number.isNaN(oldDate) && isFresh(new Date(oldDate).toISOString())) {
-        const key = `${oldDeal.url}|${oldDeal.brand}|${String(oldDeal.title || '').toLowerCase()}`;
-        if (!dedup.has(key)) {
-          dedup.set(key, oldDeal);
-          report.totals.reusedPreviousDeals += 1;
-        }
-      }
-    }
-
-    const uniqueDeals = [...dedup.values()]
-      .filter((d) => d.pubDate && isFresh(d.pubDate))
+    const uniqueDeals = deals
       .sort((a, b) => {
         if (b.qualityScore !== a.qualityScore) return b.qualityScore - a.qualityScore;
         return Date.parse(b.pubDate) - Date.parse(a.pubDate);
-      })
-      .slice(0, CONFIG.maxDealsPerRun);
+      });
 
     const payload = {
       lastUpdated: new Date().toISOString(),

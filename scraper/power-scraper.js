@@ -20,10 +20,6 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const INCLUDE_BASE_DEALS = String(process.env.POWER_INCLUDE_BASE_DEALS || '1') !== '0';
-const MAX_DEALS_PER_SOURCE = Math.max(1, Number(process.env.POWER_MAX_DEALS_PER_SOURCE || (INCLUDE_BASE_DEALS ? 8 : 2)));
-const MAX_TOTAL_DEALS = Math.max(1, Number(process.env.POWER_MAX_TOTAL_DEALS || (INCLUDE_BASE_DEALS ? 72 : 24)));
-const MIN_QUALITY_SCORE = Math.max(0, Number(process.env.POWER_MIN_QUALITY_SCORE || (INCLUDE_BASE_DEALS ? 38 : 46)));
-
 // ============================================
 // STATISCHE BASIS-DEALS (Dauerhaft gültig)
 // Stand: Februar 2026
@@ -463,17 +459,6 @@ function normalizePowerDeal(deal, sourceLabel) {
   };
 }
 
-function isUsefulPowerDeal(deal) {
-  const title = cleanUiNoiseText(deal.title || '');
-  if (title.length < 12) return false;
-  if (deal.category === 'reisen') return false;
-  if (/(lieferung|versand|überblick|jetzt entdecken|urlaubsangebote)/i.test(title)) return false;
-  if (Number(deal.qualityScore || 0) < MIN_QUALITY_SCORE) return false;
-  if (isGenericJunkDeal(deal)) return false;
-  if (isFalsePositiveFreeDeal(deal)) return false;
-  return true;
-}
-
 // ============================================
 // HELFER: Extract Deals from HTML (simplified)
 // ============================================
@@ -509,15 +494,12 @@ function extractDealsFromHTML(html, source) {
           pubDate: new Date().toISOString()
         }, source.name);
 
-        if (!isUsefulPowerDeal(candidate)) continue;
         deals.push(candidate);
       }
     }
   }
   
-  return deals
-    .sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0))
-    .slice(0, MAX_DEALS_PER_SOURCE);
+  return deals.sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0));
 }
 
 // ============================================
@@ -558,25 +540,13 @@ async function main() {
           qualityScore: Number(deal.qualityScore || 72),
           pubDate: deal.pubDate || new Date().toISOString()
         }, 'power-scraper-v5'))
-        .filter(isUsefulPowerDeal)
     : [];
 
   // Combine base + scraped
   const allDeals = [...normalizedBaseDeals, ...scrapedDeals];
   
-  // Remove duplicates
-  const uniqueDeals = [];
-  const seen = new Set();
-  for (const deal of allDeals) {
-    const key = stableDealId([deal.brand, deal.title, deal.url, deal.source]);
-    if (!seen.has(key)) {
-      seen.add(key);
-      uniqueDeals.push({ ...deal, id: deal.id || key });
-    }
-  }
-  
   // Sort: freebies first, then hot, then quality, then priority
-  uniqueDeals.sort((a, b) => {
+  allDeals.sort((a, b) => {
     if (a.type === 'gratis' && b.type !== 'gratis') return -1;
     if (a.type !== 'gratis' && b.type === 'gratis') return 1;
     if (a.hot && !b.hot) return -1;
@@ -585,7 +555,7 @@ async function main() {
     return (a.priority || 99) - (b.priority || 99);
   });
 
-  const finalDeals = uniqueDeals.slice(0, MAX_TOTAL_DEALS);
+  const finalDeals = allDeals;
   
   // Output
   const output = {

@@ -16,9 +16,7 @@ const FEED_LANGUAGE = 'de';
 const FEED_REGION = 'AT';
 const FEED_EDITION = 'AT:de';
 const REQUEST_TIMEOUT_MS = 15000;
-const MAX_RESULTS_PER_QUERY = 14;
-const MAX_DEALS_OUTPUT = 18;
-const MIN_QUALITY_SCORE = 56;
+const MAX_RESULTS_PER_QUERY = 50;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const SEARCH_PACKS = [
@@ -451,45 +449,40 @@ function createCandidate(item, pack) {
   const categoryMatch = pack.required.some((pattern) => pattern.test(normalizedSignal));
   const currentSignal = CURRENT_SIGNAL_PATTERNS.some((pattern) => pattern.test(normalizedSignal));
 
-  if (!hasLocationConfidence(normalizedSignal, pack)) return null;
-  if (!softPromo) return null;
-  if (!categoryMatch) return null;
-  if (!type) return null;
-  if (NEGATIVE_PATTERNS.some((pattern) => pattern.test(normalizedSignal))) return null;
-  if (articleAgeDays === null || articleAgeDays > maxAgeDays) return null;
+  const hasLocationSignal = hasLocationConfidence(normalizedSignal, pack);
+  const resolvedType = type || 'rabatt';
+  const effectiveAgeDays = articleAgeDays === null ? 0 : articleAgeDays;
 
   const expiryText = extractExpiryText(normalizedSignal);
   const brand = extractBrandCandidate(titleCore);
   const qualityScore = buildQualityScore({
-    type,
+    type: resolvedType,
     trustedSource: isTrustedSource(host),
     strongPromo,
     softPromo,
     currentSignal,
     categoryMatch,
     brandFound: Boolean(brand),
-    articleAgeDays,
+    articleAgeDays: effectiveAgeDays,
     explicitExpiry: Boolean(expiryText),
   });
-
-  if (qualityScore < MIN_QUALITY_SCORE) return null;
 
   let deal = {
     id: dealId('vpr', brand || sourceName || 'wien', titleCore, item.link || sourceUrl || titleCore),
     brand,
     logo: pack.logo,
     logoUrl: buildLogoUrl(sourceUrl),
-    title: normalizeDealTitle(titleCore, type),
+    title: normalizeDealTitle(titleCore, resolvedType),
     description: buildDescription(titleCore, sourceName, expiryText),
-    type,
-    badge: badgeForType(type),
+    type: resolvedType,
+    badge: badgeForType(resolvedType),
     category,
     source: 'Vienna Promo Radar',
     originSource: 'Google News RSS',
     url: item.link || sourceUrl,
     expires: expiryText,
-    distance: sourceName ? `Wien • ${sourceName}` : 'Wien',
-    hot: type === 'gratis' || type === 'bogo',
+    distance: sourceName ? `${hasLocationSignal ? 'Wien' : 'Ort unklar'} • ${sourceName}` : (hasLocationSignal ? 'Wien' : 'Ort unklar'),
+    hot: resolvedType === 'gratis' || resolvedType === 'bogo',
     isNew: true,
     qualityScore,
     pubDate: new Date(Date.parse(item.pubDate)).toISOString(),
@@ -505,10 +498,6 @@ function createCandidate(item, pack) {
   }
   deal.logo = pack.logo;
   deal.logoUrl = buildLogoUrl(sourceUrl) || deal.logoUrl;
-  if (isGenericJunkDeal(deal)) return null;
-  if (deal.type === 'gratis' && isFalsePositiveFreeDeal(deal)) return null;
-  if (isExpiredDealRecord(deal)) return null;
-
   deal.expires = sanitizeExpiryText(deal.expires || '');
   return deal;
 }
@@ -523,7 +512,6 @@ async function main() {
   console.log(new Date().toLocaleString('de-AT'));
   console.log('========================================');
 
-  const seenKeys = new Set();
   const collectedDeals = [];
 
   for (const pack of SEARCH_PACKS) {
@@ -537,15 +525,6 @@ async function main() {
         const candidate = createCandidate(item, pack);
         if (!candidate) continue;
 
-        const dedupeKey = [
-          cleanSignal(candidate.brand || ''),
-          cleanSignal(candidate.title || ''),
-          cleanSignal(candidate.publisher || ''),
-          candidate.pubDate ? candidate.pubDate.slice(0, 10) : '',
-        ].join('|');
-
-        if (seenKeys.has(dedupeKey)) continue;
-        seenKeys.add(dedupeKey);
         collectedDeals.push(candidate);
         console.log(`  + ${candidate.title} [${candidate.qualityScore}]`);
       }
@@ -560,8 +539,7 @@ async function main() {
         return (right.qualityScore || 0) - (left.qualityScore || 0);
       }
       return new Date(right.pubDate || 0).getTime() - new Date(left.pubDate || 0).getTime();
-    })
-    .slice(0, MAX_DEALS_OUTPUT);
+    });
 
   const payload = {
     lastUpdated: new Date().toISOString(),

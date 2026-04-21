@@ -27,9 +27,6 @@ jobs:
       - name: Run Power Scraper
         env:
           POWER_INCLUDE_BASE_DEALS: '0'
-          POWER_MAX_DEALS_PER_SOURCE: '2'
-          POWER_MAX_TOTAL_DEALS: '24'
-          POWER_MIN_QUALITY_SCORE: '46'
         run: node scraper/power-scraper.js
 
       - name: Commit pending power deals

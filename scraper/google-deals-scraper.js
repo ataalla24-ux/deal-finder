@@ -13,9 +13,7 @@ const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY || '';
 const OUTPUT_PATH = 'docs/deals-pending-google.json';
 const MAX_DEAL_AGE_DAYS = 14;
 const MAX_API_CALLS = 30;
-const MAX_RESULTS_PER_SEARCH = 7;
-const MAX_DEALS_OUTPUT = 16;
-const MIN_QUALITY_SCORE = 46;
+const MAX_RESULTS_PER_SEARCH = 50;
 
 if (!GOOGLE_PLACES_API_KEY) {
   console.log('⚠️  GOOGLE_PLACES_API_KEY nicht gesetzt');
@@ -407,7 +405,6 @@ async function main() {
 
   const allDeals = [];
   const seenPlaceIds = new Set();
-  const seenDealSeeds = new Set();
   let apiCalls = 0;
 
   // Rotiere Suchen nach Wochentag
@@ -449,7 +446,6 @@ async function main() {
         const types = place.types || [];
         if (['lodging', 'real_estate_agency'].some(t => types.includes(t))) continue;
         const inVienna = containsVienna(place.vicinity || place.formatted_address || '');
-        if (!inVienna) continue;
 
         seenPlaceIds.add(place.place_id);
 
@@ -471,10 +467,6 @@ async function main() {
           }
         }
 
-        // Streng: nur Deals mit frischer Review-Evidenz.
-        if (!reviewDeal.found) continue;
-        if (isClearlyExpired(reviewDeal.dealText)) continue;
-
         const dealSource = reviewDeal.found ? reviewDeal : websiteDeal;
         const isGratis = Boolean(reviewDeal.isGratis || websiteDeal.isGratis);
         const cheapPrice = reviewDeal.price ?? websiteDeal.price ?? null;
@@ -491,8 +483,6 @@ async function main() {
           userRatingsTotal: place.user_ratings_total,
           inVienna,
         });
-        if (qualityScore < MIN_QUALITY_SCORE) continue;
-
         const address = place.vicinity || place.formatted_address || 'Wien';
         const district = extractDistrict(address);
         const logo = getLogo(place.name, place.types, search.logo);
@@ -509,8 +499,6 @@ async function main() {
         title = title.substring(0, 70);
         const dedupeSeed = `${place.name}|${title}|${address}`;
         const dedupeKey = stableHash(dedupeSeed);
-        if (seenDealSeeds.has(dedupeKey)) continue;
-        seenDealSeeds.add(dedupeKey);
 
         const deal = {
           id: dealId('gd', place.name || '', title, `google:${place.place_id}:${dedupeKey}`),
@@ -556,8 +544,7 @@ async function main() {
         return (b.qualityScore || 0) - (a.qualityScore || 0);
       }
       return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
-    })
-    .slice(0, MAX_DEALS_OUTPUT);
+    });
 
   console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('📊 ERGEBNIS:');

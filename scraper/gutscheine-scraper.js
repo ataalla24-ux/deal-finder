@@ -262,7 +262,6 @@ function parseDeals(html) {
   // Simpler approach: find all "XX% BRAND" or "XX€ BRAND" patterns
   const simpleRegex = /(\d{1,3})\s*(%|€)\s+([\w\s&.'-]{2,35}?)\s*(?:Gutschein(?:code)?|Rabatt(?:code)?|Nachlass|Ersparnis)/gi;
   let match;
-  const seenDeals = new Set();
 
   while ((match = simpleRegex.exec(text)) !== null) {
     const amount = parseInt(match[1]);
@@ -272,23 +271,12 @@ function parseDeals(html) {
     // Clean brand name
     brand = brand.replace(/^\s*(für|bei|auf|von|im)\s+/i, '').trim();
     
-    // Skip junk
-    if (brand.length < 2 || brand.length > 35) continue;
-    if (/^(Rabatt|alle|die|der|das|für|bei|auf)\s*$/i.test(brand)) continue;
-
     // Check minimum discount
     // Bekannte Marken: ALLES durchlassen!
     const brandLower = brand.toLowerCase().replace(/^\s*(für|bei|auf|von|im)\s+/i, '');
     const isKnownBrand = Object.keys(RELEVANT_CATEGORIES).some(key => 
       brandLower.includes(key) || key.includes(brandLower)
     );
-    
-    if (!isKnownBrand) {
-      // Nur unbekannte Marken filtern
-      if (unit === '%' && amount < MIN_DISCOUNT_PERCENT) continue;
-      if (unit === '€' && amount < MIN_DISCOUNT_EURO) continue;
-    }
-    if (amount > 95 && unit === '%') continue; // Probably fake
 
     // Find closest expiry date (within 500 chars after the match)
     let expires = 'Siehe Website';
@@ -296,18 +284,9 @@ function parseDeals(html) {
       if (idx > match.index && idx < match.index + 500) {
         expires = `Bis ${date}`;
         
-        // Check if deal is already expired
-        const [day, month, year] = date.split('.');
-        const expiryDate = new Date(year, month - 1, day);
-        if (expiryDate < new Date()) {
-          expires = null; // Mark as expired, skip later
-        }
         break;
       }
     }
-
-    // Skip expired deals
-    if (expires === null) continue;
 
     // Look for a description after the brand/discount
     const afterMatch = text.substring(match.index, match.index + 200);
@@ -403,13 +382,7 @@ function parseDeals(html) {
       // Extract brand (might be in different capture groups)
       let saleBrand = (m[1] || m[2] || '').trim();
       saleBrand = saleBrand.replace(/^\s*(bei|für|von|im|auf)\s+/i, '').trim();
-      if (saleBrand.length < 2 || saleBrand.length > 30) continue;
-
       const saleBrandLower = saleBrand.toLowerCase();
-      const isKnown = Object.keys(RELEVANT_CATEGORIES).some(key =>
-        saleBrandLower.includes(key) || key.includes(saleBrandLower)
-      );
-      if (!isKnown) continue; // Nur bekannte Marken für diese Deals
 
       const matched = m[0].trim().substring(0, 60);
       let cat2 = 'shopping', logo2 = '🏷️';

@@ -1,7 +1,7 @@
 import '../sentry/instrument.mjs';
 // ============================================
-// 🔥 FIRECRAWL KEY 3 - VERIFIED INSTAGRAM FREEBIES
-// Fokus: Heute/Gestern, Wien, Gratis oder 1+1, deutschsprachig
+// 🔥 FIRECRAWL KEY 3 - INSTAGRAM CONSUMABLE OFFERS
+// Breiter Intake ohne harte Freshness-/Promo-Gates
 // ============================================
 
 import Firecrawl from '@mendable/firecrawl-js';
@@ -36,7 +36,7 @@ const key3Schema = z.object({
     offer_type: z.string().describe('The specific type of deal found in the post'),
     offer_type_citation: z.string().optional(),
   })).default([]),
-}).describe('Instagram Posts about verified free food and BOGO deals in Vienna from today or yesterday');
+}).describe('Instagram posts about consumable offers with location, timing and direct post URLs');
 
 function normalizeText(value) {
   return (value || '').toString().replace(/\s+/g, ' ').trim();
@@ -145,7 +145,7 @@ async function main() {
   console.log();
 
   const result = await firecrawl.agent({
-    prompt: `Extrahiere mindestens 30 Instagram-Posts aus Wien, die HEUTE oder GESTERN veröffentlicht wurden. WICHTIG: Es werden NUR Beiträge extrahiert, die ein konkretes Gratis-Angebot oder eine 1+1 Gratis-Aktion (BOGO) enthalten. Reine Restaurant-Vorstellungen oder Neueröffnungen OHNE spezifisches Eröffnungsangebot sind auszuschließen. Der Beitrag MUSS zwingend eines der Schlagworte 'Gratis', 'Kostenlos' oder '1+1' enthalten. Berücksichtige nur deutschsprachige Beiträge. Schließe Gewinnspiele und Verlosungen (Giveaways) explizit aus. Suche gezielt nach Kombinationen wie 'Wien Gratis Pizza', 'Wien Kostenlos Döner', 'Wien 1+1 Kaffee' etc. Erfasse für jeden Post den Gültigkeitszeitraum, den genauen Standort, die Art der Speisen/Getränke, die URL des Original-Posts sowie den Veröffentlichungszeitpunkt. Wenn der Post älter als ${MAX_POST_AGE_DAYS} Tage ist oder der Veröffentlichungszeitpunkt nicht belastbar erkennbar ist, lasse ihn weg.`,
+    prompt: `Extrahiere Instagram-Posts über Angebote rund um Essen und Getränke. Schließe keine Kandidaten wegen Alter, Giveaway-Charakter, Standort oder fehlender Signalwörter aus. Erfasse pro Post möglichst den Gültigkeitszeitraum, den Standort, die Art der Speisen/Getränke, die URL des Original-Posts sowie den Veröffentlichungszeitpunkt. Wenn Informationen unklar sind, gib trotzdem den Kandidaten mit den besten verfügbaren Feldern zurück.`,
     schema: key3Schema,
     model: 'spark-1-mini',
   });

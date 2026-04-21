@@ -859,16 +859,15 @@ async function main() {
       }
     }
 
-    const deduped = dedupeDeals(allDeals);
     const payload = {
       lastUpdated: new Date().toISOString(),
       source: 'joe-scraper',
-      totalDeals: deduped.length,
-      deals: deduped,
+      totalDeals: allDeals.length,
+      deals: allDeals,
     };
 
     fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
-    console.log(`💾 ${deduped.length} Deals → ${OUTPUT_PATH}`);
+    console.log(`💾 ${allDeals.length} Deals → ${OUTPUT_PATH}`);
   } finally {
     await browser.close();
   }
