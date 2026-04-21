@@ -419,8 +419,11 @@ function sanitizePublicCommunitySubmission(record) {
     brand: cleanShortText(record.brand, 120),
     logo: cleanShortText(record.logo, 16),
     title: cleanShortText(record.title, 240),
+    description: cleanLongText(record.description, 500),
     category: cleanShortText(record.category, 80).toLowerCase(),
     type: cleanShortText(record.type, 40).toLowerCase(),
+    distance: cleanShortText(record.distance, 200),
+    expires: cleanShortText(record.expires, 120),
     status: normalizeSubmissionStatus(record.status),
     submittedAt: Number(record.submittedAt || record.createdAt || 0) || null,
     postedAt: Number(record.postedAt || 0) || null,
@@ -453,8 +456,11 @@ function normalizeCommunitySubmissionInput(body, request) {
     brand: cleanShortText(body?.brand, 120),
     logo: cleanShortText(body?.logo, 16),
     title: cleanShortText(body?.title, 240),
+    description: cleanLongText(body?.description, 500),
     category: cleanShortText(body?.category, 80).toLowerCase() || 'wien',
     type: cleanShortText(body?.type, 40).toLowerCase() || 'rabatt',
+    distance: cleanShortText(body?.distance, 200),
+    expires: cleanShortText(body?.expires, 120),
     status: 'pending',
     submittedAt: Date.now(),
     createdAt: Date.now(),
@@ -523,6 +529,301 @@ async function readBody(request) {
 
 function invalid(message, status = 400) {
   return json({ ok: false, error: message }, status);
+}
+
+function decodeHtmlEntities(value) {
+  return String(value || '')
+    .replace(/&#(\d+);/g, (_, code) => {
+      const parsed = Number(code);
+      return Number.isFinite(parsed) ? String.fromCharCode(parsed) : '';
+    })
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => {
+      const parsed = parseInt(code, 16);
+      return Number.isFinite(parsed) ? String.fromCharCode(parsed) : '';
+    })
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ');
+}
+
+function stripHtmlTags(value) {
+  return String(value || '')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ');
+}
+
+function cleanPreviewText(value, max = 600) {
+  return decodeHtmlEntities(stripHtmlTags(value))
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, max);
+}
+
+function getPreviewHost(url) {
+  try {
+    return new URL(String(url || '')).hostname.toLowerCase().replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+}
+
+function isPrivatePreviewHost(host) {
+  const normalized = String(host || '').trim().toLowerCase();
+  if (!normalized) return true;
+  if (
+    normalized === 'localhost' ||
+    normalized === '0.0.0.0' ||
+    normalized === '::1' ||
+    normalized === '[::1]' ||
+    normalized.endsWith('.local') ||
+    normalized.endsWith('.internal')
+  ) {
+    return true;
+  }
+
+  if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(normalized)) {
+    const [a, b] = normalized.split('.').map(Number);
+    if (
+      a === 0 ||
+      a === 10 ||
+      a === 127 ||
+      (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function normalizePreviewUrl(rawValue) {
+  let raw = String(rawValue || '').trim();
+  if (!raw) return '';
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(raw)) raw = `https://${raw}`;
+
+  try {
+    const parsed = new URL(raw);
+    if (!/^https?:$/i.test(parsed.protocol)) return '';
+    if (parsed.username || parsed.password) return '';
+    if (parsed.port && !['80', '443'].includes(parsed.port)) return '';
+
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+    if (isPrivatePreviewHost(host)) return '';
+
+    parsed.hash = '';
+
+    const trackingPrefixes = ['utm_', 'igsh', 'fbclid', 'gclid', 'mc_cid', 'mc_eid'];
+    const keptEntries = [...parsed.searchParams.entries()].filter(([key]) => {
+      const normalizedKey = String(key || '').toLowerCase();
+      return !trackingPrefixes.some((prefix) => normalizedKey.startsWith(prefix));
+    });
+    parsed.search = '';
+    for (const [key, value] of keptEntries) {
+      parsed.searchParams.append(key, value);
+    }
+
+    if (host === 'instagram.com' || host === 'instagr.am' || host === 'm.instagram.com') {
+      const parts = parsed.pathname.split('/').filter(Boolean);
+      if (parts.length >= 2 && ['p', 'reel', 'tv'].includes(parts[0].toLowerCase())) {
+        parsed.hostname = 'www.instagram.com';
+        parsed.pathname = `/${parts[0].toLowerCase()}/${parts[1]}/`;
+        parsed.search = '';
+      }
+    }
+
+    if (host.endsWith('tiktok.com')) {
+      parsed.hostname = 'www.tiktok.com';
+      parsed.searchParams.delete('lang');
+      parsed.searchParams.delete('is_copy_url');
+      parsed.searchParams.delete('is_from_webapp');
+      parsed.searchParams.delete('sender_device');
+    }
+
+    return parsed.toString();
+  } catch {
+    return '';
+  }
+}
+
+function extractMetaContent(html, key) {
+  const escaped = String(key || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const patterns = [
+    new RegExp(`<meta[^>]+(?:property|name)=["']${escaped}["'][^>]+content=["']([^"']*)["'][^>]*>`, 'i'),
+    new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["']${escaped}["'][^>]*>`, 'i'),
+  ];
+
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match && match[1]) return cleanPreviewText(match[1], 1400);
+  }
+  return '';
+}
+
+function extractCanonicalUrl(html) {
+  const match = html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["'][^>]*>/i)
+    || html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["'][^>]*>/i);
+  return match && match[1] ? cleanPreviewText(match[1], 1200) : '';
+}
+
+function extractTitleTag(html) {
+  const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  return match && match[1] ? cleanPreviewText(match[1], 300) : '';
+}
+
+function extractJsonLdSummary(html) {
+  const scriptMatches = [...html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+  for (const match of scriptMatches) {
+    const raw = match && match[1] ? match[1].trim() : '';
+    if (!raw) continue;
+
+    try {
+      const parsed = JSON.parse(raw);
+      const queue = Array.isArray(parsed) ? parsed : [parsed];
+      for (const entry of queue) {
+        if (!entry || typeof entry !== 'object') continue;
+        const candidate = entry.headline || entry.name || entry.description || entry.articleBody || '';
+        if (candidate) {
+          return {
+            title: cleanPreviewText(entry.headline || entry.name || '', 280),
+            description: cleanPreviewText(entry.description || entry.articleBody || '', 1400),
+          };
+        }
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return { title: '', description: '' };
+}
+
+function getSourcePlatform(host) {
+  const normalized = String(host || '').toLowerCase();
+  if (/(^|\.)instagram\.com$/.test(normalized) || normalized === 'instagr.am') return 'instagram';
+  if (/(^|\.)tiktok\.com$/.test(normalized)) return 'tiktok';
+  if (/(^|\.)facebook\.com$/.test(normalized)) return 'facebook';
+  if (normalized === 'x.com' || /(^|\.)twitter\.com$/.test(normalized)) return 'x';
+  return '';
+}
+
+function extractInstagramAccountInfo(title, description) {
+  const titleText = cleanPreviewText(title, 320);
+  const descriptionText = cleanPreviewText(description, 1400);
+
+  let accountName = '';
+  let accountHandle = '';
+
+  let match = titleText.match(/^(.+?)\s+(?:on|auf)\s+Instagram:/i);
+  if (match) accountName = cleanPreviewText(match[1], 120);
+
+  match = titleText.match(/^(.+?)\s+\(@([^)\s]+)\)\s+•\s+Instagram/i);
+  if (match) {
+    accountName = cleanPreviewText(match[1], 120);
+    accountHandle = cleanPreviewText(match[2], 80).replace(/^@+/, '');
+  }
+
+  match = descriptionText.match(/-\s*([A-Za-z0-9._-]{2,40})\s+(?:on|am)\s+[^:]{4,80}:/i);
+  if (match && !accountHandle) accountHandle = cleanPreviewText(match[1], 80).replace(/^@+/, '');
+
+  return {
+    accountName,
+    accountHandle,
+  };
+}
+
+function extractInstagramCaption(description, title) {
+  const descriptionText = cleanPreviewText(description, 1600);
+  const titleText = cleanPreviewText(title, 1200);
+
+  const fromDescription = descriptionText.match(/-\s*[^:]{1,80}\s+(?:on|am)\s+[^:]{4,80}:\s*"([\s\S]+?)"\.?\s*$/i);
+  if (fromDescription && fromDescription[1]) {
+    return cleanPreviewText(fromDescription[1], 1200);
+  }
+
+  const fromTitle = titleText.match(/(?:on|auf)\s+Instagram:\s*"([\s\S]+?)"\s*$/i);
+  if (fromTitle && fromTitle[1]) {
+    return cleanPreviewText(fromTitle[1], 800);
+  }
+
+  return '';
+}
+
+async function buildDealLinkPreview(rawUrl) {
+  const normalizedUrl = normalizePreviewUrl(rawUrl);
+  if (!normalizedUrl) throw new Error('Invalid preview URL');
+
+  const targetHost = getPreviewHost(normalizedUrl);
+  if (!targetHost || isPrivatePreviewHost(targetHost)) {
+    throw new Error('Preview host is not allowed');
+  }
+
+  const response = await fetch(normalizedUrl, {
+    method: 'GET',
+    redirect: 'follow',
+    headers: {
+      'user-agent': 'Mozilla/5.0 (compatible; FreeFinderPreviewBot/1.0; +https://freefinder.app)',
+      accept: 'text/html,application/xhtml+xml',
+      'accept-language': 'de-AT,de;q=0.9,en;q=0.8',
+      'cache-control': 'no-cache',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Preview fetch failed with ${response.status}`);
+  }
+
+  const html = (await response.text()).slice(0, 250000);
+  const finalUrl = normalizePreviewUrl(response.url || normalizedUrl) || normalizedUrl;
+  const finalHost = getPreviewHost(finalUrl);
+  const sourcePlatform = getSourcePlatform(finalHost);
+
+  const ogTitle = extractMetaContent(html, 'og:title');
+  const ogDescription = extractMetaContent(html, 'og:description');
+  const twitterTitle = extractMetaContent(html, 'twitter:title');
+  const twitterDescription = extractMetaContent(html, 'twitter:description');
+  const metaDescription = extractMetaContent(html, 'description');
+  const ogImage = extractMetaContent(html, 'og:image');
+  const siteName = extractMetaContent(html, 'og:site_name');
+  const canonicalUrl = normalizePreviewUrl(extractCanonicalUrl(html)) || finalUrl;
+  const titleTag = extractTitleTag(html);
+  const jsonLd = extractJsonLdSummary(html);
+  const account = sourcePlatform === 'instagram'
+    ? extractInstagramAccountInfo(ogTitle || twitterTitle || titleTag, ogDescription || metaDescription)
+    : { accountName: '', accountHandle: '' };
+  const caption = sourcePlatform === 'instagram'
+    ? extractInstagramCaption(ogDescription || metaDescription, ogTitle || twitterTitle || titleTag)
+    : '';
+
+  return {
+    ok: true,
+    requestedUrl: normalizedUrl,
+    finalUrl,
+    canonicalUrl,
+    host: finalHost,
+    sourcePlatform,
+    siteName: cleanPreviewText(siteName, 120),
+    title: cleanPreviewText(ogTitle || twitterTitle || jsonLd.title || titleTag, 280),
+    description: cleanPreviewText(caption || ogDescription || twitterDescription || jsonLd.description || metaDescription, 1400),
+    image: cleanPreviewText(ogImage, 1400),
+    meta: {
+      ogTitle,
+      ogDescription,
+      twitterTitle,
+      twitterDescription,
+      titleTag,
+      metaDescription,
+    },
+    accountName: cleanPreviewText(account.accountName, 120),
+    accountHandle: cleanPreviewText(account.accountHandle, 80),
+    caption: cleanPreviewText(caption, 1200),
+  };
 }
 
 function escapeHtml(value) {
@@ -1057,6 +1358,18 @@ export default {
         overrides: overrides.map(sanitizePublicDealOverride).filter(Boolean),
         dailyDeal: isCurrentDailyDealRecord(dailyDeal) ? sanitizePublicDailyDeal(dailyDeal) : null,
       });
+    }
+
+    if (path === '/api/deals/preview' && request.method === 'GET') {
+      const targetUrl = url.searchParams.get('url');
+      if (!targetUrl) return invalid('Missing preview url');
+
+      try {
+        const preview = await buildDealLinkPreview(targetUrl);
+        return json(preview);
+      } catch (error) {
+        return invalid(error?.message || 'Preview fetch failed', 502);
+      }
     }
 
     if (path === '/api/deals/submissions' && request.method === 'POST') {

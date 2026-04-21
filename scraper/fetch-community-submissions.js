@@ -61,8 +61,15 @@ function normalizeSubmissionDeal(submission) {
   const brand = cleanText(submission?.brand) || 'Community Fund';
   const title = cleanText(submission?.title) || 'Community-Deal prüfen';
   const logo = cleanText(submission?.logo) || '🔗';
+  const description = cleanText(submission?.description) || '📨 Von der Community eingereicht. Bitte Link, Ort und Ablauf prüfen, bevor der Deal live geht.';
   const category = cleanText(submission?.category).toLowerCase() || 'wien';
   const type = cleanText(submission?.type).toLowerCase() || 'rabatt';
+  const distance = cleanText(submission?.distance) || 'Bitte prüfen';
+  const expires = cleanText(submission?.expires);
+  const missingFields = [];
+  if (!description) missingFields.push('Beschreibung');
+  if (!distance) missingFields.push('Ort');
+  if (!expires) missingFields.push('Ablauf');
 
   return {
     id: `community:${cleanText(submission?.id)}`,
@@ -70,14 +77,14 @@ function normalizeSubmissionDeal(submission) {
     brand,
     logo,
     title,
-    description: '📨 Von der Community eingereicht. Bitte Link, Ort und Ablauf prüfen, bevor der Deal live geht.',
+    description,
     type,
     category,
     source: 'Community Submission',
     originSource: 'community-submission',
     url: cleanText(submission?.url),
-    expires: '',
-    distance: 'Bitte prüfen',
+    expires,
+    distance,
     hot: false,
     isNew: true,
     votes: 1,
@@ -86,7 +93,7 @@ function normalizeSubmissionDeal(submission) {
     pubDate: new Date(submittedAt).toISOString(),
     pubDateSource: 'communitySubmission',
     submittedAt: new Date(submittedAt).toISOString(),
-    missingFields: ['Ort', 'Ablauf', 'Beschreibung prüfen'],
+    missingFields,
   };
 }
 

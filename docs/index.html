@@ -6402,9 +6402,16 @@
         
         // ===== LINK SUBMIT SYSTEM =====
         let currentLinkData = null;
+        let currentLinkPreviewRequestId = 0;
+        let currentLinkPreviewTimer = null;
         
         function openLinkModal() {
             setBottomChromeHidden(false);
+            currentLinkPreviewRequestId += 1;
+            if (currentLinkPreviewTimer) {
+                clearTimeout(currentLinkPreviewTimer);
+                currentLinkPreviewTimer = null;
+            }
             document.getElementById('linkModal').classList.add('show');
             document.getElementById('linkInput').value = '';
             document.getElementById('linkPreview').classList.remove('show');
@@ -6413,6 +6420,11 @@
         }
         
         function closeLinkModal() {
+            currentLinkPreviewRequestId += 1;
+            if (currentLinkPreviewTimer) {
+                clearTimeout(currentLinkPreviewTimer);
+                currentLinkPreviewTimer = null;
+            }
             document.getElementById('linkModal').classList.remove('show');
         }
         
@@ -6427,11 +6439,392 @@
         }
         
         function previewLink() {
+            if (currentLinkPreviewTimer) clearTimeout(currentLinkPreviewTimer);
+            currentLinkPreviewTimer = setTimeout(() => {
+                previewLinkNow();
+            }, 240);
+        }
+
+        function decodeHtmlEntitiesForApp(value) {
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = String(value || '');
+            return textarea.value;
+        }
+
+        function normalizeSubmittedDealUrl(url) {
+            let raw = String(url || '').trim();
+            if (!raw) return '';
+            if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(raw)) raw = `https://${raw}`;
+
+            try {
+                const parsed = new URL(raw);
+                if (!/^https?:$/i.test(parsed.protocol)) return '';
+
+                const host = parsed.hostname.toLowerCase().replace(/^m\./, '').replace(/^www\./, '');
+                parsed.hash = '';
+
+                const keptParams = [...parsed.searchParams.entries()].filter(([key]) => {
+                    const normalizedKey = String(key || '').toLowerCase();
+                    return !normalizedKey.startsWith('utm_') &&
+                        !['fbclid', 'gclid', 'igshid', 'igsh', 'si', 'lang', 'is_copy_url', 'is_from_webapp', 'sender_device'].includes(normalizedKey);
+                });
+                parsed.search = '';
+
+                if (host === 'instagram.com' || host === 'instagr.am') {
+                    const parts = parsed.pathname.split('/').filter(Boolean);
+                    if (parts.length >= 2 && ['p', 'reel', 'tv'].includes(parts[0].toLowerCase())) {
+                        parsed.hostname = 'www.instagram.com';
+                        parsed.pathname = `/${parts[0].toLowerCase()}/${parts[1]}/`;
+                        return parsed.toString();
+                    }
+                }
+
+                if (host.endsWith('tiktok.com')) {
+                    parsed.hostname = 'www.tiktok.com';
+                }
+
+                for (const [key, value] of keptParams) {
+                    parsed.searchParams.append(key, value);
+                }
+
+                return parsed.toString();
+            } catch {
+                return '';
+            }
+        }
+
+        function getSubmittedSourceLabel(host) {
+            const normalizedHost = String(host || '').toLowerCase();
+            if (normalizedHost.includes('instagram.com')) return 'Instagram';
+            if (normalizedHost.includes('tiktok.com')) return 'TikTok';
+            if (normalizedHost.includes('facebook.com')) return 'Facebook';
+            if (normalizedHost === 'x.com' || normalizedHost.includes('twitter.com')) return 'X';
+            if (!normalizedHost) return 'Community';
+
+            const label = cleanUiNoiseText(normalizedHost
+                .replace(/^www\./, '')
+                .replace(/\.(at|com|de|net|org|io)$/i, '')
+                .replace(/[-_]+/g, ' '));
+            return label ? label.charAt(0).toUpperCase() + label.slice(1) : 'Community';
+        }
+
+        function isOpaqueUrlTokenForApp(token, host) {
+            const normalized = String(token || '').toLowerCase();
+            if (!normalized) return true;
+            if (['p', 'reel', 'tv', 'video', 'shop', 'products'].includes(normalized)) return true;
+            if (/^\d{6,}$/.test(normalized)) return true;
+            if (/^[a-z0-9_-]{8,20}$/i.test(normalized) && host.includes('instagram.com')) return true;
+            if (/^[a-z0-9_-]{12,}$/i.test(normalized) && host.includes('tiktok.com')) return true;
+            if (/^[a-z0-9]{9,}$/i.test(normalized) && !/[aeiouäöü]/i.test(normalized)) return true;
+            return false;
+        }
+
+        function extractMeaningfulUrlTokensForApp(url) {
+            const normalizedUrl = normalizeSubmittedDealUrl(url);
+            if (!normalizedUrl) return [];
+
+            try {
+                const parsed = new URL(normalizedUrl);
+                const host = parsed.hostname.toLowerCase();
+                const tokens = [];
+
+                const pushToken = (value) => {
+                    const cleaned = cleanUiNoiseText(decodeHtmlEntitiesForApp(String(value || '')))
+                        .toLowerCase()
+                        .replace(/\.(html?|php|aspx?)$/i, '')
+                        .replace(/[^a-z0-9äöüß]+/gi, ' ')
+                        .trim();
+                    if (!cleaned) return;
+                    cleaned.split(/\s+/).forEach((part) => {
+                        if (part.length < 3 || part.length > 32) return;
+                        if (!/[a-zäöüß]/i.test(part)) return;
+                        if (isOpaqueUrlTokenForApp(part, host)) return;
+                        tokens.push(part);
+                    });
+                };
+
+                parsed.pathname.split('/').filter(Boolean).forEach(pushToken);
+
+                ['title', 'deal', 'offer', 'aktion', 'angebot'].forEach((key) => {
+                    const value = parsed.searchParams.get(key);
+                    if (value) pushToken(value);
+                });
+
+                return [...new Set(tokens)];
+            } catch {
+                return [];
+            }
+        }
+
+        function findExistingDealByUrlForApp(url) {
+            const normalizedUrl = normalizeSubmittedDealUrl(url);
+            if (!normalizedUrl || !Array.isArray(allDeals) || !allDeals.length) return null;
+
+            return allDeals.find((deal) => {
+                const candidates = [deal.url, deal.post_url].filter(Boolean);
+                return candidates.some((candidate) => normalizeSubmittedDealUrl(candidate) === normalizedUrl);
+            }) || null;
+        }
+
+        function getPreviewTypeLabel(type) {
+            const normalized = String(type || '').toLowerCase();
+            if (normalized === 'gratis') return 'GRATIS';
+            if (normalized === 'freebie') return 'FREEBIE';
+            if (normalized === 'bogo') return '1+1';
+            if (normalized === 'testabo') return 'TESTABO';
+            if (normalized === 'gewinnspiel') return 'GEWINNSPIEL';
+            return 'RABATT';
+        }
+
+        function formatEuroAmountForTitle(value) {
+            const numeric = Number(String(value || '').replace(',', '.'));
+            if (!Number.isFinite(numeric)) return '';
+            const rounded = Math.round(numeric * 100) / 100;
+            return Number.isInteger(rounded) ? `${rounded}€` : `${String(rounded).replace('.', ',')}€`;
+        }
+
+        function normalizeOfferItemLabel(value) {
+            const normalized = String(value || '').toLowerCase();
+            const itemMap = {
+                'döner': 'Döner',
+                'doener': 'Döner',
+                'kebab': 'Kebab',
+                'kebap': 'Kebab',
+                'pizza': 'Pizza',
+                'burger': 'Burger',
+                'kaffee': 'Kaffee',
+                'coffee': 'Kaffee',
+                'cocktail': 'Cocktail',
+                'drink': 'Drink',
+                'wrap': 'Wrap',
+                'falafel': 'Falafel',
+                'eis': 'Eis',
+                'gelato': 'Gelato',
+                'ramen': 'Ramen',
+                'sushi': 'Sushi',
+                'bowl': 'Bowl',
+                'brunch': 'Brunch',
+                'ticket': 'Ticket',
+                'eintritt': 'Eintritt'
+            };
+            return itemMap[normalized] || (normalized ? normalized.charAt(0).toUpperCase() + normalized.slice(1) : '');
+        }
+
+        function extractOfferHeadlineFromSignalText(text) {
+            const signal = cleanUiNoiseText(decodeHtmlEntitiesForApp(text || '')).toLowerCase();
+            if (!signal) return '';
+
+            const offerItems = 'döner|doener|kebab|kebap|pizza|burger|kaffee|coffee|cocktail|drink|wrap|falafel|eis|gelato|ramen|sushi|bowl|brunch|ticket|eintritt';
+
+            let match = signal.match(new RegExp(`(?:für|fuer|nur|um|ab)?\\s*(\\d+[,.]?\\d{0,2})\\s*(?:€|euro)\\s*(?:pro\\s+)?(${offerItems})`, 'i'));
+            if (match) return `${formatEuroAmountForTitle(match[1])} ${normalizeOfferItemLabel(match[2])} Aktion`;
+
+            match = signal.match(new RegExp(`(${offerItems})\\s*(?:für|fuer|nur|um|ab)?\\s*(\\d+[,.]?\\d{0,2})\\s*(?:€|euro)`, 'i'));
+            if (match) return `${formatEuroAmountForTitle(match[2])} ${normalizeOfferItemLabel(match[1])} Aktion`;
+
+            match = signal.match(new RegExp(`(?:gratis|kostenlos|free)\\s+(?:einen?|eine|ein)?\\s*(${offerItems})`, 'i'));
+            if (match) return `Gratis ${normalizeOfferItemLabel(match[1])}`;
+
+            match = signal.match(new RegExp(`(1\\+1|2\\s*f[üu]r\\s*1|buy\\s*one\\s*get\\s*one|bogo)\\s*(?:auf|für|fuer)?\\s*(${offerItems})?`, 'i'));
+            if (match) {
+                const dealPrefix = '1+1';
+                return match[2] ? `${dealPrefix} ${normalizeOfferItemLabel(match[2])}` : dealPrefix;
+            }
+
+            match = signal.match(/(\d{1,2})\s*%\s*(rabatt|discount)/i);
+            if (match) return `${match[1]}% Rabatt`;
+
+            match = signal.match(/(\d+)\s*(monat|monate|month|months)\s*(?:gratis|kostenlos|free)/i);
+            if (match) return `${match[1]} ${Number(match[1]) === 1 ? 'Monat' : 'Monate'} gratis`;
+
+            return '';
+        }
+
+        function buildReadableTitleFromText(text) {
+            const cleaned = cleanUiNoiseText(decodeHtmlEntitiesForApp(text || ''))
+                .replace(/#[\w.äöüß-]+/gi, ' ')
+                .replace(/[\r\n]+/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            if (!cleaned) return '';
+
+            const firstSentence = cleaned.split(/[.!?]/)[0].trim();
+            const candidate = (firstSentence || cleaned).replace(/^["“]+|["”]+$/g, '').trim();
+            if (!candidate) return '';
+            if (candidate.length <= 90) return candidate;
+            return `${candidate.slice(0, 87).trim()}…`;
+        }
+
+        function inferBrandFromPreviewSignal(url, preview, host) {
+            const knownBrand = findKnownBrandForApp(
+                preview?.accountName,
+                preview?.accountHandle,
+                preview?.title,
+                preview?.description,
+                preview?.caption,
+                extractMeaningfulUrlTokensForApp(url).join(' ')
+            );
+            if (knownBrand) return knownBrand.name;
+
+            const accountName = cleanUiNoiseText(preview?.accountName || '').replace(/\s+on instagram$/i, '').trim();
+            if (accountName && !/^(instagram|tiktok|facebook|x)$/i.test(accountName)) return accountName;
+
+            const accountHandle = cleanUiNoiseText(preview?.accountHandle || '').replace(/^@+/, '').trim();
+            if (accountHandle && !/^(instagram|tiktok|facebook|x)$/i.test(accountHandle)) return accountHandle;
+
+            if (!isSourceLikeHostForApp(host)) {
+                const hostKey = getLogoHostKeyForApp(host);
+                if (hostKey && KNOWN_BRANDS[hostKey]) return KNOWN_BRANDS[hostKey].name;
+            }
+
+            return getSubmittedSourceLabel(host);
+        }
+
+        function inferLocationFromPreviewSignal(text, host) {
+            const cleaned = cleanUiNoiseText(decodeHtmlEntitiesForApp(text || ''));
+            if (!cleaned) return isSourceLikeHostForApp(host) ? 'Siehe Link' : 'Online';
+
+            const exactVienna = cleaned.match(/\b(10[1-9]0|1[12][0-9]0)\s+wien\b/i);
+            if (exactVienna) return exactVienna[0];
+            if (/\b(wien|vienna)\b/i.test(cleaned)) return 'Wien';
+
+            return isSourceLikeHostForApp(host) ? 'Siehe Link' : 'Online';
+        }
+
+        function inferExpiryFromPreviewSignal(text) {
+            const cleaned = cleanUiNoiseText(decodeHtmlEntitiesForApp(text || ''));
+            if (!cleaned) return 'Siehe Link';
+
+            let match = cleaned.match(/\b(?:g[üu]ltig bis|gueltig bis|endet am|läuft bis|laeuft bis|bis)\s+(\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?|\d{1,2}\.\s*(?:januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)(?:\s+\d{4})?)/i);
+            if (match) return cleanUiNoiseText(match[0]);
+
+            match = cleaned.match(/\b(\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?)\b/);
+            if (match) return match[1];
+
+            return 'Siehe Link';
+        }
+
+        async function fetchDealPreviewFromApi(url) {
+            const base = await getReferralApiBase();
+            if (!base) return null;
+
+            try {
+                const res = await fetch(base + '/api/deals/preview?url=' + encodeURIComponent(url));
+                const body = await res.json().catch(() => null);
+                if (!res.ok || !body?.ok) return null;
+                return body;
+            } catch {
+                return null;
+            }
+        }
+
+        function buildFallbackLinkDescription(preview, host, title) {
+            const sourceText = cleanUiNoiseText(
+                decodeHtmlEntitiesForApp(
+                    preview?.caption ||
+                    preview?.description ||
+                    preview?.title ||
+                    ''
+                )
+            ).replace(/#[\w.äöüß-]+/gi, ' ').replace(/\s+/g, ' ').trim();
+
+            if (sourceText) {
+                if (title && sourceText.toLowerCase().startsWith(title.toLowerCase())) {
+                    return sourceText.slice(0, 220);
+                }
+                return sourceText.slice(0, 220);
+            }
+
+            const sourceLabel = getSubmittedSourceLabel(host);
+            return `Von der Community geteilter ${sourceLabel}-Deal. Bitte Details direkt im Link prüfen.`;
+        }
+
+        async function parseDealLink(url) {
+            const normalizedUrl = normalizeSubmittedDealUrl(url);
+            const host = extractHostFromUrlForApp(normalizedUrl);
+            const sourceLabel = getSubmittedSourceLabel(host);
+            const existingDeal = findExistingDealByUrlForApp(normalizedUrl);
+
+            if (existingDeal) {
+                const normalizedExisting = normalizeDealForApp({ ...existingDeal });
+                return {
+                    id: 'user-' + Date.now(),
+                    url: normalizedUrl,
+                    brand: normalizedExisting.brand || sourceLabel,
+                    logo: normalizedExisting.logo || inferLogoForApp(normalizedExisting, normalizedExisting.brand || sourceLabel),
+                    category: normalizedExisting.category || 'wien',
+                    type: normalizedExisting.type || 'rabatt',
+                    title: normalizedExisting.title || `${sourceLabel} Deal`,
+                    description: normalizedExisting.description || buildFallbackDescriptionForApp(normalizedExisting),
+                    distance: normalizedExisting.distance || inferLocationFromPreviewSignal(normalizedExisting.description || normalizedExisting.title, host),
+                    expires: normalizedExisting.expires || 'Siehe Link',
+                    source: `Community · ${sourceLabel}`,
+                };
+            }
+
+            const preview = await fetchDealPreviewFromApi(normalizedUrl);
+            const urlTokens = extractMeaningfulUrlTokensForApp(normalizedUrl);
+            const signalText = [
+                preview?.caption,
+                preview?.description,
+                preview?.title,
+                preview?.accountName,
+                preview?.accountHandle,
+                urlTokens.join(' ')
+            ].filter(Boolean).join(' ');
+
+            const brand = inferBrandFromPreviewSignal(normalizedUrl, preview, host);
+            const title = extractOfferHeadlineFromSignalText(signalText)
+                || buildReadableTitleFromText(preview?.caption || preview?.title || preview?.description || urlTokens.join(' '))
+                || (urlTokens.length ? cleanUiNoiseText(urlTokens.join(' ')) : '')
+                || `${sourceLabel} Deal`;
+
+            const seedDeal = {
+                url: normalizedUrl,
+                source: `Community ${sourceLabel}`,
+                brand,
+                title,
+                description: buildFallbackLinkDescription(preview, host, title),
+                category: '',
+                type: '',
+                distance: inferLocationFromPreviewSignal(signalText, host),
+                expires: inferExpiryFromPreviewSignal(signalText),
+            };
+
+            const type = inferDealTypeForApp(seedDeal);
+            const category = normalizeCategoryForApp('', { ...seedDeal, type });
+            const finalLogo = inferLogoForApp({ ...seedDeal, type, category }, brand);
+
+            return {
+                id: 'user-' + Date.now(),
+                url: normalizedUrl,
+                brand,
+                logo: finalLogo,
+                category,
+                type,
+                title,
+                description: seedDeal.description,
+                distance: seedDeal.distance,
+                expires: seedDeal.expires,
+                source: `Community · ${sourceLabel}`,
+            };
+        }
+
+        function renderLinkPreviewCard(linkData) {
+            document.getElementById('previewLogo').textContent = linkData.logo || '🎁';
+            document.getElementById('previewBrand').textContent = linkData.brand || getSubmittedSourceLabel(extractHostFromUrlForApp(linkData.url));
+            document.getElementById('previewTitle').textContent = linkData.title || 'Deal erkannt';
+            document.getElementById('previewType').textContent = getPreviewTypeLabel(linkData.type);
+        }
+
+        async function previewLinkNow() {
             const input = document.getElementById('linkInput').value.trim();
             const preview = document.getElementById('linkPreview');
             const submitBtn = document.getElementById('linkSubmitBtn');
+            const requestId = ++currentLinkPreviewRequestId;
+            const normalizedInput = normalizeSubmittedDealUrl(input);
             
-            if (!input || !input.includes('.')) {
+            if (!normalizedInput) {
                 preview.classList.remove('show');
                 submitBtn.disabled = true;
                 currentLinkData = null;
@@ -6439,71 +6832,27 @@
             }
             
             // Check if already submitted
-            if (submittedLinks.includes(input)) {
+            if (submittedLinks.some((savedUrl) => normalizeSubmittedDealUrl(savedUrl) === normalizedInput)) {
                 showToast(t('alreadySubmitted'));
                 submitBtn.disabled = true;
+                currentLinkData = null;
                 return;
             }
-            
-            // Parse the URL
-            const linkData = parseDealLink(input);
-            currentLinkData = linkData;
-            
-            // Update preview
-            document.getElementById('previewLogo').textContent = linkData.logo;
-            document.getElementById('previewBrand').textContent = linkData.brand;
-            document.getElementById('previewTitle').textContent = linkData.title;
-            document.getElementById('previewType').textContent = linkData.type.toUpperCase();
-            
+
             preview.classList.add('show');
+            document.getElementById('previewLogo').textContent = '🧠';
+            document.getElementById('previewBrand').textContent = currentLanguage === 'en' ? 'Analyzing link…' : 'Link wird analysiert…';
+            document.getElementById('previewTitle').textContent = currentLanguage === 'en' ? 'Detecting brand, offer and description…' : 'Marke, Angebot und Beschreibung werden erkannt…';
+            document.getElementById('previewType').textContent = '...';
+            submitBtn.disabled = true;
+            currentLinkData = null;
+
+            const linkData = await parseDealLink(normalizedInput);
+            if (requestId !== currentLinkPreviewRequestId) return;
+
+            currentLinkData = linkData;
+            renderLinkPreviewCard(linkData);
             submitBtn.disabled = false;
-        }
-        
-        function parseDealLink(url) {
-            const urlLower = url.toLowerCase();
-            
-            // Find matching brand
-            let brand = { name: t('unknownBrand'), logo: '🎁', category: 'shopping' };
-            for (const [key, value] of Object.entries(KNOWN_BRANDS)) {
-                if (urlLower.includes(key)) {
-                    brand = value;
-                    break;
-                }
-            }
-            
-            // Detect deal type from URL keywords
-            let type = 'rabatt';
-            let title = 'Neuer Deal';
-            
-            const gratisKeywords = ['gratis', 'kostenlos', 'free', 'geschenk', 'umsonst', 'freebie', '0-euro', '0euro'];
-            const rabattKeywords = ['rabatt', 'sale', 'prozent', 'aktion', 'angebot', 'deal', 'sparen', 'reduziert', 'gutschein', 'code', 'coupon'];
-            
-            if (gratisKeywords.some(k => urlLower.includes(k))) {
-                type = 'gratis';
-                title = 'Gratis-Angebot entdeckt!';
-            } else if (rabattKeywords.some(k => urlLower.includes(k))) {
-                type = 'rabatt';
-                title = 'Rabatt-Deal entdeckt!';
-            }
-            
-            // Try to extract more info from URL path
-            const pathMatch = url.match(/\/([^\/\?]+)(?:\?|$)/);
-            if (pathMatch) {
-                const pathPart = pathMatch[1].replace(/[-_]/g, ' ').replace(/\.(html|php|aspx)/i, '');
-                if (pathPart.length > 3 && pathPart.length < 50) {
-                    title = pathPart.charAt(0).toUpperCase() + pathPart.slice(1);
-                }
-            }
-            
-            return {
-                url: url,
-                brand: brand.name,
-                logo: brand.logo,
-                category: brand.category,
-                type: type,
-                title: title,
-                id: 'user-' + Date.now()
-            };
         }
         
         async function submitDealLink() {
@@ -6523,16 +6872,20 @@
                         brand: currentLinkData.brand,
                         logo: currentLinkData.logo,
                         title: currentLinkData.title,
+                        description: currentLinkData.description,
                         category: currentLinkData.category,
                         type: currentLinkData.type,
+                        distance: currentLinkData.distance,
+                        expires: currentLinkData.expires,
                         submittedFrom: 'web-app',
                         language: currentLanguage,
                         userAgent: navigator.userAgent || ''
                     })
                 });
 
-                if (!submittedLinks.includes(currentLinkData.url)) {
-                    submittedLinks.push(currentLinkData.url);
+                const normalizedUrl = normalizeSubmittedDealUrl(currentLinkData.url) || currentLinkData.url;
+                if (!submittedLinks.some((savedUrl) => normalizeSubmittedDealUrl(savedUrl) === normalizedUrl)) {
+                    submittedLinks.push(normalizedUrl);
                     localStorage.setItem('submittedLinks', JSON.stringify(submittedLinks));
                 }
 
