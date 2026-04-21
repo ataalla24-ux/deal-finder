@@ -48,7 +48,7 @@ jobs:
         run: |
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
-          git add docs/deals-pending-community.json docs/deals-pending-all.json docs/sent-deal-ids.json 2>/dev/null || true
+          git add docs/deals-pending-community.json docs/deals-pending-all.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0

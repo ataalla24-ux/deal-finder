@@ -23,11 +23,10 @@
     "instagram:apify": "node scraper/import-apify-instagram-deals.js",
     "instagram:check": "node scripts/check-instagram-auth.mjs",
     "deal-health": "node scraper/build-deal-source-health.js",
-    "filter-old": "node scraper/filter-old-deals.js",
     "slack-notify": "node scraper/slack-notify.js",
     "slack-approve": "node scraper/slack-approve.js",
     "smart-summary": "node scraper/smart-summary.js",
-    "scrape-all": "npm run scrape && npm run firecrawl4 && npm run firecrawl-consumables && npm run gastro2 && npm run food3 && npm run firecrawl5 && npm run google-deals && npm run flights-vienna && npm run joe && npm run gutscheine && npm run instagram:discovery && npm run filter-old && npm run slack-notify",
+    "scrape-all": "npm run scrape && npm run firecrawl4 && npm run firecrawl-consumables && npm run gastro2 && npm run food3 && npm run firecrawl5 && npm run google-deals && npm run flights-vienna && npm run joe && npm run gutscheine && npm run instagram:discovery && npm run slack-notify",
     "sync:fresh": "npm run scrape-all && npm run ios:shot",
     "ios:install": "playwright install webkit",
     "ios:shot": "node scripts/ios-screenshot.mjs"

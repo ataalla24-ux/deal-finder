@@ -32,9 +32,6 @@ jobs:
           APIFY_INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
         run: node scraper/import-apify-instagram-deals.js
 
-      - name: Filter alte Deals
-        run: node scraper/filter-old-deals.js
-
       - name: Commit Apify Instagram updates
         run: |
           git config user.name "Deal Bot"

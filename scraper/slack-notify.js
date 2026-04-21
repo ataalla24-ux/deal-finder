@@ -6,7 +6,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
-const SENT_IDS_PATH = path.join(DOCS_DIR, 'sent-deal-ids.json');
 const PENDING_ALL_PATH = path.join(DOCS_DIR, 'deals-pending-all.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
@@ -31,13 +30,7 @@ loadEnvFile();
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
-
-const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-const CUTOFF_DATE = Date.now() - TWO_WEEKS_MS;
-const RECENT_SOCIAL_CUTOFF_DATE = Date.now() - SEVEN_DAYS_MS;
-const DAY_MS = 24 * 60 * 60 * 1000;
-const TRUSTED_PUBDATE_SOURCES = new Set(['ldDate', 'timeDatetime', 'igScriptTimestamp', 'socialPostDate', 'apifyPostMetadata']);
+const PENDING_FILE_NAMES = process.env.PENDING_FILE_NAMES || '';
 
 function ensureObject(value, fallback = {}) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
@@ -58,86 +51,11 @@ function cleanText(value) {
     .trim();
 }
 
-function isStrictRecentSocialDeal(deal) {
-  const source = cleanText(deal?.source).toLowerCase();
-  return source.includes('firecrawl gastro #2') ||
-    source.includes('firecrawl food #3') ||
-    source.includes('firecrawl consumables') ||
-    source.includes('firecrawl instagram direct #4') ||
-    source.includes('firecrawl instagram gastro #5');
-}
-
-function isViennaDeal(deal) {
-  const haystack = [
-    deal?.distance,
-    deal?.location,
-    deal?.ort,
-    deal?.description,
-    deal?.title,
-    deal?.brand,
-  ]
-    .map(cleanText)
-    .join(' ')
-    .toLowerCase();
-
-  return haystack.includes('wien') || haystack.includes('vienna') || /\b1\d{3}\b/.test(haystack);
-}
-
 function normalizeUrl(url) {
   const text = cleanText(url);
   if (!text) return '';
   if (!/^https?:\/\//i.test(text)) return '';
   return text;
-}
-
-function stableDealSignature(deal) {
-  const normalizedUrl = normalizeUrl(deal?.url)
-    .toLowerCase()
-    .replace(/^https?:\/\//, '')
-    .replace(/\/+$/, '');
-  const title = cleanText(deal?.title)
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  const brand = cleanText(deal?.brand)
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  const type = cleanText(deal?.type).toLowerCase();
-  const distance = cleanText(deal?.distance || deal?.location || deal?.ort)
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  return [normalizedUrl, brand, title, type, distance].filter(Boolean).join('|');
-}
-
-function alternateDealSignature(deal) {
-  const title = cleanText(deal?.title)
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  const brand = cleanText(deal?.brand)
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  const type = cleanText(deal?.type).toLowerCase();
-  const distance = cleanText(deal?.distance || deal?.location || deal?.ort)
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  return [brand, title, type, distance].filter(Boolean).join('|');
-}
-
-function getDealSignatureVariants(deal) {
-  return [stableDealSignature(deal), alternateDealSignature(deal)].filter(Boolean);
 }
 
 function toIsoDate(value) {
@@ -191,86 +109,6 @@ function inferExpires(deal) {
   const raw = deal.expires || deal.end_date || deal.validity_date || '';
   const iso = toIsoDate(raw);
   return iso || cleanText(raw) || '';
-}
-
-function parseLooseExpiry(text) {
-  const value = cleanText(text);
-  if (!value) return null;
-  const lower = value.toLowerCase();
-
-  if (
-    lower.includes('unknown') ||
-    lower.includes('unbekannt') ||
-    lower.includes('ongoing') ||
-    lower.includes('laufend') ||
-    lower.includes('siehe') ||
-    lower.includes('website') ||
-    lower.includes('webseite')
-  ) {
-    return null;
-  }
-
-  const direct = new Date(value);
-  if (!Number.isNaN(direct.getTime())) return direct.getTime();
-
-  const matchYmd = value.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if (matchYmd) {
-    const ts = Date.parse(`${matchYmd[1]}-${matchYmd[2]}-${matchYmd[3]}T23:59:59`);
-    if (!Number.isNaN(ts)) return ts;
-  }
-
-  const matchDmy = value.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
-  if (matchDmy) {
-    const yyyy = matchDmy[3].length === 2 ? `20${matchDmy[3]}` : matchDmy[3];
-    const mm = String(matchDmy[2]).padStart(2, '0');
-    const dd = String(matchDmy[1]).padStart(2, '0');
-    const ts = Date.parse(`${yyyy}-${mm}-${dd}T23:59:59`);
-    if (!Number.isNaN(ts)) return ts;
-  }
-
-  return null;
-}
-
-function extractRelativeAgeDays(text) {
-  const t = cleanText(text).toLowerCase();
-  if (!t) return null;
-  const m = t.match(/(\d+)\s*(weeks?|wochen|days?|tage|months?|monate|years?|jahre?n?|y|w|d|m)\b/i);
-  if (!m) return null;
-  const n = Number(m[1]);
-  if (!Number.isFinite(n) || n < 0) return null;
-  const unit = m[2].toLowerCase();
-  if (unit.startsWith('w') || unit.includes('woch')) return n * 7;
-  if (unit.startsWith('d') || unit.includes('tag')) return n;
-  if (unit.startsWith('m') || unit.includes('monat')) return n * 30;
-  if (unit.startsWith('y') || unit.includes('jahr') || unit.includes('year')) return n * 365;
-  return null;
-}
-
-function parseDateCandidatesFromText(text) {
-  const t = cleanText(text);
-  if (!t) return [];
-  const out = [];
-
-  const ymdMatches = [...t.matchAll(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/g)];
-  for (const m of ymdMatches) {
-    const yyyy = Number(m[1]);
-    const mm = Number(m[2]);
-    const dd = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, mm - 1, dd, 12, 0, 0));
-    if (!Number.isNaN(d.getTime())) out.push(d.getTime());
-  }
-
-  const dmyMatches = [...t.matchAll(/\b(\d{1,2})\.(\d{1,2})\.(\d{2,4})\b/g)];
-  for (const m of dmyMatches) {
-    const dd = Number(m[1]);
-    const mm = Number(m[2]);
-    const yyRaw = String(m[3]);
-    const yyyy = yyRaw.length === 2 ? Number(`20${yyRaw}`) : Number(yyRaw);
-    const d = new Date(Date.UTC(yyyy, mm - 1, dd, 12, 0, 0));
-    if (!Number.isNaN(d.getTime())) out.push(d.getTime());
-  }
-
-  return out;
 }
 
 function stableId(seed) {
@@ -327,19 +165,22 @@ function normalizeDeal(rawDeal, sourceKey) {
 }
 
 function getPendingFiles() {
-  const files = fs.readdirSync(DOCS_DIR);
-  return files.filter((file) => {
+  const allPendingFiles = fs.readdirSync(DOCS_DIR).filter((file) => {
     if (!file.startsWith('deals-pending-') || !file.endsWith('.json')) return false;
-    if (file === 'deals-pending-merged.json') return false;
-    if (file === 'deals-pending-all.json') return false;
-    if (file === 'deals-pending-instagram-web.json') return false;
-    if (file === 'deals-pending-instagram-discovery.json') return false;
-    return true;
+    return file !== 'deals-pending-all.json';
   });
+  if (!cleanText(PENDING_FILE_NAMES)) {
+    return allPendingFiles.sort((left, right) => left.localeCompare(right));
+  }
+
+  const requested = PENDING_FILE_NAMES
+    .split(',')
+    .map((name) => cleanText(name))
+    .filter(Boolean);
+  return requested.filter((name) => allPendingFiles.includes(name));
 }
 
-function loadPendingDeals() {
-  const files = getPendingFiles();
+function loadPendingDeals(files) {
   const deals = [];
   console.log(`📂 Found ${files.length} pending deal files`);
 
@@ -360,20 +201,6 @@ function loadPendingDeals() {
   return deals;
 }
 
-function loadSentIds() {
-  if (!fs.existsSync(SENT_IDS_PATH)) return {};
-  try {
-    const parsed = JSON.parse(fs.readFileSync(SENT_IDS_PATH, 'utf-8'));
-    return ensureObject(parsed);
-  } catch {
-    return {};
-  }
-}
-
-function saveSentIds(sentIds) {
-  fs.writeFileSync(SENT_IDS_PATH, JSON.stringify(sentIds, null, 2));
-}
-
 function loadPendingQueue() {
   if (!fs.existsSync(PENDING_ALL_PATH)) return [];
   try {
@@ -383,64 +210,6 @@ function loadPendingQueue() {
   } catch {
     return [];
   }
-}
-
-function buildSeenSignatureMap(sentIds, pendingQueue) {
-  const seen = new Map();
-
-  for (const [key, value] of Object.entries(sentIds)) {
-    if (key.startsWith('sig:')) {
-      seen.set(key.slice(4), Number(value) || Date.now());
-    }
-  }
-
-  for (const deal of pendingQueue) {
-    if (!deal?.slackTs) continue;
-    const postedAt = deal.slackTs ? Number.parseFloat(deal.slackTs) * 1000 : Date.now();
-    for (const signature of getDealSignatureVariants(deal)) {
-      seen.set(signature, Number.isFinite(postedAt) ? postedAt : Date.now());
-    }
-  }
-
-  return seen;
-}
-
-function isRecent(deal) {
-  const pubMs = new Date(deal.pubDate).getTime();
-  if (!Number.isFinite(pubMs)) return false;
-  if (isStrictRecentSocialDeal(deal)) return pubMs >= RECENT_SOCIAL_CUTOFF_DATE;
-  return pubMs >= CUTOFF_DATE;
-}
-
-function hasTrustedInstagramDate(deal) {
-  const source = cleanText(deal.source).toLowerCase();
-  if (isStrictRecentSocialDeal(deal)) return true;
-  if (!source.includes('instagram')) return true;
-  return TRUSTED_PUBDATE_SOURCES.has(cleanText(deal.pubDateSource));
-}
-
-function isNotExpired(deal) {
-  if (isStrictRecentSocialDeal(deal)) return true;
-  const expiryMs = parseLooseExpiry(deal.expires);
-  if (!expiryMs) return true;
-  return expiryMs + DAY_MS >= Date.now();
-}
-
-function hasOldAgeSignal(deal) {
-  if (isStrictRecentSocialDeal(deal)) return false;
-  const haystack = `${deal.title || ''} ${deal.description || ''} ${deal.expires || ''}`;
-  const ageDays = extractRelativeAgeDays(haystack);
-  if (!Number.isFinite(ageDays)) return false;
-  return ageDays > 14;
-}
-
-function hasStaleExplicitDateSignal(deal) {
-  if (isStrictRecentSocialDeal(deal)) return false;
-  const bundle = `${deal.title || ''} ${deal.description || ''} ${deal.expires || ''}`;
-  const dates = parseDateCandidatesFromText(bundle);
-  if (dates.length === 0) return false;
-  const newest = Math.max(...dates);
-  return newest < CUTOFF_DATE;
 }
 
 function formatDate(value) {
@@ -540,27 +309,13 @@ async function main() {
     process.exit(1);
   }
 
-  const pendingDeals = loadPendingDeals();
+  const pendingFiles = getPendingFiles();
+  const pendingDeals = loadPendingDeals(pendingFiles);
   console.log(`📋 Total pending deals loaded: ${pendingDeals.length}`);
-
-  const sentIds = loadSentIds();
   const existingQueue = loadPendingQueue();
-  const seenSignatures = buildSeenSignatureMap(sentIds, existingQueue);
-  const unseenDeals = pendingDeals.filter((deal) => {
-    if (sentIds[deal.id]) return false;
-    const signatures = getDealSignatureVariants(deal);
-    if (signatures.length === 0) return true;
-    return !signatures.some((signature) => seenSignatures.has(signature));
-  });
-  const freshDeals = unseenDeals
-    .filter(isRecent)
-    .filter(hasTrustedInstagramDate)
-    .filter((d) => !isStrictRecentSocialDeal(d) || isViennaDeal(d))
-    .filter((d) => !hasOldAgeSignal(d))
-    .filter((d) => !hasStaleExplicitDateSignal(d))
-    .filter(isNotExpired);
 
-  console.log(`📨 Pending: ${pendingDeals.length}, unseen: ${unseenDeals.length}, fresh: ${freshDeals.length}`);
+  const freshDeals = pendingDeals;
+  console.log(`📨 Pending: ${pendingDeals.length}, posting to Slack: ${freshDeals.length}`);
 
   if (freshDeals.length === 0) {
     console.log('✅ Keine neuen Deals für Slack');
@@ -597,7 +352,6 @@ async function main() {
     deal.slackTs = ts;
     deal.slackThreadTs = headerTs;
     postedDeals.push(deal);
-    sentIds[deal.id] = Date.now();
 
     if ((i + 1) % 10 === 0) {
       console.log(`  ✅ posted ${i + 1}/${freshDeals.length}`);
@@ -605,13 +359,6 @@ async function main() {
     await sleep(600);
   }
 
-  for (const deal of postedDeals) {
-    for (const signature of getDealSignatureVariants(deal)) {
-      sentIds[`sig:${signature}`] = Date.now();
-    }
-  }
-
-  saveSentIds(sentIds);
   const mergedQueue = mergePendingQueue(existingQueue, postedDeals);
   writePendingAll(mergedQueue);
 
