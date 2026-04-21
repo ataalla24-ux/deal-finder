@@ -685,6 +685,43 @@ function detectDeadLinkReason(html, options = {}) {
   return '';
 }
 
+function detectProtectionInterstitial(html, options = {}) {
+  const text = String(html || '')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 20000)
+    .toLowerCase();
+
+  if (!text) return '';
+
+  const hostname = cleanText(options.hostname || '').toLowerCase();
+
+  if (
+    /vercel security checkpoint|we're verifying your browser|verify your browser|enable javascript to continue/.test(text)
+  ) {
+    return 'Security Checkpoint';
+  }
+
+  if (
+    /just a moment|checking your browser|verify you are human|captcha|unusual traffic|access denied/.test(text)
+  ) {
+    return hostname || 'Browser Verification';
+  }
+
+  return '';
+}
+
+function shouldTreatHttpStatusAsTransient(status) {
+  return [401, 403, 408, 409, 423, 425, 429, 500, 502, 503, 504].includes(Number(status || 0));
+}
+
+function shouldTreatHttpStatusAsInvalid(status) {
+  return [404, 410, 451].includes(Number(status || 0));
+}
+
 function decodeHtmlEntities(value) {
   return String(value || '')
     .replace(/&amp;/gi, '&')
@@ -1133,8 +1170,49 @@ export async function inspectDealUrlHealth(url, options = {}) {
     const finalUrl = response.url || url;
     const status = Number(response.status || 0);
     const contentType = cleanText(response.headers.get('content-type') || '').toLowerCase();
+    const hostname = (() => {
+      try {
+        return new URL(finalUrl).hostname;
+      } catch {
+        return '';
+      }
+    })();
 
     if (!response.ok) {
+      if (shouldTreatHttpStatusAsInvalid(status)) {
+        return {
+          invalid: true,
+          reason: `HTTP ${status}`,
+          status,
+          finalUrl,
+        };
+      }
+
+      if (contentType.includes('text/html') || contentType.includes('application/xhtml+xml')) {
+        const html = await response.text();
+        const protectionReason = detectProtectionInterstitial(html, { hostname });
+        if (protectionReason) {
+          return {
+            invalid: false,
+            transientError: true,
+            blockedByProtection: true,
+            reason: protectionReason,
+            status,
+            finalUrl,
+          };
+        }
+      }
+
+      if (shouldTreatHttpStatusAsTransient(status)) {
+        return {
+          invalid: false,
+          transientError: true,
+          status,
+          finalUrl,
+          reason: `HTTP ${status}`,
+        };
+      }
+
       return {
         invalid: true,
         reason: `HTTP ${status}`,
@@ -1153,13 +1231,18 @@ export async function inspectDealUrlHealth(url, options = {}) {
     }
 
     const html = await response.text();
-    const hostname = (() => {
-      try {
-        return new URL(finalUrl).hostname;
-      } catch {
-        return '';
-      }
-    })();
+    const protectionReason = detectProtectionInterstitial(html, { hostname });
+    if (protectionReason) {
+      return {
+        invalid: false,
+        transientError: true,
+        blockedByProtection: true,
+        reason: protectionReason,
+        status,
+        finalUrl,
+      };
+    }
+
     const deadReason = detectDeadLinkReason(html, { hostname });
 
     if (deadReason) {
