@@ -44,6 +44,24 @@ const REMOVE_IDS = new Set([
 const LEGACY_CHURCH_ID_PATTERNS = [
   /^(hillsong-vienna|cig-wien|icf-wien|jesuszentrum)-(kirche|gottesdienste|events)-20260308$/i,
 ];
+const FORCE_KEEP_IDS = new Set([
+  'g2-17at53u',
+  'igx-ovlm4t',
+  'icf-wien-kirche-20260406',
+  'joe-omv-146t7m4',
+  'joe-omv-1jfthhz',
+  'icf-wien-events-20260413',
+  'jesuszentrum-kirche-20260413',
+  'jesuszentrum-gottesdienste-20260413',
+  'hillsong-vienna-kirche-20260413',
+  'hillsong-vienna-gottesdienste-20260413',
+  'hillsong-vienna-events-20260413',
+  'cig-wien-kirche-20260413',
+  'cig-wien-gottesdienste-20260413',
+  'cig-wien-events-20260413',
+  'icf-wien-gottesdienste-20260413',
+  'jesuszentrum-events-20260413',
+]);
 
 const MAX_LIVE_URL_HEALTH_CHECKS = Number(process.env.MAX_LIVE_URL_HEALTH_CHECKS || 180);
 const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REFRESHES || 120);
@@ -575,6 +593,10 @@ function shouldDropLegacyChurchDeal(deal) {
   return REMOVE_IDS.has(deal.id) || LEGACY_CHURCH_ID_PATTERNS.some((pattern) => pattern.test(String(deal?.id || '')));
 }
 
+function shouldForceKeepDeal(deal) {
+  return FORCE_KEEP_IDS.has(cleanText(deal?.id || ''));
+}
+
 function fixPubDateFromSlackTs(deal, now) {
   if (!deal?.slackTs) return deal;
   const slackTs = Number(String(deal.slackTs).split('.')[0]);
@@ -715,11 +737,12 @@ async function main() {
 
   for (const original of dealsDoc.deals || []) {
     if (!original || typeof original !== 'object') continue;
-    if (shouldDropLegacyChurchDeal(original)) {
+    const forceKeep = shouldForceKeepDeal(original);
+    if (!forceKeep && shouldDropLegacyChurchDeal(original)) {
       markRemoved(original, 'Legacy-Kircheneintrag entfernt');
       continue;
     }
-    if (curatedChurchIds.has(original.id)) {
+    if (!forceKeep && curatedChurchIds.has(original.id)) {
       markRemoved(original, 'Wird durch kuratierten Kirche-/Event-Eintrag ersetzt');
       continue;
     }
@@ -791,7 +814,7 @@ async function main() {
     deal.expires = sanitizeExpiryText(deal.expires);
 
     const health = await verifyDealUrl(deal);
-    if (health?.invalid) {
+    if (!forceKeep && health?.invalid) {
       brokenLinkRemovals += 1;
       markRemoved(deal, `Ziellink ungültig: ${health.reason}`);
       continue;
@@ -803,7 +826,7 @@ async function main() {
         deal.url = health.finalUrl;
       }
     }
-    if (shouldDropOpaqueSocialShellDeal(deal, health, now)) {
+    if (!forceKeep && shouldDropOpaqueSocialShellDeal(deal, health, now)) {
       brokenLinkRemovals += 1;
       opaqueSocialShellRemovals += 1;
       markRemoved(deal, 'Social-Post nicht mehr öffentlich verifizierbar');
@@ -825,11 +848,11 @@ async function main() {
         }
       }
     }
-    if (isGenericJunkDeal(deal)) {
+    if (!forceKeep && isGenericJunkDeal(deal)) {
       markRemoved(deal, 'Generischer Junk-Deal');
       continue;
     }
-    if (isFalsePositiveFreeDeal(deal)) {
+    if (!forceKeep && isFalsePositiveFreeDeal(deal)) {
       markRemoved(deal, 'False Positive Free Deal');
       continue;
     }
