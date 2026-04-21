@@ -137,7 +137,7 @@ function parseSlackEditCommand(messageText) {
   const changes = {};
   const segments = body.split(/\s*(?:\||;|\n)\s*/).filter(Boolean);
   for (const segment of segments) {
-    const fieldMatch = segment.match(/^([^:]+):\s*(.+)$/);
+    const fieldMatch = segment.match(/^([^:]+):\s*(.+)$/) || segment.match(/^([^\s:]+)\s+(.+)$/);
     if (!fieldMatch) continue;
     const field = normalizeEditFieldName(fieldMatch[1]);
     const value = normalizeEditedFieldValue(field, fieldMatch[2]);

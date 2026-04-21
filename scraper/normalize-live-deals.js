@@ -280,6 +280,7 @@ function normalizeSocialDeal(deal) {
   if (!isSocialUrl(deal.url)) return deal;
 
   const next = { ...deal };
+  const editedFields = getSlackEditedFieldSet(next);
   const socialTitle = tidySocialSummary(next.title, 96);
   const socialDescription = localizeFreeText(tidySocialSummary(next.description, 160));
   const inferredBrand = cleanUiNoiseText(inferPreferredBrand(next));
@@ -292,39 +293,43 @@ function normalizeSocialDeal(deal) {
     next.brand = inferredBrand;
   }
 
-  if (/^(instagram|tiktok)$/i.test(cleanUiNoiseText(next.title)) || /(?:auf|on)\s+(?:instagram|tiktok)\s*:/i.test(next.title || '')) {
-    if (socialTitle && !/^(instagram|tiktok)$/i.test(cleanUiNoiseText(socialTitle))) {
+  if (!editedFields.has('title')) {
+    if (/^(instagram|tiktok)$/i.test(cleanUiNoiseText(next.title)) || /(?:auf|on)\s+(?:instagram|tiktok)\s*:/i.test(next.title || '')) {
+      if (socialTitle && !/^(instagram|tiktok)$/i.test(cleanUiNoiseText(socialTitle))) {
+        next.title = socialTitle;
+      } else {
+        const fallbackTitle = buildSocialTitleFallback(next);
+        if (fallbackTitle) next.title = fallbackTitle;
+      }
+    } else if ((next.title || '').includes('&#') && socialTitle) {
       next.title = socialTitle;
-    } else {
-      const fallbackTitle = buildSocialTitleFallback(next);
-      if (fallbackTitle) next.title = fallbackTitle;
     }
-  } else if ((next.title || '').includes('&#') && socialTitle) {
-    next.title = socialTitle;
   }
 
-  if (isWeakDescription(next.description)) {
-    const fallbackDescription = buildFallbackDescription({
-      ...next,
-      brand: next.brand,
-      title: next.title,
-      category: next.category,
-      type: next.type,
-    });
-    next.description = buildNaturalSocialDescription(next, socialDescription) || socialDescription || fallbackDescription || localizeFreeText(next.description);
-  } else if (socialDescription && /(?:auf|on)\s+(?:instagram|tiktok)\s*:/i.test(next.description || '')) {
-    next.description = buildNaturalSocialDescription(next, socialDescription) || socialDescription;
-  } else {
-    next.description = buildNaturalSocialDescription(next, socialDescription) || localizeFreeText(next.description);
+  if (!editedFields.has('description')) {
+    if (isWeakDescription(next.description)) {
+      const fallbackDescription = buildFallbackDescription({
+        ...next,
+        brand: next.brand,
+        title: next.title,
+        category: next.category,
+        type: next.type,
+      });
+      next.description = buildNaturalSocialDescription(next, socialDescription) || socialDescription || fallbackDescription || localizeFreeText(next.description);
+    } else if (socialDescription && /(?:auf|on)\s+(?:instagram|tiktok)\s*:/i.test(next.description || '')) {
+      next.description = buildNaturalSocialDescription(next, socialDescription) || socialDescription;
+    } else {
+      next.description = buildNaturalSocialDescription(next, socialDescription) || localizeFreeText(next.description);
+    }
+    next.description = collapseRepeatedBrandLocation(next.description, next.brand, next.distance);
   }
-  next.description = collapseRepeatedBrandLocation(next.description, next.brand, next.distance);
 
-  if (isWeakTitle(next.title)) {
+  if (!editedFields.has('title') && isWeakTitle(next.title)) {
     const fallbackTitle = buildSocialTitleFallback(next);
     if (fallbackTitle) next.title = fallbackTitle;
   }
 
-  if ((next.category === 'kultur' || next.category === 'events' || next.category === 'reisen' || next.category === 'shopping') && FOOD_SIGNAL_PATTERN.test(combinedText)) {
+  if (!editedFields.has('category') && (next.category === 'kultur' || next.category === 'events' || next.category === 'reisen' || next.category === 'shopping') && FOOD_SIGNAL_PATTERN.test(combinedText)) {
     next.category = COFFEE_SIGNAL_PATTERN.test(combinedText) ? 'kaffee' : 'essen';
   }
 
@@ -395,6 +400,15 @@ function isWeakTitle(value) {
   return text.length <= 12 && !hasUsefulWords(text);
 }
 
+function getSlackEditedFieldSet(deal) {
+  const fields = Array.isArray(deal?.slackEditedFields) ? deal.slackEditedFields : [];
+  return new Set(fields.map((field) => cleanText(field)).filter(Boolean));
+}
+
+function isSlackEditedField(deal, field) {
+  return getSlackEditedFieldSet(deal).has(field);
+}
+
 function normalizeHintText(value, maxLength = 180) {
   const text = stripSiteSuffix(value)
     .replace(/\b(jetzt|heute|aktuell|neu)\b/gi, ' ')
@@ -412,7 +426,7 @@ function maybeEnrichDealCopy(deal, contentHints = {}) {
   const hintDescription = normalizeHintText(contentHints.description || '', 180);
   let changed = false;
 
-  if (isWeakDescription(deal.description)) {
+  if (!isSlackEditedField(deal, 'description') && isWeakDescription(deal.description)) {
     const candidateDescription = [hintDescription, hintTitle]
       .find((candidate) => candidate && !GENERIC_DESCRIPTION_PATTERN.test(candidate) && candidate.toLowerCase() !== cleanText(deal.description).toLowerCase());
     if (candidateDescription) {
@@ -421,7 +435,7 @@ function maybeEnrichDealCopy(deal, contentHints = {}) {
     }
   }
 
-  if (isWeakTitle(deal.title)) {
+  if (!isSlackEditedField(deal, 'title') && isWeakTitle(deal.title)) {
     const candidateTitle = [hintTitle, hintDescription]
       .map((candidate) => normalizeHintText(candidate, 96))
       .find((candidate) => candidate && !GENERIC_DESCRIPTION_PATTERN.test(candidate) && candidate.toLowerCase() !== cleanText(deal.title).toLowerCase());
@@ -460,10 +474,12 @@ function mergeSupplementalSocialDeal(deal, supplementalDeal) {
   const currentTitle = cleanUiNoiseText(next.title || '');
   const currentDescription = cleanUiNoiseText(next.description || '');
   const currentCategory = cleanUiNoiseText(next.category || '').toLowerCase();
+  const editedFields = getSlackEditedFieldSet(next);
 
   const assignIfBetter = (key, value, predicate = true) => {
     const text = cleanText(value);
     if (!predicate || !text) return;
+    if (editedFields.has(key)) return;
     if (cleanText(next[key] || '') === text) return;
     next[key] = value;
     changed = true;
