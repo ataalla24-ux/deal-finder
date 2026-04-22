@@ -1,4 +1,4 @@
-const CACHE_NAME = 'freefinder-v5';
+const CACHE_NAME = 'freefinder-v6';
 const urlsToCache = [
   './',
   './index.html',
@@ -36,6 +36,8 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
   const isDealsJson = requestUrl.pathname.endsWith('/deals.json') || requestUrl.pathname.endsWith('deals.json');
+  const isDealOfDayJson = requestUrl.pathname.endsWith('/deal-of-the-day.json') || requestUrl.pathname.endsWith('deal-of-the-day.json');
+  const isDealOfWeekJson = requestUrl.pathname.endsWith('/deal-of-the-week.json') || requestUrl.pathname.endsWith('deal-of-the-week.json');
   const isNetworkFirstDocument =
     event.request.mode === 'navigate' ||
     requestUrl.pathname.endsWith('/deal-finder/') ||
@@ -55,7 +57,7 @@ self.addEventListener('fetch', event => {
     }
   }
 
-  if (isDealsJson || isNetworkFirstDocument) {
+  if (isDealsJson || isDealOfDayJson || isDealOfWeekJson || isNetworkFirstDocument) {
     event.respondWith(networkFirst());
     return;
   }
