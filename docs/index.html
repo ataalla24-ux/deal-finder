@@ -5022,8 +5022,22 @@
     }
 
         let lastForegroundSyncAt = 0;
+        let lastInputFocusAt = 0;
+
+        function isTextEntryElement(element) {
+            if (!element) return false;
+            const tagName = (element.tagName || '').toUpperCase();
+            return tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT' || !!element.isContentEditable;
+        }
+
+        function shouldPauseForegroundSync() {
+            if (isTextEntryElement(document.activeElement)) return true;
+            return Date.now() - lastInputFocusAt < 1500;
+        }
+
         async function syncDealsOnForeground() {
             const now = Date.now();
+            if (shouldPauseForegroundSync()) return;
             if (now - lastForegroundSyncAt < 5000) return;
             lastForegroundSyncAt = now;
             try {
@@ -8411,9 +8425,18 @@
             }
         }, 60000);
 
+        document.addEventListener('focusin', (event) => {
+            if (isTextEntryElement(event.target)) {
+                lastInputFocusAt = Date.now();
+            }
+        });
+
         window.addEventListener('pageshow', () => { syncDealsOnForeground(); });
-        window.addEventListener('focus', () => { syncDealsOnForeground(); });
+        window.addEventListener('focus', () => {
+            if (shouldPauseForegroundSync()) return;
+            syncDealsOnForeground();
+        });
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) syncDealsOnForeground();
+            if (!document.hidden && !shouldPauseForegroundSync()) syncDealsOnForeground();
         });
 </script>
