@@ -2020,6 +2020,7 @@
         localStorage.removeItem('userDeals');
         let activeHomeDailyDealId = '';
         let activeHomeWeeklyDealId = '';
+        let lastResolvedWeeklyDeal = null;
         const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
             timeZone: 'Europe/Vienna',
             year: 'numeric',
@@ -5212,7 +5213,6 @@
         }
         function setFeaturedHomeDeals() {
             syncFeaturedDealPlacement();
-            activeHomeWeeklyDealId = '';
             const excludedIds = [activeHomeDailyDealId].filter(Boolean);
             const activeWeeklyDealOverride = isCurrentWeeklyDealRecord(weeklyDealOverride)
                 ? normalizeWeeklyDealRecord(weeklyDealOverride)
@@ -5223,8 +5223,13 @@
                 weeklyDeal = normalizeDealForApp(overridden || activeWeeklyDealOverride);
             }
             if (!weeklyDeal) {
-                weeklyDeal = pickFeaturedDeal(7, { excludeIds: excludedIds });
+                if (lastResolvedWeeklyDeal && !excludedIds.includes(lastResolvedWeeklyDeal.id)) {
+                    weeklyDeal = normalizeDealForApp(lastResolvedWeeklyDeal);
+                } else {
+                    weeklyDeal = pickFeaturedDeal(7, { excludeIds: excludedIds });
+                }
             }
+            lastResolvedWeeklyDeal = weeklyDeal ? normalizeDealForApp(weeklyDeal) : null;
             activeHomeWeeklyDealId = weeklyDeal?.id || '';
             const monthlyDeal = pickFeaturedDeal(30, { excludeIds: [...excludedIds, weeklyDeal ? weeklyDeal.id : ''].filter(Boolean) });
             renderFeaturedDealCard({
@@ -7332,6 +7337,7 @@
     dealOverridesById = {};
     dailyDealOverride = null;
     weeklyDealOverride = null;
+    lastResolvedWeeklyDeal = null;
     try {
       const cached = JSON.parse(localStorage.getItem(DEAL_OVERRIDE_CACHE_KEY) || 'null');
       const cachedOverrides = Array.isArray(cached && cached.overrides) ? cached.overrides : [];
