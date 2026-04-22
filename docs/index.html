@@ -5348,7 +5348,7 @@
         .map((d) => ({ ...d, _lifecycle: getDealLifecycle(d) }))
         .filter((d) => d._lifecycle.state !== 'hidden');
       if (currentView === 'home') {
-        const featuredIds = new Set([activeHomeDailyDealId, activeHomeWeeklyDealId].filter(Boolean));
+        const featuredIds = new Set([activeHomeDailyDealId].filter(Boolean));
         if (featuredIds.size) {
           deals = deals.filter((d) => !featuredIds.has(d.id));
         }
