@@ -92,6 +92,18 @@
         .featured-deal-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
         .featured-deal-header .daily-label { margin-bottom: 0; }
         .featured-deal-meta { font-size: 12px; font-weight: 700; letter-spacing: 0.2px; color: rgba(255,255,255,0.82); margin-top: 10px; }
+        #weeklyDeal {
+            border-radius: 28px;
+            padding: 24px 22px 22px;
+            min-height: 248px;
+            box-shadow: 0 20px 44px rgba(15,23,42,0.12);
+        }
+        #weeklyDeal .featured-deal-header { margin-bottom: 10px; }
+        #weeklyDeal .daily-label { padding: 6px 12px; font-size: 12px; }
+        #weeklyDeal .daily-title { font-size: 34px; line-height: 1.02; margin-bottom: 12px; max-width: 96%; }
+        #weeklyDeal .daily-desc { font-size: 16px; line-height: 1.55; margin-bottom: 14px; max-width: 94%; }
+        #weeklyDeal .featured-deal-meta { font-size: 13px; margin-top: 0; }
+        #weeklyDeal .daily-btn { margin-top: 16px; padding: 13px 18px; font-size: 15px; font-weight: 800; }
         .daily-deal.featured-locked > :not(.featured-lock) { filter: blur(3px); opacity: 0.35; pointer-events: none; user-select: none; }
         .featured-lock { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; z-index: 3; background: linear-gradient(135deg, rgba(17,24,39,0.4), rgba(88,28,135,0.55)); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
         .featured-lock-content { max-width: 280px; text-align: center; }
@@ -192,6 +204,12 @@
         .countdown-label { font-size: 10px; opacity: 0.84; text-transform: uppercase; letter-spacing: 0.04em; }
         .daily-btn { background: rgba(255,255,255,0.18); color: white; border: 1px solid rgba(255,255,255,0.18); padding: 12px 18px; border-radius: 16px; font-weight: 800; cursor: pointer; margin-top: 14px; min-height: 48px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
         .daily-btn:hover { transform: scale(1.05); }
+        @media (max-width: 480px) {
+            #weeklyDeal { padding: 21px 18px 19px; min-height: 0; }
+            #weeklyDeal .daily-title { font-size: 28px; max-width: 100%; }
+            #weeklyDeal .daily-desc { font-size: 15px; max-width: 100%; }
+            #weeklyDeal .daily-btn { width: 100%; }
+        }
         
         /* SPAR-TRACKER */
         .savings-card { background: linear-gradient(180deg, #ffffff 0%, #fffaf5 100%); border-radius: 22px; padding: 16px; margin-bottom: 14px; color: #0f172a; position: relative; overflow: hidden; border: 1px solid rgba(148,163,184,0.12); box-shadow: 0 8px 20px rgba(15,23,42,0.04); }
