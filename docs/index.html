@@ -6033,7 +6033,11 @@
             html += '<div class="tips-section"><div class="tips-title">💡 ' + t('tipsTitle') + '</div>';
             if (tips.length > 0) {
                 tips.forEach(tip => {
-                    html += '<div class="tip-card"><div class="tip-header"><div class="tip-avatar">' + (tip.avatar || '👤') + '</div><span class="tip-user">' + tip.user + '</span>' + (tip.verified ? '<span class="verified-badge">✓ Verifiziert</span>' : '') + (tip.badge ? '<span class="tip-badge">' + tip.badge + '</span>' : '') + '</div><div class="tip-text">' + tip.text + '</div><div class="tip-helpful"><button onclick="markHelpful(\'' + dealId + '\',\'' + tip.id + '\',event)">👍 ' + (currentLanguage === 'en' ? 'Helpful' : 'Hilfreich') + ' (' + (tip.helpful || 0) + ')</button></div></div>';
+                    const tipUser = escapeHtml(String(tip.user || 'Unbekannt'));
+                    const tipAvatar = escapeHtml(String(tip.avatar || '👤'));
+                    const tipBadge = tip.badge ? '<span class="tip-badge">' + escapeHtml(String(tip.badge)) + '</span>' : '';
+                    const tipText = escapeHtml(String(tip.text || ''));
+                    html += '<div class="tip-card"><div class="tip-header"><div class="tip-avatar">' + tipAvatar + '</div><span class="tip-user">' + tipUser + '</span>' + (tip.verified ? '<span class="verified-badge">✓ Verifiziert</span>' : '') + tipBadge + '</div><div class="tip-text">' + tipText + '</div><div class="tip-helpful"><button onclick="markHelpful(\'' + dealId + '\',\'' + tip.id + '\',event)">👍 ' + (currentLanguage === 'en' ? 'Helpful' : 'Hilfreich') + ' (' + (tip.helpful || 0) + ')</button></div></div>';
                 });
             } else {
                 html += '<div class="no-content">' + t('noTips') + '</div>';
@@ -6043,7 +6047,11 @@
             html += '<div class="comments-section"><div class="comments-title">💬 ' + t('commentsTitle') + ' (' + comments.length + ')</div>';
             if (comments.length > 0) {
                 comments.slice(-5).forEach(c => {
-                    html += '<div class="comment-card"><div class="comment-header"><div class="comment-avatar">' + (c.user ? c.user[0].toUpperCase() : 'A') + '</div><span class="comment-user">' + c.user + '</span><span class="comment-time">' + timeAgo(c.time) + '</span></div><div class="comment-text">' + c.text + '</div><div class="comment-actions"><button onclick="likeComment(\'' + dealId + '\',\'' + c.id + '\',event)">👍 ' + (c.likes || 0) + '</button></div></div>';
+                    const commentUser = String(c.user || 'Anonym');
+                    const commentAvatar = escapeHtml(commentUser ? commentUser[0].toUpperCase() : 'A');
+                    const commentUserSafe = escapeHtml(commentUser);
+                    const commentText = escapeHtml(String(c.text || ''));
+                    html += '<div class="comment-card"><div class="comment-header"><div class="comment-avatar">' + commentAvatar + '</div><span class="comment-user">' + commentUserSafe + '</span><span class="comment-time">' + timeAgo(c.time) + '</span></div><div class="comment-text">' + commentText + '</div><div class="comment-actions"><button onclick="likeComment(\'' + dealId + '\',\'' + c.id + '\',event)">👍 ' + (c.likes || 0) + '</button></div></div>';
                 });
             } else {
                 html += '<div class="no-content">' + t('noComments') + '</div>';
@@ -6074,14 +6082,23 @@
         
         function switchInputTab(dealId, type, btn) {
             const input = document.getElementById('input-' + dealId);
+            if (!input || !btn || !btn.parentElement) return;
             input.dataset.type = type;
             input.placeholder = type === 'tip' ? t('tipPlaceholder') : t('commentPlaceholder');
             btn.parentElement.querySelectorAll('.input-tab').forEach(t => t.classList.remove('active'));
             btn.classList.add('active');
         }
+
+        function reopenCommunityAfterRender(dealId) {
+            requestAnimationFrame(() => {
+                const content = document.getElementById('comm-' + dealId);
+                if (content) content.classList.add('show');
+            });
+        }
         
         function submitInput(dealId) {
             const input = document.getElementById('input-' + dealId);
+            if (!input) return;
             const text = input.value.trim();
             if (!text) return;
             
@@ -6103,7 +6120,7 @@
             
             input.value = '';
             renderDeals();
-            document.getElementById('comm-' + dealId).classList.add('show');
+            reopenCommunityAfterRender(dealId);
         }
         
         function rateDeal(dealId, stars, e) {
@@ -6146,7 +6163,7 @@
             localStorage.setItem('userTips', JSON.stringify(userTips));
             showToast(t('helpfulMarked'));
             renderDeals();
-            document.getElementById('comm-' + dealId).classList.add('show');
+            reopenCommunityAfterRender(dealId);
         }
         
         function likeComment(dealId, commentId, e) {
@@ -6155,7 +6172,7 @@
             if (comment) { comment.likes = (comment.likes || 0) + 1; }
             localStorage.setItem('comments', JSON.stringify(comments));
             renderDeals();
-            document.getElementById('comm-' + dealId).classList.add('show');
+            reopenCommunityAfterRender(dealId);
         }
         
         function timeAgo(timestamp) {
