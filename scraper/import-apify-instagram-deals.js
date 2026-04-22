@@ -46,6 +46,19 @@ function normalizeText(value) {
     .trim();
 }
 
+function normalizeUrl(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  try {
+    const url = new URL(raw);
+    if (!/^https?:$/i.test(url.protocol)) return '';
+    url.hash = '';
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
 function toIso(value) {
   if (!value) return '';
   const d = new Date(value);
@@ -118,7 +131,7 @@ function computeQualityScore(item, type) {
 
 function normalizeApifyItem(raw) {
   const item = raw && typeof raw === 'object' ? raw : {};
-  const postUrl = normalizeText(item.postUrl);
+  const postUrl = normalizeUrl(item.postUrl);
   if (!postUrl) return null;
 
   const brand = normalizeText(item.venueName || item.instagramHandle || 'Instagram Deal');
