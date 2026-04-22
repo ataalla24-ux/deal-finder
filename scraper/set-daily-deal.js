@@ -312,6 +312,47 @@ function hasHumanApproval(message, botUserId) {
     return checks.some((reaction) => Array.isArray(reaction.users) && reaction.users.some((user) => user && user !== botUserId));
 }
 
+function loadApprovedDeals() {
+    const dealsPath = path.join(__dirname, '..', 'docs', 'deals.json');
+    try {
+        if (!fs.existsSync(dealsPath)) return [];
+        const parsed = JSON.parse(fs.readFileSync(dealsPath, 'utf-8'));
+        return Array.isArray(parsed?.deals) ? parsed.deals : [];
+    } catch (error) {
+        console.log('Could not read deals.json:', error.message);
+        return [];
+    }
+}
+
+function findApprovedDealMatch(approvedDeals, deal) {
+    if (!deal) return null;
+    return approvedDeals.find((candidate) =>
+        (candidate?.id && deal.id && candidate.id === deal.id) ||
+        (candidate?.url && deal.url && candidate.url === deal.url)
+    ) || null;
+}
+
+function mergePickedDealWithApproved(approvedDeal, pickedDeal) {
+    if (!approvedDeal) return pickedDeal;
+    return {
+        ...approvedDeal,
+        ...pickedDeal,
+        id: pickedDeal.id || approvedDeal.id,
+        url: pickedDeal.url || approvedDeal.url,
+        title: pickedDeal.title || approvedDeal.title,
+        description: pickedDeal.description || approvedDeal.description,
+        distance: pickedDeal.distance || approvedDeal.distance,
+        brand: pickedDeal.brand || approvedDeal.brand,
+        category: pickedDeal.category || approvedDeal.category,
+        type: pickedDeal.type || approvedDeal.type,
+        logo: pickedDeal.logo || approvedDeal.logo,
+        logoUrl: pickedDeal.logoUrl || approvedDeal.logoUrl || '',
+        slackTs: pickedDeal.slackTs || approvedDeal.slackTs || '',
+        slackThreadTs: pickedDeal.slackThreadTs || approvedDeal.slackThreadTs || '',
+        order: pickedDeal.order || approvedDeal.order,
+    };
+}
+
 // ============================================
 // Step 4: Write featured deal files
 // ============================================
@@ -368,19 +409,8 @@ function saveDealOfTheWeek(deal) {
 // ============================================
 // Step 5: Ensure the picked deal is approved (exists in deals.json)
 // ============================================
-function isDealApproved(deal) {
-    const dealsPath = path.join(__dirname, '..', 'docs', 'deals.json');
-
-  let dealsData = { deals: [], totalDeals: 0, lastUpdated: new Date().toISOString() };
-    try {
-          if (fs.existsSync(dealsPath)) {
-                  dealsData = JSON.parse(fs.readFileSync(dealsPath, 'utf-8'));
-          }
-    } catch(e) {
-          console.log('Could not read deals.json:', e.message);
-    }
-
-  const deals = dealsData.deals || [];
+function isDealApproved(deal, approvedDeals = []) {
+  const deals = approvedDeals;
 
   // Check if the deal already exists (by id or url)
   const exists = deals.some(d =>
@@ -437,6 +467,7 @@ async function main() {
     }
 
   const botUserId = await getBotUserId();
+  const approvedDeals = loadApprovedDeals();
   const maxOrder = deals.reduce((max, current) => Math.max(max, Number(current?.order) || 0), 0);
 
   function maybePersistPick(kind, pickNumber) {
@@ -448,15 +479,17 @@ async function main() {
     }
     console.log(`${kind} deal #${deal.order}: ${deal.brand} - ${deal.title}`);
     const pickedMessage = threadMessages.find((msg) => cleanText(msg?.ts) === cleanText(deal.slackTs));
+    const approvedDeal = findApprovedDealMatch(approvedDeals, deal);
     const approvedBySlack = isDealApprovedBySlack(pickedMessage, botUserId);
-    if (!approvedBySlack && !isDealApproved(deal)) {
+    if (!approvedBySlack && !isDealApproved(deal, approvedDeals)) {
       console.log(`${kind} pick is not approved yet, skipping`);
       return false;
     }
+    const dealToPersist = mergePickedDealWithApproved(approvedDeal, deal);
     if (kind === 'daily') {
-      saveDealOfTheDay(deal);
+      saveDealOfTheDay(dealToPersist);
     } else if (kind === 'weekly') {
-      saveDealOfTheWeek(deal);
+      saveDealOfTheWeek(dealToPersist);
     }
     return true;
   }
