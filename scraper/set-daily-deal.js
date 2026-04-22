@@ -101,6 +101,151 @@ function parsePickCommand(rawText) {
     return null;
 }
 
+function normalizeEditKey(value) {
+    return cleanText(value)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '');
+}
+
+function parseFlexibleDateInput(value, mode = 'datetime') {
+    const raw = cleanText(value);
+    if (!raw) return '';
+
+    const direct = new Date(raw);
+    if (!Number.isNaN(direct.getTime())) {
+        if (mode === 'expiry') {
+            const d = new Date(direct);
+            d.setHours(23, 59, 59, 999);
+            return d.toISOString();
+        }
+        return direct.toISOString();
+    }
+
+    const dmy = raw.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2}|\d{4})$/);
+    if (!dmy) return '';
+
+    const day = Number(dmy[1]);
+    const month = Number(dmy[2]);
+    const year = Number(dmy[3].length === 2 ? `20${dmy[3]}` : dmy[3]);
+    const isoBase = `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const iso = mode === 'expiry' ? `${isoBase}T23:59:59.999` : `${isoBase}T12:00:00.000`;
+    const parsed = new Date(iso);
+    return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString();
+}
+
+function normalizeEditFieldName(value) {
+    const key = normalizeEditKey(value);
+    if (!key) return '';
+
+    const fieldMap = new Map([
+        [['titel', 'title', 'headline', 'ueberschrift'], 'title'],
+        [['brand', 'marke', 'restaurant', 'restaurantname', 'anbieter'], 'brand'],
+        [['ort', 'location', 'distance', 'adresse', 'bezirk'], 'distance'],
+        [['beschreibung', 'description', 'desc', 'memo', 'text'], 'description'],
+        [['link', 'url', 'direktlink', 'posturl', 'zielurl'], 'url'],
+        [['kategorie', 'category'], 'category'],
+        [['typ', 'type', 'dealtyp', 'angebotstyp'], 'type'],
+        [['logo', 'emoji', 'icon'], 'logo'],
+        [['datum', 'pubdate', 'postdate', 'angebotsdatum'], 'pubDate'],
+        [['ablauf', 'expires', 'gueltigbis', 'gultigbis', 'validuntil', 'enddatum'], 'expires'],
+        [['quelle', 'source'], 'source'],
+    ]);
+
+    for (const [keys, target] of fieldMap.entries()) {
+        if (keys.includes(key)) return target;
+    }
+    return '';
+}
+
+function normalizeEditedFieldValue(field, value) {
+    const raw = cleanText(value);
+    if (!raw) return '';
+
+    if (field === 'pubDate') {
+        return parseFlexibleDateInput(raw, 'datetime') || raw;
+    }
+
+    if (field === 'expires') {
+        return parseFlexibleDateInput(raw, 'expiry') || raw;
+    }
+
+    if (field === 'category' || field === 'type') {
+        return raw.toLowerCase();
+    }
+
+    return raw;
+}
+
+function parseSlackEditCommand(messageText) {
+    const text = cleanText(messageText);
+    if (!text) return null;
+
+    const match = text.match(/^edit(?:iere)?\s+([^\s|;]+)\s+([\s\S]+)$/i);
+    if (!match) return null;
+
+    const target = cleanText(match[1]);
+    const body = cleanText(match[2]);
+    if (!target || !body) return null;
+
+    const changes = {};
+    const segments = body.split(/\s*(?:\||;|\n)\s*/).filter(Boolean);
+    for (const segment of segments) {
+        const fieldMatch = segment.match(/^([^:]+):\s*(.+)$/) || segment.match(/^([^\s:]+)\s+(.+)$/);
+        if (!fieldMatch) continue;
+        const field = normalizeEditFieldName(fieldMatch[1]);
+        const value = normalizeEditedFieldValue(field, fieldMatch[2]);
+        if (!field || !value) continue;
+        changes[field] = value;
+    }
+
+    if (Object.keys(changes).length === 0) return null;
+    return { target, changes };
+}
+
+function findDealIndexByEditTarget(deals, target) {
+    const normalizedTarget = cleanText(target);
+    if (!normalizedTarget) return -1;
+
+    const numericTarget = Number(normalizedTarget);
+    if (Number.isInteger(numericTarget)) {
+        const byOrder = deals.findIndex((deal, index) => Number(deal?.order || index + 1) === numericTarget);
+        if (byOrder >= 0) return byOrder;
+    }
+
+    const lowered = normalizedTarget.toLowerCase();
+    return deals.findIndex((deal) => {
+        return lowered === cleanText(deal?.id).toLowerCase() ||
+            lowered === cleanText(deal?.slackTs).toLowerCase() ||
+            lowered === cleanText(deal?.submissionId).toLowerCase();
+    });
+}
+
+function applySlackEditsToDeals(deals, threadMessages) {
+    const nextDeals = deals.map((deal, index) => ({
+        ...deal,
+        order: Number(deal?.order || index + 1),
+    }));
+
+    for (const message of threadMessages) {
+        const parsed = parseSlackEditCommand(extractSlackMessageText(message));
+        if (!parsed) continue;
+
+        const targetIndex = findDealIndexByEditTarget(nextDeals, parsed.target);
+        if (targetIndex < 0) continue;
+
+        nextDeals[targetIndex] = {
+            ...nextDeals[targetIndex],
+            ...parsed.changes,
+            editedInSlack: true,
+            lastSlackEditTs: cleanText(message?.ts),
+        };
+    }
+
+    return nextDeals;
+}
+
 async function findYourPicks(threadTs) {
     const res = await fetch(
           `https://slack.com/api/conversations.replies?channel=${SLACK_CHANNEL_ID}&ts=${threadTs}`,
@@ -279,7 +424,7 @@ async function main() {
     }
 
   const threadMessages = await getThreadMessages(threadTs);
-  const deals = extractDealsFromThreadMessages(threadMessages);
+  const deals = applySlackEditsToDeals(extractDealsFromThreadMessages(threadMessages), threadMessages);
     if (deals.length === 0) {
           const sample = threadMessages.find((msg) => cleanText(msg?.ts) !== cleanText(threadTs));
           if (sample) {
