@@ -422,7 +422,7 @@
         /* ADD COMMENT/TIP */
         .add-input-section { margin-top: 12px; }
         .add-input-row { display: flex; gap: 8px; }
-        .add-input { flex: 1; border: 2px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; font-size: 14px; outline: none; }
+        .add-input { flex: 1; min-width: 0; border: 2px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; font-size: 16px; outline: none; }
         .add-input:focus { border-color: #667eea; }
         .add-btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .add-btn:hover { transform: scale(1.05); }
@@ -2064,7 +2064,7 @@
         const APP_LANGUAGE_KEY = 'freefinder_language';
         const DEAL_OVERRIDE_CACHE_KEY = 'freefinder_deal_override_state_v2';
         const APP_SHELL_VERSION_KEY = 'freefinder_app_shell_version';
-        const APP_SHELL_VERSION = '2026-04-23-weekly-gyros-fix';
+        const APP_SHELL_VERSION = '2026-04-23-ios-comment-input-fix';
         function pad2(value) {
             return String(value).padStart(2, '0');
         }
@@ -5014,7 +5014,11 @@
             let um = 29, us = 59;
             setInterval(() => {
                 us--; if (us < 0) { us = 59; um--; }
-                if (um < 0) { um = 29; showToast('🔄 Aktualisiert!'); loadDeals(); }
+                if (um < 0) {
+                    um = 29;
+                    showToast('🔄 Aktualisiert!');
+                    if (!shouldPauseForegroundSync()) loadDeals();
+                }
                 const uc = document.getElementById('updateCountdown');
                 if (uc) uc.textContent = um + ':' + String(us).padStart(2, '0');
             }, 1000);
@@ -5041,6 +5045,7 @@
 
         let lastForegroundSyncAt = 0;
         let lastInputFocusAt = 0;
+        let lastTextEntryIntentAt = 0;
 
         function isTextEntryElement(element) {
             if (!element) return false;
@@ -5048,9 +5053,18 @@
             return tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT' || !!element.isContentEditable;
         }
 
+        function markTextEntryIntent(target) {
+            const textEntry = target && target.closest
+                ? target.closest('input, textarea, select, [contenteditable="true"]')
+                : target;
+            if (!isTextEntryElement(textEntry)) return;
+            lastTextEntryIntentAt = Date.now();
+            lastInputFocusAt = lastTextEntryIntentAt;
+        }
+
         function shouldPauseForegroundSync() {
             if (isTextEntryElement(document.activeElement)) return true;
-            return Date.now() - lastInputFocusAt < 1500;
+            return Date.now() - Math.max(lastInputFocusAt, lastTextEntryIntentAt) < 3500;
         }
 
         async function syncDealsOnForeground() {
@@ -6100,7 +6114,7 @@
             }
             html += '</div>';
             
-            html += '<div class="add-input-section"><div class="input-tabs"><button class="input-tab active" onclick="switchInputTab(\'' + safeDealId + '\',\'comment\',this)">' + t('commentTab') + '</button><button class="input-tab" onclick="switchInputTab(\'' + safeDealId + '\',\'tip\',this)">' + t('tipTab') + '</button></div><div class="add-input-row"><input type="text" class="add-input" id="input-' + escapeHtml(dealId) + '" placeholder="' + t('commentPlaceholder') + '" data-type="comment" onkeydown="if(event.key === \'Enter\') submitInput(\'' + safeDealId + '\', event)"><button class="add-btn" onclick="submitInput(\'' + safeDealId + '\', event)">' + t('sendText') + '</button></div></div>';
+            html += '<div class="add-input-section"><div class="input-tabs"><button class="input-tab active" onclick="switchInputTab(\'' + safeDealId + '\',\'comment\',this)">' + t('commentTab') + '</button><button class="input-tab" onclick="switchInputTab(\'' + safeDealId + '\',\'tip\',this)">' + t('tipTab') + '</button></div><div class="add-input-row"><input type="text" class="add-input" id="input-' + escapeHtml(dealId) + '" placeholder="' + t('commentPlaceholder') + '" data-type="comment" autocomplete="off" autocapitalize="sentences" onkeydown="if(event.key === \'Enter\') submitInput(\'' + safeDealId + '\', event)"><button class="add-btn" onclick="submitInput(\'' + safeDealId + '\', event)">' + t('sendText') + '</button></div></div>';
             
             return html;
         }
@@ -7194,6 +7208,10 @@
             let lastTouchEnd = 0;
             document.addEventListener('touchend', (event) => {
                 const now = Date.now();
+                if (isTextEntryElement(event.target)) {
+                    lastTouchEnd = now;
+                    return;
+                }
                 if (now - lastTouchEnd <= 300) event.preventDefault();
                 lastTouchEnd = now;
             }, { passive: false });
@@ -8381,7 +8399,7 @@
           }
 
           allDeals = normalizedDeals;
-          renderDeals();
+          if (!shouldPauseForegroundSync()) renderDeals();
         } catch(e) { /* ignore fetch errors */ }
     }
 
@@ -8558,12 +8576,24 @@
 
         // ⏰ Live re-render countdown every 60s to keep expiry info fresh
         setInterval(function() {
-            if (typeof renderDeals === 'function') {
+            if (typeof renderDeals === 'function' && !shouldPauseForegroundSync()) {
                 renderDeals();
             }
         }, 60000);
 
+        ['pointerdown', 'touchstart', 'mousedown'].forEach((eventName) => {
+            document.addEventListener(eventName, (event) => {
+                markTextEntryIntent(event.target);
+            }, { capture: true, passive: true });
+        });
+
         document.addEventListener('focusin', (event) => {
+            if (isTextEntryElement(event.target)) {
+                lastInputFocusAt = Date.now();
+            }
+        });
+
+        document.addEventListener('focusout', (event) => {
             if (isTextEntryElement(event.target)) {
                 lastInputFocusAt = Date.now();
             }
