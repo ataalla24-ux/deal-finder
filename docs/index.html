@@ -25,6 +25,7 @@
             --ff-content-max: 440px;
             --ff-screen-gutter: clamp(14px, 4vw, 22px);
             --ff-top-safe-gap: max(10px, env(safe-area-inset-top));
+            --ff-native-top-safe-gap: max(76px, calc(env(safe-area-inset-top) + 16px));
         }
         html {
             height: 100%;
@@ -2063,7 +2064,7 @@
         const APP_LANGUAGE_KEY = 'freefinder_language';
         const DEAL_OVERRIDE_CACHE_KEY = 'freefinder_deal_override_state_v2';
         const APP_SHELL_VERSION_KEY = 'freefinder_app_shell_version';
-        const APP_SHELL_VERSION = '2026-04-23-mobile-layout-comment-fix-v1';
+        const APP_SHELL_VERSION = '2026-04-23-mobile-layout-comment-fix-v2';
         function pad2(value) {
             return String(value).padStart(2, '0');
         }
@@ -7084,6 +7085,8 @@
 
         function installNativeWebViewLayoutGuard() {
             const guardId = 'freefinder-webview-layout-guard';
+            const isNativeWebView = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.nativeFeedback);
+            document.documentElement.classList.toggle('native-webview-shell', isNativeWebView);
             const css = `
               html, body {
                 overflow-x: hidden !important;
@@ -7100,6 +7103,10 @@
                 max-width: var(--ff-content-max) !important;
                 margin: 0 auto !important;
                 padding: calc(var(--ff-top-safe-gap) + 10px) var(--ff-screen-gutter) 0 !important;
+              }
+
+              .native-webview-shell .container {
+                padding-top: var(--ff-native-top-safe-gap) !important;
               }
 
               .stats-locked-shell,
