@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { chromium } from 'playwright';
+import { fetchInstagramCodeFromGmail, gmailInstagramCodeConfigured } from './lib/gmail-instagram-code.mjs';
 
 const ROOT = process.cwd();
 const ENV_PATH = path.join(ROOT, '.env');
@@ -338,9 +339,14 @@ async function handleTwoFactor(page) {
 async function handleEmailCodeChallenge(page) {
   if (!await emailCodeChallengeVisible(page)) return false;
 
-  const code = cleanText(env.INSTAGRAM_EMAIL_CODE);
+  let code = cleanText(env.INSTAGRAM_EMAIL_CODE);
+  if (!code && gmailInstagramCodeConfigured(env)) {
+    console.log('Instagram email challenge: fetching code via Gmail API');
+    code = await fetchInstagramCodeFromGmail({ env, sinceMs: Date.now() - 15000 });
+  }
+
   if (!code) {
-    throw new Error('Instagram verlangt einen E-Mail-Bestätigungscode. Starte den Workflow manuell mit instagram_email_code oder setze kurz INSTAGRAM_EMAIL_CODE.');
+    throw new Error('Instagram verlangt einen E-Mail-Bestätigungscode. Konfiguriere die Gmail API Secrets oder starte den Workflow manuell mit instagram_email_code.');
   }
 
   mask(code);

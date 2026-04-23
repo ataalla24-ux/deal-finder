@@ -40,6 +40,13 @@ jobs:
           INSTAGRAM_TOTP_SECRET: ${{ secrets.INSTAGRAM_TOTP_SECRET }}
           INSTAGRAM_EMAIL_CODE: ${{ inputs.instagram_email_code || secrets.INSTAGRAM_EMAIL_CODE }}
           INSTAGRAM_AUTH_TEST_USERNAME: instagram
+          GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
+          GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+          GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+          GMAIL_USER_ID: ${{ secrets.GMAIL_USER_ID || 'me' }}
+          GMAIL_INSTAGRAM_CODE_QUERY: ${{ secrets.GMAIL_INSTAGRAM_CODE_QUERY }}
+          GMAIL_INSTAGRAM_CODE_POLL_TIMEOUT_MS: 90000
+          GMAIL_INSTAGRAM_CODE_POLL_INTERVAL_MS: 5000
         run: node scripts/refresh-instagram-cookies.mjs
 
       - name: Update GitHub Secrets
