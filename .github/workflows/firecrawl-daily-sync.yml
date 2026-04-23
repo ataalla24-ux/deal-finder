@@ -41,7 +41,20 @@ jobs:
       - name: Build Instagram Merchant Registry
         run: node scraper/build-instagram-merchant-registry.js
 
+      - name: Check Instagram Auth
+        id: instagram-auth
+        env:
+          INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
+          INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
+          INSTAGRAM_AUTH_CONTEXT: Firecrawl Daily Sync
+          INSTAGRAM_AUTH_CLEAR_PENDING_ON_FAILURE: "1"
+          INSTAGRAM_AUTH_CLEAR_MODE: daily-sync
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+        run: node scripts/check-instagram-auth.mjs
+
       - name: Run Instagram Daily Sync
+        if: steps.instagram-auth.outputs.ok == 'true'
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
           INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
@@ -89,7 +102,7 @@ jobs:
         run: |
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
-          git add docs/deals-pending-instagram.json docs/deals-pending-instagram-web.json docs/deals-pending-instagram-discovery.json docs/deals-pending-joe.json docs/deals-pending-vienna-promo-radar.json docs/instagram-source-stats.json docs/instagram-discovery-report.json docs/instagram-web-report.json docs/instagram-merchant-registry.json 2>/dev/null || true
+          git add docs/deals-pending-instagram.json docs/deals-pending-instagram-web.json docs/deals-pending-instagram-discovery.json docs/deals-pending-joe.json docs/deals-pending-vienna-promo-radar.json docs/instagram-source-stats.json docs/instagram-discovery-report.json docs/instagram-web-report.json docs/instagram-merchant-registry.json docs/instagram-auth-health.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
