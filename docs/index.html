@@ -21,6 +21,11 @@
         <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --ff-content-max: 440px;
+            --ff-screen-gutter: clamp(14px, 4vw, 22px);
+            --ff-top-safe-gap: max(10px, env(safe-area-inset-top));
+        }
         html {
             height: 100%;
             -webkit-text-size-adjust: 100%;
@@ -36,10 +41,10 @@
                 linear-gradient(180deg, #fffaf4 0%, #f7f6f2 48%, #f3f4f6 100%);
             min-height: 100vh;
             min-height: 100dvh;
-            padding-top: max(12px, env(safe-area-inset-top));
-            padding-right: max(16px, env(safe-area-inset-right));
+            padding-top: 0;
+            padding-right: 0;
             padding-bottom: calc(100px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px));
-            padding-left: max(16px, env(safe-area-inset-left));
+            padding-left: 0;
             overflow-x: hidden;
             overscroll-behavior-y: none;
             position: relative;
@@ -55,7 +60,12 @@
             transform: scale(0.97);
             filter: brightness(0.98);
         }
-        .container { max-width: 560px; margin: 0 auto; }
+        .container {
+            width: min(100%, var(--ff-content-max));
+            max-width: var(--ff-content-max);
+            margin: 0 auto;
+            padding: calc(var(--ff-top-safe-gap) + 10px) var(--ff-screen-gutter) 0;
+        }
         h1 { text-align: center; font-size: 28px; margin-bottom: 8px; }
         /* DEAL DES TAGES */
         .daily-deal {
@@ -433,9 +443,9 @@
         .fab-add:hover .fab-tooltip { opacity: 1; }
         
         /* LINK SUBMIT MODAL */
-        .link-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 600; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .link-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 600; display: none; align-items: center; justify-content: center; padding: calc(20px + env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); }
         .link-modal.show { display: flex; animation: fadeIn 0.3s; }
-        .link-modal-content { background: white; border-radius: 24px; padding: 24px; max-width: 400px; width: 100%; animation: slideUp 0.3s; }
+        .link-modal-content { background: white; border-radius: 24px; padding: 60px 24px 24px; max-width: 400px; width: 100%; max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); overflow-y: auto; -webkit-overflow-scrolling: touch; position: relative; animation: slideUp 0.3s; }
         .link-modal-header { text-align: center; margin-bottom: 20px; }
         .link-modal-icon { font-size: 48px; margin-bottom: 12px; }
         .link-modal-title { font-size: 20px; font-weight: 800; color: #1f2937; }
@@ -464,7 +474,7 @@
         .link-submit-btn:hover { transform: scale(1.02); }
         .link-submit-btn:disabled { background: #9ca3af; cursor: not-allowed; transform: none; }
         
-        .link-modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 28px; cursor: pointer; color: white; }
+        .link-modal-close { position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; border-radius: 999px; background: #f8fafc; border: 1px solid #e5e7eb; font-size: 26px; line-height: 1; cursor: pointer; color: #64748b; display: inline-flex; align-items: center; justify-content: center; z-index: 2; }
         
         /* SUCCESS ANIMATION */
         .success-animation { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(16,185,129,0.95); z-index: 700; display: none; align-items: center; justify-content: center; flex-direction: column; color: white; }
@@ -754,16 +764,16 @@
   .referral-modal-close { position: absolute; top: 16px; right: 16px; background: #f7f1e8; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 18px; color: #65594d; display: flex; align-items: center; justify-content: center; }
   .ref-wa-btn { width: 100%; min-height: 48px; border: none; border-radius: 16px; background: linear-gradient(135deg, #f59a36, #ef8530); color: white; font-size: 15px; font-weight: 800; box-shadow: 0 12px 26px rgba(239, 133, 48, 0.18); }
   .ref-copy-btn { width: 100%; min-height: 44px; border: none; background: transparent; color: #5f564d; font-size: 14px; font-weight: 700; }
-  .stats-locked-shell { padding: 4px 0; }
+  .stats-locked-shell { width: 100%; max-width: 100%; min-width: 0; padding: 4px 0; overflow: hidden; }
   .stats-locked-head { margin-bottom: 14px; }
   .stats-locked-kicker { font-size: 11px; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: #a18567; }
   .stats-locked-title { font-size: 24px; margin: 6px 0 4px; letter-spacing: -0.03em; color: #201a17; }
   .stats-locked-sub { color: #746b63; font-size: 13px; line-height: 1.5; max-width: 34ch; }
-  .stats-preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .stats-preview-item { background: #fffdfa; border: 1px solid #eadfd2; border-radius: 18px; padding: 16px; box-shadow: 0 10px 24px rgba(34, 29, 24, 0.05); }
-  .stats-preview-value { font-size: 27px; font-weight: 800; letter-spacing: -0.04em; color: #201a17; }
+  .stats-preview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; width: 100%; min-width: 0; }
+  .stats-preview-item { min-width: 0; background: #fffdfa; border: 1px solid #eadfd2; border-radius: 18px; padding: 16px; box-shadow: 0 10px 24px rgba(34, 29, 24, 0.05); }
+  .stats-preview-value { font-size: clamp(22px, 6vw, 27px); font-weight: 800; letter-spacing: -0.04em; color: #201a17; overflow-wrap: anywhere; }
   .stats-preview-label { margin-top: 6px; font-size: 12px; line-height: 1.45; color: #7a7064; }
-  .stats-upgrade-card { background: linear-gradient(180deg, #fffdf9 0%, #fff4e7 100%); border: 1px solid #efdfcb; border-radius: 22px; padding: 18px; box-shadow: 0 12px 30px rgba(34, 29, 24, 0.06); }
+  .stats-upgrade-card { width: 100%; max-width: 100%; min-width: 0; background: linear-gradient(180deg, #fffdf9 0%, #fff4e7 100%); border: 1px solid #efdfcb; border-radius: 22px; padding: 18px; box-shadow: 0 12px 30px rgba(34, 29, 24, 0.06); }
   .stats-upgrade-title { font-size: 18px; font-weight: 800; color: #201a17; letter-spacing: -0.03em; }
   .stats-upgrade-list { display: grid; gap: 8px; margin-top: 12px; font-size: 14px; color: #5f564d; }
   .stats-upgrade-button { margin-top: 16px; width: 100%; min-height: 46px; border: none; border-radius: 16px; background: linear-gradient(135deg, #f59a36, #ef8530); color: white; font-size: 15px; font-weight: 800; box-shadow: 0 12px 26px rgba(239, 133, 48, 0.18); }
@@ -908,7 +918,7 @@
             padding-bottom: calc(108px + env(safe-area-inset-bottom) + var(--ff-bottom-viewport-offset, 0px));
         }
         .container {
-            max-width: 440px;
+            max-width: var(--ff-content-max);
         }
         .streak-banner {
             display: flex;
@@ -1604,6 +1614,13 @@
             #dailyDeal .daily-desc {
                 font-size: 11px;
             }
+            .stats-preview-grid {
+                gap: 8px;
+            }
+            .stats-preview-item,
+            .stats-upgrade-card {
+                padding: 14px;
+            }
         }
 </style>
 </head>
@@ -1882,9 +1899,9 @@
     </button>
     
     <!-- LINK SUBMIT MODAL -->
-    <div class="link-modal" id="linkModal">
-        <button class="link-modal-close" onclick="closeLinkModal()">×</button>
+    <div class="link-modal" id="linkModal" onclick="if (event.target === this) closeLinkModal()">
         <div class="link-modal-content">
+            <button class="link-modal-close" onclick="closeLinkModal()" aria-label="Schließen">×</button>
             <div class="link-modal-header">
                 <div class="link-modal-icon">🔗</div>
                 <div class="link-modal-title">Deal-Link teilen</div>
@@ -2046,7 +2063,7 @@
         const APP_LANGUAGE_KEY = 'freefinder_language';
         const DEAL_OVERRIDE_CACHE_KEY = 'freefinder_deal_override_state_v2';
         const APP_SHELL_VERSION_KEY = 'freefinder_app_shell_version';
-        const APP_SHELL_VERSION = '2026-04-22-weekly-deal-cache-fix-v1';
+        const APP_SHELL_VERSION = '2026-04-23-mobile-layout-comment-fix-v1';
         function pad2(value) {
             return String(value).padStart(2, '0');
         }
@@ -5978,7 +5995,7 @@
             '<div class="deal-footer-bar">' +
                 '<div class="deal-inline-actions">' +
                     '<button class="deal-inline-action' + (voteDisabled ? ' is-voted' : '') + '"' + (voteDisabled ? ' disabled ' : ' ') + 'onclick="vote(\'' + d.id + '\', 1, event)"><span class="deal-meta-icon">' + dealCardIcon('repeat') + '</span><span>' + (d.votes || 0) + '</span></button>' +
-                    '<button class="deal-inline-action" onclick="toggleCommunity(\'' + d.id + '\')"><span class="deal-meta-icon">' + dealCardIcon('comment') + '</span><span>' + totalCommunity + '</span></button>' +
+                    '<button class="deal-inline-action" onclick="toggleCommunity(\'' + d.id + '\', event)"><span class="deal-meta-icon">' + dealCardIcon('comment') + '</span><span>' + totalCommunity + '</span></button>' +
                     '<button class="deal-inline-action share-action" onclick="shareDeal(\'' + d.id + '\', event)"><span class="deal-meta-icon">' + dealCardIcon('share') + '</span><span>' + t('shareText') + '</span></button>' +
                 '</div>' +
                 '<div class="deal-primary-actions">' +
@@ -5987,7 +6004,7 @@
                 '</div>' +
             '</div>' +
             (redeemBtn ? '<div class="deal-redeem-inline-wrap">' + redeemBtn + '</div>' : '') +
-            '<div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\')"><span>💬 ' + t('communityTips') + '</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div>' +
+            '<div class="community-section"><button class="toggle-btn" onclick="toggleCommunity(\'' + d.id + '\', event)"><span>💬 ' + t('communityTips') + '</span><span class="count">' + totalCommunity + '</span></button><div class="community-content" id="comm-' + d.id + '">' + renderCommunityContent(d.id, dealTips, dealComments) + '</div></div>' +
         '</div>';
     }
 
@@ -6048,6 +6065,7 @@
         }
         
         function renderCommunityContent(dealId, tips, comments) {
+            const safeDealId = escapeJsString(dealId);
             let html = renderRatingEntry(dealId);
             html += '<div class="tips-section"><div class="tips-title">💡 ' + t('tipsTitle') + '</div>';
             if (tips.length > 0) {
@@ -6056,7 +6074,7 @@
                     const tipAvatar = escapeHtml(String(tip.avatar || '👤'));
                     const tipBadge = tip.badge ? '<span class="tip-badge">' + escapeHtml(String(tip.badge)) + '</span>' : '';
                     const tipText = escapeHtml(String(tip.text || ''));
-                    html += '<div class="tip-card"><div class="tip-header"><div class="tip-avatar">' + tipAvatar + '</div><span class="tip-user">' + tipUser + '</span>' + (tip.verified ? '<span class="verified-badge">✓ Verifiziert</span>' : '') + tipBadge + '</div><div class="tip-text">' + tipText + '</div><div class="tip-helpful"><button onclick="markHelpful(\'' + dealId + '\',\'' + tip.id + '\',event)">👍 ' + (currentLanguage === 'en' ? 'Helpful' : 'Hilfreich') + ' (' + (tip.helpful || 0) + ')</button></div></div>';
+                    html += '<div class="tip-card"><div class="tip-header"><div class="tip-avatar">' + tipAvatar + '</div><span class="tip-user">' + tipUser + '</span>' + (tip.verified ? '<span class="verified-badge">✓ Verifiziert</span>' : '') + tipBadge + '</div><div class="tip-text">' + tipText + '</div><div class="tip-helpful"><button onclick="markHelpful(\'' + safeDealId + '\',\'' + escapeJsString(tip.id) + '\',event)">👍 ' + (currentLanguage === 'en' ? 'Helpful' : 'Hilfreich') + ' (' + (tip.helpful || 0) + ')</button></div></div>';
                 });
             } else {
                 html += '<div class="no-content">' + t('noTips') + '</div>';
@@ -6070,19 +6088,20 @@
                     const commentAvatar = escapeHtml(commentUser ? commentUser[0].toUpperCase() : 'A');
                     const commentUserSafe = escapeHtml(commentUser);
                     const commentText = escapeHtml(String(c.text || ''));
-                    html += '<div class="comment-card"><div class="comment-header"><div class="comment-avatar">' + commentAvatar + '</div><span class="comment-user">' + commentUserSafe + '</span><span class="comment-time">' + timeAgo(c.time) + '</span></div><div class="comment-text">' + commentText + '</div><div class="comment-actions"><button onclick="likeComment(\'' + dealId + '\',\'' + c.id + '\',event)">👍 ' + (c.likes || 0) + '</button></div></div>';
+                    html += '<div class="comment-card"><div class="comment-header"><div class="comment-avatar">' + commentAvatar + '</div><span class="comment-user">' + commentUserSafe + '</span><span class="comment-time">' + timeAgo(c.time) + '</span></div><div class="comment-text">' + commentText + '</div><div class="comment-actions"><button onclick="likeComment(\'' + safeDealId + '\',\'' + escapeJsString(c.id) + '\',event)">👍 ' + (c.likes || 0) + '</button></div></div>';
                 });
             } else {
                 html += '<div class="no-content">' + t('noComments') + '</div>';
             }
             html += '</div>';
             
-            html += '<div class="add-input-section"><div class="input-tabs"><button class="input-tab active" onclick="switchInputTab(\'' + dealId + '\',\'comment\',this)">' + t('commentTab') + '</button><button class="input-tab" onclick="switchInputTab(\'' + dealId + '\',\'tip\',this)">' + t('tipTab') + '</button></div><div class="add-input-row"><input type="text" class="add-input" id="input-' + dealId + '" placeholder="' + t('commentPlaceholder') + '" data-type="comment"><button class="add-btn" onclick="submitInput(\'' + dealId + '\')">' + t('sendText') + '</button></div></div>';
+            html += '<div class="add-input-section"><div class="input-tabs"><button class="input-tab active" onclick="switchInputTab(\'' + safeDealId + '\',\'comment\',this)">' + t('commentTab') + '</button><button class="input-tab" onclick="switchInputTab(\'' + safeDealId + '\',\'tip\',this)">' + t('tipTab') + '</button></div><div class="add-input-row"><input type="text" class="add-input" id="input-' + escapeHtml(dealId) + '" placeholder="' + t('commentPlaceholder') + '" data-type="comment" onkeydown="if(event.key === \'Enter\') submitInput(\'' + safeDealId + '\', event)"><button class="add-btn" onclick="submitInput(\'' + safeDealId + '\', event)">' + t('sendText') + '</button></div></div>';
             
             return html;
         }
         
-        function toggleCommunity(dealId) {
+        function toggleCommunity(dealId, e) {
+            if (e) e.stopPropagation();
             const content = document.getElementById('comm-' + dealId);
             if (!content) return;
             content.classList.toggle('show');
@@ -6115,7 +6134,12 @@
             });
         }
         
-        function submitInput(dealId) {
+        function submitInput(dealId, e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            if (!dealId) return;
             const input = document.getElementById('input-' + dealId);
             if (!input) return;
             const text = input.value.trim();
@@ -6123,21 +6147,34 @@
             
             const type = input.dataset.type || 'comment';
             const userName = 'Du';
-            const id = Date.now().toString();
+            const id = Date.now().toString() + '-' + Math.random().toString(36).slice(2, 8);
             
             if (type === 'tip') {
                 if (!userTips[dealId]) userTips[dealId] = [];
                 userTips[dealId].push({ id, user: userName, text, avatar: '😊', helpful: 0 });
-                localStorage.setItem('userTips', JSON.stringify(userTips));
+                try {
+                    localStorage.setItem('userTips', JSON.stringify(userTips));
+                } catch (err) {
+                    console.warn('Could not save user tip:', err);
+                    showToast(currentLanguage === 'en' ? 'Could not save tip' : 'Tipp konnte nicht gespeichert werden');
+                    return;
+                }
                 addXP(10, t('tipShared'));
             } else {
                 if (!comments[dealId]) comments[dealId] = [];
                 comments[dealId].push({ id, user: userName, text, time: Date.now(), likes: 0 });
-                localStorage.setItem('comments', JSON.stringify(comments));
+                try {
+                    localStorage.setItem('comments', JSON.stringify(comments));
+                } catch (err) {
+                    console.warn('Could not save comment:', err);
+                    showToast(currentLanguage === 'en' ? 'Could not save comment' : 'Kommentar konnte nicht gespeichert werden');
+                    return;
+                }
                 addXP(5, t('commentPosted'));
             }
             
             input.value = '';
+            input.blur();
             renderDeals();
             reopenCommunityAfterRender(dealId);
         }
@@ -7042,7 +7079,97 @@
             window.visualViewport.addEventListener('scroll', updateViewportBottomOffset, { passive: true });
         }
         setupInteractionFeedback();
+        installNativeWebViewLayoutGuard();
         disableIOSViewportZoom();
+
+        function installNativeWebViewLayoutGuard() {
+            const guardId = 'freefinder-webview-layout-guard';
+            const css = `
+              html, body {
+                overflow-x: hidden !important;
+              }
+
+              body {
+                padding-top: 0 !important;
+                padding-right: 0 !important;
+                padding-left: 0 !important;
+              }
+
+              .container {
+                width: min(100%, var(--ff-content-max)) !important;
+                max-width: var(--ff-content-max) !important;
+                margin: 0 auto !important;
+                padding: calc(var(--ff-top-safe-gap) + 10px) var(--ff-screen-gutter) 0 !important;
+              }
+
+              .stats-locked-shell,
+              .stats-preview-grid,
+              .stats-upgrade-card {
+                max-width: 100% !important;
+                min-width: 0 !important;
+              }
+
+              .nav-item {
+                min-height: 62px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 3px !important;
+              }
+
+              .nav-icon {
+                width: 28px !important;
+                height: 28px !important;
+                margin: 0 auto !important;
+              }
+
+              .nav-icon svg {
+                width: 28px !important;
+                height: 28px !important;
+              }
+
+              .nav-label {
+                position: static !important;
+                width: auto !important;
+                height: auto !important;
+                padding: 0 !important;
+                margin: 2px 0 0 !important;
+                overflow: visible !important;
+                clip: auto !important;
+                white-space: nowrap !important;
+                border: 0 !important;
+                display: block !important;
+                color: inherit !important;
+                font-size: 10px !important;
+                font-weight: 700 !important;
+                line-height: 1.1 !important;
+                opacity: 0.95 !important;
+              }
+            `;
+            const ensureGuardIsLast = () => {
+                const head = document.head || document.getElementsByTagName('head')[0];
+                if (!head) return;
+                let guard = document.getElementById(guardId);
+                if (!guard) {
+                    guard = document.createElement('style');
+                    guard.id = guardId;
+                    guard.textContent = css;
+                }
+                if (guard.parentNode !== head || guard !== head.lastElementChild) {
+                    head.appendChild(guard);
+                }
+            };
+
+            ensureGuardIsLast();
+            try {
+                const observer = new MutationObserver(ensureGuardIsLast);
+                observer.observe(document.head, { childList: true });
+            } catch (e) {}
+            setTimeout(ensureGuardIsLast, 0);
+            setTimeout(ensureGuardIsLast, 300);
+            setTimeout(ensureGuardIsLast, 1200);
+        }
 
         function disableIOSViewportZoom() {
             const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
