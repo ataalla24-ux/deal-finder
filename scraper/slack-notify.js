@@ -2,6 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import {
+  DEFAULT_REPORT_PATH,
+  validateDealsForSlack,
+  writeDealValidityReport,
+} from './deal-validity-agent.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
@@ -219,12 +225,45 @@ function formatDate(value) {
   return d.toLocaleDateString('de-AT');
 }
 
+function formatValidationDetails(deal) {
+  const validity = ensureObject(deal.validity);
+  if (!validity.status) return '';
+
+  const icon = validity.status === 'ok'
+    ? '✅'
+    : (validity.status === 'warning' ? '⚠️' : '🚫');
+  const lines = [`🧪 Prüfstatus: ${icon} ${validity.status}`];
+
+  if (validity.sourceDate) {
+    lines.push(`🗓️ Quell-/Post-Datum: ${formatDate(validity.sourceDate)} (${validity.sourceDateSource || 'k.A.'})`);
+  }
+  if (validity.expiryDate) {
+    lines.push(`⏳ Gefundene Gültigkeit: ${formatDate(validity.expiryDate)} (${validity.expirySource || 'k.A.'})`);
+  }
+
+  const warnings = ensureArray(validity.warnings).filter(Boolean);
+  if (warnings.length > 0) {
+    lines.push(`⚠️ Hinweise: ${warnings.slice(0, 2).join('; ')}`);
+  }
+
+  return `\n${lines.join('\n')}`;
+}
+
+function formatReasonCategoryCounts(counts) {
+  const entries = Object.entries(ensureObject(counts))
+    .filter(([, count]) => Number(count) > 0)
+    .sort((left, right) => Number(right[1]) - Number(left[1]));
+  if (entries.length === 0) return '';
+  return entries.map(([reason, count]) => `${count} ${reason}`).join(' | ');
+}
+
 function buildSlackMessage(deal, index) {
   const link = deal.url ? `<${deal.url}|Zum Angebot>` : '⚠️ FEHLT';
   const desc = deal.description ? `\n📝 ${deal.description.slice(0, 180)}` : '';
   const missingNote = Array.isArray(deal.missingFields) && deal.missingFields.length > 0
     ? `\n⚠️ FEHLT: ${deal.missingFields.join(', ')}`
     : '';
+  const validationDetails = formatValidationDetails(deal);
   return [
     `*${index}. ${deal.title}*`,
     `🏷️ Marke/Restaurant: ${deal.brand || 'k.A.'}`,
@@ -235,6 +274,7 @@ function buildSlackMessage(deal, index) {
     `🧩 Ursprung intern: ${deal.originSource || deal.source || 'k.A.'}`,
     `🔗 Direktlink: ${link}`,
     `🆔 Deal-ID: ${deal.id}`,
+    validationDetails,
     missingNote,
     desc,
     '_Mit ✅ freigeben_',
@@ -314,7 +354,19 @@ async function main() {
   console.log(`📋 Total pending deals loaded: ${pendingDeals.length}`);
   const existingQueue = loadPendingQueue();
 
-  const freshDeals = pendingDeals;
+  const validation = await validateDealsForSlack(pendingDeals);
+  writeDealValidityReport(validation.report);
+  const freshDeals = validation.allowedDeals;
+  const blockedSummary = formatReasonCategoryCounts(validation.summary.reasonCategoryCounts);
+
+  console.log(
+    `🧪 Deal validity agent: ${validation.summary.allowed}/${validation.summary.total} allowed, ` +
+    `${validation.summary.blocked} blocked, ${validation.summary.warnings} warnings`
+  );
+  if (blockedSummary) {
+    console.log(`🚫 Blocked reasons: ${blockedSummary}`);
+  }
+  console.log(`💾 saved: ${path.relative(ROOT, DEFAULT_REPORT_PATH)}`);
   console.log(`📨 Pending: ${pendingDeals.length}, posting to Slack: ${freshDeals.length}`);
 
   if (freshDeals.length === 0) {
@@ -333,6 +385,8 @@ async function main() {
   const headerTs = await postSlackMessage(
     `🎯 *FreeFinder Wien* — ${freshDeals.length} neue Deals\n` +
     `🆓 ${freeCount} gratis | 💰 ${freshDeals.length - freeCount} rabatt/test\n` +
+    `🧪 Gültigkeitscheck: ${validation.summary.allowed}/${validation.summary.total} freigegeben | ${validation.summary.blocked} blockiert (max. ${validation.summary.maxAgeDays} Tage)\n` +
+    (blockedSummary ? `🚫 Blockiert: ${blockedSummary}\n` : '') +
     `_Jeden Deal mit ✅ bestätigen, dann erscheint er in der iOS-App._\n` +
     `_Bearbeiten vor Freigabe: z. B. edit 3 titel: Gratis Matcha | ort: Neubaugasse 12, 1070 Wien | ablauf: 20.04.2026_`
   );
