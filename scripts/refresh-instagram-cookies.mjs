@@ -35,6 +35,20 @@ const PASSWORD_SELECTORS = [
   'input[autocomplete="current-password"]',
   'input[type="password"]',
 ];
+const INSTAGRAM_PROMPT_BUTTONS = [
+  'Nur erforderliche Cookies erlauben',
+  'Allow essential cookies',
+  'Ablehnen',
+  'Decline optional cookies',
+  'Jetzt nicht',
+  'Nicht jetzt',
+  'Not now',
+  'Später',
+  'Skip',
+  'Weiter',
+  'Continue',
+  'Fortfahren',
+];
 
 function cleanText(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
@@ -143,16 +157,12 @@ async function clickButtonByText(page, labels, timeout = 700) {
 }
 
 async function dismissInstagramPrompts(page) {
-  await clickButtonByText(page, [
-    'Nur erforderliche Cookies erlauben',
-    'Allow essential cookies',
-    'Ablehnen',
-    'Decline optional cookies',
-    'Jetzt nicht',
-    'Not now',
-    'Später',
-    'Skip',
-  ]);
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const clicked = await clickButtonByText(page, INSTAGRAM_PROMPT_BUTTONS);
+    if (!clicked) break;
+    await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(700);
+  }
   try {
     await page.keyboard.press('Escape');
   } catch {
@@ -248,17 +258,54 @@ async function handleTwoFactor(page) {
 }
 
 async function detectBlockingState(page) {
+  const currentUrl = page.url();
+  if (/\/challenge\/|\/checkpoint\/|two_factor|suspended|disabled/i.test(currentUrl)) {
+    return `Instagram Challenge/Verifizierung erkannt (${currentUrl})`;
+  }
+
   const bodyText = await page.locator('body').innerText({ timeout: 5000 }).catch(() => '');
   const signal = cleanText(bodyText).toLowerCase();
   if (!signal) return '';
 
-  if (/challenge|required|confirm it'?s you|suspicious|help us confirm|verify your account|bestätige|verdächtig/.test(signal)) {
+  if (/challenge|required|confirm it'?s you|suspicious|help us confirm|verify your account|bestätige|verdächtig|verification code|security code|two-factor|authentifizierung|sicherheitscode|gib den code/.test(signal)) {
     return 'Instagram Challenge/Verifizierung erkannt';
   }
   if (/incorrect|falsch|passwort.*falsch|wrong password|invalid/.test(signal)) {
     return 'Instagram Login-Daten wurden abgelehnt';
   }
   return '';
+}
+
+async function collectInstagramCookies(context) {
+  const cookies = await context.cookies(INSTAGRAM_HOME);
+  return sortCookies(
+    cookies.filter((cookie) => cookie.name && cookie.value && /(^|\.)instagram\.com$/i.test(cookie.domain || '.instagram.com'))
+  );
+}
+
+function cookieDiagnostics(cookies) {
+  const cookieNames = cookies.map((cookie) => cookie.name);
+  return {
+    cookieCount: cookies.length,
+    cookieNames,
+    hasSessionCookie: cookieNames.includes('sessionid'),
+    hasCsrfCookie: cookieNames.includes('csrftoken'),
+  };
+}
+
+async function waitForSessionCookie(context, timeout = 20000) {
+  const deadline = Date.now() + timeout;
+  let cookies = [];
+
+  while (Date.now() < deadline) {
+    cookies = await collectInstagramCookies(context);
+    if (cookies.some((cookie) => cookie.name === 'sessionid' && cookie.value)) {
+      return cookies;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+
+  return cookies;
 }
 
 async function validateBrowserSession(page) {
@@ -315,10 +362,7 @@ function sortCookies(cookies) {
 }
 
 async function extractCookieOutput(context) {
-  const cookies = await context.cookies(INSTAGRAM_HOME);
-  const instagramCookies = sortCookies(
-    cookies.filter((cookie) => cookie.name && cookie.value && /(^|\.)instagram\.com$/i.test(cookie.domain || '.instagram.com'))
-  );
+  const instagramCookies = await collectInstagramCookies(context);
   const session = instagramCookies.find((cookie) => cookie.name === 'sessionid');
   const csrf = instagramCookies.find((cookie) => cookie.name === 'csrftoken');
 
@@ -332,12 +376,7 @@ async function extractCookieOutput(context) {
   return {
     cookieString,
     sessionId: session.value,
-    diagnostics: {
-      cookieCount: instagramCookies.length,
-      cookieNames: instagramCookies.map((cookie) => cookie.name),
-      hasSessionCookie: true,
-      hasCsrfCookie: true,
-    },
+    diagnostics: cookieDiagnostics(instagramCookies),
   };
 }
 
@@ -401,6 +440,12 @@ async function main() {
 
     const blockingState = await detectBlockingState(page);
     if (blockingState) throw new Error(blockingState);
+
+    const sessionCookies = await waitForSessionCookie(context);
+    if (!sessionCookies.some((cookie) => cookie.name === 'sessionid' && cookie.value)) {
+      const diagnostics = cookieDiagnostics(sessionCookies);
+      throw new Error(`Instagram hat keinen sessionid Cookie gesetzt: ${await diagnosePage(page)}; Cookies: ${diagnostics.cookieNames.join(', ') || 'keine'}`);
+    }
 
     const validation = await validateBrowserSession(page);
     const output = await extractCookieOutput(context);
