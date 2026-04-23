@@ -22,6 +22,19 @@ const COOKIE_ORDER = [
   'ps_l',
   'ps_n',
 ];
+const USERNAME_SELECTORS = [
+  'input[name="username"]',
+  'input[autocomplete="username"]',
+  'input[aria-label*="Phone"]',
+  'input[aria-label*="Telefon"]',
+  'input[aria-label*="Benutzer"]',
+  'input[type="text"]',
+];
+const PASSWORD_SELECTORS = [
+  'input[name="password"]',
+  'input[autocomplete="current-password"]',
+  'input[type="password"]',
+];
 
 function cleanText(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
@@ -147,13 +160,60 @@ async function dismissInstagramPrompts(page) {
   }
 }
 
-async function fillLoginForm(page, username, password) {
-  await page.goto(INSTAGRAM_LOGIN, { waitUntil: 'domcontentloaded', timeout: 45000 });
-  await page.waitForTimeout(1500);
-  await dismissInstagramPrompts(page);
+async function firstVisibleLocator(page, selectors, timeout = 15000) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    for (const selector of selectors) {
+      try {
+        const locator = page.locator(selector).first();
+        if (await locator.isVisible({ timeout: 400 })) return locator;
+      } catch {
+        // Try next selector.
+      }
+    }
+    await page.waitForTimeout(500);
+  }
+  return null;
+}
 
-  await page.locator('input[name="username"]').fill(username, { timeout: 15000 });
-  await page.locator('input[name="password"]').fill(password, { timeout: 15000 });
+async function diagnosePage(page) {
+  const snapshot = await page.evaluate(() => ({
+    title: document.title || '',
+    url: location.href,
+    body: document.body?.innerText?.slice(0, 600) || '',
+  })).catch(() => ({ title: '', url: page.url(), body: '' }));
+  return `${snapshot.title || 'ohne Titel'} @ ${snapshot.url}: ${cleanText(snapshot.body).slice(0, 240)}`;
+}
+
+async function openLoginPage(page) {
+  const urls = [
+    `${INSTAGRAM_LOGIN}?hl=en`,
+    `${INSTAGRAM_LOGIN}?next=%2F&hl=en`,
+    INSTAGRAM_HOME,
+  ];
+
+  for (const url of urls) {
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await page.waitForLoadState('networkidle', { timeout: 12000 }).catch(() => {});
+    await page.waitForTimeout(2500);
+    await dismissInstagramPrompts(page);
+    if (await firstVisibleLocator(page, USERNAME_SELECTORS, 2500)) return;
+    await clickButtonByText(page, ['Log in', 'Einloggen', 'Anmelden'], 900);
+    if (await firstVisibleLocator(page, USERNAME_SELECTORS, 2500)) return;
+  }
+}
+
+async function fillLoginForm(page, username, password) {
+  await openLoginPage(page);
+
+  const usernameInput = await firstVisibleLocator(page, USERNAME_SELECTORS, 20000);
+  const passwordInput = await firstVisibleLocator(page, PASSWORD_SELECTORS, 10000);
+  if (!usernameInput || !passwordInput) {
+    throw new Error(`Instagram Login-Formular nicht gefunden: ${await diagnosePage(page)}`);
+  }
+
+  await usernameInput.fill(username, { timeout: 10000 });
+  await passwordInput.fill(password, { timeout: 10000 });
   await Promise.all([
     page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {}),
     clickFirstVisible(page, ['button[type="submit"]'], 2000),
