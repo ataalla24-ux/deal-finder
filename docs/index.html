@@ -5252,7 +5252,11 @@
             let weeklyDeal = null;
             if (activeWeeklyDealOverride && activeWeeklyDealOverride.dealId && !excludedIds.includes(activeWeeklyDealOverride.dealId)) {
                 const overridden = allDeals.find((d) => d.id === activeWeeklyDealOverride.dealId);
-                weeklyDeal = normalizeDealForApp(overridden || activeWeeklyDealOverride);
+                weeklyDeal = normalizeDealForApp({
+                    ...(overridden || {}),
+                    ...activeWeeklyDealOverride,
+                    id: activeWeeklyDealOverride.dealId
+                });
             }
             if (!weeklyDeal) {
                 if (lastResolvedWeeklyDeal && !excludedIds.includes(lastResolvedWeeklyDeal.id)) {
