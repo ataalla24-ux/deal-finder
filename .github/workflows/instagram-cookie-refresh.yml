@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '45 2 * * *' # 04:45 Vienna summer / 03:45 winter, before Instagram sync jobs
   workflow_dispatch:
+    inputs:
+      instagram_email_code:
+        description: "Optional one-time Instagram email verification code"
+        required: false
+        type: string
 
 concurrency:
   group: instagram-cookie-refresh
@@ -33,6 +38,7 @@ jobs:
           INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
           INSTAGRAM_PASSWORD: ${{ secrets.INSTAGRAM_PASSWORD }}
           INSTAGRAM_TOTP_SECRET: ${{ secrets.INSTAGRAM_TOTP_SECRET }}
+          INSTAGRAM_EMAIL_CODE: ${{ inputs.instagram_email_code || secrets.INSTAGRAM_EMAIL_CODE }}
           INSTAGRAM_AUTH_TEST_USERNAME: instagram
         run: node scripts/refresh-instagram-cookies.mjs
 

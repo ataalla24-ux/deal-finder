@@ -54,6 +54,15 @@ function cleanText(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
 }
 
+function safePageUrl(rawUrl) {
+  try {
+    const parsed = new URL(rawUrl);
+    return `${parsed.origin}${parsed.pathname}${parsed.search ? '?...' : ''}`;
+  } catch {
+    return String(rawUrl || '');
+  }
+}
+
 function loadEnv() {
   if (!fs.existsSync(ENV_PATH)) return {};
   const out = {};
@@ -192,7 +201,7 @@ async function diagnosePage(page) {
     url: location.href,
     body: document.body?.innerText?.slice(0, 600) || '',
   })).catch(() => ({ title: '', url: page.url(), body: '' }));
-  return `${snapshot.title || 'ohne Titel'} @ ${snapshot.url}: ${cleanText(snapshot.body).slice(0, 240)}`;
+  return `${snapshot.title || 'ohne Titel'} @ ${safePageUrl(snapshot.url)}: ${cleanText(snapshot.body).slice(0, 240)}`;
 }
 
 async function openLoginPage(page) {
@@ -242,6 +251,7 @@ async function waitForLoginAttemptResult(page, context, timeout = 9000) {
   while (Date.now() < deadline) {
     if (await hasSessionCookie(context)) return 'session';
     if (await twoFactorInputVisible(page)) return 'transition';
+    if (await emailCodeChallengeVisible(page)) return 'transition';
 
     const blockingState = await detectBlockingState(page);
     if (blockingState) throw new Error(blockingState);
@@ -325,6 +335,25 @@ async function handleTwoFactor(page) {
   return true;
 }
 
+async function handleEmailCodeChallenge(page) {
+  if (!await emailCodeChallengeVisible(page)) return false;
+
+  const code = cleanText(env.INSTAGRAM_EMAIL_CODE);
+  if (!code) {
+    throw new Error('Instagram verlangt einen E-Mail-Bestätigungscode. Starte den Workflow manuell mit instagram_email_code oder setze kurz INSTAGRAM_EMAIL_CODE.');
+  }
+
+  mask(code);
+  const input = page.locator('input[autocomplete="one-time-code"], input[inputmode="numeric"], input[type="tel"], input[type="text"]').first();
+  await input.fill(code, { timeout: 10000 });
+  await Promise.all([
+    page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {}),
+    clickButtonByText(page, ['Weiter', 'Continue', 'Confirm', 'Bestätigen', 'Submit'], 2500),
+  ]);
+  await page.waitForTimeout(3500);
+  return true;
+}
+
 function twoFactorInput(page) {
   return page.locator('input[name="verificationCode"], input[autocomplete="one-time-code"], input[type="tel"]').first();
 }
@@ -337,17 +366,23 @@ async function twoFactorInputVisible(page) {
   }
 }
 
+async function emailCodeChallengeVisible(page) {
+  if (/\/auth_platform\/codeentry/i.test(page.url())) return true;
+  const bodyText = await page.locator('body').innerText({ timeout: 1000 }).catch(() => '');
+  return /sieh in deinen e-mails nach|check your email|email.*code|code.*email|gib den code/i.test(cleanText(bodyText));
+}
+
 async function detectBlockingState(page) {
   const currentUrl = page.url();
   if (/\/challenge\/|\/checkpoint\/|two_factor|suspended|disabled/i.test(currentUrl)) {
-    return `Instagram Challenge/Verifizierung erkannt (${currentUrl})`;
+    return `Instagram Challenge/Verifizierung erkannt (${safePageUrl(currentUrl)})`;
   }
 
   const bodyText = await page.locator('body').innerText({ timeout: 5000 }).catch(() => '');
   const signal = cleanText(bodyText).toLowerCase();
   if (!signal) return '';
 
-  if (/challenge|required|confirm it'?s you|suspicious|help us confirm|verify your account|bestätige|verdächtig|verification code|security code|two-factor|authentifizierung|sicherheitscode|gib den code/.test(signal)) {
+  if (/challenge|required|confirm it'?s you|suspicious|help us confirm|verify your account|bestätige|verdächtig|verification code|security code|two-factor|authentifizierung|sicherheitscode/.test(signal)) {
     return 'Instagram Challenge/Verifizierung erkannt';
   }
   if (/incorrect|falsch|passwort.*falsch|wrong password|invalid/.test(signal)) {
@@ -517,6 +552,7 @@ async function main() {
     const { passwordInput } = await fillLoginForm(page, username, password);
     await submitLoginForm(page, context, passwordInput);
     await handleTwoFactor(page);
+    await handleEmailCodeChallenge(page);
     await dismissInstagramPrompts(page);
 
     const blockingState = await detectBlockingState(page);
