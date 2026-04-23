@@ -37,6 +37,11 @@ loadEnvFile();
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 const PENDING_FILE_NAMES = process.env.PENDING_FILE_NAMES || '';
+const EXCLUDED_PENDING_FILES = new Set([
+  'deals-pending-all.json',
+  'deals-pending-firecrawl.json',
+  'deals-pending-merged.json',
+]);
 
 function ensureObject(value, fallback = {}) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
@@ -107,7 +112,7 @@ function inferLogo(deal, type) {
 }
 
 function inferDistance(deal) {
-  const distance = cleanText(deal.distance || deal.location || deal.ort);
+  const distance = cleanText(deal.distance || deal.location || deal.ort || deal.address);
   return distance || 'Wien';
 }
 
@@ -130,7 +135,7 @@ function normalizeDeal(rawDeal, sourceKey) {
   const brand = inferBrand(deal, sourceKey);
   const title = inferTitle(deal, brand);
   const rawUrl = normalizeUrl(deal.url);
-  const rawDistance = cleanText(deal.distance || deal.location || deal.ort);
+  const rawDistance = cleanText(deal.distance || deal.location || deal.ort || deal.address);
   const rawExpires = cleanText(deal.expires || deal.end_date || deal.validity_date || '');
   const rawSource = cleanText(deal.source);
   const originSource = cleanText(deal.originSource) || rawSource || sourceKey;
@@ -156,6 +161,9 @@ function normalizeDeal(rawDeal, sourceKey) {
     type,
     logo: inferLogo(deal, type),
     distance: inferDistance(deal),
+    address: cleanText(deal.address),
+    location: cleanText(deal.location),
+    ort: cleanText(deal.ort),
     pubDate,
     pubDateSource,
     expires: inferExpires(deal),
@@ -173,7 +181,7 @@ function normalizeDeal(rawDeal, sourceKey) {
 function getPendingFiles() {
   const allPendingFiles = fs.readdirSync(DOCS_DIR).filter((file) => {
     if (!file.startsWith('deals-pending-') || !file.endsWith('.json')) return false;
-    return file !== 'deals-pending-all.json';
+    return !EXCLUDED_PENDING_FILES.has(file);
   });
   if (!cleanText(PENDING_FILE_NAMES)) {
     return allPendingFiles.sort((left, right) => left.localeCompare(right));
@@ -183,7 +191,7 @@ function getPendingFiles() {
     .split(',')
     .map((name) => cleanText(name))
     .filter(Boolean);
-  return requested.filter((name) => allPendingFiles.includes(name));
+  return requested.filter((name) => allPendingFiles.includes(name) && !EXCLUDED_PENDING_FILES.has(name));
 }
 
 function loadPendingDeals(files) {

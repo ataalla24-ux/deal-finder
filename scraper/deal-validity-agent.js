@@ -10,6 +10,14 @@ const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const DEFAULT_REPORT_PATH = path.join(DOCS_DIR, 'deal-validity-report.json');
 const DAY_MS = 24 * 60 * 60 * 1000;
+const DEFAULT_CHURCH_WEEKDAY = 1; // Monday, aligned with the Churches Wien weekly workflow.
+const EXCLUDED_SOURCE_PATTERNS = [
+  { label: 'DieRestaurantWoche', hostPattern: /(^|\.)dierestaurantwoche\.at$/i, textPattern: /\b(die\s*restaurantwoche|restaurantwoche|culinarius\s+restaurant\s+week)\b/i },
+  { label: 'Neotaste', hostPattern: /(^|\.)neotaste\.com$/i, textPattern: /\bneotaste\b/i },
+  { label: 'TheFork', hostPattern: /(^|\.)thefork\.(at|com)$/i, textPattern: /\bthe\s*fork\b|\bthefork\b/i },
+  { label: 'gastro.news', hostPattern: /(^|\.)gastro\.news$/i, textPattern: /\bgastro\.news\b|\bgastro\s+news\b/i },
+];
+const VIENNA_SIGNAL_PATTERN = /\b(wien|vienna)\b|(?:^|[^\d])(1(?:0[1-9]0|1[0-9]0|2[0-3]0))(?:\b|[^\d])/i;
 
 function cleanText(value) {
   if (!value) return '';
@@ -55,6 +63,95 @@ function ageDays(date, now) {
 function normalizeUrl(value) {
   const text = cleanText(value);
   return /^https?:\/\//i.test(text) ? text : '';
+}
+
+function hostnameFromUrl(value) {
+  const url = normalizeUrl(value);
+  if (!url) return '';
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+function getDealSignalText(deal, health = null) {
+  return [
+    deal.id,
+    deal.brand,
+    deal.title,
+    deal.description,
+    deal.category,
+    deal.type,
+    deal.source,
+    deal.originSource,
+    deal.distance,
+    deal.location,
+    deal.ort,
+    deal.address,
+    deal.url,
+    health?.finalUrl,
+    health?.contentHints?.title,
+    health?.contentHints?.description,
+  ].map(cleanText).filter(Boolean).join(' ');
+}
+
+function getExcludedSourceMatch(deal, health = null) {
+  const signal = getDealSignalText(deal, health);
+  const hosts = [deal.url, health?.finalUrl].map(hostnameFromUrl).filter(Boolean);
+  return EXCLUDED_SOURCE_PATTERNS.find((entry) => {
+    if (entry.textPattern.test(signal)) return true;
+    return hosts.some((host) => entry.hostPattern.test(host));
+  }) || null;
+}
+
+function hasViennaSignalInText(value) {
+  return VIENNA_SIGNAL_PATTERN.test(cleanText(value));
+}
+
+function hasMissingLocation(deal) {
+  return Array.isArray(deal.missingFields) && deal.missingFields.includes('Ort');
+}
+
+function hasViennaEvidence(deal, health = null) {
+  const strongLocationText = [
+    deal.address,
+    deal.location,
+    deal.ort,
+    hasMissingLocation(deal) ? '' : deal.distance,
+  ].map(cleanText).filter(Boolean).join(' ');
+
+  if (hasViennaSignalInText(strongLocationText)) return true;
+
+  const contextText = [
+    deal.title,
+    deal.description,
+    deal.brand,
+    deal.url,
+    health?.finalUrl,
+    health?.contentHints?.title,
+    health?.contentHints?.description,
+  ].map(cleanText).filter(Boolean).join(' ');
+
+  return hasViennaSignalInText(contextText);
+}
+
+function isChurchServiceDeal(deal) {
+  const signal = [
+    deal.category,
+    deal.source,
+    deal.originSource,
+    deal.title,
+    deal.description,
+  ].map(cleanText).join(' ').toLowerCase();
+
+  return /\b(gottesdienste?|freikirche|freikirchen|church service|service times)\b/i.test(signal);
+}
+
+function shouldAllowChurchThisRun(now, options = {}) {
+  const configured = Number(options.churchWeekday ?? process.env.DEAL_VALIDITY_CHURCH_WEEKDAY ?? DEFAULT_CHURCH_WEEKDAY);
+  const weekday = Number.isFinite(configured) ? configured : DEFAULT_CHURCH_WEEKDAY;
+  return startOfUtcDay(now).getUTCDay() === weekday;
 }
 
 function collectExpiryCandidates(deal, health, now) {
@@ -228,6 +325,7 @@ async function validateDeal(deal, context) {
   const checkedAt = new Date().toISOString();
   const url = normalizeUrl(deal.url);
   const health = await inspectUrlWithCache(url, context.urlCache, context.urlOptions);
+  const excludedSource = getExcludedSourceMatch(deal, health);
   const publicationCandidates = getPublicationCandidates(deal, health);
   const freshness = getFreshnessDecision(publicationCandidates, context.maxAgeDays, now);
   const expiryCandidates = collectExpiryCandidates(deal, health, now);
@@ -239,6 +337,18 @@ async function validateDeal(deal, context) {
     reasons.push(`URL ungültig (${health.reason || 'unbekannt'})`);
   } else if (health?.transientError) {
     warnings.push(`URL nicht eindeutig prüfbar (${health.reason || 'temporärer Fehler'})`);
+  }
+
+  if (excludedSource) {
+    reasons.push(`ausgeschlossene Quelle (${excludedSource.label})`);
+  }
+
+  if (context.requireVienna && !hasViennaEvidence(deal, health)) {
+    reasons.push('nicht eindeutig in Wien');
+  }
+
+  if (isChurchServiceDeal(deal) && !context.allowChurchThisRun) {
+    reasons.push('Gottesdienste nur im Wochenlauf');
   }
 
   if (freshness.blocked) {
@@ -322,6 +432,9 @@ function classifyBlockReason(reason) {
   if (text.startsWith('älter') || text.startsWith('aelter')) return 'älter als 7 Tage';
   if (text.startsWith('abgelaufen')) return 'abgelaufen';
   if (text.startsWith('url ungültig')) return 'ungültige URL';
+  if (text.startsWith('ausgeschlossene quelle')) return 'ausgeschlossene Quelle';
+  if (text.startsWith('nicht eindeutig in wien')) return 'nicht Wien';
+  if (text.startsWith('gottesdienste nur')) return 'Gottesdienste außerhalb Wochenlauf';
   return 'sonstiges';
 }
 
@@ -357,9 +470,12 @@ async function validateDealsForSlack(deals, options = {}) {
   const concurrency = Number(options.concurrency || process.env.DEAL_VALIDITY_URL_CONCURRENCY || 8);
   const timeoutMs = Number(options.timeoutMs || process.env.URL_CHECK_TIMEOUT_MS || 7000);
   const urlCache = options.urlCache || new Map();
+  const requireVienna = options.requireVienna ?? process.env.DEAL_VALIDITY_REQUIRE_VIENNA !== '0';
   const context = {
     now,
     maxAgeDays,
+    requireVienna,
+    allowChurchThisRun: options.allowChurchThisRun ?? shouldAllowChurchThisRun(now, options),
     urlCache,
     urlOptions: {
       now,
