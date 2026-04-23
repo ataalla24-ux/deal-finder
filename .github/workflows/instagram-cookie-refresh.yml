@@ -1,0 +1,79 @@
+name: "Instagram Cookie Refresh"
+
+on:
+  schedule:
+    - cron: '45 2 * * *' # 04:45 Vienna summer / 03:45 winter, before Instagram sync jobs
+  workflow_dispatch:
+
+concurrency:
+  group: instagram-cookie-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh-instagram-cookies:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium chromium-headless-shell
+
+      - name: Refresh Instagram Cookies
+        id: refresh
+        env:
+          INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
+          INSTAGRAM_PASSWORD: ${{ secrets.INSTAGRAM_PASSWORD }}
+          INSTAGRAM_TOTP_SECRET: ${{ secrets.INSTAGRAM_TOTP_SECRET }}
+          INSTAGRAM_AUTH_TEST_USERNAME: instagram
+        run: node scripts/refresh-instagram-cookies.mjs
+
+      - name: Update GitHub Secrets
+        if: steps.refresh.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_SECRETS_PAT }}
+          COOKIE_PATH: ${{ steps.refresh.outputs.cookies_path }}
+          SESSIONID_PATH: ${{ steps.refresh.outputs.sessionid_path }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::GH_SECRETS_PAT fehlt. Lege einen Fine-grained PAT mit Repository Secrets write permission an."
+            exit 1
+          fi
+          gh secret set INSTAGRAM_COOKIES < "$COOKIE_PATH"
+          gh secret set INSTAGRAM_SESSIONID < "$SESSIONID_PATH"
+          echo "Instagram cookie secrets updated."
+
+      - name: Notify Slack on refresh failure
+        if: failure()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+        run: |
+          if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$SLACK_CHANNEL_ID" ]; then
+            echo "Slack secrets missing; skip notification."
+            exit 0
+          fi
+          node - <<'NODE'
+          const text = '⚠️ *Instagram Cookie Refresh fehlgeschlagen*\\nDie Instagram-Cookies konnten nicht automatisch erneuert werden. Bitte Login/2FA/Challenge prüfen.';
+          const response = await fetch('https://slack.com/api/chat.postMessage', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ channel: process.env.SLACK_CHANNEL_ID, text }),
+          });
+          const data = await response.json();
+          if (!data.ok) {
+            console.error(`Slack notification failed: ${data.error || 'unknown_error'}`);
+            process.exit(1);
+          }
+          NODE
