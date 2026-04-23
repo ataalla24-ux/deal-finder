@@ -224,22 +224,90 @@ async function fillLoginForm(page, username, password) {
 
   await usernameInput.fill(username, { timeout: 10000 });
   await passwordInput.fill(password, { timeout: 10000 });
-  await Promise.all([
-    page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {}),
-    clickFirstVisible(page, ['button[type="submit"]'], 2000),
-  ]);
-  await page.waitForTimeout(2500);
+  return { usernameInput, passwordInput };
+}
+
+async function hasSessionCookie(context) {
+  const cookies = await collectInstagramCookies(context);
+  return cookies.some((cookie) => cookie.name === 'sessionid' && cookie.value);
+}
+
+async function loginFormVisible(page) {
+  return Boolean(await firstVisibleLocator(page, PASSWORD_SELECTORS, 900));
+}
+
+async function waitForLoginAttemptResult(page, context, timeout = 9000) {
+  const deadline = Date.now() + timeout;
+
+  while (Date.now() < deadline) {
+    if (await hasSessionCookie(context)) return 'session';
+    if (await twoFactorInputVisible(page)) return 'transition';
+
+    const blockingState = await detectBlockingState(page);
+    if (blockingState) throw new Error(blockingState);
+
+    const stillOnLogin = /\/accounts\/login/i.test(page.url()) && await loginFormVisible(page);
+    if (!stillOnLogin) return 'transition';
+
+    await page.waitForTimeout(700);
+  }
+
+  return '';
+}
+
+async function submitLoginForm(page, context, passwordInput) {
+  const submitAttempts = [
+    {
+      label: 'submit button',
+      run: () => clickFirstVisible(page, ['button[type="submit"]'], 3500),
+    },
+    {
+      label: 'login button text',
+      run: () => clickButtonByText(page, ['Log in', 'Einloggen', 'Anmelden'], 2500),
+    },
+    {
+      label: 'password enter',
+      run: async () => {
+        await passwordInput.press('Enter');
+        return true;
+      },
+    },
+    {
+      label: 'form requestSubmit',
+      run: () => page.evaluate(() => {
+        const password = document.querySelector('input[type="password"]');
+        const form = password?.closest('form');
+        const submit = form?.querySelector('button[type="submit"]');
+        if (submit instanceof HTMLElement) {
+          submit.click();
+          return true;
+        }
+        if (typeof form?.requestSubmit === 'function') {
+          form.requestSubmit();
+          return true;
+        }
+        return false;
+      }),
+    },
+  ];
+
+  for (const attempt of submitAttempts) {
+    console.log(`Instagram login submit: ${attempt.label}`);
+    const submitted = await attempt.run().catch(() => false);
+    if (!submitted) continue;
+
+    await page.waitForLoadState('networkidle', { timeout: 12000 }).catch(() => {});
+    const result = await waitForLoginAttemptResult(page, context);
+    if (result) return result;
+  }
+
+  throw new Error(`Instagram Login wurde nicht akzeptiert: ${await diagnosePage(page)}`);
 }
 
 async function handleTwoFactor(page) {
   const totpSecret = cleanText(env.INSTAGRAM_TOTP_SECRET);
-  const codeInput = page.locator('input[name="verificationCode"], input[autocomplete="one-time-code"], input[type="tel"]').first();
-  let visible = false;
-  try {
-    visible = await codeInput.isVisible({ timeout: 2500 });
-  } catch {
-    visible = false;
-  }
+  const codeInput = twoFactorInput(page);
+  const visible = await twoFactorInputVisible(page);
 
   if (!visible) return false;
   if (!totpSecret) {
@@ -255,6 +323,18 @@ async function handleTwoFactor(page) {
   ]);
   await page.waitForTimeout(3500);
   return true;
+}
+
+function twoFactorInput(page) {
+  return page.locator('input[name="verificationCode"], input[autocomplete="one-time-code"], input[type="tel"]').first();
+}
+
+async function twoFactorInputVisible(page) {
+  try {
+    return await twoFactorInput(page).isVisible({ timeout: 700 });
+  } catch {
+    return false;
+  }
 }
 
 async function detectBlockingState(page) {
@@ -434,7 +514,8 @@ async function main() {
       Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
     });
 
-    await fillLoginForm(page, username, password);
+    const { passwordInput } = await fillLoginForm(page, username, password);
+    await submitLoginForm(page, context, passwordInput);
     await handleTwoFactor(page);
     await dismissInstagramPrompts(page);
 
