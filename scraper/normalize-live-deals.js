@@ -29,6 +29,8 @@ const CHURCH_FILES = [
 ];
 
 const REMOVE_IDS = new Set([
+  'community:4ef92a64-5860-408f-af8f-ad47f7ead8dc',
+  'g2-18jns35',
   'freikirche-0-20260308',
   'freikirche-1-20260308',
   'freikirche-2-20260308',
@@ -43,6 +45,10 @@ const REMOVE_IDS = new Set([
 
 const LEGACY_CHURCH_ID_PATTERNS = [
   /^(hillsong-vienna|cig-wien|icf-wien|jesuszentrum)-(kirche|gottesdienste|events)-20260308$/i,
+];
+const EXPIRED_DEAL_URL_PATTERNS = [
+  /instagram\.com\/(?:reel|p)\/DXWur6dDL0h/i,
+  /tiktok\.com\/@eatinvienna\/video\/7630833927053233430/i,
 ];
 const FORCE_KEEP_IDS = new Set([
   'g2-17at53u',
@@ -589,8 +595,11 @@ function getChurchCuratedIds(churchDeals) {
   return new Set(churchDeals.map((deal) => deal.id).filter(Boolean));
 }
 
-function shouldDropLegacyChurchDeal(deal) {
-  return REMOVE_IDS.has(deal.id) || LEGACY_CHURCH_ID_PATTERNS.some((pattern) => pattern.test(String(deal?.id || '')));
+function shouldDropExplicitlyRemovedDeal(deal) {
+  const url = cleanText(deal?.url || deal?.post_url || '');
+  return REMOVE_IDS.has(deal.id)
+    || EXPIRED_DEAL_URL_PATTERNS.some((pattern) => pattern.test(url))
+    || LEGACY_CHURCH_ID_PATTERNS.some((pattern) => pattern.test(String(deal?.id || '')));
 }
 
 function shouldForceKeepDeal(deal) {
@@ -738,8 +747,8 @@ async function main() {
   for (const original of dealsDoc.deals || []) {
     if (!original || typeof original !== 'object') continue;
     const forceKeep = shouldForceKeepDeal(original);
-    if (!forceKeep && shouldDropLegacyChurchDeal(original)) {
-      markRemoved(original, 'Legacy-Kircheneintrag entfernt');
+    if (!forceKeep && shouldDropExplicitlyRemovedDeal(original)) {
+      markRemoved(original, 'Explizit entfernter Deal');
       continue;
     }
     if (!forceKeep && curatedChurchIds.has(original.id)) {
