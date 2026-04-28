@@ -7,6 +7,7 @@ import {
   validateDealsForSlack,
   writeDealValidityReport,
 } from './deal-validity-agent.js';
+import { extractDealsFromThreadMessages } from './slack-digest-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,6 +38,8 @@ loadEnvFile();
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 const PENDING_FILE_NAMES = process.env.PENDING_FILE_NAMES || '';
+const SEEN_DEAL_SUPPRESSION_DAYS = Number(process.env.SLACK_SEEN_DEAL_SUPPRESSION_DAYS || 7);
+const MAX_SEEN_REACTION_CHECKS = Number(process.env.SLACK_SEEN_MAX_REACTION_CHECKS || 250);
 const EXCLUDED_PENDING_FILES = new Set([
   'deals-pending-all.json',
   'deals-pending-firecrawl.json',
@@ -67,6 +70,65 @@ function normalizeUrl(url) {
   if (!text) return '';
   if (!/^https?:\/\//i.test(text)) return '';
   return text;
+}
+
+function canonicalPostKey(url) {
+  const text = normalizeUrl(url);
+  if (!text) return '';
+  try {
+    const parsed = new URL(text);
+    parsed.hash = '';
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+    const pathParts = parsed.pathname.split('/').filter(Boolean);
+
+    if (host === 'instagram.com' && parsed.pathname.toLowerCase().startsWith('/accounts/login')) {
+      const next = cleanText(parsed.searchParams.get('next'));
+      if (next) {
+        const nextUrl = next.startsWith('http') ? next : `https://instagram.com${next}`;
+        return canonicalPostKey(nextUrl);
+      }
+    }
+
+    if (host === 'instagram.com') {
+      const postTypeIndex = pathParts.findIndex((part) => ['p', 'reel', 'tv'].includes(part.toLowerCase()));
+      if (postTypeIndex >= 0 && pathParts[postTypeIndex + 1]) {
+        return `instagram:${pathParts[postTypeIndex].toLowerCase()}:${pathParts[postTypeIndex + 1].toLowerCase()}`;
+      }
+    }
+
+    if (host === 'tiktok.com') {
+      const videoIndex = pathParts.findIndex((part) => part.toLowerCase() === 'video');
+      if (videoIndex >= 0 && pathParts[videoIndex + 1]) {
+        return `tiktok:video:${pathParts[videoIndex + 1].toLowerCase()}`;
+      }
+    }
+
+    parsed.hostname = host;
+    parsed.pathname = parsed.pathname.replace(/\/+$/, '');
+    parsed.search = '';
+    return parsed.toString().toLowerCase();
+  } catch {
+    return text.replace(/[#?].*$/, '').replace(/\/+$/, '').toLowerCase();
+  }
+}
+
+function isDigestHeader(message) {
+  return cleanText(message?.text).includes('FreeFinder Wien');
+}
+
+function isLikelyHumanMessage(message, botUserId) {
+  const user = cleanText(message?.user);
+  if (!user || (botUserId && user === botUserId)) return false;
+  if (message?.bot_id || message?.subtype === 'bot_message') return false;
+  return !isDigestHeader(message);
+}
+
+function hasHumanCheckReaction(reactions, botUserId) {
+  const checkNames = new Set(['white_check_mark', 'heavy_check_mark', 'check']);
+  return ensureArray(reactions).some((reaction) => {
+    if (!checkNames.has(cleanText(reaction?.name))) return false;
+    return ensureArray(reaction?.users).some((user) => user && user !== botUserId);
+  });
 }
 
 function toIsoDate(value) {
@@ -320,6 +382,155 @@ async function postSlackMessage(text, threadTs = null, attempt = 0) {
   return null;
 }
 
+async function slackApi(url, attempt = 0) {
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${SLACK_BOT_TOKEN}`,
+    },
+  });
+
+  const retryAfterHeader = response.headers.get('retry-after');
+  const data = await response.json();
+
+  if (response.status === 429 || data.error === 'ratelimited') {
+    if (attempt >= 5) return { ok: false, error: 'ratelimited' };
+    const retryMs = Math.max(1000, Number(retryAfterHeader || data.retry_after || 2) * 1000);
+    console.log(`  ⏳ Rate limited, waiting ${retryMs}ms...`);
+    await sleep(retryMs);
+    return slackApi(url, attempt + 1);
+  }
+
+  return data;
+}
+
+async function getBotUserId() {
+  const data = await slackApi('https://slack.com/api/auth.test');
+  if (!data.ok) return '';
+  return cleanText(data.user_id);
+}
+
+async function findRecentDigestThreadTs(days = SEEN_DEAL_SUPPRESSION_DAYS) {
+  if (!Number.isFinite(days) || days <= 0) return [];
+  const oldest = Math.floor((Date.now() - days * 24 * 60 * 60 * 1000) / 1000);
+  let cursor = '';
+  const threadTs = [];
+
+  while (true) {
+    const query = new URLSearchParams({
+      channel: SLACK_CHANNEL_ID,
+      limit: '100',
+      oldest: String(oldest),
+    });
+    if (cursor) query.set('cursor', cursor);
+
+    const data = await slackApi(`https://slack.com/api/conversations.history?${query.toString()}`);
+    if (!data.ok) {
+      console.log(`⚠️ Konnte alte Slack-Digests nicht lesen: ${data.error || 'unknown_error'}`);
+      break;
+    }
+
+    for (const msg of ensureArray(data.messages)) {
+      if (isDigestHeader(msg)) {
+        const ts = cleanText(msg.ts);
+        if (ts) threadTs.push(ts);
+      }
+    }
+
+    cursor = cleanText(data.response_metadata?.next_cursor);
+    if (!cursor) break;
+    await sleep(300);
+  }
+
+  return [...new Set(threadTs)];
+}
+
+async function getThreadMessages(threadTs) {
+  let cursor = '';
+  const messages = [];
+
+  while (true) {
+    const query = new URLSearchParams({
+      channel: SLACK_CHANNEL_ID,
+      ts: threadTs,
+      limit: '200',
+    });
+    if (cursor) query.set('cursor', cursor);
+
+    const data = await slackApi(`https://slack.com/api/conversations.replies?${query.toString()}`);
+    if (!data.ok) break;
+    messages.push(...ensureArray(data.messages));
+
+    cursor = cleanText(data.response_metadata?.next_cursor);
+    if (!cursor) break;
+    await sleep(300);
+  }
+
+  return messages;
+}
+
+async function getReactions(messageTs) {
+  const query = new URLSearchParams({
+    channel: SLACK_CHANNEL_ID,
+    timestamp: messageTs,
+  });
+  const data = await slackApi(`https://slack.com/api/reactions.get?${query.toString()}`);
+  if (!data.ok) return [];
+  return ensureArray(data.message?.reactions);
+}
+
+async function loadRecentlySeenPostKeys() {
+  const threadTsList = await findRecentDigestThreadTs();
+  if (threadTsList.length === 0) return new Set();
+
+  const botUserId = await getBotUserId();
+  const seenKeys = new Set();
+  let reactionChecks = 0;
+
+  for (const threadTs of threadTsList) {
+    const messages = await getThreadMessages(threadTs);
+    const deals = extractDealsFromThreadMessages(messages);
+    const dealByTs = new Map(deals.map((deal) => [cleanText(deal.slackTs), deal]).filter(([ts]) => ts));
+    const humanReplyInThread = messages.some((message) => {
+      if (cleanText(message?.ts) === cleanText(threadTs)) return false;
+      if (dealByTs.has(cleanText(message?.ts))) return false;
+      return isLikelyHumanMessage(message, botUserId);
+    });
+
+    if (humanReplyInThread) {
+      for (const deal of deals) {
+        const key = canonicalPostKey(deal.url);
+        if (key) seenKeys.add(key);
+      }
+      continue;
+    }
+
+    for (const deal of deals) {
+      const message = messages.find((item) => cleanText(item?.ts) === cleanText(deal.slackTs));
+      let reactions = ensureArray(message?.reactions);
+      if (reactions.length === 0 && deal.slackTs && reactionChecks < MAX_SEEN_REACTION_CHECKS) {
+        reactions = await getReactions(deal.slackTs);
+        reactionChecks += 1;
+        await sleep(150);
+      }
+      if (!hasHumanCheckReaction(reactions, botUserId)) continue;
+      const key = canonicalPostKey(deal.url);
+      if (key) seenKeys.add(key);
+    }
+  }
+
+  console.log(`👀 Seen filter: ${seenKeys.size} exakte Post-URLs aus ${threadTsList.length} Slack-Digest(s) der letzten ${SEEN_DEAL_SUPPRESSION_DAYS} Tage`);
+  return seenKeys;
+}
+
+function filterRecentlySeenDeals(deals, seenKeys) {
+  if (!seenKeys || seenKeys.size === 0) return { deals, removed: 0 };
+  const filtered = deals.filter((deal) => {
+    const key = canonicalPostKey(deal.url);
+    return !key || !seenKeys.has(key);
+  });
+  return { deals: filtered, removed: deals.length - filtered.length };
+}
+
 function writePendingAll(deals) {
   const payload = {
     deals,
@@ -362,7 +573,13 @@ async function main() {
   console.log(`📋 Total pending deals loaded: ${pendingDeals.length}`);
   const existingQueue = loadPendingQueue();
 
-  const validation = await validateDealsForSlack(pendingDeals);
+  const seenPostKeys = await loadRecentlySeenPostKeys();
+  const preSlackSeenFilter = filterRecentlySeenDeals(pendingDeals, seenPostKeys);
+  if (preSlackSeenFilter.removed > 0) {
+    console.log(`👀 Seen filter: ${preSlackSeenFilter.removed} bereits gesehene exakte Posts vor Slack entfernt`);
+  }
+
+  const validation = await validateDealsForSlack(preSlackSeenFilter.deals);
   writeDealValidityReport(validation.report);
   const freshDeals = validation.allowedDeals;
   const blockedSummary = formatReasonCategoryCounts(validation.summary.reasonCategoryCounts);
