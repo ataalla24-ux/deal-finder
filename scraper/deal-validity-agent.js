@@ -16,6 +16,7 @@ const EXCLUDED_SOURCE_PATTERNS = [
   { label: 'Neotaste', hostPattern: /(^|\.)neotaste\.com$/i, textPattern: /\bneotaste\b/i },
   { label: 'TheFork', hostPattern: /(^|\.)thefork\.(at|com)$/i, textPattern: /\bthe\s*fork\b|\bthefork\b/i },
   { label: 'gastro.news', hostPattern: /(^|\.)gastro\.news$/i, textPattern: /\bgastro\.news\b|\bgastro\s+news\b/i },
+  { label: '1000things Website', hostPattern: /(^|\.)1000things(?:magazine)?\.(?:at|com)$/i },
 ];
 const VIENNA_SIGNAL_PATTERN = /\b(wien|vienna)\b|(?:^|[^\d])(1(?:0[1-9]0|1[0-9]0|2[0-3]0))(?:\b|[^\d])/i;
 
@@ -100,7 +101,7 @@ function getExcludedSourceMatch(deal, health = null) {
   const signal = getDealSignalText(deal, health);
   const hosts = [deal.url, health?.finalUrl].map(hostnameFromUrl).filter(Boolean);
   return EXCLUDED_SOURCE_PATTERNS.find((entry) => {
-    if (entry.textPattern.test(signal)) return true;
+    if (entry.textPattern?.test(signal)) return true;
     return hosts.some((host) => entry.hostPattern.test(host));
   }) || null;
 }
