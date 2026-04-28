@@ -73,6 +73,7 @@ const MAX_LIVE_URL_HEALTH_CHECKS = Number(process.env.MAX_LIVE_URL_HEALTH_CHECKS
 const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REFRESHES || 120);
 const MAX_LIVE_CONTENT_ENRICHMENTS = Number(process.env.MAX_LIVE_CONTENT_ENRICHMENTS || 120);
 const MAX_OPAQUE_SOCIAL_AGE_DAYS = Number(process.env.MAX_LIVE_OPAQUE_SOCIAL_AGE_DAYS || 14);
+const FLIGHT_DEAL_PATTERN = /\b(flug|flüge|flight|flights|hin\s*&\s*zurück|hin\s+und\s+zurück|ryanair|wizz\s*air|wizzair|iata)\b/i;
 const GENERIC_DESCRIPTION_PATTERN = /^(free|gratis|rabatt|discount|deal|angebot|aktion|promo|special|event|post|reel|instagram|coupon|gutschein|gewinnspiel|new|neu)$/i;
 const FOOD_SIGNAL_PATTERN = /\b(eis\w*|ice cream|gelato|kaffee\w*|coffee|cafe|café|pizza\w*|burger\w*|döner\w*|doener\w*|kebab\w*|sushi|ramen|brunch|croissant|drink|drinks|getränk\w*|getraenk\w*|cocktail\w*|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein\w*|vino|fleisch\w*|meat|steak|bbq|grill\w*|bäckerei|backerei|bakery|krapfen\w*)\b/i;
 const COFFEE_SIGNAL_PATTERN = /\b(kaffee|coffee|espresso|latte|cappuccino|cafe|café)\b/i;
@@ -86,6 +87,27 @@ function hasUsefulWords(text) {
 
 function isSocialUrl(url = '') {
   return /instagram\.com|tiktok\.com/i.test(cleanText(url));
+}
+
+function hasRunBudget(used, limit) {
+  return !Number.isFinite(limit) || limit <= 0 || used < limit;
+}
+
+function isFlightDeal(deal = {}) {
+  const id = cleanText(deal.id || '');
+  if (/^flight-/i.test(id)) return true;
+
+  const signal = [
+    deal.category,
+    deal.source,
+    deal.originSource,
+    deal.brand,
+    deal.title,
+    deal.description,
+    deal.url,
+  ].map(cleanText).filter(Boolean).join(' ');
+
+  return FLIGHT_DEAL_PATTERN.test(signal);
 }
 
 function normalizeSocialPostKey(url = '') {
@@ -717,6 +739,7 @@ async function main() {
   let socialPubDateSourceFixes = 0;
   let socialPolishFixes = 0;
   let duplicateCollapses = 0;
+  let flightUrlCheckSkips = 0;
 
   function markRemoved(deal, reason) {
     removed.push({
@@ -729,10 +752,14 @@ async function main() {
   }
 
   async function verifyDealUrl(deal) {
+    if (isFlightDeal(deal)) {
+      flightUrlCheckSkips += 1;
+      return null;
+    }
     const url = cleanText(deal?.url || '');
     if (!url || !/^https?:\/\//i.test(url)) return null;
     const cached = linkHealthCache.has(url);
-    if (!cached && linkChecksUsed >= MAX_LIVE_URL_HEALTH_CHECKS) {
+    if (!cached && !hasRunBudget(linkChecksUsed, MAX_LIVE_URL_HEALTH_CHECKS)) {
       return null;
     }
     let result = linkHealthCache.get(url);
@@ -798,11 +825,13 @@ async function main() {
       deal.validity_date ||
       ''
     );
+    const skipUrlChecksForDeal = isFlightDeal(deal);
     const expiryCacheHit = deal.url ? urlCache.has(deal.url) : false;
     const allowExpiryUrlLookup = Boolean(
+      !skipUrlChecksForDeal &&
       deal.url &&
       !shouldSkipUrlExpiryLookup(deal, deal.url || '', rawExpiry) &&
-      (expiryCacheHit || expiryUrlChecksUsed < MAX_LIVE_URL_EXPIRY_REFRESHES)
+      (expiryCacheHit || hasRunBudget(expiryUrlChecksUsed, MAX_LIVE_URL_EXPIRY_REFRESHES))
     );
     const expiryCacheSizeBefore = urlCache.size;
     const hadUrlDerivedExpiry = Boolean(deal.expiresDetectedFromUrl);
@@ -841,7 +870,7 @@ async function main() {
       markRemoved(deal, 'Social-Post nicht mehr öffentlich verifizierbar');
       continue;
     }
-    if (health?.contentHints && contentEnrichments < MAX_LIVE_CONTENT_ENRICHMENTS) {
+    if (!skipUrlChecksForDeal && health?.contentHints && hasRunBudget(contentEnrichments, MAX_LIVE_CONTENT_ENRICHMENTS)) {
       const enriched = maybeEnrichDealCopy(deal, health.contentHints);
       if (enriched) {
         contentEnrichments += 1;
@@ -896,11 +925,13 @@ async function main() {
       normalizedChurchDeal.validity_date ||
       ''
     );
+    const churchSkipUrlChecks = isFlightDeal(normalizedChurchDeal);
     const churchExpiryCacheHit = normalizedChurchDeal.url ? urlCache.has(normalizedChurchDeal.url) : false;
     const churchAllowExpiryUrlLookup = Boolean(
+      !churchSkipUrlChecks &&
       normalizedChurchDeal.url &&
       !shouldSkipUrlExpiryLookup(normalizedChurchDeal, normalizedChurchDeal.url || '', churchRawExpiry) &&
-      (churchExpiryCacheHit || expiryUrlChecksUsed < MAX_LIVE_URL_EXPIRY_REFRESHES)
+      (churchExpiryCacheHit || hasRunBudget(expiryUrlChecksUsed, MAX_LIVE_URL_EXPIRY_REFRESHES))
     );
     const churchExpiryCacheSizeBefore = urlCache.size;
     const churchHadUrlDerivedExpiry = Boolean(normalizedChurchDeal.expiresDetectedFromUrl);
@@ -980,6 +1011,7 @@ async function main() {
     urlVerifiedExpiryHits,
     contentEnrichments,
     maxContentEnrichments: MAX_LIVE_CONTENT_ENRICHMENTS,
+    flightUrlCheckSkips,
     socialPolishFixes,
     removalReasons,
     removed: removed.slice(0, 200),
@@ -995,6 +1027,7 @@ async function main() {
   console.log(`Expiry refresh checks: ${expiryUrlChecksUsed}/${MAX_LIVE_URL_EXPIRY_REFRESHES}`);
   console.log(`Expiry dates refreshed from URL: ${urlVerifiedExpiryHits}`);
   console.log(`Descriptions enriched from target pages: ${contentEnrichments}/${MAX_LIVE_CONTENT_ENRICHMENTS}`);
+  console.log(`Flight URL checks skipped: ${flightUrlCheckSkips}`);
   console.log(`Social polish fixes applied: ${socialPolishFixes}`);
 }
 
