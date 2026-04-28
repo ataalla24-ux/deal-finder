@@ -12,6 +12,7 @@ concurrency:
 jobs:
   scrape-and-prepare:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     permissions:
       contents: write
     env:
@@ -59,12 +60,14 @@ jobs:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
           INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
           IG_MAX_AGE_DAYS: 365
-          IG_MAX_DEALS: 500
-          IG_MAX_SOURCES_TOTAL: 120
-          IG_MAX_TIMELINE_POSTS: 80
-          IG_MAX_REGISTRY_ACCOUNTS: 120
+          IG_MAX_DEALS: 800
+          IG_MAX_SOURCES_TOTAL: 220
+          IG_MAX_TIMELINE_POSTS: 120
+          IG_MAX_REGISTRY_ACCOUNTS: 220
           IG_MIN_SCORE: 0
           IG_MAX_DEALS_PER_ACCOUNT: 120
+          IG_SOURCE_DELAY_MS: 700
+          IG_MAX_RUN_MINUTES: 55
         run: |
           node - <<'NODE'
           const session = String(process.env.INSTAGRAM_SESSIONID || '').trim();

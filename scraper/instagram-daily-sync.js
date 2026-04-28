@@ -25,6 +25,8 @@ const DEFAULT_CONFIG = {
   maxRegistryAccounts: 12,
   minDealScore: 58,
   maxDealsPerAccount: 3,
+  sourceDelayMs: 650,
+  maxRunMinutes: 45,
 };
 
 const TRUSTED_PUBDATE_SOURCE = 'profileTimeline';
@@ -160,6 +162,8 @@ function buildConfig() {
     maxRegistryAccounts: toNum(process.env.IG_MAX_REGISTRY_ACCOUNTS, DEFAULT_CONFIG.maxRegistryAccounts),
     minDealScore: toNum(process.env.IG_MIN_SCORE, DEFAULT_CONFIG.minDealScore),
     maxDealsPerAccount: toNum(process.env.IG_MAX_DEALS_PER_ACCOUNT, DEFAULT_CONFIG.maxDealsPerAccount),
+    sourceDelayMs: toNum(process.env.IG_SOURCE_DELAY_MS, DEFAULT_CONFIG.sourceDelayMs),
+    maxRunMinutes: toNum(process.env.IG_MAX_RUN_MINUTES, DEFAULT_CONFIG.maxRunMinutes),
   };
 }
 
@@ -1182,6 +1186,14 @@ async function main() {
   const accountDealCounts = new Map();
   let totalCandidates = 0;
   let visitedPosts = 0;
+  const runStartedAt = Date.now();
+  let stoppedByRunBudget = false;
+
+  const shouldStopForRunBudget = () => (
+    Number.isFinite(CONFIG.maxRunMinutes) &&
+    CONFIG.maxRunMinutes > 0 &&
+    Date.now() - runStartedAt >= CONFIG.maxRunMinutes * 60 * 1000
+  );
 
   let browser;
   try {
@@ -1235,8 +1247,15 @@ async function main() {
     console.log('📸 INSTAGRAM DAILY SYNC V2');
     console.log('========================================');
     console.log(`🧠 source queue: ${sourceQueue.length} accounts`);
+    console.log(`⏱️ search budget: ${CONFIG.maxRunMinutes} min, delay ${CONFIG.sourceDelayMs}ms/account`);
 
     for (const source of sourceQueue) {
+      if (shouldStopForRunBudget()) {
+        stoppedByRunBudget = true;
+        console.log(`⏱️ stopping source loop after ${Math.round((Date.now() - runStartedAt) / 1000)}s budget`);
+        break;
+      }
+
       const stat = runStats.get(source.key) || {
         kind: source.sourceType,
         runs: 0,
@@ -1367,6 +1386,10 @@ async function main() {
       } else {
         rejectionReasons.noProfile += 1;
       }
+
+      if (CONFIG.sourceDelayMs > 0) {
+        await page.waitForTimeout(CONFIG.sourceDelayMs);
+      }
     }
 
     const finalDeals = acceptedDeals
@@ -1411,6 +1434,7 @@ async function main() {
         totalCandidates,
         visitedPosts,
         scrapedDealsRaw: acceptedDeals.length,
+        stoppedByRunBudget,
         profileStrategies: profileStrategyCounts,
         rejectionReasons,
       },
@@ -1452,6 +1476,7 @@ async function main() {
       totalCandidates,
       visitedPosts,
       savedDeals: finalDeals.length,
+      stoppedByRunBudget,
       profileStrategies: profileStrategyCounts,
       rejectionReasons,
       topSources,
@@ -1472,6 +1497,7 @@ async function main() {
         visitedPosts,
         scrapedDealsRaw: acceptedDeals.length,
         savedDeals: finalDeals.length,
+        stoppedByRunBudget,
         profileStrategies: profileStrategyCounts,
       },
       topSources,
