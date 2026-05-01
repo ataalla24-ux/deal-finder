@@ -1,11 +1,11 @@
 {
-  "updatedAt": "2026-05-01T06:22:56.281Z",
-  "context": "Apify Instagram Daily",
-  "ok": true,
-  "status": "ok",
-  "reason": "Profil instagram erreichbar",
+  "updatedAt": "2026-05-01T06:37:15.513Z",
+  "context": "Firecrawl Daily Sync",
+  "ok": false,
+  "status": "blocked",
+  "reason": "Instagram API lieferte HTTP 401",
   "username": "instagram",
-  "httpStatus": 200,
+  "httpStatus": 401,
   "diagnostics": {
     "cookieCount": 8,
     "cookieNames": [
@@ -21,8 +21,15 @@
     "hasSessionCookie": true,
     "hasCsrfCookie": true
   },
-  "apiUserFound": true,
-  "clearedFiles": [],
-  "slackNotified": false,
+  "apiUserFound": false,
+  "bodySample": "{\"message\":\"Please wait a few minutes before you try again.\",\"require_login\":true,\"igweb_rollout\":true,\"status\":\"fail\"}",
+  "clearedFiles": [
+    "docs/deals-pending-instagram.json",
+    "docs/deals-pending-instagram-web.json",
+    "docs/deals-pending-instagram-discovery.json",
+    "docs/instagram-discovery-report.json",
+    "docs/instagram-web-report.json"
+  ],
+  "slackNotified": true,
   "slackNotificationSuppressed": false
 }
