@@ -6616,6 +6616,20 @@
             return label ? label.charAt(0).toUpperCase() + label.slice(1) : 'Community';
         }
 
+        function isGenericSubmittedPreviewTitle(title, host) {
+            const normalized = cleanUiNoiseText(decodeHtmlEntitiesForApp(title || ''))
+                .toLowerCase()
+                .replace(/[.!?\s]+$/g, '')
+                .trim();
+            if (!normalized) return true;
+            if (/^(instagram|instagram deal|instagram post|instagram reel|instagram video|instagram photo|tiktok|tiktok deal|facebook|x)$/.test(normalized)) return true;
+            if (String(host || '').toLowerCase().includes('instagram.com')) {
+                if (/^instagram\s+(photos?|videos?|reels?)\s+and\s+videos$/i.test(normalized)) return true;
+                if (/^(photo|video|reel)\s+(by|von)\s+.+\s+(on|auf)\s+instagram$/i.test(normalized)) return true;
+            }
+            return false;
+        }
+
         function isOpaqueUrlTokenForApp(token, host) {
             const normalized = String(token || '').toLowerCase();
             if (!normalized) return true;
@@ -6702,8 +6716,13 @@
                 'burger': 'Burger',
                 'kaffee': 'Kaffee',
                 'coffee': 'Kaffee',
+                'espresso': 'Espresso',
+                'latte': 'Latte',
+                'cappuccino': 'Cappuccino',
                 'cocktail': 'Cocktail',
                 'drink': 'Drink',
+                'getränk': 'Getränk',
+                'getraenk': 'Getränk',
                 'wrap': 'Wrap',
                 'falafel': 'Falafel',
                 'eis': 'Eis',
@@ -6712,6 +6731,8 @@
                 'sushi': 'Sushi',
                 'bowl': 'Bowl',
                 'brunch': 'Brunch',
+                'croissant': 'Croissant',
+                'krapfen': 'Krapfen',
                 'ticket': 'Ticket',
                 'eintritt': 'Eintritt'
             };
@@ -6722,7 +6743,7 @@
             const signal = cleanUiNoiseText(decodeHtmlEntitiesForApp(text || '')).toLowerCase();
             if (!signal) return '';
 
-            const offerItems = 'döner|doener|kebab|kebap|pizza|burger|kaffee|coffee|cocktail|drink|wrap|falafel|eis|gelato|ramen|sushi|bowl|brunch|ticket|eintritt';
+            const offerItems = 'döner|doener|kebab|kebap|pizza|burger|kaffee|coffee|espresso|latte|cappuccino|cocktail|drink|getränk|getraenk|wrap|falafel|eis|gelato|ramen|sushi|bowl|brunch|croissant|krapfen|ticket|eintritt';
 
             let match = signal.match(new RegExp(`(?:für|fuer|nur|um|ab)?\\s*(\\d+[,.]?\\d{0,2})\\s*(?:€|euro)\\s*(?:pro\\s+)?(${offerItems})`, 'i'));
             if (match) return `${formatEuroAmountForTitle(match[1])} ${normalizeOfferItemLabel(match[2])} Aktion`;
@@ -6733,11 +6754,17 @@
             match = signal.match(new RegExp(`(?:gratis|kostenlos|free)\\s+(?:einen?|eine|ein)?\\s*(${offerItems})`, 'i'));
             if (match) return `Gratis ${normalizeOfferItemLabel(match[1])}`;
 
+            match = signal.match(new RegExp(`(${offerItems})\\s+(?:gratis|kostenlos|free)`, 'i'));
+            if (match) return `Gratis ${normalizeOfferItemLabel(match[1])}`;
+
             match = signal.match(new RegExp(`(1\\+1|2\\s*f[üu]r\\s*1|buy\\s*one\\s*get\\s*one|bogo)\\s*(?:auf|für|fuer)?\\s*(${offerItems})?`, 'i'));
             if (match) {
                 const dealPrefix = '1+1';
                 return match[2] ? `${dealPrefix} ${normalizeOfferItemLabel(match[2])}` : dealPrefix;
             }
+
+            match = signal.match(new RegExp(`(${offerItems})\\s*(?:1\\+1|2\\s*f[üu]r\\s*1|buy\\s*one\\s*get\\s*one|bogo)`, 'i'));
+            if (match) return `1+1 ${normalizeOfferItemLabel(match[1])}`;
 
             match = signal.match(/(\d{1,2})\s*%\s*(rabatt|discount)/i);
             if (match) return `${match[1]}% Rabatt`;
@@ -6875,15 +6902,16 @@
             const signalText = [
                 preview?.caption,
                 preview?.description,
-                preview?.title,
+                isGenericSubmittedPreviewTitle(preview?.title, host) ? '' : preview?.title,
                 preview?.accountName,
                 preview?.accountHandle,
                 urlTokens.join(' ')
             ].filter(Boolean).join(' ');
 
             const brand = inferBrandFromPreviewSignal(normalizedUrl, preview, host);
+            const readablePreviewTitle = isGenericSubmittedPreviewTitle(preview?.title, host) ? '' : preview?.title;
             const title = extractOfferHeadlineFromSignalText(signalText)
-                || buildReadableTitleFromText(preview?.caption || preview?.title || preview?.description || urlTokens.join(' '))
+                || buildReadableTitleFromText(preview?.caption || preview?.description || readablePreviewTitle || urlTokens.join(' '))
                 || (urlTokens.length ? cleanUiNoiseText(urlTokens.join(' ')) : '')
                 || `${sourceLabel} Deal`;
 

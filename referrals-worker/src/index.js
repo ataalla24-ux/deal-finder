@@ -450,13 +450,31 @@ function normalizeCommunitySubmissionInput(body, request) {
   const url = normalizeSubmissionUrl(body?.url);
   if (!url) return null;
 
+  const host = getPreviewHost(url);
+  const sourcePlatform = getSourcePlatform(host);
+  const submittedTitle = cleanShortText(body?.title, 240);
+  const submittedDescription = cleanLongText(body?.description, 500);
+  const submittedBrand = cleanShortText(body?.brand, 120);
+  const submittedTitleIsGeneric = isGenericSocialPreviewTitle(submittedTitle, sourcePlatform)
+    || /^(instagram|tiktok|facebook|x)\s+deal$/i.test(submittedTitle);
+  const improvedTitle = submittedTitleIsGeneric
+    ? buildSmartSocialPreviewTitle({
+      sourcePlatform,
+      rawTitle: submittedTitle,
+      caption: submittedDescription,
+      description: submittedDescription,
+      accountName: submittedBrand,
+      accountHandle: '',
+    })
+    : submittedTitle;
+
   return {
     id: crypto.randomUUID(),
     url,
-    brand: cleanShortText(body?.brand, 120),
+    brand: submittedBrand,
     logo: cleanShortText(body?.logo, 16),
-    title: cleanShortText(body?.title, 240),
-    description: cleanLongText(body?.description, 500),
+    title: cleanShortText(improvedTitle || submittedTitle, 240),
+    description: submittedDescription,
     category: cleanShortText(body?.category, 80).toLowerCase() || 'wien',
     type: cleanShortText(body?.type, 40).toLowerCase() || 'rabatt',
     distance: cleanShortText(body?.distance, 200),
@@ -562,6 +580,90 @@ function cleanPreviewText(value, max = 600) {
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, max);
+}
+
+function normalizeOfferItemLabel(value) {
+  const normalized = cleanPreviewText(value, 80).toLowerCase();
+  const itemMap = {
+    'döner': 'Döner',
+    doener: 'Döner',
+    kebab: 'Kebab',
+    kebap: 'Kebab',
+    pizza: 'Pizza',
+    burger: 'Burger',
+    kaffee: 'Kaffee',
+    coffee: 'Kaffee',
+    espresso: 'Espresso',
+    latte: 'Latte',
+    cappuccino: 'Cappuccino',
+    cocktail: 'Cocktail',
+    drink: 'Drink',
+    getraenk: 'Getränk',
+    getränk: 'Getränk',
+    wrap: 'Wrap',
+    falafel: 'Falafel',
+    eis: 'Eis',
+    gelato: 'Gelato',
+    ramen: 'Ramen',
+    sushi: 'Sushi',
+    bowl: 'Bowl',
+    brunch: 'Brunch',
+    croissant: 'Croissant',
+    krapfen: 'Krapfen',
+    ticket: 'Ticket',
+    eintritt: 'Eintritt',
+  };
+  return itemMap[normalized] || (normalized ? `${normalized[0].toUpperCase()}${normalized.slice(1)}` : '');
+}
+
+function formatEuroAmountForTitle(value) {
+  const numeric = Number(String(value || '').replace(',', '.'));
+  if (!Number.isFinite(numeric)) return '';
+  const rounded = Math.round(numeric * 100) / 100;
+  return Number.isInteger(rounded) ? `${rounded}€` : `${String(rounded).replace('.', ',')}€`;
+}
+
+function extractOfferHeadlineFromText(value) {
+  const signal = cleanPreviewText(value, 2200)
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/gi, ' ')
+    .replace(/#[\w.äöüß-]+/gi, ' ')
+    .replace(/@\w[\w.-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!signal) return '';
+
+  const offerItems = 'döner|doener|kebab|kebap|pizza|burger|kaffee|coffee|espresso|latte|cappuccino|cocktail|drink|getränk|getraenk|wrap|falafel|eis|gelato|ramen|sushi|bowl|brunch|croissant|krapfen|ticket|eintritt';
+
+  let match = signal.match(new RegExp(`(?:für|fuer|nur|um|ab)?\\s*(\\d+[,.]?\\d{0,2})\\s*(?:€|euro)\\s*(?:pro\\s+)?(${offerItems})`, 'i'));
+  if (match) return `${formatEuroAmountForTitle(match[1])} ${normalizeOfferItemLabel(match[2])} Aktion`;
+
+  match = signal.match(new RegExp(`(${offerItems})\\s*(?:für|fuer|nur|um|ab)?\\s*(\\d+[,.]?\\d{0,2})\\s*(?:€|euro)`, 'i'));
+  if (match) return `${formatEuroAmountForTitle(match[2])} ${normalizeOfferItemLabel(match[1])} Aktion`;
+
+  match = signal.match(new RegExp(`(?:gratis|kostenlos|free)\\s+(?:einen?|eine|ein|deinen?|deine|dein)?\\s*(${offerItems})`, 'i'));
+  if (match) return `Gratis ${normalizeOfferItemLabel(match[1])}`;
+
+  match = signal.match(new RegExp(`(${offerItems})\\s+(?:gratis|kostenlos|free)`, 'i'));
+  if (match) return `Gratis ${normalizeOfferItemLabel(match[1])}`;
+
+  match = signal.match(new RegExp(`(1\\+1|2\\s*f[üu]r\\s*1|buy\\s*one\\s*get\\s*one|bogo)\\s*(?:auf|für|fuer)?\\s*(${offerItems})?`, 'i'));
+  if (match) return match[2] ? `1+1 ${normalizeOfferItemLabel(match[2])}` : '1+1 Aktion';
+
+  match = signal.match(new RegExp(`(${offerItems})\\s*(?:1\\+1|2\\s*f[üu]r\\s*1|buy\\s*one\\s*get\\s*one|bogo)`, 'i'));
+  if (match) return `1+1 ${normalizeOfferItemLabel(match[1])}`;
+
+  match = signal.match(/(\d{1,2})\s*%\s*(?:rabatt|discount|off)/i);
+  if (match) return `${match[1]}% Rabatt`;
+
+  match = signal.match(/\b(?:rabatt|discount|spare|save)\s*(\d{1,2})\s*%/i);
+  if (match) return `${match[1]}% Rabatt`;
+
+  match = signal.match(/(\d+)\s*(monat|monate|month|months)\s*(?:gratis|kostenlos|free)/i);
+  if (match) return `${match[1]} ${Number(match[1]) === 1 ? 'Monat' : 'Monate'} gratis`;
+
+  if (/\b(gratis|kostenlos|free)\b/i.test(signal)) return 'Gratis Aktion';
+  return '';
 }
 
 function getPreviewHost(url) {
@@ -742,7 +844,9 @@ function extractInstagramCaption(description, title) {
   const descriptionText = cleanPreviewText(description, 1600);
   const titleText = cleanPreviewText(title, 1200);
 
-  const fromDescription = descriptionText.match(/-\s*[^:]{1,80}\s+(?:on|am)\s+[^:]{4,80}:\s*"([\s\S]+?)"\.?\s*$/i);
+  const fromDescription = descriptionText.match(/-\s*[^:]{1,120}\s+(?:on|am)\s+[^:]{4,120}:\s*"([\s\S]+?)"\.?\s*$/i)
+    || descriptionText.match(/(?:on|auf)\s+Instagram:\s*"([\s\S]+?)"\.?\s*$/i)
+    || descriptionText.match(/:\s*"([\s\S]{16,})"\.?\s*$/i);
   if (fromDescription && fromDescription[1]) {
     return cleanPreviewText(fromDescription[1], 1200);
   }
@@ -752,6 +856,68 @@ function extractInstagramCaption(description, title) {
     return cleanPreviewText(fromTitle[1], 800);
   }
 
+  return '';
+}
+
+function isGenericSocialPreviewTitle(title, sourcePlatform = '') {
+  const normalized = cleanPreviewText(title, 280)
+    .toLowerCase()
+    .replace(/[.!?\s]+$/g, '')
+    .trim();
+  if (!normalized) return true;
+  if (/^(instagram|instagram deal|instagram post|instagram reel|instagram video|instagram photo|login \u2022 instagram|instagram)$/.test(normalized)) return true;
+  if (/^(tik ?tok|tiktok deal|tiktok - make your day|facebook|x)$/.test(normalized)) return true;
+  if (sourcePlatform === 'instagram') {
+    if (/^instagram\s+(?:photos?|videos?|reels?)\s+and\s+videos$/i.test(normalized)) return true;
+    if (/^(?:photo|video|reel)\s+(?:by|von)\s+.+\s+(?:on|auf)\s+instagram$/i.test(normalized)) return true;
+  }
+  return false;
+}
+
+function buildReadablePreviewTitleFromText(value) {
+  const cleaned = cleanPreviewText(value, 1200)
+    .replace(/https?:\/\/\S+/gi, ' ')
+    .replace(/#[\w.äöüß-]+/gi, ' ')
+    .replace(/@\w[\w.-]+/g, ' ')
+    .replace(/\s+(?:on|auf)\s+Instagram:\s*/i, ' ')
+    .replace(/^["“]+|["”]+$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!cleaned) return '';
+
+  const firstSentence = cleaned.split(/[.!?]/)[0].trim();
+  const candidate = (firstSentence || cleaned).replace(/^["“]+|["”]+$/g, '').trim();
+  if (!candidate || isGenericSocialPreviewTitle(candidate)) return '';
+  if (candidate.length <= 90) return candidate;
+  return `${candidate.slice(0, 87).trim()}...`;
+}
+
+function buildSmartSocialPreviewTitle({ sourcePlatform, rawTitle, caption, description, accountName, accountHandle }) {
+  const signalText = [
+    caption,
+    description,
+    rawTitle,
+    accountName,
+    accountHandle,
+  ].filter(Boolean).join(' ');
+  const offerTitle = extractOfferHeadlineFromText(signalText);
+  if (offerTitle) return offerTitle;
+
+  if (sourcePlatform === 'instagram') {
+    const captionTitle = buildReadablePreviewTitleFromText(caption || description);
+    if (captionTitle) return captionTitle;
+  }
+
+  if (!isGenericSocialPreviewTitle(rawTitle, sourcePlatform)) {
+    const readableRawTitle = buildReadablePreviewTitleFromText(rawTitle);
+    if (readableRawTitle) return readableRawTitle;
+    return cleanPreviewText(rawTitle, 280);
+  }
+
+  const readableFallback = buildReadablePreviewTitleFromText(caption || description);
+  if (readableFallback) return readableFallback;
+  if (sourcePlatform === 'instagram') return 'Instagram Deal prüfen';
+  if (sourcePlatform === 'tiktok') return 'TikTok Deal prüfen';
   return '';
 }
 
@@ -800,6 +966,16 @@ async function buildDealLinkPreview(rawUrl) {
   const caption = sourcePlatform === 'instagram'
     ? extractInstagramCaption(ogDescription || metaDescription, ogTitle || twitterTitle || titleTag)
     : '';
+  const rawTitle = cleanPreviewText(ogTitle || twitterTitle || jsonLd.title || titleTag, 280);
+  const rawDescription = cleanPreviewText(caption || ogDescription || twitterDescription || jsonLd.description || metaDescription, 1400);
+  const smartTitle = buildSmartSocialPreviewTitle({
+    sourcePlatform,
+    rawTitle,
+    caption,
+    description: rawDescription,
+    accountName: account.accountName,
+    accountHandle: account.accountHandle,
+  }) || rawTitle;
 
   return {
     ok: true,
@@ -809,8 +985,8 @@ async function buildDealLinkPreview(rawUrl) {
     host: finalHost,
     sourcePlatform,
     siteName: cleanPreviewText(siteName, 120),
-    title: cleanPreviewText(ogTitle || twitterTitle || jsonLd.title || titleTag, 280),
-    description: cleanPreviewText(caption || ogDescription || twitterDescription || jsonLd.description || metaDescription, 1400),
+    title: cleanPreviewText(smartTitle, 280),
+    description: rawDescription,
     image: cleanPreviewText(ogImage, 1400),
     meta: {
       ogTitle,
