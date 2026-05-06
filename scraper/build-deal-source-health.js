@@ -35,6 +35,7 @@ const SOURCE_LABEL_OVERRIDES = {
   'instagram-discovery': 'Daily Sync Instagram Discovery',
   'instagram-web': 'Daily Sync Instagram Web',
   joe: 'jö Bonus Club',
+  'member-benefits': 'Member Benefits',
   power: 'Power Scraper',
   'vienna-promo-radar': 'Vienna Promo Radar',
 };

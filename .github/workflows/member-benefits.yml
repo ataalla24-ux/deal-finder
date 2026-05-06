@@ -1,0 +1,57 @@
+name: "Member Benefits Scraper"
+
+on:
+  schedule:
+    - cron: '20 5 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: member-benefits-scraper
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  scrape-and-notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Scrape member benefit deals
+        run: node scraper/member-benefits-scraper.js
+
+      - name: Send member benefit deals to Slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          PENDING_FILE_NAMES: deals-pending-member-benefits.json
+        run: node scraper/slack-notify.js
+
+      - name: Commit member benefit state
+        run: |
+          git config user.name "Deal Bot"
+          git config user.email "bot@freefinder.wien"
+          git add docs/deals-pending-member-benefits.json docs/deals-pending-all.json docs/deal-candidates-index.json docs/deal-validity-report.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Member benefits deals $(date +%Y-%m-%d)"
+          if ! git pull --rebase --autostash origin main; then
+            echo "⚠️ Rebase conflict on generated files. Skipping push for this run."
+            git rebase --abort || true
+            exit 0
+          fi
+          if ! git push origin HEAD:main; then
+            echo "⚠️ Push failed (branch moved). Skipping push for this run."
+            exit 0
+          fi
