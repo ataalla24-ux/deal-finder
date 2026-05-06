@@ -37,6 +37,7 @@ const SOURCE_LABEL_OVERRIDES = {
   joe: 'jö Bonus Club',
   'member-benefits': 'Member Benefits',
   power: 'Power Scraper',
+  tiktok: 'TikTok Scanner',
   'vienna-promo-radar': 'Vienna Promo Radar',
 };
 
