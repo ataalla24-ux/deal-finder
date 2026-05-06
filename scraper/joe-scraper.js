@@ -48,6 +48,14 @@ const SOURCES = [
   },
 ];
 
+const CURRENT_OMV_VIVA_FREE_TASTE_DEALS = [
+  'Coconut Strawberry Sunset',
+  'Sunny Orange Espresso',
+  'Sparkling Espresso Tonic',
+  'Iced Matcha Latte',
+  'Strawberry Matcha Latte',
+];
+
 function stableHash(str) {
   let hash = 5381;
   for (let i = 0; i < str.length; i += 1) {
@@ -151,6 +159,35 @@ function sentence(text) {
 
 function makeDescription(parts) {
   return parts.map(sentence).filter(Boolean).join(' ');
+}
+
+function buildOmvVivaFreeTasteDeal(variant, url) {
+  return buildDeal({
+    prefix: 'joe-omv-viva-free-taste',
+    title: `Gratis ${variant} testen`,
+    description: makeDescription([
+      `In der jö App gibt es bei OMV VIVA den Vorteil “Gratis ${variant} testen”.`,
+      'Laut Screenshot ist die Aktion mit 0 Ös einlösbar und bei OMV/VIVA verfügbar.',
+      'Einlösung direkt über die jö App bzw. jö Karte an teilnehmenden OMV Stationen.',
+    ]),
+    brand: 'OMV VIVA',
+    source: 'jö Bonus Club',
+    url,
+    expires: 'Bis ca. 30.08.2026 laut jö App',
+    distance: 'OMV Stationen Wien',
+    category: 'kaffee',
+    type: 'gratis',
+    badge: 'jö',
+    hot: true,
+    qualityScore: 96,
+  });
+}
+
+function addCurrentOmvVivaFreeTasteDeals(deals, url) {
+  for (const variant of CURRENT_OMV_VIVA_FREE_TASTE_DEALS) {
+    const deal = buildOmvVivaFreeTasteDeal(variant, url);
+    if (deal) deals.push(deal);
+  }
 }
 
 function decodeJsonString(value) {
@@ -646,6 +683,7 @@ async function extractOmvJoePage(page, source) {
     });
   }
 
+  addCurrentOmvVivaFreeTasteDeals(deals, source.url);
   return deals;
 }
 
@@ -791,11 +829,22 @@ async function extractLoggedInJoeBenefitsPage(page) {
     if (deal) deals.push(deal);
   }
 
+  if (/omv|viva|coconut strawberry sunset|matcha|gratis testen/i.test(pageData.bodyText)) {
+    addCurrentOmvVivaFreeTasteDeals(deals, pageData.url || JOE_PRIVATE_BENEFITS_URL);
+  }
+
   return dedupeDeals(deals);
 }
 
 function dedupeDeals(deals) {
-  return deals.filter(Boolean);
+  const seen = new Set();
+  return deals.filter((deal) => {
+    if (!deal) return false;
+    const key = deal.id || `${deal.source}|${deal.title}|${deal.url}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 async function main() {
