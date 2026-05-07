@@ -6261,6 +6261,7 @@
             const url = new URL('https://ataalla24-ux.github.io/deal-finder/');
             url.searchParams.set('deal', dealId);
             url.searchParams.set('ref', code);
+            url.searchParams.set('src', 'deal_share');
             return url.toString();
         }
 
@@ -7384,6 +7385,29 @@
     localStorage.setItem(getPendingClaimStorageKey(code), JSON.stringify(payload));
   }
 
+  function referralClipboardPayload(refCode, claimToken, dealId) {
+    return {
+      code: refCode,
+      claimToken,
+      visitorId: getDeviceId(),
+      startedAt: Date.now(),
+      dealId: dealId || null
+    };
+  }
+
+  async function writeReferralClaimToClipboard(refCode, claimToken, dealId) {
+    if (!claimToken || !navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+      return false;
+    }
+    try {
+      await navigator.clipboard.writeText('FREEFINDER_REFERRAL:' + JSON.stringify(referralClipboardPayload(refCode, claimToken, dealId)));
+      return true;
+    } catch (err) {
+      console.warn('Referral clipboard write failed:', err);
+      return false;
+    }
+  }
+
   function clearPendingClaim(code) {
     localStorage.removeItem(getPendingClaimStorageKey(code));
   }
@@ -7878,7 +7902,7 @@
     }
   }
 
-  async function startReferralClaim(refCode) {
+  async function startReferralClaim(refCode, source = 'landing', dealId = null) {
     const base = await getReferralApiBase();
     if (!base) {
       localStorage.setItem('pending_' + refCode, '1');
@@ -7891,12 +7915,15 @@
           code: refCode,
           visitorId: getDeviceId(),
           userAgent: navigator.userAgent || '',
-          source: 'landing'
+          source,
+          dealId: dealId || undefined
         })
       });
       if (result && result.claimToken) {
         setPendingClaim(refCode, {
           claimToken: result.claimToken,
+          visitorId: getDeviceId(),
+          dealId: dealId || null,
           startedAt: Date.now()
         });
       }
@@ -8000,6 +8027,7 @@
     const params = new URLSearchParams(window.location.search);
     const refCode = params.get('ref');
     const downloaded = params.get('downloaded');
+    const dealId = params.get('deal');
     const myCode = proData.referralCode;
 
     if (!refCode) return;
@@ -8020,19 +8048,21 @@
     if (refCode !== myCode) {
       // Mark as pending (friend visited, needs to download)
       localStorage.setItem('pending_' + refCode, '1');
-      showReferralLandingBanner(refCode);
+      showReferralLandingBanner(refCode, dealId);
     }
   }
 
-  function showReferralLandingBanner(refCode) {
+  function showReferralLandingBanner(refCode, dealId) {
     // Show a prominent "Download the app to help your friend" banner
     const banner = document.createElement('div');
     banner.id = 'refLandingBanner';
     banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#f59e0b,#ef4444,#8b5cf6);color:white;padding:16px;z-index:2000;text-align:center;';
+    const safeRefCode = String(refCode || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const safeDealId = String(dealId || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     banner.innerHTML = `
-      <div style="font-size:13px;opacity:0.9;margin-bottom:4px">👑 Dein Freund möchte PRO werden!</div>
-      <div style="font-size:16px;font-weight:800;margin-bottom:12px">Lade die App herunter & hilf ihm!</div>
-      <button onclick="handleAppDownload('${refCode}')" style="background:white;color:#7c3aed;border:none;padding:12px 28px;border-radius:25px;font-weight:800;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:8px;margin:0 auto">
+      <div style="font-size:13px;opacity:0.9;margin-bottom:4px">👑 Dein Freund hat dir einen FreeFinder-Deal geschickt!</div>
+      <div style="font-size:16px;font-weight:800;margin-bottom:12px">Lade die App herunter – das zählt als bestätigter Freund.</div>
+      <button onclick="handleAppDownload('${safeRefCode}', '${safeDealId}')" style="background:white;color:#7c3aed;border:none;padding:12px 28px;border-radius:25px;font-weight:800;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:8px;margin:0 auto">
         <span>📱</span> App jetzt kostenlos laden
       </button>
       <button onclick="document.getElementById('refLandingBanner').remove()" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:12px;margin-top:8px;cursor:pointer;display:block;margin:8px auto 0">Später</button>
@@ -8040,11 +8070,11 @@
     document.body.prepend(banner);
   }
 
-  async function handleAppDownload(refCode) {
+  async function handleAppDownload(refCode, dealId = null) {
     const appStoreWindow = window.open('', '_blank', 'noopener');
     // 1. Start central claim before opening the store
     localStorage.setItem('pending_' + refCode, '1');
-    const claimStart = await startReferralClaim(refCode);
+    const claimStart = await startReferralClaim(refCode, dealId ? 'deal-share-download' : 'landing', dealId);
     if (claimStart && claimStart.error && !claimStart.fallback) {
       if (appStoreWindow && !appStoreWindow.closed) {
         appStoreWindow.close();
@@ -8052,6 +8082,9 @@
       localStorage.removeItem('pending_' + refCode);
       showToast('⚠️ Einladung gerade nicht verfügbar.');
       return;
+    }
+    if (claimStart && claimStart.claimToken) {
+      await writeReferralClaimToClipboard(refCode, claimStart.claimToken, dealId);
     }
     // 2. Open App Store
     const appStoreUrl = getAppStoreDownloadUrl(refCode);
@@ -8575,7 +8608,7 @@
             const dealId = params.get('deal');
             const refCode = params.get('ref');
             const appShellVersion = params.get('appv');
-            if (!dealId || appShellVersion) return;
+            if (!dealId || appShellVersion || refCode) return;
 
             let fallbackHandled = false;
             const cleanup = function() {
