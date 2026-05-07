@@ -236,6 +236,9 @@ function normalizeDeal(rawDeal, sourceKey) {
     isNew: true,
     votes: Number(deal.votes) || 1,
     priority: Number(deal.priority) || 3,
+    slackTs: cleanText(deal.slackTs),
+    slackThreadTs: cleanText(deal.slackThreadTs),
+    slackPostFormatVersion: cleanText(deal.slackPostFormatVersion),
     missingFields,
   };
 }
