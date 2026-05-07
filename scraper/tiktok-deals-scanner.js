@@ -20,14 +20,26 @@ const CONFIG = {
   maxPostsToVisit: Number(process.env.TIKTOK_MAX_POSTS || 90),
   maxDeals: Number(process.env.TIKTOK_MAX_DEALS || 45),
   minScore: Number(process.env.TIKTOK_MIN_SCORE || 58),
+  apiSearchPages: Number(process.env.TIKTOK_SEARCH_PAGES || 2),
+  apiSearchCount: Number(process.env.TIKTOK_SEARCH_COUNT || 24),
+  maxApiCandidates: Number(process.env.TIKTOK_MAX_API_CANDIDATES || 900),
 };
 
 const SEARCH_QUERIES = [
+  'site:tiktok.com/@ wien gratis heute',
+  'site:tiktok.com/@ wien nur heute gratis',
   'site:tiktok.com/@ wien gratis essen',
   'site:tiktok.com/@ wien gratis kaffee',
   'site:tiktok.com/@ wien gratis drink',
+  'site:tiktok.com/@ wien gratis eintritt',
+  'site:tiktok.com/@ wien kostenlos eintritt',
+  'site:tiktok.com/@ wien gratis event',
+  'site:tiktok.com/@ vienna free entry',
+  'site:tiktok.com/@ vienna free drinks',
   'site:tiktok.com/@ wien gratis pizza burger kebab',
   'site:tiktok.com/@ wien neueröffnung gratis',
+  'site:tiktok.com/@ wien eröffnung gratis essen',
+  'site:tiktok.com/@ wien döner 1+1',
   'site:tiktok.com/@ wien opening free food',
   'site:tiktok.com/@ vienna free coffee',
   'site:tiktok.com/@ vienna free food',
@@ -41,26 +53,69 @@ const SEARCH_QUERIES = [
   'site:tiktok.com/@ tiktok wien gratis',
 ];
 
-const TIKTOK_API_KEYWORDS = [
+const CORE_TIKTOK_API_KEYWORDS = [
+  'wien gratis heute',
+  'wien nur heute gratis',
+  'wien kostenlos heute',
   'wien gratis essen',
   'wien gratis kaffee',
   'wien gratis drink',
+  'wien gratis drinks',
+  'wien gratis eintritt',
+  'wien kostenlos eintritt',
+  'wien gratis event',
+  'wien gratis festival',
+  'wien gratis museum',
+  'wien free entry',
+  'vienna free entry',
+  'vienna free admission',
+  'vienna free drinks',
   'wien gratis pizza',
   'wien gratis burger',
   'wien gratis kebab',
   'wien döner gratis',
+  'wien döner 1+1',
+  'wien 1+1 döner',
+  'wien pizza 1+1',
   'wien neueröffnung gratis',
+  'wien eröffnung gratis essen',
+  'wien neueröffnung döner',
   'wien opening free food',
+  'vienna opening free food',
   'vienna free coffee',
   'vienna free food',
   'wien 1+1 restaurant',
   'wien 2 für 1 essen',
   'wien happy hour deal',
   'wien rabatt gutschein',
+  'wien 50 rabatt',
   'wien gratis probetraining',
   'wien gratis goodie bag',
   'wien kostenlos aktion',
 ];
+
+const TIKTOK_SEED_ACCOUNT_KEYWORDS = [
+  'dahabdoener gratis',
+  'fitnessunionwien kostenlos',
+  'viennas_joy gratis',
+  'viennas joy free entry',
+  'kseniainvienna free drinks',
+  'foodiewien gratis',
+  'foodiewien deal',
+  'eatinvienna gratis',
+  'eatinvienna deal',
+  'tasteofvienna gratis',
+  'foodspots_vienna gratis',
+  'robert.erobert wien gratis',
+  'shaysfoodblog wien gratis',
+  'neotaste wien deal',
+  'bestekorpe wien gratis',
+  'wienerkebapmehmetusta gratis',
+  'tastyfoodvienna gratis',
+  'dishthedirt vienna free',
+];
+
+const TIKTOK_API_KEYWORDS = [...new Set([...CORE_TIKTOK_API_KEYWORDS, ...TIKTOK_SEED_ACCOUNT_KEYWORDS])];
 
 const VIENNA_PATTERNS = [
   /\bwien\b/i,
@@ -87,6 +142,8 @@ const STRONG_DEAL_PATTERNS = [
   /\bgratis\b/i,
   /\bkostenlos(?:e|er|es|en)?\b/i,
   /\bfree\b/i,
+  /\beintritt\s+frei\b/i,
+  /\bfreier\s+eintritt\b/i,
   /\b0\s*€/i,
   /\b1\s*\+\s*1\b/i,
   /\b2\s*(?:für|fuer)\s*1\b/i,
@@ -103,6 +160,14 @@ const FALSE_POSITIVE_PATTERNS = [
   /\bgewinnspiel\b/i,
   /\bverlosung\b/i,
   /\bjob\b/i,
+  /\bno ink needed\b/i,
+  /\bstudyhacks?\b/i,
+  /\bamazonfinds?\b/i,
+  /\bwie gratis\?/i,
+  /\bgar\s*kein\b/i,
+  /\bgarkein\b/i,
+  /\bkein\s+\w+\s+enthalten\b/i,
+  /\bjemanden gefunden der hilft\b/i,
   /\bwohnung\b/i,
   /\bhotelzimmer\b/i,
   /\bairbnb\b/i,
@@ -120,9 +185,29 @@ const CATEGORY_RULES = [
   { category: 'essen', logo: '🍽️', pattern: /\b(essen|food|restaurant|pizza|burger|kebab|kebap|döner|doener|sushi|ramen|brunch|croissant|wrap|falafel|eis|gelato|snack)\b/i },
   { category: 'fitness', logo: '💪', pattern: /\b(fitness|gym|probetraining|workout|yoga|pilates|training)\b/i },
   { category: 'beauty', logo: '💄', pattern: /\b(beauty|kosmetik|make.?up|parfum|goodie bag|haare|friseur|barber)\b/i },
-  { category: 'kultur', logo: '🎟️', pattern: /\b(kino|ticket|museum|theater|konzert|festival|event|ausstellung|prater)\b/i },
+  { category: 'kultur', logo: '🎟️', pattern: /\b(kino|ticket|eintritt|entry|admission|museum|theater|konzert|festival|event|ausstellung|mittelalterfest|stift|klosterneuburg|prater)\b/i },
   { category: 'shopping', logo: '🛍️', pattern: /\b(shop|store|shopping|sale|gutschein|coupon|rabattcode|fashion|sneaker)\b/i },
 ];
+
+const MONTH_NAMES = new Map([
+  ['jänner', 1],
+  ['jaenner', 1],
+  ['januar', 1],
+  ['februar', 2],
+  ['märz', 3],
+  ['maerz', 3],
+  ['april', 4],
+  ['mai', 5],
+  ['maj', 5],
+  ['maja', 5],
+  ['juni', 6],
+  ['juli', 7],
+  ['august', 8],
+  ['september', 9],
+  ['oktober', 10],
+  ['november', 11],
+  ['dezember', 12],
+]);
 
 function cleanText(value = '', max = 1600) {
   return String(value || '')
@@ -175,7 +260,8 @@ function hasViennaSignal(text) {
 
 function hasStrongDealSignal(text) {
   const signal = cleanText(text, 2600);
-  if (!STRONG_DEAL_PATTERNS.some((pattern) => pattern.test(signal))) return false;
+  const offerText = signal.replace(/#[\w.äöüß-]+/gi, ' ');
+  if (!STRONG_DEAL_PATTERNS.some((pattern) => pattern.test(offerText))) return false;
   if (FALSE_POSITIVE_PATTERNS.some((pattern) => pattern.test(signal))) return false;
   return true;
 }
@@ -187,6 +273,9 @@ function inferType(text) {
 }
 
 function inferCategoryAndLogo(text, type) {
+  if (/\b(eintritt|entry|admission|festival|event|museum|garten|botanisch|stadtpark|stift|klosterneuburg)\b/i.test(text)) {
+    return { category: 'kultur', logo: '🎟️' };
+  }
   for (const rule of CATEGORY_RULES) {
     if (rule.pattern.test(text)) return { category: rule.category, logo: rule.logo };
   }
@@ -196,24 +285,58 @@ function inferCategoryAndLogo(text, type) {
 
 function extractBrand(text, accountHandle) {
   const signal = cleanText(text, 800);
+  const knownVenue = signal.match(/\b(Stift Klosterneuburg|Silent Disco Austria|Dahab Döner|Fitness Union Wien|Botanischer Garten Wien|Botanische(?:r|n)? Garten|Filipino Food Festival Austria|FilipinoFoodFestivalAustria|Genuss-Festival Wien|GENUSS-FESTIVAL VIENNA|Zlatno Ćoše|Zlatno Cose)\b/i);
+  if (knownVenue?.[1]) return cleanText(knownVenue[1], 80);
+
   const patterns = [
     /\bbei\s+([A-ZÄÖÜ][A-Za-zÄÖÜäöüß0-9&'. -]{2,45})/i,
     /\bvon\s+([A-ZÄÖÜ][A-Za-zÄÖÜäöüß0-9&'. -]{2,45})/i,
+    /\bbeim?\s+([A-ZÄÖÜ][A-Za-zÄÖÜäöüß0-9&'. -]{2,45})/i,
     /^([A-ZÄÖÜ][A-Za-zÄÖÜäöüß0-9&'. -]{2,45})\s+(?:schenkt|gibt|macht|startet|eröffnet|eroeffnet)/i,
   ];
   for (const pattern of patterns) {
     const match = signal.match(pattern);
-    if (match?.[1]) return cleanText(match[1], 80).replace(/[.!?:;].*$/, '').trim();
+    if (!match?.[1]) continue;
+    const candidate = cleanText(match[1], 80).replace(/[.!?:;].*$/, '').trim();
+    if (!isWeakBrandCandidate(candidate)) return candidate;
   }
   return accountHandle ? `@${accountHandle}` : 'TikTok Wien';
 }
 
+function isWeakBrandCandidate(value) {
+  const normalized = cleanText(value, 120).toLowerCase();
+  if (!normalized) return true;
+  if (normalized.split(/\s+/).length > 5) return true;
+  return /\b(wien entfernt|vienna entfernt|könnt|koennt|kannst|euch|ihr|meinem|besuch|heute|morgen|nur|gratis|kostenlos|free|angebot|deal|zeitreise|mit)\b/i.test(normalized);
+}
+
 function buildOfferTitle(text, brand) {
   const signal = cleanText(text, 1200);
-  const items = 'kaffee|coffee|drink|drinks|getränk|getraenk|pizza|burger|kebab|kebap|döner|doener|eis|gelato|ticket|kino|goodie bag|probetraining|brunch|croissant|matcha|boba|bubble tea';
+  const venueMatch = signal.match(/\b(?:beim?|bei)\s+(Stift Klosterneuburg)\b/i);
+  const venue = cleanText(venueMatch?.[1] || '', 80);
+  if (/\bgenuss[-\s]?festival\b/i.test(signal) && /\b(?:eintritt|frei|gratis|kostenlos|free)\b/i.test(signal)) {
+    return 'Gratis Eintritt Genuss-Festival Stadtpark';
+  }
+  if (/\bfilipino\s*food\s*festival\b|FilipinoFoodFestivalAustria/i.test(signal) && /\b(?:eintritt\s+frei|freier\s+eintritt|eintritt\s+(?:ist\s+)?gratis|gratis(?:er|en)?\s+eintritt|free\s+(?:entry|admission))\b/i.test(signal)) {
+    return 'Gratis Eintritt Filipino Food Festival';
+  }
+  if (/\bbotanische(?:r|n)?\s+garten\b/i.test(signal) && /\b(?:eintritt\s+frei|freier\s+eintritt|eintritt\s+(?:ist\s+)?gratis|kostenlos|free\s+(?:entry|admission))\b/i.test(signal)) {
+    return 'Gratis Eintritt Botanischer Garten Wien';
+  }
+  if (/\bzlatno\s+(?:ćoše|cose)\b/i.test(signal) && /\bgratis\s+(?:pe[čc]enje|essen|food)\b/i.test(signal)) {
+    return 'Gratis Essen bei Zlatno Ćoše';
+  }
+  if (/\bmittelalterfest\b/i.test(signal) && /\b(?:eintritt\s+(?:ist\s+)?gratis|gratis(?:er|en)?\s+eintritt|free\s+(?:entry|admission))\b/i.test(signal)) {
+    return `Gratis Eintritt Mittelalterfest${venue ? ` ${venue}` : ''}`;
+  }
+  if (/\b(?:eintritt\s+frei|freier\s+eintritt|eintritt\s+(?:ist\s+)?gratis|gratis(?:er|en)?\s+eintritt|free\s+(?:entry|admission))\b/i.test(signal)) {
+    return `Gratis Eintritt${brand ? ` bei ${brand}` : ''}`;
+  }
+
+  const items = 'kaffee|coffee|drink|drinks|getränk|getraenk|pizza|burger|kebab|kebap|döner|doener|eis|gelato|eintritt|entry|admission|ticket|kino|goodie bag|probetraining|brunch|croissant|matcha|boba|bubble tea';
   let match = signal.match(new RegExp(`\\b(?:gratis|kostenlos(?:e|er|es|en)?|free)\\s+(?:einen?|eine|ein)?\\s*(${items})`, 'i'));
   if (match) return `Gratis ${cleanText(match[1], 40).replace(/^./, (c) => c.toUpperCase())}${brand ? ` bei ${brand}` : ''}`;
-  match = signal.match(new RegExp(`\\b(${items})\\s+(?:gratis|kostenlos(?:e|er|es|en)?|free)\\b`, 'i'));
+  match = signal.match(new RegExp(`\\b(${items})\\s+(?:ist\\s+)?(?:gratis|kostenlos(?:e|er|es|en)?|free)\\b`, 'i'));
   if (match) return `Gratis ${cleanText(match[1], 40).replace(/^./, (c) => c.toUpperCase())}${brand ? ` bei ${brand}` : ''}`;
   match = signal.match(/\b(1\s*\+\s*1|2\s*(?:für|fuer)\s*1|bogo)\b[^.!?]{0,55}/i);
   if (match) return cleanText(match[0], 90).replace(/\b2\s*fuer\s*1\b/i, '2 für 1');
@@ -270,6 +393,10 @@ function endOfViennaDay(year, month, day) {
   return new Date(Date.UTC(year, month - 1, day, 21, 59, 59, 999));
 }
 
+function monthFromName(value) {
+  return MONTH_NAMES.get(cleanText(value, 40).toLowerCase()) || 0;
+}
+
 function parseExplicitOfferEndDate(text) {
   const signal = cleanText(text, 1600).toLowerCase();
   const year = new Date().getUTCFullYear();
@@ -284,6 +411,24 @@ function parseExplicitOfferEndDate(text) {
   if (match) {
     const parsedYear = match[4] ? (Number(match[4]) < 100 ? 2000 + Number(match[4]) : Number(match[4])) : year;
     return endOfViennaDay(parsedYear, Number(match[3]), Number(match[2]));
+  }
+
+  match = signal.match(/\b(?:von\s+)?(\d{1,2})\.?\s*(?:bis|[-–])\s*(\d{1,2})\.?\s*(jänner|jaenner|januar|februar|märz|maerz|april|mai|maj|maja|juni|juli|august|september|oktober|november|dezember)\b/i);
+  if (match) {
+    const month = monthFromName(match[3]);
+    if (month) return endOfViennaDay(year, month, Number(match[2]));
+  }
+
+  match = signal.match(/\b(\d{1,2})\.\s*&\s*(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?/i);
+  if (match) {
+    const parsedYear = match[4] ? (Number(match[4]) < 100 ? 2000 + Number(match[4]) : Number(match[4])) : year;
+    return endOfViennaDay(parsedYear, Number(match[3]), Number(match[2]));
+  }
+
+  match = signal.match(/\b(?:am|nur am|samstag|sonntag|montag|dienstag|mittwoch|donnerstag|freitag|subotu)?\s*(\d{1,2})\.?\s*(jänner|jaenner|januar|februar|märz|maerz|april|mai|maj|maja|juni|juli|august|september|oktober|november|dezember)\b/i);
+  if (match) {
+    const month = monthFromName(match[2]);
+    if (month) return endOfViennaDay(year, month, Number(match[1]));
   }
 
   match = signal.match(/\b(?:am|nur am)\s+(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?/i);
@@ -335,6 +480,12 @@ function extractExpiryText(text) {
   if (explicit) return explicit[0];
   const range = signal.match(/\b(?:von\s+)?\d{1,2}\.\s*[-–]\s*\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?/i);
   if (range) return range[0];
+  const monthRange = signal.match(/\b(?:von\s+)?\d{1,2}\.?\s*(?:bis|[-–])\s*\d{1,2}\.?\s*(?:Jänner|Jaenner|Januar|Februar|März|Maerz|April|Mai|Maj|Maja|Juni|Juli|August|September|Oktober|November|Dezember)\b/i);
+  if (monthRange) return monthRange[0];
+  const splitRange = signal.match(/\b\d{1,2}\.\s*&\s*\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?/i);
+  if (splitRange) return splitRange[0];
+  const monthSingle = signal.match(/\b(?:am|nur am|Samstag|Sonntag|Montag|Dienstag|Mittwoch|Donnerstag|Freitag|subotu)?\s*\d{1,2}\.?\s*(?:Jänner|Jaenner|Januar|Februar|März|Maerz|April|Mai|Maj|Maja|Juni|Juli|August|September|Oktober|November|Dezember)\b/i);
+  if (monthSingle) return monthSingle[0];
   const single = signal.match(/\b(?:am|nur am)\s+\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?/i);
   if (single) return single[0];
   if (/\bnur heute\b/i.test(signal)) return 'Nur heute';
@@ -377,35 +528,44 @@ function normalizeTikTokApiItem(raw) {
 async function fetchTikTokApiCandidates(page) {
   const rows = [];
   const errors = [];
+  const seenUrls = new Set();
   for (const keyword of TIKTOK_API_KEYWORDS) {
-    try {
-      const result = await page.evaluate(async ({ keyword }) => {
-        const url = `/api/search/general/full/?keyword=${encodeURIComponent(keyword)}&offset=0&count=18`;
-        const response = await fetch(url, {
-          headers: { accept: 'application/json,text/plain,*/*' },
-        });
-        const text = await response.text();
-        if (!response.ok) return { ok: false, status: response.status, text: text.slice(0, 200) };
-        if (!text) return { ok: false, status: response.status, text: '' };
-        try {
-          return { ok: true, status: response.status, body: JSON.parse(text) };
-        } catch {
-          return { ok: false, status: response.status, text: text.slice(0, 200) };
-        }
-      }, { keyword });
+    for (let pageIndex = 0; pageIndex < CONFIG.apiSearchPages; pageIndex += 1) {
+      const offset = pageIndex * CONFIG.apiSearchCount;
+      try {
+        const result = await page.evaluate(async ({ keyword, offset, count }) => {
+          const url = `/api/search/general/full/?keyword=${encodeURIComponent(keyword)}&offset=${offset}&count=${count}`;
+          const response = await fetch(url, {
+            headers: { accept: 'application/json,text/plain,*/*' },
+          });
+          const text = await response.text();
+          if (!response.ok) return { ok: false, status: response.status, text: text.slice(0, 200) };
+          if (!text) return { ok: false, status: response.status, text: '' };
+          try {
+            return { ok: true, status: response.status, body: JSON.parse(text) };
+          } catch {
+            return { ok: false, status: response.status, text: text.slice(0, 200) };
+          }
+        }, { keyword, offset, count: CONFIG.apiSearchCount });
 
-      if (!result.ok) {
-        errors.push({ keyword, status: result.status, error: result.text || 'empty response' });
-        continue;
+        if (!result.ok) {
+          errors.push({ keyword, offset, status: result.status, error: result.text || 'empty response' });
+          continue;
+        }
+        const batch = result.body?.data || [];
+        for (const row of batch) {
+          const normalized = normalizeTikTokApiItem(row);
+          if (!normalized || seenUrls.has(normalized.url)) continue;
+          seenUrls.add(normalized.url);
+          rows.push({ keyword, offset, data: normalized });
+          if (rows.length >= CONFIG.maxApiCandidates) return { rows, errors };
+        }
+        if (batch.length === 0) break;
+      } catch (error) {
+        errors.push({ keyword, offset, error: error.message });
       }
-      for (const row of result.body?.data || []) {
-        const normalized = normalizeTikTokApiItem(row);
-        if (normalized) rows.push({ keyword, data: normalized });
-      }
-    } catch (error) {
-      errors.push({ keyword, error: error.message });
+      await page.waitForTimeout(350);
     }
-    await page.waitForTimeout(450);
   }
   return { rows, errors };
 }
@@ -548,13 +708,56 @@ function buildQualityScore(signal, postDate, type, category) {
   return score;
 }
 
+function normalizeOfferKeyText(value = '') {
+  return cleanText(value, 200)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9+% ]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function semanticDealKey(deal) {
+  const brand = normalizeOfferKeyText(deal.brand);
+  const title = normalizeOfferKeyText(deal.title);
+  if (!brand || !title) return '';
+  return `${brand}|${title}`;
+}
+
+function hasSpecificExpiry(deal) {
+  const expires = cleanText(deal.expires);
+  return Boolean(expires && !/^kurzfristig\b/i.test(expires));
+}
+
+function pickBetterDeal(existing, candidate) {
+  const existingSpecificExpiry = hasSpecificExpiry(existing);
+  const candidateSpecificExpiry = hasSpecificExpiry(candidate);
+  if (existingSpecificExpiry !== candidateSpecificExpiry) return candidateSpecificExpiry ? candidate : existing;
+
+  if ((candidate.qualityScore || 0) !== (existing.qualityScore || 0)) {
+    return (candidate.qualityScore || 0) > (existing.qualityScore || 0) ? candidate : existing;
+  }
+
+  return Date.parse(candidate.pubDate || '') > Date.parse(existing.pubDate || '') ? candidate : existing;
+}
+
 function dedupeDeals(deals) {
   const byUrl = new Map();
+  const bySemanticKey = new Map();
   for (const deal of deals) {
+    const semanticKey = semanticDealKey(deal);
+    if (semanticKey) {
+      const existing = bySemanticKey.get(semanticKey);
+      bySemanticKey.set(semanticKey, existing ? pickBetterDeal(existing, deal) : deal);
+      continue;
+    }
+
     const existing = byUrl.get(deal.url);
-    if (!existing || deal.qualityScore > existing.qualityScore) byUrl.set(deal.url, deal);
+    byUrl.set(deal.url, existing ? pickBetterDeal(existing, deal) : deal);
   }
-  return [...byUrl.values()]
+
+  return [...new Set([...bySemanticKey.values(), ...byUrl.values()])]
     .sort((left, right) => right.qualityScore - left.qualityScore || Date.parse(right.pubDate) - Date.parse(left.pubDate))
     .slice(0, CONFIG.maxDeals);
 }
@@ -592,7 +795,7 @@ async function main() {
 
     discovery = await discoverTikTokLinksViaDuckDuckGo();
     const knownUrls = new Set(apiDiscovery.rows.map((item) => item.data.url));
-    const urls = discovery.links.filter((url) => !knownUrls.has(url)).slice(0, Math.max(0, CONFIG.maxPostsToVisit - apiDiscovery.rows.length));
+    const urls = discovery.links.filter((url) => !knownUrls.has(url)).slice(0, CONFIG.maxPostsToVisit);
     console.log(`🔎 search-engine videos: ${discovery.links.length}, visiting fallback: ${urls.length}`);
     const page = apiPage;
     for (const url of urls) {

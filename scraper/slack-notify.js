@@ -531,6 +531,29 @@ function filterRecentlySeenDeals(deals, seenKeys) {
   return { deals: filtered, removed: deals.length - filtered.length };
 }
 
+function isSocialPostKey(key) {
+  return /^instagram:|^tiktok:/i.test(cleanText(key));
+}
+
+function loadQueuedSocialPostKeys(existingDeals) {
+  const keys = new Set();
+  for (const deal of existingDeals) {
+    if (!cleanText(deal.slackTs)) continue;
+    const key = canonicalPostKey(deal.url);
+    if (isSocialPostKey(key)) keys.add(key);
+  }
+  return keys;
+}
+
+function filterAlreadyQueuedSocialDeals(deals, queuedPostKeys) {
+  if (!queuedPostKeys || queuedPostKeys.size === 0) return { deals, removed: 0 };
+  const filtered = deals.filter((deal) => {
+    const key = canonicalPostKey(deal.url);
+    return !isSocialPostKey(key) || !queuedPostKeys.has(key);
+  });
+  return { deals: filtered, removed: deals.length - filtered.length };
+}
+
 function writePendingAll(deals) {
   const payload = {
     deals,
@@ -541,6 +564,8 @@ function writePendingAll(deals) {
 }
 
 function queueKey(deal) {
+  const postKey = canonicalPostKey(deal.url);
+  if (isSocialPostKey(postKey)) return postKey;
   return cleanText(deal.slackTs) || cleanText(deal.id) || normalizeUrl(deal.url);
 }
 
@@ -579,7 +604,13 @@ async function main() {
     console.log(`👀 Seen filter: ${preSlackSeenFilter.removed} bereits gesehene exakte Posts vor Slack entfernt`);
   }
 
-  const validation = await validateDealsForSlack(preSlackSeenFilter.deals);
+  const queuedSocialPostKeys = loadQueuedSocialPostKeys(existingQueue);
+  const preSlackQueueFilter = filterAlreadyQueuedSocialDeals(preSlackSeenFilter.deals, queuedSocialPostKeys);
+  if (preSlackQueueFilter.removed > 0) {
+    console.log(`🔁 Queue filter: ${preSlackQueueFilter.removed} bereits gepostete Social-Posts vor Slack entfernt`);
+  }
+
+  const validation = await validateDealsForSlack(preSlackQueueFilter.deals);
   writeDealValidityReport(validation.report);
   const freshDeals = validation.allowedDeals;
   const blockedSummary = formatReasonCategoryCounts(validation.summary.reasonCategoryCounts);
