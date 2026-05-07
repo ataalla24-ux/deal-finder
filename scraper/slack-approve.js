@@ -35,6 +35,10 @@ loadEnvFile();
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 const MAX_APPROVAL_URL_EXPIRY_CHECKS = Number(process.env.MAX_APPROVAL_URL_EXPIRY_CHECKS || 50);
+const BLOCKED_APPROVAL_URL_PATTERNS = [
+  /tiktok\.com\/@planetmatters\/video\/7634961057521437975/i,
+  /tiktok\.com\/@viennas_joy\/video\/7635566976642911510/i,
+];
 
 function ensureObject(value, fallback = {}) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
@@ -214,6 +218,11 @@ function normalizeUrl(url) {
   if (!text) return '';
   if (!/^https?:\/\//i.test(text)) return '';
   return text;
+}
+
+function isBlockedApprovalDeal(deal) {
+  const url = normalizeUrl(deal?.url);
+  return BLOCKED_APPROVAL_URL_PATTERNS.some((pattern) => pattern.test(url));
 }
 
 function normalizeLooseText(value) {
@@ -775,6 +784,11 @@ async function main() {
 
   for (let i = 0; i < dedupedPendingDeals.length; i += 1) {
     const deal = dedupedPendingDeals[i];
+    if (isBlockedApprovalDeal(deal)) {
+      console.log(`  🚫 blocked expired/invalid Slack deal: ${deal.title || deal.url}`);
+      continue;
+    }
+
     const msg = messageByTs.get(deal.slackTs);
     let reactions = msg && Array.isArray(msg.reactions) ? msg.reactions : [];
     if (reactions.length === 0 && deal.slackTs) {
