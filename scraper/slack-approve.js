@@ -239,10 +239,52 @@ function normalizeBrandSignature(value) {
 }
 
 function getCanonicalUrlBrandKey(deal) {
+  const variantKey = getSameUrlVariantKey(deal);
+  if (variantKey) return variantKey;
+
   const brand = normalizeBrandSignature(deal?.brand);
   const url = normalizeUrl(deal?.url).toLowerCase();
   if (!brand || !url) return '';
   return `${brand}|${url}`;
+}
+
+function getSameUrlVariantKey(deal) {
+  const id = cleanText(deal?.id).toLowerCase();
+  const brand = normalizeBrandSignature(deal?.brand);
+  const url = normalizeUrl(deal?.url).toLowerCase();
+  const title = normalizeLooseText(deal?.title);
+  if (!brand || !url || !title) return '';
+
+  const sourceText = normalizeLooseText([deal?.source, deal?.originSource].filter(Boolean).join(' '));
+  const isJoeOmvFreeTaste =
+    id.startsWith('joe-omv-viva-free-taste-') ||
+    (
+      sourceText.includes('jo bonus club') &&
+      brand.includes('omv viva') &&
+      /gratis/.test(title) &&
+      /(coconut|strawberry|sunny|orange|espresso|sparkling|tonic|iced|matcha|latte|sunset)/.test(title)
+    );
+
+  if (!isJoeOmvFreeTaste) return '';
+  return `${brand}|${url}|${title}`;
+}
+
+function isSameUrlVariantDeal(deal) {
+  return Boolean(getSameUrlVariantKey(deal));
+}
+
+function getApprovedMergeKeys(deal) {
+  const keys = [
+    getCanonicalSocialPostKey(deal),
+    getCanonicalUrlBrandKey(deal),
+    cleanText(deal?.id),
+  ];
+
+  if (!isSameUrlVariantDeal(deal)) {
+    keys.push(normalizeUrl(deal?.url));
+  }
+
+  return keys.filter(Boolean);
 }
 
 function isSocialDeal(deal) {
@@ -601,24 +643,14 @@ function mergeApprovedDeals(existingDeals, newlyApproved) {
 
   const indexByKey = new Map();
   for (let i = 0; i < merged.length; i += 1) {
-    const keys = [
-      getCanonicalSocialPostKey(merged[i]),
-      getCanonicalUrlBrandKey(merged[i]),
-      merged[i].id,
-      merged[i].url,
-    ].filter(Boolean);
+    const keys = getApprovedMergeKeys(merged[i]);
     for (const key of keys) {
       indexByKey.set(key, i);
     }
   }
 
   for (const deal of newlyApproved) {
-    const keys = [
-      getCanonicalSocialPostKey(deal),
-      getCanonicalUrlBrandKey(deal),
-      deal.id,
-      deal.url,
-    ].filter(Boolean);
+    const keys = getApprovedMergeKeys(deal);
     if (keys.length === 0) continue;
     const existingIndex = keys
       .map((key) => indexByKey.get(key))
@@ -626,12 +658,7 @@ function mergeApprovedDeals(existingDeals, newlyApproved) {
     if (Number.isInteger(existingIndex)) {
       merged[existingIndex] = pickBetterDeal(merged[existingIndex], { ...merged[existingIndex], ...deal });
       const mergedDeal = merged[existingIndex];
-      for (const key of [
-        getCanonicalSocialPostKey(mergedDeal),
-        getCanonicalUrlBrandKey(mergedDeal),
-        mergedDeal.id,
-        mergedDeal.url,
-      ].filter(Boolean)) {
+      for (const key of getApprovedMergeKeys(mergedDeal)) {
         indexByKey.set(key, existingIndex);
       }
     } else {
