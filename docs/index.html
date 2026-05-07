@@ -5013,14 +5013,25 @@
             const res = await fetch('deals.json?t=' + Date.now(), { cache: 'no-store' });
             const data = await res.json();
             const baseDeals = data.deals.map(d => normalizeDealForApp({ ...d, votes: votes[d.id] || d.votes || 0 }));
-            await fetchDealOverrideState();
-            allDeals = applyDealOverridesToList(baseDeals);
+            allDeals = baseDeals.filter(d => d && d.id && (!d._lifecycle || d._lifecycle.state !== 'expired-hidden'));
             updateCounts();
             await setDailyDeal();
             setFeaturedHomeDeals();
             renderDeals();
             updateHomeSectionVisibility();
             updateAdminUiVisibility();
+            try {
+                await fetchDealOverrideState();
+                allDeals = applyDealOverridesToList(baseDeals);
+                updateCounts();
+                await setDailyDeal();
+                setFeaturedHomeDeals();
+                renderDeals();
+                updateHomeSectionVisibility();
+                updateAdminUiVisibility();
+            } catch (overrideError) {
+                console.warn('Deal overrides skipped after base feed render:', overrideError);
+            }
         } catch (e) {
             document.getElementById('deals').innerHTML = '<div class="empty"><div class="empty-icon">\uD83D\uDE15</div><p>Fehler</p></div>';
         }
@@ -7539,7 +7550,13 @@
     try {
       const base = await getReferralApiBase();
       if (base) {
-        const res = await fetch(base + '/api/deals/state?t=' + Date.now(), { cache: 'no-store' });
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timeout = controller ? setTimeout(() => controller.abort(), 3500) : null;
+        const res = await fetch(base + '/api/deals/state?t=' + Date.now(), {
+          cache: 'no-store',
+          signal: controller ? controller.signal : undefined
+        });
+        if (timeout) clearTimeout(timeout);
         if (res.ok) {
           const data = await res.json();
           const overrides = Array.isArray(data && data.overrides) ? data.overrides : [];
@@ -7558,7 +7575,13 @@
       console.warn('Deal override state unavailable:', e);
     }
     try {
-      const res = await fetch('deal-of-the-week.json?t=' + Date.now(), { cache: 'no-store' });
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timeout = controller ? setTimeout(() => controller.abort(), 3000) : null;
+      const res = await fetch('deal-of-the-week.json?t=' + Date.now(), {
+        cache: 'no-store',
+        signal: controller ? controller.signal : undefined
+      });
+      if (timeout) clearTimeout(timeout);
       if (res.ok) {
         const data = normalizeWeeklyDealRecord(await res.json());
         if (isCurrentWeeklyDealRecord(data)) {
