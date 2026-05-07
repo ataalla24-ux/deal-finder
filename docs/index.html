@@ -8610,7 +8610,7 @@
 
         // ⏰ Live re-render countdown every 60s to keep expiry info fresh
         setInterval(function() {
-            if (typeof renderDeals === 'function' && !shouldPauseForegroundSync()) {
+            if (typeof renderDeals === 'function' && !shouldPauseForegroundSync() && (window.scrollY || 0) < 80) {
                 renderDeals();
             }
         }, 60000);
