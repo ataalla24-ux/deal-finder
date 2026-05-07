@@ -49,6 +49,8 @@ const LEGACY_CHURCH_ID_PATTERNS = [
 const EXPIRED_DEAL_URL_PATTERNS = [
   /instagram\.com\/(?:reel|p)\/DXWur6dDL0h/i,
   /tiktok\.com\/@eatinvienna\/video\/7630833927053233430/i,
+  /tiktok\.com\/@planetmatters\/video\/7634961057521437975/i,
+  /tiktok\.com\/@viennas_joy\/video\/7635566976642911510/i,
 ];
 const FORCE_KEEP_IDS = new Set([
   'g2-17at53u',

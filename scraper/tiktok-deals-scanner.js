@@ -164,6 +164,11 @@ const FALSE_POSITIVE_PATTERNS = [
   /\bstudyhacks?\b/i,
   /\bamazonfinds?\b/i,
   /\bwie gratis\?/i,
+  /\bjetzt kostenlos testen\b/i,
+  /\bnotidesk\b/i,
+  /\bfinden statt suchen\b/i,
+  /\bgeschenke,\s*restaurants\s*&\s*aktivitäten\b/i,
+  /\banzeige\b/i,
   /\bgar\s*kein\b/i,
   /\bgarkein\b/i,
   /\bkein\s+\w+\s+enthalten\b/i,
@@ -413,6 +418,12 @@ function parseExplicitOfferEndDate(text) {
     return endOfViennaDay(parsedYear, Number(match[3]), Number(match[2]));
   }
 
+  match = signal.match(/\b\d{1,2}[./]\d{1,2}\.?\s*(?:and|und|bis|to)\s*(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?/i);
+  if (match) {
+    const parsedYear = match[3] ? (Number(match[3]) < 100 ? 2000 + Number(match[3]) : Number(match[3])) : year;
+    return endOfViennaDay(parsedYear, Number(match[2]), Number(match[1]));
+  }
+
   match = signal.match(/\b(?:von\s+)?(\d{1,2})\.?\s*(?:bis|[-–])\s*(\d{1,2})\.?\s*(jänner|jaenner|januar|februar|märz|maerz|april|mai|maj|maja|juni|juli|august|september|oktober|november|dezember)\b/i);
   if (match) {
     const month = monthFromName(match[3]);
@@ -463,7 +474,7 @@ function isExplicitlyExpired(text, postDate = null) {
   if (endDate && endDate.getTime() < Date.now() - 2 * 60 * 60 * 1000) return true;
 
   if (postDate instanceof Date && !Number.isNaN(postDate.getTime())) {
-    if (/\bnur heute\b/i.test(signal) && endOfUtcDay(postDate).getTime() < Date.now()) return true;
+    if (/\bnur(?:\s+noch)?\s+heute\b/i.test(signal) && endOfUtcDay(postDate).getTime() < Date.now()) return true;
     if (/\bmorgen\b/i.test(signal)) {
       const tomorrow = new Date(Date.UTC(postDate.getUTCFullYear(), postDate.getUTCMonth(), postDate.getUTCDate() + 1, 23, 59, 59, 999));
       if (tomorrow.getTime() < Date.now()) return true;
@@ -480,6 +491,8 @@ function extractExpiryText(text) {
   if (explicit) return explicit[0];
   const range = signal.match(/\b(?:von\s+)?\d{1,2}\.\s*[-–]\s*\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?/i);
   if (range) return range[0];
+  const englishRange = signal.match(/\b\d{1,2}[./]\d{1,2}\.?\s*(?:and|und|bis|to)\s*\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?/i);
+  if (englishRange) return englishRange[0];
   const monthRange = signal.match(/\b(?:von\s+)?\d{1,2}\.?\s*(?:bis|[-–])\s*\d{1,2}\.?\s*(?:Jänner|Jaenner|Januar|Februar|März|Maerz|April|Mai|Maj|Maja|Juni|Juli|August|September|Oktober|November|Dezember)\b/i);
   if (monthRange) return monthRange[0];
   const splitRange = signal.match(/\b\d{1,2}\.\s*&\s*\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?/i);
