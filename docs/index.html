@@ -1627,13 +1627,6 @@
 </head>
 <body>
     <div class="container">
-        <div class="streak-banner" id="streakBanner">
-            <div class="streak-copy">
-                <div class="streak-title" id="streakTitle">1 Tag Streak!</div>
-                <div class="streak-subtitle" id="streakSubtitle">Komm morgen wieder für neue Deals.</div>
-            </div>
-        </div>
-
         <div class="daily-deal" id="dailyDeal">
             <div class="daily-label">⭐ DEAL DES TAGES</div>
             <div class="daily-title" id="dailyTitle">Wird geladen...</div>
@@ -4906,17 +4899,7 @@
         }
 
         function updateStreakBanner() {
-            const titleEl = document.getElementById('streakTitle');
-            const subtitleEl = document.getElementById('streakSubtitle');
-            if (!titleEl || !subtitleEl) return;
-            const streakDays = Math.max(1, getViewingStreakDays() || (userData.todayViewed > 0 ? 1 : 1));
-            if (currentLanguage === 'en') {
-                titleEl.textContent = streakDays + ' Day Streak!';
-                subtitleEl.textContent = streakDays > 1 ? 'Come back tomorrow and keep your streak going.' : 'Come back tomorrow for fresh deals.';
-            } else {
-                titleEl.textContent = streakDays + ' Tag' + (streakDays === 1 ? '' : 'e') + ' Streak!';
-                subtitleEl.textContent = streakDays > 1 ? 'Komm morgen wieder und halte deine Serie am Laufen.' : 'Komm morgen wieder für neue Deals.';
-            }
+            return;
         }
         
         function trackDealView(dealId) {
@@ -5046,6 +5029,12 @@
         let lastForegroundSyncAt = 0;
         let lastInputFocusAt = 0;
         let lastTextEntryIntentAt = 0;
+        let lastUserScrollAt = 0;
+        let lastProgrammaticScrollAt = 0;
+
+        function markUserScrollIntent() {
+            lastUserScrollAt = Date.now();
+        }
 
         function isTextEntryElement(element) {
             if (!element) return false;
@@ -5064,6 +5053,7 @@
 
         function shouldPauseForegroundSync() {
             if (isTextEntryElement(document.activeElement)) return true;
+            if (Date.now() - lastUserScrollAt < 2200) return true;
             return Date.now() - Math.max(lastInputFocusAt, lastTextEntryIntentAt) < 3500;
         }
 
@@ -6027,13 +6017,52 @@
         '</div>';
     }
 
+    function captureVisibleDealAnchor() {
+        const currentScrollY = window.scrollY || 0;
+        if (currentScrollY < 120 || document.body.classList.contains('modal-open')) {
+            return null;
+        }
+        const cards = Array.from(document.querySelectorAll('#deals .deal-card[id]'));
+        for (const card of cards) {
+            const rect = card.getBoundingClientRect();
+            if (rect.bottom > 96 && rect.top < window.innerHeight - 80) {
+                return { id: card.id, top: rect.top, scrollY: currentScrollY };
+            }
+        }
+        return { id: null, top: 0, scrollY: currentScrollY };
+    }
+
+    function restoreVisibleDealAnchor(anchor) {
+        if (!anchor) return;
+        requestAnimationFrame(() => {
+            if (anchor.id) {
+                const card = document.getElementById(anchor.id);
+                if (card) {
+                    const delta = card.getBoundingClientRect().top - anchor.top;
+                    if (Math.abs(delta) > 1) {
+                        lastProgrammaticScrollAt = Date.now();
+                        window.scrollBy(0, delta);
+                    }
+                    return;
+                }
+            }
+            const currentScrollY = window.scrollY || 0;
+            if (anchor.scrollY > 120 && Math.abs(currentScrollY - anchor.scrollY) > 16) {
+                lastProgrammaticScrollAt = Date.now();
+                window.scrollTo(0, anchor.scrollY);
+            }
+        });
+    }
+
     function renderDeals() {
+        const anchor = captureVisibleDealAnchor();
         if (currentView === 'favorites') {
             const favoriteIds = new Set(sanitizeFavoriteIds(favorites));
             const fav = allDeals
                 .map(normalizeDealForApp)
                 .filter(d => favoriteIds.has(d.id));
             document.getElementById('deals').innerHTML = fav.length ? fav.map(renderDealCard).join('') : '<div class="empty"><div class="empty-icon">❤️</div><p>' + t('favoritesEmptyTitle') + '</p><p style="font-size:13px;color:#999;margin-top:8px">' + t('favoritesEmptyHint') + '</p></div>';
+            restoreVisibleDealAnchor(anchor);
             return;
         }
         const deals = filterDeals();
@@ -6042,6 +6071,7 @@
             return;
         }
         document.getElementById('deals').innerHTML = deals.map(renderDealCard).join('');
+        restoreVisibleDealAnchor(anchor);
 
         checkDeepLink();
     }
@@ -7116,7 +7146,10 @@
             renderDeals();
             scrollToTopContent();
         });
-        window.addEventListener('scroll', handleBottomChromeScroll, { passive: true });
+        window.addEventListener('scroll', () => {
+            handleBottomChromeScroll();
+            if (Date.now() - lastProgrammaticScrollAt > 350) markUserScrollIntent();
+        }, { passive: true });
         updateViewportBottomOffset();
         setBottomChromeHidden(false);
         window.addEventListener('resize', updateViewportBottomOffset, { passive: true });
@@ -8609,9 +8642,14 @@
             }
         }, 60000);
 
+        ['touchmove', 'wheel'].forEach((eventName) => {
+            document.addEventListener(eventName, markUserScrollIntent, { capture: true, passive: true });
+        });
+
         ['pointerdown', 'touchstart', 'mousedown'].forEach((eventName) => {
             document.addEventListener(eventName, (event) => {
                 markTextEntryIntent(event.target);
+                if (!isTextEntryElement(event.target)) markUserScrollIntent();
             }, { capture: true, passive: true });
         });
 
