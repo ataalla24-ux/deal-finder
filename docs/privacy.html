@@ -20,6 +20,8 @@
         .contact { background: #f0fdf4; border: 2px solid #10b981; }
         .footer { text-align: center; margin-top: 40px; color: #9ca3af; font-size: 14px; }
         a { color: #667eea; }
+        .link-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 16px; }
+        .link-row a { font-weight: 800; }
         .lang-switch { display: flex; justify-content: center; gap: 10px; margin-bottom: 24px; }
         .lang-switch button { border: none; border-radius: 999px; padding: 10px 16px; font-weight: 700; cursor: pointer; background: #e5e7eb; color: #111827; }
         .lang-switch button.active { background: linear-gradient(135deg, #111827, #374151); color: #fff; }
@@ -90,12 +92,17 @@
             <h2 id="contactTitle"></h2>
             <p id="contactBody"></p>
             <p><strong>Stefan Ataalla</strong><br><span id="contactAddress"></span></p>
+            <p><strong id="supportEmailLabel"></strong> <a href="mailto:dermarollerdesign@gmail.com">dermarollerdesign@gmail.com</a></p>
         </div>
 
         <div class="footer">
             <p id="updatedText"></p>
             <p style="margin-top: 8px;" id="copyrightText"></p>
-            <p style="margin-top: 16px;"><a href="/" id="backLink"></a></p>
+            <div class="link-row">
+                <a href="./support.html" id="supportLink"></a>
+                <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" id="termsLink"></a>
+                <a href="./index.html" id="backLink"></a>
+            </div>
         </div>
     </div>
 
@@ -128,8 +135,11 @@
                 contactTitle: '📧 9. Kontakt',
                 contactBody: 'Bei Fragen zur Datenschutzerklärung:',
                 contactAddress: 'Lotte Hass Weg 2, 1220 Wien<br>Österreich',
+                supportEmailLabel: 'Support-E-Mail:',
                 updatedText: 'Stand: März 2026',
                 copyrightText: '© 2026 FreeFinder. Alle Rechte vorbehalten.',
+                supportLink: 'Support',
+                termsLink: 'Terms of Use (EULA)',
                 backLink: '← Zurück zur App'
             },
             en: {
@@ -159,8 +169,11 @@
                 contactTitle: '📧 9. Contact',
                 contactBody: 'If you have questions about this privacy policy:',
                 contactAddress: 'Lotte Hass Weg 2, 1220 Vienna<br>Austria',
+                supportEmailLabel: 'Support email:',
                 updatedText: 'Updated: March 2026',
                 copyrightText: '© 2026 FreeFinder. All rights reserved.',
+                supportLink: 'Support',
+                termsLink: 'Terms of Use (EULA)',
                 backLink: '← Back to app'
             }
         };
