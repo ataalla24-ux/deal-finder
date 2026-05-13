@@ -7880,11 +7880,33 @@
     }
   }
 
+  function normalizeReferralApiResult(result) {
+    if (!result || typeof result !== 'object') return result;
+    const count = typeof result.installsCount === 'number'
+      ? result.installsCount
+      : (typeof result.installs === 'number' ? result.installs : undefined);
+    if (typeof count === 'number') {
+      result.installsCount = count;
+      result.installs = count;
+    }
+    const eligible = typeof result.eligibleForPro === 'boolean'
+      ? result.eligibleForPro
+      : (typeof result.isEligible === 'boolean' ? result.isEligible : undefined);
+    if (typeof eligible === 'boolean') {
+      result.eligibleForPro = eligible;
+      result.isEligible = eligible;
+    }
+    if (result.ok && typeof result.installsCount === 'number' && !result.alreadyPending) {
+      result.completed = result.completed || result.alreadyClaimed || result.installsCount > 0;
+    }
+    return result;
+  }
+
   async function fetchReferralStatus(code) {
     const base = await getReferralApiBase();
     if (!base) return { installsCount: getDownloadCount(code), eligibleForPro: getDownloadCount(code) >= 2, fallback: true };
     try {
-      const result = await referralApi('/api/referrals/status?code=' + encodeURIComponent(code));
+      const result = normalizeReferralApiResult(await referralApi('/api/referrals/status?code=' + encodeURIComponent(code)));
       if (result && typeof result.installsCount === 'number') {
         proData.referralCount = result.installsCount;
         saveProData();
@@ -7945,7 +7967,7 @@
       return null;
     }
     try {
-      const result = await referralApi('/api/referrals/claim/complete', {
+      const result = normalizeReferralApiResult(await referralApi('/api/referrals/claim/complete', {
         method: 'POST',
         body: JSON.stringify({
           code: refCode,
@@ -7954,7 +7976,7 @@
           userAgent: navigator.userAgent || '',
           installSource
         })
-      });
+      }));
       if (result && (result.completed || result.alreadyClaimed)) {
         clearPendingClaim(refCode);
         localStorage.removeItem('pending_' + refCode);
@@ -8086,6 +8108,9 @@
     if (claimStart && claimStart.claimToken) {
       await writeReferralClaimToClipboard(refCode, claimStart.claimToken, dealId);
     }
+    const clickCredit = claimStart && claimStart.claimToken
+      ? await completeReferralClaim(refCode, dealId ? 'deal-share-download' : 'app-store-click')
+      : normalizeReferralApiResult(claimStart);
     // 2. Open App Store
     const appStoreUrl = getAppStoreDownloadUrl(refCode);
     openExternalUrlFromGesture(appStoreUrl, appStoreWindow);
@@ -8093,16 +8118,25 @@
     // Show pending feedback
     const banner = document.getElementById('refLandingBanner');
     if (banner) {
-      banner.innerHTML = `
-        <div style="font-size:15px;font-weight:700">⏳ App Store geöffnet...</div>
-        <div style="font-size:13px;opacity:0.9;margin-top:4px">Lade FreeFinder herunter und öffne die App einmal</div>
-        <div style="font-size:12px;opacity:0.8;margin-top:8px">Nach dem Installieren diese Seite wieder öffnen und unten bestätigen</div>
-        <button onclick="manualConfirmDownload('${refCode}')" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.5);color:white;padding:8px 20px;border-radius:20px;font-size:12px;cursor:pointer;margin-top:12px">
-          ✓ Ich habe die App installiert
-        </button>
-      `;
+      if (clickCredit && (clickCredit.completed || clickCredit.alreadyClaimed || clickCredit.fallback)) {
+        const countText = typeof clickCredit.installsCount === 'number' ? ' (' + Math.min(clickCredit.installsCount, 2) + '/2)' : '';
+        banner.innerHTML = `
+          <div style="font-size:15px;font-weight:800">✅ Freund gezählt${countText}</div>
+          <div style="font-size:13px;opacity:0.9;margin-top:4px">Der App-Store-Klick wurde für die Einladung gespeichert.</div>
+        `;
+        setTimeout(() => banner.remove(), 2200);
+      } else {
+        banner.innerHTML = `
+          <div style="font-size:15px;font-weight:700">⏳ App Store geöffnet...</div>
+          <div style="font-size:13px;opacity:0.9;margin-top:4px">Lade FreeFinder herunter und öffne die App einmal</div>
+          <div style="font-size:12px;opacity:0.8;margin-top:8px">Falls der Klick nicht automatisch gezählt wurde, kannst du unten bestätigen.</div>
+          <button onclick="manualConfirmDownload('${refCode}')" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.5);color:white;padding:8px 20px;border-radius:20px;font-size:12px;cursor:pointer;margin-top:12px">
+            ✓ Ich habe die App installiert
+          </button>
+        `;
+      }
     }
-    showToast('📱 App Store geöffnet!');
+    showToast(clickCredit && (clickCredit.completed || clickCredit.alreadyClaimed || clickCredit.fallback) ? '✅ Freund gezählt!' : '📱 App Store geöffnet!');
   }
 
   async function manualConfirmDownload(refCode) {

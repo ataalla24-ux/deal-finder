@@ -529,10 +529,14 @@ function normalizeRecord(record, code, inviterDeviceId) {
 
 function sanitizeInstallSummary(record) {
   const installs = Array.isArray(record?.installs) ? record.installs : [];
+  const installsCount = installs.length;
+  const eligibleForPro = installsCount >= 2;
   return {
     code: record?.code || '',
-    installs: installs.length,
-    isEligible: installs.length >= 2,
+    installs: installsCount,
+    installsCount,
+    isEligible: eligibleForPro,
+    eligibleForPro,
     latestInstallAt: installs.length ? installs[installs.length - 1].completedAt : null
   };
 }
@@ -1411,7 +1415,7 @@ export default {
       return new Response(null, { status: 204, headers: JSON_HEADERS });
     }
 
-    if (path === '/health') {
+    if (path === '/health' || path === '/api/health') {
       return json({ ok: true, service: 'freefinder-referrals' });
     }
 
@@ -1720,6 +1724,13 @@ export default {
       const code = normalizeCode(body?.code);
       const visitorId = normalizeId(body?.visitorId);
       const claimToken = String(body?.claimToken || '').trim();
+      const installSource = String(body?.installSource || 'app-store').slice(0, 128);
+      const canConfirmImmediately = [
+        'app-store-click',
+        'deal-share-download',
+        'referral-download-click',
+        'whatsapp-app-store-click'
+      ].includes(installSource);
       if (!code) return invalid('Invalid referral code');
       if (!visitorId) return invalid('Invalid visitor id');
       if (!claimToken) return invalid('Missing claim token');
@@ -1734,7 +1745,7 @@ export default {
         if (!record) return invalid('Referral code not found', 404);
         return json({ ok: true, alreadyClaimed: true, ...sanitizeInstallSummary(record) });
       }
-      if (Date.now() - claim.startedAt < MIN_CONFIRM_DELAY_MS) {
+      if (!canConfirmImmediately && Date.now() - claim.startedAt < MIN_CONFIRM_DELAY_MS) {
         return invalid('Confirm too early after opening the referral link', 429);
       }
 
@@ -1750,7 +1761,8 @@ export default {
           visitorId,
           completedAt: Date.now(),
           userAgent: String(body?.userAgent || '').slice(0, 512),
-          installSource: String(body?.installSource || 'app-store').slice(0, 128)
+          installSource,
+          source: String(claim.source || '').slice(0, 128)
         });
       }
 
@@ -1763,7 +1775,7 @@ export default {
       });
       await env.REFERRAL_KV.delete(pendingKey(code, visitorId));
 
-      return json({ ok: true, ...sanitizeInstallSummary(nextRecord) });
+      return json({ ok: true, completed: true, ...sanitizeInstallSummary(nextRecord) });
     }
 
     return invalid('Not found', 404);
