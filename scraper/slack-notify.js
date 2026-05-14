@@ -481,6 +481,17 @@ async function getReactions(messageTs) {
   return ensureArray(data.message?.reactions);
 }
 
+function addSeenDealsFromThread(seenKeys, deals) {
+  let added = 0;
+  for (const deal of deals) {
+    const key = canonicalPostKey(deal.url);
+    if (!key || seenKeys.has(key)) continue;
+    seenKeys.add(key);
+    added += 1;
+  }
+  return added;
+}
+
 async function loadRecentlySeenPostKeys() {
   const threadTsList = await findRecentDigestThreadTs();
   if (threadTsList.length === 0) return new Set();
@@ -488,11 +499,28 @@ async function loadRecentlySeenPostKeys() {
   const botUserId = await getBotUserId();
   const seenKeys = new Set();
   let reactionChecks = 0;
+  let checkedThreads = 0;
+  let repliedThreads = 0;
+  let checkedDeals = 0;
 
   for (const threadTs of threadTsList) {
     const messages = await getThreadMessages(threadTs);
     const deals = extractDealsFromThreadMessages(messages);
     const dealByTs = new Map(deals.map((deal) => [cleanText(deal.slackTs), deal]).filter(([ts]) => ts));
+    const headerMessage = messages.find((message) => cleanText(message?.ts) === cleanText(threadTs));
+    let headerReactions = ensureArray(headerMessage?.reactions);
+    if (headerReactions.length === 0 && reactionChecks < MAX_SEEN_REACTION_CHECKS) {
+      headerReactions = await getReactions(threadTs);
+      reactionChecks += 1;
+      await sleep(150);
+    }
+
+    if (hasHumanCheckReaction(headerReactions, botUserId)) {
+      const added = addSeenDealsFromThread(seenKeys, deals);
+      if (added > 0) checkedThreads += 1;
+      continue;
+    }
+
     const humanReplyInThread = messages.some((message) => {
       if (cleanText(message?.ts) === cleanText(threadTs)) return false;
       if (dealByTs.has(cleanText(message?.ts))) return false;
@@ -500,10 +528,8 @@ async function loadRecentlySeenPostKeys() {
     });
 
     if (humanReplyInThread) {
-      for (const deal of deals) {
-        const key = canonicalPostKey(deal.url);
-        if (key) seenKeys.add(key);
-      }
+      const added = addSeenDealsFromThread(seenKeys, deals);
+      if (added > 0) repliedThreads += 1;
       continue;
     }
 
@@ -517,11 +543,18 @@ async function loadRecentlySeenPostKeys() {
       }
       if (!hasHumanCheckReaction(reactions, botUserId)) continue;
       const key = canonicalPostKey(deal.url);
-      if (key) seenKeys.add(key);
+      if (key && !seenKeys.has(key)) {
+        seenKeys.add(key);
+        checkedDeals += 1;
+      }
     }
   }
 
-  console.log(`👀 Seen filter: ${seenKeys.size} exakte Post-URLs aus ${threadTsList.length} Slack-Digest(s) der letzten ${SEEN_DEAL_SUPPRESSION_DAYS} Tage`);
+  console.log(
+    `👀 Seen filter: ${seenKeys.size} exakte Post-URLs aus ${threadTsList.length} Slack-Digest(s) ` +
+    `der letzten ${SEEN_DEAL_SUPPRESSION_DAYS} Tage ` +
+    `(${checkedThreads} abgehakte Threads, ${repliedThreads} beantwortete Threads, ${checkedDeals} einzelne Deals)`
+  );
   return seenKeys;
 }
 
