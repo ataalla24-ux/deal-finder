@@ -65,6 +65,17 @@ function cleanText(value) {
     .trim();
 }
 
+function normalizeLooseText(value) {
+  return cleanText(value)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function normalizeUrl(url) {
   const text = cleanText(url);
   if (!text) return '';
@@ -571,21 +582,58 @@ function isSocialPostKey(key) {
   return /^instagram:|^tiktok:/i.test(cleanText(key));
 }
 
-function loadQueuedSocialPostKeys(existingDeals) {
+function buildDealDuplicateKeys(deal) {
+  const keys = [];
+  const postKey = canonicalPostKey(deal.url);
+  const titleKey = normalizeLooseText(deal.title);
+  const sourceKey = normalizeLooseText(deal.source || deal.originSource);
+  const idKey = cleanText(deal.id).toLowerCase();
+
+  if (postKey && isSocialPostKey(postKey)) {
+    keys.push(`post:${postKey}`);
+  }
+  if (postKey && titleKey) {
+    keys.push(`url-title:${postKey}|${titleKey}`);
+  }
+  if (sourceKey && idKey) {
+    keys.push(`source-id:${sourceKey}|${idKey}`);
+  }
+
+  return [...new Set(keys)];
+}
+
+function loadQueuedDealDuplicateKeys(existingDeals) {
   const keys = new Set();
   for (const deal of existingDeals) {
     if (!cleanText(deal.slackTs)) continue;
-    const key = canonicalPostKey(deal.url);
-    if (isSocialPostKey(key)) keys.add(key);
+    for (const key of buildDealDuplicateKeys(deal)) keys.add(key);
   }
   return keys;
 }
 
-function filterAlreadyQueuedSocialDeals(deals, queuedPostKeys) {
-  if (!queuedPostKeys || queuedPostKeys.size === 0) return { deals, removed: 0 };
+function filterDuplicateDealsInRun(deals) {
+  const seen = new Set();
+  const filtered = [];
+  let removed = 0;
+
+  for (const deal of deals) {
+    const keys = buildDealDuplicateKeys(deal);
+    if (keys.length > 0 && keys.some((key) => seen.has(key))) {
+      removed += 1;
+      continue;
+    }
+    filtered.push(deal);
+    for (const key of keys) seen.add(key);
+  }
+
+  return { deals: filtered, removed };
+}
+
+function filterAlreadyQueuedDeals(deals, queuedDealKeys) {
+  if (!queuedDealKeys || queuedDealKeys.size === 0) return { deals, removed: 0 };
   const filtered = deals.filter((deal) => {
-    const key = canonicalPostKey(deal.url);
-    return !isSocialPostKey(key) || !queuedPostKeys.has(key);
+    const keys = buildDealDuplicateKeys(deal);
+    return keys.length === 0 || !keys.some((key) => queuedDealKeys.has(key));
   });
   return { deals: filtered, removed: deals.length - filtered.length };
 }
@@ -640,10 +688,15 @@ async function main() {
     console.log(`👀 Seen filter: ${preSlackSeenFilter.removed} bereits gesehene exakte Posts vor Slack entfernt`);
   }
 
-  const queuedSocialPostKeys = loadQueuedSocialPostKeys(existingQueue);
-  const preSlackQueueFilter = filterAlreadyQueuedSocialDeals(preSlackSeenFilter.deals, queuedSocialPostKeys);
+  const inRunDuplicateFilter = filterDuplicateDealsInRun(preSlackSeenFilter.deals);
+  if (inRunDuplicateFilter.removed > 0) {
+    console.log(`🔁 Run filter: ${inRunDuplicateFilter.removed} doppelte Deals innerhalb dieses Laufs entfernt`);
+  }
+
+  const queuedDealKeys = loadQueuedDealDuplicateKeys(existingQueue);
+  const preSlackQueueFilter = filterAlreadyQueuedDeals(inRunDuplicateFilter.deals, queuedDealKeys);
   if (preSlackQueueFilter.removed > 0) {
-    console.log(`🔁 Queue filter: ${preSlackQueueFilter.removed} bereits gepostete Social-Posts vor Slack entfernt`);
+    console.log(`🔁 Queue filter: ${preSlackQueueFilter.removed} bereits gepostete Deals vor Slack entfernt`);
   }
 
   const validation = await validateDealsForSlack(preSlackQueueFilter.deals);

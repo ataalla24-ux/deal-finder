@@ -29,18 +29,11 @@ jobs:
       - name: Scrape member benefit deals
         run: node scraper/member-benefits-scraper.js
 
-      - name: Send member benefit deals to Slack
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
-          PENDING_FILE_NAMES: deals-pending-member-benefits.json
-        run: node scraper/slack-notify.js
-
       - name: Commit member benefit state
         run: |
           git config user.name "Deal Bot"
           git config user.email "bot@freefinder.wien"
-          git add docs/deals-pending-member-benefits.json docs/deals-pending-all.json docs/deal-candidates-index.json docs/deal-validity-report.json 2>/dev/null || true
+          git add docs/deals-pending-member-benefits.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
