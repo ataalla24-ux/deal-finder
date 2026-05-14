@@ -33,20 +33,4 @@ jobs:
 
       - name: Commit deals
         run: |
-          git config user.name "Deal Bot"
-          git config user.email "bot@freefinder.wien"
-          git add docs/deals-pending-firecrawl5.json
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git commit -m "Firecrawl5 deals $(date +%Y-%m-%d)"
-          if ! git pull --rebase --autostash origin main; then
-            echo "⚠️ Rebase conflict on generated files. Skipping push for this run."
-            git rebase --abort || true
-            exit 0
-          fi
-          if ! git push origin HEAD:main; then
-            echo "⚠️ Push failed (branch moved). Skipping push for this run."
-            exit 0
-          fi
+          node scripts/commit-generated.mjs --message "Firecrawl5 deals $(date +%Y-%m-%d)" --files docs/deals-pending-firecrawl5.json

@@ -38,22 +38,6 @@ jobs:
 
       - name: 📤 Push Approved Deals
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add docs/deals.json docs/deals-pending-all.json docs/live-deal-validation-report.json 2>/dev/null || true
           DEAL_COUNT=$(cat docs/deals.json | python3 -c "import sys, json; print(json.load(sys.stdin)['totalDeals'])" 2>/dev/null || echo "?")
           TIMESTAMP=$(date -u +"%H:%M")
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git commit -m "✅ ${TIMESTAMP} - Genehmigte Deals (${DEAL_COUNT} total)"
-          if ! git pull --rebase --autostash origin main; then
-            echo "⚠️ Rebase conflict on generated files. Skipping push for this run."
-            git rebase --abort || true
-            exit 0
-          fi
-          if ! git push origin HEAD:main; then
-            echo "⚠️ Push failed (branch moved). Skipping push for this run."
-            exit 0
-          fi
+          node scripts/commit-generated.mjs --message "✅ ${TIMESTAMP} - Genehmigte Deals (${DEAL_COUNT} total)" --files docs/deals.json docs/deals-pending-all.json docs/live-deal-validation-report.json

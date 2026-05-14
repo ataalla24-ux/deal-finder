@@ -21,6 +21,11 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Install Python deps
         run: |
           python -m pip install --upgrade pip
@@ -34,20 +39,4 @@ jobs:
       - name: Commit deals
         working-directory: deal-finder
         run: |
-          git config user.name "Deal Bot"
-          git config user.email "bot@freefinder.wien"
-          git add docs/deals-*.json
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git commit -m "Deals $(date +%Y-%m-%d)"
-          if ! git pull --rebase --autostash origin main; then
-            echo "⚠️ Rebase conflict on generated files. Skipping push for this run."
-            git rebase --abort || true
-            exit 0
-          fi
-          if ! git push origin HEAD:main; then
-            echo "⚠️ Push failed (branch moved). Skipping push for this run."
-            exit 0
-          fi
+          node scripts/commit-generated.mjs --message "Deals $(date +%Y-%m-%d)" --files docs/deals-*.json

@@ -34,20 +34,4 @@ jobs:
 
       - name: Commit featured deal files
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add docs/deal-of-the-day.json docs/deal-of-the-week.json
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git commit -m "🏆 Featured deals gesetzt"
-          if ! git pull --rebase --autostash origin main; then
-            echo "⚠️ Rebase conflict on generated files. Skipping push for this run."
-            git rebase --abort || true
-            exit 0
-          fi
-          if ! git push origin HEAD:main; then
-            echo "⚠️ Push failed (branch moved). Skipping push for this run."
-            exit 0
-          fi
+          node scripts/commit-generated.mjs --message "🏆 Featured deals gesetzt" --files docs/deal-of-the-day.json docs/deal-of-the-week.json

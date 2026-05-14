@@ -46,20 +46,4 @@ jobs:
 
       - name: Commit queue state
         run: |
-          git config user.name "Deal Bot"
-          git config user.email "bot@freefinder.wien"
-          git add docs/deals-pending-community.json docs/deals-pending-all.json 2>/dev/null || true
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git commit -m "Community intake state $(date +%Y-%m-%d-%H%M)"
-          if ! git pull --rebase --autostash origin main; then
-            echo "⚠️ Rebase conflict on generated files. Skipping push for this run."
-            git rebase --abort || true
-            exit 0
-          fi
-          if ! git push origin HEAD:main; then
-            echo "⚠️ Push failed (branch moved). Skipping push for this run."
-            exit 0
-          fi
+          node scripts/commit-generated.mjs --message "Community intake state $(date +%Y-%m-%d-%H%M)" --files docs/deals-pending-community.json docs/deals-pending-all.json
