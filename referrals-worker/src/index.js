@@ -1022,8 +1022,8 @@ function renderReferralLanding(code, requestUrl) {
   const appStoreUrl = `https://apps.apple.com/at/app/id${APP_STORE_APP_ID}?ct=${encodeURIComponent(`ref_${code}`)}&mt=8`;
   const minDelaySeconds = Math.ceil(MIN_CONFIRM_DELAY_MS / 1000);
   const continueUrl = dealId
-    ? `https://ataalla24-ux.github.io/deal-finder/?deal=${encodeURIComponent(dealId)}`
-    : 'https://ataalla24-ux.github.io/deal-finder/';
+    ? `https://freefinder.wien/?deal=${encodeURIComponent(dealId)}`
+    : 'https://freefinder.wien/';
   const safeDealHint = dealId ? '<p>Dein Freund hat dir einen konkreten Deal geschickt. Nach der Bestaetigung kannst du ihn direkt in FreeFinder ansehen.</p>' : '';
   const continueButtonHtml = dealId
     ? '<button id="continueBtn" class="button secondary" style="display:none">Zum geteilten Deal</button>'
