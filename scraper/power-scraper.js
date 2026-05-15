@@ -395,7 +395,7 @@ function fetchHTML(url) {
     protocol.get(url, {
       timeout: 10000,
       headers: {
-        'user-agent': 'FreeFinder Power Scraper/5.1 (+https://freefinder.wien)',
+        'user-agent': 'FreeFinder Power Scraper/5.1 (+https://github.com/ataalla24-ux/deal-finder)',
         'accept-language': 'de-AT,de;q=0.9,en;q=0.8'
       }
     }, (res) => {

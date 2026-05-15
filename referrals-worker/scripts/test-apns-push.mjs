@@ -24,7 +24,7 @@ const payload = {
   title: process.env.PUSH_TITLE || 'FreeFinder Test',
   body: process.env.PUSH_BODY || 'Push-Test erfolgreich',
   dealId: process.env.PUSH_DEAL_ID || 'test-deal',
-  url: process.env.PUSH_URL || 'https://freefinder.wien/?deal=test-deal',
+  url: process.env.PUSH_URL || 'https://ataalla24-ux.github.io/deal-finder/?deal=test-deal',
 };
 
 const response = await fetch(`${workerBase.replace(/\/$/, '')}/api/push/apns/send`, {
