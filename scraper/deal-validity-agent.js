@@ -76,6 +76,18 @@ function hostnameFromUrl(value) {
   }
 }
 
+function isSocialPostDeal(deal) {
+  const signal = [
+    deal.url,
+    deal.source,
+    deal.originSource,
+    deal.id,
+  ].map(cleanText).join(' ').toLowerCase();
+  return /(^|[^\w])(tiktok|instagram)([^\w]|$)/i.test(signal)
+    || /(^|\.)tiktok\.com$/i.test(hostnameFromUrl(deal.url))
+    || /(^|\.)instagram\.com$/i.test(hostnameFromUrl(deal.url));
+}
+
 function getDealSignalText(deal, health = null) {
   return [
     deal.id,
@@ -234,6 +246,9 @@ function getPublicationCandidates(deal, health) {
 
   add('url.publicationDate', health?.dateHints?.publicationDate);
   add('deal.pubDate', deal.pubDate);
+  if (isSocialPostDeal(deal)) {
+    return candidates;
+  }
   add('deal.createdAt', deal.createdAt);
   add('deal.discoveredAt', deal.discoveredAt);
   add('deal.submittedAt', deal.submittedAt);
@@ -241,10 +256,11 @@ function getPublicationCandidates(deal, health) {
   return candidates;
 }
 
-function getFreshnessDecision(publicationCandidates, maxAgeDays, now) {
+function getFreshnessDecision(publicationCandidates, maxAgeDays, now, options = {}) {
   if (publicationCandidates.length === 0) {
     return {
-      blocked: false,
+      blocked: Boolean(options.requireDate),
+      reason: options.requireDate ? 'kein echtes Social-Post-Datum gefunden' : '',
       warning: 'kein Quell-/Post-Datum gefunden',
       selected: null,
     };
@@ -327,8 +343,11 @@ async function validateDeal(deal, context) {
   const url = normalizeUrl(deal.url);
   const health = await inspectUrlWithCache(url, context.urlCache, context.urlOptions);
   const excludedSource = getExcludedSourceMatch(deal, health);
+  const socialPostDeal = isSocialPostDeal(deal);
   const publicationCandidates = getPublicationCandidates(deal, health);
-  const freshness = getFreshnessDecision(publicationCandidates, context.maxAgeDays, now);
+  const freshness = getFreshnessDecision(publicationCandidates, context.maxAgeDays, now, {
+    requireDate: socialPostDeal,
+  });
   const expiryCandidates = collectExpiryCandidates(deal, health, now);
   const expiry = getExpiryDecision(expiryCandidates, now);
   const reasons = [];

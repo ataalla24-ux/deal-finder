@@ -389,7 +389,9 @@ function ageDays(date) {
 }
 
 function isCurrentPost(date) {
-  if (date.getTime() > Date.now() + 2 * 60 * 60 * 1000) return false;
+  const now = new Date();
+  if (date.getUTCFullYear() !== now.getUTCFullYear()) return false;
+  if (date.getTime() > now.getTime() + 2 * 60 * 60 * 1000) return false;
   const age = ageDays(date);
   return age >= 0 && age <= CONFIG.maxAgeDays;
 }
