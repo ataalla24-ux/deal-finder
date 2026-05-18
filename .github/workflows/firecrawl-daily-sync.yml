@@ -2,7 +2,7 @@ name: "Firecrawl Daily Sync"
 
 on:
   schedule:
-    - cron: '0 4 * * *' # Start early so Instagram/jö can finish before 11:00 Vienna digest
+    - cron: '20 5 * * *' # Keep Instagram API calls spaced out from cookie refresh and Apify.
   workflow_dispatch:
 
 concurrency:
@@ -48,7 +48,10 @@ jobs:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
           INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
           INSTAGRAM_AUTH_CONTEXT: Firecrawl Daily Sync
-          INSTAGRAM_AUTH_CLEAR_PENDING_ON_FAILURE: "1"
+          INSTAGRAM_AUTH_TEST_USERNAME: ciosgrill
+          INSTAGRAM_AUTH_ATTEMPTS: "3"
+          INSTAGRAM_AUTH_BACKOFF_MS: "60000"
+          INSTAGRAM_AUTH_CLEAR_PENDING_ON_FAILURE: "0"
           INSTAGRAM_AUTH_CLEAR_MODE: daily-sync
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
@@ -66,8 +69,8 @@ jobs:
           IG_MAX_REGISTRY_ACCOUNTS: 220
           IG_MIN_SCORE: 0
           IG_MAX_DEALS_PER_ACCOUNT: 120
-          IG_SOURCE_DELAY_MS: 700
-          IG_MAX_RUN_MINUTES: 55
+          IG_SOURCE_DELAY_MS: 1800
+          IG_MAX_RUN_MINUTES: 80
         run: |
           node - <<'NODE'
           const session = String(process.env.INSTAGRAM_SESSIONID || '').trim();

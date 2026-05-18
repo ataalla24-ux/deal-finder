@@ -6,7 +6,7 @@ const ROOT = process.cwd();
 const DOCS_DIR = path.join(ROOT, 'docs');
 const ENV_PATH = path.join(ROOT, '.env');
 const DEFAULT_REPORT_PATH = path.join(DOCS_DIR, 'instagram-auth-health.json');
-const DEFAULT_TEST_USERNAME = 'instagram';
+const DEFAULT_TEST_USERNAME = 'ciosgrill';
 const INSTAGRAM_APP_ID = '936619743392459';
 
 function cleanText(value) {
@@ -118,6 +118,15 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
   }
 }
 
+function toPositiveInt(value, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function instagramHeaders(cookieHeader, username) {
   return {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -133,6 +142,8 @@ async function validateInstagramAuth(cookies) {
   const username = cleanText(env.INSTAGRAM_AUTH_TEST_USERNAME) || DEFAULT_TEST_USERNAME;
   const diagnostics = cookieDiagnostics(cookies);
   const cookieHeader = buildCookieHeader(cookies);
+  const maxAttempts = Math.max(1, toPositiveInt(env.INSTAGRAM_AUTH_ATTEMPTS || env.INSTAGRAM_AUTH_RETRIES, 3));
+  const baseBackoffMs = toPositiveInt(env.INSTAGRAM_AUTH_BACKOFF_MS, 45000);
 
   if (!diagnostics.hasSessionCookie) {
     return {
@@ -146,62 +157,87 @@ async function validateInstagramAuth(cookies) {
   }
 
   const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
-  try {
-    const response = await fetchWithTimeout(url, {
-      method: 'GET',
-      headers: instagramHeaders(cookieHeader, username),
-    }, Number(env.INSTAGRAM_AUTH_TIMEOUT_MS || 15000));
-
-    const contentType = cleanText(response.headers.get('content-type')).toLowerCase();
-    const bodyText = await response.text();
-    let parsed = null;
-    if (contentType.includes('json') || bodyText.trim().startsWith('{')) {
-      try {
-        parsed = JSON.parse(bodyText);
-      } catch {
-        parsed = null;
-      }
+  let lastFailure = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    if (attempt > 1) {
+      await sleep(baseBackoffMs * (attempt - 1));
     }
 
-    const apiUser = parsed?.data?.user;
-    if (response.ok && apiUser?.username) {
-      return {
-        ok: true,
-        status: 'ok',
-        reason: `Profil ${apiUser.username} erreichbar`,
+    try {
+      const response = await fetchWithTimeout(url, {
+        method: 'GET',
+        headers: instagramHeaders(cookieHeader, username),
+      }, Number(env.INSTAGRAM_AUTH_TIMEOUT_MS || 15000));
+
+      const contentType = cleanText(response.headers.get('content-type')).toLowerCase();
+      const bodyText = await response.text();
+      let parsed = null;
+      if (contentType.includes('json') || bodyText.trim().startsWith('{')) {
+        try {
+          parsed = JSON.parse(bodyText);
+        } catch {
+          parsed = null;
+        }
+      }
+
+      const apiUser = parsed?.data?.user;
+      if (response.ok && apiUser?.username) {
+        return {
+          ok: true,
+          status: 'ok',
+          reason: `Profil ${apiUser.username} erreichbar`,
+          username,
+          httpStatus: response.status,
+          diagnostics,
+          apiUserFound: true,
+          attempts: attempt,
+        };
+      }
+
+      const bodySample = cleanText(bodyText).slice(0, 500);
+      const lowerSample = bodySample.toLowerCase();
+      const loginWall = lowerSample.includes('login') || lowerSample.includes('log in') || lowerSample.includes('anmelden');
+      const rateLimited = response.status === 429 || lowerSample.includes('please wait');
+      const blocked = response.status === 403 || lowerSample.includes('challenge');
+
+      lastFailure = {
+        ok: false,
+        status: rateLimited ? 'rate-limited' : (blocked ? 'blocked' : (loginWall ? 'login-wall' : 'invalid-session')),
+        reason: `Instagram API lieferte HTTP ${response.status}`,
         username,
         httpStatus: response.status,
         diagnostics,
-        apiUserFound: true,
+        apiUserFound: false,
+        bodySample,
+        attempts: attempt,
       };
+
+      if (!rateLimited) return lastFailure;
+    } catch (error) {
+      lastFailure = {
+        ok: false,
+        status: 'error',
+        reason: `Auth-Check fehlgeschlagen: ${error.message}`,
+        username,
+        httpStatus: 0,
+        diagnostics,
+        apiUserFound: false,
+        attempts: attempt,
+      };
+      return lastFailure;
     }
-
-    const bodySample = cleanText(bodyText).slice(0, 500);
-    const lowerSample = bodySample.toLowerCase();
-    const loginWall = lowerSample.includes('login') || lowerSample.includes('log in') || lowerSample.includes('anmelden');
-    const blocked = response.status === 429 || response.status === 403 || lowerSample.includes('please wait') || lowerSample.includes('challenge');
-
-    return {
-      ok: false,
-      status: blocked ? 'blocked' : (loginWall ? 'login-wall' : 'invalid-session'),
-      reason: `Instagram API lieferte HTTP ${response.status}`,
-      username,
-      httpStatus: response.status,
-      diagnostics,
-      apiUserFound: false,
-      bodySample,
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      status: 'error',
-      reason: `Auth-Check fehlgeschlagen: ${error.message}`,
-      username,
-      httpStatus: 0,
-      diagnostics,
-      apiUserFound: false,
-    };
   }
+
+  return lastFailure || {
+    ok: false,
+    status: 'error',
+    reason: 'Auth-Check fehlgeschlagen',
+    username,
+    httpStatus: 0,
+    diagnostics,
+    apiUserFound: false,
+    attempts: maxAttempts,
+  };
 }
 
 function readPreviousReport(reportPath) {
@@ -357,6 +393,7 @@ function writeGithubOutputs(report) {
       `- Status: ${report.ok ? 'OK' : 'FAILED'} (${report.status})`,
       `- Reason: ${report.reason}`,
       `- Test username: ${report.username}`,
+      `- Attempts: ${report.attempts || 1}`,
       `- Session cookie: ${report.diagnostics.hasSessionCookie ? 'yes' : 'no'}`,
       `- CSRF cookie: ${report.diagnostics.hasCsrfCookie ? 'yes' : 'no'}`,
       '',
@@ -397,6 +434,7 @@ async function main() {
   console.log(`- status: ${finalReport.status}`);
   console.log(`- ok: ${finalReport.ok ? 'true' : 'false'}`);
   console.log(`- reason: ${finalReport.reason}`);
+  console.log(`- attempts: ${finalReport.attempts || 1}`);
   console.log(`- cookies: sessionid=${finalReport.diagnostics.hasSessionCookie ? 'yes' : 'no'}, csrftoken=${finalReport.diagnostics.hasCsrfCookie ? 'yes' : 'no'}, total=${finalReport.diagnostics.cookieCount}`);
   if (clearedFiles.length) console.log(`- cleared: ${clearedFiles.join(', ')}`);
   if (slackNotified) console.log('- slack: warning sent');
