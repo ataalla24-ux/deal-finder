@@ -15,6 +15,7 @@ const DISCOVERY_REPORT_PATH = path.join(DOCS_DIR, 'instagram-discovery-report.js
 const WEB_REPORT_PATH = path.join(DOCS_DIR, 'instagram-web-report.json');
 const SOURCE_STATS_PATH = path.join(DOCS_DIR, 'instagram-source-stats.json');
 const MERCHANT_REGISTRY_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
+const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
 const DEFAULT_CONFIG = {
@@ -765,10 +766,45 @@ function loadMerchantRegistryAccounts() {
   }
 }
 
+function loadWatchlistAccounts() {
+  if (!fs.existsSync(WATCHLIST_PATH)) return [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(WATCHLIST_PATH, 'utf-8'));
+    const accounts = Array.isArray(parsed?.accounts) ? parsed.accounts : [];
+    return accounts
+      .map((account) => {
+        if (typeof account === 'string') {
+          return { username: normalizeUsername(account), priority: 80 };
+        }
+        return {
+          username: normalizeUsername(account?.username),
+          priority: Number(account?.priority || 80),
+          label: cleanText(account?.label || ''),
+        };
+      })
+      .filter((account) => account.username)
+      .sort((a, b) => b.priority - a.priority || a.username.localeCompare(b.username));
+  } catch {
+    return [];
+  }
+}
+
 function buildSourceQueue(sourceStats) {
   const queue = [];
   const seen = new Set();
+  const watchlistAccounts = loadWatchlistAccounts();
   const registryAccounts = loadMerchantRegistryAccounts().slice(0, CONFIG.maxRegistryAccounts);
+
+  for (const account of watchlistAccounts) {
+    if (seen.has(account.username)) continue;
+    seen.add(account.username);
+    queue.push({
+      username: account.username,
+      key: `acct:${account.username}`,
+      sourceType: 'watchlist',
+      priority: 120 + Math.min(30, Math.max(0, account.priority)),
+    });
+  }
 
   for (const username of SEED_ACCOUNTS) {
     const normalized = normalizeUsername(username);

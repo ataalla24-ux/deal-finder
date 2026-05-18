@@ -11,6 +11,7 @@ const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-instagram-discovery.j
 const SOURCE_STATS_PATH = path.join(ROOT, 'docs', 'instagram-source-stats.json');
 const DISCOVERY_REPORT_PATH = path.join(ROOT, 'docs', 'instagram-discovery-report.json');
 const MERCHANT_REGISTRY_PATH = path.join(ROOT, 'docs', 'instagram-merchant-registry.json');
+const WATCHLIST_PATH = path.join(ROOT, 'docs', 'instagram-watchlist.json');
 const ARTIFACTS_DIR = path.join(ROOT, 'artifacts');
 const CANDIDATE_LOG_PATH = path.join(ARTIFACTS_DIR, 'instagram-discovery-candidates.json');
 const ENV_PATH = path.join(ROOT, '.env');
@@ -714,6 +715,28 @@ function loadMerchantRegistryAccounts() {
   }
 }
 
+function loadWatchlistAccounts() {
+  if (!fs.existsSync(WATCHLIST_PATH)) return [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(WATCHLIST_PATH, 'utf-8'));
+    const accounts = Array.isArray(parsed?.accounts) ? parsed.accounts : [];
+    return accounts
+      .map((account) => {
+        if (typeof account === 'string') {
+          return { username: normalizeUsername(account), priority: 80 };
+        }
+        return {
+          username: normalizeUsername(account?.username),
+          priority: Number(account?.priority || 80),
+        };
+      })
+      .filter((account) => account.username)
+      .sort((a, b) => b.priority - a.priority || a.username.localeCompare(b.username));
+  } catch {
+    return [];
+  }
+}
+
 function countAccountishCandidates(candidatePosts) {
   let count = 0;
   for (const candidate of candidatePosts.values()) {
@@ -725,6 +748,11 @@ function countAccountishCandidates(candidatePosts) {
 function getSeedAccounts() {
   const ordered = [];
   const seen = new Set();
+  for (const account of loadWatchlistAccounts()) {
+    if (seen.has(account.username)) continue;
+    seen.add(account.username);
+    ordered.push(account.username);
+  }
   for (const username of SEED_ACCOUNTS) {
     const normalized = normalizeUsername(username);
     if (!normalized || seen.has(normalized)) continue;

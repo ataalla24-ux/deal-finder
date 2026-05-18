@@ -10,6 +10,7 @@ const ROOT = path.join(__dirname, '..');
 const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-instagram-web.json');
 const WEB_REPORT_PATH = path.join(ROOT, 'docs', 'instagram-web-report.json');
 const MERCHANT_REGISTRY_PATH = path.join(ROOT, 'docs', 'instagram-merchant-registry.json');
+const WATCHLIST_PATH = path.join(ROOT, 'docs', 'instagram-watchlist.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
 const DEFAULT_CONFIG = {
@@ -254,6 +255,28 @@ function loadMerchantRegistryAccounts() {
       }))
       .filter((account) => account.username)
       .sort((a, b) => b.priorityScore - a.priorityScore || b.confidence - a.confidence || a.username.localeCompare(b.username));
+  } catch {
+    return [];
+  }
+}
+
+function loadWatchlistAccounts() {
+  if (!fs.existsSync(WATCHLIST_PATH)) return [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(WATCHLIST_PATH, 'utf-8'));
+    const accounts = Array.isArray(parsed?.accounts) ? parsed.accounts : [];
+    return accounts
+      .map((account) => {
+        if (typeof account === 'string') {
+          return { username: normalizeUsername(account), priority: 80 };
+        }
+        return {
+          username: normalizeUsername(account?.username),
+          priority: Number(account?.priority || 80),
+        };
+      })
+      .filter((account) => account.username)
+      .sort((a, b) => b.priority - a.priority || a.username.localeCompare(b.username));
   } catch {
     return [];
   }
@@ -671,6 +694,17 @@ function buildSources() {
 
   const accountSources = [];
   const seenAccounts = new Set();
+  for (const account of loadWatchlistAccounts()) {
+    if (seenAccounts.has(account.username)) continue;
+    seenAccounts.add(account.username);
+    accountSources.push({
+      kind: 'account',
+      key: `acct:${account.username}`,
+      url: `https://www.instagram.com/${account.username}/`,
+      username: account.username,
+      priority: 5 + Math.max(0, Math.min(3, Math.floor(account.priority / 35))),
+    });
+  }
   for (const username of INSTAGRAM_ACCOUNTS) {
     const normalized = normalizeUsername(username);
     if (!normalized || seenAccounts.has(normalized)) continue;
