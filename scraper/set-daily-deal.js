@@ -84,11 +84,22 @@ async function findTodaysThread() {
 // ============================================
 // Step 2: Read replies in thread, find your picks
 // ============================================
+function normalizePickCommandText(rawText) {
+    return cleanText(rawText)
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[.,;:!?()[\]{}"'/_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 function parsePickCommand(rawText) {
-    const text = cleanText(rawText).toLowerCase();
+    const text = normalizePickCommandText(rawText);
     if (!text) return null;
 
-    let match = text.match(/^(?:deal(?:\s+der)?\s+woche|woche|week|weekly)\s*#?\s*(\d+)$/);
+    let match = text.match(/^(?:deal(?:\s+der)?\s+woche|wochen\s*deal|wochendeal|woche|week|weekly|weekly\s*deal)\s*#?\s*(\d+)$/)
+        || text.match(/^#?\s*(\d+)\s*(?:woche|wochendeal|week|weekly)$/);
     if (match) {
         return { kind: 'weekly', number: parseInt(match[1], 10) };
     }
