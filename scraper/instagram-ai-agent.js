@@ -33,13 +33,13 @@ const INSTAGRAM_SHORTCODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
 loadEnvFile();
 
 const CONFIG = {
-  maxCandidates: numberEnv('INSTAGRAM_AI_MAX_CANDIDATES', 120),
+  maxCandidates: numberEnv('INSTAGRAM_AI_MAX_CANDIDATES', 80),
   maxDeals: numberEnv('INSTAGRAM_AI_MAX_DEALS', 35),
   maxSearchQueries: numberEnv('INSTAGRAM_AI_MAX_SEARCH_QUERIES', 42),
-  maxPreviewFetches: numberEnv('INSTAGRAM_AI_MAX_PREVIEW_FETCHES', 120),
-  maxRenderFetches: numberEnv('INSTAGRAM_AI_MAX_RENDER_FETCHES', 120),
-  maxProfileAccounts: numberEnv('INSTAGRAM_AI_MAX_PROFILE_ACCOUNTS', 24),
-  maxProfilePostsPerAccount: numberEnv('INSTAGRAM_AI_MAX_PROFILE_POSTS', 8),
+  maxPreviewFetches: numberEnv('INSTAGRAM_AI_MAX_PREVIEW_FETCHES', 80),
+  maxRenderFetches: numberEnv('INSTAGRAM_AI_MAX_RENDER_FETCHES', 80),
+  maxProfileAccounts: numberEnv('INSTAGRAM_AI_MAX_PROFILE_ACCOUNTS', 8),
+  maxProfilePostsPerAccount: numberEnv('INSTAGRAM_AI_MAX_PROFILE_POSTS', 4),
   maxAgeDays: numberEnv('INSTAGRAM_AI_MAX_AGE_DAYS', 7),
   minScore: numberEnv('INSTAGRAM_AI_MIN_SCORE', 62),
   aiCandidateLimit: numberEnv('INSTAGRAM_AI_LLM_CANDIDATES', 32),
