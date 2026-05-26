@@ -1,0 +1,38 @@
+name: "Instagram AI Agent"
+
+on:
+  schedule:
+    - cron: '15 8 * * *' # 09:15 Vienna winter / 10:15 summer, before the daily digest
+  workflow_dispatch:
+
+concurrency:
+  group: instagram-ai-agent
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  scan-instagram-ai:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Instagram AI Agent
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          INSTAGRAM_AI_MAX_CANDIDATES: 120
+          INSTAGRAM_AI_MAX_DEALS: 35
+        run: npm run instagram:ai
+
+      - name: Commit Instagram AI output
+        run: |
+          node scripts/commit-generated.mjs --message "Instagram AI deals $(date +%Y-%m-%d)" --files docs/deals-pending-instagram-ai.json docs/instagram-ai-report.json

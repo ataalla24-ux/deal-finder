@@ -33,6 +33,7 @@ const SOURCE_LABEL_OVERRIDES = {
   gottesdienste: 'Kirchen Gottesdienste',
   gutscheine: 'Gutscheine.at',
   'instagram-discovery': 'Daily Sync Instagram Discovery',
+  'instagram-ai': 'Instagram AI Agent',
   'instagram-web': 'Daily Sync Instagram Web',
   joe: 'jö Bonus Club',
   'member-benefits': 'Member Benefits',
