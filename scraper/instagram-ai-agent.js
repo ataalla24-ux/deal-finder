@@ -977,9 +977,9 @@ function mergeAiDeal(candidate, aiRow) {
 }
 
 async function classifyWithOpenAi(candidates) {
-  if (!CONFIG.aiEnabled || !process.env.OPENAI_API_KEY || candidates.length === 0) {
-    return { deals: [], errors: CONFIG.aiEnabled ? ['OPENAI_API_KEY fehlt'] : ['LLM deaktiviert'] };
-  }
+  if (candidates.length === 0) return { deals: [], errors: [] };
+  if (!CONFIG.aiEnabled) return { deals: [], errors: ['LLM deaktiviert'] };
+  if (!process.env.OPENAI_API_KEY) return { deals: [], errors: ['OPENAI_API_KEY fehlt'] };
 
   const payload = buildAiPrompt(candidates);
   const body = {
@@ -1072,6 +1072,20 @@ function rejectionCounts(candidates) {
   return Object.fromEntries(Object.entries(counts).sort((a, b) => b[1] - a[1]));
 }
 
+function rankCandidatesForScan(candidates) {
+  const priority = (candidate) => {
+    if (candidate.source === 'seed-url') return 0;
+    if (candidate.source.includes('duckduckgo')) return 1;
+    if (candidate.source.includes('instagram')) return 2;
+    return 3;
+  };
+  return [...candidates].sort((left, right) => {
+    const priorityDiff = priority(left) - priority(right);
+    if (priorityDiff !== 0) return priorityDiff;
+    return (Number(right.sourceDeal?.qualityScore) || 0) - (Number(left.sourceDeal?.qualityScore) || 0);
+  });
+}
+
 async function discoverCandidates(accounts) {
   const map = new Map();
   const stats = {
@@ -1083,7 +1097,7 @@ async function discoverCandidates(accounts) {
   };
   stats.existingCandidates = collectExistingCandidates(map);
 
-  if (!CONFIG.searchEnabled) return { candidates: [...map.values()].slice(0, CONFIG.maxCandidates), stats };
+  if (!CONFIG.searchEnabled) return { candidates: rankCandidatesForScan([...map.values()]).slice(0, CONFIG.maxCandidates), stats };
 
   const queries = buildSearchQueries(accounts);
   stats.searchQueries = queries;
@@ -1096,9 +1110,8 @@ async function discoverCandidates(accounts) {
       stats.searchErrors.push({ query, error: error.message });
     }
     await sleep(250);
-    if (map.size >= CONFIG.maxCandidates) break;
   }
-  return { candidates: [...map.values()].slice(0, CONFIG.maxCandidates), stats };
+  return { candidates: rankCandidatesForScan([...map.values()]).slice(0, CONFIG.maxCandidates), stats };
 }
 
 async function enrichPreviews(candidates) {
@@ -1173,7 +1186,7 @@ async function main() {
   const heuristicDeals = candidates.map(buildHeuristicDeal).filter(Boolean);
 
   const aiCandidates = candidates
-    .filter((candidate) => candidate.score >= Math.max(40, CONFIG.minScore - 20))
+    .filter((candidate) => !candidate.rejectionReason && candidate.score >= Math.max(40, CONFIG.minScore - 20))
     .sort((left, right) => right.score - left.score)
     .slice(0, CONFIG.aiCandidateLimit);
   const aiResult = await classifyWithOpenAi(aiCandidates);

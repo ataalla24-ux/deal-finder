@@ -34,7 +34,8 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
-          INSTAGRAM_AI_MAX_CANDIDATES: 120
+          INSTAGRAM_AI_MAX_CANDIDATES: 80
+          INSTAGRAM_AI_MAX_RENDER_FETCHES: 80
           INSTAGRAM_AI_MAX_DEALS: 35
           INSTAGRAM_AI_MAX_AGE_DAYS: 7
         run: npm run instagram:ai
