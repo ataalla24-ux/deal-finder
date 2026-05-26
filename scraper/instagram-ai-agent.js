@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { chromium } from 'playwright';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
 import {
@@ -34,11 +35,13 @@ const CONFIG = {
   maxDeals: numberEnv('INSTAGRAM_AI_MAX_DEALS', 35),
   maxSearchQueries: numberEnv('INSTAGRAM_AI_MAX_SEARCH_QUERIES', 42),
   maxPreviewFetches: numberEnv('INSTAGRAM_AI_MAX_PREVIEW_FETCHES', 60),
-  maxAgeDays: numberEnv('INSTAGRAM_AI_MAX_AGE_DAYS', 14),
+  maxRenderFetches: numberEnv('INSTAGRAM_AI_MAX_RENDER_FETCHES', 80),
+  maxAgeDays: numberEnv('INSTAGRAM_AI_MAX_AGE_DAYS', 7),
   minScore: numberEnv('INSTAGRAM_AI_MIN_SCORE', 62),
   aiCandidateLimit: numberEnv('INSTAGRAM_AI_LLM_CANDIDATES', 32),
   searchEnabled: process.env.INSTAGRAM_AI_DISABLE_SEARCH !== '1',
   previewFetchEnabled: process.env.INSTAGRAM_AI_FETCH_PAGES !== '0',
+  renderFetchEnabled: process.env.INSTAGRAM_AI_RENDER_PAGES !== '0',
   aiEnabled: process.env.INSTAGRAM_AI_DISABLE_AI !== '1',
   model: process.env.OPENAI_MODEL || process.env.INSTAGRAM_AI_MODEL || 'gpt-4.1-mini',
 };
@@ -98,6 +101,12 @@ const FALSE_POSITIVE_PATTERNS = [
   /\b(?:job|stellenangebot|wohnung|immobilie|airbnb|hotelzimmer)\b/i,
   /\b(?:things to do|wochenendtipps|guide|was in wien geht|top \d+)\b/i,
   /\b(?:anzeige|sponsored|affiliate)\b/i,
+];
+
+const BLOCKED_SOURCE_PATTERNS = [
+  /\bneotaste\b/i,
+  /\bneotaste\.app\b/i,
+  /\bneotaste\.wien\b/i,
 ];
 
 const EXPIRY_PATTERNS = [
@@ -168,6 +177,54 @@ function normalizeAscii(value = '') {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/\u00df/g, 'ss')
     .toLowerCase();
+}
+
+const MONTH_NAMES = new Map([
+  ['january', 1],
+  ['february', 2],
+  ['march', 3],
+  ['april', 4],
+  ['may', 5],
+  ['june', 6],
+  ['july', 7],
+  ['august', 8],
+  ['september', 9],
+  ['october', 10],
+  ['november', 11],
+  ['december', 12],
+  ['januar', 1],
+  ['jaenner', 1],
+  ['janner', 1],
+  ['februar', 2],
+  ['maerz', 3],
+  ['marz', 3],
+  ['mai', 5],
+  ['juni', 6],
+  ['juli', 7],
+  ['oktober', 10],
+  ['dezember', 12],
+]);
+
+function parseDateText(value = '') {
+  const text = normalizeAscii(value);
+  if (!text) return null;
+
+  const english = text.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+([0-3]?\d),\s*(20\d{2})\b/);
+  if (english) {
+    return new Date(Date.UTC(Number(english[3]), MONTH_NAMES.get(english[1]) - 1, Number(english[2])));
+  }
+
+  const german = text.match(/\b([0-3]?\d)\.\s*(januar|jaenner|janner|februar|maerz|marz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+(20\d{2})\b/);
+  if (german) {
+    return new Date(Date.UTC(Number(german[3]), MONTH_NAMES.get(german[2]) - 1, Number(german[1])));
+  }
+
+  const iso = text.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);
+  if (iso) {
+    return new Date(Date.UTC(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3])));
+  }
+
+  return null;
 }
 
 function stableHash(value) {
@@ -507,6 +564,53 @@ async function fetchInstagramPreview(url) {
   return preview;
 }
 
+function extractRenderedPostDate(data = {}) {
+  const fromMeta = parseDateText([data.ogDescription, data.ogTitle].filter(Boolean).join(' '));
+  if (fromMeta) return { date: fromMeta, source: 'instagram-rendered-og' };
+
+  const absoluteTime = (data.times || []).find((item) => parseDateText(item.text));
+  const fromTimeText = parseDateText(absoluteTime?.text || '');
+  if (fromTimeText) return { date: fromTimeText, source: 'instagram-rendered-time-text' };
+
+  return null;
+}
+
+async function fetchRenderedInstagramPreview(page, url) {
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForTimeout(4500);
+
+  const data = await page.evaluate(() => {
+    const meta = (name) => document.querySelector(`meta[property="${name}"], meta[name="${name}"]`)?.getAttribute('content') || '';
+    return {
+      finalUrl: location.href,
+      title: document.title || '',
+      ogTitle: meta('og:title'),
+      ogDescription: meta('og:description') || meta('description') || meta('twitter:description'),
+      image: meta('og:image') || meta('twitter:image'),
+      times: Array.from(document.querySelectorAll('time')).map((node) => ({
+        dateTime: node.getAttribute('datetime') || '',
+        text: node.textContent || '',
+      })).slice(0, 24),
+      bodyText: document.body?.innerText || '',
+    };
+  });
+
+  const postDate = extractRenderedPostDate(data);
+  return {
+    status: 200,
+    finalUrl: data.finalUrl,
+    loginWall: /accounts\/login|anmelden|registrieren|log in to instagram/i.test(cleanText(data.bodyText, 500)),
+    title: cleanText(data.ogTitle || data.title, 1200),
+    description: cleanText(data.ogDescription, 2200),
+    image: cleanText(data.image, 1200),
+    jsonLdText: '',
+    bodyText: cleanText(data.bodyText, 2500),
+    pubDate: postDate?.date?.toISOString() || '',
+    pubDateSource: postDate?.source || '',
+    timeTags: data.times,
+  };
+}
+
 function candidateSignal(candidate) {
   const deal = candidate.sourceDeal || {};
   const preview = candidate.preview || {};
@@ -516,11 +620,22 @@ function candidateSignal(candidate) {
     preview.title,
     preview.description,
     preview.jsonLdText,
+    preview.bodyText,
     deal.title,
     deal.description,
     deal.brand,
     deal.distance,
     deal.expires,
+  ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
+}
+
+function postSignal(candidate) {
+  const preview = candidate.preview || {};
+  return [
+    preview.title,
+    preview.description,
+    preview.jsonLdText,
+    preview.bodyText,
   ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
 }
 
@@ -530,18 +645,9 @@ function hasPattern(patterns, value) {
 }
 
 function parsePubDate(candidate) {
-  const deal = candidate.sourceDeal || {};
-  const candidates = [
-    candidate.preview?.pubDate,
-    deal.pubDate,
-    deal.date,
-    deal.createdAt,
-    deal.updatedAt,
-  ];
-  for (const raw of candidates) {
-    const date = new Date(raw);
-    if (!Number.isNaN(date.getTime())) return { date, source: raw === candidate.preview?.pubDate ? 'instagram-preview' : 'existing-candidate' };
-  }
+  const raw = candidate.preview?.pubDate || '';
+  const date = new Date(raw);
+  if (!Number.isNaN(date.getTime())) return { date, source: candidate.preview?.pubDateSource || 'instagram-rendered' };
   return null;
 }
 
@@ -624,12 +730,13 @@ function buildQualityScore(candidate, signal) {
   const reasons = [];
   let score = 0;
 
+  const primarySignal = postSignal(candidate) || signal;
   const pubDate = parsePubDate(candidate);
   const sourceDeal = candidate.sourceDeal || {};
-  const hasVienna = hasPattern(VIENNA_PATTERNS, signal);
-  const hasDeal = hasPattern(STRONG_DEAL_PATTERNS, signal);
-  const hasFoodDrink = hasPattern(FOOD_DRINK_PATTERNS, signal);
-  const hasCurrent = hasPattern(CURRENT_PATTERNS, signal);
+  const hasVienna = hasPattern(VIENNA_PATTERNS, primarySignal);
+  const hasDeal = hasPattern(STRONG_DEAL_PATTERNS, primarySignal);
+  const hasFoodDrink = hasPattern(FOOD_DRINK_PATTERNS, primarySignal);
+  const hasCurrent = hasPattern(CURRENT_PATTERNS, primarySignal);
   const hasPreview = Boolean(candidate.preview?.description || candidate.preview?.title);
 
   if (hasVienna) {
@@ -669,16 +776,20 @@ function buildQualityScore(candidate, signal) {
     else if (age <= CONFIG.maxAgeDays) score += 4;
     else score -= 18;
     reasons.push(`age-${age}d`);
-  } else if (!hasCurrent) {
-    score -= 8;
+  } else {
+    score -= 28;
     reasons.push('unknown-date');
   }
 
-  if (hasPattern(FALSE_POSITIVE_PATTERNS, signal)) {
+  if (hasPattern(BLOCKED_SOURCE_PATTERNS, signal)) {
+    score -= 60;
+    reasons.push('blocked-source');
+  }
+  if (hasPattern(FALSE_POSITIVE_PATTERNS, primarySignal)) {
     score -= 28;
     reasons.push('false-positive-language');
   }
-  if (hasPattern(EXPIRY_PATTERNS, signal)) {
+  if (hasPattern(EXPIRY_PATTERNS, primarySignal)) {
     score -= 20;
     reasons.push('expired-language');
   }
@@ -691,16 +802,18 @@ function buildQualityScore(candidate, signal) {
 }
 
 function getRejectionReason(candidate, signal, score) {
+  const primarySignal = postSignal(candidate) || signal;
   if (!signal) return 'kein Textsignal zum Post';
-  if (!hasPattern(VIENNA_PATTERNS, signal)) return 'kein eindeutiges Wien-Signal';
-  if (!hasPattern(STRONG_DEAL_PATTERNS, signal)) return 'kein starkes Gratis-/Deal-Signal';
-  if (!hasSpecificBrand(candidate, signal)) return 'keine belastbare Marke/Quelle';
-  if (hasPattern(FALSE_POSITIVE_PATTERNS, signal)) return 'Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal';
-  if (hasPattern(EXPIRY_PATTERNS, signal)) return 'explizit abgelaufen oder vorbei';
+  if (hasPattern(BLOCKED_SOURCE_PATTERNS, signal)) return 'NeoTaste blockiert';
   const pubDate = parsePubDate(candidate);
-  if (pubDate?.date && ageDays(pubDate.date) > CONFIG.maxAgeDays && !hasPattern(CURRENT_PATTERNS, signal)) {
-    return `Post aelter als ${CONFIG.maxAgeDays} Tage`;
-  }
+  if (!pubDate?.date) return 'kein echtes Instagram-Postdatum';
+  const postAge = ageDays(pubDate.date);
+  if (postAge > CONFIG.maxAgeDays) return `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage`;
+  if (!hasPattern(VIENNA_PATTERNS, primarySignal)) return 'kein eindeutiges Wien-Signal im Instagram-Post';
+  if (!hasPattern(STRONG_DEAL_PATTERNS, primarySignal)) return 'kein starkes Gratis-/Deal-Signal im Instagram-Post';
+  if (!hasSpecificBrand(candidate, signal)) return 'keine belastbare Marke/Quelle';
+  if (hasPattern(FALSE_POSITIVE_PATTERNS, primarySignal)) return 'Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal';
+  if (hasPattern(EXPIRY_PATTERNS, primarySignal)) return 'explizit abgelaufen oder vorbei';
   if (score < CONFIG.minScore) return `Score zu niedrig (${score})`;
   return '';
 }
@@ -719,13 +832,14 @@ function buildHeuristicDeal(candidate) {
   const pubDate = parsePubDate(candidate);
   const title = buildOfferTitle(brand, type, signal);
   const expires = extractExpiryText(signal);
+  const primarySignal = postSignal(candidate) || signal;
 
   const rawDeal = {
     id: `instagram-ai-${stableHash(`${candidate.url}|${title}`)}`,
     brand,
     logo: 'IG',
     title,
-    description: cleanText(`${signal.slice(0, 360)} Quelle: Instagram/Public Search.`, 520),
+    description: cleanText(`${primarySignal.slice(0, 360)} Quelle: Instagram/Public Search.`, 520),
     type,
     category,
     source: 'Instagram AI Agent',
@@ -746,6 +860,7 @@ function buildHeuristicDeal(candidate) {
       query: candidate.query,
       previewStatus: candidate.preview?.status || null,
       previewLoginWall: Boolean(candidate.preview?.loginWall),
+      postDateSource: pubDate?.source || '',
       textSample: cleanText(signal, 500),
     },
     confidence: Math.min(0.97, Math.max(0.45, score / 100)),
@@ -794,16 +909,29 @@ function coerceAiType(value) {
 
 function mergeAiDeal(candidate, aiRow) {
   const signal = candidateSignal(candidate);
+  const primarySignal = postSignal(candidate) || signal;
   const confidence = Math.max(0, Math.min(1, Number(aiRow.confidence) || 0));
   if (!aiRow.accept || confidence < 0.58) {
     candidate.rejectionReason = cleanText(aiRow.reason, 180) || 'LLM hat Kandidat abgelehnt';
     return null;
   }
+  if (hasPattern(BLOCKED_SOURCE_PATTERNS, signal)) {
+    candidate.rejectionReason = 'NeoTaste blockiert';
+    return null;
+  }
 
   const type = coerceAiType(aiRow.type || inferType(signal));
   const brand = cleanText(aiRow.brand, 80) || inferBrand(candidate, signal);
-  const category = normalizeCategoryForScraper(aiRow.category || '', [brand, aiRow.title, aiRow.description, signal]);
+  const category = normalizeCategoryForScraper(aiRow.category || '', [brand, aiRow.title, aiRow.description, primarySignal]);
   const pubDate = parsePubDate(candidate);
+  if (!pubDate?.date) {
+    candidate.rejectionReason = 'kein echtes Instagram-Postdatum';
+    return null;
+  }
+  if (ageDays(pubDate.date) > CONFIG.maxAgeDays) {
+    candidate.rejectionReason = `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage`;
+    return null;
+  }
   const score = Math.max(candidate.score, Math.round(confidence * 100));
   const rawDeal = {
     id: `instagram-ai-${stableHash(`${candidate.url}|${aiRow.title || brand}`)}`,
@@ -833,6 +961,7 @@ function mergeAiDeal(candidate, aiRow) {
       query: candidate.query,
       previewStatus: candidate.preview?.status || null,
       previewLoginWall: Boolean(candidate.preview?.loginWall),
+      postDateSource: pubDate?.source || '',
       textSample: cleanText(signal, 500),
     },
     confidence,
@@ -954,7 +1083,7 @@ async function discoverCandidates(accounts) {
   };
   stats.existingCandidates = collectExistingCandidates(map);
 
-  if (!CONFIG.searchEnabled) return { candidates: [...map.values()], stats };
+  if (!CONFIG.searchEnabled) return { candidates: [...map.values()].slice(0, CONFIG.maxCandidates), stats };
 
   const queries = buildSearchQueries(accounts);
   stats.searchQueries = queries;
@@ -991,6 +1120,46 @@ async function enrichPreviews(candidates) {
   return errors;
 }
 
+async function enrichRenderedPreviews(candidates) {
+  const errors = [];
+  if (!CONFIG.renderFetchEnabled) return errors;
+
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext({
+    viewport: { width: 1366, height: 900 },
+    userAgent: USER_AGENT,
+    locale: 'de-AT',
+    timezoneId: 'Europe/Vienna',
+  });
+
+  let fetched = 0;
+  try {
+    for (const candidate of candidates) {
+      if (fetched >= CONFIG.maxRenderFetches) break;
+      const page = await context.newPage();
+      try {
+        const rendered = await fetchRenderedInstagramPreview(page, candidate.url);
+        candidate.preview = {
+          ...(candidate.preview || {}),
+          ...rendered,
+          loginWall: rendered.loginWall && !rendered.description,
+        };
+      } catch (error) {
+        errors.push({ url: candidate.url, error: error.message });
+      } finally {
+        await page.close();
+      }
+      fetched += 1;
+      await sleep(250);
+    }
+  } finally {
+    await context.close();
+    await browser.close();
+  }
+
+  return errors;
+}
+
 async function main() {
   console.log('Instagram AI Agent');
   console.log('No Instagram Graph API, no cookies; using public search/preview signals.');
@@ -1000,6 +1169,7 @@ async function main() {
   console.log(`Candidates: ${candidates.length} (${stats.existingCandidates} existing, ${stats.searchDiscovered} search hits)`);
 
   const previewErrors = await enrichPreviews(candidates);
+  const renderErrors = await enrichRenderedPreviews(candidates);
   const heuristicDeals = candidates.map(buildHeuristicDeal).filter(Boolean);
 
   const aiCandidates = candidates
@@ -1037,6 +1207,7 @@ async function main() {
     existingCandidates: stats.existingCandidates,
     seedUrls: stats.seedUrls,
     previewErrors,
+    renderErrors,
     aiErrors: aiResult.errors,
     rejectionReasons: rejectionCounts(candidates),
     rejected: candidates

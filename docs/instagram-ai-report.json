@@ -1,1082 +1,598 @@
 {
-  "lastUpdated": "2026-05-26T09:24:50.364Z",
+  "lastUpdated": "2026-05-26T09:53:01.461Z",
   "config": {
-    "maxCandidates": 120,
+    "maxCandidates": 40,
     "maxDeals": 35,
     "maxSearchQueries": 42,
     "maxPreviewFetches": 60,
-    "maxAgeDays": 14,
+    "maxRenderFetches": 40,
+    "maxAgeDays": 7,
     "minScore": 62,
     "aiCandidateLimit": 32,
-    "searchEnabled": true,
+    "searchEnabled": false,
     "previewFetchEnabled": true,
+    "renderFetchEnabled": true,
     "aiEnabled": false,
     "model": "gpt-4.1-mini",
     "openAiKeyPresent": false
   },
   "watchlistAccounts": 22,
-  "discoveredCandidates": 120,
-  "acceptedDeals": 35,
-  "heuristicAccepted": 42,
+  "discoveredCandidates": 40,
+  "acceptedDeals": 0,
+  "heuristicAccepted": 0,
   "aiAccepted": 0,
   "search": {
-    "enabled": true,
-    "queries": [
-      "site:instagram.com/reel wien gratis essen",
-      "site:instagram.com/p wien gratis essen",
-      "site:instagram.com/reel wien gratis kaffee",
-      "site:instagram.com/p vienna free coffee",
-      "site:instagram.com/reel vienna free food",
-      "site:instagram.com/p wien 1+1 restaurant",
-      "site:instagram.com/reel wien 2 fuer 1 essen",
-      "site:instagram.com/p wien happy hour deal",
-      "site:instagram.com/reel wien neueroeffnung gratis",
-      "site:instagram.com/p wien neueroeffnung gratis",
-      "site:instagram.com/reel vienna opening free food",
-      "site:instagram.com/p wien goodie bag gratis",
-      "site:instagram.com/reel wien rabatt gutschein essen",
-      "site:instagram.com/p vienna food deal",
-      "site:instagram.com/reel wien gratis drink",
-      "site:instagram.com/p vienna free drinks",
-      "site:instagram.com/ciosgrill wien gratis",
-      "site:instagram.com/ciosgrill vienna deal",
-      "site:instagram.com/corner_xvi wien gratis",
-      "site:instagram.com/corner_xvi vienna deal",
-      "site:instagram.com/eatinvienna_ wien gratis",
-      "site:instagram.com/eatinvienna_ vienna deal",
-      "site:instagram.com/hotline_5 wien gratis",
-      "site:instagram.com/hotline_5 vienna deal",
-      "site:instagram.com/meat_point_smashburgerbar wien gratis",
-      "site:instagram.com/meat_point_smashburgerbar vienna deal",
-      "site:instagram.com/assal.burger wien gratis",
-      "site:instagram.com/assal.burger vienna deal",
-      "site:instagram.com/cascade_bar_vienna wien gratis",
-      "site:instagram.com/cascade_bar_vienna vienna deal",
-      "site:instagram.com/woa.vienna wien gratis",
-      "site:instagram.com/woa.vienna vienna deal",
-      "site:instagram.com/xo_grill wien gratis",
-      "site:instagram.com/xo_grill vienna deal",
-      "site:instagram.com/lorenzos_bar_lounge wien gratis",
-      "site:instagram.com/lorenzos_bar_lounge vienna deal",
-      "site:instagram.com/wolt.oesterreich wien gratis",
-      "site:instagram.com/wolt.oesterreich vienna deal",
-      "site:instagram.com/ghettosmash_ wien gratis",
-      "site:instagram.com/ghettosmash_ vienna deal",
-      "site:instagram.com/naanbrueder wien gratis",
-      "site:instagram.com/naanbrueder vienna deal"
-    ],
-    "discovered": 20,
+    "enabled": false,
+    "queries": [],
+    "discovered": 0,
     "errors": []
   },
   "existingCandidates": 213,
   "seedUrls": 0,
   "previewErrors": [],
+  "renderErrors": [],
   "aiErrors": [
-    "OPENAI_API_KEY fehlt"
+    "LLM deaktiviert"
   ],
   "rejectionReasons": {
-    "kein starkes Gratis-/Deal-Signal": 50,
-    "Post aelter als 14 Tage": 12,
-    "Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal": 6,
-    "kein eindeutiges Wien-Signal": 4,
-    "keine belastbare Marke/Quelle": 4,
-    "explizit abgelaufen oder vorbei": 2
+    "Instagram-Post aelter als 7 Tage": 34,
+    "kein echtes Instagram-Postdatum": 4,
+    "NeoTaste blockiert": 1,
+    "Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal": 1
   },
   "rejected": [
     {
       "url": "https://www.instagram.com/reel/DXw6hcCtb19/",
-      "score": 24,
+      "score": 0,
       "source": "community",
-      "reason": "kein eindeutiges Wien-Signal",
+      "reason": "kein echtes Instagram-Postdatum",
       "reasons": [
-        "deal-signal",
         "public-preview",
         "existing-source-context",
-        "age-24d"
+        "unknown-date",
+        "preview-login-wall"
       ]
     },
     {
       "url": "https://www.instagram.com/p/DXNczVNjLG7/",
-      "score": 24,
+      "score": 0,
       "source": "community",
-      "reason": "kein eindeutiges Wien-Signal",
+      "reason": "kein echtes Instagram-Postdatum",
       "reasons": [
-        "deal-signal",
         "public-preview",
         "existing-source-context",
-        "age-30d"
+        "unknown-date",
+        "preview-login-wall"
       ]
     },
     {
       "url": "https://www.instagram.com/reel/DXWur6dDL0h/",
-      "score": 24,
+      "score": 58,
       "source": "community",
-      "reason": "kein eindeutiges Wien-Signal",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
         "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-34d"
+        "age-36d"
       ]
     },
     {
       "url": "https://www.instagram.com/reel/DVYkFzDCnIl/",
-      "score": 54,
+      "score": 0,
       "source": "firecrawl2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
-        "vienna",
         "public-preview",
         "existing-source-context",
         "known-source",
-        "age-1d"
+        "age-85d"
       ]
     },
     {
       "url": "https://www.instagram.com/reel/DN5R4n9iB0k/",
-      "score": 94,
+      "score": 34,
       "source": "firecrawl2",
-      "reason": "keine belastbare Marke/Quelle",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "known-source",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DXrV02pjcew/",
-      "score": 94,
-      "source": "firecrawl2",
-      "reason": "keine belastbare Marke/Quelle",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "known-source",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DT5VGMpj9Wm/",
-      "score": 54,
-      "source": "firecrawl2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "public-preview",
-        "existing-source-context",
-        "known-source",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DDZLpymtGbV/",
-      "score": 66,
-      "source": "firecrawl2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
         "food-drink",
         "public-preview",
         "existing-source-context",
         "known-source",
-        "age-1d"
+        "age-271d"
       ]
     },
     {
-      "url": "https://www.instagram.com/reel/DU3d2IljXmb/",
-      "score": 68,
-      "source": "food3",
-      "reason": "kein eindeutiges Wien-Signal",
-      "reasons": [
-        "deal-signal",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DSVXRR1gP-5/",
-      "score": 62,
-      "source": "food3",
-      "reason": "kein starkes Gratis-/Deal-Signal",
+      "url": "https://www.instagram.com/reel/DWbG-hYCGZr/",
+      "score": 0,
+      "source": "firecrawl2",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DK2T5aUNW9w/",
-      "score": 62,
-      "source": "food3",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DPZIkwTCElg/",
-      "score": 62,
-      "source": "food3",
-      "reason": "keine belastbare Marke/Quelle",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-1d",
-        "false-positive-language"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DSmisSejSbq/",
-      "score": 34,
-      "source": "food3",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-1d",
-        "false-positive-language"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DUYXI8DDfjg/",
-      "score": 34,
-      "source": "food3",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-1d",
-        "false-positive-language"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DPuDI8eiENz/",
-      "score": 34,
-      "source": "food3",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-1d",
-        "false-positive-language"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DYclO1ciL1X/",
-      "score": 34,
-      "source": "food3",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-1d",
-        "false-positive-language"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DXtnx4njRbm/",
-      "score": 62,
-      "source": "food3",
-      "reason": "Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-1d",
-        "false-positive-language"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DSS2VkqjNzz/",
-      "score": 42,
-      "source": "food3",
-      "reason": "Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-1d",
+        "known-source",
+        "age-59d",
         "false-positive-language",
         "expired-language"
       ]
     },
     {
-      "url": "https://www.instagram.com/p/DT8LpXMgpCj/",
+      "url": "https://www.instagram.com/p/DXrV02pjcew/",
+      "score": 14,
+      "source": "firecrawl2",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-28d",
+        "expired-language"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DT5VGMpj9Wm/",
+      "score": 34,
+      "source": "firecrawl2",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-122d"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/p/DDZLpymtGbV/",
       "score": 42,
-      "source": "food3",
-      "reason": "Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal",
+      "source": "firecrawl2",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
         "deal-signal",
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-1d",
+        "known-source",
+        "age-532d",
+        "expired-language"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DQtR1-fiKYb/",
+      "score": 10,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-202d",
+        "false-positive-language",
+        "expired-language"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DTXfKSqjUA9/",
+      "score": 68,
+      "source": "food3, gastro2, gastro2",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "current-language",
+        "public-preview",
+        "existing-source-context",
+        "age-135d"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DKPjUXTMpCE/",
+      "score": 40,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "current-language",
+        "public-preview",
+        "existing-source-context",
+        "age-362d"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/p/DSQV7PZDfgN/",
+      "score": 0,
+      "source": "food3",
+      "reason": "NeoTaste blockiert",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-163d",
+        "blocked-source",
+        "false-positive-language"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/p/DXXHZVPE0mY/",
+      "score": 58,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-36d"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DU3d2IljXmb/",
+      "score": 58,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-98d"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DSVXRR1gP-5/",
+      "score": 18,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "public-preview",
+        "existing-source-context",
+        "age-161d"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DK2T5aUNW9w/",
+      "score": 30,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-347d"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DJtU8ndCvHm/",
+      "score": 18,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "public-preview",
+        "existing-source-context",
+        "age-375d"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/p/C50huW1M5tC/",
+      "score": 36,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-770d"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/p/DOQR9DKCHaZ/",
+      "score": 58,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-262d"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DPZIkwTCElg/",
+      "score": 18,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "public-preview",
+        "existing-source-context",
+        "age-234d",
+        "false-positive-language"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DSmisSejSbq/",
+      "score": 12,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "current-language",
+        "public-preview",
+        "existing-source-context",
+        "age-154d",
+        "false-positive-language"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DUYXI8DDfjg/",
+      "score": 8,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-110d",
+        "false-positive-language"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DPuDI8eiENz/",
+      "score": 0,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "public-preview",
+        "existing-source-context",
+        "age-226d"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/p/DYclO1ciL1X/",
+      "score": 30,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-9d",
+        "false-positive-language"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DX1oAvUqxVQ/",
+      "score": 0,
+      "source": "food3",
+      "reason": "kein echtes Instagram-Postdatum",
+      "reasons": [
+        "public-preview",
+        "existing-source-context",
+        "unknown-date",
+        "preview-login-wall"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DXtnx4njRbm/",
+      "score": 40,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "current-language",
+        "public-preview",
+        "existing-source-context",
+        "age-27d",
+        "false-positive-language"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DKZZ1RmtSw1/",
+      "score": 30,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-358d"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/reel/DSS2VkqjNzz/",
+      "score": 0,
+      "source": "food3",
+      "reason": "kein echtes Instagram-Postdatum",
+      "reasons": [
+        "public-preview",
+        "existing-source-context",
+        "unknown-date",
+        "preview-login-wall"
+      ]
+    },
+    {
+      "url": "https://www.instagram.com/p/DT8LpXMgpCj/",
+      "score": 10,
+      "source": "food3",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-121d",
         "false-positive-language",
         "expired-language"
       ]
     },
     {
       "url": "https://www.instagram.com/p/DYg_p4vDMEf/",
-      "score": 34,
+      "score": 44,
       "source": "food3",
-      "reason": "kein starkes Gratis-/Deal-Signal",
+      "reason": "Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal",
       "reasons": [
         "vienna",
-        "food-drink",
+        "deal-signal",
         "public-preview",
         "existing-source-context",
-        "age-1d",
+        "age-7d",
         "false-positive-language"
       ]
     },
     {
       "url": "https://www.instagram.com/p/DRrMAqOjSOc/",
-      "score": 62,
+      "score": 0,
       "source": "food3",
-      "reason": "Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
-        "vienna",
-        "deal-signal",
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-1d",
+        "age-177d",
         "false-positive-language"
       ]
     },
     {
       "url": "https://www.instagram.com/reel/DVu82YhihC9/",
-      "score": 34,
+      "score": 0,
       "source": "food3",
-      "reason": "kein starkes Gratis-/Deal-Signal",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
-        "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-1d",
+        "age-77d",
         "false-positive-language"
       ]
     },
     {
       "url": "https://www.instagram.com/p/DU6ChRKDLdl/",
-      "score": 34,
+      "score": 2,
       "source": "food3",
-      "reason": "kein starkes Gratis-/Deal-Signal",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-1d",
+        "age-97d",
         "false-positive-language"
       ]
     },
     {
       "url": "https://www.instagram.com/reel/DXjK7c7jZ8A/",
-      "score": 34,
+      "score": 12,
       "source": "food3",
-      "reason": "kein starkes Gratis-/Deal-Signal",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
         "food-drink",
+        "current-language",
         "public-preview",
         "existing-source-context",
-        "age-1d",
+        "age-31d",
         "false-positive-language"
       ]
     },
     {
       "url": "https://www.instagram.com/reel/DTAWbdWCEp4/",
-      "score": 34,
+      "score": 2,
       "source": "food3",
-      "reason": "kein starkes Gratis-/Deal-Signal",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-1d",
+        "age-144d",
         "false-positive-language"
       ]
     },
     {
       "url": "https://www.instagram.com/reel/DTAsihPDdQp/",
-      "score": 62,
+      "score": 58,
       "source": "food3, gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
+        "deal-signal",
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-1d"
+        "age-144d"
       ]
     },
     {
       "url": "https://www.instagram.com/p/DKwqUaTIXxQ/",
-      "score": 42,
+      "score": 30,
       "source": "food3",
-      "reason": "Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
         "deal-signal",
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-1d",
-        "false-positive-language",
-        "expired-language"
+        "age-349d",
+        "false-positive-language"
       ]
     },
     {
       "url": "https://www.instagram.com/reel/DW_NHtRDbUR/",
-      "score": 62,
+      "score": 12,
       "source": "food3",
-      "reason": "Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
-        "deal-signal",
         "food-drink",
+        "current-language",
         "public-preview",
         "existing-source-context",
-        "age-1d",
+        "age-45d",
         "false-positive-language"
       ]
     },
     {
       "url": "https://www.instagram.com/reel/DWWiE6jjjFG/",
-      "score": 50,
+      "score": 18,
       "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
         "public-preview",
         "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DW3TtjliHyT/",
-      "score": 58,
-      "source": "gastro2",
-      "reason": "Post aelter als 14 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-45d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DUAlVNoCAjx/",
-      "score": 50,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "public-preview",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DW63jMIDcqg/",
-      "score": 46,
-      "source": "gastro2",
-      "reason": "Post aelter als 14 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "public-preview",
-        "existing-source-context",
-        "age-45d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DW9RpjYjLvm/",
-      "score": 46,
-      "source": "gastro2",
-      "reason": "Post aelter als 14 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "public-preview",
-        "existing-source-context",
-        "age-44d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DUq7lJFjjVy/",
-      "score": 46,
-      "source": "gastro2",
-      "reason": "Post aelter als 14 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "public-preview",
-        "existing-source-context",
-        "age-101d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DUpjch6iLUi/",
-      "score": 46,
-      "source": "gastro2",
-      "reason": "Post aelter als 14 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "public-preview",
-        "existing-source-context",
-        "age-100d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DMPilGbKO0o/",
-      "score": 46,
-      "source": "gastro2",
-      "reason": "Post aelter als 14 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "public-preview",
-        "existing-source-context",
-        "age-304d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DWGa4idiEO8/",
-      "score": 46,
-      "source": "gastro2",
-      "reason": "Post aelter als 14 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "public-preview",
-        "existing-source-context",
-        "age-64d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DTSRNJBCDAB/",
-      "score": 50,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "public-preview",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DVx-XzRiOTA/",
-      "score": 44,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DPTQogcCMQu/",
-      "score": 12,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "existing-source-context",
-        "age-229d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DQwGTQmDePB/",
-      "score": 66,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "current-language",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DTf0shwjT2G/",
-      "score": 44,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DXO-SvjIpVk/",
-      "score": 56,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DVVv8pADUtb/",
-      "score": 56,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DNDBzweoVj1/",
-      "score": 44,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DJtTMQ7N8oW/",
-      "score": 44,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DOfswuaDUgh/",
-      "score": 56,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DVdZrDBDFk1/",
-      "score": 52,
-      "source": "gastro2",
-      "reason": "Post aelter als 14 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "food-drink",
-        "existing-source-context",
-        "age-71d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DMhiYctsPL4/",
-      "score": 40,
-      "source": "gastro2",
-      "reason": "Post aelter als 14 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "existing-source-context",
-        "age-305d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DWeCMZKDLBN/",
-      "score": 62,
-      "source": "gastro2",
-      "reason": "explizit abgelaufen oder vorbei",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "current-language",
-        "existing-source-context",
-        "age-1d",
-        "expired-language"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DV_xylLDqY2/",
-      "score": 52,
-      "source": "gastro2",
-      "reason": "explizit abgelaufen oder vorbei",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "existing-source-context",
-        "age-1d",
-        "expired-language"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DU8G9bdDIiA/",
-      "score": 56,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DOBGsSFCO6q/",
-      "score": 12,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "existing-source-context",
-        "age-260d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DW3VsQfjNRr/",
-      "score": 44,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DXg1C96DMjf/",
-      "score": 44,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DYe4PuOsTB3/",
-      "score": 24,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-22d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DHLSHGyRae1/",
-      "score": 84,
-      "source": "gastro2",
-      "reason": "keine belastbare Marke/Quelle",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "food-drink",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DX3n3VSAurq/",
-      "score": 44,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DWnzfHmiJJL/",
-      "score": 24,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-51d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DXL8iF2CKv5/",
-      "score": 24,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-33d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DW3tZ26iJ68/",
-      "score": 34,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "current-language",
-        "existing-source-context",
-        "age-46d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DFaXQHezPxf/",
-      "score": 56,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DTF2paBjFHc/",
-      "score": 56,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DRsfIwfDMxW/",
-      "score": 52,
-      "source": "gastro2",
-      "reason": "Post aelter als 14 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "food-drink",
-        "existing-source-context",
-        "age-29d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DXb3kRfjPRi/",
-      "score": 44,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DUN8OrGgsrr/",
-      "score": 24,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-64d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DUDNFtliJ_D/",
-      "score": 44,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DXhUQLPjV-m/",
-      "score": 54,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "current-language",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DUDNFtliJ_D/",
-      "score": 12,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "existing-source-context",
-        "age-117d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DYcsP7ZtZgU/",
-      "score": 50,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-7d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/C8MlgKmN0S7/",
-      "score": 56,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DVzgOLPjuUs/",
-      "score": 24,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-24d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DYjn8NmsL8Q/",
-      "score": 53,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-3d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DUpsHWsjUsa/",
-      "score": 24,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-99d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DWGUB_CiDwo/",
-      "score": 56,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/reel/DXJkZWijXtZ/",
-      "score": 54,
-      "source": "gastro2",
-      "reason": "kein starkes Gratis-/Deal-Signal",
-      "reasons": [
-        "vienna",
-        "current-language",
-        "existing-source-context",
-        "age-1d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DOV0hfPjaL6/",
-      "score": 40,
-      "source": "gastro2",
-      "reason": "Post aelter als 14 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "existing-source-context",
-        "age-251d"
-      ]
-    },
-    {
-      "url": "https://www.instagram.com/p/DUwJBCiDVZH/",
-      "score": 40,
-      "source": "gastro2",
-      "reason": "Post aelter als 14 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "existing-source-context",
-        "age-97d"
+        "age-61d"
       ]
     }
   ]
