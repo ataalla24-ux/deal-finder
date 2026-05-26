@@ -52,6 +52,9 @@ jobs:
           INSTAGRAM_AI_MAX_AGE_DAYS: 7
         run: npm run instagram:ai
 
+      - name: Validate Instagram AI output
+        run: npm run instagram:ai:validate
+
       - name: Commit Instagram AI output
         run: |
           node scripts/commit-generated.mjs --message "Instagram AI deals $(date +%Y-%m-%d)" --files docs/deals-pending-instagram-ai.json docs/instagram-ai-report.json

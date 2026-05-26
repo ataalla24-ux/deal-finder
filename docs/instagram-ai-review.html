@@ -568,9 +568,26 @@
     };
 
     const $ = (id) => document.getElementById(id);
+    const DAY_MS = 86400000;
 
     function cleanText(value) {
       return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function maxAgeDays() {
+      return Number(state.data?.report?.config?.maxAgeDays || 7);
+    }
+
+    function ageDaysExact(value) {
+      if (!value) return null;
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return null;
+      return Math.max(0, (Date.now() - date.getTime()) / DAY_MS);
+    }
+
+    function displayAge(value) {
+      if (typeof value !== 'number') return '';
+      return value < 1 ? '<1' : value.toFixed(1).replace('.0', '');
     }
 
     function formatDate(value) {
@@ -639,13 +656,15 @@
     }
 
     function normalizeDeal(deal) {
+      const exactAge = ageDaysExact(deal.pubDate);
       return {
         kind: 'accepted',
         title: cleanText(deal.title) || 'Instagram Deal',
         brand: cleanText(deal.brand) || 'Unbekannt',
         url: cleanText(deal.url),
         pubDate: cleanText(deal.pubDate),
-        ageDays: deal.pubDate ? Math.max(0, Math.floor((Date.now() - new Date(deal.pubDate).getTime()) / 86400000)) : null,
+        ageDays: typeof exactAge === 'number' ? Math.floor(exactAge) : null,
+        ageDaysExact: exactAge,
         source: cleanText(deal.evidence?.source || deal.source || 'instagram-ai-agent'),
         score: Number(deal.qualityScore || 0),
         reason: '',
@@ -664,6 +683,7 @@
         url: cleanText(row.url),
         pubDate: cleanText(row.pubDate),
         ageDays: typeof row.ageDays === 'number' ? row.ageDays : null,
+        ageDaysExact: typeof row.ageDaysExact === 'number' ? row.ageDaysExact : ageDaysExact(row.pubDate),
         source: cleanText(row.source || 'instagram-ai-agent'),
         score: Number(row.score || 0),
         reason: cleanText(row.reason || 'abgelehnt'),
@@ -676,10 +696,9 @@
 
     function deriveFreshRejected(report) {
       if (Array.isArray(report.freshRejected)) return report.freshRejected.map(normalizeRejected);
-      const maxAge = Number(report.config?.maxAgeDays || 7);
       return (report.rejected || [])
         .map(normalizeRejected)
-        .filter((item) => typeof item.ageDays === 'number' && item.ageDays <= maxAge);
+        .filter((item) => typeof item.ageDaysExact === 'number' && item.ageDaysExact <= maxAgeDays());
     }
 
     function buildViewData() {
@@ -722,8 +741,9 @@
       const typeClass = item.kind === 'accepted' ? 'accepted' : 'rejected';
       const reasonBadge = item.reason ? '<span class="badge amber">' + escapeHtml(item.reason) + '</span>' : '<span class="badge green">akzeptiert</span>';
       const scoreBadge = '<span class="badge blue">Score ' + Math.round(item.score || 0) + '</span>';
-      const ageBadge = typeof item.ageDays === 'number'
-        ? '<span class="badge ' + (item.ageDays <= 7 ? 'green' : 'red') + '">' + item.ageDays + ' Tage alt</span>'
+      const exactAge = typeof item.ageDaysExact === 'number' ? item.ageDaysExact : item.ageDays;
+      const ageBadge = typeof exactAge === 'number'
+        ? '<span class="badge ' + (exactAge <= maxAgeDays() ? 'green' : 'red') + '">' + displayAge(exactAge) + ' Tage alt</span>'
         : '<span class="badge red">kein Datum</span>';
       const expiryBadge = item.expires ? '<span class="badge amber">bis ' + escapeHtml(formatShortDate(item.expires)) + '</span>' : '';
       const reviewedBadge = isReviewed ? '<span class="badge">lokal geprueft</span>' : '';

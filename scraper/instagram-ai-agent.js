@@ -861,6 +861,14 @@ function ageDays(date) {
   return Math.max(0, Math.floor((Date.now() - date.getTime()) / DAY_MS));
 }
 
+function ageDaysExact(date) {
+  return Math.max(0, (Date.now() - date.getTime()) / DAY_MS);
+}
+
+function isPostWithinMaxAge(date) {
+  return ageDaysExact(date) <= CONFIG.maxAgeDays;
+}
+
 function localDayStart(date = new Date()) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
@@ -1096,13 +1104,13 @@ function buildQualityScore(candidate, signal) {
   }
 
   if (pubDate?.date) {
-    const age = ageDays(pubDate.date);
+    const age = ageDaysExact(pubDate.date);
     if (age <= 1) score += 14;
     else if (age <= 3) score += 11;
     else if (age <= 7) score += 8;
     else if (age <= CONFIG.maxAgeDays) score += 4;
     else score -= 18;
-    reasons.push(`age-${age}d`);
+    reasons.push(`age-${ageDays(pubDate.date)}d`);
   } else {
     score -= 28;
     reasons.push('unknown-date');
@@ -1143,8 +1151,7 @@ function getRejectionReason(candidate, signal, score) {
   if (hasPattern(BLOCKED_SOURCE_PATTERNS, signal)) return 'NeoTaste blockiert';
   const pubDate = parsePubDate(candidate);
   if (!pubDate?.date) return 'kein echtes Instagram-Postdatum';
-  const postAge = ageDays(pubDate.date);
-  if (postAge > CONFIG.maxAgeDays) return `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage`;
+  if (!isPostWithinMaxAge(pubDate.date)) return `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage`;
   const dateSignal = offerDateSignal(candidate) || primarySignal;
   if (hasPastExplicitOfferDate(dateSignal)) return 'explizites Aktionsdatum liegt in der Vergangenheit';
   if (hasExpiredRelativeOfferDate(dateSignal, pubDate.date)) return 'relative Kurz-Aktion ist abgelaufen';
@@ -1267,7 +1274,7 @@ function mergeAiDeal(candidate, aiRow) {
     candidate.rejectionReason = 'kein echtes Instagram-Postdatum';
     return null;
   }
-  if (ageDays(pubDate.date) > CONFIG.maxAgeDays) {
+  if (!isPostWithinMaxAge(pubDate.date)) {
     candidate.rejectionReason = `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage`;
     return null;
   }
@@ -1430,6 +1437,7 @@ function summarizeCandidate(candidate) {
     reasons: candidate.reasons,
     pubDate: pubDate?.date?.toISOString() || '',
     ageDays: pubDate?.date ? ageDays(pubDate.date) : null,
+    ageDaysExact: pubDate?.date ? Number(ageDaysExact(pubDate.date).toFixed(2)) : null,
     postDateSource: pubDate?.source || '',
     title: cleanText(candidate.preview?.title || candidate.title || candidate.sourceDeal?.title || '', 180),
     textSample: cleanText(postSignal(candidate) || candidateSignal(candidate), 360),
@@ -1440,7 +1448,7 @@ function freshRejectedCandidates(candidates) {
   return candidates
     .filter((candidate) => candidate.rejectionReason)
     .map(summarizeCandidate)
-    .filter((candidate) => typeof candidate.ageDays === 'number' && candidate.ageDays <= CONFIG.maxAgeDays)
+    .filter((candidate) => typeof candidate.ageDaysExact === 'number' && candidate.ageDaysExact <= CONFIG.maxAgeDays)
     .sort((left, right) => (right.score || 0) - (left.score || 0))
     .slice(0, 40);
 }
