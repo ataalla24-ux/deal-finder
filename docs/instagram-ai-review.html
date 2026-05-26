@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Instagram AI Review - FreeFinder Wien</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --surface-muted: #eef3f7;
+      --line: #d8dee7;
+      --text: #18202b;
+      --muted: #647184;
+      --green: #16784f;
+      --green-soft: #e6f4ed;
+      --blue: #2563a8;
+      --blue-soft: #e8f1fb;
+      --amber: #9a6200;
+      --amber-soft: #fff4d8;
+      --red: #a43b3b;
+      --red-soft: #fae9e9;
+      --shadow: 0 16px 36px rgba(20, 29, 42, 0.08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    a { color: inherit; }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 18px;
+      border-right: 1px solid var(--line);
+      background: #101926;
+      color: #f5f7fb;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 24px;
+    }
+
+    .brand strong {
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      color: #aeb9c8;
+      font-size: 13px;
+    }
+
+    .side-stat {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: baseline;
+      padding: 12px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .side-stat span {
+      color: #aeb9c8;
+      font-size: 13px;
+    }
+
+    .side-stat strong {
+      font-size: 18px;
+    }
+
+    .side-actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .side-actions a,
+    .side-actions button {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      color: #f5f7fb;
+      text-decoration: none;
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: 0;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 6px 10px;
+      color: var(--muted);
+      font-size: 13px;
+      box-shadow: var(--shadow);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--amber);
+    }
+
+    .status-dot.ok { background: var(--green); }
+    .status-dot.bad { background: var(--red); }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      min-width: 0;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 28px;
+      line-height: 1;
+      overflow-wrap: anywhere;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto auto auto;
+      gap: 10px;
+      margin: 18px 0;
+      align-items: center;
+    }
+
+    .toolbar input,
+    .toolbar select {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 8px 10px;
+      color: var(--text);
+    }
+
+    .toggle-row {
+      display: inline-flex;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .toggle-row button {
+      min-height: 40px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .toggle-row button:last-child {
+      border-right: 0;
+    }
+
+    .toggle-row button.active {
+      color: var(--text);
+      background: var(--blue-soft);
+    }
+
+    .section {
+      margin-top: 22px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .section-head span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .item {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--blue);
+      border-radius: 8px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .item.accepted { border-left-color: var(--green); }
+    .item.rejected { border-left-color: var(--amber); }
+    .item.reviewed { opacity: 0.58; }
+
+    .item-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .item-title {
+      min-width: 0;
+    }
+
+    .item-title strong {
+      display: block;
+      font-size: 16px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .item-title span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 10px 0;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border-radius: 8px;
+      padding: 3px 8px;
+      background: var(--surface-muted);
+      color: #3d4a5c;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+      max-width: 100%;
+    }
+
+    .badge.green { background: var(--green-soft); color: var(--green); }
+    .badge.amber { background: var(--amber-soft); color: var(--amber); }
+    .badge.red { background: var(--red-soft); color: var(--red); }
+    .badge.blue { background: var(--blue-soft); color: var(--blue); }
+
+    .sample {
+      color: #364255;
+      background: #f3f6f9;
+      border: 1px solid #e1e7ef;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px 0 0;
+      overflow-wrap: anywhere;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .actions a,
+    .actions button {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 8px;
+      min-height: 34px;
+      padding: 6px 10px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .actions button.primary {
+      background: var(--text);
+      color: #fff;
+      border-color: var(--text);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: #f4f7fa;
+    }
+
+    td {
+      font-size: 14px;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .empty,
+    .error {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      background: var(--surface);
+      color: var(--muted);
+    }
+
+    .error {
+      border-color: #e0a3a3;
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      max-width: 360px;
+      background: #101926;
+      color: #fff;
+      border-radius: 8px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 10;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 980px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+      }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .toolbar { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; }
+    }
+
+    @media (max-width: 560px) {
+      .main { padding: 18px; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .item-top { grid-template-columns: 1fr; }
+      .toggle-row { display: grid; grid-template-columns: repeat(3, 1fr); }
+      .toggle-row button { border-right: 0; border-bottom: 1px solid var(--line); }
+      .toggle-row button:last-child { border-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <strong>Instagram AI Review</strong>
+        <span>FreeFinder Wien</span>
+      </div>
+      <div class="side-stat"><span>Letzter Lauf</span><strong id="sideUpdated">-</strong></div>
+      <div class="side-stat"><span>Akzeptiert</span><strong id="sideAccepted">0</strong></div>
+      <div class="side-stat"><span>Frisch abgelehnt</span><strong id="sideFreshRejected">0</strong></div>
+      <div class="side-stat"><span>Watchlist</span><strong id="sideWatchlist">0</strong></div>
+      <div class="side-actions">
+        <a href="./index.html">Zur App</a>
+        <a href="./deals-pending-instagram-ai.json">Deal-JSON</a>
+        <a href="./instagram-ai-report.json">Report-JSON</a>
+        <button type="button" id="clearReviewedBtn">Lokale Markierungen loeschen</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h1>Instagram AI Review</h1>
+          <p class="subtitle">Tageskontrolle fuer aktuelle Instagram-Deals: echte Postdaten, Annahmen, Ablehnungsgruende und Watchlist-Quellen auf einen Blick.</p>
+        </div>
+        <div class="status-pill" id="statusPill"><span class="status-dot" id="statusDot"></span><span id="statusText">Lade Daten...</span></div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="metric"><span>Akzeptierte Deals</span><strong id="metricDeals">0</strong></div>
+        <div class="metric"><span>Kandidaten</span><strong id="metricCandidates">0</strong></div>
+        <div class="metric"><span>Frisch abgelehnt</span><strong id="metricFreshRejected">0</strong></div>
+        <div class="metric"><span>Profil-Discovery</span><strong id="metricProfiles">0</strong></div>
+      </div>
+
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="Suche nach Marke, Titel, URL oder Grund">
+        <select id="reasonFilter" aria-label="Ablehnungsgrund filtern"></select>
+        <select id="sourceFilter" aria-label="Quelle filtern"></select>
+        <div class="toggle-row" role="tablist" aria-label="Ansicht">
+          <button type="button" class="active" data-view="accepted">Deals</button>
+          <button type="button" data-view="freshRejected">Frisch abgelehnt</button>
+          <button type="button" data-view="allRejected">Alle abgelehnt</button>
+        </div>
+      </div>
+
+      <section class="section">
+        <div class="section-head">
+          <h2 id="mainSectionTitle">Akzeptierte Deals</h2>
+          <span id="mainSectionMeta"></span>
+        </div>
+        <div id="mainList" class="list"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Top-Ablehnungsgruende</h2>
+          <span>hilft beim Tuning der Regeln</span>
+        </div>
+        <div id="reasonList" class="list"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Watchlist</h2>
+          <span id="watchlistMeta"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Account</th>
+                <th>Prioritaet</th>
+                <th>Kategorie</th>
+                <th>Notiz</th>
+                <th>Aktion</th>
+              </tr>
+            </thead>
+            <tbody id="watchlistBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const state = {
+      data: null,
+      view: 'accepted',
+      query: '',
+      reason: 'all',
+      source: 'all',
+      reviewed: new Set(JSON.parse(localStorage.getItem('instagramAiReviewed') || '[]')),
+    };
+
+    const files = {
+      deals: './deals-pending-instagram-ai.json',
+      report: './instagram-ai-report.json',
+      watchlist: './instagram-watchlist.json',
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function cleanText(value) {
+      return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function formatDate(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return cleanText(value);
+      return date.toLocaleString('de-AT', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
+
+    function formatShortDate(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return cleanText(value);
+      return date.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit' });
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    async function loadJson(url) {
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error(url + ' konnte nicht geladen werden (' + response.status + ')');
+      return response.json();
+    }
+
+    function candidateKey(item) {
+      return [item.url, item.reason || item.title || item.brand].filter(Boolean).join('|');
+    }
+
+    function saveReviewed() {
+      localStorage.setItem('instagramAiReviewed', JSON.stringify([...state.reviewed]));
+    }
+
+    function showToast(message) {
+      const toast = $('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    async function copyText(text, label) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(label || 'Kopiert');
+      } catch {
+        showToast('Kopieren im Browser nicht erlaubt');
+      }
+    }
+
+    function setStatus(type, text) {
+      $('statusDot').className = 'status-dot ' + (type || '');
+      $('statusText').textContent = text;
+    }
+
+    function normalizeDeal(deal) {
+      return {
+        kind: 'accepted',
+        title: cleanText(deal.title) || 'Instagram Deal',
+        brand: cleanText(deal.brand) || 'Unbekannt',
+        url: cleanText(deal.url),
+        pubDate: cleanText(deal.pubDate),
+        ageDays: deal.pubDate ? Math.max(0, Math.floor((Date.now() - new Date(deal.pubDate).getTime()) / 86400000)) : null,
+        source: cleanText(deal.evidence?.source || deal.source || 'instagram-ai-agent'),
+        score: Number(deal.qualityScore || 0),
+        reason: '',
+        reasons: deal.evidence?.heuristicReasons || [],
+        sample: cleanText(deal.evidence?.textSample || deal.description),
+        expires: cleanText(deal.expires),
+        raw: deal,
+      };
+    }
+
+    function normalizeRejected(row) {
+      return {
+        kind: 'rejected',
+        title: cleanText(row.title) || 'Abgelehnter Instagram-Post',
+        brand: '',
+        url: cleanText(row.url),
+        pubDate: cleanText(row.pubDate),
+        ageDays: typeof row.ageDays === 'number' ? row.ageDays : null,
+        source: cleanText(row.source || 'instagram-ai-agent'),
+        score: Number(row.score || 0),
+        reason: cleanText(row.reason || 'abgelehnt'),
+        reasons: row.reasons || [],
+        sample: cleanText(row.textSample || ''),
+        expires: '',
+        raw: row,
+      };
+    }
+
+    function deriveFreshRejected(report) {
+      if (Array.isArray(report.freshRejected)) return report.freshRejected.map(normalizeRejected);
+      const maxAge = Number(report.config?.maxAgeDays || 7);
+      return (report.rejected || [])
+        .map(normalizeRejected)
+        .filter((item) => typeof item.ageDays === 'number' && item.ageDays <= maxAge);
+    }
+
+    function buildViewData() {
+      const { deals, report } = state.data;
+      const accepted = (deals.deals || []).map(normalizeDeal);
+      const freshRejected = deriveFreshRejected(report);
+      const allRejected = (report.rejected || []).map(normalizeRejected);
+      return { accepted, freshRejected, allRejected };
+    }
+
+    function buildOptions() {
+      const viewData = buildViewData();
+      const all = [...viewData.accepted, ...viewData.freshRejected, ...viewData.allRejected];
+      const reasons = [...new Set(all.map((item) => item.reason).filter(Boolean))].sort();
+      const sources = [...new Set(all.map((item) => item.source).filter(Boolean))].sort();
+
+      $('reasonFilter').innerHTML = '<option value="all">Alle Gruende</option>' + reasons.map((reason) => (
+        '<option value="' + escapeHtml(reason) + '">' + escapeHtml(reason) + '</option>'
+      )).join('');
+      $('sourceFilter').innerHTML = '<option value="all">Alle Quellen</option>' + sources.map((source) => (
+        '<option value="' + escapeHtml(source) + '">' + escapeHtml(source) + '</option>'
+      )).join('');
+    }
+
+    function filterItems(items) {
+      const query = state.query.toLowerCase();
+      return items.filter((item) => {
+        if (state.reason !== 'all' && item.reason !== state.reason) return false;
+        if (state.source !== 'all' && item.source !== state.source) return false;
+        if (!query) return true;
+        return [item.title, item.brand, item.url, item.reason, item.source, item.sample]
+          .join(' ')
+          .toLowerCase()
+          .includes(query);
+      });
+    }
+
+    function renderItem(item) {
+      const isReviewed = state.reviewed.has(candidateKey(item));
+      const typeClass = item.kind === 'accepted' ? 'accepted' : 'rejected';
+      const reasonBadge = item.reason ? '<span class="badge amber">' + escapeHtml(item.reason) + '</span>' : '<span class="badge green">akzeptiert</span>';
+      const scoreBadge = '<span class="badge blue">Score ' + Math.round(item.score || 0) + '</span>';
+      const ageBadge = typeof item.ageDays === 'number'
+        ? '<span class="badge ' + (item.ageDays <= 7 ? 'green' : 'red') + '">' + item.ageDays + ' Tage alt</span>'
+        : '<span class="badge red">kein Datum</span>';
+      const expiryBadge = item.expires ? '<span class="badge amber">bis ' + escapeHtml(formatShortDate(item.expires)) + '</span>' : '';
+      const reviewedBadge = isReviewed ? '<span class="badge">lokal geprueft</span>' : '';
+      const source = item.source ? '<span class="badge">' + escapeHtml(item.source) + '</span>' : '';
+      const reasons = (item.reasons || []).slice(0, 8).map((reason) => '<span class="badge">' + escapeHtml(reason) + '</span>').join('');
+      const sample = item.sample ? '<div class="sample">' + escapeHtml(item.sample) + '</div>' : '';
+      const copyPayload = JSON.stringify(item.raw || item, null, 2);
+
+      return [
+        '<article class="item ' + typeClass + (isReviewed ? ' reviewed' : '') + '">',
+          '<div class="item-top">',
+            '<div class="item-title">',
+              '<strong>' + escapeHtml(item.title) + '</strong>',
+              '<span>' + escapeHtml(item.brand || item.url || '') + '</span>',
+            '</div>',
+            '<span class="badge">' + escapeHtml(formatDate(item.pubDate)) + '</span>',
+          '</div>',
+          '<div class="badges">' + reasonBadge + scoreBadge + ageBadge + expiryBadge + source + reviewedBadge + reasons + '</div>',
+          sample,
+          '<div class="actions">',
+            item.url ? '<a href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener">Post oeffnen</a>' : '',
+            '<button type="button" data-action="copy" data-payload="' + escapeHtml(copyPayload) + '">JSON kopieren</button>',
+            item.url ? '<button type="button" data-action="copy-url" data-payload="' + escapeHtml(item.url) + '">URL kopieren</button>' : '',
+            '<button type="button" class="primary" data-action="reviewed" data-key="' + escapeHtml(candidateKey(item)) + '">' + (isReviewed ? 'Geprueft entfernen' : 'Als geprueft markieren') + '</button>',
+          '</div>',
+        '</article>',
+      ].join('');
+    }
+
+    function renderMainList() {
+      const viewData = buildViewData();
+      const titles = {
+        accepted: 'Akzeptierte Deals',
+        freshRejected: 'Frisch abgelehnte Posts',
+        allRejected: 'Alle abgelehnten Kandidaten',
+      };
+      const items = filterItems(viewData[state.view] || []);
+      $('mainSectionTitle').textContent = titles[state.view] || 'Review';
+      $('mainSectionMeta').textContent = items.length + ' Eintraege';
+      $('mainList').innerHTML = items.length
+        ? items.map(renderItem).join('')
+        : '<div class="empty">Keine Eintraege fuer diesen Filter.</div>';
+    }
+
+    function renderReasons() {
+      const counts = state.data.report.rejectionReasons || {};
+      const entries = Object.entries(counts).sort((a, b) => Number(b[1]) - Number(a[1]));
+      $('reasonList').innerHTML = entries.length
+        ? entries.slice(0, 10).map(([reason, count]) => (
+          '<div class="item rejected"><div class="item-top"><div class="item-title"><strong>' + escapeHtml(reason) + '</strong><span>' + count + ' Kandidaten</span></div><span class="badge amber">' + count + '</span></div></div>'
+        )).join('')
+        : '<div class="empty">Noch keine Ablehnungsgruende im Report.</div>';
+    }
+
+    function renderWatchlist() {
+      const accounts = state.data.watchlist.accounts || [];
+      $('watchlistMeta').textContent = accounts.length + ' Accounts';
+      $('watchlistBody').innerHTML = accounts.map((account) => {
+        const username = cleanText(account.username);
+        const url = 'https://www.instagram.com/' + encodeURIComponent(username) + '/';
+        return [
+          '<tr>',
+            '<td><strong>' + escapeHtml(username) + '</strong></td>',
+            '<td>' + escapeHtml(account.priority || '') + '</td>',
+            '<td>' + escapeHtml(account.category || '') + '</td>',
+            '<td>' + escapeHtml(account.note || '') + '</td>',
+            '<td><a href="' + url + '" target="_blank" rel="noopener">Profil</a></td>',
+          '</tr>',
+        ].join('');
+      }).join('');
+    }
+
+    function renderStats() {
+      const { deals, report, watchlist } = state.data;
+      const freshRejected = deriveFreshRejected(report);
+      const profiles = report.profileDiscovery || {};
+      const updated = report.lastUpdated || deals.lastUpdated;
+      const updatedLabel = formatDate(updated);
+      $('sideUpdated').textContent = updated ? formatShortDate(updated) : '-';
+      $('sideAccepted').textContent = deals.totalDeals || 0;
+      $('sideFreshRejected').textContent = freshRejected.length;
+      $('sideWatchlist').textContent = (watchlist.accounts || []).length;
+      $('metricDeals').textContent = deals.totalDeals || 0;
+      $('metricCandidates').textContent = report.discoveredCandidates || 0;
+      $('metricFreshRejected').textContent = freshRejected.length;
+      $('metricProfiles').textContent = (profiles.discovered || 0) + '/' + (profiles.accountsVisited || 0);
+      const accepted = Number(deals.totalDeals || 0);
+      setStatus(accepted > 0 ? 'ok' : '', 'Letzter Lauf: ' + updatedLabel);
+    }
+
+    function renderAll() {
+      buildOptions();
+      renderStats();
+      renderMainList();
+      renderReasons();
+      renderWatchlist();
+    }
+
+    async function init() {
+      try {
+        const [deals, report, watchlist] = await Promise.all([
+          loadJson(files.deals),
+          loadJson(files.report),
+          loadJson(files.watchlist),
+        ]);
+        state.data = { deals, report, watchlist };
+        renderAll();
+      } catch (error) {
+        setStatus('bad', 'Daten konnten nicht geladen werden');
+        $('mainList').innerHTML = '<div class="error">' + escapeHtml(error.message) + '</div>';
+      }
+    }
+
+    document.querySelectorAll('[data-view]').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('[data-view]').forEach((item) => item.classList.toggle('active', item === button));
+        state.view = button.dataset.view;
+        renderMainList();
+      });
+    });
+
+    $('searchInput').addEventListener('input', (event) => {
+      state.query = event.target.value;
+      renderMainList();
+    });
+
+    $('reasonFilter').addEventListener('change', (event) => {
+      state.reason = event.target.value;
+      renderMainList();
+    });
+
+    $('sourceFilter').addEventListener('change', (event) => {
+      state.source = event.target.value;
+      renderMainList();
+    });
+
+    $('clearReviewedBtn').addEventListener('click', () => {
+      state.reviewed.clear();
+      saveReviewed();
+      renderMainList();
+      showToast('Lokale Markierungen geloescht');
+    });
+
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+      const action = button.dataset.action;
+      if (action === 'copy' || action === 'copy-url') {
+        copyText(button.dataset.payload || '', action === 'copy-url' ? 'URL kopiert' : 'JSON kopiert');
+      }
+      if (action === 'reviewed') {
+        const key = button.dataset.key;
+        if (state.reviewed.has(key)) state.reviewed.delete(key);
+        else state.reviewed.add(key);
+        saveReviewed();
+        renderMainList();
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
