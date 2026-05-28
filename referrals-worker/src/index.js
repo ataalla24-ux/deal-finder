@@ -1406,6 +1406,15 @@ function renderReferralLanding(code, requestUrl) {
   });
 }
 
+function redirectReferralToWebsite(code, requestUrl) {
+  const dealId = normalizeDealId(requestUrl.searchParams.get('deal'));
+  const destination = new URL('https://ataalla24-ux.github.io/deal-finder/');
+  destination.searchParams.set('ref', code);
+  destination.searchParams.set('source', dealId ? 'legacy_deal_share' : 'legacy_referral_share');
+  if (dealId) destination.searchParams.set('deal', dealId);
+  return Response.redirect(destination.toString(), 302);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -1422,7 +1431,7 @@ export default {
     if (request.method === 'GET' && path.startsWith('/r/')) {
       const code = normalizeCode(decodeURIComponent(path.slice(3)));
       if (!code) return invalid('Invalid referral code', 404);
-      return renderReferralLanding(code, url);
+      return redirectReferralToWebsite(code, url);
     }
 
     if (!env.REFERRAL_KV) {

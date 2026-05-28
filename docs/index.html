@@ -10,6 +10,8 @@
   <meta property="og:title" content="FreeFinder - Täglich kostenlose Angebote in Wien">
   <meta property="og:description" content="Kostenlose Angebote, Gratis-Deals, Rabatte und lokale Highlights für Wien - schnell am iPhone geöffnet.">
   <meta property="og:image" content="https://ataalla24-ux.github.io/deal-finder/og-image.svg">
+  <meta property="og:url" content="https://ataalla24-ux.github.io/deal-finder/">
+  <meta property="og:site_name" content="FreeFinder Wien">
   <meta property="og:type" content="website">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.svg" type="image/svg+xml">
@@ -1495,9 +1497,14 @@
   </div>
 
   <script>
-    const appStoreUrl = "https://apps.apple.com/app/id6758958213";
+    const appStoreBaseUrl = "https://apps.apple.com/app/id6758958213";
+    const referralApiBase = "https://freefinder-referrals.freefinder-stefan.workers.dev";
     const navToggle = document.getElementById("mobileMenu");
     const navLinks = document.getElementById("navLinks");
+    const params = new URLSearchParams(window.location.search);
+    const refCode = normalizeReferralCode(params.get("ref"));
+    const dealId = params.get("deal");
+    const appStoreUrl = getAppStoreDownloadUrl(refCode);
 
     navToggle?.addEventListener("click", () => {
       const isOpen = navLinks.classList.toggle("open");
@@ -1511,8 +1518,6 @@
       });
     });
 
-    const params = new URLSearchParams(window.location.search);
-    const dealId = params.get("deal");
     if (dealId) {
       const banner = document.getElementById("deepLinkBanner");
       const button = document.getElementById("deepLinkButton");
@@ -1521,12 +1526,89 @@
       if (banner && button) {
         banner.classList.add("visible");
         button.href = appLink;
-        setTimeout(() => {
-          if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-            window.location.href = appLink;
-          }
-        }, 420);
       }
+    }
+
+    document.querySelectorAll('a[href^="https://apps.apple.com"]').forEach((link) => {
+      link.href = appStoreUrl;
+      if (refCode) {
+        link.addEventListener("click", async (event) => {
+          event.preventDefault();
+          try {
+            await prepareReferralDownload();
+          } catch {}
+          window.location.href = link.href;
+        });
+      }
+    });
+
+    function normalizeReferralCode(value) {
+      const code = String(value || "").trim().toUpperCase();
+      return /^FF-[A-Z0-9]{4,12}$/.test(code) ? code : "";
+    }
+
+    function getAppStoreDownloadUrl(code) {
+      if (!code) return appStoreBaseUrl;
+      return `${appStoreBaseUrl}?ct=${encodeURIComponent(`ref_${code}`)}&mt=8`;
+    }
+
+    function visitorId() {
+      const key = "freefinder_referral_visitor_id";
+      let id = localStorage.getItem(key);
+      if (!id) {
+        id = Math.random().toString(36).slice(2, 14) + Date.now().toString(36);
+        localStorage.setItem(key, id);
+      }
+      return id;
+    }
+
+    async function referralRequest(path, body) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 1400);
+      try {
+        const response = await fetch(referralApiBase + path, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+          signal: controller.signal
+        });
+        if (!response.ok) throw new Error("Referral request failed");
+        return response.json();
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    async function prepareReferralDownload() {
+      if (!refCode) return;
+      const visitor = visitorId();
+      const claim = await referralRequest("/api/referrals/claim/start", {
+        code: refCode,
+        visitorId: visitor,
+        userAgent: navigator.userAgent || "",
+        source: dealId ? "website-deal-share" : "website-invite",
+        dealId: dealId || undefined
+      });
+      if (!claim?.claimToken) return;
+
+      const clipboardPayload = {
+        code: refCode,
+        claimToken: claim.claimToken,
+        visitorId: visitor,
+        startedAt: Date.now(),
+        dealId: dealId || null
+      };
+      try {
+        await navigator.clipboard?.writeText("FREEFINDER_REFERRAL:" + JSON.stringify(clipboardPayload));
+      } catch {}
+
+      await referralRequest("/api/referrals/claim/complete", {
+        code: refCode,
+        visitorId: visitor,
+        claimToken: claim.claimToken,
+        userAgent: navigator.userAgent || "",
+        installSource: dealId ? "deal-share-download" : "referral-download-click"
+      });
     }
 
     window.addEventListener("load", () => {
