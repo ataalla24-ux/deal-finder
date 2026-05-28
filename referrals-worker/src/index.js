@@ -9,6 +9,9 @@ const JSON_HEADERS = {
 const MIN_CONFIRM_DELAY_MS = 15 * 1000;
 const textEncoder = new TextEncoder();
 const APP_STORE_APP_ID = '6758958213';
+const WEBSITE_HOME_URL = 'https://ataalla24-ux.github.io/deal-finder/';
+const WEBSITE_DEALS_JSON_URL = `${WEBSITE_HOME_URL}deals.json`;
+const WEBSITE_SHARE_IMAGE_URL = `${WEBSITE_HOME_URL}og-preview.png`;
 const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Europe/Vienna',
   year: 'numeric',
@@ -1006,6 +1009,133 @@ async function buildDealLinkPreview(rawUrl) {
   };
 }
 
+async function loadPublicDealsForShare() {
+  const response = await fetch(WEBSITE_DEALS_JSON_URL, {
+    headers: {
+      accept: 'application/json',
+      'cache-control': 'no-cache',
+    },
+    cf: {
+      cacheTtl: 180,
+      cacheEverything: true,
+    },
+  });
+
+  if (!response.ok) return [];
+
+  const raw = await response.json();
+  const deals = Array.isArray(raw) ? raw : (Array.isArray(raw?.deals) ? raw.deals : []);
+  return deals.filter((deal) => deal && typeof deal === 'object');
+}
+
+async function dealForShare(dealId) {
+  const normalizedDealId = normalizeDealId(dealId);
+  if (!normalizedDealId) return null;
+  const deals = await loadPublicDealsForShare();
+  return deals.find((deal) => normalizeDealId(deal.id) === normalizedDealId) || null;
+}
+
+function buildDealShareDestination(dealId, requestUrl) {
+  const destination = new URL(WEBSITE_HOME_URL);
+  const code = normalizeCode(requestUrl.searchParams.get('ref'));
+  if (code) destination.searchParams.set('ref', code);
+  destination.searchParams.set('source', 'deal_share_preview');
+  destination.searchParams.set('deal', dealId);
+  return destination.toString();
+}
+
+function dealShareTitle(deal) {
+  const title = cleanPreviewText(deal?.title, 120);
+  if (!title) return 'FreeFinder Deal in Wien';
+  return `${title} - FreeFinder Wien`;
+}
+
+function dealShareDescription(deal) {
+  const brand = cleanPreviewText(deal?.brand, 80);
+  const description = cleanPreviewText(deal?.description, 190);
+  const location = cleanPreviewText(deal?.distance || deal?.location, 90);
+  const type = cleanPreviewText(deal?.type, 40).toLowerCase();
+  const intro = type === 'gratis' ? 'Gratis-Deal' : 'Deal';
+  const parts = [
+    brand,
+    description,
+    location ? `Ort: ${location}` : '',
+  ].filter(Boolean);
+  return cleanPreviewText(`${intro} in Wien: ${parts.join(' - ')}. Direkt in FreeFinder oeffnen.`, 260);
+}
+
+async function renderDealSharePreview(dealId, requestUrl) {
+  const normalizedDealId = normalizeDealId(dealId);
+  if (!normalizedDealId) return invalid('Invalid deal id', 404);
+
+  const deal = await dealForShare(normalizedDealId);
+  const destination = buildDealShareDestination(normalizedDealId, requestUrl);
+  const title = dealShareTitle(deal);
+  const description = deal
+    ? dealShareDescription(deal)
+    : 'Oeffne diesen geteilten Wien-Deal direkt in FreeFinder.';
+  const safeTitle = escapeHtml(title);
+  const safeDescription = escapeHtml(description);
+  const safeDestination = escapeHtml(destination);
+  const jsDestination = JSON.stringify(destination);
+
+  const html = `<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${safeTitle}</title>
+  <meta name="description" content="${safeDescription}" />
+  <meta property="og:title" content="${safeTitle}" />
+  <meta property="og:description" content="${safeDescription}" />
+  <meta property="og:image" content="${WEBSITE_SHARE_IMAGE_URL}" />
+  <meta property="og:image:secure_url" content="${WEBSITE_SHARE_IMAGE_URL}" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="${safeDestination}" />
+  <meta property="og:site_name" content="FreeFinder Wien" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${safeTitle}" />
+  <meta name="twitter:description" content="${safeDescription}" />
+  <meta name="twitter:image" content="${WEBSITE_SHARE_IMAGE_URL}" />
+  <meta http-equiv="refresh" content="0;url=${safeDestination}" />
+  <link rel="canonical" href="${safeDestination}" />
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #fffaf4;
+      color: #151414;
+    }
+    a {
+      color: #071634;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <strong>${safeTitle}</strong><br />
+    <a href="${safeDestination}">Deal in FreeFinder oeffnen</a>
+  </main>
+  <script>location.replace(${jsDestination});</script>
+</body>
+</html>`;
+
+  return new Response(html, {
+    status: 200,
+    headers: {
+      'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'public, max-age=300',
+    },
+  });
+}
+
 function escapeHtml(value) {
   return String(value || '')
     .replace(/&/g, '&amp;')
@@ -1426,6 +1556,11 @@ export default {
 
     if (path === '/health' || path === '/api/health') {
       return json({ ok: true, service: 'freefinder-referrals' });
+    }
+
+    if (request.method === 'GET' && path.startsWith('/d/')) {
+      const dealId = decodeURIComponent(path.slice(3));
+      return renderDealSharePreview(dealId, url);
     }
 
     if (request.method === 'GET' && path.startsWith('/r/')) {
