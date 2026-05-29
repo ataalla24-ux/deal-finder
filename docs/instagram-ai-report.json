@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-28T12:01:11.395Z",
+  "lastUpdated": "2026-05-29T11:50:43.787Z",
   "config": {
     "maxCandidates": 80,
     "maxDeals": 35,
@@ -19,10 +19,10 @@
     "model": "gpt-4.1-mini",
     "openAiKeyPresent": true
   },
-  "watchlistAccounts": 38,
+  "watchlistAccounts": 39,
   "discoveredCandidates": 80,
-  "acceptedDeals": 0,
-  "heuristicAccepted": 0,
+  "acceptedDeals": 1,
+  "heuristicAccepted": 1,
   "aiAccepted": 0,
   "search": {
     "enabled": true,
@@ -73,48 +73,34 @@
     "discovered": 40,
     "errors": []
   },
-  "existingCandidates": 485,
+  "existingCandidates": 439,
   "seedUrls": 0,
   "profileDiscovery": {
     "accountsVisited": 8,
     "discovered": 0,
-    "blocked": 8,
-    "noPostLinks": 0,
+    "blocked": 0,
+    "noPostLinks": 8,
     "errors": []
   },
   "previewErrors": [],
   "renderErrors": [],
-  "aiErrors": [],
+  "aiErrors": [
+    "OpenAI HTTP 429: {\n    \"error\": {\n        \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.\",\n        \"type\": \"insufficient"
+  ],
   "rejectionReasons": {
-    "Instagram-Post aelter als 7 Tage": 65,
-    "kein echtes Instagram-Postdatum": 5,
-    "kein eindeutiges Wien-Signal im Instagram-Post": 5,
-    "relative Kurz-Aktion ist abgelaufen": 3,
-    "explizites Aktionsdatum liegt in der Vergangenheit": 2
+    "Instagram-Post aelter als 7 Tage": 60,
+    "kein eindeutiges Wien-Signal im Instagram-Post": 7,
+    "kein echtes Instagram-Postdatum": 6,
+    "NeoTaste blockiert": 3,
+    "Normalisierung/Validity-Filter blockiert Deal": 1,
+    "kein starkes Gratis-/Deal-Signal im Instagram-Post": 1,
+    "relative Kurz-Aktion ist abgelaufen": 1
   },
   "freshRejected": [
     {
-      "url": "https://www.instagram.com/reel/DYxez3aCNFU/",
-      "score": 53,
-      "source": "food3",
-      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
-      "reasons": [
-        "deal-signal",
-        "public-preview",
-        "existing-source-context",
-        "age-2d"
-      ],
-      "pubDate": "2026-05-25T19:20:33.000Z",
-      "ageDays": 2,
-      "ageDaysExact": 2.69,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "DRESDEN FOR FRIENDS | Sparen bei Restaurants & Erlebnissen auf Instagram: \"💸 Wir zeigen dir in 20 Sekunden, wie du mit deiner Dresden for Friends Karte sparen kannst 👀✨ So einfac",
-      "textSample": "DRESDEN FOR FRIENDS | Sparen bei Restaurants & Erlebnissen auf Instagram: \"💸 Wir zeigen dir in 20 Sekunden, wie du mit deiner Dresden for Friends Karte sparen kannst 👀✨ So einfach funktioniert’s: 1️⃣ App öffnen & einen Spot aussuchen 2️⃣ Karte oder App vorzeigen 3️⃣ Das zweite Angebot kostenlos genießen 🤭 Mit über 280 Deals in den Bereichen Restaurants, W"
-    },
-    {
       "url": "https://www.instagram.com/p/DYzrSe3sKGX/",
-      "score": 49,
-      "source": "firecrawl5",
+      "score": 69,
+      "source": "firecrawl5, all",
       "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
         "deal-signal",
@@ -122,15 +108,53 @@
         "public-preview",
         "existing-source-context",
         "known-source",
-        "age-1d",
-        "expired-language"
+        "age-2d"
       ],
       "pubDate": "2026-05-26T15:47:44.000Z",
-      "ageDays": 1,
-      "ageDaysExact": 1.84,
+      "ageDays": 2,
+      "ageDaysExact": 2.84,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "duka.direct auf Instagram: \"Syrian Restaurant deal is live on duka.direct! Don't miss out, order now! 🔥 #KilaKituKipo\"",
-      "textSample": "duka.direct auf Instagram: \"Syrian Restaurant deal is live on duka.direct! Don't miss out, order now! 🔥 #KilaKituKipo\" 11 likes, 0 comments - dukadirect am May 26, 2026: \"Syrian Restaurant deal is live on duka.direct! Don't miss out, order now! 🔥 #KilaKituKipo\". Anmelden Registrieren Verpasse keinen Beitrag mehr von dukadirect Registriere dich für Instagra"
+      "textSample": "duka.direct auf Instagram: \"Syrian Restaurant deal is live on duka.direct! Don't miss out, order now! 🔥 #KilaKituKipo\" 12 likes, 0 comments - dukadirect am May 26, 2026: \"Syrian Restaurant deal is live on duka.direct! Don't miss out, order now! 🔥 #KilaKituKipo\". Anmelden Registrieren Verpasse keinen Beitrag mehr von dukadirect Registriere dich für Instagra"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DYr87WpNI_j/",
+      "score": 64,
+      "source": "duckduckgo",
+      "reason": "Normalisierung/Validity-Filter blockiert Deal",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "public-preview",
+        "age-5d"
+      ],
+      "pubDate": "2026-05-23T15:49:16.000Z",
+      "ageDays": 5,
+      "ageDaysExact": 5.83,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Jenny Jiang | Aktivitäten & Unternehmungen auf Instagram: \"5 Kilo 🍓🍓 gepflückt. Die Selbsterntefelder haben endlich geöffnet! Wir waren beim @biohof_radl Von denen gibt es zwei S",
+      "textSample": "Jenny Jiang | Aktivitäten & Unternehmungen auf Instagram: \"5 Kilo 🍓🍓 gepflückt. Die Selbsterntefelder haben endlich geöffnet! Wir waren beim @biohof_radl Von denen gibt es zwei Selbsterntefelder, eines in Strebersdorf eines auf der Breitenleer Straße. Man zahlt 14€ Eintritt (als Erwachsener), dabei sind 2kg Erdbeeren inkludiert. Kinder zahlen 7€ bis 12 Jah"
+    },
+    {
+      "url": "https://www.instagram.com/p/DYrHeIIDQRq/",
+      "score": 52,
+      "source": "community",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "current-language",
+        "public-preview",
+        "existing-source-context",
+        "age-3d",
+        "expired-language"
+      ],
+      "pubDate": "2026-05-25T12:52:41.000Z",
+      "ageDays": 3,
+      "ageDaysExact": 3.96,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Eis-Greissler auf Instagram: \"🍦🎉 Jubiläums-Special Nr. 3 🎉🍦 Weil ein Jubiläum ohne Eis einfach nicht geht, schenken wir euch GRATIS Eis! 💛✨ In allen Eis-Greissler Shops in Öst",
+      "textSample": "Eis-Greissler auf Instagram: \"🍦🎉 Jubiläums-Special Nr. 3 🎉🍦 Weil ein Jubiläum ohne Eis einfach nicht geht, schenken wir euch GRATIS Eis! 💛✨ In allen Eis-Greissler Shops in Österreich und im Hofladen in Krumbach gibt es von Dienstag bis Sonntag (26.-31.05.) in die ersten 15 Minuten nach Öffnung kostenloses Eis. 🍨🎈 Und in der Eis-Greissler Welt wartet u"
     },
     {
       "url": "https://www.instagram.com/reel/DYpEgOpIm4v/",
@@ -144,19 +168,19 @@
         "current-language",
         "public-preview",
         "existing-source-context",
-        "age-5d",
+        "age-6d",
         "expired-relative-date"
       ],
       "pubDate": "2026-05-22T12:58:27.000Z",
-      "ageDays": 5,
-      "ageDaysExact": 5.96,
+      "ageDays": 6,
+      "ageDaysExact": 6.95,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Wien | Vienna auf Instagram: \"If you don’t know what to do this weekend: Check out @wienliebefestival 💕 📆 When: 23-25 May 2026 📍 Where: Vienna City Hall ✨Entry: free ❤️ Enjoy vi",
-      "textSample": "Wien | Vienna auf Instagram: \"If you don’t know what to do this weekend: Check out @wienliebefestival 💕 📆 When: 23-25 May 2026 📍 Where: Vienna City Hall ✨Entry: free ❤️ Enjoy viennese food, live music & culture programm. ✅Save this for your trip #vienna #thingstodo\" 1,505 likes, 23 comments - vienna am May 22, 2026: \"If you don’t know what to do this week"
+      "textSample": "Wien | Vienna auf Instagram: \"If you don’t know what to do this weekend: Check out @wienliebefestival 💕 📆 When: 23-25 May 2026 📍 Where: Vienna City Hall ✨Entry: free ❤️ Enjoy viennese food, live music & culture programm. ✅Save this for your trip #vienna #thingstodo\" 1,513 likes, 23 comments - vienna am May 22, 2026: \"If you don’t know what to do this week"
     },
     {
       "url": "https://www.instagram.com/p/DYxVsGnDMkH/",
-      "score": 41,
+      "score": 38,
       "source": "firecrawl5",
       "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
@@ -164,11 +188,11 @@
         "public-preview",
         "existing-source-context",
         "known-source",
-        "age-2d"
+        "age-3d"
       ],
       "pubDate": "2026-05-25T18:00:29.000Z",
-      "ageDays": 2,
-      "ageDaysExact": 2.75,
+      "ageDays": 3,
+      "ageDaysExact": 3.74,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "EDEKA Ueltzhöfer auf Instagram: \"Unsere Wochenkarte vom 25. bis 30. Mai 2026 Wir kochen täglich von 11:00 bis 14:30 Uhr frisch für Euch in unserer marktkUEche in Sontheim. Es gibt",
       "textSample": "EDEKA Ueltzhöfer auf Instagram: \"Unsere Wochenkarte vom 25. bis 30. Mai 2026 Wir kochen täglich von 11:00 bis 14:30 Uhr frisch für Euch in unserer marktkUEche in Sontheim. Es gibt jeden Tag ein vegetarisches und ein Fleischgericht für euch zur Auswahl. Wir freuen uns über Rückmeldungen wie euch unsere Wochenkarte für den Mittagstisch* in Sontheim gefällt. *"
@@ -183,158 +207,132 @@
         "public-preview",
         "existing-source-context",
         "known-source",
-        "age-3d"
+        "age-4d"
       ],
       "pubDate": "2026-05-24T20:31:42.000Z",
-      "ageDays": 3,
-      "ageDaysExact": 3.65,
+      "ageDays": 4,
+      "ageDaysExact": 4.64,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "THE DOM - Bar & Restaurant auf Instagram: \"Wochenkarte · 26.–29. Mai Täglich frischer Salat + hausgemachtes Dessert inklusive. 3 Gänge · 11:30–14:30 Uhr Di: Rigatoni all'Arrabbiata",
       "textSample": "THE DOM - Bar & Restaurant auf Instagram: \"Wochenkarte · 26.–29. Mai Täglich frischer Salat + hausgemachtes Dessert inklusive. 3 Gänge · 11:30–14:30 Uhr Di: Rigatoni all'Arrabbiata · Scaloppina ai Funghi · Rinderhüftsteak Mi: Gemischter Salat · Cremiger Risotto · Rinderhüftsteak Do: Gemischter Salat · Hähnchenschnitzel · Rinderhüftsteak Fr: Lachs-Salat · Zan"
     },
     {
-      "url": "https://www.instagram.com/reel/DYmlzscMhDf/",
-      "score": 15,
+      "url": "https://www.instagram.com/reel/DYzjaRrsN2k/",
+      "score": 37,
       "source": "gastro2",
-      "reason": "relative Kurz-Aktion ist abgelaufen",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
-        "deal-signal",
-        "current-language",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-6d",
-        "expired-relative-date"
+        "age-2d"
       ],
-      "pubDate": "2026-05-21T13:50:54.000Z",
-      "ageDays": 6,
-      "ageDaysExact": 6.92,
+      "pubDate": "2026-05-26T14:39:12.000Z",
+      "ageDays": 2,
+      "ageDaysExact": 2.88,
       "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Zushi Market auf Instagram: \"🚨 Zushi Market eröffnet morgen Freitag 22. Mai im @alex_krems 🎉 Freut euch auf unsere Eröffnungsaktionen: 🍣 1+1 gratis aufs All You Can Eat Buffet*",
-      "textSample": "Zushi Market auf Instagram: \"🚨 Zushi Market eröffnet morgen Freitag 22. Mai im @alex_krems 🎉 Freut euch auf unsere Eröffnungsaktionen: 🍣 1+1 gratis aufs All You Can Eat Buffet* 🥗 Bowls ab 1€ 🔥 -50% auf Speisen & Bowls* 🎡 Glücksrad & Eröffnungsprogramm ab 15:30 Uhr Einfach @zushimarket folgen und an der Kassa vorzeigen 💚 📍 ALEX Krems 📅 *22.05.–26.05."
+      "title": "Zushi Market auf Instagram: \"Zushi Market ALEX Krems 🍣✨ All You Can Eat & Drink Buffet auf Ebene 3. So schnell kann’s gehen und der Teller ist voll. 😄 Aber kein Problem, Nachschu",
+      "textSample": "Zushi Market auf Instagram: \"Zushi Market ALEX Krems 🍣✨ All You Can Eat & Drink Buffet auf Ebene 3. So schnell kann’s gehen und der Teller ist voll. 😄 Aber kein Problem, Nachschub gibt’s jederzeit - so viel & oft du willst! Entdecke jetzt unser neues Restaurant mit Sushi, Wok-Gerichten, Vorspeisen, Desserts, Schokobrunnen und vielem mehr. 💚 #zushimarket #"
     },
     {
       "url": "https://www.instagram.com/p/DY0E-jdtcAQ/",
-      "score": 9,
+      "score": 29,
       "source": "firecrawl5",
       "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
         "public-preview",
         "existing-source-context",
         "known-source",
-        "age-1d",
-        "expired-language"
+        "age-2d"
       ],
       "pubDate": "2026-05-26T19:32:47.000Z",
-      "ageDays": 1,
-      "ageDaysExact": 1.69,
+      "ageDays": 2,
+      "ageDaysExact": 2.68,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Mariannenhof auf Instagram: \"Unsere #wochenkarte #mittagessen #alldaylong #special #lehel\"",
       "textSample": "Mariannenhof auf Instagram: \"Unsere #wochenkarte #mittagessen #alldaylong #special #lehel\" 1 likes, 0 comments - mariannenhofbar am May 26, 2026: \"Unsere #wochenkarte #mittagessen #alldaylong #special #lehel\". Anmelden Registrieren Verpasse keinen Beitrag mehr von mariannenhofbar Registriere dich für Instagram, um auf dem Laufenden zu bleiben. Registrieren A"
     },
     {
-      "url": "https://www.instagram.com/reel/DYmMp86E2H2/",
-      "score": 9,
-      "source": "all",
-      "reason": "relative Kurz-Aktion ist abgelaufen",
+      "url": "https://www.instagram.com/p/DYuWVOTMAL7/",
+      "score": 28,
+      "source": "food3, all",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
       "reasons": [
         "vienna",
-        "current-language",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-6d",
-        "expired-relative-date"
+        "age-4d",
+        "false-positive-language"
       ],
-      "pubDate": "2026-05-21T14:30:06.000Z",
-      "ageDays": 6,
-      "ageDaysExact": 6.9,
+      "pubDate": "2026-05-24T14:14:31.000Z",
+      "ageDays": 4,
+      "ageDaysExact": 4.9,
       "postDateSource": "instagram-rendered-time-datetime",
-      "title": "visitaustria auf Instagram: \"Today, on the World Day for Cultural Diversity for Dialogue and Development, we celebrate cultural diversity, dialogue, and the connections that bring",
-      "textSample": "visitaustria auf Instagram: \"Today, on the World Day for Cultural Diversity for Dialogue and Development, we celebrate cultural diversity, dialogue, and the connections that bring people together 🌍 And Vienna is full of moments where cultures come together - in cafés, markets, museums, dance floors, and everyday encounters across the city 🤩 Discover some o"
+      "title": "Ksenia | Content Creator auf Instagram: \"🍕 GIVEAWAY TIME with @pizzeriapummaro Win a meal for two (2 pizzas + 2 lemonades) at Pizzeria Pummaro, home of authentic Neapolitan pizza.",
+      "textSample": "Ksenia | Content Creator auf Instagram: \"🍕 GIVEAWAY TIME with @pizzeriapummaro Win a meal for two (2 pizzas + 2 lemonades) at Pizzeria Pummaro, home of authentic Neapolitan pizza. Their incredible tasty pizzas are made with 48-hour sourdough for lightness, and the menu has an endless variety of different flavors, so you will definitely find something you li"
     },
     {
-      "url": "https://www.instagram.com/p/DYowWZOjASG/",
-      "score": 0,
-      "source": "food3",
-      "reason": "explizites Aktionsdatum liegt in der Vergangenheit",
+      "url": "https://www.instagram.com/p/DY3-4IsMGch/",
+      "score": 13,
+      "source": "firecrawl5",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-1d",
+        "false-positive-language"
+      ],
+      "pubDate": "2026-05-28T07:56:09.000Z",
+      "ageDays": 1,
+      "ageDaysExact": 1.16,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "@restaurantweek_de auf Instagram: \"Hey Foodie! Überrasche deine Liebsten diesen Sommer mit einer Einladung zum Festival! ☀️🍽️ Mach mit bei unserem Gewinnspiel und gewinne eins von",
+      "textSample": "@restaurantweek_de auf Instagram: \"Hey Foodie! Überrasche deine Liebsten diesen Sommer mit einer Einladung zum Festival! ☀️🍽️ Mach mit bei unserem Gewinnspiel und gewinne eins von 5x2 Tickets für die RestaurantWeek! 🎟️✨ So einfach bist du dabei: 1️⃣ Folge @restaurantweek_de 2️⃣ Verrate uns in den Kommentaren, in welches der teilnehmenden Restauranst du am"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DYy9Y18tb44/",
+      "score": 0,
+      "source": "food3, gastro2",
+      "reason": "NeoTaste blockiert",
+      "reasons": [
+        "vienna",
         "deal-signal",
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-6d",
-        "false-positive-language",
-        "past-offer-date"
+        "age-1d",
+        "blocked-source",
+        "false-positive-language"
       ],
-      "pubDate": "2026-05-22T10:00:08.000Z",
-      "ageDays": 6,
-      "ageDaysExact": 6.08,
+      "pubDate": "2026-05-27T15:44:18.000Z",
+      "ageDays": 1,
+      "ageDaysExact": 1.84,
       "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Raku Ramen auf Instagram: \"Zwei Jahre voller toller Momente und das möchten wir mit euch feiern! 🎉 Danke für euren ganzen Support, eure Besuche und eure Liebe zu unserem Essen. De",
-      "textSample": "Raku Ramen auf Instagram: \"Zwei Jahre voller toller Momente und das möchten wir mit euch feiern! 🎉 Danke für euren ganzen Support, eure Besuche und eure Liebe zu unserem Essen. Deshalb verlosen wir 5x unsere leckeren Ramen oder Bowls mit einem Getränk an euch! 🤤 Du möchtest gewinnen? So landest du im Lostopf: So machst du mit: 1. ❤️ Liken: Gib diesem Beitr"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DYm-F0nM6sO/",
-      "score": 0,
-      "source": "gastro2",
-      "reason": "explizites Aktionsdatum liegt in der Vergangenheit",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "current-language",
-        "public-preview",
-        "existing-source-context",
-        "age-6d",
-        "expired-language",
-        "past-offer-date",
-        "expired-relative-date"
-      ],
-      "pubDate": "2026-05-21T17:23:21.000Z",
-      "ageDays": 6,
-      "ageDaysExact": 6.78,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Zushi Market auf Instagram: \"Morgen, am Fr, 22.05. feiern wir die Eröffnung von Zushi Market im ALEX Krems und so findest du uns auf Ebene 3 neben dem Media Markt. Alle Infos zur A",
-      "textSample": "Zushi Market auf Instagram: \"Morgen, am Fr, 22.05. feiern wir die Eröffnung von Zushi Market im ALEX Krems und so findest du uns auf Ebene 3 neben dem Media Markt. Alle Infos zur Aktion findest du auf unserem Profil. 📍 Zushi Market im ALEX Krems 📅 22. Mai 2026 Markier die Person, mit der du hingehen würdest 👇🍱 Aktion nur am 22.05.-26.05. gültig. Nur für"
+      "title": "Tastyfood auf Instagram: \"1€ Matcha Eis 🤍 | Anzeige Mit @neotaste.wien könnt ihr euch von 26.05 14 Tage lang ein veganes Matcha Eis um nur 1€ sichern🤍 @chasenbrew Code: Tastyvien",
+      "textSample": "Tastyfood auf Instagram: \"1€ Matcha Eis 🤍 | Anzeige Mit @neotaste.wien könnt ihr euch von 26.05 14 Tage lang ein veganes Matcha Eis um nur 1€ sichern🤍 @chasenbrew Code: Tastyvienna2m für 2 Monate gratis NeoTaste 🩷 & 20% Rabatt auf alle Abos als Bestandskunden 🥰 📍Chasen Brew SCS #matcha #icecream #matchaeis #foodvienna #wien tastyfoodvienna foodie\" 315 l"
     }
   ],
   "rejected": [
     {
-      "url": "https://www.instagram.com/reel/DXwmsHWsAMY/",
-      "score": 22,
+      "url": "https://www.instagram.com/reel/DYr87WpNI_j/",
+      "score": 64,
       "source": "duckduckgo",
-      "reason": "Instagram-Post aelter als 7 Tage",
+      "reason": "Normalisierung/Validity-Filter blockiert Deal",
       "reasons": [
         "vienna",
         "deal-signal",
-        "food-drink",
         "public-preview",
-        "age-27d",
-        "false-positive-language"
+        "age-5d"
       ],
-      "pubDate": "2026-04-30T14:43:16.000Z",
-      "ageDays": 27,
-      "ageDaysExact": 27.89,
+      "pubDate": "2026-05-23T15:49:16.000Z",
+      "ageDays": 5,
+      "ageDaysExact": 5.83,
       "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Lara | VIENNA TRAVEL BLOGGER auf Instagram: \"8 THINGS TO DO IN MAY IN VIENNA 🇦🇹 🇬🇧 English text in the first comment ⬇️ 🍴 WIENER GENUSSFESTIVAL Von 8. – 10. Mai verwandelt sic",
-      "textSample": "Lara | VIENNA TRAVEL BLOGGER auf Instagram: \"8 THINGS TO DO IN MAY IN VIENNA 🇦🇹 🇬🇧 English text in the first comment ⬇️ 🍴 WIENER GENUSSFESTIVAL Von 8. – 10. Mai verwandelt sich der Stadtpark in ein Paradies für Foodies! Beim Genussfestival kannst du dich durch österreichische Spezialitäten aus allen Bundesländern kosten. Der Eintritt ist gratis! 🛍️ FLA"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DXbjT6Qjc_k/",
-      "score": 50,
-      "source": "duckduckgo",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "food-drink",
-        "public-preview",
-        "age-23d"
-      ],
-      "pubDate": "2026-05-05T07:25:28.000Z",
-      "ageDays": 23,
-      "ageDaysExact": 23.19,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Nadja‘s Taste of Vienna auf Instagram: \"Juicy, Smashburger, richtig gute Corn, Ribs, riesige Loaded Fries und noch mehr gibt es bei @itsforlvrs Was ich toll finde, jeden Burger auf",
-      "textSample": "Nadja‘s Taste of Vienna auf Instagram: \"Juicy, Smashburger, richtig gute Corn, Ribs, riesige Loaded Fries und noch mehr gibt es bei @itsforlvrs Was ich toll finde, jeden Burger auf der Karte gibt es auch in einer Veggie Variation, es wird einfach das Patty getauscht. Und für alle von euch die grossen Hunger haben kann ich euch die LVRS Box empfehlen. Das Ess"
+      "title": "Jenny Jiang | Aktivitäten & Unternehmungen auf Instagram: \"5 Kilo 🍓🍓 gepflückt. Die Selbsterntefelder haben endlich geöffnet! Wir waren beim @biohof_radl Von denen gibt es zwei S",
+      "textSample": "Jenny Jiang | Aktivitäten & Unternehmungen auf Instagram: \"5 Kilo 🍓🍓 gepflückt. Die Selbsterntefelder haben endlich geöffnet! Wir waren beim @biohof_radl Von denen gibt es zwei Selbsterntefelder, eines in Strebersdorf eines auf der Breitenleer Straße. Man zahlt 14€ Eintritt (als Erwachsener), dabei sind 2kg Erdbeeren inkludiert. Kinder zahlen 7€ bis 12 Jah"
     },
     {
       "url": "https://www.instagram.com/p/DXHqT7sCFZh/",
@@ -348,11 +346,11 @@
         "current-language",
         "public-preview",
         "existing-source-context",
-        "age-43d"
+        "age-44d"
       ],
       "pubDate": "2026-04-14T17:01:18.000Z",
-      "ageDays": 43,
-      "ageDaysExact": 43.79,
+      "ageDays": 44,
+      "ageDaysExact": 44.78,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "1000things to do in Vienna auf Instagram: \"💐HAPPY BIRTHDAY💐 Wir verraten euch, wo und welche Dinge ihr an eurem Geburtstag kostenlos erleben könnt. Habt ihr auch noch Angebote in",
       "textSample": "1000things to do in Vienna auf Instagram: \"💐HAPPY BIRTHDAY💐 Wir verraten euch, wo und welche Dinge ihr an eurem Geburtstag kostenlos erleben könnt. Habt ihr auch noch Angebote in petto? 😘\" 10K likes, 64 comments - 1000thingsinvienna am April 14, 2026: \"💐HAPPY BIRTHDAY💐 Wir verraten euch, wo und welche Dinge ihr an eurem Geburtstag kostenlos erleben könn"
@@ -366,50 +364,36 @@
         "deal-signal",
         "food-drink",
         "public-preview",
-        "age-65d"
+        "age-66d"
       ],
       "pubDate": "2026-03-24T06:30:10.000Z",
-      "ageDays": 65,
-      "ageDaysExact": 65.23,
+      "ageDays": 66,
+      "ageDaysExact": 66.22,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "HpKPH auf Instagram: \"Wer liebt gratis Essen? WIR LIEBEN GRATIS ESSEN! 🙌 Eure HPKPH ist wieder für euch da: 🥞 HAPPY MORNING FRÜHSTÜCK Nie wieder hungrig in die erste Lehrveransta",
       "textSample": "HpKPH auf Instagram: \"Wer liebt gratis Essen? WIR LIEBEN GRATIS ESSEN! 🙌 Eure HPKPH ist wieder für euch da: 🥞 HAPPY MORNING FRÜHSTÜCK Nie wieder hungrig in die erste Lehrveranstaltung, zumindest einen Tag in der Woche! Wo? Campus Strebersdorf (Mensa) & Campus St. Pölten (Studi Cafeteria) Wann? Alle Termine findet ihr in der Liste unten! 👇 Wir laden euch e"
     },
     {
-      "url": "https://www.instagram.com/reel/DWO8MqOAqEq/",
-      "score": 50,
+      "url": "https://www.instagram.com/reel/DVf8hH4DPUK/",
+      "score": 0,
       "source": "duckduckgo",
       "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
         "deal-signal",
         "food-drink",
+        "current-language",
         "public-preview",
-        "age-65d"
+        "age-85d",
+        "false-positive-language",
+        "past-offer-date"
       ],
-      "pubDate": "2026-03-23T16:21:25.000Z",
-      "ageDays": 65,
-      "ageDaysExact": 65.82,
+      "pubDate": "2026-03-05T10:20:07.000Z",
+      "ageDays": 85,
+      "ageDaysExact": 85.06,
       "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Marvin Teufl auf Instagram: \"In welchem Restaurant isst du am liebsten Gulasch? #essen #gulasch #wien #restaurants\"",
-      "textSample": "Marvin Teufl auf Instagram: \"In welchem Restaurant isst du am liebsten Gulasch? #essen #gulasch #wien #restaurants\" 140 likes, 12 comments - hicksmarvinn am March 23, 2026: \"In welchem Restaurant isst du am liebsten Gulasch? #essen #gulasch #wien #restaurants\". Anmelden Registrieren Verpasse keinen Beitrag mehr von hicksmarvinn Registriere dich für Instagram"
-    },
-    {
-      "url": "https://www.instagram.com/p/DQzVv32Dd4R/",
-      "score": 0,
-      "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "unknown-date",
-        "preview-login-wall"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Post ist nicht verfügbar • Instagram",
-      "textSample": "Post ist nicht verfügbar • Instagram Anmelden Post ist nicht verfügbar Möglicherweise funktioniert der Link nicht oder das Profil wurde entfernt. Registriere dich bei Instagram"
+      "title": "@vienna_honest_testing auf Instagram: \"#wien #döner #kebap #food #viral #trend Leute, am 06.03. eröffnet Duru Döner seinen neuen Standort! 🎉 📍 Feßtgasse 1 (Ecke Thaliastraße) Zur",
+      "textSample": "@vienna_honest_testing auf Instagram: \"#wien #döner #kebap #food #viral #trend Leute, am 06.03. eröffnet Duru Döner seinen neuen Standort! 🎉 📍 Feßtgasse 1 (Ecke Thaliastraße) Zur Eröffnung gibt es ganztags Hühner- & Steakdöner für nur 2€ 🌯🔥 Außerdem wird 1 Jahr GRATIS Döner mit der exklusiven Duru-Karte verlost. ➡️ Mitmachen: Beitrag liken, folgen & komm"
     },
     {
       "url": "https://www.instagram.com/reel/DOk6vWlCMOv/",
@@ -422,12 +406,12 @@
         "food-drink",
         "current-language",
         "public-preview",
-        "age-256d",
+        "age-257d",
         "false-positive-language"
       ],
       "pubDate": "2025-09-14T09:00:38.000Z",
-      "ageDays": 256,
-      "ageDaysExact": 256.13,
+      "ageDays": 257,
+      "ageDaysExact": 257.12,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Mahnoor auf Instagram: \"Neueröffnung Haus des Kebaps21 in Wien 📍Leopoldauerstraße 1-3, 1210 Wien Am 17.09.25 12-20 Uhr gratis Döner für alle + Gewinnspiel. 1.Platz 400€ 2.Platz 20",
       "textSample": "Mahnoor auf Instagram: \"Neueröffnung Haus des Kebaps21 in Wien 📍Leopoldauerstraße 1-3, 1210 Wien Am 17.09.25 12-20 Uhr gratis Döner für alle + Gewinnspiel. 1.Platz 400€ 2.Platz 200€ 3.Platz 2 Wochen gratis Essen € Trinken (1 Kebap & 1 Getränk pro Tag. Flyer von der Eröffnung per DM an @hausdeskebaps schicken und folgen um teilzunehmen. #döner #streetfood #h"
@@ -442,51 +426,14 @@
         "deal-signal",
         "food-drink",
         "public-preview",
-        "age-274d"
+        "age-275d"
       ],
       "pubDate": "2025-08-26T17:31:29.000Z",
-      "ageDays": 274,
-      "ageDaysExact": 274.77,
+      "ageDays": 275,
+      "ageDaysExact": 275.76,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "ZUKUNFT ESSEN auf Instagram: \"✨ Kostenlose Fortbildung für Küchenteams in der Gemeinschaftsverpflegung ✨ ➯ NATÜRLICH. GUT. KOCHEN. Dank der Förderung der Stadt Wien gibt’s jetzt GR",
       "textSample": "ZUKUNFT ESSEN auf Instagram: \"✨ Kostenlose Fortbildung für Küchenteams in der Gemeinschaftsverpflegung ✨ ➯ NATÜRLICH. GUT. KOCHEN. Dank der Förderung der Stadt Wien gibt’s jetzt GRATIS-Plätze 🙌 👩🍳 Köch:innen sind das Herz der Gemeinschaftsverpflegung – sie bringen Gesundheit, Genuss & Nachhaltigkeit auf unsere Teller. Mit unserer neuen Workshopreihe unter"
-    },
-    {
-      "url": "https://www.instagram.com/p/DLzNiQ4RVyX/",
-      "score": 32,
-      "source": "duckduckgo",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "current-language",
-        "public-preview",
-        "age-325d"
-      ],
-      "pubDate": "2025-07-07T08:39:36.000Z",
-      "ageDays": 325,
-      "ageDaysExact": 325.14,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Wiens Favoriten auf Instagram: \"😋 Diese Woche in 1100 Wien: Essen, das nicht nur schmeckt – es flirtet mit deinem Gaumen. Täglich neue Menüvorschläge, die mehr versprechen als „nu",
-      "textSample": "Wiens Favoriten auf Instagram: \"😋 Diese Woche in 1100 Wien: Essen, das nicht nur schmeckt – es flirtet mit deinem Gaumen. Täglich neue Menüvorschläge, die mehr versprechen als „nur satt“: Wir reden hier von warm, würzig, wow! Kein Stress, kein Kochen, nur Gabel zücken und genießen. 📍 Lokal in Favoriten – wo der Hunger nicht bleibt. 🔥 Komm hungrig. Geh glü"
-    },
-    {
-      "url": "https://www.instagram.com/p/DK2IdbkNweL/",
-      "score": 28,
-      "source": "duckduckgo",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "deal-signal",
-        "food-drink",
-        "public-preview",
-        "age-348d"
-      ],
-      "pubDate": "2025-06-13T15:24:53.000Z",
-      "ageDays": 348,
-      "ageDaysExact": 348.86,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Sebastian Michels auf Instagram: \"Das gab es noch nie! DOPPELTE KAISERPLATTE bei @rene.redo XXL – 6 Kilo Fleisch! 😱🥩 Ich will die doppelte Kaiserplatte - 6 kg Fleisch!🥩 Wenn ich",
-      "textSample": "Sebastian Michels auf Instagram: \"Das gab es noch nie! DOPPELTE KAISERPLATTE bei @rene.redo XXL – 6 Kilo Fleisch! 😱🥩 Ich will die doppelte Kaiserplatte - 6 kg Fleisch!🥩 Wenn ich’s schaffe, krieg ich lebenslang kostenlos Essen in allen @redo_xxl XXL Restaurants! 🤤 Doch es wird einer der härtesten Herausforderungen die ich jemals angenommen habe. Meine Gre"
     },
     {
       "url": "https://www.instagram.com/p/DKhhtU6NeZ0/",
@@ -498,12 +445,12 @@
         "deal-signal",
         "food-drink",
         "public-preview",
-        "age-356d",
+        "age-357d",
         "false-positive-language"
       ],
       "pubDate": "2025-06-05T15:18:08.000Z",
-      "ageDays": 356,
-      "ageDaysExact": 356.86,
+      "ageDays": 357,
+      "ageDaysExact": 357.86,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Wiens beliebteste Tuesday Afterwork & Outdoor Party auf Instagram: \"WINWINWIN 1. 1x Hendrick’s Flasche 0,7l & Tonic + Gratis Eintritt für dich und 4 Freunde 2. 4 Hendrick’s Copa Gl",
       "textSample": "Wiens beliebteste Tuesday Afterwork & Outdoor Party auf Instagram: \"WINWINWIN 1. 1x Hendrick’s Flasche 0,7l & Tonic + Gratis Eintritt für dich und 4 Freunde 2. 4 Hendrick’s Copa Gläser + Gratis Eintritt für dich und 3 Freunde 3. 3 Gratis Hendrick’s Gin Tonic an der Bar + Gratis Eintritt für dich und 2 Freunde So kommst du in den Lostopf: 1. Like diesen Post"
@@ -517,11 +464,11 @@
         "deal-signal",
         "food-drink",
         "public-preview",
-        "age-360d"
+        "age-361d"
       ],
       "pubDate": "2025-06-02T08:56:30.000Z",
-      "ageDays": 360,
-      "ageDaysExact": 360.13,
+      "ageDays": 361,
+      "ageDaysExact": 361.12,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Motto am Fluss auf Instagram: \"Das @neunerhaus Café ist ein Ort der Begegnung - für alle. Ein Wohnzimmer für obdach- und wohnungslose Menschen, wo man kostenlos essen, Kaffee trink",
       "textSample": "Motto am Fluss auf Instagram: \"Das @neunerhaus Café ist ein Ort der Begegnung - für alle. Ein Wohnzimmer für obdach- und wohnungslose Menschen, wo man kostenlos essen, Kaffee trinken und einfach Mensch sein kann. Doch das Café ist dringend auf Spenden angewiesen - und braucht unsere Unterstützung. Uns liegt dieser Ort sehr am Herzen. Deshalb rufen wir gemein"
@@ -535,12 +482,12 @@
         "vienna",
         "deal-signal",
         "public-preview",
-        "age-368d",
+        "age-369d",
         "false-positive-language"
       ],
       "pubDate": "2025-05-24T17:04:10.000Z",
-      "ageDays": 368,
-      "ageDaysExact": 368.79,
+      "ageDays": 369,
+      "ageDaysExact": 369.78,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "1000things to do in Vienna auf Instagram: \"Gratis grillen in Wien? Ist einfacher und schöner, als ihr denkt! 🔥🍴 Wir haben für euch die 5 schönsten kostenlosen Grillzonen in Wien",
       "textSample": "1000things to do in Vienna auf Instagram: \"Gratis grillen in Wien? Ist einfacher und schöner, als ihr denkt! 🔥🍴 Wir haben für euch die 5 schönsten kostenlosen Grillzonen in Wien ausfindig gemacht und das neue Grillsortiment von @wiesbauerwurst getestet – Urlaubsfeeling inklusive! 🏝️ Neben den Bergsteiger Grillern und den Grillzwergen haben es uns vor alle"
@@ -555,15 +502,53 @@
         "deal-signal",
         "food-drink",
         "public-preview",
-        "age-392d",
+        "age-393d",
         "expired-relative-date"
       ],
       "pubDate": "2025-05-01T08:17:26.000Z",
-      "ageDays": 392,
-      "ageDaysExact": 392.16,
+      "ageDays": 393,
+      "ageDaysExact": 393.15,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "EatinVienna – Genuss in Wien auf Instagram: \"GRATIS Steak Döner bei Ali‘s Steak Döner📍Neubaugasse 50, 1070 Wien Alle die @alissteakdoner auf Instagram oder TikTok folgen, kriegen",
       "textSample": "EatinVienna – Genuss in Wien auf Instagram: \"GRATIS Steak Döner bei Ali‘s Steak Döner📍Neubaugasse 50, 1070 Wien Alle die @alissteakdoner auf Instagram oder TikTok folgen, kriegen einen Gratis Steak Döner. Falls ihr diese Aktion verpasst, gibts für alle Folllower bis Montag 50% auf alle Speisen. #foodblogger #food #foodphotography #eatinvienna #vienna #wien"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DJFEAaxq1zO/",
+      "score": 5,
+      "source": "duckduckgo",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "age-393d",
+        "expired-relative-date"
+      ],
+      "pubDate": "2025-04-30T17:35:11.000Z",
+      "ageDays": 393,
+      "ageDaysExact": 393.76,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Taste of Vienna auf Instagram: \"Gratis Steakdöner in Wien! 🥩🥙 Am Freitag, 2. Mai feiert Alis Steak Döner Neueröffnung! Folgt dem Lokal auf Instagram & TikTok und holt euch ab 11",
+      "textSample": "Taste of Vienna auf Instagram: \"Gratis Steakdöner in Wien! 🥩🥙 Am Freitag, 2. Mai feiert Alis Steak Döner Neueröffnung! Folgt dem Lokal auf Instagram & TikTok und holt euch ab 11 Uhr euren Gratis-Döner – solange der Vorrat reicht! -50 % auf alle Speisen bis Montag! 📍 Neubaugasse 50, 1070 Wien #gratisessen #steakdöner #viennafood #neueröffnung #wien #foodie"
+    },
+    {
+      "url": "https://www.instagram.com/p/DIej9YCyA1n/",
+      "score": 38,
+      "source": "duckduckgo",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "public-preview",
+        "age-408d"
+      ],
+      "pubDate": "2025-04-15T18:37:22.000Z",
+      "ageDays": 408,
+      "ageDaysExact": 408.72,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "iamstudent.at auf Instagram: \"1+1 Cocktails gratis!❤️ Willkommen in Wiens erster und kultigster Karaokebar: Im SOHO Vienna in der Millennium City kannst du mit deinen Freunden Spaß",
+      "textSample": "iamstudent.at auf Instagram: \"1+1 Cocktails gratis!❤️ Willkommen in Wiens erster und kultigster Karaokebar: Im SOHO Vienna in der Millennium City kannst du mit deinen Freunden Spaß haben, geniale Songs performen und dank Studentenrabatt auch noch 1+1 gratis Cocktails erhalten. Und das täglich! Tipp: Verpasse nie wieder einen neuen Gutschein von SOHO Vienna u"
     },
     {
       "url": "https://www.instagram.com/p/DIUF_4ENqMM/",
@@ -575,56 +560,15 @@
         "deal-signal",
         "food-drink",
         "public-preview",
-        "age-411d",
+        "age-412d",
         "expired-language"
       ],
       "pubDate": "2025-04-11T17:03:06.000Z",
-      "ageDays": 411,
-      "ageDaysExact": 411.79,
+      "ageDays": 412,
+      "ageDaysExact": 412.78,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Gelateria La Romana Austria auf Instagram: \"Am 17. April ist es soweit und unsere neue Filiale in Wien eröffnet! 🎉 Zur Feier des Tages gibt es für alle eine Stunde lang gratis Gel",
       "textSample": "Gelateria La Romana Austria auf Instagram: \"Am 17. April ist es soweit und unsere neue Filiale in Wien eröffnet! 🎉 Zur Feier des Tages gibt es für alle eine Stunde lang gratis Gelato - von 16 - 17 Uhr. #gelaterialaromana_at #vienna #wien #eissalon #opening #eröffnung #gratisgelato\" 119 likes, 5 comments - gelaterialaromana_at am April 11, 2025: \"Am 17. Apri"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DHdQ-XnIYVZ/",
-      "score": 0,
-      "source": "duckduckgo",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "public-preview",
-        "age-433d",
-        "false-positive-language",
-        "expired-language",
-        "past-offer-date"
-      ],
-      "pubDate": "2025-03-21T10:01:38.000Z",
-      "ageDays": 433,
-      "ageDaysExact": 433.08,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Mahnoor auf Instagram: \"1+1 Gratis XXl Schnitzelsemmel in Wien - Tat Schnitzel 📍Prager Straße 57, 1210 Wien Ihr könnt euch am 23.03 1 Schnitzelsemmel holen und bekommt die zweite",
-      "textSample": "Mahnoor auf Instagram: \"1+1 Gratis XXl Schnitzelsemmel in Wien - Tat Schnitzel 📍Prager Straße 57, 1210 Wien Ihr könnt euch am 23.03 1 Schnitzelsemmel holen und bekommt die zweite gratis dazu. #viennafood #foodhotspot #schnitzel #vienna *Anzeige\" 550 likes, 21 comments - foodiewien am March 21, 2025: \"1+1 Gratis XXl Schnitzelsemmel in Wien - Tat Schnitzel 📍"
-    },
-    {
-      "url": "https://www.instagram.com/p/DHLf0YuCueE/",
-      "score": 3,
-      "source": "duckduckgo",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "current-language",
-        "public-preview",
-        "age-439d",
-        "expired-relative-date"
-      ],
-      "pubDate": "2025-03-14T12:24:11.000Z",
-      "ageDays": 439,
-      "ageDaysExact": 439.98,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Frish WIENXTRA auf Instagram: \"GRATIS MUSEEN IN WIEN, die du noch nicht besucht hast! 🫡 🍋 Wien Museum, Eintritt kostenlos in der Dauerausstellung „Wien. Meine Geschichte“ / DI-FR",
-      "textSample": "Frish WIENXTRA auf Instagram: \"GRATIS MUSEEN IN WIEN, die du noch nicht besucht hast! 🫡 🍋 Wien Museum, Eintritt kostenlos in der Dauerausstellung „Wien. Meine Geschichte“ / DI-FR, 09:00–18:00, DO, 09:00–21:00, SA-SO, 10:00–18:00 geöffnet 🍋 OstLicht Galerie, Eintritt kostenlos / MI-SA 12:00–18:00 🍋 Wien MUSA, Eintritt kostenlos / DI-SO 10:00–18:00 🍋 Doku"
     },
     {
       "url": "https://www.instagram.com/reel/DG3VkYwsD0S/",
@@ -637,14 +581,52 @@
         "food-drink",
         "current-language",
         "public-preview",
-        "age-447d"
+        "age-448d"
       ],
       "pubDate": "2025-03-06T16:31:57.000Z",
-      "ageDays": 447,
-      "ageDaysExact": 447.81,
+      "ageDays": 448,
+      "ageDaysExact": 448.8,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "EatinVienna – Genuss in Wien auf Instagram: \"GRATIS: Erste 120 Cheese- und Veggieburger: Neueröffnung: 2ndstreetburger | 📍 Kleine Stadtgutgasse 10, 1020 Wien @2ndstreetburger #foo",
       "textSample": "EatinVienna – Genuss in Wien auf Instagram: \"GRATIS: Erste 120 Cheese- und Veggieburger: Neueröffnung: 2ndstreetburger | 📍 Kleine Stadtgutgasse 10, 1020 Wien @2ndstreetburger #foodphotography #vienna #foodblogger #smashburger #burger #food #wien #fyp #yummy\" 54 likes, 7 comments - eatinvienna_ am March 6, 2025: \"GRATIS: Erste 120 Cheese- und Veggieburger: N"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DGdJIBbM7KD/",
+      "score": 22,
+      "source": "duckduckgo",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "age-449d",
+        "false-positive-language"
+      ],
+      "pubDate": "2025-03-05T14:34:48.000Z",
+      "ageDays": 449,
+      "ageDaysExact": 449.89,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "@dishthedirt.magazin auf Instagram: \"⚠️ Das ist keine Übung, es gibt gratis Pizza in Wien!! 🚨🍕☺️ Zur Eröffnung der @neapolispizzeria_vienna gibt es am 26. Februar ab 12 Uhr Pizza",
+      "textSample": "@dishthedirt.magazin auf Instagram: \"⚠️ Das ist keine Übung, es gibt gratis Pizza in Wien!! 🚨🍕☺️ Zur Eröffnung der @neapolispizzeria_vienna gibt es am 26. Februar ab 12 Uhr Pizza to go absolut kostenlos! 🥳 Lass dir das nicht entgehen, sondern lass es dir schmecken! 💸😋 📍Taborstraße 21a, 1020 Wien *Anzeige #neueröffnung #new #viennafood #wien #viennaeats"
+    },
+    {
+      "url": "https://www.instagram.com/p/DF-zDLxM46p/",
+      "score": 28,
+      "source": "duckduckgo",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "age-470d"
+      ],
+      "pubDate": "2025-02-12T17:30:40.000Z",
+      "ageDays": 470,
+      "ageDaysExact": 470.76,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "XXXLutz Restaurant auf Instagram: \"💖LOVE is in the AIR💘 Verbringt den Valentinstag in eurem Lieblingsrestaurant und lasst euch mit unserer Aktion 1+1 GRATIS Essen „die LIEBE durc",
+      "textSample": "XXXLutz Restaurant auf Instagram: \"💖LOVE is in the AIR💘 Verbringt den Valentinstag in eurem Lieblingsrestaurant und lasst euch mit unserer Aktion 1+1 GRATIS Essen „die LIEBE durch den MAGEN gehen“! 🍽️🤩💝\" 62 likes, 0 comments - xxxlutz_restaurant am February 12, 2025: \"💖LOVE is in the AIR💘 Verbringt den Valentinstag in eurem Lieblingsrestaurant und las"
     },
     {
       "url": "https://www.instagram.com/reel/DFpP_vQML9R/",
@@ -656,14 +638,32 @@
         "deal-signal",
         "food-drink",
         "public-preview",
-        "age-478d"
+        "age-479d"
       ],
       "pubDate": "2025-02-04T08:42:36.000Z",
-      "ageDays": 478,
-      "ageDaysExact": 478.14,
+      "ageDays": 479,
+      "ageDaysExact": 479.13,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Robert Erobert | Food Chaos auf Instagram: \"POV: Du gehst gratis ins größte All You Can Eat And Drink Restaurant in Österreich 🇦🇹 😍 Das @watertuin_vienna ist mit rund 500 Sitzpl",
       "textSample": "Robert Erobert | Food Chaos auf Instagram: \"POV: Du gehst gratis ins größte All You Can Eat And Drink Restaurant in Österreich 🇦🇹 😍 Das @watertuin_vienna ist mit rund 500 Sitzplätzen garantiert eine der größten World Kitchens Welt Welt😱 Für nur knapp 30 Euro kannst Du essen und trinken was Du möchtest und so viel du möchtest! An Geburtstagen isst du in d"
+    },
+    {
+      "url": "https://www.instagram.com/p/DEaJu7MIoXG/",
+      "score": 22,
+      "source": "duckduckgo",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "public-preview",
+        "age-509d"
+      ],
+      "pubDate": "2025-01-04T15:25:36.000Z",
+      "ageDays": 509,
+      "ageDaysExact": 509.85,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "ChariTable Vienna auf Instagram: \"Was ist ChariTable? 🌟Gemeinsam Essen für den Guten Zweck!🌟 Wusstest du, dass du mit einem Abendessen in einem der besten Restaurants Wiens Große",
+      "textSample": "ChariTable Vienna auf Instagram: \"Was ist ChariTable? 🌟Gemeinsam Essen für den Guten Zweck!🌟 Wusstest du, dass du mit einem Abendessen in einem der besten Restaurants Wiens Großes bewirken kannst? 🍽️❤️ ChariTable bringt Menschen an einen Tisch, um gemeinsam Spenden für wohltätige Zwecke zu sammeln. Von einem exklusiven Dinner bis zur legendären After-Part"
     },
     {
       "url": "https://www.instagram.com/reel/DCbli6INcer/",
@@ -683,28 +683,65 @@
       "textSample": "Post ist nicht verfügbar • Instagram Anmelden Post ist nicht verfügbar Möglicherweise funktioniert der Link nicht oder das Profil wurde entfernt. Registriere dich bei Instagram"
     },
     {
+      "url": "https://www.instagram.com/p/Coh0LxHIQaB/",
+      "score": 28,
+      "source": "duckduckgo",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "age-1203d"
+      ],
+      "pubDate": "2023-02-11T00:00:00.000Z",
+      "ageDays": 1203,
+      "ageDaysExact": 1203.49,
+      "postDateSource": "instagram-rendered-og",
+      "title": "iLhan&HuDA auf Instagram: \"Kostenlos Essen😁 Trick 17 #trick17 #reels #foryou #fürdich #funny #fypシ #viral #reelsvideo #trick #raten #spiel\"",
+      "textSample": "iLhan&HuDA auf Instagram: \"Kostenlos Essen😁 Trick 17 #trick17 #reels #foryou #fürdich #funny #fypシ #viral #reelsvideo #trick #raten #spiel\" 182K likes, 471 comments - ilhan.huda am February 11, 2023: \"Kostenlos Essen😁 Trick 17 #trick17 #reels #foryou #fürdich #funny #fypシ #viral #reelsvideo #trick #raten #spiel\". Anmelden Registrieren Content mit Altersbes"
+    },
+    {
+      "url": "https://www.instagram.com/p/DY3-4IsMGch/",
+      "score": 13,
+      "source": "firecrawl5",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-1d",
+        "false-positive-language"
+      ],
+      "pubDate": "2026-05-28T07:56:09.000Z",
+      "ageDays": 1,
+      "ageDaysExact": 1.16,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "@restaurantweek_de auf Instagram: \"Hey Foodie! Überrasche deine Liebsten diesen Sommer mit einer Einladung zum Festival! ☀️🍽️ Mach mit bei unserem Gewinnspiel und gewinne eins von",
+      "textSample": "@restaurantweek_de auf Instagram: \"Hey Foodie! Überrasche deine Liebsten diesen Sommer mit einer Einladung zum Festival! ☀️🍽️ Mach mit bei unserem Gewinnspiel und gewinne eins von 5x2 Tickets für die RestaurantWeek! 🎟️✨ So einfach bist du dabei: 1️⃣ Folge @restaurantweek_de 2️⃣ Verrate uns in den Kommentaren, in welches der teilnehmenden Restauranst du am"
+    },
+    {
       "url": "https://www.instagram.com/p/DY0E-jdtcAQ/",
-      "score": 9,
+      "score": 29,
       "source": "firecrawl5",
       "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
         "public-preview",
         "existing-source-context",
         "known-source",
-        "age-1d",
-        "expired-language"
+        "age-2d"
       ],
       "pubDate": "2026-05-26T19:32:47.000Z",
-      "ageDays": 1,
-      "ageDaysExact": 1.69,
+      "ageDays": 2,
+      "ageDaysExact": 2.68,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Mariannenhof auf Instagram: \"Unsere #wochenkarte #mittagessen #alldaylong #special #lehel\"",
       "textSample": "Mariannenhof auf Instagram: \"Unsere #wochenkarte #mittagessen #alldaylong #special #lehel\" 1 likes, 0 comments - mariannenhofbar am May 26, 2026: \"Unsere #wochenkarte #mittagessen #alldaylong #special #lehel\". Anmelden Registrieren Verpasse keinen Beitrag mehr von mariannenhofbar Registriere dich für Instagram, um auf dem Laufenden zu bleiben. Registrieren A"
     },
     {
       "url": "https://www.instagram.com/p/DYzrSe3sKGX/",
-      "score": 49,
-      "source": "firecrawl5",
+      "score": 69,
+      "source": "firecrawl5, all",
       "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
         "deal-signal",
@@ -712,37 +749,58 @@
         "public-preview",
         "existing-source-context",
         "known-source",
-        "age-1d",
-        "expired-language"
+        "age-2d"
       ],
       "pubDate": "2026-05-26T15:47:44.000Z",
+      "ageDays": 2,
+      "ageDaysExact": 2.84,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "duka.direct auf Instagram: \"Syrian Restaurant deal is live on duka.direct! Don't miss out, order now! 🔥 #KilaKituKipo\"",
+      "textSample": "duka.direct auf Instagram: \"Syrian Restaurant deal is live on duka.direct! Don't miss out, order now! 🔥 #KilaKituKipo\" 12 likes, 0 comments - dukadirect am May 26, 2026: \"Syrian Restaurant deal is live on duka.direct! Don't miss out, order now! 🔥 #KilaKituKipo\". Anmelden Registrieren Verpasse keinen Beitrag mehr von dukadirect Registriere dich für Instagra"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DYzjaRrsN2k/",
+      "score": 37,
+      "source": "gastro2",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-2d"
+      ],
+      "pubDate": "2026-05-26T14:39:12.000Z",
+      "ageDays": 2,
+      "ageDaysExact": 2.88,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Zushi Market auf Instagram: \"Zushi Market ALEX Krems 🍣✨ All You Can Eat & Drink Buffet auf Ebene 3. So schnell kann’s gehen und der Teller ist voll. 😄 Aber kein Problem, Nachschu",
+      "textSample": "Zushi Market auf Instagram: \"Zushi Market ALEX Krems 🍣✨ All You Can Eat & Drink Buffet auf Ebene 3. So schnell kann’s gehen und der Teller ist voll. 😄 Aber kein Problem, Nachschub gibt’s jederzeit - so viel & oft du willst! Entdecke jetzt unser neues Restaurant mit Sushi, Wok-Gerichten, Vorspeisen, Desserts, Schokobrunnen und vielem mehr. 💚 #zushimarket #"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DYy9Y18tb44/",
+      "score": 0,
+      "source": "food3, gastro2",
+      "reason": "NeoTaste blockiert",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-1d",
+        "blocked-source",
+        "false-positive-language"
+      ],
+      "pubDate": "2026-05-27T15:44:18.000Z",
       "ageDays": 1,
       "ageDaysExact": 1.84,
       "postDateSource": "instagram-rendered-time-datetime",
-      "title": "duka.direct auf Instagram: \"Syrian Restaurant deal is live on duka.direct! Don't miss out, order now! 🔥 #KilaKituKipo\"",
-      "textSample": "duka.direct auf Instagram: \"Syrian Restaurant deal is live on duka.direct! Don't miss out, order now! 🔥 #KilaKituKipo\" 11 likes, 0 comments - dukadirect am May 26, 2026: \"Syrian Restaurant deal is live on duka.direct! Don't miss out, order now! 🔥 #KilaKituKipo\". Anmelden Registrieren Verpasse keinen Beitrag mehr von dukadirect Registriere dich für Instagra"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DYxez3aCNFU/",
-      "score": 53,
-      "source": "food3",
-      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
-      "reasons": [
-        "deal-signal",
-        "public-preview",
-        "existing-source-context",
-        "age-2d"
-      ],
-      "pubDate": "2026-05-25T19:20:33.000Z",
-      "ageDays": 2,
-      "ageDaysExact": 2.69,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "DRESDEN FOR FRIENDS | Sparen bei Restaurants & Erlebnissen auf Instagram: \"💸 Wir zeigen dir in 20 Sekunden, wie du mit deiner Dresden for Friends Karte sparen kannst 👀✨ So einfac",
-      "textSample": "DRESDEN FOR FRIENDS | Sparen bei Restaurants & Erlebnissen auf Instagram: \"💸 Wir zeigen dir in 20 Sekunden, wie du mit deiner Dresden for Friends Karte sparen kannst 👀✨ So einfach funktioniert’s: 1️⃣ App öffnen & einen Spot aussuchen 2️⃣ Karte oder App vorzeigen 3️⃣ Das zweite Angebot kostenlos genießen 🤭 Mit über 280 Deals in den Bereichen Restaurants, W"
+      "title": "Tastyfood auf Instagram: \"1€ Matcha Eis 🤍 | Anzeige Mit @neotaste.wien könnt ihr euch von 26.05 14 Tage lang ein veganes Matcha Eis um nur 1€ sichern🤍 @chasenbrew Code: Tastyvien",
+      "textSample": "Tastyfood auf Instagram: \"1€ Matcha Eis 🤍 | Anzeige Mit @neotaste.wien könnt ihr euch von 26.05 14 Tage lang ein veganes Matcha Eis um nur 1€ sichern🤍 @chasenbrew Code: Tastyvienna2m für 2 Monate gratis NeoTaste 🩷 & 20% Rabatt auf alle Abos als Bestandskunden 🥰 📍Chasen Brew SCS #matcha #icecream #matchaeis #foodvienna #wien tastyfoodvienna foodie\" 315 l"
     },
     {
       "url": "https://www.instagram.com/p/DYxVsGnDMkH/",
-      "score": 41,
+      "score": 38,
       "source": "firecrawl5",
       "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
@@ -750,11 +808,11 @@
         "public-preview",
         "existing-source-context",
         "known-source",
-        "age-2d"
+        "age-3d"
       ],
       "pubDate": "2026-05-25T18:00:29.000Z",
-      "ageDays": 2,
-      "ageDaysExact": 2.75,
+      "ageDays": 3,
+      "ageDaysExact": 3.74,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "EDEKA Ueltzhöfer auf Instagram: \"Unsere Wochenkarte vom 25. bis 30. Mai 2026 Wir kochen täglich von 11:00 bis 14:30 Uhr frisch für Euch in unserer marktkUEche in Sontheim. Es gibt",
       "textSample": "EDEKA Ueltzhöfer auf Instagram: \"Unsere Wochenkarte vom 25. bis 30. Mai 2026 Wir kochen täglich von 11:00 bis 14:30 Uhr frisch für Euch in unserer marktkUEche in Sontheim. Es gibt jeden Tag ein vegetarisches und ein Fleischgericht für euch zur Auswahl. Wir freuen uns über Rückmeldungen wie euch unsere Wochenkarte für den Mittagstisch* in Sontheim gefällt. *"
@@ -769,14 +827,55 @@
         "public-preview",
         "existing-source-context",
         "known-source",
-        "age-3d"
+        "age-4d"
       ],
       "pubDate": "2026-05-24T20:31:42.000Z",
-      "ageDays": 3,
-      "ageDaysExact": 3.65,
+      "ageDays": 4,
+      "ageDaysExact": 4.64,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "THE DOM - Bar & Restaurant auf Instagram: \"Wochenkarte · 26.–29. Mai Täglich frischer Salat + hausgemachtes Dessert inklusive. 3 Gänge · 11:30–14:30 Uhr Di: Rigatoni all'Arrabbiata",
       "textSample": "THE DOM - Bar & Restaurant auf Instagram: \"Wochenkarte · 26.–29. Mai Täglich frischer Salat + hausgemachtes Dessert inklusive. 3 Gänge · 11:30–14:30 Uhr Di: Rigatoni all'Arrabbiata · Scaloppina ai Funghi · Rinderhüftsteak Mi: Gemischter Salat · Cremiger Risotto · Rinderhüftsteak Do: Gemischter Salat · Hähnchenschnitzel · Rinderhüftsteak Fr: Lachs-Salat · Zan"
+    },
+    {
+      "url": "https://www.instagram.com/p/DYuWVOTMAL7/",
+      "score": 28,
+      "source": "food3, all",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-4d",
+        "false-positive-language"
+      ],
+      "pubDate": "2026-05-24T14:14:31.000Z",
+      "ageDays": 4,
+      "ageDaysExact": 4.9,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Ksenia | Content Creator auf Instagram: \"🍕 GIVEAWAY TIME with @pizzeriapummaro Win a meal for two (2 pizzas + 2 lemonades) at Pizzeria Pummaro, home of authentic Neapolitan pizza.",
+      "textSample": "Ksenia | Content Creator auf Instagram: \"🍕 GIVEAWAY TIME with @pizzeriapummaro Win a meal for two (2 pizzas + 2 lemonades) at Pizzeria Pummaro, home of authentic Neapolitan pizza. Their incredible tasty pizzas are made with 48-hour sourdough for lightness, and the menu has an endless variety of different flavors, so you will definitely find something you li"
+    },
+    {
+      "url": "https://www.instagram.com/p/DYrHeIIDQRq/",
+      "score": 52,
+      "source": "community",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "current-language",
+        "public-preview",
+        "existing-source-context",
+        "age-3d",
+        "expired-language"
+      ],
+      "pubDate": "2026-05-25T12:52:41.000Z",
+      "ageDays": 3,
+      "ageDaysExact": 3.96,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Eis-Greissler auf Instagram: \"🍦🎉 Jubiläums-Special Nr. 3 🎉🍦 Weil ein Jubiläum ohne Eis einfach nicht geht, schenken wir euch GRATIS Eis! 💛✨ In allen Eis-Greissler Shops in Öst",
+      "textSample": "Eis-Greissler auf Instagram: \"🍦🎉 Jubiläums-Special Nr. 3 🎉🍦 Weil ein Jubiläum ohne Eis einfach nicht geht, schenken wir euch GRATIS Eis! 💛✨ In allen Eis-Greissler Shops in Österreich und im Hofladen in Krumbach gibt es von Dienstag bis Sonntag (26.-31.05.) in die ersten 15 Minuten nach Öffnung kostenloses Eis. 🍨🎈 Und in der Eis-Greissler Welt wartet u"
     },
     {
       "url": "https://www.instagram.com/reel/DYpEgOpIm4v/",
@@ -790,119 +889,138 @@
         "current-language",
         "public-preview",
         "existing-source-context",
-        "age-5d",
+        "age-6d",
         "expired-relative-date"
       ],
       "pubDate": "2026-05-22T12:58:27.000Z",
-      "ageDays": 5,
-      "ageDaysExact": 5.96,
+      "ageDays": 6,
+      "ageDaysExact": 6.95,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Wien | Vienna auf Instagram: \"If you don’t know what to do this weekend: Check out @wienliebefestival 💕 📆 When: 23-25 May 2026 📍 Where: Vienna City Hall ✨Entry: free ❤️ Enjoy vi",
-      "textSample": "Wien | Vienna auf Instagram: \"If you don’t know what to do this weekend: Check out @wienliebefestival 💕 📆 When: 23-25 May 2026 📍 Where: Vienna City Hall ✨Entry: free ❤️ Enjoy viennese food, live music & culture programm. ✅Save this for your trip #vienna #thingstodo\" 1,505 likes, 23 comments - vienna am May 22, 2026: \"If you don’t know what to do this week"
+      "textSample": "Wien | Vienna auf Instagram: \"If you don’t know what to do this weekend: Check out @wienliebefestival 💕 📆 When: 23-25 May 2026 📍 Where: Vienna City Hall ✨Entry: free ❤️ Enjoy viennese food, live music & culture programm. ✅Save this for your trip #vienna #thingstodo\" 1,513 likes, 23 comments - vienna am May 22, 2026: \"If you don’t know what to do this week"
     },
     {
-      "url": "https://www.instagram.com/p/DYowWZOjASG/",
+      "url": "https://www.instagram.com/reel/DYoqfcltIgY/",
       "score": 0,
-      "source": "food3",
-      "reason": "explizites Aktionsdatum liegt in der Vergangenheit",
+      "source": "gastro2",
+      "reason": "NeoTaste blockiert",
       "reasons": [
+        "vienna",
         "deal-signal",
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-6d",
-        "false-positive-language",
-        "past-offer-date"
+        "age-7d",
+        "blocked-source",
+        "false-positive-language"
       ],
-      "pubDate": "2026-05-22T10:00:08.000Z",
-      "ageDays": 6,
-      "ageDaysExact": 6.08,
+      "pubDate": "2026-05-22T09:10:27.000Z",
+      "ageDays": 7,
+      "ageDaysExact": 7.11,
       "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Raku Ramen auf Instagram: \"Zwei Jahre voller toller Momente und das möchten wir mit euch feiern! 🎉 Danke für euren ganzen Support, eure Besuche und eure Liebe zu unserem Essen. De",
-      "textSample": "Raku Ramen auf Instagram: \"Zwei Jahre voller toller Momente und das möchten wir mit euch feiern! 🎉 Danke für euren ganzen Support, eure Besuche und eure Liebe zu unserem Essen. Deshalb verlosen wir 5x unsere leckeren Ramen oder Bowls mit einem Getränk an euch! 🤤 Du möchtest gewinnen? So landest du im Lostopf: So machst du mit: 1. ❤️ Liken: Gib diesem Beitr"
+      "title": "Tastyfood auf Instagram: \"2,50€ Falafel Wrap in Wien 🤍 | Anzeige Mit @neotaste.wien könnt ihr euch von 22.05 5 Tage lang einen Falafel Wrap um nur 2,505€ sichern 🤍 @jaffa.streetf",
+      "textSample": "Tastyfood auf Instagram: \"2,50€ Falafel Wrap in Wien 🤍 | Anzeige Mit @neotaste.wien könnt ihr euch von 22.05 5 Tage lang einen Falafel Wrap um nur 2,505€ sichern 🤍 @jaffa.streetfood Code: Tastyvienna2m für 2 Monate gratis NeoTaste 🩷 & 20% Rabatt auf alle Abos als Bestandskunden 🥰 #streetfood #wrap #foodspot #foodvienna #wien tastyfoodvienna foodie\" 172 l"
     },
     {
-      "url": "https://www.instagram.com/reel/DYm-F0nM6sO/",
-      "score": 0,
-      "source": "gastro2",
-      "reason": "explizites Aktionsdatum liegt in der Vergangenheit",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "current-language",
-        "public-preview",
-        "existing-source-context",
-        "age-6d",
-        "expired-language",
-        "past-offer-date",
-        "expired-relative-date"
-      ],
-      "pubDate": "2026-05-21T17:23:21.000Z",
-      "ageDays": 6,
-      "ageDaysExact": 6.78,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Zushi Market auf Instagram: \"Morgen, am Fr, 22.05. feiern wir die Eröffnung von Zushi Market im ALEX Krems und so findest du uns auf Ebene 3 neben dem Media Markt. Alle Infos zur A",
-      "textSample": "Zushi Market auf Instagram: \"Morgen, am Fr, 22.05. feiern wir die Eröffnung von Zushi Market im ALEX Krems und so findest du uns auf Ebene 3 neben dem Media Markt. Alle Infos zur Aktion findest du auf unserem Profil. 📍 Zushi Market im ALEX Krems 📅 22. Mai 2026 Markier die Person, mit der du hingehen würdest 👇🍱 Aktion nur am 22.05.-26.05. gültig. Nur für"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DYmlzscMhDf/",
-      "score": 15,
-      "source": "gastro2",
-      "reason": "relative Kurz-Aktion ist abgelaufen",
+      "url": "https://www.instagram.com/p/DYm7qLMgSEo/",
+      "score": 22,
+      "source": "firecrawl5",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "deal-signal",
+        "food-drink",
         "current-language",
         "public-preview",
         "existing-source-context",
-        "age-6d",
-        "expired-relative-date"
+        "known-source",
+        "age-7d",
+        "false-positive-language"
       ],
-      "pubDate": "2026-05-21T13:50:54.000Z",
-      "ageDays": 6,
-      "ageDaysExact": 6.92,
+      "pubDate": "2026-05-21T17:00:38.000Z",
+      "ageDays": 7,
+      "ageDaysExact": 7.78,
       "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Zushi Market auf Instagram: \"🚨 Zushi Market eröffnet morgen Freitag 22. Mai im @alex_krems 🎉 Freut euch auf unsere Eröffnungsaktionen: 🍣 1+1 gratis aufs All You Can Eat Buffet*",
-      "textSample": "Zushi Market auf Instagram: \"🚨 Zushi Market eröffnet morgen Freitag 22. Mai im @alex_krems 🎉 Freut euch auf unsere Eröffnungsaktionen: 🍣 1+1 gratis aufs All You Can Eat Buffet* 🥗 Bowls ab 1€ 🔥 -50% auf Speisen & Bowls* 🎡 Glücksrad & Eröffnungsprogramm ab 15:30 Uhr Einfach @zushimarket folgen und an der Kassa vorzeigen 💚 📍 ALEX Krems 📅 *22.05.–26.05."
+      "title": "The RiverHouse auf Instagram: \"🍀 GEWINNSPIEL – zur Feier unseres Grand Openings verlosen wir ein exklusives Dinner für 2 Personen im The RiverHouse. 🥂✨ Freut euch auf einen beson",
+      "textSample": "The RiverHouse auf Instagram: \"🍀 GEWINNSPIEL – zur Feier unseres Grand Openings verlosen wir ein exklusives Dinner für 2 Personen im The RiverHouse. 🥂✨ Freut euch auf einen besonderen Abend mit feinster Kulinarik und einzigartiger Atmosphäre. Euch erwartet ein 3-Gänge-Dinner inklusive Vorspeise, Hauptspeise und Dessert für zwei Personen. 🤍 So könnt ihr te"
     },
     {
-      "url": "https://www.instagram.com/reel/DYmMp86E2H2/",
-      "score": 9,
-      "source": "all",
-      "reason": "relative Kurz-Aktion ist abgelaufen",
-      "reasons": [
-        "vienna",
-        "current-language",
-        "public-preview",
-        "existing-source-context",
-        "age-6d",
-        "expired-relative-date"
-      ],
-      "pubDate": "2026-05-21T14:30:06.000Z",
-      "ageDays": 6,
-      "ageDaysExact": 6.9,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "visitaustria auf Instagram: \"Today, on the World Day for Cultural Diversity for Dialogue and Development, we celebrate cultural diversity, dialogue, and the connections that bring",
-      "textSample": "visitaustria auf Instagram: \"Today, on the World Day for Cultural Diversity for Dialogue and Development, we celebrate cultural diversity, dialogue, and the connections that bring people together 🌍 And Vienna is full of moments where cultures come together - in cafés, markets, museums, dance floors, and everyday encounters across the city 🤩 Discover some o"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DYkbAUltemK/",
-      "score": 58,
-      "source": "gastro2",
+      "url": "https://www.instagram.com/reel/DYmjR3PCb50/",
+      "score": 30,
+      "source": "gastro2, all",
       "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
-        "deal-signal",
         "food-drink",
         "public-preview",
         "existing-source-context",
         "age-7d"
       ],
-      "pubDate": "2026-05-20T17:40:43.000Z",
+      "pubDate": "2026-05-21T13:28:17.000Z",
       "ageDays": 7,
-      "ageDaysExact": 7.76,
+      "ageDaysExact": 7.93,
       "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Centimeter - Wiens XXXL Wirt auf Instagram: \"🍔 GRATIS Burger für 1 Monat in Wien?! 👀 Schaffst du unseren Happy Meal Burger (🤭) alleine in unter 45 Minuten, gewinnst du 1 Monat l",
-      "textSample": "Centimeter - Wiens XXXL Wirt auf Instagram: \"🍔 GRATIS Burger für 1 Monat in Wien?! 👀 Schaffst du unseren Happy Meal Burger (🤭) alleine in unter 45 Minuten, gewinnst du 1 Monat lang gratis Burger in unseren 4 Wiener Lokalen. 🔥 Aktueller Rekord: @bigmeatsfood_ in unter 30 Minuten! 🤯😮💨 Glaubst du, kannst du das toppen? #centimeter #bigfood #bigm\" 190 lik"
+      "title": "BigBox Fastfood auf Instagram: \"Big Box Restaurant in Vienna 🇦🇹 ⏰ Opening Hours: Wednesday to Sunday | 10:30 AM – 9:30 PM Closed on Mondays & Tuesdays 📍Address: Heiligenstädter",
+      "textSample": "BigBox Fastfood auf Instagram: \"Big Box Restaurant in Vienna 🇦🇹 ⏰ Opening Hours: Wednesday to Sunday | 10:30 AM – 9:30 PM Closed on Mondays & Tuesdays 📍Address: Heiligenstädter Str. 160, 1190 Vienna #persianfood #wien #fastfood #pizza #hotdog\" 108 likes, 1 comments - bigbox_fastfood am May 21, 2026: \"Big Box Restaurant in Vienna 🇦🇹 ⏰ Opening Hours: Wedn"
+    },
+    {
+      "url": "https://www.instagram.com/p/DYmNlwKiCbM/",
+      "score": 12,
+      "source": "firecrawl5",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-8d",
+        "false-positive-language"
+      ],
+      "pubDate": "2026-05-21T10:18:06.000Z",
+      "ageDays": 8,
+      "ageDaysExact": 8.06,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Food Magazine from Germany 🥢🍴🍷🍾 auf Instagram: \"✨ GEWINNSPIEL ✨ Am 14. Juni 2026 feiert Hamburg ein neues Gourmet- und Lifestyle-Event, das es in dieser Form im Norden bisher n",
+      "textSample": "Food Magazine from Germany 🥢🍴🍷🍾 auf Instagram: \"✨ GEWINNSPIEL ✨ Am 14. Juni 2026 feiert Hamburg ein neues Gourmet- und Lifestyle-Event, das es in dieser Form im Norden bisher noch nicht gegeben hat: @the.culinary.society Hamburg. 🌟 17 Michelin-Sterne, 13 renommierte Gastköche aus ganz Deutschland, exklusive Winzer, außergewöhnliche Cocktail-Konzepte, Ka"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DYmMp86E2H2/",
+      "score": 0,
+      "source": "all",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "current-language",
+        "public-preview",
+        "existing-source-context",
+        "age-7d",
+        "expired-relative-date"
+      ],
+      "pubDate": "2026-05-21T14:30:06.000Z",
+      "ageDays": 7,
+      "ageDaysExact": 7.89,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "visitaustria auf Instagram: \"Today, on the World Day for Cultural Diversity for Dialogue and Development, we celebrate cultural diversity, dialogue, and the connections that bring",
+      "textSample": "visitaustria auf Instagram: \"Today, on the World Day for Cultural Diversity for Dialogue and Development, we celebrate cultural diversity, dialogue, and the connections that bring people together 🌍 And Vienna is full of moments where cultures come together - in cafés, markets, museums, dance floors, and everyday encounters across the city 🤩 Discover some o"
+    },
+    {
+      "url": "https://www.instagram.com/p/DYkQK4piY2v/",
+      "score": 46,
+      "source": "gastro2",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "public-preview",
+        "existing-source-context",
+        "age-8d"
+      ],
+      "pubDate": "2026-05-20T16:07:45.000Z",
+      "ageDays": 8,
+      "ageDaysExact": 8.82,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "ULRICH & ERICH auf Instagram: \"WORLD PALOMA DAY 22.05. 📍ERICH all day Palomas: 1+1 gratis! @altostequila @fevertreeaustria\"",
+      "textSample": "ULRICH & ERICH auf Instagram: \"WORLD PALOMA DAY 22.05. 📍ERICH all day Palomas: 1+1 gratis! @altostequila @fevertreeaustria\" 34 likes, 3 comments - ulricherichwien am May 20, 2026: \"WORLD PALOMA DAY 22.05. 📍ERICH all day Palomas: 1+1 gratis! @altostequila @fevertreeaustria\". Anmelden Registrieren Verpasse keinen Beitrag mehr von ulricherichwien Registriere"
     },
     {
       "url": "https://www.instagram.com/reel/DYj7G9kABpD/",
@@ -914,11 +1032,11 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-7d"
+        "age-8d"
       ],
       "pubDate": "2026-05-20T12:58:22.000Z",
-      "ageDays": 7,
-      "ageDaysExact": 7.96,
+      "ageDays": 8,
+      "ageDaysExact": 8.95,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Mae Aurel auf Instagram: \"Afterwork mood. 🍸✨ Good food, good drinks and a table full of laughter. You deserve this — see you later. #maeaurel #afterworkvienna #viennadrinks #vienn",
       "textSample": "Mae Aurel auf Instagram: \"Afterwork mood. 🍸✨ Good food, good drinks and a table full of laughter. You deserve this — see you later. #maeaurel #afterworkvienna #viennadrinks #viennaeats #goodvibes #viennalife\" 21 likes, 0 comments - maeaurel am May 20, 2026: \"Afterwork mood. 🍸✨ Good food, good drinks and a table full of laughter. You deserve this — see you"
@@ -934,39 +1052,42 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-8d",
+        "age-9d",
         "past-offer-date"
       ],
       "pubDate": "2026-05-20T10:18:45.000Z",
-      "ageDays": 8,
-      "ageDaysExact": 8.07,
+      "ageDays": 9,
+      "ageDaysExact": 9.06,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "THE DISTRICT KEBAB | Döner Kebab, Pide, Lahmacun & more auf Instagram: \"3€ DÖNER am 22.5 bei THE DISTRICT KEBAB!!! Wir feiern 3 Jahre THE DISTRICT KEBAB und gibt es Dönersandwich (",
       "textSample": "THE DISTRICT KEBAB | Döner Kebab, Pide, Lahmacun & more auf Instagram: \"3€ DÖNER am 22.5 bei THE DISTRICT KEBAB!!! Wir feiern 3 Jahre THE DISTRICT KEBAB und gibt es Dönersandwich (Huhn/Steak) + eine Baklava so lange der Vorrat reicht! Also sei schnell & markiere deine Freunde um das Highlight des Jahres nicht zu verpassen! #thedistrictkebap #viennafood #keba"
     },
     {
-      "url": "https://www.instagram.com/p/DYjl_kfMxx5/",
+      "url": "https://www.instagram.com/reel/DYjgWxeoBuP/",
       "score": 0,
-      "source": "food3",
-      "reason": "Instagram-Post aelter als 7 Tage",
+      "source": "community",
+      "reason": "NeoTaste blockiert",
       "reasons": [
+        "vienna",
+        "deal-signal",
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-8d",
+        "age-9d",
+        "blocked-source",
         "false-positive-language"
       ],
-      "pubDate": "2026-05-20T09:53:37.000Z",
-      "ageDays": 8,
-      "ageDaysExact": 8.09,
+      "pubDate": "2026-05-20T09:04:33.000Z",
+      "ageDays": 9,
+      "ageDaysExact": 9.12,
       "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Café ILOstan | Mittagstisch • Abendessen auf Instagram: \"✨ GEWINNSPIEL ✨ Wir verlosen ein georgisches Dinner für 2 Personen im Café ILOstan in Berlin! 🇬🇪🍷🥟 Freut euch auf einen",
-      "textSample": "Café ILOstan | Mittagstisch • Abendessen auf Instagram: \"✨ GEWINNSPIEL ✨ Wir verlosen ein georgisches Dinner für 2 Personen im Café ILOstan in Berlin! 🇬🇪🍷🥟 Freut euch auf einen gemütlichen Abend mit authentischer georgischer Küche, leckerem Wein und besonderer Atmosphäre. ❤️ So kannst du gewinnen: ✨ Diesen Beitrag liken ✨ Uns auf Instagram folgen ✨ Diese"
+      "title": "Mahnoor auf Instagram: \"2€ Tiramisu in Wien - @broetchenwelt 📍Benedikt-Schellinger-Gasse 23, 1150 Wien 📍Berggasse 27, 1090 Wien In der Neotaste App könnt ihr euch Tiramisu um 2€",
+      "textSample": "Mahnoor auf Instagram: \"2€ Tiramisu in Wien - @broetchenwelt 📍Benedikt-Schellinger-Gasse 23, 1150 Wien 📍Berggasse 27, 1090 Wien In der Neotaste App könnt ihr euch Tiramisu um 2€ sichern für 7 Tage. Code: Foodiewien2m für 2 Monate gratis NeoTaste #tiramisu #sweet #vienna #cake *Anzeige\" 595 likes, 7 comments - foodiewien am May 20, 2026: \"2€ Tiramisu in Wie"
     },
     {
       "url": "https://www.instagram.com/reel/DYjOLbOogmu/",
       "score": 30,
-      "source": "all",
+      "source": "food3, all",
       "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
@@ -974,12 +1095,12 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-8d",
+        "age-9d",
         "false-positive-language"
       ],
       "pubDate": "2026-05-20T06:28:49.000Z",
-      "ageDays": 8,
-      "ageDaysExact": 8.23,
+      "ageDays": 9,
+      "ageDaysExact": 9.22,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Vienna's Joy | Local Guide | 🇦🇹🇵🇭 auf Instagram: \"✨🍀𝑮𝑬𝑾𝑰𝑵𝑵𝑺𝑷𝑰𝑬𝑳🍀✨ *Ad/Einladung Bei @kenksvienna findet ihr leckeres Comfort food von Onion flower bis saftige Smas",
       "textSample": "Vienna's Joy | Local Guide | 🇦🇹🇵🇭 auf Instagram: \"✨🍀𝑮𝑬𝑾𝑰𝑵𝑵𝑺𝑷𝑰𝑬𝑳🍀✨ *Ad/Einladung Bei @kenksvienna findet ihr leckeres Comfort food von Onion flower bis saftige Smashburger, Bowls, Churros, San Sebastian Cheesecake und vieles mehr✨ 📍Tiefendorfergasse 1, 1140 Wien Gemeinsam verlosen wir 1x 50€ Gutschein für den nächsten Besuch❤️ Um teilzunehme"
@@ -995,52 +1116,14 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-8d"
+        "age-9d"
       ],
       "pubDate": "2026-05-19T16:25:37.000Z",
-      "ageDays": 8,
-      "ageDaysExact": 8.82,
+      "ageDays": 9,
+      "ageDaysExact": 9.81,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "ROLLERCOASTERRESTAURANT auf Instagram: \"10 Jahre Rollercoaster Restaurant 🎢 ❤️ Zu unserem Jubiläum gibt’s ein exklusives Anniversary-Shirt GRATIS ab 60€ Konsum pro Tisch* 👕✨😱 Er",
       "textSample": "ROLLERCOASTERRESTAURANT auf Instagram: \"10 Jahre Rollercoaster Restaurant 🎢 ❤️ Zu unserem Jubiläum gibt’s ein exklusives Anniversary-Shirt GRATIS ab 60€ Konsum pro Tisch* 👕✨😱 Erhältlich in verschiedenen Größen 🤍 Angebot gilt nur solange der Vorrat reicht ⚠️ 📍Riesenradplatz 6, 1020 Wien #vienna #rollercoasterrestauranr #foodspot #wien #foodwien *Gültig a"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DYhiOrzx-Sv/",
-      "score": 1,
-      "source": "food3",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "deal-signal",
-        "food-drink",
-        "current-language",
-        "public-preview",
-        "existing-source-context",
-        "age-8d",
-        "expired-relative-date"
-      ],
-      "pubDate": "2026-05-19T15:40:31.000Z",
-      "ageDays": 8,
-      "ageDaysExact": 8.85,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Patrick Steakhouse auf Instagram: \"🇺🇸✨ Memorial Weekend at Patrick Steakhouse￼ ✨🇺🇸 Brooklyn’s favorite weekend destination is turning all the way up! From brunch vibes and mart",
-      "textSample": "Patrick Steakhouse auf Instagram: \"🇺🇸✨ Memorial Weekend at Patrick Steakhouse￼ ✨🇺🇸 Brooklyn’s favorite weekend destination is turning all the way up! From brunch vibes and martini nights to karaoke, DJs, cocktails, and unforgettable dinners — celebrate Memorial Weekend with great food, strong drinks, and even better energy. 🍸🥩🎶 Join us all weekend lon"
-    },
-    {
-      "url": "https://www.instagram.com/p/DYhSchxEXLA/",
-      "score": 0,
-      "source": "food3",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "age-8d"
-      ],
-      "pubDate": "2026-05-19T12:24:18.000Z",
-      "ageDays": 8,
-      "ageDaysExact": 8.98,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "David Simmonds auf Instagram: \"Best all you can eat buffet in New Orleans and I forgot the damn name! It was so good 😭\"",
-      "textSample": "David Simmonds auf Instagram: \"Best all you can eat buffet in New Orleans and I forgot the damn name! It was so good 😭\" 12 likes, 2 comments - davidlikefood am May 19, 2026: \"Best all you can eat buffet in New Orleans and I forgot the damn name! It was so good 😭\". Anmelden Registrieren Verpasse keinen Beitrag mehr von davidlikefood Registriere dich für Ins"
     },
     {
       "url": "https://www.instagram.com/p/DYg_p4vDMEf/",
@@ -1052,12 +1135,12 @@
         "deal-signal",
         "public-preview",
         "existing-source-context",
-        "age-9d",
+        "age-10d",
         "false-positive-language"
       ],
       "pubDate": "2026-05-19T09:40:06.000Z",
-      "ageDays": 9,
-      "ageDaysExact": 9.1,
+      "ageDays": 10,
+      "ageDaysExact": 10.09,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "the catch auf Instagram: \"🐙 G E W I N N S P I E L 🦀 Catch yourself a FREE Bowl at The Catch! 🥢🐟 Alles, was du tun musst 👇🏻 ✨ LIKE diesen Post ✨ TAG deinen Catch-Partner in de",
       "textSample": "the catch auf Instagram: \"🐙 G E W I N N S P I E L 🦀 Catch yourself a FREE Bowl at The Catch! 🥢🐟 Alles, was du tun musst 👇🏻 ✨ LIKE diesen Post ✨ TAG deinen Catch-Partner in den Kommentaren ✨ FOLLOW @thecatch.at Für extra luck: Teile den Beitrag in deiner Story & markiere uns. 🔥 📅 Das Gewinnspiel endet am 02.06. Good luck & sea you soon. 🌊✨ 📍 the Cat"
@@ -1072,35 +1155,14 @@
         "current-language",
         "public-preview",
         "existing-source-context",
-        "age-9d"
+        "age-10d"
       ],
       "pubDate": "2026-05-19T05:39:12.000Z",
-      "ageDays": 9,
-      "ageDaysExact": 9.27,
+      "ageDays": 10,
+      "ageDaysExact": 10.26,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "wienliebe Festival auf Instagram: \"Bei unserem Wienliebe Festival spielt Kulinarik eine ganz besondere Rolle.🥨 Am kommenden Wochenende erwarten euch am Rathausplatz zahlreiche Gas",
       "textSample": "wienliebe Festival auf Instagram: \"Bei unserem Wienliebe Festival spielt Kulinarik eine ganz besondere Rolle.🥨 Am kommenden Wochenende erwarten euch am Rathausplatz zahlreiche Gastronom*innen, die euch mit ihren vielfältigen Schmankerln genussvoll durch das Wochenende begleiten.🫶🏻 Wir freuen und auf euer Kommen!🥰 #wienliebeFestival #soWien #wienliebel\" 6"
-    },
-    {
-      "url": "https://www.instagram.com/p/DYgORizlOer/",
-      "score": 1,
-      "source": "food3",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "deal-signal",
-        "food-drink",
-        "current-language",
-        "public-preview",
-        "existing-source-context",
-        "age-9d",
-        "expired-relative-date"
-      ],
-      "pubDate": "2026-05-19T02:28:36.000Z",
-      "ageDays": 9,
-      "ageDaysExact": 9.4,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "O.H.S.O. Brewery + Distillery | Arcadia Nano Brewery auf Instagram: \"From brunch to late night happy hour, we’ve got the whole Memorial Day weekend covered at all O.H.S.O. location",
-      "textSample": "O.H.S.O. Brewery + Distillery | Arcadia Nano Brewery auf Instagram: \"From brunch to late night happy hour, we’ve got the whole Memorial Day weekend covered at all O.H.S.O. locations. Save this for your group chat. Late night happy hour available at @ohsobrewery Arcadia @ohsobrewery_gilbert @ohso_paradisevalley @ohsodistillery @ohsosurprise @ohsocentral close"
     },
     {
       "url": "https://www.instagram.com/p/DYfjaheMgTF/",
@@ -1112,11 +1174,11 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-9d"
+        "age-10d"
       ],
       "pubDate": "2026-05-18T20:14:39.000Z",
-      "ageDays": 9,
-      "ageDaysExact": 9.66,
+      "ageDays": 10,
+      "ageDaysExact": 10.65,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "‎Hazem El gamal || حازم الجمل‎ auf Instagram‎: \"العنوان Dresdner Str. 115, 1200 Wien #مطاعم #بيتزا #pizza #اكل_فيينا\"‎",
       "textSample": "‎Hazem El gamal || حازم الجمل‎ auf Instagram‎: \"العنوان Dresdner Str. 115, 1200 Wien #مطاعم #بيتزا #pizza #اكل_فيينا\"‎ 62 likes, 3 comments - 7azemelgamal1.ph am May 18, 2026‎: \"العنوان Dresdner Str. 115, 1200 Wien #مطاعم #بيتزا #pizza #اكل_فيينا\". ‎ Anmelden Registrieren Verpasse keinen Beitrag mehr von 7azemelgamal1.ph Registriere dich für Instagram, um au"
@@ -1132,11 +1194,11 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-9d"
+        "age-10d"
       ],
       "pubDate": "2026-05-18T15:10:05.000Z",
-      "ageDays": 9,
-      "ageDaysExact": 9.87,
+      "ageDays": 10,
+      "ageDaysExact": 10.86,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "ROLLERCOASTERRESTAURANT auf Instagram: \"Feiere mit uns 10 Jahre Rollercoaster Restaurant￼ 🎉🚀 Zu unserem Jubiläum gibt’s ein exklusives Anniversary-Shirt GRATIS ab 60€ Konsum pro",
       "textSample": "ROLLERCOASTERRESTAURANT auf Instagram: \"Feiere mit uns 10 Jahre Rollercoaster Restaurant￼ 🎉🚀 Zu unserem Jubiläum gibt’s ein exklusives Anniversary-Shirt GRATIS ab 60€ Konsum pro Tisch* 👕✨ Essen. Staunen. Shirt sichern. 😎 So funktioniert’s: 🍔 Vorbeikommen 🎢 Mindestens 60€ konsumieren 👕 Jubiläums-Shirt gratis erhalten Und das Beste: Ab 120€ gibt’s 2 Shi"
@@ -1150,11 +1212,11 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-9d"
+        "age-10d"
       ],
       "pubDate": "2026-05-18T15:00:14.000Z",
-      "ageDays": 9,
-      "ageDaysExact": 9.88,
+      "ageDays": 10,
+      "ageDaysExact": 10.87,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "European Street Food Festival auf Instagram: \"EUROPEAN STREET FOOD FESTIVAL – TOUR 2026 Österreichs größtes & erfolgreichstes Street Food Event 23. - 25. Mai 2026 – GERASDORF – Rat",
       "textSample": "European Street Food Festival auf Instagram: \"EUROPEAN STREET FOOD FESTIVAL – TOUR 2026 Österreichs größtes & erfolgreichstes Street Food Event 23. - 25. Mai 2026 – GERASDORF – Rathausplatz Sa. & So. 11 Uhr bis 22 Uhr und Mo. 11 Uhr bis 20 Uhr EINTRITT FREI!! LIEBE „EUROPEAN STREET FOOD FESTIVAL“ FANS! Das EUROPEAN STREET FOOD FESTIVAL feierte 2025 das große"
@@ -1180,60 +1242,58 @@
     {
       "url": "https://www.instagram.com/reel/DYe9EFgqefz/",
       "score": 30,
-      "source": "all",
+      "source": "gastro2, all",
       "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-9d"
+        "age-10d"
       ],
       "pubDate": "2026-05-18T14:45:33.000Z",
-      "ageDays": 9,
-      "ageDaysExact": 9.89,
+      "ageDays": 10,
+      "ageDaysExact": 10.88,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Wien Foodguide auf Instagram: \"SUSURU – Japanese Izakaya & Sake in Vienna Slurp & Sip – Good Food, Good Vibe 🍸 SUSURU — the Japanese word for “slurping” — is more than just a name",
       "textSample": "Wien Foodguide auf Instagram: \"SUSURU – Japanese Izakaya & Sake in Vienna Slurp & Sip – Good Food, Good Vibe 🍸 SUSURU — the Japanese word for “slurping” — is more than just a name. It’s an invitation: to step inside, take a seat, share food and drinks, and simply let the evening unfold. Opened in May 2026 at Kirchengasse 18 in Vienna’s 7th district, SUSURU"
     },
     {
       "url": "https://www.instagram.com/p/DYeLt3BlmGC/",
-      "score": 24,
+      "score": 0,
       "source": "all",
-      "reason": "Instagram-Post aelter als 7 Tage",
+      "reason": "kein echtes Instagram-Postdatum",
       "reasons": [
-        "deal-signal",
         "public-preview",
         "existing-source-context",
-        "age-10d"
+        "unknown-date",
+        "preview-login-wall"
       ],
-      "pubDate": "2026-05-18T07:27:47.000Z",
-      "ageDays": 10,
-      "ageDaysExact": 10.19,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Zushi Market auf Instagram: \"1 € Bowl zur Neueröffnung 🎉 Am Freitag, 22. Mai, eröffnet Zushi Market im ALEX Krems und wir feiern mit unserer beliebten 1 € Bowl Aktion. 🍣 ⏰ Start:",
-      "textSample": "Zushi Market auf Instagram: \"1 € Bowl zur Neueröffnung 🎉 Am Freitag, 22. Mai, eröffnet Zushi Market im ALEX Krems und wir feiern mit unserer beliebten 1 € Bowl Aktion. 🍣 ⏰ Start: ab 13:00 Uhr 👉 Bowl Größe M 👉 Max. 1 Bowl pro Person 👉 Begrenzt auf 500 Stück 👉 Gültig nur für Social-Media-Follower von @zushimarket (wird vor Ort kontrolliert) 👉 Teilnahme"
+      "pubDate": "",
+      "ageDays": null,
+      "ageDaysExact": null,
+      "postDateSource": "",
+      "title": "Post ist nicht verfügbar • Instagram",
+      "textSample": "Post ist nicht verfügbar • Instagram Anmelden Post ist nicht verfügbar Möglicherweise funktioniert der Link nicht oder das Profil wurde entfernt. Registriere dich bei Instagram"
     },
     {
       "url": "https://www.instagram.com/p/DYeLnwAFleT/",
       "score": 0,
-      "source": "gastro2, all",
-      "reason": "Instagram-Post aelter als 7 Tage",
+      "source": "all",
+      "reason": "kein echtes Instagram-Postdatum",
       "reasons": [
-        "deal-signal",
-        "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-10d",
+        "unknown-date",
         "past-offer-date",
-        "expired-relative-date"
+        "preview-login-wall"
       ],
-      "pubDate": "2026-05-18T07:26:56.000Z",
-      "ageDays": 10,
-      "ageDaysExact": 10.19,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Zushi Market auf Instagram: \"1+1 GRATIS auf das neue All You Can Eat Buffet 🎉 Entdecke das neue Zushi Market All You Can Eat Buffet im ALEX Krems auf Ebene 3 neben dem Media Markt",
-      "textSample": "Zushi Market auf Instagram: \"1+1 GRATIS auf das neue All You Can Eat Buffet 🎉 Entdecke das neue Zushi Market All You Can Eat Buffet im ALEX Krems auf Ebene 3 neben dem Media Markt. Freu dich auf eine Auswahl von mehr als 40 Speisen: von Sushi und Vorspeisen bis zu warmen Gerichten und Desserts. 🍣 👉 1+1 GRATIS auf das All You Can Eat Buffet 👉 Gültig bis D"
+      "pubDate": "",
+      "ageDays": null,
+      "ageDaysExact": null,
+      "postDateSource": "",
+      "title": "Post ist nicht verfügbar • Instagram",
+      "textSample": "Post ist nicht verfügbar • Instagram Anmelden Post ist nicht verfügbar Möglicherweise funktioniert der Link nicht oder das Profil wurde entfernt. Registriere dich bei Instagram"
     },
     {
       "url": "https://www.instagram.com/p/DYeLcdtFYah/",
@@ -1264,12 +1324,12 @@
         "current-language",
         "public-preview",
         "existing-source-context",
-        "age-10d",
+        "age-11d",
         "expired-relative-date"
       ],
       "pubDate": "2026-05-18T06:42:12.000Z",
-      "ageDays": 10,
-      "ageDaysExact": 10.22,
+      "ageDays": 11,
+      "ageDaysExact": 11.21,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Enzo auf Instagram: \"Beer prices got out of hand BUT ENZO F**** THE INFLATION! 🍺 Früher war das einfach Standard – heute denkt man zweimal nach. Genau deshalb holen wir den Preis",
       "textSample": "Enzo auf Instagram: \"Beer prices got out of hand BUT ENZO F**** THE INFLATION! 🍺 Früher war das einfach Standard – heute denkt man zweimal nach. Genau deshalb holen wir den Preis kurz zurück. Mit dem Safeword “CHEERS” bekommst du diese Woche ein großes Bier vom Fass für 3,5€ statt 5,5€. 🔥 Hol dir dein Feierabendbier 👀 📍 Universitätsring 14 | 1010 Wien #e"
@@ -1286,12 +1346,12 @@
         "current-language",
         "public-preview",
         "existing-source-context",
-        "age-10d",
+        "age-11d",
         "expired-relative-date"
       ],
       "pubDate": "2026-05-17T16:46:46.000Z",
-      "ageDays": 10,
-      "ageDaysExact": 10.8,
+      "ageDays": 11,
+      "ageDaysExact": 11.79,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Schlossquadrat auf Instagram: \"🌿 Mittagsangebote im Schlossquadrat | 12:00–15:00 Uhr 🌿 Genussvolle Mittagspause mitten in Wien 🍽️ Suppe oder Dessert + Hauptspeise um nur € 12,90",
       "textSample": "Schlossquadrat auf Instagram: \"🌿 Mittagsangebote im Schlossquadrat | 12:00–15:00 Uhr 🌿 Genussvolle Mittagspause mitten in Wien 🍽️ Suppe oder Dessert + Hauptspeise um nur € 12,90 Suppe + Hauptspeise + Dessert um € 14,90 Heute auf den Tellern im Schlossquadrat: 🥣 Grießnockerlsuppe 🥣 Basilikumcremesuppe 🍴 Hühner-Wok mit grünem Spargel, Gemüse & Jasminreis"
@@ -1305,13 +1365,13 @@
         "public-preview",
         "existing-source-context",
         "known-source",
-        "age-10d",
+        "age-11d",
         "false-positive-language",
         "expired-relative-date"
       ],
       "pubDate": "2026-05-17T16:00:46.000Z",
-      "ageDays": 10,
-      "ageDaysExact": 10.83,
+      "ageDays": 11,
+      "ageDaysExact": 11.83,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Suburban Square auf Instagram: \"📣 GIVEAWAY! 📣 Raise a glass to outdoor dining season and enter for a chance to win a $100 gift card to @lolasgardenardmore! For a chance to win...",
       "textSample": "Suburban Square auf Instagram: \"📣 GIVEAWAY! 📣 Raise a glass to outdoor dining season and enter for a chance to win a $100 gift card to @lolasgardenardmore! For a chance to win... ① Follow Suburban Square on Instagram. ② Tag your dinner date in the comment section! 📆 Entries will be accepted until Wednesday, May 20th at 11:59pm EST. Multiple entries are ac"
@@ -1327,12 +1387,12 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-10d",
+        "age-11d",
         "expired-language"
       ],
       "pubDate": "2026-05-17T12:57:03.000Z",
-      "ageDays": 10,
-      "ageDaysExact": 10.96,
+      "ageDays": 11,
+      "ageDaysExact": 11.95,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "UgisPoppup© auf Instagram: \"MEAL DEAL! 🍔 Zu jedem Burger den du bestellst gibt es von 18.5 - 21.5 Pommes GRATIS dazu! Also kommt vorbei und verpasse diesen Deal nicht 🔥 #smashbur",
       "textSample": "UgisPoppup© auf Instagram: \"MEAL DEAL! 🍔 Zu jedem Burger den du bestellst gibt es von 18.5 - 21.5 Pommes GRATIS dazu! Also kommt vorbei und verpasse diesen Deal nicht 🔥 #smashburger #vienna #prater #food #fries\" 24 likes, 0 comments - ugispoppup.prater am May 17, 2026: \"MEAL DEAL! 🍔 Zu jedem Burger den du bestellst gibt es von 18.5 - 21.5 Pommes GRATIS da"
@@ -1346,14 +1406,14 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-11d"
+        "age-12d"
       ],
       "pubDate": "2026-05-16T14:41:00.000Z",
-      "ageDays": 11,
-      "ageDaysExact": 11.89,
+      "ageDays": 12,
+      "ageDaysExact": 12.88,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "MAKA RAMEN 🍜 auf Instagram: \"Lust auf sexy japanese tapas? 🔥 Open 16:30 - 22:00 🫶 . . #japanesetapas #makaramen #bestramenvienna #makavienna\"",
-      "textSample": "MAKA RAMEN 🍜 auf Instagram: \"Lust auf sexy japanese tapas? 🔥 Open 16:30 - 22:00 🫶 . . #japanesetapas #makaramen #bestramenvienna #makavienna\" 3,269 likes, 14 comments - maka.ramen am May 16, 2026: \"Lust auf sexy japanese tapas? 🔥 Open 16:30 - 22:00 🫶 . . #japanesetapas #makaramen #bestramenvienna #makavienna\". Anmelden Registrieren Verpasse keinen Beitr"
+      "textSample": "MAKA RAMEN 🍜 auf Instagram: \"Lust auf sexy japanese tapas? 🔥 Open 16:30 - 22:00 🫶 . . #japanesetapas #makaramen #bestramenvienna #makavienna\" 3,317 likes, 14 comments - maka.ramen am May 16, 2026: \"Lust auf sexy japanese tapas? 🔥 Open 16:30 - 22:00 🫶 . . #japanesetapas #makaramen #bestramenvienna #makavienna\". Anmelden Registrieren Verpasse keinen Beitr"
     },
     {
       "url": "https://www.instagram.com/p/DYY4LgVjc0u/",
@@ -1381,108 +1441,128 @@
       "reasons": [
         "public-preview",
         "existing-source-context",
-        "age-12d",
+        "age-13d",
         "false-positive-language"
       ],
       "pubDate": "2026-05-15T22:31:14.000Z",
-      "ageDays": 12,
-      "ageDaysExact": 12.56,
+      "ageDays": 13,
+      "ageDaysExact": 13.56,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Michaela Cook auf Instagram: \"@visitaustria Media Dinner | I had the absolute pleasure of flying to Sydney for a Eurovision Dinner Party hosted by Tourism Austria 🇦🇹 We were dine",
       "textSample": "Michaela Cook auf Instagram: \"@visitaustria Media Dinner | I had the absolute pleasure of flying to Sydney for a Eurovision Dinner Party hosted by Tourism Austria 🇦🇹 We were dined and shown all the delightful things to do in Austria! Big congratulations to @laurennatarsha from ATLAS PR for organising truly one of the best Media Events I have been to.. ther"
     },
     {
-      "url": "https://www.instagram.com/reel/DYXYMUBK_jB/",
-      "score": 2,
-      "source": "all",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-12d",
-        "false-positive-language"
-      ],
-      "pubDate": "2026-05-15T16:07:16.000Z",
-      "ageDays": 12,
-      "ageDaysExact": 12.83,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Casey Wolf auf Instagram: \"Vienna’s Steffl Kirtag 2026 💕 May 14 - 25 10:00 - 21:00 I really enjoyed the 🍷Raspberry Sturm Prosecco 🍞 Buchtel with apricot jam 🍔Leberkässemmel & a",
-      "textSample": "Casey Wolf auf Instagram: \"Vienna’s Steffl Kirtag 2026 💕 May 14 - 25 10:00 - 21:00 I really enjoyed the 🍷Raspberry Sturm Prosecco 🍞 Buchtel with apricot jam 🍔Leberkässemmel & a random glass of champagne? Also loved buying some jewelry from @caliorjewelry and trying on the gorgeous flower crowns from @barabeske! ✨don’t forget to follow for more Vienna eve"
-    },
-    {
-      "url": "https://www.instagram.com/p/DYXNvJlhtRX/",
-      "score": 30,
-      "source": "all",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-12d"
-      ],
-      "pubDate": "2026-05-15T14:34:00.000Z",
-      "ageDays": 12,
-      "ageDaysExact": 12.89,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Sabex Wien auf Instagram: \"📣SABEX Angebote 18.05.-06.06.2026 📍Eigene Zufahrt über Halban-Kurz-Straße 8,1230 Wien 🅿️🚚🚙 #gastronomie #wien #restaurant #imbiss\"",
-      "textSample": "Sabex Wien auf Instagram: \"📣SABEX Angebote 18.05.-06.06.2026 📍Eigene Zufahrt über Halban-Kurz-Straße 8,1230 Wien 🅿️🚚🚙 #gastronomie #wien #restaurant #imbiss\" 7 likes, 0 comments - sabex.at am May 15, 2026: \"📣SABEX Angebote 18.05.-06.06.2026 📍Eigene Zufahrt über Halban-Kurz-Straße 8,1230 Wien 🅿️🚚🚙 #gastronomie #wien #restaurant #imbiss\". Anmelden Re"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DYW77zVxJnw/",
-      "score": 8,
+      "url": "https://www.instagram.com/reel/DYXb_nxs4aC/",
+      "score": 58,
       "source": "food3",
       "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
         "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-13d"
+      ],
+      "pubDate": "2026-05-15T16:35:56.000Z",
+      "ageDays": 13,
+      "ageDaysExact": 13.8,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Ksenia | Content Creator auf Instagram: \"Chill vibes, colorful cocktails, endless drink choices 🍸✨ If you’re looking for the perfect bar in Vienna’s 1st district, this is your spo",
+      "textSample": "Ksenia | Content Creator auf Instagram: \"Chill vibes, colorful cocktails, endless drink choices 🍸✨ If you’re looking for the perfect bar in Vienna’s 1st district, this is your spot @chilloutlounge_vienna . Café, restaurant & bar all in one, with snacks to share, creative drinks, and literally pages and pages of cocktails to choose from 😍 Happy Hour every d"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DYXYMUBK_jB/",
+      "score": 2,
+      "source": "gastro2, all",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
         "food-drink",
         "public-preview",
         "existing-source-context",
         "age-13d",
         "false-positive-language"
       ],
-      "pubDate": "2026-05-15T11:55:17.000Z",
+      "pubDate": "2026-05-15T16:07:16.000Z",
       "ageDays": 13,
-      "ageDaysExact": 13,
+      "ageDaysExact": 13.82,
       "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Mit Vergnügen auf Instagram: \"Verlosung ✨🍽️ Anzeige | Mega lecker essen, tolle Vibes und gratis Shots aus einem mini Topf – ein Abend im Berta ist richtig Fun und ist perfekt für",
-      "textSample": "Mit Vergnügen auf Instagram: \"Verlosung ✨🍽️ Anzeige | Mega lecker essen, tolle Vibes und gratis Shots aus einem mini Topf – ein Abend im Berta ist richtig Fun und ist perfekt für ein Dinner mit Friends, einem Date oder den Eltern! Mit ein bisschen Glück bekommt ihr es sogar for free, denn wir verlosen ein Menü inklusive Drinks für 2 Personen unter allen, d"
+      "title": "Casey Wolf auf Instagram: \"Vienna’s Steffl Kirtag 2026 💕 May 14 - 25 10:00 - 21:00 I really enjoyed the 🍷Raspberry Sturm Prosecco 🍞 Buchtel with apricot jam 🍔Leberkässemmel & a",
+      "textSample": "Casey Wolf auf Instagram: \"Vienna’s Steffl Kirtag 2026 💕 May 14 - 25 10:00 - 21:00 I really enjoyed the 🍷Raspberry Sturm Prosecco 🍞 Buchtel with apricot jam 🍔Leberkässemmel & a random glass of champagne? Also loved buying some jewelry from @caliorjewelry and trying on the gorgeous flower crowns from @barabeske! ✨don’t forget to follow for more Vienna eve"
     },
     {
-      "url": "https://www.instagram.com/reel/DYWuptmiqJr/",
-      "score": 22,
-      "source": "firecrawl2",
+      "url": "https://www.instagram.com/p/DYXNvJlhtRX/",
+      "score": 34,
+      "source": "firecrawl2, all",
       "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
+        "food-drink",
         "public-preview",
         "existing-source-context",
         "known-source",
         "age-13d"
       ],
-      "pubDate": "2026-05-15T09:59:19.000Z",
+      "pubDate": "2026-05-15T14:34:00.000Z",
       "ageDays": 13,
-      "ageDaysExact": 13.08,
+      "ageDaysExact": 13.89,
       "postDateSource": "instagram-rendered-time-datetime",
-      "title": "@tokki_korean_bbq auf Instagram: \"Was bekommst bei uns für 32,90 #wien #tokki\"",
-      "textSample": "@tokki_korean_bbq auf Instagram: \"Was bekommst bei uns für 32,90 #wien #tokki\" tokki_korean_bbq am May 15, 2026: \"Was bekommst bei uns für 32,90 #wien #tokki\". Anmelden Registrieren Verpasse keinen Beitrag mehr von tokki_korean_bbq Registriere dich für Instagram, um auf dem Laufenden zu bleiben. Registrieren Anmelden tokki_korean_bbq • Folgen Original-Audio"
+      "title": "Sabex Wien auf Instagram: \"📣SABEX Angebote 18.05.-06.06.2026 📍Eigene Zufahrt über Halban-Kurz-Straße 8,1230 Wien 🅿️🚚🚙 #gastronomie #wien #restaurant #imbiss\"",
+      "textSample": "Sabex Wien auf Instagram: \"📣SABEX Angebote 18.05.-06.06.2026 📍Eigene Zufahrt über Halban-Kurz-Straße 8,1230 Wien 🅿️🚚🚙 #gastronomie #wien #restaurant #imbiss\" 7 likes, 0 comments - sabex.at am May 15, 2026: \"📣SABEX Angebote 18.05.-06.06.2026 📍Eigene Zufahrt über Halban-Kurz-Straße 8,1230 Wien 🅿️🚚🚙 #gastronomie #wien #restaurant #imbiss\". Anmelden Re"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DYXKbWZonPC/",
+      "score": 0,
+      "source": "gastro2",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "food-drink",
+        "current-language",
+        "public-preview",
+        "existing-source-context",
+        "age-13d",
+        "expired-relative-date"
+      ],
+      "pubDate": "2026-05-15T14:07:20.000Z",
+      "ageDays": 13,
+      "ageDaysExact": 13.91,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "WG 381 auf Instagram: \"Das Wochenende steht vor der Tür…👀 …und ihr habt noch keinen Plan? Manchmal braucht’s nur ein kleines Zeichen vom Universum und auf einmal ist alles klar. ✨",
+      "textSample": "WG 381 auf Instagram: \"Das Wochenende steht vor der Tür…👀 …und ihr habt noch keinen Plan? Manchmal braucht’s nur ein kleines Zeichen vom Universum und auf einmal ist alles klar. ✨ Lasst uns zusammen ins Wochenende anstoßen. 🥂 #braunschweig #wg381 #weekend #universum #bar\" 48 likes, 0 comments - wg_381 am May 15, 2026: \"Das Wochenende steht vor der Tür…👀 …"
+    },
+    {
+      "url": "https://www.instagram.com/p/DYWpk6PMrCA/",
+      "score": 0,
+      "source": "gastro2",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "public-preview",
+        "existing-source-context",
+        "age-14d",
+        "expired-language"
+      ],
+      "pubDate": "2026-05-15T09:16:03.000Z",
+      "ageDays": 14,
+      "ageDaysExact": 14.11,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Zushi Market auf Instagram: \"Meet & Greet mit @tobitainment 🎉 Zur Neueröffnung des Zushi Market All You Can Eat Buffets im ALEX Krems kommt @tobitainment vorbei! 🍣 🗓️Freitag, 22",
+      "textSample": "Zushi Market auf Instagram: \"Meet & Greet mit @tobitainment 🎉 Zur Neueröffnung des Zushi Market All You Can Eat Buffets im ALEX Krems kommt @tobitainment vorbei! 🍣 🗓️Freitag, 22. Mai ab 17 Uhr Mit über 300.000 Followern auf seinen Accounts sorgt er auf Social Media täglich für Unterhaltung, Schmäh und lustige Videos. Nutzt die Chance auf ein persönliches"
     },
     {
       "url": "https://www.instagram.com/p/DYWpWl5MyAO/",
       "score": 24,
-      "source": "all",
+      "source": "gastro2, all",
       "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "deal-signal",
         "public-preview",
         "existing-source-context",
-        "age-13d"
+        "age-14d"
       ],
       "pubDate": "2026-05-15T09:13:29.000Z",
-      "ageDays": 13,
-      "ageDaysExact": 13.12,
+      "ageDays": 14,
+      "ageDaysExact": 14.11,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Zushi Market auf Instagram: \"„Ich esse gratis, wenn du mitkommst?“ 👀🍣 Am Fr, 22.05. feiern wir die Eröffnung von Zushi Market im ALEX Krems und dafür gibt’s eine besondere Aktion",
       "textSample": "Zushi Market auf Instagram: \"„Ich esse gratis, wenn du mitkommst?“ 👀🍣 Am Fr, 22.05. feiern wir die Eröffnung von Zushi Market im ALEX Krems und dafür gibt’s eine besondere Aktion für euch: ✨ 1+1 gratis All You Can Eat Buffet✨ Bring eine Person mit und einer von euch isst gratis und folgt @zushimarket ! 📍 Zushi Market im ALEX Krems 📅 22. Mai 2026 Markier"
@@ -1496,11 +1576,11 @@
         "deal-signal",
         "public-preview",
         "existing-source-context",
-        "age-13d"
+        "age-14d"
       ],
       "pubDate": "2026-05-15T09:13:29.000Z",
-      "ageDays": 13,
-      "ageDaysExact": 13.12,
+      "ageDays": 14,
+      "ageDaysExact": 14.11,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Zushi Market auf Instagram: \"„Ich esse gratis, wenn du mitkommst?“ 👀🍣 Am Fr, 22.05. feiern wir die Eröffnung von Zushi Market im ALEX Krems und dafür gibt’s eine besondere Aktion",
       "textSample": "Zushi Market auf Instagram: \"„Ich esse gratis, wenn du mitkommst?“ 👀🍣 Am Fr, 22.05. feiern wir die Eröffnung von Zushi Market im ALEX Krems und dafür gibt’s eine besondere Aktion für euch: ✨ 1+1 gratis All You Can Eat Buffet✨ Bring eine Person mit und einer von euch isst gratis und folgt @zushimarket ! 📍 Zushi Market im ALEX Krems 📅 22. Mai 2026 Markier"
@@ -1515,14 +1595,14 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-13d"
+        "age-14d"
       ],
       "pubDate": "2026-05-15T07:52:29.000Z",
-      "ageDays": 13,
-      "ageDaysExact": 13.17,
+      "ageDays": 14,
+      "ageDaysExact": 14.17,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "SPELUNKE Haubenrestaurant & Bar auf Instagram: \"Spelunke works best when you don’t overplan it. Book the table, bring the right people, order for the table and let the place do wha",
-      "textSample": "SPELUNKE Haubenrestaurant & Bar auf Instagram: \"Spelunke works best when you don’t overplan it. Book the table, bring the right people, order for the table and let the place do what it does best. Good food, sharp drinks and a room that always has something happening. ✨ #SpelunkeVienna #ViennaFood\" 43 likes, 0 comments - spelunke_vienna am May 15, 2026: \"Spel"
+      "textSample": "SPELUNKE Haubenrestaurant & Bar auf Instagram: \"Spelunke works best when you don’t overplan it. Book the table, bring the right people, order for the table and let the place do what it does best. Good food, sharp drinks and a room that always has something happening. ✨ #SpelunkeVienna #ViennaFood\" 44 likes, 0 comments - spelunke_vienna am May 15, 2026: \"Spel"
     },
     {
       "url": "https://www.instagram.com/reel/DYUa1LXMoYL/",
@@ -1535,11 +1615,11 @@
         "current-language",
         "public-preview",
         "existing-source-context",
-        "age-13d"
+        "age-14d"
       ],
       "pubDate": "2026-05-14T12:32:48.000Z",
-      "ageDays": 13,
-      "ageDaysExact": 13.98,
+      "ageDays": 14,
+      "ageDaysExact": 14.97,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Duo Sicilian Ice Cream auf Instagram: \"🍦 GRAND OPENING – WILMA SHOPPING 🍦 This Friday we celebrate with FREE ICE CREAM from 13:00 to 18:00! Come discover our newest Duo Sicilian",
       "textSample": "Duo Sicilian Ice Cream auf Instagram: \"🍦 GRAND OPENING – WILMA SHOPPING 🍦 This Friday we celebrate with FREE ICE CREAM from 13:00 to 18:00! Come discover our newest Duo Sicilian Ice Cream location inside Wilma Shopping and enjoy authentic Sicilian gelato, fresh vibes and a sweet start together with us. ☀️✨ 📍 Wilma Shopping, Berlin 🕐 Friday | Free Ice Cre"
@@ -1554,14 +1634,32 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-14d"
+        "age-15d"
       ],
       "pubDate": "2026-05-14T11:02:10.000Z",
-      "ageDays": 14,
-      "ageDaysExact": 14.04,
+      "ageDays": 15,
+      "ageDaysExact": 15.03,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Zushi Market auf Instagram: \"Nur am 22. Mai bekommst du deine Zushi Bowl M um nur 1 € im @alex_krems 🛒 So einfach geht’s: 💚 Folge Zushi Market auf Social Media� 💚 Komm am Freita",
       "textSample": "Zushi Market auf Instagram: \"Nur am 22. Mai bekommst du deine Zushi Bowl M um nur 1 € im @alex_krems 🛒 So einfach geht’s: 💚 Folge Zushi Market auf Social Media� 💚 Komm am Freitag, 22. Mai um 13:00 Uhr ins ALEX Krems, Ebene 1� 💚 Zeig an der Kasse, dass du uns folgst� 💚 Genieße deine Bowl M um nur 1 € Pro Person 1 Bowl M. Aktion nur für Personen ab 16 Jah"
+    },
+    {
+      "url": "https://www.instagram.com/p/DYUN0j0Fjv0/",
+      "score": 8,
+      "source": "gastro2",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-15d"
+      ],
+      "pubDate": "2026-05-14T10:34:08.000Z",
+      "ageDays": 15,
+      "ageDaysExact": 15.05,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "SKY ROOFGARDEN - RESTAURANT & BAR auf Instagram: \"4 things you can’t miss this season. Which one are you starting with? 🌸 ... #sky #skybar #dryjanuary #visitvienna #viennaspots\"",
+      "textSample": "SKY ROOFGARDEN - RESTAURANT & BAR auf Instagram: \"4 things you can’t miss this season. Which one are you starting with? 🌸 ... #sky #skybar #dryjanuary #visitvienna #viennaspots\" skybarvienna am May 14, 2026: \"4 things you can’t miss this season. Which one are you starting with? 🌸 ... #sky #skybar #dryjanuary #visitvienna #viennaspots\". Anmelden Registriere"
     },
     {
       "url": "https://www.instagram.com/reel/DYUIRc_s7-9/",
@@ -1572,11 +1670,11 @@
         "vienna",
         "public-preview",
         "existing-source-context",
-        "age-14d"
+        "age-15d"
       ],
       "pubDate": "2026-05-14T09:45:52.000Z",
-      "ageDays": 14,
-      "ageDaysExact": 14.09,
+      "ageDays": 15,
+      "ageDaysExact": 15.09,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Coconut Curry Wien auf Instagram: \"New lunch menu every two weeks 🍽️✨ Fresh flavors, plenty of choices, and something new to try every time. Come by and find your new favorite lun",
       "textSample": "Coconut Curry Wien auf Instagram: \"New lunch menu every two weeks 🍽️✨ Fresh flavors, plenty of choices, and something new to try every time. Come by and find your new favorite lunch spot 🙌 📍Praterstraße 53 📍Burggasse 64 📍 Liliengasse 3 #lunchmenü #coconutcurry #viennafood #viennaeats #thai\" 27 likes, 0 comments - coconut.curry.wien am May 14, 2026: \"New"
@@ -1591,11 +1689,11 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-14d"
+        "age-15d"
       ],
       "pubDate": "2026-05-14T08:01:32.000Z",
-      "ageDays": 14,
-      "ageDaysExact": 14.17,
+      "ageDays": 15,
+      "ageDaysExact": 15.16,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "WOA | buffet restaurant auf Instagram: \"POV: Every round at the buffet looks better than the last 😍 Sushi, hot dishes, sweets & more - ready for another plate? 😎 . . #woagraben #",
       "textSample": "WOA | buffet restaurant auf Instagram: \"POV: Every round at the buffet looks better than the last 😍 Sushi, hot dishes, sweets & more - ready for another plate? 😎 . . #woagraben #sushiheaven #allyoucaneat #vienna #wien #woa #rolls #asianbuffet #asiarestaurant #graben allyoucaneat\" 24 likes, 0 comments - woa.vienna am May 13, 2026: \"POV: Every round at the b"
@@ -1611,12 +1709,12 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-14d",
+        "age-15d",
         "false-positive-language"
       ],
       "pubDate": "2026-05-14T06:23:49.000Z",
-      "ageDays": 14,
-      "ageDaysExact": 14.23,
+      "ageDays": 15,
+      "ageDaysExact": 15.23,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Vienna's Joy | Local Guide | 🇦🇹🇵🇭 auf Instagram: \"✨𝗠𝘂𝘀𝘁-𝗧𝗿𝘆 𝗦𝘁𝗿𝗮𝗻𝗱𝗯𝗮𝗱 𝗥𝗲𝘀𝘁𝗮𝘂𝗿𝗮𝗻𝘁 𝗯𝗲𝗶 𝗪𝗶𝗲𝗻✨ *Anzeige SAVE THIS: Ein Geheimtipp im Sommer, die @b",
       "textSample": "Vienna's Joy | Local Guide | 🇦🇹🇵🇭 auf Instagram: \"✨𝗠𝘂𝘀𝘁-𝗧𝗿𝘆 𝗦𝘁𝗿𝗮𝗻𝗱𝗯𝗮𝗱 𝗥𝗲𝘀𝘁𝗮𝘂𝗿𝗮𝗻𝘁 𝗯𝗲𝗶 𝗪𝗶𝗲𝗻✨ *Anzeige SAVE THIS: Ein Geheimtipp im Sommer, die @barracuda.lounge ist wieder eröffnet - nur 20min. von Wien findet ihr eine Sommer Oase im Strandbad Klosterneuburg mit kulinarischen Highlights in einer Atmosphäre wie im Urlaub mit"
@@ -1632,12 +1730,12 @@
         "current-language",
         "public-preview",
         "existing-source-context",
-        "age-14d",
+        "age-15d",
         "expired-relative-date"
       ],
       "pubDate": "2026-05-14T06:13:27.000Z",
-      "ageDays": 14,
-      "ageDaysExact": 14.24,
+      "ageDays": 15,
+      "ageDaysExact": 15.23,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Baba Döner auf Instagram: \"Guten morgen 🥰😋 Have A nice day #babadöner #wien #döner #food #TurkishFoodVienna\"",
       "textSample": "Baba Döner auf Instagram: \"Guten morgen 🥰😋 Have A nice day #babadöner #wien #döner #food #TurkishFoodVienna\" 15 likes, 1 comments - babadonervienna am May 13, 2026: \"Guten morgen 🥰😋 Have A nice day #babadöner #wien #döner #food #TurkishFoodVienna\". Anmelden Registrieren Verpasse keinen Beitrag mehr von babadonervienna Registriere dich für Instagram, um a"
@@ -1652,11 +1750,11 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-14d"
+        "age-15d"
       ],
       "pubDate": "2026-05-14T00:04:46.000Z",
-      "ageDays": 14,
-      "ageDaysExact": 14.5,
+      "ageDays": 15,
+      "ageDaysExact": 15.49,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Crusty Slices auf Instagram: \"Kostenlos?? 🥐🍕 #crustyslices #crossaintpizza #franchise #halal #food\"",
       "textSample": "Crusty Slices auf Instagram: \"Kostenlos?? 🥐🍕 #crustyslices #crossaintpizza #franchise #halal #food\" 24 likes, 1 comments - crustyslices am May 13, 2026: \"Kostenlos?? 🥐🍕 #crustyslices #crossaintpizza #franchise #halal #food\". Anmelden Registrieren Verpasse keinen Beitrag mehr von crustyslices Registriere dich für Instagram, um auf dem Laufenden zu bleiben"
@@ -1664,7 +1762,7 @@
     {
       "url": "https://www.instagram.com/p/DYSnAzEoI4z/",
       "score": 38,
-      "source": "gastro2, deals",
+      "source": "deals",
       "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "vienna",
@@ -1672,34 +1770,15 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-14d",
+        "age-15d",
         "expired-language"
       ],
       "pubDate": "2026-05-13T19:36:17.000Z",
-      "ageDays": 14,
-      "ageDaysExact": 14.68,
+      "ageDays": 15,
+      "ageDaysExact": 15.68,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Döner_Eck auf Instagram: \"🔥 NEUERÖFFNUNG bei DÖNER ECK 🔥 Am Samstag, 16.05.2026 ist es endlich so weit! 🎉 Wir eröffnen unseren neuen Dönerladen in Wien und feiern mit einem star",
       "textSample": "Döner_Eck auf Instagram: \"🔥 NEUERÖFFNUNG bei DÖNER ECK 🔥 Am Samstag, 16.05.2026 ist es endlich so weit! 🎉 Wir eröffnen unseren neuen Dönerladen in Wien und feiern mit einem starken Angebot: 🥙 Döner nur 1,99 € 📅 Nur am Eröffnungstag 📍 Wattgasse 74, 1170 Wien Kommt vorbei, bringt Freunde und Familie mit und genießt frischen, saftigen Döner bei DÖNER ECK!"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DYSecsHsest/",
-      "score": 36,
-      "source": "food3",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "deal-signal",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-14d"
-      ],
-      "pubDate": "2026-05-13T18:21:06.000Z",
-      "ageDays": 14,
-      "ageDaysExact": 14.74,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Osake App auf Instagram: \"👉Erhalte Café-, Bar- & Eventtipps und dazu gratis Getränke mit der OSAKE APP 💲Jetzt kostenlos herunterladen! #stuttgart #studentenleben #sommer #sonne #",
-      "textSample": "Osake App auf Instagram: \"👉Erhalte Café-, Bar- & Eventtipps und dazu gratis Getränke mit der OSAKE APP 💲Jetzt kostenlos herunterladen! #stuttgart #studentenleben #sommer #sonne #geheimtipp\" 1 likes, 0 comments - osake.app am May 13, 2026: \"👉Erhalte Café-, Bar- & Eventtipps und dazu gratis Getränke mit der OSAKE APP 💲Jetzt kostenlos herunterladen! #stuttg"
     },
     {
       "url": "https://www.instagram.com/p/DYSNQz5oV5y/",
@@ -1711,11 +1790,11 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-14d"
+        "age-15d"
       ],
       "pubDate": "2026-05-13T15:53:07.000Z",
-      "ageDays": 14,
-      "ageDaysExact": 14.84,
+      "ageDays": 15,
+      "ageDaysExact": 15.83,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "1030 marktKult_ur auf Instagram: \"Mittagessen unter 10€ in Wien. 😍 #viennafoodblogger #viennaeats #wienrestaurant #wienisst #viennafoodguide\"",
       "textSample": "1030 marktKult_ur auf Instagram: \"Mittagessen unter 10€ in Wien. 😍 #viennafoodblogger #viennaeats #wienrestaurant #wienisst #viennafoodguide\" 20 likes, 1 comments - 1030_marktkult_ur am May 13, 2026: \"Mittagessen unter 10€ in Wien. 😍 #viennafoodblogger #viennaeats #wienrestaurant #wienisst #viennafoodguide\". Anmelden Registrieren Verpasse keinen Beitrag me"
@@ -1730,37 +1809,14 @@
         "current-language",
         "public-preview",
         "existing-source-context",
-        "age-14d"
+        "age-15d"
       ],
       "pubDate": "2026-05-13T13:33:50.000Z",
-      "ageDays": 14,
-      "ageDaysExact": 14.94,
+      "ageDays": 15,
+      "ageDaysExact": 15.93,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Strada garden auf Instagram: \"You finally found the right spot in Vienna ✨ 📍 Auhofstraße 80, 1130 Wien 📞 Reservierung: +43 676 6405187\"",
-      "textSample": "Strada garden auf Instagram: \"You finally found the right spot in Vienna ✨ 📍 Auhofstraße 80, 1130 Wien 📞 Reservierung: +43 676 6405187\" 215 likes, 23 comments - strada.garden am May 13, 2026: \"You finally found the right spot in Vienna ✨ 📍 Auhofstraße 80, 1130 Wien 📞 Reservierung: +43 676 6405187\". Anmelden Registrieren Verpasse keinen Beitrag mehr von s"
-    },
-    {
-      "url": "https://www.instagram.com/p/DYRyzr5Nf3C/",
-      "score": 0,
-      "source": "gastro2",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "current-language",
-        "public-preview",
-        "existing-source-context",
-        "age-14d",
-        "expired-language",
-        "past-offer-date",
-        "expired-relative-date"
-      ],
-      "pubDate": "2026-05-13T12:06:37.000Z",
-      "ageDays": 14,
-      "ageDaysExact": 15,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Lamm Kebap-Pizza auf Instagram: \"📢 Wir haben morgen geöffnet! Am 14.05.2026 sind wir für euch da – mit frischem Kebap, Pizza & Dürüm 🔥 Kommt vorbei und überzeugt euch selbst vom",
-      "textSample": "Lamm Kebap-Pizza auf Instagram: \"📢 Wir haben morgen geöffnet! Am 14.05.2026 sind wir für euch da – mit frischem Kebap, Pizza & Dürüm 🔥 Kommt vorbei und überzeugt euch selbst vom Geschmack! 📍 Unsere Standorte: LAMM 10 – Neilreichgasse 17, 1100 Wien LAMM 11 – Gottschalkgasse 17, 1110 Wien LAMM 15 – Sechshauser Str. 40, 1150 Wien LAMM 20 – Klosterneuburger S"
+      "textSample": "Strada garden auf Instagram: \"You finally found the right spot in Vienna ✨ 📍 Auhofstraße 80, 1130 Wien 📞 Reservierung: +43 676 6405187\" 218 likes, 23 comments - strada.garden am May 13, 2026: \"You finally found the right spot in Vienna ✨ 📍 Auhofstraße 80, 1130 Wien 📞 Reservierung: +43 676 6405187\". Anmelden Registrieren Verpasse keinen Beitrag mehr von s"
     },
     {
       "url": "https://www.instagram.com/reel/DYRvja_ITwd/",
@@ -1773,12 +1829,12 @@
         "food-drink",
         "public-preview",
         "existing-source-context",
-        "age-15d",
+        "age-16d",
         "false-positive-language"
       ],
       "pubDate": "2026-05-13T11:45:06.000Z",
-      "ageDays": 15,
-      "ageDaysExact": 15.01,
+      "ageDays": 16,
+      "ageDaysExact": 16,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "IRIS Modern Greek auf Instagram: \"Deutsch 🇩🇪 🎤 EUROVISION 2026 GEWINNSPIEL 🎤 Du glaubst, du weißt, welches Land den Eurovision 2026 gewinnt? 👀🇪🇺 Dann beweise es und gewinne",
       "textSample": "IRIS Modern Greek auf Instagram: \"Deutsch 🇩🇪 🎤 EUROVISION 2026 GEWINNSPIEL 🎤 Du glaubst, du weißt, welches Land den Eurovision 2026 gewinnt? 👀🇪🇺 Dann beweise es und gewinne einen 100€ Gutschein 💸 SO MACHST DU MIT: ✨ Folge @iris.greek.restaurant auf Instagram 💙 Like dieses Video 💬 Kommentiere das Land, das deiner Meinung nach Eurovision 2026 gewinne"
@@ -1794,76 +1850,15 @@
         "current-language",
         "public-preview",
         "existing-source-context",
-        "age-15d",
+        "age-16d",
         "false-positive-language"
       ],
       "pubDate": "2026-05-13T10:28:49.000Z",
-      "ageDays": 15,
-      "ageDaysExact": 15.06,
+      "ageDays": 16,
+      "ageDaysExact": 16.06,
       "postDateSource": "instagram-rendered-time-datetime",
       "title": "Brunch Vienna auf Instagram: \"🔥GIVEAWAY 🍔 Craving the perfect burger? @meat_point_smashburgerbar has you covered with juicy burgers, loaded fries, and a wide menu packed with del",
       "textSample": "Brunch Vienna auf Instagram: \"🔥GIVEAWAY 🍔 Craving the perfect burger? @meat_point_smashburgerbar has you covered with juicy burgers, loaded fries, and a wide menu packed with delicious options for everyone. - We’re giving away 4x a Burger Menu+ a Drink for 2 to 4 lucky winners! 🔥 To enter: - Follow @meat_point_smashburgerbar & @brunch.vienna - Like this r"
-    },
-    {
-      "url": "https://www.instagram.com/p/DYRoB37NCh1/",
-      "score": 68,
-      "source": "all",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "vienna",
-        "deal-signal",
-        "food-drink",
-        "current-language",
-        "public-preview",
-        "existing-source-context",
-        "age-14d"
-      ],
-      "pubDate": "2026-05-13T12:23:05.000Z",
-      "ageDays": 14,
-      "ageDaysExact": 14.98,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "milyn_fusionhouse auf Instagram: \"Okay. Wir müssen reden. 😅 Letzten Samstag alleine — 40x Free All You Can Eat. Wir sind stolz auf euch. Aber ihr wisst was das bedeutet. 💪 Pull f",
-      "textSample": "milyn_fusionhouse auf Instagram: \"Okay. Wir müssen reden. 😅 Letzten Samstag alleine — 40x Free All You Can Eat. Wir sind stolz auf euch. Aber ihr wisst was das bedeutet. 💪 Pull for Sushi — Level Up. Ab sofort. Die Regeln wurden angepasst. 👩 Frauen 2x → Goodie vom Haus 4x → Drink nach Wahl 6x → 30% Rabatt 12x → Free All You Can Eat 🎉 🧔 Herren 4x → Goodie"
-    },
-    {
-      "url": "https://www.instagram.com/p/DYRn8xMDXWX/",
-      "score": 30,
-      "source": "all",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "vienna",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-15d"
-      ],
-      "pubDate": "2026-05-13T10:24:21.000Z",
-      "ageDays": 15,
-      "ageDaysExact": 15.07,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "Verde // Drinks & Food auf Instagram: \"Breakfast in the heart of Vienna ♡ Take a seat and indulge in a variety of delicious breakfast options 😍 Breakfast served: ⏰MON - FRI: 9am -",
-      "textSample": "Verde // Drinks & Food auf Instagram: \"Breakfast in the heart of Vienna ♡ Take a seat and indulge in a variety of delicious breakfast options 😍 Breakfast served: ⏰MON - FRI: 9am - 12am ⏰SAT - SUN: 9am - 3pm\" verde.vienna am May 13, 2026: \"Breakfast in the heart of Vienna ♡ Take a seat and indulge in a variety of delicious breakfast options 😍 Breakfast serv"
-    },
-    {
-      "url": "https://www.instagram.com/p/DYRi-EpgMXj/",
-      "score": 0,
-      "source": "food3",
-      "reason": "Instagram-Post aelter als 7 Tage",
-      "reasons": [
-        "deal-signal",
-        "food-drink",
-        "public-preview",
-        "existing-source-context",
-        "age-15d",
-        "false-positive-language",
-        "past-offer-date"
-      ],
-      "pubDate": "2026-05-13T09:40:50.000Z",
-      "ageDays": 15,
-      "ageDaysExact": 15.1,
-      "postDateSource": "instagram-rendered-time-datetime",
-      "title": "OÖNachrichten auf Instagram: \"😍GEWINNSPIEL😍 Du willst mit deinen Freunden Ripperl essen gehen? Im Jack the Ripperl Linz habt ihr die Möglichkeit, die zartesten Ripperl, kreative",
-      "textSample": "OÖNachrichten auf Instagram: \"😍GEWINNSPIEL😍 Du willst mit deinen Freunden Ripperl essen gehen? Im Jack the Ripperl Linz habt ihr die Möglichkeit, die zartesten Ripperl, kreative Vorspeisen – auch mit vegetarischen Alternativen –, süße Desserts und natürlich passende Getränke zu genießen. Wir verlosen einen Platz für dich und drei deiner Freunde! So nimmst"
     }
   ]
 }
