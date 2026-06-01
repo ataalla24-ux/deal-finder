@@ -1,7 +1,10 @@
 const BRAND_RULES = [
   { key: 'mcdonald', name: "McDonald's", logo: '🍟', category: 'essen', domain: 'mcdonalds.at' },
   { key: 'burger king', name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at' },
-  { key: 'starbucks', name: 'Starbucks', logo: '☕', category: 'kaffee', domain: 'starbucks.com' },
+  { key: 'starbucks', name: 'Starbucks', logo: '☕', category: 'kaffee', domain: 'starbucks.at' },
+  { key: 'foodora', name: 'foodora', logo: '🍴', category: 'essen', domain: 'foodora.at' },
+  { key: 'domino', name: "Domino's Pizza", logo: '🍕', category: 'essen', domain: 'dominos.at' },
+  { key: 'dunkin', name: "Dunkin'", logo: '☕', category: 'kaffee', domain: 'dunkin.at' },
   { key: 'tchibo', name: 'Tchibo', logo: '☕', category: 'kaffee', domain: 'tchibo.at' },
   { key: 'nespresso', name: 'Nespresso', logo: '☕', category: 'kaffee', domain: 'nespresso.com' },
   { key: 'sephora', name: 'SEPHORA', logo: '💄', category: 'beauty', domain: 'sephora.at' },
@@ -16,6 +19,7 @@ const BRAND_RULES = [
   { key: 'hofer', name: 'HOFER', logo: '🛒', category: 'supermarkt', domain: 'hofer.at' },
   { key: 'lidl', name: 'Lidl', logo: '🛒', category: 'supermarkt', domain: 'lidl.at' },
   { key: 'ikea', name: 'IKEA', logo: '🪑', category: 'shopping', domain: 'ikea.com' },
+  { key: 'xxxlutz', name: 'XXXLutz', logo: '🪑', category: 'shopping', domain: 'xxxlutz.at' },
   { key: 'botanischer garten', name: 'Botanischer Garten der Universität Wien', logo: '🌿', category: 'kultur' },
   { key: 'shell', name: 'Shell Österreich', logo: '⛽', category: 'kaffee', domain: 'shell.at' },
   { key: 'european street food festival', name: 'European Street Food Festival', logo: '🌮', category: 'essen' },
@@ -33,7 +37,8 @@ const BRAND_RULES = [
   { key: 'genuss-festival', name: 'Genuss-Festival Wien', logo: '🧀', category: 'essen' },
   { key: 'momax', name: 'mömax Restaurant', logo: '🛋️', category: 'essen' },
   { key: 'mömax', name: 'mömax Restaurant', logo: '🛋️', category: 'essen' },
-  { key: 'vapiano', name: 'Vapiano', logo: '🍝', category: 'essen' },
+  { key: 'vapiano', name: 'Vapiano', logo: '🍝', category: 'essen', domain: 'vapiano.at' },
+  { key: 'too good to go', name: 'Too Good To Go', logo: '🍴', category: 'essen', domain: 'toogoodtogo.com' },
   { key: 'grill heaven', name: 'Grill Heaven Wien', logo: '🔥', category: 'essen' },
   { key: 'gigafit', name: 'GigaFit', logo: '💪', category: 'fitness' },
   { key: 'ori fusion', name: 'Ori Fusion Kitchen', logo: '🥢', category: 'essen' },
@@ -48,6 +53,7 @@ const BRAND_RULES = [
   { key: 'chasen brew', name: 'Chasen Brew', logo: '🍵', category: 'kaffee' },
   { key: 'wiener eistraum', name: 'Wiener Eistraum', logo: '⛸️', category: 'events' },
   { key: 'donauinselfest', name: 'Donauinselfest', logo: '🎸', category: 'kultur', preferFallback: true },
+  { key: 'foodsharing', name: 'Foodsharing', logo: '🍴', category: 'essen', domain: 'foodsharing.at' },
   { key: 'peter hahn', name: 'Peter Hahn', logo: '👗', category: 'shopping' },
   { key: 'pneus online', name: 'Pneus Online', logo: '🛞', category: 'shopping' },
   { key: 'omv', name: 'OMV', logo: '⛽', category: 'shopping', domain: 'omv.at' },
@@ -57,6 +63,8 @@ const BRAND_RULES = [
   { key: 'lieferando', name: 'Lieferando', logo: '🛵', category: 'essen', domain: 'lieferando.at' },
   { key: 'uber eats', name: 'Uber Eats', logo: '🛵', category: 'essen', domain: 'ubereats.com' },
   { key: 'all4golf', name: 'ALL4GOLF', logo: '⛳', category: 'shopping', domain: 'all4golf.de' },
+  { key: 'therme wien', name: 'Therme Wien', logo: '💧', category: 'wellness', domain: 'thermewien.at' },
+  { key: 'madame tussauds', name: 'Madame Tussauds Wien', logo: '🎭', category: 'kultur', domain: 'madametussauds.com' },
   { key: 'spee', name: 'Spee', logo: '🧺', category: 'shopping' },
   { key: 'westfield', name: 'Westfield Club', logo: '🛍️', category: 'shopping', domain: 'westfield.com' },
   { key: 'ryanair', name: 'Ryanair', logo: '✈️', category: 'reisen', domain: 'ryanair.com' },
@@ -175,7 +183,7 @@ function isSourceLikeHost(host) {
 
 function buildLogoUrl(host, { allowSourceLike = false } = {}) {
   if (!host || (!allowSourceLike && isSourceLikeHost(host))) return '';
-  return `https://www.google.com/s2/favicons?sz=128&domain_url=https://${host}`;
+  return `https://www.google.com/s2/favicons?sz=256&domain_url=https://${host}`;
 }
 
 function normalizeBrandKey(value) {
@@ -254,8 +262,66 @@ function extractFromDistance(distance) {
   return candidate;
 }
 
+function brandRuleMatchesBrand(rule, brand) {
+  if (!rule || !brand) return false;
+  const brandKey = normalizeAscii(brand);
+  const ruleKey = normalizeAscii(rule.key || '');
+  const ruleName = normalizeAscii(rule.name || '');
+  return Boolean(
+    brandKey &&
+      ((ruleKey && (brandKey === ruleKey || brandKey.includes(ruleKey) || ruleKey.includes(brandKey))) ||
+        (ruleName && (brandKey === ruleName || brandKey.includes(ruleName) || ruleName.includes(brandKey))))
+  );
+}
+
+function titleHasDominantBrandRule(title, rule) {
+  if (!rule) return false;
+  const text = normalizeAscii(title);
+  if (!text) return false;
+
+  const keys = [rule.key, rule.name]
+    .map((value) => normalizeAscii(value || ''))
+    .filter((value, index, all) => value && all.indexOf(value) === index);
+
+  return keys.some((key) => {
+    const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return (
+      new RegExp(`^${escaped}(?:\\b|\\s|:|-)`).test(text) ||
+      new RegExp(`\\bbei\\s+${escaped}(?:\\b|\\s|:|-)`).test(text)
+    );
+  });
+}
+
+function sameBrandText(a, b) {
+  const first = normalizeAscii(a);
+  const second = normalizeAscii(b);
+  return Boolean(first && second && first === second);
+}
+
+function replaceBrandMention(text, fromBrand, toBrand) {
+  const value = cleanUiNoiseText(text);
+  const from = cleanUiNoiseText(fromBrand);
+  const to = cleanUiNoiseText(toBrand);
+  if (!value || !from || !to || sameBrandText(from, to)) return value;
+
+  const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return value.replace(new RegExp(escaped, 'gi'), to).replace(/\s+/g, ' ').trim();
+}
+
 function inferPreferredBrand(deal = {}) {
   const explicitBrand = cleanUiNoiseText(deal.brand || '');
+  const titleSignal = cleanUiNoiseText(deal.title || '');
+  const knownInTitle = findBrandRule(titleSignal);
+
+  if (
+    knownInTitle &&
+    !knownInTitle.source &&
+    titleHasDominantBrandRule(titleSignal, knownInTitle) &&
+    !brandRuleMatchesBrand(knownInTitle, explicitBrand)
+  ) {
+    return knownInTitle.name;
+  }
+
   if (explicitBrand && !isSourceLikeBrand(explicitBrand) && !isLikelyGenericLocation(explicitBrand)) {
     return explicitBrand;
   }
@@ -263,8 +329,6 @@ function inferPreferredBrand(deal = {}) {
   const bracketBrand = extractBracketBrand(deal.title);
   if (bracketBrand) return bracketBrand;
 
-  const titleSignal = cleanUiNoiseText(deal.title || '');
-  const knownInTitle = findBrandRule(titleSignal);
   if (knownInTitle && !knownInTitle.source) return knownInTitle.name;
 
   const beiBrand = extractBeiBrand(titleSignal);
@@ -464,13 +528,15 @@ function isFalsePositiveFreeDeal(deal = {}) {
 function normalizeDealRecord(deal = {}) {
   const title = cleanUiNoiseText(deal.title || '');
   let description = cleanUiNoiseText(deal.description || '');
+  const explicitBrand = cleanUiNoiseText(deal.brand || '');
   const brand = inferPreferredBrand({ ...deal, title, description });
   const type = inferPreferredType({ ...deal, title, description, brand });
   const known = findBrandRule([brand, title, description, deal.distance, deal.url, deal.post_url].filter(Boolean).join(' '));
   const currentCategory = cleanUiNoiseText(deal.category || '').toLowerCase();
   const categorySignal = [brand, title, description, deal.distance, deal.url, deal.post_url, currentCategory].filter(Boolean).join(' ');
   const hasTravelSignal = TRAVEL_SIGNAL_PATTERN.test(normalizeAscii(categorySignal));
-  let category = known?.category && (GENERIC_CATEGORIES.has(currentCategory) || (currentCategory === 'shopping' && known.category !== 'shopping'))
+  const brandWasCorrected = explicitBrand && brand && !sameBrandText(explicitBrand, brand);
+  let category = known?.category && (brandWasCorrected || GENERIC_CATEGORIES.has(currentCategory) || (currentCategory === 'shopping' && known.category !== 'shopping'))
     ? known.category
     : currentCategory;
 
@@ -479,6 +545,10 @@ function normalizeDealRecord(deal = {}) {
   }
 
   const sanitizedExpires = sanitizeExpiryText(deal.expires);
+  if (brandWasCorrected) {
+    description = replaceBrandMention(description, explicitBrand, brand);
+  }
+
   if (!description) {
     description = buildFallbackDescription({ ...deal, title, brand, type, category });
   }
