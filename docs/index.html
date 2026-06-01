@@ -214,6 +214,12 @@
       transform: translateY(-1px);
     }
 
+    .button[disabled] {
+      cursor: wait;
+      opacity: 0.72;
+      transform: none;
+    }
+
     .button-primary {
       color: #fff;
       background: var(--navy);
@@ -857,6 +863,20 @@
       background: #fffdfb;
     }
 
+    .package-button {
+      width: 100%;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .package-button:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 148, 31, 0.68);
+      box-shadow: var(--soft-shadow);
+    }
+
     .package svg {
       width: 48px;
       height: 48px;
@@ -883,6 +903,37 @@
       font-size: 17px;
       font-weight: 800;
       white-space: nowrap;
+    }
+
+    .payment-note {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .checkout-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 40;
+      max-width: min(440px, calc(100vw - 32px));
+      padding: 14px 18px;
+      border-radius: 999px;
+      background: #151414;
+      color: #fff;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+      font-weight: 800;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 18px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .checkout-toast.visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
     }
 
     .support-band {
@@ -1407,9 +1458,11 @@
               </article>
             </div>
             <div class="pro-actions">
-              <a class="button button-warm" href="https://apps.apple.com/app/id6758958213">PRO freischalten</a>
+              <button class="button button-warm" type="button" data-checkout-plan="pro">PRO mit Stripe starten</button>
+              <button class="button button-ghost" type="button" data-checkout-plan="plus">PLUS mit Stripe starten</button>
               <a class="button button-ghost" href="https://apps.apple.com/app/id6758958213">Freunde einladen</a>
             </div>
+            <p class="payment-note">Web-Zahlung über Stripe Checkout mit den in Stripe aktivierten Methoden, z.B. Apple Pay, Karte, PayPal, Klarna/Sofort, SEPA oder Google Pay.</p>
           </div>
           <div class="phone-frame pro-phone">
             <img src="assets/current-ios/pro-sheet.jpg" alt="Aktuelles FreeFinder PRO Sheet">
@@ -1441,23 +1494,24 @@
             <h3 id="packageTitle">Business-Anzeige buchen</h3>
             <p>Wähle ein Paket für deine Aktion. Alle Anzeigen werden vor Veröffentlichung geprüft.</p>
             <div class="package-list">
-              <div class="package">
+              <button class="package package-button" type="button" data-checkout-plan="businessStarter">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7M12 21V8M3 8h18v4H3V8ZM12 8H8.5a2.5 2.5 0 1 1 2.2-3.7L12 8Zm0 0h3.5a2.5 2.5 0 1 0-2.2-3.7L12 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <div><strong>Starter Boost</strong><span>1 Tag sichtbar im Feed</span></div>
                 <div class="package-price">25,99 €</div>
-              </div>
-              <div class="package">
+              </button>
+              <button class="package package-button" type="button" data-checkout-plan="businessSpotlight">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
                 <div><strong>Spotlight Boost</strong><span>3 Tage für laufende Aktionen</span></div>
                 <div class="package-price">64,99 €</div>
-              </div>
-              <div class="package">
+              </button>
+              <button class="package package-button" type="button" data-checkout-plan="businessCity">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19c5-1.5 9-5.5 10.5-10.5L19 5l-1.1 5.5L23 12l-5.1 1.5L19 19l-3.5-3.5C10.5 17 6.5 21 5 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <div><strong>City Push</strong><span>8 Tage maximale Reichweite</span></div>
                 <div class="package-price">129,99 €</div>
-              </div>
+              </button>
             </div>
-            <a class="button button-warm" href="https://apps.apple.com/app/id6758958213">Business-Anzeige buchen</a>
+            <button class="button button-warm" type="button" data-checkout-plan="businessStarter">Starter Boost buchen</button>
+            <p class="payment-note">Alle Business-Pakete laufen über Stripe Checkout. Die Zahlungsmethoden steuerst du im Stripe Dashboard.</p>
           </aside>
         </div>
 
@@ -1500,17 +1554,25 @@
       </div>
       <div class="copyright">© 2026 FreeFinder. Alle Rechte vorbehalten.</div>
     </footer>
+    <div class="checkout-toast" id="checkoutToast" role="status" aria-live="polite"></div>
   </div>
 
   <script>
     const appStoreBaseUrl = "https://apps.apple.com/app/id6758958213";
     const referralApiBase = "https://freefinder-referrals.freefinder-stefan.workers.dev";
+    const checkoutDefaults = {
+      stripePublishableKey: "pk_live_51TbyJkJDHL0tXKzzgYXNWQw0SjPrY1hlhaA6td7BgUQgX8LNVm162hhCDyvCGnPqjSM2CsRKhNeS2GDRwgDkUUOX00aIeKAjMh",
+      checkoutEndpoint: "https://freefinder-referrals.freefinder-stefan.workers.dev/api/checkout/session"
+    };
+    let checkoutConfig = { ...checkoutDefaults };
     const navToggle = document.getElementById("mobileMenu");
     const navLinks = document.getElementById("navLinks");
     const params = new URLSearchParams(window.location.search);
     const refCode = normalizeReferralCode(params.get("ref"));
     const dealId = params.get("deal");
     const appStoreUrl = getAppStoreDownloadUrl(refCode);
+
+    loadCheckoutConfig();
 
     navToggle?.addEventListener("click", () => {
       const isOpen = navLinks.classList.toggle("open");
@@ -1546,6 +1608,12 @@
           window.location.href = link.href;
         });
       }
+    });
+
+    document.querySelectorAll("[data-checkout-plan]").forEach((button) => {
+      button.addEventListener("click", () => {
+        startStripeCheckout(button.dataset.checkoutPlan, button);
+      });
     });
 
     function normalizeReferralCode(value) {
@@ -1615,6 +1683,61 @@
         userAgent: navigator.userAgent || "",
         installSource: dealId ? "deal-share-download" : "referral-download-click"
       });
+    }
+
+    async function loadCheckoutConfig() {
+      try {
+        const response = await fetch("checkout-config.json?t=" + Date.now());
+        if (!response.ok) return;
+        const config = await response.json();
+        checkoutConfig = { ...checkoutConfig, ...config };
+      } catch {
+        checkoutConfig = { ...checkoutDefaults };
+      }
+    }
+
+    async function startStripeCheckout(plan, trigger) {
+      const checkoutPlan = String(plan || "");
+      const endpoint = String(checkoutConfig.checkoutEndpoint || checkoutDefaults.checkoutEndpoint || "").trim();
+      if (!endpoint) {
+        showCheckoutToast("Stripe Checkout ist noch nicht konfiguriert.");
+        return;
+      }
+
+      const previousText = trigger?.textContent;
+      if (trigger) {
+        trigger.disabled = true;
+        trigger.textContent = "Checkout wird geöffnet...";
+      }
+
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ plan: checkoutPlan })
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || !payload?.url) {
+          throw new Error(payload?.error || "Stripe Checkout konnte nicht gestartet werden.");
+        }
+        window.location.href = payload.url;
+      } catch (error) {
+        showCheckoutToast(error?.message || "Checkout konnte nicht gestartet werden.");
+      } finally {
+        if (trigger) {
+          trigger.disabled = false;
+          trigger.textContent = previousText;
+        }
+      }
+    }
+
+    function showCheckoutToast(message) {
+      const toast = document.getElementById("checkoutToast");
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add("visible");
+      clearTimeout(showCheckoutToast.timeout);
+      showCheckoutToast.timeout = setTimeout(() => toast.classList.remove("visible"), 3200);
     }
 
     window.addEventListener("load", () => {

@@ -18,6 +18,46 @@ const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
   month: '2-digit',
   day: '2-digit',
 });
+const STRIPE_API_VERSION = '2026-02-25.clover';
+const STRIPE_CHECKOUT_PLANS = {
+  pro: {
+    mode: 'subscription',
+    priceEnv: 'STRIPE_PRICE_PRO',
+    lookupKey: 'freefinder_pro_monthly_eur',
+    label: 'FreeFinder PRO',
+    unitAmount: 399,
+    recurringInterval: 'month',
+  },
+  plus: {
+    mode: 'subscription',
+    priceEnv: 'STRIPE_PRICE_PLUS',
+    lookupKey: 'freefinder_plus_monthly_eur',
+    label: 'FreeFinder PLUS',
+    unitAmount: 1299,
+    recurringInterval: 'month',
+  },
+  businessStarter: {
+    mode: 'payment',
+    priceEnv: 'STRIPE_PRICE_BUSINESS_STARTER',
+    lookupKey: 'freefinder_business_starter_eur',
+    label: 'Starter Boost',
+    unitAmount: 2599,
+  },
+  businessSpotlight: {
+    mode: 'payment',
+    priceEnv: 'STRIPE_PRICE_BUSINESS_SPOTLIGHT',
+    lookupKey: 'freefinder_business_spotlight_eur',
+    label: 'Spotlight Boost',
+    unitAmount: 6499,
+  },
+  businessCity: {
+    mode: 'payment',
+    priceEnv: 'STRIPE_PRICE_BUSINESS_CITY',
+    lookupKey: 'freefinder_business_city_eur',
+    label: 'City Push',
+    unitAmount: 12999,
+  },
+};
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
@@ -572,6 +612,151 @@ async function readBody(request) {
 
 function invalid(message, status = 400) {
   return json({ ok: false, error: message }, status);
+}
+
+function envString(env, key) {
+  return String(env?.[key] || '').trim();
+}
+
+function normalizeCheckoutPlan(value) {
+  const plan = String(value || '').trim();
+  return STRIPE_CHECKOUT_PLANS[plan] ? plan : '';
+}
+
+function checkoutReturnUrl(env, kind) {
+  const configured = envString(env, kind === 'success' ? 'CHECKOUT_SUCCESS_URL' : 'CHECKOUT_CANCEL_URL');
+  if (configured) return configured;
+  const url = new URL(WEBSITE_HOME_URL);
+  url.searchParams.set('checkout', kind);
+  if (kind === 'success') url.searchParams.set('session_id', '{CHECKOUT_SESSION_ID}');
+  return url.toString();
+}
+
+async function stripeApi(secretKey, path, { method = 'GET', body, idempotencyKey } = {}) {
+  const headers = {
+    authorization: `Bearer ${secretKey}`,
+    'stripe-version': STRIPE_API_VERSION,
+  };
+  if (body) headers['content-type'] = 'application/x-www-form-urlencoded';
+  if (idempotencyKey) headers['idempotency-key'] = idempotencyKey;
+
+  const response = await fetch(`https://api.stripe.com${path}`, {
+    method,
+    headers,
+    body: body ? body.toString() : undefined,
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    const message = payload?.error?.message || `Stripe API error on ${path}`;
+    throw new Error(message);
+  }
+  return payload;
+}
+
+async function findStripePriceByLookupKey(secretKey, lookupKey) {
+  const params = new URLSearchParams();
+  params.set('active', 'true');
+  params.set('limit', '1');
+  params.append('lookup_keys[]', lookupKey);
+  const payload = await stripeApi(secretKey, `/v1/prices?${params.toString()}`);
+  return Array.isArray(payload?.data) ? payload.data[0] : null;
+}
+
+async function createStripePrice(secretKey, plan, planConfig) {
+  const params = new URLSearchParams();
+  params.set('currency', 'eur');
+  params.set('unit_amount', String(planConfig.unitAmount));
+  params.set('lookup_key', planConfig.lookupKey);
+  params.set('nickname', planConfig.label);
+  params.set('product_data[name]', planConfig.label);
+  params.set('product_data[metadata][freefinder_plan]', plan);
+  params.set('metadata[freefinder_plan]', plan);
+  params.set('metadata[source]', 'freefinder-worker');
+  if (planConfig.recurringInterval) {
+    params.set('recurring[interval]', planConfig.recurringInterval);
+  }
+
+  try {
+    return await stripeApi(secretKey, '/v1/prices', {
+      method: 'POST',
+      body: params,
+      idempotencyKey: `freefinder-price-${planConfig.lookupKey}`,
+    });
+  } catch (error) {
+    const existingPrice = await findStripePriceByLookupKey(secretKey, planConfig.lookupKey);
+    if (existingPrice?.id) return existingPrice;
+    throw error;
+  }
+}
+
+async function resolveStripePriceId(env, secretKey, plan, planConfig) {
+  const configuredPrice = envString(env, planConfig.priceEnv);
+  if (configuredPrice) return configuredPrice;
+
+  const existingPrice = await findStripePriceByLookupKey(secretKey, planConfig.lookupKey);
+  if (existingPrice?.id) return existingPrice.id;
+
+  const createdPrice = await createStripePrice(secretKey, plan, planConfig);
+  return createdPrice?.id || '';
+}
+
+async function createStripeCheckoutSession(request, env) {
+  const body = await readBody(request);
+  const plan = normalizeCheckoutPlan(body?.plan);
+  if (!plan) return invalid('Invalid checkout plan');
+
+  const planConfig = STRIPE_CHECKOUT_PLANS[plan];
+  const secretKey = envString(env, 'STRIPE_SECRET_KEY');
+  if (!secretKey) return invalid('Stripe secret key is not configured', 500);
+
+  let priceId = '';
+  try {
+    priceId = await resolveStripePriceId(env, secretKey, plan, planConfig);
+  } catch (error) {
+    return invalid(error?.message || `Stripe price is not configured for ${plan}`, 500);
+  }
+  if (!priceId) return invalid(`Stripe price is not configured for ${plan}`, 500);
+
+  const params = new URLSearchParams();
+  params.set('mode', planConfig.mode);
+  params.set('line_items[0][price]', priceId);
+  params.set('line_items[0][quantity]', '1');
+  params.set('success_url', checkoutReturnUrl(env, 'success'));
+  params.set('cancel_url', checkoutReturnUrl(env, 'cancel'));
+  params.set('allow_promotion_codes', 'true');
+  params.set('billing_address_collection', 'auto');
+  params.set('metadata[plan]', plan);
+  params.set('metadata[source]', 'freefinder-web');
+  if (planConfig.mode === 'subscription') {
+    params.set('subscription_data[metadata][plan]', plan);
+    params.set('subscription_data[metadata][source]', 'freefinder-web');
+  } else {
+    params.set('customer_creation', 'if_required');
+  }
+
+  const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${secretKey}`,
+      'content-type': 'application/x-www-form-urlencoded',
+      'stripe-version': STRIPE_API_VERSION,
+    },
+    body: params.toString(),
+  });
+
+  const payload = await stripeResponse.json().catch(() => null);
+  if (!stripeResponse.ok || !payload?.url) {
+    const message = payload?.error?.message || 'Stripe Checkout konnte nicht gestartet werden';
+    return json({ ok: false, error: message }, stripeResponse.status || 502);
+  }
+
+  return json({
+    ok: true,
+    plan,
+    label: planConfig.label,
+    url: payload.url,
+    sessionId: payload.id || '',
+  });
 }
 
 function decodeHtmlEntities(value) {
@@ -1585,6 +1770,10 @@ export default {
       const code = normalizeCode(decodeURIComponent(path.slice(3)));
       if (!code) return invalid('Invalid referral code', 404);
       return redirectReferralToWebsite(code, url);
+    }
+
+    if (path === '/api/checkout/session' && request.method === 'POST') {
+      return createStripeCheckoutSession(request, env);
     }
 
     if (!env.REFERRAL_KV) {

@@ -25,7 +25,54 @@ This is still not an Apple-verified install callback. It is the strongest web-co
 - `POST /api/push/apns/register`
 - `POST /api/push/apns/send`
 - `GET /api/push/apns/status`
+- `POST /api/checkout/session`
 - `GET /health`
+
+## Stripe Checkout
+
+The website calls `POST /api/checkout/session` with one of these plans:
+
+- `pro`
+- `plus`
+- `businessStarter`
+- `businessSpotlight`
+- `businessCity`
+
+The worker creates a Stripe-hosted Checkout Session and returns `{ ok: true, url }`.
+If no `STRIPE_PRICE_*` secret is set, the worker finds or creates the matching Stripe Price automatically by `lookup_key`.
+
+Do not commit Stripe secret keys. Set the Stripe live secret key as a Cloudflare Worker secret:
+
+```bash
+npx wrangler secret put STRIPE_SECRET_KEY
+```
+
+The Price IDs are optional. Set them only if you created the prices manually in Stripe and want to pin exact `price_...` ids:
+
+```bash
+npx wrangler secret put STRIPE_PRICE_PRO
+npx wrangler secret put STRIPE_PRICE_PLUS
+npx wrangler secret put STRIPE_PRICE_BUSINESS_STARTER
+npx wrangler secret put STRIPE_PRICE_BUSINESS_SPOTLIGHT
+npx wrangler secret put STRIPE_PRICE_BUSINESS_CITY
+```
+
+Use Stripe **Price IDs** (`price_...`), not product IDs (`prod_...`). PRO and PLUS are subscription prices; the Business Boost products are one-time prices. If the worker auto-creates them, it uses these live prices:
+
+- FreeFinder PRO: 3,99 EUR monthly, lookup key `freefinder_pro_monthly_eur`
+- FreeFinder PLUS: 12,99 EUR monthly, lookup key `freefinder_plus_monthly_eur`
+- Starter Boost: 25,99 EUR one-time, lookup key `freefinder_business_starter_eur`
+- Spotlight Boost: 64,99 EUR one-time, lookup key `freefinder_business_spotlight_eur`
+- City Push: 129,99 EUR one-time, lookup key `freefinder_business_city_eur`
+
+Optional return URLs can also be configured as worker vars or secrets:
+
+```bash
+npx wrangler secret put CHECKOUT_SUCCESS_URL
+npx wrangler secret put CHECKOUT_CANCEL_URL
+```
+
+If they are not set, the worker returns customers to the FreeFinder website with `?checkout=success` or `?checkout=cancel`.
 
 ## Required Cloudflare setup
 
