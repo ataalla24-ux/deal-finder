@@ -494,6 +494,24 @@ function normalizeCommunitySubmissionInput(body, request) {
   };
 }
 
+function normalizeLegacyDealSubmitInput(body, request) {
+  const mapped = {
+    url: body?.url,
+    title: body?.title,
+    description: body?.description || body?.details,
+    brand: body?.brand || body?.provider,
+    logo: body?.logo,
+    category: body?.category || 'wien',
+    type: body?.type || 'rabatt',
+    distance: body?.distance || body?.location || 'Wien',
+    expires: body?.expires || body?.validUntil || '',
+    submittedFrom: body?.submittedFrom || body?.source || 'ios-native-free-submit',
+    language: body?.language,
+    userAgent: body?.userAgent,
+  };
+  return normalizeCommunitySubmissionInput(mapped, request);
+}
+
 function normalizeDealOverrideInput(body, existing = null) {
   const dealId = normalizeDealId(body?.dealId || existing?.dealId);
   if (!dealId) return null;
@@ -1713,6 +1731,31 @@ export default {
       await putJsonKV(env, dealSubmissionKey(submission.id), submission);
       return json({
         ok: true,
+        submission: sanitizePublicCommunitySubmission(submission),
+      }, 201);
+    }
+
+    if (path === '/api/deals/submit' && request.method === 'POST') {
+      const body = await readBody(request);
+      const submission = normalizeLegacyDealSubmitInput(body, request);
+      if (!submission) return invalid('Invalid deal submission');
+
+      const existing = await findExistingSubmissionByUrl(env, submission.url);
+      if (existing) {
+        return json({
+          ok: true,
+          slackDelivered: false,
+          queued: true,
+          alreadyQueued: true,
+          submission: sanitizePublicCommunitySubmission(existing),
+        });
+      }
+
+      await putJsonKV(env, dealSubmissionKey(submission.id), submission);
+      return json({
+        ok: true,
+        slackDelivered: false,
+        queued: true,
         submission: sanitizePublicCommunitySubmission(submission),
       }, 201);
     }

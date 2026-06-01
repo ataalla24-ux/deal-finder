@@ -629,6 +629,44 @@ function filterDuplicateDealsInRun(deals) {
   return { deals: filtered, removed };
 }
 
+function parseDealDate(value) {
+  const text = cleanText(value);
+  if (!text) return null;
+  const date = new Date(text);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function socialDealAgeDays(deal) {
+  const date = parseDealDate(deal.pubDate || deal.createdAt || deal.discoveredAt || deal.lastUpdated);
+  if (!date) return null;
+  return Math.max(0, Math.floor((Date.now() - date.getTime()) / (24 * 60 * 60 * 1000)));
+}
+
+function pruneStaleSocialQueueDeals(deals) {
+  const filtered = [];
+  let removed = 0;
+
+  for (const deal of deals) {
+    const postKey = canonicalPostKey(deal.url);
+    const socialSignal = normalizeLooseText([deal.url, deal.source, deal.originSource, deal.id].map(cleanText).join(' '));
+    const isSocialQueueDeal = isSocialPostKey(postKey) || /\b(instagram|tiktok)\b/i.test(socialSignal);
+    if (!isSocialQueueDeal) {
+      filtered.push(deal);
+      continue;
+    }
+
+    const age = socialDealAgeDays(deal);
+    if (age === null || age >= SEEN_DEAL_SUPPRESSION_DAYS) {
+      removed += 1;
+      continue;
+    }
+
+    filtered.push(deal);
+  }
+
+  return { deals: filtered, removed };
+}
+
 function filterAlreadyQueuedDeals(deals, queuedDealKeys) {
   if (!queuedDealKeys || queuedDealKeys.size === 0) return { deals, removed: 0 };
   const filtered = deals.filter((deal) => {
@@ -680,7 +718,11 @@ async function main() {
   const pendingFiles = getPendingFiles();
   const pendingDeals = loadPendingDeals(pendingFiles);
   console.log(`📋 Total pending deals loaded: ${pendingDeals.length}`);
-  const existingQueue = loadPendingQueue();
+  const queuePrune = pruneStaleSocialQueueDeals(loadPendingQueue());
+  if (queuePrune.removed > 0) {
+    console.log(`🧹 Queue prune: ${queuePrune.removed} alte Social-Posts aus der Slack-Queue entfernt`);
+  }
+  const existingQueue = queuePrune.deals;
 
   const seenPostKeys = await loadRecentlySeenPostKeys();
   const preSlackSeenFilter = filterRecentlySeenDeals(pendingDeals, seenPostKeys);
