@@ -26,6 +26,8 @@ This is still not an Apple-verified install callback. It is the strongest web-co
 - `POST /api/push/apns/send`
 - `GET /api/push/apns/status`
 - `POST /api/checkout/session`
+- `GET /api/checkout/status?session_id=cs_...`
+- `POST /api/checkout/webhook`
 - `GET /health`
 
 ## Stripe Checkout
@@ -41,10 +43,30 @@ The website calls `POST /api/checkout/session` with one of these plans:
 The worker creates a Stripe-hosted Checkout Session and returns `{ ok: true, url }`.
 If no `STRIPE_PRICE_*` secret is set, the worker finds or creates the matching Stripe Price automatically by `lookup_key`.
 
+Business plans must include a `campaign` object from the website form. The worker stores the campaign draft in KV, attaches a `campaign_id` to Stripe Checkout metadata, and submits the campaign to the Merchant backend after Stripe confirms payment through the webhook.
+
 Do not commit Stripe secret keys. Set the Stripe live secret key as a Cloudflare Worker secret:
 
 ```bash
 npx wrangler secret put STRIPE_SECRET_KEY
+```
+
+Set the Stripe webhook signing secret after creating a Dashboard webhook endpoint for:
+
+- `checkout.session.completed`
+- `checkout.session.async_payment_succeeded`
+- `checkout.session.async_payment_failed`
+
+Use this endpoint URL:
+
+```text
+https://freefinder-referrals.freefinder-stefan.workers.dev/api/checkout/webhook
+```
+
+Then save the endpoint secret:
+
+```bash
+npx wrangler secret put STRIPE_WEBHOOK_SECRET
 ```
 
 The Price IDs are optional. Set them only if you created the prices manually in Stripe and want to pin exact `price_...` ids:
@@ -73,6 +95,12 @@ npx wrangler secret put CHECKOUT_CANCEL_URL
 ```
 
 If they are not set, the worker returns customers to the FreeFinder website with `?checkout=success` or `?checkout=cancel`.
+
+The Merchant backend base URL defaults to `https://freefinder-merchant-backend.freefinder-stefan.workers.dev`. Override it only if the backend moves:
+
+```bash
+npx wrangler secret put MERCHANT_API_BASE
+```
 
 ## Required Cloudflare setup
 

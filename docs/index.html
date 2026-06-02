@@ -912,11 +912,46 @@
       line-height: 1.6;
     }
 
+    .checkout-return-banner {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      max-width: 1120px;
+      margin: 94px auto 0;
+      padding: 16px 18px;
+      border: 1px solid rgba(255, 148, 31, 0.32);
+      border-radius: 20px;
+      background: #fff8ed;
+      color: var(--ink);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .checkout-return-banner[hidden] {
+      display: none;
+    }
+
+    .deep-link-banner.visible + .checkout-return-banner {
+      margin-top: 18px;
+    }
+
+    .checkout-return-banner strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 16px;
+    }
+
+    .checkout-return-banner span {
+      color: var(--ink-soft);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
     .checkout-toast {
       position: fixed;
       left: 50%;
       bottom: 24px;
-      z-index: 40;
+      z-index: 70;
       max-width: min(440px, calc(100vw - 32px));
       padding: 14px 18px;
       border-radius: 999px;
@@ -934,6 +969,154 @@
     .checkout-toast.visible {
       opacity: 1;
       transform: translate(-50%, 0);
+    }
+
+    .business-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background: rgba(20, 20, 20, 0.42);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease;
+    }
+
+    .business-modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .business-modal {
+      width: min(760px, 100%);
+      max-height: min(760px, calc(100vh - 44px));
+      overflow: auto;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 24px;
+      background: #fff;
+      box-shadow: 0 28px 90px rgba(18, 18, 18, 0.28);
+      transform: translateY(16px) scale(0.98);
+      transition: transform 0.18s ease;
+    }
+
+    .business-modal-backdrop.open .business-modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .business-modal-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 44px;
+      gap: 18px;
+      align-items: start;
+      padding: 24px 24px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .business-modal-header h3 {
+      margin: 0;
+      font-family: "Bricolage Grotesque", "Plus Jakarta Sans", sans-serif;
+      font-size: 30px;
+      letter-spacing: 0;
+    }
+
+    .business-modal-header p {
+      margin: 6px 0 0;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+
+    .business-modal-close {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .business-modal-body {
+      padding: 22px 24px 24px;
+    }
+
+    .business-selected-plan {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      align-items: center;
+      margin-bottom: 18px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 148, 31, 0.28);
+      border-radius: 16px;
+      background: #fff8ed;
+      color: var(--ink-soft);
+      font-weight: 700;
+    }
+
+    .business-selected-plan strong {
+      color: var(--ink);
+    }
+
+    .business-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .business-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .business-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .business-field label {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .business-field input,
+    .business-field select,
+    .business-field textarea {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fffdfb;
+      color: var(--ink);
+      font: inherit;
+      font-size: 15px;
+      padding: 13px 14px;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .business-field textarea {
+      min-height: 112px;
+      resize: vertical;
+    }
+
+    .business-field input:focus,
+    .business-field select:focus,
+    .business-field textarea:focus {
+      border-color: rgba(255, 148, 31, 0.72);
+      box-shadow: 0 0 0 4px rgba(255, 148, 31, 0.13);
+    }
+
+    .business-form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 20px;
     }
 
     .support-band {
@@ -1135,7 +1318,8 @@
       .nav,
       .section,
       .site-footer,
-      .deep-link-banner {
+      .deep-link-banner,
+      .checkout-return-banner {
         width: min(100% - 28px, var(--max));
       }
 
@@ -1253,6 +1437,38 @@
         grid-column: 2;
       }
 
+      .checkout-return-banner {
+        grid-template-columns: 1fr;
+      }
+
+      .business-modal-backdrop {
+        padding: 12px;
+      }
+
+      .business-modal {
+        max-height: calc(100vh - 24px);
+        border-radius: 20px;
+      }
+
+      .business-modal-header,
+      .business-modal-body {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .business-modal-header h3 {
+        font-size: 25px;
+      }
+
+      .business-form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .business-form-actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+      }
+
       .support-item {
         grid-template-columns: 44px minmax(0, 1fr);
         padding: 18px;
@@ -1309,6 +1525,14 @@
         <span>Öffne diesen Deal direkt in der FreeFinder App.</span>
       </div>
       <a class="button button-warm" id="deepLinkButton" href="https://apps.apple.com/app/id6758958213">App öffnen</a>
+    </div>
+
+    <div class="checkout-return-banner" id="checkoutReturnBanner" hidden>
+      <div>
+        <strong id="checkoutReturnTitle">Zahlung wird geprüft</strong>
+        <span id="checkoutReturnText">Wir prüfen den Stripe-Status und reichen Business-Anzeigen automatisch ein.</span>
+      </div>
+      <a class="button button-ghost" href="#business">Business ansehen</a>
     </div>
 
     <main id="top">
@@ -1494,23 +1718,23 @@
             <h3 id="packageTitle">Business-Anzeige buchen</h3>
             <p>Wähle ein Paket für deine Aktion. Alle Anzeigen werden vor Veröffentlichung geprüft.</p>
             <div class="package-list">
-              <button class="package package-button" type="button" data-checkout-plan="businessStarter">
+              <button class="package package-button" type="button" data-business-plan="businessStarter">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7M12 21V8M3 8h18v4H3V8ZM12 8H8.5a2.5 2.5 0 1 1 2.2-3.7L12 8Zm0 0h3.5a2.5 2.5 0 1 0-2.2-3.7L12 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <div><strong>Starter Boost</strong><span>1 Tag sichtbar im Feed</span></div>
                 <div class="package-price">25,99 €</div>
               </button>
-              <button class="package package-button" type="button" data-checkout-plan="businessSpotlight">
+              <button class="package package-button" type="button" data-business-plan="businessSpotlight">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
                 <div><strong>Spotlight Boost</strong><span>3 Tage für laufende Aktionen</span></div>
                 <div class="package-price">64,99 €</div>
               </button>
-              <button class="package package-button" type="button" data-checkout-plan="businessCity">
+              <button class="package package-button" type="button" data-business-plan="businessCity">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19c5-1.5 9-5.5 10.5-10.5L19 5l-1.1 5.5L23 12l-5.1 1.5L19 19l-3.5-3.5C10.5 17 6.5 21 5 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <div><strong>City Push</strong><span>8 Tage maximale Reichweite</span></div>
                 <div class="package-price">129,99 €</div>
               </button>
             </div>
-            <button class="button button-warm" type="button" data-checkout-plan="businessStarter">Starter Boost buchen</button>
+            <button class="button button-warm" type="button" data-business-plan="businessStarter">Starter Boost buchen</button>
             <p class="payment-note">Alle Business-Pakete laufen über Stripe Checkout. Die Zahlungsmethoden steuerst du im Stripe Dashboard.</p>
           </aside>
         </div>
@@ -1555,6 +1779,76 @@
       <div class="copyright">© 2026 FreeFinder. Alle Rechte vorbehalten.</div>
     </footer>
     <div class="checkout-toast" id="checkoutToast" role="status" aria-live="polite"></div>
+    <div class="business-modal-backdrop" id="businessCheckoutModal" aria-hidden="true">
+      <section class="business-modal" role="dialog" aria-modal="true" aria-labelledby="businessModalTitle">
+        <div class="business-modal-header">
+          <div>
+            <h3 id="businessModalTitle">Business-Anzeige erstellen</h3>
+            <p>Fülle die Anzeige aus, bezahle über Stripe Checkout, danach wird dein Deal automatisch zur Prüfung eingereicht.</p>
+          </div>
+          <button class="business-modal-close" type="button" id="businessModalClose" aria-label="Business-Formular schließen">×</button>
+        </div>
+        <div class="business-modal-body">
+          <div class="business-selected-plan">
+            Paket: <strong id="businessSelectedPlanLabel">Starter Boost</strong>
+            <span id="businessSelectedPlanMeta">1 Tag sichtbar im Feed · 25,99 €</span>
+          </div>
+          <form id="businessCheckoutForm">
+            <div class="business-form-grid">
+              <div class="business-field">
+                <label for="businessRestaurantName">Anbieter</label>
+                <input id="businessRestaurantName" name="restaurantName" autocomplete="organization" placeholder="z.B. Café Am Park" required>
+              </div>
+              <div class="business-field">
+                <label for="businessContactEmail">Kontakt-E-Mail</label>
+                <input id="businessContactEmail" name="contactEmail" type="email" autocomplete="email" placeholder="name@restaurant.at" required>
+              </div>
+              <div class="business-field">
+                <label for="businessAddress">Ort</label>
+                <input id="businessAddress" name="address" autocomplete="street-address" placeholder="Adresse, Bezirk oder Standort" required>
+              </div>
+              <div class="business-field">
+                <label for="businessCategory">Kategorie</label>
+                <select id="businessCategory" name="category">
+                  <option value="restaurant">Restaurant</option>
+                  <option value="cafe">Café</option>
+                  <option value="bar">Bar</option>
+                  <option value="bakery">Bäckerei</option>
+                  <option value="takeaway">Takeaway</option>
+                  <option value="shop">Shop</option>
+                  <option value="service">Service</option>
+                  <option value="other">Sonstiges</option>
+                </select>
+              </div>
+              <div class="business-field full">
+                <label for="businessDealTitle">Deal-Titel</label>
+                <input id="businessDealTitle" name="dealTitle" placeholder="z.B. Gratis Iced Matcha Latte" required>
+              </div>
+              <div class="business-field">
+                <label for="businessOldPrice">Normalpreis</label>
+                <input id="businessOldPrice" name="oldPrice" inputmode="decimal" placeholder="z.B. 6,90 €">
+              </div>
+              <div class="business-field">
+                <label for="businessDealPrice">Dealpreis</label>
+                <input id="businessDealPrice" name="dealPrice" inputmode="decimal" placeholder="z.B. gratis">
+              </div>
+              <div class="business-field full">
+                <label for="businessCtaURL">Link</label>
+                <input id="businessCtaURL" name="ctaURL" type="url" inputmode="url" autocomplete="url" placeholder="https://..." required>
+              </div>
+              <div class="business-field full">
+                <label for="businessDescription">Details</label>
+                <textarea id="businessDescription" name="description" placeholder="Was bekommen FreeFinder-Nutzer? Bedingungen, Zeitraum, Einlösung." required></textarea>
+              </div>
+            </div>
+            <div class="business-form-actions">
+              <button class="button button-ghost" type="button" id="businessModalCancel">Abbrechen</button>
+              <button class="button button-warm" type="submit" id="businessCheckoutSubmit">Mit Stripe bezahlen</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
   </div>
 
   <script>
@@ -1562,9 +1856,16 @@
     const referralApiBase = "https://freefinder-referrals.freefinder-stefan.workers.dev";
     const checkoutDefaults = {
       stripePublishableKey: "pk_live_51TbyJkJDHL0tXKzzgYXNWQw0SjPrY1hlhaA6td7BgUQgX8LNVm162hhCDyvCGnPqjSM2CsRKhNeS2GDRwgDkUUOX00aIeKAjMh",
-      checkoutEndpoint: "https://freefinder-referrals.freefinder-stefan.workers.dev/api/checkout/session"
+      checkoutEndpoint: "https://freefinder-referrals.freefinder-stefan.workers.dev/api/checkout/session",
+      checkoutStatusEndpoint: "https://freefinder-referrals.freefinder-stefan.workers.dev/api/checkout/status"
+    };
+    const businessPlans = {
+      businessStarter: { label: "Starter Boost", meta: "1 Tag sichtbar im Feed · 25,99 €" },
+      businessSpotlight: { label: "Spotlight Boost", meta: "3 Tage für laufende Aktionen · 64,99 €" },
+      businessCity: { label: "City Push", meta: "8 Tage maximale Reichweite · 129,99 €" }
     };
     let checkoutConfig = { ...checkoutDefaults };
+    let selectedBusinessPlan = "businessStarter";
     const navToggle = document.getElementById("mobileMenu");
     const navLinks = document.getElementById("navLinks");
     const params = new URLSearchParams(window.location.search);
@@ -1572,7 +1873,7 @@
     const dealId = params.get("deal");
     const appStoreUrl = getAppStoreDownloadUrl(refCode);
 
-    loadCheckoutConfig();
+    loadCheckoutConfig().then(handleCheckoutReturn);
 
     navToggle?.addEventListener("click", () => {
       const isOpen = navLinks.classList.toggle("open");
@@ -1614,6 +1915,27 @@
       button.addEventListener("click", () => {
         startStripeCheckout(button.dataset.checkoutPlan, button);
       });
+    });
+
+    document.querySelectorAll("[data-business-plan]").forEach((button) => {
+      button.addEventListener("click", () => {
+        openBusinessCheckout(button.dataset.businessPlan || "businessStarter");
+      });
+    });
+
+    document.getElementById("businessCheckoutForm")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      submitBusinessCheckout(event.currentTarget);
+    });
+
+    document.getElementById("businessModalClose")?.addEventListener("click", closeBusinessCheckout);
+    document.getElementById("businessModalCancel")?.addEventListener("click", closeBusinessCheckout);
+    document.getElementById("businessCheckoutModal")?.addEventListener("click", (event) => {
+      if (event.target?.id === "businessCheckoutModal") closeBusinessCheckout();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeBusinessCheckout();
     });
 
     function normalizeReferralCode(value) {
@@ -1696,7 +2018,124 @@
       }
     }
 
-    async function startStripeCheckout(plan, trigger) {
+    function openBusinessCheckout(plan) {
+      selectedBusinessPlan = businessPlans[plan] ? plan : "businessStarter";
+      const modal = document.getElementById("businessCheckoutModal");
+      const label = document.getElementById("businessSelectedPlanLabel");
+      const meta = document.getElementById("businessSelectedPlanMeta");
+      const selected = businessPlans[selectedBusinessPlan];
+      if (label) label.textContent = selected.label;
+      if (meta) meta.textContent = selected.meta;
+      modal?.classList.add("open");
+      modal?.setAttribute("aria-hidden", "false");
+      setTimeout(() => document.getElementById("businessRestaurantName")?.focus(), 80);
+    }
+
+    function closeBusinessCheckout() {
+      const modal = document.getElementById("businessCheckoutModal");
+      if (!modal?.classList.contains("open")) return;
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function collectBusinessCampaign(form) {
+      const data = Object.fromEntries(new FormData(form).entries());
+      const campaign = {
+        restaurantName: String(data.restaurantName || "").trim(),
+        contactEmail: String(data.contactEmail || "").trim(),
+        address: String(data.address || "").trim(),
+        category: String(data.category || "restaurant").trim(),
+        dealTitle: String(data.dealTitle || "").trim(),
+        oldPrice: String(data.oldPrice || "").trim(),
+        dealPrice: String(data.dealPrice || "").trim(),
+        ctaURL: String(data.ctaURL || "").trim(),
+        description: String(data.description || "").trim()
+      };
+      if (!campaign.restaurantName || !campaign.contactEmail || !campaign.address || !campaign.dealTitle || !campaign.ctaURL || !campaign.description) {
+        throw new Error("Bitte Anbieter, Kontakt-E-Mail, Ort, Deal-Titel, Link und Details ausfüllen.");
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(campaign.contactEmail)) {
+        throw new Error("Bitte eine gültige Kontakt-E-Mail eingeben.");
+      }
+      try {
+        const url = new URL(campaign.ctaURL);
+        if (!["http:", "https:"].includes(url.protocol)) throw new Error();
+      } catch {
+        throw new Error("Bitte einen gültigen Link mit https:// eingeben.");
+      }
+      return campaign;
+    }
+
+    async function submitBusinessCheckout(form) {
+      const submit = document.getElementById("businessCheckoutSubmit");
+      try {
+        const campaign = collectBusinessCampaign(form);
+        await startStripeCheckout(selectedBusinessPlan, submit, campaign);
+      } catch (error) {
+        showCheckoutToast(error?.message || "Business-Anzeige konnte nicht gestartet werden.");
+      }
+    }
+
+    function setCheckoutReturn(title, text) {
+      const banner = document.getElementById("checkoutReturnBanner");
+      const bannerTitle = document.getElementById("checkoutReturnTitle");
+      const bannerText = document.getElementById("checkoutReturnText");
+      if (!banner || !bannerTitle || !bannerText) return;
+      bannerTitle.textContent = title;
+      bannerText.textContent = text;
+      banner.hidden = false;
+    }
+
+    function checkoutStatusEndpoint() {
+      const configured = String(checkoutConfig.checkoutStatusEndpoint || checkoutDefaults.checkoutStatusEndpoint || "").trim();
+      if (configured) return configured;
+      const endpoint = String(checkoutConfig.checkoutEndpoint || checkoutDefaults.checkoutEndpoint || "").trim();
+      return endpoint.replace(/\/session\/?$/, "/status");
+    }
+
+    async function handleCheckoutReturn() {
+      const checkoutState = String(params.get("checkout") || "").toLowerCase();
+      if (!checkoutState) return;
+
+      if (checkoutState === "cancel") {
+        setCheckoutReturn("Checkout abgebrochen", "Die Zahlung wurde nicht abgeschlossen. Du kannst dein Paket jederzeit erneut starten.");
+        return;
+      }
+
+      if (checkoutState !== "success") return;
+      const sessionId = String(params.get("session_id") || "").trim();
+      setCheckoutReturn("Zahlung erhalten", "Wir prüfen den Stripe-Status und reichen Business-Anzeigen automatisch ein.");
+      if (!sessionId) return;
+
+      try {
+        const endpoint = checkoutStatusEndpoint();
+        const url = new URL(endpoint);
+        url.searchParams.set("session_id", sessionId);
+        const response = await fetch(url.toString(), { cache: "no-store" });
+        const payload = await response.json().catch(() => null);
+        const campaign = payload?.campaign;
+        if (!response.ok || !payload?.ok) {
+          throw new Error(payload?.error || "Status konnte nicht gelesen werden.");
+        }
+        if (payload.type !== "business" || !campaign) {
+          setCheckoutReturn("Zahlung abgeschlossen", "Stripe hat dich zurückgeleitet. Für PRO/PLUS ist kein Business-Draft nötig.");
+          return;
+        }
+        if (campaign.status === "merchant_submitted") {
+          setCheckoutReturn("Anzeige eingereicht", `${campaign.dealTitle || "Dein Deal"} wurde bezahlt und zur Prüfung eingereicht.`);
+        } else if (campaign.status === "paid" || campaign.status === "awaiting_payment") {
+          setCheckoutReturn("Zahlung wird verarbeitet", "Stripe hat die Zahlung gemeldet. Die Anzeige wird nach Zahlungsbestätigung eingereicht.");
+        } else if (campaign.status === "merchant_submit_failed") {
+          setCheckoutReturn("Zahlung erhalten, Prüfung offen", "Die Zahlung ist da, aber die automatische Einreichung braucht noch einen erneuten Backend-Lauf.");
+        } else {
+          setCheckoutReturn("Checkout gestartet", "Deine Business-Anzeige ist mit dieser Stripe-Session verknüpft.");
+        }
+      } catch (error) {
+        setCheckoutReturn("Zahlung erhalten", error?.message || "Der Status konnte gerade nicht geprüft werden.");
+      }
+    }
+
+    async function startStripeCheckout(plan, trigger, campaign = null) {
       const checkoutPlan = String(plan || "");
       const endpoint = String(checkoutConfig.checkoutEndpoint || checkoutDefaults.checkoutEndpoint || "").trim();
       if (!endpoint) {
@@ -1714,7 +2153,7 @@
         const response = await fetch(endpoint, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ plan: checkoutPlan })
+          body: JSON.stringify(campaign ? { plan: checkoutPlan, campaign } : { plan: checkoutPlan })
         });
         const payload = await response.json().catch(() => null);
         if (!response.ok || !payload?.url) {

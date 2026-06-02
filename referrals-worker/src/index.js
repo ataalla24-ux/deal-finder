@@ -42,6 +42,7 @@ const STRIPE_CHECKOUT_PLANS = {
     lookupKey: 'freefinder_business_starter_eur',
     label: 'Starter Boost',
     unitAmount: 2599,
+    merchantPackageId: 'starter',
   },
   businessSpotlight: {
     mode: 'payment',
@@ -49,6 +50,7 @@ const STRIPE_CHECKOUT_PLANS = {
     lookupKey: 'freefinder_business_spotlight_eur',
     label: 'Spotlight Boost',
     unitAmount: 6499,
+    merchantPackageId: 'spotlight',
   },
   businessCity: {
     mode: 'payment',
@@ -56,8 +58,11 @@ const STRIPE_CHECKOUT_PLANS = {
     lookupKey: 'freefinder_business_city_eur',
     label: 'City Push',
     unitAmount: 12999,
+    merchantPackageId: 'city',
   },
 };
+const MERCHANT_API_BASE_DEFAULT = 'https://freefinder-merchant-backend.freefinder-stefan.workers.dev';
+const STRIPE_WEBHOOK_TOLERANCE_SECONDS = 300;
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
@@ -109,6 +114,18 @@ function dealDailyKey() {
 
 function dealSubmissionKey(id) {
   return `deal:submission:${id}`;
+}
+
+function checkoutCampaignKey(id) {
+  return `checkout:campaign:${id}`;
+}
+
+function checkoutSessionKey(sessionId) {
+  return `checkout:session:${sessionId}`;
+}
+
+function checkoutEventKey(eventId) {
+  return `checkout:event:${eventId}`;
 }
 
 function getViennaDayKey(input = Date.now()) {
@@ -344,8 +361,8 @@ async function getJsonKV(env, key) {
   return env.REFERRAL_KV.get(key, 'json');
 }
 
-async function putJsonKV(env, key, value) {
-  await env.REFERRAL_KV.put(key, JSON.stringify(value));
+async function putJsonKV(env, key, value, options = undefined) {
+  await env.REFERRAL_KV.put(key, JSON.stringify(value), options);
 }
 
 async function listApnsTokens(env, limit = 20) {
@@ -487,6 +504,70 @@ function cleanShortText(value, max = 240) {
 
 function cleanLongText(value, max = 2500) {
   return String(value || '').trim().replace(/\s+/g, ' ').slice(0, max);
+}
+
+function normalizeEmail(value) {
+  const email = cleanShortText(value, 180).toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return '';
+  return email;
+}
+
+function isBusinessCheckoutPlan(plan) {
+  return Boolean(STRIPE_CHECKOUT_PLANS[plan]?.merchantPackageId);
+}
+
+function normalizeBusinessCategory(value) {
+  const category = cleanShortText(value, 40).toLowerCase();
+  if (['restaurant', 'cafe', 'bar', 'bakery', 'takeaway', 'shop', 'service', 'other'].includes(category)) {
+    return category;
+  }
+  return 'restaurant';
+}
+
+function normalizeBusinessCampaignInput(body) {
+  const input = body && typeof body === 'object' ? body : {};
+  const restaurantName = cleanShortText(input.restaurantName || input.providerName || input.provider, 120);
+  const dealTitle = cleanShortText(input.dealTitle || input.title, 160);
+  const address = cleanShortText(input.address || input.location || input.dealLocation, 220);
+  const description = cleanLongText(input.description || input.details || input.dealDetails, 1200);
+  const ctaURL = normalizeSubmissionUrl(input.ctaURL || input.link || input.dealURL || input.url);
+  const contactEmail = normalizeEmail(input.contactEmail || input.email);
+
+  if (!restaurantName || !dealTitle || !address || !description || !ctaURL || !contactEmail) {
+    return null;
+  }
+
+  return {
+    restaurantName,
+    dealTitle,
+    address,
+    description,
+    ctaURL,
+    contactEmail,
+    category: normalizeBusinessCategory(input.category),
+    oldPrice: cleanShortText(input.oldPrice, 80),
+    dealPrice: cleanShortText(input.dealPrice, 80),
+  };
+}
+
+function sanitizePublicCheckoutCampaign(record) {
+  if (!record || !record.id) return null;
+  const campaign = record.campaign || {};
+  return {
+    id: record.id,
+    plan: record.plan || '',
+    packageId: record.packageId || '',
+    label: record.planLabel || '',
+    status: cleanShortText(record.status, 80),
+    restaurantName: cleanShortText(campaign.restaurantName, 120),
+    dealTitle: cleanShortText(campaign.dealTitle, 160),
+    createdAt: Number(record.createdAt || 0) || null,
+    checkoutStartedAt: Number(record.checkoutStartedAt || 0) || null,
+    paidAt: Number(record.paidAt || 0) || null,
+    merchantSubmittedAt: Number(record.merchantSubmittedAt || 0) || null,
+    updatedAt: Number(record.updatedAt || 0) || null,
+    error: record.error ? cleanShortText(record.error, 240) : '',
+  };
 }
 
 function normalizeCommunitySubmissionInput(body, request) {
@@ -632,6 +713,66 @@ function checkoutReturnUrl(env, kind) {
   return url.toString();
 }
 
+function hexFromBytes(bytes) {
+  return Array.from(bytes).map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function timingSafeEqualString(left, right) {
+  const a = String(left || '');
+  const b = String(right || '');
+  let diff = a.length ^ b.length;
+  const length = Math.max(a.length, b.length);
+  for (let index = 0; index < length; index += 1) {
+    diff |= (a.charCodeAt(index) || 0) ^ (b.charCodeAt(index) || 0);
+  }
+  return diff === 0;
+}
+
+function parseStripeSignatureHeader(header) {
+  const parts = String(header || '').split(',');
+  const parsed = { timestamp: '', signatures: [] };
+  for (const part of parts) {
+    const [key, value] = part.split('=');
+    if (key === 't') parsed.timestamp = value || '';
+    if (key === 'v1' && value) parsed.signatures.push(value);
+  }
+  return parsed;
+}
+
+async function stripeWebhookEvent(request, env) {
+  const endpointSecret = envString(env, 'STRIPE_WEBHOOK_SECRET');
+  if (!endpointSecret) throw new Error('Stripe webhook secret is not configured');
+
+  const signature = parseStripeSignatureHeader(request.headers.get('stripe-signature'));
+  const timestamp = Number(signature.timestamp || 0);
+  if (!timestamp || signature.signatures.length === 0) {
+    throw new Error('Missing Stripe webhook signature');
+  }
+
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  if (Math.abs(nowSeconds - timestamp) > STRIPE_WEBHOOK_TOLERANCE_SECONDS) {
+    throw new Error('Stripe webhook timestamp is outside tolerance');
+  }
+
+  const payload = await request.text();
+  const signedPayload = `${signature.timestamp}.${payload}`;
+  const key = await crypto.subtle.importKey(
+    'raw',
+    textEncoder.encode(endpointSecret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const digest = await crypto.subtle.sign('HMAC', key, textEncoder.encode(signedPayload));
+  const expected = hexFromBytes(new Uint8Array(digest));
+
+  if (!signature.signatures.some((candidate) => timingSafeEqualString(candidate, expected))) {
+    throw new Error('Invalid Stripe webhook signature');
+  }
+
+  return JSON.parse(payload);
+}
+
 async function stripeApi(secretKey, path, { method = 'GET', body, idempotencyKey } = {}) {
   const headers = {
     authorization: `Bearer ${secretKey}`,
@@ -706,6 +847,15 @@ async function createStripeCheckoutSession(request, env) {
   if (!plan) return invalid('Invalid checkout plan');
 
   const planConfig = STRIPE_CHECKOUT_PLANS[plan];
+  const isBusinessPlan = isBusinessCheckoutPlan(plan);
+  const businessCampaign = isBusinessPlan ? normalizeBusinessCampaignInput(body?.campaign) : null;
+  if (isBusinessPlan && !businessCampaign) {
+    return invalid('Bitte Anbieter, Deal-Titel, Ort, Link, Details und Kontakt-E-Mail ausfüllen.');
+  }
+  if (isBusinessPlan && !env.REFERRAL_KV) {
+    return invalid('Business checkout storage is not configured', 500);
+  }
+
   const secretKey = envString(env, 'STRIPE_SECRET_KEY');
   if (!secretKey) return invalid('Stripe secret key is not configured', 500);
 
@@ -717,6 +867,20 @@ async function createStripeCheckoutSession(request, env) {
   }
   if (!priceId) return invalid(`Stripe price is not configured for ${plan}`, 500);
 
+  const campaignId = isBusinessPlan ? crypto.randomUUID() : '';
+  const campaignRecord = isBusinessPlan ? {
+    id: campaignId,
+    plan,
+    planLabel: planConfig.label,
+    packageId: planConfig.merchantPackageId,
+    priceId,
+    status: 'checkout_creating',
+    campaign: businessCampaign,
+    source: 'website',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  } : null;
+
   const params = new URLSearchParams();
   params.set('mode', planConfig.mode);
   params.set('line_items[0][price]', priceId);
@@ -727,6 +891,17 @@ async function createStripeCheckoutSession(request, env) {
   params.set('billing_address_collection', 'auto');
   params.set('metadata[plan]', plan);
   params.set('metadata[source]', 'freefinder-web');
+  if (campaignRecord) {
+    params.set('client_reference_id', campaignId);
+    params.set('customer_email', businessCampaign.contactEmail);
+    params.set('metadata[campaign_id]', campaignId);
+    params.set('metadata[merchant_package_id]', planConfig.merchantPackageId);
+    params.set('metadata[restaurant_name]', businessCampaign.restaurantName.slice(0, 120));
+    params.set('payment_intent_data[metadata][plan]', plan);
+    params.set('payment_intent_data[metadata][source]', 'freefinder-web');
+    params.set('payment_intent_data[metadata][campaign_id]', campaignId);
+    params.set('payment_intent_data[metadata][merchant_package_id]', planConfig.merchantPackageId);
+  }
   if (planConfig.mode === 'subscription') {
     params.set('subscription_data[metadata][plan]', plan);
     params.set('subscription_data[metadata][source]', 'freefinder-web');
@@ -750,13 +925,230 @@ async function createStripeCheckoutSession(request, env) {
     return json({ ok: false, error: message }, stripeResponse.status || 502);
   }
 
+  if (campaignRecord) {
+    const sessionId = payload.id || '';
+    const nextRecord = {
+      ...campaignRecord,
+      status: 'checkout_started',
+      stripeSessionId: sessionId,
+      checkoutStartedAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    await putJsonKV(env, checkoutCampaignKey(campaignId), nextRecord, { expirationTtl: 90 * 24 * 60 * 60 });
+    if (sessionId) {
+      await env.REFERRAL_KV.put(checkoutSessionKey(sessionId), campaignId, { expirationTtl: 90 * 24 * 60 * 60 });
+    }
+  }
+
   return json({
     ok: true,
     plan,
     label: planConfig.label,
     url: payload.url,
     sessionId: payload.id || '',
+    campaignId,
   });
+}
+
+async function getCheckoutStatus(request, env) {
+  if (!env.REFERRAL_KV) return invalid('Checkout storage is not configured', 500);
+  const url = new URL(request.url);
+  const sessionId = cleanShortText(url.searchParams.get('session_id'), 160);
+  if (!sessionId) return invalid('Missing session_id');
+
+  const campaignId = await env.REFERRAL_KV.get(checkoutSessionKey(sessionId));
+  if (!campaignId) {
+    return json({
+      ok: true,
+      type: 'checkout',
+      status: 'unknown',
+      message: 'Zahlung wurde zurückgemeldet. Für Business-Anzeigen ist noch kein Campaign-Draft verknüpft.',
+    });
+  }
+
+  const record = await getJsonKV(env, checkoutCampaignKey(campaignId));
+  if (!record) return invalid('Campaign draft not found', 404);
+
+  return json({
+    ok: true,
+    type: 'business',
+    campaign: sanitizePublicCheckoutCampaign(record),
+  });
+}
+
+async function submitMerchantCampaign(env, record, session) {
+  const planConfig = STRIPE_CHECKOUT_PLANS[record.plan] || {};
+  const campaign = record.campaign || {};
+  const merchantBase = envString(env, 'MERCHANT_API_BASE') || MERCHANT_API_BASE_DEFAULT;
+  const endpoint = `${merchantBase.replace(/\/+$/, '')}/api/merchant/campaigns`;
+  const transactionId = cleanShortText(session?.payment_intent || session?.id || record.stripeSessionId, 160);
+
+  const payload = {
+    packageId: record.packageId || planConfig.merchantPackageId || '',
+    productId: record.priceId || '',
+    transactionId,
+    originalTransactionId: cleanShortText(session?.id || record.stripeSessionId, 160),
+    restaurantName: campaign.restaurantName || '',
+    dealTitle: campaign.dealTitle || '',
+    description: campaign.description || '',
+    oldPrice: campaign.oldPrice || '',
+    dealPrice: campaign.dealPrice || '',
+    address: campaign.address || '',
+    ctaURL: campaign.ctaURL || '',
+    contactEmail: campaign.contactEmail || '',
+    category: campaign.category || 'restaurant',
+    paymentProvider: 'stripe',
+    stripeSessionId: cleanShortText(session?.id || record.stripeSessionId, 160),
+    stripePaymentIntentId: cleanShortText(session?.payment_intent, 160),
+    stripeCustomerId: cleanShortText(session?.customer, 160),
+    source: 'freefinder-web',
+  };
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  const responseText = await response.text();
+  let responsePayload = null;
+  try {
+    responsePayload = responseText ? JSON.parse(responseText) : null;
+  } catch {
+    responsePayload = null;
+  }
+
+  if (!response.ok || responsePayload?.ok === false) {
+    const message = responsePayload?.error || responseText || 'Merchant campaign submit failed';
+    throw new Error(message.slice(0, 500));
+  }
+
+  return responsePayload;
+}
+
+async function processPaidBusinessCheckout(env, session, event) {
+  const metadata = session?.metadata || {};
+  const plan = normalizeCheckoutPlan(metadata.plan);
+  if (!isBusinessCheckoutPlan(plan)) return { ignored: true, reason: 'not-business-plan' };
+
+  const sessionId = cleanShortText(session?.id, 160);
+  const campaignId = cleanShortText(metadata.campaign_id || session?.client_reference_id, 160)
+    || (sessionId ? await env.REFERRAL_KV.get(checkoutSessionKey(sessionId)) : '');
+  if (!campaignId) throw new Error('Business campaign id missing from Stripe session');
+
+  const record = await getJsonKV(env, checkoutCampaignKey(campaignId));
+  if (!record) throw new Error('Business campaign draft not found');
+
+  if (event.type === 'checkout.session.async_payment_failed') {
+    const failedRecord = {
+      ...record,
+      status: 'payment_failed',
+      error: 'Stripe async payment failed',
+      updatedAt: Date.now(),
+    };
+    await putJsonKV(env, checkoutCampaignKey(campaignId), failedRecord, { expirationTtl: 90 * 24 * 60 * 60 });
+    return { campaignId, status: failedRecord.status };
+  }
+
+  const paymentStatus = String(session?.payment_status || '').toLowerCase();
+  if (event.type === 'checkout.session.completed' && paymentStatus && paymentStatus !== 'paid') {
+    const waitingRecord = {
+      ...record,
+      status: 'awaiting_payment',
+      stripePaymentStatus: paymentStatus,
+      updatedAt: Date.now(),
+    };
+    await putJsonKV(env, checkoutCampaignKey(campaignId), waitingRecord, { expirationTtl: 90 * 24 * 60 * 60 });
+    return { campaignId, status: waitingRecord.status };
+  }
+
+  if (record.merchantSubmittedAt) {
+    return { campaignId, status: record.status || 'merchant_submitted', duplicate: true };
+  }
+
+  const paidRecord = {
+    ...record,
+    status: 'paid',
+    stripePaymentStatus: paymentStatus || 'paid',
+    stripePaymentIntentId: cleanShortText(session?.payment_intent, 160),
+    stripeCustomerId: cleanShortText(session?.customer, 160),
+    paidAt: record.paidAt || Date.now(),
+    updatedAt: Date.now(),
+  };
+  await putJsonKV(env, checkoutCampaignKey(campaignId), paidRecord, { expirationTtl: 90 * 24 * 60 * 60 });
+
+  try {
+    const merchantResponse = await submitMerchantCampaign(env, paidRecord, session);
+    const submittedRecord = {
+      ...paidRecord,
+      status: 'merchant_submitted',
+      merchantSubmittedAt: Date.now(),
+      merchantResponse,
+      error: '',
+      updatedAt: Date.now(),
+    };
+    await putJsonKV(env, checkoutCampaignKey(campaignId), submittedRecord, { expirationTtl: 90 * 24 * 60 * 60 });
+    return { campaignId, status: submittedRecord.status };
+  } catch (error) {
+    const failedRecord = {
+      ...paidRecord,
+      status: 'merchant_submit_failed',
+      error: error?.message || 'Merchant campaign submit failed',
+      updatedAt: Date.now(),
+    };
+    await putJsonKV(env, checkoutCampaignKey(campaignId), failedRecord, { expirationTtl: 90 * 24 * 60 * 60 });
+    throw error;
+  }
+}
+
+async function handleStripeWebhook(request, env) {
+  if (!env.REFERRAL_KV) return invalid('Checkout storage is not configured', 500);
+
+  let event = null;
+  try {
+    event = await stripeWebhookEvent(request, env);
+  } catch (error) {
+    return invalid(error?.message || 'Invalid Stripe webhook', 400);
+  }
+
+  const eventId = cleanShortText(event?.id, 160);
+  if (!eventId) return invalid('Invalid Stripe event');
+
+  const eventKey = checkoutEventKey(eventId);
+  const existingEvent = await getJsonKV(env, eventKey);
+  if (existingEvent?.processedAt) {
+    return json({ ok: true, duplicate: true, eventId });
+  }
+
+  const handledTypes = new Set([
+    'checkout.session.completed',
+    'checkout.session.async_payment_succeeded',
+    'checkout.session.async_payment_failed',
+  ]);
+  if (!handledTypes.has(event.type)) {
+    await putJsonKV(env, eventKey, {
+      id: eventId,
+      type: cleanShortText(event.type, 120),
+      ignoredAt: Date.now(),
+    }, { expirationTtl: 30 * 24 * 60 * 60 });
+    return json({ ok: true, ignored: true, eventId });
+  }
+
+  let result = null;
+  try {
+    result = await processPaidBusinessCheckout(env, event?.data?.object, event);
+  } catch (error) {
+    return invalid(error?.message || 'Stripe webhook processing failed', 502);
+  }
+
+  await putJsonKV(env, eventKey, {
+    id: eventId,
+    type: cleanShortText(event.type, 120),
+    processedAt: Date.now(),
+    result,
+  }, { expirationTtl: 30 * 24 * 60 * 60 });
+
+  return json({ ok: true, eventId, result });
 }
 
 function decodeHtmlEntities(value) {
@@ -1774,6 +2166,14 @@ export default {
 
     if (path === '/api/checkout/session' && request.method === 'POST') {
       return createStripeCheckoutSession(request, env);
+    }
+
+    if (path === '/api/checkout/status' && request.method === 'GET') {
+      return getCheckoutStatus(request, env);
+    }
+
+    if (path === '/api/checkout/webhook' && request.method === 'POST') {
+      return handleStripeWebhook(request, env);
     }
 
     if (!env.REFERRAL_KV) {
