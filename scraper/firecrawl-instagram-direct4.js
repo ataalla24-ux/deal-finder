@@ -1,7 +1,7 @@
 import '../sentry/instrument.mjs';
 // ============================================
 // 📸🔥 FIRECRAWL INSTAGRAM DIRECT AGENT #4
-// Breiter Intake aus konkreten Instagram-Quellen
+// Code-1 Agent: Instagram-only Free Food & Drink Offers
 // ============================================
 
 import Firecrawl from '@mendable/firecrawl-js';
@@ -21,43 +21,22 @@ if (!FIRECRAWL_API_KEY) {
 
 const firecrawl = new Firecrawl({ apiKey: FIRECRAWL_API_KEY });
 
-const SOURCE_URLS = [
-  'https://www.instagram.com/explore/tags/gratiswien/',
-  'https://www.instagram.com/explore/tags/wienessen/',
-  'https://www.instagram.com/explore/tags/wiengastro/',
-  'https://www.instagram.com/explore/tags/wienkaffee/',
-  'https://www.instagram.com/explore/tags/gratisessenwien/',
-  'https://www.instagram.com/explore/tags/neueroeffnungwien/',
-  'https://www.instagram.com/assal.burger/',
-  'https://www.instagram.com/cafe_wirr/',
-  'https://www.instagram.com/ciosgrill/',
-  'https://www.instagram.com/corner_xvi/',
-  'https://www.instagram.com/pizzeriapummaro/',
-  'https://www.instagram.com/vienna.coffee/',
-  'https://www.instagram.com/viennaeats/',
-  'https://www.instagram.com/viennafoodstories/',
-  'https://www.instagram.com/viennarestaurants/',
-  'https://www.instagram.com/viennawurstelstand/',
-];
-
 const offerSchema = z.object({
   offers: z.array(z.object({
     restaurant_name: z.string(),
-    restaurant_name_citation: z.string().optional(),
+    restaurant_name_citation: z.string().describe('Source URL for restaurant_name').optional(),
     post_url: z.string(),
-    post_url_citation: z.string().optional(),
-    post_date: z.string().describe('Publish date of the Instagram post.'),
-    post_date_citation: z.string().optional(),
+    post_url_citation: z.string().describe('Source URL for post_url').optional(),
     offer_description: z.string(),
-    offer_description_citation: z.string().optional(),
+    offer_description_citation: z.string().describe('Source URL for offer_description').optional(),
     offer_type: z.string(),
-    offer_type_citation: z.string().optional(),
-    valid_until: z.string().optional(),
-    valid_until_citation: z.string().optional(),
-    is_currently_valid: z.boolean().optional(),
-    is_currently_valid_citation: z.string().optional(),
-    location: z.string().optional(),
-    location_citation: z.string().optional(),
+    offer_type_citation: z.string().describe('Source URL for offer_type').optional(),
+    valid_until: z.string().describe("Das konkrete Datum oder 'nicht angegeben'. Falls ein relatives Datum wie 'nur heute' im Post steht, berechne das tatsächliche Datum basierend auf dem Post-Erstellungsdatum."),
+    valid_until_citation: z.string().describe('Source URL for valid_until').optional(),
+    is_currently_valid: z.boolean().describe('True, wenn das Angebot heute noch gültig ist oder kein Enddatum hat.'),
+    is_currently_valid_citation: z.string().describe('Source URL for is_currently_valid').optional(),
+    location: z.string(),
+    location_citation: z.string().describe('Source URL for location').optional(),
   })).default([]),
 });
 
@@ -179,20 +158,28 @@ function isRelevantOffer(text) {
   return /(gratis|kostenlos|free|freebie|0 ?€|1\s*\+\s*1|2\s*für\s*1|2 for 1|bogo|verkostung|tasting|welcome gift|gratisprobe|free sample)/i.test(text);
 }
 
-async function runAgent(url) {
+async function runAgent() {
   const today = new Date().toLocaleDateString('de-AT', { timeZone: 'Europe/Vienna' });
   return firecrawl.agent({
-    url,
-    prompt: `Extrahiere Angebots-Posts rund um Speisen und Getränke aus dieser Instagram-Quelle.
+    prompt: `Extrahiere mindestens 30 aktuelle Angebote für kostenlose Speisen und Getränke in der Wiener Gastronomie AUSSCHLIEẞLICH aus Instagram-Posts der letzten 7 Tage.
 
 Heute ist ${today} in Wien.
 
+Filter-Logik (STRENGSTENS BEACHTEN):
+1. Entferne alle Angebote, deren Gültigkeit bereits abgelaufen ist (vergleiche 'valid_until' oder relative Zeitangaben wie 'nur heute' mit dem heutigen Datum).
+2. Behalte Angebote ohne genanntes Enddatum bei, sofern sie nicht offensichtlich abgelaufen sind.
+
+Priorisierung:
+1. Höchste Priorität: Noch gültige Angebote mit konkretem oder implizitem Enddatum (z.B. 'bis morgen', 'gültig am [Datum in der Zukunft]').
+2. Zweite Priorität: Angebote ohne genanntes Enddatum.
+3. Dritte Priorität: 'Buy One Get One Free' (1+1 gratis) Aktionen.
+
 Regeln:
-- Nutze nur Inhalte, die von dieser konkreten Instagram-Quelle erreichbar sind.
-- Nur Instagram-Posts oder Reels.
-- Schließe Kandidaten nicht wegen Alter, Wien-Bezug, Giveaway-Charakter oder unklarem Ablauf aus.
-- Gib lieber zu viele Kandidaten zurück als zu wenige.
-- Liefere für jeden Kandidaten nach Möglichkeit Post-URL, Post-Datum, Beschreibung, Typ, Ablauf und Standort.`,
+- Nutze NUR Instagram als Quelle.
+- Schließe Gewinnspiele (Giveaways) explizit aus.
+- Nur Angebote in Wien.
+- Vermeide Duplikate.
+- Nutze Suchbegriffe wie 'gratis', 'kostenlos', 'free', '1+1' in Verbindung mit 'Wien'.`,
     schema: offerSchema,
     model: 'spark-1-pro',
   });
@@ -206,61 +193,55 @@ async function main() {
 
   const allDeals = [];
 
-  console.log(`🔍 Scrape ${SOURCE_URLS.length} Instagram-Quellen...`);
+  console.log('🔍 Run Code-1 Instagram Direct Agent...');
 
-  for (let i = 0; i < SOURCE_URLS.length; i += 1) {
-    const url = SOURCE_URLS[i];
-    console.log(`   [${i + 1}/${SOURCE_URLS.length}] ${url}`);
+  const result = await runAgent();
+  const rawOffers = result?.data?.offers || [];
+  console.log(`📦 Rohangebote: ${rawOffers.length}`);
 
-    try {
-      const result = await runAgent(url);
-      const rawOffers = result?.data?.offers || [];
-      console.log(`      → ${rawOffers.length} Rohangebote`);
+  const seenPostUrls = new Set();
 
-      for (const offer of rawOffers) {
-        const restaurantName = normalizeText(offer.restaurant_name) || 'Instagram';
-        const postUrl = normalizeText(offer.post_url);
-        const postDateRaw = normalizeText(offer.post_date);
-        const offerDescription = normalizeText(offer.offer_description);
-        const offerType = normalizeText(offer.offer_type);
-        const validUntil = normalizeText(offer.valid_until);
-        const location = normalizeText(offer.location) || 'Wien';
-        const isCurrentlyValid = offer.is_currently_valid !== false;
-        const combinedText = `${restaurantName} ${offerDescription} ${offerType} ${validUntil} ${location}`;
-        const postDate = parseFlexibleDate(postDateRaw);
+  for (const offer of rawOffers) {
+    const restaurantName = normalizeText(offer.restaurant_name) || 'Instagram';
+    const postUrl = normalizeText(offer.post_url);
+    const offerDescription = normalizeText(offer.offer_description);
+    const offerType = normalizeText(offer.offer_type);
+    const validUntil = normalizeText(offer.valid_until);
+    const location = normalizeText(offer.location) || 'Wien';
+    const isCurrentlyValid = offer.is_currently_valid !== false;
+    const combinedText = `${restaurantName} ${offerDescription} ${offerType} ${validUntil} ${location}`;
 
-        if (!postUrl || !isInstagramPostUrl(postUrl)) continue;
-        const pubDate = postDate instanceof Date && !Number.isNaN(postDate.getTime())
-          ? postDate.toISOString()
-          : new Date().toISOString();
+    if (!postUrl || !isInstagramPostUrl(postUrl)) continue;
+    if (seenPostUrls.has(postUrl)) continue;
+    if (!isCurrentlyValid) continue;
+    if (looksLikeGiveaway(combinedText)) continue;
+    if (!isViennaRelevant(combinedText)) continue;
+    if (!isRelevantOffer(combinedText)) continue;
+    seenPostUrls.add(postUrl);
 
-        const type = inferType(offerType, offerDescription);
-        const category = inferCategory(offerType, offerDescription);
-        const title = `${restaurantName}: ${offerDescription || offerType || 'Instagram-Angebot'}`.slice(0, 140);
+    const type = inferType(offerType, offerDescription);
+    const category = inferCategory(offerType, offerDescription);
+    const title = `${restaurantName}: ${offerDescription || offerType || 'Instagram-Angebot'}`.slice(0, 140);
 
-        allDeals.push({
-          id: dealId(restaurantName, title, postUrl),
-          brand: restaurantName,
-          title,
-          description: [offerDescription, offerType, location].filter(Boolean).join(' | '),
-          type,
-          category,
-          source: 'Firecrawl Instagram Direct #4',
-          url: postUrl,
-          expires: validUntil || 'nicht angegeben',
-          distance: location,
-          hot: type === 'gratis' || type === 'bogo',
-          isNew: true,
-          priority: type === 'gratis' ? 2 : type === 'bogo' ? 3 : 4,
-          votes: 1,
-          qualityScore: type === 'gratis' ? 84 : type === 'bogo' ? 78 : 70,
-          pubDate,
-          pubDateSource: 'socialPostDate',
-        });
-      }
-    } catch (error) {
-      console.log(`      → Error: ${error.message}`);
-    }
+    allDeals.push({
+      id: dealId(restaurantName, title, postUrl),
+      brand: restaurantName,
+      title,
+      description: [offerDescription, offerType, location].filter(Boolean).join(' | '),
+      type,
+      category,
+      source: 'Firecrawl Instagram Direct #4',
+      url: postUrl,
+      expires: validUntil || 'nicht angegeben',
+      distance: location,
+      hot: type === 'gratis' || type === 'bogo',
+      isNew: true,
+      priority: type === 'gratis' ? 2 : type === 'bogo' ? 3 : 4,
+      votes: 1,
+      qualityScore: type === 'gratis' ? 84 : type === 'bogo' ? 78 : 70,
+      pubDate: new Date().toISOString(),
+      pubDateSource: 'firecrawlAgentRun',
+    });
   }
 
   const output = {
