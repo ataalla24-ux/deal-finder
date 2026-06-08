@@ -781,6 +781,93 @@ async function handleDealAdminRemove(request, env) {
   }
 }
 
+function decodeBase64UrlJson(value) {
+  try {
+    const normalized = String(value || '').replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    return parseJsonObject(atob(padded));
+  } catch {
+    return {};
+  }
+}
+
+async function signedDealRemovalUrlSignature(secret, payload) {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    textEncoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const digest = await crypto.subtle.sign('HMAC', key, textEncoder.encode(payload));
+  return hexFromBytes(new Uint8Array(digest));
+}
+
+function dealRemovalHtml(title, body, status = 200) {
+  const safeTitle = cleanShortText(title, 120)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  const safeBody = cleanLongText(body, 900)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  return new Response(`<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${safeTitle}</title>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f6f7f9; color: #17202c; }
+    main { max-width: 680px; margin: 10vh auto; padding: 28px; background: #fff; border: 1px solid #d8dee8; border-radius: 8px; box-shadow: 0 12px 28px rgba(16, 24, 40, 0.08); }
+    h1 { margin: 0 0 12px; font-size: 26px; }
+    p { margin: 0 0 16px; line-height: 1.55; color: #344054; }
+    a { color: #2364aa; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>${safeTitle}</h1>
+    <p>${safeBody}</p>
+    <p><a href="https://github.com/ataalla24-ux/deal-finder/actions/workflows/deal-moderation.yml">GitHub Moderation Workflow</a> · <a href="https://ataalla24-ux.github.io/deal-finder/deal-admin.html">Deal Admin</a></p>
+  </main>
+</body>
+</html>`, {
+    status,
+    headers: {
+      ...JSON_HEADERS,
+      'content-type': 'text/html; charset=utf-8',
+    },
+  });
+}
+
+async function handleSignedDealRemoveLink(request, env) {
+  const url = new URL(request.url);
+  const secret = envString(env, 'DEAL_REMOVE_LINK_SECRET');
+  if (!secret) return dealRemovalHtml('Nicht konfiguriert', 'DEAL_REMOVE_LINK_SECRET fehlt im Worker.', 500);
+
+  const payload = cleanShortText(url.searchParams.get('payload'), 5000);
+  const sig = cleanShortText(url.searchParams.get('sig'), 128).toLowerCase();
+  if (!payload || !sig) return dealRemovalHtml('Ungueltiger Link', 'Dieser Entfernen-Link ist unvollstaendig.', 400);
+
+  const expected = await signedDealRemovalUrlSignature(secret, payload);
+  if (!timingSafeEqualString(sig, expected)) {
+    return dealRemovalHtml('Ungueltiger Link', 'Die Signatur dieses Entfernen-Links ist ungueltig.', 401);
+  }
+
+  const removal = normalizeDealRemovalInput(decodeBase64UrlJson(payload));
+  if (!removal) return dealRemovalHtml('Ungueltiger Deal', 'Der Entfernen-Link enthaelt keine gueltige Deal-ID oder URL.', 400);
+
+  try {
+    await triggerDealModerationWorkflow(env, removal);
+    const label = cleanShortText(removal.title || removal.brand || removal.dealId || removal.dealUrl, 160);
+    return dealRemovalHtml('Entfernung gestartet', `${label} wird entfernt. Der GitHub-Workflow laeuft jetzt; danach verschwindet der Deal aus iOS, Web und Android.`);
+  } catch (error) {
+    return dealRemovalHtml('Entfernen fehlgeschlagen', error?.message || 'Der GitHub-Workflow konnte nicht gestartet werden.', 502);
+  }
+}
+
 async function slackSignatureHex(secret, timestamp, payload) {
   const key = await crypto.subtle.importKey(
     'raw',
@@ -2340,6 +2427,10 @@ export default {
 
     if (path === '/api/deals/admin/remove' && request.method === 'POST') {
       return handleDealAdminRemove(request, env);
+    }
+
+    if (path === '/api/deals/admin/remove-link' && request.method === 'GET') {
+      return handleSignedDealRemoveLink(request, env);
     }
 
     if (!env.REFERRAL_KV) {

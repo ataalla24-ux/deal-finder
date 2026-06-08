@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from 'fs';
+import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -14,6 +15,8 @@ const DRY_RUN = process.env.SLACK_LIVE_REVIEW_DRY_RUN === '1';
 const MAX_DEALS = Math.max(1, Math.min(200, Number(process.env.SLACK_LIVE_REVIEW_MAX_DEALS || 120)));
 const CHUNK_SIZE = Math.max(1, Math.min(15, Number(process.env.SLACK_LIVE_REVIEW_CHUNK_SIZE || 10)));
 const ADMIN_URL = process.env.DEAL_ADMIN_URL || 'https://ataalla24-ux.github.io/deal-finder/deal-admin.html';
+const WORKER_BASE_URL = (process.env.FREEFINDER_WORKER_BASE_URL || 'https://freefinder-referrals.freefinder-stefan.workers.dev').replace(/\/+$/, '');
+const REMOVE_LINK_SECRET = process.env.DEAL_REMOVE_LINK_SECRET || (DRY_RUN ? 'dry-run-secret' : '');
 
 function cleanText(value, max = 500) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max);
@@ -59,6 +62,19 @@ function buttonValue(deal) {
   return JSON.stringify(payload);
 }
 
+function signedRemovalUrl(deal) {
+  if (!REMOVE_LINK_SECRET) {
+    throw new Error('DEAL_REMOVE_LINK_SECRET is required for signed removal links');
+  }
+
+  const payload = Buffer.from(buttonValue(deal)).toString('base64url');
+  const sig = crypto
+    .createHmac('sha256', REMOVE_LINK_SECRET)
+    .update(payload)
+    .digest('hex');
+  return `${WORKER_BASE_URL}/api/deals/admin/remove-link?payload=${encodeURIComponent(payload)}&sig=${encodeURIComponent(sig)}`;
+}
+
 function dealBlocks(deal, index) {
   const title = slackEscape(deal.title || deal.brand || 'Deal');
   const brand = slackEscape(deal.brand || 'Unbekannt');
@@ -78,7 +94,7 @@ function dealBlocks(deal, index) {
       text: { type: 'plain_text', text: 'Entfernen' },
       style: 'danger',
       action_id: 'freefinder_remove_deal',
-      value: buttonValue(deal),
+      url: signedRemovalUrl(deal),
       confirm: {
         title: { type: 'plain_text', text: 'Deal entfernen?' },
         text: { type: 'mrkdwn', text: `*${title}* aus iOS, Web und Android entfernen?` },
@@ -149,6 +165,9 @@ async function main() {
   if (!DRY_RUN && (!SLACK_BOT_TOKEN || !SLACK_CHANNEL_ID)) {
     throw new Error('SLACK_BOT_TOKEN and SLACK_CHANNEL_ID are required');
   }
+  if (!REMOVE_LINK_SECRET) {
+    throw new Error('DEAL_REMOVE_LINK_SECRET is required');
+  }
 
   const headerText = [
     `*FreeFinder Live-Deal-Review*`,
@@ -162,7 +181,7 @@ async function main() {
     text: `FreeFinder Live-Deal-Review: ${live.totalDeals} Deals online`,
     blocks: [
       { type: 'section', text: { type: 'mrkdwn', text: headerText } },
-      { type: 'context', elements: [{ type: 'mrkdwn', text: 'Klicke bei abgelaufenen oder falschen Deals auf *Entfernen*.' }] },
+      { type: 'context', elements: [{ type: 'mrkdwn', text: 'Klicke bei abgelaufenen oder falschen Deals auf *Entfernen*. Der Link startet die Moderation direkt.' }] },
     ],
   });
 
