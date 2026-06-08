@@ -63,6 +63,7 @@ const STRIPE_CHECKOUT_PLANS = {
 };
 const MERCHANT_API_BASE_DEFAULT = 'https://freefinder-merchant-backend.freefinder-stefan.workers.dev';
 const STRIPE_WEBHOOK_TOLERANCE_SECONDS = 300;
+const SLACK_REQUEST_TOLERANCE_SECONDS = 300;
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
@@ -693,6 +694,163 @@ async function readBody(request) {
 
 function invalid(message, status = 400) {
   return json({ ok: false, error: message }, status);
+}
+
+function parseJsonObject(value) {
+  try {
+    const parsed = JSON.parse(String(value || ''));
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function normalizeDealRemovalInput(body = {}) {
+  const dealId = normalizeDealId(body.dealId || body.deal_id || body.id);
+  const dealUrl = normalizeSubmissionUrl(body.dealUrl || body.deal_url || body.url);
+  const title = cleanShortText(body.title, 180);
+  const brand = cleanShortText(body.brand, 120);
+  const reason = cleanShortText(body.reason, 180) || 'aus Slack Live-Review entfernt';
+
+  if (!dealId && !dealUrl) return null;
+
+  return {
+    dealId,
+    dealUrl,
+    title,
+    brand,
+    reason,
+  };
+}
+
+async function triggerDealModerationWorkflow(env, removal) {
+  const token = envString(env, 'GITHUB_WORKFLOW_TOKEN') || envString(env, 'GITHUB_TOKEN');
+  if (!token) throw new Error('GITHUB_WORKFLOW_TOKEN is not configured');
+
+  const owner = envString(env, 'GITHUB_OWNER') || 'ataalla24-ux';
+  const repo = envString(env, 'GITHUB_REPO') || 'deal-finder';
+  const workflow = envString(env, 'GITHUB_DEAL_MODERATION_WORKFLOW') || 'deal-moderation.yml';
+  const ref = envString(env, 'GITHUB_REF') || 'main';
+  const endpoint = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/workflows/${encodeURIComponent(workflow)}/dispatches`;
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${token}`,
+      accept: 'application/vnd.github+json',
+      'content-type': 'application/json',
+      'user-agent': 'freefinder-referrals-worker',
+      'x-github-api-version': '2022-11-28',
+    },
+    body: JSON.stringify({
+      ref,
+      inputs: {
+        deal_id: removal.dealId,
+        deal_url: removal.dealUrl,
+        provider: '',
+        text: '',
+        reason: removal.reason,
+      },
+    }),
+  });
+
+  if (response.status === 204) return { ok: true, status: response.status };
+
+  const detail = cleanLongText(await response.text().catch(() => ''), 700);
+  throw new Error(`GitHub workflow dispatch failed (${response.status})${detail ? `: ${detail}` : ''}`);
+}
+
+async function handleDealAdminRemove(request, env) {
+  if (!requireAdmin(request, env)) {
+    return invalid('Unauthorized', 401);
+  }
+
+  const body = await readBody(request);
+  const removal = normalizeDealRemovalInput(body);
+  if (!removal) return invalid('Missing deal id or url');
+
+  try {
+    const workflow = await triggerDealModerationWorkflow(env, removal);
+    return json({
+      ok: true,
+      removal,
+      workflow,
+    });
+  } catch (error) {
+    return invalid(error?.message || 'Deal removal failed', 502);
+  }
+}
+
+async function slackSignatureHex(secret, timestamp, payload) {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    textEncoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signatureBase = `v0:${timestamp}:${payload}`;
+  const digest = await crypto.subtle.sign('HMAC', key, textEncoder.encode(signatureBase));
+  return `v0=${hexFromBytes(new Uint8Array(digest))}`;
+}
+
+async function verifySlackRequest(request, env, payloadText) {
+  const signingSecret = envString(env, 'SLACK_SIGNING_SECRET');
+  if (!signingSecret) throw new Error('SLACK_SIGNING_SECRET is not configured');
+
+  const timestamp = Number(request.headers.get('x-slack-request-timestamp') || 0);
+  const signature = request.headers.get('x-slack-signature') || '';
+  if (!timestamp || !signature) throw new Error('Missing Slack signature');
+
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  if (Math.abs(nowSeconds - timestamp) > SLACK_REQUEST_TOLERANCE_SECONDS) {
+    throw new Error('Slack request timestamp is outside tolerance');
+  }
+
+  const expected = await slackSignatureHex(signingSecret, timestamp, payloadText);
+  if (!timingSafeEqualString(signature, expected)) {
+    throw new Error('Invalid Slack signature');
+  }
+}
+
+function slackEphemeral(text) {
+  return json({
+    response_type: 'ephemeral',
+    text: cleanShortText(text, 240),
+  });
+}
+
+async function handleSlackInteraction(request, env) {
+  const rawBody = await request.text();
+
+  try {
+    await verifySlackRequest(request, env, rawBody);
+  } catch (error) {
+    return invalid(error?.message || 'Invalid Slack request', 401);
+  }
+
+  const form = new URLSearchParams(rawBody);
+  const payload = parseJsonObject(form.get('payload'));
+  const action = Array.isArray(payload.actions) ? payload.actions[0] : null;
+  const actionId = cleanShortText(action?.action_id, 120);
+
+  if (actionId !== 'freefinder_remove_deal') {
+    return slackEphemeral('Diese Slack-Aktion wird vom FreeFinder Worker ignoriert.');
+  }
+
+  const actionPayload = parseJsonObject(action?.value);
+  const removal = normalizeDealRemovalInput(actionPayload);
+  if (!removal) {
+    return slackEphemeral('Deal konnte nicht entfernt werden: ID oder URL fehlt.');
+  }
+
+  try {
+    await triggerDealModerationWorkflow(env, removal);
+    const label = cleanShortText(removal.title || removal.brand || removal.dealId || removal.dealUrl, 120);
+    return slackEphemeral(`Entfernung gestartet: ${label}. Der Deal verschwindet nach dem GitHub-Workflow aus iOS, Web und Android.`);
+  } catch (error) {
+    return slackEphemeral(`Entfernen fehlgeschlagen: ${error?.message || 'unbekannter Fehler'}`);
+  }
 }
 
 function envString(env, key) {
@@ -2174,6 +2332,14 @@ export default {
 
     if (path === '/api/checkout/webhook' && request.method === 'POST') {
       return handleStripeWebhook(request, env);
+    }
+
+    if (path === '/api/slack/interactions' && request.method === 'POST') {
+      return handleSlackInteraction(request, env);
+    }
+
+    if (path === '/api/deals/admin/remove' && request.method === 'POST') {
+      return handleDealAdminRemove(request, env);
     }
 
     if (!env.REFERRAL_KV) {

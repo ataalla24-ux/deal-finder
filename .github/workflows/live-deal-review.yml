@@ -1,0 +1,30 @@
+name: "Live Deals Slack Review"
+
+on:
+  schedule:
+    - cron: '30 11 * * *' # 12:30 Vienna winter / 13:30 summer, after daily digest and approvals
+  workflow_dispatch:
+
+concurrency:
+  group: live-deal-review
+  cancel-in-progress: false
+
+jobs:
+  send-live-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Send live deal review to Slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+        run: node scripts/slack-live-deal-review.mjs
