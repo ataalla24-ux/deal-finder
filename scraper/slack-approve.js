@@ -3,6 +3,11 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { cleanText, extractDealsFromThreadMessages, extractSlackMessageText } from './slack-digest-utils.js';
+import {
+  filterModeratedDeals,
+  loadDealModeration,
+  moderationCounts,
+} from './deal-moderation-utils.js';
 import { isVagueExpiry, normalizeDealExpiry, parseExpiryDetails } from './expiry-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -707,9 +712,14 @@ async function main() {
     process.exit(1);
   }
 
+  const moderation = loadDealModeration();
   const botUserId = await getBotUserId();
   console.log(`🤖 Bot User ID: ${botUserId || 'unknown'}`);
-  const queuedDeals = loadPendingDeals();
+  const queuedModeration = filterModeratedDeals(loadPendingDeals(), moderation);
+  if (queuedModeration.removed.length > 0) {
+    console.log(`🛡️ Moderation filter: ${queuedModeration.removed.length} queued Deals entfernt`);
+  }
+  const queuedDeals = queuedModeration.deals;
   const queueThreadTs = [...new Set(queuedDeals.map((deal) => cleanText(deal.slackThreadTs)).filter(Boolean))];
   const recentThreadTs = [...new Set(await findRecentDigestThreadTs())].filter(Boolean);
   const threadCandidates = [...new Set([...queueThreadTs, ...recentThreadTs])].filter(Boolean);
@@ -760,13 +770,21 @@ async function main() {
     dedupedPendingDeals.push(deal);
   }
 
-  console.log(`📋 Pending posted deals across ${threadCandidates.length} thread(s): ${dedupedPendingDeals.length}`);
+  const pendingModeration = filterModeratedDeals(dedupedPendingDeals, moderation);
+  if (pendingModeration.removed.length > 0) {
+    console.log(`🛡️ Moderation filter: ${pendingModeration.removed.length} pending Deals vor Approval entfernt`);
+    const counts = moderationCounts(pendingModeration.removed);
+    console.log(`🛡️ Moderation reasons: ${Object.entries(counts).map(([reason, count]) => `${count} ${reason}`).join(' | ')}`);
+  }
+  const moderatedPendingDeals = pendingModeration.deals;
+
+  console.log(`📋 Pending posted deals across ${threadCandidates.length} thread(s): ${moderatedPendingDeals.length}`);
   console.log(`✏️ Slack edits applied: ${appliedEditCount}`);
   if (unresolvedEditTargets.length > 0) {
     console.log(`⚠️ Unresolved edit targets: ${[...new Set(unresolvedEditTargets)].join(', ')}`);
   }
 
-  if (dedupedPendingDeals.length === 0) {
+  if (moderatedPendingDeals.length === 0) {
     const sampleThread = threadMessagesByThread.get(threadCandidates[0]) || [];
     const sample = sampleThread.find((msg) => cleanText(msg?.ts) !== threadCandidates[0]);
     if (sample) {
@@ -782,8 +800,8 @@ async function main() {
   const approved = [];
   const unapproved = [];
 
-  for (let i = 0; i < dedupedPendingDeals.length; i += 1) {
-    const deal = dedupedPendingDeals[i];
+  for (let i = 0; i < moderatedPendingDeals.length; i += 1) {
+    const deal = moderatedPendingDeals[i];
     if (isBlockedApprovalDeal(deal)) {
       console.log(`  🚫 blocked expired/invalid Slack deal: ${deal.title || deal.url}`);
       continue;
@@ -803,7 +821,7 @@ async function main() {
     }
 
     if ((i + 1) % 25 === 0) {
-      console.log(`  ✅ checked ${i + 1}/${dedupedPendingDeals.length}`);
+      console.log(`  ✅ checked ${i + 1}/${moderatedPendingDeals.length}`);
     }
 
     await sleep(200);
@@ -818,11 +836,19 @@ async function main() {
     return;
   }
 
-  const expiryNormalization = await normalizeApprovedDealExpiries(approved);
+  const approvedModeration = filterModeratedDeals(approved, moderation);
+  if (approvedModeration.removed.length > 0) {
+    console.log(`🛡️ Moderation filter: ${approvedModeration.removed.length} approved Deals vor Live-Merge entfernt`);
+  }
+
+  const expiryNormalization = await normalizeApprovedDealExpiries(approvedModeration.deals);
   console.log(`🔎 approval expiry checks: ${expiryNormalization.urlChecksUsed}/${MAX_APPROVAL_URL_EXPIRY_CHECKS}, Treffer: ${expiryNormalization.urlExpiryHits}`);
 
-  const existingApproved = loadExistingApprovedDeals();
-  const mergedApproved = mergeApprovedDeals(existingApproved, approved);
+  const existingApprovedModeration = filterModeratedDeals(loadExistingApprovedDeals(), moderation);
+  if (existingApprovedModeration.removed.length > 0) {
+    console.log(`🛡️ Moderation filter: ${existingApprovedModeration.removed.length} bestehende Live-Deals entfernt`);
+  }
+  const mergedApproved = mergeApprovedDeals(existingApprovedModeration.deals, approvedModeration.deals);
 
   saveDealsJson(mergedApproved);
   savePendingRemaining(unapproved);

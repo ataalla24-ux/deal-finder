@@ -5,6 +5,10 @@ import { fileURLToPath } from 'node:url';
 
 import { inspectDealUrlHealth, normalizeDealExpiry, shouldSkipUrlExpiryLookup } from './expiry-utils.js';
 import {
+  filterModeratedDeals,
+  loadDealModeration,
+} from './deal-moderation-utils.js';
+import {
   buildFallbackDescription,
   cleanUiNoiseText,
   inferPreferredBrand,
@@ -742,6 +746,7 @@ async function main() {
   let socialPolishFixes = 0;
   let duplicateCollapses = 0;
   let flightUrlCheckSkips = 0;
+  let moderationRemovals = 0;
 
   function markRemoved(deal, reason) {
     removed.push({
@@ -980,14 +985,23 @@ async function main() {
   const dedupedRemaining = dedupeNormalizedLiveDeals(remaining);
   duplicateCollapses = remaining.length - dedupedRemaining.length;
 
-  dedupedRemaining.sort((a, b) => {
+  const moderation = loadDealModeration();
+  const moderationFilter = filterModeratedDeals(dedupedRemaining, moderation);
+  moderationRemovals = moderationFilter.removed.length;
+  for (const deal of moderationFilter.removed) {
+    markRemoved(deal, `Moderation: ${deal.reason}`);
+  }
+
+  const finalRemaining = moderationFilter.deals;
+
+  finalRemaining.sort((a, b) => {
     const aTime = Date.parse(a.pubDate || '') || 0;
     const bTime = Date.parse(b.pubDate || '') || 0;
     return bTime - aTime;
   });
 
-  dealsDoc.deals = dedupedRemaining;
-  dealsDoc.totalDeals = dedupedRemaining.length;
+  dealsDoc.deals = finalRemaining;
+  dealsDoc.totalDeals = finalRemaining.length;
   dealsDoc.lastUpdated = now.toISOString();
 
   const removalReasons = removed.reduce((acc, entry) => {
@@ -999,9 +1013,10 @@ async function main() {
   await writeFile(VALIDATION_REPORT_PATH, JSON.stringify({
     checkedAt: now.toISOString(),
     totalBefore,
-    totalAfter: dedupedRemaining.length,
+    totalAfter: finalRemaining.length,
     removedCount: removed.length,
     duplicateCollapses,
+    moderationRemovals,
     brokenLinkRemovals,
     opaqueSocialShellRemovals,
     expiredByVerifiedDateRemovals,
@@ -1019,9 +1034,10 @@ async function main() {
     removed: removed.slice(0, 200),
   }, null, 2) + '\n', 'utf8');
 
-  console.log(`Normalized live deals: ${dedupedRemaining.length}`);
+  console.log(`Normalized live deals: ${finalRemaining.length}`);
   console.log(`Removed deals: ${removed.length}`);
   console.log(`Duplicate collapses: ${duplicateCollapses}`);
+  console.log(`Moderation removals: ${moderationRemovals}`);
   console.log(`Broken link removals: ${brokenLinkRemovals}`);
   console.log(`Opaque social shell removals: ${opaqueSocialShellRemovals}`);
   console.log(`Social pubDateSource fixes applied: ${socialPubDateSourceFixes}`);

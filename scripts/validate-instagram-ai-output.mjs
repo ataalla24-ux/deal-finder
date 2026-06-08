@@ -2,6 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import {
+  loadDealModeration,
+  moderationReasonForDeal,
+} from '../scraper/deal-moderation-utils.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
@@ -23,6 +28,7 @@ const report = fs.existsSync(REPORT_PATH) ? readJson(REPORT_PATH) : {};
 const maxAgeDays = Number(report.config?.maxAgeDays || process.env.INSTAGRAM_AI_MAX_AGE_DAYS || 7);
 const deals = Array.isArray(output.deals) ? output.deals : [];
 const now = Date.now();
+const moderation = loadDealModeration();
 
 if (Number(output.totalDeals) !== deals.length) {
   fail(`totalDeals=${output.totalDeals} but deals.length=${deals.length}`);
@@ -50,6 +56,11 @@ for (const deal of deals) {
   ].filter(Boolean).join(' ').toLowerCase();
   if (text.includes('neotaste')) {
     fail(`${label} contains blocked NeoTaste signal`);
+  }
+
+  const moderationReason = moderationReasonForDeal(deal, moderation);
+  if (moderationReason) {
+    fail(`${label} is blocked by moderation: ${moderationReason}`);
   }
 }
 

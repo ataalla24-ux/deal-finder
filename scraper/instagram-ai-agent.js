@@ -6,6 +6,11 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
 
+import {
+  filterModeratedDeals,
+  loadDealModeration,
+  moderationCounts,
+} from './deal-moderation-utils.js';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import {
   cleanText as cleanDealText,
@@ -1591,7 +1596,10 @@ async function main() {
     .slice(0, CONFIG.aiCandidateLimit);
   const aiResult = await classifyWithOpenAi(aiCandidates);
 
-  const finalDeals = dedupeDeals([...aiResult.deals, ...heuristicDeals]);
+  const preModerationDeals = dedupeDeals([...aiResult.deals, ...heuristicDeals]);
+  const moderation = loadDealModeration();
+  const moderationFilter = filterModeratedDeals(preModerationDeals, moderation);
+  const finalDeals = moderationFilter.deals;
   const lastUpdated = new Date().toISOString();
   const payload = {
     lastUpdated,
@@ -1609,8 +1617,14 @@ async function main() {
     watchlistAccounts: accounts.length,
     discoveredCandidates: candidates.length,
     acceptedDeals: finalDeals.length,
+    acceptedBeforeModeration: preModerationDeals.length,
     heuristicAccepted: heuristicDeals.length,
     aiAccepted: aiResult.deals.length,
+    moderation: {
+      removed: moderationFilter.removed.length,
+      reasons: moderationCounts(moderationFilter.removed),
+      removedDeals: moderationFilter.removed.slice(0, 40),
+    },
     search: {
       enabled: CONFIG.searchEnabled,
       queries: stats.searchQueries,

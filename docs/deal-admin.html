@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deal Moderation - FreeFinder Wien</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --muted: #667085;
+      --text: #17202c;
+      --line: #d8dee8;
+      --blue: #2364aa;
+      --blue-soft: #e8f1fb;
+      --green: #16784f;
+      --green-soft: #e8f5ee;
+      --amber: #9a6200;
+      --amber-soft: #fff4d8;
+      --red: #a43b3b;
+      --red-soft: #fae9e9;
+      --shadow: 0 12px 28px rgba(16, 24, 40, 0.08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    a { color: inherit; }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 18px;
+      background: #101926;
+      color: #f5f7fb;
+    }
+
+    .brand {
+      display: grid;
+      gap: 4px;
+      margin-bottom: 24px;
+    }
+
+    .brand strong { font-size: 18px; }
+    .brand span { color: #aeb9c8; font-size: 13px; }
+
+    .side-stat {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: baseline;
+      padding: 12px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .side-stat span { color: #aeb9c8; font-size: 13px; }
+    .side-stat strong { font-size: 18px; }
+
+    .side-actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .side-actions a,
+    .side-actions button {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      color: #f5f7fb;
+      text-decoration: none;
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      max-width: 780px;
+      color: var(--muted);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--muted);
+      padding: 6px 10px;
+      box-shadow: var(--shadow);
+      font-size: 13px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--amber);
+    }
+
+    .status-dot.ok { background: var(--green); }
+    .status-dot.bad { background: var(--red); }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .metric,
+    .panel,
+    .item {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric {
+      min-width: 0;
+      padding: 14px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 28px;
+      line-height: 1;
+      overflow-wrap: anywhere;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(160px, 220px) minmax(160px, 220px);
+      gap: 10px;
+      margin: 18px 0;
+      align-items: center;
+    }
+
+    .toolbar input,
+    .toolbar select,
+    .panel input,
+    .panel textarea {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 9px 10px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .item {
+      border-left: 5px solid var(--blue);
+      padding: 14px;
+    }
+
+    .item.blocked { border-left-color: var(--red); opacity: 0.72; }
+
+    .item-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .item-title strong {
+      display: block;
+      overflow-wrap: anywhere;
+      line-height: 1.3;
+    }
+
+    .item-title span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 10px 0;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      max-width: 100%;
+      border-radius: 8px;
+      padding: 3px 8px;
+      background: #eef3f7;
+      color: #3d4a5c;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .badge.green { background: var(--green-soft); color: var(--green); }
+    .badge.amber { background: var(--amber-soft); color: var(--amber); }
+    .badge.red { background: var(--red-soft); color: var(--red); }
+    .badge.blue { background: var(--blue-soft); color: var(--blue); }
+
+    .sample {
+      color: #364255;
+      background: #f3f6f9;
+      border: 1px solid #e1e7ef;
+      border-radius: 8px;
+      padding: 10px;
+      overflow-wrap: anywhere;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .actions a,
+    .actions button,
+    .panel button,
+    .panel a {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 8px;
+      min-height: 36px;
+      padding: 7px 10px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .actions button.primary,
+    .panel button.primary,
+    .panel a.primary {
+      background: var(--text);
+      color: #fff;
+      border-color: var(--text);
+    }
+
+    .panel {
+      position: sticky;
+      top: 18px;
+      padding: 16px;
+    }
+
+    .panel h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    label span { color: var(--text); font-weight: 650; }
+
+    textarea {
+      min-height: 128px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    .empty,
+    .error {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--muted);
+      padding: 20px;
+    }
+
+    .error {
+      border-color: #e0a3a3;
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      max-width: 360px;
+      background: #101926;
+      color: #fff;
+      border-radius: 8px;
+      padding: 12px 14px;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1040px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; }
+      .layout { grid-template-columns: 1fr; }
+      .panel { position: static; }
+    }
+
+    @media (max-width: 680px) {
+      .main { padding: 18px; }
+      .stats-grid,
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+      .topbar,
+      .item-top {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <strong>Deal Moderation</strong>
+        <span>FreeFinder Wien</span>
+      </div>
+      <div class="side-stat"><span>Live Deals</span><strong id="sideLive">0</strong></div>
+      <div class="side-stat"><span>Instagram AI</span><strong id="sideInstagram">0</strong></div>
+      <div class="side-stat"><span>Queue</span><strong id="sideQueue">0</strong></div>
+      <div class="side-stat"><span>Hidden</span><strong id="sideHidden">0</strong></div>
+      <div class="side-actions">
+        <a href="./index.html">Zur App</a>
+        <a href="./deal-moderation.json">Moderation JSON</a>
+        <a href="./deal-moderation-report.json">Moderation Report</a>
+        <a href="https://github.com/ataalla24-ux/deal-finder/actions/workflows/deal-moderation.yml">GitHub Action</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h1>Deal Moderation</h1>
+          <p class="subtitle">Live-Deals, Instagram-AI-Treffer und Slack-Queue durchsuchen, Moderationsziel vorbereiten und die kostenlose GitHub Action starten.</p>
+        </div>
+        <div class="status-pill"><span class="status-dot" id="statusDot"></span><span id="statusText">Lade Daten...</span></div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="metric"><span>Alle geladen</span><strong id="metricAll">0</strong></div>
+        <div class="metric"><span>Live</span><strong id="metricLive">0</strong></div>
+        <div class="metric"><span>Instagram AI</span><strong id="metricInstagram">0</strong></div>
+        <div class="metric"><span>Hidden</span><strong id="metricHidden">0</strong></div>
+      </div>
+
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="Suche nach Marke, Titel, URL oder ID">
+        <select id="sourceFilter" aria-label="Quelle filtern"></select>
+        <select id="blockedFilter" aria-label="Moderationsstatus filtern">
+          <option value="all">Alle Status</option>
+          <option value="visible">Sichtbar</option>
+          <option value="blocked">Bereits blockiert</option>
+        </select>
+      </div>
+
+      <div class="layout">
+        <section>
+          <div class="list" id="dealList"></div>
+        </section>
+
+        <aside class="panel">
+          <h2>Moderation vorbereiten</h2>
+          <div class="form-grid">
+            <label><span>Deal-ID</span><input id="targetId"></label>
+            <label><span>URL</span><input id="targetUrl"></label>
+            <label><span>Provider/Text</span><input id="targetProvider" placeholder="optional"></label>
+            <label><span>Grund</span><input id="targetReason" value="removed"></label>
+            <label><span>Action Inputs</span><textarea id="actionPayload" readonly></textarea></label>
+            <div class="actions">
+              <button type="button" class="primary" id="copyPayloadBtn">Inputs kopieren</button>
+              <button type="button" id="copyJsonBtn">JSON Entry kopieren</button>
+              <a class="primary" href="https://github.com/ataalla24-ux/deal-finder/actions/workflows/deal-moderation.yml" target="_blank" rel="noopener">Action oeffnen</a>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const files = {
+      live: './deals.json',
+      instagram: './deals-pending-instagram-ai.json',
+      queue: './deals-pending-all.json',
+      moderation: './deal-moderation.json',
+    };
+
+    const state = {
+      data: null,
+      query: '',
+      source: 'all',
+      blocked: 'all',
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function cleanText(value) {
+      return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function normalizeLoose(value) {
+      return cleanText(value).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    function normalizeUrl(value) {
+      const text = cleanText(value);
+      if (!text) return '';
+      try {
+        const url = new URL(text);
+        url.hash = '';
+        url.search = '';
+        url.hostname = url.hostname.toLowerCase().replace(/^www\./, '');
+        url.pathname = url.pathname.replace(/\/+$/, '');
+        return url.toString().replace(/\/+$/, '').toLowerCase();
+      } catch {
+        return text.replace(/[#?].*$/, '').replace(/\/+$/, '').toLowerCase();
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    async function loadJson(url) {
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error(url + ' konnte nicht geladen werden');
+      return response.json();
+    }
+
+    function dealArray(bundle) {
+      if (Array.isArray(bundle)) return bundle;
+      if (Array.isArray(bundle.deals)) return bundle.deals;
+      return [];
+    }
+
+    function normalizeDeal(deal, source) {
+      return {
+        id: cleanText(deal.id),
+        brand: cleanText(deal.brand) || 'Unbekannt',
+        title: cleanText(deal.title) || 'Deal',
+        description: cleanText(deal.description),
+        url: cleanText(deal.url),
+        source,
+        originSource: cleanText(deal.originSource || deal.source || source),
+        category: cleanText(deal.category),
+        type: cleanText(deal.type),
+        pubDate: cleanText(deal.pubDate),
+        raw: deal,
+      };
+    }
+
+    function hiddenEntries() {
+      return Array.isArray(state.data?.moderation?.hiddenDeals) ? state.data.moderation.hiddenDeals : [];
+    }
+
+    function blockedSignal(item) {
+      const ids = [item.id, item.raw?.submissionId, item.raw?.slackTs].map((value) => cleanText(value).toLowerCase()).filter(Boolean);
+      const url = normalizeUrl(item.url);
+      const signal = normalizeLoose([
+        item.id,
+        item.brand,
+        item.title,
+        item.description,
+        item.url,
+        item.originSource,
+        item.category,
+      ].join(' '));
+
+      for (const entry of hiddenEntries()) {
+        if (entry.id && ids.includes(cleanText(entry.id).toLowerCase())) return cleanText(entry.reason || 'hidden');
+        if (entry.url && normalizeUrl(entry.url) === url) return cleanText(entry.reason || 'hidden');
+        if (entry.provider && signal.includes(normalizeLoose(entry.provider))) return cleanText(entry.reason || 'hidden');
+        if (entry.text && signal.includes(normalizeLoose(entry.text))) return cleanText(entry.reason || 'hidden');
+      }
+
+      for (const provider of state.data?.moderation?.blockedProviders || []) {
+        const value = typeof provider === 'string' ? provider : provider.value;
+        if (value && signal.includes(normalizeLoose(value))) return cleanText(provider.reason || 'provider blocked');
+      }
+
+      return '';
+    }
+
+    function allDeals() {
+      if (!state.data) return [];
+      return [
+        ...dealArray(state.data.live).map((deal) => normalizeDeal(deal, 'live')),
+        ...dealArray(state.data.instagram).map((deal) => normalizeDeal(deal, 'instagram-ai')),
+        ...dealArray(state.data.queue).map((deal) => normalizeDeal(deal, 'queue')),
+      ];
+    }
+
+    function formatDate(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return cleanText(value);
+      return date.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    }
+
+    function buildOptions(items) {
+      const sources = [...new Set(items.map((item) => item.source))].sort();
+      $('sourceFilter').innerHTML = '<option value="all">Alle Quellen</option>' + sources.map((source) => (
+        '<option value="' + escapeHtml(source) + '">' + escapeHtml(source) + '</option>'
+      )).join('');
+    }
+
+    function filteredItems(items) {
+      const query = normalizeLoose(state.query);
+      return items.filter((item) => {
+        const reason = blockedSignal(item);
+        if (state.source !== 'all' && item.source !== state.source) return false;
+        if (state.blocked === 'visible' && reason) return false;
+        if (state.blocked === 'blocked' && !reason) return false;
+        if (!query) return true;
+        return normalizeLoose([item.id, item.brand, item.title, item.description, item.url, item.originSource].join(' ')).includes(query);
+      });
+    }
+
+    function setTarget(item) {
+      $('targetId').value = item.id || '';
+      $('targetUrl').value = item.url || '';
+      $('targetProvider').value = '';
+      $('targetReason').value = blockedSignal(item) || 'removed';
+      renderPayload();
+    }
+
+    function payloadEntry() {
+      return {
+        id: cleanText($('targetId').value),
+        url: cleanText($('targetUrl').value),
+        provider: cleanText($('targetProvider').value),
+        reason: cleanText($('targetReason').value) || 'removed',
+      };
+    }
+
+    function renderPayload() {
+      const entry = payloadEntry();
+      $('actionPayload').value = [
+        'deal_id: ' + entry.id,
+        'deal_url: ' + entry.url,
+        'provider: ' + entry.provider,
+        'reason: ' + entry.reason,
+      ].join('\n');
+    }
+
+    function renderItem(item) {
+      const reason = blockedSignal(item);
+      const classes = 'item' + (reason ? ' blocked' : '');
+      const sample = item.description ? '<div class="sample">' + escapeHtml(item.description.slice(0, 260)) + '</div>' : '';
+      return [
+        '<article class="' + classes + '" data-id="' + escapeHtml(item.id) + '" data-url="' + escapeHtml(item.url) + '">',
+          '<div class="item-top">',
+            '<div class="item-title">',
+              '<strong>' + escapeHtml(item.title) + '</strong>',
+              '<span>' + escapeHtml(item.brand) + '</span>',
+            '</div>',
+            '<span class="badge">' + escapeHtml(formatDate(item.pubDate)) + '</span>',
+          '</div>',
+          '<div class="badges">',
+            '<span class="badge blue">' + escapeHtml(item.source) + '</span>',
+            item.id ? '<span class="badge">' + escapeHtml(item.id) + '</span>' : '',
+            item.category ? '<span class="badge">' + escapeHtml(item.category) + '</span>' : '',
+            reason ? '<span class="badge red">' + escapeHtml(reason) + '</span>' : '<span class="badge green">sichtbar</span>',
+          '</div>',
+          sample,
+          '<div class="actions">',
+            '<button type="button" class="primary" data-action="select">Moderieren</button>',
+            item.url ? '<a href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener">Quelle</a>' : '',
+          '</div>',
+        '</article>',
+      ].join('');
+    }
+
+    function render() {
+      const items = allDeals();
+      const filtered = filteredItems(items);
+      $('metricAll').textContent = items.length;
+      $('metricLive').textContent = dealArray(state.data.live).length;
+      $('metricInstagram').textContent = dealArray(state.data.instagram).length;
+      $('metricHidden').textContent = hiddenEntries().length;
+      $('sideLive').textContent = dealArray(state.data.live).length;
+      $('sideInstagram').textContent = dealArray(state.data.instagram).length;
+      $('sideQueue').textContent = dealArray(state.data.queue).length;
+      $('sideHidden').textContent = hiddenEntries().length;
+
+      $('dealList').innerHTML = filtered.length
+        ? filtered.slice(0, 120).map(renderItem).join('')
+        : '<div class="empty">Keine Deals gefunden.</div>';
+
+      $('dealList').querySelectorAll('[data-action="select"]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const card = button.closest('.item');
+          const item = filtered.find((deal) => deal.id === card.dataset.id && deal.url === card.dataset.url);
+          if (item) setTarget(item);
+        });
+      });
+    }
+
+    function showToast(message) {
+      const toast = $('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    async function copyText(text, label) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(label || 'Kopiert');
+      } catch {
+        showToast('Kopieren im Browser nicht erlaubt');
+      }
+    }
+
+    async function init() {
+      try {
+        const [live, instagram, queue, moderation] = await Promise.all([
+          loadJson(files.live),
+          loadJson(files.instagram),
+          loadJson(files.queue),
+          loadJson(files.moderation),
+        ]);
+        state.data = { live, instagram, queue, moderation };
+        buildOptions(allDeals());
+        $('statusDot').className = 'status-dot ok';
+        $('statusText').textContent = 'Daten geladen';
+        render();
+      } catch (error) {
+        $('statusDot').className = 'status-dot bad';
+        $('statusText').textContent = error.message || 'Fehler';
+        $('dealList').innerHTML = '<div class="error">' + escapeHtml(error.message || 'Fehler beim Laden') + '</div>';
+      }
+    }
+
+    $('searchInput').addEventListener('input', (event) => {
+      state.query = event.target.value;
+      render();
+    });
+    $('sourceFilter').addEventListener('change', (event) => {
+      state.source = event.target.value;
+      render();
+    });
+    $('blockedFilter').addEventListener('change', (event) => {
+      state.blocked = event.target.value;
+      render();
+    });
+    ['targetId', 'targetUrl', 'targetProvider', 'targetReason'].forEach((id) => {
+      $(id).addEventListener('input', renderPayload);
+    });
+    $('copyPayloadBtn').addEventListener('click', () => copyText($('actionPayload').value, 'Action Inputs kopiert'));
+    $('copyJsonBtn').addEventListener('click', () => {
+      const entry = {
+        ...payloadEntry(),
+        removedAt: new Date().toISOString(),
+        removedBy: 'admin',
+      };
+      copyText(JSON.stringify(entry, null, 2), 'JSON Entry kopiert');
+    });
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+name: "Deal Moderation"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/deal-moderation.yml'
+      - 'docs/deal-moderation.json'
+      - 'scraper/deal-moderation-utils.js'
+      - 'scripts/add-deal-moderation-entry.mjs'
+      - 'scripts/apply-deal-moderation.mjs'
+      - 'package.json'
+  workflow_dispatch:
+    inputs:
+      deal_id:
+        description: "Deal-ID to hide"
+        required: false
+        type: string
+      deal_url:
+        description: "Deal URL to hide"
+        required: false
+        type: string
+      provider:
+        description: "Provider/source text to block, e.g. neotaste"
+        required: false
+        type: string
+      text:
+        description: "Any text signal to block"
+        required: false
+        type: string
+      reason:
+        description: "Reason shown in moderation report"
+        required: false
+        default: "removed"
+        type: string
+
+concurrency:
+  group: deal-moderation
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  apply-moderation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Add manual moderation entry
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          DEAL_MODERATION_ID: ${{ inputs.deal_id }}
+          DEAL_MODERATION_URL: ${{ inputs.deal_url }}
+          DEAL_MODERATION_PROVIDER: ${{ inputs.provider }}
+          DEAL_MODERATION_TEXT: ${{ inputs.text }}
+          DEAL_MODERATION_REASON: ${{ inputs.reason }}
+          DEAL_MODERATION_BY: ${{ github.actor }}
+        run: node scripts/add-deal-moderation-entry.mjs
+
+      - name: Apply deal moderation
+        run: npm run deals:moderate
+
+      - name: Commit moderated deal files
+        run: |
+          node scripts/commit-generated.mjs --message "Apply deal moderation $(date +%Y-%m-%d)" --files docs/deal-moderation.json docs/deal-moderation-report.json docs/deals.json "docs/deals-pending-*.json"

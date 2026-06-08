@@ -7,6 +7,11 @@ import {
   validateDealsForSlack,
   writeDealValidityReport,
 } from './deal-validity-agent.js';
+import {
+  filterModeratedDeals,
+  loadDealModeration,
+  moderationCounts,
+} from './deal-moderation-utils.js';
 import { extractDealsFromThreadMessages } from './slack-digest-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -716,13 +721,26 @@ async function main() {
   }
 
   const pendingFiles = getPendingFiles();
-  const pendingDeals = loadPendingDeals(pendingFiles);
+  const moderation = loadDealModeration();
+  const loadedPendingDeals = loadPendingDeals(pendingFiles);
+  const moderationPendingFilter = filterModeratedDeals(loadedPendingDeals, moderation);
+  if (moderationPendingFilter.removed.length > 0) {
+    console.log(`🛡️ Moderation filter: ${moderationPendingFilter.removed.length} pending Deals vor Slack entfernt`);
+    const counts = formatReasonCategoryCounts(moderationCounts(moderationPendingFilter.removed));
+    if (counts) console.log(`🛡️ Moderation reasons: ${counts}`);
+  }
+  const pendingDeals = moderationPendingFilter.deals;
   console.log(`📋 Total pending deals loaded: ${pendingDeals.length}`);
   const queuePrune = pruneStaleSocialQueueDeals(loadPendingQueue());
   if (queuePrune.removed > 0) {
     console.log(`🧹 Queue prune: ${queuePrune.removed} alte Social-Posts aus der Slack-Queue entfernt`);
   }
-  const existingQueue = queuePrune.deals;
+  const moderationQueueFilter = filterModeratedDeals(queuePrune.deals, moderation);
+  if (moderationQueueFilter.removed.length > 0) {
+    console.log(`🛡️ Queue moderation: ${moderationQueueFilter.removed.length} Deals aus der Slack-Queue entfernt`);
+  }
+  const existingQueue = moderationQueueFilter.deals;
+  const queueChanged = queuePrune.removed > 0 || moderationQueueFilter.removed.length > 0;
 
   const seenPostKeys = await loadRecentlySeenPostKeys();
   const preSlackSeenFilter = filterRecentlySeenDeals(pendingDeals, seenPostKeys);
@@ -757,6 +775,10 @@ async function main() {
   console.log(`📨 Pending: ${pendingDeals.length}, posting to Slack: ${freshDeals.length}`);
 
   if (freshDeals.length === 0) {
+    if (queueChanged) {
+      writePendingAll(existingQueue);
+      console.log(`💾 pending queue updated after moderation/prune: ${existingQueue.length} deals left`);
+    }
     console.log('✅ Keine neuen Deals für Slack');
     return;
   }
