@@ -21,6 +21,12 @@ const SEED_POST_URL_FILES = [
   'deals-pending-all.json',
   'deals.json',
 ];
+const FALLBACK_DEAL_FILES = [
+  'deals-pending-instagram-ai.json',
+  'deals-pending-instagram-discovery.json',
+  'deals-pending-instagram-web.json',
+  'deals-pending-instagram.json',
+];
 
 const APIFY_TOKEN = String(process.env.APIFY_TOKEN || '').trim();
 const APIFY_ACTOR_ID = String(
@@ -100,6 +106,22 @@ function toIso(value) {
   if (!value) return '';
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? '' : d.toISOString();
+}
+
+function parseDateMs(value) {
+  const iso = toIso(value);
+  return iso ? Date.parse(iso) : 0;
+}
+
+function isCurrentYearIso(value) {
+  const iso = toIso(value);
+  if (!iso) return false;
+  return new Date(iso).getUTCFullYear() === new Date().getUTCFullYear();
+}
+
+function isExpiredIso(value) {
+  const ts = parseDateMs(value);
+  return Boolean(ts && ts < Date.now() - 2 * 60 * 60 * 1000);
 }
 
 function sleep(ms) {
@@ -193,6 +215,76 @@ function collectSeedPostUrls(maxSeedPostUrls) {
     seen.add(url);
     return true;
   }).slice(0, maxSeedPostUrls);
+}
+
+function hasUsefulInstagramFallbackDate(deal) {
+  const pubDate = toIso(deal.pubDate || deal.postPublishedAt || deal.createdAt || '');
+  const validUntil = toIso(deal.validUntil || deal.expires || '');
+  if (validUntil) return isCurrentYearIso(validUntil) && !isExpiredIso(validUntil);
+  if (!pubDate || !isCurrentYearIso(pubDate)) return false;
+  if (Date.parse(pubDate) > Date.now() + 2 * 60 * 60 * 1000) return false;
+  return Date.now() - Date.parse(pubDate) <= 14 * 24 * 60 * 60 * 1000;
+}
+
+function normalizeFallbackDeal(raw, sourceFile) {
+  const deal = raw && typeof raw === 'object' ? raw : {};
+  const postUrl = normalizeInstagramPostUrl(deal.url || deal.postUrl);
+  if (!postUrl) return null;
+  if (!hasUsefulInstagramFallbackDate(deal)) return null;
+
+  const brand = normalizeText(deal.brand || deal.venueName || deal.instagramHandle || 'Instagram Deal');
+  const type = normalizeText(deal.type || deal.offerKind || 'gratis').toLowerCase() === 'bogo' ? 'bogo' : (normalizeText(deal.type || deal.offerKind || '').toLowerCase() || 'gratis');
+  const category = normalizeCategoryForScraper(deal.category || '', [
+    deal.title,
+    deal.description,
+    brand,
+  ]);
+  const pubDate = toIso(deal.pubDate || deal.postPublishedAt || deal.createdAt || '') || new Date().toISOString();
+  const expires = toIso(deal.validUntil || deal.expires || '') || normalizeText(deal.expires) || 'Kurzfristig / siehe Instagram';
+  const title = normalizeText(deal.title || deal.description || `${brand} Instagram-Angebot`).slice(0, 110);
+  const qualityScore = Math.max(72, Math.min(96, Number(deal.qualityScore || deal.priority * 10 || 82)));
+
+  return {
+    id: `igap-fallback-${stableId(`${postUrl}|${pubDate}|${title}`)}`,
+    brand,
+    title,
+    logo: inferLogo(category, type),
+    description: normalizeText(deal.description || `Instagram-Angebot bei ${brand} in Wien`).slice(0, 520),
+    type,
+    category,
+    source: 'Instagram',
+    originSource: 'Apify Instagram Fallback',
+    url: postUrl,
+    expires,
+    distance: normalizeText(deal.distance || deal.location || deal.ort || deal.address || 'Wien'),
+    hot: Boolean(deal.hot || qualityScore >= 88),
+    isNew: true,
+    priority: Math.max(6, Math.round(qualityScore / 10)),
+    votes: Number(deal.votes || 1),
+    qualityScore,
+    pubDate,
+    pubDateSource: normalizeText(deal.pubDateSource || `fallback:${sourceFile}`),
+    discoveredBy: `fallback:${sourceFile}`,
+    sourceHits: 1,
+    reviewTier: qualityScore >= 88 ? 'high' : 'medium',
+    apifyOfferKind: type,
+    validFrom: toIso(deal.validFrom || ''),
+    validUntil: toIso(deal.validUntil || ''),
+    fallbackReason: 'apify-actor-empty-dataset',
+  };
+}
+
+function collectFallbackDeals() {
+  const deals = [];
+  for (const fileName of FALLBACK_DEAL_FILES) {
+    const payload = readJsonIfExists(path.join(DOCS_DIR, fileName), null);
+    const rows = Array.isArray(payload?.deals) ? payload.deals : [];
+    for (const row of rows) {
+      const deal = normalizeFallbackDeal(row, fileName);
+      if (deal) deals.push(deal);
+    }
+  }
+  return deals;
 }
 
 function buildActorInput() {
@@ -450,6 +542,22 @@ async function main() {
     return;
   }
 
+  if (process.env.APIFY_FALLBACK_DRY_RUN === '1') {
+    const fallbackDeals = dedupeDeals(collectFallbackDeals());
+    console.log(JSON.stringify({
+      fallbackDeals: fallbackDeals.length,
+      emptyExpires: fallbackDeals.filter((deal) => !String(deal.expires || '').trim()).length,
+      firstDeals: fallbackDeals.slice(0, 8).map((deal) => ({
+        title: deal.title,
+        brand: deal.brand,
+        expires: deal.expires,
+        pubDate: deal.pubDate,
+        url: deal.url,
+      })),
+    }, null, 2));
+    return;
+  }
+
   if (!APIFY_TOKEN) {
     throw new Error('APIFY_TOKEN fehlt');
   }
@@ -481,9 +589,11 @@ async function main() {
   const acceptedItems = Array.isArray(datasetItems)
     ? datasetItems.filter((item) => item)
     : [];
-  const normalizedDeals = acceptedItems
+  const actorDeals = acceptedItems
     .map(normalizeApifyItem)
     .filter(Boolean);
+  const fallbackDeals = actorDeals.length ? [] : collectFallbackDeals();
+  const normalizedDeals = dedupeDeals([...actorDeals, ...fallbackDeals]);
 
   const payload = {
     lastUpdated: new Date().toISOString(),
@@ -495,6 +605,8 @@ async function main() {
       datasetId: finishedRun.defaultDatasetId,
       status: finishedRun.status,
       inputSourceSummary: input.inputSourceSummary,
+      actorDeals: actorDeals.length,
+      fallbackDeals: fallbackDeals.length,
     },
     deals: normalizedDeals,
   };
@@ -510,6 +622,8 @@ async function main() {
     keyValueStoreId: finishedRun.defaultKeyValueStoreId,
     rawDatasetItems: Array.isArray(datasetItems) ? datasetItems.length : 0,
     acceptedDeals: normalizedDeals.length,
+    actorDeals: actorDeals.length,
+    fallbackDeals: fallbackDeals.length,
     inputSourceSummary: input.inputSourceSummary,
     summary,
   };
