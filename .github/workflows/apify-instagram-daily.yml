@@ -49,7 +49,9 @@ jobs:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           APIFY_INSTAGRAM_VIENNA_ACTOR_ID: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
           CI: "true"
+          APIFY_CLI_DISABLE_TELEMETRY: "1"
         run: |
+          apify login --token "$APIFY_TOKEN"
           apify push "$APIFY_INSTAGRAM_VIENNA_ACTOR_ID" --dir apify/instagram-vienna-food-offers --force --wait-for-finish=600 --json
 
       - name: Run Apify Instagram Import
