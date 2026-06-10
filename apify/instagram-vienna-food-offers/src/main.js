@@ -28,6 +28,7 @@ const DEFAULT_INPUT = {
     'freefoodvienna',
     'freedrinkvienna',
   ],
+  seedPostUrls: [],
   maxPostsPerSource: 40,
   maxPostsToInspect: 120,
   maxAgeDaysWithoutExplicitValidity: 10,
@@ -632,6 +633,7 @@ await Actor.main(async () => {
     ...rawInput,
     seedAccounts: (rawInput.seedAccounts || DEFAULT_INPUT.seedAccounts).map(normalizeHandle).filter(Boolean),
     seedHashtags: (rawInput.seedHashtags || DEFAULT_INPUT.seedHashtags).map((tag) => normalizeText(tag).replace(/^#/, '')).filter(Boolean),
+    seedPostUrls: (rawInput.seedPostUrls || DEFAULT_INPUT.seedPostUrls).map(uniquePostUrl).filter(Boolean),
   };
 
   const now = new Date();
@@ -648,6 +650,28 @@ await Actor.main(async () => {
   const acceptedUrls = new Set();
   const rejectReasons = {};
   let queuedPostCount = 0;
+
+  if (input.seedPostUrls.length) {
+    sourceStats.seedPostUrls = {
+      type: 'seedPostUrl',
+      seed: 'direct-post-urls',
+      queued: 0,
+      visited: 0,
+      accepted: 0,
+    };
+  }
+
+  for (const postUrl of input.seedPostUrls) {
+    if (seenPostUrls.has(postUrl) || queuedPostCount >= input.maxPostsToInspect) continue;
+    seenPostUrls.add(postUrl);
+    queuedPostCount += 1;
+    await requestQueue.addRequest({
+      url: postUrl,
+      uniqueKey: `seed-post:${postUrl}`,
+      userData: { label: 'POST', sourceType: 'seedPostUrl', seedValue: postUrl, sourcePage: 'seedPostUrls' },
+    });
+    sourceStats.seedPostUrls.queued += 1;
+  }
 
   for (const account of input.seedAccounts) {
     const url = `https://www.instagram.com/${account}/`;
@@ -782,6 +806,7 @@ await Actor.main(async () => {
     inspectedPosts: Object.values(sourceStats).reduce((sum, entry) => sum + entry.visited, 0),
     queuedPosts: queuedPostCount,
     inputCookieDiagnostics,
+    seedPostUrls: input.seedPostUrls.length,
     sources: sourceStats,
     rejectReasons,
   };

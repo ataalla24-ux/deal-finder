@@ -40,6 +40,13 @@ jobs:
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
         run: node scripts/check-instagram-auth.mjs
 
+      - name: Deploy Apify Instagram Actor
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          APIFY_INSTAGRAM_VIENNA_ACTOR_ID: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
+        run: |
+          npx --yes apify push "$APIFY_INSTAGRAM_VIENNA_ACTOR_ID" --dir apify/instagram-vienna-food-offers --force --wait-for-finish=600
+
       - name: Run Apify Instagram Import
         if: steps.instagram-auth.outputs.ok == 'true' || steps.instagram-auth.outputs.status == 'rate-limited'
         env:
@@ -48,8 +55,9 @@ jobs:
           APIFY_INSTAGRAM_COOKIE_STRING: ${{ secrets.INSTAGRAM_COOKIES }}
           APIFY_INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
           APIFY_INSTAGRAM_MAX_SEED_ACCOUNTS: 70
+          APIFY_INSTAGRAM_MAX_SEED_POST_URLS: 120
           APIFY_INSTAGRAM_MAX_POSTS_PER_SOURCE: 12
-          APIFY_INSTAGRAM_MAX_POSTS_TO_INSPECT: 260
+          APIFY_INSTAGRAM_MAX_POSTS_TO_INSPECT: 320
         run: node scraper/import-apify-instagram-deals.js
 
       - name: Commit Apify Instagram updates

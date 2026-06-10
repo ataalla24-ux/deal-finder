@@ -12,6 +12,15 @@ const REPORT_PATH = path.join(DOCS_DIR, 'apify-instagram-report.json');
 const DEFAULT_INPUT_PATH = path.join(ROOT, 'apify', 'instagram-vienna-food-offers', 'default-input.json');
 const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
 const MERCHANT_REGISTRY_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
+const SEED_POST_URL_FILES = [
+  'deals-pending-instagram-ai.json',
+  'deals-pending-instagram-discovery.json',
+  'deals-pending-instagram-web.json',
+  'deals-pending-instagram-apify.json',
+  'deal-candidates-index.json',
+  'deals-pending-all.json',
+  'deals.json',
+];
 
 const APIFY_TOKEN = String(process.env.APIFY_TOKEN || '').trim();
 const APIFY_ACTOR_ID = String(
@@ -62,6 +71,26 @@ function normalizeUrl(value) {
     if (!/^https?:$/i.test(url.protocol)) return '';
     url.hash = '';
     return url.toString();
+  } catch {
+    return '';
+  }
+}
+
+function normalizeInstagramPostUrl(value) {
+  const url = normalizeUrl(value);
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+    if (host !== 'instagram.com') return '';
+    const parts = parsed.pathname.split('/').filter(Boolean);
+    const typeIndex = parts.findIndex((part) => ['p', 'reel', 'tv'].includes(part.toLowerCase()));
+    if (typeIndex < 0 || !parts[typeIndex + 1]) return '';
+    parsed.hostname = 'www.instagram.com';
+    parsed.pathname = `/${parts[typeIndex].toLowerCase()}/${parts[typeIndex + 1]}/`;
+    parsed.search = '';
+    parsed.hash = '';
+    return parsed.toString();
   } catch {
     return '';
   }
@@ -127,20 +156,62 @@ function mergeSeedAccounts(defaultAccounts, dynamicEntries, maxSeedAccounts) {
   return merged.slice(0, maxSeedAccounts);
 }
 
+function collectInstagramPostUrlsFromValue(value, output) {
+  if (typeof value === 'string') {
+    const direct = normalizeInstagramPostUrl(value);
+    if (direct) output.push(direct);
+
+    const matches = value.match(/https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|tv)\/[A-Za-z0-9_-]+\/?/gi) || [];
+    for (const match of matches) {
+      const url = normalizeInstagramPostUrl(match);
+      if (url) output.push(url);
+    }
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) collectInstagramPostUrlsFromValue(item, output);
+    return;
+  }
+
+  if (value && typeof value === 'object') {
+    for (const item of Object.values(value)) collectInstagramPostUrlsFromValue(item, output);
+  }
+}
+
+function collectSeedPostUrls(maxSeedPostUrls) {
+  const urls = [];
+  for (const fileName of SEED_POST_URL_FILES) {
+    const payload = readJsonIfExists(path.join(DOCS_DIR, fileName), null);
+    if (!payload) continue;
+    collectInstagramPostUrlsFromValue(payload, urls);
+  }
+
+  const seen = new Set();
+  return urls.filter((url) => {
+    if (!url || seen.has(url)) return false;
+    seen.add(url);
+    return true;
+  }).slice(0, maxSeedPostUrls);
+}
+
 function buildActorInput() {
   const baseInput = readJsonIfExists(DEFAULT_INPUT_PATH, {});
   const dynamicAccounts = collectDynamicSeedAccounts();
   const maxSeedAccounts = positiveIntEnv('APIFY_INSTAGRAM_MAX_SEED_ACCOUNTS', 70);
   const seedAccounts = mergeSeedAccounts(baseInput.seedAccounts, dynamicAccounts, maxSeedAccounts);
+  const maxSeedPostUrls = positiveIntEnv('APIFY_INSTAGRAM_MAX_SEED_POST_URLS', 120);
+  const seedPostUrls = collectSeedPostUrls(maxSeedPostUrls);
   const maxPostsPerSource = positiveIntEnv('APIFY_INSTAGRAM_MAX_POSTS_PER_SOURCE', 12);
   const maxPostsToInspect = positiveIntEnv(
     'APIFY_INSTAGRAM_MAX_POSTS_TO_INSPECT',
-    Math.max(Number(baseInput.maxPostsToInspect || 120), Math.min(320, seedAccounts.length * 6)),
+    Math.max(Number(baseInput.maxPostsToInspect || 120), Math.min(360, (seedAccounts.length * 6) + seedPostUrls.length)),
   );
 
   return {
     ...baseInput,
     seedAccounts,
+    seedPostUrls,
     maxPostsPerSource,
     maxPostsToInspect,
     ...(APIFY_INSTAGRAM_COOKIE_STRING ? { cookieString: APIFY_INSTAGRAM_COOKIE_STRING } : {}),
@@ -150,6 +221,8 @@ function buildActorInput() {
       dynamicSeedAccounts: dynamicAccounts.length,
       mergedSeedAccounts: seedAccounts.length,
       maxSeedAccounts,
+      seedPostUrls: seedPostUrls.length,
+      maxSeedPostUrls,
     },
   };
 }
@@ -367,10 +440,12 @@ async function main() {
     console.log(JSON.stringify({
       seedAccounts: input.seedAccounts?.length || 0,
       seedHashtags: Array.isArray(input.seedHashtags) ? input.seedHashtags.length : 0,
+      seedPostUrls: Array.isArray(input.seedPostUrls) ? input.seedPostUrls.length : 0,
       maxPostsPerSource: input.maxPostsPerSource,
       maxPostsToInspect: input.maxPostsToInspect,
       inputSourceSummary: input.inputSourceSummary,
       firstSeedAccounts: (input.seedAccounts || []).slice(0, 12),
+      firstSeedPostUrls: (input.seedPostUrls || []).slice(0, 8),
     }, null, 2));
     return;
   }
@@ -387,6 +462,7 @@ async function main() {
   console.log('🕷️ APIFY INSTAGRAM IMPORT');
   console.log(`Actor: ${APIFY_ACTOR_ID}`);
   console.log(`Seed accounts: ${input.seedAccounts?.length || 0}`);
+  console.log(`Seed post URLs: ${input.seedPostUrls?.length || 0}`);
   console.log(`Max posts: ${input.maxPostsToInspect} total, ${input.maxPostsPerSource} per source`);
 
   const run = await triggerActorRun(input);
