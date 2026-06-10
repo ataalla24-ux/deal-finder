@@ -39,6 +39,7 @@ const POLL_INTERVAL_MS = Math.max(5000, Number(process.env.APIFY_POLL_INTERVAL_M
 const RUN_TIMEOUT_MS = Math.max(120000, Number(process.env.APIFY_RUN_TIMEOUT_MS || 25 * 60 * 1000));
 const APIFY_INSTAGRAM_COOKIE_STRING = String(process.env.APIFY_INSTAGRAM_COOKIE_STRING || '').trim();
 const APIFY_INSTAGRAM_SESSIONID = String(process.env.APIFY_INSTAGRAM_SESSIONID || '').trim();
+const FALLBACK_REVIEW_VALIDITY_DAYS = 14;
 
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -122,6 +123,25 @@ function isCurrentYearIso(value) {
 function isExpiredIso(value) {
   const ts = parseDateMs(value);
   return Boolean(ts && ts < Date.now() - 2 * 60 * 60 * 1000);
+}
+
+function toIsoEndOfDay(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  date.setUTCHours(23, 59, 59, 999);
+  return date.toISOString();
+}
+
+function addDaysIso(value, days) {
+  const ts = parseDateMs(value);
+  if (!ts) return '';
+  return toIsoEndOfDay(ts + days * 24 * 60 * 60 * 1000);
+}
+
+function resolveFallbackValidUntil(deal, pubDate) {
+  const explicitValidUntil = toIso(deal.validUntil || deal.expires || '');
+  if (explicitValidUntil) return explicitValidUntil;
+  return addDaysIso(pubDate, FALLBACK_REVIEW_VALIDITY_DAYS);
 }
 
 function sleep(ms) {
@@ -223,7 +243,7 @@ function hasUsefulInstagramFallbackDate(deal) {
   if (validUntil) return isCurrentYearIso(validUntil) && !isExpiredIso(validUntil);
   if (!pubDate || !isCurrentYearIso(pubDate)) return false;
   if (Date.parse(pubDate) > Date.now() + 2 * 60 * 60 * 1000) return false;
-  return Date.now() - Date.parse(pubDate) <= 14 * 24 * 60 * 60 * 1000;
+  return Date.now() - Date.parse(pubDate) <= FALLBACK_REVIEW_VALIDITY_DAYS * 24 * 60 * 60 * 1000;
 }
 
 function normalizeFallbackDeal(raw, sourceFile) {
@@ -240,7 +260,8 @@ function normalizeFallbackDeal(raw, sourceFile) {
     brand,
   ]);
   const pubDate = toIso(deal.pubDate || deal.postPublishedAt || deal.createdAt || '') || new Date().toISOString();
-  const expires = toIso(deal.validUntil || deal.expires || '') || normalizeText(deal.expires) || 'Kurzfristig / siehe Instagram';
+  const validUntil = resolveFallbackValidUntil(deal, pubDate);
+  const expires = validUntil || normalizeText(deal.expires) || 'Kurzfristig / siehe Instagram';
   const title = normalizeText(deal.title || deal.description || `${brand} Instagram-Angebot`).slice(0, 110);
   const qualityScore = Math.max(72, Math.min(96, Number(deal.qualityScore || deal.priority * 10 || 82)));
 
@@ -269,7 +290,8 @@ function normalizeFallbackDeal(raw, sourceFile) {
     reviewTier: qualityScore >= 88 ? 'high' : 'medium',
     apifyOfferKind: type,
     validFrom: toIso(deal.validFrom || ''),
-    validUntil: toIso(deal.validUntil || ''),
+    validUntil,
+    validUntilSource: toIso(deal.validUntil || deal.expires || '') ? 'explicit' : `pubDate+${FALLBACK_REVIEW_VALIDITY_DAYS}d-review-window`,
     fallbackReason: 'apify-actor-empty-dataset',
   };
 }
@@ -547,10 +569,14 @@ async function main() {
     console.log(JSON.stringify({
       fallbackDeals: fallbackDeals.length,
       emptyExpires: fallbackDeals.filter((deal) => !String(deal.expires || '').trim()).length,
+      emptyValidUntil: fallbackDeals.filter((deal) => !String(deal.validUntil || '').trim()).length,
+      expiredValidUntil: fallbackDeals.filter((deal) => deal.validUntil && isExpiredIso(deal.validUntil)).length,
       firstDeals: fallbackDeals.slice(0, 8).map((deal) => ({
         title: deal.title,
         brand: deal.brand,
         expires: deal.expires,
+        validUntil: deal.validUntil,
+        validUntilSource: deal.validUntilSource,
         pubDate: deal.pubDate,
         url: deal.url,
       })),

@@ -87,6 +87,16 @@ const COOKIE_BUTTON_TEXTS = [
   'Allow essential and optional cookies',
 ];
 
+const COOKIE_ATTRIBUTE_NAMES = new Set([
+  'domain',
+  'expires',
+  'httponly',
+  'max-age',
+  'path',
+  'samesite',
+  'secure',
+]);
+
 const MONTHS = new Map([
   ['january', 0], ['jan', 0], ['januar', 0],
   ['february', 1], ['feb', 1], ['februar', 1],
@@ -419,7 +429,7 @@ function extractPostDateFromMeta(text) {
   return parseDateToken(match[1], new Date());
 }
 
-async function extractPostData(page) {
+async function extractPostData(page, requestUrl) {
   const snapshot = await page.evaluate(() => {
     const metaContent = (selector) => document.querySelector(selector)?.getAttribute('content') || '';
     const textContent = (selector) => document.querySelector(selector)?.textContent || '';
@@ -489,7 +499,7 @@ async function extractPostData(page) {
   );
 
   return {
-    url: uniquePostUrl(snapshot.canonical || snapshot.url),
+    url: uniquePostUrl(snapshot.canonical || snapshot.url) || uniquePostUrl(requestUrl),
     caption,
     venueName,
     locationText,
@@ -583,27 +593,39 @@ function getRejectReason(item) {
 }
 
 function buildCookieObjects(input) {
-  const cookies = [];
+  const byName = new Map();
+  const addCookie = (name, value) => {
+    const cookieName = normalizeText(name);
+    const cookieValue = String(value || '').trim();
+    if (!cookieName || !cookieValue || COOKIE_ATTRIBUTE_NAMES.has(cookieName.toLowerCase())) return;
+    byName.set(cookieName, {
+      name: cookieName,
+      value: cookieValue,
+      domain: '.instagram.com',
+      path: '/',
+      secure: true,
+      sameSite: 'None',
+      ...(cookieName.toLowerCase() === 'sessionid' ? { httpOnly: true } : {}),
+    });
+  };
+
   const cookieString = normalizeText(input.cookieString);
   if (cookieString) {
     for (const part of cookieString.split(';').map((value) => value.trim()).filter(Boolean)) {
       const index = part.indexOf('=');
       if (index <= 0) continue;
-      cookies.push({
-        name: part.slice(0, index).trim(),
-        value: part.slice(index + 1).trim(),
-        domain: '.instagram.com',
-        path: '/',
-      });
+      addCookie(part.slice(0, index), part.slice(index + 1));
     }
   }
 
-  const sessionId = normalizeText(input.sessionId);
-  if (sessionId && !cookies.some((cookie) => cookie.name === 'sessionid')) {
-    cookies.push({ name: 'sessionid', value: sessionId, domain: '.instagram.com', path: '/' });
+  const sessionIdInput = normalizeText(input.sessionId);
+  const sessionMatch = sessionIdInput.match(/(?:^|;\s*)sessionid=([^;]+)/i);
+  const sessionId = sessionMatch ? sessionMatch[1].trim() : sessionIdInput;
+  if (sessionId && !byName.has('sessionid')) {
+    addCookie('sessionid', sessionId);
   }
 
-  return cookies;
+  return [...byName.values()];
 }
 
 async function getContextCookieDiagnostics(page) {
@@ -757,7 +779,7 @@ await Actor.main(async () => {
         return;
       }
 
-      const post = await extractPostData(page);
+      const post = await extractPostData(page, request.url);
       const validity = extractValidity(
         [post.caption, post.metaDescription, post.ogDescription, post.bodyText].join(' '),
         now,
