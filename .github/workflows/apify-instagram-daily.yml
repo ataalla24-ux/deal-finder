@@ -45,7 +45,7 @@ jobs:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           APIFY_INSTAGRAM_VIENNA_ACTOR_ID: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
         run: |
-          npx --yes apify push "$APIFY_INSTAGRAM_VIENNA_ACTOR_ID" --dir apify/instagram-vienna-food-offers --force --wait-for-finish=600
+          npx --yes apify-cli push "$APIFY_INSTAGRAM_VIENNA_ACTOR_ID" --dir apify/instagram-vienna-food-offers --force --wait-for-finish=600
 
       - name: Run Apify Instagram Import
         if: steps.instagram-auth.outputs.ok == 'true' || steps.instagram-auth.outputs.status == 'rate-limited'
