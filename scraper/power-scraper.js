@@ -20,6 +20,8 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const INCLUDE_BASE_DEALS = String(process.env.POWER_INCLUDE_BASE_DEALS || '1') !== '0';
+const FETCH_TIMEOUT_MS = Math.max(3000, Number(process.env.POWER_FETCH_TIMEOUT_MS || 10000));
+const MAX_RESPONSE_BYTES = Math.max(100_000, Number(process.env.POWER_MAX_RESPONSE_BYTES || 2_000_000));
 // ============================================
 // STATISCHE BASIS-DEALS (Dauerhaft gültig)
 // Stand: Februar 2026
@@ -392,22 +394,43 @@ const ACTIVE_SOURCES = SOURCES.filter((source) => !DISABLED_SOURCE_NAMES.has(sou
 function fetchHTML(url) {
   return new Promise((resolve, reject) => {
     const protocol = url.startsWith('https') ? https : http;
-    protocol.get(url, {
-      timeout: 10000,
+    let settled = false;
+    const settle = (error, data = '') => {
+      if (settled) return;
+      settled = true;
+      if (error) reject(error);
+      else resolve(data);
+    };
+
+    const req = protocol.get(url, {
+      timeout: FETCH_TIMEOUT_MS,
+      agent: false,
       headers: {
         'user-agent': 'FreeFinder Power Scraper/5.1 (+https://github.com/ataalla24-ux/deal-finder)',
         'accept-language': 'de-AT,de;q=0.9,en;q=0.8'
       }
     }, (res) => {
       if (res.statusCode && res.statusCode >= 400) {
-        reject(new Error(`HTTP ${res.statusCode}`));
         res.resume();
+        settle(new Error(`HTTP ${res.statusCode}`));
         return;
       }
       let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(data));
-    }).on('error', reject).setTimeout(10000, () => reject(new Error('Timeout')));
+      res.setEncoding('utf8');
+      res.on('data', chunk => {
+        data += chunk;
+        if (data.length > MAX_RESPONSE_BYTES) {
+          req.destroy(new Error(`Response too large (${data.length} bytes)`));
+        }
+      });
+      res.on('end', () => settle(null, data));
+      res.on('error', settle);
+    });
+
+    req.on('error', settle);
+    req.setTimeout(FETCH_TIMEOUT_MS, () => {
+      req.destroy(new Error('Timeout'));
+    });
   });
 }
 
@@ -452,6 +475,7 @@ function normalizePowerDeal(deal, sourceLabel) {
     ...normalized,
     id: deal.id || stableDealId([normalized.brand, normalized.title, normalized.url, normalized.source]),
     source: deal.source || sourceLabel,
+    expires: cleanUiNoiseText(normalized.expires || deal.expires || 'Siehe Webseite'),
     qualityScore: Number(normalized.qualityScore || deal.qualityScore || 42),
     votes: Number(normalized.votes || deal.votes || 1),
     priority: Number(deal.priority || 3),
@@ -575,7 +599,11 @@ async function main() {
   console.log(`🆓 ${finalDeals.filter(d => d.type === 'gratis').length} Gratis Deals`);
 }
 
-main().catch((error) => {
-  console.error('❌ power-scraper fehlgeschlagen:', error);
-  process.exit(1);
-});
+main()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('❌ power-scraper fehlgeschlagen:', error);
+    process.exit(1);
+  });

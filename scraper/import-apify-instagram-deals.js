@@ -10,6 +10,8 @@ const DOCS_DIR = path.join(ROOT, 'docs');
 const OUTPUT_PATH = path.join(DOCS_DIR, 'deals-pending-instagram-apify.json');
 const REPORT_PATH = path.join(DOCS_DIR, 'apify-instagram-report.json');
 const DEFAULT_INPUT_PATH = path.join(ROOT, 'apify', 'instagram-vienna-food-offers', 'default-input.json');
+const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
+const MERCHANT_REGISTRY_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
 
 const APIFY_TOKEN = String(process.env.APIFY_TOKEN || '').trim();
 const APIFY_ACTOR_ID = String(
@@ -46,6 +48,12 @@ function normalizeText(value) {
     .trim();
 }
 
+function normalizeHandle(value) {
+  const handle = normalizeText(value).toLowerCase().replace(/^@/, '');
+  if (!/^[a-z0-9._]{2,40}$/.test(handle)) return '';
+  return handle;
+}
+
 function normalizeUrl(value) {
   const raw = String(value || '').trim();
   if (!raw) return '';
@@ -67,6 +75,83 @@ function toIso(value) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function positiveIntEnv(name, fallback) {
+  const value = Number(process.env[name]);
+  return Number.isFinite(value) && value > 0 ? Math.floor(value) : fallback;
+}
+
+function collectDynamicSeedAccounts() {
+  const entries = [];
+
+  const watchlist = readJsonIfExists(WATCHLIST_PATH, {});
+  for (const account of Array.isArray(watchlist.accounts) ? watchlist.accounts : []) {
+    const username = normalizeHandle(account?.username || account?.handle);
+    if (!username) continue;
+    entries.push({
+      username,
+      priority: Number(account?.priority || 0),
+      source: 'instagram-watchlist',
+    });
+  }
+
+  const registry = readJsonIfExists(MERCHANT_REGISTRY_PATH, {});
+  for (const account of Array.isArray(registry.accounts) ? registry.accounts : []) {
+    const username = normalizeHandle(account?.username || account?.handle);
+    if (!username) continue;
+    entries.push({
+      username,
+      priority: Number(account?.priorityScore || account?.confidence || 0),
+      source: 'instagram-merchant-registry',
+    });
+  }
+
+  return entries
+    .sort((left, right) => right.priority - left.priority || left.username.localeCompare(right.username));
+}
+
+function mergeSeedAccounts(defaultAccounts, dynamicEntries, maxSeedAccounts) {
+  const merged = [];
+  const seen = new Set();
+  const add = (username) => {
+    const handle = normalizeHandle(username);
+    if (!handle || seen.has(handle)) return;
+    seen.add(handle);
+    merged.push(handle);
+  };
+
+  for (const username of Array.isArray(defaultAccounts) ? defaultAccounts : []) add(username);
+  for (const entry of dynamicEntries) add(entry.username);
+
+  return merged.slice(0, maxSeedAccounts);
+}
+
+function buildActorInput() {
+  const baseInput = readJsonIfExists(DEFAULT_INPUT_PATH, {});
+  const dynamicAccounts = collectDynamicSeedAccounts();
+  const maxSeedAccounts = positiveIntEnv('APIFY_INSTAGRAM_MAX_SEED_ACCOUNTS', 70);
+  const seedAccounts = mergeSeedAccounts(baseInput.seedAccounts, dynamicAccounts, maxSeedAccounts);
+  const maxPostsPerSource = positiveIntEnv('APIFY_INSTAGRAM_MAX_POSTS_PER_SOURCE', 12);
+  const maxPostsToInspect = positiveIntEnv(
+    'APIFY_INSTAGRAM_MAX_POSTS_TO_INSPECT',
+    Math.max(Number(baseInput.maxPostsToInspect || 120), Math.min(320, seedAccounts.length * 6)),
+  );
+
+  return {
+    ...baseInput,
+    seedAccounts,
+    maxPostsPerSource,
+    maxPostsToInspect,
+    ...(APIFY_INSTAGRAM_COOKIE_STRING ? { cookieString: APIFY_INSTAGRAM_COOKIE_STRING } : {}),
+    ...(APIFY_INSTAGRAM_SESSIONID ? { sessionId: APIFY_INSTAGRAM_SESSIONID } : {}),
+    inputSourceSummary: {
+      defaultSeedAccounts: Array.isArray(baseInput.seedAccounts) ? baseInput.seedAccounts.length : 0,
+      dynamicSeedAccounts: dynamicAccounts.length,
+      mergedSeedAccounts: seedAccounts.length,
+      maxSeedAccounts,
+    },
+  };
 }
 
 function stableId(seed) {
@@ -138,7 +223,7 @@ function normalizeApifyItem(raw) {
   const type = inferType(item);
   const category = inferCategory(item);
   const pubDate = toIso(item.postPublishedAt);
-  const expires = toIso(item.validUntil) || 'Unbekannt';
+  const expires = toIso(item.validUntil) || 'Kurzfristig / siehe Instagram';
   const title = buildTitle(item, brand);
   const qualityScore = computeQualityScore(item, type);
 
@@ -277,6 +362,19 @@ async function waitForRunCompletion(runId) {
 async function main() {
   ensureDir(DOCS_DIR);
 
+  if (process.env.APIFY_DRY_RUN === '1') {
+    const input = buildActorInput();
+    console.log(JSON.stringify({
+      seedAccounts: input.seedAccounts?.length || 0,
+      seedHashtags: Array.isArray(input.seedHashtags) ? input.seedHashtags.length : 0,
+      maxPostsPerSource: input.maxPostsPerSource,
+      maxPostsToInspect: input.maxPostsToInspect,
+      inputSourceSummary: input.inputSourceSummary,
+      firstSeedAccounts: (input.seedAccounts || []).slice(0, 12),
+    }, null, 2));
+    return;
+  }
+
   if (!APIFY_TOKEN) {
     throw new Error('APIFY_TOKEN fehlt');
   }
@@ -284,14 +382,12 @@ async function main() {
     throw new Error('APIFY_INSTAGRAM_VIENNA_ACTOR_ID oder APIFY_ACTOR_ID fehlt');
   }
 
-  const input = {
-    ...readJsonIfExists(DEFAULT_INPUT_PATH, {}),
-    ...(APIFY_INSTAGRAM_COOKIE_STRING ? { cookieString: APIFY_INSTAGRAM_COOKIE_STRING } : {}),
-    ...(APIFY_INSTAGRAM_SESSIONID ? { sessionId: APIFY_INSTAGRAM_SESSIONID } : {}),
-  };
+  const input = buildActorInput();
 
   console.log('🕷️ APIFY INSTAGRAM IMPORT');
   console.log(`Actor: ${APIFY_ACTOR_ID}`);
+  console.log(`Seed accounts: ${input.seedAccounts?.length || 0}`);
+  console.log(`Max posts: ${input.maxPostsToInspect} total, ${input.maxPostsPerSource} per source`);
 
   const run = await triggerActorRun(input);
   console.log(`▶️ Started Apify run ${run.id}`);
@@ -322,6 +418,7 @@ async function main() {
       runId: finishedRun.id,
       datasetId: finishedRun.defaultDatasetId,
       status: finishedRun.status,
+      inputSourceSummary: input.inputSourceSummary,
     },
     deals: normalizedDeals,
   };
@@ -337,6 +434,7 @@ async function main() {
     keyValueStoreId: finishedRun.defaultKeyValueStoreId,
     rawDatasetItems: Array.isArray(datasetItems) ? datasetItems.length : 0,
     acceptedDeals: normalizedDeals.length,
+    inputSourceSummary: input.inputSourceSummary,
     summary,
   };
 

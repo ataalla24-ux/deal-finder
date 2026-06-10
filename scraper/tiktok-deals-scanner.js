@@ -17,6 +17,7 @@ const REPORT_PATH = path.join(DOCS_DIR, 'tiktok-scanner-report.json');
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CONFIG = {
   maxAgeDays: Number(process.env.TIKTOK_MAX_AGE_DAYS || 7),
+  maxExplicitValidityAgeDays: Number(process.env.TIKTOK_MAX_EXPLICIT_VALIDITY_AGE_DAYS || 21),
   maxPostsToVisit: Number(process.env.TIKTOK_MAX_POSTS || 90),
   maxDeals: Number(process.env.TIKTOK_MAX_DEALS || 45),
   minScore: Number(process.env.TIKTOK_MIN_SCORE || 58),
@@ -388,12 +389,32 @@ function ageDays(date) {
   return Math.max(0, Math.floor((Date.now() - date.getTime()) / DAY_MS));
 }
 
-function isCurrentPost(date) {
+function currentPostStatus(date, signal = '') {
   const now = new Date();
-  if (date.getUTCFullYear() !== now.getUTCFullYear()) return false;
-  if (date.getTime() > now.getTime() + 2 * 60 * 60 * 1000) return false;
+  if (date.getUTCFullYear() !== now.getUTCFullYear()) {
+    return { ok: false, reason: `TikTok-Post nicht aus aktuellem Jahr (${date.toISOString().slice(0, 10)})` };
+  }
+  if (date.getTime() > now.getTime() + 2 * 60 * 60 * 1000) {
+    return { ok: false, reason: `TikTok-Postdatum liegt in der Zukunft (${date.toISOString().slice(0, 10)})` };
+  }
+
   const age = ageDays(date);
-  return age >= 0 && age <= CONFIG.maxAgeDays;
+  if (age >= 0 && age <= CONFIG.maxAgeDays) return { ok: true, reason: '' };
+
+  const explicitEndDate = parseExplicitOfferEndDate(signal);
+  if (
+    explicitEndDate
+    && explicitEndDate.getUTCFullYear() === now.getUTCFullYear()
+    && explicitEndDate.getTime() >= now.getTime() - 2 * 60 * 60 * 1000
+    && age <= CONFIG.maxExplicitValidityAgeDays
+  ) {
+    return { ok: true, reason: '' };
+  }
+
+  return {
+    ok: false,
+    reason: `TikTok-Post älter als ${CONFIG.maxAgeDays} Tage und kein aktuell gültiges Ablaufdatum (${date.toISOString().slice(0, 10)})`,
+  };
 }
 
 function endOfViennaDay(year, month, day) {
@@ -656,9 +677,6 @@ function buildDealFromPost(url, data) {
   if (!dateCandidate) {
     return { deal: null, reason: 'kein echtes TikTok-Post-Datum gefunden' };
   }
-  if (!isCurrentPost(dateCandidate.date)) {
-    return { deal: null, reason: `TikTok-Post älter als ${CONFIG.maxAgeDays} Tage (${dateCandidate.date.toISOString().slice(0, 10)})` };
-  }
 
   const signal = [
     data.title,
@@ -667,6 +685,9 @@ function buildDealFromPost(url, data) {
     data.accountHandle,
     url,
   ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
+
+  const freshness = currentPostStatus(dateCandidate.date, signal);
+  if (!freshness.ok) return { deal: null, reason: freshness.reason };
 
   if (!hasViennaSignal(signal)) return { deal: null, reason: 'kein eindeutiges Wien-Signal' };
   if (!hasStrongDealSignal(signal)) return { deal: null, reason: 'kein starkes Gratis-/Deal-Signal' };
@@ -716,6 +737,14 @@ function buildQualityScore(signal, postDate, type, category) {
   if (/\bkaffee|coffee|pizza|burger|drink|goodie|ticket|probetraining/i.test(signal)) score += 10;
   if (category === 'kaffee' || category === 'essen') score += 8;
   if (/\bnur heute|heute|morgen|wochenende|diese woche|neueröffnung|neueroeffnung|opening/i.test(signal)) score += 8;
+  const explicitEndDate = parseExplicitOfferEndDate(signal);
+  if (
+    explicitEndDate
+    && explicitEndDate.getUTCFullYear() === new Date().getUTCFullYear()
+    && explicitEndDate.getTime() >= Date.now() - 2 * 60 * 60 * 1000
+  ) {
+    score += 8;
+  }
   const age = ageDays(postDate);
   if (age <= 1) score += 16;
   else if (age <= 3) score += 12;
@@ -780,7 +809,7 @@ function dedupeDeals(deals) {
 async function main() {
   console.log('🎵 TIKTOK DEAL SCANNER (STRICT CURRENT)');
   console.log('========================================');
-  console.log(` freshness: max ${CONFIG.maxAgeDays} Tage, ohne Post-Datum blockiert`);
+  console.log(` freshness: max ${CONFIG.maxAgeDays} Tage; mit explizit gültigem Ablaufdatum max ${CONFIG.maxExplicitValidityAgeDays} Tage; ohne Post-Datum blockiert`);
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({

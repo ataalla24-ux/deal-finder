@@ -26,9 +26,52 @@ function fail(message) {
 const output = readJson(OUTPUT_PATH);
 const report = fs.existsSync(REPORT_PATH) ? readJson(REPORT_PATH) : {};
 const maxAgeDays = Number(report.config?.maxAgeDays || process.env.INSTAGRAM_AI_MAX_AGE_DAYS || 7);
+const maxExplicitValidityAgeDays = Number(
+  report.config?.maxExplicitValidityAgeDays
+  || process.env.INSTAGRAM_AI_MAX_EXPLICIT_VALIDITY_AGE_DAYS
+  || 21,
+);
 const deals = Array.isArray(output.deals) ? output.deals : [];
-const now = Date.now();
+const validationNow = Date.parse(output.lastUpdated || report.generatedAt || report.lastUpdated || '') || Date.now();
+const validationDate = new Date(validationNow);
 const moderation = loadDealModeration();
+
+function endOfUtcDay(year, month, day) {
+  return new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+}
+
+function parseExpiryDate(value) {
+  const text = String(value || '').trim();
+  if (!text) return null;
+
+  const direct = new Date(text);
+  if (!Number.isNaN(direct.getTime())) return direct;
+
+  const match = text.match(/([0-3]?\d)[./]([01]?\d)(?:[./](20\d{2}))?/);
+  if (!match) return null;
+
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]) || validationDate.getUTCFullYear();
+  if (day < 1 || day > 31 || month < 1 || month > 12) return null;
+
+  const parsed = endOfUtcDay(year, month, day);
+  if (parsed.getUTCMonth() !== month - 1 || parsed.getUTCDate() !== day) return null;
+  return parsed;
+}
+
+function hasCurrentOrFutureExpiry(deal) {
+  const expiry = parseExpiryDate(deal.expires);
+  if (!expiry) return false;
+
+  const todayStart = Date.UTC(
+    validationDate.getUTCFullYear(),
+    validationDate.getUTCMonth(),
+    validationDate.getUTCDate(),
+  );
+  return expiry.getUTCFullYear() === validationDate.getUTCFullYear()
+    && expiry.getTime() >= todayStart;
+}
 
 if (Number(output.totalDeals) !== deals.length) {
   fail(`totalDeals=${output.totalDeals} but deals.length=${deals.length}`);
@@ -42,9 +85,16 @@ for (const deal of deals) {
     continue;
   }
 
-  const ageDays = Math.max(0, (now - pubDate.getTime()) / DAY_MS);
+  if (pubDate.getUTCFullYear() !== validationDate.getUTCFullYear()) {
+    fail(`${label} is not from current year (${pubDate.toISOString().slice(0, 10)})`);
+  }
+
+  const ageDays = Math.max(0, (validationNow - pubDate.getTime()) / DAY_MS);
   if (ageDays > maxAgeDays) {
-    fail(`${label} is ${ageDays.toFixed(2)} days old, max is ${maxAgeDays}`);
+    const hasExplicitValidity = ageDays <= maxExplicitValidityAgeDays && hasCurrentOrFutureExpiry(deal);
+    if (!hasExplicitValidity) {
+      fail(`${label} is ${ageDays.toFixed(2)} days old, max is ${maxAgeDays} without current explicit expiry`);
+    }
   }
 
   const text = [
@@ -66,4 +116,4 @@ for (const deal of deals) {
 
 if (process.exitCode) process.exit();
 
-console.log(`Instagram AI output valid: ${deals.length} deals, max age ${maxAgeDays} days`);
+console.log(`Instagram AI output valid: ${deals.length} deals, max age ${maxAgeDays} days / explicit validity ${maxExplicitValidityAgeDays} days`);

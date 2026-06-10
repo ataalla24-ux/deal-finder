@@ -46,6 +46,7 @@ const CONFIG = {
   maxProfileAccounts: numberEnv('INSTAGRAM_AI_MAX_PROFILE_ACCOUNTS', 8),
   maxProfilePostsPerAccount: numberEnv('INSTAGRAM_AI_MAX_PROFILE_POSTS', 4),
   maxAgeDays: numberEnv('INSTAGRAM_AI_MAX_AGE_DAYS', 7),
+  maxExplicitValidityAgeDays: numberEnv('INSTAGRAM_AI_MAX_EXPLICIT_VALIDITY_AGE_DAYS', 21),
   minScore: numberEnv('INSTAGRAM_AI_MIN_SCORE', 62),
   aiCandidateLimit: numberEnv('INSTAGRAM_AI_LLM_CANDIDATES', 32),
   profileDiscoveryEnabled: process.env.INSTAGRAM_AI_DISABLE_PROFILES !== '1',
@@ -870,10 +871,6 @@ function ageDaysExact(date) {
   return Math.max(0, (Date.now() - date.getTime()) / DAY_MS);
 }
 
-function isPostWithinMaxAge(date) {
-  return ageDaysExact(date) <= CONFIG.maxAgeDays;
-}
-
 function localDayStart(date = new Date()) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
@@ -960,6 +957,38 @@ function relativeOfferWindowEnd(signal, pubDate = new Date()) {
 function hasPastExplicitOfferDate(signal) {
   const today = localDayStart();
   return extractExplicitOfferDates(signal).some((item) => item.date.getTime() < today.getTime());
+}
+
+function hasCurrentOrFutureExplicitOfferDate(signal, now = new Date()) {
+  const today = localDayStart(now);
+  return extractExplicitOfferDates(signal, now).some((item) => (
+    item.date.getFullYear() === now.getFullYear()
+    && item.date.getTime() >= today.getTime()
+  ));
+}
+
+function postFreshnessStatus(date, signal = '') {
+  const now = new Date();
+  if (date.getFullYear() !== now.getFullYear()) {
+    return { ok: false, reason: `Instagram-Post nicht aus aktuellem Jahr (${date.toISOString().slice(0, 10)})` };
+  }
+  if (date.getTime() > now.getTime() + 2 * 60 * 60 * 1000) {
+    return { ok: false, reason: `Instagram-Postdatum liegt in der Zukunft (${date.toISOString().slice(0, 10)})` };
+  }
+
+  const age = ageDaysExact(date);
+  if (age <= CONFIG.maxAgeDays) return { ok: true, reason: '' };
+  if (
+    age <= CONFIG.maxExplicitValidityAgeDays
+    && hasCurrentOrFutureExplicitOfferDate(signal, now)
+  ) {
+    return { ok: true, reason: '' };
+  }
+
+  return {
+    ok: false,
+    reason: `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage und kein aktuell gueltiges Ablaufdatum`,
+  };
 }
 
 function hasExpiredRelativeOfferDate(signal, pubDate) {
@@ -1063,7 +1092,7 @@ function extractExpiryText(signal, pubDate = null) {
     text.match(/\b(?:nur heute|heute|morgen|dieses wochenende|this weekend|today only)\b/i)?.[0],
     text.match(/\b(?:bis sonntag|bis morgen|bis freitag|bis samstag)\b/i)?.[0],
   ].filter(Boolean);
-  return cleanText(matches[0] || '', 80);
+  return cleanText(matches[0] || 'Kurzfristig / siehe Instagram', 80);
 }
 
 function buildQualityScore(candidate, signal) {
@@ -1073,6 +1102,7 @@ function buildQualityScore(candidate, signal) {
   const primarySignal = postSignal(candidate) || signal;
   const pubDate = parsePubDate(candidate);
   const sourceDeal = candidate.sourceDeal || {};
+  const dateSignal = offerDateSignal(candidate) || primarySignal;
   const hasVienna = hasPattern(VIENNA_PATTERNS, primarySignal);
   const hasDeal = hasPattern(STRONG_DEAL_PATTERNS, primarySignal);
   const hasFoodDrink = hasPattern(FOOD_DRINK_PATTERNS, primarySignal);
@@ -1110,10 +1140,15 @@ function buildQualityScore(candidate, signal) {
 
   if (pubDate?.date) {
     const age = ageDaysExact(pubDate.date);
+    const freshness = postFreshnessStatus(pubDate.date, dateSignal);
     if (age <= 1) score += 14;
     else if (age <= 3) score += 11;
     else if (age <= 7) score += 8;
     else if (age <= CONFIG.maxAgeDays) score += 4;
+    else if (freshness.ok) {
+      score += 6;
+      reasons.push('explicit-current-offer-date');
+    }
     else score -= 18;
     reasons.push(`age-${ageDays(pubDate.date)}d`);
   } else {
@@ -1133,7 +1168,6 @@ function buildQualityScore(candidate, signal) {
     score -= 20;
     reasons.push('expired-language');
   }
-  const dateSignal = offerDateSignal(candidate) || primarySignal;
   if (hasPastExplicitOfferDate(dateSignal)) {
     score -= 45;
     reasons.push('past-offer-date');
@@ -1156,8 +1190,9 @@ function getRejectionReason(candidate, signal, score) {
   if (hasPattern(BLOCKED_SOURCE_PATTERNS, signal)) return 'NeoTaste blockiert';
   const pubDate = parsePubDate(candidate);
   if (!pubDate?.date) return 'kein echtes Instagram-Postdatum';
-  if (!isPostWithinMaxAge(pubDate.date)) return `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage`;
   const dateSignal = offerDateSignal(candidate) || primarySignal;
+  const freshness = postFreshnessStatus(pubDate.date, dateSignal);
+  if (!freshness.ok) return freshness.reason;
   if (hasPastExplicitOfferDate(dateSignal)) return 'explizites Aktionsdatum liegt in der Vergangenheit';
   if (hasExpiredRelativeOfferDate(dateSignal, pubDate.date)) return 'relative Kurz-Aktion ist abgelaufen';
   if (!hasPattern(VIENNA_PATTERNS, primarySignal)) return 'kein eindeutiges Wien-Signal im Instagram-Post';
@@ -1279,11 +1314,12 @@ function mergeAiDeal(candidate, aiRow) {
     candidate.rejectionReason = 'kein echtes Instagram-Postdatum';
     return null;
   }
-  if (!isPostWithinMaxAge(pubDate.date)) {
-    candidate.rejectionReason = `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage`;
+  const dateSignal = offerDateSignal(candidate) || primarySignal;
+  const freshness = postFreshnessStatus(pubDate.date, dateSignal);
+  if (!freshness.ok) {
+    candidate.rejectionReason = freshness.reason;
     return null;
   }
-  const dateSignal = offerDateSignal(candidate) || primarySignal;
   if (hasPastExplicitOfferDate(dateSignal)) {
     candidate.rejectionReason = 'explizites Aktionsdatum liegt in der Vergangenheit';
     return null;
