@@ -40,12 +40,17 @@ jobs:
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
         run: node scripts/check-instagram-auth.mjs
 
+      - name: Install Apify CLI
+        run: npm install -g apify-cli@latest
+
       - name: Deploy Apify Instagram Actor
+        timeout-minutes: 15
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           APIFY_INSTAGRAM_VIENNA_ACTOR_ID: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
+          CI: "true"
         run: |
-          npx --yes apify-cli push "$APIFY_INSTAGRAM_VIENNA_ACTOR_ID" --dir apify/instagram-vienna-food-offers --force --wait-for-finish=600
+          apify push "$APIFY_INSTAGRAM_VIENNA_ACTOR_ID" --dir apify/instagram-vienna-food-offers --force --wait-for-finish=600 --json
 
       - name: Run Apify Instagram Import
         if: steps.instagram-auth.outputs.ok == 'true' || steps.instagram-auth.outputs.status == 'rate-limited'
