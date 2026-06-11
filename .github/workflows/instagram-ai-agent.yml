@@ -7,6 +7,8 @@ on:
     paths:
       - '.github/workflows/instagram-ai-agent.yml'
       - 'scraper/instagram-ai-agent.js'
+      - 'scraper/instagram-deal-policy.js'
+      - 'scraper/merge-instagram-pending.js'
       - 'docs/instagram-watchlist.json'
       - 'docs/instagram-ai-seeds.json'
       - 'docs/instagram-merchant-registry.json'
@@ -44,19 +46,24 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           INSTAGRAM_AI_MAX_CANDIDATES: 140
+          INSTAGRAM_AI_MAX_SEARCH_QUERIES: 80
           INSTAGRAM_AI_MAX_PREVIEW_FETCHES: 120
           INSTAGRAM_AI_MAX_RENDER_FETCHES: 120
+          INSTAGRAM_AI_MAX_IMAGE_OCR_FETCHES: 24
           INSTAGRAM_AI_MAX_PROFILE_ACCOUNTS: 16
           INSTAGRAM_AI_MAX_PROFILE_POSTS: 6
           INSTAGRAM_AI_MAX_DEALS: 45
           INSTAGRAM_AI_MAX_AGE_DAYS: 7
-          INSTAGRAM_AI_MAX_EXPLICIT_VALIDITY_AGE_DAYS: 21
+          INSTAGRAM_AI_MAX_EXPLICIT_VALIDITY_AGE_DAYS: 14
           INSTAGRAM_AI_LLM_CANDIDATES: 24
         run: npm run instagram:ai
 
       - name: Validate Instagram AI output
         run: npm run instagram:ai:validate
 
+      - name: Merge Instagram outputs
+        run: npm run instagram:merge
+
       - name: Commit Instagram AI output
         run: |
-          node scripts/commit-generated.mjs --message "Instagram AI deals $(date +%Y-%m-%d)" --files docs/deals-pending-instagram-ai.json docs/instagram-ai-report.json
+          node scripts/commit-generated.mjs --message "Instagram AI deals $(date +%Y-%m-%d)" --files docs/deals-pending-instagram-ai.json docs/instagram-ai-report.json docs/deals-pending-instagram.json

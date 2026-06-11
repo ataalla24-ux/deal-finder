@@ -67,6 +67,9 @@ jobs:
           APIFY_INSTAGRAM_MAX_POSTS_TO_INSPECT: 320
         run: node scraper/import-apify-instagram-deals.js
 
+      - name: Merge Instagram outputs
+        run: npm run instagram:merge
+
       - name: Commit Apify Instagram updates
         run: |
-          node scripts/commit-generated.mjs --message "Apify Instagram sync $(date +%Y-%m-%d)" --files docs/deals-pending-instagram-apify.json docs/apify-instagram-report.json docs/instagram-auth-health.json
+          node scripts/commit-generated.mjs --message "Apify Instagram sync $(date +%Y-%m-%d)" --files docs/deals-pending-instagram-apify.json docs/apify-instagram-report.json docs/instagram-auth-health.json docs/deals-pending-instagram.json

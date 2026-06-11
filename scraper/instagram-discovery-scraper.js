@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { filterInstagramDealsWithPolicy } from './instagram-deal-policy.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -63,6 +64,12 @@ const SEED_HASHTAGS = [
   'freeicecreamvienna',
   'wieneroeffnung',
   'openingwien',
+  'happyhourwien',
+  'studentdealwien',
+  'lunchdealwien',
+  'softopeningwien',
+  'freebubbleteavienna',
+  'freematchavienna',
 ];
 
 const SEED_ACCOUNTS = [
@@ -91,6 +98,13 @@ const EXTRA_SEARCH_QUERIES = [
   'site:instagram.com/p vienna free drink',
   'site:instagram.com/reel wien gratis eis',
   'site:instagram.com/p wien 1+1 restaurant',
+  'site:instagram.com/reel wien happy hour',
+  'site:instagram.com/p wien student deal',
+  'site:instagram.com/reel wien studenten rabatt essen',
+  'site:instagram.com/reel wien lunch deal',
+  'site:instagram.com/p wien gratis pizza',
+  'site:instagram.com/reel wien gratis doener',
+  'site:instagram.com/p vienna free bubble tea',
 ];
 
 const ACCOUNT_SEARCH_QUERIES = [
@@ -111,6 +125,11 @@ const ACCOUNT_SEARCH_QUERIES = [
   'vienna brunch',
   'neueröffnung wien cafe',
   'neueröffnung wien restaurant',
+  'happy hour wien',
+  'student deal wien',
+  'gratis pizza wien',
+  'gratis kaffee wien',
+  'opening offer wien',
 ];
 
 const RESERVED_IG_PATHS = new Set([
@@ -1308,7 +1327,16 @@ function finalizeDiscoveryRun({
   rejectionReasons = createRejectionCounters(),
 }) {
   const previousDeals = loadPreviousDeals();
-  const finalDeals = mergeDeals(rawDeals, previousDeals);
+  const mergedDeals = mergeDeals(rawDeals, previousDeals);
+  const policyFilter = filterInstagramDealsWithPolicy(mergedDeals, {
+    maxAgeDaysWithoutExplicitValidity: 7,
+    maxAgeDaysWithExplicitValidity: 14,
+    reviewValidityDays: 14,
+    requireViennaSignal: true,
+    requireDealSignal: true,
+    minSlackScore: CONFIG.minDealScore,
+  });
+  const finalDeals = policyFilter.deals;
 
   ensureArtifactsDir();
   fs.writeFileSync(CANDIDATE_LOG_PATH, JSON.stringify({
@@ -1366,6 +1394,12 @@ function finalizeDiscoveryRun({
     visitedPosts,
     rawDeals: rawDeals.length,
     savedDeals: finalDeals.length,
+    policy: {
+      accepted: policyFilter.deals.length,
+      removed: policyFilter.rejected.length,
+      reasons: policyFilter.reasonCounts,
+      removedDeals: policyFilter.rejected.slice(0, 60),
+    },
     rejectionReasons,
     topSources,
   }, null, 2));
@@ -1381,6 +1415,9 @@ function finalizeDiscoveryRun({
       totalCandidates,
       visitedPosts,
       scrapedDealsRaw: rawDeals.length,
+      policyAccepted: policyFilter.deals.length,
+      policyRejected: policyFilter.rejected.length,
+      policyReasons: policyFilter.reasonCounts,
       rejectionReasons,
     },
   };

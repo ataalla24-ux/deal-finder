@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { filterInstagramDealsWithPolicy } from './instagram-deal-policy.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -566,12 +567,23 @@ async function main() {
 
   if (process.env.APIFY_FALLBACK_DRY_RUN === '1') {
     const fallbackDeals = dedupeDeals(collectFallbackDeals());
+    const policyFilter = filterInstagramDealsWithPolicy(fallbackDeals, {
+      maxAgeDaysWithoutExplicitValidity: 7,
+      maxAgeDaysWithExplicitValidity: 14,
+      reviewValidityDays: 14,
+      requireViennaSignal: true,
+      requireDealSignal: true,
+      minSlackScore: 62,
+    });
     console.log(JSON.stringify({
       fallbackDeals: fallbackDeals.length,
+      policyAccepted: policyFilter.deals.length,
+      policyRejected: policyFilter.rejected.length,
+      policyReasons: policyFilter.reasonCounts,
       emptyExpires: fallbackDeals.filter((deal) => !String(deal.expires || '').trim()).length,
-      emptyValidUntil: fallbackDeals.filter((deal) => !String(deal.validUntil || '').trim()).length,
-      expiredValidUntil: fallbackDeals.filter((deal) => deal.validUntil && isExpiredIso(deal.validUntil)).length,
-      firstDeals: fallbackDeals.slice(0, 8).map((deal) => ({
+      emptyValidUntil: policyFilter.deals.filter((deal) => !String(deal.validUntil || '').trim()).length,
+      expiredValidUntil: policyFilter.deals.filter((deal) => deal.validUntil && isExpiredIso(deal.validUntil)).length,
+      firstDeals: policyFilter.deals.slice(0, 8).map((deal) => ({
         title: deal.title,
         brand: deal.brand,
         expires: deal.expires,
@@ -619,7 +631,15 @@ async function main() {
     .map(normalizeApifyItem)
     .filter(Boolean);
   const fallbackDeals = actorDeals.length ? [] : collectFallbackDeals();
-  const normalizedDeals = dedupeDeals([...actorDeals, ...fallbackDeals]);
+  const policyFilter = filterInstagramDealsWithPolicy(dedupeDeals([...actorDeals, ...fallbackDeals]), {
+    maxAgeDaysWithoutExplicitValidity: 7,
+    maxAgeDaysWithExplicitValidity: 14,
+    reviewValidityDays: 14,
+    requireViennaSignal: true,
+    requireDealSignal: true,
+    minSlackScore: 62,
+  });
+  const normalizedDeals = policyFilter.deals;
 
   const payload = {
     lastUpdated: new Date().toISOString(),
@@ -633,6 +653,8 @@ async function main() {
       inputSourceSummary: input.inputSourceSummary,
       actorDeals: actorDeals.length,
       fallbackDeals: fallbackDeals.length,
+      policyAccepted: normalizedDeals.length,
+      policyRejected: policyFilter.rejected.length,
     },
     deals: normalizedDeals,
   };
@@ -650,6 +672,12 @@ async function main() {
     acceptedDeals: normalizedDeals.length,
     actorDeals: actorDeals.length,
     fallbackDeals: fallbackDeals.length,
+    policy: {
+      accepted: normalizedDeals.length,
+      removed: policyFilter.rejected.length,
+      reasons: policyFilter.reasonCounts,
+      removedDeals: policyFilter.rejected.slice(0, 80),
+    },
     inputSourceSummary: input.inputSourceSummary,
     summary,
   };

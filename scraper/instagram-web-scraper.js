@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { filterInstagramDealsWithPolicy } from './instagram-deal-policy.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,6 +54,13 @@ const HASHTAGS = [
   'freeicecreamvienna',
   'gratisburgerwien',
   'gratispizza',
+  'happyhourwien',
+  'studentdealwien',
+  'lunchdealwien',
+  'openingwien',
+  'softopeningwien',
+  'freebubbleteavienna',
+  'freematchavienna',
 ];
 
 const INSTAGRAM_ACCOUNTS = [
@@ -88,6 +96,12 @@ const SEARCH_QUERIES = [
   'site:instagram.com/p vienna free drink',
   'site:instagram.com/reel wien neueröffnung gratis',
   'site:instagram.com/p wien 1+1 restaurant',
+  'site:instagram.com/reel wien happy hour',
+  'site:instagram.com/p wien student deal',
+  'site:instagram.com/reel wien lunch deal',
+  'site:instagram.com/p wien gratis pizza',
+  'site:instagram.com/reel wien gratis doener',
+  'site:instagram.com/p vienna free bubble tea',
 ];
 
 const WIEN_KEYWORDS = [
@@ -1129,11 +1143,20 @@ async function scrapeInstagram() {
 
     report.totals.acceptedBeforeDedup = deals.length;
 
-    const uniqueDeals = deals
+    const rankedDeals = deals
       .sort((a, b) => {
         if (b.qualityScore !== a.qualityScore) return b.qualityScore - a.qualityScore;
         return Date.parse(b.pubDate) - Date.parse(a.pubDate);
       });
+    const policyFilter = filterInstagramDealsWithPolicy(rankedDeals, {
+      maxAgeDaysWithoutExplicitValidity: 7,
+      maxAgeDaysWithExplicitValidity: 14,
+      reviewValidityDays: 14,
+      requireViennaSignal: true,
+      requireDealSignal: true,
+      minSlackScore: 60,
+    });
+    const uniqueDeals = policyFilter.deals;
 
     const payload = {
       lastUpdated: new Date().toISOString(),
@@ -1143,6 +1166,12 @@ async function scrapeInstagram() {
     };
     report.lastUpdated = payload.lastUpdated;
     report.totals.uniqueDeals = uniqueDeals.length;
+    report.policy = {
+      accepted: policyFilter.deals.length,
+      removed: policyFilter.rejected.length,
+      reasons: policyFilter.reasonCounts,
+      removedDeals: policyFilter.rejected.slice(0, 60),
+    };
 
     fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
     writeWebReport(report);

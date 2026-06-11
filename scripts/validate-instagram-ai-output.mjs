@@ -61,7 +61,7 @@ function parseExpiryDate(value) {
 }
 
 function hasCurrentOrFutureExpiry(deal) {
-  const expiry = parseExpiryDate(deal.expires);
+  const expiry = parseExpiryDate(deal.validUntil || deal.expires);
   if (!expiry) return false;
 
   const todayStart = Date.UTC(
@@ -94,6 +94,23 @@ for (const deal of deals) {
     const hasExplicitValidity = ageDays <= maxExplicitValidityAgeDays && hasCurrentOrFutureExpiry(deal);
     if (!hasExplicitValidity) {
       fail(`${label} is ${ageDays.toFixed(2)} days old, max is ${maxAgeDays} without current explicit expiry`);
+    }
+  }
+
+  const validUntil = parseExpiryDate(deal.validUntil || deal.expires);
+  if (!validUntil) {
+    fail(`${label} has no valid validUntil/expires`);
+  } else {
+    const todayStart = Date.UTC(
+      validationDate.getUTCFullYear(),
+      validationDate.getUTCMonth(),
+      validationDate.getUTCDate(),
+    );
+    if (validUntil.getUTCFullYear() !== validationDate.getUTCFullYear()) {
+      fail(`${label} validUntil is not current year (${validUntil.toISOString().slice(0, 10)})`);
+    }
+    if (validUntil.getTime() < todayStart) {
+      fail(`${label} validUntil is expired (${validUntil.toISOString().slice(0, 10)})`);
     }
   }
 

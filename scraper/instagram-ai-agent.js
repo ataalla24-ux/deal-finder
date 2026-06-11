@@ -18,6 +18,10 @@ import {
   isFalsePositiveFreeDeal,
   normalizeDealRecord,
 } from './deal-normalization-utils.js';
+import {
+  applyInstagramDealPolicy,
+  filterInstagramDealsWithPolicy,
+} from './instagram-deal-policy.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,21 +44,24 @@ loadEnvFile();
 const CONFIG = {
   maxCandidates: numberEnv('INSTAGRAM_AI_MAX_CANDIDATES', 80),
   maxDeals: numberEnv('INSTAGRAM_AI_MAX_DEALS', 35),
-  maxSearchQueries: numberEnv('INSTAGRAM_AI_MAX_SEARCH_QUERIES', 42),
+  maxSearchQueries: numberEnv('INSTAGRAM_AI_MAX_SEARCH_QUERIES', 80),
   maxPreviewFetches: numberEnv('INSTAGRAM_AI_MAX_PREVIEW_FETCHES', 80),
   maxRenderFetches: numberEnv('INSTAGRAM_AI_MAX_RENDER_FETCHES', 80),
+  maxImageOcrFetches: numberEnv('INSTAGRAM_AI_MAX_IMAGE_OCR_FETCHES', 24),
   maxProfileAccounts: numberEnv('INSTAGRAM_AI_MAX_PROFILE_ACCOUNTS', 8),
   maxProfilePostsPerAccount: numberEnv('INSTAGRAM_AI_MAX_PROFILE_POSTS', 4),
   maxAgeDays: numberEnv('INSTAGRAM_AI_MAX_AGE_DAYS', 7),
-  maxExplicitValidityAgeDays: numberEnv('INSTAGRAM_AI_MAX_EXPLICIT_VALIDITY_AGE_DAYS', 21),
+  maxExplicitValidityAgeDays: numberEnv('INSTAGRAM_AI_MAX_EXPLICIT_VALIDITY_AGE_DAYS', 14),
   minScore: numberEnv('INSTAGRAM_AI_MIN_SCORE', 62),
   aiCandidateLimit: numberEnv('INSTAGRAM_AI_LLM_CANDIDATES', 32),
   profileDiscoveryEnabled: process.env.INSTAGRAM_AI_DISABLE_PROFILES !== '1',
   searchEnabled: process.env.INSTAGRAM_AI_DISABLE_SEARCH !== '1',
   previewFetchEnabled: process.env.INSTAGRAM_AI_FETCH_PAGES !== '0',
   renderFetchEnabled: process.env.INSTAGRAM_AI_RENDER_PAGES !== '0',
+  imageOcrEnabled: process.env.INSTAGRAM_AI_DISABLE_IMAGE_OCR !== '1',
   aiEnabled: process.env.INSTAGRAM_AI_DISABLE_AI !== '1',
   model: process.env.OPENAI_MODEL || process.env.INSTAGRAM_AI_MODEL || 'gpt-4.1-mini',
+  imageOcrModel: process.env.OPENAI_VISION_MODEL || process.env.INSTAGRAM_AI_OCR_MODEL || process.env.OPENAI_MODEL || process.env.INSTAGRAM_AI_MODEL || 'gpt-4.1-mini',
 };
 
 const BASE_SEARCH_QUERIES = [
@@ -74,6 +81,23 @@ const BASE_SEARCH_QUERIES = [
   'site:instagram.com/p vienna food deal',
   'site:instagram.com/reel wien gratis drink',
   'site:instagram.com/p vienna free drinks',
+  'site:instagram.com/reel wien happy hour',
+  'site:instagram.com/p wien happy hour',
+  'site:instagram.com/reel vienna happy hour',
+  'site:instagram.com/reel wien student deal',
+  'site:instagram.com/p wien student deal',
+  'site:instagram.com/reel wien studenten rabatt essen',
+  'site:instagram.com/reel wien lunch deal',
+  'site:instagram.com/p wien mittagsdeal',
+  'site:instagram.com/reel wien opening offer',
+  'site:instagram.com/p vienna grand opening free',
+  'site:instagram.com/reel wien soft opening gratis',
+  'site:instagram.com/p wien gratis pizza',
+  'site:instagram.com/reel wien gratis pizza',
+  'site:instagram.com/p wien gratis doener',
+  'site:instagram.com/reel wien gratis doener',
+  'site:instagram.com/p vienna free bubble tea',
+  'site:instagram.com/reel vienna free matcha',
 ];
 
 const LOCAL_DEAL_CORPUS_FILES = [
@@ -91,7 +115,14 @@ const LOCAL_DEAL_CORPUS_FILES = [
 const CORE_PROFILE_ACCOUNTS = [
   { username: 'tastyfood.vienna', priority: 96, category: 'discovery', note: 'High-volume Vienna food deals and restaurant promos' },
   { username: 'foodiewien', priority: 96, category: 'discovery', note: 'Vienna food discovery account with promo posts' },
+  { username: 'wienfood', priority: 95, category: 'discovery', note: 'Vienna food discovery and restaurant promos' },
+  { username: 'viennafoodguide', priority: 94, category: 'discovery', note: 'Vienna food guide with openings and promotions' },
+  { username: 'viennaafterclass', priority: 94, category: 'student', note: 'Student-facing Vienna food and activity promos' },
+  { username: 'viennainsider', priority: 90, category: 'discovery', note: 'Vienna discovery account for openings and local offers' },
+  { username: 'viennafoodies', priority: 90, category: 'discovery', note: 'Vienna food discovery account' },
   { username: 'zushimarket', priority: 94, category: 'food', note: 'Merchant account with frequent opening and discount posts' },
+  { username: 'kaktusbarwien', priority: 92, category: 'food', note: 'Vienna bar/food source with free-food promos' },
+  { username: 'yangguofu_malatang_vienna', priority: 90, category: 'food', note: 'Vienna restaurant source with opening promos' },
   { username: 'german.doener.house', priority: 88, category: 'food', note: 'Merchant account with recent promos' },
   { username: 'merdins_cheesy_doener', priority: 88, category: 'food', note: 'Merchant account with recent promos' },
   { username: 'doenerwerkwien', priority: 84, category: 'food', note: 'Vienna kebab merchant/discovery source' },
@@ -102,7 +133,6 @@ const CORE_PROFILE_ACCOUNTS = [
   { username: 'lebaron.wien', priority: 78, category: 'food', note: 'Vienna food merchant source' },
   { username: 'friendscovienna', priority: 76, category: 'food', note: 'Vienna food merchant source' },
   { username: 'behalal.official', priority: 76, category: 'food', note: 'Vienna halal food discovery source' },
-  { username: 'viennaafterclass', priority: 72, category: 'discovery', note: 'Vienna student/deal discovery source' },
 ];
 
 const VIENNA_PATTERNS = [
@@ -817,7 +847,9 @@ function candidateSignal(candidate) {
     preview.title,
     preview.description,
     preview.jsonLdText,
+    preview.ocrText,
     preview.bodyText,
+    candidate.ocrText,
     deal.title,
     deal.description,
     deal.brand,
@@ -832,7 +864,9 @@ function postSignal(candidate) {
     preview.title,
     preview.description,
     preview.jsonLdText,
+    preview.ocrText,
     preview.bodyText,
+    candidate.ocrText,
   ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
 }
 
@@ -845,6 +879,8 @@ function offerDateSignal(candidate) {
     preview.title,
     preview.description,
     preview.jsonLdText,
+    preview.ocrText,
+    candidate.ocrText,
     deal.title,
     deal.description,
     deal.expires,
@@ -1095,6 +1131,26 @@ function extractExpiryText(signal, pubDate = null) {
   return cleanText(matches[0] || 'Kurzfristig / siehe Instagram', 80);
 }
 
+function instagramPolicyOptions() {
+  return {
+    maxAgeDaysWithoutExplicitValidity: CONFIG.maxAgeDays,
+    maxAgeDaysWithExplicitValidity: CONFIG.maxExplicitValidityAgeDays,
+    reviewValidityDays: 14,
+    requireViennaSignal: true,
+    requireDealSignal: true,
+    minSlackScore: CONFIG.minScore,
+  };
+}
+
+function applyPolicyToCandidateDeal(candidate, deal, label) {
+  const result = applyInstagramDealPolicy(deal, instagramPolicyOptions());
+  if (!result.ok) {
+    candidate.rejectionReason = `${label}: ${result.reason}`;
+    return null;
+  }
+  return result.deal;
+}
+
 function buildQualityScore(candidate, signal) {
   const reasons = [];
   let score = 0;
@@ -1258,7 +1314,7 @@ function buildHeuristicDeal(candidate) {
     candidate.rejectionReason = 'Normalisierung/Validity-Filter blockiert Deal';
     return null;
   }
-  return deal;
+  return applyPolicyToCandidateDeal(candidate, deal, 'Instagram-Policy blockiert Deal');
 }
 
 function dedupeDeals(deals) {
@@ -1281,6 +1337,8 @@ function buildAiPrompt(candidates) {
     url: candidate.url,
     heuristicScore: candidate.score,
     evidence: cleanText(candidateSignal(candidate), 1800),
+    imageOcrText: cleanText(candidate.preview?.ocrText || candidate.ocrText || '', 900),
+    imageUrl: cleanText(candidate.preview?.image || '', 600),
     pubDate: parsePubDate(candidate)?.date?.toISOString() || '',
   }));
 }
@@ -1369,7 +1427,7 @@ function mergeAiDeal(candidate, aiRow) {
     candidate.rejectionReason = 'Normalisierung/Validity-Filter blockiert LLM-Deal';
     return null;
   }
-  return deal;
+  return applyPolicyToCandidateDeal(candidate, deal, 'Instagram-Policy blockiert LLM-Deal');
 }
 
 async function classifyWithOpenAi(candidates) {
@@ -1614,6 +1672,82 @@ async function enrichRenderedPreviews(candidates) {
   return errors;
 }
 
+function candidateImageUrl(candidate) {
+  const url = cleanText(candidate.preview?.image || '', 1200);
+  if (!/^https?:\/\//i.test(url)) return '';
+  return url;
+}
+
+async function extractImageTextWithOpenAi(candidate) {
+  const imageUrl = candidateImageUrl(candidate);
+  if (!imageUrl) return '';
+  if (!process.env.OPENAI_API_KEY) return '';
+
+  const body = {
+    model: CONFIG.imageOcrModel,
+    temperature: 0,
+    max_tokens: 220,
+    messages: [
+      {
+        role: 'system',
+        content: [
+          'Extract only visible text from this Instagram image or reel cover.',
+          'Focus on deal text, prices, dates, validity, location, food or drink items.',
+          'Return a compact plain-text OCR summary. If no useful text is visible, return an empty string.',
+        ].join(' '),
+      },
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: `Instagram post URL: ${candidate.url}` },
+          { type: 'image_url', image_url: { url: imageUrl, detail: 'low' } },
+        ],
+      },
+    ],
+  };
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  const text = await response.text();
+  if (!response.ok) throw new Error(`OpenAI image OCR HTTP ${response.status}: ${text.slice(0, 220)}`);
+  const parsed = JSON.parse(text);
+  return cleanText(parsed.choices?.[0]?.message?.content || '', 900);
+}
+
+async function enrichImageOcr(candidates) {
+  const errors = [];
+  if (!CONFIG.imageOcrEnabled || !process.env.OPENAI_API_KEY) return errors;
+
+  let fetched = 0;
+  for (const candidate of candidates) {
+    if (fetched >= CONFIG.maxImageOcrFetches) break;
+    if (!candidateImageUrl(candidate)) continue;
+
+    try {
+      const ocrText = await extractImageTextWithOpenAi(candidate);
+      if (ocrText) {
+        candidate.ocrText = ocrText;
+        candidate.preview = {
+          ...(candidate.preview || {}),
+          ocrText,
+        };
+      }
+    } catch (error) {
+      errors.push({ url: candidate.url, image: candidateImageUrl(candidate), error: error.message });
+    }
+
+    fetched += 1;
+    await sleep(300);
+  }
+  return errors;
+}
+
 async function main() {
   console.log('Instagram AI Agent');
   console.log('No Instagram Graph API, no cookies; using public search/preview signals.');
@@ -1624,6 +1758,7 @@ async function main() {
 
   const previewErrors = await enrichPreviews(candidates);
   const renderErrors = await enrichRenderedPreviews(candidates);
+  const imageOcrErrors = await enrichImageOcr(candidates);
   const heuristicDeals = candidates.map(buildHeuristicDeal).filter(Boolean);
 
   const aiCandidates = candidates
@@ -1635,7 +1770,8 @@ async function main() {
   const preModerationDeals = dedupeDeals([...aiResult.deals, ...heuristicDeals]);
   const moderation = loadDealModeration();
   const moderationFilter = filterModeratedDeals(preModerationDeals, moderation);
-  const finalDeals = moderationFilter.deals;
+  const policyFilter = filterInstagramDealsWithPolicy(moderationFilter.deals, instagramPolicyOptions());
+  const finalDeals = policyFilter.deals;
   const lastUpdated = new Date().toISOString();
   const payload = {
     lastUpdated,
@@ -1656,6 +1792,12 @@ async function main() {
     acceptedBeforeModeration: preModerationDeals.length,
     heuristicAccepted: heuristicDeals.length,
     aiAccepted: aiResult.deals.length,
+    policy: {
+      accepted: policyFilter.deals.length,
+      removed: policyFilter.rejected.length,
+      reasons: policyFilter.reasonCounts,
+      removedDeals: policyFilter.rejected.slice(0, 60),
+    },
     moderation: {
       removed: moderationFilter.removed.length,
       reasons: moderationCounts(moderationFilter.removed),
@@ -1672,6 +1814,12 @@ async function main() {
     profileDiscovery: stats.profileDiscovery,
     previewErrors,
     renderErrors,
+    imageOcr: {
+      enabled: Boolean(CONFIG.imageOcrEnabled && process.env.OPENAI_API_KEY),
+      attempted: candidates.filter((candidate) => candidate.preview?.ocrText || candidate.ocrText).length + imageOcrErrors.length,
+      extracted: candidates.filter((candidate) => candidate.preview?.ocrText || candidate.ocrText).length,
+      errors: imageOcrErrors,
+    },
     aiErrors: aiResult.errors,
     rejectionReasons: rejectionCounts(candidates),
     freshRejected: freshRejectedCandidates(candidates),

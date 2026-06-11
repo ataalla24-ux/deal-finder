@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { filterInstagramDealsWithPolicy } from './instagram-deal-policy.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -9,6 +10,8 @@ const DOCS_DIR = path.join(ROOT, 'docs');
 
 const WEB_PATH = path.join(DOCS_DIR, 'deals-pending-instagram-web.json');
 const DISCOVERY_PATH = path.join(DOCS_DIR, 'deals-pending-instagram-discovery.json');
+const AI_PATH = path.join(DOCS_DIR, 'deals-pending-instagram-ai.json');
+const APIFY_PATH = path.join(DOCS_DIR, 'deals-pending-instagram-apify.json');
 const MERGED_PATH = path.join(DOCS_DIR, 'deals-pending-instagram.json');
 
 function readPayload(filePath) {
@@ -43,7 +46,17 @@ function writePayload(payload) {
 function mergeDeals() {
   const hasWebFile = fs.existsSync(WEB_PATH);
   const hasDiscoveryFile = fs.existsSync(DISCOVERY_PATH);
+  const hasAiFile = fs.existsSync(AI_PATH);
+  const hasApifyFile = fs.existsSync(APIFY_PATH);
   const existingMergedDeals = readExistingMergedDeals();
+  const aiDeals = readDeals(AI_PATH).map((deal) => ({
+    ...deal,
+    originSource: deal.originSource || deal.source || 'instagram-ai-agent',
+  }));
+  const apifyDeals = readDeals(APIFY_PATH).map((deal) => ({
+    ...deal,
+    originSource: deal.originSource || deal.source || 'instagram-apify',
+  }));
   const webDeals = readDeals(WEB_PATH).map((deal) => ({
     ...deal,
     originSource: deal.originSource || deal.source || 'instagram-web',
@@ -53,13 +66,15 @@ function mergeDeals() {
     originSource: deal.originSource || deal.source || 'instagram-discovery-engine',
   }));
 
-  if (!hasWebFile && !hasDiscoveryFile) {
+  if (!hasAiFile && !hasApifyFile && !hasWebFile && !hasDiscoveryFile) {
     const fallbackPayload = {
       lastUpdated: new Date().toISOString(),
       source: 'instagram-merged',
       totalDeals: existingMergedDeals.length,
       meta: {
         sources: {
+          ai: 0,
+          apify: 0,
           web: 0,
           discovery: 0,
           merged: existingMergedDeals.length,
@@ -73,7 +88,7 @@ function mergeDeals() {
     return [];
   }
 
-  return { webDeals, discoveryDeals, existingMergedDeals };
+  return { aiDeals, apifyDeals, webDeals, discoveryDeals, existingMergedDeals };
 }
 
 function normalizeUrl(url) {
@@ -128,10 +143,10 @@ function chooseBetterDeal(a, b) {
 function runMerge() {
   const inputs = mergeDeals();
   if (!inputs || Array.isArray(inputs)) return;
-  const { webDeals, discoveryDeals } = inputs;
+  const { aiDeals, apifyDeals, webDeals, discoveryDeals } = inputs;
 
   const merged = new Map();
-  for (const deal of [...discoveryDeals, ...webDeals]) {
+  for (const deal of [...aiDeals, ...apifyDeals, ...discoveryDeals, ...webDeals]) {
     const key = getSignature(deal);
     if (!key) continue;
     if (!merged.has(key)) {
@@ -141,7 +156,7 @@ function runMerge() {
     merged.set(key, chooseBetterDeal(merged.get(key), deal));
   }
 
-  const deals = [...merged.values()]
+  const rankedDeals = [...merged.values()]
     .map((deal) => ({
       ...deal,
       source: 'Instagram',
@@ -151,6 +166,15 @@ function runMerge() {
       if (scoreDiff !== 0) return scoreDiff;
       return getPubDateMs(b) - getPubDateMs(a);
     });
+  const policyFilter = filterInstagramDealsWithPolicy(rankedDeals, {
+    maxAgeDaysWithoutExplicitValidity: 7,
+    maxAgeDaysWithExplicitValidity: 14,
+    reviewValidityDays: 14,
+    requireViennaSignal: true,
+    requireDealSignal: true,
+    minSlackScore: 60,
+  });
+  const deals = policyFilter.deals;
 
   const payload = {
     lastUpdated: new Date().toISOString(),
@@ -158,9 +182,17 @@ function runMerge() {
     totalDeals: deals.length,
     meta: {
       sources: {
+        ai: aiDeals.length,
+        apify: apifyDeals.length,
         web: webDeals.length,
         discovery: discoveryDeals.length,
         merged: deals.length,
+      },
+      policy: {
+        accepted: deals.length,
+        removed: policyFilter.rejected.length,
+        reasons: policyFilter.reasonCounts,
+        removedDeals: policyFilter.rejected.slice(0, 80),
       },
     },
     deals,
@@ -168,7 +200,7 @@ function runMerge() {
 
   writePayload(payload);
   console.log(`✅ merged Instagram deals → ${MERGED_PATH}`);
-  console.log(`   web: ${webDeals.length}, discovery: ${discoveryDeals.length}, merged: ${deals.length}`);
+  console.log(`   ai: ${aiDeals.length}, apify: ${apifyDeals.length}, web: ${webDeals.length}, discovery: ${discoveryDeals.length}, merged: ${deals.length}`);
 }
 
 runMerge();
