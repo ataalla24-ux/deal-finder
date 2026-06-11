@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: instagram-ai-agent
+  group: instagram-generated-deals-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
@@ -42,6 +42,7 @@ jobs:
         run: npx playwright install --with-deps chromium chromium-headless-shell
 
       - name: Run Instagram AI Agent
+        timeout-minutes: 30
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}

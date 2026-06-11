@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: apify-instagram-daily
+  group: instagram-generated-deals-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -56,6 +56,7 @@ jobs:
 
       - name: Run Apify Instagram Import
         if: steps.instagram-auth.outputs.ok == 'true' || steps.instagram-auth.outputs.status == 'rate-limited'
+        timeout-minutes: 35
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           APIFY_INSTAGRAM_VIENNA_ACTOR_ID: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
