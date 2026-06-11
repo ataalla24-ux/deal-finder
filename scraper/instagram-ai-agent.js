@@ -62,6 +62,9 @@ const CONFIG = {
   aiEnabled: process.env.INSTAGRAM_AI_DISABLE_AI !== '1',
   model: process.env.OPENAI_MODEL || process.env.INSTAGRAM_AI_MODEL || 'gpt-4.1-mini',
   imageOcrModel: process.env.OPENAI_VISION_MODEL || process.env.INSTAGRAM_AI_OCR_MODEL || process.env.OPENAI_MODEL || process.env.INSTAGRAM_AI_MODEL || 'gpt-4.1-mini',
+  searchTimeoutMs: numberEnv('INSTAGRAM_AI_SEARCH_TIMEOUT_MS', 12000),
+  previewTimeoutMs: numberEnv('INSTAGRAM_AI_PREVIEW_TIMEOUT_MS', 15000),
+  openAiTimeoutMs: numberEnv('INSTAGRAM_AI_OPENAI_TIMEOUT_MS', 45000),
 };
 
 const BASE_SEARCH_QUERIES = [
@@ -350,6 +353,24 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = 15000, label = 'request') {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(new Error(`${label} timed out after ${timeoutMs}ms`)), timeoutMs);
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw new Error(`${label} timed out after ${timeoutMs}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function unwrapRedirectUrl(value) {
   const text = decodeHtmlEntities(cleanText(value, 2000));
   if (!text) return '';
@@ -517,12 +538,12 @@ function parseDuckDuckGoResults(html, query) {
 
 async function searchDuckDuckGo(query) {
   const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     headers: {
       'user-agent': USER_AGENT,
       'accept-language': 'de-AT,de;q=0.9,en;q=0.8',
     },
-  });
+  }, CONFIG.searchTimeoutMs, `DuckDuckGo search for "${query}"`);
   const html = await response.text();
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${html.slice(0, 160)}`);
   return parseDuckDuckGoResults(html, query);
@@ -779,14 +800,14 @@ function extractDateFromHtml(html) {
 }
 
 async function fetchInstagramPreview(url) {
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     redirect: 'follow',
     headers: {
       'user-agent': USER_AGENT,
       'accept-language': 'de-AT,de;q=0.9,en;q=0.8',
       accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     },
-  });
+  }, CONFIG.previewTimeoutMs, `Instagram preview fetch for ${url}`);
   const html = await response.text();
   const finalUrl = response.url || url;
   const status = response.status;
@@ -1535,14 +1556,14 @@ async function classifyWithOpenAi(candidates) {
   };
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         'content-type': 'application/json',
       },
       body: JSON.stringify(body),
-    });
+    }, CONFIG.openAiTimeoutMs, 'OpenAI deal classification');
     const text = await response.text();
     if (!response.ok) throw new Error(`OpenAI HTTP ${response.status}: ${text.slice(0, 260)}`);
     const parsed = JSON.parse(text);
@@ -1750,14 +1771,14 @@ async function extractImageTextWithOpenAi(candidate) {
     ],
   };
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const response = await fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       'content-type': 'application/json',
     },
     body: JSON.stringify(body),
-  });
+  }, CONFIG.openAiTimeoutMs, `OpenAI image OCR for ${candidate.url}`);
   const text = await response.text();
   if (!response.ok) throw new Error(`OpenAI image OCR HTTP ${response.status}: ${text.slice(0, 220)}`);
   const parsed = JSON.parse(text);
