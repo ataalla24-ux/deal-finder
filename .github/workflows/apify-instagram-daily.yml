@@ -26,14 +26,16 @@ jobs:
 
       - name: Check Instagram Auth
         id: instagram-auth
+        timeout-minutes: 4
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
           INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
           APIFY_INSTAGRAM_VIENNA_ACTOR_ID: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
           INSTAGRAM_AUTH_CONTEXT: Apify Instagram Daily
           INSTAGRAM_AUTH_TEST_USERNAME: ciosgrill
-          INSTAGRAM_AUTH_ATTEMPTS: "3"
-          INSTAGRAM_AUTH_BACKOFF_MS: "60000"
+          INSTAGRAM_AUTH_ATTEMPTS: "2"
+          INSTAGRAM_AUTH_TIMEOUT_MS: "10000"
+          INSTAGRAM_AUTH_BACKOFF_MS: "10000"
           INSTAGRAM_AUTH_CLEAR_PENDING_ON_FAILURE: "0"
           INSTAGRAM_AUTH_CLEAR_MODE: apify
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
