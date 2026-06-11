@@ -108,8 +108,9 @@ function cleanText(value) {
 }
 
 function getSignature(deal) {
+  const url = normalizeUrl(deal?.url);
+  if (url) return url;
   return [
-    normalizeUrl(deal?.url),
     cleanText(deal?.brand),
     cleanText(deal?.title),
   ].filter(Boolean).join('|');

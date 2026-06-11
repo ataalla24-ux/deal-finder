@@ -65,6 +65,35 @@ function normalizeText(value) {
     .trim();
 }
 
+function normalizeAscii(value) {
+  return normalizeText(value)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\u00df/g, 'ss')
+    .toLowerCase();
+}
+
+function isWeakTitleText(value) {
+  const text = normalizeAscii(value);
+  if (!text) return true;
+  if (text.includes('|')) return true;
+  if (/[,:;/-]\s*$/.test(text)) return true;
+  if (/^(?:studying|shopping|wondering|looking|thinking|discovering|exploring)\b/.test(text)) return true;
+  if (/\b(?:what|where|when|how|why|to|for|with|and|or|bei|mit|zum|zur|und|oder|fur)\s*$/.test(text)) return true;
+  if (/\b1(?:0[1-9]0|1[0-9]0|2[0-3]0)\b/.test(text) && /(?:strasse|str\.?|gasse|platz|weg|ring|allee)/.test(text)) return true;
+  if (!/\b(?:gratis|kostenlos|free|deal|aktion|angebot|rabatt|gutschein|voucher|1\+1|bogo|pizza|burger|croissant|kaffee|coffee|drink|ayce)\b/.test(text) && text.split(/\s+/).length < 5) {
+    return true;
+  }
+  return false;
+}
+
+function fallbackInstagramTitle(brand, type) {
+  if (type === 'bogo') return `${brand}: 1+1 Deal in Wien`;
+  if (type === 'gutschein') return `${brand}: Gutschein-Aktion in Wien`;
+  if (type === 'gratis') return `${brand}: Gratis-Aktion in Wien`;
+  return `${brand}: Instagram-Deal in Wien`;
+}
+
 function normalizeHandle(value) {
   const handle = normalizeText(value).toLowerCase().replace(/^@/, '');
   if (!/^[a-z0-9._]{2,40}$/.test(handle)) return '';
@@ -263,7 +292,8 @@ function normalizeFallbackDeal(raw, sourceFile) {
   const pubDate = toIso(deal.pubDate || deal.postPublishedAt || deal.createdAt || '') || new Date().toISOString();
   const validUntil = resolveFallbackValidUntil(deal, pubDate);
   const expires = validUntil || normalizeText(deal.expires) || 'Kurzfristig / siehe Instagram';
-  const title = normalizeText(deal.title || deal.description || `${brand} Instagram-Angebot`).slice(0, 110);
+  const rawTitle = normalizeText(deal.title || deal.description || `${brand} Instagram-Angebot`).slice(0, 110);
+  const title = isWeakTitleText(rawTitle) ? fallbackInstagramTitle(brand, type) : rawTitle;
   const qualityScore = Math.max(72, Math.min(96, Number(deal.qualityScore || deal.priority * 10 || 82)));
 
   return {
@@ -381,7 +411,8 @@ function buildTitle(item, brand) {
   const base = normalizeText(item.description);
   const withoutBrand = base.replace(new RegExp(`^${brand}\\s*:?\\s*`, 'i'), '').trim();
   const titleText = normalizeText(withoutBrand || base || `${brand} Instagram-Angebot`);
-  return titleText.slice(0, 110);
+  const trimmed = titleText.slice(0, 110);
+  return isWeakTitleText(trimmed) ? fallbackInstagramTitle(brand, inferType(item)) : trimmed;
 }
 
 function buildDescription(item, brand, type) {
