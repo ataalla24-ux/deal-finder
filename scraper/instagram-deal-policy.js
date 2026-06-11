@@ -44,6 +44,22 @@ const GIVEAWAY_PATTERNS = [
   /\b(?:gewinnspiel|verlosung|giveaway|zu gewinnen|win a|tagge|kommentiere|comment to win)\b/i,
 ];
 
+const BLOCKED_CONTEXT_PATTERNS = [
+  /\b(?:civil action network|rathausklub|gemeinderat|stadtrat|partei|politik|politisch)\b/i,
+  /\b(?:kinderarmut|kindergrundsicherung|armuts-?\s*oder\s+ausgrenzungsgefährdet|schulsozialarbeit)\b/i,
+  /\b(?:kostenlose\s+kindergärten|gratis\s+mittagessen|ganztägige\s+bildung|lernförderung)\b/i,
+  /\b(?:bewegung,\s*begegnung\s+und\s+gemeinschaft|mitmachen\s+oder\s+einfach\s+zuschauen|vogelweidpark)\b/i,
+  /\b(?:demo|demonstration|kundgebung|petition|ehrenamt|volunteer)\b/i,
+];
+
+const SEASONAL_CUTOFFS = [
+  { label: 'muttertag', pattern: /\b(?:muttertag|mother'?s day)\b/i, month: 5, day: 31 },
+  { label: 'valentinstag', pattern: /\b(?:valentinstag|valentine'?s day)\b/i, month: 2, day: 16 },
+  { label: 'ostern', pattern: /\b(?:ostern|oster|easter)\b/i, month: 4, day: 30 },
+  { label: 'black-friday', pattern: /\b(?:black friday|cyber monday)\b/i, month: 12, day: 7 },
+  { label: 'advent-weihnachten', pattern: /\b(?:advent|weihnacht|christmas|nikolo|nikolaus)\b/i, month: 12, day: 27 },
+];
+
 const TEXTUAL_EXPIRY_PLACEHOLDER = /^(?:unbekannt|kurzfristig(?:\s*\/.*)?|siehe.*|n\/a|na|null|undefined)$/i;
 
 function cleanText(value) {
@@ -102,6 +118,20 @@ function currentYear(now) {
   return now.getFullYear();
 }
 
+function cutoffDateForYear(now, month, day) {
+  return new Date(Date.UTC(currentYear(now), month - 1, day, 23, 59, 59, 999));
+}
+
+function blockedContextReason(text) {
+  const match = BLOCKED_CONTEXT_PATTERNS.find((pattern) => pattern.test(text));
+  return match ? 'blocked-non-commercial-context' : '';
+}
+
+function staleSeasonalReason(text, now) {
+  const stale = SEASONAL_CUTOFFS.find((entry) => entry.pattern.test(text) && now.getTime() > cutoffDateForYear(now, entry.month, entry.day).getTime());
+  return stale ? `stale-seasonal:${stale.label}` : '';
+}
+
 function dateOnly(value) {
   return toIso(value).slice(0, 10);
 }
@@ -157,6 +187,7 @@ export function getInstagramDealSignals(deal = {}) {
     hasDealSignal: DEAL_PATTERNS.some((pattern) => pattern.test(text)),
     hasFoodDrinkSignal: FOOD_DRINK_PATTERNS.some((pattern) => pattern.test(text)),
     isGiveaway: GIVEAWAY_PATTERNS.some((pattern) => pattern.test(text)),
+    blockedContextReason: blockedContextReason(text),
   };
 }
 
@@ -234,11 +265,19 @@ export function applyInstagramDealPolicy(deal = {}, options = {}) {
   if (config.blockGiveaways && signals.isGiveaway) {
     return { ok: false, reason: 'giveaway-blocked', deal, signals };
   }
+  if (signals.blockedContextReason) {
+    return { ok: false, reason: signals.blockedContextReason, deal, signals };
+  }
   if (config.requireViennaSignal && !signals.hasViennaSignal) {
     return { ok: false, reason: 'missing-vienna-signal', deal, signals };
   }
   if (config.requireDealSignal && !signals.hasDealSignal) {
     return { ok: false, reason: 'missing-deal-signal', deal, signals };
+  }
+
+  const seasonalReason = staleSeasonalReason(buildInstagramPolicyText(deal), config.now instanceof Date ? config.now : new Date());
+  if (seasonalReason) {
+    return { ok: false, reason: seasonalReason, deal, signals };
   }
 
   const dateResult = normalizeInstagramDealDates(deal, config);
