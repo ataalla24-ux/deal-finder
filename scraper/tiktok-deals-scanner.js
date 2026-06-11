@@ -195,6 +195,14 @@ const FALSE_POSITIVE_PATTERNS = [
   /\bwir haben für euch\b/i,
   /\bgesammelt\b/i,
   /\bwas in wien geht\b/i,
+  /\bkinderarmut\b/i,
+  /\bkindergrundsicherung\b/i,
+  /\brathausklub\b/i,
+  /\barmuts-?\s*oder\s+ausgrenzungsgefährdet\b/i,
+  /\bkostenlose\s+kindergärten\b/i,
+  /\bgratis\s+mittagessen\b/i,
+  /\bschulsozialarbeit\b/i,
+  /\bpolitik|politisch|gemeinderat|stadtrat|partei\b/i,
 ];
 
 const CATEGORY_RULES = [
