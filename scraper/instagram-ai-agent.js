@@ -224,13 +224,41 @@ function readJson(filePath, fallback = null) {
   }
 }
 
+function stripInvalidSurrogates(value = '') {
+  const text = String(value || '');
+  let output = '';
+  for (let index = 0; index < text.length; index += 1) {
+    const code = text.charCodeAt(index);
+    if (code >= 0xD800 && code <= 0xDBFF) {
+      const next = text.charCodeAt(index + 1);
+      if (next >= 0xDC00 && next <= 0xDFFF) {
+        output += text[index] + text[index + 1];
+        index += 1;
+      }
+      continue;
+    }
+    if (code >= 0xDC00 && code <= 0xDFFF) continue;
+    output += text[index];
+  }
+  return output;
+}
+
+function sanitizeForJson(value) {
+  if (typeof value === 'string') return stripInvalidSurrogates(value);
+  if (Array.isArray(value)) return value.map(sanitizeForJson);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [stripInvalidSurrogates(key), sanitizeForJson(item)]));
+  }
+  return value;
+}
+
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+  fs.writeFileSync(filePath, `${JSON.stringify(sanitizeForJson(value), null, 2)}\n`);
 }
 
 function cleanText(value = '', max = 1800) {
-  return cleanDealText(value)
+  return stripInvalidSurrogates(cleanDealText(value))
     .replace(/[\u200B-\u200D\uFEFF]/g, '')
     .slice(0, max)
     .trim();
