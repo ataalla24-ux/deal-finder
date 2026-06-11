@@ -11,6 +11,8 @@ jobs:
     env:
       PLAYWRIGHT_BROWSERS_PATH: 0
       PLAYWRIGHT_HEADLESS: 1
+      WIEN_DEALS_COMBINED_MAX_DEALS: 100
+      WIEN_DEALS_COMBINED_REVIEW_VALIDITY_DAYS: 14
     steps:
       - uses: actions/checkout@v4
         with:

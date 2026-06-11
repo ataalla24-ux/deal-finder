@@ -17,7 +17,8 @@ const REPORT_PATH = path.join(DOCS_DIR, 'tiktok-scanner-report.json');
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CONFIG = {
   maxAgeDays: Number(process.env.TIKTOK_MAX_AGE_DAYS || 7),
-  maxExplicitValidityAgeDays: Number(process.env.TIKTOK_MAX_EXPLICIT_VALIDITY_AGE_DAYS || 21),
+  maxExplicitValidityAgeDays: Number(process.env.TIKTOK_MAX_EXPLICIT_VALIDITY_AGE_DAYS || 14),
+  reviewValidityDays: Number(process.env.TIKTOK_REVIEW_VALIDITY_DAYS || 14),
   maxPostsToVisit: Number(process.env.TIKTOK_MAX_POSTS || 90),
   maxDeals: Number(process.env.TIKTOK_MAX_DEALS || 45),
   minScore: Number(process.env.TIKTOK_MIN_SCORE || 58),
@@ -47,6 +48,11 @@ const SEARCH_QUERIES = [
   'site:tiktok.com/@ wien 1+1 restaurant',
   'site:tiktok.com/@ wien 2 für 1 essen',
   'site:tiktok.com/@ wien happy hour deal',
+  'site:tiktok.com/@ wien lunch deal',
+  'site:tiktok.com/@ wien studenten deal',
+  'site:tiktok.com/@ wien gratis dessert',
+  'site:tiktok.com/@ wien gratis bubble tea',
+  'site:tiktok.com/@ wien gratis matcha',
   'site:tiktok.com/@ wien rabatt gutschein',
   'site:tiktok.com/@ wien gratis probetraining',
   'site:tiktok.com/@ wien gratis goodie bag',
@@ -88,6 +94,11 @@ const CORE_TIKTOK_API_KEYWORDS = [
   'wien 1+1 restaurant',
   'wien 2 für 1 essen',
   'wien happy hour deal',
+  'wien lunch deal',
+  'wien studenten deal',
+  'wien gratis dessert',
+  'wien gratis bubble tea',
+  'wien gratis matcha',
   'wien rabatt gutschein',
   'wien 50 rabatt',
   'wien gratis probetraining',
@@ -478,6 +489,16 @@ function endOfUtcDay(date) {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 23, 59, 59, 999));
 }
 
+function dateOnly(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function formatDateAt(isoDate) {
+  const date = new Date(`${isoDate}T12:00:00Z`);
+  if (Number.isNaN(date.getTime())) return isoDate;
+  return date.toLocaleDateString('de-AT');
+}
+
 function endOfWeekendForPost(postDate) {
   const day = postDate.getUTCDay();
   const daysUntilSunday = (7 - day) % 7;
@@ -528,6 +549,44 @@ function extractExpiryText(text) {
   if (/\bdieses wochenende\b/i.test(signal)) return 'Dieses Wochenende';
   if (/\bdiese woche\b/i.test(signal)) return 'Diese Woche';
   return 'Kurzfristig / siehe TikTok';
+}
+
+function relativeOfferEndDate(signal, postDate) {
+  if (!(postDate instanceof Date) || Number.isNaN(postDate.getTime())) return null;
+  if (/\bnur(?:\s+noch)?\s+heute\b/i.test(signal)) return endOfUtcDay(postDate);
+  if (/\bmorgen\b/i.test(signal)) {
+    return new Date(Date.UTC(postDate.getUTCFullYear(), postDate.getUTCMonth(), postDate.getUTCDate() + 1, 23, 59, 59, 999));
+  }
+  if (/\bdieses wochenende\b/i.test(signal)) return endOfWeekendForPost(postDate);
+  if (/\bdiese woche\b/i.test(signal)) return endOfWeekendForPost(postDate);
+  return null;
+}
+
+function resolveTikTokValidity(signal, postDate) {
+  const explicit = parseExplicitOfferEndDate(signal) || relativeOfferEndDate(signal, postDate);
+  if (explicit) {
+    const validUntil = dateOnly(explicit);
+    return {
+      expires: extractExpiryText(signal),
+      validUntil,
+      validUntilSource: 'explicit-or-relative-text',
+      expiryKind: 'end',
+      expiryDisplayText: extractExpiryText(signal),
+      dateConfidence: 'text',
+    };
+  }
+
+  const reviewDate = new Date(postDate);
+  reviewDate.setUTCDate(reviewDate.getUTCDate() + CONFIG.reviewValidityDays);
+  const validUntil = dateOnly(reviewDate);
+  return {
+    expires: `Review bis ${formatDateAt(validUntil)}`,
+    validUntil,
+    validUntilSource: `pubDate+${CONFIG.reviewValidityDays}d-review-window`,
+    expiryKind: 'end',
+    expiryDisplayText: `Review bis ${formatDateAt(validUntil)}`,
+    dateConfidence: 'review-window',
+  };
 }
 
 async function prepareTikTokSession(context) {
@@ -699,6 +758,7 @@ function buildDealFromPost(url, data) {
   const title = buildOfferTitle(signal, brand);
   const score = buildQualityScore(signal, dateCandidate.date, type, category);
   if (score < CONFIG.minScore) return { deal: null, reason: `Score zu niedrig (${score})` };
+  const validity = resolveTikTokValidity(signal, dateCandidate.date);
 
   return {
     deal: {
@@ -712,7 +772,12 @@ function buildDealFromPost(url, data) {
       source: 'TikTok Scanner',
       originSource: 'tiktok-deals-scanner',
       url,
-      expires: extractExpiryText(signal),
+      expires: validity.expires,
+      validUntil: validity.validUntil,
+      validUntilSource: validity.validUntilSource,
+      expiryKind: validity.expiryKind,
+      expiryDisplayText: validity.expiryDisplayText,
+      dateConfidence: validity.dateConfidence,
       distance: 'Wien',
       hot: type === 'gratis' || type === 'bogo',
       isNew: true,

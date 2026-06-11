@@ -195,7 +195,7 @@ function inferDistance(deal) {
 }
 
 function inferExpires(deal) {
-  const raw = deal.expires || deal.end_date || deal.validity_date || '';
+  const raw = deal.expires || deal.validUntil || deal.validOn || deal.end_date || deal.validity_date || '';
   const iso = toIsoDate(raw);
   return iso || cleanText(raw) || '';
 }
@@ -214,7 +214,7 @@ function normalizeDeal(rawDeal, sourceKey) {
   const title = inferTitle(deal, brand);
   const rawUrl = normalizeUrl(deal.url);
   const rawDistance = cleanText(deal.distance || deal.location || deal.ort || deal.address);
-  const rawExpires = cleanText(deal.expires || deal.end_date || deal.validity_date || '');
+  const rawExpires = cleanText(deal.expires || deal.validUntil || deal.validOn || deal.end_date || deal.validity_date || '');
   const rawSource = cleanText(deal.source);
   const originSource = cleanText(deal.originSource) || rawSource || sourceKey;
   const url = rawUrl;
@@ -248,6 +248,12 @@ function normalizeDeal(rawDeal, sourceKey) {
     source: cleanText(deal.source) || sourceKey,
     originSource,
     qualityScore: Number(deal.qualityScore) || 0,
+    validOn: cleanText(deal.validOn),
+    validFrom: cleanText(deal.validFrom),
+    validUntil: cleanText(deal.validUntil),
+    expiryKind: cleanText(deal.expiryKind),
+    expiryDisplayText: cleanText(deal.expiryDisplayText),
+    dateConfidence: cleanText(deal.dateConfidence),
     hot: Boolean(deal.hot),
     isNew: true,
     votes: Number(deal.votes) || 1,

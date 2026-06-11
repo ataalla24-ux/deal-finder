@@ -447,7 +447,7 @@ function normalizeDeal(raw) {
   const missingFields = [];
   if (!url) missingFields.push('Ziel-URL');
   if (!cleanText(deal.distance || deal.location || deal.ort)) missingFields.push('Ort');
-  if (!cleanText(deal.expires || deal.end_date || deal.validity_date || '')) missingFields.push('Ablauf');
+  if (!cleanText(deal.expires || deal.validUntil || deal.validOn || deal.end_date || deal.validity_date || '')) missingFields.push('Ablauf');
   if (!cleanText(deal.source)) missingFields.push('Quelle');
   for (const item of rawMissing) {
     const t = cleanText(item);
@@ -467,11 +467,17 @@ function normalizeDeal(raw) {
     distance: cleanText(deal.distance || deal.location || deal.ort) || 'Wien',
     source: cleanText(deal.source) || 'Slack Approved',
     originSource: cleanText(deal.originSource) || cleanText(deal.source) || 'Slack Approved',
-    expires: cleanText(deal.expires),
-    expiresOriginal: cleanText(deal.expiresOriginal || deal.expires),
+    expires: cleanText(deal.expires || deal.validUntil || deal.validOn),
+    expiresOriginal: cleanText(deal.expiresOriginal || deal.expires || deal.validUntil || deal.validOn),
     expiresPrecision: cleanText(deal.expiresPrecision),
     expiresSource: cleanText(deal.expiresSource),
     expiresDetectedFromUrl: Boolean(deal.expiresDetectedFromUrl),
+    validOn: cleanText(deal.validOn),
+    validFrom: cleanText(deal.validFrom),
+    validUntil: cleanText(deal.validUntil),
+    expiryKind: cleanText(deal.expiryKind),
+    expiryDisplayText: cleanText(deal.expiryDisplayText),
+    dateConfidence: cleanText(deal.dateConfidence),
     pubDate,
     qualityScore: Number(deal.qualityScore) || 0,
     votes: Number(deal.votes) || 1,

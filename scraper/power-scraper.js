@@ -12,16 +12,20 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import {
   cleanUiNoiseText,
-  isFalsePositiveFreeDeal,
   isGenericJunkDeal,
   normalizeDealRecord,
 } from './deal-normalization-utils.js';
+import { parseExpiryShape } from './expiry-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const INCLUDE_BASE_DEALS = String(process.env.POWER_INCLUDE_BASE_DEALS || '1') !== '0';
 const FETCH_TIMEOUT_MS = Math.max(3000, Number(process.env.POWER_FETCH_TIMEOUT_MS || 10000));
 const MAX_RESPONSE_BYTES = Math.max(100_000, Number(process.env.POWER_MAX_RESPONSE_BYTES || 2_000_000));
+const MAX_DEALS = Math.max(1, Number(process.env.POWER_MAX_DEALS || 80));
+const REVIEW_VALIDITY_DAYS = Math.max(1, Number(process.env.POWER_REVIEW_VALIDITY_DAYS || 14));
+const MIN_DYNAMIC_QUALITY_SCORE = Math.max(0, Number(process.env.POWER_MIN_DYNAMIC_QUALITY_SCORE || 36));
+const REPORT_PATH = path.join(__dirname, '..', 'docs', 'power-scraper-report.json');
 // ============================================
 // STATISCHE BASIS-DEALS (Dauerhaft gültig)
 // Stand: Februar 2026
@@ -464,11 +468,12 @@ function buildQualityScore(title, source) {
 }
 
 function normalizePowerDeal(deal, sourceLabel) {
+  const pubDate = deal.pubDate || new Date().toISOString();
   const normalized = normalizeDealRecord({
     ...deal,
     source: deal.source || sourceLabel,
     qualityScore: Number(deal.qualityScore || 0),
-    pubDate: deal.pubDate || new Date().toISOString()
+    pubDate
   });
 
   return {
@@ -479,7 +484,118 @@ function normalizePowerDeal(deal, sourceLabel) {
     qualityScore: Number(normalized.qualityScore || deal.qualityScore || 42),
     votes: Number(normalized.votes || deal.votes || 1),
     priority: Number(deal.priority || 3),
-    pubDate: deal.pubDate || new Date().toISOString()
+    pubDate,
+    pubDateSource: deal.pubDateSource || 'power-scraper-run',
+  };
+}
+
+function dateOnly(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function formatDateAt(isoDate) {
+  const date = new Date(`${isoDate}T12:00:00Z`);
+  if (Number.isNaN(date.getTime())) return isoDate;
+  return date.toLocaleDateString('de-AT');
+}
+
+function reviewValidUntil(fromDate = new Date()) {
+  const date = new Date(fromDate);
+  if (Number.isNaN(date.getTime())) date.setTime(Date.now());
+  date.setUTCDate(date.getUTCDate() + REVIEW_VALIDITY_DAYS);
+  return dateOnly(date);
+}
+
+function isEvergreenOrRecurringExpiry(value = '') {
+  return /\b(unbegrenzt|dauerhaft|täglich|taeglich|wöchentlich|woechentlich|monatlich|jederzeit|geburtstag|studentenausweis|solange vorrat|für neukunden|fuer neukunden|laufend)\b/i.test(cleanUiNoiseText(value));
+}
+
+function isWeakPowerCandidate(deal) {
+  const title = cleanUiNoiseText(deal.title || '').toLowerCase();
+  const description = cleanUiNoiseText(deal.description || '').toLowerCase();
+  const signal = `${title} ${description}`;
+  if (!title) return true;
+  if (/\b(marketing|sales|kontakt|newsletter|filial|karriere|jobs?|login|konto)\b/i.test(signal)) return true;
+  if (/\b(dauerhaft günstiger|dauerhaft guenstiger|aktuelle angebote.*aktionen|alle .*gutscheine)\b/i.test(title)) {
+    return true;
+  }
+  if (/^(angebote?|aktionen?|preise & angebote|exklusivangebote|online shop aktionsartikel|tiefpreis aktionen|angebote im überblick|angebote im ueberblick|alle .*gutscheine|dauerhaft günstiger|dauerhaft guenstiger|günstig kochen|guenstig kochen)$/i.test(title)) {
+    return true;
+  }
+  if (/\b(überblick|ueberblick|entdecken|mehr erfahren|weiterlesen|programm|übersicht|uebersicht)\b/i.test(title)) {
+    return true;
+  }
+  return false;
+}
+
+function applyPowerValidity(deal) {
+  const now = new Date();
+  const today = dateOnly(now);
+  const next = { ...deal };
+  const contextText = [next.title, next.description, next.category, next.type].filter(Boolean).join(' ');
+  const shape = parseExpiryShape(next.expires || '', { now, contextText });
+  const parsedValidity = shape.validOn || shape.validUntil || '';
+
+  if (parsedValidity) {
+    if (parsedValidity < today) {
+      return { deal: null, reason: `expired:${parsedValidity}` };
+    }
+    next.validUntil = parsedValidity;
+    next.validUntilSource = 'expires-text';
+    next.expiryKind = shape.kind || 'end';
+    next.expiryDisplayText = shape.raw || next.expires;
+    next.dateConfidence = shape.confidence || 'text';
+    return { deal: next, reason: '' };
+  }
+
+  if (isEvergreenOrRecurringExpiry(next.expires)) {
+    next.validUntil = next.validUntil || '';
+    next.validUntilSource = 'evergreen-or-recurring';
+    return { deal: next, reason: '' };
+  }
+
+  const validUntil = reviewValidUntil(now);
+  next.validUntil = validUntil;
+  next.validUntilSource = `run+${REVIEW_VALIDITY_DAYS}d-review-window`;
+  next.expires = `Review bis ${formatDateAt(validUntil)}`;
+  next.expiryKind = 'end';
+  next.expiryDisplayText = next.expires;
+  next.dateConfidence = 'review-window';
+  return { deal: next, reason: '' };
+}
+
+function reviewPowerDeals(deals) {
+  const accepted = [];
+  const rejected = [];
+  for (const deal of deals) {
+    if (!cleanUiNoiseText(deal.url)) {
+      rejected.push({ title: deal.title, source: deal.source, reason: 'missing-url' });
+      continue;
+    }
+    if (isGenericJunkDeal(deal)) {
+      rejected.push({ title: deal.title, source: deal.source, reason: 'generic-junk' });
+      continue;
+    }
+    if (isWeakPowerCandidate(deal)) {
+      rejected.push({ title: deal.title, source: deal.source, reason: 'weak-navigation-candidate' });
+      continue;
+    }
+    if (!INCLUDE_BASE_DEALS && Number(deal.qualityScore || 0) < MIN_DYNAMIC_QUALITY_SCORE) {
+      rejected.push({ title: deal.title, source: deal.source, reason: `low-score:${deal.qualityScore || 0}` });
+      continue;
+    }
+    const validity = applyPowerValidity(deal);
+    if (!validity.deal) {
+      rejected.push({ title: deal.title, source: deal.source, reason: validity.reason });
+      continue;
+    }
+    accepted.push(validity.deal);
+  }
+
+  return {
+    accepted: accepted.slice(0, MAX_DEALS),
+    rejected,
+    acceptedBeforeLimit: accepted.length,
   };
 }
 
@@ -579,22 +695,50 @@ async function main() {
     return (a.priority || 99) - (b.priority || 99);
   });
 
-  const finalDeals = allDeals;
+  const review = reviewPowerDeals(allDeals);
+  const finalDeals = review.accepted;
   
   // Output
   const output = {
     lastUpdated: new Date().toISOString(),
     source: 'power-scraper-v5',
     totalDeals: finalDeals.length,
+    meta: {
+      includeBaseDeals: INCLUDE_BASE_DEALS,
+      maxDeals: MAX_DEALS,
+      reviewValidityDays: REVIEW_VALIDITY_DAYS,
+      acceptedBeforeLimit: review.acceptedBeforeLimit,
+      rejected: review.rejected.length,
+    },
     deals: finalDeals
   };
   
   const outputPath = path.join(__dirname, '..', 'docs', 'deals-pending-power.json');
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
+  fs.writeFileSync(REPORT_PATH, JSON.stringify({
+    lastUpdated: output.lastUpdated,
+    config: {
+      includeBaseDeals: INCLUDE_BASE_DEALS,
+      activeSources: ACTIVE_SOURCES.length,
+      maxDeals: MAX_DEALS,
+      reviewValidityDays: REVIEW_VALIDITY_DAYS,
+      minDynamicQualityScore: MIN_DYNAMIC_QUALITY_SCORE,
+    },
+    scrapedDeals: scrapedDeals.length,
+    baseDeals: normalizedBaseDeals.length,
+    acceptedBeforeLimit: review.acceptedBeforeLimit,
+    accepted: finalDeals.length,
+    rejectedReasons: review.rejected.reduce((acc, item) => {
+      acc[item.reason] = (acc[item.reason] || 0) + 1;
+      return acc;
+    }, {}),
+    rejected: review.rejected.slice(0, 120),
+  }, null, 2));
   
   console.log('\n' + '='.repeat(40));
   console.log(`✅ ${finalDeals.length} Deals gespeichert`);
   console.log(`📁 ${outputPath}`);
+  console.log(`🧪 ${review.rejected.length} Kandidaten verworfen`);
   console.log(`🔥 ${finalDeals.filter(d => d.hot).length} Hot Deals`);
   console.log(`🆓 ${finalDeals.filter(d => d.type === 'gratis').length} Gratis Deals`);
 }

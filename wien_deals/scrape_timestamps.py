@@ -35,6 +35,7 @@ TODAY = NOW.date()
 CURRENT_YEAR = TODAY.year
 MAX_DEALS = max(1, int(os.getenv("WIEN_DEALS_COMBINED_MAX_DEALS", "80")))
 REQUEST_TIMEOUT = max(3, int(os.getenv("WIEN_DEALS_COMBINED_TIMEOUT", "18")))
+REVIEW_VALIDITY_DAYS = max(1, int(os.getenv("WIEN_DEALS_COMBINED_REVIEW_VALIDITY_DAYS", "14")))
 
 
 @dataclass(frozen=True)
@@ -52,14 +53,20 @@ SOURCES = [
     Source("MuseumsQuartier Programm", "https://www.mqw.at/programm/", "kultur"),
     Source("Wien Museum Besuch", "https://www.wienmuseum.at/besuch", "kultur", True),
     Source("MeinBezirk Wien Freizeit", "https://www.meinbezirk.at/wien/c-freizeit", "kultur"),
+    Source("Eventbrite Gratis Wien", "https://www.eventbrite.at/d/austria--wien/free--events/", "kultur"),
+    Source("1000things Gratis in Wien", "https://www.1000things.at/blog/gratis-in-wien/", "kultur"),
+    Source("Vienna Würstelstand Events", "https://viennawurstelstand.com/events/", "kultur"),
+    Source("Falter Events Wien", "https://www.falter.at/events", "kultur"),
 ]
 
 DEAL_PATTERNS = [
     r"\bgratis\b",
     r"\bkostenlos(?:e|er|es|en)?\b",
     r"\bfree\b",
+    r"\bfree\s+(?:entry|admission|food|drink|coffee)\b",
     r"\beintritt\s+frei\b",
     r"\bfreier\s+eintritt\b",
+    r"\bpay\s+what\s+you\s+want\b",
     r"\b0\s*(?:€|euro|eur)\b",
     r"\b1\s*\+\s*1\b",
     r"\b2\s*(?:für|fuer)\s*1\b",
@@ -79,6 +86,9 @@ FALSE_POSITIVE_PATTERNS = [
     r"\bwohnung\b",
     r"\bhotel\b",
     r"\bnewsletter\b",
+    r"\bkostenlose\s+beratung\b",
+    r"\bgratis\s+anmelden\b",
+    r"\bfree\s+trial\b",
     r"\bdatenschutz\b",
     r"\bimpressum\b",
     r"\bcookie\b",
@@ -140,6 +150,27 @@ def fetch_html(source: Source) -> tuple[str, str | None]:
 
 def source_domain(url: str) -> str:
     return urlparse(url).netloc.replace("www.", "")
+
+
+def should_skip_url(url: str, source: Source) -> bool:
+    parsed = urlparse(url)
+    host = parsed.netloc.lower().replace("www.", "")
+    path = parsed.path.lower()
+    if host in {
+        "facebook.com",
+        "instagram.com",
+        "tiktok.com",
+        "x.com",
+        "twitter.com",
+        "linkedin.com",
+        "youtube.com",
+    }:
+        return True
+    if "eventbrite" in source.name.lower():
+        return not (host.endswith("eventbrite.at") and path.startswith("/e/") and "tickets-" in path)
+    if re.search(r"/(?:support|blog|product-updates|help|kontakt|newsletter|login|register|about|press)(?:/|$)", path):
+        return True
+    return False
 
 
 def title_from_url(url: str) -> str:
@@ -211,9 +242,10 @@ def parse_expiry(text: str, evergreen: bool) -> tuple[str, date | None, str | No
     if dates and max(dates) < TODAY:
         return "", max(dates), "expired-date"
 
+    review_until = TODAY + timedelta(days=REVIEW_VALIDITY_DAYS)
     if evergreen:
-        return "laufend / laut Quelle", None, None
-    return "Siehe Quelle", None, None
+        return f"laufend / Review bis {review_until:%d.%m.%Y}", review_until, None
+    return f"Review bis {review_until:%d.%m.%Y}", review_until, None
 
 
 def infer_type(text: str) -> str:
@@ -266,6 +298,8 @@ def candidate_links(html: str, source: Source) -> list[dict]:
         url = urljoin(source.url, href)
         if not url.startswith("http"):
             continue
+        if should_skip_url(url, source):
+            continue
 
         title = clean_text(link.get_text(" ", strip=True), 160)
         if len(title) < 6:
@@ -279,7 +313,7 @@ def candidate_links(html: str, source: Source) -> list[dict]:
             "title": title,
             "url": url,
             "context": parent_text,
-            "signal": clean_text(f"{title} {parent_text} {source.name}", 1200),
+            "signal": clean_text(f"{title} {parent_text}", 1200),
         })
     return rows
 
@@ -334,6 +368,7 @@ def build_deal(row: dict, source: Source) -> tuple[dict | None, str]:
         "url": url,
         "expires": expires,
         "validUntil": expiry_date.isoformat() if expiry_date else "",
+        "validUntilSource": "text-or-review-window" if expiry_date else "evergreen-or-recurring",
         "distance": "Wien",
         "hot": deal_type in {"gratis", "bogo"} and score >= 68,
         "isNew": True,
@@ -427,6 +462,7 @@ def main() -> None:
     meta = {
         "criteria": "Vienna + concrete free/discount/1+1/action signal, current-year guard, no expired explicit dates.",
         "maxDeals": MAX_DEALS,
+        "reviewValidityDays": REVIEW_VALIDITY_DAYS,
         "sourcesVisited": len(SOURCES),
     }
     write_payload(OUTPUT_PATH, "wien-deals-combined", final_deals, meta)
