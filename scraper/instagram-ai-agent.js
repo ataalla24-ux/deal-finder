@@ -1139,9 +1139,25 @@ function buildOfferTitle(brand, type, signal, candidate = null) {
 
 function isWeakTitleText(value) {
   const text = normalizeAscii(value);
+  if (!text) return true;
   if (text.includes('|')) return true;
+  if (/[,:;/-]\s*$/.test(text)) return true;
   if (/\b1(?:0[1-9]0|1[0-9]0|2[0-3]0)\b/.test(text) && /(?:strasse|str\.?|gasse|platz|weg|ring|allee)/.test(text)) return true;
+  if (/^(?:studying|shopping|wondering|looking|thinking|discovering|exploring)\b/.test(text)) return true;
+  if (/\b(?:what|where|when|how|why|to|for|with|and|or|bei|mit|zum|zur|und|oder|für)\s*$/.test(text)) return true;
+  if (!hasPattern(STRONG_DEAL_PATTERNS, text) && !hasPattern(FOOD_DRINK_PATTERNS, text) && text.split(/\s+/).length < 5) return true;
   return false;
+}
+
+function finalizeDealTitle(value, brand, type, signal, candidate = null) {
+  const candidateTitle = cleanText(value, 110);
+  if (candidateTitle && !isWeakTitleText(candidateTitle)) return candidateTitle;
+  return buildOfferTitle(brand, type, signal, candidate);
+}
+
+function isQuotaErrorMessage(value = '') {
+  const text = String(value || '');
+  return /\b429\b/.test(text) || /insufficient_quota/i.test(text) || /exceeded your current quota/i.test(text);
 }
 
 function extractExpiryText(signal, pubDate = null) {
@@ -1419,7 +1435,7 @@ function mergeAiDeal(candidate, aiRow) {
     id: `instagram-ai-${stableHash(`${candidate.url}|${aiRow.title || brand}`)}`,
     brand,
     logo: 'IG',
-    title: cleanText(aiRow.title, 110) || buildOfferTitle(brand, type, signal, candidate),
+    title: finalizeDealTitle(aiRow.title, brand, type, signal, candidate),
     description: cleanText(aiRow.description, 520) || cleanText(`${signal.slice(0, 360)} Quelle: Instagram/Public Search.`, 520),
     type,
     category,
@@ -1753,8 +1769,10 @@ async function enrichImageOcr(candidates) {
   if (!CONFIG.imageOcrEnabled || !process.env.OPENAI_API_KEY) return errors;
 
   let fetched = 0;
+  let quotaLimited = false;
   for (const candidate of candidates) {
     if (fetched >= CONFIG.maxImageOcrFetches) break;
+    if (quotaLimited) break;
     if (!candidateImageUrl(candidate)) continue;
 
     try {
@@ -1767,6 +1785,16 @@ async function enrichImageOcr(candidates) {
         };
       }
     } catch (error) {
+      if (isQuotaErrorMessage(error.message)) {
+        quotaLimited = true;
+        errors.push({
+          url: candidate.url,
+          image: candidateImageUrl(candidate),
+          error: error.message,
+          code: 'openai-quota',
+        });
+        break;
+      }
       errors.push({ url: candidate.url, image: candidateImageUrl(candidate), error: error.message });
     }
 
@@ -1809,6 +1837,12 @@ async function main() {
   };
   const report = {
     lastUpdated,
+    summary: {
+      acceptedDeals: finalDeals.length,
+      discoveredCandidates: candidates.length,
+      aiErrors: aiResult.errors.length,
+      imageOcrErrors: imageOcrErrors.length,
+    },
     config: {
       ...CONFIG,
       aiEnabled: Boolean(CONFIG.aiEnabled && process.env.OPENAI_API_KEY),
@@ -1846,6 +1880,7 @@ async function main() {
       enabled: Boolean(CONFIG.imageOcrEnabled && process.env.OPENAI_API_KEY),
       attempted: candidates.filter((candidate) => candidate.preview?.ocrText || candidate.ocrText).length + imageOcrErrors.length,
       extracted: candidates.filter((candidate) => candidate.preview?.ocrText || candidate.ocrText).length,
+      quotaLimited: imageOcrErrors.some((entry) => entry?.code === 'openai-quota'),
       errors: imageOcrErrors,
     },
     aiErrors: aiResult.errors,
