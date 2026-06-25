@@ -43,6 +43,10 @@ jobs:
           DEAL_REVIEW_MAX_DEALS: '160'
           DEAL_REVIEW_CHUNK_SIZE: '24'
           DEAL_REVIEW_MIN_REMOVE_CONFIDENCE: '0.86'
+          DEAL_REVIEW_TARGET_EVIDENCE: '1'
+          DEAL_REVIEW_TARGET_CONCURRENCY: '8'
+          DEAL_REVIEW_TARGET_TIMEOUT_MS: '7000'
+          DEAL_REVIEW_TARGET_TEXT_CHARS: '900'
         run: node scripts/review-live-deals-llm.mjs
 
       - name: Commit validated live deals
