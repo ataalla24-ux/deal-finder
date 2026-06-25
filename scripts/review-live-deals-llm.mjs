@@ -26,7 +26,11 @@ const AUTO_REMOVE_REASONS = new Set([
   'not_vienna',
   'bad_source',
   'duplicate',
+  'missing_link',
 ]);
+const OUTSIDE_VIENNA_PATTERN = /\b(graz|linz|salzburg|innsbruck|klagenfurt|villach|wels|st\.?\s*p[öo]lten|sankt\s+p[öo]lten|steyr|eisenstadt|tirol|vorarlberg|k[äa]rnten|steiermark|burgenland|ober[öo]sterreich|nieder[öo]sterreich)\b/i;
+const GENERIC_TARGET_PATTERN = /\b(startseite|homepage|aggregator|google news|rss|weiterleitung zur startseite|ohne spezifische|keine spezifischen|kein klarer nachweis|no specific|without specific|not specific)\b/i;
+const BLOCKED_OR_TRANSIENT_STATUSES = new Set(['blocked', 'transient']);
 
 function cleanText(value, maxLength = 1000) {
   return String(value || '')
@@ -346,6 +350,123 @@ function normalizeReviews(rawReviews, dealById) {
   return reviews;
 }
 
+function evidenceSearchText(evidence = {}) {
+  return cleanText([
+    evidence.finalUrl,
+    evidence.finalHost,
+    evidence.page?.title,
+    evidence.page?.description,
+    evidence.page?.heading,
+    ...(Array.isArray(evidence.page?.headings) ? evidence.page.headings : []),
+    evidence.page?.textSnippet,
+  ].filter(Boolean).join(' '), 5000);
+}
+
+function isFlightDeal(deal = {}) {
+  const signal = [
+    deal.id,
+    deal.category,
+    deal.type,
+    deal.title,
+    deal.description,
+    deal.source,
+    deal.originSource,
+  ].map((value) => cleanText(value, 200)).join(' ');
+  return /\b(flug|flüge|flight|flights|airport|flughafen|ryanair|wizz\s*air|naples|neapel|iata)\b/i.test(signal);
+}
+
+function isBlockedOrTransientEvidence(evidence = {}) {
+  return BLOCKED_OR_TRANSIENT_STATUSES.has(cleanText(evidence.status, 40));
+}
+
+function makePolicyOverride(review, deal = {}, evidence = {}) {
+  const messageText = cleanText([review.message, review.suggestion].join(' '), 800);
+  const targetText = evidenceSearchText(evidence);
+  const combinedText = cleanText([messageText, targetText].join(' '), 5000);
+  const blockedOrTransient = isBlockedOrTransientEvidence(evidence);
+  const hasUrl = /^https?:\/\//i.test(cleanText(deal.url, 500));
+  const reviewSaysNotVienna = /\b(not\s+wien|not\s+vienna|nicht\s+wien|nicht\s+in\s+wien|not\s+for\s+vienna|location mismatch|ort.*falsch|not\s+wien)\b/i.test(messageText);
+  const targetHasVienna = hasViennaSignal(targetText);
+
+  if (!hasUrl || cleanText(evidence.status, 40) === 'missing_link') {
+    return {
+      decision: 'remove',
+      reason: 'missing_link',
+      confidence: Math.max(review.confidence, 0.9),
+      message: 'Policy override: Live-Deal hat keinen pruefbaren Ziellink und kann in der App nicht verifiziert werden.',
+    };
+  }
+
+  if (
+    !blockedOrTransient &&
+    review.decision !== 'keep' &&
+    !isFlightDeal(deal) &&
+    OUTSIDE_VIENNA_PATTERN.test(combinedText) &&
+    (reviewSaysNotVienna || !targetHasVienna)
+  ) {
+    return {
+      decision: 'remove',
+      reason: 'not_vienna',
+      confidence: Math.max(review.confidence, 0.9),
+      message: `Policy override: Zielseiten-Evidence nennt einen Ort ausserhalb von Wien (${cleanText(review.message, 180) || 'nicht Wien'}).`,
+    };
+  }
+
+  if (
+    !blockedOrTransient &&
+    review.decision === 'flag' &&
+    review.reason === 'weak_evidence' &&
+    GENERIC_TARGET_PATTERN.test(messageText) &&
+    !evidence.signals?.mentionsDealTerms &&
+    !evidence.signals?.hasValidityDate
+  ) {
+    return {
+      decision: 'remove',
+      reason: 'bad_source',
+      confidence: Math.max(review.confidence, 0.88),
+      message: `Policy override: Zielseite liefert keinen konkreten Deal-Nachweis (${cleanText(review.message, 180)}).`,
+    };
+  }
+
+  return null;
+}
+
+function applyPolicyOverrides(reviews, dealById, evidenceByDealId) {
+  const overrides = [];
+  const adjustedReviews = reviews.map((review) => {
+    const deal = dealById.get(review.dealID) || {};
+    const evidence = evidenceByDealId.get(review.dealID) || {};
+    const override = makePolicyOverride(review, deal, evidence);
+    if (!override) return review;
+
+    const adjusted = {
+      ...review,
+      decision: override.decision,
+      reason: override.reason,
+      confidence: override.confidence,
+      message: override.message,
+      suggestion: review.suggestion || 'Automatisch durch Zielseiten-Policy korrigiert.',
+    };
+    overrides.push({
+      dealID: review.dealID,
+      from: {
+        decision: review.decision,
+        reason: review.reason,
+        confidence: review.confidence,
+        message: review.message,
+      },
+      to: {
+        decision: adjusted.decision,
+        reason: adjusted.reason,
+        confidence: adjusted.confidence,
+        message: adjusted.message,
+      },
+    });
+    return adjusted;
+  });
+  return { reviews: adjustedReviews, overrides };
+}
+
 function shouldRemove(review) {
   return review.decision === 'remove'
     && AUTO_REMOVE_REASONS.has(review.reason)
@@ -417,9 +538,13 @@ async function classifyChunk(deals, referenceDate) {
             'Vergleiche alle App-Angaben mit der Zielseite: Titel, Marke, Beschreibung, Deal-Vorteil, Gueltigkeit/Ablauf, Wien-Bezug, Quelle und Veroeffentlichungsdatum.',
             'Wenn Slack/App-Daten der Zielseite widersprechen, vertraue der Zielseiten-Evidence staerker.',
             'Entferne nur mit hoher Sicherheit: abgelaufen, kein echter Deal, nicht fuer Wien/online fuer Wien, unserioese Quelle oder eindeutiges Duplikat.',
-            'Wenn targetEvidence eindeutig zeigt, dass die Zielseite nicht zum Deal passt, nutze bad_source. Wenn sie nur schwach oder blockiert ist, nutze weak_evidence oder missing_link nur als flag.',
+            'Wenn targetEvidence eindeutig zeigt, dass die Zielseite nicht zum Deal passt, nutze bad_source und remove.',
+            'Wenn die Zielseite eine andere Stadt/Region ausserhalb von Wien zeigt, nutze not_vienna und remove.',
+            'Wenn ein Live-Deal keinen direkten pruefbaren Ziellink hat, nutze missing_link und remove.',
+            'Wenn targetEvidence eine Homepage, Suchseite, News-Aggregator- oder Gutschein-Sammelseite ohne konkreten Deal-Nachweis ist, nutze bad_source und remove.',
+            'Wenn targetEvidence nur wegen Bot-Schutz, HTTP 429 oder temporaerem Fehler unklar ist, nutze weak_evidence als flag statt remove.',
             'Wenn targetEvidence ein abgelaufenes Datum oder bei Social Posts ein altes Veroeffentlichungsdatum zeigt, nutze expired.',
-            'Markiere missing_link, weak_evidence oder wrong_category nur als flag, nicht als remove.',
+            'Markiere weak_evidence oder wrong_category nur als flag, nicht als remove.',
             'Lass Kirchen-/Community-/Event-Eintraege drin, solange sie nicht eindeutig abgelaufen oder irrelevant sind.',
             'Antworte ausschliesslich im geforderten JSON-Schema.',
           ].join(' '),
@@ -497,7 +622,9 @@ async function main() {
     }
   }
 
-  const removeReviews = reviews.filter(shouldRemove);
+  const policyResult = applyPolicyOverrides(reviews, dealById, targetEvidence.byDealId);
+  const finalReviews = policyResult.reviews;
+  const removeReviews = finalReviews.filter(shouldRemove);
   const removedIDs = new Set(removeReviews.map((review) => review.dealID));
   const keptDeals = APPLY && removedIDs.size
     ? deals.filter((deal) => !removedIDs.has(cleanText(deal.id, 120)))
@@ -526,13 +653,14 @@ async function main() {
     reviewedDeals: compactDeals.length,
     totalDealsAfter: keptDeals.length,
     removedCount: removedDeals.length,
-    flaggedCount: reviews.filter((review) => review.decision === 'flag').length,
+    flaggedCount: finalReviews.filter((review) => review.decision === 'flag').length,
+    policyOverrides: policyResult.overrides,
     targetEvidenceSummary: targetEvidence.summary,
     targetEvidenceErrors: targetEvidence.errors.slice(0, 50),
     errors,
     usage,
     removedDeals,
-    reviews,
+    reviews: finalReviews,
     targetEvidence: targetEvidence.items,
   };
 
