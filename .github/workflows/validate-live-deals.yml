@@ -36,6 +36,7 @@ jobs:
         run: node scraper/normalize-live-deals.js
 
       - name: LLM review live feed
+        if: ${{ vars.ENABLE_LIVE_DEAL_LLM_REVIEW == '1' }}
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
@@ -48,6 +49,10 @@ jobs:
           DEAL_REVIEW_TARGET_TIMEOUT_MS: '7000'
           DEAL_REVIEW_TARGET_TEXT_CHARS: '900'
         run: node scripts/review-live-deals-llm.mjs
+
+      - name: Write disabled LLM review report
+        if: ${{ vars.ENABLE_LIVE_DEAL_LLM_REVIEW != '1' }}
+        run: node scripts/write-disabled-live-deal-llm-report.mjs
 
       - name: Commit validated live deals
         run: |

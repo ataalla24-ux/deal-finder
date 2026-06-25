@@ -41,6 +41,8 @@ const PROTECTED_LIVE_DEAL_IDS = new Set([
   'joe-omv-xlrh16',
   'joe-omv-p1b2lo',
   'joe-omv-liwfnv',
+  'g2-10jufnd',
+  'g2-12ucgbs',
 ]);
 const OUTSIDE_VIENNA_PATTERN = /\b(graz|linz|salzburg|innsbruck|klagenfurt|villach|wels|st\.?\s*p[öo]lten|sankt\s+p[öo]lten|steyr|eisenstadt|tirol|vorarlberg|k[äa]rnten|steiermark|burgenland|ober[öo]sterreich|nieder[öo]sterreich)\b/i;
 const GENERIC_TARGET_PATTERN = /\b(startseite|homepage|aggregator|google news|rss|weiterleitung zur startseite|ohne spezifische|keine spezifischen|kein klarer nachweis|no specific|without specific|not specific)\b/i;
