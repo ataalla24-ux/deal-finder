@@ -34,6 +34,16 @@ jobs:
           URL_CHECK_TIMEOUT_MS: 7000
         run: node scraper/normalize-live-deals.js
 
+      - name: LLM review live feed
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          DEAL_REVIEW_APPLY: '1'
+          DEAL_REVIEW_MAX_DEALS: '160'
+          DEAL_REVIEW_CHUNK_SIZE: '24'
+          DEAL_REVIEW_MIN_REMOVE_CONFIDENCE: '0.86'
+        run: node scripts/review-live-deals-llm.mjs
+
       - name: Commit validated live deals
         run: |
-          node scripts/commit-generated.mjs --message "Validate live deals $(date +%Y-%m-%d)" --files docs/deals.json docs/live-deal-validation-report.json
+          node scripts/commit-generated.mjs --message "Validate live deals $(date +%Y-%m-%d)" --files docs/deals.json docs/live-deal-validation-report.json docs/live-deal-llm-review.json
