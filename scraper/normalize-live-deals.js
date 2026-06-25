@@ -79,6 +79,7 @@ const MAX_LIVE_URL_HEALTH_CHECKS = Number(process.env.MAX_LIVE_URL_HEALTH_CHECKS
 const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REFRESHES || 120);
 const MAX_LIVE_CONTENT_ENRICHMENTS = Number(process.env.MAX_LIVE_CONTENT_ENRICHMENTS || 120);
 const MAX_OPAQUE_SOCIAL_AGE_DAYS = Number(process.env.MAX_LIVE_OPAQUE_SOCIAL_AGE_DAYS || 14);
+const MAX_SOCIAL_POST_AGE_DAYS = Number(process.env.MAX_LIVE_SOCIAL_POST_AGE_DAYS || process.env.DEAL_VALIDITY_MAX_AGE_DAYS || 7);
 const FLIGHT_DEAL_PATTERN = /\b(flug|flüge|flight|flights|hin\s*&\s*zurück|hin\s+und\s+zurück|ryanair|wizz\s*air|wizzair|iata)\b/i;
 const GENERIC_DESCRIPTION_PATTERN = /^(free|gratis|rabatt|discount|deal|angebot|aktion|promo|special|event|post|reel|instagram|coupon|gutschein|gewinnspiel|new|neu)$/i;
 const FOOD_SIGNAL_PATTERN = /\b(eis\w*|ice cream|gelato|kaffee\w*|coffee|cafe|café|pizza\w*|burger\w*|döner\w*|doener\w*|kebab\w*|sushi|ramen|brunch|croissant|drink|drinks|getränk\w*|getraenk\w*|cocktail\w*|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein\w*|vino|fleisch\w*|meat|steak|bbq|grill\w*|bäckerei|backerei|bakery|krapfen\w*)\b/i;
@@ -427,6 +428,53 @@ function shouldDropOpaqueSocialShellDeal(deal, health, now) {
   return ageDays >= MAX_OPAQUE_SOCIAL_AGE_DAYS;
 }
 
+function isoDateOnly(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toISOString().slice(0, 10);
+}
+
+function applyVerifiedSocialPublicationDate(deal, health) {
+  if (!isSocialUrl(deal?.url || '')) return { deal, changed: false };
+  const publicationDate = cleanText(health?.dateHints?.publicationDate || '');
+  const publicationMs = Date.parse(publicationDate);
+  if (!Number.isFinite(publicationMs)) return { deal, changed: false };
+
+  const source = cleanText(health?.dateHints?.publicationDateSource || 'urlPublicationDate');
+  const next = {
+    ...deal,
+    pubDate: new Date(publicationMs).toISOString(),
+    pubDateSource: `url.${source}`,
+  };
+  return {
+    deal: next,
+    changed: next.pubDate !== cleanText(deal.pubDate || '') || next.pubDateSource !== cleanText(deal.pubDateSource || ''),
+  };
+}
+
+function getSocialPostFreshnessRemovalReason(deal, now) {
+  if (!isSocialUrl(deal?.url || '')) return '';
+  const pubDateText = cleanText(deal?.pubDate || '');
+  const pubDateMs = Date.parse(pubDateText);
+  const source = cleanText(deal?.pubDateSource || '');
+
+  if (!/^url\./i.test(source)) {
+    return '';
+  }
+  if (!Number.isFinite(pubDateMs)) {
+    return '';
+  }
+  if (pubDateMs > now.getTime() + 1000 * 60 * 60 * 36) {
+    return `Social-Postdatum liegt in der Zukunft (${isoDateOnly(pubDateText)})`;
+  }
+
+  const ageDays = (now.getTime() - pubDateMs) / (1000 * 60 * 60 * 24);
+  if (Number.isFinite(ageDays) && ageDays > MAX_SOCIAL_POST_AGE_DAYS) {
+    return `Social-Post älter als ${MAX_SOCIAL_POST_AGE_DAYS} Tage (${isoDateOnly(pubDateText)}, ${source || 'unbekannte Quelle'})`;
+  }
+  return '';
+}
+
 function stripSiteSuffix(value) {
   const text = cleanText(value);
   if (!text) return '';
@@ -738,6 +786,8 @@ async function main() {
   let linkChecksUsed = 0;
   let brokenLinkRemovals = 0;
   let opaqueSocialShellRemovals = 0;
+  let socialPostDateRemovals = 0;
+  let socialPostDateFixes = 0;
   let expiryUrlChecksUsed = 0;
   let urlVerifiedExpiryHits = 0;
   let expiredByVerifiedDateRemovals = 0;
@@ -870,6 +920,17 @@ async function main() {
       if (finalUrl && finalUrl !== currentUrl) {
         deal.url = health.finalUrl;
       }
+    }
+    const socialDateUpdate = applyVerifiedSocialPublicationDate(deal, health);
+    if (socialDateUpdate.changed) {
+      deal = normalizeDealRecord(socialDateUpdate.deal);
+      socialPostDateFixes += 1;
+    }
+    const socialFreshnessRemovalReason = getSocialPostFreshnessRemovalReason(deal, now);
+    if (!forceKeep && socialFreshnessRemovalReason) {
+      socialPostDateRemovals += 1;
+      markRemoved(deal, socialFreshnessRemovalReason);
+      continue;
     }
     if (!forceKeep && shouldDropOpaqueSocialShellDeal(deal, health, now)) {
       brokenLinkRemovals += 1;
@@ -1019,6 +1080,9 @@ async function main() {
     moderationRemovals,
     brokenLinkRemovals,
     opaqueSocialShellRemovals,
+    socialPostDateRemovals,
+    socialPostDateFixes,
+    maxSocialPostAgeDays: MAX_SOCIAL_POST_AGE_DAYS,
     expiredByVerifiedDateRemovals,
     socialPubDateSourceFixes,
     linkChecksUsed,
@@ -1040,6 +1104,8 @@ async function main() {
   console.log(`Moderation removals: ${moderationRemovals}`);
   console.log(`Broken link removals: ${brokenLinkRemovals}`);
   console.log(`Opaque social shell removals: ${opaqueSocialShellRemovals}`);
+  console.log(`Social post date removals: ${socialPostDateRemovals}`);
+  console.log(`Social post date fixes: ${socialPostDateFixes}`);
   console.log(`Social pubDateSource fixes applied: ${socialPubDateSourceFixes}`);
   console.log(`Link health checks: ${linkChecksUsed}/${MAX_LIVE_URL_HEALTH_CHECKS}`);
   console.log(`Expiry refresh checks: ${expiryUrlChecksUsed}/${MAX_LIVE_URL_EXPIRY_REFRESHES}`);
