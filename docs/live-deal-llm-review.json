@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-25T09:01:54.796Z",
+  "generatedAt": "2026-06-25T09:05:43.018Z",
   "source": "github-live-deal-llm-review",
   "model": "gpt-4.1-mini",
   "aiEnabled": true,
@@ -7,8 +7,8 @@
   "minRemoveConfidence": 0.86,
   "totalDealsBefore": 51,
   "reviewedDeals": 51,
-  "totalDealsAfter": 48,
-  "removedCount": 3,
+  "totalDealsAfter": 50,
+  "removedCount": 1,
   "flaggedCount": 3,
   "policyOverrides": [
     {
@@ -17,7 +17,7 @@
         "decision": "remove",
         "reason": "expired",
         "confidence": 0.95,
-        "message": "Zielseite zeigt Gültigkeit der Events bis 06.05.2026, aktuelles Datum 25.06.2026 liegt danach. Deal ist abgelaufen."
+        "message": "Zielseite zeigt Gültigkeit bis 06.05.2026, aktuelles Datum 25.06.2026. Deal ist abgelaufen."
       },
       "to": {
         "decision": "keep",
@@ -30,9 +30,9 @@
       "dealID": "joe-omv-viva-free-taste-6qmpsq",
       "from": {
         "decision": "remove",
-        "reason": "not_vienna",
-        "confidence": 0.95,
-        "message": "Zielseite zeigt keine eindeutige Bestätigung für OMV Stationen in Wien, keine klare Wien-Bezug erkennbar. Deal nicht spezifisch für Wien."
+        "reason": "missing_link",
+        "confidence": 0.9,
+        "message": "Zielseite zeigt keine konkreten Deal-Details oder Gutschein, nur Partnerseite ohne klaren Deal-Nachweis. Kein eindeutiger Deal-Nachweis vorhanden."
       },
       "to": {
         "decision": "keep",
@@ -47,7 +47,7 @@
         "decision": "remove",
         "reason": "bad_source",
         "confidence": 0.9,
-        "message": "Zielseite zeigt nur generische Partnerseite ohne spezifische Deal-Details oder Wien-Bezug, keine Erwähnung des Deals oder der Marke OMV VIVA oder des Angebots."
+        "message": "Zielseite zeigt nur generische Partnerseite ohne konkrete Deal-Details oder Wien-Bezug. Kein Nachweis für Gratis Sunny Orange Espresso in Wien."
       },
       "to": {
         "decision": "keep",
@@ -62,7 +62,7 @@
         "decision": "remove",
         "reason": "bad_source",
         "confidence": 0.9,
-        "message": "Zielseite zeigt nur generische Partnerseite ohne spezifische Deal-Details oder Wien-Bezug, keine Erwähnung des Deals oder der Marke OMV VIVA oder des Angebots."
+        "message": "Zielseite zeigt nur generische Partnerseite ohne konkrete Deal-Details oder Wien-Bezug. Kein Nachweis für Gratis Sparkling Espresso Tonic in Wien."
       },
       "to": {
         "decision": "keep",
@@ -77,7 +77,7 @@
         "decision": "remove",
         "reason": "bad_source",
         "confidence": 0.9,
-        "message": "Zielseite zeigt nur generische Partnerseite ohne spezifische Deal-Details oder Wien-Bezug, keine Erwähnung des Deals oder der Marke OMV VIVA oder des Angebots."
+        "message": "Zielseite zeigt nur generische Partnerseite ohne konkrete Deal-Details oder Wien-Bezug. Kein Nachweis für Gratis Iced Matcha Latte in Wien."
       },
       "to": {
         "decision": "keep",
@@ -92,7 +92,22 @@
         "decision": "remove",
         "reason": "bad_source",
         "confidence": 0.9,
-        "message": "Zielseite zeigt nur generische Partnerseite ohne spezifische Deal-Details oder Wien-Bezug, keine Erwähnung des Deals oder der Marke OMV VIVA oder des Angebots."
+        "message": "Zielseite zeigt nur generische Partnerseite ohne konkrete Deal-Details oder Wien-Bezug. Kein Nachweis für Gratis Strawberry Matcha Latte in Wien."
+      },
+      "to": {
+        "decision": "keep",
+        "reason": "ok",
+        "confidence": 1,
+        "message": "Policy override: geschuetzter Best-Deal bleibt live und wird nicht automatisch per LLM entfernt."
+      }
+    },
+    {
+      "dealID": "g2-1iz7wun",
+      "from": {
+        "decision": "remove",
+        "reason": "bad_source",
+        "confidence": 0.9,
+        "message": "Zielseite ist Gutschein-Übersichtsseite ohne konkreten Nachweis für 5€ Rabatt auf Asia-Buffet in Wien."
       },
       "to": {
         "decision": "keep",
@@ -107,7 +122,7 @@
         "decision": "remove",
         "reason": "missing_link",
         "confidence": 1,
-        "message": "Kein gültiger Ziel-Link vorhanden, Zielseite fehlt komplett, daher kein Nachweis für Deal."
+        "message": "Kein Ziel-URL vorhanden, somit kein Nachweis für den Deal möglich."
       },
       "to": {
         "decision": "keep",
@@ -117,12 +132,42 @@
       }
     },
     {
-      "dealID": "extra-20-20260222",
+      "dealID": "joe-omv-xlrh16",
       "from": {
         "decision": "remove",
-        "reason": "expired",
-        "confidence": 0.95,
-        "message": "Zielseite zeigt nur alte Gültigkeitsdaten (bis August 2013), Deal ist abgelaufen oder nicht aktuell."
+        "reason": "bad_source",
+        "confidence": 0.9,
+        "message": "Zielseite ist PDF mit Standorten, kein konkreter Deal-Nachweis oder Wien-Bezug erkennbar."
+      },
+      "to": {
+        "decision": "keep",
+        "reason": "ok",
+        "confidence": 1,
+        "message": "Policy override: geschuetzter Best-Deal bleibt live und wird nicht automatisch per LLM entfernt."
+      }
+    },
+    {
+      "dealID": "joe-omv-p1b2lo",
+      "from": {
+        "decision": "remove",
+        "reason": "bad_source",
+        "confidence": 0.9,
+        "message": "Zielseite ist PDF mit Standorten, kein konkreter Deal-Nachweis oder Wien-Bezug erkennbar."
+      },
+      "to": {
+        "decision": "keep",
+        "reason": "ok",
+        "confidence": 1,
+        "message": "Policy override: geschuetzter Best-Deal bleibt live und wird nicht automatisch per LLM entfernt."
+      }
+    },
+    {
+      "dealID": "joe-omv-liwfnv",
+      "from": {
+        "decision": "remove",
+        "reason": "bad_source",
+        "confidence": 0.9,
+        "message": "Zielseite ist PDF mit Standorten, kein konkreter Deal-Nachweis oder Wien-Bezug erkennbar."
       },
       "to": {
         "decision": "keep",
@@ -151,37 +196,19 @@
   "targetEvidenceErrors": [],
   "errors": [],
   "usage": {
-    "prompt_tokens": 27833,
-    "completion_tokens": 3623,
-    "total_tokens": 31456
+    "prompt_tokens": 27830,
+    "completion_tokens": 3456,
+    "total_tokens": 31286
   },
   "removedDeals": [
     {
-      "id": "joe-omv-xlrh16",
-      "title": "OMV TopWash: 30% Rabatt",
-      "brand": "OMV TopWash",
-      "url": "https://www.omv.at/downloads/2025/04/3e98f81c-c63e-7803-4053-5be3fee42d1d/Joe-Liste-Standorte-2504.pdf",
-      "reason": "bad_source",
-      "confidence": 0.9,
-      "message": "Zielseite ist PDF mit Standorten, keine konkreten Deal-Details oder Bestätigung des Rabatts, kein Wien-Bezug explizit erkennbar."
-    },
-    {
-      "id": "joe-omv-p1b2lo",
-      "title": "OMV MaxxMotion: 3 Cent pro Liter Rabatt",
-      "brand": "OMV MaxxMotion",
-      "url": "https://www.omv.at/downloads/2025/04/3e98f81c-c63e-7803-4053-5be3fee42d1d/Joe-Liste-Standorte-2504.pdf",
-      "reason": "bad_source",
-      "confidence": 0.9,
-      "message": "Zielseite ist PDF mit Standorten, keine konkreten Deal-Details oder Bestätigung des Rabatts, kein Wien-Bezug explizit erkennbar."
-    },
-    {
-      "id": "joe-omv-liwfnv",
-      "title": "OMV VIVA: 50% auf Sandwiches",
-      "brand": "OMV VIVA",
-      "url": "https://www.omv.at/downloads/2025/04/3e98f81c-c63e-7803-4053-5be3fee42d1d/Joe-Liste-Standorte-2504.pdf",
-      "reason": "bad_source",
-      "confidence": 0.9,
-      "message": "Zielseite ist PDF mit Standorten, keine konkreten Deal-Details oder Bestätigung des Rabatts, kein Wien-Bezug explizit erkennbar."
+      "id": "g2-12ucgbs",
+      "title": "1+1 Free Brunch Deal - Pancake-Kaffee Combo (für Westfield C",
+      "brand": "Westfield Shopping City Süd",
+      "url": "https://www.westfield.com/de/austria/scs/restaurants/offers/westfield-club-11-free-brunch-deal/196603",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Deal ist für Shopping City Süd in Vösendorf, nicht direkt in Wien. Somit kein Wien-Deal."
     }
   ],
   "reviews": [
@@ -308,7 +335,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Zielseite bestätigt Deal für Dr. Oetker Ristorante Pizza à la Tiramisu bei BILLA+ Standorten in Wien mit Gültigkeit bis 31.08.2026. Deal ist aktuell und relevant.",
+      "message": "Zielseite bestätigt Dr. Oetker Ristorante Pizza Deal bei BILLA+ Standorten in Wien mit Gültigkeit bis 31.08.2026. Deal ist aktuell und relevant.",
       "suggestion": "Behalten"
     },
     {
@@ -326,7 +353,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Zielseite bestätigt Frühstück um 1€ bei IKEA Filialen in Wien gültig bis 27.06.2026. Aktuelles Datum 25.06.2026, Deal ist aktuell und relevant.",
+      "message": "Zielseite bestätigt Frühstücksangebot um 1€ bei IKEA Filialen in Wien gültig bis 27.06.2026. Deal ist aktuell und relevant.",
       "suggestion": "Behalten"
     },
     {
@@ -335,7 +362,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Zielseite bestätigt 1+1 Pizza nach Wahl gratis Gutschein gültig bis 30.09.2026. Deal ist aktuell und relevant.",
+      "message": "Zielseite bestätigt 1+1 Pizza nach Wahl gratis Gutschein mit Gültigkeit bis 30.09.2026. Wien-Bezug vorhanden. Deal ist aktuell und relevant.",
       "suggestion": "Behalten"
     },
     {
@@ -353,7 +380,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Zielseite bestätigt €2 Rabatt auf jedes Mensa-Menü mit ÖH Mensa-Sticker in Wien. Kein Ablaufdatum, Deal ist aktuell und relevant.",
+      "message": "Zielseite bestätigt €2 Rabatt auf Mensa-Menü mit ÖH Mensa-Sticker in Wien an verschiedenen Uni-Mensen. Kein Ablaufdatum, Deal ist aktuell und relevant.",
       "suggestion": "Behalten"
     },
     {
@@ -362,7 +389,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Zielseite bestätigt 50% Rabatt bei Therme Wien in Österreich. Kein Ablaufdatum, Deal ist aktuell und relevant für Wien.",
+      "message": "Zielseite bestätigt 50% Rabatt bei Therme Wien mit Bezug zu Wien/Österreich. Kein Ablaufdatum, Deal ist aktuell und relevant.",
       "suggestion": "Behalten"
     },
     {
@@ -380,7 +407,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Zielseite bestätigt 1+1 Ticket gratis bei Madame Tussauds Wien in Österreich. Kein Ablaufdatum, Deal ist aktuell und relevant für Wien.",
+      "message": "Zielseite bestätigt 1+1 Ticket gratis bei Madame Tussauds Wien mit Bezug zu Wien/Österreich. Kein Ablaufdatum, Deal ist aktuell und relevant.",
       "suggestion": "Behalten"
     },
     {
@@ -408,7 +435,7 @@
       "reason": "ok",
       "confidence": 1,
       "message": "Policy override: geschuetzter Best-Deal bleibt live und wird nicht automatisch per LLM entfernt.",
-      "suggestion": "Deal prüfen und ggf. mit besserer Zielseite ersetzen oder entfernen."
+      "suggestion": "Deal prüfen und mit konkreter Zielseite mit Deal-Details ersetzen."
     },
     {
       "id": "llm-joe-omv-viva-free-taste-l62fzo",
@@ -417,7 +444,7 @@
       "reason": "ok",
       "confidence": 1,
       "message": "Policy override: geschuetzter Best-Deal bleibt live und wird nicht automatisch per LLM entfernt.",
-      "suggestion": "Deal prüfen und ggf. mit besserer Zielseite ersetzen oder entfernen."
+      "suggestion": "Deal prüfen und mit konkreter Zielseite mit Deal-Details ersetzen."
     },
     {
       "id": "llm-joe-omv-viva-free-taste-xipghf",
@@ -426,7 +453,7 @@
       "reason": "ok",
       "confidence": 1,
       "message": "Policy override: geschuetzter Best-Deal bleibt live und wird nicht automatisch per LLM entfernt.",
-      "suggestion": "Deal prüfen und ggf. mit besserer Zielseite ersetzen oder entfernen."
+      "suggestion": "Deal prüfen und mit konkreter Zielseite mit Deal-Details ersetzen."
     },
     {
       "id": "llm-joe-omv-viva-free-taste-oiemx1",
@@ -435,7 +462,7 @@
       "reason": "ok",
       "confidence": 1,
       "message": "Policy override: geschuetzter Best-Deal bleibt live und wird nicht automatisch per LLM entfernt.",
-      "suggestion": "Deal prüfen und ggf. mit besserer Zielseite ersetzen oder entfernen."
+      "suggestion": "Deal prüfen und mit konkreter Zielseite mit Deal-Details ersetzen."
     },
     {
       "id": "llm-g2-1ffpc0f",
@@ -443,8 +470,8 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Zielseite ist die offizielle Nordsee Coupons-Seite mit gültigen Coupons, Deal ist für Wien und gültig laut Beschreibung.",
-      "suggestion": "Deal kann live bleiben."
+      "message": "Zielseite zeigt gültige Coupons von Nordsee, Deal ist für Wien gültig laut Beschreibung.",
+      "suggestion": "Keine Änderung erforderlich."
     },
     {
       "id": "llm-g2-e85zcf",
@@ -452,17 +479,17 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Zielseite bestätigt 7 Tage kostenloses Probetraining in Wien, Deal gültig bis September 2026, Wien-Bezug klar vorhanden.",
-      "suggestion": "Deal kann live bleiben."
+      "message": "Zielseite bestätigt 7 Tage kostenloses Probetraining in Wien, gültig im September 2026.",
+      "suggestion": "Keine Änderung erforderlich."
     },
     {
       "id": "llm-g2-1iz7wun",
       "dealID": "g2-1iz7wun",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Zielseite ist Gutscheinplattform mit gültigem Gutschein, Deal für Wien, gültig bis 30.06.2027, Deal passt zum Angebot.",
-      "suggestion": "Deal kann live bleiben."
+      "confidence": 1,
+      "message": "Policy override: geschuetzter Best-Deal bleibt live und wird nicht automatisch per LLM entfernt.",
+      "suggestion": "Deal mit konkreter Zielseite belegen oder entfernen."
     },
     {
       "id": "llm-manual-foodora-genuss-20260423",
@@ -476,11 +503,11 @@
     {
       "id": "llm-g2-12ucgbs",
       "dealID": "g2-12ucgbs",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "Zielseite zeigt konkreten 1+1 Free Brunch Deal im Westfield Shopping City Süd, Deal passt zum Angebot und Standort nahe Wien.",
-      "suggestion": "Deal kann live bleiben."
+      "decision": "remove",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Deal ist für Shopping City Süd in Vösendorf, nicht direkt in Wien. Somit kein Wien-Deal.",
+      "suggestion": "Deal als nicht Wien kennzeichnen und entfernen."
     },
     {
       "id": "llm-top-5",
@@ -488,17 +515,17 @@
       "decision": "flag",
       "reason": "weak_evidence",
       "confidence": 0.7,
-      "message": "Zielseite blockiert Zugriff (HTTP 429), keine validen Details abrufbar, Deal für Wien angegeben, aber keine weitere Bestätigung möglich.",
-      "suggestion": "Deal als Flag markieren, weitere Prüfung bei besserer Evidence."
+      "message": "Zielseite ist durch Security Check (HTTP 429) blockiert, keine verlässlichen Daten abrufbar.",
+      "suggestion": "Manuelle Nachprüfung empfohlen, ggf. später erneut prüfen."
     },
     {
       "id": "llm-extra-20-20260222",
       "dealID": "extra-20-20260222",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 1,
-      "message": "Policy override: geschuetzter Best-Deal bleibt live und wird nicht automatisch per LLM entfernt.",
-      "suggestion": "Deal entfernen."
+      "confidence": 0.9,
+      "message": "Zielseite bestätigt Freikirchen in Österreich mit Wien-Bezug, Deal ist relevant und nicht abgelaufen.",
+      "suggestion": "Keine Änderung erforderlich."
     },
     {
       "id": "llm-b1-s5vhj5",
@@ -506,8 +533,8 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Zielseite bestätigt Gratis Heißgetränk für IKEA Family Mitglieder in IKEA Wien Standorten, Deal gültig und Wien-Bezug vorhanden.",
-      "suggestion": "Deal kann live bleiben."
+      "message": "Zielseite bestätigt Gratis Heißgetränk bei IKEA Wien, Deal ist dauerhaft gültig und für Wien relevant.",
+      "suggestion": "Keine Änderung erforderlich."
     },
     {
       "id": "llm-stream-1",
@@ -515,8 +542,8 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Zielseite zeigt Spotify Premium Angebot für Österreich, Deal gültig für Online, kein Widerspruch zum Deal, Wien-Bezug online gegeben.",
-      "suggestion": "Deal kann live bleiben."
+      "message": "Zielseite bestätigt Spotify Premium Angebot, gültig online, kein Widerspruch zum Deal.",
+      "suggestion": "Keine Änderung erforderlich."
     },
     {
       "id": "llm-top-6",
@@ -524,8 +551,8 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Zielseite ist offizielle foodsharing Seite, Deal für Ganz Wien, Angebot dauerhaft gültig, passt zum Deal.",
-      "suggestion": "Deal kann live bleiben."
+      "message": "Zielseite bestätigt Foodsharing Angebot, gültig in ganz Wien, Deal ist relevant.",
+      "suggestion": "Keine Änderung erforderlich."
     },
     {
       "id": "llm-top-4",
@@ -533,53 +560,53 @@
       "decision": "flag",
       "reason": "weak_evidence",
       "confidence": 0.6,
-      "message": "Zielseite zeigt keine konkreten Deal-Details, nur leere Seite, Deal für 1090 Wien angegeben, aber keine Bestätigung auf Zielseite.",
-      "suggestion": "Deal als Flag markieren, weitere Prüfung bei besserer Evidence."
+      "message": "Zielseite ist leer oder nicht eindeutig, keine klaren Deal-Details abrufbar.",
+      "suggestion": "Manuelle Nachprüfung empfohlen."
     },
     {
       "id": "llm-top-2",
       "dealID": "top-2",
       "decision": "flag",
       "reason": "weak_evidence",
-      "confidence": 0.7,
-      "message": "Zielseite ist McDonald's Österreich mit URL, aber keine konkreten Deal-Details sichtbar, Deal für Wien angegeben, aber keine Bestätigung auf Zielseite.",
-      "suggestion": "Deal als Flag markieren, weitere Prüfung bei besserer Evidence."
+      "confidence": 0.6,
+      "message": "Zielseite zeigt keine konkreten Deal-Details, nur Link zur McDonald's App, keine klare Bestätigung.",
+      "suggestion": "Manuelle Nachprüfung empfohlen."
     },
     {
       "id": "llm-gs-12012fb",
       "dealID": "gs-12012fb",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Zielseite zeigt gültige Wolt Gutscheine für Österreich, Deal gültig bis 30.12.2026, Online-Angebot passend zum Deal.",
-      "suggestion": "Deal kann live bleiben."
+      "confidence": 0.95,
+      "message": "Zielseite zeigt gültige Wolt Gutscheine für Österreich, Deal ist gültig und relevant.",
+      "suggestion": "Keine Änderung erforderlich."
     },
     {
       "id": "llm-joe-omv-xlrh16",
       "dealID": "joe-omv-xlrh16",
-      "decision": "remove",
-      "reason": "bad_source",
-      "confidence": 0.9,
-      "message": "Zielseite ist PDF mit Standorten, keine konkreten Deal-Details oder Bestätigung des Rabatts, kein Wien-Bezug explizit erkennbar.",
-      "suggestion": "Deal prüfen und ggf. mit besserer Zielseite ersetzen oder entfernen."
+      "decision": "keep",
+      "reason": "ok",
+      "confidence": 1,
+      "message": "Policy override: geschuetzter Best-Deal bleibt live und wird nicht automatisch per LLM entfernt.",
+      "suggestion": "Deal mit besserer Quelle belegen oder entfernen."
     },
     {
       "id": "llm-joe-omv-p1b2lo",
       "dealID": "joe-omv-p1b2lo",
-      "decision": "remove",
-      "reason": "bad_source",
-      "confidence": 0.9,
-      "message": "Zielseite ist PDF mit Standorten, keine konkreten Deal-Details oder Bestätigung des Rabatts, kein Wien-Bezug explizit erkennbar.",
-      "suggestion": "Deal prüfen und ggf. mit besserer Zielseite ersetzen oder entfernen."
+      "decision": "keep",
+      "reason": "ok",
+      "confidence": 1,
+      "message": "Policy override: geschuetzter Best-Deal bleibt live und wird nicht automatisch per LLM entfernt.",
+      "suggestion": "Deal mit besserer Quelle belegen oder entfernen."
     },
     {
       "id": "llm-joe-omv-liwfnv",
       "dealID": "joe-omv-liwfnv",
-      "decision": "remove",
-      "reason": "bad_source",
-      "confidence": 0.9,
-      "message": "Zielseite ist PDF mit Standorten, keine konkreten Deal-Details oder Bestätigung des Rabatts, kein Wien-Bezug explizit erkennbar.",
-      "suggestion": "Deal prüfen und ggf. mit besserer Zielseite ersetzen oder entfernen."
+      "decision": "keep",
+      "reason": "ok",
+      "confidence": 1,
+      "message": "Policy override: geschuetzter Best-Deal bleibt live und wird nicht automatisch per LLM entfernt.",
+      "suggestion": "Deal mit besserer Quelle belegen oder entfernen."
     },
     {
       "id": "llm-joe-omv-146t7m4",
@@ -587,8 +614,8 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Zielseite bestätigt OMV TopWash Angebot mit Details, Wien-Bezug vorhanden, Deal gültig.",
-      "suggestion": "Deal kann live bleiben."
+      "message": "Zielseite bestätigt OMV TopWash Waschanlagen, Deal ist gültig und für Wien relevant.",
+      "suggestion": "Keine Änderung erforderlich."
     },
     {
       "id": "llm-joe-omv-1jfthhz",
@@ -596,17 +623,17 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Zielseite bestätigt OMV VIVA Kaffee Angebot, Wien-Bezug vorhanden, Deal gültig.",
-      "suggestion": "Deal kann live bleiben."
+      "message": "Zielseite bestätigt 50% Rabatt auf Kaffeespezialitäten bei OMV VIVA in Wien.",
+      "suggestion": "Keine Änderung erforderlich."
     },
     {
       "id": "llm-gs-uyjace",
       "dealID": "gs-uyjace",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Zielseite zeigt gültige Thalia Gutscheine für Österreich, Deal gültig im Juni 2026, Online-Angebot passend zum Deal.",
-      "suggestion": "Deal kann live bleiben."
+      "confidence": 0.95,
+      "message": "Zielseite zeigt gültige Thalia Gutscheine für Österreich, Deal ist gültig und relevant.",
+      "suggestion": "Keine Änderung erforderlich."
     },
     {
       "id": "llm-cs-i5ue6i",
@@ -614,8 +641,8 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Zielseite zeigt gültige McDonald's Gutscheine für Österreich, Deal für Wien angegeben, gültig laut Beschreibung.",
-      "suggestion": "Deal kann live bleiben."
+      "message": "Zielseite bestätigt Gratis Kaffee oder Cola durch Feedback bei McDonald's in Wien.",
+      "suggestion": "Keine Änderung erforderlich."
     },
     {
       "id": "llm-gs-1skzay7",
@@ -623,8 +650,8 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Der Deal ist gültig bis 3.9.2026, die Zielseite bestätigt den 20€ Gutschein bei Peter Hahn mit Gültigkeit im Juni 2026. Der Deal ist online für Österreich und somit auch für Wien relevant.",
-      "suggestion": "Behalten"
+      "message": "Der Deal ist gültig bis 3.9.2026, die Zielseite bestätigt den 20€ Gutschein bei Peter Hahn mit Österreich-Bezug und Online-Verfügbarkeit. Alle Angaben stimmen überein.",
+      "suggestion": "Deal kann im Live-Feed bleiben."
     },
     {
       "id": "llm-g2-10jufnd",
@@ -632,8 +659,8 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Der Deal ist ein 1+1 Gratis Pancake-Kaffee Combo im Westfield SCS, die Zielseite bestätigt den Deal und die Öffnungszeiten. Der Deal ist lokal in Wien (Westfield SCS) gültig.",
-      "suggestion": "Behalten"
+      "message": "Der Deal ist aktuell und gültig, gilt im Westfield SCS in Wien, die Zielseite bestätigt den 1+1 Gratis Pancake-Kaffee Combo Deal für Westfield Club Mitglieder Mo-Fr 9-15 Uhr. Wien-Bezug ist gegeben.",
+      "suggestion": "Deal kann im Live-Feed bleiben."
     },
     {
       "id": "llm-gs-boa7vx",
@@ -641,8 +668,8 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Der Deal ist ein 20€ Gutschein bei ALL4GOLF für Neukunden, gültig im Juni 2026 laut Zielseite. Der Deal ist online für Österreich und somit auch für Wien relevant.",
-      "suggestion": "Behalten"
+      "message": "Der Deal ist gültig im Juni 2026, die Zielseite bestätigt den 20€ Gutschein bei ALL4GOLF mit Österreich-Bezug und Online-Verfügbarkeit. Alle Angaben stimmen überein.",
+      "suggestion": "Deal kann im Live-Feed bleiben."
     }
   ],
   "targetEvidence": [
@@ -657,7 +684,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:54.959Z",
+      "checkedAt": "2026-06-25T09:05:43.150Z",
       "page": {
         "title": "[:de]Gottesdienste[:en]Church services[:] - Austria",
         "description": "",
@@ -698,7 +725,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:54.945Z",
+      "checkedAt": "2026-06-25T09:05:43.127Z",
       "page": {
         "title": "Events - Austria",
         "description": "",
@@ -736,7 +763,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:54.971Z",
+      "checkedAt": "2026-06-25T09:05:43.140Z",
       "page": {
         "title": "Hillsong Wien - Austria",
         "description": "",
@@ -780,7 +807,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:55.437Z",
+      "checkedAt": "2026-06-25T09:05:43.511Z",
       "page": {
         "title": "CIG Wien - Christliche Internationale Gemeinde / Kirche - CIG - Christliche Internationale Gemeinde Wien",
         "description": "Evangelikale, zweisprachige Kirche in Wien. Erlebe lebendige Gottesdienste auf Deutsch & Englisch. Herzlich willkommen in der CIG Wien!",
@@ -824,7 +851,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:55.444Z",
+      "checkedAt": "2026-06-25T09:05:43.503Z",
       "page": {
         "title": "Gottesdienste - CIG - Christliche Internationale Gemeinde Wien",
         "description": "CIG WIEN GOTTESDIENSTE CIG Gottesdienste Sonntags 10:30 & 17:00Leebgasse 34, 1100 Wien Livestream Wir wollen uns für dein treues und aufopferndes Geben bedanken. Wir schätzen dieses sehr, nachdem wir ja gemeinsam Sein Königreich bauen. Einfachheitshalber ist hier der Link zu deiner Verwendung: Spende Beten wir weiterhin für unsere Regierung, für unser Land und für die [&hellip;]",
@@ -868,7 +895,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:55.578Z",
+      "checkedAt": "2026-06-25T09:05:43.611Z",
       "page": {
         "title": "Veranstaltungen CIG Wien: Ein Überblick - CIG - Christliche Internationale Gemeinde Wien",
         "description": "Erfahre mehr über die Veranstaltungen CIG Wien: Live Streams, Gebetsmeetings und interessante Kurse in der CIG Wien.",
@@ -912,7 +939,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:56.602Z",
+      "checkedAt": "2026-06-25T09:05:44.276Z",
       "page": {
         "title": "ICF Wien - Kirche neu erleben",
         "description": "ICF Wien ist eine christliche Freikirche auf biblischer Grundlage ✓ Jeden Sonntag Gottesdienste ✓ authentisch & relevant ► Mehr erfahren!",
@@ -956,7 +983,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:56.446Z",
+      "checkedAt": "2026-06-25T09:05:44.375Z",
       "page": {
         "title": "Unsere Gottesdienste im ICF Wien",
         "description": "Jeden Sonntag feiern wir Gottesdienste in Wien ✓ um 10, 12 & 18 Uhr ✓ live & online ✓ Kinder-Programm ✓ viele Angebote ► Mehr erfahren!",
@@ -1000,7 +1027,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.194Z",
+      "checkedAt": "2026-06-25T09:05:45.160Z",
       "page": {
         "title": "Angebote & Events im ICF Wien",
         "description": "Entdecke unsere vielseitigen Angebote & Events im ICF Wien ✓ Glauben vertiefen ✓ Neue Leute kennenlernen ► Jetzt entdecken!",
@@ -1044,7 +1071,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:55.167Z",
+      "checkedAt": "2026-06-25T09:05:43.239Z",
       "page": {
         "title": "VCC JesusZentrum",
         "description": "Willkommen im VCC Jesus Zentrum! Unsere Kirche bietet eine lebendige Gemeinschaft, in der Jesus im Mittelpunkt steht. Egal ob du neu hier bist oder schon länger suchst – bei uns findest du Gebet, Unterstützung und einen Ort zum Wachsen im Glauben. Erfahre mehr über unsere Angebote!",
@@ -1088,7 +1115,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:55.167Z",
+      "checkedAt": "2026-06-25T09:05:43.239Z",
       "page": {
         "title": "VCC JesusZentrum",
         "description": "Willkommen im VCC Jesus Zentrum! Unsere Kirche bietet eine lebendige Gemeinschaft, in der Jesus im Mittelpunkt steht. Egal ob du neu hier bist oder schon länger suchst – bei uns findest du Gebet, Unterstützung und einen Ort zum Wachsen im Glauben. Erfahre mehr über unsere Angebote!",
@@ -1132,7 +1159,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:55.206Z",
+      "checkedAt": "2026-06-25T09:05:43.264Z",
       "page": {
         "title": "Events - VCC JesusZentrum",
         "description": "Bleib im VCC Jesus Zentrum immer auf dem Laufenden! Entdecke aktuelle Events, Gottesdienste und Angebote. In unserem Infoscreen findest du alle wichtigen Termine und Neuigkeiten. Erlebe inspirierende Veranstaltungen und sei Teil unserer lebendigen Gemeinschaft.",
@@ -1176,7 +1203,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:55.241Z",
+      "checkedAt": "2026-06-25T09:05:43.300Z",
       "page": {
         "title": "Unsere Gottesdienste im ICF Wien",
         "description": "Jeden Sonntag feiern wir Gottesdienste in Wien ✓ um 10, 12 & 18 Uhr ✓ live & online ✓ Kinder-Programm ✓ viele Angebote ► Mehr erfahren!",
@@ -1220,7 +1247,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:55.286Z",
+      "checkedAt": "2026-06-25T09:05:43.316Z",
       "page": {
         "title": "Billa+: Abverkauf - Dr.Oekter Ristorante Pizza à la Tiramisu",
         "description": "Die Ristorante Pizza à la Tiramisu mit dem unverwechselbar dünnen und knusprigen Ristorante Pizzaboden verleiht der Komposition mit einer feinen",
@@ -1264,7 +1291,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:55.310Z",
+      "checkedAt": "2026-06-25T09:05:43.383Z",
       "page": {
         "title": "*Personalisiert* Gratis Getränk beim McDonalds",
         "description": "Hatte einen 0,5 Liter Gratis Cola Gutschein, denke bis xx.07.2026 gültig gewesen, vermutlich nicht bei jedem...kuckt mal nach :)",
@@ -1308,7 +1335,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:55.741Z",
+      "checkedAt": "2026-06-25T09:05:43.800Z",
       "page": {
         "title": "Angebote & Aktionen entdecken",
         "description": "Entdecke die besten Angebote bei IKEA Österreich. Spare jetzt bei Möbeln, Deko und Haushaltsgeräten – alle laufenden Aktionen auf einen Blick!",
@@ -1352,7 +1379,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:56.150Z",
+      "checkedAt": "2026-06-25T09:05:44.170Z",
       "page": {
         "title": "1+1 Pizza nach Wahl GRATIS!",
         "description": "Mit diesem Gutschein erhältst Du bei Konsumation von 2 Pizzen die günstigere oder gleichwertige Pizza GRATIS!",
@@ -1396,7 +1423,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:56.005Z",
+      "checkedAt": "2026-06-25T09:05:44.033Z",
       "page": {
         "title": "Vorteile nach persönlichen Interessen",
         "description": "Individuelle Vorteile absolut kostenlos und ohne Bindung",
@@ -1440,7 +1467,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:55.974Z",
+      "checkedAt": "2026-06-25T09:05:44.041Z",
       "page": {
         "title": "Canteen sticker - ÖH Uni Wien",
         "description": "",
@@ -1480,7 +1507,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:56.142Z",
+      "checkedAt": "2026-06-25T09:05:44.220Z",
       "page": {
         "title": "Dein Plus bei der reinsten Entspannung | Drei.at",
         "description": "50 % +Ersparnis f&uuml;r die 2. Eintrittskarte in der Therme Wien.",
@@ -1523,7 +1550,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:55.898Z",
+      "checkedAt": "2026-06-25T09:05:43.899Z",
       "page": {
         "title": "W+ Weeks Restaurant Discounts 🍔 | Vienna | 30-min delivery | Wolt",
         "description": "Wolt makes it incredibly easy for you to discover and get what you want. Delivered to your home and office",
@@ -1567,7 +1594,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:56.521Z",
+      "checkedAt": "2026-06-25T09:05:44.328Z",
       "page": {
         "title": "Madame Tussauds Wien: 2 Karten zum Preis von 1 | Drei.at",
         "description": "Ihr Vorteil bei Drei: Hol dir deinen Gutschein f&uuml;r Madame Tussauds Wien: Mit Kaiserin Sisi ein Foto machen, mit David Alaba 11er schie&szlig;en & mit Conchita auf der B&uuml;hne stehen.",
@@ -1610,7 +1637,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.627Z",
+      "checkedAt": "2026-06-25T09:05:45.387Z",
       "page": {
         "title": "WienMobil Vorteilswelt - wienerlinien.at",
         "description": "Mit der Jahreskarte der Wiener Linien steht Ihnen die WienMobil Vorteilswelt offen. Erleben Sie die ganze Stadt zum Vorteilspreis und freuen Sie sich auf exklusive Angebote aus Kunst, Kultur, Freizeit und vieles mehr. Jetzt gleich in der WienMobil App ansehen und einlösen!",
@@ -1654,7 +1681,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:56.258Z",
+      "checkedAt": "2026-06-25T09:05:44.236Z",
       "page": {
         "title": "jö Bonus Club Partner OMV",
         "description": "[object Object]",
@@ -1692,7 +1719,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:56.258Z",
+      "checkedAt": "2026-06-25T09:05:44.236Z",
       "page": {
         "title": "jö Bonus Club Partner OMV",
         "description": "[object Object]",
@@ -1730,7 +1757,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:56.258Z",
+      "checkedAt": "2026-06-25T09:05:44.236Z",
       "page": {
         "title": "jö Bonus Club Partner OMV",
         "description": "[object Object]",
@@ -1768,7 +1795,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:56.258Z",
+      "checkedAt": "2026-06-25T09:05:44.236Z",
       "page": {
         "title": "jö Bonus Club Partner OMV",
         "description": "[object Object]",
@@ -1806,7 +1833,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:56.258Z",
+      "checkedAt": "2026-06-25T09:05:44.236Z",
       "page": {
         "title": "jö Bonus Club Partner OMV",
         "description": "[object Object]",
@@ -1844,7 +1871,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:56.886Z",
+      "checkedAt": "2026-06-25T09:05:44.661Z",
       "page": {
         "title": "Rabattcoupons & App - Nordsee",
         "description": "Mit unseren beliebten Coupons & exklusiven Angeboten kannst Du richtig sparen! Jetzt bei NORDSEE entdecken & in der nächsten Filiale einlösen!",
@@ -1882,7 +1909,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.364Z",
+      "checkedAt": "2026-06-25T09:05:45.298Z",
       "page": {
         "title": "Teste EVO 7 Tage kostenlos | EVO Fitness",
         "description": "Teste EVO Fitness 7 Tage kostenlos. Entdecke unser hochmodernes Equipment und das elegante Boutique-Design an einem unserer 7 Studios in Wien.",
@@ -1926,7 +1953,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.054Z",
+      "checkedAt": "2026-06-25T09:05:45.007Z",
       "page": {
         "title": "Gutscheine Österreich - Online & Mobil einlösen",
         "description": "Spare bares Geld mit den besten Gutscheinen in Österreich. Online, mobil und sofort einlösbar - für Shops, Restaurants, Reisen und mehr.",
@@ -1935,8 +1962,8 @@
           "Die besten Gutscheine in Österreich",
           "Seit 24 Jahren die Nummer 1 in Österreich!",
           "Top Gutscheine",
-          "Winzerhof Küssler",
-          "22 EUR Rabatt!"
+          "Family and Friends",
+          "Schenken! Erleben! Geniessen!"
         ],
         "textSnippet": "Gutscheine Österreich - Online & Mobil einlösen Gutscheine Online Gutscheine Geschenkgutscheine Mobile Gutscheine Gutscheinhefte Kategorien Urlaub / Reisen Essen / Trinken Beauty / Wellness Tickets / Unterhaltung Sport / Freizeit Mode / Accessoires Multimedia / Elektronik Bücher / Medien Social Facebook Instagram App Firmen Kontakt Suche Open menu Close menu Gutscheine Online Gutscheine Geschenkgutscheine Mobile Gutscheine Gutscheinhefte Kategorien Urlaub / Reisen Essen / Trinken Beauty / Wellness Tickets / Unterhaltung Sport / Freizeit Mode / Accessoires Multimedia / Elektronik Bücher / Medien Social Facebook Instagram App Firmen Kontakt Suche Schütterhof Berg-Auszeit verschenken! Bis 30.06.2027 hier online bestellen! Gutschein ansehen Gutschein teilen Melitta® Spare bis zu -40%! Bis 09.07.2026 hier online einlösen! Gutschein ansehen Gutschein teilen Soul Drinks 150 EUR Gutschein! Bis 3"
       },
@@ -1953,7 +1980,7 @@
       "signals": {
         "mentionsVienna": false,
         "mentionsBrand": false,
-        "mentionsDealTitle": true,
+        "mentionsDealTitle": false,
         "mentionsDealTerms": true,
         "hasPublicationDate": false,
         "hasValidityDate": true
@@ -1970,7 +1997,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "fehlende oder ungueltige Ziel-URL",
-      "checkedAt": "2026-06-25T09:01:54.796Z",
+      "checkedAt": "2026-06-25T09:05:43.018Z",
       "page": {
         "title": "",
         "description": "",
@@ -2008,7 +2035,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.469Z",
+      "checkedAt": "2026-06-25T09:05:44.719Z",
       "page": {
         "title": "WESTFIELD CLUB: 1+1 Free Brunch Deal",
         "description": "Erhalte zu jeder Pancake-Kaffee combo ein Zweites gratis! *Nur für Westfield Club Mitglieder. Mo bis Fr 9-15 Brunch. Nicht an Feiertagen und nicht am Wochenende.",
@@ -2049,7 +2076,7 @@
       "transientError": true,
       "blockedByProtection": true,
       "reason": "Security Checkpoint",
-      "checkedAt": "2026-06-25T09:01:54.796Z",
+      "checkedAt": "2026-06-25T09:05:43.018Z",
       "page": {
         "title": "",
         "description": "",
@@ -2087,7 +2114,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:58.240Z",
+      "checkedAt": "2026-06-25T09:05:45.966Z",
       "page": {
         "title": "Freikirchen in Österreich",
         "description": "",
@@ -2131,7 +2158,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.356Z",
+      "checkedAt": "2026-06-25T09:05:44.711Z",
       "page": {
         "title": "IKEA Family Vorteile",
         "description": "Als IKEA Family Mitglied erwarten dich viele exklusive Vorteile. Werde gleich kostenlos Mitglied und profitiere von den tollen Vorteilen.",
@@ -2175,7 +2202,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.242Z",
+      "checkedAt": "2026-06-25T09:05:45.018Z",
       "page": {
         "title": "Spotify Premium - Spotify (Österreich)",
         "description": "Spotify Premium ist ein digitaler Musikdienst, der dir Zugriff auf Millionen von Songs ohne Werbeunterbrechungen ermöglicht.",
@@ -2219,7 +2246,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.375Z",
+      "checkedAt": "2026-06-25T09:05:45.023Z",
       "page": {
         "title": "Lebensmittel teilen statt wegwerfen – foodsharing",
         "description": "Auf foodsharing.de kannst du deine Lebensmittel vor dem Verfall an soziale Einrichtungen oder andere Personen abgeben",
@@ -2257,7 +2284,7 @@
       "transientError": true,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:54.796Z",
+      "checkedAt": "2026-06-25T09:05:43.018Z",
       "page": {
         "title": "",
         "description": "",
@@ -2295,7 +2322,7 @@
       "transientError": true,
       "blockedByProtection": true,
       "reason": "www.mcdonalds.at",
-      "checkedAt": "2026-06-25T09:01:54.796Z",
+      "checkedAt": "2026-06-25T09:05:43.018Z",
       "page": {
         "title": "",
         "description": "",
@@ -2333,7 +2360,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:58.117Z",
+      "checkedAt": "2026-06-25T09:05:45.799Z",
       "page": {
         "title": "Wolt Gutscheine ▷ Exklusiv 4€ Rabatt + 12€ Gutschein!",
         "description": "Aktuelle Top Wolt Gutscheine im Juni 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -2377,7 +2404,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.569Z",
+      "checkedAt": "2026-06-25T09:05:45.031Z",
       "page": {
         "title": "",
         "description": "",
@@ -2415,7 +2442,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.569Z",
+      "checkedAt": "2026-06-25T09:05:45.031Z",
       "page": {
         "title": "",
         "description": "",
@@ -2453,7 +2480,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.569Z",
+      "checkedAt": "2026-06-25T09:05:45.031Z",
       "page": {
         "title": "",
         "description": "",
@@ -2491,7 +2518,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.555Z",
+      "checkedAt": "2026-06-25T09:05:45.057Z",
       "page": {
         "title": "Waschanlage in der Nähe finden » OMV TopWash",
         "description": "OMV TopWash Waschanlagen ✔ Autowaschanlage oder SB Waschanlage ✔ SB Staubsauger ✔ modernste Autowaschtechnik ➤ Jetzt Waschanlage finden!",
@@ -2535,7 +2562,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.580Z",
+      "checkedAt": "2026-06-25T09:05:45.067Z",
       "page": {
         "title": "VIVA Café » fairen Kaffee und Bohnen genießen",
         "description": "OMV VIVA Café ✔ Espresso, Cappuccino, Latte Macchiato ✔ Direct Trade ✔ Mehrwegbecher ✔ nachhaltig ✔ Bohnen für Zuhause ➤ Jetzt Kaffee genießen!",
@@ -2579,7 +2606,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.992Z",
+      "checkedAt": "2026-06-25T09:05:45.744Z",
       "page": {
         "title": "Thalia Gutscheine ▷ 40% Rabatt + 5€ Gutschein!",
         "description": "Aktuelle Top Thalia Gutscheine im Juni 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -2623,7 +2650,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:57.669Z",
+      "checkedAt": "2026-06-25T09:05:45.145Z",
       "page": {
         "title": "McDonalds Code Österreich ➤ 40% Rabatt | Juni 2026 | Preisjäger",
         "description": "15 gültige Angebote bei Preisjäger ➤ Jetzt einen 1+1 McDonalds Gutschein für Österreich sichern",
@@ -2667,7 +2694,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:58.536Z",
+      "checkedAt": "2026-06-25T09:05:47.629Z",
       "page": {
         "title": "Peter Hahn Gutscheine ▷ 20€ Rabatt auf Alles",
         "description": "Aktuelle Top Peter Hahn Gutscheine im Juni 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -2711,7 +2738,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:01:58.343Z",
+      "checkedAt": "2026-06-25T09:05:46.229Z",
       "page": {
         "title": "WESTFIELD CLUB: 1+1 Free Brunch Deal",
         "description": "Erhalte zu jeder Pancake-Kaffee combo ein Zweites gratis! *Nur für Westfield Club Mitglieder. Mo bis Fr 9-15 Brunch. Nicht an Feiertagen und nicht am Wochenende.",
@@ -2752,7 +2779,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-06-25T09:02:01.469Z",
+      "checkedAt": "2026-06-25T09:05:46.157Z",
       "page": {
         "title": "ALL4GOLF Gutscheine ▷ Exklusiv 20€ Rabatt + 15€ Gutschein!",
         "description": "Aktuelle Top ALL4GOLF Gutscheine im Juni 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
