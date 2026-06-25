@@ -14,7 +14,7 @@ const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 const DRY_RUN = process.env.SLACK_LIVE_REVIEW_DRY_RUN === '1';
 const MAX_DEALS = Math.max(1, Math.min(200, Number(process.env.SLACK_LIVE_REVIEW_MAX_DEALS || 120)));
 const CHUNK_SIZE = Math.max(1, Math.min(15, Number(process.env.SLACK_LIVE_REVIEW_CHUNK_SIZE || 10)));
-const ADMIN_URL = process.env.DEAL_ADMIN_URL || 'https://ataalla24-ux.github.io/deal-finder/deal-admin.html';
+const ADMIN_URL = process.env.DEAL_ADMIN_URL || 'https://freefinder.at/deal-admin.html';
 const WORKER_BASE_URL = (process.env.FREEFINDER_WORKER_BASE_URL || 'https://freefinder-referrals.freefinder-stefan.workers.dev').replace(/\/+$/, '');
 const REMOVE_LINK_SECRET = process.env.DEAL_REMOVE_LINK_SECRET || (DRY_RUN ? 'dry-run-secret' : '');
 

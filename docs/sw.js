@@ -1,4 +1,4 @@
-const CACHE_NAME = 'freefinder-website-v3';
+const CACHE_NAME = 'freefinder-website-v4';
 const urlsToCache = [
   './',
   './index.html',
@@ -44,7 +44,7 @@ self.addEventListener('fetch', event => {
   const isDealOfWeekJson = requestUrl.pathname.endsWith('/deal-of-the-week.json') || requestUrl.pathname.endsWith('deal-of-the-week.json');
   const isNetworkFirstDocument =
     event.request.mode === 'navigate' ||
-    requestUrl.pathname.endsWith('/deal-finder/') ||
+    requestUrl.pathname === '/' ||
     requestUrl.pathname.endsWith('/index.html') ||
     requestUrl.pathname.endsWith('push-config.json');
 

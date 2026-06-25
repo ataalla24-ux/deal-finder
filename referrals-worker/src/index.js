@@ -9,7 +9,7 @@ const JSON_HEADERS = {
 const MIN_CONFIRM_DELAY_MS = 15 * 1000;
 const textEncoder = new TextEncoder();
 const APP_STORE_APP_ID = '6758958213';
-const WEBSITE_HOME_URL = 'https://ataalla24-ux.github.io/deal-finder/';
+const WEBSITE_HOME_URL = 'https://freefinder.at/';
 const WEBSITE_DEALS_JSON_URL = `${WEBSITE_HOME_URL}deals.json`;
 const WEBSITE_SHARE_IMAGE_URL = `${WEBSITE_HOME_URL}og-preview.png`;
 const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
@@ -830,7 +830,7 @@ function dealRemovalHtml(title, body, status = 200) {
   <main>
     <h1>${safeTitle}</h1>
     <p>${safeBody}</p>
-    <p><a href="https://github.com/ataalla24-ux/deal-finder/actions/workflows/deal-moderation.yml">GitHub Moderation Workflow</a> · <a href="https://ataalla24-ux.github.io/deal-finder/deal-admin.html">Deal Admin</a></p>
+    <p><a href="https://github.com/ataalla24-ux/deal-finder/actions/workflows/deal-moderation.yml">GitHub Moderation Workflow</a> · <a href="https://freefinder.at/deal-admin.html">Deal Admin</a></p>
   </main>
 </body>
 </html>`, {
@@ -1992,8 +1992,8 @@ function renderReferralLanding(code, requestUrl) {
   const appStoreUrl = `https://apps.apple.com/at/app/id${APP_STORE_APP_ID}?ct=${encodeURIComponent(`ref_${code}`)}&mt=8`;
   const minDelaySeconds = Math.ceil(MIN_CONFIRM_DELAY_MS / 1000);
   const continueUrl = dealId
-    ? `https://ataalla24-ux.github.io/deal-finder/?deal=${encodeURIComponent(dealId)}`
-    : 'https://ataalla24-ux.github.io/deal-finder/';
+    ? `https://freefinder.at/?deal=${encodeURIComponent(dealId)}`
+    : 'https://freefinder.at/';
   const safeDealHint = dealId ? '<p>Dein Freund hat dir einen konkreten Deal geschickt. Nach der Bestaetigung kannst du ihn direkt in FreeFinder ansehen.</p>' : '';
   const continueButtonHtml = dealId
     ? '<button id="continueBtn" class="button secondary" style="display:none">Zum geteilten Deal</button>'
@@ -2378,7 +2378,7 @@ function renderReferralLanding(code, requestUrl) {
 
 function redirectReferralToWebsite(code, requestUrl) {
   const dealId = normalizeDealId(requestUrl.searchParams.get('deal'));
-  const destination = new URL('https://ataalla24-ux.github.io/deal-finder/');
+  const destination = new URL('https://freefinder.at/');
   destination.searchParams.set('ref', code);
   destination.searchParams.set('source', dealId ? 'legacy_deal_share' : 'legacy_referral_share');
   if (dealId) destination.searchParams.set('deal', dealId);
