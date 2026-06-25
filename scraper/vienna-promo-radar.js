@@ -496,8 +496,9 @@ function createCandidate(item, pack) {
   if (looksLikePublisherBrand(deal.brand, sourceName)) {
     deal.brand = brand || extractBrandCandidate(titleCore) || sourceName || 'Wien Promo';
   }
-  deal.logo = pack.logo;
-  deal.logoUrl = buildLogoUrl(sourceUrl) || deal.logoUrl;
+  deal = normalizeDealRecord(deal);
+  deal.logo = deal.logo || pack.logo;
+  deal.logoUrl = deal.logoUrl || buildLogoUrl(sourceUrl);
   deal.expires = sanitizeExpiryText(deal.expires || '');
   return deal;
 }

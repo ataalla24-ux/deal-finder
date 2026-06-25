@@ -57,6 +57,8 @@ const BRAND_RULES = [
   { key: 'peter hahn', name: 'Peter Hahn', logo: '👗', category: 'shopping' },
   { key: 'pneus online', name: 'Pneus Online', logo: '🛞', category: 'shopping' },
   { key: 'omv', name: 'OMV', logo: '⛽', category: 'shopping', domain: 'omv.at' },
+  { key: 'spotify', name: 'Spotify', logo: '🎵', category: 'streaming', domain: 'spotify.com' },
+  { key: 'evo fitness', name: 'EVO Fitness', logo: '💪', category: 'fitness', domain: 'evofitness.at' },
   { key: 'joe', name: 'joo', logo: '💳', category: 'supermarkt', domain: 'joe-club.at' },
   { key: 'joo', name: 'joo', logo: '💳', category: 'supermarkt', domain: 'joe-club.at' },
   { key: 'wolt', name: 'Wolt', logo: '🛵', category: 'essen', domain: 'wolt.com' },
@@ -199,6 +201,23 @@ function isGoogleFaviconUrl(url) {
   return /https?:\/\/(?:www\.)?google\.com\/s2\/favicons/i.test(String(url || ''));
 }
 
+function extractGoogleFaviconTargetHost(url) {
+  if (!isGoogleFaviconUrl(url)) return '';
+  try {
+    const parsed = new URL(String(url));
+    const rawTarget = parsed.searchParams.get('domain_url') || parsed.searchParams.get('domain') || '';
+    if (!rawTarget) return '';
+    const targetUrl = /^[a-z][a-z0-9+.-]*:\/\//i.test(rawTarget) ? rawTarget : `https://${rawTarget}`;
+    return extractHostFromUrl(targetUrl);
+  } catch {
+    return '';
+  }
+}
+
+function extractLogoTargetHost(url) {
+  return isGoogleFaviconUrl(url) ? extractGoogleFaviconTargetHost(url) : extractHostFromUrl(url);
+}
+
 function getHostKey(host) {
   const parts = cleanUiNoiseText(String(host || '').replace(/^www\./i, '')).split('.').filter(Boolean);
   if (!parts.length) return '';
@@ -213,20 +232,31 @@ function brandMatchesHost(brand, host) {
   return brandKey === hostKey || brandKey.includes(hostKey) || hostKey.includes(brandKey);
 }
 
+function hostMatchesKnownDomain(host, known = null) {
+  const knownHost = extractHostFromUrl(known?.domain ? `https://${known.domain}` : '');
+  if (!host || !knownHost) return false;
+  return host === knownHost || host.endsWith(`.${knownHost}`) || brandMatchesHost(known?.name || known?.key || '', host);
+}
+
 function shouldUseHostLogo(deal = {}, brand = '', host = '', known = null) {
   if (!host || isSourceLikeHost(host)) return false;
   if (known?.preferFallback || known?.source) return false;
-  return !!known?.domain;
+  if (known?.domain) return hostMatchesKnownDomain(host, known);
+
+  const candidateBrand = brand || cleanUiNoiseText(deal.brand || '');
+  if (!candidateBrand || isSourceLikeBrand(candidateBrand) || isLikelyGenericLocation(candidateBrand)) return false;
+  return brandMatchesHost(candidateBrand, host);
 }
 
 function shouldUseLogoImage(deal = {}, brand = '', logoUrl = '', known = null) {
   if (!logoUrl) return false;
-  const host = extractHostFromUrl(logoUrl);
+  const host = extractLogoTargetHost(logoUrl);
   if (!host) return false;
-  if (!isGoogleFaviconUrl(logoUrl)) {
-    return !isSourceLikeHost(host) || brandMatchesHost(brand || known?.name || '', host);
-  }
   return shouldUseHostLogo(deal, brand, host, known);
+}
+
+function hasSignalTerm(signal, pattern) {
+  return new RegExp(`(?:^|[^a-z0-9])(?:${pattern})(?=$|[^a-z0-9])`, 'i').test(signal);
 }
 
 function isLikelyGenericLocation(value) {
@@ -351,8 +381,8 @@ function inferLogoUrl(deal = {}, brand = '') {
     .filter(Boolean)
     .join(' ');
   const known = findBrandRule(combined);
-  if (deal.logoUrl && shouldUseLogoImage(deal, brand, deal.logoUrl, known)) return deal.logoUrl;
   if (known?.domain && !known?.preferFallback) return buildLogoUrl(known.domain, { allowSourceLike: true });
+  if (deal.logoUrl && shouldUseLogoImage(deal, brand, deal.logoUrl, known)) return deal.logoUrl;
 
   const directHost = extractHostFromUrl(deal.image || deal.imageUrl || deal.url || deal.post_url);
   if (shouldUseHostLogo(deal, brand, directHost, known)) return buildLogoUrl(directHost);
@@ -376,11 +406,11 @@ function inferLogo(deal = {}, brand = '') {
   if (/(ramen|noodle)/.test(signal)) return '🍜';
   if (/(crepe|crepes|crêpe|crêpes|waffel|shake)/.test(signal)) return '🥞';
   if (/(croissant|brioche|pastry|bakery)/.test(signal)) return '🥐';
-  if (/(ice cream|eis|gelato|cone)/.test(signal)) return '🍦';
-  if (/(kaffee|coffee|espresso|latte|matcha|tea)/.test(signal)) return '☕';
-  if (/(ticket|festival|museum|concert|ausstellung|show)/.test(signal)) return '🎫';
-  if (/(garten|botanisch|park)/.test(signal)) return '🌿';
-  if (/(book|buch|thalia)/.test(signal)) return '📚';
+  if (hasSignalTerm(signal, 'ice cream|eis|eiscreme|gelato|cone')) return '🍦';
+  if (hasSignalTerm(signal, 'kaffee|coffee|espresso|latte|matcha|tea|tee')) return '☕';
+  if (hasSignalTerm(signal, 'ticket|festival|museum|concert|ausstellung|show')) return '🎫';
+  if (hasSignalTerm(signal, 'garten|botanisch|park')) return '🌿';
+  if (hasSignalTerm(signal, 'book|buch|thalia')) return '📚';
   if (category === 'kaffee') return '☕';
   if (category === 'essen') return '🍴';
   if (category === 'supermarkt') return '🛒';
