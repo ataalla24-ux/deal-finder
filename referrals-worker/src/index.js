@@ -1233,6 +1233,7 @@ async function submitMerchantCampaign(env, record, session) {
     productId: record.priceId || '',
     transactionId,
     originalTransactionId: cleanShortText(session?.id || record.stripeSessionId, 160),
+    platform: 'web',
     restaurantName: campaign.restaurantName || '',
     dealTitle: campaign.dealTitle || '',
     description: campaign.description || '',
@@ -1248,10 +1249,15 @@ async function submitMerchantCampaign(env, record, session) {
     stripeCustomerId: cleanShortText(session?.customer, 160),
     source: 'freefinder-web',
   };
+  const merchantSecret = envString(env, 'MERCHANT_API_SECRET');
+  const headers = { 'content-type': 'application/json', accept: 'application/json' };
+  if (merchantSecret) {
+    headers['x-freefinder-merchant-secret'] = merchantSecret;
+  }
 
   const response = await fetch(endpoint, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    headers,
     body: JSON.stringify(payload),
   });
 
@@ -1781,7 +1787,7 @@ async function buildDealLinkPreview(rawUrl) {
     method: 'GET',
     redirect: 'follow',
     headers: {
-      'user-agent': 'Mozilla/5.0 (compatible; FreeFinderPreviewBot/1.0; +https://freefinder.app)',
+      'user-agent': 'Mozilla/5.0 (compatible; FreeFinderPreviewBot/1.0; +https://freefinder.at)',
       accept: 'text/html,application/xhtml+xml',
       'accept-language': 'de-AT,de;q=0.9,en;q=0.8',
       'cache-control': 'no-cache',
