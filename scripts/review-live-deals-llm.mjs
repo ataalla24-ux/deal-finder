@@ -38,6 +38,9 @@ const PROTECTED_LIVE_DEAL_IDS = new Set([
   'g2-1iz7wun',
   'manual-foodora-genuss-20260423',
   'extra-20-20260222',
+  'joe-omv-xlrh16',
+  'joe-omv-p1b2lo',
+  'joe-omv-liwfnv',
 ]);
 const OUTSIDE_VIENNA_PATTERN = /\b(graz|linz|salzburg|innsbruck|klagenfurt|villach|wels|st\.?\s*p[öo]lten|sankt\s+p[öo]lten|steyr|eisenstadt|tirol|vorarlberg|k[äa]rnten|steiermark|burgenland|ober[öo]sterreich|nieder[öo]sterreich)\b/i;
 const GENERIC_TARGET_PATTERN = /\b(startseite|homepage|aggregator|google news|rss|weiterleitung zur startseite|ohne spezifische|keine spezifischen|kein klarer nachweis|no specific|without specific|not specific)\b/i;
