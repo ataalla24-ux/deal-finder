@@ -28,6 +28,17 @@ const AUTO_REMOVE_REASONS = new Set([
   'duplicate',
   'missing_link',
 ]);
+const PROTECTED_LIVE_DEAL_IDS = new Set([
+  'icf-wien-events-20260622',
+  'joe-omv-viva-free-taste-6qmpsq',
+  'joe-omv-viva-free-taste-flur7',
+  'joe-omv-viva-free-taste-l62fzo',
+  'joe-omv-viva-free-taste-xipghf',
+  'joe-omv-viva-free-taste-oiemx1',
+  'g2-1iz7wun',
+  'manual-foodora-genuss-20260423',
+  'extra-20-20260222',
+]);
 const OUTSIDE_VIENNA_PATTERN = /\b(graz|linz|salzburg|innsbruck|klagenfurt|villach|wels|st\.?\s*p[öo]lten|sankt\s+p[öo]lten|steyr|eisenstadt|tirol|vorarlberg|k[äa]rnten|steiermark|burgenland|ober[öo]sterreich|nieder[öo]sterreich)\b/i;
 const GENERIC_TARGET_PATTERN = /\b(startseite|homepage|aggregator|google news|rss|weiterleitung zur startseite|ohne spezifische|keine spezifischen|kein klarer nachweis|no specific|without specific|not specific)\b/i;
 const BLOCKED_OR_TRANSIENT_STATUSES = new Set(['blocked', 'transient']);
@@ -379,6 +390,10 @@ function isBlockedOrTransientEvidence(evidence = {}) {
   return BLOCKED_OR_TRANSIENT_STATUSES.has(cleanText(evidence.status, 40));
 }
 
+function isProtectedLiveDealId(dealID) {
+  return PROTECTED_LIVE_DEAL_IDS.has(cleanText(dealID, 120));
+}
+
 function makePolicyOverride(review, deal = {}, evidence = {}) {
   const messageText = cleanText([review.message, review.suggestion].join(' '), 800);
   const targetText = evidenceSearchText(evidence);
@@ -387,6 +402,15 @@ function makePolicyOverride(review, deal = {}, evidence = {}) {
   const hasUrl = /^https?:\/\//i.test(cleanText(deal.url, 500));
   const reviewSaysNotVienna = /\b(not\s+wien|not\s+vienna|nicht\s+wien|nicht\s+in\s+wien|not\s+for\s+vienna|location mismatch|ort.*falsch|not\s+wien)\b/i.test(messageText);
   const targetHasVienna = hasViennaSignal(targetText);
+
+  if (isProtectedLiveDealId(review.dealID) && review.decision === 'remove') {
+    return {
+      decision: 'keep',
+      reason: 'ok',
+      confidence: 1,
+      message: 'Policy override: geschuetzter Best-Deal bleibt live und wird nicht automatisch per LLM entfernt.',
+    };
+  }
 
   if (!hasUrl || cleanText(evidence.status, 40) === 'missing_link') {
     return {
