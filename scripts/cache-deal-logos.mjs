@@ -12,6 +12,21 @@ const DEALS_PATH = path.join(DOCS_DIR, 'deals.json');
 const LOGO_DIR = path.join(DOCS_DIR, 'assets', 'brand-logos');
 const PUBLIC_LOGO_BASE_URL = (process.env.PUBLIC_BRAND_LOGO_BASE_URL || 'https://freefinder.at/assets/brand-logos').replace(/\/+$/, '');
 const REFRESH = process.argv.includes('--refresh');
+const MIN_LOGO_DIMENSION = 160;
+const PROTECTED_EMBLEM_FILES = new Set([
+  'billa-billa-at.png',
+  'burger-king-burgerking-at.png',
+  'dunkin-dunkin-at.png',
+  'foodora-foodora-at.png',
+  'ikea-restaurant-ikea-com.png',
+  'mcdonald-s-mcdonalds-at.png',
+  'nordsee-nordsee-com.png',
+  'omv-viva-omv-at.png',
+  'spotify-spotify-com.png',
+  'starbucks-starbucks-at.png',
+  'steakdoner-wolt-com.png',
+  'westfield-club-westfield-com.png',
+]);
 
 function cleanText(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
@@ -88,6 +103,44 @@ async function fetchLogo(url) {
   return buffer;
 }
 
+function pngDimensions(buffer) {
+  if (buffer.length < 24 || buffer.toString('ascii', 1, 4) !== 'PNG') return null;
+  return {
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20),
+  };
+}
+
+function jpegDimensions(buffer) {
+  if (buffer.length < 4 || buffer[0] !== 0xff || buffer[1] !== 0xd8) return null;
+  let offset = 2;
+  while (offset < buffer.length) {
+    if (buffer[offset] !== 0xff) return null;
+    const marker = buffer[offset + 1];
+    const length = buffer.readUInt16BE(offset + 2);
+    if (marker >= 0xc0 && marker <= 0xc3) {
+      return {
+        height: buffer.readUInt16BE(offset + 5),
+        width: buffer.readUInt16BE(offset + 7),
+      };
+    }
+    offset += 2 + length;
+  }
+  return null;
+}
+
+function imageDimensions(buffer) {
+  return pngDimensions(buffer) || jpegDimensions(buffer);
+}
+
+function assertLogoQuality(buffer) {
+  const dimensions = imageDimensions(buffer);
+  if (!dimensions) return;
+  if (dimensions.width < MIN_LOGO_DIMENSION || dimensions.height < MIN_LOGO_DIMENSION) {
+    throw new Error(`Logo dimensions too small (${dimensions.width}x${dimensions.height})`);
+  }
+}
+
 async function main() {
   await mkdir(LOGO_DIR, { recursive: true });
 
@@ -119,8 +172,10 @@ async function main() {
       cachedUrl = `${PUBLIC_LOGO_BASE_URL}/${fileName}`;
 
       try {
-        if (REFRESH || !(await fileExists(filePath))) {
+        const hasProtectedEmblem = PROTECTED_EMBLEM_FILES.has(fileName) && await fileExists(filePath);
+        if (!hasProtectedEmblem && (REFRESH || !(await fileExists(filePath)))) {
           const logo = await fetchLogo(sourceLogoUrl);
+          assertLogoQuality(logo);
           await writeFile(filePath, logo);
           cachedCount += 1;
         }
