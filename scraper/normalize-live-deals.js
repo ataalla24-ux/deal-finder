@@ -25,6 +25,7 @@ const ROOT = path.resolve(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const DEALS_PATH = path.join(DOCS_DIR, 'deals.json');
 const VALIDATION_REPORT_PATH = path.join(DOCS_DIR, 'live-deal-validation-report.json');
+const REVIEW_CANDIDATES_PATH = path.join(DOCS_DIR, 'live-deal-review-candidates.json');
 const DEAL_CANDIDATES_INDEX_PATH = path.join(DOCS_DIR, 'deal-candidates-index.json');
 const CHURCH_FILES = [
   path.join(ROOT, 'docs', 'deals-pending-church-gemeinde.json'),
@@ -97,7 +98,8 @@ function isSocialUrl(url = '') {
 }
 
 function hasRunBudget(used, limit) {
-  return !Number.isFinite(limit) || limit <= 0 || used < limit;
+  if (!Number.isFinite(limit)) return true;
+  return used < Math.max(0, limit);
 }
 
 function isFlightDeal(deal = {}) {
@@ -121,6 +123,62 @@ function normalizeSocialPostKey(url = '') {
   const text = cleanText(url).toLowerCase();
   if (!isSocialUrl(text)) return '';
   return text.replace(/\/+$/, '/');
+}
+
+function reviewCandidateKey(deal = {}) {
+  const id = cleanText(deal.id || '');
+  if (id) return `id:${id}`;
+  const url = normalizeUrlForCompare(deal.url || '');
+  return url ? `url:${url}` : '';
+}
+
+function compactReviewCandidate(deal = {}, reason = '', details = {}, now = new Date()) {
+  return {
+    id: cleanText(deal.id || ''),
+    title: cleanText(deal.title || deal.brand || '?'),
+    brand: cleanText(deal.brand || ''),
+    category: cleanText(deal.category || ''),
+    type: cleanText(deal.type || ''),
+    url: cleanText(deal.url || ''),
+    pubDate: cleanText(deal.pubDate || ''),
+    expires: cleanText(deal.expires || ''),
+    expiresOriginal: cleanText(deal.expiresOriginal || ''),
+    expiresSource: cleanText(deal.expiresSource || ''),
+    expiresPrecision: cleanText(deal.expiresPrecision || ''),
+    dateConfidence: cleanText(deal.dateConfidence || ''),
+    reason: cleanText(reason),
+    details,
+    queuedAt: now.toISOString(),
+  };
+}
+
+function isStrongInvalidHealth(deal, health) {
+  if (!health?.invalid) return false;
+  const reason = cleanText(health.reason || '');
+  if (reason === 'Ungültige Ziel-URL') return true;
+  if (/HTTP\s+(404|410|451)\b/i.test(reason)) return true;
+  if (/angebot abgelaufen|aktion beendet|deal beendet|offer expired/i.test(reason)) return true;
+  if (isSocialUrl(deal?.url || health?.finalUrl || '')) return false;
+  return /seite nicht gefunden|inhalt nicht mehr verfügbar|seite oder account nicht gefunden/i.test(reason);
+}
+
+function isStrongExpiredDealEvidence(deal) {
+  const source = cleanText(deal.expiresSource || '').toLowerCase();
+  const precision = cleanText(deal.expiresPrecision || '').toLowerCase();
+  const confidence = cleanText(deal.dateConfidence || '').toLowerCase();
+  const fromUrl = Boolean(deal.expiresDetectedFromUrl || source === 'url');
+  const exactDay = precision === 'day';
+  const highConfidence = confidence === 'high';
+
+  if (fromUrl) return exactDay && highConfidence;
+  if (source === 'text') return exactDay && highConfidence;
+  return false;
+}
+
+function shouldQueueExpiredDealForReview(deal, now = new Date()) {
+  if (!isExpiredDealRecord(deal, now)) return false;
+  if (isSocialUrl(deal.url || '')) return true;
+  return !isStrongExpiredDealEvidence(deal);
 }
 
 function looksAddressLike(value = '') {
@@ -783,14 +841,18 @@ async function main() {
   const remaining = [];
   const seenIds = new Set();
   const removed = [];
+  const reviewCandidatesByKey = new Map();
   let linkChecksUsed = 0;
   let brokenLinkRemovals = 0;
   let opaqueSocialShellRemovals = 0;
+  let invalidLinkReviewCandidates = 0;
+  let opaqueSocialShellReviewCandidates = 0;
   let socialPostDateRemovals = 0;
   let socialPostDateFixes = 0;
   let expiryUrlChecksUsed = 0;
   let urlVerifiedExpiryHits = 0;
   let expiredByVerifiedDateRemovals = 0;
+  let expiredReviewCandidates = 0;
   let contentEnrichments = 0;
   let socialPubDateSourceFixes = 0;
   let socialPolishFixes = 0;
@@ -806,6 +868,25 @@ async function main() {
       url: cleanText(deal?.url || ''),
       reason,
     });
+  }
+
+  function markForReview(deal, reason, details = {}) {
+    const key = reviewCandidateKey(deal);
+    if (!key) return;
+    const existing = reviewCandidatesByKey.get(key);
+    const candidate = compactReviewCandidate(deal, reason, details, now);
+    if (existing) {
+      reviewCandidatesByKey.set(key, {
+        ...existing,
+        reason: Array.from(new Set([existing.reason, candidate.reason].filter(Boolean))).join(' + '),
+        details: {
+          ...existing.details,
+          ...candidate.details,
+        },
+      });
+      return;
+    }
+    reviewCandidatesByKey.set(key, candidate);
   }
 
   async function verifyDealUrl(deal) {
@@ -910,9 +991,17 @@ async function main() {
 
     const health = await verifyDealUrl(deal);
     if (!forceKeep && health?.invalid) {
-      brokenLinkRemovals += 1;
-      markRemoved(deal, `Ziellink ungültig: ${health.reason}`);
-      continue;
+      if (isStrongInvalidHealth(deal, health)) {
+        brokenLinkRemovals += 1;
+        markRemoved(deal, `Ziellink ungültig: ${health.reason}`);
+        continue;
+      }
+      invalidLinkReviewCandidates += 1;
+      markForReview(deal, 'Ziellink prüfen: nicht eindeutig ungültig', {
+        healthReason: cleanText(health.reason || ''),
+        status: health.status || null,
+        finalUrl: cleanText(health.finalUrl || ''),
+      });
     }
     if (health?.finalUrl) {
       const currentUrl = normalizeUrlForCompare(deal.url);
@@ -933,10 +1022,12 @@ async function main() {
       continue;
     }
     if (!forceKeep && shouldDropOpaqueSocialShellDeal(deal, health, now)) {
-      brokenLinkRemovals += 1;
-      opaqueSocialShellRemovals += 1;
-      markRemoved(deal, 'Social-Post nicht mehr öffentlich verifizierbar');
-      continue;
+      opaqueSocialShellReviewCandidates += 1;
+      markForReview(deal, 'Social-Post öffentlich nicht eindeutig verifizierbar', {
+        healthReason: cleanText(health?.reason || ''),
+        status: health?.status || null,
+        finalUrl: cleanText(health?.finalUrl || ''),
+      });
     }
     if (!skipUrlChecksForDeal && health?.contentHints && hasRunBudget(contentEnrichments, MAX_LIVE_CONTENT_ENRICHMENTS)) {
       const enriched = maybeEnrichDealCopy(deal, health.contentHints);
@@ -963,13 +1054,24 @@ async function main() {
       continue;
     }
     if (isExpiredDealRecord(deal, now)) {
-      if (deal.expiresDetectedFromUrl || deal.expiresSource === 'url') {
+      if (!forceKeep && shouldQueueExpiredDealForReview(deal, now)) {
+        expiredReviewCandidates += 1;
+        markForReview(deal, 'Ablaufdatum unsicher - bitte manuell prüfen', {
+          expires: cleanText(deal.expires || ''),
+          expiresOriginal: cleanText(deal.expiresOriginal || ''),
+          expiresSource: cleanText(deal.expiresSource || ''),
+          expiresPrecision: cleanText(deal.expiresPrecision || ''),
+          dateConfidence: cleanText(deal.dateConfidence || ''),
+          expiresDetectedFromUrl: Boolean(deal.expiresDetectedFromUrl),
+        });
+      } else if (deal.expiresDetectedFromUrl || deal.expiresSource === 'url') {
         expiredByVerifiedDateRemovals += 1;
         markRemoved(deal, 'Deal laut Zielseite abgelaufen');
+        continue;
       } else {
         markRemoved(deal, 'Deal abgelaufen');
+        continue;
       }
-      continue;
     }
     if (!deal.id) {
       markRemoved(deal, 'Deal ohne ID');
@@ -1023,13 +1125,24 @@ async function main() {
       continue;
     }
     if (isExpiredDealRecord(normalizedChurchDeal, now)) {
-      if (normalizedChurchDeal.expiresDetectedFromUrl || normalizedChurchDeal.expiresSource === 'url') {
+      if (shouldQueueExpiredDealForReview(normalizedChurchDeal, now)) {
+        expiredReviewCandidates += 1;
+        markForReview(normalizedChurchDeal, 'Kirchen-/Event-Ablaufdatum unsicher - bitte manuell prüfen', {
+          expires: cleanText(normalizedChurchDeal.expires || ''),
+          expiresOriginal: cleanText(normalizedChurchDeal.expiresOriginal || ''),
+          expiresSource: cleanText(normalizedChurchDeal.expiresSource || ''),
+          expiresPrecision: cleanText(normalizedChurchDeal.expiresPrecision || ''),
+          dateConfidence: cleanText(normalizedChurchDeal.dateConfidence || ''),
+          expiresDetectedFromUrl: Boolean(normalizedChurchDeal.expiresDetectedFromUrl),
+        });
+      } else if (normalizedChurchDeal.expiresDetectedFromUrl || normalizedChurchDeal.expiresSource === 'url') {
         expiredByVerifiedDateRemovals += 1;
         markRemoved(normalizedChurchDeal, 'Kirchen-/Event-Deal laut Zielseite abgelaufen');
+        continue;
       } else {
         markRemoved(normalizedChurchDeal, 'Kirchen-/Event-Deal abgelaufen');
+        continue;
       }
-      continue;
     }
     if (!normalizedChurchDeal.id) {
       markRemoved(normalizedChurchDeal, 'Kirchen-/Event-Deal ohne ID');
@@ -1054,6 +1167,14 @@ async function main() {
   }
 
   const finalRemaining = moderationFilter.deals;
+  const finalDealKeys = new Set(finalRemaining.map((deal) => reviewCandidateKey(deal)).filter(Boolean));
+  const reviewCandidates = Array.from(reviewCandidatesByKey.values())
+    .filter((candidate) => finalDealKeys.has(reviewCandidateKey(candidate)))
+    .sort((a, b) => {
+      const aTime = Date.parse(a.pubDate || '') || 0;
+      const bTime = Date.parse(b.pubDate || '') || 0;
+      return bTime - aTime;
+    });
 
   finalRemaining.sort((a, b) => {
     const aTime = Date.parse(a.pubDate || '') || 0;
@@ -1071,6 +1192,11 @@ async function main() {
   }, {});
 
   await writeFile(DEALS_PATH, JSON.stringify(dealsDoc, null, 2) + '\n', 'utf8');
+  await writeFile(REVIEW_CANDIDATES_PATH, JSON.stringify({
+    checkedAt: now.toISOString(),
+    totalCandidates: reviewCandidates.length,
+    candidates: reviewCandidates.slice(0, 200),
+  }, null, 2) + '\n', 'utf8');
   await writeFile(VALIDATION_REPORT_PATH, JSON.stringify({
     checkedAt: now.toISOString(),
     totalBefore,
@@ -1080,10 +1206,14 @@ async function main() {
     moderationRemovals,
     brokenLinkRemovals,
     opaqueSocialShellRemovals,
+    invalidLinkReviewCandidates,
+    opaqueSocialShellReviewCandidates,
     socialPostDateRemovals,
     socialPostDateFixes,
     maxSocialPostAgeDays: MAX_SOCIAL_POST_AGE_DAYS,
     expiredByVerifiedDateRemovals,
+    expiredReviewCandidates,
+    reviewCandidateCount: reviewCandidates.length,
     socialPubDateSourceFixes,
     linkChecksUsed,
     maxLinkChecks: MAX_LIVE_URL_HEALTH_CHECKS,
@@ -1095,6 +1225,7 @@ async function main() {
     flightUrlCheckSkips,
     socialPolishFixes,
     removalReasons,
+    reviewCandidates: reviewCandidates.slice(0, 100),
     removed: removed.slice(0, 200),
   }, null, 2) + '\n', 'utf8');
 
@@ -1104,6 +1235,10 @@ async function main() {
   console.log(`Moderation removals: ${moderationRemovals}`);
   console.log(`Broken link removals: ${brokenLinkRemovals}`);
   console.log(`Opaque social shell removals: ${opaqueSocialShellRemovals}`);
+  console.log(`Invalid link review candidates: ${invalidLinkReviewCandidates}`);
+  console.log(`Opaque social shell review candidates: ${opaqueSocialShellReviewCandidates}`);
+  console.log(`Expired review candidates: ${expiredReviewCandidates}`);
+  console.log(`Review candidates kept live: ${reviewCandidates.length}`);
   console.log(`Social post date removals: ${socialPostDateRemovals}`);
   console.log(`Social post date fixes: ${socialPostDateFixes}`);
   console.log(`Social pubDateSource fixes applied: ${socialPubDateSourceFixes}`);

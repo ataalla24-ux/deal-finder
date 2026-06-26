@@ -364,13 +364,139 @@ function mergePickedDealWithApproved(approvedDeal, pickedDeal) {
     };
 }
 
+function parseTime(value) {
+    const parsed = Date.parse(cleanText(value || ''));
+    return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function isFeaturedDealStillLive(deal, now = new Date()) {
+    if (!deal || typeof deal !== 'object') return false;
+    if (!cleanText(deal.id || deal.url || '')) return false;
+
+    const expiresAt = parseTime(deal.expires || deal.validUntil || deal.end_date || deal.validity_date || '');
+    if (expiresAt && expiresAt < now.getTime()) return false;
+
+    return true;
+}
+
+function loadExistingFeaturedDeal(kind) {
+    const fileName = kind === 'weekly' ? 'deal-of-the-week.json' : 'deal-of-the-day.json';
+    const filePath = path.join(__dirname, '..', 'docs', fileName);
+    try {
+        if (!fs.existsSync(filePath)) return null;
+        return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    } catch (error) {
+        console.log(`Could not read ${fileName}:`, error.message);
+        return null;
+    }
+}
+
+function isExistingFeaturedDealCurrent(kind, approvedDeals) {
+    const existing = loadExistingFeaturedDeal(kind);
+    if (!existing) return false;
+
+    const expectedKey = kind === 'weekly' ? getViennaWeekKey() : getViennaDayKey();
+    const actualKey = kind === 'weekly' ? cleanText(existing.week || '') : cleanText(existing.date || '');
+    if (actualKey !== expectedKey) return false;
+
+    const approvedDeal = findApprovedDealMatch(approvedDeals, {
+        id: existing.dealId || existing.id || '',
+        url: existing.url || '',
+    });
+    return isFeaturedDealStillLive(approvedDeal || existing);
+}
+
+function automaticCategoryScore(category) {
+    const value = cleanText(category || '').toLowerCase();
+    const scores = new Map([
+        ['essen', 22],
+        ['kaffee', 20],
+        ['supermarkt', 16],
+        ['shopping', 12],
+        ['beauty', 10],
+        ['fitness', 10],
+        ['reisen', 8],
+        ['kultur', 6],
+        ['events', 6],
+        ['kirche', -20],
+        ['gottesdienste', -20],
+        ['gemeinde', -18],
+    ]);
+    return scores.get(value) || 0;
+}
+
+function automaticTypeScore(type) {
+    const value = cleanText(type || '').toLowerCase();
+    if (value === 'gratis') return 30;
+    if (value === 'bogo') return 24;
+    if (value === 'rabatt') return 18;
+    if (value === 'gutschein') return 14;
+    return 0;
+}
+
+function isWeakAutomaticBrand(value) {
+    const text = cleanText(value || '').toLowerCase();
+    if (!text) return true;
+    return /^(instagram|tiktok|wien|deal|gutschein|gratis|rabatt|angebot|restaurant|lieferung|jeder|jede|jedem|jeden)\b/.test(text)
+        || /\bbestellung\b/.test(text);
+}
+
+function scoreAutomaticFeaturedDeal(deal, kind, now = new Date()) {
+    const normalized = normalizeDealRecord(deal);
+    const brand = cleanText(normalized.brand || '');
+    const title = cleanText(normalized.title || '');
+    const description = cleanText(normalized.description || '');
+    const weakBrand = isWeakAutomaticBrand(brand);
+    let score = automaticTypeScore(normalized.type) + automaticCategoryScore(normalized.category);
+
+    if (brand && !weakBrand) score += 12;
+    if (weakBrand) score -= 18;
+    if (title.length >= 14) score += 8;
+    if (description.length >= 28) score += 6;
+    if (/^https?:\/\//i.test(cleanText(normalized.url || ''))) score += 6;
+    if (cleanText(normalized.logoUrl || '')) score += 2;
+    if (kind === 'weekly') score += Math.min(description.length, 160) / 24;
+
+    const pubDate = parseTime(normalized.pubDate || normalized.approvedAt || '');
+    if (pubDate) {
+        const ageDays = Math.max(0, (now.getTime() - pubDate) / (24 * 60 * 60 * 1000));
+        score += Math.max(0, 18 - ageDays);
+    }
+
+    return score;
+}
+
+function selectAutomaticFeaturedDeal(approvedDeals, options = {}) {
+    const kind = options.kind || 'daily';
+    const now = options.now instanceof Date ? options.now : new Date();
+    const excludedIds = options.excludedIds instanceof Set ? options.excludedIds : new Set();
+    const liveDeals = approvedDeals
+        .filter((deal) => isFeaturedDealStillLive(deal, now))
+        .filter((deal) => !excludedIds.has(cleanText(deal.id || '')));
+
+    if (liveDeals.length === 0) return null;
+
+    const preferred = liveDeals.filter((deal) => {
+        const category = cleanText(deal.category || '').toLowerCase();
+        return !['kirche', 'gottesdienste', 'gemeinde'].includes(category);
+    });
+    const candidates = preferred.length > 0 ? preferred : liveDeals;
+
+    return [...candidates].sort((a, b) => {
+        const scoreDelta = scoreAutomaticFeaturedDeal(b, kind, now) - scoreAutomaticFeaturedDeal(a, kind, now);
+        if (scoreDelta !== 0) return scoreDelta;
+        return parseTime(b.pubDate || b.approvedAt || '') - parseTime(a.pubDate || a.approvedAt || '');
+    })[0] || null;
+}
+
 // ============================================
 // Step 4: Write featured deal files
 // ============================================
-function saveDealOfTheDay(deal) {
+function saveDealOfTheDay(deal, options = {}) {
     const outputPath = path.join(__dirname, '..', 'docs', 'deal-of-the-day.json');
     const today = getViennaDayKey();
     const normalized = normalizeDealRecord(deal);
+    const manualPick = options.manualPick !== false;
 
   const output = {
         date: today,
@@ -384,7 +510,8 @@ function saveDealOfTheDay(deal) {
         type: normalized.type,
         category: normalized.category || 'wien',
         distance: normalized.distance || 'Wien',
-        manualPick: true,
+        manualPick,
+        selectionReason: manualPick ? 'slack-pick' : 'automatic-approved-fallback',
         pickedAt: new Date().toISOString()
   };
 
@@ -392,10 +519,11 @@ function saveDealOfTheDay(deal) {
     console.log('Saved deal-of-the-day.json:', deal.brand, '-', deal.title);
 }
 
-function saveDealOfTheWeek(deal) {
+function saveDealOfTheWeek(deal, options = {}) {
     const outputPath = path.join(__dirname, '..', 'docs', 'deal-of-the-week.json');
     const week = getViennaWeekKey();
     const normalized = normalizeDealRecord(deal);
+    const manualPick = options.manualPick !== false;
 
     const output = {
         week,
@@ -409,7 +537,8 @@ function saveDealOfTheWeek(deal) {
         type: normalized.type,
         category: normalized.category || 'wien',
         distance: normalized.distance || 'Wien',
-        manualPick: true,
+        manualPick,
+        selectionReason: manualPick ? 'slack-pick' : 'automatic-approved-fallback',
         pickedAt: new Date().toISOString()
     };
 
@@ -449,40 +578,39 @@ async function main() {
     console.log('='.repeat(40));
 
   if (!SLACK_BOT_TOKEN || !SLACK_CHANNEL_ID) {
-        console.log('Slack not configured, skipping');
-        process.exit(0);
+        console.log('Slack not configured, falling back to approved live deals');
   }
 
-  const threadTs = await findTodaysThread();
-    if (!threadTs) {
-          process.exit(0);
-    }
-
-  const picks = await findYourPicks(threadTs);
-    if (!picks.daily && !picks.weekly) {
-          console.log('No picks found - featured deals stay on automatic selection');
-          process.exit(0);
-    }
-
-  const threadMessages = await getThreadMessages(threadTs);
-  const deals = applySlackEditsToDeals(extractDealsFromThreadMessages(threadMessages), threadMessages);
-    if (deals.length === 0) {
-          const sample = threadMessages.find((msg) => cleanText(msg?.ts) !== cleanText(threadTs));
-          if (sample) {
-                  console.log('Sample digest message text:', JSON.stringify(extractSlackMessageText(sample).slice(0, 1000)));
-                  console.log('Sample digest message keys:', Object.keys(sample).slice(0, 20).join(','));
-                  console.log('Sample digest has blocks:', Array.isArray(sample.blocks), 'blockCount:', Array.isArray(sample.blocks) ? sample.blocks.length : 0);
-          }
-          console.log('No digest deals found');
-          process.exit(0);
-    }
-
-  const botUserId = await getBotUserId();
   const approvedDeals = loadApprovedDeals();
+  let threadTs = null;
+  let picks = { daily: null, weekly: null };
+  let threadMessages = [];
+  let deals = [];
+  let botUserId = '';
+
+  if (SLACK_BOT_TOKEN && SLACK_CHANNEL_ID) {
+    threadTs = await findTodaysThread();
+    if (threadTs) {
+      picks = await findYourPicks(threadTs) || picks;
+      threadMessages = await getThreadMessages(threadTs);
+      deals = applySlackEditsToDeals(extractDealsFromThreadMessages(threadMessages), threadMessages);
+      botUserId = await getBotUserId();
+      if (deals.length === 0) {
+            const sample = threadMessages.find((msg) => cleanText(msg?.ts) !== cleanText(threadTs));
+            if (sample) {
+                    console.log('Sample digest message text:', JSON.stringify(extractSlackMessageText(sample).slice(0, 1000)));
+                    console.log('Sample digest message keys:', Object.keys(sample).slice(0, 20).join(','));
+                    console.log('Sample digest has blocks:', Array.isArray(sample.blocks), 'blockCount:', Array.isArray(sample.blocks) ? sample.blocks.length : 0);
+            }
+            console.log('No digest deals found, falling back to approved live deals');
+      }
+    }
+  }
+
   const maxOrder = deals.reduce((max, current) => Math.max(max, Number(current?.order) || 0), 0);
 
   function maybePersistPick(kind, pickNumber) {
-    if (!pickNumber) return false;
+    if (!pickNumber || deals.length === 0) return false;
     const deal = findPickedDeal(deals, pickNumber);
     if (!deal) {
       console.log(`${kind} pick #${pickNumber} not found in digest numbering (parsed deals: ${deals.length}, max order: ${maxOrder})`);
@@ -505,8 +633,47 @@ async function main() {
     return true;
   }
 
-  const savedDaily = maybePersistPick('daily', picks.daily);
-  const savedWeekly = maybePersistPick('weekly', picks.weekly);
+  let savedDaily = maybePersistPick('daily', picks.daily);
+  let savedWeekly = maybePersistPick('weekly', picks.weekly);
+
+  const automaticExcludedIds = new Set();
+  if (savedDaily && picks.daily) {
+    const pickedDaily = findPickedDeal(deals, picks.daily);
+    if (pickedDaily?.id) automaticExcludedIds.add(cleanText(pickedDaily.id));
+  }
+
+  if (!savedDaily && !isExistingFeaturedDealCurrent('daily', approvedDeals)) {
+    const fallbackDaily = selectAutomaticFeaturedDeal(approvedDeals, {
+      kind: 'daily',
+      excludedIds: automaticExcludedIds,
+    });
+    if (fallbackDaily) {
+      console.log(`Automatic daily fallback: ${fallbackDaily.brand} - ${fallbackDaily.title}`);
+      saveDealOfTheDay(fallbackDaily, { manualPick: false });
+      savedDaily = true;
+      if (fallbackDaily.id) automaticExcludedIds.add(cleanText(fallbackDaily.id));
+    } else {
+      console.log('No approved live deal available for automatic daily fallback');
+    }
+  } else if (!savedDaily) {
+    console.log('Existing daily featured deal is current and approved');
+  }
+
+  if (!savedWeekly && !isExistingFeaturedDealCurrent('weekly', approvedDeals)) {
+    const fallbackWeekly = selectAutomaticFeaturedDeal(approvedDeals, {
+      kind: 'weekly',
+      excludedIds: automaticExcludedIds,
+    });
+    if (fallbackWeekly) {
+      console.log(`Automatic weekly fallback: ${fallbackWeekly.brand} - ${fallbackWeekly.title}`);
+      saveDealOfTheWeek(fallbackWeekly, { manualPick: false });
+      savedWeekly = true;
+    } else {
+      console.log('No approved live deal available for automatic weekly fallback');
+    }
+  } else if (!savedWeekly) {
+    console.log('Existing weekly featured deal is current and approved');
+  }
 
   if (!savedDaily && !savedWeekly) {
     console.log('No featured deal files updated');

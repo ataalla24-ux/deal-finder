@@ -8,6 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const LIVE_DEALS_PATH = path.join(ROOT, 'docs', 'deals.json');
+const REVIEW_CANDIDATES_PATH = path.join(ROOT, 'docs', 'live-deal-review-candidates.json');
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
@@ -32,11 +33,72 @@ function slackEscape(value) {
 function loadLiveDeals() {
   const parsed = JSON.parse(fs.readFileSync(LIVE_DEALS_PATH, 'utf8'));
   const deals = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.deals) ? parsed.deals : []);
+  const review = loadReviewCandidates();
   return {
     lastUpdated: cleanText(parsed.lastUpdated || ''),
     totalDeals: Number(parsed.totalDeals || deals.length) || deals.length,
+    reviewCheckedAt: review.checkedAt,
+    reviewCandidates: review.candidates,
     deals,
   };
+}
+
+function loadReviewCandidates() {
+  try {
+    if (!fs.existsSync(REVIEW_CANDIDATES_PATH)) {
+      return { checkedAt: '', candidates: [] };
+    }
+    const parsed = JSON.parse(fs.readFileSync(REVIEW_CANDIDATES_PATH, 'utf8'));
+    return {
+      checkedAt: cleanText(parsed.checkedAt || ''),
+      candidates: Array.isArray(parsed.candidates) ? parsed.candidates : [],
+    };
+  } catch (error) {
+    console.warn(`Could not read live review candidates: ${error.message}`);
+    return { checkedAt: '', candidates: [] };
+  }
+}
+
+function normalizeUrlForCompare(value) {
+  const text = cleanText(value, 1000);
+  if (!text) return '';
+  try {
+    const parsed = new URL(text);
+    if (parsed.pathname !== '/' && parsed.pathname.endsWith('/')) {
+      parsed.pathname = parsed.pathname.slice(0, -1);
+    }
+    parsed.hash = '';
+    return parsed.toString();
+  } catch {
+    return text.replace(/\/+$/, '');
+  }
+}
+
+function reviewKey(deal = {}) {
+  const id = cleanText(deal.id || '', 256);
+  if (id) return `id:${id}`;
+  const url = normalizeUrlForCompare(deal.url || '');
+  return url ? `url:${url}` : '';
+}
+
+function buildReviewCandidateMap(candidates = []) {
+  const map = new Map();
+  for (const candidate of candidates) {
+    const idKey = cleanText(candidate.id || '', 256) ? `id:${cleanText(candidate.id || '', 256)}` : '';
+    const url = normalizeUrlForCompare(candidate.url || '');
+    if (idKey) map.set(idKey, candidate);
+    if (url) map.set(`url:${url}`, candidate);
+  }
+  return map;
+}
+
+function prioritizeReviewCandidates(deals = [], reviewCandidateMap = new Map()) {
+  return [...deals].sort((a, b) => {
+    const aReview = reviewCandidateMap.has(reviewKey(a)) ? 1 : 0;
+    const bReview = reviewCandidateMap.has(reviewKey(b)) ? 1 : 0;
+    if (aReview !== bReview) return bReview - aReview;
+    return 0;
+  });
 }
 
 function formatDate(value) {
@@ -103,16 +165,18 @@ function signedEditUrl(deal) {
   return signedWorkerUrl('/api/deals/admin/edit-link', editValue(deal));
 }
 
-function dealBlocks(deal, index) {
+function dealBlocks(deal, index, reviewCandidate = null) {
   const title = slackEscape(deal.title || deal.brand || 'Deal');
   const brand = slackEscape(deal.brand || 'Unbekannt');
   const location = slackEscape(deal.distance || deal.location || deal.address || 'Wien');
   const pubDate = slackEscape(formatDate(deal.pubDate));
   const id = slackEscape(deal.id || '');
+  const reviewReason = reviewCandidate ? slackEscape(reviewCandidate.reason || 'Bitte prüfen') : '';
   const text = [
-    `*${index + 1}. ${title}*`,
+    `*${index + 1}. ${reviewReason ? 'Prüfen: ' : ''}${title}*`,
     brand ? brand : '',
     `${location} · ${pubDate}`,
+    reviewReason ? `Prüfgrund: ${reviewReason}` : '',
     id ? `ID: \`${id}\`` : '',
   ].filter(Boolean).join('\n');
 
@@ -195,7 +259,8 @@ async function postMessage(body) {
 
 async function main() {
   const live = loadLiveDeals();
-  const deals = live.deals.slice(0, MAX_DEALS);
+  const reviewCandidateMap = buildReviewCandidateMap(live.reviewCandidates);
+  const deals = prioritizeReviewCandidates(live.deals, reviewCandidateMap).slice(0, MAX_DEALS);
 
   if (!DRY_RUN && (!SLACK_BOT_TOKEN || !SLACK_CHANNEL_ID)) {
     throw new Error('SLACK_BOT_TOKEN and SLACK_CHANNEL_ID are required');
@@ -207,7 +272,9 @@ async function main() {
   const headerText = [
     `*FreeFinder Live-Deal-Review*`,
     `${live.totalDeals} Deals sind aktuell online in iOS, Web und Android.`,
+    live.reviewCandidates.length > 0 ? `${live.reviewCandidates.length} Deals brauchen besondere Prüfung.` : '',
     live.lastUpdated ? `Stand: ${live.lastUpdated}` : '',
+    live.reviewCheckedAt ? `Review-Kandidaten: ${live.reviewCheckedAt}` : '',
     `Zum Admin: ${ADMIN_URL}`,
   ].filter(Boolean).join('\n');
 
@@ -232,7 +299,7 @@ async function main() {
 
   for (const [chunkIndex, group] of chunk(deals, CHUNK_SIZE).entries()) {
     const offset = chunkIndex * CHUNK_SIZE;
-    const blocks = group.flatMap((deal, index) => dealBlocks(deal, offset + index));
+    const blocks = group.flatMap((deal, index) => dealBlocks(deal, offset + index, reviewCandidateMap.get(reviewKey(deal)) || null));
     await postMessage({
       channel: SLACK_CHANNEL_ID,
       thread_ts: header.ts,
