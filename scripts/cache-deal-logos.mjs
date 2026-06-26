@@ -14,18 +14,33 @@ const PUBLIC_LOGO_BASE_URL = (process.env.PUBLIC_BRAND_LOGO_BASE_URL || 'https:/
 const REFRESH = process.argv.includes('--refresh');
 const MIN_LOGO_DIMENSION = 160;
 const PROTECTED_EMBLEM_FILES = new Set([
+  'all4golf-all4golf-de.png',
   'billa-billa-at.png',
   'burger-king-burgerking-at.png',
+  'cig-wien-cigwien-at.png',
   'dunkin-dunkin-at.png',
+  'evo-fitness-evofitness-at.png',
   'foodora-foodora-at.png',
+  'foodsharing-foodsharing-at.png',
+  'hillsong-vienna-hillsong-com.png',
+  'icf-wien-icf-church.png',
+  'icf-wien-icf-wien-at.png',
   'ikea-restaurant-ikea-com.png',
+  'madame-tussauds-wien-madametussauds-com.png',
+  'marschfuerjesus-marschfuerjesus-com.png',
   'mcdonald-s-mcdonalds-at.png',
   'nordsee-nordsee-com.png',
   'omv-viva-omv-at.png',
+  'raiffeisen-raiffeistag-raiffeisen-at.png',
   'spotify-spotify-com.png',
   'starbucks-starbucks-at.png',
   'steakdoner-wolt-com.png',
+  'thalia-thalia-at.png',
+  'therme-wien-thermewien-at.png',
+  'too-good-to-go-toogoodtogo-com.png',
+  'vcc-jesuszentrum-jesuszentrum-at.png',
   'westfield-club-westfield-com.png',
+  'wiener-deewan-deewan-at.png',
 ]);
 
 function cleanText(value) {
