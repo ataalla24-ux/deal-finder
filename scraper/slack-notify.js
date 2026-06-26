@@ -366,6 +366,7 @@ function buildSlackMessage(deal, index) {
     validationDetails,
     missingNote,
     desc,
+    `✏️ Bearbeiten: \`edit ${index} titel: Neuer Titel | datum: TT.MM.JJJJ | ablauf: TT.MM.JJJJ | ort: Adresse | link: https://... | quelle: Quelle\``,
     '_Mit ✅ freigeben_',
   ].join('\n');
 }
