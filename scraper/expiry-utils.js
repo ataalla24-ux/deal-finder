@@ -724,6 +724,14 @@ function shouldTreatHttpStatusAsInvalid(status) {
 
 function decodeHtmlEntities(value) {
   return String(value || '')
+    .replace(/&#(\d+);/g, (_, code) => {
+      const point = Number(code);
+      return Number.isInteger(point) && point >= 0 && point <= 0x10ffff ? String.fromCodePoint(point) : _;
+    })
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => {
+      const point = Number.parseInt(code, 16);
+      return Number.isInteger(point) && point >= 0 && point <= 0x10ffff ? String.fromCodePoint(point) : _;
+    })
     .replace(/&amp;/gi, '&')
     .replace(/&quot;/gi, '"')
     .replace(/&#39;/gi, "'")
@@ -1129,6 +1137,31 @@ function extractFirstHeading(html) {
   return cleanHtmlText(match?.[1] || '');
 }
 
+function extractHeadings(html, limit = 5) {
+  const matches = String(html || '').matchAll(/<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/gi);
+  const headings = [];
+  const seen = new Set();
+  for (const match of matches) {
+    const heading = cleanHtmlText(match?.[1] || '');
+    const key = heading.toLowerCase();
+    if (!heading || seen.has(key)) continue;
+    headings.push(heading);
+    seen.add(key);
+    if (headings.length >= limit) break;
+  }
+  return headings;
+}
+
+function extractVisibleTextSnippet(html, maxLength = 1200) {
+  const stripped = String(html || '')
+    .replace(/<script\b[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<noscript\b[\s\S]*?<\/noscript>/gi, ' ')
+    .replace(/<svg\b[\s\S]*?<\/svg>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ');
+  return cleanHtmlText(stripped).slice(0, maxLength);
+}
+
 function extractDealPageHints(html) {
   const description =
     extractMetaTagContent(html, 'property', 'og:description') ||
@@ -1141,9 +1174,14 @@ function extractDealPageHints(html) {
     extractTitleFromHtml(html) ||
     extractFirstHeading(html);
 
+  const headings = extractHeadings(html);
+
   return {
     title: cleanHtmlText(title),
     description: cleanHtmlText(description),
+    heading: headings[0] || '',
+    headings,
+    textSnippet: extractVisibleTextSnippet(html),
   };
 }
 

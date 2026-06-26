@@ -9,7 +9,7 @@ const JSON_HEADERS = {
 const MIN_CONFIRM_DELAY_MS = 15 * 1000;
 const textEncoder = new TextEncoder();
 const APP_STORE_APP_ID = '6758958213';
-const WEBSITE_HOME_URL = 'https://ataalla24-ux.github.io/deal-finder/';
+const WEBSITE_HOME_URL = 'https://freefinder.at/';
 const WEBSITE_DEALS_JSON_URL = `${WEBSITE_HOME_URL}deals.json`;
 const WEBSITE_SHARE_IMAGE_URL = `${WEBSITE_HOME_URL}og-preview.png`;
 const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
@@ -450,6 +450,7 @@ function sanitizePublicDealOverride(record) {
     description: typeof record.description === 'string' ? record.description : '',
     brand: typeof record.brand === 'string' ? record.brand : '',
     distance: typeof record.distance === 'string' ? record.distance : '',
+    pubDate: typeof record.pubDate === 'string' ? record.pubDate : '',
     expires: typeof record.expires === 'string' ? record.expires : '',
     expiresOriginal: typeof record.expiresOriginal === 'string' ? record.expiresOriginal : '',
     expiryKind: typeof record.expiryKind === 'string' ? record.expiryKind : '',
@@ -646,6 +647,7 @@ function normalizeDealOverrideInput(body, existing = null) {
     description: cleanLongText(body?.description, 2500),
     brand: cleanShortText(body?.brand, 120),
     distance: cleanShortText(body?.distance, 200),
+    pubDate: cleanShortText(body?.pubDate, 80),
     expires: cleanShortText(body?.expires, 120),
     expiresOriginal: cleanShortText(body?.expiresOriginal, 180),
     expiryKind: cleanShortText(body?.expiryKind, 40).toLowerCase(),
@@ -830,7 +832,7 @@ function dealRemovalHtml(title, body, status = 200) {
   <main>
     <h1>${safeTitle}</h1>
     <p>${safeBody}</p>
-    <p><a href="https://github.com/ataalla24-ux/deal-finder/actions/workflows/deal-moderation.yml">GitHub Moderation Workflow</a> · <a href="https://ataalla24-ux.github.io/deal-finder/deal-admin.html">Deal Admin</a></p>
+    <p><a href="https://github.com/ataalla24-ux/deal-finder/actions/workflows/deal-moderation.yml">GitHub Moderation Workflow</a> · <a href="https://freefinder.at/deal-admin.html">Deal Admin</a></p>
   </main>
 </body>
 </html>`, {
@@ -866,6 +868,245 @@ async function handleSignedDealRemoveLink(request, env) {
   } catch (error) {
     return dealRemovalHtml('Entfernen fehlgeschlagen', error?.message || 'Der GitHub-Workflow konnte nicht gestartet werden.', 502);
   }
+}
+
+function normalizeSignedDealEditPayload(raw = {}) {
+  const dealId = normalizeDealId(raw.dealId || raw.deal_id || raw.id);
+  if (!dealId) return null;
+
+  return {
+    dealId,
+    url: normalizeSubmissionUrl(raw.url || raw.dealUrl || raw.deal_url),
+    title: cleanShortText(raw.title, 240),
+    description: cleanLongText(raw.description || raw.details, 2500),
+    brand: cleanShortText(raw.brand || raw.provider, 120),
+    distance: cleanShortText(raw.distance || raw.location || raw.address, 200),
+    pubDate: cleanShortText(raw.pubDate || raw.date, 80),
+    expires: cleanShortText(raw.expires || raw.validUntil, 120),
+    expiresOriginal: cleanShortText(raw.expiresOriginal || raw.expires || raw.validUntil, 180),
+    expiryKind: cleanShortText(raw.expiryKind, 40).toLowerCase(),
+    validOn: cleanShortText(raw.validOn, 32),
+    validFrom: cleanShortText(raw.validFrom, 32),
+    validUntil: cleanShortText(raw.validUntil, 32),
+    expiryDisplayText: cleanShortText(raw.expiryDisplayText, 180),
+    hidden: raw.hidden === true,
+    pinnedRank: normalizePinnedRank(raw.pinnedRank),
+  };
+}
+
+async function readSignedDealEditRequest(request, env) {
+  const secret = envString(env, 'DEAL_REMOVE_LINK_SECRET');
+  if (!secret) return { error: 'DEAL_REMOVE_LINK_SECRET fehlt im Worker.', status: 500 };
+
+  let payload = '';
+  let sig = '';
+  let fields = {};
+
+  if (request.method === 'POST') {
+    const form = await request.formData().catch(() => null);
+    if (!form) return { error: 'Formular konnte nicht gelesen werden.', status: 400 };
+    payload = cleanShortText(form.get('payload'), 5000);
+    sig = cleanShortText(form.get('sig'), 128).toLowerCase();
+    fields = Object.fromEntries(form.entries());
+  } else {
+    const url = new URL(request.url);
+    payload = cleanShortText(url.searchParams.get('payload'), 5000);
+    sig = cleanShortText(url.searchParams.get('sig'), 128).toLowerCase();
+  }
+
+  if (!payload || !sig) return { error: 'Dieser Bearbeiten-Link ist unvollstaendig.', status: 400 };
+
+  const expected = await signedDealRemovalUrlSignature(secret, payload);
+  if (!timingSafeEqualString(sig, expected)) {
+    return { error: 'Die Signatur dieses Bearbeiten-Links ist ungueltig.', status: 401 };
+  }
+
+  const base = normalizeSignedDealEditPayload(decodeBase64UrlJson(payload));
+  if (!base) return { error: 'Der Bearbeiten-Link enthaelt keine gueltige Deal-ID.', status: 400 };
+
+  return { base, fields, payload, sig };
+}
+
+function dealEditFormHtml({ edit, payload, sig, saved = false, error = '' }, status = 200) {
+  const title = saved ? 'Aenderung gespeichert' : (error ? 'Bearbeiten fehlgeschlagen' : 'Live-Deal bearbeiten');
+  const value = (key) => escapeHtml(edit?.[key] ?? '');
+  const checked = edit?.hidden ? ' checked' : '';
+  const sourceLink = edit?.url
+    ? `<a class="secondary" href="${escapeHtml(edit.url)}" target="_blank" rel="noopener">Quelle oeffnen</a>`
+    : '';
+
+  return new Response(`<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${escapeHtml(title)} - FreeFinder</title>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #fff8ef; color: #211b16; }
+    main { width: min(760px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 42px; }
+    h1 { margin: 0 0 8px; font-size: clamp(32px, 8vw, 54px); line-height: .98; letter-spacing: 0; }
+    p { margin: 0 0 20px; color: #70665e; font-size: 17px; line-height: 1.4; }
+    form { display: grid; gap: 14px; }
+    label { display: grid; gap: 7px; color: #5f574f; font-weight: 800; }
+    input, textarea, select { box-sizing: border-box; width: 100%; border: 1px solid #e1d6c8; border-radius: 8px; padding: 12px 13px; font: inherit; color: #211b16; background: #fff; }
+    textarea { min-height: 128px; resize: vertical; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .readonly { background: #f1ebe4; color: #766b62; }
+    .message { margin: 0 0 16px; padding: 12px 14px; border-radius: 8px; background: #e7f7ec; color: #17613b; font-weight: 800; }
+    .message.error { background: #ffe7e1; color: #9d321e; }
+    button, a.secondary { border: 0; border-radius: 999px; padding: 14px 18px; font: inherit; font-weight: 900; text-decoration: none; cursor: pointer; }
+    button { color: #fff; background: linear-gradient(90deg, #f0a33d, #df654e); }
+    a.secondary { color: #211b16; background: #ede6dc; }
+    .check { display: flex; gap: 10px; align-items: center; font-weight: 800; }
+    .check input { width: auto; }
+    @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } main { padding-top: 22px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>${escapeHtml(title)}</h1>
+    <p>Diese Aenderung wird als Live-Override gespeichert und von FreeFinder beim Deal-State beruecksichtigt.</p>
+    ${saved ? '<div class="message">Gespeichert. Der Deal-State liefert die Korrektur jetzt aus.</div>' : ''}
+    ${error ? `<div class="message error">${escapeHtml(error)}</div>` : ''}
+    <form method="post">
+      <input type="hidden" name="payload" value="${escapeHtml(payload)}">
+      <input type="hidden" name="sig" value="${escapeHtml(sig)}">
+      <label>Deal-ID
+        <input class="readonly" name="dealId" value="${value('dealId')}" readonly>
+      </label>
+      <div class="grid">
+        <label>Titel
+          <input name="title" value="${value('title')}" placeholder="Deal-Titel">
+        </label>
+        <label>Anbieter
+          <input name="brand" value="${value('brand')}" placeholder="Anbieter">
+        </label>
+      </div>
+      <label>Beschreibung
+        <textarea name="description" placeholder="Details">${value('description')}</textarea>
+      </label>
+      <div class="grid">
+        <label>Ort
+          <input name="distance" value="${value('distance')}" placeholder="Adresse, Bezirk oder Wien">
+        </label>
+        <label>Quelle
+          <input class="readonly" value="${value('url')}" readonly>
+        </label>
+      </div>
+      <div class="grid">
+        <label>Angebotsdatum
+          <input name="pubDate" value="${value('pubDate')}" placeholder="TT.MM.JJJJ oder ISO">
+        </label>
+        <label>Gueltig bis
+          <input name="expires" value="${value('expires')}" placeholder="TT.MM.JJJJ oder Text">
+        </label>
+      </div>
+      <div class="grid">
+        <label>Valid from
+          <input name="validFrom" value="${value('validFrom')}" placeholder="YYYY-MM-DD">
+        </label>
+        <label>Valid until
+          <input name="validUntil" value="${value('validUntil')}" placeholder="YYYY-MM-DD">
+        </label>
+      </div>
+      <div class="grid">
+        <label>Valid on
+          <input name="validOn" value="${value('validOn')}" placeholder="YYYY-MM-DD">
+        </label>
+        <label>Anzeige-Text Ablauf
+          <input name="expiryDisplayText" value="${value('expiryDisplayText')}" placeholder="z.B. Nur heute">
+        </label>
+      </div>
+      <div class="grid">
+        <label>Ablauf-Art
+          <select name="expiryKind">
+            <option value=""${edit?.expiryKind ? '' : ' selected'}>Automatisch</option>
+            <option value="date"${edit?.expiryKind === 'date' ? ' selected' : ''}>Datum</option>
+            <option value="range"${edit?.expiryKind === 'range' ? ' selected' : ''}>Zeitraum</option>
+            <option value="text"${edit?.expiryKind === 'text' ? ' selected' : ''}>Text</option>
+          </select>
+        </label>
+        <label>Pin-Rang
+          <input name="pinnedRank" inputmode="numeric" value="${value('pinnedRank')}" placeholder="0">
+        </label>
+      </div>
+      <label class="check"><input type="checkbox" name="hidden"${checked}> Deal verstecken</label>
+      <div class="row">
+        <button type="submit">Aenderung speichern</button>
+        ${sourceLink}
+        <a class="secondary" href="https://freefinder.at/deal-admin.html?deal=${encodeURIComponent(edit?.dealId || '')}" target="_blank" rel="noopener">Admin oeffnen</a>
+      </div>
+    </form>
+  </main>
+</body>
+</html>`, {
+    status,
+    headers: {
+      ...JSON_HEADERS,
+      'content-type': 'text/html; charset=utf-8',
+    },
+  });
+}
+
+async function handleSignedDealEditLink(request, env) {
+  if (!env.REFERRAL_KV) return dealRemovalHtml('Nicht konfiguriert', 'REFERRAL_KV binding fehlt im Worker.', 500);
+
+  const signed = await readSignedDealEditRequest(request, env);
+  if (signed.error) {
+    return dealEditFormHtml({
+      edit: {},
+      payload: '',
+      sig: '',
+      error: signed.error,
+    }, signed.status || 400);
+  }
+
+  const existing = await getJsonKV(env, dealOverrideKey(signed.base.dealId));
+  const edit = {
+    ...signed.base,
+    ...(existing || {}),
+    dealId: signed.base.dealId,
+    url: signed.base.url,
+  };
+
+  if (request.method === 'GET') {
+    return dealEditFormHtml({ edit, payload: signed.payload, sig: signed.sig });
+  }
+
+  const body = {
+    dealId: signed.base.dealId,
+    title: signed.fields.title,
+    brand: signed.fields.brand,
+    description: signed.fields.description,
+    distance: signed.fields.distance,
+    pubDate: signed.fields.pubDate,
+    expires: signed.fields.expires,
+    expiresOriginal: signed.fields.expiresOriginal || signed.fields.expires,
+    expiryKind: signed.fields.expiryKind,
+    validOn: signed.fields.validOn,
+    validFrom: signed.fields.validFrom,
+    validUntil: signed.fields.validUntil,
+    expiryDisplayText: signed.fields.expiryDisplayText,
+    pinnedRank: signed.fields.pinnedRank,
+    hidden: signed.fields.hidden === 'on',
+  };
+  const next = normalizeDealOverrideInput(body, existing);
+  if (!next) {
+    return dealEditFormHtml({ edit, payload: signed.payload, sig: signed.sig, error: 'Ungueltige Deal-Aenderung.' });
+  }
+
+  await putJsonKV(env, dealOverrideKey(next.dealId), next);
+  return dealEditFormHtml({
+    edit: {
+      ...signed.base,
+      ...next,
+      url: signed.base.url,
+    },
+    payload: signed.payload,
+    sig: signed.sig,
+    saved: true,
+  });
 }
 
 async function slackSignatureHex(secret, timestamp, payload) {
@@ -1233,6 +1474,7 @@ async function submitMerchantCampaign(env, record, session) {
     productId: record.priceId || '',
     transactionId,
     originalTransactionId: cleanShortText(session?.id || record.stripeSessionId, 160),
+    platform: 'web',
     restaurantName: campaign.restaurantName || '',
     dealTitle: campaign.dealTitle || '',
     description: campaign.description || '',
@@ -1248,10 +1490,15 @@ async function submitMerchantCampaign(env, record, session) {
     stripeCustomerId: cleanShortText(session?.customer, 160),
     source: 'freefinder-web',
   };
+  const merchantSecret = envString(env, 'MERCHANT_API_SECRET');
+  const headers = { 'content-type': 'application/json', accept: 'application/json' };
+  if (merchantSecret) {
+    headers['x-freefinder-merchant-secret'] = merchantSecret;
+  }
 
   const response = await fetch(endpoint, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    headers,
     body: JSON.stringify(payload),
   });
 
@@ -1781,7 +2028,7 @@ async function buildDealLinkPreview(rawUrl) {
     method: 'GET',
     redirect: 'follow',
     headers: {
-      'user-agent': 'Mozilla/5.0 (compatible; FreeFinderPreviewBot/1.0; +https://freefinder.app)',
+      'user-agent': 'Mozilla/5.0 (compatible; FreeFinderPreviewBot/1.0; +https://freefinder.at)',
       accept: 'text/html,application/xhtml+xml',
       'accept-language': 'de-AT,de;q=0.9,en;q=0.8',
       'cache-control': 'no-cache',
@@ -1992,8 +2239,8 @@ function renderReferralLanding(code, requestUrl) {
   const appStoreUrl = `https://apps.apple.com/at/app/id${APP_STORE_APP_ID}?ct=${encodeURIComponent(`ref_${code}`)}&mt=8`;
   const minDelaySeconds = Math.ceil(MIN_CONFIRM_DELAY_MS / 1000);
   const continueUrl = dealId
-    ? `https://ataalla24-ux.github.io/deal-finder/?deal=${encodeURIComponent(dealId)}`
-    : 'https://ataalla24-ux.github.io/deal-finder/';
+    ? `https://freefinder.at/?deal=${encodeURIComponent(dealId)}`
+    : 'https://freefinder.at/';
   const safeDealHint = dealId ? '<p>Dein Freund hat dir einen konkreten Deal geschickt. Nach der Bestaetigung kannst du ihn direkt in FreeFinder ansehen.</p>' : '';
   const continueButtonHtml = dealId
     ? '<button id="continueBtn" class="button secondary" style="display:none">Zum geteilten Deal</button>'
@@ -2378,7 +2625,7 @@ function renderReferralLanding(code, requestUrl) {
 
 function redirectReferralToWebsite(code, requestUrl) {
   const dealId = normalizeDealId(requestUrl.searchParams.get('deal'));
-  const destination = new URL('https://ataalla24-ux.github.io/deal-finder/');
+  const destination = new URL('https://freefinder.at/');
   destination.searchParams.set('ref', code);
   destination.searchParams.set('source', dealId ? 'legacy_deal_share' : 'legacy_referral_share');
   if (dealId) destination.searchParams.set('deal', dealId);
@@ -2431,6 +2678,10 @@ export default {
 
     if (path === '/api/deals/admin/remove-link' && request.method === 'GET') {
       return handleSignedDealRemoveLink(request, env);
+    }
+
+    if (path === '/api/deals/admin/edit-link' && (request.method === 'GET' || request.method === 'POST')) {
+      return handleSignedDealEditLink(request, env);
     }
 
     if (!env.REFERRAL_KV) {

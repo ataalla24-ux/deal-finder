@@ -102,6 +102,18 @@ The Merchant backend base URL defaults to `https://freefinder-merchant-backend.f
 npx wrangler secret put MERCHANT_API_BASE
 ```
 
+For automatic Business ads after a paid Stripe checkout, deploy the Merchant backend with the same `STRIPE_SECRET_KEY` so it can verify the Checkout Session before storing the campaign. Optionally set a shared server-to-server secret on both workers:
+
+```bash
+npx wrangler secret put MERCHANT_API_SECRET
+```
+
+If you want a Slack notification after a paid campaign is stored, set this on the Merchant backend:
+
+```bash
+npx wrangler secret put SLACK_WEBHOOK_URL
+```
+
 ## Required Cloudflare setup
 
 1. Create a KV namespace.
