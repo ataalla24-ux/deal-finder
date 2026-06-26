@@ -762,6 +762,57 @@ async function triggerDealModerationWorkflow(env, removal) {
   throw new Error(`GitHub workflow dispatch failed (${response.status})${detail ? `: ${detail}` : ''}`);
 }
 
+async function triggerDealEditWorkflow(env, edit) {
+  const token = envString(env, 'GITHUB_WORKFLOW_TOKEN') || envString(env, 'GITHUB_TOKEN');
+  if (!token) throw new Error('GITHUB_WORKFLOW_TOKEN is not configured');
+
+  const owner = envString(env, 'GITHUB_OWNER') || 'ataalla24-ux';
+  const repo = envString(env, 'GITHUB_REPO') || 'deal-finder';
+  const workflow = envString(env, 'GITHUB_LIVE_DEAL_EDIT_WORKFLOW') || 'live-deal-edit.yml';
+  const ref = envString(env, 'GITHUB_REF') || 'main';
+  const endpoint = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/workflows/${encodeURIComponent(workflow)}/dispatches`;
+  const payload = {
+    dealId: edit.dealId,
+    title: edit.title || '',
+    brand: edit.brand || '',
+    description: edit.description || '',
+    distance: edit.distance || '',
+    pubDate: edit.pubDate || '',
+    expires: edit.expires || '',
+    expiresOriginal: edit.expiresOriginal || '',
+    expiryKind: edit.expiryKind || '',
+    validOn: edit.validOn || '',
+    validFrom: edit.validFrom || '',
+    validUntil: edit.validUntil || '',
+    expiryDisplayText: edit.expiryDisplayText || '',
+    pinnedRank: edit.pinnedRank ?? '',
+    hidden: edit.hidden === true,
+    editedBy: 'slack-live-review',
+  };
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${token}`,
+      accept: 'application/vnd.github+json',
+      'content-type': 'application/json',
+      'user-agent': 'freefinder-referrals-worker',
+      'x-github-api-version': '2022-11-28',
+    },
+    body: JSON.stringify({
+      ref,
+      inputs: {
+        edit_payload: JSON.stringify(payload),
+      },
+    }),
+  });
+
+  if (response.status === 204) return { ok: true, status: response.status, workflow };
+
+  const detail = cleanLongText(await response.text().catch(() => ''), 700);
+  throw new Error(`GitHub edit workflow dispatch failed (${response.status})${detail ? `: ${detail}` : ''}`);
+}
+
 async function handleDealAdminRemove(request, env) {
   if (!requireAdmin(request, env)) {
     return invalid('Unauthorized', 401);
@@ -927,12 +978,15 @@ async function readSignedDealEditRequest(request, env) {
   return { base, fields, payload, sig };
 }
 
-function dealEditFormHtml({ edit, payload, sig, saved = false, error = '' }, status = 200) {
+function dealEditFormHtml({ edit, payload, sig, saved = false, error = '', workflow = null }, status = 200) {
   const title = saved ? 'Aenderung gespeichert' : (error ? 'Bearbeiten fehlgeschlagen' : 'Live-Deal bearbeiten');
   const value = (key) => escapeHtml(edit?.[key] ?? '');
   const checked = edit?.hidden ? ' checked' : '';
   const sourceLink = edit?.url
     ? `<a class="secondary" href="${escapeHtml(edit.url)}" target="_blank" rel="noopener">Quelle oeffnen</a>`
+    : '';
+  const workflowLink = workflow?.workflow
+    ? ` <a href="https://github.com/ataalla24-ux/deal-finder/actions/workflows/${encodeURIComponent(workflow.workflow)}" target="_blank" rel="noopener">Workflow ansehen</a>`
     : '';
 
   return new Response(`<!doctype html>
@@ -966,8 +1020,8 @@ function dealEditFormHtml({ edit, payload, sig, saved = false, error = '' }, sta
 <body>
   <main>
     <h1>${escapeHtml(title)}</h1>
-    <p>Diese Aenderung wird als Live-Override gespeichert und von FreeFinder beim Deal-State beruecksichtigt.</p>
-    ${saved ? '<div class="message">Gespeichert. Der Deal-State liefert die Korrektur jetzt aus.</div>' : ''}
+    <p>Diese Aenderung wird als Live-Override gespeichert und per GitHub Action in die App-Daten veroeffentlicht.</p>
+    ${saved ? `<div class="message">Gespeichert. Das App-Update wurde gestartet.${workflowLink}</div>` : ''}
     ${error ? `<div class="message error">${escapeHtml(error)}</div>` : ''}
     <form method="post">
       <input type="hidden" name="payload" value="${escapeHtml(payload)}">
@@ -1097,6 +1151,22 @@ async function handleSignedDealEditLink(request, env) {
   }
 
   await putJsonKV(env, dealOverrideKey(next.dealId), next);
+  let workflow = null;
+  try {
+    workflow = await triggerDealEditWorkflow(env, next);
+  } catch (error) {
+    return dealEditFormHtml({
+      edit: {
+        ...signed.base,
+        ...next,
+        url: signed.base.url,
+      },
+      payload: signed.payload,
+      sig: signed.sig,
+      error: `KV gespeichert, aber App-Update nicht gestartet: ${error?.message || 'GitHub Workflow Fehler'}`,
+    }, 502);
+  }
+
   return dealEditFormHtml({
     edit: {
       ...signed.base,
@@ -1106,6 +1176,7 @@ async function handleSignedDealEditLink(request, env) {
     payload: signed.payload,
     sig: signed.sig,
     saved: true,
+    workflow,
   });
 }
 

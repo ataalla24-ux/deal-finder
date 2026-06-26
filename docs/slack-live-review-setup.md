@@ -2,7 +2,7 @@
 
 The daily `Live Deals Slack Review` workflow sends all live app deals to Slack with `Bearbeiten`, `Entfernen`, and `Quelle` actions per deal.
 
-The edit and remove buttons are signed Worker links. `Bearbeiten` opens a prefilled Worker form for title, provider, description, location, date, expiry and visibility overrides. `Entfernen` verifies the HMAC signature, dispatches the existing `Deal Moderation` GitHub Action, and the action removes the deal from the published JSON feeds. Once GitHub Pages updates, the deal disappears from iOS, Web, and Android because all clients read the same `deals.json`.
+The edit and remove buttons are signed Worker links. `Bearbeiten` opens a prefilled Worker form for title, provider, description, location, date, expiry and visibility overrides, stores the Live override, and dispatches the `Live Deal Edit` GitHub Action so `docs/deals.json` is published with the change. `Entfernen` verifies the HMAC signature, dispatches the existing `Deal Moderation` GitHub Action, and the action removes the deal from the published JSON feeds. Once GitHub Pages updates, the edit or removal appears in iOS, Web, and Android because all clients read the same `deals.json`.
 
 ## Slack App
 

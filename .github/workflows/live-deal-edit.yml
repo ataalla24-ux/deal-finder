@@ -1,0 +1,38 @@
+name: "Live Deal Edit"
+
+on:
+  workflow_dispatch:
+    inputs:
+      edit_payload:
+        description: "JSON payload with dealId and edited fields"
+        required: true
+        type: string
+
+concurrency:
+  group: live-deal-edit
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  apply-edit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Apply live deal edit
+        env:
+          LIVE_DEAL_EDIT_PAYLOAD: ${{ inputs.edit_payload }}
+          LIVE_DEAL_EDIT_BY: ${{ github.actor }}
+        run: node scripts/apply-live-deal-edit.mjs
+
+      - name: Commit edited deal files
+        run: |
+          node scripts/commit-generated.mjs --message "Apply live deal edit $(date +%Y-%m-%d)" --files docs/deals.json docs/live-deal-edit-report.json
