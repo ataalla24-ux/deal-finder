@@ -62,17 +62,45 @@ function buttonValue(deal) {
   return JSON.stringify(payload);
 }
 
-function signedRemovalUrl(deal) {
+function editValue(deal) {
+  const payload = {
+    dealId: cleanText(deal.id, 256),
+    url: cleanText(deal.url, 1000),
+    title: cleanText(deal.title || deal.brand, 240),
+    brand: cleanText(deal.brand, 120),
+    description: cleanText(deal.description, 2500),
+    distance: cleanText(deal.distance || deal.location || deal.address, 200),
+    pubDate: cleanText(deal.pubDate, 80),
+    expires: cleanText(deal.expires, 120),
+    expiresOriginal: cleanText(deal.expiresOriginal || deal.expires, 180),
+    expiryKind: cleanText(deal.expiryKind, 40),
+    validOn: cleanText(deal.validOn, 32),
+    validFrom: cleanText(deal.validFrom, 32),
+    validUntil: cleanText(deal.validUntil, 32),
+    expiryDisplayText: cleanText(deal.expiryDisplayText, 180),
+  };
+  return JSON.stringify(payload);
+}
+
+function signedWorkerUrl(pathname, value) {
   if (!REMOVE_LINK_SECRET) {
-    throw new Error('DEAL_REMOVE_LINK_SECRET is required for signed removal links');
+    throw new Error('DEAL_REMOVE_LINK_SECRET is required for signed review links');
   }
 
-  const payload = Buffer.from(buttonValue(deal)).toString('base64url');
+  const payload = Buffer.from(value).toString('base64url');
   const sig = crypto
     .createHmac('sha256', REMOVE_LINK_SECRET)
     .update(payload)
     .digest('hex');
-  return `${WORKER_BASE_URL}/api/deals/admin/remove-link?payload=${encodeURIComponent(payload)}&sig=${encodeURIComponent(sig)}`;
+  return `${WORKER_BASE_URL}${pathname}?payload=${encodeURIComponent(payload)}&sig=${encodeURIComponent(sig)}`;
+}
+
+function signedRemovalUrl(deal) {
+  return signedWorkerUrl('/api/deals/admin/remove-link', buttonValue(deal));
+}
+
+function signedEditUrl(deal) {
+  return signedWorkerUrl('/api/deals/admin/edit-link', editValue(deal));
 }
 
 function dealBlocks(deal, index) {
@@ -89,6 +117,13 @@ function dealBlocks(deal, index) {
   ].filter(Boolean).join('\n');
 
   const elements = [
+    {
+      type: 'button',
+      text: { type: 'plain_text', text: 'Bearbeiten' },
+      style: 'primary',
+      action_id: 'freefinder_edit_live_deal',
+      url: signedEditUrl(deal),
+    },
     {
       type: 'button',
       text: { type: 'plain_text', text: 'Entfernen' },
@@ -181,7 +216,7 @@ async function main() {
     text: `FreeFinder Live-Deal-Review: ${live.totalDeals} Deals online`,
     blocks: [
       { type: 'section', text: { type: 'mrkdwn', text: headerText } },
-      { type: 'context', elements: [{ type: 'mrkdwn', text: 'Klicke bei abgelaufenen oder falschen Deals auf *Entfernen*. Der Link startet die Moderation direkt.' }] },
+      { type: 'context', elements: [{ type: 'mrkdwn', text: 'Nutze *Bearbeiten* für Titel, Datum, Ort oder Details. Klicke bei abgelaufenen oder falschen Deals auf *Entfernen*.' }] },
     ],
   });
 

@@ -1,8 +1,8 @@
 # Slack Live Deal Review Setup
 
-The daily `Live Deals Slack Review` workflow sends all live app deals to Slack with one `Entfernen` button per deal.
+The daily `Live Deals Slack Review` workflow sends all live app deals to Slack with `Bearbeiten`, `Entfernen`, and `Quelle` actions per deal.
 
-The remove buttons are signed Worker links. A click opens the Cloudflare Worker, the Worker verifies the HMAC signature, dispatches the existing `Deal Moderation` GitHub Action, and the action removes the deal from the published JSON feeds. Once GitHub Pages updates, the deal disappears from iOS, Web, and Android because all clients read the same `deals.json`.
+The edit and remove buttons are signed Worker links. `Bearbeiten` opens a prefilled Worker form for title, provider, description, location, date, expiry and visibility overrides. `Entfernen` verifies the HMAC signature, dispatches the existing `Deal Moderation` GitHub Action, and the action removes the deal from the published JSON feeds. Once GitHub Pages updates, the deal disappears from iOS, Web, and Android because all clients read the same `deals.json`.
 
 ## Slack App
 
@@ -47,10 +47,11 @@ curl -X POST "https://freefinder-referrals.freefinder-stefan.workers.dev/api/dea
   -d '{"dealId":"community:41aa7928-48b2-4ef1-b570-b67f3e5d1e3c","reason":"abgelaufen"}'
 ```
 
-Signed remove links use this endpoint:
+Signed review links use these endpoints:
 
 ```text
 https://freefinder-referrals.freefinder-stefan.workers.dev/api/deals/admin/remove-link
+https://freefinder-referrals.freefinder-stefan.workers.dev/api/deals/admin/edit-link
 ```
 
 ## Local Dry Run
