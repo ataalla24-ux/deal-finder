@@ -33,6 +33,9 @@ jobs:
           LIVE_DEAL_EDIT_BY: ${{ github.actor }}
         run: node scripts/apply-live-deal-edit.mjs
 
+      - name: Cache brand logos
+        run: npm run logos:cache
+
       - name: Commit edited deal files
         run: |
           node scripts/commit-generated.mjs --message "Apply live deal edit $(date +%Y-%m-%d)" --files docs/deals.json docs/live-deal-edit-report.json

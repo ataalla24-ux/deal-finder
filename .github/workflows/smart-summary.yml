@@ -29,6 +29,9 @@ jobs:
 
       - name: Run Smart Summary
         run: node scraper/smart-summary.js
+
+      - name: Cache brand logos
+        run: npm run logos:cache
       
       - name: Commit live deal summaries
         run: |

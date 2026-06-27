@@ -36,6 +36,9 @@ jobs:
           MAX_LIVE_CONTENT_ENRICHMENTS: '40'
         run: node scraper/normalize-live-deals.js
 
+      - name: 🖼️ Cache brand logos
+        run: npm run logos:cache
+
       - name: 📤 Push Approved Deals
         run: |
           DEAL_COUNT=$(cat docs/deals.json | python3 -c "import sys, json; print(json.load(sys.stdin)['totalDeals'])" 2>/dev/null || echo "?")

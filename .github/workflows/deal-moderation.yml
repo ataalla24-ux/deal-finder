@@ -68,6 +68,9 @@ jobs:
       - name: Apply deal moderation
         run: npm run deals:moderate
 
+      - name: Cache brand logos
+        run: npm run logos:cache
+
       - name: Commit moderated deal files
         run: |
           node scripts/commit-generated.mjs --message "Apply deal moderation $(date +%Y-%m-%d)" --files docs/deal-moderation.json docs/deal-moderation-report.json docs/deals.json "docs/deals-pending-*.json"
