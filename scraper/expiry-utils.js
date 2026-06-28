@@ -58,6 +58,10 @@ function cleanText(value) {
   return String(value).replace(/\s+/g, ' ').trim();
 }
 
+function isIsoDateExpiry(value) {
+  return /^\d{4}-\d{1,2}-\d{1,2}(?:\b|t)/i.test(cleanText(value));
+}
+
 function confidenceRank(confidence) {
   if (confidence === 'high') return 3;
   if (confidence === 'medium') return 2;
@@ -95,8 +99,9 @@ function endOfUtcMonth(year, monthIndex) {
 export function isVagueExpiry(value) {
   const text = cleanText(value).toLowerCase();
   if (!text) return true;
-  return /^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend|ongoing|k\.a\.?|tbd|coming soon|bei eröffnung|bei eroeffnung|regelm[aä]ßig|regelmaessig|immer|permanent\b|frühjahr\b|fruehjahr\b|season opening\b)/i.test(text)
-    || /(siehe details|siehe website|siehe webseite|check website|not specified|unknown unknown|zeiten auf webseite pr[üu]fen|aktuelle termine auf webseite|\(neotaste deal\)|\(7 days rolling\)|g[üu]ltig 2 tage vor oder nach dem geburtstag)/i.test(text)
+  if (isIsoDateExpiry(text)) return false;
+  return /^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend|ongoing|k\.a\.?|tbd|coming soon|bei eröffnung|bei eroeffnung|regelm[aä]ßig|regelmaessig|immer|permanent\b|kurzfristig\b|laut quelle\b|nicht angegeben\b|gutschein[-\s]?abh[aä]ngig\b|frühjahr\b|fruehjahr\b|season opening\b)/i.test(text)
+    || /(siehe details|siehe website|siehe webseite|siehe post|siehe tiktok|siehe instagram|check website|not specified|unknown unknown|zeiten auf webseite pr[üu]fen|aktuelle termine auf webseite|ganzt[aä]gig|\(neotaste deal\)|\(7 days rolling\)|g[üu]ltig 2 tage vor oder nach dem geburtstag)/i.test(text)
     || isScheduleOnlyExpiry(text)
     || isPartOfDayExpiry(text);
 }
@@ -111,6 +116,7 @@ function isScheduleOnlyExpiry(value) {
   const text = cleanText(value).toLowerCase();
   if (!text) return false;
   const hasExplicitDate =
+    /\b\d{4}-\d{1,2}-\d{1,2}(?:\b|t)/i.test(text) ||
     /\b\d{1,2}\.\d{1,2}\.(?:\d{2,4})?\b/.test(text) ||
     /\b\d{1,2}\.\s*[-–]\s*\d{1,2}\.\d{1,2}\.\d{4}\b/.test(text) ||
     /\b(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+\d{4}\b/.test(text) ||
@@ -124,7 +130,7 @@ function isScheduleOnlyExpiry(value) {
 function isPartOfDayExpiry(value) {
   const text = cleanText(value).toLowerCase();
   if (!text) return false;
-  return /\b(vormittag|nachmittag|abend|morgens|mittags|abends)\b/i.test(text);
+  return /\b(vormittag|nachmittag|abend|morgens|mittags|abends|ganzt[aä]gig)\b/i.test(text);
 }
 
 function isChurchDomain(hostname = '') {
@@ -262,7 +268,7 @@ function parseDmy(text, now) {
     };
   }
 
-  m = text.match(/\b(\d{1,2})\.(\d{1,2})\.(?!\d)/);
+  m = text.match(/\b(\d{1,2})\.(\d{1,2})(?:\.(?!\d)|(?![\d.]))/);
   if (m) {
     return {
       date: endOfUtcDay(now.getUTCFullYear(), Number(m[2]) - 1, Number(m[1])),
@@ -355,7 +361,7 @@ export function parseExpiryDetails(value, options = {}) {
   if (isVagueExpiry(text)) return null;
 
   const withoutPrefixes = isolateLeadingExpiryToken(
-    text.replace(/^(gültig\s*bis|einlösbar\s*bis|aktion\s*bis|angebot\s*bis|läuft\s*bis|nur\s*bis|endet\s*am|bis)\s*[:\-]?\s*/i, '')
+    text.replace(/^(gültig\s*bis|einlösbar\s*bis|aktion\s*bis|angebot\s*bis|läuft\s*bis|nur\s*bis|endet\s*am|gültig\s*am|nur\s*am|am|bis)\s*[:\-]?\s*/i, '')
   );
 
   return (
@@ -1317,6 +1323,7 @@ export async function normalizeDealExpiry(deal, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const allowUrlLookup = options.allowUrlLookup !== false;
   const forceUrlLookup = options.forceUrlLookup === true;
+  const originalExpiryText = cleanText(deal.expiresOriginal || '');
   const raw = cleanText(
     deal.expires ||
     deal.expiresOriginal ||
@@ -1383,10 +1390,21 @@ export async function normalizeDealExpiry(deal, options = {}) {
   }
 
   if (parsed?.date) {
+    const parsedExistingExpiry = raw && raw === cleanText(deal.expires || '');
+    const keepUrlSource = parsedExistingExpiry && (
+      Boolean(deal.expiresDetectedFromUrl) ||
+      cleanText(deal.expiresSource || '').toLowerCase() === 'url'
+    );
     deal.expires = parsed.date.toISOString();
     deal.expiresPrecision = parsed.precision || 'day';
-    deal.expiresSource = parsed.source || 'text';
-    applyStructuredExpiryFields(deal, deal.expiresOriginal || raw || deal.expires, { now });
+    deal.expiresSource = keepUrlSource ? 'url' : (parsed.source || 'text');
+    if (keepUrlSource) {
+      deal.expiresDetectedFromUrl = true;
+    }
+    const displaySource = originalExpiryText && !isVagueExpiry(originalExpiryText)
+      ? originalExpiryText
+      : (raw || deal.expires);
+    applyStructuredExpiryFields(deal, displaySource, { now });
     return deal;
   }
 

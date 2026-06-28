@@ -3,7 +3,7 @@ import { readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { inspectDealUrlHealth, normalizeDealExpiry, shouldSkipUrlExpiryLookup } from './expiry-utils.js';
+import { inspectDealUrlHealth, isVagueExpiry, normalizeDealExpiry, shouldSkipUrlExpiryLookup } from './expiry-utils.js';
 import {
   filterModeratedDeals,
   loadDealModeration,
@@ -81,6 +81,7 @@ const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REF
 const MAX_LIVE_CONTENT_ENRICHMENTS = Number(process.env.MAX_LIVE_CONTENT_ENRICHMENTS || 120);
 const MAX_OPAQUE_SOCIAL_AGE_DAYS = Number(process.env.MAX_LIVE_OPAQUE_SOCIAL_AGE_DAYS || 14);
 const MAX_SOCIAL_POST_AGE_DAYS = Number(process.env.MAX_LIVE_SOCIAL_POST_AGE_DAYS || process.env.DEAL_VALIDITY_MAX_AGE_DAYS || 7);
+const MAX_EXPIRED_REVIEW_GRACE_DAYS = Number(process.env.MAX_LIVE_EXPIRED_REVIEW_GRACE_DAYS || 7);
 const FLIGHT_DEAL_PATTERN = /\b(flug|flüge|flight|flights|hin\s*&\s*zurück|hin\s+und\s+zurück|ryanair|wizz\s*air|wizzair|iata)\b/i;
 const GENERIC_DESCRIPTION_PATTERN = /^(free|gratis|rabatt|discount|deal|angebot|aktion|promo|special|event|post|reel|instagram|coupon|gutschein|gewinnspiel|new|neu)$/i;
 const FOOD_SIGNAL_PATTERN = /\b(eis\w*|ice cream|gelato|kaffee\w*|coffee|cafe|café|pizza\w*|burger\w*|döner\w*|doener\w*|kebab\w*|sushi|ramen|brunch|croissant|drink|drinks|getränk\w*|getraenk\w*|cocktail\w*|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein\w*|vino|fleisch\w*|meat|steak|bbq|grill\w*|bäckerei|backerei|bakery|krapfen\w*)\b/i;
@@ -95,6 +96,59 @@ function hasUsefulWords(text) {
 
 function isSocialUrl(url = '') {
   return /instagram\.com|tiktok\.com/i.test(cleanText(url));
+}
+
+function socialPostAgeDays(deal, now = new Date()) {
+  const pubDateMs = Date.parse(cleanText(deal?.pubDate || ''));
+  if (!Number.isFinite(pubDateMs)) return null;
+  return (now.getTime() - pubDateMs) / (1000 * 60 * 60 * 24);
+}
+
+function expiredDealAgeDays(deal, now = new Date()) {
+  const expiresMs = Date.parse(cleanText(deal?.expires || ''));
+  if (!Number.isFinite(expiresMs)) return null;
+  return (now.getTime() - expiresMs) / (1000 * 60 * 60 * 24);
+}
+
+function hasCurrentExpiryEvidence(deal, now = new Date()) {
+  const expiresMs = Date.parse(cleanText(deal?.expires || ''));
+  if (Number.isFinite(expiresMs)) return expiresMs >= now.getTime();
+
+  for (const field of ['validOn', 'validUntil']) {
+    const value = cleanText(deal?.[field] || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) continue;
+    const endOfDayMs = Date.parse(`${value}T23:59:59.999Z`);
+    if (Number.isFinite(endOfDayMs) && endOfDayMs >= now.getTime()) return true;
+  }
+
+  const expiryText = cleanText([
+    deal?.expiryDisplayText,
+    deal?.expiresOriginal,
+    deal?.validity_date,
+  ].filter(Boolean).join(' ')).toLowerCase();
+  if (!expiryText) return false;
+  if (/\b(kurzfristig|siehe\s+(?:post|tiktok|instagram)|laut quelle|k\.a\.?|unbekannt|nicht angegeben)\b/i.test(expiryText)) {
+    return false;
+  }
+  return /\b(dauerhaft|laufend|jederzeit|bei jedem besuch|geburtstag|jeden\b|wöchentlich|woechentlich|monatlich|regelm[aä]ßig|regelmaessig)\b/i.test(expiryText);
+}
+
+function hasReliableSocialPubDate(deal = {}) {
+  const source = cleanText(deal.pubDateSource || '').toLowerCase();
+  if (/^url\./i.test(source)) return true;
+  if ([
+    'socialpostdate',
+    'profiletimeline',
+    'derivedpubdate',
+    'firecrawlagentrun',
+    'time.datetime',
+    'url.contextpublished',
+  ].includes(source)) {
+    return true;
+  }
+
+  const signal = cleanText([deal.originSource, deal.source].filter(Boolean).join(' ')).toLowerCase();
+  return /(tiktok-deals-scanner|instagram(?:\s|-|_)|firecrawl food #3|firecrawl instagram|firecrawl gastro|apify)/i.test(signal);
 }
 
 function hasRunBudget(used, limit) {
@@ -177,7 +231,17 @@ function isStrongExpiredDealEvidence(deal) {
 
 function shouldQueueExpiredDealForReview(deal, now = new Date()) {
   if (!isExpiredDealRecord(deal, now)) return false;
-  if (isSocialUrl(deal.url || '')) return true;
+  if (isSocialUrl(deal.url || '')) {
+    const ageDays = socialPostAgeDays(deal, now);
+    if (Number.isFinite(ageDays) && ageDays > MAX_SOCIAL_POST_AGE_DAYS && hasReliableSocialPubDate(deal)) {
+      return false;
+    }
+    return !isStrongExpiredDealEvidence(deal);
+  }
+  const expiredAgeDays = expiredDealAgeDays(deal, now);
+  if (Number.isFinite(expiredAgeDays) && expiredAgeDays > MAX_EXPIRED_REVIEW_GRACE_DAYS) {
+    return false;
+  }
   return !isStrongExpiredDealEvidence(deal);
 }
 
@@ -513,22 +577,23 @@ function applyVerifiedSocialPublicationDate(deal, health) {
 function getSocialPostFreshnessRemovalReason(deal, now) {
   if (!isSocialUrl(deal?.url || '')) return '';
   const pubDateText = cleanText(deal?.pubDate || '');
-  const pubDateMs = Date.parse(pubDateText);
   const source = cleanText(deal?.pubDateSource || '');
 
-  if (!/^url\./i.test(source)) {
+  if (!hasReliableSocialPubDate(deal)) {
     return '';
   }
-  if (!Number.isFinite(pubDateMs)) {
+  const ageDays = socialPostAgeDays(deal, now);
+  if (!Number.isFinite(ageDays)) {
     return '';
   }
-  if (pubDateMs > now.getTime() + 1000 * 60 * 60 * 36) {
+  if (ageDays < -1.5) {
     return `Social-Postdatum liegt in der Zukunft (${isoDateOnly(pubDateText)})`;
   }
 
-  const ageDays = (now.getTime() - pubDateMs) / (1000 * 60 * 60 * 24);
-  if (Number.isFinite(ageDays) && ageDays > MAX_SOCIAL_POST_AGE_DAYS) {
-    return `Social-Post älter als ${MAX_SOCIAL_POST_AGE_DAYS} Tage (${isoDateOnly(pubDateText)}, ${source || 'unbekannte Quelle'})`;
+  if (ageDays > MAX_SOCIAL_POST_AGE_DAYS && !hasCurrentExpiryEvidence(deal, now)) {
+    const expiryText = cleanText(deal?.expiryDisplayText || deal?.expiresOriginal || deal?.expires || '');
+    const suffix = expiryText && isVagueExpiry(expiryText) ? ', kein konkretes Ablaufdatum' : '';
+    return `Social-Post älter als ${MAX_SOCIAL_POST_AGE_DAYS} Tage (${isoDateOnly(pubDateText)}, ${source || 'unbekannte Quelle'}${suffix})`;
   }
   return '';
 }
@@ -957,8 +1022,8 @@ async function main() {
       socialPolishFixes += 1;
     }
     const rawExpiry = cleanText(
-      deal.expiresOriginal ||
       deal.expires ||
+      deal.expiresOriginal ||
       deal.end_date ||
       deal.validity_date ||
       ''
@@ -1089,8 +1154,8 @@ async function main() {
   for (const churchDeal of churchDeals) {
     const normalizedChurchDeal = normalizeDealRecord({ ...churchDeal });
     const churchRawExpiry = cleanText(
-      normalizedChurchDeal.expiresOriginal ||
       normalizedChurchDeal.expires ||
+      normalizedChurchDeal.expiresOriginal ||
       normalizedChurchDeal.end_date ||
       normalizedChurchDeal.validity_date ||
       ''

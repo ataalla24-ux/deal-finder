@@ -14,6 +14,27 @@ function expectNormalizedLogo(name, rawDeal, expected) {
 }
 
 expectNormalizedLogo(
+  'cached FreeFinder brand logo is preserved',
+  {
+    brand: 'CIG Wien',
+    logo: '⛪',
+    logoUrl: 'https://freefinder.at/assets/brand-logos/cig-wien-cigwien-at.png',
+    title: 'CIG Wien',
+    description:
+      '⛪ CIG Wien - Christliche Internationale Gemeinde / Kirche - CIG - Christliche Internationale Gemeinde Wien. Evangelikale, zweisprachige Kirche in Wien.',
+    type: 'gratis',
+    category: 'kirche',
+    source: 'Freikirchen Wien',
+    url: 'https://www.cigwien.at',
+    distance: 'Leebgasse 34, 1100 Wien',
+  },
+  {
+    logo: '⛪',
+    logoUrl: 'https://freefinder.at/assets/brand-logos/cig-wien-cigwien-at.png',
+  },
+);
+
+expectNormalizedLogo(
   'CIG church text does not trigger Eis fallback',
   {
     brand: 'CIG Wien',
@@ -38,6 +59,24 @@ expectNormalizedLogo(
   'dominant title brand beats wrong submitted provider',
   {
     brand: "Dunkin'",
+    title: 'Starbucks Austria gratis Kaffee am Geburtstag',
+    description: 'Gratis Kaffee im Starbucks Store.',
+    type: 'gratis',
+    category: 'kaffee',
+    url: 'https://www.instagram.com/reel/example/',
+  },
+  {
+    brand: 'Starbucks',
+    logo: '☕',
+    logoUrlIncludes: /starbucks\.at/,
+  },
+);
+
+expectNormalizedLogo(
+  'wrong cached logo is replaced when brand is corrected',
+  {
+    brand: "Dunkin'",
+    logoUrl: 'https://freefinder.at/assets/brand-logos/dunkin-dunkin-at.png',
     title: 'Starbucks Austria gratis Kaffee am Geburtstag',
     description: 'Gratis Kaffee im Starbucks Store.',
     type: 'gratis',

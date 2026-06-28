@@ -201,6 +201,15 @@ function isGoogleFaviconUrl(url) {
   return /https?:\/\/(?:www\.)?google\.com\/s2\/favicons/i.test(String(url || ''));
 }
 
+function isCachedBrandLogoUrl(url) {
+  try {
+    const parsed = new URL(String(url || ''));
+    return /(^|\.)freefinder\.at$/i.test(parsed.hostname) && /\/assets\/brand-logos\//i.test(parsed.pathname);
+  } catch {
+    return false;
+  }
+}
+
 function extractGoogleFaviconTargetHost(url) {
   if (!isGoogleFaviconUrl(url)) return '';
   try {
@@ -223,6 +232,28 @@ function getHostKey(host) {
   if (!parts.length) return '';
   const root = parts.length > 1 ? parts[parts.length - 2] : parts[0];
   return normalizeBrandKey(root);
+}
+
+function cachedBrandLogoMatches(logoUrl, brand = '', known = null) {
+  if (!isCachedBrandLogoUrl(logoUrl)) return false;
+  let fileKey = '';
+  try {
+    const parsed = new URL(String(logoUrl));
+    const filename = decodeURIComponent(parsed.pathname.split('/').pop() || '').replace(/\.[a-z0-9]+$/i, '');
+    fileKey = normalizeBrandKey(filename);
+  } catch {
+    return false;
+  }
+  if (!fileKey) return false;
+
+  const candidateKeys = [
+    brand,
+    known?.name,
+    known?.key,
+    known?.domain ? getHostKey(known.domain) : '',
+  ].map(normalizeBrandKey).filter(Boolean);
+
+  return candidateKeys.some((key) => fileKey.includes(key) || key.includes(fileKey));
 }
 
 function brandMatchesHost(brand, host) {
@@ -381,6 +412,7 @@ function inferLogoUrl(deal = {}, brand = '') {
     .filter(Boolean)
     .join(' ');
   const known = findBrandRule(combined);
+  if (deal.logoUrl && cachedBrandLogoMatches(deal.logoUrl, brand || deal.brand, known)) return deal.logoUrl;
   if (known?.domain && !known?.preferFallback) return buildLogoUrl(known.domain, { allowSourceLike: true });
   if (deal.logoUrl && shouldUseLogoImage(deal, brand, deal.logoUrl, known)) return deal.logoUrl;
 
