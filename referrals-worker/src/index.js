@@ -641,6 +641,7 @@ function normalizeDealOverrideInput(body, existing = null) {
 
   const next = {
     dealId,
+    url: normalizeSubmissionUrl(body?.url || existing?.url),
     hidden: body?.hidden === true,
     pinnedRank: normalizePinnedRank(body?.pinnedRank),
     title: cleanShortText(body?.title, 240),
@@ -773,6 +774,7 @@ async function triggerDealEditWorkflow(env, edit) {
   const endpoint = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/workflows/${encodeURIComponent(workflow)}/dispatches`;
   const payload = {
     dealId: edit.dealId,
+    url: edit.url || '',
     title: edit.title || '',
     brand: edit.brand || '',
     description: edit.description || '',
@@ -1130,6 +1132,7 @@ async function handleSignedDealEditLink(request, env) {
 
   const body = {
     dealId: signed.base.dealId,
+    url: signed.base.url,
     title: signed.fields.title,
     brand: signed.fields.brand,
     description: signed.fields.description,

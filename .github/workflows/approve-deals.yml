@@ -36,6 +36,9 @@ jobs:
           MAX_LIVE_CONTENT_ENRICHMENTS: '40'
         run: node scraper/normalize-live-deals.js
 
+      - name: ✏️ Reapply persistent live edits
+        run: node scripts/apply-live-deal-edits.mjs
+
       - name: 🖼️ Cache brand logos
         run: npm run logos:cache
 
@@ -43,4 +46,4 @@ jobs:
         run: |
           DEAL_COUNT=$(cat docs/deals.json | python3 -c "import sys, json; print(json.load(sys.stdin)['totalDeals'])" 2>/dev/null || echo "?")
           TIMESTAMP=$(date -u +"%H:%M")
-          node scripts/commit-generated.mjs --message "✅ ${TIMESTAMP} - Genehmigte Deals (${DEAL_COUNT} total)" --files docs/deals.json docs/deals-pending-all.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json
+          node scripts/commit-generated.mjs --message "✅ ${TIMESTAMP} - Genehmigte Deals (${DEAL_COUNT} total)" --files docs/deals.json docs/deals-pending-all.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json docs/live-deal-edit-report.json

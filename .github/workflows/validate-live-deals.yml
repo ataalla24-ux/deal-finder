@@ -54,9 +54,12 @@ jobs:
         if: ${{ vars.ENABLE_LIVE_DEAL_LLM_REVIEW != '1' }}
         run: node scripts/write-disabled-live-deal-llm-report.mjs
 
+      - name: Reapply persistent live edits
+        run: node scripts/apply-live-deal-edits.mjs
+
       - name: Cache brand logos
         run: npm run logos:cache
 
       - name: Commit validated live deals
         run: |
-          node scripts/commit-generated.mjs --message "Validate live deals $(date +%Y-%m-%d)" --files docs/deals.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json docs/live-deal-llm-review.json
+          node scripts/commit-generated.mjs --message "Validate live deals $(date +%Y-%m-%d)" --files docs/deals.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json docs/live-deal-llm-review.json docs/live-deal-edit-report.json
