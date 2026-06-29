@@ -44,7 +44,8 @@ const CHRISTIAN_KEYWORDS = [
   'kirche', 'gemeinde', 'pfarre', 'pfarr', 'gottesdienst', 'messe', 'anbetung',
   'bibel', 'jesus', 'christ', 'christlich', 'evangelisch', 'katholisch', 'freikirche',
   'jugendgottesdienst', 'lobpreis', 'andacht', 'segnung', 'worship', 'himmelsstürmer',
-  'himmelsstuermer', 'christlicher event', 'gebetsabend', 'glaubensabend'
+  'himmelsstuermer', 'christlicher event', 'gebetsabend', 'glaubensabend',
+  'hillsong', 'icf', 'jesuszentrum', 'cig'
 ];
 
 const SERVICE_KEYWORDS = [
@@ -60,16 +61,20 @@ const CHRISTIAN_EVENT_KEYWORDS = [
 const CATEGORY_HINTS = {
   kaffee: [
     'kaffee', 'coffee', 'cafe', 'café', 'espresso', 'latte', 'cappuccino',
-    'starbucks', 'tchibo', 'nespresso', 'mccafe'
+    'matcha', 'tee', 'tea', 'chai', 'starbucks', 'tchibo', 'nespresso', 'mccafe'
   ],
   essen: [
     'restaurant', 'essen', 'food', 'pizza', 'burger', 'kebab', 'kebap', 'döner',
-    'doener', 'falafel', 'wrap', 'brunch', 'buffet', 'snack', 'cocktail',
-    'drink', 'mittag', 'menü', 'menue', 'mcdonald', 'burger king', 'subway',
-    'domino', 'kfc', 'vapiano', 'lieferando', 'mjam', 'uber eats', 'croissant',
+    'doener', 'doner', 'falafel', 'wrap', 'brunch', 'buffet', 'snack', 'cocktail',
+    'drink', 'drinks', 'getränk', 'getraenk', 'cola', 'saft', 'smoothie', 'tonic',
+    'boba', 'bubble tea', 'sandwich', 'schnitzel', 'ramen', 'donburi', 'nudeln',
+    'noodles', 'curry', 'steak', 'bbq', 'grill', 'fleisch', 'mittag', 'menü',
+    'menue', 'mcdonald', 'burger king', 'subway', 'domino', 'kfc', 'vapiano',
+    'lieferando', 'mjam', 'uber eats', 'croissant',
     'frühstück', 'fruehstueck', 'eis', 'eissalon', 'gelato', 'ice cream',
     'dessert', 'schoko', 'schokolade', 'erdbeer', 'erdbeere', 'erdbeeren',
-    'chocoberry', 'waffel', 'pancake', 'kuchen', 'torte'
+    'chocoberry', 'waffel', 'pancake', 'kuchen', 'torte', 'bäckerei', 'backerei',
+    'bakery', 'krapfen'
   ],
   supermarkt: [
     'supermarkt', 'lebensmittel', 'einkauf', 'gutscheinheft', 'jö', 'joe',
@@ -169,9 +174,9 @@ function normalizeCategoryForScraper(rawCategory, parts = []) {
   const inferred = inferCategoryFromText([category, ...parts]);
   const text = buildSignalText([category, ...parts]);
 
+  if (category === 'events') return isChristianText(text) ? 'events' : (inferred || 'kultur');
   if (category === 'gottesdienste' || (isChristianText(text) && hasServiceContext(text))) return 'gottesdienste';
   if (category === 'kirche') return 'kirche';
-  if (category === 'events') return isChristianText(text) ? 'events' : (inferred || 'kultur');
 
   if (WEAK_CATEGORIES.has(category) && inferred) return inferred;
   if (['shopping', 'beauty', 'kultur', 'reisen'].includes(category) && (inferred === 'essen' || inferred === 'kaffee')) return inferred;

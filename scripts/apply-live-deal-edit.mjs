@@ -14,6 +14,7 @@ import {
   upsertLiveDealEdit,
   writeJson,
 } from './live-deal-edits-lib.mjs';
+import { alignNativeWeeklyDealRotation } from '../scraper/native-weekly-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,6 +22,7 @@ const ROOT = path.join(__dirname, '..');
 const DEFAULT_DEALS_PATH = path.join(ROOT, 'docs', 'deals.json');
 const DEFAULT_EDITS_PATH = path.join(ROOT, 'docs', 'live-deal-edits.json');
 const DEFAULT_REPORT_PATH = path.join(ROOT, 'docs', 'live-deal-edit-report.json');
+const DEFAULT_WEEKLY_PATH = path.join(ROOT, 'docs', 'deal-of-the-week.json');
 
 const nowIso = new Date().toISOString();
 const payload = parseLiveDealEditPayload(process.env.LIVE_DEAL_EDIT_PAYLOAD);
@@ -35,6 +37,8 @@ const rawEdit = {
   title: payloadValue(payload, 'title', 'LIVE_DEAL_EDIT_TITLE'),
   brand: payloadValue(payload, 'brand', 'LIVE_DEAL_EDIT_BRAND'),
   description: payloadValue(payload, 'description', 'LIVE_DEAL_EDIT_DESCRIPTION'),
+  category: payloadValue(payload, 'category', 'LIVE_DEAL_EDIT_CATEGORY'),
+  type: payloadValue(payload, 'type', 'LIVE_DEAL_EDIT_TYPE'),
   distance: payloadValue(payload, 'distance', 'LIVE_DEAL_EDIT_DISTANCE'),
   pubDate: payloadValue(payload, 'pubDate', 'LIVE_DEAL_EDIT_PUB_DATE'),
   expires: payloadValue(payload, 'expires', 'LIVE_DEAL_EDIT_EXPIRES'),
@@ -61,11 +65,21 @@ saveLiveDealEditStore(editsPath, nextStore, nowIso);
 
 const bundle = readJson(dealsPath);
 const result = applyLiveDealEditsToBundle(bundle, nextStore, { checkedAt: nowIso });
-if (result.changed) {
-  writeJson(dealsPath, result.bundle);
+let nextBundle = result.bundle;
+let changed = result.changed;
+const weeklyPick = readJson(DEFAULT_WEEKLY_PATH, null);
+const weeklyAlignment = alignNativeWeeklyDealRotation(nextBundle, weeklyPick, { now: new Date(nowIso) });
+if (weeklyAlignment.changed) {
+  nextBundle = weeklyAlignment.bundle;
+  changed = true;
+}
+if (changed) {
+  writeJson(dealsPath, nextBundle);
 }
 writeJson(reportPath, {
   ...result.report,
+  afterCount: Array.isArray(nextBundle?.deals) ? nextBundle.deals.length : result.report.afterCount,
+  nativeWeeklyAlignment: weeklyAlignment.report,
   mode: 'single-edit',
   dealId,
   editedBy: edit.editedBy,

@@ -18,12 +18,14 @@ import {
   normalizeDealRecord,
   sanitizeExpiryText,
 } from './deal-normalization-utils.js';
+import { alignNativeWeeklyDealRotation } from './native-weekly-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const DEALS_PATH = path.join(DOCS_DIR, 'deals.json');
+const WEEKLY_DEAL_PATH = path.join(DOCS_DIR, 'deal-of-the-week.json');
 const VALIDATION_REPORT_PATH = path.join(DOCS_DIR, 'live-deal-validation-report.json');
 const REVIEW_CANDIDATES_PATH = path.join(DOCS_DIR, 'live-deal-review-candidates.json');
 const DEAL_CANDIDATES_INDEX_PATH = path.join(DOCS_DIR, 'deal-candidates-index.json');
@@ -93,6 +95,8 @@ const MAX_OPAQUE_SOCIAL_AGE_DAYS = Number(process.env.MAX_LIVE_OPAQUE_SOCIAL_AGE
 const MAX_SOCIAL_POST_AGE_DAYS = Number(process.env.MAX_LIVE_SOCIAL_POST_AGE_DAYS || process.env.DEAL_VALIDITY_MAX_AGE_DAYS || 7);
 const MAX_EXPIRED_REVIEW_GRACE_DAYS = Number(process.env.MAX_LIVE_EXPIRED_REVIEW_GRACE_DAYS || 7);
 const APPLY_LIVE_VALIDATION = process.env.LIVE_DEAL_VALIDATION_APPLY !== '0';
+const LIVE_DEAL_REMOVALS_ENABLED = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
+const CAN_REMOVE_LIVE_DEALS = APPLY_LIVE_VALIDATION && LIVE_DEAL_REMOVALS_ENABLED;
 const FLIGHT_DEAL_PATTERN = /\b(flug|flüge|flight|flights|hin\s*&\s*zurück|hin\s+und\s+zurück|ryanair|wizz\s*air|wizzair|iata)\b/i;
 const GENERIC_DESCRIPTION_PATTERN = /^(free|gratis|rabatt|discount|deal|angebot|aktion|promo|special|event|post|reel|instagram|coupon|gutschein|gewinnspiel|new|neu)$/i;
 const FOOD_SIGNAL_PATTERN = /\b(eis\w*|eissalon\w*|ice cream|gelato|kaffee\w*|coffee|cafe|café|pizza\w*|burger\w*|döner\w*|doener\w*|kebab\w*|sushi|ramen|brunch|croissant|drink|drinks|getränk\w*|getraenk\w*|cocktail\w*|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein\w*|vino|fleisch\w*|meat|steak|bbq|grill\w*|bäckerei|backerei|bakery|krapfen\w*|schoko\w*|erdbeer\w*|dessert\w*)\b/i;
@@ -820,6 +824,25 @@ function isCuratedChurchDeal(deal = {}) {
     /\b(gottesdienst|gottesdienste|freikirche|kirche|christlich|hillsong|icf|jesuszentrum|cig\s+wien|gemeinde)\b/i.test(signal);
 }
 
+function liveFeedSortRank(deal = {}) {
+  return isCuratedChurchDeal(deal) ? 95 : 0;
+}
+
+function compareLiveFeedDeals(a, b) {
+  const rankDelta = liveFeedSortRank(a) - liveFeedSortRank(b);
+  if (rankDelta !== 0) return rankDelta;
+
+  const aTime = Date.parse(a.pubDate || '') || 0;
+  const bTime = Date.parse(b.pubDate || '') || 0;
+  if (aTime !== bTime) return bTime - aTime;
+
+  const aPriority = Number.isFinite(Number(a.priority)) ? Number(a.priority) : 99;
+  const bPriority = Number.isFinite(Number(b.priority)) ? Number(b.priority) : 99;
+  if (aPriority !== bPriority) return aPriority - bPriority;
+
+  return cleanText(a.title || a.brand || '').localeCompare(cleanText(b.title || b.brand || ''));
+}
+
 function normalizeChurchDealForLiveFeed(deal = {}) {
   if (!isCuratedChurchDeal(deal)) return { ...deal };
   const category = cleanText(deal.category || '').toLowerCase();
@@ -1009,9 +1032,14 @@ async function main() {
       url: cleanText(deal?.url || ''),
       reason,
     });
-    if (!APPLY_LIVE_VALIDATION) {
+    if (!CAN_REMOVE_LIVE_DEALS) {
       markForReview(deal, `Auto-Entfernung pausiert: ${reason}`);
     }
+  }
+
+  function shouldRemoveDeal(deal, reason) {
+    markRemoved(deal, reason);
+    return CAN_REMOVE_LIVE_DEALS;
   }
 
   function markForReview(deal, reason, details = {}) {
@@ -1057,8 +1085,7 @@ async function main() {
     if (!original || typeof original !== 'object') continue;
     const forceKeep = shouldForceKeepDeal(original);
     if (!forceKeep && shouldDropExplicitlyRemovedDeal(original)) {
-      markRemoved(original, 'Explizit entfernter Deal');
-      continue;
+      if (shouldRemoveDeal(original, 'Explizit entfernter Deal')) continue;
     }
     if (!forceKeep && curatedChurchIds.has(original.id)) {
       markRemoved(original, 'Wird durch kuratierten Kirche-/Event-Eintrag ersetzt');
@@ -1137,8 +1164,7 @@ async function main() {
     if (!forceKeep && health?.invalid) {
       if (isStrongInvalidHealth(deal, health)) {
         brokenLinkRemovals += 1;
-        markRemoved(deal, `Ziellink ungültig: ${health.reason}`);
-        continue;
+        if (shouldRemoveDeal(deal, `Ziellink ungültig: ${health.reason}`)) continue;
       }
       invalidLinkReviewCandidates += 1;
       markForReview(deal, 'Ziellink prüfen: nicht eindeutig ungültig', {
@@ -1162,8 +1188,7 @@ async function main() {
     const socialFreshnessRemovalReason = getSocialPostFreshnessRemovalReason(deal, now);
     if (!forceKeep && socialFreshnessRemovalReason) {
       socialPostDateRemovals += 1;
-      markRemoved(deal, socialFreshnessRemovalReason);
-      continue;
+      if (shouldRemoveDeal(deal, socialFreshnessRemovalReason)) continue;
     }
     if (!forceKeep && shouldDropOpaqueSocialShellDeal(deal, health, now)) {
       opaqueSocialShellReviewCandidates += 1;
@@ -1190,12 +1215,10 @@ async function main() {
       }
     }
     if (!forceKeep && isGenericJunkDeal(deal)) {
-      markRemoved(deal, 'Generischer Junk-Deal');
-      continue;
+      if (shouldRemoveDeal(deal, 'Generischer Junk-Deal')) continue;
     }
     if (!forceKeep && isFalsePositiveFreeDeal(deal)) {
-      markRemoved(deal, 'False Positive Free Deal');
-      continue;
+      if (shouldRemoveDeal(deal, 'False Positive Free Deal')) continue;
     }
     if (isExpiredDealRecord(deal, now)) {
       if (!forceKeep && shouldQueueExpiredDealForReview(deal, now)) {
@@ -1210,20 +1233,16 @@ async function main() {
         });
       } else if (deal.expiresDetectedFromUrl || deal.expiresSource === 'url') {
         expiredByVerifiedDateRemovals += 1;
-        markRemoved(deal, 'Deal laut Zielseite abgelaufen');
-        continue;
+        if (shouldRemoveDeal(deal, 'Deal laut Zielseite abgelaufen')) continue;
       } else {
-        markRemoved(deal, 'Deal abgelaufen');
-        continue;
+        if (shouldRemoveDeal(deal, 'Deal abgelaufen')) continue;
       }
     }
     if (!deal.id) {
-      markRemoved(deal, 'Deal ohne ID');
-      continue;
+      if (shouldRemoveDeal(deal, 'Deal ohne ID')) continue;
     }
     if (seenIds.has(deal.id)) {
-      markRemoved(deal, 'Doppelte Deal-ID');
-      continue;
+      if (shouldRemoveDeal(deal, 'Doppelte Deal-ID')) continue;
     }
 
     seenIds.add(deal.id);
@@ -1243,8 +1262,7 @@ async function main() {
     deal.expires = sanitizeExpiryText(deal.expires);
 
     if (isExpiredDealRecord(deal, now)) {
-      markRemoved(deal, 'Geschützter OMV-VIVA-Deal abgelaufen');
-      continue;
+      if (shouldRemoveDeal(deal, 'Geschützter OMV-VIVA-Deal abgelaufen')) continue;
     }
     if (!deal.id) continue;
 
@@ -1288,8 +1306,7 @@ async function main() {
     }
     normalizedChurchDeal.expires = sanitizeExpiryText(normalizedChurchDeal.expires);
     if (isFalsePositiveFreeDeal(normalizedChurchDeal)) {
-      markRemoved(normalizedChurchDeal, 'False Positive Church Deal');
-      continue;
+      if (shouldRemoveDeal(normalizedChurchDeal, 'False Positive Church Deal')) continue;
     }
     if (isExpiredDealRecord(normalizedChurchDeal, now)) {
       if (shouldQueueExpiredDealForReview(normalizedChurchDeal, now)) {
@@ -1304,20 +1321,16 @@ async function main() {
         });
       } else if (normalizedChurchDeal.expiresDetectedFromUrl || normalizedChurchDeal.expiresSource === 'url') {
         expiredByVerifiedDateRemovals += 1;
-        markRemoved(normalizedChurchDeal, 'Kirchen-/Event-Deal laut Zielseite abgelaufen');
-        continue;
+        if (shouldRemoveDeal(normalizedChurchDeal, 'Kirchen-/Event-Deal laut Zielseite abgelaufen')) continue;
       } else {
-        markRemoved(normalizedChurchDeal, 'Kirchen-/Event-Deal abgelaufen');
-        continue;
+        if (shouldRemoveDeal(normalizedChurchDeal, 'Kirchen-/Event-Deal abgelaufen')) continue;
       }
     }
     if (!normalizedChurchDeal.id) {
-      markRemoved(normalizedChurchDeal, 'Kirchen-/Event-Deal ohne ID');
-      continue;
+      if (shouldRemoveDeal(normalizedChurchDeal, 'Kirchen-/Event-Deal ohne ID')) continue;
     }
     if (seenIds.has(normalizedChurchDeal.id)) {
-      markRemoved(normalizedChurchDeal, 'Doppelte Kirchen-/Event-ID');
-      continue;
+      if (shouldRemoveDeal(normalizedChurchDeal, 'Doppelte Kirchen-/Event-ID')) continue;
     }
     seenIds.add(normalizedChurchDeal.id);
     remaining.push(normalizedChurchDeal);
@@ -1333,7 +1346,7 @@ async function main() {
     markRemoved(deal, `Moderation: ${deal.reason}`);
   }
 
-  const finalRemaining = moderationFilter.deals;
+  const finalRemaining = CAN_REMOVE_LIVE_DEALS ? moderationFilter.deals : dedupedRemaining;
   const reviewCandidateSourceDeals = APPLY_LIVE_VALIDATION ? finalRemaining : (Array.isArray(dealsDoc.deals) ? dealsDoc.deals : []);
   const finalDealKeys = new Set(reviewCandidateSourceDeals.map((deal) => reviewCandidateKey(deal)).filter(Boolean));
   const reviewCandidates = Array.from(reviewCandidatesByKey.values())
@@ -1344,11 +1357,19 @@ async function main() {
       return bTime - aTime;
     });
 
-  finalRemaining.sort((a, b) => {
-    const aTime = Date.parse(a.pubDate || '') || 0;
-    const bTime = Date.parse(b.pubDate || '') || 0;
-    return bTime - aTime;
-  });
+  finalRemaining.sort(compareLiveFeedDeals);
+
+  let nativeWeeklyAlignment = { reason: 'not_run' };
+  try {
+    const weeklyPick = await readJson(WEEKLY_DEAL_PATH);
+    const aligned = alignNativeWeeklyDealRotation({ deals: finalRemaining }, weeklyPick, { now });
+    nativeWeeklyAlignment = aligned.report;
+    if (aligned.changed && Array.isArray(aligned.bundle?.deals)) {
+      finalRemaining.splice(0, finalRemaining.length, ...aligned.bundle.deals);
+    }
+  } catch (error) {
+    nativeWeeklyAlignment = { reason: 'error', message: cleanText(error?.message || error) };
+  }
 
   const removalReasons = removed.reduce((acc, entry) => {
     acc[entry.reason] = (acc[entry.reason] || 0) + 1;
@@ -1370,9 +1391,11 @@ async function main() {
   await writeFile(VALIDATION_REPORT_PATH, JSON.stringify({
     checkedAt: now.toISOString(),
     apply: APPLY_LIVE_VALIDATION,
+    removalsEnabled: LIVE_DEAL_REMOVALS_ENABLED,
+    removalsPaused: !CAN_REMOVE_LIVE_DEALS,
     totalBefore,
     totalAfter: APPLY_LIVE_VALIDATION ? finalRemaining.length : totalBefore,
-    removedCount: APPLY_LIVE_VALIDATION ? removed.length : 0,
+    removedCount: CAN_REMOVE_LIVE_DEALS ? removed.length : 0,
     wouldRemoveCount: removed.length,
     duplicateCollapses,
     moderationRemovals,
@@ -1397,6 +1420,7 @@ async function main() {
     flightUrlCheckSkips,
     protectedLiveDealRestores: protectedLiveDealRestoresCount,
     socialPolishFixes,
+    nativeWeeklyAlignment,
     removalReasons,
     reviewCandidates: reviewCandidates.slice(0, 100),
     removed: removed.slice(0, 200),
@@ -1404,7 +1428,8 @@ async function main() {
 
   console.log(`Normalized live deals: ${APPLY_LIVE_VALIDATION ? finalRemaining.length : totalBefore}`);
   console.log(`Live validation apply: ${APPLY_LIVE_VALIDATION ? 'enabled' : 'disabled'}`);
-  console.log(`${APPLY_LIVE_VALIDATION ? 'Removed' : 'Would remove'} deals: ${removed.length}`);
+  console.log(`Live deal removals: ${CAN_REMOVE_LIVE_DEALS ? 'enabled' : 'paused'}`);
+  console.log(`${CAN_REMOVE_LIVE_DEALS ? 'Removed' : 'Would remove'} deals: ${removed.length}`);
   console.log(`Duplicate collapses: ${duplicateCollapses}`);
   console.log(`Moderation removals: ${moderationRemovals}`);
   console.log(`Broken link removals: ${brokenLinkRemovals}`);

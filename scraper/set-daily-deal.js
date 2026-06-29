@@ -641,6 +641,15 @@ async function isExistingFeaturedDealCurrent(kind, approvedDeals) {
         id: existing.dealId || existing.id || '',
         url: existing.url || '',
     });
+
+    if (kind === 'weekly' && existing.manualPick) {
+        const manualEligibility = await getFeaturedDealEligibility(approvedDeal || existing, kind, { llmEnabled: false });
+        if (!manualEligibility.eligible) {
+            console.log(`Existing manual weekly featured deal is not eligible anymore: ${manualEligibility.reason}`);
+        }
+        return manualEligibility.eligible;
+    }
+
     const eligibility = await getFeaturedDealEligibility(approvedDeal || existing, kind);
     if (!eligibility.eligible) {
         console.log(`Existing ${kind} featured deal is not eligible anymore: ${eligibility.reason}`);

@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { cleanText, extractDealsFromThreadMessages, extractSlackMessageText } from './slack-digest-utils.js';
+import { normalizeCategoryForScraper } from './category-utils.js';
 import {
   filterModeratedDeals,
   loadDealModeration,
@@ -482,6 +483,18 @@ function normalizeDeal(raw) {
   const title = cleanText(deal.title) || `${brand} Deal`;
   const description = cleanText(deal.description);
   const url = normalizeUrl(deal.url);
+  const type = cleanText(deal.type).toLowerCase() || 'rabatt';
+  const distance = cleanText(deal.distance || deal.location || deal.ort) || 'Wien';
+  const category = normalizeCategoryForScraper(deal.category, [
+    brand,
+    title,
+    description,
+    distance,
+    url,
+    type,
+    deal.source,
+    deal.originSource,
+  ]);
   const pubDate = toIsoDate(deal.pubDate) || new Date().toISOString();
   const approvedAt = toIsoDate(deal.approvedAt) || new Date().toISOString();
   const rawMissing = Array.isArray(deal.missingFields) ? deal.missingFields : [];
@@ -502,10 +515,10 @@ function normalizeDeal(raw) {
     title,
     description,
     url,
-    category: cleanText(deal.category).toLowerCase() || 'wien',
-    type: cleanText(deal.type).toLowerCase() || 'rabatt',
+    category,
+    type,
     logo: cleanText(deal.logo) || '🎯',
-    distance: cleanText(deal.distance || deal.location || deal.ort) || 'Wien',
+    distance,
     source: cleanText(deal.source) || 'Slack Approved',
     originSource: cleanText(deal.originSource) || cleanText(deal.source) || 'Slack Approved',
     expires: cleanText(deal.expires),

@@ -1,3 +1,5 @@
+import { normalizeCategoryForScraper } from './category-utils.js';
+
 const BRAND_RULES = [
   { key: 'mcdonald', name: "McDonald's", logo: '🍟', category: 'essen', domain: 'mcdonalds.at' },
   { key: 'burger king', name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at' },
@@ -605,6 +607,18 @@ function normalizeDealRecord(deal = {}) {
   if ((currentCategory === 'freizeit' || GENERIC_CATEGORIES.has(currentCategory)) && hasTravelSignal) {
     category = 'reisen';
   }
+
+  category = normalizeCategoryForScraper(category || currentCategory, [
+    brand,
+    title,
+    description,
+    deal.distance,
+    deal.url,
+    deal.post_url,
+    type,
+    deal.source,
+    deal.originSource,
+  ]);
 
   const sanitizedExpires = sanitizeExpiryText(deal.expires);
   if (brandWasCorrected) {

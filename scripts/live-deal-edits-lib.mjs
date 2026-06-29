@@ -5,6 +5,8 @@ export const LIVE_DEAL_EDIT_FIELDS = [
   'title',
   'brand',
   'description',
+  'category',
+  'type',
   'distance',
   'pubDate',
   'expires',
@@ -161,7 +163,7 @@ export function normalizeLiveDealEdit(raw = {}, options = {}) {
   };
 
   for (const field of LIVE_DEAL_EDIT_FIELDS) {
-    if (Object.prototype.hasOwnProperty.call(raw, field)) {
+    if (Object.prototype.hasOwnProperty.call(raw, field) && raw[field] !== undefined) {
       if (field === 'pinnedRank') {
         const pinnedRank = normalizePinnedRank(raw[field]);
         if (pinnedRank && pinnedRank > 0) edit[field] = pinnedRank;
@@ -229,6 +231,8 @@ function applyEditToDeal(deal, edit, checkedAt) {
   if (setIfPresent(next, edit, 'title')) changed.push('title');
   if (setIfPresent(next, edit, 'brand')) changed.push('brand');
   if (setIfPresent(next, edit, 'description')) changed.push('description');
+  if (setIfPresent(next, edit, 'category', { normalize: (value) => cleanText(value).toLowerCase() })) changed.push('category');
+  if (setIfPresent(next, edit, 'type', { normalize: (value) => cleanText(value).toLowerCase() })) changed.push('type');
   if (setIfPresent(next, edit, 'distance')) changed.push('distance');
   if (setIfPresent(next, edit, 'pubDate', { normalize: (value) => isoDateTime(value, false) })) changed.push('pubDate');
   if (setIfPresent(next, edit, 'expires', { normalize: (value) => isoDateTime(value, true) })) changed.push('expires');
