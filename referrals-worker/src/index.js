@@ -64,6 +64,7 @@ const STRIPE_CHECKOUT_PLANS = {
 const MERCHANT_API_BASE_DEFAULT = 'https://freefinder-merchant-backend.freefinder-stefan.workers.dev';
 const STRIPE_WEBHOOK_TOLERANCE_SECONDS = 300;
 const SLACK_REQUEST_TOLERANCE_SECONDS = 300;
+const APPROVE_WORKFLOW_THROTTLE_MS = 60 * 1000;
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
@@ -115,6 +116,10 @@ function dealDailyKey() {
 
 function dealSubmissionKey(id) {
   return `deal:submission:${id}`;
+}
+
+function workflowDispatchKey(name) {
+  return `workflow:dispatch:${name}`;
 }
 
 function checkoutCampaignKey(id) {
@@ -854,6 +859,66 @@ async function triggerCommunityIntakeSafely(env) {
   }
 }
 
+async function triggerSlackApproveWorkflow(env) {
+  const token = envString(env, 'GITHUB_WORKFLOW_TOKEN') || envString(env, 'GITHUB_TOKEN');
+  if (!token) throw new Error('GITHUB_WORKFLOW_TOKEN is not configured');
+
+  const owner = envString(env, 'GITHUB_OWNER') || 'ataalla24-ux';
+  const repo = envString(env, 'GITHUB_REPO') || 'deal-finder';
+  const workflow = envString(env, 'GITHUB_APPROVE_DEALS_WORKFLOW') || 'approve-deals.yml';
+  const ref = envString(env, 'GITHUB_REF') || 'main';
+  const endpoint = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/workflows/${encodeURIComponent(workflow)}/dispatches`;
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${token}`,
+      accept: 'application/vnd.github+json',
+      'content-type': 'application/json',
+      'user-agent': 'freefinder-referrals-worker',
+      'x-github-api-version': '2022-11-28',
+    },
+    body: JSON.stringify({ ref }),
+  });
+
+  if (response.status === 204) return { ok: true, status: response.status, workflow };
+
+  const detail = cleanLongText(await response.text().catch(() => ''), 700);
+  throw new Error(`GitHub approve workflow dispatch failed (${response.status})${detail ? `: ${detail}` : ''}`);
+}
+
+async function triggerSlackApproveSafely(env, reason = 'slack-reaction') {
+  try {
+    const key = workflowDispatchKey('approve-deals');
+    if (env.REFERRAL_KV) {
+      const existing = await getJsonKV(env, key);
+      const lastTriggeredAt = Number(existing?.triggeredAt || 0);
+      const ageMs = Date.now() - lastTriggeredAt;
+      if (lastTriggeredAt > 0 && ageMs >= 0 && ageMs < APPROVE_WORKFLOW_THROTTLE_MS) {
+        return {
+          ok: true,
+          skipped: 'recently-triggered',
+          retryAfterMs: APPROVE_WORKFLOW_THROTTLE_MS - ageMs,
+        };
+      }
+    }
+
+    const workflow = await triggerSlackApproveWorkflow(env);
+    if (env.REFERRAL_KV) {
+      await putJsonKV(env, key, {
+        triggeredAt: Date.now(),
+        reason: cleanShortText(reason, 120),
+      }, { expirationTtl: 10 * 60 });
+    }
+    return workflow;
+  } catch (error) {
+    return {
+      ok: false,
+      error: cleanLongText(error?.message || 'Approve workflow dispatch failed', 700),
+    };
+  }
+}
+
 async function handleDealAdminRemove(request, env) {
   if (!requireAdmin(request, env)) {
     return invalid('Unauthorized', 401);
@@ -1258,6 +1323,47 @@ function slackEphemeral(text) {
   return json({
     response_type: 'ephemeral',
     text: cleanShortText(text, 240),
+  });
+}
+
+function isSlackCheckReaction(value) {
+  return ['white_check_mark', 'heavy_check_mark', 'check'].includes(cleanShortText(value, 80));
+}
+
+async function handleSlackEvent(request, env) {
+  const rawBody = await request.text();
+
+  try {
+    await verifySlackRequest(request, env, rawBody);
+  } catch (error) {
+    return invalid(error?.message || 'Invalid Slack request', 401);
+  }
+
+  const payload = parseJsonObject(rawBody);
+  if (payload.type === 'url_verification') {
+    return json({ challenge: cleanShortText(payload.challenge, 1200) });
+  }
+
+  if (payload.type !== 'event_callback') {
+    return json({ ok: true, ignored: true, reason: 'unsupported-type' });
+  }
+
+  const event = payload.event && typeof payload.event === 'object' ? payload.event : {};
+  if (event.type !== 'reaction_added' || !isSlackCheckReaction(event.reaction)) {
+    return json({ ok: true, ignored: true, reason: 'not-approve-reaction' });
+  }
+
+  const expectedChannel = envString(env, 'SLACK_CHANNEL_ID');
+  const eventChannel = cleanShortText(event.item?.channel || event.channel, 120);
+  if (expectedChannel && eventChannel !== expectedChannel) {
+    return json({ ok: true, ignored: true, reason: 'wrong-channel' });
+  }
+
+  const workflow = await triggerSlackApproveSafely(env, 'slack-reaction-added');
+  return json({
+    ok: true,
+    approveTriggered: Boolean(workflow?.ok && !workflow?.skipped),
+    workflow,
   });
 }
 
@@ -2783,6 +2889,10 @@ export default {
 
     if (path === '/api/slack/interactions' && request.method === 'POST') {
       return handleSlackInteraction(request, env);
+    }
+
+    if (path === '/api/slack/events' && request.method === 'POST') {
+      return handleSlackEvent(request, env);
     }
 
     if (path === '/api/deals/admin/remove' && request.method === 'POST') {

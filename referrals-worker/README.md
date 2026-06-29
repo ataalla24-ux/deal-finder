@@ -28,7 +28,19 @@ This is still not an Apple-verified install callback. It is the strongest web-co
 - `POST /api/checkout/session`
 - `GET /api/checkout/status?session_id=cs_...`
 - `POST /api/checkout/webhook`
+- `POST /api/slack/interactions`
+- `POST /api/slack/events`
 - `GET /health`
+
+## Slack approvals
+
+Slack approve reactions can trigger the GitHub approval workflow immediately. In the Slack app dashboard, configure Event Subscriptions with this request URL:
+
+```text
+https://freefinder-referrals.freefinder-stefan.workers.dev/api/slack/events
+```
+
+Subscribe the bot to `reaction_added`. The worker verifies Slack signatures, ignores non-check reactions, and dispatches `approve-deals.yml` for `white_check_mark`, `heavy_check_mark`, or `check`. The approval workflow also runs every 15 minutes as a fallback.
 
 ## Stripe Checkout
 

@@ -2,8 +2,12 @@ name: ✅ Approve Deals from Slack
 
 on:
   schedule:
-    - cron: '5 * * * *' # stündlich, Minute 5
+    - cron: '*/15 * * * *' # fallback polling if Slack Events miss a reaction
   workflow_dispatch:
+
+concurrency:
+  group: approve-deals
+  cancel-in-progress: false
 
 jobs:
   approve-deals:
