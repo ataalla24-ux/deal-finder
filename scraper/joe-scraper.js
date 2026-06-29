@@ -53,8 +53,14 @@ const CURRENT_OMV_VIVA_FREE_TASTE_DEALS = [
   'Sunny Orange Espresso',
   'Sparkling Espresso Tonic',
   'Iced Matcha Latte',
-  'Strawberry Matcha Latte',
 ];
+
+const OMV_VIVA_FREE_TASTE_URL_FRAGMENTS = new Map([
+  ['Coconut Strawberry Sunset', 'coconut-strawberry-sunset'],
+  ['Sunny Orange Espresso', 'sunny-orange-espresso'],
+  ['Sparkling Espresso Tonic', 'sparkling-espresso-tonic'],
+  ['Iced Matcha Latte', 'iced-matcha-latte'],
+]);
 
 function stableHash(str) {
   let hash = 5381;
@@ -185,7 +191,9 @@ function buildOmvVivaFreeTasteDeal(variant, url) {
 
 function addCurrentOmvVivaFreeTasteDeals(deals, url) {
   for (const variant of CURRENT_OMV_VIVA_FREE_TASTE_DEALS) {
-    const deal = buildOmvVivaFreeTasteDeal(variant, url);
+    const fragment = OMV_VIVA_FREE_TASTE_URL_FRAGMENTS.get(variant);
+    const variantUrl = fragment ? `${url.replace(/#.*$/, '')}#${fragment}` : url;
+    const deal = buildOmvVivaFreeTasteDeal(variant, variantUrl);
     if (deal) deals.push(deal);
   }
 }

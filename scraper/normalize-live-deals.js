@@ -87,6 +87,12 @@ const PROTECTED_LIVE_RESTORE_IDS = new Set([
   'joe-omv-viva-free-taste-l62fzo',
   'joe-omv-viva-free-taste-xipghf',
 ]);
+const OMV_VIVA_FREE_TASTE_URLS = new Map([
+  ['joe-omv-viva-free-taste-6qmpsq', 'https://www.joe-club.at/partner/omv#coconut-strawberry-sunset'],
+  ['joe-omv-viva-free-taste-flur7', 'https://www.joe-club.at/partner/omv#sunny-orange-espresso'],
+  ['joe-omv-viva-free-taste-l62fzo', 'https://www.joe-club.at/partner/omv#sparkling-espresso-tonic'],
+  ['joe-omv-viva-free-taste-xipghf', 'https://www.joe-club.at/partner/omv#iced-matcha-latte'],
+]);
 
 const MAX_LIVE_URL_HEALTH_CHECKS = Number(process.env.MAX_LIVE_URL_HEALTH_CHECKS || 180);
 const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REFRESHES || 120);
@@ -790,6 +796,11 @@ function normalizeTargetUrl(value) {
   return text;
 }
 
+function normalizeVariantTargetUrl(deal = {}) {
+  const variantUrl = OMV_VIVA_FREE_TASTE_URLS.get(cleanText(deal.id || ''));
+  return variantUrl || normalizeTargetUrl(deal.url);
+}
+
 function normalizeUrlForCompare(value) {
   const text = normalizeTargetUrl(value);
   if (!text) return '';
@@ -974,7 +985,7 @@ async function loadProtectedLiveDealRestores() {
       const candidate = normalizeDealRecord({
         ...rawDeal,
         id,
-        url: normalizeTargetUrl(rawDeal.url || rawDeal.postUrl || rawDeal.post_url || rawDeal.link || ''),
+        url: normalizeVariantTargetUrl({ id, url: rawDeal.url || rawDeal.postUrl || rawDeal.post_url || rawDeal.link || '' }),
         type: 'gratis',
         category: 'kaffee',
         hot: true,
@@ -1093,7 +1104,7 @@ async function main() {
     }
 
     let deal = { ...original };
-    deal.url = normalizeTargetUrl(deal.url);
+    deal.url = normalizeVariantTargetUrl(deal);
     deal = fixPubDateFromSlackTs(deal, now);
     deal = resetUnsafeUrlExpiry(deal);
     deal = normalizeDealRecord(deal);
@@ -1251,7 +1262,7 @@ async function main() {
 
   for (const [id, restoreDeal] of protectedLiveDealRestores.entries()) {
     let deal = normalizeDealRecord({ ...restoreDeal });
-    deal.url = normalizeTargetUrl(deal.url);
+    deal.url = normalizeVariantTargetUrl(deal);
     deal = resetUnsafeUrlExpiry(deal);
     await normalizeDealExpiry(deal, {
       now,
