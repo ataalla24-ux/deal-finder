@@ -89,7 +89,7 @@ const MAX_EXPIRED_REVIEW_GRACE_DAYS = Number(process.env.MAX_LIVE_EXPIRED_REVIEW
 const APPLY_LIVE_VALIDATION = process.env.LIVE_DEAL_VALIDATION_APPLY !== '0';
 const FLIGHT_DEAL_PATTERN = /\b(flug|flüge|flight|flights|hin\s*&\s*zurück|hin\s+und\s+zurück|ryanair|wizz\s*air|wizzair|iata)\b/i;
 const GENERIC_DESCRIPTION_PATTERN = /^(free|gratis|rabatt|discount|deal|angebot|aktion|promo|special|event|post|reel|instagram|coupon|gutschein|gewinnspiel|new|neu)$/i;
-const FOOD_SIGNAL_PATTERN = /\b(eis\w*|ice cream|gelato|kaffee\w*|coffee|cafe|café|pizza\w*|burger\w*|döner\w*|doener\w*|kebab\w*|sushi|ramen|brunch|croissant|drink|drinks|getränk\w*|getraenk\w*|cocktail\w*|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein\w*|vino|fleisch\w*|meat|steak|bbq|grill\w*|bäckerei|backerei|bakery|krapfen\w*)\b/i;
+const FOOD_SIGNAL_PATTERN = /\b(eis\w*|eissalon\w*|ice cream|gelato|kaffee\w*|coffee|cafe|café|pizza\w*|burger\w*|döner\w*|doener\w*|kebab\w*|sushi|ramen|brunch|croissant|drink|drinks|getränk\w*|getraenk\w*|cocktail\w*|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein\w*|vino|fleisch\w*|meat|steak|bbq|grill\w*|bäckerei|backerei|bakery|krapfen\w*|schoko\w*|erdbeer\w*|dessert\w*)\b/i;
 const COFFEE_SIGNAL_PATTERN = /\b(kaffee|coffee|espresso|latte|cappuccino|cafe|café)\b/i;
 const SOURCE_PREFIX_PATTERN = /\s+(?:auf|on)\s+(?:instagram|tiktok)\s*:\s*/i;
 const WEAK_TITLE_PATTERN = /^(free|gratis|deal|angebot|aktion|promo|special|event|instagram|tiktok|new|neu)$/i;
@@ -509,7 +509,7 @@ function normalizeSocialDeal(deal) {
     if (fallbackTitle) next.title = fallbackTitle;
   }
 
-  if (!editedFields.has('category') && (next.category === 'kultur' || next.category === 'events' || next.category === 'reisen' || next.category === 'shopping') && FOOD_SIGNAL_PATTERN.test(combinedText)) {
+  if (!editedFields.has('category') && (next.category === 'kultur' || next.category === 'events' || next.category === 'reisen' || next.category === 'shopping' || next.category === 'beauty') && FOOD_SIGNAL_PATTERN.test(combinedText)) {
     next.category = COFFEE_SIGNAL_PATTERN.test(combinedText) ? 'kaffee' : 'essen';
   }
 

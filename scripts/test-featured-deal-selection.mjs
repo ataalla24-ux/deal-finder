@@ -29,6 +29,27 @@ assert.equal(isFoodDrinkDeal({
   category: 'shopping',
 }), false, 'shopping should not be weekly-eligible');
 
+assert.equal(isFoodDrinkDeal({
+  brand: 'Hillsong Vienna',
+  title: 'Hillsong Vienna Events',
+  description: 'Community genießen und unserer Stadt dienen',
+  category: 'events',
+}), false, 'church/event copy should not be weekly-eligible via genießen');
+
+assert.equal(isFoodDrinkDeal({
+  brand: 'CIG Gemeinde',
+  title: 'CIG Gemeinde',
+  description: 'Gratis Event in Wien',
+  category: 'gemeinde',
+}), false, 'church/community deals should never be weekly food deals');
+
+assert.equal(isFoodDrinkDeal({
+  brand: 'Raiffeisen RaiffEIStag',
+  title: 'Gratis Eis in teilnehmenden Eissalons',
+  description: 'Gratis Eis im Juli',
+  category: 'essen',
+}), true, 'ice cream deals should remain weekly-eligible');
+
 const weeklyEligibility = await getFeaturedDealEligibility({
   id: 'food-1',
   brand: 'Pizza Wien',
@@ -52,6 +73,16 @@ const expiredEligibility = await getFeaturedDealEligibility({
 assert.equal(expiredEligibility.eligible, false, 'expired weekly deal should fail eligibility');
 
 const selectedWeekly = await selectAutomaticFeaturedDeal([
+  {
+    id: 'church-1',
+    brand: 'Hillsong Vienna',
+    title: 'Hillsong Vienna Events',
+    description: 'Community genießen und Gottesdienst',
+    category: 'events',
+    type: 'gratis',
+    pubDate: '2026-06-29T10:00:00.000Z',
+    url: 'https://example.com/hillsong',
+  },
   {
     id: 'fitness-1',
     brand: 'Gym',

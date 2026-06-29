@@ -22,7 +22,9 @@ const FEATURED_WEEKLY_LLM_REQUIRED = process.env.FEATURED_WEEKLY_LLM_REQUIRED ==
 const FEATURED_WEEKLY_LLM_MIN_CONFIDENCE = Math.max(0, Math.min(1, Number(process.env.FEATURED_WEEKLY_LLM_MIN_CONFIDENCE || 0.55)));
 const FEATURED_TARGET_TIMEOUT_MS = Number(process.env.FEATURED_DEAL_TARGET_TIMEOUT_MS || process.env.URL_CHECK_TIMEOUT_MS || 7000);
 const FOOD_DRINK_CATEGORIES = new Set(['essen', 'kaffee', 'trinken', 'getränke', 'getraenke', 'bars']);
-const FOOD_DRINK_SIGNAL_PATTERN = /\b(essen|trinken|food|drink|drinks|getränk|getraenk|kaffee|coffee|espresso|latte|matcha|tee|tea|eis|gelato|ice\s*cream|pizza|burger|döner|doener|kebab|falafel|sushi|ramen|nudel|noodle|brunch|frühstück|fruehstueck|croissant|bowl|restaurant|cafe|café|bistro|bar|cocktail|smoothie|saft|juice|cola|menü|menue|meal|lunch|dinner|snack|pommes|kuchen|torte|cookie|cookies|schokolade|praline|wein|bier)\b/i;
+const NON_FOOD_WEEKLY_CATEGORIES = new Set(['fitness', 'beauty', 'reisen', 'kultur', 'events', 'freizeit', 'kirche', 'gottesdienste', 'gemeinde', 'shopping', 'technik', 'streaming', 'gewinnspiel']);
+const CHURCH_EVENT_SIGNAL_PATTERN = /\b(gottesdienst|kirche|freikirche|christlich|hillsong|icf|jesuszentrum|cig|gemeinde|worship|lobpreis|messe)\b/i;
+const FOOD_DRINK_SIGNAL_PATTERN = /\b(essen|trinken|food|drink|drinks|getränk|getraenk|kaffee|coffee|espresso|latte|matcha|tee|tea|eis|eissalon|gelato|ice\s*cream|pizza|burger|döner|doener|kebab|falafel|sushi|ramen|nudel|noodle|brunch|frühstück|fruehstueck|croissant|bowl|restaurant|cafe|café|bistro|bar|cocktail|smoothie|saft|juice|cola|menü|menue|meal|lunch|dinner|snack|pommes|kuchen|torte|cookie|cookies|schoko\w*|erdbeer\w*|praline|wein|bier)\b/i;
 const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Vienna',
     year: 'numeric',
@@ -406,8 +408,6 @@ function compactFeaturedEvidence(health = null) {
 function isFoodDrinkDeal(deal = {}) {
     const normalized = normalizeDealRecord(deal || {});
     const category = cleanText(normalized.category || '').toLowerCase();
-    if (FOOD_DRINK_CATEGORIES.has(category)) return true;
-
     const signal = [
         normalized.brand,
         normalized.title,
@@ -417,8 +417,12 @@ function isFoodDrinkDeal(deal = {}) {
         normalized.url,
     ].map((value) => cleanText(value)).join(' ');
 
+    if (NON_FOOD_WEEKLY_CATEGORIES.has(category)) return false;
+    if (CHURCH_EVENT_SIGNAL_PATTERN.test(signal)) return false;
+    if (FOOD_DRINK_CATEGORIES.has(category)) return true;
+
     if (category === 'supermarkt') return FOOD_DRINK_SIGNAL_PATTERN.test(signal);
-    return FOOD_DRINK_SIGNAL_PATTERN.test(signal) && !['fitness', 'beauty', 'reisen', 'kultur', 'events', 'shopping'].includes(category);
+    return FOOD_DRINK_SIGNAL_PATTERN.test(signal);
 }
 
 function isFeaturedDealStillLive(deal, now = new Date()) {

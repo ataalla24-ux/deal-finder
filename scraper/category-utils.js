@@ -67,7 +67,9 @@ const CATEGORY_HINTS = {
     'doener', 'falafel', 'wrap', 'brunch', 'buffet', 'snack', 'cocktail',
     'drink', 'mittag', 'menü', 'menue', 'mcdonald', 'burger king', 'subway',
     'domino', 'kfc', 'vapiano', 'lieferando', 'mjam', 'uber eats', 'croissant',
-    'frühstück', 'fruehstueck'
+    'frühstück', 'fruehstueck', 'eis', 'eissalon', 'gelato', 'ice cream',
+    'dessert', 'schoko', 'schokolade', 'erdbeer', 'erdbeere', 'erdbeeren',
+    'chocoberry', 'waffel', 'pancake', 'kuchen', 'torte'
   ],
   supermarkt: [
     'supermarkt', 'lebensmittel', 'einkauf', 'gutscheinheft', 'jö', 'joe',
@@ -108,16 +110,33 @@ function buildSignalText(parts = []) {
   return parts.map((part) => cleanText(part)).filter(Boolean).join(' ').toLowerCase();
 }
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function hasTerm(text, token) {
+  const term = cleanText(token).toLowerCase();
+  if (!term) return false;
+  if (/^[\p{L}\p{N}]+$/u.test(term)) {
+    return new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRegExp(term)}($|[^\\p{L}\\p{N}])`, 'iu').test(text);
+  }
+  return text.includes(term);
+}
+
+function hasAnyTerm(text, tokens = []) {
+  return tokens.some((token) => hasTerm(text, token));
+}
+
 function isChristianText(text) {
-  return CHRISTIAN_KEYWORDS.some((token) => text.includes(token));
+  return hasAnyTerm(text, CHRISTIAN_KEYWORDS);
 }
 
 function hasServiceContext(text) {
-  return SERVICE_KEYWORDS.some((token) => text.includes(token));
+  return hasAnyTerm(text, SERVICE_KEYWORDS);
 }
 
 function isChristianEvent(text) {
-  return CHRISTIAN_EVENT_KEYWORDS.some((token) => text.includes(token));
+  return hasAnyTerm(text, CHRISTIAN_EVENT_KEYWORDS);
 }
 
 function inferCategoryFromText(parts = []) {
@@ -130,16 +149,16 @@ function inferCategoryFromText(parts = []) {
     return 'kirche';
   }
 
-  if (CATEGORY_HINTS.kaffee.some((token) => text.includes(token))) return 'kaffee';
-  if (CATEGORY_HINTS.essen.some((token) => text.includes(token))) return 'essen';
-  if (CATEGORY_HINTS.supermarkt.some((token) => text.includes(token))) return 'supermarkt';
-  if (CATEGORY_HINTS.fitness.some((token) => text.includes(token))) return 'fitness';
-  if (CATEGORY_HINTS.reisen.some((token) => text.includes(token))) return 'reisen';
-  if (CATEGORY_HINTS.kultur.some((token) => text.includes(token))) return 'kultur';
-  if (CATEGORY_HINTS.streaming.some((token) => text.includes(token))) return 'streaming';
-  if (CATEGORY_HINTS.technik.some((token) => text.includes(token))) return 'technik';
-  if (CATEGORY_HINTS.beauty.some((token) => text.includes(token))) return 'beauty';
-  if (CATEGORY_HINTS.shopping.some((token) => text.includes(token))) return 'shopping';
+  if (hasAnyTerm(text, CATEGORY_HINTS.kaffee)) return 'kaffee';
+  if (hasAnyTerm(text, CATEGORY_HINTS.essen)) return 'essen';
+  if (hasAnyTerm(text, CATEGORY_HINTS.supermarkt)) return 'supermarkt';
+  if (hasAnyTerm(text, CATEGORY_HINTS.fitness)) return 'fitness';
+  if (hasAnyTerm(text, CATEGORY_HINTS.reisen)) return 'reisen';
+  if (hasAnyTerm(text, CATEGORY_HINTS.kultur)) return 'kultur';
+  if (hasAnyTerm(text, CATEGORY_HINTS.streaming)) return 'streaming';
+  if (hasAnyTerm(text, CATEGORY_HINTS.technik)) return 'technik';
+  if (hasAnyTerm(text, CATEGORY_HINTS.beauty)) return 'beauty';
+  if (hasAnyTerm(text, CATEGORY_HINTS.shopping)) return 'shopping';
 
   return null;
 }
@@ -155,6 +174,7 @@ function normalizeCategoryForScraper(rawCategory, parts = []) {
   if (category === 'events') return isChristianText(text) ? 'events' : (inferred || 'kultur');
 
   if (WEAK_CATEGORIES.has(category) && inferred) return inferred;
+  if (['shopping', 'beauty', 'kultur', 'reisen'].includes(category) && (inferred === 'essen' || inferred === 'kaffee')) return inferred;
   if (category === 'shopping' && inferred && inferred !== 'shopping') return inferred;
 
   return category || inferred || 'wien';
