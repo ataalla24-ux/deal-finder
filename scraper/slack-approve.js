@@ -44,6 +44,8 @@ const APPROVE_SLACK_MESSAGE_TS = cleanText(process.env.APPROVE_SLACK_MESSAGE_TS 
 const APPROVE_SLACK_REACTION = cleanText(process.env.APPROVE_SLACK_REACTION || '');
 const APPROVE_SLACK_REACTION_USER = cleanText(process.env.APPROVE_SLACK_REACTION_USER || '');
 const MAX_APPROVAL_URL_EXPIRY_CHECKS = Number(process.env.MAX_APPROVAL_URL_EXPIRY_CHECKS || 50);
+const APPROVE_FULL_SCAN_MAX_THREADS = Number(process.env.APPROVE_FULL_SCAN_MAX_THREADS || 8);
+const APPROVE_FULL_SCAN_MAX_DEALS = Number(process.env.APPROVE_FULL_SCAN_MAX_DEALS || 250);
 const BLOCKED_APPROVAL_URL_PATTERNS = [
   /tiktok\.com\/@planetmatters\/video\/7634961057521437975/i,
   /tiktok\.com\/@viennas_joy\/video\/7635566976642911510/i,
@@ -227,6 +229,41 @@ function normalizeUrl(url) {
   if (!text) return '';
   if (!/^https?:\/\//i.test(text)) return '';
   return text;
+}
+
+function slackTsNumber(value) {
+  const num = Number.parseFloat(cleanText(value));
+  return Number.isFinite(num) ? num : 0;
+}
+
+function pendingApprovalKey(deal) {
+  const slackTs = cleanText(deal?.slackTs);
+  if (slackTs) return `slack:${slackTs}`;
+  const id = cleanText(deal?.id);
+  if (id) return `id:${id}`;
+  const url = normalizeUrl(deal?.url).toLowerCase();
+  const title = normalizeLooseText(deal?.title);
+  if (url && title) return `url-title:${url}|${title}`;
+  if (url) return `url:${url}`;
+  return title ? `title:${title}` : '';
+}
+
+function uniqueDealsByApprovalKey(deals) {
+  const byKey = new Map();
+  for (const deal of deals) {
+    const key = pendingApprovalKey(deal);
+    if (!key || byKey.has(key)) continue;
+    byKey.set(key, deal);
+  }
+  return [...byKey.values()];
+}
+
+function mergeRemainingPendingQueue(allQueuedDeals, checkedDeals, stillUnapprovedDeals) {
+  const checkedKeys = new Set(checkedDeals.map(pendingApprovalKey).filter(Boolean));
+  return uniqueDealsByApprovalKey([
+    ...allQueuedDeals.filter((deal) => !checkedKeys.has(pendingApprovalKey(deal))),
+    ...stillUnapprovedDeals,
+  ]);
 }
 
 function isBlockedApprovalDeal(deal) {
@@ -807,7 +844,17 @@ async function main() {
   const queuedDeals = queuedModeration.deals;
   const queueThreadTs = [...new Set(queuedDeals.map((deal) => cleanText(deal.slackThreadTs)).filter(Boolean))];
   const recentThreadTs = [...new Set(await findRecentDigestThreadTs())].filter(Boolean);
-  const threadCandidates = [...new Set([...queueThreadTs, ...recentThreadTs])].filter(Boolean);
+  let threadCandidates = [...new Set([...queueThreadTs, ...recentThreadTs])]
+    .filter(Boolean)
+    .sort((left, right) => slackTsNumber(right) - slackTsNumber(left));
+
+  if (APPROVE_FULL_SCAN_MAX_THREADS > 0 && threadCandidates.length > APPROVE_FULL_SCAN_MAX_THREADS) {
+    console.log(
+      `🧭 limiting fallback scan to newest ${APPROVE_FULL_SCAN_MAX_THREADS}/${threadCandidates.length} thread(s); ` +
+      'older pending deals stay queued for direct reaction events'
+    );
+    threadCandidates = threadCandidates.slice(0, APPROVE_FULL_SCAN_MAX_THREADS);
+  }
 
   if (threadCandidates.length === 0) {
     console.log('ℹ️ Kein offener Digest- oder Community-Thread gefunden');
@@ -862,14 +909,25 @@ async function main() {
     console.log(`🛡️ Moderation reasons: ${Object.entries(counts).map(([reason, count]) => `${count} ${reason}`).join(' | ')}`);
   }
   const moderatedPendingDeals = pendingModeration.deals;
+  const approvalCheckDeals = moderatedPendingDeals
+    .slice()
+    .sort((left, right) => slackTsNumber(right.slackTs) - slackTsNumber(left.slackTs))
+    .slice(0, APPROVE_FULL_SCAN_MAX_DEALS > 0 ? APPROVE_FULL_SCAN_MAX_DEALS : undefined);
+  const deferredPendingDeals = moderatedPendingDeals.filter((deal) => {
+    const key = pendingApprovalKey(deal);
+    return key && !approvalCheckDeals.some((candidate) => pendingApprovalKey(candidate) === key);
+  });
 
   console.log(`📋 Pending posted deals across ${threadCandidates.length} thread(s): ${moderatedPendingDeals.length}`);
+  if (approvalCheckDeals.length < moderatedPendingDeals.length) {
+    console.log(`🧭 checking newest ${approvalCheckDeals.length}/${moderatedPendingDeals.length} pending deals in fallback mode`);
+  }
   console.log(`✏️ Slack edits applied: ${appliedEditCount}`);
   if (unresolvedEditTargets.length > 0) {
     console.log(`⚠️ Unresolved edit targets: ${[...new Set(unresolvedEditTargets)].join(', ')}`);
   }
 
-  if (moderatedPendingDeals.length === 0) {
+  if (approvalCheckDeals.length === 0) {
     const sampleThread = threadMessagesByThread.get(threadCandidates[0]) || [];
     const sample = sampleThread.find((msg) => cleanText(msg?.ts) !== threadCandidates[0]);
     if (sample) {
@@ -878,15 +936,15 @@ async function main() {
       console.log('🧪 sample digest has blocks:', Array.isArray(sample.blocks), 'blockCount:', Array.isArray(sample.blocks) ? sample.blocks.length : 0);
     }
     console.log('✅ Keine offenen Slack-Deals zum Prüfen');
-    savePendingRemaining([]);
+    savePendingRemaining(uniqueDealsByApprovalKey([...queuedDeals, ...deferredPendingDeals]));
     return;
   }
 
   const approved = [];
   const unapproved = [];
 
-  for (let i = 0; i < moderatedPendingDeals.length; i += 1) {
-    const deal = moderatedPendingDeals[i];
+  for (let i = 0; i < approvalCheckDeals.length; i += 1) {
+    const deal = approvalCheckDeals[i];
     if (isBlockedApprovalDeal(deal)) {
       console.log(`  🚫 blocked expired/invalid Slack deal: ${deal.title || deal.url}`);
       continue;
@@ -906,7 +964,7 @@ async function main() {
     }
 
     if ((i + 1) % 25 === 0) {
-      console.log(`  ✅ checked ${i + 1}/${moderatedPendingDeals.length}`);
+      console.log(`  ✅ checked ${i + 1}/${approvalCheckDeals.length}`);
     }
 
     await sleep(200);
@@ -916,7 +974,7 @@ async function main() {
   console.log(`🕓 Still waiting approval: ${unapproved.length}`);
 
   if (approved.length === 0) {
-    savePendingRemaining(unapproved);
+    savePendingRemaining(mergeRemainingPendingQueue([...queuedDeals, ...deferredPendingDeals], approvalCheckDeals, unapproved));
     console.log('ℹ️ Keine neuen approvals gefunden, deals.json bleibt unverändert');
     return;
   }
@@ -936,10 +994,11 @@ async function main() {
   const mergedApproved = mergeApprovedDeals(existingApprovedModeration.deals, approvedModeration.deals);
 
   saveDealsJson(mergedApproved);
-  savePendingRemaining(unapproved);
+  const remainingPending = mergeRemainingPendingQueue([...queuedDeals, ...deferredPendingDeals], approvalCheckDeals, unapproved);
+  savePendingRemaining(remainingPending);
 
   console.log(`✅ deals.json updated with approved-only deals: ${mergedApproved.length}`);
-  console.log(`💾 pending queue updated: ${unapproved.length} deals left`);
+  console.log(`💾 pending queue updated: ${remainingPending.length} deals left`);
 }
 
 main().catch((error) => {
