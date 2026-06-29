@@ -49,6 +49,8 @@ npx wrangler secret put SLACK_SIGNING_SECRET
 npx wrangler secret put SLACK_CHANNEL_ID
 ```
 
+`SLACK_SIGNING_SECRET` is strongly recommended. If it is temporarily missing, the worker can still use Slack Events to dispatch the targeted approval workflow, but it does not trust the event user and the workflow must confirm the real check reaction through the Slack API before approving a deal.
+
 Slack Event dispatches include the reacted `message_ts`, so the approval workflow can approve that single deal immediately instead of scanning the full pending queue.
 
 ## Stripe Checkout

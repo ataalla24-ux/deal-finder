@@ -1321,6 +1321,16 @@ async function verifySlackRequest(request, env, payloadText) {
   }
 }
 
+async function verifySlackEventRequest(request, env, payloadText) {
+  const signingSecret = envString(env, 'SLACK_SIGNING_SECRET');
+  if (!signingSecret) {
+    return { verified: false, missingSecret: true };
+  }
+
+  await verifySlackRequest(request, env, payloadText);
+  return { verified: true, missingSecret: false };
+}
+
 function slackEphemeral(text) {
   return json({
     response_type: 'ephemeral',
@@ -1334,9 +1344,10 @@ function isSlackCheckReaction(value) {
 
 async function handleSlackEvent(request, env) {
   const rawBody = await request.text();
+  let verification = { verified: false, missingSecret: false };
 
   try {
-    await verifySlackRequest(request, env, rawBody);
+    verification = await verifySlackEventRequest(request, env, rawBody);
   } catch (error) {
     return invalid(error?.message || 'Invalid Slack request', 401);
   }
@@ -1370,11 +1381,13 @@ async function handleSlackEvent(request, env) {
     slack_channel: eventChannel,
     message_ts: messageTs,
     reaction: cleanShortText(event.reaction, 80),
-    reaction_user: cleanShortText(event.user, 120),
+    ...(verification.verified ? { reaction_user: cleanShortText(event.user, 120) } : {}),
   });
   return json({
     ok: true,
     approveTriggered: Boolean(workflow?.ok && !workflow?.skipped),
+    slackSignatureVerified: verification.verified,
+    slackSigningSecretMissing: verification.missingSecret,
     workflow,
   });
 }
