@@ -30,6 +30,9 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          FEATURED_WEEKLY_LLM_REQUIRED: ${{ vars.FEATURED_WEEKLY_LLM_REQUIRED }}
         run: node scraper/set-daily-deal.js
 
       - name: Commit featured deal files

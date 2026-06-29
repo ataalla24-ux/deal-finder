@@ -10,12 +10,19 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { cleanText, extractDealsFromThreadMessages, extractSlackMessageText } from './slack-digest-utils.js';
 import { normalizeDealRecord } from './deal-normalization-utils.js';
+import { inspectDealUrlHealth } from './expiry-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
+const FEATURED_LLM_MODEL = process.env.FEATURED_DEAL_REVIEW_MODEL || process.env.DEAL_REVIEW_MODEL || process.env.OPENAI_MODEL || 'gpt-4.1-mini';
+const FEATURED_WEEKLY_LLM_REQUIRED = process.env.FEATURED_WEEKLY_LLM_REQUIRED === '1';
+const FEATURED_WEEKLY_LLM_MIN_CONFIDENCE = Math.max(0, Math.min(1, Number(process.env.FEATURED_WEEKLY_LLM_MIN_CONFIDENCE || 0.55)));
+const FEATURED_TARGET_TIMEOUT_MS = Number(process.env.FEATURED_DEAL_TARGET_TIMEOUT_MS || process.env.URL_CHECK_TIMEOUT_MS || 7000);
+const FOOD_DRINK_CATEGORIES = new Set(['essen', 'kaffee', 'trinken', 'getränke', 'getraenke', 'bars']);
+const FOOD_DRINK_SIGNAL_PATTERN = /\b(essen|trinken|food|drink|drinks|getränk|getraenk|kaffee|coffee|espresso|latte|matcha|tee|tea|eis|gelato|ice\s*cream|pizza|burger|döner|doener|kebab|falafel|sushi|ramen|nudel|noodle|brunch|frühstück|fruehstueck|croissant|bowl|restaurant|cafe|café|bistro|bar|cocktail|smoothie|saft|juice|cola|menü|menue|meal|lunch|dinner|snack|pommes|kuchen|torte|cookie|cookies|schokolade|praline|wein|bier)\b/i;
 const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Vienna',
     year: 'numeric',
@@ -369,6 +376,51 @@ function parseTime(value) {
     return Number.isNaN(parsed) ? 0 : parsed;
 }
 
+function clipText(value, maxLength = 1000) {
+    return cleanText(value || '').slice(0, maxLength);
+}
+
+function compactFeaturedEvidence(health = null) {
+    if (!health) return null;
+    const hints = health.contentHints || {};
+    const dates = health.dateHints || {};
+    return {
+        invalid: Boolean(health.invalid),
+        transientError: Boolean(health.transientError),
+        blockedByProtection: Boolean(health.blockedByProtection),
+        status: health.status || null,
+        reason: clipText(health.reason || '', 180),
+        finalUrl: clipText(health.finalUrl || '', 360),
+        pageTitle: clipText(hints.title || '', 220),
+        pageDescription: clipText(hints.description || '', 360),
+        pageHeading: clipText(hints.heading || '', 180),
+        textSnippet: clipText(hints.textSnippet || '', 900),
+        publicationDate: clipText(dates.publicationDate || '', 80),
+        validOn: clipText(dates.validOn || '', 40),
+        validFrom: clipText(dates.validFrom || '', 40),
+        validUntil: clipText(dates.validUntil || '', 40),
+        targetDateRaw: clipText(dates.targetDateRaw || '', 160),
+    };
+}
+
+function isFoodDrinkDeal(deal = {}) {
+    const normalized = normalizeDealRecord(deal || {});
+    const category = cleanText(normalized.category || '').toLowerCase();
+    if (FOOD_DRINK_CATEGORIES.has(category)) return true;
+
+    const signal = [
+        normalized.brand,
+        normalized.title,
+        normalized.description,
+        normalized.distance,
+        normalized.type,
+        normalized.url,
+    ].map((value) => cleanText(value)).join(' ');
+
+    if (category === 'supermarkt') return FOOD_DRINK_SIGNAL_PATTERN.test(signal);
+    return FOOD_DRINK_SIGNAL_PATTERN.test(signal) && !['fitness', 'beauty', 'reisen', 'kultur', 'events', 'shopping'].includes(category);
+}
+
 function isFeaturedDealStillLive(deal, now = new Date()) {
     if (!deal || typeof deal !== 'object') return false;
     if (!cleanText(deal.id || deal.url || '')) return false;
@@ -377,6 +429,188 @@ function isFeaturedDealStillLive(deal, now = new Date()) {
     if (expiresAt && expiresAt < now.getTime()) return false;
 
     return true;
+}
+
+async function reviewWeeklyDealActiveWithLLM(deal, options = {}) {
+    const now = options.now instanceof Date ? options.now : new Date();
+    const normalized = normalizeDealRecord(deal || {});
+    const url = cleanText(normalized.url || '');
+    const resultBase = {
+        enabled: Boolean(process.env.OPENAI_API_KEY),
+        model: FEATURED_LLM_MODEL,
+        checkedAt: now.toISOString(),
+        decision: 'skipped',
+        confidence: 0,
+        reason: '',
+        evidence: null,
+    };
+
+    if (!process.env.OPENAI_API_KEY) {
+        return {
+            ...resultBase,
+            reason: 'OPENAI_API_KEY fehlt; deterministischer Aktivitätscheck verwendet.',
+            allowed: !FEATURED_WEEKLY_LLM_REQUIRED,
+        };
+    }
+
+    let evidence = null;
+    if (/^https?:\/\//i.test(url)) {
+        try {
+            evidence = compactFeaturedEvidence(await inspectDealUrlHealth(url, { timeoutMs: FEATURED_TARGET_TIMEOUT_MS }));
+        } catch (error) {
+            evidence = {
+                invalid: false,
+                transientError: true,
+                blockedByProtection: false,
+                status: null,
+                reason: clipText(error?.message || error, 180),
+                finalUrl: url,
+            };
+        }
+    } else {
+        evidence = {
+            invalid: true,
+            transientError: false,
+            blockedByProtection: false,
+            status: null,
+            reason: 'fehlender prüfbarer Ziellink',
+            finalUrl: '',
+        };
+    }
+
+    if (evidence?.invalid && !evidence?.transientError && !evidence?.blockedByProtection) {
+        return {
+            ...resultBase,
+            decision: 'inactive',
+            confidence: 1,
+            reason: `Ziellink ungültig: ${evidence.reason || 'unbekannt'}`,
+            evidence,
+            allowed: false,
+        };
+    }
+
+    try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            },
+            body: JSON.stringify({
+                model: FEATURED_LLM_MODEL,
+                temperature: 0,
+                response_format: {
+                    type: 'json_schema',
+                    json_schema: {
+                        name: 'freefinder_featured_weekly_active_check',
+                        strict: true,
+                        schema: {
+                            type: 'object',
+                            additionalProperties: false,
+                            properties: {
+                                decision: { type: 'string', enum: ['active', 'inactive', 'unclear'] },
+                                confidence: { type: 'number' },
+                                reason: { type: 'string' },
+                            },
+                            required: ['decision', 'confidence', 'reason'],
+                        },
+                    },
+                },
+                messages: [
+                    {
+                        role: 'system',
+                        content: [
+                            'Du prüfst genau einen FreeFinder Deal der Woche für Wien.',
+                            'Der Deal der Woche darf nur gesetzt werden, wenn er ein Essen- oder Trinken-Deal ist und heute noch aktiv wirkt.',
+                            'Nutze die App-Daten und die Zielseiten-Evidence. Wenn ein Ablaufdatum in der Vergangenheit liegt, entscheide inactive.',
+                            'Wenn der Zielseiten-Text den Deal, die Marke oder den Vorteil nicht bestätigt, entscheide unclear oder inactive.',
+                            'Bei Bot-Schutz oder temporären Fehlern entscheide unclear, außer App-Daten zeigen eindeutig ein künftiges Ablaufdatum.',
+                            'Antworte ausschließlich im JSON-Schema.',
+                        ].join(' '),
+                    },
+                    {
+                        role: 'user',
+                        content: JSON.stringify({
+                            referenceDate: now.toISOString(),
+                            timezone: 'Europe/Vienna',
+                            deal: {
+                                id: clipText(normalized.id || '', 120),
+                                brand: clipText(normalized.brand || '', 100),
+                                title: clipText(normalized.title || '', 180),
+                                description: clipText(normalized.description || '', 360),
+                                category: clipText(normalized.category || '', 80),
+                                type: clipText(normalized.type || '', 80),
+                                distance: clipText(normalized.distance || '', 180),
+                                url,
+                                expires: clipText(normalized.expiryDisplayText || normalized.expires || normalized.expiresOriginal || '', 180),
+                                validOn: clipText(normalized.validOn || '', 40),
+                                validFrom: clipText(normalized.validFrom || '', 40),
+                                validUntil: clipText(normalized.validUntil || '', 40),
+                                pubDate: clipText(normalized.pubDate || normalized.approvedAt || '', 80),
+                            },
+                            targetEvidence: evidence,
+                        }),
+                    },
+                ],
+            }),
+        });
+
+        const text = await response.text();
+        if (!response.ok) throw new Error(`OpenAI HTTP ${response.status}: ${text.slice(0, 220)}`);
+        const parsed = JSON.parse(JSON.parse(text)?.choices?.[0]?.message?.content || '{}');
+        const decision = cleanText(parsed.decision || '').toLowerCase();
+        const confidence = Math.max(0, Math.min(1, Number(parsed.confidence) || 0));
+        const allowed = decision === 'active' && confidence >= FEATURED_WEEKLY_LLM_MIN_CONFIDENCE;
+        return {
+            ...resultBase,
+            decision,
+            confidence,
+            reason: clipText(parsed.reason || '', 240),
+            evidence,
+            allowed,
+        };
+    } catch (error) {
+        return {
+            ...resultBase,
+            decision: 'error',
+            confidence: 0,
+            reason: clipText(error?.message || error, 240),
+            evidence,
+            allowed: !FEATURED_WEEKLY_LLM_REQUIRED,
+        };
+    }
+}
+
+async function getFeaturedDealEligibility(deal, kind = 'daily', options = {}) {
+    const now = options.now instanceof Date ? options.now : new Date();
+    const normalized = normalizeDealRecord(deal || {});
+
+    if (!isFeaturedDealStillLive(normalized, now)) {
+        return { eligible: false, reason: 'not_live_or_expired', llmActiveCheck: null };
+    }
+
+    if (kind !== 'weekly') {
+        return { eligible: true, reason: 'daily_live', llmActiveCheck: null };
+    }
+
+    if (!isFoodDrinkDeal(normalized)) {
+        return { eligible: false, reason: 'weekly_not_food_or_drink', llmActiveCheck: null };
+    }
+
+    if (options.llmEnabled === false) {
+        return {
+            eligible: true,
+            reason: 'weekly_food_or_drink_llm_disabled',
+            llmActiveCheck: { enabled: false, decision: 'skipped', reason: 'LLM check disabled by caller.' },
+        };
+    }
+
+    const llmActiveCheck = await reviewWeeklyDealActiveWithLLM(normalized, { now });
+    return {
+        eligible: Boolean(llmActiveCheck.allowed),
+        reason: llmActiveCheck.allowed ? 'weekly_food_or_drink_llm_active' : 'weekly_llm_not_active',
+        llmActiveCheck,
+    };
 }
 
 function loadExistingFeaturedDeal(kind) {
@@ -391,7 +625,7 @@ function loadExistingFeaturedDeal(kind) {
     }
 }
 
-function isExistingFeaturedDealCurrent(kind, approvedDeals) {
+async function isExistingFeaturedDealCurrent(kind, approvedDeals) {
     const existing = loadExistingFeaturedDeal(kind);
     if (!existing) return false;
 
@@ -403,7 +637,11 @@ function isExistingFeaturedDealCurrent(kind, approvedDeals) {
         id: existing.dealId || existing.id || '',
         url: existing.url || '',
     });
-    return isFeaturedDealStillLive(approvedDeal || existing);
+    const eligibility = await getFeaturedDealEligibility(approvedDeal || existing, kind);
+    if (!eligibility.eligible) {
+        console.log(`Existing ${kind} featured deal is not eligible anymore: ${eligibility.reason}`);
+    }
+    return eligibility.eligible;
 }
 
 function automaticCategoryScore(category) {
@@ -466,7 +704,7 @@ function scoreAutomaticFeaturedDeal(deal, kind, now = new Date()) {
     return score;
 }
 
-function selectAutomaticFeaturedDeal(approvedDeals, options = {}) {
+async function selectAutomaticFeaturedDeal(approvedDeals, options = {}) {
     const kind = options.kind || 'daily';
     const now = options.now instanceof Date ? options.now : new Date();
     const excludedIds = options.excludedIds instanceof Set ? options.excludedIds : new Set();
@@ -476,17 +714,33 @@ function selectAutomaticFeaturedDeal(approvedDeals, options = {}) {
 
     if (liveDeals.length === 0) return null;
 
-    const preferred = liveDeals.filter((deal) => {
-        const category = cleanText(deal.category || '').toLowerCase();
-        return !['kirche', 'gottesdienste', 'gemeinde'].includes(category);
-    });
-    const candidates = preferred.length > 0 ? preferred : liveDeals;
+    const preferred = kind === 'weekly'
+        ? liveDeals.filter((deal) => isFoodDrinkDeal(deal))
+        : liveDeals.filter((deal) => {
+            const category = cleanText(deal.category || '').toLowerCase();
+            return !['kirche', 'gottesdienste', 'gemeinde'].includes(category);
+        });
+    const candidates = kind === 'weekly'
+        ? preferred
+        : (preferred.length > 0 ? preferred : liveDeals);
+    if (candidates.length === 0) return null;
 
-    return [...candidates].sort((a, b) => {
+    const sortedCandidates = [...candidates].sort((a, b) => {
         const scoreDelta = scoreAutomaticFeaturedDeal(b, kind, now) - scoreAutomaticFeaturedDeal(a, kind, now);
         if (scoreDelta !== 0) return scoreDelta;
         return parseTime(b.pubDate || b.approvedAt || '') - parseTime(a.pubDate || a.approvedAt || '');
-    })[0] || null;
+    });
+
+    for (const deal of sortedCandidates) {
+        const eligibility = await getFeaturedDealEligibility(deal, kind, {
+            now,
+            llmEnabled: options.llmEnabled,
+        });
+        if (eligibility.eligible) return { deal, eligibility };
+        console.log(`Automatic ${kind} candidate skipped: ${deal.brand} - ${deal.title} (${eligibility.reason})`);
+    }
+
+    return null;
 }
 
 // ============================================
@@ -539,6 +793,7 @@ function saveDealOfTheWeek(deal, options = {}) {
         distance: normalized.distance || 'Wien',
         manualPick,
         selectionReason: manualPick ? 'slack-pick' : 'automatic-approved-fallback',
+        eligibility: options.eligibility || null,
         pickedAt: new Date().toISOString()
     };
 
@@ -609,7 +864,7 @@ async function main() {
 
   const maxOrder = deals.reduce((max, current) => Math.max(max, Number(current?.order) || 0), 0);
 
-  function maybePersistPick(kind, pickNumber) {
+  async function maybePersistPick(kind, pickNumber) {
     if (!pickNumber || deals.length === 0) return false;
     const deal = findPickedDeal(deals, pickNumber);
     if (!deal) {
@@ -625,16 +880,21 @@ async function main() {
       return false;
     }
     const dealToPersist = mergePickedDealWithApproved(approvedDeal, deal);
+    const eligibility = await getFeaturedDealEligibility(dealToPersist, kind);
+    if (!eligibility.eligible) {
+      console.log(`${kind} pick is not eligible, skipping: ${eligibility.reason}`);
+      return false;
+    }
     if (kind === 'daily') {
       saveDealOfTheDay(dealToPersist);
     } else if (kind === 'weekly') {
-      saveDealOfTheWeek(dealToPersist);
+      saveDealOfTheWeek(dealToPersist, { eligibility });
     }
     return true;
   }
 
-  let savedDaily = maybePersistPick('daily', picks.daily);
-  let savedWeekly = maybePersistPick('weekly', picks.weekly);
+  let savedDaily = await maybePersistPick('daily', picks.daily);
+  let savedWeekly = await maybePersistPick('weekly', picks.weekly);
 
   const automaticExcludedIds = new Set();
   if (savedDaily && picks.daily) {
@@ -642,16 +902,16 @@ async function main() {
     if (pickedDaily?.id) automaticExcludedIds.add(cleanText(pickedDaily.id));
   }
 
-  if (!savedDaily && !isExistingFeaturedDealCurrent('daily', approvedDeals)) {
-    const fallbackDaily = selectAutomaticFeaturedDeal(approvedDeals, {
+  if (!savedDaily && !(await isExistingFeaturedDealCurrent('daily', approvedDeals))) {
+    const fallbackDaily = await selectAutomaticFeaturedDeal(approvedDeals, {
       kind: 'daily',
       excludedIds: automaticExcludedIds,
     });
     if (fallbackDaily) {
-      console.log(`Automatic daily fallback: ${fallbackDaily.brand} - ${fallbackDaily.title}`);
-      saveDealOfTheDay(fallbackDaily, { manualPick: false });
+      console.log(`Automatic daily fallback: ${fallbackDaily.deal.brand} - ${fallbackDaily.deal.title}`);
+      saveDealOfTheDay(fallbackDaily.deal, { manualPick: false });
       savedDaily = true;
-      if (fallbackDaily.id) automaticExcludedIds.add(cleanText(fallbackDaily.id));
+      if (fallbackDaily.deal.id) automaticExcludedIds.add(cleanText(fallbackDaily.deal.id));
     } else {
       console.log('No approved live deal available for automatic daily fallback');
     }
@@ -659,14 +919,14 @@ async function main() {
     console.log('Existing daily featured deal is current and approved');
   }
 
-  if (!savedWeekly && !isExistingFeaturedDealCurrent('weekly', approvedDeals)) {
-    const fallbackWeekly = selectAutomaticFeaturedDeal(approvedDeals, {
+  if (!savedWeekly && !(await isExistingFeaturedDealCurrent('weekly', approvedDeals))) {
+    const fallbackWeekly = await selectAutomaticFeaturedDeal(approvedDeals, {
       kind: 'weekly',
       excludedIds: automaticExcludedIds,
     });
     if (fallbackWeekly) {
-      console.log(`Automatic weekly fallback: ${fallbackWeekly.brand} - ${fallbackWeekly.title}`);
-      saveDealOfTheWeek(fallbackWeekly, { manualPick: false });
+      console.log(`Automatic weekly fallback: ${fallbackWeekly.deal.brand} - ${fallbackWeekly.deal.title}`);
+      saveDealOfTheWeek(fallbackWeekly.deal, { manualPick: false, eligibility: fallbackWeekly.eligibility });
       savedWeekly = true;
     } else {
       console.log('No approved live deal available for automatic weekly fallback');
@@ -683,7 +943,18 @@ async function main() {
   console.log('Done!');
 }
 
-main().catch(err => {
-    console.error('Error:', err.message);
-    process.exit(1);
-});
+export {
+    getFeaturedDealEligibility,
+    getViennaDayKey,
+    getViennaWeekKey,
+    isFeaturedDealStillLive,
+    isFoodDrinkDeal,
+    selectAutomaticFeaturedDeal,
+};
+
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+    main().catch(err => {
+        console.error('Error:', err.message);
+        process.exit(1);
+    });
+}
