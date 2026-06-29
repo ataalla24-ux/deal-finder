@@ -815,6 +815,45 @@ async function triggerDealEditWorkflow(env, edit) {
   throw new Error(`GitHub edit workflow dispatch failed (${response.status})${detail ? `: ${detail}` : ''}`);
 }
 
+async function triggerCommunityIntakeWorkflow(env) {
+  const token = envString(env, 'GITHUB_WORKFLOW_TOKEN') || envString(env, 'GITHUB_TOKEN');
+  if (!token) throw new Error('GITHUB_WORKFLOW_TOKEN is not configured');
+
+  const owner = envString(env, 'GITHUB_OWNER') || 'ataalla24-ux';
+  const repo = envString(env, 'GITHUB_REPO') || 'deal-finder';
+  const workflow = envString(env, 'GITHUB_COMMUNITY_INTAKE_WORKFLOW') || 'community-submissions.yml';
+  const ref = envString(env, 'GITHUB_REF') || 'main';
+  const endpoint = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/workflows/${encodeURIComponent(workflow)}/dispatches`;
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${token}`,
+      accept: 'application/vnd.github+json',
+      'content-type': 'application/json',
+      'user-agent': 'freefinder-referrals-worker',
+      'x-github-api-version': '2022-11-28',
+    },
+    body: JSON.stringify({ ref }),
+  });
+
+  if (response.status === 204) return { ok: true, status: response.status, workflow };
+
+  const detail = cleanLongText(await response.text().catch(() => ''), 700);
+  throw new Error(`GitHub community intake dispatch failed (${response.status})${detail ? `: ${detail}` : ''}`);
+}
+
+async function triggerCommunityIntakeSafely(env) {
+  try {
+    return await triggerCommunityIntakeWorkflow(env);
+  } catch (error) {
+    return {
+      ok: false,
+      error: cleanLongText(error?.message || 'Community intake workflow dispatch failed', 700),
+    };
+  }
+}
+
 async function handleDealAdminRemove(request, env) {
   if (!requireAdmin(request, env)) {
     return invalid('Unauthorized', 401);
@@ -2892,16 +2931,26 @@ export default {
 
       const existing = await findExistingSubmissionByUrl(env, submission.url);
       if (existing) {
+        const intakeWorkflow = normalizeSubmissionStatus(existing.status) === 'pending'
+          ? await triggerCommunityIntakeSafely(env)
+          : { ok: false, skipped: 'already-not-pending' };
         return json({
           ok: true,
           alreadyQueued: true,
+          slackDeliveryPending: normalizeSubmissionStatus(existing.status) === 'pending',
+          intakeTriggered: Boolean(intakeWorkflow?.ok),
+          intakeWorkflow,
           submission: sanitizePublicCommunitySubmission(existing),
         });
       }
 
       await putJsonKV(env, dealSubmissionKey(submission.id), submission);
+      const intakeWorkflow = await triggerCommunityIntakeSafely(env);
       return json({
         ok: true,
+        slackDeliveryPending: true,
+        intakeTriggered: Boolean(intakeWorkflow?.ok),
+        intakeWorkflow,
         submission: sanitizePublicCommunitySubmission(submission),
       }, 201);
     }
@@ -2913,20 +2962,30 @@ export default {
 
       const existing = await findExistingSubmissionByUrl(env, submission.url);
       if (existing) {
+        const intakeWorkflow = normalizeSubmissionStatus(existing.status) === 'pending'
+          ? await triggerCommunityIntakeSafely(env)
+          : { ok: false, skipped: 'already-not-pending' };
         return json({
           ok: true,
           slackDelivered: false,
           queued: true,
           alreadyQueued: true,
+          slackDeliveryPending: normalizeSubmissionStatus(existing.status) === 'pending',
+          intakeTriggered: Boolean(intakeWorkflow?.ok),
+          intakeWorkflow,
           submission: sanitizePublicCommunitySubmission(existing),
         });
       }
 
       await putJsonKV(env, dealSubmissionKey(submission.id), submission);
+      const intakeWorkflow = await triggerCommunityIntakeSafely(env);
       return json({
         ok: true,
         slackDelivered: false,
         queued: true,
+        slackDeliveryPending: true,
+        intakeTriggered: Boolean(intakeWorkflow?.ok),
+        intakeWorkflow,
         submission: sanitizePublicCommunitySubmission(submission),
       }, 201);
     }
