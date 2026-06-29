@@ -1231,8 +1231,6 @@ async function main() {
   }
 
   for (const [id, restoreDeal] of protectedLiveDealRestores.entries()) {
-    if (seenIds.has(id)) continue;
-
     let deal = normalizeDealRecord({ ...restoreDeal });
     deal.url = normalizeTargetUrl(deal.url);
     deal = resetUnsafeUrlExpiry(deal);

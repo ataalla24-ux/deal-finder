@@ -137,6 +137,7 @@ function setIfPresent(target, source, field, options = {}) {
 function editMatchesDeal(edit, deal) {
   const editId = cleanText(edit.dealId);
   if (editId && editId === cleanText(deal?.id)) return true;
+  if (editId) return false;
   const editUrl = normalizeUrlForMatch(edit.url || edit.dealUrl || '');
   const dealUrl = normalizeUrlForMatch(deal?.url || '');
   return Boolean(editUrl && dealUrl && editUrl === dealUrl);
