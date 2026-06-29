@@ -79,6 +79,12 @@ const FORCE_KEEP_IDS = new Set([
   'icf-wien-gottesdienste-20260413',
   'jesuszentrum-events-20260413',
 ]);
+const PROTECTED_LIVE_RESTORE_IDS = new Set([
+  'joe-omv-viva-free-taste-6qmpsq',
+  'joe-omv-viva-free-taste-flur7',
+  'joe-omv-viva-free-taste-l62fzo',
+  'joe-omv-viva-free-taste-xipghf',
+]);
 
 const MAX_LIVE_URL_HEALTH_CHECKS = Number(process.env.MAX_LIVE_URL_HEALTH_CHECKS || 180);
 const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REFRESHES || 120);
@@ -923,12 +929,51 @@ async function loadSupplementalSocialIndex() {
   return supplementalByUrl;
 }
 
+async function loadProtectedLiveDealRestores() {
+  const protectedDealsById = new Map();
+  const pendingFiles = (await readdir(DOCS_DIR))
+    .filter((name) => /^deals-pending-.*\.json$/i.test(name))
+    .map((name) => path.join(DOCS_DIR, name));
+  const sourceFiles = [DEAL_CANDIDATES_INDEX_PATH, ...pendingFiles];
+
+  for (const filePath of sourceFiles) {
+    let bundle;
+    try {
+      bundle = await readJson(filePath);
+    } catch {
+      continue;
+    }
+
+    for (const rawDeal of collectBundleDeals(bundle)) {
+      const id = cleanText(rawDeal?.id || '');
+      if (!PROTECTED_LIVE_RESTORE_IDS.has(id)) continue;
+
+      const candidate = normalizeDealRecord({
+        ...rawDeal,
+        id,
+        url: normalizeTargetUrl(rawDeal.url || rawDeal.postUrl || rawDeal.post_url || rawDeal.link || ''),
+        type: 'gratis',
+        category: 'kaffee',
+        hot: true,
+        forceRestored: true,
+      });
+      const existing = protectedDealsById.get(id);
+      if (!existing || pickBetterNormalizedDeal(existing, candidate) === candidate) {
+        protectedDealsById.set(id, candidate);
+      }
+    }
+  }
+
+  return protectedDealsById;
+}
+
 async function main() {
   const now = new Date();
   const urlCache = new Map();
   const linkHealthCache = new Map();
   const dealsDoc = await readJson(DEALS_PATH);
   const supplementalSocialByUrl = await loadSupplementalSocialIndex();
+  const protectedLiveDealRestores = await loadProtectedLiveDealRestores();
   const totalBefore = Array.isArray(dealsDoc.deals) ? dealsDoc.deals.length : 0;
   const churchDeals = await loadCuratedChurchDeals();
   const curatedChurchIds = getChurchCuratedIds(churchDeals);
@@ -952,6 +997,7 @@ async function main() {
   let socialPubDateSourceFixes = 0;
   let socialPolishFixes = 0;
   let duplicateCollapses = 0;
+  let protectedLiveDealRestoresCount = 0;
   let flightUrlCheckSkips = 0;
   let moderationRemovals = 0;
 
@@ -1184,6 +1230,31 @@ async function main() {
     remaining.push(deal);
   }
 
+  for (const [id, restoreDeal] of protectedLiveDealRestores.entries()) {
+    if (seenIds.has(id)) continue;
+
+    let deal = normalizeDealRecord({ ...restoreDeal });
+    deal.url = normalizeTargetUrl(deal.url);
+    deal = resetUnsafeUrlExpiry(deal);
+    await normalizeDealExpiry(deal, {
+      now,
+      allowUrlLookup: false,
+      forceUrlLookup: false,
+      urlCache,
+    });
+    deal.expires = sanitizeExpiryText(deal.expires);
+
+    if (isExpiredDealRecord(deal, now)) {
+      markRemoved(deal, 'Geschützter OMV-VIVA-Deal abgelaufen');
+      continue;
+    }
+    if (!deal.id) continue;
+
+    seenIds.add(deal.id);
+    remaining.push(deal);
+    protectedLiveDealRestoresCount += 1;
+  }
+
   for (const churchDeal of churchDeals) {
     const normalizedChurchDeal = normalizeDealRecord(normalizeChurchDealForLiveFeed(churchDeal));
     const churchRawExpiry = cleanText(
@@ -1326,6 +1397,7 @@ async function main() {
     contentEnrichments,
     maxContentEnrichments: MAX_LIVE_CONTENT_ENRICHMENTS,
     flightUrlCheckSkips,
+    protectedLiveDealRestores: protectedLiveDealRestoresCount,
     socialPolishFixes,
     removalReasons,
     reviewCandidates: reviewCandidates.slice(0, 100),
