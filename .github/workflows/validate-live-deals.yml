@@ -32,6 +32,7 @@ jobs:
           MAX_LIVE_URL_EXPIRY_REFRESHES: 0
           MAX_LIVE_CONTENT_ENRICHMENTS: 0
           MAX_LIVE_SOCIAL_POST_AGE_DAYS: 7
+          LIVE_DEAL_VALIDATION_APPLY: '0'
           URL_CHECK_TIMEOUT_MS: 7000
         run: node scraper/normalize-live-deals.js
 
@@ -40,7 +41,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
-          DEAL_REVIEW_APPLY: '1'
+          DEAL_REVIEW_APPLY: '0'
           DEAL_REVIEW_MAX_DEALS: '160'
           DEAL_REVIEW_CHUNK_SIZE: '24'
           DEAL_REVIEW_MIN_REMOVE_CONFIDENCE: '0.86'

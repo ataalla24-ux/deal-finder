@@ -82,6 +82,7 @@ const MAX_LIVE_CONTENT_ENRICHMENTS = Number(process.env.MAX_LIVE_CONTENT_ENRICHM
 const MAX_OPAQUE_SOCIAL_AGE_DAYS = Number(process.env.MAX_LIVE_OPAQUE_SOCIAL_AGE_DAYS || 14);
 const MAX_SOCIAL_POST_AGE_DAYS = Number(process.env.MAX_LIVE_SOCIAL_POST_AGE_DAYS || process.env.DEAL_VALIDITY_MAX_AGE_DAYS || 7);
 const MAX_EXPIRED_REVIEW_GRACE_DAYS = Number(process.env.MAX_LIVE_EXPIRED_REVIEW_GRACE_DAYS || 7);
+const APPLY_LIVE_VALIDATION = process.env.LIVE_DEAL_VALIDATION_APPLY !== '0';
 const FLIGHT_DEAL_PATTERN = /\b(flug|flüge|flight|flights|hin\s*&\s*zurück|hin\s+und\s+zurück|ryanair|wizz\s*air|wizzair|iata)\b/i;
 const GENERIC_DESCRIPTION_PATTERN = /^(free|gratis|rabatt|discount|deal|angebot|aktion|promo|special|event|post|reel|instagram|coupon|gutschein|gewinnspiel|new|neu)$/i;
 const FOOD_SIGNAL_PATTERN = /\b(eis\w*|ice cream|gelato|kaffee\w*|coffee|cafe|café|pizza\w*|burger\w*|döner\w*|doener\w*|kebab\w*|sushi|ramen|brunch|croissant|drink|drinks|getränk\w*|getraenk\w*|cocktail\w*|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein\w*|vino|fleisch\w*|meat|steak|bbq|grill\w*|bäckerei|backerei|bakery|krapfen\w*)\b/i;
@@ -933,6 +934,9 @@ async function main() {
       url: cleanText(deal?.url || ''),
       reason,
     });
+    if (!APPLY_LIVE_VALIDATION) {
+      markForReview(deal, `Auto-Entfernung pausiert: ${reason}`);
+    }
   }
 
   function markForReview(deal, reason, details = {}) {
@@ -1232,7 +1236,8 @@ async function main() {
   }
 
   const finalRemaining = moderationFilter.deals;
-  const finalDealKeys = new Set(finalRemaining.map((deal) => reviewCandidateKey(deal)).filter(Boolean));
+  const reviewCandidateSourceDeals = APPLY_LIVE_VALIDATION ? finalRemaining : (Array.isArray(dealsDoc.deals) ? dealsDoc.deals : []);
+  const finalDealKeys = new Set(reviewCandidateSourceDeals.map((deal) => reviewCandidateKey(deal)).filter(Boolean));
   const reviewCandidates = Array.from(reviewCandidatesByKey.values())
     .filter((candidate) => finalDealKeys.has(reviewCandidateKey(candidate)))
     .sort((a, b) => {
@@ -1247,16 +1252,18 @@ async function main() {
     return bTime - aTime;
   });
 
-  dealsDoc.deals = finalRemaining;
-  dealsDoc.totalDeals = finalRemaining.length;
-  dealsDoc.lastUpdated = now.toISOString();
-
   const removalReasons = removed.reduce((acc, entry) => {
     acc[entry.reason] = (acc[entry.reason] || 0) + 1;
     return acc;
   }, {});
 
-  await writeFile(DEALS_PATH, JSON.stringify(dealsDoc, null, 2) + '\n', 'utf8');
+  if (APPLY_LIVE_VALIDATION) {
+    dealsDoc.deals = finalRemaining;
+    dealsDoc.totalDeals = finalRemaining.length;
+    dealsDoc.lastUpdated = now.toISOString();
+    await writeFile(DEALS_PATH, JSON.stringify(dealsDoc, null, 2) + '\n', 'utf8');
+  }
+
   await writeFile(REVIEW_CANDIDATES_PATH, JSON.stringify({
     checkedAt: now.toISOString(),
     totalCandidates: reviewCandidates.length,
@@ -1264,9 +1271,11 @@ async function main() {
   }, null, 2) + '\n', 'utf8');
   await writeFile(VALIDATION_REPORT_PATH, JSON.stringify({
     checkedAt: now.toISOString(),
+    apply: APPLY_LIVE_VALIDATION,
     totalBefore,
-    totalAfter: finalRemaining.length,
-    removedCount: removed.length,
+    totalAfter: APPLY_LIVE_VALIDATION ? finalRemaining.length : totalBefore,
+    removedCount: APPLY_LIVE_VALIDATION ? removed.length : 0,
+    wouldRemoveCount: removed.length,
     duplicateCollapses,
     moderationRemovals,
     brokenLinkRemovals,
@@ -1294,8 +1303,9 @@ async function main() {
     removed: removed.slice(0, 200),
   }, null, 2) + '\n', 'utf8');
 
-  console.log(`Normalized live deals: ${finalRemaining.length}`);
-  console.log(`Removed deals: ${removed.length}`);
+  console.log(`Normalized live deals: ${APPLY_LIVE_VALIDATION ? finalRemaining.length : totalBefore}`);
+  console.log(`Live validation apply: ${APPLY_LIVE_VALIDATION ? 'enabled' : 'disabled'}`);
+  console.log(`${APPLY_LIVE_VALIDATION ? 'Removed' : 'Would remove'} deals: ${removed.length}`);
   console.log(`Duplicate collapses: ${duplicateCollapses}`);
   console.log(`Moderation removals: ${moderationRemovals}`);
   console.log(`Broken link removals: ${brokenLinkRemovals}`);
