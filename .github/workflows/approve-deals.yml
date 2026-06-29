@@ -4,6 +4,19 @@ on:
   schedule:
     - cron: '*/15 * * * *' # fallback polling if Slack Events miss a reaction
   workflow_dispatch:
+    inputs:
+      slack_channel:
+        description: 'Slack channel that received the approval reaction'
+        required: false
+      message_ts:
+        description: 'Slack message timestamp to approve immediately'
+        required: false
+      reaction:
+        description: 'Slack approval reaction name'
+        required: false
+      reaction_user:
+        description: 'Slack user who added the approval reaction'
+        required: false
 
 concurrency:
   group: approve-deals
@@ -31,6 +44,10 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          APPROVE_SLACK_CHANNEL_ID: ${{ github.event.inputs.slack_channel }}
+          APPROVE_SLACK_MESSAGE_TS: ${{ github.event.inputs.message_ts }}
+          APPROVE_SLACK_REACTION: ${{ github.event.inputs.reaction }}
+          APPROVE_SLACK_REACTION_USER: ${{ github.event.inputs.reaction_user }}
         run: node scraper/slack-approve.js
 
       - name: 🧼 Normalize Live Deals After Approvals

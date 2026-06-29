@@ -39,6 +39,10 @@ loadEnvFile();
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
+const APPROVE_SLACK_CHANNEL_ID = cleanText(process.env.APPROVE_SLACK_CHANNEL_ID || '');
+const APPROVE_SLACK_MESSAGE_TS = cleanText(process.env.APPROVE_SLACK_MESSAGE_TS || '');
+const APPROVE_SLACK_REACTION = cleanText(process.env.APPROVE_SLACK_REACTION || '');
+const APPROVE_SLACK_REACTION_USER = cleanText(process.env.APPROVE_SLACK_REACTION_USER || '');
 const MAX_APPROVAL_URL_EXPIRY_CHECKS = Number(process.env.MAX_APPROVAL_URL_EXPIRY_CHECKS || 50);
 const BLOCKED_APPROVAL_URL_PATTERNS = [
   /tiktok\.com\/@planetmatters\/video\/7634961057521437975/i,
@@ -611,8 +615,8 @@ async function getThreadMessages(threadTs) {
   return messages;
 }
 
-async function getReactions(messageTs) {
-  const url = `https://slack.com/api/reactions.get?channel=${SLACK_CHANNEL_ID}&timestamp=${encodeURIComponent(messageTs)}`;
+async function getReactions(messageTs, channelId = SLACK_CHANNEL_ID) {
+  const url = `https://slack.com/api/reactions.get?channel=${encodeURIComponent(channelId)}&timestamp=${encodeURIComponent(messageTs)}`;
   const data = await slackApi(url);
   if (!data.ok) return [];
   return ensureArray(data.message?.reactions);
@@ -704,6 +708,82 @@ function savePendingRemaining(unapprovedDeals) {
   fs.writeFileSync(PENDING_ALL_PATH, JSON.stringify(payload, null, 2));
 }
 
+async function runTargetedApproval({ moderation, botUserId }) {
+  if (!APPROVE_SLACK_MESSAGE_TS) return false;
+
+  const targetChannel = APPROVE_SLACK_CHANNEL_ID || SLACK_CHANNEL_ID;
+  console.log(`🎯 Targeted Slack approval mode: ${APPROVE_SLACK_MESSAGE_TS}${APPROVE_SLACK_REACTION ? ` (${APPROVE_SLACK_REACTION})` : ''}`);
+  if (targetChannel !== SLACK_CHANNEL_ID) {
+    console.log(`ℹ️ Ignoring approval from unexpected channel ${targetChannel}`);
+    return true;
+  }
+
+  const queuedModeration = filterModeratedDeals(loadPendingDeals(), moderation);
+  if (queuedModeration.removed.length > 0) {
+    console.log(`🛡️ Moderation filter: ${queuedModeration.removed.length} queued Deals entfernt`);
+  }
+
+  const queuedDeals = queuedModeration.deals;
+  const targetDeal = queuedDeals.find((deal) => cleanText(deal.slackTs) === APPROVE_SLACK_MESSAGE_TS);
+  if (!targetDeal) {
+    console.log('ℹ️ Targeted Slack message is not in the pending queue anymore');
+    return true;
+  }
+
+  let dealToApprove = targetDeal;
+  const threadTs = cleanText(targetDeal.slackThreadTs);
+  if (threadTs) {
+    const threadMessages = await getThreadMessages(threadTs);
+    const editResult = applySlackEdits([targetDeal], threadMessages);
+    const editedTarget = editResult.deals.find((deal) => cleanText(deal.slackTs) === APPROVE_SLACK_MESSAGE_TS);
+    if (editedTarget) dealToApprove = editedTarget;
+    console.log(`✏️ Slack edits applied for targeted approval: ${editResult.appliedCount}`);
+    if (editResult.unresolvedTargets.length > 0) {
+      console.log(`⚠️ Unresolved edit targets: ${editResult.unresolvedTargets.join(', ')}`);
+    }
+  }
+
+  const remainingPending = queuedDeals.filter((deal) => cleanText(deal.slackTs) !== APPROVE_SLACK_MESSAGE_TS);
+
+  if (isBlockedApprovalDeal(dealToApprove)) {
+    console.log(`🚫 blocked expired/invalid Slack deal: ${dealToApprove.title || dealToApprove.url}`);
+    savePendingRemaining(remainingPending);
+    return true;
+  }
+
+  const reactions = await getReactions(APPROVE_SLACK_MESSAGE_TS, targetChannel);
+  const eventConfirmsHumanApproval = ['white_check_mark', 'heavy_check_mark', 'check'].includes(APPROVE_SLACK_REACTION) &&
+    APPROVE_SLACK_REACTION_USER &&
+    APPROVE_SLACK_REACTION_USER !== botUserId;
+  if (!hasHumanApproval(reactions, botUserId) && !eventConfirmsHumanApproval) {
+    console.log('ℹ️ Targeted Slack message has no human check reaction yet');
+    return true;
+  }
+
+  const approved = [{ ...dealToApprove, approvedAt: new Date().toISOString() }];
+  const approvedModeration = filterModeratedDeals(approved, moderation);
+  if (approvedModeration.removed.length > 0) {
+    console.log(`🛡️ Moderation filter: ${approvedModeration.removed.length} approved Deals vor Live-Merge entfernt`);
+  }
+
+  const expiryNormalization = await normalizeApprovedDealExpiries(approvedModeration.deals);
+  console.log(`🔎 approval expiry checks: ${expiryNormalization.urlChecksUsed}/${MAX_APPROVAL_URL_EXPIRY_CHECKS}, Treffer: ${expiryNormalization.urlExpiryHits}`);
+
+  const existingApprovedModeration = filterModeratedDeals(loadExistingApprovedDeals(), moderation);
+  if (existingApprovedModeration.removed.length > 0) {
+    console.log(`🛡️ Moderation filter: ${existingApprovedModeration.removed.length} bestehende Live-Deals entfernt`);
+  }
+
+  const mergedApproved = mergeApprovedDeals(existingApprovedModeration.deals, approvedModeration.deals);
+  saveDealsJson(mergedApproved);
+  savePendingRemaining(remainingPending);
+
+  console.log('✅ Newly approved in this targeted run: 1');
+  console.log(`✅ deals.json updated with approved-only deals: ${mergedApproved.length}`);
+  console.log(`💾 pending queue updated: ${remainingPending.length} deals left`);
+  return true;
+}
+
 async function main() {
   console.log('🔍 SLACK APPROVE - strict approved-only mode');
 
@@ -715,6 +795,11 @@ async function main() {
   const moderation = loadDealModeration();
   const botUserId = await getBotUserId();
   console.log(`🤖 Bot User ID: ${botUserId || 'unknown'}`);
+
+  if (await runTargetedApproval({ moderation, botUserId })) {
+    return;
+  }
+
   const queuedModeration = filterModeratedDeals(loadPendingDeals(), moderation);
   if (queuedModeration.removed.length > 0) {
     console.log(`🛡️ Moderation filter: ${queuedModeration.removed.length} queued Deals entfernt`);

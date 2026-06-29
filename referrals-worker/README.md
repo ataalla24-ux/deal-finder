@@ -42,6 +42,15 @@ https://freefinder-referrals.freefinder-stefan.workers.dev/api/slack/events
 
 Subscribe the bot to `reaction_added`. The worker verifies Slack signatures, ignores non-check reactions, and dispatches `approve-deals.yml` for `white_check_mark`, `heavy_check_mark`, or `check`. The approval workflow also runs every 15 minutes as a fallback.
 
+Required Worker secrets for Slack Events:
+
+```bash
+npx wrangler secret put SLACK_SIGNING_SECRET
+npx wrangler secret put SLACK_CHANNEL_ID
+```
+
+Slack Event dispatches include the reacted `message_ts`, so the approval workflow can approve that single deal immediately instead of scanning the full pending queue.
+
 ## Stripe Checkout
 
 The website calls `POST /api/checkout/session` with one of these plans:

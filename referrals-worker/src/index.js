@@ -859,7 +859,7 @@ async function triggerCommunityIntakeSafely(env) {
   }
 }
 
-async function triggerSlackApproveWorkflow(env) {
+async function triggerSlackApproveWorkflow(env, inputs = {}) {
   const token = envString(env, 'GITHUB_WORKFLOW_TOKEN') || envString(env, 'GITHUB_TOKEN');
   if (!token) throw new Error('GITHUB_WORKFLOW_TOKEN is not configured');
 
@@ -878,7 +878,7 @@ async function triggerSlackApproveWorkflow(env) {
       'user-agent': 'freefinder-referrals-worker',
       'x-github-api-version': '2022-11-28',
     },
-    body: JSON.stringify({ ref }),
+    body: JSON.stringify(Object.keys(inputs).length > 0 ? { ref, inputs } : { ref }),
   });
 
   if (response.status === 204) return { ok: true, status: response.status, workflow };
@@ -887,9 +887,10 @@ async function triggerSlackApproveWorkflow(env) {
   throw new Error(`GitHub approve workflow dispatch failed (${response.status})${detail ? `: ${detail}` : ''}`);
 }
 
-async function triggerSlackApproveSafely(env, reason = 'slack-reaction') {
+async function triggerSlackApproveSafely(env, reason = 'slack-reaction', inputs = {}) {
   try {
-    const key = workflowDispatchKey('approve-deals');
+    const messageTs = cleanShortText(inputs.message_ts, 120);
+    const key = workflowDispatchKey(`approve-deals:${messageTs || 'global'}`);
     if (env.REFERRAL_KV) {
       const existing = await getJsonKV(env, key);
       const lastTriggeredAt = Number(existing?.triggeredAt || 0);
@@ -903,11 +904,12 @@ async function triggerSlackApproveSafely(env, reason = 'slack-reaction') {
       }
     }
 
-    const workflow = await triggerSlackApproveWorkflow(env);
+    const workflow = await triggerSlackApproveWorkflow(env, inputs);
     if (env.REFERRAL_KV) {
       await putJsonKV(env, key, {
         triggeredAt: Date.now(),
         reason: cleanShortText(reason, 120),
+        messageTs,
       }, { expirationTtl: 10 * 60 });
     }
     return workflow;
@@ -1359,7 +1361,17 @@ async function handleSlackEvent(request, env) {
     return json({ ok: true, ignored: true, reason: 'wrong-channel' });
   }
 
-  const workflow = await triggerSlackApproveSafely(env, 'slack-reaction-added');
+  const messageTs = cleanShortText(event.item?.ts, 120);
+  if (!messageTs) {
+    return json({ ok: true, ignored: true, reason: 'missing-message-ts' });
+  }
+
+  const workflow = await triggerSlackApproveSafely(env, 'slack-reaction-added', {
+    slack_channel: eventChannel,
+    message_ts: messageTs,
+    reaction: cleanShortText(event.reaction, 80),
+    reaction_user: cleanShortText(event.user, 120),
+  });
   return json({
     ok: true,
     approveTriggered: Boolean(workflow?.ok && !workflow?.skipped),
