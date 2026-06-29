@@ -41,4 +41,13 @@ const vagueSocialDeal = await normalizeDealExpiry({
 assert.equal(vagueSocialDeal.expires, '');
 assert.equal(vagueSocialDeal.expiresPrecision, '');
 
+const repairedSocialDate = await normalizeDealExpiry({
+  title: 'Gratis Pizza bei Pizzeria Pozzuoli 3',
+  expires: '29.6.2001',
+  pubDate: '2026-06-24T10:42:26.000Z',
+}, { now, allowUrlLookup: false });
+assert.equal(repairedSocialDate.expires, '2026-06-29T23:59:59.999Z');
+assert.equal(repairedSocialDate.expiresOriginal, '29.06.2026');
+assert.equal(repairedSocialDate.validUntil, '2026-06-29');
+
 console.log('Expiry normalization regression tests passed.');

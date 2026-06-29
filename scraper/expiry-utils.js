@@ -543,6 +543,32 @@ function applyStructuredExpiryFields(deal, value, options = {}) {
   if (shape.confidence) deal.dateConfidence = shape.confidence;
 }
 
+function repairImplausiblePastExpiry(parsed, raw, deal, now) {
+  if (!parsed?.date) return null;
+
+  const text = cleanText(raw);
+  const m = text.match(/^\s*(\d{1,2})[./](\d{1,2})[./](19\d{2}|20\d{2})\s*$/);
+  if (!m) return null;
+
+  const parsedYear = parsed.date.getUTCFullYear();
+  const referenceMs = Date.parse(cleanText(deal?.pubDate || deal?.approvedAt || ''));
+  const referenceDate = Number.isFinite(referenceMs) ? new Date(referenceMs) : now;
+  const referenceYear = referenceDate.getUTCFullYear();
+
+  if (parsedYear >= 2010 || referenceYear < 2020 || referenceYear - parsedYear < 5) {
+    return null;
+  }
+
+  const day = Number(m[1]);
+  const month = Number(m[2]);
+  return {
+    date: endOfUtcDay(referenceYear, month - 1, day),
+    precision: parsed.precision || 'day',
+    source: parsed.source || 'text',
+    displayText: `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${referenceYear}`,
+  };
+}
+
 function extractWestfieldExpiry(text, now) {
   const range = text.match(/\b\d{1,2}\s+[A-Za-zäöüÄÖÜ]+\s+\d{4}\s*[—-]\s*(\d{1,2}\s+[A-Za-zäöüÄÖÜ]+\s+\d{4})\b/);
   if (!range) return null;
@@ -1337,7 +1363,12 @@ export async function normalizeDealExpiry(deal, options = {}) {
     deal.expiresOriginal = deal.expiresOriginal || raw;
   }
 
-  const parsed = parseExpiryDetails(raw, { now });
+  const initialParsed = parseExpiryDetails(raw, { now });
+  const repairedParsed = repairImplausiblePastExpiry(initialParsed, raw, deal, now);
+  const parsed = repairedParsed || initialParsed;
+  if (repairedParsed?.displayText) {
+    deal.expiresOriginal = repairedParsed.displayText;
+  }
   const shouldCheckUrl = Boolean(
     allowUrlLookup &&
     url &&
@@ -1401,9 +1432,9 @@ export async function normalizeDealExpiry(deal, options = {}) {
     if (keepUrlSource) {
       deal.expiresDetectedFromUrl = true;
     }
-    const displaySource = originalExpiryText && !isVagueExpiry(originalExpiryText)
+    const displaySource = repairedParsed?.displayText || (originalExpiryText && !isVagueExpiry(originalExpiryText)
       ? originalExpiryText
-      : (raw || deal.expires);
+      : (raw || deal.expires));
     applyStructuredExpiryFields(deal, displaySource, { now });
     return deal;
   }
