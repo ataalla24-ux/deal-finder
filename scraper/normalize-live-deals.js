@@ -799,6 +799,31 @@ function getChurchCuratedIds(churchDeals) {
   return new Set(churchDeals.map((deal) => deal.id).filter(Boolean));
 }
 
+function isCuratedChurchDeal(deal = {}) {
+  const category = cleanText(deal.category || '').toLowerCase();
+  const source = cleanText(deal.source || '').toLowerCase();
+  const signal = cleanText([
+    deal.brand,
+    deal.title,
+    deal.description,
+    deal.category,
+    deal.source,
+  ].filter(Boolean).join(' ')).toLowerCase();
+  return source.includes('freikirchen wien') ||
+    ['kirche', 'gottesdienste', 'gemeinde', 'freikirche'].includes(category) ||
+    /\b(gottesdienst|gottesdienste|freikirche|kirche|christlich|hillsong|icf|jesuszentrum|cig\s+wien|gemeinde)\b/i.test(signal);
+}
+
+function normalizeChurchDealForLiveFeed(deal = {}) {
+  if (!isCuratedChurchDeal(deal)) return { ...deal };
+  const category = cleanText(deal.category || '').toLowerCase();
+  return {
+    ...deal,
+    type: category === 'events' ? 'event' : 'info',
+    hot: false,
+  };
+}
+
 function shouldDropExplicitlyRemovedDeal(deal) {
   const url = cleanText(deal?.url || deal?.post_url || '');
   return REMOVE_IDS.has(deal.id)
@@ -1160,7 +1185,7 @@ async function main() {
   }
 
   for (const churchDeal of churchDeals) {
-    const normalizedChurchDeal = normalizeDealRecord({ ...churchDeal });
+    const normalizedChurchDeal = normalizeDealRecord(normalizeChurchDealForLiveFeed(churchDeal));
     const churchRawExpiry = cleanText(
       normalizedChurchDeal.expires ||
       normalizedChurchDeal.expiresOriginal ||

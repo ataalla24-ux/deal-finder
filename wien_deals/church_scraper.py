@@ -270,7 +270,7 @@ def build_deal(
         "logoUrl": build_logo_url(source.homepage),
         "title": title,
         "description": description,
-        "type": "gratis",
+        "type": "event" if kind == "events" else "info",
         "category": kind,
         "source": "Freikirchen Wien",
         "url": url,

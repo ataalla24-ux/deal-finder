@@ -71,7 +71,7 @@ def scrape_all():
             'logo': emoji,
             'title': f"{name} Gottesdienst",
             'description': f"⛪ {name}\n🕐 Gottesdienst: {times}\n📍 Wien\n🔗 Webseite & aktuelle Infos",
-            'type': 'gratis',
+            'type': 'info',
             'category': 'freikirche' if is_freechurch else 'kirche',
             'source': 'Freikirchen Wien',
             'url': url,
