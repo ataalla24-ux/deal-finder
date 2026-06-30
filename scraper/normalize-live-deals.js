@@ -18,6 +18,10 @@ import {
   normalizeDealRecord,
   sanitizeExpiryText,
 } from './deal-normalization-utils.js';
+import {
+  configuredNewDealWindowHours,
+  normalizeDealFreshnessFlags,
+} from './deal-freshness-utils.js';
 import { alignNativeWeeklyDealRotation } from './native-weekly-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -1062,6 +1066,8 @@ async function main() {
   let protectedLiveDealRestoresCount = 0;
   let flightUrlCheckSkips = 0;
   let moderationRemovals = 0;
+  let freshnessFlagUpdates = 0;
+  let freshDealCount = 0;
 
   function markRemoved(deal, reason) {
     removed.push({
@@ -1413,6 +1419,10 @@ async function main() {
   }
 
   const finalRemaining = CAN_REMOVE_LIVE_DEALS ? moderationFilter.deals : dedupedRemaining;
+  const freshness = normalizeDealFreshnessFlags(finalRemaining, { now });
+  finalRemaining.splice(0, finalRemaining.length, ...freshness.deals);
+  freshnessFlagUpdates = freshness.changed;
+  freshDealCount = freshness.freshCount;
   const reviewCandidateSourceDeals = APPLY_LIVE_VALIDATION ? finalRemaining : (Array.isArray(dealsDoc.deals) ? dealsDoc.deals : []);
   const finalDealKeys = new Set(reviewCandidateSourceDeals.map((deal) => reviewCandidateKey(deal)).filter(Boolean));
   const reviewCandidates = Array.from(reviewCandidatesByKey.values())
@@ -1465,6 +1475,9 @@ async function main() {
     wouldRemoveCount: removed.length,
     duplicateCollapses,
     moderationRemovals,
+    freshnessWindowHours: configuredNewDealWindowHours(),
+    freshnessFlagUpdates,
+    freshDealCount,
     brokenLinkRemovals,
     opaqueSocialShellRemovals,
     invalidLinkReviewCandidates,
@@ -1498,6 +1511,7 @@ async function main() {
   console.log(`${CAN_REMOVE_LIVE_DEALS ? 'Removed' : 'Would remove'} deals: ${removed.length}`);
   console.log(`Duplicate collapses: ${duplicateCollapses}`);
   console.log(`Moderation removals: ${moderationRemovals}`);
+  console.log(`Fresh deal flags: ${freshDealCount} new, ${freshnessFlagUpdates} updated within ${configuredNewDealWindowHours()}h window`);
   console.log(`Broken link removals: ${brokenLinkRemovals}`);
   console.log(`Opaque social shell removals: ${opaqueSocialShellRemovals}`);
   console.log(`Invalid link review candidates: ${invalidLinkReviewCandidates}`);

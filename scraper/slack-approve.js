@@ -10,6 +10,7 @@ import {
   moderationCounts,
 } from './deal-moderation-utils.js';
 import { isVagueExpiry, normalizeDealExpiry, parseExpiryDetails } from './expiry-utils.js';
+import { isDealNewByDate } from './deal-freshness-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -509,7 +510,7 @@ function normalizeDeal(raw) {
     if (t && !missingFields.includes(t)) missingFields.push(t);
   }
 
-  return {
+  const normalized = {
     id: cleanText(deal.id) || `slack-${cleanText(deal.slackTs)}`,
     submissionId: cleanText(deal.submissionId).replace(/^community:/, ''),
     brand,
@@ -532,13 +533,15 @@ function normalizeDeal(raw) {
     votes: Number(deal.votes) || 1,
     priority: Number(deal.priority) || 3,
     hot: Boolean(deal.hot),
-    isNew: Boolean(deal.isNew),
+    isNew: false,
     slackTs: cleanText(deal.slackTs),
     slackThreadTs: cleanText(deal.slackThreadTs),
     slackPostFormatVersion: cleanText(deal.slackPostFormatVersion),
     approvedAt,
     missingFields,
   };
+  normalized.isNew = isDealNewByDate(normalized);
+  return normalized;
 }
 
 async function normalizeApprovedDealExpiries(approvedDeals) {
