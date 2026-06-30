@@ -14,6 +14,9 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const REPORT_PATH = path.join(DOCS_DIR, 'deal-moderation-report.json');
+const DEAL_MODERATION_APPLY = process.env.DEAL_MODERATION_APPLY === '1';
+const LIVE_DEAL_REMOVALS_ENABLED = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
+const CAN_REMOVE_LIVE_DEALS = DEAL_MODERATION_APPLY && LIVE_DEAL_REMOVALS_ENABLED;
 
 const DEFAULT_TARGETS = [
   'deals.json',
@@ -72,8 +75,13 @@ const targetFiles = parseArgs(process.argv.slice(2));
 const report = {
   checkedAt: new Date().toISOString(),
   moderationUpdatedAt: cleanText(moderation.updatedAt),
+  apply: CAN_REMOVE_LIVE_DEALS,
+  applyRequested: DEAL_MODERATION_APPLY,
+  removalsEnabled: LIVE_DEAL_REMOVALS_ENABLED,
+  removalsPaused: !CAN_REMOVE_LIVE_DEALS,
   files: [],
   removedCount: 0,
+  wouldRemoveCount: 0,
   removalReasons: {},
   removed: [],
 };
@@ -96,17 +104,19 @@ for (const target of targetFiles) {
   }
 
   const result = filterModeratedDeals(deals, moderation);
-  if (result.removed.length > 0) {
+  if (CAN_REMOVE_LIVE_DEALS && result.removed.length > 0) {
     writeBundle(filePath, parsed, result.deals);
   }
 
   report.files.push({
     file: relative,
     before: deals.length,
-    after: result.deals.length,
-    removed: result.removed.length,
+    after: CAN_REMOVE_LIVE_DEALS ? result.deals.length : deals.length,
+    removed: CAN_REMOVE_LIVE_DEALS ? result.removed.length : 0,
+    wouldRemove: result.removed.length,
   });
-  report.removedCount += result.removed.length;
+  report.removedCount += CAN_REMOVE_LIVE_DEALS ? result.removed.length : 0;
+  report.wouldRemoveCount += result.removed.length;
   report.removed.push(...result.removed.map((item) => ({ ...item, file: relative })));
 }
 
@@ -114,4 +124,4 @@ report.removalReasons = moderationCounts(report.removed);
 report.removed = report.removed.slice(0, 300);
 fs.writeFileSync(REPORT_PATH, `${JSON.stringify(report, null, 2)}\n`);
 
-console.log(`Deal moderation applied: ${report.removedCount} removed across ${report.files.length} files`);
+console.log(`Deal moderation ${CAN_REMOVE_LIVE_DEALS ? 'applied' : 'paused'}: ${report.removedCount} removed, ${report.wouldRemoveCount} would remove across ${report.files.length} files`);

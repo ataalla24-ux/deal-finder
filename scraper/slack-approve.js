@@ -47,6 +47,7 @@ const APPROVE_SLACK_REACTION_USER = cleanText(process.env.APPROVE_SLACK_REACTION
 const MAX_APPROVAL_URL_EXPIRY_CHECKS = Number(process.env.MAX_APPROVAL_URL_EXPIRY_CHECKS || 50);
 const APPROVE_FULL_SCAN_MAX_THREADS = Number(process.env.APPROVE_FULL_SCAN_MAX_THREADS || 8);
 const APPROVE_FULL_SCAN_MAX_DEALS = Number(process.env.APPROVE_FULL_SCAN_MAX_DEALS || 250);
+const LIVE_DEAL_REMOVALS_ENABLED = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
 const BLOCKED_APPROVAL_URL_PATTERNS = [
   /tiktok\.com\/@planetmatters\/video\/7634961057521437975/i,
   /tiktok\.com\/@viennas_joy\/video\/7635566976642911510/i,
@@ -588,6 +589,16 @@ function loadExistingApprovedDeals() {
   return ensureArray(parsed.deals).map(normalizeDeal);
 }
 
+function loadExistingApprovedDealsForMerge(moderation) {
+  const existingDeals = loadExistingApprovedDeals();
+  const moderated = filterModeratedDeals(existingDeals, moderation);
+  if (moderated.removed.length > 0) {
+    const status = LIVE_DEAL_REMOVALS_ENABLED ? 'entfernt' : 'pausiert';
+    console.log(`🛡️ Moderation filter: ${moderated.removed.length} bestehende Live-Deals ${status}`);
+  }
+  return LIVE_DEAL_REMOVALS_ENABLED ? moderated.deals : existingDeals;
+}
+
 async function sleep(ms) {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -819,12 +830,8 @@ async function runTargetedApproval({ moderation, botUserId }) {
   const expiryNormalization = await normalizeApprovedDealExpiries(approvedModeration.deals);
   console.log(`🔎 approval expiry checks: ${expiryNormalization.urlChecksUsed}/${MAX_APPROVAL_URL_EXPIRY_CHECKS}, Treffer: ${expiryNormalization.urlExpiryHits}`);
 
-  const existingApprovedModeration = filterModeratedDeals(loadExistingApprovedDeals(), moderation);
-  if (existingApprovedModeration.removed.length > 0) {
-    console.log(`🛡️ Moderation filter: ${existingApprovedModeration.removed.length} bestehende Live-Deals entfernt`);
-  }
-
-  const mergedApproved = mergeApprovedDeals(existingApprovedModeration.deals, approvedModeration.deals);
+  const existingApprovedDeals = loadExistingApprovedDealsForMerge(moderation);
+  const mergedApproved = mergeApprovedDeals(existingApprovedDeals, approvedModeration.deals);
   saveDealsJson(mergedApproved);
   savePendingRemaining(remainingPending);
 
@@ -1000,11 +1007,8 @@ async function main() {
   const expiryNormalization = await normalizeApprovedDealExpiries(approvedModeration.deals);
   console.log(`🔎 approval expiry checks: ${expiryNormalization.urlChecksUsed}/${MAX_APPROVAL_URL_EXPIRY_CHECKS}, Treffer: ${expiryNormalization.urlExpiryHits}`);
 
-  const existingApprovedModeration = filterModeratedDeals(loadExistingApprovedDeals(), moderation);
-  if (existingApprovedModeration.removed.length > 0) {
-    console.log(`🛡️ Moderation filter: ${existingApprovedModeration.removed.length} bestehende Live-Deals entfernt`);
-  }
-  const mergedApproved = mergeApprovedDeals(existingApprovedModeration.deals, approvedModeration.deals);
+  const existingApprovedDeals = loadExistingApprovedDealsForMerge(moderation);
+  const mergedApproved = mergeApprovedDeals(existingApprovedDeals, approvedModeration.deals);
 
   saveDealsJson(mergedApproved);
   const remainingPending = mergeRemainingPendingQueue([...queuedDeals, ...deferredPendingDeals], approvalCheckDeals, unapproved);

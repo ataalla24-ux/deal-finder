@@ -56,6 +56,7 @@ const rawEdit = {
 const dealsPath = process.env.LIVE_DEALS_PATH || DEFAULT_DEALS_PATH;
 const editsPath = process.env.LIVE_DEAL_EDITS_PATH || DEFAULT_EDITS_PATH;
 const reportPath = process.env.LIVE_DEAL_EDIT_REPORT_PATH || DEFAULT_REPORT_PATH;
+const liveDealRemovalsEnabled = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
 const edit = normalizeLiveDealEdit(rawEdit, { nowIso });
 if (!edit) throw new Error('Invalid live deal edit');
 
@@ -64,7 +65,7 @@ const nextStore = upsertLiveDealEdit(existingStore, edit, nowIso);
 saveLiveDealEditStore(editsPath, nextStore, nowIso);
 
 const bundle = readJson(dealsPath);
-const result = applyLiveDealEditsToBundle(bundle, nextStore, { checkedAt: nowIso });
+const result = applyLiveDealEditsToBundle(bundle, nextStore, { checkedAt: nowIso, allowRemovals: liveDealRemovalsEnabled });
 let nextBundle = result.bundle;
 let changed = result.changed;
 const weeklyPick = readJson(DEFAULT_WEEKLY_PATH, null);

@@ -66,6 +66,9 @@ jobs:
         run: node scripts/add-deal-moderation-entry.mjs
 
       - name: Apply deal moderation
+        env:
+          DEAL_MODERATION_APPLY: '0'
+          LIVE_DEAL_REMOVALS_ENABLED: '0'
         run: npm run deals:moderate
 
       - name: Cache brand logos

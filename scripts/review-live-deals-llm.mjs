@@ -15,7 +15,9 @@ const MODEL = cleanText(process.env.DEAL_REVIEW_MODEL || process.env.OPENAI_MODE
 const MAX_DEALS = numberEnv('DEAL_REVIEW_MAX_DEALS', 160);
 const CHUNK_SIZE = Math.max(1, Math.min(32, numberEnv('DEAL_REVIEW_CHUNK_SIZE', 24)));
 const MIN_REMOVE_CONFIDENCE = Math.max(0, Math.min(1, numberEnv('DEAL_REVIEW_MIN_REMOVE_CONFIDENCE', 0.86)));
-const APPLY = process.env.DEAL_REVIEW_APPLY === '1';
+const APPLY_REQUESTED = process.env.DEAL_REVIEW_APPLY === '1';
+const LIVE_DEAL_REMOVALS_ENABLED = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
+const APPLY = APPLY_REQUESTED && LIVE_DEAL_REMOVALS_ENABLED;
 const TARGET_EVIDENCE_ENABLED = process.env.DEAL_REVIEW_TARGET_EVIDENCE !== '0';
 const TARGET_EVIDENCE_CONCURRENCY = Math.max(1, Math.min(12, numberEnv('DEAL_REVIEW_TARGET_CONCURRENCY', 8)));
 const TARGET_EVIDENCE_TIMEOUT_MS = numberEnv('DEAL_REVIEW_TARGET_TIMEOUT_MS', numberEnv('URL_CHECK_TIMEOUT_MS', 7000));
@@ -677,11 +679,15 @@ async function main() {
     model: MODEL,
     aiEnabled: Boolean(process.env.OPENAI_API_KEY),
     apply: APPLY,
+    applyRequested: APPLY_REQUESTED,
+    removalsEnabled: LIVE_DEAL_REMOVALS_ENABLED,
+    removalsPaused: !APPLY,
     minRemoveConfidence: MIN_REMOVE_CONFIDENCE,
     totalDealsBefore: deals.length,
     reviewedDeals: compactDeals.length,
     totalDealsAfter: keptDeals.length,
-    removedCount: removedDeals.length,
+    removedCount: APPLY ? removedDeals.length : 0,
+    wouldRemoveCount: removedDeals.length,
     flaggedCount: finalReviews.filter((review) => review.decision === 'flag').length,
     policyOverrides: policyResult.overrides,
     targetEvidenceSummary: targetEvidence.summary,
@@ -701,7 +707,7 @@ async function main() {
   }
 
   await writeJson(REPORT_PATH, report);
-  console.log(`LLM live deal review: ${reviews.length} reviewed, ${removedDeals.length} removed, ${errors.length} errors.`);
+  console.log(`LLM live deal review: ${reviews.length} reviewed, ${APPLY ? removedDeals.length : 0} removed, ${APPLY ? 0 : removedDeals.length} would remove, ${errors.length} errors.`);
 }
 
 main().catch((error) => {

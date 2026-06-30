@@ -280,11 +280,13 @@ function applyEditToDeal(deal, edit, checkedAt) {
 
 export function applyLiveDealEditsToBundle(bundle, store, options = {}) {
   const checkedAt = options.checkedAt || new Date().toISOString();
+  const allowRemovals = options.allowRemovals === true;
   const deals = dealArrayFromBundle(bundle);
   if (!deals) throw new Error('Live deals bundle does not contain a deals array');
 
   const edits = Array.isArray(store?.edits) ? store.edits.map((edit) => normalizeLiveDealEdit(edit)).filter(Boolean) : [];
   const applied = [];
+  const skippedRemovals = [];
   const missing = [];
   let changed = false;
   let nextDeals = [...deals];
@@ -298,6 +300,10 @@ export function applyLiveDealEditsToBundle(bundle, store, options = {}) {
 
     const result = applyEditToDeal(nextDeals[index], edit, checkedAt);
     if (result.removed) {
+      if (!allowRemovals) {
+        skippedRemovals.push({ dealId: edit.dealId, url: edit.url || '', changedFields: result.changedFields });
+        continue;
+      }
       nextDeals.splice(index, 1);
       changed = true;
       applied.push({ dealId: edit.dealId, removed: true, changedFields: result.changedFields });
@@ -317,8 +323,12 @@ export function applyLiveDealEditsToBundle(bundle, store, options = {}) {
     beforeCount: deals.length,
     afterCount: nextDeals.length,
     appliedCount: applied.length,
+    removalsEnabled: allowRemovals,
+    removalsPaused: !allowRemovals,
+    skippedRemovalCount: skippedRemovals.length,
     missingCount: missing.length,
     applied,
+    skippedRemovals: skippedRemovals.slice(0, 200),
     missing: missing.slice(0, 200),
   };
 

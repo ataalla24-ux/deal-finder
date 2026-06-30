@@ -22,6 +22,7 @@ const checkedAt = new Date().toISOString();
 const dealsPath = process.env.LIVE_DEALS_PATH || DEFAULT_DEALS_PATH;
 const editsPath = process.env.LIVE_DEAL_EDITS_PATH || DEFAULT_EDITS_PATH;
 const reportPath = process.env.LIVE_DEAL_EDIT_REPORT_PATH || DEFAULT_REPORT_PATH;
+const liveDealRemovalsEnabled = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
 const store = loadLiveDealEditStore(editsPath);
 
 if (!store.edits.length) {
@@ -30,7 +31,7 @@ if (!store.edits.length) {
 }
 
 const bundle = readJson(dealsPath);
-const result = applyLiveDealEditsToBundle(bundle, store, { checkedAt });
+const result = applyLiveDealEditsToBundle(bundle, store, { checkedAt, allowRemovals: liveDealRemovalsEnabled });
 let nextBundle = result.bundle;
 let changed = result.changed;
 const weeklyPick = readJson(DEFAULT_WEEKLY_PATH, null);
@@ -42,6 +43,9 @@ if (weeklyAlignment.changed) {
 
 if (changed) {
   writeJson(dealsPath, nextBundle);
+}
+
+if (changed || result.report.skippedRemovalCount > 0) {
   writeJson(reportPath, {
     ...result.report,
     afterCount: Array.isArray(nextBundle?.deals) ? nextBundle.deals.length : result.report.afterCount,

@@ -43,6 +43,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           DEAL_REVIEW_APPLY: '0'
+          LIVE_DEAL_REMOVALS_ENABLED: '0'
           DEAL_REVIEW_MAX_DEALS: '160'
           DEAL_REVIEW_CHUNK_SIZE: '24'
           DEAL_REVIEW_MIN_REMOVE_CONFIDENCE: '0.86'
@@ -57,6 +58,8 @@ jobs:
         run: node scripts/write-disabled-live-deal-llm-report.mjs
 
       - name: Reapply persistent live edits
+        env:
+          LIVE_DEAL_REMOVALS_ENABLED: '0'
         run: node scripts/apply-live-deal-edits.mjs
 
       - name: Cache brand logos

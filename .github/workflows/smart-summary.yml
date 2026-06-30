@@ -31,6 +31,8 @@ jobs:
         run: node scraper/smart-summary.js
 
       - name: Reapply persistent live edits
+        env:
+          LIVE_DEAL_REMOVALS_ENABLED: '0'
         run: node scripts/apply-live-deal-edits.mjs
 
       - name: Cache brand logos
