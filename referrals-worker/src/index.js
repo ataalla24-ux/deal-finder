@@ -929,6 +929,14 @@ async function handleDealAdminRemove(request, env) {
   const body = await readBody(request);
   const removal = normalizeDealRemovalInput(body);
   if (!removal) return invalid('Missing deal id or url');
+  if (!liveDealRemovalsEnabled(env)) {
+    return json({
+      ok: true,
+      paused: true,
+      removal,
+      message: 'Live deal removals are paused; no workflow was dispatched and no live deal was changed.',
+    });
+  }
 
   try {
     const workflow = await triggerDealModerationWorkflow(env, removal);
@@ -1019,10 +1027,13 @@ async function handleSignedDealRemoveLink(request, env) {
 
   const removal = normalizeDealRemovalInput(decodeBase64UrlJson(payload));
   if (!removal) return dealRemovalHtml('Ungueltiger Deal', 'Der Entfernen-Link enthaelt keine gueltige Deal-ID oder URL.', 400);
+  const label = cleanShortText(removal.title || removal.brand || removal.dealId || removal.dealUrl, 160);
+  if (!liveDealRemovalsEnabled(env)) {
+    return dealRemovalHtml('Entfernung pausiert', `${label} bleibt live. Live-Deal-Entfernungen sind vorerst pausiert; bitte den Fall manuell in Slack markieren.`);
+  }
 
   try {
     await triggerDealModerationWorkflow(env, removal);
-    const label = cleanShortText(removal.title || removal.brand || removal.dealId || removal.dealUrl, 160);
     return dealRemovalHtml('Entfernung gestartet', `${label} wird entfernt. Der GitHub-Workflow laeuft jetzt; danach verschwindet der Deal aus iOS, Web und Android.`);
   } catch (error) {
     return dealRemovalHtml('Entfernen fehlgeschlagen', error?.message || 'Der GitHub-Workflow konnte nicht gestartet werden.', 502);
@@ -1254,6 +1265,18 @@ async function handleSignedDealEditLink(request, env) {
     pinnedRank: signed.fields.pinnedRank,
     hidden: signed.fields.hidden === 'on',
   };
+  if (body.hidden && !liveDealRemovalsEnabled(env)) {
+    return dealEditFormHtml({
+      edit: {
+        ...edit,
+        ...body,
+        hidden: false,
+      },
+      payload: signed.payload,
+      sig: signed.sig,
+      error: 'Deal verstecken ist aktuell pausiert. Es wurde kein Live-Deal entfernt oder versteckt.',
+    }, 409);
+  }
   const next = normalizeDealOverrideInput(body, existing);
   if (!next) {
     return dealEditFormHtml({ edit, payload: signed.payload, sig: signed.sig, error: 'Ungueltige Deal-Aenderung.' });
@@ -1415,6 +1438,9 @@ async function handleSlackInteraction(request, env) {
   if (!removal) {
     return slackEphemeral('Deal konnte nicht entfernt werden: ID oder URL fehlt.');
   }
+  if (!liveDealRemovalsEnabled(env)) {
+    return slackEphemeral('Entfernen ist aktuell pausiert. Kein Live-Deal wurde geaendert; bitte vorerst manuell in Slack notieren.');
+  }
 
   try {
     await triggerDealModerationWorkflow(env, removal);
@@ -1427,6 +1453,10 @@ async function handleSlackInteraction(request, env) {
 
 function envString(env, key) {
   return String(env?.[key] || '').trim();
+}
+
+function liveDealRemovalsEnabled(env) {
+  return envString(env, 'LIVE_DEAL_REMOVALS_ENABLED') === '1';
 }
 
 function normalizeCheckoutPlan(value) {
