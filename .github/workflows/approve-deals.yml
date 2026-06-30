@@ -58,6 +58,7 @@ jobs:
           MAX_LIVE_URL_EXPIRY_REFRESHES: '60'
           MAX_LIVE_CONTENT_ENRICHMENTS: '40'
           LIVE_DEAL_VALIDATION_APPLY: '0'
+          LIVE_DEAL_REMOVALS_ENABLED: '0'
         run: node scraper/normalize-live-deals.js
 
       - name: ✏️ Reapply persistent live edits
