@@ -396,10 +396,6 @@ export function applyLiveDealEditsToBundle(bundle, store, options = {}) {
 
     const result = applyEditToDeal(nextDeals[index], edit, checkedAt);
     if (result.removed) {
-      if (!allowRemovals) {
-        skippedRemovals.push({ dealId: edit.dealId, url: edit.url || '', changedFields: result.changedFields });
-        continue;
-      }
       nextDeals.splice(index, 1);
       changed = true;
       applied.push({ dealId: edit.dealId, removed: true, changedFields: result.changedFields });
