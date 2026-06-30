@@ -731,6 +731,70 @@ function normalizeDealRemovalInput(body = {}) {
   };
 }
 
+function normalizeOfflineRestoreDeal(raw = {}) {
+  const dealId = normalizeDealId(raw.dealId || raw.deal_id || raw.id);
+  if (!dealId) return null;
+
+  return {
+    id: dealId,
+    submissionId: cleanShortText(raw.submissionId || raw.submission_id, 160),
+    brand: cleanShortText(raw.brand || raw.provider, 120) || cleanShortText(raw.title, 120) || 'FreeFinder',
+    title: cleanShortText(raw.title, 240) || cleanShortText(raw.brand || raw.provider, 240) || 'FreeFinder Deal',
+    description: cleanLongText(raw.description || raw.details, 2500),
+    url: normalizeSubmissionUrl(raw.url || raw.dealUrl || raw.deal_url),
+    category: cleanShortText(raw.category, 80).toLowerCase() || 'wien',
+    type: cleanShortText(raw.type, 40).toLowerCase() || 'rabatt',
+    logo: cleanShortText(raw.logo, 16) || '🎯',
+    distance: cleanShortText(raw.distance || raw.location || raw.address, 200) || 'Wien',
+    source: cleanShortText(raw.source, 160) || 'Offline Restore',
+    originSource: cleanShortText(raw.originSource || raw.source, 160) || 'Offline Restore',
+    expires: cleanShortText(raw.expires, 120),
+    expiresOriginal: cleanShortText(raw.expiresOriginal || raw.expires, 180),
+    expiresPrecision: cleanShortText(raw.expiresPrecision, 40),
+    expiresSource: cleanShortText(raw.expiresSource, 80),
+    expiresDetectedFromUrl: raw.expiresDetectedFromUrl === true,
+    pubDate: cleanShortText(raw.pubDate, 80),
+    qualityScore: Number(raw.qualityScore || 0) || 0,
+    votes: Number(raw.votes || 1) || 1,
+    priority: Number(raw.priority || 3) || 3,
+    hot: raw.hot === true,
+    isNew: raw.isNew === true,
+    slackTs: cleanShortText(raw.slackTs, 120),
+    slackThreadTs: cleanShortText(raw.slackThreadTs, 120),
+    approvedAt: cleanShortText(raw.approvedAt, 80),
+    expiryKind: cleanShortText(raw.expiryKind, 40).toLowerCase(),
+    validOn: cleanShortText(raw.validOn, 32),
+    validFrom: cleanShortText(raw.validFrom, 32),
+    validUntil: cleanShortText(raw.validUntil, 32),
+    expiryDisplayText: cleanShortText(raw.expiryDisplayText, 180),
+  };
+}
+
+function normalizeDealRestoreInput(body = {}) {
+  const restoreDeal = normalizeOfflineRestoreDeal(body.restoreDeal || body.deal || body);
+  if (!restoreDeal) return null;
+
+  return {
+    dealId: restoreDeal.id,
+    url: restoreDeal.url,
+    title: restoreDeal.title,
+    brand: restoreDeal.brand,
+    description: restoreDeal.description,
+    distance: restoreDeal.distance,
+    pubDate: restoreDeal.pubDate,
+    expires: restoreDeal.expires,
+    expiresOriginal: restoreDeal.expiresOriginal,
+    expiryKind: restoreDeal.expiryKind,
+    validOn: restoreDeal.validOn,
+    validFrom: restoreDeal.validFrom,
+    validUntil: restoreDeal.validUntil,
+    expiryDisplayText: restoreDeal.expiryDisplayText,
+    hidden: false,
+    forceKeep: true,
+    restoreDeal,
+  };
+}
+
 async function triggerDealModerationWorkflow(env, removal) {
   const token = envString(env, 'GITHUB_WORKFLOW_TOKEN') || envString(env, 'GITHUB_TOKEN');
   if (!token) throw new Error('GITHUB_WORKFLOW_TOKEN is not configured');
@@ -794,6 +858,8 @@ async function triggerDealEditWorkflow(env, edit) {
     expiryDisplayText: edit.expiryDisplayText || '',
     pinnedRank: edit.pinnedRank ?? '',
     hidden: edit.hidden === true,
+    forceKeep: edit.forceKeep === true,
+    ...(edit.restoreDeal ? { restoreDeal: edit.restoreDeal } : {}),
     editedBy: 'slack-live-review',
   };
 
@@ -1034,6 +1100,53 @@ async function handleSignedDealRemoveLink(request, env) {
     return dealRemovalHtml('Entfernung gestartet', `${label} wird entfernt. Der GitHub-Workflow laeuft jetzt; danach verschwindet der Deal aus iOS, Web und Android.`);
   } catch (error) {
     return dealRemovalHtml('Entfernen fehlgeschlagen', error?.message || 'Der GitHub-Workflow konnte nicht gestartet werden.', 502);
+  }
+}
+
+async function handleSignedDealRestoreLink(request, env) {
+  const url = new URL(request.url);
+  const secret = envString(env, 'DEAL_REMOVE_LINK_SECRET');
+  if (!secret) return dealRemovalHtml('Nicht konfiguriert', 'DEAL_REMOVE_LINK_SECRET fehlt im Worker.', 500);
+
+  const payload = cleanShortText(url.searchParams.get('payload'), 5000);
+  const sig = cleanShortText(url.searchParams.get('sig'), 128).toLowerCase();
+  if (!payload || !sig) return dealRemovalHtml('Ungueltiger Link', 'Dieser Offline-Link ist unvollstaendig.', 400);
+
+  const expected = await signedDealRemovalUrlSignature(secret, payload);
+  if (!timingSafeEqualString(sig, expected)) {
+    return dealRemovalHtml('Ungueltiger Link', 'Die Signatur dieses Offline-Links ist ungueltig.', 401);
+  }
+
+  const restore = normalizeDealRestoreInput(decodeBase64UrlJson(payload));
+  if (!restore) return dealRemovalHtml('Ungueltiger Deal', 'Der Offline-Link enthaelt keinen gueltigen Deal.', 400);
+
+  try {
+    await putJsonKV(env, dealOverrideKey(restore.dealId), normalizeDealOverrideInput(restore) || {
+      dealId: restore.dealId,
+      url: restore.url,
+      hidden: false,
+      pinnedRank: 0,
+      title: restore.title,
+      description: restore.description,
+      brand: restore.brand,
+      distance: restore.distance,
+      pubDate: restore.pubDate,
+      expires: restore.expires,
+      expiresOriginal: restore.expiresOriginal,
+      expiryKind: restore.expiryKind,
+      validOn: restore.validOn,
+      validFrom: restore.validFrom,
+      validUntil: restore.validUntil,
+      expiryDisplayText: restore.expiryDisplayText,
+      updatedAt: Date.now(),
+      createdAt: Date.now(),
+    });
+    const workflow = await triggerDealEditWorkflow(env, restore);
+    const label = cleanShortText(restore.title || restore.brand || restore.dealId, 160);
+    const workflowName = workflow?.workflow ? ` Workflow: ${workflow.workflow}.` : '';
+    return dealRemovalHtml('Wiederherstellung gestartet', `${label} wird wieder live gesetzt. Der Deal bekommt einen Schutz gegen automatische Offline-Entfernung.${workflowName}`);
+  } catch (error) {
+    return dealRemovalHtml('Wiederherstellen fehlgeschlagen', error?.message || 'Der GitHub-Workflow konnte nicht gestartet werden.', 502);
   }
 }
 
@@ -2950,6 +3063,10 @@ export default {
 
     if (path === '/api/deals/admin/remove-link' && request.method === 'GET') {
       return handleSignedDealRemoveLink(request, env);
+    }
+
+    if (path === '/api/deals/admin/restore-link' && request.method === 'GET') {
+      return handleSignedDealRestoreLink(request, env);
     }
 
     if (path === '/api/deals/admin/edit-link' && (request.method === 'GET' || request.method === 'POST')) {

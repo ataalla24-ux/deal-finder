@@ -18,6 +18,39 @@ export const LIVE_DEAL_EDIT_FIELDS = [
   'expiryDisplayText',
   'pinnedRank',
 ];
+export const LIVE_DEAL_RESTORE_FIELDS = [
+  'id',
+  'submissionId',
+  'brand',
+  'title',
+  'description',
+  'url',
+  'category',
+  'type',
+  'logo',
+  'distance',
+  'source',
+  'originSource',
+  'expires',
+  'expiresOriginal',
+  'expiresPrecision',
+  'expiresSource',
+  'expiresDetectedFromUrl',
+  'pubDate',
+  'qualityScore',
+  'votes',
+  'priority',
+  'hot',
+  'isNew',
+  'slackTs',
+  'slackThreadTs',
+  'approvedAt',
+  'expiryKind',
+  'validOn',
+  'validFrom',
+  'validUntil',
+  'expiryDisplayText',
+];
 
 export function cleanText(value) {
   return String(value ?? '').trim();
@@ -56,6 +89,38 @@ export function parseBoolean(value) {
   if (value === false) return false;
   const text = cleanText(value).toLowerCase();
   return ['1', 'true', 'yes', 'on'].includes(text);
+}
+
+function normalizeRestoreDeal(raw = {}, dealId = '') {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const id = cleanText(raw.id || dealId);
+  if (!id) return null;
+
+  const restored = { id };
+  for (const field of LIVE_DEAL_RESTORE_FIELDS) {
+    if (!Object.prototype.hasOwnProperty.call(raw, field)) continue;
+    const value = raw[field];
+    if (value === undefined || value === null) continue;
+    if (typeof value === 'boolean') {
+      restored[field] = value;
+    } else if (typeof value === 'number') {
+      if (Number.isFinite(value)) restored[field] = value;
+    } else {
+      const text = cleanText(value);
+      if (text) restored[field] = text;
+    }
+  }
+
+  restored.id = id;
+  if (!cleanText(restored.title)) restored.title = cleanText(restored.brand) || id;
+  if (!cleanText(restored.brand)) restored.brand = cleanText(restored.title) || 'FreeFinder';
+  if (!cleanText(restored.distance)) restored.distance = 'Wien';
+  if (!cleanText(restored.category)) restored.category = 'wien';
+  if (!cleanText(restored.type)) restored.type = 'rabatt';
+  if (!cleanText(restored.logo)) restored.logo = '🎯';
+  if (!cleanText(restored.pubDate)) restored.pubDate = new Date().toISOString();
+  if (!cleanText(restored.approvedAt)) restored.approvedAt = new Date().toISOString();
+  return restored;
 }
 
 export function normalizePinnedRank(value) {
@@ -157,10 +222,16 @@ export function normalizeLiveDealEdit(raw = {}, options = {}) {
     dealId,
     url: cleanText(raw.url || raw.dealUrl || raw.deal_url || existing.url || ''),
     hidden: parseBoolean(raw.hidden),
+    forceKeep: parseBoolean(
+      Object.prototype.hasOwnProperty.call(raw, 'forceKeep') ? raw.forceKeep : existing.forceKeep
+    ),
     editedBy: cleanText(raw.editedBy || raw.edited_by || raw.updatedBy || existing.editedBy || 'live-review'),
     createdAt: cleanText(existing.createdAt || raw.createdAt || updatedAt),
     updatedAt,
   };
+
+  const restoreDeal = normalizeRestoreDeal(raw.restoreDeal || raw.restore_deal || existing.restoreDeal, dealId);
+  if (restoreDeal) edit.restoreDeal = restoreDeal;
 
   for (const field of LIVE_DEAL_EDIT_FIELDS) {
     if (Object.prototype.hasOwnProperty.call(raw, field) && raw[field] !== undefined) {
@@ -278,6 +349,23 @@ function applyEditToDeal(deal, edit, checkedAt) {
   return { deal: next, changedFields: uniqueChanged, removed: false };
 }
 
+function restoredDealFromEdit(edit, checkedAt) {
+  const restoreDeal = normalizeRestoreDeal(edit.restoreDeal, edit.dealId);
+  if (!restoreDeal || edit.hidden) return null;
+
+  const base = {
+    ...restoreDeal,
+    id: cleanText(edit.dealId) || restoreDeal.id,
+    url: cleanText(edit.url) || cleanText(restoreDeal.url),
+    liveRestoredAt: checkedAt,
+    liveRestoredBy: cleanText(edit.editedBy) || 'live-review',
+    liveForceKeep: Boolean(edit.forceKeep),
+  };
+
+  const result = applyEditToDeal(base, edit, checkedAt);
+  return result.deal || base;
+}
+
 export function applyLiveDealEditsToBundle(bundle, store, options = {}) {
   const checkedAt = options.checkedAt || new Date().toISOString();
   const allowRemovals = options.allowRemovals === true;
@@ -294,6 +382,13 @@ export function applyLiveDealEditsToBundle(bundle, store, options = {}) {
   for (const edit of edits) {
     const index = nextDeals.findIndex((deal) => editMatchesDeal(edit, deal));
     if (index < 0) {
+      const restoredDeal = restoredDealFromEdit(edit, checkedAt);
+      if (restoredDeal) {
+        nextDeals.push(restoredDeal);
+        changed = true;
+        applied.push({ dealId: edit.dealId, removed: false, changedFields: ['restore'] });
+        continue;
+      }
       missing.push({ dealId: edit.dealId, url: edit.url || '', hidden: Boolean(edit.hidden) });
       continue;
     }

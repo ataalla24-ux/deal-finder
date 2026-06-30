@@ -29,6 +29,7 @@ const WEEKLY_DEAL_PATH = path.join(DOCS_DIR, 'deal-of-the-week.json');
 const VALIDATION_REPORT_PATH = path.join(DOCS_DIR, 'live-deal-validation-report.json');
 const REVIEW_CANDIDATES_PATH = path.join(DOCS_DIR, 'live-deal-review-candidates.json');
 const DEAL_CANDIDATES_INDEX_PATH = path.join(DOCS_DIR, 'deal-candidates-index.json');
+const LIVE_DEAL_EDITS_PATH = path.join(DOCS_DIR, 'live-deal-edits.json');
 const CHURCH_FILES = [
   path.join(ROOT, 'docs', 'deals-pending-church-gemeinde.json'),
   path.join(ROOT, 'docs', 'deals-pending-church-gottesdienste.json'),
@@ -93,6 +94,8 @@ const OMV_VIVA_FREE_TASTE_URLS = new Map([
   ['joe-omv-viva-free-taste-l62fzo', 'https://www.joe-club.at/partner/omv#sparkling-espresso-tonic'],
   ['joe-omv-viva-free-taste-xipghf', 'https://www.joe-club.at/partner/omv#iced-matcha-latte'],
 ]);
+const FORCE_KEEP_DYNAMIC_IDS = new Set();
+const FORCE_KEEP_DYNAMIC_URLS = new Set();
 
 const MAX_LIVE_URL_HEALTH_CHECKS = Number(process.env.MAX_LIVE_URL_HEALTH_CHECKS || 180);
 const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REFRESHES || 120);
@@ -872,7 +875,10 @@ function shouldDropExplicitlyRemovedDeal(deal) {
 }
 
 function shouldForceKeepDeal(deal) {
-  return FORCE_KEEP_IDS.has(cleanText(deal?.id || ''));
+  const id = cleanText(deal?.id || '');
+  if (FORCE_KEEP_IDS.has(id) || FORCE_KEEP_DYNAMIC_IDS.has(id)) return true;
+  const url = normalizeUrlForCompare(deal?.url || '');
+  return Boolean(url && FORCE_KEEP_DYNAMIC_URLS.has(url));
 }
 
 function fixPubDateFromSlackTs(deal, now) {
@@ -919,6 +925,27 @@ function resetUnsafeUrlExpiry(deal) {
 
 async function readJson(filePath) {
   return JSON.parse(await readFile(filePath, 'utf8'));
+}
+
+async function loadDynamicForceKeepDeals() {
+  FORCE_KEEP_DYNAMIC_IDS.clear();
+  FORCE_KEEP_DYNAMIC_URLS.clear();
+
+  try {
+    const store = await readJson(LIVE_DEAL_EDITS_PATH);
+    const edits = Array.isArray(store?.edits) ? store.edits : [];
+    for (const edit of edits) {
+      if (!edit || edit.hidden === true || edit.forceKeep !== true) continue;
+      const id = cleanText(edit.dealId || edit.id || edit.restoreDeal?.id || '');
+      if (id) FORCE_KEEP_DYNAMIC_IDS.add(id);
+      const url = normalizeUrlForCompare(edit.url || edit.restoreDeal?.url || '');
+      if (url) FORCE_KEEP_DYNAMIC_URLS.add(url);
+    }
+  } catch (error) {
+    if (error?.code !== 'ENOENT') {
+      console.warn(`Could not read live deal force-keep edits: ${error.message}`);
+    }
+  }
 }
 
 async function loadCuratedChurchDeals() {
@@ -1006,6 +1033,7 @@ async function main() {
   const urlCache = new Map();
   const linkHealthCache = new Map();
   const dealsDoc = await readJson(DEALS_PATH);
+  await loadDynamicForceKeepDeals();
   const supplementalSocialByUrl = await loadSupplementalSocialIndex();
   const protectedLiveDealRestores = await loadProtectedLiveDealRestores();
   const totalBefore = Array.isArray(dealsDoc.deals) ? dealsDoc.deals.length : 0;
@@ -1039,8 +1067,35 @@ async function main() {
     removed.push({
       id: deal?.id || '',
       title: cleanText(deal?.title || deal?.brand || '?'),
+      brand: cleanText(deal?.brand || ''),
+      description: cleanText(deal?.description || ''),
       category: cleanText(deal?.category || ''),
+      type: cleanText(deal?.type || ''),
+      logo: cleanText(deal?.logo || ''),
+      distance: cleanText(deal?.distance || deal?.location || deal?.address || ''),
       url: cleanText(deal?.url || ''),
+      source: cleanText(deal?.source || ''),
+      originSource: cleanText(deal?.originSource || deal?.source || ''),
+      pubDate: cleanText(deal?.pubDate || ''),
+      expires: cleanText(deal?.expires || ''),
+      expiresOriginal: cleanText(deal?.expiresOriginal || deal?.expires || ''),
+      expiresPrecision: cleanText(deal?.expiresPrecision || ''),
+      expiresSource: cleanText(deal?.expiresSource || ''),
+      expiresDetectedFromUrl: Boolean(deal?.expiresDetectedFromUrl),
+      validOn: cleanText(deal?.validOn || ''),
+      validFrom: cleanText(deal?.validFrom || ''),
+      validUntil: cleanText(deal?.validUntil || ''),
+      expiryKind: cleanText(deal?.expiryKind || ''),
+      expiryDisplayText: cleanText(deal?.expiryDisplayText || ''),
+      qualityScore: Number(deal?.qualityScore) || 0,
+      votes: Number(deal?.votes) || 1,
+      priority: Number(deal?.priority) || 3,
+      hot: Boolean(deal?.hot),
+      isNew: Boolean(deal?.isNew),
+      slackTs: cleanText(deal?.slackTs || ''),
+      slackThreadTs: cleanText(deal?.slackThreadTs || ''),
+      approvedAt: cleanText(deal?.approvedAt || ''),
+      removedAutomatically: !/^Moderation:|^Explizit entfernter Deal$/i.test(reason),
       reason,
     });
     if (!CAN_REMOVE_LIVE_DEALS) {

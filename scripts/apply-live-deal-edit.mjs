@@ -50,6 +50,8 @@ const rawEdit = {
   expiryDisplayText: payloadValue(payload, 'expiryDisplayText', 'LIVE_DEAL_EDIT_EXPIRY_DISPLAY_TEXT'),
   pinnedRank: payloadValue(payload, 'pinnedRank', 'LIVE_DEAL_EDIT_PINNED_RANK'),
   hidden: payloadValue(payload, 'hidden', 'LIVE_DEAL_EDIT_HIDDEN'),
+  forceKeep: payloadValue(payload, 'forceKeep', 'LIVE_DEAL_EDIT_FORCE_KEEP'),
+  restoreDeal: payloadValue(payload, 'restoreDeal', 'LIVE_DEAL_EDIT_RESTORE_DEAL'),
   editedBy: cleanText(payloadValue(payload, 'editedBy', 'LIVE_DEAL_EDIT_BY')) || 'live-review',
 };
 
@@ -85,6 +87,7 @@ writeJson(reportPath, {
   dealId,
   editedBy: edit.editedBy,
   hidden: edit.hidden,
+  forceKeep: edit.forceKeep,
 });
 
 const applied = result.report.applied.find((item) => item.dealId === dealId);
