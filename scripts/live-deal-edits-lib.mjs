@@ -91,7 +91,7 @@ export function parseBoolean(value) {
   return ['1', 'true', 'yes', 'on'].includes(text);
 }
 
-function normalizeRestoreDeal(raw = {}, dealId = '') {
+function normalizeRestoreDeal(raw, dealId = '') {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
   const id = cleanText(raw.id || dealId);
   if (!id) return null;
@@ -215,20 +215,21 @@ export function normalizeLiveDealEdit(raw = {}, options = {}) {
   if (!dealId) return null;
   const nowIso = options.nowIso || new Date().toISOString();
   const existing = options.existing || {};
-  const sourceUpdatedAt = Number(raw.updatedAt || raw.updatedAtMs || 0);
-  const updatedAt = cleanText(raw.updatedAtIso)
+  const sourceUpdatedAt = Number(raw.updatedAtMs || 0);
+  const updatedAt = cleanText(raw.updatedAt || raw.updated_at || raw.updatedAtIso)
     || (sourceUpdatedAt > 0 ? new Date(sourceUpdatedAt).toISOString() : nowIso);
   const edit = {
     dealId,
     url: cleanText(raw.url || raw.dealUrl || raw.deal_url || existing.url || ''),
     hidden: parseBoolean(raw.hidden),
-    forceKeep: parseBoolean(
-      Object.prototype.hasOwnProperty.call(raw, 'forceKeep') ? raw.forceKeep : existing.forceKeep
-    ),
     editedBy: cleanText(raw.editedBy || raw.edited_by || raw.updatedBy || existing.editedBy || 'live-review'),
     createdAt: cleanText(existing.createdAt || raw.createdAt || updatedAt),
     updatedAt,
   };
+  const forceKeepValue = Object.prototype.hasOwnProperty.call(raw, 'forceKeep') && raw.forceKeep !== undefined
+    ? raw.forceKeep
+    : existing.forceKeep;
+  if (parseBoolean(forceKeepValue)) edit.forceKeep = true;
 
   const restoreDeal = normalizeRestoreDeal(raw.restoreDeal || raw.restore_deal || existing.restoreDeal, dealId);
   if (restoreDeal) edit.restoreDeal = restoreDeal;

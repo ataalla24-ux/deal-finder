@@ -31,7 +31,7 @@ jobs:
         env:
           LIVE_DEAL_EDIT_PAYLOAD: ${{ inputs.edit_payload }}
           LIVE_DEAL_EDIT_BY: ${{ github.actor }}
-          LIVE_DEAL_REMOVALS_ENABLED: '0'
+          LIVE_DEAL_REMOVALS_ENABLED: '1'
         run: node scripts/apply-live-deal-edit.mjs
 
       - name: Cache brand logos
