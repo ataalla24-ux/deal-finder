@@ -1028,9 +1028,6 @@ async function handleSignedDealRemoveLink(request, env) {
   const removal = normalizeDealRemovalInput(decodeBase64UrlJson(payload));
   if (!removal) return dealRemovalHtml('Ungueltiger Deal', 'Der Entfernen-Link enthaelt keine gueltige Deal-ID oder URL.', 400);
   const label = cleanShortText(removal.title || removal.brand || removal.dealId || removal.dealUrl, 160);
-  if (!liveDealRemovalsEnabled(env)) {
-    return dealRemovalHtml('Entfernung pausiert', `${label} bleibt live. Live-Deal-Entfernungen sind vorerst pausiert; bitte den Fall manuell in Slack markieren.`);
-  }
 
   try {
     await triggerDealModerationWorkflow(env, removal);
@@ -1437,9 +1434,6 @@ async function handleSlackInteraction(request, env) {
   const removal = normalizeDealRemovalInput(actionPayload);
   if (!removal) {
     return slackEphemeral('Deal konnte nicht entfernt werden: ID oder URL fehlt.');
-  }
-  if (!liveDealRemovalsEnabled(env)) {
-    return slackEphemeral('Entfernen ist aktuell pausiert. Kein Live-Deal wurde geaendert; bitte vorerst manuell in Slack notieren.');
   }
 
   try {
