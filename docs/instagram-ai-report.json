@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-06-30T11:30:52.894Z",
+  "lastUpdated": "2026-07-01T11:42:34.048Z",
   "config": {
     "maxCandidates": 80,
     "maxDeals": 35,
@@ -19,12 +19,12 @@
     "model": "gpt-4.1-mini",
     "openAiKeyPresent": true
   },
-  "watchlistAccounts": 45,
+  "watchlistAccounts": 46,
   "discoveredCandidates": 80,
-  "acceptedDeals": 0,
-  "acceptedBeforeModeration": 0,
-  "heuristicAccepted": 0,
-  "aiAccepted": 0,
+  "acceptedDeals": 4,
+  "acceptedBeforeModeration": 4,
+  "heuristicAccepted": 4,
+  "aiAccepted": 3,
   "moderation": {
     "removed": 0,
     "reasons": {},
@@ -79,499 +79,1157 @@
     "discovered": 40,
     "errors": []
   },
-  "existingCandidates": 403,
+  "existingCandidates": 469,
   "seedUrls": 0,
   "profileDiscovery": {
     "accountsVisited": 8,
     "discovered": 0,
-    "blocked": 8,
-    "noPostLinks": 0,
+    "blocked": 0,
+    "noPostLinks": 8,
     "errors": []
   },
   "previewErrors": [],
   "renderErrors": [],
   "aiErrors": [],
   "rejectionReasons": {
-    "kein echtes Instagram-Postdatum": 80
+    "Instagram-Post aelter als 7 Tage": 48,
+    "kein eindeutiges Wien-Signal im Instagram-Post": 9,
+    "kein starkes Gratis-/Deal-Signal im Instagram-Post": 6,
+    "explizit abgelaufen oder vorbei": 4,
+    "kein echtes Instagram-Postdatum": 4,
+    "Normalisierung/Validity-Filter blockiert Deal": 2,
+    "keine belastbare Marke/Quelle": 1,
+    "explizites Aktionsdatum liegt in der Vergangenheit": 1,
+    "Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal": 1,
+    "Normalisierung/Validity-Filter blockiert LLM-Deal": 1
   },
-  "freshRejected": [],
-  "rejected": [
+  "freshRejected": [
     {
-      "url": "https://www.instagram.com/reel/DaAv_HIKJ2B/",
-      "score": 0,
-      "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "url": "https://www.instagram.com/reel/DaAUnKSimfa/",
+      "score": 88,
+      "source": "firecrawl4, all",
+      "reason": "Normalisierung/Validity-Filter blockiert LLM-Deal",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
-        "unknown-date"
+        "existing-source-context",
+        "known-source",
+        "age-6d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-25T10:11:33.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.06,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "U4 Vienna auf Instagram: \"SUMMER VIBES ALL OVER – EVERY THURSDAY 🔥 ▶︎ FREE ENTRY for all U4 app members until midnight ▶︎ SOL Beer 1+1 #sharewithafriendorastranger 🤝 ▶︎ Cocktail",
+      "textSample": "U4 Vienna auf Instagram: \"SUMMER VIBES ALL OVER – EVERY THURSDAY 🔥 ▶︎ FREE ENTRY for all U4 app members until midnight ▶︎ SOL Beer 1+1 #sharewithafriendorastranger 🤝 ▶︎ Cocktail Happy Hour | freshly mixed Cocktails only 7,50 – ’till 00.00h 🍍 ▶︎ MUSIC. DANCEHALL | AFROBEATS | HIP HOP DJ CREAM T • DJ MASTERCASH • DJ ONE • DJ SHORTY ▶︎ INFO. doors. 11pm fee."
+    },
+    {
+      "url": "https://www.instagram.com/reel/DaDMsp-Cul6/",
+      "score": 84,
+      "source": "gastro2",
+      "reason": "Normalisierung/Validity-Filter blockiert Deal",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-4d"
+      ],
+      "pubDate": "2026-06-26T13:03:56.000Z",
+      "ageDays": 4,
+      "ageDaysExact": 4.94,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Frish WIENXTRA auf Instagram: \"Gratis Filipino Food Festival in Wien? YES! 🇵🇭🔥 Am Samstag, den 27. Juni, findet das Filipino Food Festival wieder beim SV Donau statt. Freut euch",
+      "textSample": "Frish WIENXTRA auf Instagram: \"Gratis Filipino Food Festival in Wien? YES! 🇵🇭🔥 Am Samstag, den 27. Juni, findet das Filipino Food Festival wieder beim SV Donau statt. Freut euch auf authentische philippinische Küche und natürlich auch Karaoke vor Ort! 🎤😁 Filipino Food Festival 🕖 27. Juni, 11:00–19:00 Uhr 📍 SV Donau, Weissauweg 1, 1220 Wien 🍋 Eintritt"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DaA9pvNoND-/",
+      "score": 84,
+      "source": "all",
+      "reason": "Normalisierung/Validity-Filter blockiert Deal",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-5d"
+      ],
+      "pubDate": "2026-06-25T16:11:24.000Z",
+      "ageDays": 5,
+      "ageDaysExact": 5.81,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Filipino_Food_Festival auf Instagram: \"🌴🇵🇭 FILIPINO FOOD FESTIVAL 2026 🇵🇭🌴 Get ready for a colorful day filled with authentic Filipino food, live entertainment, fun activitie",
+      "textSample": "Filipino_Food_Festival auf Instagram: \"🌴🇵🇭 FILIPINO FOOD FESTIVAL 2026 🇵🇭🌴 Get ready for a colorful day filled with authentic Filipino food, live entertainment, fun activities, and great company! 📅 Saturday, June 27, 2026 ⏰ 11:00 AM – 7:00 PM 📍 SV Donau Weissauweg 1, 1220 Wien ✨ FREE ENTRANCE ✨ 🍢 Authentic Filipino Food 🍨 Filipino Desserts 🎤 Live"
+    },
+    {
+      "url": "https://www.instagram.com/p/DaLQbpJq1Wf/",
+      "score": 79,
+      "source": "duckduckgo",
+      "reason": "keine belastbare Marke/Quelle",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "age-1d"
+      ],
+      "pubDate": "2026-06-29T16:06:26.000Z",
+      "ageDays": 1,
+      "ageDaysExact": 1.82,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "WOA | buffet restaurant auf Instagram: \"🎓 Zeugnis Aktion an alle SchülerInnen 🍽️✨ Dein Zeugnis kann sich dieses Jahr richtig auszahlen! 😍 ⭐ 3 Einser? → 50 % Rabatt auf dein Buff",
+      "textSample": "WOA | buffet restaurant auf Instagram: \"🎓 Zeugnis Aktion an alle SchülerInnen 🍽️✨ Dein Zeugnis kann sich dieses Jahr richtig auszahlen! 😍 ⭐ 3 Einser? → 50 % Rabatt auf dein Buffet* 🌟 5 Einser? → Buffet GRATIS!* Zeig uns einfach dein Originalzeugnis und feiere deine Leistung mit einem richtig guten Essen bei uns. 🥳 📅 Nur am 3. & 4. Juli bis 18:00 Uhr. *"
+    },
+    {
+      "url": "https://www.instagram.com/p/DaDKn8UKMFx/",
+      "score": 64,
+      "source": "gastro2, all",
+      "reason": "explizit abgelaufen oder vorbei",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-4d",
+        "expired-language"
+      ],
+      "pubDate": "2026-06-26T12:42:29.000Z",
+      "ageDays": 4,
+      "ageDaysExact": 4.96,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "CHI CHI Snack Bar / Shop & Eat🤍 auf Instagram: \"Feiert das Schulende mit uns! 🎉📚 Die Noten stehen fest, die Ferien stehen vor der Tür und wir haben das perfekte Special für euch",
+      "textSample": "CHI CHI Snack Bar / Shop & Eat🤍 auf Instagram: \"Feiert das Schulende mit uns! 🎉📚 Die Noten stehen fest, die Ferien stehen vor der Tür und wir haben das perfekte Special für euch, um den Sommer einzuläuten! ☀️✨ Ab einer Konsumation von 10 € schenken wir euch einen Lemon Ice Tea GRATIS zu eurer Bestellung dazu! Und das Beste: Ihr könnt aussuchen, ob ihr ihn"
+    },
+    {
+      "url": "https://www.instagram.com/p/DZ-PznFgqoI/",
+      "score": 64,
+      "source": "gastro2",
+      "reason": "explizit abgelaufen oder vorbei",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-6d",
+        "expired-language"
+      ],
+      "pubDate": "2026-06-24T14:50:40.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.87,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "WIENXTRA auf Instagram: \"Unserer Meinung mach hat jedes Zeugnis ein gratis Eis verdient! Also kommt vorbei! Egal wie eure Noten aussehen -> holt euch euer Gratis Eis von @zanonieis",
+      "textSample": "WIENXTRA auf Instagram: \"Unserer Meinung mach hat jedes Zeugnis ein gratis Eis verdient! Also kommt vorbei! Egal wie eure Noten aussehen -> holt euch euer Gratis Eis von @zanonieis Welche Eissorte holt ihr euch? #wienxtra #jugendinfo #eis #gratis #wien\" 68 likes, 1 comments - wienxtra am June 24, 2026: \"Unserer Meinung mach hat jedes Zeugnis ein gratis Eis v"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DaBKzPbtZWP/",
+      "score": 62,
+      "source": "all",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-5d"
+      ],
+      "pubDate": "2026-06-25T18:06:39.000Z",
+      "ageDays": 5,
+      "ageDaysExact": 5.73,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Eda | Berlin Food & Activities auf Instagram: \"🍕 GRATIS PIZZA ALARM! Pizza Bulls feiert sein 18-jähriges Jubiläum – und das mit einer richtig coolen Aktion! 🎉 🍕 Die ersten 200 G",
+      "textSample": "Eda | Berlin Food & Activities auf Instagram: \"🍕 GRATIS PIZZA ALARM! Pizza Bulls feiert sein 18-jähriges Jubiläum – und das mit einer richtig coolen Aktion! 🎉 🍕 Die ersten 200 Gäste erhalten eine Pizza Margherita, Salami oder Schinken kostenlos ✅ Alle Pizzen sind halal 📅 27. Juni 2026 ⏰ Ab 15:00 Uhr 🥡 Nur für Abholung 📍 @pizzabulls.europe Hohenstaufens"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DaAXec-MYIN/",
+      "score": 62,
+      "source": "gastro2",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-6d"
+      ],
+      "pubDate": "2026-06-25T10:37:17.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.05,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "@restaurantweek_de auf Instagram: \"Schnell zahlen, mehr genießen – und jetzt 5 € sparen mit Visa! 💳✨ Die Vorfreude auf die RestaurantWeek 2026 steigt! Während die besten Küchenche",
+      "textSample": "@restaurantweek_de auf Instagram: \"Schnell zahlen, mehr genießen – und jetzt 5 € sparen mit Visa! 💳✨ Die Vorfreude auf die RestaurantWeek 2026 steigt! Während die besten Küchenchefs der Stadt die exklusiven 3-Gänge-Menüs vorbereiten, sorgt unser Partner Visa nicht nur für ein absolut entspanntes Genusserlebnis, sondern auch für ein exklusives Highlight in d"
     },
     {
       "url": "https://www.instagram.com/p/DZ-Ab5njHwn/",
-      "score": 0,
+      "score": 56,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "explizit abgelaufen oder vorbei",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
-        "unknown-date"
+        "age-6d",
+        "expired-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-24T12:36:18.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.96,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Birgit / Model / Bestager / Photolover auf Instagram: \"Werbung Meine Herzensempfelung - du liebst die Berge? Magst Wellness? Gutes Essen gehört für dich dazu, herzliche Menschen si",
+      "textSample": "Birgit / Model / Bestager / Photolover auf Instagram: \"Werbung Meine Herzensempfelung - du liebst die Berge? Magst Wellness? Gutes Essen gehört für dich dazu, herzliche Menschen sind dir wichtig? Dann wirst du dich im @hotelstadtwien in Zell am See absolut wohlfühlen. Wir sind Wiederkehrer und auch dieses Mal happy. Ob man schwimmen, wandern, klettern oder s"
     },
     {
-      "url": "https://www.instagram.com/reel/DZ4k5fCOVAK/",
-      "score": 0,
-      "source": "food3, gastro2, duckduckgo, duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "url": "https://www.instagram.com/reel/DaGDBR_qEgl/",
+      "score": 56,
+      "source": "all",
+      "reason": "Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-3d",
+        "false-positive-language"
+      ],
+      "pubDate": "2026-06-27T15:33:05.000Z",
+      "ageDays": 3,
+      "ageDaysExact": 3.84,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Taste of Vienna auf Instagram: \"🎉🥂 GEWINNSPIEL: Your Choice Menü für 2 Personen bei merk&würdig! (Einlösbar bis 26.07.2026) So machst du mit: • Folge @tasteofviennaa & @merkundwu",
+      "textSample": "Taste of Vienna auf Instagram: \"🎉🥂 GEWINNSPIEL: Your Choice Menü für 2 Personen bei merk&würdig! (Einlösbar bis 26.07.2026) So machst du mit: • Folge @tasteofviennaa & @merkundwuerdig • Like diesen Beitrag ❤️ • Markiere deine Begleitung in den Kommentaren 👇 👉 Extra-Chance: Teile den Beitrag in deiner Story & markiere uns! 🥂✨ Ein 3-gängiges High-End-Menü"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DaAoBgcKj4r/",
+      "score": 56,
+      "source": "gastro2",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-5d"
+      ],
+      "pubDate": "2026-06-25T13:00:20.000Z",
+      "ageDays": 5,
+      "ageDaysExact": 5.95,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Jüdisches Museum Wien auf Instagram: \"ESSEN GEHEN IN 1010 WIEN UNTER 10€ ? JAAAAAA Bei uns im Taïm Museumscafé - es gibt täglich ein Lunch Menü ab 9,70€ Frisch, saisonal, lecker un",
+      "textSample": "Jüdisches Museum Wien auf Instagram: \"ESSEN GEHEN IN 1010 WIEN UNTER 10€ ? JAAAAAA Bei uns im Taïm Museumscafé - es gibt täglich ein Lunch Menü ab 9,70€ Frisch, saisonal, lecker und gleichzeitig günstig und das im ersten Bezirk.\" 173 likes, 11 comments - jewishmuseumvienna am June 18, 2026: \"ESSEN GEHEN IN 1010 WIEN UNTER 10€ ? JAAAAAA Bei uns im Taïm Museum"
+    },
+    {
+      "url": "https://www.instagram.com/p/DaASGdJI9fU/",
+      "score": 54,
+      "source": "firecrawl4, all",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "deal-signal",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-6d"
+      ],
+      "pubDate": "2026-06-25T09:49:39.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.08,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Origins Luxembourg auf Instagram: \"Raise a glass with us every Thursday from 6PM to 9PM at Origins Kirchberg Infinity. Enjoy our Happy Hour: Buy 1, Get 2 on Aperol Spritz, Gin & To",
+      "textSample": "Origins Luxembourg auf Instagram: \"Raise a glass with us every Thursday from 6PM to 9PM at Origins Kirchberg Infinity. Enjoy our Happy Hour: Buy 1, Get 2 on Aperol Spritz, Gin & Tonic, and Beer. Cheers to good company. 🥂\" origins.lu am June 25, 2026: \"Raise a glass with us every Thursday from 6PM to 9PM at Origins Kirchberg Infinity. Enjoy our Happy Hour: B"
+    },
+    {
+      "url": "https://www.instagram.com/p/DZ97jklK6wy/",
+      "score": 52,
+      "source": "deals",
+      "reason": "explizit abgelaufen oder vorbei",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "public-preview",
+        "existing-source-context",
+        "age-6d",
+        "expired-language"
+      ],
+      "pubDate": "2026-06-24T11:55:26.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.99,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "TEEAMO Vienna • 茶伴 auf Instagram: \"Das Schuljahr ist bald vorbei und wir belohnen deine Bestleistungen! Komm im Aktionszeitraum vom 03.07. bis 05.07.2026 mit deinem Zeugnis in eine",
+      "textSample": "TEEAMO Vienna • 茶伴 auf Instagram: \"Das Schuljahr ist bald vorbei und wir belohnen deine Bestleistungen! Komm im Aktionszeitraum vom 03.07. bis 05.07.2026 mit deinem Zeugnis in einer unserer Filialen vorbei und hol dir deinen Rabatt auf ein Getränk deiner Wahl: 🌟 ... für jeden 1er einen Rabatt von -5% 🌟 ... für zwei 1er = -10% / drei 1er = -15% usw. Je mehr"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DaLLz7wN1Ca/",
+      "score": 49,
+      "source": "firecrawl4, all",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-1d",
+        "expired-language"
+      ],
+      "pubDate": "2026-06-29T15:26:18.000Z",
+      "ageDays": 1,
+      "ageDaysExact": 1.84,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Pop Up Kitchen by Baked auf Instagram: \"Free Coffee Alert! ☕ Join us for brunch between 8 AM – 10 AM and enjoy a complimentary coffee with your meal.\"",
+      "textSample": "Pop Up Kitchen by Baked auf Instagram: \"Free Coffee Alert! ☕ Join us for brunch between 8 AM – 10 AM and enjoy a complimentary coffee with your meal.\" 17 likes, 1 comments - popup_kitchenpk am June 29, 2026: \"Free Coffee Alert! ☕ Join us for brunch between 8 AM – 10 AM and enjoy a complimentary coffee with your meal.\". Anmelden Registrieren Verpasse keinen B"
+    },
+    {
+      "url": "https://www.instagram.com/p/DaOWqVGOs4I/",
+      "score": 48,
+      "source": "all, community",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-0d",
+        "expired-language"
+      ],
+      "pubDate": "2026-07-01T05:40:09.000Z",
+      "ageDays": 0,
+      "ageDaysExact": 0.25,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Billa Familie Militowski auf Instagram: \"Am Zeugnistag den 3.7.2026 gibt's für jedes Kind mit Zeugnis ein gratis Eis an der Kassa. 💛 Kommt vorbei – wir freuen uns mit euch! ☀️🍦\"",
+      "textSample": "Billa Familie Militowski auf Instagram: \"Am Zeugnistag den 3.7.2026 gibt's für jedes Kind mit Zeugnis ein gratis Eis an der Kassa. 💛 Kommt vorbei – wir freuen uns mit euch! ☀️🍦\" 19 likes, 1 comments - billa_familie_militowski am June 30, 2026: \"Am Zeugnistag den 3.7.2026 gibt's für jedes Kind mit Zeugnis ein gratis Eis an der Kassa. 💛 Kommt vorbei – wir f"
+    },
+    {
+      "url": "https://www.instagram.com/p/DaDTAdJjMqB/",
+      "score": 48,
+      "source": "firecrawl4",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
+      "reasons": [
+        "vienna",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-4d"
+      ],
+      "pubDate": "2026-06-26T13:54:47.000Z",
+      "ageDays": 4,
+      "ageDaysExact": 4.91,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "DK auf Instagram: \"looking back at the last few weeks, it’s been heat, music, and people who made every night feel like something special. vienna in summer does something to you!!!",
+      "textSample": "DK auf Instagram: \"looking back at the last few weeks, it’s been heat, music, and people who made every night feel like something special. vienna in summer does something to you!!! tonight i’m back where it all keeps happening @volksgarten xoxo, D 🎞️ @claudius.mn\" theofficialdk am June 26, 2026: \"looking back at the last few weeks, it’s been heat, music, an"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DaIDMYuiOec/",
+      "score": 44,
+      "source": "all",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
+      "reasons": [
+        "vienna",
+        "public-preview",
+        "existing-source-context",
+        "age-3d"
+      ],
+      "pubDate": "2026-06-28T10:12:54.000Z",
+      "ageDays": 3,
+      "ageDaysExact": 3.06,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "@tokki_korean_bbq auf Instagram: \"Lunch für unter 10€✨ #lunch #vienna #bowl #noodles\"",
+      "textSample": "@tokki_korean_bbq auf Instagram: \"Lunch für unter 10€✨ #lunch #vienna #bowl #noodles\" tokki_korean_bbq am June 28, 2026: \"Lunch für unter 10€✨ #lunch #vienna #bowl #noodles\". Anmelden Registrieren Verpasse keinen Beitrag mehr von tokki_korean_bbq Registriere dich f�r Instagram, um auf dem Laufenden zu bleiben. Registrieren Anmelden tokki_korean_bbq \" Folgen"
+    },
+    {
+      "url": "https://www.instagram.com/p/DaK5n19DHe3/",
+      "score": 38,
+      "source": "firecrawl4",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-0d",
+        "false-positive-language"
+      ],
+      "pubDate": "2026-06-30T14:23:22.000Z",
+      "ageDays": 0,
+      "ageDaysExact": 0.89,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Wien Ticket auf Instagram: \"GEWINNSPIEL - Erlebe Kaffee wie nie zuvor 🔥☕ 🤩 Beim Vienna Coffee Festival in der Marx Halle Wien! Wir verlosen 5x2 Tickets für einen Tageseintritt an",
+      "textSample": "Wien Ticket auf Instagram: \"GEWINNSPIEL - Erlebe Kaffee wie nie zuvor 🔥☕ 🤩 Beim Vienna Coffee Festival in der Marx Halle Wien! Wir verlosen 5x2 Tickets für einen Tageseintritt an einem Tag deiner Wahl! SO MACHST DU MIT 1️⃣ FOLGE unserem Account @wienticket und @viennacoffeefestival. ✅ 2️⃣ LIKE diesen Post. ❤️ 3️⃣ KOMMENTIERE unter diesem Post - Wie trinkst"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DaIq7thDPKi/",
+      "score": 37,
+      "source": "food3, all",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-2d"
+      ],
+      "pubDate": "2026-06-28T16:00:05.000Z",
+      "ageDays": 2,
+      "ageDaysExact": 2.82,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Café Wolke 7 by mirema auf Instagram: \"Unser Brunch in Action 😎\"",
+      "textSample": "Café Wolke 7 by mirema auf Instagram: \"Unser Brunch in Action 😎\" 96 likes, 6 comments - cafewolke7.bymirema am June 28, 2026: \"Unser Brunch in Action 😎\". Anmelden Registrieren Verpasse keinen Beitrag mehr von cafewolke7.bymirema Registriere dich f�r Instagram, um auf dem Laufenden zu bleiben. Registrieren Anmelden cafewolke7.bymirema \" Folgen cafewolke7.by"
+    },
+    {
+      "url": "https://www.instagram.com/p/DaFeK7ut9Tx/",
+      "score": 34,
+      "source": "food3, all",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-4d",
+        "false-positive-language"
+      ],
+      "pubDate": "2026-06-27T10:11:57.000Z",
+      "ageDays": 4,
+      "ageDaysExact": 4.06,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "SCHOTTIS Restaurant & Weinbar auf Instagram: \"Was gibt es eigentlich Schöneres als an einem Sonntag bei einem Brunch entspannt in den Tag zu starten? Wir verlosen einen Brunch für",
+      "textSample": "SCHOTTIS Restaurant & Weinbar auf Instagram: \"Was gibt es eigentlich Schöneres als an einem Sonntag bei einem Brunch entspannt in den Tag zu starten? Wir verlosen einen Brunch für zwei Personen voller regionaler Schmankerl & italienischer Spezialitäten der Cucina d’Italia. 🤍 Am Sonntag, 05.07.2026, findet unser Brunch all’Italiana von 10:00 bis 15:00 Uhr st"
+    },
+    {
+      "url": "https://www.instagram.com/p/DZ-RWA7Mlu4/",
+      "score": 34,
+      "source": "community",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-3d",
+        "false-positive-language"
+      ],
+      "pubDate": "2026-06-27T15:30:57.000Z",
+      "ageDays": 3,
+      "ageDaysExact": 3.84,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Sodastream DACH auf Instagram: \"Jetzt anmelden und gratis probieren 👇👇👇 Melde dich jetzt zu unserem Newsletter an & erhalte einen gratis Energy drink mix* inkl. gratis Versand.",
+      "textSample": "Sodastream DACH auf Instagram: \"Jetzt anmelden und gratis probieren 👇👇👇 Melde dich jetzt zu unserem Newsletter an & erhalte einen gratis Energy drink mix* inkl. gratis Versand. Du musst nichts weiter tun, als die Informationen im Link auszufüllen & deine Bestätigungs-E-Mail zu bestätigen. *Die Aktion ist limitiert auf 2.000 Stück. Bitte bestätige deine E-"
+    },
+    {
+      "url": "https://www.instagram.com/p/DaFYy6WtT06/",
+      "score": 32,
+      "source": "firecrawl5",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-4d",
+        "false-positive-language"
+      ],
+      "pubDate": "2026-06-27T09:24:21.000Z",
+      "ageDays": 4,
+      "ageDaysExact": 4.1,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Dine Your Journey auf Instagram: \"🎁GEWINNSPIEL ALERT🎁 Gemeinsam mit @aladdin.das.restaurant verlosen wir 2 Gutscheine im Wert von je 50€. So kannst du teilnehmen: -Diesen Reel li",
+      "textSample": "Dine Your Journey auf Instagram: \"🎁GEWINNSPIEL ALERT🎁 Gemeinsam mit @aladdin.das.restaurant verlosen wir 2 Gutscheine im Wert von je 50€. So kannst du teilnehmen: -Diesen Reel liken @dineyourjourney & @aladdin.das.restaurant folgen -Deine Begleitung in den Kommentaren markieren -Teile den Beitrag in deiner Story, um deine Gewinnchance zu erhöhen Teilnahmes"
+    },
+    {
+      "url": "https://www.instagram.com/p/DZ_8PBajIuP/",
+      "score": 28,
+      "source": "all",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-6d",
+        "false-positive-language"
+      ],
+      "pubDate": "2026-06-25T08:46:45.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.12,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Zum Bretschneider auf Instagram: \"🍷 GEWINNSPIEL 🍽️ A guates Essen, a guats Glasl Wein und jemand, mit dem ma gern länger sitzn bleibt. ✨ Genau des gibt’s bei uns zu gewinnen: Ein",
+      "textSample": "Zum Bretschneider auf Instagram: \"🍷 GEWINNSPIEL 🍽️ A guates Essen, a guats Glasl Wein und jemand, mit dem ma gern länger sitzn bleibt. ✨ Genau des gibt’s bei uns zu gewinnen: Ein 2-Gang-Menü für 2 Personen inklusive Weinbegleitung im Zum Bretschneider. 🫶🏼 Und so bist dabei: • Beitrag liken • @zum.bretschneider folgen • In die Kommentare schreiben, wen du"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DZ-gvKukgZd/",
+      "score": 26,
+      "source": "firecrawl5",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "known-source",
+        "age-6d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-24T17:19:02.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.77,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Superbad auf Instagram: \"Was ist euer Tipp? 👀🍔 #superbad #smashburger #wm2026 #hamburgfood\"",
+      "textSample": "Superbad auf Instagram: \"Was ist euer Tipp? 👀🍔 #superbad #smashburger #wm2026 #hamburgfood\" 14 likes, 2 comments - superbad.hamburg am June 24, 2026: \"Was ist euer Tipp? 👀🍔 #superbad #smashburger #wm2026 #hamburgfood\". Anmelden Registrieren Verpasse keinen Beitrag mehr von superbad.hamburg Registriere dich f�r Instagram, um auf dem Laufenden zu bleiben."
+    },
+    {
+      "url": "https://www.instagram.com/reel/DaIAPWqscKE/",
+      "score": 3,
+      "source": "firecrawl4, all",
+      "reason": "explizites Aktionsdatum liegt in der Vergangenheit",
+      "reasons": [
+        "vienna",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-3d",
+        "past-offer-date"
+      ],
+      "pubDate": "2026-06-28T09:52:49.000Z",
+      "ageDays": 3,
+      "ageDaysExact": 3.08,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "@freiherz.wien auf Instagram: \"Volles Haus, blanke Nerven und diese eine Sekunde, in der alles explodiert ist.🇦🇹🔥 Am 22.6. gab es im Freiherz kein Halten mehr. Wer dabei war, we",
+      "textSample": "@freiherz.wien auf Instagram: \"Volles Haus, blanke Nerven und diese eine Sekunde, in der alles explodiert ist.🇦🇹🔥 Am 22.6. gab es im Freiherz kein Halten mehr. Wer dabei war, weiß genau, wovon wir reden - für alle anderen (und zum Immer-wieder-Anschauen) gibt es hier die Highlights. Danke für die geile Stimmung. Genau dafür machen wir das. ❤️🍻 #freiherz"
+    }
+  ],
+  "rejected": [
+    {
+      "url": "https://www.instagram.com/p/DaLQbpJq1Wf/",
+      "score": 79,
+      "source": "duckduckgo",
+      "reason": "keine belastbare Marke/Quelle",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "age-1d"
+      ],
+      "pubDate": "2026-06-29T16:06:26.000Z",
+      "ageDays": 1,
+      "ageDaysExact": 1.82,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "WOA | buffet restaurant auf Instagram: \"🎓 Zeugnis Aktion an alle SchülerInnen 🍽️✨ Dein Zeugnis kann sich dieses Jahr richtig auszahlen! 😍 ⭐ 3 Einser? → 50 % Rabatt auf dein Buff",
+      "textSample": "WOA | buffet restaurant auf Instagram: \"🎓 Zeugnis Aktion an alle SchülerInnen 🍽️✨ Dein Zeugnis kann sich dieses Jahr richtig auszahlen! 😍 ⭐ 3 Einser? → 50 % Rabatt auf dein Buffet* 🌟 5 Einser? → Buffet GRATIS!* Zeig uns einfach dein Originalzeugnis und feiere deine Leistung mit einem richtig guten Essen bei uns. 🥳 📅 Nur am 3. & 4. Juli bis 18:00 Uhr. *"
+    },
+    {
+      "url": "https://www.instagram.com/p/DZ-Ab5njHwn/",
+      "score": 56,
+      "source": "duckduckgo",
+      "reason": "explizit abgelaufen oder vorbei",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "age-6d",
+        "expired-language"
+      ],
+      "pubDate": "2026-06-24T12:36:18.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.96,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Birgit / Model / Bestager / Photolover auf Instagram: \"Werbung Meine Herzensempfelung - du liebst die Berge? Magst Wellness? Gutes Essen gehört für dich dazu, herzliche Menschen si",
+      "textSample": "Birgit / Model / Bestager / Photolover auf Instagram: \"Werbung Meine Herzensempfelung - du liebst die Berge? Magst Wellness? Gutes Essen gehört für dich dazu, herzliche Menschen sind dir wichtig? Dann wirst du dich im @hotelstadtwien in Zell am See absolut wohlfühlen. Wir sind Wiederkehrer und auch dieses Mal happy. Ob man schwimmen, wandern, klettern oder s"
+    },
+    {
+      "url": "https://www.instagram.com/p/DZ47mozgpcA/",
+      "score": 28,
+      "source": "duckduckgo",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "age-8d"
+      ],
+      "pubDate": "2026-06-22T13:17:54.000Z",
+      "ageDays": 8,
+      "ageDaysExact": 8.93,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Zukunftshaus Wedding auf Instagram: \"Offene Familienküche: Gemeinsam kochen & genießen 🌟 Mit Kindern kochen! Habt ihr Lust, zusammen mit euren Kindern leckere Gerichte zu zaubern?",
+      "textSample": "Zukunftshaus Wedding auf Instagram: \"Offene Familienküche: Gemeinsam kochen & genießen 🌟 Mit Kindern kochen! Habt ihr Lust, zusammen mit euren Kindern leckere Gerichte zu zaubern? Wir schnippeln, rühren und probieren gemeinsam Neues aus. Egal ob groß oder klein, erfahren oder einfach neugierig – alle dürfen mitmachen! Am Ende genießen wir unser selbstgekoch"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DZ4k5fCOVAK/",
+      "score": 50,
+      "source": "duckduckgo",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "age-9d"
+      ],
+      "pubDate": "2026-06-22T10:01:54.000Z",
+      "ageDays": 9,
+      "ageDaysExact": 9.07,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Mikario Foodie auf Instagram: \"Vienna foodies, I found a ramen deal you don’t want to miss! 🍜☀️ This might be one of the craziest food offers in Vienna right now — you enjoy your",
+      "textSample": "Mikario Foodie auf Instagram: \"Vienna foodies, I found a ramen deal you don’t want to miss! 🍜☀️ This might be one of the craziest food offers in Vienna right now — you enjoy your meal once, and get your entire bill back as a voucher for your next visit. 🤯 Yes, literally the full amount! I checked out @tomochanvienna new 6th district location, and from 25 J"
     },
     {
       "url": "https://www.instagram.com/p/DZ10pPyDe4Z/",
       "score": 0,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "deal-signal",
+        "food-drink",
+        "current-language",
         "public-preview",
-        "unknown-date"
+        "age-10d",
+        "expired-relative-date"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-21T08:19:20.000Z",
+      "ageDays": 10,
+      "ageDaysExact": 10.14,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Brauereigaststätte Am Strand | Marktredwitz auf Instagram: \"🌞 Willkommen zurück am Strand! 🌞 Wir sind aus UK zurück und heute heißt’s wieder: 🍽️ Mittagstisch ab 11.30 Uhr 🔥 dur",
+      "textSample": "Brauereigaststätte Am Strand | Marktredwitz auf Instagram: \"🌞 Willkommen zurück am Strand! 🌞 Wir sind aus UK zurück und heute heißt’s wieder: 🍽️ Mittagstisch ab 11.30 Uhr 🔥 durchgehend warme Küche bis 20.30 Uhr Auf der Speisekarte stehen unter anderem: 🥩 Rinderroulade mit handgerolltem Kloß & Blaukraut 🥣 Leberknödel in kräftiger Suppe 🦆 Entenbrust-Fil"
+    },
+    {
+      "url": "https://www.instagram.com/p/DZiAhe2u4nC/",
+      "score": 58,
+      "source": "gastro2, duckduckgo, duckduckgo",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-17d"
+      ],
+      "pubDate": "2026-06-13T15:39:56.000Z",
+      "ageDays": 17,
+      "ageDaysExact": 17.84,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "ROLLERCOASTERRESTAURANT auf Instagram: \"10 Jahre Rollercoaster Restaurant Wien🎢❤️ Das feiern wir mit euch – und einem besonderen Geschenk: unserem limitierten Jubiläums-Shirt! 👕",
+      "textSample": "ROLLERCOASTERRESTAURANT auf Instagram: \"10 Jahre Rollercoaster Restaurant Wien🎢❤️ Das feiern wir mit euch – und einem besonderen Geschenk: unserem limitierten Jubiläums-Shirt! 👕 ✨ So bekommst du dein Shirt: 🍔 Bei uns essen und genießen 💸 Mindestens 60 € pro Tisch konsumieren 🎁 Gratis Anniversary-Shirt mitnehmen Mehr Genuss = mehr Shirts: 👕 60 € = 1 Shi"
     },
     {
       "url": "https://www.instagram.com/p/DZU5ppVszfJ/",
-      "score": 0,
+      "score": 50,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
-        "unknown-date"
+        "age-22d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-08T13:33:00.000Z",
+      "ageDays": 22,
+      "ageDaysExact": 22.92,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "12min.me_vienna auf Instagram: \"🔥 Diesen Donnerstag ist es so weit! 🔥 Drei Speaker, drei Perspektiven, unzählige neue Ideen. 🚀 Bei unserer 12min.me IGNITE #18 erwarten euch insp",
+      "textSample": "12min.me_vienna auf Instagram: \"🔥 Diesen Donnerstag ist es so weit! 🔥 Drei Speaker, drei Perspektiven, unzählige neue Ideen. 🚀 Bei unserer 12min.me IGNITE #18 erwarten euch inspirierende Geschichten, spannende Einblicke und Menschen, die zeigen, wie Innovation, soziales Engagement und persönliches Wachstum gelingen können. 🎤 Alexander Pichl – Social Entr"
     },
     {
-      "url": "https://www.instagram.com/reel/DYr87WpNI_j/",
-      "score": 0,
+      "url": "https://www.instagram.com/reel/DX6FYNPIk_o/",
+      "score": 2,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
-        "unknown-date"
+        "age-16d",
+        "false-positive-language",
+        "expired-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/p/DXHqT7sCFZh/",
-      "score": 0,
-      "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-15T04:24:48.000Z",
+      "ageDays": 16,
+      "ageDaysExact": 16.3,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Vienna's Joy | Local Guide | 🇦🇹🇵🇭 auf Instagram: \"✨𝑭𝒊𝒍𝒊𝒑𝒊𝒏𝒐 𝑭𝒐𝒐𝒅 𝑭𝒆𝒔𝒕𝒊𝒗𝒂𝒍 𝒊𝒏 𝑾𝒊𝒆𝒏✨ SAVE THIS: Beim Weissauweg im 22. Bezirk findet ihr beim @filipinof",
+      "textSample": "Vienna's Joy | Local Guide | 🇦🇹🇵🇭 auf Instagram: \"✨𝑭𝒊𝒍𝒊𝒑𝒊𝒏𝒐 𝑭𝒐𝒐𝒅 𝑭𝒆𝒔𝒕𝒊𝒗𝒂𝒍 𝒊𝒏 𝑾𝒊𝒆𝒏✨ SAVE THIS: Beim Weissauweg im 22. Bezirk findet ihr beim @filipinofoodfestival_vienna Streetfood aus den Philippinen, herzhaft & süß sowie Karaoke und Sitzgelegenheiten, das nächste findet am a 14. & 27.6. statt wenn das Wetter mitspielt, Eintritt"
     },
     {
       "url": "https://www.instagram.com/p/DWQdZ2vAYIL/",
-      "score": 0,
+      "score": 28,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "deal-signal",
+        "food-drink",
         "public-preview",
-        "unknown-date"
+        "age-99d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-03-24T06:30:10.000Z",
+      "ageDays": 99,
+      "ageDaysExact": 99.22,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "HpKPH auf Instagram: \"Wer liebt gratis Essen? WIR LIEBEN GRATIS ESSEN! 🙌 Eure HPKPH ist wieder für euch da: 🥞 HAPPY MORNING FRÜHSTÜCK Nie wieder hungrig in die erste Lehrveransta",
+      "textSample": "HpKPH auf Instagram: \"Wer liebt gratis Essen? WIR LIEBEN GRATIS ESSEN! 🙌 Eure HPKPH ist wieder für euch da: 🥞 HAPPY MORNING FRÜHSTÜCK Nie wieder hungrig in die erste Lehrveranstaltung, zumindest einen Tag in der Woche! Wo? Campus Strebersdorf (Mensa) & Campus St. Pölten (Studi Cafeteria) Wann? Alle Termine findet ihr in der Liste unten! 👇 Wir laden euch e"
     },
     {
       "url": "https://www.instagram.com/p/DSb_3a2CCOe/",
       "score": 0,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "current-language",
         "public-preview",
-        "unknown-date"
+        "age-194d",
+        "expired-language",
+        "expired-relative-date"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2025-12-19T07:57:24.000Z",
+      "ageDays": 194,
+      "ageDaysExact": 194.16,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Stefan Joham 📷🎤 ® auf Instagram: \"Heute ist es soweit! Vernissage & Opening von TWO FRAMES 🖼️ in der neuen @insideout.gallery , Kirchengasse 33, 1070 Vienna. Hipster City @callm",
+      "textSample": "Stefan Joham 📷🎤 ® auf Instagram: \"Heute ist es soweit! Vernissage & Opening von TWO FRAMES 🖼️ in der neuen @insideout.gallery , Kirchengasse 33, 1070 Vienna. Hipster City @callmecay aka @cay.lattee und Stefan Joham laden zu einem großen Fest: 30 Arbeiten der beiden Künstler, die vor Ort günstig ersteigert werden können. Dazu gibt’s gratis Essen & Getränke"
     },
     {
       "url": "https://www.instagram.com/p/DN06JzQ2NWD/",
-      "score": 0,
+      "score": 50,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
-        "unknown-date"
+        "age-308d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2025-08-26T17:31:29.000Z",
+      "ageDays": 308,
+      "ageDaysExact": 308.76,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "ZUKUNFT ESSEN auf Instagram: \"✨ Kostenlose Fortbildung für Küchenteams in der Gemeinschaftsverpflegung ✨ ➯ NATÜRLICH. GUT. KOCHEN. Dank der Förderung der Stadt Wien gibt’s jetzt GR",
+      "textSample": "ZUKUNFT ESSEN auf Instagram: \"✨ Kostenlose Fortbildung für Küchenteams in der Gemeinschaftsverpflegung ✨ ➯ NATÜRLICH. GUT. KOCHEN. Dank der Förderung der Stadt Wien gibt’s jetzt GRATIS-Plätze 🙌 👩🍳 Köch:innen sind das Herz der Gemeinschaftsverpflegung – sie bringen Gesundheit, Genuss & Nachhaltigkeit auf unsere Teller. Mit unserer neuen Workshopreihe unter"
     },
     {
       "url": "https://www.instagram.com/reel/DMx24NcNf9C/",
-      "score": 0,
+      "score": 50,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
-        "unknown-date"
+        "age-334d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2025-07-31T16:37:52.000Z",
+      "ageDays": 334,
+      "ageDaysExact": 334.79,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Sebastian Michels auf Instagram: \"Ich Kämpfe um das Größte Ritter FLEISCH SCHWERT in Wien! 🍖🔥 Das Schwert wartet… und ich will es mir holen! 🗡️ Ihr habt entschieden: Ich MUSS es",
+      "textSample": "Sebastian Michels auf Instagram: \"Ich Kämpfe um das Größte Ritter FLEISCH SCHWERT in Wien! 🍖🔥 Das Schwert wartet… und ich will es mir holen! 🗡️ Ihr habt entschieden: Ich MUSS es versuchen. 60 Minuten. Eine unfassbare Fleischplatte. Pommes ohne Ende. Wenn ich’s schaffe, winkt nicht nur das Schwert… sondern auch lebenslang kostenlos Essen in ALLEN @centimet"
     },
     {
-      "url": "https://www.instagram.com/p/DK2IdbkNweL/",
+      "url": "https://www.instagram.com/reel/DLpQcvVthxv/",
       "score": 0,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "current-language",
         "public-preview",
-        "unknown-date"
+        "age-362d",
+        "expired-language",
+        "expired-relative-date"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2025-07-03T11:52:59.000Z",
+      "ageDays": 362,
+      "ageDaysExact": 362.99,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Mahnoor auf Instagram: \"Magnum Pop Up in Wien - Gratis Eis zusammenstellen lassen 📍Museumsquartier Ovalhalle Heute am 03.07 & 04.07 von 12-20 Uhr #popup #magnum #icecream #vienna\"",
+      "textSample": "Mahnoor auf Instagram: \"Magnum Pop Up in Wien - Gratis Eis zusammenstellen lassen 📍Museumsquartier Ovalhalle Heute am 03.07 & 04.07 von 12-20 Uhr #popup #magnum #icecream #vienna\" 694 likes, 10 comments - foodiewien am July 3, 2025: \"Magnum Pop Up in Wien - Gratis Eis zusammenstellen lassen 📍Museumsquartier Ovalhalle Heute am 03.07 & 04.07 von 12-20 Uhr #p"
     },
     {
       "url": "https://www.instagram.com/p/DKhhtU6NeZ0/",
-      "score": 0,
+      "score": 22,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
-        "unknown-date"
+        "age-390d",
+        "false-positive-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2025-06-05T15:18:08.000Z",
+      "ageDays": 390,
+      "ageDaysExact": 390.85,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Tuesday = das techno cafe Outdoor&Afterwork auf Instagram: \"WINWINWIN 1. 1x Hendrick’s Flasche 0,7l & Tonic + Gratis Eintritt für dich und 4 Freunde 2. 4 Hendrick’s Copa Gläser + G",
+      "textSample": "Tuesday = das techno cafe Outdoor&Afterwork auf Instagram: \"WINWINWIN 1. 1x Hendrick’s Flasche 0,7l & Tonic + Gratis Eintritt für dich und 4 Freunde 2. 4 Hendrick’s Copa Gläser + Gratis Eintritt für dich und 3 Freunde 3. 3 Gratis Hendrick’s Gin Tonic an der Bar + Gratis Eintritt für dich und 2 Freunde So kommst du in den Lostopf: 1. Like diesen Post 2. Folge"
     },
     {
       "url": "https://www.instagram.com/reel/DKC0ONZyxQc/",
-      "score": 0,
+      "score": 10,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
         "public-preview",
-        "unknown-date"
+        "age-402d",
+        "false-positive-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2025-05-24T17:04:10.000Z",
+      "ageDays": 402,
+      "ageDaysExact": 402.78,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "1000things to do in Vienna auf Instagram: \"Gratis grillen in Wien? Ist einfacher und schöner, als ihr denkt! 🔥🍴 Wir haben für euch die 5 schönsten kostenlosen Grillzonen in Wien",
+      "textSample": "1000things to do in Vienna auf Instagram: \"Gratis grillen in Wien? Ist einfacher und schöner, als ihr denkt! 🔥🍴 Wir haben für euch die 5 schönsten kostenlosen Grillzonen in Wien ausfindig gemacht und das neue Grillsortiment von @wiesbauerwurst getestet – Urlaubsfeeling inklusive! 🏝️ Neben den Bergsteiger Grillern und den Grillzwergen haben es uns vor alle"
     },
     {
       "url": "https://www.instagram.com/reel/DJGpmLeMNCT/",
-      "score": 0,
+      "score": 5,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
-        "unknown-date"
+        "age-426d",
+        "expired-relative-date"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2025-05-01T08:17:26.000Z",
+      "ageDays": 426,
+      "ageDaysExact": 426.14,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "EatinVienna – Genuss in Wien auf Instagram: \"GRATIS Steak Döner bei Ali‘s Steak Döner📍Neubaugasse 50, 1070 Wien Alle die @alissteakdoner auf Instagram oder TikTok folgen, kriegen",
+      "textSample": "EatinVienna – Genuss in Wien auf Instagram: \"GRATIS Steak Döner bei Ali‘s Steak Döner📍Neubaugasse 50, 1070 Wien Alle die @alissteakdoner auf Instagram oder TikTok folgen, kriegen einen Gratis Steak Döner. Falls ihr diese Aktion verpasst, gibts für alle Folllower bis Montag 50% auf alle Speisen. #foodblogger #food #foodphotography #eatinvienna #vienna #wien"
     },
     {
       "url": "https://www.instagram.com/reel/DJFEAaxq1zO/",
-      "score": 0,
+      "score": 5,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
-        "unknown-date"
+        "age-426d",
+        "expired-relative-date"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2025-04-30T17:35:11.000Z",
+      "ageDays": 426,
+      "ageDaysExact": 426.76,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Taste of Vienna auf Instagram: \"Gratis Steakdöner in Wien! 🥩🥙 Am Freitag, 2. Mai feiert Alis Steak Döner Neueröffnung! Folgt dem Lokal auf Instagram & TikTok und holt euch ab 11",
+      "textSample": "Taste of Vienna auf Instagram: \"Gratis Steakdöner in Wien! 🥩🥙 Am Freitag, 2. Mai feiert Alis Steak Döner Neueröffnung! Folgt dem Lokal auf Instagram & TikTok und holt euch ab 11 Uhr euren Gratis-Döner – solange der Vorrat reicht! -50 % auf alle Speisen bis Montag! 📍 Neubaugasse 50, 1070 Wien #gratisessen #steakdöner #viennafood #neueröffnung #wien #foodie"
     },
     {
-      "url": "https://www.instagram.com/p/DIUF_4ENqMM/",
+      "url": "https://www.instagram.com/reel/DHdQ-XnIYVZ/",
       "score": 0,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
         "public-preview",
-        "unknown-date"
+        "age-467d",
+        "false-positive-language",
+        "expired-language",
+        "past-offer-date"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2025-03-21T10:01:38.000Z",
+      "ageDays": 467,
+      "ageDaysExact": 467.07,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Mahnoor auf Instagram: \"1+1 Gratis XXl Schnitzelsemmel in Wien - Tat Schnitzel 📍Prager Straße 57, 1210 Wien Ihr könnt euch am 23.03 1 Schnitzelsemmel holen und bekommt die zweite",
+      "textSample": "Mahnoor auf Instagram: \"1+1 Gratis XXl Schnitzelsemmel in Wien - Tat Schnitzel 📍Prager Straße 57, 1210 Wien Ihr könnt euch am 23.03 1 Schnitzelsemmel holen und bekommt die zweite gratis dazu. #viennafood #foodhotspot #schnitzel #vienna *Anzeige\" 550 likes, 21 comments - foodiewien am March 21, 2025: \"1+1 Gratis XXl Schnitzelsemmel in Wien - Tat Schnitzel 📍"
     },
     {
       "url": "https://www.instagram.com/reel/DG3VkYwsD0S/",
-      "score": 0,
+      "score": 60,
       "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "current-language",
         "public-preview",
-        "unknown-date"
+        "age-481d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DGdJIBbM7KD/",
-      "score": 0,
-      "source": "duckduckgo",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2025-03-06T16:31:57.000Z",
+      "ageDays": 481,
+      "ageDaysExact": 481.8,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "EatinVienna – Genuss in Wien auf Instagram: \"GRATIS: Erste 120 Cheese- und Veggieburger: Neueröffnung: 2ndstreetburger | 📍 Kleine Stadtgutgasse 10, 1020 Wien @2ndstreetburger #foo",
+      "textSample": "EatinVienna – Genuss in Wien auf Instagram: \"GRATIS: Erste 120 Cheese- und Veggieburger: Neueröffnung: 2ndstreetburger | 📍 Kleine Stadtgutgasse 10, 1020 Wien @2ndstreetburger #foodphotography #vienna #foodblogger #smashburger #burger #food #wien #fyp #yummy\" 54 likes, 7 comments - eatinvienna_ am March 6, 2025: \"GRATIS: Erste 120 Cheese- und Veggieburger: N"
     },
     {
       "url": "https://www.instagram.com/reel/DFpP_vQML9R/",
-      "score": 0,
+      "score": 50,
       "source": "duckduckgo",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "age-512d"
+      ],
+      "pubDate": "2025-02-04T08:42:36.000Z",
+      "ageDays": 512,
+      "ageDaysExact": 512.12,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Robert Erobert | Food Chaos auf Instagram: \"POV: Du gehst gratis ins größte All You Can Eat And Drink Restaurant in Österreich 🇦🇹 😍 Das @watertuin_vienna ist mit rund 500 Sitzpl",
+      "textSample": "Robert Erobert | Food Chaos auf Instagram: \"POV: Du gehst gratis ins größte All You Can Eat And Drink Restaurant in Österreich 🇦🇹 😍 Das @watertuin_vienna ist mit rund 500 Sitzplätzen garantiert eine der größten World Kitchens Welt Welt😱 Für nur knapp 30 Euro kannst Du essen und trinken was Du möchtest und so viel du möchtest! An Geburtstagen isst du in d"
+    },
+    {
+      "url": "https://www.instagram.com/reel/codex-instagram-share-probe-20260701081012/",
+      "score": 0,
+      "source": "all, community",
       "reason": "kein echtes Instagram-Postdatum",
       "reasons": [
         "public-preview",
-        "unknown-date"
+        "existing-source-context",
+        "unknown-date",
+        "preview-login-wall"
       ],
       "pubDate": "",
       "ageDays": null,
       "ageDaysExact": null,
       "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "title": "Post ist nicht verfügbar • Instagram",
+      "textSample": "Post ist nicht verfügbar • Instagram Anmelden Post ist nicht verfügbar Möglicherweise funktioniert der Link nicht oder das Profil wurde entfernt. Registriere dich bei Instagram"
+    },
+    {
+      "url": "https://www.instagram.com/p/CODEXSHAREPROBE/",
+      "score": 0,
+      "source": "community, all, community",
+      "reason": "kein echtes Instagram-Postdatum",
+      "reasons": [
+        "public-preview",
+        "existing-source-context",
+        "unknown-date",
+        "preview-login-wall"
+      ],
+      "pubDate": "",
+      "ageDays": null,
+      "ageDaysExact": null,
+      "postDateSource": "",
+      "title": "Post ist nicht verfügbar • Instagram",
+      "textSample": "Post ist nicht verfügbar • Instagram Anmelden Post ist nicht verfügbar Möglicherweise funktioniert der Link nicht oder das Profil wurde entfernt. Registriere dich bei Instagram"
+    },
+    {
+      "url": "https://www.instagram.com/p/DaOWqVGOs4I/",
+      "score": 48,
+      "source": "all, community",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-0d",
+        "expired-language"
+      ],
+      "pubDate": "2026-07-01T05:40:09.000Z",
+      "ageDays": 0,
+      "ageDaysExact": 0.25,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Billa Familie Militowski auf Instagram: \"Am Zeugnistag den 3.7.2026 gibt's für jedes Kind mit Zeugnis ein gratis Eis an der Kassa. 💛 Kommt vorbei – wir freuen uns mit euch! ☀️🍦\"",
+      "textSample": "Billa Familie Militowski auf Instagram: \"Am Zeugnistag den 3.7.2026 gibt's für jedes Kind mit Zeugnis ein gratis Eis an der Kassa. 💛 Kommt vorbei – wir freuen uns mit euch! ☀️🍦\" 19 likes, 1 comments - billa_familie_militowski am June 30, 2026: \"Am Zeugnistag den 3.7.2026 gibt's für jedes Kind mit Zeugnis ein gratis Eis an der Kassa. 💛 Kommt vorbei – wir f"
     },
     {
       "url": "https://www.instagram.com/reel/DaLLz7wN1Ca/",
-      "score": 0,
+      "score": 49,
+      "source": "firecrawl4, all",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-1d",
+        "expired-language"
+      ],
+      "pubDate": "2026-06-29T15:26:18.000Z",
+      "ageDays": 1,
+      "ageDaysExact": 1.84,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Pop Up Kitchen by Baked auf Instagram: \"Free Coffee Alert! ☕ Join us for brunch between 8 AM – 10 AM and enjoy a complimentary coffee with your meal.\"",
+      "textSample": "Pop Up Kitchen by Baked auf Instagram: \"Free Coffee Alert! ☕ Join us for brunch between 8 AM – 10 AM and enjoy a complimentary coffee with your meal.\" 17 likes, 1 comments - popup_kitchenpk am June 29, 2026: \"Free Coffee Alert! ☕ Join us for brunch between 8 AM – 10 AM and enjoy a complimentary coffee with your meal.\". Anmelden Registrieren Verpasse keinen B"
+    },
+    {
+      "url": "https://www.instagram.com/p/DaK5n19DHe3/",
+      "score": 38,
       "source": "firecrawl4",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
       "reasons": [
+        "vienna",
+        "food-drink",
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "age-0d",
+        "false-positive-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-30T14:23:22.000Z",
+      "ageDays": 0,
+      "ageDaysExact": 0.89,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Wien Ticket auf Instagram: \"GEWINNSPIEL - Erlebe Kaffee wie nie zuvor 🔥☕ 🤩 Beim Vienna Coffee Festival in der Marx Halle Wien! Wir verlosen 5x2 Tickets für einen Tageseintritt an",
+      "textSample": "Wien Ticket auf Instagram: \"GEWINNSPIEL - Erlebe Kaffee wie nie zuvor 🔥☕ 🤩 Beim Vienna Coffee Festival in der Marx Halle Wien! Wir verlosen 5x2 Tickets für einen Tageseintritt an einem Tag deiner Wahl! SO MACHST DU MIT 1️⃣ FOLGE unserem Account @wienticket und @viennacoffeefestival. ✅ 2️⃣ LIKE diesen Post. ❤️ 3️⃣ KOMMENTIERE unter diesem Post - Wie trinkst"
     },
     {
-      "url": "https://www.instagram.com/reel/DaJ7cBQCsVQ/",
-      "score": 0,
-      "source": "firecrawl5",
-      "reason": "kein echtes Instagram-Postdatum",
+      "url": "https://www.instagram.com/reel/DaIq7thDPKi/",
+      "score": 37,
+      "source": "food3, all",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "known-source",
-        "unknown-date"
+        "age-2d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DaI_0VlxSBF/",
-      "score": 0,
-      "source": "community, deals, community",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-28T16:00:05.000Z",
+      "ageDays": 2,
+      "ageDaysExact": 2.82,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Café Wolke 7 by mirema auf Instagram: \"Unser Brunch in Action 😎\"",
+      "textSample": "Café Wolke 7 by mirema auf Instagram: \"Unser Brunch in Action 😎\" 96 likes, 6 comments - cafewolke7.bymirema am June 28, 2026: \"Unser Brunch in Action 😎\". Anmelden Registrieren Verpasse keinen Beitrag mehr von cafewolke7.bymirema Registriere dich f�r Instagram, um auf dem Laufenden zu bleiben. Registrieren Anmelden cafewolke7.bymirema \" Folgen cafewolke7.by"
     },
     {
       "url": "https://www.instagram.com/reel/DaIDMYuiOec/",
-      "score": 0,
-      "source": "gastro2, all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "score": 44,
+      "source": "all",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
       "reasons": [
+        "vienna",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-3d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-28T10:12:54.000Z",
+      "ageDays": 3,
+      "ageDaysExact": 3.06,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "@tokki_korean_bbq auf Instagram: \"Lunch für unter 10€✨ #lunch #vienna #bowl #noodles\"",
+      "textSample": "@tokki_korean_bbq auf Instagram: \"Lunch für unter 10€✨ #lunch #vienna #bowl #noodles\" tokki_korean_bbq am June 28, 2026: \"Lunch für unter 10€✨ #lunch #vienna #bowl #noodles\". Anmelden Registrieren Verpasse keinen Beitrag mehr von tokki_korean_bbq Registriere dich f�r Instagram, um auf dem Laufenden zu bleiben. Registrieren Anmelden tokki_korean_bbq \" Folgen"
     },
     {
       "url": "https://www.instagram.com/reel/DaIAPWqscKE/",
-      "score": 0,
-      "source": "firecrawl4",
-      "reason": "kein echtes Instagram-Postdatum",
+      "score": 3,
+      "source": "firecrawl4, all",
+      "reason": "explizites Aktionsdatum liegt in der Vergangenheit",
       "reasons": [
+        "vienna",
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "age-3d",
+        "past-offer-date"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/p/DaGLVgNjEeQ/",
-      "score": 0,
-      "source": "community, deals, community",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DaGI2ebsaR_/",
-      "score": 0,
-      "source": "community, deals, community",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-28T09:52:49.000Z",
+      "ageDays": 3,
+      "ageDaysExact": 3.08,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "@freiherz.wien auf Instagram: \"Volles Haus, blanke Nerven und diese eine Sekunde, in der alles explodiert ist.🇦🇹🔥 Am 22.6. gab es im Freiherz kein Halten mehr. Wer dabei war, we",
+      "textSample": "@freiherz.wien auf Instagram: \"Volles Haus, blanke Nerven und diese eine Sekunde, in der alles explodiert ist.🇦🇹🔥 Am 22.6. gab es im Freiherz kein Halten mehr. Wer dabei war, weiß genau, wovon wir reden - für alle anderen (und zum Immer-wieder-Anschauen) gibt es hier die Highlights. Danke für die geile Stimmung. Genau dafür machen wir das. ❤️🍻 #freiherz"
     },
     {
       "url": "https://www.instagram.com/reel/DaGDBR_qEgl/",
-      "score": 0,
-      "source": "food3, all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "score": 56,
+      "source": "all",
+      "reason": "Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-3d",
+        "false-positive-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-27T15:33:05.000Z",
+      "ageDays": 3,
+      "ageDaysExact": 3.84,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Taste of Vienna auf Instagram: \"🎉🥂 GEWINNSPIEL: Your Choice Menü für 2 Personen bei merk&würdig! (Einlösbar bis 26.07.2026) So machst du mit: • Folge @tasteofviennaa & @merkundwu",
+      "textSample": "Taste of Vienna auf Instagram: \"🎉🥂 GEWINNSPIEL: Your Choice Menü für 2 Personen bei merk&würdig! (Einlösbar bis 26.07.2026) So machst du mit: • Folge @tasteofviennaa & @merkundwuerdig • Like diesen Beitrag ❤️ • Markiere deine Begleitung in den Kommentaren 👇 👉 Extra-Chance: Teile den Beitrag in deiner Story & markiere uns! 🥂✨ Ein 3-gängiges High-End-Menü"
     },
     {
-      "url": "https://www.instagram.com/p/DaDXlFTiAwl/",
-      "score": 0,
-      "source": "gastro2",
-      "reason": "kein echtes Instagram-Postdatum",
+      "url": "https://www.instagram.com/p/DaFeK7ut9Tx/",
+      "score": 34,
+      "source": "food3, all",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-4d",
+        "false-positive-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-27T10:11:57.000Z",
+      "ageDays": 4,
+      "ageDaysExact": 4.06,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "SCHOTTIS Restaurant & Weinbar auf Instagram: \"Was gibt es eigentlich Schöneres als an einem Sonntag bei einem Brunch entspannt in den Tag zu starten? Wir verlosen einen Brunch für",
+      "textSample": "SCHOTTIS Restaurant & Weinbar auf Instagram: \"Was gibt es eigentlich Schöneres als an einem Sonntag bei einem Brunch entspannt in den Tag zu starten? Wir verlosen einen Brunch für zwei Personen voller regionaler Schmankerl & italienischer Spezialitäten der Cucina d’Italia. 🤍 Am Sonntag, 05.07.2026, findet unser Brunch all’Italiana von 10:00 bis 15:00 Uhr st"
+    },
+    {
+      "url": "https://www.instagram.com/p/DaFYy6WtT06/",
+      "score": 32,
+      "source": "firecrawl5",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-4d",
+        "false-positive-language"
+      ],
+      "pubDate": "2026-06-27T09:24:21.000Z",
+      "ageDays": 4,
+      "ageDaysExact": 4.1,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Dine Your Journey auf Instagram: \"🎁GEWINNSPIEL ALERT🎁 Gemeinsam mit @aladdin.das.restaurant verlosen wir 2 Gutscheine im Wert von je 50€. So kannst du teilnehmen: -Diesen Reel li",
+      "textSample": "Dine Your Journey auf Instagram: \"🎁GEWINNSPIEL ALERT🎁 Gemeinsam mit @aladdin.das.restaurant verlosen wir 2 Gutscheine im Wert von je 50€. So kannst du teilnehmen: -Diesen Reel liken @dineyourjourney & @aladdin.das.restaurant folgen -Deine Begleitung in den Kommentaren markieren -Teile den Beitrag in deiner Story, um deine Gewinnchance zu erhöhen Teilnahmes"
+    },
+    {
+      "url": "https://www.instagram.com/p/DaDTAdJjMqB/",
+      "score": 48,
+      "source": "firecrawl4",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
+      "reasons": [
+        "vienna",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-4d"
+      ],
+      "pubDate": "2026-06-26T13:54:47.000Z",
+      "ageDays": 4,
+      "ageDaysExact": 4.91,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "DK auf Instagram: \"looking back at the last few weeks, it’s been heat, music, and people who made every night feel like something special. vienna in summer does something to you!!!",
+      "textSample": "DK auf Instagram: \"looking back at the last few weeks, it’s been heat, music, and people who made every night feel like something special. vienna in summer does something to you!!! tonight i’m back where it all keeps happening @volksgarten xoxo, D 🎞️ @claudius.mn\" theofficialdk am June 26, 2026: \"looking back at the last few weeks, it’s been heat, music, an"
     },
     {
       "url": "https://www.instagram.com/p/DaDO6TkiIk9/",
@@ -582,360 +1240,431 @@
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "unknown-date",
+        "preview-login-wall"
       ],
       "pubDate": "",
       "ageDays": null,
       "ageDaysExact": null,
       "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "title": "Post ist nicht verfügbar • Instagram",
+      "textSample": "Post ist nicht verfügbar • Instagram Anmelden Post ist nicht verfügbar Möglicherweise funktioniert der Link nicht oder das Profil wurde entfernt. Registriere dich bei Instagram"
     },
     {
       "url": "https://www.instagram.com/reel/DaDMsp-Cul6/",
-      "score": 0,
+      "score": 84,
       "source": "gastro2",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Normalisierung/Validity-Filter blockiert Deal",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-4d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-26T13:03:56.000Z",
+      "ageDays": 4,
+      "ageDaysExact": 4.94,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Frish WIENXTRA auf Instagram: \"Gratis Filipino Food Festival in Wien? YES! 🇵🇭🔥 Am Samstag, den 27. Juni, findet das Filipino Food Festival wieder beim SV Donau statt. Freut euch",
+      "textSample": "Frish WIENXTRA auf Instagram: \"Gratis Filipino Food Festival in Wien? YES! 🇵🇭🔥 Am Samstag, den 27. Juni, findet das Filipino Food Festival wieder beim SV Donau statt. Freut euch auf authentische philippinische Küche und natürlich auch Karaoke vor Ort! 🎤😁 Filipino Food Festival 🕖 27. Juni, 11:00–19:00 Uhr 📍 SV Donau, Weissauweg 1, 1220 Wien 🍋 Eintritt"
     },
     {
       "url": "https://www.instagram.com/p/DaDKn8UKMFx/",
-      "score": 0,
+      "score": 64,
       "source": "gastro2, all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "explizit abgelaufen oder vorbei",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-4d",
+        "expired-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-26T12:42:29.000Z",
+      "ageDays": 4,
+      "ageDaysExact": 4.96,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "CHI CHI Snack Bar / Shop & Eat🤍 auf Instagram: \"Feiert das Schulende mit uns! 🎉📚 Die Noten stehen fest, die Ferien stehen vor der Tür und wir haben das perfekte Special für euch",
+      "textSample": "CHI CHI Snack Bar / Shop & Eat🤍 auf Instagram: \"Feiert das Schulende mit uns! 🎉📚 Die Noten stehen fest, die Ferien stehen vor der Tür und wir haben das perfekte Special für euch, um den Sommer einzuläuten! ☀️✨ Ab einer Konsumation von 10 € schenken wir euch einen Lemon Ice Tea GRATIS zu eurer Bestellung dazu! Und das Beste: Ihr könnt aussuchen, ob ihr ihn"
     },
     {
       "url": "https://www.instagram.com/reel/DaBKzPbtZWP/",
-      "score": 0,
-      "source": "gastro2, all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "score": 62,
+      "source": "all",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-5d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-25T18:06:39.000Z",
+      "ageDays": 5,
+      "ageDaysExact": 5.73,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Eda | Berlin Food & Activities auf Instagram: \"🍕 GRATIS PIZZA ALARM! Pizza Bulls feiert sein 18-jähriges Jubiläum – und das mit einer richtig coolen Aktion! 🎉 🍕 Die ersten 200 G",
+      "textSample": "Eda | Berlin Food & Activities auf Instagram: \"🍕 GRATIS PIZZA ALARM! Pizza Bulls feiert sein 18-jähriges Jubiläum – und das mit einer richtig coolen Aktion! 🎉 🍕 Die ersten 200 Gäste erhalten eine Pizza Margherita, Salami oder Schinken kostenlos ✅ Alle Pizzen sind halal 📅 27. Juni 2026 ⏰ Ab 15:00 Uhr 🥡 Nur für Abholung 📍 @pizzabulls.europe Hohenstaufens"
     },
     {
       "url": "https://www.instagram.com/reel/DaA9pvNoND-/",
-      "score": 0,
+      "score": 84,
       "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Normalisierung/Validity-Filter blockiert Deal",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-5d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-25T16:11:24.000Z",
+      "ageDays": 5,
+      "ageDaysExact": 5.81,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Filipino_Food_Festival auf Instagram: \"🌴🇵🇭 FILIPINO FOOD FESTIVAL 2026 🇵🇭🌴 Get ready for a colorful day filled with authentic Filipino food, live entertainment, fun activitie",
+      "textSample": "Filipino_Food_Festival auf Instagram: \"🌴🇵🇭 FILIPINO FOOD FESTIVAL 2026 🇵🇭🌴 Get ready for a colorful day filled with authentic Filipino food, live entertainment, fun activities, and great company! 📅 Saturday, June 27, 2026 ⏰ 11:00 AM – 7:00 PM 📍 SV Donau Weissauweg 1, 1220 Wien ✨ FREE ENTRANCE ✨ 🍢 Authentic Filipino Food 🍨 Filipino Desserts 🎤 Live"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DaAoBgcKj4r/",
+      "score": 56,
+      "source": "gastro2",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-5d"
+      ],
+      "pubDate": "2026-06-25T13:00:20.000Z",
+      "ageDays": 5,
+      "ageDaysExact": 5.95,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Jüdisches Museum Wien auf Instagram: \"ESSEN GEHEN IN 1010 WIEN UNTER 10€ ? JAAAAAA Bei uns im Taïm Museumscafé - es gibt täglich ein Lunch Menü ab 9,70€ Frisch, saisonal, lecker un",
+      "textSample": "Jüdisches Museum Wien auf Instagram: \"ESSEN GEHEN IN 1010 WIEN UNTER 10€ ? JAAAAAA Bei uns im Taïm Museumscafé - es gibt täglich ein Lunch Menü ab 9,70€ Frisch, saisonal, lecker und gleichzeitig günstig und das im ersten Bezirk.\" 173 likes, 11 comments - jewishmuseumvienna am June 18, 2026: \"ESSEN GEHEN IN 1010 WIEN UNTER 10€ ? JAAAAAA Bei uns im Taïm Museum"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DaAXec-MYIN/",
+      "score": 62,
+      "source": "gastro2",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
+      "reasons": [
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-6d"
+      ],
+      "pubDate": "2026-06-25T10:37:17.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.05,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "@restaurantweek_de auf Instagram: \"Schnell zahlen, mehr genießen – und jetzt 5 € sparen mit Visa! 💳✨ Die Vorfreude auf die RestaurantWeek 2026 steigt! Während die besten Küchenche",
+      "textSample": "@restaurantweek_de auf Instagram: \"Schnell zahlen, mehr genießen – und jetzt 5 € sparen mit Visa! 💳✨ Die Vorfreude auf die RestaurantWeek 2026 steigt! Während die besten Küchenchefs der Stadt die exklusiven 3-Gänge-Menüs vorbereiten, sorgt unser Partner Visa nicht nur für ein absolut entspanntes Genusserlebnis, sondern auch für ein exklusives Highlight in d"
     },
     {
       "url": "https://www.instagram.com/reel/DaAUnKSimfa/",
-      "score": 0,
-      "source": "firecrawl4",
-      "reason": "kein echtes Instagram-Postdatum",
+      "score": 88,
+      "source": "firecrawl4, all",
+      "reason": "Normalisierung/Validity-Filter blockiert LLM-Deal",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "age-6d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-25T10:11:33.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.06,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "U4 Vienna auf Instagram: \"SUMMER VIBES ALL OVER – EVERY THURSDAY 🔥 ▶︎ FREE ENTRY for all U4 app members until midnight ▶︎ SOL Beer 1+1 #sharewithafriendorastranger 🤝 ▶︎ Cocktail",
+      "textSample": "U4 Vienna auf Instagram: \"SUMMER VIBES ALL OVER – EVERY THURSDAY 🔥 ▶︎ FREE ENTRY for all U4 app members until midnight ▶︎ SOL Beer 1+1 #sharewithafriendorastranger 🤝 ▶︎ Cocktail Happy Hour | freshly mixed Cocktails only 7,50 – ’till 00.00h 🍍 ▶︎ MUSIC. DANCEHALL | AFROBEATS | HIP HOP DJ CREAM T • DJ MASTERCASH • DJ ONE • DJ SHORTY ▶︎ INFO. doors. 11pm fee."
     },
     {
       "url": "https://www.instagram.com/p/DaASGdJI9fU/",
-      "score": 0,
-      "source": "firecrawl4",
-      "reason": "kein echtes Instagram-Postdatum",
+      "score": 54,
+      "source": "firecrawl4, all",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
+        "deal-signal",
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "age-6d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-25T09:49:39.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.08,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Origins Luxembourg auf Instagram: \"Raise a glass with us every Thursday from 6PM to 9PM at Origins Kirchberg Infinity. Enjoy our Happy Hour: Buy 1, Get 2 on Aperol Spritz, Gin & To",
+      "textSample": "Origins Luxembourg auf Instagram: \"Raise a glass with us every Thursday from 6PM to 9PM at Origins Kirchberg Infinity. Enjoy our Happy Hour: Buy 1, Get 2 on Aperol Spritz, Gin & Tonic, and Beer. Cheers to good company. 🥂\" origins.lu am June 25, 2026: \"Raise a glass with us every Thursday from 6PM to 9PM at Origins Kirchberg Infinity. Enjoy our Happy Hour: B"
     },
     {
       "url": "https://www.instagram.com/p/DZ_8PBajIuP/",
-      "score": 0,
+      "score": 28,
       "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "kein starkes Gratis-/Deal-Signal im Instagram-Post",
       "reasons": [
+        "vienna",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-6d",
+        "false-positive-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-25T08:46:45.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.12,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Zum Bretschneider auf Instagram: \"🍷 GEWINNSPIEL 🍽️ A guates Essen, a guats Glasl Wein und jemand, mit dem ma gern länger sitzn bleibt. ✨ Genau des gibt’s bei uns zu gewinnen: Ein",
+      "textSample": "Zum Bretschneider auf Instagram: \"🍷 GEWINNSPIEL 🍽️ A guates Essen, a guats Glasl Wein und jemand, mit dem ma gern länger sitzn bleibt. ✨ Genau des gibt’s bei uns zu gewinnen: Ein 2-Gang-Menü für 2 Personen inklusive Weinbegleitung im Zum Bretschneider. 🫶🏼 Und so bist dabei: • Beitrag liken • @zum.bretschneider folgen • In die Kommentare schreiben, wen du"
     },
     {
       "url": "https://www.instagram.com/reel/DZ-gvKukgZd/",
-      "score": 0,
+      "score": 26,
       "source": "firecrawl5",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "age-6d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-24T17:19:02.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.77,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Superbad auf Instagram: \"Was ist euer Tipp? 👀🍔 #superbad #smashburger #wm2026 #hamburgfood\"",
+      "textSample": "Superbad auf Instagram: \"Was ist euer Tipp? 👀🍔 #superbad #smashburger #wm2026 #hamburgfood\" 14 likes, 2 comments - superbad.hamburg am June 24, 2026: \"Was ist euer Tipp? 👀🍔 #superbad #smashburger #wm2026 #hamburgfood\". Anmelden Registrieren Verpasse keinen Beitrag mehr von superbad.hamburg Registriere dich f�r Instagram, um auf dem Laufenden zu bleiben."
     },
     {
       "url": "https://www.instagram.com/p/DZ-RWA7Mlu4/",
-      "score": 0,
+      "score": 34,
       "source": "community",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "kein eindeutiges Wien-Signal im Instagram-Post",
       "reasons": [
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-3d",
+        "false-positive-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-27T15:30:57.000Z",
+      "ageDays": 3,
+      "ageDaysExact": 3.84,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Sodastream DACH auf Instagram: \"Jetzt anmelden und gratis probieren 👇👇👇 Melde dich jetzt zu unserem Newsletter an & erhalte einen gratis Energy drink mix* inkl. gratis Versand.",
+      "textSample": "Sodastream DACH auf Instagram: \"Jetzt anmelden und gratis probieren 👇👇👇 Melde dich jetzt zu unserem Newsletter an & erhalte einen gratis Energy drink mix* inkl. gratis Versand. Du musst nichts weiter tun, als die Informationen im Link auszufüllen & deine Bestätigungs-E-Mail zu bestätigen. *Die Aktion ist limitiert auf 2.000 Stück. Bitte bestätige deine E-"
+    },
+    {
+      "url": "https://www.instagram.com/p/DZ-PznFgqoI/",
+      "score": 64,
+      "source": "gastro2",
+      "reason": "explizit abgelaufen oder vorbei",
+      "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-6d",
+        "expired-language"
+      ],
+      "pubDate": "2026-06-24T14:50:40.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.87,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "WIENXTRA auf Instagram: \"Unserer Meinung mach hat jedes Zeugnis ein gratis Eis verdient! Also kommt vorbei! Egal wie eure Noten aussehen -> holt euch euer Gratis Eis von @zanonieis",
+      "textSample": "WIENXTRA auf Instagram: \"Unserer Meinung mach hat jedes Zeugnis ein gratis Eis verdient! Also kommt vorbei! Egal wie eure Noten aussehen -> holt euch euer Gratis Eis von @zanonieis Welche Eissorte holt ihr euch? #wienxtra #jugendinfo #eis #gratis #wien\" 68 likes, 1 comments - wienxtra am June 24, 2026: \"Unserer Meinung mach hat jedes Zeugnis ein gratis Eis v"
     },
     {
       "url": "https://www.instagram.com/p/DZ97jklK6wy/",
-      "score": 0,
+      "score": 52,
       "source": "deals",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "explizit abgelaufen oder vorbei",
       "reasons": [
+        "vienna",
+        "deal-signal",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-6d",
+        "expired-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-24T11:55:26.000Z",
+      "ageDays": 6,
+      "ageDaysExact": 6.99,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "TEEAMO Vienna • 茶伴 auf Instagram: \"Das Schuljahr ist bald vorbei und wir belohnen deine Bestleistungen! Komm im Aktionszeitraum vom 03.07. bis 05.07.2026 mit deinem Zeugnis in eine",
+      "textSample": "TEEAMO Vienna • 茶伴 auf Instagram: \"Das Schuljahr ist bald vorbei und wir belohnen deine Bestleistungen! Komm im Aktionszeitraum vom 03.07. bis 05.07.2026 mit deinem Zeugnis in einer unserer Filialen vorbei und hol dir deinen Rabatt auf ein Getränk deiner Wahl: 🌟 ... für jeden 1er einen Rabatt von -5% 🌟 ... für zwei 1er = -10% / drei 1er = -15% usw. Je mehr"
     },
     {
       "url": "https://www.instagram.com/reel/DZ9z-5OgACN/",
-      "score": 0,
-      "source": "gastro2, instagram-ai, all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "score": 68,
+      "source": "all",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
+        "current-language",
         "public-preview",
         "existing-source-context",
-        "known-source",
-        "unknown-date"
+        "age-7d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DZ9wgOjo-ek/",
-      "score": 0,
-      "source": "firecrawl5",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "known-source",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-24T10:47:37.000Z",
+      "ageDays": 7,
+      "ageDaysExact": 7.04,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Pizzeria Pozzuoli auf Instagram: \"GRAND OPENING ALERT 🍕 Wir feiern die Eröffnung von Pizzeria Pozzuoli 3.0 im 5. Bezirk und du bist eingeladen! 🎉 📅 Montag, 29. Juni 2026 ⏰ 16:00",
+      "textSample": "Pizzeria Pozzuoli auf Instagram: \"GRAND OPENING ALERT 🍕 Wir feiern die Eröffnung von Pizzeria Pozzuoli 3.0 im 5. Bezirk und du bist eingeladen! 🎉 📅 Montag, 29. Juni 2026 ⏰ 16:00 – 21:00 Uhr 📍 Reinprechtsdorferstraße 3, 1050 Wien 🎁 Gratis Pizza Margherita oder Pizza Marinara für alle Gäste! Du zahlst nur deine Getränke. 🍷 Freu dich auf authentische neap"
     },
     {
       "url": "https://www.instagram.com/reel/DZ9RNedNm3I/",
-      "score": 0,
+      "score": 36,
       "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-7d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-24T05:44:04.000Z",
+      "ageDays": 7,
+      "ageDaysExact": 7.25,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "the first thought auf Instagram: \"Foodie Deal of the Year 🍜💸 At @tomochanvienna, your bill turns into a voucher 😮💨✨ 📍 Stiegengasse 6–8 📅 June 25 – July 3rd ~~~~~~~~~~~~~~~~~~",
+      "textSample": "the first thought auf Instagram: \"Foodie Deal of the Year 🍜💸 At @tomochanvienna, your bill turns into a voucher 😮💨✨ 📍 Stiegengasse 6–8 📅 June 25 – July 3rd ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 📸 Content production for @tomochanvienna ••• Let‘s cook tasty content for your Restaurant 👨🏻🍳 👉🏻 be@thefirstthought.at 📱+43 676 535 59 89 #thefirstthought #"
     },
     {
       "url": "https://www.instagram.com/p/DZ8JKfgInGm/",
-      "score": 0,
-      "source": "gastro2, all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "score": 36,
+      "source": "all",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-8d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-23T00:00:00.000Z",
+      "ageDays": 8,
+      "ageDaysExact": 8.49,
+      "postDateSource": "instagram-rendered-og",
+      "title": "Unikat 2 BG auf Instagram: \"🔥 EVERY WEDNESDAY at UNIKAT-2 🔥 🍾 BUY ONE, GET ONE FREE 🍾 Enjoy our exclusive Wednesday offer: Buy any bottle of alcohol and get another one FREE! ✨",
+      "textSample": "Unikat 2 BG auf Instagram: \"🔥 EVERY WEDNESDAY at UNIKAT-2 🔥 🍾 BUY ONE, GET ONE FREE 🍾 Enjoy our exclusive Wednesday offer: Buy any bottle of alcohol and get another one FREE! ✨ Premium drinks 🎉 Great atmosphere 🥂 Perfect for celebrating with friends 📍 UNIKAT-2 📍 N13 5TU\" 1 likes, 0 comments - unikat_2 am June 23, 2026: \"🔥 EVERY WEDNESDAY at UNIKAT-2"
     },
     {
       "url": "https://www.instagram.com/p/DZ7ZPvKjQCs/",
       "score": 0,
-      "source": "firecrawl4",
-      "reason": "kein echtes Instagram-Postdatum",
+      "source": "firecrawl4, all",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "age-7d",
+        "expired-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-23T12:15:22.000Z",
+      "ageDays": 7,
+      "ageDaysExact": 7.98,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Würstelstand LEO auf Instagram: \"𝗗𝗶𝗲 𝗯𝗲𝘀𝘁𝗲 𝗞𝗼𝗺𝗯𝗶𝗻𝗮𝘁𝗶𝗼𝗻 seit Senf und Käsekrainer: WM & Leo.🌭 Kommt vorbei und verfolgt die Spiele direkt bei uns – mit Würstel i",
+      "textSample": "Würstelstand LEO auf Instagram: \"𝗗𝗶𝗲 𝗯𝗲𝘀𝘁𝗲 𝗞𝗼𝗺𝗯𝗶𝗻𝗮𝘁𝗶𝗼𝗻 seit Senf und Käsekrainer: WM & Leo.🌭 Kommt vorbei und verfolgt die Spiele direkt bei uns – mit Würstel in der Hand und bester Stimmung am Stand.🍻📺 #WM #publicviewing #würstelstandleo #wienerwürstelstand #1090wien\" 17 likes, 1 comments - wurstelstandleo am June 23, 2026: \"𝗗𝗶𝗲 𝗯\ud835"
     },
     {
       "url": "https://www.instagram.com/reel/DZ69kIKomIB/",
-      "score": 0,
+      "score": 38,
       "source": "community, deals, community",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-8d",
+        "expired-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-23T08:15:10.000Z",
+      "ageDays": 8,
+      "ageDaysExact": 8.14,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Tomochan Ramen | taste the Tokyo vibe 🍜❤️ auf Instagram: \"Get your entire bill back as a voucher 🎉🍜 Diesen Donnerstag startet unsere große Sommeraktion in der Filiale im 6. Bezi",
+      "textSample": "Tomochan Ramen | taste the Tokyo vibe 🍜❤️ auf Instagram: \"Get your entire bill back as a voucher 🎉🍜 Diesen Donnerstag startet unsere große Sommeraktion in der Filiale im 6. Bezirk! Vom 25.06. bis einschließlich 03.07.erhaltet ihr einen Gutschein in Höhe eurer gesamten Rechnung.✨ Egal ob Ramen, Donburi, Vorspeisen, Drinks oder Desserts – alles zählt. Den G"
     },
     {
       "url": "https://www.instagram.com/p/DZ5VBHKC3vA/",
       "score": 0,
       "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-8d",
+        "past-offer-date"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/p/DZ5HVqKDWtD/",
-      "score": 0,
-      "source": "gastro2",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-22T17:03:43.000Z",
+      "ageDays": 8,
+      "ageDaysExact": 8.78,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "ROYAL DÖNER auf Instagram: \"👑🔥 GROSSE ANGEBOTE BEI ROYAL DÖNER! 🔥👑 Nur am 26.06. & 27.06. 🍕 Pizza (32 cm) nur 5 € 🍔 Burger nur 5 € 🥙 Döner nur 5 € 🥙 + Getränk nur 7 € ✅ Fri",
+      "textSample": "ROYAL DÖNER auf Instagram: \"👑🔥 GROSSE ANGEBOTE BEI ROYAL DÖNER! 🔥👑 Nur am 26.06. & 27.06. 🍕 Pizza (32 cm) nur 5 € 🍔 Burger nur 5 € 🥙 Döner nur 5 € 🥙 + Getränk nur 7 € ✅ Frisch zubereitet ✅ Beste Qualität ✅ Königlicher Geschmack 📍 Angebot gilt nur für Selbstabholung und Verzehr vor Ort. 📞 Jetzt bestellen und von unseren Top-Angeboten profitieren! #R"
     },
     {
       "url": "https://www.instagram.com/p/DZ46tcUjWi3/",
       "score": 0,
       "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "food-drink",
+        "current-language",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-8d",
+        "expired-relative-date"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-22T13:10:13.000Z",
+      "ageDays": 8,
+      "ageDaysExact": 8.94,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "La Pausa Vienna auf Instagram: \"Bereit fürs Spiel heute? 🇦🇹⚽️ Wenn Österreich heute alles gibt, brauchst du die passende Nervennahrung auf dem Tisch. Unsere Ruccola Pizza ist fri",
+      "textSample": "La Pausa Vienna auf Instagram: \"Bereit fürs Spiel heute? 🇦🇹⚽️ Wenn Österreich heute alles gibt, brauchst du die passende Nervennahrung auf dem Tisch. Unsere Ruccola Pizza ist frisch, leicht und die ideale vegetarische Option für dein Team vor dem Fernseher. Box greifen, mitnehmen und pünktlich zum Spiel lossnacken. Sichere dir rechtzeitig deine Stärkung vo"
     },
     {
-      "url": "https://www.instagram.com/p/DZ4t_ksjlU4/",
-      "score": 0,
-      "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "url": "https://www.instagram.com/reel/DZ4v8Fam_iI/",
+      "score": 12,
+      "source": "firecrawl4",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "known-source",
+        "age-9d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-22T11:36:17.000Z",
+      "ageDays": 9,
+      "ageDaysExact": 9,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Café Brecht auf Instagram",
+      "textSample": "Café Brecht auf Instagram 2 likes, 0 comments - cafebrecht am June 22, 2026 Anmelden Registrieren Verpasse keinen Beitrag mehr von cafebrecht Registriere dich f�r Instagram, um auf dem Laufenden zu bleiben. Registrieren Anmelden cafebrecht \" Folgen Noch keine Kommentare. Beginne die Unterhaltung. 2 22. Juni Melde dich an, um mit \u001eGef�llt mir\u001c zu markieren od"
     },
     {
       "url": "https://www.instagram.com/p/DZ4ljDQFpyK/",
@@ -945,517 +1674,449 @@
       "reasons": [
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "unknown-date",
+        "preview-login-wall"
       ],
       "pubDate": "",
       "ageDays": null,
       "ageDaysExact": null,
       "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "title": "Post ist nicht verfügbar • Instagram",
+      "textSample": "Post ist nicht verfügbar • Instagram Anmelden Post ist nicht verfügbar Möglicherweise funktioniert der Link nicht oder das Profil wurde entfernt. Registriere dich bei Instagram"
     },
     {
       "url": "https://www.instagram.com/p/DZ4geP7jWQR/",
-      "score": 0,
-      "source": "all, firecrawl4",
-      "reason": "kein echtes Instagram-Postdatum",
+      "score": 62,
+      "source": "firecrawl4, all, firecrawl4",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "age-9d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-22T09:20:47.000Z",
+      "ageDays": 9,
+      "ageDaysExact": 9.1,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Travel Shack Vienna. auf Instagram: \"⚽️ WORLD CUP WEEK 2 ⚽️ Catch all the biggest World Cup matches live at Travel Shack Vienna! 🍻 ✅ Indoor & outdoor screens ✅ Daily specials 🍺 €",
+      "textSample": "Travel Shack Vienna. auf Instagram: \"⚽️ WORLD CUP WEEK 2 ⚽️ Catch all the biggest World Cup matches live at Travel Shack Vienna! 🍻 ✅ Indoor & outdoor screens ✅ Daily specials 🍺 €2 Beer & Wine (5–7pm) 🍹 Buy One Get One FREE Cocktails & Long Drinks (7–9pm) 🍕 Pizzas available all night 🌙 Open daily until 4am If the match is on during our opening hours, we’"
     },
     {
       "url": "https://www.instagram.com/p/DZ4aVgmjR84/",
-      "score": 0,
-      "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "score": 58,
+      "source": "gastro2, all",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-9d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-22T08:27:10.000Z",
+      "ageDays": 9,
+      "ageDaysExact": 9.14,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Hard Rock Cafe Vienna auf Instagram: \"TOOOOOOOOR! ⚽️ Noch mehr Gründe, dabei zu sein, wenn Argentinien auf dem Platz steht! Wenn Messi trifft, feiern wir mit euch. 🏆 Hol dir einen",
+      "textSample": "Hard Rock Cafe Vienna auf Instagram: \"TOOOOOOOOR! ⚽️ Noch mehr Gründe, dabei zu sein, wenn Argentinien auf dem Platz steht! Wenn Messi trifft, feiern wir mit euch. 🏆 Hol dir einen Messi Legendary Burger und bekomme einen GRATIS dazu. Angebot gilt 48 Stunden in teilnehmenden Hard Rock Cafes. #hrcvienna #weltmeisterschaft #burgergratis #footballinvienna\" 29 l"
     },
     {
       "url": "https://www.instagram.com/reel/DZ4Ssx6t0Zo/",
-      "score": 0,
+      "score": 30,
       "source": "gastro2, all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-9d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/p/DZ4Iz9sEp5j/",
-      "score": 0,
-      "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-22T07:22:38.000Z",
+      "ageDays": 9,
+      "ageDaysExact": 9.18,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Enzo auf Instagram: \"Parma for 10€? 🍕 Die Preise steigen, wir machen kurz das Gegenteil. Because ENZO F***S THE INFLATION! 😌 Mit dem Safeword “PARMA” bekommst du die nächsten 2 W",
+      "textSample": "Enzo auf Instagram: \"Parma for 10€? 🍕 Die Preise steigen, wir machen kurz das Gegenteil. Because ENZO F***S THE INFLATION! 😌 Mit dem Safeword “PARMA” bekommst du die nächsten 2 Wochen die Pizza Parma für 10€ statt 16,50€. 🔥 Don’t miss this one 👀 📍 Universitätsring 14 | 1010 Wien #enzo #enzovienna #wien #pizza thefirstthought\" 34 likes, 3 comments - enzo"
     },
     {
       "url": "https://www.instagram.com/p/DZ4Co45Eies/",
-      "score": 0,
+      "score": 36,
       "source": "deals",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-9d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-22T05:00:25.000Z",
+      "ageDays": 9,
+      "ageDaysExact": 9.28,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "RECUP-/REBOWL-Mehrwegsystem Österreich auf Instagram: \"Schnappt euch euren kostenlosen Kaffee im RECUP! ☕⁣ Wir freuen uns auf euch! ⁣ ⁣ Riesiges Danke an @tchibo.at & @espressomobi",
+      "textSample": "RECUP-/REBOWL-Mehrwegsystem Österreich auf Instagram: \"Schnappt euch euren kostenlosen Kaffee im RECUP! ☕⁣ Wir freuen uns auf euch! ⁣ ⁣ Riesiges Danke an @tchibo.at & @espressomobil 💚\" 37 likes, 3 comments - recup_at am June 21, 2026: \"Schnappt euch euren kostenlosen Kaffee im RECUP! ☕⁣ Wir freuen uns auf euch! ⁣ ⁣ Riesiges Danke an @tchibo.at & @espressomo"
     },
     {
       "url": "https://www.instagram.com/p/DZ24NfYDPDj/",
       "score": 0,
       "source": "firecrawl4",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "current-language",
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "age-9d",
+        "expired-relative-date"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-21T18:10:17.000Z",
+      "ageDays": 9,
+      "ageDaysExact": 9.73,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Promenade Graz auf Instagram: \"Wir sehen uns morgen beim Österreich-Spiel ⚽️🇦🇹 Gemütlicher Gastgarten, große Leinwand, kühles Bier, viele Emotionen - morgen ab 19.00 Uhr möchten",
+      "textSample": "Promenade Graz auf Instagram: \"Wir sehen uns morgen beim Österreich-Spiel ⚽️🇦🇹 Gemütlicher Gastgarten, große Leinwand, kühles Bier, viele Emotionen - morgen ab 19.00 Uhr möchten wir gemeinsam mit euch Österreich gegen Argentinien schauen und danach hoffentlich auch ein bisschen feiern 🙌🏻 📸 @anjainabox\" 70 likes, 2 comments - promenadegraz am June 21, 20"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DZ2Q_4IIpkl/",
+      "score": 12,
+      "source": "firecrawl5",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-9d"
+      ],
+      "pubDate": "2026-06-21T12:32:14.000Z",
+      "ageDays": 9,
+      "ageDaysExact": 9.97,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Rindocks auf Instagram: \"4 Gerichte, 11,90€ – unser Mittagstisch nächste Woche 🍽️ #hamburg #essen #steakhouse #pinneberg\"",
+      "textSample": "Rindocks auf Instagram: \"4 Gerichte, 11,90€ – unser Mittagstisch nächste Woche 🍽️ #hamburg #essen #steakhouse #pinneberg\" 62 likes, 5 comments - rindocks am June 21, 2026: \"4 Gerichte, 11,90€ – unser Mittagstisch nächste Woche 🍽️ #hamburg #essen #steakhouse #pinneberg\". Anmelden Registrieren Verpasse keinen Beitrag mehr von rindocks Registriere dich f�r In"
     },
     {
       "url": "https://www.instagram.com/p/DZ0pAAiMGy_/",
-      "score": 0,
+      "score": 62,
       "source": "firecrawl4",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "age-10d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-20T21:18:25.000Z",
+      "ageDays": 10,
+      "ageDaysExact": 10.6,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Rooni Restaurant auf Instagram: \"⚽️ FIFA WM 2026 LIVE bei ROONI! 🏆 Erlebe alle Spiele der Fußball-Weltmeisterschaft live auf unseren Großbildschirmen! 🍹 Gratis Welcome Shot währe",
+      "textSample": "Rooni Restaurant auf Instagram: \"⚽️ FIFA WM 2026 LIVE bei ROONI! 🏆 Erlebe alle Spiele der Fußball-Weltmeisterschaft live auf unseren Großbildschirmen! 🍹 Gratis Welcome Shot während der Spiele 🍽️ Leckeres Essen 🥂 Kalte Getränke 🎉 Beste Stimmung in Wien 📍 Rooni Restaurant Hütteldorfer Straße 66, 1150 Wien Reserviere jetzt deinen Platz und genieße die WM"
     },
     {
       "url": "https://www.instagram.com/reel/DZ0F9EiKN46/",
-      "score": 0,
+      "score": 58,
       "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-10d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DZzF5Brt6r3/",
-      "score": 0,
-      "source": "food3",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-20T16:16:39.000Z",
+      "ageDays": 10,
+      "ageDaysExact": 10.81,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Addicted to Rock Bar & Burger auf Instagram: \"Bei uns Bier trinken und vielleicht ein Jahr lang, jeden Tag ein gratis Bier trinken!🍻🤘🏻😍 #addictedtorock #wien #gastroliebe\"",
+      "textSample": "Addicted to Rock Bar & Burger auf Instagram: \"Bei uns Bier trinken und vielleicht ein Jahr lang, jeden Tag ein gratis Bier trinken!🍻🤘🏻😍 #addictedtorock #wien #gastroliebe\" 19 likes, 1 comments - addictedtorock_barburger am June 20, 2026: \"Bei uns Bier trinken und vielleicht ein Jahr lang, jeden Tag ein gratis Bier trinken!🍻🤘🏻😍 #addictedtorock #wien #"
     },
     {
       "url": "https://www.instagram.com/reel/DZxmtKvj6HV/",
-      "score": 0,
+      "score": 46,
       "source": "community",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-11d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-19T17:01:38.000Z",
+      "ageDays": 11,
+      "ageDaysExact": 11.78,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Cineplexx Österreich auf Instagram: \"Mathenote + € 0,90 = dein Ticketpreis! 🫢 Die Cineplexx Zeugnisaktion ist bald zurück! 🎉 Merk dir die Termine vor! 📅 03.07. - Wien, Burgenla",
+      "textSample": "Cineplexx Österreich auf Instagram: \"Mathenote + € 0,90 = dein Ticketpreis! 🫢 Die Cineplexx Zeugnisaktion ist bald zurück! 🎉 Merk dir die Termine vor! 📅 03.07. - Wien, Burgenland & Niederösterreich | 📅 10.07. - Kärnten, Oberösterreich, Salzburg, Tirol, Steiermark & Vorarlberg 🍿 Alle Infos 👉️ cineplexx.at/zeugnisaktion #cineplexx #kino #grosseskino #ze"
     },
     {
       "url": "https://www.instagram.com/reel/DZxbau2on_5/",
-      "score": 0,
+      "score": 14,
       "source": "firecrawl4",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "food-drink",
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "age-11d",
+        "expired-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-19T15:23:44.000Z",
+      "ageDays": 11,
+      "ageDaysExact": 11.85,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Café | Bar | Restaurant - Kaffee Alt Wien, 1922 auf Instagram: \"⚽🍻 WM 2026 im Kaffee Alt Wien Gute Spiele, kaltes Bier, tolle Stimmung und Fußball gemeinsam erleben, genau dafür l",
+      "textSample": "Café | Bar | Restaurant - Kaffee Alt Wien, 1922 auf Instagram: \"⚽🍻 WM 2026 im Kaffee Alt Wien Gute Spiele, kaltes Bier, tolle Stimmung und Fußball gemeinsam erleben, genau dafür lieben wir den Sommer in Wien. ❤️ 📺 Ausgewählte WM-Spiele live auf Großbildleinwand 📍𝗞𝗮𝗳𝗳𝗲𝗲 𝗔𝗹𝘁 𝗪𝗶𝗲𝗻 Bäckerstraße 9, 1010 Wien ☎️ +4315125222 📧 office@kaffeealtwien."
     },
     {
       "url": "https://www.instagram.com/reel/DZxY3OIsE6t/",
-      "score": 0,
+      "score": 12,
       "source": "firecrawl5",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "age-11d",
+        "false-positive-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-19T15:04:31.000Z",
+      "ageDays": 11,
+      "ageDaysExact": 11.86,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "CrossFatBerlin auf Instagram: \"🎁 GIVEAWAY ALERT 🎁 Win a €60 voucher for Marie, one of Berlin’s most inspiring bistros! Located in Bundestag, @marieimbundestag is more than a rest",
+      "textSample": "CrossFatBerlin auf Instagram: \"🎁 GIVEAWAY ALERT 🎁 Win a €60 voucher for Marie, one of Berlin’s most inspiring bistros! Located in Bundestag, @marieimbundestag is more than a restaurant. It’s a place where inclusion is lived every day, where people with and without disabilities work together, and where great food brings everyone to the same table. From crea"
+    },
+    {
+      "url": "https://www.instagram.com/p/DZxXvh_DP4v/",
+      "score": 12,
+      "source": "firecrawl4",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "known-source",
+        "age-11d"
+      ],
+      "pubDate": "2026-06-19T14:49:49.000Z",
+      "ageDays": 11,
+      "ageDaysExact": 11.87,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "JACC Munich auf Instagram: \"JACC Izakaya Event🍶🍾 The long anticipated izakaya event is here!🍾 Join us for authentic Japanese bar experience 🏮🥃 We will be offering Izakaya styl",
+      "textSample": "JACC Munich auf Instagram: \"JACC Izakaya Event🍶🍾 The long anticipated izakaya event is here!🍾 Join us for authentic Japanese bar experience 🏮🥃 We will be offering Izakaya style dishes and crisp drinks. You won't need to bring anything but good mood ✨ Tickets are 6 Euros, if you're a member grab yours for 4€! Tickets: https://orbi.io/l/koIfFjw2C59YvsfQ D"
     },
     {
       "url": "https://www.instagram.com/reel/DZxHF1VCRlK/",
-      "score": 0,
-      "source": "gastro2, all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "score": 26,
+      "source": "all",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-11d",
+        "expired-language"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-19T12:24:41.000Z",
+      "ageDays": 11,
+      "ageDaysExact": 11.97,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Fuego auf Instagram: \"Montag 1 Bier zahlen 1 Bier Gratis!! Kommt vorbei\"",
+      "textSample": "Fuego auf Instagram: \"Montag 1 Bier zahlen 1 Bier Gratis!! Kommt vorbei\" 10 likes, 1 comments - fuego.wien am June 19, 2026: \"Montag 1 Bier zahlen 1 Bier Gratis!! Kommt vorbei\". Anmelden Registrieren Verpasse keinen Beitrag mehr von fuego.wien Registriere dich f�r Instagram, um auf dem Laufenden zu bleiben. Registrieren Anmelden fuego.wien \" Folgen fuego.wie"
     },
     {
       "url": "https://www.instagram.com/reel/DZwyZ7Bt1vH/",
       "score": 0,
       "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "food-drink",
+        "current-language",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-12d",
+        "false-positive-language",
+        "expired-relative-date"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-19T09:27:47.000Z",
+      "ageDays": 12,
+      "ageDaysExact": 12.09,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Brunch Vienna auf Instagram: \"GIVEAWAY 🥞 Discover @moncher_vienna new brunch experience with your choice of à la carte or buffet 🍳☕️ Win a Brunch for 2 ✨🍀 How to enter: • Follow",
+      "textSample": "Brunch Vienna auf Instagram: \"GIVEAWAY 🥞 Discover @moncher_vienna new brunch experience with your choice of à la carte or buffet 🍳☕️ Win a Brunch for 2 ✨🍀 How to enter: • Follow @moncher_vienna & @brunch.vienna • Like this reel🤍 • Comment who you would take with you🥰 • Reshare and Repost on your account to boost your chances🍀 #viennagiveaway #giveaway"
     },
     {
       "url": "https://www.instagram.com/reel/DZvOQOFhDEh/",
-      "score": 0,
-      "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "score": 36,
+      "source": "food3, all",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-12d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-18T18:49:51.000Z",
+      "ageDays": 12,
+      "ageDaysExact": 12.7,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Down Under - Australian Steakhouse Restaurant & Bar auf Instagram: \"🛍️ SO SICHERST DU DIR DEN DEAL: 1️⃣ Speichern & Sichern: Mach einen Screenshot von diesem Beitrag oder speicher",
+      "textSample": "Down Under - Australian Steakhouse Restaurant & Bar auf Instagram: \"🛍️ SO SICHERST DU DIR DEN DEAL: 1️⃣ Speichern & Sichern: Mach einen Screenshot von diesem Beitrag oder speichere ihn direkt ab! 📸 2️⃣ Vorzeigen: Zeig den Coupon einfach VOR deiner Bestellung bei uns im Restaurant vor. 3️⃣ Genießen: Schlemmen und sparen! 🤤\" 3 likes, 0 comments - downunder."
     },
     {
       "url": "https://www.instagram.com/reel/DZvN1j8oyd2/",
-      "score": 0,
+      "score": 1,
       "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-12d",
+        "past-offer-date"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-18T18:45:03.000Z",
+      "ageDays": 12,
+      "ageDaysExact": 12.71,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "MEGA Supermarkt auf Instagram: \"SEMAVER - SCHWARZER TEE IN AKTION Gültig bis 30.06.2026 Gültig in allen MEGA Supermarkt Filialen . . #wien #semaver #cay #tee #megasupermarkt\"",
+      "textSample": "MEGA Supermarkt auf Instagram: \"SEMAVER - SCHWARZER TEE IN AKTION Gültig bis 30.06.2026 Gültig in allen MEGA Supermarkt Filialen . . #wien #semaver #cay #tee #megasupermarkt\" 27 likes, 1 comments - megasupermarkt.wien am June 18, 2026: \"SEMAVER - SCHWARZER TEE IN AKTION Gültig bis 30.06.2026 Gültig in allen MEGA Supermarkt Filialen . . #wien #semaver #cay #t"
     },
     {
       "url": "https://www.instagram.com/p/DZu7G3jFCRY/",
       "score": 0,
       "source": "firecrawl4",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "age-12d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-18T16:01:18.000Z",
+      "ageDays": 12,
+      "ageDaysExact": 12.82,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Jeremy’s auf Instagram: \"Bring your friends, bring the family. Join us for every U.S. and Germany World Cup match during our regular hours, alongside cold cocktails, Viennese class",
+      "textSample": "Jeremy’s auf Instagram: \"Bring your friends, bring the family. Join us for every U.S. and Germany World Cup match during our regular hours, alongside cold cocktails, Viennese classics, and a crowd that makes every goal feel a little bigger.\" 15 likes, 0 comments - jeremysnyc am June 18, 2026: \"Bring your friends, bring the family. Join us for every U.S. and"
     },
     {
       "url": "https://www.instagram.com/reel/DZuxWYKI_-7/",
-      "score": 0,
+      "score": 30,
       "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-12d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DZub6EXDYmI/",
-      "score": 0,
-      "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-18T14:36:18.000Z",
+      "ageDays": 12,
+      "ageDaysExact": 12.88,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Café | Bar | Restaurant - Kaffee Alt Wien, 1922 auf Instagram: \"WM 2026 live im Kaffee Alt Wien ⚽🍻 Wer schon einmal während eines WM-Spiels im Service gearbeitet hat, kennt dieses",
+      "textSample": "Café | Bar | Restaurant - Kaffee Alt Wien, 1922 auf Instagram: \"WM 2026 live im Kaffee Alt Wien ⚽🍻 Wer schon einmal während eines WM-Spiels im Service gearbeitet hat, kennt dieses Gefühl. 😂 📺 Ausgewählte Spiele live auf Großbildleinwand Nächstes Highlight: 🇦🇹 Österreich – Argentinien 🇦🇷 📅 Montag 🕖 19:00 Uhr 📍 Kaffee Alt Wien Bäckerstraße 9, 1010 Wi"
     },
     {
       "url": "https://www.instagram.com/reel/DZt6YkFNo7L/",
-      "score": 0,
+      "score": 36,
       "source": "gastro2",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-13d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-18T06:36:09.000Z",
+      "ageDays": 13,
+      "ageDaysExact": 13.21,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "the first thought auf Instagram: \"📍 Valid only at @tomochanvienna Stiegengasse 6–8 😱🍜 Get a voucher for the full value of your bill 🤑 💢 25.06 - 3.07 💢 ~~~~~~~~~~~~~~~~~~~~~~~",
+      "textSample": "the first thought auf Instagram: \"📍 Valid only at @tomochanvienna Stiegengasse 6–8 😱🍜 Get a voucher for the full value of your bill 🤑 💢 25.06 - 3.07 💢 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 📸 Content production for @tomochanvienna ••• Let‘s cook tasty content for your Restaurant 👨🏻🍳 👉🏻 be@thefirstthought.at 📱+43 676 535 59 89 #thefirstthought #socia"
     },
     {
       "url": "https://www.instagram.com/reel/DZt0sdotQY8/",
-      "score": 0,
+      "score": 22,
       "source": "firecrawl4",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
         "public-preview",
         "existing-source-context",
         "known-source",
-        "unknown-date"
+        "age-13d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-18T05:46:06.000Z",
+      "ageDays": 13,
+      "ageDaysExact": 13.25,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Molly Darcys Vienna auf Instagram: \"Join us for the FIFA WORLD CUP 2026⚽️🙌🏼 📍Molly Darcy‘s, 1010 Vienna\"",
+      "textSample": "Molly Darcys Vienna auf Instagram: \"Join us for the FIFA WORLD CUP 2026⚽️🙌🏼 📍Molly Darcy‘s, 1010 Vienna\" 55 likes, 1 comments - mollydarcysvienna am June 17, 2026: \"Join us for the FIFA WORLD CUP 2026⚽️🙌🏼 📍Molly Darcy‘s, 1010 Vienna\". Anmelden Registrieren Verpasse keinen Beitrag mehr von mollydarcysvienna Registriere dich f�r Instagram, um auf dem Lau"
+    },
+    {
+      "url": "https://www.instagram.com/p/DZtHSz2s79c/",
+      "score": 30,
+      "source": "gastro2",
+      "reason": "Instagram-Post aelter als 7 Tage",
+      "reasons": [
+        "vienna",
+        "food-drink",
+        "public-preview",
+        "existing-source-context",
+        "age-13d"
+      ],
+      "pubDate": "2026-06-17T23:09:50.000Z",
+      "ageDays": 13,
+      "ageDaysExact": 13.52,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "PROSI 🌶️ Estd. 1999 auf Instagram: \"✨ 10 Golden Years of PROSI Indian Restaurant ✨ Join us for a special evening of authentic Indian cuisine, live music, culture, and celebration",
+      "textSample": "PROSI 🌶️ Estd. 1999 auf Instagram: \"✨ 10 Golden Years of PROSI Indian Restaurant ✨ Join us for a special evening of authentic Indian cuisine, live music, culture, and celebration as we mark this wonderful milestone together. 🎶🍛🥂 🌟 Special Welcome Offer: The first 50 guests will be welcomed with a complimentary Mango Lassi. 🥭 📅 Friday, 19 June 2026 🕕"
     },
     {
       "url": "https://www.instagram.com/reel/DZsnZEbO2zN/",
-      "score": 0,
+      "score": 58,
       "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
+      "reason": "Instagram-Post aelter als 7 Tage",
       "reasons": [
+        "vienna",
+        "deal-signal",
+        "food-drink",
         "public-preview",
         "existing-source-context",
-        "unknown-date"
+        "age-13d"
       ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/p/DZsUj3Tt4sX/",
-      "score": 0,
-      "source": "all, firecrawl4",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "known-source",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DZsP-n-I5h1/",
-      "score": 0,
-      "source": "firecrawl4",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "known-source",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DZsKrNRo8hw/",
-      "score": 0,
-      "source": "gastro2",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/p/DZpb_N_tk11/",
-      "score": 0,
-      "source": "all",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DZo_8InInzo/",
-      "score": 0,
-      "source": "gastro2",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DZo6AgHqYKT/",
-      "score": 0,
-      "source": "food3",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
-    },
-    {
-      "url": "https://www.instagram.com/reel/DZoV2Z-xOOS/",
-      "score": 0,
-      "source": "firecrawl5",
-      "reason": "kein echtes Instagram-Postdatum",
-      "reasons": [
-        "public-preview",
-        "existing-source-context",
-        "known-source",
-        "unknown-date"
-      ],
-      "pubDate": "",
-      "ageDays": null,
-      "ageDaysExact": null,
-      "postDateSource": "",
-      "title": "Instagram",
-      "textSample": "Instagram Erstelle ein Konto oder melde dich bei Instagram an – Teile deine Ideen mit Menschen, die so ticken wie du. Sei dabei, wenn deine engen Freunde ganz alltägliche Momente erleben. Bei Instagram anmelden Handynummer, Benutzername oder E-Mail-Adresse Passwort Anmelden Passwort vergessen? Mit Facebook anmelden Neues Konto erstellen Meta Info Blog Jobs H"
+      "pubDate": "2026-06-17T18:30:50.000Z",
+      "ageDays": 13,
+      "ageDaysExact": 13.72,
+      "postDateSource": "instagram-rendered-time-datetime",
+      "title": "Micaela Vicente auf Instagram: \"Best way to spend a birthday: getting things for free!!🎂💸✨ Went all over Vienna and had the best time! If you want to enjoy your special day, don'",
+      "textSample": "Micaela Vicente auf Instagram: \"Best way to spend a birthday: getting things for free!!🎂💸✨ Went all over Vienna and had the best time! If you want to enjoy your special day, don't miss out on these cool opportunities! -Get entry free and to ride the slide for free at Donauturm🗼 -Eat for free at all you can eat buffet at Watertuin restaurant🍽️ -Free entry"
     }
   ]
 }
