@@ -1,6 +1,18 @@
 import { normalizeCategoryForScraper } from './category-utils.js';
 
 const BRAND_RULES = [
+  { key: 'centimeter_vienna', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at' },
+  { key: 'centimeter vienna', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at' },
+  { key: 'centimeter', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at' },
+  { key: 'chocoberry', name: 'Chocoberry', logo: '🍓', category: 'essen', domain: 'chocoberry.at' },
+  { key: 'aida', name: 'AIDA', logo: '🍦', category: 'essen', domain: 'aida.at' },
+  { key: 'tomochan', name: 'Tomochan Ramen', logo: '🍜', category: 'essen' },
+  { key: 'apapika', name: 'Apapika', logo: '🍲', category: 'essen', domain: 'apapika.com' },
+  { key: 'honu tiki', name: 'Honu Tiki Bowls', logo: '🥗', category: 'essen', domain: 'honutikibowls.com' },
+  { key: 'öh mensa', name: 'ÖH Mensa Wien', logo: '🍽️', category: 'essen', domain: 'oeh.ac.at' },
+  { key: 'oeh mensa', name: 'ÖH Mensa Wien', logo: '🍽️', category: 'essen', domain: 'oeh.ac.at' },
+  { key: 'oh mensa', name: 'ÖH Mensa Wien', logo: '🍽️', category: 'essen', domain: 'oeh.ac.at' },
+  { key: 'raiffeisen raiffeistag', name: 'Raiffeisen RaiffEIStag', logo: '🍦', category: 'essen', domain: 'raiffeisen.at' },
   { key: 'mcdonald', name: "McDonald's", logo: '🍟', category: 'essen', domain: 'mcdonalds.at' },
   { key: 'burger king', name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at' },
   { key: 'starbucks', name: 'Starbucks', logo: '☕', category: 'kaffee', domain: 'starbucks.at' },
@@ -58,6 +70,8 @@ const BRAND_RULES = [
   { key: 'foodsharing', name: 'Foodsharing', logo: '🍴', category: 'essen', domain: 'foodsharing.at' },
   { key: 'peter hahn', name: 'Peter Hahn', logo: '👗', category: 'shopping' },
   { key: 'pneus online', name: 'Pneus Online', logo: '🛞', category: 'shopping' },
+  { key: 'omv viva', name: 'OMV VIVA', logo: '⛽', category: 'shopping', domain: 'omv.at' },
+  { key: 'omv maxxmotion', name: 'OMV MaxxMotion', logo: '⛽', category: 'shopping', domain: 'omv.at' },
   { key: 'omv', name: 'OMV', logo: '⛽', category: 'shopping', domain: 'omv.at' },
   { key: 'spotify', name: 'Spotify', logo: '🎵', category: 'streaming', domain: 'spotify.com' },
   { key: 'evo fitness', name: 'EVO Fitness', logo: '💪', category: 'fitness', domain: 'evofitness.at' },
@@ -130,13 +144,27 @@ const SOURCE_LIKE_HOSTS = [
 
 function cleanText(value) {
   if (!value) return '';
-  return String(value)
+  return repairMojibake(String(value))
     .replace(/<[^>]*>/g, ' ')
     .replace(/&amp;/gi, '&')
     .replace(/&quot;/gi, '"')
     .replace(/&#39;/gi, "'")
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function repairMojibake(value) {
+  const text = String(value || '');
+  if (!/[ÃÂâð]/.test(text)) return text;
+
+  try {
+    const repaired = Buffer.from(text, 'latin1').toString('utf8');
+    const originalNoise = (text.match(/[ÃÂâð]/g) || []).length;
+    const repairedNoise = (repaired.match(/[ÃÂâð]/g) || []).length;
+    return repairedNoise < originalNoise ? repaired : text;
+  } catch {
+    return text;
+  }
 }
 
 function cleanUiNoiseText(value) {
@@ -151,7 +179,12 @@ function cleanUiNoiseText(value) {
   junkPatterns.forEach((pattern) => {
     text = text.replace(pattern, ' ');
   });
-  return text.replace(/\s+/g, ' ').replace(/^[,:\-–\s]+|[,:\-–\s]+$/g, '').trim();
+  return text
+    .replace(/\bBestellunge\b/gi, 'Bestellung')
+    .replace(/\*{3,}/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/^[,:\-–\s]+|[,:\-–\s]+$/g, '')
+    .trim();
 }
 
 function normalizeAscii(value) {
@@ -373,7 +406,14 @@ function replaceBrandMention(text, fromBrand, toBrand) {
 
 function inferPreferredBrand(deal = {}) {
   const explicitBrand = cleanUiNoiseText(deal.brand || '');
+  const idSignal = cleanUiNoiseText(deal.id || '');
+  const logoSignal = cleanUiNoiseText(deal.logoUrl || '');
+  if (/joe-omv-viva|omv-viva/i.test(`${idSignal} ${logoSignal}`)) {
+    return 'OMV VIVA';
+  }
+
   const titleSignal = cleanUiNoiseText(deal.title || '');
+  const knownInExplicitBrand = findBrandRule(explicitBrand);
   const knownInTitle = findBrandRule(titleSignal);
 
   if (
@@ -383,6 +423,10 @@ function inferPreferredBrand(deal = {}) {
     !brandRuleMatchesBrand(knownInTitle, explicitBrand)
   ) {
     return knownInTitle.name;
+  }
+
+  if (knownInExplicitBrand && !knownInExplicitBrand.source) {
+    return knownInExplicitBrand.name;
   }
 
   if (explicitBrand && !isSourceLikeBrand(explicitBrand) && !isLikelyGenericLocation(explicitBrand)) {
@@ -531,6 +575,133 @@ function buildFallbackDescription(deal = {}) {
   return [brand, title, location, category].filter(Boolean).join(' • ');
 }
 
+function normalizeDescriptionKey(value = '') {
+  return cleanUiNoiseText(value)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/&/g, ' und ')
+    .replace(/[^\p{L}\p{N}%€]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function descriptionMetadataWords(deal = {}) {
+  const base = [
+    'gratis',
+    'kostenlos',
+    'rabatt',
+    'aktion',
+    'angebot',
+    'deal',
+    'bzw',
+    'bogo',
+    'kombination',
+    'kombi',
+    'wien',
+    'online',
+    'osterreich',
+    'österreich',
+    'standort',
+    'standorte',
+    'station',
+    'stationen',
+    'filiale',
+    'filialen',
+    'app',
+    'bei',
+    'in',
+    'auf',
+    'bis',
+    'ca',
+    'am',
+    'laut',
+    'quelle',
+  ];
+  return new Set([
+    ...base,
+    ...normalizeDescriptionKey([deal.brand, deal.distance, deal.location, deal.category, deal.type].filter(Boolean).join(' ')).split(' '),
+  ].filter(Boolean));
+}
+
+function isRedundantDescription(description = '', deal = {}) {
+  const titleKey = normalizeDescriptionKey(deal.title || '');
+  const descriptionKey = normalizeDescriptionKey(description);
+  if (!titleKey || !descriptionKey) return false;
+  if (descriptionKey === titleKey) return true;
+
+  const metadata = descriptionMetadataWords(deal);
+  const descriptionWords = descriptionKey.split(' ').filter((word) => word.length > 1 || /^\d+$/.test(word));
+  if (descriptionWords.length > 0 && descriptionWords.every((word) => metadata.has(word) || /^\d+$/.test(word))) {
+    return true;
+  }
+
+  const residue = descriptionKey.replace(titleKey, ' ').replace(/\s+/g, ' ').trim();
+  if (!residue) return true;
+  const residueWords = residue.split(' ').filter((word) => word.length > 1 || /^\d+$/.test(word));
+  return residueWords.length > 0 && residueWords.every((word) => metadata.has(word) || /^\d{4}$/.test(word));
+}
+
+function cleanDescriptionForDisplay(description = '', deal = {}) {
+  let text = cleanUiNoiseText(description);
+  if (!text) return '';
+
+  const brand = cleanUiNoiseText(deal.brand || '');
+  if (brand) {
+    const escapedBrand = brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    text = text
+      .replace(new RegExp(`^[^\\p{L}\\p{N}]{0,4}\\s*${escapedBrand}\\s*[-–:]\\s*`, 'iu'), '')
+      .trim();
+  }
+
+  const titleKey = normalizeDescriptionKey(deal.title || '');
+  const rawDescriptionKey = normalizeDescriptionKey(text);
+  if (titleKey && rawDescriptionKey.includes(titleKey) && /laut screenshot|screenshot ist|den vorteil/i.test(text)) {
+    return '';
+  }
+
+  text = text
+    .replace(/\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z\b/gi, ' ')
+    .replace(/\bGratis\s*[•|-]\s*Gratis\b/gi, 'Gratis')
+    .replace(/\s*[•|]\s*/g, ' • ')
+    .replace(/\s+/g, ' ')
+    .replace(/^[•,:\-–\s]+|[•,:\-–\s]+$/g, '')
+    .trim();
+
+  if (brand) {
+    const escaped = brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    text = text.replace(new RegExp(`^${escaped}\\s*:\\s*`, 'i'), '').trim();
+  }
+
+  const title = cleanUiNoiseText(deal.title || '');
+  if (title) {
+    const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const compacted = text
+      .replace(new RegExp(`^${escapedTitle}\\s*`, 'i'), '')
+      .replace(/^[,.:;\-–\s]+/, '')
+      .trim();
+    if (compacted && compacted.length < text.length && compacted.split(/\s+/).length <= 8) {
+      text = compacted.replace(/^(für|fur)\b/i, 'Für');
+    }
+  }
+
+  const parts = text.split(/\s+•\s+/).map(cleanUiNoiseText).filter(Boolean);
+  if (parts.length > 1) {
+    const metadata = descriptionMetadataWords(deal);
+    const filtered = parts.filter((part) => {
+      if (isRedundantDescription(part, deal)) return false;
+      const key = normalizeDescriptionKey(part);
+      if (!key) return false;
+      const words = key.split(' ').filter(Boolean);
+      return !words.every((word) => metadata.has(word) || /^\d{4}$/.test(word));
+    });
+    text = filtered.join(' • ');
+  }
+
+  if (isRedundantDescription(text, deal)) return '';
+  return text;
+}
+
 function sanitizeExpiryText(value) {
   const raw = cleanUiNoiseText(value || '');
   if (!raw) return '';
@@ -538,10 +709,15 @@ function sanitizeExpiryText(value) {
 
   let text = raw
     .replace(/\bunknown\b/gi, ' ')
+    .replace(/\bk\.?\s*a\.?\b/gi, ' ')
     .replace(/\bnot specified\b/gi, ' ')
+    .replace(/\bnicht spezifiziert\b/gi, ' ')
     .replace(/\bsiehe details\b/gi, ' ')
     .replace(/\bsee details\b/gi, ' ')
     .replace(/\bsiehe website\b/gi, ' ')
+    .replace(/\bsiehe coupons(?: in)?\b/gi, ' ')
+    .replace(/\bsiehe mensa-?öffnungszeiten\b/gi, ' ')
+    .replace(/\bsiehe mensa-?oeffnungszeiten\b/gi, ' ')
     .replace(/\bregular hours\b/gi, ' ')
     .replace(/\bw[aä]hrend [a-zäöüß ]*öffnungszeiten\b/gi, ' ')
     .replace(/\bvia neotaste\b/gi, ' ')
@@ -551,6 +727,8 @@ function sanitizeExpiryText(value) {
     .replace(/\bnicht angegeben\b/gi, ' ')
     .replace(/\bzeiten auf webseite prüfen\b/gi, ' ')
     .replace(/\baktuelle termine auf webseite\b/gi, ' ')
+    .replace(/\blaut quelle\b/gi, ' ')
+    .replace(/laut\s+j[öo]/gi, ' ')
     .replace(/\bsiehe webseite\b/gi, ' ')
     .replace(/\bimmer\b/gi, ' ')
     .replace(/\bpermanent nach vereinbarung\b/gi, ' ')
@@ -559,11 +737,14 @@ function sanitizeExpiryText(value) {
     .replace(/\bseason opening 20\d{2}\b/gi, ' ')
     .replace(/\(neotaste deal\)/gi, ' ')
     .replace(/\(7 days rolling\)/gi, ' ')
+    .replace(/\bw\+\s*weeks\b/gi, ' ')
     .replace(/\bgültig 2 tage vor oder nach dem geburtstag\b/gi, ' ')
     .replace(/\s+/g, ' ')
-    .replace(/^[,:\-–\s]+|[,:\-–\s]+$/g, '')
+    .replace(/^[,.:;\/\-–\s]+|[,.:;\/\-–\s]+$/g, '')
     .trim();
 
+  if (/^[.\/:;\-–\s]*$/.test(text)) return '';
+  if (/^\d{4}$/.test(text)) return '';
   if (!text || /^(regelm[aä]ßig|t[aä]glich|jeden sonntag|jeden dienstag|monatlich)$/i.test(text)) return '';
   if (/^(mo|di|mi|do|fr|sa|so|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)/i.test(text)) return '';
   if (/\b(vormittag|nachmittag|abend|morgens|mittags|abends)\b/i.test(text)) return '';
@@ -620,13 +801,29 @@ function normalizeDealRecord(deal = {}) {
     deal.originSource,
   ]);
 
+  const categoryAsciiSignal = normalizeAscii(categorySignal);
+  if (/\bomv\b/.test(categoryAsciiSignal)) {
+    if (hasSignalTerm(categoryAsciiSignal, 'kaffee|coffee|espresso|latte|matcha|cappuccino')) {
+      category = 'kaffee';
+    } else if (hasSignalTerm(categoryAsciiSignal, 'drink|getraenk|getrank|tonic|sunset|orange|strawberry|coconut|sandwich|sandwiches|meal|snack')) {
+      category = 'essen';
+    }
+  }
+
   const sanitizedExpires = sanitizeExpiryText(deal.expires);
   if (brandWasCorrected) {
     description = replaceBrandMention(description, explicitBrand, brand);
   }
+  description = cleanDescriptionForDisplay(description, {
+    ...deal,
+    brand,
+    title,
+    type,
+    category,
+  });
 
   if (!description) {
-    description = buildFallbackDescription({ ...deal, title, brand, type, category });
+    description = '';
   }
   return {
     ...deal,
@@ -636,6 +833,10 @@ function normalizeDealRecord(deal = {}) {
     type: type || cleanUiNoiseText(deal.type || '').toLowerCase(),
     category: category || currentCategory,
     expires: sanitizedExpires,
+    expiresOriginal: sanitizeExpiryText(deal.expiresOriginal),
+    expiryDisplayText: sanitizeExpiryText(deal.expiryDisplayText),
+    distance: cleanUiNoiseText(deal.distance || ''),
+    location: cleanUiNoiseText(deal.location || ''),
     logo: inferLogo({ ...deal, title, description, type, category }, brand),
     logoUrl: inferLogoUrl({ ...deal, title, description, type, category }, brand),
   };
@@ -643,6 +844,7 @@ function normalizeDealRecord(deal = {}) {
 
 export {
   buildFallbackDescription,
+  cleanDescriptionForDisplay,
   cleanText,
   cleanUiNoiseText,
   inferPreferredBrand,

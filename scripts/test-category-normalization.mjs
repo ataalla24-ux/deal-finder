@@ -34,6 +34,32 @@ assert.equal(
 );
 
 assert.equal(
+  normalizeDealRecord({
+    brand: 'OMV VIVA',
+    title: 'Gratis Coconut Strawberry Sunset testen',
+    description: '',
+    category: 'supermarkt',
+    type: 'gratis',
+    distance: 'OMV Stationen Wien',
+  }).category,
+  'essen',
+  'OMV VIVA drink deals should not stay in supermarket',
+);
+
+assert.equal(
+  normalizeDealRecord({
+    brand: 'OMV VIVA',
+    title: 'OMV VIVA: 50% auf Sandwiches',
+    description: '',
+    category: 'supermarkt',
+    type: 'rabatt',
+    distance: 'OMV Stationen Wien',
+  }).category,
+  'essen',
+  'OMV VIVA sandwich deals should not stay in supermarket',
+);
+
+assert.equal(
   normalizeCategoryForScraper('shopping', [
     '1+1 Aktion auf Schokoerdbeeren',
     'Beim Kauf eines Bechers gibt es einen zweiten kostenlos dazu',

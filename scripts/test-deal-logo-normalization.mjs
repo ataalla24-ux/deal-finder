@@ -142,4 +142,61 @@ expectNormalizedLogo(
   },
 );
 
+expectNormalizedLogo(
+  'submitted social handle brand is prettified and gets cached domain logo',
+  {
+    id: 'community:0dac331a-eeb2-42e8-b2bb-e8f1e2aa5007',
+    brand: 'Centimeter_vienna',
+    title: 'Gratis 2. Schnitzel mit Schulzeugnis',
+    description: '1.7 - 7.7: Bestelle ein Schnitzel, das 2. gibt es gratis dazu.',
+    type: 'gratis',
+    category: 'essen',
+    url: 'https://www.instagram.com/reel/example/',
+  },
+  {
+    brand: 'Centimeter Wien',
+    logo: '🍽️',
+    logoUrlIncludes: /centimeter\.at/,
+  },
+);
+
+expectNormalizedLogo(
+  'OMV VIVA variants keep the cafe brand instead of generic OMV',
+  {
+    id: 'joe-omv-viva-free-taste-flur7',
+    brand: 'OMV',
+    logoUrl: 'https://freefinder.at/assets/brand-logos/omv-viva-omv-at.png',
+    title: 'Gratis Sunny Orange Espresso testen',
+    description: 'Gratis • Gratis Sunny Orange Espresso testen • OMV Stationen Wien • 2026-08-30T23:59:59.999Z',
+    type: 'gratis',
+    category: 'kaffee',
+    url: 'https://www.joe-club.at/partner/omv#sunny-orange-espresso',
+  },
+  {
+    brand: 'OMV VIVA',
+    description: '',
+    logoUrl: 'https://freefinder.at/assets/brand-logos/omv-viva-omv-at.png',
+  },
+);
+
+expectNormalizedLogo(
+  'mojibake text is repaired in visible fields',
+  {
+    brand: 'Therme Wien',
+    title: '50% Rabatt bei Therme Wien',
+    description: '50% Rabatt bei Therme Wien für Drei Kunden',
+    type: 'rabatt',
+    category: 'kultur',
+    url: 'https://www.drei.at/de/dreiplus/ersparnisse/therme-wien/',
+    distance: 'Ãsterreich',
+    expiryDisplayText: 'regelmÃ¤Ãig / laut Quelle',
+  },
+  {
+    brand: 'Therme Wien',
+    distance: 'Österreich',
+    expiryDisplayText: '',
+    logoUrlIncludes: /thermewien\.at/,
+  },
+);
+
 console.log('Deal logo normalization checks passed.');
