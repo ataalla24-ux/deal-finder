@@ -1,11 +1,11 @@
 {
-  "checkedAt": "2026-07-02T15:44:38.015Z",
+  "checkedAt": "2026-07-02T16:22:50.873Z",
   "editCount": 43,
   "beforeCount": 55,
   "afterCount": 55,
   "appliedCount": 7,
-  "removalsEnabled": true,
-  "removalsPaused": false,
+  "removalsEnabled": false,
+  "removalsPaused": true,
   "skippedRemovalCount": 0,
   "missingCount": 36,
   "applied": [
@@ -36,6 +36,17 @@
       ]
     },
     {
+      "dealId": "community:4ffc04f8-9c74-4a98-88a3-391a0e79b4bb",
+      "removed": false,
+      "changedFields": [
+        "title",
+        "brand",
+        "pubDate",
+        "validOn",
+        "validUntil"
+      ]
+    },
+    {
       "dealId": "community:8de4ad94-d47d-4ede-85cd-060eae5d3d19",
       "removed": false,
       "changedFields": [
@@ -46,7 +57,9 @@
       "dealId": "community:93318edc-5b19-48f2-b8aa-c23ad3a5e299",
       "removed": false,
       "changedFields": [
-        "description"
+        "description",
+        "pubDate",
+        "validOn"
       ]
     },
     {
@@ -54,18 +67,9 @@
       "removed": false,
       "changedFields": [
         "description",
-        "expiryDisplayText"
-      ]
-    },
-    {
-      "dealId": "community:4ffc04f8-9c74-4a98-88a3-391a0e79b4bb",
-      "removed": false,
-      "changedFields": [
-        "title",
-        "brand",
-        "pubDate",
-        "validOn",
-        "validUntil"
+        "validUntil",
+        "expiryDisplayText",
+        "expiryKind"
       ]
     }
   ],
@@ -253,11 +257,10 @@
     }
   ],
   "nativeWeeklyAlignment": {
-    "reason": "aligned",
+    "reason": "already_aligned",
     "targetId": "community:8de4ad94-d47d-4ede-85cd-060eae5d3d19",
-    "previousIndex": 4,
+    "currentIndex": 3,
     "targetIndex": 3,
-    "nextIndex": 3,
     "sourceCount": 24,
     "week": 27,
     "excludedId": "g2-jgovwx"
@@ -266,8 +269,5 @@
     "removedCount": 0,
     "removed": []
   },
-  "mode": "single-edit",
-  "dealId": "community:4ffc04f8-9c74-4a98-88a3-391a0e79b4bb",
-  "editedBy": "slack-live-review",
-  "hidden": false
+  "mode": "replay"
 }
