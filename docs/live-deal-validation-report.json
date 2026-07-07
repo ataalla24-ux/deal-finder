@@ -1,20 +1,20 @@
 {
-  "checkedAt": "2026-07-06T23:45:12.456Z",
+  "checkedAt": "2026-07-07T01:26:40.289Z",
   "apply": false,
   "removalsEnabled": false,
   "removalsPaused": true,
   "totalBefore": 48,
   "totalAfter": 48,
   "removedCount": 0,
-  "wouldRemoveCount": 2,
+  "wouldRemoveCount": 3,
   "duplicateCollapses": 0,
   "moderationRemovals": 1,
   "freshnessWindowHours": 72,
-  "freshnessFlagUpdates": 3,
+  "freshnessFlagUpdates": 4,
   "freshDealCount": 17,
-  "brokenLinkRemovals": 0,
+  "brokenLinkRemovals": 1,
   "opaqueSocialShellRemovals": 0,
-  "invalidLinkReviewCandidates": 0,
+  "invalidLinkReviewCandidates": 1,
   "opaqueSocialShellReviewCandidates": 0,
   "socialPostDateRemovals": 1,
   "socialPostDateFixes": 3,
@@ -45,6 +45,7 @@
   },
   "removalReasons": {
     "Social-Post älter als 7 Tage (2026-06-27, url.contextPublished)": 1,
+    "Ziellink ungültig: HTTP 404": 1,
     "Moderation: aus Slack Live-Review entfernt": 1
   },
   "reviewCandidates": [
@@ -61,8 +62,11 @@
       "expiresSource": "text",
       "expiresPrecision": "day",
       "dateConfidence": "low",
-      "reason": "Ablaufdatum unsicher - bitte manuell prüfen",
+      "reason": "Auto-Entfernung pausiert: Ziellink ungültig: HTTP 404 + Ziellink prüfen: nicht eindeutig ungültig + Ablaufdatum unsicher - bitte manuell prüfen",
       "details": {
+        "healthReason": "HTTP 404",
+        "status": 404,
+        "finalUrl": "https://www.albertina.at/besuch/programm/250-jahre-open-house/",
         "expires": "2026-07-04T23:59:59.999Z",
         "expiresOriginal": "4. Juli 2026 10:00 Uhr",
         "expiresSource": "text",
@@ -70,7 +74,7 @@
         "dateConfidence": "low",
         "expiresDetectedFromUrl": false
       },
-      "queuedAt": "2026-07-06T23:45:12.456Z"
+      "queuedAt": "2026-07-07T01:26:40.289Z"
     },
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -87,7 +91,7 @@
       "dateConfidence": "",
       "reason": "Auto-Entfernung pausiert: Social-Post älter als 7 Tage (2026-06-27, url.contextPublished)",
       "details": {},
-      "queuedAt": "2026-07-06T23:45:12.456Z"
+      "queuedAt": "2026-07-07T01:26:40.289Z"
     },
     {
       "id": "g2-jgovwx",
@@ -111,7 +115,7 @@
         "dateConfidence": "medium",
         "expiresDetectedFromUrl": false
       },
-      "queuedAt": "2026-07-06T23:45:12.456Z"
+      "queuedAt": "2026-07-07T01:26:40.289Z"
     },
     {
       "id": "icf-wien-kirche-20260629",
@@ -128,7 +132,7 @@
       "dateConfidence": "",
       "reason": "Auto-Entfernung pausiert: Moderation: aus Slack Live-Review entfernt",
       "details": {},
-      "queuedAt": "2026-07-06T23:45:12.456Z"
+      "queuedAt": "2026-07-07T01:26:40.289Z"
     }
   ],
   "removed": [
@@ -165,6 +169,40 @@
       "approvedAt": "2026-06-29T23:07:32.449Z",
       "removedAutomatically": true,
       "reason": "Social-Post älter als 7 Tage (2026-06-27, url.contextPublished)"
+    },
+    {
+      "id": "g2-h2hczh",
+      "title": "Gratis Jubiläums-Sachertorte (solange Vorrat)",
+      "brand": "ALBERTINA",
+      "description": "",
+      "category": "essen",
+      "type": "gratis",
+      "logo": "🍴",
+      "distance": "Bastei der ALBERTINA, Albertinaplatz 1, 1010 Wien",
+      "url": "https://www.albertina.at/besuch/programm/250-jahre-open-house/",
+      "source": "Slack Digest",
+      "originSource": "Firecrawl Gastro #2",
+      "pubDate": "2026-07-02T12:09:10.000Z",
+      "expires": "2026-07-04T23:59:59.999Z",
+      "expiresOriginal": "4. Juli 2026 10:00 Uhr",
+      "expiresPrecision": "day",
+      "expiresSource": "text",
+      "expiresDetectedFromUrl": false,
+      "validOn": "",
+      "validFrom": "",
+      "validUntil": "2026-07-04",
+      "expiryKind": "end",
+      "expiryDisplayText": "4. Juli 2026 10:00 Uhr",
+      "qualityScore": 0,
+      "votes": 1,
+      "priority": 3,
+      "hot": false,
+      "isNew": true,
+      "slackTs": "1782994150.607449",
+      "slackThreadTs": "1782994126.437809",
+      "approvedAt": "2026-07-07T01:26:24.216Z",
+      "removedAutomatically": true,
+      "reason": "Ziellink ungültig: HTTP 404"
     },
     {
       "id": "icf-wien-kirche-20260629",
