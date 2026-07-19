@@ -96,6 +96,32 @@ function endOfUtcMonth(year, monthIndex) {
   return new Date(Date.UTC(year, monthIndex + 1, 0, 23, 59, 59, 999));
 }
 
+function inferYearlessEndYear(month, day, now, options = {}) {
+  const currentYear = now.getUTCFullYear();
+  if (!options.crossesYear) return currentYear;
+  const startMonth = Number(options.startMonth || 12);
+  const startDay = Number(options.startDay || 1);
+  const upcomingStart = Date.UTC(currentYear, startMonth - 1, startDay);
+  const nowMs = now.getTime();
+  // A Dec→Jan caption shortly before or during the range describes the
+  // upcoming January. Earlier in the year it conservatively stays in the
+  // current year so an old range cannot be revived for many months.
+  if (nowMs >= upcomingStart || upcomingStart - nowMs <= 45 * 24 * 60 * 60 * 1000) {
+    return currentYear + 1;
+  }
+  return currentYear;
+}
+
+function inferYearlessSingleYear(month, day, now) {
+  const currentYear = now.getUTCFullYear();
+  const currentDate = endOfUtcDay(currentYear, Number(month) - 1, Number(day));
+  const nextDate = endOfUtcDay(currentYear + 1, Number(month) - 1, Number(day));
+  if (currentDate < now && nextDate.getTime() - now.getTime() <= 45 * 24 * 60 * 60 * 1000) {
+    return currentYear + 1;
+  }
+  return currentYear;
+}
+
 export function isVagueExpiry(value) {
   const text = cleanText(value).toLowerCase();
   if (!text) return true;
@@ -212,7 +238,7 @@ function parseIsoLike(text) {
   return null;
 }
 
-function parseDmyRange(text) {
+function parseDmyRange(text, now) {
   let m = text.match(/\b\d{1,2}\.\d{1,2}\.\d{4}\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{4})\b/);
   if (m) {
     return {
@@ -235,6 +261,42 @@ function parseDmyRange(text) {
   if (m) {
     return {
       date: endOfUtcDay(Number(m[3]), Number(m[2]) - 1, Number(m[1])),
+      precision: 'day',
+      source: 'text',
+    };
+  }
+
+  // Fully written yearless range, e.g. "12.07.–25.07.".
+  m = text.match(/\b(\d{1,2})\.(\d{1,2})\.\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.?(?!\d|\.\d)/);
+  if (m) {
+    const startMonth = Number(m[2]);
+    const endMonth = Number(m[4]);
+    const endYear = inferYearlessEndYear(endMonth, m[3], now, {
+      crossesYear: startMonth > endMonth,
+      startMonth,
+      startDay: Number(m[1]),
+    });
+    return {
+      date: endOfUtcDay(endYear, Number(m[4]) - 1, Number(m[3])),
+      precision: 'day',
+      source: 'text',
+    };
+  }
+
+  // Compact social-caption notation: "12.–25.07.". The first number is the
+  // start day, so this must be parsed before a generic single-date matcher.
+  m = text.match(/\b(\d{1,2})\.\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.?(?!\d|\.\d)/);
+  if (m) {
+    const endMonth = Number(m[3]);
+    const crossesMonth = Number(m[1]) > Number(m[2]);
+    const startMonth = crossesMonth ? (endMonth === 1 ? 12 : endMonth - 1) : endMonth;
+    const endYear = inferYearlessEndYear(endMonth, m[2], now, {
+      crossesYear: crossesMonth && endMonth === 1,
+      startMonth,
+      startDay: Number(m[1]),
+    });
+    return {
+      date: endOfUtcDay(endYear, Number(m[3]) - 1, Number(m[2])),
       precision: 'day',
       source: 'text',
     };
@@ -270,8 +332,9 @@ function parseDmy(text, now) {
 
   m = text.match(/\b(\d{1,2})\.(\d{1,2})(?:\.(?!\d)|(?![\d.]))/);
   if (m) {
+    const year = inferYearlessSingleYear(Number(m[2]), Number(m[1]), now);
     return {
-      date: endOfUtcDay(now.getUTCFullYear(), Number(m[2]) - 1, Number(m[1])),
+      date: endOfUtcDay(year, Number(m[2]) - 1, Number(m[1])),
       precision: 'day',
       source: 'text',
     };
@@ -286,7 +349,7 @@ function parseNamedDate(text, now) {
   if (m) {
     const month = MONTH_MAP[m[2].toLowerCase()];
     if (month !== undefined) {
-      const year = m[3] ? Number(m[3]) : now.getUTCFullYear();
+      const year = m[3] ? Number(m[3]) : inferYearlessSingleYear(month + 1, Number(m[1]), now);
       return {
         date: endOfUtcDay(year, month, Number(m[1])),
         precision: 'day',
@@ -299,7 +362,7 @@ function parseNamedDate(text, now) {
   if (m) {
     const month = MONTH_MAP[m[1].toLowerCase()];
     if (month !== undefined) {
-      const year = m[3] ? Number(m[3]) : now.getUTCFullYear();
+      const year = m[3] ? Number(m[3]) : inferYearlessSingleYear(month + 1, Number(m[2]), now);
       return {
         date: endOfUtcDay(year, month, Number(m[2])),
         precision: 'day',
@@ -339,6 +402,8 @@ function isolateLeadingExpiryToken(text) {
     /^(\d{1,2}\.\s*[-–]\s*\d{1,2}\.\d{1,2}\.\d{4})\b/i,
     /^(\d{1,2}\.\d{1,2}\.\d{4}\s*[-–]\s*\d{1,2}\.\d{1,2}\.\d{4})\b/i,
     /^(\d{1,2}\.\d{1,2}\.\s*[-–]\s*\d{1,2}\.\d{1,2}\.\d{4})\b/i,
+    /^(\d{1,2}\.\d{1,2}\.\s*[-–]\s*\d{1,2}\.\d{1,2}\.)/i,
+    /^(\d{1,2}\.\s*[-–]\s*\d{1,2}\.\d{1,2}\.)/i,
     /^((?:j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+\d{4})\b/i,
     /^(\d{1,2}\.\d{1,2}\.\d{2,4})\b/i,
     /^(\d{1,2}\.\d{1,2}\.)\b/i,
@@ -366,7 +431,7 @@ export function parseExpiryDetails(value, options = {}) {
 
   return (
     parseIsoLike(withoutPrefixes) ||
-    parseDmyRange(withoutPrefixes) ||
+    parseDmyRange(withoutPrefixes, now) ||
     parseMonthNameRange(withoutPrefixes) ||
     parseDmy(withoutPrefixes, now) ||
     parseNamedDate(withoutPrefixes, now) ||
@@ -376,6 +441,10 @@ export function parseExpiryDetails(value, options = {}) {
 
 export function parseExpiryShape(value, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
+  const referenceDate = options.referenceDate instanceof Date
+    ? options.referenceDate
+    : (options.referenceDate ? new Date(options.referenceDate) : now);
+  const dateInferenceNow = Number.isNaN(referenceDate.getTime()) ? now : referenceDate;
   const raw = cleanText(value);
   if (!raw) return { kind: 'unknown', raw: '' };
 
@@ -402,6 +471,44 @@ export function parseExpiryShape(value, options = {}) {
   };
 
   const buildIso = (year, month, day) => toIsoDateString(Number(year), Number(month), Number(day));
+  const referenceParts = (() => {
+    if (Number.isNaN(referenceDate.getTime())) return null;
+    try {
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: options.timeZone || 'UTC',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).formatToParts(referenceDate);
+      const byType = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+      return { year: Number(byType.year), month: Number(byType.month), day: Number(byType.day) };
+    } catch {
+      return { year: referenceDate.getUTCFullYear(), month: referenceDate.getUTCMonth() + 1, day: referenceDate.getUTCDate() };
+    }
+  })();
+
+  if (referenceParts && /\b(?:nur heute|today only|heute only)\b/.test(text)) {
+    return {
+      kind: 'single',
+      raw,
+      validOn: buildIso(referenceParts.year, referenceParts.month, referenceParts.day),
+      confidence: 'high',
+    };
+  }
+
+  if (referenceParts && /\b(?:nur morgen|tomorrow only)\b/.test(text)) {
+    const tomorrow = new Date(Date.UTC(
+      referenceParts.year,
+      referenceParts.month - 1,
+      referenceParts.day + 1,
+    ));
+    return {
+      kind: 'single',
+      raw,
+      validOn: buildIso(tomorrow.getUTCFullYear(), tomorrow.getUTCMonth() + 1, tomorrow.getUTCDate()),
+      confidence: 'high',
+    };
+  }
 
   if (isVagueExpiry(raw) || isRecurringChurchLikeExpiry(raw)) {
     return { kind: 'recurring', raw, confidence: 'low' };
@@ -439,14 +546,68 @@ export function parseExpiryShape(value, options = {}) {
     };
   }
 
-  m = text.match(/(\d{1,2})\.\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  m = text.match(/(\d{1,2})\.(\d{1,2})\.\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
   if (m) {
-    const year = m[4].length === 2 ? `20${m[4]}` : m[4];
+    const endYear = Number(m[5].length === 2 ? `20${m[5]}` : m[5]);
+    const startMonth = Number(m[2]);
+    const endMonth = Number(m[4]);
+    const startYear = startMonth > endMonth || (startMonth === endMonth && Number(m[1]) > Number(m[3]))
+      ? endYear - 1
+      : endYear;
     return {
       kind: 'range',
       raw,
-      validFrom: buildIso(year, m[3], m[1]),
-      validUntil: buildIso(year, m[3], m[2]),
+      validFrom: buildIso(startYear, startMonth, m[1]),
+      validUntil: buildIso(endYear, endMonth, m[3]),
+      confidence: 'high',
+    };
+  }
+
+  m = text.match(/(\d{1,2})\.(\d{1,2})\.\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.?(?!\d|\.\d)/);
+  if (m) {
+    const startMonth = Number(m[2]);
+    const endMonth = Number(m[4]);
+    const crossesYear = startMonth > endMonth;
+    const endYear = inferYearlessEndYear(endMonth, m[3], dateInferenceNow, { crossesYear, startMonth, startDay: Number(m[1]) });
+    const startYear = crossesYear ? endYear - 1 : endYear;
+    return {
+      kind: 'range',
+      raw,
+      validFrom: buildIso(startYear, m[2], m[1]),
+      validUntil: buildIso(endYear, m[4], m[3]),
+      confidence: 'high',
+    };
+  }
+
+  m = text.match(/(\d{1,2})\.\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.?(?!\d|\.\d)/);
+  if (m) {
+    const crossesMonth = Number(m[1]) > Number(m[2]);
+    const endMonth = Number(m[3]);
+    const startMonth = crossesMonth ? (endMonth === 1 ? 12 : endMonth - 1) : endMonth;
+    const crossesYear = crossesMonth && endMonth === 1;
+    const endYear = inferYearlessEndYear(endMonth, m[2], dateInferenceNow, { crossesYear, startMonth, startDay: Number(m[1]) });
+    const startYear = crossesMonth && endMonth === 1 ? endYear - 1 : endYear;
+    return {
+      kind: 'range',
+      raw,
+      validFrom: buildIso(startYear, startMonth, m[1]),
+      validUntil: buildIso(endYear, endMonth, m[2]),
+      confidence: 'high',
+    };
+  }
+
+  m = text.match(/(\d{1,2})\.\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (m) {
+    const endYear = Number(m[4].length === 2 ? `20${m[4]}` : m[4]);
+    const endMonth = Number(m[3]);
+    const crossesMonth = Number(m[1]) > Number(m[2]);
+    const startMonth = crossesMonth ? (endMonth === 1 ? 12 : endMonth - 1) : endMonth;
+    const startYear = crossesMonth && endMonth === 1 ? endYear - 1 : endYear;
+    return {
+      kind: 'range',
+      raw,
+      validFrom: buildIso(startYear, startMonth, m[1]),
+      validUntil: buildIso(endYear, endMonth, m[2]),
       confidence: 'high',
     };
   }
@@ -498,7 +659,7 @@ export function parseExpiryShape(value, options = {}) {
     raw.match(/\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/) ||
     raw.match(new RegExp(`\\b\\d{1,2}\\.?(?:\\s+|\\.)${monthPattern}(?:\\s+\\d{4})?\\b`, 'i'));
 
-  const parsed = parseExpiryDetails(directTokenMatch ? directTokenMatch[0] : raw, { now });
+  const parsed = parseExpiryDetails(directTokenMatch ? directTokenMatch[0] : raw, { now: dateInferenceNow });
   const parsedIso = parsed?.date ? isoDateFromMs(parsed.date.getTime()) : '';
   if (!parsedIso) {
     return { kind: 'unknown', raw, confidence: 'low' };

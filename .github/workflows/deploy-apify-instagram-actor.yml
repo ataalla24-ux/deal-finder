@@ -1,0 +1,39 @@
+name: "Deploy Apify Instagram Actor"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apify/instagram-vienna-food-offers/**'
+      - '.github/workflows/deploy-apify-instagram-actor.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-apify-instagram-vienna-actor
+  cancel-in-progress: false
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Test Actor source
+        working-directory: apify/instagram-vienna-food-offers
+        run: |
+          npm ci
+          npm run check
+
+      - name: Push and build the configured Actor
+        uses: apify/push-actor-action@v1
+        with:
+          token: ${{ secrets.APIFY_TOKEN }}
+          actor-id: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
+          working-directory: apify/instagram-vienna-food-offers
+          build-tag: latest

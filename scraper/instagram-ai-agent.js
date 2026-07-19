@@ -12,12 +12,18 @@ import {
   moderationCounts,
 } from './deal-moderation-utils.js';
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
 import {
   cleanText as cleanDealText,
   isExpiredDealRecord,
   isFalsePositiveFreeDeal,
   normalizeDealRecord,
 } from './deal-normalization-utils.js';
+import { parseExpiryShape } from './expiry-utils.js';
+
+// All relative language in this agent ("heute", "morgen", weekdays) refers
+// to Vienna calendar days, independently of the runner's host timezone.
+process.env.TZ = 'Europe/Vienna';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,6 +38,10 @@ const CANDIDATES_INDEX_PATH = path.join(DOCS_DIR, 'deal-candidates-index.json');
 const MERCHANT_REGISTRY_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
+const FRESH_PRIORITY_HOURS = 72;
+const ABSOLUTE_MAX_POST_AGE_DAYS = 7;
+const MAX_FUTURE_CLOCK_SKEW_MS = 10 * 60 * 1000;
 const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const INSTAGRAM_SHORTCODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
@@ -81,6 +91,8 @@ const LOCAL_DEAL_CORPUS_FILES = [
   'deals-pending-merged.json',
   'deals-pending-community.json',
   'deals-pending-instagram-apify.json',
+  'deals-pending-instagram-verified.json',
+  'deals-pending-meta-instagram.json',
   'deals-pending-instagram-discovery.json',
   'deals-pending-instagram-web.json',
   'deals-pending-firecrawl4.json',
@@ -112,10 +124,12 @@ const VIENNA_PATTERNS = [
   /\binnere stadt|leopoldstadt|landstrasse|wieden|margareten|mariahilf|neubau|josefstadt|alsergrund|favoriten|meidling|hietzing|penzing|rudolfsheim|ottakring|hernals|waehring|doebling|brigittenau|floridsdorf|donaustadt|liesing\b/i,
 ];
 
+const CONCRETE_FREE_PATTERN = /(?<!gluten[- ])(?<!sugar[- ])(?<!lactose[- ])(?<!dairy[- ])(?<!alcohol[- ])(?<!caffeine[- ])(?<!cruelty[- ])(?<!plastic[- ])(?<!smoke[- ])(?<!tax[- ])(?<!risk[- ])(?<!fat[- ])(?<!nut[- ])(?<!gmo[- ])\bfree\b/i;
+
 const STRONG_DEAL_PATTERNS = [
   /\bgratis\b/i,
   /\bkostenlos(?:e|er|es|en)?\b/i,
-  /\bfree\b/i,
+  CONCRETE_FREE_PATTERN,
   /\b0\s*(?:euro|eur)\b/i,
   /\b1\s*\+\s*1\b/i,
   /\b2\s*(?:fuer|fur)\s*1\b/i,
@@ -145,7 +159,6 @@ const FALSE_POSITIVE_PATTERNS = [
   /\b(?:gratis versand|kostenlose lieferung|free shipping)\b/i,
   /\b(?:job|stellenangebot|wohnung|immobilie|airbnb|hotelzimmer)\b/i,
   /\b(?:things to do|wochenendtipps|guide|was in wien geht|top \d+)\b/i,
-  /\b(?:anzeige|sponsored|affiliate)\b/i,
 ];
 
 const BLOCKED_SOURCE_PATTERNS = [
@@ -160,8 +173,15 @@ const DISCOVERY_ACCOUNT_PATTERNS = [
 
 const EXPIRY_PATTERNS = [
   /\b(?:abgelaufen|vorbei|nicht mehr gueltig|expired|ended)\b/i,
-  /\b(?:gestern|yesterday)\b/i,
+  /\b(?:nur|only)\s+(?:gestern|yesterday)\b/i,
+  /\b(?:gestern|yesterday)\s+(?:nur|only)\b/i,
 ];
+
+const SYNTHETIC_POST_DATE_SOURCE_PATTERN = /(?:agent[-_ ]?run|instagram[-_ ]?ai[-_ ]?agent|ai[-_ ]?agent|firecrawl.*run|current[-_ ]?language|discover(?:ed|y)|crawl(?:ed|er)?(?:at|time)?|scrap(?:ed|er)?(?:at|time)?|generated(?:at|time)?|communitysubmission|submittedat|import(?:ed|er)?(?:at|time)?)/i;
+const TERMINAL_REJECTION_PATTERN = /(?:Instagram-Post (?:aelter|älter) als \d+ Tage$|aktionsdatum liegt in der vergangenheit|kurz-aktion ist abgelaufen|abgelaufen oder vorbei|gewinnspiel|neotaste blockiert)/i;
+
+let terminalHistoryKeysCache = null;
+let viennaAccountContextCache = null;
 
 function numberEnv(name, fallback) {
   const value = Number(process.env[name]);
@@ -321,9 +341,9 @@ function normalizeInstagramPostUrl(value) {
     }
 
     const parts = parsed.pathname.split('/').filter(Boolean);
-    const typeIndex = parts.findIndex((part) => ['p', 'reel', 'tv'].includes(part.toLowerCase()));
+    const typeIndex = parts.findIndex((part) => ['p', 'reel', 'reels', 'tv'].includes(part.toLowerCase()));
     if (typeIndex < 0 || !parts[typeIndex + 1]) return '';
-    const type = parts[typeIndex].toLowerCase();
+    const type = /^reels?$/i.test(parts[typeIndex]) ? 'reel' : parts[typeIndex].toLowerCase();
     const shortcode = parts[typeIndex + 1].replace(/[^a-z0-9_-]/gi, '');
     if (!shortcode) return '';
     return `https://www.instagram.com/${type}/${shortcode}/`;
@@ -351,21 +371,86 @@ function instagramShortcodeRank(url) {
 }
 
 function canonicalPostKey(url) {
-  const normalized = normalizeInstagramPostUrl(url);
-  if (!normalized) return '';
-  try {
-    const parsed = new URL(normalized);
-    const parts = parsed.pathname.split('/').filter(Boolean);
-    return `instagram:${parts[0]}:${parts[1].toLowerCase()}`;
-  } catch {
-    return normalized.toLowerCase();
+  return canonicalInstagramPostKey(normalizeInstagramPostUrl(url));
+}
+
+function isSyntheticPostDateSource(value = '') {
+  return SYNTHETIC_POST_DATE_SOURCE_PATTERN.test(cleanText(value, 180));
+}
+
+function isTrustedPostDateSource(value = '') {
+  const source = cleanText(value, 180);
+  if (!source || isSyntheticPostDateSource(source)) return false;
+  const compact = source.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const hasProvider = /(?:instagram|apify|meta|graph)/.test(compact);
+  const hasConcreteTimestampProvenance = /(?:timestamp|datetime|timetext|datepublished|datecreated|publishedat|uploaddate|takenat|postmetadata|postdate|posttime)/.test(compact);
+  const trustedStandalone = /^(?:timedatetime|datepublished|lddatepublished|lddatecreated|lduploaddate|articledatepublished)$/.test(compact);
+  return (hasProvider && hasConcreteTimestampProvenance) || trustedStandalone;
+}
+
+function isTerminalRejection(reason = '') {
+  return TERMINAL_REJECTION_PATTERN.test(cleanText(reason, 300));
+}
+
+function isTerminalRejectionRow(row = {}) {
+  const reason = cleanText(row.reason, 300);
+  if (!reason) return false;
+  return isTerminalRejection(reason);
+}
+
+function loadTerminalHistoryKeys() {
+  const report = readJson(REPORT_PATH, {});
+  const rejected = [
+    ...(Array.isArray(report.terminalRejected) ? report.terminalRejected : []),
+    ...(Array.isArray(report.rejected) ? report.rejected : []),
+  ];
+  return new Set(rejected
+    .filter(isTerminalRejectionRow)
+    .map((row) => canonicalPostKey(row.url))
+    .filter(Boolean));
+}
+
+function buildTerminalRejectionHistory(candidates, acceptedDeals = []) {
+  const previous = readJson(REPORT_PATH, {});
+  const acceptedKeys = new Set(acceptedDeals.map((deal) => canonicalPostKey(deal.url)).filter(Boolean));
+  const rows = [
+    ...(Array.isArray(previous.terminalRejected) ? previous.terminalRejected.filter(isTerminalRejectionRow) : []),
+    ...(Array.isArray(previous.rejected) ? previous.rejected.filter(isTerminalRejectionRow) : []),
+    ...candidates.filter((candidate) => isTerminalRejection(candidate.rejectionReason)).map(summarizeCandidate),
+  ];
+  const byKey = new Map();
+  for (const row of rows) {
+    const key = canonicalPostKey(row.url);
+    if (key && !acceptedKeys.has(key)) byKey.set(key, row);
   }
+  return [...byKey.values()].slice(-1200);
+}
+
+function trustedSourceDealPostDate(sourceDeal = {}) {
+  const candidates = [
+    {
+      value: sourceDeal.sourcePublishedAt,
+      source: sourceDeal.sourcePublishedAtSource || sourceDeal.pubDateSource,
+    },
+    { value: sourceDeal.postPublishedAt, source: sourceDeal.postPublishedAtSource },
+    { value: sourceDeal.pubDate, source: sourceDeal.pubDateSource },
+    { value: sourceDeal.postTimestamp, source: sourceDeal.postTimestampSource },
+    { value: sourceDeal.timestamp, source: sourceDeal.timestampSource },
+    { value: sourceDeal.takenAt, source: sourceDeal.takenAtSource },
+  ];
+  for (const candidate of candidates) {
+    if (!candidate.value || !isTrustedPostDateSource(candidate.source)) continue;
+    const date = new Date(candidate.value);
+    if (Number.isNaN(date.getTime())) continue;
+    return { date, source: cleanText(candidate.source, 180) };
+  }
+  return null;
 }
 
 function extractInstagramUrlsFromText(value) {
   const text = decodeHtmlEntities(String(value || ''));
   const urls = new Set();
-  const directMatches = text.match(/https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|tv)\/[A-Za-z0-9_-]+\/?(?:\?[^"'<\s]*)?/gi) || [];
+  const directMatches = text.match(/https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|reels|tv)\/[A-Za-z0-9_-]+\/?(?:\?[^"'<\s]*)?/gi) || [];
   for (const match of directMatches) {
     const normalized = normalizeInstagramPostUrl(match);
     if (normalized) urls.add(normalized);
@@ -383,7 +468,7 @@ function extractInstagramPostPaths(value) {
   const text = decodeHtmlEntities(String(value || ''))
     .replace(/\\u002f/gi, '/')
     .replace(/\\\//g, '/');
-  const matches = text.match(/\/(?:p|reel|tv)\/[A-Za-z0-9_-]+\/?/g) || [];
+  const matches = text.match(/\/(?:p|reel|reels|tv)\/[A-Za-z0-9_-]+\/?/g) || [];
   return [...new Set(matches)]
     .map((postPath) => normalizeInstagramPostUrl(`https://www.instagram.com${postPath}`))
     .filter(Boolean);
@@ -400,8 +485,16 @@ function makeCandidate({ url, title = '', snippet = '', source = '', query = '',
     source: cleanText(source, 80),
     query: cleanText(query, 240),
     sourceDeal,
-    sourceAccount: cleanText(sourceDeal?.profileAccount || '', 80),
+    sourceAccount: cleanText(
+      sourceDeal?.profileAccount
+      || sourceDeal?.instagramHandle
+      || sourceDeal?.instagramUsername
+      || sourceDeal?.ownerUsername
+      || '',
+      80,
+    ),
     sourceCategory: cleanText(sourceDeal?.sourceCategory || '', 80),
+    sourcePublishedAt: cleanText(sourceDeal?.sourcePublishedAt || '', 80),
     preview: null,
     score: 0,
     reasons: [],
@@ -409,23 +502,52 @@ function makeCandidate({ url, title = '', snippet = '', source = '', query = '',
   };
 }
 
+function mergeSourceDealEvidence(left = {}, right = {}) {
+  const merged = { ...left };
+  const preferLonger = new Set(['caption', 'description', 'title', 'locationText', 'address', 'location']);
+  for (const [field, value] of Object.entries(right || {})) {
+    if (value === undefined || value === null || value === '') continue;
+    const current = merged[field];
+    if (current === undefined || current === null || current === '') {
+      merged[field] = value;
+      continue;
+    }
+    if (preferLonger.has(field) && String(value).length > String(current).length) merged[field] = value;
+    if (field === 'viennaVerified' && value === true) merged[field] = true;
+    if (field === 'viennaEvidence' && typeof value === 'object') merged[field] = value;
+  }
+  return merged;
+}
+
 function mergeCandidate(existing, candidate) {
   if (!existing) return candidate;
+  const existingSourceDate = trustedSourceDealPostDate(existing.sourceDeal || {});
+  const candidateSourceDate = trustedSourceDealPostDate(candidate.sourceDeal || {});
+  const preferredSourceDeal = candidateSourceDate && !existingSourceDate
+    ? mergeSourceDealEvidence(existing.sourceDeal, candidate.sourceDeal)
+    : mergeSourceDealEvidence(candidate.sourceDeal, existing.sourceDeal);
   return {
     ...existing,
     title: existing.title || candidate.title,
     snippet: [existing.snippet, candidate.snippet].filter(Boolean).join(' ').slice(0, 1600),
     source: [...new Set([existing.source, candidate.source].filter(Boolean))].join(', '),
     query: [...new Set([existing.query, candidate.query].filter(Boolean))].join(' | ').slice(0, 500),
-    sourceDeal: existing.sourceDeal || candidate.sourceDeal,
-    sourceAccount: existing.sourceAccount || candidate.sourceAccount,
+    sourceDeal: preferredSourceDeal,
+    sourceAccount: candidate.sourceAccount || existing.sourceAccount,
     sourceCategory: existing.sourceCategory || candidate.sourceCategory,
+    sourcePublishedAt: candidateSourceDate?.date?.toISOString()
+      || existingSourceDate?.date?.toISOString()
+      || existing.sourcePublishedAt
+      || candidate.sourcePublishedAt,
   };
 }
 
 function addCandidate(map, candidate) {
-  if (!candidate?.key) return;
+  if (!candidate?.key) return false;
+  if (!terminalHistoryKeysCache) terminalHistoryKeysCache = loadTerminalHistoryKeys();
+  if (terminalHistoryKeysCache.has(candidate.key)) return false;
   map.set(candidate.key, mergeCandidate(map.get(candidate.key), candidate));
+  return true;
 }
 
 function parseDuckDuckGoResults(html, query) {
@@ -499,6 +621,164 @@ function loadWatchlist() {
   return [...byUsername.values()].sort((left, right) => (Number(right.priority) || 0) - (Number(left.priority) || 0));
 }
 
+function normalizeInstagramUsername(value = '') {
+  return cleanText(value, 100)
+    .replace(/^https?:\/\/(?:www\.)?instagram\.com\//i, '')
+    .replace(/^@/, '')
+    .split(/[/?#\s]/)[0]
+    .toLowerCase()
+    .replace(/[^a-z0-9._]/g, '');
+}
+
+function loadViennaAccountContext() {
+  if (viennaAccountContextCache) return viennaAccountContextCache;
+  const byUsername = new Map();
+  const watchlist = readJson(WATCHLIST_PATH, {});
+  const registry = readJson(MERCHANT_REGISTRY_PATH, {});
+
+  for (const account of [...(Array.isArray(watchlist.accounts) ? watchlist.accounts : []), ...CORE_PROFILE_ACCOUNTS]) {
+    const username = normalizeInstagramUsername(account.username);
+    const note = cleanText(account.note, 300);
+    if (!username) continue;
+    const existing = byUsername.get(username) || {};
+    byUsername.set(username, {
+      ...existing,
+      source: 'curated-watchlist',
+      username,
+      detail: existing.detail || note || `@${username}`,
+      category: existing.category || cleanText(account.category, 80),
+      verified: existing.verified === true || account.viennaVerified === true || account.verifiedVienna === true,
+    });
+  }
+
+  for (const account of Array.isArray(registry.accounts) ? registry.accounts : []) {
+    const username = normalizeInstagramUsername(account.username);
+    const occurrences = Math.max(1, Number(account.occurrences) || 1);
+    const viennaHits = Number(account.viennaHits) || 0;
+    const confidence = Number(account.confidence) || 0;
+    const registryVerified = account.viennaVerified === true || account.verifiedVienna === true;
+    if (!username || !registryVerified) continue;
+    byUsername.set(username, {
+      source: 'merchant-registry',
+      username,
+      category: cleanText(account.category, 80),
+      verified: true,
+      detail: [
+        `Registry confidence ${confidence}, Vienna hits ${viennaHits}/${occurrences}`,
+        ...(Array.isArray(account.viennaEvidence) ? account.viennaEvidence.slice(0, 2) : []),
+      ].join(', '),
+    });
+  }
+
+  viennaAccountContextCache = byUsername;
+  return byUsername;
+}
+
+function candidateAccountUsernames(candidate) {
+  const sourceDeal = candidate.sourceDeal || {};
+  const values = [
+    candidate.sourceAccount,
+    sourceDeal.profileAccount,
+    sourceDeal.ownerUsername,
+    sourceDeal.instagramHandle,
+    sourceDeal.instagramUsername,
+    sourceDeal.owner?.username,
+    sourceDeal.username,
+    sourceDeal.account,
+  ];
+  // Caption mentions can point at unrelated accounts. Only structured owner
+  // fields and a search-result byline may establish the posting account.
+  const combined = [candidate.title, candidate.preview?.title].filter(Boolean).join(' ');
+  for (const match of combined.matchAll(/(?:^|[-–]\s])([a-z0-9._]{2,40})\s+(?:am|on)\s+(?:january|february|march|april|may|june|july|august|september|october|november|december|januar|februar|maerz|märz|mai|juni|juli|oktober|dezember)\b/gi)) {
+    values.push(match[1]);
+  }
+  return [...new Set(values.map(normalizeInstagramUsername).filter(Boolean))];
+}
+
+function extractViennaLocation(signal = '') {
+  const text = cleanText(signal, 4000);
+  const postal = text.match(/(?:[A-ZÄÖÜ][^.!?\n]{0,55}\s+)?\b(1(?:0[1-9]0|1[0-9]0|2[0-3]0))\s+Wien\b/i)?.[0];
+  if (postal) return cleanText(postal, 120);
+  const postalOnly = text.match(/\b(1(?:0[1-9]0|1[0-9]0|2[0-3]0))\b/)?.[1];
+  if (postalOnly) return `${postalOnly} Wien`;
+  const vienna = text.match(/\b(?:Wien|Vienna)\b/i)?.[0];
+  return vienna ? (normalizeAscii(vienna) === 'vienna' ? 'Vienna' : 'Wien') : '';
+}
+
+function hasNegatedViennaLocation(signal = '') {
+  const text = normalizeAscii(signal);
+  return /\b(?:nicht|never|not|kein(?:e|en|er|es)?|no)\s+(?:direkt\s+)?(?:in\s+)?(?:wien|vienna)\b/.test(text)
+    || /\b(?:ausserhalb|outside)\s+(?:(?:von|of)\s+)?(?:wien|vienna)\b/.test(text)
+    || /\b(?:except|ausser)\s+(?:wien|vienna)\b/.test(text)
+    || /\b(?:wien|vienna)\s+(?:ausgenommen|ausgeschlossen|excepted|excluded|nicht\s+verfuegbar|not\s+available)\b/.test(text);
+}
+
+function trustedStructuredViennaEvidence(sourceDeal = {}) {
+  const declared = sourceDeal.viennaEvidence || sourceDeal.evidence?.viennaEvidence;
+  if (!declared || typeof declared !== 'object' || declared.verified !== true) return null;
+
+  const evidenceSource = normalizeAscii(declared.source || declared.type);
+  const detail = cleanText(declared.detail || declared.value || declared.location, 300);
+  const location = extractViennaLocation(detail);
+  if (!location || hasNegatedViennaLocation(detail)) return null;
+
+  const provenance = normalizeAscii([
+    sourceDeal.source,
+    sourceDeal.originSource,
+    sourceDeal.sourcePublishedAtSource,
+    sourceDeal.pubDateSource,
+  ].filter(Boolean).join(' '));
+  const fromApify = /\bapify\b/.test(provenance) && /\bapify[-_ ]?location\b/.test(evidenceSource);
+  const fromMeta = /\b(?:meta|graph)\b/.test(provenance)
+    && /\b(?:meta[-_ ]?target[-_ ]?location|business[-_ ]?discovery|graph[-_ ]?location)\b/.test(evidenceSource);
+  const trustedStructuredLocation = /\b(?:apify|meta|graph)\b/.test(provenance)
+    && /\b(?:address|postal|coordinates|structured[-_ ]?location)\b/.test(evidenceSource);
+  if (!fromApify && !fromMeta && !trustedStructuredLocation) return null;
+
+  return {
+    verified: true,
+    source: 'structured-location',
+    value: detail,
+    detail,
+    location,
+  };
+}
+
+function resolveViennaEvidence(candidate) {
+  const primarySignal = postSignal(candidate);
+  if (hasNegatedViennaLocation(primarySignal)) return null;
+
+  const explicitLocation = extractViennaLocation(primarySignal);
+  if (explicitLocation && hasPattern(VIENNA_PATTERNS, primarySignal)) {
+    return {
+      verified: true,
+      source: 'instagram-post',
+      value: explicitLocation,
+      detail: explicitLocation,
+      location: explicitLocation,
+    };
+  }
+
+  const sourceDeal = candidate.sourceDeal || {};
+  const structuredEvidence = trustedStructuredViennaEvidence(sourceDeal);
+  if (structuredEvidence) return structuredEvidence;
+
+  const contexts = loadViennaAccountContext();
+  for (const username of candidateAccountUsernames(candidate)) {
+    const context = contexts.get(username);
+    if (context?.verified === true) {
+      return {
+        verified: true,
+        source: context.source === 'curated-watchlist' ? 'verified-account-watchlist' : context.source,
+        value: `@${username}: ${context.detail}`,
+        detail: `@${username}: ${context.detail}`,
+        location: 'Wien',
+      };
+    }
+  }
+  return null;
+}
+
 function loadSeedFile() {
   const parsed = readJson(SEEDS_PATH, {});
   const urls = [];
@@ -511,10 +791,29 @@ function loadSeedFile() {
   };
 }
 
+function instagramRunBucket() {
+  const explicit = Number(process.env.INSTAGRAM_AI_SHARD_INDEX || process.env.GITHUB_RUN_NUMBER);
+  if (Number.isFinite(explicit)) return Math.max(0, Math.floor(explicit));
+  return Math.floor(Date.now() / (6 * HOUR_MS));
+}
+
+function selectRotatingAccounts(accounts, limit, hotCount = 2) {
+  const sorted = [...accounts]
+    .sort((left, right) => (Number(right.priority) || 0) - (Number(left.priority) || 0));
+  const safeLimit = Math.max(0, Math.min(Math.floor(limit), sorted.length));
+  if (safeLimit === 0) return [];
+  const safeHotCount = Math.min(Math.max(0, hotCount), safeLimit);
+  const hot = sorted.slice(0, safeHotCount);
+  const rest = sorted.slice(safeHotCount);
+  const rotatingLimit = safeLimit - hot.length;
+  if (!rotatingLimit || !rest.length) return hot;
+  const start = (instagramRunBucket() * rotatingLimit) % rest.length;
+  const rotating = [...rest.slice(start), ...rest.slice(0, start)].slice(0, rotatingLimit);
+  return [...hot, ...rotating];
+}
+
 function buildWatchlistQueries(accounts) {
-  const selected = [...accounts]
-    .sort((left, right) => (Number(right.priority) || 0) - (Number(left.priority) || 0))
-    .slice(0, 16);
+  const selected = selectRotatingAccounts(accounts, 16);
 
   const queries = [];
   for (const account of selected) {
@@ -562,9 +861,7 @@ async function discoverProfileCandidates(accounts, map) {
   };
   if (!CONFIG.profileDiscoveryEnabled || accounts.length === 0) return stats;
 
-  const selected = [...accounts]
-    .sort((left, right) => (Number(right.priority) || 0) - (Number(left.priority) || 0))
-    .slice(0, CONFIG.maxProfileAccounts);
+  const selected = selectRotatingAccounts(accounts, CONFIG.maxProfileAccounts);
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
@@ -707,16 +1004,19 @@ function extractJsonLdText(html) {
 function extractDateFromHtml(html) {
   const text = String(html || '');
   const candidates = [
-    ...text.matchAll(/"(?:uploadDate|datePublished|dateCreated|taken_at_timestamp)"\s*:\s*"?([^",}]+)"?/gi),
-    ...text.matchAll(/<time[^>]+datetime=["']([^"']+)["']/gi),
-  ].map((match) => match[1]);
+    ...[...text.matchAll(/"(uploadDate|datePublished|dateCreated|taken_at_timestamp)"\s*:\s*"?([^",}]+)"?/gi)]
+      .map((match) => ({ raw: match[2], source: `instagram-public-html-${match[1]}` })),
+    ...[...text.matchAll(/<time[^>]+datetime=["']([^"']+)["']/gi)]
+      .map((match) => ({ raw: match[1], source: 'instagram-public-html-time-datetime' })),
+  ];
 
-  for (const raw of candidates) {
+  for (const candidate of candidates) {
+    const { raw } = candidate;
     const value = /^\d{10}$/.test(raw) ? Number(raw) * 1000 : raw;
     const parsed = new Date(value);
-    if (!Number.isNaN(parsed.getTime())) return parsed.toISOString();
+    if (!Number.isNaN(parsed.getTime())) return { date: parsed.toISOString(), source: candidate.source };
   }
-  return '';
+  return { date: '', source: '' };
 }
 
 async function fetchInstagramPreview(url) {
@@ -748,7 +1048,9 @@ async function fetchInstagramPreview(url) {
     preview.description = metaContent(html, 'og:description') || metaContent(html, 'description') || metaContent(html, 'twitter:description');
     preview.image = metaContent(html, 'og:image') || metaContent(html, 'twitter:image');
     preview.jsonLdText = extractJsonLdText(html);
-    preview.pubDate = extractDateFromHtml(html);
+    const postDate = extractDateFromHtml(html);
+    preview.pubDate = postDate.date;
+    preview.pubDateSource = postDate.source;
   }
 
   return preview;
@@ -762,7 +1064,7 @@ function extractRenderedPostDate(data = {}) {
   }
 
   const fromMeta = parseDateText([data.ogDescription, data.ogTitle].filter(Boolean).join(' '));
-  if (fromMeta) return { date: fromMeta, source: 'instagram-rendered-og' };
+  if (fromMeta) return { date: fromMeta, source: 'instagram-rendered-og-post-date-text' };
 
   const absoluteTime = (data.times || []).find((item) => parseDateText(item.text));
   const fromTimeText = parseDateText(absoluteTime?.text || '');
@@ -827,11 +1129,28 @@ function candidateSignal(candidate) {
 
 function postSignal(candidate) {
   const preview = candidate.preview || {};
+  const sourceDeal = candidate.sourceDeal || {};
+  const sourceDate = trustedSourceDealPostDate(sourceDeal);
+  const structuredSource = /(?:apify instagram|meta instagram|instagram[-_ ]?graph)/i.test([
+    sourceDeal.originSource,
+    sourceDeal.source,
+    sourceDeal.pubDateSource,
+  ].filter(Boolean).join(' '));
+  const structuredCaption = sourceDate
+    ? [
+      sourceDeal.caption,
+      sourceDeal.postCaption,
+      sourceDeal.rawCaption,
+      sourceDeal.media?.caption,
+      ...(structuredSource ? [sourceDeal.title, sourceDeal.description] : []),
+    ]
+    : [];
   return [
     preview.title,
     preview.description,
     preview.jsonLdText,
     preview.bodyText,
+    ...structuredCaption,
   ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
 }
 
@@ -856,9 +1175,27 @@ function hasPattern(patterns, value) {
 }
 
 function parsePubDate(candidate) {
-  const raw = candidate.preview?.pubDate || '';
-  const date = new Date(raw);
-  if (!Number.isNaN(date.getTime())) return { date, source: candidate.preview?.pubDateSource || 'instagram-rendered' };
+  // Structured Graph/Apify timestamps are authoritative. A newer rendered
+  // preview must not launder an old structured post into the fresh window.
+  const sourceDate = trustedSourceDealPostDate(candidate.sourceDeal || {});
+  if (sourceDate) {
+    if (sourceDate.date.getTime() > Date.now() + MAX_FUTURE_CLOCK_SKEW_MS) return null;
+    return sourceDate;
+  }
+
+  const previewRaw = candidate.preview?.sourcePublishedAt || candidate.preview?.pubDate || '';
+  const previewSource = candidate.preview?.sourcePublishedAt
+    ? candidate.preview?.sourcePublishedAtSource
+    : candidate.preview?.pubDateSource;
+  const previewDate = new Date(previewRaw);
+  if (
+    previewRaw
+    && !Number.isNaN(previewDate.getTime())
+    && isTrustedPostDateSource(previewSource)
+    && previewDate.getTime() <= Date.now() + MAX_FUTURE_CLOCK_SKEW_MS
+  ) {
+    return { date: previewDate, source: cleanText(previewSource, 180) };
+  }
   return null;
 }
 
@@ -871,7 +1208,7 @@ function ageDaysExact(date) {
 }
 
 function isPostWithinMaxAge(date) {
-  return ageDaysExact(date) <= CONFIG.maxAgeDays;
+  return ageDaysExact(date) <= Math.min(CONFIG.maxAgeDays, ABSOLUTE_MAX_POST_AGE_DAYS);
 }
 
 function localDayStart(date = new Date()) {
@@ -890,27 +1227,155 @@ function addLocalDays(date, days) {
   return localDayEnd(date.getFullYear(), date.getMonth() + 1, date.getDate() + days);
 }
 
+function toLocalIsoDate(date) {
+  return [
+    String(date.getFullYear()).padStart(4, '0'),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-');
+}
+
+function localStartFromIsoDate(value) {
+  const match = cleanText(value, 40).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 0, 0, 0, 0);
+  if (
+    date.getFullYear() !== Number(match[1])
+    || date.getMonth() !== Number(match[2]) - 1
+    || date.getDate() !== Number(match[3])
+  ) return null;
+  return date;
+}
+
+function localEndFromIsoDate(value) {
+  const start = localStartFromIsoDate(value);
+  return start ? endOfLocalDay(start) : null;
+}
+
+function hasRecurringMorningContext(signal = '') {
+  const text = normalizeAscii(signal);
+  return /\b(?:jeden|jeder|jedes|every)\s+morgen\b/.test(text)
+    || /\b(?:morgens|mornings)\b/.test(text)
+    || /\b(?:am|zum)\s+morgen\b/.test(text);
+}
+
+function hasRelativeTomorrowSignal(signal = '') {
+  const text = normalizeAscii(signal);
+  if (hasRecurringMorningContext(text)) return false;
+  return /\b(?:morgen|tomorrow)\b/.test(text);
+}
+
+function inferOfferDateYear(month, explicitYear, now = new Date()) {
+  if (explicitYear) return Number(explicitYear);
+  const currentYear = now.getFullYear();
+  const currentYearDate = localDayEnd(currentYear, month, 1);
+  const nextYearDate = localDayEnd(currentYear + 1, month, 1);
+  // Only bridge the nearby New-Year boundary. An old unqualified January
+  // date seen in summer must stay expired instead of becoming next January.
+  if (currentYearDate < now && nextYearDate.getTime() - now.getTime() <= 45 * DAY_MS) {
+    return currentYear + 1;
+  }
+  return currentYear;
+}
+
+function makeExplicitOfferDate({ day, month, year, kind, text }, now = new Date()) {
+  const numericDay = Number(day);
+  const numericMonth = Number(month);
+  const numericYear = inferOfferDateYear(numericMonth, year, now);
+  if (numericDay < 1 || numericDay > 31 || numericMonth < 1 || numericMonth > 12) return null;
+  const date = localDayEnd(numericYear, numericMonth, numericDay);
+  if (date.getMonth() !== numericMonth - 1 || date.getDate() !== numericDay) return null;
+  return { kind, date, text: cleanText(text, 100) };
+}
+
 function extractExplicitOfferDates(signal, now = new Date()) {
   const text = normalizeAscii(signal);
   const dates = [];
-  const patterns = [
+  const numericPatterns = [
     { kind: 'until', regex: /\b(?:bis|gueltig bis|gultig bis|valid until|until)\s+(?:zum\s+)?([0-3]?\d)[./]([01]?\d)(?:[./](20\d{2}))?\b/g },
     { kind: 'on', regex: /\b(?:am|nur am|only on|on)\s+([0-3]?\d)[./]([01]?\d)(?:[./](20\d{2}))?\b/g },
   ];
 
-  for (const { kind, regex } of patterns) {
+  for (const { kind, regex } of numericPatterns) {
     for (const match of text.matchAll(regex)) {
-      const day = Number(match[1]);
-      const month = Number(match[2]);
-      const year = Number(match[3]) || now.getFullYear();
-      if (day < 1 || day > 31 || month < 1 || month > 12) continue;
-      const date = localDayEnd(year, month, day);
-      if (date.getMonth() !== month - 1 || date.getDate() !== day) continue;
-      dates.push({ kind, date, text: match[0] });
+      const item = makeExplicitOfferDate({ day: match[1], month: match[2], year: match[3], kind, text: match[0] }, now);
+      if (item) dates.push(item);
     }
   }
 
-  return dates.sort((left, right) => left.date.getTime() - right.date.getTime());
+  for (const match of text.matchAll(/\b(?:vom\s+)?[0-3]?\d\.?\s*(?:-|–|—|bis)\s*([0-3]?\d)[./]([01]?\d)(?:[./](20\d{2}))?\b/g)) {
+    const item = makeExplicitOfferDate({ day: match[1], month: match[2], year: match[3], kind: 'until-range', text: match[0] }, now);
+    if (item) dates.push(item);
+  }
+
+  const monthNames = [...MONTH_NAMES.keys()].sort((left, right) => right.length - left.length).join('|');
+  const namedRange = new RegExp(`\\b(?:vom\\s+)?[0-3]?\\d\\.?\\s+(?:${monthNames})?\\s*(?:-|–|—|bis)\\s*([0-3]?\\d)\\.?\\s+(${monthNames})(?:\\s+(20\\d{2}))?\\b`, 'g');
+  for (const match of text.matchAll(namedRange)) {
+    const item = makeExplicitOfferDate({ day: match[1], month: MONTH_NAMES.get(match[2]), year: match[3], kind: 'until-range', text: match[0] }, now);
+    if (item) dates.push(item);
+  }
+
+  const namedUntil = new RegExp(`\\b(?:bis|gueltig bis|gultig bis|valid until|until|am|nur am|only on|on)\\s+(?:zum\\s+)?([0-3]?\\d)\\.?\\s+(${monthNames})(?:\\s+(20\\d{2}))?\\b`, 'g');
+  for (const match of text.matchAll(namedUntil)) {
+    const item = makeExplicitOfferDate({ day: match[1], month: MONTH_NAMES.get(match[2]), year: match[3], kind: /^(?:am|nur am|only on|on)\b/.test(match[0]) ? 'on' : 'until', text: match[0] }, now);
+    if (item) dates.push(item);
+  }
+
+  for (const match of text.matchAll(/\b(20\d{2})-([01]\d)-([0-3]\d)\b/g)) {
+    const item = makeExplicitOfferDate({ day: match[3], month: match[2], year: match[1], kind: 'explicit-iso', text: match[0] }, now);
+    if (item) dates.push(item);
+  }
+
+  const byTimestamp = new Map();
+  for (const item of dates) byTimestamp.set(item.date.getTime(), item);
+  return [...byTimestamp.values()].sort((left, right) => left.date.getTime() - right.date.getTime());
+}
+
+function explicitOfferEnd(signal, now = new Date()) {
+  const dates = extractExplicitOfferDates(signal, now);
+  return dates.length > 0 ? dates[dates.length - 1] : null;
+}
+
+function namedRangeStart(signal, now = new Date()) {
+  const text = normalizeAscii(signal);
+  const monthNames = [...MONTH_NAMES.keys()].sort((left, right) => right.length - left.length).join('|');
+  const pattern = new RegExp(`\\b(?:vom|from)\\s+([0-3]?\\d)\\.?\\s+(${monthNames})(?:\\s+(20\\d{2}))?\\s*(?:-|–|—|bis|to)`, 'i');
+  const match = text.match(pattern);
+  if (!match) return null;
+  return makeExplicitOfferDate({
+    day: match[1],
+    month: MONTH_NAMES.get(match[2]),
+    year: match[3],
+    kind: 'from-range',
+    text: match[0],
+  }, now);
+}
+
+function explicitOfferWindow(signal, now = new Date()) {
+  const shape = parseExpiryShape(signal, { now, contextText: signal });
+  const explicitEnd = explicitOfferEnd(signal, now);
+  const fallbackEnd = localEndFromIsoDate(shape.validUntil || shape.validOn || '');
+  const namedStart = namedRangeStart(signal, now);
+  const validFrom = cleanText(shape.validFrom || shape.validOn || (namedStart ? toLocalIsoDate(namedStart.date) : ''), 40);
+  const validUntil = explicitEnd?.date?.toISOString() || fallbackEnd?.toISOString() || '';
+  return {
+    kind: cleanText(shape.kind, 40),
+    confidence: cleanText(shape.confidence, 20),
+    validFrom,
+    validUntil,
+    explicitEnd,
+  };
+}
+
+function futureOfferStart(signal, now = new Date()) {
+  const window = explicitOfferWindow(signal, now);
+  const start = localStartFromIsoDate(window.validFrom);
+  return start && start.getTime() > now.getTime() ? window.validFrom : '';
+}
+
+function hasFutureExplicitOfferEnd(signal, now = new Date()) {
+  const end = explicitOfferEnd(signal, now);
+  return Boolean(end && end.date.getTime() >= localDayStart(now).getTime());
 }
 
 function relativeOfferWindowEnd(signal, pubDate = new Date()) {
@@ -921,7 +1386,7 @@ function relativeOfferWindowEnd(signal, pubDate = new Date()) {
     return endOfLocalDay(pubDate);
   }
 
-  if (/\b(?:bis morgen|morgen|tomorrow)\b/.test(text)) {
+  if (hasRelativeTomorrowSignal(text)) {
     return addLocalDays(pubDate, 1);
   }
 
@@ -959,7 +1424,8 @@ function relativeOfferWindowEnd(signal, pubDate = new Date()) {
 
 function hasPastExplicitOfferDate(signal) {
   const today = localDayStart();
-  return extractExplicitOfferDates(signal).some((item) => item.date.getTime() < today.getTime());
+  const end = explicitOfferEnd(signal);
+  return Boolean(end && end.date.getTime() < today.getTime());
 }
 
 function hasExpiredRelativeOfferDate(signal, pubDate) {
@@ -968,10 +1434,23 @@ function hasExpiredRelativeOfferDate(signal, pubDate) {
   return Boolean(windowEnd && windowEnd.getTime() < Date.now());
 }
 
+function freshnessRejectionReason(candidate, dateSignal = offerDateSignal(candidate)) {
+  const pubDate = parsePubDate(candidate);
+  if (!pubDate?.date) return 'kein echtes Instagram-Postdatum';
+  const ageHours = Math.max(0, (Date.now() - pubDate.date.getTime()) / HOUR_MS);
+  const maxAgeDays = Math.min(CONFIG.maxAgeDays, ABSOLUTE_MAX_POST_AGE_DAYS);
+  if (ageHours > maxAgeDays * 24) return `Instagram-Post aelter als ${maxAgeDays} Tage`;
+  if (ageHours <= Math.min(FRESH_PRIORITY_HOURS, maxAgeDays * 24)) return '';
+  if (!hasFutureExplicitOfferEnd(dateSignal)) {
+    return 'Instagram-Post aelter als 72 Stunden ohne explizit zukuenftiges Aktionsende';
+  }
+  return '';
+}
+
 function inferType(signal) {
   const text = normalizeAscii(signal);
   if (/\b1\s*\+\s*1\b|\b2\s*(?:fuer|fur)\s*1\b|\bbogo\b/.test(text)) return 'bogo';
-  if (/\bgratis\b|\bkostenlos\w*\b|\bfree\b|\b0\s*(?:euro|eur)\b/.test(text)) return 'gratis';
+  if (/\bgratis\b|\bkostenlos\w*\b|\b0\s*(?:euro|eur)\b/.test(text) || CONCRETE_FREE_PATTERN.test(text)) return 'gratis';
   if (/\bgutschein|coupon|voucher\b/.test(text)) return 'gutschein';
   return 'rabatt';
 }
@@ -1053,15 +1532,16 @@ function isWeakTitleText(value) {
 
 function extractExpiryText(signal, pubDate = null) {
   const text = cleanText(signal, 1000);
-  const explicitDate = extractExplicitOfferDates(text)[0];
+  const explicitDate = explicitOfferEnd(text);
   if (explicitDate?.date) return explicitDate.date.toISOString();
   const relativeEnd = pubDate ? relativeOfferWindowEnd(text, pubDate) : null;
   if (relativeEnd) return relativeEnd.toISOString();
 
   const matches = [
     text.match(/\b(?:bis|gueltig bis|valid until)\s+([0-3]?\d[./-][01]?\d(?:[./-]\d{2,4})?)/i)?.[0],
-    text.match(/\b(?:nur heute|heute|morgen|dieses wochenende|this weekend|today only)\b/i)?.[0],
-    text.match(/\b(?:bis sonntag|bis morgen|bis freitag|bis samstag)\b/i)?.[0],
+    text.match(/\b(?:nur heute|heute|dieses wochenende|this weekend|today only)\b/i)?.[0],
+    hasRelativeTomorrowSignal(text) ? text.match(/\b(?:bis\s+morgen|nur\s+morgen|morgen|tomorrow)\b/i)?.[0] : '',
+    text.match(/\b(?:bis sonntag|bis freitag|bis samstag)\b/i)?.[0],
   ].filter(Boolean);
   return cleanText(matches[0] || '', 80);
 }
@@ -1073,7 +1553,8 @@ function buildQualityScore(candidate, signal) {
   const primarySignal = postSignal(candidate) || signal;
   const pubDate = parsePubDate(candidate);
   const sourceDeal = candidate.sourceDeal || {};
-  const hasVienna = hasPattern(VIENNA_PATTERNS, primarySignal);
+  const viennaEvidence = resolveViennaEvidence(candidate);
+  const hasVienna = Boolean(viennaEvidence);
   const hasDeal = hasPattern(STRONG_DEAL_PATTERNS, primarySignal);
   const hasFoodDrink = hasPattern(FOOD_DRINK_PATTERNS, primarySignal);
   const hasCurrent = hasPattern(CURRENT_PATTERNS, primarySignal);
@@ -1081,7 +1562,7 @@ function buildQualityScore(candidate, signal) {
 
   if (hasVienna) {
     score += 22;
-    reasons.push('vienna');
+    reasons.push(`vienna-${viennaEvidence.source}`);
   }
   if (hasDeal) {
     score += 28;
@@ -1154,17 +1635,19 @@ function getRejectionReason(candidate, signal, score) {
   const primarySignal = postSignal(candidate) || signal;
   if (!signal) return 'kein Textsignal zum Post';
   if (hasPattern(BLOCKED_SOURCE_PATTERNS, signal)) return 'NeoTaste blockiert';
-  const pubDate = parsePubDate(candidate);
-  if (!pubDate?.date) return 'kein echtes Instagram-Postdatum';
-  if (!isPostWithinMaxAge(pubDate.date)) return `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage`;
   const dateSignal = offerDateSignal(candidate) || primarySignal;
+  const freshnessReason = freshnessRejectionReason(candidate, primarySignal);
+  if (freshnessReason) return freshnessReason;
+  const pubDate = parsePubDate(candidate);
+  const futureStart = futureOfferStart(primarySignal);
+  if (futureStart) return `Aktion noch nicht gestartet (${futureStart})`;
   if (hasPastExplicitOfferDate(dateSignal)) return 'explizites Aktionsdatum liegt in der Vergangenheit';
   if (hasExpiredRelativeOfferDate(dateSignal, pubDate.date)) return 'relative Kurz-Aktion ist abgelaufen';
-  if (!hasPattern(VIENNA_PATTERNS, primarySignal)) return 'kein eindeutiges Wien-Signal im Instagram-Post';
-  if (!hasPattern(STRONG_DEAL_PATTERNS, primarySignal)) return 'kein starkes Gratis-/Deal-Signal im Instagram-Post';
-  if (!hasSpecificBrand(candidate, signal)) return 'keine belastbare Marke/Quelle';
   if (hasPattern(FALSE_POSITIVE_PATTERNS, primarySignal)) return 'Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal';
   if (hasPattern(EXPIRY_PATTERNS, primarySignal)) return 'explizit abgelaufen oder vorbei';
+  if (!resolveViennaEvidence(candidate)) return 'kein eindeutiges Wien-Signal im Post oder verifiziertem Account-Kontext';
+  if (!hasPattern(STRONG_DEAL_PATTERNS, primarySignal)) return 'kein starkes Gratis-/Deal-Signal im Instagram-Post';
+  if (!hasSpecificBrand(candidate, signal)) return 'keine belastbare Marke/Quelle';
   if (score < CONFIG.minScore) return `Score zu niedrig (${score})`;
   return '';
 }
@@ -1182,8 +1665,14 @@ function buildHeuristicDeal(candidate) {
   const category = normalizeCategoryForScraper('', [brand, signal]);
   const pubDate = parsePubDate(candidate);
   const title = buildOfferTitle(brand, type, signal, candidate);
-  const expires = extractExpiryText(offerDateSignal(candidate) || signal, pubDate?.date || null);
+  const dateSignal = offerDateSignal(candidate) || signal;
   const primarySignal = postSignal(candidate) || signal;
+  const offerWindow = explicitOfferWindow(primarySignal);
+  const explicitEnd = offerWindow.explicitEnd;
+  const expires = offerWindow.validUntil
+    || extractExpiryText(primarySignal, pubDate?.date || null)
+    || extractExpiryText(dateSignal, pubDate?.date || null);
+  const viennaEvidence = resolveViennaEvidence(candidate);
 
   const rawDeal = {
     id: `instagram-ai-${stableHash(`${candidate.url}|${title}`)}`,
@@ -1197,14 +1686,26 @@ function buildHeuristicDeal(candidate) {
     originSource: 'instagram-ai-agent',
     url: candidate.url,
     expires,
-    distance: 'Wien',
+    validFrom: offerWindow.validFrom,
+    validUntil: offerWindow.validUntil || (Date.parse(expires) ? expires : ''),
+    expirySource: offerWindow.validUntil ? 'content-date' : (expires ? 'relative-post-date' : ''),
+    expiresSource: offerWindow.validUntil ? 'content-date' : (expires ? 'relative-post-date' : ''),
+    expiryKind: offerWindow.kind,
+    dateConfidence: offerWindow.confidence,
+    distance: viennaEvidence.location,
+    city: 'Wien',
+    viennaVerified: true,
+    viennaEvidence,
+    ownerUsername: candidateAccountUsernames(candidate)[0] || '',
     hot: type === 'gratis' || type === 'bogo',
     isNew: true,
     priority: score >= 78 ? 5 : 4,
     votes: score >= 78 ? 3 : 2,
     qualityScore: score,
-    pubDate: pubDate?.date?.toISOString() || new Date().toISOString(),
-    pubDateSource: pubDate?.source || (hasPattern(CURRENT_PATTERNS, signal) ? 'current-language' : 'agent-run'),
+    pubDate: pubDate.date.toISOString(),
+    sourcePublishedAt: pubDate.date.toISOString(),
+    sourcePublishedAtSource: pubDate.source,
+    pubDateSource: pubDate.source,
     evidence: {
       heuristicReasons: reasons,
       source: candidate.source,
@@ -1212,6 +1713,10 @@ function buildHeuristicDeal(candidate) {
       previewStatus: candidate.preview?.status || null,
       previewLoginWall: Boolean(candidate.preview?.loginWall),
       postDateSource: pubDate?.source || '',
+      viennaEvidence,
+      explicitOfferEnd: explicitEnd?.date?.toISOString() || '',
+      explicitOfferDateSource: explicitEnd?.text || '',
+      validFrom: offerWindow.validFrom,
       textSample: cleanText(signal, 500),
     },
     confidence: Math.min(0.97, Math.max(0.45, score / 100)),
@@ -1240,6 +1745,14 @@ function dedupeDeals(deals) {
     .slice(0, CONFIG.maxDeals);
 }
 
+function filterDealsRejectedByCandidates(deals, candidates) {
+  const rejectedKeys = new Set(candidates
+    .filter((candidate) => candidate.rejectionReason)
+    .map((candidate) => candidate.key || canonicalPostKey(candidate.url))
+    .filter(Boolean));
+  return deals.filter((deal) => !rejectedKeys.has(canonicalPostKey(deal.url)));
+}
+
 function buildAiPrompt(candidates) {
   return candidates.map((candidate, index) => ({
     index,
@@ -1263,7 +1776,9 @@ function mergeAiDeal(candidate, aiRow) {
   const primarySignal = postSignal(candidate) || signal;
   const confidence = Math.max(0, Math.min(1, Number(aiRow.confidence) || 0));
   if (!aiRow.accept || confidence < 0.58) {
-    candidate.rejectionReason = cleanText(aiRow.reason, 180) || 'LLM hat Kandidat abgelehnt';
+    const reason = cleanText(aiRow.reason, 180);
+    candidate.rejectionReason = `LLM hat Kandidat abgelehnt${reason ? `: ${reason}` : ''}`;
+    candidate.llmRejected = true;
     return null;
   }
   if (hasPattern(BLOCKED_SOURCE_PATTERNS, signal)) {
@@ -1271,28 +1786,22 @@ function mergeAiDeal(candidate, aiRow) {
     return null;
   }
 
+  const aiValidatedScore = Math.max(candidate.score, Math.round(confidence * 100));
+  const hardRejection = getRejectionReason(candidate, signal, aiValidatedScore);
+  if (hardRejection) {
+    candidate.rejectionReason = hardRejection;
+    return null;
+  }
+
   const type = coerceAiType(aiRow.type || inferType(signal));
   const brand = cleanText(aiRow.brand, 80) || inferBrand(candidate, signal);
   const category = normalizeCategoryForScraper(aiRow.category || '', [brand, aiRow.title, aiRow.description, primarySignal]);
   const pubDate = parsePubDate(candidate);
-  if (!pubDate?.date) {
-    candidate.rejectionReason = 'kein echtes Instagram-Postdatum';
-    return null;
-  }
-  if (!isPostWithinMaxAge(pubDate.date)) {
-    candidate.rejectionReason = `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage`;
-    return null;
-  }
   const dateSignal = offerDateSignal(candidate) || primarySignal;
-  if (hasPastExplicitOfferDate(dateSignal)) {
-    candidate.rejectionReason = 'explizites Aktionsdatum liegt in der Vergangenheit';
-    return null;
-  }
-  if (hasExpiredRelativeOfferDate(dateSignal, pubDate.date)) {
-    candidate.rejectionReason = 'relative Kurz-Aktion ist abgelaufen';
-    return null;
-  }
-  const score = Math.max(candidate.score, Math.round(confidence * 100));
+  const offerWindow = explicitOfferWindow(primarySignal);
+  const explicitEnd = offerWindow.explicitEnd;
+  const viennaEvidence = resolveViennaEvidence(candidate);
+  const score = aiValidatedScore;
   const rawDeal = {
     id: `instagram-ai-${stableHash(`${candidate.url}|${aiRow.title || brand}`)}`,
     brand,
@@ -1304,15 +1813,30 @@ function mergeAiDeal(candidate, aiRow) {
     source: 'Instagram AI Agent',
     originSource: 'instagram-ai-agent',
     url: candidate.url,
-    expires: cleanText(aiRow.expires, 90) || extractExpiryText(dateSignal || signal, pubDate?.date || null),
-    distance: 'Wien',
+    expires: offerWindow.validUntil
+      || extractExpiryText(primarySignal, pubDate.date)
+      || extractExpiryText(dateSignal || signal, pubDate.date)
+      || cleanText(aiRow.expires, 90),
+    validFrom: offerWindow.validFrom,
+    validUntil: offerWindow.validUntil,
+    expirySource: offerWindow.validUntil ? 'content-date' : '',
+    expiresSource: offerWindow.validUntil ? 'content-date' : '',
+    expiryKind: offerWindow.kind,
+    dateConfidence: offerWindow.confidence,
+    distance: viennaEvidence.location,
+    city: 'Wien',
+    viennaVerified: true,
+    viennaEvidence,
+    ownerUsername: candidateAccountUsernames(candidate)[0] || '',
     hot: type === 'gratis' || type === 'bogo',
     isNew: true,
     priority: score >= 80 ? 5 : 4,
     votes: score >= 80 ? 3 : 2,
     qualityScore: score,
-    pubDate: pubDate?.date?.toISOString() || new Date().toISOString(),
-    pubDateSource: pubDate?.source || 'agent-run',
+    pubDate: pubDate.date.toISOString(),
+    sourcePublishedAt: pubDate.date.toISOString(),
+    sourcePublishedAtSource: pubDate.source,
+    pubDateSource: pubDate.source,
     evidence: {
       heuristicScore: candidate.score,
       heuristicReasons: candidate.reasons,
@@ -1322,6 +1846,10 @@ function mergeAiDeal(candidate, aiRow) {
       previewStatus: candidate.preview?.status || null,
       previewLoginWall: Boolean(candidate.preview?.loginWall),
       postDateSource: pubDate?.source || '',
+      viennaEvidence,
+      explicitOfferEnd: explicitEnd?.date?.toISOString() || '',
+      explicitOfferDateSource: explicitEnd?.text || '',
+      validFrom: offerWindow.validFrom,
       textSample: cleanText(signal, 500),
     },
     confidence,
@@ -1467,6 +1995,20 @@ function sourcePriority(candidate) {
   return 3;
 }
 
+function freshnessPriority(candidate) {
+  const pubDate = parsePubDate(candidate);
+  if (pubDate?.date) {
+    const ageHours = Math.max(0, (Date.now() - pubDate.date.getTime()) / HOUR_MS);
+    if (ageHours <= FRESH_PRIORITY_HOURS) return 0;
+    if (ageHours <= ABSOLUTE_MAX_POST_AGE_DAYS * 24 && hasFutureExplicitOfferEnd(offerDateSignal(candidate))) return 2;
+    if (ageHours <= ABSOLUTE_MAX_POST_AGE_DAYS * 24) return 4;
+    return 6;
+  }
+  const source = candidate.source || '';
+  if (source.includes('seed-url') || source.startsWith('profile:') || source.includes('duckduckgo')) return 1;
+  return 5;
+}
+
 function compareBigIntDesc(left, right) {
   if (left > right) return -1;
   if (left < right) return 1;
@@ -1475,6 +2017,8 @@ function compareBigIntDesc(left, right) {
 
 function rankCandidatesForScan(candidates) {
   return [...candidates].sort((left, right) => {
+    const freshnessDiff = freshnessPriority(left) - freshnessPriority(right);
+    if (freshnessDiff !== 0) return freshnessDiff;
     const priorityDiff = sourcePriority(left) - sourcePriority(right);
     if (priorityDiff !== 0) return priorityDiff;
     const shortcodeDiff = compareBigIntDesc(instagramShortcodeRank(left.url), instagramShortcodeRank(right.url));
@@ -1588,7 +2132,7 @@ async function main() {
 
   const previewErrors = await enrichPreviews(candidates);
   const renderErrors = await enrichRenderedPreviews(candidates);
-  const heuristicDeals = candidates.map(buildHeuristicDeal).filter(Boolean);
+  const heuristicDealsBeforeAi = candidates.map(buildHeuristicDeal).filter(Boolean);
 
   const aiCandidates = candidates
     .filter((candidate) => !candidate.rejectionReason && candidate.score >= Math.max(40, CONFIG.minScore - 20))
@@ -1596,7 +2140,9 @@ async function main() {
     .slice(0, CONFIG.aiCandidateLimit);
   const aiResult = await classifyWithOpenAi(aiCandidates);
 
-  const preModerationDeals = dedupeDeals([...aiResult.deals, ...heuristicDeals]);
+  const heuristicDeals = filterDealsRejectedByCandidates(heuristicDealsBeforeAi, candidates);
+  const candidateApprovedDeals = filterDealsRejectedByCandidates([...aiResult.deals, ...heuristicDeals], candidates);
+  const preModerationDeals = dedupeDeals(candidateApprovedDeals);
   const moderation = loadDealModeration();
   const moderationFilter = filterModeratedDeals(preModerationDeals, moderation);
   const finalDeals = moderationFilter.deals;
@@ -1619,6 +2165,8 @@ async function main() {
     acceptedDeals: finalDeals.length,
     acceptedBeforeModeration: preModerationDeals.length,
     heuristicAccepted: heuristicDeals.length,
+    heuristicAcceptedBeforeAi: heuristicDealsBeforeAi.length,
+    heuristicVetoedByAi: heuristicDealsBeforeAi.length - heuristicDeals.length,
     aiAccepted: aiResult.deals.length,
     moderation: {
       removed: moderationFilter.removed.length,
@@ -1638,6 +2186,7 @@ async function main() {
     renderErrors,
     aiErrors: aiResult.errors,
     rejectionReasons: rejectionCounts(candidates),
+    terminalRejected: buildTerminalRejectionHistory(candidates, finalDeals),
     freshRejected: freshRejectedCandidates(candidates),
     rejected: candidates
       .filter((candidate) => candidate.rejectionReason)
@@ -1650,7 +2199,31 @@ async function main() {
   console.log(`Wrote ${finalDeals.length} deals to ${OUTPUT_PATH}`);
 }
 
-main().catch((error) => {
-  console.error('instagram-ai-agent failed:', error);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main().catch((error) => {
+    console.error('instagram-ai-agent failed:', error);
+    process.exit(1);
+  });
+}
+
+export {
+  buildHeuristicDeal,
+  buildQualityScore,
+  explicitOfferEnd,
+  explicitOfferWindow,
+  extractExplicitOfferDates,
+  filterDealsRejectedByCandidates,
+  freshnessPriority,
+  freshnessRejectionReason,
+  futureOfferStart,
+  getRejectionReason,
+  hasFutureExplicitOfferEnd,
+  isSyntheticPostDateSource,
+  isTerminalRejection,
+  isTrustedPostDateSource,
+  makeCandidate,
+  mergeAiDeal,
+  parsePubDate,
+  rankCandidatesForScan,
+  resolveViennaEvidence,
+};

@@ -13,6 +13,15 @@ import {
   moderationCounts,
 } from './deal-moderation-utils.js';
 import { extractDealsFromThreadMessages } from './slack-digest-utils.js';
+import {
+  canonicalDealUrl,
+  canonicalSocialPostKey,
+  extractStructuredOwnerUsername,
+  getPublicationEvidence,
+  getViennaEvidence,
+  mergeDealEvidence,
+  mergeDuplicateDealRecords,
+} from './deal-evidence-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -89,43 +98,7 @@ function normalizeUrl(url) {
 }
 
 function canonicalPostKey(url) {
-  const text = normalizeUrl(url);
-  if (!text) return '';
-  try {
-    const parsed = new URL(text);
-    parsed.hash = '';
-    const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
-    const pathParts = parsed.pathname.split('/').filter(Boolean);
-
-    if (host === 'instagram.com' && parsed.pathname.toLowerCase().startsWith('/accounts/login')) {
-      const next = cleanText(parsed.searchParams.get('next'));
-      if (next) {
-        const nextUrl = next.startsWith('http') ? next : `https://instagram.com${next}`;
-        return canonicalPostKey(nextUrl);
-      }
-    }
-
-    if (host === 'instagram.com') {
-      const postTypeIndex = pathParts.findIndex((part) => ['p', 'reel', 'tv'].includes(part.toLowerCase()));
-      if (postTypeIndex >= 0 && pathParts[postTypeIndex + 1]) {
-        return `instagram:${pathParts[postTypeIndex].toLowerCase()}:${pathParts[postTypeIndex + 1].toLowerCase()}`;
-      }
-    }
-
-    if (host === 'tiktok.com') {
-      const videoIndex = pathParts.findIndex((part) => part.toLowerCase() === 'video');
-      if (videoIndex >= 0 && pathParts[videoIndex + 1]) {
-        return `tiktok:video:${pathParts[videoIndex + 1].toLowerCase()}`;
-      }
-    }
-
-    parsed.hostname = host;
-    parsed.pathname = parsed.pathname.replace(/\/+$/, '');
-    parsed.search = '';
-    return parsed.toString().toLowerCase();
-  } catch {
-    return text.replace(/[#?].*$/, '').replace(/\/+$/, '').toLowerCase();
-  }
+  return canonicalSocialPostKey(url) || canonicalDealUrl(url);
 }
 
 function isDigestHeader(message) {
@@ -190,14 +163,18 @@ function inferLogo(deal, type) {
 }
 
 function inferDistance(deal) {
-  const distance = cleanText(deal.distance || deal.location || deal.ort || deal.address);
-  return distance || 'Wien';
+  const structuredLocation = deal.location && typeof deal.location === 'object'
+    ? (deal.location.name || deal.location.address || deal.location.city)
+    : deal.location;
+  const distance = cleanText(deal.distance || structuredLocation || deal.ort || deal.address);
+  return distance;
 }
 
 function inferExpires(deal) {
-  const raw = deal.expires || deal.end_date || deal.validity_date || '';
+  const raw = cleanText(deal.expires || deal.validUntil || deal.validOn || deal.end_date || deal.validity_date || '');
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
   const iso = toIsoDate(raw);
-  return iso || cleanText(raw) || '';
+  return iso || raw;
 }
 
 function stableId(seed) {
@@ -212,17 +189,21 @@ function normalizeDeal(rawDeal, sourceKey) {
   const deal = ensureObject(rawDeal);
   const brand = inferBrand(deal, sourceKey);
   const title = inferTitle(deal, brand);
-  const rawUrl = normalizeUrl(deal.url);
-  const rawDistance = cleanText(deal.distance || deal.location || deal.ort || deal.address);
-  const rawExpires = cleanText(deal.expires || deal.end_date || deal.validity_date || '');
+  const rawUrl = normalizeUrl(deal.url || deal.post_url || deal.postUrl);
+  const rawDistance = inferDistance(deal);
+  const rawExpires = cleanText(deal.expires || deal.validUntil || deal.validOn || deal.end_date || deal.validity_date || '');
   const rawSource = cleanText(deal.source);
   const originSource = cleanText(deal.originSource) || rawSource || sourceKey;
   const url = rawUrl;
-  const pubDate = toIsoDate(deal.pubDate);
-  const pubDateSource = cleanText(deal.pubDateSource);
+  const publication = getPublicationEvidence(deal);
+  const legacyFirecrawl = /\bfirecrawl\b/i.test([rawSource, originSource, sourceKey].join(' '));
+  const legacyPubDate = toIsoDate(deal.pubDate);
+  const pubDate = legacyFirecrawl ? legacyPubDate : publication.sourcePublishedAt;
+  const pubDateSource = legacyFirecrawl ? cleanText(deal.pubDateSource) : publication.sourcePublishedAtSource;
   const idSeed = `${sourceKey}|${deal.id || ''}|${url}|${title}`;
   const id = cleanText(deal.id) || `${sourceKey}-${stableId(idSeed)}`;
   const type = inferType(deal);
+  const viennaEvidence = getViennaEvidence(deal);
   const missingFields = [];
   if (!rawUrl) missingFields.push('Ziel-URL');
   if (!rawDistance) missingFields.push('Ort');
@@ -240,10 +221,13 @@ function normalizeDeal(rawDeal, sourceKey) {
     logo: inferLogo(deal, type),
     distance: inferDistance(deal),
     address: cleanText(deal.address),
-    location: cleanText(deal.location),
+    location: cleanText(deal.location && typeof deal.location === 'object' ? (deal.location.name || deal.location.address || deal.location.city) : deal.location),
     ort: cleanText(deal.ort),
     pubDate,
     pubDateSource,
+    sourcePublishedAt: publication.sourcePublishedAt,
+    sourcePublishedAtSource: publication.sourcePublishedAtSource,
+    discoveredAt: publication.discoveredAt,
     expires: inferExpires(deal),
     source: cleanText(deal.source) || sourceKey,
     originSource,
@@ -252,6 +236,29 @@ function normalizeDeal(rawDeal, sourceKey) {
     isNew: true,
     votes: Number(deal.votes) || 1,
     priority: Number(deal.priority) || 3,
+    ownerUsername: extractStructuredOwnerUsername(deal),
+    postalCode: cleanText(deal.postalCode || deal.zip || deal.zipCode),
+    city: cleanText(deal.city || deal.location?.city),
+    latitude: deal.latitude ?? deal.lat ?? deal.location?.latitude,
+    longitude: deal.longitude ?? deal.lng ?? deal.lon ?? deal.location?.longitude,
+    viennaVerified: viennaEvidence.hasViennaEvidence,
+    viennaEvidence: viennaEvidence.hasViennaEvidence
+      ? {
+          verified: true,
+          type: viennaEvidence.type,
+          source: viennaEvidence.type,
+          value: viennaEvidence.value,
+          detail: viennaEvidence.value,
+        }
+      : undefined,
+    validOn: cleanText(deal.validOn),
+    validFrom: cleanText(deal.validFrom),
+    validUntil: cleanText(deal.validUntil),
+    expiresOriginal: cleanText(deal.expiresOriginal),
+    expiresSource: cleanText(deal.expiresSource),
+    expirySource: cleanText(deal.expirySource || deal.expiresSource),
+    expiryKind: cleanText(deal.expiryKind),
+    dateConfidence: cleanText(deal.dateConfidence),
     slackTs: cleanText(deal.slackTs),
     slackThreadTs: cleanText(deal.slackThreadTs),
     slackPostFormatVersion: cleanText(deal.slackPostFormatVersion),
@@ -356,7 +363,7 @@ function buildSlackMessage(deal, index) {
   return [
     `*${index}. ${deal.title}*`,
     `🏷️ Marke/Restaurant: ${deal.brand || 'k.A.'}`,
-    `📍 Ort: ${deal.distance || 'Wien'}`,
+    `📍 Ort: ${deal.distance || 'k.A.'}`,
     `📅 Angebotsdatum: ${formatDate(deal.pubDate)}`,
     `⏳ Gültig bis: ${deal.expires ? formatDate(deal.expires) : 'k.A.'}`,
     `🧭 Kategorie: ${deal.category} | Typ: ${deal.type}`,
@@ -618,21 +625,8 @@ function loadQueuedDealDuplicateKeys(existingDeals) {
 }
 
 function filterDuplicateDealsInRun(deals) {
-  const seen = new Set();
-  const filtered = [];
-  let removed = 0;
-
-  for (const deal of deals) {
-    const keys = buildDealDuplicateKeys(deal);
-    if (keys.length > 0 && keys.some((key) => seen.has(key))) {
-      removed += 1;
-      continue;
-    }
-    filtered.push(deal);
-    for (const key of keys) seen.add(key);
-  }
-
-  return { deals: filtered, removed };
+  const result = mergeDuplicateDealRecords(deals);
+  return { deals: result.deals, removed: result.duplicateCount };
 }
 
 function parseDealDate(value) {
@@ -643,7 +637,8 @@ function parseDealDate(value) {
 }
 
 function socialDealAgeDays(deal) {
-  const date = parseDealDate(deal.pubDate || deal.createdAt || deal.discoveredAt || deal.lastUpdated);
+  // Discovery/crawl time is not evidence of when a social post was published.
+  const date = parseDealDate(getPublicationEvidence(deal).sourcePublishedAt);
   if (!date) return null;
   return Math.max(0, Math.floor((Date.now() - date.getTime()) / (24 * 60 * 60 * 1000)));
 }
@@ -662,7 +657,9 @@ function pruneStaleSocialQueueDeals(deals) {
     }
 
     const age = socialDealAgeDays(deal);
-    if (age === null || age >= SEEN_DEAL_SUPPRESSION_DAYS) {
+    // Unknown publication time blocks a new automatic validation, but an
+    // already-posted Slack item must remain addressable for a later human ✅.
+    if (age !== null && age >= SEEN_DEAL_SUPPRESSION_DAYS) {
       removed += 1;
       continue;
     }
@@ -688,13 +685,17 @@ function writePendingAll(deals) {
     totalDeals: deals.length,
     updatedAt: new Date().toISOString(),
   };
-  fs.writeFileSync(PENDING_ALL_PATH, JSON.stringify(payload, null, 2));
+  const tempPath = `${PENDING_ALL_PATH}.tmp-${process.pid}`;
+  fs.writeFileSync(tempPath, JSON.stringify(payload, null, 2));
+  fs.renameSync(tempPath, PENDING_ALL_PATH);
 }
 
 function queueKey(deal) {
+  const slackTs = cleanText(deal.slackTs);
+  if (slackTs) return `slack:${slackTs}`;
   const postKey = canonicalPostKey(deal.url);
   if (isSocialPostKey(postKey)) return postKey;
-  return cleanText(deal.slackTs) || cleanText(deal.id) || normalizeUrl(deal.url);
+  return cleanText(deal.id) || normalizeUrl(deal.url);
 }
 
 function mergePendingQueue(existingDeals, newPostedDeals) {
@@ -702,12 +703,12 @@ function mergePendingQueue(existingDeals, newPostedDeals) {
   for (const deal of existingDeals) {
     const key = queueKey(deal);
     if (!key) continue;
-    byKey.set(key, deal);
+    byKey.set(key, byKey.has(key) ? mergeDealEvidence(byKey.get(key), deal) : deal);
   }
   for (const deal of newPostedDeals) {
     const key = queueKey(deal);
     if (!key) continue;
-    byKey.set(key, deal);
+    byKey.set(key, byKey.has(key) ? mergeDealEvidence(byKey.get(key), deal) : deal);
   }
   return [...byKey.values()];
 }
@@ -817,6 +818,11 @@ async function main() {
     deal.slackThreadTs = headerTs;
     postedDeals.push(deal);
 
+    // Persist each confirmed Slack message immediately. If a later request
+    // times out, the always-run workflow commit still has a durable queue
+    // checkpoint and the next scan will not repost these rows.
+    writePendingAll(mergePendingQueue(existingQueue, postedDeals));
+
     if ((i + 1) % 10 === 0) {
       console.log(`  ✅ posted ${i + 1}/${freshDeals.length}`);
     }
@@ -829,9 +835,16 @@ async function main() {
   console.log(`✅ ${postedDeals.length} Deals an Slack gesendet`);
   console.log(`🗂️ pending queue size: ${mergedQueue.length}`);
   console.log(`💾 saved: ${path.relative(ROOT, PENDING_ALL_PATH)}`);
+  if (postedDeals.length !== freshDeals.length) {
+    throw new Error(`${freshDeals.length - postedDeals.length} Deal(s) konnten nicht an Slack gesendet werden`);
+  }
 }
 
-main().catch((error) => {
-  console.error('❌ slack-notify failed:', error.message);
-  process.exit(1);
-});
+export { normalizeDeal };
+
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main().catch((error) => {
+    console.error('❌ slack-notify failed:', error.message);
+    process.exit(1);
+  });
+}

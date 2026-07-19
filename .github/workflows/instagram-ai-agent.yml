@@ -11,12 +11,12 @@ on:
       - 'docs/instagram-ai-seeds.json'
       - 'docs/instagram-merchant-registry.json'
   schedule:
-    - cron: '15 8 * * *' # 09:15 Vienna winter / 10:15 summer, before the daily digest
+    - cron: '15 1,7,13,19 * * *' # four freshness passes per day
   workflow_dispatch:
 
 concurrency:
-  group: instagram-ai-agent
-  cancel-in-progress: false
+  group: deal-pending-writer
+  queue: max
 
 permissions:
   contents: write
@@ -26,6 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PLAYWRIGHT_BROWSERS_PATH: 0
+      TZ: Europe/Vienna
     steps:
       - uses: actions/checkout@v4
 
@@ -53,8 +54,31 @@ jobs:
         run: npm run instagram:ai
 
       - name: Validate Instagram AI output
+        id: validate_instagram_ai
+        continue-on-error: true
         run: npm run instagram:ai:validate
 
+      - name: Restore last-good AI source after validation failure
+        if: steps.validate_instagram_ai.outcome == 'failure'
+        run: git restore --source=HEAD -- docs/deals-pending-instagram-ai.json
+
+      - name: Merge verified Instagram evidence
+        if: steps.validate_instagram_ai.outcome == 'success'
+        run: node scraper/merge-instagram-pending.js
+
+      - name: Send newly verified Instagram deals to Slack
+        if: steps.validate_instagram_ai.outcome == 'success'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          PENDING_FILE_NAMES: deals-pending-instagram-verified.json
+        run: node scraper/slack-notify.js
+
       - name: Commit Instagram AI output
+        if: always()
         run: |
-          node scripts/commit-generated.mjs --message "Instagram AI deals $(date +%Y-%m-%d)" --files docs/deals-pending-instagram-ai.json docs/instagram-ai-report.json
+          node scripts/commit-generated.mjs --message "Instagram AI deals $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-instagram-ai.json docs/instagram-ai-report.json docs/deals-pending-instagram-verified.json docs/deals-pending-all.json
+
+      - name: Fail workflow when AI output validation failed
+        if: steps.validate_instagram_ai.outcome == 'failure'
+        run: exit 1

@@ -1,5 +1,13 @@
 import { Actor, log } from 'apify';
 import { PlaywrightCrawler, RequestQueue } from 'crawlee';
+import {
+  isCalendarDateAfter,
+  isCalendarDateBefore,
+  extractCaptionDateRange,
+  inferCaptionDateYear,
+  relativeCaptionValidity,
+  stripInstagramMetaDescriptionPrefix,
+} from './validity-utils.js';
 
 const DEFAULT_INPUT = {
   seedAccounts: [
@@ -14,6 +22,9 @@ const DEFAULT_INPUT = {
     'cafe_wirr',
     'mangalet.at',
   ],
+  // Accounts are crawl targets, not location proof. The importer supplies only
+  // registry/watchlist entries that were explicitly verified for Vienna.
+  verifiedViennaAccounts: [],
   seedHashtags: [
     'gratiswien',
     'wiengastro',
@@ -28,9 +39,10 @@ const DEFAULT_INPUT = {
     'freefoodvienna',
     'freedrinkvienna',
   ],
-  maxPostsPerSource: 40,
+  maxPostsPerSource: 9,
   maxPostsToInspect: 120,
-  maxAgeDaysWithoutExplicitValidity: 10,
+  maxPostAgeDays: 7,
+  maxAgeDaysWithoutExplicitValidity: 3,
   maxFutureValidityDays: 120,
   debugMode: false,
 };
@@ -66,6 +78,19 @@ const FREE_KEYWORDS = [
 const BOGO_KEYWORDS = [
   '1+1', '1 + 1', '2for1', '2 for 1', 'buy one get one', 'bogo', 'bring 1 friend get 1',
   'zwei zum preis von einem', '2 zum preis von 1',
+];
+
+const DISCOUNT_KEYWORDS = [
+  'rabatt', 'discount', 'off', 'gutschein', 'voucher', 'coupon', 'promocode', 'aktionscode',
+  'happy hour', 'halber preis', 'half price', 'sonderpreis', 'special price',
+];
+
+const CONCRETE_DISCOUNT_PATTERNS = [
+  /\b\d{1,2}\s*%\s*(?:rabatt|off|discount)?\b/i,
+  /\b(?:nur|only|um|ab|f(?:ü|u|ue)r)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|eur|euro)\b/i,
+  /\b(?:happy\s*hour|halber\s+preis|half\s+price)\b/i,
+  /\b(?:mit\s+)?(?:code|codewort|promo(?:code)?)\s*[:\-]?\s*[a-z0-9]{3,}\b/i,
+  /\b\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|eur|euro)\s*(?:rabatt|gutschein|bonus)\b/i,
 ];
 
 const EXCLUDE_KEYWORDS = [
@@ -122,15 +147,32 @@ function normalizeHandle(value) {
   return handle;
 }
 
+function keywordPattern(keyword) {
+  const normalized = normalizeText(keyword).toLowerCase();
+  const escaped = normalized.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+  const startsWithWord = /^[\p{L}\p{N}]/u.test(normalized);
+  const endsWithWord = /[\p{L}\p{N}]$/u.test(normalized);
+  return new RegExp(
+    `${startsWithWord ? '(?<![\\p{L}\\p{N}_-])' : ''}${escaped}${endsWithWord ? '(?![\\p{L}\\p{N}_-])' : ''}`,
+    'iu',
+  );
+}
+
 function containsAny(text, keywords) {
   const haystack = normalizeText(text).toLowerCase();
   if (!haystack) return false;
-  return keywords.some((keyword) => haystack.includes(keyword));
+  return keywords.some((keyword) => keywordPattern(keyword).test(haystack));
+}
+
+function boundedInt(value, fallback, min, max) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(min, Math.min(max, Math.floor(parsed)));
 }
 
 function collectMatchedKeywords(text, keywords) {
   const haystack = normalizeText(text).toLowerCase();
-  return keywords.filter((keyword) => haystack.includes(keyword));
+  return keywords.filter((keyword) => keywordPattern(keyword).test(haystack));
 }
 
 function uniquePostUrl(value) {
@@ -139,9 +181,10 @@ function uniquePostUrl(value) {
   try {
     const url = new URL(raw.startsWith('http') ? raw : `https://www.instagram.com${raw}`);
     if (!/instagram\.com$/i.test(url.hostname) && !/\.instagram\.com$/i.test(url.hostname)) return '';
-    const match = url.pathname.match(/^\/(p|reel)\/([^/?#]+)\/?/i);
+    const match = url.pathname.match(/^\/(p|reel|reels|tv)\/([^/?#]+)\/?/i);
     if (!match) return '';
-    return `https://www.instagram.com/${match[1].toLowerCase()}/${match[2]}/`;
+    const type = /^reels?$/i.test(match[1]) ? 'reel' : match[1].toLowerCase();
+    return `https://www.instagram.com/${type}/${match[2]}/`;
   } catch {
     return '';
   }
@@ -164,12 +207,8 @@ function parseIsoDate(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function resolveYear(monthIndex, now, preferredYear) {
-  if (Number.isInteger(preferredYear)) return preferredYear;
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth();
-  if (monthIndex < currentMonth - 2) return currentYear + 1;
-  return currentYear;
+function resolveYear(monthIndex, day, now, preferredYear) {
+  return inferCaptionDateYear(monthIndex, day, now, preferredYear);
 }
 
 function parseNumericDates(text, now) {
@@ -182,8 +221,8 @@ function parseNumericDates(text, now) {
     const explicitYear = match[3]
       ? (match[3].length === 2 ? Number(`20${match[3]}`) : Number(match[3]))
       : null;
-    const year = resolveYear(monthIndex, now, explicitYear);
-    const date = new Date(year, monthIndex, day, 12, 0, 0, 0);
+    const year = resolveYear(monthIndex, day, now, explicitYear);
+    const date = new Date(Date.UTC(year, monthIndex, day, 0, 0, 0, 0));
     if (!Number.isNaN(date.getTime())) {
       results.push({ raw: match[0], date });
     }
@@ -200,8 +239,8 @@ function parseMonthNameDates(text, now) {
     if (monthIndex === undefined) continue;
     const day = Number(match[2]);
     const explicitYear = match[3] ? Number(match[3]) : null;
-    const year = resolveYear(monthIndex, now, explicitYear);
-    const date = new Date(year, monthIndex, day, 12, 0, 0, 0);
+    const year = resolveYear(monthIndex, day, now, explicitYear);
+    const date = new Date(Date.UTC(year, monthIndex, day, 0, 0, 0, 0));
     if (!Number.isNaN(date.getTime())) {
       results.push({ raw: match[0], date });
     }
@@ -217,6 +256,7 @@ function parseDateToken(token, now) {
 function extractValidity(text, now, postPublishedAt, maxFutureValidityDays) {
   const cleaned = normalizeText(text);
   const lower = cleaned.toLowerCase();
+  const dateReference = parseIsoDate(postPublishedAt) || now;
 
   if (!cleaned) {
     return { explicit: false, validFrom: null, validUntil: null, isFuture: false };
@@ -226,25 +266,17 @@ function extractValidity(text, now, postPublishedAt, maxFutureValidityDays) {
     return { explicit: true, validFrom: null, validUntil: addDays(now, -1).toISOString(), isFuture: false };
   }
 
-  if (/\bnur heute\b|\btoday only\b|\bheute only\b/.test(lower)) {
-    return { explicit: true, validFrom: null, validUntil: toIsoEndOfDay(now), isFuture: false };
-  }
+  const relativeValidity = relativeCaptionValidity(cleaned, now, postPublishedAt);
+  if (relativeValidity) return relativeValidity;
 
-  if (/\bnur morgen\b|\btomorrow only\b/.test(lower)) {
-    const tomorrow = addDays(now, 1);
-    return {
-      explicit: true,
-      validFrom: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0, 0, 0).toISOString(),
-      validUntil: toIsoEndOfDay(tomorrow),
-      isFuture: true,
-    };
-  }
+  const numericRange = extractCaptionDateRange(cleaned, now, maxFutureValidityDays, dateReference);
+  if (numericRange) return numericRange;
 
   const rangeRegex = /\b(?:von|ab|from)\s+([^,\n;]+?)\s*(?:-|–|bis|to)\s*([^,\n;]+)\b/i;
   const rangeMatch = cleaned.match(rangeRegex);
   if (rangeMatch) {
-    const startDate = parseDateToken(rangeMatch[1], now);
-    const endDate = parseDateToken(rangeMatch[2], now);
+    const startDate = parseDateToken(rangeMatch[1], dateReference);
+    const endDate = parseDateToken(rangeMatch[2], dateReference);
     if (startDate || endDate) {
       const safeEnd = endDate && endDate.getTime() - now.getTime() <= maxFutureValidityDays * 24 * 60 * 60 * 1000
         ? toIsoEndOfDay(endDate)
@@ -261,7 +293,7 @@ function extractValidity(text, now, postPublishedAt, maxFutureValidityDays) {
   const untilRegex = /\b(?:bis|until|gültig bis|gueltig bis|valid until|nur bis)\s+([^,\n;]+)/i;
   const untilMatch = cleaned.match(untilRegex);
   if (untilMatch) {
-    const endDate = parseDateToken(untilMatch[1], now);
+    const endDate = parseDateToken(untilMatch[1], dateReference);
     if (endDate && endDate.getTime() - now.getTime() <= maxFutureValidityDays * 24 * 60 * 60 * 1000) {
       return {
         explicit: true,
@@ -275,7 +307,7 @@ function extractValidity(text, now, postPublishedAt, maxFutureValidityDays) {
   const startRegex = /\b(?:ab|from|starting)\s+([^,\n;]+)/i;
   const startMatch = cleaned.match(startRegex);
   if (startMatch) {
-    const startDate = parseDateToken(startMatch[1], now);
+    const startDate = parseDateToken(startMatch[1], dateReference);
     if (startDate) {
       return {
         explicit: true,
@@ -286,7 +318,7 @@ function extractValidity(text, now, postPublishedAt, maxFutureValidityDays) {
     }
   }
 
-  const allDates = [...parseNumericDates(cleaned, now), ...parseMonthNameDates(cleaned, now)]
+  const allDates = [...parseNumericDates(cleaned, dateReference), ...parseMonthNameDates(cleaned, dateReference)]
     .map((item) => item.date)
     .sort((a, b) => a - b);
   if (allDates.length === 1) {
@@ -356,7 +388,16 @@ async function collectSourceLinks(page, maxPostsPerSource) {
 
     const [snapshot, html] = await Promise.all([
       page.evaluate(() => {
-        const links = [...document.querySelectorAll('a[href]')].map((link) => link.getAttribute('href')).filter(Boolean);
+        const links = [...document.querySelectorAll('a[href*="/p/"], a[href*="/reel/"], a[href*="/reels/"]')]
+          .map((link, index) => ({
+            href: link.getAttribute('href') || '',
+            index,
+            pinned: Boolean(
+              link.querySelector('svg[aria-label*="Pinned" i], svg[aria-label*="Angepinnt" i]')
+              || link.parentElement?.querySelector('svg[aria-label*="Pinned" i], svg[aria-label*="Angepinnt" i]'),
+            ),
+          }))
+          .filter((entry) => entry.href);
         return {
           title: document.title || '',
           bodyText: document.body?.innerText?.slice(0, 2000) || '',
@@ -368,7 +409,9 @@ async function collectSourceLinks(page, maxPostsPerSource) {
     ]);
 
     const htmlMatches = [...html.matchAll(/https:\/\/www\.instagram\.com\/(?:[^"'?\s<>]+\/)?(?:p|reel)\/[^"'?#\s<>]+\/?|\/(?:[^"'?\s<>]+\/)?(?:p|reel)\/[^"'?#\s<>]+\/?/gi)].map((match) => match[0]);
-    const hrefCandidates = snapshot.hrefs.map((href) => (href.startsWith('http') ? href : `https://www.instagram.com${href}`));
+    const hrefCandidates = snapshot.hrefs
+      .sort((left, right) => Number(left.pinned) - Number(right.pinned) || left.index - right.index)
+      .map(({ href }) => (href.startsWith('http') ? href : `https://www.instagram.com${href}`));
     const postUrls = extractPostUrls([...hrefCandidates, ...htmlMatches], maxPostsPerSource);
 
     const diagnosticText = normalizeText(`${snapshot.title} ${snapshot.bodyText}`).toLowerCase();
@@ -459,7 +502,6 @@ async function extractPostData(page) {
     snapshot.metaDescription,
     snapshot.ogDescription,
     snapshot.ogTitle,
-    snapshot.bodyText,
   ]
     .map(stripQuotes)
     .filter(Boolean);
@@ -472,14 +514,16 @@ async function extractPostData(page) {
     snapshot.ogTitle?.split(':')[0],
   );
 
-  const postPublishedAt =
-    normalizeText(firstLd.uploadDate) ||
-    normalizeText(snapshot.publishedTime) ||
-    normalizeText(snapshot.timeDatetime) ||
-    (() => {
-      const date = extractPostDateFromMeta(snapshot.metaDescription) || extractPostDateFromMeta(snapshot.ogDescription);
-      return date ? date.toISOString() : '';
-    })();
+  const timestampCandidates = [
+    { value: normalizeText(firstLd.uploadDate), source: 'ldJson.uploadDate' },
+    { value: normalizeText(snapshot.publishedTime), source: 'meta.articlePublishedTime' },
+    { value: normalizeText(snapshot.timeDatetime), source: 'time.datetime' },
+  ];
+  const metaDate = extractPostDateFromMeta(snapshot.metaDescription) || extractPostDateFromMeta(snapshot.ogDescription);
+  if (metaDate) timestampCandidates.push({ value: metaDate.toISOString(), source: 'instagramMetaDescription' });
+  const realTimestamp = timestampCandidates.find((candidate) => parseIsoDate(candidate.value));
+  const postPublishedAt = realTimestamp?.value || '';
+  const postPublishedAtSource = realTimestamp?.source || '';
 
   const locationText = stripQuotes(
     firstLd?.locationCreated?.name ||
@@ -493,6 +537,7 @@ async function extractPostData(page) {
     venueName,
     locationText,
     postPublishedAt,
+    postPublishedAtSource,
     title: stripQuotes(snapshot.ogTitle || snapshot.title),
     metaDescription: stripQuotes(snapshot.metaDescription),
     ogDescription: stripQuotes(snapshot.ogDescription),
@@ -503,43 +548,52 @@ async function extractPostData(page) {
 function classifyOffer(text) {
   if (containsAny(text, BOGO_KEYWORDS)) return 'bogo';
   if (containsAny(text, FREE_KEYWORDS)) return 'free';
+  if (CONCRETE_DISCOUNT_PATTERNS.some((pattern) => pattern.test(text))) return 'discount';
   return 'other';
 }
 
 function buildDescription(post) {
-  return stripQuotes(post.caption || post.metaDescription || post.ogDescription || post.title);
+  return stripQuotes(stripInstagramMetaDescriptionPrefix(
+    post.caption || post.metaDescription || post.ogDescription || post.title,
+  ));
 }
 
-function buildItem(post, validity, input, request) {
+function buildItem(post, validity, input, request, now = new Date()) {
   const description = buildDescription(post);
   const combinedText = normalizeText([
     post.venueName,
     description,
     post.locationText,
-    post.bodyText,
   ].join(' '));
+  const locationEvidenceText = normalizeText([description, post.locationText].join(' '));
 
   const offerKind = classifyOffer(combinedText);
   const foodOrDrinkMatch = containsAny(combinedText, FOOD_DRINK_KEYWORDS);
-  const isVienna = containsAny(combinedText, VIENNA_KEYWORDS);
+  const explicitViennaSignal = containsAny(locationEvidenceText, VIENNA_KEYWORDS);
+  const seedHandle = normalizeHandle(request.userData?.seedValue);
+  const trustedViennaAccount = request.userData?.sourceType === 'account'
+    && input.verifiedViennaAccounts.includes(seedHandle);
+  const isVienna = explicitViennaSignal || trustedViennaAccount;
   const isGiveaway = containsAny(combinedText, EXCLUDE_KEYWORDS);
-  const explicitExpired = Boolean(validity.validUntil && new Date(validity.validUntil) < new Date());
+  const explicitExpired = Boolean(validity.validUntil && isCalendarDateBefore(validity.validUntil, now));
+  const explicitNotStarted = Boolean(validity.validFrom && isCalendarDateAfter(validity.validFrom, now));
   const postDate = parseIsoDate(post.postPublishedAt);
+  const postAgeDays = postDate ? (now.getTime() - postDate.getTime()) / (24 * 60 * 60 * 1000) : null;
   const explicitStartOnlyActive =
     Boolean(validity.explicit && validity.validFrom && !validity.validUntil) &&
-    new Date(validity.validFrom) <= new Date() &&
-    (!postDate || postDate >= addDays(new Date(), -input.maxAgeDaysWithoutExplicitValidity));
+    !isCalendarDateAfter(validity.validFrom, now) &&
+    Boolean(postDate && postDate >= addDays(now, -input.maxAgeDaysWithoutExplicitValidity));
   const noExplicitValidityButFreshEnough =
     !validity.explicit &&
     postDate &&
-    postDate >= addDays(new Date(), -input.maxAgeDaysWithoutExplicitValidity);
+    postDate >= addDays(now, -input.maxAgeDaysWithoutExplicitValidity);
 
   const stillValid =
     !explicitExpired &&
+    !explicitNotStarted &&
     (
-      validity.isFuture ||
       explicitStartOnlyActive ||
-      Boolean(validity.validUntil && new Date(validity.validUntil) >= new Date()) ||
+      Boolean(validity.validUntil && new Date(validity.validUntil) >= now) ||
       noExplicitValidityButFreshEnough
     );
 
@@ -551,18 +605,25 @@ function buildItem(post, validity, input, request) {
     description,
     locationText: post.locationText || '',
     postPublishedAt: post.postPublishedAt || null,
+    postPublishedAtSource: post.postPublishedAtSource || null,
+    postAgeDays,
+    maxPostAgeDays: input.maxPostAgeDays,
     validFrom: validity.validFrom,
     validUntil: validity.validUntil,
     explicitValidityDetected: validity.explicit,
     stillValid,
     offerKind,
     isVienna,
+    viennaEvidence: explicitViennaSignal
+      ? { type: 'postText', values: collectMatchedKeywords(locationEvidenceText, VIENNA_KEYWORDS) }
+      : (trustedViennaAccount ? { type: 'trustedSeedAccount', values: [seedHandle] } : null),
     foodOrDrinkMatch,
     isGiveaway,
     matchedKeywords: {
       free: collectMatchedKeywords(combinedText, FREE_KEYWORDS),
       bogo: collectMatchedKeywords(combinedText, BOGO_KEYWORDS),
-      vienna: collectMatchedKeywords(combinedText, VIENNA_KEYWORDS),
+      discount: collectMatchedKeywords(combinedText, DISCOUNT_KEYWORDS),
+      vienna: collectMatchedKeywords(locationEvidenceText, VIENNA_KEYWORDS),
       foodDrink: collectMatchedKeywords(combinedText, FOOD_DRINK_KEYWORDS),
     },
     sourcePage: request.userData?.sourcePage || null,
@@ -573,10 +634,14 @@ function buildItem(post, validity, input, request) {
 
 function getRejectReason(item) {
   if (!item.postUrl) return 'missingPostUrl';
+  if (!item.postPublishedAt || !item.postPublishedAtSource) return 'missingRealPostTimestamp';
+  if (!Number.isFinite(item.postAgeDays)) return 'invalidPostTimestamp';
+  if (item.postAgeDays < -(10 / (24 * 60))) return 'futurePostTimestamp';
+  if (item.postAgeDays > item.maxPostAgeDays) return 'postTooOld';
   if (item.isGiveaway) return 'giveaway';
   if (!item.isVienna) return 'notVienna';
   if (!item.foodOrDrinkMatch) return 'notFoodOrDrink';
-  if (item.offerKind === 'other') return 'noFreeOrBogoSignal';
+  if (item.offerKind === 'other') return 'noConcreteOfferSignal';
   if (!item.stillValid) return 'expiredOrTooOld';
   return '';
 }
@@ -631,7 +696,23 @@ await Actor.main(async () => {
     ...DEFAULT_INPUT,
     ...rawInput,
     seedAccounts: (rawInput.seedAccounts || DEFAULT_INPUT.seedAccounts).map(normalizeHandle).filter(Boolean),
+    verifiedViennaAccounts: (rawInput.verifiedViennaAccounts || DEFAULT_INPUT.verifiedViennaAccounts).map(normalizeHandle).filter(Boolean),
     seedHashtags: (rawInput.seedHashtags || DEFAULT_INPUT.seedHashtags).map((tag) => normalizeText(tag).replace(/^#/, '')).filter(Boolean),
+    maxPostsPerSource: boundedInt(rawInput.maxPostsPerSource, DEFAULT_INPUT.maxPostsPerSource, 1, 12),
+    maxPostsToInspect: boundedInt(rawInput.maxPostsToInspect, DEFAULT_INPUT.maxPostsToInspect, 1, 500),
+    maxPostAgeDays: boundedInt(rawInput.maxPostAgeDays, DEFAULT_INPUT.maxPostAgeDays, 1, 30),
+    maxAgeDaysWithoutExplicitValidity: boundedInt(
+      rawInput.maxAgeDaysWithoutExplicitValidity,
+      DEFAULT_INPUT.maxAgeDaysWithoutExplicitValidity,
+      1,
+      30,
+    ),
+    maxFutureValidityDays: boundedInt(
+      rawInput.maxFutureValidityDays,
+      DEFAULT_INPUT.maxFutureValidityDays,
+      1,
+      365,
+    ),
   };
 
   const now = new Date();
@@ -644,7 +725,7 @@ await Actor.main(async () => {
   };
   const requestQueue = await RequestQueue.open();
   const sourceStats = {};
-  const seenPostUrls = new Set();
+  const seenPostContexts = new Set();
   const acceptedUrls = new Set();
   const rejectReasons = {};
   let queuedPostCount = 0;
@@ -696,8 +777,15 @@ await Actor.main(async () => {
       if (request.userData.label === 'SOURCE') {
         const contextCookieDiagnostics = await getContextCookieDiagnostics(page);
         const { postUrls, diagnostic } = await collectSourceLinks(page, input.maxPostsPerSource);
-        const freshPostUrls = postUrls.filter((url) => !seenPostUrls.has(url)).slice(0, Math.max(0, input.maxPostsToInspect - queuedPostCount));
-        freshPostUrls.forEach((url) => seenPostUrls.add(url));
+        // Preserve a verified account context even when a hashtag discovers
+        // the same URL first. Hashtag duplicates still share one context.
+        const contextKey = (url) => request.userData.sourceType === 'account'
+          ? `account:${request.userData.seedValue}:${url}`
+          : `hashtag:${url}`;
+        const freshPostUrls = postUrls
+          .filter((url) => !seenPostContexts.has(contextKey(url)))
+          .slice(0, Math.max(0, input.maxPostsToInspect - queuedPostCount));
+        freshPostUrls.forEach((url) => seenPostContexts.add(contextKey(url)));
 
         queuedPostCount += freshPostUrls.length;
         sourceStats[request.url].queued = freshPostUrls.length;
@@ -713,7 +801,7 @@ await Actor.main(async () => {
           await currentCrawler.addRequests(
             freshPostUrls.map((url) => ({
               url,
-              uniqueKey: url,
+              uniqueKey: contextKey(url),
               userData: {
                 label: 'POST',
                 sourceType: request.userData.sourceType,
@@ -735,13 +823,13 @@ await Actor.main(async () => {
 
       const post = await extractPostData(page);
       const validity = extractValidity(
-        [post.caption, post.metaDescription, post.ogDescription, post.bodyText].join(' '),
+        [post.caption, post.metaDescription, post.ogDescription].join(' '),
         now,
         post.postPublishedAt,
         input.maxFutureValidityDays,
       );
 
-      const item = buildItem(post, validity, input, request);
+      const item = buildItem(post, validity, input, request, now);
       sourceStats[request.userData.sourcePage].visited += 1;
 
       const rejectReason = getRejectReason(item);

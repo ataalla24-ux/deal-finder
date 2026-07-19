@@ -1,17 +1,18 @@
-name: "Apify Instagram Daily"
+name: "Apify Instagram Fresh Scan"
 
 on:
   schedule:
-    - cron: '40 3 * * *'
+    - cron: '40 */6 * * *'
   workflow_dispatch:
 
 concurrency:
-  group: apify-instagram-daily
-  cancel-in-progress: false
+  group: deal-pending-writer
+  queue: max
 
 jobs:
   scrape-apify-instagram:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     permissions:
       contents: write
     steps:
@@ -24,31 +25,41 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Check Instagram Auth
-        id: instagram-auth
-        env:
-          INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
-          INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
-          APIFY_INSTAGRAM_VIENNA_ACTOR_ID: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
-          INSTAGRAM_AUTH_CONTEXT: Apify Instagram Daily
-          INSTAGRAM_AUTH_TEST_USERNAME: ciosgrill
-          INSTAGRAM_AUTH_ATTEMPTS: "3"
-          INSTAGRAM_AUTH_BACKOFF_MS: "60000"
-          INSTAGRAM_AUTH_CLEAR_PENDING_ON_FAILURE: "0"
-          INSTAGRAM_AUTH_CLEAR_MODE: apify
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
-        run: node scripts/check-instagram-auth.mjs
+      - name: Test Instagram reliability guards
+        run: |
+          node scripts/test-instagram-auth-reliability.mjs
+          node scripts/test-apify-instagram-reliability.mjs
 
       - name: Run Apify Instagram Import
-        if: steps.instagram-auth.outputs.ok == 'true'
+        id: apify-import
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           APIFY_INSTAGRAM_VIENNA_ACTOR_ID: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
           APIFY_INSTAGRAM_COOKIE_STRING: ${{ secrets.INSTAGRAM_COOKIES }}
           APIFY_INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
+          APIFY_INSTAGRAM_SHARD_INDEX: ${{ github.run_number }}
+          APIFY_INSTAGRAM_ACCOUNT_SHARDS: "4"
+          APIFY_INSTAGRAM_HOT_ACCOUNT_COUNT: "6"
+          APIFY_INSTAGRAM_MAX_ACCOUNTS: "24"
+          APIFY_INSTAGRAM_MAX_HASHTAGS: "6"
+          APIFY_INSTAGRAM_POSTS_PER_SOURCE: "9"
+          APIFY_INSTAGRAM_MAX_POSTS_TO_INSPECT: "120"
+          APIFY_INSTAGRAM_MAX_POST_AGE_DAYS: "7"
+          APIFY_INSTAGRAM_MAX_AGE_WITHOUT_EXPLICIT_VALIDITY_DAYS: "3"
+          APIFY_INSTAGRAM_UNKNOWN_EXPIRY_TTL_HOURS: "72"
         run: node scraper/import-apify-instagram-deals.js
 
+      - name: Merge verified Instagram evidence
+        run: node scraper/merge-instagram-pending.js
+
+      - name: Send newly verified Instagram deals to Slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          PENDING_FILE_NAMES: deals-pending-instagram-verified.json
+        run: node scraper/slack-notify.js
+
       - name: Commit Apify Instagram updates
+        if: always()
         run: |
-          node scripts/commit-generated.mjs --message "Apify Instagram sync $(date +%Y-%m-%d)" --files docs/deals-pending-instagram-apify.json docs/apify-instagram-report.json docs/instagram-auth-health.json
+          node scripts/commit-generated.mjs --message "Apify Instagram sync $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-instagram-apify.json docs/apify-instagram-report.json docs/deals-pending-instagram-verified.json docs/deals-pending-all.json

@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: tiktok-deal-scanner
-  cancel-in-progress: false
+  group: deal-pending-writer
+  queue: max
 
 permissions:
   contents: write
@@ -43,5 +43,6 @@ jobs:
         run: node scraper/slack-notify.js
 
       - name: Commit TikTok scanner state
+        if: always()
         run: |
           node scripts/commit-generated.mjs --message "TikTok deals $(date +%Y-%m-%d)" --files docs/deals-pending-tiktok.json docs/tiktok-scanner-report.json docs/deals-pending-all.json docs/deal-validity-report.json

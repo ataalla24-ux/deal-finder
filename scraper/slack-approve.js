@@ -11,6 +11,7 @@ import {
 } from './deal-moderation-utils.js';
 import { isVagueExpiry, normalizeDealExpiry, parseExpiryDetails } from './expiry-utils.js';
 import { isDealNewByDate } from './deal-freshness-utils.js';
+import { canonicalSocialPostKey, mergeDealEvidence } from './deal-evidence-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,6 +49,7 @@ const APPROVE_SLACK_REACTION_USER = cleanText(process.env.APPROVE_SLACK_REACTION
 const MAX_APPROVAL_URL_EXPIRY_CHECKS = Number(process.env.MAX_APPROVAL_URL_EXPIRY_CHECKS || 50);
 const APPROVE_FULL_SCAN_MAX_THREADS = Number(process.env.APPROVE_FULL_SCAN_MAX_THREADS || 8);
 const APPROVE_FULL_SCAN_MAX_DEALS = Number(process.env.APPROVE_FULL_SCAN_MAX_DEALS || 250);
+const PENDING_QUEUE_TTL_DAYS = Number(process.env.PENDING_QUEUE_TTL_DAYS || 14);
 const LIVE_DEAL_REMOVALS_ENABLED = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
 const BLOCKED_APPROVAL_URL_PATTERNS = [
   /tiktok\.com\/@planetmatters\/video\/7634961057521437975/i,
@@ -242,6 +244,8 @@ function slackTsNumber(value) {
 function pendingApprovalKey(deal) {
   const slackTs = cleanText(deal?.slackTs);
   if (slackTs) return `slack:${slackTs}`;
+  const socialPostKey = canonicalSocialPostKey(deal?.url);
+  if (socialPostKey) return socialPostKey;
   const id = cleanText(deal?.id);
   if (id) return `id:${id}`;
   const url = normalizeUrl(deal?.url).toLowerCase();
@@ -255,8 +259,9 @@ function uniqueDealsByApprovalKey(deals) {
   const byKey = new Map();
   for (const deal of deals) {
     const key = pendingApprovalKey(deal);
-    if (!key || byKey.has(key)) continue;
-    byKey.set(key, deal);
+    if (!key) continue;
+    const existing = byKey.get(key);
+    byKey.set(key, existing ? mergeDealEvidence(existing, deal) : deal);
   }
   return [...byKey.values()];
 }
@@ -352,8 +357,7 @@ function isSocialDeal(deal) {
 
 function getCanonicalSocialPostKey(deal) {
   if (!isSocialDeal(deal)) return '';
-  const url = normalizeUrl(deal?.url).toLowerCase();
-  return url || '';
+  return canonicalSocialPostKey(deal?.url) || normalizeUrl(deal?.url).toLowerCase();
 }
 
 function getSemanticOfferKey(deal) {
@@ -479,14 +483,14 @@ function toIsoDate(value) {
   return d.toISOString();
 }
 
-function normalizeDeal(raw) {
+function normalizeDeal(raw, options = {}) {
   const deal = ensureObject(raw);
   const brand = cleanText(deal.brand) || 'Wien Deals';
   const title = cleanText(deal.title) || `${brand} Deal`;
   const description = cleanText(deal.description);
   const url = normalizeUrl(deal.url);
   const type = cleanText(deal.type).toLowerCase() || 'rabatt';
-  const distance = cleanText(deal.distance || deal.location || deal.ort) || 'Wien';
+  const distance = cleanText(deal.distance || deal.location || deal.ort || deal.address);
   const category = normalizeCategoryForScraper(deal.category, [
     brand,
     title,
@@ -497,13 +501,13 @@ function normalizeDeal(raw) {
     deal.source,
     deal.originSource,
   ]);
-  const pubDate = toIsoDate(deal.pubDate) || new Date().toISOString();
-  const approvedAt = toIsoDate(deal.approvedAt) || new Date().toISOString();
+  const pubDate = toIsoDate(deal.sourcePublishedAt || deal.postPublishedAt || deal.pubDate);
+  const approvedAt = options.pending ? '' : toIsoDate(deal.approvedAt);
   const rawMissing = Array.isArray(deal.missingFields) ? deal.missingFields : [];
   const missingFields = [];
   if (!url) missingFields.push('Ziel-URL');
-  if (!cleanText(deal.distance || deal.location || deal.ort)) missingFields.push('Ort');
-  if (!cleanText(deal.expires || deal.end_date || deal.validity_date || '')) missingFields.push('Ablauf');
+  if (!cleanText(deal.distance || deal.location || deal.ort || deal.address || deal.city || deal.postalCode)) missingFields.push('Ort');
+  if (!cleanText(deal.expires || deal.validUntil || deal.validOn || deal.end_date || deal.validity_date || '')) missingFields.push('Ablauf');
   if (!cleanText(deal.source)) missingFields.push('Quelle');
   for (const item of rawMissing) {
     const t = cleanText(item);
@@ -523,12 +527,32 @@ function normalizeDeal(raw) {
     distance,
     source: cleanText(deal.source) || 'Slack Approved',
     originSource: cleanText(deal.originSource) || cleanText(deal.source) || 'Slack Approved',
-    expires: cleanText(deal.expires),
-    expiresOriginal: cleanText(deal.expiresOriginal || deal.expires),
+    expires: cleanText(deal.expires || deal.validUntil || deal.validOn),
+    expiresOriginal: cleanText(deal.expiresOriginal || deal.expires || deal.validUntil || deal.validOn),
     expiresPrecision: cleanText(deal.expiresPrecision),
     expiresSource: cleanText(deal.expiresSource),
+    expirySource: cleanText(deal.expirySource || deal.expiresSource),
+    expiryKind: cleanText(deal.expiryKind),
+    expiryDisplayText: cleanText(deal.expiryDisplayText),
+    validOn: cleanText(deal.validOn),
+    validFrom: cleanText(deal.validFrom),
+    validUntil: cleanText(deal.validUntil),
+    dateConfidence: cleanText(deal.dateConfidence),
     expiresDetectedFromUrl: Boolean(deal.expiresDetectedFromUrl),
+    ownerUsername: cleanText(deal.ownerUsername || deal.owner?.username),
+    instagramHandle: cleanText(deal.instagramHandle || deal.instagramUsername),
+    city: cleanText(deal.city),
+    postalCode: cleanText(deal.postalCode || deal.zip || deal.zipCode),
+    address: cleanText(deal.address || deal.streetAddress || deal.venueAddress),
+    location: cleanText(typeof deal.location === 'string' ? deal.location : deal.location?.name),
+    viennaVerified: deal.viennaVerified === true,
+    viennaEvidence: ensureObject(deal.viennaEvidence),
+    evidence: ensureObject(deal.evidence),
+    sourcePublishedAt: pubDate,
+    sourcePublishedAtSource: cleanText(deal.sourcePublishedAtSource || deal.pubDateSource),
     pubDate,
+    pubDateSource: cleanText(deal.pubDateSource || deal.sourcePublishedAtSource),
+    discoveredAt: toIsoDate(deal.discoveredAt),
     qualityScore: Number(deal.qualityScore) || 0,
     votes: Number(deal.votes) || 1,
     priority: Number(deal.priority) || 3,
@@ -582,9 +606,51 @@ function loadJson(filePath, fallback) {
   }
 }
 
+function pendingQueueTimestamp(deal) {
+  const slackTs = Number.parseFloat(cleanText(deal?.slackTs));
+  if (Number.isFinite(slackTs) && slackTs > 0) return slackTs * 1000;
+  for (const value of [deal?.discoveredAt, deal?.sourcePublishedAt, deal?.pubDate]) {
+    const timestamp = Date.parse(cleanText(value));
+    if (Number.isFinite(timestamp)) return timestamp;
+  }
+  return 0;
+}
+
+function prunePendingQueue(deals, now = Date.now()) {
+  const ttlMs = Number.isFinite(PENDING_QUEUE_TTL_DAYS) && PENDING_QUEUE_TTL_DAYS > 0
+    ? PENDING_QUEUE_TTL_DAYS * 24 * 60 * 60 * 1000
+    : 0;
+  let expiredCount = 0;
+  let staleCount = 0;
+  const kept = uniqueDealsByApprovalKey(deals).filter((deal) => {
+    const expiryText = cleanText(deal?.validUntil || deal?.expires);
+    const dateOnlyOrMidnight = expiryText.match(/^(\d{4}-\d{2}-\d{2})(?:T00:00:00(?:\.000)?Z)?$/)?.[1];
+    const expiry = Date.parse(dateOnlyOrMidnight
+      ? `${dateOnlyOrMidnight}T23:59:59.999Z`
+      : expiryText);
+    if (Number.isFinite(expiry) && expiry < now) {
+      expiredCount += 1;
+      return false;
+    }
+    const queuedAt = pendingQueueTimestamp(deal);
+    if (ttlMs > 0 && queuedAt > 0 && now - queuedAt > ttlMs) {
+      staleCount += 1;
+      return false;
+    }
+    return true;
+  });
+  if (expiredCount || staleCount) {
+    console.log(`🧹 pending queue cleanup: ${expiredCount} expired, ${staleCount} older than ${PENDING_QUEUE_TTL_DAYS} day(s)`);
+  }
+  return kept;
+}
+
 function loadPendingDeals() {
   const parsed = loadJson(PENDING_ALL_PATH, { deals: [] });
-  return ensureArray(parsed.deals).map(normalizeDeal).filter((d) => d.slackTs);
+  const normalized = ensureArray(parsed.deals)
+    .map((deal) => normalizeDeal(deal, { pending: true }))
+    .filter((deal) => deal.slackTs);
+  return prunePendingQueue(normalized);
 }
 
 function loadExistingApprovedDeals() {
@@ -764,9 +830,13 @@ function saveDealsJson(deals) {
 }
 
 function savePendingRemaining(unapprovedDeals) {
+  const cleanedDeals = prunePendingQueue(unapprovedDeals).map((deal) => {
+    const { approvedAt: _approvedAt, ...pendingDeal } = deal;
+    return pendingDeal;
+  });
   const payload = {
-    deals: unapprovedDeals,
-    totalDeals: unapprovedDeals.length,
+    deals: cleanedDeals,
+    totalDeals: cleanedDeals.length,
     updatedAt: new Date().toISOString(),
   };
   fs.writeFileSync(PENDING_ALL_PATH, JSON.stringify(payload, null, 2));
@@ -1021,7 +1091,16 @@ async function main() {
   console.log(`💾 pending queue updated: ${remainingPending.length} deals left`);
 }
 
-main().catch((error) => {
-  console.error('❌ slack-approve failed:', error.message);
-  process.exit(1);
-});
+export {
+  normalizeDeal,
+  pendingApprovalKey,
+  prunePendingQueue,
+  uniqueDealsByApprovalKey,
+};
+
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main().catch((error) => {
+    console.error('❌ slack-approve failed:', error.message);
+    process.exit(1);
+  });
+}

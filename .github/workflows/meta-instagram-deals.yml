@@ -1,0 +1,68 @@
+name: "Meta Instagram Deal Discovery"
+
+on:
+  schedule:
+    - cron: '10 */2 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: deal-pending-writer
+  queue: max
+
+permissions:
+  contents: write
+
+jobs:
+  collect-and-notify:
+    if: ${{ vars.ENABLE_META_INSTAGRAM_DISCOVERY == '1' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Collect official Meta Instagram deals
+        env:
+          META_AD_LIBRARY_ACCESS_TOKEN: ${{ secrets.META_AD_LIBRARY_ACCESS_TOKEN }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
+          META_AD_LIBRARY_SEARCH_TERMS: ${{ vars.META_AD_LIBRARY_SEARCH_TERMS }}
+          META_INSTAGRAM_HASHTAGS: ${{ vars.META_INSTAGRAM_HASHTAGS }}
+          META_INSTAGRAM_ACCOUNTS: ${{ vars.META_INSTAGRAM_ACCOUNTS }}
+          META_INSTAGRAM_VERIFIED_ACCOUNTS: ${{ vars.META_INSTAGRAM_VERIFIED_ACCOUNTS }}
+          META_INSTAGRAM_MAX_ACCOUNTS_PER_RUN: '20'
+          META_INSTAGRAM_MEDIA_PER_ACCOUNT: '6'
+          META_INSTAGRAM_MAX_POST_AGE_HOURS: '72'
+          META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS: '7'
+          META_INSTAGRAM_UNKNOWN_EXPIRY_TTL_HOURS: '72'
+          META_INSTAGRAM_MAX_DEALS_PER_RUN: '40'
+          META_INSTAGRAM_SEEN_TTL_DAYS: '7'
+          META_INSTAGRAM_ALLOW_WATCHLIST_VIENNA: '0'
+          META_INSTAGRAM_REQUIRE_SOURCE: '1'
+        run: node scraper/meta-instagram-deals.js
+
+      - name: Verify factual collector status
+        run: node scripts/verify-meta-instagram-report.mjs
+
+      - name: Merge evidence from official, AI and Apify Instagram sources
+        run: node scraper/merge-instagram-pending.js
+
+      - name: Send verified new Meta Instagram deals to Slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          PENDING_FILE_NAMES: deals-pending-instagram-verified.json
+        run: node scraper/slack-notify.js
+
+      - name: Commit collector state
+        if: always()
+        run: |
+          node scripts/commit-generated.mjs --message "Meta Instagram deals $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-meta-instagram.json docs/meta-instagram-report.json docs/meta-instagram-state.json docs/deals-pending-instagram-verified.json docs/deals-pending-all.json

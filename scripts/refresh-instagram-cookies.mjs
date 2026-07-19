@@ -51,6 +51,15 @@ const INSTAGRAM_PROMPT_BUTTONS = [
   'Fortfahren',
 ];
 
+class InstagramRefreshError extends Error {
+  constructor(status, message, details = {}) {
+    super(message);
+    this.name = 'InstagramRefreshError';
+    this.status = status;
+    this.details = details;
+  }
+}
+
 function cleanText(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
 }
@@ -346,7 +355,7 @@ async function handleEmailCodeChallenge(page) {
   }
 
   if (!code) {
-    throw new Error('Instagram verlangt einen E-Mail-Bestätigungscode. Konfiguriere die Gmail API Secrets oder starte den Workflow manuell mit instagram_email_code.');
+    throw new Error('Instagram verlangt einen E-Mail-Bestätigungscode. Konfiguriere die Gmail API Secrets oder das Repository Secret INSTAGRAM_EMAIL_CODE.');
   }
 
   mask(code);
@@ -456,6 +465,7 @@ async function validateBrowserSession(page) {
         status: response.status,
         username: parsed?.data?.user?.username || '',
         bodySample: text.slice(0, 300),
+        retryAfter: response.headers.get('retry-after') || '',
       };
     } catch (error) {
       return { ok: false, status: 0, username: '', bodySample: String(error?.message || error || '') };
@@ -463,7 +473,22 @@ async function validateBrowserSession(page) {
   }, { username, appId: INSTAGRAM_APP_ID });
 
   if (!result.ok || !result.username) {
-    throw new Error(`Instagram Auth-Validierung fehlgeschlagen (HTTP ${result.status}): ${cleanText(result.bodySample).slice(0, 160)}`);
+    if (result.status === 429 || /please wait|try again later/i.test(result.bodySample)) {
+      throw new InstagramRefreshError(
+        'rate-limited',
+        `Instagram Auth-Validierung wurde rate-limited (HTTP ${result.status || 429})`,
+        { httpStatus: result.status || 429, retryAfter: cleanText(result.retryAfter) },
+      );
+    }
+
+    const status = result.status === 401 || /login|log in|anmelden/i.test(result.bodySample)
+      ? 'login-wall'
+      : 'validation-failed';
+    throw new InstagramRefreshError(
+      status,
+      `Instagram Auth-Validierung fehlgeschlagen (HTTP ${result.status}): ${cleanText(result.bodySample).slice(0, 160)}`,
+      { httpStatus: result.status || 0 },
+    );
   }
 
   return result;
@@ -529,7 +554,90 @@ function writeReport(report) {
   fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
 }
 
+function writeGithubStatus(report) {
+  const githubOutput = process.env.GITHUB_OUTPUT;
+  if (githubOutput) {
+    fs.appendFileSync(githubOutput, `ok=${report.ok ? 'true' : 'false'}\n`);
+    fs.appendFileSync(githubOutput, `status=${report.status}\n`);
+    fs.appendFileSync(githubOutput, `should_retry_login=${report.shouldRetryLogin ? 'true' : 'false'}\n`);
+  }
+
+  const summaryPath = process.env.GITHUB_STEP_SUMMARY;
+  if (summaryPath) {
+    fs.appendFileSync(summaryPath, [
+      '### Instagram Cookie Refresh',
+      '',
+      `- Status: ${report.status}`,
+      `- Login attempted: ${report.loginAttempted ? 'yes' : 'no'}`,
+      `- Retry login: ${report.shouldRetryLogin ? 'yes' : 'no'}`,
+      ...(report.reason ? [`- Reason: ${report.reason}`] : []),
+      '',
+    ].join('\n'));
+  }
+}
+
+function refreshPermission() {
+  const eventName = cleanText(process.env.GITHUB_EVENT_NAME).toLowerCase();
+  const reason = cleanText(env.INSTAGRAM_COOKIE_REFRESH_REASON).toLowerCase();
+  const manual = !process.env.GITHUB_ACTIONS || eventName === 'workflow_dispatch';
+  const authFailure = ['login-wall', 'invalid-session', 'missing-session', 'blocked'].includes(reason);
+  const automatedAllowed = env.INSTAGRAM_COOKIE_REFRESH_ALLOW_AUTOMATED === '1' && authFailure;
+
+  if (manual || automatedAllowed) {
+    return { allowed: true, eventName: eventName || 'local', reason: reason || (manual ? 'manual' : 'auth-failure') };
+  }
+
+  return {
+    allowed: false,
+    eventName: eventName || 'unknown',
+    reason: eventName === 'schedule'
+      ? 'scheduled-refresh-disabled'
+      : 'refresh-requires-manual-run-or-confirmed-auth-failure',
+  };
+}
+
+function classifyRefreshFailure(error) {
+  if (error instanceof InstagramRefreshError) {
+    return {
+      status: error.status,
+      reason: error.message,
+      details: error.details,
+    };
+  }
+
+  const reason = cleanText(error?.message || error);
+  if (/rate.?limit|http 429|please wait|try again later/i.test(reason)) {
+    return { status: 'rate-limited', reason, details: {} };
+  }
+  if (/challenge|verifizierung|verification|checkpoint/i.test(reason)) {
+    return { status: 'blocked', reason, details: {} };
+  }
+  if (/login-daten|wrong password|passwort.*falsch|invalid-session/i.test(reason)) {
+    return { status: 'invalid-session', reason, details: {} };
+  }
+  return { status: 'failed', reason, details: {} };
+}
+
 async function main() {
+  const permission = refreshPermission();
+  if (!permission.allowed) {
+    const report = {
+      updatedAt: new Date().toISOString(),
+      ok: false,
+      status: 'manual-only',
+      reason: permission.reason,
+      eventName: permission.eventName,
+      loginAttempted: false,
+      shouldRetryLogin: false,
+    };
+    writeReport(report);
+    writeGithubStatus(report);
+    console.log('Instagram cookie refresh: skipped');
+    console.log(`- reason: ${report.reason}`);
+    console.log('- no login request was sent to Instagram');
+    return;
+  }
+
   const username = requireEnv('INSTAGRAM_USERNAME', 'IG_USERNAME');
   const password = requireEnv('INSTAGRAM_PASSWORD', 'IG_PASSWORD');
   const headless = cleanText(env.INSTAGRAM_COOKIE_REFRESH_HEADLESS || '1') !== '0';
@@ -578,8 +686,19 @@ async function main() {
       updatedAt: new Date().toISOString(),
       ok: true,
       status: 'ok',
+      reason: permission.reason,
+      eventName: permission.eventName,
+      loginAttempted: true,
+      shouldRetryLogin: false,
       validation,
       diagnostics: output.diagnostics,
+    });
+
+    writeGithubStatus({
+      ok: true,
+      status: 'ok',
+      loginAttempted: true,
+      shouldRetryLogin: false,
     });
 
     console.log('Instagram cookie refresh: ok');
@@ -593,16 +712,19 @@ async function main() {
 }
 
 main().catch((error) => {
-  writeReport({
+  const failure = classifyRefreshFailure(error);
+  const shouldRetryLogin = ['login-wall', 'invalid-session', 'blocked'].includes(failure.status);
+  const report = {
     updatedAt: new Date().toISOString(),
     ok: false,
-    status: 'failed',
-    reason: error.message,
-  });
-  const githubOutput = process.env.GITHUB_OUTPUT;
-  if (githubOutput) {
-    fs.appendFileSync(githubOutput, 'ok=false\n');
-  }
-  console.error(`Instagram cookie refresh failed: ${error.message}`);
+    status: failure.status,
+    reason: failure.reason,
+    loginAttempted: true,
+    shouldRetryLogin,
+    ...failure.details,
+  };
+  writeReport(report);
+  writeGithubStatus(report);
+  console.error(`Instagram cookie refresh failed [${failure.status}]: ${failure.reason}`);
   process.exit(1);
 });

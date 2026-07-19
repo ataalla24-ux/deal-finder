@@ -1,6 +1,7 @@
 import '../sentry/instrument.mjs';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const ROOT = process.cwd();
 const DOCS_DIR = path.join(ROOT, 'docs');
@@ -34,7 +35,7 @@ function loadEnv() {
 
 const env = { ...loadEnv(), ...process.env };
 
-function parseCookiePairs(value) {
+export function parseCookiePairs(value) {
   const pairs = [];
   const raw = String(value || '').trim();
   if (!raw) return pairs;
@@ -127,6 +128,89 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export function parseRetryAfter(value, nowMs = Date.now()) {
+  const raw = cleanText(value);
+  if (!raw) return null;
+
+  if (/^\d+(?:\.\d+)?$/.test(raw)) {
+    return new Date(nowMs + Math.max(0, Number(raw)) * 1000);
+  }
+
+  const parsed = Date.parse(raw);
+  return Number.isNaN(parsed) ? null : new Date(Math.max(nowMs, parsed));
+}
+
+function toIsoOrEmpty(value) {
+  const timestamp = Date.parse(value || '');
+  return Number.isNaN(timestamp) ? '' : new Date(timestamp).toISOString();
+}
+
+function previousRateLimitState(previousReport) {
+  if (!previousReport || previousReport.status !== 'rate-limited') {
+    return { consecutiveRateLimits: 0, nextRetryAt: '' };
+  }
+
+  return {
+    consecutiveRateLimits: Math.max(1, Number(previousReport.consecutiveRateLimits || 1)),
+    nextRetryAt: toIsoOrEmpty(previousReport.nextRetryAt),
+  };
+}
+
+function rateLimitResult({
+  username,
+  diagnostics,
+  previousReport,
+  nowMs,
+  response,
+  bodySample = '',
+  attempt = 1,
+  circuitOpen = false,
+  config = env,
+}) {
+  const previous = previousRateLimitState(previousReport);
+  const consecutiveRateLimits = circuitOpen
+    ? previous.consecutiveRateLimits
+    : previous.consecutiveRateLimits + 1;
+  const baseCooldownMs = toPositiveInt(config.INSTAGRAM_AUTH_RATE_LIMIT_COOLDOWN_MS, 15 * 60 * 1000);
+  const maxCooldownMs = toPositiveInt(config.INSTAGRAM_AUTH_RATE_LIMIT_MAX_COOLDOWN_MS, 6 * 60 * 60 * 1000);
+  const exponentialCooldownMs = Math.min(
+    maxCooldownMs,
+    baseCooldownMs * (2 ** Math.max(0, consecutiveRateLimits - 1)),
+  );
+  const retryAfterDate = circuitOpen
+    ? (previous.nextRetryAt ? new Date(previous.nextRetryAt) : null)
+    : parseRetryAfter(response?.headers?.get?.('retry-after'), nowMs);
+  const nextRetryMs = circuitOpen && retryAfterDate
+    ? retryAfterDate.getTime()
+    : Math.max(
+      nowMs + exponentialCooldownMs,
+      retryAfterDate?.getTime?.() || 0,
+    );
+  const nextRetryAt = new Date(nextRetryMs).toISOString();
+
+  return {
+    ok: false,
+    status: 'rate-limited',
+    reason: circuitOpen
+      ? `Instagram Auth-Check pausiert bis ${nextRetryAt}`
+      : `Instagram rate-limited den Healthcheck (HTTP ${response?.status || 429}); Cookies werden nicht als ungültig markiert`,
+    username,
+    httpStatus: Number(response?.status || previousReport?.httpStatus || 429),
+    diagnostics,
+    apiUserFound: false,
+    bodySample,
+    attempts: attempt,
+    rateLimited: true,
+    circuitOpen,
+    credentialsState: 'unknown',
+    shouldRefreshCookies: false,
+    consecutiveRateLimits,
+    retryAfter: retryAfterDate?.toISOString?.() || '',
+    nextRetryAt,
+    cooldownSeconds: Math.max(0, Math.ceil((nextRetryMs - nowMs) / 1000)),
+  };
+}
+
 function instagramHeaders(cookieHeader, username) {
   return {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -138,12 +222,17 @@ function instagramHeaders(cookieHeader, username) {
   };
 }
 
-async function validateInstagramAuth(cookies) {
-  const username = cleanText(env.INSTAGRAM_AUTH_TEST_USERNAME) || DEFAULT_TEST_USERNAME;
+export async function validateInstagramAuth(cookies, options = {}) {
+  const config = options.env || env;
+  const nowMs = Number.isFinite(options.nowMs) ? options.nowMs : Date.now();
+  const fetchImpl = options.fetchImpl || fetchWithTimeout;
+  const sleepImpl = options.sleepImpl || sleep;
+  const previousReport = options.previousReport || null;
+  const username = cleanText(config.INSTAGRAM_AUTH_TEST_USERNAME) || DEFAULT_TEST_USERNAME;
   const diagnostics = cookieDiagnostics(cookies);
   const cookieHeader = buildCookieHeader(cookies);
-  const maxAttempts = Math.max(1, toPositiveInt(env.INSTAGRAM_AUTH_ATTEMPTS || env.INSTAGRAM_AUTH_RETRIES, 3));
-  const baseBackoffMs = toPositiveInt(env.INSTAGRAM_AUTH_BACKOFF_MS, 45000);
+  const maxAttempts = Math.max(1, toPositiveInt(config.INSTAGRAM_AUTH_ATTEMPTS || config.INSTAGRAM_AUTH_RETRIES, 1));
+  const baseBackoffMs = toPositiveInt(config.INSTAGRAM_AUTH_BACKOFF_MS, 15000);
 
   if (!diagnostics.hasSessionCookie) {
     return {
@@ -153,21 +242,38 @@ async function validateInstagramAuth(cookies) {
       username,
       httpStatus: 0,
       diagnostics,
+      credentialsState: 'missing',
+      shouldRefreshCookies: true,
+      rateLimited: false,
+      circuitOpen: false,
     };
+  }
+
+  const previous = previousRateLimitState(previousReport);
+  if (previous.nextRetryAt && Date.parse(previous.nextRetryAt) > nowMs) {
+    return rateLimitResult({
+      username,
+      diagnostics,
+      previousReport,
+      nowMs,
+      attempt: 0,
+      circuitOpen: true,
+      config,
+    });
   }
 
   const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
   let lastFailure = null;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     if (attempt > 1) {
-      await sleep(baseBackoffMs * (attempt - 1));
+      await sleepImpl(baseBackoffMs * (attempt - 1));
     }
 
     try {
-      const response = await fetchWithTimeout(url, {
+      const response = await fetchImpl(url, {
         method: 'GET',
         headers: instagramHeaders(cookieHeader, username),
-      }, Number(env.INSTAGRAM_AUTH_TIMEOUT_MS || 15000));
+      }, Number(config.INSTAGRAM_AUTH_TIMEOUT_MS || 15000));
 
       const contentType = cleanText(response.headers.get('content-type')).toLowerCase();
       const bodyText = await response.text();
@@ -191,6 +297,12 @@ async function validateInstagramAuth(cookies) {
           diagnostics,
           apiUserFound: true,
           attempts: attempt,
+          credentialsState: 'valid',
+          shouldRefreshCookies: false,
+          rateLimited: false,
+          circuitOpen: false,
+          consecutiveRateLimits: 0,
+          nextRetryAt: '',
         };
       }
 
@@ -198,11 +310,32 @@ async function validateInstagramAuth(cookies) {
       const lowerSample = bodySample.toLowerCase();
       const loginWall = lowerSample.includes('login') || lowerSample.includes('log in') || lowerSample.includes('anmelden');
       const rateLimited = response.status === 429 || lowerSample.includes('please wait');
-      const blocked = response.status === 403 || lowerSample.includes('challenge');
+      const challengeRequired = lowerSample.includes('challenge_required')
+        || lowerSample.includes('checkpoint_required')
+        || lowerSample.includes('/challenge/');
+      const blocked = response.status === 403 || challengeRequired;
+      const invalidSession = response.status === 401 || loginWall;
+      const confirmedCredentialFailure = invalidSession || challengeRequired;
+      const serviceUnavailable = response.status >= 500;
+
+      if (rateLimited) {
+        return rateLimitResult({
+          username,
+          diagnostics,
+          previousReport,
+          nowMs,
+          response,
+          bodySample,
+          attempt,
+          config,
+        });
+      }
 
       lastFailure = {
         ok: false,
-        status: rateLimited ? 'rate-limited' : (blocked ? 'blocked' : (loginWall ? 'login-wall' : 'invalid-session')),
+        status: blocked
+          ? 'blocked'
+          : (loginWall ? 'login-wall' : (invalidSession ? 'invalid-session' : (serviceUnavailable ? 'service-unavailable' : 'unexpected-response'))),
         reason: `Instagram API lieferte HTTP ${response.status}`,
         username,
         httpStatus: response.status,
@@ -210,9 +343,13 @@ async function validateInstagramAuth(cookies) {
         apiUserFound: false,
         bodySample,
         attempts: attempt,
+        rateLimited: false,
+        circuitOpen: false,
+        credentialsState: confirmedCredentialFailure ? 'invalid' : 'unknown',
+        shouldRefreshCookies: confirmedCredentialFailure,
       };
 
-      if (!rateLimited) return lastFailure;
+      if (!serviceUnavailable || attempt === maxAttempts) return lastFailure;
     } catch (error) {
       lastFailure = {
         ok: false,
@@ -223,8 +360,12 @@ async function validateInstagramAuth(cookies) {
         diagnostics,
         apiUserFound: false,
         attempts: attempt,
+        rateLimited: false,
+        circuitOpen: false,
+        credentialsState: 'unknown',
+        shouldRefreshCookies: false,
       };
-      return lastFailure;
+      if (attempt === maxAttempts) return lastFailure;
     }
   }
 
@@ -237,6 +378,10 @@ async function validateInstagramAuth(cookies) {
     diagnostics,
     apiUserFound: false,
     attempts: maxAttempts,
+    rateLimited: false,
+    circuitOpen: false,
+    credentialsState: 'unknown',
+    shouldRefreshCookies: false,
   };
 }
 
@@ -269,7 +414,7 @@ function buildEmptyPayload(source, report) {
 }
 
 function clearPendingOutputsIfRequested(report) {
-  if (report.ok || env.INSTAGRAM_AUTH_CLEAR_PENDING_ON_FAILURE !== '1') return [];
+  if (report.ok || !report.shouldRefreshCookies || env.INSTAGRAM_AUTH_CLEAR_PENDING_ON_FAILURE !== '1') return [];
 
   const mode = cleanText(env.INSTAGRAM_AUTH_CLEAR_MODE).toLowerCase();
   const written = [];
@@ -351,13 +496,19 @@ function shouldNotifySlack(report, previousReport) {
 async function postSlackWarning(report, clearedFiles) {
   const context = report.context || 'Instagram Auth';
   const cleared = clearedFiles.length ? `\nGeleerte Dateien: ${clearedFiles.join(', ')}` : '';
+  const headline = report.rateLimited
+    ? `⏸️ *Instagram Healthcheck rate-limited* (${context})`
+    : `⚠️ *Instagram Auth kaputt* (${context})`;
+  const recommendation = report.rateLimited
+    ? `Keine Cookie-Erneuerung auslösen. Nächster Versuch frühestens: ${report.nextRetryAt || 'nach Cooldown'}.`
+    : 'Instagram-Session/Cookies nur bei echter Login-Wall oder ungültiger Session erneuern.';
   const text = [
-    `⚠️ *Instagram Auth kaputt* (${context})`,
+    headline,
     `Status: ${report.status}`,
     `Grund: ${report.reason}`,
     `Testprofil: ${report.username}`,
     `Cookies: sessionid=${report.diagnostics.hasSessionCookie ? 'ja' : 'nein'}, csrftoken=${report.diagnostics.hasCsrfCookie ? 'ja' : 'nein'}, gesamt=${report.diagnostics.cookieCount}`,
-    'Bitte Instagram-Session/Cookies erneuern; sonst liefern Apify/Daily Sync keine Posts.',
+    recommendation,
     cleared,
   ].filter(Boolean).join('\n');
 
@@ -383,6 +534,10 @@ function writeGithubOutputs(report) {
     fs.appendFileSync(outputPath, `ok=${report.ok ? 'true' : 'false'}\n`);
     fs.appendFileSync(outputPath, `status=${report.status}\n`);
     fs.appendFileSync(outputPath, `reason=${report.reason.replace(/\n/g, ' ')}\n`);
+    fs.appendFileSync(outputPath, `rate_limited=${report.rateLimited ? 'true' : 'false'}\n`);
+    fs.appendFileSync(outputPath, `circuit_open=${report.circuitOpen ? 'true' : 'false'}\n`);
+    fs.appendFileSync(outputPath, `should_refresh=${report.shouldRefreshCookies ? 'true' : 'false'}\n`);
+    fs.appendFileSync(outputPath, `next_retry_at=${report.nextRetryAt || ''}\n`);
   }
 
   const summaryPath = process.env.GITHUB_STEP_SUMMARY;
@@ -394,6 +549,10 @@ function writeGithubOutputs(report) {
       `- Reason: ${report.reason}`,
       `- Test username: ${report.username}`,
       `- Attempts: ${report.attempts || 1}`,
+      `- Rate limited: ${report.rateLimited ? 'yes' : 'no'}`,
+      `- Circuit open: ${report.circuitOpen ? 'yes' : 'no'}`,
+      `- Refresh cookies: ${report.shouldRefreshCookies ? 'yes' : 'no'}`,
+      ...(report.nextRetryAt ? [`- Next retry: ${report.nextRetryAt}`] : []),
       `- Session cookie: ${report.diagnostics.hasSessionCookie ? 'yes' : 'no'}`,
       `- CSRF cookie: ${report.diagnostics.hasCsrfCookie ? 'yes' : 'no'}`,
       '',
@@ -401,11 +560,11 @@ function writeGithubOutputs(report) {
   }
 }
 
-async function main() {
+export async function main() {
   const reportPath = cleanText(env.INSTAGRAM_AUTH_REPORT_PATH) || DEFAULT_REPORT_PATH;
   const previousReport = readPreviousReport(reportPath);
   const cookies = collectCookiePairs();
-  const result = await validateInstagramAuth(cookies);
+  const result = await validateInstagramAuth(cookies, { previousReport });
   const report = {
     updatedAt: new Date().toISOString(),
     context: cleanText(env.INSTAGRAM_AUTH_CONTEXT) || 'local',
@@ -441,7 +600,10 @@ async function main() {
   else if (!finalReport.ok) console.log('- slack: warning not sent or suppressed');
 }
 
-main().catch((error) => {
-  console.error(`Instagram auth healthcheck crashed: ${error.message}`);
-  process.exit(1);
-});
+const isMainModule = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMainModule) {
+  main().catch((error) => {
+    console.error(`Instagram auth healthcheck crashed: ${error.message}`);
+    process.exit(1);
+  });
+}

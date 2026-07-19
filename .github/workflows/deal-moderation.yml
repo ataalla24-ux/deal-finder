@@ -36,8 +36,8 @@ on:
         type: string
 
 concurrency:
-  group: deal-moderation
-  cancel-in-progress: false
+  group: deal-pending-writer
+  queue: max
 
 permissions:
   contents: write
