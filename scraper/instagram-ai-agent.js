@@ -18,6 +18,13 @@ import {
   isFalsePositiveFreeDeal,
   normalizeDealRecord,
 } from './deal-normalization-utils.js';
+import {
+  evaluateInstagramOfferTiming,
+  extractActiveOfferWindow,
+  hasRecurringWeekdaySchedule,
+  hasViennaInstagramEvidence,
+  unicodeSafeTruncate,
+} from './instagram-ai-validity-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,6 +53,8 @@ const CONFIG = {
   maxProfileAccounts: numberEnv('INSTAGRAM_AI_MAX_PROFILE_ACCOUNTS', 8),
   maxProfilePostsPerAccount: numberEnv('INSTAGRAM_AI_MAX_PROFILE_POSTS', 4),
   maxAgeDays: numberEnv('INSTAGRAM_AI_MAX_AGE_DAYS', 7),
+  activeOfferMaxAgeDays: numberEnv('INSTAGRAM_AI_ACTIVE_OFFER_MAX_AGE_DAYS', 45),
+  publicationFutureSkewMinutes: numberEnv('INSTAGRAM_AI_PUBLICATION_FUTURE_SKEW_MINUTES', 10),
   minScore: numberEnv('INSTAGRAM_AI_MIN_SCORE', 62),
   aiCandidateLimit: numberEnv('INSTAGRAM_AI_LLM_CANDIDATES', 32),
   profileDiscoveryEnabled: process.env.INSTAGRAM_AI_DISABLE_PROFILES !== '1',
@@ -126,6 +135,8 @@ const STRONG_DEAL_PATTERNS = [
   /\b(?:nur|only|um|for just|for only)\s+\d{1,2}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)?\b/i,
   /\b\d{1,2}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)\s*(?:angebot|aktion|special|deal)\b/i,
   /\b\d{1,2}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)\s*(?:doner|doener|kebab|kebap|durum|burger|pizza|kaffee|coffee|drink|taco|wrap|falafel|croissant|baklava|menu|menue)\b/i,
+  /\b\d{1,2}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)\s*(?:matcha|latte|espresso|cappuccino)\b/i,
+  /(?:€\s*)\d{1,3}(?:[,.]\d{1,2})?\s+statt\s+(?:€\s*)?\d{1,3}(?:[,.]\d{1,2})?/i,
   /\b\d{1,2}\s*%\s*(?:rabatt|off|discount)\b/i,
   /\b(?:mittag(?:s)?deal|lunch deal|student(?:en)?deal|special price|spezialpreis)\b/i,
 ];
@@ -160,7 +171,6 @@ const DISCOVERY_ACCOUNT_PATTERNS = [
 
 const EXPIRY_PATTERNS = [
   /\b(?:abgelaufen|vorbei|nicht mehr gueltig|expired|ended)\b/i,
-  /\b(?:gestern|yesterday)\b/i,
 ];
 
 function numberEnv(name, fallback) {
@@ -195,14 +205,19 @@ function readJson(filePath, fallback = null) {
 
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+  const json = JSON.stringify(
+    value,
+    (_key, item) => (typeof item === 'string' ? unicodeSafeTruncate(item) : item),
+    2
+  );
+  fs.writeFileSync(filePath, `${json}\n`);
 }
 
 function cleanText(value = '', max = 1800) {
-  return cleanDealText(value)
-    .replace(/[\u200B-\u200D\uFEFF]/g, '')
-    .slice(0, max)
-    .trim();
+  return unicodeSafeTruncate(
+    cleanDealText(value).replace(/[\u200B-\u200D\uFEFF]/g, ''),
+    max
+  ).trim();
 }
 
 function decodeHtmlEntities(value = '') {
@@ -414,9 +429,9 @@ function mergeCandidate(existing, candidate) {
   return {
     ...existing,
     title: existing.title || candidate.title,
-    snippet: [existing.snippet, candidate.snippet].filter(Boolean).join(' ').slice(0, 1600),
+    snippet: cleanText([existing.snippet, candidate.snippet].filter(Boolean).join(' '), 1600),
     source: [...new Set([existing.source, candidate.source].filter(Boolean))].join(', '),
-    query: [...new Set([existing.query, candidate.query].filter(Boolean))].join(' | ').slice(0, 500),
+    query: cleanText([...new Set([existing.query, candidate.query].filter(Boolean))].join(' | '), 500),
     sourceDeal: existing.sourceDeal || candidate.sourceDeal,
     sourceAccount: existing.sourceAccount || candidate.sourceAccount,
     sourceCategory: existing.sourceCategory || candidate.sourceCategory,
@@ -465,7 +480,7 @@ async function searchDuckDuckGo(query) {
     },
   });
   const html = await response.text();
-  if (!response.ok) throw new Error(`HTTP ${response.status}: ${html.slice(0, 160)}`);
+  if (!response.ok) throw new Error(`HTTP ${response.status}: ${unicodeSafeTruncate(html, 160)}`);
   return parseDuckDuckGoResults(html, query);
 }
 
@@ -851,8 +866,17 @@ function offerDateSignal(candidate) {
 }
 
 function hasPattern(patterns, value) {
-  const normalized = normalizeAscii(value);
+  const normalized = patterns === STRONG_DEAL_PATTERNS
+    ? stripFreeFromClaims(normalizeAscii(value))
+    : normalizeAscii(value);
   return patterns.some((pattern) => pattern.test(normalized));
+}
+
+function stripFreeFromClaims(value = '') {
+  return String(value || '')
+    .replace(/\b(?:gluten|sugar|zucker|alcohol|alkohol|dairy|lactose|laktose|cruelty|fat|caffeine|koffein)[-\s]?free\b/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function parsePubDate(candidate) {
@@ -870,14 +894,6 @@ function ageDaysExact(date) {
   return Math.max(0, (Date.now() - date.getTime()) / DAY_MS);
 }
 
-function isPostWithinMaxAge(date) {
-  return ageDaysExact(date) <= CONFIG.maxAgeDays;
-}
-
-function localDayStart(date = new Date()) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
 function localDayEnd(year, month, day) {
   return new Date(year, month - 1, day, 23, 59, 59, 999);
 }
@@ -890,42 +906,21 @@ function addLocalDays(date, days) {
   return localDayEnd(date.getFullYear(), date.getMonth() + 1, date.getDate() + days);
 }
 
-function extractExplicitOfferDates(signal, now = new Date()) {
-  const text = normalizeAscii(signal);
-  const dates = [];
-  const patterns = [
-    { kind: 'until', regex: /\b(?:bis|gueltig bis|gultig bis|valid until|until)\s+(?:zum\s+)?([0-3]?\d)[./]([01]?\d)(?:[./](20\d{2}))?\b/g },
-    { kind: 'on', regex: /\b(?:am|nur am|only on|on)\s+([0-3]?\d)[./]([01]?\d)(?:[./](20\d{2}))?\b/g },
-  ];
-
-  for (const { kind, regex } of patterns) {
-    for (const match of text.matchAll(regex)) {
-      const day = Number(match[1]);
-      const month = Number(match[2]);
-      const year = Number(match[3]) || now.getFullYear();
-      if (day < 1 || day > 31 || month < 1 || month > 12) continue;
-      const date = localDayEnd(year, month, day);
-      if (date.getMonth() !== month - 1 || date.getDate() !== day) continue;
-      dates.push({ kind, date, text: match[0] });
-    }
-  }
-
-  return dates.sort((left, right) => left.date.getTime() - right.date.getTime());
-}
-
 function relativeOfferWindowEnd(signal, pubDate = new Date()) {
   const text = normalizeAscii(signal);
   if (!text) return null;
 
-  if (/\b(?:nur heute|heute gratis|heute|today only|today)\b/.test(text)) {
+  if (/\b(?:nur heute|heute gratis|today only|free today)\b/.test(text)) {
     return endOfLocalDay(pubDate);
   }
 
-  if (/\b(?:bis morgen|morgen|tomorrow)\b/.test(text)) {
+  if (/\b(?:bis morgen|nur morgen|tomorrow only|only tomorrow)\b/.test(text)) {
     return addLocalDays(pubDate, 1);
   }
 
-  const weekdayMatch = text.match(/\b(?:bis|until)\s+(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/);
+  const weekdayMatch = hasRecurringWeekdaySchedule(text)
+    ? null
+    : text.match(/\b(?:bis|until)\s+(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/);
   if (weekdayMatch) {
     const weekdayMap = {
       sonntag: 0,
@@ -957,11 +952,6 @@ function relativeOfferWindowEnd(signal, pubDate = new Date()) {
   return null;
 }
 
-function hasPastExplicitOfferDate(signal) {
-  const today = localDayStart();
-  return extractExplicitOfferDates(signal).some((item) => item.date.getTime() < today.getTime());
-}
-
 function hasExpiredRelativeOfferDate(signal, pubDate) {
   if (!pubDate) return false;
   const windowEnd = relativeOfferWindowEnd(signal, pubDate);
@@ -969,7 +959,7 @@ function hasExpiredRelativeOfferDate(signal, pubDate) {
 }
 
 function inferType(signal) {
-  const text = normalizeAscii(signal);
+  const text = stripFreeFromClaims(normalizeAscii(signal));
   if (/\b1\s*\+\s*1\b|\b2\s*(?:fuer|fur)\s*1\b|\bbogo\b/.test(text)) return 'bogo';
   if (/\bgratis\b|\bkostenlos\w*\b|\bfree\b|\b0\s*(?:euro|eur)\b/.test(text)) return 'gratis';
   if (/\bgutschein|coupon|voucher\b/.test(text)) return 'gutschein';
@@ -1053,8 +1043,8 @@ function isWeakTitleText(value) {
 
 function extractExpiryText(signal, pubDate = null) {
   const text = cleanText(signal, 1000);
-  const explicitDate = extractExplicitOfferDates(text)[0];
-  if (explicitDate?.date) return explicitDate.date.toISOString();
+  const activeWindow = extractActiveOfferWindow(text, { pubDate });
+  if (activeWindow?.endDate) return activeWindow.endDate.toISOString();
   const relativeEnd = pubDate ? relativeOfferWindowEnd(text, pubDate) : null;
   if (relativeEnd) return relativeEnd.toISOString();
 
@@ -1066,14 +1056,46 @@ function extractExpiryText(signal, pubDate = null) {
   return cleanText(matches[0] || '', 80);
 }
 
+function offerTimingEvidence(timing) {
+  return {
+    kind: timing.offerWindow?.kind || (timing.recurring ? 'recurring' : ''),
+    matchedText: cleanText(timing.offerWindow?.evidence || '', 180),
+    validFrom: timing.offerWindow?.startDate?.toISOString() || '',
+    validUntil: timing.offerWindow?.endDate?.toISOString() || '',
+    recurring: Boolean(timing.recurring),
+    activeOfferMaxAgeDays: timing.activeOfferMaxAgeDays,
+  };
+}
+
+function hasTrustedViennaEvidence(candidate, primarySignal) {
+  if (hasViennaInstagramEvidence(primarySignal)) return true;
+  const trustedApprovedContext = /(?:^|,\s*)deals(?:,|$)/i.test(cleanText(candidate.source));
+  if (!trustedApprovedContext && !candidate.sourceDeal?.viennaEvidence?.verified) return false;
+  const sourceLocation = [
+    candidate.sourceDeal?.distance,
+    candidate.sourceDeal?.address,
+    candidate.sourceDeal?.location,
+    candidate.sourceDeal?.ort,
+  ].map((value) => cleanText(value, 300)).filter(Boolean).join(' ');
+  return hasPattern(VIENNA_PATTERNS, sourceLocation);
+}
+
 function buildQualityScore(candidate, signal) {
   const reasons = [];
   let score = 0;
 
   const primarySignal = postSignal(candidate) || signal;
   const pubDate = parsePubDate(candidate);
+  const dateSignal = offerDateSignal(candidate) || primarySignal;
+  const offerTiming = evaluateInstagramOfferTiming({
+    signal: dateSignal,
+    pubDate: pubDate?.date,
+    maxAgeDays: CONFIG.maxAgeDays,
+    activeOfferMaxAgeDays: CONFIG.activeOfferMaxAgeDays,
+    futureSkewMinutes: CONFIG.publicationFutureSkewMinutes,
+  });
   const sourceDeal = candidate.sourceDeal || {};
-  const hasVienna = hasPattern(VIENNA_PATTERNS, primarySignal);
+  const hasVienna = hasTrustedViennaEvidence(candidate, primarySignal);
   const hasDeal = hasPattern(STRONG_DEAL_PATTERNS, primarySignal);
   const hasFoodDrink = hasPattern(FOOD_DRINK_PATTERNS, primarySignal);
   const hasCurrent = hasPattern(CURRENT_PATTERNS, primarySignal);
@@ -1114,7 +1136,10 @@ function buildQualityScore(candidate, signal) {
     else if (age <= 3) score += 11;
     else if (age <= 7) score += 8;
     else if (age <= CONFIG.maxAgeDays) score += 4;
-    else score -= 18;
+    else if (offerTiming.eligibleByAge) {
+      score += 4;
+      reasons.push(offerTiming.recurring ? 'active-recurring-offer' : 'active-explicit-offer');
+    } else score -= 18;
     reasons.push(`age-${ageDays(pubDate.date)}d`);
   } else {
     score -= 28;
@@ -1133,10 +1158,21 @@ function buildQualityScore(candidate, signal) {
     score -= 20;
     reasons.push('expired-language');
   }
-  const dateSignal = offerDateSignal(candidate) || primarySignal;
-  if (hasPastExplicitOfferDate(dateSignal)) {
+  if (offerTiming.explicitExpired) {
     score -= 45;
     reasons.push('past-offer-date');
+  }
+  if (offerTiming.yesterdayOnly) {
+    score -= 45;
+    reasons.push('yesterday-only-offer');
+  }
+  if (offerTiming.notStarted) {
+    score -= 45;
+    reasons.push('future-offer-date');
+  }
+  if (offerTiming.futurePublication) {
+    score -= 60;
+    reasons.push('future-publication-date');
   }
   if (hasExpiredRelativeOfferDate(dateSignal, pubDate?.date)) {
     score -= 45;
@@ -1156,11 +1192,26 @@ function getRejectionReason(candidate, signal, score) {
   if (hasPattern(BLOCKED_SOURCE_PATTERNS, signal)) return 'NeoTaste blockiert';
   const pubDate = parsePubDate(candidate);
   if (!pubDate?.date) return 'kein echtes Instagram-Postdatum';
-  if (!isPostWithinMaxAge(pubDate.date)) return `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage`;
   const dateSignal = offerDateSignal(candidate) || primarySignal;
-  if (hasPastExplicitOfferDate(dateSignal)) return 'explizites Aktionsdatum liegt in der Vergangenheit';
+  const offerTiming = evaluateInstagramOfferTiming({
+    signal: dateSignal,
+    pubDate: pubDate.date,
+    maxAgeDays: CONFIG.maxAgeDays,
+    activeOfferMaxAgeDays: CONFIG.activeOfferMaxAgeDays,
+    futureSkewMinutes: CONFIG.publicationFutureSkewMinutes,
+  });
+  if (offerTiming.futurePublication) return 'Instagram-Postdatum liegt unplausibel in der Zukunft';
+  if (offerTiming.explicitExpired) return 'explizites Aktionsende liegt in der Vergangenheit';
+  if (offerTiming.yesterdayOnly) return 'Aktion galt ausdruecklich nur gestern';
+  if (offerTiming.notStarted) return 'expliziter Aktionszeitraum hat noch nicht begonnen';
   if (hasExpiredRelativeOfferDate(dateSignal, pubDate.date)) return 'relative Kurz-Aktion ist abgelaufen';
-  if (!hasPattern(VIENNA_PATTERNS, primarySignal)) return 'kein eindeutiges Wien-Signal im Instagram-Post';
+  if (!offerTiming.eligibleByAge) {
+    if (offerTiming.ageDays > CONFIG.activeOfferMaxAgeDays) {
+      return `Instagram-Post aelter als ${CONFIG.activeOfferMaxAgeDays} Tage`;
+    }
+    return `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage ohne belegte laufende Aktion`;
+  }
+  if (!hasTrustedViennaEvidence(candidate, primarySignal)) return 'kein eindeutiges Wien-Signal im Instagram-Post';
   if (!hasPattern(STRONG_DEAL_PATTERNS, primarySignal)) return 'kein starkes Gratis-/Deal-Signal im Instagram-Post';
   if (!hasSpecificBrand(candidate, signal)) return 'keine belastbare Marke/Quelle';
   if (hasPattern(FALSE_POSITIVE_PATTERNS, primarySignal)) return 'Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal';
@@ -1181,37 +1232,57 @@ function buildHeuristicDeal(candidate) {
   const brand = inferBrand(candidate, signal);
   const category = normalizeCategoryForScraper('', [brand, signal]);
   const pubDate = parsePubDate(candidate);
+  if (!pubDate?.date) {
+    candidate.rejectionReason = 'kein echtes Instagram-Postdatum';
+    return null;
+  }
   const title = buildOfferTitle(brand, type, signal, candidate);
-  const expires = extractExpiryText(offerDateSignal(candidate) || signal, pubDate?.date || null);
+  const dateSignal = offerDateSignal(candidate) || signal;
+  const offerTiming = evaluateInstagramOfferTiming({
+    signal: dateSignal,
+    pubDate: pubDate.date,
+    maxAgeDays: CONFIG.maxAgeDays,
+    activeOfferMaxAgeDays: CONFIG.activeOfferMaxAgeDays,
+    futureSkewMinutes: CONFIG.publicationFutureSkewMinutes,
+  });
+  const expires = extractExpiryText(dateSignal, pubDate.date);
   const primarySignal = postSignal(candidate) || signal;
+  const timingEvidence = offerTimingEvidence(offerTiming);
 
   const rawDeal = {
     id: `instagram-ai-${stableHash(`${candidate.url}|${title}`)}`,
     brand,
     logo: 'IG',
     title,
-    description: cleanText(`${primarySignal.slice(0, 360)} Quelle: Instagram/Public Search.`, 520),
+    description: cleanText(`${unicodeSafeTruncate(primarySignal, 360)} Quelle: Instagram/Public Search.`, 520),
     type,
     category,
     source: 'Instagram AI Agent',
     originSource: 'instagram-ai-agent',
     url: candidate.url,
     expires,
+    expiryKind: timingEvidence.kind,
+    expiryDisplayText: timingEvidence.matchedText,
+    validFrom: timingEvidence.validFrom.slice(0, 10),
+    validUntil: timingEvidence.validUntil.slice(0, 10),
+    dateConfidence: timingEvidence.kind ? 'high' : '',
     distance: 'Wien',
     hot: type === 'gratis' || type === 'bogo',
     isNew: true,
     priority: score >= 78 ? 5 : 4,
     votes: score >= 78 ? 3 : 2,
     qualityScore: score,
-    pubDate: pubDate?.date?.toISOString() || new Date().toISOString(),
-    pubDateSource: pubDate?.source || (hasPattern(CURRENT_PATTERNS, signal) ? 'current-language' : 'agent-run'),
+    pubDate: pubDate.date.toISOString(),
+    pubDateSource: pubDate.source,
     evidence: {
       heuristicReasons: reasons,
       source: candidate.source,
       query: candidate.query,
       previewStatus: candidate.preview?.status || null,
       previewLoginWall: Boolean(candidate.preview?.loginWall),
-      postDateSource: pubDate?.source || '',
+      postDateSource: pubDate.source,
+      offerDateSignal: cleanText(dateSignal, 4000),
+      offerTiming: timingEvidence,
       textSample: cleanText(signal, 500),
     },
     confidence: Math.min(0.97, Math.max(0.45, score / 100)),
@@ -1251,7 +1322,7 @@ function buildAiPrompt(candidates) {
 }
 
 function coerceAiType(value) {
-  const text = normalizeAscii(value);
+  const text = stripFreeFromClaims(normalizeAscii(value));
   if (text.includes('gratis') || text.includes('free')) return 'gratis';
   if (text.includes('bogo') || text.includes('1+1')) return 'bogo';
   if (text.includes('gutschein') || text.includes('coupon') || text.includes('voucher')) return 'gutschein';
@@ -1279,40 +1350,67 @@ function mergeAiDeal(candidate, aiRow) {
     candidate.rejectionReason = 'kein echtes Instagram-Postdatum';
     return null;
   }
-  if (!isPostWithinMaxAge(pubDate.date)) {
-    candidate.rejectionReason = `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage`;
+  const dateSignal = offerDateSignal(candidate) || primarySignal;
+  const offerTiming = evaluateInstagramOfferTiming({
+    signal: dateSignal,
+    pubDate: pubDate.date,
+    maxAgeDays: CONFIG.maxAgeDays,
+    activeOfferMaxAgeDays: CONFIG.activeOfferMaxAgeDays,
+    futureSkewMinutes: CONFIG.publicationFutureSkewMinutes,
+  });
+  if (offerTiming.futurePublication) {
+    candidate.rejectionReason = 'Instagram-Postdatum liegt unplausibel in der Zukunft';
     return null;
   }
-  const dateSignal = offerDateSignal(candidate) || primarySignal;
-  if (hasPastExplicitOfferDate(dateSignal)) {
-    candidate.rejectionReason = 'explizites Aktionsdatum liegt in der Vergangenheit';
+  if (offerTiming.explicitExpired) {
+    candidate.rejectionReason = 'explizites Aktionsende liegt in der Vergangenheit';
+    return null;
+  }
+  if (offerTiming.yesterdayOnly) {
+    candidate.rejectionReason = 'Aktion galt ausdruecklich nur gestern';
+    return null;
+  }
+  if (offerTiming.notStarted) {
+    candidate.rejectionReason = 'expliziter Aktionszeitraum hat noch nicht begonnen';
     return null;
   }
   if (hasExpiredRelativeOfferDate(dateSignal, pubDate.date)) {
     candidate.rejectionReason = 'relative Kurz-Aktion ist abgelaufen';
     return null;
   }
+  if (!offerTiming.eligibleByAge) {
+    candidate.rejectionReason = offerTiming.ageDays > CONFIG.activeOfferMaxAgeDays
+      ? `Instagram-Post aelter als ${CONFIG.activeOfferMaxAgeDays} Tage`
+      : `Instagram-Post aelter als ${CONFIG.maxAgeDays} Tage ohne belegte laufende Aktion`;
+    return null;
+  }
   const score = Math.max(candidate.score, Math.round(confidence * 100));
+  const timingEvidence = offerTimingEvidence(offerTiming);
   const rawDeal = {
     id: `instagram-ai-${stableHash(`${candidate.url}|${aiRow.title || brand}`)}`,
     brand,
     logo: 'IG',
     title: cleanText(aiRow.title, 110) || buildOfferTitle(brand, type, signal, candidate),
-    description: cleanText(aiRow.description, 520) || cleanText(`${signal.slice(0, 360)} Quelle: Instagram/Public Search.`, 520),
+    description: cleanText(aiRow.description, 520) || cleanText(`${unicodeSafeTruncate(signal, 360)} Quelle: Instagram/Public Search.`, 520),
     type,
     category,
     source: 'Instagram AI Agent',
     originSource: 'instagram-ai-agent',
     url: candidate.url,
     expires: cleanText(aiRow.expires, 90) || extractExpiryText(dateSignal || signal, pubDate?.date || null),
+    expiryKind: timingEvidence.kind,
+    expiryDisplayText: timingEvidence.matchedText,
+    validFrom: timingEvidence.validFrom.slice(0, 10),
+    validUntil: timingEvidence.validUntil.slice(0, 10),
+    dateConfidence: timingEvidence.kind ? 'high' : '',
     distance: 'Wien',
     hot: type === 'gratis' || type === 'bogo',
     isNew: true,
     priority: score >= 80 ? 5 : 4,
     votes: score >= 80 ? 3 : 2,
     qualityScore: score,
-    pubDate: pubDate?.date?.toISOString() || new Date().toISOString(),
-    pubDateSource: pubDate?.source || 'agent-run',
+    pubDate: pubDate.date.toISOString(),
+    pubDateSource: pubDate.source,
     evidence: {
       heuristicScore: candidate.score,
       heuristicReasons: candidate.reasons,
@@ -1321,7 +1419,9 @@ function mergeAiDeal(candidate, aiRow) {
       query: candidate.query,
       previewStatus: candidate.preview?.status || null,
       previewLoginWall: Boolean(candidate.preview?.loginWall),
-      postDateSource: pubDate?.source || '',
+      postDateSource: pubDate.source,
+      offerDateSignal: cleanText(dateSignal, 4000),
+      offerTiming: timingEvidence,
       textSample: cleanText(signal, 500),
     },
     confidence,
@@ -1385,7 +1485,8 @@ async function classifyWithOpenAi(candidates) {
         content: [
           'You classify public Instagram/search snippets for FreeFinder Wien.',
           'Accept only concrete current deals in Vienna: free items, 1+1/BOGO, food/drink promos, vouchers, opening offers, or similar.',
-          'Reject giveaways, free shipping, generic guides, old posts, non-Vienna offers, and vague brand marketing.',
+          'Reject ordinary posts older than 7 days. An older post may be accepted only up to 45 days when its text proves a currently active explicit offer period/end date or a recurring weekday schedule.',
+          'Reject giveaways, free shipping, generic guides, expired offers, non-Vienna offers, and vague brand marketing.',
           'Use only the supplied evidence. Do not invent dates, prices, brands, or locations.',
         ].join(' '),
       },
@@ -1406,7 +1507,7 @@ async function classifyWithOpenAi(candidates) {
       body: JSON.stringify(body),
     });
     const text = await response.text();
-    if (!response.ok) throw new Error(`OpenAI HTTP ${response.status}: ${text.slice(0, 260)}`);
+    if (!response.ok) throw new Error(`OpenAI HTTP ${response.status}: ${unicodeSafeTruncate(text, 260)}`);
     const parsed = JSON.parse(text);
     const content = parsed.choices?.[0]?.message?.content || '{}';
     const classified = JSON.parse(content);
@@ -1650,7 +1751,15 @@ async function main() {
   console.log(`Wrote ${finalDeals.length} deals to ${OUTPUT_PATH}`);
 }
 
-main().catch((error) => {
-  console.error('instagram-ai-agent failed:', error);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main().catch((error) => {
+    console.error('instagram-ai-agent failed:', error);
+    process.exit(1);
+  });
+}
+
+export {
+  buildHeuristicDeal,
+  buildQualityScore,
+  getRejectionReason,
+};

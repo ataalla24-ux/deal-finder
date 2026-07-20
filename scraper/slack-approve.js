@@ -11,6 +11,7 @@ import {
 } from './deal-moderation-utils.js';
 import { isVagueExpiry, normalizeDealExpiry, parseExpiryDetails } from './expiry-utils.js';
 import { isDealNewByDate } from './deal-freshness-utils.js';
+import { validateDealsForSlack } from './deal-validity-agent.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -486,7 +487,10 @@ function normalizeDeal(raw) {
   const description = cleanText(deal.description);
   const url = normalizeUrl(deal.url);
   const type = cleanText(deal.type).toLowerCase() || 'rabatt';
-  const distance = cleanText(deal.distance || deal.location || deal.ort) || 'Wien';
+  const structuredLocation = deal.location && typeof deal.location === 'object'
+    ? (deal.location.address || deal.location.streetAddress || deal.location.name || deal.location.city)
+    : deal.location;
+  const distance = cleanText(deal.distance || structuredLocation || deal.ort || deal.address || deal.city);
   const category = normalizeCategoryForScraper(deal.category, [
     brand,
     title,
@@ -497,12 +501,12 @@ function normalizeDeal(raw) {
     deal.source,
     deal.originSource,
   ]);
-  const pubDate = toIsoDate(deal.pubDate) || new Date().toISOString();
-  const approvedAt = toIsoDate(deal.approvedAt) || new Date().toISOString();
+  const pubDate = toIsoDate(deal.pubDate);
+  const approvedAt = toIsoDate(deal.approvedAt);
   const rawMissing = Array.isArray(deal.missingFields) ? deal.missingFields : [];
   const missingFields = [];
   if (!url) missingFields.push('Ziel-URL');
-  if (!cleanText(deal.distance || deal.location || deal.ort)) missingFields.push('Ort');
+  if (!distance) missingFields.push('Ort');
   if (!cleanText(deal.expires || deal.end_date || deal.validity_date || '')) missingFields.push('Ablauf');
   if (!cleanText(deal.source)) missingFields.push('Quelle');
   for (const item of rawMissing) {
@@ -511,6 +515,7 @@ function normalizeDeal(raw) {
   }
 
   const normalized = {
+    ...deal,
     id: cleanText(deal.id) || `slack-${cleanText(deal.slackTs)}`,
     submissionId: cleanText(deal.submissionId).replace(/^community:/, ''),
     brand,
@@ -542,6 +547,29 @@ function normalizeDeal(raw) {
   };
   normalized.isNew = isDealNewByDate(normalized);
   return normalized;
+}
+
+function normalizePendingDeal(raw) {
+  return {
+    ...normalizeDeal(raw),
+    // Presence in deals-pending-all.json is authoritative: this record is
+    // still waiting for approval, even if an older workflow polluted it.
+    approvedAt: '',
+  };
+}
+
+async function validateApprovalCandidates(deals, options = {}) {
+  return validateDealsForSlack(ensureArray(deals), options);
+}
+
+function formatApprovalValidationReasons(validation) {
+  return ensureArray(validation?.results)
+    .filter((result) => !result?.decision?.allowed)
+    .map((result) => {
+      const label = cleanText(result?.deal?.title || result?.deal?.id || result?.deal?.url) || 'Deal';
+      const reasons = ensureArray(result?.decision?.reasons).map(cleanText).filter(Boolean).join('; ');
+      return `${label}: ${reasons || 'Gültigkeitsprüfung fehlgeschlagen'}`;
+    });
 }
 
 async function normalizeApprovedDealExpiries(approvedDeals) {
@@ -584,7 +612,7 @@ function loadJson(filePath, fallback) {
 
 function loadPendingDeals() {
   const parsed = loadJson(PENDING_ALL_PATH, { deals: [] });
-  return ensureArray(parsed.deals).map(normalizeDeal).filter((d) => d.slackTs);
+  return ensureArray(parsed.deals).map(normalizePendingDeal).filter((d) => d.slackTs);
 }
 
 function loadExistingApprovedDeals() {
@@ -824,7 +852,18 @@ async function runTargetedApproval({ moderation, botUserId }) {
     return true;
   }
 
-  const approved = [{ ...dealToApprove, approvedAt: new Date().toISOString() }];
+  const approvalValidation = await validateApprovalCandidates([dealToApprove]);
+  if (approvalValidation.allowedDeals.length === 0) {
+    const reasons = formatApprovalValidationReasons(approvalValidation);
+    console.log(`🚫 Slack-Approval durch aktuelle Gültigkeitsprüfung blockiert: ${reasons.join(' | ')}`);
+    savePendingRemaining(remainingPending);
+    return true;
+  }
+
+  const approved = approvalValidation.allowedDeals.map((deal) => ({
+    ...deal,
+    approvedAt: new Date().toISOString(),
+  }));
   const approvedModeration = filterModeratedDeals(approved, moderation);
   if (approvedModeration.removed.length > 0) {
     console.log(`🛡️ Moderation filter: ${approvedModeration.removed.length} approved Deals vor Live-Merge entfernt`);
@@ -1002,7 +1041,25 @@ async function main() {
     return;
   }
 
-  const approvedModeration = filterModeratedDeals(approved, moderation);
+  const approvalValidation = await validateApprovalCandidates(approved);
+  const validationBlockedReasons = formatApprovalValidationReasons(approvalValidation);
+  if (validationBlockedReasons.length > 0) {
+    console.log(`🚫 Approval validity filter: ${validationBlockedReasons.length} Deal(s) blockiert`);
+    for (const reason of validationBlockedReasons.slice(0, 10)) console.log(`  - ${reason}`);
+  }
+
+  if (approvalValidation.allowedDeals.length === 0) {
+    const remainingPending = mergeRemainingPendingQueue(
+      [...queuedDeals, ...deferredPendingDeals],
+      approvalCheckDeals,
+      unapproved,
+    );
+    savePendingRemaining(remainingPending);
+    console.log('ℹ️ Keine aktuell gültigen Approvals zum Veröffentlichen');
+    return;
+  }
+
+  const approvedModeration = filterModeratedDeals(approvalValidation.allowedDeals, moderation);
   if (approvedModeration.removed.length > 0) {
     console.log(`🛡️ Moderation filter: ${approvedModeration.removed.length} approved Deals vor Live-Merge entfernt`);
   }
@@ -1021,7 +1078,15 @@ async function main() {
   console.log(`💾 pending queue updated: ${remainingPending.length} deals left`);
 }
 
-main().catch((error) => {
-  console.error('❌ slack-approve failed:', error.message);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main().catch((error) => {
+    console.error('❌ slack-approve failed:', error.message);
+    process.exit(1);
+  });
+}
+
+export {
+  normalizeDeal,
+  normalizePendingDeal,
+  validateApprovalCandidates,
+};

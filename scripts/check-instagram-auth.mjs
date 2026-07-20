@@ -1,6 +1,7 @@
 import '../sentry/instrument.mjs';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const ROOT = process.cwd();
 const DOCS_DIR = path.join(ROOT, 'docs');
@@ -34,7 +35,7 @@ function loadEnv() {
 
 const env = { ...loadEnv(), ...process.env };
 
-function parseCookiePairs(value) {
+export function parseCookiePairs(value) {
   const pairs = [];
   const raw = String(value || '').trim();
   if (!raw) return pairs;
@@ -138,12 +139,15 @@ function instagramHeaders(cookieHeader, username) {
   };
 }
 
-async function validateInstagramAuth(cookies) {
-  const username = cleanText(env.INSTAGRAM_AUTH_TEST_USERNAME) || DEFAULT_TEST_USERNAME;
+export async function validateInstagramAuth(cookies, options = {}) {
+  const config = options.env || env;
+  const fetchImpl = options.fetchImpl || fetchWithTimeout;
+  const sleepImpl = options.sleepImpl || sleep;
+  const username = cleanText(config.INSTAGRAM_AUTH_TEST_USERNAME) || DEFAULT_TEST_USERNAME;
   const diagnostics = cookieDiagnostics(cookies);
   const cookieHeader = buildCookieHeader(cookies);
-  const maxAttempts = Math.max(1, toPositiveInt(env.INSTAGRAM_AUTH_ATTEMPTS || env.INSTAGRAM_AUTH_RETRIES, 3));
-  const baseBackoffMs = toPositiveInt(env.INSTAGRAM_AUTH_BACKOFF_MS, 45000);
+  const maxAttempts = Math.max(1, toPositiveInt(config.INSTAGRAM_AUTH_ATTEMPTS || config.INSTAGRAM_AUTH_RETRIES, 3));
+  const baseBackoffMs = toPositiveInt(config.INSTAGRAM_AUTH_BACKOFF_MS, 45000);
 
   if (!diagnostics.hasSessionCookie) {
     return {
@@ -153,6 +157,9 @@ async function validateInstagramAuth(cookies) {
       username,
       httpStatus: 0,
       diagnostics,
+      rateLimited: false,
+      shouldRefreshCookies: true,
+      canProceed: false,
     };
   }
 
@@ -160,14 +167,14 @@ async function validateInstagramAuth(cookies) {
   let lastFailure = null;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     if (attempt > 1) {
-      await sleep(baseBackoffMs * (attempt - 1));
+      await sleepImpl(baseBackoffMs * (attempt - 1));
     }
 
     try {
-      const response = await fetchWithTimeout(url, {
+      const response = await fetchImpl(url, {
         method: 'GET',
         headers: instagramHeaders(cookieHeader, username),
-      }, Number(env.INSTAGRAM_AUTH_TIMEOUT_MS || 15000));
+      }, Number(config.INSTAGRAM_AUTH_TIMEOUT_MS || 15000));
 
       const contentType = cleanText(response.headers.get('content-type')).toLowerCase();
       const bodyText = await response.text();
@@ -191,6 +198,9 @@ async function validateInstagramAuth(cookies) {
           diagnostics,
           apiUserFound: true,
           attempts: attempt,
+          rateLimited: false,
+          shouldRefreshCookies: false,
+          canProceed: true,
         };
       }
 
@@ -198,11 +208,33 @@ async function validateInstagramAuth(cookies) {
       const lowerSample = bodySample.toLowerCase();
       const loginWall = lowerSample.includes('login') || lowerSample.includes('log in') || lowerSample.includes('anmelden');
       const rateLimited = response.status === 429 || lowerSample.includes('please wait');
-      const blocked = response.status === 403 || lowerSample.includes('challenge');
+      const challengeRequired = lowerSample.includes('challenge_required')
+        || lowerSample.includes('checkpoint_required')
+        || lowerSample.includes('/challenge/');
+      const blocked = response.status === 403 || challengeRequired;
+
+      if (rateLimited) {
+        return {
+          ok: false,
+          status: 'rate-limited',
+          reason: `Instagram rate-limited nur den Healthcheck (HTTP ${response.status}); Cookies sind damit nicht als ungültig bewiesen`,
+          username,
+          httpStatus: response.status,
+          diagnostics,
+          apiUserFound: false,
+          bodySample,
+          attempts: attempt,
+          rateLimited: true,
+          shouldRefreshCookies: false,
+          canProceed: true,
+        };
+      }
+
+      const confirmedCredentialFailure = response.status === 401 || loginWall || challengeRequired;
 
       lastFailure = {
         ok: false,
-        status: rateLimited ? 'rate-limited' : (blocked ? 'blocked' : (loginWall ? 'login-wall' : 'invalid-session')),
+        status: blocked ? 'blocked' : (loginWall ? 'login-wall' : 'invalid-session'),
         reason: `Instagram API lieferte HTTP ${response.status}`,
         username,
         httpStatus: response.status,
@@ -210,9 +242,12 @@ async function validateInstagramAuth(cookies) {
         apiUserFound: false,
         bodySample,
         attempts: attempt,
+        rateLimited: false,
+        shouldRefreshCookies: confirmedCredentialFailure,
+        canProceed: false,
       };
 
-      if (!rateLimited) return lastFailure;
+      return lastFailure;
     } catch (error) {
       lastFailure = {
         ok: false,
@@ -223,6 +258,9 @@ async function validateInstagramAuth(cookies) {
         diagnostics,
         apiUserFound: false,
         attempts: attempt,
+        rateLimited: false,
+        shouldRefreshCookies: false,
+        canProceed: false,
       };
       return lastFailure;
     }
@@ -237,6 +275,9 @@ async function validateInstagramAuth(cookies) {
     diagnostics,
     apiUserFound: false,
     attempts: maxAttempts,
+    rateLimited: false,
+    shouldRefreshCookies: false,
+    canProceed: false,
   };
 }
 
@@ -269,7 +310,7 @@ function buildEmptyPayload(source, report) {
 }
 
 function clearPendingOutputsIfRequested(report) {
-  if (report.ok || env.INSTAGRAM_AUTH_CLEAR_PENDING_ON_FAILURE !== '1') return [];
+  if (report.ok || !report.shouldRefreshCookies || env.INSTAGRAM_AUTH_CLEAR_PENDING_ON_FAILURE !== '1') return [];
 
   const mode = cleanText(env.INSTAGRAM_AUTH_CLEAR_MODE).toLowerCase();
   const written = [];
@@ -351,13 +392,19 @@ function shouldNotifySlack(report, previousReport) {
 async function postSlackWarning(report, clearedFiles) {
   const context = report.context || 'Instagram Auth';
   const cleared = clearedFiles.length ? `\nGeleerte Dateien: ${clearedFiles.join(', ')}` : '';
+  const headline = report.rateLimited
+    ? `⏸️ *Instagram Healthcheck rate-limited* (${context})`
+    : `⚠️ *Instagram Auth kaputt* (${context})`;
+  const recommendation = report.rateLimited
+    ? 'Apify darf trotzdem anlaufen; Cookies nicht wegen HTTP 429 erneuern.'
+    : 'Bitte Instagram-Session/Cookies erneuern; sonst liefern Apify/Daily Sync keine Posts.';
   const text = [
-    `⚠️ *Instagram Auth kaputt* (${context})`,
+    headline,
     `Status: ${report.status}`,
     `Grund: ${report.reason}`,
     `Testprofil: ${report.username}`,
     `Cookies: sessionid=${report.diagnostics.hasSessionCookie ? 'ja' : 'nein'}, csrftoken=${report.diagnostics.hasCsrfCookie ? 'ja' : 'nein'}, gesamt=${report.diagnostics.cookieCount}`,
-    'Bitte Instagram-Session/Cookies erneuern; sonst liefern Apify/Daily Sync keine Posts.',
+    recommendation,
     cleared,
   ].filter(Boolean).join('\n');
 
@@ -377,12 +424,18 @@ async function postSlackWarning(report, clearedFiles) {
   }
 }
 
-function writeGithubOutputs(report) {
+export function writeGithubOutputs(report) {
   const outputPath = process.env.GITHUB_OUTPUT;
   if (outputPath) {
-    fs.appendFileSync(outputPath, `ok=${report.ok ? 'true' : 'false'}\n`);
+    // Keep the legacy `ok` gate collector-compatible: a throttled probe does
+    // not prove invalid credentials and must not disable downstream syncs.
+    fs.appendFileSync(outputPath, `ok=${report.canProceed ? 'true' : 'false'}\n`);
+    fs.appendFileSync(outputPath, `auth_valid=${report.ok ? 'true' : 'false'}\n`);
+    fs.appendFileSync(outputPath, `proceed=${report.canProceed ? 'true' : 'false'}\n`);
     fs.appendFileSync(outputPath, `status=${report.status}\n`);
     fs.appendFileSync(outputPath, `reason=${report.reason.replace(/\n/g, ' ')}\n`);
+    fs.appendFileSync(outputPath, `rate_limited=${report.rateLimited ? 'true' : 'false'}\n`);
+    fs.appendFileSync(outputPath, `should_refresh=${report.shouldRefreshCookies ? 'true' : 'false'}\n`);
   }
 
   const summaryPath = process.env.GITHUB_STEP_SUMMARY;
@@ -390,10 +443,13 @@ function writeGithubOutputs(report) {
     fs.appendFileSync(summaryPath, [
       '### Instagram Auth Health',
       '',
-      `- Status: ${report.ok ? 'OK' : 'FAILED'} (${report.status})`,
+      `- Status: ${report.ok ? 'OK' : (report.canProceed ? 'PROCEED' : 'FAILED')} (${report.status})`,
       `- Reason: ${report.reason}`,
       `- Test username: ${report.username}`,
       `- Attempts: ${report.attempts || 1}`,
+      `- Collector may proceed: ${report.canProceed ? 'yes' : 'no'}`,
+      `- Rate limited: ${report.rateLimited ? 'yes' : 'no'}`,
+      `- Refresh cookies: ${report.shouldRefreshCookies ? 'yes' : 'no'}`,
       `- Session cookie: ${report.diagnostics.hasSessionCookie ? 'yes' : 'no'}`,
       `- CSRF cookie: ${report.diagnostics.hasCsrfCookie ? 'yes' : 'no'}`,
       '',
@@ -401,7 +457,7 @@ function writeGithubOutputs(report) {
   }
 }
 
-async function main() {
+export async function main() {
   const reportPath = cleanText(env.INSTAGRAM_AUTH_REPORT_PATH) || DEFAULT_REPORT_PATH;
   const previousReport = readPreviousReport(reportPath);
   const cookies = collectCookiePairs();
@@ -441,7 +497,10 @@ async function main() {
   else if (!finalReport.ok) console.log('- slack: warning not sent or suppressed');
 }
 
-main().catch((error) => {
-  console.error(`Instagram auth healthcheck crashed: ${error.message}`);
-  process.exit(1);
-});
+const isMainModule = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMainModule) {
+  main().catch((error) => {
+    console.error(`Instagram auth healthcheck crashed: ${error.message}`);
+    process.exit(1);
+  });
+}

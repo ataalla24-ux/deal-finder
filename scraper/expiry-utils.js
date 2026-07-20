@@ -268,6 +268,16 @@ function parseDmy(text, now) {
     };
   }
 
+  m = text.match(/\b(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/);
+  if (m) {
+    const year = String(m[3]).length === 2 ? Number(`20${m[3]}`) : Number(m[3]);
+    return {
+      date: endOfUtcDay(year, Number(m[2]) - 1, Number(m[1])),
+      precision: 'day',
+      source: 'text',
+    };
+  }
+
   m = text.match(/\b(\d{1,2})\.(\d{1,2})(?:\.(?!\d)|(?![\d.]))/);
   if (m) {
     return {
@@ -389,7 +399,7 @@ export function parseExpiryShape(value, options = {}) {
   const hasDateRange = /\b\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\s*[-–]\s*\d{1,2}[./-]\d{1,2}/.test(text);
   const hasTimeOnlyEndSignal = /\bbis\s+\d{1,2}:\d{2}\b/.test(text);
   const hasEventishSignal =
-    /\b(eröffnung|eroeffnung|opening|launch|after work|event|brunch|verkostung|tasting|festival)\b/.test(signalText) ||
+    /\b(eröffnung|eroeffnung|opening|launch|after work|event|veranstaltung|konzert|brunch|verkostung|tasting|festival|straßenfest|strassenfest)\b/.test(signalText) ||
     /\(\s*\d+\s*(stunde|stunden|hour|hours|tag|tage)\b/.test(signalText);
   const hasSingleDaySignal =
     /\b(gültig am|gueltig am|nur heute|heute|morgen)\b/.test(signalText) ||
@@ -609,21 +619,23 @@ export function extractExpiryDateFromHtml(html, options = {}) {
     return null;
   }
 
+  const explicitMonth = '(?:j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|may|june|july|october|november|december)';
+  const explicitDateToken = String.raw`(?:\d{4}-\d{1,2}-\d{1,2}(?:\s*(?:-|bis|to|through|until)\s*\d{4}-\d{1,2}-\d{1,2})?|\d{1,2}[./]\d{1,2}[./]\d{2,4}(?:\s*(?:-|bis|to|through|until)\s*\d{1,2}[./]\d{1,2}[./]\d{2,4})?|\d{1,2}[./]\d{1,2}\.?(?!\d)|\d{1,2}\.?\s+${explicitMonth}(?:\s+\d{4})?|(?:ende\s+|end\s+of\s+)?${explicitMonth}(?:\s+\d{4})?)`;
   const phrasePatterns = [
     {
       kind: 'end',
       label: 'gültig bis',
-      regex: /(?:gültig\s*bis|einlösbar\s*bis|aktion\s*bis|angebot\s*bis|läuft\s*bis|laeuft\s*bis|nur\s*bis|endet\s*am|end(?:s|et)?\s*(?:on)?|until)\s*[:\-]?\s*([^.!,;\n]{4,90})/gi,
+      regex: new RegExp(`(?:gültig\\s*bis|einlösbar\\s*bis|aktion\\s*bis|angebot\\s*bis|läuft\\s*bis|laeuft\\s*bis|nur\\s*bis|endet\\s*am|end(?:s|et)?\\s*(?:on)?|until)\\s*[:\\-]?\\s*(${explicitDateToken})`, 'gi'),
     },
     {
       kind: 'single',
       label: 'gültig am',
-      regex: /(?:gültig\s*am|einlösbar\s*am|aktion\s*am|angebot\s*am|nur\s*am|event\s*am|opening\s*on)\s*[:\-]?\s*([^.!,;\n]{4,90})/gi,
+      regex: new RegExp(`(?:gültig\\s*am|einlösbar\\s*am|aktion\\s*am|angebot\\s*am|nur\\s*am|event\\s*am|opening\\s*on)\\s*[:\\-]?\\s*(${explicitDateToken})`, 'gi'),
     },
     {
       kind: 'start',
       label: 'gültig ab',
-      regex: /(?:gültig\s*ab|einlösbar\s*ab|aktion\s*ab|angebot\s*ab|verfügbar\s*ab|verfuegbar\s*ab|startet\s*(?:am|ab)?|available\s*from)\s*[:\-]?\s*([^.!,;\n]{4,90})/gi,
+      regex: new RegExp(`(?:gültig\\s*ab|einlösbar\\s*ab|aktion\\s*ab|angebot\\s*ab|verfügbar\\s*ab|verfuegbar\\s*ab|startet\\s*(?:am|ab)?|available\\s*from)\\s*[:\\-]?\\s*(${explicitDateToken})`, 'gi'),
     },
   ];
 
@@ -638,6 +650,7 @@ export function extractExpiryDateFromHtml(html, options = {}) {
           rawText: cleanText(m[1]),
           shapeText: `${pattern.label} ${cleanText(m[1])}`,
           kindHint: pattern.kind,
+          evidence: 'explicit-phrase',
         };
       }
     }
@@ -652,6 +665,7 @@ export function extractExpiryDateFromHtml(html, options = {}) {
         source: 'url',
         rawText: cleanText(token),
         shapeText: cleanText(token),
+        evidence: 'broad-token',
       };
     }
   }
@@ -924,6 +938,7 @@ function buildStructuredTargetDateHint(input = {}, options = {}) {
   const targetDateSource = cleanText(input.source || 'url');
   const targetDateRaw = cleanText(input.rawText || input.date || '');
   const targetDateKind = cleanText(input.kind || '');
+  const targetDateEvidence = cleanText(input.evidence || '');
   const validOn = cleanText(input.validOn || '');
   const validFrom = cleanText(input.validFrom || '');
   const validUntil = cleanText(input.validUntil || '');
@@ -932,6 +947,7 @@ function buildStructuredTargetDateHint(input = {}, options = {}) {
     return {
       targetDateSource,
       targetDateRaw,
+      targetDateEvidence,
       targetDateKind: targetDateKind || (validOn ? 'single' : (validFrom && validUntil ? 'range' : (validFrom ? 'start' : 'end'))),
       validOn,
       validFrom,
@@ -950,6 +966,7 @@ function buildStructuredTargetDateHint(input = {}, options = {}) {
   return {
     targetDateSource,
     targetDateRaw: targetDateRaw || parsedIso,
+    targetDateEvidence,
     targetDateKind: cleanText(shape.kind || targetDateKind || 'end'),
     validOn: cleanText(shape.validOn || (targetDateKind === 'single' ? parsedIso : '')),
     validFrom: cleanText(shape.validFrom || (targetDateKind === 'start' ? parsedIso : '')),
@@ -970,6 +987,7 @@ function detectFocusedDateContextHint(text, options = {}) {
     if (month !== undefined) {
       return buildStructuredTargetDateHint({
         source: 'focusedContext',
+        evidence: 'focused-context',
         rawText: cleanText(match[0]),
         kind: 'range',
         validFrom: toIsoDateString(year, month + 1, Number(match[1])),
@@ -985,6 +1003,7 @@ function detectFocusedDateContextHint(text, options = {}) {
     if (month !== undefined) {
       return buildStructuredTargetDateHint({
         source: 'focusedContext',
+        evidence: 'focused-context',
         rawText: cleanText(match[0]),
         kind: 'single',
         date: toIsoDateString(year, month + 1, Number(match[1])),
@@ -1117,6 +1136,7 @@ export function extractTargetPageDateHints(html, options = {}) {
           : (htmlHint.shapeText || htmlHint.rawText || isoDateFromMs(htmlHint.date.getTime()))
       ),
       kind: cleanText(htmlHint.kindHint || focusedShape.kind || ''),
+      evidence: cleanText(htmlHint.evidence || ''),
       date: htmlHint.date.toISOString(),
     }, { now });
   }
@@ -1130,6 +1150,7 @@ export function extractTargetPageDateHints(html, options = {}) {
     if (bestStart && bestEnd) {
       targetDateHint = buildStructuredTargetDateHint({
         source: `${bestStart.source}+${bestEnd.source}`,
+        evidence: 'structured-data',
         rawText: `${bestStart.raw} – ${bestEnd.raw}`,
         kind: 'range',
         validFrom: isoDateFromMs(bestStart.ts),
@@ -1138,6 +1159,7 @@ export function extractTargetPageDateHints(html, options = {}) {
     } else if (bestEnd) {
       targetDateHint = buildStructuredTargetDateHint({
         source: bestEnd.source,
+        evidence: 'structured-data',
         rawText: bestEnd.raw,
         kind: 'end',
         date: bestEnd.iso,
@@ -1145,6 +1167,7 @@ export function extractTargetPageDateHints(html, options = {}) {
     } else if (bestStart) {
       targetDateHint = buildStructuredTargetDateHint({
         source: bestStart.source,
+        evidence: 'structured-data',
         rawText: bestStart.raw,
         kind: 'single',
         date: bestStart.iso,

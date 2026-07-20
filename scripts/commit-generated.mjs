@@ -171,66 +171,12 @@ function capturedMatchesRemote(state, ref) {
   return remoteContent !== null && Buffer.compare(state.content, remoteContent) === 0;
 }
 
-function parseJsonBuffer(content) {
-  try {
-    return JSON.parse(Buffer.from(content).toString('utf8'));
-  } catch {
-    return null;
-  }
-}
-
-function queueDealKey(deal) {
-  if (!deal || typeof deal !== 'object') return '';
-  const slackTs = cleanText(deal.slackTs);
-  if (slackTs) return `slack:${slackTs}`;
-  const id = cleanText(deal.id);
-  if (id) return `id:${id}`;
-  const url = cleanText(deal.url).toLowerCase().replace(/[#?].*$/, '').replace(/\/+$/, '');
-  const title = cleanText(deal.title).toLowerCase();
-  if (url && title) return `url-title:${url}|${title}`;
-  if (url) return `url:${url}`;
-  return title ? `title:${title}` : '';
-}
-
-function mergePendingAllQueueState(state, headRef) {
-  if (state.path !== 'docs/deals-pending-all.json' || !state.exists) return false;
-  const remoteContent = remoteFileContent(headRef, state.path);
-  const remoteJson = remoteContent ? parseJsonBuffer(remoteContent) : { deals: [] };
-  const localJson = parseJsonBuffer(state.content);
-  if (!remoteJson || !localJson) return false;
-
-  const byKey = new Map();
-  const append = (deal) => {
-    const key = queueDealKey(deal);
-    if (!key) return;
-    byKey.set(key, deal);
-  };
-
-  const remoteDeals = Array.isArray(remoteJson.deals) ? remoteJson.deals : [];
-  const localDeals = Array.isArray(localJson.deals) ? localJson.deals : [];
-  remoteDeals.forEach(append);
-  localDeals.forEach(append);
-
-  const deals = [...byKey.values()];
-  const merged = {
-    ...remoteJson,
-    ...localJson,
-    deals,
-    totalDeals: deals.length,
-    updatedAt: new Date().toISOString(),
-  };
-  state.content = Buffer.from(`${JSON.stringify(merged, null, 2)}\n`, 'utf8');
-  console.log(`Merged ${state.path}: ${remoteDeals.length} remote + ${localDeals.length} local => ${deals.length}`);
-  return true;
-}
-
 function resolveSameFileRemoteChanges(states, baseRef, headRef) {
   const conflicts = [];
 
   for (const state of states) {
     if (!pathChangedBetween(baseRef, headRef, state.path)) continue;
     if (capturedMatchesRemote(state, headRef)) continue;
-    if (mergePendingAllQueueState(state, headRef)) continue;
     conflicts.push(state.path);
   }
 
