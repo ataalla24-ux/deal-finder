@@ -145,7 +145,7 @@ assert.equal(parsePubDate(syntheticAiDate), null, 'the AI agent name is not post
 
 const giveaway = candidate({
   shortcode: 'Giveaway1',
-  description: '@ugisvienna: Gewinnspiel – gewinne einen Burger gratis.',
+  description: '@ugisvienna: Gewinnspiel in 1070 Wien – gewinne einen Burger gratis.',
 });
 assert.equal(buildHeuristicDeal(giveaway), null);
 assert.match(giveaway.rejectionReason, /Gewinnspiel/i);
@@ -153,7 +153,7 @@ assert.match(giveaway.rejectionReason, /Gewinnspiel/i);
 const staleWithoutEnd = candidate({
   shortcode: 'StaleNoEnd1',
   ageMs: 4 * DAY_MS,
-  description: '@ugisvienna: Zu jedem Burger gibt es einen Kaffee gratis.',
+  description: '@ugisvienna: In 1070 Wien gibt es zu jedem Burger einen Kaffee gratis.',
 });
 assert.equal(freshnessRejectionReason(staleWithoutEnd), '');
 assert.ok(buildHeuristicDeal(staleWithoutEnd), 'a four-day-old post remains inside the current seven-day freshness window');
@@ -269,6 +269,24 @@ const selfCertifiedVienna = makeCandidate({
 });
 assert.equal(resolveViennaEvidence(selfCertifiedVienna), null, 'a boolean plus default distance cannot certify Vienna');
 assert.equal(buildHeuristicDeal(selfCertifiedVienna), null);
+
+const legacyDealsDistance = candidate({
+  shortcode: 'LegacyDealsDistance1',
+  source: 'deals',
+  description: 'Dein Anker: Bis Ende der Woche kostet der Matcha Latte nur 3 Euro.',
+  sourceDeal: {
+    brand: 'Dein Anker',
+    distance: 'Wien',
+    city: 'Wien',
+    viennaVerified: true,
+  },
+});
+assert.equal(
+  buildHeuristicDeal(legacyDealsDistance),
+  null,
+  'legacy city/distance labels from existing deals are not Instagram Vienna evidence',
+);
+assert.match(legacyDealsDistance.rejectionReason, /Wien-Signal/i);
 
 const futureStartDate = new Date(Date.now() + 2 * DAY_MS);
 const futureEndDate = new Date(Date.now() + 4 * DAY_MS);

@@ -727,6 +727,10 @@ function hasNegatedViennaLocation(signal = '') {
     || /\b(?:wien|vienna)\s+(?:ausgenommen|ausgeschlossen|excepted|excluded|nicht\s+verfuegbar|not\s+available)\b/.test(text);
 }
 
+function hasExplicitNonViennaLocation(signal = '') {
+  return /\b(?:nur\s+)?(?:in|at|bei)\s+(?:münchen|munich|graz|salzburg|linz|innsbruck|klagenfurt|bregenz|berlin|hamburg|ried(?:\s+im\s+innkreis)?)\b/i.test(signal);
+}
+
 function trustedStructuredViennaEvidence(sourceDeal = {}) {
   const declared = sourceDeal.viennaEvidence || sourceDeal.evidence?.viennaEvidence;
   if (!declared || typeof declared !== 'object' || declared.verified !== true) return null;
@@ -760,7 +764,7 @@ function trustedStructuredViennaEvidence(sourceDeal = {}) {
 
 function resolveViennaEvidence(candidate) {
   const primarySignal = postSignal(candidate);
-  if (hasNegatedViennaLocation(primarySignal)) return null;
+  if (hasNegatedViennaLocation(primarySignal) || hasExplicitNonViennaLocation(primarySignal)) return null;
 
   const explicitLocation = extractViennaLocation(primarySignal);
   if (explicitLocation && hasPattern(VIENNA_PATTERNS, primarySignal)) {
@@ -770,6 +774,24 @@ function resolveViennaEvidence(candidate) {
       value: explicitLocation,
       detail: explicitLocation,
       location: explicitLocation,
+    };
+  }
+
+  if (hasViennaInstagramEvidence(primarySignal)) {
+    const evidenceToken = cleanText(
+      primarySignal.match(/[@#][a-z0-9._-]*(?:wien|vienna)\b/i)?.[0]
+        || primarySignal.match(/\brotenturmstra(?:ß|ss)e\b/i)?.[0]
+        || primarySignal.match(/\b(?:innere stadt|leopoldstadt|landstraße|landstrasse|wieden|margareten|mariahilf|neubau|josefstadt|alsergrund|favoriten|meidling|hietzing|penzing|rudolfsheim|ottakring|hernals|währing|waehring|döbling|doebling|brigittenau|floridsdorf|donaustadt|liesing)\b/i)?.[0]
+        || 'Instagram-Wien-Signal',
+      120,
+    );
+    const detail = `Wien – ${evidenceToken}`;
+    return {
+      verified: true,
+      source: 'instagram-post',
+      value: detail,
+      detail,
+      location: 'Wien',
     };
   }
 
@@ -1480,30 +1502,11 @@ function offerTimingEvidence(timing) {
   };
 }
 
-function hasTrustedViennaEvidence(candidate, primarySignal) {
-  if (hasViennaInstagramEvidence(primarySignal)) return true;
-  const trustedApprovedContext = /(?:^|,\s*)deals(?:,|$)/i.test(cleanText(candidate.source));
-  if (!trustedApprovedContext && !candidate.sourceDeal?.viennaEvidence?.verified) return false;
-  const sourceLocation = [
-    candidate.sourceDeal?.distance,
-    candidate.sourceDeal?.address,
-    candidate.sourceDeal?.location,
-    candidate.sourceDeal?.ort,
-  ].map((value) => cleanText(value, 300)).filter(Boolean).join(' ');
-  return hasPattern(VIENNA_PATTERNS, sourceLocation);
-}
-
-function resolveAcceptedViennaEvidence(candidate, primarySignal = postSignal(candidate)) {
-  const structured = resolveViennaEvidence(candidate);
-  if (structured) return structured;
-  const explicitNonViennaLocation = /\b(?:nur\s+)?(?:in|at|bei)\s+(?:münchen|munich|graz|salzburg|linz|innsbruck|klagenfurt|bregenz|berlin|hamburg)\b/i.test(primarySignal);
-  if (explicitNonViennaLocation) return null;
-  if (!hasTrustedViennaEvidence(candidate, primarySignal)) return null;
-  return {
-    verified: true,
-    source: 'trusted-instagram-or-approved-context',
-    value: extractViennaLocation(primarySignal) || 'Wien',
-  };
+function resolveAcceptedViennaEvidence(candidate) {
+  // Only evidence forms understood by the downstream validator may certify
+  // Vienna. A legacy `distance: Wien` on an existing/community deal is a
+  // label, not proof that the Instagram offer itself applies in Vienna.
+  return resolveViennaEvidence(candidate);
 }
 
 function buildQualityScore(candidate, signal) {

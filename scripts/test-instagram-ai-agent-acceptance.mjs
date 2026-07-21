@@ -35,7 +35,7 @@ const blueTomato = buildHeuristicDeal(candidate({
 }));
 assert.ok(blueTomato, 'the explicit Vienna branch handle must rescue the Blue Tomato free-coffee post');
 
-const approvedViennaContext = buildHeuristicDeal(candidate({
+const unverifiedLegacyViennaContext = buildHeuristicDeal(candidate({
   url: 'https://www.instagram.com/p/Das-rG-kVlD/',
   source: 'deals',
   sourceDeal: {
@@ -47,8 +47,11 @@ const approvedViennaContext = buildHeuristicDeal(candidate({
   description: `AKTION: 2. Illy Caffè GRATIS zu jedem Frühstück. Gültig bis ${activeEndText}.`,
   pubDate: publishedEightDaysAgo,
 }));
-assert.ok(approvedViennaContext, 'approved Vienna source context plus an active end date must pass end to end');
-assert.equal(approvedViennaContext.validUntil, activeEnd.toISOString().slice(0, 10));
+assert.equal(
+  unverifiedLegacyViennaContext,
+  null,
+  'a legacy distance label must not turn a non-Vienna Instagram offer into a Vienna deal',
+);
 
 const apronPrice = buildHeuristicDeal(candidate({
   url: 'https://www.instagram.com/p/Daia5aCFi-M/',
