@@ -8,6 +8,7 @@ import '../sentry/instrument.mjs';
 
 import https from 'https';
 import fs from 'fs';
+import { pathToFileURL } from 'url';
 
 // ============================================
 // CONFIG
@@ -162,11 +163,6 @@ const RELEVANT_CATEGORIES = {
   'ravensburger': { category: 'shopping', logo: '🧩' },
 };
 
-// Bekannte Marken → ALLES durchlassen (kein Mindest-Rabatt)
-// Unbekannte Marken → kleiner Mindest-Filter
-const MIN_DISCOUNT_PERCENT = 5;   // Nur für UNBEKANNTE Marken
-const MIN_DISCOUNT_EURO = 3;      // Nur für UNBEKANNTE Marken
-
 // ============================================
 // FETCH HTML
 // ============================================
@@ -201,222 +197,230 @@ function fetchPage(url) {
 // PARSE DEALS FROM HTML
 // ============================================
 
-function parseDeals(html) {
-  const deals = [];
+const HTML_ENTITIES = {
+  amp: '&', apos: "'", gt: '>', lt: '<', nbsp: ' ', quot: '"',
+  auml: 'ä', Auml: 'Ä', ouml: 'ö', Ouml: 'Ö', uuml: 'ü', Uuml: 'Ü', szlig: 'ß',
+  euro: '€', ndash: '–', mdash: '—', hellip: '…', trade: '™', reg: '®', copy: '©',
+};
 
-  // Strategy: Extract deal blocks from the HTML
-  // gutscheine.at renders deals as cards with structured data
-  // We look for patterns like:
-  //   Brand from: title="BRAND Gutscheine" or alt="BRAND Logo"
-  //   Discount from: <strong> tags containing % or €
-  //   Expiry from: "Gültig bis: DD.MM.YYYY"
-  //   Link from: href="/shop-slug"
-
-  // ---- Method 1: Parse structured deal cards ----
-  
-  // Find all deal-like blocks: look for discount patterns near brand mentions
-  // Pattern: "XX% [Brand] Gutschein" or "XX€ [Brand] Gutschein"
-  const dealPatterns = [
-    // "10% Rabattcode für ..." or "20€ Gutschein für ..."
-    /(?:(\d{1,3})%\s+(?:Rabatt(?:code)?|Gutschein))\s+(?:für\s+)?(.{3,60}?)(?:\n|$|Gutschein anzeigen|Zum Angebot)/gi,
-    // "XX€ BRAND Gutschein"
-    /(\d{1,3})€\s+(\w[\w\s&.'-]{1,30}?)\s*Gutschein/gi,
-    // "XX% BRAND Gutschein für ..."
-    /(\d{1,3})%\s+(\w[\w\s&.'-]{1,30}?)\s*Gutschein(?:\s+für\s+(.{3,50}))?/gi,
-    // "Bis zu XX% Rabatt"
-    /[Bb]is zu\s+(\d{1,3})%\s+(?:Rabatt|Nachlass)\s+(?:auf\s+)?(?:alles\s+)?(?:bei\s+)?(\w[\w\s&.'-]{1,30})/gi,
-  ];
-
-  // Extract brand names from image alt texts
-  const brandFromImages = {};
-  const imgRegex = /(?:alt|title)="(\w[\w\s&.'-]+?)\s*(?:Logo|Gutscheine?)"/gi;
-  let imgMatch;
-  while ((imgMatch = imgRegex.exec(html)) !== null) {
-    const brand = imgMatch[1].trim();
-    if (brand.length > 1 && brand.length < 40) {
-      brandFromImages[brand.toLowerCase()] = brand;
-    }
+function decodeCodePoint(value) {
+  try {
+    return Number.isInteger(value) && value >= 0 && value <= 0x10ffff
+      ? String.fromCodePoint(value)
+      : '';
+  } catch {
+    return '';
   }
+}
 
-  // Strip HTML for text analysis
-  const text = html
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/\s+/g, ' ');
+function decodeHtml(value = '') {
+  return String(value)
+    .replace(/&#x([0-9a-f]+);/gi, (_match, hex) => decodeCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_match, decimal) => decodeCodePoint(parseInt(decimal, 10)))
+    .replace(/&([a-z]+);/gi, (match, name) => HTML_ENTITIES[name] ?? match);
+}
 
-  // Find expiry dates
-  const expiryMap = new Map();
-  const expiryRegex = /Gültig bis:\s*(\d{1,2}\.\d{1,2}\.\d{4})/gi;
-  let expiryMatch;
-  while ((expiryMatch = expiryRegex.exec(text)) !== null) {
-    expiryMap.set(expiryMatch.index, expiryMatch[1]);
-  }
+function htmlToText(fragment = '') {
+  return decodeHtml(String(fragment)
+    .replace(/<script\b[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<[^>]+>/g, ' '))
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
-  // ---- Method 2: More robust - scan for "XX% ... Gutschein/Rabatt" blocks ----
-  
-  const blockRegex = /(\d{1,3})\s*(%|€)\s+([\w\s&.'-]{2,35}?)\s*(?:Gutschein(?:code)?|Rabatt(?:code)?|Nachlass|Ersparnis)\s*(?:für\s+)?([^]*?)?(?=\d{1,3}\s*(?:%|€)\s+\w|\s*(?:Mehr anzeigen|Die besten Shops|$))/gi;
-  
-  // Simpler approach: find all "XX% BRAND" or "XX€ BRAND" patterns
-  const simpleRegex = /(\d{1,3})\s*(%|€)\s+([\w\s&.'-]{2,35}?)\s*(?:Gutschein(?:code)?|Rabatt(?:code)?|Nachlass|Ersparnis)/gi;
+function getAttribute(tag, name) {
+  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(`\\b${escapedName}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i');
+  const match = String(tag).match(pattern);
+  return decodeHtml(match?.[1] ?? match?.[2] ?? match?.[3] ?? '');
+}
+
+function extractBalancedDiv(html, startIndex) {
+  const divTag = /<\/?div\b[^>]*>/gi;
+  divTag.lastIndex = startIndex;
+  let depth = 0;
   let match;
 
-  while ((match = simpleRegex.exec(text)) !== null) {
-    const amount = parseInt(match[1]);
-    const unit = match[2]; // % or €
-    let brand = match[3].trim();
-
-    // Clean brand name
-    brand = brand.replace(/^\s*(für|bei|auf|von|im)\s+/i, '').trim();
-    
-    // Check minimum discount
-    // Bekannte Marken: ALLES durchlassen!
-    const brandLower = brand.toLowerCase().replace(/^\s*(für|bei|auf|von|im)\s+/i, '');
-    const isKnownBrand = Object.keys(RELEVANT_CATEGORIES).some(key => 
-      brandLower.includes(key) || key.includes(brandLower)
-    );
-
-    // Find closest expiry date (within 500 chars after the match)
-    let expires = 'Siehe Website';
-    for (const [idx, date] of expiryMap) {
-      if (idx > match.index && idx < match.index + 500) {
-        expires = `Bis ${date}`;
-        
-        break;
-      }
-    }
-
-    // Look for a description after the brand/discount
-    const afterMatch = text.substring(match.index, match.index + 200);
-    const descMatch = afterMatch.match(/(?:für|auf)\s+(.{5,60})(?=\s*(?:Gutschein anzeigen|Zum Angebot|Geprüft|Gültig|$))/i);
-    const extraDesc = descMatch ? descMatch[1].trim() : '';
-
-    // Determine category from brand (brandLower already set above)
-    let category = 'shopping';
-    let logo = '🏷️';
-    
-    for (const [key, val] of Object.entries(RELEVANT_CATEGORIES)) {
-      if (brandLower.includes(key) || key.includes(brandLower)) {
-        category = val.category;
-        logo = val.logo;
-        break;
-      }
-    }
-
-    // Build the deal title
-    let title = '';
-    if (unit === '%') {
-      title = `${amount}% Rabatt bei ${brand}`;
+  while ((match = divTag.exec(html)) !== null) {
+    if (/^<div\b/i.test(match[0])) {
+      if (!/\/\s*>$/.test(match[0])) depth += 1;
     } else {
-      title = `${amount}€ Gutschein bei ${brand}`;
+      depth -= 1;
     }
-    if (extraDesc && extraDesc.length > 5) {
-      title += ` – ${extraDesc.substring(0, 40)}`;
-    }
-    title = title.substring(0, 70);
+    if (depth === 0) return html.slice(startIndex, divTag.lastIndex);
+  }
+  return '';
+}
 
-    // Build description
-    let description = `${logo} ${brand}: `;
-    if (unit === '%') {
-      description += `${amount}% Rabatt`;
-    } else {
-      description += `${amount}€ Gutschein`;
-    }
-    if (extraDesc) {
-      description += ` – ${extraDesc.substring(0, 60)}`;
-    }
-    description = description.substring(0, 120);
+function extractVoucherCards(html) {
+  const cards = [];
+  const openingDiv = /<div\b[^>]*\bdata-voucher-id\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)[^>]*>/gi;
+  let match;
 
-    // Build URL
-    const shopSlug = brand.toLowerCase()
-      .replace(/[^a-z0-9äöüß]+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
-    const url = `https://www.gutscheine.at/${shopSlug}`;
+  while ((match = openingDiv.exec(html)) !== null) {
+    const className = getAttribute(match[0], 'class');
+    if (!/(?:^|\s)flex-col(?:\s|$)/i.test(className) || /(?:^|\s)search-result-item(?:\s|$)/i.test(className)) continue;
 
-    // Quality score: higher discount = higher score, % bonus for gratis/big discounts
-    let qualityScore = 30; // base
-    if (unit === '%') {
-      qualityScore += Math.min(amount / 2, 30);
-      if (amount >= 50) qualityScore += 15;
-    } else {
-      qualityScore += Math.min(amount, 30);
-      if (amount >= 20) qualityScore += 15;
+    const voucherId = getAttribute(match[0], 'data-voucher-id').replace(/^voucher-id:/i, '').trim();
+    if (!/^[a-z0-9_-]+$/i.test(voucherId)) continue;
+
+    const cardHtml = extractBalancedDiv(html, match.index);
+    if (!cardHtml) continue;
+    cards.push({ voucherId, html: cardHtml });
+    openingDiv.lastIndex = match.index + cardHtml.length;
+  }
+  return cards;
+}
+
+function cleanBrand(value) {
+  let brand = htmlToText(value);
+  for (let i = 0; i < 3; i++) {
+    brand = brand
+      .replace(/\s+(?:Gutscheine?|Gutscheincodes?|Logo)$/i, '')
+      .replace(/\s+Österreich$/i, '')
+      .trim();
+  }
+  return brand;
+}
+
+function extractBrand(cardHtml) {
+  const images = cardHtml.match(/<img\b[^>]*>/gi) || [];
+  for (const attribute of ['title', 'alt']) {
+    for (const image of images) {
+      const brand = cleanBrand(getAttribute(image, attribute));
+      if (brand.length >= 2 && brand.length <= 80) return brand;
     }
-    // Bonus for known popular AT brands
-    if (RELEVANT_CATEGORIES[brandLower]) qualityScore += 10;
+  }
+  return '';
+}
 
+function slugifyBrand(brand) {
+  return brand.normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ß/g, 'ss')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function safeGutscheineUrl(rawHref) {
+  if (!rawHref) return '';
+  try {
+    const url = new URL(decodeHtml(rawHref), 'https://www.gutscheine.at/');
+    const hostname = url.hostname.toLowerCase().replace(/^www\./, '');
+    if (!['http:', 'https:'].includes(url.protocol) || hostname !== 'gutscheine.at') return '';
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
+function buildVoucherHrefMap(html) {
+  const hrefsByVoucherId = new Map();
+  const quotedUrl = /(?:href\s*=\s*)?["']([^"']*\?[^"']*\bcode=([a-z0-9_-]+)[^"']*)["']/gi;
+  let match;
+  while ((match = quotedUrl.exec(html)) !== null) {
+    const safeUrl = safeGutscheineUrl(match[1]);
+    if (!safeUrl) continue;
+    const code = new URL(safeUrl).searchParams.get('code');
+    if (code === match[2] && !hrefsByVoucherId.has(code)) hrefsByVoucherId.set(code, safeUrl);
+  }
+  return hrefsByVoucherId;
+}
+
+function resolveVoucherUrl(cardHtml, voucherId, brand, hrefsByVoucherId) {
+  const anchors = cardHtml.match(/<a\b[^>]*\bhref\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)[^>]*>/gi) || [];
+  for (const anchor of anchors) {
+    const safeUrl = safeGutscheineUrl(getAttribute(anchor, 'href'));
+    if (!safeUrl) continue;
+    const code = new URL(safeUrl).searchParams.get('code');
+    if (!code || code === voucherId) return safeUrl;
+  }
+  if (hrefsByVoucherId.has(voucherId)) return hrefsByVoucherId.get(voucherId);
+
+  const slug = slugifyBrand(brand);
+  return slug ? `https://www.gutscheine.at/${slug}` : 'https://www.gutscheine.at/';
+}
+
+function getCategory(brand) {
+  const brandLower = brand.toLocaleLowerCase('de-AT');
+  for (const [key, value] of Object.entries(RELEVANT_CATEGORIES)) {
+    if (brandLower === key || brandLower.includes(key)) return value;
+  }
+  return { category: 'shopping', logo: '🏷️' };
+}
+
+function getOfferValue(title) {
+  const percent = title.match(/(\d{1,3}(?:[,.]\d+)?)\s*%/);
+  if (percent) return { amount: Number(percent[1].replace(',', '.')), unit: '%' };
+  const euro = title.match(/(?:€\s*(\d{1,4}(?:[,.]\d+)?)|(\d{1,4}(?:[,.]\d+)?)\s*€)/);
+  if (euro) return { amount: Number((euro[1] || euro[2]).replace(',', '.')), unit: '€' };
+  return { amount: 0, unit: '' };
+}
+
+function hasConcreteVoucherSignal(title) {
+  return /(?:€\s*\d{1,4}(?:[,.]\d+)?|\d{1,4}(?:[,.]\d+)?\s*(?:€|%))/.test(title)
+    || /\b(?:1\s*[+&]\s*1|\d+\s+für\s+\d+|gratis|kostenlos|versandkostenfrei)\b/i.test(title);
+}
+
+function getQualityScore(title, brand, offer) {
+  let score = 30;
+  if (offer.unit === '%') {
+    score += Math.min(offer.amount / 2, 30);
+    if (offer.amount >= 50) score += 15;
+  } else if (offer.unit === '€') {
+    score += Math.min(offer.amount, 30);
+    if (offer.amount >= 20) score += 15;
+  } else if (/\b(?:gratis|kostenlos|versandkostenfrei|\d+\s+für\s+\d+)\b/i.test(title)) {
+    score += 10;
+  }
+  if (RELEVANT_CATEGORIES[brand.toLocaleLowerCase('de-AT')]) score += 10;
+  return Math.round(score);
+}
+
+function parseDeals(html, options = {}) {
+  const deals = [];
+  const seenVoucherIds = options.seenVoucherIds || new Set();
+  const hrefsByVoucherId = buildVoucherHrefMap(html);
+  const pubDate = (options.now instanceof Date ? options.now : new Date()).toISOString();
+
+  for (const card of extractVoucherCards(html)) {
+    if (seenVoucherIds.has(card.voucherId)) continue;
+    const brand = extractBrand(card.html);
+    const titleMatch = card.html.match(/<h3\b[^>]*>([\s\S]*?)<\/h3>/i);
+    const title = htmlToText(titleMatch?.[1] || '');
+    if (!brand || !title || !hasConcreteVoucherSignal(title)) continue;
+
+    const expiryMatch = htmlToText(card.html).match(/Gültig\s+bis:\s*(\d{1,2}\.\d{1,2}\.\d{4})/i);
+    const expires = expiryMatch ? `Bis ${expiryMatch[1]}` : 'Siehe Website';
+    const { category, logo } = getCategory(brand);
+    const offer = getOfferValue(title);
+    const url = resolveVoucherUrl(card.html, card.voucherId, brand, hrefsByVoucherId);
+
+    seenVoucherIds.add(card.voucherId);
     deals.push({
-      id: dealId('gs', brand, title, url),
-      brand: brand,
-      logo: logo,
-      title: title,
-      description: description,
+      id: `gs-${card.voucherId}`,
+      voucherId: card.voucherId,
+      brand,
+      logo,
+      title: title.substring(0, 120),
+      description: `${logo} ${brand}: ${title}`.substring(0, 180),
       type: 'rabatt',
       badge: 'limited',
-      category: category,
+      category,
       source: 'Gutscheine.at',
-      url: url,
-      expires: expires,
+      url,
+      expires,
       distance: 'Online / Österreich',
-      hot: amount >= 20 || (unit === '€' && amount >= 10),
+      hot: offer.amount >= 20 || (offer.unit === '€' && offer.amount >= 10),
       isNew: true,
-      qualityScore: Math.round(qualityScore),
-      pubDate: new Date().toISOString(),
+      qualityScore: getQualityScore(title, brand, offer),
+      pubDate,
     });
   }
-
-  // ---- Pass 2: "Gratis Versand", "Sale", "Aktion" Deals von bekannten Marken ----
-  const gratisPatterns = [
-    /(?:Gratis|Kostenlos(?:e[rn]?)?|Free)\s+(?:Versand|Lieferung|Zustellung|Rücksendung)(?:\s+(?:bei|ab|für)\s+)?([\w\s&.'-]{2,30})/gi,
-    /([\w\s&.'-]{2,30}?)(?:\s*Gutscheine?)?\s*(?:Gratis|Kostenlos(?:e[rn]?)?)\s+(?:Versand|Lieferung)/gi,
-    /[Bb]is zu\s+(\d{1,3})%\s+(?:Rabatt\s+)?(?:im\s+)?Sale\s+(?:bei\s+)?([\w\s&.'-]{2,30})/gi,
-    /([\w\s&.'-]{2,30}?)\s+(?:Sale|Outlet):\s+[Bb]is zu\s+(\d{1,3})%/gi,
-  ];
-
-  for (const pattern of gratisPatterns) {
-    let m;
-    while ((m = pattern.exec(text)) !== null) {
-      // Extract brand (might be in different capture groups)
-      let saleBrand = (m[1] || m[2] || '').trim();
-      saleBrand = saleBrand.replace(/^\s*(bei|für|von|im|auf)\s+/i, '').trim();
-      const saleBrandLower = saleBrand.toLowerCase();
-
-      const matched = m[0].trim().substring(0, 60);
-      let cat2 = 'shopping', logo2 = '🏷️';
-      for (const [key, val] of Object.entries(RELEVANT_CATEGORIES)) {
-        if (saleBrandLower.includes(key) || key.includes(saleBrandLower)) {
-          cat2 = val.category;
-          logo2 = val.logo;
-          break;
-        }
-      }
-
-      const slug2 = saleBrand.toLowerCase().replace(/[^a-z0-9äöüß]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-
-    deals.push({
-        id: dealId('gs', saleBrand, matched, `https://www.gutscheine.at/${slug2}`),
-        brand: saleBrand,
-        logo: logo2,
-        title: matched,
-        description: `${logo2} ${saleBrand}: ${matched}`,
-        type: 'rabatt',
-        badge: 'limited',
-        category: cat2,
-        source: 'Gutscheine.at',
-        url: `https://www.gutscheine.at/${slug2}`,
-        expires: 'Siehe Website',
-        distance: 'Online / Österreich',
-        hot: false,
-        isNew: true,
-        qualityScore: 20,
-        pubDate: new Date().toISOString(),
-      });
-    }
-  }
-
   return deals;
 }
 
@@ -425,22 +429,6 @@ function parseDeals(html) {
 // ============================================
 
 
-// ============================================
-// STABILE DEAL-ID (Hash statt Date.now/random)
-// ============================================
-function stableHash(str) {
-  let hash = 5381;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
-    hash = hash >>> 0;
-  }
-  return hash.toString(36);
-}
-function dealId(prefix, brand, title, url) {
-  const key = (brand || '') + '|' + (title || '') + '|' + (url || '');
-  return prefix + '-' + stableHash(key);
-}
-
 async function main() {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('🏷️  GUTSCHEINE.AT SCRAPER');
@@ -448,6 +436,7 @@ async function main() {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
   const allDeals = [];
+  const seenVoucherIds = new Set();
 
   for (const page of PAGES_TO_SCRAPE) {
     try {
@@ -455,7 +444,7 @@ async function main() {
       const html = await fetchPage(page.url);
       console.log(`   📄 ${(html.length / 1024).toFixed(0)} KB geladen`);
 
-      const deals = parseDeals(html);
+      const deals = parseDeals(html, { seenVoucherIds });
       console.log(`   ✅ ${deals.length} Deals extrahiert`);
 
       for (const d of deals) {
@@ -477,7 +466,7 @@ async function main() {
   console.log('📊 ERGEBNIS:');
   console.log(`   🔍 Seiten gescraped:   ${PAGES_TO_SCRAPE.length}`);
   console.log(`   📦 Deals extrahiert:   ${allDeals.length}`);
-  console.log(`   ✅ Ohne Dedupe/Top100: ${finalDeals.length}`);
+  console.log(`   ✅ Eindeutige Voucher: ${finalDeals.length}`);
   if (finalDeals.length > 0) {
     console.log(`   🏆 Bester Deal:        ${finalDeals[0].title}`);
   }
@@ -497,9 +486,17 @@ async function main() {
   console.log('📱 Warten auf Slack-Approval...\n');
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch(err => {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch(err => {
     console.error('❌ Fatal:', err.message);
-    process.exit(0); // Exit 0 to not fail workflow
+    process.exitCode = 0; // Keep the scheduled workflow alive, as before.
   });
+}
+
+export {
+  buildVoucherHrefMap,
+  extractVoucherCards,
+  main,
+  parseDeals,
+  safeGutscheineUrl,
+};

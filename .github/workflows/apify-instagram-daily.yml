@@ -41,7 +41,10 @@ jobs:
         run: node scripts/check-instagram-auth.mjs
 
       - name: Run Apify Instagram Import
-        if: steps.instagram-auth.outputs.ok == 'true'
+        # A 429 only proves that the lightweight probe was throttled. The
+        # actor has its own retry/session handling, so do not turn a healthy
+        # cookie into a full-day zero-result outage.
+        if: steps.instagram-auth.outputs.proceed == 'true'
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           APIFY_INSTAGRAM_VIENNA_ACTOR_ID: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}

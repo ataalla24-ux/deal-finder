@@ -7,6 +7,7 @@ import {
   validateDealsForSlack,
   writeDealValidityReport,
 } from './deal-validity-agent.js';
+import { parseExpiryShape } from './expiry-utils.js';
 import {
   filterModeratedDeals,
   loadDealModeration,
@@ -108,7 +109,7 @@ function canonicalPostKey(url) {
     if (host === 'instagram.com') {
       const postTypeIndex = pathParts.findIndex((part) => ['p', 'reel', 'tv'].includes(part.toLowerCase()));
       if (postTypeIndex >= 0 && pathParts[postTypeIndex + 1]) {
-        return `instagram:${pathParts[postTypeIndex].toLowerCase()}:${pathParts[postTypeIndex + 1].toLowerCase()}`;
+        return `instagram:${pathParts[postTypeIndex].toLowerCase()}:${pathParts[postTypeIndex + 1]}`;
       }
     }
 
@@ -190,14 +191,71 @@ function inferLogo(deal, type) {
 }
 
 function inferDistance(deal) {
-  const distance = cleanText(deal.distance || deal.location || deal.ort || deal.address);
-  return distance || 'Wien';
+  const structuredLocation = deal.location && typeof deal.location === 'object'
+    ? (deal.location.address || deal.location.streetAddress || deal.location.name || deal.location.city)
+    : deal.location;
+  return cleanText(deal.distance || structuredLocation || deal.ort || deal.address || deal.city);
 }
 
 function inferExpires(deal) {
-  const raw = deal.expires || deal.end_date || deal.validity_date || '';
-  const iso = toIsoDate(raw);
-  return iso || cleanText(raw) || '';
+  const raw = deal.expires || deal.validUntil || deal.validOn || deal.end_date || deal.validity_date || '';
+  const text = cleanText(raw);
+  if (!text || /^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+  if (/^(?:abflug|departure|hinflug)\b/i.test(text)) return text;
+  if (!/\b(?:19|20)\d{2}\b/.test(text)) return text;
+  const shape = parseExpiryShape(text, {
+    contextText: [deal.title, deal.description, deal.category, deal.type].map(cleanText).filter(Boolean).join(' '),
+  });
+  return cleanText(shape.validOn || shape.validUntil || text);
+}
+
+function repairKnownDealIdentity(deal, url, inferredBrand, inferredTitle) {
+  let hostname = '';
+  try {
+    hostname = new URL(url).hostname.toLowerCase().replace(/^www\./, '');
+  } catch {
+    hostname = '';
+  }
+  if (hostname === 'watertuin.at' && /^tui$/i.test(inferredBrand)) {
+    return {
+      brand: 'Watertuin',
+      title: /free all-you-can-eat/i.test(inferredTitle)
+        ? 'Gratis All-you-can-eat & Drinks am Geburtstag'
+        : inferredTitle,
+      logo: '🍽️',
+      logoUrl: 'https://www.google.com/s2/favicons?sz=256&domain_url=https://www.watertuin.at',
+    };
+  }
+  if (hostname.endsWith('foodora.at') && /^mcdonald'?s$/i.test(inferredBrand) && /^1\s*\+\s*1\s+gratis\s+burger/i.test(inferredTitle)) {
+    return {
+      brand: "McDonald's",
+      title: "1+1 gratis Burger bei McDonald's",
+      logo: inferLogo(deal, inferType(deal)),
+      logoUrl: cleanText(deal.logoUrl),
+    };
+  }
+  if (hostname.endsWith('burgerking.at') && /^burger\s+king$/i.test(inferredBrand) && /^verschiedene\s+coupons/i.test(inferredTitle)) {
+    return {
+      brand: 'Burger King',
+      title: 'Verschiedene Burger-King-Coupons und 1+1-Aktionen',
+      logo: inferLogo(deal, inferType(deal)),
+      logoUrl: cleanText(deal.logoUrl),
+    };
+  }
+  if (hostname.endsWith('tiktok.com') && /^@?lovinghut\.neubau$/i.test(inferredBrand) && /^strawberry:\s*/i.test(inferredTitle)) {
+    return {
+      brand: '@lovinghut.neubau',
+      title: inferredTitle.replace(/^strawberry:\s*/i, ''),
+      logo: inferLogo(deal, inferType(deal)),
+      logoUrl: cleanText(deal.logoUrl),
+    };
+  }
+  return {
+    brand: inferredBrand,
+    title: inferredTitle,
+    logo: inferLogo(deal, inferType(deal)),
+    logoUrl: cleanText(deal.logoUrl),
+  };
 }
 
 function stableId(seed) {
@@ -210,11 +268,15 @@ function stableId(seed) {
 
 function normalizeDeal(rawDeal, sourceKey) {
   const deal = ensureObject(rawDeal);
-  const brand = inferBrand(deal, sourceKey);
-  const title = inferTitle(deal, brand);
-  const rawUrl = normalizeUrl(deal.url);
-  const rawDistance = cleanText(deal.distance || deal.location || deal.ort || deal.address);
-  const rawExpires = cleanText(deal.expires || deal.end_date || deal.validity_date || '');
+  const rawUrl = normalizeUrl(deal.url || deal.post_url || deal.postUrl);
+  const inferredBrand = inferBrand(deal, sourceKey);
+  const inferredTitle = inferTitle(deal, inferredBrand);
+  const identity = repairKnownDealIdentity(deal, rawUrl, inferredBrand, inferredTitle);
+  const brand = identity.brand;
+  const title = identity.title;
+  const rawDistance = inferDistance(deal);
+  const rawExpires = cleanText(deal.expires || deal.validUntil || deal.validOn || deal.end_date || deal.validity_date || '');
+  const normalizedExpires = inferExpires(deal);
   const rawSource = cleanText(deal.source);
   const originSource = cleanText(deal.originSource) || rawSource || sourceKey;
   const url = rawUrl;
@@ -223,13 +285,14 @@ function normalizeDeal(rawDeal, sourceKey) {
   const idSeed = `${sourceKey}|${deal.id || ''}|${url}|${title}`;
   const id = cleanText(deal.id) || `${sourceKey}-${stableId(idSeed)}`;
   const type = inferType(deal);
-  const missingFields = [];
+  const missingFields = ensureArray(deal.missingFields).map(cleanText).filter(Boolean);
   if (!rawUrl) missingFields.push('Ziel-URL');
   if (!rawDistance) missingFields.push('Ort');
   if (!rawExpires) missingFields.push('Ablauf');
   if (!rawSource) missingFields.push('Quelle');
 
   return {
+    ...deal,
     id,
     brand,
     title,
@@ -237,14 +300,36 @@ function normalizeDeal(rawDeal, sourceKey) {
     url,
     category: inferCategory(deal),
     type,
-    logo: inferLogo(deal, type),
-    distance: inferDistance(deal),
+    logo: identity.logo,
+    logoUrl: identity.logoUrl,
+    distance: rawDistance,
     address: cleanText(deal.address),
-    location: cleanText(deal.location),
+    location: deal.location && typeof deal.location === 'object'
+      ? { ...deal.location }
+      : cleanText(deal.location),
     ort: cleanText(deal.ort),
+    city: cleanText(deal.city || (deal.location && typeof deal.location === 'object' ? deal.location.city : '')),
+    postalCode: cleanText(deal.postalCode || deal.zip || deal.zipCode || (deal.location && typeof deal.location === 'object' ? (deal.location.postalCode || deal.location.zip) : '')),
+    latitude: deal.latitude ?? deal.lat ?? (deal.location && typeof deal.location === 'object' ? deal.location.latitude : undefined),
+    longitude: deal.longitude ?? deal.lng ?? deal.lon ?? (deal.location && typeof deal.location === 'object' ? deal.location.longitude : undefined),
     pubDate,
     pubDateSource,
-    expires: inferExpires(deal),
+    sourcePublishedAt: toIsoDate(deal.sourcePublishedAt || deal.source_published_at),
+    sourcePublishedAtSource: cleanText(deal.sourcePublishedAtSource || deal.sourceDateSource),
+    createdAt: toIsoDate(deal.createdAt),
+    discoveredAt: toIsoDate(deal.discoveredAt),
+    submittedAt: toIsoDate(deal.submittedAt),
+    lastUpdated: toIsoDate(deal.lastUpdated),
+    expires: normalizedExpires,
+    expiresOriginal: cleanText(deal.expiresOriginal || (rawExpires && rawExpires !== normalizedExpires ? rawExpires : '')),
+    expiresSource: cleanText(deal.expiresSource),
+    expirySource: cleanText(deal.expirySource || deal.expiresSource),
+    expiryKind: cleanText(deal.expiryKind),
+    expiryDisplayText: cleanText(deal.expiryDisplayText),
+    validOn: cleanText(deal.validOn),
+    validFrom: cleanText(deal.validFrom),
+    validUntil: cleanText(deal.validUntil),
+    dateConfidence: cleanText(deal.dateConfidence),
     source: cleanText(deal.source) || sourceKey,
     originSource,
     qualityScore: Number(deal.qualityScore) || 0,
@@ -255,7 +340,7 @@ function normalizeDeal(rawDeal, sourceKey) {
     slackTs: cleanText(deal.slackTs),
     slackThreadTs: cleanText(deal.slackThreadTs),
     slackPostFormatVersion: cleanText(deal.slackPostFormatVersion),
-    missingFields,
+    missingFields: [...new Set(missingFields)],
   };
 }
 
@@ -347,6 +432,9 @@ function formatReasonCategoryCounts(counts) {
 }
 
 function buildSlackMessage(deal, index) {
+  const validity = ensureObject(deal.validity);
+  const displayedOfferDate = validity.status ? validity.sourceDate : deal.pubDate;
+  const displayedExpiry = validity.expiryDate || deal.validUntil || deal.validOn || deal.expires;
   const link = deal.url ? `<${deal.url}|Zum Angebot>` : '⚠️ FEHLT';
   const desc = deal.description ? `\n📝 ${deal.description.slice(0, 180)}` : '';
   const missingNote = Array.isArray(deal.missingFields) && deal.missingFields.length > 0
@@ -356,9 +444,9 @@ function buildSlackMessage(deal, index) {
   return [
     `*${index}. ${deal.title}*`,
     `🏷️ Marke/Restaurant: ${deal.brand || 'k.A.'}`,
-    `📍 Ort: ${deal.distance || 'Wien'}`,
-    `📅 Angebotsdatum: ${formatDate(deal.pubDate)}`,
-    `⏳ Gültig bis: ${deal.expires ? formatDate(deal.expires) : 'k.A.'}`,
+    `📍 Ort: ${deal.distance || 'k.A.'}`,
+    `📅 Angebotsdatum: ${formatDate(displayedOfferDate)}`,
+    `⏳ Gültig bis: ${displayedExpiry ? formatDate(displayedExpiry) : 'k.A.'}`,
     `🧭 Kategorie: ${deal.category} | Typ: ${deal.type}`,
     `🧩 Ursprung intern: ${deal.originSource || deal.source || 'k.A.'}`,
     `🔗 Direktlink: ${link}`,
@@ -605,6 +693,19 @@ function buildDealDuplicateKeys(deal) {
     keys.push(`source-id:${sourceKey}|${idKey}`);
   }
 
+  const crawlerSignal = normalizeLooseText([deal.source, deal.originSource].map(cleanText).join(' '));
+  if (postKey && /\b(?:firecrawl|crawler)\b/.test(crawlerSignal)) {
+    const brandKey = normalizeLooseText(deal.brand)
+      .replace(/\b(?:wien|vienna|österreich|oesterreich|austria)\b/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (brandKey) keys.push(`crawler-url-brand:${postKey}|${brandKey}`);
+  }
+
+  if (postKey && /\bgutscheine\s+at\b/.test(crawlerSignal)) {
+    keys.push(`gutscheine-url:${postKey}`);
+  }
+
   return [...new Set(keys)];
 }
 
@@ -635,6 +736,46 @@ function filterDuplicateDealsInRun(deals) {
   return { deals: filtered, removed };
 }
 
+function explicitValidityRank(deal) {
+  if (cleanText(deal.validUntil || deal.validOn || deal.validity?.expiryDate)) return 3;
+  const raw = cleanText(deal.expires);
+  if (/\b(?:20\d{2}-\d{2}-\d{2}|\d{1,2}[./]\d{1,2}[./]20\d{2})\b/.test(raw)) return 2;
+  if (raw && !/\b(?:siehe|unbekannt|laut\s+quelle|regelmäßig|regelmaessig|ongoing|k\.a\.)\b/i.test(raw)) return 1;
+  return 0;
+}
+
+function directOfferUrlRank(deal) {
+  try {
+    const hostname = new URL(cleanText(deal.url)).hostname.toLowerCase().replace(/^www\./, '');
+    return /(?:goodnight\.at|news\.google\.com|yelp\.|tripadvisor\.|1000things)/i.test(hostname) ? 0 : 1;
+  } catch {
+    return 0;
+  }
+}
+
+function compareSlackDeals(left, right) {
+  const validityDifference = explicitValidityRank(right) - explicitValidityRank(left);
+  if (validityDifference) return validityDifference;
+  const directUrlDifference = directOfferUrlRank(right) - directOfferUrlRank(left);
+  if (directUrlDifference) return directUrlDifference;
+  const qualityDifference = Number(right.qualityScore || 0) - Number(left.qualityScore || 0);
+  if (qualityDifference) return qualityDifference;
+  const rightDate = parseDealDate(right.pubDate)?.getTime() || 0;
+  const leftDate = parseDealDate(left.pubDate)?.getTime() || 0;
+  return rightDate - leftDate;
+}
+
+async function validateAndDedupeDealsForSlack(deals, options = {}) {
+  const validation = await validateDealsForSlack(deals, options);
+  const rankedAllowed = [...validation.allowedDeals].sort(compareSlackDeals);
+  const duplicateFilter = filterDuplicateDealsInRun(rankedAllowed);
+  return {
+    validation,
+    allowedDeals: duplicateFilter.deals,
+    duplicateRemoved: duplicateFilter.removed,
+  };
+}
+
 function parseDealDate(value) {
   const text = cleanText(value);
   if (!text) return null;
@@ -642,13 +783,23 @@ function parseDealDate(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function socialDealAgeDays(deal) {
-  const date = parseDealDate(deal.pubDate || deal.createdAt || deal.discoveredAt || deal.lastUpdated);
+function queueDealAgeDays(deal, now = new Date()) {
+  const slackSeconds = Number(cleanText(deal.slackTs).split('.')[0]);
+  const slackDate = Number.isFinite(slackSeconds) && slackSeconds > 0
+    ? new Date(slackSeconds * 1000)
+    : null;
+  const date = slackDate && !Number.isNaN(slackDate.getTime())
+    ? slackDate
+    : parseDealDate(deal.pubDate || deal.createdAt || deal.discoveredAt || deal.lastUpdated);
   if (!date) return null;
-  return Math.max(0, Math.floor((Date.now() - date.getTime()) / (24 * 60 * 60 * 1000)));
+  return Math.max(0, Math.floor((now.getTime() - date.getTime()) / (24 * 60 * 60 * 1000)));
 }
 
-function pruneStaleSocialQueueDeals(deals) {
+function pruneStaleQueueDeals(deals, options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date();
+  const maxAgeDays = Number.isFinite(Number(options.maxAgeDays))
+    ? Number(options.maxAgeDays)
+    : SEEN_DEAL_SUPPRESSION_DAYS;
   const filtered = [];
   let removed = 0;
 
@@ -656,13 +807,8 @@ function pruneStaleSocialQueueDeals(deals) {
     const postKey = canonicalPostKey(deal.url);
     const socialSignal = normalizeLooseText([deal.url, deal.source, deal.originSource, deal.id].map(cleanText).join(' '));
     const isSocialQueueDeal = isSocialPostKey(postKey) || /\b(instagram|tiktok)\b/i.test(socialSignal);
-    if (!isSocialQueueDeal) {
-      filtered.push(deal);
-      continue;
-    }
-
-    const age = socialDealAgeDays(deal);
-    if (age === null || age >= SEEN_DEAL_SUPPRESSION_DAYS) {
+    const age = queueDealAgeDays(deal, now);
+    if ((isSocialQueueDeal && age === null) || (age !== null && age >= maxAgeDays)) {
       removed += 1;
       continue;
     }
@@ -671,6 +817,40 @@ function pruneStaleSocialQueueDeals(deals) {
   }
 
   return { deals: filtered, removed };
+}
+
+async function revalidateRecentPostedQueue(deals, options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date();
+  const maxAgeDays = Number.isFinite(Number(options.revalidationDays))
+    ? Number(options.revalidationDays)
+    : SEEN_DEAL_SUPPRESSION_DAYS;
+  const entries = deals
+    .map((deal, index) => ({ deal, index }))
+    .filter(({ deal }) => cleanText(deal.slackTs)
+      && (queueDealAgeDays(deal, now) ?? Infinity) < maxAgeDays);
+  if (entries.length === 0) {
+    return { deals, removed: 0, validation: null };
+  }
+
+  const validation = await validateDealsForSlack(entries.map((entry) => entry.deal), {
+    ...options,
+    now,
+  });
+  const blockedIndexes = new Set();
+  const validatedByIndex = new Map();
+  validation.results.forEach((result, resultIndex) => {
+    const originalIndex = entries[resultIndex].index;
+    if (result.decision.allowed) validatedByIndex.set(originalIndex, result.deal);
+    else blockedIndexes.add(originalIndex);
+  });
+  const filtered = deals
+    .map((deal, index) => validatedByIndex.get(index) || deal)
+    .filter((deal, index) => !blockedIndexes.has(index));
+  return {
+    deals: filtered,
+    removed: blockedIndexes.size,
+    validation,
+  };
 }
 
 function filterAlreadyQueuedDeals(deals, queuedDealKeys) {
@@ -732,16 +912,23 @@ async function main() {
   }
   const pendingDeals = moderationPendingFilter.deals;
   console.log(`📋 Total pending deals loaded: ${pendingDeals.length}`);
-  const queuePrune = pruneStaleSocialQueueDeals(loadPendingQueue());
+  const queuePrune = pruneStaleQueueDeals(loadPendingQueue());
   if (queuePrune.removed > 0) {
-    console.log(`🧹 Queue prune: ${queuePrune.removed} alte Social-Posts aus der Slack-Queue entfernt`);
+    console.log(`🧹 Queue prune: ${queuePrune.removed} mehr als ${SEEN_DEAL_SUPPRESSION_DAYS} Tage alte Deals aus der Slack-Queue entfernt`);
   }
   const moderationQueueFilter = filterModeratedDeals(queuePrune.deals, moderation);
   if (moderationQueueFilter.removed.length > 0) {
     console.log(`🛡️ Queue moderation: ${moderationQueueFilter.removed.length} Deals aus der Slack-Queue entfernt`);
   }
-  const existingQueue = moderationQueueFilter.deals;
-  const queueChanged = queuePrune.removed > 0 || moderationQueueFilter.removed.length > 0;
+  let existingQueue = moderationQueueFilter.deals;
+  let queueChanged = queuePrune.removed > 0 || moderationQueueFilter.removed.length > 0;
+  const validityUrlCache = new Map();
+  const recentQueueValidation = await revalidateRecentPostedQueue(existingQueue, { urlCache: validityUrlCache });
+  if (recentQueueValidation.removed > 0) {
+    console.log(`🧹 Queue validity: ${recentQueueValidation.removed} kürzlich gepostete, inzwischen blockierte Deals entfernt`);
+    existingQueue = recentQueueValidation.deals;
+    queueChanged = true;
+  }
 
   const seenPostKeys = await loadRecentlySeenPostKeys();
   const preSlackSeenFilter = filterRecentlySeenDeals(pendingDeals, seenPostKeys);
@@ -749,20 +936,16 @@ async function main() {
     console.log(`👀 Seen filter: ${preSlackSeenFilter.removed} bereits gesehene exakte Posts vor Slack entfernt`);
   }
 
-  const inRunDuplicateFilter = filterDuplicateDealsInRun(preSlackSeenFilter.deals);
-  if (inRunDuplicateFilter.removed > 0) {
-    console.log(`🔁 Run filter: ${inRunDuplicateFilter.removed} doppelte Deals innerhalb dieses Laufs entfernt`);
-  }
-
   const queuedDealKeys = loadQueuedDealDuplicateKeys(existingQueue);
-  const preSlackQueueFilter = filterAlreadyQueuedDeals(inRunDuplicateFilter.deals, queuedDealKeys);
+  const preSlackQueueFilter = filterAlreadyQueuedDeals(preSlackSeenFilter.deals, queuedDealKeys);
   if (preSlackQueueFilter.removed > 0) {
     console.log(`🔁 Queue filter: ${preSlackQueueFilter.removed} bereits gepostete Deals vor Slack entfernt`);
   }
 
-  const validation = await validateDealsForSlack(preSlackQueueFilter.deals);
+  const validatedRun = await validateAndDedupeDealsForSlack(preSlackQueueFilter.deals, { urlCache: validityUrlCache });
+  const validation = validatedRun.validation;
   writeDealValidityReport(validation.report);
-  const freshDeals = validation.allowedDeals;
+  const freshDeals = validatedRun.allowedDeals;
   const blockedSummary = formatReasonCategoryCounts(validation.summary.reasonCategoryCounts);
 
   console.log(
@@ -771,6 +954,9 @@ async function main() {
   );
   if (blockedSummary) {
     console.log(`🚫 Blocked reasons: ${blockedSummary}`);
+  }
+  if (validatedRun.duplicateRemoved > 0) {
+    console.log(`🔁 Run filter: ${validatedRun.duplicateRemoved} doppelte gültige Deals innerhalb dieses Laufs entfernt`);
   }
   console.log(`💾 saved: ${path.relative(ROOT, DEFAULT_REPORT_PATH)}`);
   console.log(`📨 Pending: ${pendingDeals.length}, posting to Slack: ${freshDeals.length}`);
@@ -831,7 +1017,19 @@ async function main() {
   console.log(`💾 saved: ${path.relative(ROOT, PENDING_ALL_PATH)}`);
 }
 
-main().catch((error) => {
-  console.error('❌ slack-notify failed:', error.message);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main().catch((error) => {
+    console.error('❌ slack-notify failed:', error.message);
+    process.exit(1);
+  });
+}
+
+export {
+  buildSlackMessage,
+  compareSlackDeals,
+  filterDuplicateDealsInRun,
+  normalizeDeal,
+  pruneStaleQueueDeals,
+  revalidateRecentPostedQueue,
+  validateAndDedupeDealsForSlack,
+};
