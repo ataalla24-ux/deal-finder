@@ -30,10 +30,14 @@ jobs:
           npm ci
           npm run check
 
-      - name: Push and build the configured Actor
-        uses: apify/push-actor-action@v1
+      - name: Set up authenticated Apify CLI
+        uses: apify/setup-apify-cli-action@v1
         with:
           token: ${{ secrets.APIFY_TOKEN }}
-          actor-id: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
-          working-directory: apify/instagram-vienna-food-offers
-          build-tag: latest
+
+      - name: Push and build the configured Actor
+        working-directory: apify/instagram-vienna-food-offers
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          ACTOR_ID: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
+        run: apify push "$ACTOR_ID" --build-tag=latest --force --wait-for-finish=1800
