@@ -31,10 +31,10 @@ jobs:
           node scripts/test-apify-instagram-reliability.mjs
 
       - name: Run Apify Instagram Import
-        # A 429 only proves that the lightweight probe was throttled. The
-        # actor has its own retry/session handling, so do not turn a healthy
-        # cookie into a full-day zero-result outage.
-        if: steps.instagram-auth.outputs.proceed == 'true'
+        # The Actor owns its retry/session handling. Always run the import so
+        # a throttled lightweight Instagram probe cannot create a zero-result
+        # outage while the authenticated Actor is still healthy.
+        id: apify-import
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           APIFY_INSTAGRAM_VIENNA_ACTOR_ID: ${{ secrets.APIFY_INSTAGRAM_VIENNA_ACTOR_ID }}
