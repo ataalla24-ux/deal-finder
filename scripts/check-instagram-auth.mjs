@@ -128,6 +128,90 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export function parseRetryAfter(value, nowMs = Date.now()) {
+  const raw = cleanText(value);
+  if (!raw) return null;
+
+  if (/^\d+(?:\.\d+)?$/.test(raw)) {
+    return new Date(nowMs + Math.max(0, Number(raw)) * 1000);
+  }
+
+  const parsed = Date.parse(raw);
+  return Number.isNaN(parsed) ? null : new Date(Math.max(nowMs, parsed));
+}
+
+function toIsoOrEmpty(value) {
+  const timestamp = Date.parse(value || '');
+  return Number.isNaN(timestamp) ? '' : new Date(timestamp).toISOString();
+}
+
+function previousRateLimitState(previousReport) {
+  if (!previousReport || previousReport.status !== 'rate-limited') {
+    return { consecutiveRateLimits: 0, nextRetryAt: '' };
+  }
+
+  return {
+    consecutiveRateLimits: Math.max(1, Number(previousReport.consecutiveRateLimits || 1)),
+    nextRetryAt: toIsoOrEmpty(previousReport.nextRetryAt),
+  };
+}
+
+function rateLimitResult({
+  username,
+  diagnostics,
+  previousReport,
+  nowMs,
+  response,
+  bodySample = '',
+  attempt = 1,
+  circuitOpen = false,
+  config = env,
+}) {
+  const previous = previousRateLimitState(previousReport);
+  const consecutiveRateLimits = circuitOpen
+    ? previous.consecutiveRateLimits
+    : previous.consecutiveRateLimits + 1;
+  const baseCooldownMs = toPositiveInt(config.INSTAGRAM_AUTH_RATE_LIMIT_COOLDOWN_MS, 15 * 60 * 1000);
+  const maxCooldownMs = toPositiveInt(config.INSTAGRAM_AUTH_RATE_LIMIT_MAX_COOLDOWN_MS, 6 * 60 * 60 * 1000);
+  const exponentialCooldownMs = Math.min(
+    maxCooldownMs,
+    baseCooldownMs * (2 ** Math.max(0, consecutiveRateLimits - 1)),
+  );
+  const retryAfterDate = circuitOpen
+    ? (previous.nextRetryAt ? new Date(previous.nextRetryAt) : null)
+    : parseRetryAfter(response?.headers?.get?.('retry-after'), nowMs);
+  const nextRetryMs = circuitOpen && retryAfterDate
+    ? retryAfterDate.getTime()
+    : Math.max(
+      nowMs + exponentialCooldownMs,
+      retryAfterDate?.getTime?.() || 0,
+    );
+  const nextRetryAt = new Date(nextRetryMs).toISOString();
+
+  return {
+    ok: false,
+    status: 'rate-limited',
+    reason: circuitOpen
+      ? `Instagram Auth-Check pausiert bis ${nextRetryAt}`
+      : `Instagram rate-limited den Healthcheck (HTTP ${response?.status || 429}); Cookies werden nicht als ungültig markiert`,
+    username,
+    httpStatus: Number(response?.status || previousReport?.httpStatus || 429),
+    diagnostics,
+    apiUserFound: false,
+    bodySample,
+    attempts: attempt,
+    rateLimited: true,
+    circuitOpen,
+    credentialsState: 'unknown',
+    shouldRefreshCookies: false,
+    canProceed: true,
+    consecutiveRateLimits,
+    retryAfter: retryAfterDate?.toISOString?.() || '',
+    nextRetryAt,
+    cooldownSeconds: Math.max(0, Math.ceil((nextRetryMs - nowMs) / 1000)),
+  };
+}
+
 function instagramHeaders(cookieHeader, username) {
   return {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -141,13 +225,15 @@ function instagramHeaders(cookieHeader, username) {
 
 export async function validateInstagramAuth(cookies, options = {}) {
   const config = options.env || env;
+  const nowMs = Number.isFinite(options.nowMs) ? options.nowMs : Date.now();
+  const previousReport = options.previousReport || null;
   const fetchImpl = options.fetchImpl || fetchWithTimeout;
   const sleepImpl = options.sleepImpl || sleep;
   const username = cleanText(config.INSTAGRAM_AUTH_TEST_USERNAME) || DEFAULT_TEST_USERNAME;
   const diagnostics = cookieDiagnostics(cookies);
   const cookieHeader = buildCookieHeader(cookies);
-  const maxAttempts = Math.max(1, toPositiveInt(config.INSTAGRAM_AUTH_ATTEMPTS || config.INSTAGRAM_AUTH_RETRIES, 3));
-  const baseBackoffMs = toPositiveInt(config.INSTAGRAM_AUTH_BACKOFF_MS, 45000);
+  const maxAttempts = Math.max(1, toPositiveInt(config.INSTAGRAM_AUTH_ATTEMPTS || config.INSTAGRAM_AUTH_RETRIES, 1));
+  const baseBackoffMs = toPositiveInt(config.INSTAGRAM_AUTH_BACKOFF_MS, 15000);
 
   if (!diagnostics.hasSessionCookie) {
     return {
@@ -157,10 +243,25 @@ export async function validateInstagramAuth(cookies, options = {}) {
       username,
       httpStatus: 0,
       diagnostics,
+      credentialsState: 'missing',
       rateLimited: false,
+      circuitOpen: false,
       shouldRefreshCookies: true,
       canProceed: false,
     };
+  }
+
+  const previous = previousRateLimitState(previousReport);
+  if (previous.nextRetryAt && Date.parse(previous.nextRetryAt) > nowMs) {
+    return rateLimitResult({
+      username,
+      diagnostics,
+      previousReport,
+      nowMs,
+      attempt: 0,
+      circuitOpen: true,
+      config,
+    });
   }
 
   const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
@@ -198,7 +299,11 @@ export async function validateInstagramAuth(cookies, options = {}) {
           diagnostics,
           apiUserFound: true,
           attempts: attempt,
+          credentialsState: 'valid',
           rateLimited: false,
+          circuitOpen: false,
+          consecutiveRateLimits: 0,
+          nextRetryAt: '',
           shouldRefreshCookies: false,
           canProceed: true,
         };
@@ -214,27 +319,27 @@ export async function validateInstagramAuth(cookies, options = {}) {
       const blocked = response.status === 403 || challengeRequired;
 
       if (rateLimited) {
-        return {
-          ok: false,
-          status: 'rate-limited',
-          reason: `Instagram rate-limited nur den Healthcheck (HTTP ${response.status}); Cookies sind damit nicht als ungültig bewiesen`,
+        return rateLimitResult({
           username,
-          httpStatus: response.status,
           diagnostics,
-          apiUserFound: false,
+          previousReport,
+          nowMs,
+          response,
           bodySample,
-          attempts: attempt,
-          rateLimited: true,
-          shouldRefreshCookies: false,
-          canProceed: true,
-        };
+          attempt,
+          config,
+        });
       }
 
-      const confirmedCredentialFailure = response.status === 401 || loginWall || challengeRequired;
+      const invalidSession = response.status === 401 || loginWall;
+      const confirmedCredentialFailure = invalidSession || challengeRequired;
+      const serviceUnavailable = response.status >= 500;
 
       lastFailure = {
         ok: false,
-        status: blocked ? 'blocked' : (loginWall ? 'login-wall' : 'invalid-session'),
+        status: blocked
+          ? 'blocked'
+          : (loginWall ? 'login-wall' : (invalidSession ? 'invalid-session' : (serviceUnavailable ? 'service-unavailable' : 'unexpected-response'))),
         reason: `Instagram API lieferte HTTP ${response.status}`,
         username,
         httpStatus: response.status,
@@ -243,11 +348,13 @@ export async function validateInstagramAuth(cookies, options = {}) {
         bodySample,
         attempts: attempt,
         rateLimited: false,
+        circuitOpen: false,
+        credentialsState: confirmedCredentialFailure ? 'invalid' : 'unknown',
         shouldRefreshCookies: confirmedCredentialFailure,
         canProceed: false,
       };
 
-      return lastFailure;
+      if (!serviceUnavailable || attempt === maxAttempts) return lastFailure;
     } catch (error) {
       lastFailure = {
         ok: false,
@@ -259,10 +366,12 @@ export async function validateInstagramAuth(cookies, options = {}) {
         apiUserFound: false,
         attempts: attempt,
         rateLimited: false,
+        circuitOpen: false,
+        credentialsState: 'unknown',
         shouldRefreshCookies: false,
         canProceed: false,
       };
-      return lastFailure;
+      if (attempt === maxAttempts) return lastFailure;
     }
   }
 
@@ -276,6 +385,8 @@ export async function validateInstagramAuth(cookies, options = {}) {
     apiUserFound: false,
     attempts: maxAttempts,
     rateLimited: false,
+    circuitOpen: false,
+    credentialsState: 'unknown',
     shouldRefreshCookies: false,
     canProceed: false,
   };
@@ -461,7 +572,7 @@ export async function main() {
   const reportPath = cleanText(env.INSTAGRAM_AUTH_REPORT_PATH) || DEFAULT_REPORT_PATH;
   const previousReport = readPreviousReport(reportPath);
   const cookies = collectCookiePairs();
-  const result = await validateInstagramAuth(cookies);
+  const result = await validateInstagramAuth(cookies, { previousReport });
   const report = {
     updatedAt: new Date().toISOString(),
     context: cleanText(env.INSTAGRAM_AUTH_CONTEXT) || 'local',

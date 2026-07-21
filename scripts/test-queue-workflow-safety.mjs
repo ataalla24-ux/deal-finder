@@ -20,10 +20,13 @@ const queueWriterFiles = fs.readdirSync(workflowsDir)
   .sort();
 
 assert.deepEqual(queueWriterFiles, [
+  'apify-instagram-daily.yml',
   'approve-deals.yml',
   'community-submissions.yml',
   'daily-digest.yml',
   'deal-moderation.yml',
+  'instagram-ai-agent.yml',
+  'meta-instagram-deals.yml',
   'tiktok-deals.yml',
 ]);
 

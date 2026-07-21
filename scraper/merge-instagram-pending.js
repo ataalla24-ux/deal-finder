@@ -1,15 +1,28 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import {
+  duplicateDealKey,
+  getPublicationEvidence,
+  mergeDealEvidence,
+} from './deal-evidence-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 
-const WEB_PATH = path.join(DOCS_DIR, 'deals-pending-instagram-web.json');
-const DISCOVERY_PATH = path.join(DOCS_DIR, 'deals-pending-instagram-discovery.json');
-const MERGED_PATH = path.join(DOCS_DIR, 'deals-pending-instagram.json');
+// The legacy Firecrawl/daily-sync pipeline owns deals-pending-instagram.json.
+// Keep the evidence-gated sources isolated so neither pipeline can overwrite
+// the other's Slack state or generated output.
+const MERGED_PATH = path.join(DOCS_DIR, 'deals-pending-instagram-verified.json');
+const SOURCE_FILES = [
+  { key: 'instagram-web', file: 'deals-pending-instagram-web.json' },
+  { key: 'instagram-discovery', file: 'deals-pending-instagram-discovery.json' },
+  { key: 'instagram-ai', file: 'deals-pending-instagram-ai.json' },
+  { key: 'instagram-apify', file: 'deals-pending-instagram-apify.json' },
+  { key: 'meta-instagram', file: 'deals-pending-meta-instagram.json' },
+];
 
 function readPayload(filePath) {
   if (!fs.existsSync(filePath)) return [];
@@ -40,51 +53,6 @@ function writePayload(payload) {
   fs.writeFileSync(MERGED_PATH, JSON.stringify(payload, null, 2));
 }
 
-function mergeDeals() {
-  const hasWebFile = fs.existsSync(WEB_PATH);
-  const hasDiscoveryFile = fs.existsSync(DISCOVERY_PATH);
-  const existingMergedDeals = readExistingMergedDeals();
-  const webDeals = readDeals(WEB_PATH).map((deal) => ({
-    ...deal,
-    originSource: deal.originSource || deal.source || 'instagram-web',
-  }));
-  const discoveryDeals = readDeals(DISCOVERY_PATH).map((deal) => ({
-    ...deal,
-    originSource: deal.originSource || deal.source || 'instagram-discovery-engine',
-  }));
-
-  if (!hasWebFile && !hasDiscoveryFile) {
-    const fallbackPayload = {
-      lastUpdated: new Date().toISOString(),
-      source: 'instagram-merged',
-      totalDeals: existingMergedDeals.length,
-      meta: {
-        sources: {
-          web: 0,
-          discovery: 0,
-          merged: existingMergedDeals.length,
-        },
-        note: 'No fresh Instagram source files found; kept existing merged payload.',
-      },
-      deals: existingMergedDeals,
-    };
-    writePayload(fallbackPayload);
-    console.log(`ℹ️ no fresh Instagram source files found; keeping existing merged file (${existingMergedDeals.length} deals)`);
-    return [];
-  }
-
-  return { webDeals, discoveryDeals, existingMergedDeals };
-}
-
-function normalizeUrl(url) {
-  const value = String(url || '').trim();
-  if (!/^https?:\/\//i.test(value)) return '';
-  return value
-    .toLowerCase()
-    .replace(/^https?:\/\//, '')
-    .replace(/\/+$/, '');
-}
-
 function cleanText(value) {
   return String(value || '')
     .replace(/\s+/g, ' ')
@@ -93,15 +61,13 @@ function cleanText(value) {
 }
 
 function getSignature(deal) {
-  return [
-    normalizeUrl(deal?.url),
-    cleanText(deal?.brand),
-    cleanText(deal?.title),
-  ].filter(Boolean).join('|');
+  const canonicalKey = duplicateDealKey(deal);
+  if (canonicalKey) return canonicalKey;
+  return [cleanText(deal?.brand), cleanText(deal?.title)].filter(Boolean).join('|');
 }
 
 function getPubDateMs(deal) {
-  const ts = Date.parse(String(deal?.pubDate || ''));
+  const ts = Date.parse(getPublicationEvidence(deal).sourcePublishedAt);
   return Number.isFinite(ts) ? ts : 0;
 }
 
@@ -109,36 +75,51 @@ function getQualityScore(deal) {
   return Number(deal?.qualityScore) || 0;
 }
 
-function chooseBetterDeal(a, b) {
-  const aScore = getQualityScore(a);
-  const bScore = getQualityScore(b);
-  if (aScore !== bScore) return bScore > aScore ? b : a;
+export function buildMergedInstagramPayload(options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date();
+  const sourceDeals = [];
+  const sourceCounts = {};
+  let existingSourceFiles = 0;
 
-  const aDate = getPubDateMs(a);
-  const bDate = getPubDateMs(b);
-  if (aDate !== bDate) return bDate > aDate ? b : a;
+  for (const source of SOURCE_FILES) {
+    const filePath = path.join(DOCS_DIR, source.file);
+    if (!fs.existsSync(filePath)) {
+      sourceCounts[source.key] = 0;
+      continue;
+    }
+    existingSourceFiles += 1;
+    const deals = readDeals(filePath).map((deal) => mergeDealEvidence({}, {
+      ...deal,
+      originSource: deal.originSource || deal.source || source.key,
+      sourceKeys: [source.key],
+    }, { now }));
+    sourceCounts[source.key] = deals.length;
+    sourceDeals.push(...deals);
+  }
 
-  const aTrusted = String(a?.pubDateSource || '').length > 0;
-  const bTrusted = String(b?.pubDateSource || '').length > 0;
-  if (aTrusted !== bTrusted) return bTrusted ? b : a;
-
-  return a;
-}
-
-function runMerge() {
-  const inputs = mergeDeals();
-  if (!inputs || Array.isArray(inputs)) return;
-  const { webDeals, discoveryDeals } = inputs;
+  if (existingSourceFiles === 0) {
+    const existingMergedDeals = readExistingMergedDeals();
+    return {
+      lastUpdated: now.toISOString(),
+      source: 'instagram-merged',
+      totalDeals: existingMergedDeals.length,
+      meta: {
+        sources: { ...sourceCounts, merged: existingMergedDeals.length },
+        note: 'No Instagram source files found; kept existing merged payload.',
+      },
+      deals: existingMergedDeals,
+    };
+  }
 
   const merged = new Map();
-  for (const deal of [...discoveryDeals, ...webDeals]) {
+  for (const deal of sourceDeals) {
     const key = getSignature(deal);
     if (!key) continue;
     if (!merged.has(key)) {
       merged.set(key, deal);
       continue;
     }
-    merged.set(key, chooseBetterDeal(merged.get(key), deal));
+    merged.set(key, mergeDealEvidence(merged.get(key), deal, { now }));
   }
 
   const deals = [...merged.values()]
@@ -152,23 +133,25 @@ function runMerge() {
       return getPubDateMs(b) - getPubDateMs(a);
     });
 
-  const payload = {
-    lastUpdated: new Date().toISOString(),
+  return {
+    lastUpdated: now.toISOString(),
     source: 'instagram-merged',
     totalDeals: deals.length,
     meta: {
-      sources: {
-        web: webDeals.length,
-        discovery: discoveryDeals.length,
-        merged: deals.length,
-      },
+      sources: { ...sourceCounts, merged: deals.length },
     },
     deals,
   };
+}
+
+export function runMerge() {
+  const payload = buildMergedInstagramPayload();
 
   writePayload(payload);
   console.log(`✅ merged Instagram deals → ${MERGED_PATH}`);
-  console.log(`   web: ${webDeals.length}, discovery: ${discoveryDeals.length}, merged: ${deals.length}`);
+  console.log(`   ${Object.entries(payload.meta.sources).map(([source, count]) => `${source}: ${count}`).join(', ')}`);
 }
 
-runMerge();
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  runMerge();
+}

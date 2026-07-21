@@ -22,6 +22,12 @@
       ],
       "editor": "stringList"
     },
+    "verifiedViennaAccounts": {
+      "title": "Verified Vienna accounts",
+      "type": "array",
+      "description": "Subset of seed accounts whose Vienna location was verified by the watchlist or merchant registry. Other accounts still need explicit Vienna evidence in the post.",
+      "editor": "stringList"
+    },
     "seedHashtags": {
       "title": "Seed hashtags",
       "type": "array",
@@ -45,9 +51,10 @@
     "maxPostsPerSource": {
       "title": "Max posts per source",
       "type": "integer",
-      "description": "Maximum number of Instagram post URLs to collect from each source page.",
-      "default": 40,
-      "minimum": 1
+      "description": "Maximum number of the newest Instagram post URLs to collect from each source page.",
+      "default": 9,
+      "minimum": 1,
+      "maximum": 12
     },
     "maxPostsToInspect": {
       "title": "Max posts to inspect",
@@ -56,11 +63,19 @@
       "default": 120,
       "minimum": 1
     },
+    "maxPostAgeDays": {
+      "title": "Hard maximum post age",
+      "type": "integer",
+      "description": "Reject every post older than this, even if its text contains an explicit validity date. A real Instagram timestamp is mandatory.",
+      "default": 7,
+      "minimum": 1,
+      "maximum": 30
+    },
     "maxAgeDaysWithoutExplicitValidity": {
       "title": "Max age without explicit validity",
       "type": "integer",
       "description": "If a post does not mention an explicit end date, keep it only when the post itself is newer than this many days.",
-      "default": 10,
+      "default": 3,
       "minimum": 1
     },
     "maxFutureValidityDays": {

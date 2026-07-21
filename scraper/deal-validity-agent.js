@@ -4,6 +4,10 @@ import { fileURLToPath } from 'url';
 
 import { inspectDealUrlHealth, parseExpiryShape } from './expiry-utils.js';
 import {
+  getPublicationEvidence,
+  getViennaEvidence as getStructuredViennaEvidence,
+} from './deal-evidence-utils.js';
+import {
   extractActiveOfferWindow,
   hasRecurringOfferSchedule,
 } from './instagram-ai-validity-utils.js';
@@ -36,7 +40,7 @@ const NON_VIENNA_PLACE_PATTERN = /\b(?:graz|salzburg|linz|innsbruck|klagenfurt|v
 const PLACE_BOUND_OFFER_PATTERN = /\b(?:museum|museen|theater|oper|konzert|concert|festival|festwochen|veranstaltung|event|ausstellung|führung|fuehrung|ticket|kino|schloss|zentrum|center|arena|steinbruch)\w*/i;
 const VERIFIED_VIENNA_MEMBER_BENEFIT_PATTERN = /\b(?:belvedere|leopold\s+museum|kinodonnerstag)\b/i;
 const SYNTHETIC_PUBLICATION_SOURCE_PATTERN = /(?:firecrawl.*(?:run|crawl)|agent(?:\s|[-_])?run|crawl(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|scrap(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|discovered(?:\s|[-_])?at|generated(?:\s|[-_])?at|fallback|current(?:\s|[-_])?time|workflow(?:\s|[-_])?run)/i;
-const TRUSTED_PUBLICATION_SOURCE_PATTERN = /(?:url\.publicationdate|time\.datetime|rendered[-_. ]?time|post[-_. ]?(?:date|time|timestamp)|source[-_. ]?published[-_. ]?at|published[-_. ]?(?:at|time|date)|article:published_time|og:published_time|instagram[-_. ]?(?:graph|timestamp)|tiktok[-_. ]?(?:timestamp|video[-_. ]?id)|apify[-_. ]?(?:timestamp|taken[-_. ]?at)|meta[-_. ]?(?:timestamp|created[-_. ]?time))/i;
+const TRUSTED_PUBLICATION_SOURCE_PATTERN = /(?:url\.publicationdate|time\.datetime|rendered[-_. ]?time|post[-_. ]?(?:date|time|timestamp)|source[-_. ]?published[-_. ]?at|published[-_. ]?(?:at|time|date)|article:published_time|og:published_time|instagram[-_. ]?(?:graph|timestamp)|tiktok[-_. ]?(?:timestamp|video[-_. ]?id)|apify[-_. ]?(?:timestamp|taken[-_. ]?at)|meta(?:[-_. ][a-z]+){0,3}[-_. ](?:timestamp|created[-_. ]?time))/i;
 const INSTAGRAM_SHORTCODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
 function cleanText(value) {
@@ -230,6 +234,14 @@ function isNewsAggregatorDeal(deal) {
 function isSharedBenefitPageDeal(deal) {
   const signal = [deal.source, deal.originSource, deal.url, deal.id].map(cleanText).join(' ');
   return /\bmember-benefits-scraper\b|\bwienmobil\s+vorteilswelt\b|\bvorteilsclub\b|\bdrei\s+plus\b|\böamtc\b|\boeamtc\b/i.test(signal);
+}
+
+function isLegacyFirecrawlDeal(deal) {
+  const signal = [deal.source, deal.originSource, deal.id, deal.sourceKeys, deal.evidenceSources]
+    .flat()
+    .map(cleanText)
+    .join(' ');
+  return /\bfirecrawl\b/i.test(signal);
 }
 
 function getDealSignalText(deal, health = null) {
@@ -521,6 +533,21 @@ function getRelativeOfferDecision(deal, selectedPublication, now, options = {}) 
   };
 }
 
+function hasSocialViennaEvidence(deal, context = {}) {
+  const structured = getStructuredViennaEvidence(deal, {
+    registryUsernames: context.registryUsernames,
+  });
+  if (structured.hasViennaEvidence) return true;
+
+  // For social posts a display/default value such as `distance: "Wien"` is
+  // not evidence. If no structured evidence exists, require the post content
+  // itself to name Vienna or a Vienna postcode.
+  return hasViennaSignalInText([
+    deal.description,
+    deal.evidence?.textSample,
+  ].map(cleanText).filter(Boolean).join(' '));
+}
+
 function isChurchServiceDeal(deal) {
   const signal = [
     deal.category,
@@ -571,7 +598,27 @@ function collectExpiryCandidates(deal, health, now) {
   const flightDepartureAsExpiry = isViennaOriginFlight(deal)
     && /^\s*(?:abflug|departure|hinflug)\b/i.test(cleanText(rawDealExpiry));
   if (!flightDepartureAsExpiry) {
-    add('deal.expires', rawDealExpiry, null, 50);
+    const directOfferWindow = cleanText(rawDealExpiry)
+      ? extractActiveOfferWindow(rawDealExpiry, { now })
+      : null;
+    const directExpiryShape = directOfferWindow
+      ? {
+          kind: directOfferWindow.kind,
+          raw: directOfferWindow.evidence || cleanText(rawDealExpiry),
+          validFrom: directOfferWindow.startDate?.toISOString().slice(0, 10) || '',
+          validUntil: directOfferWindow.endDate?.toISOString().slice(0, 10) || '',
+          confidence: 'medium',
+        }
+      : (cleanText(rawDealExpiry)
+          ? parseExpiryShape(rawDealExpiry, {
+              now,
+              // A dated event title can turn a bare date into a single-day
+              // offer. Free-form description words such as "heute" must not
+              // reinterpret an otherwise explicit end date.
+              contextText: [deal.title, deal.category, deal.type].filter(Boolean).join(' '),
+            })
+          : null);
+    add('deal.expires', rawDealExpiry, directExpiryShape, 50);
   }
 
   const offerTiming = deal.evidence?.offerTiming;
@@ -593,7 +640,7 @@ function collectExpiryCandidates(deal, health, now) {
       && confidenceRank(deal.dateConfidence) <= 1;
     add('deal.structured', deal.expiryDisplayText || deal.expires || '', {
       kind: deal.expiryKind || (deal.validOn ? 'single' : (deal.validUntil ? 'end' : 'start')),
-      raw: deal.expiryDisplayText || deal.expires || '',
+      raw: deal.expiryDisplayText || deal.validUntil || deal.validOn || deal.expires || '',
       validOn: deal.validOn || '',
       validFrom: deal.validFrom || '',
       validUntil: deal.validUntil || '',
@@ -604,7 +651,7 @@ function collectExpiryCandidates(deal, health, now) {
   const hints = reliableDateHints(health);
   const hintEvidence = cleanText(hints.targetDateEvidence);
   const hintRaw = cleanText(hints.targetDateRaw);
-  const explicitHintLanguage = /\b(?:gültig|gueltig|einlösbar|einloesbar|aktion|angebot|deal|nur)\s+(?:bis|am|ab)\b|\b(?:endet|deadline|valid\s+until|until\s+further\s+notice)\b/i.test(hintRaw);
+  const explicitHintLanguage = /\b(?:gültig|gueltig|einlösbar|einloesbar|aktion|angebot|deal|nur)\s+(?:bis|am|ab)\b|\b(?:endet|beendet|deadline|valid\s+until|until\s+further\s+notice)\b/i.test(hintRaw);
   const structuredHint = hintEvidence === 'structured-data'
     || /(?:validthrough|enddate|startdate|availabilityends|availabilitystarts)/i.test(cleanText(hints.targetDateSource));
   const trustedTargetHint = hintEvidence === 'explicit-phrase' || explicitHintLanguage || structuredHint;
@@ -695,12 +742,24 @@ function getPublicationCandidates(deal, health, options = {}) {
     });
   };
 
-  if (!options.ignoreUrlPublicationDate) {
+  if (!options.ignoreUrlPublicationDate && !options.socialPost) {
     add('url.publicationDate', dateHints.publicationDate, 100);
   }
   const encodedSocial = getEncodedSocialPublication(deal.url);
   if (encodedSocial) {
     add(encodedSocial.source, encodedSocial.date, encodedSocial.rank);
+  }
+
+  if (options.socialPost) {
+    const publicationEvidence = getPublicationEvidence(deal);
+    if (publicationEvidence.publicationEvidenceRank >= 4
+        && !SYNTHETIC_PUBLICATION_SOURCE_PATTERN.test(publicationEvidence.sourcePublishedAtSource)) {
+      add(
+        `deal.${publicationEvidence.sourcePublishedAtSource || publicationEvidence.field || 'postTimestamp'}`,
+        publicationEvidence.sourcePublishedAt,
+        105,
+      );
+    }
   }
 
   const freshnessSensitive = Boolean(options.freshnessSensitive);
@@ -753,11 +812,7 @@ function hasActiveExplicitValidity(deal, expiryDecision, now) {
   const structuredValidity = Number(candidate.rank || 0) >= 90;
   const rawHasExplicitYear = /\b20\d{2}\b/.test(candidate.raw);
   const rawConfidence = confidenceRank(deal.dateConfidence) >= 2;
-  const firecrawlDeal = /\bfirecrawl\b/i.test([
-    deal.source,
-    deal.originSource,
-    deal.id,
-  ].map(cleanText).join(' '));
+  const firecrawlDeal = isLegacyFirecrawlDeal(deal);
   if (!structuredValidity && !(candidate.source === 'deal.expires' && rawHasExplicitYear && (rawConfidence || firecrawlDeal))) {
     return false;
   }
@@ -903,6 +958,7 @@ async function validateDeal(deal, context) {
   const publicationCandidates = getPublicationCandidates(deal, health, {
     freshnessSensitive,
     ignoreUrlPublicationDate: sharedBenefitPageDeal,
+    socialPost: socialPostDeal,
   });
   const freshness = getFreshnessDecision(publicationCandidates, context.maxAgeDays, now, {
     // Crawler run timestamps are ignored, but an official non-social offer
@@ -933,7 +989,11 @@ async function validateDeal(deal, context) {
     reasons.push(`ausgeschlossene Quelle (${excludedSource.label})`);
   }
 
-  if (context.requireVienna && !isExplicitlyUsableInVienna(deal, health)) {
+  const legacyFirecrawlDeal = isLegacyFirecrawlDeal(deal);
+  const viennaConfirmed = socialPostDeal && !legacyFirecrawlDeal
+    ? hasSocialViennaEvidence(deal, context)
+    : isExplicitlyUsableInVienna(deal, health);
+  if (context.requireVienna && !viennaConfirmed) {
     reasons.push('nicht eindeutig in Wien');
   }
 
@@ -973,7 +1033,7 @@ async function validateDeal(deal, context) {
     sourceDateSource: selectedDate?.source || '',
     sourceAgeDays: freshness.ageDays ?? null,
     expiryDate: selectedExpiry?.validOn || selectedExpiry?.validUntil || '',
-    expirySource: selectedExpiry?.source || '',
+    expirySource: selectedExpiry?.evidenceSource || selectedExpiry?.source || '',
     urlStatus: summarizeUrlHealth(health),
     finalUrl: health?.finalUrl || url,
   };
@@ -1000,6 +1060,9 @@ async function validateDeal(deal, context) {
     if (selectedExpiry.validOn) nextDeal.validOn = selectedExpiry.validOn;
     if (selectedExpiry.validFrom) nextDeal.validFrom = selectedExpiry.validFrom;
     if (selectedExpiry.validUntil) nextDeal.validUntil = selectedExpiry.validUntil;
+    nextDeal.expires = selectedExpiry.validUntil || selectedExpiry.validOn;
+    nextDeal.expiresSource = selectedExpiry.evidenceSource || selectedExpiry.source;
+    nextDeal.expirySource = selectedExpiry.evidenceSource || selectedExpiry.source;
   }
 
   return { deal: nextDeal, decision };
@@ -1094,6 +1157,7 @@ async function validateDealsForSlack(deals, options = {}) {
     extendedMaxAgeDays,
     requireVienna,
     allowChurchThisRun: options.allowChurchThisRun ?? shouldAllowChurchThisRun(now, options),
+    registryUsernames: options.registryUsernames instanceof Set ? options.registryUsernames : new Set(),
     urlCache,
     urlOptions: {
       now,

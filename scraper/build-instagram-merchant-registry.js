@@ -3,18 +3,20 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { cleanText, cleanUiNoiseText } from './deal-normalization-utils.js';
+import {
+  canonicalInstagramPostKey,
+  extractInstagramProfileUsername,
+  extractStructuredOwnerUsername,
+  getPublicationEvidence,
+  getViennaEvidence,
+  mergeDealEvidence,
+} from './deal-evidence-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const OUTPUT_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
-
-const RESERVED_IG_PATHS = new Set([
-  'explore', 'accounts', 'about', 'developer', 'legal', 'privacy', 'api', 'reel', 'p',
-  'stories', 'direct', 'reels', 'tv', 'challenge', 'directory', 'topics', 'emails',
-  'download', 'press', 'jobs', 'threads', 'create', 'login', 'signup',
-]);
 
 const FOOD_DRINK_KEYWORDS = [
   'restaurant', 'pizza', 'burger', 'kebab', 'kebap', 'döner', 'doener', 'sushi', 'cafe',
@@ -30,12 +32,6 @@ const PROMO_KEYWORDS = [
   'eröffnung', 'eroeffnung', 'grand opening', 'soft opening',
 ];
 
-const WIEN_KEYWORDS = [
-  'wien', 'vienna', '1010', '1020', '1030', '1040', '1050', '1060', '1070', '1080',
-  '1090', '1100', '1110', '1120', '1130', '1140', '1150', '1160', '1170', '1180',
-  '1190', '1200', '1210', '1220', '1230',
-];
-
 const INPUT_FILES = [
   'deals.json',
   'deals-pending-all.json',
@@ -44,33 +40,14 @@ const INPUT_FILES = [
   'deals-pending-firecrawl4.json',
   'deals-pending-firecrawl5.json',
   'deals-pending-instagram.json',
+  'deals-pending-instagram-ai.json',
+  'deals-pending-instagram-apify.json',
   'deals-pending-instagram-discovery.json',
   'deals-pending-instagram-web.json',
+  'deals-pending-meta-instagram.json',
 ];
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-function normalizeUsername(value) {
-  const text = cleanText(value).toLowerCase().replace(/^@/, '').trim();
-  if (!text || RESERVED_IG_PATHS.has(text)) return '';
-  if (!/^[a-z0-9._]{2,40}$/.test(text)) return '';
-  return text;
-}
-
-function extractInstagramProfileUsername(url) {
-  const text = cleanText(url);
-  if (!text) return '';
-  try {
-    const parsed = new URL(text);
-    const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
-    if (host !== 'instagram.com') return '';
-    const parts = parsed.pathname.split('/').filter(Boolean);
-    if (parts.length !== 1) return '';
-    return normalizeUsername(parts[0]);
-  } catch {
-    return '';
-  }
-}
 
 function hasKeyword(text, keywords) {
   const lower = cleanText(text).toLowerCase();
@@ -108,6 +85,8 @@ function ensureEntry(registry, username) {
       fresh1dHits: 0,
       fresh7dHits: 0,
       missionHits: 0,
+      structuredOwnerOccurrences: 0,
+      verifiedProfileOccurrences: 0,
       totalQualityScore: 0,
       categories: new Map(),
       types: new Map(),
@@ -115,6 +94,7 @@ function ensureEntry(registry, username) {
       sourceLabels: new Set(),
       sampleTitles: [],
       sampleUrls: new Set(),
+      viennaEvidence: new Set(),
     });
   }
   return registry.get(username);
@@ -157,29 +137,110 @@ function compactCounts(map, limit = 4) {
     .map(([value, count]) => ({ value, count }));
 }
 
-function main() {
-  const registry = new Map();
-  const now = Date.now();
+function profileEvidence(deal = {}) {
+  const structuredUsername = extractStructuredOwnerUsername(deal);
+  const profileUrls = [
+    deal?.profileUrl,
+    deal?.instagramProfileUrl,
+    deal?.ownerProfileUrl,
+    deal?.accountUrl,
+    deal?.url,
+    deal?.post_url,
+  ];
+  const profileUsername = profileUrls.map(extractInstagramProfileUsername).find(Boolean) || '';
+  return { structuredUsername, profileUsername, username: structuredUsername || profileUsername };
+}
 
+function registryRecordKey(deal, username) {
+  const postKey = canonicalInstagramPostKey(deal?.url || deal?.post_url || deal?.postUrl)
+    || canonicalInstagramPostKey(deal?.post_url || deal?.postUrl);
+  if (postKey) return `${username}|${postKey}`;
+  const publication = getPublicationEvidence(deal).sourcePublishedAt;
+  return [username, cleanText(deal?.id), cleanText(deal?.title).toLowerCase(), publication].filter(Boolean).join('|');
+}
+
+export function getIndependentViennaEvidence(deal) {
+  const sanitized = { ...deal };
+  delete sanitized.viennaVerified;
+  delete sanitized.locationVerified;
+  const derivedAccountEvidence = /(?:verified-registry|merchant-registry|verified-account|configured-watchlist)/i;
+  const declaredSource = cleanText(deal?.viennaEvidence?.source || deal?.viennaEvidence?.type);
+  let accountDerivedLocation = derivedAccountEvidence.test(declaredSource);
+  if (accountDerivedLocation) {
+    delete sanitized.viennaEvidence;
+  }
+  if (sanitized.evidence && typeof sanitized.evidence === 'object' && !Array.isArray(sanitized.evidence)) {
+    sanitized.evidence = { ...sanitized.evidence };
+    const nestedSource = cleanText(
+      sanitized.evidence?.viennaEvidence?.source || sanitized.evidence?.viennaEvidence?.type
+    );
+    if (derivedAccountEvidence.test(nestedSource)) {
+      accountDerivedLocation = true;
+      delete sanitized.evidence.viennaEvidence;
+    }
+  }
+  if (accountDerivedLocation) {
+    for (const field of [
+      'city', 'distance', 'location', 'ort', 'address', 'streetAddress',
+      'venueAddress', 'postalCode', 'zip', 'zipCode', 'latitude', 'longitude',
+    ]) delete sanitized[field];
+  }
+  return getViennaEvidence(sanitized);
+}
+
+function collectRegistryRecords() {
+  const records = new Map();
   for (const fileName of INPUT_FILES) {
     const filePath = path.join(DOCS_DIR, fileName);
-    const deals = loadDeals(filePath);
     const isLiveFile = fileName === 'deals.json';
+    for (const deal of loadDeals(filePath)) {
+      const evidence = profileEvidence(deal);
+      if (!evidence.username) continue;
+      const key = registryRecordKey(deal, evidence.username);
+      if (!key) continue;
+      const record = {
+        ...deal,
+        ownerUsername: evidence.structuredUsername || deal.ownerUsername,
+        __username: evidence.username,
+        __structuredOwner: Boolean(evidence.structuredUsername),
+        __verifiedProfile: Boolean(evidence.profileUsername),
+        __isLive: isLiveFile,
+        __sourceFiles: [fileName],
+      };
+      if (!records.has(key)) {
+        records.set(key, record);
+        continue;
+      }
+      const previous = records.get(key);
+      const merged = mergeDealEvidence(previous, record);
+      merged.__username = evidence.username;
+      merged.__structuredOwner = Boolean(previous.__structuredOwner || record.__structuredOwner);
+      merged.__verifiedProfile = Boolean(previous.__verifiedProfile || record.__verifiedProfile);
+      merged.__isLive = Boolean(previous.__isLive || record.__isLive);
+      merged.__sourceFiles = [...new Set([...(previous.__sourceFiles || []), fileName])];
+      records.set(key, merged);
+    }
+  }
+  return [...records.values()];
+}
 
-    for (const deal of deals) {
-      const urls = [deal?.url, deal?.post_url, deal?.logoUrl];
-      const username = urls.map(extractInstagramProfileUsername).find(Boolean);
-      if (!username) continue;
+export function buildInstagramMerchantRegistry(options = {}) {
+  const registry = new Map();
+  const now = options.now instanceof Date ? options.now.getTime() : Number(options.now) || Date.now();
+
+  for (const deal of collectRegistryRecords()) {
+      const username = deal.__username;
 
       const entry = ensureEntry(registry, username);
       entry.occurrences += 1;
-      if (isLiveFile) entry.liveOccurrences += 1;
+      if (deal.__isLive) entry.liveOccurrences += 1;
       else entry.pendingOccurrences += 1;
-      entry.files.add(fileName);
+      if (deal.__structuredOwner) entry.structuredOwnerOccurrences += 1;
+      if (deal.__verifiedProfile) entry.verifiedProfileOccurrences += 1;
+      for (const fileName of deal.__sourceFiles || []) entry.files.add(fileName);
       if (deal?.source) entry.sourceLabels.add(cleanText(deal.source));
       if (deal?.title && entry.sampleTitles.length < 4) entry.sampleTitles.push(cleanText(deal.title));
-      const normalizedUrl = urls.find((url) => extractInstagramProfileUsername(url) === username);
-      if (normalizedUrl) entry.sampleUrls.add(cleanText(normalizedUrl));
+      entry.sampleUrls.add(`https://www.instagram.com/${username}/`);
 
       const haystack = [deal?.brand, deal?.title, deal?.description, deal?.distance, deal?.location]
         .map(cleanText)
@@ -190,18 +251,22 @@ function main() {
       if (promoHit) {
         entry.promoHits += 1;
       }
-      const viennaHit = hasKeyword(haystack, WIEN_KEYWORDS);
-      if (viennaHit) entry.viennaHits += 1;
+      const viennaEvidence = getIndependentViennaEvidence(deal);
+      const viennaHit = viennaEvidence.hasViennaEvidence;
+      if (viennaHit) {
+        entry.viennaHits += 1;
+        entry.viennaEvidence.add(`${viennaEvidence.type}:${viennaEvidence.value}`);
+      }
 
-      const pubTs = parseTimestamp(deal?.pubDate);
-      if (pubTs && now - pubTs <= DAY_MS) entry.fresh1dHits += 1;
-      if (pubTs && now - pubTs <= 7 * DAY_MS) entry.fresh7dHits += 1;
+      const publication = getPublicationEvidence(deal);
+      const pubTs = parseTimestamp(publication.sourcePublishedAt);
+      if (pubTs && pubTs <= now + 5 * 60 * 1000 && now - pubTs <= DAY_MS) entry.fresh1dHits += 1;
+      if (pubTs && pubTs <= now + 5 * 60 * 1000 && now - pubTs <= 7 * DAY_MS) entry.fresh7dHits += 1;
       if (viennaHit && promoHit && hasKeyword(haystack, FOOD_DRINK_KEYWORDS)) entry.missionHits += 1;
       entry.totalQualityScore += Number.isFinite(Number(deal?.qualityScore)) ? Number(deal.qualityScore) : 0;
 
       incrementMap(entry.categories, deal?.category);
       incrementMap(entry.types, deal?.type);
-    }
   }
 
   const accounts = [...registry.values()]
@@ -218,6 +283,16 @@ function main() {
       fresh1dHits: entry.fresh1dHits,
       fresh7dHits: entry.fresh7dHits,
       missionHits: entry.missionHits,
+      structuredOwnerOccurrences: entry.structuredOwnerOccurrences,
+      verifiedProfileOccurrences: entry.verifiedProfileOccurrences,
+      viennaVerified: Boolean(
+        entry.structuredOwnerOccurrences > 0
+        && (
+          (entry.liveOccurrences > 0 && entry.viennaHits > 0)
+          || (entry.structuredOwnerOccurrences >= 2 && entry.viennaHits >= 2)
+        )
+      ),
+      viennaEvidence: [...entry.viennaEvidence].slice(0, 6),
       averageQualityScore: entry.occurrences > 0 ? Math.round((entry.totalQualityScore / entry.occurrences) * 10) / 10 : 0,
       sourceFiles: [...entry.files].sort(),
       sourceLabels: [...entry.sourceLabels].sort(),
@@ -226,20 +301,28 @@ function main() {
       sampleTitles: entry.sampleTitles,
       sampleUrls: [...entry.sampleUrls].slice(0, 3),
     }))
+    // Keep unverified accounts as discovery leads, but downstream Vienna checks
+    // may trust only the explicit `viennaVerified` flag.
     .filter((entry) => entry.confidence >= 30)
     .sort((a, b) => b.priorityScore - a.priorityScore || b.confidence - a.confidence || b.occurrences - a.occurrences || a.username.localeCompare(b.username));
 
   const payload = {
-    generatedAt: new Date().toISOString(),
+    generatedAt: new Date(now).toISOString(),
     totalAccounts: accounts.length,
     accounts,
   };
 
-  fs.writeFileSync(OUTPUT_PATH, `${JSON.stringify(payload, null, 2)}\n`);
+  if (options.write !== false) {
+    fs.writeFileSync(OUTPUT_PATH, `${JSON.stringify(payload, null, 2)}\n`);
+  }
 
   console.log('📇 Instagram merchant registry updated');
   console.log(`   accounts: ${accounts.length}`);
   console.log(`   top: ${accounts.slice(0, 8).map((entry) => `${entry.username} (${entry.confidence})`).join(', ')}`);
+
+  return payload;
 }
 
-main();
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  buildInstagramMerchantRegistry();
+}

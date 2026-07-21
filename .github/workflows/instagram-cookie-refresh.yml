@@ -1,13 +1,12 @@
-name: "Instagram Cookie Refresh"
+name: "Instagram Cookie Refresh (Manual)"
 
 on:
-  schedule:
-    - cron: '45 2 * * *' # 04:45 Vienna summer / 03:45 winter, before Instagram sync jobs
   workflow_dispatch:
     inputs:
-      instagram_email_code:
-        description: "Optional one-time Instagram email verification code"
-        required: false
+      refresh_reason:
+        description: "Reason for rotating the session (manual, login-wall, invalid-session, blocked)"
+        required: true
+        default: "manual"
         type: string
 
 concurrency:
@@ -38,7 +37,8 @@ jobs:
           INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
           INSTAGRAM_PASSWORD: ${{ secrets.INSTAGRAM_PASSWORD }}
           INSTAGRAM_TOTP_SECRET: ${{ secrets.INSTAGRAM_TOTP_SECRET }}
-          INSTAGRAM_EMAIL_CODE: ${{ inputs.instagram_email_code || secrets.INSTAGRAM_EMAIL_CODE }}
+          INSTAGRAM_EMAIL_CODE: ${{ secrets.INSTAGRAM_EMAIL_CODE }}
+          INSTAGRAM_COOKIE_REFRESH_REASON: ${{ inputs.refresh_reason }}
           INSTAGRAM_AUTH_TEST_USERNAME: instagram
           GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
           GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
@@ -69,13 +69,20 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          REFRESH_STATUS: ${{ steps.refresh.outputs.status }}
+          SHOULD_RETRY_LOGIN: ${{ steps.refresh.outputs.should_retry_login }}
         run: |
           if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$SLACK_CHANNEL_ID" ]; then
             echo "Slack secrets missing; skip notification."
             exit 0
           fi
           node - <<'NODE'
-          const text = '⚠️ *Instagram Cookie Refresh fehlgeschlagen*\\nDie Instagram-Cookies konnten nicht automatisch erneuert werden. Bitte Login/2FA/Challenge prüfen.';
+          const status = process.env.REFRESH_STATUS || 'failed';
+          const text = status === 'rate-limited'
+            ? '⏳ *Instagram Cookie Refresh rate-limited*\\nInstagram hat den Login vorübergehend gedrosselt. Keine Cookies rotieren; nach dem Cooldown manuell erneut versuchen.'
+            : process.env.SHOULD_RETRY_LOGIN === 'true'
+              ? '⚠️ *Instagram Cookie Refresh fehlgeschlagen*\\nDie Session ist ungültig oder Instagram verlangt eine Challenge. Bitte Login/2FA/Challenge prüfen.'
+              : `⚠️ *Instagram Cookie Refresh technisch fehlgeschlagen*\\nStatus: ${status}. Die vorhandenen Cookies wurden nicht ersetzt.`;
           const response = await fetch('https://slack.com/api/chat.postMessage', {
             method: 'POST',
             headers: {

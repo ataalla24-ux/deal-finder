@@ -3,6 +3,13 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { cleanText, cleanUiNoiseText, normalizeDealRecord } from './deal-normalization-utils.js';
+import {
+  canonicalSocialPostKey,
+  extractStructuredOwnerUsername,
+  getPublicationEvidence,
+  getViennaEvidence,
+  mergeDealEvidence,
+} from './deal-evidence-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -118,6 +125,9 @@ function normalizedWords(value) {
 }
 
 function stableDealSignature(deal) {
+  const socialPostKey = canonicalSocialPostKey(deal?.url || deal?.post_url || deal?.postUrl)
+    || canonicalSocialPostKey(deal?.post_url || deal?.postUrl);
+  if (socialPostKey) return socialPostKey;
   const normalizedUrl = normalizeUrl(deal?.url || deal?.post_url)
     .toLowerCase()
     .replace(/^https?:\/\//, '');
@@ -164,7 +174,15 @@ function ageDays(ts, now = Date.now()) {
   return Math.max(0, Math.floor((now - ts) / DAY_MS));
 }
 
-function hasViennaSignal(deal) {
+function loadVerifiedViennaRegistryUsernames() {
+  const registry = readJson(path.join(DOCS_DIR, 'instagram-merchant-registry.json'), {}) || {};
+  return new Set((Array.isArray(registry.accounts) ? registry.accounts : [])
+    .filter((account) => account?.viennaVerified === true)
+    .map((account) => cleanText(account?.username).toLowerCase())
+    .filter(Boolean));
+}
+
+function hasLegacyViennaSignal(deal) {
   const haystack = [
     deal.brand,
     deal.title,
@@ -279,6 +297,7 @@ function buildSourceWeightScore(stats) {
 
 async function main() {
   const now = Date.now();
+  const verifiedViennaRegistryUsernames = loadVerifiedViennaRegistryUsernames();
   const allPendingFiles = fs.readdirSync(DOCS_DIR)
     .filter((file) => file.startsWith('deals-pending-') && file.endsWith('.json'))
     .filter((file) => !EXCLUDED_PENDING_FILES.has(file))
@@ -296,11 +315,24 @@ async function main() {
 
     for (const rawDeal of deals) {
       const deal = normalizeDealRecord(rawDeal || {});
+      const evidenceRecord = { ...deal, ...(rawDeal || {}) };
       const stableSignature = stableDealSignature(deal);
       const alternateSignature = alternateDealSignature(deal);
       const signature = stableSignature || alternateSignature || fallbackDealSignature(deal, sourceKey);
-      const pubTs = parseTimestamp(deal.pubDate);
+      const publication = getPublicationEvidence(evidenceRecord);
+      const socialSignal = [deal.url, deal.post_url, deal.source, deal.originSource, sourceKey]
+        .map(cleanText)
+        .join(' ');
+      const isSocial = /(?:instagram\.com|tiktok\.com|\binstagram\b|\btiktok\b)/i.test(socialSignal);
+      const legacyFirecrawl = /\bfirecrawl\b/i.test(socialSignal);
+      const pubTs = legacyFirecrawl
+        ? parseTimestamp(deal.pubDate)
+        : (!isSocial || publication.publicationEvidenceRank >= 4
+          ? parseTimestamp(publication.sourcePublishedAt)
+          : null);
       const expiresTs = parseTimestamp(deal.expires);
+      const viennaEvidence = getViennaEvidence(evidenceRecord, { registryUsernames: verifiedViennaRegistryUsernames });
+      const viennaConfirmed = legacyFirecrawl ? hasLegacyViennaSignal(deal) : viennaEvidence.hasViennaEvidence;
       const sourceLabel = inferSourceLabel(sourceKey, deal, fileData);
       const withUrl = Boolean(normalizeUrl(deal.url || deal.post_url));
       const candidate = {
@@ -317,19 +349,29 @@ async function main() {
         postUrl: normalizeUrl(deal.post_url),
         distance: cleanText(deal.distance || deal.location || deal.ort),
         pubDate: Number.isFinite(pubTs) ? new Date(pubTs).toISOString() : '',
+        sourcePublishedAt: Number.isFinite(pubTs) ? new Date(pubTs).toISOString() : '',
+        sourcePublishedAtSource: publication.sourcePublishedAtSource,
+        discoveredAt: publication.discoveredAt,
+        ownerUsername: extractStructuredOwnerUsername(evidenceRecord),
         expires: Number.isFinite(expiresTs) ? new Date(expiresTs).toISOString() : cleanText(deal.expires),
         qualityScore: Number.isFinite(Number(deal.qualityScore)) ? Number(deal.qualityScore) : 0,
         votes: Number.isFinite(Number(deal.votes)) ? Number(deal.votes) : 0,
         stableSignature,
         alternateSignature,
         signature,
-        hasViennaSignal: hasViennaSignal(deal),
+        hasViennaSignal: viennaConfirmed,
+        viennaVerified: viennaConfirmed,
+        viennaEvidence: viennaConfirmed
+          ? (legacyFirecrawl
+            ? { type: 'legacy-firecrawl-compatibility', value: cleanText(deal.distance || deal.location || deal.ort || 'Wien') }
+            : { type: viennaEvidence.type, value: viennaEvidence.value })
+          : null,
         hasFoodDrinkSignal: hasFoodDrinkSignal(deal),
         hasPromoSignal: hasPromoSignal(deal),
         withUrl,
         ageDays: ageDays(pubTs, now),
-        isFresh1d: Number.isFinite(pubTs) ? (now - pubTs) <= DAY_MS : false,
-        isFresh7d: Number.isFinite(pubTs) ? (now - pubTs) <= 7 * DAY_MS : false,
+        isFresh1d: Number.isFinite(pubTs) ? pubTs <= now + 5 * 60 * 1000 && (now - pubTs) <= DAY_MS : false,
+        isFresh7d: Number.isFinite(pubTs) ? pubTs <= now + 5 * 60 * 1000 && (now - pubTs) <= 7 * DAY_MS : false,
       };
       candidates.push(candidate);
     }
@@ -393,6 +435,21 @@ async function main() {
     if (stats.sampleTitles.length < 3 && candidate.title) stats.sampleTitles.push(candidate.title);
   }
 
+  const mergedCandidateMap = new Map();
+  for (const candidate of candidates) {
+    const mergeable = { ...candidate, sourceKeys: [candidate.sourceKey] };
+    mergedCandidateMap.set(
+      candidate.signature,
+      mergedCandidateMap.has(candidate.signature)
+        ? mergeDealEvidence(mergedCandidateMap.get(candidate.signature), mergeable, {
+          now,
+          registryUsernames: verifiedViennaRegistryUsernames,
+        })
+        : mergeable
+    );
+  }
+  const mergedCandidates = [...mergedCandidateMap.values()];
+
   const sources = [...sourceStats.values()].map((stats) => {
     const total = stats.totalDeals || 1;
     const normalized = {
@@ -436,6 +493,7 @@ async function main() {
   sources.sort((a, b) => b.healthScore - a.healthScore || b.totalDeals - a.totalDeals || a.sourceKey.localeCompare(b.sourceKey));
 
   const uniqueCandidates = candidates.filter((candidate) => (signatureMap.get(candidate.signature)?.count || 0) === 1).length;
+  const distinctCandidates = mergedCandidates.length;
   const duplicateClusters = [...signatureMap.values()].filter((entry) => entry.count > 1).length;
   const recommendations = sources
     .filter((source) => source.issues.length > 0)
@@ -453,6 +511,7 @@ async function main() {
     generatedAt: new Date(now).toISOString(),
     totalCandidates: candidates.length,
     uniqueCandidates,
+    distinctCandidates,
     duplicateClusters,
     filesConsidered: allPendingFiles,
     candidates: candidates
@@ -460,6 +519,8 @@ async function main() {
         if (a.sourceKey !== b.sourceKey) return a.sourceKey.localeCompare(b.sourceKey);
         return b.qualityScore - a.qualityScore || a.title.localeCompare(b.title);
       }),
+    mergedCandidates: mergedCandidates
+      .sort((a, b) => (Date.parse(b.sourcePublishedAt || '') || 0) - (Date.parse(a.sourcePublishedAt || '') || 0)),
   };
 
   const healthReport = {
@@ -468,6 +529,7 @@ async function main() {
       filesConsidered: allPendingFiles.length,
       totalCandidates: candidates.length,
       uniqueCandidates,
+      distinctCandidates,
       duplicateClusters,
       topHealthySources: sources.slice(0, 5).map((source) => ({
         sourceKey: source.sourceKey,

@@ -14,6 +14,15 @@ import {
   moderationCounts,
 } from './deal-moderation-utils.js';
 import { extractDealsFromThreadMessages } from './slack-digest-utils.js';
+import {
+  canonicalDealUrl,
+  canonicalSocialPostKey,
+  extractStructuredOwnerUsername,
+  getPublicationEvidence,
+  getViennaEvidence,
+  mergeDealEvidence,
+  mergeDuplicateDealRecords,
+} from './deal-evidence-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -280,8 +289,24 @@ function normalizeDeal(rawDeal, sourceKey) {
   const rawSource = cleanText(deal.source);
   const originSource = cleanText(deal.originSource) || rawSource || sourceKey;
   const url = rawUrl;
-  const pubDate = toIsoDate(deal.pubDate);
-  const pubDateSource = cleanText(deal.pubDateSource);
+  const publication = getPublicationEvidence(deal);
+  const viennaEvidence = getViennaEvidence(deal);
+  const suppliedViennaEvidence = ensureObject(deal.viennaEvidence);
+  const normalizedViennaEvidence = Object.keys(suppliedViennaEvidence).length > 0
+    ? { ...suppliedViennaEvidence }
+    : (viennaEvidence.hasViennaEvidence
+        ? {
+            verified: true,
+            type: viennaEvidence.type,
+            source: viennaEvidence.type,
+            value: viennaEvidence.value,
+            detail: viennaEvidence.value,
+          }
+        : undefined);
+  const legacyFirecrawl = /\bfirecrawl\b/i.test([rawSource, originSource, sourceKey].join(' '));
+  const legacyPubDate = toIsoDate(deal.pubDate);
+  const pubDate = legacyFirecrawl ? legacyPubDate : publication.sourcePublishedAt;
+  const pubDateSource = legacyFirecrawl ? cleanText(deal.pubDateSource) : publication.sourcePublishedAtSource;
   const idSeed = `${sourceKey}|${deal.id || ''}|${url}|${title}`;
   const id = cleanText(deal.id) || `${sourceKey}-${stableId(idSeed)}`;
   const type = inferType(deal);
@@ -337,6 +362,9 @@ function normalizeDeal(rawDeal, sourceKey) {
     isNew: true,
     votes: Number(deal.votes) || 1,
     priority: Number(deal.priority) || 3,
+    ownerUsername: extractStructuredOwnerUsername(deal),
+    viennaVerified: deal.viennaVerified === true || viennaEvidence.hasViennaEvidence,
+    viennaEvidence: normalizedViennaEvidence,
     slackTs: cleanText(deal.slackTs),
     slackThreadTs: cleanText(deal.slackThreadTs),
     slackPostFormatVersion: cleanText(deal.slackPostFormatVersion),
@@ -719,18 +747,28 @@ function loadQueuedDealDuplicateKeys(existingDeals) {
 }
 
 function filterDuplicateDealsInRun(deals) {
-  const seen = new Set();
+  const sharedDuplicates = mergeDuplicateDealRecords(deals);
   const filtered = [];
-  let removed = 0;
+  const keyToIndex = new Map();
+  let removed = sharedDuplicates.duplicateCount;
 
-  for (const deal of deals) {
+  for (const deal of sharedDuplicates.deals) {
     const keys = buildDealDuplicateKeys(deal);
-    if (keys.length > 0 && keys.some((key) => seen.has(key))) {
+    const existingIndex = keys
+      .map((key) => keyToIndex.get(key))
+      .find((index) => Number.isInteger(index));
+
+    if (Number.isInteger(existingIndex)) {
+      const merged = mergeDealEvidence(filtered[existingIndex], deal);
+      filtered[existingIndex] = merged;
+      for (const key of buildDealDuplicateKeys(merged)) keyToIndex.set(key, existingIndex);
       removed += 1;
       continue;
     }
+
+    const index = filtered.length;
     filtered.push(deal);
-    for (const key of keys) seen.add(key);
+    for (const key of keys) keyToIndex.set(key, index);
   }
 
   return { deals: filtered, removed };
@@ -868,13 +906,17 @@ function writePendingAll(deals) {
     totalDeals: deals.length,
     updatedAt: new Date().toISOString(),
   };
-  fs.writeFileSync(PENDING_ALL_PATH, JSON.stringify(payload, null, 2));
+  const tempPath = `${PENDING_ALL_PATH}.tmp-${process.pid}`;
+  fs.writeFileSync(tempPath, JSON.stringify(payload, null, 2));
+  fs.renameSync(tempPath, PENDING_ALL_PATH);
 }
 
 function queueKey(deal) {
+  const slackTs = cleanText(deal.slackTs);
+  if (slackTs) return `slack:${slackTs}`;
   const postKey = canonicalPostKey(deal.url);
   if (isSocialPostKey(postKey)) return postKey;
-  return cleanText(deal.slackTs) || cleanText(deal.id) || normalizeUrl(deal.url);
+  return cleanText(deal.id) || normalizeUrl(deal.url);
 }
 
 function mergePendingQueue(existingDeals, newPostedDeals) {
@@ -882,12 +924,12 @@ function mergePendingQueue(existingDeals, newPostedDeals) {
   for (const deal of existingDeals) {
     const key = queueKey(deal);
     if (!key) continue;
-    byKey.set(key, deal);
+    byKey.set(key, byKey.has(key) ? mergeDealEvidence(byKey.get(key), deal) : deal);
   }
   for (const deal of newPostedDeals) {
     const key = queueKey(deal);
     if (!key) continue;
-    byKey.set(key, deal);
+    byKey.set(key, byKey.has(key) ? mergeDealEvidence(byKey.get(key), deal) : deal);
   }
   return [...byKey.values()];
 }
@@ -1003,6 +1045,11 @@ async function main() {
     deal.slackThreadTs = headerTs;
     postedDeals.push(deal);
 
+    // Persist each confirmed Slack message immediately. If a later request
+    // times out, the always-run workflow commit still has a durable queue
+    // checkpoint and the next scan will not repost these rows.
+    writePendingAll(mergePendingQueue(existingQueue, postedDeals));
+
     if ((i + 1) % 10 === 0) {
       console.log(`  ✅ posted ${i + 1}/${freshDeals.length}`);
     }
@@ -1015,6 +1062,9 @@ async function main() {
   console.log(`✅ ${postedDeals.length} Deals an Slack gesendet`);
   console.log(`🗂️ pending queue size: ${mergedQueue.length}`);
   console.log(`💾 saved: ${path.relative(ROOT, PENDING_ALL_PATH)}`);
+  if (postedDeals.length !== freshDeals.length) {
+    throw new Error(`${freshDeals.length - postedDeals.length} Deal(s) konnten nicht an Slack gesendet werden`);
+  }
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
