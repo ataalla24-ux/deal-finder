@@ -13,6 +13,8 @@ const REPORT_PATH = path.join(DOCS_DIR, 'apify-instagram-report.json');
 const DEFAULT_INPUT_PATH = path.join(ROOT, 'apify', 'instagram-vienna-food-offers', 'default-input.json');
 const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
 const MERCHANT_REGISTRY_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
+const INSTAGRAM_AI_OUTPUT_PATH = path.join(DOCS_DIR, 'deals-pending-instagram-ai.json');
+const INSTAGRAM_AI_REPORT_PATH = path.join(DOCS_DIR, 'instagram-ai-report.json');
 
 const APIFY_TOKEN = String(process.env.APIFY_TOKEN || '').trim();
 const APIFY_ACTOR_ID = String(
@@ -107,6 +109,23 @@ function normalizePostUrl(value) {
   } catch {
     return '';
   }
+}
+
+export function collectDirectPostSeedUrls({ output = {}, report = {}, limit = 32 } = {}) {
+  const rows = [
+    ...(Array.isArray(output?.deals) ? output.deals : []),
+    ...(Array.isArray(report?.freshRejected) ? report.freshRejected : []),
+  ];
+  const urls = [];
+  const seen = new Set();
+  for (const row of rows) {
+    const url = normalizePostUrl(row?.url || row?.postUrl || row);
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    urls.push(url);
+    if (urls.length >= toBoundedInt(limit, 32, 1, 100)) break;
+  }
+  return urls;
 }
 
 function postShortcode(postUrl) {
@@ -717,7 +736,19 @@ export async function main() {
     throw new Error('APIFY_INSTAGRAM_VIENNA_ACTOR_ID oder APIFY_ACTOR_ID fehlt');
   }
 
-  const baseInput = readJsonIfExists(DEFAULT_INPUT_PATH, {});
+  const storedBaseInput = readJsonIfExists(DEFAULT_INPUT_PATH, {});
+  const directPostSeeds = collectDirectPostSeedUrls({
+    output: readJsonIfExists(INSTAGRAM_AI_OUTPUT_PATH, {}),
+    report: readJsonIfExists(INSTAGRAM_AI_REPORT_PATH, {}),
+    limit: process.env.APIFY_INSTAGRAM_MAX_DIRECT_POSTS || 32,
+  });
+  const baseInput = {
+    ...storedBaseInput,
+    seedPostUrls: [...new Set([
+      ...(Array.isArray(storedBaseInput.seedPostUrls) ? storedBaseInput.seedPostUrls : []),
+      ...directPostSeeds,
+    ])],
+  };
   const watchlist = readJsonIfExists(WATCHLIST_PATH, {});
   const registry = readJsonIfExists(MERCHANT_REGISTRY_PATH, {});
   const explicitShardIndex = String(process.env.APIFY_INSTAGRAM_SHARD_INDEX || process.env.GITHUB_RUN_NUMBER || '').trim();
@@ -744,6 +775,7 @@ export async function main() {
   console.log('🕷️ APIFY INSTAGRAM IMPORT');
   console.log(`Actor: ${APIFY_ACTOR_ID}`);
   console.log(`Shard: ${shard.shardIndex + 1}/${shard.shardCount}; accounts=${shard.accounts.length}/${shard.totalAccounts}; hashtags=${shard.selectedHashtags.length}`);
+  console.log(`Direct recent post candidates: ${input.seedPostUrls.length}`);
   console.log(`Posts per source: ${input.maxPostsPerSource}; max age: ${input.maxPostAgeDays} days`);
 
   const run = await triggerActorRun(input);

@@ -25,6 +25,7 @@ const DEFAULT_INPUT = {
   // Accounts are crawl targets, not location proof. The importer supplies only
   // registry/watchlist entries that were explicitly verified for Vienna.
   verifiedViennaAccounts: [],
+  seedPostUrls: [],
   seedHashtags: [
     'gratiswien',
     'wiengastro',
@@ -697,6 +698,9 @@ await Actor.main(async () => {
     ...rawInput,
     seedAccounts: (rawInput.seedAccounts || DEFAULT_INPUT.seedAccounts).map(normalizeHandle).filter(Boolean),
     verifiedViennaAccounts: (rawInput.verifiedViennaAccounts || DEFAULT_INPUT.verifiedViennaAccounts).map(normalizeHandle).filter(Boolean),
+    seedPostUrls: [...new Set(
+      (rawInput.seedPostUrls || DEFAULT_INPUT.seedPostUrls).map(uniquePostUrl).filter(Boolean),
+    )],
     seedHashtags: (rawInput.seedHashtags || DEFAULT_INPUT.seedHashtags).map((tag) => normalizeText(tag).replace(/^#/, '')).filter(Boolean),
     maxPostsPerSource: boundedInt(rawInput.maxPostsPerSource, DEFAULT_INPUT.maxPostsPerSource, 1, 12),
     maxPostsToInspect: boundedInt(rawInput.maxPostsToInspect, DEFAULT_INPUT.maxPostsToInspect, 1, 500),
@@ -729,6 +733,32 @@ await Actor.main(async () => {
   const acceptedUrls = new Set();
   const rejectReasons = {};
   let queuedPostCount = 0;
+
+  const directSeedSource = 'direct:recent-instagram-candidates';
+  const directPostUrls = input.seedPostUrls.slice(0, input.maxPostsToInspect);
+  if (directPostUrls.length) {
+    sourceStats[directSeedSource] = {
+      type: 'direct-post',
+      seed: 'seedPostUrls',
+      queued: directPostUrls.length,
+      visited: 0,
+      accepted: 0,
+      state: 'ok',
+    };
+    for (const url of directPostUrls) {
+      await requestQueue.addRequest({
+        url,
+        uniqueKey: `direct:${url}`,
+        userData: {
+          label: 'POST',
+          sourceType: 'direct',
+          seedValue: '',
+          sourcePage: directSeedSource,
+        },
+      });
+    }
+    queuedPostCount += directPostUrls.length;
+  }
 
   for (const account of input.seedAccounts) {
     const url = `https://www.instagram.com/${account}/`;
@@ -765,8 +795,10 @@ await Actor.main(async () => {
       },
     },
     preNavigationHooks: [
-      async ({ page }) => {
-        if (cookieObjects.length) {
+      async ({ page, request }) => {
+        // Direct post checks deliberately use a clean public context. An
+        // expired session cookie can hide an otherwise readable public post.
+        if (cookieObjects.length && request.userData?.sourceType !== 'direct') {
           await page.context().addCookies(cookieObjects);
         }
       },

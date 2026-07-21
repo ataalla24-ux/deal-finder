@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import {
   buildShardedActorInput,
   classifyApifyRunHealth,
+  collectDirectPostSeedUrls,
   normalizeApifyItem,
   selectAccountShard,
   toIso,
@@ -24,6 +25,7 @@ const actorSource = fs.readFileSync(path.join(testDir, '..', 'apify', 'instagram
 
 assert.doesNotMatch(actorSource, /postPublishedAt\s*:\s*new Date\s*\(/, 'actor must never manufacture a publication timestamp');
 assert.match(actorSource, /missingRealPostTimestamp/, 'actor must reject records without real Instagram timestamps');
+assert.match(actorSource, /sourceType:\s*'direct'/, 'actor must support direct public post fallbacks');
 const captionCandidateBlock = actorSource.match(/const captionCandidates\s*=\s*\[[\s\S]*?\.filter\(Boolean\);/)?.[0] || '';
 assert.ok(captionCandidateBlock, 'caption candidate block must remain inspectable');
 assert.doesNotMatch(captionCandidateBlock, /snapshot\.bodyText/, 'generic Instagram page chrome/body text must not become deal-classification caption evidence');
@@ -187,6 +189,7 @@ assert.equal(new Set([...shardZero.accounts, ...shardOne.accounts]).size, 14, 'a
 
 const built = buildShardedActorInput({
   seedAccounts: [],
+  seedPostUrls: ['https://www.instagram.com/reel/DirectSeed123/?utm_source=test'],
   seedHashtags: ['gratiswien', 'wiengastro', 'wienessen', 'wienkaffee'],
 }, {
   now,
@@ -199,8 +202,31 @@ const built = buildShardedActorInput({
 assert.equal(built.input.maxPostsPerSource, 6);
 assert.equal(built.input.maxPostAgeDays, 7);
 assert.equal(built.input.maxAgeDaysWithoutExplicitValidity, 3);
+assert.deepEqual(built.input.seedPostUrls, ['https://www.instagram.com/reel/DirectSeed123/?utm_source=test']);
 assert.ok(built.input.seedAccounts.length > 0);
 assert.ok(built.input.verifiedViennaAccounts.every((account) => built.input.seedAccounts.includes(account)));
+
+assert.deepEqual(
+  collectDirectPostSeedUrls({
+    output: {
+      deals: [
+        { url: 'https://www.instagram.com/reel/FreshAccepted1/?utm_source=test' },
+        { url: 'https://example.com/not-instagram' },
+      ],
+    },
+    report: {
+      freshRejected: [
+        { url: 'https://www.instagram.com/reel/FreshAccepted1/' },
+        { url: 'https://www.instagram.com/p/FreshRejected2/' },
+      ],
+    },
+  }),
+  [
+    'https://www.instagram.com/reel/FreshAccepted1/',
+    'https://www.instagram.com/p/FreshRejected2/',
+  ],
+  'the Actor fallback receives only normalized, deduplicated recent Instagram posts',
+);
 
 assert.deepEqual(
   classifyApifyRunHealth({ summary: { inspectedPosts: 0, sources: { a: { state: 'loginWall' } } }, rawDatasetItems: 0, acceptedDeals: 0 }),
