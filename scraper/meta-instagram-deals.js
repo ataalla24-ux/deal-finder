@@ -616,6 +616,76 @@ async function fetchMetaJson(url, config, fetchImpl = fetch) {
   throw lastError || new Error(`Meta API request failed: ${safeUrl(url)}`);
 }
 
+function instagramManagedPagesUrl(config) {
+  const url = new URL(`https://graph.facebook.com/${config.graphVersion}/me/accounts`);
+  url.searchParams.set('fields', 'id,name,access_token,tasks,instagram_business_account{id,username}');
+  url.searchParams.set('access_token', config.instagramAccessToken);
+  return url.toString();
+}
+
+function instagramLinkedPageUrl(config) {
+  const url = new URL(`https://graph.facebook.com/${config.graphVersion}/me`);
+  url.searchParams.set('fields', 'id,name,instagram_business_account{id,username}');
+  url.searchParams.set('access_token', config.instagramAccessToken);
+  return url.toString();
+}
+
+async function discoverInstagramGraphIdentity(config, fetchImpl) {
+  const errors = [];
+  const attempts = [
+    {
+      source: 'facebook-managed-pages',
+      url: instagramManagedPagesUrl(config),
+      select(payload) {
+        const pages = Array.isArray(payload?.data) ? payload.data : [];
+        const page = pages.find((entry) => cleanText(entry?.instagram_business_account?.id, 100));
+        if (!page) return null;
+        return {
+          userId: cleanText(page.instagram_business_account.id, 100),
+          username: cleanText(page.instagram_business_account.username, 100),
+          accessToken: cleanText(page.access_token, 700) || config.instagramAccessToken,
+        };
+      },
+    },
+    {
+      source: 'facebook-page-token',
+      url: instagramLinkedPageUrl(config),
+      select(payload) {
+        const userId = cleanText(payload?.instagram_business_account?.id, 100);
+        if (!userId) return null;
+        return {
+          userId,
+          username: cleanText(payload.instagram_business_account.username, 100),
+          accessToken: config.instagramAccessToken,
+        };
+      },
+    },
+  ];
+
+  for (const attempt of attempts) {
+    try {
+      const response = await fetchMetaJson(attempt.url, config, fetchImpl);
+      const identity = attempt.select(response.payload);
+      if (identity?.userId) return { ...identity, source: attempt.source, errors };
+      errors.push({
+        source: attempt.source,
+        status: 200,
+        code: 'instagram-account-not-linked',
+        message: 'Meta returned no linked Instagram professional account.',
+      });
+    } catch (error) {
+      errors.push({
+        source: attempt.source,
+        status: Number(error?.status || 0),
+        code: error?.code || '',
+        message: safeErrorMessage(error, config),
+      });
+    }
+  }
+
+  return { userId: '', username: '', accessToken: '', source: '', errors };
+}
+
 function adLibraryUrl(config, searchTerm) {
   const url = new URL(`https://graph.facebook.com/${config.graphVersion}/ads_archive`);
   url.searchParams.set('access_token', config.adLibraryToken);
@@ -785,7 +855,7 @@ function pruneSeenIds(seenIds, now, ttlDays = 7) {
 export async function runMetaInstagramCollector(options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const env = options.env || process.env;
-  const config = options.config || buildConfig(env, now);
+  const config = { ...(options.config || buildConfig(env, now)) };
   const fetchImpl = options.fetchImpl || fetch;
   const state = readJson(config.statePath, { version: 1, hashtagIds: {}, seenIds: {} });
   const previousPayload = readJson(config.outputPath, null);
@@ -795,7 +865,7 @@ export async function runMetaInstagramCollector(options = {}) {
   const accountCatalog = loadAccountCatalog(config, options.paths || {});
   const configured = {
     adLibrary: Boolean(config.adLibraryToken),
-    instagramGraph: Boolean(config.instagramAccessToken && config.instagramUserId),
+    instagramGraph: Boolean(config.instagramAccessToken),
   };
 
   const report = {
@@ -815,13 +885,33 @@ export async function runMetaInstagramCollector(options = {}) {
 
   if (!configured.adLibrary && !configured.instagramGraph) {
     report.status = 'not-configured';
-    report.message = 'Configure META_AD_LIBRARY_ACCESS_TOKEN and/or INSTAGRAM_ACCESS_TOKEN plus INSTAGRAM_USER_ID.';
+    report.message = 'Configure META_AD_LIBRARY_ACCESS_TOKEN and/or INSTAGRAM_ACCESS_TOKEN.';
     report.preservedDeals = lastGoodPayload?.deals?.length || 0;
     const payload = lastGoodPayload || { lastUpdated: now.toISOString(), source: 'meta-instagram', totalDeals: 0, deals: [] };
     if (options.write !== false) {
       writeJsonAtomic(config.reportPath, report);
     }
     return { payload, report, state, shouldFail: config.requireConfiguredSource };
+  }
+
+  if (configured.instagramGraph && !config.instagramUserId) {
+    const identity = await discoverInstagramGraphIdentity(config, fetchImpl);
+    if (identity.userId) {
+      config.instagramUserId = identity.userId;
+      config.instagramAccessToken = identity.accessToken || config.instagramAccessToken;
+      report.sources.instagramGraph.identity = {
+        status: 'ok',
+        source: identity.source,
+        username: identity.username,
+      };
+    } else {
+      report.sources.instagramGraph.status = 'failed';
+      report.sources.instagramGraph.identity = {
+        status: 'failed',
+        source: 'automatic-discovery',
+      };
+      report.sources.instagramGraph.errors.push(...identity.errors);
+    }
   }
 
   const accepted = [];
@@ -848,7 +938,7 @@ export async function runMetaInstagramCollector(options = {}) {
     }
   }
 
-  if (configured.instagramGraph) {
+  if (configured.instagramGraph && config.instagramUserId) {
     const result = await collectInstagramGraph(config, accountCatalog, state, fetchImpl);
     nextState.hashtagIds = result.hashtagIds;
     report.selectedAccounts = result.selectedAccounts.map((account) => ({

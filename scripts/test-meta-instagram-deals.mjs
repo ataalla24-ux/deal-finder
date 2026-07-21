@@ -164,6 +164,65 @@ const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'meta-instagram-test-'));
 const outputPath = path.join(tempDir, 'deals.json');
 const reportPath = path.join(tempDir, 'report.json');
 const statePath = path.join(tempDir, 'state.json');
+const userAccessToken = 'auto-discovery-user-token';
+const pageAccessToken = 'auto-discovery-page-token';
+const autoDiscoveryConfig = {
+  ...buildConfig({
+    INSTAGRAM_ACCESS_TOKEN: userAccessToken,
+    META_INSTAGRAM_MAX_RETRIES: '0',
+  }, now),
+  explicitAccounts: ['autocafe'],
+  hashtags: [],
+  maxAccountsPerRun: 1,
+  outputPath,
+  reportPath,
+  statePath,
+};
+const autoDiscoveryRun = await runMetaInstagramCollector({
+  now,
+  config: autoDiscoveryConfig,
+  paths: {
+    watchlistPath: path.join(tempDir, 'missing-watchlist.json'),
+    registryPath: path.join(tempDir, 'missing-registry.json'),
+  },
+  fetchImpl: async (rawUrl) => {
+    const url = new URL(rawUrl);
+    if (url.pathname.endsWith('/me/accounts')) {
+      assert.equal(url.searchParams.get('access_token'), userAccessToken);
+      return new Response(JSON.stringify({
+        data: [{
+          id: 'page-123',
+          access_token: pageAccessToken,
+          instagram_business_account: { id: 'ig-123', username: 'freefinderwien' },
+        }],
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    if (url.pathname.endsWith('/ig-123')) {
+      assert.equal(url.searchParams.get('access_token'), pageAccessToken);
+      return new Response(JSON.stringify({
+        business_discovery: {
+          username: 'autocafe',
+          name: 'Auto Café',
+          media: {
+            data: [{
+              id: 'auto-media-1',
+              caption: 'Heute in 1020 Wien: 1+1 Kaffee gratis.',
+              permalink: 'https://www.instagram.com/p/AUTO_DISCOVERY_1/',
+              timestamp: '2026-07-17T09:00:00.000Z',
+            }],
+          },
+        },
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`unexpected Meta test URL: ${url.pathname}`);
+  },
+  write: false,
+});
+assert.equal(autoDiscoveryRun.report.sources.instagramGraph.identity.status, 'ok');
+assert.equal(autoDiscoveryRun.report.sources.instagramGraph.identity.source, 'facebook-managed-pages');
+assert.equal(autoDiscoveryRun.payload.totalDeals, 1, 'the existing token can activate Graph discovery without a separately configured user id');
+assert.doesNotMatch(JSON.stringify(autoDiscoveryRun), /auto-discovery-(?:user|page)-token/, 'identity discovery tokens must stay out of reports and output');
+
 const lastGoodPayload = {
   lastUpdated: '2026-07-16T10:00:00.000Z',
   source: 'meta-instagram',

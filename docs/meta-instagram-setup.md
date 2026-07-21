@@ -14,7 +14,8 @@ so a missing credential cannot look like a successful zero-result scan.
 At least one source must be configured:
 
 - `META_AD_LIBRARY_ACCESS_TOKEN` for Ad Library discovery.
-- `INSTAGRAM_ACCESS_TOKEN` and `INSTAGRAM_USER_ID` for Instagram Graph discovery.
+- `INSTAGRAM_ACCESS_TOKEN` for Instagram Graph discovery. The collector resolves the linked
+  professional Instagram account through the managed Facebook Page automatically.
 
 The Instagram Graph path requires a professional Instagram account and the applicable Meta app
 permissions. Hashtag discovery additionally requires Instagram Public Content Access approval.
@@ -24,6 +25,7 @@ Slack delivery uses the existing `SLACK_BOT_TOKEN` and `SLACK_CHANNEL_ID` secret
 ## Optional repository variables
 
 - `META_GRAPH_VERSION` (defaults to `v24.0`).
+- `INSTAGRAM_USER_ID` can be supplied as a secret to override automatic account discovery.
 - `META_AD_LIBRARY_SEARCH_TERMS` as a comma/newline separated list.
 - `META_INSTAGRAM_HASHTAGS` as a comma/newline separated list, without `#`.
 - `META_INSTAGRAM_ACCOUNTS` for additional Business Discovery usernames.
