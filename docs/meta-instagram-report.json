@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-07-21T12:38:52.826Z",
+  "source": "meta-instagram",
+  "status": "failed",
+  "configured": {
+    "adLibrary": false,
+    "instagramGraph": true
+  },
+  "accountCatalogSize": 54,
+  "selectedAccounts": [],
+  "sources": {
+    "adLibrary": {
+      "status": "not-configured",
+      "fetched": 0,
+      "accepted": 0,
+      "errors": []
+    },
+    "instagramGraph": {
+      "status": "failed",
+      "fetched": 0,
+      "accepted": 0,
+      "errors": [
+        {
+          "source": "facebook-managed-pages",
+          "status": 400,
+          "code": 190,
+          "message": "Meta API 400 for https://graph.facebook.com/v24.0/me/accounts?fields=id%2Cname%2Caccess_token%2Ctasks%2Cinstagram_business_account%7Bid%2Cusername%7D&access_token=[redacted] Bad signature"
+        },
+        {
+          "source": "facebook-page-token",
+          "status": 400,
+          "code": 190,
+          "message": "Meta API 400 for https://graph.facebook.com/v24.0/me?fields=id%2Cname%2Cinstagram_business_account%7Bid%2Cusername%7D&access_token=[redacted] Bad signature"
+        }
+      ],
+      "identity": {
+        "status": "failed",
+        "source": "automatic-discovery"
+      }
+    }
+  },
+  "rejectionReasons": {},
+  "totalDeals": 0,
+  "verifiedBeforeLimit": 0,
+  "outputLimit": 40,
+  "freshPostsFetched": 0,
+  "verifiedDeals": 0,
+  "message": "All configured Meta sources failed; preserved 0 last-good deal(s).",
+  "preservedDeals": 0
+}
