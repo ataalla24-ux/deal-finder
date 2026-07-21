@@ -201,6 +201,30 @@ assert.deepEqual(
   'an LLM rejection must veto a heuristic deal for the same post',
 );
 
+const acceptedAiCandidate = candidate({
+  shortcode: 'LlmAcceptedVienna1',
+  description: 'Test Café: Heute gibt es in der Taborstraße 1, 1020 Wien einen Kaffee gratis.',
+  sourceDeal: { ownerUsername: 'testcafe', brand: 'Test Café' },
+});
+const acceptedAiDeal = mergeAiDeal(acceptedAiCandidate, {
+  accept: true,
+  confidence: 0.92,
+  brand: 'Test Café',
+  title: 'Kaffee gratis',
+  description: 'Heute gibt es einen Kaffee gratis.',
+  type: 'gratis',
+  category: 'Food & Drink',
+  expires: '',
+  reason: 'Aktueller, klar belegter Wien-Deal',
+});
+assert.ok(acceptedAiDeal, 'an accepted LLM deal with primary evidence should survive normalization');
+assert.equal(acceptedAiDeal.sourcePublishedAt, acceptedAiDeal.pubDate);
+assert.equal(acceptedAiDeal.sourcePublishedAtSource, acceptedAiDeal.pubDateSource);
+assert.equal(acceptedAiDeal.evidence.postDateSource, acceptedAiDeal.pubDateSource);
+assert.equal(acceptedAiDeal.city, 'Wien');
+assert.equal(acceptedAiDeal.viennaVerified, true);
+assert.deepEqual(acceptedAiDeal.evidence.viennaEvidence, acceptedAiDeal.viennaEvidence);
+
 const freshRanked = makeCandidate({
   url: 'https://www.instagram.com/reel/FreshRank1/',
   source: 'existing-instagram',

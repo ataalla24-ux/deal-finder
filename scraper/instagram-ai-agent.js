@@ -1840,6 +1840,7 @@ function mergeAiDeal(candidate, aiRow) {
   }
   const score = Math.max(candidate.score, Math.round(confidence * 100));
   const timingEvidence = offerTimingEvidence(offerTiming);
+  const viennaEvidence = resolveAcceptedViennaEvidence(candidate, primarySignal);
   const rawDeal = {
     id: `instagram-ai-${stableHash(`${candidate.url}|${aiRow.title || brand}`)}`,
     brand,
@@ -1856,14 +1857,22 @@ function mergeAiDeal(candidate, aiRow) {
     expiryDisplayText: timingEvidence.matchedText,
     validFrom: timingEvidence.validFrom.slice(0, 10),
     validUntil: timingEvidence.validUntil.slice(0, 10),
+    expirySource: timingEvidence.kind ? 'content-date' : '',
+    expiresSource: timingEvidence.kind ? 'content-date' : '',
     dateConfidence: timingEvidence.kind ? 'high' : '',
-    distance: 'Wien',
+    distance: viennaEvidence?.location || viennaEvidence?.value || 'Wien',
+    city: 'Wien',
+    viennaVerified: Boolean(viennaEvidence),
+    viennaEvidence,
+    ownerUsername: candidateAccountUsernames(candidate)[0] || '',
     hot: type === 'gratis' || type === 'bogo',
     isNew: true,
     priority: score >= 80 ? 5 : 4,
     votes: score >= 80 ? 3 : 2,
     qualityScore: score,
     pubDate: pubDate.date.toISOString(),
+    sourcePublishedAt: pubDate.date.toISOString(),
+    sourcePublishedAtSource: pubDate.source,
     pubDateSource: pubDate.source,
     evidence: {
       heuristicScore: candidate.score,
@@ -1874,6 +1883,7 @@ function mergeAiDeal(candidate, aiRow) {
       previewStatus: candidate.preview?.status || null,
       previewLoginWall: Boolean(candidate.preview?.loginWall),
       postDateSource: pubDate.source,
+      viennaEvidence,
       offerDateSignal: cleanText(dateSignal, 4000),
       offerTiming: timingEvidence,
       textSample: cleanText(signal, 500),
