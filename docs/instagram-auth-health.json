@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-07-21T07:46:22.942Z",
+  "updatedAt": "2026-07-22T07:43:57.377Z",
   "context": "Firecrawl Daily Sync",
   "ok": false,
   "status": "rate-limited",
-  "reason": "Instagram API lieferte HTTP 429",
+  "reason": "Instagram rate-limited den Healthcheck (HTTP 429); Cookies werden nicht als ungültig markiert",
   "username": "ciosgrill",
   "httpStatus": 429,
   "diagnostics": {
@@ -23,8 +23,17 @@
   },
   "apiUserFound": false,
   "bodySample": "",
-  "attempts": 3,
+  "attempts": 1,
+  "rateLimited": true,
+  "circuitOpen": false,
+  "credentialsState": "unknown",
+  "shouldRefreshCookies": false,
+  "canProceed": true,
+  "consecutiveRateLimits": 2,
+  "retryAfter": "",
+  "nextRetryAt": "2026-07-22T08:13:57.260Z",
+  "cooldownSeconds": 1800,
   "clearedFiles": [],
-  "slackNotified": false,
-  "slackNotificationSuppressed": true
+  "slackNotified": true,
+  "slackNotificationSuppressed": false
 }
