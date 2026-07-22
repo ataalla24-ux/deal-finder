@@ -40,7 +40,7 @@ const NON_VIENNA_PLACE_PATTERN = /\b(?:graz|salzburg|linz|innsbruck|klagenfurt|v
 const PLACE_BOUND_OFFER_PATTERN = /\b(?:museum|museen|theater|oper|konzert|concert|festival|festwochen|veranstaltung|event|ausstellung|führung|fuehrung|ticket|kino|schloss|zentrum|center|arena|steinbruch)\w*/i;
 const VERIFIED_VIENNA_MEMBER_BENEFIT_PATTERN = /\b(?:belvedere|leopold\s+museum|kinodonnerstag)\b/i;
 const SYNTHETIC_PUBLICATION_SOURCE_PATTERN = /(?:firecrawl.*(?:run|crawl)|agent(?:\s|[-_])?run|crawl(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|scrap(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|discovered(?:\s|[-_])?at|generated(?:\s|[-_])?at|fallback|current(?:\s|[-_])?time|workflow(?:\s|[-_])?run)/i;
-const TRUSTED_PUBLICATION_SOURCE_PATTERN = /(?:url\.publicationdate|time\.datetime|rendered[-_. ]?time|post[-_. ]?(?:date|time|timestamp)|source[-_. ]?published[-_. ]?at|published[-_. ]?(?:at|time|date)|article:published_time|og:published_time|instagram[-_. ]?(?:graph|timestamp)|tiktok[-_. ]?(?:timestamp|video[-_. ]?id)|apify[-_. ]?(?:timestamp|taken[-_. ]?at)|meta(?:[-_. ][a-z]+){0,3}[-_. ](?:timestamp|created[-_. ]?time))/i;
+const TRUSTED_PUBLICATION_SOURCE_PATTERN = /(?:url\.publicationdate|time\.datetime|rendered[-_. ]?time|post[-_. ]?(?:date|time|timestamp)|source[-_. ]?published[-_. ]?at|published[-_. ]?(?:at|time|date)|article:published_time|og:published_time|instagram[-_. ]?(?:graph|timestamp)|tiktok[-_. ]?(?:timestamp|video[-_. ]?id)|apify[-_. ]?(?:timestamp|taken[-_. ]?at)|meta(?:[-_. ][a-z]+){0,3}[-_. ](?:timestamp|created[-_. ]?time)|slack[-_. ]human[-_. ]review)/i;
 const INSTAGRAM_SHORTCODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
 function cleanText(value) {

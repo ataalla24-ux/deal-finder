@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 
 import {
+  applySlackEdits,
   normalizeDeal as normalizeApprovalDeal,
   normalizePendingDeal,
   validateApprovalCandidates,
@@ -43,6 +44,50 @@ const normalizedMissingEvidence = normalizeApprovalDeal({
 assert.equal(normalizedMissingEvidence.pubDate, '', 'approval normalization must not invent a fresh publication date');
 assert.equal(normalizedMissingEvidence.distance, '', 'approval normalization must not invent Vienna as the location');
 assert.ok(normalizedMissingEvidence.missingFields.includes('Ort'));
+
+const reviewedFirecrawlEdit = applySlackEdits([
+  {
+    id: 'manual-firecrawl-review',
+    order: 1,
+    brand: 'Wien Café',
+    title: '1+1 Kaffee gratis',
+    description: '1+1 Kaffee gratis nach manueller Prüfung.',
+    url: 'https://www.instagram.com/wiencafe/',
+    source: 'Firecrawl Food #2',
+    originSource: 'Firecrawl Food #2',
+    distance: 'Wien',
+    firecrawlReview: true,
+  },
+], [{
+  ts: '1784550002.123',
+  text: 'edit 1 datum: 20.07.2026 | ablauf: 31.07.2026 | ort: 1070 Wien',
+}]);
+assert.equal(reviewedFirecrawlEdit.appliedCount, 1, 'plain Slack edit replies must be applied');
+const reviewedFirecrawlDeal = reviewedFirecrawlEdit.deals[0];
+assert.match(reviewedFirecrawlDeal.pubDate, /^2026-07-20/);
+assert.equal(reviewedFirecrawlDeal.sourcePublishedAt, reviewedFirecrawlDeal.pubDate);
+assert.equal(reviewedFirecrawlDeal.sourcePublishedAtSource, 'slack.human-review');
+assert.equal(reviewedFirecrawlDeal.pubDateSource, 'slack.human-review');
+assert.match(reviewedFirecrawlDeal.expires, /^2026-07-31/);
+assert.match(reviewedFirecrawlDeal.validUntil, /^2026-07-31/);
+assert.equal(reviewedFirecrawlDeal.expirySource, 'slack.human-review');
+assert.equal(reviewedFirecrawlDeal.distance, '1070 Wien');
+
+const reviewedFirecrawlValidation = await validateApprovalCandidates([reviewedFirecrawlDeal], {
+  now,
+  concurrency: 1,
+  inspectDealUrlHealth: async (url) => ({
+    status: 200,
+    finalUrl: url,
+    dateHints: {},
+    contentHints: {},
+  }),
+});
+assert.deepEqual(
+  reviewedFirecrawlValidation.allowedDeals.map((deal) => deal.id),
+  ['manual-firecrawl-review'],
+  'a human-reviewed Firecrawl candidate must become approvable after factual edits',
+);
 
 const cleanedPollutedPending = normalizePendingDeal({
   ...normalizedPending,

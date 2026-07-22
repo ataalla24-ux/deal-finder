@@ -2,11 +2,13 @@ import assert from 'node:assert/strict';
 
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import {
+  buildFirecrawlReviewMessage,
   buildSlackMessage,
   filterDuplicateDealsInRun,
   normalizeDeal,
   pruneStaleQueueDeals,
   revalidateRecentPostedQueue,
+  selectFirecrawlReviewDeals,
   validateAndDedupeDealsForSlack,
 } from '../scraper/slack-notify.js';
 
@@ -1196,6 +1198,118 @@ assert.equal(focacceriaPipeline.validation.blockedDeals.length, 1);
 assert.equal(focacceriaPipeline.allowedDeals.length, 1);
 assert.equal(focacceriaPipeline.allowedDeals[0].id, 'focacceria-current-second');
 
+const firecrawlReviewSelection = selectFirecrawlReviewDeals([
+  {
+    deal: {
+      id: 'review-food-recent',
+      brand: 'Wien Food Deal',
+      title: '1+1 Mittagessen',
+      url: 'https://example.com/review-food-recent',
+      source: 'Firecrawl Food #2',
+      originSource: 'Firecrawl Food #2',
+      distance: '1070 Wien',
+      validity: {},
+    },
+    decision: { allowed: false, reasons: ['älter als 7 Tage (2026-07-10)'], sourceAgeDays: 10 },
+  },
+  {
+    deal: {
+      id: 'review-food-second',
+      brand: 'Wien Food Deal 2',
+      title: 'Gratis Dessert',
+      url: 'https://example.com/review-food-second',
+      source: 'Firecrawl Food #2',
+      originSource: 'Firecrawl Food #2',
+      distance: '1020 Wien',
+      validity: {},
+    },
+    decision: { allowed: false, reasons: ['älter als 7 Tage (2026-07-08)'], sourceAgeDays: 12 },
+  },
+  {
+    deal: {
+      id: 'review-food-over-source-limit',
+      brand: 'Wien Food Deal 3',
+      title: 'Kaffee-Aktion',
+      url: 'https://example.com/review-food-third',
+      source: 'Firecrawl Food #2',
+      originSource: 'Firecrawl Food #2',
+      distance: '1030 Wien',
+      validity: {},
+    },
+    decision: { allowed: false, reasons: ['kein konkretes Angebot erkennbar'], sourceAgeDays: null },
+  },
+  {
+    deal: {
+      id: 'review-consumables-unclear',
+      brand: 'Wien Shop',
+      title: 'Sommeraktion',
+      url: 'https://example.com/review-consumables',
+      source: 'Firecrawl Key 3 - Consumables',
+      originSource: 'Firecrawl Key 3 - Consumables',
+      distance: 'Wien',
+      validity: {},
+    },
+    decision: { allowed: false, reasons: ['kein konkretes Angebot erkennbar'], sourceAgeDays: null },
+  },
+  {
+    deal: {
+      id: 'review-expired-hard-block',
+      title: 'Gratis Getränk',
+      url: 'https://example.com/review-expired',
+      source: 'Firecrawl Instagram Gastro #5',
+    },
+    decision: { allowed: false, reasons: ['abgelaufen (2026-07-18)'], sourceAgeDays: 4 },
+  },
+  {
+    deal: {
+      id: 'review-not-vienna-hard-block',
+      title: '1+1 Burger',
+      url: 'https://example.com/review-graz',
+      source: 'Firecrawl Gastro #2',
+    },
+    decision: { allowed: false, reasons: ['nicht eindeutig in Wien'], sourceAgeDays: 2 },
+  },
+  {
+    deal: {
+      id: 'review-too-old',
+      title: 'Gratis Kaffee',
+      url: 'https://example.com/review-too-old',
+      source: 'Firecrawl Gastro #2',
+    },
+    decision: { allowed: false, reasons: ['älter als 7 Tage (2026-05-01)'], sourceAgeDays: 80 },
+  },
+  {
+    deal: {
+      id: 'review-non-firecrawl',
+      title: 'Gratis Kaffee',
+      url: 'https://example.com/review-official',
+      source: 'Official',
+    },
+    decision: { allowed: false, reasons: ['kein konkretes Angebot erkennbar'], sourceAgeDays: null },
+  },
+], {
+  maxPerSource: 2,
+  maxTotal: 3,
+  maxAgeDays: 45,
+});
+assert.deepEqual(
+  firecrawlReviewSelection.deals.map((deal) => deal.id),
+  ['review-food-recent', 'review-food-second', 'review-consumables-unclear'],
+  'review lane must keep only capped soft Firecrawl failures',
+);
+assert.equal(firecrawlReviewSelection.eligible, 4);
+assert.equal(firecrawlReviewSelection.sourceLimitRemoved, 1);
+assert.deepEqual(firecrawlReviewSelection.sourceCounts, {
+  'Firecrawl Key 2 - Food': 2,
+  'Firecrawl Key 3 - Consumables': 1,
+});
+assert.equal(firecrawlReviewSelection.deals[0].firecrawlReview, true);
+
+const firecrawlReviewDisplay = buildFirecrawlReviewMessage(firecrawlReviewSelection.deals[0], 1);
+assert.match(firecrawlReviewDisplay, /Automatisch blockiert: älter als 7 Tage/);
+assert.match(firecrawlReviewDisplay, /Link prüfen/);
+assert.doesNotMatch(firecrawlReviewDisplay, /_Mit ✅ freigeben_/);
+
 const recentSlackTs = String(Math.floor(new Date('2026-07-19T12:00:00.000Z').getTime() / 1000));
 const queueRevalidation = await revalidateRecentPostedQueue([
   {
@@ -1220,6 +1334,19 @@ const queueRevalidation = await revalidateRecentPostedQueue([
     pubDate: '2026-07-19T08:00:00.000Z',
     pubDateSource: 'time.datetime',
   },
+  {
+    id: 'recent-firecrawl-review',
+    brand: 'Wien Review Deal',
+    title: 'Unklare Gratis-Aktion',
+    description: 'Muss von einem Menschen geprüft werden.',
+    url: 'https://example.com/recent-firecrawl-review',
+    source: 'Firecrawl Food #2',
+    originSource: 'Firecrawl Food #2',
+    distance: 'Wien',
+    slackTs: `${recentSlackTs}.3`,
+    firecrawlReview: true,
+    firecrawlReviewReasons: ['kein konkretes Angebot erkennbar'],
+  },
 ], {
   now,
   revalidationDays: 7,
@@ -1227,7 +1354,12 @@ const queueRevalidation = await revalidateRecentPostedQueue([
   concurrency: 1,
 });
 assert.equal(queueRevalidation.removed, 1);
-assert.deepEqual(queueRevalidation.deals.map((deal) => deal.id), ['recent-good']);
+assert.deepEqual(
+  queueRevalidation.deals.map((deal) => deal.id),
+  ['recent-good', 'recent-firecrawl-review'],
+  'manual review rows must stay queued until edited, approved, or naturally pruned',
+);
+assert.equal(queueRevalidation.validation?.summary?.total, 2, 'review rows must not be auto-revalidated away');
 
 const pollutedPendingRevalidation = await revalidateRecentPostedQueue([
   {

@@ -55,6 +55,25 @@ const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 const PENDING_FILE_NAMES = process.env.PENDING_FILE_NAMES || '';
 const SEEN_DEAL_SUPPRESSION_DAYS = Number(process.env.SLACK_SEEN_DEAL_SUPPRESSION_DAYS || 7);
 const MAX_SEEN_REACTION_CHECKS = Number(process.env.SLACK_SEEN_MAX_REACTION_CHECKS || 250);
+const FIRECRAWL_REVIEW_ENABLED = /^(?:1|true|yes)$/i.test(cleanText(process.env.FIRECRAWL_REVIEW_ENABLED));
+const FIRECRAWL_REVIEW_MAX_PER_SOURCE = boundedInteger(
+  process.env.FIRECRAWL_REVIEW_MAX_PER_SOURCE,
+  10,
+  1,
+  25,
+);
+const FIRECRAWL_REVIEW_MAX_TOTAL = boundedInteger(
+  process.env.FIRECRAWL_REVIEW_MAX_TOTAL,
+  30,
+  1,
+  100,
+);
+const FIRECRAWL_REVIEW_MAX_AGE_DAYS = boundedInteger(
+  process.env.FIRECRAWL_REVIEW_MAX_AGE_DAYS,
+  21,
+  8,
+  90,
+);
 const EXCLUDED_PENDING_FILES = new Set([
   'deals-pending-all.json',
   'deals-pending-firecrawl.json',
@@ -78,6 +97,12 @@ function cleanText(value) {
     .replace(/&#39;/g, "'")
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function boundedInteger(value, fallback, min, max) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(min, Math.min(max, Math.floor(parsed)));
 }
 
 function normalizeLooseText(value) {
@@ -443,6 +468,11 @@ function formatValidationDetails(deal) {
     lines.push(`⏳ Gefundene Gültigkeit: ${formatDate(validity.expiryDate)} (${validity.expirySource || 'k.A.'})`);
   }
 
+  const reasons = ensureArray(validity.reasons).filter(Boolean);
+  if (reasons.length > 0) {
+    lines.push(`🚫 Automatisch blockiert: ${reasons.slice(0, 3).join('; ')}`);
+  }
+
   const warnings = ensureArray(validity.warnings).filter(Boolean);
   if (warnings.length > 0) {
     lines.push(`⚠️ Hinweise: ${warnings.slice(0, 2).join('; ')}`);
@@ -485,6 +515,13 @@ function buildSlackMessage(deal, index) {
     `✏️ Bearbeiten: \`edit ${index} titel: Neuer Titel | datum: TT.MM.JJJJ | ablauf: TT.MM.JJJJ | ort: Adresse | link: https://... | quelle: Quelle\``,
     '_Mit ✅ freigeben_',
   ].join('\n');
+}
+
+function buildFirecrawlReviewMessage(deal, index) {
+  return buildSlackMessage(deal, index).replace(
+    '_Mit ✅ freigeben_',
+    '_Review: Link prüfen. Wenn der Deal aktuell ist, Datum/Ablauf/Ort mit `edit` belegen und erst danach ✅ setzen._',
+  );
 }
 
 async function sleep(ms) {
@@ -803,6 +840,123 @@ function compareSlackDeals(left, right) {
   return rightDate - leftDate;
 }
 
+const FIRECRAWL_REVIEW_HARD_REASON_PATTERN = /(?:abgelaufen|nicht eindeutig in wien|url ungültig|ausgeschlossene quelle|gewinnspiel|noch nicht gestartet|liegt in der zukunft|nur gratis-lieferung|gottesdienste)/i;
+const FIRECRAWL_REVIEW_SOFT_REASON_PATTERN = /^(?:älter als \d+ tage(?: trotz [^(]+)? \(\d{4}-\d{2}-\d{2}\)|kein konkretes angebot erkennbar|allgemeine empfehlung\/gratis-event statt konkreter aktion|kein echtes social-post-datum gefunden|kein verlässliches quell-\/post-datum gefunden)$/i;
+
+function isFirecrawlReviewSource(deal) {
+  return /\bfirecrawl\b/i.test([
+    deal?.source,
+    deal?.originSource,
+    deal?.sourceKeys,
+    deal?.evidenceSources,
+  ].map(cleanText).join(' '));
+}
+
+function firecrawlReviewSourceKey(deal) {
+  const signal = [deal?.originSource, deal?.source].map(cleanText).filter(Boolean).join(' ');
+  if (/instagram direct\s*#?\s*4/i.test(signal)) return 'Firecrawl Key 4 - Instagram Direct';
+  if (/instagram gastro\s*#?\s*5/i.test(signal)) return 'Firecrawl Key 5 - Instagram Gastro';
+  if (/key\s*3|consumables/i.test(signal)) return 'Firecrawl Key 3 - Consumables';
+  if (/food\s*#?\s*2/i.test(signal)) return 'Firecrawl Key 2 - Food';
+  if (/gastro\s*#?\s*2/i.test(signal)) return 'Firecrawl Key 1 - Gastro';
+  return cleanText(deal?.originSource || deal?.source) || 'Firecrawl';
+}
+
+function compareFirecrawlReviewDeals(left, right) {
+  const leftAgeRaw = left?.validity?.sourceAgeDays;
+  const rightAgeRaw = right?.validity?.sourceAgeDays;
+  const leftAge = leftAgeRaw === null || leftAgeRaw === undefined || leftAgeRaw === ''
+    ? Number.NaN
+    : Number(leftAgeRaw);
+  const rightAge = rightAgeRaw === null || rightAgeRaw === undefined || rightAgeRaw === ''
+    ? Number.NaN
+    : Number(rightAgeRaw);
+  const leftAgeRank = Number.isFinite(leftAge) ? leftAge : Number.POSITIVE_INFINITY;
+  const rightAgeRank = Number.isFinite(rightAge) ? rightAge : Number.POSITIVE_INFINITY;
+  if (leftAgeRank !== rightAgeRank) return leftAgeRank - rightAgeRank;
+
+  const leftReasons = ensureArray(left?.firecrawlReviewReasons).length;
+  const rightReasons = ensureArray(right?.firecrawlReviewReasons).length;
+  if (leftReasons !== rightReasons) return leftReasons - rightReasons;
+
+  const qualityDifference = Number(right?.qualityScore || 0) - Number(left?.qualityScore || 0);
+  if (qualityDifference) return qualityDifference;
+  return compareSlackDeals(left, right);
+}
+
+function selectFirecrawlReviewDeals(results, options = {}) {
+  const maxPerSource = boundedInteger(options.maxPerSource, 10, 1, 25);
+  const maxTotal = boundedInteger(options.maxTotal, 30, 1, 100);
+  const maxAgeDays = boundedInteger(options.maxAgeDays, 21, 8, 90);
+  const candidates = [];
+
+  for (const result of ensureArray(results)) {
+    if (result?.decision?.allowed || !isFirecrawlReviewSource(result?.deal)) continue;
+    const reasons = ensureArray(result?.decision?.reasons).map(cleanText).filter(Boolean);
+    if (reasons.length === 0) continue;
+    if (reasons.some((reason) => FIRECRAWL_REVIEW_HARD_REASON_PATTERN.test(reason))) continue;
+    if (reasons.some((reason) => !FIRECRAWL_REVIEW_SOFT_REASON_PATTERN.test(reason))) continue;
+
+    const sourceAgeRaw = result?.decision?.sourceAgeDays;
+    const sourceAgeDays = sourceAgeRaw === null || sourceAgeRaw === undefined || sourceAgeRaw === ''
+      ? Number.NaN
+      : Number(sourceAgeRaw);
+    if (Number.isFinite(sourceAgeDays) && sourceAgeDays > maxAgeDays) continue;
+
+    const sourceKey = firecrawlReviewSourceKey(result.deal);
+    candidates.push({
+      ...result.deal,
+      firecrawlReview: true,
+      firecrawlReviewSource: sourceKey,
+      firecrawlReviewReasons: reasons,
+      validity: {
+        ...ensureObject(result.deal?.validity),
+        status: 'blocked',
+        reasons,
+        sourceAgeDays: Number.isFinite(sourceAgeDays) ? sourceAgeDays : null,
+      },
+    });
+  }
+
+  candidates.sort(compareFirecrawlReviewDeals);
+  const sourceCounts = new Map();
+  const duplicateKeys = new Set();
+  const selected = [];
+  let duplicateRemoved = 0;
+  let sourceLimitRemoved = 0;
+
+  for (const deal of candidates) {
+    const keys = buildDealDuplicateKeys(deal);
+    if (keys.length > 0 && keys.some((key) => duplicateKeys.has(key))) {
+      duplicateRemoved += 1;
+      continue;
+    }
+
+    const sourceKey = firecrawlReviewSourceKey(deal);
+    const sourceCount = sourceCounts.get(sourceKey) || 0;
+    if (sourceCount >= maxPerSource) {
+      sourceLimitRemoved += 1;
+      continue;
+    }
+
+    selected.push(deal);
+    sourceCounts.set(sourceKey, sourceCount + 1);
+    for (const key of keys) duplicateKeys.add(key);
+    if (selected.length >= maxTotal) break;
+  }
+
+  return {
+    deals: selected,
+    eligible: candidates.length,
+    duplicateRemoved,
+    sourceLimitRemoved,
+    sourceCounts: Object.fromEntries(sourceCounts),
+    maxPerSource,
+    maxTotal,
+    maxAgeDays,
+  };
+}
+
 async function validateAndDedupeDealsForSlack(deals, options = {}) {
   const validation = await validateDealsForSlack(deals, options);
   const rankedAllowed = [...validation.allowedDeals].sort(compareSlackDeals);
@@ -864,7 +1018,11 @@ async function revalidateRecentPostedQueue(deals, options = {}) {
     : SEEN_DEAL_SUPPRESSION_DAYS;
   const entries = deals
     .map((deal, index) => ({ deal, index }))
-    .filter(({ deal }) => cleanText(deal.slackTs)
+    // Review candidates intentionally remain queued so a human can add
+    // factual date/expiry/location evidence before approving them. The
+    // approval workflow still runs the full validator after any edit.
+    .filter(({ deal }) => deal.firecrawlReview !== true
+      && cleanText(deal.slackTs)
       && (queueDealAgeDays(deal, now) ?? Infinity) < maxAgeDays);
   if (entries.length === 0) {
     return { deals, removed: 0, validation: null };
@@ -989,6 +1147,23 @@ async function main() {
   writeDealValidityReport(validation.report);
   const freshDeals = validatedRun.allowedDeals;
   const blockedSummary = formatReasonCategoryCounts(validation.summary.reasonCategoryCounts);
+  const firecrawlReview = FIRECRAWL_REVIEW_ENABLED
+    ? selectFirecrawlReviewDeals(validation.results, {
+        maxPerSource: FIRECRAWL_REVIEW_MAX_PER_SOURCE,
+        maxTotal: FIRECRAWL_REVIEW_MAX_TOTAL,
+        maxAgeDays: FIRECRAWL_REVIEW_MAX_AGE_DAYS,
+      })
+    : {
+        deals: [],
+        eligible: 0,
+        duplicateRemoved: 0,
+        sourceLimitRemoved: 0,
+        sourceCounts: {},
+        maxPerSource: FIRECRAWL_REVIEW_MAX_PER_SOURCE,
+        maxTotal: FIRECRAWL_REVIEW_MAX_TOTAL,
+        maxAgeDays: FIRECRAWL_REVIEW_MAX_AGE_DAYS,
+      };
+  const firecrawlReviewDeals = firecrawlReview.deals;
 
   console.log(
     `🧪 Deal validity agent: ${validation.summary.allowed}/${validation.summary.total} allowed, ` +
@@ -1002,8 +1177,17 @@ async function main() {
   }
   console.log(`💾 saved: ${path.relative(ROOT, DEFAULT_REPORT_PATH)}`);
   console.log(`📨 Pending: ${pendingDeals.length}, posting to Slack: ${freshDeals.length}`);
+  if (FIRECRAWL_REVIEW_ENABLED) {
+    console.log(
+      `🔎 Firecrawl Review: ${firecrawlReviewDeals.length}/${firecrawlReview.eligible} weiche Zweifelsfälle ` +
+      `(max. ${firecrawlReview.maxPerSource}/Quelle, ${firecrawlReview.maxTotal} gesamt, ${firecrawlReview.maxAgeDays} Tage)`,
+    );
+    if (Object.keys(firecrawlReview.sourceCounts).length > 0) {
+      console.log(`🔎 Firecrawl Review sources: ${formatReasonCategoryCounts(firecrawlReview.sourceCounts)}`);
+    }
+  }
 
-  if (freshDeals.length === 0) {
+  if (freshDeals.length === 0 && firecrawlReviewDeals.length === 0) {
     if (queueChanged) {
       writePendingAll(existingQueue);
       console.log(`💾 pending queue updated after moderation/prune: ${existingQueue.length} deals left`);
@@ -1019,51 +1203,95 @@ async function main() {
     return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
   });
 
-  const freeCount = freshDeals.filter((d) => d.type === 'gratis').length;
-  const headerTs = await postSlackMessage(
-    `🎯 *FreeFinder Wien* — ${freshDeals.length} neue Deals\n` +
-    `🆓 ${freeCount} gratis | 💰 ${freshDeals.length - freeCount} rabatt/test\n` +
-    `🧪 Gültigkeitscheck: ${validation.summary.allowed}/${validation.summary.total} freigegeben | ${validation.summary.blocked} blockiert (max. ${validation.summary.maxAgeDays} Tage)\n` +
-    (blockedSummary ? `🚫 Blockiert: ${blockedSummary}\n` : '') +
-    `_Jeden Deal mit ✅ bestätigen, dann erscheint er in der iOS-App._\n` +
-    `_Bearbeiten vor Freigabe: z. B. edit 3 titel: Gratis Matcha | ort: Neubaugasse 12, 1070 Wien | ablauf: 20.04.2026_`
-  );
-
-  if (!headerTs) {
-    console.log('❌ Konnte Header-Nachricht nicht senden');
-    process.exit(1);
-  }
-
   const postedDeals = [];
-  for (let i = 0; i < freshDeals.length; i += 1) {
-    const deal = freshDeals[i];
-    const text = buildSlackMessage(deal, i + 1);
-    const ts = await postSlackMessage(text, headerTs);
-    if (!ts) continue;
+  if (freshDeals.length > 0) {
+    const freeCount = freshDeals.filter((d) => d.type === 'gratis').length;
+    const headerTs = await postSlackMessage(
+      `🎯 *FreeFinder Wien* — ${freshDeals.length} neue Deals\n` +
+      `🆓 ${freeCount} gratis | 💰 ${freshDeals.length - freeCount} rabatt/test\n` +
+      `🧪 Gültigkeitscheck: ${validation.summary.allowed}/${validation.summary.total} freigegeben | ${validation.summary.blocked} blockiert (max. ${validation.summary.maxAgeDays} Tage)\n` +
+      (blockedSummary ? `🚫 Blockiert: ${blockedSummary}\n` : '') +
+      `_Jeden Deal mit ✅ bestätigen, dann erscheint er in der iOS-App._\n` +
+      `_Bearbeiten vor Freigabe: z. B. edit 3 titel: Gratis Matcha | ort: Neubaugasse 12, 1070 Wien | ablauf: TT.MM.JJJJ_`,
+    );
 
-    deal.slackTs = ts;
-    deal.slackThreadTs = headerTs;
-    postedDeals.push(deal);
-
-    // Persist each confirmed Slack message immediately. If a later request
-    // times out, the always-run workflow commit still has a durable queue
-    // checkpoint and the next scan will not repost these rows.
-    writePendingAll(mergePendingQueue(existingQueue, postedDeals));
-
-    if ((i + 1) % 10 === 0) {
-      console.log(`  ✅ posted ${i + 1}/${freshDeals.length}`);
+    if (!headerTs) {
+      throw new Error('Konnte Header-Nachricht nicht senden');
     }
-    await sleep(600);
+
+    for (let i = 0; i < freshDeals.length; i += 1) {
+      const deal = freshDeals[i];
+      const text = buildSlackMessage(deal, i + 1);
+      const ts = await postSlackMessage(text, headerTs);
+      if (!ts) continue;
+
+      deal.slackTs = ts;
+      deal.slackThreadTs = headerTs;
+      deal.order = i + 1;
+      postedDeals.push(deal);
+
+      // Persist each confirmed Slack message immediately. If a later request
+      // times out, the always-run workflow commit still has a durable queue
+      // checkpoint and the next scan will not repost these rows.
+      writePendingAll(mergePendingQueue(existingQueue, postedDeals));
+
+      if ((i + 1) % 10 === 0) {
+        console.log(`  ✅ posted ${i + 1}/${freshDeals.length}`);
+      }
+      await sleep(600);
+    }
   }
 
-  const mergedQueue = mergePendingQueue(existingQueue, postedDeals);
+  const postedReviewDeals = [];
+  if (firecrawlReviewDeals.length > 0) {
+    const reviewSources = Object.entries(firecrawlReview.sourceCounts)
+      .map(([source, count]) => `${source.replace(/^Firecrawl\s*/i, '')}: ${count}`)
+      .join(' | ');
+    const reviewHeaderTs = await postSlackMessage(
+      `🔎 *FreeFinder Wien – Firecrawl Review* — ${firecrawlReviewDeals.length} unsichere Kandidaten\n` +
+      `📦 ${reviewSources || 'Firecrawl'}\n` +
+      `🛡️ Nur weiche Zweifelsfälle: älteres/fehlendes Datum oder unklarer Dealtext; max. ${firecrawlReview.maxPerSource} pro Quelle.\n` +
+      `_Eindeutig abgelaufene, Nicht-Wien-, Gewinnspiel-, ungültige und ausgeschlossene Quellen bleiben blockiert._\n` +
+      `_Link prüfen; bei aktuellem Deal zuerst Datum/Ablauf/Ort mit \`edit\` belegen und danach ✅ setzen._`,
+    );
+
+    if (!reviewHeaderTs) {
+      throw new Error('Konnte Firecrawl-Review-Header nicht senden');
+    }
+
+    for (let i = 0; i < firecrawlReviewDeals.length; i += 1) {
+      const deal = firecrawlReviewDeals[i];
+      const ts = await postSlackMessage(buildFirecrawlReviewMessage(deal, i + 1), reviewHeaderTs);
+      if (!ts) continue;
+
+      deal.slackTs = ts;
+      deal.slackThreadTs = reviewHeaderTs;
+      deal.order = i + 1;
+      deal.firecrawlReviewQueuedAt = new Date().toISOString();
+      postedReviewDeals.push(deal);
+      writePendingAll(mergePendingQueue(existingQueue, [...postedDeals, ...postedReviewDeals]));
+
+      if ((i + 1) % 10 === 0) {
+        console.log(`  🔎 review posted ${i + 1}/${firecrawlReviewDeals.length}`);
+      }
+      await sleep(600);
+    }
+  }
+
+  const mergedQueue = mergePendingQueue(existingQueue, [...postedDeals, ...postedReviewDeals]);
   writePendingAll(mergedQueue);
 
   console.log(`✅ ${postedDeals.length} Deals an Slack gesendet`);
+  if (FIRECRAWL_REVIEW_ENABLED) {
+    console.log(`🔎 ${postedReviewDeals.length} Firecrawl-Kandidaten zur manuellen Prüfung gesendet`);
+  }
   console.log(`🗂️ pending queue size: ${mergedQueue.length}`);
   console.log(`💾 saved: ${path.relative(ROOT, PENDING_ALL_PATH)}`);
   if (postedDeals.length !== freshDeals.length) {
     throw new Error(`${freshDeals.length - postedDeals.length} Deal(s) konnten nicht an Slack gesendet werden`);
+  }
+  if (postedReviewDeals.length !== firecrawlReviewDeals.length) {
+    throw new Error(`${firecrawlReviewDeals.length - postedReviewDeals.length} Firecrawl-Review(s) konnten nicht an Slack gesendet werden`);
   }
 }
 
@@ -1075,11 +1303,13 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
 }
 
 export {
+  buildFirecrawlReviewMessage,
   buildSlackMessage,
   compareSlackDeals,
   filterDuplicateDealsInRun,
   normalizeDeal,
   pruneStaleQueueDeals,
   revalidateRecentPostedQueue,
+  selectFirecrawlReviewDeals,
   validateAndDedupeDealsForSlack,
 };

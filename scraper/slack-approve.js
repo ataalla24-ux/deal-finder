@@ -194,6 +194,18 @@ function applyEditChangesToDeal(deal, changes, message) {
     next[field] = value;
   }
 
+  if (changes.pubDate) {
+    next.sourcePublishedAt = changes.pubDate;
+    next.sourcePublishedAtSource = 'slack.human-review';
+    next.pubDateSource = 'slack.human-review';
+  }
+  if (changes.expires) {
+    next.validUntil = changes.expires;
+    next.expirySource = 'slack.human-review';
+    next.expiresSource = 'slack.human-review';
+    next.dateConfidence = 'high';
+  }
+
   next.editedInSlack = true;
   next.slackEditedAt = new Date().toISOString();
   next.slackEditedFields = [...new Set([...(ensureArray(deal?.slackEditedFields)), ...Object.keys(changes)])];
@@ -1153,6 +1165,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
 }
 
 export {
+  applySlackEdits,
   normalizeDeal,
   normalizePendingDeal,
   pendingApprovalKey,

@@ -101,7 +101,8 @@ function extractSlackMessageText(message) {
 
   const parts = [];
   flattenSlackNode(message?.blocks || [], parts);
-  return parts.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  const blockText = parts.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  return blockText || direct;
 }
 
 function parseSlackLink(raw) {
