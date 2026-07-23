@@ -3,13 +3,18 @@ import assert from 'node:assert/strict';
 import {
   canonicalDealUrl,
   canonicalInstagramPostKey,
+  decodeInstagramShortcodeDate,
   extractInstagramProfileUsername,
   extractStructuredOwnerUsername,
   getPublicationEvidence,
   getViennaEvidence,
   mergeDuplicateDealRecords,
 } from '../scraper/deal-evidence-utils.js';
-import { getIndependentViennaEvidence } from '../scraper/build-instagram-merchant-registry.js';
+import {
+  buildInstagramMerchantRegistry,
+  getIndependentViennaEvidence,
+  parseHistoricalProfileEvidence,
+} from '../scraper/build-instagram-merchant-registry.js';
 
 const shortcode = 'ABC_123-xY';
 assert.equal(
@@ -49,6 +54,30 @@ assert.equal(extractInstagramProfileUsername('https://instagram.com/cafe_wien/')
 assert.equal(extractInstagramProfileUsername(`https://instagram.com/p/${shortcode}/`), '', 'post paths never become merchant usernames');
 assert.equal(extractStructuredOwnerUsername({ owner: { username: '@Cafe_Wien' } }), 'cafe_wien');
 assert.equal(extractStructuredOwnerUsername({ instagramHandle: '@Cafe_Wien' }), 'cafe_wien');
+assert.match(
+  decodeInstagramShortcodeDate('https://www.instagram.com/p/DbDbw1Glw4Q/').toISOString(),
+  /^2026-07-21T/,
+  'Instagram shortcodes expose the original platform publication time',
+);
+
+const historicalMerchantEvidence = parseHistoricalProfileEvidence(
+  'sig:www.instagram.com/ciosgrill|Cio’s Grill|Gratis Premium Döner|gratis|Franz-Josefs-Kai 15, 1010 Wien',
+  Date.parse('2026-07-01T10:00:00.000Z'),
+);
+assert.equal(historicalMerchantEvidence.username, 'ciosgrill');
+assert.equal(historicalMerchantEvidence.hasStreetAddress, true);
+assert.match(historicalMerchantEvidence.viennaEvidence, /1010/);
+
+const merchantRegistry = buildInstagramMerchantRegistry({
+  now: new Date('2026-07-23T12:00:00.000Z'),
+  write: false,
+});
+const verifiedMerchant = merchantRegistry.accounts.find((entry) => entry.username === 'ciosgrill');
+assert.equal(verifiedMerchant.accountType, 'merchant');
+assert.equal(verifiedMerchant.viennaVerified, true, 'watchlisted merchants with historical Vienna address evidence are verified');
+const discoveryAccount = merchantRegistry.accounts.find((entry) => entry.username === 'viennaeats');
+assert.equal(discoveryAccount.accountType, 'discovery');
+assert.equal(discoveryAccount.viennaVerified, false, 'discovery publishers never become trusted merchant locations');
 
 const crawlerTimestamp = getPublicationEvidence({
   pubDate: '2026-07-17T08:00:00.000Z',

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 
 import { inspectDealUrlHealth, parseExpiryShape } from './expiry-utils.js';
 import {
+  decodeInstagramShortcodeDate,
   getPublicationEvidence,
   getViennaEvidence as getStructuredViennaEvidence,
 } from './deal-evidence-utils.js';
@@ -41,7 +42,6 @@ const PLACE_BOUND_OFFER_PATTERN = /\b(?:museum|museen|theater|oper|konzert|conce
 const VERIFIED_VIENNA_MEMBER_BENEFIT_PATTERN = /\b(?:belvedere|leopold\s+museum|kinodonnerstag)\b/i;
 const SYNTHETIC_PUBLICATION_SOURCE_PATTERN = /(?:firecrawl.*(?:run|crawl)|agent(?:\s|[-_])?run|crawl(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|scrap(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|discovered(?:\s|[-_])?at|generated(?:\s|[-_])?at|fallback|current(?:\s|[-_])?time|workflow(?:\s|[-_])?run)/i;
 const TRUSTED_PUBLICATION_SOURCE_PATTERN = /(?:url\.publicationdate|time\.datetime|rendered[-_. ]?time|post[-_. ]?(?:date|time|timestamp)|source[-_. ]?published[-_. ]?at|published[-_. ]?(?:at|time|date)|article:published_time|og:published_time|instagram[-_. ]?(?:graph|timestamp)|tiktok[-_. ]?(?:timestamp|video[-_. ]?id)|apify[-_. ]?(?:timestamp|taken[-_. ]?at)|meta(?:[-_. ][a-z]+){0,3}[-_. ](?:timestamp|created[-_. ]?time)|slack[-_. ]human[-_. ]review)/i;
-const INSTAGRAM_SHORTCODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
 function cleanText(value) {
   if (!value) return '';
@@ -136,31 +136,6 @@ function reliableDateHints(health) {
   return hasReliableHealthPayload(health) && health.dateHints && typeof health.dateHints === 'object'
     ? health.dateHints
     : {};
-}
-
-function decodeInstagramShortcodeDate(value) {
-  const url = normalizeUrl(value);
-  if (!url) return null;
-  try {
-    const parsed = new URL(url);
-    if (!/(^|\.)instagram\.com$/i.test(parsed.hostname)) return null;
-    const parts = parsed.pathname.split('/').filter(Boolean);
-    const typeIndex = parts.findIndex((part) => /^(?:p|reel|tv)$/i.test(part));
-    const shortcode = typeIndex >= 0 ? cleanText(parts[typeIndex + 1]) : '';
-    if (!/^[A-Za-z0-9_-]{5,20}$/.test(shortcode)) return null;
-
-    let mediaId = 0n;
-    for (const char of shortcode) {
-      const digit = INSTAGRAM_SHORTCODE_ALPHABET.indexOf(char);
-      if (digit < 0) return null;
-      mediaId = mediaId * 64n + BigInt(digit);
-    }
-    const timestamp = Number((mediaId >> 23n) + 1314220021300n);
-    const date = new Date(timestamp);
-    return Number.isNaN(date.getTime()) || date < new Date('2011-01-01T00:00:00.000Z') ? null : date;
-  } catch {
-    return null;
-  }
 }
 
 function decodeTikTokVideoDate(value) {
@@ -1051,6 +1026,8 @@ async function validateDeal(deal, context) {
   )) {
     nextDeal.pubDate = selectedDate.iso;
     nextDeal.pubDateSource = selectedDate.source;
+    nextDeal.sourcePublishedAt = selectedDate.iso;
+    nextDeal.sourcePublishedAtSource = selectedDate.source;
   }
 
   if (selectedExpiry?.validOn || selectedExpiry?.validFrom || selectedExpiry?.validUntil) {

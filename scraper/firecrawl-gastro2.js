@@ -7,6 +7,7 @@ import '../sentry/instrument.mjs';
 import Firecrawl from '@mendable/firecrawl-js';
 import { z } from 'zod';
 import fs from 'fs';
+import { verifyFirecrawlDeals } from './firecrawl-post-verifier.js';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY1 || process.env.FIRECRAWL_API_KEY;
 
@@ -64,6 +65,10 @@ const gastroSchema = z.object({
     validity_time_citation: z.string().optional(),
     post_url: z.string(),
     post_url_citation: z.string().optional(),
+    owner_username: z.string().optional(),
+    owner_username_citation: z.string().optional(),
+    post_date: z.string().optional(),
+    post_date_citation: z.string().optional(),
   })),
 });
 
@@ -88,7 +93,10 @@ Erfasse für jeden Deal:
 - Was genau verschenkt/rabattiert wird
 - Den Standort
 - Datum und Uhrzeit der Gültigkeit
-- Die direkte URL zum ursprünglichen Post oder Web-Beitrag`;
+- Die direkte URL zum ursprünglichen Post oder Web-Beitrag
+- Bei Instagram: den echten Account-Handle und das Veröffentlichungsdatum des Original-Posts.
+
+Wichtig: Das Veröffentlichungsdatum des Posts und die Gültigkeit des Angebots sind zwei verschiedene Felder.`;
 
 // ============================================
 // MAIN
@@ -175,25 +183,33 @@ async function main() {
             const validityDate = parseGermanDate(d.validity_date || '');
             const brand = d.brand_or_store || source;
             const title = d.item_given_away?.substring(0, 60) || 'Gastro Deal';
-            const pubDate = validityDate ? validityDate.toISOString() : new Date().toISOString();
+            const ownerUsername = (d.owner_username || '').replace(/^@/, '').trim().toLowerCase();
             
             allDeals.push({
               id: dealId('g2', brand, title, postUrl),
               brand,
               title,
-              description: `${d.item_given_away} – ${d.location}`.trim(),
+              description: [d.item_given_away, d.location].filter(Boolean).join(' – '),
               type: isGratis ? 'gratis' : 'rabatt',
               category: 'essen',
               source: 'Firecrawl Gastro #2',
               url: postUrl,
               expires: `${d.validity_date || ''} ${d.validity_time || ''}`.trim(),
-              distance: d.location || 'Wien',
+              distance: d.location || '',
               hot: true,
               isNew: true,
               priority: isGratis ? 2 : 3,
               votes: 1,
               qualityScore: 65,
-              pubDate,
+              ownerUsername,
+              reportedPostDate: d.post_date || '',
+              expiresOriginal: `${d.validity_date || ''} ${d.validity_time || ''}`.trim(),
+              ...(validityDate ? {
+                validOn: validityDate.toISOString(),
+                expires: validityDate.toISOString(),
+                expirySource: 'firecrawl-agent-reported-validity',
+                dateConfidence: 'low',
+              } : {}),
             });
           }
         }
@@ -213,7 +229,9 @@ async function main() {
   console.log('📊 ERGEBNIS:');
   console.log(`   📦 Deals: ${allDeals.length}`);
   console.log('🔄 URL-Dedupe deaktiviert');
-  const finalDeals = allDeals;
+  const finalDeals = await verifyFirecrawlDeals(allDeals, {
+    sourceKey: 'firecrawl-key1-gastro',
+  });
   
   const outputPath = 'docs/deals-pending-gastro2.json';
   const output = {

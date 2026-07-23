@@ -7,6 +7,7 @@ import '../sentry/instrument.mjs';
 import Firecrawl from '@mendable/firecrawl-js';
 import { z } from 'zod';
 import fs from 'fs';
+import { verifyFirecrawlDeals } from './firecrawl-post-verifier.js';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY4 || process.env.FIRECRAWL_API_KEY;
 const MAX_POST_AGE_DAYS = (() => {
@@ -37,6 +38,10 @@ const offerSchema = z.object({
     is_currently_valid_citation: z.string().describe('Source URL for is_currently_valid').optional(),
     location: z.string(),
     location_citation: z.string().describe('Source URL for location').optional(),
+    owner_username: z.string().describe('Instagram username that published the original post').optional(),
+    owner_username_citation: z.string().optional(),
+    post_date: z.string().describe('Publication date of the original Instagram post').optional(),
+    post_date_citation: z.string().optional(),
   })).default([]),
 });
 
@@ -179,6 +184,8 @@ Regeln:
 - Schließe Gewinnspiele (Giveaways) explizit aus.
 - Nur Angebote in Wien.
 - Vermeide Duplikate.
+- Erfasse den Account-Handle und das echte Veröffentlichungsdatum des Original-Posts.
+- Verwechsle Veröffentlichungsdatum, Aktionsbeginn und Aktionsende nicht.
 - Nutze Suchbegriffe wie 'gratis', 'kostenlos', 'free', '1+1' in Verbindung mit 'Wien'.`,
     schema: offerSchema,
     model: 'spark-1-pro',
@@ -207,7 +214,9 @@ async function main() {
     const offerDescription = normalizeText(offer.offer_description);
     const offerType = normalizeText(offer.offer_type);
     const validUntil = normalizeText(offer.valid_until);
-    const location = normalizeText(offer.location) || 'Wien';
+    const location = normalizeText(offer.location);
+    const ownerUsername = normalizeText(offer.owner_username).replace(/^@/, '').toLowerCase();
+    const reportedPostDate = normalizeText(offer.post_date);
     const isCurrentlyValid = offer.is_currently_valid !== false;
     const combinedText = `${restaurantName} ${offerDescription} ${offerType} ${validUntil} ${location}`;
 
@@ -215,7 +224,6 @@ async function main() {
     if (seenPostUrls.has(postUrl)) continue;
     if (!isCurrentlyValid) continue;
     if (looksLikeGiveaway(combinedText)) continue;
-    if (!isViennaRelevant(combinedText)) continue;
     if (!isRelevantOffer(combinedText)) continue;
     seenPostUrls.add(postUrl);
 
@@ -232,28 +240,33 @@ async function main() {
       category,
       source: 'Firecrawl Instagram Direct #4',
       url: postUrl,
-      expires: validUntil || 'nicht angegeben',
+      expires: validUntil,
+      expiresOriginal: validUntil,
       distance: location,
       hot: type === 'gratis' || type === 'bogo',
       isNew: true,
       priority: type === 'gratis' ? 2 : type === 'bogo' ? 3 : 4,
       votes: 1,
       qualityScore: type === 'gratis' ? 84 : type === 'bogo' ? 78 : 70,
-      pubDate: new Date().toISOString(),
-      pubDateSource: 'firecrawlAgentRun',
+      ownerUsername,
+      reportedPostDate,
     });
   }
+
+  const verifiedDeals = await verifyFirecrawlDeals(allDeals, {
+    sourceKey: 'firecrawl-key4-instagram-direct',
+  });
 
   const output = {
     lastUpdated: new Date().toISOString(),
     source: 'firecrawl4',
-    totalDeals: allDeals.length,
-    deals: allDeals,
+    totalDeals: verifiedDeals.length,
+    deals: verifiedDeals,
   };
 
   fs.writeFileSync('docs/deals-pending-firecrawl4.json', JSON.stringify(output, null, 2));
-  console.log(`✅ Final: ${allDeals.length} Deals`);
-  console.log(`💾 ${allDeals.length} Deals → docs/deals-pending-firecrawl4.json`);
+  console.log(`✅ Final: ${verifiedDeals.length} Deals`);
+  console.log(`💾 ${verifiedDeals.length} Deals → docs/deals-pending-firecrawl4.json`);
 }
 
 main()

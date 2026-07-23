@@ -8,6 +8,7 @@ const RESERVED_INSTAGRAM_USERNAMES = new Set([
   'download', 'explore', 'legal', 'login', 'p', 'press', 'privacy', 'reel', 'reels',
   'signup', 'stories', 'threads', 'topics', 'tv',
 ]);
+const INSTAGRAM_SHORTCODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
 function cleanText(value) {
   return value === null || value === undefined
@@ -62,6 +63,28 @@ export function canonicalInstagramPostKey(url) {
   // Instagram shortcodes are case-sensitive; only URL shape/query noise is
   // canonicalized, never the shortcode itself.
   return shortcode ? `instagram:${shortcode}` : '';
+}
+
+export function decodeInstagramShortcodeDate(url) {
+  const parsed = instagramUrl(url);
+  if (!parsed) return null;
+
+  const parts = parsed.pathname.split('/').filter(Boolean);
+  const typeIndex = parts.findIndex((part) => ['p', 'reel', 'reels', 'tv'].includes(part.toLowerCase()));
+  const shortcode = typeIndex >= 0 ? cleanText(parts[typeIndex + 1]) : '';
+  if (!/^[A-Za-z0-9_-]{5,20}$/.test(shortcode)) return null;
+
+  let mediaId = 0n;
+  for (const char of shortcode) {
+    const digit = INSTAGRAM_SHORTCODE_ALPHABET.indexOf(char);
+    if (digit < 0) return null;
+    mediaId = mediaId * 64n + BigInt(digit);
+  }
+
+  const timestamp = Number((mediaId >> 23n) + 1314220021300n);
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime()) || date < new Date('2011-01-01T00:00:00.000Z')) return null;
+  return date;
 }
 
 export function canonicalSocialPostKey(url) {

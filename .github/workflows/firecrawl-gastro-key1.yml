@@ -28,6 +28,10 @@ jobs:
         env:
           FIRECRAWL_API_KEY1: ${{ secrets.FIRECRAWL_API_KEY1 }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          FIRECRAWL_POST_VERIFY_MAX: 60
+          FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 45
+          FIRECRAWL_POST_VERIFY_CONCURRENCY: 4
+          FIRECRAWL_POST_VERIFY_TIMEOUT_MS: 6000
         run: node scraper/firecrawl-gastro2.js
 
       - name: Commit deals

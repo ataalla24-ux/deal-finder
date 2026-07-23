@@ -182,18 +182,6 @@ function loadVerifiedViennaRegistryUsernames() {
     .filter(Boolean));
 }
 
-function hasLegacyViennaSignal(deal) {
-  const haystack = [
-    deal.brand,
-    deal.title,
-    deal.description,
-    deal.distance,
-    deal.location,
-    deal.ort,
-  ].map(cleanText).join(' ').toLowerCase();
-  return haystack.includes('wien') || haystack.includes('vienna') || /\b1\d{3}\b/.test(haystack);
-}
-
 function hasFoodDrinkSignal(deal) {
   const category = cleanUiNoiseText(deal.category || '').toLowerCase();
   if (FOOD_DRINK_CATEGORIES.has(category)) return true;
@@ -324,15 +312,12 @@ async function main() {
         .map(cleanText)
         .join(' ');
       const isSocial = /(?:instagram\.com|tiktok\.com|\binstagram\b|\btiktok\b)/i.test(socialSignal);
-      const legacyFirecrawl = /\bfirecrawl\b/i.test(socialSignal);
-      const pubTs = legacyFirecrawl
-        ? parseTimestamp(deal.pubDate)
-        : (!isSocial || publication.publicationEvidenceRank >= 4
-          ? parseTimestamp(publication.sourcePublishedAt)
-          : null);
+      const pubTs = !isSocial || publication.publicationEvidenceRank >= 4
+        ? parseTimestamp(publication.sourcePublishedAt)
+        : null;
       const expiresTs = parseTimestamp(deal.expires);
       const viennaEvidence = getViennaEvidence(evidenceRecord, { registryUsernames: verifiedViennaRegistryUsernames });
-      const viennaConfirmed = legacyFirecrawl ? hasLegacyViennaSignal(deal) : viennaEvidence.hasViennaEvidence;
+      const viennaConfirmed = viennaEvidence.hasViennaEvidence;
       const sourceLabel = inferSourceLabel(sourceKey, deal, fileData);
       const withUrl = Boolean(normalizeUrl(deal.url || deal.post_url));
       const candidate = {
@@ -362,9 +347,7 @@ async function main() {
         hasViennaSignal: viennaConfirmed,
         viennaVerified: viennaConfirmed,
         viennaEvidence: viennaConfirmed
-          ? (legacyFirecrawl
-            ? { type: 'legacy-firecrawl-compatibility', value: cleanText(deal.distance || deal.location || deal.ort || 'Wien') }
-            : { type: viennaEvidence.type, value: viennaEvidence.value })
+          ? { type: viennaEvidence.type, value: viennaEvidence.value }
           : null,
         hasFoodDrinkSignal: hasFoodDrinkSignal(deal),
         hasPromoSignal: hasPromoSignal(deal),

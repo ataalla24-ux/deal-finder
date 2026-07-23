@@ -7,6 +7,7 @@ import '../sentry/instrument.mjs';
 import Firecrawl from '@mendable/firecrawl-js';
 import { z } from 'zod';
 import fs from 'fs';
+import { verifyFirecrawlDeals } from './firecrawl-post-verifier.js';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY3 || process.env.FIRECRAWL_API_KEY;
 const MAX_POST_AGE_DAYS = (() => {
@@ -35,6 +36,8 @@ const key3Schema = z.object({
     post_timestamp_citation: z.string().optional(),
     offer_type: z.string().describe('The specific type of deal found in the post'),
     offer_type_citation: z.string().optional(),
+    owner_username: z.string().describe('The Instagram username that published the original post').optional(),
+    owner_username_citation: z.string().optional(),
   })).default([]),
 }).describe('Instagram posts about consumable offers with location, timing and direct post URLs');
 
@@ -145,7 +148,7 @@ async function main() {
   console.log();
 
   const result = await firecrawl.agent({
-    prompt: `Extrahiere Instagram-Posts über Angebote rund um Essen und Getränke. Schließe keine Kandidaten wegen Alter, Giveaway-Charakter, Standort oder fehlender Signalwörter aus. Erfasse pro Post möglichst den Gültigkeitszeitraum, den Standort, die Art der Speisen/Getränke, die URL des Original-Posts sowie den Veröffentlichungszeitpunkt. Wenn Informationen unklar sind, gib trotzdem den Kandidaten mit den besten verfügbaren Feldern zurück.`,
+    prompt: `Extrahiere Instagram-Posts über Angebote rund um Essen und Getränke. Schließe keine Kandidaten wegen Alter, Giveaway-Charakter, Standort oder fehlender Signalwörter aus. Erfasse pro Post möglichst den Gültigkeitszeitraum, den Standort, die Art der Speisen/Getränke, die URL des Original-Posts, den Account-Handle sowie den Veröffentlichungszeitpunkt. Verwechsle das Veröffentlichungsdatum nicht mit dem Angebotszeitraum. Wenn Informationen unklar sind, gib trotzdem den Kandidaten mit den besten verfügbaren Feldern zurück.`,
     schema: key3Schema,
     model: 'spark-1-mini',
   });
@@ -157,25 +160,20 @@ async function main() {
 
   for (const post of rawPosts) {
     const validityPeriod = normalizeText(post.validity_period);
-    const location = normalizeText(post.location) || 'Wien';
+    const location = normalizeText(post.location);
     const foodAndDrinks = normalizeText(post.food_and_drinks);
     const originalPostUrl = normalizeText(post.original_post_url);
     const postTimestampRaw = normalizeText(post.post_timestamp);
     const offerType = normalizeText(post.offer_type);
-    const combinedText = `${validityPeriod} ${location} ${foodAndDrinks} ${postTimestampRaw} ${offerType}`;
-    const postDate = parsePostTimestamp(postTimestampRaw);
+    const ownerUsername = normalizeText(post.owner_username).replace(/^@/, '').toLowerCase();
 
     if (!originalPostUrl || !isInstagramPostUrl(originalPostUrl)) continue;
 
-    const brand = location.split(',')[0] || 'Instagram Wien';
+    const brand = ownerUsername || location.split(',')[0] || 'Instagram';
     const titleCore = offerType || foodAndDrinks || 'Instagram Freebie';
     const title = `${brand}: ${titleCore}`.slice(0, 140);
     const type = inferType(offerType);
     const category = inferCategory(foodAndDrinks, offerType);
-    const pubDate = postDate instanceof Date && !Number.isNaN(postDate.getTime())
-      ? postDate.toISOString()
-      : new Date().toISOString();
-
     deals.push({
       id: dealId(brand, title, originalPostUrl),
       brand,
@@ -185,30 +183,36 @@ async function main() {
       category,
       source: 'Firecrawl Key 3 - Consumables',
       url: originalPostUrl,
-      expires: validityPeriod || 'Kurzfristig / siehe Post',
+      expires: '',
+      expiresOriginal: validityPeriod,
+      expiryDisplayText: validityPeriod,
       distance: location,
       hot: true,
       isNew: true,
       priority: type === 'gratis' ? 1 : 2,
       votes: 1,
       qualityScore: type === 'gratis' ? 84 : 78,
-      pubDate,
-      pubDateSource: 'socialPostDate',
+      ownerUsername,
+      reportedPostDate: postTimestampRaw,
     });
   }
 
-  console.log(`✅ Final: ${deals.length} Deals`);
+  const verifiedDeals = await verifyFirecrawlDeals(deals, {
+    sourceKey: 'firecrawl-key3-consumables',
+  });
+
+  console.log(`✅ Final: ${verifiedDeals.length} Deals`);
 
   const output = {
     lastUpdated: new Date().toISOString(),
     source: 'firecrawl3',
-    totalDeals: deals.length,
-    deals,
+    totalDeals: verifiedDeals.length,
+    deals: verifiedDeals,
   };
 
   const outputPath = 'docs/deals-pending-firecrawl2.json';
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
-  console.log(`💾 ${deals.length} Deals → ${outputPath}`);
+  console.log(`💾 ${verifiedDeals.length} Deals → ${outputPath}`);
 }
 
 main()

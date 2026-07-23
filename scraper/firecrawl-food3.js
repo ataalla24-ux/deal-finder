@@ -7,6 +7,7 @@ import '../sentry/instrument.mjs';
 import Firecrawl from '@mendable/firecrawl-js';
 import { z } from 'zod';
 import fs from 'fs';
+import { verifyFirecrawlDeals } from './firecrawl-post-verifier.js';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY2 || process.env.FIRECRAWL_API_KEY;
 
@@ -33,6 +34,10 @@ const schema = z.object({
     offer_type_citation: z.string().optional(),
     post_url: z.string(),
     post_url_citation: z.string().optional(),
+    owner_username: z.string().optional(),
+    owner_username_citation: z.string().optional(),
+    post_date: z.string().optional(),
+    post_date_citation: z.string().optional(),
   })).default([]),
 });
 
@@ -101,7 +106,7 @@ async function main() {
   console.log();
 
   const result = await firecrawl.agent({
-    prompt: "Extrahiere Instagram-Angebote rund um Essen und Getränke. Schließe Kandidaten nicht wegen Alter, Wien-Bezug oder Deal-Typ aus. Erfasse Anbietername, Produktart, Standort, Uhrzeiten, Teilnahmebedingungen und den direkten Link zum Instagram-Post im Feld 'post_url'. Wenn Details unklar sind, liefere trotzdem den Kandidaten mit den verfügbaren Angaben.",
+    prompt: "Extrahiere Instagram-Angebote rund um Essen und Getränke. Schließe Kandidaten nicht wegen Alter, Wien-Bezug oder Deal-Typ aus. Erfasse Anbietername, Produktart, Standort, Angebotszeiten, Teilnahmebedingungen, den echten Account-Handle, das Veröffentlichungsdatum und den direkten Link zum Original-Post. Verwechsle das Veröffentlichungsdatum des Posts nicht mit Start oder Ende des Angebots. Wenn Details unklar sind, liefere trotzdem den Kandidaten mit den verfügbaren Angaben.",
     schema,
     model: 'spark-1-pro',
   });
@@ -114,11 +119,13 @@ async function main() {
   for (const offer of rawOffers) {
     const providerName = normalizeText(offer.provider_name) || 'Instagram';
     const productType = normalizeText(offer.product_type);
-    const location = normalizeText(offer.location) || 'Wien';
+    const location = normalizeText(offer.location);
     const times = normalizeText(offer.times);
     const conditions = normalizeText(offer.participation_conditions);
     const offerTypeText = normalizeText(offer.offer_type);
     const postUrl = normalizeText(offer.post_url);
+    const ownerUsername = normalizeText(offer.owner_username).replace(/^@/, '').toLowerCase();
+    const reportedPostDate = normalizeText(offer.post_date);
     const combined = `${providerName} ${productType} ${location} ${times} ${conditions} ${offerTypeText}`;
 
     if (!postUrl || !isInstagramPostUrl(postUrl)) continue;
@@ -137,32 +144,38 @@ async function main() {
       brand: providerName,
       title,
       logo: getEmoji(category, type, `${title} ${description}`),
-      description: description || `${providerName} | ${location}`,
+      description: description || providerName,
       type,
       category,
       source: 'Firecrawl Food #2',
       url: postUrl,
-      expires: times || 'Siehe Post',
+      expires: '',
+      expiresOriginal: times,
+      expiryDisplayText: times,
       distance: location || 'Ort unklar',
       hot: type === 'gratis' || type === 'bogo',
       isNew: true,
       priority: type === 'gratis' ? 2 : type === 'bogo' ? 3 : 4,
       votes: 1,
       qualityScore: type === 'gratis' ? 72 : type === 'bogo' ? 70 : 58,
-      pubDate: new Date().toISOString(),
-      pubDateSource: 'firecrawlAgentRun',
+      ownerUsername,
+      reportedPostDate,
     });
   }
+
+  const verifiedDeals = await verifyFirecrawlDeals(deals, {
+    sourceKey: 'firecrawl-key2-food',
+  });
 
   const output = {
     lastUpdated: new Date().toISOString(),
     source: 'firecrawl-food3',
-    totalDeals: deals.length,
-    deals,
+    totalDeals: verifiedDeals.length,
+    deals: verifiedDeals,
   };
 
   fs.writeFileSync('docs/deals-pending-food3.json', JSON.stringify(output, null, 2));
-  console.log(`✅ Final: ${deals.length} Deals`);
+  console.log(`✅ Final: ${verifiedDeals.length} Deals`);
   console.log('💾 Deals → docs/deals-pending-food3.json');
 }
 

@@ -29,6 +29,10 @@ jobs:
           FIRECRAWL_API_KEY4: ${{ secrets.FIRECRAWL_API_KEY4 }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
           FC4_MAX_AGE_DAYS: 365
+          FIRECRAWL_POST_VERIFY_MAX: 40
+          FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 45
+          FIRECRAWL_POST_VERIFY_CONCURRENCY: 4
+          FIRECRAWL_POST_VERIFY_TIMEOUT_MS: 6000
         run: node scraper/firecrawl-instagram-direct4.js
 
       - name: Commit deals

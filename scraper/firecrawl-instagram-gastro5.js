@@ -7,6 +7,7 @@ import '../sentry/instrument.mjs';
 import Firecrawl from '@mendable/firecrawl-js';
 import { z } from 'zod';
 import fs from 'fs';
+import { verifyFirecrawlDeals } from './firecrawl-post-verifier.js';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY5 || process.env.FIRECRAWL_API_KEY;
 const MAX_POST_AGE_DAYS = (() => {
@@ -37,6 +38,8 @@ const offerSchema = z.object({
     valid_until_citation: z.string().optional(),
     location: z.string().optional(),
     location_citation: z.string().optional(),
+    owner_username: z.string().describe('Instagram username that published the original post').optional(),
+    owner_username_citation: z.string().optional(),
   })).default([]),
 }).describe('Information about gastro offers from Instagram posts');
 
@@ -130,7 +133,7 @@ async function main() {
   console.log();
 
   const result = await firecrawl.agent({
-    prompt: `Extrahiere möglichst viele Gastro-Angebote aus Instagram-Posts. Schließe Kandidaten nicht wegen Alter, Standort, Giveaway-Charakter, unklarem Veröffentlichungsdatum oder unklarem Ablauf aus. Nutze nur Instagram als Quelle und gib für jeden Kandidaten nach Möglichkeit Restaurantname, Post-URL, Post-Datum, Beschreibung, Angebotstyp, Ablauf und Standort zurück. Im Zweifel lieber den Kandidaten trotzdem aufnehmen.`,
+    prompt: `Extrahiere möglichst viele Gastro-Angebote aus Instagram-Posts. Schließe Kandidaten nicht wegen Alter, Standort, Giveaway-Charakter, unklarem Veröffentlichungsdatum oder unklarem Ablauf aus. Nutze nur Instagram als Quelle und gib für jeden Kandidaten nach Möglichkeit Restaurantname, Post-URL, Account-Handle, echtes Post-Datum, Beschreibung, Angebotstyp, Ablauf und Standort zurück. Verwechsle Veröffentlichungsdatum und Angebotszeitraum nicht. Im Zweifel lieber den Kandidaten trotzdem aufnehmen.`,
     schema: offerSchema,
     model: 'spark-1-mini',
   });
@@ -145,21 +148,17 @@ async function main() {
     const postUrl = normalizeText(offer.post_url);
     const description = normalizeText(offer.offer_description);
     const offerType = normalizeText(offer.offer_type);
-    const location = normalizeText(offer.location) || 'Wien';
+    const location = normalizeText(offer.location);
     const validUntil = normalizeValidUntil(offer.valid_until);
     const postDateRaw = normalizeText(offer.post_date);
-    const combinedText = `${restaurant} ${description} ${offerType} ${location} ${validUntil} ${postDateRaw}`;
-    const postDate = parseGermanDate(postDateRaw);
+    const ownerUsername = normalizeText(offer.owner_username).replace(/^@/, '').toLowerCase();
 
     if (!postUrl || !isInstagramPostUrl(postUrl)) continue;
-    const pubDate = postDate instanceof Date && !Number.isNaN(postDate.getTime())
-      ? postDate.toISOString()
-      : new Date().toISOString();
 
     const type = inferType(offerType, description);
     const category = inferCategory(`${offerType} ${description}`);
     const title = `${restaurant}: ${description || offerType || 'Instagram-Angebot'}`.slice(0, 140);
-    const expires = validUntil || 'Kurzfristig / siehe Post';
+    const expires = validUntil;
 
     deals.push({
       id: dealId(restaurant, title, postUrl),
@@ -171,29 +170,34 @@ async function main() {
       source: 'Firecrawl Instagram Gastro #5',
       url: postUrl,
       expires,
+      expiresOriginal: validUntil,
       distance: location,
       hot: true,
       isNew: true,
       priority: type === 'gratis' ? 1 : 2,
       votes: 1,
       qualityScore: 80,
-      pubDate,
-      pubDateSource: 'socialPostDate',
+      ownerUsername,
+      reportedPostDate: postDateRaw,
     });
   }
 
-  console.log(`✅ Final: ${deals.length} Deals`);
+  const verifiedDeals = await verifyFirecrawlDeals(deals, {
+    sourceKey: 'firecrawl-key5-instagram-gastro',
+  });
+
+  console.log(`✅ Final: ${verifiedDeals.length} Deals`);
 
   const output = {
     lastUpdated: new Date().toISOString(),
     source: 'firecrawl5',
-    totalDeals: deals.length,
-    deals,
+    totalDeals: verifiedDeals.length,
+    deals: verifiedDeals,
   };
 
   const outputPath = 'docs/deals-pending-firecrawl5.json';
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
-  console.log(`💾 ${deals.length} Deals → ${outputPath}`);
+  console.log(`💾 ${verifiedDeals.length} Deals → ${outputPath}`);
 }
 
 main()

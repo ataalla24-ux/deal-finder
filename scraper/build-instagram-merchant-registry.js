@@ -17,6 +17,8 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const OUTPUT_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
+const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
+const HISTORICAL_SENT_PATH = path.join(DOCS_DIR, 'sent-deal-ids.json');
 
 const FOOD_DRINK_KEYWORDS = [
   'restaurant', 'pizza', 'burger', 'kebab', 'kebap', 'döner', 'doener', 'sushi', 'cafe',
@@ -72,10 +74,36 @@ function loadDeals(filePath) {
   }
 }
 
+function readJson(filePath, fallback = {}) {
+  if (!fs.existsSync(filePath)) return fallback;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  } catch {
+    return fallback;
+  }
+}
+
+function normalizeRegistryUsername(value) {
+  return extractInstagramProfileUsername(`https://www.instagram.com/${cleanText(value).replace(/^@/, '')}/`);
+}
+
+function inferAccountType(account = {}) {
+  const explicit = cleanText(account.accountType || account.kind || account.type).toLowerCase();
+  if (['merchant', 'discovery', 'platform'].includes(explicit)) return explicit;
+  const category = cleanText(account.category).toLowerCase();
+  if (category === 'discovery') return 'discovery';
+  if (['delivery', 'platform', 'media'].includes(category)) return 'platform';
+  return 'merchant';
+}
+
 function ensureEntry(registry, username) {
   if (!registry.has(username)) {
     registry.set(username, {
       username,
+      accountType: 'merchant',
+      watchlist: false,
+      watchlistPriority: 0,
+      watchlistNote: '',
       occurrences: 0,
       liveOccurrences: 0,
       pendingOccurrences: 0,
@@ -95,6 +123,9 @@ function ensureEntry(registry, username) {
       sampleTitles: [],
       sampleUrls: new Set(),
       viennaEvidence: new Set(),
+      historicalViennaHits: 0,
+      historicalAddressHits: 0,
+      historicalEvidence: new Set(),
     });
   }
   return registry.get(username);
@@ -112,7 +143,19 @@ function scoreEntry(entry) {
   const promoScore = Math.min(entry.promoHits * 8, 16);
   const foodScore = Math.min(entry.foodDrinkHits * 8, 16);
   const viennaScore = Math.min(entry.viennaHits * 4, 8);
-  return Math.max(0, Math.min(100, Math.round(countScore + liveScore + promoScore + foodScore + viennaScore)));
+  const watchlistScore = entry.watchlist ? 10 : 0;
+  const historicalViennaScore = Math.min(entry.historicalViennaHits * 14, 28);
+  const historicalAddressScore = Math.min(entry.historicalAddressHits * 8, 16);
+  return Math.max(0, Math.min(100, Math.round(
+    countScore
+    + liveScore
+    + promoScore
+    + foodScore
+    + viennaScore
+    + watchlistScore
+    + historicalViennaScore
+    + historicalAddressScore
+  )));
 }
 
 function priorityScore(entry) {
@@ -157,6 +200,67 @@ function registryRecordKey(deal, username) {
   if (postKey) return `${username}|${postKey}`;
   const publication = getPublicationEvidence(deal).sourcePublishedAt;
   return [username, cleanText(deal?.id), cleanText(deal?.title).toLowerCase(), publication].filter(Boolean).join('|');
+}
+
+export function parseHistoricalProfileEvidence(signature, timestamp = '') {
+  const text = cleanText(signature);
+  if (!text.startsWith('sig:')) return null;
+  const parts = text.slice(4).split('|');
+  if (parts.length < 5) return null;
+
+  const profileUrl = /^https?:\/\//i.test(parts[0]) ? parts[0] : `https://${parts[0]}`;
+  const username = extractInstagramProfileUsername(profileUrl);
+  if (!username) return null;
+
+  const location = cleanText(parts.slice(4).join(' | '));
+  const vienna = getIndependentViennaEvidence({ address: location });
+  if (!vienna.hasViennaEvidence) return null;
+
+  return {
+    username,
+    profileUrl: `https://www.instagram.com/${username}/`,
+    brand: cleanText(parts[1]),
+    title: cleanText(parts[2]),
+    dealType: cleanText(parts[3]),
+    location,
+    viennaEvidence: `${vienna.type}:${vienna.value}`,
+    hasStreetAddress: /(?:stra(?:ß|ss)e|gasse|platz|weg|ring|allee|kai|markt|zeile|promenade|graben|ufer|steg|u[- ]?bahnbögen)\b/i.test(location),
+    observedAt: Number.isFinite(Number(timestamp)) ? new Date(Number(timestamp)).toISOString() : '',
+  };
+}
+
+function seedWatchlist(registry, watchlistPath = WATCHLIST_PATH) {
+  const watchlist = readJson(watchlistPath, {});
+  const accounts = Array.isArray(watchlist?.accounts) ? watchlist.accounts : [];
+  for (const account of accounts) {
+    const username = normalizeRegistryUsername(account?.username);
+    if (!username) continue;
+    const entry = ensureEntry(registry, username);
+    entry.watchlist = true;
+    entry.watchlistPriority = Math.max(entry.watchlistPriority, Number(account?.priority) || 0);
+    entry.watchlistNote = cleanText(account?.note);
+    entry.accountType = inferAccountType(account);
+    entry.sampleUrls.add(`https://www.instagram.com/${username}/`);
+    if (account?.category) incrementMap(entry.categories, account.category);
+  }
+}
+
+function seedHistoricalProfileEvidence(registry, sentPath = HISTORICAL_SENT_PATH) {
+  const sent = readJson(sentPath, {});
+  if (!sent || typeof sent !== 'object' || Array.isArray(sent)) return;
+  for (const [signature, timestamp] of Object.entries(sent)) {
+    const evidence = parseHistoricalProfileEvidence(signature, timestamp);
+    if (!evidence) continue;
+    const entry = ensureEntry(registry, evidence.username);
+    entry.historicalViennaHits += 1;
+    if (evidence.hasStreetAddress) entry.historicalAddressHits += 1;
+    entry.viennaEvidence.add(evidence.viennaEvidence);
+    entry.historicalEvidence.add(`${evidence.location}${evidence.observedAt ? ` @ ${evidence.observedAt}` : ''}`);
+    entry.sampleUrls.add(evidence.profileUrl);
+    if (evidence.title && entry.sampleTitles.length < 4) entry.sampleTitles.push(evidence.title);
+    if (hasKeyword(`${evidence.brand} ${evidence.title}`, FOOD_DRINK_KEYWORDS)) entry.foodDrinkHits += 1;
+    if (hasKeyword(evidence.title, PROMO_KEYWORDS)) entry.promoHits += 1;
+  }
 }
 
 export function getIndependentViennaEvidence(deal) {
@@ -227,6 +331,8 @@ function collectRegistryRecords() {
 export function buildInstagramMerchantRegistry(options = {}) {
   const registry = new Map();
   const now = options.now instanceof Date ? options.now.getTime() : Number(options.now) || Date.now();
+  seedWatchlist(registry, options.watchlistPath || WATCHLIST_PATH);
+  seedHistoricalProfileEvidence(registry, options.historicalSentPath || HISTORICAL_SENT_PATH);
 
   for (const deal of collectRegistryRecords()) {
       const username = deal.__username;
@@ -270,8 +376,23 @@ export function buildInstagramMerchantRegistry(options = {}) {
   }
 
   const accounts = [...registry.values()]
-    .map((entry) => ({
+    .map((entry) => {
+      const verifiedByCurrentEvidence = entry.structuredOwnerOccurrences > 0
+        && (
+          (entry.liveOccurrences > 0 && entry.viennaHits > 0)
+          || (entry.structuredOwnerOccurrences >= 2 && entry.viennaHits >= 2)
+        );
+      const verifiedByHistory = entry.accountType === 'merchant'
+        && (
+          (entry.watchlist && entry.historicalAddressHits >= 1)
+          || entry.historicalAddressHits >= 2
+        );
+      return {
       username: entry.username,
+      accountType: entry.accountType,
+      watchlist: entry.watchlist,
+      watchlistPriority: entry.watchlistPriority,
+      watchlistNote: entry.watchlistNote,
       confidence: scoreEntry(entry),
       priorityScore: priorityScore(entry),
       occurrences: entry.occurrences,
@@ -285,14 +406,14 @@ export function buildInstagramMerchantRegistry(options = {}) {
       missionHits: entry.missionHits,
       structuredOwnerOccurrences: entry.structuredOwnerOccurrences,
       verifiedProfileOccurrences: entry.verifiedProfileOccurrences,
-      viennaVerified: Boolean(
-        entry.structuredOwnerOccurrences > 0
-        && (
-          (entry.liveOccurrences > 0 && entry.viennaHits > 0)
-          || (entry.structuredOwnerOccurrences >= 2 && entry.viennaHits >= 2)
-        )
-      ),
+      historicalViennaHits: entry.historicalViennaHits,
+      historicalAddressHits: entry.historicalAddressHits,
+      viennaVerified: Boolean(entry.accountType === 'merchant' && (verifiedByCurrentEvidence || verifiedByHistory)),
+      verificationSource: verifiedByCurrentEvidence
+        ? 'structured-current-deal-evidence'
+        : (verifiedByHistory ? 'historical-profile-address-evidence' : ''),
       viennaEvidence: [...entry.viennaEvidence].slice(0, 6),
+      verificationEvidence: [...entry.historicalEvidence].slice(0, 6),
       averageQualityScore: entry.occurrences > 0 ? Math.round((entry.totalQualityScore / entry.occurrences) * 10) / 10 : 0,
       sourceFiles: [...entry.files].sort(),
       sourceLabels: [...entry.sourceLabels].sort(),
@@ -300,15 +421,18 @@ export function buildInstagramMerchantRegistry(options = {}) {
       topTypes: compactCounts(entry.types),
       sampleTitles: entry.sampleTitles,
       sampleUrls: [...entry.sampleUrls].slice(0, 3),
-    }))
+      };
+    })
     // Keep unverified accounts as discovery leads, but downstream Vienna checks
     // may trust only the explicit `viennaVerified` flag.
-    .filter((entry) => entry.confidence >= 30)
+    .filter((entry) => entry.watchlist || entry.confidence >= 30 || entry.historicalViennaHits > 0)
     .sort((a, b) => b.priorityScore - a.priorityScore || b.confidence - a.confidence || b.occurrences - a.occurrences || a.username.localeCompare(b.username));
 
   const payload = {
     generatedAt: new Date(now).toISOString(),
     totalAccounts: accounts.length,
+    totalVerifiedViennaMerchants: accounts.filter((entry) => entry.viennaVerified).length,
+    totalDiscoveryAccounts: accounts.filter((entry) => entry.accountType === 'discovery').length,
     accounts,
   };
 
@@ -318,6 +442,7 @@ export function buildInstagramMerchantRegistry(options = {}) {
 
   console.log('📇 Instagram merchant registry updated');
   console.log(`   accounts: ${accounts.length}`);
+  console.log(`   verified Vienna merchants: ${payload.totalVerifiedViennaMerchants}`);
   console.log(`   top: ${accounts.slice(0, 8).map((entry) => `${entry.username} (${entry.confidence})`).join(', ')}`);
 
   return payload;

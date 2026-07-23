@@ -51,7 +51,7 @@ function candidate({
 
 const handleContext = candidate({
   shortcode: 'ViennaHandle1',
-  description: '@ugisvienna: Nur heute gibt es in 1070 Wien zu jedem Burger einen Kaffee gratis.',
+  description: '@ugisvienna: Diese Woche gibt es in 1070 Wien zu jedem Burger einen Kaffee gratis.',
 });
 const viennaEvidence = resolveViennaEvidence(handleContext);
 assert.equal(viennaEvidence?.source, 'instagram-post');
@@ -184,7 +184,7 @@ assert.equal(explicitOfferEnd('12.-25.07.2026')?.date.getDate(), 25);
 
 const vetoCandidate = candidate({
   shortcode: 'LlmVeto1',
-  description: '@ugisvienna: Nur heute gibt es in 1070 Wien einen Burger gratis.',
+  description: '@ugisvienna: Diese Woche gibt es in 1070 Wien einen Burger gratis.',
 });
 const heuristicBeforeVeto = buildHeuristicDeal(vetoCandidate);
 assert.ok(heuristicBeforeVeto);
@@ -203,7 +203,7 @@ assert.deepEqual(
 
 const acceptedAiCandidate = candidate({
   shortcode: 'LlmAcceptedVienna1',
-  description: 'Test Café: Heute gibt es in der Taborstraße 1, 1020 Wien einen Kaffee gratis.',
+  description: 'Test Café: Diese Woche gibt es in der Taborstraße 1, 1020 Wien einen Kaffee gratis.',
   sourceDeal: { ownerUsername: 'testcafe', brand: 'Test Café' },
 });
 const acceptedAiDeal = mergeAiDeal(acceptedAiCandidate, {
@@ -211,7 +211,7 @@ const acceptedAiDeal = mergeAiDeal(acceptedAiCandidate, {
   confidence: 0.92,
   brand: 'Test Café',
   title: 'Kaffee gratis',
-  description: 'Heute gibt es einen Kaffee gratis.',
+  description: 'Diese Woche gibt es einen Kaffee gratis.',
   type: 'gratis',
   category: 'Food & Drink',
   expires: '',

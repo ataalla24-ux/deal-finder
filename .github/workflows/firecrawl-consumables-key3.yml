@@ -29,6 +29,10 @@ jobs:
           FIRECRAWL_API_KEY3: ${{ secrets.FIRECRAWL_API_KEY3 }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
           FC3_MAX_AGE_DAYS: 365
+          FIRECRAWL_POST_VERIFY_MAX: 30
+          FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 45
+          FIRECRAWL_POST_VERIFY_CONCURRENCY: 4
+          FIRECRAWL_POST_VERIFY_TIMEOUT_MS: 6000
         run: node scraper/firecrawl-consumables.js
 
       - name: Commit deals
