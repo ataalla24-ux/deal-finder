@@ -265,6 +265,28 @@ assert.equal(
 const agentExpired = { ...freshVerified, agentCurrentlyValid: false };
 assert.equal(qualifyKey4Deals([agentExpired], { now }).rejected[0].reason, 'agent-marked-expired');
 
+const genericBrand = {
+  ...withVerifiedOriginalPost(
+    freshVerified,
+    'Sushi und Onigiri: Kaufe 2 Onigiri und erhalte 1 gratis! 📍Rotgasse 8, 1010 Wien',
+  ),
+  brand: 'Instagram Gastro',
+  title: 'Instagram Gastro: vermischter Suchtext',
+  description: 'vermischter Suchtext',
+  ownerUsername: 'soya_wien',
+  viennaEvidence: {
+    verified: true,
+    source: 'instagram-post-caption',
+    type: 'instagram-post-caption',
+    value: '1010',
+    detail: '1010',
+  },
+};
+const genericBrandResult = qualifyKey4Deals([genericBrand], { now });
+assert.equal(genericBrandResult.deals[0].brand, '@soya_wien');
+assert.match(genericBrandResult.deals[0].title, /Sushi und Onigiri: Kaufe 2 Onigiri und erhalte 1 gratis/);
+assert.equal(genericBrandResult.deals[0].descriptionSource, 'instagram-original-post');
+
 const deduped = qualifyKey4Deals([freshVerified, { ...freshVerified, title: `${freshVerified.title} ausführlich` }], { now });
 assert.equal(deduped.deals.length, 1);
 

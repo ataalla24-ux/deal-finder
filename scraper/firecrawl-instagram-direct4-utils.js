@@ -130,6 +130,38 @@ function verifiedOriginalPostSignal(deal = {}) {
   ].map((value) => cleanText(value, 2600)).filter(Boolean).join(' ');
 }
 
+function originalOfferSummary(signal) {
+  const text = cleanText(signal, 2600);
+  const match = text.match(FREE_OFFER_PATTERN);
+  if (!match || match.index === undefined) return '';
+  const matchStart = match.index;
+  const previousBoundary = Math.max(
+    text.lastIndexOf('.', matchStart - 1),
+    text.lastIndexOf('!', matchStart - 1),
+    text.lastIndexOf('?', matchStart - 1),
+  );
+  const following = text.slice(matchStart + match[0].length);
+  const followingBoundary = following.search(/[.!?](?:\s|$)/);
+  const end = followingBoundary >= 0
+    ? matchStart + match[0].length + followingBoundary + 1
+    : Math.min(text.length, matchStart + match[0].length + 140);
+  let summary = cleanText(text.slice(previousBoundary + 1, end), 240);
+  if (summary.length < 12) {
+    summary = cleanText(text.slice(Math.max(0, matchStart - 70), matchStart + match[0].length + 140), 240);
+  }
+  return summary;
+}
+
+function verifiedDisplayBrand(deal = {}) {
+  const brand = cleanText(deal.brand, 120);
+  const ownerUsername = normalizeUsername(deal.ownerUsername);
+  const unreliableBrand = !brand
+    || /^(?:instagram gastro|instagram|restaurant)$/i.test(brand)
+    || brand.length > 60
+    || /\bon instagram\b|\.\.\.|…/i.test(brand);
+  return unreliableBrand && ownerUsername ? `@${ownerUsername}` : (brand || 'Instagram Gastro');
+}
+
 function publicationDecision(deal, now, maxAgeDays) {
   const publication = getPublicationEvidence(deal);
   const date = publication.sourcePublishedAt ? new Date(publication.sourcePublishedAt) : null;
@@ -349,8 +381,17 @@ export function qualifyKey4Deals(deals = [], options = {}) {
     }
 
     const publicationIso = publication.date.toISOString();
+    const brand = verifiedDisplayBrand(deal);
+    const offerSummary = originalOfferSummary(originalOfferSignal)
+      || cleanText(deal.description, 220)
+      || 'Kostenloses Instagram-Angebot';
     const next = {
       ...deal,
+      brand,
+      title: `${brand}: ${offerSummary}`.slice(0, 160),
+      description: offerSummary,
+      offerEvidenceText: offerSummary,
+      descriptionSource: 'instagram-original-post',
       pubDate: publicationIso,
       pubDateSource: publication.publication.sourcePublishedAtSource,
       sourcePublishedAt: publicationIso,
