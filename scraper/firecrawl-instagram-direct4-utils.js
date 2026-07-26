@@ -16,9 +16,11 @@ const FREE_ATTRIBUTE_PATTERN = /\b(?:gluten|sugar|zucker|lactose|laktose|alcohol
 const FREE_OFFER_PATTERN = /(?:\bgratis\b|\bkostenlos(?:e[nrms]?)?\b|\bkostenfrei\b|\bumsonst\b|\bfor free\b|\bcomplimentary\b|\baufs haus\b|\bon the house\b|\b0\s*(?:€|eur|euro)\b|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b2\s*[+&]\s*1\b|\bbogo\b|\bbuy one get one(?: free)?\b|\bwelcome drink\b|\b(?:free|gratis|kostenlose?)\s+(?:sample|probe|kostprobe|verkostung|tasting)\b)/i;
 const FOOD_DRINK_PATTERN = /\b(?:essen|food|speise|gericht|menü|menu|meal|frühstück|fruehstueck|brunch|lunch|dinner|buffet|restaurant|gastronomie|cafe|café|kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drink|getränk|getraenk|cocktail|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothie|limonade|pizza|burger|döner|doener|kebab|kebap|falafel|sushi|ramen|pasta|tiramisu|dessert|kuchen|cake|croissant|bagel|waffel|eis|gelato|sandwich|snack|pommes|fries|taco|burrito|bakery|bäckerei|baeckerei|brot|gebäck|gebaeck)\b/i;
 const DRINK_PATTERN = /\b(?:kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drink|getränk|getraenk|cocktail|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothie|limonade|shake)\b/i;
+const NON_CONSUMABLE_FREE_PATTERN = /(?:\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app)\b.{0,100}\b(?:gratis|kostenlos|for free|free)\b|\b(?:gratis|kostenlos|for free|free)\b.{0,100}\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app)\b|\b(?:service|reparatur|wartungs?)[-\s]?(?:pauschale|gebühr|gebuehr|fee)\b)/i;
 const VIENNA_POSTCODE_PATTERN = /(?:^|\D)(1(?:0[1-9]|1\d|2[0-3])0)(?!\d)/;
 const VIENNA_DISTRICT_PATTERN = /\b(?:innere stadt|leopoldstadt|landstra(?:ß|ss)e|wieden|margareten|mariahilf|neubau|josefstadt|alsergrund|favoriten|meidling|hietzing|penzing|rudolfsheim|ottakring|hernals|währing|waehring|döbling|doebling|brigittenau|floridsdorf|donaustadt|liesing|(?:1\d|2[0-3])\.\s*bezirk)\b/i;
 const STREET_PATTERN = /\b(?:stra(?:ß|ss)e|gasse|platz|weg|ring|allee|kai|markt|zeile|promenade|graben|ufer|steg)\b/i;
+const OUTSIDE_VIENNA_PATTERN = /\b(?:raus|hinaus|außerhalb|ausserhalb)\s+(?:aus|von)?\s*wien\b|\bvor\s+den\s+toren\s+(?:von\s+)?wien\b/i;
 const UNKNOWN_VALUE_PATTERN = /^(?:unknown|unbekannt|nicht angegeben|keine angabe|n\/?a|null|undefined|-+)$/i;
 
 function cleanText(value, maxLength = Infinity) {
@@ -106,13 +108,26 @@ function dealSignal(deal = {}) {
   ].map((value) => cleanText(value, 2400)).filter(Boolean).join(' ');
 }
 
-function freeFoodDrinkDecision(deal) {
-  const originalSignal = dealSignal(deal);
+function freeFoodDrinkSignalDecision(originalSignal) {
   const signal = originalSignal.replace(FREE_ATTRIBUTE_PATTERN, ' ');
   if (GIVEAWAY_PATTERN.test(originalSignal)) return { accepted: false, reason: 'giveaway' };
   if (!FREE_OFFER_PATTERN.test(signal)) return { accepted: false, reason: 'not-free' };
   if (!FOOD_DRINK_PATTERN.test(signal)) return { accepted: false, reason: 'not-food-drink' };
+  if (NON_CONSUMABLE_FREE_PATTERN.test(signal)) {
+    return { accepted: false, reason: 'free-item-not-food-drink' };
+  }
   return { accepted: true, reason: '' };
+}
+
+function verifiedOriginalPostSignal(deal = {}) {
+  const verificationStatus = cleanText(
+    deal.postVerification?.status || deal.evidence?.originalPost?.status,
+  ).toLowerCase();
+  if (verificationStatus !== 'verified-original-post') return '';
+  return [
+    deal.postCaption,
+    deal.evidence?.originalPost?.captionSample,
+  ].map((value) => cleanText(value, 2600)).filter(Boolean).join(' ');
 }
 
 function publicationDecision(deal, now, maxAgeDays) {
@@ -148,12 +163,31 @@ function publicationDecision(deal, now, maxAgeDays) {
 function viennaDecision(deal) {
   const verified = getViennaEvidence(deal);
   if (verified.hasViennaEvidence) {
-    return { accepted: true, source: verified.type, value: verified.value, cited: false };
+    const type = cleanText(verified.type).toLowerCase();
+    const value = cleanText(verified.value, 2600);
+    const originalSignal = verifiedOriginalPostSignal(deal);
+    const hasSpecificOriginalLocation = specificViennaLocation(originalSignal);
+    const explicitlyOutside = OUTSIDE_VIENNA_PATTERN.test(originalSignal)
+      && !VIENNA_POSTCODE_PATTERN.test(originalSignal);
+    const needsSpecificOriginalLocation = /instagram-post|verified-flag|structured-city/.test(type);
+    if (!explicitlyOutside && (!needsSpecificOriginalLocation || specificViennaLocation(value))) {
+      return { accepted: true, source: verified.type, value: verified.value, cited: false };
+    }
+    if (!explicitlyOutside && hasSpecificOriginalLocation) {
+      return {
+        accepted: true,
+        source: 'instagram-post-caption-specific-location',
+        value: originalSignal.match(VIENNA_POSTCODE_PATTERN)?.[1] || value,
+        cited: false,
+      };
+    }
   }
 
   const location = cleanText(deal.reportedLocation || deal.distance, 500);
   const citation = cleanText(deal.locationCitation);
-  if (specificViennaLocation(location) && sameInstagramPost(deal.url, citation)) {
+  const fromSearchSnippet = (Array.isArray(deal.discoveredBy) ? deal.discoveredBy : [])
+    .some((source) => /^firecrawl-search:/i.test(cleanText(source)));
+  if (!fromSearchSnippet && specificViennaLocation(location) && sameInstagramPost(deal.url, citation)) {
     return {
       accepted: true,
       source: 'firecrawl-cited-original-post-location',
@@ -295,8 +329,12 @@ export function qualifyKey4Deals(deals = [], options = {}) {
   for (const rawDeal of dedupeKey4Deals(deals)) {
     const deal = { ...rawDeal, url: normalizeInstagramPostUrl(rawDeal.url) };
     let reason = '';
-    const freeFood = freeFoodDrinkDecision(deal);
-    if (!freeFood.accepted) reason = freeFood.reason;
+    const originalOfferSignal = verifiedOriginalPostSignal(deal);
+    if (!originalOfferSignal) reason = 'missing-original-offer-evidence';
+    const freeFood = originalOfferSignal
+      ? freeFoodDrinkSignalDecision(originalOfferSignal)
+      : { accepted: false, reason };
+    if (!reason && !freeFood.accepted) reason = freeFood.reason;
     if (!reason && deal.agentCurrentlyValid === false) reason = 'agent-marked-expired';
 
     const publication = publicationDecision(deal, now, maxAgeDays);
@@ -371,10 +409,10 @@ export function qualifyKey4Deals(deals = [], options = {}) {
 }
 
 export const KEY4_SEARCH_QUERIES = [
-  'site:instagram.com/reel gratis Essen Wien',
-  'site:instagram.com/reel kostenlos Kaffee Wien',
-  'site:instagram.com/reel 1+1 Restaurant Wien',
-  'site:instagram.com/p Neueröffnung gratis Wien Gastronomie',
-  'site:instagram.com/reel Verkostung gratis Wien',
-  'site:instagram.com/reel free food Vienna restaurant',
+  'site:instagram.com/reel/ Wien "gratis Essen"',
+  'site:instagram.com/reel/ Wien "gratis Kaffee"',
+  'site:instagram.com/reel/ Wien "1+1 gratis"',
+  'site:instagram.com/p/ Wien "kostenlos" Restaurant',
+  'site:instagram.com/reel/ Wien "gratis Verkostung"',
+  'site:instagram.com/reel/ Vienna "free food"',
 ];

@@ -27,7 +27,7 @@ const MAX_POST_AGE_DAYS = Math.min(7, Math.max(1, Number(process.env.FC4_MAX_AGE
 const MIN_RAW_CANDIDATES = Math.max(1, Number(process.env.FC4_MIN_RAW_CANDIDATES || 12) || 12);
 const MAX_DEALS = Math.max(1, Number(process.env.FC4_MAX_DEALS || 40) || 40);
 const SEARCH_LIMIT = Math.max(1, Math.min(20, Number(process.env.FC4_SEARCH_LIMIT || 10) || 10));
-const MAX_CREDITS_PER_AGENT = Math.max(100, Number(process.env.FC4_MAX_CREDITS_PER_AGENT || 900) || 900);
+const MAX_CREDITS_PER_AGENT = Math.max(100, Number(process.env.FC4_MAX_CREDITS_PER_AGENT || 2500) || 2500);
 
 const offerSchema = z.object({
   offers: z.array(z.object({
@@ -187,6 +187,7 @@ async function searchInstagramPosts(client) {
         limit: SEARCH_LIMIT,
         tbs: 'qdr:w,sbd:1',
         location: 'Vienna, Austria',
+        country: 'AT',
         ignoreInvalidURLs: true,
         timeout: 45_000,
       });
@@ -238,7 +239,9 @@ export async function discoverKey4RawOffers(options = {}) {
   )).length;
 
   let fallback = null;
-  if (recentPostsBeforeFallback < (Number(options.minRawCandidates) || MIN_RAW_CANDIDATES)) {
+  const primarySucceededWithOffers = primary.status === 'completed' && primary.offers.length > 0;
+  if (!primarySucceededWithOffers
+      || recentPostsBeforeFallback < (Number(options.minRawCandidates) || MIN_RAW_CANDIDATES)) {
     const handles = Array.isArray(options.profileHandles)
       ? options.profileHandles
       : loadPriorityProfileHandles();

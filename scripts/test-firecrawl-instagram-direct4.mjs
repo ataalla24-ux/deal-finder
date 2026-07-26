@@ -90,22 +90,40 @@ async function timestampDeals(deals) {
   });
 }
 
+function withVerifiedOriginalPost(deal, postCaption) {
+  return {
+    ...deal,
+    postCaption,
+    postVerification: {
+      ...(deal.postVerification || {}),
+      status: 'verified-original-post',
+    },
+    evidence: {
+      ...(deal.evidence || {}),
+      originalPost: {
+        ...(deal.evidence?.originalPost || {}),
+        status: 'verified-original-post',
+        captionSample: postCaption,
+      },
+    },
+  };
+}
+
 const freshUrl = 'https://www.instagram.com/reel/DbN6gIBK7Zk/';
 assert.equal(isRecentKey4PostUrl(freshUrl, { now }), true);
 assert.equal(isRecentKey4PostUrl('https://www.instagram.com/reel/DaifkcjshtA/', { now }), false);
-const freshVerified = (await timestampDeals([rawOffer({
+const freshVerified = withVerifiedOriginalPost((await timestampDeals([rawOffer({
   url: freshUrl,
   description: 'Diese Woche gibt es einen Kaffee gratis.',
-})]))[0];
-freshVerified.postCaption = 'Diese Woche gibt es einen Kaffee gratis in Wien.';
+})]))[0], 'Diese Woche gibt es einen Kaffee gratis in 1170 Wien.');
 freshVerified.city = 'Wien';
 freshVerified.viennaVerified = true;
 freshVerified.viennaEvidence = {
   verified: true,
   source: 'instagram-post-caption',
   type: 'instagram-post-caption',
-  value: 'Wien',
-  detail: 'Wien',
+  value: '1170',
+  detail: '1170',
 };
 
 const wrongReportedYear = qualifyKey4Deals([freshVerified], { now, maxAgeDays: 7 });
@@ -118,32 +136,32 @@ assert.equal(
 );
 
 const citedUrl = 'https://www.instagram.com/p/DbDbw1Glw4Q/';
-const citedLocation = (await timestampDeals([rawOffer({
+const citedLocation = withVerifiedOriginalPost((await timestampDeals([rawOffer({
   url: citedUrl,
   description: '1+1 gratis Burger',
   location: 'Berggasse 30, 1090 Wien',
   locationCitation: citedUrl,
-})]))[0];
+})]))[0], 'Heute gibt es bei uns 1+1 gratis Burger.');
 const citedResult = qualifyKey4Deals([citedLocation], { now, maxAgeDays: 7 });
 assert.equal(citedResult.deals.length, 1, 'a specific Vienna address cited to the same original post is accepted');
 assert.equal(citedResult.deals[0].viennaEvidence.method, 'firecrawl-cited-original-post-location');
 
-const genericVienna = (await timestampDeals([rawOffer({
+const genericVienna = withVerifiedOriginalPost((await timestampDeals([rawOffer({
   url: citedUrl,
   description: '1+1 gratis Burger',
   location: 'Wien',
   locationCitation: citedUrl,
-})]))[0];
+})]))[0], 'Heute gibt es bei uns 1+1 gratis Burger.');
 const genericResult = qualifyKey4Deals([genericVienna], { now, maxAgeDays: 7 });
 assert.equal(genericResult.deals.length, 0, 'an agent-only generic "Wien" label is not enough');
 assert.equal(genericResult.rejected[0].reason, 'not-verified-vienna');
 
-const wrongCitation = (await timestampDeals([rawOffer({
+const wrongCitation = withVerifiedOriginalPost((await timestampDeals([rawOffer({
   url: citedUrl,
   description: 'Gratis Burger',
   location: 'Berggasse 30, 1090 Wien',
   locationCitation: freshUrl,
-})]))[0];
+})]))[0], 'Heute gibt es bei uns einen Burger gratis.');
 assert.equal(
   qualifyKey4Deals([wrongCitation], { now }).rejected[0].reason,
   'not-verified-vienna',
@@ -151,18 +169,18 @@ assert.equal(
 );
 
 const oldUrl = 'https://www.instagram.com/reel/DaifkcjshtA/';
-const oldDeal = (await timestampDeals([rawOffer({
+const oldDeal = withVerifiedOriginalPost((await timestampDeals([rawOffer({
   url: oldUrl,
   description: 'Gratis Kaffee in Wien',
-})]))[0];
+})]))[0], 'Gratis Kaffee in 1170 Wien.');
 oldDeal.city = 'Wien';
 oldDeal.viennaVerified = true;
 oldDeal.viennaEvidence = {
   verified: true,
   source: 'instagram-post-caption',
   type: 'instagram-post-caption',
-  value: 'Wien',
-  detail: 'Wien',
+  value: '1170',
+  detail: '1170',
 };
 assert.equal(
   qualifyKey4Deals([oldDeal], { now, maxAgeDays: 365 }).rejected[0].reason,
@@ -181,20 +199,68 @@ assert.equal(
 );
 
 const giveaway = {
-  ...freshVerified,
+  ...withVerifiedOriginalPost(
+    freshVerified,
+    'Gewinnspiel: Gewinne einen gratis Burger, markiere zwei Freunde.',
+  ),
   description: 'Gewinnspiel: Gewinne einen gratis Burger, markiere zwei Freunde.',
-  postCaption: '',
 };
 assert.equal(qualifyKey4Deals([giveaway], { now }).rejected[0].reason, 'giveaway');
 
 const freeEntry = {
-  ...freshVerified,
+  ...withVerifiedOriginalPost(
+    freshVerified,
+    'Free entry zur Live-Musik im Restaurant.',
+  ),
   title: 'Live-Musik im Restaurant: free entry',
   description: 'Free entry zur Live-Musik im Restaurant.',
   offerTypeOriginal: 'free entry',
-  postCaption: '',
 };
 assert.equal(qualifyKey4Deals([freeEntry], { now }).rejected[0].reason, 'not-free');
+
+const contaminatedSearchSnippet = {
+  ...withVerifiedOriginalPost(
+    freshVerified,
+    'Wir servieren heute frische Burger und freuen uns auf euren Besuch.',
+  ),
+  description: 'Gratis Burger in Wien',
+  offerTypeOriginal: 'Gratis Burger in Wien',
+  discoveredBy: ['firecrawl-search:fixture'],
+};
+assert.equal(
+  qualifyKey4Deals([contaminatedSearchSnippet], { now }).rejected[0].reason,
+  'not-free',
+  'a free offer found only in the search snippet is rejected',
+);
+
+const freeCoffeeMachine = withVerifiedOriginalPost(
+  freshVerified,
+  'Kaffee fürs Büro: Wir stellen die Kaffeemaschine kostenlos zur Verfügung. Ihr zahlt eine Servicepauschale.',
+);
+assert.equal(
+  qualifyKey4Deals([freeCoffeeMachine], { now }).rejected[0].reason,
+  'free-item-not-food-drink',
+  'free equipment is not a free food or drink deal',
+);
+
+const outsideVienna = {
+  ...withVerifiedOriginalPost(
+    freshVerified,
+    'Gratis Frühstück und Kaffee: einfach raus aus Wien und rein ins Grüne.',
+  ),
+  viennaEvidence: {
+    verified: true,
+    source: 'instagram-post-caption',
+    type: 'instagram-post-caption',
+    value: 'raus aus Wien',
+    detail: 'raus aus Wien',
+  },
+};
+assert.equal(
+  qualifyKey4Deals([outsideVienna], { now }).rejected[0].reason,
+  'not-verified-vienna',
+  '"raus aus Wien" is not Vienna location evidence',
+);
 
 const agentExpired = { ...freshVerified, agentCurrentlyValid: false };
 assert.equal(qualifyKey4Deals([agentExpired], { now }).rejected[0].reason, 'agent-marked-expired');
