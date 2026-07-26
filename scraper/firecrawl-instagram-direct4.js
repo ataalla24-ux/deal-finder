@@ -25,6 +25,7 @@ const REGISTRY_PATH = path.join(ROOT, 'docs', 'instagram-merchant-registry.json'
 
 const MAX_POST_AGE_DAYS = Math.min(7, Math.max(1, Number(process.env.FC4_MAX_AGE_DAYS || 7) || 7));
 const MIN_RAW_CANDIDATES = Math.max(1, Number(process.env.FC4_MIN_RAW_CANDIDATES || 12) || 12);
+const MIN_QUALIFIED_DEALS = Math.max(1, Number(process.env.FC4_MIN_QUALIFIED_DEALS || 3) || 3);
 const MAX_DEALS = Math.max(1, Number(process.env.FC4_MAX_DEALS || 40) || 40);
 const SEARCH_LIMIT = Math.max(1, Math.min(20, Number(process.env.FC4_SEARCH_LIMIT || 10) || 10));
 const MAX_CREDITS_PER_AGENT = Math.max(100, Number(process.env.FC4_MAX_CREDITS_PER_AGENT || 2500) || 2500);
@@ -212,6 +213,43 @@ async function searchInstagramPosts(client) {
   return rows;
 }
 
+export async function discoverKey4FocusedFallback(options = {}) {
+  const client = options.client;
+  if (!client || typeof client.agent !== 'function') {
+    throw new Error('Key 4 focused fallback requires a Firecrawl agent() method');
+  }
+  const handles = Array.isArray(options.profileHandles)
+    ? options.profileHandles
+    : loadPriorityProfileHandles();
+  const run = await runAgent(
+    client,
+    'focused-profile-agent',
+    focusedFallbackPrompt(handles),
+    'spark-1-mini'
+  );
+  const rawOffers = run.offers.map((offer) => ({
+    ...offer,
+    discoverySource: run.label,
+  }));
+  const normalizedDeals = dedupeKey4Deals(rawOffers
+    .map((offer) => normalizeKey4Offer(offer, {
+      discoverySource: offer.discoverySource,
+    }))
+    .filter(Boolean));
+  return {
+    rawOffers,
+    normalizedDeals,
+    diagnostics: {
+      status: run.status,
+      offers: run.offers.length,
+      distinctInstagramPosts: normalizedDeals.length,
+      error: run.error,
+      creditsUsed: run.creditsUsed,
+      durationMs: run.durationMs,
+    },
+  };
+}
+
 export async function discoverKey4RawOffers(options = {}) {
   const client = options.client;
   if (!client || typeof client.agent !== 'function' || typeof client.search !== 'function') {
@@ -242,18 +280,14 @@ export async function discoverKey4RawOffers(options = {}) {
   const primarySucceededWithOffers = primary.status === 'completed' && primary.offers.length > 0;
   if (!primarySucceededWithOffers
       || recentPostsBeforeFallback < (Number(options.minRawCandidates) || MIN_RAW_CANDIDATES)) {
-    const handles = Array.isArray(options.profileHandles)
-      ? options.profileHandles
-      : loadPriorityProfileHandles();
-    fallback = await runAgent(
+    const fallbackDiscovery = await discoverKey4FocusedFallback({
       client,
-      'focused-profile-agent',
-      focusedFallbackPrompt(handles),
-      'spark-1-mini'
-    );
+      profileHandles: options.profileHandles,
+    });
+    fallback = fallbackDiscovery.diagnostics;
     rawOffers = [
       ...rawOffers,
-      ...fallback.offers.map((offer) => ({ ...offer, discoverySource: fallback.label })),
+      ...fallbackDiscovery.rawOffers,
     ];
   }
 
@@ -284,7 +318,8 @@ export async function discoverKey4RawOffers(options = {}) {
       fallback: fallback
         ? {
             status: fallback.status,
-            offers: fallback.offers.length,
+            offers: fallback.offers,
+            distinctInstagramPosts: fallback.distinctInstagramPosts,
             error: fallback.error,
             creditsUsed: fallback.creditsUsed,
             durationMs: fallback.durationMs,
@@ -337,14 +372,48 @@ async function main() {
     networkMaxAgeDays: MAX_POST_AGE_DAYS,
   });
 
-  const qualification = qualifyKey4Deals([
+  const previousDeals = previousKey4Deals();
+  let allVerifiedNewDeals = verifiedNewDeals;
+  let qualification = qualifyKey4Deals([
     ...verifiedNewDeals,
-    ...previousKey4Deals(),
+    ...previousDeals,
   ], {
     now,
     maxAgeDays: MAX_POST_AGE_DAYS,
     maxDeals: MAX_DEALS,
   });
+
+  if (qualification.deals.length < MIN_QUALIFIED_DEALS && !discovery.diagnostics.fallback) {
+    console.log(`🧭 Nur ${qualification.deals.length} belastbare Deals – starte Profil-Fallback`);
+    const lateFallback = await discoverKey4FocusedFallback({ client });
+    console.log(`🧭 Fallback-Agent: ${lateFallback.diagnostics.offers} Rohangebote`);
+    const verifiedFallbackDeals = await verifyFirecrawlDeals(lateFallback.normalizedDeals, {
+      sourceKey: 'firecrawl-key4-instagram-direct-fallback',
+      now,
+      networkMaxAgeDays: MAX_POST_AGE_DAYS,
+    });
+    allVerifiedNewDeals = dedupeKey4Deals([
+      ...allVerifiedNewDeals,
+      ...verifiedFallbackDeals,
+    ]);
+    qualification = qualifyKey4Deals([
+      ...allVerifiedNewDeals,
+      ...previousDeals,
+    ], {
+      now,
+      maxAgeDays: MAX_POST_AGE_DAYS,
+      maxDeals: MAX_DEALS,
+    });
+    discovery.diagnostics.fallback = {
+      ...lateFallback.diagnostics,
+      triggeredAfterQualification: true,
+    };
+    discovery.diagnostics.rawOffers += lateFallback.rawOffers.length;
+    discovery.diagnostics.distinctInstagramPosts = dedupeKey4Deals([
+      ...discovery.normalizedDeals,
+      ...lateFallback.normalizedDeals,
+    ]).length;
+  }
 
   console.log(`✅ Verifizierte aktuelle Wien-Deals: ${qualification.deals.length}`);
   console.log(`🗑️ Abgelehnt: ${JSON.stringify(qualification.summary.rejectedByReason)}`);
