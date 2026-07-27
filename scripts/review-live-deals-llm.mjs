@@ -435,7 +435,7 @@ function isProtectedLiveDealId(dealID) {
   return PROTECTED_LIVE_DEAL_IDS.has(cleanText(dealID, 120));
 }
 
-function makePolicyOverride(review, deal = {}, evidence = {}) {
+export function makePolicyOverride(review, deal = {}, evidence = {}) {
   const messageText = cleanText([review.message, review.suggestion].join(' '), 800);
   const targetText = evidenceSearchText(evidence);
   const combinedText = cleanText([messageText, targetText].join(' '), 5000);
@@ -453,12 +453,40 @@ function makePolicyOverride(review, deal = {}, evidence = {}) {
     };
   }
 
+  if (blockedOrTransient) {
+    return {
+      decision: 'flag',
+      reason: 'weak_evidence',
+      confidence: Math.min(Math.max(review.confidence, 0.6), 0.8),
+      message: 'Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.',
+    };
+  }
+
   if (!hasUrl || cleanText(evidence.status, 40) === 'missing_link') {
     return {
       decision: 'remove',
       reason: 'missing_link',
       confidence: Math.max(review.confidence, 0.9),
       message: 'Policy override: Live-Deal hat keinen pruefbaren Ziellink und kann in der App nicht verifiziert werden.',
+    };
+  }
+
+  const finalHost = cleanText(evidence.finalHost, 200).replace(/^www\./, '').toLowerCase();
+  const isOpaqueSocialShell = (
+    finalHost === 'instagram.com'
+    || finalHost.endsWith('.instagram.com')
+    || finalHost === 'tiktok.com'
+    || finalHost.endsWith('.tiktok.com')
+  )
+    && evidence.signals?.mentionsDealTitle !== true
+    && evidence.signals?.mentionsDealTerms !== true
+    && evidence.signals?.hasValidityDate !== true;
+  if (isOpaqueSocialShell && review.decision === 'remove') {
+    return {
+      decision: 'flag',
+      reason: 'weak_evidence',
+      confidence: Math.min(Math.max(review.confidence, 0.6), 0.8),
+      message: 'Policy override: Öffentliche Social-Seite enthält keinen auslesbaren Deal-Inhalt; Originalpost manuell prüfen.',
     };
   }
 
@@ -634,6 +662,7 @@ async function classifyChunk(deals, referenceDate) {
             'Wenn ein Live-Deal keinen direkten pruefbaren Ziellink hat, nutze missing_link und remove.',
             'Wenn targetEvidence eine Homepage, Suchseite, News-Aggregator- oder Gutschein-Sammelseite ohne konkreten Deal-Nachweis ist, nutze bad_source und remove.',
             'Wenn targetEvidence nur wegen Bot-Schutz, HTTP 429 oder temporaerem Fehler unklar ist, nutze weak_evidence als flag statt remove.',
+            'HTTP 401/403, Bot-Schutz oder eine leere Instagram-/TikTok-Shell sind niemals allein ein Entfernungsgrund; nutze weak_evidence als flag.',
             'Wenn targetEvidence ein abgelaufenes Datum oder bei Social Posts ein altes Veroeffentlichungsdatum zeigt, nutze expired.',
             'Markiere weak_evidence oder wrong_category nur als flag, nicht als remove.',
             'Wenn belegbare Felder falsch oder uneinheitlich sind, nutze flag und liefere proposedPatch. Verwende fuer unveraenderte oder nicht sicher belegte Felder leere Strings.',
@@ -846,7 +875,9 @@ async function main() {
   console.log(`LLM live deal review: ${reviews.length} reviewed, ${APPLY ? removedDeals.length : 0} removed, ${APPLY ? 0 : removedDeals.length} would remove, ${errors.length} errors.`);
 }
 
-main().catch((error) => {
-  console.error('review-live-deals-llm failed:', error);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main().catch((error) => {
+    console.error('review-live-deals-llm failed:', error);
+    process.exit(1);
+  });
+}
