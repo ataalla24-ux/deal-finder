@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { inspectDealUrlHealth } from '../scraper/expiry-utils.js';
+import { sanitizeLlmProposedPatch } from './live-deal-llm-patch-utils.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -637,6 +638,8 @@ async function classifyChunk(deals, referenceDate) {
             'Markiere weak_evidence oder wrong_category nur als flag, nicht als remove.',
             'Wenn belegbare Felder falsch oder uneinheitlich sind, nutze flag und liefere proposedPatch. Verwende fuer unveraenderte oder nicht sicher belegte Felder leere Strings.',
             'proposedPatch darf nur Angaben aus Deal-Daten oder targetEvidence enthalten. Erfinde keine Marke, Adresse oder Gueltigkeit.',
+            'Setze validFrom, validUntil und expiryDisplayText nur, wenn die Werte exakt aus targetEvidence.dates stammen und targetEvidence den konkreten Deal-Titel sowie Deal-Konditionen bestaetigt.',
+            'Bei weak_evidence, bad_source, missing_link, not_vienna, expired oder unclear muss proposedPatch komplett leer bleiben.',
             'Lass Kirchen-/Community-/Event-Eintraege drin, solange sie nicht eindeutig abgelaufen oder irrelevant sind.',
             'Antworte ausschliesslich im geforderten JSON-Schema.',
           ].join(' '),
@@ -715,7 +718,18 @@ async function main() {
   }
 
   const policyResult = applyPolicyOverrides(reviews, dealById, targetEvidence.byDealId);
-  const finalReviews = policyResult.reviews;
+  const rawPatchFieldCount = policyResult.reviews
+    .reduce((sum, review) => sum + Object.keys(review.proposedPatch || {}).length, 0);
+  const finalReviews = policyResult.reviews.map((review) => ({
+    ...review,
+    proposedPatch: sanitizeLlmProposedPatch(
+      review,
+      dealById.get(review.dealID) || {},
+      targetEvidence.byDealId.get(review.dealID) || {},
+    ),
+  }));
+  const acceptedPatchFieldCount = finalReviews
+    .reduce((sum, review) => sum + Object.keys(review.proposedPatch || {}).length, 0);
   const removeReviews = finalReviews.filter(shouldRemove);
   const removedIDs = new Set(removeReviews.map((review) => review.dealID));
   const keptDeals = APPLY && removedIDs.size
@@ -809,6 +823,11 @@ async function main() {
     targetEvidenceErrors: targetEvidence.errors.slice(0, 50),
     errors,
     usage,
+    patchSanitization: {
+      rawFieldCount: rawPatchFieldCount,
+      acceptedFieldCount: acceptedPatchFieldCount,
+      droppedFieldCount: rawPatchFieldCount - acceptedPatchFieldCount,
+    },
     reviewCandidates,
     removalCandidates: removedDeals,
     removedDeals,
