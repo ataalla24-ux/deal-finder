@@ -8,6 +8,7 @@ import {
   dealArrayFromBundle,
   loadLiveDealEditStore,
   normalizeLiveDealEdit,
+  parseBoolean,
   parseLiveDealEditPayload,
   payloadValue,
   readJson,
@@ -33,7 +34,10 @@ function enforceModeration(bundle, checkedAt) {
   const deals = dealArrayFromBundle(bundle);
   if (!deals) return { bundle, changed: false, report: { removedCount: 0, removed: [] } };
 
-  const filtered = filterModeratedDeals(deals, loadDealModeration());
+  const filtered = filterModeratedDeals(
+    deals,
+    loadDealModeration(process.env.DEAL_MODERATION_PATH || undefined),
+  );
   if (filtered.removed.length === 0) {
     return { bundle, changed: false, report: { removedCount: 0, removed: [] } };
   }
@@ -65,6 +69,11 @@ const dealId = cleanText(payloadValue(payload, 'dealId', 'LIVE_DEAL_EDIT_ID'));
 if (!dealId) {
   throw new Error('Missing live deal edit id');
 }
+const manualActionAuthorized = process.env.LIVE_DEAL_MANUAL_ACTION === '1';
+const hiddenRequested = parseBoolean(payloadValue(payload, 'hidden', 'LIVE_DEAL_EDIT_HIDDEN'));
+if (hiddenRequested && !manualActionAuthorized) {
+  throw new Error('Live deal removal requires LIVE_DEAL_MANUAL_ACTION=1');
+}
 
 const rawEdit = {
   dealId,
@@ -84,7 +93,8 @@ const rawEdit = {
   validUntil: payloadValue(payload, 'validUntil', 'LIVE_DEAL_EDIT_VALID_UNTIL'),
   expiryDisplayText: payloadValue(payload, 'expiryDisplayText', 'LIVE_DEAL_EDIT_EXPIRY_DISPLAY_TEXT'),
   pinnedRank: payloadValue(payload, 'pinnedRank', 'LIVE_DEAL_EDIT_PINNED_RANK'),
-  hidden: payloadValue(payload, 'hidden', 'LIVE_DEAL_EDIT_HIDDEN'),
+  hidden: hiddenRequested,
+  manualRemovalApproved: hiddenRequested && manualActionAuthorized,
   forceKeep: payloadValue(payload, 'forceKeep', 'LIVE_DEAL_EDIT_FORCE_KEEP'),
   restoreDeal: payloadValue(payload, 'restoreDeal', 'LIVE_DEAL_EDIT_RESTORE_DEAL'),
   editedBy: cleanText(payloadValue(payload, 'editedBy', 'LIVE_DEAL_EDIT_BY')) || 'live-review',
@@ -94,6 +104,7 @@ const dealsPath = process.env.LIVE_DEALS_PATH || DEFAULT_DEALS_PATH;
 const editsPath = process.env.LIVE_DEAL_EDITS_PATH || DEFAULT_EDITS_PATH;
 const reportPath = process.env.LIVE_DEAL_EDIT_REPORT_PATH || DEFAULT_REPORT_PATH;
 const liveDealRemovalsEnabled = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
+const liveDealManualRemovalEnabled = liveDealRemovalsEnabled && manualActionAuthorized;
 const edit = normalizeLiveDealEdit(rawEdit, { nowIso });
 if (!edit) throw new Error('Invalid live deal edit');
 
@@ -102,7 +113,11 @@ const nextStore = upsertLiveDealEdit(existingStore, edit, nowIso);
 saveLiveDealEditStore(editsPath, nextStore, nowIso);
 
 const bundle = readJson(dealsPath);
-const result = applyLiveDealEditsToBundle(bundle, nextStore, { checkedAt: nowIso, allowRemovals: liveDealRemovalsEnabled });
+const result = applyLiveDealEditsToBundle(bundle, nextStore, {
+  checkedAt: nowIso,
+  allowRemovals: false,
+  allowManualRemovals: liveDealManualRemovalEnabled,
+});
 let nextBundle = result.bundle;
 let changed = result.changed;
 const weeklyPick = readJson(DEFAULT_WEEKLY_PATH, null);
@@ -129,6 +144,7 @@ writeJson(reportPath, {
   editedBy: edit.editedBy,
   hidden: edit.hidden,
   forceKeep: edit.forceKeep,
+  manualActionAuthorized,
 });
 
 const applied = result.report.applied.find((item) => item.dealId === dealId);

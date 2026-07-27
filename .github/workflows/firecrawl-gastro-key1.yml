@@ -36,4 +36,4 @@ jobs:
 
       - name: Commit deals
         run: |
-          node scripts/commit-generated.mjs --message "Gastro2 deals $(date +%Y-%m-%d)" --files docs/deals-pending-gastro2.json
+          node scripts/commit-generated.mjs --message "Gastro2 deals $(date +%Y-%m-%d)" --files docs/deals-pending-gastro2.json docs/deal-pipeline-last-run-gastro2.json docs/deal-pipeline-runs-gastro2.json

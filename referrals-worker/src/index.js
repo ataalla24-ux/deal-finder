@@ -652,6 +652,8 @@ function normalizeDealOverrideInput(body, existing = null) {
     title: cleanShortText(body?.title, 240),
     description: cleanLongText(body?.description, 2500),
     brand: cleanShortText(body?.brand, 120),
+    category: cleanShortText(body?.category, 80).toLowerCase(),
+    type: cleanShortText(body?.type, 40).toLowerCase(),
     distance: cleanShortText(body?.distance, 200),
     pubDate: cleanShortText(body?.pubDate, 80),
     expires: cleanShortText(body?.expires, 120),
@@ -847,6 +849,8 @@ async function triggerDealEditWorkflow(env, edit) {
     title: edit.title || '',
     brand: edit.brand || '',
     description: edit.description || '',
+    category: edit.category || '',
+    type: edit.type || '',
     distance: edit.distance || '',
     pubDate: edit.pubDate || '',
     expires: edit.expires || '',
@@ -1160,6 +1164,8 @@ function normalizeSignedDealEditPayload(raw = {}) {
     title: cleanShortText(raw.title, 240),
     description: cleanLongText(raw.description || raw.details, 2500),
     brand: cleanShortText(raw.brand || raw.provider, 120),
+    category: cleanShortText(raw.category, 80).toLowerCase(),
+    type: cleanShortText(raw.type, 40).toLowerCase(),
     distance: cleanShortText(raw.distance || raw.location || raw.address, 200),
     pubDate: cleanShortText(raw.pubDate || raw.date, 80),
     expires: cleanShortText(raw.expires || raw.validUntil, 120),
@@ -1270,6 +1276,14 @@ function dealEditFormHtml({ edit, payload, sig, saved = false, error = '', workf
         <textarea name="description" placeholder="Details">${value('description')}</textarea>
       </label>
       <div class="grid">
+        <label>Kategorie
+          <input name="category" value="${value('category')}" placeholder="z.B. essen, kaffee, shopping">
+        </label>
+        <label>Deal-Typ
+          <input name="type" value="${value('type')}" placeholder="z.B. gratis, rabatt, bogo">
+        </label>
+      </div>
+      <div class="grid">
         <label>Ort
           <input name="distance" value="${value('distance')}" placeholder="Adresse, Bezirk oder Wien">
         </label>
@@ -1363,6 +1377,8 @@ async function handleSignedDealEditLink(request, env) {
     title: signed.fields.title,
     brand: signed.fields.brand,
     description: signed.fields.description,
+    category: signed.fields.category,
+    type: signed.fields.type,
     distance: signed.fields.distance,
     pubDate: signed.fields.pubDate,
     expires: signed.fields.expires,

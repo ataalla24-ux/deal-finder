@@ -4,6 +4,8 @@ import os from 'os';
 import path from 'path';
 import { spawnSync } from 'child_process';
 
+import { stampDealsFeedFile } from './deals-feed-contract.mjs';
+
 const DEFAULT_REMOTE = process.env.GIT_GENERATED_REMOTE || 'origin';
 const DEFAULT_BRANCH = process.env.GIT_GENERATED_BRANCH || process.env.GITHUB_REF_NAME || 'main';
 const DEFAULT_RETRIES = Number(process.env.GIT_GENERATED_PUSH_RETRIES || 4);
@@ -233,6 +235,14 @@ function sleep(ms) {
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
+  const dealsPath = 'docs/deals.json';
+  const includesDealsFeed = options.patterns
+    .map(normalizeRepoPath)
+    .includes(dealsPath);
+  if (includesDealsFeed && statusChanged(dealsPath)) {
+    const stamped = stampDealsFeedFile(path.join(process.cwd(), dealsPath));
+    console.log(`Stamped deals feed ${stamped.feedVersion} (${stamped.totalDeals} deals)`);
+  }
   const changedFiles = uniqueChangedFiles(options.patterns);
   if (changedFiles.length === 0) {
     console.log('No generated file changes to commit');

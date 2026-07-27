@@ -69,6 +69,7 @@ jobs:
         env:
           DEAL_MODERATION_APPLY: ${{ github.event_name == 'workflow_dispatch' && (inputs.deal_id != '' || inputs.deal_url != '') && '1' || '0' }}
           LIVE_DEAL_REMOVALS_ENABLED: ${{ github.event_name == 'workflow_dispatch' && (inputs.deal_id != '' || inputs.deal_url != '') && '1' || '0' }}
+          LIVE_DEAL_MANUAL_ACTION: ${{ github.event_name == 'workflow_dispatch' && (inputs.deal_id != '' || inputs.deal_url != '') && '1' || '0' }}
         run: npm run deals:moderate
 
       - name: Cache brand logos

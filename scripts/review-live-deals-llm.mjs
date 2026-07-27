@@ -17,7 +17,8 @@ const CHUNK_SIZE = Math.max(1, Math.min(32, numberEnv('DEAL_REVIEW_CHUNK_SIZE', 
 const MIN_REMOVE_CONFIDENCE = Math.max(0, Math.min(1, numberEnv('DEAL_REVIEW_MIN_REMOVE_CONFIDENCE', 0.86)));
 const APPLY_REQUESTED = process.env.DEAL_REVIEW_APPLY === '1';
 const LIVE_DEAL_REMOVALS_ENABLED = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
-const APPLY = APPLY_REQUESTED && LIVE_DEAL_REMOVALS_ENABLED;
+const LLM_LIVE_REMOVALS_ALLOWED = process.env.ALLOW_LLM_LIVE_REMOVALS === '1';
+const APPLY = APPLY_REQUESTED && LIVE_DEAL_REMOVALS_ENABLED && LLM_LIVE_REMOVALS_ALLOWED;
 const TARGET_EVIDENCE_ENABLED = process.env.DEAL_REVIEW_TARGET_EVIDENCE !== '0';
 const TARGET_EVIDENCE_CONCURRENCY = Math.max(1, Math.min(12, numberEnv('DEAL_REVIEW_TARGET_CONCURRENCY', 8)));
 const TARGET_EVIDENCE_TIMEOUT_MS = numberEnv('DEAL_REVIEW_TARGET_TIMEOUT_MS', numberEnv('URL_CHECK_TIMEOUT_MS', 7000));
@@ -349,11 +350,42 @@ function normalizeDecision(value) {
   return 'flag';
 }
 
+function normalizeProposedPatch(rawPatch, deal = {}) {
+  if (!rawPatch || typeof rawPatch !== 'object' || Array.isArray(rawPatch)) return {};
+  const fields = [
+    'brand',
+    'title',
+    'description',
+    'category',
+    'type',
+    'distance',
+    'validFrom',
+    'validUntil',
+    'expiryDisplayText',
+  ];
+  const patch = {};
+  for (const field of fields) {
+    let value = cleanText(rawPatch[field], field === 'description' ? 500 : 200);
+    if (field === 'category' || field === 'type') value = value.toLowerCase();
+    if (!value) continue;
+    const current = cleanText(
+      field === 'distance'
+        ? (deal.distance || deal.location || deal.address)
+        : deal[field],
+      field === 'description' ? 500 : 200
+    );
+    if (value === current) continue;
+    patch[field] = value;
+  }
+  return patch;
+}
+
 function normalizeReviews(rawReviews, dealById) {
   const reviews = [];
   for (const raw of Array.isArray(rawReviews) ? rawReviews : []) {
     const dealID = cleanText(raw?.dealID || raw?.id, 120);
     if (!dealID || !dealById.has(dealID)) continue;
+    const deal = dealById.get(dealID) || {};
     const confidence = Math.max(0, Math.min(1, Number(raw?.confidence) || 0));
     reviews.push({
       id: `llm-${dealID}`,
@@ -363,6 +395,7 @@ function normalizeReviews(rawReviews, dealById) {
       confidence,
       message: cleanText(raw?.message, 240),
       suggestion: cleanText(raw?.suggestion, 240),
+      proposedPatch: normalizeProposedPatch(raw?.proposedPatch, deal),
     });
   }
   return reviews;
@@ -550,8 +583,34 @@ async function classifyChunk(deals, referenceDate) {
                     confidence: { type: 'number' },
                     message: { type: 'string' },
                     suggestion: { type: 'string' },
+                    proposedPatch: {
+                      type: 'object',
+                      additionalProperties: false,
+                      properties: {
+                        brand: { type: 'string' },
+                        title: { type: 'string' },
+                        description: { type: 'string' },
+                        category: { type: 'string' },
+                        type: { type: 'string' },
+                        distance: { type: 'string' },
+                        validFrom: { type: 'string' },
+                        validUntil: { type: 'string' },
+                        expiryDisplayText: { type: 'string' },
+                      },
+                      required: [
+                        'brand',
+                        'title',
+                        'description',
+                        'category',
+                        'type',
+                        'distance',
+                        'validFrom',
+                        'validUntil',
+                        'expiryDisplayText',
+                      ],
+                    },
                   },
-                  required: ['dealID', 'decision', 'reason', 'confidence', 'message', 'suggestion'],
+                  required: ['dealID', 'decision', 'reason', 'confidence', 'message', 'suggestion', 'proposedPatch'],
                 },
               },
             },
@@ -576,6 +635,8 @@ async function classifyChunk(deals, referenceDate) {
             'Wenn targetEvidence nur wegen Bot-Schutz, HTTP 429 oder temporaerem Fehler unklar ist, nutze weak_evidence als flag statt remove.',
             'Wenn targetEvidence ein abgelaufenes Datum oder bei Social Posts ein altes Veroeffentlichungsdatum zeigt, nutze expired.',
             'Markiere weak_evidence oder wrong_category nur als flag, nicht als remove.',
+            'Wenn belegbare Felder falsch oder uneinheitlich sind, nutze flag und liefere proposedPatch. Verwende fuer unveraenderte oder nicht sicher belegte Felder leere Strings.',
+            'proposedPatch darf nur Angaben aus Deal-Daten oder targetEvidence enthalten. Erfinde keine Marke, Adresse oder Gueltigkeit.',
             'Lass Kirchen-/Community-/Event-Eintraege drin, solange sie nicht eindeutig abgelaufen oder irrelevant sind.',
             'Antworte ausschliesslich im geforderten JSON-Schema.',
           ].join(' '),
@@ -693,22 +754,48 @@ async function main() {
       slackTs: cleanText(deal.slackTs, 120),
       slackThreadTs: cleanText(deal.slackThreadTs, 120),
       approvedAt: cleanText(deal.approvedAt, 80),
-      removedAutomatically: true,
+      removedAutomatically: APPLY,
       reason: review.reason,
       confidence: review.confidence,
       message: review.message,
-      sourceSystem: 'llm-live-review',
+      sourceSystem: APPLY ? 'llm-live-review' : 'llm-live-review-candidate',
     };
   });
+  const reviewCandidates = finalReviews
+    .filter((review) => review.decision !== 'keep' || Object.keys(review.proposedPatch || {}).length > 0)
+    .map((review) => {
+      const deal = dealById.get(review.dealID) || {};
+      return {
+        id: review.dealID,
+        title: cleanText(deal.title, 180),
+        brand: cleanText(deal.brand, 90),
+        description: cleanText(deal.description, 1200),
+        category: cleanText(deal.category, 80),
+        type: cleanText(deal.type, 40),
+        distance: cleanText(deal.distance || deal.location || deal.address, 200),
+        url: cleanText(deal.url, 260),
+        pubDate: cleanText(deal.pubDate, 80),
+        expires: cleanText(deal.expires, 120),
+        reason: review.reason,
+        confidence: review.confidence,
+        message: review.message,
+        suggestion: review.suggestion,
+        proposedPatch: review.proposedPatch || {},
+        decision: review.decision,
+        sourceSystem: 'llm-live-review-candidate',
+      };
+    });
 
   const report = {
     generatedAt,
     source: 'github-live-deal-llm-review',
     model: MODEL,
     aiEnabled: Boolean(process.env.OPENAI_API_KEY),
+    mode: APPLY ? 'apply-approved-llm-removals' : 'slack-review-only',
     apply: APPLY,
     applyRequested: APPLY_REQUESTED,
     removalsEnabled: LIVE_DEAL_REMOVALS_ENABLED,
+    llmLiveRemovalsAllowed: LLM_LIVE_REMOVALS_ALLOWED,
     removalsPaused: !APPLY,
     minRemoveConfidence: MIN_REMOVE_CONFIDENCE,
     totalDealsBefore: deals.length,
@@ -722,6 +809,8 @@ async function main() {
     targetEvidenceErrors: targetEvidence.errors.slice(0, 50),
     errors,
     usage,
+    reviewCandidates,
+    removalCandidates: removedDeals,
     removedDeals,
     reviews: finalReviews,
     targetEvidence: targetEvidence.items,

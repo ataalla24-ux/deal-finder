@@ -51,7 +51,6 @@ const MAX_APPROVAL_URL_EXPIRY_CHECKS = Number(process.env.MAX_APPROVAL_URL_EXPIR
 const APPROVE_FULL_SCAN_MAX_THREADS = Number(process.env.APPROVE_FULL_SCAN_MAX_THREADS || 8);
 const APPROVE_FULL_SCAN_MAX_DEALS = Number(process.env.APPROVE_FULL_SCAN_MAX_DEALS || 250);
 const PENDING_QUEUE_TTL_DAYS = Number(process.env.PENDING_QUEUE_TTL_DAYS || 14);
-const LIVE_DEAL_REMOVALS_ENABLED = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
 const BLOCKED_APPROVAL_URL_PATTERNS = [
   /tiktok\.com\/@planetmatters\/video\/7634961057521437975/i,
   /tiktok\.com\/@viennas_joy\/video\/7635566976642911510/i,
@@ -699,10 +698,9 @@ function loadExistingApprovedDealsForMerge(moderation) {
   const existingDeals = loadExistingApprovedDeals();
   const moderated = filterModeratedDeals(existingDeals, moderation);
   if (moderated.removed.length > 0) {
-    const status = LIVE_DEAL_REMOVALS_ENABLED ? 'entfernt' : 'pausiert';
-    console.log(`🛡️ Moderation filter: ${moderated.removed.length} bestehende Live-Deals ${status}`);
+    console.log(`🛡️ Moderation filter: ${moderated.removed.length} manuell moderierte Live-Deals entfernt`);
   }
-  return LIVE_DEAL_REMOVALS_ENABLED ? moderated.deals : existingDeals;
+  return moderated.deals;
 }
 
 async function sleep(ms) {

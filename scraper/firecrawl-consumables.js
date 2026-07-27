@@ -8,15 +8,33 @@ import Firecrawl from '@mendable/firecrawl-js';
 import { z } from 'zod';
 import fs from 'fs';
 import { verifyFirecrawlDeals } from './firecrawl-post-verifier.js';
+import {
+  buildPipelineRunReport,
+  summarizeVerifiedDeals,
+  writeFailedPipelineRunReport,
+  writePipelineRunReport,
+} from './pipeline-run-report-utils.js';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY3 || process.env.FIRECRAWL_API_KEY;
+const SOURCE_KEY = 'firecrawl2';
+const SOURCE_LABEL = 'Firecrawl Key 3 - Consumables';
+const OUTPUT_PATH = 'docs/deals-pending-firecrawl2.json';
+const RUN_STARTED_AT = new Date();
 const MAX_POST_AGE_DAYS = (() => {
   const parsed = Number(process.env.FC3_MAX_AGE_DAYS || 2);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 2;
 })();
 
 if (!FIRECRAWL_API_KEY) {
-  console.error('❌ FIRECRAWL_API_KEY3 oder FIRECRAWL_API_KEY nicht gesetzt!');
+  const error = new Error('FIRECRAWL_API_KEY3 oder FIRECRAWL_API_KEY nicht gesetzt');
+  writeFailedPipelineRunReport({
+    sourceKey: SOURCE_KEY,
+    sourceLabel: SOURCE_LABEL,
+    startedAt: RUN_STARTED_AT,
+    outputFile: OUTPUT_PATH,
+    error,
+  });
+  console.error(`❌ ${error.message}!`);
   process.exit(1);
 }
 
@@ -155,6 +173,7 @@ async function main() {
 
   const rawPosts = result?.data?.posts || [];
   const deals = [];
+  const rejected = [];
 
   console.log(`🔍 Agent returned ${rawPosts.length} Rohposts`);
 
@@ -167,7 +186,17 @@ async function main() {
     const offerType = normalizeText(post.offer_type);
     const ownerUsername = normalizeText(post.owner_username).replace(/^@/, '').toLowerCase();
 
-    if (!originalPostUrl || !isInstagramPostUrl(originalPostUrl)) continue;
+    if (!originalPostUrl || !isInstagramPostUrl(originalPostUrl)) {
+      rejected.push({
+        reason: 'invalid-original-post-url',
+        deal: {
+          title: offerType || foodAndDrinks,
+          brand: ownerUsername || location,
+          url: originalPostUrl,
+        },
+      });
+      continue;
+    }
 
     const brand = ownerUsername || location.split(',')[0] || 'Instagram';
     const titleCore = offerType || foodAndDrinks || 'Instagram Freebie';
@@ -200,6 +229,10 @@ async function main() {
   const verifiedDeals = await verifyFirecrawlDeals(deals, {
     sourceKey: 'firecrawl-key3-consumables',
   });
+  const verifiedIDs = new Set(verifiedDeals.map((deal) => deal.id));
+  rejected.push(...deals
+    .filter((deal) => !verifiedIDs.has(deal.id))
+    .map((deal) => ({ reason: 'post-verification-rejected', deal })));
 
   console.log(`✅ Final: ${verifiedDeals.length} Deals`);
 
@@ -207,17 +240,41 @@ async function main() {
     lastUpdated: new Date().toISOString(),
     source: 'firecrawl3',
     totalDeals: verifiedDeals.length,
+    pipelineReport: `deal-pipeline-last-run-${SOURCE_KEY}.json`,
     deals: verifiedDeals,
   };
 
-  const outputPath = 'docs/deals-pending-firecrawl2.json';
-  fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
-  console.log(`💾 ${verifiedDeals.length} Deals → ${outputPath}`);
+  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(output, null, 2));
+  writePipelineRunReport(buildPipelineRunReport({
+    sourceKey: SOURCE_KEY,
+    sourceLabel: SOURCE_LABEL,
+    startedAt: RUN_STARTED_AT,
+    finishedAt: new Date(),
+    outputFile: OUTPUT_PATH,
+    rawCandidates: rawPosts.length,
+    normalizedCandidates: deals.length,
+    verifiedCandidates: verifiedDeals.length,
+    acceptedDeals: verifiedDeals.length,
+    rejected,
+    diagnostics: {
+      agentStatus: result?.status || 'completed',
+      creditsUsed: Number(result?.creditsUsed || result?.credits_used || 0),
+      verifier: summarizeVerifiedDeals(verifiedDeals),
+    },
+  }));
+  console.log(`💾 ${verifiedDeals.length} Deals → ${OUTPUT_PATH}`);
 }
 
 main()
   .then(() => process.exit(0))
   .catch((err) => {
+    writeFailedPipelineRunReport({
+      sourceKey: SOURCE_KEY,
+      sourceLabel: SOURCE_LABEL,
+      startedAt: RUN_STARTED_AT,
+      outputFile: OUTPUT_PATH,
+      error: err,
+    });
     console.error('Error:', err.message);
     process.exit(1);
   });

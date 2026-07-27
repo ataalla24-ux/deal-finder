@@ -109,7 +109,10 @@ const MAX_SOCIAL_POST_AGE_DAYS = Number(process.env.MAX_LIVE_SOCIAL_POST_AGE_DAY
 const MAX_EXPIRED_REVIEW_GRACE_DAYS = Number(process.env.MAX_LIVE_EXPIRED_REVIEW_GRACE_DAYS || 7);
 const APPLY_LIVE_VALIDATION = process.env.LIVE_DEAL_VALIDATION_APPLY === '1';
 const LIVE_DEAL_REMOVALS_ENABLED = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
-const CAN_REMOVE_LIVE_DEALS = APPLY_LIVE_VALIDATION && LIVE_DEAL_REMOVALS_ENABLED;
+const AUTOMATED_LIVE_REMOVALS_ALLOWED = process.env.ALLOW_AUTOMATED_LIVE_REMOVALS === '1';
+const CAN_REMOVE_LIVE_DEALS = APPLY_LIVE_VALIDATION
+  && LIVE_DEAL_REMOVALS_ENABLED
+  && AUTOMATED_LIVE_REMOVALS_ALLOWED;
 const FLIGHT_DEAL_PATTERN = /\b(flug|flüge|flight|flights|hin\s*&\s*zurück|hin\s+und\s+zurück|ryanair|wizz\s*air|wizzair|iata)\b/i;
 const GENERIC_DESCRIPTION_PATTERN = /^(free|gratis|rabatt|discount|deal|angebot|aktion|promo|special|event|post|reel|instagram|coupon|gutschein|gewinnspiel|new|neu)$/i;
 const FOOD_SIGNAL_PATTERN = /\b(eis\w*|eissalon\w*|ice cream|gelato|kaffee\w*|coffee|cafe|café|pizza\w*|burger\w*|döner\w*|doener\w*|kebab\w*|sushi|ramen|brunch|croissant|drink|drinks|getränk\w*|getraenk\w*|cocktail\w*|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein\w*|vino|fleisch\w*|meat|steak|bbq|grill\w*|bäckerei|backerei|bakery|krapfen\w*|schoko\w*|erdbeer\w*|dessert\w*)\b/i;
@@ -1069,7 +1072,10 @@ async function main() {
   let freshnessFlagUpdates = 0;
   let freshDealCount = 0;
 
-  function markRemoved(deal, reason) {
+  function markRemoved(deal, reason, options = {}) {
+    const removedAutomatically = options.manual !== true
+      && !/^Moderation:|^Explizit entfernter Deal$/i.test(reason);
+    const applied = options.applied === true;
     removed.push({
       id: deal?.id || '',
       title: cleanText(deal?.title || deal?.brand || '?'),
@@ -1101,16 +1107,17 @@ async function main() {
       slackTs: cleanText(deal?.slackTs || ''),
       slackThreadTs: cleanText(deal?.slackThreadTs || ''),
       approvedAt: cleanText(deal?.approvedAt || ''),
-      removedAutomatically: !/^Moderation:|^Explizit entfernter Deal$/i.test(reason),
+      removedAutomatically,
+      applied,
       reason,
     });
-    if (!CAN_REMOVE_LIVE_DEALS) {
+    if (!applied && removedAutomatically) {
       markForReview(deal, `Auto-Entfernung pausiert: ${reason}`);
     }
   }
 
   function shouldRemoveDeal(deal, reason) {
-    markRemoved(deal, reason);
+    markRemoved(deal, reason, { applied: CAN_REMOVE_LIVE_DEALS });
     return CAN_REMOVE_LIVE_DEALS;
   }
 
@@ -1160,8 +1167,7 @@ async function main() {
       if (shouldRemoveDeal(original, 'Explizit entfernter Deal')) continue;
     }
     if (!forceKeep && curatedChurchIds.has(original.id)) {
-      markRemoved(original, 'Wird durch kuratierten Kirche-/Event-Eintrag ersetzt');
-      continue;
+      if (shouldRemoveDeal(original, 'Wird durch kuratierten Kirche-/Event-Eintrag ersetzt')) continue;
     }
 
     let deal = { ...original };
@@ -1337,6 +1343,7 @@ async function main() {
       if (shouldRemoveDeal(deal, 'Geschützter OMV-VIVA-Deal abgelaufen')) continue;
     }
     if (!deal.id) continue;
+    if (seenIds.has(deal.id)) continue;
 
     seenIds.add(deal.id);
     remaining.push(deal);
@@ -1402,23 +1409,42 @@ async function main() {
       if (shouldRemoveDeal(normalizedChurchDeal, 'Kirchen-/Event-Deal ohne ID')) continue;
     }
     if (seenIds.has(normalizedChurchDeal.id)) {
-      if (shouldRemoveDeal(normalizedChurchDeal, 'Doppelte Kirchen-/Event-ID')) continue;
+      markForReview(normalizedChurchDeal, 'Kuratierter Kirchen-/Event-Eintrag ist bereits live');
+      continue;
     }
     seenIds.add(normalizedChurchDeal.id);
     remaining.push(normalizedChurchDeal);
   }
 
-  const dedupedRemaining = dedupeNormalizedLiveDeals(remaining);
-  duplicateCollapses = remaining.length - dedupedRemaining.length;
+  const dedupePreview = dedupeNormalizedLiveDeals(remaining);
+  duplicateCollapses = remaining.length - dedupePreview.length;
+  const dedupedRemaining = CAN_REMOVE_LIVE_DEALS ? dedupePreview : remaining;
+  if (!CAN_REMOVE_LIVE_DEALS && duplicateCollapses > 0) {
+    const seenDuplicateKeys = new Set();
+    for (const deal of remaining) {
+      const socialKey = normalizeSocialPostKey(deal.url || '');
+      const id = cleanText(deal.id || '');
+      const key = socialKey ? `social:${socialKey}` : id ? `id:${id}` : '';
+      if (!key) continue;
+      if (seenDuplicateKeys.has(key)) {
+        markForReview(deal, 'Möglicher doppelter Deal - automatische Zusammenführung pausiert');
+      } else {
+        seenDuplicateKeys.add(key);
+      }
+    }
+  }
 
   const moderation = loadDealModeration();
   const moderationFilter = filterModeratedDeals(dedupedRemaining, moderation);
   moderationRemovals = moderationFilter.removed.length;
   for (const deal of moderationFilter.removed) {
-    markRemoved(deal, `Moderation: ${deal.reason}`);
+    markRemoved(deal, `Moderation: ${deal.reason}`, {
+      applied: APPLY_LIVE_VALIDATION,
+      manual: true,
+    });
   }
 
-  const finalRemaining = CAN_REMOVE_LIVE_DEALS ? moderationFilter.deals : dedupedRemaining;
+  const finalRemaining = moderationFilter.deals;
   const freshness = normalizeDealFreshnessFlags(finalRemaining, { now });
   finalRemaining.splice(0, finalRemaining.length, ...freshness.deals);
   freshnessFlagUpdates = freshness.changed;
@@ -1451,6 +1477,8 @@ async function main() {
     acc[entry.reason] = (acc[entry.reason] || 0) + 1;
     return acc;
   }, {});
+  const appliedRemovalCount = removed.filter((entry) => entry.applied === true).length;
+  const pendingRemovalCount = removed.length - appliedRemovalCount;
 
   if (APPLY_LIVE_VALIDATION) {
     dealsDoc.deals = finalRemaining;
@@ -1468,11 +1496,12 @@ async function main() {
     checkedAt: now.toISOString(),
     apply: APPLY_LIVE_VALIDATION,
     removalsEnabled: LIVE_DEAL_REMOVALS_ENABLED,
+    automatedRemovalsAllowed: AUTOMATED_LIVE_REMOVALS_ALLOWED,
     removalsPaused: !CAN_REMOVE_LIVE_DEALS,
     totalBefore,
     totalAfter: APPLY_LIVE_VALIDATION ? finalRemaining.length : totalBefore,
-    removedCount: CAN_REMOVE_LIVE_DEALS ? removed.length : 0,
-    wouldRemoveCount: removed.length,
+    removedCount: appliedRemovalCount,
+    wouldRemoveCount: pendingRemovalCount,
     duplicateCollapses,
     moderationRemovals,
     freshnessWindowHours: configuredNewDealWindowHours(),
@@ -1508,7 +1537,7 @@ async function main() {
   console.log(`Normalized live deals: ${APPLY_LIVE_VALIDATION ? finalRemaining.length : totalBefore}`);
   console.log(`Live validation apply: ${APPLY_LIVE_VALIDATION ? 'enabled' : 'disabled'}`);
   console.log(`Live deal removals: ${CAN_REMOVE_LIVE_DEALS ? 'enabled' : 'paused'}`);
-  console.log(`${CAN_REMOVE_LIVE_DEALS ? 'Removed' : 'Would remove'} deals: ${removed.length}`);
+  console.log(`Removed deals: ${appliedRemovalCount}; review-only removal candidates: ${pendingRemovalCount}`);
   console.log(`Duplicate collapses: ${duplicateCollapses}`);
   console.log(`Moderation removals: ${moderationRemovals}`);
   console.log(`Fresh deal flags: ${freshDealCount} new, ${freshnessFlagUpdates} updated within ${configuredNewDealWindowHours()}h window`);

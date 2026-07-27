@@ -8,11 +8,29 @@ import Firecrawl from '@mendable/firecrawl-js';
 import { z } from 'zod';
 import fs from 'fs';
 import { verifyFirecrawlDeals } from './firecrawl-post-verifier.js';
+import {
+  buildPipelineRunReport,
+  summarizeVerifiedDeals,
+  writeFailedPipelineRunReport,
+  writePipelineRunReport,
+} from './pipeline-run-report-utils.js';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY2 || process.env.FIRECRAWL_API_KEY;
+const SOURCE_KEY = 'food3';
+const SOURCE_LABEL = 'Firecrawl Key 2 - Food';
+const OUTPUT_PATH = 'docs/deals-pending-food3.json';
+const RUN_STARTED_AT = new Date();
 
 if (!FIRECRAWL_API_KEY) {
-  console.error('❌ FIRECRAWL_API_KEY2 oder FIRECRAWL_API_KEY nicht gesetzt!');
+  const error = new Error('FIRECRAWL_API_KEY2 oder FIRECRAWL_API_KEY nicht gesetzt');
+  writeFailedPipelineRunReport({
+    sourceKey: SOURCE_KEY,
+    sourceLabel: SOURCE_LABEL,
+    startedAt: RUN_STARTED_AT,
+    outputFile: OUTPUT_PATH,
+    error,
+  });
+  console.error(`❌ ${error.message}!`);
   process.exit(1);
 }
 
@@ -115,6 +133,7 @@ async function main() {
   console.log(`📦 Rohangebote: ${rawOffers.length}`);
 
   const deals = [];
+  const rejected = [];
 
   for (const offer of rawOffers) {
     const providerName = normalizeText(offer.provider_name) || 'Instagram';
@@ -128,7 +147,17 @@ async function main() {
     const reportedPostDate = normalizeText(offer.post_date);
     const combined = `${providerName} ${productType} ${location} ${times} ${conditions} ${offerTypeText}`;
 
-    if (!postUrl || !isInstagramPostUrl(postUrl)) continue;
+    if (!postUrl || !isInstagramPostUrl(postUrl)) {
+      rejected.push({
+        reason: 'invalid-original-post-url',
+        deal: {
+          title: productType || offerTypeText,
+          brand: providerName,
+          url: postUrl,
+        },
+      });
+      continue;
+    }
 
     const type = inferType(offerTypeText, `${productType} ${conditions}`);
     const category = inferCategory(productType, `${offerTypeText} ${conditions}`);
@@ -166,15 +195,37 @@ async function main() {
   const verifiedDeals = await verifyFirecrawlDeals(deals, {
     sourceKey: 'firecrawl-key2-food',
   });
+  const verifiedIDs = new Set(verifiedDeals.map((deal) => deal.id));
+  rejected.push(...deals
+    .filter((deal) => !verifiedIDs.has(deal.id))
+    .map((deal) => ({ reason: 'post-verification-rejected', deal })));
 
   const output = {
     lastUpdated: new Date().toISOString(),
     source: 'firecrawl-food3',
     totalDeals: verifiedDeals.length,
+    pipelineReport: `deal-pipeline-last-run-${SOURCE_KEY}.json`,
     deals: verifiedDeals,
   };
 
-  fs.writeFileSync('docs/deals-pending-food3.json', JSON.stringify(output, null, 2));
+  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(output, null, 2));
+  writePipelineRunReport(buildPipelineRunReport({
+    sourceKey: SOURCE_KEY,
+    sourceLabel: SOURCE_LABEL,
+    startedAt: RUN_STARTED_AT,
+    finishedAt: new Date(),
+    outputFile: OUTPUT_PATH,
+    rawCandidates: rawOffers.length,
+    normalizedCandidates: deals.length,
+    verifiedCandidates: verifiedDeals.length,
+    acceptedDeals: verifiedDeals.length,
+    rejected,
+    diagnostics: {
+      agentStatus: result?.status || 'completed',
+      creditsUsed: Number(result?.creditsUsed || result?.credits_used || 0),
+      verifier: summarizeVerifiedDeals(verifiedDeals),
+    },
+  }));
   console.log(`✅ Final: ${verifiedDeals.length} Deals`);
   console.log('💾 Deals → docs/deals-pending-food3.json');
 }
@@ -182,6 +233,13 @@ async function main() {
 main()
   .then(() => process.exit(0))
   .catch((err) => {
+    writeFailedPipelineRunReport({
+      sourceKey: SOURCE_KEY,
+      sourceLabel: SOURCE_LABEL,
+      startedAt: RUN_STARTED_AT,
+      outputFile: OUTPUT_PATH,
+      error: err,
+    });
     console.error('Error:', err.message);
     process.exit(1);
   });

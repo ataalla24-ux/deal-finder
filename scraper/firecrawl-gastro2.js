@@ -8,11 +8,29 @@ import Firecrawl from '@mendable/firecrawl-js';
 import { z } from 'zod';
 import fs from 'fs';
 import { verifyFirecrawlDeals } from './firecrawl-post-verifier.js';
+import {
+  buildPipelineRunReport,
+  summarizeVerifiedDeals,
+  writeFailedPipelineRunReport,
+  writePipelineRunReport,
+} from './pipeline-run-report-utils.js';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY1 || process.env.FIRECRAWL_API_KEY;
+const SOURCE_KEY = 'gastro2';
+const SOURCE_LABEL = 'Firecrawl Key 1 - Gastro';
+const OUTPUT_PATH = 'docs/deals-pending-gastro2.json';
+const RUN_STARTED_AT = new Date();
 
 if (!FIRECRAWL_API_KEY) {
-  console.error('❌ FIRECRAWL_API_KEY1 oder FIRECRAWL_API_KEY nicht gesetzt!');
+  const error = new Error('FIRECRAWL_API_KEY1 oder FIRECRAWL_API_KEY nicht gesetzt');
+  writeFailedPipelineRunReport({
+    sourceKey: SOURCE_KEY,
+    sourceLabel: SOURCE_LABEL,
+    startedAt: RUN_STARTED_AT,
+    outputFile: OUTPUT_PATH,
+    error,
+  });
+  console.error(`❌ ${error.message}!`);
   process.exit(1);
 }
 
@@ -145,6 +163,10 @@ async function main() {
   console.log();
 
   const allDeals = [];
+  const rejected = [];
+  const runErrors = [];
+  let rawCandidateCount = 0;
+  let completedSources = 0;
   
   console.log(`🔍 Scrape ${SCRAPE_URLS.length} Seiten (Gastro Focus)...`);
   
@@ -172,12 +194,23 @@ async function main() {
         }
         
         if (data && data.deals && Array.isArray(data.deals)) {
+          completedSources += 1;
+          rawCandidateCount += data.deals.length;
           console.log(`      → ${data.deals.length} Deals gefunden`);
           
           for (const d of data.deals) {
             const postUrl = d.post_url || '';
             
-            if (!postUrl) continue;
+            if (!postUrl) {
+              rejected.push({
+                reason: 'missing-target-url',
+                deal: {
+                  title: d.item_given_away || '',
+                  brand: d.brand_or_store || source,
+                },
+              });
+              continue;
+            }
             
             const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
             const validityDate = parseGermanDate(d.validity_date || '');
@@ -216,6 +249,7 @@ async function main() {
       }
     } catch (e) {
       console.log(`      → Error: ${e.message}`);
+      runErrors.push(`${source}: ${e.message}`);
       if (isRateOrCreditError(e.message)) {
         console.log('      → Stoppe Run frühzeitig wegen API-Limit/Credits');
         break;
@@ -232,22 +266,52 @@ async function main() {
   const finalDeals = await verifyFirecrawlDeals(allDeals, {
     sourceKey: 'firecrawl-key1-gastro',
   });
+  const verifiedIDs = new Set(finalDeals.map((deal) => deal.id));
+  rejected.push(...allDeals
+    .filter((deal) => !verifiedIDs.has(deal.id))
+    .map((deal) => ({ reason: 'post-verification-rejected', deal })));
   
-  const outputPath = 'docs/deals-pending-gastro2.json';
   const output = {
     lastUpdated: new Date().toISOString(),
     source: 'gastro2',
     totalDeals: finalDeals.length,
+    pipelineReport: `deal-pipeline-last-run-${SOURCE_KEY}.json`,
     deals: finalDeals,
   };
   
-  fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
-  console.log(`💾 ${finalDeals.length} Deals → ${outputPath}`);
+  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(output, null, 2));
+  writePipelineRunReport(buildPipelineRunReport({
+    sourceKey: SOURCE_KEY,
+    sourceLabel: SOURCE_LABEL,
+    startedAt: RUN_STARTED_AT,
+    finishedAt: new Date(),
+    status: runErrors.length > 0 ? 'completed-with-errors' : 'completed',
+    outputFile: OUTPUT_PATH,
+    rawCandidates: rawCandidateCount,
+    normalizedCandidates: allDeals.length,
+    verifiedCandidates: finalDeals.length,
+    acceptedDeals: finalDeals.length,
+    rejected,
+    diagnostics: {
+      configuredSources: SCRAPE_URLS.length,
+      completedSources,
+      verifier: summarizeVerifiedDeals(finalDeals),
+    },
+    errors: runErrors,
+  }));
+  console.log(`💾 ${finalDeals.length} Deals → ${OUTPUT_PATH}`);
 }
 
 main()
   .then(() => process.exit(0))
   .catch(err => {
+    writeFailedPipelineRunReport({
+      sourceKey: SOURCE_KEY,
+      sourceLabel: SOURCE_LABEL,
+      startedAt: RUN_STARTED_AT,
+      outputFile: OUTPUT_PATH,
+      error: err,
+    });
     console.error('Error:', err.message);
     process.exit(1);
   });

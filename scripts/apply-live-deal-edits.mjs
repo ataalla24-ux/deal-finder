@@ -27,7 +27,10 @@ function enforceModeration(bundle, checkedAt) {
   const deals = dealArrayFromBundle(bundle);
   if (!deals) return { bundle, changed: false, report: { removedCount: 0, removed: [] } };
 
-  const filtered = filterModeratedDeals(deals, loadDealModeration());
+  const filtered = filterModeratedDeals(
+    deals,
+    loadDealModeration(process.env.DEAL_MODERATION_PATH || undefined),
+  );
   if (filtered.removed.length === 0) {
     return { bundle, changed: false, report: { removedCount: 0, removed: [] } };
   }
@@ -58,15 +61,17 @@ const dealsPath = process.env.LIVE_DEALS_PATH || DEFAULT_DEALS_PATH;
 const editsPath = process.env.LIVE_DEAL_EDITS_PATH || DEFAULT_EDITS_PATH;
 const reportPath = process.env.LIVE_DEAL_EDIT_REPORT_PATH || DEFAULT_REPORT_PATH;
 const liveDealRemovalsEnabled = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
+const automatedRemovalsAllowed = process.env.ALLOW_AUTOMATED_LIVE_REMOVALS === '1';
+const canApplyAutomatedRemovals = liveDealRemovalsEnabled && automatedRemovalsAllowed;
+const canReplayManualRemovals = process.env.LIVE_DEAL_MANUAL_REPLAY_ENABLED !== '0';
 const store = loadLiveDealEditStore(editsPath);
 
-if (!store.edits.length) {
-  console.log('No persistent live deal edits to apply');
-  process.exit(0);
-}
-
 const bundle = readJson(dealsPath);
-const result = applyLiveDealEditsToBundle(bundle, store, { checkedAt, allowRemovals: liveDealRemovalsEnabled });
+const result = applyLiveDealEditsToBundle(bundle, store, {
+  checkedAt,
+  allowRemovals: canApplyAutomatedRemovals,
+  allowManualRemovals: canReplayManualRemovals,
+});
 let nextBundle = result.bundle;
 let changed = result.changed;
 const weeklyPick = readJson(DEFAULT_WEEKLY_PATH, null);

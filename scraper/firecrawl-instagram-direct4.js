@@ -8,6 +8,12 @@ import { z } from 'zod';
 
 import { verifyFirecrawlDeals } from './firecrawl-post-verifier.js';
 import {
+  buildPipelineRunReport,
+  summarizeVerifiedDeals,
+  writeFailedPipelineRunReport,
+  writePipelineRunReport,
+} from './pipeline-run-report-utils.js';
+import {
   dedupeKey4Deals,
   isRecentKey4PostUrl,
   KEY4_SEARCH_QUERIES,
@@ -22,6 +28,9 @@ const ROOT = path.join(__dirname, '..');
 const OUTPUT_PATH = path.join(ROOT, 'docs', 'deals-pending-firecrawl4.json');
 const WATCHLIST_PATH = path.join(ROOT, 'docs', 'instagram-watchlist.json');
 const REGISTRY_PATH = path.join(ROOT, 'docs', 'instagram-merchant-registry.json');
+const SOURCE_KEY = 'firecrawl4';
+const SOURCE_LABEL = 'Firecrawl Key 4 - Instagram Direct';
+const RUN_STARTED_AT = new Date();
 
 const MAX_POST_AGE_DAYS = Math.min(7, Math.max(1, Number(process.env.FC4_MAX_AGE_DAYS || 7) || 7));
 const MIN_RAW_CANDIDATES = Math.max(1, Number(process.env.FC4_MIN_RAW_CANDIDATES || 12) || 12);
@@ -432,15 +441,47 @@ async function main() {
       ...discovery.diagnostics,
       qualification: qualification.summary,
     },
+    pipelineReport: `deal-pipeline-last-run-${SOURCE_KEY}.json`,
     deals: qualification.deals,
   };
 
   fs.writeFileSync(OUTPUT_PATH, `${JSON.stringify(output, null, 2)}\n`);
+  writePipelineRunReport(buildPipelineRunReport({
+    sourceKey: SOURCE_KEY,
+    sourceLabel: SOURCE_LABEL,
+    startedAt: RUN_STARTED_AT,
+    finishedAt: new Date(),
+    outputFile: path.relative(ROOT, OUTPUT_PATH),
+    rawCandidates: discovery.diagnostics.rawOffers,
+    normalizedCandidates: discovery.diagnostics.distinctInstagramPosts,
+    verifiedCandidates: allVerifiedNewDeals.length,
+    previousDeals: previousDeals.length,
+    acceptedDeals: qualification.deals.length,
+    rejected: qualification.rejected,
+    rejectedByReason: qualification.summary.rejectedByReason,
+    diagnostics: {
+      discovery: discovery.diagnostics,
+      verifier: summarizeVerifiedDeals(allVerifiedNewDeals),
+      qualification: qualification.summary,
+    },
+    constraints: output.constraints,
+  }));
   console.log(`💾 ${qualification.deals.length} Deals → docs/deals-pending-firecrawl4.json`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
   main().catch((error) => {
+    writeFailedPipelineRunReport({
+      sourceKey: SOURCE_KEY,
+      sourceLabel: SOURCE_LABEL,
+      startedAt: RUN_STARTED_AT,
+      outputFile: path.relative(ROOT, OUTPUT_PATH),
+      error,
+      constraints: {
+        maximumPostAgeDays: MAX_POST_AGE_DAYS,
+        location: 'Wien',
+      },
+    });
     console.error('❌ Firecrawl Key 4 fehlgeschlagen:', error?.message || error);
     process.exit(1);
   });

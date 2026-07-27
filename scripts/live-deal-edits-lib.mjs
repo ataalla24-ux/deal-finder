@@ -226,6 +226,12 @@ export function normalizeLiveDealEdit(raw = {}, options = {}) {
     createdAt: cleanText(existing.createdAt || raw.createdAt || updatedAt),
     updatedAt,
   };
+  const manualRemovalApprovedValue = Object.prototype.hasOwnProperty.call(raw, 'manualRemovalApproved')
+    ? raw.manualRemovalApproved
+    : existing.manualRemovalApproved;
+  if (parseBoolean(manualRemovalApprovedValue)) {
+    edit.manualRemovalApproved = true;
+  }
   const forceKeepValue = Object.prototype.hasOwnProperty.call(raw, 'forceKeep') && raw.forceKeep !== undefined
     ? raw.forceKeep
     : existing.forceKeep;
@@ -370,6 +376,7 @@ function restoredDealFromEdit(edit, checkedAt) {
 export function applyLiveDealEditsToBundle(bundle, store, options = {}) {
   const checkedAt = options.checkedAt || new Date().toISOString();
   const allowRemovals = options.allowRemovals === true;
+  const allowManualRemovals = options.allowManualRemovals === true;
   const deals = dealArrayFromBundle(bundle);
   if (!deals) throw new Error('Live deals bundle does not contain a deals array');
 
@@ -396,9 +403,23 @@ export function applyLiveDealEditsToBundle(bundle, store, options = {}) {
 
     const result = applyEditToDeal(nextDeals[index], edit, checkedAt);
     if (result.removed) {
+      const manualRemovalAllowed = allowManualRemovals && edit.manualRemovalApproved === true;
+      if (!allowRemovals && !manualRemovalAllowed) {
+        skippedRemovals.push({
+          dealId: edit.dealId,
+          url: edit.url || '',
+          manualRemovalApproved: edit.manualRemovalApproved === true,
+        });
+        continue;
+      }
       nextDeals.splice(index, 1);
       changed = true;
-      applied.push({ dealId: edit.dealId, removed: true, changedFields: result.changedFields });
+      applied.push({
+        dealId: edit.dealId,
+        removed: true,
+        manualRemoval: manualRemovalAllowed,
+        changedFields: result.changedFields,
+      });
       continue;
     }
 
@@ -416,6 +437,7 @@ export function applyLiveDealEditsToBundle(bundle, store, options = {}) {
     afterCount: nextDeals.length,
     appliedCount: applied.length,
     removalsEnabled: allowRemovals,
+    manualRemovalsEnabled: allowManualRemovals,
     removalsPaused: !allowRemovals,
     skippedRemovalCount: skippedRemovals.length,
     missingCount: missing.length,

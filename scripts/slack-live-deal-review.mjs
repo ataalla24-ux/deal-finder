@@ -51,13 +51,60 @@ function loadLiveDeals() {
 
 function loadReviewCandidates() {
   try {
-    if (!fs.existsSync(REVIEW_CANDIDATES_PATH)) {
-      return { checkedAt: '', candidates: [] };
+    let checkedAt = '';
+    const candidates = [];
+    if (fs.existsSync(REVIEW_CANDIDATES_PATH)) {
+      const parsed = JSON.parse(fs.readFileSync(REVIEW_CANDIDATES_PATH, 'utf8'));
+      checkedAt = newestTimestamp(checkedAt, parsed.checkedAt);
+      if (Array.isArray(parsed.candidates)) candidates.push(...parsed.candidates);
     }
-    const parsed = JSON.parse(fs.readFileSync(REVIEW_CANDIDATES_PATH, 'utf8'));
+
+    if (fs.existsSync(LLM_REVIEW_PATH)) {
+      const parsed = JSON.parse(fs.readFileSync(LLM_REVIEW_PATH, 'utf8'));
+      checkedAt = newestTimestamp(checkedAt, parsed.generatedAt);
+      if (parsed.apply !== true) {
+        const llmCandidates = Array.isArray(parsed.reviewCandidates)
+          ? parsed.reviewCandidates
+          : Array.isArray(parsed.removalCandidates)
+            ? parsed.removalCandidates
+            : (Array.isArray(parsed.removedDeals) ? parsed.removedDeals : []);
+        candidates.push(...llmCandidates.map((deal) => ({
+          ...deal,
+          reason: `LLM-Vorschlag: ${cleanText(deal.message || deal.suggestion || deal.reason || 'Deal prüfen')}`,
+          details: {
+            confidence: Number(deal.confidence) || 0,
+            sourceSystem: 'llm-live-review-candidate',
+          },
+        })));
+      }
+    }
+
+    const byKey = new Map();
+    for (const candidate of candidates) {
+      const key = reviewKey(candidate);
+      if (!key) continue;
+      const existing = byKey.get(key);
+      if (existing) {
+        byKey.set(key, {
+          ...existing,
+          ...candidate,
+          reason: Array.from(new Set([
+            cleanText(existing.reason),
+            cleanText(candidate.reason),
+          ].filter(Boolean))).join(' + '),
+          details: {
+            ...(existing.details || {}),
+            ...(candidate.details || {}),
+          },
+        });
+      } else {
+        byKey.set(key, candidate);
+      }
+    }
+
     return {
-      checkedAt: cleanText(parsed.checkedAt || ''),
-      candidates: Array.isArray(parsed.candidates) ? parsed.candidates : [],
+      checkedAt,
+      candidates: [...byKey.values()],
     };
   } catch (error) {
     console.warn(`Could not read live review candidates: ${error.message}`);
@@ -85,23 +132,27 @@ function loadOfflineDeals() {
       const parsed = JSON.parse(fs.readFileSync(VALIDATION_REPORT_PATH, 'utf8'));
       checkedAt = newestTimestamp(checkedAt, parsed.checkedAt);
       const removed = Array.isArray(parsed.removed) ? parsed.removed : [];
-      offlineDeals.push(...removed
-        .filter((deal) => deal?.removedAutomatically !== false)
-        .filter((deal) => !isManualRemovalReason(deal?.reason))
-        .map((deal) => ({ ...deal, sourceSystem: deal.sourceSystem || 'live-normalizer' })));
+      if (parsed.apply === true && parsed.removalsPaused !== true) {
+        offlineDeals.push(...removed
+          .filter((deal) => deal?.removedAutomatically !== false)
+          .filter((deal) => !isManualRemovalReason(deal?.reason))
+          .map((deal) => ({ ...deal, sourceSystem: deal.sourceSystem || 'live-normalizer' })));
+      }
     }
     if (fs.existsSync(LLM_REVIEW_PATH)) {
       const parsed = JSON.parse(fs.readFileSync(LLM_REVIEW_PATH, 'utf8'));
       checkedAt = newestTimestamp(checkedAt, parsed.generatedAt);
-      const removed = Array.isArray(parsed.removedDeals) ? parsed.removedDeals : [];
-      offlineDeals.push(...removed
-        .filter((deal) => cleanText(deal?.id || deal?.url || deal?.title))
-        .map((deal) => ({
-          ...deal,
-          reason: cleanText(deal.reason || deal.message || 'LLM Review entfernt'),
-          removedAutomatically: true,
-          sourceSystem: deal.sourceSystem || 'llm-live-review',
-        })));
+      if (parsed.apply === true) {
+        const removed = Array.isArray(parsed.removedDeals) ? parsed.removedDeals : [];
+        offlineDeals.push(...removed
+          .filter((deal) => cleanText(deal?.id || deal?.url || deal?.title))
+          .map((deal) => ({
+            ...deal,
+            reason: cleanText(deal.reason || deal.message || 'LLM Review entfernt'),
+            removedAutomatically: true,
+            sourceSystem: deal.sourceSystem || 'llm-live-review',
+          })));
+      }
     }
 
     const byKey = new Map();
@@ -190,22 +241,28 @@ function buttonValue(deal) {
   return JSON.stringify(payload);
 }
 
-function editValue(deal) {
+function editValue(deal, reviewCandidate = null) {
+  const proposedPatch = reviewCandidate?.proposedPatch && typeof reviewCandidate.proposedPatch === 'object'
+    ? reviewCandidate.proposedPatch
+    : {};
+  const proposed = (field, fallback, max = 240) => cleanText(proposedPatch[field], max) || cleanText(fallback, max);
   const payload = {
     dealId: cleanText(deal.id, 256),
     url: cleanText(deal.url, 1000),
-    title: cleanText(deal.title || deal.brand, 240),
-    brand: cleanText(deal.brand, 120),
-    description: cleanText(deal.description, 2500),
-    distance: cleanText(deal.distance || deal.location || deal.address, 200),
+    title: proposed('title', deal.title || deal.brand, 240),
+    brand: proposed('brand', deal.brand, 120),
+    description: proposed('description', deal.description, 2500),
+    category: proposed('category', deal.category, 80).toLowerCase(),
+    type: proposed('type', deal.type, 40).toLowerCase(),
+    distance: proposed('distance', deal.distance || deal.location || deal.address, 200),
     pubDate: cleanText(deal.pubDate, 80),
     expires: cleanText(deal.expires, 120),
     expiresOriginal: cleanText(deal.expiresOriginal || deal.expires, 180),
     expiryKind: cleanText(deal.expiryKind, 40),
     validOn: cleanText(deal.validOn, 32),
-    validFrom: cleanText(deal.validFrom, 32),
-    validUntil: cleanText(deal.validUntil, 32),
-    expiryDisplayText: cleanText(deal.expiryDisplayText, 180),
+    validFrom: proposed('validFrom', deal.validFrom, 32),
+    validUntil: proposed('validUntil', deal.validUntil, 32),
+    expiryDisplayText: proposed('expiryDisplayText', deal.expiryDisplayText, 180),
   };
   return JSON.stringify(payload);
 }
@@ -266,8 +323,8 @@ function signedRemovalUrl(deal) {
   return signedWorkerUrl('/api/deals/admin/remove-link', buttonValue(deal));
 }
 
-function signedEditUrl(deal) {
-  return signedWorkerUrl('/api/deals/admin/edit-link', editValue(deal));
+function signedEditUrl(deal, reviewCandidate = null) {
+  return signedWorkerUrl('/api/deals/admin/edit-link', editValue(deal, reviewCandidate));
 }
 
 function signedRestoreUrl(deal) {
@@ -281,11 +338,30 @@ function dealBlocks(deal, index, reviewCandidate = null) {
   const pubDate = slackEscape(formatDate(deal.pubDate));
   const id = slackEscape(deal.id || '');
   const reviewReason = reviewCandidate ? slackEscape(reviewCandidate.reason || 'Bitte prüfen') : '';
+  const patchLabels = {
+    brand: 'Anbieter',
+    title: 'Titel',
+    description: 'Beschreibung',
+    category: 'Kategorie',
+    type: 'Typ',
+    distance: 'Ort',
+    validFrom: 'Start',
+    validUntil: 'Ende',
+    expiryDisplayText: 'Gültigkeit',
+  };
+  const patchSummary = reviewCandidate?.proposedPatch && typeof reviewCandidate.proposedPatch === 'object'
+    ? Object.entries(reviewCandidate.proposedPatch)
+      .filter(([, value]) => cleanText(value))
+      .slice(0, 4)
+      .map(([field, value]) => `${patchLabels[field] || field}: ${slackEscape(value)}`)
+      .join(' · ')
+    : '';
   const text = [
     `*${index + 1}. ${reviewReason ? 'Prüfen: ' : ''}${title}*`,
     brand ? brand : '',
     `${location} · ${pubDate}`,
     reviewReason ? `Prüfgrund: ${reviewReason}` : '',
+    patchSummary ? `Vorschlag: ${patchSummary}` : '',
     id ? `ID: \`${id}\`` : '',
   ].filter(Boolean).join('\n');
 
@@ -295,7 +371,7 @@ function dealBlocks(deal, index, reviewCandidate = null) {
       text: { type: 'plain_text', text: 'Bearbeiten' },
       style: 'primary',
       action_id: 'freefinder_edit_live_deal',
-      url: signedEditUrl(deal),
+      url: signedEditUrl(deal, reviewCandidate),
     },
     {
       type: 'button',

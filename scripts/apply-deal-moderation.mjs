@@ -16,7 +16,10 @@ const DOCS_DIR = path.join(ROOT, 'docs');
 const REPORT_PATH = path.join(DOCS_DIR, 'deal-moderation-report.json');
 const DEAL_MODERATION_APPLY = process.env.DEAL_MODERATION_APPLY === '1';
 const LIVE_DEAL_REMOVALS_ENABLED = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
-const CAN_REMOVE_LIVE_DEALS = DEAL_MODERATION_APPLY && LIVE_DEAL_REMOVALS_ENABLED;
+const MANUAL_ACTION_AUTHORIZED = process.env.LIVE_DEAL_MANUAL_ACTION === '1';
+const CAN_REMOVE_LIVE_DEALS = DEAL_MODERATION_APPLY
+  && LIVE_DEAL_REMOVALS_ENABLED
+  && MANUAL_ACTION_AUTHORIZED;
 
 const DEFAULT_TARGETS = [
   'deals.json',
@@ -78,6 +81,7 @@ const report = {
   apply: CAN_REMOVE_LIVE_DEALS,
   applyRequested: DEAL_MODERATION_APPLY,
   removalsEnabled: LIVE_DEAL_REMOVALS_ENABLED,
+  manualActionAuthorized: MANUAL_ACTION_AUTHORIZED,
   removalsPaused: !CAN_REMOVE_LIVE_DEALS,
   files: [],
   removedCount: 0,

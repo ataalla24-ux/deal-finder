@@ -14,7 +14,9 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
-const DOCS_DIR = path.join(ROOT, 'docs');
+const DOCS_DIR = process.env.DEAL_HEALTH_DOCS_DIR
+  ? path.resolve(process.env.DEAL_HEALTH_DOCS_DIR)
+  : path.join(ROOT, 'docs');
 
 const CANDIDATES_OUTPUT_PATH = path.join(DOCS_DIR, 'deal-candidates-index.json');
 const HEALTH_OUTPUT_PATH = path.join(DOCS_DIR, 'deal-source-health.json');
@@ -182,6 +184,31 @@ function loadVerifiedViennaRegistryUsernames() {
     .filter(Boolean));
 }
 
+function loadLatestPipelineReports() {
+  const reports = new Map();
+  const files = fs.readdirSync(DOCS_DIR)
+    .filter((file) => file.startsWith('deal-pipeline-last-run-') && file.endsWith('.json'))
+    .sort((left, right) => left.localeCompare(right));
+  for (const file of files) {
+    const report = readJson(path.join(DOCS_DIR, file), null);
+    const sourceKey = cleanText(report?.sourceKey);
+    if (!sourceKey) continue;
+    reports.set(sourceKey, {
+      status: cleanText(report.status),
+      startedAt: cleanText(report.startedAt),
+      finishedAt: cleanText(report.finishedAt),
+      durationMs: Number(report.durationMs) || 0,
+      counts: report.counts && typeof report.counts === 'object' ? report.counts : {},
+      rejectedByReason: report.rejectedByReason && typeof report.rejectedByReason === 'object'
+        ? report.rejectedByReason
+        : {},
+      errors: Array.isArray(report.errors) ? report.errors.slice(0, 8) : [],
+      reportFile: file,
+    });
+  }
+  return reports;
+}
+
 function hasFoodDrinkSignal(deal) {
   const category = cleanUiNoiseText(deal.category || '').toLowerCase();
   if (FOOD_DRINK_CATEGORIES.has(category)) return true;
@@ -215,6 +242,13 @@ function round(value) {
 
 function buildIssues(stats) {
   const issues = [];
+  if (stats.lastRun?.status === 'failed') issues.push('letzter Pipeline-Lauf ist fehlgeschlagen');
+  if (
+    Number(stats.lastRun?.counts?.rawCandidates || 0) > 0
+    && Number(stats.lastRun?.counts?.acceptedDeals || 0) === 0
+  ) {
+    issues.push('letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal');
+  }
   if (stats.totalDeals === 0) issues.push('liefert aktuell 0 Deals');
   if (stats.totalDeals > 0 && stats.fresh1dRate < 0.2) issues.push('wenige Deals sind frischer als 1 Tag');
   if (stats.totalDeals > 0 && stats.foodDrinkRate < 0.45) issues.push('geringe Food-/Drink-Relevanz');
@@ -286,6 +320,7 @@ function buildSourceWeightScore(stats) {
 async function main() {
   const now = Date.now();
   const verifiedViennaRegistryUsernames = loadVerifiedViennaRegistryUsernames();
+  const latestPipelineReports = loadLatestPipelineReports();
   const allPendingFiles = fs.readdirSync(DOCS_DIR)
     .filter((file) => file.startsWith('deals-pending-') && file.endsWith('.json'))
     .filter((file) => !EXCLUDED_PENDING_FILES.has(file))
@@ -389,6 +424,7 @@ async function main() {
       categories: [],
       types: [],
       sampleTitles: [],
+      lastRun: latestPipelineReports.get(fileSummary.sourceKey) || null,
     });
   }
 
@@ -558,6 +594,15 @@ async function main() {
           totalDeals: source.totalDeals,
         })),
       topSourcesToFix: recommendations,
+      pipelineRuns: {
+        reportedSources: latestPipelineReports.size,
+        failedSources: [...latestPipelineReports.entries()]
+          .filter(([, report]) => report.status === 'failed')
+          .map(([sourceKey]) => sourceKey),
+        completedWithErrors: [...latestPipelineReports.entries()]
+          .filter(([, report]) => report.status === 'completed-with-errors')
+          .map(([sourceKey]) => sourceKey),
+      },
     },
     sources,
   };
