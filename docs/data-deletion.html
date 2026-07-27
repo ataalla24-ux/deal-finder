@@ -3,68 +3,144 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Deletion - FreeFinder</title>
+  <title>Datenlöschung - FreeFinder Wien</title>
+  <meta name="description" content="Anleitung zur Daten- und Kontolöschung für die App FreeFinder Wien.">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 760px; margin: 0 auto; padding: 32px 20px; background: #f8fafc; color: #1f2937; line-height: 1.6; }
-    .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .lang-switch { display: flex; gap: 10px; margin-bottom: 20px; }
-    .lang-switch button { border: none; border-radius: 999px; padding: 10px 16px; font-weight: 700; cursor: pointer; background: #e5e7eb; }
-    .lang-switch button.active { background: linear-gradient(135deg, #111827, #374151); color: #fff; }
-    h1, h2 { margin-bottom: 12px; }
-    p { margin-bottom: 14px; }
-    a { color: #667eea; }
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --ink: #172033;
+      --muted: #5b6475;
+      --line: #e5e7eb;
+      --accent: #ff8a1f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    main {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 12px 34px rgba(15, 23, 42, 0.06);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 5vw, 3rem);
+      line-height: 1.05;
+    }
+
+    h2 {
+      margin: 28px 0 10px;
+      font-size: 1.25rem;
+    }
+
+    p, li {
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    strong {
+      color: var(--ink);
+    }
+
+    a {
+      color: #2563eb;
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-flex;
+      margin-bottom: 16px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: #fff3e6;
+      color: #9a4b00;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+    }
+
+    .divider {
+      margin: 30px 0;
+      border: 0;
+      border-top: 1px solid var(--line);
+    }
   </style>
 </head>
 <body>
-  <div class="lang-switch">
-    <button id="langDe" onclick="setLanguage('de')">Deutsch</button>
-    <button id="langEn" onclick="setLanguage('en')">English</button>
-  </div>
-  <div class="card">
-    <h1 id="title"></h1>
-    <h2 id="subtitle"></h2>
-    <p id="body1"></p>
-    <p><strong>dermarollerdesign@gmail.com</strong></p>
-    <p id="body2"></p>
-    <p id="body3"></p>
-    <p id="updated"></p>
-    <p><a href="/" id="backLink"></a></p>
-  </div>
-  <script>
-    const I18N = {
-      de: {
-        title: 'Datenlöschung',
-        subtitle: 'So löschen Sie Ihre Daten',
-        body1: 'Um die Löschung serverseitig verarbeiteter Daten anzufragen, senden Sie eine E-Mail an:',
-        body2: 'mit dem Betreff "Datenlöschung". Betroffene Referral-, Push- oder sonstige serverseitige Datensätze werden dann geprüft und gelöscht, soweit sie Ihrer Anfrage zugeordnet werden können.',
-        body3: 'Lokal auf Ihrem Gerät gespeicherte Daten wie Favoriten, Einstellungen oder Kommentare können Sie jederzeit selbst entfernen, indem Sie die App-Daten löschen oder die App deinstallieren.',
-        updated: 'Stand: 26.03.2026',
-        backLink: '← Zurück zur App'
-      },
-      en: {
-        title: 'Data deletion',
-        subtitle: 'How to delete your data',
-        body1: 'To request deletion of server-side data, send an email to:',
-        body2: 'with the subject line "Data deletion". Referral, push or other server-side records will then be reviewed and deleted where they can be matched to your request.',
-        body3: 'Data stored locally on your device such as favorites, settings or comments can be removed by clearing app data or uninstalling the app.',
-        updated: 'Updated: 2026-03-26',
-        backLink: '← Back to app'
-      }
-    };
-    function setLanguage(lang) {
-      const copy = I18N[lang] || I18N.de;
-      localStorage.setItem('freefinder_language', lang);
-      document.documentElement.lang = lang;
-      document.getElementById('langDe').classList.toggle('active', lang === 'de');
-      document.getElementById('langEn').classList.toggle('active', lang === 'en');
-      Object.entries(copy).forEach(([key, value]) => {
-        const el = document.getElementById(key);
-        if (el) el.innerHTML = value;
-      });
-    }
-    const saved = localStorage.getItem('freefinder_language');
-    const detected = navigator.language && navigator.language.toLowerCase().startsWith('en') ? 'en' : 'de';
-    setLanguage(saved || detected);
-  </script>
+  <main>
+    <section class="card">
+      <span class="badge">FreeFinder Wien</span>
+      <h1>Daten- und Kontolöschung</h1>
+      <p>
+        Diese Seite gehört zur App <strong>FreeFinder Wien</strong> und erklärt, wie Nutzerinnen
+        und Nutzer die Löschung ihres Kontos und ihrer personenbezogenen Daten anfordern können.
+      </p>
+
+      <h2>Kontolöschung anfordern</h2>
+      <p>
+        Um die Löschung eines FreeFinder-Wien-Kontos oder serverseitig verarbeiteter Daten
+        anzufordern, sende bitte eine E-Mail an:
+      </p>
+      <p><strong><a href="mailto:dermarollerdesign@gmail.com?subject=FreeFinder%20Wien%20Datenl%C3%B6schung">dermarollerdesign@gmail.com</a></strong></p>
+      <p>
+        Bitte verwende den Betreff <strong>FreeFinder Wien Datenlöschung</strong> und sende die
+        Anfrage von der E-Mail-Adresse, die deinem Konto oder deiner Anfrage zugeordnet ist, sofern
+        vorhanden.
+      </p>
+
+      <h2>Welche Daten gelöscht werden</h2>
+      <p>
+        Nach Eingang der Anfrage löschen oder anonymisieren wir personenbezogene Daten, die eindeutig
+        deiner Anfrage zugeordnet werden können. Dazu können beispielsweise Konto-, Referral-,
+        Push-Token-, Support- oder sonstige serverseitige App-Datensätze gehören.
+      </p>
+      <p>
+        Daten, die ausschließlich lokal auf deinem Gerät gespeichert sind, zum Beispiel Favoriten,
+        Einstellungen oder App-Cache, kannst du jederzeit selbst entfernen, indem du die App-Daten
+        löschst oder FreeFinder Wien deinstallierst.
+      </p>
+
+      <h2>Bearbeitungsdauer</h2>
+      <p>
+        Löschanfragen werden in der Regel innerhalb von 30 Tagen bearbeitet. Falls gesetzliche
+        Aufbewahrungspflichten bestehen, werden betroffene Daten nur so lange gespeichert, wie es
+        gesetzlich erforderlich ist.
+      </p>
+
+      <h2>English summary</h2>
+      <p>
+        This page belongs to the <strong>FreeFinder Wien</strong> app. To request deletion of your
+        account or personal data, email
+        <strong><a href="mailto:dermarollerdesign@gmail.com?subject=FreeFinder%20Wien%20Data%20Deletion">dermarollerdesign@gmail.com</a></strong>
+        with the subject <strong>FreeFinder Wien Data Deletion</strong>. We delete or anonymize
+        personal server-side data that can be matched to your request, usually within 30 days.
+      </p>
+
+      <hr class="divider">
+      <p><strong>Stand / Last updated:</strong> 27.07.2026</p>
+      <p><a href="/">Zurück zu freefinder.at</a></p>
+    </section>
+  </main>
 </body>
 </html>
