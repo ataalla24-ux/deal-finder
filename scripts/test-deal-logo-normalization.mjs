@@ -111,6 +111,42 @@ expectNormalizedLogo(
 );
 
 expectNormalizedLogo(
+  'KFC on a Lieferando target keeps the KFC emblem',
+  {
+    brand: 'KFC Wien',
+    logo: '🛵',
+    logoUrl: 'https://freefinder.at/assets/brand-logos/kfc-wien-lieferando-at.png',
+    title: '2 for 1 Deal (Buy one get one free)',
+    description: 'KFC Standorte in Wien',
+    type: 'bogo',
+    category: 'essen',
+    url: 'https://www.lieferando.at/en/menu/kfc-wien-millennium-city',
+  },
+  {
+    brand: 'KFC',
+    logo: '🍗',
+    logoUrl: 'https://freefinder.at/assets/brand-logos/kfc-wien-kfc-at.png',
+  },
+);
+
+expectNormalizedLogo(
+  'Lieferando uses its cached high resolution emblem',
+  {
+    brand: 'Lieferando',
+    title: 'Gratis Lieferando+ für 90 Tage',
+    description: 'Exklusiv für Drei Kund:innen.',
+    type: 'gratis',
+    category: 'essen',
+    url: 'https://www.drei.at/de/dreiplus/ersparnisse/lieferando/',
+  },
+  {
+    brand: 'Lieferando',
+    logo: '🛵',
+    logoUrl: 'https://freefinder.at/assets/brand-logos/lieferando-lieferando-at.png',
+  },
+);
+
+expectNormalizedLogo(
   'direct unknown provider host can supply logo',
   {
     brand: 'Rooni Restaurant',

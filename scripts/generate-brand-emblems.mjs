@@ -88,6 +88,20 @@ const LOGOS = [
     maxHeight: 390
   },
   {
+    file: 'kfc-wien-kfc-at.png',
+    type: 'remote-image',
+    url: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/17/92/c4/1792c4fb-5388-00f7-ae04-41628960f55f/AppIcon-1x_U007emarketing-0-10-0-0-85-220-0.png/512x512bb.jpg',
+    maxWidth: 420,
+    maxHeight: 420
+  },
+  {
+    file: 'lieferando-lieferando-at.png',
+    type: 'remote-image',
+    url: 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/38/be/0f/38be0f8f-dea6-23b6-29ec-dac7f7f21359/AppIcon-AT-0-0-1x_U007epad-0-1-0-sRGB-85-220.png/512x512bb.jpg',
+    maxWidth: 420,
+    maxHeight: 420
+  },
+  {
     file: 'starbucks-starbucks-at.png',
     type: 'simple-icon',
     slug: 'starbucks',
@@ -411,10 +425,19 @@ async function renderLogo(page, logo) {
 async function main() {
   await mkdir(LOGO_DIR, { recursive: true });
 
+  const requestedFiles = process.argv.slice(2).filter((argument) => !argument.startsWith('--'));
+  const selectedLogos = requestedFiles.length
+    ? LOGOS.filter((logo) => requestedFiles.includes(logo.file))
+    : LOGOS;
+  const missingFiles = requestedFiles.filter((file) => !selectedLogos.some((logo) => logo.file === file));
+  if (missingFiles.length) {
+    throw new Error(`Unknown emblem file(s): ${missingFiles.join(', ')}`);
+  }
+
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: SIZE, height: SIZE }, deviceScaleFactor: 1 });
 
-  for (const logo of LOGOS) {
+  for (const logo of selectedLogos) {
     await renderLogo(page, logo);
     console.log(`Generated ${path.relative(ROOT, path.join(LOGO_DIR, logo.file))}`);
   }

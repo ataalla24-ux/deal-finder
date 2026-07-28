@@ -26,6 +26,8 @@ const PROTECTED_EMBLEM_FILES = new Set([
   'icf-wien-icf-church.png',
   'icf-wien-icf-wien-at.png',
   'ikea-restaurant-ikea-com.png',
+  'kfc-wien-kfc-at.png',
+  'lieferando-lieferando-at.png',
   'madame-tussauds-wien-madametussauds-com.png',
   'marschfuerjesus-marschfuerjesus-com.png',
   'mcdonald-s-mcdonalds-at.png',

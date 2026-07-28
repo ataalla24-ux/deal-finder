@@ -1,5 +1,7 @@
 import { normalizeCategoryForScraper } from './category-utils.js';
 
+const PUBLIC_BRAND_LOGO_BASE_URL = 'https://freefinder.at/assets/brand-logos';
+
 const BRAND_RULES = [
   { key: 'centimeter_vienna', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at' },
   { key: 'centimeter vienna', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at' },
@@ -15,6 +17,7 @@ const BRAND_RULES = [
   { key: 'raiffeisen raiffeistag', name: 'Raiffeisen RaiffEIStag', logo: '🍦', category: 'essen', domain: 'raiffeisen.at' },
   { key: 'mcdonald', name: "McDonald's", logo: '🍟', category: 'essen', domain: 'mcdonalds.at' },
   { key: 'burger king', name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at' },
+  { key: 'kfc', name: 'KFC', logo: '🍗', category: 'essen', domain: 'kfc.at', logoFile: 'kfc-wien-kfc-at.png' },
   { key: 'starbucks', name: 'Starbucks', logo: '☕', category: 'kaffee', domain: 'starbucks.at' },
   { key: 'foodora', name: 'foodora', logo: '🍴', category: 'essen', domain: 'foodora.at' },
   { key: 'domino', name: "Domino's Pizza", logo: '🍕', category: 'essen', domain: 'dominos.at' },
@@ -78,7 +81,7 @@ const BRAND_RULES = [
   { key: 'joe', name: 'joo', logo: '💳', category: 'supermarkt', domain: 'joe-club.at' },
   { key: 'joo', name: 'joo', logo: '💳', category: 'supermarkt', domain: 'joe-club.at' },
   { key: 'wolt', name: 'Wolt', logo: '🛵', category: 'essen', domain: 'wolt.com' },
-  { key: 'lieferando', name: 'Lieferando', logo: '🛵', category: 'essen', domain: 'lieferando.at' },
+  { key: 'lieferando', name: 'Lieferando', logo: '🛵', category: 'essen', domain: 'lieferando.at', logoFile: 'lieferando-lieferando-at.png' },
   { key: 'uber eats', name: 'Uber Eats', logo: '🛵', category: 'essen', domain: 'ubereats.com' },
   { key: 'all4golf', name: 'ALL4GOLF', logo: '⛳', category: 'shopping', domain: 'all4golf.de' },
   { key: 'therme wien', name: 'Therme Wien', logo: '💧', category: 'wellness', domain: 'thermewien.at' },
@@ -458,6 +461,7 @@ function inferLogoUrl(deal = {}, brand = '') {
     .filter(Boolean)
     .join(' ');
   const known = findBrandRule(combined);
+  if (known?.logoFile) return `${PUBLIC_BRAND_LOGO_BASE_URL}/${known.logoFile}`;
   if (deal.logoUrl && cachedBrandLogoMatches(deal.logoUrl, brand || deal.brand, known)) return deal.logoUrl;
   if (known?.domain && !known?.preferFallback) return buildLogoUrl(known.domain, { allowSourceLike: true });
   if (deal.logoUrl && shouldUseLogoImage(deal, brand, deal.logoUrl, known)) return deal.logoUrl;
