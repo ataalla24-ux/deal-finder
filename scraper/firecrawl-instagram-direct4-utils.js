@@ -13,9 +13,9 @@ import {
 const DAY_MS = 24 * 60 * 60 * 1000;
 const GIVEAWAY_PATTERN = /\b(?:gewinnspiel|giveaway|verlosung|zu gewinnen|win(?:ne|nen)?|tagge|markiere|kommentiere|folge uns|follow us)\b/i;
 const FREE_ATTRIBUTE_PATTERN = /\b(?:gluten|sugar|zucker|lactose|laktose|alcohol|alkohol|dairy|plastic|meat|fleisch|cruelty|guilt)[-\s]?free\b|\bfree[-\s]?flow\b|\b(?:free|gratis|kostenlos(?:er)?)\s+(?:entry|admission|eintritt|shipping|versand|delivery|lieferung|wifi|wlan|parking|parkplatz)\b|\b(?:eintritt|entry|admission|versand|shipping|lieferung|delivery|wlan|wifi|parking|parkplatz)\s+(?:frei|gratis|kostenlos|free)\b/gi;
-const FREE_OFFER_PATTERN = /(?:\bgratis\b|\bkostenlos(?:e[nrms]?)?\b|\bkostenfrei\b|\bumsonst\b|\bfor free\b|\bcomplimentary\b|\baufs haus\b|\bon the house\b|\b0\s*(?:€|eur|euro)\b|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b2\s*[+&]\s*1\b|\bbogo\b|\bbuy one get one(?: free)?\b|\bwelcome drink\b|\b(?:free|gratis|kostenlose?)\s+(?:sample|probe|kostprobe|verkostung|tasting)\b)/i;
-const FOOD_DRINK_PATTERN = /\b(?:essen|food|speise|gericht|menü|menu|meal|frühstück|fruehstueck|brunch|lunch|dinner|buffet|restaurant|gastronomie|cafe|café|kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drink|getränk|getraenk|cocktail|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothie|limonade|pizza|burger|döner|doener|kebab|kebap|falafel|sushi|ramen|pasta|tiramisu|dessert|kuchen|cake|croissant|bagel|waffel|eis|gelato|sandwich|snack|pommes|fries|taco|burrito|bakery|bäckerei|baeckerei|brot|gebäck|gebaeck)\b/i;
-const DRINK_PATTERN = /\b(?:kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drink|getränk|getraenk|cocktail|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothie|limonade|shake)\b/i;
+const FREE_OFFER_PATTERN = /(?:\bgratis\b|\bkostenlos(?:e[nrms]?)?\b|\bkostenfrei\b|\bumsonst\b|\bfor free\b|\bcomplimentary\b|\baufs haus\b|\bon the house\b|\b0\s*(?:€|eur|euro)\b|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b2\s*[+&]\s*1\b|\bbogo\b|\bbuy[\s,-]*(?:one|1)[\s,-]*get[\s,-]*(?:one|1)(?:[\s,-]*(?:free|gratis|kostenlos))?\b|\bwelcome drink\b|\b(?:free|gratis|kostenlose?)\s+(?:sample|probe|kostprobe|verkostung|tasting)\b)/i;
+const FOOD_DRINK_PATTERN = /\b(?:essen|foods?|speisen?|gerichte?|menü|menus?|meals?|frühstück|fruehstueck|brunch|lunch|dinner|buffet|restaurant|gastronomie|cafe|café|kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drinks?|getränke?|getraenke?|cocktails?|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothies?|limonade|pizzas?|burgers?|döner|doener|kebab|kebap|falafel|sushi|ramen|pasta|tiramisu|desserts?|kuchen|cakes?|croissants?|bagels?|waffeln?|eis|gelato|sandwich(?:es)?|snacks?|pommes|fries|tacos?|burritos?|bakery|bäckerei|baeckerei|brot|gebäck|gebaeck)\b/i;
+const DRINK_PATTERN = /\b(?:kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drinks?|getränke?|getraenke?|cocktails?|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothies?|limonade|shakes?)\b/i;
 const NON_CONSUMABLE_FREE_PATTERN = /(?:\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app)\b.{0,100}\b(?:gratis|kostenlos|for free|free)\b|\b(?:gratis|kostenlos|for free|free)\b.{0,100}\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app)\b|\b(?:service|reparatur|wartungs?)[-\s]?(?:pauschale|gebühr|gebuehr|fee)\b)/i;
 const VIENNA_POSTCODE_PATTERN = /(?:^|\D)(1(?:0[1-9]|1\d|2[0-3])0)(?!\d)/;
 const VIENNA_DISTRICT_PATTERN = /\b(?:innere stadt|leopoldstadt|landstra(?:ß|ss)e|wieden|margareten|mariahilf|neubau|josefstadt|alsergrund|favoriten|meidling|hietzing|penzing|rudolfsheim|ottakring|hernals|währing|waehring|döbling|doebling|brigittenau|floridsdorf|donaustadt|liesing|(?:1\d|2[0-3])\.\s*bezirk)\b/i;
@@ -52,7 +52,7 @@ function stableHash(value) {
 }
 
 function offerType(signal) {
-  if (/\b(?:1\s*[+&]\s*1|2\s*(?:für|fuer|for)\s*1|2\s*[+&]\s*1|bogo|buy one get one)\b/i.test(signal)) {
+  if (/\b(?:1\s*[+&]\s*1|2\s*(?:für|fuer|for)\s*1|2\s*[+&]\s*1|bogo|buy[\s,-]*(?:one|1)[\s,-]*get[\s,-]*(?:one|1))\b/i.test(signal)) {
     return 'bogo';
   }
   return 'gratis';

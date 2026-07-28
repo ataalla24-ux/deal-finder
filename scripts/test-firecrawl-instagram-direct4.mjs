@@ -146,6 +146,16 @@ const citedResult = qualifyKey4Deals([citedLocation], { now, maxAgeDays: 7 });
 assert.equal(citedResult.deals.length, 1, 'a specific Vienna address cited to the same original post is accepted');
 assert.equal(citedResult.deals[0].viennaEvidence.method, 'firecrawl-cited-original-post-location');
 
+const digitBogo = withVerifiedOriginalPost((await timestampDeals([rawOffer({
+  url: freshUrl,
+  description: 'BUY 1, GET 1 FREE Cocktails',
+  location: 'Neubaugasse 12, 1070 Wien',
+  locationCitation: freshUrl,
+})]))[0], 'BUY 1, GET 1 FREE ON ALL COCKTAILS. Neubaugasse 12, 1070 Wien.');
+const digitBogoResult = qualifyKey4Deals([digitBogo], { now, maxAgeDays: 7 });
+assert.equal(digitBogoResult.deals.length, 1, 'digit-based BOGO captions are accepted as free gastro offers');
+assert.equal(digitBogoResult.deals[0].type, 'bogo');
+
 const genericVienna = withVerifiedOriginalPost((await timestampDeals([rawOffer({
   url: citedUrl,
   description: '1+1 gratis Burger',
