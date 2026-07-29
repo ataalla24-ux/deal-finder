@@ -14,9 +14,42 @@ const errors = [];
 const locations = Array.isArray(mapPayload.locations) ? mapPayload.locations : [];
 const liveDealIds = new Set((dealsPayload.deals || []).map((deal) => String(deal.id || '').trim()).filter(Boolean));
 const locationIds = new Set();
+const coverageByDealId = new Map();
+const locationsByChainId = new Map();
+
+const requiredChainCoverage = [
+  {
+    chainId: 'omv-vienna',
+    minimumLocations: 21,
+    dealCoverage: {
+      'joe-omv-viva-free-taste-l62fzo': 21,
+      'joe-omv-viva-free-taste-flur7': 21,
+      'joe-omv-viva-free-taste-xipghf': 21,
+      'joe-omv-viva-free-taste-6qmpsq': 21,
+      'joe-omv-xlrh16': 17
+    }
+  },
+  {
+    chainId: 'nordsee-vienna-area',
+    minimumLocations: 12,
+    dealCoverage: {
+      'g2-1ffpc0f': 12,
+      'benefit-drei-plus-aekytk': 12
+    }
+  },
+  {
+    chainId: 'ikea-vienna-area',
+    minimumLocations: 3,
+    dealCoverage: {
+      'g2-5ntng7': 3,
+      'g2-5rler1': 3
+    }
+  }
+];
 
 if (mapPayload.schemaVersion !== 1) errors.push('schemaVersion must be 1');
 if (!locations.length) errors.push('locations must not be empty');
+if (Number.isNaN(Date.parse(mapPayload.lastUpdated))) errors.push('lastUpdated must be an ISO date');
 
 for (const [index, location] of locations.entries()) {
   const label = `locations[${index}]`;
@@ -43,11 +76,35 @@ for (const [index, location] of locations.entries()) {
   if (!(Number(location.confidence) >= 0.9 && Number(location.confidence) <= 1)) {
     errors.push(`${label}.confidence must be between 0.9 and 1`);
   }
+  const chainId = String(location.chainId || '').trim();
+  if (chainId) {
+    const chainLocations = locationsByChainId.get(chainId) || [];
+    chainLocations.push(location);
+    locationsByChainId.set(chainId, chainLocations);
+  }
   if (!dealIds.length && matchCount === 0) {
     errors.push(`${label} must reference a deal or include a matching rule`);
   }
   for (const dealId of dealIds) {
     if (!liveDealIds.has(dealId)) errors.push(`${label} references missing live deal: ${dealId}`);
+    coverageByDealId.set(dealId, (coverageByDealId.get(dealId) || 0) + 1);
+  }
+}
+
+for (const requirement of requiredChainCoverage) {
+  const chainLocations = locationsByChainId.get(requirement.chainId) || [];
+  if (chainLocations.length < requirement.minimumLocations) {
+    errors.push(
+      `${requirement.chainId} must include at least ${requirement.minimumLocations} locations, found ${chainLocations.length}`
+    );
+  }
+  for (const [dealId, minimumLocations] of Object.entries(requirement.dealCoverage)) {
+    const actualLocations = coverageByDealId.get(dealId) || 0;
+    if (actualLocations < minimumLocations) {
+      errors.push(
+        `${dealId} must be mapped to at least ${minimumLocations} locations, found ${actualLocations}`
+      );
+    }
   }
 }
 
