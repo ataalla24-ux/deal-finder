@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>1 Monat FreeFinder PLUS gratis</title>
+  <meta name="description" content="30 Tage FreeFinder PLUS gratis: Entdecke Deals für Essen, Kaffee und Getränke in Wien. Keine Zahlungsmethode nötig.">
+  <meta name="theme-color" content="#ff6b35">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="FreeFinder">
+  <meta property="og:title" content="1 Monat FreeFinder PLUS gratis">
+  <meta property="og:description" content="Gratis Essen & Trinken in Wien entdecken. 30 Tage PLUS, ohne Zahlungsmethode.">
+  <meta property="og:url" content="https://freefinder.at/plus-gratis.html?promo=PLUS30WIEN">
+  <meta property="og:image" content="https://freefinder.at/assets/campaigns/plus30-preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/icon-192.svg">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #0b1428;
+      --muted: #526079;
+      --orange: #ff6b35;
+      --coral: #e8543f;
+      --green: #3ecf79;
+      --paper: #fffdf9;
+      --line: rgba(11, 20, 40, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--paper);
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: ui-rounded, "SF Pro Rounded", "SF Pro Display", Inter, system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    button,
+    a {
+      font: inherit;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 760px;
+      overflow: hidden;
+      isolation: isolate;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero::after {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      content: "";
+      background:
+        linear-gradient(90deg, rgba(255, 253, 249, 0.98) 0%, rgba(255, 253, 249, 0.9) 43%, rgba(255, 253, 249, 0.15) 76%),
+        linear-gradient(0deg, rgba(255, 253, 249, 0.98) 0%, transparent 36%);
+    }
+
+    .hero-photo {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .nav,
+    .hero-inner,
+    .app-proof,
+    .fine-print {
+      width: min(1120px, calc(100% - 40px));
+      margin-inline: auto;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 82px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--ink);
+      font-size: 24px;
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    .brand img {
+      width: 46px;
+      height: 46px;
+      border-radius: 11px;
+      background: var(--orange);
+    }
+
+    .campaign-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 0 15px;
+      border: 1px solid rgba(255, 107, 53, 0.25);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      color: #c84724;
+      font-size: 14px;
+      font-weight: 900;
+      backdrop-filter: blur(16px);
+    }
+
+    .hero-inner {
+      display: flex;
+      min-height: 635px;
+      align-items: center;
+      padding: 44px 0 88px;
+    }
+
+    .copy {
+      width: min(640px, 100%);
+    }
+
+    .eyebrow {
+      margin: 0 0 18px;
+      color: #d34d28;
+      font-size: 15px;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 670px;
+      margin: 0;
+      font-size: clamp(52px, 7.2vw, 92px);
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+
+    h1 span {
+      color: var(--orange);
+    }
+
+    .lead {
+      max-width: 580px;
+      margin: 28px 0 0;
+      color: var(--muted);
+      font-size: clamp(20px, 2.5vw, 28px);
+      font-weight: 650;
+      line-height: 1.35;
+    }
+
+    .benefits {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      margin: 25px 0 0;
+      padding: 0;
+      list-style: none;
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .benefits li::before {
+      margin-right: 7px;
+      color: var(--green);
+      content: "✓";
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 56px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 22px;
+      border: 0;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .button-primary {
+      color: white;
+      background: var(--ink);
+      box-shadow: 0 14px 30px rgba(11, 20, 40, 0.18);
+    }
+
+    .button-secondary {
+      color: var(--ink);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .code-line {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .code-line strong {
+      color: var(--ink);
+      letter-spacing: 0.08em;
+    }
+
+    .app-proof {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(280px, 1.1fr);
+      gap: 56px;
+      align-items: center;
+      padding: 88px 0;
+    }
+
+    .app-proof h2 {
+      margin: 0;
+      font-size: clamp(36px, 5vw, 64px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .app-proof p {
+      margin: 20px 0 0;
+      color: var(--muted);
+      font-size: 19px;
+      line-height: 1.55;
+    }
+
+    .screens {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .screens img {
+      width: min(42%, 250px);
+      border: 8px solid var(--ink);
+      border-radius: 30px;
+      background: white;
+      box-shadow: 0 20px 45px rgba(11, 20, 40, 0.18);
+    }
+
+    .screens img:nth-child(2) {
+      margin-top: 46px;
+    }
+
+    .fine-print {
+      padding: 24px 0 44px;
+      color: #778198;
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .status {
+      min-height: 22px;
+      margin-top: 10px;
+      color: #138747;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 760px) {
+      .hero {
+        min-height: 720px;
+      }
+
+      .hero::after {
+        background:
+          linear-gradient(180deg, rgba(255, 253, 249, 0.98) 0%, rgba(255, 253, 249, 0.86) 58%, rgba(255, 253, 249, 0.48) 100%);
+      }
+
+      .hero-photo {
+        object-position: 68% center;
+        opacity: 0.48;
+      }
+
+      .nav {
+        min-height: 72px;
+      }
+
+      .brand {
+        font-size: 21px;
+      }
+
+      .brand img {
+        width: 40px;
+        height: 40px;
+      }
+
+      .campaign-pill {
+        display: none;
+      }
+
+      .hero-inner {
+        min-height: 640px;
+        align-items: flex-start;
+        padding-top: 70px;
+      }
+
+      h1 {
+        font-size: clamp(48px, 15vw, 72px);
+      }
+
+      .lead {
+        font-size: 21px;
+      }
+
+      .actions,
+      .button {
+        width: 100%;
+      }
+
+      .app-proof {
+        grid-template-columns: 1fr;
+        gap: 42px;
+        padding: 64px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <img class="hero-photo" src="/assets/campaigns/plus30-food-background.jpg" alt="">
+      <nav class="nav" aria-label="Hauptnavigation">
+        <a class="brand" href="/">
+          <img src="/icon-192.svg" alt="">
+          <span>FreeFinder</span>
+        </a>
+        <span class="campaign-pill">30 Tage · 0 € · ohne Zahlungsmethode</span>
+      </nav>
+
+      <div class="hero-inner">
+        <div class="copy">
+          <p class="eyebrow">Exklusiver Gratis-Monat</p>
+          <h1>1 Monat <span>PLUS.</span><br>0 €.</h1>
+          <p class="lead">Entdecke gratis Essen, Kaffee und Getränke in Wien – mit Karte, smarten Empfehlungen und allen PLUS-Funktionen.</p>
+          <ul class="benefits">
+            <li>30 Tage PLUS</li>
+            <li>Keine Zahlungsmethode</li>
+            <li>Einmal pro Gerät</li>
+          </ul>
+          <div class="actions">
+            <a class="button button-primary" id="open-app" href="freefinder://promotion?promo=PLUS30WIEN">Jetzt gratis aktivieren</a>
+            <a class="button button-secondary store-link" data-store="ios" href="https://apps.apple.com/app/id6758958213">iPhone App laden</a>
+            <a class="button button-secondary store-link" data-store="android" href="https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien">Android App laden</a>
+          </div>
+          <p class="code-line">Aktionscode: <strong>PLUS30WIEN</strong></p>
+          <div class="status" id="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="app-proof">
+      <div>
+        <h2>Wien-Deals, die sich wirklich lohnen.</h2>
+        <p>Finde aktuelle Angebote, öffne den Ziellink direkt und entdecke alle Deals auf der Karte. Mit PLUS bekommst du zusätzlich personalisierte Empfehlungen, Stats und erweiterte Filter.</p>
+      </div>
+      <div class="screens" aria-label="FreeFinder App Vorschau">
+        <img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder Deals Übersicht">
+        <img src="/assets/current-ios/for-you.jpg" alt="FreeFinder Für dich Ansicht">
+      </div>
+    </section>
+
+    <p class="fine-print">Der Gratis-Monat endet automatisch nach 30 Tagen und wird nicht kostenpflichtig verlängert. Keine Zahlungsmethode erforderlich. Einmalige Aktivierung pro Gerät. Die Aktion kann jederzeit beendet werden.</p>
+  </main>
+
+  <script>
+    (() => {
+      const promoCode = 'PLUS30WIEN';
+      const clipboardValue = 'FREEFINDER_PROMO:' + promoCode;
+      const status = document.getElementById('status');
+
+      async function rememberPromotion() {
+        try {
+          await navigator.clipboard.writeText(clipboardValue);
+          status.textContent = 'Aktionscode gesichert – FreeFinder aktiviert ihn beim ersten Öffnen.';
+          return true;
+        } catch (_) {
+          const input = document.createElement('textarea');
+          input.value = clipboardValue;
+          input.setAttribute('readonly', '');
+          input.style.position = 'fixed';
+          input.style.opacity = '0';
+          document.body.appendChild(input);
+          input.select();
+          const copied = document.execCommand('copy');
+          input.remove();
+          if (copied) {
+            status.textContent = 'Aktionscode gesichert – FreeFinder aktiviert ihn beim ersten Öffnen.';
+          }
+          return copied;
+        }
+      }
+
+      document.getElementById('open-app').addEventListener('click', () => {
+        rememberPromotion();
+      });
+
+      document.querySelectorAll('.store-link').forEach((link) => {
+        link.addEventListener('click', async (event) => {
+          event.preventDefault();
+          await rememberPromotion();
+          window.location.href = link.href;
+        });
+      });
+
+      const isAndroid = /android/i.test(navigator.userAgent);
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      document.querySelectorAll('.store-link').forEach((link) => {
+        const store = link.dataset.store;
+        if ((isAndroid && store === 'ios') || (isIOS && store === 'android')) {
+          link.hidden = true;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -12,6 +12,14 @@ const APP_STORE_APP_ID = '6758958213';
 const WEBSITE_HOME_URL = 'https://freefinder.at/';
 const WEBSITE_DEALS_JSON_URL = `${WEBSITE_HOME_URL}deals.json`;
 const WEBSITE_SHARE_IMAGE_URL = `${WEBSITE_HOME_URL}og-preview.png`;
+const PROMOTION_CAMPAIGNS = {
+  PLUS30WIEN: {
+    code: 'PLUS30WIEN',
+    plan: 'plus',
+    durationDays: 30,
+    label: '1 Monat FreeFinder PLUS gratis',
+  },
+};
 const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Europe/Vienna',
   year: 'numeric',
@@ -75,6 +83,11 @@ function normalizeCode(value) {
   return /^FF-[A-Z0-9]{4,12}$/.test(code) ? code : '';
 }
 
+function normalizePromotionCode(value) {
+  const code = String(value || '').trim().toUpperCase();
+  return /^[A-Z0-9_-]{4,24}$/.test(code) ? code : '';
+}
+
 function normalizeId(value) {
   const id = String(value || '').trim();
   return /^[a-zA-Z0-9_-]{8,128}$/.test(id) ? id : '';
@@ -100,6 +113,24 @@ function claimKey(token) {
 
 function pendingKey(code, visitorId) {
   return `referral:pending:${code}:${visitorId}`;
+}
+
+function promotionClaimKey(code, deviceId) {
+  return `promotion:claim:${code}:${deviceId}`;
+}
+
+function promotionPayload(campaign, record, now = Date.now()) {
+  const claimedAt = Number(record?.claimedAt || 0) || null;
+  const expiresAt = Number(record?.expiresAt || 0) || null;
+  return {
+    code: campaign.code,
+    label: campaign.label,
+    plan: campaign.plan,
+    durationDays: campaign.durationDays,
+    claimedAt,
+    expiresAt,
+    active: Boolean(expiresAt && expiresAt > now),
+  };
 }
 
 function apnsTokenKey(token) {
@@ -3091,6 +3122,82 @@ export default {
 
     if (!env.REFERRAL_KV) {
       return invalid('REFERRAL_KV binding is missing', 500);
+    }
+
+    if (path === '/api/promotions/redeem' && request.method === 'POST') {
+      const body = await readBody(request);
+      const code = normalizePromotionCode(body?.code);
+      const deviceId = normalizeId(body?.deviceId);
+      const platform = cleanShortText(body?.platform, 24).toLowerCase();
+      const appVersion = cleanShortText(body?.appVersion, 64);
+      const campaign = PROMOTION_CAMPAIGNS[code];
+
+      if (!campaign) return invalid('Promotion code is not active', 404);
+      if (!deviceId) return invalid('Invalid device id');
+      if (!['ios', 'android'].includes(platform)) return invalid('Invalid platform');
+
+      const key = promotionClaimKey(code, deviceId);
+      const existing = await getJsonKV(env, key);
+      if (existing) {
+        const promotion = promotionPayload(campaign, existing);
+        if (!promotion.active) {
+          return json({
+            ok: false,
+            error: 'Promotion was already redeemed on this device',
+            alreadyRedeemed: true,
+            promotion,
+          }, 409);
+        }
+        return json({
+          ok: true,
+          alreadyRedeemed: true,
+          promotion,
+        });
+      }
+
+      const claimedAt = Date.now();
+      const record = {
+        code,
+        deviceId,
+        plan: campaign.plan,
+        claimedAt,
+        expiresAt: claimedAt + campaign.durationDays * 24 * 60 * 60 * 1000,
+        platform,
+        appVersion,
+        source: cleanShortText(body?.source, 80) || 'campaign-link',
+        userAgent: cleanShortText(request.headers.get('user-agent'), 256),
+      };
+      await putJsonKV(env, key, record);
+
+      return json({
+        ok: true,
+        redeemed: true,
+        promotion: promotionPayload(campaign, record),
+      }, 201);
+    }
+
+    if (path === '/api/promotions/status' && request.method === 'GET') {
+      const code = normalizePromotionCode(url.searchParams.get('code'));
+      const deviceId = normalizeId(url.searchParams.get('deviceId'));
+      const campaign = PROMOTION_CAMPAIGNS[code];
+
+      if (!campaign) return invalid('Promotion code is not active', 404);
+      if (!deviceId) return invalid('Invalid device id');
+
+      const record = await getJsonKV(env, promotionClaimKey(code, deviceId));
+      if (!record) {
+        return json({
+          ok: true,
+          redeemed: false,
+          promotion: promotionPayload(campaign, null),
+        });
+      }
+
+      return json({
+        ok: true,
+        redeemed: true,
+        promotion: promotionPayload(campaign, record),
+      });
     }
 
     if (path === '/api/referrals/register' && request.method === 'POST') {
