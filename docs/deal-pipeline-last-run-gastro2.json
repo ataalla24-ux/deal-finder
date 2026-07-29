@@ -1,38 +1,40 @@
 {
   "schemaVersion": 1,
-  "runId": "gastro2-2026-07-28T04:56:46.520Z",
+  "runId": "gastro2-2026-07-29T04:42:24.146Z",
   "sourceKey": "gastro2",
   "sourceLabel": "Firecrawl Key 1 - Gastro",
-  "status": "completed",
-  "startedAt": "2026-07-28T04:11:36.700Z",
-  "finishedAt": "2026-07-28T04:56:46.520Z",
-  "durationMs": 2709820,
+  "status": "completed-with-errors",
+  "startedAt": "2026-07-29T04:13:31.186Z",
+  "finishedAt": "2026-07-29T04:42:24.146Z",
+  "durationMs": 1732960,
   "outputFile": "docs/deals-pending-gastro2.json",
   "counts": {
-    "rawCandidates": 357,
-    "normalizedCandidates": 357,
-    "verifiedCandidates": 357,
+    "rawCandidates": 313,
+    "normalizedCandidates": 313,
+    "verifiedCandidates": 313,
     "previousDeals": 0,
-    "acceptedDeals": 357,
+    "acceptedDeals": 313,
     "rejectedDeals": 0
   },
   "rejectedByReason": {},
   "rejectedSamples": [],
   "diagnostics": {
     "configuredSources": 7,
-    "completedSources": 6,
+    "completedSources": 5,
     "verifier": {
       "statusCounts": {
-        "not-recorded": 309,
-        "timestamp-derived": 36,
-        "verified-original-post": 12
+        "not-recorded": 193,
+        "timestamp-derived": 102,
+        "verified-original-post": 18
       },
-      "verifiedOriginalPosts": 12,
+      "verifiedOriginalPosts": 18,
       "timestampOnlyPosts": 0,
       "unavailableOriginalPosts": 0,
       "registryViennaEvidence": 0
     }
   },
   "constraints": {},
-  "errors": []
+  "errors": [
+    "1000things.at: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+  ]
 }
