@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-08-01T13:05:41.966Z",
+  "lastUpdated": "2026-08-01T14:14:34.438Z",
   "source": "firecrawl4",
   "totalDeals": 1,
   "constraints": {
@@ -9,213 +9,320 @@
     "location": "Wien",
     "offer": "kostenlose Speisen/Getränke, 1+1/2für1 und kostenlose Gastro-Proben",
     "originalEvidenceRequiredForAutomaticAcceptance": true,
-    "discoveryMode": "merchant-first Firecrawl search plus recent direct-post seeds from existing pipelines"
+    "discoveryMode": "Gastro2-style Firecrawl hashtag agents plus merchant search and recent direct-post seeds",
+    "hashtagAgentSources": 10,
+    "hashtagAgentTimeoutSeconds": 240,
+    "excludedDiscoverySources": [
+      "1000things.at",
+      "meinbezirk.at"
+    ]
   },
   "diagnostics": {
     "targetAccounts": 30,
-    "seedCandidates": 35,
+    "seedCandidates": 36,
     "discovery": {
-      "queries": [
-        {
-          "id": "general-1",
-          "status": "completed",
-          "results": 3,
-          "error": ""
-        },
-        {
-          "id": "general-2",
-          "status": "completed",
-          "results": 3,
-          "error": ""
-        },
-        {
-          "id": "general-3",
-          "status": "completed",
-          "results": 6,
-          "error": ""
-        },
-        {
-          "id": "general-4",
-          "status": "completed",
-          "results": 6,
-          "error": ""
-        },
-        {
-          "id": "general-5",
-          "status": "completed",
-          "results": 6,
-          "error": ""
-        },
-        {
-          "id": "general-6",
-          "status": "completed",
-          "results": 0,
-          "error": ""
-        },
-        {
-          "id": "profile-zushimarket",
-          "status": "completed",
-          "results": 6,
-          "error": ""
-        },
-        {
-          "id": "profile-woa.vienna",
-          "status": "completed",
-          "results": 1,
-          "error": ""
-        },
-        {
-          "id": "profile-ciosgrill",
-          "status": "completed",
-          "results": 0,
-          "error": ""
-        },
-        {
-          "id": "profile-corner_xvi",
-          "status": "completed",
-          "results": 0,
-          "error": ""
-        },
-        {
-          "id": "profile-assal.burger",
-          "status": "completed",
-          "results": 6,
-          "error": ""
-        },
-        {
-          "id": "profile-2ndstreetburger",
-          "status": "completed",
-          "results": 0,
-          "error": ""
-        },
-        {
-          "id": "profile-framburi_fries",
-          "status": "completed",
-          "results": 0,
-          "error": ""
-        },
-        {
-          "id": "profile-cafe_wirr",
-          "status": "completed",
-          "results": 1,
-          "error": ""
-        },
-        {
-          "id": "profile-mangalet.at",
-          "status": "completed",
-          "results": 3,
-          "error": ""
-        },
-        {
-          "id": "profile-pizzeriapummaro",
-          "status": "completed",
-          "results": 0,
-          "error": ""
-        },
-        {
-          "id": "profile-gustolab.vienna",
-          "status": "completed",
-          "results": 3,
-          "error": ""
-        },
-        {
-          "id": "profile-soya_wien",
-          "status": "completed",
-          "results": 0,
-          "error": ""
-        },
-        {
-          "id": "profile-dahabdoener",
-          "status": "completed",
-          "results": 0,
-          "error": ""
-        },
-        {
-          "id": "profile-castillo.wien",
-          "status": "completed",
-          "results": 1,
-          "error": ""
-        },
-        {
-          "id": "profile-hotline_5",
-          "status": "completed",
-          "results": 0,
-          "error": ""
-        },
-        {
-          "id": "profile-meat_point_smashburgerbar",
-          "status": "completed",
-          "results": 0,
-          "error": ""
-        },
-        {
-          "id": "profile-viennas_joy",
-          "status": "completed",
-          "results": 0,
-          "error": ""
-        },
-        {
-          "id": "profile-rollercoasterrestaurant",
-          "status": "completed",
-          "results": 0,
-          "error": ""
-        }
-      ],
-      "queryCount": 24,
-      "failedQueries": 0,
-      "rawSearchResults": 45,
-      "directPostResults": 38,
-      "recentDistinctPosts": 0,
-      "prefilteredAsOld": 38
+      "search": {
+        "queries": [
+          {
+            "id": "general-1",
+            "status": "completed",
+            "results": 1,
+            "error": ""
+          },
+          {
+            "id": "general-2",
+            "status": "completed",
+            "results": 4,
+            "error": ""
+          },
+          {
+            "id": "general-3",
+            "status": "completed",
+            "results": 6,
+            "error": ""
+          },
+          {
+            "id": "general-4",
+            "status": "completed",
+            "results": 6,
+            "error": ""
+          },
+          {
+            "id": "general-5",
+            "status": "completed",
+            "results": 6,
+            "error": ""
+          },
+          {
+            "id": "general-6",
+            "status": "completed",
+            "results": 0,
+            "error": ""
+          },
+          {
+            "id": "general-7",
+            "status": "completed",
+            "results": 6,
+            "error": ""
+          },
+          {
+            "id": "general-8",
+            "status": "completed",
+            "results": 6,
+            "error": ""
+          },
+          {
+            "id": "profile-zushimarket",
+            "status": "completed",
+            "results": 6,
+            "error": ""
+          },
+          {
+            "id": "profile-woa.vienna",
+            "status": "completed",
+            "results": 1,
+            "error": ""
+          },
+          {
+            "id": "profile-ciosgrill",
+            "status": "completed",
+            "results": 0,
+            "error": ""
+          },
+          {
+            "id": "profile-corner_xvi",
+            "status": "completed",
+            "results": 0,
+            "error": ""
+          },
+          {
+            "id": "profile-assal.burger",
+            "status": "completed",
+            "results": 6,
+            "error": ""
+          },
+          {
+            "id": "profile-2ndstreetburger",
+            "status": "completed",
+            "results": 0,
+            "error": ""
+          },
+          {
+            "id": "profile-framburi_fries",
+            "status": "completed",
+            "results": 0,
+            "error": ""
+          },
+          {
+            "id": "profile-cafe_wirr",
+            "status": "completed",
+            "results": 1,
+            "error": ""
+          },
+          {
+            "id": "profile-mangalet.at",
+            "status": "completed",
+            "results": 3,
+            "error": ""
+          },
+          {
+            "id": "profile-pizzeriapummaro",
+            "status": "completed",
+            "results": 0,
+            "error": ""
+          },
+          {
+            "id": "profile-gustolab.vienna",
+            "status": "completed",
+            "results": 6,
+            "error": ""
+          },
+          {
+            "id": "profile-soya_wien",
+            "status": "completed",
+            "results": 0,
+            "error": ""
+          },
+          {
+            "id": "profile-dahabdoener",
+            "status": "completed",
+            "results": 0,
+            "error": ""
+          },
+          {
+            "id": "profile-castillo.wien",
+            "status": "completed",
+            "results": 6,
+            "error": ""
+          },
+          {
+            "id": "profile-hotline_5",
+            "status": "completed",
+            "results": 0,
+            "error": ""
+          },
+          {
+            "id": "profile-meat_point_smashburgerbar",
+            "status": "completed",
+            "results": 0,
+            "error": ""
+          },
+          {
+            "id": "profile-viennas_joy",
+            "status": "completed",
+            "results": 2,
+            "error": ""
+          },
+          {
+            "id": "profile-rollercoasterrestaurant",
+            "status": "completed",
+            "results": 0,
+            "error": ""
+          }
+        ],
+        "queryCount": 26,
+        "failedQueries": 0,
+        "rawSearchResults": 66,
+        "directPostResults": 58,
+        "recentDistinctPosts": 4,
+        "prefilteredAsOld": 54
+      },
+      "agent": {
+        "configuredSources": 10,
+        "completedSources": 4,
+        "failedSources": 0,
+        "timedOutSources": 6,
+        "rawAgentDeals": 9,
+        "directPostResults": 9,
+        "recentDistinctPosts": 2,
+        "prefilteredAsOld": 7,
+        "sources": [
+          {
+            "id": "hashtag-gratiswien",
+            "hashtag": "gratiswien",
+            "status": "timed-out",
+            "deals": 0,
+            "error": "agent-timeout-240s"
+          },
+          {
+            "id": "hashtag-aktionwien",
+            "hashtag": "aktionwien",
+            "status": "timed-out",
+            "deals": 0,
+            "error": "agent-timeout-240s"
+          },
+          {
+            "id": "hashtag-schnäppchenwien",
+            "hashtag": "schnäppchenwien",
+            "status": "timed-out",
+            "deals": 0,
+            "error": "agent-timeout-240s"
+          },
+          {
+            "id": "hashtag-wienfood",
+            "hashtag": "wienfood",
+            "status": "timed-out",
+            "deals": 0,
+            "error": "agent-timeout-240s"
+          },
+          {
+            "id": "hashtag-wienesse",
+            "hashtag": "wienesse",
+            "status": "completed",
+            "deals": 1,
+            "error": ""
+          },
+          {
+            "id": "hashtag-viennafood",
+            "hashtag": "viennafood",
+            "status": "completed",
+            "deals": 4,
+            "error": ""
+          },
+          {
+            "id": "hashtag-viennarestaurant",
+            "hashtag": "viennarestaurant",
+            "status": "completed",
+            "deals": 0,
+            "error": ""
+          },
+          {
+            "id": "hashtag-restaurantvienna",
+            "hashtag": "restaurantvienna",
+            "status": "timed-out",
+            "deals": 0,
+            "error": "agent-timeout-240s"
+          },
+          {
+            "id": "hashtag-viennafoodie",
+            "hashtag": "viennafoodie",
+            "status": "timed-out",
+            "deals": 0,
+            "error": "agent-timeout-240s"
+          },
+          {
+            "id": "hashtag-allyoucaneatvienna",
+            "hashtag": "allyoucaneatvienna",
+            "status": "completed",
+            "deals": 4,
+            "error": ""
+          }
+        ]
+      },
+      "rawSearchResults": 66,
+      "rawAgentDeals": 9,
+      "recentDistinctPosts": 6,
+      "prefilteredAsOld": 61
     },
     "extraction": {
-      "selectedForDirectScrape": 35,
-      "originalPostsVerified": 33,
+      "selectedForDirectScrape": 41,
+      "originalPostsVerified": 39,
       "unavailableOriginalPosts": 2,
-      "directOriginalPostInspections": 35
+      "directOriginalPostInspections": 41
     },
     "classification": {
-      "candidates": 35,
+      "candidates": 41,
       "accepted": 1,
-      "review": 2,
-      "rejected": 32,
+      "review": 3,
+      "rejected": 37,
       "rejectedByReason": {
         "free-item-not-food-drink": 1,
-        "not-free": 16,
-        "giveaway": 11,
+        "not-free": 20,
+        "giveaway": 12,
         "excluded-platform": 4,
         "missing-original-offer-evidence": 1
       },
       "reviewByReason": {
+        "chance-based-offer": 1,
         "missing-original-offer-evidence": 1,
         "not-verified-vienna": 1
       }
     },
     "keyPool": {
-      "totalCalls": 28,
+      "totalCalls": 37,
       "maxCalls": 140,
       "keys": [
         {
           "alias": "key-4",
           "calls": 12,
-          "failures": 2,
+          "failures": 0,
           "disabledReason": ""
         },
         {
           "alias": "key-1",
-          "calls": 12,
-          "failures": 2,
-          "disabledReason": ""
+          "calls": 1,
+          "failures": 1,
+          "disabledReason": "credits"
         },
         {
           "alias": "key-2",
-          "calls": 4,
+          "calls": 19,
           "failures": 0,
           "disabledReason": ""
         },
         {
           "alias": "key-3",
-          "calls": 0,
+          "calls": 5,
           "failures": 0,
           "disabledReason": ""
         },
@@ -233,34 +340,34 @@
         }
       ]
     },
-    "previousAcceptedDeals": 0
+    "previousAcceptedDeals": 1
   },
   "pipelineReport": "deal-pipeline-last-run-firecrawl4.json",
   "deals": [
     {
-      "id": "fc4-12zu7jx",
-      "brand": "Instagram Gastro",
-      "title": "Instagram Gastro: 😋 Und das Beste: 🎲 Jeden Mittwoch und Donnerstag hast du die Chance, dein Essen kostenlos zu bekommen!",
-      "description": "😋 Und das Beste: 🎲 Jeden Mittwoch und Donnerstag hast du die Chance, dein Essen kostenlos zu bekommen!",
-      "offerEvidenceText": "😋 Und das Beste: 🎲 Jeden Mittwoch und Donnerstag hast du die Chance, dein Essen kostenlos zu bekommen!",
+      "id": "fc4-1u2fkyg",
+      "brand": "@tokki_korean_bbq",
+      "title": "@tokki_korean_bbq: Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #allyoucaneat #vienna #birthday #steak",
+      "description": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #allyoucaneat #vienna #birthday #steak",
+      "offerEvidenceText": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #allyoucaneat #vienna #birthday #steak",
       "descriptionSource": "instagram-original-post",
       "type": "gratis",
-      "category": "essen",
+      "category": "kaffee",
       "source": "Firecrawl Instagram Direct #4",
       "originSource": "firecrawl4",
-      "url": "https://www.instagram.com/reel/Da7vhpUCsnA/",
-      "address": "📍 Heiligenstädter Straße 160, 1190 Wien 📞 0664 99802000 Wir freuen uns auf deinen Besuch",
-      "location": "📍 Heiligenstädter Straße 160, 1190 Wien 📞 0664 99802000 Wir freuen uns auf deinen Besuch",
+      "url": "https://www.instagram.com/reel/DbXav_ligAf/",
+      "address": "",
+      "location": "",
       "city": "Wien",
-      "ownerUsername": "",
-      "instagramProfileUrl": "",
+      "ownerUsername": "tokki_korean_bbq",
+      "instagramProfileUrl": "https://www.instagram.com/tokki_korean_bbq/",
       "discoveredBy": [
-        "key4-seed:deals-pending-gastro2.json"
+        "key4-seed:deals-pending-food3.json"
       ],
-      "discoveredAt": "2026-08-01T13:05:41.966Z",
-      "sourcePublishedAt": "2026-07-18T23:59:59.999Z",
+      "discoveredAt": "2026-08-01T14:14:34.438Z",
+      "sourcePublishedAt": "2026-07-28T23:59:59.999Z",
       "sourcePublishedAtSource": "instagram-original-metadata",
-      "pubDate": "2026-07-18T23:59:59.999Z",
+      "pubDate": "2026-07-28T23:59:59.999Z",
       "pubDateSource": "instagram-original-metadata",
       "validFrom": "",
       "validUntil": "",
@@ -271,40 +378,40 @@
       "viennaVerified": true,
       "locationVerified": true,
       "viennaEvidence": {
-        "source": "instagram-original-caption",
-        "value": "1190"
+        "source": "instagram-original-caption-hashtag",
+        "value": "Vienna"
       },
-      "postCaption": "72 likes, 3 comments - bigbox_fastfood on July 18, 2026‎: \"🍔 Willkommen bei Big Box! Bei uns erwartet dich mehr als nur gutes Essen – frische Zutaten, großzügige Portionen und echter Geschmack stehen bei jedem Gericht im Mittelpunkt. 🔥 Ob Burger, Pizza, Sandwiches oder Fingerfood – hier findet jeder etwas nach seinem Geschmack. 😋 Und das Beste: 🎲 Jeden Mittwoch und Donnerstag hast du die Chance, dein Essen kostenlos zu bekommen! Einfach vor Ort essen und dein Glück beim Würfeln versuchen. 📍 Heiligenstädter Straße 160, 1190 Wien 📞 0664 99802000 Wir freuen uns auf deinen Besuch! ❤️ #food #pizza #وین #پیتزا #غذای_ایرانی\". ‎",
+      "postCaption": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #allyoucaneat #vienna #birthday #steak",
       "postVerification": {
         "status": "verified-original-post",
-        "checkedAt": "2026-08-01T13:05:41.966Z",
-        "originalPostUrl": "https://www.instagram.com/reel/Da7vhpUCsnA/",
-        "finalUrl": "https://www.instagram.com/reel/Da7vhpUCsnA/",
+        "checkedAt": "2026-08-01T14:14:34.438Z",
+        "originalPostUrl": "https://www.instagram.com/reel/DbXav_ligAf/",
+        "finalUrl": "https://www.instagram.com/reel/DbXav_ligAf/",
         "httpStatus": 200,
         "captionSource": "metadata.ogDescription",
-        "ownerUsername": "",
+        "ownerUsername": "tokki_korean_bbq",
         "reason": ""
       },
-      "lastVerifiedAt": "2026-08-01T13:05:41.966Z",
+      "lastVerifiedAt": "2026-08-01T14:14:34.438Z",
       "evidence": {
         "originalPost": {
           "status": "verified-original-post",
-          "checkedAt": "2026-08-01T13:05:41.966Z",
-          "url": "https://www.instagram.com/reel/Da7vhpUCsnA/",
+          "checkedAt": "2026-08-01T14:14:34.438Z",
+          "url": "https://www.instagram.com/reel/DbXav_ligAf/",
           "publicationSource": "instagram-original-metadata",
-          "ownerUsername": "",
+          "ownerUsername": "tokki_korean_bbq",
           "captionSource": "metadata.ogDescription",
-          "captionSample": "72 likes, 3 comments - bigbox_fastfood on July 18, 2026‎: \"🍔 Willkommen bei Big Box! Bei uns erwartet dich mehr als nur gutes Essen – frische Zutaten, großzügige Portionen und echter Geschmack stehen bei jedem Gericht im Mittelpunkt. 🔥 Ob Burger, Pizza, Sandwiches oder Fingerfood – hier findet jeder etwas nach seinem Geschmack. 😋 Und das Beste: 🎲 Jeden Mittwoch und Donnerstag hast du die Chance, dein Essen kostenlos zu bekommen! Einfach vor Ort essen und dein Glück beim Würfeln versuchen. 📍 Heiligenstädter Straße 160, 1190 Wien 📞 0664 99802000 Wir freuen uns auf deinen Besuch! ❤️ #food #pizza #وین #پیتزا #غذای_ایرانی\". ‎"
+          "captionSample": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #allyoucaneat #vienna #birthday #steak"
         },
-        "discoverySnippet": "🍔 Willkommen bei Big Box! Bei uns erwartet dich mehr als nur gutes Essen – frische Zutaten, großzügige Portionen und echter Geschmack stehen bei jedem Gericht im Mittelpunkt. 🔥 Ob Burger, Pizza, Sandwiches oder Fingerfood – hier findet jeder etwas nach seinem Geschmack. 😋 Und das Beste: 🎲 Jeden Mittwoch und Donnerstag hast du die Chance, dein Essen kostenlos zu bekommen! Einfach vor Ort essen und dein Glück beim Würfeln versuchen. 📍 Heiligenstädter Straße 160, 1190 Wien 📞 0664 99802000 Wir"
+        "discoverySnippet": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #allyoucaneat #vienna #birthday #steak Geburtstagsaktion - Gratis | All You Can Eat | Wien | Am Geburtstag | Ausweis + vollzahlende Begleitung Unknown AYCE Restaurant: All You Can Eat"
       },
       "key4Decision": {
         "status": "accepted",
         "reasons": [],
         "confidence": 100,
-        "decidedAt": "2026-08-01T13:05:41.966Z"
+        "decidedAt": "2026-08-01T14:14:34.438Z"
       },
-      "postAgeDays": 13.5,
+      "postAgeDays": 3.6,
       "qualityScore": 100,
       "hot": true,
       "isNew": true,
