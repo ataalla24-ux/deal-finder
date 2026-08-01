@@ -86,6 +86,53 @@ assert.equal(rotatingPool.diagnostics().keys[1].calls, 2, 'the healthy Key 4 rep
 const rotatedAgentResult = await rotatingPool.agent({ url: hashtagSources[0].url });
 assert.equal(rotatedAgentResult.data.deals.length, 1);
 
+const concurrentAliases = [];
+const concurrentPool = createKey4FirecrawlPool({
+  keys: [
+    { alias: 'primary', apiKey: 'fixture-primary' },
+    { alias: 'secondary', apiKey: 'fixture-secondary' },
+  ],
+  clientFactory(apiKey, alias) {
+    return {
+      async agent() {
+        concurrentAliases.push(alias);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        return { status: 'completed', data: { deals: [] } };
+      },
+    };
+  },
+  maxCalls: 10,
+});
+await Promise.all([
+  concurrentPool.agent({ url: hashtagSources[0].url, timeout: 30 }),
+  concurrentPool.agent({ url: hashtagSources[1].url, timeout: 30 }),
+]);
+assert.deepEqual(
+  new Set(concurrentAliases),
+  new Set(['primary', 'secondary']),
+  'parallel hashtag agents are spread across free keys',
+);
+
+let cancelledAgentId = '';
+const timeoutPool = createKey4FirecrawlPool({
+  keys: [{ alias: 'timeout', apiKey: 'fixture-timeout' }],
+  clientFactory() {
+    return {
+      async agent() {
+        return { id: 'fixture-agent-job', status: 'processing' };
+      },
+      async cancelAgent(id) {
+        cancelledAgentId = id;
+        return true;
+      },
+    };
+  },
+  maxCalls: 2,
+});
+const timedOutAgent = await timeoutPool.agent({ url: hashtagSources[0].url, timeout: 30 });
+assert.equal(timedOutAgent.key4TimedOut, true);
+assert.equal(cancelledAgentId, 'fixture-agent-job', 'timed-out remote agents are cancelled');
+
 const discoveryPool = {
   async search() {
     return {

@@ -73,7 +73,11 @@ const SEARCH_CONCURRENCY = Math.max(1, Number(process.env.FC4_SEARCH_CONCURRENCY
 const SCRAPE_CONCURRENCY = Math.max(1, Number(process.env.FC4_SCRAPE_CONCURRENCY || 3) || 3);
 const MAX_FIRECRAWL_CALLS = Math.max(1, Number(process.env.FC4_MAX_FIRECRAWL_CALLS || 140) || 140);
 const AGENT_SOURCE_LIMIT = Math.max(0, Number(process.env.FC4_AGENT_SOURCE_LIMIT || 10) || 0);
-const AGENT_CONCURRENCY = Math.max(1, Number(process.env.FC4_AGENT_CONCURRENCY || 1) || 1);
+const AGENT_CONCURRENCY = Math.max(1, Number(process.env.FC4_AGENT_CONCURRENCY || 2) || 2);
+const AGENT_TIMEOUT_SECONDS = Math.max(
+  30,
+  Number(process.env.FC4_AGENT_TIMEOUT_SECONDS || 240) || 240,
+);
 const AGENT_MODEL = String(process.env.FC4_AGENT_MODEL || 'spark-1-pro').trim() || 'spark-1-pro';
 const AGENT_DISCOVERY_ENABLED = !/^(?:0|false|no)$/i.test(
   String(process.env.FC4_AGENT_DISCOVERY_ENABLED ?? 'true').trim(),
@@ -205,6 +209,7 @@ export function createKey4FirecrawlPool(options = {}) {
     client: clientFactory(entry.apiKey, entry.alias),
     calls: 0,
     failures: 0,
+    inFlight: 0,
     disabledReason: '',
   }));
   const maxCalls = Math.max(1, Number(options.maxCalls || MAX_FIRECRAWL_CALLS) || MAX_FIRECRAWL_CALLS);
@@ -222,9 +227,16 @@ export function createKey4FirecrawlPool(options = {}) {
         throw new Error(`Firecrawl Key 4 call budget reached (${maxCalls})`);
       }
       let index = -1;
+      let minimumInFlight = Number.POSITIVE_INFINITY;
+      for (let candidateIndex = 0; candidateIndex < states.length; candidateIndex += 1) {
+        if (attempted.has(candidateIndex) || states[candidateIndex].disabledReason) continue;
+        minimumInFlight = Math.min(minimumInFlight, states[candidateIndex].inFlight);
+      }
       for (let offset = 0; offset < states.length; offset += 1) {
         const candidateIndex = (cursor + offset) % states.length;
-        if (!attempted.has(candidateIndex) && !states[candidateIndex].disabledReason) {
+        if (!attempted.has(candidateIndex)
+          && !states[candidateIndex].disabledReason
+          && states[candidateIndex].inFlight === minimumInFlight) {
           index = candidateIndex;
           break;
         }
@@ -234,6 +246,7 @@ export function createKey4FirecrawlPool(options = {}) {
       const state = states[index];
       attempted.add(index);
       state.calls += 1;
+      state.inFlight += 1;
       totalCalls += 1;
       try {
         const result = await callback(state.client);
@@ -246,6 +259,8 @@ export function createKey4FirecrawlPool(options = {}) {
         if (kind === 'credits' || kind === 'authentication') state.disabledReason = kind;
         cursor = (index + 1) % states.length;
         if (kind === 'request') throw error;
+      } finally {
+        state.inFlight = Math.max(0, state.inFlight - 1);
       }
     }
     throw new Error(`No Firecrawl API key available for ${operation}: ${safeErrorMessage(lastError)}`);
@@ -256,7 +271,27 @@ export function createKey4FirecrawlPool(options = {}) {
       return call('search', (client) => client.search(query, request));
     },
     agent(request) {
-      return call('agent', (client) => client.agent(request));
+      return call('agent', async (client) => {
+        const response = await client.agent(request);
+        const status = cleanText(response?.status).toLowerCase();
+        if (response?.success === false || /^(?:failed|cancelled)$/.test(status)) {
+          throw new Error(cleanText(
+            response?.error || response?.message || `Firecrawl agent ${status || 'failed'}`,
+            500,
+          ));
+        }
+        if (status && status !== 'completed' && request?.timeout) {
+          if (response?.id && typeof client.cancelAgent === 'function') {
+            try {
+              await client.cancelAgent(response.id);
+            } catch {
+              // The local timeout still applies if the remote cancellation races with completion.
+            }
+          }
+          return { ...response, key4TimedOut: true };
+        }
+        return response;
+      });
     },
     scrape(url, request) {
       return call('scrape', (client) => client.scrape(url, request));
@@ -307,6 +342,7 @@ export async function discoverKey4AgentCandidates(options = {}) {
         configuredSources: 0,
         completedSources: 0,
         failedSources: 0,
+        timedOutSources: 0,
         rawAgentDeals: 0,
         directPostResults: 0,
         recentDistinctPosts: 0,
@@ -329,12 +365,22 @@ export async function discoverKey4AgentCandidates(options = {}) {
           prompt: `${options.prompt || KEY4_AGENT_PROMPT}\n\nAusgangs-Hashtag: #${source.hashtag}`,
           schema: options.schema || KEY4_AGENT_SCHEMA,
           model: options.model || AGENT_MODEL,
+          pollInterval: 5,
+          timeout: Number(options.timeoutSeconds ?? AGENT_TIMEOUT_SECONDS) || AGENT_TIMEOUT_SECONDS,
         });
         if (response?.success === false) {
           throw new Error(cleanText(response?.error || response?.message || 'Firecrawl agent failed', 500));
         }
         const deals = extractAgentDeals(response);
-        return { source, status: 'completed', deals, error: '' };
+        const timedOut = response?.key4TimedOut === true;
+        return {
+          source,
+          status: timedOut ? 'timed-out' : 'completed',
+          deals,
+          error: timedOut
+            ? `agent-timeout-${Number(options.timeoutSeconds ?? AGENT_TIMEOUT_SECONDS) || AGENT_TIMEOUT_SECONDS}s`
+            : '',
+        };
       } catch (error) {
         return { source, status: 'failed', deals: [], error: safeErrorMessage(error) };
       }
@@ -373,6 +419,7 @@ export async function discoverKey4AgentCandidates(options = {}) {
       configuredSources: sources.length,
       completedSources: rows.filter((row) => row.status === 'completed').length,
       failedSources: rows.filter((row) => row.status === 'failed').length,
+      timedOutSources: rows.filter((row) => row.status === 'timed-out').length,
       rawAgentDeals: rawResults.length,
       directPostResults: directCandidates.length,
       recentDistinctPosts: candidates.length,
@@ -605,6 +652,7 @@ export async function runKey4Pipeline(options = {}) {
     now,
     concurrency: options.agentConcurrency,
     model: options.agentModel,
+    timeoutSeconds: options.agentTimeoutSeconds,
     discoveryMaxAgeDays: options.discoveryMaxAgeDays,
     recurringMaxAgeDays: options.recurringMaxAgeDays,
   });
@@ -734,6 +782,7 @@ async function main() {
     originalEvidenceRequiredForAutomaticAcceptance: true,
     discoveryMode: 'Gastro2-style Firecrawl hashtag agents plus merchant search and recent direct-post seeds',
     hashtagAgentSources: result.discovery.diagnostics.agent.configuredSources,
+    hashtagAgentTimeoutSeconds: AGENT_TIMEOUT_SECONDS,
     excludedDiscoverySources: ['1000things.at', 'meinbezirk.at'],
   };
   const diagnostics = {
@@ -821,6 +870,7 @@ async function main() {
   console.log(
     `Hashtag-Agenten: ${result.discovery.diagnostics.agent.completedSources}/`
     + `${result.discovery.diagnostics.agent.configuredSources} Quellen, `
+    + `${result.discovery.diagnostics.agent.timedOutSources} Timeouts, `
     + `${result.discovery.rawAgentResults.length} Kandidaten`,
   );
   console.log(`Aktuelle direkte Seeds aus bestehenden Pipelines: ${result.seedCandidates.length}`);

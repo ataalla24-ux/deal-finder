@@ -12,6 +12,7 @@ concurrency:
 jobs:
   instagram-direct:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:
@@ -46,7 +47,8 @@ jobs:
           FC4_SCRAPE_CONCURRENCY: 4
           FC4_AGENT_DISCOVERY_ENABLED: "true"
           FC4_AGENT_SOURCE_LIMIT: 10
-          FC4_AGENT_CONCURRENCY: 1
+          FC4_AGENT_CONCURRENCY: 2
+          FC4_AGENT_TIMEOUT_SECONDS: 240
           FC4_AGENT_MODEL: spark-1-pro
           FC4_MAX_FIRECRAWL_CALLS: 140
         run: node scraper/firecrawl-instagram-direct4.js
