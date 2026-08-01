@@ -4,6 +4,7 @@ import Firecrawl from '@mendable/firecrawl-js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { z } from 'zod';
 
 import { inspectDealUrlHealth } from './expiry-utils.js';
 import {
@@ -12,6 +13,8 @@ import {
   writePipelineRunReport,
 } from './pipeline-run-report-utils.js';
 import {
+  agentDealToKey4Candidate,
+  buildKey4HashtagSources,
   buildKey4SearchQueries,
   buildKey4TargetAccounts,
   classifyKey4Evidence,
@@ -57,18 +60,56 @@ const RECURRING_MAX_AGE_DAYS = Math.max(
   DISCOVERY_MAX_AGE_DAYS,
   Number(process.env.FC4_RECURRING_MAX_AGE_DAYS || 45) || 45,
 );
-const MAX_DEALS = Math.max(1, Number(process.env.FC4_MAX_DEALS || 40) || 40);
-const MAX_REVIEW = Math.max(1, Number(process.env.FC4_MAX_REVIEW || 80) || 80);
+const MAX_DEALS = Math.max(1, Number(process.env.FC4_MAX_DEALS || 160) || 160);
+const MAX_REVIEW = Math.max(1, Number(process.env.FC4_MAX_REVIEW || 160) || 160);
 const SEARCH_LIMIT = Math.max(1, Math.min(20, Number(process.env.FC4_SEARCH_LIMIT || 6) || 6));
 const PROFILE_QUERY_LIMIT = Math.max(0, Number(process.env.FC4_PROFILE_QUERY_LIMIT || 18) || 0);
 const TARGET_ACCOUNT_LIMIT = Math.max(
   PROFILE_QUERY_LIMIT,
   Number(process.env.FC4_TARGET_ACCOUNT_LIMIT || 30) || 30,
 );
-const MAX_POSTS_TO_SCRAPE = Math.max(1, Number(process.env.FC4_MAX_POSTS_TO_SCRAPE || 80) || 80);
+const MAX_POSTS_TO_SCRAPE = Math.max(1, Number(process.env.FC4_MAX_POSTS_TO_SCRAPE || 160) || 160);
 const SEARCH_CONCURRENCY = Math.max(1, Number(process.env.FC4_SEARCH_CONCURRENCY || 2) || 2);
 const SCRAPE_CONCURRENCY = Math.max(1, Number(process.env.FC4_SCRAPE_CONCURRENCY || 3) || 3);
 const MAX_FIRECRAWL_CALLS = Math.max(1, Number(process.env.FC4_MAX_FIRECRAWL_CALLS || 140) || 140);
+const AGENT_SOURCE_LIMIT = Math.max(0, Number(process.env.FC4_AGENT_SOURCE_LIMIT || 10) || 0);
+const AGENT_CONCURRENCY = Math.max(1, Number(process.env.FC4_AGENT_CONCURRENCY || 1) || 1);
+const AGENT_MODEL = String(process.env.FC4_AGENT_MODEL || 'spark-1-pro').trim() || 'spark-1-pro';
+const AGENT_DISCOVERY_ENABLED = !/^(?:0|false|no)$/i.test(
+  String(process.env.FC4_AGENT_DISCOVERY_ENABLED ?? 'true').trim(),
+);
+
+const KEY4_AGENT_SCHEMA = z.object({
+  deals: z.array(z.object({
+    post_url: z.string(),
+    owner_username: z.string().optional(),
+    brand_or_store: z.string().optional(),
+    post_caption: z.string().optional(),
+    post_date: z.string().optional(),
+    offer: z.string().optional(),
+    offer_type: z.string().optional(),
+    location: z.string().optional(),
+    validity: z.string().optional(),
+  })),
+});
+
+const KEY4_AGENT_PROMPT = `Finde aktuelle oder weiterhin gültige Gastronomie-Angebote in Wien, Österreich.
+
+Gesucht werden ausschließlich mögliche Kandidaten für:
+- komplett kostenlose Speisen oder Getränke
+- 1+1, 2-für-1 oder Buy-one-get-one-Angebote
+- kostenlose Speisen oder Getränke am Geburtstag
+- Neueröffnungen mit garantiert kostenlosen Speisen oder Getränken
+- glücksabhängige Gratis-Gastro-Aktionen wie Würfeln oder Glücksrad als unsichere Kandidaten
+
+Nicht aufnehmen:
+- gewöhnliche Rabatte oder nur günstige Preise
+- Instagram-Gewinnspiele oder Verlosungen mit Folgen, Liken, Markieren oder Kommentieren
+- NeoTaste, TheFork, BOGO-App oder andere App-/Plattformangebote
+- Gratis-Eintritt, Lieferung, WLAN, Versand oder nicht essbare Geschenke
+- Posts außerhalb Wiens oder Vienna in den USA
+
+Nutze die angegebene Instagram-Hashtag-Seite als Ausgangspunkt und suche nach direkten Originalposts. Gib nur URLs im Format instagram.com/p/... oder instagram.com/reel/... zurück, niemals Profil-, Hashtag-, Such- oder Aggregator-URLs. Ein unsicherer möglicher Treffer darf enthalten sein; er wird danach am Originalpost geprüft. Erfinde keine Deals. Wenn kein passender direkter Post auffindbar ist, gib eine leere Liste zurück.`;
 
 function cleanText(value, maxLength = Infinity) {
   const text = value === null || value === undefined
@@ -214,6 +255,9 @@ export function createKey4FirecrawlPool(options = {}) {
     search(query, request) {
       return call('search', (client) => client.search(query, request));
     },
+    agent(request) {
+      return call('agent', (client) => client.agent(request));
+    },
     scrape(url, request) {
       return call('scrape', (client) => client.scrape(url, request));
     },
@@ -234,6 +278,114 @@ export function createKey4FirecrawlPool(options = {}) {
 
 function extractSearchResults(response = {}) {
   return Array.isArray(response?.web) ? response.web : [];
+}
+
+function extractAgentDeals(response = {}) {
+  let data = response?.data ?? response;
+  if (typeof data === 'string') {
+    try {
+      data = JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+  return Array.isArray(data?.deals) ? data.deals : [];
+}
+
+export async function discoverKey4AgentCandidates(options = {}) {
+  const pool = options.pool;
+  const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
+  const sources = Array.isArray(options.sources)
+    ? options.sources
+    : buildKey4HashtagSources(options.sourceLimit ?? AGENT_SOURCE_LIMIT);
+  if (!sources.length) {
+    return {
+      candidates: [],
+      rawResults: [],
+      prefilterRejected: [],
+      diagnostics: {
+        configuredSources: 0,
+        completedSources: 0,
+        failedSources: 0,
+        rawAgentDeals: 0,
+        directPostResults: 0,
+        recentDistinctPosts: 0,
+        prefilteredAsOld: 0,
+        sources: [],
+      },
+    };
+  }
+  if (!pool || typeof pool.agent !== 'function') {
+    throw new Error('Key 4 hashtag discovery requires a Firecrawl agent pool');
+  }
+
+  const rows = await mapWithConcurrency(
+    sources,
+    Number(options.concurrency ?? AGENT_CONCURRENCY) || AGENT_CONCURRENCY,
+    async (source) => {
+      try {
+        const response = await pool.agent({
+          url: source.url,
+          prompt: `${options.prompt || KEY4_AGENT_PROMPT}\n\nAusgangs-Hashtag: #${source.hashtag}`,
+          schema: options.schema || KEY4_AGENT_SCHEMA,
+          model: options.model || AGENT_MODEL,
+        });
+        if (response?.success === false) {
+          throw new Error(cleanText(response?.error || response?.message || 'Firecrawl agent failed', 500));
+        }
+        const deals = extractAgentDeals(response);
+        return { source, status: 'completed', deals, error: '' };
+      } catch (error) {
+        return { source, status: 'failed', deals: [], error: safeErrorMessage(error) };
+      }
+    },
+  );
+
+  const rawResults = rows.flatMap((row) => row.deals.map((deal) => ({
+    sourceId: row.source.id,
+    sourceHashtag: row.source.hashtag,
+    sourceUrl: row.source.url,
+    ...deal,
+  })));
+  const directCandidates = rows.flatMap((row) => row.deals
+    .map((deal) => agentDealToKey4Candidate(deal, row.source, now))
+    .filter(Boolean));
+  const prefilterRejected = [];
+  const recentCandidates = [];
+  for (const candidate of directCandidates) {
+    if (isKey4DiscoveryCandidateRecent(candidate, {
+      now,
+      maxAgeDays: options.discoveryMaxAgeDays ?? DISCOVERY_MAX_AGE_DAYS,
+      recurringMaxAgeDays: options.recurringMaxAgeDays ?? RECURRING_MAX_AGE_DAYS,
+    })) {
+      recentCandidates.push(candidate);
+    } else {
+      prefilterRejected.push({ reason: 'discovery-post-too-old', deal: candidate });
+    }
+  }
+  const candidates = dedupeKey4Candidates(recentCandidates);
+
+  return {
+    candidates,
+    rawResults,
+    prefilterRejected,
+    diagnostics: {
+      configuredSources: sources.length,
+      completedSources: rows.filter((row) => row.status === 'completed').length,
+      failedSources: rows.filter((row) => row.status === 'failed').length,
+      rawAgentDeals: rawResults.length,
+      directPostResults: directCandidates.length,
+      recentDistinctPosts: candidates.length,
+      prefilteredAsOld: prefilterRejected.length,
+      sources: rows.map((row) => ({
+        id: row.source.id,
+        hashtag: row.source.hashtag,
+        status: row.status,
+        deals: row.deals.length,
+        error: row.error,
+      })),
+    },
+  };
 }
 
 export async function discoverKey4PostCandidates(options = {}) {
@@ -433,7 +585,7 @@ export async function runKey4Pipeline(options = {}) {
     registryDocument,
     options.targetAccountLimit ?? TARGET_ACCOUNT_LIMIT,
   );
-  const discovery = await discoverKey4PostCandidates({
+  const searchDiscovery = await discoverKey4PostCandidates({
     pool: options.pool,
     targetAccounts,
     queries: options.queries,
@@ -444,6 +596,40 @@ export async function runKey4Pipeline(options = {}) {
     discoveryMaxAgeDays: options.discoveryMaxAgeDays,
     recurringMaxAgeDays: options.recurringMaxAgeDays,
   });
+  const agentSources = options.agentSources === undefined
+    ? (AGENT_DISCOVERY_ENABLED ? buildKey4HashtagSources(options.agentSourceLimit ?? AGENT_SOURCE_LIMIT) : [])
+    : options.agentSources;
+  const agentDiscovery = await discoverKey4AgentCandidates({
+    pool: options.pool,
+    sources: agentSources,
+    now,
+    concurrency: options.agentConcurrency,
+    model: options.agentModel,
+    discoveryMaxAgeDays: options.discoveryMaxAgeDays,
+    recurringMaxAgeDays: options.recurringMaxAgeDays,
+  });
+  const discoveryCandidates = dedupeKey4Candidates([
+    ...searchDiscovery.candidates,
+    ...agentDiscovery.candidates,
+  ]);
+  const discovery = {
+    candidates: discoveryCandidates,
+    rawResults: searchDiscovery.rawResults,
+    rawAgentResults: agentDiscovery.rawResults,
+    prefilterRejected: [
+      ...searchDiscovery.prefilterRejected,
+      ...agentDiscovery.prefilterRejected,
+    ],
+    diagnostics: {
+      search: searchDiscovery.diagnostics,
+      agent: agentDiscovery.diagnostics,
+      rawSearchResults: searchDiscovery.rawResults.length,
+      rawAgentDeals: agentDiscovery.rawResults.length,
+      recentDistinctPosts: discoveryCandidates.length,
+      prefilteredAsOld: searchDiscovery.prefilterRejected.length
+        + agentDiscovery.prefilterRejected.length,
+    },
+  };
   const previousCandidates = previousDealsToCandidates(options.previousDeals || [], now);
   const seedCandidates = dedupeKey4Candidates(options.seedCandidates || [])
     .filter((candidate) => isKey4DiscoveryCandidateRecent(candidate, {
@@ -499,6 +685,16 @@ function countReasons(entries = []) {
   return counts;
 }
 
+function mergeReasonCounts(...groups) {
+  const merged = {};
+  for (const group of groups) {
+    for (const [reason, count] of Object.entries(group || {})) {
+      merged[reason] = (merged[reason] || 0) + (Number(count) || 0);
+    }
+  }
+  return merged;
+}
+
 async function main() {
   const keyEntries = loadKey4ApiKeyEntries();
   if (!keyEntries.length) {
@@ -536,7 +732,9 @@ async function main() {
     location: 'Wien',
     offer: 'kostenlose Speisen/Getränke, 1+1/2für1 und kostenlose Gastro-Proben',
     originalEvidenceRequiredForAutomaticAcceptance: true,
-    discoveryMode: 'merchant-first Firecrawl search plus recent direct-post seeds from existing pipelines',
+    discoveryMode: 'Gastro2-style Firecrawl hashtag agents plus merchant search and recent direct-post seeds',
+    hashtagAgentSources: result.discovery.diagnostics.agent.configuredSources,
+    excludedDiscoverySources: ['1000things.at', 'meinbezirk.at'],
   };
   const diagnostics = {
     targetAccounts: result.targetAccounts.length,
@@ -561,9 +759,11 @@ async function main() {
     lastUpdated: now.toISOString(),
     source: SOURCE_KEY,
     totalSearchResults: result.discovery.rawResults.length,
+    totalAgentResults: result.discovery.rawAgentResults.length,
     totalSeedCandidates: result.seedCandidates.length,
     totalDirectPosts: result.scrape.evidenceRows.length,
     searchResults: result.discovery.rawResults,
+    agentResults: result.discovery.rawAgentResults,
     posts: result.scrape.evidenceRows.map(compactEvidence),
   });
   writeJsonAtomic(REVIEW_OUTPUT_PATH, {
@@ -576,10 +776,10 @@ async function main() {
     lastUpdated: now.toISOString(),
     source: SOURCE_KEY,
     totalDeals: rejected.length + result.discovery.prefilterRejected.length,
-    rejectedByReason: {
-      ...result.classification.summary.rejectedByReason,
-      ...countReasons(result.discovery.prefilterRejected),
-    },
+    rejectedByReason: mergeReasonCounts(
+      result.classification.summary.rejectedByReason,
+      countReasons(result.discovery.prefilterRejected),
+    ),
     deals: [
       ...rejected.map((entry) => ({
         ...entry.deal,
@@ -602,7 +802,10 @@ async function main() {
     startedAt: RUN_STARTED_AT,
     finishedAt: new Date(),
     outputFile: path.relative(ROOT, OUTPUT_PATH),
-    rawCandidates: result.discovery.rawResults.length + result.seedCandidates.length + previousDeals.length,
+    rawCandidates: result.discovery.rawResults.length
+      + result.discovery.rawAgentResults.length
+      + result.seedCandidates.length
+      + previousDeals.length,
     normalizedCandidates: result.candidates.length,
     verifiedCandidates: result.scrape.evidenceRows.filter((row) => (
       /^verified-original-post/.test(row.postVerification?.status || '')
@@ -614,16 +817,21 @@ async function main() {
     constraints,
   }));
 
-  console.log(`Suchtreffer: ${result.discovery.rawResults.length}`);
+  console.log(`Web-Suchtreffer: ${result.discovery.rawResults.length}`);
+  console.log(
+    `Hashtag-Agenten: ${result.discovery.diagnostics.agent.completedSources}/`
+    + `${result.discovery.diagnostics.agent.configuredSources} Quellen, `
+    + `${result.discovery.rawAgentResults.length} Kandidaten`,
+  );
   console.log(`Aktuelle direkte Seeds aus bestehenden Pipelines: ${result.seedCandidates.length}`);
   console.log(`Direkte Posts nach Vorfilter/Deduplizierung: ${result.candidates.length}`);
   console.log(`Original-Posts verifiziert: ${result.scrape.diagnostics.originalPostsVerified}`);
   console.log(`Akzeptiert: ${accepted.length}`);
   console.log(`Review: ${review.length} ${JSON.stringify(result.classification.summary.reviewByReason)}`);
-  console.log(`Abgelehnt: ${pipelineRejected.length} ${JSON.stringify({
-    ...result.classification.summary.rejectedByReason,
-    ...countReasons(result.discovery.prefilterRejected),
-  })}`);
+  console.log(`Abgelehnt: ${pipelineRejected.length} ${JSON.stringify(mergeReasonCounts(
+    result.classification.summary.rejectedByReason,
+    countReasons(result.discovery.prefilterRejected),
+  ))}`);
   console.log(`Gespeichert: docs/${path.basename(OUTPUT_PATH)} sowie Raw/Review/Rejected-Artefakte`);
 }
 

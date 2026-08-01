@@ -2,10 +2,13 @@ import assert from 'node:assert/strict';
 
 import {
   createKey4FirecrawlPool,
+  discoverKey4AgentCandidates,
   discoverKey4PostCandidates,
   runKey4Pipeline,
 } from '../scraper/firecrawl-instagram-direct4.js';
 import {
+  agentDealToKey4Candidate,
+  buildKey4HashtagSources,
   buildKey4SearchQueries,
   buildKey4TargetAccounts,
   classifyKey4Evidence,
@@ -36,18 +39,31 @@ assert.deepEqual(targetAccounts.map((account) => account.username), ['soya_wien'
 assert.equal(targetAccounts[0].viennaVerified, true);
 
 const queries = buildKey4SearchQueries(targetAccounts, { profileLimit: 1 });
-assert.equal(queries.length, 7, 'six focused searches plus one verified merchant query');
+assert.equal(queries.length, 9, 'eight focused searches plus one verified merchant query');
 assert.equal(queries.at(-1).targetUsername, 'soya_wien');
+
+const hashtagSources = buildKey4HashtagSources();
+assert.equal(hashtagSources.length, 10);
+assert.ok(hashtagSources.some((source) => source.hashtag === 'gratiswien'));
+assert.ok(hashtagSources.some((source) => source.hashtag === 'viennafood'));
+assert.ok(hashtagSources.some((source) => source.hashtag === 'allyoucaneatvienna'));
+assert.ok(hashtagSources.every((source) => !/(?:1000things|meinbezirk)/i.test(source.url)));
 
 const clients = {
   exhausted: {
     async search() {
       throw new Error('Insufficient credits to perform this request');
     },
+    async agent() {
+      throw new Error('Insufficient credits to perform this request');
+    },
   },
   healthy: {
     async search() {
       return { web: [{ url: freshUrl, title: 'SOYA (@soya_wien) on Instagram' }] };
+    },
+    async agent() {
+      return { data: { deals: [{ post_url: freshUrl }] } };
     },
   },
 };
@@ -67,6 +83,8 @@ await rotatingPool.search('fixture-again', { sources: ['web'] });
 assert.equal(rotatingPool.diagnostics().keys[0].disabledReason, 'credits');
 assert.equal(rotatingPool.diagnostics().keys[0].calls, 1);
 assert.equal(rotatingPool.diagnostics().keys[1].calls, 2, 'the healthy Key 4 replacement remains primary');
+const rotatedAgentResult = await rotatingPool.agent({ url: hashtagSources[0].url });
+assert.equal(rotatedAgentResult.data.deals.length, 1);
 
 const discoveryPool = {
   async search() {
@@ -99,6 +117,45 @@ const discovery = await discoverKey4PostCandidates({
 });
 assert.equal(discovery.rawResults.length, 2);
 assert.equal(discovery.candidates.length, 1, 'only direct post/reel URLs survive discovery');
+
+const agentCandidate = agentDealToKey4Candidate({
+  post_url: `${freshUrl}?utm_source=agent`,
+  owner_username: '@soya_wien',
+  brand_or_store: 'SOYA Wien',
+  post_caption: 'BUY 1, GET 1 FREE ON ALL COCKTAILS. #viennafood',
+  post_date: '2026-07-25',
+}, hashtagSources[0], now);
+assert.equal(agentCandidate.url, freshUrl);
+assert.equal(agentCandidate.ownerUsername, 'soya_wien');
+assert.match(agentCandidate.discoveredBy[0], /^firecrawl-agent:/);
+
+const agentDiscovery = await discoverKey4AgentCandidates({
+  pool: {
+    async agent() {
+      return {
+        data: {
+          deals: [
+            {
+              post_url: freshUrl,
+              owner_username: 'soya_wien',
+              post_caption: 'BUY 1, GET 1 FREE ON ALL COCKTAILS. #viennafood',
+            },
+            {
+              post_url: 'https://www.instagram.com/soya_wien/',
+              post_caption: 'profile page',
+            },
+          ],
+        },
+      };
+    },
+  },
+  sources: [hashtagSources[0]],
+  now,
+  concurrency: 1,
+});
+assert.equal(agentDiscovery.rawResults.length, 2);
+assert.equal(agentDiscovery.candidates.length, 1, 'hashtag agents also retain only direct posts or reels');
+assert.equal(agentDiscovery.diagnostics.completedSources, 1);
 
 const seedCandidate = dealToKey4SeedCandidate({
   url: freshUrl,
@@ -189,6 +246,37 @@ const recurringResult = classifyKey4Evidence([recurringEvidence], {
 assert.equal(recurringResult.accepted.length, 1, 'verified recurring offers may be older than seven days');
 assert.equal(recurringResult.accepted[0].recurringSchedule, true);
 
+const birthdayDocument = {
+  metadata: {
+    ...directDocument.metadata,
+    ogTitle: 'TOKKI Korean BBQ (@tokki_korean_bbq) on Instagram',
+    ogDescription: 'tokki_korean_bbq on Instagram: "Du isst zu deinem Geburtstag gratis bei uns. Ausweis und vollzahlende Begleitung mitnehmen. #vienna #birthday"',
+    publishedTime: '2026-07-05T09:00:00.000Z',
+  },
+};
+const birthdayEvidence = extractKey4PostEvidence(birthdayDocument, directCandidate, {
+  now,
+  registry: new Map(),
+});
+const birthdayResult = classifyKey4Evidence([birthdayEvidence], {
+  now,
+  maxAgeDays: 7,
+  recurringMaxAgeDays: 45,
+});
+assert.equal(birthdayResult.accepted.length, 1, 'an original #vienna birthday offer is recurring and accepted');
+assert.equal(birthdayResult.accepted[0].recurringSchedule, true);
+
+const chanceDocument = {
+  metadata: {
+    ...directDocument.metadata,
+    ogDescription: 'bigbox_fastfood on Instagram: "Jeden Mittwoch hast du die Chance, dein Essen kostenlos zu bekommen. Einfach würfeln. 1190 Wien."',
+  },
+};
+const chanceEvidence = extractKey4PostEvidence(chanceDocument, directCandidate, { now, registry });
+const chanceResult = classifyKey4Evidence([chanceEvidence], { now });
+assert.equal(chanceResult.review.length, 1, 'chance-based free offers require human review');
+assert.deepEqual(chanceResult.review[0].key4Decision.reasons, ['chance-based-offer']);
+
 const expiredDocument = {
   metadata: {
     ...directDocument.metadata,
@@ -246,6 +334,7 @@ const pipeline = await runKey4Pipeline({
   registryDocument: { accounts: [...registry.values()] },
   previousDeals: [],
   seedCandidates: [seedCandidate],
+  agentSources: [],
   queries: [{ id: 'fixture', query: 'fixture', targetUsername: 'soya_wien', targetViennaVerified: true }],
   inspector: async () => ({
     status: 200,

@@ -4,8 +4,10 @@ import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import {
   buildFirecrawlReviewMessage,
   buildSlackMessage,
+  combineFirecrawlReviewSelections,
   filterDuplicateDealsInRun,
   normalizeDeal,
+  prepareKey4ReviewDeals,
   pruneStaleQueueDeals,
   revalidateRecentPostedQueue,
   selectFirecrawlReviewDeals,
@@ -1304,6 +1306,64 @@ assert.deepEqual(firecrawlReviewSelection.sourceCounts, {
   'Firecrawl Key 3 - Consumables': 1,
 });
 assert.equal(firecrawlReviewSelection.deals[0].firecrawlReview, true);
+
+const key4ReviewSelection = prepareKey4ReviewDeals([
+  normalizeDeal({
+    id: 'key4-chance-review',
+    brand: '@bigbox_fastfood',
+    title: 'Mit Würfelglück gratis essen',
+    description: 'Jeden Mittwoch besteht die Chance auf ein kostenloses Essen.',
+    url: 'https://www.instagram.com/reel/Key4ChanceOne/',
+    source: 'Firecrawl Instagram Direct #4',
+    originSource: 'firecrawl4',
+    pubDate: '2026-07-19T08:00:00.000Z',
+    postAgeDays: 1,
+    key4Decision: { status: 'review', reasons: ['chance-based-offer'] },
+  }, 'firecrawl4-review'),
+  normalizeDeal({
+    id: 'key4-vienna-review',
+    brand: '@wien_food',
+    title: '1+1 Burger',
+    description: 'Direkter Originalpost ohne eindeutige Adresse.',
+    url: 'https://www.instagram.com/p/Key4ViennaTwo/',
+    source: 'Firecrawl Instagram Direct #4',
+    originSource: 'firecrawl4',
+    pubDate: '2026-07-18T08:00:00.000Z',
+    postAgeDays: 2,
+    key4Decision: { status: 'review', reasons: ['not-verified-vienna'] },
+  }, 'firecrawl4-review'),
+  normalizeDeal({
+    id: 'key4-rejected-row',
+    url: 'https://www.instagram.com/p/Key4Rejected/',
+    source: 'Firecrawl Instagram Direct #4',
+    originSource: 'firecrawl4',
+    key4Decision: { status: 'rejected', reasons: ['giveaway'] },
+  }, 'firecrawl4-review'),
+], { maxAgeDays: 45 });
+assert.deepEqual(
+  key4ReviewSelection.deals.map((deal) => deal.id),
+  ['key4-chance-review', 'key4-vienna-review'],
+  'only explicit Key4 review decisions on direct Instagram posts enter the dedicated Slack lane',
+);
+assert.match(key4ReviewSelection.deals[0].firecrawlReviewReasons[0], /glücksabhängig/);
+
+const combinedReviewSelection = combineFirecrawlReviewSelections(
+  key4ReviewSelection,
+  firecrawlReviewSelection,
+  [{ url: 'https://example.com/review-food-recent' }],
+);
+assert.equal(combinedReviewSelection.key4Eligible, 2);
+assert.deepEqual(
+  combinedReviewSelection.deals.map((deal) => deal.id),
+  [
+    'key4-chance-review',
+    'key4-vienna-review',
+    'review-food-second',
+    'review-consumables-unclear',
+  ],
+  'all dedicated Key4 reviews survive while review duplicates of accepted deals are removed',
+);
+assert.equal(combinedReviewSelection.sourceCounts['Firecrawl Key 4 - Instagram Direct'], 2);
 
 const firecrawlReviewDisplay = buildFirecrawlReviewMessage(firecrawlReviewSelection.deals[0], 1);
 assert.match(firecrawlReviewDisplay, /Automatisch blockiert: älter als 7 Tage/);

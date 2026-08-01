@@ -9,7 +9,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const GIVEAWAY_PATTERN = /\b(?:gewinnspiel|giveaway|verlosung|zu gewinnen|win(?:ne|nen)?|tagge|markiere|kommentiere|folge uns|follow us)\b/i;
 const FREE_ATTRIBUTE_PATTERN = /\b(?:gluten|sugar|zucker|lactose|laktose|alcohol|alkohol|dairy|plastic|meat|fleisch|cruelty|guilt)[-\s]?free\b|\bfree[-\s]?flow\b|\b(?:free|gratis|kostenlos(?:er)?)\s+(?:entry|admission|eintritt|shipping|versand|delivery|lieferung|wifi|wlan|parking|parkplatz)\b|\b(?:eintritt|entry|admission|versand|shipping|lieferung|delivery|wlan|wifi|parking|parkplatz)\s+(?:frei|gratis|kostenlos|free)\b/gi;
 const FREE_OFFER_PATTERN = /(?:\bgratis\b|\bkostenlos(?:e[nrms]?)?\b|\bkostenfrei\b|\bumsonst\b|\bfor free\b|\bcomplimentary\b|\baufs haus\b|\bon the house\b|\b0\s*(?:€|eur|euro)\b|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b2\s*[+&]\s*1\b|\bbogo\b|\bbuy[\s,-]*(?:one|1)[\s,-]*get[\s,-]*(?:one|1)(?:[\s,-]*(?:free|gratis|kostenlos))?\b|\bwelcome drink\b|\b(?:free|gratis|kostenlose?)\s+(?:sample|probe|kostprobe|verkostung|tasting)\b)/i;
-const FOOD_DRINK_PATTERN = /\b(?:essen|foods?|speisen?|gerichte?|menü|menus?|meals?|frühstück|fruehstueck|brunch|lunch|dinner|buffet|restaurant|gastronomie|cafe|café|kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drinks?|getränke?|getraenke?|cocktails?|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothies?|limonade|pizzas?|burgers?|döner|doener|kebab|kebap|falafel|sushi|ramen|pasta|tiramisu|desserts?|kuchen|cakes?|croissants?|bagels?|waffeln?|eis|gelato|sandwich(?:es)?|snacks?|pommes|fries|tacos?|burritos?|bakery|bäckerei|baeckerei|brot|gebäck|gebaeck|onigiri)\b/i;
+const FOOD_DRINK_PATTERN = /\b(?:essen|isst|iss|eat(?:ing)?|foods?|speisen?|gerichte?|menü|menus?|meals?|frühstück|fruehstueck|brunch|lunch|dinner|buffet|restaurant|gastronomie|cafe|café|kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drinks?|getränke?|getraenke?|cocktails?|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothies?|limonade|pizzas?|burgers?|döner|doener|kebab|kebap|falafel|sushi|ramen|pasta|tiramisu|desserts?|kuchen|cakes?|croissants?|bagels?|waffeln?|eis|gelato|sandwich(?:es)?|snacks?|pommes|fries|tacos?|burritos?|bakery|bäckerei|baeckerei|brot|gebäck|gebaeck|onigiri)\b/i;
 const DRINK_PATTERN = /\b(?:kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drinks?|getränke?|getraenke?|cocktails?|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothies?|limonade|shakes?)\b/i;
 const NON_CONSUMABLE_FREE_PATTERN = /(?:\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app|shirt|t-shirt|fanartikel|merch(?:andise)?|tasche|becher|glas)\b.{0,100}\b(?:gratis|kostenlos|for free|free)\b|\b(?:gratis|kostenlos|for free|free)\b.{0,100}\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app|shirt|t-shirt|fanartikel|merch(?:andise)?|tasche|becher|glas)\b|\b(?:service|reparatur|wartungs?)[-\s]?(?:pauschale|gebühr|gebuehr|fee)\b)/i;
 const VIENNA_POSTCODE_PATTERN = /(?:^|\D)(1(?:0[1-9]|1\d|2[0-3])0)(?!\d)/;
@@ -18,6 +18,7 @@ const STREET_PATTERN = /\b(?:stra(?:ß|ss)e|gasse|platz|weg|ring|allee|kai|markt
 const OUTSIDE_VIENNA_PATTERN = /\b(?:raus|hinaus|außerhalb|ausserhalb)\s+(?:aus|von)?\s*wien\b|\bvor\s+den\s+toren\s+(?:von\s+)?wien\b/i;
 const FOREIGN_VIENNA_PATTERN = /\bvienna\s*,?\s*(?:va|virginia|wv|west virginia|ga|georgia|il|illinois|oh|ohio|usa|u\.?s\.?)\b|\b(?:22180|22181|22182)\b|\b(?:maple|chain bridge|nutley|gallows)\s+(?:ave(?:nue)?|rd|road)\b/i;
 const EXCLUDED_PLATFORM_PATTERN = /\b(?:neotaste|thefork|download\s+(?:the\s+)?bogo|open\s+bogo|bogo\s+app)\b/i;
+const CHANCE_BASED_OFFER_PATTERN = /\b(?:würfel|wuerfel|würfeln|wuerfeln|roll\s+the\s+dice|glücksrad|gluecksrad|mit\s+etwas\s+glück|chance[^.!?]{0,80}(?:gratis|kostenlos|for free))\b/i;
 const BLOCKED_INSTAGRAM_PAGE_PATTERN = /\b(?:log in|login|sign up|anmelden|registrieren|create an account)\b/i;
 
 export const KEY4_GENERAL_SEARCH_QUERIES = [
@@ -27,7 +28,22 @@ export const KEY4_GENERAL_SEARCH_QUERIES = [
   'site:instagram.com/reel/ Wien ("1+1" OR "2 für 1" OR BOGO) (Restaurant OR Cafe OR Bar)',
   'site:instagram.com/p/ Vienna Austria -Virginia -"Vienna, VA" ("buy one get one" OR "for free" OR complimentary) (food OR coffee OR drink)',
   'site:instagram.com/reel/ Wien (Neueröffnung OR Eröffnung) (gratis OR kostenlos OR "welcome drink")',
+  'site:instagram.com (inurl:/p/ OR inurl:/reel/) Wien (Geburtstag OR birthday) (gratis OR kostenlos OR free) (Essen OR Getränk OR Restaurant)',
+  'site:instagram.com (inurl:/p/ OR inurl:/reel/) ("#viennafood" OR "#viennafoodie" OR "#restaurantvienna") (gratis OR kostenlos OR "1+1" OR BOGO)',
 ];
+
+export const KEY4_INSTAGRAM_HASHTAGS = Object.freeze([
+  'gratiswien',
+  'aktionwien',
+  'schnäppchenwien',
+  'wienfood',
+  'wienesse',
+  'viennafood',
+  'viennarestaurant',
+  'restaurantvienna',
+  'viennafoodie',
+  'allyoucaneatvienna',
+]);
 
 function cleanText(value, maxLength = Infinity) {
   const text = value === null || value === undefined
@@ -88,6 +104,7 @@ function extractOwnerUsername(values = []) {
     /\(@([a-z0-9._]{2,40})\)/i,
     /(?:^|[\s"'(])@([a-z0-9._]{2,40})(?=$|[\s"',).:])/i,
     /[-–—]\s*([a-z0-9._]{2,40})\s+(?:on|auf)\s+instagram\b/i,
+    /[-–—]\s*([a-z0-9._]{2,40})\s+on\s+[a-z]{3,10}\s+\d{1,2},?\s+20\d{2}\b/i,
     /^([a-z0-9._]{2,40})\s+(?:on|auf)\s+instagram\b/i,
   ];
   for (const value of values) {
@@ -110,6 +127,9 @@ function unwrapInstagramCaption(value) {
   const dashWrapped = text.match(/[-–—]\s*[a-z0-9._]{2,40}\s+(?:on|auf)\s+instagram\s*:\s*["“]?([\s\S]{12,4000}?)["”]?\s*$/i)?.[1];
   if (dashWrapped) return cleanText(dashWrapped, 4000);
 
+  const datedWrapped = text.match(/[-–—]\s*[a-z0-9._]{2,40}\s+on\s+[a-z]{3,10}\s+\d{1,2},?\s+20\d{2}[^:]{0,30}:\s*["“]([\s\S]{12,4000})["”]\s*\.?/i)?.[1];
+  if (datedWrapped) return cleanText(datedWrapped, 4000);
+
   return cleanText(text, 4000);
 }
 
@@ -122,6 +142,9 @@ function specificViennaEvidence(signal) {
   if (district) return { source: 'instagram-original-caption', value: district };
   if (/\b(?:wien|vienna)\b/i.test(text) && STREET_PATTERN.test(text)) {
     return { source: 'instagram-original-caption', value: 'Wien address' };
+  }
+  if (/(?:^|\s)#(?:wien|vienna)\b/i.test(text) || /\bvienna\s*,?\s*austria\b/i.test(text)) {
+    return { source: 'instagram-original-caption-hashtag', value: 'Vienna' };
   }
   return null;
 }
@@ -261,6 +284,57 @@ export function buildKey4SearchQueries(targetAccounts = [], options = {}) {
   return [...general, ...profiles];
 }
 
+export function buildKey4HashtagSources(limit = KEY4_INSTAGRAM_HASHTAGS.length) {
+  return KEY4_INSTAGRAM_HASHTAGS
+    .slice(0, Math.max(0, Number(limit) || 0))
+    .map((hashtag, index) => ({
+      id: `hashtag-${hashtag}`,
+      hashtag,
+      priority: KEY4_INSTAGRAM_HASHTAGS.length - index,
+      url: `https://www.instagram.com/explore/tags/${encodeURIComponent(hashtag)}/`,
+    }));
+}
+
+export function agentDealToKey4Candidate(deal = {}, source = {}, now = new Date()) {
+  const url = normalizeInstagramPostUrl(
+    deal?.post_url || deal?.postUrl || deal?.url || deal?.original_post_url,
+  );
+  if (!url) return null;
+
+  const encodedPublication = decodeInstagramShortcodeDate(url);
+  const reportedPublication = finiteDate(
+    deal?.post_date || deal?.postDate || deal?.published_at || deal?.publishedAt,
+  );
+  const publication = encodedPublication || reportedPublication;
+  const ownerUsername = normalizeUsername(deal?.owner_username || deal?.ownerUsername);
+  const discoverySnippet = cleanText([
+    deal?.post_caption,
+    deal?.postCaption,
+    deal?.offer,
+    deal?.item_given_away,
+    deal?.location,
+    deal?.validity,
+    deal?.validity_date,
+  ].filter(Boolean).join(' '), 4000);
+  return {
+    url,
+    title: cleanText(deal?.brand_or_store || deal?.brand || deal?.title, 500),
+    discoverySnippet,
+    ownerUsername,
+    ownerSource: ownerUsername ? 'firecrawl-agent-candidate' : '',
+    targetUsername: ownerUsername,
+    targetViennaVerified: false,
+    sourcePublishedAt: publication?.toISOString() || '',
+    sourcePublishedAtSource: publication
+      ? (encodedPublication ? 'url.instagramShortcode' : 'firecrawl-agent-reported-publication')
+      : '',
+    discoveredAt: finiteDate(now)?.toISOString() || new Date().toISOString(),
+    agentSource: cleanText(source?.id || source?.hashtag || source?.url, 160),
+    agentSourcePriority: Number(source?.priority) || 0,
+    discoveredBy: [`firecrawl-agent:${cleanText(source?.id || source?.hashtag || 'hashtag', 160)}`],
+  };
+}
+
 export function searchResultToKey4Candidate(result = {}, query = {}, now = new Date()) {
   const metadata = result?.metadata && typeof result.metadata === 'object' ? result.metadata : {};
   const url = normalizeInstagramPostUrl(
@@ -340,7 +414,7 @@ export function isKey4DiscoveryCandidateRecent(candidate = {}, options = {}) {
   if (ageDays < -0.25) return false;
   if (ageDays <= maxAgeDays) return true;
   return ageDays <= recurringMaxAgeDays
-    && /\b(?:jeden|jede|every|daily|weekly|wöchentlich|woechentlich|monatlich|ongoing|bis auf weiteres)\b/i.test(candidate.discoverySnippet || '');
+    && /\b(?:jeden|jede|every|daily|weekly|wöchentlich|woechentlich|monatlich|ongoing|bis auf weiteres|geburtstag|birthday)\b/i.test(candidate.discoverySnippet || '');
 }
 
 export function key4CandidatePriority(candidate = {}, now = new Date()) {
@@ -351,6 +425,7 @@ export function key4CandidatePriority(candidate = {}, now = new Date()) {
   if (candidate.seedSource) score += 120;
   if (candidate.targetViennaVerified) score += 160;
   if (candidate.targetUsername) score += 60;
+  if (candidate.agentSource) score += 100 + Math.max(0, Number(candidate.agentSourcePriority) || 0);
   if (FREE_OFFER_PATTERN.test(candidate.discoverySnippet || '')) score += 80;
   if (FOOD_DRINK_PATTERN.test(candidate.discoverySnippet || '')) score += 40;
   score += Math.max(0, 60 - ageDays * 3);
@@ -393,6 +468,9 @@ export function extractKey4PostEvidence(document = {}, candidate = {}, options =
     metadata?.ogTitle,
     rawMeta.get('og:title'),
     metadata?.title,
+    metadata?.ogDescription,
+    rawMeta.get('og:description'),
+    metadata?.description,
   ];
   let ownerUsername = extractOwnerUsername(ownerValues);
   let ownerSource = ownerUsername ? 'instagram-original-metadata' : '';
@@ -590,7 +668,7 @@ function decideEvidence(evidence, options) {
   }
 
   const publication = finiteDate(evidence.sourcePublishedAt);
-  const timing = evaluateInstagramOfferTiming({
+  const evaluatedTiming = evaluateInstagramOfferTiming({
     now,
     pubDate: publication,
     signal: originalSignal,
@@ -598,6 +676,19 @@ function decideEvidence(evidence, options) {
     activeOfferMaxAgeDays: recurringMaxAgeDays,
     futureSkewMinutes: 10,
   });
+  const recurringOccasion = /\bgeburtstag(?:sangebot|sdeal|sspecial)?\b|\bbirthday\b/i.test(originalSignal);
+  const timing = recurringOccasion
+    && evaluatedTiming.withinActiveOfferLimit
+    && !evaluatedTiming.expired
+    && !evaluatedTiming.notStarted
+    && !evaluatedTiming.futurePublication
+    ? {
+        ...evaluatedTiming,
+        recurring: true,
+        activeEvidence: true,
+        eligibleByAge: true,
+      }
+    : evaluatedTiming;
 
   if (timing.futurePublication) {
     const decision = { status: 'rejected', reasons: ['future-post-date'] };
@@ -615,6 +706,10 @@ function decideEvidence(evidence, options) {
   if (!evidence.viennaVerified) {
     const decision = { status: 'review', reasons: ['not-verified-vienna'] };
     return { decision, timing, confidence: 70, deal: toDeal(evidence, decision, now, timing, 70) };
+  }
+  if (CHANCE_BASED_OFFER_PATTERN.test(originalSignal)) {
+    const decision = { status: 'review', reasons: ['chance-based-offer'] };
+    return { decision, timing, confidence: 85, deal: toDeal(evidence, decision, now, timing, 85) };
   }
   if (!publication) {
     const decision = { status: 'review', reasons: ['missing-real-post-date'] };

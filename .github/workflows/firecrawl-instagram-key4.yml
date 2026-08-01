@@ -36,14 +36,18 @@ jobs:
           FC4_MAX_AGE_DAYS: 7
           FC4_DISCOVERY_MAX_AGE_DAYS: 14
           FC4_RECURRING_MAX_AGE_DAYS: 45
-          FC4_MAX_DEALS: 40
-          FC4_MAX_REVIEW: 80
+          FC4_MAX_DEALS: 160
+          FC4_MAX_REVIEW: 160
           FC4_SEARCH_LIMIT: 6
           FC4_PROFILE_QUERY_LIMIT: 18
           FC4_TARGET_ACCOUNT_LIMIT: 30
-          FC4_MAX_POSTS_TO_SCRAPE: 80
+          FC4_MAX_POSTS_TO_SCRAPE: 160
           FC4_SEARCH_CONCURRENCY: 2
-          FC4_SCRAPE_CONCURRENCY: 3
+          FC4_SCRAPE_CONCURRENCY: 4
+          FC4_AGENT_DISCOVERY_ENABLED: "true"
+          FC4_AGENT_SOURCE_LIMIT: 10
+          FC4_AGENT_CONCURRENCY: 1
+          FC4_AGENT_MODEL: spark-1-pro
           FC4_MAX_FIRECRAWL_CALLS: 140
         run: node scraper/firecrawl-instagram-direct4.js
 
