@@ -29,20 +29,21 @@ export const KEY4_GENERAL_SEARCH_QUERIES = [
   'site:instagram.com/p/ Vienna Austria -Virginia -"Vienna, VA" ("buy one get one" OR "for free" OR complimentary) (food OR coffee OR drink)',
   'site:instagram.com/reel/ Wien (Neueröffnung OR Eröffnung) (gratis OR kostenlos OR "welcome drink")',
   'site:instagram.com (inurl:/p/ OR inurl:/reel/) Wien (Geburtstag OR birthday) (gratis OR kostenlos OR free) (Essen OR Getränk OR Restaurant)',
-  'site:instagram.com (inurl:/p/ OR inurl:/reel/) ("#viennafood" OR "#viennafoodie" OR "#restaurantvienna") (gratis OR kostenlos OR "1+1" OR BOGO)',
+  'site:instagram.com (inurl:/p/ OR inurl:/reel/) ("#gratiswien" OR "#aktionwien" OR "#schnäppchenwien" OR "#wienfood" OR "#wienesse") (gratis OR kostenlos OR "1+1" OR BOGO OR Geburtstag)',
+  'site:instagram.com (inurl:/p/ OR inurl:/reel/) ("#viennafood" OR "#viennarestaurant" OR "#restaurantvienna" OR "#viennafoodie" OR "#allyoucaneatvienna") (gratis OR kostenlos OR "1+1" OR BOGO OR birthday)',
 ];
 
 export const KEY4_INSTAGRAM_HASHTAGS = Object.freeze([
+  'allyoucaneatvienna',
+  'viennafood',
+  'wienesse',
+  'viennarestaurant',
   'gratiswien',
   'aktionwien',
   'schnäppchenwien',
   'wienfood',
-  'wienesse',
-  'viennafood',
-  'viennarestaurant',
   'restaurantvienna',
   'viennafoodie',
-  'allyoucaneatvienna',
 ]);
 
 function cleanText(value, maxLength = Infinity) {

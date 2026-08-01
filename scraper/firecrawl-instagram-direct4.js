@@ -72,7 +72,7 @@ const MAX_POSTS_TO_SCRAPE = Math.max(1, Number(process.env.FC4_MAX_POSTS_TO_SCRA
 const SEARCH_CONCURRENCY = Math.max(1, Number(process.env.FC4_SEARCH_CONCURRENCY || 2) || 2);
 const SCRAPE_CONCURRENCY = Math.max(1, Number(process.env.FC4_SCRAPE_CONCURRENCY || 3) || 3);
 const MAX_FIRECRAWL_CALLS = Math.max(1, Number(process.env.FC4_MAX_FIRECRAWL_CALLS || 140) || 140);
-const AGENT_SOURCE_LIMIT = Math.max(0, Number(process.env.FC4_AGENT_SOURCE_LIMIT || 10) || 0);
+const AGENT_SOURCE_LIMIT = Math.max(0, Number(process.env.FC4_AGENT_SOURCE_LIMIT || 4) || 0);
 const AGENT_CONCURRENCY = Math.max(1, Number(process.env.FC4_AGENT_CONCURRENCY || 2) || 2);
 const AGENT_TIMEOUT_SECONDS = Math.max(
   30,

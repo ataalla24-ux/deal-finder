@@ -39,7 +39,7 @@ assert.deepEqual(targetAccounts.map((account) => account.username), ['soya_wien'
 assert.equal(targetAccounts[0].viennaVerified, true);
 
 const queries = buildKey4SearchQueries(targetAccounts, { profileLimit: 1 });
-assert.equal(queries.length, 9, 'eight focused searches plus one verified merchant query');
+assert.equal(queries.length, 10, 'nine focused searches plus one verified merchant query');
 assert.equal(queries.at(-1).targetUsername, 'soya_wien');
 
 const hashtagSources = buildKey4HashtagSources();
@@ -48,6 +48,11 @@ assert.ok(hashtagSources.some((source) => source.hashtag === 'gratiswien'));
 assert.ok(hashtagSources.some((source) => source.hashtag === 'viennafood'));
 assert.ok(hashtagSources.some((source) => source.hashtag === 'allyoucaneatvienna'));
 assert.ok(hashtagSources.every((source) => !/(?:1000things|meinbezirk)/i.test(source.url)));
+assert.deepEqual(
+  buildKey4HashtagSources(4).map((source) => source.hashtag),
+  ['allyoucaneatvienna', 'viennafood', 'wienesse', 'viennarestaurant'],
+  'the live-tested productive hashtags receive the expensive agent slots',
+);
 
 const clients = {
   exhausted: {
