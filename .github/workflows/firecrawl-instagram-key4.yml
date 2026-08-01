@@ -27,19 +27,27 @@ jobs:
       - name: Run Instagram Direct Scraper
         env:
           FIRECRAWL_API_KEY4: ${{ secrets.FIRECRAWL_API_KEY4 }}
+          FIRECRAWL_API_KEY1: ${{ secrets.FIRECRAWL_API_KEY1 }}
+          FIRECRAWL_API_KEY2: ${{ secrets.FIRECRAWL_API_KEY2 }}
+          FIRECRAWL_API_KEY3: ${{ secrets.FIRECRAWL_API_KEY3 }}
+          FIRECRAWL_API_KEY5: ${{ secrets.FIRECRAWL_API_KEY5 }}
+          FIRECRAWL_API_KEY6: ${{ secrets.FIRECRAWL_API_KEY6 }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
           FC4_MAX_AGE_DAYS: 7
+          FC4_DISCOVERY_MAX_AGE_DAYS: 14
+          FC4_RECURRING_MAX_AGE_DAYS: 45
           FC4_MAX_DEALS: 40
-          FC4_MIN_RAW_CANDIDATES: 12
-          FC4_MIN_QUALIFIED_DEALS: 3
-          FC4_SEARCH_LIMIT: 10
-          FC4_MAX_CREDITS_PER_AGENT: 2500
-          FIRECRAWL_POST_VERIFY_MAX: 140
-          FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 7
-          FIRECRAWL_POST_VERIFY_CONCURRENCY: 4
-          FIRECRAWL_POST_VERIFY_TIMEOUT_MS: 6000
+          FC4_MAX_REVIEW: 80
+          FC4_SEARCH_LIMIT: 6
+          FC4_PROFILE_QUERY_LIMIT: 18
+          FC4_TARGET_ACCOUNT_LIMIT: 30
+          FC4_MAX_POSTS_TO_SCRAPE: 80
+          FC4_SEARCH_CONCURRENCY: 2
+          FC4_SCRAPE_CONCURRENCY: 3
+          FC4_DIRECT_FALLBACK_MAX: 30
+          FC4_MAX_FIRECRAWL_CALLS: 140
         run: node scraper/firecrawl-instagram-direct4.js
 
       - name: Commit deals
         run: |
-          node scripts/commit-generated.mjs --message "Firecrawl4 deals $(date +%Y-%m-%d)" --files docs/deals-pending-firecrawl4.json docs/deal-pipeline-last-run-firecrawl4.json docs/deal-pipeline-runs-firecrawl4.json
+          node scripts/commit-generated.mjs --message "Firecrawl4 deals $(date +%Y-%m-%d)" --files docs/deals-pending-firecrawl4.json docs/deals-raw-firecrawl4.json docs/deals-review-firecrawl4.json docs/deals-rejected-firecrawl4.json docs/deal-pipeline-last-run-firecrawl4.json docs/deal-pipeline-runs-firecrawl4.json
