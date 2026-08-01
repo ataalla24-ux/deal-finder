@@ -15,6 +15,7 @@ import {
   buildKey4SearchQueries,
   buildKey4TargetAccounts,
   classifyKey4Evidence,
+  dealToKey4SeedCandidate,
   dedupeKey4Candidates,
   extractKey4PostEvidence,
   isKey4DiscoveryCandidateRecent,
@@ -32,6 +33,17 @@ const REVIEW_OUTPUT_PATH = path.join(DOCS_DIR, 'deals-review-firecrawl4.json');
 const REJECTED_OUTPUT_PATH = path.join(DOCS_DIR, 'deals-rejected-firecrawl4.json');
 const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
 const REGISTRY_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
+const SEED_FILE_NAMES = [
+  'deals-pending-gastro2.json',
+  'deals-pending-food3.json',
+  'deals-pending-firecrawl2.json',
+  'deals-pending-firecrawl5.json',
+  'deals-pending-instagram-ai.json',
+  'deals-pending-instagram-apify.json',
+  'deals-pending-instagram-discovery.json',
+  'deals-pending-instagram-verified.json',
+  'deals-pending-instagram.json',
+];
 const SOURCE_KEY = 'firecrawl4';
 const SOURCE_LABEL = 'Firecrawl Key 4 - Instagram Direct';
 const RUN_STARTED_AT = new Date();
@@ -56,7 +68,6 @@ const TARGET_ACCOUNT_LIMIT = Math.max(
 const MAX_POSTS_TO_SCRAPE = Math.max(1, Number(process.env.FC4_MAX_POSTS_TO_SCRAPE || 80) || 80);
 const SEARCH_CONCURRENCY = Math.max(1, Number(process.env.FC4_SEARCH_CONCURRENCY || 2) || 2);
 const SCRAPE_CONCURRENCY = Math.max(1, Number(process.env.FC4_SCRAPE_CONCURRENCY || 3) || 3);
-const DIRECT_FALLBACK_MAX = Math.max(0, Number(process.env.FC4_DIRECT_FALLBACK_MAX || 30) || 0);
 const MAX_FIRECRAWL_CALLS = Math.max(1, Number(process.env.FC4_MAX_FIRECRAWL_CALLS || 140) || 140);
 
 function cleanText(value, maxLength = Infinity) {
@@ -72,6 +83,21 @@ function readJson(filePath, fallback = {}) {
   } catch {
     return fallback;
   }
+}
+
+function readKey4SeedCandidates(now) {
+  return dedupeKey4Candidates(SEED_FILE_NAMES.flatMap((fileName) => {
+    const payload = readJson(path.join(DOCS_DIR, fileName), {});
+    const deals = Array.isArray(payload?.deals) ? payload.deals : [];
+    return deals
+      .map((deal) => dealToKey4SeedCandidate(deal, fileName, now))
+      .filter(Boolean)
+      .filter((candidate) => isKey4DiscoveryCandidateRecent(candidate, {
+        now,
+        maxAgeDays: DISCOVERY_MAX_AGE_DAYS,
+        recurringMaxAgeDays: RECURRING_MAX_AGE_DAYS,
+      }));
+  }));
 }
 
 function writeJsonAtomic(filePath, value) {
@@ -338,15 +364,12 @@ function healthToFirecrawlDocument(health = {}) {
 }
 
 export async function scrapeKey4PostCandidates(options = {}) {
-  const pool = options.pool;
-  if (!pool || typeof pool.scrape !== 'function') {
-    throw new Error('Key 4 direct-post extraction requires a Firecrawl key pool');
-  }
   const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
   const registry = options.registry instanceof Map ? options.registry : new Map();
   const inspector = options.inspector === undefined ? inspectDealUrlHealth : options.inspector;
-  const fallbackMax = Math.max(0, Number(options.fallbackMax ?? DIRECT_FALLBACK_MAX) || 0);
-  let fallbackCount = 0;
+  if (typeof inspector !== 'function') {
+    throw new Error('Key 4 direct-post extraction requires an original-post inspector');
+  }
   const selected = dedupeKey4Candidates(options.candidates || [])
     .sort((left, right) => key4CandidatePriority(right, now) - key4CandidatePriority(left, now))
     .slice(0, Math.max(1, Number(options.maxPosts ?? MAX_POSTS_TO_SCRAPE) || MAX_POSTS_TO_SCRAPE));
@@ -355,48 +378,22 @@ export async function scrapeKey4PostCandidates(options = {}) {
     selected,
     Number(options.concurrency ?? SCRAPE_CONCURRENCY) || SCRAPE_CONCURRENCY,
     async (candidate) => {
-      let document = {};
-      let scrapeError = '';
       try {
-        document = await pool.scrape(candidate.url, {
-          formats: ['markdown', 'html', 'rawHtml'],
-          onlyMainContent: false,
-          waitFor: 1000,
-          timeout: 30_000,
-          proxy: 'auto',
-          removeBase64Images: true,
+        const health = await inspector(candidate.url, { timeoutMs: 8000, now });
+        return extractKey4PostEvidence(healthToFirecrawlDocument(health), candidate, {
+          now,
+          registry,
+          scrapeError: cleanText(health?.reason, 300),
+          retrievalMode: 'direct-original-post-inspection',
         });
       } catch (error) {
-        scrapeError = safeErrorMessage(error);
+        return extractKey4PostEvidence({}, candidate, {
+          now,
+          registry,
+          scrapeError: safeErrorMessage(error),
+          retrievalMode: 'direct-original-post-inspection',
+        });
       }
-
-      let evidence = extractKey4PostEvidence(document || {}, candidate, {
-        now,
-        registry,
-        scrapeError,
-        retrievalMode: 'firecrawl-direct-scrape',
-      });
-      if (!/^verified-original-post/.test(evidence.postVerification?.status || '')
-          && typeof inspector === 'function'
-          && fallbackCount < fallbackMax) {
-        fallbackCount += 1;
-        try {
-          const health = await inspector(candidate.url, { timeoutMs: 8000, now });
-          const fallbackDocument = healthToFirecrawlDocument(health);
-          const fallbackEvidence = extractKey4PostEvidence(fallbackDocument, candidate, {
-            now,
-            registry,
-            scrapeError: cleanText(health?.reason || scrapeError, 300),
-            retrievalMode: 'direct-http-fallback',
-          });
-          if (/^verified-original-post/.test(fallbackEvidence.postVerification?.status || '')) {
-            evidence = fallbackEvidence;
-          }
-        } catch (error) {
-          evidence.postVerification.reason = safeErrorMessage(error);
-        }
-      }
-      return evidence;
     },
   );
 
@@ -410,7 +407,7 @@ export async function scrapeKey4PostCandidates(options = {}) {
       unavailableOriginalPosts: evidenceRows.filter((row) => (
         !/^verified-original-post/.test(row.postVerification?.status || '')
       )).length,
-      directHttpFallbacks: fallbackCount,
+      directOriginalPostInspections: selected.length,
     },
   };
 }
@@ -448,18 +445,23 @@ export async function runKey4Pipeline(options = {}) {
     recurringMaxAgeDays: options.recurringMaxAgeDays,
   });
   const previousCandidates = previousDealsToCandidates(options.previousDeals || [], now);
+  const seedCandidates = dedupeKey4Candidates(options.seedCandidates || [])
+    .filter((candidate) => isKey4DiscoveryCandidateRecent(candidate, {
+      now,
+      maxAgeDays: options.discoveryMaxAgeDays ?? DISCOVERY_MAX_AGE_DAYS,
+      recurringMaxAgeDays: options.recurringMaxAgeDays ?? RECURRING_MAX_AGE_DAYS,
+    }));
   const candidates = dedupeKey4Candidates([
     ...discovery.candidates,
+    ...seedCandidates,
     ...previousCandidates,
   ]);
   const scrape = await scrapeKey4PostCandidates({
-    pool: options.pool,
     candidates,
     registry,
     now,
     maxPosts: options.maxPosts,
     concurrency: options.scrapeConcurrency,
-    fallbackMax: options.fallbackMax,
     inspector: options.inspector,
   });
   const classification = classifyKey4Evidence(scrape.evidenceRows, {
@@ -470,6 +472,7 @@ export async function runKey4Pipeline(options = {}) {
   return {
     now,
     targetAccounts,
+    seedCandidates,
     candidates,
     discovery,
     scrape,
@@ -507,6 +510,7 @@ async function main() {
   const registryDocument = readJson(REGISTRY_PATH, {});
   const previousOutput = readJson(OUTPUT_PATH, {});
   const previousDeals = Array.isArray(previousOutput?.deals) ? previousOutput.deals : [];
+  const seedCandidates = readKey4SeedCandidates(now);
 
   console.log('FIRECRAWL KEY 4 V2 - DIRECT INSTAGRAM EVIDENCE');
   console.log('='.repeat(58));
@@ -520,6 +524,7 @@ async function main() {
     watchlist,
     registryDocument,
     previousDeals,
+    seedCandidates,
   });
   const accepted = result.classification.accepted.slice(0, MAX_DEALS);
   const review = result.classification.review.slice(0, MAX_REVIEW);
@@ -531,10 +536,11 @@ async function main() {
     location: 'Wien',
     offer: 'kostenlose Speisen/Getränke, 1+1/2für1 und kostenlose Gastro-Proben',
     originalEvidenceRequiredForAutomaticAcceptance: true,
-    discoveryMode: 'direct Instagram post/reel URLs from merchant-first Firecrawl search',
+    discoveryMode: 'merchant-first Firecrawl search plus recent direct-post seeds from existing pipelines',
   };
   const diagnostics = {
     targetAccounts: result.targetAccounts.length,
+    seedCandidates: result.seedCandidates.length,
     discovery: result.discovery.diagnostics,
     extraction: result.scrape.diagnostics,
     classification: result.classification.summary,
@@ -555,6 +561,7 @@ async function main() {
     lastUpdated: now.toISOString(),
     source: SOURCE_KEY,
     totalSearchResults: result.discovery.rawResults.length,
+    totalSeedCandidates: result.seedCandidates.length,
     totalDirectPosts: result.scrape.evidenceRows.length,
     searchResults: result.discovery.rawResults,
     posts: result.scrape.evidenceRows.map(compactEvidence),
@@ -595,7 +602,7 @@ async function main() {
     startedAt: RUN_STARTED_AT,
     finishedAt: new Date(),
     outputFile: path.relative(ROOT, OUTPUT_PATH),
-    rawCandidates: result.discovery.rawResults.length + previousDeals.length,
+    rawCandidates: result.discovery.rawResults.length + result.seedCandidates.length + previousDeals.length,
     normalizedCandidates: result.candidates.length,
     verifiedCandidates: result.scrape.evidenceRows.filter((row) => (
       /^verified-original-post/.test(row.postVerification?.status || '')
@@ -608,6 +615,7 @@ async function main() {
   }));
 
   console.log(`Suchtreffer: ${result.discovery.rawResults.length}`);
+  console.log(`Aktuelle direkte Seeds aus bestehenden Pipelines: ${result.seedCandidates.length}`);
   console.log(`Direkte Posts nach Vorfilter/Deduplizierung: ${result.candidates.length}`);
   console.log(`Original-Posts verifiziert: ${result.scrape.diagnostics.originalPostsVerified}`);
   console.log(`Akzeptiert: ${accepted.length}`);

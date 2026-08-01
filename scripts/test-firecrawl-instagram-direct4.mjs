@@ -9,6 +9,7 @@ import {
   buildKey4SearchQueries,
   buildKey4TargetAccounts,
   classifyKey4Evidence,
+  dealToKey4SeedCandidate,
   extractKey4PostEvidence,
   searchResultToKey4Candidate,
 } from '../scraper/firecrawl-instagram-direct4-utils.js';
@@ -99,6 +100,16 @@ const discovery = await discoverKey4PostCandidates({
 assert.equal(discovery.rawResults.length, 2);
 assert.equal(discovery.candidates.length, 1, 'only direct post/reel URLs survive discovery');
 
+const seedCandidate = dealToKey4SeedCandidate({
+  url: freshUrl,
+  title: 'Gratis Kaffee in Wien',
+  description: 'Heute gibt es einen Kaffee gratis.',
+  ownerUsername: 'soya_wien',
+  viennaVerified: true,
+}, 'deals-pending-fixture.json', now);
+assert.equal(seedCandidate.seedSource, 'deals-pending-fixture.json');
+assert.equal(seedCandidate.url, freshUrl);
+
 const registry = new Map([['soya_wien', {
   username: 'soya_wien',
   accountType: 'merchant',
@@ -188,6 +199,31 @@ const expiredEvidence = extractKey4PostEvidence(expiredDocument, directCandidate
 const expiredResult = classifyKey4Evidence([expiredEvidence], { now });
 assert.equal(expiredResult.rejected[0].reason, 'expired-offer');
 
+const foreignViennaDocument = {
+  metadata: {
+    ...directDocument.metadata,
+    ogTitle: 'Aroma Express | Coffee • Bakery • Kitchen on Instagram',
+    ogDescription: 'Aroma Express on Instagram: "Complimentary coffee all day. 416 Maple Ave, Vienna, VA 22180."',
+  },
+};
+const foreignViennaEvidence = extractKey4PostEvidence(foreignViennaDocument, directCandidate, {
+  now,
+  registry: new Map(),
+});
+assert.equal(foreignViennaEvidence.ownerUsername, '', 'a generic title suffix is not treated as an account owner');
+const foreignViennaResult = classifyKey4Evidence([foreignViennaEvidence], { now });
+assert.equal(foreignViennaResult.rejected[0].reason, 'not-vienna-austria');
+
+const excludedPlatformDocument = {
+  metadata: {
+    ...directDocument.metadata,
+    ogDescription: 'soya_wien on Instagram: "Mit NeoTaste bekommst du heute 1+1 Pizza gratis. Rotgasse 8, 1010 Wien."',
+  },
+};
+const excludedPlatformEvidence = extractKey4PostEvidence(excludedPlatformDocument, directCandidate, { now, registry });
+const excludedPlatformResult = classifyKey4Evidence([excludedPlatformEvidence], { now });
+assert.equal(excludedPlatformResult.rejected[0].reason, 'excluded-platform');
+
 const integrationPool = {
   async search() {
     return {
@@ -198,11 +234,8 @@ const integrationPool = {
       }],
     };
   },
-  async scrape() {
-    return directDocument;
-  },
   diagnostics() {
-    return { totalCalls: 2, keys: [] };
+    return { totalCalls: 1, keys: [] };
   },
 };
 const pipeline = await runKey4Pipeline({
@@ -212,8 +245,20 @@ const pipeline = await runKey4Pipeline({
   registry,
   registryDocument: { accounts: [...registry.values()] },
   previousDeals: [],
+  seedCandidates: [seedCandidate],
   queries: [{ id: 'fixture', query: 'fixture', targetUsername: 'soya_wien', targetViennaVerified: true }],
-  inspector: null,
+  inspector: async () => ({
+    status: 200,
+    finalUrl: freshUrl,
+    contentHints: {
+      title: directDocument.metadata.ogTitle,
+      description: directDocument.metadata.ogDescription,
+      textSnippet: directDocument.markdown,
+    },
+    dateHints: {
+      publicationDate: directDocument.metadata.publishedTime,
+    },
+  }),
   searchConcurrency: 1,
   scrapeConcurrency: 1,
 });

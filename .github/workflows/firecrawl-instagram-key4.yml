@@ -2,7 +2,7 @@ name: "Firecrawl Key 4 - Instagram Direct"
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Start stagger 0: 01:00 Vienna winter / 02:00 summer
+    - cron: '0 7 * * *' # Run after Firecrawl Keys 1-3 and 5, before the daily digest
   workflow_dispatch:
 
 concurrency:
@@ -44,7 +44,6 @@ jobs:
           FC4_MAX_POSTS_TO_SCRAPE: 80
           FC4_SEARCH_CONCURRENCY: 2
           FC4_SCRAPE_CONCURRENCY: 3
-          FC4_DIRECT_FALLBACK_MAX: 30
           FC4_MAX_FIRECRAWL_CALLS: 140
         run: node scraper/firecrawl-instagram-direct4.js
 

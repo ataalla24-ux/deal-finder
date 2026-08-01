@@ -11,11 +11,13 @@ const FREE_ATTRIBUTE_PATTERN = /\b(?:gluten|sugar|zucker|lactose|laktose|alcohol
 const FREE_OFFER_PATTERN = /(?:\bgratis\b|\bkostenlos(?:e[nrms]?)?\b|\bkostenfrei\b|\bumsonst\b|\bfor free\b|\bcomplimentary\b|\baufs haus\b|\bon the house\b|\b0\s*(?:€|eur|euro)\b|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b2\s*[+&]\s*1\b|\bbogo\b|\bbuy[\s,-]*(?:one|1)[\s,-]*get[\s,-]*(?:one|1)(?:[\s,-]*(?:free|gratis|kostenlos))?\b|\bwelcome drink\b|\b(?:free|gratis|kostenlose?)\s+(?:sample|probe|kostprobe|verkostung|tasting)\b)/i;
 const FOOD_DRINK_PATTERN = /\b(?:essen|foods?|speisen?|gerichte?|menü|menus?|meals?|frühstück|fruehstueck|brunch|lunch|dinner|buffet|restaurant|gastronomie|cafe|café|kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drinks?|getränke?|getraenke?|cocktails?|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothies?|limonade|pizzas?|burgers?|döner|doener|kebab|kebap|falafel|sushi|ramen|pasta|tiramisu|desserts?|kuchen|cakes?|croissants?|bagels?|waffeln?|eis|gelato|sandwich(?:es)?|snacks?|pommes|fries|tacos?|burritos?|bakery|bäckerei|baeckerei|brot|gebäck|gebaeck|onigiri)\b/i;
 const DRINK_PATTERN = /\b(?:kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drinks?|getränke?|getraenke?|cocktails?|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothies?|limonade|shakes?)\b/i;
-const NON_CONSUMABLE_FREE_PATTERN = /(?:\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app)\b.{0,100}\b(?:gratis|kostenlos|for free|free)\b|\b(?:gratis|kostenlos|for free|free)\b.{0,100}\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app)\b|\b(?:service|reparatur|wartungs?)[-\s]?(?:pauschale|gebühr|gebuehr|fee)\b)/i;
+const NON_CONSUMABLE_FREE_PATTERN = /(?:\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app|shirt|t-shirt|fanartikel|merch(?:andise)?|tasche|becher|glas)\b.{0,100}\b(?:gratis|kostenlos|for free|free)\b|\b(?:gratis|kostenlos|for free|free)\b.{0,100}\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app|shirt|t-shirt|fanartikel|merch(?:andise)?|tasche|becher|glas)\b|\b(?:service|reparatur|wartungs?)[-\s]?(?:pauschale|gebühr|gebuehr|fee)\b)/i;
 const VIENNA_POSTCODE_PATTERN = /(?:^|\D)(1(?:0[1-9]|1\d|2[0-3])0)(?!\d)/;
 const VIENNA_DISTRICT_PATTERN = /\b(?:innere stadt|leopoldstadt|landstra(?:ß|ss)e|wieden|margareten|mariahilf|neubau|josefstadt|alsergrund|favoriten|meidling|hietzing|penzing|rudolfsheim|ottakring|hernals|währing|waehring|döbling|doebling|brigittenau|floridsdorf|donaustadt|liesing|(?:1\d|2[0-3])\.\s*bezirk)\b/i;
 const STREET_PATTERN = /\b(?:stra(?:ß|ss)e|gasse|platz|weg|ring|allee|kai|markt|zeile|promenade|graben|ufer|steg)\b/i;
 const OUTSIDE_VIENNA_PATTERN = /\b(?:raus|hinaus|außerhalb|ausserhalb)\s+(?:aus|von)?\s*wien\b|\bvor\s+den\s+toren\s+(?:von\s+)?wien\b/i;
+const FOREIGN_VIENNA_PATTERN = /\bvienna\s*,?\s*(?:va|virginia|wv|west virginia|ga|georgia|il|illinois|oh|ohio|usa|u\.?s\.?)\b|\b(?:22180|22181|22182)\b|\b(?:maple|chain bridge|nutley|gallows)\s+(?:ave(?:nue)?|rd|road)\b/i;
+const EXCLUDED_PLATFORM_PATTERN = /\b(?:neotaste|thefork|download\s+(?:the\s+)?bogo|open\s+bogo|bogo\s+app)\b/i;
 const BLOCKED_INSTAGRAM_PAGE_PATTERN = /\b(?:log in|login|sign up|anmelden|registrieren|create an account)\b/i;
 
 export const KEY4_GENERAL_SEARCH_QUERIES = [
@@ -23,7 +25,7 @@ export const KEY4_GENERAL_SEARCH_QUERIES = [
   'site:instagram.com/reel/ Wien (gratis OR kostenlos OR "aufs Haus") (Essen OR Getränk OR Restaurant)',
   'site:instagram.com/p/ Wien ("1+1" OR "2 für 1" OR "2+1") (Burger OR Pizza OR Kaffee OR Cocktail)',
   'site:instagram.com/reel/ Wien ("1+1" OR "2 für 1" OR BOGO) (Restaurant OR Cafe OR Bar)',
-  'site:instagram.com/p/ Vienna ("buy one get one" OR "for free" OR complimentary) (food OR coffee OR drink)',
+  'site:instagram.com/p/ Vienna Austria -Virginia -"Vienna, VA" ("buy one get one" OR "for free" OR complimentary) (food OR coffee OR drink)',
   'site:instagram.com/reel/ Wien (Neueröffnung OR Eröffnung) (gratis OR kostenlos OR "welcome drink")',
 ];
 
@@ -86,7 +88,7 @@ function extractOwnerUsername(values = []) {
     /\(@([a-z0-9._]{2,40})\)/i,
     /(?:^|[\s"'(])@([a-z0-9._]{2,40})(?=$|[\s"',).:])/i,
     /[-–—]\s*([a-z0-9._]{2,40})\s+(?:on|auf)\s+instagram\b/i,
-    /\b([a-z0-9._]{2,40})\s+(?:on|auf)\s+instagram\b/i,
+    /^([a-z0-9._]{2,40})\s+(?:on|auf)\s+instagram\b/i,
   ];
   for (const value of values) {
     for (const pattern of patterns) {
@@ -288,6 +290,33 @@ export function searchResultToKey4Candidate(result = {}, query = {}, now = new D
   };
 }
 
+export function dealToKey4SeedCandidate(deal = {}, sourceLabel = 'pending-source', now = new Date()) {
+  const url = normalizeInstagramPostUrl(deal?.url || deal?.post_url || deal?.postUrl);
+  if (!url) return null;
+  const publication = decodeInstagramShortcodeDate(url)
+    || finiteDate(deal?.sourcePublishedAt || deal?.pubDate || deal?.reportedPostDate);
+  const ownerUsername = normalizeUsername(deal?.ownerUsername);
+  return {
+    url,
+    title: cleanText(deal?.title, 500),
+    discoverySnippet: cleanText(
+      [deal?.postCaption, deal?.description, deal?.title].filter(Boolean).join(' '),
+      3000,
+    ),
+    ownerUsername,
+    ownerSource: ownerUsername ? 'pending-seed' : '',
+    targetUsername: ownerUsername,
+    targetViennaVerified: deal?.viennaVerified === true,
+    sourcePublishedAt: publication?.toISOString() || '',
+    sourcePublishedAtSource: publication
+      ? (decodeInstagramShortcodeDate(url) ? 'url.instagramShortcode' : 'pending-seed-publication')
+      : '',
+    discoveredAt: finiteDate(now)?.toISOString() || new Date().toISOString(),
+    seedSource: cleanText(sourceLabel, 160),
+    discoveredBy: [`key4-seed:${cleanText(sourceLabel, 160)}`],
+  };
+}
+
 export function dedupeKey4Candidates(candidates = []) {
   const byKey = new Map();
   for (const candidate of candidates) {
@@ -319,6 +348,7 @@ export function key4CandidatePriority(candidate = {}, now = new Date()) {
     || decodeInstagramShortcodeDate(candidate.url);
   const ageDays = publication ? Math.max(0, (now.getTime() - publication.getTime()) / DAY_MS) : 30;
   let score = candidate.previousDeal ? 300 : 0;
+  if (candidate.seedSource) score += 120;
   if (candidate.targetViennaVerified) score += 160;
   if (candidate.targetUsername) score += 60;
   if (FREE_OFFER_PATTERN.test(candidate.discoverySnippet || '')) score += 80;
@@ -528,6 +558,16 @@ function decideEvidence(evidence, options) {
     [evidence.discoverySnippet, evidence.title].filter(Boolean).join(' '),
     3000,
   );
+  const availableSignal = originalSignal || discoverySignal;
+
+  if (FOREIGN_VIENNA_PATTERN.test(availableSignal)) {
+    const decision = { status: 'rejected', reasons: ['not-vienna-austria'] };
+    return { decision, timing: null, confidence: 90, deal: toDeal(evidence, decision, now, null, 90) };
+  }
+  if (EXCLUDED_PLATFORM_PATTERN.test(availableSignal)) {
+    const decision = { status: 'rejected', reasons: ['excluded-platform'] };
+    return { decision, timing: null, confidence: 90, deal: toDeal(evidence, decision, now, null, 90) };
+  }
 
   if (!hasOriginalEvidence) {
     const discoveryDecision = freeSignalDecision(discoverySignal);
