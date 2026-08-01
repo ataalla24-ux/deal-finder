@@ -625,6 +625,38 @@ function toDeal(evidence, decision, now, timing, confidence) {
   };
 }
 
+function key4OfferSignature(deal = {}) {
+  const ownerUsername = normalizeUsername(deal.ownerUsername);
+  const offerText = cleanText(deal.description, 1000)
+    .replace(/#[\p{L}\p{N}_]+/gu, ' ')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ß/g, 'ss')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!ownerUsername || offerText.length < 24) return '';
+  return `${ownerUsername}|${cleanText(deal.type).toLowerCase()}|${offerText}`;
+}
+
+function rejectDuplicateOfferPost(deal, originalDeal) {
+  return {
+    reason: 'duplicate-offer-post',
+    deal: {
+      ...deal,
+      duplicateOfDealId: originalDeal.id,
+      hot: false,
+      priority: 1,
+      key4Decision: {
+        ...deal.key4Decision,
+        status: 'rejected',
+        reasons: ['duplicate-offer-post'],
+      },
+    },
+  };
+}
+
 function decideEvidence(evidence, options) {
   const now = finiteDate(options.now) || new Date();
   const maxAgeDays = Math.max(1, Number(options.maxAgeDays ?? 7) || 7);
@@ -734,14 +766,36 @@ function decideEvidence(evidence, options) {
 }
 
 export function classifyKey4Evidence(evidenceRows = [], options = {}) {
-  const accepted = [];
-  const review = [];
+  const acceptedCandidates = [];
+  const reviewCandidates = [];
   const rejected = [];
   for (const evidence of dedupeKey4Candidates(evidenceRows)) {
     const result = decideEvidence(evidence, options);
-    if (result.decision.status === 'accepted') accepted.push(result.deal);
-    else if (result.decision.status === 'review') review.push(result.deal);
+    if (result.decision.status === 'accepted') acceptedCandidates.push(result.deal);
+    else if (result.decision.status === 'review') reviewCandidates.push(result.deal);
     else rejected.push({ reason: result.decision.reasons[0], deal: result.deal });
+  }
+
+  const byDate = (left, right) => String(right.sourcePublishedAt || '').localeCompare(left.sourcePublishedAt || '');
+  acceptedCandidates.sort(byDate);
+  reviewCandidates.sort(byDate);
+  const accepted = [];
+  const review = [];
+  const offerBySignature = new Map();
+  for (const [status, candidates, target] of [
+    ['accepted', acceptedCandidates, accepted],
+    ['review', reviewCandidates, review],
+  ]) {
+    for (const deal of candidates) {
+      const signature = key4OfferSignature(deal);
+      const originalDeal = signature ? offerBySignature.get(signature) : null;
+      if (originalDeal) {
+        rejected.push(rejectDuplicateOfferPost(deal, originalDeal));
+        continue;
+      }
+      target.push(deal);
+      if (signature) offerBySignature.set(signature, { ...deal, key4OriginalStatus: status });
+    }
   }
 
   const rejectedByReason = {};
@@ -757,9 +811,6 @@ export function classifyKey4Evidence(evidenceRows = [], options = {}) {
     }
   }
 
-  const byDate = (left, right) => String(right.sourcePublishedAt || '').localeCompare(left.sourcePublishedAt || '');
-  accepted.sort(byDate);
-  review.sort(byDate);
   return {
     accepted,
     review,

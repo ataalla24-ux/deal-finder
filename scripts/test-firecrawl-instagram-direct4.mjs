@@ -318,6 +318,28 @@ const birthdayResult = classifyKey4Evidence([birthdayEvidence], {
 assert.equal(birthdayResult.accepted.length, 1, 'an original #vienna birthday offer is recurring and accepted');
 assert.equal(birthdayResult.accepted[0].recurringSchedule, true);
 
+const newerBirthdayEvidence = {
+  ...birthdayEvidence,
+  url: 'https://www.instagram.com/reel/DbcqqHNijHo/',
+  postCaption: 'Du isst zu deinem Geburtstag gratis bei uns. #birthday #vienna',
+  sourcePublishedAt: '2026-07-25T10:00:00.000Z',
+  postVerification: {
+    ...birthdayEvidence.postVerification,
+    originalPostUrl: 'https://www.instagram.com/reel/DbcqqHNijHo/',
+  },
+};
+const duplicateBirthdayResult = classifyKey4Evidence([
+  birthdayEvidence,
+  newerBirthdayEvidence,
+], {
+  now,
+  maxAgeDays: 7,
+  recurringMaxAgeDays: 45,
+});
+assert.equal(duplicateBirthdayResult.accepted.length, 1, 'the same merchant offer is emitted once');
+assert.equal(duplicateBirthdayResult.accepted[0].url, newerBirthdayEvidence.url, 'the newest offer post wins');
+assert.equal(duplicateBirthdayResult.rejected[0].reason, 'duplicate-offer-post');
+
 const chanceDocument = {
   metadata: {
     ...directDocument.metadata,
