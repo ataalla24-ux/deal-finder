@@ -1,7 +1,7 @@
 {
-  "lastUpdated": "2026-08-01T14:39:10.951Z",
+  "lastUpdated": "2026-08-01T14:51:52.987Z",
   "source": "firecrawl4",
-  "totalDeals": 2,
+  "totalDeals": 1,
   "constraints": {
     "maximumPostAgeDays": 7,
     "recurringOfferMaximumAgeDays": 45,
@@ -26,7 +26,7 @@
           {
             "id": "general-1",
             "status": "completed",
-            "results": 2,
+            "results": 3,
             "error": ""
           },
           {
@@ -188,27 +188,27 @@
         ],
         "queryCount": 27,
         "failedQueries": 0,
-        "rawSearchResults": 78,
+        "rawSearchResults": 79,
         "directPostResults": 70,
-        "recentDistinctPosts": 4,
-        "prefilteredAsOld": 65
+        "recentDistinctPosts": 2,
+        "prefilteredAsOld": 67
       },
       "agent": {
         "configuredSources": 4,
-        "completedSources": 3,
+        "completedSources": 0,
         "failedSources": 0,
-        "timedOutSources": 1,
-        "rawAgentDeals": 10,
-        "directPostResults": 10,
-        "recentDistinctPosts": 3,
-        "prefilteredAsOld": 6,
+        "timedOutSources": 4,
+        "rawAgentDeals": 0,
+        "directPostResults": 0,
+        "recentDistinctPosts": 0,
+        "prefilteredAsOld": 0,
         "sources": [
           {
             "id": "hashtag-allyoucaneatvienna",
             "hashtag": "allyoucaneatvienna",
-            "status": "completed",
-            "deals": 4,
-            "error": ""
+            "status": "timed-out",
+            "deals": 0,
+            "error": "agent-timeout-240s"
           },
           {
             "id": "hashtag-viennafood",
@@ -220,49 +220,50 @@
           {
             "id": "hashtag-wienesse",
             "hashtag": "wienesse",
-            "status": "completed",
-            "deals": 3,
-            "error": ""
+            "status": "timed-out",
+            "deals": 0,
+            "error": "agent-timeout-240s"
           },
           {
             "id": "hashtag-viennarestaurant",
             "hashtag": "viennarestaurant",
-            "status": "completed",
-            "deals": 3,
-            "error": ""
+            "status": "timed-out",
+            "deals": 0,
+            "error": "agent-timeout-240s"
           }
         ]
       },
-      "rawSearchResults": 78,
-      "rawAgentDeals": 10,
-      "recentDistinctPosts": 7,
-      "prefilteredAsOld": 71
+      "rawSearchResults": 79,
+      "rawAgentDeals": 0,
+      "recentDistinctPosts": 2,
+      "prefilteredAsOld": 67
     },
     "extraction": {
-      "selectedForDirectScrape": 41,
-      "originalPostsVerified": 39,
+      "selectedForDirectScrape": 39,
+      "originalPostsVerified": 37,
       "unavailableOriginalPosts": 2,
-      "directOriginalPostInspections": 41
+      "directOriginalPostInspections": 39
     },
     "classification": {
-      "candidates": 41,
-      "accepted": 2,
+      "candidates": 39,
+      "accepted": 1,
       "review": 2,
-      "rejected": 37,
+      "rejected": 36,
       "rejectedByReason": {
         "free-item-not-food-drink": 1,
-        "not-free": 20,
+        "not-free": 18,
         "giveaway": 12,
         "excluded-platform": 4,
-        "missing-original-offer-evidence": 1
+        "missing-original-offer-evidence": 1,
+        "duplicate-offer-post": 1
       },
       "reviewByReason": {
-        "chance-based-offer": 1,
-        "missing-original-offer-evidence": 1
+        "missing-original-offer-evidence": 1,
+        "chance-based-offer": 1
       }
     },
     "keyPool": {
-      "totalCalls": 34,
+      "totalCalls": 33,
       "maxCalls": 140,
       "keys": [
         {
@@ -285,25 +286,25 @@
         },
         {
           "alias": "key-3",
-          "calls": 1,
-          "failures": 1,
-          "disabledReason": ""
-        },
-        {
-          "alias": "key-5",
           "calls": 6,
           "failures": 0,
           "disabledReason": ""
         },
         {
-          "alias": "default-key",
+          "alias": "key-5",
           "calls": 2,
+          "failures": 0,
+          "disabledReason": ""
+        },
+        {
+          "alias": "default-key",
+          "calls": 0,
           "failures": 0,
           "disabledReason": ""
         }
       ]
     },
-    "previousAcceptedDeals": 1
+    "previousAcceptedDeals": 2
   },
   "pipelineReport": "deal-pipeline-last-run-firecrawl4.json",
   "deals": [
@@ -325,7 +326,8 @@
       "ownerUsername": "tokki_korean_bbq",
       "instagramProfileUrl": "https://www.instagram.com/tokki_korean_bbq/",
       "discoveredBy": [
-        "firecrawl-agent:hashtag-allyoucaneatvienna"
+        "firecrawl-agent:hashtag-allyoucaneatvienna",
+        "previous-key4-accepted"
       ],
       "discoveredAt": "2026-08-01T14:39:10.951Z",
       "sourcePublishedAt": "2026-07-30T23:59:59.999Z",
@@ -347,7 +349,7 @@
       "postCaption": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #steak #vienna #birthday #allyoucaneat",
       "postVerification": {
         "status": "verified-original-post",
-        "checkedAt": "2026-08-01T14:39:10.951Z",
+        "checkedAt": "2026-08-01T14:51:52.987Z",
         "originalPostUrl": "https://www.instagram.com/reel/DbcqqHNijHo/",
         "finalUrl": "https://www.instagram.com/reel/DbcqqHNijHo/",
         "httpStatus": 200,
@@ -355,103 +357,26 @@
         "ownerUsername": "tokki_korean_bbq",
         "reason": ""
       },
-      "lastVerifiedAt": "2026-08-01T14:39:10.951Z",
+      "lastVerifiedAt": "2026-08-01T14:51:52.987Z",
       "evidence": {
         "originalPost": {
           "status": "verified-original-post",
-          "checkedAt": "2026-08-01T14:39:10.951Z",
+          "checkedAt": "2026-08-01T14:51:52.987Z",
           "url": "https://www.instagram.com/reel/DbcqqHNijHo/",
           "publicationSource": "instagram-original-metadata",
           "ownerUsername": "tokki_korean_bbq",
           "captionSource": "metadata.ogDescription",
           "captionSample": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #steak #vienna #birthday #allyoucaneat"
         },
-        "discoverySnippet": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung Gratis AYCE am Geburtstag - über 100 Gerichte wählbar Wien An deinem Geburtstag"
+        "discoverySnippet": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #steak #vienna #birthday #allyoucaneat"
       },
       "key4Decision": {
         "status": "accepted",
         "reasons": [],
         "confidence": 100,
-        "decidedAt": "2026-08-01T14:39:10.951Z"
+        "decidedAt": "2026-08-01T14:51:52.987Z"
       },
       "postAgeDays": 1.6,
-      "qualityScore": 100,
-      "hot": true,
-      "isNew": true,
-      "priority": 2,
-      "votes": 1
-    },
-    {
-      "id": "fc4-1u2fkyg",
-      "brand": "@tokki_korean_bbq",
-      "title": "@tokki_korean_bbq: Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #allyoucaneat #vienna #birthday #steak",
-      "description": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #allyoucaneat #vienna #birthday #steak",
-      "offerEvidenceText": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #allyoucaneat #vienna #birthday #steak",
-      "descriptionSource": "instagram-original-post",
-      "type": "gratis",
-      "category": "kaffee",
-      "source": "Firecrawl Instagram Direct #4",
-      "originSource": "firecrawl4",
-      "url": "https://www.instagram.com/reel/DbXav_ligAf/",
-      "address": "",
-      "location": "",
-      "city": "Wien",
-      "ownerUsername": "tokki_korean_bbq",
-      "instagramProfileUrl": "https://www.instagram.com/tokki_korean_bbq/",
-      "discoveredBy": [
-        "firecrawl-agent:hashtag-allyoucaneatvienna",
-        "firecrawl-agent:hashtag-viennarestaurant",
-        "key4-seed:deals-pending-food3.json",
-        "previous-key4-accepted"
-      ],
-      "discoveredAt": "2026-08-01T14:39:10.951Z",
-      "sourcePublishedAt": "2026-07-28T23:59:59.999Z",
-      "sourcePublishedAtSource": "instagram-original-metadata",
-      "pubDate": "2026-07-28T23:59:59.999Z",
-      "pubDateSource": "instagram-original-metadata",
-      "validFrom": "",
-      "validUntil": "",
-      "expires": "",
-      "expiryDisplayText": "",
-      "expirySource": "",
-      "recurringSchedule": true,
-      "viennaVerified": true,
-      "locationVerified": true,
-      "viennaEvidence": {
-        "source": "instagram-original-caption-hashtag",
-        "value": "Vienna"
-      },
-      "postCaption": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #allyoucaneat #vienna #birthday #steak",
-      "postVerification": {
-        "status": "verified-original-post",
-        "checkedAt": "2026-08-01T14:39:10.951Z",
-        "originalPostUrl": "https://www.instagram.com/reel/DbXav_ligAf/",
-        "finalUrl": "https://www.instagram.com/reel/DbXav_ligAf/",
-        "httpStatus": 200,
-        "captionSource": "metadata.ogDescription",
-        "ownerUsername": "tokki_korean_bbq",
-        "reason": ""
-      },
-      "lastVerifiedAt": "2026-08-01T14:39:10.951Z",
-      "evidence": {
-        "originalPost": {
-          "status": "verified-original-post",
-          "checkedAt": "2026-08-01T14:39:10.951Z",
-          "url": "https://www.instagram.com/reel/DbXav_ligAf/",
-          "publicationSource": "instagram-original-metadata",
-          "ownerUsername": "tokki_korean_bbq",
-          "captionSource": "metadata.ogDescription",
-          "captionSample": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #allyoucaneat #vienna #birthday #steak"
-        },
-        "discoverySnippet": "Du isst zu deinem Geburtstag gratis bei uns✨ Ausweis + vollzahlende Begleitung mitnehmen und unser All you Can Eat + 1 Getränk gratis genießen🔥 #allyoucaneat #vienna #birthday #steak Geburtstagsaktion - Gratis | All You Can Eat | Wien | Am Geburtstag | Ausweis + vollzahlende Begleitung Unknown AYCE Restaurant: All You Can Eat"
-      },
-      "key4Decision": {
-        "status": "accepted",
-        "reasons": [],
-        "confidence": 100,
-        "decidedAt": "2026-08-01T14:39:10.951Z"
-      },
-      "postAgeDays": 3.6,
       "qualityScore": 100,
       "hot": true,
       "isNew": true,
