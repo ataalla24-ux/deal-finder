@@ -1,7 +1,7 @@
 {
-  "lastUpdated": "2026-08-01T12:57:30.647Z",
+  "lastUpdated": "2026-08-01T13:05:41.966Z",
   "source": "firecrawl4",
-  "totalDeals": 0,
+  "totalDeals": 1,
   "constraints": {
     "maximumPostAgeDays": 7,
     "recurringOfferMaximumAgeDays": 45,
@@ -9,22 +9,23 @@
     "location": "Wien",
     "offer": "kostenlose Speisen/Getränke, 1+1/2für1 und kostenlose Gastro-Proben",
     "originalEvidenceRequiredForAutomaticAcceptance": true,
-    "discoveryMode": "direct Instagram post/reel URLs from merchant-first Firecrawl search"
+    "discoveryMode": "merchant-first Firecrawl search plus recent direct-post seeds from existing pipelines"
   },
   "diagnostics": {
     "targetAccounts": 30,
+    "seedCandidates": 35,
     "discovery": {
       "queries": [
         {
           "id": "general-1",
           "status": "completed",
-          "results": 1,
+          "results": 3,
           "error": ""
         },
         {
           "id": "general-2",
           "status": "completed",
-          "results": 4,
+          "results": 3,
           "error": ""
         },
         {
@@ -114,7 +115,7 @@
         {
           "id": "profile-gustolab.vienna",
           "status": "completed",
-          "results": 6,
+          "results": 3,
           "error": ""
         },
         {
@@ -132,7 +133,7 @@
         {
           "id": "profile-castillo.wien",
           "status": "completed",
-          "results": 6,
+          "results": 1,
           "error": ""
         },
         {
@@ -150,7 +151,7 @@
         {
           "id": "profile-viennas_joy",
           "status": "completed",
-          "results": 2,
+          "results": 0,
           "error": ""
         },
         {
@@ -162,31 +163,36 @@
       ],
       "queryCount": 24,
       "failedQueries": 0,
-      "rawSearchResults": 54,
-      "directPostResults": 48,
-      "recentDistinctPosts": 2,
-      "prefilteredAsOld": 46
+      "rawSearchResults": 45,
+      "directPostResults": 38,
+      "recentDistinctPosts": 0,
+      "prefilteredAsOld": 38
     },
     "extraction": {
-      "selectedForDirectScrape": 2,
-      "originalPostsVerified": 2,
-      "unavailableOriginalPosts": 0,
-      "directHttpFallbacks": 2
+      "selectedForDirectScrape": 35,
+      "originalPostsVerified": 33,
+      "unavailableOriginalPosts": 2,
+      "directOriginalPostInspections": 35
     },
     "classification": {
-      "candidates": 2,
-      "accepted": 0,
-      "review": 1,
-      "rejected": 1,
+      "candidates": 35,
+      "accepted": 1,
+      "review": 2,
+      "rejected": 32,
       "rejectedByReason": {
-        "not-free": 1
+        "free-item-not-food-drink": 1,
+        "not-free": 16,
+        "giveaway": 11,
+        "excluded-platform": 4,
+        "missing-original-offer-evidence": 1
       },
       "reviewByReason": {
+        "missing-original-offer-evidence": 1,
         "not-verified-vienna": 1
       }
     },
     "keyPool": {
-      "totalCalls": 30,
+      "totalCalls": 28,
       "maxCalls": 140,
       "keys": [
         {
@@ -203,8 +209,8 @@
         },
         {
           "alias": "key-2",
-          "calls": 6,
-          "failures": 2,
+          "calls": 4,
+          "failures": 0,
           "disabledReason": ""
         },
         {
@@ -230,5 +236,80 @@
     "previousAcceptedDeals": 0
   },
   "pipelineReport": "deal-pipeline-last-run-firecrawl4.json",
-  "deals": []
+  "deals": [
+    {
+      "id": "fc4-12zu7jx",
+      "brand": "Instagram Gastro",
+      "title": "Instagram Gastro: 😋 Und das Beste: 🎲 Jeden Mittwoch und Donnerstag hast du die Chance, dein Essen kostenlos zu bekommen!",
+      "description": "😋 Und das Beste: 🎲 Jeden Mittwoch und Donnerstag hast du die Chance, dein Essen kostenlos zu bekommen!",
+      "offerEvidenceText": "😋 Und das Beste: 🎲 Jeden Mittwoch und Donnerstag hast du die Chance, dein Essen kostenlos zu bekommen!",
+      "descriptionSource": "instagram-original-post",
+      "type": "gratis",
+      "category": "essen",
+      "source": "Firecrawl Instagram Direct #4",
+      "originSource": "firecrawl4",
+      "url": "https://www.instagram.com/reel/Da7vhpUCsnA/",
+      "address": "📍 Heiligenstädter Straße 160, 1190 Wien 📞 0664 99802000 Wir freuen uns auf deinen Besuch",
+      "location": "📍 Heiligenstädter Straße 160, 1190 Wien 📞 0664 99802000 Wir freuen uns auf deinen Besuch",
+      "city": "Wien",
+      "ownerUsername": "",
+      "instagramProfileUrl": "",
+      "discoveredBy": [
+        "key4-seed:deals-pending-gastro2.json"
+      ],
+      "discoveredAt": "2026-08-01T13:05:41.966Z",
+      "sourcePublishedAt": "2026-07-18T23:59:59.999Z",
+      "sourcePublishedAtSource": "instagram-original-metadata",
+      "pubDate": "2026-07-18T23:59:59.999Z",
+      "pubDateSource": "instagram-original-metadata",
+      "validFrom": "",
+      "validUntil": "",
+      "expires": "",
+      "expiryDisplayText": "",
+      "expirySource": "",
+      "recurringSchedule": true,
+      "viennaVerified": true,
+      "locationVerified": true,
+      "viennaEvidence": {
+        "source": "instagram-original-caption",
+        "value": "1190"
+      },
+      "postCaption": "72 likes, 3 comments - bigbox_fastfood on July 18, 2026‎: \"🍔 Willkommen bei Big Box! Bei uns erwartet dich mehr als nur gutes Essen – frische Zutaten, großzügige Portionen und echter Geschmack stehen bei jedem Gericht im Mittelpunkt. 🔥 Ob Burger, Pizza, Sandwiches oder Fingerfood – hier findet jeder etwas nach seinem Geschmack. 😋 Und das Beste: 🎲 Jeden Mittwoch und Donnerstag hast du die Chance, dein Essen kostenlos zu bekommen! Einfach vor Ort essen und dein Glück beim Würfeln versuchen. 📍 Heiligenstädter Straße 160, 1190 Wien 📞 0664 99802000 Wir freuen uns auf deinen Besuch! ❤️ #food #pizza #وین #پیتزا #غذای_ایرانی\". ‎",
+      "postVerification": {
+        "status": "verified-original-post",
+        "checkedAt": "2026-08-01T13:05:41.966Z",
+        "originalPostUrl": "https://www.instagram.com/reel/Da7vhpUCsnA/",
+        "finalUrl": "https://www.instagram.com/reel/Da7vhpUCsnA/",
+        "httpStatus": 200,
+        "captionSource": "metadata.ogDescription",
+        "ownerUsername": "",
+        "reason": ""
+      },
+      "lastVerifiedAt": "2026-08-01T13:05:41.966Z",
+      "evidence": {
+        "originalPost": {
+          "status": "verified-original-post",
+          "checkedAt": "2026-08-01T13:05:41.966Z",
+          "url": "https://www.instagram.com/reel/Da7vhpUCsnA/",
+          "publicationSource": "instagram-original-metadata",
+          "ownerUsername": "",
+          "captionSource": "metadata.ogDescription",
+          "captionSample": "72 likes, 3 comments - bigbox_fastfood on July 18, 2026‎: \"🍔 Willkommen bei Big Box! Bei uns erwartet dich mehr als nur gutes Essen – frische Zutaten, großzügige Portionen und echter Geschmack stehen bei jedem Gericht im Mittelpunkt. 🔥 Ob Burger, Pizza, Sandwiches oder Fingerfood – hier findet jeder etwas nach seinem Geschmack. 😋 Und das Beste: 🎲 Jeden Mittwoch und Donnerstag hast du die Chance, dein Essen kostenlos zu bekommen! Einfach vor Ort essen und dein Glück beim Würfeln versuchen. 📍 Heiligenstädter Straße 160, 1190 Wien 📞 0664 99802000 Wir freuen uns auf deinen Besuch! ❤️ #food #pizza #وین #پیتزا #غذای_ایرانی\". ‎"
+        },
+        "discoverySnippet": "🍔 Willkommen bei Big Box! Bei uns erwartet dich mehr als nur gutes Essen – frische Zutaten, großzügige Portionen und echter Geschmack stehen bei jedem Gericht im Mittelpunkt. 🔥 Ob Burger, Pizza, Sandwiches oder Fingerfood – hier findet jeder etwas nach seinem Geschmack. 😋 Und das Beste: 🎲 Jeden Mittwoch und Donnerstag hast du die Chance, dein Essen kostenlos zu bekommen! Einfach vor Ort essen und dein Glück beim Würfeln versuchen. 📍 Heiligenstädter Straße 160, 1190 Wien 📞 0664 99802000 Wir"
+      },
+      "key4Decision": {
+        "status": "accepted",
+        "reasons": [],
+        "confidence": 100,
+        "decidedAt": "2026-08-01T13:05:41.966Z"
+      },
+      "postAgeDays": 13.5,
+      "qualityScore": 100,
+      "hot": true,
+      "isNew": true,
+      "priority": 2,
+      "votes": 1
+    }
+  ]
 }
