@@ -116,10 +116,11 @@ Nicht aufnehmen:
 Nutze die angegebene Instagram-Hashtag-Seite als Ausgangspunkt und suche nach direkten Originalposts. Gib nur URLs im Format instagram.com/p/... oder instagram.com/reel/... zurück, niemals Profil-, Hashtag-, Such- oder Aggregator-URLs. Ein unsicherer möglicher Treffer darf enthalten sein; er wird danach am Originalpost geprüft. Erfinde keine Deals. Wenn kein passender direkter Post auffindbar ist, gib eine leere Liste zurück.`;
 
 function cleanText(value, maxLength = Infinity) {
-  const text = value === null || value === undefined
+  const rawText = value === null || value === undefined
     ? ''
     : String(value).replace(/\s+/g, ' ').trim();
-  return Number.isFinite(maxLength) ? text.slice(0, maxLength) : text;
+  const text = typeof rawText.toWellFormed === 'function' ? rawText.toWellFormed() : rawText;
+  return Number.isFinite(maxLength) ? [...text].slice(0, maxLength).join('') : text;
 }
 
 function readJson(filePath, fallback = {}) {
@@ -148,7 +149,12 @@ function readKey4SeedCandidates(now) {
 function writeJsonAtomic(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const tempPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
-  fs.writeFileSync(tempPath, `${JSON.stringify(value, null, 2)}\n`);
+  const json = JSON.stringify(value, (_key, entry) => (
+    typeof entry === 'string' && typeof entry.toWellFormed === 'function'
+      ? entry.toWellFormed()
+      : entry
+  ), 2);
+  fs.writeFileSync(tempPath, `${json}\n`);
   fs.renameSync(tempPath, filePath);
 }
 

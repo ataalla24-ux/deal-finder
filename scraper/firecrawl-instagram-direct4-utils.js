@@ -47,10 +47,11 @@ export const KEY4_INSTAGRAM_HASHTAGS = Object.freeze([
 ]);
 
 function cleanText(value, maxLength = Infinity) {
-  const text = value === null || value === undefined
+  const rawText = value === null || value === undefined
     ? ''
     : String(value).replace(/\s+/g, ' ').trim();
-  return Number.isFinite(maxLength) ? text.slice(0, maxLength) : text;
+  const text = typeof rawText.toWellFormed === 'function' ? rawText.toWellFormed() : rawText;
+  return Number.isFinite(maxLength) ? [...text].slice(0, maxLength).join('') : text;
 }
 
 function normalizeUsername(value) {
@@ -562,7 +563,7 @@ function toDeal(evidence, decision, now, timing, confidence) {
   return {
     id: `fc4-${stableHash(evidence.url)}`,
     brand,
-    title: `${brand}: ${summary}`.slice(0, 220),
+    title: cleanText(`${brand}: ${summary}`, 220),
     description: summary,
     offerEvidenceText: evidence.postCaption ? summary : cleanText(evidence.discoverySnippet, 260),
     descriptionSource: evidence.postCaption ? 'instagram-original-post' : 'firecrawl-search-review',

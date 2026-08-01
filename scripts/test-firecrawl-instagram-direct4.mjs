@@ -252,6 +252,22 @@ assert.equal(accepted.accepted[0].type, 'bogo');
 assert.equal(accepted.accepted[0].source, 'Firecrawl Instagram Direct #4');
 assert.equal(accepted.accepted[0].descriptionSource, 'instagram-original-post');
 
+const malformedUnicodeDocument = {
+  metadata: {
+    ...directDocument.metadata,
+    ogDescription: `soya_wien on Instagram: "Heute gibt es einen Burger gratis. Rotgasse 8, 1010 Wien. ${'x'.repeat(240)}\uD83E"`,
+  },
+};
+const malformedUnicodeEvidence = extractKey4PostEvidence(
+  malformedUnicodeDocument,
+  directCandidate,
+  { now, registry },
+);
+const malformedUnicodeResult = classifyKey4Evidence([malformedUnicodeEvidence], { now });
+assert.equal(malformedUnicodeResult.accepted.length, 1);
+assert.equal(malformedUnicodeResult.accepted[0].title.isWellFormed(), true, 'deal titles remain valid Unicode');
+assert.equal(malformedUnicodeResult.accepted[0].postCaption.isWellFormed(), true, 'captions remain valid Unicode');
+
 const missingEvidence = extractKey4PostEvidence({}, directCandidate, { now, registry });
 const missingResult = classifyKey4Evidence([missingEvidence], { now });
 assert.equal(missingResult.review.length, 1, 'strong discovery snippets are retained for review');
