@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-01T11:14:36.926Z",
+  "generatedAt": "2026-08-02T11:14:22.345Z",
   "summary": {
     "filesConsidered": 28,
-    "totalCandidates": 807,
-    "uniqueCandidates": 699,
-    "distinctCandidates": 744,
-    "duplicateClusters": 45,
+    "totalCandidates": 763,
+    "uniqueCandidates": 683,
+    "distinctCandidates": 719,
+    "duplicateClusters": 36,
     "topHealthySources": [
       {
         "sourceKey": "joe",
@@ -16,8 +16,14 @@
       {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
-        "healthScore": 57,
-        "totalDeals": 7
+        "healthScore": 69,
+        "totalDeals": 8
+      },
+      {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "healthScore": 58,
+        "totalDeals": 20
       },
       {
         "sourceKey": "member-benefits",
@@ -26,16 +32,10 @@
         "totalDeals": 46
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
         "healthScore": 51,
-        "totalDeals": 51
-      },
-      {
-        "sourceKey": "church-events",
-        "sourceLabel": "Freikirchen Wien",
-        "healthScore": 50,
-        "totalDeals": 3
+        "totalDeals": 338
       }
     ],
     "topMissionSources": [
@@ -48,8 +48,8 @@
       {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
-        "missionFitScore": 63,
-        "totalDeals": 7
+        "missionFitScore": 65,
+        "totalDeals": 8
       },
       {
         "sourceKey": "instagram-apify",
@@ -60,14 +60,14 @@
       {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "missionFitScore": 49,
-        "totalDeals": 30
+        "missionFitScore": 52,
+        "totalDeals": 20
       },
       {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
+        "sourceKey": "instagram-verified",
+        "sourceLabel": "Instagram",
         "missionFitScore": 46,
-        "totalDeals": 9
+        "totalDeals": 12
       }
     ],
     "topCoverageSources": [
@@ -75,7 +75,7 @@
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "coverageScore": 69,
-        "totalDeals": 332,
+        "totalDeals": 338,
         "fresh1dCount": 0
       },
       {
@@ -86,18 +86,18 @@
         "fresh1dCount": 46
       },
       {
-        "sourceKey": "vienna-promo-radar",
-        "sourceLabel": "Vienna Promo Radar",
-        "coverageScore": 21,
-        "totalDeals": 93,
-        "fresh1dCount": 0
+        "sourceKey": "gutscheine",
+        "sourceLabel": "Gutscheine.at",
+        "coverageScore": 23,
+        "totalDeals": 33,
+        "fresh1dCount": 33
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "coverageScore": 17,
-        "totalDeals": 51,
-        "fresh1dCount": 1
+        "sourceKey": "vienna-promo-radar",
+        "sourceLabel": "Vienna Promo Radar",
+        "coverageScore": 20,
+        "totalDeals": 90,
+        "fresh1dCount": 0
       },
       {
         "sourceKey": "joe",
@@ -117,8 +117,8 @@
       {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
-        "precisionScore": 58,
-        "totalDeals": 7
+        "precisionScore": 66,
+        "totalDeals": 8
       },
       {
         "sourceKey": "instagram-apify",
@@ -135,8 +135,8 @@
       {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "precisionScore": 49,
-        "totalDeals": 30
+        "precisionScore": 51,
+        "totalDeals": 20
       }
     ],
     "topWeightedSources": [
@@ -149,26 +149,26 @@
       {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
-        "sourceWeightScore": 50,
-        "totalDeals": 7
+        "sourceWeightScore": 56,
+        "totalDeals": 8
       },
       {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "sourceWeightScore": 50,
-        "totalDeals": 332
+        "sourceWeightScore": 51,
+        "totalDeals": 338
+      },
+      {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "sourceWeightScore": 45,
+        "totalDeals": 20
       },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Instagram",
         "sourceWeightScore": 44,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "sourceWeightScore": 42,
-        "totalDeals": 46
       }
     ],
     "topSourcesToFix": [
@@ -185,6 +185,15 @@
       {
         "sourceKey": "flights",
         "sourceLabel": "Flights Vienna",
+        "healthScore": 0,
+        "issues": [
+          "liefert aktuell 0 Deals"
+        ],
+        "sampleTitles": []
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
         "healthScore": 0,
         "issues": [
           "liefert aktuell 0 Deals"
@@ -212,15 +221,6 @@
       {
         "sourceKey": "telegram",
         "sourceLabel": "telegram",
-        "healthScore": 0,
-        "issues": [
-          "liefert aktuell 0 Deals"
-        ],
-        "sampleTitles": []
-      },
-      {
-        "sourceKey": "twitter",
-        "sourceLabel": "twitter",
         "healthScore": 0,
         "issues": [
           "liefert aktuell 0 Deals"
@@ -303,70 +303,149 @@
       "sourceKey": "firecrawl2",
       "file": "deals-pending-firecrawl2.json",
       "sourceLabel": "Firecrawl Key 3 - Consumables",
-      "totalDeals": 7,
-      "uniqueDeals": 5,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
+      "totalDeals": 8,
+      "uniqueDeals": 8,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 7,
+      "fresh7dCount": 1,
+      "viennaCount": 2,
+      "foodDrinkCount": 8,
       "promoCount": 7,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "viennas_joy: Happy Hour Hot Pot ab 19.90€",
-        "tastyfood.vienna: Student*innen Angebot 9,90€",
-        "lisapestschansky: All You Can Eat Buffet 26,90€"
+        "maniimvierten: 30% Rabatt auf die gesamte Karte",
+        "dasessenfm: All-You-Can-Eat für 25€",
+        "nanos.am.ring: Ultimate Summer Dining Deal"
       ],
       "lastRun": {
         "status": "completed",
-        "startedAt": "2026-08-01T05:46:03.998Z",
-        "finishedAt": "2026-08-01T05:52:36.338Z",
-        "durationMs": 392340,
+        "startedAt": "2026-08-02T05:47:01.371Z",
+        "finishedAt": "2026-08-02T05:48:09.890Z",
+        "durationMs": 68519,
         "counts": {
           "rawCandidates": 9,
-          "normalizedCandidates": 7,
-          "verifiedCandidates": 7,
+          "normalizedCandidates": 8,
+          "verifiedCandidates": 8,
           "previousDeals": 0,
-          "acceptedDeals": 7,
-          "rejectedDeals": 2
+          "acceptedDeals": 8,
+          "rejectedDeals": 1
         },
         "rejectedByReason": {
-          "invalid-original-post-url": 2
+          "invalid-original-post-url": 1
         },
         "errors": [],
         "reportFile": "deal-pipeline-last-run-firecrawl2.json"
       },
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
       "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
+      "fresh7dRate": 0.1,
+      "viennaRate": 0.3,
       "foodDrinkRate": 1,
-      "promoRate": 1,
+      "promoRate": 0.9,
       "missingUrlRate": 0,
       "averageQualityScore": 84,
       "topCategories": [
         {
           "value": "essen",
-          "count": 7
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 3
         }
       ],
       "topTypes": [
         {
           "value": "gratis",
-          "count": 7
+          "count": 6
+        },
+        {
+          "value": "rabatt",
+          "count": 2
         }
       ],
       "issues": [
         "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 57,
-      "missionFitScore": 63,
-      "coverageScore": 11,
-      "precisionScore": 58,
-      "sourceWeightScore": 50
+      "healthScore": 69,
+      "missionFitScore": 65,
+      "coverageScore": 13,
+      "precisionScore": 66,
+      "sourceWeightScore": 56
+    },
+    {
+      "sourceKey": "firecrawl5",
+      "file": "deals-pending-firecrawl5.json",
+      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+      "totalDeals": 20,
+      "uniqueDeals": 20,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 1,
+      "viennaCount": 0,
+      "foodDrinkCount": 20,
+      "promoCount": 12,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Tim's Restaurant: GEWINNSPIEL 3-GANG AMERICAN STYLE MENÜ RAFFEL HOTEL RESTAURANT BISTRO. Angebot gilt bis 19. August 2026.",
+        "Iranika Restaurant: Happy Thanksgiving Gewinnspiel. All you can eat Restaurant.",
+        "Anami Restaurant: XXL Gewinnspiel. Das Angebot gilt ab Montag den 20. Juli bis einschließlich..."
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-02T06:32:19.733Z",
+        "finishedAt": "2026-08-02T06:33:31.820Z",
+        "durationMs": 72087,
+        "counts": {
+          "rawCandidates": 20,
+          "normalizedCandidates": 20,
+          "verifiedCandidates": 20,
+          "previousDeals": 0,
+          "acceptedDeals": 20,
+          "rejectedDeals": 0
+        },
+        "rejectedByReason": {},
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0.1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 80,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 20
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 12
+        },
+        {
+          "value": "gewinnspiel",
+          "count": 8
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 58,
+      "missionFitScore": 52,
+      "coverageScore": 12,
+      "precisionScore": 51,
+      "sourceWeightScore": 45
     },
     {
       "sourceKey": "member-benefits",
@@ -379,13 +458,13 @@
       "fresh1dCount": 46,
       "fresh7dCount": 46,
       "viennaCount": 0,
-      "foodDrinkCount": 10,
-      "promoCount": 18,
+      "foodDrinkCount": 9,
+      "promoCount": 20,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "1+1 Kinoticket gratis bei KinoDonnerstag",
-        "1+1 Wrap gratis bei Nordsee",
-        "1+1 Ticket gratis bei Madame Tussauds Wien"
+        "1+1 Ticket gratis bei Mozarthaus Vienna",
+        "1+1 Ticket gratis bei Pratermuseum",
+        "1+1 Kinoticket gratis bei KinoDonnerstag"
       ],
       "lastRun": null,
       "uniqueRate": 1,
@@ -396,15 +475,15 @@
       "foodDrinkRate": 0.2,
       "promoRate": 0.4,
       "missingUrlRate": 0,
-      "averageQualityScore": 34.9,
+      "averageQualityScore": 37.3,
       "topCategories": [
         {
-          "value": "shopping",
-          "count": 17
+          "value": "kultur",
+          "count": 16
         },
         {
-          "value": "kultur",
-          "count": 13
+          "value": "shopping",
+          "count": 15
         },
         {
           "value": "essen",
@@ -419,18 +498,18 @@
           "count": 4
         },
         {
-          "value": "kaffee",
+          "value": "reisen",
           "count": 2
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 28
+          "count": 26
         },
         {
           "value": "bogo",
-          "count": 10
+          "count": 12
         },
         {
           "value": "gratis",
@@ -448,78 +527,70 @@
       "sourceWeightScore": 42
     },
     {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 51,
-      "uniqueDeals": 45,
-      "duplicateDeals": 6,
-      "duplicateAcrossSources": 6,
-      "fresh1dCount": 1,
-      "fresh7dCount": 7,
-      "viennaCount": 6,
-      "foodDrinkCount": 51,
-      "promoCount": 9,
+      "sourceKey": "gastro2",
+      "file": "deals-pending-gastro2.json",
+      "sourceLabel": "Firecrawl Key 1 - Gastro",
+      "totalDeals": 338,
+      "uniqueDeals": 292,
+      "duplicateDeals": 46,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 0,
+      "fresh7dCount": 3,
+      "viennaCount": 8,
+      "foodDrinkCount": 338,
+      "promoCount": 95,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Restaurant Ninetyone: Restaurant Gutscheine",
-        "Aladdin Das Restaurant: Restaurant Gutscheine",
-        "Amici Wien: Neapolitanische Pizza"
+        "1+1 Döner gratis (jede Sorte)",
+        "1+1 Döner gratis",
+        "1+1 gratis Smashburger"
       ],
       "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-01T05:31:10.238Z",
-        "finishedAt": "2026-08-01T05:37:30.032Z",
-        "durationMs": 379794,
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-02T04:24:01.045Z",
+        "finishedAt": "2026-08-02T05:01:52.636Z",
+        "durationMs": 2271591,
         "counts": {
-          "rawCandidates": 54,
-          "normalizedCandidates": 51,
-          "verifiedCandidates": 51,
+          "rawCandidates": 338,
+          "normalizedCandidates": 338,
+          "verifiedCandidates": 338,
           "previousDeals": 0,
-          "acceptedDeals": 51,
-          "rejectedDeals": 3
+          "acceptedDeals": 338,
+          "rejectedDeals": 0
         },
-        "rejectedByReason": {
-          "invalid-original-post-url": 3
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-food3.json"
+        "rejectedByReason": {},
+        "errors": [
+          "1000things.at: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+        ],
+        "reportFile": "deal-pipeline-last-run-gastro2.json"
       },
       "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
+      "duplicateRate": 0,
       "fresh1dRate": 0,
-      "fresh7dRate": 0.1,
-      "viennaRate": 0.1,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
       "foodDrinkRate": 1,
-      "promoRate": 0.2,
+      "promoRate": 0.3,
       "missingUrlRate": 0,
-      "averageQualityScore": 59.3,
+      "averageQualityScore": 65,
       "topCategories": [
         {
           "value": "essen",
-          "count": 41
-        },
-        {
-          "value": "kaffee",
-          "count": 10
+          "count": 338
         }
       ],
       "topTypes": [
         {
-          "value": "gewinnspiel",
-          "count": 25
-        },
-        {
           "value": "rabatt",
-          "count": 21
-        },
-        {
-          "value": "bogo",
-          "count": 3
+          "count": 251
         },
         {
           "value": "gratis",
-          "count": 2
+          "count": 46
+        },
+        {
+          "value": "bogo",
+          "count": 41
         }
       ],
       "issues": [
@@ -528,10 +599,10 @@
         "Wien-Signal ist zu schwach"
       ],
       "healthScore": 51,
-      "missionFitScore": 42,
-      "coverageScore": 17,
-      "precisionScore": 44,
-      "sourceWeightScore": 40
+      "missionFitScore": 43,
+      "coverageScore": 69,
+      "precisionScore": 45,
+      "sourceWeightScore": 51
     },
     {
       "sourceKey": "church-events",
@@ -694,9 +765,9 @@
       "file": "deals-pending-community.json",
       "sourceLabel": "Community Submission",
       "totalDeals": 39,
-      "uniqueDeals": 35,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 2,
+      "uniqueDeals": 37,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
       "fresh7dCount": 0,
       "viennaCount": 0,
@@ -710,7 +781,7 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
+      "duplicateRate": 0,
       "fresh1dRate": 0,
       "fresh7dRate": 0,
       "viennaRate": 0,
@@ -769,185 +840,63 @@
       "healthScore": 49,
       "missionFitScore": 40,
       "coverageScore": 14,
-      "precisionScore": 43,
+      "precisionScore": 44,
       "sourceWeightScore": 38
     },
     {
-      "sourceKey": "firecrawl5",
-      "file": "deals-pending-firecrawl5.json",
-      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-      "totalDeals": 30,
-      "uniqueDeals": 21,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 30,
-      "promoCount": 16,
+      "sourceKey": "tiktok",
+      "file": "deals-pending-tiktok.json",
+      "sourceLabel": "TikTok Scanner",
+      "totalDeals": 5,
+      "uniqueDeals": 5,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 5,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 5,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Chopnblok: $7 Happy Hour @chopnblok_ it’s a must pull up!",
-        "The Well: Happy Hour. Served Monday–Friday from 3–5 PM, featuring exclusive dishes you won’t find on our regular menu",
-        "Corzetti: Happy hour every day from 3:30–5:30pm with $10 cocktails, pizzettas, and small plates"
+        "😲 Ekel-Alarm in Favoriten",
+        "@swiftienightsvienna Angebot",
+        "Alyona | About Austria Meet beautiful Austria with me 📍Vienna museum vienna free alyona"
       ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-01T06:28:43.130Z",
-        "finishedAt": "2026-08-01T06:34:08.839Z",
-        "durationMs": 325709,
-        "counts": {
-          "rawCandidates": 30,
-          "normalizedCandidates": 30,
-          "verifiedCandidates": 30,
-          "previousDeals": 0,
-          "acceptedDeals": 30,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
-      },
-      "uniqueRate": 0.7,
+      "lastRun": null,
+      "uniqueRate": 1,
       "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
+      "fresh1dRate": 0.2,
+      "fresh7dRate": 1,
       "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 0.5,
+      "foodDrinkRate": 0,
+      "promoRate": 1,
       "missingUrlRate": 0,
-      "averageQualityScore": 80,
+      "averageQualityScore": 67.2,
       "topCategories": [
         {
-          "value": "essen",
-          "count": 29
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 16
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 13
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 49,
-      "missionFitScore": 49,
-      "coverageScore": 13,
-      "precisionScore": 49,
-      "sourceWeightScore": 42
-    },
-    {
-      "sourceKey": "gastro2",
-      "file": "deals-pending-gastro2.json",
-      "sourceLabel": "Firecrawl Key 1 - Gastro",
-      "totalDeals": 332,
-      "uniqueDeals": 275,
-      "duplicateDeals": 57,
-      "duplicateAcrossSources": 12,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 8,
-      "foodDrinkCount": 327,
-      "promoCount": 103,
-      "missingUrlCount": 7,
-      "sampleTitles": [
-        "Afterwork-Drinks mit Blick über Wien",
-        "Mittsommerfest",
-        "Afterwork-Genuss mit Happy Hour und Tapas-Packages"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-01T04:21:47.456Z",
-        "finishedAt": "2026-08-01T04:50:23.527Z",
-        "durationMs": 1716071,
-        "counts": {
-          "rawCandidates": 332,
-          "normalizedCandidates": 332,
-          "verifiedCandidates": 332,
-          "previousDeals": 0,
-          "acceptedDeals": 332,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "1000things.at: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
-        ],
-        "reportFile": "deal-pipeline-last-run-gastro2.json"
-      },
-      "uniqueRate": 0.8,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 65,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 322
-        },
-        {
-          "value": "shopping",
-          "count": 4
-        },
-        {
-          "value": "kaffee",
+          "value": "kultur",
           "count": 3
         },
         {
-          "value": "supermarkt",
+          "value": "shopping",
           "count": 2
-        },
-        {
-          "value": "beauty",
-          "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "rabatt",
-          "count": 233
-        },
-        {
-          "value": "bogo",
-          "count": 54
-        },
-        {
           "value": "gratis",
-          "count": 44
-        },
-        {
-          "value": "freebie",
-          "count": 1
+          "count": 5
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale",
+        "geringe Food-/Drink-Relevanz",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 48,
-      "missionFitScore": 43,
-      "coverageScore": 69,
-      "precisionScore": 45,
-      "sourceWeightScore": 50
+      "healthScore": 47,
+      "missionFitScore": 32,
+      "coverageScore": 6,
+      "precisionScore": 38,
+      "sourceWeightScore": 32
     },
     {
       "sourceKey": "gemeinde",
@@ -1049,8 +998,80 @@
       ],
       "healthScore": 44,
       "missionFitScore": 28,
-      "coverageScore": 12,
+      "coverageScore": 11,
       "precisionScore": 36,
+      "sourceWeightScore": 31
+    },
+    {
+      "sourceKey": "gutscheine",
+      "file": "deals-pending-gutscheine.json",
+      "sourceLabel": "Gutscheine.at",
+      "totalDeals": 33,
+      "uniqueDeals": 33,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 33,
+      "fresh7dCount": 33,
+      "viennaCount": 0,
+      "foodDrinkCount": 2,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Bis zu 80€ Coupon für Pauschalreisen & Reisen ab 7 Nächten",
+        "Bis zu 70% Rabatt +15% Peter Hahn Extra-Gutschein für Sale-Styles",
+        "30€ Gutschein für alles bei Autodoc"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.1,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 47.8,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 27
+        },
+        {
+          "value": "beauty",
+          "count": 3
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        },
+        {
+          "value": "supermarkt",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 32
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 44,
+      "missionFitScore": 26,
+      "coverageScore": 23,
+      "precisionScore": 28,
       "sourceWeightScore": 31
     },
     {
@@ -1104,62 +1125,6 @@
       "coverageScore": 11,
       "precisionScore": 36,
       "sourceWeightScore": 31
-    },
-    {
-      "sourceKey": "tiktok",
-      "file": "deals-pending-tiktok.json",
-      "sourceLabel": "TikTok Scanner",
-      "totalDeals": 3,
-      "uniqueDeals": 3,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "💃 Gratis tanzen mitten in Wien",
-        "Gratis Eintritt bei @heartbreakhotelvienna",
-        "Wir suchen eine Person, die wir komplett gratis einkleiden"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 63.3,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 44,
-      "missionFitScore": 28,
-      "coverageScore": 6,
-      "precisionScore": 36,
-      "sourceWeightScore": 30
     },
     {
       "sourceKey": "events",
@@ -1216,70 +1181,6 @@
       "coverageScore": 12,
       "precisionScore": 35,
       "sourceWeightScore": 30
-    },
-    {
-      "sourceKey": "gutscheine",
-      "file": "deals-pending-gutscheine.json",
-      "sourceLabel": "Gutscheine.at",
-      "totalDeals": 22,
-      "uniqueDeals": 22,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 22,
-      "fresh7dCount": 22,
-      "viennaCount": 0,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Bis zu 70% Rabatt +15% Peter Hahn Extra-Gutschein für Sale-Styles",
-        "100€ Rabatt auf alle Buchungen",
-        "Summer Sale: Bis zu 50% Rabatt sichern bei Street One"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 47,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 18
-        },
-        {
-          "value": "beauty",
-          "count": 3
-        },
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 21
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 42,
-      "missionFitScore": 22,
-      "coverageScore": 15,
-      "precisionScore": 26,
-      "sourceWeightScore": 27
     },
     {
       "sourceKey": "instagram-apify",
@@ -1346,9 +1247,9 @@
       "promoCount": 3,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Gratis Rollercoaster FanShirt ab 60€ Konsum",
         "Lunch Deal von Montag bis Freitag",
-        "2für1 Gutschein für Speisen und Zimmer"
+        "Chance auf kostenloses Essen durch Würfeln",
+        "10€ Rabatt mit Code FOODIE10 ab 25€ Einkauf"
       ],
       "lastRun": null,
       "uniqueRate": 0,
@@ -1363,11 +1264,7 @@
       "topCategories": [
         {
           "value": "food/drink",
-          "count": 3
-        },
-        {
-          "value": "hotel/food",
-          "count": 1
+          "count": 4
         }
       ],
       "topTypes": [
@@ -1376,7 +1273,7 @@
           "count": 2
         },
         {
-          "value": "bogo",
+          "value": "gewinnspiel",
           "count": 1
         },
         {
@@ -1399,20 +1296,20 @@
       "sourceKey": "vienna-promo-radar",
       "file": "deals-pending-vienna-promo-radar.json",
       "sourceLabel": "Vienna Promo Radar",
-      "totalDeals": 93,
-      "uniqueDeals": 89,
+      "totalDeals": 90,
+      "uniqueDeals": 86,
       "duplicateDeals": 4,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
       "fresh7dCount": 0,
       "viennaCount": 0,
-      "foodDrinkCount": 28,
-      "promoCount": 27,
+      "foodDrinkCount": 27,
+      "promoCount": 25,
       "missingUrlCount": 0,
       "sampleTitles": [
         "GRATIS: Gratis-Getränk-Aktion: Starbucks eröffnet neuen Standort in Wien",
         "GRATIS: Gratis-Getränk-Aktion: Starbucks eröffnet neuen Standort in Wien",
-        "GRATIS: Gratis Eis bei Neueröffnung: Wieden – Große Menschenmenge stand für \"Sreja Ice\" an"
+        "GRATIS: Salzburg lockt zur Neutorsperre mit 33-Euro-Klimaticket und Gratis-Tageskarten"
       ],
       "lastRun": null,
       "uniqueRate": 1,
@@ -1423,15 +1320,15 @@
       "foodDrinkRate": 0.3,
       "promoRate": 0.3,
       "missingUrlRate": 0,
-      "averageQualityScore": 44.8,
+      "averageQualityScore": 44.2,
       "topCategories": [
         {
           "value": "reisen",
-          "count": 37
+          "count": 35
         },
         {
           "value": "kaffee",
-          "count": 23
+          "count": 21
         },
         {
           "value": "beauty",
@@ -1442,22 +1339,22 @@
           "count": 9
         },
         {
-          "value": "shopping",
+          "value": "essen",
           "count": 5
         },
         {
-          "value": "technik",
+          "value": "shopping",
           "count": 5
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 68
+          "count": 67
         },
         {
           "value": "gratis",
-          "count": 24
+          "count": 22
         },
         {
           "value": "freebie",
@@ -1472,7 +1369,7 @@
       ],
       "healthScore": 39,
       "missionFitScore": 19,
-      "coverageScore": 21,
+      "coverageScore": 20,
       "precisionScore": 28,
       "sourceWeightScore": 27
     },
@@ -1481,14 +1378,14 @@
       "file": "deals-pending-instagram-verified.json",
       "sourceLabel": "Instagram",
       "totalDeals": 12,
-      "uniqueDeals": 1,
-      "duplicateDeals": 11,
-      "duplicateAcrossSources": 11,
+      "uniqueDeals": 0,
+      "duplicateDeals": 12,
+      "duplicateAcrossSources": 12,
       "fresh1dCount": 0,
       "fresh7dCount": 4,
       "viennaCount": 4,
       "foodDrinkCount": 8,
-      "promoCount": 6,
+      "promoCount": 7,
       "missingUrlCount": 0,
       "sampleTitles": [
         "1 + 1 Pizza gratis in Wien - Mit der bekommt ihr bei vielen Restaurants 1+1. Einfach mit „FOODIEWIEN2M“ 2 Mona",
@@ -1496,31 +1393,23 @@
         "🎁Gewinnspiel🎁 Ich verlose gemeinsam mit @restaurant.ninetyone 2 x 50€ Gutscheine✨ W..."
       ],
       "lastRun": null,
-      "uniqueRate": 0.1,
-      "duplicateRate": 0.9,
+      "uniqueRate": 0,
+      "duplicateRate": 1,
       "fresh1dRate": 0,
       "fresh7dRate": 0.3,
       "viennaRate": 0.3,
       "foodDrinkRate": 0.7,
-      "promoRate": 0.5,
+      "promoRate": 0.6,
       "missingUrlRate": 0,
-      "averageQualityScore": 91.4,
+      "averageQualityScore": 89,
       "topCategories": [
         {
           "value": "essen",
-          "count": 7
+          "count": 8
         },
         {
           "value": "food/drink",
-          "count": 3
-        },
-        {
-          "value": "hotel/food",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
+          "count": 4
         }
       ],
       "topTypes": [
@@ -1529,12 +1418,12 @@
           "count": 7
         },
         {
-          "value": "bogo",
-          "count": 2
+          "value": "gewinnspiel",
+          "count": 3
         },
         {
-          "value": "gewinnspiel",
-          "count": 2
+          "value": "bogo",
+          "count": 1
         },
         {
           "value": "gratis",
@@ -1546,75 +1435,11 @@
         "Wien-Signal ist zu schwach",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 37,
-      "missionFitScore": 43,
-      "coverageScore": 9,
-      "precisionScore": 43,
-      "sourceWeightScore": 35
-    },
-    {
-      "sourceKey": "instagram-discovery",
-      "file": "deals-pending-instagram-discovery.json",
-      "sourceLabel": "Daily Sync Instagram Discovery",
-      "totalDeals": 9,
-      "uniqueDeals": 1,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 8,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 9,
-      "promoCount": 4,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "1 + 1 Pizza gratis in Wien - @wolke.vienna Mit der @neotaste. bekommt ihr bei viel...",
-        "Voller Warenkorb für 25€?🤔 - Mit den Gurkerl Eigenmarken funktioniert das✨ „FOODIE10...",
-        "🎁Gewinnspiel🎁 Ich verlose gemeinsam mit @restaurant.ninetyone 2 x 50€ Gutscheine✨ W..."
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.1,
-      "duplicateRate": 0.9,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 0.4,
-      "missingUrlRate": 0,
-      "averageQualityScore": 89.2,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 8
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 6
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 2
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 35,
+      "healthScore": 36,
       "missionFitScore": 46,
-      "coverageScore": 8,
-      "precisionScore": 40,
-      "sourceWeightScore": 34
+      "coverageScore": 9,
+      "precisionScore": 44,
+      "sourceWeightScore": 35
     },
     {
       "sourceKey": "power",
@@ -1624,7 +1449,7 @@
       "uniqueDeals": 4,
       "duplicateDeals": 2,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
+      "fresh1dCount": 6,
       "fresh7dCount": 6,
       "viennaCount": 0,
       "foodDrinkCount": 0,
@@ -1638,7 +1463,7 @@
       "lastRun": null,
       "uniqueRate": 0.7,
       "duplicateRate": 0,
-      "fresh1dRate": 0,
+      "fresh1dRate": 1,
       "fresh7dRate": 1,
       "viennaRate": 0,
       "foodDrinkRate": 0,
@@ -1662,16 +1487,75 @@
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag",
         "geringe Food-/Drink-Relevanz",
         "wenige klare Gratis-/Promo-Signale",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 21,
-      "missionFitScore": 0,
-      "coverageScore": 1,
-      "precisionScore": 14,
-      "sourceWeightScore": 9
+      "healthScore": 35,
+      "missionFitScore": 22,
+      "coverageScore": 4,
+      "precisionScore": 26,
+      "sourceWeightScore": 23
+    },
+    {
+      "sourceKey": "instagram-discovery",
+      "file": "deals-pending-instagram-discovery.json",
+      "sourceLabel": "Daily Sync Instagram Discovery",
+      "totalDeals": 9,
+      "uniqueDeals": 0,
+      "duplicateDeals": 9,
+      "duplicateAcrossSources": 9,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 9,
+      "promoCount": 4,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "1 + 1 Pizza gratis in Wien - @wolke.vienna Mit der @neotaste. bekommt ihr bei viel...",
+        "Voller Warenkorb für 25€?🤔 - Mit den Gurkerl Eigenmarken funktioniert das✨ „FOODIE10...",
+        "🎁Gewinnspiel🎁 Ich verlose gemeinsam mit @restaurant.ninetyone 2 x 50€ Gutscheine✨ W..."
+      ],
+      "lastRun": null,
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 0.4,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88.7,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 9
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 6
+        },
+        {
+          "value": "gewinnspiel",
+          "count": 2
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 32,
+      "missionFitScore": 46,
+      "coverageScore": 8,
+      "precisionScore": 39,
+      "sourceWeightScore": 33
     },
     {
       "sourceKey": "firecrawl4",
@@ -1690,24 +1574,22 @@
       "sampleTitles": [],
       "lastRun": {
         "status": "completed",
-        "startedAt": "2026-08-01T02:10:53.802Z",
-        "finishedAt": "2026-08-01T02:16:59.867Z",
-        "durationMs": 366065,
+        "startedAt": "2026-08-02T02:07:52.202Z",
+        "finishedAt": "2026-08-02T02:26:25.364Z",
+        "durationMs": 1113162,
         "counts": {
-          "rawCandidates": 119,
-          "normalizedCandidates": 119,
-          "verifiedCandidates": 119,
+          "rawCandidates": 91,
+          "normalizedCandidates": 88,
+          "verifiedCandidates": 88,
           "previousDeals": 0,
           "acceptedDeals": 0,
-          "rejectedDeals": 119
+          "rejectedDeals": 88
         },
         "rejectedByReason": {
-          "missing-original-offer-evidence": 71,
-          "older-than-7-days": 1,
-          "not-verified-vienna": 5,
-          "not-food-drink": 2,
-          "not-free": 33,
-          "giveaway": 7
+          "missing-original-offer-evidence": 83,
+          "not-free": 3,
+          "free-item-not-food-drink": 1,
+          "not-verified-vienna": 1
         },
         "errors": [],
         "reportFile": "deal-pipeline-last-run-firecrawl4.json"
@@ -1749,6 +1631,58 @@
       "missingUrlCount": 0,
       "sampleTitles": [],
       "lastRun": null,
+      "uniqueRate": 0,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 0,
+      "topCategories": [],
+      "topTypes": [],
+      "issues": [
+        "liefert aktuell 0 Deals"
+      ],
+      "healthScore": 0,
+      "missionFitScore": 0,
+      "coverageScore": 0,
+      "precisionScore": 0,
+      "sourceWeightScore": 0
+    },
+    {
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 0,
+      "uniqueDeals": 0,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-02T05:31:24.576Z",
+        "finishedAt": "2026-08-02T05:34:10.228Z",
+        "durationMs": 165652,
+        "counts": {
+          "rawCandidates": 0,
+          "normalizedCandidates": 0,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 0,
+          "rejectedDeals": 0
+        },
+        "rejectedByReason": {},
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-food3.json"
+      },
       "uniqueRate": 0,
       "duplicateRate": 0,
       "fresh1dRate": 0,
