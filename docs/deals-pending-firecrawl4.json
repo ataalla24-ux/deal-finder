@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-08-02T02:07:52.203Z",
+  "lastUpdated": "2026-08-03T02:10:01.394Z",
   "source": "firecrawl4",
   "totalDeals": 0,
   "constraints": {
@@ -10,11 +10,11 @@
   },
   "diagnostics": {
     "primary": {
-      "status": "completed",
-      "offers": 31,
-      "error": "",
+      "status": "failed",
+      "offers": 0,
+      "error": "Refusal: I apologize, but I'm experiencing technical difficulties with the Python execution environment. I was able to successfully identify and compile 59 concrete free food and drink offers from Vienna Instagram posts, including:\n\n- Multiple venues offering free welcome drinks (first 100-300 guests)\n- 1+1 and 2+1 beverage promotions\n- Grand opening offers (free pizza, burgers, bowls)\n- Ladies night free prosecco offers\n- Free ice cream promotions (AIDA at 35°C, ÖH on June 24)\n- Tokki's free drink with All You Can Eat (Mon-Fri 12-17h)\n- Zushi Market 1 Euro bowl promotions at multiple opening locations\n- Free appetizers with aperitifs (Das Mezzanin, Collana Bar)\n\nHowever, I cannot complete the final data export due to a system error preventing Python execution. The data has been collected from Instagram search results and includes post URLs, offer descriptions, locations, validity periods, and other required information per your schema.",
       "creditsUsed": 0,
-      "durationMs": 378729
+      "durationMs": 557049
     },
     "searches": [
       {
@@ -48,8 +48,8 @@
       {
         "query": "site:instagram.com/reel/ Wien \"gratis Verkostung\"",
         "status": "completed",
-        "resultCount": 10,
-        "directPostCandidates": 10,
+        "resultCount": 9,
+        "directPostCandidates": 9,
         "error": ""
       },
       {
@@ -61,28 +61,30 @@
       }
     ],
     "fallback": {
-      "status": "processing",
-      "offers": 0,
-      "distinctInstagramPosts": 0,
+      "status": "completed",
+      "offers": 15,
+      "distinctInstagramPosts": 15,
       "error": "",
       "creditsUsed": 0,
-      "durationMs": 726486
+      "durationMs": 717444
     },
-    "rawOffers": 91,
-    "distinctInstagramPosts": 88,
-    "recentInstagramPostsBeforeFallback": 5,
+    "rawOffers": 74,
+    "distinctInstagramPosts": 74,
+    "recentInstagramPostsBeforeFallback": 59,
     "qualification": {
-      "inputDeals": 88,
-      "distinctPosts": 88,
+      "inputDeals": 74,
+      "distinctPosts": 74,
       "acceptedDeals": 0,
       "acceptedBeforeLimit": 0,
       "maxAgeDays": 7,
       "maxDeals": 40,
       "rejectedByReason": {
-        "missing-original-offer-evidence": 83,
-        "not-free": 3,
+        "not-verified-vienna": 4,
+        "giveaway": 6,
+        "not-free": 49,
         "free-item-not-food-drink": 1,
-        "not-verified-vienna": 1
+        "not-food-drink": 1,
+        "missing-original-offer-evidence": 13
       }
     }
   },
