@@ -28,9 +28,24 @@ function normalizeUrl(value) {
   try {
     const parsed = new URL(text);
     parsed.hash = '';
-    parsed.search = '';
     parsed.hostname = parsed.hostname.toLowerCase().replace(/^www\./, '');
     parsed.pathname = parsed.pathname.replace(/\/+$/, '');
+
+    // Flight offer identity lives in the query string. Dropping it turns one
+    // manually removed itinerary into a provider-wide block for every route.
+    if (/\/trip\/flights\/select$/i.test(parsed.pathname)) {
+      const paramsByLowerKey = new Map(
+        [...parsed.searchParams.entries()].map(([key, paramValue]) => [key.toLowerCase(), paramValue]),
+      );
+      const identityParams = new URLSearchParams();
+      for (const key of ['originiata', 'destinationiata', 'dateout', 'datein']) {
+        const paramValue = cleanText(paramsByLowerKey.get(key));
+        if (paramValue) identityParams.set(key, paramValue.toLowerCase());
+      }
+      parsed.search = identityParams.toString();
+    } else {
+      parsed.search = '';
+    }
     return parsed.toString().replace(/\/+$/, '').toLowerCase();
   } catch {
     return text.replace(/[#?].*$/, '').replace(/\/+$/, '').toLowerCase();

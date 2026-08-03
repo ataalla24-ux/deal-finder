@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
+import { moderationReasonForDeal, normalizeUrl } from '../scraper/deal-moderation-utils.js';
 import {
   buildFirecrawlReviewMessage,
   buildSlackMessage,
@@ -15,6 +16,19 @@ import {
 } from '../scraper/slack-notify.js';
 
 const now = new Date('2026-07-20T12:00:00.000Z');
+
+const removedFlightUrl = 'https://www.ryanair.com/gb/en/trip/flights/select?originIata=VIE&destinationIata=IBZ&dateOut=2026-06-28&dateIn=2026-07-03&isReturn=true';
+const freshFlightUrl = 'https://www.ryanair.com/gb/en/trip/flights/select?adults=1&originIata=VIE&destinationIata=PMI&dateOut=2026-09-28&dateIn=2026-10-02&isReturn=true';
+const flightModeration = {
+  hiddenDeals: [{ url: removedFlightUrl, reason: 'old itinerary removed' }],
+};
+assert.notEqual(normalizeUrl(removedFlightUrl), normalizeUrl(freshFlightUrl));
+assert.equal(moderationReasonForDeal({ url: removedFlightUrl }, flightModeration), 'old itinerary removed');
+assert.equal(
+  moderationReasonForDeal({ url: freshFlightUrl }, flightModeration),
+  '',
+  'removing one itinerary must not suppress every flight from the provider',
+);
 
 function healthyUrl(url, overrides = {}) {
   return {
