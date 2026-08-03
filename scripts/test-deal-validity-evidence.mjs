@@ -208,8 +208,8 @@ const futureRange = await validate({
   expirySource: 'content-date',
   dateConfidence: 'high',
 });
-assert.equal(futureRange.decision.allowed, false, 'deals must not be released before an explicit start date');
-assert.match(futureRange.decision.reasons.join(' '), /noch nicht gestartet/);
+assert.equal(futureRange.decision.allowed, true, 'published upcoming deals should reach Slack before their explicit start date');
+assert.match(futureRange.decision.warnings.join(' '), /startet am 2026-07-20/);
 
 const futureSingleDay = await validate({
   ...baseSocialDeal,
@@ -225,8 +225,8 @@ const futureSingleDay = await validate({
   expirySource: 'content-date',
   dateConfidence: 'high',
 });
-assert.equal(futureSingleDay.decision.allowed, false, 'a future single-day offer must stay blocked until validOn');
-assert.match(futureSingleDay.decision.reasons.join(' '), /noch nicht gestartet/);
+assert.equal(futureSingleDay.decision.allowed, true, 'published future single-day offers should reach Slack early');
+assert.match(futureSingleDay.decision.warnings.join(' '), /startet am 2026-07-20/);
 
 const liveUrlExpired = await validate({
   ...baseSocialDeal,

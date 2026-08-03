@@ -324,8 +324,8 @@ const futureApifyRange = normalizeApifyItem({
   validUntil: '2026-07-25T23:59:59.999Z',
   stillValid: true,
 }, { now });
-assert.equal(futureApifyRange.deal, null);
-assert.equal(futureApifyRange.rejectReason, 'offerNotStarted', 'importer independently blocks future ranges even if actor stillValid is inconsistent');
+assert.ok(futureApifyRange.deal, 'published upcoming ranges must survive the importer');
+assert.equal(futureApifyRange.deal.validFrom, '2026-07-20T00:00:00.000Z');
 
 const genericDiscoveryDate = normalizeApifyItem({
   ...currentItem,

@@ -413,21 +413,11 @@ function apifyItemRejectReason(item, timestamp, now, maxPostAgeDays, maxAgeWitho
   const maxFutureMs = now.getTime() + 10 * 60 * 1000;
   if (publishedMs > maxFutureMs) return 'futurePostTimestamp';
   if (publishedMs < now.getTime() - maxPostAgeDays * 24 * 60 * 60 * 1000) return 'postTooOld';
-  if (item.accepted === false) return normalizeText(item.rejectReason || 'actorRejected');
+  const actorRejectReason = normalizeText(item.rejectReason || 'actorRejected');
+  if (item.accepted === false && !/^offerNotStarted$/i.test(actorRejectReason)) return actorRejectReason;
   if (!hasViennaEvidence(item)) return 'missingViennaEvidence';
   if (!hasConcreteOfferSignal(item)) return 'noConcreteOfferSignal';
   if (item.stillValid === false) return 'expiredOrTooOld';
-  const validFrom = toIso(item.validFrom);
-  const validFromDay = validFrom.slice(0, 10);
-  const viennaNowParts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Vienna',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(now);
-  const nowByType = Object.fromEntries(viennaNowParts.map((part) => [part.type, part.value]));
-  const viennaToday = `${nowByType.year}-${nowByType.month}-${nowByType.day}`;
-  if (validFromDay && validFromDay > viennaToday) return 'offerNotStarted';
   const validUntil = toIso(item.validUntil);
   if (validUntil && Date.parse(validUntil) < now.getTime()) return 'expiredOrTooOld';
   const hasExplicitFutureValidity = Boolean(validUntil && Date.parse(validUntil) >= now.getTime());

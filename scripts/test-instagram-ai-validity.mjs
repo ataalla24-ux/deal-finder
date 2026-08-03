@@ -92,7 +92,7 @@ assert.equal(expiredRange.eligibleByAge, false);
 
 const futureRange = timing('Wien Deal vom 1.–31. August', '2026-07-10T10:00:00.000Z');
 assert.equal(futureRange.notStarted, true, 'a future range is not a currently active offer');
-assert.equal(futureRange.eligibleByAge, false);
+assert.equal(futureRange.eligibleByAge, true, 'a published upcoming range remains eligible');
 
 const expiredSingleDay = timing('Nur am 18.7. gibt es in Wien Kaffee gratis.', '2026-07-19T10:00:00.000Z');
 assert.equal(expiredSingleDay.offerWindow?.kind, 'single');
@@ -139,7 +139,7 @@ const aidsFutureEvent = timing(
 assert.equal(aidsFutureEvent.offerWindow?.kind, 'single');
 assert.equal(aidsFutureEvent.offerWindow?.startDate?.toISOString().slice(0, 10), '2026-09-04');
 assert.equal(aidsFutureEvent.notStarted, true);
-assert.equal(aidsFutureEvent.eligibleByAge, false);
+assert.equal(aidsFutureEvent.eligibleByAge, true);
 
 assert.equal(
   extractActiveOfferWindow('Gültig bis Ende März 2026', { now })?.endDate?.toISOString().slice(0, 10),

@@ -595,6 +595,7 @@ function formatReasonCategoryCounts(counts) {
 function buildSlackMessage(deal, index) {
   const validity = ensureObject(deal.validity);
   const displayedOfferDate = validity.status ? validity.sourceDate : deal.pubDate;
+  const displayedStart = deal.validFrom || (deal.expiryKind === 'single' ? deal.validOn : '');
   const displayedExpiry = validity.expiryDate || deal.validUntil || deal.validOn || deal.expires;
   const link = deal.url ? `<${deal.url}|Zum Angebot>` : '⚠️ FEHLT';
   const desc = deal.description ? `\n📝 ${deal.description.slice(0, 180)}` : '';
@@ -607,6 +608,7 @@ function buildSlackMessage(deal, index) {
     `🏷️ Marke/Restaurant: ${deal.brand || 'k.A.'}`,
     `📍 Ort: ${deal.distance || 'k.A.'}`,
     `📅 Angebotsdatum: ${formatDate(displayedOfferDate)}`,
+    ...(displayedStart ? [`🚀 Startet am: ${formatDate(displayedStart)}`] : []),
     `⏳ Gültig bis: ${displayedExpiry ? formatDate(displayedExpiry) : 'k.A.'}`,
     `🧭 Kategorie: ${deal.category} | Typ: ${deal.type}`,
     `🧩 Ursprung intern: ${deal.originSource || deal.source || 'k.A.'}`,

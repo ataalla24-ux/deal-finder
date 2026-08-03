@@ -235,7 +235,6 @@ function validateInstagramAiPayload(output, report = {}, options = {}) {
         errors.push(`${label} is ${ageDays.toFixed(2)} days old; ${detail}`);
       }
       if (offerTiming.expired) errors.push(`${label} has expired source offer evidence`);
-      if (offerTiming.notStarted) errors.push(`${label} has a future offer period that has not started`);
       if (offerTiming.futurePublication) errors.push(`${label} pubDate is implausibly in the future`);
     }
 
@@ -243,8 +242,6 @@ function validateInstagramAiPayload(output, report = {}, options = {}) {
     const validFrom = parseValidityStart(validFromRaw);
     if (validFromRaw && !validFrom) {
       errors.push(`${label} has invalid validFrom`);
-    } else if (validFrom && validFrom.getTime() > now.getTime()) {
-      errors.push(`${label} is not active until ${validFrom.toISOString()}`);
     }
 
     const explicitEnd = parseDate(deal.evidence?.explicitOfferEnd);

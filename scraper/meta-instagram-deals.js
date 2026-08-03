@@ -358,8 +358,6 @@ function expiryFromText(text, now, fallbackStop, ttlHours, referenceDate = now) 
 
 function explicitExpiryRejection(expiry, now) {
   if (!expiry || expiry.expirySource === 'short-review-ttl') return '';
-  const validFromMs = Date.parse(expiry.validFrom || '');
-  if (Number.isFinite(validFromMs) && validFromMs > now.getTime()) return 'offer-not-started';
   const expiryMs = Date.parse(expiry.expires || '');
   if (Number.isFinite(expiryMs) && expiryMs < now.getTime()) return 'offer-expired';
   return '';

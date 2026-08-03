@@ -89,7 +89,7 @@ const graphTomorrow = normalizeGraphMediaItem({
   permalink: 'https://www.instagram.com/p/RELATIVETOMORROW/',
   timestamp: '2026-07-17T08:30:00.000Z',
 }, { sourceType: 'hashtag', sourceName: '#wienaktion' }, config, now);
-assert.equal(graphTomorrow.rejection, 'offer-not-started', 'Nur morgen must not be released one calendar day early');
+assert.ok(graphTomorrow.deal, 'a published deal for tomorrow should reach Slack early');
 
 const graphFutureRange = normalizeGraphMediaItem({
   id: '17890003-future',
@@ -97,7 +97,7 @@ const graphFutureRange = normalizeGraphMediaItem({
   permalink: 'https://www.instagram.com/p/FUTURERANGE/',
   timestamp: '2026-07-17T08:30:00.000Z',
 }, { sourceType: 'hashtag', sourceName: '#wienaktion' }, config, now);
-assert.equal(graphFutureRange.rejection, 'offer-not-started', 'future Meta ranges must not be released before validFrom');
+assert.ok(graphFutureRange.deal, 'published future Meta ranges should reach Slack before validFrom');
 
 const graphOldWithFutureExpiry = normalizeGraphMediaItem({
   id: '17890004',

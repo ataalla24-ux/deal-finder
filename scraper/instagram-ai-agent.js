@@ -1596,10 +1596,6 @@ function buildQualityScore(candidate, signal) {
     score -= 45;
     reasons.push('yesterday-only-offer');
   }
-  if (offerTiming.notStarted) {
-    score -= 45;
-    reasons.push('future-offer-date');
-  }
   if (offerTiming.futurePublication) {
     score -= 60;
     reasons.push('future-publication-date');
@@ -1633,7 +1629,6 @@ function getRejectionReason(candidate, signal, score) {
   if (offerTiming.futurePublication) return 'Instagram-Postdatum liegt unplausibel in der Zukunft';
   if (offerTiming.explicitExpired) return 'explizites Aktionsende liegt in der Vergangenheit';
   if (offerTiming.yesterdayOnly) return 'Aktion galt ausdruecklich nur gestern';
-  if (offerTiming.notStarted) return 'expliziter Aktionszeitraum hat noch nicht begonnen';
   if (hasExpiredRelativeOfferDate(dateSignal, pubDate.date)) return 'relative Kurz-Aktion ist abgelaufen';
   if (!offerTiming.eligibleByAge) {
     if (offerTiming.ageDays > CONFIG.activeOfferMaxAgeDays) {
@@ -1825,10 +1820,6 @@ function mergeAiDeal(candidate, aiRow) {
   }
   if (offerTiming.yesterdayOnly) {
     candidate.rejectionReason = 'Aktion galt ausdruecklich nur gestern';
-    return null;
-  }
-  if (offerTiming.notStarted) {
-    candidate.rejectionReason = 'expliziter Aktionszeitraum hat noch nicht begonnen';
     return null;
   }
   if (hasExpiredRelativeOfferDate(dateSignal, pubDate.date)) {

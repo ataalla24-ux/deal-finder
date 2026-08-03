@@ -407,6 +407,7 @@ export function evaluateInstagramOfferTiming(options = {}) {
   const withinFreshWindow = ageDays !== null && !futurePublication && ageDays <= maxAgeDays;
   const withinActiveOfferLimit = ageDays !== null && !futurePublication && ageDays <= activeOfferMaxAgeDays;
   const activeEvidence = activeExplicitWindow || recurring;
+  const upcomingEvidence = Boolean(notStarted && offerWindow?.endDate);
   const expired = explicitExpired || yesterdayOnly;
 
   return {
@@ -424,8 +425,10 @@ export function evaluateInstagramOfferTiming(options = {}) {
     futurePublication,
     activeExplicitWindow,
     activeEvidence,
+    upcomingEvidence,
     expired,
-    eligibleByAge: Boolean(pubDate && !futurePublication && !expired && !notStarted && (withinFreshWindow || (withinActiveOfferLimit && activeEvidence))),
+    eligibleByAge: Boolean(pubDate && !futurePublication && !expired
+      && (withinFreshWindow || (withinActiveOfferLimit && (activeEvidence || upcomingEvidence)))),
   };
 }
 

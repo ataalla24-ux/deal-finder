@@ -71,7 +71,7 @@ const futureAidsEvent = buildHeuristicDeal(candidate({
   title: 'Aids Hilfe Wien Straßenfest',
   description: `Am ${futureEventDate.getUTCDate()}. ${germanMonths[futureEventDate.getUTCMonth()]} ${futureEventDate.getUTCFullYear()} findet unser 6. Straßenfest statt – gratis Kinderbetreuung in Wien.`,
 }));
-assert.equal(futureAidsEvent, null, 'a future one-day event must not enter the current-deal queue');
+assert.ok(futureAidsEvent, 'a published future one-day offer should enter the review queue');
 
 const glutenFreeMarketing = buildHeuristicDeal(candidate({
   url: 'https://www.instagram.com/p/Da0GlutenFree/',

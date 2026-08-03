@@ -515,8 +515,8 @@ const futureValidFrom = await validateOne({
   expiryKind: 'range',
   dateConfidence: 'high',
 });
-assert.equal(futureValidFrom.decision.allowed, false);
-assert.match(reasonText(futureValidFrom), /noch nicht gestartet/);
+assert.equal(futureValidFrom.decision.allowed, true);
+assert.match(futureValidFrom.decision.warnings.join(' '), /startet am 2026-07-21/);
 
 const futurePublication = await validateOne({
   id: 'future-publication',
@@ -1077,8 +1077,8 @@ const futureAidsQueueDeal = await validateOne({
   pubDateSource: 'time.datetime',
   expires: '4.9.2026',
 });
-assert.equal(futureAidsQueueDeal.decision.allowed, false);
-assert.match(reasonText(futureAidsQueueDeal), /noch nicht gestartet \(2026-09-04\)/);
+assert.equal(futureAidsQueueDeal.decision.allowed, true);
+assert.match(futureAidsQueueDeal.decision.warnings.join(' '), /startet am 2026-09-04/);
 
 for (const [id, expires] of [
   ['le-pho-range', '2026-06-01 bis 2026-08-31'],

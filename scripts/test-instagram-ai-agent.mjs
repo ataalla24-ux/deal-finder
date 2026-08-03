@@ -296,8 +296,7 @@ const futureRange = candidate({
   sourceDeal: { ownerUsername: 'testcafe', brand: 'Test Café' },
 });
 assert.equal(explicitOfferWindow(futureRange.preview.description).validFrom, dateText(futureStartDate).split('.').reverse().join('-'));
-assert.equal(buildHeuristicDeal(futureRange), null, 'a future validity range must not surface before validFrom');
-assert.match(futureRange.rejectionReason, /noch nicht (?:gestartet|begonnen)/i);
+assert.ok(buildHeuristicDeal(futureRange), 'a published future validity range should surface before validFrom');
 
 const authoritativeOldDate = isoAgo(30 * DAY_MS);
 const freshPreviewCannotOverride = makeCandidate({

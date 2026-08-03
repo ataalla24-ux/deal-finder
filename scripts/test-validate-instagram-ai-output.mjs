@@ -237,7 +237,7 @@ const notYetActive = baseDeal({
   validUntil: new Date(now.getTime() + 2 * DAY_MS).toISOString(),
   expires: new Date(now.getTime() + 2 * DAY_MS).toISOString(),
 });
-assert.ok(validate([notYetActive]).some((error) => /is not active until/.test(error)));
+assert.deepEqual(validate([notYetActive]), [], 'published upcoming deals are valid output');
 
 const withinClockSkew = new Date(now.getTime() + 9 * 60 * 1000).toISOString();
 const acceptableClockSkew = baseDeal({

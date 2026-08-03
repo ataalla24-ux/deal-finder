@@ -687,8 +687,8 @@ function getExpiryDecision(expiryCandidates, now) {
   const startsOn = selected.validFrom || selected.validOn || '';
   if (startsOn && isAfterToday(startsOn, now)) {
     return {
-      blocked: true,
-      reason: `noch nicht gestartet (${startsOn})`,
+      blocked: false,
+      warning: `startet am ${startsOn}`,
       source: selected.source,
       candidate: selected,
     };
@@ -988,6 +988,8 @@ async function validateDeal(deal, context) {
 
   if (expiry.blocked) {
     reasons.push(expiry.reason);
+  } else if (expiry.warning) {
+    warnings.push(expiry.warning);
   } else if (expiryCandidates.length === 0) {
     warnings.push('kein Ablaufdatum gefunden');
   }
