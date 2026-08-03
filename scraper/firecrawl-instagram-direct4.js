@@ -1,900 +1,350 @@
 import '../sentry/instrument.mjs';
+// ============================================
+// 🍕🔥 FIRECRAWL GASTRO AGENT #4
+// Fokus: Gastronomie - Mahlzeiten unter €3, 50%+ Rabatt, Döner €1,99
+// ============================================
 
 import Firecrawl from '@mendable/firecrawl-js';
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
-
-import { inspectDealUrlHealth } from './expiry-utils.js';
+import fs from 'fs';
+import { verifyFirecrawlDeals } from './firecrawl-post-verifier.js';
 import {
   buildPipelineRunReport,
+  summarizeVerifiedDeals,
   writeFailedPipelineRunReport,
   writePipelineRunReport,
 } from './pipeline-run-report-utils.js';
-import {
-  agentDealToKey4Candidate,
-  buildKey4HashtagSources,
-  buildKey4SearchQueries,
-  buildKey4TargetAccounts,
-  classifyKey4Evidence,
-  dealToKey4SeedCandidate,
-  dedupeKey4Candidates,
-  extractKey4PostEvidence,
-  isKey4DiscoveryCandidateRecent,
-  key4CandidatePriority,
-  searchResultToKey4Candidate,
-} from './firecrawl-instagram-direct4-utils.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const ROOT = path.join(__dirname, '..');
-const DOCS_DIR = path.join(ROOT, 'docs');
-const OUTPUT_PATH = path.join(DOCS_DIR, 'deals-pending-firecrawl4.json');
-const RAW_OUTPUT_PATH = path.join(DOCS_DIR, 'deals-raw-firecrawl4.json');
-const REVIEW_OUTPUT_PATH = path.join(DOCS_DIR, 'deals-review-firecrawl4.json');
-const REJECTED_OUTPUT_PATH = path.join(DOCS_DIR, 'deals-rejected-firecrawl4.json');
-const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
-const REGISTRY_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
-const SEED_FILE_NAMES = [
-  'deals-pending-gastro2.json',
-  'deals-pending-food3.json',
-  'deals-pending-firecrawl2.json',
-  'deals-pending-firecrawl5.json',
-  'deals-pending-instagram-ai.json',
-  'deals-pending-instagram-apify.json',
-  'deals-pending-instagram-discovery.json',
-  'deals-pending-instagram-verified.json',
-  'deals-pending-instagram.json',
-];
+const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY4;
 const SOURCE_KEY = 'firecrawl4';
-const SOURCE_LABEL = 'Firecrawl Key 4 - Instagram Direct';
+const SOURCE_LABEL = 'Firecrawl Key 4 - Gastro Discovery';
+const OUTPUT_PATH = 'docs/deals-pending-firecrawl4.json';
 const RUN_STARTED_AT = new Date();
 
-const MAX_POST_AGE_DAYS = Math.max(1, Number(process.env.FC4_MAX_AGE_DAYS || 7) || 7);
-const DISCOVERY_MAX_AGE_DAYS = Math.max(
-  MAX_POST_AGE_DAYS,
-  Number(process.env.FC4_DISCOVERY_MAX_AGE_DAYS || 14) || 14,
-);
-const RECURRING_MAX_AGE_DAYS = Math.max(
-  DISCOVERY_MAX_AGE_DAYS,
-  Number(process.env.FC4_RECURRING_MAX_AGE_DAYS || 45) || 45,
-);
-const MAX_DEALS = Math.max(1, Number(process.env.FC4_MAX_DEALS || 160) || 160);
-const MAX_REVIEW = Math.max(1, Number(process.env.FC4_MAX_REVIEW || 160) || 160);
-const SEARCH_LIMIT = Math.max(1, Math.min(20, Number(process.env.FC4_SEARCH_LIMIT || 6) || 6));
-const PROFILE_QUERY_LIMIT = Math.max(0, Number(process.env.FC4_PROFILE_QUERY_LIMIT || 18) || 0);
-const TARGET_ACCOUNT_LIMIT = Math.max(
-  PROFILE_QUERY_LIMIT,
-  Number(process.env.FC4_TARGET_ACCOUNT_LIMIT || 30) || 30,
-);
-const MAX_POSTS_TO_SCRAPE = Math.max(1, Number(process.env.FC4_MAX_POSTS_TO_SCRAPE || 160) || 160);
-const SEARCH_CONCURRENCY = Math.max(1, Number(process.env.FC4_SEARCH_CONCURRENCY || 2) || 2);
-const SCRAPE_CONCURRENCY = Math.max(1, Number(process.env.FC4_SCRAPE_CONCURRENCY || 3) || 3);
-const MAX_FIRECRAWL_CALLS = Math.max(1, Number(process.env.FC4_MAX_FIRECRAWL_CALLS || 140) || 140);
-const AGENT_SOURCE_LIMIT = Math.max(0, Number(process.env.FC4_AGENT_SOURCE_LIMIT || 4) || 0);
-const AGENT_CONCURRENCY = Math.max(1, Number(process.env.FC4_AGENT_CONCURRENCY || 2) || 2);
-const AGENT_TIMEOUT_SECONDS = Math.max(
-  30,
-  Number(process.env.FC4_AGENT_TIMEOUT_SECONDS || 240) || 240,
-);
-const AGENT_MODEL = String(process.env.FC4_AGENT_MODEL || 'spark-1-pro').trim() || 'spark-1-pro';
-const AGENT_DISCOVERY_ENABLED = !/^(?:0|false|no)$/i.test(
-  String(process.env.FC4_AGENT_DISCOVERY_ENABLED ?? 'true').trim(),
-);
+if (!FIRECRAWL_API_KEY) {
+  const error = new Error('FIRECRAWL_API_KEY4 nicht gesetzt');
+  writeFailedPipelineRunReport({
+    sourceKey: SOURCE_KEY,
+    sourceLabel: SOURCE_LABEL,
+    startedAt: RUN_STARTED_AT,
+    outputFile: OUTPUT_PATH,
+    error,
+  });
+  console.error(`❌ ${error.message}!`);
+  process.exit(1);
+}
 
-const KEY4_AGENT_SCHEMA = z.object({
+const firecrawl = new Firecrawl({ apiKey: FIRECRAWL_API_KEY });
+
+async function runAgent(payload) {
+  return firecrawl.agent(payload);
+}
+
+// ============================================
+// SEITEN
+// ============================================
+
+const SCRAPE_URLS = [
+  'https://www.instagram.com/explore/tags/viennafood/',
+  'https://www.instagram.com/tastyfood.vienna/',
+  'https://www.instagram.com/explore/tags/viennafoodie/',
+  'https://www.instagram.com/foodiewien/',
+  'https://www.instagram.com/explore/tags/viennarestaurant/',
+  'https://www.instagram.com/eatinvienna_/',
+  'https://www.instagram.com/explore/tags/restaurantvienna/',
+  'https://www.instagram.com/viennaeats/',
+  'https://www.instagram.com/explore/tags/allyoucaneatvienna/',
+  'https://www.instagram.com/viennafoodstories/',
+  'https://www.instagram.com/explore/tags/kostenloswien/',
+  'https://www.instagram.com/viennarestaurants/',
+  'https://www.instagram.com/explore/tags/wiengratis/',
+  'https://www.instagram.com/zushimarket/',
+  'https://www.instagram.com/explore/tags/gratisessenwien/',
+  'https://www.instagram.com/ciosgrill/',
+  'https://www.instagram.com/explore/tags/kostenlosessenwien/',
+  'https://www.instagram.com/corner_xvi/',
+  'https://www.instagram.com/explore/tags/angebotwien/',
+  'https://www.instagram.com/tokki_korean_bbq/',
+  'https://www.instagram.com/explore/tags/angebotewien/',
+  'https://www.instagram.com/sajado.bbq/',
+  'https://www.instagram.com/explore/tags/wienangebot/',
+  'https://www.instagram.com/mosquito_mexican/',
+  'https://www.instagram.com/explore/tags/dealswien/',
+  'https://www.instagram.com/explore/tags/wienerdeals/',
+  'https://www.instagram.com/explore/tags/rabattwien/',
+  'https://www.instagram.com/explore/tags/wienrabatt/',
+  'https://www.instagram.com/explore/tags/sparenwien/',
+  'https://www.instagram.com/explore/tags/fooddealwien/',
+  'https://www.instagram.com/explore/tags/fooddealsvienna/',
+  'https://www.instagram.com/explore/tags/freefoodvienna/',
+  'https://www.instagram.com/explore/tags/viennadeals/',
+  'https://www.instagram.com/explore/tags/viennaoffers/',
+  'https://www.instagram.com/explore/tags/viennafreebies/',
+  'https://www.instagram.com/explore/tags/happyhourwien/',
+  'https://www.instagram.com/explore/tags/lunchdealwien/',
+  'https://www.instagram.com/explore/tags/gastroaktionwien/',
+  'https://www.instagram.com/explore/tags/neueröffnungwien/',
+  'https://www.instagram.com/explore/tags/eröffnungwien/',
+];
+
+function isRateOrCreditError(message) {
+  const m = (message || '').toLowerCase();
+  return m.includes('insufficient credits') || m.includes('rate limit exceeded');
+}
+
+function isInstagramUrl(url) {
+  return (url || '').includes('instagram.com');
+}
+
+// ============================================
+// SCHEMA
+// ============================================
+
+const gastroSchema = z.object({
   deals: z.array(z.object({
+    category: z.string(),
+    category_citation: z.string().optional(),
+        brand_or_store: z.string(),
+        brand_or_store_citation: z.string().optional(),
+    item_given_away: z.string(),
+    item_given_away_citation: z.string().optional(),
+    location: z.string(),
+    location_citation: z.string().optional(),
+    validity_date: z.string(),
+    validity_date_citation: z.string().optional(),
+    validity_time: z.string(),
+    validity_time_citation: z.string().optional(),
     post_url: z.string(),
+    post_url_citation: z.string().optional(),
     owner_username: z.string().optional(),
-    brand_or_store: z.string().optional(),
-    post_caption: z.string().optional(),
+    owner_username_citation: z.string().optional(),
     post_date: z.string().optional(),
-    offer: z.string().optional(),
-    offer_type: z.string().optional(),
-    location: z.string().optional(),
-    validity: z.string().optional(),
+    post_date_citation: z.string().optional(),
   })),
 });
 
-const KEY4_AGENT_PROMPT = `Finde aktuelle oder weiterhin gültige Gastronomie-Angebote in Wien, Österreich.
+// ============================================
+// PROMPT
+// ============================================
 
-Gesucht werden ausschließlich mögliche Kandidaten für:
-- komplett kostenlose Speisen oder Getränke
-- 1+1, 2-für-1 oder Buy-one-get-one-Angebote
-- kostenlose Speisen oder Getränke am Geburtstag
-- Neueröffnungen mit garantiert kostenlosen Speisen oder Getränken
-- glücksabhängige Gratis-Gastro-Aktionen wie Würfeln oder Glücksrad als unsichere Kandidaten
+const PROMPT = `Extrahiere aktuelle und zukünftige Deals in Wien mit höchster Priorität auf Gastronomie-Angebote (Essen & Trinken).
 
-Nicht aufnehmen:
-- gewöhnliche Rabatte oder nur günstige Preise
-- Instagram-Gewinnspiele oder Verlosungen mit Folgen, Liken, Markieren oder Kommentieren
-- NeoTaste, TheFork, BOGO-App oder andere App-/Plattformangebote
-- Gratis-Eintritt, Lieferung, WLAN, Versand oder nicht essbare Geschenke
-- Posts außerhalb Wiens oder Vienna in den USA
+Suche gezielt nach:
+- Starken Rabatten wie Mahlzeiten unter €3
+- Mindestens 50% Preisnachlass (z.B. 1,99€ Döner, 1+1 Aktionen)
+- Kostenlose Freebies
+- Neueröffnungen mit Gratis-Aktionen
+- Starke Rabatte allgemein
 
-Nutze die angegebene Instagram-Hashtag-Seite als Ausgangspunkt und suche nach direkten Originalposts. Gib nur URLs im Format instagram.com/p/... oder instagram.com/reel/... zurück, niemals Profil-, Hashtag-, Such- oder Aggregator-URLs. Ein unsicherer möglicher Treffer darf enthalten sein; er wird danach am Originalpost geprüft. Erfinde keine Deals. Wenn kein passender direkter Post auffindbar ist, gib eine leere Liste zurück.`;
+Suche primär auf Instagram nach den ersten 50-100 Deals und ergänze diese durch Funde aus dem restlichen Web (z.B. 1000things, meinbezirk.at).
 
-function cleanText(value, maxLength = Infinity) {
-  const rawText = value === null || value === undefined
-    ? ''
-    : String(value).replace(/\s+/g, ' ').trim();
-  const text = typeof rawText.toWellFormed === 'function' ? rawText.toWellFormed() : rawText;
-  return Number.isFinite(maxLength) ? [...text].slice(0, maxLength).join('') : text;
-}
+Erfasse für jeden Deal:
+  – Den genauen Namen des Restaurants/Geschäfts/Unternehmens (brand_or_store – NICHT die Website-Domain!)
+- Kategorie
+- Was genau verschenkt/rabattiert wird
+- Den Standort
+- Datum und Uhrzeit der Gültigkeit
+- Die direkte URL zum ursprünglichen Post oder Web-Beitrag
+- Bei Instagram: den echten Account-Handle und das Veröffentlichungsdatum des Original-Posts.
 
-function readJson(filePath, fallback = {}) {
-  try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch {
-    return fallback;
+Wichtig: Das Veröffentlichungsdatum des Posts und die Gültigkeit des Angebots sind zwei verschiedene Felder.`;
+
+// ============================================
+// MAIN
+// ============================================
+
+
+// ============================================
+// STABILE DEAL-ID (Hash statt Date.now/random)
+// ============================================
+function stableHash(str) {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
+    hash = hash >>> 0;
   }
+  return hash.toString(36);
+}
+function dealId(prefix, brand, title, url) {
+  const key = (brand || '') + '|' + (title || '') + '|' + (url || '');
+  return prefix + '-' + stableHash(key);
 }
 
-function readKey4SeedCandidates(now) {
-  return dedupeKey4Candidates(SEED_FILE_NAMES.flatMap((fileName) => {
-    const payload = readJson(path.join(DOCS_DIR, fileName), {});
-    const deals = Array.isArray(payload?.deals) ? payload.deals : [];
-    return deals
-      .map((deal) => dealToKey4SeedCandidate(deal, fileName, now))
-      .filter(Boolean)
-      .filter((candidate) => isKey4DiscoveryCandidateRecent(candidate, {
-        now,
-        maxAgeDays: DISCOVERY_MAX_AGE_DAYS,
-        recurringMaxAgeDays: RECURRING_MAX_AGE_DAYS,
-      }));
-  }));
-}
-
-function writeJsonAtomic(filePath, value) {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  const tempPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
-  const json = JSON.stringify(value, (_key, entry) => (
-    typeof entry === 'string' && typeof entry.toWellFormed === 'function'
-      ? entry.toWellFormed()
-      : entry
-  ), 2);
-  fs.writeFileSync(tempPath, `${json}\n`);
-  fs.renameSync(tempPath, filePath);
-}
-
-async function mapWithConcurrency(items, concurrency, mapper) {
-  const rows = new Array(items.length);
-  let nextIndex = 0;
-  const workers = Array.from({ length: Math.max(1, Math.floor(concurrency)) }, async () => {
-    while (nextIndex < items.length) {
-      const index = nextIndex;
-      nextIndex += 1;
-      rows[index] = await mapper(items[index], index);
-    }
-  });
-  await Promise.all(workers);
-  return rows;
-}
-
-function keyFailureKind(error) {
-  const signal = cleanText(error?.message || error, 1000).toLowerCase();
-  if (/insufficient credits|not enough credits|payment required|\b402\b/.test(signal)) return 'credits';
-  if (/invalid api key|unauthori[sz]ed|authentication failed|\b401\b/.test(signal)) return 'authentication';
-  if (/rate limit|too many requests|\b429\b/.test(signal)) return 'rate-limit';
-  return 'request';
-}
-
-function safeErrorMessage(error) {
-  return cleanText(error?.message || error || 'unknown Firecrawl error', 500)
-    .replace(/fc-[a-z0-9_-]+/gi, '[redacted-key]');
-}
-
-export function loadKey4ApiKeyEntries(environment = process.env) {
-  const apiKey = cleanText(environment.FIRECRAWL_API_KEY4);
-  return apiKey ? [{ alias: 'key-4', apiKey }] : [];
-}
-
-export function createKey4FirecrawlPool(options = {}) {
-  const entries = (Array.isArray(options.keys) ? options.keys : [])
-    .map((entry, index) => typeof entry === 'string'
-      ? { alias: `key-${index + 1}`, apiKey: entry }
-      : { alias: cleanText(entry?.alias) || `key-${index + 1}`, apiKey: cleanText(entry?.apiKey) })
-    .filter((entry) => entry.apiKey);
-  if (!entries.length) throw new Error('Firecrawl Key 4 requires at least one API key');
-
-  const clientFactory = options.clientFactory || ((apiKey) => new Firecrawl({ apiKey }));
-  const states = entries.map((entry) => ({
-    ...entry,
-    client: clientFactory(entry.apiKey, entry.alias),
-    calls: 0,
-    failures: 0,
-    inFlight: 0,
-    disabledReason: '',
-  }));
-  const maxCalls = Math.max(1, Number(options.maxCalls || MAX_FIRECRAWL_CALLS) || MAX_FIRECRAWL_CALLS);
-  let cursor = 0;
-  let totalCalls = 0;
-
-  async function call(operation, callback) {
-    if (totalCalls >= maxCalls) {
-      throw new Error(`Firecrawl Key 4 call budget reached (${maxCalls})`);
-    }
-    const attempted = new Set();
-    let lastError = null;
-    while (attempted.size < states.length) {
-      if (totalCalls >= maxCalls) {
-        throw new Error(`Firecrawl Key 4 call budget reached (${maxCalls})`);
-      }
-      let index = -1;
-      let minimumInFlight = Number.POSITIVE_INFINITY;
-      for (let candidateIndex = 0; candidateIndex < states.length; candidateIndex += 1) {
-        if (attempted.has(candidateIndex) || states[candidateIndex].disabledReason) continue;
-        minimumInFlight = Math.min(minimumInFlight, states[candidateIndex].inFlight);
-      }
-      for (let offset = 0; offset < states.length; offset += 1) {
-        const candidateIndex = (cursor + offset) % states.length;
-        if (!attempted.has(candidateIndex)
-          && !states[candidateIndex].disabledReason
-          && states[candidateIndex].inFlight === minimumInFlight) {
-          index = candidateIndex;
-          break;
-        }
-      }
-      if (index < 0) break;
-
-      const state = states[index];
-      attempted.add(index);
-      state.calls += 1;
-      state.inFlight += 1;
-      totalCalls += 1;
-      try {
-        const result = await callback(state.client);
-        cursor = index;
-        return result;
-      } catch (error) {
-        lastError = error;
-        state.failures += 1;
-        const kind = keyFailureKind(error);
-        if (kind === 'credits' || kind === 'authentication') state.disabledReason = kind;
-        cursor = (index + 1) % states.length;
-        if (kind === 'request') throw error;
-      } finally {
-        state.inFlight = Math.max(0, state.inFlight - 1);
-      }
-    }
-    throw new Error(`No Firecrawl API key available for ${operation}: ${safeErrorMessage(lastError)}`);
+function parseGermanDate(str) {
+  if (!str || typeof str !== 'string') return null;
+  const s = str.trim();
+  let m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0));
+  m = s.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (m) {
+    const year = m[3].length === 2 ? Number(`20${m[3]}`) : Number(m[3]);
+    return new Date(Date.UTC(year, Number(m[2]) - 1, Number(m[1]), 12, 0, 0));
   }
-
-  return {
-    search(query, request) {
-      return call('search', (client) => client.search(query, request));
-    },
-    agent(request) {
-      return call('agent', async (client) => {
-        const response = await client.agent(request);
-        const status = cleanText(response?.status).toLowerCase();
-        if (response?.success === false || /^(?:failed|cancelled)$/.test(status)) {
-          throw new Error(cleanText(
-            response?.error || response?.message || `Firecrawl agent ${status || 'failed'}`,
-            500,
-          ));
-        }
-        if (status && status !== 'completed' && request?.timeout) {
-          if (response?.id && typeof client.cancelAgent === 'function') {
-            try {
-              await client.cancelAgent(response.id);
-            } catch {
-              // The local timeout still applies if the remote cancellation races with completion.
-            }
-          }
-          return { ...response, key4TimedOut: true };
-        }
-        return response;
-      });
-    },
-    scrape(url, request) {
-      return call('scrape', (client) => client.scrape(url, request));
-    },
-    diagnostics() {
-      return {
-        totalCalls,
-        maxCalls,
-        keys: states.map((state) => ({
-          alias: state.alias,
-          calls: state.calls,
-          failures: state.failures,
-          disabledReason: state.disabledReason,
-        })),
-      };
-    },
-  };
+  return null;
 }
 
-function extractSearchResults(response = {}) {
-  return Array.isArray(response?.web) ? response.web : [];
-}
-
-function extractAgentDeals(response = {}) {
-  let data = response?.data ?? response;
-  if (typeof data === 'string') {
-    try {
-      data = JSON.parse(data);
-    } catch {
-      return [];
-    }
-  }
-  return Array.isArray(data?.deals) ? data.deals : [];
-}
-
-export async function discoverKey4AgentCandidates(options = {}) {
-  const pool = options.pool;
-  const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
-  const sources = Array.isArray(options.sources)
-    ? options.sources
-    : buildKey4HashtagSources(options.sourceLimit ?? AGENT_SOURCE_LIMIT);
-  if (!sources.length) {
-    return {
-      candidates: [],
-      rawResults: [],
-      prefilterRejected: [],
-      diagnostics: {
-        configuredSources: 0,
-        completedSources: 0,
-        failedSources: 0,
-        timedOutSources: 0,
-        rawAgentDeals: 0,
-        directPostResults: 0,
-        recentDistinctPosts: 0,
-        prefilteredAsOld: 0,
-        sources: [],
-      },
-    };
-  }
-  if (!pool || typeof pool.agent !== 'function') {
-    throw new Error('Key 4 hashtag discovery requires a Firecrawl agent pool');
-  }
-
-  const rows = await mapWithConcurrency(
-    sources,
-    Number(options.concurrency ?? AGENT_CONCURRENCY) || AGENT_CONCURRENCY,
-    async (source) => {
-      try {
-        const response = await pool.agent({
-          url: source.url,
-          prompt: `${options.prompt || KEY4_AGENT_PROMPT}\n\nAusgangs-Hashtag: #${source.hashtag}`,
-          schema: options.schema || KEY4_AGENT_SCHEMA,
-          model: options.model || AGENT_MODEL,
-          pollInterval: 5,
-          timeout: Number(options.timeoutSeconds ?? AGENT_TIMEOUT_SECONDS) || AGENT_TIMEOUT_SECONDS,
-        });
-        if (response?.success === false) {
-          throw new Error(cleanText(response?.error || response?.message || 'Firecrawl agent failed', 500));
-        }
-        const deals = extractAgentDeals(response);
-        const timedOut = response?.key4TimedOut === true;
-        return {
-          source,
-          status: timedOut ? 'timed-out' : 'completed',
-          deals,
-          error: timedOut
-            ? `agent-timeout-${Number(options.timeoutSeconds ?? AGENT_TIMEOUT_SECONDS) || AGENT_TIMEOUT_SECONDS}s`
-            : '',
-        };
-      } catch (error) {
-        return { source, status: 'failed', deals: [], error: safeErrorMessage(error) };
-      }
-    },
-  );
-
-  const rawResults = rows.flatMap((row) => row.deals.map((deal) => ({
-    sourceId: row.source.id,
-    sourceHashtag: row.source.hashtag,
-    sourceUrl: row.source.url,
-    ...deal,
-  })));
-  const directCandidates = rows.flatMap((row) => row.deals
-    .map((deal) => agentDealToKey4Candidate(deal, row.source, now))
-    .filter(Boolean));
-  const prefilterRejected = [];
-  const recentCandidates = [];
-  for (const candidate of directCandidates) {
-    if (isKey4DiscoveryCandidateRecent(candidate, {
-      now,
-      maxAgeDays: options.discoveryMaxAgeDays ?? DISCOVERY_MAX_AGE_DAYS,
-      recurringMaxAgeDays: options.recurringMaxAgeDays ?? RECURRING_MAX_AGE_DAYS,
-    })) {
-      recentCandidates.push(candidate);
-    } else {
-      prefilterRejected.push({ reason: 'discovery-post-too-old', deal: candidate });
-    }
-  }
-  const candidates = dedupeKey4Candidates(recentCandidates);
-
-  return {
-    candidates,
-    rawResults,
-    prefilterRejected,
-    diagnostics: {
-      configuredSources: sources.length,
-      completedSources: rows.filter((row) => row.status === 'completed').length,
-      failedSources: rows.filter((row) => row.status === 'failed').length,
-      timedOutSources: rows.filter((row) => row.status === 'timed-out').length,
-      rawAgentDeals: rawResults.length,
-      directPostResults: directCandidates.length,
-      recentDistinctPosts: candidates.length,
-      prefilteredAsOld: prefilterRejected.length,
-      sources: rows.map((row) => ({
-        id: row.source.id,
-        hashtag: row.source.hashtag,
-        status: row.status,
-        deals: row.deals.length,
-        error: row.error,
-      })),
-    },
-  };
-}
-
-export async function discoverKey4PostCandidates(options = {}) {
-  const pool = options.pool;
-  if (!pool || typeof pool.search !== 'function') {
-    throw new Error('Key 4 discovery requires a Firecrawl key pool');
-  }
-  const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
-  const queries = options.queries || buildKey4SearchQueries(options.targetAccounts || [], {
-    profileLimit: options.profileQueryLimit ?? PROFILE_QUERY_LIMIT,
-  });
-  const searchLimit = Math.max(1, Number(options.searchLimit ?? SEARCH_LIMIT) || SEARCH_LIMIT);
-  const rows = await mapWithConcurrency(
-    queries,
-    Number(options.concurrency ?? SEARCH_CONCURRENCY) || SEARCH_CONCURRENCY,
-    async (query) => {
-      try {
-        const response = await pool.search(query.query, {
-          sources: ['web'],
-          limit: searchLimit,
-          tbs: 'qdr:m,sbd:1',
-          location: 'Vienna, Austria',
-          country: 'AT',
-          ignoreInvalidURLs: true,
-          timeout: 45_000,
-        });
-        const results = extractSearchResults(response);
-        return { query, status: 'completed', results, error: '' };
-      } catch (error) {
-        return { query, status: 'failed', results: [], error: safeErrorMessage(error) };
-      }
-    },
-  );
-
-  const rawResults = rows.flatMap((row) => row.results.map((result) => ({
-    queryId: row.query.id,
-    query: row.query.query,
-    targetUsername: row.query.targetUsername || '',
-    url: cleanText(result?.url || result?.metadata?.url || result?.metadata?.ogUrl, 500),
-    title: cleanText(result?.title || result?.metadata?.title || result?.metadata?.ogTitle, 500),
-    description: cleanText(
-      result?.description || result?.metadata?.description || result?.metadata?.ogDescription,
-      1200,
-    ),
-  })));
-
-  const directCandidates = rows.flatMap((row) => row.results
-    .map((result) => searchResultToKey4Candidate(result, row.query, now))
-    .filter(Boolean));
-  const prefilterRejected = [];
-  const recentCandidates = [];
-  for (const candidate of directCandidates) {
-    if (isKey4DiscoveryCandidateRecent(candidate, {
-      now,
-      maxAgeDays: options.discoveryMaxAgeDays ?? DISCOVERY_MAX_AGE_DAYS,
-      recurringMaxAgeDays: options.recurringMaxAgeDays ?? RECURRING_MAX_AGE_DAYS,
-    })) {
-      recentCandidates.push(candidate);
-    } else {
-      prefilterRejected.push({ reason: 'discovery-post-too-old', deal: candidate });
-    }
-  }
-
-  return {
-    candidates: dedupeKey4Candidates(recentCandidates),
-    rawResults,
-    prefilterRejected,
-    diagnostics: {
-      queries: rows.map((row) => ({
-        id: row.query.id,
-        status: row.status,
-        results: row.results.length,
-        error: row.error,
-      })),
-      queryCount: rows.length,
-      failedQueries: rows.filter((row) => row.status === 'failed').length,
-      rawSearchResults: rawResults.length,
-      directPostResults: directCandidates.length,
-      recentDistinctPosts: dedupeKey4Candidates(recentCandidates).length,
-      prefilteredAsOld: prefilterRejected.length,
-    },
-  };
-}
-
-function previousDealsToCandidates(previousDeals = [], now = new Date()) {
-  return previousDeals.map((deal) => ({
-    url: deal.url,
-    title: deal.title,
-    discoverySnippet: deal.postCaption || deal.description || deal.title || '',
-    ownerUsername: deal.ownerUsername || '',
-    targetUsername: deal.ownerUsername || '',
-    targetViennaVerified: deal.viennaVerified === true,
-    sourcePublishedAt: deal.sourcePublishedAt || deal.pubDate || '',
-    sourcePublishedAtSource: deal.sourcePublishedAtSource || deal.pubDateSource || '',
-    discoveredAt: deal.discoveredAt || now.toISOString(),
-    discoveredBy: [
-      ...(Array.isArray(deal.discoveredBy) ? deal.discoveredBy : []),
-      'previous-key4-accepted',
-    ],
-    previousDeal: deal,
-  })).filter((candidate) => isKey4DiscoveryCandidateRecent(candidate, {
-    now,
-    maxAgeDays: DISCOVERY_MAX_AGE_DAYS,
-    recurringMaxAgeDays: RECURRING_MAX_AGE_DAYS,
-  }));
-}
-
-function healthToFirecrawlDocument(health = {}) {
-  return {
-    markdown: cleanText(health?.contentHints?.textSnippet, 5000),
-    metadata: {
-      title: cleanText(health?.contentHints?.title, 1000),
-      description: cleanText(
-        health?.contentHints?.description || health?.contentHints?.textSnippet,
-        5000,
-      ),
-      ogTitle: cleanText(health?.contentHints?.title, 1000),
-      ogDescription: cleanText(
-        health?.contentHints?.description || health?.contentHints?.textSnippet,
-        5000,
-      ),
-      publishedTime: cleanText(health?.dateHints?.publicationDate, 100),
-      sourceURL: cleanText(health?.finalUrl, 500),
-      statusCode: Number(health?.status || 0) || null,
-      error: cleanText(health?.reason, 300),
-    },
-  };
-}
-
-export async function scrapeKey4PostCandidates(options = {}) {
-  const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
-  const registry = options.registry instanceof Map ? options.registry : new Map();
-  const inspector = options.inspector === undefined ? inspectDealUrlHealth : options.inspector;
-  if (typeof inspector !== 'function') {
-    throw new Error('Key 4 direct-post extraction requires an original-post inspector');
-  }
-  const selected = dedupeKey4Candidates(options.candidates || [])
-    .sort((left, right) => key4CandidatePriority(right, now) - key4CandidatePriority(left, now))
-    .slice(0, Math.max(1, Number(options.maxPosts ?? MAX_POSTS_TO_SCRAPE) || MAX_POSTS_TO_SCRAPE));
-
-  const evidenceRows = await mapWithConcurrency(
-    selected,
-    Number(options.concurrency ?? SCRAPE_CONCURRENCY) || SCRAPE_CONCURRENCY,
-    async (candidate) => {
-      try {
-        const health = await inspector(candidate.url, { timeoutMs: 8000, now });
-        return extractKey4PostEvidence(healthToFirecrawlDocument(health), candidate, {
-          now,
-          registry,
-          scrapeError: cleanText(health?.reason, 300),
-          retrievalMode: 'direct-original-post-inspection',
-        });
-      } catch (error) {
-        return extractKey4PostEvidence({}, candidate, {
-          now,
-          registry,
-          scrapeError: safeErrorMessage(error),
-          retrievalMode: 'direct-original-post-inspection',
-        });
-      }
-    },
-  );
-
-  return {
-    evidenceRows,
-    diagnostics: {
-      selectedForDirectScrape: selected.length,
-      originalPostsVerified: evidenceRows.filter((row) => (
-        /^verified-original-post/.test(row.postVerification?.status || '')
-      )).length,
-      unavailableOriginalPosts: evidenceRows.filter((row) => (
-        !/^verified-original-post/.test(row.postVerification?.status || '')
-      )).length,
-      directOriginalPostInspections: selected.length,
-    },
-  };
-}
-
-function verifiedRegistryMap(registryDocument = {}) {
-  const accounts = Array.isArray(registryDocument?.accounts) ? registryDocument.accounts : [];
-  return new Map(accounts
-    .filter((account) => account?.viennaVerified === true
-      && cleanText(account?.accountType || 'merchant').toLowerCase() === 'merchant')
-    .map((account) => [cleanText(account?.username).replace(/^@/, '').toLowerCase(), account])
-    .filter(([username]) => username));
-}
-
-export async function runKey4Pipeline(options = {}) {
-  const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
-  const watchlist = options.watchlist || {};
-  const registryDocument = options.registryDocument || {};
-  const registry = options.registry instanceof Map
-    ? options.registry
-    : verifiedRegistryMap(registryDocument);
-  const targetAccounts = options.targetAccounts || buildKey4TargetAccounts(
-    watchlist,
-    registryDocument,
-    options.targetAccountLimit ?? TARGET_ACCOUNT_LIMIT,
-  );
-  const searchDiscovery = await discoverKey4PostCandidates({
-    pool: options.pool,
-    targetAccounts,
-    queries: options.queries,
-    now,
-    searchLimit: options.searchLimit,
-    profileQueryLimit: options.profileQueryLimit,
-    concurrency: options.searchConcurrency,
-    discoveryMaxAgeDays: options.discoveryMaxAgeDays,
-    recurringMaxAgeDays: options.recurringMaxAgeDays,
-  });
-  const agentSources = options.agentSources === undefined
-    ? (AGENT_DISCOVERY_ENABLED ? buildKey4HashtagSources(options.agentSourceLimit ?? AGENT_SOURCE_LIMIT) : [])
-    : options.agentSources;
-  const agentDiscovery = await discoverKey4AgentCandidates({
-    pool: options.pool,
-    sources: agentSources,
-    now,
-    concurrency: options.agentConcurrency,
-    model: options.agentModel,
-    timeoutSeconds: options.agentTimeoutSeconds,
-    discoveryMaxAgeDays: options.discoveryMaxAgeDays,
-    recurringMaxAgeDays: options.recurringMaxAgeDays,
-  });
-  const discoveryCandidates = dedupeKey4Candidates([
-    ...searchDiscovery.candidates,
-    ...agentDiscovery.candidates,
-  ]);
-  const discovery = {
-    candidates: discoveryCandidates,
-    rawResults: searchDiscovery.rawResults,
-    rawAgentResults: agentDiscovery.rawResults,
-    prefilterRejected: [
-      ...searchDiscovery.prefilterRejected,
-      ...agentDiscovery.prefilterRejected,
-    ],
-    diagnostics: {
-      search: searchDiscovery.diagnostics,
-      agent: agentDiscovery.diagnostics,
-      rawSearchResults: searchDiscovery.rawResults.length,
-      rawAgentDeals: agentDiscovery.rawResults.length,
-      recentDistinctPosts: discoveryCandidates.length,
-      prefilteredAsOld: searchDiscovery.prefilterRejected.length
-        + agentDiscovery.prefilterRejected.length,
-    },
-  };
-  const previousCandidates = previousDealsToCandidates(options.previousDeals || [], now);
-  const seedCandidates = dedupeKey4Candidates(options.seedCandidates || [])
-    .filter((candidate) => isKey4DiscoveryCandidateRecent(candidate, {
-      now,
-      maxAgeDays: options.discoveryMaxAgeDays ?? DISCOVERY_MAX_AGE_DAYS,
-      recurringMaxAgeDays: options.recurringMaxAgeDays ?? RECURRING_MAX_AGE_DAYS,
-    }));
-  const candidates = dedupeKey4Candidates([
-    ...discovery.candidates,
-    ...seedCandidates,
-    ...previousCandidates,
-  ]);
-  const scrape = await scrapeKey4PostCandidates({
-    candidates,
-    registry,
-    now,
-    maxPosts: options.maxPosts,
-    concurrency: options.scrapeConcurrency,
-    inspector: options.inspector,
-  });
-  const classification = classifyKey4Evidence(scrape.evidenceRows, {
-    now,
-    maxAgeDays: options.maxAgeDays ?? MAX_POST_AGE_DAYS,
-    recurringMaxAgeDays: options.recurringMaxAgeDays ?? RECURRING_MAX_AGE_DAYS,
-  });
-  return {
-    now,
-    targetAccounts,
-    seedCandidates,
-    candidates,
-    discovery,
-    scrape,
-    classification,
-  };
-}
-
-function compactEvidence(row = {}) {
-  const { previousDeal, ...rest } = row;
-  return {
-    ...rest,
-    postCaption: cleanText(rest.postCaption, 5000),
-    discoverySnippet: cleanText(rest.discoverySnippet, 2000),
-    previousDealId: cleanText(previousDeal?.id, 160),
-  };
-}
-
-function countReasons(entries = []) {
-  const counts = {};
-  for (const entry of entries) {
-    const reason = cleanText(entry?.reason || 'rejected', 180) || 'rejected';
-    counts[reason] = (counts[reason] || 0) + 1;
-  }
-  return counts;
-}
-
-function mergeReasonCounts(...groups) {
-  const merged = {};
-  for (const group of groups) {
-    for (const [reason, count] of Object.entries(group || {})) {
-      merged[reason] = (merged[reason] || 0) + (Number(count) || 0);
-    }
-  }
-  return merged;
+function isNotTooOld(dateObj) {
+  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return true;
+  const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+  return dateObj.getTime() >= twoWeeksAgo;
 }
 
 async function main() {
-  const keyEntries = loadKey4ApiKeyEntries();
-  if (!keyEntries.length) {
-    throw new Error('Kein Firecrawl API-Key für Firecrawler 4 gesetzt');
+  console.log('🍕🔥 FIRECRAWL GASTRO AGENT #4');
+  console.log('='.repeat(40));
+  console.log(`📅 ${new Date().toLocaleString('de-AT')}`);
+  console.log();
+
+  const allDeals = [];
+  const rejected = [];
+  const runErrors = [];
+  let rawCandidateCount = 0;
+  let completedSources = 0;
+
+  console.log(`🔍 Scrape ${SCRAPE_URLS.length} Seiten (Gastro Focus)...`);
+
+  for (let i = 0; i < SCRAPE_URLS.length; i++) {
+    const url = SCRAPE_URLS[i];
+    const source = new URL(url).hostname.replace('www.', '');
+
+    console.log(`   [${i + 1}/${SCRAPE_URLS.length}] ${source}...`);
+
+    try {
+      const result = await runAgent({
+        url: url,
+        prompt: PROMPT,
+        schema: gastroSchema,
+        model: 'spark-1-pro',
+      });
+
+      if (result && result.data) {
+        let data = result.data;
+
+        if (typeof data === 'string') {
+          try {
+            data = JSON.parse(data);
+          } catch (e) {}
+        }
+
+        if (data && data.deals && Array.isArray(data.deals)) {
+          completedSources += 1;
+          rawCandidateCount += data.deals.length;
+          console.log(`      → ${data.deals.length} Deals gefunden`);
+
+          for (const d of data.deals) {
+            const postUrl = d.post_url || '';
+
+            if (!postUrl) {
+              rejected.push({
+                reason: 'missing-target-url',
+                deal: {
+                  title: d.item_given_away || '',
+                  brand: d.brand_or_store || source,
+                },
+              });
+              continue;
+            }
+
+            const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
+            const validityDate = parseGermanDate(d.validity_date || '');
+            const brand = d.brand_or_store || source;
+            const title = d.item_given_away?.substring(0, 60) || 'Gastro Deal';
+            const ownerUsername = (d.owner_username || '').replace(/^@/, '').trim().toLowerCase();
+
+            allDeals.push({
+              id: dealId('fc4g', brand, title, postUrl),
+              brand,
+              title,
+              description: [d.item_given_away, d.location].filter(Boolean).join(' – '),
+              type: isGratis ? 'gratis' : 'rabatt',
+              category: 'essen',
+              source: 'Firecrawl Gastro #4',
+              url: postUrl,
+              expires: `${d.validity_date || ''} ${d.validity_time || ''}`.trim(),
+              distance: d.location || '',
+              hot: true,
+              isNew: true,
+              priority: isGratis ? 2 : 3,
+              votes: 1,
+              qualityScore: 65,
+              ownerUsername,
+              reportedPostDate: d.post_date || '',
+              expiresOriginal: `${d.validity_date || ''} ${d.validity_time || ''}`.trim(),
+              ...(validityDate ? {
+                validOn: validityDate.toISOString(),
+                expires: validityDate.toISOString(),
+                expirySource: 'firecrawl-agent-reported-validity',
+                dateConfidence: 'low',
+              } : {}),
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.log(`      → Error: ${e.message}`);
+      runErrors.push(`${source}: ${e.message}`);
+      if (isRateOrCreditError(e.message)) {
+        console.log('      → Stoppe Run frühzeitig wegen API-Limit/Credits');
+        break;
+      }
+    }
+
+    await new Promise(r => setTimeout(r, 2000));
   }
-  const pool = createKey4FirecrawlPool({ keys: keyEntries });
-  const now = new Date();
-  const watchlist = readJson(WATCHLIST_PATH, {});
-  const registryDocument = readJson(REGISTRY_PATH, {});
-  const previousOutput = readJson(OUTPUT_PATH, {});
-  const previousDeals = Array.isArray(previousOutput?.deals) ? previousOutput.deals : [];
-  const seedCandidates = readKey4SeedCandidates(now);
 
-  console.log('FIRECRAWL KEY 4 V2 - DIRECT INSTAGRAM EVIDENCE');
-  console.log('='.repeat(58));
-  console.log(`Wien: ${now.toLocaleString('de-AT', { timeZone: 'Europe/Vienna' })}`);
-  console.log(`API-Key-Pool: ${keyEntries.length} Key(s)`);
-  console.log(`Regeln: ${MAX_POST_AGE_DAYS} Tage frisch, ${RECURRING_MAX_AGE_DAYS} Tage bei belegter Wiederholung`);
-
-  const result = await runKey4Pipeline({
-    pool,
-    now,
-    watchlist,
-    registryDocument,
-    previousDeals,
-    seedCandidates,
+  console.log();
+  console.log('📊 ERGEBNIS:');
+  console.log(`   📦 Deals: ${allDeals.length}`);
+  console.log('🔄 URL-Dedupe deaktiviert');
+  const finalDeals = await verifyFirecrawlDeals(allDeals, {
+    sourceKey: 'firecrawl-key4-gastro',
   });
-  const accepted = result.classification.accepted.slice(0, MAX_DEALS);
-  const review = result.classification.review.slice(0, MAX_REVIEW);
-  const rejected = result.classification.rejected;
-  const constraints = {
-    maximumPostAgeDays: MAX_POST_AGE_DAYS,
-    recurringOfferMaximumAgeDays: RECURRING_MAX_AGE_DAYS,
-    discoveryMaximumAgeDays: DISCOVERY_MAX_AGE_DAYS,
-    location: 'Wien',
-    offer: 'kostenlose Speisen/Getränke, 1+1/2für1 und kostenlose Gastro-Proben',
-    originalEvidenceRequiredForAutomaticAcceptance: true,
-    discoveryMode: 'Gastro2-style Firecrawl hashtag agents plus merchant search and recent direct-post seeds',
-    hashtagAgentSources: result.discovery.diagnostics.agent.configuredSources,
-    hashtagAgentTimeoutSeconds: AGENT_TIMEOUT_SECONDS,
-    excludedDiscoverySources: ['1000things.at', 'meinbezirk.at'],
-  };
-  const diagnostics = {
-    targetAccounts: result.targetAccounts.length,
-    seedCandidates: result.seedCandidates.length,
-    discovery: result.discovery.diagnostics,
-    extraction: result.scrape.diagnostics,
-    classification: result.classification.summary,
-    keyPool: pool.diagnostics(),
-    previousAcceptedDeals: previousDeals.length,
-  };
+  const verifiedIDs = new Set(finalDeals.map((deal) => deal.id));
+  rejected.push(...allDeals
+    .filter((deal) => !verifiedIDs.has(deal.id))
+    .map((deal) => ({ reason: 'post-verification-rejected', deal })));
 
-  writeJsonAtomic(OUTPUT_PATH, {
-    lastUpdated: now.toISOString(),
-    source: SOURCE_KEY,
-    totalDeals: accepted.length,
-    constraints,
-    diagnostics,
+  const output = {
+    lastUpdated: new Date().toISOString(),
+    source: 'firecrawl4',
+    totalDeals: finalDeals.length,
     pipelineReport: `deal-pipeline-last-run-${SOURCE_KEY}.json`,
-    deals: accepted,
-  });
-  writeJsonAtomic(RAW_OUTPUT_PATH, {
-    lastUpdated: now.toISOString(),
-    source: SOURCE_KEY,
-    totalSearchResults: result.discovery.rawResults.length,
-    totalAgentResults: result.discovery.rawAgentResults.length,
-    totalSeedCandidates: result.seedCandidates.length,
-    totalDirectPosts: result.scrape.evidenceRows.length,
-    searchResults: result.discovery.rawResults,
-    agentResults: result.discovery.rawAgentResults,
-    posts: result.scrape.evidenceRows.map(compactEvidence),
-  });
-  writeJsonAtomic(REVIEW_OUTPUT_PATH, {
-    lastUpdated: now.toISOString(),
-    source: SOURCE_KEY,
-    totalDeals: review.length,
-    deals: review,
-  });
-  writeJsonAtomic(REJECTED_OUTPUT_PATH, {
-    lastUpdated: now.toISOString(),
-    source: SOURCE_KEY,
-    totalDeals: rejected.length + result.discovery.prefilterRejected.length,
-    rejectedByReason: mergeReasonCounts(
-      result.classification.summary.rejectedByReason,
-      countReasons(result.discovery.prefilterRejected),
-    ),
-    deals: [
-      ...rejected.map((entry) => ({
-        ...entry.deal,
-        rejectionReason: entry.reason,
-      })),
-      ...result.discovery.prefilterRejected.map((entry) => ({
-        ...entry.deal,
-        rejectionReason: entry.reason,
-      })),
-    ],
-  });
+    deals: finalDeals,
+  };
 
-  const pipelineRejected = [
-    ...rejected,
-    ...result.discovery.prefilterRejected,
-  ];
+  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(output, null, 2));
   writePipelineRunReport(buildPipelineRunReport({
     sourceKey: SOURCE_KEY,
     sourceLabel: SOURCE_LABEL,
     startedAt: RUN_STARTED_AT,
     finishedAt: new Date(),
-    outputFile: path.relative(ROOT, OUTPUT_PATH),
-    rawCandidates: result.discovery.rawResults.length
-      + result.discovery.rawAgentResults.length
-      + result.seedCandidates.length
-      + previousDeals.length,
-    normalizedCandidates: result.candidates.length,
-    verifiedCandidates: result.scrape.evidenceRows.filter((row) => (
-      /^verified-original-post/.test(row.postVerification?.status || '')
-    )).length,
-    previousDeals: previousDeals.length,
-    acceptedDeals: accepted.length,
-    rejected: pipelineRejected,
-    diagnostics,
-    constraints,
+    status: runErrors.length > 0 ? 'completed-with-errors' : 'completed',
+    outputFile: OUTPUT_PATH,
+    rawCandidates: rawCandidateCount,
+    normalizedCandidates: allDeals.length,
+    verifiedCandidates: finalDeals.length,
+    acceptedDeals: finalDeals.length,
+    rejected,
+    diagnostics: {
+      configuredSources: SCRAPE_URLS.length,
+      completedSources,
+      verifier: summarizeVerifiedDeals(finalDeals),
+    },
+    errors: runErrors,
   }));
-
-  console.log(`Web-Suchtreffer: ${result.discovery.rawResults.length}`);
-  console.log(
-    `Hashtag-Agenten: ${result.discovery.diagnostics.agent.completedSources}/`
-    + `${result.discovery.diagnostics.agent.configuredSources} Quellen, `
-    + `${result.discovery.diagnostics.agent.timedOutSources} Timeouts, `
-    + `${result.discovery.rawAgentResults.length} Kandidaten`,
-  );
-  console.log(`Aktuelle direkte Seeds aus bestehenden Pipelines: ${result.seedCandidates.length}`);
-  console.log(`Direkte Posts nach Vorfilter/Deduplizierung: ${result.candidates.length}`);
-  console.log(`Original-Posts verifiziert: ${result.scrape.diagnostics.originalPostsVerified}`);
-  console.log(`Akzeptiert: ${accepted.length}`);
-  console.log(`Review: ${review.length} ${JSON.stringify(result.classification.summary.reviewByReason)}`);
-  console.log(`Abgelehnt: ${pipelineRejected.length} ${JSON.stringify(mergeReasonCounts(
-    result.classification.summary.rejectedByReason,
-    countReasons(result.discovery.prefilterRejected),
-  ))}`);
-  console.log(`Gespeichert: docs/${path.basename(OUTPUT_PATH)} sowie Raw/Review/Rejected-Artefakte`);
+  console.log(`💾 ${finalDeals.length} Deals → ${OUTPUT_PATH}`);
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
-  main().catch((error) => {
+main()
+  .then(() => process.exit(0))
+  .catch(err => {
     writeFailedPipelineRunReport({
       sourceKey: SOURCE_KEY,
       sourceLabel: SOURCE_LABEL,
       startedAt: RUN_STARTED_AT,
-      outputFile: path.relative(ROOT, OUTPUT_PATH),
-      error,
-      constraints: {
-        maximumPostAgeDays: MAX_POST_AGE_DAYS,
-        recurringOfferMaximumAgeDays: RECURRING_MAX_AGE_DAYS,
-        location: 'Wien',
-      },
+      outputFile: OUTPUT_PATH,
+      error: err,
     });
-    console.error('Firecrawl Key 4 fehlgeschlagen:', safeErrorMessage(error));
+    console.error('Error:', err.message);
     process.exit(1);
   });
-}

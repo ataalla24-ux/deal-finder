@@ -1,4 +1,4 @@
-name: "Firecrawl Key 4 - Instagram Direct"
+name: "Firecrawl Key 4 - Gastro Discovery"
 
 on:
   schedule:
@@ -10,9 +10,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  instagram-direct:
+  gastro:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     permissions:
       contents: write
     steps:
@@ -25,28 +24,15 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Run Instagram Direct Scraper
+      - name: Run Gastro Scraper
         env:
           FIRECRAWL_API_KEY4: ${{ secrets.FIRECRAWL_API_KEY4 }}
-          FC4_MAX_AGE_DAYS: 7
-          FC4_DISCOVERY_MAX_AGE_DAYS: 14
-          FC4_RECURRING_MAX_AGE_DAYS: 45
-          FC4_MAX_DEALS: 160
-          FC4_MAX_REVIEW: 160
-          FC4_SEARCH_LIMIT: 6
-          FC4_PROFILE_QUERY_LIMIT: 18
-          FC4_TARGET_ACCOUNT_LIMIT: 30
-          FC4_MAX_POSTS_TO_SCRAPE: 160
-          FC4_SEARCH_CONCURRENCY: 2
-          FC4_SCRAPE_CONCURRENCY: 4
-          FC4_AGENT_DISCOVERY_ENABLED: "true"
-          FC4_AGENT_SOURCE_LIMIT: 4
-          FC4_AGENT_CONCURRENCY: 2
-          FC4_AGENT_TIMEOUT_SECONDS: 240
-          FC4_AGENT_MODEL: spark-1-pro
-          FC4_MAX_FIRECRAWL_CALLS: 140
+          FIRECRAWL_POST_VERIFY_MAX: 60
+          FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 45
+          FIRECRAWL_POST_VERIFY_CONCURRENCY: 4
+          FIRECRAWL_POST_VERIFY_TIMEOUT_MS: 6000
         run: node scraper/firecrawl-instagram-direct4.js
 
       - name: Commit deals
         run: |
-          node scripts/commit-generated.mjs --message "Firecrawl4 deals $(date +%Y-%m-%d)" --files docs/deals-pending-firecrawl4.json docs/deals-raw-firecrawl4.json docs/deals-review-firecrawl4.json docs/deals-rejected-firecrawl4.json docs/deal-pipeline-last-run-firecrawl4.json docs/deal-pipeline-runs-firecrawl4.json
+          node scripts/commit-generated.mjs --message "Firecrawl4 deals $(date +%Y-%m-%d)" --files docs/deals-pending-firecrawl4.json docs/deal-pipeline-last-run-firecrawl4.json docs/deal-pipeline-runs-firecrawl4.json
