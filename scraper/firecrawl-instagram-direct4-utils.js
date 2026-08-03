@@ -1,45 +1,62 @@
 import {
   canonicalInstagramPostKey,
   decodeInstagramShortcodeDate,
-  getPublicationEvidence,
-  getViennaEvidence,
 } from './deal-evidence-utils.js';
 import { normalizeInstagramPostUrl } from './firecrawl-post-verifier.js';
-import {
-  evaluateInstagramOfferTiming,
-  hasViennaInstagramEvidence,
-} from './instagram-ai-validity-utils.js';
+import { evaluateInstagramOfferTiming } from './instagram-ai-validity-utils.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const GIVEAWAY_PATTERN = /\b(?:gewinnspiel|giveaway|verlosung|zu gewinnen|win(?:ne|nen)?|tagge|markiere|kommentiere|folge uns|follow us)\b/i;
 const FREE_ATTRIBUTE_PATTERN = /\b(?:gluten|sugar|zucker|lactose|laktose|alcohol|alkohol|dairy|plastic|meat|fleisch|cruelty|guilt)[-\s]?free\b|\bfree[-\s]?flow\b|\b(?:free|gratis|kostenlos(?:er)?)\s+(?:entry|admission|eintritt|shipping|versand|delivery|lieferung|wifi|wlan|parking|parkplatz)\b|\b(?:eintritt|entry|admission|versand|shipping|lieferung|delivery|wlan|wifi|parking|parkplatz)\s+(?:frei|gratis|kostenlos|free)\b/gi;
 const FREE_OFFER_PATTERN = /(?:\bgratis\b|\bkostenlos(?:e[nrms]?)?\b|\bkostenfrei\b|\bumsonst\b|\bfor free\b|\bcomplimentary\b|\baufs haus\b|\bon the house\b|\b0\s*(?:€|eur|euro)\b|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b2\s*[+&]\s*1\b|\bbogo\b|\bbuy[\s,-]*(?:one|1)[\s,-]*get[\s,-]*(?:one|1)(?:[\s,-]*(?:free|gratis|kostenlos))?\b|\bwelcome drink\b|\b(?:free|gratis|kostenlose?)\s+(?:sample|probe|kostprobe|verkostung|tasting)\b)/i;
-const FOOD_DRINK_PATTERN = /\b(?:essen|foods?|speisen?|gerichte?|menü|menus?|meals?|frühstück|fruehstueck|brunch|lunch|dinner|buffet|restaurant|gastronomie|cafe|café|kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drinks?|getränke?|getraenke?|cocktails?|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothies?|limonade|pizzas?|burgers?|döner|doener|kebab|kebap|falafel|sushi|ramen|pasta|tiramisu|desserts?|kuchen|cakes?|croissants?|bagels?|waffeln?|eis|gelato|sandwich(?:es)?|snacks?|pommes|fries|tacos?|burritos?|bakery|bäckerei|baeckerei|brot|gebäck|gebaeck)\b/i;
+const FOOD_DRINK_PATTERN = /\b(?:essen|isst|iss|eat(?:ing)?|foods?|speisen?|gerichte?|menü|menus?|meals?|frühstück|fruehstueck|brunch|lunch|dinner|buffet|restaurant|gastronomie|cafe|café|kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drinks?|getränke?|getraenke?|cocktails?|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothies?|limonade|pizzas?|burgers?|döner|doener|kebab|kebap|falafel|sushi|ramen|pasta|tiramisu|desserts?|kuchen|cakes?|croissants?|bagels?|waffeln?|eis|gelato|sandwich(?:es)?|snacks?|pommes|fries|tacos?|burritos?|bakery|bäckerei|baeckerei|brot|gebäck|gebaeck|onigiri)\b/i;
 const DRINK_PATTERN = /\b(?:kaffee|coffee|espresso|latte|cappuccino|matcha|tee|tea|drinks?|getränke?|getraenke?|cocktails?|spritz|bier|beer|wein|wine|sekt|saft|juice|smoothies?|limonade|shakes?)\b/i;
-const NON_CONSUMABLE_FREE_PATTERN = /(?:\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app)\b.{0,100}\b(?:gratis|kostenlos|for free|free)\b|\b(?:gratis|kostenlos|for free|free)\b.{0,100}\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app)\b|\b(?:service|reparatur|wartungs?)[-\s]?(?:pauschale|gebühr|gebuehr|fee)\b)/i;
+const NON_CONSUMABLE_FREE_PATTERN = /(?:\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app|shirt|t-shirt|fanartikel|merch(?:andise)?|tasche|becher|glas)\b.{0,100}\b(?:gratis|kostenlos|for free|free)\b|\b(?:gratis|kostenlos|for free|free)\b.{0,100}\b(?:maschine|maschinen|gerät|geräte|geraet|geraete|equipment|software|beratung|consulting|kurs|course|app|shirt|t-shirt|fanartikel|merch(?:andise)?|tasche|becher|glas)\b|\b(?:service|reparatur|wartungs?)[-\s]?(?:pauschale|gebühr|gebuehr|fee)\b)/i;
 const VIENNA_POSTCODE_PATTERN = /(?:^|\D)(1(?:0[1-9]|1\d|2[0-3])0)(?!\d)/;
 const VIENNA_DISTRICT_PATTERN = /\b(?:innere stadt|leopoldstadt|landstra(?:ß|ss)e|wieden|margareten|mariahilf|neubau|josefstadt|alsergrund|favoriten|meidling|hietzing|penzing|rudolfsheim|ottakring|hernals|währing|waehring|döbling|doebling|brigittenau|floridsdorf|donaustadt|liesing|(?:1\d|2[0-3])\.\s*bezirk)\b/i;
 const STREET_PATTERN = /\b(?:stra(?:ß|ss)e|gasse|platz|weg|ring|allee|kai|markt|zeile|promenade|graben|ufer|steg)\b/i;
 const OUTSIDE_VIENNA_PATTERN = /\b(?:raus|hinaus|außerhalb|ausserhalb)\s+(?:aus|von)?\s*wien\b|\bvor\s+den\s+toren\s+(?:von\s+)?wien\b/i;
-const UNKNOWN_VALUE_PATTERN = /^(?:unknown|unbekannt|nicht angegeben|keine angabe|n\/?a|null|undefined|-+)$/i;
+const FOREIGN_VIENNA_PATTERN = /\bvienna\s*,?\s*(?:va|virginia|wv|west virginia|ga|georgia|il|illinois|oh|ohio|usa|u\.?s\.?)\b|\b(?:22180|22181|22182)\b|\b(?:maple|chain bridge|nutley|gallows)\s+(?:ave(?:nue)?|rd|road)\b/i;
+const EXCLUDED_PLATFORM_PATTERN = /\b(?:neotaste|thefork|download\s+(?:the\s+)?bogo|open\s+bogo|bogo\s+app)\b/i;
+const CHANCE_BASED_OFFER_PATTERN = /\b(?:würfel|wuerfel|würfeln|wuerfeln|roll\s+the\s+dice|glücksrad|gluecksrad|mit\s+etwas\s+glück|chance[^.!?]{0,80}(?:gratis|kostenlos|for free))\b/i;
+const BLOCKED_INSTAGRAM_PAGE_PATTERN = /\b(?:log in|login|sign up|anmelden|registrieren|create an account)\b/i;
+
+export const KEY4_GENERAL_SEARCH_QUERIES = [
+  'site:instagram.com/p/ Wien (gratis OR kostenlos OR "aufs Haus") (Essen OR Kaffee OR Restaurant OR Cafe)',
+  'site:instagram.com/reel/ Wien (gratis OR kostenlos OR "aufs Haus") (Essen OR Getränk OR Restaurant)',
+  'site:instagram.com/p/ Wien ("1+1" OR "2 für 1" OR "2+1") (Burger OR Pizza OR Kaffee OR Cocktail)',
+  'site:instagram.com/reel/ Wien ("1+1" OR "2 für 1" OR BOGO) (Restaurant OR Cafe OR Bar)',
+  'site:instagram.com/p/ Vienna Austria -Virginia -"Vienna, VA" ("buy one get one" OR "for free" OR complimentary) (food OR coffee OR drink)',
+  'site:instagram.com/reel/ Wien (Neueröffnung OR Eröffnung) (gratis OR kostenlos OR "welcome drink")',
+  'site:instagram.com (inurl:/p/ OR inurl:/reel/) Wien (Geburtstag OR birthday) (gratis OR kostenlos OR free) (Essen OR Getränk OR Restaurant)',
+  'site:instagram.com (inurl:/p/ OR inurl:/reel/) ("#gratiswien" OR "#aktionwien" OR "#schnäppchenwien" OR "#wienfood" OR "#wienesse") (gratis OR kostenlos OR "1+1" OR BOGO OR Geburtstag)',
+  'site:instagram.com (inurl:/p/ OR inurl:/reel/) ("#viennafood" OR "#viennarestaurant" OR "#restaurantvienna" OR "#viennafoodie" OR "#allyoucaneatvienna") (gratis OR kostenlos OR "1+1" OR BOGO OR birthday)',
+];
+
+export const KEY4_INSTAGRAM_HASHTAGS = Object.freeze([
+  'allyoucaneatvienna',
+  'viennafood',
+  'wienesse',
+  'viennarestaurant',
+  'gratiswien',
+  'aktionwien',
+  'schnäppchenwien',
+  'wienfood',
+  'restaurantvienna',
+  'viennafoodie',
+]);
 
 function cleanText(value, maxLength = Infinity) {
-  const text = value === null || value === undefined
+  const rawText = value === null || value === undefined
     ? ''
     : String(value).replace(/\s+/g, ' ').trim();
-  return Number.isFinite(maxLength) ? text.slice(0, maxLength) : text;
-}
-
-function usableText(value, maxLength = Infinity) {
-  const text = cleanText(value, maxLength);
-  return text && !UNKNOWN_VALUE_PATTERN.test(text) ? text : '';
+  const text = typeof rawText.toWellFormed === 'function' ? rawText.toWellFormed() : rawText;
+  return Number.isFinite(maxLength) ? [...text].slice(0, maxLength).join('') : text;
 }
 
 function normalizeUsername(value) {
-  const username = usableText(value, 80).replace(/^@/, '').toLowerCase();
-  if (!/^[a-z0-9._]{2,40}$/.test(username)) return '';
-  if (/^(?:unknown|unbekannt|instagram|wien|vienna|restaurant|gastro|admin|user)$/.test(username)) return '';
-  return username;
+  const username = cleanText(value, 80).replace(/^@/, '').toLowerCase();
+  return /^[a-z0-9._]{2,40}$/.test(username) ? username : '';
 }
 
 function stableHash(value) {
@@ -51,15 +68,133 @@ function stableHash(value) {
   return hash.toString(36);
 }
 
-function offerType(signal) {
-  if (/\b(?:1\s*[+&]\s*1|2\s*(?:für|fuer|for)\s*1|2\s*[+&]\s*1|bogo|buy[\s,-]*(?:one|1)[\s,-]*get[\s,-]*(?:one|1))\b/i.test(signal)) {
-    return 'bogo';
+function finiteDate(value) {
+  const date = value instanceof Date ? value : new Date(value || '');
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function decodeHtmlEntities(value) {
+  return cleanText(value)
+    .replace(/&quot;|&#34;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&#x2F;/gi, '/')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(Number.parseInt(code, 16)));
+}
+
+function extractMetaValues(rawHtml) {
+  const values = new Map();
+  const html = String(rawHtml || '');
+  for (const tag of html.match(/<meta\b[^>]*>/gi) || []) {
+    const attrs = {};
+    const attributePattern = /([:\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g;
+    let match;
+    while ((match = attributePattern.exec(tag))) {
+      attrs[match[1].toLowerCase()] = decodeHtmlEntities(match[2] ?? match[3] ?? match[4] ?? '');
+    }
+    const key = cleanText(attrs.property || attrs.name || attrs.itemprop).toLowerCase();
+    if (key && attrs.content) values.set(key, attrs.content);
   }
-  return 'gratis';
+  return values;
+}
+
+function extractOwnerUsername(values = []) {
+  const patterns = [
+    /\(@([a-z0-9._]{2,40})\)/i,
+    /(?:^|[\s"'(])@([a-z0-9._]{2,40})(?=$|[\s"',).:])/i,
+    /[-–—]\s*([a-z0-9._]{2,40})\s+(?:on|auf)\s+instagram\b/i,
+    /[-–—]\s*([a-z0-9._]{2,40})\s+on\s+[a-z]{3,10}\s+\d{1,2},?\s+20\d{2}\b/i,
+    /^([a-z0-9._]{2,40})\s+(?:on|auf)\s+instagram\b/i,
+  ];
+  for (const value of values) {
+    for (const pattern of patterns) {
+      const username = normalizeUsername(cleanText(value, 1000).match(pattern)?.[1]);
+      if (username && !/^(?:instagram|wien|vienna|restaurant|gastro)$/.test(username)) return username;
+    }
+  }
+  return '';
+}
+
+function unwrapInstagramCaption(value) {
+  const text = decodeHtmlEntities(value);
+  if (text.length < 12 || BLOCKED_INSTAGRAM_PAGE_PATTERN.test(text)) return '';
+  if (/^(?:instagram|instagram photos and videos|see instagram photos)/i.test(text)) return '';
+
+  const quoted = text.match(/(?:instagram\s*:|\bon\s+instagram\s*:|\bauf\s+instagram\s*:|:\s*)\s*["“]([\s\S]{12,4000})["”]\s*\.?$/i)?.[1];
+  if (quoted) return cleanText(quoted, 4000);
+
+  const dashWrapped = text.match(/[-–—]\s*[a-z0-9._]{2,40}\s+(?:on|auf)\s+instagram\s*:\s*["“]?([\s\S]{12,4000}?)["”]?\s*$/i)?.[1];
+  if (dashWrapped) return cleanText(dashWrapped, 4000);
+
+  const datedWrapped = text.match(/[-–—]\s*[a-z0-9._]{2,40}\s+on\s+[a-z]{3,10}\s+\d{1,2},?\s+20\d{2}[^:]{0,30}:\s*["“]([\s\S]{12,4000})["”]\s*\.?/i)?.[1];
+  if (datedWrapped) return cleanText(datedWrapped, 4000);
+
+  return cleanText(text, 4000);
+}
+
+function specificViennaEvidence(signal) {
+  const text = cleanText(signal, 5000);
+  if (!text || OUTSIDE_VIENNA_PATTERN.test(text)) return null;
+  const postcode = text.match(VIENNA_POSTCODE_PATTERN)?.[1] || '';
+  if (postcode) return { source: 'instagram-original-caption', value: postcode };
+  const district = text.match(VIENNA_DISTRICT_PATTERN)?.[0] || '';
+  if (district) return { source: 'instagram-original-caption', value: district };
+  if (/\b(?:wien|vienna)\b/i.test(text) && STREET_PATTERN.test(text)) {
+    return { source: 'instagram-original-caption', value: 'Wien address' };
+  }
+  if (/(?:^|\s)#(?:wien|vienna)\b/i.test(text) || /\bvienna\s*,?\s*austria\b/i.test(text)) {
+    return { source: 'instagram-original-caption-hashtag', value: 'Vienna' };
+  }
+  return null;
+}
+
+function extractAddress(signal) {
+  const text = cleanText(signal, 5000);
+  const match = text.match(/(?:^|[.!?]\s|📍)([^.!?]{0,100}(?:1(?:0[1-9]|1\d|2[0-3])0)\s+(?:wien|vienna)[^.!?]{0,60})/i);
+  return cleanText(match?.[1], 180);
+}
+
+function freeSignalDecision(signal) {
+  const original = cleanText(signal, 5000);
+  const cleaned = original.replace(FREE_ATTRIBUTE_PATTERN, ' ');
+  if (GIVEAWAY_PATTERN.test(original)) return { accepted: false, reason: 'giveaway' };
+  if (!FREE_OFFER_PATTERN.test(cleaned)) return { accepted: false, reason: 'not-free' };
+  if (!FOOD_DRINK_PATTERN.test(cleaned)) return { accepted: false, reason: 'not-food-drink' };
+  if (NON_CONSUMABLE_FREE_PATTERN.test(cleaned)) {
+    return { accepted: false, reason: 'free-item-not-food-drink' };
+  }
+  return { accepted: true, reason: '', cleaned };
+}
+
+function offerType(signal) {
+  return /\b(?:1\s*[+&]\s*1|2\s*(?:für|fuer|for)\s*1|2\s*[+&]\s*1|bogo|buy[\s,-]*(?:one|1)[\s,-]*get[\s,-]*(?:one|1))\b/i.test(signal)
+    ? 'bogo'
+    : 'gratis';
 }
 
 function offerCategory(signal) {
   return DRINK_PATTERN.test(signal) ? 'kaffee' : 'essen';
+}
+
+function offerSummary(signal) {
+  const text = cleanText(signal, 4000);
+  const match = text.match(FREE_OFFER_PATTERN);
+  if (!match || match.index === undefined) return cleanText(text, 220);
+  const start = Math.max(0, Math.max(
+    text.lastIndexOf('.', match.index - 1),
+    text.lastIndexOf('!', match.index - 1),
+    text.lastIndexOf('?', match.index - 1),
+  ) + 1);
+  const after = text.slice(match.index + match[0].length);
+  const boundary = after.search(/[.!?](?:\s|$)/);
+  const end = boundary >= 0
+    ? match.index + match[0].length + boundary + 1
+    : Math.min(text.length, match.index + match[0].length + 160);
+  const summary = cleanText(text.slice(start, end), 260);
+  return summary.length >= 12 ? summary : cleanText(text, 220);
 }
 
 function sameInstagramPost(left, right) {
@@ -68,181 +203,17 @@ function sameInstagramPost(left, right) {
   return Boolean(leftKey && rightKey && leftKey === rightKey);
 }
 
-function specificViennaLocation(value) {
-  const location = cleanText(value, 500);
-  if (!location || !hasViennaInstagramEvidence(location)) return false;
-  if (VIENNA_POSTCODE_PATTERN.test(location)) return true;
-  if (VIENNA_DISTRICT_PATTERN.test(location)) return true;
-  return /\b(?:wien|vienna)\b/i.test(location) && STREET_PATTERN.test(location);
-}
-
-function viennaDateKey(value) {
-  const date = value instanceof Date ? value : new Date(value || '');
-  if (Number.isNaN(date.getTime())) return '';
-  const parts = new Intl.DateTimeFormat('en', {
-    timeZone: 'Europe/Vienna',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(date);
-  const part = (type) => parts.find((item) => item.type === type)?.value || '';
-  return `${part('year')}-${part('month')}-${part('day')}`;
-}
-
-function isExpiredRelativeOffer(signal, publicationDate, now) {
-  if (!publicationDate) return false;
-  const todayOnly = /\b(?:nur heute|heute nur|only today|today only)\b/i.test(signal)
-    && !/\b(?:ab heute|starting today|from today)\b/i.test(signal);
-  return todayOnly && viennaDateKey(publicationDate) < viennaDateKey(now);
-}
-
-function dealSignal(deal = {}) {
-  return [
-    deal.postCaption,
-    deal.title,
-    deal.description,
-    deal.offerTypeOriginal,
-    deal.expiresOriginal,
-    deal.expiryDisplayText,
-    deal.expires,
-  ].map((value) => cleanText(value, 2400)).filter(Boolean).join(' ');
-}
-
-function freeFoodDrinkSignalDecision(originalSignal) {
-  const signal = originalSignal.replace(FREE_ATTRIBUTE_PATTERN, ' ');
-  if (GIVEAWAY_PATTERN.test(originalSignal)) return { accepted: false, reason: 'giveaway' };
-  if (!FREE_OFFER_PATTERN.test(signal)) return { accepted: false, reason: 'not-free' };
-  if (!FOOD_DRINK_PATTERN.test(signal)) return { accepted: false, reason: 'not-food-drink' };
-  if (NON_CONSUMABLE_FREE_PATTERN.test(signal)) {
-    return { accepted: false, reason: 'free-item-not-food-drink' };
-  }
-  return { accepted: true, reason: '' };
-}
-
-function verifiedOriginalPostSignal(deal = {}) {
-  const verificationStatus = cleanText(
-    deal.postVerification?.status || deal.evidence?.originalPost?.status,
-  ).toLowerCase();
-  if (verificationStatus !== 'verified-original-post') return '';
-  return [
-    deal.postCaption,
-    deal.evidence?.originalPost?.captionSample,
-  ].map((value) => cleanText(value, 2600)).filter(Boolean).join(' ');
-}
-
-function originalOfferSummary(signal) {
-  const text = cleanText(signal, 2600);
-  const match = text.match(FREE_OFFER_PATTERN);
-  if (!match || match.index === undefined) return '';
-  const matchStart = match.index;
-  const previousBoundary = Math.max(
-    text.lastIndexOf('.', matchStart - 1),
-    text.lastIndexOf('!', matchStart - 1),
-    text.lastIndexOf('?', matchStart - 1),
-  );
-  const following = text.slice(matchStart + match[0].length);
-  const followingBoundary = following.search(/[.!?](?:\s|$)/);
-  const end = followingBoundary >= 0
-    ? matchStart + match[0].length + followingBoundary + 1
-    : Math.min(text.length, matchStart + match[0].length + 140);
-  let summary = cleanText(text.slice(previousBoundary + 1, end), 240);
-  if (summary.length < 12) {
-    summary = cleanText(text.slice(Math.max(0, matchStart - 70), matchStart + match[0].length + 140), 240);
-  }
-  return summary;
-}
-
-function verifiedDisplayBrand(deal = {}) {
-  const brand = cleanText(deal.brand, 120);
-  const ownerUsername = normalizeUsername(deal.ownerUsername);
-  const unreliableBrand = !brand
-    || /^(?:instagram gastro|instagram|restaurant)$/i.test(brand)
-    || brand.length > 60
-    || /\bon instagram\b|\.\.\.|…/i.test(brand);
-  return unreliableBrand && ownerUsername ? `@${ownerUsername}` : (brand || 'Instagram Gastro');
-}
-
-function publicationDecision(deal, now, maxAgeDays) {
-  const publication = getPublicationEvidence(deal);
-  const date = publication.sourcePublishedAt ? new Date(publication.sourcePublishedAt) : null;
-  if (!date || Number.isNaN(date.getTime()) || publication.publicationEvidenceRank < 4) {
-    return { accepted: false, reason: 'missing-real-post-date', publication, date: null, timing: null };
-  }
-
-  const timing = evaluateInstagramOfferTiming({
-    now,
-    pubDate: date,
-    signal: dealSignal(deal),
-    maxAgeDays,
-    activeOfferMaxAgeDays: maxAgeDays,
-    futureSkewMinutes: 10,
-  });
-  if (timing.futurePublication) {
-    return { accepted: false, reason: 'future-post-date', publication, date, timing };
-  }
-  if (!timing.withinFreshWindow) {
-    return { accepted: false, reason: 'older-than-7-days', publication, date, timing };
-  }
-  if (timing.expired || isExpiredRelativeOffer(dealSignal(deal), date, now)) {
-    return { accepted: false, reason: 'expired-offer', publication, date, timing };
-  }
-  if (timing.notStarted) {
-    return { accepted: false, reason: 'not-started', publication, date, timing };
-  }
-  return { accepted: true, reason: '', publication, date, timing };
-}
-
-function viennaDecision(deal) {
-  const verified = getViennaEvidence(deal);
-  if (verified.hasViennaEvidence) {
-    const type = cleanText(verified.type).toLowerCase();
-    const value = cleanText(verified.value, 2600);
-    const originalSignal = verifiedOriginalPostSignal(deal);
-    const hasSpecificOriginalLocation = specificViennaLocation(originalSignal);
-    const explicitlyOutside = OUTSIDE_VIENNA_PATTERN.test(originalSignal)
-      && !VIENNA_POSTCODE_PATTERN.test(originalSignal);
-    const needsSpecificOriginalLocation = /instagram-post|verified-flag|structured-city/.test(type);
-    if (!explicitlyOutside && (!needsSpecificOriginalLocation || specificViennaLocation(value))) {
-      return { accepted: true, source: verified.type, value: verified.value, cited: false };
-    }
-    if (!explicitlyOutside && hasSpecificOriginalLocation) {
-      return {
-        accepted: true,
-        source: 'instagram-post-caption-specific-location',
-        value: originalSignal.match(VIENNA_POSTCODE_PATTERN)?.[1] || value,
-        cited: false,
-      };
-    }
-  }
-
-  const location = cleanText(deal.reportedLocation || deal.distance, 500);
-  const citation = cleanText(deal.locationCitation);
-  const fromSearchSnippet = (Array.isArray(deal.discoveredBy) ? deal.discoveredBy : [])
-    .some((source) => /^firecrawl-search:/i.test(cleanText(source)));
-  if (!fromSearchSnippet && specificViennaLocation(location) && sameInstagramPost(deal.url, citation)) {
-    return {
-      accepted: true,
-      source: 'firecrawl-cited-original-post-location',
-      value: location,
-      cited: true,
-      citation: normalizeInstagramPostUrl(citation),
-    };
-  }
-  return { accepted: false, source: '', value: '', cited: false };
-}
-
-function richerDeal(left, right) {
-  const score = (deal) => [
-    deal.postVerification?.status === 'verified-original-post' ? 1000 : 0,
-    getViennaEvidence(deal).hasViennaEvidence ? 500 : 0,
-    cleanText(deal.postCaption).length,
-    cleanText(deal.description).length,
-  ].reduce((sum, value) => sum + Number(value || 0), 0);
-  const primary = score(right) > score(left) ? right : left;
-  const secondary = primary === left ? right : left;
+function mergeCandidate(left, right) {
+  const richer = cleanText(right.discoverySnippet).length > cleanText(left.discoverySnippet).length
+    ? right
+    : left;
+  const other = richer === left ? right : left;
   return {
-    ...secondary,
-    ...primary,
+    ...other,
+    ...richer,
+    targetUsername: richer.targetUsername || other.targetUsername || '',
+    targetViennaVerified: Boolean(richer.targetViennaVerified || other.targetViennaVerified),
+    previousDeal: richer.previousDeal || other.previousDeal || null,
     discoveredBy: [...new Set([
       ...(Array.isArray(left.discoveredBy) ? left.discoveredBy : []),
       ...(Array.isArray(right.discoveredBy) ? right.discoveredBy : []),
@@ -250,210 +221,608 @@ function richerDeal(left, right) {
   };
 }
 
-export function normalizeKey4Offer(offer = {}, options = {}) {
-  const url = normalizeInstagramPostUrl(offer.post_url || offer.postUrl || offer.url);
+export function buildKey4TargetAccounts(watchlist = {}, registry = {}, limit = 30) {
+  const entries = new Map();
+  const registryAccounts = Array.isArray(registry?.accounts) ? registry.accounts : [];
+  const registryByUsername = new Map(registryAccounts
+    .map((entry) => [normalizeUsername(entry?.username), entry])
+    .filter(([username]) => username));
+
+  for (const account of registryAccounts) {
+    const username = normalizeUsername(account?.username);
+    const accountType = cleanText(account?.accountType || 'merchant').toLowerCase();
+    if (!username || accountType !== 'merchant') continue;
+    const viennaVerified = account?.viennaVerified === true;
+    const score = (viennaVerified ? 1000 : 0)
+      + (Number(account?.priorityScore) || 0)
+      + (Number(account?.confidence) || 0);
+    entries.set(username, {
+      username,
+      viennaVerified,
+      score,
+      source: 'merchant-registry',
+    });
+  }
+
+  for (const account of Array.isArray(watchlist?.accounts) ? watchlist.accounts : []) {
+    const username = normalizeUsername(account?.username);
+    const category = cleanText(account?.category || account?.accountType).toLowerCase();
+    if (!username || !/(?:food|gastro|merchant|restaurant|cafe)/.test(category)) continue;
+    const registryAccount = registryByUsername.get(username);
+    const viennaVerified = registryAccount?.viennaVerified === true;
+    const score = (viennaVerified ? 1000 : 0)
+      + (Number(account?.priority) || 0)
+      + (Number(registryAccount?.priorityScore) || 0);
+    const existing = entries.get(username);
+    if (!existing || score > existing.score) {
+      entries.set(username, {
+        username,
+        viennaVerified,
+        score,
+        source: 'watchlist',
+      });
+    }
+  }
+
+  return [...entries.values()]
+    .sort((left, right) => right.score - left.score || left.username.localeCompare(right.username))
+    .slice(0, Math.max(1, Number(limit) || 30));
+}
+
+export function buildKey4SearchQueries(targetAccounts = [], options = {}) {
+  const profileLimit = Math.max(0, Number(options.profileLimit ?? 18) || 0);
+  const general = KEY4_GENERAL_SEARCH_QUERIES.map((query, index) => ({
+    id: `general-${index + 1}`,
+    query,
+    targetUsername: '',
+    targetViennaVerified: false,
+  }));
+  const profiles = targetAccounts.slice(0, profileLimit).map((account) => ({
+    id: `profile-${account.username}`,
+    query: `site:instagram.com (inurl:/p/ OR inurl:/reel/) "${account.username}" (gratis OR kostenlos OR "1+1" OR "2 für 1" OR BOGO OR "aufs Haus")`,
+    targetUsername: account.username,
+    targetViennaVerified: account.viennaVerified === true,
+  }));
+  return [...general, ...profiles];
+}
+
+export function buildKey4HashtagSources(limit = KEY4_INSTAGRAM_HASHTAGS.length) {
+  return KEY4_INSTAGRAM_HASHTAGS
+    .slice(0, Math.max(0, Number(limit) || 0))
+    .map((hashtag, index) => ({
+      id: `hashtag-${hashtag}`,
+      hashtag,
+      priority: KEY4_INSTAGRAM_HASHTAGS.length - index,
+      url: `https://www.instagram.com/explore/tags/${encodeURIComponent(hashtag)}/`,
+    }));
+}
+
+export function agentDealToKey4Candidate(deal = {}, source = {}, now = new Date()) {
+  const url = normalizeInstagramPostUrl(
+    deal?.post_url || deal?.postUrl || deal?.url || deal?.original_post_url,
+  );
   if (!url) return null;
 
-  const ownerUsername = normalizeUsername(offer.owner_username || offer.ownerUsername);
-  const restaurantName = usableText(offer.restaurant_name || offer.restaurantName, 100)
-    || ownerUsername
-    || 'Instagram Gastro';
-  const description = usableText(offer.offer_description || offer.description, 600);
-  const rawOfferType = usableText(offer.offer_type || offer.offerType, 220);
-  const location = usableText(offer.location || offer.reportedLocation, 500);
-  const validUntil = usableText(offer.valid_until || offer.validUntil || offer.expires, 300);
-  const signal = [restaurantName, description, rawOfferType].filter(Boolean).join(' ');
-  const type = offerType(signal);
-  const category = offerCategory(signal);
-  const titleCore = description || rawOfferType || 'kostenloses Instagram-Angebot';
-  const title = `${restaurantName}: ${titleCore}`.slice(0, 160);
-
+  const encodedPublication = decodeInstagramShortcodeDate(url);
+  const reportedPublication = finiteDate(
+    deal?.post_date || deal?.postDate || deal?.published_at || deal?.publishedAt,
+  );
+  const publication = encodedPublication || reportedPublication;
+  const ownerUsername = normalizeUsername(deal?.owner_username || deal?.ownerUsername);
+  const discoverySnippet = cleanText([
+    deal?.post_caption,
+    deal?.postCaption,
+    deal?.offer,
+    deal?.item_given_away,
+    deal?.location,
+    deal?.validity,
+    deal?.validity_date,
+  ].filter(Boolean).join(' '), 4000);
   return {
-    id: `fc4-${stableHash(`${restaurantName}|${title}|${url}`)}`,
-    brand: restaurantName,
-    title,
-    description: [description, rawOfferType].filter(Boolean).join(' | ').slice(0, 800),
-    type,
-    category,
-    source: 'Firecrawl Instagram Direct #4',
-    originSource: 'firecrawl4',
     url,
-    expires: validUntil,
-    expiresOriginal: validUntil,
-    expiryDisplayText: validUntil,
-    distance: location,
-    reportedLocation: location,
-    locationCitation: usableText(offer.location_citation || offer.locationCitation, 1000),
-    postUrlCitation: usableText(offer.post_url_citation || offer.postUrlCitation, 1000),
+    title: cleanText(deal?.brand_or_store || deal?.brand || deal?.title, 500),
+    discoverySnippet,
     ownerUsername,
-    ownerUsernameCitation: usableText(offer.owner_username_citation || offer.ownerUsernameCitation, 1000),
-    reportedPostDate: usableText(offer.post_date || offer.reportedPostDate, 120),
-    reportedPostDateCitation: usableText(offer.post_date_citation || offer.reportedPostDateCitation, 1000),
-    offerTypeOriginal: rawOfferType,
-    agentCurrentlyValid: typeof offer.is_currently_valid === 'boolean'
-      ? offer.is_currently_valid
-      : null,
-    discoveredBy: [usableText(options.discoverySource, 120)].filter(Boolean),
-    hot: true,
-    isNew: true,
-    priority: type === 'gratis' ? 1 : 2,
-    votes: 1,
-    qualityScore: type === 'gratis' ? 82 : 76,
+    ownerSource: ownerUsername ? 'firecrawl-agent-candidate' : '',
+    targetUsername: ownerUsername,
+    targetViennaVerified: false,
+    sourcePublishedAt: publication?.toISOString() || '',
+    sourcePublishedAtSource: publication
+      ? (encodedPublication ? 'url.instagramShortcode' : 'firecrawl-agent-reported-publication')
+      : '',
+    discoveredAt: finiteDate(now)?.toISOString() || new Date().toISOString(),
+    agentSource: cleanText(source?.id || source?.hashtag || source?.url, 160),
+    agentSourcePriority: Number(source?.priority) || 0,
+    discoveredBy: [`firecrawl-agent:${cleanText(source?.id || source?.hashtag || 'hashtag', 160)}`],
   };
 }
 
-export function searchResultToKey4Offer(result = {}, query = '') {
-  const url = normalizeInstagramPostUrl(result.url || result.metadata?.sourceURL || result.metadata?.url);
+export function searchResultToKey4Candidate(result = {}, query = {}, now = new Date()) {
+  const metadata = result?.metadata && typeof result.metadata === 'object' ? result.metadata : {};
+  const url = normalizeInstagramPostUrl(
+    result?.url || metadata?.url || metadata?.ogUrl || metadata?.sourceURL,
+  );
   if (!url) return null;
-  const title = usableText(result.title || result.metadata?.title, 300);
-  const description = usableText(result.description || result.snippet || result.markdown, 1200);
-  const signal = [title, description].filter(Boolean).join(' ');
-  const owner = title.match(/^@?([a-z0-9._]{2,40})\s+(?:on|auf)\s+instagram\b/i)?.[1] || '';
+
+  const title = cleanText(result?.title || metadata?.title || metadata?.ogTitle, 500);
+  const description = cleanText(
+    result?.description || result?.markdown || metadata?.description || metadata?.ogDescription,
+    2200,
+  );
+  const encoded = decodeInstagramShortcodeDate(url);
+  const ownerUsername = extractOwnerUsername([title, description]);
   return {
-    restaurant_name: title.replace(/\s+(?:on|auf)\s+instagram[\s:–-].*$/i, '').replace(/^@/, ''),
-    post_url: url,
-    post_url_citation: url,
-    offer_description: signal,
-    offer_description_citation: url,
-    offer_type: signal,
-    offer_type_citation: url,
-    location: specificViennaLocation(signal) ? signal : '',
-    location_citation: url,
-    owner_username: owner,
-    owner_username_citation: owner ? url : '',
-    discoverySource: `firecrawl-search:${cleanText(query, 100)}`,
+    url,
+    title,
+    discoverySnippet: description,
+    ownerUsername,
+    ownerSource: ownerUsername ? 'search-result' : '',
+    targetUsername: normalizeUsername(query?.targetUsername),
+    targetViennaVerified: query?.targetViennaVerified === true,
+    sourcePublishedAt: encoded?.toISOString() || '',
+    sourcePublishedAtSource: encoded ? 'url.instagramShortcode' : '',
+    discoveredAt: finiteDate(now)?.toISOString() || new Date().toISOString(),
+    discoveredBy: [`firecrawl-search:${cleanText(query?.id || query?.query, 160)}`],
   };
 }
 
-export function dedupeKey4Deals(deals = []) {
-  const byPost = new Map();
-  for (const deal of deals.filter(Boolean)) {
-    const key = canonicalInstagramPostKey(deal.url);
-    if (!key) continue;
-    byPost.set(key, byPost.has(key) ? richerDeal(byPost.get(key), deal) : deal);
-  }
-  return [...byPost.values()];
-}
-
-export function isRecentKey4PostUrl(url, options = {}) {
-  const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
-  if (Number.isNaN(now.getTime())) return false;
-  const configuredMaxAgeDays = Number(options.maxAgeDays ?? 7);
-  const maxAgeDays = Math.min(7, Math.max(
-    1,
-    Number.isFinite(configuredMaxAgeDays) ? configuredMaxAgeDays : 7,
-  ));
-  const publishedAt = decodeInstagramShortcodeDate(url);
-  if (!publishedAt) return false;
-  const ageMs = now.getTime() - publishedAt.getTime();
-  return ageMs >= -(10 * 60 * 1000) && ageMs <= maxAgeDays * DAY_MS;
-}
-
-export function qualifyKey4Deals(deals = [], options = {}) {
-  const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
-  const configuredMaxAgeDays = Number(options.maxAgeDays ?? 7);
-  const maxAgeDays = Math.min(7, Math.max(1, Number.isFinite(configuredMaxAgeDays) ? configuredMaxAgeDays : 7));
-  const configuredMaxDeals = Number(options.maxDeals ?? 40);
-  const maxDeals = Math.max(1, Number.isFinite(configuredMaxDeals) ? Math.floor(configuredMaxDeals) : 40);
-  const rejected = [];
-  const accepted = [];
-
-  for (const rawDeal of dedupeKey4Deals(deals)) {
-    const deal = { ...rawDeal, url: normalizeInstagramPostUrl(rawDeal.url) };
-    let reason = '';
-    const originalOfferSignal = verifiedOriginalPostSignal(deal);
-    if (!originalOfferSignal) reason = 'missing-original-offer-evidence';
-    const freeFood = originalOfferSignal
-      ? freeFoodDrinkSignalDecision(originalOfferSignal)
-      : { accepted: false, reason };
-    if (!reason && !freeFood.accepted) reason = freeFood.reason;
-    if (!reason && deal.agentCurrentlyValid === false) reason = 'agent-marked-expired';
-
-    const publication = publicationDecision(deal, now, maxAgeDays);
-    if (!reason && !publication.accepted) reason = publication.reason;
-
-    const vienna = viennaDecision(deal);
-    if (!reason && !vienna.accepted) reason = 'not-verified-vienna';
-
-    if (reason) {
-      rejected.push({ deal, reason });
-      continue;
-    }
-
-    const publicationIso = publication.date.toISOString();
-    const brand = verifiedDisplayBrand(deal);
-    const offerSummary = originalOfferSummary(originalOfferSignal)
-      || cleanText(deal.description, 220)
-      || 'Kostenloses Instagram-Angebot';
-    const next = {
-      ...deal,
-      brand,
-      title: `${brand}: ${offerSummary}`.slice(0, 160),
-      description: offerSummary,
-      offerEvidenceText: offerSummary,
-      descriptionSource: 'instagram-original-post',
-      pubDate: publicationIso,
-      pubDateSource: publication.publication.sourcePublishedAtSource,
-      sourcePublishedAt: publicationIso,
-      sourcePublishedAtSource: publication.publication.sourcePublishedAtSource,
-      postAgeDays: Math.round((publication.timing.ageDays || 0) * 10) / 10,
-      key4VerifiedAt: now.toISOString(),
-      qualityScore: Math.min(100, Math.max(
-        Number(deal.qualityScore) || 0,
-        78
-          + (deal.postVerification?.status === 'verified-original-post' ? 10 : 0)
-          + (vienna.cited ? 4 : 8)
-          + (publication.timing.ageDays <= 2 ? 4 : 0)
-      )),
-    };
-    if (vienna.cited) {
-      next.city = 'Wien';
-      next.locationVerified = true;
-      next.viennaVerified = true;
-      next.viennaEvidence = {
-        verified: true,
-        source: 'structured-location',
-        type: 'structured-location',
-        value: vienna.value,
-        detail: vienna.value,
-        method: vienna.source,
-        citation: vienna.citation,
-      };
-      if (!next.address) next.address = vienna.value;
-    }
-    accepted.push(next);
-  }
-
-  accepted.sort((left, right) => {
-    const dateDifference = Date.parse(right.sourcePublishedAt) - Date.parse(left.sourcePublishedAt);
-    if (dateDifference) return dateDifference;
-    return Number(right.qualityScore || 0) - Number(left.qualityScore || 0);
-  });
-
-  const reasonCounts = rejected.reduce((counts, item) => {
-    counts[item.reason] = (counts[item.reason] || 0) + 1;
-    return counts;
-  }, {});
+export function dealToKey4SeedCandidate(deal = {}, sourceLabel = 'pending-source', now = new Date()) {
+  const url = normalizeInstagramPostUrl(deal?.url || deal?.post_url || deal?.postUrl);
+  if (!url) return null;
+  const publication = decodeInstagramShortcodeDate(url)
+    || finiteDate(deal?.sourcePublishedAt || deal?.pubDate || deal?.reportedPostDate);
+  const ownerUsername = normalizeUsername(deal?.ownerUsername);
   return {
-    deals: accepted.slice(0, maxDeals),
-    rejected,
-    summary: {
-      inputDeals: deals.length,
-      distinctPosts: dedupeKey4Deals(deals).length,
-      acceptedDeals: Math.min(accepted.length, maxDeals),
-      acceptedBeforeLimit: accepted.length,
-      maxAgeDays,
-      maxDeals,
-      rejectedByReason: reasonCounts,
+    url,
+    title: cleanText(deal?.title, 500),
+    discoverySnippet: cleanText(
+      [deal?.postCaption, deal?.description, deal?.title].filter(Boolean).join(' '),
+      3000,
+    ),
+    ownerUsername,
+    ownerSource: ownerUsername ? 'pending-seed' : '',
+    targetUsername: ownerUsername,
+    targetViennaVerified: deal?.viennaVerified === true,
+    sourcePublishedAt: publication?.toISOString() || '',
+    sourcePublishedAtSource: publication
+      ? (decodeInstagramShortcodeDate(url) ? 'url.instagramShortcode' : 'pending-seed-publication')
+      : '',
+    discoveredAt: finiteDate(now)?.toISOString() || new Date().toISOString(),
+    seedSource: cleanText(sourceLabel, 160),
+    discoveredBy: [`key4-seed:${cleanText(sourceLabel, 160)}`],
+  };
+}
+
+export function dedupeKey4Candidates(candidates = []) {
+  const byKey = new Map();
+  for (const candidate of candidates) {
+    const url = normalizeInstagramPostUrl(candidate?.url);
+    const key = canonicalInstagramPostKey(url);
+    if (!key) continue;
+    const normalized = { ...candidate, url };
+    byKey.set(key, byKey.has(key) ? mergeCandidate(byKey.get(key), normalized) : normalized);
+  }
+  return [...byKey.values()];
+}
+
+export function isKey4DiscoveryCandidateRecent(candidate = {}, options = {}) {
+  const now = finiteDate(options.now) || new Date();
+  const maxAgeDays = Math.max(1, Number(options.maxAgeDays ?? 14) || 14);
+  const recurringMaxAgeDays = Math.max(maxAgeDays, Number(options.recurringMaxAgeDays ?? 45) || 45);
+  const publication = finiteDate(candidate.sourcePublishedAt)
+    || decodeInstagramShortcodeDate(candidate.url);
+  if (!publication) return true;
+  const ageDays = (now.getTime() - publication.getTime()) / DAY_MS;
+  if (ageDays < -0.25) return false;
+  if (ageDays <= maxAgeDays) return true;
+  return ageDays <= recurringMaxAgeDays
+    && /\b(?:jeden|jede|every|daily|weekly|wöchentlich|woechentlich|monatlich|ongoing|bis auf weiteres|geburtstag|birthday)\b/i.test(candidate.discoverySnippet || '');
+}
+
+export function key4CandidatePriority(candidate = {}, now = new Date()) {
+  const publication = finiteDate(candidate.sourcePublishedAt)
+    || decodeInstagramShortcodeDate(candidate.url);
+  const ageDays = publication ? Math.max(0, (now.getTime() - publication.getTime()) / DAY_MS) : 30;
+  let score = candidate.previousDeal ? 300 : 0;
+  if (candidate.seedSource) score += 120;
+  if (candidate.targetViennaVerified) score += 160;
+  if (candidate.targetUsername) score += 60;
+  if (candidate.agentSource) score += 100 + Math.max(0, Number(candidate.agentSourcePriority) || 0);
+  if (FREE_OFFER_PATTERN.test(candidate.discoverySnippet || '')) score += 80;
+  if (FOOD_DRINK_PATTERN.test(candidate.discoverySnippet || '')) score += 40;
+  score += Math.max(0, 60 - ageDays * 3);
+  return score;
+}
+
+export function extractKey4PostEvidence(document = {}, candidate = {}, options = {}) {
+  const now = finiteDate(options.now) || new Date();
+  const registry = options.registry instanceof Map ? options.registry : new Map();
+  const url = normalizeInstagramPostUrl(candidate.url);
+  const metadata = document?.metadata && typeof document.metadata === 'object' ? document.metadata : {};
+  const rawMeta = extractMetaValues(document?.rawHtml || document?.html);
+  const finalUrl = normalizeInstagramPostUrl(
+    metadata?.url || metadata?.ogUrl || metadata?.sourceURL || url,
+  );
+  const matchingOriginalUrl = !finalUrl || sameInstagramPost(url, finalUrl);
+
+  const captionSources = [
+    ['metadata.ogDescription', metadata?.ogDescription],
+    ['html.og:description', rawMeta.get('og:description')],
+    ['metadata.description', metadata?.description],
+  ];
+  if (FREE_OFFER_PATTERN.test(document?.markdown || '')) {
+    captionSources.push(['firecrawl.markdown', document.markdown]);
+  }
+
+  let postCaption = '';
+  let captionSource = '';
+  if (matchingOriginalUrl) {
+    for (const [source, value] of captionSources) {
+      const caption = unwrapInstagramCaption(value);
+      if (!caption || caption.length < 12) continue;
+      postCaption = caption;
+      captionSource = source;
+      break;
+    }
+  }
+
+  const ownerValues = [
+    metadata?.ogTitle,
+    rawMeta.get('og:title'),
+    metadata?.title,
+    metadata?.ogDescription,
+    rawMeta.get('og:description'),
+    metadata?.description,
+  ];
+  let ownerUsername = extractOwnerUsername(ownerValues);
+  let ownerSource = ownerUsername ? 'instagram-original-metadata' : '';
+  if (!ownerUsername && candidate.previousDeal?.ownerUsername) {
+    ownerUsername = normalizeUsername(candidate.previousDeal.ownerUsername);
+    ownerSource = ownerUsername ? 'previous-verified-post' : '';
+  }
+
+  let publication = [
+    metadata?.publishedTime,
+    rawMeta.get('article:published_time'),
+    metadata?.dcTermsCreated,
+    metadata?.dcDateCreated,
+    metadata?.dcDate,
+  ].map(finiteDate).find(Boolean);
+  let publicationSource = publication ? 'instagram-original-metadata' : '';
+  if (!publication) {
+    publication = decodeInstagramShortcodeDate(url) || finiteDate(candidate.sourcePublishedAt);
+    publicationSource = publication ? 'url.instagramShortcode' : '';
+  }
+
+  let verificationStatus = postCaption ? 'verified-original-post' : 'unavailable';
+  if (!postCaption && candidate.previousDeal?.postCaption) {
+    const previousVerifiedAt = finiteDate(
+      candidate.previousDeal.lastVerifiedAt || candidate.previousDeal.postVerification?.checkedAt,
+    );
+    const cacheAgeDays = previousVerifiedAt
+      ? (now.getTime() - previousVerifiedAt.getTime()) / DAY_MS
+      : Infinity;
+    if (cacheAgeDays <= 3) {
+      postCaption = cleanText(candidate.previousDeal.postCaption, 4000);
+      captionSource = 'previous-verified-post';
+      verificationStatus = 'verified-original-post-cached';
+    }
+  }
+
+  const captionVienna = specificViennaEvidence(postCaption);
+  const merchant = ownerUsername && ownerSource !== 'search-result'
+    ? registry.get(ownerUsername)
+    : null;
+  const registryVienna = merchant?.viennaVerified === true;
+  const viennaEvidence = captionVienna || (registryVienna
+    ? {
+        source: 'merchant-registry',
+        value: ownerUsername,
+        verificationSource: cleanText(merchant?.verificationSource, 160),
+      }
+    : null);
+
+  return {
+    ...candidate,
+    url,
+    ownerUsername,
+    ownerSource,
+    postCaption,
+    captionSource,
+    sourcePublishedAt: publication?.toISOString() || '',
+    sourcePublishedAtSource: publicationSource,
+    postVerification: {
+      status: verificationStatus,
+      checkedAt: now.toISOString(),
+      originalPostUrl: url,
+      finalUrl: finalUrl || url,
+      httpStatus: Number(metadata?.statusCode || 0) || null,
+      captionSource,
+      ownerUsername,
+      reason: cleanText(options.scrapeError || document?.warning || metadata?.error, 240),
+    },
+    viennaVerified: Boolean(viennaEvidence),
+    viennaEvidence,
+    address: extractAddress(postCaption),
+    scrapeEvidence: {
+      retrievalMode: cleanText(options.retrievalMode || 'firecrawl-direct-scrape', 80),
+      metadataTitle: cleanText(metadata?.ogTitle || metadata?.title, 300),
+      captionSource,
+      matchingOriginalUrl,
     },
   };
 }
 
-export const KEY4_SEARCH_QUERIES = [
-  'site:instagram.com/reel/ Wien "gratis Essen"',
-  'site:instagram.com/reel/ Wien "gratis Kaffee"',
-  'site:instagram.com/reel/ Wien "1+1 gratis"',
-  'site:instagram.com/p/ Wien "kostenlos" Restaurant',
-  'site:instagram.com/reel/ Wien "gratis Verkostung"',
-  'site:instagram.com/reel/ Vienna "free food"',
-];
+function toDeal(evidence, decision, now, timing, confidence) {
+  const signal = evidence.postCaption || evidence.discoverySnippet || evidence.title || '';
+  const summary = offerSummary(signal) || 'Möglicher kostenloser Gastro-Deal';
+  const ownerUsername = normalizeUsername(evidence.ownerUsername);
+  const brand = ownerUsername ? `@${ownerUsername}` : 'Instagram Gastro';
+  const publication = finiteDate(evidence.sourcePublishedAt);
+  const offerWindow = timing?.offerWindow || null;
+  return {
+    id: `fc4-${stableHash(evidence.url)}`,
+    brand,
+    title: cleanText(`${brand}: ${summary}`, 220),
+    description: summary,
+    offerEvidenceText: evidence.postCaption ? summary : cleanText(evidence.discoverySnippet, 260),
+    descriptionSource: evidence.postCaption ? 'instagram-original-post' : 'firecrawl-search-review',
+    type: offerType(signal),
+    category: offerCategory(signal),
+    source: 'Firecrawl Instagram Direct #4',
+    originSource: 'firecrawl4',
+    url: evidence.url,
+    address: evidence.address || '',
+    location: evidence.address || '',
+    city: evidence.viennaVerified ? 'Wien' : '',
+    ownerUsername,
+    instagramProfileUrl: ownerUsername ? `https://www.instagram.com/${ownerUsername}/` : '',
+    discoveredBy: Array.isArray(evidence.discoveredBy) ? evidence.discoveredBy : [],
+    discoveredAt: evidence.discoveredAt || now.toISOString(),
+    sourcePublishedAt: publication?.toISOString() || '',
+    sourcePublishedAtSource: evidence.sourcePublishedAtSource || '',
+    pubDate: publication?.toISOString() || '',
+    pubDateSource: evidence.sourcePublishedAtSource || '',
+    validFrom: offerWindow?.startDate?.toISOString() || '',
+    validUntil: offerWindow?.endDate?.toISOString() || '',
+    expires: offerWindow?.endDate?.toISOString() || '',
+    expiryDisplayText: cleanText(offerWindow?.evidence, 220),
+    expirySource: offerWindow ? 'instagram-original-post' : '',
+    recurringSchedule: timing?.recurring === true,
+    viennaVerified: evidence.viennaVerified === true,
+    locationVerified: evidence.viennaVerified === true,
+    viennaEvidence: evidence.viennaEvidence || null,
+    postCaption: evidence.postCaption || '',
+    postVerification: evidence.postVerification || {},
+    lastVerifiedAt: /^verified-original-post/.test(evidence.postVerification?.status || '')
+      ? evidence.postVerification?.checkedAt || now.toISOString()
+      : '',
+    evidence: {
+      originalPost: {
+        status: evidence.postVerification?.status || 'unavailable',
+        checkedAt: evidence.postVerification?.checkedAt || now.toISOString(),
+        url: evidence.url,
+        publicationSource: evidence.sourcePublishedAtSource || '',
+        ownerUsername,
+        captionSource: evidence.captionSource || '',
+        captionSample: cleanText(evidence.postCaption, 700),
+      },
+      discoverySnippet: cleanText(evidence.discoverySnippet, 500),
+    },
+    key4Decision: {
+      status: decision.status,
+      reasons: decision.reasons,
+      confidence,
+      decidedAt: now.toISOString(),
+    },
+    postAgeDays: publication
+      ? Number(Math.max(0, (now.getTime() - publication.getTime()) / DAY_MS).toFixed(1))
+      : null,
+    qualityScore: confidence,
+    hot: decision.status === 'accepted',
+    isNew: true,
+    priority: decision.status === 'accepted' ? 2 : 1,
+    votes: decision.status === 'accepted' ? 1 : 0,
+  };
+}
+
+function key4OfferSignature(deal = {}) {
+  const ownerUsername = normalizeUsername(deal.ownerUsername);
+  const offerText = cleanText(deal.description, 1000)
+    .replace(/#[\p{L}\p{N}_]+/gu, ' ')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ß/g, 'ss')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!ownerUsername || offerText.length < 24) return '';
+  return `${ownerUsername}|${cleanText(deal.type).toLowerCase()}|${offerText}`;
+}
+
+function rejectDuplicateOfferPost(deal, originalDeal) {
+  return {
+    reason: 'duplicate-offer-post',
+    deal: {
+      ...deal,
+      duplicateOfDealId: originalDeal.id,
+      hot: false,
+      priority: 1,
+      key4Decision: {
+        ...deal.key4Decision,
+        status: 'rejected',
+        reasons: ['duplicate-offer-post'],
+      },
+    },
+  };
+}
+
+function decideEvidence(evidence, options) {
+  const now = finiteDate(options.now) || new Date();
+  const maxAgeDays = Math.max(1, Number(options.maxAgeDays ?? 7) || 7);
+  const recurringMaxAgeDays = Math.max(maxAgeDays, Number(options.recurringMaxAgeDays ?? 45) || 45);
+  const originalStatus = cleanText(evidence.postVerification?.status).toLowerCase();
+  const hasOriginalEvidence = /^verified-original-post/.test(originalStatus)
+    && Boolean(cleanText(evidence.postCaption));
+  const originalSignal = cleanText(evidence.postCaption, 5000);
+  const discoverySignal = cleanText(
+    [evidence.discoverySnippet, evidence.title].filter(Boolean).join(' '),
+    3000,
+  );
+  const availableSignal = originalSignal || discoverySignal;
+
+  if (FOREIGN_VIENNA_PATTERN.test(availableSignal)) {
+    const decision = { status: 'rejected', reasons: ['not-vienna-austria'] };
+    return { decision, timing: null, confidence: 90, deal: toDeal(evidence, decision, now, null, 90) };
+  }
+  if (EXCLUDED_PLATFORM_PATTERN.test(availableSignal)) {
+    const decision = { status: 'rejected', reasons: ['excluded-platform'] };
+    return { decision, timing: null, confidence: 90, deal: toDeal(evidence, decision, now, null, 90) };
+  }
+
+  if (!hasOriginalEvidence) {
+    const discoveryDecision = freeSignalDecision(discoverySignal);
+    const decision = discoveryDecision.accepted
+      ? { status: 'review', reasons: ['missing-original-offer-evidence'] }
+      : { status: 'rejected', reasons: ['missing-original-offer-evidence', discoveryDecision.reason] };
+    const confidence = discoveryDecision.accepted ? 40 : 10;
+    return { decision, timing: null, confidence, deal: toDeal(evidence, decision, now, null, confidence) };
+  }
+
+  const signalDecision = freeSignalDecision(originalSignal);
+  if (!signalDecision.accepted) {
+    const decision = { status: 'rejected', reasons: [signalDecision.reason] };
+    return { decision, timing: null, confidence: 35, deal: toDeal(evidence, decision, now, null, 35) };
+  }
+
+  if (OUTSIDE_VIENNA_PATTERN.test(originalSignal)) {
+    const decision = { status: 'rejected', reasons: ['not-verified-vienna'] };
+    return { decision, timing: null, confidence: 55, deal: toDeal(evidence, decision, now, null, 55) };
+  }
+
+  const publication = finiteDate(evidence.sourcePublishedAt);
+  const evaluatedTiming = evaluateInstagramOfferTiming({
+    now,
+    pubDate: publication,
+    signal: originalSignal,
+    maxAgeDays,
+    activeOfferMaxAgeDays: recurringMaxAgeDays,
+    futureSkewMinutes: 10,
+  });
+  const recurringOccasion = /\bgeburtstag(?:sangebot|sdeal|sspecial)?\b|\bbirthday\b/i.test(originalSignal);
+  const timing = recurringOccasion
+    && evaluatedTiming.withinActiveOfferLimit
+    && !evaluatedTiming.expired
+    && !evaluatedTiming.notStarted
+    && !evaluatedTiming.futurePublication
+    ? {
+        ...evaluatedTiming,
+        recurring: true,
+        activeEvidence: true,
+        eligibleByAge: true,
+      }
+    : evaluatedTiming;
+
+  if (timing.futurePublication) {
+    const decision = { status: 'rejected', reasons: ['future-post-date'] };
+    return { decision, timing, confidence: 55, deal: toDeal(evidence, decision, now, timing, 55) };
+  }
+  if (timing.expired) {
+    const decision = { status: 'rejected', reasons: ['expired-offer'] };
+    return { decision, timing, confidence: 70, deal: toDeal(evidence, decision, now, timing, 70) };
+  }
+  if (timing.notStarted) {
+    const decision = { status: 'rejected', reasons: ['not-started'] };
+    return { decision, timing, confidence: 70, deal: toDeal(evidence, decision, now, timing, 70) };
+  }
+
+  if (!evidence.viennaVerified) {
+    const decision = { status: 'review', reasons: ['not-verified-vienna'] };
+    return { decision, timing, confidence: 70, deal: toDeal(evidence, decision, now, timing, 70) };
+  }
+  if (CHANCE_BASED_OFFER_PATTERN.test(originalSignal)) {
+    const decision = { status: 'review', reasons: ['chance-based-offer'] };
+    return { decision, timing, confidence: 85, deal: toDeal(evidence, decision, now, timing, 85) };
+  }
+  if (!publication) {
+    const decision = { status: 'review', reasons: ['missing-real-post-date'] };
+    return { decision, timing, confidence: 80, deal: toDeal(evidence, decision, now, timing, 80) };
+  }
+  if (!timing.eligibleByAge) {
+    const reason = timing.ageDays !== null && timing.ageDays > recurringMaxAgeDays
+      ? `older-than-${recurringMaxAgeDays}-days`
+      : `older-than-${maxAgeDays}-days`;
+    const status = timing.ageDays !== null && timing.ageDays <= recurringMaxAgeDays
+      ? 'review'
+      : 'rejected';
+    const decision = { status, reasons: [reason] };
+    return { decision, timing, confidence: 75, deal: toDeal(evidence, decision, now, timing, 75) };
+  }
+
+  const cachedPenalty = originalStatus === 'verified-original-post-cached' ? 5 : 0;
+  const confidence = 100 - cachedPenalty;
+  const decision = { status: 'accepted', reasons: [] };
+  return { decision, timing, confidence, deal: toDeal(evidence, decision, now, timing, confidence) };
+}
+
+export function classifyKey4Evidence(evidenceRows = [], options = {}) {
+  const acceptedCandidates = [];
+  const reviewCandidates = [];
+  const rejected = [];
+  for (const evidence of dedupeKey4Candidates(evidenceRows)) {
+    const result = decideEvidence(evidence, options);
+    if (result.decision.status === 'accepted') acceptedCandidates.push(result.deal);
+    else if (result.decision.status === 'review') reviewCandidates.push(result.deal);
+    else rejected.push({ reason: result.decision.reasons[0], deal: result.deal });
+  }
+
+  const byDate = (left, right) => String(right.sourcePublishedAt || '').localeCompare(left.sourcePublishedAt || '');
+  acceptedCandidates.sort(byDate);
+  reviewCandidates.sort(byDate);
+  const accepted = [];
+  const review = [];
+  const offerBySignature = new Map();
+  for (const [status, candidates, target] of [
+    ['accepted', acceptedCandidates, accepted],
+    ['review', reviewCandidates, review],
+  ]) {
+    for (const deal of candidates) {
+      const signature = key4OfferSignature(deal);
+      const originalDeal = signature ? offerBySignature.get(signature) : null;
+      if (originalDeal) {
+        rejected.push(rejectDuplicateOfferPost(deal, originalDeal));
+        continue;
+      }
+      target.push(deal);
+      if (signature) offerBySignature.set(signature, { ...deal, key4OriginalStatus: status });
+    }
+  }
+
+  const rejectedByReason = {};
+  for (const entry of rejected) {
+    for (const reason of entry.deal.key4Decision?.reasons || [entry.reason]) {
+      rejectedByReason[reason] = (rejectedByReason[reason] || 0) + 1;
+    }
+  }
+  const reviewByReason = {};
+  for (const deal of review) {
+    for (const reason of deal.key4Decision?.reasons || []) {
+      reviewByReason[reason] = (reviewByReason[reason] || 0) + 1;
+    }
+  }
+
+  return {
+    accepted,
+    review,
+    rejected,
+    summary: {
+      candidates: evidenceRows.length,
+      accepted: accepted.length,
+      review: review.length,
+      rejected: rejected.length,
+      rejectedByReason,
+      reviewByReason,
+    },
+  };
+}

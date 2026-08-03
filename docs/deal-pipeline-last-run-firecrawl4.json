@@ -417,6 +417,8 @@
     }
   ],
   "diagnostics": {
+    "targetAccounts": 30,
+    "seedCandidates": 36,
     "discovery": {
       "primary": {
         "status": "failed",
@@ -506,13 +508,65 @@
         "not-food-drink": 1,
         "missing-original-offer-evidence": 13
       }
-    }
+    },
+    "keyPool": {
+      "totalCalls": 33,
+      "maxCalls": 140,
+      "keys": [
+        {
+          "alias": "key-4",
+          "calls": 13,
+          "failures": 0,
+          "disabledReason": ""
+        },
+        {
+          "alias": "key-1",
+          "calls": 1,
+          "failures": 1,
+          "disabledReason": "credits"
+        },
+        {
+          "alias": "key-2",
+          "calls": 11,
+          "failures": 1,
+          "disabledReason": ""
+        },
+        {
+          "alias": "key-3",
+          "calls": 6,
+          "failures": 0,
+          "disabledReason": ""
+        },
+        {
+          "alias": "key-5",
+          "calls": 2,
+          "failures": 0,
+          "disabledReason": ""
+        },
+        {
+          "alias": "default-key",
+          "calls": 0,
+          "failures": 0,
+          "disabledReason": ""
+        }
+      ]
+    },
+    "previousAcceptedDeals": 2
   },
   "constraints": {
     "maximumPostAgeDays": 7,
+    "recurringOfferMaximumAgeDays": 45,
+    "discoveryMaximumAgeDays": 14,
     "location": "Wien",
     "offer": "kostenlose Speisen/Getränke, 1+1/2für1 und kostenlose Gastro-Proben",
-    "publicationDateAuthority": "Instagram original post timestamp or shortcode"
+    "originalEvidenceRequiredForAutomaticAcceptance": true,
+    "discoveryMode": "Gastro2-style Firecrawl hashtag agents plus merchant search and recent direct-post seeds",
+    "hashtagAgentSources": 4,
+    "hashtagAgentTimeoutSeconds": 240,
+    "excludedDiscoverySources": [
+      "1000things.at",
+      "meinbezirk.at"
+    ]
   },
   "errors": []
 }
