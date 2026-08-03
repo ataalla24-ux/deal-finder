@@ -186,19 +186,8 @@ function safeErrorMessage(error) {
 }
 
 export function loadKey4ApiKeyEntries(environment = process.env) {
-  const candidates = [
-    ['key-4', environment.FIRECRAWL_API_KEY4],
-    ['key-1', environment.FIRECRAWL_API_KEY1],
-    ['key-2', environment.FIRECRAWL_API_KEY2],
-    ['key-3', environment.FIRECRAWL_API_KEY3],
-    ['key-5', environment.FIRECRAWL_API_KEY5],
-    ['key-6', environment.FIRECRAWL_API_KEY6],
-    ['default-key', environment.FIRECRAWL_API_KEY],
-  ];
-  const seen = new Set();
-  return candidates
-    .map(([alias, apiKey]) => ({ alias, apiKey: cleanText(apiKey) }))
-    .filter(({ apiKey }) => apiKey && !seen.has(apiKey) && seen.add(apiKey));
+  const apiKey = cleanText(environment.FIRECRAWL_API_KEY4);
+  return apiKey ? [{ alias: 'key-4', apiKey }] : [];
 }
 
 export function createKey4FirecrawlPool(options = {}) {

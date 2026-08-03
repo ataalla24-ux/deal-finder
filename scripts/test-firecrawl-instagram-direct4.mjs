@@ -4,6 +4,7 @@ import {
   createKey4FirecrawlPool,
   discoverKey4AgentCandidates,
   discoverKey4PostCandidates,
+  loadKey4ApiKeyEntries,
   runKey4Pipeline,
 } from '../scraper/firecrawl-instagram-direct4.js';
 import {
@@ -19,6 +20,17 @@ import {
 
 const now = new Date('2026-07-26T12:00:00.000Z');
 const freshUrl = 'https://www.instagram.com/reel/DbN6gIBK7Zk/';
+
+assert.deepEqual(loadKey4ApiKeyEntries({
+  FIRECRAWL_API_KEY4: 'fixture-key-4',
+  FIRECRAWL_API_KEY1: 'fixture-key-1',
+  FIRECRAWL_API_KEY2: 'fixture-key-2',
+  FIRECRAWL_API_KEY: 'fixture-default-key',
+}), [{ alias: 'key-4', apiKey: 'fixture-key-4' }], 'Firecrawler 4 only loads its assigned API key');
+assert.deepEqual(loadKey4ApiKeyEntries({
+  FIRECRAWL_API_KEY1: 'fixture-key-1',
+  FIRECRAWL_API_KEY: 'fixture-default-key',
+}), [], 'other crawler keys must never be used as a fallback');
 
 const targetAccounts = buildKey4TargetAccounts({
   accounts: [
