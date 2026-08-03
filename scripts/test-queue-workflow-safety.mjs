@@ -25,6 +25,7 @@ assert.deepEqual(queueWriterFiles, [
   'community-submissions.yml',
   'daily-digest.yml',
   'deal-moderation.yml',
+  'flights-vienna.yml',
   'instagram-ai-agent.yml',
   'meta-instagram-deals.yml',
   'tiktok-deals.yml',
