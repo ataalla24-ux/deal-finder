@@ -7,7 +7,10 @@ import '../sentry/instrument.mjs';
 import Firecrawl from '@mendable/firecrawl-js';
 import { z } from 'zod';
 import fs from 'fs';
-import { verifyFirecrawlDeals } from './firecrawl-post-verifier.js';
+import {
+  normalizeInstagramPostUrl,
+  verifyFirecrawlDeals,
+} from './firecrawl-post-verifier.js';
 import {
   buildPipelineRunReport,
   summarizeVerifiedDeals,
@@ -44,47 +47,30 @@ async function runAgent(payload) {
 // SEITEN
 // ============================================
 
+const DISCOVERY_HASHTAGS = [
+  'viennafood', 'viennafoodie', 'viennarestaurant', 'restaurantvienna',
+  'allyoucaneatvienna', 'kostenloswien', 'wiengratis', 'gratisessenwien',
+  'kostenlosessenwien', 'angebotwien', 'angebotewien', 'wienangebot',
+  'dealswien', 'wienerdeals', 'rabattwien', 'wienrabatt', 'sparenwien',
+  'fooddealwien', 'fooddealsvienna', 'freefoodvienna', 'viennadeals',
+  'viennaoffers', 'viennafreebies', 'happyhourwien', 'lunchdealwien',
+  'gastroaktionwien', 'neueröffnungwien', 'eröffnungwien',
+];
+
+const DISCOVERY_ACCOUNTS = [
+  'tastyfood.vienna', 'foodiewien', 'eatinvienna_', 'viennaeats',
+  'viennafoodstories', 'viennarestaurants', 'zushimarket', 'ciosgrill',
+  'corner_xvi', 'tokki_korean_bbq', 'sajado.bbq', 'mosquito_mexican',
+];
+
 const SCRAPE_URLS = [
   'https://www.instagram.com/explore/tags/viennafood/',
-  'https://www.instagram.com/tastyfood.vienna/',
   'https://www.instagram.com/explore/tags/viennafoodie/',
-  'https://www.instagram.com/foodiewien/',
   'https://www.instagram.com/explore/tags/viennarestaurant/',
-  'https://www.instagram.com/eatinvienna_/',
-  'https://www.instagram.com/explore/tags/restaurantvienna/',
-  'https://www.instagram.com/viennaeats/',
-  'https://www.instagram.com/explore/tags/allyoucaneatvienna/',
-  'https://www.instagram.com/viennafoodstories/',
   'https://www.instagram.com/explore/tags/kostenloswien/',
-  'https://www.instagram.com/viennarestaurants/',
-  'https://www.instagram.com/explore/tags/wiengratis/',
-  'https://www.instagram.com/zushimarket/',
-  'https://www.instagram.com/explore/tags/gratisessenwien/',
-  'https://www.instagram.com/ciosgrill/',
-  'https://www.instagram.com/explore/tags/kostenlosessenwien/',
-  'https://www.instagram.com/corner_xvi/',
   'https://www.instagram.com/explore/tags/angebotwien/',
-  'https://www.instagram.com/tokki_korean_bbq/',
-  'https://www.instagram.com/explore/tags/angebotewien/',
-  'https://www.instagram.com/sajado.bbq/',
-  'https://www.instagram.com/explore/tags/wienangebot/',
-  'https://www.instagram.com/mosquito_mexican/',
-  'https://www.instagram.com/explore/tags/dealswien/',
-  'https://www.instagram.com/explore/tags/wienerdeals/',
-  'https://www.instagram.com/explore/tags/rabattwien/',
-  'https://www.instagram.com/explore/tags/wienrabatt/',
-  'https://www.instagram.com/explore/tags/sparenwien/',
-  'https://www.instagram.com/explore/tags/fooddealwien/',
-  'https://www.instagram.com/explore/tags/fooddealsvienna/',
-  'https://www.instagram.com/explore/tags/freefoodvienna/',
-  'https://www.instagram.com/explore/tags/viennadeals/',
-  'https://www.instagram.com/explore/tags/viennaoffers/',
-  'https://www.instagram.com/explore/tags/viennafreebies/',
   'https://www.instagram.com/explore/tags/happyhourwien/',
-  'https://www.instagram.com/explore/tags/lunchdealwien/',
-  'https://www.instagram.com/explore/tags/gastroaktionwien/',
   'https://www.instagram.com/explore/tags/neueröffnungwien/',
-  'https://www.instagram.com/explore/tags/eröffnungwien/',
 ];
 
 function isRateOrCreditError(message) {
@@ -138,6 +124,12 @@ Suche gezielt nach:
 
 Suche primär auf Instagram nach den ersten 50-100 Deals und ergänze diese durch Funde aus dem restlichen Web (z.B. 1000things, meinbezirk.at).
 
+Nutze dabei insbesondere diese Hashtags als Suchbegriffe:
+${DISCOVERY_HASHTAGS.map((hashtag) => `#${hashtag}`).join(', ')}
+
+Prüfe außerdem gezielt aktuelle Posts dieser Accounts:
+${DISCOVERY_ACCOUNTS.map((account) => `@${account}`).join(', ')}
+
 Erfasse für jeden Deal:
   – Den genauen Namen des Restaurants/Geschäfts/Unternehmens (brand_or_store – NICHT die Website-Domain!)
 - Kategorie
@@ -146,6 +138,8 @@ Erfasse für jeden Deal:
 - Datum und Uhrzeit der Gültigkeit
 - Die direkte URL zum ursprünglichen Post oder Web-Beitrag
 - Bei Instagram: den echten Account-Handle und das Veröffentlichungsdatum des Original-Posts.
+
+Bei Instagram muss post_url zwingend direkt zum konkreten Originalpost führen und das Format instagram.com/p/... oder instagram.com/reel/... haben. Niemals Profil-, Kanal-, Hashtag- oder Explore-URLs als post_url ausgeben. Wenn kein konkreter Originalpost auffindbar ist, den Fund weglassen.
 
 Wichtig: Das Veröffentlichungsdatum des Posts und die Gültigkeit des Angebots sind zwei verschiedene Felder.`;
 
@@ -245,6 +239,21 @@ async function main() {
               continue;
             }
 
+            const targetUrl = isInstagramUrl(postUrl)
+              ? normalizeInstagramPostUrl(postUrl)
+              : postUrl;
+            if (!targetUrl) {
+              rejected.push({
+                reason: 'instagram-profile-not-post',
+                deal: {
+                  title: d.item_given_away || '',
+                  brand: d.brand_or_store || source,
+                  url: postUrl,
+                },
+              });
+              continue;
+            }
+
             const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
             const validityDate = parseGermanDate(d.validity_date || '');
             const brand = d.brand_or_store || source;
@@ -252,14 +261,14 @@ async function main() {
             const ownerUsername = (d.owner_username || '').replace(/^@/, '').trim().toLowerCase();
 
             allDeals.push({
-              id: dealId('fc4g', brand, title, postUrl),
+              id: dealId('fc4g', brand, title, targetUrl),
               brand,
               title,
               description: [d.item_given_away, d.location].filter(Boolean).join(' – '),
               type: isGratis ? 'gratis' : 'rabatt',
               category: 'essen',
               source: 'Firecrawl Gastro #4',
-              url: postUrl,
+              url: targetUrl,
               expires: `${d.validity_date || ''} ${d.validity_time || ''}`.trim(),
               distance: d.location || '',
               hot: true,
