@@ -2,9 +2,65 @@
   "schemaVersion": 1,
   "sourceKey": "firecrawl4",
   "sourceLabel": "Firecrawl Key 4 - Gastro Discovery",
-  "updatedAt": "2026-08-06T10:17:16.600Z",
-  "runCount": 13,
+  "updatedAt": "2026-08-07T09:00:26.620Z",
+  "runCount": 14,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "firecrawl4-2026-08-07T09:00:26.620Z",
+      "sourceKey": "firecrawl4",
+      "sourceLabel": "Firecrawl Key 4 - Gastro Discovery",
+      "status": "completed-with-errors",
+      "startedAt": "2026-08-07T08:14:29.227Z",
+      "finishedAt": "2026-08-07T09:00:26.620Z",
+      "durationMs": 2757393,
+      "outputFile": "docs/deals-pending-firecrawl4.json",
+      "counts": {
+        "rawCandidates": 67,
+        "normalizedCandidates": 66,
+        "verifiedCandidates": 66,
+        "previousDeals": 0,
+        "acceptedDeals": 66,
+        "rejectedDeals": 1
+      },
+      "rejectedByReason": {
+        "instagram-profile-not-post": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "instagram-profile-not-post",
+          "deal": {
+            "id": "",
+            "title": "All you can eat sushi buffet (22,90€)",
+            "brand": "WOA Graben",
+            "url": "https://www.instagram.com/popular/sushi-all-you-can-eat-vienna/",
+            "source": "",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "configuredSources": 7,
+        "completedSources": 2,
+        "verifier": {
+          "statusCounts": {
+            "timestamp-derived": 24,
+            "verified-original-post": 3,
+            "not-recorded": 39
+          },
+          "verifiedOriginalPosts": 3,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 0
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "instagram.com: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "firecrawl4-2026-08-06T10:17:16.600Z",
