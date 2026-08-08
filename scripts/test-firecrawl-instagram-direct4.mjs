@@ -116,6 +116,9 @@ assert.match(key4Source, /URL-Dedupe deaktiviert/);
 assert.match(key4Source, /verifyFirecrawlDeals\(allDeals/);
 assert.match(key4Source, /sourceStats/);
 assert.match(key4Source, /totalCreditsUsed/);
+assert.match(key4Source, /preservePreviousOutput/);
+assert.match(key4Source, /previousOutput\.deals\.length > 0/);
+assert.match(key4Source, /runErrors\.some\(isRateOrCreditError\)/);
 assert.doesNotMatch(key4Source, /classifyKey4Evidence|dedupeKey4Candidates|FC4_MAX_AGE_DAYS/);
 
 assert.match(workflow, /FIRECRAWL_API_KEY4: \$\{\{ secrets\.FIRECRAWL_API_KEY4 \}\}/);

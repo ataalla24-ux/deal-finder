@@ -68,6 +68,18 @@ function isInstagramUrl(url) {
   return (url || '').includes('instagram.com');
 }
 
+function readPreviousOutput() {
+  try {
+    const payload = JSON.parse(fs.readFileSync(OUTPUT_PATH, 'utf8'));
+    return {
+      payload,
+      deals: Array.isArray(payload?.deals) ? payload.deals : [],
+    };
+  } catch {
+    return { payload: null, deals: [] };
+  }
+}
+
 // ============================================
 // SCHEMA
 // ============================================
@@ -141,6 +153,7 @@ async function main() {
   console.log(`📅 ${new Date().toLocaleString('de-AT')}`);
   console.log();
 
+  const previousOutput = readPreviousOutput();
   const allDeals = [];
   const rejected = [];
   const runErrors = [];
@@ -311,15 +324,27 @@ async function main() {
     .filter((deal) => !verifiedIDs.has(deal.id))
     .map((deal) => ({ reason: 'post-verification-rejected', deal })));
 
-  const output = {
-    lastUpdated: new Date().toISOString(),
-    source: 'firecrawl4',
-    totalDeals: finalDeals.length,
-    pipelineReport: `deal-pipeline-last-run-${SOURCE_KEY}.json`,
-    deals: finalDeals,
-  };
+  const preservePreviousOutput = (
+    finalDeals.length === 0
+    && completedSources === 0
+    && previousOutput.deals.length > 0
+    && runErrors.some(isRateOrCreditError)
+  );
+  const outputDeals = preservePreviousOutput ? previousOutput.deals : finalDeals;
 
-  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(output, null, 2));
+  if (preservePreviousOutput) {
+    console.log(`🛡️ Credit-Fehler vor erstem Ergebnis: ${previousOutput.deals.length} vorhandene Deals bleiben erhalten`);
+  } else {
+    const output = {
+      lastUpdated: new Date().toISOString(),
+      source: 'firecrawl4',
+      totalDeals: finalDeals.length,
+      pipelineReport: `deal-pipeline-last-run-${SOURCE_KEY}.json`,
+      deals: finalDeals,
+    };
+    fs.writeFileSync(OUTPUT_PATH, JSON.stringify(output, null, 2));
+  }
+
   writePipelineRunReport(buildPipelineRunReport({
     sourceKey: SOURCE_KEY,
     sourceLabel: SOURCE_LABEL,
@@ -330,7 +355,8 @@ async function main() {
     rawCandidates: rawCandidateCount,
     normalizedCandidates: allDeals.length,
     verifiedCandidates: finalDeals.length,
-    acceptedDeals: finalDeals.length,
+    previousDeals: previousOutput.deals.length,
+    acceptedDeals: outputDeals.length,
     rejected,
     diagnostics: {
       configuredSources: SCRAPE_TARGETS.length,
@@ -338,12 +364,13 @@ async function main() {
       completedSources,
       maxCreditsPerTarget: MAX_CREDITS_PER_TARGET,
       totalCreditsUsed,
+      preservedPreviousOutput,
       sourceStats,
       verifier: summarizeVerifiedDeals(finalDeals),
     },
     errors: runErrors,
   }));
-  console.log(`💾 ${finalDeals.length} Deals → ${OUTPUT_PATH}`);
+  console.log(`💾 ${outputDeals.length} Deals → ${OUTPUT_PATH}`);
 }
 
 main()
