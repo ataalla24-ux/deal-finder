@@ -31,6 +31,7 @@ jobs:
           FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 45
           FIRECRAWL_POST_VERIFY_CONCURRENCY: 4
           FIRECRAWL_POST_VERIFY_TIMEOUT_MS: 6000
+          FIRECRAWL4_MAX_CREDITS_PER_TARGET: 350
         run: node scraper/firecrawl-instagram-direct4.js
 
       - name: Commit deals

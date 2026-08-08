@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
+import {
+  GASTRO2_BASE_PROMPT,
+  ROTATING_ACCOUNT_TARGETS,
+  ROTATING_HASHTAG_TARGETS,
+  WEB_TARGETS,
+  buildTargetPrompt,
+  selectScrapeTargets,
+} from '../scraper/firecrawl-instagram-direct4-config.js';
 import { normalizeInstagramPostUrl } from '../scraper/firecrawl-post-verifier.js';
 
 const KEY4_SOURCE_PATH = 'scraper/firecrawl-instagram-direct4.js';
@@ -16,13 +24,6 @@ function scrapeUrls(source) {
   return [...block.matchAll(/'([^']+)'/g)].map((match) => match[1]);
 }
 
-function stringArray(source, name) {
-  const block = source.match(new RegExp(`const ${name} = \\[([\\s\\S]*?)\\];`))?.[1] || '';
-  return [...block.matchAll(/'([^']+)'/g)].map((match) => match[1]);
-}
-
-const key4Urls = scrapeUrls(key4Source);
-const gastro2Urls = new Set(scrapeUrls(gastro2Source));
 const expectedHashtags = [
   'viennafood', 'viennafoodie', 'viennarestaurant', 'restaurantvienna',
   'allyoucaneatvienna', 'kostenloswien', 'wiengratis', 'gratisessenwien',
@@ -37,28 +38,60 @@ const expectedAccounts = [
   'viennafoodstories', 'viennarestaurants', 'zushimarket', 'ciosgrill',
   'corner_xvi', 'tokki_korean_bbq', 'sajado.bbq', 'mosquito_mexican',
 ];
-const discoveryHashtags = stringArray(key4Source, 'DISCOVERY_HASHTAGS');
-const discoveryAccounts = stringArray(key4Source, 'DISCOVERY_ACCOUNTS');
-const lastPathSegment = (url) => decodeURIComponent(
-  new URL(url).pathname.split('/').filter(Boolean).at(-1),
+
+const fixedDate = new Date('2026-08-08T00:00:00.000Z');
+const nextDate = new Date('2026-08-09T00:00:00.000Z');
+const selectedTargets = selectScrapeTargets(fixedDate);
+const nextTargets = selectScrapeTargets(nextDate);
+const selectedByKind = (kind) => selectedTargets.filter((target) => target.kind === kind);
+const selectedUrls = selectedTargets.map((target) => target.url);
+const gastro2Urls = new Set(scrapeUrls(gastro2Source));
+
+const configuredHashtags = [
+  'kostenlosessenwien',
+  'fooddealwien',
+  'gastroaktionwien',
+  ...ROTATING_HASHTAG_TARGETS.map((target) => target.label.slice(1)),
+];
+const configuredAccounts = [
+  'tastyfood.vienna',
+  ...ROTATING_ACCOUNT_TARGETS.map((target) => target.label.slice(1)),
+];
+
+assert.deepEqual(new Set(configuredHashtags), new Set(expectedHashtags));
+assert.deepEqual(new Set(configuredAccounts), new Set(expectedAccounts));
+assert.equal(WEB_TARGETS.length, 2);
+
+assert.equal(selectedTargets.length, 10, 'Key 4 should run ten real, bounded targets');
+assert.equal(new Set(selectedUrls).size, selectedTargets.length, 'selected targets must be unique');
+assert.equal(selectedByKind('instagram-hashtag').length, 5);
+assert.equal(selectedByKind('instagram-account').length, 3);
+assert.equal(selectedByKind('web-deal-list').length, 2);
+assert.ok(selectedTargets.some((target) => target.id === 'hashtag:kostenlosessenwien'));
+assert.ok(selectedTargets.some((target) => target.id === 'hashtag:fooddealwien'));
+assert.ok(selectedTargets.some((target) => target.id === 'hashtag:gastroaktionwien'));
+assert.ok(selectedTargets.some((target) => target.id === 'account:tastyfood.vienna'));
+assert.ok(selectedByKind('instagram-hashtag').every((target) => target.url.includes('/explore/tags/')));
+assert.ok(selectedByKind('instagram-account').every((target) => /^https:\/\/www\.instagram\.com\/[^/]+\/$/.test(target.url)));
+assert.ok(selectedUrls.every((url) => !gastro2Urls.has(url)), 'Key 4 targets must not duplicate Gastro2 start URLs');
+assert.notDeepEqual(
+  selectedTargets.map((target) => target.id),
+  nextTargets.map((target) => target.id),
+  'rotating targets should change between days',
 );
 
-assert.equal(key4Urls.length, 7, 'Key 4 uses the same number of starting sources as Gastro2');
-assert.equal(new Set(key4Urls).size, key4Urls.length, 'discovery sources must be unique');
-assert.ok(key4Urls.every((url) => url.includes('/explore/tags/')), 'accounts must not be direct starting URLs');
-assert.deepEqual(new Set(discoveryHashtags), new Set(expectedHashtags));
-assert.deepEqual(new Set(discoveryAccounts), new Set(expectedAccounts));
-assert.deepEqual(key4Urls, [
-  'https://www.instagram.com/explore/tags/viennafood/',
-  'https://www.instagram.com/explore/tags/viennafoodie/',
-  'https://www.instagram.com/explore/tags/viennarestaurant/',
-  'https://www.instagram.com/explore/tags/kostenloswien/',
-  'https://www.instagram.com/explore/tags/angebotwien/',
-  'https://www.instagram.com/explore/tags/happyhourwien/',
-  'https://www.instagram.com/explore/tags/neueröffnungwien/',
-]);
-assert.ok(key4Urls.every((url) => !gastro2Urls.has(url)), 'Key 4 sources must not duplicate Gastro2 sources');
-assert.ok(key4Urls.map(lastPathSegment).every((hashtag) => expectedHashtags.includes(hashtag)));
+const gastro2Prompt = gastro2Source.match(/const PROMPT = `([\s\S]*?)`;/)?.[1] || '';
+assert.equal(GASTRO2_BASE_PROMPT, gastro2Prompt, 'Key 4 base prompt must stay identical to Gastro2');
+
+const hashtagPrompt = buildTargetPrompt(selectedByKind('instagram-hashtag')[0]);
+const accountPrompt = buildTargetPrompt(selectedByKind('instagram-account')[0]);
+const webPrompt = buildTargetPrompt(selectedByKind('web-deal-list')[0]);
+assert.ok(hashtagPrompt.startsWith(GASTRO2_BASE_PROMPT));
+assert.match(hashtagPrompt, /Beginne auf der angegebenen Hashtag-Seite/);
+assert.match(accountPrompt, /Beginne beim angegebenen Instagram-Konto/);
+assert.match(webPrompt, /Erfasse jede unterschiedliche aktuelle Aktion als eigenen Deal/);
+assert.match(hashtagPrompt, /Niemals Profil-, Kanal-, Hashtag- oder Explore-URLs/);
+assert.doesNotMatch(hashtagPrompt, /Prüfe außerdem gezielt aktuelle Posts dieser Accounts/);
 
 assert.equal(normalizeInstagramPostUrl('https://www.instagram.com/corner_xvi/'), '');
 assert.equal(
@@ -66,25 +99,32 @@ assert.equal(
   'https://www.instagram.com/reel/DbEYTWHRymD/',
 );
 
+const agentPayload = key4Source.match(/const result = await runAgent\(\{([\s\S]*?)\n\s*\}\);/)?.[1] || '';
 assert.match(key4Source, /process\.env\.FIRECRAWL_API_KEY4/);
 assert.doesNotMatch(key4Source, /process\.env\.FIRECRAWL_API_KEY(?:1|2|3|5|6)\b/);
 assert.doesNotMatch(key4Source, /process\.env\.FIRECRAWL_API_KEY\b/);
 assert.match(key4Source, /return firecrawl\.agent\(payload\)/);
-assert.match(key4Source, /schema: gastroSchema/);
-assert.match(key4Source, /model: 'spark-1-pro'/);
+assert.match(agentPayload, /urls: \[target\.url\]/);
+assert.doesNotMatch(agentPayload, /(^|\n)\s*url:/);
+assert.match(agentPayload, /prompt: buildTargetPrompt\(target\)/);
+assert.match(agentPayload, /schema: gastroSchema/);
+assert.match(agentPayload, /model: 'spark-1-pro'/);
+assert.match(agentPayload, /maxCredits: MAX_CREDITS_PER_TARGET/);
 assert.match(key4Source, /normalizeInstagramPostUrl\(postUrl\)/);
 assert.match(key4Source, /instagram-profile-not-post/);
-assert.match(key4Source, /Niemals Profil-, Kanal-, Hashtag- oder Explore-URLs/);
 assert.match(key4Source, /URL-Dedupe deaktiviert/);
 assert.match(key4Source, /verifyFirecrawlDeals\(allDeals/);
+assert.match(key4Source, /sourceStats/);
+assert.match(key4Source, /totalCreditsUsed/);
 assert.doesNotMatch(key4Source, /classifyKey4Evidence|dedupeKey4Candidates|FC4_MAX_AGE_DAYS/);
 
 assert.match(workflow, /FIRECRAWL_API_KEY4: \$\{\{ secrets\.FIRECRAWL_API_KEY4 \}\}/);
 assert.doesNotMatch(workflow, /FIRECRAWL_API_KEY(?:1|2|3|5|6):/);
 assert.doesNotMatch(workflow, /^\s+FIRECRAWL_API_KEY:/m);
+assert.match(workflow, /FIRECRAWL4_MAX_CREDITS_PER_TARGET: 350/);
 assert.match(workflow, /FIRECRAWL_POST_VERIFY_MAX: 60/);
 assert.match(workflow, /FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 45/);
 assert.doesNotMatch(workflow, /timeout-minutes:/);
 assert.doesNotMatch(workflow, /deals-(?:raw|review|rejected)-firecrawl4\.json/);
 
-console.log('Firecrawl Key 4 Gastro2-clone regression tests passed.');
+console.log('Firecrawl Key 4 targeted Gastro2-clone regression tests passed.');

@@ -17,12 +17,28 @@ import {
   writeFailedPipelineRunReport,
   writePipelineRunReport,
 } from './pipeline-run-report-utils.js';
+import {
+  buildTargetPrompt,
+  selectScrapeTargets,
+} from './firecrawl-instagram-direct4-config.js';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY4;
 const SOURCE_KEY = 'firecrawl4';
 const SOURCE_LABEL = 'Firecrawl Key 4 - Gastro Discovery';
 const OUTPUT_PATH = 'docs/deals-pending-firecrawl4.json';
 const RUN_STARTED_AT = new Date();
+const DEFAULT_MAX_CREDITS_PER_TARGET = 350;
+
+function positiveInteger(value, fallback) {
+  const parsed = Number.parseInt(value || '', 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+const MAX_CREDITS_PER_TARGET = positiveInteger(
+  process.env.FIRECRAWL4_MAX_CREDITS_PER_TARGET,
+  DEFAULT_MAX_CREDITS_PER_TARGET,
+);
+const SCRAPE_TARGETS = selectScrapeTargets(RUN_STARTED_AT);
 
 if (!FIRECRAWL_API_KEY) {
   const error = new Error('FIRECRAWL_API_KEY4 nicht gesetzt');
@@ -42,36 +58,6 @@ const firecrawl = new Firecrawl({ apiKey: FIRECRAWL_API_KEY });
 async function runAgent(payload) {
   return firecrawl.agent(payload);
 }
-
-// ============================================
-// SEITEN
-// ============================================
-
-const DISCOVERY_HASHTAGS = [
-  'viennafood', 'viennafoodie', 'viennarestaurant', 'restaurantvienna',
-  'allyoucaneatvienna', 'kostenloswien', 'wiengratis', 'gratisessenwien',
-  'kostenlosessenwien', 'angebotwien', 'angebotewien', 'wienangebot',
-  'dealswien', 'wienerdeals', 'rabattwien', 'wienrabatt', 'sparenwien',
-  'fooddealwien', 'fooddealsvienna', 'freefoodvienna', 'viennadeals',
-  'viennaoffers', 'viennafreebies', 'happyhourwien', 'lunchdealwien',
-  'gastroaktionwien', 'neueröffnungwien', 'eröffnungwien',
-];
-
-const DISCOVERY_ACCOUNTS = [
-  'tastyfood.vienna', 'foodiewien', 'eatinvienna_', 'viennaeats',
-  'viennafoodstories', 'viennarestaurants', 'zushimarket', 'ciosgrill',
-  'corner_xvi', 'tokki_korean_bbq', 'sajado.bbq', 'mosquito_mexican',
-];
-
-const SCRAPE_URLS = [
-  'https://www.instagram.com/explore/tags/viennafood/',
-  'https://www.instagram.com/explore/tags/viennafoodie/',
-  'https://www.instagram.com/explore/tags/viennarestaurant/',
-  'https://www.instagram.com/explore/tags/kostenloswien/',
-  'https://www.instagram.com/explore/tags/angebotwien/',
-  'https://www.instagram.com/explore/tags/happyhourwien/',
-  'https://www.instagram.com/explore/tags/neueröffnungwien/',
-];
 
 function isRateOrCreditError(message) {
   const m = (message || '').toLowerCase();
@@ -108,40 +94,6 @@ const gastroSchema = z.object({
     post_date_citation: z.string().optional(),
   })),
 });
-
-// ============================================
-// PROMPT
-// ============================================
-
-const PROMPT = `Extrahiere aktuelle und zukünftige Deals in Wien mit höchster Priorität auf Gastronomie-Angebote (Essen & Trinken).
-
-Suche gezielt nach:
-- Starken Rabatten wie Mahlzeiten unter €3
-- Mindestens 50% Preisnachlass (z.B. 1,99€ Döner, 1+1 Aktionen)
-- Kostenlose Freebies
-- Neueröffnungen mit Gratis-Aktionen
-- Starke Rabatte allgemein
-
-Suche primär auf Instagram nach den ersten 50-100 Deals und ergänze diese durch Funde aus dem restlichen Web (z.B. 1000things, meinbezirk.at).
-
-Nutze dabei insbesondere diese Hashtags als Suchbegriffe:
-${DISCOVERY_HASHTAGS.map((hashtag) => `#${hashtag}`).join(', ')}
-
-Prüfe außerdem gezielt aktuelle Posts dieser Accounts:
-${DISCOVERY_ACCOUNTS.map((account) => `@${account}`).join(', ')}
-
-Erfasse für jeden Deal:
-  – Den genauen Namen des Restaurants/Geschäfts/Unternehmens (brand_or_store – NICHT die Website-Domain!)
-- Kategorie
-- Was genau verschenkt/rabattiert wird
-- Den Standort
-- Datum und Uhrzeit der Gültigkeit
-- Die direkte URL zum ursprünglichen Post oder Web-Beitrag
-- Bei Instagram: den echten Account-Handle und das Veröffentlichungsdatum des Original-Posts.
-
-Bei Instagram muss post_url zwingend direkt zum konkreten Originalpost führen und das Format instagram.com/p/... oder instagram.com/reel/... haben. Niemals Profil-, Kanal-, Hashtag- oder Explore-URLs als post_url ausgeben. Wenn kein konkreter Originalpost auffindbar ist, den Fund weglassen.
-
-Wichtig: Das Veröffentlichungsdatum des Posts und die Gültigkeit des Angebots sind zwei verschiedene Felder.`;
 
 // ============================================
 // MAIN
@@ -192,37 +144,67 @@ async function main() {
   const allDeals = [];
   const rejected = [];
   const runErrors = [];
+  const sourceStats = [];
   let rawCandidateCount = 0;
   let completedSources = 0;
+  let totalCreditsUsed = 0;
 
-  console.log(`🔍 Scrape ${SCRAPE_URLS.length} Seiten (Gastro Focus)...`);
+  console.log(`🔍 Scrape ${SCRAPE_TARGETS.length} echte Ziele (Gastro Focus)...`);
+  console.log(`💳 Maximal ${MAX_CREDITS_PER_TARGET} Credits pro Ziel`);
 
-  for (let i = 0; i < SCRAPE_URLS.length; i++) {
-    const url = SCRAPE_URLS[i];
-    const source = new URL(url).hostname.replace('www.', '');
+  for (let i = 0; i < SCRAPE_TARGETS.length; i++) {
+    const target = SCRAPE_TARGETS[i];
+    const normalizedBefore = allDeals.length;
+    const rejectedBefore = rejected.length;
+    const stat = {
+      id: target.id,
+      kind: target.kind,
+      label: target.label,
+      url: target.url,
+      status: 'started',
+      rawCandidates: 0,
+      normalizedCandidates: 0,
+      rejectedCandidates: 0,
+      creditsUsed: 0,
+    };
+    let stopAfterTarget = false;
 
-    console.log(`   [${i + 1}/${SCRAPE_URLS.length}] ${source}...`);
+    console.log(`   [${i + 1}/${SCRAPE_TARGETS.length}] ${target.label} (${target.kind})...`);
 
     try {
       const result = await runAgent({
-        url: url,
-        prompt: PROMPT,
+        urls: [target.url],
+        prompt: buildTargetPrompt(target),
         schema: gastroSchema,
         model: 'spark-1-pro',
+        maxCredits: MAX_CREDITS_PER_TARGET,
       });
 
-      if (result && result.data) {
+      if (Number.isFinite(Number(result?.creditsUsed))) {
+        stat.creditsUsed = Number(result.creditsUsed);
+        totalCreditsUsed += stat.creditsUsed;
+      }
+
+      if (result?.status === 'failed' || result?.success === false) {
+        throw new Error(result?.error || 'Firecrawl Agent fehlgeschlagen');
+      }
+
+      if (result?.data) {
         let data = result.data;
 
         if (typeof data === 'string') {
           try {
             data = JSON.parse(data);
-          } catch (e) {}
+          } catch (error) {
+            throw new Error(`Ungültige Agent-Antwort: ${error.message}`);
+          }
         }
 
         if (data && data.deals && Array.isArray(data.deals)) {
           completedSources += 1;
           rawCandidateCount += data.deals.length;
+          stat.status = 'completed';
+          stat.rawCandidates = data.deals.length;
           console.log(`      → ${data.deals.length} Deals gefunden`);
 
           for (const d of data.deals) {
@@ -233,7 +215,7 @@ async function main() {
                 reason: 'missing-target-url',
                 deal: {
                   title: d.item_given_away || '',
-                  brand: d.brand_or_store || source,
+                  brand: d.brand_or_store || target.label,
                 },
               });
               continue;
@@ -247,7 +229,7 @@ async function main() {
                 reason: 'instagram-profile-not-post',
                 deal: {
                   title: d.item_given_away || '',
-                  brand: d.brand_or_store || source,
+                  brand: d.brand_or_store || target.label,
                   url: postUrl,
                 },
               });
@@ -256,7 +238,7 @@ async function main() {
 
             const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
             const validityDate = parseGermanDate(d.validity_date || '');
-            const brand = d.brand_or_store || source;
+            const brand = d.brand_or_store || target.label;
             const title = d.item_given_away?.substring(0, 60) || 'Gastro Deal';
             const ownerUsername = (d.owner_username || '').replace(/^@/, '').trim().toLowerCase();
 
@@ -279,6 +261,8 @@ async function main() {
               ownerUsername,
               reportedPostDate: d.post_date || '',
               expiresOriginal: `${d.validity_date || ''} ${d.validity_time || ''}`.trim(),
+              discoveryTarget: target.id,
+              discoveryTargetLabel: target.label,
               ...(validityDate ? {
                 validOn: validityDate.toISOString(),
                 expires: validityDate.toISOString(),
@@ -287,16 +271,30 @@ async function main() {
               } : {}),
             });
           }
+        } else {
+          stat.status = 'no-data';
+          console.log('      → Keine strukturierte Deal-Liste erhalten');
         }
+      } else {
+        stat.status = 'no-data';
+        console.log('      → Keine Agent-Daten erhalten');
       }
     } catch (e) {
       console.log(`      → Error: ${e.message}`);
-      runErrors.push(`${source}: ${e.message}`);
+      stat.status = 'failed';
+      stat.error = e.message;
+      runErrors.push(`${target.label}: ${e.message}`);
       if (isRateOrCreditError(e.message)) {
         console.log('      → Stoppe Run frühzeitig wegen API-Limit/Credits');
-        break;
+        stopAfterTarget = true;
       }
     }
+
+    stat.normalizedCandidates = allDeals.length - normalizedBefore;
+    stat.rejectedCandidates = rejected.length - rejectedBefore;
+    sourceStats.push(stat);
+
+    if (stopAfterTarget) break;
 
     await new Promise(r => setTimeout(r, 2000));
   }
@@ -335,8 +333,12 @@ async function main() {
     acceptedDeals: finalDeals.length,
     rejected,
     diagnostics: {
-      configuredSources: SCRAPE_URLS.length,
+      configuredSources: SCRAPE_TARGETS.length,
+      attemptedSources: sourceStats.length,
       completedSources,
+      maxCreditsPerTarget: MAX_CREDITS_PER_TARGET,
+      totalCreditsUsed,
+      sourceStats,
       verifier: summarizeVerifiedDeals(finalDeals),
     },
     errors: runErrors,
