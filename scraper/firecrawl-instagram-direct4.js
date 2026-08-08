@@ -324,15 +324,15 @@ async function main() {
     .filter((deal) => !verifiedIDs.has(deal.id))
     .map((deal) => ({ reason: 'post-verification-rejected', deal })));
 
-  const preservePreviousOutput = (
+  const preservedPreviousOutput = (
     finalDeals.length === 0
     && completedSources === 0
     && previousOutput.deals.length > 0
     && runErrors.some(isRateOrCreditError)
   );
-  const outputDeals = preservePreviousOutput ? previousOutput.deals : finalDeals;
+  const outputDeals = preservedPreviousOutput ? previousOutput.deals : finalDeals;
 
-  if (preservePreviousOutput) {
+  if (preservedPreviousOutput) {
     console.log(`🛡️ Credit-Fehler vor erstem Ergebnis: ${previousOutput.deals.length} vorhandene Deals bleiben erhalten`);
   } else {
     const output = {
