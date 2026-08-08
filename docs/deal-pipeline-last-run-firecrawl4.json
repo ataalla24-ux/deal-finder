@@ -1,88 +1,46 @@
 {
   "schemaVersion": 1,
-  "runId": "firecrawl4-2026-08-08T08:29:00.459Z",
+  "runId": "firecrawl4-2026-08-08T08:52:03.565Z",
   "sourceKey": "firecrawl4",
   "sourceLabel": "Firecrawl Key 4 - Gastro Discovery",
   "status": "completed-with-errors",
-  "startedAt": "2026-08-08T07:50:02.145Z",
-  "finishedAt": "2026-08-08T08:29:00.459Z",
-  "durationMs": 2338314,
+  "startedAt": "2026-08-08T08:52:03.316Z",
+  "finishedAt": "2026-08-08T08:52:03.565Z",
+  "durationMs": 249,
   "outputFile": "docs/deals-pending-firecrawl4.json",
   "counts": {
-    "rawCandidates": 109,
-    "normalizedCandidates": 105,
-    "verifiedCandidates": 105,
+    "rawCandidates": 0,
+    "normalizedCandidates": 0,
+    "verifiedCandidates": 0,
     "previousDeals": 0,
-    "acceptedDeals": 105,
-    "rejectedDeals": 4
+    "acceptedDeals": 0,
+    "rejectedDeals": 0
   },
-  "rejectedByReason": {
-    "instagram-profile-not-post": 4
-  },
-  "rejectedSamples": [
-    {
-      "reason": "instagram-profile-not-post",
-      "deal": {
-        "id": "",
-        "title": "All You Can Eat Korean BBQ ab 32,90€",
-        "brand": "Tokki Korean BBQ",
-        "url": "https://www.instagram.com/tokki_korean_bbq/",
-        "source": "",
-        "pubDate": "",
-        "expires": "",
-        "postVerificationStatus": ""
-      }
-    },
-    {
-      "reason": "instagram-profile-not-post",
-      "deal": {
-        "id": "",
-        "title": "50% Rabatt auf alle Bowls",
-        "brand": "Zushi Market (ALEX Krems)",
-        "url": "https://www.instagram.com/zushimarket/",
-        "source": "",
-        "pubDate": "",
-        "expires": "",
-        "postVerificationStatus": ""
-      }
-    },
-    {
-      "reason": "instagram-profile-not-post",
-      "deal": {
-        "id": "",
-        "title": "All you can eat Korean BBQ",
-        "brand": "Tokki Korean BBQ",
-        "url": "https://www.instagram.com/tokki_korean_bbq/",
-        "source": "",
-        "pubDate": "",
-        "expires": "",
-        "postVerificationStatus": ""
-      }
-    },
-    {
-      "reason": "instagram-profile-not-post",
-      "deal": {
-        "id": "",
-        "title": "All You Can Eat Korean BBQ",
-        "brand": "Sajado BBQ",
-        "url": "https://www.instagram.com/sajado.bbq/",
-        "source": "",
-        "pubDate": "",
-        "expires": "",
-        "postVerificationStatus": ""
-      }
-    }
-  ],
+  "rejectedByReason": {},
+  "rejectedSamples": [],
   "diagnostics": {
-    "configuredSources": 7,
-    "completedSources": 3,
+    "configuredSources": 10,
+    "attemptedSources": 1,
+    "completedSources": 0,
+    "maxCreditsPerTarget": 350,
+    "totalCreditsUsed": 0,
+    "sourceStats": [
+      {
+        "id": "hashtag:kostenlosessenwien",
+        "kind": "instagram-hashtag",
+        "label": "#kostenlosessenwien",
+        "url": "https://www.instagram.com/explore/tags/kostenlosessenwien/",
+        "status": "failed",
+        "rawCandidates": 0,
+        "normalizedCandidates": 0,
+        "rejectedCandidates": 0,
+        "creditsUsed": 0,
+        "error": "Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+      }
+    ],
     "verifier": {
-      "statusCounts": {
-        "timestamp-derived": 45,
-        "not-recorded": 54,
-        "verified-original-post": 6
-      },
-      "verifiedOriginalPosts": 6,
+      "statusCounts": {},
+      "verifiedOriginalPosts": 0,
       "timestampOnlyPosts": 0,
       "unavailableOriginalPosts": 0,
       "registryViennaEvidence": 0
@@ -90,6 +48,6 @@
   },
   "constraints": {},
   "errors": [
-    "instagram.com: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+    "#kostenlosessenwien: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
   ]
 }
