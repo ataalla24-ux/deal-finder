@@ -1,29 +1,61 @@
 {
   "schemaVersion": 1,
-  "runId": "food3-2026-08-08T03:42:48.266Z",
+  "runId": "food3-2026-08-09T03:51:48.211Z",
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
   "status": "completed",
-  "startedAt": "2026-08-08T03:37:01.877Z",
-  "finishedAt": "2026-08-08T03:42:48.266Z",
-  "durationMs": 346389,
+  "startedAt": "2026-08-09T03:46:18.235Z",
+  "finishedAt": "2026-08-09T03:51:48.211Z",
+  "durationMs": 329976,
   "outputFile": "docs/deals-pending-food3.json",
   "counts": {
-    "rawCandidates": 0,
-    "normalizedCandidates": 0,
-    "verifiedCandidates": 0,
+    "rawCandidates": 33,
+    "normalizedCandidates": 31,
+    "verifiedCandidates": 31,
     "previousDeals": 0,
-    "acceptedDeals": 0,
-    "rejectedDeals": 0
+    "acceptedDeals": 31,
+    "rejectedDeals": 2
   },
-  "rejectedByReason": {},
-  "rejectedSamples": [],
+  "rejectedByReason": {
+    "invalid-original-post-url": 2
+  },
+  "rejectedSamples": [
+    {
+      "reason": "invalid-original-post-url",
+      "deal": {
+        "id": "",
+        "title": "2-for-1 drinks, cocktails, mocktails",
+        "brand": "THEO'S Lounge & Bar Vienna",
+        "url": "https://www.instagram.com/theosvienna/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "invalid-original-post-url",
+      "deal": {
+        "id": "",
+        "title": "Drinks and food",
+        "brand": "Billabong Australian Pub",
+        "url": "https://www.instagram.com/billabong.pub/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    }
+  ],
   "diagnostics": {
-    "agentStatus": "failed",
+    "agentStatus": "completed",
     "creditsUsed": 0,
     "verifier": {
-      "statusCounts": {},
-      "verifiedOriginalPosts": 0,
+      "statusCounts": {
+        "verified-original-post": 11,
+        "timestamp-derived": 20
+      },
+      "verifiedOriginalPosts": 11,
       "timestampOnlyPosts": 0,
       "unavailableOriginalPosts": 0,
       "registryViennaEvidence": 0
