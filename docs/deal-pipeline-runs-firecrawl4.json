@@ -2,9 +2,128 @@
   "schemaVersion": 1,
   "sourceKey": "firecrawl4",
   "sourceLabel": "Firecrawl Key 4 - Gastro Discovery",
-  "updatedAt": "2026-08-09T08:06:18.374Z",
-  "runCount": 18,
+  "updatedAt": "2026-08-10T08:35:22.194Z",
+  "runCount": 19,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "firecrawl4-2026-08-10T08:35:22.194Z",
+      "sourceKey": "firecrawl4",
+      "sourceLabel": "Firecrawl Key 4 - Gastro Discovery",
+      "status": "completed-with-errors",
+      "startedAt": "2026-08-10T08:26:59.638Z",
+      "finishedAt": "2026-08-10T08:35:22.194Z",
+      "durationMs": 502556,
+      "outputFile": "docs/deals-pending-firecrawl4.json",
+      "counts": {
+        "rawCandidates": 0,
+        "normalizedCandidates": 0,
+        "verifiedCandidates": 0,
+        "previousDeals": 100,
+        "acceptedDeals": 100,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "configuredSources": 10,
+        "attemptedSources": 6,
+        "completedSources": 0,
+        "maxCreditsPerTarget": 350,
+        "totalCreditsUsed": 0,
+        "preservedPreviousOutput": true,
+        "sourceStats": [
+          {
+            "id": "hashtag:kostenlosessenwien",
+            "kind": "instagram-hashtag",
+            "label": "#kostenlosessenwien",
+            "url": "https://www.instagram.com/explore/tags/kostenlosessenwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: Error: Agent reached max credits"
+          },
+          {
+            "id": "hashtag:fooddealwien",
+            "kind": "instagram-hashtag",
+            "label": "#fooddealwien",
+            "url": "https://www.instagram.com/explore/tags/fooddealwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: Error: Agent reached max credits"
+          },
+          {
+            "id": "hashtag:gastroaktionwien",
+            "kind": "instagram-hashtag",
+            "label": "#gastroaktionwien",
+            "url": "https://www.instagram.com/explore/tags/gastroaktionwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: I apologize, but I cannot complete this task as specified. The mandatory source constraint requires extracting data ONLY from https://www.instagram.com/explore/tags/gastroaktionwien/, however:\n\n1. Instagram is not supported by the available scraping tools due to their authentication requirements and anti-scraping measures\n2. The browser automation agent was unable to access the Instagram content (failed with a null error)\n3. Direct scraping attempts return an explicit message that Instagram is not supported\n\nInstagram requires user authentication and employs strong anti-bot protections that prevent automated data extraction through the available tools.\n\nTo complete this task, you would need either:\n- Manual access to Instagram with a logged-in account\n- API access through Instagram's official Graph API (requires app approval)\n- Alternative sources for Vienna gastronomy deals (1000things.at, meinbezirk.at, etc.)\n\nIf you'd like to proceed with alternative sources for Vienna gastronomy deals (which the task description mentions as supplementary), please let me know and I can modify the search criteria."
+          },
+          {
+            "id": "hashtag:viennafood",
+            "kind": "instagram-hashtag",
+            "label": "#viennafood",
+            "url": "https://www.instagram.com/explore/tags/viennafood/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: Error: Agent reached max credits"
+          },
+          {
+            "id": "hashtag:viennafoodie",
+            "kind": "instagram-hashtag",
+            "label": "#viennafoodie",
+            "url": "https://www.instagram.com/explore/tags/viennafoodie/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: Error: Agent reached max credits"
+          },
+          {
+            "id": "account:tastyfood.vienna",
+            "kind": "instagram-account",
+            "label": "@tastyfood.vienna",
+            "url": "https://www.instagram.com/tastyfood.vienna/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+          }
+        ],
+        "verifier": {
+          "statusCounts": {},
+          "verifiedOriginalPosts": 0,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 0
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "#kostenlosessenwien: Refusal: Error: Agent reached max credits",
+        "#fooddealwien: Refusal: Error: Agent reached max credits",
+        "#gastroaktionwien: Refusal: I apologize, but I cannot complete this task as specified. The mandatory source constraint requires extracting data ONLY from https://www.instagram.com/explore/tags/gastroaktionwien/, however: 1. Instagram is not supported by the available scraping tools due to their authentication requirements and anti-scraping measures 2. The browser automation agent was unable to access the Instagram content (failed with a null error) 3. Direct scraping attempts return an explicit message that Instagram is not supported Instagram requires user authentication and employs strong anti-bot protections that prevent automated data extraction through the available tools. To complete t",
+        "#viennafood: Refusal: Error: Agent reached max credits",
+        "#viennafoodie: Refusal: Error: Agent reached max credits",
+        "@tastyfood.vienna: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "firecrawl4-2026-08-09T08:06:18.374Z",
