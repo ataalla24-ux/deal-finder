@@ -1,32 +1,48 @@
 {
   "schemaVersion": 1,
-  "runId": "firecrawl2-2026-08-10T04:23:35.136Z",
+  "runId": "firecrawl2-2026-08-11T04:22:44.794Z",
   "sourceKey": "firecrawl2",
   "sourceLabel": "Firecrawl Key 3 - Consumables",
   "status": "completed",
-  "startedAt": "2026-08-10T04:22:37.842Z",
-  "finishedAt": "2026-08-10T04:23:35.136Z",
-  "durationMs": 57294,
+  "startedAt": "2026-08-11T04:11:46.324Z",
+  "finishedAt": "2026-08-11T04:22:44.794Z",
+  "durationMs": 658470,
   "outputFile": "docs/deals-pending-firecrawl2.json",
   "counts": {
-    "rawCandidates": 6,
-    "normalizedCandidates": 6,
-    "verifiedCandidates": 6,
+    "rawCandidates": 10,
+    "normalizedCandidates": 9,
+    "verifiedCandidates": 9,
     "previousDeals": 0,
-    "acceptedDeals": 6,
-    "rejectedDeals": 0
+    "acceptedDeals": 9,
+    "rejectedDeals": 1
   },
-  "rejectedByReason": {},
-  "rejectedSamples": [],
+  "rejectedByReason": {
+    "invalid-original-post-url": 1
+  },
+  "rejectedSamples": [
+    {
+      "reason": "invalid-original-post-url",
+      "deal": {
+        "id": "",
+        "title": "1€ Matcha Ice Cream",
+        "brand": "chasenbrew",
+        "url": "https://www.instagram.com/chasenbrew/reels/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    }
+  ],
   "diagnostics": {
     "agentStatus": "completed",
     "creditsUsed": 0,
     "verifier": {
       "statusCounts": {
-        "timestamp-derived": 4,
-        "verified-original-post": 2
+        "timestamp-derived": 8,
+        "verified-original-post": 1
       },
-      "verifiedOriginalPosts": 2,
+      "verifiedOriginalPosts": 1,
       "timestampOnlyPosts": 0,
       "unavailableOriginalPosts": 0,
       "registryViennaEvidence": 0
