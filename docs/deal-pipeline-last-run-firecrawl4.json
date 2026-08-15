@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "runId": "firecrawl4-2026-08-14T08:23:15.355Z",
+  "runId": "firecrawl4-2026-08-15T07:46:10.463Z",
   "sourceKey": "firecrawl4",
   "sourceLabel": "Firecrawl Key 4 - Gastro Discovery",
   "status": "completed-with-errors",
-  "startedAt": "2026-08-14T08:15:53.865Z",
-  "finishedAt": "2026-08-14T08:23:15.355Z",
-  "durationMs": 441490,
+  "startedAt": "2026-08-15T07:31:11.389Z",
+  "finishedAt": "2026-08-15T07:46:10.463Z",
+  "durationMs": 899074,
   "outputFile": "docs/deals-pending-firecrawl4.json",
   "counts": {
     "rawCandidates": 0,
@@ -48,7 +48,7 @@
         "normalizedCandidates": 0,
         "rejectedCandidates": 0,
         "creditsUsed": 0,
-        "error": "Refusal: I apologize, but I cannot complete this task. The request specifically constrains data extraction to Instagram (https://www.instagram.com/explore/tags/fooddealwien/), but Instagram is not supported by the available scraping tools.\n\nWhen attempting to:\n1. Use a browser automation agent - the agent encountered an error\n2. Directly scrape Instagram - received error: \"We do not support this site\"\n\nInstagram implements anti-scraping measures and requires authentication for most content access, which the available tools cannot bypass.\n\nTo complete this task, you would need:\n- Direct API access to Instagram (requires authentication and API keys)\n- Manual extraction of the data\n- Permission to use alternative sources beyond Instagram\n\nIf you can relax the website constraint to include other Vienna food deal sources (like 1000things.at, meinbezirk.at, or other local deal sites), I would be able to extract the requested information."
+        "error": "Refusal: Error: Agent reached max credits"
       },
       {
         "id": "hashtag:gastroaktionwien",
@@ -63,10 +63,10 @@
         "error": "Refusal: Error: Agent reached max credits"
       },
       {
-        "id": "hashtag:angebotwien",
+        "id": "hashtag:wienangebot",
         "kind": "instagram-hashtag",
-        "label": "#angebotwien",
-        "url": "https://www.instagram.com/explore/tags/angebotwien/",
+        "label": "#wienangebot",
+        "url": "https://www.instagram.com/explore/tags/wienangebot/",
         "status": "failed",
         "rawCandidates": 0,
         "normalizedCandidates": 0,
@@ -75,10 +75,10 @@
         "error": "Refusal: Error: Agent reached max credits"
       },
       {
-        "id": "hashtag:angebotewien",
+        "id": "hashtag:dealswien",
         "kind": "instagram-hashtag",
-        "label": "#angebotewien",
-        "url": "https://www.instagram.com/explore/tags/angebotewien/",
+        "label": "#dealswien",
+        "url": "https://www.instagram.com/explore/tags/dealswien/",
         "status": "failed",
         "rawCandidates": 0,
         "normalizedCandidates": 0,
@@ -110,10 +110,10 @@
   "constraints": {},
   "errors": [
     "#kostenlosessenwien: Refusal: Error: Agent reached max credits",
-    "#fooddealwien: Refusal: I apologize, but I cannot complete this task. The request specifically constrains data extraction to Instagram (https://www.instagram.com/explore/tags/fooddealwien/), but Instagram is not supported by the available scraping tools. When attempting to: 1. Use a browser automation agent - the agent encountered an error 2. Directly scrape Instagram - received error: \"We do not support this site\" Instagram implements anti-scraping measures and requires authentication for most content access, which the available tools cannot bypass. To complete this task, you would need: - Direct API access to Instagram (requires authentication and API keys) - Manual extraction of the data ",
+    "#fooddealwien: Refusal: Error: Agent reached max credits",
     "#gastroaktionwien: Refusal: Error: Agent reached max credits",
-    "#angebotwien: Refusal: Error: Agent reached max credits",
-    "#angebotewien: Refusal: Error: Agent reached max credits",
+    "#wienangebot: Refusal: Error: Agent reached max credits",
+    "#dealswien: Refusal: Error: Agent reached max credits",
     "@tastyfood.vienna: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
   ]
 }
