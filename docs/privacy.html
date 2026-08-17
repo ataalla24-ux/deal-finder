@@ -29,6 +29,9 @@
         .lang-switch button { border: none; border-radius: 999px; padding: 10px 16px; font-weight: 700; cursor: pointer; background: #e5e7eb; color: #111827; }
         .lang-switch button.active { background: linear-gradient(135deg, #111827, #374151); color: #fff; }
     </style>
+    <link rel="stylesheet" href="/consent.css">
+    <script src="/analytics-config.js"></script>
+    <script defer src="/consent.js"></script>
 </head>
 <body>
     <div class="container">
@@ -114,7 +117,7 @@
             de: {
                 pageSubtitle: 'Datenschutzerklärung / Privacy Policy',
                 summaryTitle: '🔒 Zusammenfassung',
-                summaryBody: '<strong>FreeFinder respektiert deine Privatsphäre.</strong> Die App speichert viele Nutzungsdaten lokal auf deinem Gerät und verarbeitet für optionale Funktionen nur die Daten, die dafür technisch nötig sind.',
+                summaryBody: '<strong>FreeFinder respektiert deine Privatsphäre.</strong> Die App speichert viele Nutzungsdaten lokal auf deinem Gerät und verarbeitet für optionale Funktionen nur die Daten, die dafür technisch nötig sind. Auf der Website werden optionale Analyse-Dienste erst nach deiner ausdrücklichen Einwilligung geladen.',
                 controllerTitle: '📱 1. Verantwortlicher',
                 addressBlock: 'Lotte Hass Weg 2<br>1220 Wien, Österreich',
                 emailLabel: 'E-Mail:',
@@ -128,7 +131,7 @@
                 externalLinksTitle: '🌐 4. Externe Links',
                 externalLinksBody: 'Die App enthält Links zu externen Websites (Deal-Anbieter wie IKEA, McDonalds, etc.). Für deren Datenschutzpraktiken sind die jeweiligen Anbieter verantwortlich.',
                 cookiesTitle: '🍪 5. Cookies & Tracking',
-                cookiesBody: 'FreeFinder verwendet keine Werbe- oder Analytics-Cookies. Die Web-App nutzt jedoch technischen Browser-/WebView-Speicher (z. B. localStorage, Cache, Service-Worker-Cache), damit Favoriten, Einstellungen und der aktuelle App-Stand erhalten bleiben. Für optionale Funktionen wie Referral, Push oder Admin-Synchronisierung werden außerdem technische Anfragen an FreeFinder-Server bzw. Worker gesendet.',
+                cookiesBody: 'Die Website nutzt Google Tag Manager als technische Einbindungsplattform. Google Analytics 4 misst nach deiner Einwilligung Seitenaufrufe, Herkunft, Geräteinformationen und Interaktionen. Informationen zur Verarbeitung durch Google findest du unter <a href="https://policies.google.com/technologies/partner-sites?hl=de">Datenverwendung durch Google</a>. Microsoft Clarity erstellt nach deiner Einwilligung Heatmaps und pseudonymisierte Sitzungsaufzeichnungen, damit wir Bedienprobleme erkennen und die Website verbessern können; weitere Angaben stehen in der <a href="https://privacy.microsoft.com/de-de/privacystatement">Microsoft-Datenschutzerklärung</a>. Ohne Zustimmung werden diese Dienste nicht geladen. Deine Auswahl wird im localStorage gespeichert und kann jederzeit über „Cookie-Einstellungen“ geändert oder widerrufen werden. FreeFinder nutzt diese Daten nicht für personalisierte Werbung. Technisch notwendige Speicherungen, Cache und Service-Worker-Cache können unabhängig davon verwendet werden, damit Einstellungen und grundlegende Funktionen erhalten bleiben.',
                 childrenTitle: '👶 6. Kinder',
                 childrenBody: 'FreeFinder richtet sich nicht speziell an Kinder. Es werden keine Kinderprofile erstellt und keine besonderen Daten von Kindern angefordert.',
                 changesTitle: '🔄 7. Änderungen',
@@ -139,7 +142,7 @@
                 contactBody: 'Bei Fragen zur Datenschutzerklärung:',
                 contactAddress: 'Lotte Hass Weg 2, 1220 Wien<br>Österreich',
                 supportEmailLabel: 'Support-E-Mail:',
-                updatedText: 'Stand: März 2026',
+                updatedText: 'Stand: August 2026',
                 copyrightText: '© 2026 FreeFinder. Alle Rechte vorbehalten.',
                 supportLink: 'Support',
                 termsLink: 'Terms of Use (EULA)',
@@ -148,7 +151,7 @@
             en: {
                 pageSubtitle: 'Privacy Policy',
                 summaryTitle: '🔒 Summary',
-                summaryBody: '<strong>FreeFinder respects your privacy.</strong> The app stores many usage details locally on your device and only processes the data that is technically needed for optional features.',
+                summaryBody: '<strong>FreeFinder respects your privacy.</strong> The app stores many usage details locally on your device and only processes the data that is technically needed for optional features. Optional analytics services on the website are loaded only after your explicit consent.',
                 controllerTitle: '📱 1. Controller',
                 addressBlock: 'Lotte Hass Weg 2<br>1220 Vienna, Austria',
                 emailLabel: 'Email:',
@@ -162,7 +165,7 @@
                 externalLinksTitle: '🌐 4. External links',
                 externalLinksBody: 'The app contains links to external websites (deal providers such as IKEA, McDonalds, etc.). Those providers are responsible for their own privacy practices.',
                 cookiesTitle: '🍪 5. Cookies & Tracking',
-                cookiesBody: 'FreeFinder does not use advertising or analytics cookies. However, the web layer uses technical browser/WebView storage such as localStorage, caches and service-worker cache so favorites, settings and the current app shell can persist. Optional features such as referrals, push alerts or admin sync also send technical requests to FreeFinder servers/workers.',
+                cookiesBody: 'The website uses Google Tag Manager as a technical tag-loading platform. After you consent, Google Analytics 4 measures page views, traffic sources, device information and interactions. Details about Google’s processing are available at <a href="https://policies.google.com/technologies/partner-sites?hl=en">How Google uses data</a>. After you consent, Microsoft Clarity creates heatmaps and pseudonymized session recordings so we can identify usability issues and improve the website; more information is available in the <a href="https://privacy.microsoft.com/en-us/privacystatement">Microsoft Privacy Statement</a>. These services are not loaded without consent. Your choice is stored in localStorage and can be changed or withdrawn at any time through “Cookie settings”. FreeFinder does not use this data for personalized advertising. Technically necessary storage, caches and service-worker caches may be used independently to preserve settings and essential functionality.',
                 childrenTitle: '👶 6. Children',
                 childrenBody: 'FreeFinder is not specifically directed to children. It does not create child profiles and does not request special data from children.',
                 changesTitle: '🔄 7. Changes',
@@ -173,7 +176,7 @@
                 contactBody: 'If you have questions about this privacy policy:',
                 contactAddress: 'Lotte Hass Weg 2, 1220 Vienna<br>Austria',
                 supportEmailLabel: 'Support email:',
-                updatedText: 'Updated: March 2026',
+                updatedText: 'Updated: August 2026',
                 copyrightText: '© 2026 FreeFinder. All rights reserved.',
                 supportLink: 'Support',
                 termsLink: 'Terms of Use (EULA)',

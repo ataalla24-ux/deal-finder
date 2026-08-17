@@ -37,6 +37,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="consent.css">
+  <script src="analytics-config.js"></script>
+  <script defer src="consent.js"></script>
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -83,6 +86,32 @@
             "availability": "https://schema.org/InStock"
           },
           "publisher": { "@id": "https://freefinder.at/#organization" }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://freefinder.at/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Was ist FreeFinder?",
+              "acceptedAnswer": { "@type": "Answer", "text": "FreeFinder ist eine App für kostenlose Angebote, Rabatte und lokale Deals in Wien. Angebote können direkt geöffnet und als Favoriten gespeichert werden." }
+            },
+            {
+              "@type": "Question",
+              "name": "Welche kostenlosen Angebote finde ich in Wien?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Je nach aktueller Aktion findest du zum Beispiel Gratis-Essen, Kaffee, Pizza, Kebab, Produktproben und Rabatte von Restaurants, Cafés, Shops und anderen Anbietern in Wien." }
+            },
+            {
+              "@type": "Question",
+              "name": "Gibt es FreeFinder für Android und iPhone?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Ja. FreeFinder ist kostenlos im App Store für iPhone und bei Google Play für Android verfügbar." }
+            },
+            {
+              "@type": "Question",
+              "name": "Sind alle Angebote immer gültig?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Angebote können zeitlich begrenzt sein oder kurzfristig enden. Prüfe vor der Einlösung Zeitraum, Standort und Bedingungen beim jeweiligen Anbieter." }
+            }
+          ]
         }
       ]
     }
@@ -95,11 +124,11 @@
       --surface-warm: #fff7ee;
       --ink: #151414;
       --ink-soft: #4d5563;
-      --muted: #747b86;
+      --muted: #626a75;
       --line: #eadfd2;
       --line-cool: #e7e9ee;
       --orange: #ff941f;
-      --orange-deep: #f0642b;
+      --orange-deep: #b43b1d;
       --coral: #ff4545;
       --navy: #071634;
       --green: #14b877;
@@ -726,7 +755,7 @@
       padding: 7px 9px;
       border-radius: 999px;
       background: #ecfff7;
-      color: #03935c;
+      color: #057549;
       font-size: 11px;
       font-weight: 800;
       text-transform: uppercase;
@@ -1227,6 +1256,78 @@
       line-height: 1.35;
     }
 
+    .blog-section {
+      padding-top: 84px;
+      padding-bottom: 84px;
+      border-top: 1px solid var(--line);
+    }
+
+    .blog-section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.55fr);
+      gap: 48px;
+      align-items: end;
+      margin-bottom: 34px;
+    }
+
+    .blog-section-head .section-copy {
+      margin: 0;
+    }
+
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .blog-card {
+      min-width: 0;
+      border: 1px solid var(--line-cool);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .blog-card img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+    }
+
+    .blog-card-body {
+      padding: 20px;
+    }
+
+    .blog-card-label {
+      color: var(--orange-deep);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .blog-card h3 {
+      margin: 8px 0 10px;
+      font-size: 24px;
+      line-height: 1.08;
+    }
+
+    .blog-card p {
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .blog-card a {
+      display: inline-block;
+      margin-top: 16px;
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
     .faq-section {
       display: grid;
       grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
@@ -1414,7 +1515,9 @@
       .app-grid,
       .business-grid,
       .pro-grid,
-      .faq-section {
+      .faq-section,
+      .blog-section-head,
+      .blog-grid {
         grid-template-columns: 1fr;
       }
 
@@ -1640,6 +1743,7 @@
           <a href="#app">App</a>
           <a href="#pro">PRO</a>
           <a href="#business">Business</a>
+          <a href="blog/">Blog</a>
           <a href="support.html">Support</a>
         </div>
         <div class="nav-actions">
@@ -1756,7 +1860,7 @@
             <aside class="live-deals" aria-labelledby="liveDealsTitle">
               <div class="live-deals-head">
                 <strong id="liveDealsTitle">Aktuelle Highlights</strong>
-                <a href="#download" data-store-auto aria-label="FreeFinder in der passenden App öffnen">Alle öffnen</a>
+                <a href="#download" data-store-auto>Alle öffnen</a>
               </div>
               <div class="deal-list" id="dealList">
                 <article class="deal-card">
@@ -1901,6 +2005,45 @@
         </div>
       </section>
 
+      <section class="section blog-section" id="blog" aria-labelledby="blogTitle">
+        <div class="blog-section-head">
+          <div>
+            <span class="eyebrow">FreeFinder Guides</span>
+            <h2 class="section-title" id="blogTitle">Gratis-Angebote und Rabatte in Wien besser nutzen.</h2>
+          </div>
+          <p class="section-copy">Kurze, praktische Ratgeber zu Gratis-Essen, kostenlosen Produktaktionen, Gutscheinen und 1+1-Deals.</p>
+        </div>
+        <div class="blog-grid">
+          <article class="blog-card">
+            <img src="assets/current-ios/deals-home.jpg" alt="FreeFinder App mit kostenlosen Food-Deals in Wien" width="1200" height="675" loading="lazy">
+            <div class="blog-card-body">
+              <span class="blog-card-label">Gratis-Essen</span>
+              <h3>Gratis Essen in Wien finden</h3>
+              <p>Food-Aktionen finden, Bedingungen prüfen und abgelaufene Treffer schneller erkennen.</p>
+              <a href="blog/gratis-essen-wien.html">Guide lesen</a>
+            </div>
+          </article>
+          <article class="blog-card">
+            <img src="og-preview-stores.png" alt="FreeFinder für iPhone und Android mit kostenlosen Angeboten in Wien" width="1200" height="675" loading="lazy">
+            <div class="blog-card-body">
+              <span class="blog-card-label">Gratis-Angebote</span>
+              <h3>Kostenlose Angebote in Wien</h3>
+              <p>Produktproben, Eröffnungsaktionen und lokale Gratis-Deals richtig einordnen.</p>
+              <a href="blog/kostenlose-angebote-wien.html">Übersicht öffnen</a>
+            </div>
+          </article>
+          <article class="blog-card">
+            <img src="assets/current-ios/for-you.jpg" alt="Personalisierte Wiener Rabatte in der FreeFinder App" width="1200" height="675" loading="lazy">
+            <div class="blog-card-body">
+              <span class="blog-card-label">Rabatte</span>
+              <h3>Rabatte und 1+1-Deals prüfen</h3>
+              <p>Endpreis, Mindestbestellwert und App-Bedingungen in wenigen Sekunden vergleichen.</p>
+              <a href="blog/rabatte-wien.html">Rabatt-Guide lesen</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section class="section faq-section" id="faq" aria-labelledby="faqTitle">
         <div class="faq-intro">
           <h2 class="section-title" id="faqTitle">Häufige Fragen zu Gratis-Angeboten in Wien.</h2>
@@ -1943,6 +2086,7 @@
       </div>
       <div class="footer-links">
         <a href="#faq">FAQ</a>
+        <a href="blog/">Blog</a>
         <a href="privacy.html">Datenschutz</a>
         <a href="support.html">Support</a>
         <a href="terms.html">Nutzungsbedingungen</a>

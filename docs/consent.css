@@ -1,0 +1,172 @@
+.ff-cookie-banner {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 10000;
+  width: min(440px, calc(100vw - 36px));
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.2);
+  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.ff-cookie-banner[hidden] {
+  display: none;
+}
+
+.ff-cookie-manage {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 9999;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #334155;
+  padding: 7px 10px;
+  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+}
+
+.ff-cookie-manage[hidden] {
+  display: none;
+}
+
+.ff-cookie-inner {
+  padding: 20px;
+}
+
+.ff-cookie-title {
+  margin: 0 0 8px;
+  font-size: 19px;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.ff-cookie-copy {
+  margin: 0;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.ff-cookie-copy a {
+  color: #0f4c81;
+  font-weight: 700;
+}
+
+.ff-cookie-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.ff-cookie-button {
+  min-height: 42px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #111827;
+  padding: 9px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.ff-cookie-button:hover,
+.ff-cookie-button:focus-visible {
+  border-color: #0f4c81;
+  outline: 2px solid transparent;
+}
+
+.ff-cookie-button--primary {
+  border-color: #061a38;
+  background: #061a38;
+  color: #ffffff;
+}
+
+.ff-cookie-button--accent {
+  border-color: #c13f22;
+  background: #c13f22;
+  color: #ffffff;
+}
+
+.ff-cookie-settings {
+  display: none;
+  margin-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 14px;
+}
+
+.ff-cookie-settings.is-open {
+  display: block;
+}
+
+.ff-cookie-option {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.ff-cookie-option + .ff-cookie-option {
+  border-top: 1px solid #eef2f7;
+}
+
+.ff-cookie-option strong,
+.ff-cookie-option span {
+  display: block;
+}
+
+.ff-cookie-option strong {
+  margin-bottom: 3px;
+  font-size: 14px;
+}
+
+.ff-cookie-option span {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.ff-cookie-option input {
+  width: 20px;
+  height: 20px;
+  accent-color: #ff6b47;
+}
+
+@media (max-width: 560px) {
+  .ff-cookie-banner {
+    right: 10px;
+    bottom: 10px;
+    width: calc(100vw - 20px);
+  }
+
+  .ff-cookie-manage {
+    left: 10px;
+    bottom: 10px;
+  }
+
+  .ff-cookie-inner {
+    padding: 16px;
+  }
+
+  .ff-cookie-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .ff-cookie-button {
+    width: 100%;
+  }
+}
