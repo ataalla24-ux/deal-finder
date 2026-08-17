@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de-AT">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>FreeFinder - Täglich kostenlose Angebote in Wien</title>
-  <meta name="description" content="FreeFinder findet kostenlose Angebote, Gratis-Deals, Rabatte und lokale Highlights in Wien. Jetzt für iPhone und Android herunterladen.">
+  <title>Kostenlose Angebote in Wien | FreeFinder App</title>
+  <meta name="description" content="Entdecke täglich kostenlose Angebote, Gratis-Essen, Rabatte und lokale Deals in Wien. FreeFinder kostenlos für iPhone und Android herunterladen.">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <meta name="application-name" content="FreeFinder">
   <meta name="theme-color" content="#ff8a1f">
   <meta name="apple-itunes-app" content="app-id=6758958213">
-  <meta property="og:title" content="FreeFinder - Täglich kostenlose Angebote in Wien">
-  <meta property="og:description" content="Kostenlose Angebote, Gratis-Deals, Rabatte und lokale Highlights für Wien - jetzt für iPhone und Android.">
+  <meta property="og:title" content="Kostenlose Angebote in Wien | FreeFinder">
+  <meta property="og:description" content="Entdecke täglich Gratis-Angebote, Gratis-Essen, Rabatte und lokale Deals in Wien - kostenlos für iPhone und Android.">
   <meta property="og:image" content="https://freefinder.at/og-preview-stores.png">
   <meta property="og:image:secure_url" content="https://freefinder.at/og-preview-stores.png">
   <meta property="og:image:type" content="image/png">
@@ -16,18 +18,74 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="FreeFinder App mit kostenlosen Angeboten in Wien sowie Download für App Store und Google Play">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Kostenlose Angebote in Wien | FreeFinder">
+  <meta name="twitter:description" content="Täglich Gratis-Angebote, Gratis-Essen, Rabatte und lokale Deals in Wien entdecken.">
   <meta name="twitter:image" content="https://freefinder.at/og-preview-stores.png">
   <meta name="twitter:image:alt" content="FreeFinder App mit kostenlosen Angeboten in Wien sowie Download für App Store und Google Play">
   <meta property="og:url" content="https://freefinder.at/">
   <meta property="og:site_name" content="FreeFinder Wien">
   <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_AT">
   <link rel="canonical" href="https://freefinder.at/">
+  <link rel="alternate" hreflang="de-AT" href="https://freefinder.at/">
+  <link rel="alternate" hreflang="x-default" href="https://freefinder.at/">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon-192.svg">
+  <link rel="preload" as="image" href="assets/current-ios/deals-home.jpg" fetchpriority="high">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://freefinder.at/#website",
+          "url": "https://freefinder.at/",
+          "name": "FreeFinder",
+          "alternateName": "FreeFinder Wien",
+          "inLanguage": "de-AT",
+          "publisher": { "@id": "https://freefinder.at/#organization" }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://freefinder.at/#organization",
+          "name": "FreeFinder",
+          "url": "https://freefinder.at/",
+          "logo": "https://freefinder.at/icon-512.svg",
+          "sameAs": [
+            "https://apps.apple.com/app/id6758958213",
+            "https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien"
+          ]
+        },
+        {
+          "@type": "MobileApplication",
+          "@id": "https://freefinder.at/#app",
+          "name": "FreeFinder",
+          "url": "https://freefinder.at/",
+          "description": "FreeFinder zeigt täglich kostenlose Angebote, Gratis-Essen, Rabatte und lokale Deals in Wien.",
+          "applicationCategory": "LifestyleApplication",
+          "operatingSystem": ["iOS", "Android"],
+          "inLanguage": "de-AT",
+          "isAccessibleForFree": true,
+          "image": "https://freefinder.at/og-preview-stores.png",
+          "downloadUrl": [
+            "https://apps.apple.com/app/id6758958213",
+            "https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien"
+          ],
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR",
+            "availability": "https://schema.org/InStock"
+          },
+          "publisher": { "@id": "https://freefinder.at/#organization" }
+        }
+      ]
+    }
+  </script>
   <style>
     :root {
       --bg: #ffffff;
@@ -1168,6 +1226,72 @@
       line-height: 1.35;
     }
 
+    .faq-section {
+      display: grid;
+      grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+      gap: 72px;
+      align-items: start;
+      padding-top: 84px;
+      padding-bottom: 84px;
+    }
+
+    .faq-intro .section-copy {
+      margin-top: 18px;
+    }
+
+    .faq-list {
+      border-top: 1px solid var(--line);
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .faq-item summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 22px 0;
+      color: var(--ink);
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.35;
+      list-style: none;
+      cursor: pointer;
+    }
+
+    .faq-item summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .faq-item summary::after {
+      content: "+";
+      flex: 0 0 auto;
+      color: var(--orange-deep);
+      font-size: 24px;
+      font-weight: 500;
+    }
+
+    .faq-item[open] summary::after {
+      content: "-";
+    }
+
+    .faq-item p {
+      max-width: 700px;
+      margin: -4px 0 22px;
+      color: var(--ink-soft);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .faq-item a {
+      color: var(--orange-deep);
+      font-weight: 800;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
     .site-footer {
       width: min(100% - 40px, var(--max));
       margin: 0 auto;
@@ -1288,8 +1412,13 @@
 
       .app-grid,
       .business-grid,
-      .pro-grid {
+      .pro-grid,
+      .faq-section {
         grid-template-columns: 1fr;
+      }
+
+      .faq-section {
+        gap: 32px;
       }
 
       .screenshot-column {
@@ -1549,7 +1678,7 @@
       <section class="section hero" aria-labelledby="heroTitle">
         <div class="hero-copy">
           <h1 id="heroTitle">Täglich kostenlose Angebote in Wien.</h1>
-          <p>FreeFinder findet Gratis-Angebote, Rabatte und lokale Highlights, damit du Angebote schneller öffnest und speicherst.</p>
+          <p>FreeFinder zeigt Gratis-Angebote, Gratis-Essen, Rabatte und lokale Deals in Wien, damit du passende Angebote schneller öffnest und speicherst.</p>
           <div class="hero-actions" id="download">
             <a class="button button-primary" href="https://apps.apple.com/app/id6758958213">
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -1585,13 +1714,13 @@
         </div>
         <div class="phone-stage" aria-label="Aktuelle FreeFinder App Screenshots">
           <div class="phone-frame phone-side">
-            <img src="assets/current-ios/for-you.jpg" alt="FreeFinder Empfehlungen mit kostenlosen Angeboten">
+            <img src="assets/current-ios/for-you.jpg" width="736" height="1600" alt="FreeFinder Empfehlungen mit kostenlosen Angeboten" decoding="async">
           </div>
           <div class="phone-frame phone-main">
-            <img src="assets/current-ios/deals-home.jpg" alt="FreeFinder Startscreen mit kostenlosen Angeboten">
+            <img src="assets/current-ios/deals-home.jpg" width="736" height="1600" alt="FreeFinder Startscreen mit kostenlosen Angeboten in Wien" decoding="async" fetchpriority="high">
           </div>
           <div class="phone-frame phone-side right">
-            <img src="assets/current-ios/stats-plus.jpg" alt="FreeFinder PLUS Stats">
+            <img src="assets/current-ios/stats-plus.jpg" width="368" height="800" alt="FreeFinder PLUS Statistiken" decoding="async">
           </div>
         </div>
         <div class="next-strip" aria-hidden="true">
@@ -1621,7 +1750,7 @@
         <div class="app-grid">
           <div class="screenshot-column">
             <div class="phone-frame">
-              <img src="assets/current-ios/for-you.jpg" alt="Aktuelle FreeFinder Empfehlungen mit Pizza, Kebab und Matcha">
+              <img src="assets/current-ios/for-you.jpg" width="736" height="1600" alt="Aktuelle FreeFinder Empfehlungen mit Pizza, Kebab und Matcha" loading="lazy" decoding="async">
             </div>
             <aside class="live-deals" aria-labelledby="liveDealsTitle">
               <div class="live-deals-head">
@@ -1648,7 +1777,7 @@
             </aside>
           </div>
           <div>
-            <h2 class="section-title" id="appTitle">Alles Wichtige in einer ruhigen App.</h2>
+            <h2 class="section-title" id="appTitle">Kostenlose Angebote und Rabatte in Wien entdecken.</h2>
             <p class="section-copy">Öffne kostenlose Angebote und Rabatte, speichere Favoriten, entdecke Empfehlungen und behalte deine Deal-Aktivität im Blick.</p>
             <div class="feature-list">
               <div class="feature-row">
@@ -1675,7 +1804,7 @@
       <section class="pro-section" id="pro" aria-labelledby="proTitle">
         <div class="pro-grid">
           <div>
-            <h2 class="section-title" id="proTitle">PRO und PLUS ohne Werbegefühl.</h2>
+            <h2 class="section-title" id="proTitle">Mehr Wien-Deals mit FreeFinder PRO und PLUS.</h2>
             <p class="section-copy">Schalte Deal des Tages, Top-Deal-Benachrichtigungen, Standortfilter und erweiterte Stats frei.</p>
             <div class="plans">
               <article class="plan featured">
@@ -1705,7 +1834,7 @@
             <p class="payment-note">Web-Zahlung über Stripe Checkout mit den in Stripe aktivierten Methoden, z.B. Apple Pay, Karte, PayPal, Klarna/Sofort, SEPA oder Google Pay.</p>
           </div>
           <div class="phone-frame pro-phone">
-            <img src="assets/current-ios/pro-sheet.jpg" alt="Aktuelles FreeFinder PRO Sheet">
+            <img src="assets/current-ios/pro-sheet.jpg" width="368" height="800" alt="FreeFinder PRO und PLUS Funktionen" loading="lazy" decoding="async">
           </div>
         </div>
       </section>
@@ -1713,7 +1842,7 @@
       <section class="section business-section" id="business" aria-labelledby="businessTitle">
         <div class="business-grid">
           <div>
-            <h2 class="section-title" id="businessTitle">Für Restaurants sichtbar im Feed.</h2>
+            <h2 class="section-title" id="businessTitle">Deals für Restaurants in Wien sichtbar machen.</h2>
             <p class="section-copy">Restaurants können bezahlte Feed-Anzeigen buchen. Die Laufzeit bestimmt das Paket: 1 Tag, 3 Tage oder 8 Tage.</p>
             <div class="business-points">
               <div class="business-point">
@@ -1770,6 +1899,31 @@
           </div>
         </div>
       </section>
+
+      <section class="section faq-section" id="faq" aria-labelledby="faqTitle">
+        <div class="faq-intro">
+          <h2 class="section-title" id="faqTitle">Häufige Fragen zu Gratis-Angeboten in Wien.</h2>
+          <p class="section-copy">Kurz erklärt, wie FreeFinder funktioniert und wo du die App herunterladen kannst.</p>
+        </div>
+        <div class="faq-list">
+          <details class="faq-item">
+            <summary>Was ist FreeFinder?</summary>
+            <p>FreeFinder ist eine App für kostenlose Angebote, Rabatte und lokale Deals in Wien. Du kannst Angebote entdecken, direkt öffnen und als Favoriten speichern.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Welche kostenlosen Angebote finde ich in Wien?</summary>
+            <p>Je nach aktueller Aktion findest du zum Beispiel Gratis-Essen, Kaffee, Pizza, Kebab, Produktproben und Rabatte von Restaurants, Cafés, Shops und anderen Anbietern in Wien.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Gibt es FreeFinder für Android und iPhone?</summary>
+            <p>Ja. FreeFinder ist kostenlos im <a href="https://apps.apple.com/app/id6758958213">App Store für iPhone</a> und bei <a href="https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien">Google Play für Android</a> verfügbar.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Sind alle Angebote immer gültig?</summary>
+            <p>Angebote können zeitlich begrenzt sein oder kurzfristig enden. Prüfe deshalb vor der Einlösung den Zeitraum, den Standort und die Bedingungen beim jeweiligen Anbieter.</p>
+          </details>
+        </div>
+      </section>
     </main>
 
     <footer class="site-footer">
@@ -1787,9 +1941,11 @@
         </div>
       </div>
       <div class="footer-links">
+        <a href="#faq">FAQ</a>
         <a href="privacy.html">Datenschutz</a>
         <a href="support.html">Support</a>
-        <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">EULA</a>
+        <a href="terms.html">Nutzungsbedingungen</a>
+        <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Apple-EULA</a>
         <a href="data-deletion.html">Datenlöschung</a>
       </div>
       <div class="copyright">© 2026 FreeFinder. Alle Rechte vorbehalten.</div>
