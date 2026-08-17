@@ -147,6 +147,40 @@ expectNormalizedLogo(
 );
 
 expectNormalizedLogo(
+  'Vapiano uses its cached official emblem',
+  {
+    brand: 'Vapiano',
+    title: '1+1 gratis Pizza (Studentenrabatt)',
+    description: 'Vapiano Wien Studentenrabatt.',
+    type: 'bogo',
+    category: 'essen',
+    url: 'https://www.vapiano.at/',
+  },
+  {
+    brand: 'Vapiano',
+    logo: '🍝',
+    logoUrl: 'https://freefinder.at/assets/brand-logos/vapiano-vapiano-at.png',
+  },
+);
+
+expectNormalizedLogo(
+  'OMV VIVA uses its cropped official emblem',
+  {
+    brand: 'OMV VIVA',
+    title: 'Gratis Iced Matcha Latte testen',
+    description: 'Gratis in OMV Stationen Wien testen.',
+    type: 'gratis',
+    category: 'kaffee',
+    url: 'https://www.joe-club.at/partner/omv',
+  },
+  {
+    brand: 'OMV VIVA',
+    logo: '⛽',
+    logoUrl: 'https://freefinder.at/assets/brand-logos/omv-viva-omv-at.png',
+  },
+);
+
+expectNormalizedLogo(
   'direct unknown provider host can supply logo',
   {
     brand: 'Rooni Restaurant',
