@@ -53,6 +53,15 @@
     </section>
     <section class="blog-main" aria-label="Aktuelle Beiträge und Ratgeber">
       <div class="post-grid">
+        <article class="post-card" data-deal-expires="2026-09-30T23:59:59+02:00">
+          <img src="/assets/blog/nordsee-wrap-1plus1-2026.jpg" alt="Zwei unmarkierte Garnelen-Wraps auf einem hellblauen Tisch" width="1600" height="900">
+          <div class="post-card-body">
+            <span class="topic-label">Aktuell bis 30. September</span>
+            <h2>NORDSEE 1+1 Garnelen-Wrap</h2>
+            <p>Mit Drei Plus zwei Garnelen-Wraps zum Preis von einem erhalten: Gutschein, Filialen und Ausschlüsse im Überblick.</p>
+            <a href="nordsee-wrap-1plus1-wien.html">Deal und Bedingungen lesen</a>
+          </div>
+        </article>
         <article class="post-card">
           <img src="/assets/blog/omv-viva-eiskaffee-gratis.jpg" alt="Drei sommerliche Eiskaffees in Orange, Espresso-Tonic und Erdbeer-Kokos" width="1600" height="900">
           <div class="post-card-body">
@@ -110,5 +119,10 @@
       </div>
     </div>
   </footer>
+  <script>
+    document.querySelectorAll('[data-deal-expires]').forEach((card) => {
+      if (Date.now() > Date.parse(card.dataset.dealExpires)) card.hidden = true;
+    });
+  </script>
 </body>
 </html>
