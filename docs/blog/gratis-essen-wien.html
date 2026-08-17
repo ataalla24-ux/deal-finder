@@ -15,11 +15,13 @@
   <link rel="icon" href="/icon-192.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/consent.css">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="/consent.css?v=5">
   <link rel="stylesheet" href="blog.css">
-  <script src="/analytics-config.js"></script>
-  <script defer src="/consent.js"></script>
+  <script defer src="/analytics-config.js"></script>
+  <script defer src="/consent.js?v=5"></script>
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -33,7 +35,7 @@
           "inLanguage": "de-AT",
           "mainEntityOfPage": "https://freefinder.at/blog/gratis-essen-wien.html",
           "image": "https://freefinder.at/assets/current-ios/deals-home.jpg",
-          "author": { "@type": "Organization", "name": "FreeFinder" },
+          "author": { "@type": "Organization", "name": "FreeFinder Redaktion", "url": "https://freefinder.at/about.html" },
           "publisher": { "@type": "Organization", "name": "FreeFinder", "logo": { "@type": "ImageObject", "url": "https://freefinder.at/icon-512.svg" } }
         },
         {
@@ -62,6 +64,7 @@
         <h1>Gratis Essen in Wien finden, ohne abgelaufenen Aktionen hinterherzulaufen.</h1>
         <p class="hero-copy">Kostenlose Pizza, Gratis-Kaffee oder ein Food-Deal zur Neueröffnung: Solche Aktionen gibt es, aber oft nur kurz und unter klaren Bedingungen.</p>
         <div class="article-meta"><span>Aktualisiert am 17. August 2026</span><span>6 Minuten Lesezeit</span></div>
+        <div class="article-byline"><span>Von <a href="/about.html">FreeFinder Redaktion</a></span><span>Verantwortlich: Stefan Ataalla</span></div>
       </div>
     </header>
     <div class="article-layout">
@@ -118,6 +121,6 @@
     </div>
   </main>
   <section class="download-band" aria-labelledby="downloadTitle"><div class="download-inner"><div><h2 id="downloadTitle">Kostenlose Food-Deals in Wien öffnen.</h2><p>FreeFinder kostenlos für iPhone und Android laden.</p></div><div class="store-links"><a href="https://apps.apple.com/app/id6758958213">App Store</a><a href="https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien">Google Play</a></div></div></section>
-  <footer class="site-footer"><div class="footer-inner"><strong>FreeFinder Wien</strong><div class="footer-links"><a href="/blog/">Blog</a><a href="/privacy.html">Datenschutz</a><a href="/support.html">Support</a></div></div></footer>
+  <footer class="site-footer"><div class="footer-inner"><strong>FreeFinder Wien</strong><div class="footer-links"><a href="/angebote-wien-heute.html">Aktuelle Deals</a><a href="/about.html">Über uns</a><a href="/blog/">Blog</a><a href="/presse.html">Presse</a><a href="/privacy.html">Datenschutz</a><a href="/support.html">Support</a></div></div></footer>
 </body>
 </html>

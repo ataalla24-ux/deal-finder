@@ -15,11 +15,14 @@
   <link rel="icon" href="/icon-192.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/consent.css">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="/consent.css?v=5">
   <link rel="stylesheet" href="blog.css">
-  <script src="/analytics-config.js"></script>
-  <script defer src="/consent.js"></script>
+  <script defer src="/analytics-config.js"></script>
+  <script defer src="/consent.js?v=5"></script>
+  <script defer src="deal-status.js"></script>
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -38,6 +41,7 @@
       <a class="brand" href="/"><img class="brand-mark" src="/icon-192.svg" alt="" width="38" height="38">FreeFinder</a>
       <div class="nav-links">
         <a href="/">Website</a>
+        <a href="/angebote-wien-heute.html">Aktuelle Deals</a>
         <a href="/blog/">Blog</a>
         <a class="nav-download" href="/#download">App laden</a>
       </div>
@@ -54,7 +58,7 @@
     <section class="blog-main" aria-label="Aktuelle Beiträge und Ratgeber">
       <div class="post-grid">
         <article class="post-card" data-deal-expires="2026-09-30T23:59:59+02:00">
-          <img src="/assets/blog/nordsee-wrap-1plus1-2026.jpg" alt="Zwei unmarkierte Garnelen-Wraps auf einem hellblauen Tisch" width="1600" height="900">
+          <picture><source type="image/avif" srcset="/assets/blog/nordsee-wrap-1plus1-2026-800.avif 800w, /assets/blog/nordsee-wrap-1plus1-2026-1600.avif 1600w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/blog/nordsee-wrap-1plus1-2026.jpg" alt="Zwei unmarkierte Garnelen-Wraps auf einem hellblauen Tisch" width="1600" height="900"></picture>
           <div class="post-card-body">
             <span class="topic-label">Aktuell bis 30. September</span>
             <h2>NORDSEE 1+1 Garnelen-Wrap</h2>
@@ -62,8 +66,8 @@
             <a href="nordsee-wrap-1plus1-wien.html">Deal und Bedingungen lesen</a>
           </div>
         </article>
-        <article class="post-card">
-          <img src="/assets/blog/omv-viva-eiskaffee-gratis.jpg" alt="Drei sommerliche Eiskaffees in Orange, Espresso-Tonic und Erdbeer-Kokos" width="1600" height="900">
+        <article class="post-card" data-deal-expires="2026-08-30T23:59:59+02:00">
+          <picture><source type="image/avif" srcset="/assets/blog/omv-viva-eiskaffee-gratis-800.avif 800w, /assets/blog/omv-viva-eiskaffee-gratis-1600.avif 1600w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/blog/omv-viva-eiskaffee-gratis.jpg" alt="Drei sommerliche Eiskaffees in Orange, Espresso-Tonic und Erdbeer-Kokos" width="1600" height="900"></picture>
           <div class="post-card-body">
             <span class="topic-label">Aktuell bis 30. August</span>
             <h2>Gratis OMV Eiskaffee testen</h2>
@@ -72,7 +76,7 @@
           </div>
         </article>
         <article class="post-card">
-          <img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit kostenlosen Food-Deals in Wien" width="1200" height="675">
+          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit kostenlosen Food-Deals in Wien" width="736" height="414" loading="lazy" decoding="async"></picture>
           <div class="post-card-body">
             <span class="topic-label">Gratis-Essen</span>
             <h2>Gratis Essen in Wien finden</h2>
@@ -81,7 +85,7 @@
           </div>
         </article>
         <article class="post-card">
-          <img src="/og-preview-stores.png" alt="FreeFinder für iPhone und Android mit kostenlosen Angeboten in Wien" width="1200" height="675">
+          <picture><source type="image/avif" srcset="/og-preview-stores-600.avif 600w, /og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 520px"><img src="/og-preview-stores.png" alt="FreeFinder für iPhone und Android mit kostenlosen Angeboten in Wien" width="1200" height="630" loading="lazy" decoding="async"></picture>
           <div class="post-card-body">
             <span class="topic-label">Gratis-Angebote</span>
             <h2>Kostenlose Angebote in Wien</h2>
@@ -90,13 +94,37 @@
           </div>
         </article>
         <article class="post-card">
-          <img src="/assets/current-ios/for-you.jpg" alt="Personalisierte Wiener Rabatte in der FreeFinder App" width="1200" height="675">
+          <picture><source type="image/avif" srcset="/assets/current-ios/for-you-400.avif 400w, /assets/current-ios/for-you-711.avif 711w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/for-you.jpg" alt="Personalisierte Wiener Rabatte in der FreeFinder App" width="711" height="400" loading="lazy" decoding="async"></picture>
           <div class="post-card-body">
             <span class="topic-label">Rabatte</span>
             <h2>Rabatte und 1+1-Aktionen in Wien</h2>
             <p>Ein kurzer Check für Gutscheine, App-only-Deals, 1+1-Angebote und wirklich lohnende Preisnachlässe.</p>
             <a href="rabatte-wien.html">Rabatt-Guide lesen</a>
           </div>
+        </article>
+        <article class="post-card">
+          <picture><source type="image/avif" srcset="/assets/blog/omv-viva-eiskaffee-gratis-800.avif 800w, /assets/blog/omv-viva-eiskaffee-gratis-1600.avif 1600w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/blog/omv-viva-eiskaffee-gratis.jpg" alt="Kalte Kaffeegetränke als Beispiel für Gratis-Kaffee-Aktionen" width="1600" height="900" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">Kaffee</span><h2>Gratis Kaffee in Wien</h2><p>Verkostungen, App-Gutscheine und Filialbedingungen zuverlässig prüfen.</p><a href="gratis-kaffee-wien.html">Kaffee-Guide lesen</a></div>
+        </article>
+        <article class="post-card">
+          <picture><source type="image/avif" srcset="/og-preview-stores-600.avif 600w, /og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 520px"><img src="/og-preview-stores.png" alt="FreeFinder App mit Wiener Angeboten" width="1200" height="630" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">Geburtstag</span><h2>Geburtstag gratis in Wien</h2><p>Voranmeldung, Ausweis und Einlösezeitraum bei Geburtstagsvorteilen verstehen.</p><a href="geburtstag-gratis-wien.html">Geburtstags-Guide lesen</a></div>
+        </article>
+        <article class="post-card">
+          <picture><source type="image/avif" srcset="/assets/current-ios/for-you-400.avif 400w, /assets/current-ios/for-you-711.avif 711w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/for-you.jpg" alt="FreeFinder Empfehlungen mit Wiener Rabatten" width="711" height="400" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">Studierende</span><h2>Studentenrabatte in Wien</h2><p>Nachweise, Altersgrenzen und den tatsächlichen Gesamtpreis vergleichen.</p><a href="studentenrabatte-wien.html">Studenten-Guide lesen</a></div>
+        </article>
+        <article class="post-card">
+          <picture><source type="image/avif" srcset="/og-preview-stores-600.avif 600w, /og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 520px"><img src="/og-preview-stores.png" alt="FreeFinder App mit kostenlosen Produktaktionen" width="1200" height="630" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">Produktproben</span><h2>Produktproben in Wien</h2><p>Samples, Verkostungen und Cashback-Tests voneinander unterscheiden.</p><a href="produktproben-wien.html">Produktproben-Guide lesen</a></div>
+        </article>
+        <article class="post-card">
+          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit 1+1- und Food-Aktionen" width="736" height="414" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">1+1</span><h2>1+1-Aktionen in Wien</h2><p>Stückpreis, Produktbindung und Zusatzkosten vor dem Kauf prüfen.</p><a href="eins-plus-eins-wien.html">1+1-Guide lesen</a></div>
+        </article>
+        <article class="post-card">
+          <picture><source type="image/avif" srcset="/assets/current-ios/for-you-400.avif 400w, /assets/current-ios/for-you-711.avif 711w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/for-you.jpg" alt="FreeFinder App mit lokalen Wiener Empfehlungen" width="711" height="400" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">Freizeit</span><h2>Kostenlose Freizeit in Wien</h2><p>Freie Tage, Schnupperangebote und Reservierungen sinnvoll planen.</p><a href="kostenlose-freizeitangebote-wien.html">Freizeit-Guide lesen</a></div>
         </article>
       </div>
     </section>
@@ -114,15 +142,13 @@
     <div class="footer-inner">
       <strong>FreeFinder Wien</strong>
       <div class="footer-links">
+        <a href="/angebote-wien-heute.html">Aktuelle Deals</a>
+        <a href="/about.html">Über uns</a>
+        <a href="/presse.html">Presse</a>
         <a href="/privacy.html">Datenschutz</a>
         <a href="/support.html">Support</a>
       </div>
     </div>
   </footer>
-  <script>
-    document.querySelectorAll('[data-deal-expires]').forEach((card) => {
-      if (Date.now() > Date.parse(card.dataset.dealExpires)) card.hidden = true;
-    });
-  </script>
 </body>
 </html>

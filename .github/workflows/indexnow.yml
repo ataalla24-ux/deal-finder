@@ -1,0 +1,33 @@
+name: Submit website updates to IndexNow
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**/*.html"
+      - "docs/sitemap.xml"
+      - "docs/indexnow-key.txt"
+      - "scripts/submit-indexnow.mjs"
+      - ".github/workflows/indexnow.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: indexnow-freefinder
+  cancel-in-progress: true
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Allow GitHub Pages to publish the commit
+        run: sleep 90
+      - name: Submit sitemap URLs
+        run: node scripts/submit-indexnow.mjs

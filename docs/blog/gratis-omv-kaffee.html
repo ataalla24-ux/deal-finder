@@ -25,11 +25,14 @@
   <link rel="icon" href="/icon-192.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/consent.css">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="/consent.css?v=5">
   <link rel="stylesheet" href="blog.css">
-  <script src="/analytics-config.js"></script>
-  <script defer src="/consent.js"></script>
+  <script defer src="/analytics-config.js"></script>
+  <script defer src="/consent.js?v=5"></script>
+  <script defer src="deal-status.js"></script>
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -48,7 +51,7 @@
             "width": 1600,
             "height": 900
           },
-          "author": { "@type": "Organization", "name": "FreeFinder" },
+          "author": { "@type": "Organization", "name": "FreeFinder Redaktion", "url": "https://freefinder.at/about.html" },
           "publisher": {
             "@type": "Organization",
             "name": "FreeFinder",
@@ -103,19 +106,21 @@
       <div class="nav-links"><a href="/">Website</a><a href="/blog/">Blog</a><a class="nav-download" href="/#download">App laden</a></div>
     </nav>
   </header>
-  <main>
+  <main data-deal-page data-deal-expires="2026-08-30T23:59:59+02:00">
     <header class="article-hero">
       <div class="hero-inner">
         <p class="eyebrow">Aktueller Gratis-Deal</p>
         <h1>Gratis OMV Eiskaffee: So testest du drei VIVA Sorten kostenlos.</h1>
         <p class="hero-copy">Mit drei Vorteilsbons können jö Mitglieder Sunny Orange Espresso, Sparkling Espresso Tonic und Coconut Strawberry Sunset jeweils einmal gratis probieren.</p>
         <div class="article-meta"><span>Geprüft am 17. August 2026</span><span>Gültig bis 30. August 2026</span><span>4 Minuten Lesezeit</span></div>
+        <div class="article-byline"><span>Von <a href="/about.html">FreeFinder Redaktion</a></span><span>Verantwortlich: Stefan Ataalla</span></div>
+        <div class="deal-status-banner" data-deal-status-banner hidden><strong>Diese Aktion ist beendet.</strong>Das angegebene Enddatum ist vorbei. Öffne die <a href="/angebote-wien-heute.html">aktuell verfügbaren Wien-Deals</a>, bevor du losfährst.</div>
       </div>
     </header>
     <div class="article-layout">
       <article class="article-body">
         <figure class="article-cover">
-          <img src="/assets/blog/omv-viva-eiskaffee-gratis.jpg" alt="Drei sommerliche Eiskaffees in Orange, Espresso-Tonic und Erdbeer-Kokos" width="1600" height="900">
+          <picture><source type="image/avif" srcset="/assets/blog/omv-viva-eiskaffee-gratis-800.avif 800w, /assets/blog/omv-viva-eiskaffee-gratis-1600.avif 1600w" sizes="(max-width: 860px) 100vw, 720px"><img src="/assets/blog/omv-viva-eiskaffee-gratis.jpg" alt="Drei sommerliche Eiskaffees in Orange, Espresso-Tonic und Erdbeer-Kokos" width="1600" height="900"></picture>
           <figcaption>Die drei Aktionssorten kombinieren Espresso mit Orange, Tonic oder Erdbeer-Kokos.</figcaption>
         </figure>
         <p>Bei OMV gibt es gerade nicht nur einen, sondern <strong>drei VIVA Eiskaffees gratis</strong>. Die Aktion läuft österreichweit an teilnehmenden OMV Stationen mit VIVA oder VIVA BILLA. Du brauchst dafür die passenden Vorteilsbons und deine jö Karte.</p>
@@ -169,6 +174,6 @@
     </div>
   </main>
   <section class="download-band" aria-labelledby="downloadTitle"><div class="download-inner"><div><h2 id="downloadTitle">Neue Gratis-Deals nicht verpassen.</h2><p>FreeFinder kostenlos für iPhone und Android laden.</p></div><div class="store-links"><a href="https://apps.apple.com/app/id6758958213">App Store</a><a href="https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien">Google Play</a></div></div></section>
-  <footer class="site-footer"><div class="footer-inner"><strong>FreeFinder Wien</strong><div class="footer-links"><a href="/blog/">Blog</a><a href="/privacy.html">Datenschutz</a><a href="/support.html">Support</a></div></div></footer>
+  <footer class="site-footer"><div class="footer-inner"><strong>FreeFinder Wien</strong><div class="footer-links"><a href="/angebote-wien-heute.html">Aktuelle Deals</a><a href="/about.html">Über uns</a><a href="/blog/">Blog</a><a href="/presse.html">Presse</a><a href="/privacy.html">Datenschutz</a><a href="/support.html">Support</a></div></div></footer>
 </body>
 </html>

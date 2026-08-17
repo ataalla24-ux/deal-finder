@@ -242,6 +242,17 @@ async function main() {
   if (includesDealsFeed && statusChanged(dealsPath)) {
     const stamped = stampDealsFeedFile(path.join(process.cwd(), dealsPath));
     console.log(`Stamped deals feed ${stamped.feedVersion} (${stamped.totalDeals} deals)`);
+    const generated = spawnSync(process.execPath, ['scripts/generate-seo-deals-page.mjs'], {
+      cwd: process.cwd(),
+      env: process.env,
+      encoding: 'utf8',
+    });
+    if (generated.status !== 0) {
+      throw new Error(`SEO deals page generation failed: ${cleanText(generated.stderr || generated.stdout)}`);
+    }
+    if (cleanText(generated.stdout)) console.log(cleanText(generated.stdout));
+    options.patterns.push('docs/angebote-wien-heute.html');
+    options.patterns.push('docs/sitemap.xml');
   }
   const changedFiles = uniqueChangedFiles(options.patterns);
   if (changedFiles.length === 0) {

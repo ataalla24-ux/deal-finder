@@ -28,86 +28,88 @@
         .lang-switch { display: flex; justify-content: center; gap: 10px; margin-bottom: 24px; }
         .lang-switch button { border: none; border-radius: 999px; padding: 10px 16px; font-weight: 700; cursor: pointer; background: #e5e7eb; color: #111827; }
         .lang-switch button.active { background: linear-gradient(135deg, #111827, #374151); color: #fff; }
+        .local-outro { margin-top: 12px; }
+        .footer-spaced { margin-top: 8px; }
     </style>
-    <link rel="stylesheet" href="/consent.css">
-    <script src="/analytics-config.js"></script>
-    <script defer src="/consent.js"></script>
+    <link rel="stylesheet" href="/consent.css?v=5">
+    <script defer src="/analytics-config.js"></script>
+    <script defer src="/consent.js?v=5"></script>
 </head>
 <body>
     <div class="container">
         <div class="lang-switch">
-            <button id="langDe" onclick="setLanguage('de')">Deutsch</button>
-            <button id="langEn" onclick="setLanguage('en')">English</button>
+            <button id="langDe" type="button" onclick="setLanguage('de')">Deutsch</button>
+            <button id="langEn" type="button" onclick="setLanguage('en')">English</button>
         </div>
 
         <div class="header">
             <h1>🎁 FreeFinder</h1>
-            <p id="pageSubtitle"></p>
+            <p id="pageSubtitle">Datenschutzerklärung / Privacy Policy</p>
         </div>
 
         <div class="card highlight">
-            <h2 id="summaryTitle"></h2>
-            <p id="summaryBody"></p>
+            <h2 id="summaryTitle">Zusammenfassung</h2>
+            <p id="summaryBody"><strong>FreeFinder respektiert deine Privatsphäre.</strong> Optionale Analyse-Dienste der Website werden erst nach deiner ausdrücklichen Einwilligung geladen.</p>
         </div>
 
         <div class="card">
-            <h2 id="controllerTitle"></h2>
+            <h2 id="controllerTitle">1. Verantwortlicher</h2>
             <p><strong>Stefan Ataalla</strong></p>
-            <p id="addressBlock"></p>
-            <p><span id="emailLabel"></span> <a href="mailto:dermarollerdesign@gmail.com" id="emailValue"></a></p>
+            <p id="addressBlock">Lotte Hass Weg 2<br>1220 Wien, Österreich</p>
+            <p><span id="emailLabel">E-Mail:</span> <a href="mailto:dermarollerdesign@gmail.com" id="emailValue">dermarollerdesign@gmail.com</a></p>
         </div>
 
         <div class="card">
-            <h2 id="localDataTitle"></h2>
-            <p id="localIntro"></p>
-            <ul id="localList"></ul>
-            <p style="margin-top: 12px;"><strong id="localOutro"></strong></p>
+            <h2 id="localDataTitle">2. Welche Daten werden gespeichert?</h2>
+            <p id="localIntro">FreeFinder speichert viele Einstellungen und Nutzungsdaten lokal auf deinem Gerät.</p>
+            <ul id="localList"><li>Favoriten, Votes, Ratings, Kommentare und Community-Tipps</li><li>Einstellungen, PRO-Status, Referral-Fortschritt und eingelöste Deals</li><li>Technische Cache-Daten für die App</li></ul>
+            <p class="local-outro"><strong id="localOutro">Diese Daten bleiben grundsätzlich auf deinem Gerät, bis du sie löschst oder die App entfernst.</strong></p>
         </div>
 
         <div class="card">
-            <h2 id="notCollectedTitle"></h2>
-            <ul id="notCollectedList"></ul>
+            <h2 id="notCollectedTitle">3. Was wir nicht sammeln</h2>
+            <ul id="notCollectedList"><li>Keine personalisierte Werbung</li><li>Keine Weitergabe an Datenhändler</li><li>Keine Kontaktlisten oder Fotos</li></ul>
         </div>
 
         <div class="card">
-            <h2 id="externalLinksTitle"></h2>
-            <p id="externalLinksBody"></p>
+            <h2 id="externalLinksTitle">4. Externe Links</h2>
+            <p id="externalLinksBody">Für Datenschutzpraktiken verlinkter Deal-Anbieter sind die jeweiligen Anbieter verantwortlich.</p>
         </div>
 
         <div class="card">
-            <h2 id="cookiesTitle"></h2>
-            <p id="cookiesBody"></p>
+            <h2 id="cookiesTitle">5. Cookies und Tracking</h2>
+            <p id="cookiesBody">Google Analytics 4 und Microsoft Clarity werden auf der Website erst nach deiner Einwilligung geladen. Deine Auswahl kann jederzeit über die Cookie-Einstellungen geändert werden.</p>
         </div>
 
         <div class="card">
-            <h2 id="childrenTitle"></h2>
-            <p id="childrenBody"></p>
+            <h2 id="childrenTitle">6. Kinder</h2>
+            <p id="childrenBody">FreeFinder richtet sich nicht speziell an Kinder und erstellt keine Kinderprofile.</p>
         </div>
 
         <div class="card">
-            <h2 id="changesTitle"></h2>
-            <p id="changesBody"></p>
+            <h2 id="changesTitle">7. Änderungen</h2>
+            <p id="changesBody">Bei Änderungen dieser Datenschutzerklärung wird das Datum unten aktualisiert.</p>
         </div>
 
         <div class="card">
-            <h2 id="rightsTitle"></h2>
-            <p id="rightsBody"></p>
+            <h2 id="rightsTitle">8. DSGVO-Rechte</h2>
+            <p id="rightsBody">Du kannst Auskunft, Berichtigung oder Löschung serverseitig verarbeiteter Daten anfragen. Lokale App-Daten kannst du auf deinem Gerät löschen.</p>
         </div>
 
         <div class="card contact">
-            <h2 id="contactTitle"></h2>
-            <p id="contactBody"></p>
-            <p><strong>Stefan Ataalla</strong><br><span id="contactAddress"></span></p>
-            <p><strong id="supportEmailLabel"></strong> <a href="mailto:dermarollerdesign@gmail.com">dermarollerdesign@gmail.com</a></p>
+            <h2 id="contactTitle">9. Kontakt</h2>
+            <p id="contactBody">Bei Fragen zur Datenschutzerklärung:</p>
+            <p><strong>Stefan Ataalla</strong><br><span id="contactAddress">Lotte Hass Weg 2, 1220 Wien<br>Österreich</span></p>
+            <p><strong id="supportEmailLabel">Support-E-Mail:</strong> <a href="mailto:dermarollerdesign@gmail.com">dermarollerdesign@gmail.com</a></p>
         </div>
 
         <div class="footer">
-            <p id="updatedText"></p>
-            <p style="margin-top: 8px;" id="copyrightText"></p>
+            <p id="updatedText">Stand: August 2026</p>
+            <p class="footer-spaced" id="copyrightText">© 2026 FreeFinder. Alle Rechte vorbehalten.</p>
             <div class="link-row">
-                <a href="./support.html" id="supportLink"></a>
-                <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" id="termsLink"></a>
-                <a href="./index.html" id="backLink"></a>
+                <a href="./support.html" id="supportLink">Support</a>
+                <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" id="termsLink">Terms of Use (EULA)</a>
+                <a href="./index.html" id="backLink">Zurück zur App</a>
             </div>
         </div>
     </div>

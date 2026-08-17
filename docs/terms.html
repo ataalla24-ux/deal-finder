@@ -17,28 +17,28 @@
     p { margin-bottom: 14px; }
     a { color: #667eea; }
   </style>
-  <link rel="stylesheet" href="/consent.css">
-  <script src="/analytics-config.js"></script>
-  <script defer src="/consent.js"></script>
+  <link rel="stylesheet" href="/consent.css?v=5">
+  <script defer src="/analytics-config.js"></script>
+  <script defer src="/consent.js?v=5"></script>
 </head>
 <body>
   <div class="lang-switch">
-    <button id="langDe" onclick="setLanguage('de')">Deutsch</button>
-    <button id="langEn" onclick="setLanguage('en')">English</button>
+    <button id="langDe" type="button" onclick="setLanguage('de')">Deutsch</button>
+    <button id="langEn" type="button" onclick="setLanguage('en')">English</button>
   </div>
   <div class="card">
-    <h1 id="title"></h1>
-    <p id="intro"></p>
-    <h2 id="useTitle"></h2>
-    <p id="useBody"></p>
-    <h2 id="warrantyTitle"></h2>
-    <p id="warrantyBody"></p>
-    <h2 id="liabilityTitle"></h2>
-    <p id="liabilityBody"></p>
-    <h2 id="copyrightTitle"></h2>
-    <p id="copyrightBody"></p>
-    <p id="updated"></p>
-    <p><a href="/" id="backLink"></a></p>
+    <h1 id="title">Nutzungsbedingungen</h1>
+    <p id="intro"><strong>FreeFinder</strong> sammelt Hinweise zu kostenlosen Deals und Angeboten in Wien.</p>
+    <h2 id="useTitle">1. Nutzung</h2>
+    <p id="useBody">Die App ist kostenlos und dient der Information über Angebote in Wien.</p>
+    <h2 id="warrantyTitle">2. Keine Garantie</h2>
+    <p id="warrantyBody">Wir übernehmen keine Garantie für Aktualität, Richtigkeit oder Vollständigkeit angezeigter Deals.</p>
+    <h2 id="liabilityTitle">3. Keine Haftung</h2>
+    <p id="liabilityBody">Für Schäden durch die Nutzung der App übernehmen wir keine Haftung.</p>
+    <h2 id="copyrightTitle">4. Urheberrecht</h2>
+    <p id="copyrightBody">Alle Inhalte gehören den jeweiligen Eigentümern.</p>
+    <p id="updated">Stand: 16.02.2026</p>
+    <p><a href="/" id="backLink">Zurück zur App</a></p>
   </div>
   <script>
     const I18N = {

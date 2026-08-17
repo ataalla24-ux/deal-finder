@@ -109,6 +109,63 @@
     hideBanner();
   }
 
+  function compactValue(value) {
+    return String(value || "").replace(/\s+/g, " ").trim().slice(0, 120);
+  }
+
+  function trackEvent(name, parameters) {
+    if (readConsent() !== "granted") return;
+    const eventParameters = Object.assign({
+      page_path: window.location.pathname,
+      transport_type: "beacon"
+    }, parameters || {});
+    window.gtag("event", name, eventParameters);
+    if (typeof window.clarity === "function") {
+      window.clarity("event", name);
+    }
+  }
+
+  function bindConversionTracking() {
+    document.addEventListener("click", function (event) {
+      const target = event.target.closest("a, button");
+      if (!target) return;
+      const href = target instanceof HTMLAnchorElement ? target.href : "";
+      const label = compactValue(target.textContent || target.getAttribute("aria-label"));
+      if (/^https:\/\/apps\.apple\.com\//i.test(href)) {
+        trackEvent("app_store_click", { link_text: label, link_url: href });
+        return;
+      }
+      if (/^https:\/\/play\.google\.com\//i.test(href)) {
+        trackEvent("google_play_click", { link_text: label, link_url: href });
+        return;
+      }
+      if (target.matches('[data-track="deal_outbound"]')) {
+        trackEvent("deal_outbound_click", {
+          deal_brand: compactValue(target.getAttribute("data-deal-brand")),
+          link_url: href
+        });
+        return;
+      }
+      if (target.matches("[data-checkout-plan], [data-business-plan]")) {
+        trackEvent("business_plan_click", {
+          plan_name: compactValue(target.getAttribute("data-checkout-plan") || target.getAttribute("data-business-plan"))
+        });
+        return;
+      }
+      if (target.id === "shareAppButton") {
+        trackEvent("share_app_click", { link_text: label });
+        return;
+      }
+      if (target.closest(".post-card, .blog-card")) {
+        trackEvent("blog_article_click", { link_text: label, link_url: href });
+        return;
+      }
+      if (/^mailto:/i.test(href)) {
+        trackEvent("contact_click", { link_text: label });
+      }
+    });
+  }
+
   function hideBanner() {
     const banner = document.getElementById("ffCookieBanner");
     if (banner) banner.hidden = true;
@@ -185,6 +242,7 @@
 
   function initialize() {
     buildBanner();
+    bindConversionTracking();
     const saved = readConsent();
     if (saved === "granted") {
       googleConsent("granted", "update");

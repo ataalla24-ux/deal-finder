@@ -33,13 +33,15 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon-192.svg">
-  <link rel="preload" as="image" href="assets/current-ios/deals-home.jpg" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/current-ios/deals-home-736.avif" type="image/avif" fetchpriority="high">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="consent.css">
-  <script src="analytics-config.js"></script>
-  <script defer src="consent.js"></script>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=optional" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=optional" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="consent.css?v=5">
+  <script defer src="analytics-config.js"></script>
+  <script defer src="consent.js?v=5"></script>
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -59,6 +61,8 @@
           "name": "FreeFinder",
           "url": "https://freefinder.at/",
           "logo": "https://freefinder.at/icon-512.svg",
+          "founder": { "@type": "Person", "name": "Stefan Ataalla" },
+          "publishingPrinciples": "https://freefinder.at/about.html",
           "sameAs": [
             "https://apps.apple.com/app/id6758958213",
             "https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien"
@@ -448,8 +452,9 @@
       gap: 18px;
       max-width: 660px;
       margin-top: 36px;
-      padding-top: 26px;
+      padding: 26px 0 0;
       border-top: 1px solid var(--line-cool);
+      list-style: none;
     }
 
     .proof-item {
@@ -514,6 +519,12 @@
       object-fit: cover;
       border-radius: 34px;
       background: #fff;
+    }
+
+    .phone-frame picture {
+      display: block;
+      width: 100%;
+      height: 100%;
     }
 
     .phone-main {
@@ -983,7 +994,7 @@
       font-size: 18px;
     }
 
-    .package span {
+    .package-copy > span {
       display: block;
       margin-top: 3px;
       color: var(--muted);
@@ -1290,6 +1301,7 @@
 
     .blog-card img {
       width: 100%;
+      height: auto;
       aspect-ratio: 16 / 9;
       object-fit: cover;
     }
@@ -1741,6 +1753,7 @@
         </button>
         <div class="nav-links" id="navLinks">
           <a href="#app">App</a>
+          <a href="angebote-wien-heute.html">Deals</a>
           <a href="#pro">PRO</a>
           <a href="#business">Business</a>
           <a href="blog/">Blog</a>
@@ -1797,35 +1810,35 @@
               </svg>
               Bei Google Play laden
             </a>
-            <a class="button button-secondary" href="#app">Deals ansehen</a>
+            <a class="button button-secondary" href="angebote-wien-heute.html">Deals ansehen</a>
           </div>
-          <div class="hero-proof" aria-label="FreeFinder Vorteile">
-            <div class="proof-item">
+          <ul class="hero-proof" aria-label="FreeFinder Vorteile">
+            <li class="proof-item">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <strong>Täglich kostenlos</strong>
               <span>Gratis-Angebote und Rabatte statt endloser Gutschein-Suche.</span>
-            </div>
-            <div class="proof-item">
+            </li>
+            <li class="proof-item">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-5.3 7-12a7 7 0 1 0-14 0c0 6.7 7 12 7 12Z" stroke="currentColor" stroke-width="2.2"/><path d="M12 12.2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="2.2"/></svg>
               <strong>Lokal in Wien</strong>
               <span>Restaurants, Cafes, Shops und Services in deiner Nähe.</span>
-            </div>
-            <div class="proof-item">
+            </li>
+            <li class="proof-item">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"/></svg>
               <strong>Schnell merken</strong>
               <span>Favoriten und Empfehlungen bleiben jederzeit griffbereit.</span>
-            </div>
-          </div>
+            </li>
+          </ul>
         </div>
-        <div class="phone-stage" aria-label="Aktuelle FreeFinder App Screenshots">
+        <div class="phone-stage" role="group" aria-label="Aktuelle FreeFinder App Screenshots">
           <div class="phone-frame phone-side">
-            <img src="assets/current-ios/for-you.jpg" width="736" height="1600" alt="FreeFinder Empfehlungen mit kostenlosen Angeboten" decoding="async">
+            <picture><source type="image/avif" srcset="assets/current-ios/for-you-400.avif 400w, assets/current-ios/for-you-711.avif 711w" sizes="226px"><img src="assets/current-ios/for-you.jpg" width="711" height="1600" alt="FreeFinder Empfehlungen mit kostenlosen Angeboten" decoding="async"></picture>
           </div>
           <div class="phone-frame phone-main">
-            <img src="assets/current-ios/deals-home.jpg" width="736" height="1600" alt="FreeFinder Startscreen mit kostenlosen Angeboten in Wien" decoding="async" fetchpriority="high">
+            <picture><source type="image/avif" srcset="assets/current-ios/deals-home-400.avif 400w, assets/current-ios/deals-home-736.avif 736w" sizes="300px"><img src="assets/current-ios/deals-home.jpg" width="736" height="1600" alt="FreeFinder Startscreen mit kostenlosen Angeboten in Wien" decoding="async" fetchpriority="high"></picture>
           </div>
           <div class="phone-frame phone-side right">
-            <img src="assets/current-ios/stats-plus.jpg" width="368" height="800" alt="FreeFinder PLUS Statistiken" decoding="async">
+            <picture><source type="image/avif" srcset="assets/current-ios/stats-plus.avif"><img src="assets/current-ios/stats-plus.jpg" width="368" height="800" alt="FreeFinder PLUS Statistiken" decoding="async"></picture>
           </div>
         </div>
         <div class="next-strip" aria-hidden="true">
@@ -1855,12 +1868,12 @@
         <div class="app-grid">
           <div class="screenshot-column">
             <div class="phone-frame">
-              <img src="assets/current-ios/for-you.jpg" width="736" height="1600" alt="Aktuelle FreeFinder Empfehlungen mit Pizza, Kebab und Matcha" loading="lazy" decoding="async">
+              <picture><source type="image/avif" srcset="assets/current-ios/for-you-400.avif 400w, assets/current-ios/for-you-711.avif 711w" sizes="300px"><img src="assets/current-ios/for-you.jpg" width="711" height="1600" alt="Aktuelle FreeFinder Empfehlungen mit Pizza, Kebab und Matcha" loading="lazy" decoding="async"></picture>
             </div>
             <aside class="live-deals" aria-labelledby="liveDealsTitle">
               <div class="live-deals-head">
                 <strong id="liveDealsTitle">Aktuelle Highlights</strong>
-                <a href="#download" data-store-auto>Alle öffnen</a>
+                <a href="angebote-wien-heute.html">Alle ansehen</a>
               </div>
               <div class="deal-list" id="dealList">
                 <article class="deal-card">
@@ -1939,7 +1952,7 @@
             <p class="payment-note">Web-Zahlung über Stripe Checkout mit den in Stripe aktivierten Methoden, z.B. Apple Pay, Karte, PayPal, Klarna/Sofort, SEPA oder Google Pay.</p>
           </div>
           <div class="phone-frame pro-phone">
-            <img src="assets/current-ios/pro-sheet.jpg" width="368" height="800" alt="FreeFinder PRO und PLUS Funktionen" loading="lazy" decoding="async">
+            <picture><source type="image/avif" srcset="assets/current-ios/pro-sheet.avif"><img src="assets/current-ios/pro-sheet.jpg" width="368" height="800" alt="FreeFinder PRO und PLUS Funktionen" loading="lazy" decoding="async"></picture>
           </div>
         </div>
       </section>
@@ -1970,18 +1983,18 @@
             <div class="package-list">
               <button class="package package-button" type="button" data-business-plan="businessStarter">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7M12 21V8M3 8h18v4H3V8ZM12 8H8.5a2.5 2.5 0 1 1 2.2-3.7L12 8Zm0 0h3.5a2.5 2.5 0 1 0-2.2-3.7L12 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <div><strong>Starter Boost</strong><span>1 Tag sichtbar im Feed</span></div>
-                <div class="package-price">25,99 €</div>
+                <span class="package-copy"><strong>Starter Boost</strong><span>1 Tag sichtbar im Feed</span></span>
+                <span class="package-price">25,99 €</span>
               </button>
               <button class="package package-button" type="button" data-business-plan="businessSpotlight">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-                <div><strong>Spotlight Boost</strong><span>3 Tage für laufende Aktionen</span></div>
-                <div class="package-price">64,99 €</div>
+                <span class="package-copy"><strong>Spotlight Boost</strong><span>3 Tage für laufende Aktionen</span></span>
+                <span class="package-price">64,99 €</span>
               </button>
               <button class="package package-button" type="button" data-business-plan="businessCity">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19c5-1.5 9-5.5 10.5-10.5L19 5l-1.1 5.5L23 12l-5.1 1.5L19 19l-3.5-3.5C10.5 17 6.5 21 5 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <div><strong>City Push</strong><span>8 Tage maximale Reichweite</span></div>
-                <div class="package-price">129,99 €</div>
+                <span class="package-copy"><strong>City Push</strong><span>8 Tage maximale Reichweite</span></span>
+                <span class="package-price">129,99 €</span>
               </button>
             </div>
             <button class="button button-warm" type="button" data-business-plan="businessStarter">Starter Boost buchen</button>
@@ -2015,7 +2028,7 @@
         </div>
         <div class="blog-grid">
           <article class="blog-card">
-            <img src="assets/current-ios/deals-home.jpg" alt="FreeFinder App mit kostenlosen Food-Deals in Wien" width="1200" height="675" loading="lazy">
+            <picture><source type="image/avif" srcset="assets/current-ios/deals-home-400.avif 400w, assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 33vw"><img src="assets/current-ios/deals-home.jpg" alt="FreeFinder App mit kostenlosen Food-Deals in Wien" width="736" height="414" loading="lazy" decoding="async"></picture>
             <div class="blog-card-body">
               <span class="blog-card-label">Gratis-Essen</span>
               <h3>Gratis Essen in Wien finden</h3>
@@ -2024,7 +2037,7 @@
             </div>
           </article>
           <article class="blog-card">
-            <img src="og-preview-stores.png" alt="FreeFinder für iPhone und Android mit kostenlosen Angeboten in Wien" width="1200" height="675" loading="lazy">
+            <picture><source type="image/avif" srcset="og-preview-stores-600.avif 600w, og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 33vw"><img src="og-preview-stores.png" alt="FreeFinder für iPhone und Android mit kostenlosen Angeboten in Wien" width="1200" height="630" loading="lazy" decoding="async"></picture>
             <div class="blog-card-body">
               <span class="blog-card-label">Gratis-Angebote</span>
               <h3>Kostenlose Angebote in Wien</h3>
@@ -2033,7 +2046,7 @@
             </div>
           </article>
           <article class="blog-card">
-            <img src="assets/current-ios/for-you.jpg" alt="Personalisierte Wiener Rabatte in der FreeFinder App" width="1200" height="675" loading="lazy">
+            <picture><source type="image/avif" srcset="assets/current-ios/for-you-400.avif 400w, assets/current-ios/for-you-711.avif 711w" sizes="(max-width: 860px) 100vw, 33vw"><img src="assets/current-ios/for-you.jpg" alt="Personalisierte Wiener Rabatte in der FreeFinder App" width="711" height="400" loading="lazy" decoding="async"></picture>
             <div class="blog-card-body">
               <span class="blog-card-label">Rabatte</span>
               <h3>Rabatte und 1+1-Deals prüfen</h3>
@@ -2086,7 +2099,10 @@
       </div>
       <div class="footer-links">
         <a href="#faq">FAQ</a>
+        <a href="angebote-wien-heute.html">Aktuelle Deals</a>
         <a href="blog/">Blog</a>
+        <a href="about.html">Über uns</a>
+        <a href="presse.html">Presse</a>
         <a href="privacy.html">Datenschutz</a>
         <a href="support.html">Support</a>
         <a href="terms.html">Nutzungsbedingungen</a>
@@ -2096,7 +2112,7 @@
       <div class="copyright">© 2026 FreeFinder. Alle Rechte vorbehalten.</div>
     </footer>
     <div class="checkout-toast" id="checkoutToast" role="status" aria-live="polite"></div>
-    <div class="business-modal-backdrop" id="businessCheckoutModal" aria-hidden="true">
+    <div class="business-modal-backdrop" id="businessCheckoutModal" inert>
       <section class="business-modal" role="dialog" aria-modal="true" aria-labelledby="businessModalTitle">
         <div class="business-modal-header">
           <div>
@@ -2114,7 +2130,7 @@
             <div class="business-form-grid">
               <div class="business-field">
                 <label for="businessRestaurantName">Anbieter</label>
-                <input id="businessRestaurantName" name="restaurantName" autocomplete="organization" placeholder="z.B. Café Am Park" required>
+                <input id="businessRestaurantName" name="restaurantName" type="text" autocomplete="organization" placeholder="z.B. Café Am Park" required>
               </div>
               <div class="business-field">
                 <label for="businessContactEmail">Kontakt-E-Mail</label>
@@ -2122,7 +2138,7 @@
               </div>
               <div class="business-field">
                 <label for="businessAddress">Ort</label>
-                <input id="businessAddress" name="address" autocomplete="street-address" placeholder="Adresse, Bezirk oder Standort" required>
+                <input id="businessAddress" name="address" type="text" autocomplete="address-line1" placeholder="Adresse, Bezirk oder Standort" required>
               </div>
               <div class="business-field">
                 <label for="businessCategory">Kategorie</label>
@@ -2139,15 +2155,15 @@
               </div>
               <div class="business-field full">
                 <label for="businessDealTitle">Deal-Titel</label>
-                <input id="businessDealTitle" name="dealTitle" placeholder="z.B. Gratis Iced Matcha Latte" required>
+                <input id="businessDealTitle" name="dealTitle" type="text" placeholder="z.B. Gratis Iced Matcha Latte" required>
               </div>
               <div class="business-field">
                 <label for="businessOldPrice">Normalpreis</label>
-                <input id="businessOldPrice" name="oldPrice" inputmode="decimal" placeholder="z.B. 6,90 €">
+                <input id="businessOldPrice" name="oldPrice" type="text" inputmode="decimal" placeholder="z.B. 6,90 €">
               </div>
               <div class="business-field">
                 <label for="businessDealPrice">Dealpreis</label>
-                <input id="businessDealPrice" name="dealPrice" inputmode="decimal" placeholder="z.B. gratis">
+                <input id="businessDealPrice" name="dealPrice" type="text" inputmode="decimal" placeholder="z.B. gratis">
               </div>
               <div class="business-field full">
                 <label for="businessCtaURL">Link</label>
@@ -2386,8 +2402,8 @@
       const selected = businessPlans[selectedBusinessPlan];
       if (label) label.textContent = selected.label;
       if (meta) meta.textContent = selected.meta;
+      modal?.removeAttribute("inert");
       modal?.classList.add("open");
-      modal?.setAttribute("aria-hidden", "false");
       setTimeout(() => document.getElementById("businessRestaurantName")?.focus(), 80);
     }
 
@@ -2395,7 +2411,7 @@
       const modal = document.getElementById("businessCheckoutModal");
       if (!modal?.classList.contains("open")) return;
       modal.classList.remove("open");
-      modal.setAttribute("aria-hidden", "true");
+      modal.setAttribute("inert", "");
     }
 
     function collectBusinessCampaign(form) {

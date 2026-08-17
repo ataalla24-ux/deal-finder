@@ -1,8 +1,10 @@
-const CACHE_NAME = 'freefinder-website-v4';
+const CACHE_NAME = 'freefinder-website-v5';
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
+  './consent.css',
+  './consent.js',
   './icon-192.svg',
   './icon-512.svg',
   './icon-maskable.svg',
