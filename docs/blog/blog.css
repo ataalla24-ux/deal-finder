@@ -166,7 +166,7 @@ h1 {
 
 .post-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -180,6 +180,7 @@ h1 {
 
 .post-card img {
   width: 100%;
+  height: auto;
   aspect-ratio: 16 / 9;
   object-fit: cover;
 }
@@ -218,10 +219,27 @@ h1 {
   min-width: 0;
 }
 
-.article-body > p:first-child {
+.article-body > p:first-of-type {
   margin-top: 0;
   color: #333b47;
   font-size: 20px;
+}
+
+.article-cover {
+  margin: 0 0 34px;
+}
+
+.article-cover img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.article-cover figcaption {
+  margin-top: 9px;
+  color: #667085;
+  font-size: 12px;
 }
 
 .article-body h2 {
