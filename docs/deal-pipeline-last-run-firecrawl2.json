@@ -1,32 +1,48 @@
 {
   "schemaVersion": 1,
-  "runId": "firecrawl2-2026-08-16T03:41:39.912Z",
+  "runId": "firecrawl2-2026-08-17T03:42:48.718Z",
   "sourceKey": "firecrawl2",
   "sourceLabel": "Firecrawl Key 3 - Consumables",
   "status": "completed",
-  "startedAt": "2026-08-16T03:39:34.800Z",
-  "finishedAt": "2026-08-16T03:41:39.912Z",
-  "durationMs": 125112,
+  "startedAt": "2026-08-17T03:40:53.620Z",
+  "finishedAt": "2026-08-17T03:42:48.718Z",
+  "durationMs": 115098,
   "outputFile": "docs/deals-pending-firecrawl2.json",
   "counts": {
-    "rawCandidates": 5,
-    "normalizedCandidates": 5,
-    "verifiedCandidates": 5,
+    "rawCandidates": 7,
+    "normalizedCandidates": 6,
+    "verifiedCandidates": 6,
     "previousDeals": 0,
-    "acceptedDeals": 5,
-    "rejectedDeals": 0
+    "acceptedDeals": 6,
+    "rejectedDeals": 1
   },
-  "rejectedByReason": {},
-  "rejectedSamples": [],
+  "rejectedByReason": {
+    "invalid-original-post-url": 1
+  },
+  "rejectedSamples": [
+    {
+      "reason": "invalid-original-post-url",
+      "deal": {
+        "id": "",
+        "title": "Happy Hour",
+        "brand": "zokuvienna",
+        "url": "https://www.instagram.com/zokuvienna/reel/C16thUosptj/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    }
+  ],
   "diagnostics": {
     "agentStatus": "completed",
     "creditsUsed": 0,
     "verifier": {
       "statusCounts": {
-        "timestamp-derived": 4,
-        "verified-original-post": 1
+        "verified-original-post": 3,
+        "timestamp-derived": 3
       },
-      "verifiedOriginalPosts": 1,
+      "verifiedOriginalPosts": 3,
       "timestampOnlyPosts": 0,
       "unavailableOriginalPosts": 0,
       "registryViennaEvidence": 0
