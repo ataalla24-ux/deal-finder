@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "runId": "firecrawl4-2026-08-18T07:46:28.830Z",
+  "runId": "firecrawl4-2026-08-19T07:49:07.064Z",
   "sourceKey": "firecrawl4",
   "sourceLabel": "Firecrawl Key 4 - Gastro Discovery",
   "status": "completed-with-errors",
-  "startedAt": "2026-08-18T07:38:11.482Z",
-  "finishedAt": "2026-08-18T07:46:28.830Z",
-  "durationMs": 497348,
+  "startedAt": "2026-08-19T07:38:23.485Z",
+  "finishedAt": "2026-08-19T07:49:07.064Z",
+  "durationMs": 643579,
   "outputFile": "docs/deals-pending-firecrawl4.json",
   "counts": {
     "rawCandidates": 0,
@@ -36,7 +36,7 @@
         "normalizedCandidates": 0,
         "rejectedCandidates": 0,
         "creditsUsed": 0,
-        "error": "Refusal: I cannot complete this task because the required data source (https://www.instagram.com/explore/tags/kostenlosessenwien/) is not accessible. Instagram is not supported by the available scraping tools, and the task explicitly mandates extracting data ONLY from this Instagram hashtag page. \n\nThe scrape attempt returned: \"We apologize for the inconvenience but we do not support this site.\"\n\nSince the website constraint is mandatory and cannot be bypassed, I cannot extract the requested Vienna food deals from the specified Instagram hashtag."
+        "error": "Refusal: Error: Agent reached max credits"
       },
       {
         "id": "hashtag:fooddealwien",
@@ -48,7 +48,7 @@
         "normalizedCandidates": 0,
         "rejectedCandidates": 0,
         "creditsUsed": 0,
-        "error": "Refusal: Unfortunately, I cannot extract data from the Instagram hashtag #fooddealwien as requested. \n\nInstagram scraping is not supported by the available tools due to:\n1. Platform restrictions and authentication requirements\n2. Anti-bot measures that block automated access\n3. Terms of service limitations\n\nThe browser automation agent failed when attempting to access the page, and direct scraping returned an error stating that Instagram is not a supported site.\n\nTo gather this data, you would need to:\n- Manually browse Instagram and copy the deal information\n- Use Instagram's official API (requires authentication and approval)\n- Look for alternative public sources that aggregate Vienna food deals from Instagram\n\nThe original task constraint required data ONLY from https://www.instagram.com/explore/tags/fooddealwien/, which is technically not accessible through the available scraping infrastructure. If you'd like, I can search for Vienna food deals from other publicly accessible sources instead (like 1000things.at, meinbezirk.at, etc.), but this would violate the \"ONLY from these sources\" constraint you specified."
+        "error": "Refusal: Error: Agent reached max credits"
       },
       {
         "id": "hashtag:gastroaktionwien",
@@ -63,10 +63,10 @@
         "error": "Refusal: Error: Agent reached max credits"
       },
       {
-        "id": "hashtag:fooddealsvienna",
+        "id": "hashtag:viennadeals",
         "kind": "instagram-hashtag",
-        "label": "#fooddealsvienna",
-        "url": "https://www.instagram.com/explore/tags/fooddealsvienna/",
+        "label": "#viennadeals",
+        "url": "https://www.instagram.com/explore/tags/viennadeals/",
         "status": "failed",
         "rawCandidates": 0,
         "normalizedCandidates": 0,
@@ -75,10 +75,10 @@
         "error": "Refusal: Error: Agent reached max credits"
       },
       {
-        "id": "hashtag:freefoodvienna",
+        "id": "hashtag:viennaoffers",
         "kind": "instagram-hashtag",
-        "label": "#freefoodvienna",
-        "url": "https://www.instagram.com/explore/tags/freefoodvienna/",
+        "label": "#viennaoffers",
+        "url": "https://www.instagram.com/explore/tags/viennaoffers/",
         "status": "failed",
         "rawCandidates": 0,
         "normalizedCandidates": 0,
@@ -109,11 +109,11 @@
   },
   "constraints": {},
   "errors": [
-    "#kostenlosessenwien: Refusal: I cannot complete this task because the required data source (https://www.instagram.com/explore/tags/kostenlosessenwien/) is not accessible. Instagram is not supported by the available scraping tools, and the task explicitly mandates extracting data ONLY from this Instagram hashtag page. The scrape attempt returned: \"We apologize for the inconvenience but we do not support this site.\" Since the website constraint is mandatory and cannot be bypassed, I cannot extract the requested Vienna food deals from the specified Instagram hashtag.",
-    "#fooddealwien: Refusal: Unfortunately, I cannot extract data from the Instagram hashtag #fooddealwien as requested. Instagram scraping is not supported by the available tools due to: 1. Platform restrictions and authentication requirements 2. Anti-bot measures that block automated access 3. Terms of service limitations The browser automation agent failed when attempting to access the page, and direct scraping returned an error stating that Instagram is not a supported site. To gather this data, you would need to: - Manually browse Instagram and copy the deal information - Use Instagram's official API (requires authentication and approval) - Look for alternative public sources that aggregate ",
+    "#kostenlosessenwien: Refusal: Error: Agent reached max credits",
+    "#fooddealwien: Refusal: Error: Agent reached max credits",
     "#gastroaktionwien: Refusal: Error: Agent reached max credits",
-    "#fooddealsvienna: Refusal: Error: Agent reached max credits",
-    "#freefoodvienna: Refusal: Error: Agent reached max credits",
+    "#viennadeals: Refusal: Error: Agent reached max credits",
+    "#viennaoffers: Refusal: Error: Agent reached max credits",
     "@tastyfood.vienna: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
   ]
 }
