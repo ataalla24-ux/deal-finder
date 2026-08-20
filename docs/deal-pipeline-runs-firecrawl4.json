@@ -2,9 +2,128 @@
   "schemaVersion": 1,
   "sourceKey": "firecrawl4",
   "sourceLabel": "Firecrawl Key 4 - Gastro Discovery",
-  "updatedAt": "2026-08-19T07:49:07.064Z",
-  "runCount": 28,
+  "updatedAt": "2026-08-20T07:48:11.713Z",
+  "runCount": 29,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "firecrawl4-2026-08-20T07:48:11.713Z",
+      "sourceKey": "firecrawl4",
+      "sourceLabel": "Firecrawl Key 4 - Gastro Discovery",
+      "status": "completed-with-errors",
+      "startedAt": "2026-08-20T07:40:59.577Z",
+      "finishedAt": "2026-08-20T07:48:11.713Z",
+      "durationMs": 432136,
+      "outputFile": "docs/deals-pending-firecrawl4.json",
+      "counts": {
+        "rawCandidates": 0,
+        "normalizedCandidates": 0,
+        "verifiedCandidates": 0,
+        "previousDeals": 100,
+        "acceptedDeals": 100,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "configuredSources": 10,
+        "attemptedSources": 6,
+        "completedSources": 0,
+        "maxCreditsPerTarget": 350,
+        "totalCreditsUsed": 0,
+        "preservedPreviousOutput": true,
+        "sourceStats": [
+          {
+            "id": "hashtag:kostenlosessenwien",
+            "kind": "instagram-hashtag",
+            "label": "#kostenlosessenwien",
+            "url": "https://www.instagram.com/explore/tags/kostenlosessenwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: Error: Agent reached max credits"
+          },
+          {
+            "id": "hashtag:fooddealwien",
+            "kind": "instagram-hashtag",
+            "label": "#fooddealwien",
+            "url": "https://www.instagram.com/explore/tags/fooddealwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: Error: Agent reached max credits"
+          },
+          {
+            "id": "hashtag:gastroaktionwien",
+            "kind": "instagram-hashtag",
+            "label": "#gastroaktionwien",
+            "url": "https://www.instagram.com/explore/tags/gastroaktionwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: I cannot complete this task because Instagram scraping is not supported by the available tools. When attempting to scrape https://www.instagram.com/explore/tags/gastroaktionwien/, I received an error stating \"we do not support this site.\" Additionally, the browser automation agent failed with an error. \n\nSince the task explicitly requires extracting data ONLY from Instagram (https://www.instagram.com/explore/tags/gastroaktionwien/), and this source is not accessible through any of the available tools, I cannot fulfill the requirements.\n\nTo complete this task, you would need to either:\n1. Use a different data source that is accessible\n2. Manually extract the data from Instagram\n3. Use a different toolset that supports Instagram scraping"
+          },
+          {
+            "id": "hashtag:viennafreebies",
+            "kind": "instagram-hashtag",
+            "label": "#viennafreebies",
+            "url": "https://www.instagram.com/explore/tags/viennafreebies/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: Error: Agent reached max credits"
+          },
+          {
+            "id": "hashtag:happyhourwien",
+            "kind": "instagram-hashtag",
+            "label": "#happyhourwien",
+            "url": "https://www.instagram.com/explore/tags/happyhourwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: Error: Agent reached max credits"
+          },
+          {
+            "id": "account:tastyfood.vienna",
+            "kind": "instagram-account",
+            "label": "@tastyfood.vienna",
+            "url": "https://www.instagram.com/tastyfood.vienna/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+          }
+        ],
+        "verifier": {
+          "statusCounts": {},
+          "verifiedOriginalPosts": 0,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 0
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "#kostenlosessenwien: Refusal: Error: Agent reached max credits",
+        "#fooddealwien: Refusal: Error: Agent reached max credits",
+        "#gastroaktionwien: Refusal: I cannot complete this task because Instagram scraping is not supported by the available tools. When attempting to scrape https://www.instagram.com/explore/tags/gastroaktionwien/, I received an error stating \"we do not support this site.\" Additionally, the browser automation agent failed with an error. Since the task explicitly requires extracting data ONLY from Instagram (https://www.instagram.com/explore/tags/gastroaktionwien/), and this source is not accessible through any of the available tools, I cannot fulfill the requirements. To complete this task, you would need to either: 1. Use a different data source that is accessible 2. Manually extract the data from",
+        "#viennafreebies: Refusal: Error: Agent reached max credits",
+        "#happyhourwien: Refusal: Error: Agent reached max credits",
+        "@tastyfood.vienna: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "firecrawl4-2026-08-19T07:49:07.064Z",
