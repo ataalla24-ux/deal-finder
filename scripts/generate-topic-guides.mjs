@@ -125,22 +125,24 @@ const guides = [
   {
     slug: 'kostenlose-freizeitangebote-wien',
     title: 'Kostenlose Freizeitangebote in Wien finden',
-    meta: 'Kostenlose Freizeitangebote in Wien finden: freie Tage, Schnupperangebote und gratis Aktivitäten aktuell und seriös prüfen.',
+    meta: 'Kostenlose Freizeitangebote in Wien finden: freie Tage, Schnupperangebote und Probetrainings mit Anmeldung, Kündigungsfrist und Folgekosten seriös prüfen.',
     eyebrow: 'Kostenlose Freizeit Wien',
-    headline: 'Kostenlose Freizeitangebote in Wien sinnvoll entdecken.',
-    intro: 'Freier Eintritt, Schnuppertraining oder offene Aktivität: Wien bietet unterschiedliche Möglichkeiten, Freizeit ohne Eintrittspreis zu planen. Aktualität und Anmeldung bleiben entscheidend.',
-    image: '/assets/current-ios/for-you.jpg', imageAvif: '/assets/current-ios/for-you-400.avif 400w, /assets/current-ios/for-you-711.avif 711w', imageWidth: 711, imageHeight: 400,
-    imageAlt: 'FreeFinder App mit Empfehlungen für lokale Wiener Angebote',
+    headline: 'Kostenlose Freizeitangebote in Wien sinnvoll entdecken – und Probetrainings richtig beenden.',
+    intro: 'Freier Eintritt, Schnuppertraining oder offene Aktivität: Wien bietet unterschiedliche Möglichkeiten, Freizeit ohne Eintrittspreis zu planen. Bei einer kostenlosen Probe sind Anmeldung, Kündigungsfrist und Folgekosten ebenso wichtig wie der Gratiszeitraum.',
+    modified: '2026-08-21', modifiedLabel: '21. August 2026',
+    image: '/assets/blog/evo-probetraining-wien-2026.jpg', imageWidth: 1600, imageHeight: 900,
+    imageAlt: 'Person betritt ein helles Fitnessstudio mit Trainingsgeräten im Hintergrund',
     sections: [
       ['kategorien', 'Welche kostenlosen Aktivitäten gibt es?', `<p><strong>Kostenlose Freizeitangebote in Wien</strong> können freie Museumstage, öffentliche Programme, offene Sportangebote, Schnupperstunden, Märkte oder zeitlich begrenzte Aktionen umfassen. Manche sind dauerhaft kostenlos, andere nur an einem Termin oder für eine bestimmte Zielgruppe.</p><p>Unterscheide freie Teilnahme von einem kostenlosen Probetraining. Bei einer Probe können Anmeldung, Beratungsgespräch oder spätere Aboangebote dazugehören, auch wenn für den Termin selbst nichts berechnet wird.</p>`],
       ['quellen', 'Offizielle Quellen zuerst prüfen', `<p>Für städtische Kultur-, Natur- und Freizeitangebote sind die offiziellen Seiten der jeweiligen Einrichtung oder der Stadt die zuverlässigste Quelle. Bei Studios, Kursen und privaten Veranstaltern zählt die aktuelle Anbieterseite. Kalender-Aggregatoren helfen beim Entdecken, sollten aber nicht die letzte Prüfung ersetzen.</p>`],
-      ['anmeldung', 'Anmeldung und Kapazität', `<p>„Kostenlos“ bedeutet nicht automatisch „ohne Reservierung“. Viele Führungen, Workshops und Schnupperstunden haben begrenzte Plätze. Prüfe, ob eine Buchung erforderlich ist, wann die Anmeldung öffnet und ob bei Nichterscheinen eine Gebühr entstehen kann.</p><div class="article-note"><strong>Planungstipp</strong>Speichere neben dem Termin auch den direkten Link zur Anmeldung. Ein Veranstaltungstitel allein reicht bei kurzfristigen Änderungen nicht aus.</div>`],
+      ['probetraining', 'Probetraining: die Frist vor der Anmeldung prüfen', `<p>Ein kostenloses Probetraining ist nur dann kostenfrei, wenn du die Kündigungs- und Zahlungsregel verstanden hast. Die aktuell geprüfte <a href="https://evofitness.at/de/7-tage-probetraining/" rel="noopener">EVO-Probetrainingseite</a> nennt ein konkretes Beispiel: Nach der Online-Anmeldung kommt der Zugangscode per SMS, der Zugang beginnt direkt mit der Anmeldung und gilt sieben Tage in den EVO Clubs.</p><p>Entscheidend ist der achte Tag: Laut EVO startet dann automatisch eine monatlich kündbare Mitgliedschaft. Wer nicht weitermachen möchte, muss über MyEVO bis zum Ende des siebten Tages kündigen; der Anmeldetag zählt bereits als erster Probetrainingstag. Die Anbieterseite nennt für die kostenlose Testwoche kein kalendarisches Aktionsende. Deshalb ist sie ein laufendes Beispiel und kein Deal mit zugesichertem Ablaufdatum.</p><div class="article-note"><strong>Vor dem Absenden notieren</strong>Speichere den Starttag, die Kündigungsfrist und den direkten Kündigungsweg. Setze eine Erinnerung spätestens einen Tag vor Ablauf der kostenlosen Probe – nicht erst am achten Tag.</div>`],
+      ['anmeldung', 'Anmeldung, Kapazität und Folgekosten', `<p>„Kostenlos“ bedeutet nicht automatisch „ohne Reservierung“. Viele Führungen, Workshops und Schnupperstunden haben begrenzte Plätze. Bei Studios kommen oft Konto, Zugangscode und späteres Abo dazu. Prüfe vor der Anmeldung, ob ein Zahlungsmittel verlangt wird, wann die Testzeit beginnt und zu welchem Preis es nach der Probe weitergeht.</p><p>Beim aktuell geprüften EVO-Angebot nennt der Anbieter für die Mitgliedschaft nach der Testphase einen Monatspreis von 49,90 Euro bis Ende November 2026 und danach 64,90 Euro monatlich. Dieser Preis betrifft die anschließende Mitgliedschaft, nicht die kostenlose Testwoche. Die jeweils aktuelle Anbieterinformation ist maßgeblich.</p>`],
       ['kombinieren', 'Freizeitangebote nach Bezirk kombinieren', `<p>Plane mehrere Aktivitäten in derselben Gegend und kontrolliere die Öffnungszeiten am Veranstaltungstag. Dadurch bleiben kostenlose Ausflüge auch bei ausgebuchten Programmpunkten flexibel. Kommerzielle Gratis- und Rabattaktionen mit eindeutigem Enddatum findest du ergänzend unter <a href="/angebote-wien-heute.html">Aktuelle Wien-Deals</a>.</p>`],
     ],
     faqs: [
       ['Was kann man in Wien kostenlos unternehmen?', 'Je nach Termin gibt es freie Kultur-, Natur-, Sport- und Veranstaltungsangebote sowie kostenlose Schnupperaktionen. Verbindliche Angaben liefert die jeweilige offizielle Stelle.'],
       ['Muss ich kostenlose Freizeitangebote reservieren?', 'Häufig ja, besonders bei Führungen, Workshops und Kursen mit begrenzter Kapazität. Die Reservierungsregel steht beim Veranstalter.'],
-      ['Sind kostenlose Probetrainings ohne Verpflichtung?', 'Der Termin kann kostenlos sein, dennoch können Registrierung, Beratung oder Bedingungen gelten. Prüfe insbesondere, ob automatisch ein Vertrag oder Abo entsteht.'],
+      ['Sind kostenlose Probetrainings ohne Verpflichtung?', 'Nicht unbedingt. Beim aktuell geprüften EVO-Angebot beginnt am achten Tag automatisch eine Mitgliedschaft, wenn die Probe nicht bis zum Ende des siebten Tages über MyEVO gekündigt wird. Lies bei jedem Anbieter die aktuelle Kündigungs- und Zahlungsregel.'],
     ],
     related: [['Kostenlose Angebote in Wien', 'kostenlose-angebote-wien.html'], ['Studentenrabatte in Wien', 'studentenrabatte-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
   },
@@ -157,7 +159,7 @@ function renderGuide(guide) {
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'Article', headline: guide.title, description: guide.meta, datePublished: PUBLISHED, dateModified: PUBLISHED,
+        '@type': 'Article', headline: guide.title, description: guide.meta, datePublished: PUBLISHED, dateModified: guide.modified || PUBLISHED,
         inLanguage: 'de-AT', mainEntityOfPage: canonical, image: `https://freefinder.at${guide.image}`,
         author: { '@type': 'Organization', name: 'FreeFinder Redaktion', url: 'https://freefinder.at/about.html' },
         publisher: { '@type': 'Organization', name: 'FreeFinder', logo: { '@type': 'ImageObject', url: 'https://freefinder.at/icon-512.svg' } },
@@ -211,10 +213,10 @@ function renderGuide(guide) {
   <!-- Generated by scripts/generate-topic-guides.mjs. -->
   <header class="site-header"><nav class="nav" aria-label="Hauptnavigation"><a class="brand" href="/"><img class="brand-mark" src="/icon-192.svg" alt="" width="38" height="38">FreeFinder</a><div class="nav-links"><a href="/angebote-wien-heute.html">Aktuelle Deals</a><a href="/blog/">Blog</a><a class="nav-download" href="/#download">App laden</a></div></nav></header>
   <main>
-    <header class="article-hero"><div class="hero-inner"><p class="eyebrow">${escapeHtml(guide.eyebrow)}</p><h1>${escapeHtml(guide.headline)}</h1><p class="hero-copy">${escapeHtml(guide.intro)}</p><div class="article-meta"><span>Aktualisiert am ${PUBLISHED_LABEL}</span><span>${readingMinutes} Minuten Lesezeit</span></div><div class="article-byline"><span>Von <a href="/about.html">FreeFinder Redaktion</a></span><span>Verantwortlich: Stefan Ataalla</span></div></div></header>
+    <header class="article-hero"><div class="hero-inner"><p class="eyebrow">${escapeHtml(guide.eyebrow)}</p><h1>${escapeHtml(guide.headline)}</h1><p class="hero-copy">${escapeHtml(guide.intro)}</p><div class="article-meta"><span>Aktualisiert am ${guide.modifiedLabel || PUBLISHED_LABEL}</span><span>${readingMinutes} Minuten Lesezeit</span></div><div class="article-byline"><span>Von <a href="/about.html">FreeFinder Redaktion</a></span><span>Verantwortlich: Stefan Ataalla</span></div></div></header>
     <div class="article-layout">
       <article class="article-body">
-        <picture><source type="image/avif" srcset="${guide.imageAvif}" sizes="(max-width: 860px) 100vw, 710px"><img class="article-image" src="${guide.image}" alt="${escapeHtml(guide.imageAlt)}" width="${guide.imageWidth}" height="${guide.imageHeight}" loading="eager" decoding="async"></picture>
+        <picture>${guide.imageAvif ? `<source type="image/avif" srcset="${guide.imageAvif}" sizes="(max-width: 860px) 100vw, 710px">` : ''}<img class="article-image" src="${guide.image}" alt="${escapeHtml(guide.imageAlt)}" width="${guide.imageWidth}" height="${guide.imageHeight}" loading="eager" decoding="async"></picture>
         ${sections}
         <h2 id="faq">Häufige Fragen</h2>
         ${faqs}
