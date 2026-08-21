@@ -73,6 +73,36 @@ const MERCHANT_API_BASE_DEFAULT = 'https://freefinder-merchant-backend.freefinde
 const STRIPE_WEBHOOK_TOLERANCE_SECONDS = 300;
 const SLACK_REQUEST_TOLERANCE_SECONDS = 300;
 const APPROVE_WORKFLOW_THROTTLE_MS = 60 * 1000;
+const TIKTOK_AUTHORIZE_URL = 'https://www.tiktok.com/v2/auth/authorize/';
+const TIKTOK_TOKEN_URL = 'https://open.tiktokapis.com/v2/oauth/token/';
+const TIKTOK_REVOKE_URL = 'https://open.tiktokapis.com/v2/oauth/revoke/';
+const TIKTOK_USER_INFO_URL = 'https://open.tiktokapis.com/v2/user/info/?fields=open_id,avatar_url,display_name';
+const TIKTOK_CREATOR_INFO_URL = 'https://open.tiktokapis.com/v2/post/publish/creator_info/query/';
+const TIKTOK_PUBLISH_VIDEO_URL = 'https://open.tiktokapis.com/v2/post/publish/video/init/';
+const TIKTOK_PUBLISH_STATUS_URL = 'https://open.tiktokapis.com/v2/post/publish/status/fetch/';
+const TIKTOK_REDIRECT_URI_DEFAULT = 'https://freefinder-referrals.freefinder-stefan.workers.dev/api/social/tiktok/callback';
+const TIKTOK_OAUTH_SCOPES = 'user.info.basic,video.publish';
+const TIKTOK_TOKEN_KEY = 'social:tiktok:tokens';
+const TIKTOK_LAST_PUBLISH_KEY = 'social:tiktok:last-publish';
+const TIKTOK_SANDBOX_TOKEN_KEY = 'social:tiktok:sandbox:tokens';
+const TIKTOK_SANDBOX_LAST_PUBLISH_KEY = 'social:tiktok:sandbox:last-publish';
+const INSTAGRAM_AUTHORIZE_URL = 'https://www.instagram.com/oauth/authorize';
+const INSTAGRAM_TOKEN_URL = 'https://api.instagram.com/oauth/access_token';
+const INSTAGRAM_GRAPH_BASE_URL = 'https://graph.instagram.com';
+const INSTAGRAM_REDIRECT_URI_DEFAULT = 'https://freefinder-referrals.freefinder-stefan.workers.dev/api/social/instagram/callback';
+const INSTAGRAM_OAUTH_SCOPES = 'instagram_business_basic,instagram_business_content_publish';
+const INSTAGRAM_TOKEN_KEY = 'social:instagram:tokens';
+const INSTAGRAM_LAST_PUBLISH_KEY = 'social:instagram:last-publish';
+const SOCIAL_MEDIA_TTL_SECONDS = 36 * 60 * 60;
+const SOCIAL_MEDIA_MAX_BYTES = 24 * 1024 * 1024;
+const SOCIAL_MEDIA_TYPES = new Map([
+  ['video/mp4', 'mp4'],
+  ['video/quicktime', 'mov'],
+  ['video/webm', 'webm'],
+  ['image/jpeg', 'jpg'],
+  ['image/png', 'png'],
+  ['image/webp', 'webp'],
+]);
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
@@ -735,6 +765,998 @@ async function readBody(request) {
 
 function invalid(message, status = 400) {
   return json({ ok: false, error: message }, status);
+}
+
+function fromBase64Url(value) {
+  const normalized = String(value || '').replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return bytes;
+}
+
+function socialBearer(request) {
+  const authorization = String(request.headers.get('authorization') || '');
+  return authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
+}
+
+function requireSocialConnect(request, env) {
+  const expected = String(env.SOCIAL_CONNECT_TOKEN || '').trim();
+  if (!expected) return false;
+  return socialBearer(request) === expected || request.headers.get('x-social-connect-token') === expected;
+}
+
+function requireSocialPublish(request, env) {
+  const expected = String(env.SOCIAL_PUBLISH_TOKEN || '').trim();
+  if (!expected) return false;
+  return socialBearer(request) === expected || request.headers.get('x-social-publish-token') === expected;
+}
+
+function tiktokRedirectUri(env) {
+  return String(env.TIKTOK_REDIRECT_URI || TIKTOK_REDIRECT_URI_DEFAULT).trim();
+}
+
+function normalizeTikTokEnvironment(value) {
+  return String(value || '').trim().toLowerCase() === 'sandbox' ? 'sandbox' : 'production';
+}
+
+function requestedTikTokEnvironment(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized || normalized === 'production') return 'production';
+  if (normalized === 'sandbox') return 'sandbox';
+  return '';
+}
+
+function tiktokCredentials(env, environment = 'production') {
+  const normalizedEnvironment = normalizeTikTokEnvironment(environment);
+  if (normalizedEnvironment === 'sandbox') {
+    return {
+      clientKey: String(env.TIKTOK_SANDBOX_CLIENT_KEY || '').trim(),
+      clientSecret: String(env.TIKTOK_SANDBOX_CLIENT_SECRET || '').trim(),
+      environment: normalizedEnvironment,
+    };
+  }
+  return {
+    clientKey: String(env.TIKTOK_CLIENT_KEY || '').trim(),
+    clientSecret: String(env.TIKTOK_CLIENT_SECRET || '').trim(),
+    environment: normalizedEnvironment,
+  };
+}
+
+function tiktokTokenKey(environment = 'production') {
+  return normalizeTikTokEnvironment(environment) === 'sandbox' ? TIKTOK_SANDBOX_TOKEN_KEY : TIKTOK_TOKEN_KEY;
+}
+
+function tiktokLastPublishKey(environment = 'production') {
+  return normalizeTikTokEnvironment(environment) === 'sandbox'
+    ? TIKTOK_SANDBOX_LAST_PUBLISH_KEY
+    : TIKTOK_LAST_PUBLISH_KEY;
+}
+
+function tiktokPublishIdempotencyKey(environment, idempotencyKey) {
+  const prefix = normalizeTikTokEnvironment(environment) === 'sandbox' ? 'social:tiktok:sandbox:publish' : 'social:tiktok:publish';
+  return `${prefix}:${idempotencyKey}`;
+}
+
+function tiktokCredentialsReady(env, environment = 'production') {
+  const credentials = tiktokCredentials(env, environment);
+  return Boolean(
+    credentials.clientKey
+    && credentials.clientSecret
+    && String(env.SOCIAL_TOKEN_ENCRYPTION_KEY || '').trim()
+  );
+}
+
+async function socialEncryptionKey(env) {
+  const secret = String(env.SOCIAL_TOKEN_ENCRYPTION_KEY || '').trim();
+  if (secret.length < 32) throw new Error('Social token encryption key is missing or too short');
+  const digest = await crypto.subtle.digest('SHA-256', textEncoder.encode(secret));
+  return crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+}
+
+async function encryptSocialRecord(env, record) {
+  const key = await socialEncryptionKey(env);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    textEncoder.encode(JSON.stringify(record)),
+  );
+  return {
+    version: 1,
+    iv: toBase64Url(iv),
+    ciphertext: toBase64Url(encrypted),
+  };
+}
+
+async function decryptSocialRecord(env, encrypted) {
+  if (!encrypted || encrypted.version !== 1 || !encrypted.iv || !encrypted.ciphertext) return null;
+  const key = await socialEncryptionKey(env);
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: fromBase64Url(encrypted.iv) },
+    key,
+    fromBase64Url(encrypted.ciphertext),
+  );
+  return JSON.parse(new TextDecoder().decode(decrypted));
+}
+
+async function getTikTokTokenRecord(env, environment = 'production') {
+  const encrypted = await getJsonKV(env, tiktokTokenKey(environment));
+  if (!encrypted) return null;
+  return decryptSocialRecord(env, encrypted);
+}
+
+async function putTikTokTokenRecord(env, record, environment = 'production') {
+  await putJsonKV(env, tiktokTokenKey(environment), await encryptSocialRecord(env, record));
+}
+
+function tiktokErrorMessage(payload, fallback) {
+  if (typeof payload?.error_description === 'string') return payload.error_description;
+  if (typeof payload?.error === 'string') return payload.error;
+  if (typeof payload?.error?.message === 'string') return payload.error.message;
+  return fallback;
+}
+
+async function fetchTikTokJson(url, init, fallback) {
+  const response = await fetch(url, init);
+  const payload = await response.json().catch(() => null);
+  const apiError = payload?.error && typeof payload.error === 'object' && payload.error.code !== 'ok'
+    ? payload.error
+    : null;
+  if (!response.ok || apiError || typeof payload?.error === 'string') {
+    throw new Error(tiktokErrorMessage(payload, fallback));
+  }
+  return payload;
+}
+
+async function exchangeTikTokCode(env, code, environment = 'production') {
+  const credentials = tiktokCredentials(env, environment);
+  const body = new URLSearchParams({
+    client_key: credentials.clientKey,
+    client_secret: credentials.clientSecret,
+    code,
+    grant_type: 'authorization_code',
+    redirect_uri: tiktokRedirectUri(env),
+  });
+  return fetchTikTokJson(TIKTOK_TOKEN_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body,
+  }, 'TikTok token exchange failed');
+}
+
+async function refreshTikTokToken(env, record, environment = 'production') {
+  const credentials = tiktokCredentials(env, environment);
+  const body = new URLSearchParams({
+    client_key: credentials.clientKey,
+    client_secret: credentials.clientSecret,
+    grant_type: 'refresh_token',
+    refresh_token: String(record.refreshToken || ''),
+  });
+  const token = await fetchTikTokJson(TIKTOK_TOKEN_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body,
+  }, 'TikTok token refresh failed');
+  const now = Date.now();
+  const next = {
+    ...record,
+    openId: token.open_id || record.openId,
+    scope: token.scope || record.scope,
+    accessToken: token.access_token,
+    refreshToken: token.refresh_token || record.refreshToken,
+    accessExpiresAt: now + (Number(token.expires_in || 0) * 1000),
+    refreshExpiresAt: now + (Number(token.refresh_expires_in || 0) * 1000),
+    refreshedAt: now,
+  };
+  await putTikTokTokenRecord(env, next, environment);
+  return next;
+}
+
+async function authorizedTikTokRecord(env, environment = 'production') {
+  const record = await getTikTokTokenRecord(env, environment);
+  if (!record?.accessToken || !record?.refreshToken) return null;
+  if (Number(record.accessExpiresAt || 0) > Date.now() + (5 * 60 * 1000)) return record;
+  return refreshTikTokToken(env, record, environment);
+}
+
+async function queryTikTokUser(accessToken) {
+  const payload = await fetchTikTokJson(TIKTOK_USER_INFO_URL, {
+    headers: { authorization: `Bearer ${accessToken}` },
+  }, 'TikTok user lookup failed');
+  return payload?.data?.user || null;
+}
+
+async function queryTikTokCreator(accessToken) {
+  const payload = await fetchTikTokJson(TIKTOK_CREATOR_INFO_URL, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+      'content-type': 'application/json; charset=UTF-8',
+    },
+    body: '{}',
+  }, 'TikTok creator lookup failed');
+  return payload?.data || null;
+}
+
+async function revokeTikTokToken(env, accessToken, environment = 'production') {
+  if (!accessToken) return;
+  const credentials = tiktokCredentials(env, environment);
+  const body = new URLSearchParams({
+    client_key: credentials.clientKey,
+    client_secret: credentials.clientSecret,
+    token: accessToken,
+  });
+  await fetch(TIKTOK_REVOKE_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body,
+  }).catch(() => null);
+}
+
+function renderTikTokConnectionResult({ ok, title, message, username = '' }) {
+  const color = ok ? '#168a57' : '#c43f34';
+  const account = username ? `<p class="account">@${escapeHtml(username.replace(/^@/, ''))}</p>` : '';
+  const html = `<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(title)}</title><style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#fffaf2;color:#101828;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{width:min(560px,calc(100% - 40px));padding:36px;background:#fff;border:1px solid #f0dcc0;border-radius:8px;box-shadow:0 16px 50px rgba(34,24,10,.1);text-align:center}
+.mark{width:64px;height:64px;margin:0 auto 20px;display:grid;place-items:center;border-radius:50%;background:${color};color:#fff;font-size:34px;font-weight:800}
+h1{margin:0 0 12px;font-size:30px}.account{font-size:22px;font-weight:750;color:${color};margin:16px 0 0}p{line-height:1.55;color:#526079}a{display:inline-block;margin-top:24px;color:#e6603d;font-weight:700}</style></head>
+<body><main><div class="mark">${ok ? '&#10003;' : '!'}</div><h1>${escapeHtml(title)}</h1><p>${escapeHtml(message)}</p>${account}<a href="https://freefinder.at/">Zur FreeFinder Website</a></main></body></html>`;
+  return new Response(html, {
+    status: ok ? 200 : 400,
+    headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' },
+  });
+}
+
+async function handleTikTokConnectSession(request, env) {
+  if (!requireSocialConnect(request, env) && !requireAdmin(request, env)) {
+    return invalid('Unauthorized', 401);
+  }
+  const url = new URL(request.url);
+  const body = await readBody(request);
+  const environment = requestedTikTokEnvironment(body?.environment || url.searchParams.get('environment'));
+  if (!environment) return invalid('Invalid TikTok environment');
+  const credentials = tiktokCredentials(env, environment);
+  if (!tiktokCredentialsReady(env, environment)) return invalid(`TikTok ${environment} credentials are incomplete`, 503);
+
+  const state = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
+  await putJsonKV(env, `social:tiktok:oauth-state:${state}`, {
+    environment,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + (10 * 60 * 1000),
+  }, { expirationTtl: 600 });
+
+  const authorizeUrl = new URL(TIKTOK_AUTHORIZE_URL);
+  authorizeUrl.searchParams.set('client_key', credentials.clientKey);
+  authorizeUrl.searchParams.set('response_type', 'code');
+  authorizeUrl.searchParams.set('scope', TIKTOK_OAUTH_SCOPES);
+  authorizeUrl.searchParams.set('redirect_uri', tiktokRedirectUri(env));
+  authorizeUrl.searchParams.set('state', state);
+  authorizeUrl.searchParams.set('disable_auto_auth', '1');
+  return json({ ok: true, environment, authorizeUrl: authorizeUrl.toString(), expiresIn: 600 });
+}
+
+async function handleTikTokCallback(request, env) {
+  const url = new URL(request.url);
+  const state = cleanShortText(url.searchParams.get('state'), 160);
+  const code = cleanLongText(url.searchParams.get('code'), 2048);
+  const oauthError = cleanShortText(url.searchParams.get('error_description') || url.searchParams.get('error'), 320);
+  if (oauthError) {
+    return renderTikTokConnectionResult({ ok: false, title: 'Verbindung abgebrochen', message: oauthError });
+  }
+  if (!state || !code) {
+    return renderTikTokConnectionResult({ ok: false, title: 'Ungültige Antwort', message: 'TikTok hat keinen gültigen Verbindungscode zurückgegeben.' });
+  }
+
+  const stateKey = `social:tiktok:oauth-state:${state}`;
+  const stateRecord = await getJsonKV(env, stateKey);
+  await env.REFERRAL_KV.delete(stateKey);
+  if (!stateRecord || Number(stateRecord.expiresAt || 0) < Date.now()) {
+    return renderTikTokConnectionResult({ ok: false, title: 'Verbindung abgelaufen', message: 'Bitte starte die TikTok-Verbindung erneut.' });
+  }
+  const environment = normalizeTikTokEnvironment(stateRecord.environment);
+  if (!tiktokCredentialsReady(env, environment)) {
+    return renderTikTokConnectionResult({ ok: false, title: 'Konfiguration fehlt', message: `Die TikTok-${environment === 'sandbox' ? 'Sandbox-' : ''}Zugangsdaten sind noch nicht vollständig hinterlegt.` });
+  }
+
+  try {
+    const token = await exchangeTikTokCode(env, code, environment);
+    if (!token?.access_token || !token?.refresh_token) throw new Error('TikTok returned incomplete tokens');
+
+    const [userResult, creatorResult] = await Promise.allSettled([
+      queryTikTokUser(token.access_token),
+      queryTikTokCreator(token.access_token),
+    ]);
+    const user = userResult.status === 'fulfilled' ? userResult.value : null;
+    const creator = creatorResult.status === 'fulfilled' ? creatorResult.value : null;
+    const username = cleanShortText(creator?.creator_username, 80).replace(/^@/, '');
+    const expectedUsername = cleanShortText(env.TIKTOK_EXPECTED_USERNAME || 'freefinder.at', 80).replace(/^@/, '').toLowerCase();
+    if (username && expectedUsername && username.toLowerCase() !== expectedUsername) {
+      await revokeTikTokToken(env, token.access_token, environment);
+      return renderTikTokConnectionResult({
+        ok: false,
+        title: 'Falsches TikTok-Konto',
+        message: `Bitte verbinde @${expectedUsername} statt @${username}.`,
+      });
+    }
+
+    const now = Date.now();
+    const record = {
+      environment,
+      openId: token.open_id,
+      scope: token.scope || TIKTOK_OAUTH_SCOPES,
+      accessToken: token.access_token,
+      refreshToken: token.refresh_token,
+      accessExpiresAt: now + (Number(token.expires_in || 0) * 1000),
+      refreshExpiresAt: now + (Number(token.refresh_expires_in || 0) * 1000),
+      connectedAt: now,
+      account: {
+        username,
+        displayName: cleanShortText(user?.display_name || creator?.creator_nickname, 120),
+        avatarUrl: normalizeSubmissionUrl(user?.avatar_url || creator?.creator_avatar_url),
+      },
+    };
+    await putTikTokTokenRecord(env, record, environment);
+    return renderTikTokConnectionResult({
+      ok: true,
+      title: 'TikTok ist verbunden',
+      message: 'FreeFinder kann die Verbindung nun serverseitig erneuern und freigegebene Posts veröffentlichen.',
+      username: username || expectedUsername,
+    });
+  } catch (error) {
+    return renderTikTokConnectionResult({
+      ok: false,
+      title: 'Verbindung fehlgeschlagen',
+      message: error?.message || 'TikTok konnte nicht verbunden werden.',
+    });
+  }
+}
+
+async function handleTikTokStatus(request, env) {
+  if (!requireSocialConnect(request, env) && !requireSocialPublish(request, env) && !requireAdmin(request, env)) {
+    return invalid('Unauthorized', 401);
+  }
+  const environment = requestedTikTokEnvironment(new URL(request.url).searchParams.get('environment'));
+  if (!environment) return invalid('Invalid TikTok environment');
+  if (!tiktokCredentialsReady(env, environment)) return json({ ok: true, environment, configured: false, connected: false });
+  try {
+    const record = await authorizedTikTokRecord(env, environment);
+    return json({
+      ok: true,
+      environment,
+      configured: true,
+      connected: Boolean(record),
+      account: record?.account || null,
+      scope: record?.scope || '',
+      accessExpiresAt: record?.accessExpiresAt || null,
+      refreshExpiresAt: record?.refreshExpiresAt || null,
+      connectedAt: record?.connectedAt || null,
+    });
+  } catch (error) {
+    return invalid(error?.message || 'TikTok status failed', 502);
+  }
+}
+
+function tiktokUploadPlan(videoSize) {
+  const singleChunkLimit = 64 * 1024 * 1024;
+  const multiChunkSize = 32 * 1024 * 1024;
+  if (!Number.isSafeInteger(videoSize) || videoSize < 1 || videoSize > 4 * 1024 * 1024 * 1024) return null;
+  if (videoSize <= singleChunkLimit) {
+    return { videoSize, chunkSize: videoSize, totalChunkCount: 1 };
+  }
+  return {
+    videoSize,
+    chunkSize: multiChunkSize,
+    totalChunkCount: Math.floor(videoSize / multiChunkSize),
+  };
+}
+
+function normalizeTikTokPublishInput(body) {
+  const caption = cleanLongText(body?.caption, 2200);
+  const idempotencyKey = cleanShortText(body?.idempotencyKey, 120);
+  if (!caption || !idempotencyKey || !/^[a-zA-Z0-9:_-]{8,120}$/.test(idempotencyKey)) return null;
+  if (body?.consent !== true) return null;
+  const environment = requestedTikTokEnvironment(body?.environment);
+  if (!environment) return null;
+
+  const source = String(body?.source || body?.uploadMode || '').trim().toUpperCase() === 'FILE_UPLOAD'
+    || String(body?.uploadMode || '').trim().toLowerCase() === 'file'
+    ? 'FILE_UPLOAD'
+    : 'PULL_FROM_URL';
+  let sourceInfo;
+  let mediaType = '';
+  if (source === 'FILE_UPLOAD') {
+    const uploadPlan = tiktokUploadPlan(Number(body?.videoSize));
+    mediaType = cleanShortText(body?.mediaType, 80).toLowerCase();
+    if (!uploadPlan || !['video/mp4', 'video/quicktime', 'video/webm'].includes(mediaType)) return null;
+    sourceInfo = {
+      source,
+      video_size: uploadPlan.videoSize,
+      chunk_size: uploadPlan.chunkSize,
+      total_chunk_count: uploadPlan.totalChunkCount,
+    };
+  } else {
+    let videoUrl;
+    try {
+      videoUrl = new URL(String(body?.videoUrl || ''));
+    } catch {
+      return null;
+    }
+    if (videoUrl.protocol !== 'https:' || videoUrl.hostname.toLowerCase() !== 'freefinder.at') return null;
+    sourceInfo = { source, video_url: videoUrl.toString() };
+  }
+
+  return {
+    environment,
+    caption,
+    idempotencyKey,
+    source,
+    sourceInfo,
+    mediaType,
+    privacyLevel: cleanShortText(body?.privacyLevel, 64),
+    disableComment: body?.disableComment === true,
+    disableDuet: body?.disableDuet === true,
+    disableStitch: body?.disableStitch === true,
+    isAigc: body?.isAigc !== false,
+  };
+}
+
+async function handleTikTokPublish(request, env) {
+  if (!requireSocialPublish(request, env)) return invalid('Unauthorized', 401);
+  const input = normalizeTikTokPublishInput(await readBody(request));
+  if (!input) return invalid('Invalid TikTok publish request');
+
+  const idempotencyKvKey = tiktokPublishIdempotencyKey(input.environment, input.idempotencyKey);
+  const existing = await getJsonKV(env, idempotencyKvKey);
+  if (existing?.publishId) {
+    if (existing.source === 'FILE_UPLOAD') {
+      const uploadSession = await getJsonKV(env, `${idempotencyKvKey}:upload`);
+      if (!uploadSession?.uploadUrl || Number(uploadSession.expiresAt || 0) <= Date.now()) {
+        return invalid('TikTok upload session expired; use a new idempotency key', 409);
+      }
+      return json({
+        ok: true,
+        replayed: true,
+        ...existing,
+        uploadUrl: uploadSession.uploadUrl,
+        uploadExpiresAt: uploadSession.expiresAt,
+      });
+    }
+    return json({ ok: true, replayed: true, ...existing });
+  }
+
+  try {
+    const record = await authorizedTikTokRecord(env, input.environment);
+    if (!record) return invalid('TikTok is not connected', 409);
+    const creator = await queryTikTokCreator(record.accessToken);
+    const allowedPrivacy = Array.isArray(creator?.privacy_level_options) ? creator.privacy_level_options : [];
+    const privacyLevel = allowedPrivacy.includes(input.privacyLevel)
+      ? input.privacyLevel
+      : (allowedPrivacy.includes('PUBLIC_TO_EVERYONE') ? 'PUBLIC_TO_EVERYONE' : (allowedPrivacy[0] || 'SELF_ONLY'));
+    const payload = await fetchTikTokJson(TIKTOK_PUBLISH_VIDEO_URL, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${record.accessToken}`,
+        'content-type': 'application/json; charset=UTF-8',
+      },
+      body: JSON.stringify({
+        post_info: {
+          title: input.caption,
+          privacy_level: privacyLevel,
+          disable_comment: input.disableComment,
+          disable_duet: input.disableDuet,
+          disable_stitch: input.disableStitch,
+          brand_content_toggle: false,
+          brand_organic_toggle: true,
+          is_aigc: input.isAigc,
+        },
+        source_info: input.sourceInfo,
+      }),
+    }, 'TikTok publish initialization failed');
+    const publishId = cleanShortText(payload?.data?.publish_id, 100);
+    if (!publishId) throw new Error('TikTok did not return a publish id');
+    const uploadUrl = normalizeSubmissionUrl(payload?.data?.upload_url);
+    if (input.source === 'FILE_UPLOAD' && !uploadUrl) throw new Error('TikTok did not return an upload URL');
+    const result = {
+      publishId,
+      privacyLevel,
+      idempotencyKey: input.idempotencyKey,
+      source: input.source,
+      videoUrl: input.sourceInfo.video_url || '',
+      videoSize: input.sourceInfo.video_size || null,
+      chunkSize: input.sourceInfo.chunk_size || null,
+      totalChunkCount: input.sourceInfo.total_chunk_count || null,
+      mediaType: input.mediaType || '',
+      createdAt: Date.now(),
+      environment: input.environment,
+      account: record.account || null,
+    };
+    await putJsonKV(env, idempotencyKvKey, result, { expirationTtl: 45 * 24 * 60 * 60 });
+    let uploadSession = {};
+    if (uploadUrl) {
+      uploadSession = { uploadUrl, uploadExpiresAt: Date.now() + (60 * 60 * 1000) };
+      await putJsonKV(env, `${idempotencyKvKey}:upload`, {
+        uploadUrl,
+        expiresAt: uploadSession.uploadExpiresAt,
+      }, { expirationTtl: 60 * 60 });
+    }
+    await putJsonKV(env, tiktokLastPublishKey(input.environment), result);
+    return json({ ok: true, ...result, ...uploadSession }, 202);
+  } catch (error) {
+    return invalid(error?.message || 'TikTok publish failed', 502);
+  }
+}
+
+async function handleTikTokPublishStatus(request, env) {
+  if (!requireSocialPublish(request, env) && !requireSocialConnect(request, env) && !requireAdmin(request, env)) {
+    return invalid('Unauthorized', 401);
+  }
+  const body = request.method === 'POST' ? await readBody(request) : null;
+  const url = new URL(request.url);
+  const environment = requestedTikTokEnvironment(body?.environment || url.searchParams.get('environment'));
+  if (!environment) return invalid('Invalid TikTok environment');
+  const last = await getJsonKV(env, tiktokLastPublishKey(environment));
+  const publishId = cleanShortText(body?.publishId || url.searchParams.get('publishId') || last?.publishId, 100);
+  if (!publishId) return invalid('Missing publish id');
+  try {
+    const record = await authorizedTikTokRecord(env, environment);
+    if (!record) return invalid('TikTok is not connected', 409);
+    const payload = await fetchTikTokJson(TIKTOK_PUBLISH_STATUS_URL, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${record.accessToken}`,
+        'content-type': 'application/json; charset=UTF-8',
+      },
+      body: JSON.stringify({ publish_id: publishId }),
+    }, 'TikTok publish status failed');
+    return json({ ok: true, environment, publishId, status: payload?.data || null });
+  } catch (error) {
+    return invalid(error?.message || 'TikTok publish status failed', 502);
+  }
+}
+
+function socialMediaKey(token) {
+  return `social:media:${token}`;
+}
+
+function socialMediaTypeFromExtension(extension) {
+  for (const [contentType, mappedExtension] of SOCIAL_MEDIA_TYPES.entries()) {
+    if (mappedExtension === extension) return contentType;
+  }
+  return '';
+}
+
+function parseSocialMediaPath(path) {
+  const match = String(path || '').match(/^\/api\/social\/media\/([a-zA-Z0-9_-]{40,64})\.(mp4|mov|webm|jpg|png|webp)$/);
+  if (!match) return null;
+  return { token: match[1], extension: match[2] };
+}
+
+async function handleSocialMediaUpload(request, env) {
+  if (!requireSocialPublish(request, env)) return invalid('Unauthorized', 401);
+  const declaredLength = Number(request.headers.get('content-length') || 0);
+  if (declaredLength > SOCIAL_MEDIA_MAX_BYTES) return invalid('Media file is too large', 413);
+
+  const contentType = String(request.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+  const extension = SOCIAL_MEDIA_TYPES.get(contentType);
+  if (!extension) return invalid('Unsupported media type', 415);
+
+  const media = await request.arrayBuffer();
+  if (!media.byteLength) return invalid('Media file is empty');
+  if (media.byteLength > SOCIAL_MEDIA_MAX_BYTES) return invalid('Media file is too large', 413);
+
+  const token = toBase64Url(crypto.getRandomValues(new Uint8Array(32)));
+  await env.REFERRAL_KV.put(socialMediaKey(token), media, { expirationTtl: SOCIAL_MEDIA_TTL_SECONDS });
+  const mediaUrl = `${new URL(request.url).origin}/api/social/media/${token}.${extension}`;
+  return json({
+    ok: true,
+    mediaUrl,
+    contentType,
+    size: media.byteLength,
+    expiresAt: Date.now() + (SOCIAL_MEDIA_TTL_SECONDS * 1000),
+  }, 201);
+}
+
+async function handleSocialMediaDownload(path, env) {
+  const mediaPath = parseSocialMediaPath(path);
+  if (!mediaPath) return invalid('Media not found', 404);
+  const media = await env.REFERRAL_KV.get(socialMediaKey(mediaPath.token), 'arrayBuffer');
+  if (!media) return invalid('Media not found', 404);
+  const contentType = socialMediaTypeFromExtension(mediaPath.extension);
+  return new Response(media, {
+    status: 200,
+    headers: {
+      'content-type': contentType,
+      'content-length': String(media.byteLength),
+      'content-disposition': `inline; filename="freefinder-social.${mediaPath.extension}"`,
+      'cache-control': 'public, max-age=3600',
+      'access-control-allow-origin': '*',
+      'x-content-type-options': 'nosniff',
+    },
+  });
+}
+
+function instagramRedirectUri(env) {
+  return String(env.INSTAGRAM_REDIRECT_URI || INSTAGRAM_REDIRECT_URI_DEFAULT).trim();
+}
+
+function instagramGraphVersion(env) {
+  const version = String(env.INSTAGRAM_GRAPH_API_VERSION || 'v26.0').trim().toLowerCase();
+  return /^v\d+\.0$/.test(version) ? version : 'v26.0';
+}
+
+function instagramGraphUrl(env, path) {
+  return new URL(`${INSTAGRAM_GRAPH_BASE_URL}/${instagramGraphVersion(env)}/${String(path || '').replace(/^\/+/, '')}`);
+}
+
+function instagramCredentialsReady(env) {
+  return Boolean(
+    String(env.INSTAGRAM_APP_ID || '').trim()
+    && String(env.INSTAGRAM_APP_SECRET || '').trim()
+    && String(env.SOCIAL_TOKEN_ENCRYPTION_KEY || '').trim()
+  );
+}
+
+async function getInstagramTokenRecord(env) {
+  const encrypted = await getJsonKV(env, INSTAGRAM_TOKEN_KEY);
+  if (!encrypted) return null;
+  return decryptSocialRecord(env, encrypted);
+}
+
+async function putInstagramTokenRecord(env, record) {
+  await putJsonKV(env, INSTAGRAM_TOKEN_KEY, await encryptSocialRecord(env, record));
+}
+
+function instagramErrorMessage(payload, fallback) {
+  if (typeof payload?.error_description === 'string') return payload.error_description;
+  if (typeof payload?.error_message === 'string') return payload.error_message;
+  if (typeof payload?.error?.message === 'string') return payload.error.message;
+  if (typeof payload?.error === 'string') return payload.error;
+  return fallback;
+}
+
+async function fetchInstagramJson(url, init, fallback) {
+  const response = await fetch(url, init);
+  const payload = await response.json().catch(() => null);
+  if (!response.ok || payload?.error || payload?.error_type) {
+    throw new Error(instagramErrorMessage(payload, fallback));
+  }
+  return payload;
+}
+
+async function exchangeInstagramCode(env, code) {
+  const body = new URLSearchParams({
+    client_id: String(env.INSTAGRAM_APP_ID || '').trim(),
+    client_secret: String(env.INSTAGRAM_APP_SECRET || '').trim(),
+    grant_type: 'authorization_code',
+    redirect_uri: instagramRedirectUri(env),
+    code,
+  });
+  const shortLived = await fetchInstagramJson(INSTAGRAM_TOKEN_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body,
+  }, 'Instagram token exchange failed');
+  if (!shortLived?.access_token) throw new Error('Instagram returned an incomplete access token');
+
+  const longLivedUrl = new URL(`${INSTAGRAM_GRAPH_BASE_URL}/access_token`);
+  longLivedUrl.searchParams.set('grant_type', 'ig_exchange_token');
+  longLivedUrl.searchParams.set('client_secret', String(env.INSTAGRAM_APP_SECRET || '').trim());
+  longLivedUrl.searchParams.set('access_token', shortLived.access_token);
+  const longLived = await fetchInstagramJson(longLivedUrl, {}, 'Instagram long-lived token exchange failed');
+  if (!longLived?.access_token) throw new Error('Instagram returned an incomplete long-lived token');
+  return {
+    userId: cleanShortText(shortLived.user_id, 100),
+    accessToken: longLived.access_token,
+    expiresIn: Number(longLived.expires_in || 0),
+  };
+}
+
+async function queryInstagramProfile(env, accessToken) {
+  const url = instagramGraphUrl(env, 'me');
+  url.searchParams.set('fields', 'user_id,username,name,profile_picture_url');
+  return fetchInstagramJson(url, {
+    headers: { authorization: `Bearer ${accessToken}` },
+  }, 'Instagram profile lookup failed');
+}
+
+async function refreshInstagramToken(env, record) {
+  const url = new URL(`${INSTAGRAM_GRAPH_BASE_URL}/refresh_access_token`);
+  url.searchParams.set('grant_type', 'ig_refresh_token');
+  url.searchParams.set('access_token', String(record.accessToken || ''));
+  const refreshed = await fetchInstagramJson(url, {}, 'Instagram token refresh failed');
+  if (!refreshed?.access_token) throw new Error('Instagram returned an incomplete refreshed token');
+  const now = Date.now();
+  const next = {
+    ...record,
+    accessToken: refreshed.access_token,
+    expiresAt: now + (Number(refreshed.expires_in || 0) * 1000),
+    refreshedAt: now,
+  };
+  await putInstagramTokenRecord(env, next);
+  return next;
+}
+
+async function authorizedInstagramRecord(env) {
+  const record = await getInstagramTokenRecord(env);
+  if (!record?.accessToken || !record?.userId) return null;
+  const refreshAge = Date.now() - Number(record.refreshedAt || record.connectedAt || 0);
+  const expiresSoon = Number(record.expiresAt || 0) <= Date.now() + (7 * 24 * 60 * 60 * 1000);
+  if (!expiresSoon && refreshAge < 30 * 24 * 60 * 60 * 1000) return record;
+  return refreshInstagramToken(env, record);
+}
+
+async function handleInstagramConnectSession(request, env) {
+  if (!requireSocialConnect(request, env) && !requireAdmin(request, env)) return invalid('Unauthorized', 401);
+  if (!instagramCredentialsReady(env)) return invalid('Instagram credentials are incomplete', 503);
+
+  const state = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
+  await putJsonKV(env, `social:instagram:oauth-state:${state}`, {
+    createdAt: Date.now(),
+    expiresAt: Date.now() + (10 * 60 * 1000),
+  }, { expirationTtl: 600 });
+
+  const authorizeUrl = new URL(INSTAGRAM_AUTHORIZE_URL);
+  authorizeUrl.searchParams.set('client_id', String(env.INSTAGRAM_APP_ID || '').trim());
+  authorizeUrl.searchParams.set('redirect_uri', instagramRedirectUri(env));
+  authorizeUrl.searchParams.set('response_type', 'code');
+  authorizeUrl.searchParams.set('scope', INSTAGRAM_OAUTH_SCOPES);
+  authorizeUrl.searchParams.set('state', state);
+  authorizeUrl.searchParams.set('enable_fb_login', '0');
+  authorizeUrl.searchParams.set('force_authentication', '1');
+  return json({ ok: true, authorizeUrl: authorizeUrl.toString(), expiresIn: 600 });
+}
+
+async function handleInstagramCallback(request, env) {
+  const url = new URL(request.url);
+  const state = cleanShortText(url.searchParams.get('state'), 160);
+  const code = cleanLongText(url.searchParams.get('code'), 4096);
+  const oauthError = cleanShortText(url.searchParams.get('error_description') || url.searchParams.get('error_reason') || url.searchParams.get('error'), 320);
+  if (oauthError) {
+    return renderTikTokConnectionResult({ ok: false, title: 'Instagram-Verbindung abgebrochen', message: oauthError });
+  }
+  if (!state || !code) {
+    return renderTikTokConnectionResult({ ok: false, title: 'Ungültige Antwort', message: 'Instagram hat keinen gültigen Verbindungscode zurückgegeben.' });
+  }
+
+  const stateKey = `social:instagram:oauth-state:${state}`;
+  const stateRecord = await getJsonKV(env, stateKey);
+  await env.REFERRAL_KV.delete(stateKey);
+  if (!stateRecord || Number(stateRecord.expiresAt || 0) < Date.now()) {
+    return renderTikTokConnectionResult({ ok: false, title: 'Verbindung abgelaufen', message: 'Bitte starte die Instagram-Verbindung erneut.' });
+  }
+  if (!instagramCredentialsReady(env)) {
+    return renderTikTokConnectionResult({ ok: false, title: 'Konfiguration fehlt', message: 'Die Instagram-Zugangsdaten sind noch nicht vollständig hinterlegt.' });
+  }
+
+  try {
+    const token = await exchangeInstagramCode(env, code);
+    const profile = await queryInstagramProfile(env, token.accessToken);
+    const username = cleanShortText(profile?.username, 80).replace(/^@/, '');
+    const expectedUsername = cleanShortText(env.INSTAGRAM_EXPECTED_USERNAME || 'freefinder.at', 80).replace(/^@/, '').toLowerCase();
+    if (username && expectedUsername && username.toLowerCase() !== expectedUsername) {
+      return renderTikTokConnectionResult({
+        ok: false,
+        title: 'Falsches Instagram-Konto',
+        message: `Bitte verbinde @${expectedUsername} statt @${username}.`,
+      });
+    }
+
+    const now = Date.now();
+    const record = {
+      userId: cleanShortText(profile?.user_id || token.userId || profile?.id, 100),
+      scope: INSTAGRAM_OAUTH_SCOPES,
+      accessToken: token.accessToken,
+      expiresAt: now + (Math.max(token.expiresIn, 3600) * 1000),
+      connectedAt: now,
+      refreshedAt: now,
+      account: {
+        username,
+        displayName: cleanShortText(profile?.name, 120),
+        avatarUrl: normalizeSubmissionUrl(profile?.profile_picture_url),
+      },
+    };
+    if (!record.userId) throw new Error('Instagram returned no professional account id');
+    await putInstagramTokenRecord(env, record);
+    return renderTikTokConnectionResult({
+      ok: true,
+      title: 'Instagram ist verbunden',
+      message: 'FreeFinder kann die Verbindung nun serverseitig erneuern und freigegebene Reels veröffentlichen.',
+      username: username || expectedUsername,
+    });
+  } catch (error) {
+    return renderTikTokConnectionResult({
+      ok: false,
+      title: 'Instagram-Verbindung fehlgeschlagen',
+      message: error?.message || 'Instagram konnte nicht verbunden werden.',
+    });
+  }
+}
+
+async function handleInstagramStatus(request, env) {
+  if (!requireSocialConnect(request, env) && !requireSocialPublish(request, env) && !requireAdmin(request, env)) {
+    return invalid('Unauthorized', 401);
+  }
+  if (!instagramCredentialsReady(env)) return json({ ok: true, configured: false, connected: false });
+  try {
+    const record = await authorizedInstagramRecord(env);
+    return json({
+      ok: true,
+      configured: true,
+      connected: Boolean(record),
+      account: record?.account || null,
+      scope: record?.scope || '',
+      expiresAt: record?.expiresAt || null,
+      connectedAt: record?.connectedAt || null,
+    });
+  } catch (error) {
+    return invalid(error?.message || 'Instagram status failed', 502);
+  }
+}
+
+function normalizeHostedSocialMediaUrl(value, request, env) {
+  let mediaUrl;
+  try {
+    mediaUrl = new URL(String(value || ''));
+  } catch {
+    return '';
+  }
+  if (mediaUrl.protocol !== 'https:') return '';
+  const workerHost = new URL(request.url).hostname.toLowerCase();
+  const configuredHosts = String(env.SOCIAL_MEDIA_ALLOWED_HOSTS || '')
+    .split(',')
+    .map((host) => host.trim().toLowerCase())
+    .filter(Boolean);
+  const allowedHosts = new Set([workerHost, 'freefinder.at', 'www.freefinder.at', ...configuredHosts]);
+  if (!allowedHosts.has(mediaUrl.hostname.toLowerCase())) return '';
+  return mediaUrl.toString();
+}
+
+function instagramPublishKey(idempotencyKey) {
+  return `social:instagram:publish:${idempotencyKey}`;
+}
+
+function normalizeInstagramPublishInput(body, request, env) {
+  const caption = cleanLongText(body?.caption, 2200);
+  const idempotencyKey = cleanShortText(body?.idempotencyKey, 120);
+  const videoUrl = normalizeHostedSocialMediaUrl(body?.videoUrl, request, env);
+  if (!caption || !videoUrl || !/^[a-zA-Z0-9:_-]{8,120}$/.test(idempotencyKey)) return null;
+  if (body?.consent !== true) return null;
+  return {
+    caption,
+    idempotencyKey,
+    videoUrl,
+    shareToFeed: body?.shareToFeed !== false,
+  };
+}
+
+async function queryInstagramContainer(env, accessToken, containerId) {
+  const url = instagramGraphUrl(env, containerId);
+  url.searchParams.set('fields', 'status_code,status');
+  return fetchInstagramJson(url, {
+    headers: { authorization: `Bearer ${accessToken}` },
+  }, 'Instagram container status failed');
+}
+
+async function handleInstagramPublish(request, env) {
+  if (!requireSocialPublish(request, env)) return invalid('Unauthorized', 401);
+  const input = normalizeInstagramPublishInput(await readBody(request), request, env);
+  if (!input) return invalid('Invalid Instagram publish request');
+  const key = instagramPublishKey(input.idempotencyKey);
+  const existing = await getJsonKV(env, key);
+  if (existing?.containerId) return json({ ok: true, replayed: true, ...existing });
+
+  try {
+    const record = await authorizedInstagramRecord(env);
+    if (!record) return invalid('Instagram is not connected', 409);
+    const endpoint = instagramGraphUrl(env, `${record.userId}/media`);
+    const body = new URLSearchParams({
+      media_type: 'REELS',
+      video_url: input.videoUrl,
+      caption: input.caption,
+      share_to_feed: input.shareToFeed ? 'true' : 'false',
+      access_token: record.accessToken,
+    });
+    const payload = await fetchInstagramJson(endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body,
+    }, 'Instagram Reel container creation failed');
+    const containerId = cleanShortText(payload?.id, 100);
+    if (!containerId) throw new Error('Instagram returned no Reel container id');
+    const result = {
+      containerId,
+      idempotencyKey: input.idempotencyKey,
+      videoUrl: input.videoUrl,
+      shareToFeed: input.shareToFeed,
+      createdAt: Date.now(),
+      account: record.account || null,
+    };
+    await putJsonKV(env, key, result, { expirationTtl: 45 * 24 * 60 * 60 });
+    await putJsonKV(env, INSTAGRAM_LAST_PUBLISH_KEY, result);
+    return json({ ok: true, ...result }, 202);
+  } catch (error) {
+    return invalid(error?.message || 'Instagram publish initialization failed', 502);
+  }
+}
+
+async function handleInstagramPublishStatus(request, env) {
+  if (!requireSocialPublish(request, env) && !requireSocialConnect(request, env) && !requireAdmin(request, env)) {
+    return invalid('Unauthorized', 401);
+  }
+  const body = request.method === 'POST' ? await readBody(request) : null;
+  const url = new URL(request.url);
+  const last = await getJsonKV(env, INSTAGRAM_LAST_PUBLISH_KEY);
+  const idempotencyKey = cleanShortText(body?.idempotencyKey || url.searchParams.get('idempotencyKey'), 120);
+  const stored = idempotencyKey ? await getJsonKV(env, instagramPublishKey(idempotencyKey)) : null;
+  const requestedContainerId = cleanShortText(body?.containerId || url.searchParams.get('containerId'), 100);
+  if (idempotencyKey && !requestedContainerId && !stored?.containerId) {
+    return invalid('Instagram publish session not found', 404);
+  }
+  const containerId = cleanShortText(requestedContainerId || stored?.containerId || last?.containerId, 100);
+  if (!containerId) return invalid('Missing Instagram container id');
+  if (stored?.mediaId) {
+    return json({
+      ok: true,
+      containerId,
+      mediaId: stored.mediaId,
+      status: { status_code: 'PUBLISHED' },
+    });
+  }
+  try {
+    const record = await authorizedInstagramRecord(env);
+    if (!record) return invalid('Instagram is not connected', 409);
+    const status = await queryInstagramContainer(env, record.accessToken, containerId);
+    return json({ ok: true, containerId, status });
+  } catch (error) {
+    return invalid(error?.message || 'Instagram publish status failed', 502);
+  }
+}
+
+async function handleInstagramPublishComplete(request, env) {
+  if (!requireSocialPublish(request, env)) return invalid('Unauthorized', 401);
+  const body = await readBody(request);
+  const idempotencyKey = cleanShortText(body?.idempotencyKey, 120);
+  if (!/^[a-zA-Z0-9:_-]{8,120}$/.test(idempotencyKey) || body?.consent !== true) {
+    return invalid('Invalid Instagram completion request');
+  }
+  const key = instagramPublishKey(idempotencyKey);
+  const stored = await getJsonKV(env, key);
+  if (!stored?.containerId) return invalid('Instagram publish session not found', 404);
+  if (stored.mediaId) return json({ ok: true, replayed: true, ...stored });
+
+  try {
+    const record = await authorizedInstagramRecord(env);
+    if (!record) return invalid('Instagram is not connected', 409);
+    const status = await queryInstagramContainer(env, record.accessToken, stored.containerId);
+    if (String(status?.status_code || '').toUpperCase() !== 'FINISHED') {
+      return json({ ok: false, ready: false, containerId: stored.containerId, status }, 409);
+    }
+    const endpoint = instagramGraphUrl(env, `${record.userId}/media_publish`);
+    const publishBody = new URLSearchParams({
+      creation_id: stored.containerId,
+      access_token: record.accessToken,
+    });
+    const payload = await fetchInstagramJson(endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: publishBody,
+    }, 'Instagram Reel publishing failed');
+    const mediaId = cleanShortText(payload?.id, 100);
+    if (!mediaId) throw new Error('Instagram returned no published media id');
+    const completed = { ...stored, mediaId, publishedAt: Date.now() };
+    await putJsonKV(env, key, completed, { expirationTtl: 45 * 24 * 60 * 60 });
+    await putJsonKV(env, INSTAGRAM_LAST_PUBLISH_KEY, completed);
+    return json({ ok: true, ...completed }, 201);
+  } catch (error) {
+    return invalid(error?.message || 'Instagram Reel publishing failed', 502);
+  }
 }
 
 function parseJsonObject(value) {
@@ -3122,6 +4144,58 @@ export default {
 
     if (!env.REFERRAL_KV) {
       return invalid('REFERRAL_KV binding is missing', 500);
+    }
+
+    if (path.startsWith('/api/social/media/') && request.method === 'GET') {
+      return handleSocialMediaDownload(path, env);
+    }
+
+    if (path === '/api/social/media' && request.method === 'POST') {
+      return handleSocialMediaUpload(request, env);
+    }
+
+    if (path === '/api/social/tiktok/connect-session' && request.method === 'POST') {
+      return handleTikTokConnectSession(request, env);
+    }
+
+    if (path === '/api/social/tiktok/callback' && request.method === 'GET') {
+      return handleTikTokCallback(request, env);
+    }
+
+    if (path === '/api/social/tiktok/status' && request.method === 'GET') {
+      return handleTikTokStatus(request, env);
+    }
+
+    if (path === '/api/social/tiktok/publish' && request.method === 'POST') {
+      return handleTikTokPublish(request, env);
+    }
+
+    if (path === '/api/social/tiktok/publish/status' && (request.method === 'GET' || request.method === 'POST')) {
+      return handleTikTokPublishStatus(request, env);
+    }
+
+    if (path === '/api/social/instagram/connect-session' && request.method === 'POST') {
+      return handleInstagramConnectSession(request, env);
+    }
+
+    if (path === '/api/social/instagram/callback' && request.method === 'GET') {
+      return handleInstagramCallback(request, env);
+    }
+
+    if (path === '/api/social/instagram/status' && request.method === 'GET') {
+      return handleInstagramStatus(request, env);
+    }
+
+    if (path === '/api/social/instagram/publish' && request.method === 'POST') {
+      return handleInstagramPublish(request, env);
+    }
+
+    if (path === '/api/social/instagram/publish/status' && (request.method === 'GET' || request.method === 'POST')) {
+      return handleInstagramPublishStatus(request, env);
+    }
+
+    if (path === '/api/social/instagram/publish/complete' && request.method === 'POST') {
+      return handleInstagramPublishComplete(request, env);
     }
 
     if (path === '/api/promotions/redeem' && request.method === 'POST') {

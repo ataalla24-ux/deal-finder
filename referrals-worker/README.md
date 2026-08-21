@@ -30,7 +30,110 @@ This is still not an Apple-verified install callback. It is the strongest web-co
 - `POST /api/checkout/webhook`
 - `POST /api/slack/interactions`
 - `POST /api/slack/events`
+- `POST /api/social/tiktok/connect-session`
+- `GET /api/social/tiktok/callback`
+- `GET /api/social/tiktok/status`
+- `POST /api/social/tiktok/publish`
+- `GET|POST /api/social/tiktok/publish/status`
+- `POST /api/social/media`
+- `GET /api/social/media/:token.:extension`
+- `POST /api/social/instagram/connect-session`
+- `GET /api/social/instagram/callback`
+- `GET /api/social/instagram/status`
+- `POST /api/social/instagram/publish`
+- `GET|POST /api/social/instagram/publish/status`
+- `POST /api/social/instagram/publish/complete`
 - `GET /health`
+
+## TikTok publishing
+
+The Worker owns the OAuth callback, encrypted refresh-token storage, token rotation,
+idempotent Direct Post initialization, direct file-upload sessions, and publish-status
+polling. `PULL_FROM_URL` media must use the verified `https://freefinder.at/` prefix.
+Local MP4, MOV, or WebM files can use `FILE_UPLOAD`; TikTok receives the binary directly,
+so no video file needs to be committed to the website repository.
+
+Set these Worker secrets before connecting the account:
+
+```bash
+npx wrangler secret put TIKTOK_CLIENT_KEY
+npx wrangler secret put TIKTOK_CLIENT_SECRET
+npx wrangler secret put TIKTOK_SANDBOX_CLIENT_KEY
+npx wrangler secret put TIKTOK_SANDBOX_CLIENT_SECRET
+npx wrangler secret put SOCIAL_TOKEN_ENCRYPTION_KEY
+npx wrangler secret put SOCIAL_CONNECT_TOKEN
+npx wrangler secret put SOCIAL_PUBLISH_TOKEN
+```
+
+Optional variables:
+
+```text
+TIKTOK_EXPECTED_USERNAME=freefinder.at
+TIKTOK_REDIRECT_URI=https://freefinder-referrals.freefinder-stefan.workers.dev/api/social/tiktok/callback
+```
+
+`connect-session` and `status` accept `Authorization: Bearer <SOCIAL_CONNECT_TOKEN>`.
+Publishing accepts `Authorization: Bearer <SOCIAL_PUBLISH_TOKEN>` and requires an
+explicit `consent: true` marker plus an idempotency key for every scheduled post.
+Production is the default. Add `?environment=sandbox` to connection/status requests,
+or `"environment":"sandbox"` to publishing requests, for isolated sandbox credentials,
+encrypted tokens, and idempotency records.
+
+## Instagram publishing
+
+Instagram publishing uses **Instagram API with Instagram Login**. The connected account
+must be a professional Business or Creator account. A linked Facebook Page is not
+required for this login type. Configure the Meta app with this exact OAuth callback:
+
+```text
+https://freefinder-referrals.freefinder-stefan.workers.dev/api/social/instagram/callback
+```
+
+Required scopes:
+
+```text
+instagram_business_basic
+instagram_business_content_publish
+```
+
+Set the Meta app credentials as Worker secrets:
+
+```bash
+npx wrangler secret put INSTAGRAM_APP_ID
+npx wrangler secret put INSTAGRAM_APP_SECRET
+```
+
+The existing `SOCIAL_TOKEN_ENCRYPTION_KEY`, `SOCIAL_CONNECT_TOKEN`, and
+`SOCIAL_PUBLISH_TOKEN` secrets are shared with TikTok. Optional variables:
+
+```text
+INSTAGRAM_EXPECTED_USERNAME=freefinder.at
+INSTAGRAM_REDIRECT_URI=https://freefinder-referrals.freefinder-stefan.workers.dev/api/social/instagram/callback
+INSTAGRAM_GRAPH_API_VERSION=v26.0
+```
+
+The Worker exchanges the OAuth code for a long-lived Instagram token, stores it encrypted,
+and refreshes it before expiry. Reels are initialized, polled until processing finishes,
+then published through a separate idempotent completion request. The temporary media
+endpoint accepts authenticated files up to 24 MB and removes them automatically after
+36 hours. Public download URLs are unguessable and exist only so Meta can fetch the file.
+
+Publish a prepared video to both platforms from the repository root:
+
+```bash
+npm run social:publish -- \
+  --platform both \
+  --video /absolute/path/to/freefinder-reel.mp4 \
+  --tiktok-caption "Gratis essen und trinken in Wien mit FreeFinder #freefinder" \
+  --instagram-caption "Gratis essen und trinken in Wien. Jetzt mit FreeFinder entdecken. #freefinder" \
+  --idempotency daily:2026-08-21 \
+  --consent
+```
+
+The script validates the video with `ffprobe`, loads `SOCIAL_PUBLISH_TOKEN` from the
+environment or the macOS Keychain service `freefinder-tiktok-publish-token`, uploads the
+file, polls both platforms, and prints a secret-free JSON result. Use `--dry-run` to check
+connections without uploading or publishing anything.
 
 ## Slack approvals
 

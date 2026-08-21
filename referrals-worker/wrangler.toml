@@ -2,6 +2,13 @@ name = "freefinder-referrals"
 main = "src/index.js"
 compatibility_date = "2026-03-09"
 
+[vars]
+TIKTOK_EXPECTED_USERNAME = "freefinder.at"
+TIKTOK_REDIRECT_URI = "https://freefinder-referrals.freefinder-stefan.workers.dev/api/social/tiktok/callback"
+INSTAGRAM_EXPECTED_USERNAME = "freefinder.at"
+INSTAGRAM_REDIRECT_URI = "https://freefinder-referrals.freefinder-stefan.workers.dev/api/social/instagram/callback"
+INSTAGRAM_GRAPH_API_VERSION = "v26.0"
+
 [[kv_namespaces]]
 binding = "REFERRAL_KV"
 id = "a9e89926db014692adccdd2cf8272d2b"
