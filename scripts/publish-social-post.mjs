@@ -371,6 +371,9 @@ async function main() {
   const client = apiClient(workerBase, publishToken);
   const environment = String(args.environment || 'production').trim().toLowerCase();
   if (!['production', 'sandbox'].includes(environment)) throw new Error('--environment must be production or sandbox');
+  if (platforms.includes('tiktok') && environment === 'production' && !args['dry-run']) {
+    throw new Error('TikTok production Direct Post is disabled until a compliant per-post review UX is approved; use sandbox or prepare the file for TikTok Studio');
+  }
 
   if (args['dry-run']) {
     const checks = {};
@@ -380,7 +383,7 @@ async function main() {
     return;
   }
 
-  if (!args.consent) throw new Error('Pass --consent to confirm this scheduled post is approved for publishing');
+  if (!args.consent) throw new Error('Pass --consent to confirm this individual post was reviewed and expressly approved');
   const filePath = path.resolve(String(args.video || ''));
   const sharedCaption = String(args.caption || '').trim();
   const captions = {

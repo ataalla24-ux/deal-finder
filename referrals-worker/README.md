@@ -74,10 +74,18 @@ TIKTOK_REDIRECT_URI=https://freefinder-referrals.freefinder-stefan.workers.dev/a
 
 `connect-session` and `status` accept `Authorization: Bearer <SOCIAL_CONNECT_TOKEN>`.
 Publishing accepts `Authorization: Bearer <SOCIAL_PUBLISH_TOKEN>` and requires an
-explicit `consent: true` marker plus an idempotency key for every scheduled post.
+explicit `consent: true` marker plus an idempotency key for every individually reviewed post.
 Production is the default. Add `?environment=sandbox` to connection/status requests,
 or `"environment":"sandbox"` to publishing requests, for isolated sandbox credentials,
 encrypted tokens, and idempotency records.
+
+TikTok's Content Sharing Guidelines require a visible preview, current creator data,
+manual privacy and interaction choices, and express consent before every Direct Post.
+They also reject internal utilities that only publish to accounts managed by the app owner.
+For that reason production TikTok publishing is disabled by default, and the CLI only posts
+to TikTok in `sandbox`. Keep daily TikTok packages as `READY_FOR_UPLOAD` and schedule them
+manually in TikTok Studio. A future compliant creator-facing review UI may enable the Worker
+guard with `TIKTOK_PRODUCTION_PUBLISH_ENABLED=1` after TikTok approves that integration.
 
 ## Instagram publishing
 

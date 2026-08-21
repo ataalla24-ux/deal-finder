@@ -1211,6 +1211,9 @@ async function handleTikTokPublish(request, env) {
   if (!requireSocialPublish(request, env)) return invalid('Unauthorized', 401);
   const input = normalizeTikTokPublishInput(await readBody(request));
   if (!input) return invalid('Invalid TikTok publish request');
+  if (input.environment === 'production' && String(env.TIKTOK_PRODUCTION_PUBLISH_ENABLED || '').trim() !== '1') {
+    return invalid('TikTok production publishing is disabled until a compliant per-post review UX is approved', 403);
+  }
 
   const idempotencyKvKey = tiktokPublishIdempotencyKey(input.environment, input.idempotencyKey);
   const existing = await getJsonKV(env, idempotencyKvKey);

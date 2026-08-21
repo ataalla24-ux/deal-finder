@@ -37,6 +37,7 @@ const env = {
   SOCIAL_CONNECT_TOKEN: 'connect-token',
   SOCIAL_PUBLISH_TOKEN: 'publish-token',
   TIKTOK_EXPECTED_USERNAME: 'freefinder.at',
+  TIKTOK_PRODUCTION_PUBLISH_ENABLED: '1',
 };
 
 const connectResponse = await worker.fetch(new Request(
@@ -141,6 +142,21 @@ try {
   const status = await statusResponse.json();
   assert.equal(status.connected, true);
   assert.equal(status.account.username, 'freefinder.at');
+
+  const disabledProductionResponse = await worker.fetch(new Request(
+    'https://worker.example/api/social/tiktok/publish',
+    {
+      method: 'POST',
+      headers: { authorization: 'Bearer publish-token', 'content-type': 'application/json' },
+      body: JSON.stringify({
+        videoUrl: 'https://freefinder.at/social/test.mp4',
+        caption: 'Darf ohne Review-UX nicht live gehen',
+        idempotencyKey: 'daily:2026-08-16:disabled',
+        consent: true,
+      }),
+    },
+  ), { ...env, TIKTOK_PRODUCTION_PUBLISH_ENABLED: '0' });
+  assert.equal(disabledProductionResponse.status, 403);
 
   const publishResponse = await worker.fetch(new Request(
     'https://worker.example/api/social/tiktok/publish',
