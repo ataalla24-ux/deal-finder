@@ -136,7 +136,7 @@
         return;
       }
       if (/^https:\/\/play\.google\.com\//i.test(href)) {
-        trackEvent("google_play_click", { link_text: label, link_url: href });
+        trackEvent("play_store_click", { link_text: label, link_url: href });
         return;
       }
       if (target.matches('[data-track="deal_outbound"]')) {
