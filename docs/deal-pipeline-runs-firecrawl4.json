@@ -2,9 +2,128 @@
   "schemaVersion": 1,
   "sourceKey": "firecrawl4",
   "sourceLabel": "Firecrawl Key 4 - Gastro Discovery",
-  "updatedAt": "2026-08-20T07:48:11.713Z",
-  "runCount": 29,
+  "updatedAt": "2026-08-21T07:54:41.800Z",
+  "runCount": 30,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "firecrawl4-2026-08-21T07:54:41.800Z",
+      "sourceKey": "firecrawl4",
+      "sourceLabel": "Firecrawl Key 4 - Gastro Discovery",
+      "status": "completed-with-errors",
+      "startedAt": "2026-08-21T07:42:32.418Z",
+      "finishedAt": "2026-08-21T07:54:41.800Z",
+      "durationMs": 729382,
+      "outputFile": "docs/deals-pending-firecrawl4.json",
+      "counts": {
+        "rawCandidates": 0,
+        "normalizedCandidates": 0,
+        "verifiedCandidates": 0,
+        "previousDeals": 100,
+        "acceptedDeals": 100,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "configuredSources": 10,
+        "attemptedSources": 6,
+        "completedSources": 0,
+        "maxCreditsPerTarget": 350,
+        "totalCreditsUsed": 0,
+        "preservedPreviousOutput": true,
+        "sourceStats": [
+          {
+            "id": "hashtag:kostenlosessenwien",
+            "kind": "instagram-hashtag",
+            "label": "#kostenlosessenwien",
+            "url": "https://www.instagram.com/explore/tags/kostenlosessenwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: Error: Agent reached max credits"
+          },
+          {
+            "id": "hashtag:fooddealwien",
+            "kind": "instagram-hashtag",
+            "label": "#fooddealwien",
+            "url": "https://www.instagram.com/explore/tags/fooddealwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: Error: Agent reached max credits"
+          },
+          {
+            "id": "hashtag:gastroaktionwien",
+            "kind": "instagram-hashtag",
+            "label": "#gastroaktionwien",
+            "url": "https://www.instagram.com/explore/tags/gastroaktionwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: I was unable to extract data from the Instagram hashtag #gastroaktionwien as requested. \n\nThe task has a mandatory constraint to extract data ONLY from https://www.instagram.com/explore/tags/gastroaktionwien/, but:\n\n1. Instagram blocks automated scraping tools (including browser automation)\n2. The scraping service does not support Instagram\n3. Direct access to Instagram content requires authentication and is protected against automated extraction\n\nTo complete this task, you would need to:\n- Manually access the Instagram hashtag page while logged in\n- Use official Instagram API with proper authentication\n- Or provide an alternative data source that contains the #gastroaktionwien posts\n\nI found many Vienna food deal sources in my search (TheFork, NeoTaste, 1000things, etc.), but per your explicit instructions, I cannot use these as they are not from the mandated Instagram source."
+          },
+          {
+            "id": "hashtag:lunchdealwien",
+            "kind": "instagram-hashtag",
+            "label": "#lunchdealwien",
+            "url": "https://www.instagram.com/explore/tags/lunchdealwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: Error: Agent reached max credits"
+          },
+          {
+            "id": "hashtag:neueröffnungwien",
+            "kind": "instagram-hashtag",
+            "label": "#neueröffnungwien",
+            "url": "https://www.instagram.com/explore/tags/neuer%C3%B6ffnungwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Refusal: Error: Agent reached max credits"
+          },
+          {
+            "id": "account:tastyfood.vienna",
+            "kind": "instagram-account",
+            "label": "@tastyfood.vienna",
+            "url": "https://www.instagram.com/tastyfood.vienna/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "normalizedCandidates": 0,
+            "rejectedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+          }
+        ],
+        "verifier": {
+          "statusCounts": {},
+          "verifiedOriginalPosts": 0,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 0
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "#kostenlosessenwien: Refusal: Error: Agent reached max credits",
+        "#fooddealwien: Refusal: Error: Agent reached max credits",
+        "#gastroaktionwien: Refusal: I was unable to extract data from the Instagram hashtag #gastroaktionwien as requested. The task has a mandatory constraint to extract data ONLY from https://www.instagram.com/explore/tags/gastroaktionwien/, but: 1. Instagram blocks automated scraping tools (including browser automation) 2. The scraping service does not support Instagram 3. Direct access to Instagram content requires authentication and is protected against automated extraction To complete this task, you would need to: - Manually access the Instagram hashtag page while logged in - Use official Instagram API with proper authentication - Or provide an alternative data source that contains the #gastro",
+        "#lunchdealwien: Refusal: Error: Agent reached max credits",
+        "#neueröffnungwien: Refusal: Error: Agent reached max credits",
+        "@tastyfood.vienna: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "firecrawl4-2026-08-20T07:48:11.713Z",
