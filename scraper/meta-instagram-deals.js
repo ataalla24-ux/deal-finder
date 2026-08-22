@@ -526,11 +526,24 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
   const mediaEvidence = raw?._mediaEvidence && typeof raw._mediaEvidence === 'object' ? raw._mediaEvidence : {};
   const ocrText = cleanText(mediaEvidence.ocrText, config.mediaOcrMaxTextChars || 4000);
   const ai = mediaEvidence.ai && typeof mediaEvidence.ai === 'object' ? mediaEvidence.ai : null;
+  const aiConfidenceThreshold = Number(config.mediaLlmMinConfidence || 0.82);
+  const aiConfidence = Number(ai?.confidence || 0);
+  const captionPromotion = classifyPromotion(caption);
+  const ocrPromotion = classifyPromotion(ocrText);
   const trustedAiOffer = ai?.isDeal === true
-    && Number(ai.confidence || 0) >= Number(config.mediaLlmMinConfidence || 0.82)
+    && aiConfidence >= aiConfidenceThreshold
     && ai.exclusion === 'none'
       ? cleanText(ai.offerText, 500)
       : '';
+  // OCR occasionally turns decorative text into a plausible percentage. If
+  // the caption has no offer and the evidence classifier confidently rejects
+  // that OCR-only signal, do not let the noisy text create a deal by itself.
+  if (!captionPromotion.accepted
+      && ocrPromotion.accepted
+      && ai?.isDeal === false
+      && aiConfidence >= aiConfidenceThreshold) {
+    return { deal: null, rejection: 'media-ai-rejected-offer' };
+  }
   const contentText = [caption, ocrText ? `Bildtext: ${ocrText}` : '', trustedAiOffer ? `AI-Angebotsbeleg: ${trustedAiOffer}` : '']
     .filter(Boolean)
     .join('\n');

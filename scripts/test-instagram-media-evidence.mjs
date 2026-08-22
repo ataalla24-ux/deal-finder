@@ -147,6 +147,32 @@ assert.match(imageOnlyDeal.deal.description, /Bildtext:/);
 assert.equal(imageOnlyDeal.deal.evidence.mediaEvidence.ai.isDeal, true);
 assert.equal(imageOnlyDeal.deal.pubDateSource, 'instagram-graph-timestamp');
 
+const noisyOcrFalsePositive = normalizeGraphMediaItem({
+  id: 'noisy-ocr-1',
+  caption: 'Ein Tag beim Festival in St. Poelten #vienna',
+  permalink: 'https://www.instagram.com/reel/NOISYOCR1/',
+  timestamp: '2026-08-22T09:00:00.000Z',
+  username: 'wiencreator',
+  _mediaEvidence: {
+    ocrText: 'FR a make 7% ReeEEREQUENCY FESTIVAL',
+    assetCount: 2,
+    imageCount: 1,
+    videoFrameCount: 4,
+    ai: {
+      isDeal: false,
+      confidence: 0.9,
+      offerText: '',
+      exclusion: 'generic-content',
+    },
+  },
+}, {
+  sourceType: 'account',
+  sourceName: '@wiencreator',
+  account: { username: 'wiencreator', verifiedVienna: true },
+}, config, now);
+assert.equal(noisyOcrFalsePositive.deal, null, 'confident AI rejection must veto an OCR-only offer signal');
+assert.equal(noisyOcrFalsePositive.rejection, 'media-ai-rejected-offer');
+
 const staleCache = await enrichInstagramGraphMedia([], config, now, {
   tools: { tesseract: true, ffmpeg: true },
   cache: {
