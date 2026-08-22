@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-22T14:12:25.304Z",
+  "generatedAt": "2026-08-22T14:34:01.365Z",
   "source": "meta-instagram",
   "status": "degraded",
   "configured": {
@@ -26,16 +26,6 @@
     {
       "username": "tastyfood.vienna",
       "priority": 104,
-      "verifiedVienna": false
-    },
-    {
-      "username": "cascade_bar_vienna",
-      "priority": 90,
-      "verifiedVienna": false
-    },
-    {
-      "username": "german.doener.house",
-      "priority": 88,
       "verifiedVienna": false
     },
     {
@@ -124,8 +114,18 @@
       "verifiedVienna": false
     },
     {
-      "username": "friendscovienna",
-      "priority": 76,
+      "username": "vienna.coffee",
+      "priority": 72,
+      "verifiedVienna": false
+    },
+    {
+      "username": "viennaafterclass",
+      "priority": 72,
+      "verifiedVienna": false
+    },
+    {
+      "username": "viennaeats",
+      "priority": 72,
       "verifiedVienna": false
     }
   ],
@@ -138,35 +138,37 @@
     },
     "instagramGraph": {
       "status": "degraded",
-      "fetched": 204,
-      "accepted": 7,
+      "fetched": 194,
+      "accepted": 6,
       "errors": [
         {
-          "source": "@friendscovienna",
+          "source": "@vienna.coffee",
           "status": 400,
           "code": 110,
-          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28friendscovienna%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28vienna.coffee%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
+        },
+        {
+          "source": "@viennaafterclass",
+          "status": 400,
+          "code": 110,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28viennaafterclass%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
         }
       ],
       "skippedCooldown": {
-        "accounts": 7,
+        "accounts": 8,
         "hashtags": 2
       },
       "globalError": null,
       "mediaEvidence": {
-        "status": "degraded",
-        "eligible": 14,
-        "selected": 14,
-        "cached": 34,
-        "analyzed": 14,
-        "withOcrText": 13,
-        "aiCalls": 10,
-        "aiAccepted": 1,
-        "errors": [
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-jCKwZp/asset-2-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-Fnrw1E/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-a1H9w6/asset-0-ocr.png stdout -l deu+eng --psm 6 Image too small to scale!! (2x36 vs min width of 3) Line can"
-        ],
+        "status": "ok",
+        "eligible": 0,
+        "selected": 0,
+        "cached": 44,
+        "analyzed": 0,
+        "withOcrText": 0,
+        "aiCalls": 0,
+        "aiAccepted": 0,
+        "errors": [],
         "llmConfigured": true,
         "tools": {
           "tesseract": true,
@@ -175,99 +177,99 @@
       },
       "accountYield": {
         "foodiewien": {
-          "recentFetched": 15.75,
-          "recentAccepted": 3.5
+          "recentFetched": 20.813,
+          "recentAccepted": 4.625
         },
         "boca.vienna": {
-          "recentFetched": 15.75,
-          "recentAccepted": 1.75
+          "recentFetched": 20.813,
+          "recentAccepted": 2.313
         },
         "shaysfoodblog": {
-          "recentFetched": 15.75,
-          "recentAccepted": 4.5
+          "recentFetched": 20.813,
+          "recentAccepted": 6.375
         },
         "tastyfood.vienna": {
-          "recentFetched": 15.75,
-          "recentAccepted": 0
-        },
-        "cascade_bar_vienna": {
-          "recentFetched": 9,
-          "recentAccepted": 0
-        },
-        "german.doener.house": {
-          "recentFetched": 9,
+          "recentFetched": 20.813,
           "recentAccepted": 0
         },
         "merdins_cheesy_doener": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "woa.vienna": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "xo_grill": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "lorenzos_bar_lounge": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "2ndstreetburger": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "seelokaya": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "wolt.oesterreich": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "birbsbagel": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "blumencafe.wien": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "framburi_fries": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "ghettosmash_": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "naanbrueder": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "cafe_wirr": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "lebaron.wien": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "mangalet.at": {
-          "recentFetched": 3,
+          "recentFetched": 5.25,
           "recentAccepted": 0
         },
         "pizzeriapummaro": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
         "behalal.official": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
-        "friendscovienna": {
+        "vienna.coffee": {
           "recentFetched": 0,
+          "recentAccepted": 0
+        },
+        "viennaafterclass": {
+          "recentFetched": 0,
+          "recentAccepted": 0
+        },
+        "viennaeats": {
+          "recentFetched": 9,
           "recentAccepted": 0
         }
       }
@@ -275,10 +277,10 @@
   },
   "rejectionReasons": {
     "non-vienna-location": 1,
-    "no-concrete-offer": 173,
+    "no-concrete-offer": 165,
     "post-too-old": 5,
     "offer-expired": 2,
-    "excluded-promotion-type": 6,
+    "excluded-promotion-type": 5,
     "missing-vienna-evidence": 7,
     "media-ai-rejected-offer": 1,
     "missing-text": 1,
@@ -286,14 +288,14 @@
   },
   "graphEvidence": {
     "status": "ok",
-    "observed": 204,
+    "observed": 194,
     "retained": 136,
     "blocked": 14
   },
-  "totalDeals": 7,
-  "verifiedBeforeLimit": 7,
+  "totalDeals": 6,
+  "verifiedBeforeLimit": 6,
   "outputLimit": 40,
-  "freshPostsFetched": 204,
-  "verifiedDeals": 7,
-  "message": "7 new, evidence-verified Vienna Instagram deals found."
+  "freshPostsFetched": 194,
+  "verifiedDeals": 6,
+  "message": "6 new, evidence-verified Vienna Instagram deals found."
 }
