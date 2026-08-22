@@ -31,6 +31,9 @@ const BRAND_RULES = [
   { key: 'dm', name: 'dm', logo: '🧴', category: 'beauty', domain: 'dm.at' },
   { key: 'muller', name: 'Muller', logo: '💋', category: 'beauty', domain: 'mueller.at' },
   { key: 'mueller', name: 'Muller', logo: '💋', category: 'beauty', domain: 'mueller.at' },
+  { key: 'apple', name: 'Apple', logo: '🍎', category: 'technik', domain: 'apple.com' },
+  { key: 'intersport', name: 'Intersport', logo: '⛷️', category: 'sport', domain: 'intersport.at' },
+  { key: 'sportscheck', name: 'Sportscheck', logo: '🏃', category: 'sport', domain: 'sportscheck.at' },
   { key: 'spar', name: 'SPAR', logo: '🛒', category: 'supermarkt', domain: 'spar.at' },
   { key: 'billa', name: 'BILLA', logo: '🛒', category: 'supermarkt', domain: 'billa.at' },
   { key: 'hofer', name: 'HOFER', logo: '🛒', category: 'supermarkt', domain: 'hofer.at' },
@@ -204,7 +207,8 @@ function findBrandRule(signal) {
     return new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`, 'i');
   };
   return BRAND_RULES.find((rule) => escapedWordMatch(rule.key).test(normalized))
-    || BRAND_RULES.find((rule) => normalized.includes(rule.key));
+    // "sparen", "spare" and "Intersport" are not evidence for the SPAR brand.
+    || BRAND_RULES.find((rule) => rule.key !== 'spar' && normalized.includes(rule.key));
 }
 
 function extractHostFromUrl(url) {

@@ -269,4 +269,40 @@ expectNormalizedLogo(
   },
 );
 
+expectNormalizedLogo(
+  'Intersport is not mistaken for SPAR',
+  {
+    brand: 'Intersport',
+    title: 'Bikeleasing mit FIRMENRADL und spare bis zu 42 %',
+    description: 'Aktuelles Angebot von Intersport.',
+    type: 'rabatt',
+    category: 'sport',
+    source: 'Intersport',
+    url: 'https://www.intersport.at/firmenradl/',
+  },
+  {
+    brand: 'Intersport',
+    logo: '⛷️',
+    logoUrlIncludes: /intersport\.at/,
+  },
+);
+
+expectNormalizedLogo(
+  'the verb sparen does not replace the Apple brand with SPAR',
+  {
+    brand: 'Apple',
+    title: 'AppleCare+ für Studierende',
+    description: 'Qualifizierte Studierende und Lehrkräfte sparen bis zu 10 %.',
+    type: 'rabatt',
+    category: 'technik',
+    source: 'Apple Store',
+    url: 'https://www.apple.com/at-edu/shop/',
+  },
+  {
+    brand: 'Apple',
+    logo: '🍎',
+    logoUrlIncludes: /apple\.com/,
+  },
+);
+
 console.log('Deal logo normalization checks passed.');
