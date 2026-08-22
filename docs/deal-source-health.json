@@ -1,17 +1,23 @@
 {
-  "generatedAt": "2026-08-22T13:54:09.621Z",
+  "generatedAt": "2026-08-22T14:17:12.748Z",
   "summary": {
-    "filesConsidered": 29,
-    "totalCandidates": 471,
-    "uniqueCandidates": 445,
-    "distinctCandidates": 456,
+    "filesConsidered": 30,
+    "totalCandidates": 481,
+    "uniqueCandidates": 455,
+    "distinctCandidates": 466,
     "duplicateClusters": 11,
     "topHealthySources": [
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Instagram",
-        "healthScore": 77,
-        "totalDeals": 6
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "healthScore": 78,
+        "totalDeals": 12
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 78,
+        "totalDeals": 1
       },
       {
         "sourceKey": "joe",
@@ -20,25 +26,25 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Instagram",
+        "healthScore": 74,
+        "totalDeals": 7
+      },
+      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Instagram",
         "healthScore": 64,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "healthScore": 58,
-        "totalDeals": 13
-      },
-      {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "healthScore": 52,
-        "totalDeals": 45
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 100,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -54,20 +60,14 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Instagram",
-        "missionFitScore": 74,
-        "totalDeals": 6
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "missionFitScore": 63,
-        "totalDeals": 1
+        "missionFitScore": 72,
+        "totalDeals": 7
       },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "missionFitScore": 52,
-        "totalDeals": 13
+        "missionFitScore": 64,
+        "totalDeals": 12
       }
     ],
     "topCoverageSources": [
@@ -109,10 +109,10 @@
     ],
     "topPrecisionSources": [
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Instagram",
-        "precisionScore": 81,
-        "totalDeals": 6
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 92,
+        "totalDeals": 1
       },
       {
         "sourceKey": "instagram-apify",
@@ -121,30 +121,30 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Instagram",
+        "precisionScore": 79,
+        "totalDeals": 7
+      },
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "precisionScore": 77,
+        "totalDeals": 12
+      },
+      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 68,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 57,
-        "totalDeals": 2
-      },
-      {
-        "sourceKey": "instagram-verified",
-        "sourceLabel": "Instagram",
-        "precisionScore": 53,
-        "totalDeals": 7
       }
     ],
     "topWeightedSources": [
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Instagram",
-        "sourceWeightScore": 65,
-        "totalDeals": 6
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 75,
+        "totalDeals": 1
       },
       {
         "sourceKey": "joe",
@@ -153,22 +153,22 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "instagram-apify",
+        "sourceKey": "meta-instagram",
         "sourceLabel": "Instagram",
-        "sourceWeightScore": 62,
-        "totalDeals": 1
+        "sourceWeightScore": 63,
+        "totalDeals": 7
       },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 47,
-        "totalDeals": 13
+        "sourceWeightScore": 62,
+        "totalDeals": 12
       },
       {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "sourceWeightScore": 46,
-        "totalDeals": 45
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Instagram",
+        "sourceWeightScore": 62,
+        "totalDeals": 1
       }
     ],
     "topSourcesToFix": [
@@ -228,74 +228,152 @@
       }
     ],
     "pipelineRuns": {
-      "reportedSources": 5,
+      "reportedSources": 7,
       "failedSources": [],
       "completedWithErrors": [
         "firecrawl4",
-        "gastro2"
+        "gastro2",
+        "power",
+        "wien-combined"
       ]
     }
   },
   "sources": [
     {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Instagram",
-      "totalDeals": 6,
-      "uniqueDeals": 4,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 1,
-      "fresh7dCount": 6,
-      "viennaCount": 6,
-      "foodDrinkCount": 6,
-      "promoCount": 4,
+      "sourceKey": "tiktok",
+      "file": "deals-pending-tiktok.json",
+      "sourceLabel": "TikTok Scanner",
+      "totalDeals": 12,
+      "uniqueDeals": 12,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 4,
+      "fresh7dCount": 12,
+      "viennaCount": 12,
+      "foodDrinkCount": 5,
+      "promoCount": 12,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "NEUSTIFTER KIRTAG 🍇 Dieses Wochenende findet wieder der Neustifter Kirtag statt und wenn du ihn besuchen möchtest, hast du noch bis Sonntag",
-        "Einer der besten Ramen in Wien bei ramen.makotoya und mit neotaste. kriegt ihr aktuell den Tori Paitan Ramen für nur 5€ also schnell sein",
-        "Say hola to our Lunch Deal. From Monday to Friday, 12:00 - 15:00. Shaped with intention and ease. Simple, seasonal, and cared for in every d"
+        "@lara_kristiin Angebot",
+        "Gratis Matcha bei @laserglow_vienna",
+        "Gratis Probetraining bei @datriboxing"
       ],
       "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0.2,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.3,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0.7,
+      "foodDrinkRate": 0.4,
+      "promoRate": 1,
       "missingUrlRate": 0,
-      "averageQualityScore": 80.7,
+      "averageQualityScore": 66,
       "topCategories": [
         {
-          "value": "essen",
+          "value": "shopping",
           "count": 4
         },
         {
           "value": "kaffee",
-          "count": 1
+          "count": 3
         },
         {
-          "value": "supermarkt",
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "kultur",
+          "count": 2
+        },
+        {
+          "value": "fitness",
           "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "rabatt",
-          "count": 4
-        },
-        {
           "value": "gratis",
-          "count": 2
+          "count": 12
         }
       ],
-      "issues": [],
-      "healthScore": 77,
-      "missionFitScore": 74,
-      "coverageScore": 17,
-      "precisionScore": 81,
-      "sourceWeightScore": 65
+      "issues": [
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 78,
+      "missionFitScore": 64,
+      "coverageScore": 21,
+      "precisionScore": 77,
+      "sourceWeightScore": 62
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 1,
+      "uniqueDeals": 0,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 1,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "NEUSTIFTER KIRTAG 🍇 Dieses Wochenende findet wieder der Neustifter Kirtag statt und wenn du ihn besuchen möchtest, hast du noch bis Sonntag"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-22T14:16:02.483Z",
+        "finishedAt": "2026-08-22T14:16:11.981Z",
+        "durationMs": 9498,
+        "counts": {
+          "rawCandidates": 3,
+          "normalizedCandidates": 1,
+          "verifiedCandidates": 1,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 2
+        },
+        "rejectedByReason": {
+          "self-syndicated-deal": 1,
+          "no-concrete-offer": 1
+        },
+        "errors": [
+          "#wienhappyhour: Meta Graph 24: The requested resource does not exist",
+          "#viennafooddeals: Meta Graph 24: The requested resource does not exist"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 91,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 78,
+      "missionFitScore": 100,
+      "coverageScore": 16,
+      "precisionScore": 92,
+      "sourceWeightScore": 75
     },
     {
       "sourceKey": "joe",
@@ -360,6 +438,73 @@
       "sourceWeightScore": 64
     },
     {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Instagram",
+      "totalDeals": 7,
+      "uniqueDeals": 4,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 1,
+      "fresh7dCount": 7,
+      "viennaCount": 7,
+      "foodDrinkCount": 7,
+      "promoCount": 5,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "1+1 bei Burgerking nur bei der Foodora bis zum 31.08. 🥳🥳 #fyp #aktion #birgerking",
+        "NEUSTIFTER KIRTAG 🍇 Dieses Wochenende findet wieder der Neustifter Kirtag statt und wenn du ihn besuchen möchtest, hast du noch bis Sonntag",
+        "1€ Matcha in Wien - matchaba.at Mit der Neotaste bekommt ihr bis 25.08 Matcha für 1€✨ Einfach mit „FOODIEWIEN2M“ 2 Monate kostenlos test"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 83.6,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "supermarkt",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 4
+        },
+        {
+          "value": "gratis",
+          "count": 2
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 74,
+      "missionFitScore": 72,
+      "coverageScore": 18,
+      "precisionScore": 79,
+      "sourceWeightScore": 63
+    },
+    {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Instagram",
@@ -407,76 +552,6 @@
       "coverageScore": 15,
       "precisionScore": 80,
       "sourceWeightScore": 62
-    },
-    {
-      "sourceKey": "tiktok",
-      "file": "deals-pending-tiktok.json",
-      "sourceLabel": "TikTok Scanner",
-      "totalDeals": 13,
-      "uniqueDeals": 13,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 4,
-      "fresh7dCount": 13,
-      "viennaCount": 0,
-      "foodDrinkCount": 6,
-      "promoCount": 13,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "@lara_kristiin Angebot",
-        "Gratis Matcha bei @laserglow_vienna",
-        "@weimpactla Angebot"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0.3,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0.5,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 66.6,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 4
-        },
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "kaffee",
-          "count": 3
-        },
-        {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 12
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 58,
-      "missionFitScore": 52,
-      "coverageScore": 18,
-      "precisionScore": 52,
-      "sourceWeightScore": 47
     },
     {
       "sourceKey": "member-benefits",
@@ -1153,6 +1228,99 @@
       "sourceWeightScore": 32
     },
     {
+      "sourceKey": "power",
+      "file": "deals-pending-power.json",
+      "sourceLabel": "Power Scraper",
+      "totalDeals": 15,
+      "uniqueDeals": 15,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 10,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Zum Apple Music Abo für Studierende gibt's Apple TV kostenlos dazu. Fußnote ◊◊ S",
+        "Alaska-Seelachsfilet 1+1",
+        "Baguette ab 2 Stück um € 2,30 pro Stück"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-22T14:12:03.334Z",
+        "finishedAt": "2026-08-22T14:12:16.404Z",
+        "durationMs": 13070,
+        "counts": {
+          "rawCandidates": 15,
+          "normalizedCandidates": 15,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 15,
+          "rejectedDeals": 0
+        },
+        "rejectedByReason": {},
+        "errors": [
+          "Too Good To Go: HTTP 429",
+          "Foodsharing Wien: HTTP 404",
+          "KFC: HTTP 404",
+          "Saturn: HTTP 403",
+          "H&M: Timeout after 8000ms",
+          "Zara: HTTP 403",
+          "Wienerwald: HTTP 404",
+          "Dean&David: fetch failed"
+        ],
+        "reportFile": "deal-pipeline-last-run-power.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 52.8,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 10
+        },
+        {
+          "value": "technik",
+          "count": 3
+        },
+        {
+          "value": "sport",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 13
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 44,
+      "missionFitScore": 27,
+      "coverageScore": 13,
+      "precisionScore": 33,
+      "sourceWeightScore": 30
+    },
+    {
       "sourceKey": "events",
       "file": "deals-pending-events.json",
       "sourceLabel": "Kirchen Events",
@@ -1474,62 +1642,6 @@
       "coverageScore": 66,
       "precisionScore": 30,
       "sourceWeightScore": 38
-    },
-    {
-      "sourceKey": "power",
-      "file": "deals-pending-power.json",
-      "sourceLabel": "Power Scraper",
-      "totalDeals": 6,
-      "uniqueDeals": 4,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 6,
-      "fresh7dCount": 6,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Preise & Angebote",
-        "Exklusivangebote",
-        "Marketing / Sales"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 38,
-      "topCategories": [
-        {
-          "value": "freizeit",
-          "count": 3
-        },
-        {
-          "value": "reisen",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 6
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 35,
-      "missionFitScore": 22,
-      "coverageScore": 6,
-      "precisionScore": 26,
-      "sourceWeightScore": 23
     },
     {
       "sourceKey": "instagram-discovery",
