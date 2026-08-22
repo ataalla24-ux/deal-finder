@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-22T10:15:56.143Z",
+  "generatedAt": "2026-08-22T10:30:21.994Z",
   "source": "meta-instagram",
-  "status": "degraded",
+  "status": "ok",
   "configured": {
     "adLibrary": false,
     "instagramGraph": true
@@ -69,11 +69,6 @@
       "verifiedVienna": false
     },
     {
-      "username": "rollercoasterrestaurant",
-      "priority": 90,
-      "verifiedVienna": false
-    },
-    {
       "username": "german.doener.house",
       "priority": 88,
       "verifiedVienna": false
@@ -89,23 +84,28 @@
       "verifiedVienna": true
     },
     {
-      "username": "thedistrictkebab",
-      "priority": 87,
-      "verifiedVienna": false
-    },
-    {
       "username": "xo_grill",
       "priority": 86,
       "verifiedVienna": false
     },
     {
-      "username": "doenerwerkwien",
+      "username": "lorenzos_bar_lounge",
       "priority": 84,
       "verifiedVienna": false
     },
     {
-      "username": "lorenzos_bar_lounge",
-      "priority": 84,
+      "username": "2ndstreetburger",
+      "priority": 82,
+      "verifiedVienna": true
+    },
+    {
+      "username": "seelokaya",
+      "priority": 82,
+      "verifiedVienna": false
+    },
+    {
+      "username": "wolt.oesterreich",
+      "priority": 82,
       "verifiedVienna": false
     }
   ],
@@ -117,57 +117,28 @@
       "errors": []
     },
     "instagramGraph": {
-      "status": "degraded",
-      "fetched": 154,
-      "accepted": 4,
-      "errors": [
-        {
-          "source": "@rollercoasterrestaurant",
-          "status": 400,
-          "code": 110,
-          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28rollercoasterrestaurant%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user "
-        },
-        {
-          "source": "@thedistrictkebab",
-          "status": 400,
-          "code": 110,
-          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28thedistrictkebab%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
-        },
-        {
-          "source": "@doenerwerkwien",
-          "status": 400,
-          "code": 110,
-          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28doenerwerkwien%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
-        },
-        {
-          "source": "#freefinderwien",
-          "status": 400,
-          "code": 24,
-          "message": "Meta API 400 for https://graph.facebook.com/v26.0/ig_hashtag_search?user_id=17841438552673858&q=freefinderwien&access_token=[redacted] The requested resource does not exist"
-        },
-        {
-          "source": "#wienfooddeal",
-          "status": 400,
-          "code": 24,
-          "message": "Meta API 400 for https://graph.facebook.com/v26.0/ig_hashtag_search?user_id=17841438552673858&q=wienfooddeal&access_token=[redacted] The requested resource does not exist"
-        }
-      ],
+      "status": "ok",
+      "fetched": 181,
+      "accepted": 3,
+      "errors": [],
       "skippedCooldown": {
-        "accounts": 0,
-        "hashtags": 0
+        "accounts": 3,
+        "hashtags": 2
       },
       "mediaEvidence": {
         "status": "degraded",
-        "eligible": 35,
+        "eligible": 24,
         "selected": 18,
-        "cached": 0,
+        "cached": 18,
         "analyzed": 18,
-        "withOcrText": 16,
+        "withOcrText": 17,
         "aiCalls": 8,
-        "aiAccepted": 1,
+        "aiAccepted": 0,
         "errors": [
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-4CEL2S/asset-0-ocr.png stdout --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-mYOtPK/asset-0-ocr.png stdout --psm 6"
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-JtZQNx/video-1-frame-01.jpg.ocr.png stdout --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-2q00Dy/asset-0-ocr.png stdout --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-rsUqEP/asset-0-ocr.png stdout --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-rsUqEP/video-1-frame-01.jpg.ocr.png stdout --psm 6"
         ],
         "llmConfigured": true,
         "tools": {
@@ -178,16 +149,17 @@
     }
   },
   "rejectionReasons": {
-    "no-concrete-offer": 127,
+    "no-concrete-offer": 151,
     "post-too-old": 7,
-    "excluded-promotion-type": 9,
+    "media-ai-rejected-offer": 1,
+    "excluded-promotion-type": 10,
     "offer-expired": 2,
-    "missing-vienna-evidence": 5
+    "missing-vienna-evidence": 7
   },
-  "totalDeals": 4,
-  "verifiedBeforeLimit": 4,
+  "totalDeals": 3,
+  "verifiedBeforeLimit": 3,
   "outputLimit": 40,
-  "freshPostsFetched": 154,
-  "verifiedDeals": 4,
-  "message": "4 new, evidence-verified Vienna Instagram deals found."
+  "freshPostsFetched": 181,
+  "verifiedDeals": 3,
+  "message": "3 new, evidence-verified Vienna Instagram deals found."
 }
