@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "runId": "firecrawl2-2026-08-22T12:15:02.306Z",
+  "runId": "firecrawl2-2026-08-22T23:42:41.681Z",
   "sourceKey": "firecrawl2",
   "sourceLabel": "Firecrawl Key 3 - Consumables",
-  "status": "completed",
-  "startedAt": "2026-08-22T11:57:13.067Z",
-  "finishedAt": "2026-08-22T12:15:02.306Z",
-  "durationMs": 1069239,
+  "status": "completed-with-errors",
+  "startedAt": "2026-08-22T23:41:07.496Z",
+  "finishedAt": "2026-08-22T23:42:41.681Z",
+  "durationMs": 94185,
   "outputFile": "docs/deals-pending-firecrawl2.json",
   "counts": {
     "rawCandidates": 0,
@@ -21,6 +21,12 @@
   "diagnostics": {
     "agentStatus": "failed",
     "creditsUsed": 0,
+    "configuredSources": 8,
+    "agentTimeoutSeconds": 300,
+    "maxCredits": 500,
+    "retainedPreviousDeals": 0,
+    "prunedPreviousDeals": 0,
+    "duplicateCandidatesMerged": 0,
     "verifier": {
       "statusCounts": {},
       "verifiedOriginalPosts": 0,
@@ -30,5 +36,7 @@
     }
   },
   "constraints": {},
-  "errors": []
+  "errors": [
+    "Refusal: Error: Agent reached max credits"
+  ]
 }
