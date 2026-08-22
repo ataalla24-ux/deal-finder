@@ -76,6 +76,14 @@ const EXCLUDED_PATTERNS = [
   /\b(?:affiliate|influencer gesucht|creator gesucht)\b/i,
 ];
 
+const SELF_SYNDICATION_PATTERNS = [
+  /\boriginal[- ]?link\b.{0,140}\b(?:direkt\s+)?in\s+freefinder\b/i,
+  /\balle aktuellen bedingungen\b.{0,180}\bfreefinder\b/i,
+];
+
+const OUTSIDE_VIENNA_LOCATION_PATTERN = /\b(?:in|bei|am|im|standort(?:e)?\s*:?|location\s*:?)\s+(?:st\.?\s*p(?:ö|oe)lten|graz|linz|salzburg|innsbruck|klagenfurt|eisenstadt|bregenz|wiener\s+neustadt|wr\.?\s+neustadt|krems|bratislava)\b/i;
+const WIDE_AVAILABILITY_PATTERN = /\b(?:österreichweit|oesterreichweit|austria[- ]?wide|online|alle[nr]?\s+(?:filialen|standorten))\b/i;
+
 const VIENNA_PATTERNS = [
   /\bwien\b/i,
   /\bvienna\b/i,
@@ -224,6 +232,17 @@ function normalizedUsername(value) {
 function hasViennaText(value) {
   const text = cleanText(value, 5000);
   return VIENNA_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function textWithoutHashtags(value) {
+  return cleanText(value, 5000).replace(/#[\p{L}\p{N}_.-]+/gu, ' ');
+}
+
+function hasConflictingOutsideViennaLocation(value) {
+  const prose = textWithoutHashtags(value);
+  if (!OUTSIDE_VIENNA_LOCATION_PATTERN.test(prose)) return false;
+  if (WIDE_AVAILABILITY_PATTERN.test(prose)) return false;
+  return !hasViennaText(prose);
 }
 
 function registryAccountIsVerified(account) {
@@ -523,6 +542,12 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
 
 export function normalizeGraphMediaItem(raw, context, config, now = new Date()) {
   const caption = cleanText(raw?.caption, 4000);
+  if (SELF_SYNDICATION_PATTERNS.some((pattern) => pattern.test(caption))) {
+    return { deal: null, rejection: 'self-syndicated-deal' };
+  }
+  if (hasConflictingOutsideViennaLocation(caption)) {
+    return { deal: null, rejection: 'non-vienna-location' };
+  }
   const mediaEvidence = raw?._mediaEvidence && typeof raw._mediaEvidence === 'object' ? raw._mediaEvidence : {};
   const ocrText = cleanText(mediaEvidence.ocrText, config.mediaOcrMaxTextChars || 4000);
   const ai = mediaEvidence.ai && typeof mediaEvidence.ai === 'object' ? mediaEvidence.ai : null;

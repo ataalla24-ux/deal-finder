@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 
 import {
+  analyzeInstagramMediaItem,
   classifyInstagramOcrWithOpenAI,
   enrichInstagramGraphMedia,
   extractInstagramMediaAssets,
@@ -149,7 +150,7 @@ assert.equal(imageOnlyDeal.deal.pubDateSource, 'instagram-graph-timestamp');
 
 const noisyOcrFalsePositive = normalizeGraphMediaItem({
   id: 'noisy-ocr-1',
-  caption: 'Ein Tag beim Festival in St. Poelten #vienna',
+  caption: 'Ein Tag beim Frequency Festival #vienna',
   permalink: 'https://www.instagram.com/reel/NOISYOCR1/',
   timestamp: '2026-08-22T09:00:00.000Z',
   username: 'wiencreator',
@@ -172,6 +173,85 @@ const noisyOcrFalsePositive = normalizeGraphMediaItem({
 }, config, now);
 assert.equal(noisyOcrFalsePositive.deal, null, 'confident AI rejection must veto an OCR-only offer signal');
 assert.equal(noisyOcrFalsePositive.rejection, 'media-ai-rejected-offer');
+
+const selfSyndicatedDeal = normalizeGraphMediaItem({
+  id: 'self-syndicated-1',
+  caption: 'Gratis Drink testen. Alle aktuellen Bedingungen und den Original-Link findest du direkt in FreeFinder. #freefinder #wien',
+  permalink: 'https://www.instagram.com/reel/SELFSYNDICATED1/',
+  timestamp: '2026-08-22T09:00:00.000Z',
+}, {
+  sourceType: 'hashtag',
+  sourceName: '#gratiswien',
+}, config, now);
+assert.equal(selfSyndicatedDeal.deal, null, 'FreeFinder syndication must not feed back into discovery');
+assert.equal(selfSyndicatedDeal.rejection, 'self-syndicated-deal');
+
+const outsideViennaDeal = normalizeGraphMediaItem({
+  id: 'outside-vienna-1',
+  caption: '20% Rabatt beim Festival in St. Poelten #vienna',
+  permalink: 'https://www.instagram.com/reel/OUTSIDEVIENNA1/',
+  timestamp: '2026-08-22T09:00:00.000Z',
+  username: 'wiencreator',
+}, {
+  sourceType: 'account',
+  sourceName: '@wiencreator',
+  account: { username: 'wiencreator', verifiedVienna: true },
+}, config, now);
+assert.equal(outsideViennaDeal.deal, null, 'an explicit non-Vienna location must override a hashtag and account hint');
+assert.equal(outsideViennaDeal.rejection, 'non-vienna-location');
+
+const multiCityDeal = normalizeGraphMediaItem({
+  id: 'multi-city-1',
+  caption: '20% Rabatt in Graz und Wien am 24. August',
+  permalink: 'https://www.instagram.com/p/MULTICITY1/',
+  timestamp: '2026-08-22T09:00:00.000Z',
+  username: 'austriadeals',
+}, {
+  sourceType: 'account',
+  sourceName: '@austriadeals',
+  account: { username: 'austriadeals', verifiedVienna: false },
+}, config, now);
+assert.ok(multiCityDeal.deal, 'a multi-city offer that explicitly includes Vienna must remain eligible');
+
+const imageResponse = () => new Response(Uint8Array.from([1, 2, 3]), {
+  headers: { 'content-type': 'image/jpeg' },
+});
+let failedOcrCalls = 0;
+const failedOcr = await analyzeInstagramMediaItem({
+  media_type: 'IMAGE',
+  media_url: 'https://cdn.example/broken.jpg',
+}, config, {
+  tools: { tesseract: true, ffmpeg: false },
+  fetchImpl: async () => imageResponse(),
+  execFileImpl: async () => {
+    failedOcrCalls += 1;
+    const error = new Error('Command failed: tesseract');
+    error.stderr = 'Error in pixReadMem';
+    throw error;
+  },
+});
+assert.equal(failedOcrCalls, 1, 'non-language OCR failures must not be retried');
+assert.equal(failedOcr.errors.length, 1);
+
+let languageFallbackCalls = 0;
+const languageFallback = await analyzeInstagramMediaItem({
+  media_type: 'IMAGE',
+  media_url: 'https://cdn.example/language-fallback.jpg',
+}, config, {
+  tools: { tesseract: true, ffmpeg: false },
+  fetchImpl: async () => imageResponse(),
+  execFileImpl: async () => {
+    languageFallbackCalls += 1;
+    if (languageFallbackCalls === 1) {
+      const error = new Error('Command failed: tesseract');
+      error.stderr = "Error opening data file deu.traineddata. Failed loading language 'deu'. Could not initialize tesseract.";
+      throw error;
+    }
+    return { stdout: 'Zweiter Kaffee gratis in Wien' };
+  },
+});
+assert.equal(languageFallbackCalls, 2, 'missing language data should retry with the default OCR language');
+assert.match(languageFallback.ocrText, /Kaffee gratis/);
 
 const staleCache = await enrichInstagramGraphMedia([], config, now, {
   tools: { tesseract: true, ffmpeg: true },

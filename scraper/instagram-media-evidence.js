@@ -153,7 +153,9 @@ async function runTesseract(imagePath, config, execImpl) {
       maxBuffer: 4 * 1024 * 1024,
     });
     return cleanText(result.stdout, config.mediaOcrMaxTextChars);
-  } catch {
+  } catch (error) {
+    const detail = `${error?.message || ''}\n${error?.stderr || ''}`;
+    if (!/(?:failed loading language|error opening data file|could not initialize tesseract)/i.test(detail)) throw error;
     const result = await execImpl('tesseract', baseArgs, {
       timeout: config.ocrTimeoutMs,
       maxBuffer: 4 * 1024 * 1024,
