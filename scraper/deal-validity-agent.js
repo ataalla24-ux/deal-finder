@@ -38,7 +38,7 @@ const VIENNA_NEGATION_PATTERN = /\b(?:nicht|kein(?:e[rmns]?)?|au(?:ß|ss)erhalb)
 const AUSTRIA_SCOPE_PATTERN = /(?:österreich(?:weit)?|\boesterreich(?:weit)?|\baustria(?:n|wide)?|\bbundesweit|\blandesweit)\b/i;
 const ONLINE_SCOPE_PATTERN = /\b(?:onlineshop|online[-\s]angebot|online\s+einlösbar|online\s+einloesbar|im\s+online[-\s]?shop|webshop|österreichweiter\s+versand|oesterreichweiter\s+versand)\b/i;
 const UNCERTAIN_LOCATION_PATTERN = /\b(?:not specified|unknown|nicht angegeben|unbekannt|suggests?|vermutlich|wahrscheinlich|möglicherweise|moeglicherweise)\b/i;
-const NON_VIENNA_PLACE_PATTERN = /\b(?:graz|salzburg|linz|innsbruck|klagenfurt|villach|st\.?\s*pölten|st\.?\s*poelten|eisenstadt|bregenz|baden|wels|niederösterreich|niederoesterreich|burgenland|steiermark|kärnten|kaernten|tirol|vorarlberg|deutschland|germany|schweiz|switzerland|united\s+states|vereinigte\s+staaten|u\.?s\.?a\.?|america)\b/i;
+const NON_VIENNA_PLACE_PATTERN = /\b(?:graz|salzburg|linz|innsbruck|klagenfurt|villach|st\.?\s*pölten|st\.?\s*poelten|eisenstadt|bregenz|baden|wels|münchen|munich|berlin|hamburg|zürich|zurich|gading\s+serpong|jakarta|niederösterreich|niederoesterreich|burgenland|steiermark|kärnten|kaernten|tirol|vorarlberg|deutschland|germany|schweiz|switzerland|indonesien|indonesia|united\s+states|vereinigte\s+staaten|u\.?s\.?a\.?|america)\b/i;
 const PLACE_BOUND_OFFER_PATTERN = /\b(?:museum|museen|theater|oper|konzert|concert|festival|festwochen|veranstaltung|event|ausstellung|führung|fuehrung|ticket|kino|schloss|zentrum|center|arena|steinbruch)\w*/i;
 const VERIFIED_VIENNA_MEMBER_BENEFIT_PATTERN = /\b(?:belvedere|leopold\s+museum|kinodonnerstag)\b/i;
 const SYNTHETIC_PUBLICATION_SOURCE_PATTERN = /(?:firecrawl.*(?:run|crawl)|agent(?:\s|[-_])?run|crawl(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|scrap(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|discovered(?:\s|[-_])?at|generated(?:\s|[-_])?at|fallback|current(?:\s|[-_])?time|workflow(?:\s|[-_])?run)/i;
@@ -445,7 +445,11 @@ function getEditorialPriceListingReason(deal, health = null) {
 function getOfferText(deal, health = null) {
   const contentHints = reliableContentHints(health);
   const title = cleanText(deal.title);
-  const usableTitle = /^@?[a-z0-9._-]+\s+(?:angebot|deal)$/i.test(title) ? '' : title;
+  const generatedSocialTitle = /\b(?:tiktok|instagram)[-\s]?(?:deals[-\s]?)?(?:scanner|scraper)\b/i.test([
+    deal.source,
+    deal.originSource,
+  ].map(cleanText).join(' ')) && /\b(?:angebot|deal)$/i.test(title);
+  const usableTitle = generatedSocialTitle || /^@?[a-z0-9._-]+\s+(?:angebot|deal)$/i.test(title) ? '' : title;
   return [
     usableTitle,
     deal.description,
@@ -483,7 +487,7 @@ function getConcreteOfferDecision(deal, health = null) {
     return { concrete: false, reason: 'Gewinnspiel/Verlosung statt direkt nutzbarem Deal' };
   }
 
-  const recommendationLanguage = /\b(?:favou?rite|lieblings(?:platz|spot|ort)|summer\s+spot|things\s+to\s+do|must[-\s]?visit|guide|tipps?|vibe|save\s+(?:this|and)|send\s+this)\b/i;
+  const recommendationLanguage = /\b(?:favou?rite|lieblings(?:platz|spot|ort)|summer\s+spot|things\s+to\s+do|must[-\s]?visit|guide|tipps?|vibe|empfehl\w*|recommend\w*|save\s+(?:this|and)|send\s+this)\b/i;
   const explicitPromotionBeyondGenericFree = /(?:\b\d+\s*%|\b1\s*[+&]\s*1\b|\b(?:rabatt|gutschein|coupon|deal|aktion|angebot|special|happy\s*hour)\b|\b(?:statt|nur\s+heute|today\s+only)\b|\b(?:gratis|free)\s+(?:zu|zum|bei|with)\b)/i;
   if (recommendationLanguage.test(offerText) && !explicitPromotionBeyondGenericFree.test(offerText)) {
     return { concrete: false, reason: 'allgemeine Empfehlung/Gratis-Event statt konkreter Aktion' };
@@ -491,6 +495,10 @@ function getConcreteOfferDecision(deal, health = null) {
   const genericFreeEvent = /(?:\b(?:gratis|kostenlos|kostenfrei|free)\s+(?:eintritt|entry)\b[^.!?]{0,80}\b(?:festival|veranstaltung|event)\b|\b(?:festival|veranstaltung|event)\b[^.!?]{0,80}\b(?:gratis|kostenlos|kostenfrei|free)\s+(?:eintritt|entry)\b)/i;
   const eventPromotionMechanism = /\b(?:aktion|deal|rabatt|gutschein|coupon|1\s*[+&]\s*1|nur\s+heute|today\s+only|mitglieder|members|code)\b/i;
   if (genericFreeEvent.test(offerText) && !eventPromotionMechanism.test(offerText)) {
+    return { concrete: false, reason: 'allgemeine Empfehlung/Gratis-Event statt konkreter Aktion' };
+  }
+  const genericFreeListing = /\b(?:amount\s+of|so\s+many|viele|zahlreiche)\s+(?:free|gratis|kostenlose\w*)\s+(?:events?|veranstaltungen?)\b|\bfree\s+events?\s+happening\s+all\s+the\s+time\b/i;
+  if (genericFreeListing.test(offerText)) {
     return { concrete: false, reason: 'allgemeine Empfehlung/Gratis-Event statt konkreter Aktion' };
   }
 
@@ -552,10 +560,14 @@ function hasSocialViennaEvidence(deal, context = {}) {
   // For social posts a display/default value such as `distance: "Wien"` is
   // not evidence. If no structured evidence exists, require the post content
   // itself to name Vienna or a Vienna postcode.
-  return hasViennaSignalInText([
+  const postText = [
     deal.description,
     deal.evidence?.textSample,
-  ].map(cleanText).filter(Boolean).join(' '));
+  ].map(cleanText).filter(Boolean).join(' ');
+  if (VIENNA_NEGATION_PATTERN.test(postText)
+      || hasNonViennaPostalCode(postText)
+      || NON_VIENNA_PLACE_PATTERN.test(postText)) return false;
+  return hasViennaSignalInText(postText);
 }
 
 function isChurchServiceDeal(deal) {

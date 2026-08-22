@@ -296,6 +296,36 @@ const selfSyndicatedInstagram = await validateOne({
 assert.equal(selfSyndicatedInstagram.decision.allowed, false);
 assert.match(reasonText(selfSyndicatedInstagram), /selbst syndizierter FreeFinder-Post/);
 
+const foreignViennaHandle = await validateOne({
+  id: 'foreign-vienna-handle',
+  brand: '@twofatpanda.vienna',
+  title: 'Weekend Free Treats',
+  description: 'Free treats every weekend at Two Fat Panda Vienna, Gading Serpong, Indonesia.',
+  url: 'https://www.tiktok.com/@twofatpanda.vienna/video/7676699636131761415',
+  source: 'TikTok Scanner',
+  originSource: 'tiktok-deals-scanner',
+  distance: 'Wien',
+  pubDate: now.toISOString(),
+  pubDateSource: 'time.datetime',
+});
+assert.equal(foreignViennaHandle.decision.allowed, false);
+assert.match(reasonText(foreignViennaHandle), /nicht eindeutig in Wien/);
+
+const genericFreeEvents = await validateOne({
+  id: 'generic-free-events',
+  brand: '@vienna.creator',
+  title: '@vienna.creator Angebot',
+  description: 'I love the amount of free events happening all the time in Vienna: concerts, festivals and activities.',
+  url: 'https://www.tiktok.com/@vienna.creator/video/7674945375526030624',
+  source: 'TikTok Scanner',
+  originSource: 'tiktok-deals-scanner',
+  distance: 'Wien',
+  pubDate: now.toISOString(),
+  pubDateSource: 'time.datetime',
+});
+assert.equal(genericFreeEvents.decision.allowed, false);
+assert.match(reasonText(genericFreeEvents), /allgemeine Empfehlung\/Gratis-Event/);
+
 const syntheticTripAdvisor = await validateOne({
   id: 'tripadvisor-firecrawl',
   brand: 'Example Restaurant',

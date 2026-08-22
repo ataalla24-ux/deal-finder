@@ -136,6 +136,16 @@ const CONFLICT_LOCATION_PATTERNS = [
   /\bvorarlberg\b/i,
   /\bkärnten\b/i,
   /\bkaernten\b/i,
+  /\bmünchen\b/i,
+  /\bmunich\b/i,
+  /\bberlin\b/i,
+  /\bhamburg\b/i,
+  /\bzürich\b/i,
+  /\bzurich\b/i,
+  /\bgading\s+serpong\b/i,
+  /\bjakarta\b/i,
+  /\bindonesien\b/i,
+  /\bindonesia\b/i,
 ];
 
 const STRONG_DEAL_PATTERNS = [
@@ -183,6 +193,8 @@ const FALSE_POSITIVE_PATTERNS = [
   /\bwir haben für euch\b/i,
   /\bgesammelt\b/i,
   /\bwas in wien geht\b/i,
+  /\b(?:amount\s+of|so\s+many|viele|zahlreiche)\s+(?:free|gratis|kostenlose\w*)\s+(?:events?|veranstaltungen?)\b/i,
+  /\bfree\s+events?\s+happening\s+all\s+the\s+time\b/i,
 ];
 
 const CATEGORY_RULES = [
@@ -312,7 +324,8 @@ function isWeakBrandCandidate(value) {
   const normalized = cleanText(value, 120).toLowerCase();
   if (!normalized) return true;
   if (normalized.split(/\s+/).length > 5) return true;
-  return /\b(wien entfernt|vienna entfernt|könnt|koennt|kannst|euch|ihr|meinem|besuch|heute|morgen|nur|gratis|kostenlos|free|angebot|deal|zeitreise|mit)\b/i.test(normalized);
+  return /\b(wien entfernt|vienna entfernt|könnt|koennt|kannst|euch|ihr|meinem|besuch|heute|morgen|nur|gratis|kostenlos|free|angebot|deal|zeitreise|mit|statt|aussehen|immer wieder|platzkonzerten)\b/i.test(normalized)
+    || /^am\s+\d/i.test(normalized);
 }
 
 function buildOfferTitle(text, brand) {
@@ -651,7 +664,7 @@ async function extractTikTokPostData(page, url) {
   });
 }
 
-function buildDealFromPost(url, data) {
+export function buildDealFromPost(url, data) {
   const dateCandidate = parseDateFromPost(data);
   if (!dateCandidate) {
     return { deal: null, reason: 'kein echtes TikTok-Post-Datum gefunden' };
@@ -660,23 +673,24 @@ function buildDealFromPost(url, data) {
     return { deal: null, reason: `TikTok-Post älter als ${CONFIG.maxAgeDays} Tage (${dateCandidate.date.toISOString().slice(0, 10)})` };
   }
 
-  const signal = [
+  const offerSignal = [
     data.title,
     data.description,
+  ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
+  const contextSignal = [
+    offerSignal,
     data.bodyText,
-    data.accountHandle,
-    url,
   ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
 
-  if (!hasViennaSignal(signal)) return { deal: null, reason: 'kein eindeutiges Wien-Signal' };
-  if (!hasStrongDealSignal(signal)) return { deal: null, reason: 'kein starkes Gratis-/Deal-Signal' };
-  if (isExplicitlyExpired(signal, dateCandidate.date)) return { deal: null, reason: 'explizites/relatives Aktionsdatum ist abgelaufen' };
+  if (!hasViennaSignal(contextSignal)) return { deal: null, reason: 'kein eindeutiges Wien-Signal' };
+  if (!hasStrongDealSignal(offerSignal)) return { deal: null, reason: 'kein starkes Gratis-/Deal-Signal' };
+  if (isExplicitlyExpired(offerSignal, dateCandidate.date)) return { deal: null, reason: 'explizites/relatives Aktionsdatum ist abgelaufen' };
 
-  const type = inferType(signal);
-  const { category, logo } = inferCategoryAndLogo(signal, type);
-  const brand = extractBrand(signal, data.accountHandle);
-  const title = buildOfferTitle(signal, brand);
-  const score = buildQualityScore(signal, dateCandidate.date, type, category);
+  const type = inferType(offerSignal);
+  const { category, logo } = inferCategoryAndLogo(offerSignal, type);
+  const brand = extractBrand(offerSignal, data.accountHandle);
+  const title = buildOfferTitle(offerSignal, brand);
+  const score = buildQualityScore(offerSignal, dateCandidate.date, type, category);
   if (score < CONFIG.minScore) return { deal: null, reason: `Score zu niedrig (${score})` };
 
   return {
@@ -691,7 +705,7 @@ function buildDealFromPost(url, data) {
       source: 'TikTok Scanner',
       originSource: 'tiktok-deals-scanner',
       url,
-      expires: extractExpiryText(signal),
+      expires: extractExpiryText(offerSignal),
       distance: 'Wien',
       hot: type === 'gratis' || type === 'bogo',
       isNew: true,
@@ -859,7 +873,9 @@ async function main() {
   console.log(`💾 ${finalDeals.length} Deals → ${OUTPUT_PATH}`);
 }
 
-main().catch((error) => {
-  console.error('❌ tiktok deal scanner failed:', error);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main().catch((error) => {
+    console.error('❌ tiktok deal scanner failed:', error);
+    process.exit(1);
+  });
+}
