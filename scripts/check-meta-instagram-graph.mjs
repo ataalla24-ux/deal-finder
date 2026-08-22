@@ -194,7 +194,10 @@ async function runCheck(options = {}) {
   let username = '';
 
   try {
-    const me = await fetchMetaJson(graphUrl(config, '/me', { fields: 'id,name,instagram_business_account{id,username}' }, graphToken), config, 'instagram', fetchImpl);
+    const meFields = igUserId
+      ? 'id,name'
+      : 'id,name,instagram_business_account{id,username}';
+    const me = await fetchMetaJson(graphUrl(config, '/me', { fields: meFields }, graphToken), config, 'instagram', fetchImpl);
     const linkedIg = me.payload?.instagram_business_account || null;
     if (!igUserId && linkedIg?.id) {
       igUserId = cleanText(linkedIg.id, 100);

@@ -400,6 +400,48 @@ assert.equal(healthOk.ok, true);
 assert.equal(healthOk.report.status, 'ok');
 assert.doesNotMatch(JSON.stringify(healthOk.report), /graph-user-token/, 'healthcheck report must not include access tokens');
 
+const configuredHealthRequests = [];
+const configuredHealth = await runMetaInstagramGraphHealthCheck({
+  env: {
+    INSTAGRAM_ACCESS_TOKEN: 'configured-user-token',
+    INSTAGRAM_USER_ID: 'ig-health-configured',
+    META_INSTAGRAM_MAX_RETRIES: '0',
+    META_INSTAGRAM_AUTH_REPORT_PATH: path.join(tempDir, 'configured-health.json'),
+  },
+  fetchImpl: async (rawUrl) => {
+    const url = new URL(rawUrl);
+    configuredHealthRequests.push(url);
+    if (url.pathname.endsWith('/me')) {
+      assert.equal(url.searchParams.get('fields'), 'id,name');
+      return new Response(JSON.stringify({ id: 'user-configured', name: 'FreeFinder Admin' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+    if (url.pathname.endsWith('/ig-health-configured/media')) {
+      return new Response(JSON.stringify({ data: [] }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+    if (url.pathname.endsWith('/ig-health-configured') && url.searchParams.get('fields')?.includes('business_discovery')) {
+      return new Response(JSON.stringify({
+        business_discovery: {
+          username: 'ciosgrill',
+          name: 'CIOS Grill',
+          media: { data: [] },
+        },
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`unexpected configured healthcheck URL: ${url.pathname}`);
+  },
+  write: false,
+});
+assert.equal(configuredHealth.ok, true);
+assert.equal(configuredHealth.report.status, 'ok');
+assert.equal(configuredHealthRequests.some((url) => url.pathname.endsWith('/me/accounts')), false);
+assert.doesNotMatch(JSON.stringify(configuredHealth.report), /configured-user-token/, 'configured healthcheck report must not include access tokens');
+
 fs.writeFileSync(statePath, JSON.stringify({ version: 1, hashtagIds: {}, seenIds: {} }));
 const rotatingAds = Array.from({ length: 5 }, (_, index) => ({
   id: `rotation-${index + 1}`,
