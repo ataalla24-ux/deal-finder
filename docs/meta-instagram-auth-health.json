@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-08-22T10:45:28.208Z",
+  "generatedAt": "2026-08-22T12:56:52.184Z",
   "source": "meta-instagram-auth-health",
   "graphVersion": "v26.0",
-  "status": "ok",
+  "status": "missing-permission",
   "configured": {
     "instagramGraph": true,
     "instagramUserId": true,
@@ -10,9 +10,19 @@
   },
   "checks": [
     {
+      "name": "token-expiry",
+      "status": "ok",
+      "detail": "Configured token expiry is 2026-10-21T00:00:00.000Z (59.5 days remaining)."
+    },
+    {
       "name": "token-basic",
       "status": "ok",
       "detail": "Token resolved /me."
+    },
+    {
+      "name": "token-permissions",
+      "status": "ok",
+      "detail": "5 granted permission(s): pages_show_list, instagram_basic, instagram_manage_insights, pages_read_engagement, public_profile."
     },
     {
       "name": "instagram-user-id",
@@ -25,6 +35,13 @@
       "detail": "Read 2 recent media row(s); timestamp/permalink fields are available."
     },
     {
+      "name": "tagged-media",
+      "status": "missing-permission",
+      "detail": "(#10) Application does not have permission for this action",
+      "code": "10",
+      "httpStatus": 400
+    },
+    {
       "name": "business-discovery",
       "status": "ok",
       "detail": "Business Discovery works for @ciosgrill; 1 media row(s) returned."
@@ -35,5 +52,17 @@
       "detail": "Set META_INSTAGRAM_HEALTHCHECK_HASHTAG to test hashtag access; this counts toward Meta hashtag limits."
     }
   ],
-  "nextAction": "Meta Instagram Graph is ready for the deal collector."
+  "nextAction": "Fix the Meta Graph token permissions before enabling scheduled discovery.",
+  "tokenExpiry": {
+    "expiresAt": "2026-10-21T00:00:00.000Z",
+    "daysRemaining": 59.5,
+    "status": "ok"
+  },
+  "grantedPermissions": [
+    "pages_show_list",
+    "instagram_basic",
+    "instagram_manage_insights",
+    "pages_read_engagement",
+    "public_profile"
+  ]
 }
