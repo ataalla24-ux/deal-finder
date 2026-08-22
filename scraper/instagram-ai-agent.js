@@ -178,6 +178,12 @@ const BLOCKED_SOURCE_PATTERNS = [
   /\bneotaste\.wien\b/i,
 ];
 
+const SELF_SYNDICATED_PATTERNS = [
+  /\balle aktuellen bedingungen\b.{0,180}\bfreefinder\b/i,
+  /\boriginal[- ]?link\b.{0,180}\b(?:direkt\s+)?in\s+freefinder\b/i,
+];
+const SELF_SYNDICATED_IDENTITY_PATTERN = /^@?freefinder(?:\.at|wien)?$/i;
+
 const DISCOVERY_ACCOUNT_PATTERNS = [
   /\b(?:eatinvienna|foodiewien|tastyfood|viennafood|viennaeats|viennarestaurants|viennas_joy|1000things|foodspots|shaysfoodblog|lisapestschansky)\b/i,
 ];
@@ -187,7 +193,7 @@ const EXPIRY_PATTERNS = [
 ];
 
 const SYNTHETIC_POST_DATE_SOURCE_PATTERN = /(?:agent[-_ ]?run|instagram[-_ ]?ai[-_ ]?agent|ai[-_ ]?agent|firecrawl.*run|current[-_ ]?language|discover(?:ed|y)|crawl(?:ed|er)?(?:at|time)?|scrap(?:ed|er)?(?:at|time)?|generated(?:at|time)?|communitysubmission|submittedat|import(?:ed|er)?(?:at|time)?)/i;
-const TERMINAL_REJECTION_PATTERN = /(?:Instagram-Post (?:aelter|älter) als \d+ Tage$|aktionsdatum liegt in der vergangenheit|kurz-aktion ist abgelaufen|abgelaufen oder vorbei|gewinnspiel|neotaste blockiert)/i;
+const TERMINAL_REJECTION_PATTERN = /(?:Instagram-Post (?:aelter|älter) als \d+ Tage$|aktionsdatum liegt in der vergangenheit|kurz-aktion ist abgelaufen|abgelaufen oder vorbei|gewinnspiel|neotaste blockiert|selbst syndizierter freefinder-post)/i;
 
 let terminalHistoryKeysCache = null;
 let viennaAccountContextCache = null;
@@ -1509,6 +1515,19 @@ function resolveAcceptedViennaEvidence(candidate) {
   return resolveViennaEvidence(candidate);
 }
 
+function isSelfSyndicatedPost(candidate, signal) {
+  const sourceDeal = candidate.sourceDeal || {};
+  const identities = [
+    sourceDeal.brand,
+    sourceDeal.ownerUsername,
+    sourceDeal.instagramHandle,
+    sourceDeal.username,
+    candidate.accountHint,
+  ].map((value) => cleanText(value, 120)).filter(Boolean);
+  return identities.some((value) => SELF_SYNDICATED_IDENTITY_PATTERN.test(value))
+    || hasPattern(SELF_SYNDICATED_PATTERNS, signal);
+}
+
 function buildQualityScore(candidate, signal) {
   const reasons = [];
   let score = 0;
@@ -1580,6 +1599,10 @@ function buildQualityScore(candidate, signal) {
     score -= 60;
     reasons.push('blocked-source');
   }
+  if (isSelfSyndicatedPost(candidate, primarySignal)) {
+    score -= 100;
+    reasons.push('self-syndicated-post');
+  }
   if (hasPattern(FALSE_POSITIVE_PATTERNS, primarySignal)) {
     score -= 28;
     reasons.push('false-positive-language');
@@ -1616,6 +1639,7 @@ function getRejectionReason(candidate, signal, score) {
   const primarySignal = postSignal(candidate) || signal;
   if (!signal) return 'kein Textsignal zum Post';
   if (hasPattern(BLOCKED_SOURCE_PATTERNS, signal)) return 'NeoTaste blockiert';
+  if (isSelfSyndicatedPost(candidate, primarySignal)) return 'selbst syndizierter FreeFinder-Post';
   const pubDate = parsePubDate(candidate);
   if (!pubDate?.date) return 'kein echtes Instagram-Postdatum';
   const dateSignal = offerDateSignal(candidate) || primarySignal;

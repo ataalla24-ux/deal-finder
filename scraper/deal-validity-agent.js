@@ -43,6 +43,11 @@ const PLACE_BOUND_OFFER_PATTERN = /\b(?:museum|museen|theater|oper|konzert|conce
 const VERIFIED_VIENNA_MEMBER_BENEFIT_PATTERN = /\b(?:belvedere|leopold\s+museum|kinodonnerstag)\b/i;
 const SYNTHETIC_PUBLICATION_SOURCE_PATTERN = /(?:firecrawl.*(?:run|crawl)|agent(?:\s|[-_])?run|crawl(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|scrap(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|discovered(?:\s|[-_])?at|generated(?:\s|[-_])?at|fallback|current(?:\s|[-_])?time|workflow(?:\s|[-_])?run)/i;
 const TRUSTED_PUBLICATION_SOURCE_PATTERN = /(?:url\.publicationdate|time\.datetime|rendered[-_. ]?time|post[-_. ]?(?:date|time|timestamp)|source[-_. ]?published[-_. ]?at|published[-_. ]?(?:at|time|date)|article:published_time|og:published_time|instagram[-_. ]?(?:graph|timestamp)|tiktok[-_. ]?(?:timestamp|video[-_. ]?id)|apify[-_. ]?(?:timestamp|taken[-_. ]?at)|meta(?:[-_. ][a-z]+){0,3}[-_. ](?:timestamp|created[-_. ]?time)|slack[-_. ]human[-_. ]review)/i;
+const SELF_SYNDICATED_IDENTITY_PATTERN = /^@?freefinder(?:\.at|wien)?$/i;
+const SELF_SYNDICATED_TEXT_PATTERNS = [
+  /\balle aktuellen bedingungen\b.{0,180}\bfreefinder\b/i,
+  /\boriginal[- ]?link\b.{0,180}\b(?:direkt\s+)?in\s+freefinder\b/i,
+];
 
 function cleanText(value) {
   if (!value) return '';
@@ -242,6 +247,23 @@ function getDealSignalText(deal, health = null) {
     contentHints.title,
     contentHints.description,
   ].map(cleanText).filter(Boolean).join(' ');
+}
+
+function isSelfSyndicatedSocialDeal(deal, health = null) {
+  const identities = [
+    deal.brand,
+    deal.ownerUsername,
+    deal.instagramHandle,
+    deal.username,
+  ].map(cleanText).filter(Boolean);
+  if (identities.some((value) => SELF_SYNDICATED_IDENTITY_PATTERN.test(value))) return true;
+  const signal = [
+    getDealSignalText(deal, health),
+    deal.caption,
+    deal.evidence?.textSample,
+    deal.evidence?.offerDateSignal,
+  ].map(cleanText).filter(Boolean).join(' ');
+  return SELF_SYNDICATED_TEXT_PATTERNS.some((pattern) => pattern.test(signal));
 }
 
 function getExcludedSourceMatch(deal, health = null) {
@@ -936,6 +958,7 @@ async function validateDeal(deal, context) {
   const health = await inspectUrlWithCache(url, context.urlCache, context.urlOptions);
   const excludedSource = getExcludedSourceMatch(deal, health);
   const socialPostDeal = isSocialPostDeal(deal);
+  const selfSyndicatedSocialDeal = socialPostDeal && isSelfSyndicatedSocialDeal(deal, health);
   const newsAggregatorDeal = isNewsAggregatorDeal(deal);
   const sharedBenefitPageDeal = isSharedBenefitPageDeal(deal);
   const freshnessSensitive = socialPostDeal || newsAggregatorDeal || isCrawlerDeal(deal);
@@ -984,6 +1007,10 @@ async function validateDeal(deal, context) {
 
   if (excludedSource) {
     reasons.push(`ausgeschlossene Quelle (${excludedSource.label})`);
+  }
+
+  if (selfSyndicatedSocialDeal) {
+    reasons.push('selbst syndizierter FreeFinder-Post');
   }
 
   const legacyFirecrawlDeal = isLegacyFirecrawlDeal(deal);
@@ -1101,6 +1128,7 @@ function classifyBlockReason(reason) {
   if (text.startsWith('relative kurz-aktion abgelaufen')) return 'abgelaufen';
   if (text.startsWith('url ungültig')) return 'ungültige URL';
   if (text.startsWith('ausgeschlossene quelle')) return 'ausgeschlossene Quelle';
+  if (text.startsWith('selbst syndizierter freefinder-post')) return 'selbst syndiziert';
   if (text.startsWith('nicht eindeutig in wien')) return 'nicht Wien';
   if (text.startsWith('kein konkretes angebot') || text.startsWith('nur gratis-lieferung') || text.startsWith('allgemeine empfehlung') || text.startsWith('redaktioneller preis-')) return 'kein konkreter Deal';
   if (text.startsWith('gewinnspiel')) return 'Gewinnspiel';

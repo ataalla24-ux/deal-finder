@@ -278,6 +278,24 @@ const queueStyleGiveaway = await validateOne({
 assert.equal(queueStyleGiveaway.decision.allowed, false);
 assert.match(reasonText(queueStyleGiveaway), /Gewinnspiel\/Verlosung/);
 
+const selfSyndicatedInstagram = await validateOne({
+  id: 'freefinder-feedback-loop',
+  brand: 'freefinder.at',
+  title: 'Gratis Coconut Strawberry Sunset testen',
+  description: 'Teilnehmende Standorte in Wien prüfen.',
+  url: 'https://www.instagram.com/reel/DcUFijTz9lX/',
+  source: 'Instagram AI Agent',
+  originSource: 'instagram-ai-agent',
+  distance: 'Wien',
+  pubDate: now.toISOString(),
+  pubDateSource: 'instagram-rendered-time-datetime',
+  evidence: {
+    textSample: 'Alle aktuellen Bedingungen und den Original-Link findest du direkt in FreeFinder.',
+  },
+});
+assert.equal(selfSyndicatedInstagram.decision.allowed, false);
+assert.match(reasonText(selfSyndicatedInstagram), /selbst syndizierter FreeFinder-Post/);
+
 const syntheticTripAdvisor = await validateOne({
   id: 'tripadvisor-firecrawl',
   brand: 'Example Restaurant',

@@ -150,6 +150,14 @@ const giveaway = candidate({
 assert.equal(buildHeuristicDeal(giveaway), null);
 assert.match(giveaway.rejectionReason, /Gewinnspiel/i);
 
+const selfSyndicated = candidate({
+  shortcode: 'FreeFinderFeedbackLoop1',
+  description: '@freefinder.at: In 1070 Wien gibt es einen Drink gratis. Alle aktuellen Bedingungen und den Original-Link findest du direkt in FreeFinder.',
+  sourceDeal: { ownerUsername: 'freefinder.at', brand: 'freefinder.at' },
+});
+assert.equal(buildHeuristicDeal(selfSyndicated), null, 'the AI agent must not rediscover FreeFinder syndication posts');
+assert.match(selfSyndicated.rejectionReason, /selbst syndizierter FreeFinder-Post/i);
+
 const staleWithoutEnd = candidate({
   shortcode: 'StaleNoEnd1',
   ageMs: 4 * DAY_MS,
