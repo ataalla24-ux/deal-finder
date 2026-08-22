@@ -89,6 +89,7 @@ const KEY4_REVIEW_ARTIFACT_MAX_AGE_HOURS = boundedInteger(
 const EXCLUDED_PENDING_FILES = new Set([
   'deals-pending-all.json',
   'deals-pending-firecrawl.json',
+  'deals-pending-instagram-verified.json',
   'deals-pending-merged.json',
 ]);
 

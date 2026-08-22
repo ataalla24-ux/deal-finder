@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deal-pending-all-queue
+  group: flights-vienna-scan
   cancel-in-progress: false
 
 permissions:
@@ -31,14 +31,7 @@ jobs:
           KIWI_API_KEY: ${{ secrets.KIWI_API_KEY }}
         run: node scraper/flights-vienna-scraper.js
 
-      - name: Send fresh flight deals to Slack
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
-          PENDING_FILE_NAMES: deals-pending-flights.json
-        run: node scraper/slack-notify.js
-
       - name: Commit flight scanner state
         if: always()
         run: |
-          node scripts/commit-generated.mjs --skip-conflicts --message "Flights Vienna deals" --files docs/deals-pending-flights.json docs/deals-pending-all.json docs/deal-validity-report.json
+          node scripts/commit-generated.mjs --skip-conflicts --message "Flights Vienna deals" --files docs/deals-pending-flights.json

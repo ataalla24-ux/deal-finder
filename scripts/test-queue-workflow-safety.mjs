@@ -8,37 +8,77 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 const workflowsDir = path.join(root, '.github', 'workflows');
-const sharedQueueGroup = 'deal-pending-all-queue';
-
-const queueWriterFiles = fs.readdirSync(workflowsDir)
+const workflowFiles = fs.readdirSync(workflowsDir)
   .filter((file) => /\.ya?ml$/i.test(file))
-  .filter((file) => {
-    const text = fs.readFileSync(path.join(workflowsDir, file), 'utf8');
-    return text.includes('docs/deals-pending-all.json')
-      || /docs\/deals-pending-\*\.json/.test(text);
-  })
   .sort();
+const workflows = new Map(workflowFiles.map((file) => [
+  file,
+  fs.readFileSync(path.join(workflowsDir, file), 'utf8'),
+]));
+
+function concurrencyFor(file) {
+  const text = workflows.get(file) || '';
+  const match = text.match(/(?:^|\n)concurrency:\s*\n\s+group:\s*([^\n]+)\n\s+cancel-in-progress:\s*([^\n]+)/);
+  assert.ok(match, `${file} must define top-level concurrency`);
+  assert.equal(match[2].trim(), 'false', `${file} must never cancel its active run`);
+  return match[1].trim();
+}
+
+const slackDealPublishers = workflowFiles.filter((file) => (
+  workflows.get(file).includes('node scraper/slack-notify.js')
+));
+assert.deepEqual(slackDealPublishers, ['daily-digest.yml'], 'only the central dispatch may publish deals to Slack');
+const communityAcknowledgeWorkflows = workflowFiles.filter((file) => (
+  workflows.get(file).includes('node scraper/ack-community-submissions.js')
+));
+assert.deepEqual(communityAcknowledgeWorkflows, ['daily-digest.yml']);
+
+const slackNotifySource = fs.readFileSync(path.join(root, 'scraper', 'slack-notify.js'), 'utf8');
+assert.match(
+  slackNotifySource,
+  /EXCLUDED_PENDING_FILES[\s\S]*deals-pending-instagram-verified\.json/,
+  'the stale derived Instagram aggregate must not duplicate raw collector inputs',
+);
+
+const centralDispatch = workflows.get('daily-digest.yml');
+assert.match(centralDispatch, /name:\s*["']Central Deal Dispatch["']/);
+assert.match(centralDispatch, /cron:\s*['"]7,22,37,52 \* \* \* \*['"]/);
+assert.equal(concurrencyFor('daily-digest.yml'), 'deal-dispatch');
+assert.ok(
+  centralDispatch.indexOf('node scraper/slack-notify.js')
+    < centralDispatch.indexOf('node scraper/ack-community-submissions.js'),
+  'community submissions must only be acknowledged after central Slack publishing',
+);
+assert.match(centralDispatch, /commit-generated\.mjs --skip-conflicts/);
+
+const collectors = new Map([
+  ['apify-instagram-daily.yml', 'apify-instagram-scan'],
+  ['community-submissions.yml', 'community-intake'],
+  ['flights-vienna.yml', 'flights-vienna-scan'],
+  ['instagram-ai-agent.yml', 'instagram-ai-scan'],
+  ['meta-instagram-deals.yml', 'meta-instagram-scan'],
+  ['tiktok-deals.yml', 'tiktok-deal-scan'],
+]);
+for (const [file, expectedGroup] of collectors) {
+  const text = workflows.get(file) || '';
+  assert.equal(concurrencyFor(file), expectedGroup, `${file} must run independently`);
+  assert.doesNotMatch(text, /scraper\/slack-notify\.js/, `${file} must not publish deals directly`);
+  assert.doesNotMatch(text, /docs\/deals-pending-all\.json/, `${file} must not write the shared queue`);
+}
+
+const queueWriterFiles = workflowFiles.filter((file) => {
+  const text = workflows.get(file);
+  return text.includes('docs/deals-pending-all.json')
+    || /docs\/deals-pending-\*\.json/.test(text);
+});
 
 assert.deepEqual(queueWriterFiles, [
-  'apify-instagram-daily.yml',
   'approve-deals.yml',
-  'community-submissions.yml',
   'daily-digest.yml',
   'deal-moderation.yml',
-  'flights-vienna.yml',
-  'instagram-ai-agent.yml',
-  'meta-instagram-deals.yml',
-  'tiktok-deals.yml',
 ]);
-
-for (const file of queueWriterFiles) {
-  assert.doesNotMatch(file, /firecrawl/i, 'Firecrawl workflows are outside the queue-writer lock change');
-  const text = fs.readFileSync(path.join(workflowsDir, file), 'utf8');
-  const concurrency = text.match(/(?:^|\n)concurrency:\s*\n\s+group:\s*([^\n]+)\n\s+cancel-in-progress:\s*([^\n]+)/);
-  assert.ok(concurrency, `${file} must define top-level queue concurrency`);
-  assert.equal(concurrency[1].trim(), sharedQueueGroup, `${file} must use the shared queue group`);
-  assert.equal(concurrency[2].trim(), 'false', `${file} must never cancel an active queue writer`);
-}
+assert.equal(concurrencyFor('approve-deals.yml'), 'deal-approval');
+assert.equal(concurrencyFor('deal-moderation.yml'), 'deal-moderation');
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {

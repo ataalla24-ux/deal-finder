@@ -2,11 +2,11 @@ name: "Community Deal Intake"
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '2,17,32,47 * * * *'
   workflow_dispatch:
 
 concurrency:
-  group: deal-pending-all-queue
+  group: community-intake
   cancel-in-progress: false
 
 jobs:
@@ -32,19 +32,7 @@ jobs:
           COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
         run: node scraper/fetch-community-submissions.js
 
-      - name: Send community submissions to Slack
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
-          PENDING_FILE_NAMES: deals-pending-community.json
-        run: node scraper/slack-notify.js
-
-      - name: Mark community submissions as queued
-        env:
-          COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
-        run: node scraper/ack-community-submissions.js
-
-      - name: Commit queue state
+      - name: Commit intake state
         if: always()
         run: |
-          node scripts/commit-generated.mjs --skip-conflicts --message "Community intake state $(date +%Y-%m-%d-%H%M)" --files docs/deals-pending-community.json docs/deals-pending-all.json
+          node scripts/commit-generated.mjs --skip-conflicts --message "Community intake state $(date +%Y-%m-%d-%H%M)" --files docs/deals-pending-community.json

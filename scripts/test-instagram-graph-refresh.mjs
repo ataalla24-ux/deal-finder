@@ -39,6 +39,26 @@ const inventory = collectInstagramGraphVerificationCandidates({
 assert.equal(inventory.candidates.length, 1);
 assert.equal(inventory.candidates[0].ownerUsername, 'vienna.cafe');
 
+for (const file of [
+  'deals-pending-all.json',
+  'deals-pending-firecrawl.json',
+  'deals-pending-instagram-verified.json',
+  'deals-pending-merged.json',
+]) {
+  fs.writeFileSync(path.join(tempDir, file), JSON.stringify({
+    deals: [{
+      id: `excluded-${file}`,
+      url: `https://www.instagram.com/reel/DExcluded${file.length}/`,
+      ownerUsername: 'excluded.account',
+      sourcePublishedAt: '2026-08-21T08:00:00.000Z',
+      sourcePublishedAtSource: 'instagram-rendered-time-datetime',
+    }],
+  }));
+}
+const automaticInventory = collectInstagramGraphVerificationCandidates({ now, docsDir: tempDir });
+assert.deepEqual(automaticInventory.files, ['deals-pending-firecrawl4.json']);
+assert.equal(automaticInventory.candidates.length, 1);
+
 const refreshed = await refreshInstagramGraphEvidence({
   now,
   docsDir: tempDir,

@@ -6,14 +6,14 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deal-pending-all-queue
+  group: tiktok-deal-scan
   cancel-in-progress: false
 
 permissions:
   contents: write
 
 jobs:
-  scan-and-notify:
+  scan-deals:
     runs-on: ubuntu-latest
     env:
       PLAYWRIGHT_BROWSERS_PATH: 0
@@ -35,14 +35,7 @@ jobs:
       - name: Scan current TikTok deals
         run: node scraper/tiktok-deals-scanner.js
 
-      - name: Send fresh TikTok deals to Slack
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
-          PENDING_FILE_NAMES: deals-pending-tiktok.json
-        run: node scraper/slack-notify.js
-
       - name: Commit TikTok scanner state
         if: always()
         run: |
-          node scripts/commit-generated.mjs --skip-conflicts --message "TikTok deals $(date +%Y-%m-%d)" --files docs/deals-pending-tiktok.json docs/tiktok-scanner-report.json docs/deals-pending-all.json docs/deal-validity-report.json
+          node scripts/commit-generated.mjs --skip-conflicts --message "TikTok deals $(date +%Y-%m-%d)" --files docs/deals-pending-tiktok.json docs/tiktok-scanner-report.json
