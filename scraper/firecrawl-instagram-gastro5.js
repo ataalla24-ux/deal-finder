@@ -7,7 +7,15 @@ import '../sentry/instrument.mjs';
 import Firecrawl from '@mendable/firecrawl-js';
 import { z } from 'zod';
 import fs from 'fs';
-import { verifyFirecrawlDeals } from './firecrawl-post-verifier.js';
+import {
+  mergeFirecrawlDealHistory,
+  readFirecrawlDealOutput,
+  verifyFirecrawlDeals,
+} from './firecrawl-post-verifier.js';
+import {
+  positiveInteger,
+  runBoundedFirecrawlAgent,
+} from './firecrawl-agent-utils.js';
 import {
   buildPipelineRunReport,
   summarizeVerifiedDeals,
@@ -20,11 +28,17 @@ const SOURCE_KEY = 'firecrawl5';
 const SOURCE_LABEL = 'Firecrawl Key 5 - Instagram Gastro';
 const OUTPUT_PATH = 'docs/deals-pending-firecrawl5.json';
 const RUN_STARTED_AT = new Date();
-const MAX_POST_AGE_DAYS = (() => {
-  const parsed = Number(process.env.FC5_MAX_AGE_DAYS || 1);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
-})();
-
+const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL5_AGENT_TIMEOUT_SECONDS, 300);
+const MAX_CREDITS = positiveInteger(process.env.FIRECRAWL5_MAX_CREDITS, 500);
+const DISCOVERY_URLS = [
+  'https://www.instagram.com/ciosgrill/',
+  'https://www.instagram.com/corner_xvi/',
+  'https://www.instagram.com/tokki_korean_bbq/',
+  'https://www.instagram.com/sajado.bbq/',
+  'https://www.instagram.com/mosquito_mexican/',
+  'https://www.instagram.com/zushimarket/',
+  'https://www.instagram.com/tastyfood.vienna/',
+];
 if (!FIRECRAWL_API_KEY) {
   const error = new Error('FIRECRAWL_API_KEY5 oder FIRECRAWL_API_KEY nicht gesetzt');
   writeFailedPipelineRunReport({
@@ -113,50 +127,44 @@ function inferCategory(description) {
   return 'essen';
 }
 
-function parseGermanDate(str) {
-  if (!str || typeof str !== 'string') return null;
-  const s = str.trim();
-  let m = s.match(/vor\s+(\d+)\s+tag/i);
-  if (m) {
-    const d = new Date();
-    d.setDate(d.getDate() - Number(m[1]));
-    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
-  }
-  m = s.match(/(\d+)\s+d(?:ays?)?\s+ago/i);
-  if (m) {
-    const d = new Date();
-    d.setDate(d.getDate() - Number(m[1]));
-    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
-  }
-  m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
-  if (m) return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0));
-  m = s.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
-  if (m) {
-    const year = m[3].length === 2 ? Number(`20${m[3]}`) : Number(m[3]);
-    return new Date(Date.UTC(year, Number(m[2]) - 1, Number(m[1]), 12, 0, 0));
-  }
-  return null;
-}
-
-function isNotTooOld(dateObj) {
-  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return false;
-  const cutoff = Date.now() - MAX_POST_AGE_DAYS * 24 * 60 * 60 * 1000;
-  return dateObj.getTime() >= cutoff;
-}
-
 async function main() {
   console.log('📸🍽️ FIRECRAWL INSTAGRAM GASTRO AGENT #5');
   console.log('='.repeat(48));
   console.log(`📅 ${new Date().toLocaleString('de-AT')}`);
   console.log();
 
-  const result = await firecrawl.agent({
-    prompt: `Extrahiere möglichst viele konkrete Gastro-Angebote aus Instagram-Originalposts, die in Wien nutzbar sind. Nimm nur Posts aus den letzten 7 Tagen auf und prüfe Tag, Monat und Jahr; zukünftig beginnende Aktionen sind erwünscht, sofern der Post selbst höchstens 7 Tage alt ist. Nutze nur direkte /p/...- oder /reel/...-Links und gib Restaurantname, Account-Handle, echtes Post-Datum, Beschreibung, konkreten Vorteil, Ablauf und exakten Wien-Standort zurück. Veröffentlichungsdatum und Angebotszeitraum niemals verwechseln. Alte Posts, Reposts ohne Original, Gewinnspiele, Empfehlungen, Gratis-Versand und unkonkrete Aktionen weglassen. Bei eindeutig frischem Originalpost darf ein unlesbares Detail leer bleiben, damit Graph API und Validator nachprüfen können.`,
-    schema: offerSchema,
-    model: 'spark-1-mini',
-  });
+  const previousOutput = readFirecrawlDealOutput(OUTPUT_PATH);
+  const runErrors = [];
+  let result = null;
+  let agentCreditsUsed = 0;
+  console.log(`💳 Maximal ${MAX_CREDITS} Credits; Abbruch nach ${AGENT_TIMEOUT_SECONDS}s`);
+  try {
+    result = await runBoundedFirecrawlAgent(firecrawl, {
+      urls: DISCOVERY_URLS,
+      prompt: `Prüfe alle angegebenen Wiener Gastro-Accounts und extrahiere möglichst viele konkrete Angebote aus ihren Instagram-Originalposts. Nimm nur Posts aus den letzten 7 Tagen auf und prüfe Tag, Monat und Jahr; zukünftig beginnende Aktionen sind erwünscht, sofern der Post selbst höchstens 7 Tage alt ist. Nutze nur direkte /p/...- oder /reel/...-Links und gib Restaurantname, Account-Handle, echtes Post-Datum, Beschreibung, konkreten Vorteil, Ablauf und exakten Wien-Standort zurück. Veröffentlichungsdatum und Angebotszeitraum niemals verwechseln. Alte Posts, Reposts ohne Original, Gewinnspiele, Empfehlungen, Gratis-Versand und unkonkrete Aktionen weglassen. Bei eindeutig frischem Originalpost darf ein unlesbares Detail leer bleiben, damit Graph API und Validator nachprüfen können.`,
+      schema: offerSchema,
+      model: 'spark-1-mini',
+    }, {
+      timeoutSeconds: AGENT_TIMEOUT_SECONDS,
+      maxCredits: MAX_CREDITS,
+    });
+    agentCreditsUsed = Number(result?.creditsUsed || result?.credits_used || 0);
+  } catch (error) {
+    agentCreditsUsed = Number(error?.creditsUsed || 0);
+    runErrors.push(error.message);
+    console.log(`⚠️ Firecrawl Agent: ${error.message}`);
+  }
 
-  const rawOffers = result?.data?.offers || [];
+  let resultData = result?.data || {};
+  if (typeof resultData === 'string') {
+    try {
+      resultData = JSON.parse(resultData);
+    } catch (error) {
+      runErrors.push(`Ungültige Agent-Antwort: ${error.message}`);
+      resultData = {};
+    }
+  }
+  const rawOffers = Array.isArray(resultData?.offers) ? resultData.offers : [];
   const deals = [];
   const rejected = [];
 
@@ -171,6 +179,14 @@ async function main() {
     const validUntil = normalizeValidUntil(offer.valid_until);
     const postDateRaw = normalizeText(offer.post_date);
     const ownerUsername = normalizeText(offer.owner_username).replace(/^@/, '').toLowerCase();
+
+    if (looksLikeGiveaway(`${description} ${offerType}`)) {
+      rejected.push({
+        reason: 'excluded-giveaway',
+        deal: { title: description || offerType, brand: restaurant, url: postUrl },
+      });
+      continue;
+    }
 
     if (!postUrl || !isInstagramPostUrl(postUrl)) {
       rejected.push({
@@ -211,8 +227,13 @@ async function main() {
     });
   }
 
-  const verifiedDeals = await verifyFirecrawlDeals(deals, {
+  const history = mergeFirecrawlDealHistory(deals, previousOutput.deals, {
+    now: RUN_STARTED_AT,
+  });
+  console.log(`🛡️ Fresh history: ${history.retainedPreviousDeals}/${history.previousDeals}; exact duplicates merged: ${history.duplicateCount}`);
+  const verifiedDeals = await verifyFirecrawlDeals(history.deals, {
     sourceKey: 'firecrawl-key5-instagram-gastro',
+    now: RUN_STARTED_AT,
   });
   const verifiedIDs = new Set(verifiedDeals.map((deal) => deal.id));
   rejected.push(...deals
@@ -225,6 +246,8 @@ async function main() {
     lastUpdated: new Date().toISOString(),
     source: 'firecrawl5',
     totalDeals: verifiedDeals.length,
+    freshDiscoveryDeals: deals.length,
+    retainedPreviousDeals: history.retainedPreviousDeals,
     pipelineReport: `deal-pipeline-last-run-${SOURCE_KEY}.json`,
     deals: verifiedDeals,
   };
@@ -235,17 +258,26 @@ async function main() {
     sourceLabel: SOURCE_LABEL,
     startedAt: RUN_STARTED_AT,
     finishedAt: new Date(),
+    status: runErrors.length > 0 ? 'completed-with-errors' : 'completed',
     outputFile: OUTPUT_PATH,
     rawCandidates: rawOffers.length,
     normalizedCandidates: deals.length,
     verifiedCandidates: verifiedDeals.length,
+    previousDeals: previousOutput.deals.length,
     acceptedDeals: verifiedDeals.length,
     rejected,
     diagnostics: {
-      agentStatus: result?.status || 'completed',
-      creditsUsed: Number(result?.creditsUsed || result?.credits_used || 0),
+      agentStatus: result?.status || 'failed',
+      creditsUsed: agentCreditsUsed,
+      configuredSources: DISCOVERY_URLS.length,
+      agentTimeoutSeconds: AGENT_TIMEOUT_SECONDS,
+      maxCredits: MAX_CREDITS,
+      retainedPreviousDeals: history.retainedPreviousDeals,
+      prunedPreviousDeals: history.prunedPreviousDeals,
+      duplicateCandidatesMerged: history.duplicateCount,
       verifier: summarizeVerifiedDeals(verifiedDeals),
     },
+    errors: runErrors,
   }));
   console.log(`💾 ${verifiedDeals.length} Deals → ${OUTPUT_PATH}`);
 }

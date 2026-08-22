@@ -12,6 +12,7 @@ concurrency:
 jobs:
   food:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
     steps:
@@ -28,6 +29,8 @@ jobs:
         env:
           FIRECRAWL_API_KEY2: ${{ secrets.FIRECRAWL_API_KEY2 }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          FIRECRAWL2_AGENT_TIMEOUT_SECONDS: 300
+          FIRECRAWL2_MAX_CREDITS: 650
           FIRECRAWL_POST_VERIFY_MAX: 45
           FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 7
           FIRECRAWL_POST_MAX_ACCEPTED_AGE_DAYS: 7

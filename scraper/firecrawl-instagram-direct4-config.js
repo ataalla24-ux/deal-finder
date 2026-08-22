@@ -101,9 +101,9 @@ export function buildTargetPrompt(target) {
   let targetInstruction = '';
 
   if (target.kind === 'instagram-hashtag') {
-    targetInstruction = 'Beginne auf der angegebenen Hashtag-Seite und untersuche konkrete Originalposts. Nutze das restliche Web ergänzend wie im Basisauftrag beschrieben.';
+    targetInstruction = 'Untersuche ausschließlich konkrete Originalposts, die auf der angegebenen Hashtag-Seite sichtbar oder verlinkt sind. Ignoriere für diesen Durchlauf die allgemeine Web-Ergänzung aus dem Basisauftrag.';
   } else if (target.kind === 'instagram-account') {
-    targetInstruction = 'Beginne beim angegebenen Instagram-Konto und untersuche dessen konkrete Originalposts. Nutze das restliche Web ergänzend wie im Basisauftrag beschrieben.';
+    targetInstruction = 'Untersuche ausschließlich konkrete Originalposts dieses Instagram-Kontos. Ignoriere für diesen Durchlauf die allgemeine Web-Ergänzung aus dem Basisauftrag.';
   } else {
     targetInstruction = 'Beginne auf der angegebenen Deal-Sammelseite. Erfasse jede unterschiedliche aktuelle Aktion als eigenen Deal und verwende nach Möglichkeit die direkte Detailseite der Aktion.';
   }

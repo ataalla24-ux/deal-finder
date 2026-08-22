@@ -8,8 +8,13 @@ import {
   extractStructuredOwnerUsername,
   getPublicationEvidence,
   getViennaEvidence,
+  mergeDuplicateDealRecords,
 } from './deal-evidence-utils.js';
 import { inspectDealUrlHealth } from './expiry-utils.js';
+import {
+  enrichDealWithInstagramGraphEvidence,
+  loadInstagramGraphEvidence,
+} from './instagram-graph-evidence.js';
 import { extractActiveOfferWindow } from './instagram-ai-validity-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -67,6 +72,39 @@ export function loadVerifiedViennaMerchantRegistry(registryPath = DEFAULT_REGIST
     .filter((entry) => entry?.viennaVerified === true && cleanText(entry?.accountType || 'merchant').toLowerCase() === 'merchant')
     .map((entry) => [normalizeUsername(entry.username), entry])
     .filter(([username]) => username));
+}
+
+export function readFirecrawlDealOutput(outputPath) {
+  const payload = readJson(outputPath, null);
+  return {
+    payload,
+    deals: Array.isArray(payload?.deals) ? payload.deals : [],
+  };
+}
+
+export function mergeFirecrawlDealHistory(currentDeals = [], previousDeals = [], options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
+  const maxAgeDays = Math.min(7, Math.max(1, Number(options.maxAgeDays) || 7));
+  const futureAllowanceMs = 10 * 60 * 1000;
+  const cutoff = now.getTime() - maxAgeDays * DAY_MS;
+  const freshPreviousDeals = previousDeals.filter((deal) => {
+    const publication = getPublicationEvidence(deal);
+    const publishedAt = Date.parse(publication.sourcePublishedAt || '');
+    const discoveredAt = Date.parse(publication.discoveredAt || deal?.discoveredAt || '');
+    const timestamp = Number.isFinite(publishedAt) ? publishedAt : discoveredAt;
+    return Number.isFinite(timestamp)
+      && timestamp >= cutoff
+      && timestamp <= now.getTime() + futureAllowanceMs;
+  });
+  const merged = mergeDuplicateDealRecords([...currentDeals, ...freshPreviousDeals], { now });
+
+  return {
+    deals: merged.deals,
+    previousDeals: previousDeals.length,
+    retainedPreviousDeals: freshPreviousDeals.length,
+    prunedPreviousDeals: previousDeals.length - freshPreviousDeals.length,
+    duplicateCount: merged.duplicateCount,
+  };
 }
 
 export function extractInstagramOwnerUsername(health = {}, fallback = '') {
@@ -138,11 +176,13 @@ function existingTrustedPublication(deal = {}) {
 }
 
 function choosePublication(deal, url, health = null) {
+  const trusted = existingTrustedPublication(deal);
+  if (/^instagram-graph-/i.test(trusted?.source || '')) return trusted;
   const original = health ? publicationFromOriginalPost(url, health) : null;
   if (original) return original;
   const encoded = decodeInstagramShortcodeDate(url);
   if (encoded) return { date: encoded, source: 'url.instagramShortcode' };
-  return existingTrustedPublication(deal);
+  return trusted;
 }
 
 function verificationSignal(deal = {}, caption = '', health = {}) {
@@ -311,7 +351,34 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
   ) || 4);
   const inspector = options.inspectDealUrlHealth || inspectDealUrlHealth;
 
-  const baseDeals = deals.map((deal) => {
+  let graphEvidenceByKey = new Map();
+  if (options.useGraphEvidence !== false) {
+    if (options.graphEvidenceIndex instanceof Map) {
+      graphEvidenceByKey = options.graphEvidenceIndex;
+    } else if (options.graphEvidenceIndex?.byKey instanceof Map) {
+      graphEvidenceByKey = options.graphEvidenceIndex.byKey;
+    } else {
+      graphEvidenceByKey = loadInstagramGraphEvidence(options.graphEvidencePath).byKey;
+    }
+  }
+
+  let graphMatchedCount = 0;
+  let graphBlockedCount = 0;
+  let verifiedCount = 0;
+  let timestampOnlyCount = 0;
+  let registryViennaCount = 0;
+  const graphEnrichedDeals = [];
+  for (const deal of deals) {
+    const result = enrichDealWithInstagramGraphEvidence(deal, graphEvidenceByKey, { now });
+    if (result.matched) graphMatchedCount += 1;
+    if (result.blocked) {
+      graphBlockedCount += 1;
+      continue;
+    }
+    graphEnrichedDeals.push(result.deal);
+  }
+
+  const baseDeals = graphEnrichedDeals.map((deal) => {
     const url = normalizeInstagramPostUrl(deal?.url || deal?.post_url || deal?.postUrl);
     const existingDiscovery = getPublicationEvidence(deal).discoveredAt;
     const publication = url ? choosePublication(deal, url) : existingTrustedPublication(deal);
@@ -323,18 +390,52 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
     );
     if (ownerUsername) next.ownerUsername = ownerUsername;
     if (url) {
-      next.postVerification = {
-        status: publication ? 'timestamp-derived' : 'pending',
-        checkedAt: '',
-        publicationSource: publication?.source || '',
-        originalPostUrl: url,
-      };
+      if (deal.metaGraphVerified) {
+        const graphSignal = [deal.metaGraphCaption, deal.metaGraphOcrText]
+          .map((value) => cleanText(value, 2200))
+          .filter(Boolean)
+          .join(' ');
+        if (cleanText(deal.metaGraphCaption)) next.postCaption = cleanText(deal.metaGraphCaption, 2200);
+        if (ownerUsername) next.instagramProfileUrl = `https://www.instagram.com/${ownerUsername}/`;
+        next = applyViennaEvidence(next, graphSignal, ownerUsername, registry);
+        if (next.viennaEvidence?.source === 'merchant-registry') registryViennaCount += 1;
+        if (graphSignal) next = applyOfferWindow(next, graphSignal, publication, now);
+        next.postVerification = {
+          status: 'verified-meta-graph',
+          checkedAt: cleanText(deal.metaGraphVerifiedAt) || discoveredAt,
+          publicationSource: publication?.source || 'instagram-graph-timestamp',
+          ownerUsername,
+          originalPostUrl: url,
+          reason: cleanText(deal.metaGraphRejection, 180),
+        };
+        next.lastVerifiedAt = next.postVerification.checkedAt;
+        next.evidence = {
+          ...(deal.evidence && typeof deal.evidence === 'object' ? deal.evidence : {}),
+          originalPost: {
+            status: next.postVerification.status,
+            checkedAt: next.postVerification.checkedAt,
+            url,
+            publicationSource: next.postVerification.publicationSource,
+            ownerUsername,
+            captionSample: cleanText(deal.metaGraphCaption, 500),
+            ocrSample: cleanText(deal.metaGraphOcrText, 500),
+          },
+        };
+      } else {
+        next.postVerification = {
+          status: publication ? 'timestamp-derived' : 'pending',
+          checkedAt: '',
+          publicationSource: publication?.source || '',
+          originalPostUrl: url,
+        };
+      }
     }
     return next;
   });
 
   const candidatesByKey = new Map();
   for (const deal of baseDeals) {
+    if (deal.metaGraphVerified) continue;
     const candidate = networkCandidateScore(deal, registry, now);
     const key = canonicalInstagramPostKey(candidate.url);
     if (!key || !candidate.url) continue;
@@ -362,9 +463,6 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
   });
   const healthByKey = new Map(healthRows);
 
-  let verifiedCount = 0;
-  let timestampOnlyCount = 0;
-  let registryViennaCount = 0;
   const enrichedDeals = baseDeals.map((deal) => {
     const url = normalizeInstagramPostUrl(deal.url);
     const key = canonicalInstagramPostKey(url);
@@ -449,6 +547,7 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
 
   console.log('🔬 Firecrawl original-post verification');
   console.log(`   candidates: ${deals.length}; network checked: ${networkCandidates.length}`);
+  console.log(`   Meta Graph exact matches: ${graphMatchedCount}; hard-blocked: ${graphBlockedCount}`);
   console.log(`   original posts verified: ${verifiedCount}; timestamp only: ${timestampOnlyCount}`);
   console.log(`   Vienna via verified merchant registry: ${registryViennaCount}; registry merchants: ${registry.size}`);
   console.log(`   fresh output: ${verifiedDeals.length}; stale: ${staleInstagramPosts}; undated: ${undatedInstagramPosts}; invalid Instagram URLs: ${invalidInstagramUrls}`);

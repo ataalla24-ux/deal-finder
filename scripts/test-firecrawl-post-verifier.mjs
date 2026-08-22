@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 
+import { canonicalInstagramPostKey } from '../scraper/deal-evidence-utils.js';
 import {
   extractInstagramOwnerUsername,
+  mergeFirecrawlDealHistory,
   verifyFirecrawlDeals,
 } from '../scraper/firecrawl-post-verifier.js';
 
@@ -141,5 +143,101 @@ const strictFreshness = await verifyFirecrawlDeals([
   maxAcceptedAgeDays: 7,
 });
 assert.deepEqual(strictFreshness.map((deal) => deal.id), ['non-social-web-deal']);
+
+const graphUrl = 'https://www.instagram.com/p/GraphFreshPost1/';
+let graphNetworkInspections = 0;
+const graphVerified = await verifyFirecrawlDeals([
+  {
+    id: 'graph-verified-firecrawl',
+    title: 'Aktuelles Angebot',
+    description: 'Instagram-Fund',
+    source: 'Firecrawl',
+    url: graphUrl,
+  },
+], {
+  now,
+  registry,
+  graphEvidenceIndex: new Map([[canonicalInstagramPostKey(graphUrl), {
+    postKey: canonicalInstagramPostKey(graphUrl),
+    url: graphUrl,
+    ownerUsername: 'ciosgrill',
+    sourcePublishedAt: '2026-07-22T08:30:00.000Z',
+    sourcePublishedAtSource: 'instagram-graph-timestamp',
+    caption: '1+1 gratis in Wien bis 31. Juli 2026.',
+    ocrText: '1+1 GRATIS',
+    graphAccepted: true,
+    graphRejection: '',
+    blockingReason: '',
+    verifiedAt: '2026-07-23T11:30:00.000Z',
+  }]]),
+  inspectDealUrlHealth: async () => {
+    graphNetworkInspections += 1;
+    throw new Error('Graph matches must not use the fallback network inspector');
+  },
+});
+assert.equal(graphVerified.length, 1);
+assert.equal(graphNetworkInspections, 0);
+assert.equal(graphVerified[0].sourcePublishedAt, '2026-07-22T08:30:00.000Z');
+assert.equal(graphVerified[0].sourcePublishedAtSource, 'instagram-graph-timestamp');
+assert.equal(graphVerified[0].postVerification.status, 'verified-meta-graph');
+assert.equal(graphVerified[0].metaGraphOcrText, '1+1 GRATIS');
+assert.match(graphVerified[0].validUntil, /^2026-07-31T23:59:59/);
+
+const graphBlocked = await verifyFirecrawlDeals([
+  { id: 'graph-blocked-firecrawl', title: 'Alter Deal', source: 'Firecrawl', url: graphUrl },
+], {
+  now,
+  registry,
+  graphEvidenceIndex: new Map([[canonicalInstagramPostKey(graphUrl), {
+    postKey: canonicalInstagramPostKey(graphUrl),
+    url: graphUrl,
+    sourcePublishedAt: '2026-07-22T08:30:00.000Z',
+    sourcePublishedAtSource: 'instagram-graph-timestamp',
+    blockingReason: 'offer-expired',
+    verifiedAt: '2026-07-23T11:30:00.000Z',
+  }]]),
+  maxNetworkVerifications: 0,
+});
+assert.deepEqual(graphBlocked, []);
+
+const history = mergeFirecrawlDealHistory([
+  {
+    id: 'current-post',
+    title: 'Current Graph Deal',
+    source: 'Firecrawl',
+    url: graphUrl,
+    discoveredAt: '2026-07-23T10:00:00.000Z',
+  },
+], [
+  {
+    id: 'previous-same-post',
+    title: 'Previous Graph Deal with more detail',
+    source: 'Firecrawl',
+    url: graphUrl,
+    sourcePublishedAt: '2026-07-22T08:30:00.000Z',
+    sourcePublishedAtSource: 'instagram-graph-timestamp',
+    discoveredAt: '2026-07-22T09:00:00.000Z',
+  },
+  {
+    id: 'recent-web-history',
+    title: 'Recent web deal',
+    source: 'Firecrawl',
+    url: 'https://example.com/recent',
+    discoveredAt: '2026-07-20T09:00:00.000Z',
+  },
+  {
+    id: 'stale-history',
+    title: 'Stale old deal',
+    source: 'Firecrawl',
+    url: 'https://example.com/stale',
+    discoveredAt: '2026-07-01T09:00:00.000Z',
+  },
+], { now });
+assert.equal(history.retainedPreviousDeals, 2);
+assert.equal(history.prunedPreviousDeals, 1);
+assert.equal(history.duplicateCount, 1);
+assert.equal(history.deals.length, 2);
+assert.equal(history.deals.filter((deal) => canonicalInstagramPostKey(deal.url) === canonicalInstagramPostKey(graphUrl)).length, 1);
+assert.ok(history.deals.some((deal) => deal.id === 'recent-web-history'));
 
 console.log('Firecrawl original-post verifier tests passed.');

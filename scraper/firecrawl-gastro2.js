@@ -7,7 +7,16 @@ import '../sentry/instrument.mjs';
 import Firecrawl from '@mendable/firecrawl-js';
 import { z } from 'zod';
 import fs from 'fs';
-import { verifyFirecrawlDeals } from './firecrawl-post-verifier.js';
+import {
+  mergeFirecrawlDealHistory,
+  readFirecrawlDealOutput,
+  verifyFirecrawlDeals,
+} from './firecrawl-post-verifier.js';
+import {
+  isFirecrawlRateOrCreditError,
+  positiveInteger,
+  runBoundedFirecrawlAgent,
+} from './firecrawl-agent-utils.js';
 import {
   buildPipelineRunReport,
   summarizeVerifiedDeals,
@@ -20,6 +29,8 @@ const SOURCE_KEY = 'gastro2';
 const SOURCE_LABEL = 'Firecrawl Key 1 - Gastro';
 const OUTPUT_PATH = 'docs/deals-pending-gastro2.json';
 const RUN_STARTED_AT = new Date();
+const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL1_AGENT_TIMEOUT_SECONDS, 120);
+const MAX_CREDITS_PER_TARGET = positiveInteger(process.env.FIRECRAWL1_MAX_CREDITS_PER_TARGET, 250);
 
 if (!FIRECRAWL_API_KEY) {
   const error = new Error('FIRECRAWL_API_KEY1 oder FIRECRAWL_API_KEY nicht gesetzt');
@@ -37,7 +48,10 @@ if (!FIRECRAWL_API_KEY) {
 const firecrawl = new Firecrawl({ apiKey: FIRECRAWL_API_KEY });
 
 async function runAgent(payload) {
-  return firecrawl.agent(payload);
+  return runBoundedFirecrawlAgent(firecrawl, payload, {
+    timeoutSeconds: AGENT_TIMEOUT_SECONDS,
+    maxCredits: MAX_CREDITS_PER_TARGET,
+  });
 }
 
 // ============================================
@@ -47,17 +61,12 @@ async function runAgent(payload) {
 const SCRAPE_URLS = [
   'https://www.instagram.com/explore/tags/gratiswien/',
   'https://www.instagram.com/explore/tags/wienfood/',
-  'https://www.instagram.com/explore/tags/wienesse/',
+  'https://www.instagram.com/explore/tags/wienessen/',
   'https://www.instagram.com/explore/tags/aktionwien/',
   'https://www.instagram.com/explore/tags/schnäppchenwien/',
   'https://www.1000things.at/',
   'https://www.meinbezirk.at/',
 ];
-
-function isRateOrCreditError(message) {
-  const m = (message || '').toLowerCase();
-  return m.includes('insufficient credits') || m.includes('rate limit exceeded');
-}
 
 function isInstagramUrl(url) {
   return (url || '').includes('instagram.com');
@@ -139,38 +148,22 @@ function dealId(prefix, brand, title, url) {
   return prefix + '-' + stableHash(key);
 }
 
-function parseGermanDate(str) {
-  if (!str || typeof str !== 'string') return null;
-  const s = str.trim();
-  let m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
-  if (m) return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0));
-  m = s.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
-  if (m) {
-    const year = m[3].length === 2 ? Number(`20${m[3]}`) : Number(m[3]);
-    return new Date(Date.UTC(year, Number(m[2]) - 1, Number(m[1]), 12, 0, 0));
-  }
-  return null;
-}
-
-function isNotTooOld(dateObj) {
-  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return true;
-  const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
-  return dateObj.getTime() >= twoWeeksAgo;
-}
-
 async function main() {
   console.log('🍕🔥 FIRECRAWL GASTRO AGENT #2');
   console.log('='.repeat(40));
   console.log(`📅 ${new Date().toLocaleString('de-AT')}`);
   console.log();
 
+  const previousOutput = readFirecrawlDealOutput(OUTPUT_PATH);
   const allDeals = [];
   const rejected = [];
   const runErrors = [];
   let rawCandidateCount = 0;
   let completedSources = 0;
+  let totalCreditsUsed = 0;
   
   console.log(`🔍 Scrape ${SCRAPE_URLS.length} Seiten (Gastro Focus)...`);
+  console.log(`💳 Maximal ${MAX_CREDITS_PER_TARGET} Credits und ${AGENT_TIMEOUT_SECONDS}s pro Ziel`);
   
   for (let i = 0; i < SCRAPE_URLS.length; i++) {
     const url = SCRAPE_URLS[i];
@@ -180,11 +173,14 @@ async function main() {
     
     try {
       const result = await runAgent({
-        url: url,
-        prompt: PROMPT,
+        urls: [url],
+        prompt: isInstagramUrl(url)
+          ? `${PROMPT}\n\nDieser Durchlauf startet auf Instagram. Liefere ausschließlich direkte Instagram-Originalposts von diesem Ziel; weiche nicht auf allgemeine Deal-Webseiten aus.`
+          : PROMPT,
         schema: gastroSchema,
-        model: 'spark-1-pro',
+        model: isInstagramUrl(url) ? 'spark-1-mini' : 'spark-1-pro',
       });
+      totalCreditsUsed += Number(result?.creditsUsed || result?.credits_used || 0);
       
       if (result && result.data) {
         let data = result.data;
@@ -213,9 +209,19 @@ async function main() {
               });
               continue;
             }
+            if (isInstagramUrl(url) && !isInstagramUrl(postUrl)) {
+              rejected.push({
+                reason: 'instagram-target-returned-web-result',
+                deal: {
+                  title: d.item_given_away || '',
+                  brand: d.brand_or_store || source,
+                  url: postUrl,
+                },
+              });
+              continue;
+            }
             
             const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
-            const validityDate = parseGermanDate(d.validity_date || '');
             const brand = d.brand_or_store || source;
             const title = d.item_given_away?.substring(0, 60) || 'Gastro Deal';
             const ownerUsername = (d.owner_username || '').replace(/^@/, '').trim().toLowerCase();
@@ -239,20 +245,15 @@ async function main() {
               ownerUsername,
               reportedPostDate: d.post_date || '',
               expiresOriginal: `${d.validity_date || ''} ${d.validity_time || ''}`.trim(),
-              ...(validityDate ? {
-                validOn: validityDate.toISOString(),
-                expires: validityDate.toISOString(),
-                expirySource: 'firecrawl-agent-reported-validity',
-                dateConfidence: 'low',
-              } : {}),
             });
           }
         }
       }
     } catch (e) {
       console.log(`      → Error: ${e.message}`);
+      totalCreditsUsed += Number(e?.creditsUsed || 0);
       runErrors.push(`${source}: ${e.message}`);
-      if (isRateOrCreditError(e.message)) {
+      if (isFirecrawlRateOrCreditError(e.message)) {
         console.log('      → Stoppe Run frühzeitig wegen API-Limit/Credits');
         break;
       }
@@ -264,9 +265,13 @@ async function main() {
   console.log();
   console.log('📊 ERGEBNIS:');
   console.log(`   📦 Deals: ${allDeals.length}`);
-  console.log('🔄 URL-Dedupe deaktiviert');
-  const finalDeals = await verifyFirecrawlDeals(allDeals, {
+  const history = mergeFirecrawlDealHistory(allDeals, previousOutput.deals, {
+    now: RUN_STARTED_AT,
+  });
+  console.log(`🛡️ Fresh history: ${history.retainedPreviousDeals}/${history.previousDeals}; exact duplicates merged: ${history.duplicateCount}`);
+  const finalDeals = await verifyFirecrawlDeals(history.deals, {
     sourceKey: 'firecrawl-key1-gastro',
+    now: RUN_STARTED_AT,
   });
   const verifiedIDs = new Set(finalDeals.map((deal) => deal.id));
   rejected.push(...allDeals
@@ -277,6 +282,8 @@ async function main() {
     lastUpdated: new Date().toISOString(),
     source: 'gastro2',
     totalDeals: finalDeals.length,
+    freshDiscoveryDeals: allDeals.length,
+    retainedPreviousDeals: history.retainedPreviousDeals,
     pipelineReport: `deal-pipeline-last-run-${SOURCE_KEY}.json`,
     deals: finalDeals,
   };
@@ -292,11 +299,18 @@ async function main() {
     rawCandidates: rawCandidateCount,
     normalizedCandidates: allDeals.length,
     verifiedCandidates: finalDeals.length,
+    previousDeals: previousOutput.deals.length,
     acceptedDeals: finalDeals.length,
     rejected,
     diagnostics: {
       configuredSources: SCRAPE_URLS.length,
       completedSources,
+      agentTimeoutSeconds: AGENT_TIMEOUT_SECONDS,
+      maxCreditsPerTarget: MAX_CREDITS_PER_TARGET,
+      totalCreditsUsed,
+      retainedPreviousDeals: history.retainedPreviousDeals,
+      prunedPreviousDeals: history.prunedPreviousDeals,
+      duplicateCandidatesMerged: history.duplicateCount,
       verifier: summarizeVerifiedDeals(finalDeals),
     },
     errors: runErrors,

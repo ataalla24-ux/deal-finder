@@ -12,6 +12,7 @@ concurrency:
 jobs:
   instagram-gastro:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
     steps:
@@ -28,7 +29,8 @@ jobs:
         env:
           FIRECRAWL_API_KEY5: ${{ secrets.FIRECRAWL_API_KEY5 }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
-          FC5_MAX_AGE_DAYS: 7
+          FIRECRAWL5_AGENT_TIMEOUT_SECONDS: 300
+          FIRECRAWL5_MAX_CREDITS: 500
           FIRECRAWL_POST_VERIFY_MAX: 30
           FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 7
           FIRECRAWL_POST_MAX_ACCEPTED_AGE_DAYS: 7
