@@ -156,7 +156,7 @@ function toNum(v, fallback) {
 function buildConfig() {
   return {
     ...DEFAULT_CONFIG,
-    maxAgeDays: Math.min(14, toNum(process.env.IG_MAX_AGE_DAYS, DEFAULT_CONFIG.maxAgeDays)),
+    maxAgeDays: Math.min(7, toNum(process.env.IG_MAX_AGE_DAYS, DEFAULT_CONFIG.maxAgeDays)),
     maxDealsPerRun: toNum(process.env.IG_MAX_DEALS, DEFAULT_CONFIG.maxDealsPerRun),
     maxSourcesTotal: toNum(process.env.IG_MAX_SOURCES_TOTAL, DEFAULT_CONFIG.maxSourcesTotal),
     maxTimelinePostsPerAccount: toNum(process.env.IG_MAX_TIMELINE_POSTS, DEFAULT_CONFIG.maxTimelinePostsPerAccount),
@@ -1050,6 +1050,9 @@ function buildDealFromCandidate({
     priority: Math.max(1, Math.round(score / 10)),
     votes: 1,
     qualityScore: score,
+    ownerUsername: source.username,
+    sourcePublishedAt: pubDateIso,
+    sourcePublishedAtSource: pubDateSource || TRUSTED_PUBDATE_SOURCE,
     pubDate: pubDateIso,
     pubDateSource: pubDateSource || TRUSTED_PUBDATE_SOURCE,
     discoveredBy: source.sourceType,

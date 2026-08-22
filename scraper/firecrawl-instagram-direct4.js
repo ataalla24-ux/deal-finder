@@ -324,16 +324,31 @@ async function main() {
     .filter((deal) => !verifiedIDs.has(deal.id))
     .map((deal) => ({ reason: 'post-verification-rejected', deal })));
 
-  const preservedPreviousOutput = (
+  const shouldPreservePreviousOutput = (
     finalDeals.length === 0
     && completedSources === 0
     && previousOutput.deals.length > 0
     && runErrors.some(isRateOrCreditError)
   );
-  const outputDeals = preservedPreviousOutput ? previousOutput.deals : finalDeals;
+  const freshPreviousDeals = shouldPreservePreviousOutput
+    ? await verifyFirecrawlDeals(previousOutput.deals, {
+        sourceKey: 'firecrawl-key4-gastro-last-good',
+        maxNetworkVerifications: 0,
+      })
+    : [];
+  const preservedPreviousOutput = shouldPreservePreviousOutput && freshPreviousDeals.length > 0;
+  const outputDeals = preservedPreviousOutput ? freshPreviousDeals : finalDeals;
 
   if (preservedPreviousOutput) {
-    console.log(`🛡️ Credit-Fehler vor erstem Ergebnis: ${previousOutput.deals.length} vorhandene Deals bleiben erhalten`);
+    console.log(`🛡️ Credit-Fehler vor erstem Ergebnis: ${freshPreviousDeals.length} weiterhin frische Last-good-Deals bleiben erhalten`);
+    if (freshPreviousDeals.length !== previousOutput.deals.length) {
+      fs.writeFileSync(OUTPUT_PATH, JSON.stringify({
+        ...previousOutput.payload,
+        totalDeals: freshPreviousDeals.length,
+        freshnessPrunedAt: new Date().toISOString(),
+        deals: freshPreviousDeals,
+      }, null, 2));
+    }
   } else {
     const output = {
       lastUpdated: new Date().toISOString(),

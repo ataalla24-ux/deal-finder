@@ -48,9 +48,22 @@ jobs:
           APIFY_INSTAGRAM_POSTS_PER_SOURCE: "9"
           APIFY_INSTAGRAM_MAX_POSTS_TO_INSPECT: "120"
           APIFY_INSTAGRAM_MAX_POST_AGE_DAYS: "7"
-          APIFY_INSTAGRAM_MAX_AGE_WITHOUT_EXPLICIT_VALIDITY_DAYS: "3"
+          APIFY_INSTAGRAM_MAX_AGE_WITHOUT_EXPLICIT_VALIDITY_DAYS: "7"
           APIFY_INSTAGRAM_UNKNOWN_EXPIRY_TTL_HOURS: "72"
         run: node scraper/import-apify-instagram-deals.js
+
+      - name: Refresh Instagram merchant registry
+        run: npm run instagram:merchant-registry
+
+      - name: Verify Apify candidates via Instagram Graph API
+        env:
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
+          INSTAGRAM_GRAPH_VERIFY_PENDING_FILES: deals-pending-instagram-apify.json
+          INSTAGRAM_GRAPH_VERIFY_MAX_ACCOUNTS: "24"
+          INSTAGRAM_GRAPH_VERIFY_MEDIA_PER_ACCOUNT: "25"
+        run: npm run instagram:graph:verify
 
       - name: Merge verified Instagram evidence
         run: node scraper/merge-instagram-pending.js
@@ -65,4 +78,4 @@ jobs:
       - name: Commit Apify Instagram updates
         if: always()
         run: |
-          node scripts/commit-generated.mjs --message "Apify Instagram sync $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-instagram-apify.json docs/apify-instagram-report.json docs/deals-pending-instagram-verified.json docs/deals-pending-all.json
+          node scripts/commit-generated.mjs --skip-conflicts --message "Apify Instagram sync $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-instagram-apify.json docs/apify-instagram-report.json docs/instagram-merchant-registry.json docs/instagram-graph-post-evidence.json docs/instagram-graph-verification-report.json docs/deals-pending-instagram-verified.json docs/deals-pending-all.json

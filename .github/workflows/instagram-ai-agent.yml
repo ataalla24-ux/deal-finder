@@ -51,6 +51,7 @@ jobs:
           INSTAGRAM_AI_MAX_PROFILE_POSTS: 4
           INSTAGRAM_AI_MAX_DEALS: 35
           INSTAGRAM_AI_MAX_AGE_DAYS: 7
+          INSTAGRAM_AI_ACTIVE_OFFER_MAX_AGE_DAYS: 7
         run: npm run instagram:ai
 
       - name: Validate Instagram AI output
@@ -61,6 +62,21 @@ jobs:
       - name: Restore last-good AI source after validation failure
         if: steps.validate_instagram_ai.outcome == 'failure'
         run: git restore --source=HEAD -- docs/deals-pending-instagram-ai.json
+
+      - name: Refresh Instagram merchant registry
+        if: steps.validate_instagram_ai.outcome == 'success'
+        run: npm run instagram:merchant-registry
+
+      - name: Verify AI candidates via Instagram Graph API
+        if: steps.validate_instagram_ai.outcome == 'success'
+        env:
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
+          INSTAGRAM_GRAPH_VERIFY_PENDING_FILES: deals-pending-instagram-ai.json
+          INSTAGRAM_GRAPH_VERIFY_MAX_ACCOUNTS: "24"
+          INSTAGRAM_GRAPH_VERIFY_MEDIA_PER_ACCOUNT: "25"
+        run: npm run instagram:graph:verify
 
       - name: Merge verified Instagram evidence
         if: steps.validate_instagram_ai.outcome == 'success'
@@ -77,7 +93,7 @@ jobs:
       - name: Commit Instagram AI output
         if: always()
         run: |
-          node scripts/commit-generated.mjs --message "Instagram AI deals $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-instagram-ai.json docs/instagram-ai-report.json docs/deals-pending-instagram-verified.json docs/deals-pending-all.json
+          node scripts/commit-generated.mjs --skip-conflicts --message "Instagram AI deals $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-instagram-ai.json docs/instagram-ai-report.json docs/instagram-merchant-registry.json docs/instagram-graph-post-evidence.json docs/instagram-graph-verification-report.json docs/deals-pending-instagram-verified.json docs/deals-pending-all.json
 
       - name: Fail workflow when AI output validation failed
         if: steps.validate_instagram_ai.outcome == 'failure'

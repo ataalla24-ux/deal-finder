@@ -16,7 +16,7 @@ const REPORT_PATH = path.join(DOCS_DIR, 'tiktok-scanner-report.json');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CONFIG = {
-  maxAgeDays: Number(process.env.TIKTOK_MAX_AGE_DAYS || 7),
+  maxAgeDays: Math.min(7, Math.max(1, Number(process.env.TIKTOK_MAX_AGE_DAYS || 7) || 7)),
   maxPostsToVisit: Number(process.env.TIKTOK_MAX_POSTS || 90),
   maxDeals: Number(process.env.TIKTOK_MAX_DEALS || 45),
   minScore: Number(process.env.TIKTOK_MIN_SCORE || 58),

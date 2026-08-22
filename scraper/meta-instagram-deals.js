@@ -5,8 +5,16 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
-import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
+import {
+  canonicalInstagramPostKey,
+  getPublicationEvidence,
+} from './deal-evidence-utils.js';
 import { parseExpiryShape } from './expiry-utils.js';
+import {
+  buildInstagramGraphEvidencePayload,
+  loadInstagramGraphEvidence,
+  writeInstagramGraphEvidence,
+} from './instagram-graph-evidence.js';
 import { enrichInstagramGraphMedia } from './instagram-media-evidence.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -17,6 +25,7 @@ const DOCS_DIR = path.join(ROOT, 'docs');
 const DEFAULT_OUTPUT_PATH = path.join(DOCS_DIR, 'deals-pending-meta-instagram.json');
 const DEFAULT_REPORT_PATH = path.join(DOCS_DIR, 'meta-instagram-report.json');
 const DEFAULT_STATE_PATH = path.join(DOCS_DIR, 'meta-instagram-state.json');
+const DEFAULT_GRAPH_EVIDENCE_PATH = path.join(DOCS_DIR, 'instagram-graph-post-evidence.json');
 const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
 const MERCHANT_REGISTRY_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
 const CANDIDATE_ACCOUNT_PATHS = [
@@ -24,6 +33,11 @@ const CANDIDATE_ACCOUNT_PATHS = [
   path.join(DOCS_DIR, 'deals-pending-instagram-ai.json'),
   path.join(DOCS_DIR, 'deals-pending-instagram-discovery.json'),
   path.join(DOCS_DIR, 'deals-pending-instagram-verified.json'),
+  path.join(DOCS_DIR, 'deals-pending-gastro2.json'),
+  path.join(DOCS_DIR, 'deals-pending-food3.json'),
+  path.join(DOCS_DIR, 'deals-pending-firecrawl2.json'),
+  path.join(DOCS_DIR, 'deals-pending-firecrawl4.json'),
+  path.join(DOCS_DIR, 'deals-pending-firecrawl5.json'),
 ];
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -38,13 +52,18 @@ const DEFAULT_AD_SEARCH_TERMS = [
   'Vienna opening offer',
 ];
 const DEFAULT_HASHTAGS = [
-  'freefinderwien',
   'gratiswien',
   'wienaktion',
   'wienrabatt',
   'wiengutschein',
-  'wienfooddeal',
   'neueröffnungwien',
+  'wienangebote',
+  'wienangebot',
+  'wienhappyhour',
+  'wiengratis',
+  'gratisinwien',
+  'viennadeals',
+  'viennafooddeals',
 ];
 
 const CONCRETE_FREE_PATTERN = /(?<!gluten[- ])(?<!sugar[- ])(?<!lactose[- ])(?<!dairy[- ])(?<!alcohol[- ])(?<!caffeine[- ])(?<!cruelty[- ])(?<!plastic[- ])(?<!smoke[- ])(?<!tax[- ])(?<!risk[- ])(?<!fat[- ])(?<!nut[- ])(?<!gmo[- ])\bfree\b/i;
@@ -194,7 +213,7 @@ export function buildConfig(env = process.env, now = new Date()) {
     seenTtlDays: numberEnv(env, 'META_INSTAGRAM_SEEN_TTL_DAYS', 7, 1, 45),
     maxDealsPerRun: numberEnv(env, 'META_INSTAGRAM_MAX_DEALS_PER_RUN', 40, 1, 200),
     maxOrganicAgeHours: numberEnv(env, 'META_INSTAGRAM_MAX_POST_AGE_HOURS', 72, 1, 168),
-    maxOrganicAgeWithExpiryDays: numberEnv(env, 'META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS', 7, 1, 30),
+    maxOrganicAgeWithExpiryDays: numberEnv(env, 'META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS', 7, 1, 7),
     unknownExpiryTtlHours: numberEnv(env, 'META_INSTAGRAM_UNKNOWN_EXPIRY_TTL_HOURS', 72, 12, 168),
     requestTimeoutMs: numberEnv(env, 'META_INSTAGRAM_REQUEST_TIMEOUT_MS', 15000, 1000, 60000),
     maxRetries: numberEnv(env, 'META_INSTAGRAM_MAX_RETRIES', 3, 0, 6),
@@ -202,6 +221,7 @@ export function buildConfig(env = process.env, now = new Date()) {
     allowWatchlistAsViennaEvidence: booleanEnv(env, 'META_INSTAGRAM_ALLOW_WATCHLIST_VIENNA', false),
     requireConfiguredSource: booleanEnv(env, 'META_INSTAGRAM_REQUIRE_SOURCE', false),
     sourceFailureCooldownHours: numberEnv(env, 'META_INSTAGRAM_SOURCE_FAILURE_COOLDOWN_HOURS', 168, 1, 720),
+    taggedMediaEnabled: booleanEnv(env, 'META_INSTAGRAM_TAGGED_MEDIA_ENABLED', false),
     mediaOcrEnabled: booleanEnv(env, 'META_INSTAGRAM_MEDIA_OCR_ENABLED', true),
     mediaMaxPostsPerRun: numberEnv(env, 'META_INSTAGRAM_MEDIA_MAX_POSTS_PER_RUN', 18, 0, 60),
     mediaMaxAssetsPerPost: numberEnv(env, 'META_INSTAGRAM_MEDIA_MAX_ASSETS_PER_POST', 3, 1, 10),
@@ -222,6 +242,7 @@ export function buildConfig(env = process.env, now = new Date()) {
     outputPath: cleanText(env.META_INSTAGRAM_OUTPUT_PATH, 500) || DEFAULT_OUTPUT_PATH,
     reportPath: cleanText(env.META_INSTAGRAM_REPORT_PATH, 500) || DEFAULT_REPORT_PATH,
     statePath: cleanText(env.META_INSTAGRAM_STATE_PATH, 500) || DEFAULT_STATE_PATH,
+    graphEvidencePath: cleanText(env.META_INSTAGRAM_GRAPH_EVIDENCE_PATH, 500) || DEFAULT_GRAPH_EVIDENCE_PATH,
   };
 }
 
@@ -270,10 +291,15 @@ export function loadAccountCatalog(config, paths = {}) {
       verifiedVienna: false,
       evidence: [],
       origins: [],
+      lastCandidateAt: '',
     };
     existing.priority = Math.max(existing.priority, Number(raw?.priority || raw?.priorityScore || 0));
     existing.category = cleanText(raw?.category || existing.category, 60);
     existing.verifiedVienna = existing.verifiedVienna || config.verifiedAccounts.has(username) || registryAccountIsVerified(raw);
+    const candidateAt = toIso(raw?.sourcePublishedAt || raw?.pubDate);
+    if (candidateAt && Date.parse(candidateAt) > (Date.parse(existing.lastCandidateAt) || 0)) {
+      existing.lastCandidateAt = candidateAt;
+    }
     if (config.verifiedAccounts.has(username)) existing.evidence.push('env:verified-account');
     if (registryAccountIsVerified(raw)) existing.evidence.push('registry:verified-vienna');
     existing.origins.push(origin);
@@ -293,7 +319,13 @@ export function loadAccountCatalog(config, paths = {}) {
         || deal?.media?.username
         || String(deal?.sourceName || '').replace(/^@/, '')
       );
-      if (username) add({ username, priority: 104, category: deal?.category || '' }, `candidate:${path.basename(candidatePath)}`);
+      const publication = getPublicationEvidence(deal);
+      if (username) add({
+        username,
+        priority: 104,
+        category: deal?.category || '',
+        sourcePublishedAt: publication.sourcePublishedAt,
+      }, `candidate:${path.basename(candidatePath)}`);
     }
   }
   for (const username of config.explicitAccounts) add({ username, priority: 110 }, 'env');
@@ -301,14 +333,40 @@ export function loadAccountCatalog(config, paths = {}) {
   return [...byUsername.values()].sort((a, b) => b.priority - a.priority || a.username.localeCompare(b.username));
 }
 
-export function selectAccountShard(accounts, config) {
+export function selectAccountShard(accounts, config, state = {}, now = new Date()) {
   if (!accounts.length) return [];
   const limit = Math.min(config.maxAccountsPerRun, accounts.length);
-  const shardCount = Math.max(1, Math.ceil(accounts.length / limit));
-  const shardIndex = config.shardIndex % shardCount;
-  const start = shardIndex * limit;
-  return [...accounts.slice(start, start + limit), ...accounts.slice(0, Math.max(0, start + limit - accounts.length))]
-    .slice(0, limit);
+  const selected = [];
+  const seen = new Set();
+  const add = (account) => {
+    if (!account || seen.has(account.username) || selected.length >= limit) return;
+    seen.add(account.username);
+    selected.push(account);
+  };
+  const recentCutoff = now.getTime() - 8 * DAY_MS;
+  const recentCandidates = accounts
+    .filter((account) => (Date.parse(account.lastCandidateAt || '') || 0) >= recentCutoff)
+    .sort((left, right) => Date.parse(right.lastCandidateAt) - Date.parse(left.lastCandidateAt));
+  recentCandidates.slice(0, Math.min(8, Math.ceil(limit / 3))).forEach(add);
+
+  const performance = state?.accountPerformance || {};
+  const highYield = accounts
+    .filter((account) => Number(performance[account.username]?.recentFetched || 0) > 0)
+    .sort((left, right) => {
+      const leftStats = performance[left.username] || {};
+      const rightStats = performance[right.username] || {};
+      const leftRate = Number(leftStats.recentAccepted || 0) / Math.max(1, Number(leftStats.recentFetched || 0));
+      const rightRate = Number(rightStats.recentAccepted || 0) / Math.max(1, Number(rightStats.recentFetched || 0));
+      return rightRate - leftRate || Number(rightStats.recentAccepted || 0) - Number(leftStats.recentAccepted || 0);
+    });
+  highYield.slice(0, Math.min(4, Math.ceil(limit / 6))).forEach(add);
+
+  const rotating = accounts.filter((account) => !seen.has(account.username));
+  const start = rotating.length ? (config.shardIndex * Math.max(1, limit - selected.length)) % rotating.length : 0;
+  for (let offset = 0; offset < rotating.length && selected.length < limit; offset += 1) {
+    add(rotating[(start + offset) % rotating.length]);
+  }
+  return selected;
 }
 
 function targetLocationNames(locations) {
@@ -612,7 +670,9 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
     viennaEvidence,
     now,
     source: 'Instagram',
-    originSource: context?.sourceType === 'hashtag' ? 'Meta Instagram Hashtag API' : 'Meta Instagram Business Discovery',
+    originSource: context?.sourceType === 'hashtag'
+      ? 'Meta Instagram Hashtag API'
+      : (context?.sourceType === 'tagged' ? 'Meta Instagram Tagged Media API' : 'Meta Instagram Business Discovery'),
     evidence: {
       mediaId: cleanText(raw?.id, 120),
       username,
@@ -659,6 +719,16 @@ function safeErrorMessage(error, config) {
   return message
     .replace(/([?&](?:access_token|token|client_secret)=)[^&\s"']+/gi, '$1[redacted]')
     .slice(0, 400);
+}
+
+export function isGlobalMetaGraphError(error) {
+  const status = Number(error?.status || 0);
+  const code = Number(error?.code || 0);
+  const message = cleanText(error?.message || error, 1000);
+  return [401, 403, 429].includes(status)
+    || status >= 500
+    || [4, 10, 17, 32, 190, 200].includes(code)
+    || /(?:invalid|expired|malformed).{0,30}(?:oauth|access token)|rate limit|too many calls|permission/i.test(message);
 }
 
 function retryDelayMs(response, attempt) {
@@ -864,6 +934,39 @@ function instagramBusinessDiscoveryUrl(config, username, includeMedia = true) {
   return url.toString();
 }
 
+function instagramTaggedMediaUrl(config, includeMedia = true) {
+  const url = new URL(`https://graph.facebook.com/${config.graphVersion}/${config.instagramUserId}/tags`);
+  url.searchParams.set('fields', includeMedia ? OCR_INSTAGRAM_MEDIA_FIELDS : BASIC_INSTAGRAM_MEDIA_FIELDS);
+  url.searchParams.set('limit', String(Math.max(config.mediaPerHashtag, 25)));
+  url.searchParams.set('access_token', config.instagramAccessToken);
+  return url.toString();
+}
+
+export async function fetchInstagramBusinessDiscoveryMedia(config, account, fetchImpl = fetch) {
+  const username = normalizedUsername(account?.username || account);
+  if (!username) throw new Error('A valid Instagram Business Discovery username is required.');
+  const response = await fetchGraphMediaWithFallback(
+    instagramBusinessDiscoveryUrl(config, username, true),
+    instagramBusinessDiscoveryUrl(config, username, false),
+    config,
+    fetchImpl,
+  );
+  const business = response.payload?.business_discovery || {};
+  const resolvedAccount = typeof account === 'object' && account
+    ? account
+    : { username };
+  const media = Array.isArray(business?.media?.data) ? business.media.data : [];
+  return {
+    entries: media.map((item) => ({
+      item: { ...item, username: business.username || username, name: business.name || '' },
+      context: { sourceType: 'account', sourceName: `@${username}`, account: resolvedAccount },
+    })),
+    usage: response.usage,
+    username: normalizedUsername(business.username || username),
+    name: cleanText(business.name, 100),
+  };
+}
+
 async function fetchGraphMediaWithFallback(primaryUrl, fallbackUrl, config, fetchImpl) {
   try {
     return await fetchMetaJson(primaryUrl, config, fetchImpl);
@@ -913,35 +1016,51 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
   const hashtagIds = { ...(state?.hashtagIds || {}) };
   const sourceFailures = pruneSourceFailures(state?.sourceFailures, now);
   const availableAccounts = accountCatalog.filter((account) => !sourceOnCooldown(sourceFailures.accounts[account.username], now));
-  const selectedAccounts = selectAccountShard(availableAccounts, config);
+  const selectedAccounts = selectAccountShard(availableAccounts, config, state, now);
   const skippedAccounts = accountCatalog.length - availableAccounts.length;
   let skippedHashtags = 0;
+  let taggedAttempted = false;
+  let globalError = null;
 
   for (const account of selectedAccounts) {
     try {
-      const response = await fetchGraphMediaWithFallback(
-        instagramBusinessDiscoveryUrl(config, account.username, true),
-        instagramBusinessDiscoveryUrl(config, account.username, false),
-        config,
-        fetchImpl,
-      );
+      const response = await fetchInstagramBusinessDiscoveryMedia(config, account, fetchImpl);
       usage.push(response.usage);
-      const business = response.payload?.business_discovery || {};
-      const media = Array.isArray(business?.media?.data) ? business.media.data : [];
-      for (const item of media) {
-        raw.push({
-          item: { ...item, username: business.username || account.username, name: business.name || '' },
-          context: { sourceType: 'account', sourceName: `@${account.username}`, account },
-        });
-      }
+      raw.push(...response.entries);
       clearSourceFailure(sourceFailures, 'accounts', account.username);
     } catch (error) {
-      errors.push({ source: `@${account.username}`, status: Number(error?.status || 0), code: error?.code || '', message: safeErrorMessage(error, config) });
+      const errorRow = { source: `@${account.username}`, status: Number(error?.status || 0), code: error?.code || '', message: safeErrorMessage(error, config) };
+      errors.push(errorRow);
+      if (isGlobalMetaGraphError(error)) {
+        globalError = errorRow;
+        break;
+      }
       recordSourceFailure(sourceFailures, 'accounts', account.username, error, config, now);
     }
   }
 
+  if (config.taggedMediaEnabled && !globalError) {
+    taggedAttempted = true;
+    try {
+      const response = await fetchGraphMediaWithFallback(
+        instagramTaggedMediaUrl(config, true),
+        instagramTaggedMediaUrl(config, false),
+        config,
+        fetchImpl,
+      );
+      usage.push(response.usage);
+      for (const item of Array.isArray(response.payload?.data) ? response.payload.data : []) {
+        raw.push({ item, context: { sourceType: 'tagged', sourceName: 'FreeFinder tagged media', account: null } });
+      }
+    } catch (error) {
+      const errorRow = { source: 'tagged-media', status: Number(error?.status || 0), code: error?.code || '', message: safeErrorMessage(error, config) };
+      errors.push(errorRow);
+      if (isGlobalMetaGraphError(error)) globalError = errorRow;
+    }
+  }
+
   for (const tag of config.hashtags) {
+    if (globalError) break;
     if (sourceOnCooldown(sourceFailures.hashtags[tag], now)) {
       skippedHashtags += 1;
       continue;
@@ -972,13 +1091,18 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
       }
       clearSourceFailure(sourceFailures, 'hashtags', tag);
     } catch (error) {
-      errors.push({ source: `#${tag}`, status: Number(error?.status || 0), code: error?.code || '', message: safeErrorMessage(error, config) });
+      const errorRow = { source: `#${tag}`, status: Number(error?.status || 0), code: error?.code || '', message: safeErrorMessage(error, config) };
+      errors.push(errorRow);
+      if (isGlobalMetaGraphError(error)) {
+        globalError = errorRow;
+        break;
+      }
       recordSourceFailure(sourceFailures, 'hashtags', tag, error, config, now);
       if ([24, 100].includes(Number(error?.code || 0))) delete hashtagIds[tag];
     }
   }
 
-  return { raw, errors, usage, hashtagIds, selectedAccounts, sourceFailures, skippedAccounts, skippedHashtags };
+  return { raw, errors, usage, hashtagIds, selectedAccounts, sourceFailures, skippedAccounts, skippedHashtags, taggedAttempted, globalError };
 }
 
 function incrementReason(rejections, reason) {
@@ -1021,13 +1145,38 @@ function pruneSeenIds(seenIds, now, ttlDays = 7) {
   }).slice(-5000));
 }
 
+function updateAccountPerformance(previous, selectedAccounts, outcomes, now) {
+  const cutoff = now.getTime() - 180 * DAY_MS;
+  const next = Object.fromEntries(Object.entries(previous || {}).filter(([, stats]) => {
+    const timestamp = Date.parse(stats?.lastRunAt || '');
+    return Number.isFinite(timestamp) && timestamp >= cutoff;
+  }));
+  for (const account of selectedAccounts || []) {
+    const username = normalizedUsername(account.username);
+    if (!username) continue;
+    const prior = next[username] || {};
+    const run = outcomes.get(username) || { fetched: 0, accepted: 0 };
+    next[username] = {
+      runs: Number(prior.runs || 0) + 1,
+      fetched: Number(prior.fetched || 0) + run.fetched,
+      accepted: Number(prior.accepted || 0) + run.accepted,
+      recentFetched: Number((Number(prior.recentFetched || 0) * 0.75 + run.fetched).toFixed(3)),
+      recentAccepted: Number((Number(prior.recentAccepted || 0) * 0.75 + run.accepted).toFixed(3)),
+      lastRunAt: now.toISOString(),
+      lastAcceptedAt: run.accepted > 0 ? now.toISOString() : cleanText(prior.lastAcceptedAt, 80),
+    };
+  }
+  return Object.fromEntries(Object.entries(next).slice(-500));
+}
+
 export async function runMetaInstagramCollector(options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const env = options.env || process.env;
   const config = { ...(options.config || buildConfig(env, now)) };
   const fetchImpl = options.fetchImpl || fetch;
-  const state = readJson(config.statePath, { version: 2, hashtagIds: {}, seenIds: {}, mediaEvidence: {}, sourceFailures: {} });
+  const state = readJson(config.statePath, { version: 2, hashtagIds: {}, seenIds: {}, mediaEvidence: {}, sourceFailures: {}, accountPerformance: {} });
   const previousPayload = readJson(config.outputPath, null);
+  const previousGraphEvidence = loadInstagramGraphEvidence(config.graphEvidencePath).payload;
   const lastGoodPayload = previousPayload && Array.isArray(previousPayload.deals)
     ? previousPayload
     : null;
@@ -1049,6 +1198,7 @@ export async function runMetaInstagramCollector(options = {}) {
       instagramGraph: { status: configured.instagramGraph ? 'pending' : 'not-configured', fetched: 0, accepted: 0, errors: [] },
     },
     rejectionReasons: {},
+    graphEvidence: { status: configured.instagramGraph ? 'pending' : 'not-configured', observed: 0, retained: 0, blocked: 0 },
     totalDeals: 0,
   };
 
@@ -1084,6 +1234,7 @@ export async function runMetaInstagramCollector(options = {}) {
   }
 
   const accepted = [];
+  const graphEvidenceEntries = [];
   const nextState = {
     version: 2,
     updatedAt: now.toISOString(),
@@ -1091,6 +1242,7 @@ export async function runMetaInstagramCollector(options = {}) {
     seenIds: pruneSeenIds(state?.seenIds || {}, now, config.seenTtlDays),
     mediaEvidence: { ...(state?.mediaEvidence || {}) },
     sourceFailures: pruneSourceFailures(state?.sourceFailures, now),
+    accountPerformance: { ...(state?.accountPerformance || {}) },
   };
 
   if (configured.adLibrary) {
@@ -1124,10 +1276,15 @@ export async function runMetaInstagramCollector(options = {}) {
     };
     report.sources.instagramGraph.fetched = result.raw.length;
     report.sources.instagramGraph.errors = result.errors;
-    const requestedSources = result.selectedAccounts.length + Math.max(0, config.hashtags.length - result.skippedHashtags);
-    report.sources.instagramGraph.status = requestedSources === 0
-      ? ((result.skippedAccounts || result.skippedHashtags) ? 'degraded' : 'ok')
-      : (result.errors.length >= requestedSources && !result.raw.length ? 'failed' : (result.errors.length ? 'degraded' : 'ok'));
+    report.sources.instagramGraph.globalError = result.globalError || null;
+    const requestedSources = result.selectedAccounts.length
+      + Math.max(0, config.hashtags.length - result.skippedHashtags)
+      + (result.taggedAttempted ? 1 : 0);
+    report.sources.instagramGraph.status = result.globalError && !result.raw.length
+      ? 'failed'
+      : (requestedSources === 0
+          ? ((result.skippedAccounts || result.skippedHashtags) ? 'degraded' : 'ok')
+          : (result.errors.length >= requestedSources && !result.raw.length ? 'failed' : (result.errors.length ? 'degraded' : 'ok')));
     const media = await (options.enrichGraphMedia || enrichInstagramGraphMedia)(result.raw, config, now, {
       cache: state?.mediaEvidence,
       mediaFetchImpl: options.mediaFetchImpl,
@@ -1139,8 +1296,16 @@ export async function runMetaInstagramCollector(options = {}) {
     });
     nextState.mediaEvidence = media.cache;
     report.sources.instagramGraph.mediaEvidence = media.report;
+    const accountOutcomes = new Map(result.selectedAccounts.map((account) => [account.username, { fetched: 0, accepted: 0 }]));
     for (const entry of media.entries) {
       const normalized = normalizeGraphMediaItem(entry.item, entry.context, config, now);
+      graphEvidenceEntries.push({ entry, outcome: normalized });
+      const accountUsername = normalizedUsername(entry.context?.account?.username || (entry.context?.sourceType === 'account' ? entry.item?.username : ''));
+      if (accountUsername && accountOutcomes.has(accountUsername)) {
+        const outcome = accountOutcomes.get(accountUsername);
+        outcome.fetched += 1;
+        if (normalized.deal) outcome.accepted += 1;
+      }
       if (!normalized.deal) {
         incrementReason(report.rejectionReasons, normalized.rejection);
         continue;
@@ -1148,7 +1313,34 @@ export async function runMetaInstagramCollector(options = {}) {
       accepted.push(normalized.deal);
       report.sources.instagramGraph.accepted += 1;
     }
+    nextState.accountPerformance = updateAccountPerformance(
+      state?.accountPerformance,
+      result.selectedAccounts,
+      accountOutcomes,
+      now,
+    );
+    report.sources.instagramGraph.accountYield = Object.fromEntries(result.selectedAccounts.map((account) => {
+      const stats = nextState.accountPerformance[account.username] || {};
+      return [account.username, {
+        recentFetched: Number(stats.recentFetched || 0),
+        recentAccepted: Number(stats.recentAccepted || 0),
+      }];
+    }));
   }
+
+  const graphEvidence = buildInstagramGraphEvidencePayload(graphEvidenceEntries, {
+    now,
+    previous: previousGraphEvidence,
+    retentionDays: Math.max(14, config.maxOrganicAgeWithExpiryDays * 2),
+  });
+  report.graphEvidence = {
+    status: configured.instagramGraph
+      ? (graphEvidenceEntries.length ? 'ok' : 'preserved')
+      : 'not-configured',
+    observed: graphEvidenceEntries.length,
+    retained: graphEvidence.totalPosts,
+    blocked: graphEvidence.blockedPosts,
+  };
 
   const allVerifiedDeals = dedupeDeals(accepted);
   // Previously observed rows move behind never-observed rows, but are never
@@ -1207,6 +1399,7 @@ export async function runMetaInstagramCollector(options = {}) {
       payload: lastGoodPayload || payload,
       report,
       state: failedState,
+      graphEvidence: previousGraphEvidence,
       shouldFail: true,
     };
   }
@@ -1214,8 +1407,9 @@ export async function runMetaInstagramCollector(options = {}) {
     writeJsonAtomic(config.outputPath, payload);
     writeJsonAtomic(config.reportPath, report);
     writeJsonAtomic(config.statePath, nextState);
+    if (configured.instagramGraph) writeInstagramGraphEvidence(graphEvidence, config.graphEvidencePath);
   }
-  return { payload, report, state: nextState, shouldFail: allFailed };
+  return { payload, report, state: nextState, graphEvidence, shouldFail: allFailed };
 }
 
 async function main() {

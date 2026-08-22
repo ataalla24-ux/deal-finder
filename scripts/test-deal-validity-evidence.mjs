@@ -107,6 +107,18 @@ const titleEvidence = await validate({
 assert.equal(titleEvidence.decision.allowed, true);
 assert.equal(titleEvidence.decision.sourceDate, '2026-07-16T11:00:00.000Z');
 
+const hardSocialAgeClamp = await validate({
+  ...baseSocialDeal,
+  title: 'Zweiter Kaffee gratis in Wien',
+  description: 'Zweiter Kaffee gratis in Wien, gültig bis Ende Juli.',
+  sourcePublishedAt: '2026-07-01T11:00:00.000Z',
+  sourcePublishedAtSource: 'instagram-graph-timestamp',
+  validUntil: '2026-07-31',
+  expirySource: 'instagram-post-caption',
+}, { maxAgeDays: 45 });
+assert.equal(hardSocialAgeClamp.decision.allowed, false, 'configuration cannot extend social-post age beyond seven days');
+assert.match(hardSocialAgeClamp.decision.reasons.join(' '), /älter als 7 Tage/);
+
 const handleOnlyVienna = await validate({
   ...baseSocialDeal,
   brand: 'vienna.coffee',

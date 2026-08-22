@@ -22,6 +22,8 @@ const config = buildConfig({
   META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS: '7',
   META_AD_LIBRARY_MAX_AGE_DAYS: '30',
 }, now);
+const hardAgeConfig = buildConfig({ META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS: '30' }, now);
+assert.equal(hardAgeConfig.maxOrganicAgeWithExpiryDays, 7, 'Meta configuration cannot widen social-post age beyond seven days');
 
 assert.equal(classifyPromotion('Heute 1+1 gratis auf alle Kaffees').accepted, true);
 assert.equal(classifyPromotion('20 % Rabatt auf alle Burger').type, 'rabatt');

@@ -27,11 +27,11 @@ const POLL_INTERVAL_MS = Math.max(5000, Number(process.env.APIFY_POLL_INTERVAL_M
 const RUN_TIMEOUT_MS = Math.max(120000, Number(process.env.APIFY_RUN_TIMEOUT_MS || 25 * 60 * 1000));
 const APIFY_INSTAGRAM_COOKIE_STRING = String(process.env.APIFY_INSTAGRAM_COOKIE_STRING || '').trim();
 const APIFY_INSTAGRAM_SESSIONID = String(process.env.APIFY_INSTAGRAM_SESSIONID || '').trim();
-const MAX_POST_AGE_DAYS = Math.max(1, Number(process.env.APIFY_INSTAGRAM_MAX_POST_AGE_DAYS || 7));
-const MAX_AGE_WITHOUT_EXPLICIT_VALIDITY_DAYS = Math.max(
+const MAX_POST_AGE_DAYS = Math.min(7, Math.max(1, Number(process.env.APIFY_INSTAGRAM_MAX_POST_AGE_DAYS || 7) || 7));
+const MAX_AGE_WITHOUT_EXPLICIT_VALIDITY_DAYS = Math.min(7, Math.max(
   1,
-  Number(process.env.APIFY_INSTAGRAM_MAX_AGE_WITHOUT_EXPLICIT_VALIDITY_DAYS || 3),
-);
+  Number(process.env.APIFY_INSTAGRAM_MAX_AGE_WITHOUT_EXPLICIT_VALIDITY_DAYS || 3) || 3,
+));
 const UNKNOWN_EXPIRY_TTL_HOURS = Math.max(
   12,
   Number(process.env.APIFY_INSTAGRAM_UNKNOWN_EXPIRY_TTL_HOURS || 72),

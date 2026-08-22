@@ -1090,6 +1090,9 @@ async function scrapeInstagram() {
 
           const titleBase = cleanText(data.ogTitle || data.ldCaption || 'Instagram Deal');
           const title = titleBase.length > 80 ? `${titleBase.slice(0, 77)}...` : titleBase;
+          const ownerUsername = post.accountHint
+            ? normalizeUsername(cleanText(post.sourceKey).replace(/^acct:/, ''))
+            : '';
 
           const deal = {
             id: `ig-${stableId(`${post.url}|${pubDateIso}`)}`,
@@ -1108,6 +1111,11 @@ async function scrapeInstagram() {
             priority: Math.max(1, Math.round(score / 12)),
             votes: 1,
             qualityScore: score,
+            ownerUsername,
+            sourcePublishedAt: pubDateMeta?.iso || '',
+            sourcePublishedAtSource: pubDateMeta?.source
+              ? `instagram-page-${pubDateMeta.source}`
+              : '',
             pubDate: pubDateIso,
             pubDateSource: pubDateMeta.source || '',
           };

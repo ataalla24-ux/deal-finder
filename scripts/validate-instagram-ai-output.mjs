@@ -130,16 +130,7 @@ function validateInstagramAiPayload(output, report = {}, options = {}) {
       ? configuredMaxAgeDays
       : ABSOLUTE_MAX_POST_AGE_DAYS,
   );
-  const configuredActiveOfferMaxAgeDays = Number(
-    report.config?.activeOfferMaxAgeDays
-    ?? options.activeOfferMaxAgeDays
-    ?? process.env.INSTAGRAM_AI_ACTIVE_OFFER_MAX_AGE_DAYS
-    ?? 45,
-  );
-  const activeOfferMaxAgeDays = Number.isFinite(configuredActiveOfferMaxAgeDays)
-    && configuredActiveOfferMaxAgeDays >= maxAgeDays
-    ? configuredActiveOfferMaxAgeDays
-    : Math.max(45, maxAgeDays);
+  const activeOfferMaxAgeDays = maxAgeDays;
   const configuredFutureSkewMinutes = Number(
     report.config?.publicationFutureSkewMinutes
     ?? options.publicationFutureSkewMinutes
@@ -229,10 +220,7 @@ function validateInstagramAiPayload(output, report = {}, options = {}) {
       });
       const ageDays = Math.max(0, (now.getTime() - pubDate.getTime()) / DAY_MS);
       if (ageDays > maxAgeDays && !offerTiming.eligibleByAge) {
-        const detail = ageDays > activeOfferMaxAgeDays
-          ? `active-offer max is ${activeOfferMaxAgeDays}`
-          : 'no currently active explicit period/end date or recurring weekday schedule in source evidence';
-        errors.push(`${label} is ${ageDays.toFixed(2)} days old; ${detail}`);
+        errors.push(`${label} is ${ageDays.toFixed(2)} days old; hard social-post max is ${maxAgeDays}`);
       }
       if (offerTiming.expired) errors.push(`${label} has expired source offer evidence`);
       if (offerTiming.futurePublication) errors.push(`${label} pubDate is implausibly in the future`);
@@ -288,8 +276,7 @@ function runCli() {
     return;
   }
   console.log(
-    `Instagram AI output valid: ${result.deals.length} deals, max age ${result.maxAgeDays} days `
-    + `(${result.activeOfferMaxAgeDays} with active-offer proof)`,
+    `Instagram AI output valid: ${result.deals.length} deals, hard max age ${result.maxAgeDays} days`,
   );
 }
 

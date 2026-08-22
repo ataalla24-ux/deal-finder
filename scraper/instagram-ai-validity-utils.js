@@ -391,7 +391,9 @@ export function evaluateInstagramOfferTiming(options = {}) {
   const now = finiteDate(options.now) || new Date();
   const pubDate = finiteDate(options.pubDate);
   const maxAgeDays = validNumber(options.maxAgeDays, 7);
-  const activeOfferMaxAgeDays = Math.max(maxAgeDays, validNumber(options.activeOfferMaxAgeDays, 45));
+  // Offer validity and recurring schedules describe when a promotion runs;
+  // they must never make an old Instagram post current again.
+  const activeOfferMaxAgeDays = maxAgeDays;
   const futureSkewMinutes = validNumber(options.futureSkewMinutes, 10);
   const signal = String(options.signal || '');
   const offerWindow = extractActiveOfferWindow(signal, { pubDate, now });
@@ -427,8 +429,7 @@ export function evaluateInstagramOfferTiming(options = {}) {
     activeEvidence,
     upcomingEvidence,
     expired,
-    eligibleByAge: Boolean(pubDate && !futurePublication && !expired
-      && (withinFreshWindow || (withinActiveOfferLimit && (activeEvidence || upcomingEvidence)))),
+    eligibleByAge: Boolean(pubDate && !futurePublication && !expired && withinFreshWindow),
   };
 }
 

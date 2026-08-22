@@ -104,8 +104,8 @@ const FORCE_KEEP_DYNAMIC_URLS = new Set();
 const MAX_LIVE_URL_HEALTH_CHECKS = Number(process.env.MAX_LIVE_URL_HEALTH_CHECKS || 180);
 const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REFRESHES || 120);
 const MAX_LIVE_CONTENT_ENRICHMENTS = Number(process.env.MAX_LIVE_CONTENT_ENRICHMENTS || 120);
-const MAX_OPAQUE_SOCIAL_AGE_DAYS = Number(process.env.MAX_LIVE_OPAQUE_SOCIAL_AGE_DAYS || 14);
-const MAX_SOCIAL_POST_AGE_DAYS = Number(process.env.MAX_LIVE_SOCIAL_POST_AGE_DAYS || process.env.DEAL_VALIDITY_MAX_AGE_DAYS || 7);
+const MAX_OPAQUE_SOCIAL_AGE_DAYS = Math.min(7, Math.max(1, Number(process.env.MAX_LIVE_OPAQUE_SOCIAL_AGE_DAYS || 7) || 7));
+const MAX_SOCIAL_POST_AGE_DAYS = Math.min(7, Math.max(1, Number(process.env.MAX_LIVE_SOCIAL_POST_AGE_DAYS || process.env.DEAL_VALIDITY_MAX_AGE_DAYS || 7) || 7));
 const MAX_EXPIRED_REVIEW_GRACE_DAYS = Number(process.env.MAX_LIVE_EXPIRED_REVIEW_GRACE_DAYS || 7);
 const APPLY_LIVE_VALIDATION = process.env.LIVE_DEAL_VALIDATION_APPLY === '1';
 const LIVE_DEAL_REMOVALS_ENABLED = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
@@ -167,19 +167,19 @@ function hasCurrentExpiryEvidence(deal, now = new Date()) {
 function hasReliableSocialPubDate(deal = {}) {
   const source = cleanText(deal.pubDateSource || '').toLowerCase();
   if (/^url\./i.test(source)) return true;
+  if (/(?:instagram|tiktok|meta|apify).*(?:timestamp|datetime|published|postdate|posttime|takenat)/i.test(source)) {
+    return true;
+  }
   if ([
     'socialpostdate',
     'profiletimeline',
     'derivedpubdate',
-    'firecrawlagentrun',
     'time.datetime',
     'url.contextpublished',
   ].includes(source)) {
     return true;
   }
-
-  const signal = cleanText([deal.originSource, deal.source].filter(Boolean).join(' ')).toLowerCase();
-  return /(tiktok-deals-scanner|instagram(?:\s|-|_)|firecrawl food #3|firecrawl instagram|firecrawl gastro|apify)/i.test(signal);
+  return false;
 }
 
 function hasRunBudget(used, limit) {
@@ -621,7 +621,7 @@ function getSocialPostFreshnessRemovalReason(deal, now) {
     return `Social-Postdatum liegt in der Zukunft (${isoDateOnly(pubDateText)})`;
   }
 
-  if (ageDays > MAX_SOCIAL_POST_AGE_DAYS && !hasCurrentExpiryEvidence(deal, now)) {
+  if (ageDays > MAX_SOCIAL_POST_AGE_DAYS) {
     const expiryText = cleanText(deal?.expiryDisplayText || deal?.expiresOriginal || deal?.expires || '');
     const suffix = expiryText && isVagueExpiry(expiryText) ? ', kein konkretes Ablaufdatum' : '';
     return `Social-Post älter als ${MAX_SOCIAL_POST_AGE_DAYS} Tage (${isoDateOnly(pubDateText)}, ${source || 'unbekannte Quelle'}${suffix})`;
@@ -1558,7 +1558,11 @@ async function main() {
   console.log(`Social polish fixes applied: ${socialPolishFixes}`);
 }
 
-main().catch((error) => {
-  console.error('normalize-live-deals failed:', error);
-  process.exitCode = 1;
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main().catch((error) => {
+    console.error('normalize-live-deals failed:', error);
+    process.exitCode = 1;
+  });
+}
+
+export { getSocialPostFreshnessRemovalReason };

@@ -269,14 +269,6 @@ function networkCandidateScore(deal, registry, now) {
   return { url, encoded, score };
 }
 
-function hasFutureValidity(deal, now) {
-  const candidates = [deal.validUntil, deal.validOn, deal.expires, deal.end_date];
-  return candidates.some((value) => {
-    const timestamp = Date.parse(cleanText(value));
-    return Number.isFinite(timestamp) && timestamp >= now.getTime();
-  });
-}
-
 async function mapWithConcurrency(items, concurrency, mapper) {
   const results = new Array(items.length);
   let nextIndex = 0;
@@ -302,11 +294,16 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
       ?? process.env.FIRECRAWL_POST_VERIFY_MAX
       ?? 80
   ) || 0);
-  const networkMaxAgeDays = Math.max(1, Number(
+  const networkMaxAgeDays = Math.min(7, Math.max(1, Number(
     options.networkMaxAgeDays
       ?? process.env.FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS
-      ?? 45
-  ) || 45);
+      ?? 7
+  ) || 7));
+  const maxAcceptedAgeDays = Math.min(7, Math.max(1, Number(
+    options.maxAcceptedAgeDays
+      ?? process.env.FIRECRAWL_POST_MAX_ACCEPTED_AGE_DAYS
+      ?? 7
+  ) || 7));
   const concurrency = Math.max(1, Number(
     options.concurrency
       ?? process.env.FIRECRAWL_POST_VERIFY_CONCURRENCY
@@ -342,7 +339,7 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
     const key = canonicalInstagramPostKey(candidate.url);
     if (!key || !candidate.url) continue;
     const ageDays = candidate.encoded ? (now.getTime() - candidate.encoded.getTime()) / DAY_MS : null;
-    if (ageDays !== null && ageDays > networkMaxAgeDays && !hasFutureValidity(deal, now)) continue;
+    if (ageDays !== null && ageDays > networkMaxAgeDays) continue;
     const existing = candidatesByKey.get(key);
     if (!existing || candidate.score > existing.score) {
       candidatesByKey.set(key, { ...candidate, key, deal });
@@ -368,7 +365,7 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
   let verifiedCount = 0;
   let timestampOnlyCount = 0;
   let registryViennaCount = 0;
-  const verifiedDeals = baseDeals.map((deal) => {
+  const enrichedDeals = baseDeals.map((deal) => {
     const url = normalizeInstagramPostUrl(deal.url);
     const key = canonicalInstagramPostKey(url);
     if (!key) return deal;
@@ -425,10 +422,36 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
     return next;
   });
 
+  let staleInstagramPosts = 0;
+  let undatedInstagramPosts = 0;
+  let invalidInstagramUrls = 0;
+  const verifiedDeals = enrichedDeals.filter((deal) => {
+    const rawUrl = cleanText(deal.url || deal.post_url || deal.postUrl);
+    if (!/(?:^|\.)instagram\.com\//i.test(rawUrl)) return true;
+    const postUrl = normalizeInstagramPostUrl(rawUrl);
+    if (!postUrl) {
+      invalidInstagramUrls += 1;
+      return false;
+    }
+    const publication = getPublicationEvidence(deal);
+    const timestamp = Date.parse(publication.sourcePublishedAt || '');
+    if (!Number.isFinite(timestamp)) {
+      undatedInstagramPosts += 1;
+      return false;
+    }
+    const ageDays = (now.getTime() - timestamp) / DAY_MS;
+    if (ageDays < -10 / (24 * 60) || ageDays > maxAcceptedAgeDays) {
+      staleInstagramPosts += 1;
+      return false;
+    }
+    return true;
+  });
+
   console.log('🔬 Firecrawl original-post verification');
   console.log(`   candidates: ${deals.length}; network checked: ${networkCandidates.length}`);
   console.log(`   original posts verified: ${verifiedCount}; timestamp only: ${timestampOnlyCount}`);
   console.log(`   Vienna via verified merchant registry: ${registryViennaCount}; registry merchants: ${registry.size}`);
+  console.log(`   fresh output: ${verifiedDeals.length}; stale: ${staleInstagramPosts}; undated: ${undatedInstagramPosts}; invalid Instagram URLs: ${invalidInstagramUrls}`);
 
   return verifiedDeals;
 }

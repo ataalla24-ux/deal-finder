@@ -28,6 +28,19 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Refresh Instagram merchant registry
+        run: npm run instagram:merchant-registry
+
+      - name: Verify fresh Instagram candidates via Graph API
+        env:
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
+          INSTAGRAM_GRAPH_VERIFY_MAX_ACCOUNTS: "24"
+          INSTAGRAM_GRAPH_VERIFY_MEDIA_PER_ACCOUNT: "25"
+          INSTAGRAM_GRAPH_VERIFY_MAX_AGE_DAYS: "7"
+        run: npm run instagram:graph:verify
+
       - name: Build Deal Source Health
         run: node scraper/build-deal-source-health.js
 
@@ -38,10 +51,10 @@ jobs:
           FIRECRAWL_REVIEW_ENABLED: "1"
           FIRECRAWL_REVIEW_MAX_PER_SOURCE: "10"
           FIRECRAWL_REVIEW_MAX_TOTAL: "30"
-          FIRECRAWL_REVIEW_MAX_AGE_DAYS: "21"
+          FIRECRAWL_REVIEW_MAX_AGE_DAYS: "7"
         run: node scraper/slack-notify.js
 
       - name: Commit digest state
         if: always()
         run: |
-          node scripts/commit-generated.mjs --message "Daily digest state $(date +%Y-%m-%d)" --files docs/deals-pending-all.json docs/deal-candidates-index.json docs/deal-source-health.json docs/deal-validity-report.json
+          node scripts/commit-generated.mjs --skip-conflicts --message "Daily digest state $(date +%Y-%m-%d)" --files docs/deals-pending-all.json docs/deal-candidates-index.json docs/deal-source-health.json docs/deal-validity-report.json docs/instagram-merchant-registry.json docs/instagram-graph-post-evidence.json docs/instagram-graph-verification-report.json

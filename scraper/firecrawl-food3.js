@@ -124,7 +124,7 @@ async function main() {
   console.log();
 
   const result = await firecrawl.agent({
-    prompt: "Extrahiere Instagram-Angebote rund um Essen und Getränke. Schließe Kandidaten nicht wegen Alter, Wien-Bezug oder Deal-Typ aus. Erfasse Anbietername, Produktart, Standort, Angebotszeiten, Teilnahmebedingungen, den echten Account-Handle, das Veröffentlichungsdatum und den direkten Link zum Original-Post. Verwechsle das Veröffentlichungsdatum des Posts nicht mit Start oder Ende des Angebots. Wenn Details unklar sind, liefere trotzdem den Kandidaten mit den verfügbaren Angaben.",
+    prompt: "Extrahiere möglichst viele konkrete Instagram-Angebote rund um Essen und Getränke, die in Wien nutzbar sind. Nimm nur Originalposts aus den letzten 7 Tagen auf; prüfe dabei ausdrücklich Tag, Monat und Jahr. Ein Angebot darf erst in Zukunft beginnen, solange der Post selbst höchstens 7 Tage alt ist. Erfasse Anbietername, Produktart, exakten Wien-Standort, Angebotszeiten, Teilnahmebedingungen, echten Account-Handle, Veröffentlichungsdatum und direkten /p/...- oder /reel/...-Link. Verwechsle Veröffentlichungsdatum und Angebotszeitraum nicht. Lass bekannte alte Posts, Gewinnspiele, allgemeine Empfehlungen, Gratis-Versand und Posts ohne konkreten Preisvorteil weg. Ist nur das exakte Datum unlesbar, der direkte Originalpost aber eindeutig frisch, gib ihn zur Graph-Verifikation trotzdem zurück.",
     schema,
     model: 'spark-1-pro',
   });

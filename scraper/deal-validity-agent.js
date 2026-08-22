@@ -20,6 +20,7 @@ const DOCS_DIR = path.join(ROOT, 'docs');
 const DEFAULT_REPORT_PATH = path.join(DOCS_DIR, 'deal-validity-report.json');
 const DAY_MS = 24 * 60 * 60 * 1000;
 const FUTURE_CLOCK_SKEW_MS = 10 * 60 * 1000;
+const MAX_SOCIAL_POST_AGE_DAYS = 7;
 const DEFAULT_EXTENDED_MAX_AGE_DAYS = 45;
 const DEFAULT_CHURCH_WEEKDAY = 1; // Monday, aligned with the Churches Wien weekly workflow.
 const EXCLUDED_SOURCE_PATTERNS = [
@@ -409,6 +410,16 @@ function getMalformedAggregatorReason(deal) {
   return '';
 }
 
+function getEditorialPriceListingReason(deal, health = null) {
+  const finalUrl = cleanText(health?.finalUrl || deal.url);
+  if (!/https?:\/\/(?:www\.)?wienuncovered\.com\//i.test(finalUrl)) return '';
+  const text = [deal.title, deal.description, deal.offerText].map(cleanText).join(' ');
+  const explicitPromotion = /(?:\b\d{1,2}\s*%\s*(?:rabatt|off)?\b|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b(?:gratis|kostenlos|gutschein|coupon|rabatt|aktion|happy\s*hour|statt)\b|\b(?:pay\s+what\s+you\s+want|zahl\w*\s+was\s+du\s+willst)\b)/i;
+  return explicitPromotion.test(text)
+    ? ''
+    : 'redaktioneller Preis-/Restauranttipp statt zeitlich belegter Aktion';
+}
+
 function getOfferText(deal, health = null) {
   const contentHints = reliableContentHints(health);
   const title = cleanText(deal.title);
@@ -444,6 +455,8 @@ function getConcreteOfferDecision(deal, health = null) {
   if (socialFallbackReason) return { concrete: false, reason: socialFallbackReason };
   const malformedAggregatorReason = getMalformedAggregatorReason(deal);
   if (malformedAggregatorReason) return { concrete: false, reason: malformedAggregatorReason };
+  const editorialListingReason = getEditorialPriceListingReason(deal, health);
+  if (editorialListingReason) return { concrete: false, reason: editorialListingReason };
   if (/\b(?:gewinnspiel|giveaway|verlosung|raffle|sweepstake|zu\s+gewinnen|gewinne(?:n)?)\b/i.test(offerText)) {
     return { concrete: false, reason: 'Gewinnspiel/Verlosung statt direkt nutzbarem Deal' };
   }
@@ -935,14 +948,18 @@ async function validateDeal(deal, context) {
     ignoreUrlPublicationDate: sharedBenefitPageDeal,
     socialPost: socialPostDeal,
   });
-  const freshness = getFreshnessDecision(publicationCandidates, context.maxAgeDays, now, {
+  const freshnessMaxAgeDays = socialPostDeal
+    ? Math.min(context.maxAgeDays, MAX_SOCIAL_POST_AGE_DAYS)
+    : context.maxAgeDays;
+  const freshness = getFreshnessDecision(publicationCandidates, freshnessMaxAgeDays, now, {
     // Crawler run timestamps are ignored, but an official non-social offer
-    // page may legitimately have no publication date. Social posts still
-    // need a real platform timestamp (or explicit active validity evidence).
+    // page may legitimately have no publication date. Social posts always
+    // need a recent platform timestamp; a future offer window must not revive
+    // an old Instagram or TikTok post.
     requireDate: socialPostDeal || newsAggregatorDeal,
     socialPost: socialPostDeal,
-    activeValidity,
-    recurring,
+    activeValidity: socialPostDeal ? false : activeValidity,
+    recurring: socialPostDeal ? false : recurring,
     extendedMaxAgeDays: context.extendedMaxAgeDays,
   });
   const relativeOffer = getRelativeOfferDecision(deal, freshness.selected, now, {
@@ -953,6 +970,11 @@ async function validateDeal(deal, context) {
   const offer = getConcreteOfferDecision(deal, health);
   const reasons = [];
   const warnings = [];
+
+  const graphBlockingReason = cleanText(deal.metaGraphBlockingReason);
+  if (graphBlockingReason) {
+    reasons.push(`Meta-Graph-Widerspruch (${graphBlockingReason})`);
+  }
 
   if (health?.invalid) {
     reasons.push(`URL ungültig (${health.reason || 'unbekannt'})`);
@@ -1073,13 +1095,14 @@ function buildSummary(results, maxAgeDays) {
 
 function classifyBlockReason(reason) {
   const text = cleanText(reason).toLowerCase();
+  if (text.startsWith('meta-graph-widerspruch')) return 'Meta-Graph-Widerspruch';
   if (text.startsWith('älter') || text.startsWith('aelter')) return 'älter als 7 Tage';
   if (text.startsWith('abgelaufen')) return 'abgelaufen';
   if (text.startsWith('relative kurz-aktion abgelaufen')) return 'abgelaufen';
   if (text.startsWith('url ungültig')) return 'ungültige URL';
   if (text.startsWith('ausgeschlossene quelle')) return 'ausgeschlossene Quelle';
   if (text.startsWith('nicht eindeutig in wien')) return 'nicht Wien';
-  if (text.startsWith('kein konkretes angebot') || text.startsWith('nur gratis-lieferung') || text.startsWith('allgemeine empfehlung')) return 'kein konkreter Deal';
+  if (text.startsWith('kein konkretes angebot') || text.startsWith('nur gratis-lieferung') || text.startsWith('allgemeine empfehlung') || text.startsWith('redaktioneller preis-')) return 'kein konkreter Deal';
   if (text.startsWith('gewinnspiel')) return 'Gewinnspiel';
   if (text.startsWith('kein verlässliches quell') || text.startsWith('kein echtes social-post-datum')) return 'kein echtes Post-Datum';
   if (text.startsWith('quell-/post-datum liegt in der zukunft')) return 'Post-Datum in Zukunft';

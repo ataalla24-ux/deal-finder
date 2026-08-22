@@ -1,7 +1,7 @@
 import '../sentry/instrument.mjs';
 // ============================================
 // 🔥 FIRECRAWL KEY 3 - INSTAGRAM CONSUMABLE OFFERS
-// Breiter Intake ohne harte Freshness-/Promo-Gates
+// Frischer Instagram-Intake mit zentraler Originalpost-Verifikation
 // ============================================
 
 import Firecrawl from '@mendable/firecrawl-js';
@@ -166,7 +166,7 @@ async function main() {
   console.log();
 
   const result = await firecrawl.agent({
-    prompt: `Extrahiere Instagram-Posts über Angebote rund um Essen und Getränke. Schließe keine Kandidaten wegen Alter, Giveaway-Charakter, Standort oder fehlender Signalwörter aus. Erfasse pro Post möglichst den Gültigkeitszeitraum, den Standort, die Art der Speisen/Getränke, die URL des Original-Posts, den Account-Handle sowie den Veröffentlichungszeitpunkt. Verwechsle das Veröffentlichungsdatum nicht mit dem Angebotszeitraum. Wenn Informationen unklar sind, gib trotzdem den Kandidaten mit den besten verfügbaren Feldern zurück.`,
+    prompt: `Extrahiere möglichst viele konkrete Gratis-, 1+1- und starke Rabattangebote rund um Essen und Getränke aus Instagram-Originalposts. Nur Angebote aufnehmen, die in Wien nutzbar sind und deren Post in den letzten 7 Tagen veröffentlicht wurde; Tag, Monat und Jahr ausdrücklich prüfen. Zukünftig beginnende Angebote sind erwünscht, wenn der Post selbst höchstens 7 Tage alt ist. Erfasse Gültigkeitszeitraum, exakten Wien-Standort, Speisen/Getränke, direkten /p/...- oder /reel/...-Link, Account-Handle und Veröffentlichungszeitpunkt. Veröffentlichungsdatum und Angebotszeitraum niemals verwechseln. Alte Posts, Gewinnspiele, Empfehlungen, Gratis-Versand und Posts ohne konkreten Vorteil weglassen. Bei eindeutig frischem Originalpost darf ein unlesbares Detail leer bleiben, damit Graph API und Validator nachprüfen können.`,
     schema: key3Schema,
     model: 'spark-1-mini',
   });

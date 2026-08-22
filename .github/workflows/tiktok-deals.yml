@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PLAYWRIGHT_BROWSERS_PATH: 0
-      TIKTOK_MAX_AGE_DAYS: 3
+      TIKTOK_MAX_AGE_DAYS: 7
     steps:
       - uses: actions/checkout@v4
 
@@ -45,4 +45,4 @@ jobs:
       - name: Commit TikTok scanner state
         if: always()
         run: |
-          node scripts/commit-generated.mjs --message "TikTok deals $(date +%Y-%m-%d)" --files docs/deals-pending-tiktok.json docs/tiktok-scanner-report.json docs/deals-pending-all.json docs/deal-validity-report.json
+          node scripts/commit-generated.mjs --skip-conflicts --message "TikTok deals $(date +%Y-%m-%d)" --files docs/deals-pending-tiktok.json docs/tiktok-scanner-report.json docs/deals-pending-all.json docs/deal-validity-report.json

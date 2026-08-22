@@ -23,6 +23,10 @@ import {
   mergeDealEvidence,
   mergeDuplicateDealRecords,
 } from './deal-evidence-utils.js';
+import {
+  enrichDealWithInstagramGraphEvidence,
+  loadInstagramGraphEvidence,
+} from './instagram-graph-evidence.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +34,7 @@ const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const PENDING_ALL_PATH = path.join(DOCS_DIR, 'deals-pending-all.json');
 const KEY4_REVIEW_PATH = path.join(DOCS_DIR, 'deals-review-firecrawl4.json');
+const GRAPH_EVIDENCE_PATH = path.join(DOCS_DIR, 'instagram-graph-post-evidence.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
 function loadEnvFile() {
@@ -71,9 +76,9 @@ const FIRECRAWL_REVIEW_MAX_TOTAL = boundedInteger(
 );
 const FIRECRAWL_REVIEW_MAX_AGE_DAYS = boundedInteger(
   process.env.FIRECRAWL_REVIEW_MAX_AGE_DAYS,
-  21,
-  8,
-  90,
+  7,
+  1,
+  14,
 );
 const KEY4_REVIEW_ARTIFACT_MAX_AGE_HOURS = boundedInteger(
   process.env.FIRECRAWL_KEY4_REVIEW_ARTIFACT_MAX_AGE_HOURS,
@@ -404,6 +409,11 @@ function normalizeDeal(rawDeal, sourceKey) {
   };
 }
 
+function normalizeDealWithGraphEvidence(rawDeal, sourceKey, graphEvidence) {
+  const graphResult = enrichDealWithInstagramGraphEvidence(rawDeal, graphEvidence);
+  return normalizeDeal(graphResult.deal, sourceKey);
+}
+
 function getPendingFiles() {
   const allPendingFiles = fs.readdirSync(DOCS_DIR).filter((file) => {
     if (!file.startsWith('deals-pending-') || !file.endsWith('.json')) return false;
@@ -420,7 +430,7 @@ function getPendingFiles() {
   return requested.filter((name) => allPendingFiles.includes(name) && !EXCLUDED_PENDING_FILES.has(name));
 }
 
-function loadPendingDeals(files) {
+function loadPendingDeals(files, graphEvidence = new Map()) {
   const deals = [];
   console.log(`📂 Found ${files.length} pending deal files`);
 
@@ -430,7 +440,7 @@ function loadPendingDeals(files) {
     try {
       const parsed = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
       const items = ensureArray(parsed.deals || parsed);
-      const normalized = items.map((d) => normalizeDeal(d, sourceKey));
+      const normalized = items.map((deal) => normalizeDealWithGraphEvidence(deal, sourceKey, graphEvidence));
       console.log(`  - ${file}: ${normalized.length} deals`);
       deals.push(...normalized);
     } catch (error) {
@@ -461,7 +471,7 @@ function isKey4ReviewDeal(deal) {
 }
 
 function prepareKey4ReviewDeals(deals, options = {}) {
-  const maxAgeDays = boundedInteger(options.maxAgeDays, 45, 8, 90);
+  const maxAgeDays = boundedInteger(options.maxAgeDays, 7, 1, 14);
   const selected = [];
   let discarded = 0;
 
@@ -507,7 +517,7 @@ function prepareKey4ReviewDeals(deals, options = {}) {
 
 function loadKey4ReviewArtifact(options = {}) {
   if (!fs.existsSync(KEY4_REVIEW_PATH)) {
-    return { deals: [], eligible: 0, discarded: 0, maxAgeDays: 45, status: 'missing' };
+    return { deals: [], eligible: 0, discarded: 0, maxAgeDays: 7, status: 'missing' };
   }
   try {
     const payload = ensureObject(JSON.parse(fs.readFileSync(KEY4_REVIEW_PATH, 'utf-8')));
@@ -517,11 +527,13 @@ function loadKey4ReviewArtifact(options = {}) {
       ? Number.POSITIVE_INFINITY
       : Math.max(0, (now.getTime() - updatedAt.getTime()) / (60 * 60 * 1000));
     if (ageHours > KEY4_REVIEW_ARTIFACT_MAX_AGE_HOURS) {
-      return { deals: [], eligible: 0, discarded: 0, maxAgeDays: 45, status: 'stale', ageHours };
+      return { deals: [], eligible: 0, discarded: 0, maxAgeDays: 7, status: 'stale', ageHours };
     }
-    const normalized = ensureArray(payload.deals).map((deal) => normalizeDeal(deal, 'firecrawl4-review'));
+    const normalized = ensureArray(payload.deals).map((deal) => (
+      normalizeDealWithGraphEvidence(deal, 'firecrawl4-review', options.graphEvidence || new Map())
+    ));
     return {
-      ...prepareKey4ReviewDeals(normalized, { maxAgeDays: 45 }),
+      ...prepareKey4ReviewDeals(normalized, { maxAgeDays: 7 }),
       status: 'loaded',
       ageHours,
     };
@@ -530,19 +542,21 @@ function loadKey4ReviewArtifact(options = {}) {
       deals: [],
       eligible: 0,
       discarded: 0,
-      maxAgeDays: 45,
+      maxAgeDays: 7,
       status: 'invalid',
       error: cleanText(error?.message),
     };
   }
 }
 
-function loadPendingQueue() {
+function loadPendingQueue(graphEvidence = new Map()) {
   if (!fs.existsSync(PENDING_ALL_PATH)) return [];
   try {
     const parsed = JSON.parse(fs.readFileSync(PENDING_ALL_PATH, 'utf-8'));
     const deals = ensureArray(parsed.deals);
-    return deals.map((d) => normalizeDeal(d, cleanText(d.source) || 'queue'));
+    return deals.map((deal) => (
+      normalizeDealWithGraphEvidence(deal, cleanText(deal.source) || 'queue', graphEvidence)
+    ));
   } catch {
     return [];
   }
@@ -945,7 +959,7 @@ function compareSlackDeals(left, right) {
   return rightDate - leftDate;
 }
 
-const FIRECRAWL_REVIEW_HARD_REASON_PATTERN = /(?:abgelaufen|nicht eindeutig in wien|url ungültig|ausgeschlossene quelle|gewinnspiel|noch nicht gestartet|liegt in der zukunft|nur gratis-lieferung|gottesdienste)/i;
+const FIRECRAWL_REVIEW_HARD_REASON_PATTERN = /(?:abgelaufen|nicht eindeutig in wien|url ungültig|ausgeschlossene quelle|gewinnspiel|noch nicht gestartet|liegt in der zukunft|nur gratis-lieferung|gottesdienste|meta-graph-widerspruch|kein echtes social-post-datum)/i;
 const FIRECRAWL_REVIEW_SOFT_REASON_PATTERN = /^(?:älter als \d+ tage(?: trotz [^(]+)? \(\d{4}-\d{2}-\d{2}\)|kein konkretes angebot erkennbar|allgemeine empfehlung\/gratis-event statt konkreter aktion|kein echtes social-post-datum gefunden|kein verlässliches quell-\/post-datum gefunden)$/i;
 
 function isFirecrawlReviewSource(deal) {
@@ -992,7 +1006,7 @@ function compareFirecrawlReviewDeals(left, right) {
 function selectFirecrawlReviewDeals(results, options = {}) {
   const maxPerSource = boundedInteger(options.maxPerSource, 10, 1, 25);
   const maxTotal = boundedInteger(options.maxTotal, 30, 1, 100);
-  const maxAgeDays = boundedInteger(options.maxAgeDays, 21, 8, 90);
+  const maxAgeDays = boundedInteger(options.maxAgeDays, 7, 1, 14);
   const candidates = [];
 
   for (const result of ensureArray(results)) {
@@ -1257,10 +1271,14 @@ async function main() {
 
   const pendingFiles = getPendingFiles();
   const moderation = loadDealModeration();
-  const loadedPendingDeals = loadPendingDeals(pendingFiles);
+  const graphEvidence = loadInstagramGraphEvidence(GRAPH_EVIDENCE_PATH).byKey;
+  const loadedPendingDeals = loadPendingDeals(pendingFiles, graphEvidence);
+  const graphMatchedDeals = loadedPendingDeals.filter((deal) => deal.metaGraphVerified === true);
+  const graphBlockedDeals = graphMatchedDeals.filter((deal) => cleanText(deal.metaGraphBlockingReason));
+  console.log(`🧬 Instagram Graph evidence: ${graphMatchedDeals.length} exakte Treffer, ${graphBlockedDeals.length} harte Widersprüche`);
   const key4ReviewArtifact = FIRECRAWL_REVIEW_ENABLED
-    ? loadKey4ReviewArtifact()
-    : { deals: [], eligible: 0, discarded: 0, maxAgeDays: 45, status: 'disabled' };
+    ? loadKey4ReviewArtifact({ graphEvidence })
+    : { deals: [], eligible: 0, discarded: 0, maxAgeDays: 7, status: 'disabled' };
   const moderationPendingFilter = filterModeratedDeals(loadedPendingDeals, moderation);
   if (moderationPendingFilter.removed.length > 0) {
     console.log(`🛡️ Moderation filter: ${moderationPendingFilter.removed.length} pending Deals vor Slack entfernt`);
@@ -1282,7 +1300,7 @@ async function main() {
         : ''),
     );
   }
-  const queuePrune = pruneStaleQueueDeals(loadPendingQueue());
+  const queuePrune = pruneStaleQueueDeals(loadPendingQueue(graphEvidence));
   if (queuePrune.removed > 0) {
     console.log(`🧹 Queue prune: ${queuePrune.removed} mehr als ${SEEN_DEAL_SUPPRESSION_DAYS} Tage alte Deals aus der Slack-Queue entfernt`);
   }

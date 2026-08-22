@@ -61,7 +61,8 @@ const activeExamples = [
 
 for (const example of activeExamples) {
   const result = timing(example.signal, example.pubDate);
-  assert.equal(result.eligibleByAge, true, `${example.name} should remain eligible`);
+  assert.equal(result.eligibleByAge, false, `${example.name} must stay blocked because its post is older than 7 days`);
+  assert.equal(result.activeOfferMaxAgeDays, 7, 'active offer evidence cannot extend social-post freshness');
   assert.equal(result.expired, false, `${example.name} should not be expired`);
   if (example.kind) assert.equal(result.offerWindow?.kind, example.kind, `${example.name} kind`);
   if (example.validUntil) {
@@ -79,10 +80,10 @@ assert.equal(
 assert.equal(
   timing('Spelunke Wien: Happy Hour Mo–Fr 17–18 Uhr', '2026-05-31T10:00:00.000Z').eligibleByAge,
   false,
-  'even recurring evidence must be bounded by the 45-day maximum'
+  'even recurring evidence must be bounded by the 7-day maximum'
 );
 
-const activePastStart = timing('Wien Aktion vom 1.7.–31.7.2026', '2026-07-05T10:00:00.000Z');
+const activePastStart = timing('Wien Aktion vom 1.7.–31.7.2026', '2026-07-16T10:00:00.000Z');
 assert.equal(activePastStart.explicitExpired, false, 'a past range start must not expire an active range');
 assert.equal(activePastStart.eligibleByAge, true, 'an active range remains eligible');
 
@@ -90,7 +91,7 @@ const expiredRange = timing('Wien Aktion vom 1.–30. Juni', '2026-06-20T10:00:0
 assert.equal(expiredRange.explicitExpired, true, 'a range is expired only after its end');
 assert.equal(expiredRange.eligibleByAge, false);
 
-const futureRange = timing('Wien Deal vom 1.–31. August', '2026-07-10T10:00:00.000Z');
+const futureRange = timing('Wien Deal vom 1.–31. August', '2026-07-18T10:00:00.000Z');
 assert.equal(futureRange.notStarted, true, 'a future range is not a currently active offer');
 assert.equal(futureRange.eligibleByAge, true, 'a published upcoming range remains eligible');
 
@@ -109,7 +110,7 @@ assert.equal(expiredSingleWithOpeningHours.eligibleByAge, false);
 
 const openingNarrativeWithActiveEnd = timing(
   'Am 8. Juli haben wir eröffnet; ab jetzt gibt es 20% Rabatt bis Ende August.',
-  '2026-07-08T10:00:00.000Z'
+  '2026-07-18T10:00:00.000Z'
 );
 assert.equal(openingNarrativeWithActiveEnd.explicitExpired, false);
 assert.equal(openingNarrativeWithActiveEnd.offerWindow?.kind, 'month-end');
@@ -117,7 +118,7 @@ assert.equal(openingNarrativeWithActiveEnd.eligibleByAge, true);
 
 const isoActiveRange = timing(
   'Le Pho Wien: 1+1 gratis von 2026-06-01 bis 2026-08-31.',
-  '2026-06-15T10:00:00.000Z'
+  '2026-07-18T10:00:00.000Z'
 );
 assert.equal(isoActiveRange.offerWindow?.kind, 'range');
 assert.equal(isoActiveRange.offerWindow?.endDate?.toISOString().slice(0, 10), '2026-08-31');
@@ -125,7 +126,7 @@ assert.equal(isoActiveRange.eligibleByAge, true);
 
 const openEndedOffer = timing(
   'Le Pho Wien: Seit 2026-07-01 bis auf Weiteres 1+1 gratis.',
-  '2026-07-01T10:00:00.000Z'
+  '2026-07-18T10:00:00.000Z'
 );
 assert.equal(openEndedOffer.offerWindow?.kind, 'ongoing');
 assert.equal(openEndedOffer.offerWindow?.startDate?.toISOString().slice(0, 10), '2026-07-01');
@@ -163,7 +164,7 @@ assert.equal(
   'an opening narrative must not turn a current offer into a yesterday-only offer'
 );
 assert.equal(
-  timing('Gestern eröffnet, ab heute gibt es 1+1 in Wien bis Ende August.', '2026-06-20T10:00:00.000Z').eligibleByAge,
+  timing('Gestern eröffnet, ab heute gibt es 1+1 in Wien bis Ende August.', '2026-07-18T10:00:00.000Z').eligibleByAge,
   true,
   'the current offer following yesterday narrative should remain eligible'
 );
@@ -246,4 +247,4 @@ assert.deepEqual(
 const trackedReport = JSON.parse(fs.readFileSync(new URL('../docs/instagram-ai-report.json', import.meta.url), 'utf8'));
 assertNoLoneSurrogatesDeep(trackedReport, 'instagram-ai-report');
 
-console.log('Instagram AI active-offer validity tests passed');
+console.log('Instagram AI hard freshness and offer validity tests passed');

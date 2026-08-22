@@ -47,7 +47,7 @@ assert.deepEqual(evidencePreserved.viennaEvidence, { verified: true, source: 'ap
 
 const firecrawlNormalized = normalizeForSlackNotify({
   title: '20 % Rabatt – Firecrawl deal',
-  url: 'https://www.instagram.com/p/FirecrawlCompat/',
+  url: 'https://www.instagram.com/p/Das-rG-kVlD/',
   source: 'Firecrawl Instagram Gastro #5',
   pubDate: '2026-07-17T08:00:00.000Z',
   pubDateSource: 'firecrawlAgentRun',

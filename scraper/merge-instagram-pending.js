@@ -6,6 +6,10 @@ import {
   getPublicationEvidence,
   mergeDealEvidence,
 } from './deal-evidence-utils.js';
+import {
+  enrichDealWithInstagramGraphEvidence,
+  loadInstagramGraphEvidence,
+} from './instagram-graph-evidence.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +20,7 @@ const DOCS_DIR = path.join(ROOT, 'docs');
 // Keep the evidence-gated sources isolated so neither pipeline can overwrite
 // the other's Slack state or generated output.
 const MERGED_PATH = path.join(DOCS_DIR, 'deals-pending-instagram-verified.json');
+const GRAPH_EVIDENCE_PATH = path.join(DOCS_DIR, 'instagram-graph-post-evidence.json');
 const SOURCE_FILES = [
   { key: 'instagram-web', file: 'deals-pending-instagram-web.json' },
   { key: 'instagram-discovery', file: 'deals-pending-instagram-discovery.json' },
@@ -77,8 +82,12 @@ function getQualityScore(deal) {
 
 export function buildMergedInstagramPayload(options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
+  const graphEvidence = options.graphEvidence instanceof Map
+    ? options.graphEvidence
+    : loadInstagramGraphEvidence(options.graphEvidencePath || GRAPH_EVIDENCE_PATH).byKey;
   const sourceDeals = [];
   const sourceCounts = {};
+  const graphStats = { matched: 0, blocked: 0 };
   let existingSourceFiles = 0;
 
   for (const source of SOURCE_FILES) {
@@ -88,11 +97,22 @@ export function buildMergedInstagramPayload(options = {}) {
       continue;
     }
     existingSourceFiles += 1;
-    const deals = readDeals(filePath).map((deal) => mergeDealEvidence({}, {
-      ...deal,
-      originSource: deal.originSource || deal.source || source.key,
-      sourceKeys: [source.key],
-    }, { now }));
+    const rawDeals = readDeals(filePath);
+    const deals = [];
+    for (const rawDeal of rawDeals) {
+      const merged = mergeDealEvidence({}, {
+        ...rawDeal,
+        originSource: rawDeal.originSource || rawDeal.source || source.key,
+        sourceKeys: [source.key],
+      }, { now });
+      const graphResult = enrichDealWithInstagramGraphEvidence(merged, graphEvidence, { now });
+      if (graphResult.matched) graphStats.matched += 1;
+      if (graphResult.blocked) {
+        graphStats.blocked += 1;
+        continue;
+      }
+      deals.push(graphResult.deal);
+    }
     sourceCounts[source.key] = deals.length;
     sourceDeals.push(...deals);
   }
@@ -105,6 +125,7 @@ export function buildMergedInstagramPayload(options = {}) {
       totalDeals: existingMergedDeals.length,
       meta: {
         sources: { ...sourceCounts, merged: existingMergedDeals.length },
+        graphEvidence: graphStats,
         note: 'No Instagram source files found; kept existing merged payload.',
       },
       deals: existingMergedDeals,
@@ -139,6 +160,7 @@ export function buildMergedInstagramPayload(options = {}) {
     totalDeals: deals.length,
     meta: {
       sources: { ...sourceCounts, merged: deals.length },
+      graphEvidence: graphStats,
     },
     deals,
   };

@@ -59,9 +59,19 @@ const apronPrice = buildHeuristicDeal(candidate({
   sourceDeal: { brand: 'Restaurant APRON', title: '5-Gänge-Menü', distance: 'Wien' },
   title: 'Restaurant APRON Wien auf Instagram',
   description: `Von heute bis ${activeEndText}: 5-Gänge-Menü um € 130 statt € 166 in Wien.`,
-  pubDate: publishedEightDaysAgo,
+  pubDate: publishedYesterday,
 }));
 assert.ok(apronPrice, 'the euro-before-number instead-price form must count as a concrete active offer');
+
+const oldApronPrice = buildHeuristicDeal(candidate({
+  url: 'https://www.instagram.com/p/Daia5aCFi-Old/',
+  source: 'gastro2',
+  sourceDeal: { brand: 'Restaurant APRON', title: '5-Gänge-Menü', distance: 'Wien' },
+  title: 'Restaurant APRON Wien auf Instagram',
+  description: `Von heute bis ${activeEndText}: 5-Gänge-Menü um € 130 statt € 166 in Wien.`,
+  pubDate: publishedEightDaysAgo,
+}));
+assert.equal(oldApronPrice, null, 'an active offer must not rescue an Instagram post older than seven days');
 
 const futureEventDate = new Date(now.getTime() + 20 * dayMs);
 const futureAidsEvent = buildHeuristicDeal(candidate({

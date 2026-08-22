@@ -264,7 +264,7 @@ function buildConfig() {
   const requestedMaxAgeDays = toNum(process.env.IG_MAX_AGE_DAYS, DEFAULT_CONFIG.maxAgeDays);
   return {
     ...DEFAULT_CONFIG,
-    maxAgeDays: Math.min(14, requestedMaxAgeDays),
+    maxAgeDays: Math.min(7, requestedMaxAgeDays),
     maxDealsPerRun: toNum(process.env.IG_MAX_DEALS, DEFAULT_CONFIG.maxDealsPerRun),
     maxPostsToVisit: toNum(process.env.IG_MAX_POSTS_VISIT, DEFAULT_CONFIG.maxPostsToVisit),
     maxRelatedAccounts: toNum(process.env.IG_MAX_RELATED_ACCOUNTS, DEFAULT_CONFIG.maxRelatedAccounts),
@@ -1127,8 +1127,11 @@ async function collectDealsFromAccountApi(sourceStats, page) {
         priority: Math.max(1, Math.round(score / 10)),
         votes: 1,
         qualityScore: score,
+        ownerUsername: normalizeUsername(user?.username),
         pubDate: pubDateIso,
         pubDateSource: 'profileTimeline',
+        sourcePublishedAt: pubDateIso,
+        sourcePublishedAtSource: 'instagram-profile-timeline-timestamp',
         discoveredBy: [...new Set([source.kind, 'profile-api', ...(source.discoveredBy || [])])].join(','),
         sourceHits: 1,
         reviewTier: score >= 84 ? 'high' : score >= 70 ? 'medium' : 'low',
@@ -1413,6 +1416,14 @@ function restoreCandidateMapFromSnapshot(candidateSnapshot) {
     });
   }
   return candidatePosts;
+}
+
+function ownerUsernameFromCandidate(candidate) {
+  for (const ref of candidate?.sourceRefs || []) {
+    const username = normalizeUsername(cleanText(ref).match(/^(?:acct|related):(.+)$/i)?.[1]);
+    if (username) return username;
+  }
+  return '';
 }
 
 async function scrapeInstagramDiscovery() {
@@ -1784,6 +1795,7 @@ async function scrapeInstagramDiscovery() {
         const category = detectCategory(combinedText);
         const type = detectType(combinedText);
         const brand = deriveBrand(data, candidate.url);
+        const ownerUsername = ownerUsernameFromCandidate(candidate);
         const titleBase = cleanText(data.ogTitle || data.ldCaption || 'Instagram Deal');
         const title = titleBase.length > 88 ? `${titleBase.slice(0, 85)}...` : titleBase;
 
@@ -1804,8 +1816,13 @@ async function scrapeInstagramDiscovery() {
           priority: Math.max(1, Math.round(score / 10)),
           votes: 1,
           qualityScore: score,
+          ownerUsername,
           pubDate: pubDateIso,
           pubDateSource: pubDateMeta.source || '',
+          sourcePublishedAt: pubDateIso,
+          sourcePublishedAtSource: pubDateMeta.source
+            ? `instagram-page-${pubDateMeta.source}`
+            : '',
           discoveredBy: [...candidate.sourceKinds].join(','),
           sourceHits: candidate.sourceHits,
           reviewTier: score >= 84 ? 'high' : score >= 70 ? 'medium' : 'low',

@@ -147,6 +147,7 @@ function addCheck(report, check) {
 async function runCheck(options = {}) {
   const env = { ...loadEnvFile(), ...process.env, ...(options.env || {}) };
   const fetchImpl = options.fetchImpl || fetch;
+  const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
   const config = {
     graphVersion: cleanText(env.META_GRAPH_VERSION || env.INSTAGRAM_GRAPH_VERSION || 'v26.0', 20),
     instagramAccessToken: cleanText(env.INSTAGRAM_ACCESS_TOKEN || env.META_INSTAGRAM_ACCESS_TOKEN || '', 2000),
@@ -159,10 +160,12 @@ async function runCheck(options = {}) {
       .replace(/^@/, '')
       .toLowerCase(),
     hashtagTest: cleanText(env.META_INSTAGRAM_HEALTHCHECK_HASHTAG || '', 100).replace(/^#/, '').toLowerCase(),
+    taggedMediaEnabled: booleanEnv(env, 'META_INSTAGRAM_TAGGED_MEDIA_ENABLED', false),
+    tokenExpiresAt: cleanText(env.META_INSTAGRAM_TOKEN_EXPIRES_AT || '', 100),
   };
   const secrets = [config.instagramAccessToken, config.adLibraryToken];
   const report = {
-    generatedAt: new Date().toISOString(),
+    generatedAt: now.toISOString(),
     source: 'meta-instagram-auth-health',
     graphVersion: config.graphVersion,
     status: 'running',
@@ -174,6 +177,28 @@ async function runCheck(options = {}) {
     checks: [],
     nextAction: '',
   };
+
+  const tokenExpiryTimestamp = Date.parse(config.tokenExpiresAt);
+  if (Number.isFinite(tokenExpiryTimestamp)) {
+    const daysRemaining = Number(((tokenExpiryTimestamp - now.getTime()) / (24 * 60 * 60 * 1000)).toFixed(1));
+    report.tokenExpiry = {
+      expiresAt: new Date(tokenExpiryTimestamp).toISOString(),
+      daysRemaining,
+      status: daysRemaining < 0 ? 'expired' : (daysRemaining <= 14 ? 'expiring-soon' : 'ok'),
+    };
+    addCheck(report, {
+      name: 'token-expiry',
+      status: report.tokenExpiry.status,
+      detail: `Configured token expiry is ${report.tokenExpiry.expiresAt} (${daysRemaining} days remaining).`,
+    });
+  } else {
+    report.tokenExpiry = { expiresAt: '', daysRemaining: null, status: 'unknown' };
+    addCheck(report, {
+      name: 'token-expiry',
+      status: 'unknown',
+      detail: 'Set META_INSTAGRAM_TOKEN_EXPIRES_AT so expiry can be monitored before collection stops.',
+    });
+  }
 
   if (!config.instagramAccessToken) {
     report.status = config.requireConfiguredSource && !config.adLibraryToken ? 'missing-credentials' : 'skipped';
@@ -222,6 +247,26 @@ async function runCheck(options = {}) {
     });
     if (options.write !== false) writeJsonAtomic(config.reportPath, report);
     return { report, ok: false };
+  }
+
+  try {
+    const permissions = await fetchMetaJson(graphUrl(config, '/me/permissions', {}, graphToken), config, 'instagram', fetchImpl);
+    const rows = Array.isArray(permissions.payload?.data) ? permissions.payload.data : [];
+    const granted = rows.filter((row) => row?.status === 'granted').map((row) => cleanText(row.permission, 100)).filter(Boolean);
+    report.grantedPermissions = granted;
+    addCheck(report, {
+      name: 'token-permissions',
+      status: 'ok',
+      detail: `${granted.length} granted permission(s): ${granted.join(', ') || 'none reported'}.`,
+    });
+  } catch (error) {
+    addCheck(report, {
+      name: 'token-permissions',
+      status: classifyMetaError(error),
+      detail: redact(error?.message || error, secrets),
+      code: error?.code,
+      httpStatus: error?.status,
+    });
   }
 
   if (!igUserId) {
@@ -290,6 +335,35 @@ async function runCheck(options = {}) {
       detail: redact(error?.message || error, secrets),
       code: error?.code,
       httpStatus: error?.status,
+    });
+  }
+
+  if (config.taggedMediaEnabled) {
+    try {
+      const tagged = await fetchMetaJson(graphUrl(config, `/${igUserId}/tags`, {
+        fields: 'id,caption,media_type,permalink,timestamp',
+        limit: '3',
+      }, graphToken), config, 'instagram', fetchImpl);
+      const rows = Array.isArray(tagged.payload?.data) ? tagged.payload.data : [];
+      addCheck(report, {
+        name: 'tagged-media',
+        status: 'ok',
+        detail: `Tagged media endpoint works; ${rows.length} recent media row(s) returned.`,
+      });
+    } catch (error) {
+      addCheck(report, {
+        name: 'tagged-media',
+        status: classifyMetaError(error),
+        detail: redact(error?.message || error, secrets),
+        code: error?.code,
+        httpStatus: error?.status,
+      });
+    }
+  } else {
+    addCheck(report, {
+      name: 'tagged-media',
+      status: 'skipped',
+      detail: 'Set META_INSTAGRAM_TAGGED_MEDIA_ENABLED=1 after the endpoint healthcheck succeeds.',
     });
   }
 
@@ -365,14 +439,23 @@ async function runCheck(options = {}) {
     'meta-api-error',
   ]);
   const failedChecks = report.checks.filter((check) => hardFailures.has(check.status));
-  const requiredChecks = new Set(['own-media', 'business-discovery']);
+  const requiredChecks = new Set([
+    'own-media',
+    'business-discovery',
+    ...(config.taggedMediaEnabled ? ['tagged-media'] : []),
+  ]);
   const requiredFailures = failedChecks.filter((check) => requiredChecks.has(check.name));
-  if (requiredFailures.length) {
+  if (report.tokenExpiry?.status === 'expired') {
+    report.status = 'expired-token-metadata';
+    report.nextAction = `Renew INSTAGRAM_ACCESS_TOKEN and update META_INSTAGRAM_TOKEN_EXPIRES_AT; configured expiry was ${report.tokenExpiry.expiresAt}.`;
+  } else if (requiredFailures.length) {
     report.status = requiredFailures[0].status;
     report.nextAction = 'Fix the Meta Graph token permissions before enabling scheduled discovery.';
   } else {
     report.status = 'ok';
-    report.nextAction = 'Meta Instagram Graph is ready for the deal collector.';
+    report.nextAction = report.tokenExpiry?.status === 'expiring-soon'
+      ? `Renew INSTAGRAM_ACCESS_TOKEN before ${report.tokenExpiry.expiresAt}.`
+      : 'Meta Instagram Graph is ready for the deal collector.';
   }
 
   if (options.write !== false) writeJsonAtomic(config.reportPath, report);

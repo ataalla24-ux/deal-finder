@@ -1,7 +1,7 @@
 import '../sentry/instrument.mjs';
 // ============================================
 // 📸🍽️ FIRECRAWL INSTAGRAM GASTRO AGENT #5
-// Breiter Intake für Gastro-Angebote aus Instagram
+// Frischer Intake für Gastro-Angebote aus Instagram
 // ============================================
 
 import Firecrawl from '@mendable/firecrawl-js';
@@ -151,7 +151,7 @@ async function main() {
   console.log();
 
   const result = await firecrawl.agent({
-    prompt: `Extrahiere möglichst viele Gastro-Angebote aus Instagram-Posts. Schließe Kandidaten nicht wegen Alter, Standort, Giveaway-Charakter, unklarem Veröffentlichungsdatum oder unklarem Ablauf aus. Nutze nur Instagram als Quelle und gib für jeden Kandidaten nach Möglichkeit Restaurantname, Post-URL, Account-Handle, echtes Post-Datum, Beschreibung, Angebotstyp, Ablauf und Standort zurück. Verwechsle Veröffentlichungsdatum und Angebotszeitraum nicht. Im Zweifel lieber den Kandidaten trotzdem aufnehmen.`,
+    prompt: `Extrahiere möglichst viele konkrete Gastro-Angebote aus Instagram-Originalposts, die in Wien nutzbar sind. Nimm nur Posts aus den letzten 7 Tagen auf und prüfe Tag, Monat und Jahr; zukünftig beginnende Aktionen sind erwünscht, sofern der Post selbst höchstens 7 Tage alt ist. Nutze nur direkte /p/...- oder /reel/...-Links und gib Restaurantname, Account-Handle, echtes Post-Datum, Beschreibung, konkreten Vorteil, Ablauf und exakten Wien-Standort zurück. Veröffentlichungsdatum und Angebotszeitraum niemals verwechseln. Alte Posts, Reposts ohne Original, Gewinnspiele, Empfehlungen, Gratis-Versand und unkonkrete Aktionen weglassen. Bei eindeutig frischem Originalpost darf ein unlesbares Detail leer bleiben, damit Graph API und Validator nachprüfen können.`,
     schema: offerSchema,
     model: 'spark-1-mini',
   });

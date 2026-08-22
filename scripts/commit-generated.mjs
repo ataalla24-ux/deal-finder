@@ -43,6 +43,7 @@ function parseArgs(argv) {
     remote: DEFAULT_REMOTE,
     branch: DEFAULT_BRANCH,
     retries: Number.isFinite(DEFAULT_RETRIES) && DEFAULT_RETRIES >= 0 ? DEFAULT_RETRIES : 4,
+    skipConflicts: false,
     patterns: [],
   };
 
@@ -61,6 +62,8 @@ function parseArgs(argv) {
       const retries = Number(argv[i + 1]);
       parsed.retries = Number.isFinite(retries) && retries >= 0 ? retries : parsed.retries;
       i += 1;
+    } else if (arg === '--skip-conflicts') {
+      parsed.skipConflicts = true;
     } else if (arg === '--files') {
       continue;
     } else {
@@ -173,21 +176,167 @@ function capturedMatchesRemote(state, ref) {
   return remoteContent !== null && Buffer.compare(state.content, remoteContent) === 0;
 }
 
-function resolveSameFileRemoteChanges(states, baseRef, headRef) {
-  const conflicts = [];
+function latestIso(left, right) {
+  const leftTimestamp = Date.parse(cleanText(left));
+  const rightTimestamp = Date.parse(cleanText(right));
+  if (!Number.isFinite(leftTimestamp)) return cleanText(right);
+  if (!Number.isFinite(rightTimestamp)) return cleanText(left);
+  return leftTimestamp >= rightTimestamp ? cleanText(left) : cleanText(right);
+}
 
-  for (const state of states) {
-    if (!pathChangedBetween(baseRef, headRef, state.path)) continue;
-    if (capturedMatchesRemote(state, headRef)) continue;
-    conflicts.push(state.path);
+function mergeJsonRecords(remoteRows, localRows, keyFor, mergeRecord = (remote, local) => ({ ...remote, ...local })) {
+  const merged = new Map();
+  let anonymous = 0;
+  for (const row of [...remoteRows, ...localRows]) {
+    const key = cleanText(keyFor(row)) || `anonymous:${anonymous++}`;
+    merged.set(key, merged.has(key) ? mergeRecord(merged.get(key), row) : row);
+  }
+  return [...merged.values()];
+}
+
+function jsonSignature(value) {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return '';
+  }
+}
+
+function queueDealKey(deal) {
+  const slackTs = cleanText(deal?.slackTs);
+  if (slackTs) return `slack:${slackTs}`;
+  const id = cleanText(deal?.id);
+  const url = cleanText(deal?.url);
+  if (id || url) return `deal:${id}|${url}`;
+  return `anonymous:${jsonSignature(deal)}`;
+}
+
+function recordsByKey(rows, keyFor) {
+  const records = new Map();
+  for (const row of rows) records.set(keyFor(row), row);
+  return records;
+}
+
+function mergeQueueThreeWay(baseRows, remoteRows, localRows) {
+  const base = recordsByKey(baseRows, queueDealKey);
+  const remote = recordsByKey(remoteRows, queueDealKey);
+  const local = recordsByKey(localRows, queueDealKey);
+  const merged = new Map(remote);
+
+  // Local removals are intentional validity/pruning decisions. In particular,
+  // a remote approval deletion must not be resurrected by an unchanged checkout.
+  for (const key of base.keys()) {
+    if (!local.has(key)) merged.delete(key);
   }
 
-  if (conflicts.length > 0) {
+  for (const [key, localDeal] of local.entries()) {
+    const baseDeal = base.get(key);
+    const remoteDeal = remote.get(key);
+    if (!baseDeal) {
+      merged.set(key, remoteDeal ? { ...remoteDeal, ...localDeal } : localDeal);
+      continue;
+    }
+    if (jsonSignature(baseDeal) !== jsonSignature(localDeal) && remoteDeal) {
+      merged.set(key, { ...remoteDeal, ...localDeal });
+    }
+    // If remote removed a base deal, respect that deletion even when this run
+    // enriched its stale local copy.
+  }
+  return [...merged.values()];
+}
+
+function mergeKnownGeneratedJson(state, ref, baseRef) {
+  const remoteContent = remoteFileContent(ref, state.path);
+  if (!state.exists || !remoteContent) return null;
+  let localPayload;
+  let remotePayload;
+  let basePayload;
+  try {
+    localPayload = JSON.parse(state.content.toString('utf8'));
+    remotePayload = JSON.parse(remoteContent.toString('utf8'));
+    const baseContent = remoteFileContent(baseRef, state.path);
+    basePayload = baseContent ? JSON.parse(baseContent.toString('utf8')) : {};
+  } catch {
+    return null;
+  }
+
+  if (state.path === 'docs/deals-pending-all.json') {
+    const baseDeals = Array.isArray(basePayload?.deals) ? basePayload.deals : [];
+    const remoteDeals = Array.isArray(remotePayload?.deals) ? remotePayload.deals : [];
+    const localDeals = Array.isArray(localPayload?.deals) ? localPayload.deals : [];
+    const deals = mergeQueueThreeWay(baseDeals, remoteDeals, localDeals);
+    const payload = {
+      ...remotePayload,
+      ...localPayload,
+      deals,
+      totalDeals: deals.length,
+      updatedAt: latestIso(remotePayload?.updatedAt, localPayload?.updatedAt) || new Date().toISOString(),
+    };
+    return { ...state, content: Buffer.from(`${JSON.stringify(payload, null, 2)}\n`) };
+  }
+
+  if (state.path === 'docs/instagram-graph-post-evidence.json') {
+    const remotePosts = Array.isArray(remotePayload?.posts) ? remotePayload.posts : [];
+    const localPosts = Array.isArray(localPayload?.posts) ? localPayload.posts : [];
+    const posts = mergeJsonRecords(remotePosts, localPosts, (post) => post?.postKey, (left, right) => {
+      const newest = Date.parse(right?.verifiedAt || '') >= Date.parse(left?.verifiedAt || '') ? right : left;
+      const older = newest === right ? left : right;
+      return {
+        ...older,
+        ...newest,
+        sourceTypes: [...new Set([...(older?.sourceTypes || []), ...(newest?.sourceTypes || [])])],
+        sourceNames: [...new Set([...(older?.sourceNames || []), ...(newest?.sourceNames || [])])],
+      };
+    }).sort((left, right) => Date.parse(right?.sourcePublishedAt || '') - Date.parse(left?.sourcePublishedAt || ''));
+    const payload = {
+      ...remotePayload,
+      ...localPayload,
+      generatedAt: latestIso(remotePayload?.generatedAt, localPayload?.generatedAt) || new Date().toISOString(),
+      totalPosts: posts.length,
+      blockedPosts: posts.filter((post) => cleanText(post?.blockingReason)).length,
+      posts,
+    };
+    return { ...state, content: Buffer.from(`${JSON.stringify(payload, null, 2)}\n`) };
+  }
+
+  return null;
+}
+
+function resolveSameFileRemoteChanges(states, baseRef, headRef, options = {}) {
+  const conflicts = [];
+  const safeStates = [];
+  const mergedFiles = [];
+
+  for (const state of states) {
+    const changedRemotely = pathChangedBetween(baseRef, headRef, state.path);
+    if (changedRemotely && !capturedMatchesRemote(state, headRef)) {
+      if (options.skipConflicts) {
+        const mergedState = mergeKnownGeneratedJson(state, headRef, baseRef);
+        if (mergedState) {
+          safeStates.push(mergedState);
+          mergedFiles.push(state.path);
+          continue;
+        }
+      }
+      conflicts.push(state.path);
+      continue;
+    }
+    safeStates.push(state);
+  }
+
+  if (conflicts.length > 0 && !options.skipConflicts) {
     throw new Error(
       'Remote changed the same generated file(s) while this job was running: ' +
       `${conflicts.join(', ')}. Rerun this workflow so it regenerates on the latest main.`
     );
   }
+  if (conflicts.length > 0) {
+    console.log(`Skipping remotely changed generated file(s): ${conflicts.join(', ')}`);
+  }
+  if (mergedFiles.length > 0) {
+    console.log(`Merged concurrent generated state for: ${mergedFiles.join(', ')}`);
+  }
+  return safeStates;
 }
 
 function writeTempFile(state, tempDir) {
@@ -269,8 +418,14 @@ async function main() {
     for (let attempt = 1; attempt <= options.retries + 1; attempt += 1) {
       fetchRemote(options.remote, options.branch);
       const headRef = remoteRef(options.remote, options.branch);
-      resolveSameFileRemoteChanges(states, baseRef, headRef);
-      const commit = commitFromCapturedFiles(states, options.message, options.remote, options.branch, tempDir);
+      const safeStates = resolveSameFileRemoteChanges(states, baseRef, headRef, {
+        skipConflicts: options.skipConflicts,
+      });
+      if (safeStates.length === 0) {
+        console.log('All generated changes were already superseded on remote main');
+        return;
+      }
+      const commit = commitFromCapturedFiles(safeStates, options.message, options.remote, options.branch, tempDir);
       if (!commit) {
         console.log('No changes versus latest remote main');
         return;

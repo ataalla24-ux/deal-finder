@@ -127,7 +127,8 @@ assert.doesNotMatch(workflow, /FIRECRAWL_API_KEY(?:1|2|3|5|6):/);
 assert.doesNotMatch(workflow, /^\s+FIRECRAWL_API_KEY:/m);
 assert.match(workflow, /FIRECRAWL4_MAX_CREDITS_PER_TARGET: 350/);
 assert.match(workflow, /FIRECRAWL_POST_VERIFY_MAX: 60/);
-assert.match(workflow, /FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 45/);
+assert.match(workflow, /FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 7/);
+assert.match(workflow, /FIRECRAWL_POST_MAX_ACCEPTED_AGE_DAYS: 7/);
 assert.doesNotMatch(workflow, /timeout-minutes:/);
 assert.doesNotMatch(workflow, /deals-(?:raw|review|rejected)-firecrawl4\.json/);
 

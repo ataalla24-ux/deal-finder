@@ -437,9 +437,9 @@ const oldPostWithFutureValidity = await validateOne({
   expiryKind: 'end',
   dateConfidence: 'high',
 });
-assert.equal(oldPostWithFutureValidity.decision.allowed, true);
+assert.equal(oldPostWithFutureValidity.decision.allowed, false);
 assert.equal(oldPostWithFutureValidity.decision.expiryDate, '2026-08-31');
-assert.match(oldPostWithFutureValidity.decision.warnings.join(' '), /noch aktive Gültigkeit/);
+assert.match(reasonText(oldPostWithFutureValidity), /älter als 7 Tage/);
 
 const rawFirecrawlValidityRescue = await validateOne({
   id: 'raw-firecrawl-validity',
@@ -454,8 +454,8 @@ const rawFirecrawlValidityRescue = await validateOne({
   pubDateSource: 'firecrawlAgentRun',
   expires: '2026-08-15',
 });
-assert.equal(rawFirecrawlValidityRescue.decision.allowed, true);
-assert.match(rawFirecrawlValidityRescue.decision.warnings.join(' '), /noch aktive Gültigkeit/);
+assert.equal(rawFirecrawlValidityRescue.decision.allowed, false);
+assert.match(reasonText(rawFirecrawlValidityRescue), /kein echtes Social-Post-Datum/);
 
 const spelunkeRecurring = await validateOne({
   id: 'spelunke-recurring',
@@ -468,8 +468,8 @@ const spelunkeRecurring = await validateOne({
   distance: '1020 Wien',
   expires: 'Mo-Fr 17:00-18:00',
 });
-assert.equal(spelunkeRecurring.decision.allowed, true);
-assert.match(spelunkeRecurring.decision.warnings.join(' '), /wiederkehrender Zeitplan/);
+assert.equal(spelunkeRecurring.decision.allowed, false);
+assert.match(reasonText(spelunkeRecurring), /älter als 7 Tage/);
 
 const tokkiRecurring = await validateOne({
   id: 'tokki-recurring',
@@ -482,8 +482,26 @@ const tokkiRecurring = await validateOne({
   distance: 'Mariahilfer Straße 112, 1070 Wien',
   expires: 'Mo-Fr 12:00-17:00',
 });
-assert.equal(tokkiRecurring.decision.allowed, true);
-assert.match(tokkiRecurring.decision.warnings.join(' '), /wiederkehrender Zeitplan/);
+assert.equal(tokkiRecurring.decision.allowed, false);
+assert.match(reasonText(tokkiRecurring), /älter als 7 Tage/);
+
+const freshSocialFutureOffer = await validateOne({
+  id: 'fresh-social-future-offer',
+  brand: 'Vienna Coffee',
+  title: '50% Opening Deal',
+  description: '50% Rabatt ab nächster Woche in 1070 Wien.',
+  url: 'https://www.instagram.com/reel/DbAYf0BMaIn/',
+  source: 'Instagram',
+  distance: '1070 Wien',
+  sourcePublishedAt: '2026-07-20T07:16:23.734Z',
+  sourcePublishedAtSource: 'instagram-graph-timestamp',
+  validFrom: '2026-07-25',
+  validUntil: '2026-07-31',
+  expiryKind: 'range',
+  dateConfidence: 'high',
+});
+assert.equal(freshSocialFutureOffer.decision.allowed, true);
+assert.match(freshSocialFutureOffer.decision.warnings.join(' '), /startet am 2026-07-25/);
 
 const authoritativeUrlDate = await validateOne({
   id: 'authoritative-url-date',
@@ -700,8 +718,8 @@ const instagramAiErnesto = normalizeDeal({
   },
 }, 'instagram-ai');
 const instagramAiErnestoResult = await validateOne(instagramAiErnesto);
-assert.equal(instagramAiErnestoResult.decision.allowed, true);
-assert.match(instagramAiErnestoResult.decision.warnings.join(' '), /noch aktive Gültigkeit/);
+assert.equal(instagramAiErnestoResult.decision.allowed, false);
+assert.match(reasonText(instagramAiErnestoResult), /älter als 7 Tage/);
 
 const apronActiveMonthRange = await validateOne({
   id: 'apron-active-month-range',
@@ -714,9 +732,9 @@ const apronActiveMonthRange = await validateOne({
   distance: 'Wien',
   expires: 'Juli - August 2026 Dienstags, Mittwochs, Donnerstags',
 });
-assert.equal(apronActiveMonthRange.decision.allowed, true);
+assert.equal(apronActiveMonthRange.decision.allowed, false);
 assert.equal(apronActiveMonthRange.decision.expiryDate, '2026-08-31');
-assert.match(apronActiveMonthRange.decision.warnings.join(' '), /noch aktive Gültigkeit|wiederkehrender Zeitplan/);
+assert.match(reasonText(apronActiveMonthRange), /älter als 7 Tage/);
 
 const lovingHutFollowerDeal = await validateOne({
   id: 'loving-hut-follower-deal',
@@ -777,6 +795,27 @@ const genericFreeFestivalTip = await validateOne({
 assert.equal(genericFreeFestivalTip.decision.allowed, false);
 assert.match(reasonText(genericFreeFestivalTip), /allgemeine Empfehlung/);
 
+const wienUncoveredRegularPrice = await validateOne({
+  id: 'wien-uncovered-regular-price',
+  brand: 'Sukiyaki',
+  title: 'All You Can Eat Sushi Buffet ab nur 11,90 €',
+  description: 'All You Can Eat Sushi Buffet in Wien Mitte für 11,90 €.',
+  url: 'https://wienuncovered.com/all-you-can-eat-sushi-buffet-wien-sukiyaki/',
+  source: 'Firecrawl',
+  originSource: 'Wien Uncovered',
+  distance: '1030 Wien',
+});
+assert.equal(wienUncoveredRegularPrice.decision.allowed, false);
+assert.match(reasonText(wienUncoveredRegularPrice), /redaktioneller Preis-\/Restauranttipp/);
+
+const wienUncoveredRealPromotion = await validateOne({
+  ...wienUncoveredRegularPrice.deal,
+  id: 'wien-uncovered-real-promotion',
+  title: '1+1 gratis Sushi Buffet bis Monatsende',
+  description: '1+1 gratis auf das Sushi Buffet in 1030 Wien.',
+});
+assert.equal(wienUncoveredRealPromotion.decision.allowed, true);
+
 const ancientRecurring = await validateOne({
   id: 'ancient-recurring',
   brand: 'Test',
@@ -790,7 +829,7 @@ const ancientRecurring = await validateOne({
   expires: 'jeden Freitag',
 });
 assert.equal(ancientRecurring.decision.allowed, false);
-assert.match(reasonText(ancientRecurring), /älter als 45 Tage/);
+assert.match(reasonText(ancientRecurring), /älter als 7 Tage/);
 
 const defaultViennaButSalzburg = await validateOne({
   id: 'default-vienna-but-salzburg',
@@ -1019,8 +1058,8 @@ const facebookWithActiveEnd = await validateOne({
   expiryKind: 'end',
   dateConfidence: 'high',
 });
-assert.equal(facebookWithActiveEnd.decision.allowed, true);
-assert.match(facebookWithActiveEnd.decision.warnings.join(' '), /noch aktive Gültigkeit/);
+assert.equal(facebookWithActiveEnd.decision.allowed, false);
+assert.match(reasonText(facebookWithActiveEnd), /kein echtes Social-Post-Datum/);
 
 const unrelatedUrlDate = await validateOne({
   id: 'unrelated-url-date',
@@ -1117,8 +1156,8 @@ const structuredOngoingSocial = await validateOne({
   validFrom: '2026-07-01',
   dateConfidence: 'high',
 });
-assert.equal(structuredOngoingSocial.decision.allowed, true);
-assert.match(structuredOngoingSocial.decision.warnings.join(' '), /noch aktive Gültigkeit|wiederkehrender Zeitplan/);
+assert.equal(structuredOngoingSocial.decision.allowed, false);
+assert.match(reasonText(structuredOngoingSocial), /älter als 7 Tage/);
 
 for (const malformedVoucher of [
   {

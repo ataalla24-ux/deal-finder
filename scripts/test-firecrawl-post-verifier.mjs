@@ -117,4 +117,29 @@ assert.equal(
 assert.equal(timestampOnly[1].pubDate, '', 'crawler run time is never retained as a web publication date');
 assert.equal(timestampOnly[1].sourcePublishedAt, '');
 
+const strictFreshness = await verifyFirecrawlDeals([
+  {
+    id: 'old-instagram-future-offer',
+    title: '1+1 gratis ab nächster Woche',
+    description: '1+1 gratis in Wien.',
+    source: 'Firecrawl',
+    url: 'https://www.instagram.com/reel/DZMxfDsif1b/',
+    validFrom: '2026-08-01',
+    validUntil: '2026-08-31',
+  },
+  {
+    id: 'non-social-web-deal',
+    title: '50% Rabatt',
+    description: '50% Rabatt in Wien.',
+    source: 'Firecrawl',
+    url: 'https://example.com/current-deal',
+  },
+], {
+  now,
+  registry,
+  maxNetworkVerifications: 0,
+  maxAcceptedAgeDays: 7,
+});
+assert.deepEqual(strictFreshness.map((deal) => deal.id), ['non-social-web-deal']);
+
 console.log('Firecrawl original-post verifier tests passed.');
