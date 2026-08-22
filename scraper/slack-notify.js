@@ -1194,26 +1194,48 @@ async function revalidateRecentPostedQueue(deals, options = {}) {
       && cleanText(deal.slackTs)
       && (queueDealAgeDays(deal, now) ?? Infinity) < maxAgeDays);
   if (entries.length === 0) {
-    return { deals, removed: 0, validation: null };
+    return { deals, removed: 0, blocked: 0, changed: false, validation: null };
   }
 
   const validation = await validateDealsForSlack(entries.map((entry) => entry.deal), {
     ...options,
     now,
   });
-  const blockedIndexes = new Set();
+  const blockedByIndex = new Map();
   const validatedByIndex = new Map();
   validation.results.forEach((result, resultIndex) => {
     const originalIndex = entries[resultIndex].index;
     if (result.decision.allowed) validatedByIndex.set(originalIndex, result.deal);
-    else blockedIndexes.add(originalIndex);
+    else blockedByIndex.set(originalIndex, result);
   });
-  const filtered = deals
-    .map((deal, index) => validatedByIndex.get(index) || deal)
-    .filter((deal, index) => !blockedIndexes.has(index));
+
+  // A transient validator decision must never erase the recent-post ledger,
+  // otherwise the same deal can be posted again as soon as validation flips.
+  const checkedAt = now.toISOString();
+  const revalidated = deals.map((deal, index) => {
+    const validated = validatedByIndex.get(index);
+    if (validated) {
+      const next = { ...deal, ...validated };
+      delete next.queueValidationBlocked;
+      delete next.queueValidationReasons;
+      delete next.queueValidationFirstBlockedAt;
+      return next;
+    }
+
+    const blocked = blockedByIndex.get(index);
+    if (!blocked) return deal;
+    return {
+      ...deal,
+      queueValidationBlocked: true,
+      queueValidationReasons: ensureArray(blocked.decision?.reasons).map(cleanText).filter(Boolean),
+      queueValidationFirstBlockedAt: cleanText(deal.queueValidationFirstBlockedAt) || checkedAt,
+    };
+  });
   return {
-    deals: filtered,
-    removed: blockedIndexes.size,
+    deals: revalidated,
+    removed: 0,
+    blocked: blockedByIndex.size,
+    changed: revalidated.some((deal, index) => JSON.stringify(deal) !== JSON.stringify(deals[index])),
     validation,
   };
 }
@@ -1313,9 +1335,14 @@ async function main() {
   let queueChanged = queuePrune.removed > 0 || moderationQueueFilter.removed.length > 0;
   const validityUrlCache = new Map();
   const recentQueueValidation = await revalidateRecentPostedQueue(existingQueue, { urlCache: validityUrlCache });
-  if (recentQueueValidation.removed > 0) {
-    console.log(`🧹 Queue validity: ${recentQueueValidation.removed} kürzlich gepostete, inzwischen blockierte Deals entfernt`);
-    existingQueue = recentQueueValidation.deals;
+  existingQueue = recentQueueValidation.deals;
+  if (recentQueueValidation.blocked > 0) {
+    console.log(
+      `🧷 Queue validity: ${recentQueueValidation.blocked} aktuell blockierte Deals `
+      + 'bleiben zur Duplikatunterdrückung bis zum TTL gespeichert',
+    );
+  }
+  if (recentQueueValidation.changed) {
     queueChanged = true;
   }
 
@@ -1512,7 +1539,9 @@ export {
   buildFirecrawlReviewMessage,
   buildSlackMessage,
   compareSlackDeals,
+  filterAlreadyQueuedDeals,
   filterDuplicateDealsInRun,
+  loadQueuedDealDuplicateKeys,
   normalizeDeal,
   prepareKey4ReviewDeals,
   pruneStaleQueueDeals,

@@ -6,7 +6,9 @@ import {
   buildFirecrawlReviewMessage,
   buildSlackMessage,
   combineFirecrawlReviewSelections,
+  filterAlreadyQueuedDeals,
   filterDuplicateDealsInRun,
+  loadQueuedDealDuplicateKeys,
   normalizeDeal,
   prepareKey4ReviewDeals,
   pruneStaleQueueDeals,
@@ -1540,13 +1542,30 @@ const queueRevalidation = await revalidateRecentPostedQueue([
   inspectDealUrlHealth: async (url) => healthyUrl(url),
   concurrency: 1,
 });
-assert.equal(queueRevalidation.removed, 1);
+assert.equal(queueRevalidation.removed, 0);
+assert.equal(queueRevalidation.blocked, 1);
 assert.deepEqual(
   queueRevalidation.deals.map((deal) => deal.id),
-  ['recent-good', 'recent-firecrawl-review'],
-  'manual review rows must stay queued until edited, approved, or naturally pruned',
+  ['recent-giveaway', 'recent-good', 'recent-firecrawl-review'],
+  'blocked and manual-review rows must stay in the recent-post ledger until naturally pruned',
 );
+assert.equal(queueRevalidation.deals[0].queueValidationBlocked, true);
+assert.match(queueRevalidation.deals[0].queueValidationReasons.join(' | '), /Gewinnspiel/i);
 assert.equal(queueRevalidation.validation?.summary?.total, 2, 'review rows must not be auto-revalidated away');
+
+const flappingRepostFilter = filterAlreadyQueuedDeals([
+  {
+    ...queueRevalidation.deals[0],
+    queueValidationBlocked: false,
+    queueValidationReasons: [],
+  },
+], loadQueuedDealDuplicateKeys(queueRevalidation.deals));
+assert.equal(flappingRepostFilter.removed, 1);
+assert.deepEqual(
+  flappingRepostFilter.deals,
+  [],
+  'a temporarily blocked posted deal must remain suppressed when a later run allows it again',
+);
 
 const pollutedPendingRevalidation = await revalidateRecentPostedQueue([
   {
@@ -1570,7 +1589,9 @@ const pollutedPendingRevalidation = await revalidateRecentPostedQueue([
   inspectDealUrlHealth: async (url) => healthyUrl(url),
   concurrency: 1,
 });
-assert.equal(pollutedPendingRevalidation.removed, 1, 'pending deals must be revalidated even with a polluted approvedAt');
+assert.equal(pollutedPendingRevalidation.removed, 0);
+assert.equal(pollutedPendingRevalidation.blocked, 1, 'pending deals must be revalidated even with a polluted approvedAt');
+assert.equal(pollutedPendingRevalidation.deals[0].queueValidationBlocked, true);
 assert.equal(pollutedPendingRevalidation.validation?.summary?.blocked, 1);
 
 const oldSlackTs = String(Math.floor(new Date('2026-07-10T12:00:00.000Z').getTime() / 1000));
