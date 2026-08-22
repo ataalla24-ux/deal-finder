@@ -1,36 +1,64 @@
 {
   "schemaVersion": 1,
-  "runId": "wien-combined-2026-08-22T14:12:11.626Z",
+  "runId": "wien-combined-2026-08-22T14:16:11.981Z",
   "sourceKey": "wien-combined",
   "sourceLabel": "Wien Deals Combined",
   "status": "completed-with-errors",
-  "startedAt": "2026-08-22T14:12:00.753Z",
-  "finishedAt": "2026-08-22T14:12:11.626Z",
-  "durationMs": 10873,
+  "startedAt": "2026-08-22T14:16:02.483Z",
+  "finishedAt": "2026-08-22T14:16:11.981Z",
+  "durationMs": 9498,
   "outputFile": "docs/deals-pending-wien-combined.json",
   "counts": {
-    "rawCandidates": 0,
-    "normalizedCandidates": 0,
-    "verifiedCandidates": 0,
+    "rawCandidates": 3,
+    "normalizedCandidates": 1,
+    "verifiedCandidates": 1,
     "previousDeals": 0,
-    "acceptedDeals": 0,
-    "rejectedDeals": 0
+    "acceptedDeals": 1,
+    "rejectedDeals": 2
   },
-  "rejectedByReason": {},
-  "rejectedSamples": [],
+  "rejectedByReason": {
+    "self-syndicated-deal": 1,
+    "no-concrete-offer": 1
+  },
+  "rejectedSamples": [
+    {
+      "reason": "self-syndicated-deal",
+      "deal": {
+        "id": "18165926320451155",
+        "title": "🍽️ Gratis Coconut Strawberry Sunset testen Teilnehmende Standorte – Details prüfen. Gültig bis 30.8.2026. Alle aktuellen Bedingungen und den Original-Link findest du direkt in Fre",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DcUFijTz9lX/",
+        "source": "#gratiswien",
+        "pubDate": "2026-08-21T19:27:14+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "no-concrete-offer",
+      "deal": {
+        "id": "17892787434667875",
+        "title": "LANGE NACHT DER WIENER MÄRKTE 🍎🥕 Im September gibt es unglaublich viele Veranstaltungen in Wien, eine davon ist die Lange Nacht der Wiener Märkte. An diesem Abend haben die Wiene",
+        "brand": "",
+        "url": "https://www.instagram.com/reel/DcWCw_TOrdW/",
+        "source": "#gratisinwien",
+        "pubDate": "2026-08-22T13:42:04+0000",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    }
+  ],
   "diagnostics": {
     "hashtags": 12,
-    "successfulSources": 8,
-    "failedSources": 4,
+    "successfulSources": 10,
+    "failedSources": 2,
     "graphVersion": "v26.0"
   },
   "constraints": {
     "maxSocialPostAgeDays": 7
   },
   "errors": [
-    "#gratiswien: Meta Graph 100: (#100) Please read documentation for supported fields.",
     "#wienhappyhour: Meta Graph 24: The requested resource does not exist",
-    "#gratisinwien: Meta Graph 100: (#100) Please read documentation for supported fields.",
     "#viennafooddeals: Meta Graph 24: The requested resource does not exist"
   ]
 }

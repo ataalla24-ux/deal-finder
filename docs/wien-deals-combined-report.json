@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-22T14:12:00.754Z",
+  "generatedAt": "2026-08-22T14:16:02.483Z",
   "status": "degraded",
-  "message": "0 fresh, evidence-checked Graph hashtag deal(s) found.",
+  "message": "1 fresh, evidence-checked Graph hashtag deal(s) found.",
   "hashtags": [
     "gratiswien",
     "wienaktion",
@@ -16,15 +16,14 @@
     "viennadeals",
     "viennafooddeals"
   ],
-  "fetchedPosts": 0,
-  "totalDeals": 0,
+  "fetchedPosts": 3,
+  "totalDeals": 1,
   "sources": [
     {
       "hashtag": "gratiswien",
-      "status": "error",
-      "fetched": 0,
-      "accepted": 0,
-      "error": "Meta Graph 100: (#100) Please read documentation for supported fields."
+      "status": "ok",
+      "fetched": 1,
+      "accepted": 0
     },
     {
       "hashtag": "wienaktion",
@@ -77,10 +76,9 @@
     },
     {
       "hashtag": "gratisinwien",
-      "status": "error",
-      "fetched": 0,
-      "accepted": 0,
-      "error": "Meta Graph 100: (#100) Please read documentation for supported fields."
+      "status": "ok",
+      "fetched": 2,
+      "accepted": 1
     },
     {
       "hashtag": "viennadeals",
@@ -96,5 +94,8 @@
       "error": "Meta Graph 24: The requested resource does not exist"
     }
   ],
-  "rejectionReasons": {}
+  "rejectionReasons": {
+    "self-syndicated-deal": 1,
+    "no-concrete-offer": 1
+  }
 }
