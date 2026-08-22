@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-22T18:45:45.503Z",
+  "generatedAt": "2026-08-22T20:35:39.609Z",
   "source": "meta-instagram",
-  "status": "ok",
+  "status": "degraded",
   "configured": {
     "adLibrary": false,
     "instagramGraph": true
@@ -16,7 +16,7 @@
     {
       "username": "boca.vienna",
       "priority": 104,
-      "verifiedVienna": false
+      "verifiedVienna": true
     },
     {
       "username": "shaysfoodblog",
@@ -29,103 +29,103 @@
       "verifiedVienna": false
     },
     {
-      "username": "corner_xvi",
-      "priority": 100,
+      "username": "cafe_wirr",
+      "priority": 78,
       "verifiedVienna": true
     },
     {
-      "username": "eatinvienna_",
-      "priority": 95,
+      "username": "lebaron.wien",
+      "priority": 78,
       "verifiedVienna": false
     },
     {
-      "username": "hotline_5",
-      "priority": 95,
-      "verifiedVienna": false
-    },
-    {
-      "username": "meat_point_smashburgerbar",
-      "priority": 95,
-      "verifiedVienna": false
-    },
-    {
-      "username": "zushimarket",
-      "priority": 94,
+      "username": "mangalet.at",
+      "priority": 78,
       "verifiedVienna": true
     },
     {
-      "username": "assal.burger",
-      "priority": 92,
+      "username": "pizzeriapummaro",
+      "priority": 78,
       "verifiedVienna": true
     },
     {
-      "username": "cascade_bar_vienna",
-      "priority": 90,
+      "username": "behalal.official",
+      "priority": 76,
       "verifiedVienna": false
     },
     {
-      "username": "german.doener.house",
-      "priority": 88,
+      "username": "viennaeats",
+      "priority": 72,
       "verifiedVienna": false
     },
     {
-      "username": "merdins_cheesy_doener",
-      "priority": 88,
+      "username": "viennafoodstories",
+      "priority": 72,
       "verifiedVienna": false
     },
     {
-      "username": "woa.vienna",
-      "priority": 88,
+      "username": "viennarestaurants",
+      "priority": 72,
+      "verifiedVienna": false
+    },
+    {
+      "username": "viennawurstelstand",
+      "priority": 72,
+      "verifiedVienna": false
+    },
+    {
+      "username": "castillo.wien",
+      "priority": 35,
+      "verifiedVienna": false
+    },
+    {
+      "username": "wolt",
+      "priority": 24,
+      "verifiedVienna": false
+    },
+    {
+      "username": "sparhamster.at",
+      "priority": 21,
+      "verifiedVienna": false
+    },
+    {
+      "username": "news_cafe_wien",
+      "priority": 18,
       "verifiedVienna": true
     },
     {
-      "username": "xo_grill",
-      "priority": 86,
+      "username": "casa_frascati_17",
+      "priority": 0,
       "verifiedVienna": false
     },
     {
-      "username": "lorenzos_bar_lounge",
-      "priority": 84,
+      "username": "dieseeteufel",
+      "priority": 0,
       "verifiedVienna": false
     },
     {
-      "username": "2ndstreetburger",
-      "priority": 82,
-      "verifiedVienna": true
-    },
-    {
-      "username": "seelokaya",
-      "priority": 82,
+      "username": "doenerbox.wien",
+      "priority": 0,
       "verifiedVienna": false
     },
     {
-      "username": "wolt.oesterreich",
-      "priority": 82,
+      "username": "elissar.deli",
+      "priority": 0,
       "verifiedVienna": false
     },
     {
-      "username": "birbsbagel",
-      "priority": 80,
+      "username": "eylulbaeckerei",
+      "priority": 0,
       "verifiedVienna": false
     },
     {
-      "username": "blumencafe.wien",
-      "priority": 80,
+      "username": "fenstercafe",
+      "priority": 0,
       "verifiedVienna": false
     },
     {
-      "username": "framburi_fries",
-      "priority": 80,
-      "verifiedVienna": true
-    },
-    {
-      "username": "ghettosmash_",
-      "priority": 80,
-      "verifiedVienna": false
-    },
-    {
-      "username": "naanbrueder",
-      "priority": 80,
+      "username": "firstonewien",
+      "priority": 0,
       "verifiedVienna": false
     }
   ],
@@ -137,25 +137,53 @@
       "errors": []
     },
     "instagramGraph": {
-      "status": "ok",
-      "fetched": 218,
+      "status": "degraded",
+      "fetched": 175,
       "accepted": 7,
-      "errors": [],
+      "errors": [
+        {
+          "source": "@viennarestaurants",
+          "status": 400,
+          "code": 110,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28viennarestaurants%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
+        },
+        {
+          "source": "@sparhamster.at",
+          "status": 400,
+          "code": 110,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28sparhamster.at%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
+        },
+        {
+          "source": "@news_cafe_wien",
+          "status": 400,
+          "code": 110,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28news_cafe_wien%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
+        },
+        {
+          "source": "@doenerbox.wien",
+          "status": 400,
+          "code": 110,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28doenerbox.wien%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
+        }
+      ],
       "skippedCooldown": {
         "accounts": 12,
         "hashtags": 2
       },
       "globalError": null,
       "mediaEvidence": {
-        "status": "ok",
-        "eligible": 0,
-        "selected": 0,
-        "cached": 54,
-        "analyzed": 0,
-        "withOcrText": 0,
-        "aiCalls": 0,
+        "status": "degraded",
+        "eligible": 7,
+        "selected": 7,
+        "cached": 31,
+        "analyzed": 7,
+        "withOcrText": 6,
+        "aiCalls": 6,
         "aiAccepted": 0,
-        "errors": [],
+        "errors": [
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-YGfGn1/video-1-frame-01.jpg.ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-giUT55/asset-0-ocr.png stdout -l deu+eng --psm 6"
+        ],
         "llmConfigured": true,
         "tools": {
           "tesseract": true,
@@ -164,123 +192,124 @@
       },
       "accountYield": {
         "foodiewien": {
-          "recentFetched": 27.457,
-          "recentAccepted": 6.102
+          "recentFetched": 29.593,
+          "recentAccepted": 6.577
         },
         "boca.vienna": {
-          "recentFetched": 27.457,
-          "recentAccepted": 3.051
+          "recentFetched": 29.593,
+          "recentAccepted": 3.288
         },
         "shaysfoodblog": {
-          "recentFetched": 27.457,
-          "recentAccepted": 8.836
+          "recentFetched": 29.593,
+          "recentAccepted": 9.627
         },
         "maisonnayavienna": {
+          "recentFetched": 24.61,
+          "recentAccepted": 2.313
+        },
+        "cafe_wirr": {
           "recentFetched": 20.813,
-          "recentAccepted": 1.75
+          "recentAccepted": 0
         },
-        "corner_xvi": {
+        "lebaron.wien": {
+          "recentFetched": 20.813,
+          "recentAccepted": 0
+        },
+        "mangalet.at": {
+          "recentFetched": 6.938,
+          "recentAccepted": 0
+        },
+        "pizzeriapummaro": {
+          "recentFetched": 20.813,
+          "recentAccepted": 0
+        },
+        "behalal.official": {
+          "recentFetched": 20.813,
+          "recentAccepted": 0
+        },
+        "viennaeats": {
           "recentFetched": 15.75,
           "recentAccepted": 0
         },
-        "eatinvienna_": {
-          "recentFetched": 15.75,
-          "recentAccepted": 0
-        },
-        "hotline_5": {
-          "recentFetched": 15.75,
-          "recentAccepted": 0
-        },
-        "meat_point_smashburgerbar": {
-          "recentFetched": 15.75,
-          "recentAccepted": 0
-        },
-        "zushimarket": {
-          "recentFetched": 15.75,
-          "recentAccepted": 0
-        },
-        "assal.burger": {
+        "viennafoodstories": {
           "recentFetched": 9,
           "recentAccepted": 0
         },
-        "cascade_bar_vienna": {
+        "viennarestaurants": {
+          "recentFetched": 0,
+          "recentAccepted": 0
+        },
+        "viennawurstelstand": {
+          "recentFetched": 9,
+          "recentAccepted": 0
+        },
+        "castillo.wien": {
+          "recentFetched": 9,
+          "recentAccepted": 0
+        },
+        "wolt": {
+          "recentFetched": 9,
+          "recentAccepted": 0
+        },
+        "sparhamster.at": {
+          "recentFetched": 0,
+          "recentAccepted": 0
+        },
+        "news_cafe_wien": {
+          "recentFetched": 0,
+          "recentAccepted": 0
+        },
+        "casa_frascati_17": {
+          "recentFetched": 9,
+          "recentAccepted": 0
+        },
+        "dieseeteufel": {
+          "recentFetched": 9,
+          "recentAccepted": 0
+        },
+        "doenerbox.wien": {
+          "recentFetched": 0,
+          "recentAccepted": 0
+        },
+        "elissar.deli": {
           "recentFetched": 15.75,
           "recentAccepted": 0
         },
-        "german.doener.house": {
+        "eylulbaeckerei": {
           "recentFetched": 15.75,
           "recentAccepted": 0
         },
-        "merdins_cheesy_doener": {
-          "recentFetched": 20.813,
+        "fenstercafe": {
+          "recentFetched": 15.75,
           "recentAccepted": 0
         },
-        "woa.vienna": {
-          "recentFetched": 20.813,
-          "recentAccepted": 0
-        },
-        "xo_grill": {
-          "recentFetched": 20.813,
-          "recentAccepted": 0
-        },
-        "lorenzos_bar_lounge": {
-          "recentFetched": 20.813,
-          "recentAccepted": 0
-        },
-        "2ndstreetburger": {
-          "recentFetched": 20.813,
-          "recentAccepted": 0
-        },
-        "seelokaya": {
-          "recentFetched": 20.813,
-          "recentAccepted": 0
-        },
-        "wolt.oesterreich": {
-          "recentFetched": 20.813,
-          "recentAccepted": 0
-        },
-        "birbsbagel": {
-          "recentFetched": 20.813,
-          "recentAccepted": 0
-        },
-        "blumencafe.wien": {
-          "recentFetched": 20.813,
-          "recentAccepted": 0
-        },
-        "framburi_fries": {
-          "recentFetched": 20.813,
-          "recentAccepted": 0
-        },
-        "ghettosmash_": {
-          "recentFetched": 20.813,
-          "recentAccepted": 0
-        },
-        "naanbrueder": {
-          "recentFetched": 20.813,
+        "firstonewien": {
+          "recentFetched": 15.75,
           "recentAccepted": 0
         }
       }
     }
   },
   "rejectionReasons": {
-    "non-vienna-location": 1,
-    "no-concrete-offer": 190,
-    "post-too-old": 7,
-    "excluded-promotion-type": 4,
-    "missing-vienna-evidence": 7,
-    "media-ai-rejected-offer": 1,
-    "self-syndicated-deal": 1
+    "non-vienna-location": 4,
+    "no-concrete-offer": 149,
+    "post-too-old": 5,
+    "excluded-promotion-type": 1,
+    "missing-text": 3,
+    "media-ai-rejected-offer": 2,
+    "missing-vienna-evidence": 3,
+    "offer-expired": 1
   },
   "graphEvidence": {
     "status": "ok",
-    "observed": 218,
-    "retained": 177,
-    "blocked": 15
+    "observed": 175,
+    "retained": 194,
+    "blocked": 16
   },
   "totalDeals": 7,
   "verifiedBeforeLimit": 7,
   "outputLimit": 40,
-  "freshPostsFetched": 218,
+  "freshPostsFetched": 175,
   "verifiedDeals": 7,
   "message": "7 new, evidence-verified Vienna Instagram deals found."
 }
