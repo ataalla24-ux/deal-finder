@@ -23,6 +23,9 @@ The Instagram Graph path requires a professional Instagram account and the appli
 permissions. Hashtag discovery additionally requires Instagram Public Content Access approval.
 
 Slack delivery uses the existing `SLACK_BOT_TOKEN` and `SLACK_CHANNEL_ID` secrets.
+Media-only deal classification uses the existing `OPENAI_API_KEY`. The workflow still works without
+it: deterministic caption and Tesseract OCR checks remain active, while only the optional ambiguous
+OCR classification is skipped.
 
 ## Current setup checklist
 
@@ -45,6 +48,10 @@ The existing GitHub workflow is already wired. If it reports `Bad signature`, th
 - `META_INSTAGRAM_HASHTAGS` as a comma/newline separated list, without `#`.
 - `META_INSTAGRAM_ACCOUNTS` for additional Business Discovery usernames.
 - `META_INSTAGRAM_VERIFIED_ACCOUNTS` for accounts whose Vienna address has been checked outside the post.
+- `META_INSTAGRAM_MEDIA_OCR_ENABLED` to disable media OCR explicitly (enabled in the workflow).
+- `META_INSTAGRAM_MEDIA_MAX_POSTS_PER_RUN` and `META_INSTAGRAM_MEDIA_MAX_ASSETS_PER_POST` to cap work.
+- `META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_RUN` to cap optional AI classifications.
+- `META_INSTAGRAM_SOURCE_FAILURE_COOLDOWN_HOURS` for invalid account/hashtag retry cooldowns.
 
 Only put an account in `META_INSTAGRAM_VERIFIED_ACCOUNTS` after its Vienna location is backed by an
 official website, address or merchant onboarding record. The ordinary watchlist is deliberately not
@@ -62,6 +69,22 @@ Organic posts are accepted for 72 hours. Posts up to seven days old require an e
 When an active ad or fresh post has no stated expiry, the emitted deal receives a transparent 72-hour
 review TTL (`expirySource=short-review-ttl`) instead of pretending that an expiry was published.
 
+## Media evidence
+
+The Graph request includes temporary image, carousel-child and Reel media URLs. The runner downloads
+only a bounded number of fresh posts, extracts a few Reel frames with FFmpeg and reads visible German
+and English text with Tesseract. Ambiguous OCR is classified through the OpenAI Responses API with a
+strict JSON schema. The model may only clean up supplied caption/OCR evidence; deterministic deal,
+Vienna, freshness and expiry guards still decide whether a row is emitted.
+
+Temporary Meta CDN URLs are never written to repository files. Only bounded OCR text, counts and the
+structured classification result are retained as evidence. The state cache prevents repeated OCR and
+AI calls for the same media ID during the seven-day freshness window.
+
+Accounts observed by Apify, Instagram AI and the verified queue are fed back into the Graph account
+catalog for official timestamp/caption verification. Invalid accounts and hashtags receive a bounded
+cooldown instead of consuming API quota every two hours.
+
 Generated files:
 
 - `docs/deals-pending-meta-instagram.json`
@@ -69,7 +92,7 @@ Generated files:
 - `docs/meta-instagram-auth-health.json`
 - `docs/meta-instagram-state.json`
 
-The state file caches hashtag IDs and recently observed Meta object IDs for diagnostics and fair batch
-rotation. Observed IDs move behind not-yet-observed rows but never suppress collector output, because
-collection alone does not prove that Slack delivery succeeded.
+The state file caches hashtag IDs, recent OCR evidence, source cooldowns and recently observed Meta
+object IDs for diagnostics and fair batch rotation. Observed IDs move behind not-yet-observed rows but
+never suppress collector output, because collection alone does not prove that Slack delivery succeeded.
 The state file never contains access tokens.

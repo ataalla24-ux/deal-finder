@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
 import { parseExpiryShape } from './expiry-utils.js';
+import { enrichInstagramGraphMedia } from './instagram-media-evidence.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,6 +19,12 @@ const DEFAULT_REPORT_PATH = path.join(DOCS_DIR, 'meta-instagram-report.json');
 const DEFAULT_STATE_PATH = path.join(DOCS_DIR, 'meta-instagram-state.json');
 const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
 const MERCHANT_REGISTRY_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
+const CANDIDATE_ACCOUNT_PATHS = [
+  path.join(DOCS_DIR, 'deals-pending-instagram-apify.json'),
+  path.join(DOCS_DIR, 'deals-pending-instagram-ai.json'),
+  path.join(DOCS_DIR, 'deals-pending-instagram-discovery.json'),
+  path.join(DOCS_DIR, 'deals-pending-instagram-verified.json'),
+];
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_AD_SEARCH_TERMS = [
@@ -186,6 +193,24 @@ export function buildConfig(env = process.env, now = new Date()) {
     shardIndex: numberEnv(env, 'META_INSTAGRAM_SHARD_INDEX', Math.floor(now.getUTCHours() / 2), 0, 10000),
     allowWatchlistAsViennaEvidence: booleanEnv(env, 'META_INSTAGRAM_ALLOW_WATCHLIST_VIENNA', false),
     requireConfiguredSource: booleanEnv(env, 'META_INSTAGRAM_REQUIRE_SOURCE', false),
+    sourceFailureCooldownHours: numberEnv(env, 'META_INSTAGRAM_SOURCE_FAILURE_COOLDOWN_HOURS', 168, 1, 720),
+    mediaOcrEnabled: booleanEnv(env, 'META_INSTAGRAM_MEDIA_OCR_ENABLED', true),
+    mediaMaxPostsPerRun: numberEnv(env, 'META_INSTAGRAM_MEDIA_MAX_POSTS_PER_RUN', 18, 0, 60),
+    mediaMaxAssetsPerPost: numberEnv(env, 'META_INSTAGRAM_MEDIA_MAX_ASSETS_PER_POST', 3, 1, 10),
+    mediaMaxVideoFrames: numberEnv(env, 'META_INSTAGRAM_MEDIA_MAX_VIDEO_FRAMES', 4, 1, 12),
+    mediaMaxBytes: numberEnv(env, 'META_INSTAGRAM_MEDIA_MAX_BYTES', 25 * 1024 * 1024, 1024 * 1024, 100 * 1024 * 1024),
+    mediaDownloadTimeoutMs: numberEnv(env, 'META_INSTAGRAM_MEDIA_DOWNLOAD_TIMEOUT_MS', 20000, 1000, 60000),
+    mediaOcrConcurrency: numberEnv(env, 'META_INSTAGRAM_MEDIA_OCR_CONCURRENCY', 2, 1, 6),
+    mediaOcrMaxTextChars: numberEnv(env, 'META_INSTAGRAM_MEDIA_OCR_MAX_TEXT_CHARS', 4000, 500, 12000),
+    ocrTimeoutMs: numberEnv(env, 'META_INSTAGRAM_MEDIA_OCR_TIMEOUT_MS', 30000, 5000, 120000),
+    mediaCacheTtlDays: numberEnv(env, 'META_INSTAGRAM_MEDIA_CACHE_TTL_DAYS', 7, 1, 30),
+    mediaLlmEnabled: booleanEnv(env, 'META_INSTAGRAM_MEDIA_LLM_ENABLED', Boolean(cleanText(env.OPENAI_API_KEY, 700))),
+    mediaLlmModel: cleanText(env.META_INSTAGRAM_MEDIA_LLM_MODEL || env.OPENAI_MODEL || 'gpt-4.1-mini', 100),
+    mediaLlmMaxCallsPerRun: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_RUN', 8, 0, 30),
+    mediaLlmMinOcrChars: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MIN_OCR_CHARS', 20, 5, 500),
+    mediaLlmMinConfidence: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MIN_CONFIDENCE', 0.82, 0.5, 1),
+    mediaLlmTimeoutMs: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_TIMEOUT_MS', 30000, 5000, 120000),
+    openAiApiKey: cleanText(env.OPENAI_API_KEY, 700),
     outputPath: cleanText(env.META_INSTAGRAM_OUTPUT_PATH, 500) || DEFAULT_OUTPUT_PATH,
     reportPath: cleanText(env.META_INSTAGRAM_REPORT_PATH, 500) || DEFAULT_REPORT_PATH,
     statePath: cleanText(env.META_INSTAGRAM_STATE_PATH, 500) || DEFAULT_STATE_PATH,
@@ -238,6 +263,20 @@ export function loadAccountCatalog(config, paths = {}) {
 
   for (const account of Array.isArray(watchlist?.accounts) ? watchlist.accounts : []) add(account, 'watchlist');
   for (const account of Array.isArray(registry?.accounts) ? registry.accounts : []) add(account, 'registry');
+  const candidatePaths = Array.isArray(paths.candidatePaths) ? paths.candidatePaths : CANDIDATE_ACCOUNT_PATHS;
+  for (const candidatePath of candidatePaths) {
+    const payload = readJson(candidatePath, {});
+    const deals = Array.isArray(payload) ? payload : (Array.isArray(payload?.deals) ? payload.deals : []);
+    for (const deal of deals) {
+      const username = normalizedUsername(
+        deal?.ownerUsername
+        || deal?.evidence?.username
+        || deal?.media?.username
+        || String(deal?.sourceName || '').replace(/^@/, '')
+      );
+      if (username) add({ username, priority: 104, category: deal?.category || '' }, `candidate:${path.basename(candidatePath)}`);
+    }
+  }
   for (const username of config.explicitAccounts) add({ username, priority: 110 }, 'env');
 
   return [...byUsername.values()].sort((a, b) => b.priority - a.priority || a.username.localeCompare(b.username));
@@ -484,20 +523,31 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
 
 export function normalizeGraphMediaItem(raw, context, config, now = new Date()) {
   const caption = cleanText(raw?.caption, 4000);
-  const promotion = classifyPromotion(caption);
+  const mediaEvidence = raw?._mediaEvidence && typeof raw._mediaEvidence === 'object' ? raw._mediaEvidence : {};
+  const ocrText = cleanText(mediaEvidence.ocrText, config.mediaOcrMaxTextChars || 4000);
+  const ai = mediaEvidence.ai && typeof mediaEvidence.ai === 'object' ? mediaEvidence.ai : null;
+  const trustedAiOffer = ai?.isDeal === true
+    && Number(ai.confidence || 0) >= Number(config.mediaLlmMinConfidence || 0.82)
+    && ai.exclusion === 'none'
+      ? cleanText(ai.offerText, 500)
+      : '';
+  const contentText = [caption, ocrText ? `Bildtext: ${ocrText}` : '', trustedAiOffer ? `AI-Angebotsbeleg: ${trustedAiOffer}` : '']
+    .filter(Boolean)
+    .join('\n');
+  const promotion = classifyPromotion(contentText);
   if (!promotion.accepted) return { deal: null, rejection: promotion.reason };
   const sourcePublishedAt = toIso(raw?.timestamp);
   if (!sourcePublishedAt) return { deal: null, rejection: 'missing-source-published-at' };
 
   const account = context?.account || null;
   const viennaEvidence = findViennaEvidence({
-    caption,
+    caption: [caption, ocrText].filter(Boolean).join(' '),
     // A hashtag is a discovery hint, not proof that the actual offer is in Vienna.
     sourceName: context?.sourceType === 'account' ? context?.sourceName : '',
     username: raw?.username || account?.username,
   }, account, config);
   if (!viennaEvidence.verified) return { deal: null, rejection: 'missing-vienna-evidence' };
-  const expiry = expiryFromText(caption, now, '', config.unknownExpiryTtlHours, sourcePublishedAt);
+  const expiry = expiryFromText(contentText, now, '', config.unknownExpiryTtlHours, sourcePublishedAt);
   const expiryRejection = explicitExpiryRejection(expiry, now);
   if (expiryRejection) return { deal: null, rejection: expiryRejection };
   if (!isOrganicFresh(sourcePublishedAt, expiry, now, config)) return { deal: null, rejection: 'post-too-old' };
@@ -508,13 +558,13 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
   }
   const username = normalizedUsername(raw?.username || account?.username);
   const brand = cleanText(raw?.name, 100) || (username ? `@${username}` : cleanText(context?.sourceName, 100)) || 'Instagram';
-  const category = inferCategory(caption);
-  const title = inferTitle(caption, brand, promotion);
+  const category = inferCategory(contentText);
+  const title = inferTitle(contentText, brand, promotion);
   const deal = buildDealBase({
     id: `meta-ig-${cleanText(raw?.id, 120) || stableHash(url)}`,
     brand,
     title,
-    description: caption,
+    description: contentText,
     type: promotion.type,
     category,
     url,
@@ -530,6 +580,18 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
       username,
       sourceType: cleanText(context?.sourceType, 30),
       sourceName: cleanText(context?.sourceName, 100),
+      mediaEvidence: {
+        ocrText,
+        assetCount: Number(mediaEvidence.assetCount || 0),
+        imageCount: Number(mediaEvidence.imageCount || 0),
+        videoFrameCount: Number(mediaEvidence.videoFrameCount || 0),
+        ai: ai ? {
+          isDeal: ai.isDeal === true,
+          confidence: Number(ai.confidence || 0),
+          offerText: cleanText(ai.offerText, 500),
+          exclusion: cleanText(ai.exclusion, 60),
+        } : null,
+      },
     },
   });
   if (username) deal.ownerUsername = username;
@@ -548,7 +610,7 @@ function safeUrl(value) {
 
 function safeErrorMessage(error, config) {
   let message = cleanText(error?.message || error, 1200);
-  for (const secret of [config?.adLibraryToken, config?.instagramAccessToken].filter(Boolean)) {
+  for (const secret of [config?.adLibraryToken, config?.instagramAccessToken, config?.openAiApiKey].filter(Boolean)) {
     message = message.split(secret).join('[redacted]');
     try {
       message = message.split(encodeURIComponent(secret)).join('[redacted]');
@@ -744,32 +806,87 @@ function instagramHashtagSearchUrl(config, tag) {
   return url.toString();
 }
 
-function instagramHashtagMediaUrl(config, hashtagId) {
+const BASIC_INSTAGRAM_MEDIA_FIELDS = 'id,caption,media_type,permalink,timestamp,like_count,comments_count';
+const OCR_INSTAGRAM_MEDIA_FIELDS = `${BASIC_INSTAGRAM_MEDIA_FIELDS},media_product_type,media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}`;
+
+function instagramHashtagMediaUrl(config, hashtagId, includeMedia = true) {
   const url = new URL(`https://graph.facebook.com/${config.graphVersion}/${hashtagId}/recent_media`);
   url.searchParams.set('user_id', config.instagramUserId);
-  url.searchParams.set('fields', 'id,caption,media_type,permalink,timestamp,like_count,comments_count');
+  url.searchParams.set('fields', includeMedia ? OCR_INSTAGRAM_MEDIA_FIELDS : BASIC_INSTAGRAM_MEDIA_FIELDS);
   url.searchParams.set('limit', String(config.mediaPerHashtag));
   url.searchParams.set('access_token', config.instagramAccessToken);
   return url.toString();
 }
 
-function instagramBusinessDiscoveryUrl(config, username) {
+function instagramBusinessDiscoveryUrl(config, username, includeMedia = true) {
   const url = new URL(`https://graph.facebook.com/${config.graphVersion}/${config.instagramUserId}`);
-  url.searchParams.set('fields', `business_discovery.username(${username}){username,name,media.limit(${config.mediaPerAccount}){id,caption,media_type,permalink,timestamp,like_count,comments_count}}`);
+  const fields = includeMedia ? OCR_INSTAGRAM_MEDIA_FIELDS : BASIC_INSTAGRAM_MEDIA_FIELDS;
+  url.searchParams.set('fields', `business_discovery.username(${username}){username,name,media.limit(${config.mediaPerAccount}){${fields}}}`);
   url.searchParams.set('access_token', config.instagramAccessToken);
   return url.toString();
 }
 
-async function collectInstagramGraph(config, accountCatalog, state, fetchImpl) {
+async function fetchGraphMediaWithFallback(primaryUrl, fallbackUrl, config, fetchImpl) {
+  try {
+    return await fetchMetaJson(primaryUrl, config, fetchImpl);
+  } catch (error) {
+    if (Number(error?.code || 0) !== 100) throw error;
+    return fetchMetaJson(fallbackUrl, config, fetchImpl);
+  }
+}
+
+function pruneSourceFailures(value, now) {
+  const maxAge = 30 * DAY_MS;
+  const pruneGroup = (group) => Object.fromEntries(Object.entries(group || {}).filter(([, failure]) => {
+    const timestamp = Date.parse(failure?.lastAt || '');
+    return Number.isFinite(timestamp) && now.getTime() - timestamp <= maxAge;
+  }).slice(-500));
+  return {
+    accounts: pruneGroup(value?.accounts),
+    hashtags: pruneGroup(value?.hashtags),
+  };
+}
+
+function sourceOnCooldown(failure, now) {
+  const until = Date.parse(failure?.cooldownUntil || '');
+  return Number.isFinite(until) && until > now.getTime();
+}
+
+function clearSourceFailure(failures, group, key) {
+  delete failures[group][key];
+}
+
+function recordSourceFailure(failures, group, key, error, config, now) {
+  const code = cleanText(error?.code, 80) || `http-${Number(error?.status || 0)}`;
+  if (!['24', '100', '110', 'hashtag-not-found'].includes(code)) return;
+  const previous = failures[group][key] || {};
+  failures[group][key] = {
+    count: Number(previous.count || 0) + 1,
+    code,
+    lastAt: now.toISOString(),
+    cooldownUntil: new Date(now.getTime() + config.sourceFailureCooldownHours * 60 * 60 * 1000).toISOString(),
+  };
+}
+
+async function collectInstagramGraph(config, accountCatalog, state, now, fetchImpl) {
   const raw = [];
   const errors = [];
   const usage = [];
   const hashtagIds = { ...(state?.hashtagIds || {}) };
-  const selectedAccounts = selectAccountShard(accountCatalog, config);
+  const sourceFailures = pruneSourceFailures(state?.sourceFailures, now);
+  const availableAccounts = accountCatalog.filter((account) => !sourceOnCooldown(sourceFailures.accounts[account.username], now));
+  const selectedAccounts = selectAccountShard(availableAccounts, config);
+  const skippedAccounts = accountCatalog.length - availableAccounts.length;
+  let skippedHashtags = 0;
 
   for (const account of selectedAccounts) {
     try {
-      const response = await fetchMetaJson(instagramBusinessDiscoveryUrl(config, account.username), config, fetchImpl);
+      const response = await fetchGraphMediaWithFallback(
+        instagramBusinessDiscoveryUrl(config, account.username, true),
+        instagramBusinessDiscoveryUrl(config, account.username, false),
+        config,
+        fetchImpl,
+      );
       usage.push(response.usage);
       const business = response.payload?.business_discovery || {};
       const media = Array.isArray(business?.media?.data) ? business.media.data : [];
@@ -779,12 +896,18 @@ async function collectInstagramGraph(config, accountCatalog, state, fetchImpl) {
           context: { sourceType: 'account', sourceName: `@${account.username}`, account },
         });
       }
+      clearSourceFailure(sourceFailures, 'accounts', account.username);
     } catch (error) {
       errors.push({ source: `@${account.username}`, status: Number(error?.status || 0), code: error?.code || '', message: safeErrorMessage(error, config) });
+      recordSourceFailure(sourceFailures, 'accounts', account.username, error, config, now);
     }
   }
 
   for (const tag of config.hashtags) {
+    if (sourceOnCooldown(sourceFailures.hashtags[tag], now)) {
+      skippedHashtags += 1;
+      continue;
+    }
     try {
       let hashtagId = cleanText(hashtagIds[tag], 100);
       if (!hashtagId) {
@@ -794,20 +917,30 @@ async function collectInstagramGraph(config, accountCatalog, state, fetchImpl) {
         if (hashtagId) hashtagIds[tag] = hashtagId;
       }
       if (!hashtagId) {
-        errors.push({ source: `#${tag}`, status: 0, code: 'hashtag-not-found', message: 'Meta returned no hashtag id.' });
+        const error = { source: `#${tag}`, status: 0, code: 'hashtag-not-found', message: 'Meta returned no hashtag id.' };
+        errors.push(error);
+        recordSourceFailure(sourceFailures, 'hashtags', tag, error, config, now);
         continue;
       }
-      const response = await fetchMetaJson(instagramHashtagMediaUrl(config, hashtagId), config, fetchImpl);
+      const response = await fetchGraphMediaWithFallback(
+        instagramHashtagMediaUrl(config, hashtagId, true),
+        instagramHashtagMediaUrl(config, hashtagId, false),
+        config,
+        fetchImpl,
+      );
       usage.push(response.usage);
       for (const item of Array.isArray(response.payload?.data) ? response.payload.data : []) {
         raw.push({ item, context: { sourceType: 'hashtag', sourceName: `#${tag}`, account: null } });
       }
+      clearSourceFailure(sourceFailures, 'hashtags', tag);
     } catch (error) {
-        errors.push({ source: `#${tag}`, status: Number(error?.status || 0), code: error?.code || '', message: safeErrorMessage(error, config) });
+      errors.push({ source: `#${tag}`, status: Number(error?.status || 0), code: error?.code || '', message: safeErrorMessage(error, config) });
+      recordSourceFailure(sourceFailures, 'hashtags', tag, error, config, now);
+      if ([24, 100].includes(Number(error?.code || 0))) delete hashtagIds[tag];
     }
   }
 
-  return { raw, errors, usage, hashtagIds, selectedAccounts };
+  return { raw, errors, usage, hashtagIds, selectedAccounts, sourceFailures, skippedAccounts, skippedHashtags };
 }
 
 function incrementReason(rejections, reason) {
@@ -855,7 +988,7 @@ export async function runMetaInstagramCollector(options = {}) {
   const env = options.env || process.env;
   const config = { ...(options.config || buildConfig(env, now)) };
   const fetchImpl = options.fetchImpl || fetch;
-  const state = readJson(config.statePath, { version: 1, hashtagIds: {}, seenIds: {} });
+  const state = readJson(config.statePath, { version: 2, hashtagIds: {}, seenIds: {}, mediaEvidence: {}, sourceFailures: {} });
   const previousPayload = readJson(config.outputPath, null);
   const lastGoodPayload = previousPayload && Array.isArray(previousPayload.deals)
     ? previousPayload
@@ -914,10 +1047,12 @@ export async function runMetaInstagramCollector(options = {}) {
 
   const accepted = [];
   const nextState = {
-    version: 1,
+    version: 2,
     updatedAt: now.toISOString(),
     hashtagIds: { ...(state?.hashtagIds || {}) },
     seenIds: pruneSeenIds(state?.seenIds || {}, now, config.seenTtlDays),
+    mediaEvidence: { ...(state?.mediaEvidence || {}) },
+    sourceFailures: pruneSourceFailures(state?.sourceFailures, now),
   };
 
   if (configured.adLibrary) {
@@ -937,18 +1072,36 @@ export async function runMetaInstagramCollector(options = {}) {
   }
 
   if (configured.instagramGraph && config.instagramUserId) {
-    const result = await collectInstagramGraph(config, accountCatalog, state, fetchImpl);
+    const result = await collectInstagramGraph(config, accountCatalog, state, now, fetchImpl);
     nextState.hashtagIds = result.hashtagIds;
+    nextState.sourceFailures = result.sourceFailures;
     report.selectedAccounts = result.selectedAccounts.map((account) => ({
       username: account.username,
       priority: account.priority,
       verifiedVienna: account.verifiedVienna,
     }));
+    report.sources.instagramGraph.skippedCooldown = {
+      accounts: result.skippedAccounts,
+      hashtags: result.skippedHashtags,
+    };
     report.sources.instagramGraph.fetched = result.raw.length;
     report.sources.instagramGraph.errors = result.errors;
-    const requestedSources = result.selectedAccounts.length + config.hashtags.length;
-    report.sources.instagramGraph.status = result.errors.length >= requestedSources && !result.raw.length ? 'failed' : (result.errors.length ? 'degraded' : 'ok');
-    for (const entry of result.raw) {
+    const requestedSources = result.selectedAccounts.length + Math.max(0, config.hashtags.length - result.skippedHashtags);
+    report.sources.instagramGraph.status = requestedSources === 0
+      ? ((result.skippedAccounts || result.skippedHashtags) ? 'degraded' : 'ok')
+      : (result.errors.length >= requestedSources && !result.raw.length ? 'failed' : (result.errors.length ? 'degraded' : 'ok'));
+    const media = await (options.enrichGraphMedia || enrichInstagramGraphMedia)(result.raw, config, now, {
+      cache: state?.mediaEvidence,
+      mediaFetchImpl: options.mediaFetchImpl,
+      openAiFetchImpl: options.openAiFetchImpl,
+      execFileImpl: options.execFileImpl,
+      tools: options.mediaTools,
+      analyzeItem: options.analyzeMediaItem,
+      classifyOcr: options.classifyOcr,
+    });
+    nextState.mediaEvidence = media.cache;
+    report.sources.instagramGraph.mediaEvidence = media.report;
+    for (const entry of media.entries) {
       const normalized = normalizeGraphMediaItem(entry.item, entry.context, config, now);
       if (!normalized.deal) {
         incrementReason(report.rejectionReasons, normalized.rejection);
@@ -1004,11 +1157,18 @@ export async function runMetaInstagramCollector(options = {}) {
   if (allFailed) {
     report.preservedDeals = lastGoodPayload?.deals?.length || 0;
     report.message = `All configured Meta sources failed; preserved ${report.preservedDeals} last-good deal(s).`;
-    if (options.write !== false) writeJsonAtomic(config.reportPath, report);
+    const sourceFailuresChanged = JSON.stringify(nextState.sourceFailures) !== JSON.stringify(pruneSourceFailures(state?.sourceFailures, now));
+    const failedState = sourceFailuresChanged
+      ? { ...state, version: 2, updatedAt: now.toISOString(), sourceFailures: nextState.sourceFailures }
+      : state;
+    if (options.write !== false) {
+      writeJsonAtomic(config.reportPath, report);
+      if (sourceFailuresChanged) writeJsonAtomic(config.statePath, failedState);
+    }
     return {
       payload: lastGoodPayload || payload,
       report,
-      state,
+      state: failedState,
       shouldFail: true,
     };
   }

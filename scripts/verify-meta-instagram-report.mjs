@@ -41,6 +41,10 @@ const summary = [
   `- Verified new deals: **${report.totalDeals}**`,
   `- Ad Library: ${report.sources?.adLibrary?.status || 'unknown'} (${report.sources?.adLibrary?.fetched || 0} fetched)`,
   `- Instagram Graph: ${report.sources?.instagramGraph?.status || 'unknown'} (${report.sources?.instagramGraph?.fetched || 0} fetched)`,
+  `- Media OCR: ${report.sources?.instagramGraph?.mediaEvidence?.status || 'not-run'} (${report.sources?.instagramGraph?.mediaEvidence?.withOcrText || 0} with text)`,
+  `- OCR cache hits: ${report.sources?.instagramGraph?.mediaEvidence?.cached || 0}`,
+  `- AI media classifications: ${report.sources?.instagramGraph?.mediaEvidence?.aiCalls || 0} (${report.sources?.instagramGraph?.mediaEvidence?.aiAccepted || 0} accepted)`,
+  `- Sources on cooldown: ${(report.sources?.instagramGraph?.skippedCooldown?.accounts || 0) + (report.sources?.instagramGraph?.skippedCooldown?.hashtags || 0)}`,
   `- Selected accounts: ${Array.isArray(report.selectedAccounts) ? report.selectedAccounts.length : 0}`,
   '',
 ].join('\n');

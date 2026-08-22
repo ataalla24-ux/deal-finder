@@ -7,6 +7,7 @@ import {
   buildConfig,
   classifyPromotion,
   findViennaEvidence,
+  loadAccountCatalog,
   normalizeAdLibraryItem,
   normalizeGraphMediaItem,
   runMetaInstagramCollector,
@@ -200,6 +201,8 @@ const autoDiscoveryRun = await runMetaInstagramCollector({
     }
     if (url.pathname.endsWith('/ig-123')) {
       assert.equal(url.searchParams.get('access_token'), pageAccessToken);
+      assert.match(url.searchParams.get('fields'), /media_url/);
+      assert.match(url.searchParams.get('fields'), /children\{/);
       return new Response(JSON.stringify({
         business_discovery: {
           username: 'autocafe',
@@ -223,6 +226,70 @@ assert.equal(autoDiscoveryRun.report.sources.instagramGraph.identity.status, 'ok
 assert.equal(autoDiscoveryRun.report.sources.instagramGraph.identity.source, 'facebook-managed-pages');
 assert.equal(autoDiscoveryRun.payload.totalDeals, 1, 'the existing token can activate Graph discovery without a separately configured user id');
 assert.doesNotMatch(JSON.stringify(autoDiscoveryRun), /auto-discovery-(?:user|page)-token/, 'identity discovery tokens must stay out of reports and output');
+
+const candidatePath = path.join(tempDir, 'candidate-accounts.json');
+fs.writeFileSync(candidatePath, JSON.stringify({
+  deals: [{ ownerUsername: 'new.graph.cafe', category: 'kaffee', viennaVerified: true }],
+}));
+const candidateCatalog = loadAccountCatalog(buildConfig({}, now), {
+  watchlistPath: path.join(tempDir, 'missing-watchlist.json'),
+  registryPath: path.join(tempDir, 'missing-registry.json'),
+  candidatePaths: [candidatePath],
+});
+assert.equal(candidateCatalog.length, 1);
+assert.equal(candidateCatalog[0].username, 'new.graph.cafe');
+assert.equal(candidateCatalog[0].verifiedVienna, false, 'candidate queues may target an account but cannot self-verify its Vienna location');
+
+const cooldownStatePath = path.join(tempDir, 'cooldown-state.json');
+const cooldownConfig = {
+  ...buildConfig({
+    INSTAGRAM_ACCESS_TOKEN: 'cooldown-token',
+    INSTAGRAM_USER_ID: 'ig-cooldown-user',
+    META_INSTAGRAM_ACCOUNTS: 'broken.account',
+    META_INSTAGRAM_HASHTAGS: '',
+    META_INSTAGRAM_MEDIA_OCR_ENABLED: '0',
+    META_INSTAGRAM_MAX_RETRIES: '0',
+  }, now),
+  hashtags: [],
+  outputPath: path.join(tempDir, 'cooldown-output.json'),
+  reportPath: path.join(tempDir, 'cooldown-report.json'),
+  statePath: cooldownStatePath,
+};
+const firstCooldownRun = await runMetaInstagramCollector({
+  now,
+  config: cooldownConfig,
+  paths: {
+    watchlistPath: path.join(tempDir, 'missing-watchlist.json'),
+    registryPath: path.join(tempDir, 'missing-registry.json'),
+    candidatePaths: [],
+  },
+  fetchImpl: async () => new Response(JSON.stringify({
+    error: { message: 'Invalid user id', code: 110 },
+  }), { status: 400, headers: { 'content-type': 'application/json' } }),
+  write: false,
+});
+assert.equal(firstCooldownRun.shouldFail, true);
+assert.equal(firstCooldownRun.state.sourceFailures.accounts['broken.account'].code, '110');
+fs.writeFileSync(cooldownStatePath, JSON.stringify(firstCooldownRun.state));
+let cooldownRequests = 0;
+const secondCooldownRun = await runMetaInstagramCollector({
+  now: new Date(now.getTime() + 60 * 60 * 1000),
+  config: cooldownConfig,
+  paths: {
+    watchlistPath: path.join(tempDir, 'missing-watchlist.json'),
+    registryPath: path.join(tempDir, 'missing-registry.json'),
+    candidatePaths: [],
+  },
+  fetchImpl: async () => {
+    cooldownRequests += 1;
+    throw new Error('a cooling-down source must not be requested');
+  },
+  write: false,
+});
+assert.equal(cooldownRequests, 0);
+assert.equal(secondCooldownRun.report.sources.instagramGraph.skippedCooldown.accounts, 1);
+assert.equal(secondCooldownRun.report.sources.instagramGraph.status, 'degraded');
+assert.equal(secondCooldownRun.shouldFail, false, 'cooldown is a controlled degraded state, not a total collector outage');
 
 const lastGoodPayload = {
   lastUpdated: '2026-07-16T10:00:00.000Z',
