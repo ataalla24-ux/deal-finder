@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-08-22T09:47:28.698Z",
+  "generatedAt": "2026-08-22T09:53:35.590Z",
   "source": "meta-instagram-auth-health",
   "graphVersion": "v26.0",
-  "status": "wrong-token-type-or-missing-page-link",
+  "status": "ok",
   "configured": {
     "instagramGraph": true,
     "instagramUserId": true,
@@ -11,11 +11,29 @@
   "checks": [
     {
       "name": "token-basic",
-      "status": "wrong-token-type-or-missing-page-link",
-      "detail": "(#100) Tried accessing nonexisting field (instagram_business_account)",
-      "code": "100",
-      "httpStatus": 400
+      "status": "ok",
+      "detail": "Token resolved /me."
+    },
+    {
+      "name": "instagram-user-id",
+      "status": "configured",
+      "detail": "Using INSTAGRAM_USER_ID=17841438552673858."
+    },
+    {
+      "name": "own-media",
+      "status": "ok",
+      "detail": "Read 2 recent media row(s); timestamp/permalink fields are available."
+    },
+    {
+      "name": "business-discovery",
+      "status": "ok",
+      "detail": "Business Discovery works for @ciosgrill; 1 media row(s) returned."
+    },
+    {
+      "name": "hashtag-search",
+      "status": "skipped",
+      "detail": "Set META_INSTAGRAM_HEALTHCHECK_HASHTAG to test hashtag access; this counts toward Meta hashtag limits."
     }
   ],
-  "nextAction": "Check the token type and Meta app permissions."
+  "nextAction": "Meta Instagram Graph is ready for the deal collector."
 }

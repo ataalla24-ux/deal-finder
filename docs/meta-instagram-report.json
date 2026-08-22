@@ -1,13 +1,114 @@
 {
-  "generatedAt": "2026-08-22T06:55:43.980Z",
+  "generatedAt": "2026-08-22T09:53:37.811Z",
   "source": "meta-instagram",
-  "status": "failed",
+  "status": "degraded",
   "configured": {
     "adLibrary": false,
     "instagramGraph": true
   },
   "accountCatalogSize": 95,
-  "selectedAccounts": [],
+  "selectedAccounts": [
+    {
+      "username": "kaktusclubwien",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "kome_wien",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "lautentico.at",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "maisonnayavienna",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "milyn_fusionhouse",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "oakbrewcoffee",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "pointofsale.wien",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "raw_energy_austria",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "schnitzelhomechicken",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "schwestern_bazar",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "seame_boilin",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "shirokiya_at",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "soula.vienna",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "the.short.hall.vienna",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "yu.noodle_hotpot_vienna",
+      "priority": 0,
+      "verifiedVienna": false
+    },
+    {
+      "username": "ciosgrill",
+      "priority": 100,
+      "verifiedVienna": true
+    },
+    {
+      "username": "corner_xvi",
+      "priority": 100,
+      "verifiedVienna": true
+    },
+    {
+      "username": "foodiewien",
+      "priority": 96,
+      "verifiedVienna": false
+    },
+    {
+      "username": "tastyfood.vienna",
+      "priority": 96,
+      "verifiedVienna": false
+    },
+    {
+      "username": "eatinvienna_",
+      "priority": 95,
+      "verifiedVienna": false
+    }
+  ],
   "sources": {
     "adLibrary": {
       "status": "not-configured",
@@ -16,35 +117,61 @@
       "errors": []
     },
     "instagramGraph": {
-      "status": "failed",
-      "fetched": 0,
-      "accepted": 0,
+      "status": "degraded",
+      "fetched": 97,
+      "accepted": 3,
       "errors": [
         {
-          "source": "facebook-managed-pages",
+          "source": "@kome_wien",
           "status": 400,
-          "code": 190,
-          "message": "Meta API 400 for https://graph.facebook.com/v24.0/me/accounts?fields=id%2Cname%2Caccess_token%2Ctasks%2Cinstagram_business_account%7Bid%2Cusername%7D&access_token=[redacted] Bad signature"
+          "code": 110,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28kome_wien%29%7Busername%2Cname%2Cmedia.limit%286%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%7D%7D&access_token=[redacted] Invalid user id"
         },
         {
-          "source": "facebook-page-token",
+          "source": "@pointofsale.wien",
           "status": 400,
-          "code": 190,
-          "message": "Meta API 400 for https://graph.facebook.com/v24.0/me?fields=id%2Cname%2Cinstagram_business_account%7Bid%2Cusername%7D&access_token=[redacted] Bad signature"
+          "code": 110,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28pointofsale.wien%29%7Busername%2Cname%2Cmedia.limit%286%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%7D%7D&access_token=[redacted] Invalid user id"
+        },
+        {
+          "source": "@schnitzelhomechicken",
+          "status": 400,
+          "code": 110,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28schnitzelhomechicken%29%7Busername%2Cname%2Cmedia.limit%286%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%7D%7D&access_token=[redacted] Invalid user id"
+        },
+        {
+          "source": "@seame_boilin",
+          "status": 400,
+          "code": 110,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28seame_boilin%29%7Busername%2Cname%2Cmedia.limit%286%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%7D%7D&access_token=[redacted] Invalid user id"
+        },
+        {
+          "source": "#freefinderwien",
+          "status": 400,
+          "code": 24,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/ig_hashtag_search?user_id=17841438552673858&q=freefinderwien&access_token=[redacted] The requested resource does not exist"
+        },
+        {
+          "source": "#wienfooddeal",
+          "status": 400,
+          "code": 24,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/ig_hashtag_search?user_id=17841438552673858&q=wienfooddeal&access_token=[redacted] The requested resource does not exist"
         }
-      ],
-      "identity": {
-        "status": "failed",
-        "source": "automatic-discovery"
-      }
+      ]
     }
   },
-  "rejectionReasons": {},
-  "totalDeals": 0,
-  "verifiedBeforeLimit": 0,
+  "rejectionReasons": {
+    "no-concrete-offer": 83,
+    "excluded-promotion-type": 5,
+    "offer-expired": 3,
+    "missing-text": 1,
+    "missing-vienna-evidence": 1,
+    "post-too-old": 1
+  },
+  "totalDeals": 3,
+  "verifiedBeforeLimit": 3,
   "outputLimit": 40,
-  "freshPostsFetched": 0,
-  "verifiedDeals": 0,
-  "message": "All configured Meta sources failed; preserved 0 last-good deal(s).",
-  "preservedDeals": 0
+  "freshPostsFetched": 97,
+  "verifiedDeals": 3,
+  "message": "3 new, evidence-verified Vienna Instagram deals found."
 }
