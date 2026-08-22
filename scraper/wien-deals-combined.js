@@ -24,6 +24,7 @@ const REPORT_PATH = path.join(DOCS_DIR, 'wien-deals-combined-report.json');
 const SOURCE_KEY = 'wien-combined';
 const SOURCE_LABEL = 'Wien Deals Combined';
 const RUN_STARTED_AT = new Date();
+const HASHTAG_MEDIA_FIELDS = 'id,caption,media_type,permalink,timestamp,like_count,comments_count';
 const DEFAULT_HASHTAGS = [
   'gratiswien',
   'wienaktion',
@@ -132,7 +133,9 @@ export async function runWienDealsCombined(options = {}) {
       }
       const media = await graphRequest(`${hashtagId}/recent_media`, {
         user_id: userId,
-        fields: 'id,caption,media_type,permalink,timestamp,username',
+        // Hashtag media does not consistently expose username and rejects the
+        // whole request with Graph error #100 when that field is requested.
+        fields: HASHTAG_MEDIA_FIELDS,
         limit: maxMediaPerHashtag,
       }, requestOptions);
       const rows = Array.isArray(media?.data) ? media.data : [];
@@ -202,7 +205,7 @@ export async function runWienDealsCombined(options = {}) {
     .sort((left, right) => Number(right.qualityScore || 0) - Number(left.qualityScore || 0)
       || Date.parse(right.pubDate || 0) - Date.parse(left.pubDate || 0))
     .slice(0, maxDeals);
-  const status = failedSources.length > 0 ? 'degraded' : 'healthy';
+  const status = failedSources.length > 0 || fetchedPosts === 0 ? 'degraded' : 'healthy';
   const payload = {
     lastUpdated: now.toISOString(),
     source: SOURCE_KEY,
@@ -233,6 +236,9 @@ async function main() {
   const sourceErrors = result.report.sources
     .filter((source) => source.status === 'error')
     .map((source) => `#${source.hashtag}: ${source.error}`);
+  if (result.report.fetchedPosts === 0) {
+    sourceErrors.push('Meta Graph returned zero posts across all resolved hashtags.');
+  }
   writePipelineRunReport(buildPipelineRunReport({
     sourceKey: SOURCE_KEY,
     sourceLabel: SOURCE_LABEL,

@@ -15,6 +15,8 @@ async function fetchImpl(url) {
     });
   }
   if (parsed.pathname.includes('/tag-gratiswien/recent_media')) {
+    const requestedFields = String(parsed.searchParams.get('fields') || '').split(',');
+    assert.equal(requestedFields.includes('username'), false, 'hashtag media must not request unsupported username');
     return new Response(JSON.stringify({
       data: [
         {
