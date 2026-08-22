@@ -9,6 +9,11 @@ const oldTimestamp = '2025-08-21T10:00:00.000Z';
 async function fetchImpl(url) {
   const parsed = new URL(url);
   if (parsed.pathname.endsWith('/ig_hashtag_search')) {
+    if (parsed.searchParams.get('q') === 'missingtag') {
+      return new Response(JSON.stringify({
+        error: { code: 24, message: 'The requested resource does not exist' },
+      }), { status: 400, headers: { 'content-type': 'application/json' } });
+    }
     return new Response(JSON.stringify({ data: [{ id: `tag-${parsed.searchParams.get('q')}` }] }), {
       status: 200,
       headers: { 'content-type': 'application/json' },
@@ -50,7 +55,7 @@ const result = await runWienDealsCombined({
     INSTAGRAM_ACCESS_TOKEN: 'test-token',
     INSTAGRAM_USER_ID: '17840000000000000',
     META_GRAPH_VERSION: 'v26.0',
-    WIEN_COMBINED_GRAPH_HASHTAGS: 'gratiswien,wienaktion',
+    WIEN_COMBINED_GRAPH_HASHTAGS: 'gratiswien,missingtag',
   },
 });
 
@@ -60,5 +65,7 @@ assert.equal(result.payload.deals[0].pubDate, freshTimestamp);
 assert.equal(result.payload.deals[0].pubDateSource, 'instagram-graph-timestamp');
 assert.equal(result.payload.deals[0].validUntil, '2026-08-25T23:59:59.999Z');
 assert.equal(result.report.rejectionReasons['post-too-old'], 1);
+assert.equal(result.report.status, 'healthy');
+assert.equal(result.report.sources.find((source) => source.hashtag === 'missingtag')?.status, 'not-found');
 
 console.log('wien deals combined tests passed');

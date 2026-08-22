@@ -76,7 +76,10 @@ async function graphRequest(pathname, params, options) {
   if (!response.ok || payload?.error) {
     const message = cleanText(payload?.error?.message || `HTTP ${response.status}`, 500);
     const code = Number(payload?.error?.code || response.status || 0);
-    throw new Error(`Meta Graph ${code}: ${message}`);
+    const error = new Error(`Meta Graph ${code}: ${message}`);
+    error.code = code;
+    error.status = response.status;
+    throw error;
   }
   return payload;
 }
@@ -164,12 +167,15 @@ export async function runWienDealsCombined(options = {}) {
       }
       sourceResults.push({ hashtag, status: 'ok', fetched: rows.length, accepted });
     } catch (error) {
+      const notFound = Number(error?.code || 0) === 24;
       sourceResults.push({
         hashtag,
-        status: 'error',
+        status: notFound ? 'not-found' : 'error',
         fetched: 0,
         accepted: 0,
-        error: cleanText(error?.message || error, 500),
+        ...(notFound
+          ? { detail: cleanText(error?.message || error, 500) }
+          : { error: cleanText(error?.message || error, 500) }),
       });
     }
   }
