@@ -49,6 +49,7 @@ const SOURCE_LABEL_OVERRIDES = {
   power: 'Power Scraper',
   tiktok: 'TikTok Scanner',
   'vienna-promo-radar': 'Vienna Promo Radar',
+  'wien-combined': 'Wien Deals Combined Graph',
 };
 
 const FOOD_DRINK_CATEGORIES = new Set(['essen', 'kaffee', 'supermarkt']);

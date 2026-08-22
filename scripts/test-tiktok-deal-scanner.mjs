@@ -29,6 +29,26 @@ const foreignViennaHandle = buildDealFromPost(
 assert.equal(foreignViennaHandle.deal, null);
 assert.match(foreignViennaHandle.reason, /Wien-Signal/);
 
+const losAngelesKeywordLeak = buildDealFromPost(
+  'https://www.tiktok.com/@weimpactla/video/7676331690842705183',
+  postData('FREE FOOD GIVEAWAY at 1010 E. 10th Street, Los Angeles, CA. Free and open to the community.', 'weimpactla'),
+);
+assert.equal(losAngelesKeywordLeak.deal, null);
+assert.match(losAngelesKeywordLeak.reason, /Wien-Signal/);
+
+const verifiedProfileContext = postData(
+  'Sichere dir dein kostenloses Probetraining mit Coach Isa. #BoxenWien',
+  'datriboxing',
+);
+verifiedProfileContext.bodyText = `${verifiedProfileContext.description} Creator bio: Boxclub und Training in Vienna.`;
+const validProfileContext = buildDealFromPost(
+  'https://www.tiktok.com/@datriboxing/video/7676026132944276758',
+  verifiedProfileContext,
+);
+assert.ok(validProfileContext.deal);
+assert.equal(validProfileContext.deal.viennaEvidence.source, 'tiktok-post');
+assert.match(validProfileContext.deal.viennaEvidence.detail, /Vienna/i);
+
 const bioMustNotCreateOffer = buildDealFromPost(
   'https://www.tiktok.com/@lara_kristiin/video/7676529485998656790',
   postData('Dieses Wochenende findet der Neustifter Kirtag in Wien mit Essen und Musik statt.', 'lara_kristiin'),

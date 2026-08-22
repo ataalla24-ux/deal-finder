@@ -237,7 +237,7 @@ export function getViennaEvidence(deal = {}, options = {}) {
       && (
         /(?:meta-target-location|apify-location|verified-account|merchant-registry|address|postal|coordinates|business-discovery|structured-location)/i.test(cleanText(declaredViennaEvidence.source || declaredViennaEvidence.type))
         || (
-          /instagram-post/i.test(cleanText(declaredViennaEvidence.source || declaredViennaEvidence.type))
+          /(?:instagram|tiktok)-post/i.test(cleanText(declaredViennaEvidence.source || declaredViennaEvidence.type))
           && (VIENNA_CITY_PATTERN.test(cleanText(declaredViennaEvidence.detail || declaredViennaEvidence.value))
             || VIENNA_POSTCODE_PATTERN.test(cleanText(declaredViennaEvidence.detail || declaredViennaEvidence.value)))
         )

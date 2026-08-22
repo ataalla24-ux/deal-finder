@@ -10,6 +10,7 @@ import {
   getPublicationEvidence,
 } from './deal-evidence-utils.js';
 import { parseExpiryShape } from './expiry-utils.js';
+import { extractActiveOfferWindow } from './instagram-ai-validity-utils.js';
 import {
   buildInstagramGraphEvidencePayload,
   loadInstagramGraphEvidence,
@@ -446,12 +447,20 @@ function inferTitle(text, brand, promotion) {
 }
 
 function expiryFromText(text, now, fallbackStop, ttlHours, referenceDate = now) {
-  const shape = parseExpiryShape(text, {
-    now,
-    contextText: text,
-    referenceDate,
-    timeZone: 'Europe/Vienna',
-  });
+  const activeWindow = extractActiveOfferWindow(text, { now, pubDate: referenceDate });
+  const shape = activeWindow?.endDate
+    ? {
+        kind: activeWindow.kind,
+        validFrom: activeWindow.startDate?.toISOString().slice(0, 10) || '',
+        validUntil: activeWindow.endDate.toISOString().slice(0, 10),
+        confidence: 'high',
+      }
+    : parseExpiryShape(text, {
+        now,
+        contextText: text,
+        referenceDate,
+        timeZone: 'Europe/Vienna',
+      });
   const shapeExpiry = endOfDayIso(shape?.validUntil || shape?.validOn || '');
   const stop = toIso(fallbackStop);
   if (shapeExpiry) {

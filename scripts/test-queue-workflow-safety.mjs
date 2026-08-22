@@ -57,7 +57,9 @@ const collectors = new Map([
   ['flights-vienna.yml', 'flights-vienna-scan'],
   ['instagram-ai-agent.yml', 'instagram-ai-scan'],
   ['meta-instagram-deals.yml', 'meta-instagram-scan'],
+  ['power-scraper.yml', 'power-scraper'],
   ['tiktok-deals.yml', 'tiktok-deal-scan'],
+  ['wien-deals-combined.yml', 'wien-deals-combined'],
 ]);
 for (const [file, expectedGroup] of collectors) {
   const text = workflows.get(file) || '';

@@ -5,21 +5,31 @@ import '../sentry/instrument.mjs';
 // ============================================
 
 import crypto from 'crypto';
-import https from 'https';
-import http from 'http';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import {
   cleanUiNoiseText,
-  isFalsePositiveFreeDeal,
   isGenericJunkDeal,
   normalizeDealRecord,
 } from './deal-normalization-utils.js';
+import {
+  buildPipelineRunReport,
+  writeFailedPipelineRunReport,
+  writePipelineRunReport,
+} from './pipeline-run-report-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const INCLUDE_BASE_DEALS = String(process.env.POWER_INCLUDE_BASE_DEALS || '1') !== '0';
+const FETCH_TIMEOUT_MS = Math.max(3000, Number(process.env.POWER_FETCH_TIMEOUT_MS || 12000));
+const FETCH_CONCURRENCY = Math.max(1, Math.min(12, Number(process.env.POWER_FETCH_CONCURRENCY || 6)));
+const MAX_HTML_BYTES = Math.max(250000, Number(process.env.POWER_MAX_HTML_BYTES || 2500000));
+const MAX_DEALS_PER_SOURCE = Math.max(1, Math.min(25, Number(process.env.POWER_MAX_DEALS_PER_SOURCE || 10)));
+const SOURCE_KEY = 'power';
+const SOURCE_LABEL = 'Power Scraper';
+const OUTPUT_PATH = 'docs/deals-pending-power.json';
+const RUN_STARTED_AT = new Date();
 // ============================================
 // STATISCHE BASIS-DEALS (Dauerhaft gültig)
 // Stand: Februar 2026
@@ -389,26 +399,53 @@ const ACTIVE_SOURCES = SOURCES.filter((source) => !DISABLED_SOURCE_NAMES.has(sou
 // ============================================
 // HELPER: Fetch HTML
 // ============================================
-function fetchHTML(url) {
-  return new Promise((resolve, reject) => {
-    const protocol = url.startsWith('https') ? https : http;
-    protocol.get(url, {
-      timeout: 10000,
+async function readLimitedText(response, maxBytes = MAX_HTML_BYTES) {
+  if (!response.body) return '';
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let text = '';
+  let bytes = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    bytes += value.byteLength;
+    text += decoder.decode(value, { stream: true });
+    if (bytes >= maxBytes) {
+      await reader.cancel('Power Scraper HTML byte limit reached');
+      break;
+    }
+  }
+  text += decoder.decode();
+  return text;
+}
+
+async function fetchHTML(url, options = {}) {
+  const timeoutMs = Number(options.timeoutMs || FETCH_TIMEOUT_MS);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(new Error(`Timeout after ${timeoutMs}ms`)), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      redirect: 'follow',
+      signal: controller.signal,
       headers: {
-        'user-agent': 'FreeFinder Power Scraper/5.1 (+https://github.com/ataalla24-ux/deal-finder)',
-        'accept-language': 'de-AT,de;q=0.9,en;q=0.8'
-      }
-    }, (res) => {
-      if (res.statusCode && res.statusCode >= 400) {
-        reject(new Error(`HTTP ${res.statusCode}`));
-        res.resume();
-        return;
-      }
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(data));
-    }).on('error', reject).setTimeout(10000, () => reject(new Error('Timeout')));
-  });
+        'user-agent': 'FreeFinder Power Scraper/5.2 (+https://github.com/ataalla24-ux/deal-finder)',
+        'accept-language': 'de-AT,de;q=0.9,en;q=0.8',
+        accept: 'text/html,application/xhtml+xml',
+      },
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType && !/(?:text\/html|application\/xhtml\+xml)/i.test(contentType)) {
+      throw new Error(`Unsupported content type: ${contentType}`);
+    }
+    const html = await readLimitedText(response, Number(options.maxBytes || MAX_HTML_BYTES));
+    return { html, finalUrl: response.url || url, bytes: Buffer.byteLength(html) };
+  } catch (error) {
+    if (controller.signal.aborted) throw new Error(`Timeout after ${timeoutMs}ms`);
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function stableDealId(parts) {
@@ -445,7 +482,7 @@ function normalizePowerDeal(deal, sourceLabel) {
     ...deal,
     source: deal.source || sourceLabel,
     qualityScore: Number(deal.qualityScore || 0),
-    pubDate: deal.pubDate || new Date().toISOString()
+    discoveredAt: deal.discoveredAt || new Date().toISOString(),
   });
 
   return {
@@ -455,8 +492,32 @@ function normalizePowerDeal(deal, sourceLabel) {
     qualityScore: Number(normalized.qualityScore || deal.qualityScore || 42),
     votes: Number(normalized.votes || deal.votes || 1),
     priority: Number(deal.priority || 3),
-    pubDate: deal.pubDate || new Date().toISOString()
+    discoveredAt: deal.discoveredAt || new Date().toISOString(),
   };
+}
+
+function cleanPowerText(value) {
+  return cleanUiNoiseText(String(value || '')
+    .replace(/&nbsp;|&#160;/gi, ' ')
+    .replace(/&euro;|&#8364;/gi, '€'));
+}
+
+function hasConcretePowerDealSignal(value, source = {}) {
+  const text = cleanPowerText(value);
+  if (!text || /^(?:angebote?|aktionen?|deals?|sale|gutscheine?|coupons?|mehr erfahren|jetzt entdecken)$/i.test(text)) {
+    return false;
+  }
+  if (/\b(?:(?:gratis|kostenlos(?:e[rmns]?|en)?|free)\s+(?:versand|lieferung|shipping|delivery|abholung|filialabholung|retoure|rücksendung|ruecksendung|gravur|ressourcen|resource|tools?)|(?:versand|lieferung|shipping|delivery|abholung|retoure|rücksendung|ruecksendung)\s+(?:gratis|kostenlos|free))\b/i.test(text)) {
+    return false;
+  }
+  const explicitPromotion = /(?:\b(?:gratis|kostenlos(?:e[rmns]?|en)?|kostenfrei|free)\b|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b\d{1,2}\s*%\s*(?:rabatt|off|discount)?\b|\b(?:statt|reduziert\s+von)\s*(?:€\s*)?\d{1,3}(?:[,.]\d{1,2})?\b)/i;
+  const explicitCouponCode = /\b(?:mit\s+(?:dem\s+)?code|use\s+code|gutscheincode|aktionscode|couponcode)\s*[:\-]?\s*[a-z0-9][a-z0-9_-]{2,}\b/i;
+  if (explicitPromotion.test(text) || explicitCouponCode.test(text)) return true;
+
+  const localFoodCategory = /^(?:essen|kaffee|supermarkt)$/i.test(cleanPowerText(source.category));
+  const localFoodPrice = /\b(?:nur|um|für|fuer|ab\s+\d+\s+stück|ab\s+\d+\s+stueck)\s*(?:je\s*)?(?:€\s*)?\d{1,2}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)?\b/i;
+  const namedPromotionPrice = /\b(?:aktion|angebot|deal|special|kombiaktion|kaffeejause|bäckerjause|baeckerjause)\b[^.!?]{0,100}(?:€\s*)?\d{1,3}(?:[,.]\d{1,2})?/i;
+  return localFoodCategory && (namedPromotionPrice.test(text) || localFoodPrice.test(text));
 }
 
 // ============================================
@@ -466,15 +527,14 @@ function extractDealsFromHTML(html, source) {
   const deals = [];
   
   // Simple extraction - look for links with deal-like text
-  const linkRegex = /<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/gi;
+  const linkRegex = /<a\b[^>]*\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))[^>]*>([\s\S]*?)<\/a>/gi;
   let match;
   while ((match = linkRegex.exec(html)) !== null) {
-    const url = resolveDealUrl(match[1], source.url);
-    const text = cleanUiNoiseText(match[2]);
+    const url = resolveDealUrl(match[1] || match[2] || match[3], source.url);
+    const text = cleanPowerText(match[4]);
     
     if (text.length > 10 && url && !url.includes('cookie')) {
-      // Only include if it looks like a deal
-      if (text.match(/gratis|rabatt|aktion|angebot|sale|deal|free|günstig|€|%/i)) {
+      if (hasConcretePowerDealSignal(text, source)) {
         const candidate = normalizePowerDeal({
           brand: source.brand,
           logo: source.logo,
@@ -491,21 +551,52 @@ function extractDealsFromHTML(html, source) {
           priority: 3,
           votes: 1,
           qualityScore: buildQualityScore(text, source),
-          pubDate: new Date().toISOString()
+          discoveredAt: new Date().toISOString(),
         }, source.name);
 
-        deals.push(candidate);
+        const persistedEvidence = [candidate.title, candidate.description].filter(Boolean).join(' ');
+        if (hasConcretePowerDealSignal(persistedEvidence, source) && !isGenericJunkDeal(candidate)) {
+          deals.push(candidate);
+        }
       }
     }
   }
   
-  return deals.sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0));
+  return deals
+    .sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0))
+    .slice(0, MAX_DEALS_PER_SOURCE);
+}
+
+async function mapWithConcurrency(items, concurrency, mapper) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await mapper(items[index], index);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
+
+function dedupeDeals(deals) {
+  const byKey = new Map();
+  for (const deal of deals) {
+    const key = `${cleanUiNoiseText(deal.url).toLowerCase()}|${cleanUiNoiseText(deal.title).toLowerCase()}`;
+    if (!key || key === '|') continue;
+    const current = byKey.get(key);
+    if (!current || Number(deal.qualityScore || 0) > Number(current.qualityScore || 0)) byKey.set(key, deal);
+  }
+  return [...byKey.values()];
 }
 
 // ============================================
 // MAIN
 // ============================================
 async function main() {
+  const startedAt = RUN_STARTED_AT;
   console.log('🚀 POWER SCRAPER V5 - AKTUALISIERT');
   console.log('📅', new Date().toLocaleDateString('de-AT'));
   console.log('='.repeat(40));
@@ -519,31 +610,50 @@ async function main() {
   // Scrape dynamic sources
   console.log(`\n📡 Scraping ${ACTIVE_SOURCES.length} Quellen...\n`);
   
-  const scrapedDeals = [];
-  
-  for (const source of ACTIVE_SOURCES) {
+  const sourceResults = await mapWithConcurrency(ACTIVE_SOURCES, FETCH_CONCURRENCY, async (source) => {
+    const sourceStartedAt = Date.now();
     try {
       console.log(`🌐 ${source.name}...`);
-      const html = await fetchHTML(source.url);
+      const response = await fetchHTML(source.url);
+      const html = response.html;
       const deals = extractDealsFromHTML(html, source);
-      scrapedDeals.push(...deals);
       console.log(`   → ${deals.length} Deals gefunden`);
+      return {
+        source: source.name,
+        url: source.url,
+        finalUrl: response.finalUrl,
+        status: 'ok',
+        deals: deals.length,
+        bytes: response.bytes,
+        durationMs: Date.now() - sourceStartedAt,
+        rows: deals,
+      };
     } catch (error) {
       console.log(`   ❌ ${error.message}`);
+      return {
+        source: source.name,
+        url: source.url,
+        status: 'error',
+        deals: 0,
+        durationMs: Date.now() - sourceStartedAt,
+        error: error.message,
+        rows: [],
+      };
     }
-  }
+  });
+  const scrapedDeals = sourceResults.flatMap((result) => result.rows);
   
   const normalizedBaseDeals = INCLUDE_BASE_DEALS
     ? BASE_DEALS
         .map((deal) => normalizePowerDeal({
           ...deal,
           qualityScore: Number(deal.qualityScore || 72),
-          pubDate: deal.pubDate || new Date().toISOString()
+          discoveredAt: deal.discoveredAt || new Date().toISOString(),
         }, 'power-scraper-v5'))
     : [];
 
   // Combine base + scraped
-  const allDeals = [...normalizedBaseDeals, ...scrapedDeals];
+  const allDeals = dedupeDeals([...normalizedBaseDeals, ...scrapedDeals]);
   
   // Sort: freebies first, then hot, then quality, then priority
   allDeals.sort((a, b) => {
@@ -567,15 +677,77 @@ async function main() {
   
   const outputPath = path.join(__dirname, '..', 'docs', 'deals-pending-power.json');
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
+  const reportPath = path.join(__dirname, '..', 'docs', 'power-scraper-report.json');
+  const sourceReport = sourceResults.map(({ rows, ...result }) => result);
+  const report = {
+    startedAt: startedAt.toISOString(),
+    finishedAt: new Date().toISOString(),
+    durationMs: Date.now() - startedAt.getTime(),
+    config: {
+      includeBaseDeals: INCLUDE_BASE_DEALS,
+      sourceCount: ACTIVE_SOURCES.length,
+      concurrency: FETCH_CONCURRENCY,
+      timeoutMs: FETCH_TIMEOUT_MS,
+      maxHtmlBytes: MAX_HTML_BYTES,
+      maxDealsPerSource: MAX_DEALS_PER_SOURCE,
+    },
+    summary: {
+      healthySources: sourceReport.filter((result) => result.status === 'ok').length,
+      failedSources: sourceReport.filter((result) => result.status === 'error').length,
+      rawDeals: scrapedDeals.length,
+      acceptedDeals: finalDeals.length,
+    },
+    sources: sourceReport,
+  };
+  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  const failedSources = sourceReport.filter((result) => result.status === 'error');
+  writePipelineRunReport(buildPipelineRunReport({
+    sourceKey: SOURCE_KEY,
+    sourceLabel: SOURCE_LABEL,
+    status: failedSources.length > 0 ? 'completed-with-errors' : 'completed',
+    startedAt,
+    finishedAt: new Date(),
+    outputFile: OUTPUT_PATH,
+    rawCandidates: scrapedDeals.length,
+    normalizedCandidates: finalDeals.length,
+    verifiedCandidates: 0,
+    acceptedDeals: finalDeals.length,
+    errors: failedSources.map((result) => `${result.source}: ${result.error}`),
+    diagnostics: {
+      healthySources: sourceReport.filter((result) => result.status === 'ok').length,
+      failedSources: failedSources.length,
+      sourceCount: ACTIVE_SOURCES.length,
+      concurrency: FETCH_CONCURRENCY,
+      timeoutMs: FETCH_TIMEOUT_MS,
+    },
+  }));
   
   console.log('\n' + '='.repeat(40));
   console.log(`✅ ${finalDeals.length} Deals gespeichert`);
   console.log(`📁 ${outputPath}`);
+  console.log(`📝 ${reportPath}`);
   console.log(`🔥 ${finalDeals.filter(d => d.hot).length} Hot Deals`);
   console.log(`🆓 ${finalDeals.filter(d => d.type === 'gratis').length} Gratis Deals`);
 }
 
-main().catch((error) => {
-  console.error('❌ power-scraper fehlgeschlagen:', error);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      writeFailedPipelineRunReport({
+        sourceKey: SOURCE_KEY,
+        sourceLabel: SOURCE_LABEL,
+        startedAt: RUN_STARTED_AT,
+        outputFile: OUTPUT_PATH,
+        error,
+      });
+      console.error('❌ power-scraper fehlgeschlagen:', error);
+      process.exit(1);
+    });
+}
+
+export {
+  extractDealsFromHTML,
+  fetchHTML,
+  hasConcretePowerDealSignal,
+};

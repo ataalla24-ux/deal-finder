@@ -38,7 +38,7 @@ const VIENNA_NEGATION_PATTERN = /\b(?:nicht|kein(?:e[rmns]?)?|au(?:ß|ss)erhalb)
 const AUSTRIA_SCOPE_PATTERN = /(?:österreich(?:weit)?|\boesterreich(?:weit)?|\baustria(?:n|wide)?|\bbundesweit|\blandesweit)\b/i;
 const ONLINE_SCOPE_PATTERN = /\b(?:onlineshop|online[-\s]angebot|online\s+einlösbar|online\s+einloesbar|im\s+online[-\s]?shop|webshop|österreichweiter\s+versand|oesterreichweiter\s+versand)\b/i;
 const UNCERTAIN_LOCATION_PATTERN = /\b(?:not specified|unknown|nicht angegeben|unbekannt|suggests?|vermutlich|wahrscheinlich|möglicherweise|moeglicherweise)\b/i;
-const NON_VIENNA_PLACE_PATTERN = /\b(?:graz|salzburg|linz|innsbruck|klagenfurt|villach|st\.?\s*pölten|st\.?\s*poelten|eisenstadt|bregenz|baden|wels|münchen|munich|berlin|hamburg|zürich|zurich|gading\s+serpong|jakarta|niederösterreich|niederoesterreich|burgenland|steiermark|kärnten|kaernten|tirol|vorarlberg|deutschland|germany|schweiz|switzerland|indonesien|indonesia|united\s+states|vereinigte\s+staaten|u\.?s\.?a\.?|america)\b/i;
+const NON_VIENNA_PLACE_PATTERN = /\b(?:graz|salzburg|linz|innsbruck|klagenfurt|villach|st\.?\s*pölten|st\.?\s*poelten|eisenstadt|bregenz|baden|wels|münchen|munich|berlin|hamburg|zürich|zurich|gading\s+serpong|jakarta|los\s+angeles|san\s+(?:francisco|diego|jose)|new\s+york|chicago|miami|boston|seattle|houston|dallas|las\s+vegas|niederösterreich|niederoesterreich|burgenland|steiermark|kärnten|kaernten|tirol|vorarlberg|deutschland|germany|schweiz|switzerland|indonesien|indonesia|united\s+states|vereinigte\s+staaten|u\.?s\.?a\.?|america)\b/i;
 const PLACE_BOUND_OFFER_PATTERN = /\b(?:museum|museen|theater|oper|konzert|concert|festival|festwochen|veranstaltung|event|ausstellung|führung|fuehrung|ticket|kino|schloss|zentrum|center|arena|steinbruch)\w*/i;
 const VERIFIED_VIENNA_MEMBER_BENEFIT_PATTERN = /\b(?:belvedere|leopold\s+museum|kinodonnerstag)\b/i;
 const SYNTHETIC_PUBLICATION_SOURCE_PATTERN = /(?:firecrawl.*(?:run|crawl)|agent(?:\s|[-_])?run|crawl(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|scrap(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|discovered(?:\s|[-_])?at|generated(?:\s|[-_])?at|fallback|current(?:\s|[-_])?time|workflow(?:\s|[-_])?run)/i;
@@ -512,7 +512,7 @@ function getConcreteOfferDecision(deal, health = null) {
     .replace(/\s+/g, ' ')
     .trim();
   const concreteOfferPatterns = [
-    /(?:\b(?:rabatt|spare(?:n)?|save|minus|off)\b[^.!?]{0,20}\b\d{1,2}\s*%|\b\d{1,2}\s*%\s*(?:rabatt|off|günstiger|guenstiger|auf\b|weniger))/i,
+    /(?:\b(?:rabatt|spare(?:n)?|save|minus|off)\b[^.!?]{0,20}\b\d{1,2}\s*%|\b\d{1,2}\s*%\s*(?:rabatt|off|günstiger|guenstiger|auf\b|weniger|on\s+top|extra))/i,
     /\b(?:1\s*[+&]\s*1|2\s*(?:für|fuer|zum\s+preis\s+von)\s*1|buy\s+one\s+get\s+one|bogo)\b/i,
     /\b(?:gratis|kostenlos(?:e[rmns]?|en)?|kostenfrei|umsonst|geschenkt|free)\b/i,
     /\b(?:eintritt\s+(?:frei|kostenlos|kostenfrei)|free\s+entry)\b/i,
@@ -616,6 +616,9 @@ function collectExpiryCandidates(deal, health, now) {
     });
   };
 
+  const rawExpiryProvenance = cleanText(deal.expiresSource || deal.expirySource || deal.expiryKind);
+  const weakReviewTtl = /(?:short[-_\s]?review[-_\s]?ttl|review[-_\s]?ttl)/i.test(rawExpiryProvenance)
+    && confidenceRank(deal.dateConfidence) <= 1;
   const rawDealExpiry = deal.expires || deal.expiresOriginal || deal.end_date || deal.validity_date || '';
   const flightDepartureAsExpiry = isViennaOriginFlight(deal)
     && /^\s*(?:abflug|departure|hinflug)\b/i.test(cleanText(rawDealExpiry));
@@ -640,7 +643,7 @@ function collectExpiryCandidates(deal, health, now) {
               contextText: [deal.title, deal.category, deal.type].filter(Boolean).join(' '),
             })
           : null);
-    add('deal.expires', rawDealExpiry, directExpiryShape, 50);
+    add('deal.expires', rawDealExpiry, directExpiryShape, weakReviewTtl ? 30 : 50);
   }
 
   const offerTiming = deal.evidence?.offerTiming;
@@ -671,6 +674,22 @@ function collectExpiryCandidates(deal, health, now) {
   }
 
   const hints = reliableDateHints(health);
+  const contentHints = reliableContentHints(health);
+  if (isSocialPostDeal(deal) && cleanText(contentHints.title)) {
+    const contentWindow = extractActiveOfferWindow(contentHints.title, {
+      now,
+      pubDate: deal.sourcePublishedAt || deal.pubDate || deal.postTimestamp,
+    });
+    if (contentWindow?.endDate) {
+      add('url.contentHints.title', contentWindow.evidence || contentHints.title, {
+        kind: contentWindow.kind || 'end',
+        raw: contentWindow.evidence || '',
+        validFrom: toIsoDate(contentWindow.startDate),
+        validUntil: toIsoDate(contentWindow.endDate),
+        confidence: 'url',
+      }, 98);
+    }
+  }
   const hintEvidence = cleanText(hints.targetDateEvidence);
   const hintRaw = cleanText(hints.targetDateRaw);
   const explicitHintLanguage = /\b(?:gültig|gueltig|einlösbar|einloesbar|aktion|angebot|deal|nur)\s+(?:bis|am|ab)\b|\b(?:endet|beendet|deadline|valid\s+until|until\s+further\s+notice)\b/i.test(hintRaw);

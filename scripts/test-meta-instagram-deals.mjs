@@ -103,6 +103,17 @@ const graphFutureRange = normalizeGraphMediaItem({
 }, { sourceType: 'hashtag', sourceName: '#wienaktion' }, config, now);
 assert.ok(graphFutureRange.deal, 'published future Meta ranges should reach Slack before validFrom');
 
+const graphNamedMonthRange = normalizeGraphMediaItem({
+  id: '17890003-named-range',
+  caption: 'Gratis Eintritt zum Kirtagsgelände in 1190 Wien, 20.–23. Juli 2026.',
+  permalink: 'https://www.instagram.com/p/NAMEDRANGE/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+}, { sourceType: 'hashtag', sourceName: '#gratisinwien' }, config, now);
+assert.ok(graphNamedMonthRange.deal, 'named Instagram date ranges must not fall back to a review TTL');
+assert.equal(graphNamedMonthRange.deal.validFrom, '2026-07-20T00:00:00.000Z');
+assert.equal(graphNamedMonthRange.deal.validUntil, '2026-07-23T23:59:59.999Z');
+assert.equal(graphNamedMonthRange.deal.expirySource, 'content-date');
+
 const graphOldWithFutureExpiry = normalizeGraphMediaItem({
   id: '17890004',
   caption: 'Wien: 20 % Rabatt auf Pizza, gültig bis 25.07.2026',

@@ -311,6 +311,21 @@ const foreignViennaHandle = await validateOne({
 assert.equal(foreignViennaHandle.decision.allowed, false);
 assert.match(reasonText(foreignViennaHandle), /nicht eindeutig in Wien/);
 
+const losAngelesSearchLeak = await validateOne({
+  id: 'los-angeles-search-leak',
+  brand: '@weimpactla',
+  title: 'Free food giveaway',
+  description: 'Free food distribution at 1010 E. 10th Street, Los Angeles, CA. Open to the community.',
+  url: 'https://www.tiktok.com/@weimpactla/video/7676331690842705183',
+  source: 'TikTok Scanner',
+  originSource: 'tiktok-deals-scanner',
+  distance: 'Wien',
+  pubDate: now.toISOString(),
+  pubDateSource: 'time.datetime',
+});
+assert.equal(losAngelesSearchLeak.decision.allowed, false);
+assert.match(reasonText(losAngelesSearchLeak), /nicht eindeutig in Wien/);
+
 const genericFreeEvents = await validateOne({
   id: 'generic-free-events',
   brand: '@vienna.creator',
@@ -947,6 +962,17 @@ const payWhatYouWant = await validateOne({
   pubDateSource: 'time.datetime',
 });
 assert.equal(payWhatYouWant.decision.allowed, true);
+
+const percentOnTop = await validateOne({
+  id: 'percent-on-top',
+  brand: 'Sport Shop',
+  title: 'Final Sale: 15% on top auf Bestseller',
+  description: 'Zusätzlich 15% on top im österreichweiten Onlineshop.',
+  url: 'https://example.com/final-sale',
+  source: 'Official',
+  distance: 'Österreichweit',
+});
+assert.equal(percentOnTop.decision.allowed, true);
 
 const blockedPageCannotInventOffer = await validateOne({
   id: 'blocked-page-content',

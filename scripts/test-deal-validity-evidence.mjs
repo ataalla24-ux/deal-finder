@@ -263,6 +263,31 @@ const liveUrlExpired = await validate({
 assert.equal(liveUrlExpired.decision.allowed, false, 'fresh live URL expiry evidence must beat a stale stored future date');
 assert.match(liveUrlExpired.decision.reasons.join(' '), /abgelaufen/);
 
+const captionRangeBeatsReviewTtl = await validate({
+  ...baseSocialDeal,
+  title: 'Gratis Kaffee in Wien',
+  description: 'Gratis Kaffee in Wien beim aktuellen Sommerfest.',
+  sourcePublishedAt: '2026-07-16T08:00:00.000Z',
+  sourcePublishedAtSource: 'instagram-graph-timestamp',
+  expires: '2026-07-20T12:00:00.000Z',
+  validUntil: '2026-07-20T12:00:00.000Z',
+  expirySource: 'short-review-ttl',
+  expiryKind: 'review-ttl',
+  dateConfidence: 'low',
+}, {
+  inspectDealUrlHealth: async (url) => ({
+    status: 200,
+    finalUrl: url,
+    dateHints: {},
+    contentHints: {
+      title: 'Cafe auf Instagram: "Gratis Kaffee in Wien beim Sommerfest, 15.–18. Juli 2026."',
+    },
+  }),
+});
+assert.equal(captionRangeBeatsReviewTtl.decision.allowed, true);
+assert.equal(captionRangeBeatsReviewTtl.decision.expiryDate, '2026-07-18');
+assert.equal(captionRangeBeatsReviewTtl.deal.validUntil, '2026-07-18');
+
 const futurePublication = await validate({
   ...baseSocialDeal,
   title: 'Zweiter Kaffee gratis in Wien',

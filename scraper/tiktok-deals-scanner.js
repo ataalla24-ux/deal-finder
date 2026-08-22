@@ -144,8 +144,15 @@ const CONFLICT_LOCATION_PATTERNS = [
   /\bzurich\b/i,
   /\bgading\s+serpong\b/i,
   /\bjakarta\b/i,
+  /\blos\s+angeles\b/i,
+  /\bsan\s+(?:francisco|diego|jose)\b/i,
+  /\bnew\s+york\b/i,
+  /\b(?:chicago|miami|boston|seattle|houston|dallas|las\s+vegas)\b/i,
   /\bindonesien\b/i,
   /\bindonesia\b/i,
+  /\bunited\s+states\b/i,
+  /\bvereinigte\s+staaten\b/i,
+  /\bu\.?s\.?a\.?\b/i,
 ];
 
 const STRONG_DEAL_PATTERNS = [
@@ -268,11 +275,16 @@ function normalizeTikTokVideoUrl(value = '') {
   return `https://www.tiktok.com/@${match[1]}/video/${match[2]}`;
 }
 
-function hasViennaSignal(text) {
+function extractViennaEvidence(text) {
   const signal = cleanText(text, 2600);
-  if (!VIENNA_PATTERNS.some((pattern) => pattern.test(signal))) return false;
-  if (CONFLICT_LOCATION_PATTERNS.some((pattern) => pattern.test(signal))) return false;
-  return true;
+  if (CONFLICT_LOCATION_PATTERNS.some((pattern) => pattern.test(signal))) return '';
+  const match = VIENNA_PATTERNS
+    .map((pattern) => signal.match(pattern))
+    .find(Boolean);
+  if (!match || !Number.isFinite(match.index)) return '';
+  const start = Math.max(0, match.index - 90);
+  const end = Math.min(signal.length, match.index + match[0].length + 90);
+  return cleanText(signal.slice(start, end), 220);
 }
 
 function hasStrongDealSignal(text) {
@@ -682,7 +694,8 @@ export function buildDealFromPost(url, data) {
     data.bodyText,
   ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
 
-  if (!hasViennaSignal(contextSignal)) return { deal: null, reason: 'kein eindeutiges Wien-Signal' };
+  const viennaEvidenceDetail = extractViennaEvidence(contextSignal);
+  if (!viennaEvidenceDetail) return { deal: null, reason: 'kein eindeutiges Wien-Signal' };
   if (!hasStrongDealSignal(offerSignal)) return { deal: null, reason: 'kein starkes Gratis-/Deal-Signal' };
   if (isExplicitlyExpired(offerSignal, dateCandidate.date)) return { deal: null, reason: 'explizites/relatives Aktionsdatum ist abgelaufen' };
 
@@ -707,6 +720,11 @@ export function buildDealFromPost(url, data) {
       url,
       expires: extractExpiryText(offerSignal),
       distance: 'Wien',
+      viennaEvidence: {
+        verified: true,
+        source: 'tiktok-post',
+        detail: viennaEvidenceDetail,
+      },
       hot: type === 'gratis' || type === 'bogo',
       isNew: true,
       votes: type === 'gratis' || type === 'bogo' ? 3 : 2,
