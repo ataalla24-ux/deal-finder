@@ -89,6 +89,11 @@ const sharedStateWriters = [
 ];
 for (const file of sharedStateWriters) {
   assert.equal(concurrencyFor(file), 'deal-state-writer', `${file} must serialize shared deal state writes`);
+  assert.match(
+    workflows.get(file) || '',
+    /uses:\s*actions\/checkout@v4[\s\S]{0,180}\n\s+ref:\s*main(?:\s|$)/,
+    `${file} must checkout the latest main after waiting for the shared writer lock`,
+  );
 }
 
 function run(command, args, options = {}) {
