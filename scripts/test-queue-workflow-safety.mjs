@@ -43,7 +43,7 @@ assert.match(
 const centralDispatch = workflows.get('daily-digest.yml');
 assert.match(centralDispatch, /name:\s*["']Central Deal Dispatch["']/);
 assert.match(centralDispatch, /cron:\s*['"]7,22,37,52 \* \* \* \*['"]/);
-assert.equal(concurrencyFor('daily-digest.yml'), 'deal-dispatch');
+assert.equal(concurrencyFor('daily-digest.yml'), 'deal-state-writer');
 assert.ok(
   centralDispatch.indexOf('node scraper/slack-notify.js')
     < centralDispatch.indexOf('node scraper/ack-community-submissions.js'),
@@ -79,8 +79,17 @@ assert.deepEqual(queueWriterFiles, [
   'daily-digest.yml',
   'deal-moderation.yml',
 ]);
-assert.equal(concurrencyFor('approve-deals.yml'), 'deal-approval');
-assert.equal(concurrencyFor('deal-moderation.yml'), 'deal-moderation');
+const sharedStateWriters = [
+  'approve-deals.yml',
+  'daily-digest.yml',
+  'deal-moderation.yml',
+  'live-deal-edit.yml',
+  'smart-summary.yml',
+  'validate-live-deals.yml',
+];
+for (const file of sharedStateWriters) {
+  assert.equal(concurrencyFor(file), 'deal-state-writer', `${file} must serialize shared deal state writes`);
+}
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
