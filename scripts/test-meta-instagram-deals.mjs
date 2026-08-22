@@ -12,6 +12,7 @@ import {
   runMetaInstagramCollector,
   selectAccountShard,
 } from '../scraper/meta-instagram-deals.js';
+import { runCheck as runMetaInstagramGraphHealthCheck } from './check-meta-instagram-graph.mjs';
 
 const now = new Date('2026-07-17T10:00:00.000Z');
 const config = buildConfig({
@@ -346,6 +347,58 @@ const observedButUndelivered = await runMetaInstagramCollector({
   write: false,
 });
 assert.equal(observedButUndelivered.payload.totalDeals, 1, 'observed state is not proof of Slack delivery and must not suppress output');
+
+const healthMissing = await runMetaInstagramGraphHealthCheck({
+  env: {
+    META_INSTAGRAM_REQUIRE_SOURCE: '1',
+    META_INSTAGRAM_AUTH_REPORT_PATH: path.join(tempDir, 'missing-health.json'),
+  },
+  write: false,
+});
+assert.equal(healthMissing.ok, false);
+assert.equal(healthMissing.report.status, 'missing-credentials');
+
+const healthOk = await runMetaInstagramGraphHealthCheck({
+  env: {
+    INSTAGRAM_ACCESS_TOKEN: 'graph-user-token',
+    META_INSTAGRAM_MAX_RETRIES: '0',
+    META_INSTAGRAM_AUTH_REPORT_PATH: path.join(tempDir, 'ok-health.json'),
+  },
+  fetchImpl: async (rawUrl) => {
+    const url = new URL(rawUrl);
+    if (url.pathname.endsWith('/me') && url.searchParams.get('fields')?.includes('instagram_business_account')) {
+      return new Response(JSON.stringify({
+        id: 'user-1',
+        name: 'FreeFinder Admin',
+        instagram_business_account: { id: 'ig-health-1', username: 'freefinderwien' },
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    if (url.pathname.endsWith('/ig-health-1/media')) {
+      return new Response(JSON.stringify({
+        data: [{
+          id: 'media-1',
+          caption: 'Heute in Wien: Espresso gratis',
+          permalink: 'https://www.instagram.com/p/HEALTH1/',
+          timestamp: '2026-07-17T08:00:00.000Z',
+        }],
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    if (url.pathname.endsWith('/ig-health-1') && url.searchParams.get('fields')?.includes('business_discovery')) {
+      return new Response(JSON.stringify({
+        business_discovery: {
+          username: 'ciosgrill',
+          name: 'CIOS Grill',
+          media: { data: [] },
+        },
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`unexpected healthcheck URL: ${url.pathname}`);
+  },
+  write: false,
+});
+assert.equal(healthOk.ok, true);
+assert.equal(healthOk.report.status, 'ok');
+assert.doesNotMatch(JSON.stringify(healthOk.report), /graph-user-token/, 'healthcheck report must not include access tokens');
 
 fs.writeFileSync(statePath, JSON.stringify({ version: 1, hashtagIds: {}, seenIds: {} }));
 const rotatingAds = Array.from({ length: 5 }, (_, index) => ({

@@ -158,7 +158,7 @@ export function buildConfig(env = process.env, now = new Date()) {
     parseList(env.META_INSTAGRAM_VERIFIED_ACCOUNTS).map((item) => item.replace(/^@/, '').toLowerCase())
   );
   return {
-    graphVersion: cleanText(env.META_GRAPH_VERSION || env.INSTAGRAM_GRAPH_VERSION || 'v24.0', 20),
+    graphVersion: cleanText(env.META_GRAPH_VERSION || env.INSTAGRAM_GRAPH_VERSION || 'v26.0', 20),
     adLibraryToken: cleanText(env.META_AD_LIBRARY_ACCESS_TOKEN || '', 700),
     instagramAccessToken: cleanText(env.INSTAGRAM_ACCESS_TOKEN || env.META_INSTAGRAM_ACCESS_TOKEN || '', 700),
     instagramUserId: cleanText(env.INSTAGRAM_USER_ID || env.IG_USER_ID || '', 100),

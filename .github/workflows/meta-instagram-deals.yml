@@ -28,6 +28,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check Meta Instagram Graph token
+        env:
+          META_AD_LIBRARY_ACCESS_TOKEN: ${{ secrets.META_AD_LIBRARY_ACCESS_TOKEN }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
+          META_INSTAGRAM_REQUIRE_SOURCE: '1'
+        run: npm run instagram:meta:check
+
       - name: Collect official Meta Instagram deals
         env:
           META_AD_LIBRARY_ACCESS_TOKEN: ${{ secrets.META_AD_LIBRARY_ACCESS_TOKEN }}
@@ -65,4 +74,4 @@ jobs:
       - name: Commit collector state
         if: always()
         run: |
-          node scripts/commit-generated.mjs --message "Meta Instagram deals $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-meta-instagram.json docs/meta-instagram-report.json docs/meta-instagram-state.json docs/deals-pending-instagram-verified.json docs/deals-pending-all.json
+          node scripts/commit-generated.mjs --message "Meta Instagram deals $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-meta-instagram.json docs/meta-instagram-report.json docs/meta-instagram-auth-health.json docs/meta-instagram-state.json docs/deals-pending-instagram-verified.json docs/deals-pending-all.json

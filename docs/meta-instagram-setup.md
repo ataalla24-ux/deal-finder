@@ -16,15 +16,30 @@ At least one source must be configured:
 - `META_AD_LIBRARY_ACCESS_TOKEN` for Ad Library discovery.
 - `INSTAGRAM_ACCESS_TOKEN` for Instagram Graph discovery. The collector resolves the linked
   professional Instagram account through the managed Facebook Page automatically.
+- `INSTAGRAM_USER_ID` is recommended when you already know the Instagram professional account ID.
+  With it, the collector can use a Page token directly and skips fragile `/me/accounts` discovery.
 
 The Instagram Graph path requires a professional Instagram account and the applicable Meta app
 permissions. Hashtag discovery additionally requires Instagram Public Content Access approval.
 
 Slack delivery uses the existing `SLACK_BOT_TOKEN` and `SLACK_CHANNEL_ID` secrets.
 
+## Current setup checklist
+
+1. In Meta, use a Business or Creator Instagram account that is linked to a Facebook Page.
+2. Create or open the Meta app and use Instagram API with Facebook Login for this repo.
+3. Generate a long-lived access token that can read the linked Page and Instagram account.
+4. Save the token in GitHub as `INSTAGRAM_ACCESS_TOKEN`.
+5. Save the linked Instagram professional account ID as `INSTAGRAM_USER_ID` when available.
+6. Run `npm run instagram:meta:check` locally or the `Meta Instagram Deal Discovery` workflow manually.
+7. Only enable the scheduled workflow after the healthcheck returns `ok`.
+
+The existing GitHub workflow is already wired. If it reports `Bad signature`, the stored
+`INSTAGRAM_ACCESS_TOKEN` is not a valid Meta Graph token anymore and must be replaced.
+
 ## Optional repository variables
 
-- `META_GRAPH_VERSION` (defaults to `v24.0`).
+- `META_GRAPH_VERSION` (defaults to `v26.0`).
 - `INSTAGRAM_USER_ID` can be supplied as a secret to override automatic account discovery.
 - `META_AD_LIBRARY_SEARCH_TERMS` as a comma/newline separated list.
 - `META_INSTAGRAM_HASHTAGS` as a comma/newline separated list, without `#`.
@@ -51,6 +66,7 @@ Generated files:
 
 - `docs/deals-pending-meta-instagram.json`
 - `docs/meta-instagram-report.json`
+- `docs/meta-instagram-auth-health.json`
 - `docs/meta-instagram-state.json`
 
 The state file caches hashtag IDs and recently observed Meta object IDs for diagnostics and fair batch
