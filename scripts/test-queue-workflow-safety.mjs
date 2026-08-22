@@ -96,6 +96,20 @@ for (const file of sharedStateWriters) {
   );
 }
 
+for (const [file, stepName] of [
+  ['approve-deals.yml', 'Normalize Live Deals After Approvals'],
+  ['validate-live-deals.yml', 'Validate Live Deals'],
+]) {
+  const text = workflows.get(file) || '';
+  const stepStart = text.indexOf(stepName);
+  const runStart = text.indexOf('run: node scraper/normalize-live-deals.js', stepStart);
+  assert.ok(stepStart >= 0 && runStart > stepStart, `${file} must run live normalization`);
+  const normalizationStep = text.slice(stepStart, runStart);
+  assert.match(normalizationStep, /LIVE_DEAL_VALIDATION_APPLY:\s*['"]1['"]/);
+  assert.match(normalizationStep, /LIVE_DEAL_REMOVALS_ENABLED:\s*['"]1['"]/);
+  assert.match(normalizationStep, /ALLOW_AUTOMATED_LIVE_REMOVALS:\s*['"]1['"]/);
+}
+
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
     cwd: options.cwd,

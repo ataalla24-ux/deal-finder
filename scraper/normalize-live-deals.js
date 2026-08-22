@@ -27,7 +27,7 @@ import { alignNativeWeeklyDealRotation } from './native-weekly-utils.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
-const DOCS_DIR = path.join(ROOT, 'docs');
+const DOCS_DIR = path.resolve(process.env.LIVE_DEAL_DOCS_DIR || path.join(ROOT, 'docs'));
 const DEALS_PATH = path.join(DOCS_DIR, 'deals.json');
 const WEEKLY_DEAL_PATH = path.join(DOCS_DIR, 'deal-of-the-week.json');
 const VALIDATION_REPORT_PATH = path.join(DOCS_DIR, 'live-deal-validation-report.json');
@@ -35,9 +35,9 @@ const REVIEW_CANDIDATES_PATH = path.join(DOCS_DIR, 'live-deal-review-candidates.
 const DEAL_CANDIDATES_INDEX_PATH = path.join(DOCS_DIR, 'deal-candidates-index.json');
 const LIVE_DEAL_EDITS_PATH = path.join(DOCS_DIR, 'live-deal-edits.json');
 const CHURCH_FILES = [
-  path.join(ROOT, 'docs', 'deals-pending-church-gemeinde.json'),
-  path.join(ROOT, 'docs', 'deals-pending-church-gottesdienste.json'),
-  path.join(ROOT, 'docs', 'deals-pending-church-events.json'),
+  path.join(DOCS_DIR, 'deals-pending-church-gemeinde.json'),
+  path.join(DOCS_DIR, 'deals-pending-church-gottesdienste.json'),
+  path.join(DOCS_DIR, 'deals-pending-church-events.json'),
 ];
 
 const REMOVE_IDS = new Set([
@@ -110,15 +110,20 @@ const MAX_EXPIRED_REVIEW_GRACE_DAYS = Number(process.env.MAX_LIVE_EXPIRED_REVIEW
 const APPLY_LIVE_VALIDATION = process.env.LIVE_DEAL_VALIDATION_APPLY === '1';
 const LIVE_DEAL_REMOVALS_ENABLED = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
 const AUTOMATED_LIVE_REMOVALS_ALLOWED = process.env.ALLOW_AUTOMATED_LIVE_REMOVALS === '1';
-const CAN_REMOVE_LIVE_DEALS = APPLY_LIVE_VALIDATION
-  && LIVE_DEAL_REMOVALS_ENABLED
-  && AUTOMATED_LIVE_REMOVALS_ALLOWED;
+const CAN_REMOVE_LIVE_DEALS = shouldApplyAutomatedLiveRemoval();
 const FLIGHT_DEAL_PATTERN = /\b(flug|flüge|flight|flights|hin\s*&\s*zurück|hin\s+und\s+zurück|ryanair|wizz\s*air|wizzair|iata)\b/i;
 const GENERIC_DESCRIPTION_PATTERN = /^(free|gratis|rabatt|discount|deal|angebot|aktion|promo|special|event|post|reel|instagram|coupon|gutschein|gewinnspiel|new|neu)$/i;
 const FOOD_SIGNAL_PATTERN = /\b(eis\w*|eissalon\w*|ice cream|gelato|kaffee\w*|coffee|cafe|café|pizza\w*|burger\w*|döner\w*|doener\w*|kebab\w*|sushi|ramen|brunch|croissant|drink|drinks|getränk\w*|getraenk\w*|cocktail\w*|bistro|restaurant|snack|schnitzel|falafel|bowl|popcorn|wein\w*|vino|fleisch\w*|meat|steak|bbq|grill\w*|bäckerei|backerei|bakery|krapfen\w*|schoko\w*|erdbeer\w*|dessert\w*)\b/i;
 const COFFEE_SIGNAL_PATTERN = /\b(kaffee|coffee|espresso|latte|cappuccino|cafe|café)\b/i;
 const SOURCE_PREFIX_PATTERN = /\s+(?:auf|on)\s+(?:instagram|tiktok)\s*:\s*/i;
 const WEAK_TITLE_PATTERN = /^(free|gratis|deal|angebot|aktion|promo|special|event|instagram|tiktok|new|neu)$/i;
+
+function shouldApplyAutomatedLiveRemoval(options = {}) {
+  const apply = options.apply ?? APPLY_LIVE_VALIDATION;
+  const removalsEnabled = options.removalsEnabled ?? LIVE_DEAL_REMOVALS_ENABLED;
+  const automatedRemovalsAllowed = options.automatedRemovalsAllowed ?? AUTOMATED_LIVE_REMOVALS_ALLOWED;
+  return Boolean(apply && removalsEnabled && automatedRemovalsAllowed);
+}
 
 function hasUsefulWords(text) {
   const words = cleanText(text).split(/\s+/).filter(Boolean);
@@ -1071,6 +1076,7 @@ async function main() {
   let moderationRemovals = 0;
   let freshnessFlagUpdates = 0;
   let freshDealCount = 0;
+  let heuristicReviewCandidates = 0;
 
   function markRemoved(deal, reason, options = {}) {
     const removedAutomatically = options.manual !== true
@@ -1119,6 +1125,13 @@ async function main() {
   function shouldRemoveDeal(deal, reason) {
     markRemoved(deal, reason, { applied: CAN_REMOVE_LIVE_DEALS });
     return CAN_REMOVE_LIVE_DEALS;
+  }
+
+  function markHeuristicReview(deal, reason) {
+    heuristicReviewCandidates += 1;
+    markForReview(deal, `Heuristischer Hinweis: ${reason}`, {
+      automaticRemovalEligible: false,
+    });
   }
 
   function markForReview(deal, reason, details = {}) {
@@ -1293,10 +1306,10 @@ async function main() {
       }
     }
     if (!forceKeep && isGenericJunkDeal(deal)) {
-      if (shouldRemoveDeal(deal, 'Generischer Junk-Deal')) continue;
+      markHeuristicReview(deal, 'Generischer Junk-Deal');
     }
     if (!forceKeep && isFalsePositiveFreeDeal(deal)) {
-      if (shouldRemoveDeal(deal, 'False Positive Free Deal')) continue;
+      markHeuristicReview(deal, 'Möglicher False Positive Free Deal');
     }
     if (isExpiredDealRecord(deal, now)) {
       if (!forceKeep && shouldQueueExpiredDealForReview(deal, now)) {
@@ -1385,7 +1398,7 @@ async function main() {
     }
     normalizedChurchDeal.expires = sanitizeExpiryText(normalizedChurchDeal.expires);
     if (isFalsePositiveFreeDeal(normalizedChurchDeal)) {
-      if (shouldRemoveDeal(normalizedChurchDeal, 'False Positive Church Deal')) continue;
+      markHeuristicReview(normalizedChurchDeal, 'Möglicher False Positive Church Deal');
     }
     if (isExpiredDealRecord(normalizedChurchDeal, now)) {
       if (shouldQueueExpiredDealForReview(normalizedChurchDeal, now)) {
@@ -1516,6 +1529,7 @@ async function main() {
     maxSocialPostAgeDays: MAX_SOCIAL_POST_AGE_DAYS,
     expiredByVerifiedDateRemovals,
     expiredReviewCandidates,
+    heuristicReviewCandidates,
     reviewCandidateCount: reviewCandidates.length,
     socialPubDateSourceFixes,
     linkChecksUsed,
@@ -1546,6 +1560,7 @@ async function main() {
   console.log(`Invalid link review candidates: ${invalidLinkReviewCandidates}`);
   console.log(`Opaque social shell review candidates: ${opaqueSocialShellReviewCandidates}`);
   console.log(`Expired review candidates: ${expiredReviewCandidates}`);
+  console.log(`Heuristic review candidates: ${heuristicReviewCandidates}`);
   console.log(`Review candidates kept live: ${reviewCandidates.length}`);
   console.log(`Social post date removals: ${socialPostDateRemovals}`);
   console.log(`Social post date fixes: ${socialPostDateFixes}`);
@@ -1565,4 +1580,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
   });
 }
 
-export { getSocialPostFreshnessRemovalReason };
+export {
+  getSocialPostFreshnessRemovalReason,
+  shouldApplyAutomatedLiveRemoval,
+};
