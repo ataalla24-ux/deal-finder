@@ -1,35 +1,75 @@
 {
   "schemaVersion": 1,
-  "runId": "gastro2-2026-08-22T23:53:44.925Z",
+  "runId": "gastro2-2026-08-23T00:09:32.297Z",
   "sourceKey": "gastro2",
   "sourceLabel": "Firecrawl Key 1 - Gastro",
   "status": "completed-with-errors",
-  "startedAt": "2026-08-22T23:40:59.588Z",
-  "finishedAt": "2026-08-22T23:53:44.925Z",
-  "durationMs": 765337,
+  "startedAt": "2026-08-23T00:07:20.729Z",
+  "finishedAt": "2026-08-23T00:09:32.297Z",
+  "durationMs": 131568,
   "outputFile": "docs/deals-pending-gastro2.json",
   "counts": {
-    "rawCandidates": 0,
-    "normalizedCandidates": 0,
-    "verifiedCandidates": 0,
+    "rawCandidates": 13,
+    "normalizedCandidates": 13,
+    "verifiedCandidates": 13,
     "previousDeals": 0,
-    "acceptedDeals": 0,
+    "acceptedDeals": 13,
     "rejectedDeals": 0
   },
   "rejectedByReason": {},
   "rejectedSamples": [],
   "diagnostics": {
     "configuredSources": 7,
-    "completedSources": 0,
-    "agentTimeoutSeconds": 120,
+    "attemptedSources": 4,
+    "completedSources": 3,
+    "targetsPerRun": 4,
+    "agentTimeoutSeconds": 75,
     "maxCreditsPerTarget": 250,
     "totalCreditsUsed": 0,
     "retainedPreviousDeals": 0,
     "prunedPreviousDeals": 0,
     "duplicateCandidatesMerged": 0,
+    "sourceStats": [
+      {
+        "url": "https://www.1000things.at/",
+        "status": "failed",
+        "rawCandidates": 0,
+        "searchCandidates": 0,
+        "normalizedCandidates": 0,
+        "creditsUsed": 0,
+        "error": "Firecrawl Agent nach 75s abgebrochen"
+      },
+      {
+        "url": "https://www.meinbezirk.at/",
+        "status": "completed-search",
+        "rawCandidates": 2,
+        "searchCandidates": 2,
+        "normalizedCandidates": 2,
+        "creditsUsed": 0
+      },
+      {
+        "url": "https://www.instagram.com/explore/tags/gratiswien/",
+        "status": "completed-search",
+        "rawCandidates": 3,
+        "searchCandidates": 3,
+        "normalizedCandidates": 3,
+        "creditsUsed": 0
+      },
+      {
+        "url": "https://www.instagram.com/explore/tags/wienfood/",
+        "status": "completed-search",
+        "rawCandidates": 8,
+        "searchCandidates": 8,
+        "normalizedCandidates": 8,
+        "creditsUsed": 0
+      }
+    ],
     "verifier": {
-      "statusCounts": {},
-      "verifiedOriginalPosts": 0,
+      "statusCounts": {
+        "not-recorded": 2,
+        "verified-original-post": 11
+      },
+      "verifiedOriginalPosts": 11,
       "timestampOnlyPosts": 0,
       "unavailableOriginalPosts": 0,
       "registryViennaEvidence": 0
@@ -37,12 +77,6 @@
   },
   "constraints": {},
   "errors": [
-    "instagram.com: Firecrawl Agent nach 120s abgebrochen",
-    "instagram.com: Firecrawl Agent nach 120s abgebrochen",
-    "instagram.com: Firecrawl Agent nach 120s abgebrochen",
-    "instagram.com: Firecrawl Agent nach 120s abgebrochen",
-    "instagram.com: Firecrawl Agent nach 120s abgebrochen",
-    "1000things.at: Refusal: Error: Agent reached max credits",
-    "meinbezirk.at: Refusal: Error: Agent reached max credits"
+    "1000things.at: Firecrawl Agent nach 75s abgebrochen"
   ]
 }
