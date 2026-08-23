@@ -12,7 +12,7 @@ concurrency:
 jobs:
   consumables:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     permissions:
       contents: write
     steps:
@@ -29,8 +29,9 @@ jobs:
         env:
           FIRECRAWL_API_KEY3: ${{ secrets.FIRECRAWL_API_KEY3 }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
-          FIRECRAWL3_AGENT_TIMEOUT_SECONDS: 300
-          FIRECRAWL3_MAX_CREDITS: 500
+          FIRECRAWL3_AGENT_TIMEOUT_SECONDS: 120
+          FIRECRAWL3_MAX_CREDITS_PER_TARGET: 300
+          FIRECRAWL3_TARGETS_PER_RUN: 4
           FIRECRAWL_POST_VERIFY_MAX: 30
           FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 7
           FIRECRAWL_POST_MAX_ACCEPTED_AGE_DAYS: 7

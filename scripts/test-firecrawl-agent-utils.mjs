@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import {
   isFirecrawlRateOrCreditError,
   runBoundedFirecrawlAgent,
+  selectRotatingFirecrawlTargets,
 } from '../scraper/firecrawl-agent-utils.js';
 
 let clock = 0;
@@ -82,18 +83,27 @@ await assert.rejects(
 assert.equal(isFirecrawlRateOrCreditError('Rate limit exceeded'), true);
 assert.equal(isFirecrawlRateOrCreditError('Network unavailable'), false);
 
+const rotatingTargets = ['a', 'b', 'c', 'd', 'e', 'f'];
+const rotationDayOne = selectRotatingFirecrawlTargets(rotatingTargets, 3, new Date('2026-08-22T12:00:00Z'));
+const rotationDayTwo = selectRotatingFirecrawlTargets(rotatingTargets, 3, new Date('2026-08-23T12:00:00Z'));
+assert.equal(rotationDayOne.length, 3);
+assert.equal(rotationDayTwo.length, 3);
+assert.notDeepEqual(rotationDayOne, rotationDayTwo);
+assert.deepEqual(new Set([...rotationDayOne, ...rotationDayTwo]), new Set(rotatingTargets));
+
 const scraperConfigs = [
   ['scraper/firecrawl-gastro2.js', '.github/workflows/firecrawl-gastro-key1.yml', 'FIRECRAWL1_AGENT_TIMEOUT_SECONDS', 'FIRECRAWL1_MAX_CREDITS_PER_TARGET'],
-  ['scraper/firecrawl-food3.js', '.github/workflows/firecrawl-food-key2.yml', 'FIRECRAWL2_AGENT_TIMEOUT_SECONDS', 'FIRECRAWL2_MAX_CREDITS'],
-  ['scraper/firecrawl-consumables.js', '.github/workflows/firecrawl-consumables-key3.yml', 'FIRECRAWL3_AGENT_TIMEOUT_SECONDS', 'FIRECRAWL3_MAX_CREDITS'],
+  ['scraper/firecrawl-food3.js', '.github/workflows/firecrawl-food-key2.yml', 'FIRECRAWL2_AGENT_TIMEOUT_SECONDS', 'FIRECRAWL2_MAX_CREDITS_PER_TARGET'],
+  ['scraper/firecrawl-consumables.js', '.github/workflows/firecrawl-consumables-key3.yml', 'FIRECRAWL3_AGENT_TIMEOUT_SECONDS', 'FIRECRAWL3_MAX_CREDITS_PER_TARGET'],
   ['scraper/firecrawl-instagram-direct4.js', '.github/workflows/firecrawl-instagram-key4.yml', 'FIRECRAWL4_AGENT_TIMEOUT_SECONDS', 'FIRECRAWL4_MAX_CREDITS_PER_TARGET'],
-  ['scraper/firecrawl-instagram-gastro5.js', '.github/workflows/firecrawl-instagram-key5.yml', 'FIRECRAWL5_AGENT_TIMEOUT_SECONDS', 'FIRECRAWL5_MAX_CREDITS'],
+  ['scraper/firecrawl-instagram-gastro5.js', '.github/workflows/firecrawl-instagram-key5.yml', 'FIRECRAWL5_AGENT_TIMEOUT_SECONDS', 'FIRECRAWL5_MAX_CREDITS_PER_TARGET'],
 ];
 
 for (const [sourcePath, workflowPath, timeoutVariable, creditVariable] of scraperConfigs) {
   const source = fs.readFileSync(sourcePath, 'utf8');
   const workflow = fs.readFileSync(workflowPath, 'utf8');
   assert.match(source, /runBoundedFirecrawlAgent\(/, `${sourcePath} must use bounded agent jobs`);
+  assert.match(source, /searchFreshInstagramPosts\(/, `${sourcePath} must use Firecrawl Search before agent fallback`);
   assert.match(source, /mergeFirecrawlDealHistory\(/, `${sourcePath} must retain only rolling fresh history`);
   assert.match(source, /verifyFirecrawlDeals\(history\.deals/, `${sourcePath} must verify the merged history`);
   assert.doesNotMatch(source, /firecrawl\.agent\(/, `${sourcePath} must not start an unbounded waiter`);
@@ -107,5 +117,9 @@ for (const [sourcePath, workflowPath, timeoutVariable, creditVariable] of scrape
 const key1Source = fs.readFileSync('scraper/firecrawl-gastro2.js', 'utf8');
 assert.match(key1Source, /urls: \[url\]/, 'Key 1 must pass each real target through the v2 urls field');
 assert.doesNotMatch(key1Source, /\n\s*url: url,/, 'the ignored legacy singular url field must not return');
+assert.match(key1Source, /searchFreshWebDeals\(/);
+
+const key4Source = fs.readFileSync('scraper/firecrawl-instagram-direct4.js', 'utf8');
+assert.match(key4Source, /searchFreshWebDeals\(/);
 
 console.log('Firecrawl bounded-agent tests passed.');

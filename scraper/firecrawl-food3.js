@@ -13,9 +13,15 @@ import {
   verifyFirecrawlDeals,
 } from './firecrawl-post-verifier.js';
 import {
+  isFirecrawlRateOrCreditError,
   positiveInteger,
   runBoundedFirecrawlAgent,
+  selectRotatingFirecrawlTargets,
 } from './firecrawl-agent-utils.js';
+import {
+  isConcreteFirecrawlSearchResult,
+  searchFreshInstagramPosts,
+} from './firecrawl-search-utils.js';
 import {
   buildPipelineRunReport,
   summarizeVerifiedDeals,
@@ -28,8 +34,9 @@ const SOURCE_KEY = 'food3';
 const SOURCE_LABEL = 'Firecrawl Key 2 - Food';
 const OUTPUT_PATH = 'docs/deals-pending-food3.json';
 const RUN_STARTED_AT = new Date();
-const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL2_AGENT_TIMEOUT_SECONDS, 300);
-const MAX_CREDITS = positiveInteger(process.env.FIRECRAWL2_MAX_CREDITS, 650);
+const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL2_AGENT_TIMEOUT_SECONDS, 120);
+const MAX_CREDITS_PER_TARGET = positiveInteger(process.env.FIRECRAWL2_MAX_CREDITS_PER_TARGET, 300);
+const TARGETS_PER_RUN = positiveInteger(process.env.FIRECRAWL2_TARGETS_PER_RUN, 3);
 const DISCOVERY_URLS = [
   'https://www.instagram.com/explore/tags/wienessen/',
   'https://www.instagram.com/explore/tags/viennafood/',
@@ -38,6 +45,12 @@ const DISCOVERY_URLS = [
   'https://www.instagram.com/explore/tags/lunchdealwien/',
   'https://www.instagram.com/explore/tags/neueröffnungwien/',
 ];
+const ACTIVE_DISCOVERY_URLS = selectRotatingFirecrawlTargets(
+  DISCOVERY_URLS,
+  TARGETS_PER_RUN,
+  RUN_STARTED_AT,
+);
+const DISCOVERY_PROMPT = "Extrahiere möglichst viele konkrete Instagram-Angebote rund um Essen und Getränke, die in Wien nutzbar sind. Untersuche das angegebene Hashtag-Ziel und folge nur direkten Originalposts. Nimm nur Originalposts aus den letzten 7 Tagen auf; prüfe dabei ausdrücklich Tag, Monat und Jahr. Ein Angebot darf erst in Zukunft beginnen, solange der Post selbst höchstens 7 Tage alt ist. Erfasse Anbietername, Produktart, exakten Wien-Standort, Angebotszeiten, Teilnahmebedingungen, echten Account-Handle, Veröffentlichungsdatum und direkten /p/...- oder /reel/...-Link. Verwechsle Veröffentlichungsdatum und Angebotszeitraum nicht. Lass bekannte alte Posts, Gewinnspiele, allgemeine Empfehlungen, Gratis-Versand und Posts ohne konkreten Preisvorteil weg. Ist nur das exakte Datum unlesbar, der direkte Originalpost aber eindeutig frisch, gib ihn zur Graph-Verifikation trotzdem zurück.";
 
 if (!FIRECRAWL_API_KEY) {
   const error = new Error('FIRECRAWL_API_KEY2 oder FIRECRAWL_API_KEY nicht gesetzt');
@@ -98,8 +111,8 @@ function isInstagramPostUrl(url) {
   return /^https?:\/\/(www\.)?instagram\.com\/(p|reel)\//i.test(normalizeText(url));
 }
 
-function looksVienna(text) {
-  return /(wien|vienna|\b10\d{2}\b|\b11\d{2}\b|\b12\d{2}\b)/i.test(text);
+function hasConcreteOfferSignal(text) {
+  return /(gratis|kostenlos|free|umsonst|0 ?€|1\s*\+\s*1|2\s*(?:für|for)\s*1|bogo|\d{1,2}\s*%|rabatt|aktion|angebot|coupon|gutschein|happy hour|statt\s+(?:€\s*)?\d)/i.test(text);
 }
 
 function inferType(offerType, details) {
@@ -143,36 +156,79 @@ async function main() {
 
   const previousOutput = readFirecrawlDealOutput(OUTPUT_PATH);
   const runErrors = [];
-  let result = null;
-  let agentCreditsUsed = 0;
-  console.log(`💳 Maximal ${MAX_CREDITS} Credits; Abbruch nach ${AGENT_TIMEOUT_SECONDS}s`);
-  try {
-    result = await runBoundedFirecrawlAgent(firecrawl, {
-      urls: DISCOVERY_URLS,
-      prompt: "Extrahiere möglichst viele konkrete Instagram-Angebote rund um Essen und Getränke, die in Wien nutzbar sind. Durchsuche alle angegebenen Hashtag-Ziele und folge nur direkten Originalposts. Nimm nur Originalposts aus den letzten 7 Tagen auf; prüfe dabei ausdrücklich Tag, Monat und Jahr. Ein Angebot darf erst in Zukunft beginnen, solange der Post selbst höchstens 7 Tage alt ist. Erfasse Anbietername, Produktart, exakten Wien-Standort, Angebotszeiten, Teilnahmebedingungen, echten Account-Handle, Veröffentlichungsdatum und direkten /p/...- oder /reel/...-Link. Verwechsle Veröffentlichungsdatum und Angebotszeitraum nicht. Lass bekannte alte Posts, Gewinnspiele, allgemeine Empfehlungen, Gratis-Versand und Posts ohne konkreten Preisvorteil weg. Ist nur das exakte Datum unlesbar, der direkte Originalpost aber eindeutig frisch, gib ihn zur Graph-Verifikation trotzdem zurück.",
-      schema,
-      model: 'spark-1-mini',
-    }, {
-      timeoutSeconds: AGENT_TIMEOUT_SECONDS,
-      maxCredits: MAX_CREDITS,
-    });
-    agentCreditsUsed = Number(result?.creditsUsed || result?.credits_used || 0);
-  } catch (error) {
-    agentCreditsUsed = Number(error?.creditsUsed || 0);
-    runErrors.push(error.message);
-    console.log(`⚠️ Firecrawl Agent: ${error.message}`);
-  }
+  const rawOffers = [];
+  const sourceStats = [];
+  let totalCreditsUsed = 0;
+  let completedSources = 0;
+  console.log(`🎯 ${ACTIVE_DISCOVERY_URLS.length}/${DISCOVERY_URLS.length} rotierende Ziele`);
+  console.log(`💳 Maximal ${MAX_CREDITS_PER_TARGET} Credits und ${AGENT_TIMEOUT_SECONDS}s pro Ziel`);
 
-  let resultData = result?.data || {};
-  if (typeof resultData === 'string') {
+  for (const targetUrl of ACTIVE_DISCOVERY_URLS) {
+    const stat = { url: targetUrl, status: 'started', rawCandidates: 0, searchCandidates: 0, creditsUsed: 0 };
+    let stopAfterTarget = false;
     try {
-      resultData = JSON.parse(resultData);
+      const searchPosts = (await searchFreshInstagramPosts(firecrawl, targetUrl, {
+        now: RUN_STARTED_AT,
+        limit: 12,
+      })).filter(isConcreteFirecrawlSearchResult);
+      stat.searchCandidates = searchPosts.length;
+      if (searchPosts.length > 0) {
+        rawOffers.push(...searchPosts.map((post) => ({
+          provider_name: post.ownerUsername || 'Instagram',
+          product_type: post.title,
+          location: '',
+          times: '',
+          participation_conditions: post.description,
+          offer_type: post.description,
+          post_url: post.url,
+          owner_username: post.ownerUsername,
+          post_date: '',
+          discovery_target: targetUrl,
+          discovery_method: post.discoveryMethod,
+        })));
+        stat.status = 'completed-search';
+        stat.rawCandidates = searchPosts.length;
+        completedSources += 1;
+        console.log(`   ${targetUrl} → ${searchPosts.length} direkte Posts via Firecrawl Search`);
+        sourceStats.push(stat);
+        continue;
+      }
     } catch (error) {
-      runErrors.push(`Ungültige Agent-Antwort: ${error.message}`);
-      resultData = {};
+      stat.searchError = error.message;
+      console.log(`   ${targetUrl} → Search-Warnung: ${error.message}`);
     }
+    try {
+      const result = await runBoundedFirecrawlAgent(firecrawl, {
+        urls: [targetUrl],
+        prompt: `${DISCOVERY_PROMPT}\n\nStartziel dieses Durchlaufs: ${targetUrl}`,
+        schema,
+        model: 'spark-1-mini',
+      }, {
+        timeoutSeconds: AGENT_TIMEOUT_SECONDS,
+        maxCredits: MAX_CREDITS_PER_TARGET,
+      });
+      stat.creditsUsed = Number(result?.creditsUsed || result?.credits_used || 0);
+      totalCreditsUsed += stat.creditsUsed;
+      let resultData = result?.data || {};
+      if (typeof resultData === 'string') resultData = JSON.parse(resultData);
+      const targetOffers = Array.isArray(resultData?.offers) ? resultData.offers : [];
+      rawOffers.push(...targetOffers.map((offer) => ({ ...offer, discovery_target: targetUrl })));
+      stat.status = 'completed';
+      stat.rawCandidates = targetOffers.length;
+      completedSources += 1;
+      console.log(`   ${targetUrl} → ${targetOffers.length} Rohangebote`);
+    } catch (error) {
+      stat.status = 'failed';
+      stat.error = error.message;
+      stat.creditsUsed = Number(error?.creditsUsed || 0);
+      totalCreditsUsed += stat.creditsUsed;
+      runErrors.push(`${targetUrl}: ${error.message}`);
+      console.log(`   ${targetUrl} → ⚠️ ${error.message}`);
+      stopAfterTarget = isFirecrawlRateOrCreditError(error.message);
+    }
+    sourceStats.push(stat);
+    if (stopAfterTarget) break;
   }
-  const rawOffers = Array.isArray(resultData?.offers) ? resultData.offers : [];
   console.log(`📦 Rohangebote: ${rawOffers.length}`);
 
   const deals = [];
@@ -203,6 +259,13 @@ async function main() {
     }
 
     const type = inferType(offerTypeText, `${productType} ${conditions}`);
+    if (type === 'event' || !hasConcreteOfferSignal(combined)) {
+      rejected.push({
+        reason: type === 'event' ? 'excluded-giveaway' : 'missing-concrete-offer',
+        deal: { title: productType || offerTypeText, brand: providerName, url: postUrl },
+      });
+      continue;
+    }
     const category = inferCategory(productType, `${offerTypeText} ${conditions}`);
     const titleCore = productType || offerTypeText || 'Instagram-Angebot';
     const title = `${providerName}: ${titleCore}`.slice(0, 140);
@@ -232,6 +295,8 @@ async function main() {
       qualityScore: type === 'gratis' ? 72 : type === 'bogo' ? 70 : 58,
       ownerUsername,
       reportedPostDate,
+      discoveryTarget: normalizeText(offer.discovery_target),
+      discoveryMethod: normalizeText(offer.discovery_method) || 'firecrawl-agent',
     });
   }
 
@@ -273,11 +338,15 @@ async function main() {
     acceptedDeals: verifiedDeals.length,
     rejected,
     diagnostics: {
-      agentStatus: result?.status || 'failed',
-      creditsUsed: agentCreditsUsed,
+      agentStatus: runErrors.length > 0 ? 'completed-with-errors' : 'completed',
+      creditsUsed: totalCreditsUsed,
       configuredSources: DISCOVERY_URLS.length,
+      attemptedSources: sourceStats.length,
+      completedSources,
+      targetsPerRun: TARGETS_PER_RUN,
       agentTimeoutSeconds: AGENT_TIMEOUT_SECONDS,
-      maxCredits: MAX_CREDITS,
+      maxCreditsPerTarget: MAX_CREDITS_PER_TARGET,
+      sourceStats,
       retainedPreviousDeals: history.retainedPreviousDeals,
       prunedPreviousDeals: history.prunedPreviousDeals,
       duplicateCandidatesMerged: history.duplicateCount,

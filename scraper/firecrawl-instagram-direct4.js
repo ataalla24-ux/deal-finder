@@ -19,6 +19,12 @@ import {
   runBoundedFirecrawlAgent,
 } from './firecrawl-agent-utils.js';
 import {
+  inferFirecrawlSearchDealType,
+  isConcreteFirecrawlSearchResult,
+  searchFreshInstagramPosts,
+  searchFreshWebDeals,
+} from './firecrawl-search-utils.js';
+import {
   buildPipelineRunReport,
   summarizeVerifiedDeals,
   writeFailedPipelineRunReport,
@@ -39,7 +45,8 @@ const MAX_CREDITS_PER_TARGET = positiveInteger(
   process.env.FIRECRAWL4_MAX_CREDITS_PER_TARGET,
   DEFAULT_MAX_CREDITS_PER_TARGET,
 );
-const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL4_AGENT_TIMEOUT_SECONDS, 180);
+const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL4_AGENT_TIMEOUT_SECONDS, 90);
+const MAX_AGENT_FALLBACKS = positiveInteger(process.env.FIRECRAWL4_MAX_AGENT_FALLBACKS, 3);
 const SCRAPE_TARGETS = selectScrapeTargets(RUN_STARTED_AT);
 
 if (!FIRECRAWL_API_KEY) {
@@ -138,6 +145,7 @@ async function main() {
   let rawCandidateCount = 0;
   let completedSources = 0;
   let totalCreditsUsed = 0;
+  let agentFallbacks = 0;
 
   console.log(`🔍 Scrape ${SCRAPE_TARGETS.length} echte Ziele (Gastro Focus)...`);
   console.log(`💳 Maximal ${MAX_CREDITS_PER_TARGET} Credits und ${AGENT_TIMEOUT_SECONDS}s pro Ziel`);
@@ -155,11 +163,67 @@ async function main() {
       rawCandidates: 0,
       normalizedCandidates: 0,
       rejectedCandidates: 0,
+      searchCandidates: 0,
       creditsUsed: 0,
     };
     let stopAfterTarget = false;
 
     console.log(`   [${i + 1}/${SCRAPE_TARGETS.length}] ${target.label} (${target.kind})...`);
+
+    try {
+      const searchRows = target.kind.startsWith('instagram-')
+        ? await searchFreshInstagramPosts(firecrawl, target.url, { now: RUN_STARTED_AT, limit: 12 })
+        : await searchFreshWebDeals(firecrawl, target.url, { now: RUN_STARTED_AT, limit: 12 });
+      const relevantRows = searchRows.filter(isConcreteFirecrawlSearchResult);
+      stat.searchCandidates = relevantRows.length;
+      if (relevantRows.length > 0) {
+        for (const row of relevantRows) {
+          const brand = row.ownerUsername || row.title || target.label;
+          const title = row.title || row.description.slice(0, 120) || 'Aktueller Gastro Deal';
+          allDeals.push({
+            id: dealId('fc4g', brand, title, row.url),
+            brand,
+            title: title.slice(0, 140),
+            description: row.description || title,
+            type: inferFirecrawlSearchDealType(row),
+            category: 'essen',
+            source: 'Firecrawl Gastro #4 Search',
+            url: row.url,
+            expires: '',
+            expiresOriginal: '',
+            distance: '',
+            hot: true,
+            isNew: true,
+            priority: 3,
+            votes: 1,
+            qualityScore: 60,
+            ownerUsername: row.ownerUsername || '',
+            discoveryTarget: target.id,
+            discoveryTargetLabel: target.label,
+            discoveryMethod: row.discoveryMethod,
+          });
+        }
+        completedSources += 1;
+        rawCandidateCount += relevantRows.length;
+        stat.status = 'completed-search';
+        stat.rawCandidates = relevantRows.length;
+        stat.normalizedCandidates = allDeals.length - normalizedBefore;
+        sourceStats.push(stat);
+        console.log(`      → ${relevantRows.length} direkte Treffer via Firecrawl Search`);
+        continue;
+      }
+    } catch (error) {
+      stat.searchError = error.message;
+      console.log(`      → Search-Warnung: ${error.message}`);
+    }
+
+    if (agentFallbacks >= MAX_AGENT_FALLBACKS) {
+      stat.status = 'search-empty';
+      sourceStats.push(stat);
+      console.log('      → Kein Search-Treffer; Agent-Fallback-Budget für diesen Lauf ausgeschöpft');
+      continue;
+    }
+    agentFallbacks += 1;
 
     try {
       const result = await runAgent({
@@ -247,6 +311,20 @@ async function main() {
               });
               continue;
             }
+            if (!isConcreteFirecrawlSearchResult({
+              title: d.item_given_away,
+              description: `${d.category || ''} ${d.validity_date || ''} ${d.validity_time || ''}`,
+            })) {
+              rejected.push({
+                reason: 'missing-concrete-offer-or-giveaway',
+                deal: {
+                  title: d.item_given_away || '',
+                  brand: d.brand_or_store || target.label,
+                  url: targetUrl,
+                },
+              });
+              continue;
+            }
 
             const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
             const brand = d.brand_or_store || target.label;
@@ -274,6 +352,7 @@ async function main() {
               expiresOriginal: `${d.validity_date || ''} ${d.validity_time || ''}`.trim(),
               discoveryTarget: target.id,
               discoveryTargetLabel: target.label,
+              discoveryMethod: 'firecrawl-agent',
             });
           }
         } else {
@@ -351,6 +430,8 @@ async function main() {
       attemptedSources: sourceStats.length,
       completedSources,
       agentTimeoutSeconds: AGENT_TIMEOUT_SECONDS,
+      maxAgentFallbacks: MAX_AGENT_FALLBACKS,
+      agentFallbacks,
       maxCreditsPerTarget: MAX_CREDITS_PER_TARGET,
       totalCreditsUsed,
       retainedPreviousDeals: history.retainedPreviousDeals,

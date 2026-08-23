@@ -16,7 +16,14 @@ import {
   isFirecrawlRateOrCreditError,
   positiveInteger,
   runBoundedFirecrawlAgent,
+  selectRotatingFirecrawlTargets,
 } from './firecrawl-agent-utils.js';
+import {
+  inferFirecrawlSearchDealType,
+  isConcreteFirecrawlSearchResult,
+  searchFreshInstagramPosts,
+  searchFreshWebDeals,
+} from './firecrawl-search-utils.js';
 import {
   buildPipelineRunReport,
   summarizeVerifiedDeals,
@@ -29,8 +36,9 @@ const SOURCE_KEY = 'gastro2';
 const SOURCE_LABEL = 'Firecrawl Key 1 - Gastro';
 const OUTPUT_PATH = 'docs/deals-pending-gastro2.json';
 const RUN_STARTED_AT = new Date();
-const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL1_AGENT_TIMEOUT_SECONDS, 120);
+const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL1_AGENT_TIMEOUT_SECONDS, 75);
 const MAX_CREDITS_PER_TARGET = positiveInteger(process.env.FIRECRAWL1_MAX_CREDITS_PER_TARGET, 250);
+const TARGETS_PER_RUN = positiveInteger(process.env.FIRECRAWL1_TARGETS_PER_RUN, 4);
 
 if (!FIRECRAWL_API_KEY) {
   const error = new Error('FIRECRAWL_API_KEY1 oder FIRECRAWL_API_KEY nicht gesetzt');
@@ -67,6 +75,7 @@ const SCRAPE_URLS = [
   'https://www.1000things.at/',
   'https://www.meinbezirk.at/',
 ];
+const ACTIVE_SCRAPE_URLS = selectRotatingFirecrawlTargets(SCRAPE_URLS, TARGETS_PER_RUN, RUN_STARTED_AT);
 
 function isInstagramUrl(url) {
   return (url || '').includes('instagram.com');
@@ -158,18 +167,68 @@ async function main() {
   const allDeals = [];
   const rejected = [];
   const runErrors = [];
+  const sourceStats = [];
   let rawCandidateCount = 0;
   let completedSources = 0;
   let totalCreditsUsed = 0;
   
-  console.log(`🔍 Scrape ${SCRAPE_URLS.length} Seiten (Gastro Focus)...`);
+  console.log(`🔍 Scrape ${ACTIVE_SCRAPE_URLS.length}/${SCRAPE_URLS.length} rotierende Ziele (Gastro Focus)...`);
   console.log(`💳 Maximal ${MAX_CREDITS_PER_TARGET} Credits und ${AGENT_TIMEOUT_SECONDS}s pro Ziel`);
   
-  for (let i = 0; i < SCRAPE_URLS.length; i++) {
-    const url = SCRAPE_URLS[i];
+  for (let i = 0; i < ACTIVE_SCRAPE_URLS.length; i++) {
+    const url = ACTIVE_SCRAPE_URLS[i];
     const source = new URL(url).hostname.replace('www.', '');
+    const stat = { url, status: 'started', rawCandidates: 0, searchCandidates: 0, normalizedCandidates: 0, creditsUsed: 0 };
+    const normalizedBefore = allDeals.length;
+    let stopAfterTarget = false;
     
-    console.log(`   [${i + 1}/${SCRAPE_URLS.length}] ${source}...`);
+    console.log(`   [${i + 1}/${ACTIVE_SCRAPE_URLS.length}] ${source}...`);
+
+    try {
+      const searchRows = isInstagramUrl(url)
+        ? await searchFreshInstagramPosts(firecrawl, url, { now: RUN_STARTED_AT, limit: 12 })
+        : await searchFreshWebDeals(firecrawl, url, { now: RUN_STARTED_AT, limit: 12 });
+      const relevantRows = searchRows.filter(isConcreteFirecrawlSearchResult);
+      stat.searchCandidates = relevantRows.length;
+      if (relevantRows.length > 0) {
+        for (const row of relevantRows) {
+          const brand = row.ownerUsername || row.title || source;
+          const title = row.title || row.description.slice(0, 120) || 'Aktueller Deal';
+          allDeals.push({
+            id: dealId('g2', brand, title, row.url),
+            brand,
+            title: title.slice(0, 140),
+            description: row.description || title,
+            type: inferFirecrawlSearchDealType(row),
+            category: 'essen',
+            source: 'Firecrawl Gastro #2 Search',
+            url: row.url,
+            expires: '',
+            expiresOriginal: '',
+            distance: '',
+            hot: true,
+            isNew: true,
+            priority: 3,
+            votes: 1,
+            qualityScore: 60,
+            ownerUsername: row.ownerUsername || '',
+            discoveryTarget: url,
+            discoveryMethod: row.discoveryMethod,
+          });
+        }
+        rawCandidateCount += relevantRows.length;
+        completedSources += 1;
+        stat.status = 'completed-search';
+        stat.rawCandidates = relevantRows.length;
+        stat.normalizedCandidates = allDeals.length - normalizedBefore;
+        sourceStats.push(stat);
+        console.log(`      → ${relevantRows.length} direkte Treffer via Firecrawl Search`);
+        continue;
+      }
+    } catch (error) {
+      stat.searchError = error.message;
+      console.log(`      → Search-Warnung: ${error.message}`);
+    }
     
     try {
       const result = await runAgent({
@@ -180,7 +239,8 @@ async function main() {
         schema: gastroSchema,
         model: isInstagramUrl(url) ? 'spark-1-mini' : 'spark-1-pro',
       });
-      totalCreditsUsed += Number(result?.creditsUsed || result?.credits_used || 0);
+      stat.creditsUsed = Number(result?.creditsUsed || result?.credits_used || 0);
+      totalCreditsUsed += stat.creditsUsed;
       
       if (result && result.data) {
         let data = result.data;
@@ -194,6 +254,8 @@ async function main() {
         if (data && data.deals && Array.isArray(data.deals)) {
           completedSources += 1;
           rawCandidateCount += data.deals.length;
+          stat.status = 'completed-agent';
+          stat.rawCandidates = data.deals.length;
           console.log(`      → ${data.deals.length} Deals gefunden`);
           
           for (const d of data.deals) {
@@ -212,6 +274,20 @@ async function main() {
             if (isInstagramUrl(url) && !isInstagramUrl(postUrl)) {
               rejected.push({
                 reason: 'instagram-target-returned-web-result',
+                deal: {
+                  title: d.item_given_away || '',
+                  brand: d.brand_or_store || source,
+                  url: postUrl,
+                },
+              });
+              continue;
+            }
+            if (!isConcreteFirecrawlSearchResult({
+              title: d.item_given_away,
+              description: `${d.category || ''} ${d.validity_date || ''} ${d.validity_time || ''}`,
+            })) {
+              rejected.push({
+                reason: 'missing-concrete-offer-or-giveaway',
                 deal: {
                   title: d.item_given_away || '',
                   brand: d.brand_or_store || source,
@@ -245,21 +321,27 @@ async function main() {
               ownerUsername,
               reportedPostDate: d.post_date || '',
               expiresOriginal: `${d.validity_date || ''} ${d.validity_time || ''}`.trim(),
+              discoveryTarget: url,
+              discoveryMethod: 'firecrawl-agent',
             });
           }
         }
       }
     } catch (e) {
       console.log(`      → Error: ${e.message}`);
-      totalCreditsUsed += Number(e?.creditsUsed || 0);
+      stat.status = 'failed';
+      stat.error = e.message;
+      stat.creditsUsed = Number(e?.creditsUsed || 0);
+      totalCreditsUsed += stat.creditsUsed;
       runErrors.push(`${source}: ${e.message}`);
       if (isFirecrawlRateOrCreditError(e.message)) {
         console.log('      → Stoppe Run frühzeitig wegen API-Limit/Credits');
-        break;
+        stopAfterTarget = true;
       }
     }
-    
-    await new Promise(r => setTimeout(r, 2000));
+    stat.normalizedCandidates = allDeals.length - normalizedBefore;
+    sourceStats.push(stat);
+    if (stopAfterTarget) break;
   }
 
   console.log();
@@ -304,13 +386,16 @@ async function main() {
     rejected,
     diagnostics: {
       configuredSources: SCRAPE_URLS.length,
+      attemptedSources: sourceStats.length,
       completedSources,
+      targetsPerRun: TARGETS_PER_RUN,
       agentTimeoutSeconds: AGENT_TIMEOUT_SECONDS,
       maxCreditsPerTarget: MAX_CREDITS_PER_TARGET,
       totalCreditsUsed,
       retainedPreviousDeals: history.retainedPreviousDeals,
       prunedPreviousDeals: history.prunedPreviousDeals,
       duplicateCandidatesMerged: history.duplicateCount,
+      sourceStats,
       verifier: summarizeVerifiedDeals(finalDeals),
     },
     errors: runErrors,
