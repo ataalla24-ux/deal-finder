@@ -1,18 +1,12 @@
 {
-  "generatedAt": "2026-08-23T13:21:55.479Z",
+  "generatedAt": "2026-08-23T13:49:01.855Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 432,
+    "totalCandidates": 434,
     "uniqueCandidates": 395,
-    "distinctCandidates": 410,
-    "duplicateClusters": 15,
+    "distinctCandidates": 411,
+    "duplicateClusters": 16,
     "topHealthySources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 82,
-        "totalDeals": 2
-      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -24,6 +18,12 @@
         "sourceLabel": "TikTok Scanner",
         "healthScore": 71,
         "totalDeals": 17
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 71,
+        "totalDeals": 2
       },
       {
         "sourceKey": "food3",
@@ -117,7 +117,7 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 77,
+        "precisionScore": 73,
         "totalDeals": 2
       },
       {
@@ -147,15 +147,15 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 63,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 62,
+        "totalDeals": 2
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 59,
         "totalDeals": 2
       },
       {
@@ -219,19 +219,19 @@
         "sampleTitles": []
       },
       {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
-        "healthScore": 34,
+        "sourceKey": "flights",
+        "sourceLabel": "Flights Vienna",
+        "healthScore": 28,
         "issues": [
           "wenige Deals sind frischer als 1 Tag",
+          "geringe Food-/Drink-Relevanz",
           "wenige klare Gratis-/Promo-Signale",
-          "Wien-Signal ist zu schwach",
-          "hohe Überschneidung mit anderen Quellen"
+          "Wien-Signal ist zu schwach"
         ],
         "sampleTitles": [
-          "BTS vom Online Supermarkt @gurkerl_at „FOODIE10“ für 10€ Rabatt🙌🏻 #robot #vienna #s...",
-          "3 Lunch Spots in der @westfieldshoppingcitysued , die du kennen solltest. 🍜🍔🍣 @tha...",
-          "Vintage Torten Kurs in Wien - @cupcakeswien 📍Albertgasse 17, 1080 Wien Es gibt auch ..."
+          "Hin & zurück nach Milan ab €34.48",
+          "Hin & zurück nach Palma ab €45.98",
+          "Hin & zurück nach Manchester ab €51.71"
         ]
       }
     ],
@@ -249,83 +249,6 @@
     }
   },
   "sources": [
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 2,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Und das Beste: Mit dem Vorteilsclub der Stadt Wien sparst du 25 % auf Tickets an der Tageskassa.",
-        "Und das Beste: Die Führungen sind kostenlos."
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-23T09:00:07.392Z",
-        "finishedAt": "2026-08-23T09:00:43.907Z",
-        "durationMs": 36515,
-        "counts": {
-          "rawCandidates": 117,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 115
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 94,
-          "missing-text": 6,
-          "general-recommendation": 9,
-          "excluded-promotion-type": 1,
-          "missing-vienna-evidence": 5
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84.5,
-      "topCategories": [
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [],
-      "healthScore": 82,
-      "missionFitScore": 69,
-      "coverageScore": 13,
-      "precisionScore": 77,
-      "sourceWeightScore": 63
-    },
     {
       "sourceKey": "joe",
       "file": "deals-pending-joe.json",
@@ -458,6 +381,85 @@
       "coverageScore": 23,
       "precisionScore": 70,
       "sourceWeightScore": 55
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 2,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Und das Beste: Mit dem Vorteilsclub der Stadt Wien sparst du 25 % auf Tickets an der Tageskassa.",
+        "Und das Beste: Die Führungen sind kostenlos."
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-23T09:00:07.392Z",
+        "finishedAt": "2026-08-23T09:00:43.907Z",
+        "durationMs": 36515,
+        "counts": {
+          "rawCandidates": 117,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 115
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 94,
+          "missing-text": 6,
+          "general-recommendation": 9,
+          "excluded-promotion-type": 1,
+          "missing-vienna-evidence": 5
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.5,
+      "topCategories": [
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 71,
+      "missionFitScore": 69,
+      "coverageScore": 12,
+      "precisionScore": 73,
+      "sourceWeightScore": 59
     },
     {
       "sourceKey": "food3",
@@ -753,34 +755,38 @@
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 10,
-      "uniqueDeals": 1,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 9,
-      "fresh1dCount": 0,
-      "fresh7dCount": 10,
-      "viennaCount": 10,
-      "foodDrinkCount": 5,
-      "promoCount": 8,
+      "totalDeals": 12,
+      "uniqueDeals": 2,
+      "duplicateDeals": 10,
+      "duplicateAcrossSources": 10,
+      "fresh1dCount": 2,
+      "fresh7dCount": 12,
+      "viennaCount": 12,
+      "foodDrinkCount": 4,
+      "promoCount": 9,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Freibier Run with Free Drink and Kaiserschmarrn",
-        "10% Discount with Code LISAMARIA",
-        "Lunch Deal: Starter + Main Dish for €19"
+        "Freibier Run mit gratis Getränk und Kaiserschmarrn",
+        "Lunch Deal mit Vorspeise und Hauptgericht",
+        "10% Rabatt mit Code LISAMARIA"
       ],
       "lastRun": null,
-      "uniqueRate": 0.1,
-      "duplicateRate": 0.9,
-      "fresh1dRate": 0,
+      "uniqueRate": 0.2,
+      "duplicateRate": 0.8,
+      "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.5,
+      "foodDrinkRate": 0.3,
       "promoRate": 0.8,
       "missingUrlRate": 0,
       "averageQualityScore": 89.6,
       "topCategories": [
         {
           "value": "essen",
+          "count": 4
+        },
+        {
+          "value": "event",
           "count": 3
         },
         {
@@ -788,40 +794,32 @@
           "count": 3
         },
         {
-          "value": "activity",
-          "count": 2
-        },
-        {
-          "value": "event",
+          "value": "entertainment",
           "count": 1
         },
         {
-          "value": "supermarkt",
+          "value": "health",
           "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "rabatt",
-          "count": 5
-        },
-        {
           "value": "gratis",
-          "count": 4
+          "count": 6
         },
         {
-          "value": "bogo",
-          "count": 1
+          "value": "rabatt",
+          "count": 6
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 53,
-      "missionFitScore": 55,
-      "coverageScore": 16,
-      "precisionScore": 64,
+      "healthScore": 54,
+      "missionFitScore": 52,
+      "coverageScore": 17,
+      "precisionScore": 63,
       "sourceWeightScore": 48
     },
     {
@@ -1647,58 +1645,6 @@
       "sourceWeightScore": 33
     },
     {
-      "sourceKey": "flights",
-      "file": "deals-pending-flights.json",
-      "sourceLabel": "Flights Vienna",
-      "totalDeals": 9,
-      "uniqueDeals": 9,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 9,
-      "fresh7dCount": 9,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Hin & zurück nach Milan ab €34.48",
-        "Hin & zurück nach Palma ab €45.98",
-        "Hin & zurück nach Manchester ab €51.71"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 73.1,
-      "topCategories": [
-        {
-          "value": "reisen",
-          "count": 9
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 9
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 42,
-      "missionFitScore": 22,
-      "coverageScore": 12,
-      "precisionScore": 26,
-      "sourceWeightScore": 26
-    },
-    {
       "sourceKey": "vienna-promo-radar",
       "file": "deals-pending-vienna-promo-radar.json",
       "sourceLabel": "Vienna Promo Radar",
@@ -1891,6 +1837,59 @@
       "coverageScore": 8,
       "precisionScore": 36,
       "sourceWeightScore": 31
+    },
+    {
+      "sourceKey": "flights",
+      "file": "deals-pending-flights.json",
+      "sourceLabel": "Flights Vienna",
+      "totalDeals": 9,
+      "uniqueDeals": 9,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 9,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Hin & zurück nach Milan ab €34.48",
+        "Hin & zurück nach Palma ab €45.98",
+        "Hin & zurück nach Manchester ab €51.71"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 73.1,
+      "topCategories": [
+        {
+          "value": "reisen",
+          "count": 9
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 9
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 28,
+      "missionFitScore": 0,
+      "coverageScore": 6,
+      "precisionScore": 14,
+      "sourceWeightScore": 12
     },
     {
       "sourceKey": "firecrawl2",
