@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-23T12:01:15.909Z",
+  "generatedAt": "2026-08-23T12:50:37.079Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -159,7 +159,7 @@
   },
   "candidatePosts": 3,
   "candidateAccounts": 3,
-  "skippedAccountCooldowns": 1,
+  "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "bottlechallenge_org",
@@ -168,17 +168,26 @@
     {
       "username": "boca.vienna",
       "candidates": 1
+    },
+    {
+      "username": "notarunclub_vienna",
+      "candidates": 1
     }
   ],
   "fetchedPosts": 50,
   "exactMatches": 0,
   "retainedEvidencePosts": 241,
-  "errors": [],
+  "errors": [
+    {
+      "username": "notarunclub_vienna",
+      "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28notarunclub_vienna%29%7Busername%2Cname%2Cmedia.limit%2825%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
+    }
+  ],
   "accountFailures": {
     "notarunclub_vienna": {
-      "count": 1,
-      "lastAt": "2026-08-22T12:04:26.566Z",
-      "cooldownUntil": "2026-08-23T12:04:26.566Z"
+      "count": 2,
+      "lastAt": "2026-08-23T12:50:37.079Z",
+      "cooldownUntil": "2026-08-24T12:50:37.079Z"
     }
   },
   "blockedEvidencePosts": 26,
