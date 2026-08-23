@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-23T09:00:25.875Z",
+  "generatedAt": "2026-08-23T09:05:10.843Z",
   "source": "meta-instagram",
-  "status": "ok",
+  "status": "degraded",
   "configured": {
     "adLibrary": false,
     "instagramGraph": true
@@ -32,7 +32,7 @@
     {
       "username": "shaysfoodblog",
       "priority": 104,
-      "verifiedVienna": false,
+      "verifiedVienna": true,
       "approvedDeals": 1,
       "rejectedDeals": 0
     },
@@ -206,20 +206,32 @@
       "errors": []
     },
     "instagramGraph": {
-      "status": "ok",
-      "fetched": 217,
-      "accepted": 8,
-      "errors": [],
+      "status": "degraded",
+      "fetched": 171,
+      "accepted": 9,
+      "errors": [
+        {
+          "source": "@naanbrueder",
+          "status": 403,
+          "code": 4,
+          "message": "Meta API 403 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28naanbrueder%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] (#4) Application request "
+        }
+      ],
       "skippedCooldown": {
         "accounts": 14,
         "hashtags": 0
       },
-      "globalError": null,
+      "globalError": {
+        "source": "@naanbrueder",
+        "status": 403,
+        "code": 4,
+        "message": "Meta API 403 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28naanbrueder%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] (#4) Application request "
+      },
       "mediaEvidence": {
         "status": "ok",
         "eligible": 0,
         "selected": 0,
-        "cached": 58,
+        "cached": 56,
         "analyzed": 0,
         "withOcrText": 0,
         "aiCalls": 0,
@@ -233,113 +245,113 @@
       },
       "accountYield": {
         "foodiewien": {
-          "recentFetched": 35.359,
-          "recentAccepted": 6.107
+          "recentFetched": 35.519,
+          "recentAccepted": 5.58
         },
         "bezirksvorstehung_mariahilf": {
-          "recentFetched": 31.195,
-          "recentAccepted": 9.24
+          "recentFetched": 32.396,
+          "recentAccepted": 8.93
         },
         "lisa.maria.b": {
-          "recentFetched": 31.195,
-          "recentAccepted": 4.466
+          "recentFetched": 32.396,
+          "recentAccepted": 5.349
         },
         "shaysfoodblog": {
-          "recentFetched": 35.359,
-          "recentAccepted": 7.7
+          "recentFetched": 35.519,
+          "recentAccepted": 7.775
         },
         "bottlechallenge_org": {
-          "recentFetched": 31.195,
-          "recentAccepted": 4.442
+          "recentFetched": 32.396,
+          "recentAccepted": 4.332
         },
         "ferris_bistro": {
-          "recentFetched": 20.813,
+          "recentFetched": 24.61,
           "recentAccepted": 0
         },
         "sonnentor": {
-          "recentFetched": 20.813,
+          "recentFetched": 24.61,
           "recentAccepted": 0
         },
         "boca.vienna": {
-          "recentFetched": 35.359,
-          "recentAccepted": 1.616
+          "recentFetched": 35.519,
+          "recentAccepted": 1.212
         },
         "merdins_cheesy_doener": {
-          "recentFetched": 33.297,
+          "recentFetched": 33.973,
           "recentAccepted": 0
         },
         "woa.vienna": {
-          "recentFetched": 33.297,
-          "recentAccepted": 1
+          "recentFetched": 33.973,
+          "recentAccepted": 1.75
         },
         "xo_grill": {
-          "recentFetched": 33.297,
+          "recentFetched": 33.973,
           "recentAccepted": 0
         },
         "lorenzos_bar_lounge": {
-          "recentFetched": 32.396,
+          "recentFetched": 33.297,
           "recentAccepted": 0
         },
         "2ndstreetburger": {
-          "recentFetched": 32.396,
+          "recentFetched": 33.297,
           "recentAccepted": 0
         },
         "seelokaya": {
-          "recentFetched": 32.396,
+          "recentFetched": 33.297,
           "recentAccepted": 0
         },
         "wolt.oesterreich": {
-          "recentFetched": 31.195,
+          "recentFetched": 32.396,
           "recentAccepted": 0
         },
         "birbsbagel": {
-          "recentFetched": 32.396,
+          "recentFetched": 33.297,
           "recentAccepted": 0
         },
         "blumencafe.wien": {
-          "recentFetched": 32.396,
+          "recentFetched": 33.297,
           "recentAccepted": 0
         },
         "framburi_fries": {
-          "recentFetched": 31.195,
+          "recentFetched": 32.396,
           "recentAccepted": 0
         },
         "ghettosmash_": {
-          "recentFetched": 31.195,
+          "recentFetched": 32.396,
           "recentAccepted": 0
         },
         "naanbrueder": {
-          "recentFetched": 31.195,
+          "recentFetched": 23.396,
           "recentAccepted": 0
         },
         "cafe_wirr": {
-          "recentFetched": 31.195,
+          "recentFetched": 23.396,
           "recentAccepted": 0
         },
         "lebaron.wien": {
-          "recentFetched": 31.195,
+          "recentFetched": 23.396,
           "recentAccepted": 0
         },
         "mangalet.at": {
-          "recentFetched": 10.399,
+          "recentFetched": 7.799,
           "recentAccepted": 0
         },
         "pizzeriapummaro": {
-          "recentFetched": 31.195,
+          "recentFetched": 23.396,
           "recentAccepted": 0
         }
       },
       "hashtagYield": {
         "wienessen": {
-          "recentFetched": 11.563,
-          "recentAccepted": 1.313
+          "recentFetched": 8.672,
+          "recentAccepted": 0.985
         },
         "gratisinwien": {
-          "recentFetched": 2.313,
+          "recentFetched": 1.735,
           "recentAccepted": 0
         },
         "wiengastro": {
-          "recentFetched": 2.313,
+          "recentFetched": 1.735,
           "recentAccepted": 0
         },
         "viennadeals": {
@@ -383,23 +395,23 @@
   },
   "rejectionReasons": {
     "non-vienna-location": 1,
-    "missing-vienna-evidence": 11,
-    "no-concrete-offer": 168,
+    "missing-vienna-evidence": 10,
+    "no-concrete-offer": 125,
     "post-too-old": 17,
-    "excluded-promotion-type": 4,
-    "general-recommendation": 6,
-    "missing-text": 2
+    "excluded-promotion-type": 3,
+    "general-recommendation": 5,
+    "missing-text": 1
   },
   "graphEvidence": {
     "status": "ok",
-    "observed": 217,
+    "observed": 171,
     "retained": 241,
     "blocked": 27
   },
-  "totalDeals": 8,
-  "verifiedBeforeLimit": 8,
+  "totalDeals": 9,
+  "verifiedBeforeLimit": 9,
   "outputLimit": 40,
-  "freshPostsFetched": 217,
-  "verifiedDeals": 8,
-  "message": "8 new, evidence-verified Vienna Instagram deals found."
+  "freshPostsFetched": 171,
+  "verifiedDeals": 9,
+  "message": "9 new, evidence-verified Vienna Instagram deals found."
 }
