@@ -82,7 +82,10 @@ const PROMO_PATTERNS = [
   /\b1\s*\+\s*1\b/i,
   /\b2\s*(?:f(?:ü|u|ue)r|for)\s*1\b/i,
   /\bbogo\b/i,
-  /\b\d{1,2}\s*%\s*(?:rabatt|off|discount)?\b/i,
+  /(?:^|[^\d])-\s*\d{1,2}\s*%/i,
+  /\b\d{1,2}\s*%\s*(?:rabatt|off|discount|nachlass|günstiger|guenstiger)\b/i,
+  /\b\d{1,2}\s*%\s+auf\b/i,
+  /\b(?:spar(?:e|st|en)?|save)\s+(?:dir\s+)?\d{1,2}\s*%\b/i,
   /\b(?:rabatt|discount|gutschein|voucher|coupon|promo(?:code)?|aktionscode)\b/i,
   /\bhappy\s*hour\b/i,
   /\b(?:nur|only|um|for)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)\b/i,
@@ -100,6 +103,7 @@ const EXCLUDED_PATTERNS = [
   /\b(?:gratis versand|kostenlose lieferung|free shipping)\b/i,
   /\b(?:job|stellenangebot|wohnung|immobilie|hotelzimmer)\b/i,
   /\b(?:affiliate|influencer gesucht|creator gesucht)\b/i,
+  /\b(?:one|einer|eine|eins)\s+(?:(?:of (?:them|these)|davon)\s+)?(?:is|ist)\s+(?:(?:completely|komplett|völlig|voellig)\s+)?free\b/i,
 ];
 
 const SELF_SYNDICATION_PATTERNS = [
@@ -531,15 +535,17 @@ export function classifyPromotion(text) {
   if (!normalized || EXCLUDED_PATTERNS.some((pattern) => pattern.test(normalized))) {
     return { accepted: false, type: '', reason: normalized ? 'excluded-promotion-type' : 'missing-text' };
   }
-  const strong = PROMO_PATTERNS.some((pattern) => pattern.test(normalized));
-  const soft = SOFT_PROMO_PATTERNS.some((pattern) => pattern.test(normalized));
+  const strongMatch = PROMO_PATTERNS.map((pattern) => normalized.match(pattern)).find(Boolean);
+  const softMatch = SOFT_PROMO_PATTERNS.map((pattern) => normalized.match(pattern)).find(Boolean);
+  const strong = Boolean(strongMatch);
+  const soft = Boolean(softMatch);
   const hasConcreteNumber = /(?:\d{1,3}\s*%|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)|\b\d\s*\+\s*\d\b)/i.test(normalized);
   if (!strong && !(soft && hasConcreteNumber)) return { accepted: false, type: '', reason: 'no-concrete-offer' };
 
   let type = 'rabatt';
   if (/\b(?:gratis|kostenlos)\b/i.test(normalized) || CONCRETE_FREE_PATTERN.test(normalized)) type = 'gratis';
   if (/\b(?:1\s*\+\s*1|2\s*(?:f(?:ü|u|ue)r|for)\s*1|bogo)\b/i.test(normalized)) type = 'bogo';
-  return { accepted: true, type, reason: '' };
+  return { accepted: true, type, reason: '', evidence: cleanText(strongMatch?.[0] || softMatch?.[0], 120) };
 }
 
 function inferCategory(text) {
@@ -713,6 +719,7 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
       targetLocations: raw?.target_locations || [],
     },
   });
+  deal.promotionEvidence = promotion.evidence;
   return { deal, rejection: '' };
 }
 
@@ -810,6 +817,7 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
       },
     },
   });
+  deal.promotionEvidence = promotion.evidence;
   if (username) deal.ownerUsername = username;
   return { deal, rejection: '' };
 }

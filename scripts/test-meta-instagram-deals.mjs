@@ -31,6 +31,11 @@ assert.equal(boundedHashtagConfig.maxHashtagsPerRun, 30, 'Meta hashtag selection
 
 assert.equal(classifyPromotion('Heute 1+1 gratis auf alle Kaffees').accepted, true);
 assert.equal(classifyPromotion('20 % Rabatt auf alle Burger').type, 'rabatt');
+assert.equal(classifyPromotion('Mit dem Vorteilsclub sparst du 25 % auf Tickets.').accepted, true);
+assert.equal(classifyPromotion('Das Ergebnis der Studie: Testosteron stieg um 47 Prozent.').accepted, false);
+assert.equal(classifyPromotion('100 % Geschmack und Energie für deinen Tag.').accepted, false);
+assert.equal(classifyPromotion('Comment LUXURY for four spots; one is completely FREE.').accepted, false);
+assert.equal(classifyPromotion('Die Führungen durch das Parlament sind kostenlos.').type, 'gratis');
 assert.equal(classifyPromotion('Gewinnspiel: Gewinne ein Abendessen').accepted, false);
 assert.equal(classifyPromotion('Schönes neues Sommermenü').accepted, false);
 assert.equal(classifyPromotion('Neue gluten-free Pizza jetzt in Wien').accepted, false);
