@@ -2,9 +2,123 @@
   "schemaVersion": 1,
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
-  "updatedAt": "2026-08-22T23:46:11.368Z",
-  "runCount": 27,
+  "updatedAt": "2026-08-23T00:10:01.931Z",
+  "runCount": 28,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "food3-2026-08-23T00:10:01.931Z",
+      "sourceKey": "food3",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "status": "completed-with-errors",
+      "startedAt": "2026-08-23T00:07:29.072Z",
+      "finishedAt": "2026-08-23T00:10:01.931Z",
+      "durationMs": 152859,
+      "outputFile": "docs/deals-pending-food3.json",
+      "counts": {
+        "rawCandidates": 18,
+        "normalizedCandidates": 18,
+        "verifiedCandidates": 14,
+        "previousDeals": 0,
+        "acceptedDeals": 14,
+        "rejectedDeals": 3
+      },
+      "rejectedByReason": {
+        "post-verification-rejected": 3
+      },
+      "rejectedSamples": [
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-u5mnra",
+            "title": "Instagram: Vergiss Salat. Das ist das ultimative Wiener Sommer ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DcMOZtdjE8D/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-1ie3uws",
+            "title": "Instagram: Neue Woche, neues Mittagsmenü 🍽️ Und nach der ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DcF545dCKFv/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-8dnpgr",
+            "title": "Instagram: 5€ Ramen in Wien | Anzeige Mit @neotaste.wien könnt ihr ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DcQZi7SNE_4/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "agentStatus": "completed-with-errors",
+        "creditsUsed": 0,
+        "configuredSources": 6,
+        "attemptedSources": 3,
+        "completedSources": 2,
+        "targetsPerRun": 3,
+        "agentTimeoutSeconds": 120,
+        "maxCreditsPerTarget": 300,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/wienessen/",
+            "status": "completed-search",
+            "rawCandidates": 10,
+            "searchCandidates": 10,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/viennafood/",
+            "status": "completed-search",
+            "rawCandidates": 8,
+            "searchCandidates": 8,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/fooddealsvienna/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Firecrawl Agent nach 120s abgebrochen"
+          }
+        ],
+        "retainedPreviousDeals": 0,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 1,
+        "verifier": {
+          "statusCounts": {
+            "verified-meta-graph": 1,
+            "verified-original-post": 13
+          },
+          "verifiedOriginalPosts": 13,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 1
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "https://www.instagram.com/explore/tags/fooddealsvienna/: Firecrawl Agent nach 120s abgebrochen"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "food3-2026-08-22T23:46:11.368Z",
