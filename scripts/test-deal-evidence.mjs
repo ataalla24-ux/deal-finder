@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 import {
   canonicalDealUrl,
@@ -78,6 +81,122 @@ assert.equal(verifiedMerchant.viennaVerified, true, 'watchlisted merchants with 
 const discoveryAccount = merchantRegistry.accounts.find((entry) => entry.username === 'viennaeats');
 assert.equal(discoveryAccount.accountType, 'discovery');
 assert.equal(discoveryAccount.viennaVerified, false, 'discovery publishers never become trusted merchant locations');
+
+const feedbackDir = fs.mkdtempSync(path.join(os.tmpdir(), 'instagram-registry-feedback-'));
+const feedbackDocsDir = path.join(feedbackDir, 'docs');
+fs.mkdirSync(feedbackDocsDir);
+fs.writeFileSync(path.join(feedbackDocsDir, 'deals.json'), JSON.stringify({
+  deals: [
+    {
+      id: 'approved-post',
+      ownerUsername: 'approved.cafe',
+      url: 'https://www.instagram.com/p/APPROVEDPOST/',
+      title: '1+1 Burger gratis',
+      description: '1+1 Burger gratis in 1070 Wien',
+      city: 'Wien',
+      category: 'essen',
+      sourcePublishedAt: '2026-07-22T08:00:00.000Z',
+      sourcePublishedAtSource: 'instagram-graph-timestamp',
+    },
+    {
+      id: 'website-only-owner',
+      ownerUsername: 'website.provider',
+      url: 'https://example.com/deal',
+      title: '20 % Rabatt',
+      description: '20 % Rabatt in Wien',
+      city: 'Wien',
+      category: 'shopping',
+      sourcePublishedAt: '2026-07-22T08:00:00.000Z',
+      sourcePublishedAtSource: 'website-published-at',
+    },
+  ],
+}));
+fs.writeFileSync(path.join(feedbackDocsDir, 'deals-pending-all.json'), JSON.stringify({
+  deals: [{
+    id: 'posted-post',
+    ownerUsername: 'approved.cafe',
+    url: 'https://www.instagram.com/p/POSTEDPOST/',
+    title: '20 % Rabatt auf Kaffee',
+    description: '20 % Rabatt auf Kaffee in 1070 Wien',
+    city: 'Wien',
+    category: 'kaffee',
+    sourcePublishedAt: '2026-07-22T09:00:00.000Z',
+    sourcePublishedAtSource: 'instagram-graph-timestamp',
+    slackTs: '123.456',
+  }],
+}));
+fs.writeFileSync(path.join(feedbackDocsDir, 'instagram-watchlist.json'), JSON.stringify({
+  accounts: [
+    { username: 'expired.cafe', category: 'merchant' },
+    { username: 'neotaste.wien', category: 'merchant' },
+  ],
+}));
+fs.writeFileSync(path.join(feedbackDocsDir, 'instagram-graph-post-evidence.json'), JSON.stringify({
+  posts: [{
+    url: 'https://www.instagram.com/reel/REJECTEDPOST/',
+    ownerUsername: 'rejected.cafe',
+  }],
+}));
+fs.writeFileSync(path.join(feedbackDocsDir, 'deal-moderation.json'), JSON.stringify({
+  blockedProviders: ['neotaste'],
+  hiddenDeals: [
+    {
+      url: 'deal_url: https://www.instagram.com/reel/REJECTEDPOST/?igsh=noise',
+      reason: 'kein echter Deal',
+      removedAt: '2026-07-23T08:00:00.000Z',
+    },
+    {
+      url: 'https://www.instagram.com/reel/EXPIREDPOST/',
+      ownerUsername: 'expired.cafe',
+      reason: 'abgelaufen',
+      removedAt: '2026-07-23T08:00:00.000Z',
+    },
+  ],
+}));
+fs.writeFileSync(path.join(feedbackDocsDir, 'sent-deal-ids.json'), '{}');
+const feedbackRegistry = buildInstagramMerchantRegistry({
+  docsDir: feedbackDocsDir,
+  inputFiles: ['deals.json', 'deals-pending-all.json'],
+  watchlistPath: path.join(feedbackDocsDir, 'instagram-watchlist.json'),
+  historicalSentPath: path.join(feedbackDocsDir, 'sent-deal-ids.json'),
+  graphEvidencePath: path.join(feedbackDocsDir, 'instagram-graph-post-evidence.json'),
+  moderationPath: path.join(feedbackDocsDir, 'deal-moderation.json'),
+  now: new Date('2026-07-23T12:00:00.000Z'),
+  write: false,
+});
+const approvedFeedback = feedbackRegistry.accounts.find((entry) => entry.username === 'approved.cafe');
+const rejectedFeedback = feedbackRegistry.accounts.find((entry) => entry.username === 'rejected.cafe');
+const expiredFeedback = feedbackRegistry.accounts.find((entry) => entry.username === 'expired.cafe');
+const blockedFeedback = feedbackRegistry.accounts.find((entry) => entry.username === 'neotaste.wien');
+assert.equal(approvedFeedback.approvedDeals, 1);
+assert.equal(approvedFeedback.postedDeals, 1);
+assert.equal(approvedFeedback.approvalRate, 1);
+assert.equal(rejectedFeedback.rejectedDeals, 1, 'quality moderation maps an exact post back to its account');
+assert.equal(expiredFeedback.rejectedDeals, 0, 'normal expiry is not negative account feedback');
+assert.equal(blockedFeedback.blockedByModeration, true);
+assert.equal(feedbackRegistry.accounts.some((entry) => entry.username === 'website.provider'), false, 'generic website owners do not become Instagram targets');
+
+const previousRegistryPath = path.join(feedbackDocsDir, 'previous-registry.json');
+fs.writeFileSync(previousRegistryPath, JSON.stringify(feedbackRegistry));
+fs.writeFileSync(path.join(feedbackDocsDir, 'deals.json'), JSON.stringify({ deals: [] }));
+fs.writeFileSync(path.join(feedbackDocsDir, 'deals-pending-all.json'), JSON.stringify({ deals: [] }));
+const persistedFeedbackRegistry = buildInstagramMerchantRegistry({
+  docsDir: feedbackDocsDir,
+  inputFiles: ['deals.json', 'deals-pending-all.json'],
+  previousRegistryPath,
+  watchlistPath: path.join(feedbackDocsDir, 'instagram-watchlist.json'),
+  historicalSentPath: path.join(feedbackDocsDir, 'sent-deal-ids.json'),
+  graphEvidencePath: path.join(feedbackDocsDir, 'instagram-graph-post-evidence.json'),
+  moderationPath: path.join(feedbackDocsDir, 'deal-moderation.json'),
+  now: new Date('2026-07-24T12:00:00.000Z'),
+  write: false,
+});
+assert.equal(
+  persistedFeedbackRegistry.accounts.find((entry) => entry.username === 'approved.cafe')?.approvedDeals,
+  1,
+  'final account approvals persist after the deal leaves the live snapshot',
+);
+fs.rmSync(feedbackDir, { recursive: true, force: true });
 
 const crawlerTimestamp = getPublicationEvidence({
   pubDate: '2026-07-17T08:00:00.000Z',

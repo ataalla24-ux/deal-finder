@@ -30,10 +30,12 @@ const DEFAULT_GRAPH_EVIDENCE_PATH = path.join(DOCS_DIR, 'instagram-graph-post-ev
 const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
 const MERCHANT_REGISTRY_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
 const CANDIDATE_ACCOUNT_PATHS = [
+  path.join(DOCS_DIR, 'deals-pending-instagram.json'),
   path.join(DOCS_DIR, 'deals-pending-instagram-apify.json'),
   path.join(DOCS_DIR, 'deals-pending-instagram-ai.json'),
   path.join(DOCS_DIR, 'deals-pending-instagram-discovery.json'),
   path.join(DOCS_DIR, 'deals-pending-instagram-verified.json'),
+  path.join(DOCS_DIR, 'deals-pending-wien-combined.json'),
   path.join(DOCS_DIR, 'deals-pending-gastro2.json'),
   path.join(DOCS_DIR, 'deals-pending-food3.json'),
   path.join(DOCS_DIR, 'deals-pending-firecrawl2.json'),
@@ -54,17 +56,21 @@ const DEFAULT_AD_SEARCH_TERMS = [
 ];
 const DEFAULT_HASHTAGS = [
   'gratiswien',
+  'gratisinwien',
+  'wiengastro',
+  'wienessen',
+  'wienkaffee',
+  'wienstreetfood',
   'wienaktion',
   'wienrabatt',
   'wiengutschein',
   'neueröffnungwien',
   'wienangebote',
   'wienangebot',
-  'wienhappyhour',
   'wiengratis',
-  'gratisinwien',
   'viennadeals',
-  'viennafooddeals',
+  'wienerdeals',
+  'happyhourvienna',
 ];
 
 const CONCRETE_FREE_PATTERN = /(?<!gluten[- ])(?<!sugar[- ])(?<!lactose[- ])(?<!dairy[- ])(?<!alcohol[- ])(?<!caffeine[- ])(?<!cruelty[- ])(?<!plastic[- ])(?<!smoke[- ])(?<!tax[- ])(?<!risk[- ])(?<!fat[- ])(?<!nut[- ])(?<!gmo[- ])\bfree\b/i;
@@ -207,6 +213,7 @@ export function buildConfig(env = process.env, now = new Date()) {
       .filter((item) => /^[a-z0-9._]{1,30}$/i.test(item)),
     verifiedAccounts,
     maxAccountsPerRun: numberEnv(env, 'META_INSTAGRAM_MAX_ACCOUNTS_PER_RUN', 20, 1, 100),
+    maxHashtagsPerRun: numberEnv(env, 'META_INSTAGRAM_MAX_HASHTAGS_PER_RUN', 12, 1, 30),
     mediaPerAccount: numberEnv(env, 'META_INSTAGRAM_MEDIA_PER_ACCOUNT', 6, 1, 30),
     mediaPerHashtag: numberEnv(env, 'META_INSTAGRAM_MEDIA_PER_HASHTAG', 20, 1, 50),
     maxAdPagesPerTerm: numberEnv(env, 'META_AD_LIBRARY_MAX_PAGES_PER_TERM', 2, 1, 10),
@@ -277,14 +284,36 @@ function registryAccountIsVerified(account) {
   return hasViennaText(evidence) && Boolean(cleanText(account.verifiedAt || account.viennaVerifiedAt, 80));
 }
 
+function hasInstagramCandidateEvidence(deal = {}) {
+  const values = [
+    deal?.url,
+    deal?.post_url,
+    deal?.postUrl,
+    deal?.profileUrl,
+    deal?.instagramProfileUrl,
+  ].map((value) => cleanText(value, 500));
+  if (values.some((value) => /(?:^|\.)instagram\.com\//i.test(value.replace(/^https?:\/\//i, '')))) return true;
+  return /(?:instagram|meta instagram|business discovery)/i.test([
+    deal?.source,
+    deal?.originSource,
+    deal?.sourceName,
+    deal?.pubDateSource,
+    deal?.sourcePublishedAtSource,
+  ].map((value) => cleanText(value, 300)).join(' '));
+}
+
 export function loadAccountCatalog(config, paths = {}) {
   const watchlist = readJson(paths.watchlistPath || WATCHLIST_PATH, {});
   const registry = readJson(paths.registryPath || MERCHANT_REGISTRY_PATH, {});
+  const blockedUsernames = new Set((Array.isArray(registry?.accounts) ? registry.accounts : [])
+    .filter((account) => account?.blockedByModeration === true)
+    .map((account) => normalizedUsername(account?.username))
+    .filter(Boolean));
   const byUsername = new Map();
 
   function add(raw, origin) {
     const username = normalizedUsername(raw?.username || raw?.handle || raw);
-    if (!username || !/^[a-z0-9._]{1,30}$/i.test(username)) return;
+    if (!username || blockedUsernames.has(username) || !/^[a-z0-9._]{1,30}$/i.test(username)) return;
     const existing = byUsername.get(username) || {
       username,
       priority: 0,
@@ -293,10 +322,18 @@ export function loadAccountCatalog(config, paths = {}) {
       evidence: [],
       origins: [],
       lastCandidateAt: '',
+      approvedDeals: 0,
+      postedDeals: 0,
+      rejectedDeals: 0,
+      approvalRate: 0,
     };
     existing.priority = Math.max(existing.priority, Number(raw?.priority || raw?.priorityScore || 0));
     existing.category = cleanText(raw?.category || existing.category, 60);
     existing.verifiedVienna = existing.verifiedVienna || config.verifiedAccounts.has(username) || registryAccountIsVerified(raw);
+    existing.approvedDeals = Math.max(existing.approvedDeals, Number(raw?.approvedDeals || raw?.liveOccurrences || 0));
+    existing.postedDeals = Math.max(existing.postedDeals, Number(raw?.postedDeals || raw?.postedOccurrences || 0));
+    existing.rejectedDeals = Math.max(existing.rejectedDeals, Number(raw?.rejectedDeals || raw?.rejectedOccurrences || 0));
+    existing.approvalRate = Math.max(existing.approvalRate, Number(raw?.approvalRate || 0));
     const candidateAt = toIso(raw?.sourcePublishedAt || raw?.pubDate);
     if (candidateAt && Date.parse(candidateAt) > (Date.parse(existing.lastCandidateAt) || 0)) {
       existing.lastCandidateAt = candidateAt;
@@ -321,17 +358,46 @@ export function loadAccountCatalog(config, paths = {}) {
         || String(deal?.sourceName || '').replace(/^@/, '')
       );
       const publication = getPublicationEvidence(deal);
-      if (username) add({
+      if (username && hasInstagramCandidateEvidence(deal)) add({
         username,
         priority: 104,
         category: deal?.category || '',
         sourcePublishedAt: publication.sourcePublishedAt,
       }, `candidate:${path.basename(candidatePath)}`);
+
+      for (const mentionedUsername of extractMentionedUsernames(deal)) {
+        if (mentionedUsername === username) continue;
+        add({
+          username: mentionedUsername,
+          priority: 82,
+          category: deal?.category || '',
+          sourcePublishedAt: publication.sourcePublishedAt,
+        }, `mention:${path.basename(candidatePath)}`);
+      }
     }
   }
   for (const username of config.explicitAccounts) add({ username, priority: 110 }, 'env');
 
   return [...byUsername.values()].sort((a, b) => b.priority - a.priority || a.username.localeCompare(b.username));
+}
+
+export function extractMentionedUsernames(deal = {}) {
+  const text = [
+    deal?.caption,
+    deal?.postCaption,
+    deal?.metaGraphCaption,
+    deal?.description,
+    deal?.text,
+    deal?.evidence?.caption,
+  ].map((value) => cleanText(value, 5000)).filter(Boolean).join(' ');
+  const usernames = new Set();
+  for (const match of text.matchAll(/(^|[^a-z0-9._])@([a-z0-9._]{2,30})\b/gi)) {
+    const username = normalizedUsername(match[2]);
+    if (!username || ['instagram', 'freefinder', 'freefinderwien'].includes(username)) continue;
+    usernames.add(username);
+    if (usernames.size >= 6) break;
+  }
+  return [...usernames];
 }
 
 export function selectAccountShard(accounts, config, state = {}, now = new Date()) {
@@ -350,6 +416,15 @@ export function selectAccountShard(accounts, config, state = {}, now = new Date(
     .sort((left, right) => Date.parse(right.lastCandidateAt) - Date.parse(left.lastCandidateAt));
   recentCandidates.slice(0, Math.min(8, Math.ceil(limit / 3))).forEach(add);
 
+  const finalApprovalYield = accounts
+    .filter((account) => Number(account.approvedDeals || 0) > 0)
+    .sort((left, right) => (
+      Number(right.approvalRate || 0) - Number(left.approvalRate || 0)
+      || Number(right.approvedDeals || 0) - Number(left.approvedDeals || 0)
+      || Number(left.rejectedDeals || 0) - Number(right.rejectedDeals || 0)
+    ));
+  finalApprovalYield.slice(0, Math.min(4, Math.ceil(limit / 6))).forEach(add);
+
   const performance = state?.accountPerformance || {};
   const highYield = accounts
     .filter((account) => Number(performance[account.username]?.recentFetched || 0) > 0)
@@ -364,6 +439,40 @@ export function selectAccountShard(accounts, config, state = {}, now = new Date(
 
   const rotating = accounts.filter((account) => !seen.has(account.username));
   const start = rotating.length ? (config.shardIndex * Math.max(1, limit - selected.length)) % rotating.length : 0;
+  for (let offset = 0; offset < rotating.length && selected.length < limit; offset += 1) {
+    add(rotating[(start + offset) % rotating.length]);
+  }
+  return selected;
+}
+
+export function selectHashtagShard(hashtags, config, state = {}) {
+  const unique = [...new Set((hashtags || []).map((tag) => cleanText(tag, 80).replace(/^#/, '').toLowerCase()).filter(Boolean))];
+  if (unique.length === 0) return [];
+  const limit = Math.min(Math.max(1, Number(config.maxHashtagsPerRun || unique.length)), unique.length);
+  if (unique.length <= limit) return unique;
+
+  const selected = [];
+  const seen = new Set();
+  const add = (tag) => {
+    if (!tag || seen.has(tag) || selected.length >= limit) return;
+    seen.add(tag);
+    selected.push(tag);
+  };
+  const performance = state?.hashtagPerformance || {};
+  const highYield = unique
+    .filter((tag) => Number(performance[tag]?.recentFetched || 0) > 0)
+    .sort((left, right) => {
+      const leftStats = performance[left] || {};
+      const rightStats = performance[right] || {};
+      const leftRate = Number(leftStats.recentAccepted || 0) / Math.max(1, Number(leftStats.recentFetched || 0));
+      const rightRate = Number(rightStats.recentAccepted || 0) / Math.max(1, Number(rightStats.recentFetched || 0));
+      return rightRate - leftRate || Number(rightStats.recentAccepted || 0) - Number(leftStats.recentAccepted || 0);
+    });
+  highYield.slice(0, Math.min(4, Math.ceil(limit / 3))).forEach(add);
+
+  const rotating = unique.filter((tag) => !seen.has(tag));
+  const remaining = limit - selected.length;
+  const start = rotating.length ? (Number(config.shardIndex || 0) * Math.max(1, remaining)) % rotating.length : 0;
   for (let offset = 0; offset < rotating.length && selected.length < limit; offset += 1) {
     add(rotating[(start + offset) % rotating.length]);
   }
@@ -1010,11 +1119,17 @@ function recordSourceFailure(failures, group, key, error, config, now) {
   const code = cleanText(error?.code, 80) || `http-${Number(error?.status || 0)}`;
   if (!['24', '100', '110', 'hashtag-not-found'].includes(code)) return;
   const previous = failures[group][key] || {};
+  const count = Number(previous.count || 0) + 1;
+  const baseHours = code === '110' || code === 'hashtag-not-found'
+    ? config.sourceFailureCooldownHours
+    : Math.min(config.sourceFailureCooldownHours, 72);
+  const cooldownHours = Math.min(720, baseHours * (2 ** Math.min(3, count - 1)));
   failures[group][key] = {
-    count: Number(previous.count || 0) + 1,
+    count,
     code,
     lastAt: now.toISOString(),
-    cooldownUntil: new Date(now.getTime() + config.sourceFailureCooldownHours * 60 * 60 * 1000).toISOString(),
+    cooldownHours,
+    cooldownUntil: new Date(now.getTime() + cooldownHours * 60 * 60 * 1000).toISOString(),
   };
 }
 
@@ -1026,8 +1141,10 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
   const sourceFailures = pruneSourceFailures(state?.sourceFailures, now);
   const availableAccounts = accountCatalog.filter((account) => !sourceOnCooldown(sourceFailures.accounts[account.username], now));
   const selectedAccounts = selectAccountShard(availableAccounts, config, state, now);
+  const availableHashtags = config.hashtags.filter((tag) => !sourceOnCooldown(sourceFailures.hashtags[tag], now));
+  const selectedHashtags = selectHashtagShard(availableHashtags, config, state);
   const skippedAccounts = accountCatalog.length - availableAccounts.length;
-  let skippedHashtags = 0;
+  const skippedHashtags = config.hashtags.length - availableHashtags.length;
   let taggedAttempted = false;
   let globalError = null;
 
@@ -1068,12 +1185,8 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
     }
   }
 
-  for (const tag of config.hashtags) {
+  for (const tag of selectedHashtags) {
     if (globalError) break;
-    if (sourceOnCooldown(sourceFailures.hashtags[tag], now)) {
-      skippedHashtags += 1;
-      continue;
-    }
     try {
       let hashtagId = cleanText(hashtagIds[tag], 100);
       if (!hashtagId) {
@@ -1111,7 +1224,19 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
     }
   }
 
-  return { raw, errors, usage, hashtagIds, selectedAccounts, sourceFailures, skippedAccounts, skippedHashtags, taggedAttempted, globalError };
+  return {
+    raw,
+    errors,
+    usage,
+    hashtagIds,
+    selectedAccounts,
+    selectedHashtags,
+    sourceFailures,
+    skippedAccounts,
+    skippedHashtags,
+    taggedAttempted,
+    globalError,
+  };
 }
 
 function incrementReason(rejections, reason) {
@@ -1178,12 +1303,42 @@ function updateAccountPerformance(previous, selectedAccounts, outcomes, now) {
   return Object.fromEntries(Object.entries(next).slice(-500));
 }
 
+function updateHashtagPerformance(previous, selectedHashtags, outcomes, now) {
+  const cutoff = now.getTime() - 180 * DAY_MS;
+  const next = Object.fromEntries(Object.entries(previous || {}).filter(([, stats]) => {
+    const timestamp = Date.parse(stats?.lastRunAt || '');
+    return Number.isFinite(timestamp) && timestamp >= cutoff;
+  }));
+  for (const tag of selectedHashtags || []) {
+    const prior = next[tag] || {};
+    const run = outcomes.get(tag) || { fetched: 0, accepted: 0 };
+    next[tag] = {
+      runs: Number(prior.runs || 0) + 1,
+      fetched: Number(prior.fetched || 0) + run.fetched,
+      accepted: Number(prior.accepted || 0) + run.accepted,
+      recentFetched: Number((Number(prior.recentFetched || 0) * 0.75 + run.fetched).toFixed(3)),
+      recentAccepted: Number((Number(prior.recentAccepted || 0) * 0.75 + run.accepted).toFixed(3)),
+      lastRunAt: now.toISOString(),
+      lastAcceptedAt: run.accepted > 0 ? now.toISOString() : cleanText(prior.lastAcceptedAt, 80),
+    };
+  }
+  return Object.fromEntries(Object.entries(next).slice(-100));
+}
+
 export async function runMetaInstagramCollector(options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const env = options.env || process.env;
   const config = { ...(options.config || buildConfig(env, now)) };
   const fetchImpl = options.fetchImpl || fetch;
-  const state = readJson(config.statePath, { version: 2, hashtagIds: {}, seenIds: {}, mediaEvidence: {}, sourceFailures: {}, accountPerformance: {} });
+  const state = readJson(config.statePath, {
+    version: 3,
+    hashtagIds: {},
+    seenIds: {},
+    mediaEvidence: {},
+    sourceFailures: {},
+    accountPerformance: {},
+    hashtagPerformance: {},
+  });
   const previousPayload = readJson(config.outputPath, null);
   const previousGraphEvidence = loadInstagramGraphEvidence(config.graphEvidencePath).payload;
   const lastGoodPayload = previousPayload && Array.isArray(previousPayload.deals)
@@ -1202,6 +1357,14 @@ export async function runMetaInstagramCollector(options = {}) {
     configured,
     accountCatalogSize: accountCatalog.length,
     selectedAccounts: [],
+    selectedHashtags: [],
+    discoveryBudget: {
+      maxAccountsPerRun: config.maxAccountsPerRun,
+      mediaPerAccount: config.mediaPerAccount,
+      hashtagPoolSize: config.hashtags.length,
+      maxHashtagsPerRun: config.maxHashtagsPerRun,
+      mediaPerHashtag: config.mediaPerHashtag,
+    },
     sources: {
       adLibrary: { status: configured.adLibrary ? 'pending' : 'not-configured', fetched: 0, accepted: 0, errors: [] },
       instagramGraph: { status: configured.instagramGraph ? 'pending' : 'not-configured', fetched: 0, accepted: 0, errors: [] },
@@ -1245,13 +1408,14 @@ export async function runMetaInstagramCollector(options = {}) {
   const accepted = [];
   const graphEvidenceEntries = [];
   const nextState = {
-    version: 2,
+    version: 3,
     updatedAt: now.toISOString(),
     hashtagIds: { ...(state?.hashtagIds || {}) },
     seenIds: pruneSeenIds(state?.seenIds || {}, now, config.seenTtlDays),
     mediaEvidence: { ...(state?.mediaEvidence || {}) },
     sourceFailures: pruneSourceFailures(state?.sourceFailures, now),
     accountPerformance: { ...(state?.accountPerformance || {}) },
+    hashtagPerformance: { ...(state?.hashtagPerformance || {}) },
   };
 
   if (configured.adLibrary) {
@@ -1278,7 +1442,10 @@ export async function runMetaInstagramCollector(options = {}) {
       username: account.username,
       priority: account.priority,
       verifiedVienna: account.verifiedVienna,
+      approvedDeals: Number(account.approvedDeals || 0),
+      rejectedDeals: Number(account.rejectedDeals || 0),
     }));
+    report.selectedHashtags = result.selectedHashtags;
     report.sources.instagramGraph.skippedCooldown = {
       accounts: result.skippedAccounts,
       hashtags: result.skippedHashtags,
@@ -1287,7 +1454,7 @@ export async function runMetaInstagramCollector(options = {}) {
     report.sources.instagramGraph.errors = result.errors;
     report.sources.instagramGraph.globalError = result.globalError || null;
     const requestedSources = result.selectedAccounts.length
-      + Math.max(0, config.hashtags.length - result.skippedHashtags)
+      + result.selectedHashtags.length
       + (result.taggedAttempted ? 1 : 0);
     report.sources.instagramGraph.status = result.globalError && !result.raw.length
       ? 'failed'
@@ -1306,12 +1473,21 @@ export async function runMetaInstagramCollector(options = {}) {
     nextState.mediaEvidence = media.cache;
     report.sources.instagramGraph.mediaEvidence = media.report;
     const accountOutcomes = new Map(result.selectedAccounts.map((account) => [account.username, { fetched: 0, accepted: 0 }]));
+    const hashtagOutcomes = new Map(result.selectedHashtags.map((tag) => [tag, { fetched: 0, accepted: 0 }]));
     for (const entry of media.entries) {
       const normalized = normalizeGraphMediaItem(entry.item, entry.context, config, now);
       graphEvidenceEntries.push({ entry, outcome: normalized });
       const accountUsername = normalizedUsername(entry.context?.account?.username || (entry.context?.sourceType === 'account' ? entry.item?.username : ''));
       if (accountUsername && accountOutcomes.has(accountUsername)) {
         const outcome = accountOutcomes.get(accountUsername);
+        outcome.fetched += 1;
+        if (normalized.deal) outcome.accepted += 1;
+      }
+      const hashtag = entry.context?.sourceType === 'hashtag'
+        ? cleanText(entry.context?.sourceName, 80).replace(/^#/, '').toLowerCase()
+        : '';
+      if (hashtag && hashtagOutcomes.has(hashtag)) {
+        const outcome = hashtagOutcomes.get(hashtag);
         outcome.fetched += 1;
         if (normalized.deal) outcome.accepted += 1;
       }
@@ -1331,6 +1507,19 @@ export async function runMetaInstagramCollector(options = {}) {
     report.sources.instagramGraph.accountYield = Object.fromEntries(result.selectedAccounts.map((account) => {
       const stats = nextState.accountPerformance[account.username] || {};
       return [account.username, {
+        recentFetched: Number(stats.recentFetched || 0),
+        recentAccepted: Number(stats.recentAccepted || 0),
+      }];
+    }));
+    nextState.hashtagPerformance = updateHashtagPerformance(
+      state?.hashtagPerformance,
+      result.selectedHashtags,
+      hashtagOutcomes,
+      now,
+    );
+    report.sources.instagramGraph.hashtagYield = Object.fromEntries(result.selectedHashtags.map((tag) => {
+      const stats = nextState.hashtagPerformance[tag] || {};
+      return [tag, {
         recentFetched: Number(stats.recentFetched || 0),
         recentAccepted: Number(stats.recentAccepted || 0),
       }];
@@ -1398,7 +1587,7 @@ export async function runMetaInstagramCollector(options = {}) {
     report.message = `All configured Meta sources failed; preserved ${report.preservedDeals} last-good deal(s).`;
     const sourceFailuresChanged = JSON.stringify(nextState.sourceFailures) !== JSON.stringify(pruneSourceFailures(state?.sourceFailures, now));
     const failedState = sourceFailuresChanged
-      ? { ...state, version: 2, updatedAt: now.toISOString(), sourceFailures: nextState.sourceFailures }
+      ? { ...state, version: 3, updatedAt: now.toISOString(), sourceFailures: nextState.sourceFailures }
       : state;
     if (options.write !== false) {
       writeJsonAtomic(config.reportPath, report);

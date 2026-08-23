@@ -26,18 +26,16 @@ const SOURCE_LABEL = 'Wien Deals Combined';
 const RUN_STARTED_AT = new Date();
 const HASHTAG_MEDIA_FIELDS = 'id,caption,media_type,permalink,timestamp,like_count,comments_count';
 const DEFAULT_HASHTAGS = [
-  'gratiswien',
-  'wienaktion',
-  'wienrabatt',
-  'wiengutschein',
-  'neueröffnungwien',
-  'wienangebote',
-  'wienangebot',
-  'wienhappyhour',
-  'wiengratis',
-  'gratisinwien',
-  'viennadeals',
-  'viennafooddeals',
+  'wien',
+  'vienna',
+  'viennafood',
+  'wienevents',
+  'wientipps',
+  'wienfamilie',
+  'sommerinwien',
+  'wienergastro',
+  'essenwien',
+  'viennaeats',
 ];
 
 function cleanText(value, maxLength = 1200) {
@@ -99,7 +97,9 @@ export async function runWienDealsCombined(options = {}) {
   const accessToken = cleanText(env.INSTAGRAM_ACCESS_TOKEN || env.INSTAGRAM_GRAPH_ACCESS_TOKEN, 1000);
   const userId = cleanText(env.INSTAGRAM_USER_ID || env.INSTAGRAM_GRAPH_USER_ID, 120);
   const graphVersion = cleanText(env.META_GRAPH_VERSION || 'v26.0', 20);
-  const hashtags = parseHashtags(env.WIEN_COMBINED_GRAPH_HASHTAGS || env.META_INSTAGRAM_HASHTAGS);
+  // This is intentionally a separate discovery surface from the high-intent
+  // hashtag pool used by the main Meta collector.
+  const hashtags = parseHashtags(env.WIEN_COMBINED_GRAPH_HASHTAGS);
   const maxMediaPerHashtag = Math.max(5, Math.min(50, Number(env.WIEN_COMBINED_MEDIA_PER_HASHTAG || 30)));
   const maxDeals = Math.max(1, Math.min(80, Number(env.WIEN_COMBINED_MAX_DEALS || 40)));
   const timeoutMs = Math.max(3000, Number(env.WIEN_COMBINED_GRAPH_TIMEOUT_MS || 12000));
@@ -115,7 +115,7 @@ export async function runWienDealsCombined(options = {}) {
     INSTAGRAM_ACCESS_TOKEN: accessToken,
     INSTAGRAM_USER_ID: userId,
     META_GRAPH_VERSION: graphVersion,
-    META_INSTAGRAM_MAX_POST_AGE_HOURS: '168',
+    META_INSTAGRAM_MAX_POST_AGE_HOURS: '72',
     META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS: '7',
     META_INSTAGRAM_UNKNOWN_EXPIRY_TTL_HOURS: env.META_INSTAGRAM_UNKNOWN_EXPIRY_TTL_HOURS || '72',
     META_INSTAGRAM_ALLOW_WATCHLIST_VIENNA: '0',

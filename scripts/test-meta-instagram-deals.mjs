@@ -6,12 +6,14 @@ import path from 'node:path';
 import {
   buildConfig,
   classifyPromotion,
+  extractMentionedUsernames,
   findViennaEvidence,
   loadAccountCatalog,
   normalizeAdLibraryItem,
   normalizeGraphMediaItem,
   runMetaInstagramCollector,
   selectAccountShard,
+  selectHashtagShard,
 } from '../scraper/meta-instagram-deals.js';
 import { runCheck as runMetaInstagramGraphHealthCheck } from './check-meta-instagram-graph.mjs';
 
@@ -24,6 +26,8 @@ const config = buildConfig({
 }, now);
 const hardAgeConfig = buildConfig({ META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS: '30' }, now);
 assert.equal(hardAgeConfig.maxOrganicAgeWithExpiryDays, 7, 'Meta configuration cannot widen social-post age beyond seven days');
+const boundedHashtagConfig = buildConfig({ META_INSTAGRAM_MAX_HASHTAGS_PER_RUN: '99' }, now);
+assert.equal(boundedHashtagConfig.maxHashtagsPerRun, 30, 'Meta hashtag selection stays within the platform search ceiling');
 
 assert.equal(classifyPromotion('Heute 1+1 gratis auf alle Kaffees').accepted, true);
 assert.equal(classifyPromotion('20 % Rabatt auf alle Burger').type, 'rabatt');
@@ -167,6 +171,33 @@ assert.equal(shard.length, 20);
 assert.equal(shard[0].username, 'account40');
 assert.equal(shard[5].username, 'account0');
 
+const approvalWinner = { username: 'approved.cafe', priority: 1, approvedDeals: 3, rejectedDeals: 0, approvalRate: 1 };
+const approvalShard = selectAccountShard(
+  [...accounts.slice(0, 12), approvalWinner],
+  { maxAccountsPerRun: 6, shardIndex: 0 },
+);
+assert.equal(approvalShard[0].username, approvalWinner.username, 'final app approvals reserve an account slot before blind rotation');
+
+const hashtagPool = Array.from({ length: 12 }, (_, index) => `wientag${index}`);
+const hashtagState = {
+  hashtagPerformance: {
+    wientag11: { recentFetched: 10, recentAccepted: 4 },
+  },
+};
+const hashtagShardA = selectHashtagShard(hashtagPool, { maxHashtagsPerRun: 6, shardIndex: 0 }, hashtagState);
+const hashtagShardB = selectHashtagShard(hashtagPool, { maxHashtagsPerRun: 6, shardIndex: 1 }, hashtagState);
+assert.equal(hashtagShardA.length, 6);
+assert.equal(hashtagShardB.length, 6);
+assert.equal(hashtagShardA[0], 'wientag11');
+assert.equal(hashtagShardB[0], 'wientag11', 'a productive hashtag stays in the exploitation budget');
+assert.notDeepEqual(hashtagShardA, hashtagShardB, 'the remaining hashtag budget explores a different shard');
+
+assert.deepEqual(
+  extractMentionedUsernames({ caption: 'Deal bei @Merchant.One mit @second_cafe, nicht @freefinderwien.' }),
+  ['merchant.one', 'second_cafe'],
+  'mentioned merchants become Business Discovery candidates without targeting the app account',
+);
+
 const unconfigured = await runMetaInstagramCollector({
   now,
   env: { META_INSTAGRAM_REQUIRE_SOURCE: '1' },
@@ -242,7 +273,12 @@ assert.doesNotMatch(JSON.stringify(autoDiscoveryRun), /auto-discovery-(?:user|pa
 
 const candidatePath = path.join(tempDir, 'candidate-accounts.json');
 fs.writeFileSync(candidatePath, JSON.stringify({
-  deals: [{ ownerUsername: 'new.graph.cafe', category: 'kaffee', viennaVerified: true }],
+  deals: [{
+    ownerUsername: 'new.graph.cafe',
+    category: 'kaffee',
+    viennaVerified: true,
+    url: 'https://www.instagram.com/p/CANDIDATEPOST/',
+  }],
 }));
 const candidateCatalog = loadAccountCatalog(buildConfig({}, now), {
   watchlistPath: path.join(tempDir, 'missing-watchlist.json'),
@@ -252,6 +288,31 @@ const candidateCatalog = loadAccountCatalog(buildConfig({}, now), {
 assert.equal(candidateCatalog.length, 1);
 assert.equal(candidateCatalog[0].username, 'new.graph.cafe');
 assert.equal(candidateCatalog[0].verifiedVienna, false, 'candidate queues may target an account but cannot self-verify its Vienna location');
+
+const mentionCandidatePath = path.join(tempDir, 'mention-candidates.json');
+fs.writeFileSync(mentionCandidatePath, JSON.stringify({
+  deals: [{
+    ownerUsername: 'food.discovery',
+    caption: 'Neues 1+1-Angebot bei @merchant.from.caption in 1070 Wien.',
+    sourcePublishedAt: '2026-07-17T09:00:00.000Z',
+  }],
+}));
+const blockedRegistryPath = path.join(tempDir, 'blocked-registry.json');
+fs.writeFileSync(blockedRegistryPath, JSON.stringify({
+  accounts: [
+    { username: 'blocked.merchant', blockedByModeration: true },
+    { username: 'allowed.merchant', priorityScore: 70 },
+  ],
+}));
+const feedbackCatalog = loadAccountCatalog(buildConfig({
+  META_INSTAGRAM_ACCOUNTS: 'blocked.merchant',
+}, now), {
+  watchlistPath: path.join(tempDir, 'missing-watchlist.json'),
+  registryPath: blockedRegistryPath,
+  candidatePaths: [mentionCandidatePath],
+});
+assert.equal(feedbackCatalog.some((account) => account.username === 'blocked.merchant'), false, 'moderated providers never consume Graph account slots');
+assert.equal(feedbackCatalog.some((account) => account.username === 'merchant.from.caption'), true, 'caption mentions feed the account discovery loop');
 
 const cooldownStatePath = path.join(tempDir, 'cooldown-state.json');
 const cooldownConfig = {
@@ -303,6 +364,27 @@ assert.equal(cooldownRequests, 0);
 assert.equal(secondCooldownRun.report.sources.instagramGraph.skippedCooldown.accounts, 1);
 assert.equal(secondCooldownRun.report.sources.instagramGraph.status, 'degraded');
 assert.equal(secondCooldownRun.shouldFail, false, 'cooldown is a controlled degraded state, not a total collector outage');
+
+let repeatedFailureRequests = 0;
+const repeatedFailureRun = await runMetaInstagramCollector({
+  now: new Date(now.getTime() + 169 * 60 * 60 * 1000),
+  config: cooldownConfig,
+  paths: {
+    watchlistPath: path.join(tempDir, 'missing-watchlist.json'),
+    registryPath: path.join(tempDir, 'missing-registry.json'),
+    candidatePaths: [],
+  },
+  fetchImpl: async () => {
+    repeatedFailureRequests += 1;
+    return new Response(JSON.stringify({
+      error: { message: 'Invalid user id again', code: 110 },
+    }), { status: 400, headers: { 'content-type': 'application/json' } });
+  },
+  write: false,
+});
+assert.equal(repeatedFailureRequests, 1);
+assert.equal(repeatedFailureRun.state.sourceFailures.accounts['broken.account'].count, 2);
+assert.equal(repeatedFailureRun.state.sourceFailures.accounts['broken.account'].cooldownHours, 336, 'repeat failures double the quarantine window');
 
 const lastGoodPayload = {
   lastUpdated: '2026-07-16T10:00:00.000Z',

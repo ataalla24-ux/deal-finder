@@ -46,6 +46,8 @@ const summary = [
   `- AI media classifications: ${report.sources?.instagramGraph?.mediaEvidence?.aiCalls || 0} (${report.sources?.instagramGraph?.mediaEvidence?.aiAccepted || 0} accepted)`,
   `- Sources on cooldown: ${(report.sources?.instagramGraph?.skippedCooldown?.accounts || 0) + (report.sources?.instagramGraph?.skippedCooldown?.hashtags || 0)}`,
   `- Selected accounts: ${Array.isArray(report.selectedAccounts) ? report.selectedAccounts.length : 0}`,
+  `- Selected hashtags: ${Array.isArray(report.selectedHashtags) ? report.selectedHashtags.length : 0}/${report.discoveryBudget?.hashtagPoolSize || 0}`,
+  `- Hashtag posts accepted: ${Object.values(report.sources?.instagramGraph?.hashtagYield || {}).reduce((sum, row) => sum + Number(row?.recentAccepted || 0), 0)}`,
   '',
 ].join('\n');
 

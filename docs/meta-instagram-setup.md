@@ -45,7 +45,9 @@ The existing GitHub workflow is already wired. If it reports `Bad signature`, th
 - `META_GRAPH_VERSION` (defaults to `v26.0`).
 - `INSTAGRAM_USER_ID` can be supplied as a secret to override automatic account discovery.
 - `META_AD_LIBRARY_SEARCH_TERMS` as a comma/newline separated list.
-- `META_INSTAGRAM_HASHTAGS` as a comma/newline separated list, without `#`.
+- `META_INSTAGRAM_HASHTAGS` as the high-intent comma/newline separated list, without `#`.
+- `META_INSTAGRAM_MAX_HASHTAGS_PER_RUN` controls how many high-intent tags are selected per run.
+- `WIEN_COMBINED_GRAPH_HASHTAGS` is a separate broad Vienna discovery pool for the daily combined scan.
 - `META_INSTAGRAM_ACCOUNTS` for additional Business Discovery usernames.
 - `META_INSTAGRAM_VERIFIED_ACCOUNTS` for accounts whose Vienna address has been checked outside the post.
 - `META_INSTAGRAM_MEDIA_OCR_ENABLED` to disable media OCR explicitly (enabled in the workflow).
@@ -81,9 +83,16 @@ Temporary Meta CDN URLs are never written to repository files. Only bounded OCR 
 structured classification result are retained as evidence. The state cache prevents repeated OCR and
 AI calls for the same media ID during the seven-day freshness window.
 
-Accounts observed by Apify, Instagram AI and the verified queue are fed back into the Graph account
-catalog for official timestamp/caption verification. Invalid accounts and hashtags receive a bounded
-cooldown instead of consuming API quota every two hours.
+Accounts observed by Apify, Instagram AI, Wien Combined and the verified queue are fed back into the
+Graph account catalog for official timestamp/caption verification. Mentioned merchant handles are also
+added as discovery candidates. Final app approvals reserve recurring account slots, quality moderation
+lowers account priority, and blocked providers are excluded. Normal expiry does not count as a quality
+rejection.
+
+The high-intent pool rotates every two hours while preserving proven tags. Repeatedly invalid accounts
+and hashtags receive exponentially longer cooldowns instead of consuming API quota every run. Keep the
+union of `META_INSTAGRAM_HASHTAGS` and `WIEN_COMBINED_GRAPH_HASHTAGS` bounded so the two workflows use
+complementary rather than duplicate Graph hashtag searches.
 
 Generated files:
 
@@ -92,7 +101,7 @@ Generated files:
 - `docs/meta-instagram-auth-health.json`
 - `docs/meta-instagram-state.json`
 
-The state file caches hashtag IDs, recent OCR evidence, source cooldowns and recently observed Meta
-object IDs for diagnostics and fair batch rotation. Observed IDs move behind not-yet-observed rows but
+The state file caches hashtag IDs, account and hashtag yield, recent OCR evidence, source cooldowns and
+recently observed Meta object IDs for diagnostics and fair batch rotation. Observed IDs move behind not-yet-observed rows but
 never suppress collector output, because collection alone does not prove that Slack delivery succeeded.
 The state file never contains access tokens.

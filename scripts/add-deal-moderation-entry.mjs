@@ -4,10 +4,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { cleanText, normalizeUrl } from '../scraper/deal-moderation-utils.js';
+import { canonicalDealUrl, extractStructuredOwnerUsername } from '../scraper/deal-evidence-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
+const DOCS_DIR = path.join(ROOT, 'docs');
 const MODERATION_PATH = path.join(ROOT, 'docs', 'deal-moderation.json');
 
 function parseArgs(argv) {
@@ -56,6 +58,35 @@ function entryKey(entry) {
   ].join('|');
 }
 
+function dealRows(filePath) {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    return Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.deals) ? parsed.deals : []);
+  } catch {
+    return [];
+  }
+}
+
+function findDealContext(input) {
+  const targetId = cleanText(input.id).toLowerCase();
+  const targetUrl = canonicalDealUrl(input.url) || normalizeUrl(input.url);
+  const files = fs.readdirSync(DOCS_DIR)
+    .filter((name) => name === 'deals.json' || /^deals-pending-.*\.json$/.test(name));
+  for (const fileName of files) {
+    for (const deal of dealRows(path.join(DOCS_DIR, fileName))) {
+      const ids = [deal?.id, deal?.submissionId, deal?.slackTs].map((value) => cleanText(value).toLowerCase()).filter(Boolean);
+      const dealUrl = canonicalDealUrl(deal?.url) || normalizeUrl(deal?.url);
+      if ((targetId && ids.includes(targetId)) || (targetUrl && dealUrl === targetUrl)) {
+        return {
+          ownerUsername: extractStructuredOwnerUsername(deal),
+          originSource: cleanText(deal?.originSource || deal?.source),
+        };
+      }
+    }
+  }
+  return { ownerUsername: '', originSource: '' };
+}
+
 const input = parseArgs(process.argv.slice(2));
 if (!input.id && !input.url && !input.provider && !input.text) {
   console.log('No moderation target provided; nothing to add.');
@@ -64,6 +95,7 @@ if (!input.id && !input.url && !input.provider && !input.text) {
 
 const moderation = readModeration();
 const hiddenDeals = Array.isArray(moderation.hiddenDeals) ? moderation.hiddenDeals : [];
+const context = findDealContext(input);
 const entry = {
   id: input.id,
   url: input.url,
@@ -72,6 +104,8 @@ const entry = {
   reason: input.reason,
   removedAt: new Date().toISOString(),
   removedBy: input.removedBy,
+  ...(context.ownerUsername ? { ownerUsername: context.ownerUsername } : {}),
+  ...(context.originSource ? { originSource: context.originSource } : {}),
 };
 
 const nextKey = entryKey(entry);

@@ -19,6 +19,8 @@ const DOCS_DIR = path.join(ROOT, 'docs');
 const OUTPUT_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
 const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
 const HISTORICAL_SENT_PATH = path.join(DOCS_DIR, 'sent-deal-ids.json');
+const MODERATION_PATH = path.join(DOCS_DIR, 'deal-moderation.json');
+const GRAPH_EVIDENCE_PATH = path.join(DOCS_DIR, 'instagram-graph-post-evidence.json');
 
 const FOOD_DRINK_KEYWORDS = [
   'restaurant', 'pizza', 'burger', 'kebab', 'kebap', 'döner', 'doener', 'sushi', 'cafe',
@@ -38,6 +40,7 @@ const INPUT_FILES = [
   'deals.json',
   'deals-pending-all.json',
   'deals-pending-gastro2.json',
+  'deals-pending-food3.json',
   'deals-pending-firecrawl2.json',
   'deals-pending-firecrawl4.json',
   'deals-pending-firecrawl5.json',
@@ -47,6 +50,7 @@ const INPUT_FILES = [
   'deals-pending-instagram-discovery.json',
   'deals-pending-instagram-web.json',
   'deals-pending-meta-instagram.json',
+  'deals-pending-wien-combined.json',
 ];
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -87,6 +91,24 @@ function normalizeRegistryUsername(value) {
   return extractInstagramProfileUsername(`https://www.instagram.com/${cleanText(value).replace(/^@/, '')}/`);
 }
 
+function instagramPostKey(value) {
+  const text = cleanText(value);
+  const direct = canonicalInstagramPostKey(text);
+  if (direct) return direct;
+  const embeddedUrl = text.match(/https?:\/\/(?:www\.|m\.)?instagram\.com\/[^\s"'<>]+/i)?.[0] || '';
+  return canonicalInstagramPostKey(embeddedUrl);
+}
+
+function moderationValue(entry, key = 'value') {
+  if (typeof entry === 'string') return cleanText(entry);
+  if (!entry || typeof entry !== 'object') return '';
+  return cleanText(entry[key] || entry.value);
+}
+
+function isExpiryRemovalReason(value) {
+  return /(?:abgelaufen|expired|vorbei|beendet|nicht mehr (?:g[üu]ltig|verf[üu]gbar)|offer ended)/i.test(cleanText(value));
+}
+
 function inferAccountType(account = {}) {
   const explicit = cleanText(account.accountType || account.kind || account.type).toLowerCase();
   if (['merchant', 'discovery', 'platform'].includes(explicit)) return explicit;
@@ -106,6 +128,14 @@ function ensureEntry(registry, username) {
       watchlistNote: '',
       occurrences: 0,
       liveOccurrences: 0,
+      postedOccurrences: 0,
+      rejectedOccurrences: 0,
+      approvedPostKeys: new Set(),
+      postedPostKeys: new Set(),
+      rejectedPostKeys: new Set(),
+      legacyApprovedDeals: 0,
+      legacyPostedDeals: 0,
+      legacyRejectedDeals: 0,
       pendingOccurrences: 0,
       foodDrinkHits: 0,
       promoHits: 0,
@@ -131,6 +161,18 @@ function ensureEntry(registry, username) {
   return registry.get(username);
 }
 
+function approvedDealCount(entry) {
+  return Math.max(entry.legacyApprovedDeals, entry.approvedPostKeys.size);
+}
+
+function postedDealCount(entry) {
+  return Math.max(entry.legacyPostedDeals, entry.postedPostKeys.size);
+}
+
+function rejectedDealCount(entry) {
+  return Math.max(entry.legacyRejectedDeals, entry.rejectedPostKeys.size);
+}
+
 function incrementMap(map, key) {
   const normalized = cleanUiNoiseText(key || '').toLowerCase();
   if (!normalized) return;
@@ -146,6 +188,9 @@ function scoreEntry(entry) {
   const watchlistScore = entry.watchlist ? 10 : 0;
   const historicalViennaScore = Math.min(entry.historicalViennaHits * 14, 28);
   const historicalAddressScore = Math.min(entry.historicalAddressHits * 8, 16);
+  const approvedScore = Math.min(approvedDealCount(entry) * 20, 40);
+  const postedScore = Math.min(postedDealCount(entry) * 2, 8);
+  const rejectionPenalty = Math.min(rejectedDealCount(entry) * 10, 30);
   return Math.max(0, Math.min(100, Math.round(
     countScore
     + liveScore
@@ -155,6 +200,9 @@ function scoreEntry(entry) {
     + watchlistScore
     + historicalViennaScore
     + historicalAddressScore
+    + approvedScore
+    + postedScore
+    - rejectionPenalty
   )));
 }
 
@@ -163,14 +211,44 @@ function priorityScore(entry) {
   const fresh1dRate = entry.fresh1dHits / entry.occurrences;
   const missionRate = entry.missionHits / entry.occurrences;
   const liveRate = entry.liveOccurrences / entry.occurrences;
+  const approvedDeals = approvedDealCount(entry);
+  const rejectedDeals = rejectedDealCount(entry);
+  const feedbackTotal = approvedDeals + rejectedDeals;
+  const approvalRate = feedbackTotal > 0 ? approvedDeals / feedbackTotal : 0;
   const qualityAverage = entry.totalQualityScore > 0 ? entry.totalQualityScore / entry.occurrences : 0;
   const score =
     scoreEntry(entry) * 0.42 +
     missionRate * 26 +
     fresh1dRate * 18 +
     liveRate * 8 +
+    approvalRate * 22 +
+    Math.min(approvedDeals, 4) * 6 -
+    Math.min(rejectedDeals, 4) * 5 +
     Math.min(qualityAverage, 100) * 0.06;
   return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+function seedPreviousFeedback(registry, filePath) {
+  if (!filePath) return;
+  const previous = readJson(filePath, {});
+  for (const account of Array.isArray(previous?.accounts) ? previous.accounts : []) {
+    const username = normalizeRegistryUsername(account?.username);
+    if (!username) continue;
+    const entry = ensureEntry(registry, username);
+    entry.accountType = inferAccountType(account);
+    entry.legacyApprovedDeals = Math.max(entry.legacyApprovedDeals, Number(account?.approvedDeals || 0));
+    entry.legacyPostedDeals = Math.max(entry.legacyPostedDeals, Number(account?.postedDeals || 0));
+    entry.legacyRejectedDeals = Math.max(entry.legacyRejectedDeals, Number(account?.rejectedDeals || 0));
+    for (const key of Array.isArray(account?.approvedPostKeys) ? account.approvedPostKeys : []) {
+      if (cleanText(key)) entry.approvedPostKeys.add(cleanText(key));
+    }
+    for (const key of Array.isArray(account?.postedPostKeys) ? account.postedPostKeys : []) {
+      if (cleanText(key)) entry.postedPostKeys.add(cleanText(key));
+    }
+    for (const key of Array.isArray(account?.rejectedPostKeys) ? account.rejectedPostKeys : []) {
+      if (cleanText(key)) entry.rejectedPostKeys.add(cleanText(key));
+    }
+  }
 }
 
 function compactCounts(map, limit = 4) {
@@ -180,8 +258,27 @@ function compactCounts(map, limit = 4) {
     .map(([value, count]) => ({ value, count }));
 }
 
+function hasInstagramOrigin(deal = {}) {
+  const profileUrls = [
+    deal?.profileUrl,
+    deal?.instagramProfileUrl,
+    deal?.ownerProfileUrl,
+    deal?.accountUrl,
+    deal?.url,
+    deal?.post_url,
+  ];
+  if (profileUrls.some((value) => /(?:^|\.)instagram\.com\//i.test(cleanText(value).replace(/^https?:\/\//i, '')))) return true;
+  return /(?:instagram|meta instagram|business discovery)/i.test([
+    deal?.source,
+    deal?.originSource,
+    deal?.sourceName,
+    deal?.pubDateSource,
+    deal?.sourcePublishedAtSource,
+  ].map(cleanText).join(' '));
+}
+
 function profileEvidence(deal = {}) {
-  const structuredUsername = extractStructuredOwnerUsername(deal);
+  const structuredUsername = hasInstagramOrigin(deal) ? extractStructuredOwnerUsername(deal) : '';
   const profileUrls = [
     deal?.profileUrl,
     deal?.instagramProfileUrl,
@@ -292,10 +389,19 @@ export function getIndependentViennaEvidence(deal) {
   return getViennaEvidence(sanitized);
 }
 
-function collectRegistryRecords() {
+function registryInputFiles(docsDir) {
+  const pending = fs.existsSync(docsDir)
+    ? fs.readdirSync(docsDir).filter((name) => name.startsWith('deals-pending-') && name.endsWith('.json'))
+    : [];
+  return [...new Set([...INPUT_FILES, ...pending])].sort();
+}
+
+function collectRegistryRecords(options = {}) {
   const records = new Map();
-  for (const fileName of INPUT_FILES) {
-    const filePath = path.join(DOCS_DIR, fileName);
+  const docsDir = options.docsDir || DOCS_DIR;
+  const inputFiles = Array.isArray(options.inputFiles) ? options.inputFiles : registryInputFiles(docsDir);
+  for (const fileName of inputFiles) {
+    const filePath = path.join(docsDir, fileName);
     const isLiveFile = fileName === 'deals.json';
     for (const deal of loadDeals(filePath)) {
       const evidence = profileEvidence(deal);
@@ -309,6 +415,7 @@ function collectRegistryRecords() {
         __structuredOwner: Boolean(evidence.structuredUsername),
         __verifiedProfile: Boolean(evidence.profileUsername),
         __isLive: isLiveFile,
+        __isPosted: fileName === 'deals-pending-all.json' && Boolean(cleanText(deal?.slackTs)),
         __sourceFiles: [fileName],
       };
       if (!records.has(key)) {
@@ -321,6 +428,7 @@ function collectRegistryRecords() {
       merged.__structuredOwner = Boolean(previous.__structuredOwner || record.__structuredOwner);
       merged.__verifiedProfile = Boolean(previous.__verifiedProfile || record.__verifiedProfile);
       merged.__isLive = Boolean(previous.__isLive || record.__isLive);
+      merged.__isPosted = Boolean(previous.__isPosted || record.__isPosted);
       merged.__sourceFiles = [...new Set([...(previous.__sourceFiles || []), fileName])];
       records.set(key, merged);
     }
@@ -328,52 +436,110 @@ function collectRegistryRecords() {
   return [...records.values()];
 }
 
+function applyModerationFeedback(registry, records, options = {}) {
+  const now = options.now instanceof Date ? options.now.getTime() : Number(options.now) || Date.now();
+  const postOwners = new Map();
+  for (const deal of records) {
+    const key = instagramPostKey(deal?.url || deal?.post_url || deal?.postUrl);
+    if (key && deal.__username) postOwners.set(key, deal.__username);
+  }
+
+  const evidence = readJson(options.graphEvidencePath || GRAPH_EVIDENCE_PATH, {});
+  for (const post of Array.isArray(evidence?.posts) ? evidence.posts : []) {
+    const key = instagramPostKey(post?.url);
+    const username = normalizeRegistryUsername(post?.ownerUsername);
+    if (key && username) postOwners.set(key, username);
+  }
+
+  const moderation = options.moderation || readJson(options.moderationPath || MODERATION_PATH, {});
+  const recentHidden = (Array.isArray(moderation?.hiddenDeals) ? moderation.hiddenDeals : []).filter((hidden) => {
+    const removedAt = parseTimestamp(hidden?.removedAt);
+    return !removedAt || removedAt >= now - 180 * DAY_MS;
+  });
+  const expiryPostKeys = new Set(recentHidden
+    .filter((hidden) => isExpiryRemovalReason(hidden?.reason))
+    .map((hidden) => instagramPostKey(hidden?.url))
+    .filter(Boolean));
+  const seen = new Set();
+  for (const hidden of recentHidden) {
+    const key = instagramPostKey(hidden?.url);
+    if (isExpiryRemovalReason(hidden?.reason) || (key && expiryPostKeys.has(key))) continue;
+    const username = normalizeRegistryUsername(hidden?.ownerUsername || hidden?.instagramHandle)
+      || postOwners.get(key);
+    if (!username) continue;
+    const feedbackKey = key || `${username}|${cleanText(hidden?.id).toLowerCase()}`;
+    if (!feedbackKey || seen.has(feedbackKey)) continue;
+    seen.add(feedbackKey);
+    const entry = ensureEntry(registry, username);
+    entry.rejectedPostKeys.add(feedbackKey);
+    entry.rejectedOccurrences = rejectedDealCount(entry);
+  }
+}
+
 export function buildInstagramMerchantRegistry(options = {}) {
   const registry = new Map();
   const now = options.now instanceof Date ? options.now.getTime() : Number(options.now) || Date.now();
+  const moderation = readJson(options.moderationPath || MODERATION_PATH, {});
+  const blockedProviders = (Array.isArray(moderation?.blockedProviders) ? moderation.blockedProviders : [])
+    .map((entry) => moderationValue(entry).toLowerCase().replace(/^@/, ''))
+    .filter(Boolean);
+  const previousRegistryPath = options.previousRegistryPath
+    || (!options.docsDir ? (options.outputPath || OUTPUT_PATH) : '');
+  seedPreviousFeedback(registry, previousRegistryPath);
   seedWatchlist(registry, options.watchlistPath || WATCHLIST_PATH);
   seedHistoricalProfileEvidence(registry, options.historicalSentPath || HISTORICAL_SENT_PATH);
 
-  for (const deal of collectRegistryRecords()) {
-      const username = deal.__username;
+  const records = collectRegistryRecords(options);
+  for (const deal of records) {
+    const username = deal.__username;
 
-      const entry = ensureEntry(registry, username);
-      entry.occurrences += 1;
-      if (deal.__isLive) entry.liveOccurrences += 1;
-      else entry.pendingOccurrences += 1;
-      if (deal.__structuredOwner) entry.structuredOwnerOccurrences += 1;
-      if (deal.__verifiedProfile) entry.verifiedProfileOccurrences += 1;
-      for (const fileName of deal.__sourceFiles || []) entry.files.add(fileName);
-      if (deal?.source) entry.sourceLabels.add(cleanText(deal.source));
-      if (deal?.title && entry.sampleTitles.length < 4) entry.sampleTitles.push(cleanText(deal.title));
-      entry.sampleUrls.add(`https://www.instagram.com/${username}/`);
+    const entry = ensureEntry(registry, username);
+    const postKey = instagramPostKey(deal?.url || deal?.post_url || deal?.postUrl)
+      || registryRecordKey(deal, username);
+    entry.occurrences += 1;
+    if (deal.__isLive) {
+      entry.liveOccurrences += 1;
+      if (postKey) entry.approvedPostKeys.add(postKey);
+    } else {
+      entry.pendingOccurrences += 1;
+    }
+    if (deal.__isPosted) {
+      entry.postedOccurrences += 1;
+      if (postKey) entry.postedPostKeys.add(postKey);
+    }
+    if (deal.__structuredOwner) entry.structuredOwnerOccurrences += 1;
+    if (deal.__verifiedProfile) entry.verifiedProfileOccurrences += 1;
+    for (const fileName of deal.__sourceFiles || []) entry.files.add(fileName);
+    if (deal?.source) entry.sourceLabels.add(cleanText(deal.source));
+    if (deal?.title && entry.sampleTitles.length < 4) entry.sampleTitles.push(cleanText(deal.title));
+    entry.sampleUrls.add(`https://www.instagram.com/${username}/`);
 
-      const haystack = [deal?.brand, deal?.title, deal?.description, deal?.distance, deal?.location]
-        .map(cleanText)
-        .join(' ');
+    const haystack = [deal?.brand, deal?.title, deal?.description, deal?.distance, deal?.location]
+      .map(cleanText)
+      .join(' ');
 
-      if (hasKeyword(haystack, FOOD_DRINK_KEYWORDS)) entry.foodDrinkHits += 1;
-      const promoHit = hasKeyword(haystack, PROMO_KEYWORDS) || ['gratis', 'bogo', 'freebie'].includes(cleanUiNoiseText(deal?.type || '').toLowerCase());
-      if (promoHit) {
-        entry.promoHits += 1;
-      }
-      const viennaEvidence = getIndependentViennaEvidence(deal);
-      const viennaHit = viennaEvidence.hasViennaEvidence;
-      if (viennaHit) {
-        entry.viennaHits += 1;
-        entry.viennaEvidence.add(`${viennaEvidence.type}:${viennaEvidence.value}`);
-      }
+    if (hasKeyword(haystack, FOOD_DRINK_KEYWORDS)) entry.foodDrinkHits += 1;
+    const promoHit = hasKeyword(haystack, PROMO_KEYWORDS) || ['gratis', 'bogo', 'freebie'].includes(cleanUiNoiseText(deal?.type || '').toLowerCase());
+    if (promoHit) entry.promoHits += 1;
+    const viennaEvidence = getIndependentViennaEvidence(deal);
+    const viennaHit = viennaEvidence.hasViennaEvidence;
+    if (viennaHit) {
+      entry.viennaHits += 1;
+      entry.viennaEvidence.add(`${viennaEvidence.type}:${viennaEvidence.value}`);
+    }
 
-      const publication = getPublicationEvidence(deal);
-      const pubTs = parseTimestamp(publication.sourcePublishedAt);
-      if (pubTs && pubTs <= now + 5 * 60 * 1000 && now - pubTs <= DAY_MS) entry.fresh1dHits += 1;
-      if (pubTs && pubTs <= now + 5 * 60 * 1000 && now - pubTs <= 7 * DAY_MS) entry.fresh7dHits += 1;
-      if (viennaHit && promoHit && hasKeyword(haystack, FOOD_DRINK_KEYWORDS)) entry.missionHits += 1;
-      entry.totalQualityScore += Number.isFinite(Number(deal?.qualityScore)) ? Number(deal.qualityScore) : 0;
+    const publication = getPublicationEvidence(deal);
+    const pubTs = parseTimestamp(publication.sourcePublishedAt);
+    if (pubTs && pubTs <= now + 5 * 60 * 1000 && now - pubTs <= DAY_MS) entry.fresh1dHits += 1;
+    if (pubTs && pubTs <= now + 5 * 60 * 1000 && now - pubTs <= 7 * DAY_MS) entry.fresh7dHits += 1;
+    if (viennaHit && promoHit && hasKeyword(haystack, FOOD_DRINK_KEYWORDS)) entry.missionHits += 1;
+    entry.totalQualityScore += Number.isFinite(Number(deal?.qualityScore)) ? Number(deal.qualityScore) : 0;
 
-      incrementMap(entry.categories, deal?.category);
-      incrementMap(entry.types, deal?.type);
+    incrementMap(entry.categories, deal?.category);
+    incrementMap(entry.types, deal?.type);
   }
+
+  applyModerationFeedback(registry, records, { ...options, now, moderation });
 
   const accounts = [...registry.values()]
     .map((entry) => {
@@ -387,45 +553,70 @@ export function buildInstagramMerchantRegistry(options = {}) {
           (entry.watchlist && entry.historicalAddressHits >= 1)
           || entry.historicalAddressHits >= 2
         );
+      const blockedByModeration = blockedProviders.some((provider) => (
+        entry.username === provider
+        || entry.username.startsWith(`${provider}.`)
+        || entry.username.startsWith(`${provider}_`)
+      ));
+      const approvedDeals = approvedDealCount(entry);
+      const postedDeals = postedDealCount(entry);
+      const rejectedDeals = rejectedDealCount(entry);
       return {
-      username: entry.username,
-      accountType: entry.accountType,
-      watchlist: entry.watchlist,
-      watchlistPriority: entry.watchlistPriority,
-      watchlistNote: entry.watchlistNote,
-      confidence: scoreEntry(entry),
-      priorityScore: priorityScore(entry),
-      occurrences: entry.occurrences,
-      liveOccurrences: entry.liveOccurrences,
-      pendingOccurrences: entry.pendingOccurrences,
-      foodDrinkHits: entry.foodDrinkHits,
-      promoHits: entry.promoHits,
-      viennaHits: entry.viennaHits,
-      fresh1dHits: entry.fresh1dHits,
-      fresh7dHits: entry.fresh7dHits,
-      missionHits: entry.missionHits,
-      structuredOwnerOccurrences: entry.structuredOwnerOccurrences,
-      verifiedProfileOccurrences: entry.verifiedProfileOccurrences,
-      historicalViennaHits: entry.historicalViennaHits,
-      historicalAddressHits: entry.historicalAddressHits,
-      viennaVerified: Boolean(entry.accountType === 'merchant' && (verifiedByCurrentEvidence || verifiedByHistory)),
-      verificationSource: verifiedByCurrentEvidence
-        ? 'structured-current-deal-evidence'
-        : (verifiedByHistory ? 'historical-profile-address-evidence' : ''),
-      viennaEvidence: [...entry.viennaEvidence].slice(0, 6),
-      verificationEvidence: [...entry.historicalEvidence].slice(0, 6),
-      averageQualityScore: entry.occurrences > 0 ? Math.round((entry.totalQualityScore / entry.occurrences) * 10) / 10 : 0,
-      sourceFiles: [...entry.files].sort(),
-      sourceLabels: [...entry.sourceLabels].sort(),
-      topCategories: compactCounts(entry.categories),
-      topTypes: compactCounts(entry.types),
-      sampleTitles: entry.sampleTitles,
-      sampleUrls: [...entry.sampleUrls].slice(0, 3),
+        username: entry.username,
+        accountType: entry.accountType,
+        watchlist: entry.watchlist,
+        watchlistPriority: entry.watchlistPriority,
+        watchlistNote: entry.watchlistNote,
+        confidence: scoreEntry(entry),
+        priorityScore: priorityScore(entry),
+        occurrences: entry.occurrences,
+        liveOccurrences: entry.liveOccurrences,
+        approvedDeals,
+        postedOccurrences: entry.postedOccurrences,
+        postedDeals,
+        rejectedOccurrences: rejectedDeals,
+        rejectedDeals,
+        blockedByModeration,
+        approvalRate: approvedDeals + rejectedDeals > 0
+          ? Math.round((approvedDeals / (approvedDeals + rejectedDeals)) * 1000) / 1000
+          : 0,
+        approvedPostKeys: [...entry.approvedPostKeys].slice(-100),
+        postedPostKeys: [...entry.postedPostKeys].slice(-100),
+        rejectedPostKeys: [...entry.rejectedPostKeys].slice(-100),
+        pendingOccurrences: entry.pendingOccurrences,
+        foodDrinkHits: entry.foodDrinkHits,
+        promoHits: entry.promoHits,
+        viennaHits: entry.viennaHits,
+        fresh1dHits: entry.fresh1dHits,
+        fresh7dHits: entry.fresh7dHits,
+        missionHits: entry.missionHits,
+        structuredOwnerOccurrences: entry.structuredOwnerOccurrences,
+        verifiedProfileOccurrences: entry.verifiedProfileOccurrences,
+        historicalViennaHits: entry.historicalViennaHits,
+        historicalAddressHits: entry.historicalAddressHits,
+        viennaVerified: Boolean(entry.accountType === 'merchant' && (verifiedByCurrentEvidence || verifiedByHistory)),
+        verificationSource: verifiedByCurrentEvidence
+          ? 'structured-current-deal-evidence'
+          : (verifiedByHistory ? 'historical-profile-address-evidence' : ''),
+        viennaEvidence: [...entry.viennaEvidence].slice(0, 6),
+        verificationEvidence: [...entry.historicalEvidence].slice(0, 6),
+        averageQualityScore: entry.occurrences > 0 ? Math.round((entry.totalQualityScore / entry.occurrences) * 10) / 10 : 0,
+        sourceFiles: [...entry.files].sort(),
+        sourceLabels: [...entry.sourceLabels].sort(),
+        topCategories: compactCounts(entry.categories),
+        topTypes: compactCounts(entry.types),
+        sampleTitles: entry.sampleTitles,
+        sampleUrls: [...entry.sampleUrls].slice(0, 3),
       };
     })
     // Keep unverified accounts as discovery leads, but downstream Vienna checks
     // may trust only the explicit `viennaVerified` flag.
-    .filter((entry) => entry.watchlist || entry.confidence >= 30 || entry.historicalViennaHits > 0)
+    .filter((entry) => entry.watchlist
+      || entry.confidence >= 30
+      || entry.historicalViennaHits > 0
+      || entry.approvedDeals > 0
+      || entry.rejectedDeals > 0
+      || entry.blockedByModeration)
     .sort((a, b) => b.priorityScore - a.priorityScore || b.confidence - a.confidence || b.occurrences - a.occurrences || a.username.localeCompare(b.username));
 
   const payload = {
@@ -433,11 +624,12 @@ export function buildInstagramMerchantRegistry(options = {}) {
     totalAccounts: accounts.length,
     totalVerifiedViennaMerchants: accounts.filter((entry) => entry.viennaVerified).length,
     totalDiscoveryAccounts: accounts.filter((entry) => entry.accountType === 'discovery').length,
+    totalBlockedAccounts: accounts.filter((entry) => entry.blockedByModeration).length,
     accounts,
   };
 
   if (options.write !== false) {
-    fs.writeFileSync(OUTPUT_PATH, `${JSON.stringify(payload, null, 2)}\n`);
+    fs.writeFileSync(options.outputPath || OUTPUT_PATH, `${JSON.stringify(payload, null, 2)}\n`);
   }
 
   console.log('📇 Instagram merchant registry updated');

@@ -35,7 +35,7 @@ jobs:
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
-          WIEN_COMBINED_GRAPH_HASHTAGS: ${{ vars.META_INSTAGRAM_HASHTAGS }}
+          WIEN_COMBINED_GRAPH_HASHTAGS: ${{ vars.WIEN_COMBINED_GRAPH_HASHTAGS }}
           WIEN_COMBINED_MEDIA_PER_HASHTAG: '30'
           WIEN_COMBINED_MAX_DEALS: '40'
         run: node scraper/wien-deals-combined.js
