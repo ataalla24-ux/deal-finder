@@ -39,6 +39,11 @@ assert.equal(classifyPromotion('Die Führungen durch das Parlament sind kostenlo
 const mixedPriceAndTrial = classifyPromotion('Matcha für 1€ in Wien. Mit der App zwei Monate kostenlos testen.');
 assert.equal(mixedPriceAndTrial.type, 'rabatt', 'the advertised product price wins over a secondary free app trial');
 assert.match(mixedPriceAndTrial.evidence, /1\s*€/);
+const discountBeforeRegularPrices = classifyPromotion('10% Rabattcode LISAMARIA. Erwachsene ab 24,90 € und Kinder ab 19,90 €.');
+assert.equal(discountBeforeRegularPrices.type, 'rabatt');
+assert.match(discountBeforeRegularPrices.evidence, /10\s*%\s*Rabattcode/i);
+assert.match(classifyPromotion('€10 Rabatt mit Code ALFIES10.').evidence, /€10\s*Rabatt/i);
+assert.equal(classifyPromotion('Regulärer Eintritt für Erwachsene ab 24,90 €.').accepted, false, 'a regular from-price is not a deal');
 assert.equal(
   classifyPromotion("Lieblingsrestaurant in Wien? Die Burger sind gut und es gibt gratis Saucen und Nachfüllungen.").accepted,
   false,

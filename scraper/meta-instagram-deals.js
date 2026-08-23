@@ -76,21 +76,22 @@ const DEFAULT_HASHTAGS = [
 const CONCRETE_FREE_PATTERN = /(?<!gluten[- ])(?<!sugar[- ])(?<!lactose[- ])(?<!dairy[- ])(?<!alcohol[- ])(?<!caffeine[- ])(?<!cruelty[- ])(?<!plastic[- ])(?<!smoke[- ])(?<!tax[- ])(?<!risk[- ])(?<!fat[- ])(?<!nut[- ])(?<!gmo[- ])\bfree\b/i;
 
 const PROMO_PATTERNS = [
-  /\bgratis\b/i,
-  /\bkostenlos(?:e|er|es|en)?\b/i,
-  CONCRETE_FREE_PATTERN,
   /\b1\s*\+\s*1\b/i,
   /\b2\s*(?:f(?:ü|u|ue)r|for)\s*1\b/i,
   /\bbogo\b/i,
   /(?:^|[^\d])-\s*\d{1,2}\s*%/i,
-  /\b\d{1,2}\s*%\s*(?:rabatt|off|discount|nachlass|günstiger|guenstiger)\b/i,
+  /\b\d{1,2}\s*%\s*(?:rabatt(?:code)?|off|discount|nachlass|günstiger|guenstiger)\b/i,
   /\b\d{1,2}\s*%\s+auf\b/i,
   /\b(?:spar(?:e|st|en)?|save)\s+(?:dir\s+)?\d{1,2}\s*%\b/i,
-  /\b(?:rabatt|discount|gutschein|voucher|coupon|promo(?:code)?|aktionscode)\b/i,
+  /(?:€\s*\d{1,3}(?:[,.]\d{1,2})?|\d{1,3}(?:[,.]\d{1,2})?\s*€)\s*(?:rabatt|gutschein|nachlass)\b/i,
+  /\b(?:rabatt(?:code)?|discount|gutschein|voucher|coupon|promo(?:code)?|aktionscode)\b/i,
   /\bhappy\s*hour\b/i,
   /\b(?:nur|only|um|for)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)/i,
-  /\b(?:ab|für|fuer|only)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)/i,
+  /\b(?:für|fuer)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)/i,
   /\b(?:opening|eröffnung|eroeffnung)\s+(?:offer|deal|aktion|special)\b/i,
+  /\bgratis\b/i,
+  /\bkostenlos(?:e|er|es|en)?\b/i,
+  CONCRETE_FREE_PATTERN,
 ];
 
 const SOFT_PROMO_PATTERNS = [
@@ -542,10 +543,9 @@ export function classifyPromotion(text) {
       && !EXPLICIT_PROMOTION_BEYOND_GENERIC_FREE_PATTERN.test(normalized)) {
     return { accepted: false, type: '', reason: 'general-recommendation' };
   }
-  const firstMatch = (patterns) => patterns
-    .map((pattern) => normalized.match(pattern))
-    .filter(Boolean)
-    .sort((left, right) => Number(left.index || 0) - Number(right.index || 0))[0];
+  // Pattern order is intentional: explicit savings beat regular prices and
+  // secondary free-trial language in a long social caption.
+  const firstMatch = (patterns) => patterns.map((pattern) => normalized.match(pattern)).find(Boolean);
   const strongMatch = firstMatch(PROMO_PATTERNS);
   const softMatch = firstMatch(SOFT_PROMO_PATTERNS);
   const strong = Boolean(strongMatch);
