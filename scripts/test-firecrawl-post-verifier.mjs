@@ -180,6 +180,14 @@ const strictSearchResults = await verifyFirecrawlDeals([
     url: 'https://www.instagram.com/p/StrictBerlin123/',
   },
   {
+    id: 'search-assortment-only',
+    title: 'Angebot in Wien',
+    description: 'Untrusted search snippet.',
+    source: 'Firecrawl Search',
+    discoveryMethod: 'firecrawl-search',
+    url: 'https://www.instagram.com/p/StrictAssortment123/',
+  },
+  {
     id: 'search-good-web',
     title: 'Search result',
     description: 'Untrusted snippet.',
@@ -257,6 +265,20 @@ const strictSearchResults = await verifyFirecrawlDeals([
         },
         dateHints: {
           publicationDate: '2026-07-22T07:00:00.000Z',
+          publicationDateSource: 'timeDatetime',
+        },
+      };
+    }
+    if (url.includes('StrictAssortment')) {
+      return {
+        ...base,
+        contentHints: {
+          title: 'Käsestand in Wien',
+          description: 'marketaccount on July 22, 2026: "Käse, Oliven und Gewürze runden unser Angebot ab. Besucht uns in 1160 Wien."',
+          textSnippet: 'Besuchen Sie unser Sortiment am Markt.',
+        },
+        dateHints: {
+          publicationDate: '2026-07-22T06:00:00.000Z',
           publicationDateSource: 'timeDatetime',
         },
       };

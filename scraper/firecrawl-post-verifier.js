@@ -24,6 +24,7 @@ const DEFAULT_REGISTRY_PATH = path.join(ROOT, 'docs', 'instagram-merchant-regist
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SYNTHETIC_PUBLICATION_SOURCE_PATTERN = /(?:firecrawl.*run|agent(?:\s|[-_])?run|crawl(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|scrap(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|discover(?:ed|y)(?:\s|[-_])?(?:at|run|time)?|generated(?:\s|[-_])?at|fallback|current(?:\s|[-_])?time)/i;
 const OFFER_SIGNAL_PATTERN = /(?:\bgratis\b|\bkostenlos\b|\bfree\b|\b1\s*[+&]\s*1\b|\b2\s*(?:für|for)\s*1\b|\b\d{1,2}\s*%|\brabatt\b|\baktion\b|\bangebot\b|\bdeal\b|\bhappy hour\b|\bstatt\s+(?:€\s*)?\d)/i;
+const STRONG_OFFER_SIGNAL_PATTERN = /(?:\bgratis\b|\bkostenlos\b|\bfree\b|\bumsonst\b|\b0\s*€|\b1\s*[+&]\s*1\b|\b2\s*(?:für|for)\s*1\b|\bbogo\b|\b\d{1,2}\s*%|\brabatt\b|\baktion\b|\bdeal\b|\bcoupon\b|\bgutschein\b|\bhappy hour\b|\bstatt\s+(?:€\s*)?\d|\b(?:sonder|aktions|wochen|tages)angebot\b|\bim angebot\b|\bangebot\s+(?:gilt|bis|nur)\b|\bangebot\s+(?:für|um|ab)\s+(?:€\s*)?\d|\bangebot\s*:)/i;
 const VIENNA_SIGNAL_PATTERN = /\b(?:wien|vienna)\b|(?:^|\D)1(?:0[1-9]|1\d|2[0-3])0(?!\d)/i;
 const GIVEAWAY_SIGNAL_PATTERN = /(?:\bgewinnspiel\b|\bgiveaway\b|\bverlos(?:ung|en)\b|\bgewinn(?:e|en|st|t|er|erin|erinnen)?\b|\bzu gewinnen\b|\blostopf\b|\bteilnahmeschluss\b|\bmarkiere\b.*\bfreund|\bkommentiere\b.*\bgewinn)/i;
 const NON_OFFER_FREE_PATTERN = /(?:\bfeel free\b|\bfree[ -]?flow\b|\b(?:gluten|sugar|lactose|dairy|alcohol)[ -]?free\b)/gi;
@@ -38,7 +39,7 @@ function cleanText(value, maxLength = Infinity) {
 
 function hasConcreteOriginalOfferSignal(value) {
   const signal = cleanText(value, 7000).replace(NON_OFFER_FREE_PATTERN, '');
-  return OFFER_SIGNAL_PATTERN.test(signal) && !GIVEAWAY_SIGNAL_PATTERN.test(signal);
+  return STRONG_OFFER_SIGNAL_PATTERN.test(signal) && !GIVEAWAY_SIGNAL_PATTERN.test(signal);
 }
 
 function inferExactOfferType(value) {
