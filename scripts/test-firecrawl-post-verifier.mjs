@@ -77,6 +77,8 @@ assert.equal(verified[0].sourcePublishedAt, '2026-07-21T11:42:41.000Z');
 assert.equal(verified[0].sourcePublishedAtSource, 'instagram-original-post-timeDatetime');
 assert.equal(verified[0].pubDate, verified[0].sourcePublishedAt);
 assert.equal(verified[0].postVerification.status, 'verified-original-post');
+assert.equal(verified[0].type, 'gratis');
+assert.equal(verified[0].originalEvidenceAligned, true);
 assert.match(verified[0].validUntil, /^2026-07-31T23:59:59/);
 assert.equal(verified[0].expirySource, 'instagram-original-post');
 assert.equal(verified[0].viennaEvidence.source, 'merchant-registry');
@@ -143,6 +145,153 @@ const strictFreshness = await verifyFirecrawlDeals([
   maxAcceptedAgeDays: 7,
 });
 assert.deepEqual(strictFreshness.map((deal) => deal.id), ['non-social-web-deal']);
+
+const strictSearchResults = await verifyFirecrawlDeals([
+  {
+    id: 'search-good-instagram',
+    title: 'Search snippet with mixed text',
+    description: 'Untrusted snippet.',
+    source: 'Firecrawl Search',
+    discoveryMethod: 'firecrawl-search',
+    url: 'https://www.instagram.com/p/StrictGood123/',
+  },
+  {
+    id: 'search-normal-post',
+    title: 'Gratis breakfast according to a mixed snippet',
+    description: '20% Rabatt in Wien according to search.',
+    source: 'Firecrawl Search',
+    discoveryMethod: 'firecrawl-search',
+    url: 'https://www.instagram.com/p/StrictNoise123/',
+  },
+  {
+    id: 'search-giveaway',
+    title: 'Gutschein in Wien',
+    description: 'Untrusted search snippet.',
+    source: 'Firecrawl Search',
+    discoveryMethod: 'firecrawl-search',
+    url: 'https://www.instagram.com/p/StrictGiveaway123/',
+  },
+  {
+    id: 'search-berlin-offer',
+    title: '20% Rabatt',
+    description: 'Untrusted search snippet says Wien.',
+    source: 'Firecrawl Search',
+    discoveryMethod: 'firecrawl-search',
+    url: 'https://www.instagram.com/p/StrictBerlin123/',
+  },
+  {
+    id: 'search-good-web',
+    title: 'Search result',
+    description: 'Untrusted snippet.',
+    source: 'Firecrawl Search',
+    discoveryMethod: 'firecrawl-search',
+    url: 'https://example.com/wien-deal',
+  },
+  {
+    id: 'search-bad-web',
+    title: 'Search result contaminated by deal text',
+    description: 'Gratis in Wien.',
+    source: 'Firecrawl Search',
+    discoveryMethod: 'firecrawl-search',
+    url: 'https://example.com/police-news',
+  },
+], {
+  now,
+  registry,
+  maxNetworkVerifications: 20,
+  inspectDealUrlHealth: async (url) => {
+    const base = {
+      status: 200,
+      finalUrl: url,
+      checkedAt: '2026-07-23T12:02:00.000Z',
+    };
+    if (url.includes('StrictGood')) {
+      return {
+        ...base,
+        contentHints: {
+          title: 'Cio’s Grill auf Instagram: "1+1 Döner in Wien"',
+          description: '120 likes, 5 comments - ciosgrill on July 22, 2026: "1+1 Döner in Wien"',
+          textSnippet: '1+1 Döner in 1020 Wien.',
+        },
+        dateHints: {
+          publicationDate: '2026-07-22T10:00:00.000Z',
+          publicationDateSource: 'timeDatetime',
+        },
+      };
+    }
+    if (url.includes('StrictNoise')) {
+      return {
+        ...base,
+        contentHints: {
+          title: 'Normal breakfast post',
+          description: 'otheraccount on July 22, 2026: "Our breakfast is gluten free and delicious in Berlin."',
+          textSnippet: 'Our breakfast is gluten free and delicious in Berlin.',
+        },
+        dateHints: {
+          publicationDate: '2026-07-22T09:00:00.000Z',
+          publicationDateSource: 'timeDatetime',
+        },
+      };
+    }
+    if (url.includes('StrictGiveaway')) {
+      return {
+        ...base,
+        contentHints: {
+          title: 'Gewinnspiel in Wien',
+          description: 'giveawayaccount on July 22, 2026: "Gewinnspiel: zwei Gutscheine gewinnen, markiere einen Freund in Wien."',
+          textSnippet: 'Jetzt in den Lostopf.',
+        },
+        dateHints: {
+          publicationDate: '2026-07-22T08:00:00.000Z',
+          publicationDateSource: 'timeDatetime',
+        },
+      };
+    }
+    if (url.includes('StrictBerlin')) {
+      return {
+        ...base,
+        contentHints: {
+          title: '20% Rabatt in Berlin',
+          description: 'berlinrestaurant on July 22, 2026: "Diese Woche 20% Rabatt in Berlin."',
+          textSnippet: 'Das Angebot gilt nur in Berlin.',
+        },
+        dateHints: {
+          publicationDate: '2026-07-22T07:00:00.000Z',
+          publicationDateSource: 'timeDatetime',
+        },
+      };
+    }
+    if (url.endsWith('/wien-deal')) {
+      return {
+        ...base,
+        contentHints: {
+          title: 'Lunch Deal in Wien',
+          description: 'Montag bis Freitag: 20% Rabatt in 1050 Wien.',
+          textSnippet: 'Das aktuelle Angebot gilt vor Ort.',
+        },
+      };
+    }
+    return {
+      ...base,
+      contentHints: {
+        title: 'Polizei fasst Taschendiebin',
+        description: 'Lokale Nachrichten aus Wien.',
+        textSnippet: 'Die Polizei ermittelt.',
+      },
+    };
+  },
+});
+assert.deepEqual(
+  strictSearchResults.map((deal) => deal.id).sort(),
+  ['search-good-instagram', 'search-good-web'],
+  'Search snippets never substitute for exact offer and Vienna evidence from the opened source',
+);
+const strictInstagramDeal = strictSearchResults.find((deal) => deal.id === 'search-good-instagram');
+assert.equal(strictInstagramDeal.brand, 'ciosgrill');
+assert.equal(strictInstagramDeal.type, 'bogo');
+assert.match(strictInstagramDeal.description, /1\+1 Döner in Wien/);
+assert.equal(strictInstagramDeal.searchEvidenceAligned, true);
+assert.equal(strictSearchResults.find((deal) => deal.id === 'search-good-web').type, 'rabatt');
 
 const graphUrl = 'https://www.instagram.com/p/GraphFreshPost1/';
 let graphNetworkInspections = 0;

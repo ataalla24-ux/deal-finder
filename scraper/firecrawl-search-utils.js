@@ -1,8 +1,10 @@
 import { normalizeInstagramPostUrl } from './firecrawl-post-verifier.js';
 
-const OFFER_SIGNAL_PATTERN = /(?:\bgratis\b|\bkostenlos\b|\bfree\b|\bumsonst\b|\b0\s*€|\b1\s*[+&]\s*1\b|\b2\s*(?:für|for)\s*1\b|\bbogo\b|\b\d{1,2}\s*%|\brabatt\b|\baktion\b|\bangebot\b|\bcoupon\b|\bgutschein\b|\bhappy hour\b|\bstatt\s+(?:€\s*)?\d)/i;
-const GIVEAWAY_PATTERN = /(?:\bgewinnspiel\b|\bgiveaway\b|\bverlos(?:ung|en)\b|\bzu gewinnen\b|\btagge\b|\bmarkiere\b.*\bfreund|\bkommentiere\b.*\bgewinn)/i;
+const OFFER_SIGNAL_PATTERN = /(?:\bgratis\b|\bkostenlos\b|\bfree\b|\bumsonst\b|\b0\s*€|\b1\s*[+&]\s*1\b|\b2\s*(?:für|for)\s*1\b|\bbogo\b|\b\d{1,2}\s*%|\brabatt\b|\baktion\b|\bangebot\b|\bdeal\b|\bcoupon\b|\bgutschein\b|\bhappy hour\b|\bstatt\s+(?:€\s*)?\d)/i;
+const GIVEAWAY_PATTERN = /(?:\bgewinnspiel\b|\bgiveaway\b|\bverlos(?:ung|en)\b|\bgewinn(?:e|en|st|t)?\b|\bzu gewinnen\b|\blostopf\b|\btagge\b|\bmarkiere\b.*\bfreund|\bkommentiere\b.*\bgewinn)/i;
 const SHIPPING_ONLY_PATTERN = /(?:\bgratis(?:er|e|es)? versand\b|\bkostenlos(?:er|e|es)? versand\b|\bfree shipping\b)/i;
+const NON_OFFER_FREE_PATTERN = /(?:\bfeel free\b|\bfree[ -]?flow\b|\b(?:gluten|sugar|lactose|dairy|alcohol)[ -]?free\b)/gi;
+const GENERIC_COLLECTION_TITLE_PATTERN = /(?:\balle termine\b|\bveranstaltungskalender\b|\bevents? (?:in|für) wien\b|\bangebote? im überblick\b|\bdeal[- ]?(?:liste|übersicht)\b|\bseite\s+\d+\b)/i;
 
 function cleanText(value, maxLength = 1200) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, maxLength);
@@ -25,10 +27,12 @@ function targetIdentity(targetUrl) {
 }
 
 export function isConcreteFirecrawlSearchResult(row = {}) {
+  const title = cleanText(typeof row === 'string' ? '' : row?.title, 500);
+  if (title && GENERIC_COLLECTION_TITLE_PATTERN.test(title)) return false;
   const signal = cleanText(
     typeof row === 'string' ? row : `${row?.title || ''} ${row?.description || ''}`,
     2600,
-  );
+  ).replace(NON_OFFER_FREE_PATTERN, '');
   if (!OFFER_SIGNAL_PATTERN.test(signal)) return false;
   if (GIVEAWAY_PATTERN.test(signal)) return false;
   if (SHIPPING_ONLY_PATTERN.test(signal)) {
@@ -42,7 +46,7 @@ export function inferFirecrawlSearchDealType(row = {}) {
   const signal = cleanText(
     typeof row === 'string' ? row : `${row?.title || ''} ${row?.description || ''}`,
     2600,
-  );
+  ).replace(NON_OFFER_FREE_PATTERN, '');
   if (/(?:\b1\s*[+&]\s*1\b|\b2\s*(?:für|for)\s*1\b|\bbogo\b|\bbuy one get one\b)/i.test(signal)) return 'bogo';
   if (/(?:\bgratis\b|\bkostenlos\b|\bfree\b|\bumsonst\b|\b0\s*€)/i.test(signal)) return 'gratis';
   return 'rabatt';

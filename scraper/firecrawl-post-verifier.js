@@ -25,12 +25,48 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const SYNTHETIC_PUBLICATION_SOURCE_PATTERN = /(?:firecrawl.*run|agent(?:\s|[-_])?run|crawl(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|scrap(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|discover(?:ed|y)(?:\s|[-_])?(?:at|run|time)?|generated(?:\s|[-_])?at|fallback|current(?:\s|[-_])?time)/i;
 const OFFER_SIGNAL_PATTERN = /(?:\bgratis\b|\bkostenlos\b|\bfree\b|\b1\s*[+&]\s*1\b|\b2\s*(?:für|for)\s*1\b|\b\d{1,2}\s*%|\brabatt\b|\baktion\b|\bangebot\b|\bdeal\b|\bhappy hour\b|\bstatt\s+(?:€\s*)?\d)/i;
 const VIENNA_SIGNAL_PATTERN = /\b(?:wien|vienna)\b|(?:^|\D)1(?:0[1-9]|1\d|2[0-3])0(?!\d)/i;
+const GIVEAWAY_SIGNAL_PATTERN = /(?:\bgewinnspiel\b|\bgiveaway\b|\bverlos(?:ung|en)\b|\bgewinn(?:e|en|st|t|er|erin|erinnen)?\b|\bzu gewinnen\b|\blostopf\b|\bteilnahmeschluss\b|\bmarkiere\b.*\bfreund|\bkommentiere\b.*\bgewinn)/i;
+const NON_OFFER_FREE_PATTERN = /(?:\bfeel free\b|\bfree[ -]?flow\b|\b(?:gluten|sugar|lactose|dairy|alcohol)[ -]?free\b)/gi;
+const GENERIC_COLLECTION_TITLE_PATTERN = /(?:\balle termine\b|\bveranstaltungskalender\b|\bevents? (?:in|für) wien\b|\bangebote? im überblick\b|\bdeal[- ]?(?:liste|übersicht)\b|\bseite\s+\d+\b)/i;
 
 function cleanText(value, maxLength = Infinity) {
   const text = value === null || value === undefined
     ? ''
     : String(value).replace(/\s+/g, ' ').trim();
   return Number.isFinite(maxLength) ? text.slice(0, maxLength) : text;
+}
+
+function hasConcreteOriginalOfferSignal(value) {
+  const signal = cleanText(value, 7000).replace(NON_OFFER_FREE_PATTERN, '');
+  return OFFER_SIGNAL_PATTERN.test(signal) && !GIVEAWAY_SIGNAL_PATTERN.test(signal);
+}
+
+function inferExactOfferType(value) {
+  const signal = cleanText(value, 7000).replace(NON_OFFER_FREE_PATTERN, '');
+  if (/(?:\b1\s*[+&]\s*1\b|\b2\s*(?:für|for)\s*1\b|\bbogo\b|\bbuy one get one\b)/i.test(signal)) return 'bogo';
+  if (/(?:\bgratis\b|\bkostenlos\b|\bumsonst\b|\b0\s*€|\bfree\b)/i.test(signal)) return 'gratis';
+  return 'rabatt';
+}
+
+function isFirecrawlSearchDiscovery(deal = {}) {
+  return cleanText(deal.discoveryMethod || deal.discovery_method, 80).toLowerCase() === 'firecrawl-search';
+}
+
+function exactInstagramPostSignal(deal = {}) {
+  return [
+    deal.metaGraphCaption,
+    deal.metaGraphOcrText,
+    deal.postCaption,
+    deal.evidence?.originalPost?.captionSample,
+  ].map((value) => cleanText(value, 2600)).filter(Boolean).join(' ');
+}
+
+function exactWebPageSignal(health = {}) {
+  return [
+    health?.contentHints?.title,
+    health?.contentHints?.description,
+    health?.contentHints?.textSnippet,
+  ].map((value) => cleanText(value, 2600)).filter(Boolean).join(' ');
 }
 
 function readJson(filePath, fallback = {}) {
@@ -463,10 +499,52 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
   });
   const healthByKey = new Map(healthRows);
 
+  const webSearchCandidatesByUrl = new Map();
+  for (const deal of baseDeals) {
+    const url = cleanText(deal?.url || deal?.post_url || deal?.postUrl, 1200);
+    if (!url || normalizeInstagramPostUrl(url) || !isFirecrawlSearchDiscovery(deal)) continue;
+    if (!webSearchCandidatesByUrl.has(url)) webSearchCandidatesByUrl.set(url, deal);
+  }
+  const webSearchCandidates = [...webSearchCandidatesByUrl.entries()].slice(0, maxNetworkVerifications);
+  const webHealthRows = await mapWithConcurrency(webSearchCandidates, concurrency, async ([url]) => {
+    try {
+      const health = await inspector(url, {
+        timeoutMs: Number(options.timeoutMs || process.env.FIRECRAWL_POST_VERIFY_TIMEOUT_MS || 8000),
+        now,
+      });
+      return [url, health || { transientError: true }];
+    } catch (error) {
+      return [url, { transientError: true, reason: cleanText(error?.message, 180) }];
+    }
+  });
+  const webHealthByUrl = new Map(webHealthRows);
+
   const enrichedDeals = baseDeals.map((deal) => {
     const url = normalizeInstagramPostUrl(deal.url);
     const key = canonicalInstagramPostKey(url);
-    if (!key) return deal;
+    if (!key) {
+      const rawUrl = cleanText(deal?.url || deal?.post_url || deal?.postUrl, 1200);
+      const health = webHealthByUrl.get(rawUrl);
+      if (!health) return deal;
+      const signal = exactWebPageSignal(health);
+      const pageTitle = cleanText(health?.contentHints?.title, 500);
+      return {
+        ...deal,
+        webVerification: {
+          status: hasUsableOriginalPostHealth(health) ? 'verified-source-page' : 'unavailable',
+          checkedAt: cleanText(health?.checkedAt) || discoveredAt,
+          httpStatus: Number(health?.status || 0) || null,
+          finalUrl: cleanText(health?.finalUrl || rawUrl),
+          reason: cleanText(health?.reason, 180),
+          exactOffer: hasConcreteOriginalOfferSignal(signal),
+          exactType: inferExactOfferType(signal),
+          exactVienna: VIENNA_SIGNAL_PATTERN.test(signal),
+          genericCollection: GENERIC_COLLECTION_TITLE_PATTERN.test(pageTitle),
+          titleSample: pageTitle,
+          descriptionSample: cleanText(health?.contentHints?.description, 700),
+        },
+      };
+    }
 
     const health = healthByKey.get(key);
     if (!health) {
@@ -520,12 +598,81 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
     return next;
   });
 
+  const evidenceAlignedDeals = enrichedDeals.map((deal) => {
+    const searchDiscovery = isFirecrawlSearchDiscovery(deal);
+    const rawUrl = cleanText(deal.url || deal.post_url || deal.postUrl);
+    if (!/(?:^|\.)instagram\.com\//i.test(rawUrl)) {
+      if (!searchDiscovery) return deal;
+      const type = cleanText(deal.webVerification?.exactType, 40) || deal.type;
+      return {
+        ...deal,
+        type,
+        hot: type === 'gratis' || type === 'bogo',
+        description: cleanText(deal.webVerification?.descriptionSample || deal.description, 2200),
+        searchEvidenceAligned: true,
+      };
+    }
+
+    const exactSignal = exactInstagramPostSignal(deal);
+    if (!exactSignal) return deal;
+    const ownerUsername = extractStructuredOwnerUsername(deal);
+    const type = inferExactOfferType(exactSignal);
+    if (!searchDiscovery) {
+      return {
+        ...deal,
+        type,
+        hot: type === 'gratis' || type === 'bogo',
+        description: cleanText(deal.metaGraphCaption || deal.postCaption || deal.description, 2200),
+        originalEvidenceAligned: true,
+      };
+    }
+    const oldBrand = cleanText(deal.brand, 120);
+    const currentTitle = cleanText(deal.title, 500);
+    const titleCore = oldBrand && currentTitle.toLowerCase().startsWith(`${oldBrand.toLowerCase()}:`)
+      ? cleanText(currentTitle.slice(oldBrand.length + 1), 420)
+      : currentTitle;
+    return {
+      ...deal,
+      ...(ownerUsername ? {
+        brand: ownerUsername,
+        title: `${ownerUsername}: ${titleCore || cleanText(exactSignal, 120)}`.slice(0, 140),
+      } : {}),
+      type,
+      hot: type === 'gratis' || type === 'bogo',
+      description: cleanText(deal.metaGraphCaption || deal.postCaption || deal.description, 2200),
+      searchEvidenceAligned: true,
+    };
+  });
+
   let staleInstagramPosts = 0;
   let undatedInstagramPosts = 0;
   let invalidInstagramUrls = 0;
-  const verifiedDeals = enrichedDeals.filter((deal) => {
+  let searchMissingOriginalOffer = 0;
+  let searchMissingViennaEvidence = 0;
+  let searchWebUnavailable = 0;
+  let searchWebGenericCollection = 0;
+  const verifiedDeals = evidenceAlignedDeals.filter((deal) => {
     const rawUrl = cleanText(deal.url || deal.post_url || deal.postUrl);
-    if (!/(?:^|\.)instagram\.com\//i.test(rawUrl)) return true;
+    if (!/(?:^|\.)instagram\.com\//i.test(rawUrl)) {
+      if (!isFirecrawlSearchDiscovery(deal)) return true;
+      if (deal.webVerification?.status !== 'verified-source-page') {
+        searchWebUnavailable += 1;
+        return false;
+      }
+      if (deal.webVerification.genericCollection) {
+        searchWebGenericCollection += 1;
+        return false;
+      }
+      if (!deal.webVerification.exactOffer) {
+        searchMissingOriginalOffer += 1;
+        return false;
+      }
+      if (!deal.webVerification.exactVienna) {
+        searchMissingViennaEvidence += 1;
+        return false;
+      }
+      return true;
+    }
     const postUrl = normalizeInstagramPostUrl(rawUrl);
     if (!postUrl) {
       invalidInstagramUrls += 1;
@@ -542,6 +689,18 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
       staleInstagramPosts += 1;
       return false;
     }
+    if (isFirecrawlSearchDiscovery(deal)) {
+      const exactSignal = exactInstagramPostSignal(deal);
+      if (!hasConcreteOriginalOfferSignal(exactSignal)) {
+        searchMissingOriginalOffer += 1;
+        return false;
+      }
+      const ownerUsername = extractStructuredOwnerUsername(deal);
+      if (!VIENNA_SIGNAL_PATTERN.test(exactSignal) && !(ownerUsername && registry.has(ownerUsername))) {
+        searchMissingViennaEvidence += 1;
+        return false;
+      }
+    }
     return true;
   });
 
@@ -551,6 +710,7 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
   console.log(`   original posts verified: ${verifiedCount}; timestamp only: ${timestampOnlyCount}`);
   console.log(`   Vienna via verified merchant registry: ${registryViennaCount}; registry merchants: ${registry.size}`);
   console.log(`   fresh output: ${verifiedDeals.length}; stale: ${staleInstagramPosts}; undated: ${undatedInstagramPosts}; invalid Instagram URLs: ${invalidInstagramUrls}`);
+  console.log(`   strict Search rejects: no exact offer ${searchMissingOriginalOffer}; no exact Vienna ${searchMissingViennaEvidence}; web unavailable ${searchWebUnavailable}; generic web lists ${searchWebGenericCollection}`);
 
   return verifiedDeals;
 }
