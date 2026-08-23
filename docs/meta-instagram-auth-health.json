@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-08-23T06:57:08.980Z",
+  "generatedAt": "2026-08-23T08:40:46.339Z",
   "source": "meta-instagram-auth-health",
   "graphVersion": "v26.0",
-  "status": "ok",
+  "status": "missing-permission",
   "configured": {
     "instagramGraph": true,
     "instagramUserId": true,
@@ -12,7 +12,7 @@
     {
       "name": "token-expiry",
       "status": "ok",
-      "detail": "Configured token expiry is 2026-10-21T00:00:00.000Z (58.7 days remaining)."
+      "detail": "Configured token expiry is 2026-10-21T00:00:00.000Z (58.6 days remaining)."
     },
     {
       "name": "token-basic",
@@ -36,8 +36,10 @@
     },
     {
       "name": "tagged-media",
-      "status": "skipped",
-      "detail": "Set META_INSTAGRAM_TAGGED_MEDIA_ENABLED=1 after the endpoint healthcheck succeeds."
+      "status": "missing-permission",
+      "detail": "(#10) Application does not have permission for this action",
+      "code": "10",
+      "httpStatus": 400
     },
     {
       "name": "business-discovery",
@@ -50,10 +52,10 @@
       "detail": "Set META_INSTAGRAM_HEALTHCHECK_HASHTAG to test hashtag access; this counts toward Meta hashtag limits."
     }
   ],
-  "nextAction": "Meta Instagram Graph is ready for the deal collector.",
+  "nextAction": "Fix the Meta Graph token permissions before enabling scheduled discovery.",
   "tokenExpiry": {
     "expiresAt": "2026-10-21T00:00:00.000Z",
-    "daysRemaining": 58.7,
+    "daysRemaining": 58.6,
     "status": "ok"
   },
   "grantedPermissions": [
