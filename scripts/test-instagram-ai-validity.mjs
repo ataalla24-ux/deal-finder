@@ -142,6 +142,13 @@ assert.equal(aidsFutureEvent.offerWindow?.startDate?.toISOString().slice(0, 10),
 assert.equal(aidsFutureEvent.notStarted, true);
 assert.equal(aidsFutureEvent.eligibleByAge, true);
 
+const futureFamilyEvent = extractActiveOfferWindow(
+  'Sport- und Spielefest für Kids im Esterhazypark. Am 27.8., 14–18 Uhr, gratis für die ganze Familie!',
+  { pubDate: '2026-08-20T10:00:00.000Z', now: new Date('2026-08-23T10:00:00.000Z') },
+);
+assert.equal(futureFamilyEvent?.kind, 'single');
+assert.equal(futureFamilyEvent?.endDate?.toISOString().slice(0, 10), '2026-08-27');
+
 assert.equal(
   extractActiveOfferWindow('Gültig bis Ende März 2026', { now })?.endDate?.toISOString().slice(0, 10),
   '2026-03-31',

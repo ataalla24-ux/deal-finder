@@ -311,6 +311,7 @@ assert.deepEqual(
 const strictInstagramDeal = strictSearchResults.find((deal) => deal.id === 'search-good-instagram');
 assert.equal(strictInstagramDeal.brand, 'ciosgrill');
 assert.equal(strictInstagramDeal.type, 'bogo');
+assert.equal(strictInstagramDeal.category, 'essen');
 assert.match(strictInstagramDeal.description, /1\+1 Döner in Wien/);
 assert.equal(strictInstagramDeal.searchEvidenceAligned, true);
 assert.equal(strictSearchResults.find((deal) => deal.id === 'search-good-web').type, 'rabatt');

@@ -246,7 +246,7 @@ function parseExplicitSingleDate(text, referenceDate) {
 }
 
 function parseEventSingleDate(text, referenceDate) {
-  const eventSignal = '(?:strassenfest|festival|event|veranstaltung|konzert|concert|fest|aktionstag|opening|eroeffnung)';
+  const eventSignal = '(?:strassenfest|spielefest|sportfest|familienfest|ferienfest|festival|event|veranstaltung|konzert|concert|fest|aktionstag|opening|eroeffnung)';
   const numericDate = '([0-3]?\\d)[./]([01]?\\d)(?:[./](20\\d{2}))?\\.?';
   const namedDate = `([0-3]?\\d)\\.?\\s+(${MONTH_PATTERN})(?:\\s+(20\\d{2}))?`;
   const numericRegexes = [

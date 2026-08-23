@@ -16,6 +16,7 @@ import {
   loadInstagramGraphEvidence,
 } from './instagram-graph-evidence.js';
 import { extractActiveOfferWindow } from './instagram-ai-validity-utils.js';
+import { inferCategoryFromText } from './category-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,6 +48,27 @@ function inferExactOfferType(value) {
   if (/(?:\b1\s*[+&]\s*1\b|\b2\s*(?:für|for)\s*1\b|\bbogo\b|\bbuy one get one\b)/i.test(signal)) return 'bogo';
   if (/(?:\bgratis\b|\bkostenlos\b|\bumsonst\b|\b0\s*€|\bfree\b)/i.test(signal)) return 'gratis';
   return 'rabatt';
+}
+
+function inferExactCategory(value, fallback = '') {
+  const signal = cleanText(value, 7000);
+  if (/(?:\bmini[- ]?golf\b|\bspielefest\b|\bsportfest\b|\bfamilienfest\b|\bferienpass\b|\bfreizeitpark\b)/i.test(signal)) {
+    return 'events';
+  }
+  return inferCategoryFromText([signal]) || cleanText(fallback, 80).toLowerCase() || 'wien';
+}
+
+function stripRepeatedOwnerPrefix(title, ownerUsername, oldBrand) {
+  let core = cleanText(title, 500);
+  const prefixes = [ownerUsername, oldBrand]
+    .map((value) => cleanText(value, 120).toLowerCase())
+    .filter(Boolean);
+  for (let pass = 0; pass < 4; pass += 1) {
+    const prefix = prefixes.find((value) => core.toLowerCase().startsWith(`${value}:`));
+    if (!prefix) break;
+    core = cleanText(core.slice(prefix.length + 1), 500);
+  }
+  return core;
 }
 
 function isFirecrawlSearchDiscovery(deal = {}) {
@@ -608,6 +630,10 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
       return {
         ...deal,
         type,
+        category: inferExactCategory(
+          `${deal.webVerification?.titleSample || ''} ${deal.webVerification?.descriptionSample || ''}`,
+          deal.category,
+        ),
         hot: type === 'gratis' || type === 'bogo',
         description: cleanText(deal.webVerification?.descriptionSample || deal.description, 2200),
         searchEvidenceAligned: true,
@@ -622,6 +648,7 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
       return {
         ...deal,
         type,
+        category: inferExactCategory(exactSignal, deal.category),
         hot: type === 'gratis' || type === 'bogo',
         description: cleanText(deal.metaGraphCaption || deal.postCaption || deal.description, 2200),
         originalEvidenceAligned: true,
@@ -629,9 +656,7 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
     }
     const oldBrand = cleanText(deal.brand, 120);
     const currentTitle = cleanText(deal.title, 500);
-    const titleCore = oldBrand && currentTitle.toLowerCase().startsWith(`${oldBrand.toLowerCase()}:`)
-      ? cleanText(currentTitle.slice(oldBrand.length + 1), 420)
-      : currentTitle;
+    const titleCore = stripRepeatedOwnerPrefix(currentTitle, ownerUsername, oldBrand);
     return {
       ...deal,
       ...(ownerUsername ? {
@@ -639,6 +664,7 @@ export async function verifyFirecrawlDeals(deals = [], options = {}) {
         title: `${ownerUsername}: ${titleCore || cleanText(exactSignal, 120)}`.slice(0, 140),
       } : {}),
       type,
+      category: inferExactCategory(exactSignal, deal.category),
       hot: type === 'gratis' || type === 'bogo',
       description: cleanText(deal.metaGraphCaption || deal.postCaption || deal.description, 2200),
       searchEvidenceAligned: true,
