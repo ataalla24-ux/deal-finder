@@ -88,8 +88,8 @@ const PROMO_PATTERNS = [
   /\b(?:spar(?:e|st|en)?|save)\s+(?:dir\s+)?\d{1,2}\s*%\b/i,
   /\b(?:rabatt|discount|gutschein|voucher|coupon|promo(?:code)?|aktionscode)\b/i,
   /\bhappy\s*hour\b/i,
-  /\b(?:nur|only|um|for)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)\b/i,
-  /\b(?:ab|für|fuer|only)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)\b/i,
+  /\b(?:nur|only|um|for)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)/i,
+  /\b(?:ab|für|fuer|only)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)/i,
   /\b(?:opening|eröffnung|eroeffnung)\s+(?:offer|deal|aktion|special)\b/i,
 ];
 
@@ -105,6 +105,9 @@ const EXCLUDED_PATTERNS = [
   /\b(?:affiliate|influencer gesucht|creator gesucht)\b/i,
   /\b(?:one|einer|eine|eins)\s+(?:(?:of (?:them|these)|davon)\s+)?(?:is|ist)\s+(?:(?:completely|komplett|völlig|voellig)\s+)?free\b/i,
 ];
+
+const RECOMMENDATION_LANGUAGE_PATTERN = /\b(?:favou?rite|lieblings(?:restaurant|lokal|platz|spot|ort)|summer\s+spot|things\s+to\s+do|must[-\s]?visit|guide|tipps?|vibe|empfehl\w*|recommend\w*|save\s+(?:this|and)|send\s+this)\b/i;
+const EXPLICIT_PROMOTION_BEYOND_GENERIC_FREE_PATTERN = /(?:\b\d{1,2}\s*%|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b(?:rabatt|gutschein|coupon|deal|aktion|angebot|special|happy\s*hour)\b|\b(?:statt|nur\s+heute|today\s+only)\b|\b(?:gratis|kostenlos|free)\s+(?:zu|zum|bei|with)\b|\b(?:nur|only|um|für|fuer|for)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b))/i;
 
 const SELF_SYNDICATION_PATTERNS = [
   /\boriginal[- ]?link\b.{0,140}\b(?:direkt\s+)?in\s+freefinder\b/i,
@@ -535,17 +538,28 @@ export function classifyPromotion(text) {
   if (!normalized || EXCLUDED_PATTERNS.some((pattern) => pattern.test(normalized))) {
     return { accepted: false, type: '', reason: normalized ? 'excluded-promotion-type' : 'missing-text' };
   }
-  const strongMatch = PROMO_PATTERNS.map((pattern) => normalized.match(pattern)).find(Boolean);
-  const softMatch = SOFT_PROMO_PATTERNS.map((pattern) => normalized.match(pattern)).find(Boolean);
+  if (RECOMMENDATION_LANGUAGE_PATTERN.test(normalized)
+      && !EXPLICIT_PROMOTION_BEYOND_GENERIC_FREE_PATTERN.test(normalized)) {
+    return { accepted: false, type: '', reason: 'general-recommendation' };
+  }
+  const firstMatch = (patterns) => patterns
+    .map((pattern) => normalized.match(pattern))
+    .filter(Boolean)
+    .sort((left, right) => Number(left.index || 0) - Number(right.index || 0))[0];
+  const strongMatch = firstMatch(PROMO_PATTERNS);
+  const softMatch = firstMatch(SOFT_PROMO_PATTERNS);
   const strong = Boolean(strongMatch);
   const soft = Boolean(softMatch);
   const hasConcreteNumber = /(?:\d{1,3}\s*%|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)|\b\d\s*\+\s*\d\b)/i.test(normalized);
   if (!strong && !(soft && hasConcreteNumber)) return { accepted: false, type: '', reason: 'no-concrete-offer' };
 
+  const bogoMatch = normalized.match(/\b(?:1\s*\+\s*1|2\s*(?:f(?:ü|u|ue)r|for)\s*1|bogo)\b/i);
   let type = 'rabatt';
-  if (/\b(?:gratis|kostenlos)\b/i.test(normalized) || CONCRETE_FREE_PATTERN.test(normalized)) type = 'gratis';
-  if (/\b(?:1\s*\+\s*1|2\s*(?:f(?:ü|u|ue)r|for)\s*1|bogo)\b/i.test(normalized)) type = 'bogo';
-  return { accepted: true, type, reason: '', evidence: cleanText(strongMatch?.[0] || softMatch?.[0], 120) };
+  if (strongMatch && (/\b(?:gratis|kostenlos)\b/i.test(strongMatch[0]) || CONCRETE_FREE_PATTERN.test(strongMatch[0]))) {
+    type = 'gratis';
+  }
+  if (bogoMatch) type = 'bogo';
+  return { accepted: true, type, reason: '', evidence: cleanText(bogoMatch?.[0] || strongMatch?.[0] || softMatch?.[0], 120) };
 }
 
 function inferCategory(text) {
@@ -554,9 +568,16 @@ function inferCategory(text) {
 }
 
 function inferTitle(text, brand, promotion) {
-  const lines = String(text || '').split(/[\n|]/).map((line) => cleanText(line, 180)).filter(Boolean);
-  const withSignal = lines.find((line) => PROMO_PATTERNS.some((pattern) => pattern.test(line))) || lines[0] || `${brand} Instagram-Angebot`;
-  const withoutBrand = withSignal.replace(new RegExp(`^${String(brand || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\s*[:–-]?\s*`, 'i'), '');
+  const segments = String(text || '')
+    .split(/(?:\r?\n+|\|+|(?<=[.!?])\s+)/)
+    .map((segment) => cleanText(segment, 180))
+    .filter(Boolean);
+  const signalPatterns = [...PROMO_PATTERNS, ...SOFT_PROMO_PATTERNS];
+  const withSignal = segments.find((segment) => signalPatterns.some((pattern) => pattern.test(segment)))
+    || segments[0]
+    || `${brand} Instagram-Angebot`;
+  const escapedBrand = String(brand || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const withoutBrand = withSignal.replace(new RegExp(`^${escapedBrand}\\s*[:–-]?\\s*`, 'i'), '');
   const fallback = promotion.type === 'gratis' ? `Gratis-Angebot bei ${brand}` : `Aktuelles Angebot bei ${brand}`;
   return cleanText(withoutBrand || fallback, 140);
 }

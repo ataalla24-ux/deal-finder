@@ -171,8 +171,12 @@ const noisyOcrFalsePositive = normalizeGraphMediaItem({
   sourceName: '@wiencreator',
   account: { username: 'wiencreator', verifiedVienna: true },
 }, config, now);
-assert.equal(noisyOcrFalsePositive.deal, null, 'confident AI rejection must veto an OCR-only offer signal');
-assert.equal(noisyOcrFalsePositive.rejection, 'media-ai-rejected-offer');
+assert.equal(noisyOcrFalsePositive.deal, null, 'noisy OCR must not create an offer');
+assert.equal(
+  noisyOcrFalsePositive.rejection,
+  'no-concrete-offer',
+  'a bare OCR percentage without Rabatt/auf/off is rejected before the AI veto is needed',
+);
 
 const selfSyndicatedDeal = normalizeGraphMediaItem({
   id: 'self-syndicated-1',

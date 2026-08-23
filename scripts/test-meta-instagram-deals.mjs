@@ -36,6 +36,19 @@ assert.equal(classifyPromotion('Das Ergebnis der Studie: Testosteron stieg um 47
 assert.equal(classifyPromotion('100 % Geschmack und Energie für deinen Tag.').accepted, false);
 assert.equal(classifyPromotion('Comment LUXURY for four spots; one is completely FREE.').accepted, false);
 assert.equal(classifyPromotion('Die Führungen durch das Parlament sind kostenlos.').type, 'gratis');
+const mixedPriceAndTrial = classifyPromotion('Matcha für 1€ in Wien. Mit der App zwei Monate kostenlos testen.');
+assert.equal(mixedPriceAndTrial.type, 'rabatt', 'the advertised product price wins over a secondary free app trial');
+assert.match(mixedPriceAndTrial.evidence, /1\s*€/);
+assert.equal(
+  classifyPromotion("Lieblingsrestaurant in Wien? Die Burger sind gut und es gibt gratis Saucen und Nachfüllungen.").accepted,
+  false,
+  'a restaurant recommendation with a standard inclusion is not a promotion',
+);
+assert.equal(
+  classifyPromotion('Mein Lieblingsrestaurant bietet heute 20 % Rabatt auf alle Burger.').accepted,
+  true,
+  'recommendation language must not hide an explicit promotion',
+);
 assert.equal(classifyPromotion('Gewinnspiel: Gewinne ein Abendessen').accepted, false);
 assert.equal(classifyPromotion('Schönes neues Sommermenü').accepted, false);
 assert.equal(classifyPromotion('Neue gluten-free Pizza jetzt in Wien').accepted, false);
@@ -87,6 +100,14 @@ const hashtagOnlySignals = normalizeGraphMediaItem({
   timestamp: '2026-07-17T08:30:00.000Z',
 }, { sourceType: 'hashtag', sourceName: '#wienevents' }, config, now);
 assert.equal(hashtagOnlySignals.rejection, 'no-concrete-offer', 'hashtags discover posts but never prove an offer or Vienna location');
+
+const recommendationOnly = normalizeGraphMediaItem({
+  id: 'recommendation-only',
+  caption: "Lieblingsrestaurant in Wien? Die Burger sind gut und es gibt gratis Saucen und Nachfüllungen.",
+  permalink: 'https://www.instagram.com/reel/RECOMMENDATION/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+}, { sourceType: 'hashtag', sourceName: '#wienessen' }, config, now);
+assert.equal(recommendationOnly.rejection, 'general-recommendation');
 
 const graphOldWithoutExpiry = normalizeGraphMediaItem({
   id: '17890003',

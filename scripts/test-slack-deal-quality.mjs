@@ -343,6 +343,29 @@ const genericFreeEvents = await validateOne({
 assert.equal(genericFreeEvents.decision.allowed, false);
 assert.match(reasonText(genericFreeEvents), /allgemeine Empfehlung\/Gratis-Event/);
 
+const favouriteRestaurantComparison = await validateOne({
+  id: 'favourite-restaurant-comparison',
+  brand: '#wienessen',
+  title: 'Lieblingsrestaurant in Wien?',
+  description: 'Die Burger sind gut und es gibt gratis Saucen und Nachfüllungen.',
+  url: 'https://www.instagram.com/reel/RECOMMENDATION/',
+  source: 'Instagram',
+  originSource: 'Meta Instagram Hashtag API',
+  distance: 'Wien',
+  pubDate: now.toISOString(),
+  pubDateSource: 'instagram-graph-timestamp',
+});
+assert.equal(favouriteRestaurantComparison.decision.allowed, false);
+assert.match(reasonText(favouriteRestaurantComparison), /allgemeine Empfehlung\/Gratis-Event/);
+
+const favouriteRestaurantWithPrice = await validateOne({
+  ...favouriteRestaurantComparison.deal,
+  id: 'favourite-restaurant-price-deal',
+  title: 'Lieblingsrestaurant in Wien: Burger nur 1€',
+  description: 'Nur heute gibt es den Burger für 1€ in 1070 Wien.',
+});
+assert.equal(favouriteRestaurantWithPrice.decision.allowed, true, 'an explicit promotional price must survive recommendation filtering');
+
 const syntheticTripAdvisor = await validateOne({
   id: 'tripadvisor-firecrawl',
   brand: 'Example Restaurant',
