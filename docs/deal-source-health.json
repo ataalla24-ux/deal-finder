@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-23T00:35:30.411Z",
+  "generatedAt": "2026-08-23T00:44:53.259Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 441,
@@ -7,12 +7,6 @@
     "distinctCandidates": 417,
     "duplicateClusters": 16,
     "topHealthySources": [
-      {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "healthScore": 86,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
@@ -32,6 +26,12 @@
         "totalDeals": 7
       },
       {
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "healthScore": 66,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "healthScore": 64,
@@ -44,12 +44,6 @@
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 79,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "missionFitScore": 78,
-        "totalDeals": 1
       },
       {
         "sourceKey": "wien-combined",
@@ -68,6 +62,12 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 68,
         "totalDeals": 3
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "missionFitScore": 65,
+        "totalDeals": 6
       }
     ],
     "topCoverageSources": [
@@ -109,12 +109,6 @@
     ],
     "topPrecisionSources": [
       {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "precisionScore": 88,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "precisionScore": 80,
@@ -137,15 +131,15 @@
         "sourceLabel": "Instagram AI Agent",
         "precisionScore": 71,
         "totalDeals": 6
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "precisionScore": 68,
+        "totalDeals": 10
       }
     ],
     "topWeightedSources": [
-      {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "sourceWeightScore": 70,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -169,6 +163,12 @@
         "sourceLabel": "Instagram",
         "sourceWeightScore": 59,
         "totalDeals": 7
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 54,
+        "totalDeals": 6
       }
     ],
     "topSourcesToFix": [
@@ -248,74 +248,6 @@
     }
   },
   "sources": [
-    {
-      "sourceKey": "gastro2",
-      "file": "deals-pending-gastro2.json",
-      "sourceLabel": "Firecrawl Key 1 - Gastro",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "bezirksvorstehung_mariahilf: bezirksvorstehung_mariahilf: Sport- und Spielefest für Kids im Esterhazypark 🎉 Am 27.8., ..."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-23T00:31:29.349Z",
-        "finishedAt": "2026-08-23T00:33:45.811Z",
-        "durationMs": 136462,
-        "counts": {
-          "rawCandidates": 12,
-          "normalizedCandidates": 12,
-          "verifiedCandidates": 1,
-          "previousDeals": 2,
-          "acceptedDeals": 1,
-          "rejectedDeals": 11
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 11
-        },
-        "errors": [
-          "1000things.at: Firecrawl Agent nach 75s abgebrochen"
-        ],
-        "reportFile": "deal-pipeline-last-run-gastro2.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 60,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 86,
-      "missionFitScore": 78,
-      "coverageScore": 16,
-      "precisionScore": 88,
-      "sourceWeightScore": 70
-    },
     {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
@@ -511,6 +443,75 @@
       "coverageScore": 17,
       "precisionScore": 75,
       "sourceWeightScore": 59
+    },
+    {
+      "sourceKey": "gastro2",
+      "file": "deals-pending-gastro2.json",
+      "sourceLabel": "Firecrawl Key 1 - Gastro",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 0,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "bezirksvorstehung_mariahilf: Sport- und Spielefest für Kids im Esterhazypark 🎉 Am 27.8., ..."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-23T00:31:29.349Z",
+        "finishedAt": "2026-08-23T00:33:45.811Z",
+        "durationMs": 136462,
+        "counts": {
+          "rawCandidates": 12,
+          "normalizedCandidates": 12,
+          "verifiedCandidates": 1,
+          "previousDeals": 2,
+          "acceptedDeals": 1,
+          "rejectedDeals": 11
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 11
+        },
+        "errors": [
+          "1000things.at: Firecrawl Agent nach 75s abgebrochen"
+        ],
+        "reportFile": "deal-pipeline-last-run-gastro2.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 60,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 66,
+      "missionFitScore": 43,
+      "coverageScore": 11,
+      "precisionScore": 64,
+      "sourceWeightScore": 47
     },
     {
       "sourceKey": "wien-combined",
@@ -781,7 +782,11 @@
       "topCategories": [
         {
           "value": "essen",
-          "count": 3
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 1
         }
       ],
       "topTypes": [
@@ -1484,8 +1489,12 @@
       "averageQualityScore": 60,
       "topCategories": [
         {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
           "value": "essen",
-          "count": 3
+          "count": 1
         }
       ],
       "topTypes": [
