@@ -1,44 +1,131 @@
 {
   "schemaVersion": 1,
-  "runId": "firecrawl5-2026-08-22T23:46:21.758Z",
+  "runId": "firecrawl5-2026-08-23T00:09:14.502Z",
   "sourceKey": "firecrawl5",
   "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-  "status": "completed-with-errors",
-  "startedAt": "2026-08-22T23:41:19.512Z",
-  "finishedAt": "2026-08-22T23:46:21.758Z",
-  "durationMs": 302246,
+  "status": "completed",
+  "startedAt": "2026-08-23T00:07:45.030Z",
+  "finishedAt": "2026-08-23T00:09:14.502Z",
+  "durationMs": 89472,
   "outputFile": "docs/deals-pending-firecrawl5.json",
   "counts": {
-    "rawCandidates": 0,
-    "normalizedCandidates": 0,
-    "verifiedCandidates": 1,
+    "rawCandidates": 29,
+    "normalizedCandidates": 28,
+    "verifiedCandidates": 26,
     "previousDeals": 1,
-    "acceptedDeals": 1,
-    "rejectedDeals": 0
+    "acceptedDeals": 26,
+    "rejectedDeals": 4
   },
-  "rejectedByReason": {},
-  "rejectedSamples": [],
+  "rejectedByReason": {
+    "excluded-giveaway": 1,
+    "post-verification-rejected": 3
+  },
+  "rejectedSamples": [
+    {
+      "reason": "excluded-giveaway",
+      "deal": {
+        "id": "",
+        "title": "5€ Ramen in Wien | Anzeige Mit @neotaste.wien könnt ihr ...",
+        "brand": "tastyfood.vienna",
+        "url": "https://www.instagram.com/p/DcQZi7SNE_4/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "post-verification-rejected",
+      "deal": {
+        "id": "fc5-ibocir",
+        "title": "zushimarket: Kennst du schon die neue Speisekarte von @sushicross1030 ...",
+        "brand": "zushimarket",
+        "url": "https://www.instagram.com/p/DcItkrcNAzZ/",
+        "source": "Firecrawl Instagram Gastro #5",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "post-verification-rejected",
+      "deal": {
+        "id": "fc5-jl3f30",
+        "title": "tastyfood.vienna: 2 Tickets für Disney in Concert am 01.11.26 🍣 + einen 100 ...",
+        "brand": "tastyfood.vienna",
+        "url": "https://www.instagram.com/p/DcLIX0CKPjt/",
+        "source": "Firecrawl Instagram Gastro #5",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "post-verification-rejected",
+      "deal": {
+        "id": "fc5-5p11by",
+        "title": "corner_xvi: Ömis Gemüse Kebap – Frisch. Saftig. Berlin. 🥙🔥 Bei uns ...",
+        "brand": "corner_xvi",
+        "url": "https://www.instagram.com/p/DcGMr3IhRLT/",
+        "source": "Firecrawl Instagram Gastro #5",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    }
+  ],
   "diagnostics": {
-    "agentStatus": "failed",
+    "agentStatus": "completed",
     "creditsUsed": 0,
     "configuredSources": 7,
-    "agentTimeoutSeconds": 300,
-    "maxCredits": 500,
+    "attemptedSources": 4,
+    "completedSources": 4,
+    "targetsPerRun": 4,
+    "agentTimeoutSeconds": 120,
+    "maxCreditsPerTarget": 300,
+    "sourceStats": [
+      {
+        "url": "https://www.instagram.com/zushimarket/",
+        "status": "completed-search",
+        "rawCandidates": 10,
+        "searchCandidates": 10,
+        "creditsUsed": 0
+      },
+      {
+        "url": "https://www.instagram.com/tastyfood.vienna/",
+        "status": "completed-search",
+        "rawCandidates": 10,
+        "searchCandidates": 10,
+        "creditsUsed": 0
+      },
+      {
+        "url": "https://www.instagram.com/ciosgrill/",
+        "status": "completed-search",
+        "rawCandidates": 1,
+        "searchCandidates": 1,
+        "creditsUsed": 0
+      },
+      {
+        "url": "https://www.instagram.com/corner_xvi/",
+        "status": "completed-search",
+        "rawCandidates": 8,
+        "searchCandidates": 8,
+        "creditsUsed": 0
+      }
+    ],
     "retainedPreviousDeals": 1,
     "prunedPreviousDeals": 0,
-    "duplicateCandidatesMerged": 0,
+    "duplicateCandidatesMerged": 1,
     "verifier": {
       "statusCounts": {
-        "verified-original-post": 1
+        "verified-original-post": 26
       },
-      "verifiedOriginalPosts": 1,
+      "verifiedOriginalPosts": 26,
       "timestampOnlyPosts": 0,
       "unavailableOriginalPosts": 0,
-      "registryViennaEvidence": 1
+      "registryViennaEvidence": 3
     }
   },
   "constraints": {},
-  "errors": [
-    "Firecrawl Agent nach 300s abgebrochen"
-  ]
+  "errors": []
 }
