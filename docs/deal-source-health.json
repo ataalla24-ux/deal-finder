@@ -1,17 +1,23 @@
 {
-  "generatedAt": "2026-08-23T19:26:11.621Z",
+  "generatedAt": "2026-08-23T19:47:15.182Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 432,
-    "uniqueCandidates": 394,
+    "totalCandidates": 430,
+    "uniqueCandidates": 395,
     "distinctCandidates": 410,
-    "duplicateClusters": 16,
+    "duplicateClusters": 15,
     "topHealthySources": [
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "healthScore": 75,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 75,
+        "totalDeals": 2
       },
       {
         "sourceKey": "wien-combined",
@@ -24,12 +30,6 @@
         "sourceLabel": "TikTok Scanner",
         "healthScore": 70,
         "totalDeals": 17
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 64,
-        "totalDeals": 2
       },
       {
         "sourceKey": "member-benefits",
@@ -111,7 +111,7 @@
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 80,
+        "precisionScore": 84,
         "totalDeals": 2
       },
       {
@@ -141,16 +141,16 @@
     ],
     "topWeightedSources": [
       {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceWeightScore": 66,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 64,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 62,
-        "totalDeals": 2
       },
       {
         "sourceKey": "wien-combined",
@@ -312,6 +312,80 @@
       "sourceWeightScore": 64
     },
     {
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 2,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "boca.vienna: Say hola to our Lunch Deal. From Monday to Friday, 12:00",
+        "bottlechallenge_org: both now offering free water bottle refills and part of our ..."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-23T03:06:14.700Z",
+        "finishedAt": "2026-08-23T03:08:48.361Z",
+        "durationMs": 153661,
+        "counts": {
+          "rawCandidates": 17,
+          "normalizedCandidates": 17,
+          "verifiedCandidates": 3,
+          "previousDeals": 3,
+          "acceptedDeals": 3,
+          "rejectedDeals": 15
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 15
+        },
+        "errors": [
+          "https://www.instagram.com/explore/tags/fooddealsvienna/: Firecrawl Agent nach 120s abgebrochen"
+        ],
+        "reportFile": "deal-pipeline-last-run-food3.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 65,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 75,
+      "missionFitScore": 78,
+      "coverageScore": 16,
+      "precisionScore": 84,
+      "sourceWeightScore": 66
+    },
+    {
       "sourceKey": "wien-combined",
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
@@ -462,80 +536,6 @@
       "sourceWeightScore": 54
     },
     {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 2,
-      "uniqueDeals": 0,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 2,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "boca.vienna: Say hola to our Lunch Deal. From Monday to Friday, 12:00",
-        "bottlechallenge_org: both now offering free water bottle refills and part of our ..."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-23T03:06:14.700Z",
-        "finishedAt": "2026-08-23T03:08:48.361Z",
-        "durationMs": 153661,
-        "counts": {
-          "rawCandidates": 17,
-          "normalizedCandidates": 17,
-          "verifiedCandidates": 3,
-          "previousDeals": 3,
-          "acceptedDeals": 3,
-          "rejectedDeals": 15
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 15
-        },
-        "errors": [
-          "https://www.instagram.com/explore/tags/fooddealsvienna/: Firecrawl Agent nach 120s abgebrochen"
-        ],
-        "reportFile": "deal-pipeline-last-run-food3.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 65,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 78,
-      "coverageScore": 16,
-      "precisionScore": 80,
-      "sourceWeightScore": 62
-    },
-    {
       "sourceKey": "member-benefits",
       "file": "deals-pending-member-benefits.json",
       "sourceLabel": "Member Benefits",
@@ -679,77 +679,6 @@
       "coverageScore": 13,
       "precisionScore": 69,
       "sourceWeightScore": 53
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 12,
-      "uniqueDeals": 2,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 10,
-      "fresh1dCount": 2,
-      "fresh7dCount": 12,
-      "viennaCount": 12,
-      "foodDrinkCount": 4,
-      "promoCount": 9,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Freibier Run mit gratis Getränk und Kaiserschmarrn",
-        "Lunch Deal mit Vorspeise und Hauptgericht",
-        "10% Rabatt mit Code LISAMARIA"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.2,
-      "duplicateRate": 0.8,
-      "fresh1dRate": 0.2,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 89.6,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 4
-        },
-        {
-          "value": "event",
-          "count": 3
-        },
-        {
-          "value": "food/drink",
-          "count": 3
-        },
-        {
-          "value": "entertainment",
-          "count": 1
-        },
-        {
-          "value": "health",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 6
-        },
-        {
-          "value": "rabatt",
-          "count": 6
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 54,
-      "missionFitScore": 52,
-      "coverageScore": 17,
-      "precisionScore": 63,
-      "sourceWeightScore": 48
     },
     {
       "sourceKey": "meta-instagram",
@@ -1185,6 +1114,73 @@
       "coverageScore": 10,
       "precisionScore": 58,
       "sourceWeightScore": 43
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 10,
+      "uniqueDeals": 2,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 8,
+      "fresh1dCount": 2,
+      "fresh7dCount": 10,
+      "viennaCount": 10,
+      "foodDrinkCount": 0,
+      "promoCount": 7,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Freibier Run am 25. August 2026 in Wien",
+        "10% Rabatt mit Code LISAMARIA bei Balls&Clubs Minigolf Wien",
+        "All you can Cryo Aktion - 4 Wochen Kältekammer für 200€"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.2,
+      "duplicateRate": 0.8,
+      "fresh1dRate": 0.2,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 90.5,
+      "topCategories": [
+        {
+          "value": "food/drink",
+          "count": 5
+        },
+        {
+          "value": "event",
+          "count": 3
+        },
+        {
+          "value": "entertainment",
+          "count": 1
+        },
+        {
+          "value": "wellness",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 6
+        },
+        {
+          "value": "rabatt",
+          "count": 4
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 46,
+      "missionFitScore": 39,
+      "coverageScore": 14,
+      "precisionScore": 53,
+      "sourceWeightScore": 39
     },
     {
       "sourceKey": "gutscheine",
