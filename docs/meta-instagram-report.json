@@ -1,13 +1,27 @@
 {
-  "generatedAt": "2026-08-23T18:45:07.126Z",
+  "generatedAt": "2026-08-23T20:35:31.034Z",
   "source": "meta-instagram",
   "status": "ok",
   "configured": {
     "adLibrary": false,
     "instagramGraph": true
   },
-  "accountCatalogSize": 76,
+  "accountCatalogSize": 78,
   "selectedAccounts": [
+    {
+      "username": "longevitycentervienna",
+      "priority": 104,
+      "verifiedVienna": false,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
+    },
+    {
+      "username": "dany.hirsch",
+      "priority": 104,
+      "verifiedVienna": false,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
+    },
     {
       "username": "foodiewien",
       "priority": 104,
@@ -51,38 +65,10 @@
       "rejectedDeals": 0
     },
     {
-      "username": "boca.vienna",
-      "priority": 104,
-      "verifiedVienna": true,
-      "approvedDeals": 0,
-      "rejectedDeals": 0
-    },
-    {
       "username": "shaysfoodblog",
       "priority": 60,
       "verifiedVienna": false,
       "approvedDeals": 1,
-      "rejectedDeals": 0
-    },
-    {
-      "username": "fenstercafe",
-      "priority": 0,
-      "verifiedVienna": false,
-      "approvedDeals": 0,
-      "rejectedDeals": 0
-    },
-    {
-      "username": "firstonewien",
-      "priority": 0,
-      "verifiedVienna": false,
-      "approvedDeals": 0,
-      "rejectedDeals": 0
-    },
-    {
-      "username": "forno_vie",
-      "priority": 0,
-      "verifiedVienna": false,
-      "approvedDeals": 0,
       "rejectedDeals": 0
     },
     {
@@ -175,21 +161,35 @@
       "verifiedVienna": false,
       "approvedDeals": 0,
       "rejectedDeals": 0
+    },
+    {
+      "username": "the.short.hall.vienna",
+      "priority": 0,
+      "verifiedVienna": false,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
+    },
+    {
+      "username": "yu.noodle_hotpot_vienna",
+      "priority": 0,
+      "verifiedVienna": false,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
     }
   ],
   "selectedHashtags": [
     "wienessen",
     "gratisinwien",
     "wiengastro",
+    "happyhourvienna",
+    "gratiswien",
+    "wienkaffee",
+    "wienstreetfood",
     "wienaktion",
     "wienrabatt",
     "wiengutschein",
     "neueröffnungwien",
-    "wienangebote",
-    "wienangebot",
-    "wiengratis",
-    "viennadeals",
-    "wienerdeals"
+    "wienangebote"
   ],
   "discoveryBudget": {
     "maxAccountsPerRun": 24,
@@ -207,8 +207,8 @@
     },
     "instagramGraph": {
       "status": "ok",
-      "fetched": 224,
-      "accepted": 4,
+      "fetched": 222,
+      "accepted": 7,
       "errors": [],
       "skippedCooldown": {
         "accounts": 14,
@@ -217,15 +217,26 @@
       "globalError": null,
       "mediaEvidence": {
         "status": "degraded",
-        "eligible": 2,
-        "selected": 2,
-        "cached": 57,
-        "analyzed": 2,
-        "withOcrText": 1,
-        "aiCalls": 1,
-        "aiAccepted": 0,
+        "eligible": 19,
+        "selected": 19,
+        "cached": 55,
+        "analyzed": 19,
+        "withOcrText": 18,
+        "aiCalls": 10,
+        "aiAccepted": 3,
         "errors": [
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-DaQyFm/asset-0-ocr.png stdout -l deu+eng --psm 6"
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-1Sfm3T/asset-1-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-VcftHo/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-VcftHo/asset-1-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-uLZuLx/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-hbXbCk/asset-1-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-hbXbCk/asset-2-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-tWDXf9/asset-1-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-PTzyXV/asset-0-ocr.png stdout -l deu+eng --psm 6 Image too small to scale!! (2x36 vs min width of 3) Line can",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-PTzyXV/asset-1-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-PTzyXV/asset-2-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-fJbCGT/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-fJbCGT/asset-1-ocr.png stdout -l deu+eng --psm 6"
         ],
         "llmConfigured": true,
         "tools": {
@@ -234,114 +245,130 @@
         }
       },
       "accountYield": {
+        "longevitycentervienna": {
+          "recentFetched": 9,
+          "recentAccepted": 2
+        },
+        "dany.hirsch": {
+          "recentFetched": 9,
+          "recentAccepted": 1
+        },
         "foodiewien": {
-          "recentFetched": 35.886,
-          "recentAccepted": 4.375
+          "recentFetched": 35.915,
+          "recentAccepted": 4.281
         },
         "bezirksvorstehung_mariahilf": {
-          "recentFetched": 35.145,
-          "recentAccepted": 8.221
+          "recentFetched": 35.359,
+          "recentAccepted": 8.166
         },
         "lisa.maria.b": {
-          "recentFetched": 35.145,
-          "recentAccepted": 5.059
+          "recentFetched": 35.359,
+          "recentAccepted": 4.794
         },
         "bottlechallenge_org": {
-          "recentFetched": 35.145,
-          "recentAccepted": 1.028
+          "recentFetched": 35.359,
+          "recentAccepted": 0.771
         },
         "ferris_bistro": {
-          "recentFetched": 33.297,
+          "recentFetched": 33.973,
           "recentAccepted": 0
         },
         "sonnentor": {
-          "recentFetched": 33.297,
+          "recentFetched": 33.973,
           "recentAccepted": 0
-        },
-        "boca.vienna": {
-          "recentFetched": 35.886,
-          "recentAccepted": 0.288
         },
         "shaysfoodblog": {
-          "recentFetched": 35.886,
-          "recentAccepted": 2.583
-        },
-        "fenstercafe": {
-          "recentFetched": 27.457,
-          "recentAccepted": 0
-        },
-        "firstonewien": {
-          "recentFetched": 27.457,
-          "recentAccepted": 0
-        },
-        "forno_vie": {
-          "recentFetched": 24.61,
-          "recentAccepted": 0
+          "recentFetched": 35.915,
+          "recentAccepted": 1.937
         },
         "fuego.wien": {
-          "recentFetched": 24.61,
+          "recentFetched": 27.457,
           "recentAccepted": 0
         },
         "galigrue.cafe": {
-          "recentFetched": 24.61,
+          "recentFetched": 27.457,
           "recentAccepted": 0
         },
         "gustolab.vienna": {
-          "recentFetched": 24.61,
+          "recentFetched": 27.457,
           "recentAccepted": 0
         },
         "huhu.hotpot_vienna": {
-          "recentFetched": 13.672,
+          "recentFetched": 15.254,
           "recentAccepted": 0
         },
         "interpolburger": {
-          "recentFetched": 24.61,
+          "recentFetched": 27.457,
           "recentAccepted": 0
         },
         "kaktusclubwien": {
-          "recentFetched": 24.61,
+          "recentFetched": 27.457,
           "recentAccepted": 0
         },
         "lautentico.at": {
-          "recentFetched": 24.61,
+          "recentFetched": 27.457,
           "recentAccepted": 0
         },
         "milyn_fusionhouse": {
-          "recentFetched": 27.457,
+          "recentFetched": 29.593,
           "recentAccepted": 0
         },
         "oakbrewcoffee": {
-          "recentFetched": 27.457,
+          "recentFetched": 29.593,
           "recentAccepted": 0
         },
         "raw_energy_austria": {
-          "recentFetched": 27.457,
+          "recentFetched": 29.593,
           "recentAccepted": 0
         },
         "schwestern_bazar": {
-          "recentFetched": 27.457,
+          "recentFetched": 29.593,
           "recentAccepted": 0
         },
         "shirokiya_at": {
-          "recentFetched": 27.457,
+          "recentFetched": 29.593,
           "recentAccepted": 0
         },
         "soula.vienna": {
+          "recentFetched": 27.457,
+          "recentAccepted": 0
+        },
+        "the.short.hall.vienna": {
+          "recentFetched": 21.875,
+          "recentAccepted": 0
+        },
+        "yu.noodle_hotpot_vienna": {
           "recentFetched": 24.61,
           "recentAccepted": 0
         }
       },
       "hashtagYield": {
         "wienessen": {
-          "recentFetched": 29.582,
-          "recentAccepted": 0.234
+          "recentFetched": 32.187,
+          "recentAccepted": 0.176
         },
         "gratisinwien": {
-          "recentFetched": 1.151,
+          "recentFetched": 0.863,
           "recentAccepted": 0
         },
         "wiengastro": {
-          "recentFetched": 3.463,
+          "recentFetched": 3.597,
+          "recentAccepted": 0
+        },
+        "happyhourvienna": {
+          "recentFetched": 0,
+          "recentAccepted": 0
+        },
+        "gratiswien": {
+          "recentFetched": 0,
+          "recentAccepted": 0
+        },
+        "wienkaffee": {
+          "recentFetched": 0,
+          "recentAccepted": 0
+        },
+        "wienstreetfood": {
+          "recentFetched": 0,
           "recentAccepted": 0
         },
         "wienaktion": {
@@ -363,46 +390,30 @@
         "wienangebote": {
           "recentFetched": 0,
           "recentAccepted": 0
-        },
-        "wienangebot": {
-          "recentFetched": 0,
-          "recentAccepted": 0
-        },
-        "wiengratis": {
-          "recentFetched": 0,
-          "recentAccepted": 0
-        },
-        "viennadeals": {
-          "recentFetched": 0,
-          "recentAccepted": 0
-        },
-        "wienerdeals": {
-          "recentFetched": 0,
-          "recentAccepted": 0
         }
       }
     }
   },
   "rejectionReasons": {
+    "no-concrete-offer": 166,
+    "general-recommendation": 7,
+    "post-too-old": 22,
     "non-vienna-location": 1,
     "missing-vienna-evidence": 12,
-    "no-concrete-offer": 168,
-    "post-too-old": 22,
-    "excluded-promotion-type": 3,
-    "general-recommendation": 5,
-    "missing-text": 8,
+    "excluded-promotion-type": 4,
+    "missing-text": 2,
     "offer-expired": 1
   },
   "graphEvidence": {
     "status": "ok",
-    "observed": 224,
-    "retained": 289,
+    "observed": 222,
+    "retained": 290,
     "blocked": 27
   },
-  "totalDeals": 4,
-  "verifiedBeforeLimit": 4,
+  "totalDeals": 7,
+  "verifiedBeforeLimit": 7,
   "outputLimit": 40,
-  "freshPostsFetched": 224,
-  "verifiedDeals": 4,
-  "message": "4 new, evidence-verified Vienna Instagram deals found."
+  "freshPostsFetched": 222,
+  "verifiedDeals": 7,
+  "message": "7 new, evidence-verified Vienna Instagram deals found."
 }
