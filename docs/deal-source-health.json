@@ -1,17 +1,23 @@
 {
-  "generatedAt": "2026-08-23T08:12:11.064Z",
+  "generatedAt": "2026-08-23T08:50:42.306Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 468,
-    "uniqueCandidates": 417,
+    "totalCandidates": 464,
+    "uniqueCandidates": 418,
     "distinctCandidates": 436,
-    "duplicateClusters": 19,
+    "duplicateClusters": 18,
     "topHealthySources": [
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "healthScore": 75,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 75,
+        "totalDeals": 3
       },
       {
         "sourceKey": "tiktok",
@@ -22,19 +28,13 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Instagram",
-        "healthScore": 59,
-        "totalDeals": 14
+        "healthScore": 58,
+        "totalDeals": 7
       },
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "healthScore": 57,
-        "totalDeals": 3
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "healthScore": 53,
         "totalDeals": 3
       }
     ],
@@ -58,14 +58,14 @@
         "totalDeals": 3
       },
       {
-        "sourceKey": "instagram-apify",
+        "sourceKey": "meta-instagram",
         "sourceLabel": "Instagram",
-        "missionFitScore": 59,
-        "totalDeals": 3
+        "missionFitScore": 63,
+        "totalDeals": 7
       },
       {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Instagram",
         "missionFitScore": 59,
         "totalDeals": 3
       }
@@ -115,6 +115,12 @@
         "totalDeals": 3
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Instagram",
+        "precisionScore": 70,
+        "totalDeals": 7
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 70,
@@ -127,15 +133,9 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Instagram",
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
         "precisionScore": 68,
-        "totalDeals": 14
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "precisionScore": 65,
         "totalDeals": 3
       }
     ],
@@ -153,6 +153,12 @@
         "totalDeals": 3
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 55,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 55,
@@ -161,14 +167,8 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Instagram",
-        "sourceWeightScore": 52,
-        "totalDeals": 14
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "sourceWeightScore": 51,
-        "totalDeals": 3
+        "sourceWeightScore": 54,
+        "totalDeals": 7
       }
     ],
     "topSourcesToFix": [
@@ -219,14 +219,20 @@
         "sampleTitles": []
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 0,
+        "sourceKey": "instagram-discovery",
+        "sourceLabel": "Daily Sync Instagram Discovery",
+        "healthScore": 37,
         "issues": [
-          "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
-          "liefert aktuell 0 Deals"
+          "wenige Deals sind frischer als 1 Tag",
+          "wenige klare Gratis-/Promo-Signale",
+          "Wien-Signal ist zu schwach",
+          "hohe Überschneidung mit anderen Quellen"
         ],
-        "sampleTitles": []
+        "sampleTitles": [
+          "1€ Matcha in Wien - @matchaba.at Mit der Neotaste bekommt ihr bis 25.08 Matcha fü...",
+          "BTS vom Online Supermarkt @gurkerl_at „FOODIE10“ für 10€ Rabatt🙌🏻 #robot #vienna #s...",
+          "3 Lunch Spots in der @westfieldshoppingcitysued , die du kennen solltest. 🍜🍔🍣 @tha..."
+        ]
       }
     ],
     "pipelineRuns": {
@@ -306,6 +312,90 @@
       "sourceWeightScore": 64
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 3,
+      "uniqueDeals": 3,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 3,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Testosteron steht für Antrieb, Energie, Muskeln und Libido. Sein größter Gegenspieler ist das Stresshormon Cortisol. Ist Cortisol dauerhaft",
+        "Auf zum Vienna Coffee Festival! ☕️ Vom 11. bis 13. September dreht sich in der MARX HALLE alles um die Bohne. Dich erwarten rund 100 Marken",
+        "Ich wohne in Wien und war trotzdem noch nie im Parlament. Bis jetzt. Ich muss ehrlich sagen: Ich hätte nicht gedacht, wie beeindruckend das"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-23T08:46:58.393Z",
+        "finishedAt": "2026-08-23T08:47:39.661Z",
+        "durationMs": 41268,
+        "counts": {
+          "rawCandidates": 119,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 3,
+          "previousDeals": 0,
+          "acceptedDeals": 3,
+          "rejectedDeals": 116
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 104,
+          "missing-text": 8,
+          "excluded-promotion-type": 1,
+          "missing-vienna-evidence": 3
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 85.7,
+      "topCategories": [
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 2
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 75,
+      "missionFitScore": 56,
+      "coverageScore": 11,
+      "precisionScore": 68,
+      "sourceWeightScore": 55
+    },
+    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -314,7 +404,7 @@
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 2,
-      "fresh7dCount": 17,
+      "fresh7dCount": 16,
       "viennaCount": 17,
       "foodDrinkCount": 4,
       "promoCount": 17,
@@ -328,7 +418,7 @@
       "uniqueRate": 1,
       "duplicateRate": 0,
       "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
+      "fresh7dRate": 0.9,
       "viennaRate": 1,
       "foodDrinkRate": 0.2,
       "promoRate": 1,
@@ -380,15 +470,15 @@
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Instagram",
-      "totalDeals": 14,
-      "uniqueDeals": 4,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 10,
-      "fresh1dCount": 0,
-      "fresh7dCount": 14,
-      "viennaCount": 14,
-      "foodDrinkCount": 9,
-      "promoCount": 11,
+      "totalDeals": 7,
+      "uniqueDeals": 1,
+      "duplicateDeals": 6,
+      "duplicateAcrossSources": 6,
+      "fresh1dCount": 1,
+      "fresh7dCount": 7,
+      "viennaCount": 7,
+      "foodDrinkCount": 4,
+      "promoCount": 6,
       "missingUrlCount": 0,
       "sampleTitles": [
         "Bewegung gefällig? 🏃‍♀️🧘‍♂️ Am 26. August laden wir dich von 16.30–17.30 Uhr in den Schmalzhoftempelpark ein, um schon jetzt in die Mariah",
@@ -396,26 +486,22 @@
         "Sport- und Spielefest für Kids im Esterhazypark 🎉 Am 27.8., 14–18 Uhr, gratis für die ganze Familie! 🚲 Fahrrad-Parcours der Mobilitätsagen"
       ],
       "lastRun": null,
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 0,
+      "uniqueRate": 0.1,
+      "duplicateRate": 0.9,
+      "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
       "foodDrinkRate": 0.6,
-      "promoRate": 0.8,
+      "promoRate": 0.9,
       "missingUrlRate": 0,
-      "averageQualityScore": 82.8,
+      "averageQualityScore": 86.3,
       "topCategories": [
         {
           "value": "essen",
-          "count": 6
+          "count": 3
         },
         {
           "value": "shopping",
-          "count": 4
-        },
-        {
-          "value": "kaffee",
           "count": 2
         },
         {
@@ -423,33 +509,33 @@
           "count": 1
         },
         {
-          "value": "supermarkt",
+          "value": "kaffee",
           "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "gratis",
-          "count": 7
-        },
-        {
-          "value": "rabatt",
           "count": 5
         },
         {
           "value": "bogo",
-          "count": 2
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
         }
       ],
       "issues": [
         "wenige Deals sind frischer als 1 Tag",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 59,
-      "missionFitScore": 58,
-      "coverageScore": 18,
-      "precisionScore": 68,
-      "sourceWeightScore": 52
+      "healthScore": 58,
+      "missionFitScore": 63,
+      "coverageScore": 16,
+      "precisionScore": 70,
+      "sourceWeightScore": 54
     },
     {
       "sourceKey": "food3",
@@ -778,6 +864,81 @@
       "sourceWeightScore": 42
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 10,
+      "uniqueDeals": 0,
+      "duplicateDeals": 10,
+      "duplicateAcrossSources": 10,
+      "fresh1dCount": 0,
+      "fresh7dCount": 10,
+      "viennaCount": 10,
+      "foodDrinkCount": 5,
+      "promoCount": 8,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Freibier Run with Free Drink and Kaiserschmarrn",
+        "10% Discount with Code LISAMARIA",
+        "Lunch Deal: Starter + Main Dish for €19"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 89.6,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        },
+        {
+          "value": "food/drink",
+          "count": 3
+        },
+        {
+          "value": "activity",
+          "count": 2
+        },
+        {
+          "value": "event",
+          "count": 1
+        },
+        {
+          "value": "supermarkt",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 5
+        },
+        {
+          "value": "gratis",
+          "count": 4
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 51,
+      "missionFitScore": 55,
+      "coverageScore": 15,
+      "precisionScore": 64,
+      "sourceWeightScore": 48
+    },
+    {
       "sourceKey": "church-events",
       "file": "deals-pending-church-events.json",
       "sourceLabel": "Freikirchen Wien",
@@ -992,82 +1153,6 @@
       "coverageScore": 11,
       "precisionScore": 56,
       "sourceWeightScore": 46
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 10,
-      "uniqueDeals": 0,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 10,
-      "fresh1dCount": 0,
-      "fresh7dCount": 10,
-      "viennaCount": 10,
-      "foodDrinkCount": 4,
-      "promoCount": 8,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Freibier Run on 25 August 2026 with Free Drink and Kaiserschmarrn",
-        "10% Discount with Code LISAMARIA",
-        "Lunch Deal Monday to Friday 12:00-15:00"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.4,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 89.6,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "food/drink",
-          "count": 3
-        },
-        {
-          "value": "activity",
-          "count": 2
-        },
-        {
-          "value": "event",
-          "count": 1
-        },
-        {
-          "value": "voucher",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 5
-        },
-        {
-          "value": "gratis",
-          "count": 4
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 49,
-      "missionFitScore": 51,
-      "coverageScore": 15,
-      "precisionScore": 61,
-      "sourceWeightScore": 45
     },
     {
       "sourceKey": "gutscheine",
@@ -1812,12 +1897,12 @@
       "file": "deals-pending-instagram-discovery.json",
       "sourceLabel": "Daily Sync Instagram Discovery",
       "totalDeals": 7,
-      "uniqueDeals": 1,
-      "duplicateDeals": 6,
-      "duplicateAcrossSources": 6,
+      "uniqueDeals": 2,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
       "fresh1dCount": 0,
       "fresh7dCount": 0,
-      "viennaCount": 1,
+      "viennaCount": 0,
       "foodDrinkCount": 7,
       "promoCount": 2,
       "missingUrlCount": 0,
@@ -1827,11 +1912,11 @@
         "3 Lunch Spots in der @westfieldshoppingcitysued , die du kennen solltest. 🍜🍔🍣 @tha..."
       ],
       "lastRun": null,
-      "uniqueRate": 0.1,
-      "duplicateRate": 0.9,
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
       "fresh1dRate": 0,
       "fresh7dRate": 0,
-      "viennaRate": 0.1,
+      "viennaRate": 0,
       "foodDrinkRate": 1,
       "promoRate": 0.3,
       "missingUrlRate": 0,
@@ -1858,10 +1943,10 @@
         "Wien-Signal ist zu schwach",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 35,
-      "missionFitScore": 45,
+      "healthScore": 37,
+      "missionFitScore": 43,
       "coverageScore": 10,
-      "precisionScore": 40,
+      "precisionScore": 39,
       "sourceWeightScore": 34
     },
     {
@@ -2060,61 +2145,6 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
-        "liefert aktuell 0 Deals"
-      ],
-      "healthScore": 0,
-      "missionFitScore": 0,
-      "coverageScore": 0,
-      "precisionScore": 0,
-      "sourceWeightScore": 0
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 0,
-      "uniqueDeals": 0,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-23T07:26:37.925Z",
-        "finishedAt": "2026-08-23T07:26:45.479Z",
-        "durationMs": 7554,
-        "counts": {
-          "rawCandidates": 1,
-          "normalizedCandidates": 0,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 0,
-          "rejectedDeals": 1
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 1
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 0,
-      "topCategories": [],
-      "topTypes": [],
-      "issues": [
-        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
