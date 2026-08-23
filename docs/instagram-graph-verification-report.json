@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-23T08:50:35.777Z",
+  "generatedAt": "2026-08-23T09:08:35.796Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -49,7 +49,7 @@
       "candidates": 0
     },
     "deals-pending-community.json": {
-      "deals": 40,
+      "deals": 28,
       "candidates": 0
     },
     "deals-pending-events.json": {
@@ -61,11 +61,11 @@
       "candidates": 0
     },
     "deals-pending-firecrawl4.json": {
-      "deals": 3,
+      "deals": 1,
       "candidates": 0
     },
     "deals-pending-firecrawl5.json": {
-      "deals": 3,
+      "deals": 2,
       "candidates": 1
     },
     "deals-pending-flights.json": {
@@ -73,7 +73,7 @@
       "candidates": 0
     },
     "deals-pending-food3.json": {
-      "deals": 3,
+      "deals": 2,
       "candidates": 1
     },
     "deals-pending-freikirchen.json": {
@@ -109,7 +109,7 @@
       "candidates": 0
     },
     "deals-pending-instagram-discovery.json": {
-      "deals": 7,
+      "deals": 5,
       "candidates": 0
     },
     "deals-pending-instagram-web.json": {
@@ -117,7 +117,7 @@
       "candidates": 0
     },
     "deals-pending-instagram.json": {
-      "deals": 7,
+      "deals": 5,
       "candidates": 0
     },
     "deals-pending-joe.json": {
@@ -125,7 +125,7 @@
       "candidates": 0
     },
     "deals-pending-member-benefits.json": {
-      "deals": 45,
+      "deals": 23,
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
@@ -149,11 +149,11 @@
       "candidates": 0
     },
     "deals-pending-vienna-promo-radar.json": {
-      "deals": 102,
+      "deals": 101,
       "candidates": 0
     },
     "deals-pending-wien-combined.json": {
-      "deals": 3,
+      "deals": 2,
       "candidates": 0
     }
   },
@@ -170,10 +170,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 50,
+  "fetchedPosts": 0,
   "exactMatches": 0,
   "retainedEvidencePosts": 241,
-  "errors": [],
+  "errors": [
+    {
+      "username": "bottlechallenge_org",
+      "message": "Meta API 403 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28bottlechallenge_org%29%7Busername%2Cname%2Cmedia.limit%2825%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] (#4) Application request limit reached"
+    }
+  ],
   "accountFailures": {
     "notarunclub_vienna": {
       "count": 1,
@@ -181,7 +186,13 @@
       "cooldownUntil": "2026-08-23T12:04:26.566Z"
     }
   },
-  "blockedEvidencePosts": 25,
+  "globalError": {
+    "username": "bottlechallenge_org",
+    "status": 403,
+    "code": "4",
+    "message": "Meta API 403 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28bottlechallenge_org%29%7Busername%2Cname%2Cmedia.limit%2825%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] (#4) Application request limit reached"
+  },
+  "blockedEvidencePosts": 27,
   "unmatchedCandidatePosts": 3,
   "message": "0/3 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
