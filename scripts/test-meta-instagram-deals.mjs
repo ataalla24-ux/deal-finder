@@ -80,6 +80,14 @@ const graphMissingTimestamp = normalizeGraphMediaItem({
 }, { sourceType: 'hashtag', sourceName: '#wienaktion' }, config, now);
 assert.equal(graphMissingTimestamp.rejection, 'missing-source-published-at');
 
+const hashtagOnlySignals = normalizeGraphMediaItem({
+  id: 'hashtag-only-signals',
+  caption: 'Unsere Cocktailanlage kann für Events gemietet werden. #happyhour #Wien',
+  permalink: 'https://www.instagram.com/reel/HASHTAGONLY/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+}, { sourceType: 'hashtag', sourceName: '#wienevents' }, config, now);
+assert.equal(hashtagOnlySignals.rejection, 'no-concrete-offer', 'hashtags discover posts but never prove an offer or Vienna location');
+
 const graphOldWithoutExpiry = normalizeGraphMediaItem({
   id: '17890003',
   caption: 'Wien: 20 % Rabatt auf Pizza',

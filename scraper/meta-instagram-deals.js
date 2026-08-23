@@ -725,6 +725,7 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
 
 export function normalizeGraphMediaItem(raw, context, config, now = new Date()) {
   const caption = cleanText(raw?.caption, 4000);
+  const captionProse = textWithoutHashtags(caption);
   if (SELF_SYNDICATION_PATTERNS.some((pattern) => pattern.test(caption))) {
     return { deal: null, rejection: 'self-syndicated-deal' };
   }
@@ -736,7 +737,7 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
   const ai = mediaEvidence.ai && typeof mediaEvidence.ai === 'object' ? mediaEvidence.ai : null;
   const aiConfidenceThreshold = Number(config.mediaLlmMinConfidence || 0.82);
   const aiConfidence = Number(ai?.confidence || 0);
-  const captionPromotion = classifyPromotion(caption);
+  const captionPromotion = classifyPromotion(captionProse);
   const ocrPromotion = classifyPromotion(ocrText);
   const trustedAiOffer = ai?.isDeal === true
     && aiConfidence >= aiConfidenceThreshold
@@ -752,17 +753,20 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
       && aiConfidence >= aiConfidenceThreshold) {
     return { deal: null, rejection: 'media-ai-rejected-offer' };
   }
+  const promotionText = [captionProse, ocrText ? `Bildtext: ${ocrText}` : '', trustedAiOffer ? `AI-Angebotsbeleg: ${trustedAiOffer}` : '']
+    .filter(Boolean)
+    .join('\n');
+  const promotion = classifyPromotion(promotionText);
+  if (!promotion.accepted) return { deal: null, rejection: promotion.reason };
   const contentText = [caption, ocrText ? `Bildtext: ${ocrText}` : '', trustedAiOffer ? `AI-Angebotsbeleg: ${trustedAiOffer}` : '']
     .filter(Boolean)
     .join('\n');
-  const promotion = classifyPromotion(contentText);
-  if (!promotion.accepted) return { deal: null, rejection: promotion.reason };
   const sourcePublishedAt = toIso(raw?.timestamp);
   if (!sourcePublishedAt) return { deal: null, rejection: 'missing-source-published-at' };
 
   const account = context?.account || null;
   const viennaEvidence = findViennaEvidence({
-    caption: [caption, ocrText].filter(Boolean).join(' '),
+    caption: [captionProse, ocrText].filter(Boolean).join(' '),
     // A hashtag is a discovery hint, not proof that the actual offer is in Vienna.
     sourceName: context?.sourceType === 'account' ? context?.sourceName : '',
     username: raw?.username || account?.username,
@@ -780,7 +784,7 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
   const username = normalizedUsername(raw?.username || account?.username);
   const brand = cleanText(raw?.name, 100) || (username ? `@${username}` : cleanText(context?.sourceName, 100)) || 'Instagram';
   const category = inferCategory(contentText);
-  const title = inferTitle(contentText, brand, promotion);
+  const title = inferTitle(promotionText, brand, promotion);
   const deal = buildDealBase({
     id: `meta-ig-${cleanText(raw?.id, 120) || stableHash(url)}`,
     brand,
