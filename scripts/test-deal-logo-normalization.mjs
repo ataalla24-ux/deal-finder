@@ -152,6 +152,56 @@ expectNormalizedLogo(
   {
     title: 'Happy Hour: 1+1 Drink (für 12,50 €)',
     type: 'bogo',
+    description: '',
+  },
+);
+
+expectNormalizedLogo(
+  'coupon boilerplate does not turn a percentage discount into a free deal',
+  {
+    brand: 'Oral-B',
+    title: '10% Gutschein für alles',
+    description: 'Aktuelle Gutscheine, frisch geprüft & kostenlos sichern.',
+    type: 'gratis',
+    category: 'shopping',
+    url: 'https://www.gutscheine.at/oral-b',
+  },
+  {
+    type: 'rabatt',
+    logo: '🏷️',
+  },
+);
+
+expectNormalizedLogo(
+  'euro coupon remains a voucher despite free aggregator boilerplate',
+  {
+    brand: 'TUI',
+    title: '40 € TUI Coupon für Top-Reiseziele',
+    description: 'Aktuelle Gutscheine, frisch geprüft & kostenlos sichern.',
+    type: 'gratis',
+    category: 'reisen',
+    url: 'https://www.gutscheine.at/tui',
+  },
+  {
+    type: 'gutschein',
+  },
+);
+
+expectNormalizedLogo(
+  'written Pizzamann buy-two-get-one copy is BOGO and expiry text is deduplicated',
+  {
+    brand: 'Pizzamann',
+    title: 'Gratis Extra-Pizza jeden Donnerstag bei Pizzamann',
+    description: 'Beim Kauf von 2 Pizzen ist die günstigere gratis dazu. >> Mehr erfahren',
+    type: 'freebie',
+    category: 'essen',
+    expiresOriginal: 'jeden Donnerstag Donnerstag',
+    url: 'https://www.drei.at/de/dreiplus/ersparnisse/pizza-mann/',
+  },
+  {
+    type: 'bogo',
+    description: 'Beim Kauf von 2 Pizzen ist die günstigere gratis dazu.',
+    expiresOriginal: 'jeden Donnerstag',
   },
 );
 

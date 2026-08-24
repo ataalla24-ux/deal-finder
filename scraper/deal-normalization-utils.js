@@ -562,10 +562,12 @@ function inferLogo(deal = {}, brand = '') {
   if (type === 'bogo') return '🔁';
   if (type === 'freebie') return '✨';
   if (type === 'gratis') return '🎁';
+  if (type === 'rabatt' || type === 'gutschein') return '🏷️';
   return '🎯';
 }
 
 function inferPreferredType(deal = {}) {
+  const title = cleanUiNoiseText(deal.title || '').toLowerCase();
   const combined = cleanUiNoiseText([
     deal.title,
     deal.description,
@@ -573,18 +575,28 @@ function inferPreferredType(deal = {}) {
     deal.distance,
     deal.url,
   ].filter(Boolean).join(' ')).toLowerCase();
+  const titleClaimsFree = /\b(gratis|kostenlos|free|pay what you want)\b/i.test(title);
 
   if (/\b(gewinnspiel|giveaway|verlosen|zu gewinnen|chance auf|gl[üu]cksrad)\b/i.test(combined)) {
     return 'gewinnspiel';
   }
 
-  if (/(?:\b\d+(?:[,.]\d+)?\s*€[^.]{0,40}\b(?:gutschein|bonus)\b|\b(?:gutschein|bonus)\b[^.]{0,40}\d+(?:[,.]\d+)?\s*€)/i.test(combined)) {
+  if (!titleClaimsFree && /\b\d{1,2}\s*%[^.]{0,50}\b(?:gutschein|coupon|rabatt)\b|\b(?:gutschein|coupon|rabatt)\b[^.]{0,50}\d{1,2}\s*%/i.test(title)) {
+    return 'rabatt';
+  }
+
+  if (!titleClaimsFree && /(?:\b\d+(?:[,.]\d+)?\s*€[^.]{0,50}\b(?:gutschein|coupon|bonus)\b|\b(?:gutschein|coupon|bonus)\b[^.]{0,50}\d+(?:[,.]\d+)?\s*€)/i.test(title)) {
+    return 'gutschein';
+  }
+
+  if (/(?:\b\d+(?:[,.]\d+)?\s*€[^.]{0,40}\b(?:gutschein|coupon|bonus)\b|\b(?:gutschein|coupon|bonus)\b[^.]{0,40}\d+(?:[,.]\d+)?\s*€)/i.test(combined)) {
     return 'gutschein';
   }
 
   if (/\b(1\+1|2for1|2 for 1|2f[üu]r1|2 f[üu]r 1|buy (?:one|1) get (?:one|1)|bogo|4 f[üu]r 3|3\+3|4\+2|mix&match|2x .+ \+ 1 gratis)\b/i.test(combined)
       || /\b(?:kauf von|buy)\s*2\b[^.]{0,80}\b1\b[^.]{0,30}\bgratis\b/i.test(combined)
-      || /\b2\s+pizzen?\b[^.]{0,50}\b1\s+pizza\b[^.]{0,24}\bgratis\b/i.test(combined)) {
+      || /\b2\s+pizzen?\b[^.]{0,50}\b1\s+pizza\b[^.]{0,24}\bgratis\b/i.test(combined)
+      || /\bkauf von\s*2\s+pizzen?\b[^.]{0,80}\b(?:g[üu]nstigere|eine|1)\b[^.]{0,30}\bgratis\b/i.test(combined)) {
     return 'bogo';
   }
 
@@ -709,6 +721,7 @@ function isRedundantDescription(description = '', deal = {}) {
 function cleanDescriptionForDisplay(description = '', deal = {}) {
   let text = cleanUiNoiseText(description);
   if (!text) return '';
+  if (/^(free|gratis|kostenlos|deal|angebot)$/i.test(text)) return '';
 
   const brand = cleanUiNoiseText(deal.brand || '');
   if (brand) {
@@ -727,6 +740,7 @@ function cleanDescriptionForDisplay(description = '', deal = {}) {
   text = text
     .replace(/\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z\b/gi, ' ')
     .replace(/\bGratis\s*[•|-]\s*Gratis\b/gi, 'Gratis')
+    .replace(/\s*(?:>>|►|→)\s*mehr erfahren\b.*$/i, ' ')
     .replace(/\s*[•|]\s*/g, ' • ')
     .replace(/\s+/g, ' ')
     .replace(/^[•,:\-–\s]+|[•,:\-–\s]+$/g, '')
@@ -799,6 +813,7 @@ function sanitizeExpiryText(value) {
     .replace(/\bfrühjahr 20\d{2}\b/gi, ' ')
     .replace(/\bfruehjahr 20\d{2}\b/gi, ' ')
     .replace(/\bseason opening 20\d{2}\b/gi, ' ')
+    .replace(/\bjeden\s+(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\s+\1\b/gi, 'jeden $1')
     .replace(/\(neotaste deal\)/gi, ' ')
     .replace(/\(7 days rolling\)/gi, ' ')
     .replace(/\bw\+\s*weeks\b/gi, ' ')
@@ -867,9 +882,9 @@ function normalizeDealRecord(deal = {}) {
 
   const categoryAsciiSignal = normalizeAscii(categorySignal);
   if (/\bomv\b/.test(categoryAsciiSignal)) {
-    if (hasSignalTerm(categoryAsciiSignal, 'kaffee|coffee|espresso|latte|matcha|cappuccino')) {
+    if (hasSignalTerm(categoryAsciiSignal, 'kaffee|coffee|espresso|latte|matcha|cappuccino|drink|getraenk|getrank|tonic|sunset|orange|strawberry|coconut')) {
       category = 'kaffee';
-    } else if (hasSignalTerm(categoryAsciiSignal, 'drink|getraenk|getrank|tonic|sunset|orange|strawberry|coconut|sandwich|sandwiches|meal|snack')) {
+    } else if (hasSignalTerm(categoryAsciiSignal, 'sandwich|sandwiches|meal|snack')) {
       category = 'essen';
     }
   }

@@ -77,8 +77,8 @@ assert.equal(
     type: 'gratis',
     distance: 'OMV Stationen Wien',
   }).category,
-  'essen',
-  'OMV VIVA drink deals should not stay in supermarket',
+  'kaffee',
+  'OMV VIVA drink deals should normalize to the drink/coffee category',
 );
 
 assert.equal(
