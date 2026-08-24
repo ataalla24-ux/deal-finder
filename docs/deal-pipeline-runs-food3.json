@@ -2,9 +2,99 @@
   "schemaVersion": 1,
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
-  "updatedAt": "2026-08-23T03:08:48.361Z",
-  "runCount": 30,
+  "updatedAt": "2026-08-24T03:12:17.342Z",
+  "runCount": 31,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "food3-2026-08-24T03:12:17.342Z",
+      "sourceKey": "food3",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "status": "completed-with-errors",
+      "startedAt": "2026-08-24T03:07:09.026Z",
+      "finishedAt": "2026-08-24T03:12:17.342Z",
+      "durationMs": 308316,
+      "outputFile": "docs/deals-pending-food3.json",
+      "counts": {
+        "rawCandidates": 1,
+        "normalizedCandidates": 1,
+        "verifiedCandidates": 2,
+        "previousDeals": 2,
+        "acceptedDeals": 2,
+        "rejectedDeals": 1
+      },
+      "rejectedByReason": {
+        "post-verification-rejected": 1
+      },
+      "rejectedSamples": [
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-fvz6u4",
+            "title": "Instagram: Dein Moment. Dein Genuss. Dein 808.✨️ 📍Laudongasse ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DcNqQdUtc2H/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "agentStatus": "completed-with-errors",
+        "creditsUsed": 0,
+        "configuredSources": 6,
+        "attemptedSources": 3,
+        "completedSources": 1,
+        "targetsPerRun": 3,
+        "agentTimeoutSeconds": 120,
+        "maxCreditsPerTarget": 300,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/happyhourwien/",
+            "status": "completed-search",
+            "rawCandidates": 1,
+            "searchCandidates": 1,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/lunchdealwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Firecrawl Agent nach 120s abgebrochen"
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/neueröffnungwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Firecrawl Agent nach 120s abgebrochen"
+          }
+        ],
+        "retainedPreviousDeals": 2,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 0,
+        "verifier": {
+          "statusCounts": {
+            "verified-meta-graph": 1,
+            "verified-original-post": 1
+          },
+          "verifiedOriginalPosts": 1,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 2
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "https://www.instagram.com/explore/tags/lunchdealwien/: Firecrawl Agent nach 120s abgebrochen",
+        "https://www.instagram.com/explore/tags/neueröffnungwien/: Firecrawl Agent nach 120s abgebrochen"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "food3-2026-08-23T03:08:48.361Z",
