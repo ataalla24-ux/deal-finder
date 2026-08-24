@@ -57,9 +57,6 @@ for (const [index, location] of locations.entries()) {
   const latitude = Number(location.latitude);
   const longitude = Number(location.longitude);
   const dealIds = Array.isArray(location.dealIds) ? location.dealIds : [];
-  const matchCount = ['brandMatches', 'titleMatches', 'placeMatches']
-    .flatMap((key) => Array.isArray(location[key]) ? location[key] : [])
-    .filter((value) => String(value || '').trim()).length;
 
   if (!id) errors.push(`${label}.id is required`);
   if (locationIds.has(id)) errors.push(`${label}.id is duplicated: ${id}`);
@@ -82,8 +79,8 @@ for (const [index, location] of locations.entries()) {
     chainLocations.push(location);
     locationsByChainId.set(chainId, chainLocations);
   }
-  if (!dealIds.length && matchCount === 0) {
-    errors.push(`${label} must reference a deal or include a matching rule`);
+  if (!dealIds.length) {
+    errors.push(`${label} must reference at least one active deal`);
   }
   for (const dealId of dealIds) {
     if (!liveDealIds.has(dealId)) errors.push(`${label} references missing live deal: ${dealId}`);

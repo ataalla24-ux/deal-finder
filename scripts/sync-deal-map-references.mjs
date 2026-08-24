@@ -14,6 +14,7 @@ const liveDeals = Array.isArray(dealsPayload.deals) ? dealsPayload.deals : [];
 const liveDealIds = new Set(liveDeals.map((deal) => String(deal.id || '').trim()).filter(Boolean));
 const removedReferences = [];
 const addedReferences = [];
+const removedLocations = [];
 let changed = false;
 
 function normalized(value) {
@@ -69,6 +70,11 @@ const locations = (mapPayload.locations || []).map((location) => {
   }
 
   return next;
+}).filter((location) => {
+  if (location.dealIds.length > 0) return true;
+  removedLocations.push({ locationId: location.id, name: location.name });
+  changed = true;
+  return false;
 });
 
 if (!changed) {
@@ -85,9 +91,15 @@ const temporaryPath = `${mapPath}.tmp-${process.pid}`;
 await writeFile(temporaryPath, `${JSON.stringify(nextPayload, null, 2)}\n`);
 await rename(temporaryPath, mapPath);
 
-console.log(`Removed ${removedReferences.length} stale map references and added ${addedReferences.length} verified references.`);
+console.log(
+  `Removed ${removedReferences.length} stale map references, removed ${removedLocations.length} empty locations, `
+    + `and added ${addedReferences.length} verified references.`
+);
 for (const item of removedReferences) {
   console.log(`- ${item.locationId}: ${item.dealId}`);
+}
+for (const item of removedLocations) {
+  console.log(`- ${item.locationId}: ${item.name} (no active deal)`);
 }
 for (const item of addedReferences) {
   console.log(`+ ${item.locationId}: ${item.dealId}`);
