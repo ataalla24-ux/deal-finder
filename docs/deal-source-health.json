@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-08-24T19:34:08.223Z",
+  "generatedAt": "2026-08-24T19:57:24.337Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 433,
-    "uniqueCandidates": 400,
-    "distinctCandidates": 415,
-    "duplicateClusters": 15,
+    "totalCandidates": 429,
+    "uniqueCandidates": 402,
+    "distinctCandidates": 414,
+    "duplicateClusters": 12,
     "topHealthySources": [
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 86,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -26,16 +32,10 @@
         "totalDeals": 15
       },
       {
-        "sourceKey": "church-events",
-        "sourceLabel": "Freikirchen Wien",
-        "healthScore": 64,
-        "totalDeals": 4
-      },
-      {
-        "sourceKey": "church-gemeinde",
-        "sourceLabel": "Freikirchen Wien",
-        "healthScore": 64,
-        "totalDeals": 4
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Instagram",
+        "healthScore": 65,
+        "totalDeals": 7
       }
     ],
     "topMissionSources": [
@@ -64,10 +64,10 @@
         "totalDeals": 7
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "missionFitScore": 54,
-        "totalDeals": 15
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "missionFitScore": 56,
+        "totalDeals": 5
       }
     ],
     "topCoverageSources": [
@@ -111,7 +111,7 @@
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 80,
+        "precisionScore": 88,
         "totalDeals": 1
       },
       {
@@ -127,30 +127,30 @@
         "totalDeals": 15
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Instagram",
+        "precisionScore": 69,
+        "totalDeals": 7
+      },
+      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 68,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Instagram",
-        "precisionScore": 67,
-        "totalDeals": 7
       }
     ],
     "topWeightedSources": [
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceWeightScore": 70,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 64,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 62,
-        "totalDeals": 1
       },
       {
         "sourceKey": "wien-combined",
@@ -167,7 +167,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Instagram",
-        "sourceWeightScore": 51,
+        "sourceWeightScore": 53,
         "totalDeals": 7
       }
     ],
@@ -247,6 +247,75 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Ort unklar: both now offering free water bottle refills and part of our ..."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-24T03:07:09.026Z",
+        "finishedAt": "2026-08-24T03:12:17.342Z",
+        "durationMs": 308316,
+        "counts": {
+          "rawCandidates": 1,
+          "normalizedCandidates": 1,
+          "verifiedCandidates": 2,
+          "previousDeals": 2,
+          "acceptedDeals": 2,
+          "rejectedDeals": 1
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 1
+        },
+        "errors": [
+          "https://www.instagram.com/explore/tags/lunchdealwien/: Firecrawl Agent nach 120s abgebrochen",
+          "https://www.instagram.com/explore/tags/neueröffnungwien/: Firecrawl Agent nach 120s abgebrochen"
+        ],
+        "reportFile": "deal-pipeline-last-run-food3.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 72,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 86,
+      "missionFitScore": 78,
+      "coverageScore": 16,
+      "precisionScore": 88,
+      "sourceWeightScore": 70
+    },
     {
       "sourceKey": "joe",
       "file": "deals-pending-joe.json",
@@ -462,6 +531,82 @@
       "sourceWeightScore": 56
     },
     {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Instagram",
+      "totalDeals": 7,
+      "uniqueDeals": 4,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 1,
+      "fresh7dCount": 7,
+      "viennaCount": 7,
+      "foodDrinkCount": 2,
+      "promoCount": 7,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "GRATIS!",
+        "Kostenlos, unkompliziert, direkt bei dir im Grätzl.",
+        "Sport- und Spielefest für Kids im Esterhazypark 🎉 Am 27.8., 14–18 Uhr, gratis für die ganze Familie!"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88.3,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        },
+        {
+          "value": "freizeit",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 5
+        },
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 65,
+      "missionFitScore": 56,
+      "coverageScore": 16,
+      "precisionScore": 69,
+      "sourceWeightScore": 53
+    },
+    {
       "sourceKey": "church-events",
       "file": "deals-pending-church-events.json",
       "sourceLabel": "Freikirchen Wien",
@@ -619,149 +764,65 @@
       "sourceWeightScore": 43
     },
     {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Ort unklar: both now offering free water bottle refills and part of our ..."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-24T03:07:09.026Z",
-        "finishedAt": "2026-08-24T03:12:17.342Z",
-        "durationMs": 308316,
-        "counts": {
-          "rawCandidates": 1,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 2,
-          "previousDeals": 2,
-          "acceptedDeals": 2,
-          "rejectedDeals": 1
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 1
-        },
-        "errors": [
-          "https://www.instagram.com/explore/tags/lunchdealwien/: Firecrawl Agent nach 120s abgebrochen",
-          "https://www.instagram.com/explore/tags/neueröffnungwien/: Firecrawl Agent nach 120s abgebrochen"
-        ],
-        "reportFile": "deal-pipeline-last-run-food3.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 72,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 78,
-      "coverageScore": 15,
-      "precisionScore": 80,
-      "sourceWeightScore": 62
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Instagram",
-      "totalDeals": 7,
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 5,
       "uniqueDeals": 2,
-      "duplicateDeals": 5,
-      "duplicateAcrossSources": 5,
-      "fresh1dCount": 1,
-      "fresh7dCount": 7,
-      "viennaCount": 7,
-      "foodDrinkCount": 2,
-      "promoCount": 7,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 2,
+      "fresh7dCount": 5,
+      "viennaCount": 5,
+      "foodDrinkCount": 3,
+      "promoCount": 2,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "GRATIS!",
-        "Kostenlos, unkompliziert, direkt bei dir im Grätzl.",
-        "Sport- und Spielefest für Kids im Esterhazypark 🎉 Am 27.8., 14–18 Uhr, gratis für die ganze Familie!"
+        "Mittagsmenü nur €14,90 mit Menüsuppe inklusive",
+        "Lunch Deal von Montag bis Freitag, 12:00 - 15:00",
+        "10% Rabatt mit Code LISAMARIA"
       ],
       "lastRun": null,
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 0.1,
+      "uniqueRate": 0.4,
+      "duplicateRate": 0.6,
+      "fresh1dRate": 0.4,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 1,
+      "foodDrinkRate": 0.6,
+      "promoRate": 0.4,
       "missingUrlRate": 0,
-      "averageQualityScore": 88.3,
+      "averageQualityScore": 90.6,
       "topCategories": [
         {
-          "value": "shopping",
-          "count": 2
-        },
-        {
           "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "fitness",
-          "count": 1
+          "count": 2
         },
         {
           "value": "freizeit",
-          "count": 1
+          "count": 2
         },
         {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "kultur",
+          "value": "drink",
           "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "gratis",
-          "count": 5
+          "value": "rabatt",
+          "count": 4
         },
         {
-          "value": "rabatt",
-          "count": 2
+          "value": "gratis",
+          "count": 1
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 58,
+      "healthScore": 61,
       "missionFitScore": 56,
-      "coverageScore": 15,
-      "precisionScore": 67,
+      "coverageScore": 14,
+      "precisionScore": 65,
       "sourceWeightScore": 51
     },
     {
@@ -920,74 +981,6 @@
       "missionFitScore": 40,
       "coverageScore": 31,
       "precisionScore": 44,
-      "sourceWeightScore": 42
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 9,
-      "uniqueDeals": 3,
-      "duplicateDeals": 6,
-      "duplicateAcrossSources": 6,
-      "fresh1dCount": 0,
-      "fresh7dCount": 9,
-      "viennaCount": 9,
-      "foodDrinkCount": 2,
-      "promoCount": 6,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "All You Can Drink Upgrade für 7 € Aufpreis",
-        "4 Wochen Kältekammer für 200 €",
-        "Kostenlose Führungen im Parlament Wien"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.2,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 90,
-      "topCategories": [
-        {
-          "value": "food/drink",
-          "count": 3
-        },
-        {
-          "value": "veranstaltung",
-          "count": 3
-        },
-        {
-          "value": "wellness",
-          "count": 2
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 5
-        },
-        {
-          "value": "rabatt",
-          "count": 4
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 50,
-      "missionFitScore": 42,
-      "coverageScore": 14,
-      "precisionScore": 57,
       "sourceWeightScore": 42
     },
     {
