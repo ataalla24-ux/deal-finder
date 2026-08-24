@@ -215,7 +215,7 @@ function renderPage(feed, deals, now) {
   <link rel="stylesheet" href="/consent.css?v=5">
   <link rel="stylesheet" href="/blog/blog.css">
   <script defer src="/analytics-config.js"></script>
-  <script defer src="/consent.js?v=5"></script>
+  <script defer src="/consent.js?v=7"></script>
   <script type="application/ld+json">${JSON.stringify(structuredData)}</script>
 </head>
 <body>
