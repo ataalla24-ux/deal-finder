@@ -169,6 +169,7 @@ expectNormalizedLogo(
   {
     type: 'rabatt',
     logo: '🏷️',
+    description: '',
   },
 );
 
@@ -184,6 +185,22 @@ expectNormalizedLogo(
   },
   {
     type: 'gutschein',
+    description: '',
+  },
+);
+
+expectNormalizedLogo(
+  'generic benefit-page call to action is not shown as a deal description',
+  {
+    brand: 'Nordsee',
+    title: '1+1 Wrap gratis bei Nordsee',
+    description: 'Hier erfährst du mehr über deinen Vorteil bei Nordsee >> informieren',
+    type: 'bogo',
+    category: 'essen',
+    url: 'https://www.drei.at/de/dreiplus/ersparnisse/nordsee/',
+  },
+  {
+    description: '',
   },
 );
 

@@ -722,6 +722,11 @@ function cleanDescriptionForDisplay(description = '', deal = {}) {
   let text = cleanUiNoiseText(description);
   if (!text) return '';
   if (/^(free|gratis|kostenlos|deal|angebot)$/i.test(text)) return '';
+  if (/^aktuelle\b.*\bgutscheine?\b/i.test(text)
+      && /\bfrisch gepr[üu]ft\b/i.test(text)
+      && /\bkostenlos\b/i.test(text)
+      && /\bsichern\b/i.test(text)) return '';
+  if (/^hier erf[äa]hrst du mehr [üu]ber deinen vorteil bei\b/i.test(text)) return '';
 
   const brand = cleanUiNoiseText(deal.brand || '');
   if (brand) {
