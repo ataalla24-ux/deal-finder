@@ -1,18 +1,12 @@
 {
-  "generatedAt": "2026-08-24T05:20:14.262Z",
+  "generatedAt": "2026-08-24T05:57:25.208Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 438,
-    "uniqueCandidates": 393,
-    "distinctCandidates": 412,
+    "totalCandidates": 460,
+    "uniqueCandidates": 415,
+    "distinctCandidates": 434,
     "duplicateClusters": 19,
     "topHealthySources": [
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "healthScore": 75,
-        "totalDeals": 10
-      },
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
@@ -32,19 +26,19 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "healthScore": 57,
-        "totalDeals": 23
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "healthScore": 61,
+        "totalDeals": 10
+      },
+      {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "healthScore": 56,
+        "totalDeals": 2
       }
     ],
     "topMissionSources": [
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "missionFitScore": 79,
-        "totalDeals": 10
-      },
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
@@ -68,6 +62,12 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "missionFitScore": 61,
         "totalDeals": 2
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Instagram",
+        "missionFitScore": 59,
+        "totalDeals": 3
       }
     ],
     "topCoverageSources": [
@@ -79,18 +79,18 @@
         "fresh1dCount": 0
       },
       {
-        "sourceKey": "gutscheine",
-        "sourceLabel": "Gutscheine.at",
-        "coverageScore": 45,
-        "totalDeals": 35,
-        "fresh1dCount": 35
-      },
-      {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
-        "coverageScore": 34,
-        "totalDeals": 23,
-        "fresh1dCount": 23
+        "coverageScore": 54,
+        "totalDeals": 45,
+        "fresh1dCount": 45
+      },
+      {
+        "sourceKey": "gutscheine",
+        "sourceLabel": "Gutscheine.at",
+        "coverageScore": 40,
+        "totalDeals": 35,
+        "fresh1dCount": 35
       },
       {
         "sourceKey": "community",
@@ -133,19 +133,13 @@
         "totalDeals": 17
       },
       {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
         "precisionScore": 68,
-        "totalDeals": 10
+        "totalDeals": 2
       }
     ],
     "topWeightedSources": [
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "sourceWeightScore": 64,
-        "totalDeals": 10
-      },
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
@@ -168,6 +162,12 @@
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "sourceWeightScore": 53,
+        "totalDeals": 2
+      },
+      {
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "sourceWeightScore": 51,
         "totalDeals": 2
       }
     ],
@@ -249,68 +249,6 @@
     }
   },
   "sources": [
-    {
-      "sourceKey": "joe",
-      "file": "deals-pending-joe.json",
-      "sourceLabel": "jö Bonus Club",
-      "totalDeals": 10,
-      "uniqueDeals": 10,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 10,
-      "fresh7dCount": 10,
-      "viennaCount": 0,
-      "foodDrinkCount": 10,
-      "promoCount": 8,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "jö Äpp Extrem Aktion bei BILLA",
-        "jö Rabattsammler",
-        "jö äpp Day"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84.3,
-      "topCategories": [
-        {
-          "value": "supermarkt",
-          "count": 5
-        },
-        {
-          "value": "kaffee",
-          "count": 4
-        },
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 5
-        },
-        {
-          "value": "rabatt",
-          "count": 5
-        }
-      ],
-      "issues": [
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 75,
-      "missionFitScore": 79,
-      "coverageScore": 22,
-      "precisionScore": 68,
-      "sourceWeightScore": 64
-    },
     {
       "sourceKey": "wien-combined",
       "file": "deals-pending-wien-combined.json",
@@ -537,79 +475,67 @@
       "sourceWeightScore": 62
     },
     {
-      "sourceKey": "member-benefits",
-      "file": "deals-pending-member-benefits.json",
-      "sourceLabel": "Member Benefits",
-      "totalDeals": 23,
-      "uniqueDeals": 23,
+      "sourceKey": "joe",
+      "file": "deals-pending-joe.json",
+      "sourceLabel": "jö Bonus Club",
+      "totalDeals": 10,
+      "uniqueDeals": 10,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 23,
-      "fresh7dCount": 23,
+      "fresh1dCount": 0,
+      "fresh7dCount": 10,
       "viennaCount": 0,
-      "foodDrinkCount": 4,
-      "promoCount": 16,
+      "foodDrinkCount": 10,
+      "promoCount": 8,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "1+1 Kinoticket gratis bei KinoDonnerstag",
-        "1+1 Wrap gratis bei Nordsee",
-        "1+1 Ticket gratis bei Madame Tussauds Wien"
+        "jö Äpp Extrem Aktion bei BILLA",
+        "jö Rabattsammler",
+        "jö äpp Day"
       ],
       "lastRun": null,
       "uniqueRate": 1,
       "duplicateRate": 0,
-      "fresh1dRate": 1,
+      "fresh1dRate": 0,
       "fresh7dRate": 1,
       "viennaRate": 0,
-      "foodDrinkRate": 0.2,
-      "promoRate": 0.7,
+      "foodDrinkRate": 1,
+      "promoRate": 0.8,
       "missingUrlRate": 0,
-      "averageQualityScore": 44.1,
+      "averageQualityScore": 84.3,
       "topCategories": [
         {
-          "value": "kultur",
-          "count": 10
-        },
-        {
-          "value": "technik",
+          "value": "supermarkt",
           "count": 5
         },
         {
-          "value": "essen",
+          "value": "kaffee",
           "count": 4
         },
         {
-          "value": "shopping",
-          "count": 3
-        },
-        {
-          "value": "reisen",
+          "value": "essen",
           "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "bogo",
-          "count": 8
-        },
-        {
           "value": "gratis",
-          "count": 8
+          "count": 5
         },
         {
           "value": "rabatt",
-          "count": 7
+          "count": 5
         }
       ],
       "issues": [
-        "geringe Food-/Drink-Relevanz",
+        "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 57,
-      "missionFitScore": 49,
-      "coverageScore": 34,
-      "precisionScore": 46,
-      "sourceWeightScore": 48
+      "healthScore": 61,
+      "missionFitScore": 57,
+      "coverageScore": 15,
+      "precisionScore": 56,
+      "sourceWeightScore": 50
     },
     {
       "sourceKey": "firecrawl5",
@@ -831,6 +757,85 @@
       "coverageScore": 15,
       "precisionScore": 63,
       "sourceWeightScore": 48
+    },
+    {
+      "sourceKey": "member-benefits",
+      "file": "deals-pending-member-benefits.json",
+      "sourceLabel": "Member Benefits",
+      "totalDeals": 45,
+      "uniqueDeals": 45,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 45,
+      "fresh7dCount": 45,
+      "viennaCount": 0,
+      "foodDrinkCount": 7,
+      "promoCount": 18,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "1+1 Ticket gratis bei Oberes Belvedere",
+        "1+1 Kinoticket gratis bei KinoDonnerstag",
+        "1+1 Wrap gratis bei Nordsee"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.2,
+      "promoRate": 0.4,
+      "missingUrlRate": 0,
+      "averageQualityScore": 34.9,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 17
+        },
+        {
+          "value": "kultur",
+          "count": 13
+        },
+        {
+          "value": "essen",
+          "count": 5
+        },
+        {
+          "value": "technik",
+          "count": 5
+        },
+        {
+          "value": "beauty",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 27
+        },
+        {
+          "value": "bogo",
+          "count": 10
+        },
+        {
+          "value": "gratis",
+          "count": 8
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 52,
+      "missionFitScore": 40,
+      "coverageScore": 54,
+      "precisionScore": 40,
+      "sourceWeightScore": 46
     },
     {
       "sourceKey": "community",
@@ -1342,9 +1347,9 @@
       ],
       "healthScore": 44,
       "missionFitScore": 26,
-      "coverageScore": 45,
+      "coverageScore": 40,
       "precisionScore": 28,
-      "sourceWeightScore": 35
+      "sourceWeightScore": 34
     },
     {
       "sourceKey": "gemeinde",
