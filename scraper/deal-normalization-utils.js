@@ -242,6 +242,9 @@ function cleanLocationForDisplay(value) {
     }
   }
 
+  if (/^vienna,\s*austria$/i.test(text)) return 'Wien';
+  if (/^multiple locations in vienna$/i.test(text)) return 'Mehrere Standorte in Wien';
+
   return text
     .replace(/^@[a-z0-9_.]+\s*/i, '')
     .replace(/\s+/g, ' ')
@@ -255,6 +258,18 @@ function cleanTitleForDisplay(value) {
     .replace(/(\d)€/g, '$1 €')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function polishKnownDealTitle(value, brand = '') {
+  const title = cleanTitleForDisplay(value);
+  const provider = cleanUiNoiseText(brand);
+  if (/^1\+1 deals?,\s*-?\s*30\s*% discounts?$/i.test(title)) {
+    return `1+1-Angebote und 30% Rabatt${provider ? ` bei ${provider}` : ''}`;
+  }
+  if (/^1\+1 crispy chicken sandwich free$/i.test(title)) {
+    return `1+1 Crispy Chicken Sandwich${provider ? ` bei ${provider}` : ''}`;
+  }
+  return title;
 }
 
 function normalizeAscii(value) {
@@ -618,6 +633,10 @@ function inferPreferredType(deal = {}) {
     return 'gewinnspiel';
   }
 
+  if (/\b(1\+1|2for1|2 for 1|2f[üu]r1|2 f[üu]r 1|bogo)\b/i.test(title)) {
+    return 'bogo';
+  }
+
   if (!titleClaimsFree && /\b\d{1,2}\s*%[^.]{0,50}\b(?:gutschein|coupon|rabatt)\b|\b(?:gutschein|coupon|rabatt)\b[^.]{0,50}\d{1,2}\s*%/i.test(title)) {
     return 'rabatt';
   }
@@ -694,6 +713,7 @@ function normalizeDescriptionKey(value = '') {
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/&/g, ' und ')
+    .replace(/(\d)\s*([%€])/g, '$1$2')
     .replace(/[^\p{L}\p{N}%€]+/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -728,11 +748,26 @@ function descriptionMetadataWords(deal = {}) {
     'bis',
     'ca',
     'am',
+    'gültig',
+    'gueltig',
     'laut',
     'quelle',
+    'januar',
+    'februar',
+    'märz',
+    'maerz',
+    'april',
+    'mai',
+    'juni',
+    'juli',
+    'august',
+    'september',
+    'oktober',
+    'november',
+    'dezember',
   ];
   return new Set([
-    ...base,
+    ...base.flatMap((value) => normalizeDescriptionKey(value).split(' ')),
     ...normalizeDescriptionKey([deal.brand, deal.distance, deal.location, deal.category, deal.type].filter(Boolean).join(' ')).split(' '),
   ].filter(Boolean));
 }
@@ -752,13 +787,19 @@ function isRedundantDescription(description = '', deal = {}) {
   const residue = descriptionKey.replace(titleKey, ' ').replace(/\s+/g, ' ').trim();
   if (!residue) return true;
   const residueWords = residue.split(' ').filter((word) => word.length > 1 || /^\d+$/.test(word));
-  return residueWords.length > 0 && residueWords.every((word) => metadata.has(word) || /^\d{4}$/.test(word));
+  return residueWords.length > 0 && residueWords.every((word) => metadata.has(word) || /^\d+$/.test(word));
 }
 
 function cleanDescriptionForDisplay(description = '', deal = {}) {
   let text = cleanUiNoiseText(description);
   if (!text) return '';
   if (/^(free|gratis|kostenlos|deal|angebot)$/i.test(text)) return '';
+  if (/^wolt makes it incredibly easy for you to discover and get what you want\b/i.test(text)) return '';
+  if (/^entdecke die besten angebote bei\b/i.test(text) && /\balle laufenden aktionen\b/i.test(text)) return '';
+  if (/^anzeige\b/i.test(text) && /\bcode\b/i.test(deal.title || '')) return '';
+  if (/\.\.\.$/.test(text)) return '';
+  if ((text.match(/\(/g) || []).length > (text.match(/\)/g) || []).length) return '';
+  if (text.length >= 80 && /\b(?:an|der|die|das|den|dem|des|in|auf|von|oder|und|zum|zur|mit|für)$/i.test(text)) return '';
   if (/^aktuelle\b.*\bgutscheine?\b/i.test(text)
       && /\bfrisch gepr[üu]ft\b/i.test(text)
       && /\bkostenlos\b/i.test(text)
@@ -786,10 +827,15 @@ function cleanDescriptionForDisplay(description = '', deal = {}) {
     .replace(/\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z\b/gi, ' ')
     .replace(/\bGratis\s*[•|-]\s*Gratis\b/gi, 'Gratis')
     .replace(/\s*(?:>>|►|→)\s*mehr erfahren\b.*$/i, ' ')
+    .replace(/\.\s*sichern!?$/i, '.')
     .replace(/\s*[•|]\s*/g, ' • ')
     .replace(/\s+/g, ' ')
     .replace(/^[•,:\-–\s]+|[•,:\-–\s]+$/g, '')
     .trim();
+
+  if (/^bei\b/.test(text)) {
+    text = `B${text.slice(1)}`;
+  }
 
   if (brand) {
     const escaped = brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -901,6 +947,7 @@ function normalizeDealRecord(deal = {}) {
   let description = cleanUiNoiseText(deal.description || '');
   const explicitBrand = cleanUiNoiseText(deal.brand || '');
   const brand = inferPreferredBrand({ ...deal, title, description });
+  title = polishKnownDealTitle(title, brand);
   const type = inferPreferredType({ ...deal, title, description, brand });
   const known = findBrandRule([brand, title, description, deal.distance, deal.url, deal.post_url].filter(Boolean).join(' '));
   const currentCategory = cleanUiNoiseText(deal.category || '').toLowerCase();

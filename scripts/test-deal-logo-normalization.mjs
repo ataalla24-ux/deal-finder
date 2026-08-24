@@ -94,14 +94,20 @@ expectNormalizedLogo(
   'delivery platform logo does not replace an unknown restaurant emblem',
   {
     brand: 'Duru Juicy Kebabs',
-    title: 'Gratis Döner bei Duru Juicy Kebabs',
-    type: 'gratis',
+    title: '1+1 deals, -30% discounts',
+    description: 'Wolt makes it incredibly easy for you to discover and get what you want. Delivered to your home and office',
+    type: 'bogo',
     category: 'essen',
+    distance: 'Vienna, Austria',
     logoUrl: 'https://www.google.com/s2/favicons?sz=256&domain_url=https://wolt.com',
     url: 'https://wolt.com/de/aut/vienna/restaurant/duru-juicy-kebabs',
   },
   {
     brand: 'Duru Juicy Kebabs',
+    title: '1+1-Angebote und 30% Rabatt bei Duru Juicy Kebabs',
+    description: '',
+    distance: 'Wien',
+    type: 'bogo',
     logo: '🌯',
     logoUrl: '',
   },
@@ -118,6 +124,66 @@ expectNormalizedLogo(
   },
   {
     distance: 'Wollzeile 16, 1010 Wien',
+  },
+);
+
+expectNormalizedLogo(
+  'English BOGO title and multi-location text are localized',
+  {
+    brand: 'Burger King',
+    title: '1+1 Crispy Chicken Sandwich Free',
+    description: 'Two sandwiches for the price of one.',
+    type: 'bogo',
+    category: 'essen',
+    distance: 'Multiple locations in Vienna',
+  },
+  {
+    title: '1+1 Crispy Chicken Sandwich bei Burger King',
+    distance: 'Mehrere Standorte in Wien',
+  },
+);
+
+expectNormalizedLogo(
+  'truncated scraped descriptions are hidden',
+  {
+    brand: 'Lieferando',
+    title: '10 € Rabatt ab 20 € Bestellwert',
+    description: 'Bei Lieferando gibt es 10 € Rabatt für Neukunden (ab 20 €',
+    type: 'rabatt',
+    category: 'essen',
+  },
+  {
+    description: '',
+  },
+);
+
+expectNormalizedLogo(
+  'generic offer overview copy is not shown as a deal description',
+  {
+    brand: 'IKEA',
+    title: 'Frühstück für 1 Euro',
+    description: 'Entdecke die besten Angebote bei IKEA Österreich. Spare bei Möbeln, Deko und Haushaltsgeräten – alle laufenden Aktionen auf einen Blick!',
+    type: 'rabatt',
+    category: 'essen',
+  },
+  {
+    description: '',
+  },
+);
+
+expectNormalizedLogo(
+  'description that only repeats title, validity and location is hidden',
+  {
+    brand: 'Alfies',
+    title: '10 € Rabatt bei Alfies mit Code LISAMARIA10',
+    description: '10€ Rabatt bei Alfies mit Code LISAMARIA10, gültig bis 26. August 2026 in Wien.',
+    type: 'rabatt',
+    category: 'supermarkt',
+    distance: 'Wien',
+    expiresOriginal: '2026-08-26',
+  },
+  {
+    description: '',
   },
 );
 
