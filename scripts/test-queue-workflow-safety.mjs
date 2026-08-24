@@ -106,8 +106,8 @@ for (const [file, stepName] of [
   assert.ok(stepStart >= 0 && runStart > stepStart, `${file} must run live normalization`);
   const normalizationStep = text.slice(stepStart, runStart);
   assert.match(normalizationStep, /LIVE_DEAL_VALIDATION_APPLY:\s*['"]1['"]/);
-  assert.match(normalizationStep, /LIVE_DEAL_REMOVALS_ENABLED:\s*['"]1['"]/);
-  assert.match(normalizationStep, /ALLOW_AUTOMATED_LIVE_REMOVALS:\s*['"]1['"]/);
+  assert.match(normalizationStep, /LIVE_DEAL_REMOVALS_ENABLED:\s*['"]0['"]/);
+  assert.match(normalizationStep, /ALLOW_AUTOMATED_LIVE_REMOVALS:\s*['"]0['"]/);
 }
 
 function run(command, args, options = {}) {

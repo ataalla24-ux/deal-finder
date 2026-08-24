@@ -1,0 +1,40 @@
+name: "Production Feed Integrity"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "docs/deals.json"
+      - "docs/deal-map-locations.json"
+      - "docs/deal-of-the-day.json"
+      - "docs/deal-of-the-week.json"
+      - "scripts/validate-production-feed.mjs"
+      - "scripts/validate-deal-map-locations.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-production-feed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Validate live feed contract
+        run: npm run test:feed-contract
+
+      - name: Validate production feed and derived data
+        run: npm run test:production-feed
+
+      - name: Validate map coverage contract
+        run: npm run test:deal-map

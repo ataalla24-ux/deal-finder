@@ -17,9 +17,13 @@ const BRAND_RULES = [
   { key: 'raiffeisen raiffeistag', name: 'Raiffeisen RaiffEIStag', logo: '🍦', category: 'essen', domain: 'raiffeisen.at' },
   { key: 'mcdonald', name: "McDonald's", logo: '🍟', category: 'essen', domain: 'mcdonalds.at' },
   { key: 'burger king', name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at' },
+  { key: 'burgerking', name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at' },
   { key: 'kfc', name: 'KFC', logo: '🍗', category: 'essen', domain: 'kfc.at', logoFile: 'kfc-wien-kfc-at.png' },
   { key: 'starbucks', name: 'Starbucks', logo: '☕', category: 'kaffee', domain: 'starbucks.at' },
   { key: 'foodora', name: 'foodora', logo: '🍴', category: 'essen', domain: 'foodora.at' },
+  { key: 'alfies', name: 'Alfies', logo: '🛒', category: 'supermarkt', domain: 'alfies.at' },
+  { key: 'balls and clubs', name: 'Balls & Clubs', logo: '⛳', category: 'freizeit', domain: 'ballsandclubs.at' },
+  { key: 'ballsandclubs', name: 'Balls & Clubs', logo: '⛳', category: 'freizeit', domain: 'ballsandclubs.at' },
   { key: 'domino', name: "Domino's Pizza", logo: '🍕', category: 'essen', domain: 'dominos.at' },
   { key: 'dunkin', name: "Dunkin'", logo: '☕', category: 'kaffee', domain: 'dunkin.at' },
   { key: 'tchibo', name: 'Tchibo', logo: '☕', category: 'kaffee', domain: 'tchibo.at' },
@@ -85,6 +89,14 @@ const BRAND_RULES = [
   { key: 'joo', name: 'joo', logo: '💳', category: 'supermarkt', domain: 'joe-club.at' },
   { key: 'wolt', name: 'Wolt', logo: '🛵', category: 'essen', domain: 'wolt.com' },
   { key: 'lieferando', name: 'Lieferando', logo: '🛵', category: 'essen', domain: 'lieferando.at', logoFile: 'lieferando-lieferando-at.png' },
+  { key: 'magenta moments', name: 'Magenta Moments', logo: '🎁', category: 'technik', domain: 'magenta.at' },
+  { key: 'magenta.at', name: 'Magenta Moments', logo: '🎁', category: 'technik', domain: 'magenta.at' },
+  { key: 'aeg', name: 'AEG', logo: '🏠', category: 'shopping', domain: 'aeg.at' },
+  { key: 'pizzamann', name: 'Pizzamann', logo: '🍕', category: 'essen', domain: 'pizzamann.at' },
+  { key: 'vienna marriott', name: 'Vienna Marriott Cascade Bar', logo: '🍸', category: 'bars', domain: 'viennamarriott-restaurants.com' },
+  { key: 'film festival am rathausplatz', name: 'Film Festival am Rathausplatz', logo: '🎬', category: 'kultur' },
+  { key: 'bezirksvorstehung mariahilf', name: 'Bezirksvorstehung Mariahilf', logo: '🎉', category: 'freizeit' },
+  { key: 'bezirksvorstehung_mariahilf', name: 'Bezirksvorstehung Mariahilf', logo: '🎉', category: 'freizeit' },
   { key: 'uber eats', name: 'Uber Eats', logo: '🛵', category: 'essen', domain: 'ubereats.com' },
   { key: 'all4golf', name: 'ALL4GOLF', logo: '⛳', category: 'shopping', domain: 'all4golf.de' },
   { key: 'therme wien', name: 'Therme Wien', logo: '💧', category: 'wellness', domain: 'thermewien.at' },
@@ -116,6 +128,7 @@ const SOURCE_LIKE_BRANDS = [
   /^restaurant \(wien\)$/i,
   /^gemeinde$/i,
   /^kirche$/i,
+  /^attraktive preise warten$/i,
 ];
 
 const GENERIC_TITLES = [
@@ -150,13 +163,27 @@ const SOURCE_LIKE_HOSTS = [
 
 function cleanText(value) {
   if (!value) return '';
-  return repairMojibake(String(value))
+  return decodeHtmlEntities(repairMojibake(String(value)))
     .replace(/<[^>]*>/g, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function decodeHtmlEntities(value) {
+  const named = {
+    amp: '&', quot: '"', apos: "'", nbsp: ' ', euro: '€',
+    auml: 'ä', Auml: 'Ä', ouml: 'ö', Ouml: 'Ö', uuml: 'ü', Uuml: 'Ü', szlig: 'ß',
+    ndash: '–', mdash: '—', hellip: '…', laquo: '«', raquo: '»',
+  };
+  return String(value || '').replace(/&(#x[0-9a-f]+|#\d+|[a-z][a-z0-9]+);/gi, (match, entity) => {
+    if (entity[0] === '#') {
+      const radix = entity[1]?.toLowerCase() === 'x' ? 16 : 10;
+      const digits = radix === 16 ? entity.slice(2) : entity.slice(1);
+      const codePoint = Number.parseInt(digits, radix);
+      return Number.isFinite(codePoint) ? String.fromCodePoint(codePoint) : match;
+    }
+    return Object.prototype.hasOwnProperty.call(named, entity) ? named[entity] : match;
+  });
 }
 
 function repairMojibake(value) {
@@ -190,6 +217,15 @@ function cleanUiNoiseText(value) {
     .replace(/\*{3,}/g, ' ')
     .replace(/\s+/g, ' ')
     .replace(/^[,:\-–\s]+|[,:\-–\s]+$/g, '')
+    .trim();
+}
+
+function cleanTitleForDisplay(value) {
+  return cleanUiNoiseText(value)
+    .replace(/\bbuy\s*(?:one|1)\s+get\s*(?:one|1)\s+free\s+drinks?\b/gi, '1+1 Drink')
+    .replace(/\s*\(für\s+drei\s*$/i, '')
+    .replace(/(\d)€/g, '$1 €')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
@@ -336,6 +372,7 @@ function isLikelyGenericLocation(value) {
   const text = cleanUiNoiseText(value);
   if (!text) return true;
   if (/^(wien|vienna|online|österreich|osterreich|ganz wien|restaurant \(wien\)|gemeinde|kirche)$/i.test(text)) return true;
+  if (/^(?:online|wien|vienna|österreich|osterreich)(?:\s*[\/|,&-]\s*(?:online|wien|vienna|österreich|osterreich))+$/i.test(text)) return true;
   if (/^\d{4}\s+wien/i.test(text)) return false;
   if (/,/.test(text) || /\b(straße|strasse|gasse|platz|weg|ring|allee|bezirk)\b/i.test(text)) return false;
   return text.length <= 4;
@@ -420,8 +457,15 @@ function inferPreferredBrand(deal = {}) {
   }
 
   const titleSignal = cleanUiNoiseText(deal.title || '');
+  const descriptionSignal = cleanUiNoiseText(deal.description || '');
+  const ownerUsername = cleanUiNoiseText(deal.ownerUsername || deal.instagramHandle || '');
+  const explicitLooksLikePublisher = Boolean(
+    ownerUsername && sameBrandText(ownerUsername, explicitBrand)
+  ) || /^@/.test(explicitBrand) || (/^[a-z0-9_.]{3,32}$/i.test(explicitBrand) && /[._]/.test(explicitBrand));
   const knownInExplicitBrand = findBrandRule(explicitBrand);
   const knownInTitle = findBrandRule(titleSignal);
+  const knownInDescription = findBrandRule(descriptionSignal);
+  const knownInURL = findBrandRule([deal.url, deal.post_url].filter(Boolean).join(' '));
 
   if (
     knownInTitle &&
@@ -436,7 +480,15 @@ function inferPreferredBrand(deal = {}) {
     return knownInExplicitBrand.name;
   }
 
-  if (explicitBrand && !isSourceLikeBrand(explicitBrand) && !isLikelyGenericLocation(explicitBrand)) {
+  if (
+    knownInURL &&
+    !knownInURL.source &&
+    (!explicitBrand || explicitLooksLikePublisher || isSourceLikeBrand(explicitBrand) || isLikelyGenericLocation(explicitBrand))
+  ) {
+    return knownInURL.name;
+  }
+
+  if (explicitBrand && !explicitLooksLikePublisher && !isSourceLikeBrand(explicitBrand) && !isLikelyGenericLocation(explicitBrand)) {
     return explicitBrand;
   }
 
@@ -453,8 +505,6 @@ function inferPreferredBrand(deal = {}) {
   const distanceBrand = extractFromDistance(deal.distance);
   if (distanceBrand) return distanceBrand;
 
-  const descriptionSignal = cleanUiNoiseText(deal.description || '');
-  const knownInDescription = findBrandRule(descriptionSignal);
   if (knownInDescription && !knownInDescription.source) return knownInDescription.name;
 
   return explicitBrand || '';
@@ -528,7 +578,13 @@ function inferPreferredType(deal = {}) {
     return 'gewinnspiel';
   }
 
-  if (/\b(1\+1|2for1|2 for 1|2f[üu]r1|2 f[üu]r 1|buy one get one|bogo|4 f[üu]r 3|3\+3|4\+2|mix&match|2x .+ \+ 1 gratis)\b/i.test(combined)) {
+  if (/(?:\b\d+(?:[,.]\d+)?\s*€[^.]{0,40}\b(?:gutschein|bonus)\b|\b(?:gutschein|bonus)\b[^.]{0,40}\d+(?:[,.]\d+)?\s*€)/i.test(combined)) {
+    return 'gutschein';
+  }
+
+  if (/\b(1\+1|2for1|2 for 1|2f[üu]r1|2 f[üu]r 1|buy (?:one|1) get (?:one|1)|bogo|4 f[üu]r 3|3\+3|4\+2|mix&match|2x .+ \+ 1 gratis)\b/i.test(combined)
+      || /\b(?:kauf von|buy)\s*2\b[^.]{0,80}\b1\b[^.]{0,30}\bgratis\b/i.test(combined)
+      || /\b2\s+pizzen?\b[^.]{0,50}\b1\s+pizza\b[^.]{0,24}\bgratis\b/i.test(combined)) {
     return 'bogo';
   }
 
@@ -779,7 +835,7 @@ function isFalsePositiveFreeDeal(deal = {}) {
 }
 
 function normalizeDealRecord(deal = {}) {
-  const title = cleanUiNoiseText(deal.title || '');
+  let title = cleanTitleForDisplay(deal.title || '');
   let description = cleanUiNoiseText(deal.description || '');
   const explicitBrand = cleanUiNoiseText(deal.brand || '');
   const brand = inferPreferredBrand({ ...deal, title, description });
@@ -820,6 +876,7 @@ function normalizeDealRecord(deal = {}) {
 
   const sanitizedExpires = sanitizeExpiryText(deal.expires);
   if (brandWasCorrected) {
+    title = replaceBrandMention(title, explicitBrand, brand);
     description = replaceBrandMention(description, explicitBrand, brand);
   }
   description = cleanDescriptionForDisplay(description, {

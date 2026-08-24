@@ -73,6 +73,139 @@ expectNormalizedLogo(
 );
 
 expectNormalizedLogo(
+  'social creator is replaced by the merchant named in the title',
+  {
+    brand: 'Shaysfoodblog',
+    ownerUsername: 'shaysfoodblog',
+    title: '1+1 bei Burgerking nur bei der Foodora bis zum 31.08.',
+    description: 'Burger Deal über foodora.',
+    type: 'bogo',
+    category: 'essen',
+    url: 'https://www.instagram.com/reel/example/',
+  },
+  {
+    brand: 'Burger King',
+    logo: '🍔',
+    logoUrlIncludes: /burgerking\.at/,
+  },
+);
+
+expectNormalizedLogo(
+  'generic benefit copy is replaced by the provider from its target URL',
+  {
+    brand: 'attraktive Preise warten',
+    title: '1+1 gratis bei attraktive Preise warten',
+    description: '',
+    type: 'bogo',
+    category: 'technik',
+    url: 'https://www.magenta.at/magenta-moments',
+  },
+  {
+    brand: 'Magenta Moments',
+    title: '1+1 gratis bei Magenta Moments',
+    logoUrlIncludes: /magenta\.at/,
+  },
+);
+
+expectNormalizedLogo(
+  'generic online location is replaced by the product brand',
+  {
+    brand: 'Online / Österreich',
+    title: '130€ Umdenkbonus + 5€ Gutschein extra',
+    description: 'Aktuelle Top AEG Gutscheine',
+    type: 'gratis',
+    category: 'shopping',
+    url: 'https://www.gutscheine.at/aeg',
+  },
+  {
+    brand: 'AEG',
+    title: '130 € Umdenkbonus + 5 € Gutschein extra',
+    type: 'gutschein',
+  },
+);
+
+expectNormalizedLogo(
+  'creator handle is replaced by a venue named in the title',
+  {
+    brand: '@kseniainvienna',
+    title: 'Film Festival am Rathausplatz',
+    type: 'gratis',
+    category: 'kultur',
+    url: 'https://www.tiktok.com/@kseniainvienna/video/example',
+  },
+  {
+    brand: 'Film Festival am Rathausplatz',
+    logo: '🎬',
+  },
+);
+
+expectNormalizedLogo(
+  'English numeric BOGO copy is normalized',
+  {
+    brand: 'Vienna Marriott Cascade Bar',
+    title: 'Happy Hour: Buy 1 get 1 free drink (für 12,50€)',
+    description: 'free',
+    type: 'gratis',
+    category: 'essen',
+    url: 'https://www.viennamarriott-restaurants.com/en/cascade-bar',
+  },
+  {
+    title: 'Happy Hour: 1+1 Drink (für 12,50 €)',
+    type: 'bogo',
+  },
+);
+
+expectNormalizedLogo(
+  'truncated Pizzamann qualifier is removed and 2 plus 1 is BOGO',
+  {
+    brand: 'Pizzamann',
+    title: 'Jeden Donnerstag: 2 Pizzen kaufen, 1 Pizza gratis (für Drei',
+    description: 'Beim Kauf von 2 Pizzen ist 1 Pizza gratis.',
+    type: 'freebie',
+    category: 'essen',
+    url: 'https://www.drei.at/de/business/vorteile/pizzamann/',
+  },
+  {
+    title: 'Jeden Donnerstag: 2 Pizzen kaufen, 1 Pizza gratis',
+    type: 'bogo',
+  },
+);
+
+expectNormalizedLogo(
+  'social creator is replaced by the merchant named in the description',
+  {
+    brand: 'lisa.maria.b',
+    ownerUsername: 'lisa.maria.b',
+    title: 'Indoor-Minigolf mitten in Wien',
+    description: '10% Rabattcode LISAMARIA bei ballsandclubs.austria.',
+    type: 'rabatt',
+    category: 'essen',
+    url: 'https://www.instagram.com/reel/example/',
+  },
+  {
+    brand: 'Balls & Clubs',
+    category: 'freizeit',
+    logo: '⛳',
+    logoUrlIncludes: /ballsandclubs\.at/,
+  },
+);
+
+expectNormalizedLogo(
+  'visible HTML entities are decoded',
+  {
+    brand: 'Lieferando',
+    title: 'Gratis Lieferando+',
+    description: '3 Monate keine Liefergeb&uuml;hren &amp; gratis Zustellung',
+    type: 'gratis',
+    category: 'essen',
+    url: 'https://www.lieferando.at/',
+  },
+  {
+    description: '3 Monate keine Liefergebühren & gratis Zustellung',
+  },
+);
+
+expectNormalizedLogo(
   'wrong cached logo is replaced when brand is corrected',
   {
     brand: "Dunkin'",

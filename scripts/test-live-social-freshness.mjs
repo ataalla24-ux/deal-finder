@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 
-import { getSocialPostFreshnessRemovalReason } from '../scraper/normalize-live-deals.js';
+import {
+  buildStructuredSocialTitle,
+  getSocialPostFreshnessRemovalReason,
+} from '../scraper/normalize-live-deals.js';
 
 const now = new Date('2026-08-22T12:00:00.000Z');
 const oldWithFutureOffer = {
@@ -35,5 +38,36 @@ assert.equal(getSocialPostFreshnessRemovalReason({
   sourcePublishedAtSource: 'firecrawlAgentRun',
   source: 'Firecrawl Instagram',
 }, now), '', 'a synthetic crawler run time must not masquerade as a reliable social publication date');
+
+assert.equal(buildStructuredSocialTitle({
+  brand: 'Alfies',
+  ownerUsername: 'lisa.maria.b',
+  title: 'Anzeige €10 Rabatt mit Code LISAMARIA10 bei alfies.at ALFIES TOPFENKNÖDEL',
+  description: 'Flaumige Topfenknödel zuhause machen.',
+  type: 'rabatt',
+}), '10 € Rabatt bei Alfies mit Code LISAMARIA10');
+
+assert.equal(buildStructuredSocialTitle({
+  brand: 'Balls & Clubs',
+  ownerUsername: 'lisa.maria.b',
+  title: 'lisa.maria.b: anzeige Indoor-Minigolf mitten in Wien! 10% Rabattcode LISAMARIA',
+  description: '18 verschiedene Minigolf-Bahnen.',
+  type: 'rabatt',
+}), '10% Rabatt auf Indoor-Minigolf bei Balls & Clubs mit Code LISAMARIA');
+
+assert.equal(buildStructuredSocialTitle({
+  brand: 'Balls & Clubs',
+  ownerUsername: 'lisa.maria.b',
+  title: '10% Rabatt auf Indoor-Minigolf bei Balls & Clubs mit Code ANZEIGE',
+  description: 'anzeige Indoor-Minigolf: 10% Rabattcode LISAMARIA bei Balls & Clubs',
+  type: 'rabatt',
+}), '10% Rabatt auf Indoor-Minigolf bei Balls & Clubs mit Code LISAMARIA');
+
+assert.equal(buildStructuredSocialTitle({
+  brand: 'Bezirksvorstehung Mariahilf',
+  ownerUsername: 'bezirksvorstehung_mariahilf',
+  title: 'bezirksvorstehung_mariahilf: bezirksvorstehung_mariahilf: Sport- und Spielefest für Kids im Esterhazypark :tada: Am 27.8., ...',
+  type: 'gratis',
+}), 'Gratis Sport- und Spielefest für Kids im Esterhazypark');
 
 console.log('live social freshness tests passed');

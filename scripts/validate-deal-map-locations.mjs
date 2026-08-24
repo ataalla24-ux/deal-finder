@@ -42,7 +42,7 @@ const requiredChainCoverage = [
     minimumLocations: 3,
     dealCoverage: {
       'g2-5ntng7': 3,
-      'g2-5rler1': 3
+      'b1-s5vhj5': 2
     }
   }
 ];

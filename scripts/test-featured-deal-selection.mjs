@@ -50,6 +50,21 @@ assert.equal(isFoodDrinkDeal({
   category: 'essen',
 }), true, 'ice cream deals should remain weekly-eligible');
 
+assert.equal(isFoodDrinkDeal({
+  brand: 'lisa.maria.b',
+  title: 'Indoor-Minigolf mitten in Wien',
+  description: '10% Rabatt, danach vielleicht Kino oder Restaurant',
+  category: 'essen',
+  type: 'rabatt',
+}), false, 'a miscategorized activity must not become the weekly food deal');
+
+assert.equal(isFoodDrinkDeal({
+  brand: 'EVO Fitness',
+  title: '7 Tage kostenloses Probetraining',
+  category: 'essen',
+  type: 'gratis',
+}), false, 'a miscategorized fitness trial must not become the weekly food deal');
+
 const weeklyEligibility = await getFeaturedDealEligibility({
   id: 'food-1',
   brand: 'Pizza Wien',

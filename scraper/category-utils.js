@@ -105,6 +105,11 @@ const CATEGORY_HINTS = {
     'parfum', 'make-up', 'kosmetik', 'beauty', 'pflege', 'sephora', 'douglas',
     'dm', 'bipa', 'müller', 'mueller', 'friseur'
   ],
+  freizeit: [
+    'minigolf', 'mini-golf', 'indoor-minigolf', 'bowling', 'escape room',
+    'trampolin', 'lasertag', 'kartbahn', 'spielefest', 'sportfest',
+    'sport- und spielefest'
+  ],
   shopping: [
     'gutschein', 'rabattcode', 'coupon', 'sale', 'shop', 'shopping', 'amazon',
     'zalando', 'about you', 'ikea', 'möbel', 'moebel'
@@ -154,10 +159,11 @@ function inferCategoryFromText(parts = []) {
     return 'kirche';
   }
 
+  if (hasAnyTerm(text, CATEGORY_HINTS.freizeit)) return 'freizeit';
+  if (hasAnyTerm(text, CATEGORY_HINTS.fitness)) return 'fitness';
   if (hasAnyTerm(text, CATEGORY_HINTS.kaffee)) return 'kaffee';
   if (hasAnyTerm(text, CATEGORY_HINTS.essen)) return 'essen';
   if (hasAnyTerm(text, CATEGORY_HINTS.supermarkt)) return 'supermarkt';
-  if (hasAnyTerm(text, CATEGORY_HINTS.fitness)) return 'fitness';
   if (hasAnyTerm(text, CATEGORY_HINTS.reisen)) return 'reisen';
   if (hasAnyTerm(text, CATEGORY_HINTS.kultur)) return 'kultur';
   if (hasAnyTerm(text, CATEGORY_HINTS.streaming)) return 'streaming';
@@ -171,12 +177,16 @@ function inferCategoryFromText(parts = []) {
 function normalizeCategoryForScraper(rawCategory, parts = []) {
   const original = cleanText(rawCategory).toLowerCase();
   const category = CATEGORY_ALIASES[original] || original;
-  const inferred = inferCategoryFromText([category, ...parts]);
+  const inferred = inferCategoryFromText(parts);
   const text = buildSignalText([category, ...parts]);
 
   if (category === 'events') return isChristianText(text) ? 'events' : (inferred || 'kultur');
   if (category === 'gottesdienste' || (isChristianText(text) && hasServiceContext(text))) return 'gottesdienste';
   if (category === 'kirche') return 'kirche';
+
+  if (['essen', 'kaffee'].includes(category) && ['fitness', 'freizeit', 'kultur', 'reisen', 'beauty'].includes(inferred)) {
+    return inferred;
+  }
 
   if (WEAK_CATEGORIES.has(category) && inferred) return inferred;
   if (['shopping', 'beauty', 'kultur', 'reisen'].includes(category) && (inferred === 'essen' || inferred === 'kaffee')) return inferred;

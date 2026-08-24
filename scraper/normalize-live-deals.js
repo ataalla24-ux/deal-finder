@@ -369,6 +369,84 @@ function buildSocialTitleFallback(deal) {
   return brand;
 }
 
+function cleanSocialCaptionTitle(value = '', ownerUsername = '') {
+  let text = cleanText(value);
+  const owner = cleanText(ownerUsername).replace(/^@/, '');
+  if (owner) {
+    const escapedOwner = owner.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const ownerPrefix = new RegExp(`^@?${escapedOwner}\\s*:\\s*`, 'i');
+    for (let index = 0; index < 3 && ownerPrefix.test(text); index += 1) {
+      text = text.replace(ownerPrefix, '').trim();
+    }
+  }
+  return text
+    .replace(/^\s*(?:anzeige|werbung)\b\s*[:\-–]?\s*/i, '')
+    .replace(/:tada:/gi, ' ')
+    .replace(/\s+#\S.*$/u, '')
+    .replace(/\s*(?:\.\.\.|…)\s*$/u, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function discountLabelFromText(value = '') {
+  const text = cleanText(value);
+  const percent = text.match(/\b(\d{1,3}(?:[.,]\d+)?)\s*%\s*(?:rabatt|discount|off|rabattcode)?/i);
+  if (percent && /rabatt|discount|off/i.test(text)) return `${percent[1]}%`;
+
+  const euroPrefix = text.match(/€\s*(\d{1,4}(?:[.,]\d+)?)\s*rabatt/i);
+  const euroSuffix = text.match(/\b(\d{1,4}(?:[.,]\d+)?)\s*€\s*rabatt/i);
+  const euro = euroPrefix?.[1] || euroSuffix?.[1] || '';
+  return euro ? `${euro} €` : '';
+}
+
+function buildStructuredSocialTitle(deal = {}) {
+  const brand = cleanUiNoiseText(deal.brand || '');
+  const cleanedTitle = cleanSocialCaptionTitle(deal.title || '', deal.ownerUsername || '');
+  const signal = cleanText(`${cleanedTitle} ${deal.description || ''}`);
+  if (!cleanedTitle) return '';
+
+  if (/sport-?\s*und\s*spielefest/i.test(cleanedTitle)) {
+    const eventTitle = cleanedTitle
+      .slice(cleanedTitle.search(/sport-?\s*und\s*spielefest/i))
+      .split(/\s+am\s+\d{1,2}[.\s]/i)[0]
+      .replace(/[,:;\-–\s]+$/g, '')
+      .trim();
+    if (eventTitle) return deal.type === 'gratis' ? `Gratis ${eventTitle}` : eventTitle;
+  }
+
+  const discount = discountLabelFromText(signal);
+  if (discount && brand) {
+    const activity = /indoor-?minigolf|minigolf/i.test(signal) ? ' auf Indoor-Minigolf' : '';
+    const codeStopWords = new Set(['anzeige', 'werbung', 'gratis', 'rabatt', 'discount']);
+    const codeValue = Array.from(signal.matchAll(/\b(?:rabattcode|code)\s*:?\s*-?\s*([a-z0-9-]{4,24})\b/gi))
+      .map((match) => cleanText(match[1] || ''))
+      .find((candidate) => candidate && !codeStopWords.has(candidate.toLowerCase()));
+    const code = codeValue ? ` mit Code ${codeValue.toUpperCase()}` : '';
+    return `${discount} Rabatt${activity} bei ${brand}${code}`;
+  }
+
+  if (deal.type === 'bogo' && brand) {
+    const offerLabel = detectOfferLabel(signal);
+    const channel = /\bfoodora\b/i.test(signal) && !/\bfoodora\b/i.test(brand) ? ' über Foodora' : '';
+    return `1+1${offerLabel ? ` ${offerLabel}` : ''} bei ${brand}${channel}`;
+  }
+
+  return cleanedTitle.length <= 96 ? cleanedTitle : tidySocialSummary(cleanedTitle, 96);
+}
+
+function shouldPolishSocialTitle(originalTitle = '', polishedTitle = '', ownerUsername = '') {
+  const original = cleanText(originalTitle);
+  const polished = cleanText(polishedTitle);
+  if (!polished || original === polished) return false;
+  const owner = cleanText(ownerUsername).replace(/^@/, '');
+  const hasCreatorPrefix = owner && original.toLowerCase().startsWith(`${owner.toLowerCase()}:`);
+  return original.length > 96
+    || hasCreatorPrefix
+    || /(^|\s)(?:anzeige|werbung)\b|#\S|:tada:|(?:\.\.\.|…)$/iu.test(original)
+    || /^\d{1,4}(?:[.,]\d+)?\s*(?:%|€)\s*rabatt/i.test(polished)
+    || /^1\+1\b/i.test(polished);
+}
+
 function scoreNormalizedDeal(deal) {
   let score = 0;
   const brand = cleanUiNoiseText(deal.brand || '');
@@ -505,7 +583,10 @@ function normalizeSocialDeal(deal) {
   }
 
   if (!editedFields.has('title')) {
-    if (/^(instagram|tiktok)$/i.test(cleanUiNoiseText(next.title)) || /(?:auf|on)\s+(?:instagram|tiktok)\s*:/i.test(next.title || '')) {
+    const structuredTitle = buildStructuredSocialTitle(next);
+    if (shouldPolishSocialTitle(next.title, structuredTitle, next.ownerUsername)) {
+      next.title = structuredTitle;
+    } else if (/^(instagram|tiktok)$/i.test(cleanUiNoiseText(next.title)) || /(?:auf|on)\s+(?:instagram|tiktok)\s*:/i.test(next.title || '')) {
       if (socialTitle && !/^(instagram|tiktok)$/i.test(cleanUiNoiseText(socialTitle))) {
         next.title = socialTitle;
       } else {
@@ -831,8 +912,14 @@ function normalizeUrlForCompare(value) {
   }
 }
 
+function stableChurchDealId(deal = {}) {
+  const id = cleanText(deal.id || '');
+  if (!id || !isCuratedChurchDeal(deal)) return id;
+  return id.replace(/-(?:19|20)\d{6}$/i, '');
+}
+
 function getChurchCuratedIds(churchDeals) {
-  return new Set(churchDeals.map((deal) => deal.id).filter(Boolean));
+  return new Set(churchDeals.map((deal) => stableChurchDealId(deal)).filter(Boolean));
 }
 
 function isCuratedChurchDeal(deal = {}) {
@@ -874,6 +961,7 @@ function normalizeChurchDealForLiveFeed(deal = {}) {
   const category = cleanText(deal.category || '').toLowerCase();
   return {
     ...deal,
+    id: stableChurchDealId(deal),
     type: category === 'events' ? 'event' : 'info',
     hot: false,
   };
@@ -1054,6 +1142,7 @@ async function main() {
 
   const remaining = [];
   const seenIds = new Set();
+  const churchIndexById = new Map();
   const removed = [];
   const reviewCandidatesByKey = new Map();
   let linkChecksUsed = 0;
@@ -1071,6 +1160,7 @@ async function main() {
   let socialPubDateSourceFixes = 0;
   let socialPolishFixes = 0;
   let duplicateCollapses = 0;
+  let churchDirectoryMerges = 0;
   let protectedLiveDealRestoresCount = 0;
   let flightUrlCheckSkips = 0;
   let moderationRemovals = 0;
@@ -1179,7 +1269,7 @@ async function main() {
     if (!forceKeep && shouldDropExplicitlyRemovedDeal(original)) {
       if (shouldRemoveDeal(original, 'Explizit entfernter Deal')) continue;
     }
-    if (!forceKeep && curatedChurchIds.has(original.id)) {
+    if (!forceKeep && CAN_REMOVE_LIVE_DEALS && curatedChurchIds.has(stableChurchDealId(original))) {
       if (shouldRemoveDeal(original, 'Wird durch kuratierten Kirche-/Event-Eintrag ersetzt')) continue;
     }
 
@@ -1188,6 +1278,9 @@ async function main() {
     deal = fixPubDateFromSlackTs(deal, now);
     deal = resetUnsafeUrlExpiry(deal);
     deal = normalizeDealRecord(deal);
+    if (isCuratedChurchDeal(deal)) {
+      deal = normalizeChurchDealForLiveFeed(deal);
+    }
     const supplementalSocial = supplementalSocialByUrl.get(normalizeSocialPostKey(deal.url || ''));
     if (supplementalSocial) {
       const mergedSocial = mergeSupplementalSocialDeal(deal, supplementalSocial);
@@ -1202,7 +1295,7 @@ async function main() {
       category: deal.category,
       pubDateSource: deal.pubDateSource,
     });
-    deal = normalizeSocialDeal(deal);
+    deal = normalizeDealRecord(normalizeSocialDeal(deal));
     const inferredPubDateSource = inferSocialPubDateSource(deal);
     if (inferredPubDateSource && inferredPubDateSource !== cleanText(deal.pubDateSource || '')) {
       deal.pubDateSource = inferredPubDateSource;
@@ -1293,7 +1386,7 @@ async function main() {
       const enriched = maybeEnrichDealCopy(deal, health.contentHints);
       if (enriched) {
         contentEnrichments += 1;
-        const polished = normalizeSocialDeal(deal);
+        const polished = normalizeDealRecord(normalizeSocialDeal(deal));
         if (JSON.stringify(polished) !== JSON.stringify(deal)) {
           deal = polished;
           socialPolishFixes += 1;
@@ -1333,11 +1426,22 @@ async function main() {
       if (shouldRemoveDeal(deal, 'Deal ohne ID')) continue;
     }
     if (seenIds.has(deal.id)) {
+      if (isCuratedChurchDeal(deal)) {
+        const existingIndex = churchIndexById.get(deal.id);
+        if (existingIndex !== undefined) {
+          remaining[existingIndex] = pickBetterNormalizedDeal(remaining[existingIndex], deal);
+          churchDirectoryMerges += 1;
+          continue;
+        }
+      }
       if (shouldRemoveDeal(deal, 'Doppelte Deal-ID')) continue;
     }
 
     seenIds.add(deal.id);
     remaining.push(deal);
+    if (isCuratedChurchDeal(deal)) {
+      churchIndexById.set(deal.id, remaining.length - 1);
+    }
   }
 
   for (const [id, restoreDeal] of protectedLiveDealRestores.entries()) {
@@ -1422,11 +1526,18 @@ async function main() {
       if (shouldRemoveDeal(normalizedChurchDeal, 'Kirchen-/Event-Deal ohne ID')) continue;
     }
     if (seenIds.has(normalizedChurchDeal.id)) {
-      markForReview(normalizedChurchDeal, 'Kuratierter Kirchen-/Event-Eintrag ist bereits live');
+      const existingIndex = churchIndexById.get(normalizedChurchDeal.id);
+      if (existingIndex !== undefined) {
+        remaining[existingIndex] = normalizedChurchDeal;
+        churchDirectoryMerges += 1;
+      } else {
+        markForReview(normalizedChurchDeal, 'Kuratierter Kirchen-/Event-Eintrag ist bereits live');
+      }
       continue;
     }
     seenIds.add(normalizedChurchDeal.id);
     remaining.push(normalizedChurchDeal);
+    churchIndexById.set(normalizedChurchDeal.id, remaining.length - 1);
   }
 
   const dedupePreview = dedupeNormalizedLiveDeals(remaining);
@@ -1516,6 +1627,7 @@ async function main() {
     removedCount: appliedRemovalCount,
     wouldRemoveCount: pendingRemovalCount,
     duplicateCollapses,
+    churchDirectoryMerges,
     moderationRemovals,
     freshnessWindowHours: configuredNewDealWindowHours(),
     freshnessFlagUpdates,
@@ -1553,6 +1665,7 @@ async function main() {
   console.log(`Live deal removals: ${CAN_REMOVE_LIVE_DEALS ? 'enabled' : 'paused'}`);
   console.log(`Removed deals: ${appliedRemovalCount}; review-only removal candidates: ${pendingRemovalCount}`);
   console.log(`Duplicate collapses: ${duplicateCollapses}`);
+  console.log(`Church directory entries updated in place: ${churchDirectoryMerges}`);
   console.log(`Moderation removals: ${moderationRemovals}`);
   console.log(`Fresh deal flags: ${freshDealCount} new, ${freshnessFlagUpdates} updated within ${configuredNewDealWindowHours()}h window`);
   console.log(`Broken link removals: ${brokenLinkRemovals}`);
@@ -1581,6 +1694,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
 }
 
 export {
+  buildStructuredSocialTitle,
   getSocialPostFreshnessRemovalReason,
+  stableChurchDealId,
   shouldApplyAutomatedLiveRemoval,
 };

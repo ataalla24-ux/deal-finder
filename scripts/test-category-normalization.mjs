@@ -13,6 +13,41 @@ assert.equal(
 );
 
 assert.equal(
+  normalizeDealRecord({
+    brand: 'lisa.maria.b',
+    ownerUsername: 'lisa.maria.b',
+    title: 'Indoor-Minigolf mitten in Wien',
+    description: '10% Rabatt bei Balls & Clubs.',
+    category: 'essen',
+    type: 'rabatt',
+  }).category,
+  'freizeit',
+  'strong activity evidence should override a wrong food category',
+);
+
+assert.equal(
+  normalizeDealRecord({
+    brand: 'Bezirksvorstehung Mariahilf',
+    title: 'Gratis Sport- und Spielefest für Kids im Esterhazypark',
+    category: 'essen',
+    type: 'gratis',
+  }).category,
+  'freizeit',
+  'sport and games events should not remain in the food category',
+);
+
+assert.equal(
+  normalizeDealRecord({
+    brand: 'EVO Fitness',
+    title: '7 Tage kostenloses Probetraining',
+    category: 'essen',
+    type: 'gratis',
+  }).category,
+  'fitness',
+  'strong fitness evidence should override a wrong food category',
+);
+
+assert.equal(
   normalizeCategoryForScraper('shopping', [
     'Tomochan Ramen',
     'Gratis Ramen',

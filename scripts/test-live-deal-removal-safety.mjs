@@ -8,7 +8,10 @@ import {
   applyLiveDealEditsToBundle,
   normalizeLiveDealEdit,
 } from './live-deal-edits-lib.mjs';
-import { shouldApplyAutomatedLiveRemoval } from '../scraper/normalize-live-deals.js';
+import {
+  shouldApplyAutomatedLiveRemoval,
+  stableChurchDealId,
+} from '../scraper/normalize-live-deals.js';
 
 assert.equal(shouldApplyAutomatedLiveRemoval({
   apply: true,
@@ -24,6 +27,17 @@ for (const disabledGate of ['apply', 'removalsEnabled', 'automatedRemovalsAllowe
   };
   assert.equal(shouldApplyAutomatedLiveRemoval(gates), false, `${disabledGate} must block automatic removals`);
 }
+
+assert.equal(stableChurchDealId({
+  id: 'hillsong-vienna-events-20260824',
+  source: 'Freikirchen Wien',
+  category: 'events',
+}), 'hillsong-vienna-events');
+assert.equal(stableChurchDealId({
+  id: 'ordinary-deal-20260824',
+  source: 'Slack',
+  category: 'essen',
+}), 'ordinary-deal-20260824');
 
 const bundle = {
   deals: [
@@ -214,6 +228,59 @@ try {
   assert.equal(validationReport.reviewCandidateCount, 2);
 } finally {
   fs.rmSync(normalizationDir, { recursive: true, force: true });
+}
+
+const churchNormalizationDir = fs.mkdtempSync(path.join(os.tmpdir(), 'freefinder-church-normalization-'));
+try {
+  const churchBase = {
+    brand: 'Hillsong Vienna',
+    title: 'Hillsong Vienna Events',
+    description: 'Aktuelle Veranstaltungen in Wien.',
+    category: 'events',
+    source: 'Freikirchen Wien',
+    url: 'https://hillsong.com/austria/events/',
+  };
+  const existingDeals = [
+    { ...churchBase, id: 'hillsong-vienna-events-20260810', pubDate: '2026-08-10T08:00:00.000Z' },
+    { ...churchBase, id: 'hillsong-vienna-events-20260817', pubDate: '2026-08-17T08:00:00.000Z' },
+  ];
+  fs.writeFileSync(path.join(churchNormalizationDir, 'deals.json'), JSON.stringify({
+    deals: existingDeals,
+    totalDeals: existingDeals.length,
+    lastUpdated: '2026-08-17T08:00:00.000Z',
+  }));
+  fs.writeFileSync(path.join(churchNormalizationDir, 'live-deal-edits.json'), JSON.stringify({ edits: [] }));
+  fs.writeFileSync(path.join(churchNormalizationDir, 'deal-candidates-index.json'), JSON.stringify({ deals: [] }));
+  fs.writeFileSync(path.join(churchNormalizationDir, 'deals-pending-church-gemeinde.json'), JSON.stringify({ deals: [] }));
+  fs.writeFileSync(path.join(churchNormalizationDir, 'deals-pending-church-gottesdienste.json'), JSON.stringify({ deals: [] }));
+  fs.writeFileSync(path.join(churchNormalizationDir, 'deals-pending-church-events.json'), JSON.stringify({
+    deals: [{ ...churchBase, id: 'hillsong-vienna-events-20260824', pubDate: '2026-08-24T08:00:00.000Z' }],
+  }));
+
+  const normalization = spawnSync(process.execPath, ['scraper/normalize-live-deals.js'], {
+    cwd: path.resolve('.'),
+    env: {
+      ...process.env,
+      LIVE_DEAL_DOCS_DIR: churchNormalizationDir,
+      LIVE_DEAL_VALIDATION_APPLY: '1',
+      LIVE_DEAL_REMOVALS_ENABLED: '0',
+      ALLOW_AUTOMATED_LIVE_REMOVALS: '0',
+      MAX_LIVE_URL_HEALTH_CHECKS: '0',
+      MAX_LIVE_URL_EXPIRY_REFRESHES: '0',
+      MAX_LIVE_CONTENT_ENRICHMENTS: '0',
+    },
+    encoding: 'utf8',
+  });
+  assert.equal(normalization.status, 0, normalization.stderr);
+
+  const normalizedBundle = JSON.parse(fs.readFileSync(path.join(churchNormalizationDir, 'deals.json'), 'utf8'));
+  assert.deepEqual(normalizedBundle.deals.map((deal) => deal.id), ['hillsong-vienna-events']);
+  assert.equal(normalizedBundle.deals[0].pubDate, '2026-08-24T08:00:00.000Z');
+  const report = JSON.parse(fs.readFileSync(path.join(churchNormalizationDir, 'live-deal-validation-report.json'), 'utf8'));
+  assert.equal(report.removedCount, 0);
+  assert.equal(report.churchDirectoryMerges, 2);
+} finally {
+  fs.rmSync(churchNormalizationDir, { recursive: true, force: true });
 }
 
 console.log('Live deal removal safety tests passed.');

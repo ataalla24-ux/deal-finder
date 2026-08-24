@@ -24,6 +24,7 @@ const FEATURED_TARGET_TIMEOUT_MS = Number(process.env.FEATURED_DEAL_TARGET_TIMEO
 const FOOD_DRINK_CATEGORIES = new Set(['essen', 'kaffee', 'trinken', 'getränke', 'getraenke', 'bars']);
 const NON_FOOD_WEEKLY_CATEGORIES = new Set(['fitness', 'beauty', 'reisen', 'kultur', 'events', 'freizeit', 'kirche', 'gottesdienste', 'gemeinde', 'shopping', 'technik', 'streaming', 'gewinnspiel']);
 const CHURCH_EVENT_SIGNAL_PATTERN = /\b(gottesdienst|kirche|freikirche|christlich|hillsong|icf|jesuszentrum|cig|gemeinde|worship|lobpreis|messe)\b/i;
+const NON_FOOD_WEEKLY_OFFER_PATTERN = /\b(mini\s*golf|minigolf|golf|probetraining|fitness|fitnessstudio|museum|kino|kinoticket|festival|therme|ticket|flug|reise|shopping|parfum|beauty)\b/i;
 const FOOD_DRINK_SIGNAL_PATTERN = /\b(essen|trinken|food|drink|drinks|getränk|getraenk|kaffee|coffee|espresso|latte|matcha|tee|tea|eis|eissalon|gelato|ice\s*cream|pizza|burger|döner|doener|kebab|falafel|sushi|ramen|nudel|noodle|brunch|frühstück|fruehstueck|croissant|bowl|restaurant|cafe|café|bistro|bar|cocktail|smoothie|saft|juice|cola|menü|menue|meal|lunch|dinner|snack|pommes|kuchen|torte|cookie|cookies|schoko\w*|erdbeer\w*|praline|wein|bier)\b/i;
 const VIENNA_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Vienna',
@@ -408,6 +409,8 @@ function compactFeaturedEvidence(health = null) {
 function isFoodDrinkDeal(deal = {}) {
     const normalized = normalizeDealRecord(deal || {});
     const category = cleanText(normalized.category || '').toLowerCase();
+    const primarySignal = [normalized.brand, normalized.title, normalized.type]
+        .map((value) => cleanText(value)).join(' ');
     const signal = [
         normalized.brand,
         normalized.title,
@@ -419,6 +422,8 @@ function isFoodDrinkDeal(deal = {}) {
 
     if (NON_FOOD_WEEKLY_CATEGORIES.has(category)) return false;
     if (CHURCH_EVENT_SIGNAL_PATTERN.test(signal)) return false;
+    if (NON_FOOD_WEEKLY_OFFER_PATTERN.test(primarySignal)) return false;
+    if (['event', 'info'].includes(cleanText(normalized.type || '').toLowerCase())) return false;
     if (FOOD_DRINK_CATEGORIES.has(category)) return true;
 
     if (category === 'supermarkt') return FOOD_DRINK_SIGNAL_PATTERN.test(signal);
@@ -629,6 +634,38 @@ function loadExistingFeaturedDeal(kind) {
     }
 }
 
+function syncExistingFeaturedDeal(kind, existing, approvedDeal, eligibility = null) {
+    if (!approvedDeal) return false;
+    const normalized = normalizeDealRecord(approvedDeal);
+    const canonicalFields = {
+        dealId: normalized.id,
+        brand: normalized.brand,
+        title: normalized.title,
+        description: normalized.description,
+        logo: normalized.logo || (kind === 'weekly' ? '🔥' : '🎯'),
+        logoUrl: normalized.logoUrl || '',
+        url: normalized.url,
+        type: normalized.type,
+        category: normalized.category || 'wien',
+        distance: normalized.distance || 'Wien',
+    };
+    const changed = Object.entries(canonicalFields)
+        .some(([field, value]) => cleanText(existing[field] || '') !== cleanText(value || ''));
+    if (!changed) return false;
+
+    const fileName = kind === 'weekly' ? 'deal-of-the-week.json' : 'deal-of-the-day.json';
+    const outputPath = path.join(__dirname, '..', 'docs', fileName);
+    const output = {
+        ...existing,
+        ...canonicalFields,
+        ...(kind === 'weekly' ? { eligibility: eligibility || existing.eligibility || null } : {}),
+        syncedAt: new Date().toISOString(),
+    };
+    fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
+    console.log(`Synchronized existing ${kind} featured deal with live feed: ${normalized.brand} - ${normalized.title}`);
+    return true;
+}
+
 async function isExistingFeaturedDealCurrent(kind, approvedDeals) {
     const existing = loadExistingFeaturedDeal(kind);
     if (!existing) return false;
@@ -646,6 +683,8 @@ async function isExistingFeaturedDealCurrent(kind, approvedDeals) {
         const manualEligibility = await getFeaturedDealEligibility(approvedDeal || existing, kind, { llmEnabled: false });
         if (!manualEligibility.eligible) {
             console.log(`Existing manual weekly featured deal is not eligible anymore: ${manualEligibility.reason}`);
+        } else {
+            syncExistingFeaturedDeal(kind, existing, approvedDeal, manualEligibility);
         }
         return manualEligibility.eligible;
     }
@@ -653,6 +692,8 @@ async function isExistingFeaturedDealCurrent(kind, approvedDeals) {
     const eligibility = await getFeaturedDealEligibility(approvedDeal || existing, kind);
     if (!eligibility.eligible) {
         console.log(`Existing ${kind} featured deal is not eligible anymore: ${eligibility.reason}`);
+    } else {
+        syncExistingFeaturedDeal(kind, existing, approvedDeal, eligibility);
     }
     return eligibility.eligible;
 }
@@ -688,8 +729,20 @@ function automaticTypeScore(type) {
 function isWeakAutomaticBrand(value) {
     const text = cleanText(value || '').toLowerCase();
     if (!text) return true;
+    if (/^@/.test(text) || (/^[a-z0-9_.]{3,32}$/.test(text) && /[._]/.test(text))) return true;
     return /^(instagram|tiktok|wien|deal|gutschein|gratis|rabatt|angebot|restaurant|lieferung|jeder|jede|jedem|jeden)\b/.test(text)
         || /\bbestellung\b/.test(text);
+}
+
+function isAutomaticFeaturedPresentationReady(deal) {
+    const normalized = normalizeDealRecord(deal || {});
+    const title = cleanText(normalized.title || '');
+    const description = cleanText(normalized.description || '');
+    if (isWeakAutomaticBrand(normalized.brand)) return false;
+    if (!title || title.length > 140 || /^[\w.@-]+:\s/i.test(title)) return false;
+    if (/&(?:[a-z][a-z0-9]+|#\d+|#x[a-f0-9]+);/i.test(`${title} ${description}`)) return false;
+    if (description && normalizePickCommandText(description) === normalizePickCommandText(title)) return false;
+    return true;
 }
 
 function scoreAutomaticFeaturedDeal(deal, kind, now = new Date()) {
@@ -723,6 +776,7 @@ async function selectAutomaticFeaturedDeal(approvedDeals, options = {}) {
     const excludedIds = options.excludedIds instanceof Set ? options.excludedIds : new Set();
     const liveDeals = approvedDeals
         .filter((deal) => isFeaturedDealStillLive(deal, now))
+        .filter(isAutomaticFeaturedPresentationReady)
         .filter((deal) => !excludedIds.has(cleanText(deal.id || '')));
 
     if (liveDeals.length === 0) return null;
