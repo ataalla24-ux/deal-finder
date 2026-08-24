@@ -14,9 +14,12 @@ const PUBLIC_LOGO_BASE_URL = (process.env.PUBLIC_BRAND_LOGO_BASE_URL || 'https:/
 const REFRESH = process.argv.includes('--refresh');
 const MIN_LOGO_DIMENSION = 160;
 const PROTECTED_EMBLEM_FILES = new Set([
+  'aeg-aeg-at.png',
+  'alfies-alfies-at.png',
   'all4golf-all4golf-de.png',
   'billa-billa-at.png',
   'burger-king-burgerking-at.png',
+  'balls-and-clubs-ballsandclubs-at.png',
   'cig-wien-cigwien-at.png',
   'dunkin-dunkin-at.png',
   'evo-fitness-evofitness-at.png',
@@ -29,20 +32,28 @@ const PROTECTED_EMBLEM_FILES = new Set([
   'kfc-wien-kfc-at.png',
   'lieferando-lieferando-at.png',
   'madame-tussauds-wien-madametussauds-com.png',
+  'magenta-moments-magenta-at.png',
   'marschfuerjesus-marschfuerjesus-com.png',
   'mcdonald-s-mcdonalds-at.png',
   'nordsee-nordsee-com.png',
   'omv-viva-omv-at.png',
   'raiffeisen-raiffeistag-raiffeisen-at.png',
+  'ryanair-ryanair-com.png',
   'spotify-spotify-com.png',
   'starbucks-starbucks-at.png',
   'steakdoner-wolt-com.png',
   'thalia-thalia-at.png',
   'therme-wien-thermewien-at.png',
   'too-good-to-go-toogoodtogo-com.png',
+  'tui-tui-at.png',
   'vcc-jesuszentrum-jesuszentrum-at.png',
+  'vienna-marriott-cascade-bar-viennamarriott-restaurants-com.png',
   'westfield-club-westfield-com.png',
   'wiener-deewan-deewan-at.png',
+  'wiener-laziz-food-wienerlazizfood-com.png',
+  'wolt-wolt-com.png',
+  'honu-tiki-bowls-honutikibowls-com.png',
+  'pizzamann-pizzamann-at.png',
 ]);
 
 function cleanText(value) {
@@ -174,7 +185,16 @@ async function main() {
     if (JSON.stringify(deal) !== JSON.stringify(rawDeal)) normalizedCount += 1;
 
     const sourceLogoUrl = cleanText(deal.logoUrl || '');
-    if (!sourceLogoUrl || isCacheUrl(sourceLogoUrl)) {
+    if (!sourceLogoUrl) {
+      nextDeals.push(deal);
+      continue;
+    }
+    if (isCacheUrl(sourceLogoUrl)) {
+      const fileName = decodeURIComponent(sourceLogoUrl.slice(`${PUBLIC_LOGO_BASE_URL}/`.length));
+      const filePath = path.join(LOGO_DIR, fileName);
+      if (!fileName || path.basename(fileName) !== fileName || !(await fileExists(filePath))) {
+        throw new Error(`Cached logo file is missing or unsafe: ${sourceLogoUrl}`);
+      }
       nextDeals.push(deal);
       continue;
     }

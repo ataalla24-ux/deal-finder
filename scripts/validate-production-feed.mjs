@@ -30,6 +30,9 @@ const nonFoodSignals = /\b(kirche|gottesdienst|gemeinde|worship|fitness|museum|k
 const nonFoodOfferSignals = /\b(mini\s*golf|minigolf|golf|probetraining|fitness|museum|kino|ticket|festival|therme|flug|reise|shopping|parfum|beauty)\b/i;
 const foodSignals = /\b(essen|food|drink|getränk|kaffee|espresso|latte|matcha|tee|eis|pizza|burger|wrap|restaurant|cafe|café|frühstück|brunch|bowl|lieferando|foodora|wolt)\b/i;
 const htmlEntityPattern = /&(?:[a-z][a-z0-9]+|#\d+|#x[a-f0-9]+);/i;
+const brandLogoUrlPrefix = 'https://freefinder.at/assets/brand-logos/';
+const minimumBrandLogoDimension = 160;
+const localBrandLogoFiles = new Set();
 
 function clean(value) {
   return String(value ?? '').replace(/\s+/g, ' ').trim();
@@ -60,6 +63,25 @@ function isFoodDrink(deal) {
   if (nonFoodOfferSignals.test(primarySignal)) return false;
   if (['event', 'info'].includes(clean(deal.type).toLowerCase())) return false;
   return foodDrinkCategories.has(category) || foodSignals.test(signal);
+}
+
+function imageDimensions(buffer) {
+  if (buffer.length >= 24 && buffer.toString('ascii', 1, 4) === 'PNG') {
+    return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
+  }
+  if (buffer.length < 4 || buffer[0] !== 0xff || buffer[1] !== 0xd8) return null;
+  let offset = 2;
+  while (offset + 9 < buffer.length) {
+    if (buffer[offset] !== 0xff) return null;
+    const marker = buffer[offset + 1];
+    const length = buffer.readUInt16BE(offset + 2);
+    if (marker >= 0xc0 && marker <= 0xc3) {
+      return { height: buffer.readUInt16BE(offset + 5), width: buffer.readUInt16BE(offset + 7) };
+    }
+    if (length < 2) return null;
+    offset += 2 + length;
+  }
+  return null;
 }
 
 if (!Array.isArray(feed.deals)) errors.push('deals.json must contain a deals array');
@@ -125,6 +147,31 @@ for (const [index, deal] of deals.entries()) {
   }
   if (/^[\w.]+:\s/i.test(clean(deal.title)) || clean(deal.title).length > 150) {
     warnings.push(`${id} still looks like an unnormalized social caption`);
+  }
+  if (clean(deal.description).length > 500) {
+    warnings.push(`${id} has an excessively long card description`);
+  }
+
+  const logoUrl = clean(deal.logoUrl);
+  if (logoUrl.startsWith(brandLogoUrlPrefix)) {
+    const fileName = decodeURIComponent(logoUrl.slice(brandLogoUrlPrefix.length));
+    if (!fileName || path.basename(fileName) !== fileName) errors.push(`${id} has an unsafe local logo path`);
+    else localBrandLogoFiles.add(fileName);
+  } else if (logoUrl) {
+    warnings.push(`${id} still loads its logo from an external host`);
+  }
+}
+
+for (const fileName of localBrandLogoFiles) {
+  try {
+    const buffer = await readFile(path.join(docs, 'assets', 'brand-logos', fileName));
+    const dimensions = imageDimensions(buffer);
+    if (!dimensions) errors.push(`brand logo has an unsupported image format: ${fileName}`);
+    else if (dimensions.width < minimumBrandLogoDimension || dimensions.height < minimumBrandLogoDimension) {
+      errors.push(`brand logo is too small (${dimensions.width}x${dimensions.height}): ${fileName}`);
+    }
+  } catch {
+    errors.push(`brand logo file is missing: ${fileName}`);
   }
 }
 

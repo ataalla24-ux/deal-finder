@@ -235,6 +235,86 @@ const LOGOS = [
     background: '#F4D65E',
     color: '#1A1814',
     fontSize: 86
+  },
+  {
+    file: 'ryanair-ryanair-com.png',
+    type: 'remote-image',
+    url: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/76/28/ff/7628ff9c-d237-4089-3f3e-a2603b0c21b9/AppIcon-0-0-1x_U007emarketing-0-6-0-85-220.png/512x512bb.jpg',
+    maxWidth: 420,
+    maxHeight: 420
+  },
+  {
+    file: 'wolt-wolt-com.png',
+    type: 'remote-image',
+    url: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/9c/86/3f/9c863f01-8c7a-fd76-09b2-23834f36bc39/AppIcon-0-0-1x_U007ephone-0-1-85-220.png/512x512bb.jpg',
+    maxWidth: 420,
+    maxHeight: 420
+  },
+  {
+    file: 'aeg-aeg-at.png',
+    type: 'remote-image',
+    url: 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/f9/d6/e0/f9d6e0cf-770f-439c-d4c6-008158857f7f/AppIcon-0-0-1x_U007ephone-0-1-0-85-220.png/512x512bb.jpg',
+    maxWidth: 420,
+    maxHeight: 420
+  },
+  {
+    file: 'vienna-marriott-cascade-bar-viennamarriott-restaurants-com.png',
+    type: 'remote-image',
+    url: 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/dd/96/d6/dd96d6fc-063b-ebdd-775a-599d3a476eee/AppIcon-0-0-1x_U007epad-0-0-0-1-0-0-sRGB-0-85-220.png/512x512bb.jpg',
+    maxWidth: 420,
+    maxHeight: 420
+  },
+  {
+    file: 'honu-tiki-bowls-honutikibowls-com.png',
+    type: 'remote-image',
+    url: 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/23/19/5a/23195a2e-2c65-95f2-26cb-043c8ff4811a/Honu-0-0-1x_U007emarketing-0-8-0-85-220.png/512x512bb.jpg',
+    maxWidth: 420,
+    maxHeight: 420
+  },
+  {
+    file: 'pizzamann-pizzamann-at.png',
+    type: 'text-card',
+    text: 'Pizza\nMann',
+    background: '#FFF7EA',
+    color: '#D62828',
+    fontSize: 82
+  },
+  {
+    file: 'alfies-alfies-at.png',
+    type: 'remote-image',
+    url: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/26/23/85/26238512-96e6-93a9-b59c-892a3abbbd6d/AppIcon-0-0-1x_U007epad-0-11-0-85-220.png/512x512bb.jpg',
+    maxWidth: 420,
+    maxHeight: 420
+  },
+  {
+    file: 'magenta-moments-magenta-at.png',
+    type: 'remote-image',
+    url: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/29/4d/6c/294d6cb8-33b2-19e8-4dca-19b9c1c2def4/AppIcon-0-0-1x_U007epad-0-1-0-85-220.png/512x512bb.jpg',
+    maxWidth: 420,
+    maxHeight: 420
+  },
+  {
+    file: 'tui-tui-at.png',
+    type: 'remote-image',
+    url: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/2d/7a/35/2d7a3589-9229-dd14-f973-e63ddad4de20/AppIcon-0-0-1x_U007epad-0-1-0-sRGB-85-220.png/512x512bb.jpg',
+    maxWidth: 420,
+    maxHeight: 420
+  },
+  {
+    file: 'balls-and-clubs-ballsandclubs-at.png',
+    type: 'remote-image',
+    url: 'https://www.ballsandclubs.at/assets/img/minigolf/minigolf-logo.webp',
+    background: '#FFFFFF',
+    radius: 104,
+    maxWidth: 430,
+    maxHeight: 200
+  },
+  {
+    file: 'wiener-laziz-food-wienerlazizfood-com.png',
+    type: 'remote-image',
+    url: 'https://wienerlazizfood.com/images/logo.png',
+    maxWidth: 420,
+    maxHeight: 420
   }
 ];
 

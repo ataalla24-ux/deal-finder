@@ -51,7 +51,7 @@ expectNormalizedLogo(
   },
   {
     logo: '⛪',
-    logoUrlIncludes: /cigwien\.at/,
+    logoUrlIncludes: /brand-logos\/cig-wien-cigwien-at\.png$/,
   },
 );
 
@@ -68,7 +68,7 @@ expectNormalizedLogo(
   {
     brand: 'Starbucks',
     logo: '☕',
-    logoUrlIncludes: /starbucks\.at/,
+    logoUrlIncludes: /brand-logos\/starbucks-starbucks-at\.png$/,
   },
 );
 
@@ -86,7 +86,53 @@ expectNormalizedLogo(
   {
     brand: 'Burger King',
     logo: '🍔',
-    logoUrlIncludes: /burgerking\.at/,
+    logoUrlIncludes: /brand-logos\/burger-king-burgerking-at\.png$/,
+  },
+);
+
+expectNormalizedLogo(
+  'delivery platform logo does not replace an unknown restaurant emblem',
+  {
+    brand: 'Duru Juicy Kebabs',
+    title: 'Gratis Döner bei Duru Juicy Kebabs',
+    type: 'gratis',
+    category: 'essen',
+    logoUrl: 'https://www.google.com/s2/favicons?sz=256&domain_url=https://wolt.com',
+    url: 'https://wolt.com/de/aut/vienna/restaurant/duru-juicy-kebabs',
+  },
+  {
+    brand: 'Duru Juicy Kebabs',
+    logo: '🌯',
+    logoUrl: '',
+  },
+);
+
+expectNormalizedLogo(
+  'social handle fragments before a pinned street address are removed',
+  {
+    brand: 'Balls & Clubs',
+    title: '10% Rabatt auf Indoor-Minigolf bei Balls & Clubs',
+    type: 'rabatt',
+    category: 'freizeit',
+    distance: 'ballsandclubs.austria 📍 Wollzeile 16, 1010 Wien',
+  },
+  {
+    distance: 'Wollzeile 16, 1010 Wien',
+  },
+);
+
+expectNormalizedLogo(
+  'known brands use bundled high-resolution emblems',
+  {
+    brand: 'IKEA Restaurant',
+    title: 'Frühstück für 1 Euro',
+    type: 'rabatt',
+    category: 'essen',
+    url: 'https://www.ikea.com/at/de/stores/restaurant/',
+  },
+  {
+    brand: 'IKEA',
+    logoUrlIncludes: /brand-logos\/ikea-restaurant-ikea-com\.png$/,
   },
 );
 
@@ -103,7 +149,7 @@ expectNormalizedLogo(
   {
     brand: 'Magenta Moments',
     title: '1+1 gratis bei Magenta Moments',
-    logoUrlIncludes: /magenta\.at/,
+    logoUrlIncludes: /brand-logos\/magenta-moments-magenta-at\.png$/,
   },
 );
 
@@ -219,6 +265,35 @@ expectNormalizedLogo(
     type: 'bogo',
     description: 'Beim Kauf von 2 Pizzen ist die günstigere gratis dazu.',
     expiresOriginal: 'jeden Donnerstag',
+    logoUrlIncludes: /brand-logos\/pizzamann-pizzamann-at\.png$/,
+  },
+);
+
+expectNormalizedLogo(
+  'Ryanair uses its bundled high-resolution app emblem',
+  {
+    brand: 'Ryanair',
+    title: 'Flüge ab 19,99 €',
+    type: 'rabatt',
+    category: 'reisen',
+    url: 'https://www.ryanair.com/at/de',
+  },
+  {
+    logoUrlIncludes: /brand-logos\/ryanair-ryanair-com\.png$/,
+  },
+);
+
+expectNormalizedLogo(
+  'Wolt uses its bundled high-resolution app emblem',
+  {
+    brand: 'Wolt',
+    title: '12 € Gutschein bei Wolt',
+    type: 'gutschein',
+    category: 'essen',
+    url: 'https://wolt.com/de/aut/vienna',
+  },
+  {
+    logoUrlIncludes: /brand-logos\/wolt-wolt-com\.png$/,
   },
 );
 
@@ -253,7 +328,8 @@ expectNormalizedLogo(
     brand: 'Balls & Clubs',
     category: 'freizeit',
     logo: '⛳',
-    logoUrlIncludes: /ballsandclubs\.at/,
+    logoUrlIncludes: /brand-logos\/balls-and-clubs-ballsandclubs-at\.png$/,
+    description: '18 abwechslungsreiche Indoor-Minigolf-Bahnen in der Wollzeile 16, 1010 Wien; Online-Reservierung empfohlen.',
   },
 );
 
@@ -286,7 +362,7 @@ expectNormalizedLogo(
   {
     brand: 'Starbucks',
     logo: '☕',
-    logoUrlIncludes: /starbucks\.at/,
+    logoUrlIncludes: /brand-logos\/starbucks-starbucks-at\.png$/,
   },
 );
 
@@ -306,7 +382,7 @@ expectNormalizedLogo(
   {
     brand: 'Westfield Club',
     logo: '🛍️',
-    logoUrlIncludes: /westfield\.com/,
+    logoUrlIncludes: /brand-logos\/westfield-club-westfield-com\.png$/,
   },
 );
 
@@ -426,7 +502,7 @@ expectNormalizedLogo(
   {
     brand: 'Centimeter Wien',
     logo: '🍽️',
-    logoUrlIncludes: /centimeter\.at/,
+    logoUrlIncludes: /brand-logos\/centimeter-vienna-centimeter-at\.png$/,
   },
 );
 
@@ -465,7 +541,7 @@ expectNormalizedLogo(
     brand: 'Therme Wien',
     distance: 'Österreich',
     expiryDisplayText: '',
-    logoUrlIncludes: /thermewien\.at/,
+    logoUrlIncludes: /brand-logos\/therme-wien-thermewien-at\.png$/,
   },
 );
 

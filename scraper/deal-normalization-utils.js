@@ -3,33 +3,34 @@ import { normalizeCategoryForScraper } from './category-utils.js';
 const PUBLIC_BRAND_LOGO_BASE_URL = 'https://freefinder.at/assets/brand-logos';
 
 const BRAND_RULES = [
-  { key: 'centimeter_vienna', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at' },
-  { key: 'centimeter vienna', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at' },
-  { key: 'centimeter', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at' },
+  { key: 'centimeter_vienna', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at', logoFile: 'centimeter-vienna-centimeter-at.png' },
+  { key: 'centimeter vienna', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at', logoFile: 'centimeter-vienna-centimeter-at.png' },
+  { key: 'centimeter', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at', logoFile: 'centimeter-vienna-centimeter-at.png' },
   { key: 'chocoberry', name: 'Chocoberry', logo: '🍓', category: 'essen', domain: 'chocoberry.at' },
   { key: 'aida', name: 'AIDA', logo: '🍦', category: 'essen', domain: 'aida.at' },
   { key: 'tomochan', name: 'Tomochan Ramen', logo: '🍜', category: 'essen' },
-  { key: 'apapika', name: 'Apapika', logo: '🍲', category: 'essen', domain: 'apapika.com' },
-  { key: 'honu tiki', name: 'Honu Tiki Bowls', logo: '🥗', category: 'essen', domain: 'honutikibowls.com' },
-  { key: 'öh mensa', name: 'ÖH Mensa Wien', logo: '🍽️', category: 'essen', domain: 'oeh.ac.at' },
-  { key: 'oeh mensa', name: 'ÖH Mensa Wien', logo: '🍽️', category: 'essen', domain: 'oeh.ac.at' },
-  { key: 'oh mensa', name: 'ÖH Mensa Wien', logo: '🍽️', category: 'essen', domain: 'oeh.ac.at' },
-  { key: 'raiffeisen raiffeistag', name: 'Raiffeisen RaiffEIStag', logo: '🍦', category: 'essen', domain: 'raiffeisen.at' },
-  { key: 'mcdonald', name: "McDonald's", logo: '🍟', category: 'essen', domain: 'mcdonalds.at' },
-  { key: 'burger king', name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at' },
-  { key: 'burgerking', name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at' },
+  { key: 'apapika', name: 'Apapika', logo: '🍲', category: 'essen', domain: 'apapika.com', logoFile: 'apapika-apapika-com.png' },
+  { key: 'honu tiki', name: 'Honu Tiki Bowls', logo: '🥗', category: 'essen', domain: 'honutikibowls.com', logoFile: 'honu-tiki-bowls-honutikibowls-com.png' },
+  { key: 'öh mensa', name: 'ÖH Mensa Wien', logo: '🍽️', category: 'essen', domain: 'oeh.ac.at', logoFile: 'oh-mensa-wien-oeh-ac-at.png' },
+  { key: 'oeh mensa', name: 'ÖH Mensa Wien', logo: '🍽️', category: 'essen', domain: 'oeh.ac.at', logoFile: 'oh-mensa-wien-oeh-ac-at.png' },
+  { key: 'oh mensa', name: 'ÖH Mensa Wien', logo: '🍽️', category: 'essen', domain: 'oeh.ac.at', logoFile: 'oh-mensa-wien-oeh-ac-at.png' },
+  { key: 'raiffeisen raiffeistag', name: 'Raiffeisen RaiffEIStag', logo: '🍦', category: 'essen', domain: 'raiffeisen.at', logoFile: 'raiffeisen-raiffeistag-raiffeisen-at.png' },
+  { key: 'mcdonald', name: "McDonald's", logo: '🍟', category: 'essen', domain: 'mcdonalds.at', logoFile: 'mcdonald-s-mcdonalds-at.png' },
+  { key: 'burger king', name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at', logoFile: 'burger-king-burgerking-at.png' },
+  { key: 'burgerking', name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at', logoFile: 'burger-king-burgerking-at.png' },
   { key: 'kfc', name: 'KFC', logo: '🍗', category: 'essen', domain: 'kfc.at', logoFile: 'kfc-wien-kfc-at.png' },
-  { key: 'starbucks', name: 'Starbucks', logo: '☕', category: 'kaffee', domain: 'starbucks.at' },
-  { key: 'foodora', name: 'foodora', logo: '🍴', category: 'essen', domain: 'foodora.at' },
-  { key: 'alfies', name: 'Alfies', logo: '🛒', category: 'supermarkt', domain: 'alfies.at' },
-  { key: 'balls and clubs', name: 'Balls & Clubs', logo: '⛳', category: 'freizeit', domain: 'ballsandclubs.at' },
-  { key: 'ballsandclubs', name: 'Balls & Clubs', logo: '⛳', category: 'freizeit', domain: 'ballsandclubs.at' },
+  { key: 'starbucks', name: 'Starbucks', logo: '☕', category: 'kaffee', domain: 'starbucks.at', logoFile: 'starbucks-starbucks-at.png' },
+  { key: 'foodora', name: 'foodora', logo: '🍴', category: 'essen', domain: 'foodora.at', logoFile: 'foodora-foodora-at.png' },
+  { key: 'alfies', name: 'Alfies', logo: '🛒', category: 'supermarkt', domain: 'alfies.at', logoFile: 'alfies-alfies-at.png' },
+  { key: 'balls & clubs', name: 'Balls & Clubs', logo: '⛳', category: 'freizeit', domain: 'ballsandclubs.at', logoFile: 'balls-and-clubs-ballsandclubs-at.png' },
+  { key: 'balls and clubs', name: 'Balls & Clubs', logo: '⛳', category: 'freizeit', domain: 'ballsandclubs.at', logoFile: 'balls-and-clubs-ballsandclubs-at.png' },
+  { key: 'ballsandclubs', name: 'Balls & Clubs', logo: '⛳', category: 'freizeit', domain: 'ballsandclubs.at', logoFile: 'balls-and-clubs-ballsandclubs-at.png' },
   { key: 'domino', name: "Domino's Pizza", logo: '🍕', category: 'essen', domain: 'dominos.at' },
-  { key: 'dunkin', name: "Dunkin'", logo: '☕', category: 'kaffee', domain: 'dunkin.at' },
+  { key: 'dunkin', name: "Dunkin'", logo: '☕', category: 'kaffee', domain: 'dunkin.at', logoFile: 'dunkin-dunkin-at.png' },
   { key: 'tchibo', name: 'Tchibo', logo: '☕', category: 'kaffee', domain: 'tchibo.at' },
   { key: 'nespresso', name: 'Nespresso', logo: '☕', category: 'kaffee', domain: 'nespresso.com' },
   { key: 'sephora', name: 'SEPHORA', logo: '💄', category: 'beauty', domain: 'sephora.at' },
-  { key: 'thalia', name: 'Thalia', logo: '📚', category: 'shopping', domain: 'thalia.at' },
+  { key: 'thalia', name: 'Thalia', logo: '📚', category: 'shopping', domain: 'thalia.at', logoFile: 'thalia-thalia-at.png' },
   { key: 'intimissimi', name: 'Intimissimi', logo: '🧦', category: 'shopping', domain: 'intimissimi.com' },
   { key: 'bipa', name: 'BIPA', logo: '💄', category: 'beauty', domain: 'bipa.at' },
   { key: 'dm', name: 'dm', logo: '🧴', category: 'beauty', domain: 'dm.at' },
@@ -39,10 +40,10 @@ const BRAND_RULES = [
   { key: 'intersport', name: 'Intersport', logo: '⛷️', category: 'sport', domain: 'intersport.at' },
   { key: 'sportscheck', name: 'Sportscheck', logo: '🏃', category: 'sport', domain: 'sportscheck.at' },
   { key: 'spar', name: 'SPAR', logo: '🛒', category: 'supermarkt', domain: 'spar.at' },
-  { key: 'billa', name: 'BILLA', logo: '🛒', category: 'supermarkt', domain: 'billa.at' },
+  { key: 'billa', name: 'BILLA', logo: '🛒', category: 'supermarkt', domain: 'billa.at', logoFile: 'billa-billa-at.png' },
   { key: 'hofer', name: 'HOFER', logo: '🛒', category: 'supermarkt', domain: 'hofer.at' },
   { key: 'lidl', name: 'Lidl', logo: '🛒', category: 'supermarkt', domain: 'lidl.at' },
-  { key: 'ikea', name: 'IKEA', logo: '🪑', category: 'shopping', domain: 'ikea.com' },
+  { key: 'ikea', name: 'IKEA', logo: '🪑', category: 'shopping', domain: 'ikea.com', logoFile: 'ikea-restaurant-ikea-com.png' },
   { key: 'xxxlutz', name: 'XXXLutz', logo: '🪑', category: 'shopping', domain: 'xxxlutz.at' },
   { key: 'botanischer garten', name: 'Botanischer Garten der Universität Wien', logo: '🌿', category: 'kultur' },
   { key: 'shell', name: 'Shell Österreich', logo: '⛽', category: 'kaffee', domain: 'shell.at' },
@@ -56,13 +57,13 @@ const BRAND_RULES = [
   { key: 'tybah', name: 'Tybah Pizzeria-Ristorante', logo: '🍕', category: 'essen' },
   { key: 'eismacher', name: 'Der Eismacher', logo: '🍨', category: 'essen' },
   { key: 'ben & jerry', name: "Ben & Jerry's", logo: '🍦', category: 'essen', domain: 'benjerry.at' },
-  { key: 'nordsee', name: 'NORDSEE', logo: '🐟', category: 'essen', domain: 'nordsee.com' },
+  { key: 'nordsee', name: 'NORDSEE', logo: '🐟', category: 'essen', domain: 'nordsee.com', logoFile: 'nordsee-nordsee-com.png' },
   { key: 'donauturm', name: 'Donauturm', logo: '🗼', category: 'kultur' },
   { key: 'genuss-festival', name: 'Genuss-Festival Wien', logo: '🧀', category: 'essen' },
   { key: 'momax', name: 'mömax Restaurant', logo: '🛋️', category: 'essen' },
   { key: 'mömax', name: 'mömax Restaurant', logo: '🛋️', category: 'essen' },
   { key: 'vapiano', name: 'Vapiano', logo: '🍝', category: 'essen', domain: 'vapiano.at', logoFile: 'vapiano-vapiano-at.png' },
-  { key: 'too good to go', name: 'Too Good To Go', logo: '🍴', category: 'essen', domain: 'toogoodtogo.com' },
+  { key: 'too good to go', name: 'Too Good To Go', logo: '🍴', category: 'essen', domain: 'toogoodtogo.com', logoFile: 'too-good-to-go-toogoodtogo-com.png' },
   { key: 'grill heaven', name: 'Grill Heaven Wien', logo: '🔥', category: 'essen' },
   { key: 'gigafit', name: 'GigaFit', logo: '💪', category: 'fitness' },
   { key: 'ori fusion', name: 'Ori Fusion Kitchen', logo: '🥢', category: 'essen' },
@@ -77,33 +78,41 @@ const BRAND_RULES = [
   { key: 'chasen brew', name: 'Chasen Brew', logo: '🍵', category: 'kaffee' },
   { key: 'wiener eistraum', name: 'Wiener Eistraum', logo: '⛸️', category: 'events' },
   { key: 'donauinselfest', name: 'Donauinselfest', logo: '🎸', category: 'kultur', preferFallback: true },
-  { key: 'foodsharing', name: 'Foodsharing', logo: '🍴', category: 'essen', domain: 'foodsharing.at' },
+  { key: 'foodsharing', name: 'Foodsharing', logo: '🍴', category: 'essen', domain: 'foodsharing.at', logoFile: 'foodsharing-foodsharing-at.png' },
   { key: 'peter hahn', name: 'Peter Hahn', logo: '👗', category: 'shopping' },
   { key: 'pneus online', name: 'Pneus Online', logo: '🛞', category: 'shopping' },
   { key: 'omv viva', name: 'OMV VIVA', logo: '⛽', category: 'shopping', domain: 'omv.at', logoFile: 'omv-viva-omv-at.png' },
   { key: 'omv maxxmotion', name: 'OMV MaxxMotion', logo: '⛽', category: 'shopping', domain: 'omv.at', logoFile: 'omv-viva-omv-at.png' },
   { key: 'omv', name: 'OMV', logo: '⛽', category: 'shopping', domain: 'omv.at', logoFile: 'omv-viva-omv-at.png' },
-  { key: 'spotify', name: 'Spotify', logo: '🎵', category: 'streaming', domain: 'spotify.com' },
-  { key: 'evo fitness', name: 'EVO Fitness', logo: '💪', category: 'fitness', domain: 'evofitness.at' },
+  { key: 'spotify', name: 'Spotify', logo: '🎵', category: 'streaming', domain: 'spotify.com', logoFile: 'spotify-spotify-com.png' },
+  { key: 'evo fitness', name: 'EVO Fitness', logo: '💪', category: 'fitness', domain: 'evofitness.at', logoFile: 'evo-fitness-evofitness-at.png' },
   { key: 'joe', name: 'joo', logo: '💳', category: 'supermarkt', domain: 'joe-club.at' },
   { key: 'joo', name: 'joo', logo: '💳', category: 'supermarkt', domain: 'joe-club.at' },
-  { key: 'wolt', name: 'Wolt', logo: '🛵', category: 'essen', domain: 'wolt.com' },
+  { key: 'wolt', name: 'Wolt', logo: '🛵', category: 'essen', domain: 'wolt.com', logoFile: 'wolt-wolt-com.png' },
   { key: 'lieferando', name: 'Lieferando', logo: '🛵', category: 'essen', domain: 'lieferando.at', logoFile: 'lieferando-lieferando-at.png' },
-  { key: 'magenta moments', name: 'Magenta Moments', logo: '🎁', category: 'technik', domain: 'magenta.at' },
-  { key: 'magenta.at', name: 'Magenta Moments', logo: '🎁', category: 'technik', domain: 'magenta.at' },
-  { key: 'aeg', name: 'AEG', logo: '🏠', category: 'shopping', domain: 'aeg.at' },
-  { key: 'pizzamann', name: 'Pizzamann', logo: '🍕', category: 'essen', domain: 'pizzamann.at' },
-  { key: 'vienna marriott', name: 'Vienna Marriott Cascade Bar', logo: '🍸', category: 'bars', domain: 'viennamarriott-restaurants.com' },
+  { key: 'magenta moments', name: 'Magenta Moments', logo: '🎁', category: 'technik', domain: 'magenta.at', logoFile: 'magenta-moments-magenta-at.png' },
+  { key: 'magenta.at', name: 'Magenta Moments', logo: '🎁', category: 'technik', domain: 'magenta.at', logoFile: 'magenta-moments-magenta-at.png' },
+  { key: 'aeg', name: 'AEG', logo: '🏠', category: 'shopping', domain: 'aeg.at', logoFile: 'aeg-aeg-at.png' },
+  { key: 'pizzamann', name: 'Pizzamann', logo: '🍕', category: 'essen', domain: 'pizzamann.at', logoFile: 'pizzamann-pizzamann-at.png' },
+  { key: 'vienna marriott', name: 'Vienna Marriott Cascade Bar', logo: '🍸', category: 'bars', domain: 'viennamarriott-restaurants.com', logoFile: 'vienna-marriott-cascade-bar-viennamarriott-restaurants-com.png' },
   { key: 'film festival am rathausplatz', name: 'Film Festival am Rathausplatz', logo: '🎬', category: 'kultur' },
   { key: 'bezirksvorstehung mariahilf', name: 'Bezirksvorstehung Mariahilf', logo: '🎉', category: 'freizeit' },
   { key: 'bezirksvorstehung_mariahilf', name: 'Bezirksvorstehung Mariahilf', logo: '🎉', category: 'freizeit' },
   { key: 'uber eats', name: 'Uber Eats', logo: '🛵', category: 'essen', domain: 'ubereats.com' },
-  { key: 'all4golf', name: 'ALL4GOLF', logo: '⛳', category: 'shopping', domain: 'all4golf.de' },
-  { key: 'therme wien', name: 'Therme Wien', logo: '💧', category: 'wellness', domain: 'thermewien.at' },
-  { key: 'madame tussauds', name: 'Madame Tussauds Wien', logo: '🎭', category: 'kultur', domain: 'madametussauds.com' },
+  { key: 'all4golf', name: 'ALL4GOLF', logo: '⛳', category: 'shopping', domain: 'all4golf.de', logoFile: 'all4golf-all4golf-de.png' },
+  { key: 'therme wien', name: 'Therme Wien', logo: '💧', category: 'wellness', domain: 'thermewien.at', logoFile: 'therme-wien-thermewien-at.png' },
+  { key: 'madame tussauds', name: 'Madame Tussauds Wien', logo: '🎭', category: 'kultur', domain: 'madametussauds.com', logoFile: 'madame-tussauds-wien-madametussauds-com.png' },
   { key: 'spee', name: 'Spee', logo: '🧺', category: 'shopping' },
-  { key: 'westfield', name: 'Westfield Club', logo: '🛍️', category: 'shopping', domain: 'westfield.com' },
-  { key: 'ryanair', name: 'Ryanair', logo: '✈️', category: 'reisen', domain: 'ryanair.com' },
+  { key: 'westfield', name: 'Westfield Club', logo: '🛍️', category: 'shopping', domain: 'westfield.com', logoFile: 'westfield-club-westfield-com.png' },
+  { key: 'hillsong', name: 'Hillsong Vienna', logo: '⛪', category: 'gottesdienste', domain: 'hillsong.com', logoFile: 'hillsong-vienna-hillsong-com.png' },
+  { key: 'cig wien', name: 'CIG Wien', logo: '⛪', category: 'gottesdienste', domain: 'cigwien.at', logoFile: 'cig-wien-cigwien-at.png' },
+  { key: 'icf wien', name: 'ICF Wien', logo: '⛪', category: 'kirche', domain: 'icf-wien.at', logoFile: 'icf-wien-icf-wien-at.png' },
+  { key: 'vcc jesuszentrum', name: 'VCC JesusZentrum', logo: '⛪', category: 'kirche', domain: 'jesuszentrum.at', logoFile: 'vcc-jesuszentrum-jesuszentrum-at.png' },
+  { key: 'marsch für jesus', name: 'Marsch für Jesus', logo: '✝️', category: 'events', domain: 'marschfuerjesus.com', logoFile: 'marschfuerjesus-marschfuerjesus-com.png' },
+  { key: 'marsch fur jesus', name: 'Marsch für Jesus', logo: '✝️', category: 'events', domain: 'marschfuerjesus.com', logoFile: 'marschfuerjesus-marschfuerjesus-com.png' },
+  { key: 'marschfuerjesus', name: 'Marsch für Jesus', logo: '✝️', category: 'events', domain: 'marschfuerjesus.com', logoFile: 'marschfuerjesus-marschfuerjesus-com.png' },
+  { key: 'wiener deewan', name: 'Wiener Deewan', logo: '🍛', category: 'essen', domain: 'deewan.at', logoFile: 'wiener-deewan-deewan-at.png' },
+  { key: 'ryanair', name: 'Ryanair', logo: '✈️', category: 'reisen', domain: 'ryanair.com', logoFile: 'ryanair-ryanair-com.png' },
   { key: 'wizz air', name: 'Wizz Air', logo: '✈️', category: 'reisen', domain: 'wizzair.com' },
   { key: 'wizz', name: 'Wizz Air', logo: '✈️', category: 'reisen', domain: 'wizzair.com' },
   { key: 'oebb', name: 'ÖBB', logo: '🚂', category: 'reisen', domain: 'oebb.at' },
@@ -112,7 +121,8 @@ const BRAND_RULES = [
   { key: 'booking', name: 'Booking.com', logo: '🏨', category: 'reisen', domain: 'booking.com' },
   { key: 'airbnb', name: 'Airbnb', logo: '🏠', category: 'reisen', domain: 'airbnb.com' },
   { key: 'expedia', name: 'Expedia', logo: '✈️', category: 'reisen', domain: 'expedia.at' },
-  { key: 'tui', name: 'TUI', logo: '✈️', category: 'reisen', domain: 'tui.at' },
+  { key: 'tui', name: 'TUI', logo: '✈️', category: 'reisen', domain: 'tui.at', logoFile: 'tui-tui-at.png' },
+  { key: 'wiener laziz food', name: 'Wiener Laziz Food', logo: '🍽️', category: 'essen', domain: 'wienerlazizfood.com', logoFile: 'wiener-laziz-food-wienerlazizfood-com.png' },
   { key: 'preisjaeger', name: 'Preisjaeger', logo: '🎯', category: 'shopping', source: true },
   { key: 'wien deals', name: 'Wien Deals', logo: '🎯', category: 'shopping', source: true },
   { key: 'instagram', name: 'Instagram', logo: '📸', category: 'shopping', source: true },
@@ -217,6 +227,24 @@ function cleanUiNoiseText(value) {
     .replace(/\*{3,}/g, ' ')
     .replace(/\s+/g, ' ')
     .replace(/^[,:\-–\s]+|[,:\-–\s]+$/g, '')
+    .trim();
+}
+
+function cleanLocationForDisplay(value) {
+  let text = cleanUiNoiseText(value);
+  if (!text) return '';
+
+  const pinIndex = text.lastIndexOf('📍');
+  if (pinIndex >= 0) {
+    const pinnedLocation = cleanUiNoiseText(text.slice(pinIndex + 2));
+    if (pinnedLocation && /\b\d{4}\s+(?:wien|vienna)\b|\b(?:straße|strasse|gasse|platz|weg|ring|allee)\b/i.test(pinnedLocation)) {
+      text = pinnedLocation;
+    }
+  }
+
+  return text
+    .replace(/^@[a-z0-9_.]+\s*/i, '')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
@@ -511,10 +539,15 @@ function inferPreferredBrand(deal = {}) {
 }
 
 function inferLogoUrl(deal = {}, brand = '') {
-  const combined = [brand, deal.title, deal.description, deal.distance, deal.url, deal.post_url, deal.source]
+  const explicitBrand = cleanUiNoiseText(brand || deal.brand || '');
+  const hasSpecificBrand = Boolean(
+    explicitBrand && !isSourceLikeBrand(explicitBrand) && !isLikelyGenericLocation(explicitBrand)
+  );
+  const knownFromBrand = findBrandRule(explicitBrand);
+  const fallbackSignal = [deal.title, deal.description, deal.distance, deal.url, deal.post_url, deal.source]
     .filter(Boolean)
     .join(' ');
-  const known = findBrandRule(combined);
+  const known = knownFromBrand || (!hasSpecificBrand ? findBrandRule(fallbackSignal) : null);
   if (known?.logoFile) return `${PUBLIC_BRAND_LOGO_BASE_URL}/${known.logoFile}`;
   if (deal.logoUrl && cachedBrandLogoMatches(deal.logoUrl, brand || deal.brand, known)) return deal.logoUrl;
   if (known?.domain && !known?.preferFallback) return buildLogoUrl(known.domain, { allowSourceLike: true });
@@ -530,7 +563,11 @@ function inferLogo(deal = {}, brand = '') {
   const combined = [brand, deal.title, deal.description, deal.distance, deal.url, deal.category, deal.type]
     .filter(Boolean)
     .join(' ');
-  const known = findBrandRule(combined);
+  const explicitBrand = cleanUiNoiseText(brand || deal.brand || '');
+  const hasSpecificBrand = Boolean(
+    explicitBrand && !isSourceLikeBrand(explicitBrand) && !isLikelyGenericLocation(explicitBrand)
+  );
+  const known = findBrandRule(explicitBrand) || (!hasSpecificBrand ? findBrandRule(combined) : null);
   if (known && !known.source) return known.logo;
 
   const signal = normalizeAscii(combined);
@@ -729,6 +766,9 @@ function cleanDescriptionForDisplay(description = '', deal = {}) {
   if (/^hier erf[äa]hrst du mehr [üu]ber deinen vorteil bei\b/i.test(text)) return '';
 
   const brand = cleanUiNoiseText(deal.brand || '');
+  if (/balls\s*(?:&|and)\s*clubs/i.test(brand) && /\blisamaria\b/i.test(text)) {
+    return '18 abwechslungsreiche Indoor-Minigolf-Bahnen in der Wollzeile 16, 1010 Wien; Online-Reservierung empfohlen.';
+  }
   if (brand) {
     const escapedBrand = brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     text = text
@@ -809,10 +849,12 @@ function sanitizeExpiryText(value) {
     .replace(/\blaufend\b/gi, ' ')
     .replace(/\bnicht angegeben\b/gi, ' ')
     .replace(/\bzeiten auf webseite prüfen\b/gi, ' ')
+    .replace(/\blieferzeiten\b/gi, ' ')
     .replace(/\baktuelle termine auf webseite\b/gi, ' ')
     .replace(/\blaut quelle\b/gi, ' ')
     .replace(/laut\s+j[öo]/gi, ' ')
     .replace(/\bsiehe webseite\b/gi, ' ')
+    .replace(/\bkurzfristig\s*\/?\s*siehe\s+(?:tiktok|instagram|post)\b/gi, ' ')
     .replace(/\bimmer\b/gi, ' ')
     .replace(/\bpermanent nach vereinbarung\b/gi, ' ')
     .replace(/\bfrühjahr 20\d{2}\b/gi, ' ')
@@ -920,8 +962,8 @@ function normalizeDealRecord(deal = {}) {
     expires: sanitizedExpires,
     expiresOriginal: sanitizeExpiryText(deal.expiresOriginal),
     expiryDisplayText: sanitizeExpiryText(deal.expiryDisplayText),
-    distance: cleanUiNoiseText(deal.distance || ''),
-    location: cleanUiNoiseText(deal.location || ''),
+    distance: cleanLocationForDisplay(deal.distance || ''),
+    location: cleanLocationForDisplay(deal.location || ''),
     logo: inferLogo({ ...deal, title, description, type, category }, brand),
     logoUrl: inferLogoUrl({ ...deal, title, description, type, category }, brand),
   };

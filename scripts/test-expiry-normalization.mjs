@@ -7,6 +7,7 @@ import {
   parseExpiryDetails,
   parseExpiryShape,
 } from '../scraper/expiry-utils.js';
+import { sanitizeExpiryText } from '../scraper/deal-normalization-utils.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 
 const now = new Date('2026-06-27T12:00:00.000Z');
@@ -15,6 +16,8 @@ assert.equal(isVagueExpiry('2026-05-08T23:59:59.999Z'), false, 'ISO expiry must 
 assert.equal(isVagueExpiry('Kurzfristig / siehe TikTok'), true, 'vague TikTok expiry stays vague');
 assert.equal(isVagueExpiry('Ganztägig'), true, 'all-day schedule text is not a concrete expiry');
 assert.equal(isVagueExpiry('Gutschein-abhängig'), true, 'voucher-dependent text is not a concrete expiry');
+assert.equal(sanitizeExpiryText('Lieferzeiten'), '', 'delivery hours are not an expiry');
+assert.equal(sanitizeExpiryText('Kurzfristig / siehe TikTok'), '', 'vague social hint is not an expiry');
 
 const iso = parseExpiryDetails('2026-05-08T23:59:59.999Z', { now });
 assert.equal(iso?.date.toISOString(), '2026-05-08T23:59:59.999Z', 'ISO datetime parses as day expiry');
@@ -29,6 +32,11 @@ for (const raw of ['4.9.2026', '04.09.2026', '4/9/2026']) {
     `${raw} must use de-AT day/month order`
   );
 }
+assert.equal(
+  parseExpiryDetails('2026.09.19', { now })?.date.toISOString(),
+  '2026-09-19T23:59:59.999Z',
+  'year-first dotted dates must not be misread as a day/month substring'
+);
 assert.equal(
   parseExpiryShape('4.9.2026', { now, contextText: 'Am 4. September findet das 6. Straßenfest statt.' }).validOn,
   '2026-09-04'
@@ -79,6 +87,16 @@ const urlDerivedDeal = await normalizeDealExpiry({
 assert.equal(urlDerivedDeal.expiresSource, 'url');
 assert.equal(urlDerivedDeal.expiresDetectedFromUrl, true);
 assert.equal(urlDerivedDeal.validUntil, '2026-09-30');
+
+const conflictingTextExpiry = await normalizeDealExpiry({
+  title: 'Marsch für Jesus',
+  expires: '2027-07-09T23:59:59.999Z',
+  expiresOriginal: '2026.09.19',
+  expiresSource: 'text',
+  validUntil: '2027-07-09',
+}, { now, allowUrlLookup: false });
+assert.equal(conflictingTextExpiry.expires, '2026-09-19T23:59:59.999Z');
+assert.equal(conflictingTextExpiry.validUntil, '2026-09-19');
 
 const vagueSocialDeal = await normalizeDealExpiry({
   title: 'TikTok Deal',

@@ -226,6 +226,22 @@ export function shouldVerifyExpiryAgainstUrl(deal = {}, options = {}) {
 }
 
 function parseIsoLike(text) {
+  const delimitedYmd = text.match(/^\s*(\d{4})[./](\d{1,2})[./](\d{1,2})(?:\s|$)/);
+  if (delimitedYmd) {
+    const year = Number(delimitedYmd[1]);
+    const month = Number(delimitedYmd[2]);
+    const day = Number(delimitedYmd[3]);
+    const date = endOfUtcDay(year, month - 1, day);
+    if (
+      date.getUTCFullYear() === year &&
+      date.getUTCMonth() === month - 1 &&
+      date.getUTCDate() === day
+    ) {
+      return { date, precision: 'day', source: 'text' };
+    }
+    return null;
+  }
+
   const direct = Date.parse(text);
   if (!Number.isNaN(direct) && /^\d{4}-\d{1,2}-\d{1,2}/.test(text)) {
     const m = text.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
@@ -1534,8 +1550,19 @@ export async function normalizeDealExpiry(deal, options = {}) {
   const allowUrlLookup = options.allowUrlLookup !== false;
   const forceUrlLookup = options.forceUrlLookup === true;
   const originalExpiryText = cleanText(deal.expiresOriginal || '');
+  const storedExpiryText = cleanText(deal.expires || '');
+  const storedExpirySource = cleanText(deal.expiresSource || '').toLowerCase();
+  const parsedOriginalExpiry = parseExpiryDetails(originalExpiryText, { now });
+  const parsedStoredExpiry = parseExpiryDetails(storedExpiryText, { now });
+  const hasConflictingTextExpiry = Boolean(
+    parsedOriginalExpiry?.date &&
+    parsedStoredExpiry?.date &&
+    storedExpirySource !== 'url' &&
+    !deal.expiresDetectedFromUrl &&
+    Math.abs(parsedOriginalExpiry.date.getTime() - parsedStoredExpiry.date.getTime()) > DAY_MS
+  );
   const raw = cleanText(
-    deal.expires ||
+    (hasConflictingTextExpiry ? originalExpiryText : storedExpiryText) ||
     deal.expiresOriginal ||
     deal.end_date ||
     deal.validity_date ||
