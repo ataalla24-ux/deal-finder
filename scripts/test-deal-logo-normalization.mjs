@@ -400,6 +400,67 @@ expectNormalizedLogo(
 );
 
 expectNormalizedLogo(
+  'merchant brand polluted with a repeated promo code is repaired',
+  {
+    brand: 'Balls&Clubs Minigolf Wien mit Code LISAMARIA',
+    title: '10% Rabatt auf Indoor-Minigolf bei Balls&Clubs Minigolf Wien mit Code LISAMARIA mit Code LISAMARIA',
+    description: '18 abwechslungsreiche Indoor-Minigolf-Bahnen in der Wollzeile 16, 1010 Wien; Online-Reservierung empfohlen.',
+    type: 'rabatt',
+    category: 'freizeit',
+    url: 'https://www.instagram.com/reel/example/',
+  },
+  {
+    brand: 'Balls & Clubs',
+    title: '10% Rabatt auf Indoor-Minigolf bei Balls & Clubs mit Code LISAMARIA',
+    logo: '⛳',
+    logoUrlIncludes: /brand-logos\/balls-and-clubs-ballsandclubs-at\.png$/,
+  },
+);
+
+expectNormalizedLogo(
+  'known truncated Foodsharing copy is replaced with a complete sentence',
+  {
+    brand: 'Foodsharing',
+    title: 'GRATIS Lebensmittel abholen',
+    description: 'Auf foodsharing.de kannst du deine Lebensmittel vor dem Verfall an soziale Einrichtungen oder andere Personen',
+    type: 'gratis',
+    category: 'essen',
+    url: 'https://foodsharing.at/',
+  },
+  {
+    description: 'Über foodsharing.at kannst du Lebensmittel kostenlos retten, teilen und abholen.',
+  },
+);
+
+expectNormalizedLogo(
+  'serialized object placeholders are not user-facing descriptions',
+  {
+    brand: 'OMV VIVA',
+    title: 'Gratis Iced Matcha Latte testen',
+    description: '[object Object]',
+    type: 'gratis',
+    category: 'kaffee',
+  },
+  {
+    description: '',
+  },
+);
+
+expectNormalizedLogo(
+  'generic coupon directory copy is not used as a deal description',
+  {
+    brand: 'Lieferando',
+    title: '12 € Rabatt auf erste Bestellung (Neukunden)',
+    description: 'Alle aktuellen Lieferando Gutscheine & Rabatte auf GuteGutscheine.at einlösen und sofort profitieren: Lieferando.at Gutschein: 10% Rabatt mit derm Stempelkarten-Programm.',
+    type: 'rabatt',
+    category: 'essen',
+  },
+  {
+    description: '',
+  },
+);
+
+expectNormalizedLogo(
   'visible HTML entities are decoded',
   {
     brand: 'Lieferando',

@@ -23,6 +23,7 @@ const BRAND_RULES = [
   { key: 'foodora', name: 'foodora', logo: '🍴', category: 'essen', domain: 'foodora.at', logoFile: 'foodora-foodora-at.png' },
   { key: 'alfies', name: 'Alfies', logo: '🛒', category: 'supermarkt', domain: 'alfies.at', logoFile: 'alfies-alfies-at.png' },
   { key: 'balls & clubs', name: 'Balls & Clubs', logo: '⛳', category: 'freizeit', domain: 'ballsandclubs.at', logoFile: 'balls-and-clubs-ballsandclubs-at.png' },
+  { key: 'balls&clubs', name: 'Balls & Clubs', logo: '⛳', category: 'freizeit', domain: 'ballsandclubs.at', logoFile: 'balls-and-clubs-ballsandclubs-at.png' },
   { key: 'balls and clubs', name: 'Balls & Clubs', logo: '⛳', category: 'freizeit', domain: 'ballsandclubs.at', logoFile: 'balls-and-clubs-ballsandclubs-at.png' },
   { key: 'ballsandclubs', name: 'Balls & Clubs', logo: '⛳', category: 'freizeit', domain: 'ballsandclubs.at', logoFile: 'balls-and-clubs-ballsandclubs-at.png' },
   { key: 'domino', name: "Domino's Pizza", logo: '🍕', category: 'essen', domain: 'dominos.at' },
@@ -794,8 +795,10 @@ function cleanDescriptionForDisplay(description = '', deal = {}) {
   let text = cleanUiNoiseText(description);
   if (!text) return '';
   if (/^(free|gratis|kostenlos|deal|angebot)$/i.test(text)) return '';
+  if (/^\[object Object\]$/i.test(text)) return '';
   if (/^wolt makes it incredibly easy for you to discover and get what you want\b/i.test(text)) return '';
   if (/^entdecke die besten angebote bei\b/i.test(text) && /\balle laufenden aktionen\b/i.test(text)) return '';
+  if (/^alle aktuellen\b.*\bgutscheine\s*&\s*rabatte auf gutegutscheine\.at\b/i.test(text)) return '';
   if (/^anzeige\b/i.test(text) && /\bcode\b/i.test(deal.title || '')) return '';
   if (/\.\.\.$/.test(text)) return '';
   if ((text.match(/\(/g) || []).length > (text.match(/\)/g) || []).length) return '';
@@ -807,6 +810,9 @@ function cleanDescriptionForDisplay(description = '', deal = {}) {
   if (/^hier erf[äa]hrst du mehr [üu]ber deinen vorteil bei\b/i.test(text)) return '';
 
   const brand = cleanUiNoiseText(deal.brand || '');
+  if (/^foodsharing$/i.test(brand) && /^auf foodsharing\.de kannst du deine lebensmittel vor dem verfall an soziale einrichtungen oder andere personen$/i.test(text)) {
+    return 'Über foodsharing.at kannst du Lebensmittel kostenlos retten, teilen und abholen.';
+  }
   if (/balls\s*(?:&|and)\s*clubs/i.test(brand) && /\blisamaria\b/i.test(text)) {
     return '18 abwechslungsreiche Indoor-Minigolf-Bahnen in der Wollzeile 16, 1010 Wien; Online-Reservierung empfohlen.';
   }
