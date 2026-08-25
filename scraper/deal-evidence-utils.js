@@ -9,11 +9,123 @@ const RESERVED_INSTAGRAM_USERNAMES = new Set([
   'signup', 'stories', 'threads', 'topics', 'tv',
 ]);
 const INSTAGRAM_SHORTCODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+const GENERIC_SOCIAL_BRANDS = new Set([
+  'instagram', 'meta instagram', 'tiktok', 'wien', 'vienna', 'wien events',
+  'wien tipps', 'wien essen', 'vienna food',
+]);
+const OFFER_PRODUCT_PATTERNS = [
+  ['pizza', /\bpizz(?:a|en)\b/],
+  ['burger', /\bburger\b/],
+  ['kebab', /\b(?:kebab|kebap|doener|doner|dueruem|durum)\b/],
+  ['coffee', /\b(?:kaffee|coffee|espresso|cappuccino|latte|matcha)\b/],
+  ['drink', /\b(?:drink|drinks|getraenk|getrank|cocktail|bier|spritzer|limonade|cola)\b/],
+  ['lunch', /\b(?:lunch|mittag(?:essen|smenue|smenu))\b/],
+  ['brunch', /\bbrunch\b/],
+  ['breakfast', /\b(?:fruehstueck|breakfast)\b/],
+  ['buffet', /\bbuffet\b/],
+  ['cryo', /\b(?:cryo|kaeltekammer|kaltekammer)\b/],
+  ['bowl', /\bbowl\b/],
+  ['sushi', /\b(?:sushi|maki)\b/],
+  ['ramen', /\bramen\b/],
+  ['food', /\b(?:essen|speise|gericht|menue|menu|food)\b/],
+  ['ticket', /\b(?:ticket|eintritt|admission)\b/],
+  ['tour', /\b(?:fuehrung|tour|rundgang)\b/],
+  ['fitness', /\b(?:fitness|training|probetraining|sportkurs|yoga)\b/],
+  ['parking', /\b(?:parken|parkplatz|garage)\b/],
+  ['workshop', /\b(?:workshop|kurs)\b/],
+];
 
 function cleanText(value) {
   return value === null || value === undefined
     ? ''
     : String(value).replace(/\s+/g, ' ').trim();
+}
+
+function normalizeFingerprintText(value) {
+  return cleanText(value)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ß/g, 'ss')
+    .toLowerCase()
+    .replace(/[^a-z0-9%€+./-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function semanticBrandKey(deal = {}) {
+  const brand = normalizeFingerprintText(deal.brand || deal.merchant || deal.provider)
+    .replace(/\b(?:wien|vienna|oesterreich|austria)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (brand.length >= 3 && !GENERIC_SOCIAL_BRANDS.has(brand)) return brand;
+  return extractStructuredOwnerUsername(deal);
+}
+
+function semanticOfferSignal(deal = {}) {
+  return normalizeFingerprintText([
+    deal.promotionEvidence,
+    deal.evidence?.mediaEvidence?.ai?.offerText,
+    deal.title,
+    deal.offer,
+  ].filter(Boolean).join(' '));
+}
+
+function semanticOfferContext(deal = {}) {
+  return normalizeFingerprintText([
+    semanticOfferSignal(deal),
+    deal.description,
+  ].filter(Boolean).join(' '));
+}
+
+function uniqueMatches(text, pattern, mapper = (match) => match[0]) {
+  return [...new Set([...text.matchAll(pattern)].map(mapper).filter(Boolean))];
+}
+
+/**
+ * Conservative cross-post fingerprint for one social promotion. It deliberately
+ * requires a merchant plus concrete offer evidence so unrelated posts from the
+ * same account are never merged just because both contain words such as "deal".
+ */
+export function semanticSocialOfferKey(deal = {}) {
+  if (!canonicalSocialPostKey(deal.url || deal.post_url || deal.postUrl)) return '';
+  const brand = semanticBrandKey(deal);
+  const signal = semanticOfferSignal(deal);
+  const context = semanticOfferContext(deal);
+  if (!brand || !context) return '';
+
+  const extractMarkers = (text) => {
+    const markers = [];
+    markers.push(...uniqueMatches(text, /\b(\d{1,2})\s*(?:%|prozent\b)/g, (match) => `${match[1]}pct`));
+    markers.push(...uniqueMatches(text, /(?:€\s*(\d{1,3}(?:[.,]\d{1,2})?)\b|\b(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:€|eur\b|euro\b))/g,
+      (match) => `${String(match[1] || match[2]).replace(',', '.')}eur`));
+    if (/\b(?:1\s*\+\s*1|2\s*(?:fuer|for)\s*1|bogo)\b/.test(text)) markers.push('bogo');
+    if (/\ball\s+you\s+can\b/.test(text)) markers.push('all-you-can');
+    markers.push(...uniqueMatches(text, /\b(?:code|promocode|rabattcode|gutscheincode)\s*([a-z0-9-]{4,24})\b/g,
+      (match) => `code-${match[1]}`));
+    return [...new Set(markers)].sort();
+  };
+
+  // Rich captions often contain unrelated prices or study percentages. Prefer
+  // the normalized offer fields and only inspect the caption as a fallback.
+  const markers = extractMarkers(signal);
+  if (markers.length === 0) markers.push(...extractMarkers(context));
+
+  const productKeys = (text) => OFFER_PRODUCT_PATTERNS
+    .filter(([, pattern]) => pattern.test(text))
+    .map(([key]) => key);
+  let products = productKeys(signal);
+  if (products.length === 0) products = productKeys(context);
+  if (products.length > 1) products = products.filter((product) => product !== 'food');
+  products = products.slice(0, 4);
+  const concreteMarker = markers.length > 0;
+  const freeMarker = /\b(?:gratis|kostenlos|free)\b/.test(signal || context);
+  const dateMarkers = uniqueMatches(context, /\b(20\d{2})[./-](\d{1,2})[./-](\d{1,2})\b|\b(\d{1,2})[./](\d{1,2})(?:[./](20\d{2}))?\b/g,
+    (match) => match[0].replace(/\s+/g, ''));
+
+  if (!concreteMarker && !(freeMarker && products.length > 0 && dateMarkers.length > 0)) return '';
+  if (products.length === 0) return '';
+  const campaignDate = concreteMarker ? '' : dateMarkers.slice(0, 2).sort().join('+');
+  return `offer:${brand}|${markers.join('+') || 'free'}|${products.sort().join('+')}|${campaignDate}`;
 }
 
 function toIsoTimestamp(value) {

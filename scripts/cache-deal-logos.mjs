@@ -96,8 +96,8 @@ function logoTargetHost(value) {
   return googleFaviconTargetHost(value) || hostFromUrl(value);
 }
 
-function isCacheUrl(value) {
-  return String(value || '').startsWith(`${PUBLIC_LOGO_BASE_URL}/`);
+function isCacheUrl(value, publicBaseUrl = PUBLIC_LOGO_BASE_URL) {
+  return String(value || '').startsWith(`${publicBaseUrl}/`);
 }
 
 async function fileExists(filePath) {
@@ -107,6 +107,31 @@ async function fileExists(filePath) {
   } catch {
     return false;
   }
+}
+
+export async function repairCachedLogoReference(deal, options = {}) {
+  const publicBaseUrl = cleanText(options.publicBaseUrl || PUBLIC_LOGO_BASE_URL).replace(/\/+$/, '');
+  const logoDir = options.logoDir || LOGO_DIR;
+  const sourceLogoUrl = cleanText(deal?.logoUrl || '');
+  if (!sourceLogoUrl || !isCacheUrl(sourceLogoUrl, publicBaseUrl)) {
+    return { deal, invalid: false, reason: '' };
+  }
+
+  let fileName = '';
+  try {
+    fileName = decodeURIComponent(sourceLogoUrl.slice(`${publicBaseUrl}/`.length));
+  } catch {
+    fileName = '';
+  }
+  const safeFileName = Boolean(fileName) && path.basename(fileName) === fileName;
+  const exists = safeFileName && await fileExists(path.join(logoDir, fileName));
+  if (exists) return { deal, invalid: false, reason: '' };
+
+  return {
+    deal: { ...deal, logoUrl: '' },
+    invalid: true,
+    reason: safeFileName ? 'cached logo file is missing' : 'cached logo path is unsafe',
+  };
 }
 
 async function fetchLogo(url) {
@@ -190,12 +215,12 @@ async function main() {
       continue;
     }
     if (isCacheUrl(sourceLogoUrl)) {
-      const fileName = decodeURIComponent(sourceLogoUrl.slice(`${PUBLIC_LOGO_BASE_URL}/`.length));
-      const filePath = path.join(LOGO_DIR, fileName);
-      if (!fileName || path.basename(fileName) !== fileName || !(await fileExists(filePath))) {
-        throw new Error(`Cached logo file is missing or unsafe: ${sourceLogoUrl}`);
+      const repaired = await repairCachedLogoReference(deal);
+      if (repaired.invalid) {
+        failedCount += 1;
+        console.log(`Logo cache cleared for ${deal.brand || deal.title}: ${repaired.reason}`);
       }
-      nextDeals.push(deal);
+      nextDeals.push(repaired.deal);
       continue;
     }
 
@@ -241,7 +266,9 @@ async function main() {
   console.log(`Logo directory: ${path.relative(ROOT, LOGO_DIR)}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

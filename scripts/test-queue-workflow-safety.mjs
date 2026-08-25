@@ -43,6 +43,9 @@ assert.match(
 const centralDispatch = workflows.get('daily-digest.yml');
 assert.match(centralDispatch, /name:\s*["']Central Deal Dispatch["']/);
 assert.match(centralDispatch, /cron:\s*['"]7,22,37,52 \* \* \* \*['"]/);
+assert.match(centralDispatch, /workflow_run:[\s\S]*Meta Instagram Deal Discovery/);
+assert.match(centralDispatch, /workflow_run:[\s\S]*Flights Vienna Scraper/);
+assert.match(centralDispatch, /github\.event\.workflow_run\.conclusion == 'success'/);
 assert.equal(concurrencyFor('daily-digest.yml'), 'deal-state-writer');
 assert.ok(
   centralDispatch.indexOf('node scraper/slack-notify.js')

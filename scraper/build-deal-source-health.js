@@ -9,6 +9,7 @@ import {
   getPublicationEvidence,
   getViennaEvidence,
   mergeDealEvidence,
+  semanticSocialOfferKey,
 } from './deal-evidence-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,9 +44,11 @@ const SOURCE_LABEL_OVERRIDES = {
   gutscheine: 'Gutscheine.at',
   'instagram-discovery': 'Daily Sync Instagram Discovery',
   'instagram-ai': 'Instagram AI Agent',
+  'instagram-apify': 'Apify Instagram',
   'instagram-web': 'Daily Sync Instagram Web',
   joe: 'jö Bonus Club',
   'member-benefits': 'Member Benefits',
+  'meta-instagram': 'Meta Instagram Graph',
   power: 'Power Scraper',
   tiktok: 'TikTok Scanner',
   'vienna-promo-radar': 'Vienna Promo Radar',
@@ -128,6 +131,8 @@ function normalizedWords(value) {
 }
 
 function stableDealSignature(deal) {
+  const semanticOffer = semanticSocialOfferKey(deal);
+  if (semanticOffer) return semanticOffer;
   const socialPostKey = canonicalSocialPostKey(deal?.url || deal?.post_url || deal?.postUrl)
     || canonicalSocialPostKey(deal?.post_url || deal?.postUrl);
   if (socialPostKey) return socialPostKey;
@@ -340,7 +345,7 @@ async function main() {
     for (const rawDeal of deals) {
       const deal = normalizeDealRecord(rawDeal || {});
       const evidenceRecord = { ...deal, ...(rawDeal || {}) };
-      const stableSignature = stableDealSignature(deal);
+      const stableSignature = stableDealSignature(evidenceRecord);
       const alternateSignature = alternateDealSignature(deal);
       const signature = stableSignature || alternateSignature || fallbackDealSignature(deal, sourceKey);
       const publication = getPublicationEvidence(evidenceRecord);

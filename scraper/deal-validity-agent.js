@@ -1133,6 +1133,23 @@ function buildSummary(results, maxAgeDays) {
   const warning = allowed.filter((item) => item.decision.warnings.length > 0);
   const reasonCounts = {};
   const reasonCategoryCounts = {};
+  const sourceCounts = {};
+  for (const item of results) {
+    const source = cleanText(item.deal.originSource || item.deal.source || 'Unbekannt');
+    const stats = sourceCounts[source] || { total: 0, allowed: 0, blocked: 0, warnings: 0, reasonCategoryCounts: {} };
+    stats.total += 1;
+    if (item.decision.allowed) {
+      stats.allowed += 1;
+      if (item.decision.warnings.length > 0) stats.warnings += 1;
+    } else {
+      stats.blocked += 1;
+      for (const reason of item.decision.reasons) {
+        const category = classifyBlockReason(reason);
+        stats.reasonCategoryCounts[category] = (stats.reasonCategoryCounts[category] || 0) + 1;
+      }
+    }
+    sourceCounts[source] = stats;
+  }
   for (const item of blocked) {
     for (const reason of item.decision.reasons) {
       reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
@@ -1148,6 +1165,7 @@ function buildSummary(results, maxAgeDays) {
     warnings: warning.length,
     reasonCounts,
     reasonCategoryCounts,
+    sourceCounts: Object.fromEntries(Object.entries(sourceCounts).sort(([left], [right]) => left.localeCompare(right))),
   };
 }
 

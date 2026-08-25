@@ -220,7 +220,8 @@ assert.equal(approvalShard[0].username, approvalWinner.username, 'final app appr
 const hashtagPool = Array.from({ length: 12 }, (_, index) => `wientag${index}`);
 const hashtagState = {
   hashtagPerformance: {
-    wientag11: { recentFetched: 10, recentAccepted: 4 },
+    wientag10: { recentFetched: 10, recentAccepted: 99 },
+    wientag11: { recentFetched: 10, recentAccepted: 40, recentNewAccepted: 4 },
   },
 };
 const hashtagShardA = selectHashtagShard(hashtagPool, { maxHashtagsPerRun: 6, shardIndex: 0 }, hashtagState);
@@ -352,6 +353,100 @@ const feedbackCatalog = loadAccountCatalog(buildConfig({
 });
 assert.equal(feedbackCatalog.some((account) => account.username === 'blocked.merchant'), false, 'moderated providers never consume Graph account slots');
 assert.equal(feedbackCatalog.some((account) => account.username === 'merchant.from.caption'), true, 'caption mentions feed the account discovery loop');
+
+const learnedCatalog = loadAccountCatalog(buildConfig({}, now), {
+  watchlistPath: path.join(tempDir, 'missing-watchlist.json'),
+  registryPath: blockedRegistryPath,
+  candidatePaths: [],
+}, {
+  discoveredAccounts: {
+    'fresh.graph.merchant': {
+      username: 'fresh.graph.merchant',
+      priority: 98,
+      lastCandidateAt: '2026-07-17T09:00:00.000Z',
+    },
+    'blocked.merchant': {
+      username: 'blocked.merchant',
+      priority: 99,
+      lastCandidateAt: '2026-07-17T09:00:00.000Z',
+    },
+  },
+});
+assert.equal(learnedCatalog.some((account) => account.username === 'fresh.graph.merchant'), true, 'Graph discoveries feed the account catalog');
+assert.equal(learnedCatalog.some((account) => account.username === 'blocked.merchant'), false, 'moderation also applies to learned Graph accounts');
+
+const learningStatePath = path.join(tempDir, 'learning-state.json');
+const learningConfig = {
+  ...buildConfig({
+    INSTAGRAM_ACCESS_TOKEN: 'learning-token',
+    INSTAGRAM_USER_ID: 'ig-learning-user',
+    META_INSTAGRAM_HASHTAGS: 'wienessen',
+    META_INSTAGRAM_MEDIA_OCR_ENABLED: '0',
+    META_INSTAGRAM_MAX_RETRIES: '0',
+  }, now),
+  explicitAccounts: [],
+  hashtags: ['wienessen'],
+  outputPath: path.join(tempDir, 'learning-output.json'),
+  reportPath: path.join(tempDir, 'learning-report.json'),
+  statePath: learningStatePath,
+};
+const learningFetch = async (rawUrl) => {
+  const url = new URL(rawUrl);
+  if (url.pathname.endsWith('/ig_hashtag_search')) {
+    return new Response(JSON.stringify({ data: [{ id: 'learning-hashtag-id' }] }), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    });
+  }
+  if (url.pathname.endsWith('/learning-hashtag-id/recent_media')) {
+    return new Response(JSON.stringify({
+      data: [{
+        id: 'learning-media-1',
+        username: 'new.graph.cafe',
+        caption: 'Heute in 1070 Wien: 1+1 Kaffee gratis bei @partner.cafe.',
+        permalink: 'https://www.instagram.com/p/LEARNINGPOST1/',
+        timestamp: '2026-07-17T09:00:00.000Z',
+      }],
+    }), { status: 200, headers: { 'content-type': 'application/json' } });
+  }
+  throw new Error(`unexpected learning URL: ${url.pathname}`);
+};
+const firstLearningRun = await runMetaInstagramCollector({
+  now,
+  config: learningConfig,
+  paths: {
+    watchlistPath: path.join(tempDir, 'missing-watchlist.json'),
+    registryPath: path.join(tempDir, 'missing-registry.json'),
+    candidatePaths: [],
+  },
+  fetchImpl: learningFetch,
+  write: false,
+});
+assert.equal(firstLearningRun.report.newDeals, 1);
+assert.equal(firstLearningRun.report.sources.instagramGraph.newAccepted, 1);
+assert.equal(firstLearningRun.state.discoveredAccounts['new.graph.cafe'].priority, 98);
+assert.equal(firstLearningRun.state.discoveredAccounts['partner.cafe'].priority, 88);
+assert.equal(firstLearningRun.report.accountDiscovery.newThisRun, 2);
+
+fs.writeFileSync(learningStatePath, JSON.stringify({
+  ...firstLearningRun.state,
+  discoveredAccounts: {},
+}));
+const repeatedLearningRun = await runMetaInstagramCollector({
+  now: new Date(now.getTime() + 60 * 60 * 1000),
+  config: learningConfig,
+  paths: {
+    watchlistPath: path.join(tempDir, 'missing-watchlist.json'),
+    registryPath: path.join(tempDir, 'missing-registry.json'),
+    candidatePaths: [],
+  },
+  fetchImpl: learningFetch,
+  write: false,
+});
+assert.equal(repeatedLearningRun.payload.totalDeals, 1, 'observation state must never suppress collector output');
+assert.equal(repeatedLearningRun.report.newDeals, 0, 'the same post is no longer counted as net-new');
+assert.equal(repeatedLearningRun.report.sources.instagramGraph.newAccepted, 0);
+assert.equal(repeatedLearningRun.state.hashtagPerformance.wienessen.recentNewAccepted, 0.75);
 
 const cooldownStatePath = path.join(tempDir, 'cooldown-state.json');
 const cooldownConfig = {
@@ -683,6 +778,7 @@ const secondBatchIds = new Set(rotationSecond.payload.deals.map((deal) => deal.i
 assert.equal(firstBatchIds.size, 2);
 assert.equal(secondBatchIds.size, 2);
 assert.equal([...firstBatchIds].some((id) => secondBatchIds.has(id)), false, 'rows beyond the per-run limit must rotate into the next batch');
+assert.equal(rotationSecond.report.newDeals, 0, 'accepted rows beyond the output cap must not inflate net-new yield on the next run');
 assert.deepEqual(
   rotationFourth.payload.deals.map((deal) => deal.id),
   ['meta-ad-rotation-2', 'meta-ad-rotation-3'],

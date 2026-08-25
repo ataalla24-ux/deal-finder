@@ -58,6 +58,17 @@ function reasonText(result) {
   return result.decision.reasons.join(' | ');
 }
 
+const sourceSummaryValidation = await validateDealsForSlack([
+  { id: 'source-a-1', source: 'Scraper A', title: 'Sommermenü', url: 'https://example.com/a' },
+  { id: 'source-b-1', source: 'Scraper B', title: 'Sommermenü', url: 'https://example.com/b' },
+], {
+  now,
+  concurrency: 1,
+  inspectDealUrlHealth: async (url) => healthyUrl(url),
+});
+assert.equal(sourceSummaryValidation.summary.sourceCounts['Scraper A'].total, 1);
+assert.equal(sourceSummaryValidation.summary.sourceCounts['Scraper B'].blocked, 1);
+
 const missingLocation = normalizeDeal({
   id: 'missing-location',
   title: '50% Rabatt auf Kaffee',
@@ -201,6 +212,30 @@ assert.equal(
   2,
   'different Firecrawl offers from one brand must both reach Slack',
 );
+
+const repeatedSocialPromotion = filterDuplicateDealsInRun([
+  {
+    id: 'cryo-post-a',
+    ownerUsername: 'longevitycenter.vienna',
+    brand: 'Longevity Center Vienna',
+    title: 'All you can Cryo um 200 Euro',
+    description: 'Eine Studie berichtet von 58 % Verbesserung.',
+    promotionEvidence: 'All you can Cryo Aktion um 200 €',
+    url: 'https://www.instagram.com/p/CRYOPOSTA/',
+    source: 'Meta Instagram',
+  },
+  {
+    id: 'cryo-post-b',
+    ownerUsername: 'longevitycenter.vienna',
+    brand: 'Longevity Center Vienna',
+    title: 'All-you-can Kältekammer',
+    description: 'Andere Messwerte lagen bei 47 % und 56 %.',
+    promotionEvidence: 'All you can Cryo Aktion um 200 Euro',
+    url: 'https://www.instagram.com/reel/CRYOPOSTB/',
+    source: 'Meta Instagram',
+  },
+]);
+assert.equal(repeatedSocialPromotion.deals.length, 1, 'repeated social posts for one promotion collapse before Slack');
 
 const premiumKebap = await validateOne({
   id: 'premium-kebap',

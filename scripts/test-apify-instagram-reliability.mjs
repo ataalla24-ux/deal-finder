@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   buildShardedActorInput,
+  classifyApifyApiFailure,
   classifyApifyRunHealth,
   collectDirectPostSeedUrls,
   normalizeApifyItem,
@@ -232,6 +233,17 @@ assert.deepEqual(
   classifyApifyRunHealth({ summary: { inspectedPosts: 0, sources: { a: { state: 'loginWall' } } }, rawDatasetItems: 0, acceptedDeals: 0 }),
   { usable: false, operationalStatus: 'source-unusable', reason: 'no-usable-source-data', inspectedPosts: 0, sourceStates: { loginWall: 1 } },
 );
+
+assert.deepEqual(
+  classifyApifyApiFailure(Object.assign(new Error('platform-feature-disabled: Monthly usage hard limit exceeded'), { httpStatus: 403 })),
+  {
+    operationalStatus: 'budget-blocked',
+    reasonCode: 'monthly-usage-hard-limit',
+    controlled: true,
+  },
+  'an exhausted external Apify budget is reported without erasing output or creating recurring false outage failures',
+);
+assert.equal(classifyApifyApiFailure({ message: 'too many requests', httpStatus: 429 }).controlled, false);
 assert.equal(
   classifyApifyRunHealth({ summary: { inspectedPosts: 3, sources: {} }, rawDatasetItems: 0, acceptedDeals: 0 }).operationalStatus,
   'source-unusable',

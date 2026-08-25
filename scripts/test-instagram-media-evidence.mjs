@@ -43,6 +43,7 @@ let openAiRequest = null;
 const ai = await classifyInstagramOcrWithOpenAI({
   caption: 'Unser Wochenplan',
   ocrText: 'Zweiter Kaffee gratis in 1070 Wien',
+  visionImages: ['data:image/jpeg;base64,AQID'],
 }, config, {
   fetchImpl: async (url, init) => {
     openAiRequest = { url, init, body: JSON.parse(init.body) };
@@ -55,6 +56,8 @@ const ai = await classifyInstagramOcrWithOpenAI({
             isDeal: true,
             confidence: 0.94,
             offerText: 'Zweiter Kaffee gratis in 1070 Wien',
+            locationText: '1070 Wien',
+            validityText: '',
             exclusion: 'none',
           }),
         }],
@@ -67,8 +70,15 @@ assert.equal(openAiRequest.init.headers.authorization, 'Bearer test-openai-key')
 assert.equal(openAiRequest.body.store, false);
 assert.equal(openAiRequest.body.text.format.type, 'json_schema');
 assert.equal(openAiRequest.body.text.format.strict, true);
+assert.equal(openAiRequest.body.input[0].content[0].type, 'input_text');
+assert.deepEqual(openAiRequest.body.input[0].content[1], {
+  type: 'input_image',
+  image_url: 'data:image/jpeg;base64,AQID',
+  detail: 'high',
+});
 assert.equal(ai.isDeal, true);
 assert.equal(ai.confidence, 0.94);
+assert.equal(ai.locationText, '1070 Wien');
 
 const entries = [{
   item: {
@@ -92,6 +102,7 @@ const entries = [{
 
 let analyses = 0;
 let classifications = 0;
+let classificationInput = null;
 const enriched = await enrichInstagramGraphMedia(entries, config, now, {
   tools: { tesseract: true, ffmpeg: true },
   cache: {
@@ -108,14 +119,16 @@ const enriched = await enrichInstagramGraphMedia(entries, config, now, {
     analyses += 1;
     return {
       ocrText: 'Nur am 24.08.: zweiter Kaffee gratis in 1070 Wien',
+      visionImages: ['data:image/jpeg;base64,AQID'],
       assetCount: 1,
       imageCount: 1,
       videoFrameCount: 0,
       errors: [],
     };
   },
-  classifyOcr: async () => {
+  classifyOcr: async (input) => {
     classifications += 1;
+    classificationInput = input;
     return {
       isDeal: true,
       confidence: 0.93,
@@ -129,7 +142,49 @@ assert.equal(classifications, 1, 'caption-ambiguous OCR should receive one AI cl
 assert.equal(enriched.report.cached, 1);
 assert.equal(enriched.report.analyzed, 1);
 assert.equal(enriched.report.aiAccepted, 1);
+assert.equal(enriched.report.withVisionImages, 1);
+assert.equal(enriched.report.visionCalls, 1);
+assert.equal(classificationInput.visionImages.length, 1);
 assert.match(enriched.entries[0].item._mediaEvidence.ocrText, /zweiter Kaffee gratis/);
+assert.equal(enriched.entries[0].item._mediaEvidence.visionImageCount, 1);
+assert.equal('visionImages' in enriched.entries[0].item._mediaEvidence, false, 'raw image data must not be persisted in evidence');
+
+let visionOnlyClassifications = 0;
+const visionOnly = await enrichInstagramGraphMedia([{
+  item: {
+    id: 'vision-only',
+    caption: '20 % Rabatt auf Kaffee',
+    media_type: 'IMAGE',
+    media_url: 'https://cdn.example/vision-only.jpg',
+    timestamp: '2026-08-22T09:30:00.000Z',
+  },
+  context: { sourceType: 'hashtag', sourceName: '#wienessen' },
+}], config, now, {
+  tools: { tesseract: false, ffmpeg: true },
+  analyzeItem: async () => ({
+    ocrText: '',
+    visionImages: ['data:image/jpeg;base64,AQID'],
+    assetCount: 1,
+    imageCount: 1,
+    videoFrameCount: 0,
+    errors: [],
+  }),
+  classifyOcr: async () => {
+    visionOnlyClassifications += 1;
+    return {
+      isDeal: true,
+      confidence: 0.95,
+      offerText: '20 % Rabatt auf Kaffee',
+      locationText: '1070 Wien',
+      validityText: 'Gültig bis 30.08.2026',
+      exclusion: 'none',
+    };
+  },
+});
+assert.equal(visionOnlyClassifications, 1, 'Vision keeps media classification running when Tesseract is unavailable');
+assert.equal(visionOnly.report.ocrAvailable, false);
+assert.equal(visionOnly.report.visionCalls, 1);
+assert.equal(visionOnly.report.status, 'ok');
 
 const imageOnlyDeal = normalizeGraphMediaItem({
   id: 'image-only-1',
@@ -147,6 +202,32 @@ assert.ok(imageOnlyDeal.deal, 'an image-only deal must survive normalization');
 assert.match(imageOnlyDeal.deal.description, /Bildtext:/);
 assert.equal(imageOnlyDeal.deal.evidence.mediaEvidence.ai.isDeal, true);
 assert.equal(imageOnlyDeal.deal.pubDateSource, 'instagram-graph-timestamp');
+
+const visionDiscoveredDeal = normalizeGraphMediaItem({
+  id: 'vision-location-1',
+  caption: 'Unser Wochenplan',
+  permalink: 'https://www.instagram.com/p/VISIONLOCATION1/',
+  timestamp: '2026-08-22T09:00:00.000Z',
+  username: 'new.visual.cafe',
+  _mediaEvidence: {
+    ocrText: '',
+    visionImageCount: 1,
+    ai: {
+      isDeal: true,
+      confidence: 0.95,
+      offerText: '20 % Rabatt auf Kaffee',
+      locationText: 'Neubaugasse 12, 1070 Wien',
+      validityText: 'Gültig bis 30.08.2026',
+      exclusion: 'none',
+    },
+  },
+}, {
+  sourceType: 'hashtag',
+  sourceName: '#wienessen',
+}, config, now);
+assert.ok(visionDiscoveredDeal.deal, 'visible Vision location evidence can verify a new hashtag merchant');
+assert.equal(visionDiscoveredDeal.deal.validUntil, '2026-08-30T23:59:59.999Z');
+assert.equal(visionDiscoveredDeal.deal.evidence.mediaEvidence.ai.locationText, 'Neubaugasse 12, 1070 Wien');
 
 const noisyOcrFalsePositive = normalizeGraphMediaItem({
   id: 'noisy-ocr-1',
@@ -236,6 +317,7 @@ const failedOcr = await analyzeInstagramMediaItem({
 });
 assert.equal(failedOcrCalls, 1, 'non-language OCR failures must not be retried');
 assert.equal(failedOcr.errors.length, 1);
+assert.equal(failedOcr.visionImages.length, 1, 'a failed OCR pass still leaves visual evidence for the model');
 
 let languageFallbackCalls = 0;
 const languageFallback = await analyzeInstagramMediaItem({

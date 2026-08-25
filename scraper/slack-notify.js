@@ -22,6 +22,7 @@ import {
   getViennaEvidence,
   mergeDealEvidence,
   mergeDuplicateDealRecords,
+  semanticSocialOfferKey,
 } from './deal-evidence-utils.js';
 import {
   enrichDealWithInstagramGraphEvidence,
@@ -871,6 +872,8 @@ function buildDealDuplicateKeys(deal) {
   if (postKey && isSocialPostKey(postKey)) {
     keys.push(`post:${postKey}`);
   }
+  const semanticOfferKey = semanticSocialOfferKey(deal);
+  if (semanticOfferKey) keys.push(semanticOfferKey);
   if (postKey && titleKey) {
     keys.push(`url-title:${postKey}|${titleKey}`);
   }

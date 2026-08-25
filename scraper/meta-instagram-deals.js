@@ -71,6 +71,18 @@ const DEFAULT_HASHTAGS = [
   'viennadeals',
   'wienerdeals',
   'happyhourvienna',
+  'wien',
+  'vienna',
+  'viennafood',
+  'wienevents',
+  'wientipps',
+  'wienfamilie',
+  'sommerinwien',
+  'wienergastro',
+  'essenwien',
+  'viennaeats',
+  'viennaevents',
+  'viennarestaurants',
 ];
 
 const CONCRETE_FREE_PATTERN = /(?<!gluten[- ])(?<!sugar[- ])(?<!lactose[- ])(?<!dairy[- ])(?<!alcohol[- ])(?<!caffeine[- ])(?<!cruelty[- ])(?<!plastic[- ])(?<!smoke[- ])(?<!tax[- ])(?<!risk[- ])(?<!fat[- ])(?<!nut[- ])(?<!gmo[- ])\bfree\b/i;
@@ -249,6 +261,12 @@ export function buildConfig(env = process.env, now = new Date()) {
     ocrTimeoutMs: numberEnv(env, 'META_INSTAGRAM_MEDIA_OCR_TIMEOUT_MS', 30000, 5000, 120000),
     mediaCacheTtlDays: numberEnv(env, 'META_INSTAGRAM_MEDIA_CACHE_TTL_DAYS', 7, 1, 30),
     mediaLlmEnabled: booleanEnv(env, 'META_INSTAGRAM_MEDIA_LLM_ENABLED', Boolean(cleanText(env.OPENAI_API_KEY, 700))),
+    mediaVisionEnabled: booleanEnv(env, 'META_INSTAGRAM_MEDIA_VISION_ENABLED', Boolean(cleanText(env.OPENAI_API_KEY, 700))),
+    mediaVisionMaxImagesPerPost: numberEnv(env, 'META_INSTAGRAM_MEDIA_VISION_MAX_IMAGES_PER_POST', 3, 1, 6),
+    mediaVisionMaxImageBytes: numberEnv(env, 'META_INSTAGRAM_MEDIA_VISION_MAX_IMAGE_BYTES', 1_500_000, 128_000, 5_000_000),
+    mediaVisionDetail: ['low', 'high', 'auto'].includes(cleanText(env.META_INSTAGRAM_MEDIA_VISION_DETAIL, 20).toLowerCase())
+      ? cleanText(env.META_INSTAGRAM_MEDIA_VISION_DETAIL, 20).toLowerCase()
+      : 'high',
     mediaLlmModel: cleanText(env.META_INSTAGRAM_MEDIA_LLM_MODEL || env.OPENAI_MODEL || 'gpt-4.1-mini', 100),
     mediaLlmMaxCallsPerRun: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_RUN', 8, 0, 30),
     mediaLlmMinOcrChars: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MIN_OCR_CHARS', 20, 5, 500),
@@ -310,7 +328,7 @@ function hasInstagramCandidateEvidence(deal = {}) {
   ].map((value) => cleanText(value, 300)).join(' '));
 }
 
-export function loadAccountCatalog(config, paths = {}) {
+export function loadAccountCatalog(config, paths = {}, state = {}) {
   const watchlist = readJson(paths.watchlistPath || WATCHLIST_PATH, {});
   const registry = readJson(paths.registryPath || MERCHANT_REGISTRY_PATH, {});
   const blockedUsernames = new Set((Array.isArray(registry?.accounts) ? registry.accounts : [])
@@ -342,7 +360,7 @@ export function loadAccountCatalog(config, paths = {}) {
     existing.postedDeals = Math.max(existing.postedDeals, Number(raw?.postedDeals || raw?.postedOccurrences || 0));
     existing.rejectedDeals = Math.max(existing.rejectedDeals, Number(raw?.rejectedDeals || raw?.rejectedOccurrences || 0));
     existing.approvalRate = Math.max(existing.approvalRate, Number(raw?.approvalRate || 0));
-    const candidateAt = toIso(raw?.sourcePublishedAt || raw?.pubDate);
+    const candidateAt = toIso(raw?.lastCandidateAt || raw?.sourcePublishedAt || raw?.pubDate);
     if (candidateAt && Date.parse(candidateAt) > (Date.parse(existing.lastCandidateAt) || 0)) {
       existing.lastCandidateAt = candidateAt;
     }
@@ -354,6 +372,7 @@ export function loadAccountCatalog(config, paths = {}) {
 
   for (const account of Array.isArray(watchlist?.accounts) ? watchlist.accounts : []) add(account, 'watchlist');
   for (const account of Array.isArray(registry?.accounts) ? registry.accounts : []) add(account, 'registry');
+  for (const account of Object.values(state?.discoveredAccounts || {})) add(account, 'graph-discovery');
   const candidatePaths = Array.isArray(paths.candidatePaths) ? paths.candidatePaths : CANDIDATE_ACCOUNT_PATHS;
   for (const candidatePath of candidatePaths) {
     const payload = readJson(candidatePath, {});
@@ -435,13 +454,13 @@ export function selectAccountShard(accounts, config, state = {}, now = new Date(
 
   const performance = state?.accountPerformance || {};
   const highYield = accounts
-    .filter((account) => Number(performance[account.username]?.recentFetched || 0) > 0)
+    .filter((account) => Number(performance[account.username]?.recentNewAccepted || 0) > 0)
     .sort((left, right) => {
       const leftStats = performance[left.username] || {};
       const rightStats = performance[right.username] || {};
-      const leftRate = Number(leftStats.recentAccepted || 0) / Math.max(1, Number(leftStats.recentFetched || 0));
-      const rightRate = Number(rightStats.recentAccepted || 0) / Math.max(1, Number(rightStats.recentFetched || 0));
-      return rightRate - leftRate || Number(rightStats.recentAccepted || 0) - Number(leftStats.recentAccepted || 0);
+      const leftRate = Number(leftStats.recentNewAccepted || 0) / Math.max(1, Number(leftStats.recentFetched || 0));
+      const rightRate = Number(rightStats.recentNewAccepted || 0) / Math.max(1, Number(rightStats.recentFetched || 0));
+      return rightRate - leftRate || Number(rightStats.recentNewAccepted || 0) - Number(leftStats.recentNewAccepted || 0);
     });
   highYield.slice(0, Math.min(4, Math.ceil(limit / 6))).forEach(add);
 
@@ -468,13 +487,13 @@ export function selectHashtagShard(hashtags, config, state = {}) {
   };
   const performance = state?.hashtagPerformance || {};
   const highYield = unique
-    .filter((tag) => Number(performance[tag]?.recentFetched || 0) > 0)
+    .filter((tag) => Number(performance[tag]?.recentNewAccepted || 0) > 0)
     .sort((left, right) => {
       const leftStats = performance[left] || {};
       const rightStats = performance[right] || {};
-      const leftRate = Number(leftStats.recentAccepted || 0) / Math.max(1, Number(leftStats.recentFetched || 0));
-      const rightRate = Number(rightStats.recentAccepted || 0) / Math.max(1, Number(rightStats.recentFetched || 0));
-      return rightRate - leftRate || Number(rightStats.recentAccepted || 0) - Number(leftStats.recentAccepted || 0);
+      const leftRate = Number(leftStats.recentNewAccepted || 0) / Math.max(1, Number(leftStats.recentFetched || 0));
+      const rightRate = Number(rightStats.recentNewAccepted || 0) / Math.max(1, Number(rightStats.recentFetched || 0));
+      return rightRate - leftRate || Number(rightStats.recentNewAccepted || 0) - Number(leftStats.recentNewAccepted || 0);
     });
   highYield.slice(0, Math.min(4, Math.ceil(limit / 3))).forEach(add);
 
@@ -765,6 +784,8 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
     && ai.exclusion === 'none'
       ? cleanText(ai.offerText, 500)
       : '';
+  const trustedAiLocation = trustedAiOffer ? cleanText(ai.locationText, 240) : '';
+  const trustedAiValidity = trustedAiOffer ? cleanText(ai.validityText, 240) : '';
   // OCR occasionally turns decorative text into a plausible percentage. If
   // the caption has no offer and the evidence classifier confidently rejects
   // that OCR-only signal, do not let the noisy text create a deal by itself.
@@ -779,7 +800,13 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
     .join('\n');
   const promotion = classifyPromotion(promotionText);
   if (!promotion.accepted) return { deal: null, rejection: promotion.reason };
-  const contentText = [caption, ocrText ? `Bildtext: ${ocrText}` : '', trustedAiOffer ? `AI-Angebotsbeleg: ${trustedAiOffer}` : '']
+  const contentText = [
+    caption,
+    ocrText ? `Bildtext: ${ocrText}` : '',
+    trustedAiOffer ? `AI-Angebotsbeleg: ${trustedAiOffer}` : '',
+    trustedAiLocation ? `AI-Ortsbeleg: ${trustedAiLocation}` : '',
+    trustedAiValidity ? `AI-Gültigkeitsbeleg: ${trustedAiValidity}` : '',
+  ]
     .filter(Boolean)
     .join('\n');
   const sourcePublishedAt = toIso(raw?.timestamp);
@@ -787,7 +814,7 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
 
   const account = context?.account || null;
   const viennaEvidence = findViennaEvidence({
-    caption: [captionProse, ocrText].filter(Boolean).join(' '),
+    caption: [captionProse, ocrText, trustedAiLocation].filter(Boolean).join(' '),
     // A hashtag is a discovery hint, not proof that the actual offer is in Vienna.
     sourceName: context?.sourceType === 'account' ? context?.sourceName : '',
     username: raw?.username || account?.username,
@@ -837,6 +864,8 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
           isDeal: ai.isDeal === true,
           confidence: Number(ai.confidence || 0),
           offerText: cleanText(ai.offerText, 500),
+          locationText: cleanText(ai.locationText, 240),
+          validityText: cleanText(ai.validityText, 240),
           exclusion: cleanText(ai.exclusion, 60),
         } : null,
       },
@@ -1312,6 +1341,62 @@ function pruneSeenIds(seenIds, now, ttlDays = 7) {
   }).slice(-5000));
 }
 
+function pruneDiscoveredAccounts(discoveredAccounts, now, ttlDays = 90) {
+  const cutoff = now.getTime() - ttlDays * DAY_MS;
+  const entries = Object.entries(discoveredAccounts || {})
+    .filter(([username, account]) => {
+      const timestamp = Date.parse(account?.lastCandidateAt || account?.lastSeenAt || '');
+      return /^[a-z0-9._]{1,30}$/i.test(username) && Number.isFinite(timestamp) && timestamp >= cutoff;
+    })
+    .sort(([, left], [, right]) => (
+      (Date.parse(right?.lastCandidateAt || right?.lastSeenAt || '') || 0)
+      - (Date.parse(left?.lastCandidateAt || left?.lastSeenAt || '') || 0)
+    ))
+    .slice(0, 750);
+  return Object.fromEntries(entries);
+}
+
+function learnGraphAccounts(discoveredAccounts, entry, outcome, now, observedThisRun) {
+  const item = entry?.item || {};
+  const context = entry?.context || {};
+  const publishedAt = toIso(item.timestamp);
+  const publishedMs = Date.parse(publishedAt || '');
+  if (!Number.isFinite(publishedMs) || publishedMs > now.getTime() + DAY_MS || publishedMs < now.getTime() - 7 * DAY_MS) return;
+
+  const caption = cleanText(item.caption, 5000);
+  const relevant = Boolean(outcome?.deal) || hasViennaText(textWithoutHashtags(caption));
+  if (!relevant) return;
+
+  const remember = (rawUsername, priority, kind) => {
+    const username = normalizedUsername(rawUsername);
+    if (!username || !/^[a-z0-9._]{1,30}$/i.test(username)) return;
+    if (['instagram', 'freefinder', 'freefinderwien', 'wien', 'vienna'].includes(username)) return;
+    const prior = discoveredAccounts[username] || {};
+    const origin = `${kind}:${cleanText(context.sourceName || context.sourceType, 80)}`;
+    discoveredAccounts[username] = {
+      username,
+      priority: Math.max(Number(prior.priority || 0), priority),
+      category: cleanText(outcome?.deal?.category || prior.category, 60),
+      firstSeenAt: toIso(prior.firstSeenAt) || now.toISOString(),
+      lastSeenAt: now.toISOString(),
+      lastCandidateAt: publishedMs > (Date.parse(prior.lastCandidateAt || '') || 0)
+        ? publishedAt
+        : cleanText(prior.lastCandidateAt, 80),
+      seenCount: Number(prior.seenCount || 0) + 1,
+      origins: [...new Set([...(Array.isArray(prior.origins) ? prior.origins : []), origin])].slice(-8),
+    };
+    observedThisRun.add(username);
+  };
+
+  const selectedAccount = normalizedUsername(context?.account?.username);
+  const owner = normalizedUsername(item.username || (context.sourceType === 'account' ? selectedAccount : ''));
+  if (owner && owner !== selectedAccount) remember(owner, outcome?.deal ? 98 : 62, 'owner');
+  for (const username of extractMentionedUsernames({ caption })) {
+    if (username === owner || username === selectedAccount) continue;
+    remember(username, outcome?.deal ? 88 : 68, 'mention');
+  }
+}
+
 function updateAccountPerformance(previous, selectedAccounts, outcomes, now) {
   const cutoff = now.getTime() - 180 * DAY_MS;
   const next = Object.fromEntries(Object.entries(previous || {}).filter(([, stats]) => {
@@ -1322,15 +1407,18 @@ function updateAccountPerformance(previous, selectedAccounts, outcomes, now) {
     const username = normalizedUsername(account.username);
     if (!username) continue;
     const prior = next[username] || {};
-    const run = outcomes.get(username) || { fetched: 0, accepted: 0 };
+    const run = outcomes.get(username) || { fetched: 0, accepted: 0, newAccepted: 0 };
     next[username] = {
       runs: Number(prior.runs || 0) + 1,
       fetched: Number(prior.fetched || 0) + run.fetched,
       accepted: Number(prior.accepted || 0) + run.accepted,
+      newAccepted: Number(prior.newAccepted || 0) + run.newAccepted,
       recentFetched: Number((Number(prior.recentFetched || 0) * 0.75 + run.fetched).toFixed(3)),
       recentAccepted: Number((Number(prior.recentAccepted || 0) * 0.75 + run.accepted).toFixed(3)),
+      recentNewAccepted: Number((Number(prior.recentNewAccepted || 0) * 0.75 + run.newAccepted).toFixed(3)),
       lastRunAt: now.toISOString(),
       lastAcceptedAt: run.accepted > 0 ? now.toISOString() : cleanText(prior.lastAcceptedAt, 80),
+      lastNewAcceptedAt: run.newAccepted > 0 ? now.toISOString() : cleanText(prior.lastNewAcceptedAt, 80),
     };
   }
   return Object.fromEntries(Object.entries(next).slice(-500));
@@ -1344,15 +1432,18 @@ function updateHashtagPerformance(previous, selectedHashtags, outcomes, now) {
   }));
   for (const tag of selectedHashtags || []) {
     const prior = next[tag] || {};
-    const run = outcomes.get(tag) || { fetched: 0, accepted: 0 };
+    const run = outcomes.get(tag) || { fetched: 0, accepted: 0, newAccepted: 0 };
     next[tag] = {
       runs: Number(prior.runs || 0) + 1,
       fetched: Number(prior.fetched || 0) + run.fetched,
       accepted: Number(prior.accepted || 0) + run.accepted,
+      newAccepted: Number(prior.newAccepted || 0) + run.newAccepted,
       recentFetched: Number((Number(prior.recentFetched || 0) * 0.75 + run.fetched).toFixed(3)),
       recentAccepted: Number((Number(prior.recentAccepted || 0) * 0.75 + run.accepted).toFixed(3)),
+      recentNewAccepted: Number((Number(prior.recentNewAccepted || 0) * 0.75 + run.newAccepted).toFixed(3)),
       lastRunAt: now.toISOString(),
       lastAcceptedAt: run.accepted > 0 ? now.toISOString() : cleanText(prior.lastAcceptedAt, 80),
+      lastNewAcceptedAt: run.newAccepted > 0 ? now.toISOString() : cleanText(prior.lastNewAcceptedAt, 80),
     };
   }
   return Object.fromEntries(Object.entries(next).slice(-100));
@@ -1364,20 +1455,31 @@ export async function runMetaInstagramCollector(options = {}) {
   const config = { ...(options.config || buildConfig(env, now)) };
   const fetchImpl = options.fetchImpl || fetch;
   const state = readJson(config.statePath, {
-    version: 3,
+    version: 4,
     hashtagIds: {},
     seenIds: {},
+    acceptedSeenIds: {},
     mediaEvidence: {},
     sourceFailures: {},
     accountPerformance: {},
     hashtagPerformance: {},
+    discoveredAccounts: {},
   });
+  const previousSeenIds = pruneSeenIds(state?.seenIds || {}, now, config.seenTtlDays);
+  const previousAcceptedSeenIds = pruneSeenIds({
+    ...(state?.seenIds || {}),
+    ...(state?.acceptedSeenIds || {}),
+  }, now, config.seenTtlDays);
+  const previousDiscoveredAccounts = pruneDiscoveredAccounts(state?.discoveredAccounts, now);
   const previousPayload = readJson(config.outputPath, null);
   const previousGraphEvidence = loadInstagramGraphEvidence(config.graphEvidencePath).payload;
   const lastGoodPayload = previousPayload && Array.isArray(previousPayload.deals)
     ? previousPayload
     : null;
-  const accountCatalog = loadAccountCatalog(config, options.paths || {});
+  const accountCatalog = loadAccountCatalog(config, options.paths || {}, {
+    ...state,
+    discoveredAccounts: previousDiscoveredAccounts,
+  });
   const configured = {
     adLibrary: Boolean(config.adLibraryToken),
     instagramGraph: Boolean(config.instagramAccessToken),
@@ -1399,11 +1501,12 @@ export async function runMetaInstagramCollector(options = {}) {
       mediaPerHashtag: config.mediaPerHashtag,
     },
     sources: {
-      adLibrary: { status: configured.adLibrary ? 'pending' : 'not-configured', fetched: 0, accepted: 0, errors: [] },
-      instagramGraph: { status: configured.instagramGraph ? 'pending' : 'not-configured', fetched: 0, accepted: 0, errors: [] },
+      adLibrary: { status: configured.adLibrary ? 'pending' : 'not-configured', fetched: 0, accepted: 0, newAccepted: 0, errors: [] },
+      instagramGraph: { status: configured.instagramGraph ? 'pending' : 'not-configured', fetched: 0, accepted: 0, newAccepted: 0, errors: [] },
     },
     rejectionReasons: {},
     graphEvidence: { status: configured.instagramGraph ? 'pending' : 'not-configured', observed: 0, retained: 0, blocked: 0 },
+    accountDiscovery: { stored: Object.keys(previousDiscoveredAccounts).length, observedThisRun: 0, newThisRun: 0 },
     totalDeals: 0,
   };
 
@@ -1440,15 +1543,18 @@ export async function runMetaInstagramCollector(options = {}) {
 
   const accepted = [];
   const graphEvidenceEntries = [];
+  const discoveredThisRun = new Set();
   const nextState = {
-    version: 3,
+    version: 4,
     updatedAt: now.toISOString(),
     hashtagIds: { ...(state?.hashtagIds || {}) },
-    seenIds: pruneSeenIds(state?.seenIds || {}, now, config.seenTtlDays),
+    seenIds: { ...previousSeenIds },
+    acceptedSeenIds: { ...previousAcceptedSeenIds },
     mediaEvidence: { ...(state?.mediaEvidence || {}) },
     sourceFailures: pruneSourceFailures(state?.sourceFailures, now),
     accountPerformance: { ...(state?.accountPerformance || {}) },
     hashtagPerformance: { ...(state?.hashtagPerformance || {}) },
+    discoveredAccounts: { ...previousDiscoveredAccounts },
   };
 
   if (configured.adLibrary) {
@@ -1464,6 +1570,7 @@ export async function runMetaInstagramCollector(options = {}) {
       }
       accepted.push(normalized.deal);
       report.sources.adLibrary.accepted += 1;
+      if (!previousAcceptedSeenIds[normalized.deal.id]) report.sources.adLibrary.newAccepted += 1;
     }
   }
 
@@ -1505,16 +1612,19 @@ export async function runMetaInstagramCollector(options = {}) {
     });
     nextState.mediaEvidence = media.cache;
     report.sources.instagramGraph.mediaEvidence = media.report;
-    const accountOutcomes = new Map(result.selectedAccounts.map((account) => [account.username, { fetched: 0, accepted: 0 }]));
-    const hashtagOutcomes = new Map(result.selectedHashtags.map((tag) => [tag, { fetched: 0, accepted: 0 }]));
+    const accountOutcomes = new Map(result.selectedAccounts.map((account) => [account.username, { fetched: 0, accepted: 0, newAccepted: 0 }]));
+    const hashtagOutcomes = new Map(result.selectedHashtags.map((tag) => [tag, { fetched: 0, accepted: 0, newAccepted: 0 }]));
     for (const entry of media.entries) {
       const normalized = normalizeGraphMediaItem(entry.item, entry.context, config, now);
       graphEvidenceEntries.push({ entry, outcome: normalized });
+      learnGraphAccounts(nextState.discoveredAccounts, entry, normalized, now, discoveredThisRun);
+      const isNewAccepted = Boolean(normalized.deal && !previousAcceptedSeenIds[normalized.deal.id]);
       const accountUsername = normalizedUsername(entry.context?.account?.username || (entry.context?.sourceType === 'account' ? entry.item?.username : ''));
       if (accountUsername && accountOutcomes.has(accountUsername)) {
         const outcome = accountOutcomes.get(accountUsername);
         outcome.fetched += 1;
         if (normalized.deal) outcome.accepted += 1;
+        if (isNewAccepted) outcome.newAccepted += 1;
       }
       const hashtag = entry.context?.sourceType === 'hashtag'
         ? cleanText(entry.context?.sourceName, 80).replace(/^#/, '').toLowerCase()
@@ -1523,6 +1633,7 @@ export async function runMetaInstagramCollector(options = {}) {
         const outcome = hashtagOutcomes.get(hashtag);
         outcome.fetched += 1;
         if (normalized.deal) outcome.accepted += 1;
+        if (isNewAccepted) outcome.newAccepted += 1;
       }
       if (!normalized.deal) {
         incrementReason(report.rejectionReasons, normalized.rejection);
@@ -1530,6 +1641,7 @@ export async function runMetaInstagramCollector(options = {}) {
       }
       accepted.push(normalized.deal);
       report.sources.instagramGraph.accepted += 1;
+      if (isNewAccepted) report.sources.instagramGraph.newAccepted += 1;
     }
     nextState.accountPerformance = updateAccountPerformance(
       state?.accountPerformance,
@@ -1542,6 +1654,7 @@ export async function runMetaInstagramCollector(options = {}) {
       return [account.username, {
         recentFetched: Number(stats.recentFetched || 0),
         recentAccepted: Number(stats.recentAccepted || 0),
+        recentNewAccepted: Number(stats.recentNewAccepted || 0),
       }];
     }));
     nextState.hashtagPerformance = updateHashtagPerformance(
@@ -1555,8 +1668,15 @@ export async function runMetaInstagramCollector(options = {}) {
       return [tag, {
         recentFetched: Number(stats.recentFetched || 0),
         recentAccepted: Number(stats.recentAccepted || 0),
+        recentNewAccepted: Number(stats.recentNewAccepted || 0),
       }];
     }));
+    nextState.discoveredAccounts = pruneDiscoveredAccounts(nextState.discoveredAccounts, now);
+    report.accountDiscovery = {
+      stored: Object.keys(nextState.discoveredAccounts).length,
+      observedThisRun: discoveredThisRun.size,
+      newThisRun: [...discoveredThisRun].filter((username) => !previousDiscoveredAccounts[username]).length,
+    };
   }
 
   const graphEvidence = buildInstagramGraphEvidencePayload(graphEvidenceEntries, {
@@ -1574,6 +1694,7 @@ export async function runMetaInstagramCollector(options = {}) {
   };
 
   const allVerifiedDeals = dedupeDeals(accepted);
+  for (const deal of allVerifiedDeals) nextState.acceptedSeenIds[deal.id] = now.toISOString();
   // Previously observed rows move behind never-observed rows, but are never
   // suppressed. This rotates batches beyond the output cap without treating
   // collection as proof of Slack delivery.
@@ -1586,6 +1707,7 @@ export async function runMetaInstagramCollector(options = {}) {
     return 0;
   });
   const deals = rotatedDeals.slice(0, config.maxDealsPerRun);
+  const newDeals = deals.filter((deal) => !previousAcceptedSeenIds[deal.id]);
   // This is an observation cache only. It must never suppress output because
   // collection is not proof that Slack delivery or durable queueing succeeded.
   for (const deal of deals) nextState.seenIds[deal.id] = now.toISOString();
@@ -1593,12 +1715,15 @@ export async function runMetaInstagramCollector(options = {}) {
   const allFailed = sourceStatuses.length > 0 && sourceStatuses.every((status) => status === 'failed');
   report.status = allFailed ? 'failed' : (sourceStatuses.includes('degraded') || sourceStatuses.includes('failed') ? 'degraded' : (deals.length ? 'ok' : 'legitimate-zero'));
   report.totalDeals = deals.length;
+  report.newDeals = newDeals.length;
+  report.repeatedDeals = deals.length - newDeals.length;
+  report.newVerifiedBeforeLimit = allVerifiedDeals.filter((deal) => !previousAcceptedSeenIds[deal.id]).length;
   report.verifiedBeforeLimit = allVerifiedDeals.length;
   report.outputLimit = config.maxDealsPerRun;
   report.freshPostsFetched = report.sources.instagramGraph.fetched;
   report.verifiedDeals = deals.length;
   report.message = deals.length
-    ? `${deals.length} new, evidence-verified Vienna Instagram deals found.`
+    ? `${deals.length} evidence-verified Vienna Instagram deals found (${newDeals.length} net-new, ${deals.length - newDeals.length} previously observed).`
     : 'Collectors completed, but no new deal passed timestamp, Vienna and offer evidence.';
 
   const payload = {
@@ -1612,6 +1737,8 @@ export async function runMetaInstagramCollector(options = {}) {
         adLibrary: report.sources.adLibrary.accepted,
         instagramGraph: report.sources.instagramGraph.accepted,
       },
+      newDeals: newDeals.length,
+      repeatedDeals: deals.length - newDeals.length,
     },
     deals,
   };
@@ -1620,7 +1747,7 @@ export async function runMetaInstagramCollector(options = {}) {
     report.message = `All configured Meta sources failed; preserved ${report.preservedDeals} last-good deal(s).`;
     const sourceFailuresChanged = JSON.stringify(nextState.sourceFailures) !== JSON.stringify(pruneSourceFailures(state?.sourceFailures, now));
     const failedState = sourceFailuresChanged
-      ? { ...state, version: 3, updatedAt: now.toISOString(), sourceFailures: nextState.sourceFailures }
+      ? { ...state, version: 4, updatedAt: now.toISOString(), sourceFailures: nextState.sourceFailures }
       : state;
     if (options.write !== false) {
       writeJsonAtomic(config.reportPath, report);

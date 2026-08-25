@@ -716,6 +716,29 @@ export function classifyApifyRunHealth({ summary, rawDatasetItems, acceptedDeals
   return { usable: true, operationalStatus: 'healthy', inspectedPosts, sourceStates };
 }
 
+export function classifyApifyApiFailure(error) {
+  const message = normalizeText(error?.message || error);
+  if (/monthly usage hard limit exceeded/i.test(message)) {
+    return {
+      operationalStatus: 'budget-blocked',
+      reasonCode: 'monthly-usage-hard-limit',
+      controlled: true,
+    };
+  }
+  if (error?.rateLimited || Number(error?.httpStatus || 0) === 429) {
+    return {
+      operationalStatus: 'apify-rate-limited',
+      reasonCode: 'api-rate-limited',
+      controlled: false,
+    };
+  }
+  return {
+    operationalStatus: 'failed',
+    reasonCode: 'api-failure',
+    controlled: false,
+  };
+}
+
 export async function main() {
   ensureDir(DOCS_DIR);
 
@@ -853,24 +876,30 @@ export async function main() {
 const isMainModule = process.argv[1] && path.resolve(process.argv[1]) === __filename;
 if (isMainModule) {
   main().catch((error) => {
+    const failure = classifyApifyApiFailure(error);
     if (!error.reportWritten) {
       ensureDir(DOCS_DIR);
-      const operationalStatus = error.rateLimited ? 'apify-rate-limited' : 'failed';
       const failureReport = {
         updatedAt: new Date().toISOString(),
         actorId: APIFY_ACTOR_ID,
         status: 'FAILED',
-        operationalStatus,
+        operationalStatus: failure.operationalStatus,
         usable: false,
+        controlled: failure.controlled,
         acceptedDeals: 0,
         inspectedPosts: 0,
         reason: error.message,
+        reasonCode: failure.reasonCode,
         httpStatus: Number(error.httpStatus || 0),
       };
       writeJson(REPORT_PATH, failureReport);
       writeGithubImportStatus(failureReport);
     }
+    if (failure.controlled) {
+      console.warn(`⚠️ Apify scan skipped without replacing last-good output: ${failure.reasonCode}`);
+      return;
+    }
     console.error(`❌ ${error.message}`);
-    process.exit(1);
+    process.exitCode = 1;
   });
 }

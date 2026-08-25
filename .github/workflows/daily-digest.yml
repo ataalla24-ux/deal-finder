@@ -6,6 +6,26 @@ on:
   schedule:
     - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "Meta Instagram Deal Discovery"
+      - "Apify Instagram Fresh Scan"
+      - "Instagram AI Agent"
+      - "TikTok Deal Scanner"
+      - "Wien Deals Combined"
+      - "Power Scraper"
+      - "Flights Vienna Scraper"
+      - "Gutscheine.at Scraper"
+      - "Member Benefits Scraper"
+      - "Firecrawl Daily Sync"
+      - "Firecrawl Key 1 - Gastro"
+      - "Firecrawl Key 2 - Food"
+      - "Firecrawl Key 3 - Consumables"
+      - "Firecrawl Key 4 - Gastro Discovery"
+      - "Firecrawl Key 5 - Instagram Gastro"
+      - "Freikirchen Wien"
+      - "⛪ Churches Wien Scraper"
+    types: [completed]
 
 concurrency:
   group: deal-state-writer
@@ -13,6 +33,7 @@ concurrency:
 
 jobs:
   dispatch-deals:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

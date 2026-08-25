@@ -12,6 +12,7 @@ import {
   getPublicationEvidence,
   getViennaEvidence,
   mergeDuplicateDealRecords,
+  semanticSocialOfferKey,
 } from '../scraper/deal-evidence-utils.js';
 import {
   buildInstagramMerchantRegistry,
@@ -52,6 +53,56 @@ assert.notEqual(
   canonicalDealUrl('https://www.facebook.com/ads/library/?id=112233'),
   'different Meta ads must never collapse to one seen key',
 );
+
+const cryoOfferA = semanticSocialOfferKey({
+  ownerUsername: 'longevitycenter.vienna',
+  title: 'All you can Cryo um 200 Euro',
+  description: 'Eine Studie berichtet von 58 % Verbesserung.',
+  promotionEvidence: 'All you can Cryo Aktion um 200 €',
+  url: 'https://www.instagram.com/p/CRYOPOSTA/',
+});
+const cryoOfferB = semanticSocialOfferKey({
+  ownerUsername: 'longevitycenter.vienna',
+  title: 'All-you-can Kältekammer',
+  description: 'Andere Messwerte lagen bei 47 % und 56 %.',
+  promotionEvidence: 'All you can Cryo Aktion um 200 Euro',
+  url: 'https://www.instagram.com/reel/CRYOPOSTB/',
+});
+assert.ok(cryoOfferA, 'a concrete social promotion gets a semantic fingerprint');
+assert.equal(cryoOfferA, cryoOfferB, 'unrelated caption percentages must not split one repeated promotion');
+
+const merchantOfferA = semanticSocialOfferKey({
+  ownerUsername: 'cafe_wien',
+  title: '20 % auf Pizza',
+  url: 'https://www.instagram.com/p/CAFEPOSTA/',
+});
+const merchantOfferB = semanticSocialOfferKey({
+  ownerUsername: 'cafe_wien',
+  title: '1+1 Kaffee gratis',
+  url: 'https://www.instagram.com/p/CAFEPOSTB/',
+});
+assert.ok(merchantOfferA && merchantOfferB);
+assert.notEqual(merchantOfferA, merchantOfferB, 'different offers by one merchant remain separate');
+assert.notEqual(
+  semanticSocialOfferKey({
+    ownerUsername: 'wien.uncovered',
+    brand: 'Cafe Alpha',
+    title: '20 % auf Pizza',
+    url: 'https://www.instagram.com/p/PUBLISHERPOSTA/',
+  }),
+  semanticSocialOfferKey({
+    ownerUsername: 'wien.uncovered',
+    brand: 'Cafe Beta',
+    title: '20 % auf Pizza',
+    url: 'https://www.instagram.com/p/PUBLISHERPOSTB/',
+  }),
+  'one discovery publisher must not merge matching discounts from different merchants',
+);
+assert.equal(semanticSocialOfferKey({
+  ownerUsername: 'cafe_wien',
+  title: 'Unser neues Sommermenü',
+  url: 'https://www.instagram.com/p/NODEALPOST/',
+}), '', 'ordinary merchant posts never receive an offer fingerprint');
 
 assert.equal(extractInstagramProfileUsername('https://instagram.com/cafe_wien/'), 'cafe_wien');
 assert.equal(extractInstagramProfileUsername(`https://instagram.com/p/${shortcode}/`), '', 'post paths never become merchant usernames');

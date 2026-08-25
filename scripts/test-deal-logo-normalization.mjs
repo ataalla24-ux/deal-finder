@@ -1,6 +1,32 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 
 import { normalizeDealRecord } from '../scraper/deal-normalization-utils.js';
+import { repairCachedLogoReference } from './cache-deal-logos.mjs';
+
+const logoTestDir = await fs.mkdtemp(path.join(os.tmpdir(), 'deal-logo-cache-'));
+await fs.writeFile(path.join(logoTestDir, 'present.png'), Buffer.from([1, 2, 3]));
+const logoBaseUrl = 'https://freefinder.at/assets/brand-logos';
+const presentCachedLogo = await repairCachedLogoReference({
+  brand: 'Present',
+  logoUrl: `${logoBaseUrl}/present.png`,
+}, { logoDir: logoTestDir, publicBaseUrl: logoBaseUrl });
+assert.equal(presentCachedLogo.invalid, false);
+const missingCachedLogo = await repairCachedLogoReference({
+  brand: 'Missing',
+  logoUrl: `${logoBaseUrl}/missing.png`,
+}, { logoDir: logoTestDir, publicBaseUrl: logoBaseUrl });
+assert.equal(missingCachedLogo.invalid, true);
+assert.equal(missingCachedLogo.deal.logoUrl, '', 'a missing cached logo is cleared instead of aborting approvals');
+const unsafeCachedLogo = await repairCachedLogoReference({
+  brand: 'Unsafe',
+  logoUrl: `${logoBaseUrl}/..%2Fsecret.png`,
+}, { logoDir: logoTestDir, publicBaseUrl: logoBaseUrl });
+assert.equal(unsafeCachedLogo.invalid, true);
+assert.equal(unsafeCachedLogo.deal.logoUrl, '');
+await fs.rm(logoTestDir, { recursive: true, force: true });
 
 function expectNormalizedLogo(name, rawDeal, expected) {
   const normalized = normalizeDealRecord(rawDeal);
