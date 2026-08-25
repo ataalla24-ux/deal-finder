@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-25T20:41:44.265Z",
+  "generatedAt": "2026-08-25T20:44:35.767Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 201,
-    "allowed": 0,
+    "total": 205,
+    "allowed": 4,
     "blocked": 201,
-    "warnings": 0,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 145,
       "Gottesdienste nur im Wochenlauf": 46,
@@ -40,7 +40,7 @@
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-07-16)": 2,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 18,
+      "URL ungültig (HTTP 404)": 12,
       "ausgeschlossene Quelle (gastro.news)": 6,
       "älter als 7 Tage (2019-08-02)": 1,
       "älter als 7 Tage (2023-11-04)": 1,
@@ -66,7 +66,7 @@
       "abgelaufen": 4,
       "ausgeschlossene Quelle": 7,
       "kein echtes Post-Datum": 2,
-      "ungültige URL": 20,
+      "ungültige URL": 14,
       "Meta-Graph-Widerspruch": 2
     },
     "sourceCounts": {
@@ -103,7 +103,7 @@
           "kein konkreter Deal": 44,
           "Gottesdienste außerhalb Wochenlauf": 45,
           "älter als 7 Tage": 39,
-          "ungültige URL": 3
+          "ungültige URL": 1
         }
       },
       "Gutscheine.at": {
@@ -134,7 +134,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 96,
           "älter als 7 Tage": 99,
-          "ungültige URL": 9,
+          "ungültige URL": 5,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "nicht Wien": 1
         }
@@ -147,6 +147,13 @@
         "reasonCategoryCounts": {
           "nicht Wien": 2
         }
+      },
+      "Meta Instagram Hashtag API": {
+        "total": 4,
+        "allowed": 4,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
       },
       "Ströck": {
         "total": 9,
@@ -177,7 +184,70 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-17901096795563741",
+      "title": "September kannst du historische Orte in ganz Österreich kostenlos entdecken, darunter auch einige, die sonst nicht öffentlich zugänglich sin",
+      "brand": "#wienevents",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/reel/DcdzMa2Ocay/",
+      "reasons": [],
+      "warnings": [
+        "startet am 2026-09-18"
+      ],
+      "sourceDate": "2026-08-25T13:59:02.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-09-20",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18124982773815414",
+      "title": "1 like = 1 minute of free studio time.",
+      "brand": "#vienna",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/reel/DceetvVRoct/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-25T20:19:20.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-08-28T20:38:52.386Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18061301438776901",
+      "title": "🏆 HAUPTPREIS: 1 Monat lang täglich 1 gratis Portion K-Chicken!",
+      "brand": "#viennafood",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/p/DceIWSeCvn7/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-25T17:03:53.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-08-28T20:38:52.386Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18073730768409463",
+      "title": "Milk Tea um 1€ : Diesen Samstag im chastudio.vienna solange der Vorrat reicht und ein Opening Angebot gibt’s schon ab jetzt, zu jedem Milk T",
+      "brand": "#viennafood",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/reel/Dcd-vtmtTLM/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-25T15:39:59.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-08-28T20:38:52.386Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20260824",
@@ -1917,18 +1987,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 128,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-7-20260419",
@@ -1937,18 +2008,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 128,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-8-20260419",
@@ -1982,13 +2054,15 @@
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 128,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-10-20260419",
@@ -2616,17 +2690,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 184,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -2652,17 +2727,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 184,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-11-20260222",
@@ -2807,13 +2883,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 184,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-19-20260222",
@@ -3429,17 +3507,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 184,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-17-20260222",
@@ -3465,17 +3544,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 184,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-19-20260222",
@@ -3676,13 +3756,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 184,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gs-496866",
