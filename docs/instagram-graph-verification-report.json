@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-25T07:49:38.639Z",
+  "generatedAt": "2026-08-25T08:25:01.247Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -61,8 +61,8 @@
       "candidates": 0
     },
     "deals-pending-firecrawl4.json": {
-      "deals": 1,
-      "candidates": 0
+      "deals": 10,
+      "candidates": 2
     },
     "deals-pending-firecrawl5.json": {
       "deals": 1,
@@ -101,8 +101,8 @@
       "candidates": 0
     },
     "deals-pending-instagram-ai.json": {
-      "deals": 9,
-      "candidates": 0
+      "deals": 12,
+      "candidates": 3
     },
     "deals-pending-instagram-apify.json": {
       "deals": 3,
@@ -157,27 +157,53 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 1,
-  "candidateAccounts": 1,
+  "candidatePosts": 5,
+  "candidateAccounts": 5,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
+      "username": "kunstpause.wien",
+      "candidates": 1
+    },
+    {
+      "username": "urbans_lounge_restaurant",
+      "candidates": 1
+    },
+    {
+      "username": "integration_wien",
+      "candidates": 1
+    },
+    {
       "username": "bottlechallenge_org",
+      "candidates": 1
+    },
+    {
+      "username": "markedvlogblueprints",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 25,
-  "exactMatches": 0,
-  "retainedEvidencePosts": 325,
-  "errors": [],
+  "fetchedPosts": 91,
+  "exactMatches": 3,
+  "retainedEvidencePosts": 335,
+  "errors": [
+    {
+      "username": "markedvlogblueprints",
+      "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28markedvlogblueprints%29%7Busername%2Cname%2Cmedia.limit%2825%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
+    }
+  ],
   "accountFailures": {
     "notarunclub_vienna": {
       "count": 2,
       "lastAt": "2026-08-23T12:50:37.079Z",
       "cooldownUntil": "2026-08-24T12:50:37.079Z"
+    },
+    "markedvlogblueprints": {
+      "count": 1,
+      "lastAt": "2026-08-25T08:25:01.247Z",
+      "cooldownUntil": "2026-08-26T08:25:01.247Z"
     }
   },
   "blockedEvidencePosts": 25,
-  "unmatchedCandidatePosts": 1,
-  "message": "0/1 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 2,
+  "message": "3/5 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
