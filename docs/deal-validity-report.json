@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-26T07:33:32.891Z",
+  "generatedAt": "2026-08-26T07:35:09.708Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 203,
+    "total": 204,
     "allowed": 1,
-    "blocked": 202,
+    "blocked": 203,
     "warnings": 0,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 145,
@@ -35,7 +35,7 @@
       "älter als 7 Tage (2026-05-05)": 1,
       "älter als 7 Tage (2026-04-30)": 1,
       "älter als 7 Tage (2026-04-20)": 1,
-      "älter als 7 Tage (2026-02-22)": 89,
+      "älter als 7 Tage (2026-02-22)": 87,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-07-16)": 2,
@@ -46,8 +46,9 @@
       "älter als 7 Tage (2023-11-04)": 1,
       "älter als 7 Tage (2023-02-24)": 1,
       "älter als 7 Tage (2014-10-10)": 3,
-      "älter als 7 Tage (2026-04-19)": 32,
+      "älter als 7 Tage (2026-04-19)": 31,
       "älter als 7 Tage (2016-10-30)": 3,
+      "älter als 7 Tage (2023-09-21)": 3,
       "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
@@ -55,6 +56,7 @@
       "älter als 7 Tage (2026-08-17)": 1,
       "Meta-Graph-Widerspruch (non-vienna-location)": 2,
       "abgelaufen (2026-08-22)": 2,
+      "Quell-/Post-Datum liegt in der Zukunft (2026-08-26)": 1,
       "älter als 7 Tage (2026-07-01)": 9,
       "relative Kurz-Aktion abgelaufen (2026-08-24)": 1,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 1
@@ -68,7 +70,8 @@
       "ausgeschlossene Quelle": 7,
       "kein echtes Post-Datum": 2,
       "ungültige URL": 9,
-      "Meta-Graph-Widerspruch": 2
+      "Meta-Graph-Widerspruch": 2,
+      "Post-Datum in Zukunft": 1
     },
     "sourceCounts": {
       "Apify Instagram Vienna Food Offers": {
@@ -165,6 +168,22 @@
           "nicht Wien": 2
         }
       },
+      "Meta Instagram Business Discovery": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 0,
+        "reasonCategoryCounts": {}
+      },
+      "Meta Instagram Hashtag API": {
+        "total": 1,
+        "allowed": 0,
+        "blocked": 1,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "Post-Datum in Zukunft": 1
+        }
+      },
       "Ströck": {
         "total": 9,
         "allowed": 0,
@@ -175,8 +194,8 @@
         }
       },
       "tiktok-deals-scanner": {
-        "total": 3,
-        "allowed": 1,
+        "total": 2,
+        "allowed": 0,
         "blocked": 2,
         "warnings": 0,
         "reasonCategoryCounts": {
@@ -197,18 +216,18 @@
   },
   "allowed": [
     {
-      "id": "tiktok-cq1bii",
-      "title": "In fünf Wiener Parks gibt es ab sofort kostenlose Ladestationen für Smartphones und Tablets",
-      "brand": "der städtischen Initiative",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@orfradiowienheute/video/7677999442515037462",
+      "id": "meta-ig-18085084484262005",
+      "title": "1 Like = 1 Minute kostenlose Studiozeit.",
+      "brand": "Contentbude • Studio Wien",
+      "source": "Meta Instagram Business Discovery",
+      "url": "https://www.instagram.com/reel/DcefPBMMsMm/",
       "reasons": [],
       "warnings": [],
-      "sourceDate": "2026-08-25T15:59:12.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
+      "sourceDate": "2026-08-25T20:23:52.000Z",
+      "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 1,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
+      "expiryDate": "2026-08-29T07:31:28.971Z",
+      "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     }
   ],
@@ -2143,17 +2162,15 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-04-19)"
+        "älter als 7 Tage (2023-09-21)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-04-19T08:59:47.145Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 129,
+      "warnings": [],
+      "sourceDate": "2023-09-21T15:18:49.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 1070,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "freikirche-16-20260419",
@@ -2715,17 +2732,15 @@
       "url": "https://www.mennoniten.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2023-09-21)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-02-22T21:12:35.964Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 185,
+      "warnings": [],
+      "sourceDate": "2023-09-21T15:18:49.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 1070,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gemeinde-12-20260222",
@@ -3535,17 +3550,15 @@
       "url": "https://www.mennoniten.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2023-09-21)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-02-22T21:12:35.964Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 185,
+      "warnings": [],
+      "sourceDate": "2023-09-21T15:18:49.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 1070,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gottesdienste-20-20260222",
@@ -3949,6 +3962,23 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18093426422638788",
+      "title": "Free 🔗 buskersfestivalwien 🎨 12.09.",
+      "brand": "#viennaevents",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/p/Dcfu5jaCJy4/",
+      "reasons": [
+        "Quell-/Post-Datum liegt in der Zukunft (2026-08-26)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-08-26T07:59:59.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": null,
+      "expiryDate": "2026-08-29T07:31:28.971Z",
+      "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
     {
