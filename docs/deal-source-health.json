@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-26T14:06:57.175Z",
+  "generatedAt": "2026-08-26T14:10:28.160Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 355,
-    "uniqueCandidates": 333,
-    "distinctCandidates": 343,
-    "duplicateClusters": 10,
+    "totalCandidates": 388,
+    "uniqueCandidates": 337,
+    "distinctCandidates": 359,
+    "duplicateClusters": 22,
     "topHealthySources": [
       {
         "sourceKey": "tiktok",
@@ -16,14 +16,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 76,
+        "healthScore": 68,
         "totalDeals": 5
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 75,
-        "totalDeals": 14
       },
       {
         "sourceKey": "food3",
@@ -32,10 +26,16 @@
         "totalDeals": 3
       },
       {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "healthScore": 61,
+        "totalDeals": 10
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "healthScore": 66,
-        "totalDeals": 2
+        "healthScore": 60,
+        "totalDeals": 35
       }
     ],
     "topMissionSources": [
@@ -86,6 +86,13 @@
         "fresh1dCount": 0
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "coverageScore": 55,
+        "totalDeals": 35,
+        "fresh1dCount": 12
+      },
+      {
         "sourceKey": "events",
         "sourceLabel": "Kirchen Events",
         "coverageScore": 53,
@@ -98,13 +105,6 @@
         "coverageScore": 52,
         "totalDeals": 34,
         "fresh1dCount": 0
-      },
-      {
-        "sourceKey": "gutscheine",
-        "sourceLabel": "Gutscheine.at",
-        "coverageScore": 52,
-        "totalDeals": 27,
-        "fresh1dCount": 27
       }
     ],
     "topPrecisionSources": [
@@ -117,7 +117,7 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 80,
+        "precisionScore": 77,
         "totalDeals": 5
       },
       {
@@ -129,14 +129,14 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 73,
+        "precisionScore": 68,
         "totalDeals": 14
       },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "precisionScore": 64,
-        "totalDeals": 2
+        "totalDeals": 35
       }
     ],
     "topWeightedSources": [
@@ -149,14 +149,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 65,
-        "totalDeals": 5
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 62,
-        "totalDeals": 14
+        "totalDeals": 5
       },
       {
         "sourceKey": "food3",
@@ -165,10 +159,16 @@
         "totalDeals": 3
       },
       {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 57,
+        "totalDeals": 35
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 56,
-        "totalDeals": 15
+        "totalDeals": 14
       }
     ],
     "topSourcesToFix": [
@@ -310,9 +310,9 @@
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
       "totalDeals": 5,
-      "uniqueDeals": 3,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
       "fresh1dCount": 4,
       "fresh7dCount": 5,
       "viennaCount": 5,
@@ -348,8 +348,8 @@
         "errors": [],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
+      "uniqueRate": 0.2,
+      "duplicateRate": 0.8,
       "fresh1dRate": 0.8,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -385,84 +385,10 @@
         "geringe Food-/Drink-Relevanz",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 76,
+      "healthScore": 68,
       "missionFitScore": 75,
-      "coverageScore": 20,
-      "precisionScore": 80,
-      "sourceWeightScore": 65
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 14,
-      "uniqueDeals": 12,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 9,
-      "fresh7dCount": 14,
-      "viennaCount": 14,
-      "foodDrinkCount": 5,
-      "promoCount": 10,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "FRI / 11.09 FREE ENTRY for girls until 1:00 AM via registration.",
-        "anzeige 10% Rabatt mit dem Code “LISA” bei nowayout_austria Ein magischer Escape Room, in dem ihr mit Hilfe eines Zauberstabs knifflige Räts",
-        "anzeige 10% Rabatt mit dem Code “LISA” bei nowayout_austria Ein magischer Escape Room, in dem ihr mit Hilfe eines Zauberstabs knifflige Räts"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
-      "fresh1dRate": 0.6,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.4,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 85.1,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 4
-        },
-        {
-          "value": "freizeit",
-          "count": 3
-        },
-        {
-          "value": "kultur",
-          "count": 3
-        },
-        {
-          "value": "shopping",
-          "count": 2
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 10
-        },
-        {
-          "value": "rabatt",
-          "count": 4
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 75,
-      "missionFitScore": 62,
-      "coverageScore": 33,
-      "precisionScore": 73,
+      "coverageScore": 19,
+      "precisionScore": 77,
       "sourceWeightScore": 62
     },
     {
@@ -542,145 +468,6 @@
       "sourceWeightScore": 59
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 2,
-      "foodDrinkCount": 0,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Free Kids’ Afro Dance Class on 30 August",
-        "Bildtext: 3 NEW POINTS italy Visiting Milan? 3 new restaurants now offer free bottle refills! Bottle CHALLENGE"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.5,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 83.5,
-      "topCategories": [
-        {
-          "value": "event",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 66,
-      "missionFitScore": 43,
-      "coverageScore": 13,
-      "precisionScore": 64,
-      "sourceWeightScore": 48
-    },
-    {
-      "sourceKey": "firecrawl4",
-      "file": "deals-pending-firecrawl4.json",
-      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-      "totalDeals": 15,
-      "uniqueDeals": 12,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 0,
-      "fresh7dCount": 4,
-      "viennaCount": 4,
-      "foodDrinkCount": 14,
-      "promoCount": 14,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "bottlechallenge_org: both now offering free water bottle refills and part of our ...",
-        "Café im KHM - Speisekarte, Preise, Fotos & 5 Bewertungen",
-        "Sacher - Restaurant Rote Bar - Speisekarte, Preise, Fotos ..."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-26T07:46:55.885Z",
-        "finishedAt": "2026-08-26T07:55:17.280Z",
-        "durationMs": 501395,
-        "counts": {
-          "rawCandidates": 17,
-          "normalizedCandidates": 17,
-          "verifiedCandidates": 15,
-          "previousDeals": 9,
-          "acceptedDeals": 15,
-          "rejectedDeals": 7
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 7
-        },
-        "errors": [
-          "#kostenlosessenwien: Firecrawl Agent nach 90s abgebrochen",
-          "#fooddealwien: Firecrawl Agent nach 90s abgebrochen",
-          "#gastroaktionwien: Firecrawl Agent nach 90s abgebrochen"
-        ],
-        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
-      },
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.3,
-      "viennaRate": 0.3,
-      "foodDrinkRate": 0.9,
-      "promoRate": 0.9,
-      "missingUrlRate": 0,
-      "averageQualityScore": 60,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 13
-        },
-        {
-          "value": "freizeit",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 13
-        },
-        {
-          "value": "gratis",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 63,
-      "missionFitScore": 61,
-      "coverageScore": 30,
-      "precisionScore": 62,
-      "sourceWeightScore": 56
-    },
-    {
       "sourceKey": "joe",
       "file": "deals-pending-joe.json",
       "sourceLabel": "jö Bonus Club",
@@ -742,6 +529,253 @@
       "coverageScore": 23,
       "precisionScore": 56,
       "sourceWeightScore": 51
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 35,
+      "uniqueDeals": 18,
+      "duplicateDeals": 17,
+      "duplicateAcrossSources": 17,
+      "fresh1dCount": 12,
+      "fresh7dCount": 35,
+      "viennaCount": 35,
+      "foodDrinkCount": 11,
+      "promoCount": 24,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Afterwork 1+1 gratis auf alle Getränke bis 19:00 Uhr",
+        "Mittagsmenü 4× essen, 5. gratis",
+        "August 2026 ⏰ ab 17:00 Uhr 💶 € 59 pro Person (Kinder bis 6 Jahre gratis) Perfekt für einen entspannten Sommer"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 82.4,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 9
+        },
+        {
+          "value": "essen",
+          "count": 6
+        },
+        {
+          "value": "fitness",
+          "count": 4
+        },
+        {
+          "value": "food/drink",
+          "count": 4
+        },
+        {
+          "value": "kultur",
+          "count": 3
+        },
+        {
+          "value": "supermarkt",
+          "count": 3
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 20
+        },
+        {
+          "value": "rabatt",
+          "count": 12
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "gewinnspiel",
+          "count": 1
+        },
+        {
+          "value": "gutschein",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 60,
+      "missionFitScore": 52,
+      "coverageScore": 55,
+      "precisionScore": 64,
+      "sourceWeightScore": 57
+    },
+    {
+      "sourceKey": "firecrawl4",
+      "file": "deals-pending-firecrawl4.json",
+      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+      "totalDeals": 15,
+      "uniqueDeals": 11,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
+      "fresh1dCount": 0,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 14,
+      "promoCount": 14,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "bottlechallenge_org: both now offering free water bottle refills and part of our ...",
+        "Café im KHM - Speisekarte, Preise, Fotos & 5 Bewertungen",
+        "Sacher - Restaurant Rote Bar - Speisekarte, Preise, Fotos ..."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-26T07:46:55.885Z",
+        "finishedAt": "2026-08-26T07:55:17.280Z",
+        "durationMs": 501395,
+        "counts": {
+          "rawCandidates": 17,
+          "normalizedCandidates": 17,
+          "verifiedCandidates": 15,
+          "previousDeals": 9,
+          "acceptedDeals": 15,
+          "rejectedDeals": 7
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 7
+        },
+        "errors": [
+          "#kostenlosessenwien: Firecrawl Agent nach 90s abgebrochen",
+          "#fooddealwien: Firecrawl Agent nach 90s abgebrochen",
+          "#gastroaktionwien: Firecrawl Agent nach 90s abgebrochen"
+        ],
+        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
+      },
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0.3,
+      "viennaRate": 0.3,
+      "foodDrinkRate": 0.9,
+      "promoRate": 0.9,
+      "missingUrlRate": 0,
+      "averageQualityScore": 60,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 13
+        },
+        {
+          "value": "freizeit",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 13
+        },
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 60,
+      "missionFitScore": 61,
+      "coverageScore": 29,
+      "precisionScore": 61,
+      "sourceWeightScore": 54
+    },
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 14,
+      "uniqueDeals": 3,
+      "duplicateDeals": 11,
+      "duplicateAcrossSources": 11,
+      "fresh1dCount": 9,
+      "fresh7dCount": 14,
+      "viennaCount": 14,
+      "foodDrinkCount": 5,
+      "promoCount": 10,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "FRI / 11.09 FREE ENTRY for girls until 1:00 AM via registration.",
+        "anzeige 10% Rabatt mit dem Code “LISA” bei nowayout_austria Ein magischer Escape Room, in dem ihr mit Hilfe eines Zauberstabs knifflige Räts",
+        "anzeige 10% Rabatt mit dem Code “LISA” bei nowayout_austria Ein magischer Escape Room, in dem ihr mit Hilfe eines Zauberstabs knifflige Räts"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.2,
+      "duplicateRate": 0.8,
+      "fresh1dRate": 0.6,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.4,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 85.1,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 4
+        },
+        {
+          "value": "freizeit",
+          "count": 3
+        },
+        {
+          "value": "kultur",
+          "count": 3
+        },
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 10
+        },
+        {
+          "value": "rabatt",
+          "count": 4
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 60,
+      "missionFitScore": 62,
+      "coverageScore": 29,
+      "precisionScore": 68,
+      "sourceWeightScore": 56
     },
     {
       "sourceKey": "instagram-apify",
