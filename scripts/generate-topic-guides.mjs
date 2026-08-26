@@ -76,7 +76,7 @@ const guides = [
       ['Reicht ein Studierendenausweis als Nachweis?', 'Oft ja, aber nicht immer. Manche Angebote verlangen zusätzlich eine aktuelle Inskriptionsbestätigung, Hochschul-Mailadresse oder ein bestimmtes Höchstalter.'],
       ['Sind Studentenabos automatisch günstiger?', 'Nicht zwingend. Gebühren, Mindestlaufzeiten und automatische Verlängerungen können die Ersparnis verringern. Entscheidend ist der Gesamtpreis.'],
     ],
-    related: [['Rabatte in Wien', 'rabatte-wien.html'], ['1+1-Aktionen in Wien', 'eins-plus-eins-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+    related: [['Rabatte in Wien', 'rabatte-wien.html'], ['Gutscheine in Wien', 'gutscheine-wien.html'], ['1+1-Aktionen in Wien', 'eins-plus-eins-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
   },
   {
     slug: 'produktproben-wien',
@@ -120,7 +120,7 @@ const guides = [
       ['Sind 1+1-Aktionen immer 50 Prozent Rabatt?', 'Nur wenn beide Produkte denselben Preis haben und keine Zusatzkosten anfallen. Bei unterschiedlichen Preisen, Gebühren oder Produktbindungen kann die Ersparnis geringer sein.'],
       ['Kann ich bei 1+1 zwei verschiedene Produkte wählen?', 'Das hängt von der Aktion ab. Häufig muss es dasselbe Produkt sein oder das günstigere Produkt wird kostenlos.'],
     ],
-    related: [['Rabatte in Wien', 'rabatte-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+    related: [['Rabatte in Wien', 'rabatte-wien.html'], ['Gutscheine in Wien', 'gutscheine-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
   },
   {
     slug: 'kostenlose-freizeitangebote-wien',
@@ -146,6 +146,78 @@ const guides = [
     ],
     related: [['Kostenlose Angebote in Wien', 'kostenlose-angebote-wien.html'], ['Studentenrabatte in Wien', 'studentenrabatte-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
   },
+  {
+    slug: 'gutscheine-wien',
+    title: 'Gutscheine in Wien finden und richtig einlösen',
+    meta: 'Gutscheine in Wien finden: Restaurant-, App- und Rabattcoupons auf Gültigkeit, Filiale, Mindestumsatz und echte Ersparnis prüfen.',
+    eyebrow: 'Gutscheine Wien',
+    headline: 'Gutscheine in Wien finden, prüfen und ohne Überraschungen einlösen.',
+    intro: 'Restaurantgutscheine, Rabattcodes und digitale Coupons können viel sparen. Entscheidend ist nicht der große Rabattwert, sondern ob der Gutschein aktuell ist, in deiner Filiale gilt und zum geplanten Einkauf passt.',
+    published: '2026-08-26', publishedLabel: '26. August 2026', modified: '2026-08-26', modifiedLabel: '26. August 2026',
+    image: '/assets/current-ios/for-you.jpg', imageWidth: 736, imageHeight: 1600, imagePosition: 'center 41%',
+    imageAlt: 'FreeFinder Empfehlungen mit Wiener Gutscheinen, Gratis-Angeboten und Rabatten',
+    sections: [
+      ['arten', 'Welche Gutscheinarten gibt es?', `<p>Wer nach <strong>Gutscheinen in Wien</strong> sucht, trifft auf Wertgutscheine, Prozentcoupons, Gratisartikel, 1+1-Aktionen und App-Angebote. Sie sehen ähnlich aus, funktionieren aber unterschiedlich. Ein Wertgutschein reduziert den Preis um einen festen Betrag, während ein Prozentcoupon nur für ausgewählte Produkte oder bis zu einer Obergrenze gelten kann.</p><ul><li><strong>Wertgutschein:</strong> Ein fixer Betrag wird vom Einkauf abgezogen.</li><li><strong>Rabattcoupon:</strong> Ein Prozentsatz gilt für bestimmte Artikel oder den Warenkorb.</li><li><strong>Gratiscoupon:</strong> Ein Produkt ist kostenlos, manchmal erst nach einem zusätzlichen Kauf.</li><li><strong>1+1-Gutschein:</strong> Beim Kauf eines Artikels ist ein zweiter gleichwertiger oder günstigerer Artikel gratis.</li><li><strong>App-Gutschein:</strong> Der Coupon muss in einem Kundenkonto aktiviert und digital eingelöst werden.</li></ul>`],
+      ['quelle', 'Quelle, Zeitraum und Wiener Filiale prüfen', `<p>Öffne den Gutschein immer über die offizielle Website, App, E-Mail oder den verifizierten Social-Media-Kanal des Anbieters. Kontrolliere Start- und Enddatum sowie mögliche Uhrzeiten. Ein alter Screenshot ohne Link und sichtbaren Gültigkeitszeitraum ist keine verlässliche Einlösegrundlage.</p><p>Bei Ketten kann ein Coupon nur in teilnehmenden Filialen gelten. Suche in den Bedingungen nach Standort, Postleitzahl, Liefergebiet und Einlöseart. „In Wien gültig“ bedeutet nicht automatisch, dass jede Wiener Filiale teilnimmt.</p>`],
+      ['wert', 'Die echte Ersparnis berechnen', `<p>Vergleiche den Endpreis statt nur die beworbene Ersparnis. Mindestumsatz, Lieferkosten, Servicegebühren, ausgeschlossene Produkte und ein notwendiger Zusatzkauf können den Wert deutlich verändern. Ein 10-Euro-Gutschein ab 40 Euro spart nur dann sinnvoll Geld, wenn du den Warenkorb ohnehin geplant hattest.</p><div class="article-note"><strong>Einfacher Deal-Check</strong>Notiere den regulären Gesamtpreis, ziehe den Gutschein ab und addiere alle Gebühren. Vergleiche dieses Ergebnis mit einer realistischen Alternative ohne Coupon.</div>`],
+      ['einloesen', '30-Sekunden-Check vor dem Einlösen', `<ol><li>Ist der Gutschein noch gültig und stammt er von einer offiziellen Quelle?</li><li>Gilt er in der gewünschten Filiale oder für die gewählte Bestellart?</li><li>Sind Mindestumsatz, Neukundenregel und ausgeschlossene Produkte erfüllt?</li><li>Muss der Coupon vor der Bestellung aktiviert oder dem Personal gezeigt werden?</li><li>Wird die Ersparnis vor dem Bezahlen sichtbar abgezogen?</li></ol><p>Markiere einen Einmalcode erst als eingelöst, wenn die Einlösung tatsächlich beginnt. Bei Unsicherheit frage vor der Bestellung kurz nach, ob die Filiale den Gutschein akzeptiert.</p>`],
+      ['aktuell', 'Aktuelle Coupons und Angebote entdecken', `<p>Auf der Seite <a href="/angebote-wien-heute.html">Aktuelle Angebote in Wien</a> bündelt FreeFinder ausgewählte Gratis- und Rabattaktionen mit erfasstem Enddatum. Für einzelne Couponarten helfen außerdem die Guides zu <a href="restaurant-gutscheine-wien.html">Restaurant-Gutscheinen</a> und <a href="app-gutscheine-wien.html">App-Gutscheinen in Wien</a>.</p><p>Prüfe vor jeder Einlösung trotzdem die Originalbedingungen. Anbieter können Kontingente ausschöpfen, Filialen ändern oder eine Aktion vor Ort anders kennzeichnen.</p>`],
+    ],
+    faqs: [
+      ['Wo finde ich Gutscheine in Wien?', 'Nutze offizielle Anbieter-Apps, Newsletter, Websites und aktuelle lokale Deal-Übersichten. Kontrolliere bei jedem Treffer Datum, Wiener Filiale und die vollständigen Einlösebedingungen.'],
+      ['Ist ein Gutschein dasselbe wie ein Geschenkgutschein?', 'Nein. Ein Aktionsgutschein oder Coupon gewährt einen Rabatt oder Gratisartikel. Ein Geschenkgutschein besitzt dagegen meist ein gekauftes Guthaben und folgt anderen Bedingungen.'],
+      ['Kann ich mehrere Gutscheine kombinieren?', 'Nur wenn der Anbieter dies ausdrücklich erlaubt. Viele Aktionen schließen die Kombination mit anderen Rabatten, Coupons oder Treuevorteilen aus.'],
+    ],
+    related: [['Restaurant-Gutscheine in Wien', 'restaurant-gutscheine-wien.html'], ['App-Gutscheine in Wien', 'app-gutscheine-wien.html'], ['Rabatte in Wien', 'rabatte-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+  },
+  {
+    slug: 'restaurant-gutscheine-wien',
+    title: 'Restaurant-Gutscheine in Wien richtig nutzen',
+    meta: 'Restaurant-Gutscheine in Wien prüfen: Filialen, Mindestbestellwert, Reservierung, Liefergebühren und ausgeschlossene Speisen vergleichen.',
+    eyebrow: 'Restaurant-Gutscheine Wien',
+    headline: 'Restaurant-Gutscheine in Wien einlösen, ohne dass die Rechnung überrascht.',
+    intro: 'Gratisgericht, 1+1-Menü oder fixer Gutscheinwert: Bei Gastro-Coupons entscheiden Filiale, Bestellweg und Zusatzkosten darüber, was am Ende wirklich gespart wird.',
+    published: '2026-08-26', publishedLabel: '26. August 2026', modified: '2026-08-26', modifiedLabel: '26. August 2026',
+    image: '/assets/current-ios/deals-home.jpg', imageWidth: 736, imageHeight: 1600,
+    imageAlt: 'FreeFinder App mit Wiener Pizza-, Getränke- und Restaurantangeboten',
+    sections: [
+      ['formen', 'Welche Restaurant-Coupons gibt es?', `<p><strong>Restaurant-Gutscheine in Wien</strong> reichen von einem Gratisgetränk über Prozent- und Wertgutscheine bis zu 1+1-Menüs. Manche gelten für Speisen vor Ort, andere nur bei Abholung oder Lieferung. Geburtstags- und Neukundengutscheine können zusätzlich ein Kundenkonto oder eine vorherige Registrierung verlangen.</p><p>Unterscheide einen kostenlosen Artikel von einem Vorteil mit Kaufpflicht. „Gratis Dessert zum Hauptgericht“ ist ein Rabatt auf die gesamte Bestellung, aber kein vollständig kostenloser Restaurantbesuch.</p>`],
+      ['filiale', 'Filiale, Reservierung und Bestellweg kontrollieren', `<p>Prüfe die konkrete Wiener Adresse. Franchise-Filialen können bei Aktionen unterschiedlich teilnehmen. Achte außerdem darauf, ob der Gutschein im Lokal, bei Abholung, auf der Restaurant-Website oder nur über eine bestimmte Liefer-App gilt.</p><p>Bei Reservierungen sollte der Gutschein bereits bei der Buchung erwähnt werden, wenn die Bedingungen dies verlangen. Kontrolliere Wochentage, Uhrzeiten, Tischgröße und mögliche Ausschlusstage. Ein Coupon für Montag bis Donnerstag funktioniert nicht automatisch an Feiertagen oder am Wochenende.</p>`],
+      ['kosten', 'Mindestbestellwert und Zusatzkosten vergleichen', `<ul><li>Mindestbestellwert vor oder nach Abzug des Gutscheins</li><li>Liefer-, Service- und Verpackungsgebühren</li><li>Ausgeschlossene Getränke, Menüs oder Aktionsprodukte</li><li>Beschränkung auf einen Gutschein pro Tisch oder Rechnung</li><li>Trinkgeld, das nicht Teil des Gutscheinwerts ist</li></ul><p>Lege bei einer Onlinebestellung zuerst den geplanten Warenkorb an. Aktiviere dann den Gutschein und prüfe den zu zahlenden Gesamtbetrag. Nur dieser Wert zeigt die tatsächliche Ersparnis.</p>`],
+      ['vorort', 'So klappt die Einlösung vor Ort', `<p>Zeige den Coupon vor der Bestellung, wenn die Bedingungen keinen späteren Zeitpunkt nennen. Frage kurz, ob die Filiale teilnimmt und welche Gerichte eingeschlossen sind. Bei digitalen Einmalcodes sollte die Aktivierung erst erfolgen, wenn das Personal bereit ist, den Code zu erfassen.</p><div class="article-note"><strong>Vor dem Bestellen</strong>Restaurant, Adresse, Gültigkeitstag, Einlöseart und ausgeschlossene Speisen einmal gemeinsam bestätigen lassen. Das dauert weniger als eine Minute und verhindert Diskussionen beim Bezahlen.</div>`],
+      ['finden', 'Passende Gastro-Angebote in Wien finden', `<p>Aktuelle Gratisessen-, Pizza-, Kaffee- und Rabattaktionen können auf <a href="/angebote-wien-heute.html">FreeFinders heutiger Wien-Übersicht</a> erscheinen. Für die grundsätzliche Prüfung hilft der zentrale Guide zu <a href="gutscheine-wien.html">Gutscheinen in Wien</a>; 2-für-1-Angebote werden im Guide zu <a href="eins-plus-eins-wien.html">1+1-Aktionen</a> genauer erklärt.</p>`],
+    ],
+    faqs: [
+      ['Gilt ein Restaurant-Gutschein in jeder Wiener Filiale?', 'Nicht unbedingt. Bei Ketten und Franchise-Betrieben können nur ausgewählte Standorte teilnehmen. Die konkrete Adresse muss in den Bedingungen oder direkt beim Restaurant bestätigt werden.'],
+      ['Kann ich Restaurant-Gutscheine mit anderen Rabatten kombinieren?', 'Meist nur, wenn die Aktion dies ausdrücklich erlaubt. Häufig sind weitere Coupons, Mittagsmenüs oder bereits reduzierte Speisen ausgeschlossen.'],
+      ['Gelten Restaurant-Gutscheine auch bei Lieferung?', 'Nur wenn Lieferung als Einlöseart genannt ist. Lieferplattform, Mindestbestellwert und zusätzliche Gebühren können sich von der Einlösung im Lokal unterscheiden.'],
+    ],
+    related: [['Gutscheine in Wien', 'gutscheine-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['1+1-Aktionen in Wien', 'eins-plus-eins-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+  },
+  {
+    slug: 'app-gutscheine-wien',
+    title: 'App-Gutscheine in Wien sicher aktivieren',
+    meta: 'App-Gutscheine in Wien nutzen: Aktivierung, Kundenkonto, Standort, Einmalcode, Datenschutz und Ablaufdatum vor dem Einlösen kontrollieren.',
+    eyebrow: 'App-Gutscheine Wien',
+    headline: 'App-Gutscheine in Wien aktivieren, ohne den Coupon zu früh zu verbrauchen.',
+    intro: 'Digitale Coupons sind praktisch, können aber an Konto, Standort, Gerät oder ein kurzes Einlösefenster gebunden sein. Dieser Check begleitet dich von der Aktivierung bis zur Kassa.',
+    published: '2026-08-26', publishedLabel: '26. August 2026', modified: '2026-08-26', modifiedLabel: '26. August 2026',
+    image: '/og-preview-stores.png', imageWidth: 1200, imageHeight: 630,
+    imageAlt: 'FreeFinder für iPhone und Android mit lokalen Wiener Angeboten',
+    sections: [
+      ['funktion', 'So funktionieren digitale Coupons', `<p><strong>App-Gutscheine in Wien</strong> werden häufig einem Kundenkonto zugeordnet. Manche erscheinen automatisch, andere müssen vor dem Einkauf gespeichert oder aktiviert werden. Die Einlösung erfolgt per QR-Code, Barcode, Zahlencode, Bestelllink oder direkt im Warenkorb.</p><p>Prüfe, ob der Coupon nur für Neukunden, ein bestimmtes Gerät oder eine ausgewählte Zahlungsart gilt. Auch ein sichtbarer Gutschein kann noch zusätzliche Bedingungen haben, die erst in der Detailansicht stehen.</p>`],
+      ['aktivieren', 'Aktivieren ist nicht immer Einlösen', `<p>Bei manchen Apps bleibt ein aktivierter Coupon bis zum Enddatum verfügbar. Andere starten nach einem Tipp ein kurzes Einlösefenster oder markieren den Vorteil sofort als benutzt. Lies deshalb den Buttontext und die Hinweise, bevor du ihn antippst.</p><div class="article-note"><strong>Einmalcode schützen</strong>Öffne einen zeitlich begrenzten QR- oder Zahlencode erst an der Kassa oder wenn das Personal dazu auffordert. Ein abgelaufener Bildschirm lässt sich möglicherweise nicht erneut erzeugen.</div>`],
+      ['konto', 'Konto, App und Berechtigungen prüfen', `<p>Lade die App nur aus dem offiziellen App Store oder Google Play Store und kontrolliere den Herausgeber. Für digitale Gutscheine können E-Mail-Bestätigung, Telefonnummer oder Mitgliedsstatus nötig sein. Gib keine Zugangsdaten über fremde Gutscheinseiten oder Direktnachrichten ein.</p><p>Prüfe vor der Registrierung die Datenschutzangaben und entscheide bewusst über Newsletter, Push-Mitteilungen und Standortzugriff. Ein Standort kann für Filialangebote hilfreich sein, sollte aber nur freigegeben werden, wenn die Funktion ihn nachvollziehbar benötigt.</p>`],
+      ['technik', 'Vor der Kassa technisch vorbereitet sein', `<ol><li>App aktualisieren und erneut anmelden, solange eine stabile Verbindung besteht.</li><li>Gewünschte Filiale und Gültigkeitszeitraum kontrollieren.</li><li>Displayhelligkeit erhöhen, damit Bar- oder QR-Code lesbar ist.</li><li>Den Coupon noch nicht als eingelöst markieren.</li><li>Nach dem Scan prüfen, ob der Rabatt auf Bon oder Warenkorb erscheint.</li></ol><p>Ein Screenshot kann hilfreich sein, wird aber bei dynamischen Codes oder Live-Timern oft nicht akzeptiert. Maßgeblich ist die Einlöseart des Anbieters.</p>`],
+      ['entdecken', 'Digitale Wien-Angebote vergleichen', `<p>FreeFinder bündelt ausgewählte lokale Deals und verweist zur jeweiligen Quelle. Öffne <a href="/angebote-wien-heute.html">aktuelle Angebote in Wien</a> und kontrolliere bei App-only-Aktionen die Originalbedingungen. Der Guide zu <a href="gutscheine-wien.html">Gutscheinen in Wien</a> hilft zusätzlich beim Vergleich von digitalem Coupon, Papiergutschein und Aktionscode.</p>`],
+    ],
+    faqs: [
+      ['Kann ich einen App-Gutschein als Screenshot einlösen?', 'Nur wenn der Anbieter statische Codes oder Screenshots akzeptiert. Dynamische QR-Codes, Barcodes und laufende Einlösetimer müssen meist direkt in der App geöffnet werden.'],
+      ['Warum ist mein App-Coupon verschwunden?', 'Mögliche Gründe sind Ablaufdatum, Einmalnutzung, ein gestartetes Einlösefenster, eine falsche Filiale oder ein anderes Kundenkonto. Prüfe zuerst Verlauf und Bedingungen in der offiziellen App.'],
+      ['Braucht ein App-Gutschein Standortzugriff?', 'Nicht immer. Manche Apps nutzen den Standort zur Filialauswahl. Prüfe die Begründung und erlaube nur Berechtigungen, die für die gewünschte Funktion nachvollziehbar sind.'],
+    ],
+    related: [['Gutscheine in Wien', 'gutscheine-wien.html'], ['Restaurant-Gutscheine in Wien', 'restaurant-gutscheine-wien.html'], ['Rabatte in Wien', 'rabatte-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+  },
 ];
 
 function escapeHtml(value) {
@@ -154,12 +226,14 @@ function escapeHtml(value) {
 
 function renderGuide(guide) {
   const canonical = `https://freefinder.at/blog/${guide.slug}.html`;
+  const published = guide.published || PUBLISHED;
+  const publishedLabel = guide.publishedLabel || PUBLISHED_LABEL;
   const readingMinutes = Math.max(5, Math.round(guide.sections.map((section) => section[2].replace(/<[^>]+>/g, ' ').split(/\s+/).length).reduce((a, b) => a + b, 0) / 170));
   const structuredData = {
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'Article', headline: guide.title, description: guide.meta, datePublished: PUBLISHED, dateModified: guide.modified || PUBLISHED,
+        '@type': 'Article', headline: guide.title, description: guide.meta, datePublished: published, dateModified: guide.modified || published,
         inLanguage: 'de-AT', mainEntityOfPage: canonical, image: `https://freefinder.at${guide.image}`,
         author: { '@type': 'Organization', name: 'FreeFinder Redaktion', url: 'https://freefinder.at/about.html' },
         publisher: { '@type': 'Organization', name: 'FreeFinder', logo: { '@type': 'ImageObject', url: 'https://freefinder.at/icon-512.svg' } },
@@ -213,10 +287,10 @@ function renderGuide(guide) {
   <!-- Generated by scripts/generate-topic-guides.mjs. -->
   <header class="site-header"><nav class="nav" aria-label="Hauptnavigation"><a class="brand" href="/"><img class="brand-mark" src="/icon-192.svg" alt="" width="38" height="38">FreeFinder</a><div class="nav-links"><a href="/angebote-wien-heute.html">Aktuelle Deals</a><a href="/blog/">Blog</a><a class="nav-download" href="/#download">App laden</a></div></nav></header>
   <main>
-    <header class="article-hero"><div class="hero-inner"><p class="eyebrow">${escapeHtml(guide.eyebrow)}</p><h1>${escapeHtml(guide.headline)}</h1><p class="hero-copy">${escapeHtml(guide.intro)}</p><div class="article-meta"><span>Aktualisiert am ${guide.modifiedLabel || PUBLISHED_LABEL}</span><span>${readingMinutes} Minuten Lesezeit</span></div><div class="article-byline"><span>Von <a href="/about.html">FreeFinder Redaktion</a></span><span>Verantwortlich: Stefan Ataalla</span></div></div></header>
+    <header class="article-hero"><div class="hero-inner"><p class="eyebrow">${escapeHtml(guide.eyebrow)}</p><h1>${escapeHtml(guide.headline)}</h1><p class="hero-copy">${escapeHtml(guide.intro)}</p><div class="article-meta"><span>Aktualisiert am ${guide.modifiedLabel || publishedLabel}</span><span>${readingMinutes} Minuten Lesezeit</span></div><div class="article-byline"><span>Von <a href="/about.html">FreeFinder Redaktion</a></span><span>Verantwortlich: Stefan Ataalla</span></div></div></header>
     <div class="article-layout">
       <article class="article-body">
-        <picture>${guide.imageAvif ? `<source type="image/avif" srcset="${guide.imageAvif}" sizes="(max-width: 860px) 100vw, 710px">` : ''}<img class="article-image" src="${guide.image}" alt="${escapeHtml(guide.imageAlt)}" width="${guide.imageWidth}" height="${guide.imageHeight}" loading="eager" decoding="async"></picture>
+        <picture>${guide.imageAvif ? `<source type="image/avif" srcset="${guide.imageAvif}" sizes="(max-width: 860px) 100vw, 710px">` : ''}<img class="article-image" src="${guide.image}" alt="${escapeHtml(guide.imageAlt)}" width="${guide.imageWidth}" height="${guide.imageHeight}"${guide.imagePosition ? ` style="object-position:${escapeHtml(guide.imagePosition)}"` : ''} loading="eager" decoding="async"></picture>
         ${sections}
         <h2 id="faq">Häufige Fragen</h2>
         ${faqs}
