@@ -1,13 +1,20 @@
 {
-  "generatedAt": "2026-08-26T10:49:16.309Z",
+  "generatedAt": "2026-08-26T13:12:08.768Z",
   "source": "meta-instagram",
-  "status": "ok",
+  "status": "degraded",
   "configured": {
     "adLibrary": false,
     "instagramGraph": true
   },
-  "accountCatalogSize": 90,
+  "accountCatalogSize": 92,
   "selectedAccounts": [
+    {
+      "username": "fuego.wien",
+      "priority": 68,
+      "verifiedVienna": false,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
+    },
     {
       "username": "tagdesdenkmals.at",
       "priority": 88,
@@ -16,8 +23,22 @@
       "rejectedDeals": 0
     },
     {
+      "username": "faltershop.at",
+      "priority": 68,
+      "verifiedVienna": false,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
+    },
+    {
       "username": "chastudio.vienna",
       "priority": 82,
+      "verifiedVienna": false,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
+    },
+    {
+      "username": "papa.duck.at",
+      "priority": 68,
       "verifiedVienna": false,
       "approvedDeals": 0,
       "rejectedDeals": 0
@@ -44,17 +65,10 @@
       "rejectedDeals": 0
     },
     {
-      "username": "foodiewien",
+      "username": "lisa.maria.b",
       "priority": 104,
-      "verifiedVienna": false,
-      "approvedDeals": 0,
-      "rejectedDeals": 0
-    },
-    {
-      "username": "matchaba.at",
-      "priority": 68,
-      "verifiedVienna": false,
-      "approvedDeals": 0,
+      "verifiedVienna": true,
+      "approvedDeals": 2,
       "rejectedDeals": 0
     },
     {
@@ -62,13 +76,6 @@
       "priority": 104,
       "verifiedVienna": true,
       "approvedDeals": 1,
-      "rejectedDeals": 0
-    },
-    {
-      "username": "lisa.maria.b",
-      "priority": 104,
-      "verifiedVienna": true,
-      "approvedDeals": 2,
       "rejectedDeals": 0
     },
     {
@@ -96,34 +103,6 @@
       "username": "2ndstreetburger",
       "priority": 82,
       "verifiedVienna": true,
-      "approvedDeals": 0,
-      "rejectedDeals": 0
-    },
-    {
-      "username": "milyn_fusionhouse",
-      "priority": 0,
-      "verifiedVienna": false,
-      "approvedDeals": 0,
-      "rejectedDeals": 0
-    },
-    {
-      "username": "oakbrewcoffee",
-      "priority": 0,
-      "verifiedVienna": false,
-      "approvedDeals": 0,
-      "rejectedDeals": 0
-    },
-    {
-      "username": "raw_energy_austria",
-      "priority": 0,
-      "verifiedVienna": false,
-      "approvedDeals": 0,
-      "rejectedDeals": 0
-    },
-    {
-      "username": "schwestern_bazar",
-      "priority": 0,
-      "verifiedVienna": false,
       "approvedDeals": 0,
       "rejectedDeals": 0
     },
@@ -163,6 +142,13 @@
       "rejectedDeals": 0
     },
     {
+      "username": "foodiewien",
+      "priority": 104,
+      "verifiedVienna": false,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
+    },
+    {
       "username": "ciosgrill",
       "priority": 100,
       "verifiedVienna": true,
@@ -175,21 +161,35 @@
       "verifiedVienna": true,
       "approvedDeals": 0,
       "rejectedDeals": 0
+    },
+    {
+      "username": "tastyfood.vienna",
+      "priority": 96,
+      "verifiedVienna": false,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
+    },
+    {
+      "username": "eatinvienna_",
+      "priority": 95,
+      "verifiedVienna": false,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
     }
   ],
   "selectedHashtags": [
-    "viennaevents",
-    "vienna",
-    "wienevents",
-    "viennafood",
-    "wien",
-    "wientipps",
-    "wienfamilie",
     "sommerinwien",
-    "wienergastro",
-    "essenwien",
-    "viennaeats",
-    "viennarestaurants"
+    "vienna",
+    "viennafood",
+    "viennaevents",
+    "gratiswien",
+    "gratisinwien",
+    "wiengastro",
+    "wienessen",
+    "wienkaffee",
+    "wienstreetfood",
+    "wienaktion",
+    "wienrabatt"
   ],
   "discoveryBudget": {
     "maxAccountsPerRun": 24,
@@ -207,28 +207,44 @@
       "errors": []
     },
     "instagramGraph": {
-      "status": "ok",
-      "fetched": 322,
-      "accepted": 19,
-      "newAccepted": 6,
-      "errors": [],
+      "status": "degraded",
+      "fetched": 284,
+      "accepted": 16,
+      "newAccepted": 3,
+      "errors": [
+        {
+          "source": "@faltershop.at",
+          "status": 400,
+          "code": 110,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28faltershop.at%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
+        }
+      ],
       "skippedCooldown": {
         "accounts": 14,
         "hashtags": 0
       },
       "globalError": null,
       "mediaEvidence": {
-        "status": "ok",
-        "eligible": 4,
-        "selected": 4,
-        "cached": 85,
-        "analyzed": 4,
-        "withOcrText": 4,
-        "withVisionImages": 4,
-        "aiCalls": 4,
-        "visionCalls": 4,
+        "status": "degraded",
+        "eligible": 7,
+        "selected": 7,
+        "cached": 91,
+        "analyzed": 7,
+        "withOcrText": 6,
+        "withVisionImages": 7,
+        "aiCalls": 5,
+        "visionCalls": 5,
         "aiAccepted": 0,
-        "errors": [],
+        "errors": [
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-62aJPO/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-c1rX9e/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-c1rX9e/video-1-frame-01.jpg.ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-c1rX9e/video-1-frame-04.jpg.ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-sE5xts/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-jdrruy/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-jdrruy/video-1-frame-01.jpg.ocr.png stdout -l deu+eng --psm 6 Image too small to scale!! (2x36 vs min width o",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-ditZAz/asset-0-ocr.png stdout -l deu+eng --psm 6"
+        ],
         "llmConfigured": true,
         "visionConfigured": true,
         "tools": {
@@ -238,49 +254,54 @@
         "ocrAvailable": true
       },
       "accountYield": {
+        "fuego.wien": {
+          "recentFetched": 35.145,
+          "recentAccepted": 0,
+          "recentNewAccepted": 0
+        },
         "tagdesdenkmals.at": {
-          "recentFetched": 20.813,
+          "recentFetched": 24.61,
+          "recentAccepted": 0,
+          "recentNewAccepted": 0
+        },
+        "faltershop.at": {
+          "recentFetched": 0,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
         "chastudio.vienna": {
-          "recentFetched": 9.25,
+          "recentFetched": 10.938,
+          "recentAccepted": 0,
+          "recentNewAccepted": 0
+        },
+        "papa.duck.at": {
+          "recentFetched": 9,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
         "hi.jump.wien": {
-          "recentFetched": 20.813,
+          "recentFetched": 24.61,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
         "boca.vienna": {
           "recentFetched": 35.998,
-          "recentAccepted": 1.684,
+          "recentAccepted": 1.263,
           "recentNewAccepted": 0
         },
         "alpizena.pizza": {
-          "recentFetched": 35.848,
-          "recentAccepted": 0.101,
-          "recentNewAccepted": 0
-        },
-        "foodiewien": {
-          "recentFetched": 35.998,
-          "recentAccepted": 0.534,
-          "recentNewAccepted": 0
-        },
-        "matchaba.at": {
-          "recentFetched": 15.75,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
-        },
-        "bezirksvorstehung_mariahilf": {
-          "recentFetched": 35.998,
-          "recentAccepted": 8.002,
+          "recentFetched": 35.886,
+          "recentAccepted": 0.076,
           "recentNewAccepted": 0
         },
         "lisa.maria.b": {
           "recentFetched": 35.998,
-          "recentAccepted": 0.002,
+          "recentAccepted": 2.002,
+          "recentNewAccepted": 2
+        },
+        "bezirksvorstehung_mariahilf": {
+          "recentFetched": 35.998,
+          "recentAccepted": 8.002,
           "recentNewAccepted": 0
         },
         "shaysfoodblog": {
@@ -289,57 +310,37 @@
           "recentNewAccepted": 0
         },
         "contentbude.at": {
-          "recentFetched": 24.61,
-          "recentAccepted": 0.844,
-          "recentNewAccepted": 0.422
+          "recentFetched": 27.457,
+          "recentAccepted": 0.633,
+          "recentNewAccepted": 0.317
         },
         "lara.kristiin": {
-          "recentFetched": 29.593,
-          "recentAccepted": 9.865,
-          "recentNewAccepted": 0.475
+          "recentFetched": 31.195,
+          "recentAccepted": 10.399,
+          "recentNewAccepted": 0.356
         },
         "2ndstreetburger": {
-          "recentFetched": 35.915,
-          "recentAccepted": 3.466,
-          "recentNewAccepted": 0.178
-        },
-        "milyn_fusionhouse": {
-          "recentFetched": 35.145,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
-        },
-        "oakbrewcoffee": {
-          "recentFetched": 35.145,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
-        },
-        "raw_energy_austria": {
-          "recentFetched": 34.86,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
-        },
-        "schwestern_bazar": {
-          "recentFetched": 35.145,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
+          "recentFetched": 35.936,
+          "recentAccepted": 3.599,
+          "recentNewAccepted": 0.134
         },
         "shirokiya_at": {
-          "recentFetched": 35.145,
+          "recentFetched": 35.359,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
         "soula.vienna": {
-          "recentFetched": 34.48,
+          "recentFetched": 34.86,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
         "the.short.hall.vienna": {
-          "recentFetched": 30.648,
+          "recentFetched": 30.986,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
         "yu.noodle_hotpot_vienna": {
-          "recentFetched": 34.48,
+          "recentFetched": 34.86,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
@@ -348,75 +349,90 @@
           "recentAccepted": 0.002,
           "recentNewAccepted": 0
         },
+        "foodiewien": {
+          "recentFetched": 35.998,
+          "recentAccepted": 0.401,
+          "recentNewAccepted": 0
+        },
         "ciosgrill": {
-          "recentFetched": 35.729,
+          "recentFetched": 35.797,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
         "corner_xvi": {
+          "recentFetched": 35.797,
+          "recentAccepted": 0,
+          "recentNewAccepted": 0
+        },
+        "tastyfood.vienna": {
+          "recentFetched": 35.848,
+          "recentAccepted": 0.416,
+          "recentNewAccepted": 0
+        },
+        "eatinvienna_": {
           "recentFetched": 35.729,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         }
       },
       "hashtagYield": {
-        "viennaevents": {
-          "recentFetched": 53.34,
-          "recentAccepted": 24.348,
-          "recentNewAccepted": 0.973
+        "sommerinwien": {
+          "recentFetched": 30.773,
+          "recentAccepted": 1.75,
+          "recentNewAccepted": 0.75
         },
         "vienna": {
-          "recentFetched": 76.621,
-          "recentAccepted": 2.694,
-          "recentNewAccepted": 2.619
-        },
-        "wienevents": {
-          "recentFetched": 33.002,
-          "recentAccepted": 3.83,
-          "recentNewAccepted": 0.057
+          "recentFetched": 76.466,
+          "recentAccepted": 2.021,
+          "recentNewAccepted": 1.964
         },
         "viennafood": {
-          "recentFetched": 76.621,
-          "recentAccepted": 4.616,
-          "recentNewAccepted": 2.112
+          "recentFetched": 77.466,
+          "recentAccepted": 5.462,
+          "recentNewAccepted": 1.584
         },
-        "wien": {
-          "recentFetched": 61.016,
-          "recentAccepted": 1,
-          "recentNewAccepted": 1
+        "viennaevents": {
+          "recentFetched": 55.005,
+          "recentAccepted": 22.261,
+          "recentNewAccepted": 1.73
         },
-        "wientipps": {
-          "recentFetched": 9.938,
-          "recentAccepted": 2.735,
-          "recentNewAccepted": 0
-        },
-        "wienfamilie": {
-          "recentFetched": 3.735,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
-        },
-        "sommerinwien": {
-          "recentFetched": 25.031,
-          "recentAccepted": 1,
-          "recentNewAccepted": 1
-        },
-        "wienergastro": {
+        "gratiswien": {
           "recentFetched": 0,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
-        "essenwien": {
+        "gratisinwien": {
+          "recentFetched": 0.517,
+          "recentAccepted": 0,
+          "recentNewAccepted": 0
+        },
+        "wiengastro": {
+          "recentFetched": 0.007,
+          "recentAccepted": 0,
+          "recentNewAccepted": 0
+        },
+        "wienessen": {
+          "recentFetched": 48.357,
+          "recentAccepted": 1.517,
+          "recentNewAccepted": 0
+        },
+        "wienkaffee": {
+          "recentFetched": 1,
+          "recentAccepted": 0,
+          "recentNewAccepted": 0
+        },
+        "wienstreetfood": {
           "recentFetched": 0,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
-        "viennaeats": {
-          "recentFetched": 33.094,
+        "wienaktion": {
+          "recentFetched": 0,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
-        "viennarestaurants": {
-          "recentFetched": 7.25,
+        "wienrabatt": {
+          "recentFetched": 0,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         }
@@ -424,26 +440,26 @@
     }
   },
   "rejectionReasons": {
-    "excluded-promotion-type": 20,
-    "no-concrete-offer": 234,
-    "missing-vienna-evidence": 16,
-    "general-recommendation": 12,
-    "post-too-old": 13,
+    "no-concrete-offer": 207,
+    "excluded-promotion-type": 17,
+    "missing-vienna-evidence": 15,
+    "general-recommendation": 9,
+    "post-too-old": 10,
     "media-ai-rejected-offer": 2,
-    "non-vienna-location": 1,
-    "offer-expired": 3,
-    "missing-text": 2
+    "offer-expired": 5,
+    "missing-text": 2,
+    "non-vienna-location": 1
   },
   "graphEvidence": {
     "status": "ok",
-    "observed": 322,
-    "retained": 740,
-    "blocked": 44
+    "observed": 284,
+    "retained": 782,
+    "blocked": 43
   },
   "accountDiscovery": {
-    "stored": 8,
-    "observedThisRun": 6,
-    "newThisRun": 3
+    "stored": 10,
+    "observedThisRun": 7,
+    "newThisRun": 2
   },
   "totalDeals": 14,
   "newDeals": 3,
@@ -451,7 +467,7 @@
   "newVerifiedBeforeLimit": 3,
   "verifiedBeforeLimit": 14,
   "outputLimit": 40,
-  "freshPostsFetched": 322,
+  "freshPostsFetched": 284,
   "verifiedDeals": 14,
   "message": "14 evidence-verified Vienna Instagram deals found (3 net-new, 11 previously observed)."
 }
