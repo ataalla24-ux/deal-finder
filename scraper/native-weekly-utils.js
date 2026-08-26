@@ -172,6 +172,96 @@ function weeklySource(deals = [], excludedId = '') {
   return source.length ? source : base;
 }
 
+const FEATURED_DEAL_FIELDS = [
+  'brand',
+  'title',
+  'description',
+  'url',
+  'type',
+  'category',
+  'distance',
+  'logo',
+  'logoUrl',
+];
+
+function featuredIdentityKey(deal = {}) {
+  const brand = normalizeText(deal.brand);
+  const title = normalizeText(deal.title);
+  return brand && title ? `${brand}|${title}` : '';
+}
+
+function featuredFallbackDeal(deals, kind, now, dailyDeal = null) {
+  if (kind === 'daily') return selectNativeDailyDeal(deals, now) || deals[0] || null;
+  const source = weeklySource(deals, cleanText(dailyDeal?.id));
+  if (source.length === 0) return null;
+  return source[getViennaWeekOfYear(now) % source.length] || source[0];
+}
+
+function syncFeaturedDealReference(deals = [], pick = {}, options = {}) {
+  const kind = options.kind === 'weekly' ? 'weekly' : 'daily';
+  const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
+  const targetId = cleanText(pick?.dealId || pick?.id);
+  let target = deals.find((deal) => cleanText(deal.id) === targetId) || null;
+  let reason = target ? 'current_id' : '';
+
+  if (!target) {
+    const identityKey = featuredIdentityKey(pick);
+    const identityMatches = identityKey
+      ? deals.filter((deal) => featuredIdentityKey(deal) === identityKey)
+      : [];
+    if (identityMatches.length === 1) {
+      [target] = identityMatches;
+      reason = 'semantic_relink';
+    }
+  }
+
+  if (!target) {
+    target = featuredFallbackDeal(deals, kind, now, options.dailyDeal);
+    reason = target ? 'automatic_fallback' : 'no_live_candidate';
+  }
+  if (!target) return { changed: false, payload: pick, report: { kind, reason, targetId } };
+
+  const payload = {
+    ...pick,
+    dealId: cleanText(target.id),
+  };
+  for (const field of FEATURED_DEAL_FIELDS) {
+    const fallback = field === 'category'
+      ? 'wien'
+      : (field === 'distance' ? 'Wien' : (field === 'logo' ? (kind === 'weekly' ? '🔥' : '🎯') : ''));
+    payload[field] = target[field] ?? fallback;
+  }
+  if (reason === 'automatic_fallback') {
+    payload.manualPick = false;
+    payload.selectionReason = 'automatic-live-reference-repair';
+  }
+
+  const changed = JSON.stringify(payload) !== JSON.stringify(pick);
+  return {
+    changed,
+    payload,
+    report: {
+      kind,
+      reason,
+      previousId: targetId,
+      targetId: cleanText(target.id),
+    },
+  };
+}
+
+function syncFeaturedDealSnapshots(bundle, dailyPick = {}, weeklyPick = {}, options = {}) {
+  const deals = dealArrayFromBundle(bundle) || [];
+  const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
+  const daily = syncFeaturedDealReference(deals, dailyPick, { kind: 'daily', now });
+  const dailyDeal = deals.find((deal) => cleanText(deal.id) === cleanText(daily.payload?.dealId)) || null;
+  const weekly = syncFeaturedDealReference(deals, weeklyPick, { kind: 'weekly', now, dailyDeal });
+  return {
+    changed: daily.changed || weekly.changed,
+    daily,
+    weekly,
+  };
+}
+
 function dealArrayFromBundle(bundle) {
   if (Array.isArray(bundle)) return bundle;
   if (Array.isArray(bundle?.deals)) return bundle.deals;
@@ -256,5 +346,7 @@ export {
   getViennaWeekOfYear,
   isFoodOrDrinkDeal,
   selectNativeDailyDeal,
+  syncFeaturedDealReference,
+  syncFeaturedDealSnapshots,
   weeklySource,
 };

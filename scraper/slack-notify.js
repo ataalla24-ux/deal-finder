@@ -362,7 +362,15 @@ function normalizeDeal(rawDeal, sourceKey) {
   const idSeed = `${sourceKey}|${deal.id || ''}|${url}|${title}`;
   const id = cleanText(deal.id) || `${sourceKey}-${stableId(idSeed)}`;
   const type = inferType(deal);
-  const missingFields = ensureArray(deal.missingFields).map(cleanText).filter(Boolean);
+  const resolvedMissingFields = new Set([
+    rawUrl && 'Ziel-URL',
+    rawDistance && 'Ort',
+    rawExpires && 'Ablauf',
+    rawSource && 'Quelle',
+  ].filter(Boolean));
+  const missingFields = ensureArray(deal.missingFields)
+    .map(cleanText)
+    .filter((field) => field && !resolvedMissingFields.has(field));
   if (!rawUrl) missingFields.push('Ziel-URL');
   if (!rawDistance) missingFields.push('Ort');
   if (!rawExpires) missingFields.push('Ablauf');

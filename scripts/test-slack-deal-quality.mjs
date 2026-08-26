@@ -104,6 +104,21 @@ const missingLocation = normalizeDeal({
 assert.equal(missingLocation.distance, '', 'missing locations must not be defaulted to Wien');
 assert.ok(missingLocation.missingFields.includes('Ort'));
 
+const resolvedMissingEvidence = normalizeDeal({
+  id: 'resolved-missing-evidence',
+  title: 'Gratis Kaffee',
+  url: 'https://example.com/resolved',
+  source: 'Test',
+  distance: '1070 Wien',
+  validUntil: '2026-07-31',
+  missingFields: ['Ziel-URL', 'Ort', 'Ablauf', 'Quelle', 'Manuelle Preisprüfung'],
+}, 'test');
+assert.deepEqual(
+  resolvedMissingEvidence.missingFields,
+  ['Manuelle Preisprüfung'],
+  'resolved standard fields must clear stale Slack warnings without deleting custom review notes',
+);
+
 const structuredLocation = { address: 'Museumsplatz 1', city: 'Wien', postalCode: '1070' };
 const normalizedStructured = normalizeDeal({
   id: 'structured',

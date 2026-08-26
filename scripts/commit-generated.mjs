@@ -389,6 +389,18 @@ async function main() {
     .map(normalizeRepoPath)
     .includes(dealsPath);
   if (includesDealsFeed && statusChanged(dealsPath)) {
+    const featuredSync = spawnSync(process.execPath, ['scripts/sync-featured-deal-references.mjs'], {
+      cwd: process.cwd(),
+      env: process.env,
+      encoding: 'utf8',
+    });
+    if (featuredSync.status !== 0) {
+      throw new Error(`Featured deal reference sync failed: ${cleanText(featuredSync.stderr || featuredSync.stdout)}`);
+    }
+    if (cleanText(featuredSync.stdout)) console.log(cleanText(featuredSync.stdout));
+    options.patterns.push('docs/deal-of-the-day.json');
+    options.patterns.push('docs/deal-of-the-week.json');
+
     const stamped = stampDealsFeedFile(path.join(process.cwd(), dealsPath));
     console.log(`Stamped deals feed ${stamped.feedVersion} (${stamped.totalDeals} deals)`);
     const generated = spawnSync(process.execPath, ['scripts/generate-seo-deals-page.mjs'], {

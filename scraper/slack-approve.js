@@ -377,6 +377,14 @@ function isExactLiveDuplicate(deal, liveDeal) {
   return Boolean(title && title === liveTitle && brand && brand === liveBrand);
 }
 
+function getLiveFallbackKeys(deal) {
+  const keys = getApprovedMergeKeys(deal);
+  const title = normalizeLooseText(deal?.title);
+  const brand = normalizeBrandSignature(deal?.brand);
+  if (title.length >= 10 && brand) keys.push(`title-brand:${brand}|${title}`);
+  return [...new Set(keys)];
+}
+
 function filterAlreadyLiveFallbackDeals(deals, queuedDeals, liveDeals) {
   const queuedByKey = new Map(
     ensureArray(queuedDeals)
@@ -385,7 +393,7 @@ function filterAlreadyLiveFallbackDeals(deals, queuedDeals, liveDeals) {
   );
   const liveByKey = new Map();
   for (const liveDeal of ensureArray(liveDeals)) {
-    for (const key of getApprovedMergeKeys(liveDeal)) {
+    for (const key of getLiveFallbackKeys(liveDeal)) {
       const matching = liveByKey.get(key) || [];
       matching.push(liveDeal);
       liveByKey.set(key, matching);
@@ -395,7 +403,7 @@ function filterAlreadyLiveFallbackDeals(deals, queuedDeals, liveDeals) {
   const filtered = ensureArray(deals).filter((deal) => {
     const approvalKey = pendingApprovalKey(deal);
     const queuedDeal = approvalKey ? queuedByKey.get(approvalKey) : null;
-    const liveMatches = getApprovedMergeKeys(deal)
+    const liveMatches = getLiveFallbackKeys(deal)
       .flatMap((key) => liveByKey.get(key) || []);
     if (liveMatches.length === 0) return true;
 
@@ -465,17 +473,50 @@ function dealRecencyScore(deal) {
   return 0;
 }
 
+function dealCompletenessScore(deal) {
+  const location = cleanText([
+    deal?.distance,
+    deal?.address,
+    deal?.postalCode,
+    typeof deal?.location === 'string' ? deal.location : '',
+  ].filter(Boolean).join(' '));
+  const publicationSource = cleanText(deal?.sourcePublishedAtSource || deal?.pubDateSource);
+  const descriptionLength = cleanText(deal?.description).length;
+  const missingFields = ensureArray(deal?.missingFields).filter(Boolean).length;
+
+  let score = 0;
+  if (/\b1(?:0[1-9]|1\d|2[0-3])0\b/.test(location)) score += 14;
+  else if (/\b(?:wien|vienna)\b/i.test(location)) score += 5;
+  if (deal?.viennaVerified === true || deal?.viennaEvidence?.verified === true) score += 5;
+  if (cleanText(deal?.validUntil || deal?.validOn || deal?.expires)) score += 6;
+  if (cleanText(deal?.sourcePublishedAt || deal?.pubDate)) {
+    score += /(?:slack\.message|fallback|discover|generated)/i.test(publicationSource) ? 2 : 6;
+  }
+  if (getCanonicalSocialPostKey(deal)) score += 3;
+  score += Math.min(descriptionLength / 40, 5);
+  score -= missingFields * 4;
+  return score;
+}
+
 function pickBetterDeal(current, candidate) {
-  const currentRecency = dealRecencyScore(current);
-  const candidateRecency = dealRecencyScore(candidate);
-  if (candidateRecency !== currentRecency) {
-    return candidateRecency > currentRecency ? candidate : current;
+  if (candidate?.editedInSlack === true && current?.editedInSlack !== true) return candidate;
+
+  const currentCompleteness = dealCompletenessScore(current);
+  const candidateCompleteness = dealCompletenessScore(candidate);
+  if (candidateCompleteness !== currentCompleteness) {
+    return candidateCompleteness > currentCompleteness ? candidate : current;
   }
 
   const currentQuality = Number(current?.qualityScore) || 0;
   const candidateQuality = Number(candidate?.qualityScore) || 0;
   if (candidateQuality !== currentQuality) {
     return candidateQuality > currentQuality ? candidate : current;
+  }
+
+  const currentRecency = dealRecencyScore(current);
+  const candidateRecency = dealRecencyScore(candidate);
+  if (candidateRecency !== currentRecency) {
+    return candidateRecency > currentRecency ? candidate : current;
   }
 
   const currentVotes = Number(current?.votes) || 0;
@@ -574,14 +615,23 @@ function normalizeDeal(raw, options = {}) {
   const pubDate = toIsoDate(deal.sourcePublishedAt || deal.postPublishedAt || deal.pubDate);
   const approvedAt = toIsoDate(deal.approvedAt);
   const rawMissing = Array.isArray(deal.missingFields) ? deal.missingFields : [];
+  const hasExpiry = Boolean(cleanText(
+    deal.expires || deal.validUntil || deal.validOn || deal.end_date || deal.validity_date || '',
+  ));
+  const resolvedMissingFields = new Set([
+    url && 'Ziel-URL',
+    distance && 'Ort',
+    hasExpiry && 'Ablauf',
+    cleanText(deal.source) && 'Quelle',
+  ].filter(Boolean));
   const missingFields = [];
   if (!url) missingFields.push('Ziel-URL');
   if (!distance) missingFields.push('Ort');
-  if (!cleanText(deal.expires || deal.end_date || deal.validity_date || '')) missingFields.push('Ablauf');
+  if (!hasExpiry) missingFields.push('Ablauf');
   if (!cleanText(deal.source)) missingFields.push('Quelle');
   for (const item of rawMissing) {
     const t = cleanText(item);
-    if (t && !missingFields.includes(t)) missingFields.push(t);
+    if (t && !resolvedMissingFields.has(t) && !missingFields.includes(t)) missingFields.push(t);
   }
 
   const normalized = {
@@ -1227,6 +1277,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
 
 export {
   applySlackEdits,
+  dedupeApprovedDeals,
   filterAlreadyLiveFallbackDeals,
   normalizeDeal,
   normalizePendingDeal,

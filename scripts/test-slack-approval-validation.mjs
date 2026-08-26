@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 
 import {
   applySlackEdits,
+  dedupeApprovedDeals,
   filterAlreadyLiveFallbackDeals,
   normalizeDeal as normalizeApprovalDeal,
   normalizePendingDeal,
@@ -75,6 +76,13 @@ const alreadyLiveFallback = filterAlreadyLiveFallbackDeals([
     url: 'https://cafe.example/angebote',
     slackTs: '1784550000.400',
   },
+  {
+    id: 'cross-posted-live-promotion',
+    brand: 'Example Pop-up',
+    title: 'Gratis Drink beim Pop-up',
+    url: 'https://www.instagram.com/reel/CROSSPOSTED/',
+    slackTs: '1784550000.500',
+  },
 ], [
   { ...parsedRoundTrip, slackTs: '1784550000.200' },
   { ...parsedRoundTrip, slackTs: '1784550000.300', editedInSlack: true, slackEditedFields: ['title'] },
@@ -84,6 +92,13 @@ const alreadyLiveFallback = filterAlreadyLiveFallbackDeals([
     title: '20% Rabatt auf das Abendessen',
     url: 'https://cafe.example/angebote',
     slackTs: '1784550000.400',
+  },
+  {
+    id: 'cross-posted-live-promotion',
+    brand: 'Example Pop-up',
+    title: 'Gratis Drink beim Pop-up',
+    url: 'https://www.instagram.com/reel/CROSSPOSTED/',
+    slackTs: '1784550000.500',
   },
 ], [
   { ...parsedRoundTrip, slackTs: '1784540000.100', approvedAt: now.toISOString() },
@@ -100,7 +115,35 @@ assert.deepEqual(
   ['1784550000.300', '1784550000.400'],
   'exact duplicates are skipped, while explicit edits and genuinely changed campaigns remain eligible',
 );
-assert.equal(alreadyLiveFallback.removed.length, 2);
+assert.equal(alreadyLiveFallback.removed.length, 3, 'an identical cross-platform title and merchant is already live');
+
+const [preferredCrossPost] = dedupeApprovedDeals([
+  {
+    ...parsedRoundTrip,
+    id: 'complete-existing-post',
+    description: 'Gratis Drink am Rathausplatz, 1010 Wien.',
+    distance: 'Rathausplatz, 1010 Wien',
+    validUntil: '2026-07-27',
+    missingFields: [],
+    approvedAt: '2026-07-20T09:00:00.000Z',
+    viennaVerified: true,
+  },
+  {
+    ...parsedRoundTrip,
+    id: 'newer-incomplete-cross-post',
+    description: 'Gratis Drink in Wien.',
+    distance: 'Wien',
+    url: 'https://www.instagram.com/reel/CROSSPOSTED/',
+    missingFields: ['Ort'],
+    approvedAt: '2026-07-20T11:00:00.000Z',
+    viennaVerified: true,
+  },
+]);
+assert.equal(
+  preferredCrossPost.id,
+  'complete-existing-post',
+  'semantic cross-post dedupe must preserve stronger evidence instead of blindly preferring a newer approval',
+);
 
 const normalizedPending = normalizeApprovalDeal({
   id: 'pending-without-approval',
@@ -124,6 +167,17 @@ assert.equal(normalizedPending.sourcePublishedAt, '2026-07-20T08:00:00.000Z');
 assert.equal(normalizedPending.sourcePublishedAtSource, 'post.timestamp');
 assert.equal(normalizedPending.validUntil, '2026-07-31');
 assert.deepEqual(normalizedPending.viennaEvidence, { verified: true, type: 'address' });
+assert.ok(!normalizedPending.missingFields.includes('Ablauf'));
+
+const normalizedResolvedEvidence = normalizeApprovalDeal({
+  ...normalizedPending,
+  missingFields: ['Ablauf', 'Ort', 'Manuelle Preisprüfung'],
+});
+assert.deepEqual(
+  normalizedResolvedEvidence.missingFields,
+  ['Manuelle Preisprüfung'],
+  'resolved standard fields must not keep stale warnings, while custom review notes survive',
+);
 
 const normalizedMissingEvidence = normalizeApprovalDeal({
   id: 'pending-without-date-or-place',
