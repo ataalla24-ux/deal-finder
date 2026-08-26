@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-08-26T08:14:43.617Z",
+  "generatedAt": "2026-08-26T08:19:07.550Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 376,
-    "uniqueCandidates": 345,
-    "distinctCandidates": 359,
-    "duplicateClusters": 14,
+    "totalCandidates": 365,
+    "uniqueCandidates": 341,
+    "distinctCandidates": 352,
+    "duplicateClusters": 11,
     "topHealthySources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 79,
+        "totalDeals": 5
+      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
@@ -14,16 +20,10 @@
         "totalDeals": 14
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 75,
-        "totalDeals": 5
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 67,
-        "totalDeals": 25
+        "healthScore": 74,
+        "totalDeals": 14
       },
       {
         "sourceKey": "food3",
@@ -52,6 +52,12 @@
         "totalDeals": 3
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 63,
+        "totalDeals": 14
+      },
+      {
         "sourceKey": "firecrawl4",
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
         "missionFitScore": 61,
@@ -62,12 +68,6 @@
         "sourceLabel": "TikTok Scanner",
         "missionFitScore": 61,
         "totalDeals": 14
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 59,
-        "totalDeals": 25
       }
     ],
     "topCoverageSources": [
@@ -111,7 +111,7 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 81,
+        "precisionScore": 82,
         "totalDeals": 5
       },
       {
@@ -129,8 +129,8 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 71,
-        "totalDeals": 25
+        "precisionScore": 74,
+        "totalDeals": 14
       },
       {
         "sourceKey": "instagram-ai",
@@ -143,7 +143,7 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 66,
+        "sourceWeightScore": 68,
         "totalDeals": 5
       },
       {
@@ -155,8 +155,8 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 61,
-        "totalDeals": 25
+        "sourceWeightScore": 62,
+        "totalDeals": 14
       },
       {
         "sourceKey": "food3",
@@ -242,6 +242,92 @@
   },
   "sources": [
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 5,
+      "uniqueDeals": 3,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 5,
+      "fresh7dCount": 5,
+      "viennaCount": 5,
+      "foodDrinkCount": 2,
+      "promoCount": 5,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "September kannst du historische Orte in ganz Österreich kostenlos entdecken, darunter auch einige, die sonst nicht öffentlich zugänglich sin",
+        "Milk Tea um 1 € : Diesen Samstag im chastudio.vienna solange der Vorrat reicht und ein Opening Angebot gibt’s schon ab jetzt, zu jedem Milk T",
+        "If you’d just like to go for a stroll, you can enjoy the energy and the sights for free."
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-26T07:39:08.357Z",
+        "finishedAt": "2026-08-26T07:39:43.685Z",
+        "durationMs": 35328,
+        "counts": {
+          "rawCandidates": 127,
+          "normalizedCandidates": 5,
+          "verifiedCandidates": 5,
+          "previousDeals": 0,
+          "acceptedDeals": 5,
+          "rejectedDeals": 121
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 108,
+          "excluded-promotion-type": 3,
+          "missing-text": 5,
+          "missing-vienna-evidence": 1,
+          "general-recommendation": 3,
+          "offer-expired": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.4,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.4,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        },
+        {
+          "value": "supermarkt",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 5
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 79,
+      "missionFitScore": 79,
+      "coverageScore": 20,
+      "precisionScore": 82,
+      "sourceWeightScore": 68
+    },
+    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -320,168 +406,78 @@
       "sourceWeightScore": 63
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 5,
-      "uniqueDeals": 2,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 5,
-      "fresh7dCount": 5,
-      "viennaCount": 5,
-      "foodDrinkCount": 2,
-      "promoCount": 5,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "September kannst du historische Orte in ganz Österreich kostenlos entdecken, darunter auch einige, die sonst nicht öffentlich zugänglich sin",
-        "Milk Tea um 1 € : Diesen Samstag im chastudio.vienna solange der Vorrat reicht und ein Opening Angebot gibt’s schon ab jetzt, zu jedem Milk T",
-        "If you’d just like to go for a stroll, you can enjoy the energy and the sights for free."
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-26T07:39:08.357Z",
-        "finishedAt": "2026-08-26T07:39:43.685Z",
-        "durationMs": 35328,
-        "counts": {
-          "rawCandidates": 127,
-          "normalizedCandidates": 5,
-          "verifiedCandidates": 5,
-          "previousDeals": 0,
-          "acceptedDeals": 5,
-          "rejectedDeals": 121
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 108,
-          "excluded-promotion-type": 3,
-          "missing-text": 5,
-          "missing-vienna-evidence": 1,
-          "general-recommendation": 3,
-          "offer-expired": 1
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.4,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84.4,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 2
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 5
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 75,
-      "missionFitScore": 79,
-      "coverageScore": 20,
-      "precisionScore": 81,
-      "sourceWeightScore": 66
-    },
-    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 25,
-      "uniqueDeals": 16,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 4,
-      "fresh1dCount": 13,
-      "fresh7dCount": 25,
-      "viennaCount": 25,
-      "foodDrinkCount": 7,
-      "promoCount": 20,
+      "totalDeals": 14,
+      "uniqueDeals": 11,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 10,
+      "fresh7dCount": 14,
+      "viennaCount": 14,
+      "foodDrinkCount": 4,
+      "promoCount": 11,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Free 🔗 buskersfestivalwien 🎨 12.09.",
-        "1 Like = 1 Minute kostenlose Studiozeit.",
-        "1 like = 1 minute of free studio time."
+        "12,90 € für Kids unter 10 & optional All-Can-Drink für 7 € Aufpreis🍹 Who’s coming with you?",
+        "FREE ENTRY!",
+        "September kannst du historische Orte in ganz Österreich kostenlos entdecken, darunter auch einige, die sonst nicht öffentlich zugänglich sin"
       ],
       "lastRun": null,
-      "uniqueRate": 0.6,
+      "uniqueRate": 0.8,
       "duplicateRate": 0.2,
-      "fresh1dRate": 0.5,
+      "fresh1dRate": 0.7,
       "fresh7dRate": 1,
       "viennaRate": 1,
       "foodDrinkRate": 0.3,
       "promoRate": 0.8,
       "missingUrlRate": 0,
-      "averageQualityScore": 85.9,
+      "averageQualityScore": 87.5,
       "topCategories": [
         {
-          "value": "shopping",
-          "count": 8
-        },
-        {
           "value": "essen",
-          "count": 5
-        },
-        {
-          "value": "fitness",
-          "count": 4
+          "count": 3
         },
         {
           "value": "kultur",
-          "count": 4
+          "count": 3
         },
         {
-          "value": "kaffee",
+          "value": "shopping",
+          "count": 3
+        },
+        {
+          "value": "fitness",
           "count": 2
         },
         {
           "value": "beauty",
+          "count": 1
+        },
+        {
+          "value": "freizeit",
           "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "gratis",
-          "count": 15
+          "count": 11
         },
         {
           "value": "rabatt",
-          "count": 9
-        },
-        {
-          "value": "bogo",
-          "count": 1
+          "count": 3
         }
       ],
       "issues": [
         "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 67,
-      "missionFitScore": 59,
-      "coverageScore": 47,
-      "precisionScore": 71,
-      "sourceWeightScore": 61
+      "healthScore": 74,
+      "missionFitScore": 63,
+      "coverageScore": 33,
+      "precisionScore": 74,
+      "sourceWeightScore": 62
     },
     {
       "sourceKey": "food3",
