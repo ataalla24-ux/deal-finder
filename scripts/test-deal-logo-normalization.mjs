@@ -278,6 +278,28 @@ expectNormalizedLogo(
 );
 
 expectNormalizedLogo(
+  'creator handle is replaced by a provider named in the caption',
+  {
+    brand: '@kseniainvienna',
+    title: 'Gratis Drink bei @kseniainvienna',
+    description: 'Gratis Getränk bei @kseniainvienna in Wien',
+    viennaEvidence: {
+      verified: true,
+      detail: 'Vienna Dyson Styling Tour Pop-Up: get your hair styled and enjoy free drinks am Rathausplatz.',
+    },
+    type: 'gratis',
+    category: 'kaffee',
+    url: 'https://www.tiktok.com/@kseniainvienna/video/7678002441849425155',
+  },
+  {
+    brand: 'Dyson',
+    title: 'Gratis Haarstyling und Drinks beim Dyson Pop-up',
+    category: 'beauty',
+    logo: '💇',
+  },
+);
+
+expectNormalizedLogo(
   'English numeric BOGO copy is normalized',
   {
     brand: 'Vienna Marriott Cascade Bar',

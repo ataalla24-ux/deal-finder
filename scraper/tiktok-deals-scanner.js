@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { inferPreferredBrand } from './deal-normalization-utils.js';
 import { unicodeSafeTruncate } from './instagram-ai-validity-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -303,6 +304,9 @@ function inferType(text) {
 }
 
 function inferCategoryAndLogo(text, type) {
+  if (/\bdyson\b/i.test(text) && /\b(?:hair\s+styled|haare?\s+stylen|haarstyling|styling\s+tour|styling\s+pop[- ]?up)\b/i.test(text)) {
+    return { category: 'beauty', logo: '💇' };
+  }
   if (/\b(eintritt|entry|admission|festival|event|museum|garten|botanisch|stadtpark|stift|klosterneuburg)\b/i.test(text)) {
     return { category: 'kultur', logo: '🎟️' };
   }
@@ -345,6 +349,9 @@ function buildOfferTitle(text, brand) {
   const signal = cleanText(text, 1200);
   const venueMatch = signal.match(/\b(?:beim?|bei)\s+(Stift Klosterneuburg)\b/i);
   const venue = cleanText(venueMatch?.[1] || '', 80);
+  if (/\bdyson\b/i.test(signal) && /\b(?:styling\s+tour|pop[- ]?up|hair\s+styled)\b/i.test(signal) && /\bfree\s+drinks?\b/i.test(signal)) {
+    return 'Gratis Haarstyling und Drinks beim Dyson Pop-up';
+  }
   if (/\bgenuss[-\s]?festival\b/i.test(signal) && /\b(?:eintritt|frei|gratis|kostenlos|free)\b/i.test(signal)) {
     return 'Gratis Eintritt Genuss-Festival Stadtpark';
   }
@@ -702,7 +709,14 @@ export function buildDealFromPost(url, data) {
 
   const type = inferType(offerSignal);
   const { category, logo } = inferCategoryAndLogo(offerSignal, type);
-  const brand = extractBrand(offerSignal, data.accountHandle);
+  const extractedBrand = extractBrand(offerSignal, data.accountHandle);
+  const brand = inferPreferredBrand({
+    brand: extractedBrand,
+    title: offerSignal,
+    description: offerSignal,
+    ownerUsername: data.accountHandle,
+    url,
+  }) || extractedBrand;
   const title = buildOfferTitle(offerSignal, brand);
   const score = buildQualityScore(offerSignal, dateCandidate.date, type, category);
   if (score < CONFIG.minScore) return { deal: null, reason: `Score zu niedrig (${score})` };

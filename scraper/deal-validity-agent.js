@@ -12,6 +12,7 @@ import {
   extractActiveOfferWindow,
   hasRecurringOfferSchedule,
 } from './instagram-ai-validity-utils.js';
+import { getNonGuaranteedPromotionReason } from './promotion-quality-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -453,8 +454,13 @@ function getOfferText(deal, health = null) {
   return [
     usableTitle,
     deal.description,
+    deal.metaGraphCaption,
+    deal.metaGraphOcrText,
     deal.evidence?.textSample,
     deal.offerText,
+    deal.promotionEvidence,
+    deal.evidence?.mediaEvidence?.ocrText,
+    deal.evidence?.mediaEvidence?.ai?.offerText,
     contentHints.title,
     contentHints.description,
   ].map(cleanText).filter(Boolean).join(' ');
@@ -483,9 +489,8 @@ function getConcreteOfferDecision(deal, health = null) {
   if (malformedAggregatorReason) return { concrete: false, reason: malformedAggregatorReason };
   const editorialListingReason = getEditorialPriceListingReason(deal, health);
   if (editorialListingReason) return { concrete: false, reason: editorialListingReason };
-  if (/\b(?:gewinnspiel|giveaway|verlosung|raffle|sweepstake|zu\s+gewinnen|gewinne(?:n)?)\b/i.test(offerText)) {
-    return { concrete: false, reason: 'Gewinnspiel/Verlosung statt direkt nutzbarem Deal' };
-  }
+  const nonGuaranteedPromotionReason = getNonGuaranteedPromotionReason(offerText);
+  if (nonGuaranteedPromotionReason) return { concrete: false, reason: nonGuaranteedPromotionReason };
 
   const recommendationLanguage = /\b(?:favou?rite|lieblings(?:restaurant|lokal|platz|spot|ort)|summer\s+spot|things\s+to\s+do|must[-\s]?visit|guide|tipps?|vibe|empfehl\w*|recommend\w*|save\s+(?:this|and)|send\s+this)\b/i;
   const explicitPromotionBeyondGenericFree = /(?:\b\d+\s*%|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b(?:rabatt|gutschein|coupon|deal|aktion|angebot|special|happy\s*hour)\b|\b(?:statt|nur\s+heute|today\s+only)\b|\b(?:gratis|kostenlos|free)\s+(?:zu|zum|bei|with)\b|\b(?:nur|only|um|für|fuer|for)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b))/i;

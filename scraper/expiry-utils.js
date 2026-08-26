@@ -149,11 +149,23 @@ function inferYearlessSingleYear(month, day, now) {
 export function isVagueExpiry(value) {
   const text = cleanText(value).toLowerCase();
   if (!text) return true;
-  if (isIsoDateExpiry(text)) return false;
+  if (isIsoDateExpiry(text) || hasExplicitCalendarDate(text)) return false;
   return /^(siehe|unbekannt|dauerhaft|unbegrenzt|jederzeit|laufend|ongoing|k\.a\.?|tbd|coming soon|bei eröffnung|bei eroeffnung|regelm[aä]ßig|regelmaessig|immer|permanent\b|kurzfristig\b|laut quelle\b|nicht angegeben\b|gutschein[-\s]?abh[aä]ngig\b|frühjahr\b|fruehjahr\b|season opening\b)/i.test(text)
     || /(siehe details|siehe website|siehe webseite|siehe post|siehe tiktok|siehe instagram|check website|not specified|unknown unknown|zeiten auf webseite pr[üu]fen|aktuelle termine auf webseite|ganzt[aä]gig|\(neotaste deal\)|\(7 days rolling\)|g[üu]ltig 2 tage vor oder nach dem geburtstag)/i.test(text)
     || isScheduleOnlyExpiry(text)
     || isPartOfDayExpiry(text);
+}
+
+function hasExplicitCalendarDate(value) {
+  const text = cleanText(value).toLowerCase();
+  if (!text) return false;
+  return /\b\d{4}[-./]\d{1,2}[-./]\d{1,2}\b/.test(text)
+    || /\b\d{1,2}[./-]\d{1,2}[./-](?:\d{2}|\d{4})\b/.test(text)
+    || /\b\d{1,2}\.\d{1,2}\.(?:\d{2,4})?\b/.test(text)
+    || /\b\d{1,2}\.\s*[-–]\s*\d{1,2}\.\d{1,2}\.(?:\d{2,4})?\b/.test(text)
+    || /\b(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|may|june|july|october|december)\s+\d{4}\b/.test(text)
+    || /\b\d{1,2}(?:st|nd|rd|th)?\.?\s+(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|may|june|july|october|december)\b/.test(text)
+    || /(?:^|[^\p{L}\p{N}])\d{1,2}\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)(?:\s+20\d{2})?(?=$|[^\p{L}\p{N}])/u.test(text);
 }
 
 function isRecurringChurchLikeExpiry(value) {
@@ -165,14 +177,7 @@ function isRecurringChurchLikeExpiry(value) {
 function isScheduleOnlyExpiry(value) {
   const text = cleanText(value).toLowerCase();
   if (!text) return false;
-  const hasExplicitDate =
-    /\b\d{4}-\d{1,2}-\d{1,2}(?:\b|t)/i.test(text) ||
-    /\b\d{1,2}\.\d{1,2}\.(?:\d{2,4})?\b/.test(text) ||
-    /\b\d{1,2}\.\s*[-–]\s*\d{1,2}\.\d{1,2}\.\d{4}\b/.test(text) ||
-    /\b(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+\d{4}\b/.test(text) ||
-    /\b\d{1,2}(?:st|nd|rd|th)?\.?\s+(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|may|june|july|october|december)\b/.test(text) ||
-    /(?:^|[^\p{L}\p{N}])\d{1,2}\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)(?:\s+20\d{2})?(?=$|[^\p{L}\p{N}])/u.test(text);
-  if (hasExplicitDate) return false;
+  if (hasExplicitCalendarDate(text)) return false;
   return /^(mo|di|mi|do|fr|sa|so|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)/i.test(text)
     || /\b(mo|di|mi|do|fr|sa|so)(?:\s*[-–&/]\s*(mo|di|mi|do|fr|sa|so))+/i.test(text)
     || /\b\d{1,2}:\d{2}\s*(?:uhr)?\b/i.test(text) && !/\b(bis|endet|gültig|gueltig|läuft|laeuft|nur heute|morgen)\b/i.test(text);
@@ -523,12 +528,15 @@ export function parseExpiryShape(value, options = {}) {
   const explicitDateMatches = text.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[./]\d{1,2}(?:[./-]\d{2,4})?|\d{1,2}-\d{1,2}-\d{2,4})\b/g) || [];
   explicitDateMatches.push(...(text.match(new RegExp(`\\b\\d{1,2}(?:st|nd|rd|th)?\\.?\\s+${monthPattern}\\b`, 'gi')) || []));
   explicitDateMatches.push(...(text.match(/(?:^|[^\p{L}\p{N}])\d{1,2}\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)(?:\s+20\d{2})?(?=$|[^\p{L}\p{N}])/giu) || []));
-  const uniqueExplicitDates = new Set(explicitDateMatches);
+  const uniqueExplicitDates = new Set(explicitDateMatches.map((match) => {
+    const parsed = parseExpiryDetails(match, { now: dateInferenceNow });
+    return parsed?.date ? isoDateFromMs(parsed.date.getTime()) : '';
+  }).filter(Boolean));
   const hasSingleExplicitDate = uniqueExplicitDates.size === 1;
   const hasDateRange = /\b\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\s*[-–]\s*\d{1,2}[./-]\d{1,2}/.test(text);
   const hasTimeOnlyEndSignal = /\bbis\s+\d{1,2}:\d{2}\b/.test(text);
   const hasEventishSignal =
-    /\b(eröffnung|eroeffnung|opening|launch|after work|event|veranstaltung|konzert|concert|class|kurs|party|performance|workshop|celebration|brunch|verkostung|tasting|festival|straßenfest|strassenfest)\b/.test(signalText) ||
+    /\b(eröffnung|eroeffnung|opening|launch|after work|event|veranstaltung|konzert|concert|class|kurs|party|performance|workshop|celebration|geburtstag|feier\w*|einladung|invitation|teilnahme|anmeldung|registration|show|brunch|verkostung|tasting|festival|straßenfest|strassenfest)\b/.test(signalText) ||
     /\(\s*\d+\s*(stunde|stunden|hour|hours|tag|tage)\b/.test(signalText);
   const hasSingleDaySignal =
     /\b(gültig am|gueltig am|nur heute|heute|morgen)\b/.test(signalText) ||

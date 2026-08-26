@@ -15,6 +15,11 @@ const now = new Date('2026-06-27T12:00:00.000Z');
 assert.equal(isVagueExpiry('2026-05-08T23:59:59.999Z'), false, 'ISO expiry must stay concrete');
 assert.equal(isVagueExpiry('Kurzfristig / siehe TikTok'), true, 'vague TikTok expiry stays vague');
 assert.equal(isVagueExpiry('Ganztägig'), true, 'all-day schedule text is not a concrete expiry');
+assert.equal(
+  isVagueExpiry('Freitag, 18. September 2026, ab 18:00 Uhr. Genießt den Abend.'),
+  false,
+  'part-of-day prose must not hide an explicit calendar date',
+);
 assert.equal(isVagueExpiry('Gutschein-abhängig'), true, 'voucher-dependent text is not a concrete expiry');
 assert.equal(sanitizeExpiryText('Lieferzeiten'), '', 'delivery hours are not an expiry');
 assert.equal(sanitizeExpiryText('Kurzfristig / siehe TikTok'), '', 'vague social hint is not an expiry');
@@ -57,6 +62,18 @@ assert.equal(
   parseExpiryShape('EVENT-INFOS: Freitag, 18. September 2026, Einlass ab 18:00 Uhr', { now }).validOn,
   '2026-09-18',
   'an event clock time must not turn its explicit date into a start-only window',
+);
+const yoriFullCaption = 'K-Chicken Challenge: Wer die meisten Teller stapelt, gewinnt den Hauptpreis. EVENT-INFOS: Freitag, 18. September 2026, Einlass ab 18:00 Uhr. Genießt den Abend in 1060 Wien.';
+assert.equal(
+  parseExpiryShape(yoriFullCaption, { now }).validOn,
+  '2026-09-18',
+  'an explicit event date must survive later evening prose in a full caption',
+);
+const bilingualFullCaption = '19 сентября | 17:00, 1220 Wien. Ich lade Sie herzlich ein. Freuen Sie sich auf einen ganz besonderen Abend. Die Teilnahme ist kostenlos.';
+assert.equal(
+  parseExpiryShape(bilingualFullCaption, { now }).validOn,
+  '2026-09-19',
+  'the same bilingual calendar date must collapse to one event day despite German part-of-day prose',
 );
 
 const broadPageDate = extractTargetPageDateHints(`

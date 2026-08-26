@@ -17,6 +17,7 @@ import {
   writeInstagramGraphEvidence,
 } from './instagram-graph-evidence.js';
 import { enrichInstagramGraphMedia } from './instagram-media-evidence.js';
+import { getNonGuaranteedPromotionReason } from './promotion-quality-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -112,7 +113,6 @@ const SOFT_PROMO_PATTERNS = [
 ];
 
 const EXCLUDED_PATTERNS = [
-  /\b(?:gewinnspiel|verlosung|giveaway|sweepstake|zu gewinnen|win a)\b/i,
   /\b(?:gratis versand|kostenlose lieferung|free shipping)\b/i,
   /\b(?:job|stellenangebot|wohnung|immobilie|hotelzimmer)\b/i,
   /\b(?:affiliate|influencer gesucht|creator gesucht)\b/i,
@@ -565,7 +565,10 @@ export function findViennaEvidence(candidate, account = null, config = {}) {
 
 export function classifyPromotion(text) {
   const normalized = cleanText(text, 6000);
-  if (!normalized || EXCLUDED_PATTERNS.some((pattern) => pattern.test(normalized))) {
+  if (!normalized) {
+    return { accepted: false, type: '', reason: 'missing-text' };
+  }
+  if (getNonGuaranteedPromotionReason(normalized) || EXCLUDED_PATTERNS.some((pattern) => pattern.test(normalized))) {
     return { accepted: false, type: '', reason: normalized ? 'excluded-promotion-type' : 'missing-text' };
   }
   if (RECOMMENDATION_LANGUAGE_PATTERN.test(normalized)

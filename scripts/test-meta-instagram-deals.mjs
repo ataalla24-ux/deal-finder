@@ -55,6 +55,21 @@ assert.equal(
   'recommendation language must not hide an explicit promotion',
 );
 assert.equal(classifyPromotion('Gewinnspiel: Gewinne ein Abendessen').accepted, false);
+assert.equal(
+  classifyPromotion('Wer die meisten Teller stapelt, gewinnt den Hauptpreis: einen Monat täglich gratis K-Chicken.').accepted,
+  false,
+  'winner-only challenge prizes are not directly redeemable deals',
+);
+assert.equal(
+  classifyPromotion('1 Like = 1 Minute kostenlose Studiozeit. Like das Reel und markier einen Artist. Jede Minute wird verschenkt.').accepted,
+  false,
+  'engagement-generated pooled giveaways are not guaranteed deals',
+);
+assert.equal(
+  classifyPromotion('Grand Cultural Evening in 1210 Wien: FREE ENTRY! Dance, Food und Tombola.').accepted,
+  true,
+  'an incidental tombola must not hide independently guaranteed free entry',
+);
 assert.equal(classifyPromotion('Schönes neues Sommermenü').accepted, false);
 assert.equal(classifyPromotion('Neue gluten-free Pizza jetzt in Wien').accepted, false);
 assert.equal(classifyPromotion('Gluten-free Pizza: heute 20 % Rabatt in Wien').type, 'rabatt');
@@ -199,6 +214,35 @@ const graphEventClockTime = normalizeGraphMediaItem({
 assert.ok(graphEventClockTime.deal);
 assert.equal(graphEventClockTime.deal.validFrom, '2026-09-18T00:00:00.000Z');
 assert.equal(graphEventClockTime.deal.validUntil, '2026-09-18T23:59:59.999Z');
+
+const graphBilingualEvening = normalizeGraphMediaItem({
+  id: 'live-bilingual-evening',
+  caption: '19 сентября | 17:00, Erzherzog-Karl-Straße 25, 1220 Wien. Ich lade Sie herzlich ein. Freuen Sie sich auf einen ganz besonderen Abend. Die Teilnahme ist kostenlos.',
+  permalink: 'https://www.instagram.com/p/LIVEBILINGUALEVENING/',
+  timestamp: '2026-08-25T12:08:42.000Z',
+}, { sourceType: 'hashtag', sourceName: '#viennaevents' }, liveDateConfig, liveDateNow);
+assert.ok(graphBilingualEvening.deal);
+assert.equal(graphBilingualEvening.deal.validFrom, '2026-09-19T00:00:00.000Z');
+assert.equal(graphBilingualEvening.deal.validUntil, '2026-09-19T23:59:59.999Z');
+assert.equal(graphBilingualEvening.deal.expirySource, 'content-date');
+
+const graphWinnerOnlyChallenge = normalizeGraphMediaItem({
+  id: 'live-winner-only-challenge',
+  caption: 'K-Chicken Challenge in 1060 Wien. Wer die meisten Teller stapelt, gewinnt den Hauptpreis: einen Monat täglich eine gratis Portion.',
+  permalink: 'https://www.instagram.com/p/LIVEWINNERCHALLENGE/',
+  timestamp: '2026-08-25T17:03:54.000Z',
+}, { sourceType: 'hashtag', sourceName: '#viennafood' }, liveDateConfig, liveDateNow);
+assert.equal(graphWinnerOnlyChallenge.deal, null);
+assert.equal(graphWinnerOnlyChallenge.rejection, 'excluded-promotion-type');
+
+const graphEngagementGiveaway = normalizeGraphMediaItem({
+  id: 'live-engagement-giveaway',
+  caption: '1 Like = 1 Minute kostenlose Studiozeit. Like das Reel und markier einen Artist. Jede einzelne Minute wird verschenkt. Wien.',
+  permalink: 'https://www.instagram.com/reel/LIVEENGAGEMENTGIVEAWAY/',
+  timestamp: '2026-08-25T20:24:38.000Z',
+}, { sourceType: 'account', sourceName: '@contentbude.at' }, liveDateConfig, liveDateNow);
+assert.equal(graphEngagementGiveaway.deal, null);
+assert.equal(graphEngagementGiveaway.rejection, 'excluded-promotion-type');
 
 const graphOldWithFutureExpiry = normalizeGraphMediaItem({
   id: '17890004',

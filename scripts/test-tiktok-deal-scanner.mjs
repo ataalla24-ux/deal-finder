@@ -36,6 +36,18 @@ const validMatcha = buildDealFromPost(
 assert.ok(validMatcha.deal);
 assert.match(validMatcha.deal.title, /Gratis Matcha/);
 
+const creatorPostWithNamedProvider = buildDealFromPost(
+  'https://www.tiktok.com/@kseniainvienna/video/7678002441849425155',
+  postData(
+    'Vienna Dyson Styling Tour Pop-Up. @Dyson DACH: get your hair styled, win free goodies and enjoy free drinks. 26 - 29 August 2026, Rathausplatz, 1010 Wien.',
+    'kseniainvienna',
+  ),
+);
+assert.ok(creatorPostWithNamedProvider.deal);
+assert.equal(creatorPostWithNamedProvider.deal.brand, 'Dyson');
+assert.equal(creatorPostWithNamedProvider.deal.title, 'Gratis Haarstyling und Drinks beim Dyson Pop-up');
+assert.equal(creatorPostWithNamedProvider.deal.category, 'beauty');
+
 const foreignViennaHandle = buildDealFromPost(
   'https://www.tiktok.com/@twofatpanda.vienna/video/7676699636131761415',
   postData('Free treats every weekend at Two Fat Panda Vienna, Gading Serpong, Indonesia.', 'twofatpanda.vienna'),

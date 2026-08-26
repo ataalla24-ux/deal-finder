@@ -339,6 +339,39 @@ const queueStyleGiveaway = await validateOne({
 assert.equal(queueStyleGiveaway.decision.allowed, false);
 assert.match(reasonText(queueStyleGiveaway), /Gewinnspiel\/Verlosung/);
 
+const yoriWinnerOnlyChallenge = await validateOne({
+  id: 'yori-winner-only-challenge',
+  brand: 'Yori 2',
+  title: 'Ein Monat täglich gratis K-Chicken',
+  description: 'K-Chicken Challenge in 1060 Wien. Wer am Ende die meisten Teller stapelt, gewinnt den Hauptpreis.',
+  url: 'https://www.instagram.com/p/YORIWINNERONLY/',
+  source: 'Meta Instagram',
+  originSource: 'Meta Instagram Hashtag Search',
+  distance: '1060 Wien',
+  pubDate: now.toISOString(),
+  pubDateSource: 'instagram-graph-timestamp',
+  viennaVerified: true,
+});
+assert.equal(yoriWinnerOnlyChallenge.decision.allowed, false);
+assert.match(reasonText(yoriWinnerOnlyChallenge), /Gewinnspiel\/Verlosung/);
+
+const contentbudeEngagementGiveaway = await validateOne({
+  id: 'contentbude-engagement-giveaway',
+  brand: 'Contentbude Studio Wien',
+  title: '1 Like = 1 Minute kostenlose Studiozeit',
+  description: '',
+  metaGraphCaption: 'Like das Reel und markier einen Artist, der Studiozeit gebrauchen könnte. Jede Minute, die ihr sammelt, wird verschenkt.',
+  url: 'https://www.instagram.com/reel/CONTENTBUDEGIVEAWAY/',
+  source: 'Meta Instagram',
+  originSource: 'Meta Instagram Business Discovery',
+  distance: 'Wien',
+  pubDate: now.toISOString(),
+  pubDateSource: 'instagram-graph-timestamp',
+  viennaVerified: true,
+});
+assert.equal(contentbudeEngagementGiveaway.decision.allowed, false);
+assert.match(reasonText(contentbudeEngagementGiveaway), /Engagement-Aktion ohne garantierte Gegenleistung/);
+
 const selfSyndicatedInstagram = await validateOne({
   id: 'freefinder-feedback-loop',
   brand: 'freefinder.at',

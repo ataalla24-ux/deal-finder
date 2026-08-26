@@ -315,6 +315,14 @@ const LOGOS = [
     url: 'https://wienerlazizfood.com/images/logo.png',
     maxWidth: 420,
     maxHeight: 420
+  },
+  {
+    file: 'dyson-dyson-at.png',
+    type: 'text-card',
+    text: 'dyson',
+    background: '#F5F5F2',
+    color: '#111111',
+    fontSize: 108
   }
 ];
 

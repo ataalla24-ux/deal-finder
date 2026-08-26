@@ -38,6 +38,7 @@ const BRAND_RULES = [
   { key: 'muller', name: 'Muller', logo: '💋', category: 'beauty', domain: 'mueller.at' },
   { key: 'mueller', name: 'Muller', logo: '💋', category: 'beauty', domain: 'mueller.at' },
   { key: 'apple', name: 'Apple', logo: '🍎', category: 'technik', domain: 'apple.com' },
+  { key: 'dyson', name: 'Dyson', logo: '💇', category: 'beauty', domain: 'dyson.at', logoFile: 'dyson-dyson-at.png' },
   { key: 'intersport', name: 'Intersport', logo: '⛷️', category: 'sport', domain: 'intersport.at' },
   { key: 'sportscheck', name: 'Sportscheck', logo: '🏃', category: 'sport', domain: 'sportscheck.at' },
   { key: 'spar', name: 'SPAR', logo: '🛒', category: 'supermarkt', domain: 'spar.at' },
@@ -262,9 +263,13 @@ function cleanTitleForDisplay(value) {
     .trim();
 }
 
-function polishKnownDealTitle(value, brand = '') {
+function polishKnownDealTitle(value, brand = '', context = '') {
   const title = cleanTitleForDisplay(value);
   const provider = cleanUiNoiseText(brand);
+  const signal = cleanUiNoiseText(context);
+  if (/^dyson$/i.test(provider) && /\b(?:styling\s+tour|pop[- ]?up|hair\s+styled)\b/i.test(signal) && /\bfree\s+drinks?\b/i.test(signal)) {
+    return 'Gratis Haarstyling und Drinks beim Dyson Pop-up';
+  }
   if (/^1\+1 deals?,\s*-?\s*30\s*% discounts?$/i.test(title)) {
     return `1+1-Angebote und 30% Rabatt${provider ? ` bei ${provider}` : ''}`;
   }
@@ -502,7 +507,12 @@ function inferPreferredBrand(deal = {}) {
   }
 
   const titleSignal = cleanUiNoiseText(deal.title || '');
-  const descriptionSignal = cleanUiNoiseText(deal.description || '');
+  const descriptionSignal = cleanUiNoiseText([
+    deal.description,
+    deal.viennaEvidence?.detail,
+    deal.evidence?.textSample,
+    deal.metaGraphCaption,
+  ].filter(Boolean).join(' '));
   const ownerUsername = cleanUiNoiseText(deal.ownerUsername || deal.instagramHandle || '');
   const explicitLooksLikePublisher = Boolean(
     ownerUsername && sameBrandText(ownerUsername, explicitBrand)
@@ -952,13 +962,18 @@ function isFalsePositiveFreeDeal(deal = {}) {
 function normalizeDealRecord(deal = {}) {
   let title = cleanTitleForDisplay(deal.title || '');
   let description = cleanUiNoiseText(deal.description || '');
+  const auxiliaryEvidenceSignal = cleanUiNoiseText([
+    deal.viennaEvidence?.detail,
+    deal.evidence?.textSample,
+    deal.metaGraphCaption,
+  ].filter(Boolean).join(' '));
   const explicitBrand = cleanUiNoiseText(deal.brand || '');
   const brand = inferPreferredBrand({ ...deal, title, description });
-  title = polishKnownDealTitle(title, brand);
+  title = polishKnownDealTitle(title, brand, [title, description, auxiliaryEvidenceSignal].filter(Boolean).join(' '));
   const type = inferPreferredType({ ...deal, title, description, brand });
   const known = findBrandRule([brand, title, description, deal.distance, deal.url, deal.post_url].filter(Boolean).join(' '));
   const currentCategory = cleanUiNoiseText(deal.category || '').toLowerCase();
-  const categorySignal = [brand, title, description, deal.distance, deal.url, deal.post_url, currentCategory].filter(Boolean).join(' ');
+  const categorySignal = [brand, title, description, auxiliaryEvidenceSignal, deal.distance, deal.url, deal.post_url, currentCategory].filter(Boolean).join(' ');
   const hasTravelSignal = TRAVEL_SIGNAL_PATTERN.test(normalizeAscii(categorySignal));
   const brandWasCorrected = explicitBrand && brand && !sameBrandText(explicitBrand, brand);
   let category = known?.category && (brandWasCorrected || GENERIC_CATEGORIES.has(currentCategory) || (currentCategory === 'shopping' && known.category !== 'shopping'))
@@ -980,6 +995,10 @@ function normalizeDealRecord(deal = {}) {
     deal.source,
     deal.originSource,
   ]);
+
+  if (known?.name === 'Dyson' && /\b(?:hair\s+styled|haare?\s+stylen|haarstyling|styling\s+tour|styling\s+pop[- ]?up)\b/i.test(categorySignal)) {
+    category = 'beauty';
+  }
 
   const categoryAsciiSignal = normalizeAscii(categorySignal);
   if (/\bomv\b/.test(categoryAsciiSignal)) {
