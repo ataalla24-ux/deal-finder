@@ -12,7 +12,7 @@ try {
       id: 'fc4-a',
       brand: 'Cafe Wien',
       title: 'Gratis Kaffee',
-      description: 'Gratis Kaffee in Wien',
+      description: 'Gratis Kaffee in Wien \ud83d',
       category: 'kaffee',
       type: 'gratis',
       distance: 'Wien',
@@ -54,6 +54,10 @@ try {
   assert(source.issues.includes('letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal'));
   assert.equal(health.summary.pipelineRuns.reportedSources, 1);
   assert.deepEqual(health.summary.pipelineRuns.failedSources, ['firecrawl4']);
+
+  const candidateIndex = JSON.parse(fs.readFileSync(path.join(docsDir, 'deal-candidates-index.json'), 'utf8'));
+  const serializedCandidate = JSON.stringify(candidateIndex.candidates[0]);
+  assert.doesNotMatch(serializedCandidate, /\\ud83d(?!\\ud[c-f][0-9a-f]{2})/i, 'candidate index must repair lone Unicode surrogates');
 } finally {
   fs.rmSync(docsDir, { recursive: true, force: true });
 }

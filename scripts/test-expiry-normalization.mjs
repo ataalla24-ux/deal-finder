@@ -32,6 +32,18 @@ for (const raw of ['4.9.2026', '04.09.2026', '4/9/2026']) {
     `${raw} must use de-AT day/month order`
   );
 }
+assert.equal(parseExpiryDetails('21.30-01h', { now }), null, 'a party time range must never become a calendar date');
+assert.equal(parseExpiryDetails('31.02.2026', { now }), null, 'invalid calendar dates must not roll into another month');
+assert.equal(
+  parseExpiryDetails('Sunday, 30th August', { now })?.date.toISOString(),
+  '2026-08-30T23:59:59.999Z',
+  'English ordinal dates must be retained for future events',
+);
+assert.equal(
+  parseExpiryDetails('19 сентября | 17:00', { now })?.date.toISOString(),
+  '2026-09-19T23:59:59.999Z',
+  'Russian Vienna event dates must not fall back to a short review TTL',
+);
 assert.equal(
   parseExpiryDetails('2026.09.19', { now })?.date.toISOString(),
   '2026-09-19T23:59:59.999Z',
@@ -40,6 +52,11 @@ assert.equal(
 assert.equal(
   parseExpiryShape('4.9.2026', { now, contextText: 'Am 4. September findet das 6. Straßenfest statt.' }).validOn,
   '2026-09-04'
+);
+assert.equal(
+  parseExpiryShape('EVENT-INFOS: Freitag, 18. September 2026, Einlass ab 18:00 Uhr', { now }).validOn,
+  '2026-09-18',
+  'an event clock time must not turn its explicit date into a start-only window',
 );
 
 const broadPageDate = extractTargetPageDateHints(`

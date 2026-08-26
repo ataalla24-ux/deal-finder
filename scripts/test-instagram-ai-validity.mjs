@@ -149,6 +149,19 @@ const futureFamilyEvent = extractActiveOfferWindow(
 assert.equal(futureFamilyEvent?.kind, 'single');
 assert.equal(futureFamilyEvent?.endDate?.toISOString().slice(0, 10), '2026-08-27');
 
+const liveCaptionReference = new Date('2026-08-25T10:33:21.000Z');
+const relativeSaturdayEvent = extractActiveOfferWindow(
+  'THIS SATURDAY! SUMMER SPECIAL, entry ONLY 5 euro. Party time: 21.30-01h in 1060 Vienna.',
+  { pubDate: liveCaptionReference, now: liveCaptionReference },
+);
+assert.equal(relativeSaturdayEvent?.kind, 'single');
+assert.equal(relativeSaturdayEvent?.endDate?.toISOString().slice(0, 10), '2026-08-29');
+const relativeSundayEvent = extractActiveOfferWindow(
+  'My FREE Kids Afro Dance Class is happening this Sunday, 30th August in Vienna!',
+  { pubDate: liveCaptionReference, now: liveCaptionReference },
+);
+assert.equal(relativeSundayEvent?.endDate?.toISOString().slice(0, 10), '2026-08-30');
+
 assert.equal(
   extractActiveOfferWindow('Gültig bis Ende März 2026', { now })?.endDate?.toISOString().slice(0, 10),
   '2026-03-31',

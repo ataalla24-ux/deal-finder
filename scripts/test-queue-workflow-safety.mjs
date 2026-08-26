@@ -53,6 +53,15 @@ assert.ok(
   'community submissions must only be acknowledged after central Slack publishing',
 );
 assert.match(centralDispatch, /commit-generated\.mjs --skip-conflicts/);
+assert.match(centralDispatch, /docs\/slack-seen-posts\.json/, 'the reusable Slack seen index must be committed atomically');
+
+const approvalWorkflow = workflows.get('approve-deals.yml');
+assert.match(approvalWorkflow, /npm run logos:cache/);
+assert.match(
+  approvalWorkflow,
+  /commit-generated\.mjs[^\n]*docs\/assets\/brand-logos/,
+  'approval must commit newly cached logo files with the live feed that references them',
+);
 
 const collectors = new Map([
   ['apify-instagram-daily.yml', 'apify-instagram-scan'],

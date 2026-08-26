@@ -34,6 +34,7 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const PENDING_ALL_PATH = path.join(DOCS_DIR, 'deals-pending-all.json');
+const SLACK_SEEN_CACHE_PATH = path.join(DOCS_DIR, 'slack-seen-posts.json');
 const KEY4_REVIEW_PATH = path.join(DOCS_DIR, 'deals-review-firecrawl4.json');
 const GRAPH_EVIDENCE_PATH = path.join(DOCS_DIR, 'instagram-graph-post-evidence.json');
 const ENV_PATH = path.join(ROOT, '.env');
@@ -62,6 +63,12 @@ const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 const PENDING_FILE_NAMES = process.env.PENDING_FILE_NAMES || '';
 const SEEN_DEAL_SUPPRESSION_DAYS = Number(process.env.SLACK_SEEN_DEAL_SUPPRESSION_DAYS || 7);
 const MAX_SEEN_REACTION_CHECKS = Number(process.env.SLACK_SEEN_MAX_REACTION_CHECKS || 250);
+const SLACK_SEEN_CACHE_MAX_AGE_MINUTES = boundedInteger(
+  process.env.SLACK_SEEN_CACHE_MAX_AGE_MINUTES,
+  10,
+  1,
+  60,
+);
 const FIRECRAWL_REVIEW_ENABLED = /^(?:1|true|yes)$/i.test(cleanText(process.env.FIRECRAWL_REVIEW_ENABLED));
 const FIRECRAWL_REVIEW_MAX_PER_SOURCE = boundedInteger(
   process.env.FIRECRAWL_REVIEW_MAX_PER_SOURCE,
@@ -783,9 +790,76 @@ function addSeenDealsFromThread(seenKeys, deals) {
   return added;
 }
 
-async function loadRecentlySeenPostKeys() {
+function normalizeSeenPostCache(payload, options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date();
+  const maxAgeMinutes = boundedInteger(options.maxAgeMinutes, SLACK_SEEN_CACHE_MAX_AGE_MINUTES, 1, 60);
+  const suppressionDays = boundedInteger(options.suppressionDays, SEEN_DEAL_SUPPRESSION_DAYS, 1, 30);
+  const generatedAt = toIsoDate(payload?.generatedAt);
+  const generatedMs = Date.parse(generatedAt || '');
+  const ageMinutes = Number.isFinite(generatedMs)
+    ? Math.max(0, (now.getTime() - generatedMs) / (60 * 1000))
+    : Number.POSITIVE_INFINITY;
+  const sameWindow = Number(payload?.suppressionDays || suppressionDays) === suppressionDays;
+  const usable = sameWindow && ageMinutes <= suppressionDays * 24 * 60;
+  const keys = new Set((usable ? ensureArray(payload?.seenPostKeys) : [])
+    .map((key) => cleanText(key))
+    .filter((key) => key && key.length <= 1000)
+    .slice(0, 5000));
+  return {
+    generatedAt,
+    ageMinutes,
+    fresh: usable && ageMinutes <= maxAgeMinutes,
+    usable,
+    keys,
+    suppressionDays,
+  };
+}
+
+function loadSeenPostCache(options = {}) {
+  const cachePath = options.cachePath || SLACK_SEEN_CACHE_PATH;
+  if (!fs.existsSync(cachePath)) return normalizeSeenPostCache({}, options);
+  try {
+    return normalizeSeenPostCache(JSON.parse(fs.readFileSync(cachePath, 'utf8')), options);
+  } catch {
+    return normalizeSeenPostCache({}, options);
+  }
+}
+
+function writeSeenPostCache(seenKeys, options = {}) {
+  const cachePath = options.cachePath || SLACK_SEEN_CACHE_PATH;
+  const now = options.now instanceof Date ? options.now : new Date();
+  const payload = {
+    version: 1,
+    generatedAt: now.toISOString(),
+    suppressionDays: boundedInteger(options.suppressionDays, SEEN_DEAL_SUPPRESSION_DAYS, 1, 30),
+    totalKeys: seenKeys.size,
+    seenPostKeys: [...seenKeys].sort(),
+  };
+  const tempPath = `${cachePath}.tmp-${process.pid}`;
+  fs.writeFileSync(tempPath, JSON.stringify(payload, null, 2));
+  fs.renameSync(tempPath, cachePath);
+}
+
+async function loadRecentlySeenPostKeys(options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date();
+  const cache = loadSeenPostCache({ ...options, now });
+  if (cache.fresh) {
+    console.log(
+      `👀 Seen filter cache: ${cache.keys.size} exakte Post-URLs `
+      + `(${cache.ageMinutes.toFixed(1)} Minuten alt)`,
+    );
+    return cache.keys;
+  }
+
   const threadTsList = await findRecentDigestThreadTs();
-  if (threadTsList.length === 0) return new Set();
+  if (threadTsList.length === 0) {
+    if (cache.usable && cache.keys.size > 0) {
+      console.log(`⚠️ Slack-Historie leer; verwende ${cache.keys.size} Einträge aus dem letzten Seen-Cache`);
+      return cache.keys;
+    }
+    writeSeenPostCache(new Set(), { ...options, now });
+    return new Set();
+  }
 
   const botUserId = await getBotUserId();
   const seenKeys = new Set();
@@ -846,6 +920,7 @@ async function loadRecentlySeenPostKeys() {
     `der letzten ${SEEN_DEAL_SUPPRESSION_DAYS} Tage ` +
     `(${checkedThreads} abgehakte Threads, ${repliedThreads} beantwortete Threads, ${checkedDeals} einzelne Deals)`
   );
+  writeSeenPostCache(seenKeys, { ...options, now });
   return seenKeys;
 }
 
@@ -1465,6 +1540,9 @@ async function main() {
       deal.slackThreadTs = headerTs;
       deal.order = i + 1;
       postedDeals.push(deal);
+      if (addSeenDealsFromThread(seenPostKeys, [deal]) > 0) {
+        writeSeenPostCache(seenPostKeys);
+      }
 
       // Persist each confirmed Slack message immediately. If a later request
       // times out, the always-run workflow commit still has a durable queue
@@ -1505,6 +1583,9 @@ async function main() {
       deal.order = i + 1;
       deal.firecrawlReviewQueuedAt = new Date().toISOString();
       postedReviewDeals.push(deal);
+      if (addSeenDealsFromThread(seenPostKeys, [deal]) > 0) {
+        writeSeenPostCache(seenPostKeys);
+      }
       writePendingAll(mergePendingQueue(existingQueue, [...postedDeals, ...postedReviewDeals]));
 
       if ((i + 1) % 10 === 0) {
@@ -1539,12 +1620,14 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
 }
 
 export {
+  addSeenDealsFromThread,
   buildFirecrawlReviewMessage,
   buildSlackMessage,
   compareSlackDeals,
   filterAlreadyQueuedDeals,
   filterDuplicateDealsInRun,
   loadQueuedDealDuplicateKeys,
+  normalizeSeenPostCache,
   normalizeDeal,
   prepareKey4ReviewDeals,
   pruneStaleQueueDeals,

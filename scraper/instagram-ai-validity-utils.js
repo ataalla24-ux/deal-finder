@@ -45,6 +45,22 @@ const MONTH_PATTERN = Object.keys(MONTHS)
   .join('|');
 const DATE_LINK_PATTERN = '(?:-|bis|to|through|until|und|and|&)';
 const WEEKDAY_PATTERN = '(?:mo(?:ntag)?s?|di(?:enstag)?s?|mi(?:ttwoch)?s?|do(?:nnerstag)?s?|fr(?:eitag)?s?|sa(?:mstag)?s?|so(?:nntag)?s?|mon(?:day)?s?|tue(?:sday)?s?|wed(?:nesday)?s?|thu(?:rsday)?s?|fri(?:day)?s?|sat(?:urday)?s?|sun(?:day)?s?)';
+const RELATIVE_WEEKDAYS = {
+  sonntag: 0,
+  sunday: 0,
+  montag: 1,
+  monday: 1,
+  dienstag: 2,
+  tuesday: 2,
+  mittwoch: 3,
+  wednesday: 3,
+  donnerstag: 4,
+  thursday: 4,
+  freitag: 5,
+  friday: 5,
+  samstag: 6,
+  saturday: 6,
+};
 
 function finiteDate(value) {
   const date = value instanceof Date ? new Date(value.getTime()) : new Date(value || '');
@@ -315,6 +331,22 @@ function parseOfferMonth(text, referenceDate) {
   return buildWindow('month', utcDayEnd(year, month, 1), utcMonthEnd(year, month), match[0]);
 }
 
+function parseRelativeWeekday(text, referenceDate) {
+  const match = text.match(
+    /\b(this|coming|next|diese[nmr]?|kommende[nmr]?|naechste[nmr]?|nachste[nmr]?)\s+(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i,
+  );
+  if (!match) return null;
+
+  const targetWeekday = RELATIVE_WEEKDAYS[match[2]];
+  if (!Number.isInteger(targetWeekday)) return null;
+  const reference = utcDayStart(referenceDate);
+  let dayDelta = (targetWeekday - reference.getUTCDay() + 7) % 7;
+  if (dayDelta === 0 && /^(?:next|kommende|naechste|nachste)/i.test(match[1])) dayDelta = 7;
+  const date = new Date(reference.getTime() + dayDelta * DAY_MS);
+  const eventDate = utcDayEnd(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  return buildWindow('single', eventDate, eventDate, match[0]);
+}
+
 export function extractActiveOfferWindow(signal, options = {}) {
   const text = normalizeSignal(signal);
   if (!text) return null;
@@ -329,6 +361,7 @@ export function extractActiveOfferWindow(signal, options = {}) {
     || parseExplicitEnd(text, referenceDate)
     || parseEventSingleDate(text, referenceDate)
     || parseExplicitSingleDate(text, referenceDate)
+    || parseRelativeWeekday(text, referenceDate)
     || parseOfferMonth(text, referenceDate)
   );
 }

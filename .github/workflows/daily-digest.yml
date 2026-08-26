@@ -78,6 +78,7 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          SLACK_SEEN_CACHE_MAX_AGE_MINUTES: "10"
           FIRECRAWL_REVIEW_ENABLED: "1"
           FIRECRAWL_REVIEW_MAX_PER_SOURCE: "10"
           FIRECRAWL_REVIEW_MAX_TOTAL: "30"
@@ -92,4 +93,4 @@ jobs:
       - name: Commit dispatch state
         if: always()
         run: |
-          node scripts/commit-generated.mjs --skip-conflicts --message "Central deal dispatch $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-all.json docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-firecrawl4.json docs/deals-pending-firecrawl5.json docs/deal-candidates-index.json docs/deal-source-health.json docs/deal-validity-report.json docs/instagram-merchant-registry.json docs/instagram-graph-post-evidence.json docs/instagram-graph-verification-report.json
+          node scripts/commit-generated.mjs --skip-conflicts --message "Central deal dispatch $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-all.json docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-firecrawl4.json docs/deals-pending-firecrawl5.json docs/deal-candidates-index.json docs/deal-source-health.json docs/deal-validity-report.json docs/instagram-merchant-registry.json docs/instagram-graph-post-evidence.json docs/instagram-graph-verification-report.json docs/slack-seen-posts.json

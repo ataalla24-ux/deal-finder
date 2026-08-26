@@ -16,6 +16,21 @@ const MONTH_MAP = {
   'dezember': 11, 'december': 11, 'dez': 11, 'dec': 11,
 };
 
+const RUSSIAN_MONTH_MAP = {
+  'января': 0,
+  'февраля': 1,
+  'марта': 2,
+  'апреля': 3,
+  'мая': 4,
+  'июня': 5,
+  'июля': 6,
+  'августа': 7,
+  'сентября': 8,
+  'октября': 9,
+  'ноября': 10,
+  'декабря': 11,
+};
+
 const URL_EXPIRY_BLOCK_HOSTS = new Set([
   'instagram.com',
   'www.instagram.com',
@@ -89,7 +104,15 @@ function isoDateFromMs(ms) {
 }
 
 function endOfUtcDay(year, monthIndex, day) {
-  return new Date(Date.UTC(year, monthIndex, day, 23, 59, 59, 999));
+  const date = new Date(Date.UTC(year, monthIndex, day, 23, 59, 59, 999));
+  if (
+    date.getUTCFullYear() !== Number(year)
+    || date.getUTCMonth() !== Number(monthIndex)
+    || date.getUTCDate() !== Number(day)
+  ) {
+    return new Date(Number.NaN);
+  }
+  return date;
 }
 
 function endOfUtcMonth(year, monthIndex) {
@@ -116,6 +139,7 @@ function inferYearlessSingleYear(month, day, now) {
   const currentYear = now.getUTCFullYear();
   const currentDate = endOfUtcDay(currentYear, Number(month) - 1, Number(day));
   const nextDate = endOfUtcDay(currentYear + 1, Number(month) - 1, Number(day));
+  if (Number.isNaN(currentDate.getTime()) || Number.isNaN(nextDate.getTime())) return currentYear;
   if (currentDate < now && nextDate.getTime() - now.getTime() <= 45 * 24 * 60 * 60 * 1000) {
     return currentYear + 1;
   }
@@ -146,7 +170,8 @@ function isScheduleOnlyExpiry(value) {
     /\b\d{1,2}\.\d{1,2}\.(?:\d{2,4})?\b/.test(text) ||
     /\b\d{1,2}\.\s*[-–]\s*\d{1,2}\.\d{1,2}\.\d{4}\b/.test(text) ||
     /\b(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+\d{4}\b/.test(text) ||
-    /\b\d{1,2}\.?\s+(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\b/.test(text);
+    /\b\d{1,2}(?:st|nd|rd|th)?\.?\s+(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|may|june|july|october|december)\b/.test(text) ||
+    /(?:^|[^\p{L}\p{N}])\d{1,2}\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)(?:\s+20\d{2})?(?=$|[^\p{L}\p{N}])/u.test(text);
   if (hasExplicitDate) return false;
   return /^(mo|di|mi|do|fr|sa|so|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)/i.test(text)
     || /\b(mo|di|mi|do|fr|sa|so)(?:\s*[-–&/]\s*(mo|di|mi|do|fr|sa|so))+/i.test(text)
@@ -371,7 +396,7 @@ function parseDmy(text, now) {
 
 function parseNamedDate(text, now) {
   const monthPattern = '(j[aä]nner|januar|februar|m[aä]rz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|april|may|june|july|august|september|october|november|december)';
-  let m = text.match(new RegExp(`\\b(\\d{1,2})\\.?\\s+${monthPattern}\\s*(\\d{4})?\\b`, 'i'));
+  let m = text.match(new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\.?\\s+${monthPattern}\\s*(\\d{4})?\\b`, 'i'));
   if (m) {
     const month = MONTH_MAP[m[2].toLowerCase()];
     if (month !== undefined) {
@@ -398,6 +423,19 @@ function parseNamedDate(text, now) {
   }
 
   return null;
+}
+
+function parseRussianNamedDate(text, now) {
+  const monthPattern = Object.keys(RUSSIAN_MONTH_MAP).join('|');
+  const match = text.match(new RegExp(
+    `(?:^|[^\\p{L}\\p{N}])([0-3]?\\d)\\s+(${monthPattern})(?:\\s+(20\\d{2}))?(?=$|[^\\p{L}\\p{N}])`,
+    'iu',
+  ));
+  if (!match) return null;
+  const month = RUSSIAN_MONTH_MAP[match[2].toLowerCase()];
+  const year = match[3] ? Number(match[3]) : inferYearlessSingleYear(month + 1, Number(match[1]), now);
+  const date = endOfUtcDay(year, month, Number(match[1]));
+  return Number.isNaN(date.getTime()) ? null : { date, precision: 'day', source: 'text' };
 }
 
 function parseMonthOnly(text, now) {
@@ -455,14 +493,18 @@ export function parseExpiryDetails(value, options = {}) {
     text.replace(/^(gültig\s*bis|einlösbar\s*bis|aktion\s*bis|angebot\s*bis|läuft\s*bis|nur\s*bis|endet\s*am|gültig\s*am|nur\s*am|am|bis)\s*[:\-]?\s*/i, '')
   );
 
-  return (
-    parseIsoLike(withoutPrefixes) ||
-    parseDmyRange(withoutPrefixes, now) ||
-    parseMonthNameRange(withoutPrefixes) ||
-    parseDmy(withoutPrefixes, now) ||
-    parseNamedDate(withoutPrefixes, now) ||
-    parseMonthOnly(withoutPrefixes, now)
-  );
+  const candidates = [
+    parseIsoLike(withoutPrefixes),
+    parseDmyRange(withoutPrefixes, now),
+    parseMonthNameRange(withoutPrefixes),
+    parseDmy(withoutPrefixes, now),
+    parseNamedDate(withoutPrefixes, now),
+    parseRussianNamedDate(withoutPrefixes, now),
+    parseMonthOnly(withoutPrefixes, now),
+  ];
+  return candidates.find((candidate) => (
+    candidate?.date instanceof Date && Number.isFinite(candidate.date.getTime())
+  )) || null;
 }
 
 export function parseExpiryShape(value, options = {}) {
@@ -477,20 +519,22 @@ export function parseExpiryShape(value, options = {}) {
   const contextText = cleanText(options.contextText || '');
   const text = raw.toLowerCase();
   const signalText = [raw, contextText].filter(Boolean).join(' ').toLowerCase();
-  const monthPattern = '(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)';
+  const monthPattern = '(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|may|june|july|october|december)';
   const explicitDateMatches = text.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[./]\d{1,2}(?:[./-]\d{2,4})?|\d{1,2}-\d{1,2}-\d{2,4})\b/g) || [];
+  explicitDateMatches.push(...(text.match(new RegExp(`\\b\\d{1,2}(?:st|nd|rd|th)?\\.?\\s+${monthPattern}\\b`, 'gi')) || []));
+  explicitDateMatches.push(...(text.match(/(?:^|[^\p{L}\p{N}])\d{1,2}\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)(?:\s+20\d{2})?(?=$|[^\p{L}\p{N}])/giu) || []));
   const uniqueExplicitDates = new Set(explicitDateMatches);
   const hasSingleExplicitDate = uniqueExplicitDates.size === 1;
   const hasDateRange = /\b\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\s*[-–]\s*\d{1,2}[./-]\d{1,2}/.test(text);
   const hasTimeOnlyEndSignal = /\bbis\s+\d{1,2}:\d{2}\b/.test(text);
   const hasEventishSignal =
-    /\b(eröffnung|eroeffnung|opening|launch|after work|event|veranstaltung|konzert|brunch|verkostung|tasting|festival|straßenfest|strassenfest)\b/.test(signalText) ||
+    /\b(eröffnung|eroeffnung|opening|launch|after work|event|veranstaltung|konzert|concert|class|kurs|party|performance|workshop|celebration|brunch|verkostung|tasting|festival|straßenfest|strassenfest)\b/.test(signalText) ||
     /\(\s*\d+\s*(stunde|stunden|hour|hours|tag|tage)\b/.test(signalText);
   const hasSingleDaySignal =
     /\b(gültig am|gueltig am|nur heute|heute|morgen)\b/.test(signalText) ||
     /\bam\s+\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?\b/.test(signalText) ||
     /\bam\s+\d{1,2}\.?\s+(januar|februar|märz|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\b/.test(signalText) ||
-    /\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\b/.test(signalText);
+    /\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/.test(signalText);
   const monthMap = {
     januar: 1, februar: 2, 'märz': 3, maerz: 3, april: 4, mai: 5, juni: 6,
     juli: 7, august: 8, september: 9, oktober: 10, november: 11, dezember: 12,
@@ -675,7 +719,7 @@ export function parseExpiryShape(value, options = {}) {
   const hasEndSignal = hasStrongEndSignal || (/\bbis\b/.test(text) && (!hasSingleExplicitDate || hasDateRange || !hasTimeOnlyEndSignal));
   const hasRealStartSignal = /\b(gültig ab|gueltig ab|startet|startet am|abholung ab|verfügbar ab|verfuegbar ab|ab eröffnung|ab eroeffnung|öffnet am|oeffnet am)\b/.test(signalText);
   const hasTimeOnlyStartSignal = /\bab\s+\d{1,2}:\d{2}\b/.test(signalText);
-  const hasStartSignal = !hasEndSignal && (hasRealStartSignal || hasTimeOnlyStartSignal);
+  const hasStartSignal = !hasEndSignal && (hasRealStartSignal || (hasTimeOnlyStartSignal && !hasSingleExplicitDate));
   const hasSingleDayTimeWindow = hasSingleExplicitDate && hasTimeOnlyEndSignal;
   const hasSingleDateEventSignal = hasSingleExplicitDate && hasEventishSignal && !hasStrongEndSignal && !hasRealStartSignal;
 
@@ -683,7 +727,8 @@ export function parseExpiryShape(value, options = {}) {
     raw.match(/\b\d{4}-\d{1,2}-\d{1,2}\b/) ||
     raw.match(/\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/) ||
     raw.match(/\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/) ||
-    raw.match(new RegExp(`\\b\\d{1,2}\\.?(?:\\s+|\\.)${monthPattern}(?:\\s+\\d{4})?\\b`, 'i'));
+    raw.match(new RegExp(`\\b\\d{1,2}(?:st|nd|rd|th)?\\.?(?:\\s+|\\.)${monthPattern}(?:\\s+\\d{4})?\\b`, 'i')) ||
+    raw.match(/(?:^|[^\p{L}\p{N}])\d{1,2}\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)(?:\s+20\d{2})?(?=$|[^\p{L}\p{N}])/iu);
 
   const parsed = parseExpiryDetails(directTokenMatch ? directTokenMatch[0] : raw, { now: dateInferenceNow });
   const parsedIso = parsed?.date ? isoDateFromMs(parsed.date.getTime()) : '';

@@ -10,7 +10,7 @@ import {
   getPublicationEvidence,
 } from './deal-evidence-utils.js';
 import { parseExpiryShape } from './expiry-utils.js';
-import { extractActiveOfferWindow } from './instagram-ai-validity-utils.js';
+import { extractActiveOfferWindow, unicodeSafeTruncate } from './instagram-ai-validity-utils.js';
 import {
   buildInstagramGraphEvidencePayload,
   loadInstagramGraphEvidence,
@@ -147,12 +147,12 @@ const CATEGORY_HINTS = [
 ];
 
 function cleanText(value, max = 2400) {
-  return String(value || '')
+  const cleaned = String(value || '')
     .replace(/<[^>]+>/g, ' ')
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, ' ')
     .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, max);
+    .trim();
+  return unicodeSafeTruncate(cleaned, max);
 }
 
 function parseList(value, fallback = []) {
@@ -421,6 +421,16 @@ export function extractMentionedUsernames(deal = {}) {
   for (const match of text.matchAll(/(^|[^a-z0-9._])@([a-z0-9._]{2,30})\b/gi)) {
     const username = normalizedUsername(match[2]);
     if (!username || ['instagram', 'freefinder', 'freefinderwien'].includes(username)) continue;
+    usernames.add(username);
+    if (usernames.size >= 6) break;
+  }
+  const withoutLinks = text
+    .replace(/https?:\/\/\S+/gi, ' ')
+    .replace(/\bwww\.\S+/gi, ' ')
+    .replace(/\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\b/gi, ' ');
+  for (const match of withoutLinks.matchAll(/(^|[^a-z0-9._])([a-z0-9_][a-z0-9._]{1,27}\.(?:wien|vienna|at))\b/gi)) {
+    const username = normalizedUsername(match[2]);
+    if (!username || /^(?:wien|vienna)\.(?:wien|vienna|at)$/.test(username)) continue;
     usernames.add(username);
     if (usernames.size >= 6) break;
   }

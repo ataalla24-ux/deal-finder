@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { unicodeSafeTruncate } from './instagram-ai-validity-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -234,7 +235,7 @@ const MONTH_NAMES = new Map([
 ]);
 
 function cleanText(value = '', max = 1600) {
-  return String(value || '')
+  const cleaned = String(value || '')
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
@@ -243,8 +244,8 @@ function cleanText(value = '', max = 1600) {
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
     .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, max);
+    .trim();
+  return unicodeSafeTruncate(cleaned, max);
 }
 
 function stableHash(value = '') {

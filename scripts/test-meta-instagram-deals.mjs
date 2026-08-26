@@ -60,6 +60,14 @@ assert.equal(classifyPromotion('Neue gluten-free Pizza jetzt in Wien').accepted,
 assert.equal(classifyPromotion('Gluten-free Pizza: heute 20 % Rabatt in Wien').type, 'rabatt');
 
 assert.deepEqual(
+  extractMentionedUsernames({
+    caption: 'Milk Tea bei chastudio.vienna, Reservierung unter urbans.wien/reservierung und Details auf https://example.at/deal.',
+  }),
+  ['chastudio.vienna', 'urbans.wien'],
+  'untagged Vienna-style merchant handles are learned, while ordinary URLs are ignored',
+);
+
+assert.deepEqual(
   findViennaEvidence({ targetLocations: [{ name: 'Vienna' }] }, null, config),
   { verified: true, source: 'meta-target-location', detail: 'Vienna' }
 );
@@ -156,6 +164,41 @@ assert.ok(graphNamedMonthRange.deal, 'named Instagram date ranges must not fall 
 assert.equal(graphNamedMonthRange.deal.validFrom, '2026-07-20T00:00:00.000Z');
 assert.equal(graphNamedMonthRange.deal.validUntil, '2026-07-23T23:59:59.999Z');
 assert.equal(graphNamedMonthRange.deal.expirySource, 'content-date');
+
+const liveDateNow = new Date('2026-08-25T20:41:15.236Z');
+const liveDateConfig = buildConfig({
+  META_INSTAGRAM_MAX_POST_AGE_HOURS: '72',
+  META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS: '7',
+}, liveDateNow);
+const graphRelativeParty = normalizeGraphMediaItem({
+  id: 'live-relative-party',
+  caption: 'THIS SATURDAY! SUMMER SPECIAL, entry ONLY 5 euro. Party time: 21.30-01h. Address: Windmühlgasse 28, 1060 Vienna.',
+  permalink: 'https://www.instagram.com/reel/LIVERELATIVEPARTY/',
+  timestamp: '2026-08-25T10:33:21.000Z',
+}, { sourceType: 'hashtag', sourceName: '#viennaevents' }, liveDateConfig, liveDateNow);
+assert.ok(graphRelativeParty.deal);
+assert.equal(graphRelativeParty.deal.validFrom, '2026-08-29T00:00:00.000Z');
+assert.equal(graphRelativeParty.deal.validUntil, '2026-08-29T23:59:59.999Z');
+assert.doesNotMatch(graphRelativeParty.deal.validUntil, /^2028-/, 'clock times and street numbers must never create a 2028 expiry');
+
+const graphOrdinalKidsClass = normalizeGraphMediaItem({
+  id: 'live-ordinal-kids-class',
+  caption: 'My FREE Kids Afro Dance Class is happening this Sunday, 30th August! Soundcube, Guglgasse 12, 1110 Vienna.',
+  permalink: 'https://www.instagram.com/reel/LIVEORDINALKIDS/',
+  timestamp: '2026-08-25T10:26:25.000Z',
+}, { sourceType: 'hashtag', sourceName: '#viennaevents' }, liveDateConfig, liveDateNow);
+assert.ok(graphOrdinalKidsClass.deal);
+assert.equal(graphOrdinalKidsClass.deal.validUntil, '2026-08-30T23:59:59.999Z');
+
+const graphEventClockTime = normalizeGraphMediaItem({
+  id: 'live-event-clock-time',
+  caption: 'EVENT-INFOS: Freitag, 18. September 2026. Einlass ab 18:00 Uhr. In Wien gibt es einen Monat täglich eine gratis Portion K-Chicken.',
+  permalink: 'https://www.instagram.com/p/LIVEEVENTCLOCK/',
+  timestamp: '2026-08-25T17:03:54.000Z',
+}, { sourceType: 'hashtag', sourceName: '#viennafood' }, liveDateConfig, liveDateNow);
+assert.ok(graphEventClockTime.deal);
+assert.equal(graphEventClockTime.deal.validFrom, '2026-09-18T00:00:00.000Z');
+assert.equal(graphEventClockTime.deal.validUntil, '2026-09-18T23:59:59.999Z');
 
 const graphOldWithFutureExpiry = normalizeGraphMediaItem({
   id: '17890004',

@@ -3,12 +3,14 @@ import assert from 'node:assert/strict';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import { moderationReasonForDeal, normalizeUrl } from '../scraper/deal-moderation-utils.js';
 import {
+  addSeenDealsFromThread,
   buildFirecrawlReviewMessage,
   buildSlackMessage,
   combineFirecrawlReviewSelections,
   filterAlreadyQueuedDeals,
   filterDuplicateDealsInRun,
   loadQueuedDealDuplicateKeys,
+  normalizeSeenPostCache,
   normalizeDeal,
   prepareKey4ReviewDeals,
   pruneStaleQueueDeals,
@@ -18,6 +20,28 @@ import {
 } from '../scraper/slack-notify.js';
 
 const now = new Date('2026-07-20T12:00:00.000Z');
+
+const postedSeenKeys = new Set();
+assert.equal(addSeenDealsFromThread(postedSeenKeys, [{
+  url: 'https://www.instagram.com/reel/JustPosted/?utm_source=ig_web_copy_link',
+}]), 1);
+assert.deepEqual([...postedSeenKeys], ['instagram:reel:JustPosted']);
+assert.equal(addSeenDealsFromThread(postedSeenKeys, [{
+  url: 'https://www.instagram.com/reel/JustPosted/',
+}]), 0, 'a confirmed Slack post must enter the seen cache only once');
+
+const freshSeenCache = normalizeSeenPostCache({
+  generatedAt: '2026-07-20T11:55:00.000Z',
+  suppressionDays: 7,
+  seenPostKeys: ['instagram:reel:FreshOne', '', 'x'.repeat(1001)],
+}, { now, maxAgeMinutes: 10, suppressionDays: 7 });
+assert.equal(freshSeenCache.fresh, true);
+assert.deepEqual([...freshSeenCache.keys], ['instagram:reel:FreshOne']);
+assert.equal(normalizeSeenPostCache({
+  generatedAt: '2026-07-20T11:40:00.000Z',
+  suppressionDays: 7,
+  seenPostKeys: ['instagram:reel:OlderOne'],
+}, { now, maxAgeMinutes: 10, suppressionDays: 7 }).fresh, false);
 
 const removedFlightUrl = 'https://www.ryanair.com/gb/en/trip/flights/select?originIata=VIE&destinationIata=IBZ&dateOut=2026-06-28&dateIn=2026-07-03&isReturn=true';
 const freshFlightUrl = 'https://www.ryanair.com/gb/en/trip/flights/select?adults=1&originIata=VIE&destinationIata=PMI&dateOut=2026-09-28&dateIn=2026-10-02&isReturn=true';

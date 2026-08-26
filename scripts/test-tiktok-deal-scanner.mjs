@@ -2,6 +2,20 @@ import assert from 'node:assert/strict';
 
 import { buildDealFromPost } from '../scraper/tiktok-deals-scanner.js';
 
+function containsLoneSurrogate(value) {
+  for (let index = 0; index < value.length; index += 1) {
+    const unit = value.charCodeAt(index);
+    if (unit >= 0xd800 && unit <= 0xdbff) {
+      const next = value.charCodeAt(index + 1);
+      if (next >= 0xdc00 && next <= 0xdfff) index += 1;
+      else return true;
+    } else if (unit >= 0xdc00 && unit <= 0xdfff) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function postData(description, accountHandle = 'vienna.deals', ageHours = 1) {
   return {
     accountHandle,
@@ -62,5 +76,17 @@ const genericFreeListing = buildDealFromPost(
 );
 assert.equal(genericFreeListing.deal, null);
 assert.match(genericFreeListing.reason, /Deal-Signal/);
+
+const unicodeBoundaryCaption = `${'1+1 GRATIS '.padEnd(90, 'A')}Wien${'B'.repeat(89)}😀`;
+const unicodeBoundaryDeal = buildDealFromPost(
+  'https://www.tiktok.com/@unicode.vienna/video/7674945375526030625',
+  postData(unicodeBoundaryCaption, 'unicode.vienna'),
+);
+assert.ok(unicodeBoundaryDeal.deal);
+assert.equal(
+  containsLoneSurrogate(unicodeBoundaryDeal.deal.viennaEvidence.detail),
+  false,
+  'location evidence must never split an emoji into an invalid JSON surrogate',
+);
 
 console.log('tiktok deal scanner tests passed');

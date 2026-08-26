@@ -11,6 +11,7 @@ import {
   mergeDealEvidence,
   semanticSocialOfferKey,
 } from './deal-evidence-utils.js';
+import { unicodeSafeTruncate } from './instagram-ai-validity-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -103,7 +104,12 @@ function readJson(filePath, fallback = null) {
 }
 
 function writeJson(filePath, value) {
-  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+  const json = JSON.stringify(
+    value,
+    (_key, item) => (typeof item === 'string' ? unicodeSafeTruncate(item) : item),
+    2,
+  );
+  fs.writeFileSync(filePath, `${json}\n`);
 }
 
 function sourceKeyFromFile(file) {

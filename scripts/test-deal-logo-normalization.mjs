@@ -610,6 +610,42 @@ expectNormalizedLogo(
 );
 
 expectNormalizedLogo(
+  'Joom is not confused with the similarly named joe club',
+  {
+    id: 'gs-17484',
+    brand: 'joo',
+    title: '10% Gutschein für alles bei joo',
+    type: 'rabatt',
+    category: 'supermarkt',
+    url: 'https://www.gutscheine.at/joom',
+    logoUrl: 'https://freefinder.at/assets/brand-logos/joo-joe-club-at.png',
+  },
+  {
+    brand: 'Joom',
+    title: '10% Gutschein für alles bei Joom',
+    category: 'shopping',
+    logo: '🛒',
+    logoUrlIncludes: /domain_url=https:\/\/joom\.com$/,
+  },
+);
+
+expectNormalizedLogo(
+  'joe club URLs still resolve to the full loyalty-club brand',
+  {
+    brand: 'jö Bonus Club',
+    title: 'Neue Vorteile im jö Bonus Club',
+    type: 'rabatt',
+    category: 'supermarkt',
+    url: 'https://www.joe-club.at/vorteile',
+  },
+  {
+    brand: 'jö Bonus Club',
+    logo: '💳',
+    logoUrlIncludes: /domain_url=https:\/\/joe-club\.at$/,
+  },
+);
+
+expectNormalizedLogo(
   'direct unknown provider host can supply logo',
   {
     brand: 'Rooni Restaurant',
