@@ -7,7 +7,7 @@ import {
   normalizePendingDeal,
   validateApprovalCandidates,
 } from '../scraper/slack-approve.js';
-import { parseDigestDealMessage } from '../scraper/slack-digest-utils.js';
+import { extractDealsFromThreadMessages, parseDigestDealMessage } from '../scraper/slack-digest-utils.js';
 import { buildSlackMessage } from '../scraper/slack-notify.js';
 
 const now = new Date('2026-07-20T12:00:00.000Z');
@@ -34,23 +34,73 @@ const parsedRoundTrip = parseDigestDealMessage({
 assert.match(parsedRoundTrip.description, /Gratis Drink am Rathausplatz/);
 assert.match(parsedRoundTrip.validFrom, /^2026-07-24/);
 assert.match(parsedRoundTrip.validUntil, /^2026-07-27/);
+assert.equal(parsedRoundTrip.url, 'https://www.tiktok.com/@example/video/7678002441849425155');
 assert.equal(parsedRoundTrip.postalCode, '1010');
 assert.equal(parsedRoundTrip.sourcePublishedAtSource, 'slack.digest-validated-source-date');
+
+const legacyMessageWithoutLink = roundTripMessage
+  .split('\n')
+  .filter((line) => !line.includes('Direktlink:') && !line.startsWith('📝'))
+  .join('\n');
+const [legacyRecoveredFromQueue] = extractDealsFromThreadMessages([{
+  text: legacyMessageWithoutLink,
+  ts: '1784550000.300',
+  thread_ts: '1784550000.000',
+}], {
+  pendingQueue: [{
+    ...parsedRoundTrip,
+    description: 'Vollständige Beschreibung aus der Queue.',
+    distance: 'Rathausplatz, 1010 Wien',
+    slackTs: '1784550000.300',
+  }],
+});
+assert.equal(legacyRecoveredFromQueue.url, parsedRoundTrip.url, 'legacy Slack messages recover their target URL from the queue');
+assert.equal(legacyRecoveredFromQueue.description, 'Vollständige Beschreibung aus der Queue.');
+assert.equal(legacyRecoveredFromQueue.distance, 'Rathausplatz, 1010 Wien');
 
 const alreadyLiveFallback = filterAlreadyLiveFallbackDeals([
   { ...parsedRoundTrip, slackTs: '1784550000.100' },
   { ...parsedRoundTrip, slackTs: '1784550000.200' },
+  {
+    ...parsedRoundTrip,
+    slackTs: '1784550000.300',
+    title: 'Gratis Drink plus Snack beim Pop-up',
+    editedInSlack: true,
+    slackEditedFields: ['title'],
+  },
+  {
+    id: 'new-campaign-on-shared-page',
+    brand: 'Cafe Example',
+    title: '20% Rabatt auf das Abendessen',
+    url: 'https://cafe.example/angebote',
+    slackTs: '1784550000.400',
+  },
 ], [
   { ...parsedRoundTrip, slackTs: '1784550000.200' },
+  { ...parsedRoundTrip, slackTs: '1784550000.300', editedInSlack: true, slackEditedFields: ['title'] },
+  {
+    id: 'new-campaign-on-shared-page',
+    brand: 'Cafe Example',
+    title: '20% Rabatt auf das Abendessen',
+    url: 'https://cafe.example/angebote',
+    slackTs: '1784550000.400',
+  },
 ], [
   { ...parsedRoundTrip, slackTs: '1784540000.100', approvedAt: now.toISOString() },
+  {
+    id: 'old-campaign-on-shared-page',
+    brand: 'Cafe Example',
+    title: '10% Rabatt auf das Frühstück',
+    url: 'https://cafe.example/angebote',
+    approvedAt: now.toISOString(),
+  },
 ]);
 assert.deepEqual(
   alreadyLiveFallback.deals.map((deal) => deal.slackTs),
-  ['1784550000.200'],
-  'an old reaction fallback is skipped once its deal is live, while a real queued update remains eligible',
+  ['1784550000.300', '1784550000.400'],
+  'exact duplicates are skipped, while explicit edits and genuinely changed campaigns remain eligible',
 );
-assert.equal(alreadyLiveFallback.removed.length, 1);
+assert.equal(alreadyLiveFallback.removed.length, 2);
 
 const normalizedPending = normalizeApprovalDeal({
   id: 'pending-without-approval',

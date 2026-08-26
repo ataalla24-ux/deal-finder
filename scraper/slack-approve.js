@@ -362,16 +362,57 @@ function getApprovedMergeKeys(deal) {
   return keys.filter(Boolean);
 }
 
+function isExactLiveDuplicate(deal, liveDeal) {
+  const socialKey = getCanonicalSocialPostKey(deal);
+  if (socialKey && socialKey === getCanonicalSocialPostKey(liveDeal)) return true;
+
+  const id = cleanText(deal?.id).toLowerCase();
+  const liveId = cleanText(liveDeal?.id).toLowerCase();
+  if (id && id === liveId) return true;
+
+  const title = normalizeLooseText(deal?.title);
+  const liveTitle = normalizeLooseText(liveDeal?.title);
+  const brand = normalizeBrandSignature(deal?.brand);
+  const liveBrand = normalizeBrandSignature(liveDeal?.brand);
+  return Boolean(title && title === liveTitle && brand && brand === liveBrand);
+}
+
 function filterAlreadyLiveFallbackDeals(deals, queuedDeals, liveDeals) {
-  const queuedKeys = new Set(ensureArray(queuedDeals).map(pendingApprovalKey).filter(Boolean));
-  const liveKeys = new Set(ensureArray(liveDeals).flatMap(getApprovedMergeKeys));
+  const queuedByKey = new Map(
+    ensureArray(queuedDeals)
+      .map((deal) => [pendingApprovalKey(deal), deal])
+      .filter(([key]) => Boolean(key)),
+  );
+  const liveByKey = new Map();
+  for (const liveDeal of ensureArray(liveDeals)) {
+    for (const key of getApprovedMergeKeys(liveDeal)) {
+      const matching = liveByKey.get(key) || [];
+      matching.push(liveDeal);
+      liveByKey.set(key, matching);
+    }
+  }
   const removed = [];
   const filtered = ensureArray(deals).filter((deal) => {
     const approvalKey = pendingApprovalKey(deal);
-    if (approvalKey && queuedKeys.has(approvalKey)) return true;
-    const alreadyLive = getApprovedMergeKeys(deal).some((key) => liveKeys.has(key));
-    if (alreadyLive) removed.push(deal);
-    return !alreadyLive;
+    const queuedDeal = approvalKey ? queuedByKey.get(approvalKey) : null;
+    const liveMatches = getApprovedMergeKeys(deal)
+      .flatMap((key) => liveByKey.get(key) || []);
+    if (liveMatches.length === 0) return true;
+
+    const explicitlyEdited = deal.editedInSlack === true
+      || queuedDeal?.editedInSlack === true
+      || ensureArray(deal.slackEditedFields).length > 0
+      || ensureArray(queuedDeal?.slackEditedFields).length > 0;
+    if (explicitlyEdited) return true;
+
+    // A shared landing page can host a genuinely changed campaign. Exact post
+    // IDs, source IDs, or unchanged title+brand are safe to suppress.
+    if (queuedDeal && !liveMatches.some((liveDeal) => isExactLiveDuplicate(deal, liveDeal))) {
+      return true;
+    }
+
+    removed.push(deal);
+    return false;
   });
   return { deals: filtered, removed };
 }

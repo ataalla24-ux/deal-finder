@@ -106,7 +106,7 @@ function extractSlackMessageText(message) {
 }
 
 function parseSlackLink(raw) {
-  const text = String(raw || '').trim();
+  const text = String(raw || '').trim().replace(/&amp;/g, '&');
   const match = text.match(/^<([^|>]+)(?:\|[^>]+)?>$/);
   if (match) return match[1].trim();
   return text.startsWith('http') ? text : '';
@@ -170,8 +170,10 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
   let missingFields = [];
 
   for (const line of lines.slice(1)) {
-    const rawLine = cleanText(line);
-    const descriptionMatch = rawLine.match(/^(?:📝|:memo:)\s*(.+)$/iu);
+    // Keep Slack's <url|label> markup intact until the Direktlink is parsed.
+    const rawLine = String(line || '').trim();
+    const cleanedLine = cleanText(rawLine);
+    const descriptionMatch = cleanedLine.match(/^(?:📝|:memo:)\s*(.+)$/iu);
     if (descriptionMatch) {
       description = cleanText(descriptionMatch[1]);
       continue;
@@ -302,21 +304,46 @@ function readPendingQueue() {
   }
 }
 
+function isMissingParsedValue(value) {
+  if (value === null || value === undefined || value === '') return true;
+  if (Array.isArray(value)) return value.length === 0;
+  if (typeof value === 'object') return Object.keys(value).length === 0;
+  return false;
+}
+
 function mergeDealsById(primaryDeals, fallbackDeals) {
   const byId = new Map();
   for (const deal of fallbackDeals || []) {
     if (deal?.id) byId.set(deal.id, deal);
   }
-  return (primaryDeals || []).map((deal) => ({
-    ...(byId.get(deal.id) || {}),
-    ...deal,
-    slackTs: deal.slackTs || byId.get(deal.id)?.slackTs || '',
-    slackThreadTs: deal.slackThreadTs || byId.get(deal.id)?.slackThreadTs || '',
-  }));
+  return (primaryDeals || []).map((deal) => {
+    const fallback = byId.get(deal.id) || {};
+    const merged = { ...fallback, ...deal };
+    for (const [field, value] of Object.entries(fallback)) {
+      if (isMissingParsedValue(deal[field])) merged[field] = value;
+    }
+
+    const parsedDistance = cleanText(deal.distance);
+    const fallbackDistance = cleanText(fallback.distance);
+    if ((!parsedDistance || /^wien$/i.test(parsedDistance)) && fallbackDistance) {
+      merged.distance = fallbackDistance;
+    }
+
+    if (deal.pubDateSource === 'slack.message-timestamp' && fallback.pubDate) {
+      merged.pubDate = fallback.pubDate;
+      merged.pubDateSource = fallback.pubDateSource || '';
+      merged.sourcePublishedAt = fallback.sourcePublishedAt || fallback.pubDate;
+      merged.sourcePublishedAtSource = fallback.sourcePublishedAtSource || fallback.pubDateSource || '';
+    }
+
+    merged.slackTs = deal.slackTs || fallback.slackTs || '';
+    merged.slackThreadTs = deal.slackThreadTs || fallback.slackThreadTs || '';
+    return merged;
+  });
 }
 
-function extractDealsFromThreadMessages(messages) {
-  const pendingQueue = readPendingQueue();
+function extractDealsFromThreadMessages(messages, options = {}) {
+  const pendingQueue = Array.isArray(options.pendingQueue) ? options.pendingQueue : readPendingQueue();
   const parsed = (messages || [])
     .map((msg, index) => parseDigestDealMessage(msg, index))
     .filter(Boolean)
