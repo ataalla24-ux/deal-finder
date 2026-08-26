@@ -9,6 +9,7 @@ import {
   combineFirecrawlReviewSelections,
   filterAlreadyQueuedDeals,
   filterDuplicateDealsInRun,
+  loadLiveDealDuplicateKeys,
   loadQueuedDealDuplicateKeys,
   normalizeSeenPostCache,
   normalizeDeal,
@@ -260,6 +261,71 @@ const repeatedSocialPromotion = filterDuplicateDealsInRun([
   },
 ]);
 assert.equal(repeatedSocialPromotion.deals.length, 1, 'repeated social posts for one promotion collapse before Slack');
+
+const liveDealKeys = loadLiveDealDuplicateKeys([
+  {
+    id: 'live-social-one',
+    title: 'Alter redaktioneller Titel',
+    url: 'https://www.instagram.com/reel/LIVEPOSTONE/?utm_source=instagram',
+    source: 'Slack Digest',
+  },
+  {
+    id: 'flight-existing-dates',
+    title: 'Hin & zurück nach Palma ab €45.98',
+    url: 'https://www.ryanair.com/gb/en/trip/flights/select?originIata=VIE&destinationIata=PMI&dateOut=2026-10-20&dateIn=2026-10-22&isReturn=true&utm_source=slack',
+    source: 'Slack Digest',
+  },
+  {
+    id: 'live-voucher',
+    title: '15% Gutschein bei Matratzen Discount',
+    url: 'https://www.gutscheine.at/matratzen-discount?utm_campaign=summer',
+    source: 'Slack Digest',
+  },
+  {
+    id: 'live-official-offer',
+    title: '15% Rabatt auf Frühstück',
+    url: 'https://cafe.example/angebote?utm_source=newsletter',
+    source: 'Official',
+  },
+]);
+const liveDealFilter = filterAlreadyQueuedDeals([
+  {
+    id: 'fresh-social-id',
+    title: 'Verbesserter Titel desselben Posts',
+    url: 'https://instagram.com/p/LIVEPOSTONE/',
+    source: 'Meta Instagram',
+  },
+  {
+    id: 'flight-same-dates',
+    title: 'Hin & zurück nach Palma ab €45.98',
+    url: 'https://www.ryanair.com/gb/en/trip/flights/select?dateIn=2026-10-22&isReturn=true&destinationIata=PMI&dateOut=2026-10-20&originIata=VIE',
+    source: 'Flights Vienna',
+  },
+  {
+    id: 'flight-new-dates',
+    title: 'Hin & zurück nach Palma ab €45.98',
+    url: 'https://www.ryanair.com/gb/en/trip/flights/select?originIata=VIE&destinationIata=PMI&dateOut=2026-11-03&dateIn=2026-11-06&isReturn=true',
+    source: 'Flights Vienna',
+  },
+  {
+    id: 'voucher-same-campaign',
+    title: '15% Gutschein bei Matratzen Discount',
+    url: 'https://www.gutscheine.at/matratzen-discount',
+    source: 'Gutscheine.at',
+  },
+  {
+    id: 'official-new-campaign',
+    title: '20% Rabatt auf Abendessen',
+    url: 'https://cafe.example/angebote',
+    source: 'Official',
+  },
+], liveDealKeys);
+assert.equal(liveDealFilter.removed, 3, 'exact live social posts, flight itineraries and vouchers must not return to Slack');
+assert.deepEqual(
+  liveDealFilter.deals.map((deal) => deal.id),
+  ['flight-new-dates', 'official-new-campaign'],
+  'new flight dates and a genuinely changed offer on the same landing page must remain eligible',
+);
 
 const premiumKebap = await validateOne({
   id: 'premium-kebap',
