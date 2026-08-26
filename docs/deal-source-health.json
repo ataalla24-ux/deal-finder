@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-26T02:32:14.820Z",
+  "generatedAt": "2026-08-26T02:48:16.592Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 377,
-    "uniqueCandidates": 345,
-    "distinctCandidates": 358,
-    "duplicateClusters": 13,
+    "totalCandidates": 393,
+    "uniqueCandidates": 340,
+    "distinctCandidates": 363,
+    "duplicateClusters": 23,
     "topHealthySources": [
       {
         "sourceKey": "joe",
@@ -20,21 +20,21 @@
         "totalDeals": 8
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 69,
-        "totalDeals": 18
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 68,
+        "healthScore": 66,
         "totalDeals": 3
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 66,
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 62,
+        "totalDeals": 18
+      },
+      {
+        "sourceKey": "firecrawl4",
+        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+        "healthScore": 60,
         "totalDeals": 9
       }
     ],
@@ -48,7 +48,7 @@
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
-        "missionFitScore": 65,
+        "missionFitScore": 70,
         "totalDeals": 3
       },
       {
@@ -60,7 +60,7 @@
       {
         "sourceKey": "firecrawl4",
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "missionFitScore": 60,
+        "missionFitScore": 61,
         "totalDeals": 9
       },
       {
@@ -109,6 +109,12 @@
     ],
     "topPrecisionSources": [
       {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "precisionScore": 76,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 74,
@@ -117,14 +123,8 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 72,
+        "precisionScore": 69,
         "totalDeals": 18
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 71,
-        "totalDeals": 3
       },
       {
         "sourceKey": "joe",
@@ -135,7 +135,7 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 68,
+        "precisionScore": 65,
         "totalDeals": 9
       }
     ],
@@ -147,10 +147,10 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 61,
-        "totalDeals": 18
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceWeightScore": 59,
+        "totalDeals": 3
       },
       {
         "sourceKey": "tiktok",
@@ -159,15 +159,15 @@
         "totalDeals": 8
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 57,
-        "totalDeals": 3
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 58,
+        "totalDeals": 18
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 54,
+        "sourceKey": "firecrawl4",
+        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+        "sourceWeightScore": 53,
         "totalDeals": 9
       }
     ],
@@ -375,13 +375,88 @@
       "sourceWeightScore": 58
     },
     {
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 3,
+      "uniqueDeals": 1,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 0,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 3,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Ort unklar: Ort unklar",
+        "Ort unklar: both now offering free water bottle refills and part of our ...",
+        "Ort unklar: both now offering free water bottle refills and part of our ..."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-25T03:01:49.288Z",
+        "finishedAt": "2026-08-25T03:04:43.987Z",
+        "durationMs": 174699,
+        "counts": {
+          "rawCandidates": 16,
+          "normalizedCandidates": 16,
+          "verifiedCandidates": 3,
+          "previousDeals": 1,
+          "acceptedDeals": 3,
+          "rejectedDeals": 14
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 14
+        },
+        "errors": [
+          "https://www.instagram.com/explore/tags/fooddealsvienna/: Firecrawl Agent nach 120s abgebrochen"
+        ],
+        "reportFile": "deal-pipeline-last-run-food3.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 72,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 66,
+      "missionFitScore": 70,
+      "coverageScore": 17,
+      "precisionScore": 76,
+      "sourceWeightScore": 59
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 18,
-      "uniqueDeals": 11,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 5,
+      "uniqueDeals": 6,
+      "duplicateDeals": 12,
+      "duplicateAcrossSources": 10,
       "fresh1dCount": 10,
       "fresh7dCount": 18,
       "viennaCount": 18,
@@ -394,8 +469,8 @@
         "MEDITATE WITH THE ROBOTS 🤖☀️ This Friday, you are invited to become part of Speculative Futures: Robotic Meditation by Joaquin Fargas."
       ],
       "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.3,
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.6,
       "fresh1dRate": 0.6,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -444,76 +519,87 @@
         }
       ],
       "issues": [
-        "geringe Food-/Drink-Relevanz"
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 69,
+      "healthScore": 62,
       "missionFitScore": 62,
-      "coverageScore": 37,
-      "precisionScore": 72,
-      "sourceWeightScore": 61
+      "coverageScore": 34,
+      "precisionScore": 69,
+      "sourceWeightScore": 58
     },
     {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 3,
-      "uniqueDeals": 2,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
+      "sourceKey": "firecrawl4",
+      "file": "deals-pending-firecrawl4.json",
+      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+      "totalDeals": 9,
+      "uniqueDeals": 6,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
       "fresh1dCount": 0,
       "fresh7dCount": 3,
-      "viennaCount": 2,
-      "foodDrinkCount": 3,
-      "promoCount": 2,
+      "viennaCount": 3,
+      "foodDrinkCount": 8,
+      "promoCount": 8,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Ort unklar: Ort unklar",
-        "Ort unklar: both now offering free water bottle refills and part of our ...",
-        "Ort unklar: both now offering free water bottle refills and part of our ..."
+        "bottlechallenge_org: both now offering free water bottle refills and part of our ...",
+        "boca.vienna: Say hola to our Lunch Deal. From Monday to Friday, 12:00",
+        "Café im KHM - Speisekarte, Preise, Fotos & 5 Bewertungen"
       ],
       "lastRun": {
         "status": "completed-with-errors",
-        "startedAt": "2026-08-25T03:01:49.288Z",
-        "finishedAt": "2026-08-25T03:04:43.987Z",
-        "durationMs": 174699,
+        "startedAt": "2026-08-25T07:43:27.992Z",
+        "finishedAt": "2026-08-25T07:51:01.459Z",
+        "durationMs": 453467,
         "counts": {
           "rawCandidates": 16,
           "normalizedCandidates": 16,
-          "verifiedCandidates": 3,
+          "verifiedCandidates": 10,
           "previousDeals": 1,
-          "acceptedDeals": 3,
-          "rejectedDeals": 14
+          "acceptedDeals": 10,
+          "rejectedDeals": 7
         },
         "rejectedByReason": {
-          "post-verification-rejected": 14
+          "post-verification-rejected": 7
         },
         "errors": [
-          "https://www.instagram.com/explore/tags/fooddealsvienna/: Firecrawl Agent nach 120s abgebrochen"
+          "#kostenlosessenwien: Firecrawl Agent nach 90s abgebrochen",
+          "#fooddealwien: Firecrawl Agent nach 90s abgebrochen",
+          "#gastroaktionwien: Firecrawl Agent nach 90s abgebrochen"
         ],
-        "reportFile": "deal-pipeline-last-run-food3.json"
+        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
       },
       "uniqueRate": 0.7,
       "duplicateRate": 0.3,
       "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0.7,
-      "foodDrinkRate": 1,
-      "promoRate": 0.7,
+      "fresh7dRate": 0.3,
+      "viennaRate": 0.3,
+      "foodDrinkRate": 0.9,
+      "promoRate": 0.9,
       "missingUrlRate": 0,
-      "averageQualityScore": 72,
+      "averageQualityScore": 60,
       "topCategories": [
         {
           "value": "essen",
-          "count": 3
+          "count": 7
+        },
+        {
+          "value": "freizeit",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "gratis",
-          "count": 2
+          "value": "rabatt",
+          "count": 8
         },
         {
-          "value": "rabatt",
+          "value": "gratis",
           "count": 1
         }
       ],
@@ -521,20 +607,20 @@
         "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 68,
-      "missionFitScore": 65,
-      "coverageScore": 16,
-      "precisionScore": 71,
-      "sourceWeightScore": 57
+      "healthScore": 60,
+      "missionFitScore": 61,
+      "coverageScore": 21,
+      "precisionScore": 61,
+      "sourceWeightScore": 53
     },
     {
       "sourceKey": "wien-combined",
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
       "totalDeals": 9,
-      "uniqueDeals": 6,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
+      "uniqueDeals": 3,
+      "duplicateDeals": 6,
+      "duplicateAcrossSources": 6,
       "fresh1dCount": 1,
       "fresh7dCount": 9,
       "viennaCount": 9,
@@ -569,8 +655,8 @@
         "errors": [],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
       "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -615,98 +701,93 @@
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag"
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 66,
+      "healthScore": 58,
       "missionFitScore": 55,
-      "coverageScore": 22,
-      "precisionScore": 68,
-      "sourceWeightScore": 54
+      "coverageScore": 21,
+      "precisionScore": 65,
+      "sourceWeightScore": 51
     },
     {
-      "sourceKey": "firecrawl4",
-      "file": "deals-pending-firecrawl4.json",
-      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-      "totalDeals": 9,
-      "uniqueDeals": 6,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 2,
-      "foodDrinkCount": 8,
-      "promoCount": 8,
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 27,
+      "uniqueDeals": 8,
+      "duplicateDeals": 19,
+      "duplicateAcrossSources": 17,
+      "fresh1dCount": 7,
+      "fresh7dCount": 27,
+      "viennaCount": 27,
+      "foodDrinkCount": 7,
+      "promoCount": 19,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "bottlechallenge_org: both now offering free water bottle refills and part of our ...",
-        "boca.vienna: Say hola to our Lunch Deal. From Monday to Friday, 12:00",
-        "Café im KHM - Speisekarte, Preise, Fotos & 5 Bewertungen"
+        "Pizza + Getränk nur 12 € am 27.08.",
+        "1+1 gratis auf alle Getränke bis 19:00 Uhr",
+        "Mittagsmenü nur €14,90 mit Menüsuppe inklusive"
       ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-25T07:43:27.992Z",
-        "finishedAt": "2026-08-25T07:51:01.459Z",
-        "durationMs": 453467,
-        "counts": {
-          "rawCandidates": 16,
-          "normalizedCandidates": 16,
-          "verifiedCandidates": 10,
-          "previousDeals": 1,
-          "acceptedDeals": 10,
-          "rejectedDeals": 7
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 7
-        },
-        "errors": [
-          "#kostenlosessenwien: Firecrawl Agent nach 90s abgebrochen",
-          "#fooddealwien: Firecrawl Agent nach 90s abgebrochen",
-          "#gastroaktionwien: Firecrawl Agent nach 90s abgebrochen"
-        ],
-        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
-      },
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.3,
-      "viennaRate": 0.2,
-      "foodDrinkRate": 0.9,
-      "promoRate": 0.9,
+      "lastRun": null,
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.6,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.7,
       "missingUrlRate": 0,
-      "averageQualityScore": 60,
+      "averageQualityScore": 84.1,
       "topCategories": [
         {
+          "value": "event",
+          "count": 6
+        },
+        {
+          "value": "shopping",
+          "count": 6
+        },
+        {
+          "value": "food/drink",
+          "count": 4
+        },
+        {
           "value": "essen",
-          "count": 7
+          "count": 3
         },
         {
-          "value": "freizeit",
-          "count": 1
+          "value": "fitness",
+          "count": 2
         },
         {
-          "value": "kaffee",
-          "count": 1
+          "value": "supermarkt",
+          "count": 2
         }
       ],
       "topTypes": [
         {
-          "value": "rabatt",
-          "count": 8
+          "value": "gratis",
+          "count": 14
         },
         {
-          "value": "gratis",
+          "value": "rabatt",
+          "count": 12
+        },
+        {
+          "value": "bogo",
           "count": 1
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 58,
-      "missionFitScore": 60,
-      "coverageScore": 21,
-      "precisionScore": 59,
-      "sourceWeightScore": 51
+      "healthScore": 56,
+      "missionFitScore": 52,
+      "coverageScore": 41,
+      "precisionScore": 63,
+      "sourceWeightScore": 53
     },
     {
       "sourceKey": "instagram-apify",
@@ -1152,82 +1233,6 @@
       "coverageScore": 11,
       "precisionScore": 42,
       "sourceWeightScore": 29
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 11,
-      "uniqueDeals": 4,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 7,
-      "fresh1dCount": 0,
-      "fresh7dCount": 11,
-      "viennaCount": 11,
-      "foodDrinkCount": 2,
-      "promoCount": 6,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Pizza + Getränk nur 12 € am 27.08.",
-        "1+1 gratis auf alle Getränke bis 19:00 Uhr",
-        "Mittagsmenü nur €14,90 mit Menüsuppe inklusive"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.2,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 89.9,
-      "topCategories": [
-        {
-          "value": "food/drink",
-          "count": 5
-        },
-        {
-          "value": "event",
-          "count": 4
-        },
-        {
-          "value": "activity",
-          "count": 1
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 5
-        },
-        {
-          "value": "gratis",
-          "count": 4
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "gutschein",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 49,
-      "missionFitScore": 36,
-      "coverageScore": 20,
-      "precisionScore": 53,
-      "sourceWeightScore": 40
     },
     {
       "sourceKey": "gutscheine",
