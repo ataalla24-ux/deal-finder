@@ -362,6 +362,20 @@ function getApprovedMergeKeys(deal) {
   return keys.filter(Boolean);
 }
 
+function filterAlreadyLiveFallbackDeals(deals, queuedDeals, liveDeals) {
+  const queuedKeys = new Set(ensureArray(queuedDeals).map(pendingApprovalKey).filter(Boolean));
+  const liveKeys = new Set(ensureArray(liveDeals).flatMap(getApprovedMergeKeys));
+  const removed = [];
+  const filtered = ensureArray(deals).filter((deal) => {
+    const approvalKey = pendingApprovalKey(deal);
+    if (approvalKey && queuedKeys.has(approvalKey)) return true;
+    const alreadyLive = getApprovedMergeKeys(deal).some((key) => liveKeys.has(key));
+    if (alreadyLive) removed.push(deal);
+    return !alreadyLive;
+  });
+  return { deals: filtered, removed };
+}
+
 function isSocialDeal(deal) {
   const url = normalizeUrl(deal?.url).toLowerCase();
   return url.includes('instagram.com/') || url.includes('tiktok.com/');
@@ -1047,7 +1061,16 @@ async function main() {
     const counts = moderationCounts(pendingModeration.removed);
     console.log(`🛡️ Moderation reasons: ${Object.entries(counts).map(([reason, count]) => `${count} ${reason}`).join(' | ')}`);
   }
-  const moderatedPendingDeals = pendingModeration.deals;
+  const existingApprovedDeals = loadExistingApprovedDealsForMerge(moderation);
+  const liveFallbackFilter = filterAlreadyLiveFallbackDeals(
+    pendingModeration.deals,
+    queuedDeals,
+    existingApprovedDeals,
+  );
+  if (liveFallbackFilter.removed.length > 0) {
+    console.log(`🧹 Already-live Slack fallback: ${liveFallbackFilter.removed.length} alte Approval-Reaktion(en) übersprungen`);
+  }
+  const moderatedPendingDeals = liveFallbackFilter.deals;
   const approvalCheckDeals = moderatedPendingDeals
     .slice()
     .sort((left, right) => slackTsNumber(right.slackTs) - slackTsNumber(left.slackTs))
@@ -1144,7 +1167,6 @@ async function main() {
   const expiryNormalization = await normalizeApprovedDealExpiries(approvedModeration.deals);
   console.log(`🔎 approval expiry checks: ${expiryNormalization.urlChecksUsed}/${MAX_APPROVAL_URL_EXPIRY_CHECKS}, Treffer: ${expiryNormalization.urlExpiryHits}`);
 
-  const existingApprovedDeals = loadExistingApprovedDealsForMerge(moderation);
   const mergedApproved = mergeApprovedDeals(existingApprovedDeals, approvedModeration.deals);
 
   saveDealsJson(mergedApproved);
@@ -1164,6 +1186,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
 
 export {
   applySlackEdits,
+  filterAlreadyLiveFallbackDeals,
   normalizeDeal,
   normalizePendingDeal,
   pendingApprovalKey,

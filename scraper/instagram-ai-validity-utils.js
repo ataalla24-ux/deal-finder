@@ -169,7 +169,12 @@ function parseOpenEndedStart(text, referenceDate) {
 }
 
 function parseNumericRange(text, referenceDate) {
-  const regex = /\b([0-3]?\d)[./]([01]?\d)(?:[./](20\d{2}))?\.?\s*(?:-|bis|to|through|until)\s*([0-3]?\d)[./]([01]?\d)(?:[./](20\d{2}))?\.?\b/i;
+  const regex = new RegExp(
+    `\\b([0-3]?\\d)[./]([01]?\\d)(?:[./](20\\d{2}))?\\.?\\s*`
+      + `(?:-|bis|to|through|until)\\s*(?:${WEEKDAY_PATTERN}\\s*,?\\s*)?`
+      + `([0-3]?\\d)[./]([01]?\\d)(?:[./](20\\d{2}))?\\.?\\b`,
+    'i',
+  );
   const match = text.match(regex);
   if (!match) return null;
 

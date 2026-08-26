@@ -7,7 +7,8 @@ import { chromium } from 'playwright';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { inferPreferredBrand } from './deal-normalization-utils.js';
-import { unicodeSafeTruncate } from './instagram-ai-validity-utils.js';
+import { extractActiveOfferWindow, unicodeSafeTruncate } from './instagram-ai-validity-utils.js';
+import { getNonGuaranteedPromotionReason } from './promotion-quality-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -206,9 +207,24 @@ const FALSE_POSITIVE_PATTERNS = [
   /\bfree\s+events?\s+happening\s+all\s+the\s+time\b/i,
 ];
 
+const NON_DEAL_CONTENT_RULES = [
+  {
+    reason: 'kostenlose Infrastruktur statt Deal',
+    pattern: /\b(?:(?:gratis|kostenlos(?:e|er|es|en)?|free)\s+(?:kunden[- ]?)?(?:parkpl[aä]tze?|parking|toiletten?|wcs?|ladestationen?|charging\s+stations?)|(?:parkpl[aä]tze?|parking|toiletten?|wcs?|ladestationen?|charging\s+stations?)\s+(?:gratis|kostenlos|free))\b/i,
+  },
+  {
+    reason: 'allgemeiner Reiseguide statt konkretem Deal',
+    pattern: /\b(?:travel\s+bucket\s+list|top\s+(?:vienna\s+)?spots?|first\s+trip|vienna\s+guide|save\s+this\s+post\s+for\s+(?:your\s+)?itinerary|cosa\s+si\s+pu[oò]\s+vedere\s+a\s+vienna\s+gratis)\b/i,
+  },
+  {
+    reason: 'allgemeine Empfehlung statt konkretem Deal',
+    pattern: /\b(?:stand\s+schon\s+so\s+lange\s+auf\s+meiner\s+liste|wirklich\s+nur\s+empfehlen|kann(?:'|’)?s?\s+euch\s+wirklich\s+empfehlen)\b/i,
+  },
+];
+
 const CATEGORY_RULES = [
   { category: 'kaffee', logo: '☕', pattern: /\b(kaffee|coffee|cafe|café|matcha|espresso|latte|cappuccino|drink|drinks|getränk|getraenk|bubble tea|boba)\b/i },
-  { category: 'essen', logo: '🍽️', pattern: /\b(essen|food|restaurant|pizza|burger|kebab|kebap|döner|doener|sushi|ramen|brunch|croissant|wrap|falafel|eis|gelato|snack)\b/i },
+  { category: 'essen', logo: '🍽️', pattern: /\b(essen|food|restaurant|pizza|burger|kebab|kebap|döner|doener|sushi|ramen|brunch|croissant|wrap|falafel|eis|gelato|snack|schokolade|chocolate|erdbeer\w*|strawberr(?:y|ies)|dessert|chocoberry)\b/i },
   { category: 'fitness', logo: '💪', pattern: /\b(fitness|gym|probetraining|workout|yoga|pilates|training)\b/i },
   { category: 'beauty', logo: '💄', pattern: /\b(beauty|kosmetik|make.?up|parfum|goodie bag|haare|friseur|barber)\b/i },
   { category: 'kultur', logo: '🎟️', pattern: /\b(kino|ticket|eintritt|entry|admission|museum|theater|konzert|festival|event|ausstellung|mittelalterfest|stift|klosterneuburg|prater)\b/i },
@@ -297,6 +313,13 @@ function hasStrongDealSignal(text) {
   return true;
 }
 
+function getTikTokContentQualityReason(text) {
+  const signal = cleanText(text, 2600);
+  const nonDealRule = NON_DEAL_CONTENT_RULES.find((rule) => rule.pattern.test(signal));
+  if (nonDealRule) return nonDealRule.reason;
+  return getNonGuaranteedPromotionReason(signal);
+}
+
 function inferType(text) {
   if (/\b1\s*\+\s*1\b|\b2\s*(?:für|fuer)\s*1\b|\bbogo\b/i.test(text)) return 'bogo';
   if (/\bgratis\b|\bkostenlos|\bfree\b|\b0\s*€/i.test(text)) return 'gratis';
@@ -319,6 +342,16 @@ function inferCategoryAndLogo(text, type) {
 
 function extractBrand(text, accountHandle) {
   const signal = cleanText(text, 800);
+  const knownProviders = [
+    { pattern: /\bdatri\s+boxing\b/i, name: 'Datri Boxing' },
+    { pattern: /\bchocoberry\b/i, name: 'Chocoberry' },
+    { pattern: /\bcafe\s+milano\b/i, name: 'Cafe Milano' },
+    { pattern: /\bdyson(?:\s+dach)?\b/i, name: 'Dyson' },
+    { pattern: /\bpalace\s+of\s+justice\b/i, name: 'Palace of Justice Vienna' },
+    { pattern: /@wukvienna\b|\bwuk\s+vienna\b/i, name: 'WUK Wien' },
+  ];
+  const knownProvider = knownProviders.find((provider) => provider.pattern.test(signal));
+  if (knownProvider) return knownProvider.name;
   const knownVenue = signal.match(/\b(Stift Klosterneuburg|Silent Disco Austria|Dahab Döner|Fitness Union Wien|Botanischer Garten Wien|Botanische(?:r|n)? Garten|Filipino Food Festival Austria|FilipinoFoodFestivalAustria|Genuss-Festival Wien|GENUSS-FESTIVAL VIENNA|Zlatno Ćoše|Zlatno Cose)\b/i);
   if (knownVenue?.[1]) return cleanText(knownVenue[1], 80);
 
@@ -351,6 +384,18 @@ function buildOfferTitle(text, brand) {
   const venue = cleanText(venueMatch?.[1] || '', 80);
   if (/\bdyson\b/i.test(signal) && /\b(?:styling\s+tour|pop[- ]?up|hair\s+styled)\b/i.test(signal) && /\bfree\s+drinks?\b/i.test(signal)) {
     return 'Gratis Haarstyling und Drinks beim Dyson Pop-up';
+  }
+  if (/\bcafe\s+milano\b/i.test(signal) && /\bhappy\s+hour\b/i.test(signal) && /\b(?:pool|billard)\b[^.!?]{0,24}\b(?:free|gratis|kostenlos)\b/i.test(signal)) {
+    return 'Tägliche Happy Hour und gratis Billard bei Cafe Milano';
+  }
+  if (/\bpalace\s+of\s+justice\b/i.test(signal) && /\b(?:free\s+to\s+enter|free\s+entry|eintritt\s+frei|kostenlos(?:er)?\s+eintritt)\b/i.test(signal)) {
+    return 'Gratis Eintritt im Justizpalast Wien';
+  }
+  if (/\bfilm\s*festival\b/i.test(signal) && /\brathausplatz\b/i.test(signal) && /\bgratis(?:e[nr]?)?\s+veranstaltung|\bkostenlos|\bfree\b/i.test(signal)) {
+    return 'Gratis Film Festival am Rathausplatz';
+  }
+  if (/@wukvienna\b|\bwuk\s+vienna\b/i.test(signal) && /\bgratis(?:e[nr]?)?\s+open[- ]?air[- ]?konzerte?\b/i.test(signal)) {
+    return 'Gratis Open-Air-Konzerte beim WUK';
   }
   if (/\bgenuss[-\s]?festival\b/i.test(signal) && /\b(?:eintritt|frei|gratis|kostenlos|free)\b/i.test(signal)) {
     return 'Gratis Eintritt Genuss-Festival Stadtpark';
@@ -417,16 +462,14 @@ function parseDateFromPost(data) {
   return valid[0] || null;
 }
 
-function ageDays(date) {
-  return Math.max(0, Math.floor((Date.now() - date.getTime()) / DAY_MS));
+function ageDays(date, now = new Date()) {
+  return Math.max(0, Math.floor((now.getTime() - date.getTime()) / DAY_MS));
 }
 
-function isCurrentPost(date) {
-  const now = new Date();
-  if (date.getUTCFullYear() !== now.getUTCFullYear()) return false;
+function isCurrentPost(date, now = new Date()) {
   if (date.getTime() > now.getTime() + 2 * 60 * 60 * 1000) return false;
-  const age = ageDays(date);
-  return age >= 0 && age <= CONFIG.maxAgeDays;
+  const ageMs = now.getTime() - date.getTime();
+  return ageMs >= 0 && ageMs <= CONFIG.maxAgeDays * DAY_MS;
 }
 
 function endOfViennaDay(year, month, day) {
@@ -437,9 +480,9 @@ function monthFromName(value) {
   return MONTH_NAMES.get(cleanText(value, 40).toLowerCase()) || 0;
 }
 
-function parseExplicitOfferEndDate(text) {
+function parseExplicitOfferEndDate(text, referenceDate = new Date()) {
   const signal = cleanText(text, 1600).toLowerCase();
-  const year = new Date().getUTCFullYear();
+  const year = referenceDate.getUTCFullYear();
 
   let match = signal.match(/\b(?:bis|gültig bis|gueltig bis|nur bis|noch bis)\s+(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?/i);
   if (match) {
@@ -503,19 +546,19 @@ function firstSundayOfMonth(date) {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1 + offset, 23, 59, 59, 999));
 }
 
-function isExplicitlyExpired(text, postDate = null) {
+function isExplicitlyExpired(text, postDate = null, now = new Date()) {
   const signal = cleanText(text, 1600);
-  const endDate = parseExplicitOfferEndDate(text);
-  if (endDate && endDate.getTime() < Date.now() - 2 * 60 * 60 * 1000) return true;
+  const endDate = parseExplicitOfferEndDate(text, now);
+  if (endDate && endDate.getTime() < now.getTime() - 2 * 60 * 60 * 1000) return true;
 
   if (postDate instanceof Date && !Number.isNaN(postDate.getTime())) {
-    if (/\bnur(?:\s+noch)?\s+heute\b/i.test(signal) && endOfUtcDay(postDate).getTime() < Date.now()) return true;
+    if (/\bnur(?:\s+noch)?\s+heute\b/i.test(signal) && endOfUtcDay(postDate).getTime() < now.getTime()) return true;
     if (/\bmorgen\b/i.test(signal)) {
       const tomorrow = new Date(Date.UTC(postDate.getUTCFullYear(), postDate.getUTCMonth(), postDate.getUTCDate() + 1, 23, 59, 59, 999));
-      if (tomorrow.getTime() < Date.now()) return true;
+      if (tomorrow.getTime() < now.getTime()) return true;
     }
-    if (/\bdieses wochenende\b/i.test(signal) && endOfWeekendForPost(postDate).getTime() < Date.now()) return true;
-    if (/\bersten?\s+sonntag\s+des\s+monats\b/i.test(signal) && firstSundayOfMonth(postDate).getTime() < Date.now()) return true;
+    if (/\bdieses wochenende\b/i.test(signal) && endOfWeekendForPost(postDate).getTime() < now.getTime()) return true;
+    if (/\bersten?\s+sonntag\s+des\s+monats\b/i.test(signal) && firstSundayOfMonth(postDate).getTime() < now.getTime()) return true;
   }
   return false;
 }
@@ -684,12 +727,13 @@ async function extractTikTokPostData(page, url) {
   });
 }
 
-export function buildDealFromPost(url, data) {
+export function buildDealFromPost(url, data, options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date();
   const dateCandidate = parseDateFromPost(data);
   if (!dateCandidate) {
     return { deal: null, reason: 'kein echtes TikTok-Post-Datum gefunden' };
   }
-  if (!isCurrentPost(dateCandidate.date)) {
+  if (!isCurrentPost(dateCandidate.date, now)) {
     return { deal: null, reason: `TikTok-Post älter als ${CONFIG.maxAgeDays} Tage (${dateCandidate.date.toISOString().slice(0, 10)})` };
   }
 
@@ -705,7 +749,9 @@ export function buildDealFromPost(url, data) {
   const viennaEvidenceDetail = extractViennaEvidence(contextSignal);
   if (!viennaEvidenceDetail) return { deal: null, reason: 'kein eindeutiges Wien-Signal' };
   if (!hasStrongDealSignal(offerSignal)) return { deal: null, reason: 'kein starkes Gratis-/Deal-Signal' };
-  if (isExplicitlyExpired(offerSignal, dateCandidate.date)) return { deal: null, reason: 'explizites/relatives Aktionsdatum ist abgelaufen' };
+  const contentQualityReason = getTikTokContentQualityReason(offerSignal);
+  if (contentQualityReason) return { deal: null, reason: contentQualityReason };
+  if (isExplicitlyExpired(offerSignal, dateCandidate.date, now)) return { deal: null, reason: 'explizites/relatives Aktionsdatum ist abgelaufen' };
 
   const type = inferType(offerSignal);
   const { category, logo } = inferCategoryAndLogo(offerSignal, type);
@@ -718,8 +764,15 @@ export function buildDealFromPost(url, data) {
     url,
   }) || extractedBrand;
   const title = buildOfferTitle(offerSignal, brand);
-  const score = buildQualityScore(offerSignal, dateCandidate.date, type, category);
+  const score = buildQualityScore(offerSignal, dateCandidate.date, type, category, now);
   if (score < CONFIG.minScore) return { deal: null, reason: `Score zu niedrig (${score})` };
+  const offerWindow = extractActiveOfferWindow(offerSignal, {
+    pubDate: dateCandidate.date,
+    now,
+  });
+  const validFrom = offerWindow?.startDate?.toISOString().slice(0, 10) || '';
+  const validUntil = offerWindow?.endDate?.toISOString().slice(0, 10) || '';
+  const postalCode = contextSignal.match(/\b(1(?:0[1-9]|1\d|2[0-3])0)\b/)?.[1] || '';
 
   return {
     deal: {
@@ -733,8 +786,15 @@ export function buildDealFromPost(url, data) {
       source: 'TikTok Scanner',
       originSource: 'tiktok-deals-scanner',
       url,
-      expires: extractExpiryText(offerSignal),
-      distance: 'Wien',
+      expires: validUntil || extractExpiryText(offerSignal),
+      validFrom,
+      validUntil,
+      expiryKind: offerWindow?.kind || '',
+      expirySource: offerWindow ? 'tiktok-post-caption' : '',
+      dateConfidence: offerWindow ? 'high' : '',
+      distance: postalCode ? `${postalCode} Wien` : 'Wien',
+      city: postalCode ? 'Wien' : '',
+      postalCode,
       viennaEvidence: {
         verified: true,
         source: 'tiktok-post',
@@ -752,7 +812,7 @@ export function buildDealFromPost(url, data) {
   };
 }
 
-function buildQualityScore(signal, postDate, type, category) {
+function buildQualityScore(signal, postDate, type, category, now = new Date()) {
   let score = 0;
   if (type === 'gratis') score += 34;
   else if (type === 'bogo') score += 30;
@@ -763,7 +823,7 @@ function buildQualityScore(signal, postDate, type, category) {
   if (/\bkaffee|coffee|pizza|burger|drink|goodie|ticket|probetraining/i.test(signal)) score += 10;
   if (category === 'kaffee' || category === 'essen') score += 8;
   if (/\bnur heute|heute|morgen|wochenende|diese woche|neueröffnung|neueroeffnung|opening/i.test(signal)) score += 8;
-  const age = ageDays(postDate);
+  const age = ageDays(postDate, now);
   if (age <= 1) score += 16;
   else if (age <= 3) score += 12;
   else if (age <= 7) score += 8;

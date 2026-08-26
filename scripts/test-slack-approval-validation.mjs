@@ -2,12 +2,55 @@ import assert from 'node:assert/strict';
 
 import {
   applySlackEdits,
+  filterAlreadyLiveFallbackDeals,
   normalizeDeal as normalizeApprovalDeal,
   normalizePendingDeal,
   validateApprovalCandidates,
 } from '../scraper/slack-approve.js';
+import { parseDigestDealMessage } from '../scraper/slack-digest-utils.js';
+import { buildSlackMessage } from '../scraper/slack-notify.js';
 
 const now = new Date('2026-07-20T12:00:00.000Z');
+
+const roundTripMessage = buildSlackMessage({
+  id: 'future-social-roundtrip',
+  brand: 'Example Pop-up',
+  title: 'Gratis Drink beim Pop-up',
+  description: 'Gratis Drink am Rathausplatz, 1010 Wien, solange der Vorrat reicht.',
+  url: 'https://www.tiktok.com/@example/video/7678002441849425155',
+  category: 'kaffee',
+  type: 'gratis',
+  distance: 'Rathausplatz, 1010 Wien',
+  originSource: 'tiktok-deals-scanner',
+  pubDate: '2026-07-20T08:00:00.000Z',
+  validFrom: '2026-07-24',
+  validUntil: '2026-07-27',
+}, 1);
+const parsedRoundTrip = parseDigestDealMessage({
+  text: roundTripMessage,
+  ts: '1784550000.100',
+  thread_ts: '1784550000.000',
+});
+assert.match(parsedRoundTrip.description, /Gratis Drink am Rathausplatz/);
+assert.match(parsedRoundTrip.validFrom, /^2026-07-24/);
+assert.match(parsedRoundTrip.validUntil, /^2026-07-27/);
+assert.equal(parsedRoundTrip.postalCode, '1010');
+assert.equal(parsedRoundTrip.sourcePublishedAtSource, 'slack.digest-validated-source-date');
+
+const alreadyLiveFallback = filterAlreadyLiveFallbackDeals([
+  { ...parsedRoundTrip, slackTs: '1784550000.100' },
+  { ...parsedRoundTrip, slackTs: '1784550000.200' },
+], [
+  { ...parsedRoundTrip, slackTs: '1784550000.200' },
+], [
+  { ...parsedRoundTrip, slackTs: '1784540000.100', approvedAt: now.toISOString() },
+]);
+assert.deepEqual(
+  alreadyLiveFallback.deals.map((deal) => deal.slackTs),
+  ['1784550000.200'],
+  'an old reaction fallback is skipped once its deal is live, while a real queued update remains eligible',
+);
+assert.equal(alreadyLiveFallback.removed.length, 1);
 
 const normalizedPending = normalizeApprovalDeal({
   id: 'pending-without-approval',

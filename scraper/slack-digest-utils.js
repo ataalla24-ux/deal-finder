@@ -158,6 +158,8 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
   let brand = '';
   let distance = 'Wien';
   let pubDate = '';
+  let validFrom = '';
+  let validUntil = '';
   let expires = '';
   let category = 'wien';
   let type = 'rabatt';
@@ -168,7 +170,14 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
   let missingFields = [];
 
   for (const line of lines.slice(1)) {
-    const plain = normalizeDigestLine(line);
+    const rawLine = cleanText(line);
+    const descriptionMatch = rawLine.match(/^(?:📝|:memo:)\s*(.+)$/iu);
+    if (descriptionMatch) {
+      description = cleanText(descriptionMatch[1]);
+      continue;
+    }
+
+    const plain = normalizeDigestLine(rawLine);
     if (plain.startsWith('Marke/Restaurant:')) {
       brand = cleanText(plain.slice('Marke/Restaurant:'.length));
     } else if (plain.startsWith('Ort:')) {
@@ -181,11 +190,16 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
     } else if (plain.startsWith('Deal-Zeitraum:')) {
       const period = cleanText(plain.slice('Deal-Zeitraum:'.length));
       const [, untilPart = ''] = period.split(/\bbis\b/i);
-      expires = cleanText(untilPart || period);
-    } else if (plain.startsWith('Start:')) {
-      pubDate = parseDisplayDate(plain.slice('Start:'.length));
+      const rawExpiry = cleanText(untilPart || period);
+      validUntil = parseDisplayDate(rawExpiry);
+      expires = validUntil || rawExpiry;
+    } else if (plain.startsWith('Startet am:') || plain.startsWith('Start:')) {
+      const label = plain.startsWith('Startet am:') ? 'Startet am:' : 'Start:';
+      validFrom = parseDisplayDate(plain.slice(label.length));
     } else if (plain.startsWith('Gültig bis:')) {
-      expires = cleanText(plain.slice('Gültig bis:'.length));
+      const rawExpiry = cleanText(plain.slice('Gültig bis:'.length));
+      validUntil = parseDisplayDate(rawExpiry);
+      expires = validUntil || rawExpiry;
     } else if (plain.startsWith('Kategorie:')) {
       const detail = cleanText(plain.slice('Kategorie:'.length));
       const detailParts = detail.split('|').map((part) => cleanText(part));
@@ -209,8 +223,8 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
         .split(',')
         .map((item) => cleanText(item))
         .filter(Boolean);
-    } else if (plain.startsWith('📝 ') || plain.startsWith('Beschreibung:')) {
-      description = cleanText(plain.replace(/^📝\s*/, '').replace(/^Beschreibung:\s*/, ''));
+    } else if (plain.startsWith('Beschreibung:')) {
+      description = cleanText(plain.slice('Beschreibung:'.length));
     } else if (plain.startsWith('Mit ') && plain.includes('freigeben')) {
       continue;
     } else if (plain.startsWith('memo:')) {
@@ -240,6 +254,7 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
     type,
   ]);
 
+  const postalCode = distance.match(/\b(1(?:0[1-9]|1\d|2[0-3])0)\b/)?.[1] || '';
   const normalized = normalizeDealRecord({
     id,
     title: title || `${brand || 'Deal'} Deal`,
@@ -252,7 +267,13 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
     source: 'Slack Digest',
     originSource,
     expires,
+    validFrom,
+    validUntil,
+    postalCode,
     pubDate: pubDate || new Date(parseFloat(message.ts || '0') * 1000).toISOString(),
+    pubDateSource: pubDate ? 'slack.digest-validated-source-date' : 'slack.message-timestamp',
+    sourcePublishedAt: pubDate,
+    sourcePublishedAtSource: pubDate ? 'slack.digest-validated-source-date' : '',
     qualityScore: 0,
     votes: 1,
     priority: 3,

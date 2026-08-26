@@ -2,7 +2,7 @@ const VIENNA_POSTCODE_PATTERN = /(?:^|\D)(1(?:0[1-9]|1\d|2[0-3])0)(?!\d)/;
 const VIENNA_CITY_PATTERN = /\b(?:wien|vienna)\b/i;
 const STREET_PATTERN = /\b(?:stra(?:ß|ss)e|gasse|platz|weg|ring|allee|kai|markt|zeile|promenade)\b/i;
 const UNTRUSTED_PUBLICATION_SOURCE_PATTERN = /(?:firecrawl.*run|agent\s*run|crawl(?:ed|er)?(?:\s|[-_])?(?:at|run|time)|scrap(?:ed|er)(?:\s|[-_])?(?:at|run|time)|discover(?:ed|y)(?:\s|[-_])?(?:at|run|time)?|generated(?:\s|[-_])?at|fallback|current(?:\s|[-_])?time|community\s*submission)/i;
-const TRUSTED_PUBLICATION_SOURCE_PATTERN = /(?:instagram|meta[-_. ]?(?:graph|business|ad)|apify|time[-_. ]?datetime|ld[-_. ]?json.*(?:upload|date)|article.*published|rendered.*time|taken[-_. ]?at|post[-_. ]?published|source[-_. ]?published)/i;
+const TRUSTED_PUBLICATION_SOURCE_PATTERN = /(?:instagram|meta[-_. ]?(?:graph|business|ad)|apify|time[-_. ]?datetime|ld[-_. ]?json.*(?:upload|date)|article.*published|rendered.*time|taken[-_. ]?at|post[-_. ]?published|source[-_. ]?published|slack[-_. ]?digest[-_. ]?validated[-_. ]?source[-_. ]?date)/i;
 const RESERVED_INSTAGRAM_USERNAMES = new Set([
   'about', 'accounts', 'api', 'challenge', 'create', 'developer', 'direct', 'directory',
   'download', 'explore', 'legal', 'login', 'p', 'press', 'privacy', 'reel', 'reels',
