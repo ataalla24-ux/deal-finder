@@ -1,17 +1,23 @@
 {
-  "generatedAt": "2026-08-26T21:12:31.822Z",
+  "generatedAt": "2026-08-26T21:58:48.258Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 386,
-    "uniqueCandidates": 340,
-    "distinctCandidates": 360,
-    "duplicateClusters": 20,
+    "totalCandidates": 374,
+    "uniqueCandidates": 341,
+    "distinctCandidates": 355,
+    "duplicateClusters": 14,
     "topHealthySources": [
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "healthScore": 76,
         "totalDeals": 4
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 67,
+        "totalDeals": 14
       },
       {
         "sourceKey": "food3",
@@ -22,20 +28,14 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 62,
+        "healthScore": 66,
         "totalDeals": 5
       },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "healthScore": 61,
-        "totalDeals": 35
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 61,
-        "totalDeals": 14
+        "healthScore": 65,
+        "totalDeals": 23
       }
     ],
     "topMissionSources": [
@@ -86,13 +86,6 @@
         "fresh1dCount": 0
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 54,
-        "totalDeals": 35,
-        "fresh1dCount": 8
-      },
-      {
         "sourceKey": "events",
         "sourceLabel": "Kirchen Events",
         "coverageScore": 53,
@@ -105,6 +98,13 @@
         "coverageScore": 52,
         "totalDeals": 34,
         "fresh1dCount": 0
+      },
+      {
+        "sourceKey": "gutscheine",
+        "sourceLabel": "Gutscheine.at",
+        "coverageScore": 52,
+        "totalDeals": 27,
+        "fresh1dCount": 27
       }
     ],
     "topPrecisionSources": [
@@ -115,28 +115,28 @@
         "totalDeals": 4
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 74,
+        "totalDeals": 5
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 73,
         "totalDeals": 2
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 72,
-        "totalDeals": 5
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 67,
+        "precisionScore": 70,
         "totalDeals": 14
       },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 64,
-        "totalDeals": 35
+        "precisionScore": 66,
+        "totalDeals": 23
       }
     ],
     "topWeightedSources": [
@@ -147,6 +147,18 @@
         "totalDeals": 4
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 58,
+        "totalDeals": 14
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 58,
+        "totalDeals": 5
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 57,
@@ -155,20 +167,8 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 57,
-        "totalDeals": 35
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
         "sourceWeightScore": 56,
-        "totalDeals": 5
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 55,
-        "totalDeals": 14
+        "totalDeals": 23
       }
     ],
     "topSourcesToFix": [
@@ -308,6 +308,81 @@
       "sourceWeightScore": 60
     },
     {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 14,
+      "uniqueDeals": 9,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 7,
+      "fresh7dCount": 14,
+      "viennaCount": 14,
+      "foodDrinkCount": 5,
+      "promoCount": 10,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "September 2026 🕠 Einlass: 17:30 Uhr 📍 Café-Restaurant Meierei, Hauptallee 3, 1020 Wien 🎟️ Eintritt kostenlos– bring deine Freundinnen mit",
+        "August 2026 ⏰ ab 17:00 Uhr 💶 € 59 pro Person (Kinder bis 6 Jahre gratis) Perfekt für einen entspannten Sommerabend mit Freunden und Familie",
+        "Free 🔗 buskersfestivalwien 🎨 12.09."
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0.5,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.4,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 85.9,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 4
+        },
+        {
+          "value": "freizeit",
+          "count": 3
+        },
+        {
+          "value": "kultur",
+          "count": 3
+        },
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 10
+        },
+        {
+          "value": "rabatt",
+          "count": 4
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 67,
+      "missionFitScore": 60,
+      "coverageScore": 31,
+      "precisionScore": 70,
+      "sourceWeightScore": 58
+    },
+    {
       "sourceKey": "food3",
       "file": "deals-pending-food3.json",
       "sourceLabel": "Firecrawl Key 2 - Food",
@@ -387,9 +462,9 @@
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
       "totalDeals": 5,
-      "uniqueDeals": 1,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
+      "uniqueDeals": 2,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
       "fresh1dCount": 2,
       "fresh7dCount": 5,
       "viennaCount": 5,
@@ -425,8 +500,8 @@
         "errors": [],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
-      "uniqueRate": 0.2,
-      "duplicateRate": 0.8,
+      "uniqueRate": 0.4,
+      "duplicateRate": 0.6,
       "fresh1dRate": 0.4,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -462,173 +537,89 @@
         "geringe Food-/Drink-Relevanz",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 62,
+      "healthScore": 66,
       "missionFitScore": 66,
       "coverageScore": 18,
-      "precisionScore": 72,
-      "sourceWeightScore": 56
+      "precisionScore": 74,
+      "sourceWeightScore": 58
     },
     {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 35,
-      "uniqueDeals": 20,
-      "duplicateDeals": 15,
-      "duplicateAcrossSources": 15,
-      "fresh1dCount": 8,
-      "fresh7dCount": 35,
-      "viennaCount": 35,
-      "foodDrinkCount": 11,
-      "promoCount": 24,
+      "totalDeals": 23,
+      "uniqueDeals": 15,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 8,
+      "fresh1dCount": 6,
+      "fresh7dCount": 23,
+      "viennaCount": 23,
+      "foodDrinkCount": 10,
+      "promoCount": 14,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Afterwork 1+1 gratis auf alle Getränke bis 19:00 Uhr",
-        "Mittagsmenü 4× essen, 5. gratis",
-        "August 2026 ⏰ ab 17:00 Uhr 💶 € 59 pro Person (Kinder bis 6 Jahre gratis) Perfekt für einen entspannten Sommer"
+        "All-you-can-eat HOTPOT für 29 €",
+        "All You Can Eat BBQ Garten-Grill-Party",
+        "Grand Cultural Evening 2026 - Free Entry"
       ],
       "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.2,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 82.4,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 9
-        },
-        {
-          "value": "essen",
-          "count": 6
-        },
-        {
-          "value": "fitness",
-          "count": 4
-        },
-        {
-          "value": "food/drink",
-          "count": 4
-        },
-        {
-          "value": "kultur",
-          "count": 3
-        },
-        {
-          "value": "supermarkt",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 20
-        },
-        {
-          "value": "rabatt",
-          "count": 12
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 1
-        },
-        {
-          "value": "gutschein",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 61,
-      "missionFitScore": 50,
-      "coverageScore": 54,
-      "precisionScore": 64,
-      "sourceWeightScore": 57
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 14,
-      "uniqueDeals": 4,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 10,
-      "fresh1dCount": 7,
-      "fresh7dCount": 14,
-      "viennaCount": 14,
-      "foodDrinkCount": 5,
-      "promoCount": 10,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "September 2026 🕠 Einlass: 17:30 Uhr 📍 Café-Restaurant Meierei, Hauptallee 3, 1020 Wien 🎟️ Eintritt kostenlos– bring deine Freundinnen mit",
-        "August 2026 ⏰ ab 17:00 Uhr 💶 € 59 pro Person (Kinder bis 6 Jahre gratis) Perfekt für einen entspannten Sommerabend mit Freunden und Familie",
-        "Free 🔗 buskersfestivalwien 🎨 12.09."
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 0.5,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.3,
       "fresh7dRate": 1,
       "viennaRate": 1,
       "foodDrinkRate": 0.4,
-      "promoRate": 0.7,
+      "promoRate": 0.6,
       "missingUrlRate": 0,
       "averageQualityScore": 85.9,
       "topCategories": [
         {
           "value": "essen",
-          "count": 4
+          "count": 7
         },
         {
-          "value": "freizeit",
-          "count": 3
+          "value": "event",
+          "count": 5
         },
         {
-          "value": "kultur",
+          "value": "activity",
           "count": 3
         },
         {
           "value": "shopping",
+          "count": 3
+        },
+        {
+          "value": "drink",
           "count": 2
         },
         {
-          "value": "fitness",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
+          "value": "supermarkt",
+          "count": 2
         }
       ],
       "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 12
+        },
         {
           "value": "gratis",
           "count": 10
         },
         {
-          "value": "rabatt",
-          "count": 4
+          "value": "bogo",
+          "count": 1
         }
       ],
       "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
+        "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 61,
-      "missionFitScore": 60,
-      "coverageScore": 28,
-      "precisionScore": 67,
-      "sourceWeightScore": 55
+      "healthScore": 65,
+      "missionFitScore": 52,
+      "coverageScore": 40,
+      "precisionScore": 66,
+      "sourceWeightScore": 56
     },
     {
       "sourceKey": "joe",
