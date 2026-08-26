@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-08-26T07:32:05.038Z",
+  "generatedAt": "2026-08-26T07:33:32.891Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 202,
-    "allowed": 0,
+    "total": 203,
+    "allowed": 1,
     "blocked": 202,
     "warnings": 0,
     "reasonCounts": {
@@ -35,19 +35,19 @@
       "älter als 7 Tage (2026-05-05)": 1,
       "älter als 7 Tage (2026-04-30)": 1,
       "älter als 7 Tage (2026-04-20)": 1,
-      "älter als 7 Tage (2026-02-22)": 88,
+      "älter als 7 Tage (2026-02-22)": 89,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-07-16)": 2,
-      "URL ungültig (HTTP 404)": 10,
+      "älter als 7 Tage (2025-07-30)": 1,
+      "URL ungültig (HTTP 404)": 7,
       "ausgeschlossene Quelle (gastro.news)": 6,
       "älter als 7 Tage (2019-08-02)": 1,
       "älter als 7 Tage (2023-11-04)": 1,
       "älter als 7 Tage (2023-02-24)": 1,
       "älter als 7 Tage (2014-10-10)": 3,
-      "älter als 7 Tage (2026-04-19)": 31,
+      "älter als 7 Tage (2026-04-19)": 32,
       "älter als 7 Tage (2016-10-30)": 3,
-      "älter als 7 Tage (2023-09-21)": 3,
       "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
@@ -67,7 +67,7 @@
       "abgelaufen": 4,
       "ausgeschlossene Quelle": 7,
       "kein echtes Post-Datum": 2,
-      "ungültige URL": 12,
+      "ungültige URL": 9,
       "Meta-Graph-Widerspruch": 2
     },
     "sourceCounts": {
@@ -112,8 +112,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 44,
           "Gottesdienste außerhalb Wochenlauf": 45,
-          "älter als 7 Tage": 39,
-          "ungültige URL": 1
+          "älter als 7 Tage": 39
         }
       },
       "Gutscheine.at": {
@@ -152,7 +151,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 96,
           "älter als 7 Tage": 99,
-          "ungültige URL": 5,
+          "ungültige URL": 3,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "nicht Wien": 1
         }
@@ -176,8 +175,8 @@
         }
       },
       "tiktok-deals-scanner": {
-        "total": 2,
-        "allowed": 0,
+        "total": 3,
+        "allowed": 1,
         "blocked": 2,
         "warnings": 0,
         "reasonCategoryCounts": {
@@ -196,7 +195,23 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "tiktok-cq1bii",
+      "title": "In fünf Wiener Parks gibt es ab sofort kostenlose Ladestationen für Smartphones und Tablets",
+      "brand": "der städtischen Initiative",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@orfradiowienheute/video/7677999442515037462",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-25T15:59:12.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "jesuszentrum-events-20260824",
@@ -1388,18 +1403,17 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2025-07-30)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-02-22T21:13:07.698Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 185,
+      "sourceDate": "2025-07-30T05:18:47.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 392,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-21-20260222",
@@ -1840,18 +1854,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.hillsong.com/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 129,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-2-20260419",
@@ -2128,15 +2143,17 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2023-09-21)"
+        "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
-      "sourceDate": "2023-09-21T15:18:49.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1070,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-04-19T08:59:47.145Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 129,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-16-20260419",
@@ -2698,15 +2715,17 @@
       "url": "https://www.mennoniten.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2023-09-21)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2023-09-21T15:18:49.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1070,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 185,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-12-20260222",
@@ -2735,17 +2754,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.hillsong.com/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 185,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-14-20260222",
@@ -3515,15 +3535,17 @@
       "url": "https://www.mennoniten.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2023-09-21)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2023-09-21T15:18:49.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1070,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 185,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-20-20260222",
@@ -3608,17 +3630,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.hillsong.com/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 185,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-25-20260222",
