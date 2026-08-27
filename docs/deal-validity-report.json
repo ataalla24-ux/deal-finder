@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-27T06:53:30.983Z",
+  "generatedAt": "2026-08-27T07:07:06.653Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 197,
-    "allowed": 0,
-    "blocked": 197,
+    "allowed": 1,
+    "blocked": 196,
     "warnings": 0,
     "reasonCounts": {
       "nicht eindeutig in Wien": 29,
@@ -54,7 +54,6 @@
       "abgelaufen (2026-08-22)": 2,
       "abgelaufen (2026-08-26T23:59:59.999Z)": 1,
       "älter als 7 Tage (2026-07-01)": 9,
-      "selbst syndizierter FreeFinder-Post": 1,
       "ausgeschlossene Quelle (TheFork)": 1
     },
     "reasonCategoryCounts": {
@@ -66,8 +65,7 @@
       "kein echtes Post-Datum": 2,
       "ungültige URL": 18,
       "Gottesdienste außerhalb Wochenlauf": 34,
-      "Meta-Graph-Widerspruch": 2,
-      "selbst syndiziert": 1
+      "Meta-Graph-Widerspruch": 2
     },
     "sourceCounts": {
       "Apify Instagram Vienna Food Offers": {
@@ -195,12 +193,10 @@
       },
       "tiktok-deals-scanner": {
         "total": 1,
-        "allowed": 0,
-        "blocked": 1,
+        "allowed": 1,
+        "blocked": 0,
         "warnings": 0,
-        "reasonCategoryCounts": {
-          "selbst syndiziert": 1
-        }
+        "reasonCategoryCounts": {}
       },
       "Wien Deals Combined Graph": {
         "total": 2,
@@ -213,7 +209,23 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "tiktok-f10hec",
+      "title": "Dein gratis/pay as you wish Wochende von mir für dich",
+      "brand": "mir für dich",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@elena.mov/video/7678376140351835424",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-26T16:20:58.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -897,15 +909,13 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 186,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "events-8-20260222",
@@ -3970,25 +3980,6 @@
       "sourceAgeDays": 57,
       "expiryDate": "",
       "expirySource": "url.dateHints",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "tiktok-1xz9nlb",
-      "title": "Gratis Iced Matcha Latte in Wien bis 01",
-      "brand": "OMV",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@freefinder.at/video/7678424923206929686",
-      "reasons": [
-        "selbst syndizierter FreeFinder-Post"
-      ],
-      "warnings": [
-        "kein Ablaufdatum gefunden"
-      ],
-      "sourceDate": "2026-08-26T19:30:17.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 1,
-      "expiryDate": "",
-      "expirySource": "",
       "urlStatus": "HTTP 200"
     },
     {
