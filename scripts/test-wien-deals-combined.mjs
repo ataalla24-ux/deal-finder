@@ -19,11 +19,16 @@ async function fetchImpl(url) {
       headers: { 'content-type': 'application/json' },
     });
   }
+  if (parsed.pathname.includes('/recent_media') && String(parsed.searchParams.get('fields') || '').includes('children{')) {
+    return new Response(JSON.stringify({
+      error: { code: 100, message: '(#100) Please read documentation for supported fields.' },
+    }), { status: 400, headers: { 'content-type': 'application/json' } });
+  }
   if (parsed.pathname.includes('/tag-gratiswien/recent_media')) {
     const requestedFields = String(parsed.searchParams.get('fields') || '').split(',');
     assert.equal(requestedFields.includes('username'), false, 'hashtag media must not request unsupported username');
     assert.equal(requestedFields.includes('media_url'), true, 'hashtag media must include image evidence');
-    assert.match(parsed.searchParams.get('fields') || '', /children\{media_type,media_url,thumbnail_url\}/);
+    assert.doesNotMatch(parsed.searchParams.get('fields') || '', /children\{/);
     return new Response(JSON.stringify({
       data: [
         {
@@ -149,6 +154,7 @@ assert.equal(result.report.uniquePosts, 5, 'the same Graph post found by two has
 assert.equal(result.report.mediaEvidence.visionCalls, 1);
 assert.equal(result.report.status, 'healthy');
 assert.equal(result.report.sources.find((source) => source.hashtag === 'missingtag')?.status, 'not-found');
+assert.equal(result.report.sources.find((source) => source.hashtag === 'gratiswien')?.mediaFieldMode, 'direct-media');
 
 const degraded = await runWienDealsCombined({
   now,

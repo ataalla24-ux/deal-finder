@@ -31,7 +31,17 @@ const SOURCE_KEY = 'wien-combined';
 const SOURCE_LABEL = 'Wien Deals Combined';
 const RUN_STARTED_AT = new Date();
 const BASIC_HASHTAG_MEDIA_FIELDS = 'id,caption,media_type,permalink,timestamp,like_count,comments_count';
-const HASHTAG_MEDIA_FIELDS = `${BASIC_HASHTAG_MEDIA_FIELDS},media_product_type,media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}`;
+const HASHTAG_MEDIA_FIELD_VARIANTS = [
+  {
+    mode: 'full-media',
+    fields: `${BASIC_HASHTAG_MEDIA_FIELDS},media_product_type,media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}`,
+  },
+  {
+    mode: 'direct-media',
+    fields: `${BASIC_HASHTAG_MEDIA_FIELDS},media_url,thumbnail_url`,
+  },
+  { mode: 'basic', fields: BASIC_HASHTAG_MEDIA_FIELDS },
+];
 const RESCUABLE_REJECTIONS = new Set([
   'missing-text',
   'no-concrete-offer',
@@ -139,6 +149,20 @@ async function graphRequest(pathname, params, options) {
   return payload;
 }
 
+async function graphHashtagMediaRequest(pathname, params, options) {
+  let lastUnsupportedFieldError = null;
+  for (const variant of HASHTAG_MEDIA_FIELD_VARIANTS) {
+    try {
+      const payload = await graphRequest(pathname, { ...params, fields: variant.fields }, options);
+      return { payload, fieldMode: variant.mode };
+    } catch (error) {
+      if (Number(error?.code || 0) !== 100) throw error;
+      lastUnsupportedFieldError = error;
+    }
+  }
+  throw lastUnsupportedFieldError || new Error('Meta Graph rejected all hashtag media field variants');
+}
+
 function rejectionCounts(rejected) {
   const counts = {};
   for (const item of rejected) {
@@ -196,14 +220,11 @@ export async function runWienDealsCombined(options = {}) {
         sourceResults.push({ hashtag, status: 'not-found', fetched: 0, accepted: 0 });
         continue;
       }
-      const media = await graphRequest(`${hashtagId}/recent_media`, {
+      const mediaResponse = await graphHashtagMediaRequest(`${hashtagId}/recent_media`, {
         user_id: userId,
-        // Hashtag media does not consistently expose username and rejects the
-        // whole request with Graph error #100 when that field is requested.
-        fields: HASHTAG_MEDIA_FIELDS,
         limit: maxMediaPerHashtag,
       }, requestOptions);
-      const rows = Array.isArray(media?.data) ? media.data : [];
+      const rows = Array.isArray(mediaResponse.payload?.data) ? mediaResponse.payload.data : [];
       fetchedPosts += rows.length;
       for (const raw of rows) {
         const key = canonicalInstagramPostKey(raw?.permalink) || cleanText(raw?.id, 160);
@@ -220,7 +241,13 @@ export async function runWienDealsCombined(options = {}) {
           hashtags: new Set([hashtag]),
         });
       }
-      sourceResults.push({ hashtag, status: 'ok', fetched: rows.length, accepted: 0 });
+      sourceResults.push({
+        hashtag,
+        status: 'ok',
+        fetched: rows.length,
+        accepted: 0,
+        mediaFieldMode: mediaResponse.fieldMode,
+      });
     } catch (error) {
       const notFound = Number(error?.code || 0) === 24;
       sourceResults.push({
