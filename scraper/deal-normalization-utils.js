@@ -69,6 +69,7 @@ const BRAND_RULES = [
   { key: 'grill heaven', name: 'Grill Heaven Wien', logo: '🔥', category: 'essen' },
   { key: 'gigafit', name: 'GigaFit', logo: '💪', category: 'fitness' },
   { key: 'datri boxing', name: 'Datri Boxing', logo: '🥊', category: 'fitness' },
+  { key: 'asiannight', name: 'ASIANNIGHT', logo: '🎟️', category: 'kultur' },
   { key: 'ori fusion', name: 'Ori Fusion Kitchen', logo: '🥢', category: 'essen' },
   { key: 'das lugeck', name: 'Das Lugeck', logo: '🍽️', category: 'essen' },
   { key: 'whatseat', name: 'WhatsEat', logo: '🍽️', category: 'essen' },

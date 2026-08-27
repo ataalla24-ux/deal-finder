@@ -215,6 +215,35 @@ assert.ok(weekdayBeforeNumericEnd.deal);
 assert.equal(weekdayBeforeNumericEnd.deal.validUntil, '2026-08-28');
 assert.equal(weekdayBeforeNumericEnd.deal.expires, '2026-08-28');
 
+const birthdayEntrySpecial = build(
+  'https://www.tiktok.com/@asiannight/video/7678762157336546582',
+  postData(
+    'Bereit für eine Nacht voller Beats & Vibes? Freitag, 11/09, Babenberger Passage, 1010 Wien. Kostenlose Fotobox und gratis Süßigkeiten. Birthday Special: Du hast Geburtstag? Komm mit einer Begleitperson und ihr zahlt jeweils nur €10 Eintritt!',
+    'asiannight',
+  ),
+);
+assert.ok(birthdayEntrySpecial.deal);
+assert.equal(birthdayEntrySpecial.deal.brand, 'ASIANNIGHT');
+assert.equal(birthdayEntrySpecial.deal.title, 'Birthday-Special: Eintritt um 10 € bei ASIANNIGHT');
+assert.equal(birthdayEntrySpecial.deal.type, 'rabatt');
+assert.equal(birthdayEntrySpecial.deal.validUntil, '2026-09-11');
+assert.ok(birthdayEntrySpecial.deal.qualityScore >= 58, 'a concrete promotional entry price clears the quality threshold');
+
+const birthdayEntryWithoutFreebie = build(
+  'https://www.tiktok.com/@birthdayclub/video/7678762157336546583',
+  postData('Birthday Special in 1010 Wien: Du zahlst nur €10 Eintritt.', 'birthdayclub', 72),
+);
+assert.ok(birthdayEntryWithoutFreebie.deal, 'a birthday entry special does not depend on an incidental free add-on');
+assert.equal(birthdayEntryWithoutFreebie.deal.type, 'rabatt');
+assert.ok(birthdayEntryWithoutFreebie.deal.qualityScore >= 58);
+
+const incidentalBirthdayMention = build(
+  'https://www.tiktok.com/@viennastory/video/7678762157336546584',
+  postData('Ich habe hier meinen Geburtstag gefeiert. Der reguläre Eintritt kostet €10. Adresse: 1010 Wien.', 'viennastory'),
+);
+assert.equal(incidentalBirthdayMention.deal, null);
+assert.match(incidentalBirthdayMention.reason, /Deal-Signal/);
+
 const expiredWeekdayBridgedRange = buildDealFromPost(
   'https://www.tiktok.com/@chocoberry/video/7678002441849425183',
   postData(

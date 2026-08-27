@@ -13,7 +13,10 @@ import {
   enrichInstagramGraphMedia,
   extractInstagramMediaAssets,
 } from './instagram-media-evidence.js';
-import { getNonGuaranteedPromotionReason } from './promotion-quality-utils.js';
+import {
+  extractBirthdayEntryOffer,
+  getNonGuaranteedPromotionReason,
+} from './promotion-quality-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -422,7 +425,8 @@ function hasSpecificViennaEvidence(text) {
 function hasStrongDealSignal(text) {
   const signal = cleanText(text, 2600);
   const offerText = signal.replace(/#[\w.äöüß-]+/gi, ' ');
-  if (!STRONG_DEAL_PATTERNS.some((pattern) => pattern.test(offerText))) return false;
+  if (!extractBirthdayEntryOffer(offerText)
+      && !STRONG_DEAL_PATTERNS.some((pattern) => pattern.test(offerText))) return false;
   if (FALSE_POSITIVE_PATTERNS.some((pattern) => pattern.test(signal))) return false;
   return true;
 }
@@ -436,6 +440,7 @@ function getTikTokContentQualityReason(text) {
 
 function inferType(text) {
   if (/\b1\s*\+\s*1\b|\b2\s*(?:für|fuer)\s*1\b|\bbogo\b/i.test(text)) return 'bogo';
+  if (extractBirthdayEntryOffer(text)) return 'rabatt';
   if (/\bgratis\b|\bkostenlos|\bfree\b|\b0\s*€/i.test(text)) return 'gratis';
   return 'rabatt';
 }
@@ -492,10 +497,14 @@ function isWeakBrandCandidate(value) {
     || /^am\s+\d/i.test(normalized);
 }
 
-function buildOfferTitle(text, brand) {
+function buildOfferTitle(text, brand, type) {
   const signal = cleanText(text, 1200);
   const venueMatch = signal.match(/\b(?:beim?|bei)\s+(Stift Klosterneuburg)\b/i);
   const venue = cleanText(venueMatch?.[1] || '', 80);
+  const birthdayEntryOffer = extractBirthdayEntryOffer(signal);
+  if (birthdayEntryOffer && type === 'rabatt') {
+    return `Birthday-Special: Eintritt um ${birthdayEntryOffer.amount} €${brand ? ` bei ${brand}` : ''}`;
+  }
   if (/\bdyson\b/i.test(signal) && /\b(?:styling\s+tour|pop[- ]?up|hair\s+styled)\b/i.test(signal) && /\bfree\s+drinks?\b/i.test(signal)) {
     return 'Gratis Haarstyling und Drinks beim Dyson Pop-up';
   }
@@ -939,7 +948,7 @@ export function buildDealFromPost(url, data, options = {}) {
     ownerUsername: data.accountHandle,
     url,
   }) || extractedBrand;
-  const title = buildOfferTitle(offerSignal, brand);
+  const title = buildOfferTitle(offerSignal, brand, type);
   const score = buildQualityScore(offerSignal, dateCandidate.date, type, category, now);
   if (score < CONFIG.minScore) return { deal: null, reason: `Score zu niedrig (${score})` };
   const offerWindow = extractActiveOfferWindow(offerSignal, {
@@ -1009,6 +1018,7 @@ function buildQualityScore(signal, postDate, type, category, now = new Date()) {
 
   if (/\bgratis|kostenlos|free|0\s*€/i.test(signal)) score += 16;
   if (/\b1\s*\+\s*1|2\s*(?:für|fuer)\s*1|bogo/i.test(signal)) score += 14;
+  if (type === 'rabatt' && extractBirthdayEntryOffer(signal)) score += 32;
   if (/\bkaffee|coffee|pizza|burger|drink|goodie|ticket|probetraining/i.test(signal)) score += 10;
   if (category === 'kaffee' || category === 'essen') score += 8;
   if (/\bnur heute|heute|morgen|wochenende|diese woche|neueröffnung|neueroeffnung|opening/i.test(signal)) score += 8;

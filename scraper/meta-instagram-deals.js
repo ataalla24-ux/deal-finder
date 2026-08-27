@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { inferPreferredBrand } from './deal-normalization-utils.js';
 import {
   canonicalInstagramPostKey,
   getPublicationEvidence,
@@ -17,7 +18,10 @@ import {
   writeInstagramGraphEvidence,
 } from './instagram-graph-evidence.js';
 import { enrichInstagramGraphMedia } from './instagram-media-evidence.js';
-import { getNonGuaranteedPromotionReason } from './promotion-quality-utils.js';
+import {
+  extractBirthdayEntryOffer,
+  getNonGuaranteedPromotionReason,
+} from './promotion-quality-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -583,18 +587,27 @@ export function classifyPromotion(text) {
   const firstMatch = (patterns) => patterns.map((pattern) => normalized.match(pattern)).find(Boolean);
   const strongMatch = firstMatch(PROMO_PATTERNS);
   const softMatch = firstMatch(SOFT_PROMO_PATTERNS);
+  const birthdayEntryOffer = extractBirthdayEntryOffer(normalized);
   const strong = Boolean(strongMatch);
   const soft = Boolean(softMatch);
-  const hasConcreteNumber = /(?:\d{1,3}\s*%|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)|\b\d\s*\+\s*\d\b)/i.test(normalized);
-  if (!strong && !(soft && hasConcreteNumber)) return { accepted: false, type: '', reason: 'no-concrete-offer' };
+  const hasConcreteNumber = /(?:\d{1,3}\s*%|€\s*\d{1,3}(?:[,.]\d{1,2})?|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)|\b\d\s*\+\s*\d\b)/i.test(normalized);
+  if (!strong && !birthdayEntryOffer && !(soft && hasConcreteNumber)) {
+    return { accepted: false, type: '', reason: 'no-concrete-offer' };
+  }
 
   const bogoMatch = normalized.match(/\b(?:1\s*\+\s*1|2\s*(?:f(?:ü|u|ue)r|for)\s*1|bogo)\b/i);
   let type = 'rabatt';
   if (strongMatch && (/\b(?:gratis|kostenlos)\b/i.test(strongMatch[0]) || CONCRETE_FREE_PATTERN.test(strongMatch[0]))) {
     type = 'gratis';
   }
+  if (birthdayEntryOffer) type = 'rabatt';
   if (bogoMatch) type = 'bogo';
-  return { accepted: true, type, reason: '', evidence: cleanText(bogoMatch?.[0] || strongMatch?.[0] || softMatch?.[0], 120) };
+  return {
+    accepted: true,
+    type,
+    reason: '',
+    evidence: cleanText(bogoMatch?.[0] || birthdayEntryOffer?.evidence || strongMatch?.[0] || softMatch?.[0], 120),
+  };
 }
 
 function inferCategory(text) {
@@ -603,6 +616,11 @@ function inferCategory(text) {
 }
 
 function inferTitle(text, brand, promotion) {
+  const birthdayEntryOffer = extractBirthdayEntryOffer(text);
+  if (birthdayEntryOffer && promotion.type === 'rabatt') {
+    const brandSuffix = brand && !/^#|^instagram$/i.test(brand) ? ` bei ${brand}` : '';
+    return `Birthday-Special: Eintritt um ${birthdayEntryOffer.amount} €${brandSuffix}`;
+  }
   const segments = String(text || '')
     .split(/(?:\r?\n+|\|+|(?<=[.!?])\s+)/)
     .map((segment) => cleanText(segment, 180))
@@ -849,7 +867,13 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
     return { deal: null, rejection: 'missing-instagram-permalink' };
   }
   const username = normalizedUsername(raw?.username || account?.username);
-  const brand = cleanText(raw?.name, 100) || (username ? `@${username}` : cleanText(context?.sourceName, 100)) || 'Instagram';
+  const fallbackBrand = cleanText(raw?.name, 100) || (username ? `@${username}` : 'Instagram');
+  const brand = inferPreferredBrand({
+    brand: fallbackBrand,
+    description: contentText,
+    ownerUsername: username,
+    url,
+  }) || fallbackBrand;
   const category = inferCategory(contentText);
   const title = inferTitle(promotionText, brand, promotion);
   const deal = buildDealBase({

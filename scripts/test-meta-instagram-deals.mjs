@@ -103,6 +103,16 @@ assert.equal(
 assert.equal(classifyPromotion('Schönes neues Sommermenü').accepted, false);
 assert.equal(classifyPromotion('Neue gluten-free Pizza jetzt in Wien').accepted, false);
 assert.equal(classifyPromotion('Gluten-free Pizza: heute 20 % Rabatt in Wien').type, 'rabatt');
+const birthdayEntryPromotion = classifyPromotion(
+  'Kostenlose Fotobox und gratis Süßigkeiten. Birthday Special: Du hast Geburtstag? Ihr zahlt jeweils nur €10 Eintritt.',
+);
+assert.equal(birthdayEntryPromotion.type, 'rabatt', 'the concrete birthday entry price outranks free paid-event add-ons');
+assert.match(birthdayEntryPromotion.evidence, /Birthday Special.+€10 Eintritt/i);
+assert.equal(
+  classifyPromotion('Birthday Special in 1010 Wien: Du zahlst nur €10 Eintritt.').accepted,
+  true,
+  'an explicit birthday entry special is independently strong deal evidence',
+);
 
 assert.deepEqual(
   extractMentionedUsernames({
@@ -143,6 +153,18 @@ const graphFresh = normalizeGraphMediaItem({
 assert.ok(graphFresh.deal);
 assert.equal(graphFresh.deal.pubDateSource, 'instagram-graph-timestamp');
 assert.equal(graphFresh.deal.viennaEvidence.source, 'verified-merchant-registry');
+
+const graphBirthdayEntrySpecial = normalizeGraphMediaItem({
+  id: '18112258564928369',
+  caption: 'Bereit für eine Nacht voller Beats & Vibes? Freitag, 11/09, Babenberger Passage, 1010 Wien. Kostenlose Fotobox und gratis Süßigkeiten. Birthday Special: Du hast Geburtstag? Komm mit einer Begleitperson und ihr zahlt jeweils nur €10 Eintritt! Deine ASIANNIGHT.',
+  permalink: 'https://www.instagram.com/reel/DcjQzjUqxfP/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+}, { sourceType: 'hashtag', sourceName: '#wien' }, config, now);
+assert.ok(graphBirthdayEntrySpecial.deal);
+assert.equal(graphBirthdayEntrySpecial.deal.brand, 'ASIANNIGHT');
+assert.equal(graphBirthdayEntrySpecial.deal.title, 'Birthday-Special: Eintritt um 10 € bei ASIANNIGHT');
+assert.equal(graphBirthdayEntrySpecial.deal.type, 'rabatt');
+assert.equal(graphBirthdayEntrySpecial.deal.validUntil, '2026-09-11T23:59:59.999Z');
 
 const graphMissingTimestamp = normalizeGraphMediaItem({
   id: '17890002',
