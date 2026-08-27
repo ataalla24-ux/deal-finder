@@ -56,6 +56,14 @@ function normalizeModerationList(value) {
   return Array.isArray(value) ? value : [];
 }
 
+function splitModerationTargets(value) {
+  const values = Array.isArray(value) ? value : [value];
+  return [...new Set(values
+    .flatMap((item) => String(item || '').split(/[\n,]+/))
+    .map(cleanText)
+    .filter(Boolean))];
+}
+
 function entryValue(entry, key) {
   if (typeof entry === 'string') return key === 'value' ? entry : '';
   if (!entry || typeof entry !== 'object') return '';
@@ -200,4 +208,5 @@ export {
   moderationCounts,
   moderationReasonForDeal,
   normalizeUrl,
+  splitModerationTargets,
 };

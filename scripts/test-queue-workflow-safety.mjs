@@ -108,6 +108,14 @@ for (const file of sharedStateWriters) {
   );
 }
 
+const moderationWorkflow = workflows.get('deal-moderation.yml');
+assert.match(moderationWorkflow, /deal_ids:/, 'manual moderation accepts multiple exact IDs');
+assert.match(moderationWorkflow, /deal_urls:/, 'manual moderation accepts multiple exact URLs');
+assert.ok(
+  moderationWorkflow.indexOf('npm run deals:stamp') < moderationWorkflow.indexOf('npm run test:production-feed'),
+  'manual removals must refresh the feed contract before validation',
+);
+
 for (const [file, stepName] of [
   ['approve-deals.yml', 'Normalize Live Deals After Approvals'],
   ['validate-live-deals.yml', 'Validate Live Deals'],

@@ -3,19 +3,29 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { cleanText, normalizeUrl } from '../scraper/deal-moderation-utils.js';
+import {
+  cleanText,
+  normalizeUrl,
+  splitModerationTargets,
+} from '../scraper/deal-moderation-utils.js';
 import { canonicalDealUrl, extractStructuredOwnerUsername } from '../scraper/deal-evidence-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
-const DOCS_DIR = path.join(ROOT, 'docs');
-const MODERATION_PATH = path.join(ROOT, 'docs', 'deal-moderation.json');
+const DOCS_DIR = path.resolve(process.env.DEAL_MODERATION_DOCS_DIR || path.join(ROOT, 'docs'));
+const MODERATION_PATH = path.resolve(process.env.DEAL_MODERATION_PATH || path.join(DOCS_DIR, 'deal-moderation.json'));
+
+function targetList(value) {
+  return String(value || '').trim();
+}
 
 function parseArgs(argv) {
   const parsed = {
     id: cleanText(process.env.DEAL_MODERATION_ID),
     url: cleanText(process.env.DEAL_MODERATION_URL),
+    ids: targetList(process.env.DEAL_MODERATION_IDS),
+    urls: targetList(process.env.DEAL_MODERATION_URLS),
     provider: cleanText(process.env.DEAL_MODERATION_PROVIDER),
     text: cleanText(process.env.DEAL_MODERATION_TEXT),
     reason: cleanText(process.env.DEAL_MODERATION_REASON) || 'removed',
@@ -26,6 +36,8 @@ function parseArgs(argv) {
     const arg = argv[i];
     if (arg === '--id') parsed.id = cleanText(argv[++i]);
     else if (arg === '--url') parsed.url = cleanText(argv[++i]);
+    else if (arg === '--ids') parsed.ids = targetList(argv[++i]);
+    else if (arg === '--urls') parsed.urls = targetList(argv[++i]);
     else if (arg === '--provider') parsed.provider = cleanText(argv[++i]);
     else if (arg === '--text') parsed.text = cleanText(argv[++i]);
     else if (arg === '--reason') parsed.reason = cleanText(argv[++i]) || parsed.reason;
@@ -88,29 +100,47 @@ function findDealContext(input) {
 }
 
 const input = parseArgs(process.argv.slice(2));
-if (!input.id && !input.url && !input.provider && !input.text) {
+const entries = [];
+if (input.id || input.url || input.provider || input.text) {
+  entries.push(input);
+}
+entries.push(
+  ...splitModerationTargets(input.ids).map((id) => ({ ...input, id, url: '', provider: '', text: '' })),
+  ...splitModerationTargets(input.urls).map((url) => ({ ...input, id: '', url, provider: '', text: '' })),
+);
+
+if (entries.length === 0) {
   console.log('No moderation target provided; nothing to add.');
   process.exit(0);
 }
 
 const moderation = readModeration();
 const hiddenDeals = Array.isArray(moderation.hiddenDeals) ? moderation.hiddenDeals : [];
-const context = findDealContext(input);
-const entry = {
-  id: input.id,
-  url: input.url,
-  provider: input.provider,
-  text: input.text,
-  reason: input.reason,
-  removedAt: new Date().toISOString(),
-  removedBy: input.removedBy,
-  ...(context.ownerUsername ? { ownerUsername: context.ownerUsername } : {}),
-  ...(context.originSource ? { originSource: context.originSource } : {}),
-};
+let added = 0;
+let existing = 0;
+for (const target of entries) {
+  const context = findDealContext(target);
+  const entry = {
+    id: target.id,
+    url: target.url,
+    provider: target.provider,
+    text: target.text,
+    reason: target.reason,
+    removedAt: new Date().toISOString(),
+    removedBy: target.removedBy,
+    ...(context.ownerUsername ? { ownerUsername: context.ownerUsername } : {}),
+    ...(context.originSource ? { originSource: context.originSource } : {}),
+  };
 
-const nextKey = entryKey(entry);
-const exists = hiddenDeals.some((item) => entryKey(item) === nextKey);
-if (!exists) hiddenDeals.push(entry);
+  const nextKey = entryKey(entry);
+  const exists = hiddenDeals.some((item) => entryKey(item) === nextKey);
+  if (exists) {
+    existing += 1;
+  } else {
+    hiddenDeals.push(entry);
+    added += 1;
+  }
+}
 
 const next = {
   updatedAt: new Date().toISOString(),
@@ -122,4 +152,4 @@ const next = {
 };
 
 fs.writeFileSync(MODERATION_PATH, `${JSON.stringify(next, null, 2)}\n`);
-console.log(exists ? 'Moderation entry already existed.' : 'Moderation entry added.');
+console.log(`Moderation entries processed: ${added} added, ${existing} already present.`);

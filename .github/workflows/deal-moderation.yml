@@ -21,6 +21,14 @@ on:
         description: "Deal URL to hide"
         required: false
         type: string
+      deal_ids:
+        description: "Deal IDs to hide (comma or newline separated)"
+        required: false
+        type: string
+      deal_urls:
+        description: "Deal URLs to hide (comma or newline separated)"
+        required: false
+        type: string
       provider:
         description: "Provider/source text to block, e.g. neotaste"
         required: false
@@ -64,6 +72,8 @@ jobs:
         env:
           DEAL_MODERATION_ID: ${{ inputs.deal_id }}
           DEAL_MODERATION_URL: ${{ inputs.deal_url }}
+          DEAL_MODERATION_IDS: ${{ inputs.deal_ids }}
+          DEAL_MODERATION_URLS: ${{ inputs.deal_urls }}
           DEAL_MODERATION_PROVIDER: ${{ inputs.provider }}
           DEAL_MODERATION_TEXT: ${{ inputs.text }}
           DEAL_MODERATION_REASON: ${{ inputs.reason }}
@@ -72,9 +82,9 @@ jobs:
 
       - name: Apply deal moderation
         env:
-          DEAL_MODERATION_APPLY: ${{ github.event_name == 'workflow_dispatch' && (inputs.deal_id != '' || inputs.deal_url != '') && '1' || '0' }}
-          LIVE_DEAL_REMOVALS_ENABLED: ${{ github.event_name == 'workflow_dispatch' && (inputs.deal_id != '' || inputs.deal_url != '') && '1' || '0' }}
-          LIVE_DEAL_MANUAL_ACTION: ${{ github.event_name == 'workflow_dispatch' && (inputs.deal_id != '' || inputs.deal_url != '') && '1' || '0' }}
+          DEAL_MODERATION_APPLY: ${{ github.event_name == 'workflow_dispatch' && (inputs.deal_id != '' || inputs.deal_url != '' || inputs.deal_ids != '' || inputs.deal_urls != '') && '1' || '0' }}
+          LIVE_DEAL_REMOVALS_ENABLED: ${{ github.event_name == 'workflow_dispatch' && (inputs.deal_id != '' || inputs.deal_url != '' || inputs.deal_ids != '' || inputs.deal_urls != '') && '1' || '0' }}
+          LIVE_DEAL_MANUAL_ACTION: ${{ github.event_name == 'workflow_dispatch' && (inputs.deal_id != '' || inputs.deal_url != '' || inputs.deal_ids != '' || inputs.deal_urls != '') && '1' || '0' }}
         run: npm run deals:moderate
 
       - name: Remove stale map references
@@ -85,6 +95,9 @@ jobs:
 
       - name: Refresh featured deal snapshots
         run: node scraper/set-daily-deal.js
+
+      - name: Stamp live deal feed
+        run: npm run deals:stamp
 
       - name: Validate production feed
         run: npm run test:production-feed

@@ -117,6 +117,8 @@ const EXCLUDED_PATTERNS = [
   /\b(?:job|stellenangebot|wohnung|immobilie|hotelzimmer)\b/i,
   /\b(?:affiliate|influencer gesucht|creator gesucht)\b/i,
   /\b(?:one|einer|eine|eins)\s+(?:(?:of (?:them|these)|davon)\s+)?(?:is|ist)\s+(?:(?:completely|komplett|völlig|voellig)\s+)?free\b/i,
+  /\b(?:pissoir|urinal|klo(?:gehen|s)?|toiletten?|wc(?:-anlagen?)?|trinkwasser(?:brunnen|station(?:en)?|spender)?|trinkbrunnen|wasserspendern?)\b.{0,100}\b(?:gratis|kostenlos(?:e|er|es|en)?|free)\b/i,
+  /\b(?:gratis|kostenlos(?:e|er|es|en)?|free)\b.{0,100}\b(?:pissoir|urinal|klo(?:gehen|s)?|toiletten?|wc(?:-anlagen?)?|trinkwasser(?:brunnen|station(?:en)?|spender)?|trinkbrunnen|wasserspendern?)\b/i,
 ];
 
 const RECOMMENDATION_LANGUAGE_PATTERN = /\b(?:favou?rite|lieblings(?:restaurant|lokal|platz|spot|ort)|summer\s+spot|things\s+to\s+do|must[-\s]?visit|guide|tipps?|vibe|empfehl\w*|recommend\w*|save\s+(?:this|and)|send\s+this)\b/i;

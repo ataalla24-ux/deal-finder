@@ -35,6 +35,16 @@ assert.equal(classifyPromotion('Mit dem Vorteilsclub sparst du 25 % auf Tickets.
 assert.equal(classifyPromotion('Das Ergebnis der Studie: Testosteron stieg um 47 Prozent.').accepted, false);
 assert.equal(classifyPromotion('100 % Geschmack und Energie für deinen Tag.').accepted, false);
 assert.equal(classifyPromotion('Comment LUXURY for four spots; one is completely FREE.').accepted, false);
+assert.equal(
+  classifyPromotion('Frauen zahlen 50 Cent fürs Klogehen, Männer benutzen das Pissoir gratis.').accepted,
+  false,
+  'free public infrastructure is not a consumer deal',
+);
+assert.equal(
+  classifyPromotion('Neue kostenlose Trinkwasserstationen in Wien.').accepted,
+  false,
+  'public drinking-water infrastructure is not a promotion',
+);
 assert.equal(classifyPromotion('Die Führungen durch das Parlament sind kostenlos.').type, 'gratis');
 const mixedPriceAndTrial = classifyPromotion('Matcha für 1€ in Wien. Mit der App zwei Monate kostenlos testen.');
 assert.equal(mixedPriceAndTrial.type, 'rabatt', 'the advertised product price wins over a secondary free app trial');

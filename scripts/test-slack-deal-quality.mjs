@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
-import { moderationReasonForDeal, normalizeUrl } from '../scraper/deal-moderation-utils.js';
+import {
+  moderationReasonForDeal,
+  normalizeUrl,
+  splitModerationTargets,
+} from '../scraper/deal-moderation-utils.js';
 import {
   addSeenDealsFromThread,
   buildFirecrawlReviewMessage,
@@ -21,6 +25,12 @@ import {
 } from '../scraper/slack-notify.js';
 
 const now = new Date('2026-07-20T12:00:00.000Z');
+
+assert.deepEqual(
+  splitModerationTargets('deal-a, deal-b\ndeal-a'),
+  ['deal-a', 'deal-b'],
+  'manual moderation accepts unique comma- or newline-separated targets',
+);
 
 const postedSeenKeys = new Set();
 assert.equal(addSeenDealsFromThread(postedSeenKeys, [{
