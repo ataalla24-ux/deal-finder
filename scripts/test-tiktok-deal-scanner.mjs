@@ -126,6 +126,30 @@ const customerParking = build(
 assert.equal(customerParking.deal, null);
 assert.match(customerParking.reason, /Infrastruktur/);
 
+const publicDrinkingWater = build(
+  'https://www.tiktok.com/@wienmermaid/video/7678002441849425180',
+  postData(
+    'High-quality drinking water is available for free at public drinking-water fountains and water stations throughout Vienna.',
+    'wienmermaid',
+  ),
+);
+assert.equal(publicDrinkingWater.deal, null);
+assert.match(publicDrinkingWater.reason, /Infrastruktur/);
+
+const freePissoir = build(
+  'https://www.tiktok.com/@orfradiowienheute/video/7678002441849425181',
+  postData('Männer gehen gratis aufs Pissoir, Frauen müssen für das Klo 50 Cent zahlen. #wien', 'orfradiowienheute'),
+);
+assert.equal(freePissoir.deal, null);
+assert.match(freePissoir.reason, /Infrastruktur/);
+
+const selfSyndicatedTikTok = build(
+  'https://www.tiktok.com/@freefinder.at/video/7678002441849425182',
+  postData('Gratis Iced Matcha Latte in Wien bis 01. September bei OMV.', 'freefinder.at'),
+);
+assert.equal(selfSyndicatedTikTok.deal, null);
+assert.match(selfSyndicatedTikTok.reason, /Eigenpost/);
+
 const datriTrial = build(
   'https://www.tiktok.com/@datriboxing/video/7678002441849425159',
   postData(
@@ -149,6 +173,18 @@ assert.ok(weekdayBridgedRange.deal);
 assert.equal(weekdayBridgedRange.deal.validFrom, '2026-08-24');
 assert.equal(weekdayBridgedRange.deal.validUntil, '2026-08-26');
 assert.equal(weekdayBridgedRange.deal.category, 'essen');
+
+const expiredWeekdayBridgedRange = buildDealFromPost(
+  'https://www.tiktok.com/@chocoberry/video/7678002441849425183',
+  postData(
+    '1+1 GRATIS BEI CHOCOBERRY! HEUTE, Montag, 24.08. bis Mittwoch, 26.08. Kauf 1 Becher und erhalte den 2. gratis. Copa Beach Wien.',
+    'chocoberry',
+    48,
+  ),
+  { now: new Date('2026-08-27T12:00:00.000Z') },
+);
+assert.equal(expiredWeekdayBridgedRange.deal, null);
+assert.match(expiredWeekdayBridgedRange.reason, /abgelaufen/);
 
 const cafeMilano = build(
   'https://www.tiktok.com/@iamlicette/video/7678002441849425161',
@@ -249,6 +285,27 @@ assert.equal(trustedVisualDeal.deal.validUntil, '2026-08-30');
 assert.equal(trustedVisualDeal.deal.ownerUsername, 'visual.cafe.wien');
 assert.equal(trustedVisualDeal.deal.evidence.mediaEvidence.ai.confidence, 0.96);
 assert.match(trustedVisualDeal.deal.description, /Bildbeleg/);
+
+const personalCompensation = build(
+  'https://www.tiktok.com/@assal.burger/video/7678002441849425194',
+  {
+    ...postData('Danke Anna #wien', 'assal.burger'),
+    _mediaEvidence: {
+      analyzedAt: REFERENCE_NOW.toISOString(),
+      visionImageCount: 1,
+      ai: {
+        isDeal: true,
+        confidence: 0.9,
+        offerText: 'Gratis Pommes als Ersatz für ausverkauften hausgemachten Lotus',
+        locationText: 'Wien',
+        validityText: '',
+        exclusion: 'none',
+      },
+    },
+  },
+);
+assert.equal(personalCompensation.deal, null);
+assert.match(personalCompensation.reason, /Kulanz/);
 
 const staleVisualData = {
   ...visualOnlyData,

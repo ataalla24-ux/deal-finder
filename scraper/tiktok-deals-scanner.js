@@ -219,6 +219,14 @@ const NON_DEAL_CONTENT_RULES = [
     pattern: /\b(?:(?:gratis|kostenlos(?:e|er|es|en)?|free)\s+(?:kunden[- ]?)?(?:parkpl[aä]tze?|parking|toiletten?|wcs?|ladestationen?|charging\s+stations?)|(?:parkpl[aä]tze?|parking|toiletten?|wcs?|ladestationen?|charging\s+stations?)\s+(?:gratis|kostenlos|free))\b/i,
   },
   {
+    reason: 'kostenlose Infrastruktur statt Deal',
+    pattern: /\b(?:pissoirs?|urinals?|klos?|(?:public|öffentlich\w*)\s+(?:toilets?|toiletten?|wcs?|drinking[- ]?water|trinkwasser|wasser(?:brunnen|stationen?))|drinking[- ]?water\s+(?:fountains?|stations?)|water\s+(?:fountains?|stations?)|trinkwasserbrunnen)\b/i,
+  },
+  {
+    reason: 'persönliche Kulanz statt öffentlich nutzbarem Deal',
+    pattern: /\b(?:(?:gratis|kostenlos(?:e|er|es|en)?|free)\b.{0,100}\b(?:als\s+ersatz|entschädigung|entschaedigung|wiedergutmachung)|(?:als\s+ersatz|entschädigung|entschaedigung|wiedergutmachung)\b.{0,100}\b(?:gratis|kostenlos|free))\b/i,
+  },
+  {
     reason: 'allgemeiner Reiseguide statt konkretem Deal',
     pattern: /\b(?:travel\s+bucket\s+list|top\s+(?:vienna\s+)?spots?|first\s+trip|vienna\s+guide|save\s+this\s+post\s+for\s+(?:your\s+)?itinerary|cosa\s+si\s+pu[oò]\s+vedere\s+a\s+vienna\s+gratis)\b/i,
   },
@@ -227,6 +235,12 @@ const NON_DEAL_CONTENT_RULES = [
     pattern: /\b(?:stand\s+schon\s+so\s+lange\s+auf\s+meiner\s+liste|wirklich\s+nur\s+empfehlen|kann(?:'|’)?s?\s+euch\s+wirklich\s+empfehlen)\b/i,
   },
 ];
+
+const FREEFINDER_SELF_ACCOUNT_KEYS = new Set([
+  'freefinder',
+  'freefinderat',
+  'freefinderwien',
+]);
 
 const CATEGORY_RULES = [
   { category: 'kaffee', logo: '☕', pattern: /\b(kaffee|coffee|cafe|café|matcha|espresso|latte|cappuccino|drink|drinks|getränk|getraenk|bubble tea|boba)\b/i },
@@ -568,7 +582,18 @@ function parseExplicitOfferEndDate(text, referenceDate = new Date()) {
   const signal = cleanText(text, 1600).toLowerCase();
   const year = referenceDate.getUTCFullYear();
 
-  let match = signal.match(/\b(?:bis|gültig bis|gueltig bis|nur bis|noch bis)\s+(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?/i);
+  let match = signal.match(/\b(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)?\s*,?\s*(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?\.?\s*(?:bis|to|[-–])\s*(?:(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\s*,?\s*)?(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?/i);
+  if (match) {
+    const startMonth = Number(match[2]);
+    const endMonth = Number(match[5]);
+    let parsedYear = match[6]
+      ? (Number(match[6]) < 100 ? 2000 + Number(match[6]) : Number(match[6]))
+      : (match[3] ? (Number(match[3]) < 100 ? 2000 + Number(match[3]) : Number(match[3])) : year);
+    if (!match[6] && endMonth < startMonth) parsedYear += 1;
+    return endOfViennaDay(parsedYear, endMonth, Number(match[4]));
+  }
+
+  match = signal.match(/\b(?:bis|gültig bis|gueltig bis|nur bis|noch bis)\s+(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?/i);
   if (match) {
     const parsedYear = match[3] ? (Number(match[3]) < 100 ? 2000 + Number(match[3]) : Number(match[3])) : year;
     return endOfViennaDay(parsedYear, Number(match[2]), Number(match[1]));
@@ -849,6 +874,10 @@ export function buildDealFromPost(url, data, options = {}) {
   }
   if (!isCurrentPost(dateCandidate.date, now)) {
     return { deal: null, reason: `TikTok-Post älter als ${CONFIG.maxAgeDays} Tage (${dateCandidate.date.toISOString().slice(0, 10)})` };
+  }
+  const accountKey = cleanText(data.accountHandle, 80).toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (FREEFINDER_SELF_ACCOUNT_KEYS.has(accountKey)) {
+    return { deal: null, reason: 'FreeFinder-Eigenpost statt neuer Deal-Quelle' };
   }
 
   const originalOfferSignal = [

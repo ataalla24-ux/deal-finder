@@ -19,7 +19,7 @@ async function fetchImpl(url) {
       headers: { 'content-type': 'application/json' },
     });
   }
-  if (parsed.pathname.includes('/recent_media') && String(parsed.searchParams.get('fields') || '').includes('children{')) {
+  if (parsed.pathname.includes('/recent_media') && String(parsed.searchParams.get('fields') || '').split(',').includes('children')) {
     return new Response(JSON.stringify({
       error: { code: 100, message: '(#100) Please read documentation for supported fields.' },
     }), { status: 400, headers: { 'content-type': 'application/json' } });
@@ -154,7 +154,7 @@ assert.equal(result.report.uniquePosts, 5, 'the same Graph post found by two has
 assert.equal(result.report.mediaEvidence.visionCalls, 1);
 assert.equal(result.report.status, 'healthy');
 assert.equal(result.report.sources.find((source) => source.hashtag === 'missingtag')?.status, 'not-found');
-assert.equal(result.report.sources.find((source) => source.hashtag === 'gratiswien')?.mediaFieldMode, 'direct-media');
+assert.equal(result.report.sources.find((source) => source.hashtag === 'gratiswien')?.mediaFieldMode, 'media-url');
 
 const degraded = await runWienDealsCombined({
   now,

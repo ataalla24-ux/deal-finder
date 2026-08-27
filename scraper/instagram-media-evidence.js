@@ -327,7 +327,7 @@ const AI_SCHEMA = {
     validityText: { type: 'string' },
     exclusion: {
       type: 'string',
-      enum: ['none', 'giveaway', 'free-shipping-only', 'job', 'property', 'generic-content', 'unreadable'],
+      enum: ['none', 'giveaway', 'free-shipping-only', 'job', 'property', 'personal-compensation', 'generic-content', 'unreadable'],
     },
   },
   required: ['isDeal', 'confidence', 'offerText', 'locationText', 'validityText', 'exclusion'],
@@ -376,7 +376,8 @@ export async function classifySocialMediaEvidenceWithOpenAI(input, config, optio
           'A deal needs a directly usable discount, free item, BOGO, coupon, happy hour, or explicit promotional price.',
           'Do not invent missing facts. offerText must be a short extract or faithful cleanup of supplied evidence.',
           'locationText and validityText must contain only visibly supplied location/address and date/validity text, or an empty string.',
-          'Giveaways, free shipping alone, jobs, property and generic recommendations are not deals.',
+          'The offer must be publicly redeemable by the audience, not a one-off replacement, apology, or compensation for one named customer.',
+          'Giveaways, free shipping alone, jobs, property, personal compensation and generic recommendations are not deals.',
         ].join(' '),
         input: [{
           role: 'user',

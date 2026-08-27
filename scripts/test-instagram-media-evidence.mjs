@@ -71,6 +71,8 @@ assert.equal(openAiRequest.init.headers.authorization, 'Bearer test-openai-key')
 assert.equal(openAiRequest.body.store, false);
 assert.equal(openAiRequest.body.text.format.type, 'json_schema');
 assert.equal(openAiRequest.body.text.format.strict, true);
+assert.match(openAiRequest.body.instructions, /publicly redeemable/i);
+assert.ok(openAiRequest.body.text.format.schema.properties.exclusion.enum.includes('personal-compensation'));
 assert.equal(openAiRequest.body.input[0].content[0].type, 'input_text');
 assert.deepEqual(openAiRequest.body.input[0].content[1], {
   type: 'input_image',

@@ -33,12 +33,12 @@ const RUN_STARTED_AT = new Date();
 const BASIC_HASHTAG_MEDIA_FIELDS = 'id,caption,media_type,permalink,timestamp,like_count,comments_count';
 const HASHTAG_MEDIA_FIELD_VARIANTS = [
   {
-    mode: 'full-media',
-    fields: `${BASIC_HASHTAG_MEDIA_FIELDS},media_product_type,media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}`,
+    mode: 'supported-media',
+    fields: `${BASIC_HASHTAG_MEDIA_FIELDS},media_url,children`,
   },
   {
-    mode: 'direct-media',
-    fields: `${BASIC_HASHTAG_MEDIA_FIELDS},media_url,thumbnail_url`,
+    mode: 'media-url',
+    fields: `${BASIC_HASHTAG_MEDIA_FIELDS},media_url`,
   },
   { mode: 'basic', fields: BASIC_HASHTAG_MEDIA_FIELDS },
 ];
