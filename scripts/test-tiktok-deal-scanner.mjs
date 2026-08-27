@@ -102,6 +102,19 @@ const genericFreeListing = build(
 assert.equal(genericFreeListing.deal, null);
 assert.match(genericFreeListing.reason, /Deal-Signal/);
 
+const limitedTicketAllocation = build(
+  'https://www.tiktok.com/@jaycatchme/video/7678374897038527766',
+  postData('Holt euch 2x Free Tickets 🎟️ #live #wien #konzert', 'jaycatchme'),
+);
+assert.equal(limitedTicketAllocation.deal, null);
+assert.match(limitedTicketAllocation.reason, /Begrenzte Gratis-Vergabe/);
+
+const guaranteedTicketCode = build(
+  'https://www.tiktok.com/@concert.wien/video/7678374897038527767',
+  postData('Mit Code VIENNA bekommt jede Person 2x Free Tickets für das Konzert in 1010 Wien.', 'concert.wien'),
+);
+assert.ok(guaranteedTicketCode.deal, 'a per-person redemption code remains a directly usable deal');
+
 const genericTravelGuide = build(
   'https://www.tiktok.com/@laura.the.explore70/video/7678002441849425156',
   postData(

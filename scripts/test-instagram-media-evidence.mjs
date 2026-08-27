@@ -234,6 +234,7 @@ const visionDiscoveredDeal = normalizeGraphMediaItem({
   sourceName: '#wienessen',
 }, config, now);
 assert.ok(visionDiscoveredDeal.deal, 'visible Vision location evidence can verify a new hashtag merchant');
+assert.equal(visionDiscoveredDeal.deal.title, '20 % Rabatt auf Kaffee');
 assert.equal(visionDiscoveredDeal.deal.validUntil, '2026-08-30T23:59:59.999Z');
 assert.equal(visionDiscoveredDeal.deal.evidence.mediaEvidence.ai.locationText, 'Neubaugasse 12, 1070 Wien');
 

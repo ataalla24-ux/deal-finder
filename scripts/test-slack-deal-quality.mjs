@@ -495,6 +495,21 @@ const queueStyleGiveaway = await validateOne({
 assert.equal(queueStyleGiveaway.decision.allowed, false);
 assert.match(reasonText(queueStyleGiveaway), /Gewinnspiel\/Verlosung/);
 
+const limitedTicketAllocation = await validateOne({
+  id: 'limited-ticket-allocation',
+  brand: '@jaycatchme',
+  title: 'Gratis Ticket bei @jaycatchme',
+  description: 'Holt euch 2x Free Tickets für ein Konzert in Wien.',
+  url: 'https://www.tiktok.com/@jaycatchme/video/7678374897038527766',
+  source: 'TikTok Scanner',
+  originSource: 'tiktok-deals-scanner',
+  distance: 'Wien',
+  pubDate: now.toISOString(),
+  pubDateSource: 'time.datetime',
+});
+assert.equal(limitedTicketAllocation.decision.allowed, false);
+assert.match(reasonText(limitedTicketAllocation), /Begrenzte Gratis-Vergabe/);
+
 const yoriWinnerOnlyChallenge = await validateOne({
   id: 'yori-winner-only-challenge',
   brand: 'Yori 2',

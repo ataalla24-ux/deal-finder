@@ -119,6 +119,7 @@ const EXCLUDED_PATTERNS = [
   /\b(?:one|einer|eine|eins)\s+(?:(?:of (?:them|these)|davon)\s+)?(?:is|ist)\s+(?:(?:completely|komplett|völlig|voellig)\s+)?free\b/i,
   /\b(?:pissoir|urinal|klo(?:gehen|s)?|toiletten?|wc(?:-anlagen?)?|trinkwasser(?:brunnen|station(?:en)?|spender)?|trinkbrunnen|wasserspendern?|(?:kunden[- ]?)?parkpl[aä]tze?|parking|ladestationen?|charging\s+stations?)\b.{0,100}\b(?:gratis|kostenlos(?:e|er|es|en)?|free)\b/i,
   /\b(?:gratis|kostenlos(?:e|er|es|en)?|free)\b.{0,100}\b(?:pissoir|urinal|klo(?:gehen|s)?|toiletten?|wc(?:-anlagen?)?|trinkwasser(?:brunnen|station(?:en)?|spender)?|trinkbrunnen|wasserspendern?|(?:kunden[- ]?)?parkpl[aä]tze?|parking|ladestationen?|charging\s+stations?)\b/i,
+  /(?:\b(?:wien|vienna)\b.{0,180}\b(?:volo\s+da|flight\s+from)\s+(?!(?:wien|vienna)\b)[\p{L}][\p{L}.'’-]{2,}\b|\b(?:volo\s+da|flight\s+from)\s+(?!(?:wien|vienna)\b)[\p{L}][\p{L}.'’-]{2,}\b.{0,180}\b(?:wien|vienna)\b)/iu,
 ];
 
 const RECOMMENDATION_LANGUAGE_PATTERN = /\b(?:favou?rite|lieblings(?:restaurant|lokal|platz|spot|ort)|summer\s+spot|things\s+to\s+do|must[-\s]?visit|guide|tipps?|vibe|empfehl\w*|recommend\w*|save\s+(?:this|and)|send\s+this)\b/i;
@@ -610,8 +611,9 @@ function inferTitle(text, brand, promotion) {
   const withSignal = segments.find((segment) => signalPatterns.some((pattern) => pattern.test(segment)))
     || segments[0]
     || `${brand} Instagram-Angebot`;
+  const withoutEvidencePrefix = withSignal.replace(/^(?:Bildtext|AI-Angebotsbeleg):\s*/i, '');
   const escapedBrand = String(brand || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const withoutBrand = withSignal.replace(new RegExp(`^${escapedBrand}\\s*[:–-]?\\s*`, 'i'), '');
+  const withoutBrand = withoutEvidencePrefix.replace(new RegExp(`^${escapedBrand}\\s*[:–-]?\\s*`, 'i'), '');
   const fallback = promotion.type === 'gratis' ? `Gratis-Angebot bei ${brand}` : `Aktuelles Angebot bei ${brand}`;
   return cleanText(withoutBrand || fallback, 140);
 }

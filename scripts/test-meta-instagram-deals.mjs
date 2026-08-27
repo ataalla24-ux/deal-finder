@@ -55,6 +55,16 @@ assert.equal(
   false,
   'a permanent parking amenity is not a promotion',
 );
+assert.equal(
+  classifyPromotion('SUPER PROMO VIENNA: 3 giorni con volo da Napoli €230 per persona.').accepted,
+  false,
+  'an inbound foreign travel package is not a Vienna-local deal',
+);
+assert.equal(
+  classifyPromotion('Flight from Vienna: 20 % discount with code VIE20.').accepted,
+  true,
+  'the inbound-travel exclusion must not block offers departing from Vienna',
+);
 assert.equal(classifyPromotion('Die Führungen durch das Parlament sind kostenlos.').type, 'gratis');
 const mixedPriceAndTrial = classifyPromotion('Matcha für 1€ in Wien. Mit der App zwei Monate kostenlos testen.');
 assert.equal(mixedPriceAndTrial.type, 'rabatt', 'the advertised product price wins over a secondary free app trial');
