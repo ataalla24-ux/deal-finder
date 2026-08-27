@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-27T11:19:27.724Z",
+  "generatedAt": "2026-08-27T11:28:07.677Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 378,
@@ -8,16 +8,16 @@
     "duplicateClusters": 15,
     "topHealthySources": [
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 84,
-        "totalDeals": 3
-      },
-      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "healthScore": 77,
         "totalDeals": 5
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 75,
+        "totalDeals": 3
       },
       {
         "sourceKey": "food3",
@@ -40,15 +40,15 @@
     ],
     "topMissionSources": [
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 85,
-        "totalDeals": 3
-      },
-      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "missionFitScore": 68,
+        "totalDeals": 3
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 67,
         "totalDeals": 3
       },
       {
@@ -109,12 +109,6 @@
     ],
     "topPrecisionSources": [
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 89,
-        "totalDeals": 3
-      },
-      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 76,
@@ -124,6 +118,12 @@
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "precisionScore": 75,
+        "totalDeals": 3
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 74,
         "totalDeals": 3
       },
       {
@@ -143,7 +143,7 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 73,
+        "sourceWeightScore": 63,
         "totalDeals": 3
       },
       {
@@ -243,85 +243,6 @@
   },
   "sources": [
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 3,
-      "uniqueDeals": 2,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 3,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "September 2026 🕠 Einlass: 17:30 Uhr 📍 Café-Restaurant Meierei, Hauptallee 3, 1020 Wien 🎟️ Eintritt kostenlos– bring deine Freundinnen mit",
-        "August 2026 ⏰ ab 17:00 Uhr 💶 € 59 pro Person (Kinder bis 6 Jahre gratis) Perfekt für einen entspannten Sommerabend mit Freunden und Familie",
-        "is N AS; ek SR] 5 Bene fs aa ee \\ ER nel aS Tre FREE, ase toes ° ty Bo Sian ae a ae eos se eo seers rs SESS Se Be = Sorter eee she Sat rd a"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-27T07:02:12.851Z",
-        "finishedAt": "2026-08-27T07:07:14.021Z",
-        "durationMs": 301170,
-        "counts": {
-          "rawCandidates": 56,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
-          "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 51
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 43,
-          "excluded-promotion-type": 1,
-          "general-recommendation": 4,
-          "missing-vienna-evidence": 1,
-          "missing-text": 2
-        },
-        "errors": [
-          "#wien: The operation was aborted due to timeout",
-          "#vienna: Meta Graph 1: Please reduce the amount of data you're asking for, then retry your request",
-          "#viennafood: Meta Graph 1: Please reduce the amount of data you're asking for, then retry your request",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-mdp8F3/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-ihkoCS/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-95r9fx/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-OdvSPT/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-GkQkaR/asset-0-ocr.png stdout -l deu+eng --psm 6"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0.3,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.7,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 3
-        }
-      ],
-      "issues": [],
-      "healthScore": 84,
-      "missionFitScore": 85,
-      "coverageScore": 23,
-      "precisionScore": 89,
-      "sourceWeightScore": 73
-    },
-    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -378,6 +299,95 @@
       "coverageScore": 23,
       "precisionScore": 76,
       "sourceWeightScore": 61
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 3,
+      "uniqueDeals": 2,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 3,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 1,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "September 2026 🕠 Einlass: 17:30 Uhr 📍 Café-Restaurant Meierei, Hauptallee 3, 1020 Wien 🎟️ Eintritt kostenlos– bring deine Freundinnen mit",
+        "September geht's richtig los, mit kostenlosen Schnupperkursen für Jung und Alt.",
+        "Frauen zahlen 50 Cent fürs Klogehen, Männer benutzen das Pissoir gratis."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-27T11:22:46.013Z",
+        "finishedAt": "2026-08-27T11:27:38.713Z",
+        "durationMs": 292700,
+        "counts": {
+          "rawCandidates": 144,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 3,
+          "previousDeals": 0,
+          "acceptedDeals": 3,
+          "rejectedDeals": 130
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 115,
+          "missing-text": 3,
+          "general-recommendation": 6,
+          "excluded-promotion-type": 4,
+          "missing-vienna-evidence": 2
+        },
+        "errors": [
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-PmzYPe/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-CQ5PqQ/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-y2e1Gv/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-mECIOw/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-dBA0Xm/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-b8KKW3/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-SpUG3P/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-bMudqS/asset-0-ocr.png stdout -l deu+eng --psm 6"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.7,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 75,
+      "missionFitScore": 67,
+      "coverageScore": 27,
+      "precisionScore": 74,
+      "sourceWeightScore": 63
     },
     {
       "sourceKey": "food3",
