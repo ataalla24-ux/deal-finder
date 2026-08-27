@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-27T06:50:33.496Z",
-  "status": "healthy",
-  "message": "4 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
+  "generatedAt": "2026-08-27T07:02:12.851Z",
+  "status": "degraded",
+  "message": "3 fresh, evidence-checked Graph hashtag deal(s) found; 1 recovered from media.",
   "hashtags": [
     "wien",
     "vienna",
@@ -14,104 +14,118 @@
     "essenwien",
     "viennaeats"
   ],
-  "fetchedPosts": 146,
-  "uniquePosts": 131,
-  "totalDeals": 4,
-  "rescueEligible": 0,
-  "rescuedDeals": 0,
+  "fetchedPosts": 56,
+  "uniquePosts": 54,
+  "totalDeals": 3,
+  "rescueEligible": 21,
+  "rescuedDeals": 1,
   "mediaEvidence": {
-    "status": "not-needed",
-    "eligible": 0,
-    "selected": 0,
-    "cached": 0,
-    "analyzed": 0,
-    "withOcrText": 0,
-    "withVisionImages": 0,
-    "aiCalls": 0,
-    "visionCalls": 0,
-    "aiAccepted": 0,
-    "inputTokens": 0,
-    "outputTokens": 0,
-    "totalTokens": 0,
-    "errors": []
+    "status": "degraded",
+    "eligible": 20,
+    "selected": 18,
+    "cached": 1,
+    "analyzed": 18,
+    "withOcrText": 12,
+    "withVisionImages": 18,
+    "aiCalls": 8,
+    "visionCalls": 8,
+    "aiAccepted": 1,
+    "inputTokens": 20252,
+    "outputTokens": 317,
+    "totalTokens": 20569,
+    "errors": [
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-mdp8F3/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-ihkoCS/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-95r9fx/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-OdvSPT/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-GkQkaR/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-415QMy/asset-0-ocr.png stdout -l deu+eng --psm 6"
+    ],
+    "llmConfigured": true,
+    "visionConfigured": true,
+    "tools": {
+      "tesseract": true,
+      "ffmpeg": true
+    },
+    "ocrAvailable": true
   },
   "sources": [
     {
       "hashtag": "wien",
-      "status": "ok",
-      "fetched": 30,
+      "status": "error",
+      "fetched": 0,
       "accepted": 0,
-      "mediaFieldMode": "basic"
+      "error": "The operation was aborted due to timeout"
     },
     {
       "hashtag": "vienna",
-      "status": "ok",
-      "fetched": 30,
-      "accepted": 1,
-      "mediaFieldMode": "basic"
+      "status": "error",
+      "fetched": 0,
+      "accepted": 0,
+      "error": "Meta Graph 1: Please reduce the amount of data you're asking for, then retry your request"
     },
     {
       "hashtag": "viennafood",
-      "status": "ok",
-      "fetched": 30,
-      "accepted": 1,
-      "mediaFieldMode": "basic"
+      "status": "error",
+      "fetched": 0,
+      "accepted": 0,
+      "error": "Meta Graph 1: Please reduce the amount of data you're asking for, then retry your request"
     },
     {
       "hashtag": "wienevents",
       "status": "ok",
-      "fetched": 13,
+      "fetched": 15,
       "accepted": 1,
-      "mediaFieldMode": "basic"
+      "mediaFieldMode": "supported-media"
     },
     {
       "hashtag": "wientipps",
       "status": "ok",
       "fetched": 5,
       "accepted": 0,
-      "mediaFieldMode": "basic"
+      "mediaFieldMode": "supported-media"
     },
     {
       "hashtag": "wienfamilie",
       "status": "ok",
       "fetched": 1,
       "accepted": 0,
-      "mediaFieldMode": "basic"
+      "mediaFieldMode": "supported-media"
     },
     {
       "hashtag": "sommerinwien",
       "status": "ok",
-      "fetched": 21,
+      "fetched": 20,
       "accepted": 1,
-      "mediaFieldMode": "basic"
+      "mediaFieldMode": "supported-media"
     },
     {
       "hashtag": "wienergastro",
       "status": "ok",
       "fetched": 0,
       "accepted": 0,
-      "mediaFieldMode": "full-media"
+      "mediaFieldMode": "supported-media"
     },
     {
       "hashtag": "essenwien",
       "status": "ok",
       "fetched": 0,
       "accepted": 0,
-      "mediaFieldMode": "full-media"
+      "mediaFieldMode": "supported-media"
     },
     {
       "hashtag": "viennaeats",
       "status": "ok",
-      "fetched": 16,
-      "accepted": 0,
-      "mediaFieldMode": "basic"
+      "fetched": 15,
+      "accepted": 1,
+      "mediaFieldMode": "supported-media"
     }
   ],
   "rejectionReasons": {
-    "no-concrete-offer": 106,
-    "general-recommendation": 11,
-    "missing-vienna-evidence": 2,
-    "missing-text": 7,
-    "excluded-promotion-type": 1
+    "no-concrete-offer": 43,
+    "excluded-promotion-type": 1,
+    "general-recommendation": 4,
+    "missing-vienna-evidence": 1,
+    "missing-text": 2
   }
 }
