@@ -12,7 +12,10 @@ import {
   extractActiveOfferWindow,
   hasRecurringOfferSchedule,
 } from './instagram-ai-validity-utils.js';
-import { getNonGuaranteedPromotionReason } from './promotion-quality-utils.js';
+import {
+  getInfrastructureOnlyPromotionReason,
+  getNonGuaranteedPromotionReason,
+} from './promotion-quality-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -446,14 +449,18 @@ function getEditorialPriceListingReason(deal, health = null) {
 function getOfferText(deal, health = null) {
   const contentHints = reliableContentHints(health);
   const title = cleanText(deal.title);
+  const source = [deal.source, deal.originSource].map(cleanText).join(' ');
   const generatedSocialTitle = /\b(?:tiktok|instagram)[-\s]?(?:deals[-\s]?)?(?:scanner|scraper)\b/i.test([
     deal.source,
     deal.originSource,
   ].map(cleanText).join(' ')) && /\b(?:angebot|deal)$/i.test(title);
   const usableTitle = generatedSocialTitle || /^@?[a-z0-9._-]+\s+(?:angebot|deal)$/i.test(title) ? '' : title;
+  const description = cleanText(deal.description);
+  const syntheticDescription = /\b(?:apify|meta instagram business discovery)\b/i.test(source)
+    && /^(?:1\s*\+\s*1|gratis|rabatt|aktuell(?:es|er)?)[-\s]+angebot\s+bei\b/i.test(description);
   return [
     usableTitle,
-    deal.description,
+    syntheticDescription ? '' : description,
     deal.metaGraphCaption,
     deal.metaGraphOcrText,
     deal.evidence?.textSample,
@@ -491,6 +498,8 @@ function getConcreteOfferDecision(deal, health = null) {
   if (editorialListingReason) return { concrete: false, reason: editorialListingReason };
   const nonGuaranteedPromotionReason = getNonGuaranteedPromotionReason(offerText);
   if (nonGuaranteedPromotionReason) return { concrete: false, reason: nonGuaranteedPromotionReason };
+  const infrastructurePromotionReason = getInfrastructureOnlyPromotionReason(offerText);
+  if (infrastructurePromotionReason) return { concrete: false, reason: infrastructurePromotionReason };
 
   const recommendationLanguage = /\b(?:favou?rite|lieblings(?:restaurant|lokal|platz|spot|ort)|summer\s+spot|things\s+to\s+do|must[-\s]?visit|guide|tipps?|vibe|empfehl\w*|recommend\w*|save\s+(?:this|and)|send\s+this)\b/i;
   const explicitPromotionBeyondGenericFree = /(?:\b\d+\s*%|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b(?:rabatt|gutschein|coupon|deal|aktion|angebot|special|happy\s*hour)\b|\b(?:statt|nur\s+heute|today\s+only)\b|\b(?:gratis|kostenlos|free)\s+(?:zu|zum|bei|with)\b|\b(?:nur|only|um|für|fuer|for)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b))/i;

@@ -8,6 +8,14 @@ const ENGAGEMENT_ACTION_PATTERN = /\b(?:likes?|liken|kommentier(?:e|st|t|en)?|co
 const NON_GUARANTEED_ALLOCATION_PATTERN = /\b(?:verschenk(?:e|st|t|en)?|give\s+away|given\s+away|auslos(?:e|ung|ungen|en|t)?|ausgew[aä]hlt|selected|einer\s+von\s+euch|one\s+(?:person|artist)|someone)\b/i;
 const LIMITED_FREE_ALLOCATION_PATTERN = /\b\d{1,2}\s*[x×]\s*(?:free|gratis|kostenlos(?:e|er|es|en)?)\s+(?:tickets?|karten?|gutscheine?|vouchers?|gift\s*cards?|pl[aä]tze|spots?)\b/i;
 const GUARANTEED_REDEMPTION_PATTERN = /\b(?:(?:je|pro)\s+(?:person|kunde|kundin|bestellung)|jede(?:r|n|m|s)?\s+(?:person|kunde|kundin)|f(?:ü|ue)r\s+alle|mit\s+(?:dem\s+)?(?:code|aktionscode|coupon))\b/i;
+const FREE_TERM = '(?:gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)';
+const INFRASTRUCTURE_TERM = '(?:pissoirs?|urinals?|klos?|toiletten?|wc(?:-anlagen?)?|trinkwasser(?:brunnen|station(?:en)?|spender)?|trinkbrunnen|wasserspendern?|wasserbrunnen|(?:kunden[- ]?)?parkpl[aä]tze?|parkplatzsuche|parken|parkt|parkst|parking|ladestationen?|charging\\s+stations?|wlan|wi[- ]?fi)';
+const FREE_INFRASTRUCTURE_PATTERN = new RegExp(
+  `\\b(?:${FREE_TERM}\\b.{0,100}\\b${INFRASTRUCTURE_TERM}|${INFRASTRUCTURE_TERM}\\b.{0,100}\\b${FREE_TERM})\\b`,
+  'i',
+);
+const PUBLIC_INFRASTRUCTURE_PATTERN = /\b(?:pissoirs?|urinals?|(?:public|öffentlich\w*)\s+(?:klos?|toiletten?|wcs?|drinking[- ]?water|trinkwasser|wasser(?:brunnen|stationen?))|drinking[- ]?water\s+(?:fountains?|stations?)|water\s+(?:fountains?|stations?)|trinkwasserbrunnen)\b/i;
+const INDEPENDENT_PROMOTION_PATTERN = /(?:\b\d{1,2}\s*%\s*(?:rabatt|discount|off)?\b|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\bbogo\b|\b(?:rabatt|gutschein|coupon|voucher|aktionscode|promo(?:code)?|happy\s*hour|halber\s+preis)\b|\b(?:statt|nur|only|um|für|fuer|for)\s+(?:€\s*)?\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)|\b(?:gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)\s+(?:eintritt|entry|admission|ticket|tickets|kaffee|coffee|essen|food|pizza|burger|kebab|kebap|drink|drinks|cocktail|dessert|menü|menue|styling|haarschnitt|goodie|goodies|probe|training|kurs|fotobox|photobox|süßigkeiten|suessigkeiten|lizenz|lizenzen)\b)/i;
 
 export function getNonGuaranteedPromotionReason(value) {
   const text = cleanPromotionText(value);
@@ -22,4 +30,13 @@ export function getNonGuaranteedPromotionReason(value) {
     return 'Begrenzte Gratis-Vergabe statt allgemein nutzbarem Deal';
   }
   return '';
+}
+
+export function getInfrastructureOnlyPromotionReason(value) {
+  const text = cleanPromotionText(value);
+  if (!text) return '';
+  const infrastructureSignal = FREE_INFRASTRUCTURE_PATTERN.test(text)
+    || PUBLIC_INFRASTRUCTURE_PATTERN.test(text);
+  if (!infrastructureSignal || INDEPENDENT_PROMOTION_PATTERN.test(text)) return '';
+  return 'kostenlose Infrastruktur statt Deal';
 }

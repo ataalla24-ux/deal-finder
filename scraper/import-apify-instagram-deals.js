@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { getInfrastructureOnlyPromotionReason } from './promotion-quality-utils.js';
 import { stripInstagramMetaDescriptionPrefix } from '../apify/instagram-vienna-food-offers/src/validity-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -325,6 +326,8 @@ function buildTitle(item, brand) {
 }
 
 function buildDescription(item, brand, type) {
+  const caption = normalizeText(stripInstagramMetaDescriptionPrefix(item.caption || item.description));
+  if (caption) return caption.slice(0, 700);
   const location = normalizeText(item.locationText);
   const dateText = formatDateDisplay(item.validUntil);
   const lead = type === 'bogo'
@@ -416,6 +419,11 @@ function apifyItemRejectReason(item, timestamp, now, maxPostAgeDays, maxAgeWitho
   const actorRejectReason = normalizeText(item.rejectReason || 'actorRejected');
   if (item.accepted === false && !/^offerNotStarted$/i.test(actorRejectReason)) return actorRejectReason;
   if (!hasViennaEvidence(item)) return 'missingViennaEvidence';
+  const infrastructureReason = getInfrastructureOnlyPromotionReason([
+    item.caption,
+    item.description,
+  ].map(stripInstagramMetaDescriptionPrefix).join(' '));
+  if (infrastructureReason) return 'freeInfrastructure';
   if (!hasConcreteOfferSignal(item)) return 'noConcreteOfferSignal';
   if (item.stillValid === false) return 'expiredOrTooOld';
   const validUntil = toIso(item.validUntil);

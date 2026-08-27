@@ -998,6 +998,39 @@ const genericAllYouCanEat = await validateOne({
 assert.equal(genericAllYouCanEat.decision.allowed, false);
 assert.match(reasonText(genericAllYouCanEat), /kein konkretes Angebot/);
 
+const apifyCustomerParking = await validateOne({
+  id: 'igap-customer-parking',
+  brand: 'Pizzeria Dolce Vita 1020 Wien on Instagram',
+  title: 'Parkplatzsuche in Wien? Wer bei uns essen geht, parkt 2 Stunden',
+  description: 'Gratis-Angebot bei Pizzeria Dolce Vita 1020 Wien on Instagram in Locations',
+  url: 'https://www.instagram.com/reel/CustomerParking123/',
+  source: 'Instagram',
+  originSource: 'Apify Instagram Vienna Food Offers',
+  distance: 'Locations',
+  pubDate: '2026-07-20T08:00:00.000Z',
+  pubDateSource: 'apify-postPublishedAt',
+  sourcePublishedAt: '2026-07-20T08:00:00.000Z',
+  sourcePublishedAtSource: 'apify-postPublishedAt',
+}, {
+  contentHints: {
+    title: 'Parkplatzsuche in Wien? Wer bei uns essen geht, parkt 2 Stunden gratis direkt im Haus.',
+  },
+});
+assert.equal(apifyCustomerParking.decision.allowed, false);
+assert.match(reasonText(apifyCustomerParking), /Infrastruktur/);
+
+const discountWithFreeParking = await validateOne({
+  id: 'discount-with-free-parking',
+  brand: 'Test Lokal',
+  title: '20 % Rabatt auf alle Pizzen',
+  description: '20 % Rabatt auf alle Pizzen und 2 Stunden gratis Kundenparkplatz in 1020 Wien.',
+  url: 'https://example.com/discount-with-parking',
+  source: 'Official',
+  distance: '1020 Wien',
+  pubDate: '2026-07-20T08:00:00.000Z',
+});
+assert.equal(discountWithFreeParking.decision.allowed, true);
+
 const veganMarketing = await validateOne({
   id: 'vegan-marketing',
   brand: 'Vegan Bistro',

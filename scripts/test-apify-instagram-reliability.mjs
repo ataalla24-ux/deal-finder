@@ -124,6 +124,7 @@ assert.equal(current.deal.url, 'https://www.instagram.com/p/Current123/');
 assert.equal(current.deal.pubDate, currentItem.postPublishedAt);
 assert.equal(current.deal.sourcePublishedAt, currentItem.postPublishedAt);
 assert.equal(current.deal.instagramHandle, 'test.cafe');
+assert.equal(current.deal.description, currentItem.description, 'the importer must preserve the real caption as offer evidence');
 assert.equal(current.deal.distance, '', 'missing location must not be replaced with synthetic Wien');
 assert.equal(current.deal.viennaEvidence.verified, false, 'a plain text keyword must not masquerade as verified location evidence');
 
@@ -154,6 +155,23 @@ assert.equal(geotagged.deal.viennaVerified, true);
 assert.equal(geotagged.deal.viennaEvidence.source, 'apify-location');
 assert.equal(geotagged.deal.city, 'Wien');
 assert.equal(geotagged.deal.postalCode, '1010');
+
+const freeCustomerParking = normalizeApifyItem({
+  ...currentItem,
+  description: 'Parkplatzsuche in Wien? Wer bei uns essen geht, parkt 2 Stunden gratis direkt im Haus.',
+  offerKind: 'free',
+  locationText: '1020 Wien',
+}, { now });
+assert.equal(freeCustomerParking.deal, null);
+assert.equal(freeCustomerParking.rejectReason, 'freeInfrastructure');
+
+const discountWithCustomerParking = normalizeApifyItem({
+  ...currentItem,
+  description: '20 % Rabatt auf alle Pizzen und 2 Stunden gratis Kundenparkplatz in 1020 Wien.',
+  offerKind: 'discount',
+  locationText: '1020 Wien',
+}, { now });
+assert.ok(discountWithCustomerParking.deal, 'a real discount must survive an additional parking amenity');
 
 const missingTimestamp = normalizeApifyItem({ ...currentItem, postPublishedAt: '' }, { now });
 assert.equal(missingTimestamp.deal, null);
