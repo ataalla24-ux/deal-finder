@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-27T10:29:43.515Z",
+  "generatedAt": "2026-08-27T11:00:43.541Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 366,
-    "uniqueCandidates": 339,
-    "distinctCandidates": 351,
+    "totalCandidates": 368,
+    "uniqueCandidates": 340,
+    "distinctCandidates": 352,
     "duplicateClusters": 12,
     "topHealthySources": [
       {
@@ -26,16 +26,16 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 64,
-        "totalDeals": 23
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "healthScore": 65,
+        "totalDeals": 3
       },
       {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "healthScore": 61,
-        "totalDeals": 10
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 62,
+        "totalDeals": 23
       }
     ],
     "topMissionSources": [
@@ -43,6 +43,12 @@
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 85,
+        "totalDeals": 3
+      },
+      {
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "missionFitScore": 68,
         "totalDeals": 3
       },
       {
@@ -62,12 +68,6 @@
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 57,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 57,
-        "totalDeals": 9
       }
     ],
     "topCoverageSources": [
@@ -88,9 +88,9 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 61,
+        "coverageScore": 56,
         "totalDeals": 23,
-        "fresh1dCount": 4
+        "fresh1dCount": 3
       },
       {
         "sourceKey": "events",
@@ -121,6 +121,12 @@
         "totalDeals": 5
       },
       {
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "precisionScore": 75,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 67,
@@ -131,12 +137,6 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 66,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 65,
-        "totalDeals": 23
       }
     ],
     "topWeightedSources": [
@@ -153,9 +153,15 @@
         "totalDeals": 5
       },
       {
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "sourceWeightScore": 58,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 59,
+        "sourceWeightScore": 57,
         "totalDeals": 23
       },
       {
@@ -163,12 +169,6 @@
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 57,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "sourceWeightScore": 53,
-        "totalDeals": 13
       }
     ],
     "topSourcesToFix": [
@@ -450,6 +450,85 @@
       "sourceWeightScore": 51
     },
     {
+      "sourceKey": "gastro2",
+      "file": "deals-pending-gastro2.json",
+      "sourceLabel": "Firecrawl Key 1 - Gastro",
+      "totalDeals": 3,
+      "uniqueDeals": 1,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 0,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 2,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Bezirksvorstehung Mariahilf: Sport- und Spielefest für Kids im Esterhazypark 🎉 Am 27.8., ...",
+        "MITTAGSMENÜ NUR € 14,90 💛🍽️ Neue Woche, ...",
+        "Milk Tea um 1 € : Diesen Samstag im @chastudio.vienna ..."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-27T10:58:32.389Z",
+        "finishedAt": "2026-08-27T11:00:20.600Z",
+        "durationMs": 108211,
+        "counts": {
+          "rawCandidates": 16,
+          "normalizedCandidates": 16,
+          "verifiedCandidates": 3,
+          "previousDeals": 1,
+          "acceptedDeals": 3,
+          "rejectedDeals": 12
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 12
+        },
+        "errors": [
+          "instagram.com: Refusal: Die geforderte Recherche ist aus der vorgeschriebenen Quelle nicht belastbar durchführbar: Instagram leitet die Hashtag-Seite in diesem Lauf auf den Login um, und der direkte Seitenabruf wird nicht unterstützt. Dadurch kann ich weder die Hashtag-Liste/Infiniscroll vollständig prüfen noch die Originalpost-Metadaten und die konkreten Artikelpreise aus den Beitragsbildern verifizieren. Eine Ausgabe würde daher gegen die Vorgaben (nur direkte Originalposts, 7-Tage-Frische, konkrete direkt n"
+        ],
+        "reportFile": "deal-pipeline-last-run-gastro2.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 60,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "freizeit",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 3
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 65,
+      "missionFitScore": 68,
+      "coverageScore": 17,
+      "precisionScore": 75,
+      "sourceWeightScore": 58
+    },
+    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
@@ -457,7 +536,7 @@
       "uniqueDeals": 17,
       "duplicateDeals": 6,
       "duplicateAcrossSources": 6,
-      "fresh1dCount": 4,
+      "fresh1dCount": 3,
       "fresh7dCount": 20,
       "viennaCount": 23,
       "foodDrinkCount": 10,
@@ -471,7 +550,7 @@
       "lastRun": null,
       "uniqueRate": 0.7,
       "duplicateRate": 0.3,
-      "fresh1dRate": 0.2,
+      "fresh1dRate": 0.1,
       "fresh7dRate": 0.9,
       "viennaRate": 1,
       "foodDrinkRate": 0.4,
@@ -519,13 +598,14 @@
         }
       ],
       "issues": [
+        "wenige Deals sind frischer als 1 Tag",
         "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 64,
-      "missionFitScore": 50,
-      "coverageScore": 61,
-      "precisionScore": 65,
-      "sourceWeightScore": 59
+      "healthScore": 62,
+      "missionFitScore": 48,
+      "coverageScore": 56,
+      "precisionScore": 64,
+      "sourceWeightScore": 57
     },
     {
       "sourceKey": "joe",
@@ -1036,7 +1116,7 @@
       "totalDeals": 42,
       "uniqueDeals": 38,
       "duplicateDeals": 4,
-      "duplicateAcrossSources": 0,
+      "duplicateAcrossSources": 2,
       "fresh1dCount": 0,
       "fresh7dCount": 0,
       "viennaCount": 0,
@@ -1364,77 +1444,6 @@
       "coverageScore": 25,
       "precisionScore": 33,
       "sourceWeightScore": 33
-    },
-    {
-      "sourceKey": "gastro2",
-      "file": "deals-pending-gastro2.json",
-      "sourceLabel": "Firecrawl Key 1 - Gastro",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Bezirksvorstehung Mariahilf: Sport- und Spielefest für Kids im Esterhazypark 🎉 Am 27.8., ..."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-26T02:24:42.012Z",
-        "finishedAt": "2026-08-26T02:31:39.958Z",
-        "durationMs": 417946,
-        "counts": {
-          "rawCandidates": 0,
-          "normalizedCandidates": 0,
-          "verifiedCandidates": 1,
-          "previousDeals": 1,
-          "acceptedDeals": 1,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "instagram.com: Firecrawl Agent nach 75s abgebrochen",
-          "instagram.com: Firecrawl Agent nach 75s abgebrochen",
-          "1000things.at: Firecrawl Agent nach 75s abgebrochen",
-          "meinbezirk.at: Firecrawl Agent nach 75s abgebrochen"
-        ],
-        "reportFile": "deal-pipeline-last-run-gastro2.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 60,
-      "topCategories": [
-        {
-          "value": "freizeit",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 44,
-      "missionFitScore": 43,
-      "coverageScore": 11,
-      "precisionScore": 56,
-      "sourceWeightScore": 39
     },
     {
       "sourceKey": "events",
