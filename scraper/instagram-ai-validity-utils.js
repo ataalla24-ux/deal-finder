@@ -299,8 +299,33 @@ function parseEventSingleDate(text, referenceDate) {
   return null;
 }
 
+function weekdayIndex(value) {
+  const weekday = String(value || '').toLowerCase();
+  if (/^(?:so|sonntag|sun|sunday)/.test(weekday)) return 0;
+  if (/^(?:mo|montag|mon|monday)/.test(weekday)) return 1;
+  if (/^(?:di|dienstag|tue|tuesday)/.test(weekday)) return 2;
+  if (/^(?:mi|mittwoch|wed|wednesday)/.test(weekday)) return 3;
+  if (/^(?:do|donnerstag|thu|thursday)/.test(weekday)) return 4;
+  if (/^(?:fr|freitag|fri|friday)/.test(weekday)) return 5;
+  if (/^(?:sa|samstag|sat|saturday)/.test(weekday)) return 6;
+  return null;
+}
+
+function parseDatedWeekday(text, referenceDate) {
+  const regex = new RegExp(`\\b(${WEEKDAY_PATTERN})\\s*,?\\s*(?:den\\s+)?([0-3]?\\d)[./]([01]?\\d)(?:[./](20\\d{2}))?\\.?\\b`, 'i');
+  const match = text.match(regex);
+  if (!match) return null;
+  const month = Number(match[3]) - 1;
+  const year = parseYear(match[4], month, referenceDate);
+  const endDate = utcDayEnd(year, month, Number(match[2]));
+  const expectedWeekday = weekdayIndex(match[1]);
+  if (!endDate || expectedWeekday === null || endDate.getUTCDay() !== expectedWeekday) return null;
+  return buildWindow('single', endDate, endDate, match[0]);
+}
+
 function parseExplicitEnd(text, referenceDate) {
-  const namedDayRegex = new RegExp(`\\b(?:bis|gueltig bis|valid until|until|through)(?:\\s+zum|\\s+ende)?\\s+([0-3]?\\d)\\.?\\s+(${MONTH_PATTERN})(?:\\s+(20\\d{2}))?\\b`, 'i');
+  const optionalWeekday = `(?:${WEEKDAY_PATTERN}\\s*,?\\s*(?:den\\s+)?)?`;
+  const namedDayRegex = new RegExp(`\\b(?:bis|gueltig bis|valid until|until|through)(?:\\s+zum|\\s+ende)?\\s+${optionalWeekday}([0-3]?\\d)\\.?\\s+(${MONTH_PATTERN})(?:\\s+(20\\d{2}))?\\b`, 'i');
   let match = text.match(namedDayRegex);
   if (match) {
     const month = MONTHS[match[2]];
@@ -308,7 +333,7 @@ function parseExplicitEnd(text, referenceDate) {
     return buildWindow('end', null, utcDayEnd(year, month, Number(match[1])), match[0]);
   }
 
-  const numericRegex = /\b(?:bis|gueltig bis|valid until|until|through)\s+(?:zum\s+)?([0-3]?\d)[./]([01]?\d)(?:[./](20\d{2}))?\.?\b/i;
+  const numericRegex = new RegExp(`\\b(?:bis|gueltig bis|valid until|until|through)\\s+(?:zum\\s+)?${optionalWeekday}([0-3]?\\d)[./]([01]?\\d)(?:[./](20\\d{2}))?\\.?\\b`, 'i');
   match = text.match(numericRegex);
   if (match) {
     const month = Number(match[2]) - 1;
@@ -364,6 +389,7 @@ export function extractActiveOfferWindow(signal, options = {}) {
     || parseNamedDayRange(text, referenceDate)
     || parseMonthRange(text, referenceDate)
     || parseExplicitEnd(text, referenceDate)
+    || parseDatedWeekday(text, referenceDate)
     || parseEventSingleDate(text, referenceDate)
     || parseExplicitSingleDate(text, referenceDate)
     || parseRelativeWeekday(text, referenceDate)

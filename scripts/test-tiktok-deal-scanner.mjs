@@ -204,6 +204,17 @@ assert.equal(weekdayBridgedRange.deal.validFrom, '2026-08-24');
 assert.equal(weekdayBridgedRange.deal.validUntil, '2026-08-26');
 assert.equal(weekdayBridgedRange.deal.category, 'essen');
 
+const weekdayBeforeNumericEnd = build(
+  'https://www.tiktok.com/@chocoberry.at/video/7678679890975051030',
+  postData(
+    '1+1 GRATIS BEI CHOCOBERRY! Verlängert bis Freitag 28.08. Kauf 1 Becher und erhalte den 2. gratis. Copa Beach Wien.',
+    'chocoberry.at',
+  ),
+);
+assert.ok(weekdayBeforeNumericEnd.deal);
+assert.equal(weekdayBeforeNumericEnd.deal.validUntil, '2026-08-28');
+assert.equal(weekdayBeforeNumericEnd.deal.expires, '2026-08-28');
+
 const expiredWeekdayBridgedRange = buildDealFromPost(
   'https://www.tiktok.com/@chocoberry/video/7678002441849425183',
   postData(

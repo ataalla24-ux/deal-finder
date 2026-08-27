@@ -163,6 +163,39 @@ const relativeSundayEvent = extractActiveOfferWindow(
 assert.equal(relativeSundayEvent?.endDate?.toISOString().slice(0, 10), '2026-08-30');
 
 assert.equal(
+  extractActiveOfferWindow('Verlängert bis Freitag 28.08', {
+    pubDate: '2026-08-27T11:59:46.000Z',
+    now: new Date('2026-08-27T12:00:00.000Z'),
+  })?.endDate?.toISOString().slice(0, 10),
+  '2026-08-28',
+  'a weekday between bis and a yearless numeric date must preserve the post year',
+);
+assert.equal(
+  extractActiveOfferWindow('Gültig bis Freitag 01.01', {
+    pubDate: '2026-12-30T12:00:00.000Z',
+    now: new Date('2026-12-30T12:00:00.000Z'),
+  })?.endDate?.toISOString().slice(0, 10),
+  '2027-01-01',
+  'a fresh December post must roll a yearless January end date into the next year',
+);
+assert.equal(
+  extractActiveOfferWindow('Freitag, 11/09 ab 23 Uhr in der Babenberger Passage, 1010 Wien.', {
+    pubDate: '2026-08-27T16:55:38.000Z',
+    now: new Date('2026-08-27T17:00:00.000Z'),
+  })?.endDate?.toISOString().slice(0, 10),
+  '2026-09-11',
+  'a calendar weekday plus numeric date must keep a future event alive until its event day',
+);
+assert.equal(
+  extractActiveOfferWindow('Freitag, 12/09 ab 23 Uhr in Wien.', {
+    pubDate: '2026-08-27T16:55:38.000Z',
+    now: new Date('2026-08-27T17:00:00.000Z'),
+  }),
+  null,
+  'a weekday/date combination that does not exist in the inferred year must not be trusted',
+);
+
+assert.equal(
   extractActiveOfferWindow('Gültig bis Ende März 2026', { now })?.endDate?.toISOString().slice(0, 10),
   '2026-03-31',
   'NFKD-normalized März must remain parseable'
