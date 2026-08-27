@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-08-27T16:52:53.743Z",
+  "generatedAt": "2026-08-27T16:55:29.340Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 338,
-    "uniqueCandidates": 306,
-    "distinctCandidates": 321,
-    "duplicateClusters": 15,
+    "totalCandidates": 339,
+    "uniqueCandidates": 309,
+    "distinctCandidates": 323,
+    "duplicateClusters": 14,
     "topHealthySources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 81,
+        "totalDeals": 3
+      },
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
@@ -30,12 +36,6 @@
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 64,
         "totalDeals": 32
-      },
-      {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "healthScore": 64,
-        "totalDeals": 12
       }
     ],
     "topMissionSources": [
@@ -52,16 +52,16 @@
         "totalDeals": 3
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 67,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "firecrawl4",
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
         "missionFitScore": 65,
         "totalDeals": 12
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 58,
-        "totalDeals": 2
       },
       {
         "sourceKey": "joe",
@@ -123,8 +123,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 67,
-        "totalDeals": 2
+        "precisionScore": 77,
+        "totalDeals": 3
       },
       {
         "sourceKey": "instagram-ai",
@@ -147,6 +147,12 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 63,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 63,
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
         "sourceWeightScore": 57,
         "totalDeals": 12
-      },
-      {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "sourceWeightScore": 54,
-        "totalDeals": 23
       }
     ],
     "topSourcesToFix": [
@@ -242,6 +242,103 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 3,
+      "uniqueDeals": 3,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 3,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 1,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "AI-Angebotsbeleg: Film Festival at Rathausplatz with free admission",
+        "🍓🍫 1+1 GRATIS BEI CHOCOBERRY!",
+        "‼️SUPER PROMO PRENOTA PRIMA VIENNA ‼️ ✈️3 giorni a con volo da Napoli €230 per persona✈️ 1 zaino a persona +assicurazione medico bagaglio e"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-27T16:48:40.394Z",
+        "finishedAt": "2026-08-27T16:54:29.877Z",
+        "durationMs": 349483,
+        "counts": {
+          "rawCandidates": 129,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 3,
+          "previousDeals": 0,
+          "acceptedDeals": 3,
+          "rejectedDeals": 117
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 100,
+          "missing-vienna-evidence": 3,
+          "missing-text": 5,
+          "general-recommendation": 6,
+          "excluded-promotion-type": 3
+        },
+        "errors": [
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-MuXYBJ/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-lRKHFr/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-NoKBoE/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-2J9KqW/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-XIgprw/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-hR2E36/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-tVDuvU/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-fGCnB7/asset-0-ocr.png stdout -l deu+eng --psm 6"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.7,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 81,
+      "missionFitScore": 67,
+      "coverageScore": 18,
+      "precisionScore": 77,
+      "sourceWeightScore": 63
+    },
     {
       "sourceKey": "food3",
       "file": "deals-pending-food3.json",
@@ -612,94 +709,6 @@
       "sourceWeightScore": 57
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 1,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "September 2026 🕠 Einlass: 17:30 Uhr 📍 Café-Restaurant Meierei, Hauptallee 3, 1020 Wien 🎟️ Eintritt kostenlos– bring deine Freundinnen mit",
-        "September geht's richtig los, mit kostenlosen Schnupperkursen für Jung und Alt."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-27T11:22:46.013Z",
-        "finishedAt": "2026-08-27T11:27:38.713Z",
-        "durationMs": 292700,
-        "counts": {
-          "rawCandidates": 144,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
-          "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 130
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 115,
-          "missing-text": 3,
-          "general-recommendation": 6,
-          "excluded-promotion-type": 4,
-          "missing-vienna-evidence": 2
-        },
-        "errors": [
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-PmzYPe/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-CQ5PqQ/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-y2e1Gv/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-mECIOw/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-dBA0Xm/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-b8KKW3/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-SpUG3P/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-bMudqS/asset-0-ocr.png stdout -l deu+eng --psm 6"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0.5,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 89.5,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 58,
-      "coverageScore": 14,
-      "precisionScore": 67,
-      "sourceWeightScore": 53
-    },
-    {
       "sourceKey": "joe",
       "file": "deals-pending-joe.json",
       "sourceLabel": "jö Bonus Club",
@@ -895,6 +904,82 @@
       "coverageScore": 13,
       "precisionScore": 52,
       "sourceWeightScore": 44
+    },
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 9,
+      "uniqueDeals": 2,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
+      "fresh1dCount": 0,
+      "fresh7dCount": 8,
+      "viennaCount": 9,
+      "foodDrinkCount": 3,
+      "promoCount": 7,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "September 2026 🕠 Einlass: 17:30 Uhr 📍 Café-Restaurant Meierei, Hauptallee 3, 1020 Wien 🎟️ Eintritt kostenlos– bring deine Freundinnen mit",
+        "September kannst du historische Orte in ganz Österreich kostenlos entdecken, darunter auch einige, die sonst nicht öffentlich zugänglich sin",
+        "September, gratis!"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.2,
+      "duplicateRate": 0.8,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0.9,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 85.9,
+      "topCategories": [
+        {
+          "value": "freizeit",
+          "count": 3
+        },
+        {
+          "value": "kultur",
+          "count": 2
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        },
+        {
+          "value": "supermarkt",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 7
+        },
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 51,
+      "missionFitScore": 48,
+      "coverageScore": 22,
+      "precisionScore": 60,
+      "sourceWeightScore": 46
     },
     {
       "sourceKey": "instagram-verified",
@@ -1119,82 +1204,6 @@
       "coverageScore": 12,
       "precisionScore": 42,
       "sourceWeightScore": 30
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 9,
-      "uniqueDeals": 1,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 8,
-      "fresh1dCount": 0,
-      "fresh7dCount": 8,
-      "viennaCount": 9,
-      "foodDrinkCount": 3,
-      "promoCount": 7,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "September 2026 🕠 Einlass: 17:30 Uhr 📍 Café-Restaurant Meierei, Hauptallee 3, 1020 Wien 🎟️ Eintritt kostenlos– bring deine Freundinnen mit",
-        "September kannst du historische Orte in ganz Österreich kostenlos entdecken, darunter auch einige, die sonst nicht öffentlich zugänglich sin",
-        "September, gratis!"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.1,
-      "duplicateRate": 0.9,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.9,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 85.9,
-      "topCategories": [
-        {
-          "value": "freizeit",
-          "count": 3
-        },
-        {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 7
-        },
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 49,
-      "missionFitScore": 48,
-      "coverageScore": 21,
-      "precisionScore": 60,
-      "sourceWeightScore": 45
     },
     {
       "sourceKey": "community",
