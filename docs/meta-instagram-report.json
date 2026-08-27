@@ -1,13 +1,27 @@
 {
-  "generatedAt": "2026-08-27T09:34:35.667Z",
+  "generatedAt": "2026-08-27T20:22:55.319Z",
   "source": "meta-instagram",
-  "status": "ok",
+  "status": "degraded",
   "configured": {
     "adLibrary": false,
     "instagramGraph": true
   },
-  "accountCatalogSize": 104,
+  "accountCatalogSize": 114,
   "selectedAccounts": [
+    {
+      "username": "earlyeve.at",
+      "priority": 68,
+      "verifiedVienna": false,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
+    },
+    {
+      "username": "colorsocial.vienna",
+      "priority": 68,
+      "verifiedVienna": false,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
+    },
     {
       "username": "insta.vienna",
       "priority": 68,
@@ -51,13 +65,6 @@
       "rejectedDeals": 0
     },
     {
-      "username": "the_vespa_bros.vienna",
-      "priority": 68,
-      "verifiedVienna": false,
-      "approvedDeals": 0,
-      "rejectedDeals": 0
-    },
-    {
       "username": "lisa.maria.b",
       "priority": 104,
       "verifiedVienna": true,
@@ -87,91 +94,84 @@
     },
     {
       "username": "lara.kristiin",
-      "priority": 31,
+      "priority": 104,
       "verifiedVienna": true,
       "approvedDeals": 0,
       "rejectedDeals": 0
     },
     {
       "username": "contentbude.at",
-      "priority": 20,
+      "priority": 104,
       "verifiedVienna": true,
       "approvedDeals": 0,
       "rejectedDeals": 0
     },
     {
-      "username": "viennafoodstories",
-      "priority": 72,
+      "username": "meat_point_smashburgerbar",
+      "priority": 95,
       "verifiedVienna": false,
       "approvedDeals": 0,
       "rejectedDeals": 0
     },
     {
-      "username": "viennawurstelstand",
-      "priority": 72,
+      "username": "zushimarket",
+      "priority": 94,
+      "verifiedVienna": true,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
+    },
+    {
+      "username": "assal.burger",
+      "priority": 92,
+      "verifiedVienna": true,
+      "approvedDeals": 0,
+      "rejectedDeals": 0
+    },
+    {
+      "username": "cascade_bar_vienna",
+      "priority": 90,
       "verifiedVienna": false,
       "approvedDeals": 0,
       "rejectedDeals": 0
     },
     {
-      "username": "fuego.wien",
-      "priority": 68,
+      "username": "foodpoint.at",
+      "priority": 88,
       "verifiedVienna": false,
       "approvedDeals": 0,
       "rejectedDeals": 0
     },
     {
-      "username": "hi.jump.wien",
-      "priority": 68,
+      "username": "german.doener.house",
+      "priority": 88,
       "verifiedVienna": false,
       "approvedDeals": 0,
       "rejectedDeals": 0
     },
     {
-      "username": "matchaba.at",
-      "priority": 68,
+      "username": "merdins_cheesy_doener",
+      "priority": 88,
       "verifiedVienna": false,
       "approvedDeals": 0,
       "rejectedDeals": 0
     },
     {
-      "username": "moriz.wien",
-      "priority": 68,
+      "username": "startup.at",
+      "priority": 88,
       "verifiedVienna": false,
       "approvedDeals": 0,
       "rejectedDeals": 0
     },
     {
-      "username": "papa.duck.at",
-      "priority": 68,
+      "username": "tagdesdenkmals.at",
+      "priority": 88,
       "verifiedVienna": false,
       "approvedDeals": 0,
       "rejectedDeals": 0
     },
     {
-      "username": "liveim25",
-      "priority": 39,
-      "verifiedVienna": false,
-      "approvedDeals": 0,
-      "rejectedDeals": 0
-    },
-    {
-      "username": "castillo.wien",
-      "priority": 18,
-      "verifiedVienna": false,
-      "approvedDeals": 0,
-      "rejectedDeals": 0
-    },
-    {
-      "username": "casa_frascati_17",
-      "priority": 0,
-      "verifiedVienna": false,
-      "approvedDeals": 0,
-      "rejectedDeals": 0
-    },
-    {
-      "username": "dieseeteufel",
-      "priority": 0,
+      "username": "xo_grill",
+      "priority": 86,
       "verifiedVienna": false,
       "approvedDeals": 0,
       "rejectedDeals": 0
@@ -179,9 +179,9 @@
   ],
   "selectedHashtags": [
     "wien",
-    "wienevents",
     "viennafood",
-    "viennaevents",
+    "wienevents",
+    "vienna",
     "wiengutschein",
     "neueröffnungwien",
     "wienangebote",
@@ -207,45 +207,54 @@
       "errors": []
     },
     "instagramGraph": {
-      "status": "ok",
-      "fetched": 292,
+      "status": "degraded",
+      "fetched": 262,
       "accepted": 9,
-      "newAccepted": 0,
-      "errors": [],
+      "newAccepted": 3,
+      "errors": [
+        {
+          "source": "@earlyeve.at",
+          "status": 400,
+          "code": 110,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28earlyeve.at%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
+        },
+        {
+          "source": "@foodpoint.at",
+          "status": 400,
+          "code": 110,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28foodpoint.at%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
+        },
+        {
+          "source": "@startup.at",
+          "status": 400,
+          "code": 110,
+          "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28startup.at%29%7Busername%2Cname%2Cmedia.limit%289%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
+        }
+      ],
       "skippedCooldown": {
-        "accounts": 16,
+        "accounts": 17,
         "hashtags": 0
       },
       "globalError": null,
       "mediaEvidence": {
         "status": "degraded",
-        "eligible": 18,
-        "selected": 18,
-        "cached": 70,
-        "analyzed": 18,
-        "withOcrText": 6,
-        "withVisionImages": 18,
+        "eligible": 19,
+        "selected": 19,
+        "cached": 74,
+        "analyzed": 19,
+        "withOcrText": 18,
+        "withVisionImages": 19,
         "aiCalls": 10,
         "visionCalls": 10,
-        "aiAccepted": 0,
-        "inputTokens": 31748,
-        "outputTokens": 363,
-        "totalTokens": 32111,
+        "aiAccepted": 2,
+        "inputTokens": 45566,
+        "outputTokens": 454,
+        "totalTokens": 46020,
         "errors": [
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-uy2A5w/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-qGPVaF/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-L3DwW2/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-ShrSW3/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-iZFh6O/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-iZFh6O/asset-1-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-TyxZ9j/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-Vhf4nn/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-qM1Ku9/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-NXLMgs/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-qxZM1X/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-qxZDTe/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-71elfK/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "Command failed: tesseract /tmp/freefinder-meta-ocr-W6v6a4/asset-0-ocr.png stdout -l deu+eng --psm 6"
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-cvE1Nb/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-cvE1Nb/asset-1-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-cvE1Nb/asset-2-ocr.png stdout -l deu+eng --psm 6",
+          "Command failed: tesseract /tmp/freefinder-meta-ocr-OevgkS/asset-2-ocr.png stdout -l deu+eng --psm 6"
         ],
         "llmConfigured": true,
         "visionConfigured": true,
@@ -256,50 +265,55 @@
         "ocrAvailable": true
       },
       "accountYield": {
-        "insta.vienna": {
+        "earlyeve.at": {
+          "recentFetched": 0,
+          "recentAccepted": 0,
+          "recentNewAccepted": 0
+        },
+        "colorsocial.vienna": {
           "recentFetched": 9,
+          "recentAccepted": 1,
+          "recentNewAccepted": 1
+        },
+        "insta.vienna": {
+          "recentFetched": 15.75,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
         "meinbezirk.at": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
         "patrick.vienna": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
         "tripsst.vienna": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
         "wonderful.vienna": {
-          "recentFetched": 9,
+          "recentFetched": 15.75,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
         "wonderlust.vienna": {
-          "recentFetched": 9,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
-        },
-        "the_vespa_bros.vienna": {
           "recentFetched": 15.75,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
         "lisa.maria.b": {
           "recentFetched": 35.998,
-          "recentAccepted": 6.577,
-          "recentNewAccepted": 0.475
+          "recentAccepted": 6.933,
+          "recentNewAccepted": 0.356
         },
         "bezirksvorstehung_mariahilf": {
           "recentFetched": 35.998,
-          "recentAccepted": 7.002,
-          "recentNewAccepted": 0
+          "recentAccepted": 6.252,
+          "recentNewAccepted": 1
         },
         "shaysfoodblog": {
           "recentFetched": 35.998,
@@ -307,96 +321,91 @@
           "recentNewAccepted": 0
         },
         "foodpoint_wien": {
-          "recentFetched": 15.75,
-          "recentAccepted": 1.75,
-          "recentNewAccepted": 0.75
+          "recentFetched": 20.813,
+          "recentAccepted": 2.313,
+          "recentNewAccepted": 0.563
         },
         "lara.kristiin": {
-          "recentFetched": 34.86,
-          "recentAccepted": 11.62,
-          "recentNewAccepted": 0.084
+          "recentFetched": 35.145,
+          "recentAccepted": 11.715,
+          "recentNewAccepted": 0.063
         },
         "contentbude.at": {
-          "recentFetched": 33.973,
-          "recentAccepted": 0.15,
-          "recentNewAccepted": 0.076
+          "recentFetched": 34.48,
+          "recentAccepted": 0.112,
+          "recentNewAccepted": 0.057
         },
-        "viennafoodstories": {
-          "recentFetched": 35.359,
+        "meat_point_smashburgerbar": {
+          "recentFetched": 35.729,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
-        "viennawurstelstand": {
+        "zushimarket": {
+          "recentFetched": 35.639,
+          "recentAccepted": 1,
+          "recentNewAccepted": 1
+        },
+        "assal.burger": {
           "recentFetched": 35.519,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
-        "fuego.wien": {
-          "recentFetched": 35.797,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
-        },
-        "hi.jump.wien": {
-          "recentFetched": 27.457,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
-        },
-        "matchaba.at": {
-          "recentFetched": 20.813,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
-        },
-        "moriz.wien": {
-          "recentFetched": 27.457,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
-        },
-        "papa.duck.at": {
-          "recentFetched": 20.813,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
-        },
-        "liveim25": {
-          "recentFetched": 20.813,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
-        },
-        "castillo.wien": {
-          "recentFetched": 35.359,
-          "recentAccepted": 0,
-          "recentNewAccepted": 0
-        },
-        "casa_frascati_17": {
+        "cascade_bar_vienna": {
           "recentFetched": 35.519,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
-        "dieseeteufel": {
-          "recentFetched": 35.359,
+        "foodpoint.at": {
+          "recentFetched": 0,
+          "recentAccepted": 0,
+          "recentNewAccepted": 0
+        },
+        "german.doener.house": {
+          "recentFetched": 35.639,
+          "recentAccepted": 0,
+          "recentNewAccepted": 0
+        },
+        "merdins_cheesy_doener": {
+          "recentFetched": 35.915,
+          "recentAccepted": 0,
+          "recentNewAccepted": 0
+        },
+        "startup.at": {
+          "recentFetched": 0,
+          "recentAccepted": 0,
+          "recentNewAccepted": 0
+        },
+        "tagdesdenkmals.at": {
+          "recentFetched": 33.297,
+          "recentAccepted": 0,
+          "recentNewAccepted": 0
+        },
+        "xo_grill": {
+          "recentFetched": 35.915,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         }
       },
       "hashtagYield": {
         "wien": {
-          "recentFetched": 71.992,
-          "recentAccepted": 1.172,
-          "recentNewAccepted": 1.172
-        },
-        "wienevents": {
-          "recentFetched": 47.583,
-          "recentAccepted": 3.947,
-          "recentNewAccepted": 0.44
+          "recentFetched": 73.994,
+          "recentAccepted": 0.879,
+          "recentNewAccepted": 0.879
         },
         "viennafood": {
-          "recentFetched": 79.398,
-          "recentAccepted": 3.663,
-          "recentNewAccepted": 0.797
+          "recentFetched": 79.548,
+          "recentAccepted": 2.747,
+          "recentNewAccepted": 0.598
         },
-        "viennaevents": {
-          "recentFetched": 70.822,
-          "recentAccepted": 12.424,
-          "recentNewAccepted": 0.41
+        "wienevents": {
+          "recentFetched": 48.687,
+          "recentAccepted": 2.96,
+          "recentNewAccepted": 0.33
+        },
+        "vienna": {
+          "recentFetched": 79.162,
+          "recentAccepted": 0.48,
+          "recentNewAccepted": 0.467
         },
         "wiengutschein": {
           "recentFetched": 0,
@@ -404,7 +413,7 @@
           "recentNewAccepted": 0
         },
         "neueröffnungwien": {
-          "recentFetched": 2.466,
+          "recentFetched": 1.85,
           "recentAccepted": 0,
           "recentNewAccepted": 0
         },
@@ -442,34 +451,33 @@
     }
   },
   "rejectionReasons": {
-    "no-concrete-offer": 193,
-    "general-recommendation": 24,
-    "excluded-promotion-type": 20,
-    "missing-vienna-evidence": 12,
-    "missing-text": 8,
-    "post-too-old": 18,
-    "offer-expired": 3,
+    "excluded-promotion-type": 23,
+    "no-concrete-offer": 183,
+    "general-recommendation": 15,
+    "missing-vienna-evidence": 10,
+    "post-too-old": 14,
+    "offer-expired": 1,
     "media-ai-rejected-offer": 3,
-    "non-vienna-location": 2
+    "missing-text": 4
   },
   "graphEvidence": {
     "status": "ok",
-    "observed": 292,
-    "retained": 1063,
-    "blocked": 55
+    "observed": 262,
+    "retained": 1125,
+    "blocked": 61
   },
   "accountDiscovery": {
-    "stored": 22,
-    "observedThisRun": 11,
-    "newThisRun": 2
+    "stored": 26,
+    "observedThisRun": 12,
+    "newThisRun": 4
   },
   "totalDeals": 9,
-  "newDeals": 0,
-  "repeatedDeals": 9,
-  "newVerifiedBeforeLimit": 0,
+  "newDeals": 3,
+  "repeatedDeals": 6,
+  "newVerifiedBeforeLimit": 3,
   "verifiedBeforeLimit": 9,
   "outputLimit": 40,
-  "freshPostsFetched": 292,
+  "freshPostsFetched": 262,
   "verifiedDeals": 9,
-  "message": "9 evidence-verified Vienna Instagram deals found (0 net-new, 9 previously observed)."
+  "message": "9 evidence-verified Vienna Instagram deals found (3 net-new, 6 previously observed)."
 }
