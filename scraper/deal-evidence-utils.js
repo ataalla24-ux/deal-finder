@@ -11,7 +11,8 @@ const RESERVED_INSTAGRAM_USERNAMES = new Set([
 const INSTAGRAM_SHORTCODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 const GENERIC_SOCIAL_BRANDS = new Set([
   'instagram', 'meta instagram', 'tiktok', 'wien', 'vienna', 'wien events',
-  'wien tipps', 'wien essen', 'vienna food',
+  'wien tipps', 'wien essen', 'vienna food', 'wien uncovered', 'vienna uncovered',
+  'goodnight at', '1000things', 'freefinder',
 ]);
 const OFFER_PRODUCT_PATTERNS = [
   ['pizza', /\bpizz(?:a|en)\b/],
@@ -22,12 +23,12 @@ const OFFER_PRODUCT_PATTERNS = [
   ['lunch', /\b(?:lunch|mittag(?:essen|smenue|smenu))\b/],
   ['brunch', /\bbrunch\b/],
   ['breakfast', /\b(?:fruehstueck|breakfast)\b/],
-  ['buffet', /\bbuffet\b/],
+  ['buffet', /\b(?:buffet|all[ -]+you[ -]+can[ -]+eat)\b/],
   ['cryo', /\b(?:cryo|kaeltekammer|kaltekammer)\b/],
   ['bowl', /\bbowl\b/],
   ['sushi', /\b(?:sushi|maki)\b/],
   ['ramen', /\bramen\b/],
-  ['food', /\b(?:essen|speise|gericht|menue|menu|food)\b/],
+  ['food', /\b(?:essen|eat|speise|gericht|menue|menu|food)\b/],
   ['ticket', /\b(?:ticket|eintritt|admission)\b/],
   ['tour', /\b(?:fuehrung|tour|rundgang)\b/],
   ['fitness', /\b(?:fitness|training|probetraining|sportkurs|yoga)\b/],
@@ -52,13 +53,26 @@ function normalizeFingerprintText(value) {
     .trim();
 }
 
-function semanticBrandKey(deal = {}) {
-  const brand = normalizeFingerprintText(deal.brand || deal.merchant || deal.provider)
+function compactMerchantFingerprint(value) {
+  return normalizeFingerprintText(value)
     .replace(/\b(?:wien|vienna|oesterreich|austria)\b/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  if (brand.length >= 3 && !GENERIC_SOCIAL_BRANDS.has(brand)) return brand;
-  return extractStructuredOwnerUsername(deal);
+    .replace(/\b(?:official|gmbh|kg|e\.u)\b/g, ' ')
+    .replace(/[.\s]+at$/g, ' ')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+const GENERIC_MERCHANT_KEYS = new Set([...GENERIC_SOCIAL_BRANDS].map(compactMerchantFingerprint));
+
+function semanticBrandKey(deal = {}) {
+  const candidates = [
+    deal.brand || deal.merchant || deal.provider,
+    extractStructuredOwnerUsername(deal),
+  ];
+  for (const candidate of candidates) {
+    const key = compactMerchantFingerprint(candidate);
+    if (key.length >= 3 && !GENERIC_MERCHANT_KEYS.has(key)) return key;
+  }
+  return '';
 }
 
 function semanticOfferSignal(deal = {}) {
@@ -74,6 +88,10 @@ function semanticOfferContext(deal = {}) {
   return normalizeFingerprintText([
     semanticOfferSignal(deal),
     deal.description,
+    deal.validFrom,
+    deal.validUntil,
+    deal.validOn,
+    deal.expires,
   ].filter(Boolean).join(' '));
 }
 
@@ -86,8 +104,8 @@ function uniqueMatches(text, pattern, mapper = (match) => match[0]) {
  * requires a merchant plus concrete offer evidence so unrelated posts from the
  * same account are never merged just because both contain words such as "deal".
  */
-export function semanticSocialOfferKey(deal = {}) {
-  if (!canonicalSocialPostKey(deal.url || deal.post_url || deal.postUrl)) return '';
+function semanticPromotionOfferKey(deal = {}, options = {}) {
+  if (options.requireSocial === true && !canonicalSocialPostKey(deal.url || deal.post_url || deal.postUrl)) return '';
   const brand = semanticBrandKey(deal);
   const signal = semanticOfferSignal(deal);
   const context = semanticOfferContext(deal);
@@ -98,8 +116,8 @@ export function semanticSocialOfferKey(deal = {}) {
     markers.push(...uniqueMatches(text, /\b(\d{1,2})\s*(?:%|prozent\b)/g, (match) => `${match[1]}pct`));
     markers.push(...uniqueMatches(text, /(?:€\s*(\d{1,3}(?:[.,]\d{1,2})?)\b|\b(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:€|eur\b|euro\b))/g,
       (match) => `${String(match[1] || match[2]).replace(',', '.')}eur`));
-    if (/\b(?:1\s*\+\s*1|2\s*(?:fuer|for)\s*1|bogo)\b/.test(text)) markers.push('bogo');
-    if (/\ball\s+you\s+can\b/.test(text)) markers.push('all-you-can');
+    if (/\b(?:1\s*\+\s*1|2\s*(?:fuer|for)\s*1|bogo|(?:zweite[rsn]?|2\.)\s+[a-z0-9-]+(?:\s+[a-z0-9-]+){0,3}\s+(?:gratis|kostenlos|free))\b/.test(text)) markers.push('bogo');
+    if (/\ball[ -]+you[ -]+can\b/.test(text)) markers.push('all-you-can');
     markers.push(...uniqueMatches(text, /\b(?:code|promocode|rabattcode|gutscheincode)\s*([a-z0-9-]{4,24})\b/g,
       (match) => `code-${match[1]}`));
     return [...new Set(markers)].sort();
@@ -126,6 +144,14 @@ export function semanticSocialOfferKey(deal = {}) {
   if (products.length === 0) return '';
   const campaignDate = concreteMarker ? '' : dateMarkers.slice(0, 2).sort().join('+');
   return `offer:${brand}|${markers.join('+') || 'free'}|${products.sort().join('+')}|${campaignDate}`;
+}
+
+export function semanticSocialOfferKey(deal = {}) {
+  return semanticPromotionOfferKey(deal, { requireSocial: true });
+}
+
+export function semanticCrossPlatformOfferKey(deal = {}) {
+  return semanticPromotionOfferKey(deal);
 }
 
 function toIsoTimestamp(value) {

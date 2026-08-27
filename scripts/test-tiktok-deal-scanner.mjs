@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 
-import { buildDealFromPost } from '../scraper/tiktok-deals-scanner.js';
+import {
+  buildDealFromPost,
+  rescueTikTokMediaCandidates,
+} from '../scraper/tiktok-deals-scanner.js';
 
 const REFERENCE_NOW = new Date('2026-08-26T12:00:00.000Z');
 
@@ -213,5 +216,121 @@ assert.equal(
   false,
   'location evidence must never split an emoji into an invalid JSON surrogate',
 );
+
+const visualOnlyData = postData('Unser neuer Wochenplan', 'visual.cafe.wien');
+visualOnlyData.bodyText = 'Unser neuer Wochenplan. Creator bio: coffee and brunch.';
+visualOnlyData.mediaType = 'VIDEO';
+visualOnlyData.mediaUrl = 'https://cdn.example/visual-cafe.mp4';
+visualOnlyData.thumbnailUrl = 'https://cdn.example/visual-cafe.jpg';
+const visualOnlyUrl = 'https://www.tiktok.com/@visual.cafe.wien/video/7678002441849425190';
+const visualOnlyInitial = build(visualOnlyUrl, visualOnlyData);
+assert.equal(visualOnlyInitial.deal, null);
+
+const trustedVisualData = {
+  ...visualOnlyData,
+  _mediaEvidence: {
+    analyzedAt: REFERENCE_NOW.toISOString(),
+    ocrText: 'Zweiter Kaffee gratis, Neubaugasse 12, 1070 Wien',
+    visionImageCount: 2,
+    ai: {
+      isDeal: true,
+      confidence: 0.96,
+      offerText: 'Zweiter Kaffee gratis',
+      locationText: 'Neubaugasse 12, 1070 Wien',
+      validityText: 'Gültig bis 30. August 2026',
+      exclusion: 'none',
+    },
+  },
+};
+const trustedVisualDeal = build(visualOnlyUrl, trustedVisualData);
+assert.ok(trustedVisualDeal.deal, 'trusted TikTok media evidence must recover an image-only deal');
+assert.equal(trustedVisualDeal.deal.viennaEvidence.source, 'tiktok-media-ai');
+assert.equal(trustedVisualDeal.deal.validUntil, '2026-08-30');
+assert.equal(trustedVisualDeal.deal.ownerUsername, 'visual.cafe.wien');
+assert.equal(trustedVisualDeal.deal.evidence.mediaEvidence.ai.confidence, 0.96);
+assert.match(trustedVisualDeal.deal.description, /Bildbeleg/);
+
+const staleVisualData = {
+  ...visualOnlyData,
+  timeDateTime: new Date(REFERENCE_NOW.getTime() - 120 * 60 * 60 * 1000).toISOString(),
+};
+const giveawayVisualData = {
+  ...visualOnlyData,
+  description: 'Gewinnspiel: Gewinne einen gratis Brunch.',
+  title: 'Gewinnspiel: Gewinne einen gratis Brunch.',
+  bodyText: 'Gewinnspiel: Gewinne einen gratis Brunch.',
+};
+const foreignVisualData = {
+  ...visualOnlyData,
+  description: 'Gratis Kaffee in Graz.',
+  title: 'Gratis Kaffee in Graz.',
+  bodyText: 'Gratis Kaffee in Graz.',
+};
+let rescueEntries = [];
+const mediaRescue = await rescueTikTokMediaCandidates([
+  { url: visualOnlyUrl, data: visualOnlyData, initial: visualOnlyInitial },
+  { url: visualOnlyUrl, data: visualOnlyData, initial: visualOnlyInitial },
+  {
+    url: 'https://www.tiktok.com/@visual.cafe.wien/video/7678002441849425191',
+    data: staleVisualData,
+  },
+  {
+    url: 'https://www.tiktok.com/@visual.cafe.wien/video/7678002441849425192',
+    data: giveawayVisualData,
+  },
+  {
+    url: 'https://www.tiktok.com/@visual.cafe.wien/video/7678002441849425193',
+    data: foreignVisualData,
+  },
+], {
+  now: REFERENCE_NOW,
+  env: {
+    OPENAI_API_KEY: 'test-openai-key',
+    TIKTOK_MEDIA_MAX_AGE_HOURS: '72',
+  },
+  cache: {},
+  enrichMedia: async (entries) => {
+    rescueEntries = entries;
+    assert.equal(entries.length, 1, 'only one unique, fresh, non-excluded media candidate is analyzed');
+    assert.equal(entries[0].item.media_type, 'VIDEO');
+    assert.equal(entries[0].item.thumbnail_url, 'https://cdn.example/visual-cafe.jpg');
+    entries[0].item._mediaEvidence = trustedVisualData._mediaEvidence;
+    return {
+      entries,
+      cache: { [entries[0].item.id]: trustedVisualData._mediaEvidence },
+      report: {
+        status: 'ok',
+        selected: 1,
+        cached: 0,
+        analyzed: 1,
+        withOcrText: 1,
+        withVisionImages: 1,
+        aiCalls: 1,
+        visionCalls: 1,
+        aiAccepted: 1,
+        errors: [],
+      },
+    };
+  },
+});
+assert.equal(rescueEntries.length, 1);
+assert.equal(mediaRescue.deals.length, 1);
+assert.equal(mediaRescue.report.rescueCandidates, 4, 'duplicate URLs are removed before analysis');
+assert.equal(mediaRescue.report.eligible, 1);
+assert.equal(mediaRescue.report.rescuedDeals, 1);
+assert.ok(mediaRescue.rescuedUrls.has(visualOnlyUrl));
+
+const mediaOutage = await rescueTikTokMediaCandidates([
+  { url: visualOnlyUrl, data: visualOnlyData, initial: visualOnlyInitial },
+], {
+  now: REFERENCE_NOW,
+  env: { OPENAI_API_KEY: 'test-openai-key' },
+  enrichMedia: async () => {
+    throw new Error('OpenAI unavailable');
+  },
+});
+assert.equal(mediaOutage.deals.length, 0);
+assert.equal(mediaOutage.report.status, 'degraded');
+assert.match(mediaOutage.report.errors.join(' '), /OpenAI unavailable/);
 
 console.log('tiktok deal scanner tests passed');

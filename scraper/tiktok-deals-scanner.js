@@ -8,6 +8,11 @@ import { chromium } from 'playwright';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { inferPreferredBrand } from './deal-normalization-utils.js';
 import { extractActiveOfferWindow, unicodeSafeTruncate } from './instagram-ai-validity-utils.js';
+import {
+  classifySocialMediaEvidenceWithOpenAI,
+  enrichInstagramGraphMedia,
+  extractInstagramMediaAssets,
+} from './instagram-media-evidence.js';
 import { getNonGuaranteedPromotionReason } from './promotion-quality-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -16,6 +21,7 @@ const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const OUTPUT_PATH = path.join(DOCS_DIR, 'deals-pending-tiktok.json');
 const REPORT_PATH = path.join(DOCS_DIR, 'tiktok-scanner-report.json');
+const MEDIA_CACHE_PATH = path.join(DOCS_DIR, 'tiktok-media-evidence-cache.json');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CONFIG = {
@@ -263,6 +269,84 @@ function cleanText(value = '', max = 1600) {
     .replace(/\s+/g, ' ')
     .trim();
   return unicodeSafeTruncate(cleaned, max);
+}
+
+function boundedNumber(value, fallback, minimum, maximum) {
+  const number = Number(value);
+  return Math.max(minimum, Math.min(maximum, Number.isFinite(number) ? number : fallback));
+}
+
+function booleanEnv(env, name, fallback) {
+  const raw = cleanText(env?.[name], 20).toLowerCase();
+  if (!raw) return fallback;
+  return !['0', 'false', 'no', 'off'].includes(raw);
+}
+
+function buildTikTokMediaConfig(env = process.env) {
+  const openAiApiKey = cleanText(env.OPENAI_API_KEY, 700);
+  const mediaLlmEnabled = booleanEnv(env, 'TIKTOK_MEDIA_LLM_ENABLED', Boolean(openAiApiKey)) && Boolean(openAiApiKey);
+  const mediaVisionEnabled = booleanEnv(env, 'TIKTOK_MEDIA_VISION_ENABLED', mediaLlmEnabled) && mediaLlmEnabled;
+  const mediaMaxAgeHours = boundedNumber(env.TIKTOK_MEDIA_MAX_AGE_HOURS, 72, 12, 168);
+  return {
+    maxOrganicAgeWithExpiryDays: mediaMaxAgeHours / 24,
+    mediaMaxAgeHours,
+    mediaOcrEnabled: booleanEnv(env, 'TIKTOK_MEDIA_OCR_ENABLED', mediaLlmEnabled) && mediaLlmEnabled,
+    mediaMaxPostsPerRun: boundedNumber(env.TIKTOK_MEDIA_MAX_POSTS_PER_RUN, 16, 0, 30),
+    mediaMaxAssetsPerPost: boundedNumber(env.TIKTOK_MEDIA_MAX_ASSETS_PER_POST, 2, 1, 4),
+    mediaMaxVideoFrames: boundedNumber(env.TIKTOK_MEDIA_MAX_VIDEO_FRAMES, 3, 1, 6),
+    mediaMaxBytes: boundedNumber(env.TIKTOK_MEDIA_MAX_BYTES, 25 * 1024 * 1024, 1024 * 1024, 50 * 1024 * 1024),
+    mediaDownloadTimeoutMs: boundedNumber(env.TIKTOK_MEDIA_DOWNLOAD_TIMEOUT_MS, 20000, 3000, 60000),
+    mediaOcrConcurrency: boundedNumber(env.TIKTOK_MEDIA_OCR_CONCURRENCY, 2, 1, 4),
+    mediaOcrMaxTextChars: boundedNumber(env.TIKTOK_MEDIA_OCR_MAX_TEXT_CHARS, 4000, 500, 8000),
+    ocrTimeoutMs: boundedNumber(env.TIKTOK_MEDIA_OCR_TIMEOUT_MS, 30000, 5000, 90000),
+    mediaCacheTtlDays: boundedNumber(env.TIKTOK_MEDIA_CACHE_TTL_DAYS, 7, 1, 14),
+    mediaLlmEnabled,
+    mediaVisionEnabled,
+    mediaVisionMaxImagesPerPost: boundedNumber(env.TIKTOK_MEDIA_VISION_MAX_IMAGES_PER_POST, 3, 1, 4),
+    mediaVisionMaxImageBytes: boundedNumber(env.TIKTOK_MEDIA_VISION_MAX_IMAGE_BYTES, 1_500_000, 128_000, 3_000_000),
+    mediaVisionDetail: ['low', 'high', 'auto'].includes(cleanText(env.TIKTOK_MEDIA_VISION_DETAIL, 20).toLowerCase())
+      ? cleanText(env.TIKTOK_MEDIA_VISION_DETAIL, 20).toLowerCase()
+      : 'high',
+    mediaLlmModel: cleanText(env.TIKTOK_MEDIA_LLM_MODEL || env.OPENAI_MODEL || 'gpt-4.1-mini', 100),
+    mediaLlmMaxCallsPerRun: boundedNumber(env.TIKTOK_MEDIA_LLM_MAX_CALLS_PER_RUN, 12, 0, 20),
+    mediaLlmMinOcrChars: boundedNumber(env.TIKTOK_MEDIA_LLM_MIN_OCR_CHARS, 12, 5, 200),
+    mediaLlmMinConfidence: boundedNumber(env.TIKTOK_MEDIA_LLM_MIN_CONFIDENCE, 0.84, 0.5, 1),
+    mediaLlmTimeoutMs: boundedNumber(env.TIKTOK_MEDIA_LLM_TIMEOUT_MS, 30000, 5000, 90000),
+    mediaRequestHeaders: {
+      referer: 'https://www.tiktok.com/',
+      'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36',
+    },
+    openAiApiKey,
+  };
+}
+
+function readJson(filePath, fallback = {}) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return fallback;
+  }
+}
+
+function loadTikTokMediaCache(filePath = MEDIA_CACHE_PATH) {
+  const payload = readJson(filePath);
+  const cache = payload?.mediaEvidence || payload;
+  return cache && typeof cache === 'object' ? cache : {};
+}
+
+function writeJsonAtomic(filePath, value) {
+  const tempPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
+  fs.writeFileSync(tempPath, `${JSON.stringify(value, null, 2)}\n`);
+  fs.renameSync(tempPath, filePath);
+}
+
+function rejectionReasonCounts(rejected) {
+  const counts = {};
+  for (const item of rejected) {
+    const reason = cleanText(item?.reason, 160) || 'unbekannt';
+    counts[reason] = (counts[reason] || 0) + 1;
+  }
+  return Object.fromEntries(Object.entries(counts).sort((left, right) => right[1] - left[1]));
 }
 
 function stableHash(value = '') {
@@ -598,6 +682,9 @@ function normalizeTikTokApiItem(raw) {
   const accountHandle = item.author.uniqueId;
   const url = `https://www.tiktok.com/@${accountHandle}/video/${item.id}`;
   const createTime = Number(item.createTime || item.create_time || 0);
+  const video = item.video && typeof item.video === 'object' ? item.video : {};
+  const thumbnailUrl = cleanText(video.originCover || video.cover || video.dynamicCover, 1600);
+  const mediaUrl = cleanText(video.playAddr || video.downloadAddr || video.play_addr?.url_list?.[0], 1600);
   return {
     url,
     finalUrl: url,
@@ -613,6 +700,9 @@ function normalizeTikTokApiItem(raw) {
     timeDateTime: createTime > 0 ? new Date(createTime * 1000).toISOString() : '',
     createTimes: createTime > 0 ? [String(createTime)] : [],
     stats: item.stats || {},
+    mediaType: mediaUrl ? 'VIDEO' : (thumbnailUrl ? 'IMAGE' : ''),
+    mediaUrl,
+    thumbnailUrl,
   };
 }
 
@@ -723,8 +813,32 @@ async function extractTikTokPostData(page, url) {
       jsonLdUploadDate,
       jsonLdDatePublished,
       createTimes: [...new Set(createTimes)].slice(0, 8),
+      mediaType: meta('meta[property="og:video"]') ? 'VIDEO' : (meta('meta[property="og:image"]') ? 'IMAGE' : ''),
+      mediaUrl: meta('meta[property="og:video"]') || meta('meta[property="og:video:url"]') || '',
+      thumbnailUrl: meta('meta[property="og:image"]') || meta('meta[name="twitter:image"]') || '',
     };
   });
+}
+
+function trustedTikTokMediaEvidence(data, minimumConfidence = 0.84) {
+  const evidence = data?._mediaEvidence && typeof data._mediaEvidence === 'object' ? data._mediaEvidence : null;
+  const ai = evidence?.ai && typeof evidence.ai === 'object' ? evidence.ai : null;
+  if (ai?.isDeal !== true || Number(ai.confidence || 0) < minimumConfidence || ai.exclusion !== 'none') {
+    return { evidence, ai: null };
+  }
+  const offerText = cleanText(ai.offerText, 500);
+  if (!offerText) return { evidence, ai: null };
+  return {
+    evidence,
+    ai: {
+      isDeal: true,
+      confidence: Number(ai.confidence || 0),
+      offerText,
+      locationText: cleanText(ai.locationText, 240),
+      validityText: cleanText(ai.validityText, 240),
+      exclusion: 'none',
+    },
+  };
 }
 
 export function buildDealFromPost(url, data, options = {}) {
@@ -737,15 +851,27 @@ export function buildDealFromPost(url, data, options = {}) {
     return { deal: null, reason: `TikTok-Post älter als ${CONFIG.maxAgeDays} Tage (${dateCandidate.date.toISOString().slice(0, 10)})` };
   }
 
-  const offerSignal = [
+  const originalOfferSignal = [
     data.title,
     data.description,
   ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
-  const contextSignal = [
-    offerSignal,
+  const originalContextSignal = [
+    originalOfferSignal,
     data.bodyText,
   ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
+  const media = trustedTikTokMediaEvidence(data, Number(options.mediaMinConfidence || 0.84));
+  const offerSignal = [
+    originalOfferSignal,
+    media.ai?.offerText ? `Bildangebot: ${media.ai.offerText}` : '',
+    media.ai?.validityText ? `Bildgültigkeit: ${media.ai.validityText}` : '',
+  ].filter(Boolean).join(' ');
+  const contextSignal = [
+    offerSignal,
+    originalContextSignal,
+    media.ai?.locationText ? `Bildort: ${media.ai.locationText}` : '',
+  ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
 
+  const originalViennaEvidence = extractViennaEvidence(originalContextSignal);
   const viennaEvidenceDetail = extractViennaEvidence(contextSignal);
   if (!viennaEvidenceDetail) return { deal: null, reason: 'kein eindeutiges Wien-Signal' };
   if (!hasStrongDealSignal(offerSignal)) return { deal: null, reason: 'kein starkes Gratis-/Deal-Signal' };
@@ -774,13 +900,21 @@ export function buildDealFromPost(url, data, options = {}) {
   const validUntil = offerWindow?.endDate?.toISOString().slice(0, 10) || '';
   const postalCode = contextSignal.match(/\b(1(?:0[1-9]|1\d|2[0-3])0)\b/)?.[1] || '';
 
+  const mediaEvidence = media.evidence ? {
+    ...media.evidence,
+    ...(media.ai ? { ai: media.ai } : {}),
+  } : null;
   return {
     deal: {
       id: `tiktok-${stableHash(`${url}|${dateCandidate.date.toISOString()}|${title}`)}`,
       brand,
       logo,
       title,
-      description: cleanText(`${data.description || data.title} Quelle: TikTok @${data.accountHandle}.`, 500),
+      description: cleanText([
+        data.description || data.title,
+        media.ai?.offerText ? `Bildbeleg: ${media.ai.offerText}.` : '',
+        `Quelle: TikTok @${data.accountHandle}.`,
+      ].filter(Boolean).join(' '), 500),
       type,
       category,
       source: 'TikTok Scanner',
@@ -797,9 +931,12 @@ export function buildDealFromPost(url, data, options = {}) {
       postalCode,
       viennaEvidence: {
         verified: true,
-        source: 'tiktok-post',
+        source: originalViennaEvidence ? 'tiktok-post' : 'tiktok-media-ai',
         detail: viennaEvidenceDetail,
       },
+      ownerUsername: cleanText(data.accountHandle, 80).replace(/^@/, '').toLowerCase(),
+      promotionEvidence: media.ai?.offerText || '',
+      ...(mediaEvidence ? { evidence: { mediaEvidence } } : {}),
       hot: type === 'gratis' || type === 'bogo',
       isNew: true,
       votes: type === 'gratis' || type === 'bogo' ? 3 : 2,
@@ -807,6 +944,8 @@ export function buildDealFromPost(url, data, options = {}) {
       qualityScore: score,
       pubDate: dateCandidate.date.toISOString(),
       pubDateSource: dateCandidate.source,
+      sourcePublishedAt: dateCandidate.date.toISOString(),
+      sourcePublishedAtSource: dateCandidate.source,
     },
     reason: '',
   };
@@ -828,6 +967,139 @@ function buildQualityScore(signal, postDate, type, category, now = new Date()) {
   else if (age <= 3) score += 12;
   else if (age <= 7) score += 8;
   return score;
+}
+
+function tikTokMediaItem(candidate) {
+  const data = candidate?.data || {};
+  const url = cleanText(candidate?.url || data.url || data.finalUrl, 1200);
+  const dateCandidate = parseDateFromPost(data);
+  const videoId = url.match(/\/video\/(\d{8,30})/i)?.[1] || stableHash(url);
+  const mediaType = cleanText(data.mediaType, 40).toUpperCase();
+  return {
+    id: `tiktok-media-${videoId}`,
+    caption: cleanText([data.title, data.description].filter(Boolean).join(' '), 4000),
+    media_type: mediaType || (data.mediaUrl ? 'VIDEO' : 'IMAGE'),
+    media_url: cleanText(data.mediaUrl, 1800),
+    thumbnail_url: cleanText(data.thumbnailUrl, 1800),
+    timestamp: dateCandidate?.date?.toISOString() || '',
+    permalink: url,
+  };
+}
+
+function isTikTokMediaRescueCandidate(candidate, config, now) {
+  const data = candidate?.data || {};
+  const initial = candidate?.initial || buildDealFromPost(candidate?.url || data.url, data, { now });
+  if (!['kein eindeutiges Wien-Signal', 'kein starkes Gratis-/Deal-Signal'].includes(initial?.reason)) return false;
+  const dateCandidate = parseDateFromPost(data);
+  if (!dateCandidate) return false;
+  const ageMs = now.getTime() - dateCandidate.date.getTime();
+  if (ageMs < -10 * 60 * 1000 || ageMs > config.mediaMaxAgeHours * 60 * 60 * 1000) return false;
+  const originalText = cleanText([data.title, data.description].filter(Boolean).join(' '), 3600);
+  if (CONFLICT_LOCATION_PATTERNS.some((pattern) => pattern.test(originalText))) return false;
+  if (FALSE_POSITIVE_PATTERNS.some((pattern) => pattern.test(originalText))) return false;
+  if (getTikTokContentQualityReason(originalText)) return false;
+  if (isExplicitlyExpired(originalText, dateCandidate.date, now)) return false;
+  return extractInstagramMediaAssets(tikTokMediaItem(candidate)).length > 0;
+}
+
+function emptyTikTokMediaReport(status, error = '') {
+  return {
+    status,
+    rescueCandidates: 0,
+    eligible: 0,
+    selected: 0,
+    cached: 0,
+    analyzed: 0,
+    withOcrText: 0,
+    withVisionImages: 0,
+    aiCalls: 0,
+    visionCalls: 0,
+    aiAccepted: 0,
+    inputTokens: 0,
+    outputTokens: 0,
+    totalTokens: 0,
+    rescuedDeals: 0,
+    errors: error ? [cleanText(error, 180)] : [],
+  };
+}
+
+export async function rescueTikTokMediaCandidates(candidates, options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date();
+  const env = options.env || process.env;
+  const config = options.config || buildTikTokMediaConfig(env);
+  const cache = options.cache && typeof options.cache === 'object' ? options.cache : {};
+  const unique = new Map();
+  for (const candidate of Array.isArray(candidates) ? candidates : []) {
+    const url = normalizeTikTokVideoUrl(candidate?.url || candidate?.data?.url || candidate?.data?.finalUrl);
+    if (!url || unique.has(url)) continue;
+    unique.set(url, { ...candidate, url });
+  }
+  const eligible = [...unique.values()].filter((candidate) => isTikTokMediaRescueCandidate(candidate, config, now));
+  if (!config.mediaLlmEnabled || (!config.mediaOcrEnabled && !config.mediaVisionEnabled)) {
+    return {
+      deals: [],
+      rescuedUrls: new Set(),
+      cache,
+      report: { ...emptyTikTokMediaReport('disabled'), rescueCandidates: unique.size, eligible: eligible.length },
+    };
+  }
+
+  const entries = eligible.map((candidate) => ({
+    item: tikTokMediaItem(candidate),
+    context: { sourceType: 'tiktok', sourceName: `@${cleanText(candidate.data?.accountHandle, 80)}`, account: null },
+    candidate,
+  }));
+  let media;
+  try {
+    media = await (options.enrichMedia || enrichInstagramGraphMedia)(entries, config, now, {
+      cache,
+      mediaFetchImpl: options.mediaFetchImpl,
+      openAiFetchImpl: options.openAiFetchImpl,
+      execFileImpl: options.execFileImpl,
+      tools: options.mediaTools,
+      analyzeItem: options.analyzeMediaItem,
+      classifyOcr: options.classifyMedia || ((input, classifierConfig, classifierOptions) => (
+        classifySocialMediaEvidenceWithOpenAI({ ...input, platform: 'TikTok' }, classifierConfig, classifierOptions)
+      )),
+    });
+  } catch (error) {
+    return {
+      deals: [],
+      rescuedUrls: new Set(),
+      cache,
+      report: {
+        ...emptyTikTokMediaReport('degraded', error?.message || error),
+        rescueCandidates: unique.size,
+        eligible: eligible.length,
+      },
+    };
+  }
+
+  const deals = [];
+  const rescuedUrls = new Set();
+  for (const entry of media.entries) {
+    if (!entry.item?._mediaEvidence) continue;
+    const data = { ...entry.candidate.data, _mediaEvidence: entry.item._mediaEvidence };
+    const rebuilt = buildDealFromPost(entry.candidate.url, data, {
+      now,
+      mediaMinConfidence: config.mediaLlmMinConfidence,
+    });
+    if (!rebuilt.deal) continue;
+    deals.push(rebuilt.deal);
+    rescuedUrls.add(entry.candidate.url);
+  }
+
+  return {
+    deals,
+    rescuedUrls,
+    cache: media.cache,
+    report: {
+      ...media.report,
+      rescueCandidates: unique.size,
+      eligible: eligible.length,
+      rescuedDeals: deals.length,
+    },
+  };
 }
 
 function normalizeOfferKeyText(value = '') {
@@ -899,6 +1171,7 @@ async function main() {
 
   const deals = [];
   const rejected = [];
+  const rescuePool = [];
   let discovery = { links: [], errors: [] };
   let apiDiscovery = { rows: [], errors: [] };
   try {
@@ -912,6 +1185,7 @@ async function main() {
         console.log(`  ✅ ${deal.title}`);
       } else {
         rejected.push({ url: item.data.url, keyword: item.keyword, reason });
+        rescuePool.push({ url: item.data.url, data: item.data, keyword: item.keyword, initial: { deal, reason } });
       }
     }
 
@@ -929,6 +1203,7 @@ async function main() {
           console.log(`  ✅ ${deal.title}`);
         } else {
           rejected.push({ url, reason });
+          rescuePool.push({ url, data, initial: { deal, reason } });
         }
       } catch (error) {
         rejected.push({ url, reason: error.message });
@@ -940,12 +1215,24 @@ async function main() {
     await browser.close();
   }
 
+  const mediaConfig = buildTikTokMediaConfig(process.env);
+  const mediaRescue = await rescueTikTokMediaCandidates(rescuePool, {
+    config: mediaConfig,
+    cache: loadTikTokMediaCache(),
+  });
+  deals.push(...mediaRescue.deals);
+  const finalRejected = rejected.filter((item) => !mediaRescue.rescuedUrls.has(normalizeTikTokVideoUrl(item.url)));
+  if (mediaRescue.deals.length > 0) {
+    console.log(`  🖼️ ${mediaRescue.deals.length} TikTok-Deal(s) aus Bild-/Videobelegen gerettet`);
+  }
+
   const finalDeals = dedupeDeals(deals);
   const payload = {
     lastUpdated: new Date().toISOString(),
     source: 'tiktok-deals-scanner',
     totalDeals: finalDeals.length,
     maxAgeDays: CONFIG.maxAgeDays,
+    mediaRescued: mediaRescue.deals.length,
     deals: finalDeals,
   };
   const report = {
@@ -956,13 +1243,31 @@ async function main() {
     discovered: discovery.links.length,
     apiCandidates: apiDiscovery.rows.length,
     accepted: finalDeals.length,
+    initialRejected: rejected.length,
+    finalRejected: finalRejected.length,
+    rejectionReasons: rejectionReasonCounts(finalRejected),
+    mediaConfig: {
+      maxAgeHours: mediaConfig.mediaMaxAgeHours,
+      maxPostsPerRun: mediaConfig.mediaMaxPostsPerRun,
+      maxLlmCallsPerRun: mediaConfig.mediaLlmMaxCallsPerRun,
+      minConfidence: mediaConfig.mediaLlmMinConfidence,
+      model: mediaConfig.mediaLlmModel,
+      llmEnabled: mediaConfig.mediaLlmEnabled,
+      visionEnabled: mediaConfig.mediaVisionEnabled,
+    },
+    mediaEvidence: mediaRescue.report,
     discoveryErrors: discovery.errors,
     apiErrors: apiDiscovery.errors,
-    rejected: rejected.slice(0, 250),
+    rejected: finalRejected.slice(0, 250),
   };
 
-  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
-  fs.writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2));
+  writeJsonAtomic(OUTPUT_PATH, payload);
+  writeJsonAtomic(REPORT_PATH, report);
+  writeJsonAtomic(MEDIA_CACHE_PATH, {
+    version: 1,
+    updatedAt: payload.lastUpdated,
+    mediaEvidence: mediaRescue.cache,
+  });
   console.log(`💾 ${finalDeals.length} Deals → ${OUTPUT_PATH}`);
 }
 

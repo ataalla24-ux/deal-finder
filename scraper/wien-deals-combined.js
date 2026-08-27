@@ -10,6 +10,10 @@ import {
   normalizeGraphMediaItem,
 } from './meta-instagram-deals.js';
 import {
+  enrichInstagramGraphMedia,
+  extractInstagramMediaAssets,
+} from './instagram-media-evidence.js';
+import {
   buildPipelineRunReport,
   writeFailedPipelineRunReport,
   writePipelineRunReport,
@@ -21,10 +25,18 @@ const ROOT = path.join(__dirname, '..');
 const DOCS_DIR = path.join(ROOT, 'docs');
 const OUTPUT_PATH = path.join(DOCS_DIR, 'deals-pending-wien-combined.json');
 const REPORT_PATH = path.join(DOCS_DIR, 'wien-deals-combined-report.json');
+const MEDIA_CACHE_PATH = path.join(DOCS_DIR, 'wien-deals-combined-media-cache.json');
+const META_STATE_PATH = path.join(DOCS_DIR, 'meta-instagram-state.json');
 const SOURCE_KEY = 'wien-combined';
 const SOURCE_LABEL = 'Wien Deals Combined';
 const RUN_STARTED_AT = new Date();
-const HASHTAG_MEDIA_FIELDS = 'id,caption,media_type,permalink,timestamp,like_count,comments_count';
+const BASIC_HASHTAG_MEDIA_FIELDS = 'id,caption,media_type,permalink,timestamp,like_count,comments_count';
+const HASHTAG_MEDIA_FIELDS = `${BASIC_HASHTAG_MEDIA_FIELDS},media_product_type,media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}`;
+const RESCUABLE_REJECTIONS = new Set([
+  'missing-text',
+  'no-concrete-offer',
+  'missing-vienna-evidence',
+]);
 const DEFAULT_HASHTAGS = [
   'wien',
   'vienna',
@@ -55,6 +67,51 @@ function writeJsonAtomic(filePath, value) {
   const tempPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
   fs.writeFileSync(tempPath, `${JSON.stringify(value, null, 2)}\n`);
   fs.renameSync(tempPath, filePath);
+}
+
+function readJson(filePath, fallback = {}) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return fallback;
+  }
+}
+
+function mediaEvidenceCache(options, mediaCachePath) {
+  if (options.mediaCache && typeof options.mediaCache === 'object') return options.mediaCache;
+  if (options.write === false) return {};
+  const shared = readJson(META_STATE_PATH)?.mediaEvidence;
+  const ownPayload = readJson(mediaCachePath);
+  const own = ownPayload?.mediaEvidence || ownPayload;
+  return {
+    ...(shared && typeof shared === 'object' ? shared : {}),
+    ...(own && typeof own === 'object' ? own : {}),
+  };
+}
+
+function isFreshMediaRescueCandidate(item, now, maxAgeHours) {
+  const timestamp = Date.parse(cleanText(item?.timestamp, 80));
+  if (!Number.isFinite(timestamp) || timestamp > now.getTime() + 10 * 60 * 1000) return false;
+  return now.getTime() - timestamp <= maxAgeHours * 60 * 60 * 1000;
+}
+
+function emptyMediaReport(status = 'disabled', error = '') {
+  return {
+    status,
+    eligible: 0,
+    selected: 0,
+    cached: 0,
+    analyzed: 0,
+    withOcrText: 0,
+    withVisionImages: 0,
+    aiCalls: 0,
+    visionCalls: 0,
+    aiAccepted: 0,
+    inputTokens: 0,
+    outputTokens: 0,
+    totalTokens: 0,
+    errors: error ? [cleanText(error, 180)] : [],
+  };
 }
 
 async function graphRequest(pathname, params, options) {
@@ -106,6 +163,7 @@ export async function runWienDealsCombined(options = {}) {
   const fetchImpl = options.fetchImpl || globalThis.fetch;
   const outputPath = options.outputPath || OUTPUT_PATH;
   const reportPath = options.reportPath || REPORT_PATH;
+  const mediaCachePath = options.mediaCachePath || MEDIA_CACHE_PATH;
 
   if (!accessToken || !userId) throw new Error('Instagram Graph access token or user id is missing');
   if (typeof fetchImpl !== 'function') throw new Error('Fetch implementation is missing');
@@ -119,11 +177,15 @@ export async function runWienDealsCombined(options = {}) {
     META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS: '7',
     META_INSTAGRAM_UNKNOWN_EXPIRY_TTL_HOURS: env.META_INSTAGRAM_UNKNOWN_EXPIRY_TTL_HOURS || '72',
     META_INSTAGRAM_ALLOW_WATCHLIST_VIENNA: '0',
+    META_INSTAGRAM_MEDIA_MAX_POSTS_PER_RUN: env.WIEN_COMBINED_MEDIA_MAX_POSTS_PER_RUN || '18',
+    META_INSTAGRAM_MEDIA_MAX_ASSETS_PER_POST: env.WIEN_COMBINED_MEDIA_MAX_ASSETS_PER_POST || '3',
+    META_INSTAGRAM_MEDIA_MAX_VIDEO_FRAMES: env.WIEN_COMBINED_MEDIA_MAX_VIDEO_FRAMES || '3',
+    META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_RUN: env.WIEN_COMBINED_MEDIA_LLM_MAX_CALLS_PER_RUN || '8',
+    META_INSTAGRAM_MEDIA_LLM_MIN_CONFIDENCE: env.WIEN_COMBINED_MEDIA_LLM_MIN_CONFIDENCE || '0.84',
   }, now);
   const requestOptions = { accessToken, graphVersion, fetchImpl, timeoutMs };
   const sourceResults = [];
-  const normalized = [];
-  const rejected = [];
+  const graphEntries = new Map();
   let fetchedPosts = 0;
 
   for (const hashtag of hashtags) {
@@ -143,29 +205,22 @@ export async function runWienDealsCombined(options = {}) {
       }, requestOptions);
       const rows = Array.isArray(media?.data) ? media.data : [];
       fetchedPosts += rows.length;
-      let accepted = 0;
       for (const raw of rows) {
-        const result = normalizeGraphMediaItem(raw, {
-          sourceType: 'hashtag',
-          sourceName: `#${hashtag}`,
-        }, collectorConfig, now);
-        if (result.deal) {
-          normalized.push(result.deal);
-          accepted += 1;
-        } else {
-          rejected.push({
-            reason: result.rejection || 'rejected',
-            deal: {
-              id: cleanText(raw?.id, 120),
-              title: cleanText(raw?.caption, 180),
-              url: cleanText(raw?.permalink, 400),
-              source: `#${hashtag}`,
-              pubDate: cleanText(raw?.timestamp, 80),
-            },
-          });
+        const key = canonicalInstagramPostKey(raw?.permalink) || cleanText(raw?.id, 160);
+        if (!key) continue;
+        const existing = graphEntries.get(key);
+        if (existing) {
+          existing.hashtags.add(hashtag);
+          continue;
         }
+        graphEntries.set(key, {
+          key,
+          item: raw,
+          context: { sourceType: 'hashtag', sourceName: `#${hashtag}`, account: null },
+          hashtags: new Set([hashtag]),
+        });
       }
-      sourceResults.push({ hashtag, status: 'ok', fetched: rows.length, accepted });
+      sourceResults.push({ hashtag, status: 'ok', fetched: rows.length, accepted: 0 });
     } catch (error) {
       const notFound = Number(error?.code || 0) === 24;
       sourceResults.push({
@@ -191,10 +246,73 @@ export async function runWienDealsCombined(options = {}) {
       fetchedPosts,
       totalDeals: 0,
       sources: sourceResults,
-      rejectionReasons: rejectionCounts(rejected),
+      rejectionReasons: {},
     };
     if (options.write !== false) writeJsonAtomic(reportPath, report);
     throw new Error(report.message);
+  }
+
+  const uniqueEntries = [...graphEntries.values()];
+  const initialOutcomes = new Map(uniqueEntries.map((entry) => [
+    entry.key,
+    normalizeGraphMediaItem(entry.item, entry.context, collectorConfig, now),
+  ]));
+  const rescueCandidates = uniqueEntries.filter((entry) => {
+    const initial = initialOutcomes.get(entry.key);
+    return !initial?.deal
+      && RESCUABLE_REJECTIONS.has(initial?.rejection)
+      && isFreshMediaRescueCandidate(entry.item, now, collectorConfig.maxOrganicAgeHours)
+      && extractInstagramMediaAssets(entry.item).length > 0;
+  });
+
+  let media = {
+    entries: rescueCandidates,
+    cache: mediaEvidenceCache(options, mediaCachePath),
+    report: emptyMediaReport(rescueCandidates.length ? 'disabled' : 'not-needed'),
+  };
+  if (rescueCandidates.length > 0) {
+    try {
+      media = await (options.enrichGraphMedia || enrichInstagramGraphMedia)(rescueCandidates, collectorConfig, now, {
+        cache: media.cache,
+        mediaFetchImpl: options.mediaFetchImpl,
+        openAiFetchImpl: options.openAiFetchImpl,
+        execFileImpl: options.execFileImpl,
+        tools: options.mediaTools,
+        analyzeItem: options.analyzeMediaItem,
+        classifyOcr: options.classifyOcr,
+      });
+    } catch (error) {
+      media.report = emptyMediaReport('degraded', error?.message || error);
+    }
+  }
+
+  const normalized = [];
+  const rejected = [];
+  let rescuedDeals = 0;
+  for (const entry of uniqueEntries) {
+    const id = cleanText(entry.item?.id, 160);
+    const initial = initialOutcomes.get(entry.key);
+    const result = normalizeGraphMediaItem(entry.item, entry.context, collectorConfig, now);
+    if (result.deal) {
+      normalized.push(result.deal);
+      if (!initial?.deal) rescuedDeals += 1;
+      for (const hashtag of entry.hashtags) {
+        const source = sourceResults.find((item) => item.hashtag === hashtag);
+        if (source) source.accepted += 1;
+      }
+      continue;
+    }
+    rejected.push({
+      reason: result.rejection || 'rejected',
+      initialReason: initial?.rejection || '',
+      deal: {
+        id,
+        title: cleanText(entry.item?.caption, 180),
+        url: cleanText(entry.item?.permalink, 400),
+        source: entry.context.sourceName,
+        pubDate: cleanText(entry.item?.timestamp, 80),
+      },
+    });
   }
 
   const byPost = new Map();
@@ -211,27 +329,45 @@ export async function runWienDealsCombined(options = {}) {
     .sort((left, right) => Number(right.qualityScore || 0) - Number(left.qualityScore || 0)
       || Date.parse(right.pubDate || 0) - Date.parse(left.pubDate || 0))
     .slice(0, maxDeals);
-  const status = failedSources.length > 0 || fetchedPosts === 0 ? 'degraded' : 'healthy';
+  const mediaDegraded = rescueCandidates.length > 0 && ['degraded', 'unavailable'].includes(media.report?.status);
+  const status = failedSources.length > 0 || fetchedPosts === 0 || mediaDegraded ? 'degraded' : 'healthy';
   const payload = {
     lastUpdated: now.toISOString(),
     source: SOURCE_KEY,
     totalDeals: deals.length,
-    meta: { status, fetchedPosts, successfulSources, failedSources: failedSources.length },
+    meta: {
+      status,
+      fetchedPosts,
+      uniquePosts: uniqueEntries.length,
+      successfulSources,
+      failedSources: failedSources.length,
+      rescueEligible: rescueCandidates.length,
+      rescuedDeals,
+    },
     deals,
   };
   const report = {
     generatedAt: now.toISOString(),
     status,
-    message: `${deals.length} fresh, evidence-checked Graph hashtag deal(s) found.`,
+    message: `${deals.length} fresh, evidence-checked Graph hashtag deal(s) found; ${rescuedDeals} recovered from media.`,
     hashtags,
     fetchedPosts,
+    uniquePosts: uniqueEntries.length,
     totalDeals: deals.length,
+    rescueEligible: rescueCandidates.length,
+    rescuedDeals,
+    mediaEvidence: media.report,
     sources: sourceResults,
     rejectionReasons: rejectionCounts(rejected),
   };
   if (options.write !== false) {
     writeJsonAtomic(outputPath, payload);
     writeJsonAtomic(reportPath, report);
+    writeJsonAtomic(mediaCachePath, {
+      version: 1,
+      updatedAt: now.toISOString(),
+      mediaEvidence: media.cache,
+    });
   }
   return { payload, report, rejected };
 }
@@ -244,6 +380,9 @@ async function main() {
     .map((source) => `#${source.hashtag}: ${source.error}`);
   if (result.report.fetchedPosts === 0) {
     sourceErrors.push('Meta Graph returned zero posts across all resolved hashtags.');
+  }
+  if (['degraded', 'unavailable'].includes(result.report.mediaEvidence?.status)) {
+    sourceErrors.push(...(result.report.mediaEvidence.errors || []).map((error) => `media evidence: ${error}`));
   }
   writePipelineRunReport(buildPipelineRunReport({
     sourceKey: SOURCE_KEY,
@@ -262,12 +401,20 @@ async function main() {
       hashtags: result.report.hashtags.length,
       successfulSources: result.payload.meta.successfulSources,
       failedSources: result.payload.meta.failedSources,
+      uniquePosts: result.payload.meta.uniquePosts,
+      rescueEligible: result.report.rescueEligible,
+      rescuedDeals: result.report.rescuedDeals,
+      mediaAnalyzed: result.report.mediaEvidence?.analyzed || 0,
+      mediaAiCalls: result.report.mediaEvidence?.aiCalls || 0,
+      mediaVisionCalls: result.report.mediaEvidence?.visionCalls || 0,
+      mediaTokens: result.report.mediaEvidence?.totalTokens || 0,
       graphVersion: cleanText(process.env.META_GRAPH_VERSION || 'v26.0', 20),
     },
     constraints: { maxSocialPostAgeDays: 7 },
   }));
   console.log(`Wien Deals Combined: ${result.report.status}`);
   console.log(`  Graph posts: ${result.report.fetchedPosts}`);
+  console.log(`  media rescue: ${result.report.rescuedDeals}/${result.report.rescueEligible}`);
   console.log(`  deals: ${result.payload.totalDeals}`);
 }
 

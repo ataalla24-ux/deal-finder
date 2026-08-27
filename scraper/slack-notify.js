@@ -21,7 +21,7 @@ import {
   getViennaEvidence,
   mergeDealEvidence,
   mergeDuplicateDealRecords,
-  semanticSocialOfferKey,
+  semanticCrossPlatformOfferKey,
 } from './deal-evidence-utils.js';
 import {
   enrichDealWithInstagramGraphEvidence,
@@ -979,7 +979,7 @@ function buildDealDuplicateKeys(deal) {
   if (socialPostKey) {
     keys.push(`post:${postKey}`);
   }
-  const semanticOfferKey = semanticSocialOfferKey(deal);
+  const semanticOfferKey = semanticCrossPlatformOfferKey(deal);
   if (semanticOfferKey) keys.push(semanticOfferKey);
   if (postKey && titleKey) {
     keys.push(`url-title:${postKey}|${titleKey}`);

@@ -2,7 +2,7 @@ name: "TikTok Deal Scanner"
 
 on:
   schedule:
-    - cron: '15 6 * * *'
+    - cron: '15 5,17 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -15,6 +15,7 @@ permissions:
 jobs:
   scan-deals:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     env:
       PLAYWRIGHT_BROWSERS_PATH: 0
       TIKTOK_MAX_AGE_DAYS: 7
@@ -29,13 +30,31 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Test TikTok scanner
+        run: npm run test:tiktok-deal-scanner
+
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium chromium-headless-shell
 
+      - name: Install TikTok media OCR tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng
+
       - name: Scan current TikTok deals
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          TIKTOK_MEDIA_MAX_AGE_HOURS: '72'
+          TIKTOK_MEDIA_MAX_POSTS_PER_RUN: '16'
+          TIKTOK_MEDIA_MAX_ASSETS_PER_POST: '2'
+          TIKTOK_MEDIA_MAX_VIDEO_FRAMES: '3'
+          TIKTOK_MEDIA_LLM_MAX_CALLS_PER_RUN: '12'
+          TIKTOK_MEDIA_LLM_MIN_CONFIDENCE: '0.84'
+          TIKTOK_MEDIA_VISION_DETAIL: 'high'
         run: node scraper/tiktok-deals-scanner.js
 
       - name: Commit TikTok scanner state
         if: always()
         run: |
-          node scripts/commit-generated.mjs --skip-conflicts --message "TikTok deals $(date +%Y-%m-%d)" --files docs/deals-pending-tiktok.json docs/tiktok-scanner-report.json
+          node scripts/commit-generated.mjs --skip-conflicts --message "TikTok deals $(date +%Y-%m-%d)" --files docs/deals-pending-tiktok.json docs/tiktok-scanner-report.json docs/tiktok-media-evidence-cache.json

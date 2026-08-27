@@ -2,7 +2,7 @@ name: "Wien Deals Combined"
 
 on:
   schedule:
-    - cron: '0 7 * * *'
+    - cron: '35 */6 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -15,7 +15,7 @@ permissions:
 jobs:
   graph-hashtag-fallback:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
 
@@ -30,16 +30,28 @@ jobs:
       - name: Test Wien Deals Combined
         run: npm run test:wien-deals-combined
 
+      - name: Install Instagram media OCR tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng
+
       - name: Run Graph hashtag fallback
         env:
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
           WIEN_COMBINED_GRAPH_HASHTAGS: ${{ vars.WIEN_COMBINED_GRAPH_HASHTAGS }}
           WIEN_COMBINED_MEDIA_PER_HASHTAG: '30'
           WIEN_COMBINED_MAX_DEALS: '40'
+          WIEN_COMBINED_MEDIA_MAX_POSTS_PER_RUN: '18'
+          WIEN_COMBINED_MEDIA_MAX_ASSETS_PER_POST: '3'
+          WIEN_COMBINED_MEDIA_MAX_VIDEO_FRAMES: '3'
+          WIEN_COMBINED_MEDIA_LLM_MAX_CALLS_PER_RUN: '8'
+          WIEN_COMBINED_MEDIA_LLM_MIN_CONFIDENCE: '0.84'
         run: node scraper/wien-deals-combined.js
 
       - name: Commit deals
         run: |
-          node scripts/commit-generated.mjs --message "Wien combined Graph deals $(date +%Y-%m-%d)" --files docs/deals-pending-wien-combined.json docs/wien-deals-combined-report.json docs/deal-pipeline-last-run-wien-combined.json docs/deal-pipeline-runs-wien-combined.json
+          node scripts/commit-generated.mjs --message "Wien combined Graph deals $(date +%Y-%m-%d)" --files docs/deals-pending-wien-combined.json docs/wien-deals-combined-report.json docs/wien-deals-combined-media-cache.json docs/deal-pipeline-last-run-wien-combined.json docs/deal-pipeline-runs-wien-combined.json

@@ -48,6 +48,7 @@ const ai = await classifyInstagramOcrWithOpenAI({
   fetchImpl: async (url, init) => {
     openAiRequest = { url, init, body: JSON.parse(init.body) };
     return Response.json({
+      usage: { input_tokens: 321, output_tokens: 42, total_tokens: 363 },
       output: [{
         type: 'message',
         content: [{
@@ -79,6 +80,7 @@ assert.deepEqual(openAiRequest.body.input[0].content[1], {
 assert.equal(ai.isDeal, true);
 assert.equal(ai.confidence, 0.94);
 assert.equal(ai.locationText, '1070 Wien');
+assert.deepEqual(ai.usage, { inputTokens: 321, outputTokens: 42, totalTokens: 363 });
 
 const entries = [{
   item: {
@@ -134,6 +136,7 @@ const enriched = await enrichInstagramGraphMedia(entries, config, now, {
       confidence: 0.93,
       offerText: 'Zweiter Kaffee gratis in 1070 Wien',
       exclusion: 'none',
+      usage: { inputTokens: 200, outputTokens: 30, totalTokens: 230 },
     };
   },
 });
@@ -144,6 +147,9 @@ assert.equal(enriched.report.analyzed, 1);
 assert.equal(enriched.report.aiAccepted, 1);
 assert.equal(enriched.report.withVisionImages, 1);
 assert.equal(enriched.report.visionCalls, 1);
+assert.equal(enriched.report.inputTokens, 200);
+assert.equal(enriched.report.outputTokens, 30);
+assert.equal(enriched.report.totalTokens, 230);
 assert.equal(classificationInput.visionImages.length, 1);
 assert.match(enriched.entries[0].item._mediaEvidence.ocrText, /zweiter Kaffee gratis/);
 assert.equal(enriched.entries[0].item._mediaEvidence.visionImageCount, 1);

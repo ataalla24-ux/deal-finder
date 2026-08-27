@@ -12,6 +12,7 @@ import {
   getPublicationEvidence,
   getViennaEvidence,
   mergeDuplicateDealRecords,
+  semanticCrossPlatformOfferKey,
   semanticSocialOfferKey,
 } from '../scraper/deal-evidence-utils.js';
 import {
@@ -103,6 +104,42 @@ assert.equal(semanticSocialOfferKey({
   title: 'Unser neues Sommermenü',
   url: 'https://www.instagram.com/p/NODEALPOST/',
 }), '', 'ordinary merchant posts never receive an offer fingerprint');
+
+const crossPlatformInstagram = semanticCrossPlatformOfferKey({
+  brand: 'Cafe Milano Wien',
+  ownerUsername: 'cafe.milano.at',
+  title: 'Zweiter Kaffee gratis',
+  validUntil: '2026-08-30',
+  url: 'https://www.instagram.com/p/CAFEBOGOIG/',
+});
+const crossPlatformTikTok = semanticCrossPlatformOfferKey({
+  brand: '@cafe.milano.at',
+  ownerUsername: 'cafe.milano.at',
+  promotionEvidence: '2. Kaffee kostenlos',
+  validUntil: '2026-08-30',
+  url: 'https://www.tiktok.com/@cafe.milano.at/video/7678002441849425200',
+});
+const crossPlatformWebsite = semanticCrossPlatformOfferKey({
+  brand: 'Cafe Milano',
+  title: 'Den zweiten Kaffee gibt es gratis',
+  validUntil: '2026-08-30',
+  url: 'https://cafemilano.example/aktionen/zweiter-kaffee-gratis',
+});
+assert.ok(crossPlatformInstagram);
+assert.equal(crossPlatformInstagram, crossPlatformTikTok);
+assert.equal(crossPlatformInstagram, crossPlatformWebsite, 'one campaign matches across Instagram, TikTok and its direct page');
+assert.notEqual(crossPlatformWebsite, semanticCrossPlatformOfferKey({
+  brand: 'Cafe Roma',
+  title: 'Zweiter Kaffee gratis',
+  validUntil: '2026-08-30',
+  url: 'https://caferoma.example/aktionen/zweiter-kaffee-gratis',
+}), 'matching copy from another merchant remains a separate deal');
+assert.equal(semanticCrossPlatformOfferKey({
+  brand: 'Wien Uncovered',
+  ownerUsername: 'wien.uncovered',
+  title: 'All you can eat um 19 Euro',
+  url: 'https://wienuncovered.example/all-you-can-eat-wien',
+}), '', 'a discovery publisher is never treated as the merchant fingerprint');
 
 assert.equal(extractInstagramProfileUsername('https://instagram.com/cafe_wien/'), 'cafe_wien');
 assert.equal(extractInstagramProfileUsername(`https://instagram.com/p/${shortcode}/`), '', 'post paths never become merchant usernames');

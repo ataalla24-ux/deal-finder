@@ -277,6 +277,71 @@ const repeatedSocialPromotion = filterDuplicateDealsInRun([
 ]);
 assert.equal(repeatedSocialPromotion.deals.length, 1, 'repeated social posts for one promotion collapse before Slack');
 
+const crossPlatformPromotion = filterDuplicateDealsInRun([
+  {
+    id: 'milano-instagram',
+    ownerUsername: 'cafe.milano.at',
+    brand: 'Cafe Milano Wien',
+    title: 'Zweiter Kaffee gratis',
+    promotionEvidence: 'Zweiter Kaffee gratis',
+    validUntil: '2026-08-30',
+    pubDate: '2026-07-19T08:00:00.000Z',
+    pubDateSource: 'instagram-graph-timestamp',
+    url: 'https://www.instagram.com/p/CAFEBOGOIG/',
+    source: 'Meta Instagram',
+    qualityScore: 82,
+  },
+  {
+    id: 'milano-tiktok',
+    ownerUsername: 'cafe.milano.at',
+    brand: '@cafe.milano.at',
+    title: '2. Kaffee kostenlos',
+    promotionEvidence: '2. Kaffee kostenlos',
+    validUntil: '2026-08-30',
+    pubDate: '2026-07-19T09:00:00.000Z',
+    pubDateSource: 'tiktok-create-time',
+    url: 'https://www.tiktok.com/@cafe.milano.at/video/7678002441849425200',
+    source: 'TikTok Scanner',
+    qualityScore: 88,
+  },
+  {
+    id: 'milano-website',
+    brand: 'Cafe Milano',
+    title: 'Den zweiten Kaffee gibt es gratis',
+    validUntil: '2026-08-30',
+    url: 'https://cafemilano.example/aktionen/zweiter-kaffee-gratis',
+    source: 'Official',
+    qualityScore: 90,
+  },
+]);
+assert.equal(crossPlatformPromotion.deals.length, 1, 'one campaign reaches Slack only once across Instagram, TikTok and website');
+assert.equal(crossPlatformPromotion.removed, 2);
+assert.deepEqual(
+  new Set(crossPlatformPromotion.deals[0].evidenceSources),
+  new Set(['Meta Instagram', 'TikTok Scanner', 'Official']),
+  'the surviving record preserves all evidence sources',
+);
+
+const crossPlatformLiveKeys = loadLiveDealDuplicateKeys([{
+  id: 'milano-live',
+  brand: 'Cafe Milano',
+  title: 'Den zweiten Kaffee gibt es gratis',
+  validUntil: '2026-08-30',
+  url: 'https://cafemilano.example/aktionen/zweiter-kaffee-gratis',
+  source: 'Official',
+}]);
+const crossPlatformLiveFilter = filterAlreadyQueuedDeals([{
+  id: 'milano-new-social-post',
+  brand: '@cafe.milano.at',
+  ownerUsername: 'cafe.milano.at',
+  title: '2. Kaffee kostenlos',
+  promotionEvidence: '2. Kaffee kostenlos',
+  validUntil: '2026-08-30',
+  url: 'https://www.instagram.com/p/CAFEBOGONEW/',
+  source: 'Meta Instagram',
+}], crossPlatformLiveKeys);
+assert.equal(crossPlatformLiveFilter.removed, 1, 'a live website campaign suppresses its later social cross-post');
+
 const liveDealKeys = loadLiveDealDuplicateKeys([
   {
     id: 'live-social-one',
