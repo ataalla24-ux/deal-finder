@@ -151,6 +151,7 @@ const CONFLICT_LOCATION_PATTERNS = [
   /\bhamburg\b/i,
   /\bzürich\b/i,
   /\bzurich\b/i,
+  /\bvalencia\b/i,
   /\bgading\s+serpong\b/i,
   /\bjakarta\b/i,
   /\blos\s+angeles\b/i,
@@ -227,6 +228,10 @@ const NON_DEAL_CONTENT_RULES = [
     pattern: /\b(?:(?:gratis|kostenlos(?:e|er|es|en)?|free)\b.{0,100}\b(?:als\s+ersatz|entschädigung|entschaedigung|wiedergutmachung)|(?:als\s+ersatz|entschädigung|entschaedigung|wiedergutmachung)\b.{0,100}\b(?:gratis|kostenlos|free))\b/i,
   },
   {
+    reason: 'allgemeine Event-Sammlung statt konkretem Deal',
+    pattern: /\bdein(?:e|en)?\s+(?:gratis\s*\/\s*)?pay\s+as\s+you\s+wish\s+woch(?:en)?ende\b.{0,140}\b(?:von\s+mir\s+für\s+dich|events?|flohmarkt|rave)\b/i,
+  },
+  {
     reason: 'allgemeiner Reiseguide statt konkretem Deal',
     pattern: /\b(?:travel\s+bucket\s+list|top\s+(?:vienna\s+)?spots?|first\s+trip|vienna\s+guide|save\s+this\s+post\s+for\s+(?:your\s+)?itinerary|cosa\s+si\s+pu[oò]\s+vedere\s+a\s+vienna\s+gratis)\b/i,
   },
@@ -241,6 +246,10 @@ const FREEFINDER_SELF_ACCOUNT_KEYS = new Set([
   'freefinderat',
   'freefinderwien',
 ]);
+
+const FOREIGN_LOCATION_HANDLE_PATTERNS = [
+  /valencia/i,
+];
 
 const CATEGORY_RULES = [
   { category: 'kaffee', logo: '☕', pattern: /\b(kaffee|coffee|cafe|café|matcha|espresso|latte|cappuccino|drink|drinks|getränk|getraenk|bubble tea|boba)\b/i },
@@ -401,6 +410,13 @@ function extractViennaEvidence(text) {
   const start = Math.max(0, match.index - 90);
   const end = Math.min(signal.length, match.index + match[0].length + 90);
   return cleanText(signal.slice(start, end), 220);
+}
+
+function hasSpecificViennaEvidence(text) {
+  const signal = cleanText(text, 2600).replace(/#[\w.äöüß-]+/gi, ' ');
+  return /\b1(?:0[1-9]0|1[0-9]0|2[0-3]0)\b/i.test(signal)
+    || /\b(?:wien|vienna)\s*,?\s*(?:österreich|oesterreich|austria)\b/i.test(signal)
+    || /\b(?:innere stadt|leopoldstadt|landstraße|landstrasse|wieden|margareten|mariahilf|neubau|josefstadt|alsergrund|favoriten|meidling|hietzing|penzing|rudolfsheim|ottakring|hernals|währing|waehring|döbling|doebling|brigittenau|floridsdorf|donaustadt|liesing)\b/i.test(signal);
 }
 
 function hasStrongDealSignal(text) {
@@ -888,6 +904,11 @@ export function buildDealFromPost(url, data, options = {}) {
     originalOfferSignal,
     data.bodyText,
   ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
+  const accountHandle = cleanText(data.accountHandle, 80);
+  if (FOREIGN_LOCATION_HANDLE_PATTERNS.some((pattern) => pattern.test(accountHandle))
+      && !hasSpecificViennaEvidence(originalOfferSignal)) {
+    return { deal: null, reason: 'kein belastbarer Wiener Ortsbeleg bei auswärtigem Account' };
+  }
   const media = trustedTikTokMediaEvidence(data, Number(options.mediaMinConfidence || 0.84));
   const offerSignal = [
     originalOfferSignal,

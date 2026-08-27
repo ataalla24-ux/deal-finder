@@ -24,6 +24,22 @@ async function fetchImpl(url) {
       error: { code: 100, message: '(#100) Please read documentation for supported fields.' },
     }), { status: 400, headers: { 'content-type': 'application/json' } });
   }
+  if (parsed.pathname.includes('/tag-heavyhashtag/recent_media')) {
+    if (Number(parsed.searchParams.get('limit')) > 15) {
+      return new Response(JSON.stringify({
+        error: { code: 1, message: "Please reduce the amount of data you're asking for, then retry your request" },
+      }), { status: 400, headers: { 'content-type': 'application/json' } });
+    }
+    return Response.json({ data: [] });
+  }
+  if (parsed.pathname.includes('/tag-alwaysheavy/recent_media')) {
+    if (String(parsed.searchParams.get('fields') || '').includes('media_url')) {
+      return new Response(JSON.stringify({
+        error: { code: 1, message: "Please reduce the amount of data you're asking for, then retry your request" },
+      }), { status: 400, headers: { 'content-type': 'application/json' } });
+    }
+    return Response.json({ data: [] });
+  }
   if (parsed.pathname.includes('/tag-gratiswien/recent_media')) {
     const requestedFields = String(parsed.searchParams.get('fields') || '').split(',');
     assert.equal(requestedFields.includes('username'), false, 'hashtag media must not request unsupported username');
@@ -98,7 +114,7 @@ const result = await runWienDealsCombined({
     INSTAGRAM_ACCESS_TOKEN: 'test-token',
     INSTAGRAM_USER_ID: '17840000000000000',
     META_GRAPH_VERSION: 'v26.0',
-    WIEN_COMBINED_GRAPH_HASHTAGS: 'gratiswien,missingtag,zweittag',
+    WIEN_COMBINED_GRAPH_HASHTAGS: 'gratiswien,missingtag,zweittag,heavyhashtag,alwaysheavy',
     OPENAI_API_KEY: 'test-openai-key',
   },
   enrichGraphMedia: async (entries) => {
@@ -155,6 +171,9 @@ assert.equal(result.report.mediaEvidence.visionCalls, 1);
 assert.equal(result.report.status, 'healthy');
 assert.equal(result.report.sources.find((source) => source.hashtag === 'missingtag')?.status, 'not-found');
 assert.equal(result.report.sources.find((source) => source.hashtag === 'gratiswien')?.mediaFieldMode, 'media-url');
+assert.equal(result.report.sources.find((source) => source.hashtag === 'heavyhashtag')?.mediaLimit, 15);
+assert.equal(result.report.sources.find((source) => source.hashtag === 'alwaysheavy')?.mediaFieldMode, 'basic');
+assert.equal(result.report.sources.find((source) => source.hashtag === 'alwaysheavy')?.mediaLimit, 10);
 
 const degraded = await runWienDealsCombined({
   now,

@@ -33,12 +33,12 @@ const RUN_STARTED_AT = new Date();
 const BASIC_HASHTAG_MEDIA_FIELDS = 'id,caption,media_type,permalink,timestamp,like_count,comments_count';
 const HASHTAG_MEDIA_FIELD_VARIANTS = [
   {
-    mode: 'supported-media',
-    fields: `${BASIC_HASHTAG_MEDIA_FIELDS},media_url,children`,
-  },
-  {
     mode: 'media-url',
     fields: `${BASIC_HASHTAG_MEDIA_FIELDS},media_url`,
+  },
+  {
+    mode: 'supported-media',
+    fields: `${BASIC_HASHTAG_MEDIA_FIELDS},media_url,children`,
   },
   { mode: 'basic', fields: BASIC_HASHTAG_MEDIA_FIELDS },
 ];
@@ -163,6 +163,42 @@ async function graphHashtagMediaRequest(pathname, params, options) {
   throw lastUnsupportedFieldError || new Error('Meta Graph rejected all hashtag media field variants');
 }
 
+function isReducibleGraphLoadError(error) {
+  const message = cleanText(error?.message || error, 600);
+  return (Number(error?.code || 0) === 1 && /reduce the amount of data/i.test(message))
+    || /(?:aborted due to timeout|timed? out|timeout)/i.test(message)
+    || ['AbortError', 'TimeoutError'].includes(cleanText(error?.name, 40));
+}
+
+async function graphHashtagMediaRequestWithAdaptiveLimit(pathname, params, options) {
+  const requestedLimit = Math.max(1, Number(params.limit || 30));
+  const limits = [...new Set([
+    requestedLimit,
+    Math.min(requestedLimit, 15),
+    Math.min(requestedLimit, 10),
+  ])];
+  for (const limit of limits) {
+    try {
+      const result = await graphHashtagMediaRequest(pathname, { ...params, limit }, options);
+      return { ...result, requestedLimit, appliedLimit: limit };
+    } catch (error) {
+      if (!isReducibleGraphLoadError(error)) throw error;
+    }
+  }
+  const basicLimit = limits.at(-1) || requestedLimit;
+  const payload = await graphRequest(pathname, {
+    ...params,
+    limit: basicLimit,
+    fields: BASIC_HASHTAG_MEDIA_FIELDS,
+  }, options);
+  return {
+    payload,
+    fieldMode: 'basic',
+    requestedLimit,
+    appliedLimit: basicLimit,
+  };
+}
+
 function rejectionCounts(rejected) {
   const counts = {};
   for (const item of rejected) {
@@ -220,7 +256,7 @@ export async function runWienDealsCombined(options = {}) {
         sourceResults.push({ hashtag, status: 'not-found', fetched: 0, accepted: 0 });
         continue;
       }
-      const mediaResponse = await graphHashtagMediaRequest(`${hashtagId}/recent_media`, {
+      const mediaResponse = await graphHashtagMediaRequestWithAdaptiveLimit(`${hashtagId}/recent_media`, {
         user_id: userId,
         limit: maxMediaPerHashtag,
       }, requestOptions);
@@ -247,6 +283,7 @@ export async function runWienDealsCombined(options = {}) {
         fetched: rows.length,
         accepted: 0,
         mediaFieldMode: mediaResponse.fieldMode,
+        mediaLimit: mediaResponse.appliedLimit,
       });
     } catch (error) {
       const notFound = Number(error?.code || 0) === 24;

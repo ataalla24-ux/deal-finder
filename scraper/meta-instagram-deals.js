@@ -799,14 +799,16 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
       : '';
   const trustedAiLocation = trustedAiOffer ? cleanText(ai.locationText, 240) : '';
   const trustedAiValidity = trustedAiOffer ? cleanText(ai.validityText, 240) : '';
-  // OCR occasionally turns decorative text into a plausible percentage. If
-  // the caption has no offer and the evidence classifier confidently rejects
-  // that OCR-only signal, do not let the noisy text create a deal by itself.
+  // OCR frequently turns decorative text into plausible offer words. A post
+  // rejected from its caption may only be rescued after a positive AI verdict;
+  // raw OCR alone is not reliable enough for the Slack queue.
   if (!captionPromotion.accepted
       && ocrPromotion.accepted
-      && ai?.isDeal === false
-      && aiConfidence >= aiConfidenceThreshold) {
-    return { deal: null, rejection: 'media-ai-rejected-offer' };
+      && !trustedAiOffer) {
+    return {
+      deal: null,
+      rejection: ai ? 'media-ai-rejected-offer' : 'media-ai-required-for-ocr-offer',
+    };
   }
   const promotionText = [captionProse, ocrText ? `Bildtext: ${ocrText}` : '', trustedAiOffer ? `AI-Angebotsbeleg: ${trustedAiOffer}` : '']
     .filter(Boolean)

@@ -112,6 +112,23 @@ const genericTravelGuide = build(
 assert.equal(genericTravelGuide.deal, null);
 assert.match(genericTravelGuide.reason, /Reiseguide/);
 
+const genericPayWhatYouWishWeekend = build(
+  'https://www.tiktok.com/@elena.mov/video/7678002441849425184',
+  postData(
+    'Dein gratis/pay as you wish Wochende von mir für dich! #vienna #wientipps #events #flohmarkt #rave',
+    'elena.mov',
+  ),
+);
+assert.equal(genericPayWhatYouWishWeekend.deal, null);
+assert.match(genericPayWhatYouWishWeekend.reason, /Event-Sammlung/);
+
+const foreignCreatorWithoutViennaVenue = build(
+  'https://www.tiktok.com/@muerdelatartavalencia/video/7678002441849425185',
+  postData('Ositos de peluche gratis con el café. #vienna #bear #coffeeshop', 'muerdelatartavalencia'),
+);
+assert.equal(foreignCreatorWithoutViennaVenue.deal, null);
+assert.match(foreignCreatorWithoutViennaVenue.reason, /Ortsbeleg/);
+
 const freePublicInfrastructure = build(
   'https://www.tiktok.com/@orfradiowienheute/video/7678002441849425157',
   postData('In fünf Wiener Parks gibt es ab sofort kostenlose Ladestationen für Smartphones und Tablets.', 'orfradiowienheute'),

@@ -267,6 +267,22 @@ assert.equal(
   'a bare OCR percentage without Rabatt/auf/off is rejected before the AI veto is needed',
 );
 
+const unclassifiedOcrFalsePositive = normalizeGraphMediaItem({
+  id: 'unclassified-ocr-1',
+  caption: 'Kommt vorbei in 1100 Wien und genießt unsere frisch panierten Schnitzel.',
+  permalink: 'https://www.instagram.com/reel/UNCLASSIFIEDOCR1/',
+  timestamp: '2026-08-22T09:00:00.000Z',
+  _mediaEvidence: {
+    ocrText: 'N AS ek SR 5 Bene Tre FREE Sorter',
+    visionImageCount: 1,
+  },
+}, {
+  sourceType: 'hashtag',
+  sourceName: '#viennaeats',
+}, config, now);
+assert.equal(unclassifiedOcrFalsePositive.deal, null, 'unclassified OCR must never rescue a caption-only rejection');
+assert.equal(unclassifiedOcrFalsePositive.rejection, 'media-ai-required-for-ocr-offer');
+
 const selfSyndicatedDeal = normalizeGraphMediaItem({
   id: 'self-syndicated-1',
   caption: 'Gratis Drink testen. Alle aktuellen Bedingungen und den Original-Link findest du direkt in FreeFinder. #freefinder #wien',
