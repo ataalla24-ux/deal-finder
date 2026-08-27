@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-27T06:49:15.386Z",
+  "generatedAt": "2026-08-27T06:53:30.983Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 198,
-    "allowed": 3,
-    "blocked": 195,
+    "total": 197,
+    "allowed": 0,
+    "blocked": 197,
     "warnings": 0,
     "reasonCounts": {
       "nicht eindeutig in Wien": 29,
@@ -34,8 +34,8 @@
       "älter als 7 Tage (2026-07-16)": 2,
       "Gottesdienste nur im Wochenlauf": 34,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 13,
-      "ausgeschlossene Quelle (gastro.news)": 13,
+      "URL ungültig (HTTP 404)": 16,
+      "ausgeschlossene Quelle (gastro.news)": 14,
       "älter als 7 Tage (2019-08-02)": 1,
       "älter als 7 Tage (2014-10-10)": 7,
       "älter als 7 Tage (2023-11-04)": 1,
@@ -54,16 +54,17 @@
       "abgelaufen (2026-08-22)": 2,
       "abgelaufen (2026-08-26T23:59:59.999Z)": 1,
       "älter als 7 Tage (2026-07-01)": 9,
-      "selbst syndizierter FreeFinder-Post": 1
+      "selbst syndizierter FreeFinder-Post": 1,
+      "ausgeschlossene Quelle (TheFork)": 1
     },
     "reasonCategoryCounts": {
       "nicht Wien": 29,
       "älter als 7 Tage": 172,
       "abgelaufen": 5,
-      "ausgeschlossene Quelle": 14,
+      "ausgeschlossene Quelle": 16,
       "kein konkreter Deal": 130,
       "kein echtes Post-Datum": 2,
-      "ungültige URL": 15,
+      "ungültige URL": 18,
       "Gottesdienste außerhalb Wochenlauf": 34,
       "Meta-Graph-Widerspruch": 2,
       "selbst syndiziert": 1
@@ -111,7 +112,7 @@
           "kein konkreter Deal": 32,
           "Gottesdienste außerhalb Wochenlauf": 33,
           "älter als 7 Tage": 33,
-          "ungültige URL": 2
+          "ungültige URL": 3
         }
       },
       "Gutscheine.at": {
@@ -151,7 +152,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 96,
           "älter als 7 Tage": 99,
-          "ungültige URL": 7,
+          "ungültige URL": 9,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "nicht Wien": 1
         }
@@ -193,63 +194,26 @@
         }
       },
       "tiktok-deals-scanner": {
-        "total": 4,
-        "allowed": 3,
+        "total": 1,
+        "allowed": 0,
         "blocked": 1,
         "warnings": 0,
         "reasonCategoryCounts": {
           "selbst syndiziert": 1
         }
+      },
+      "Wien Deals Combined Graph": {
+        "total": 2,
+        "allowed": 0,
+        "blocked": 2,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "ausgeschlossene Quelle": 2
+        }
       }
     }
   },
-  "allowed": [
-    {
-      "id": "tiktok-dqorxh",
-      "title": "@assal.burger Angebot",
-      "brand": "@assal.burger",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@assal.burger/video/7678412352043158806",
-      "reasons": [],
-      "warnings": [],
-      "sourceDate": "2026-08-26T18:41:30.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 1,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "tiktok-te54hm",
-      "title": "💧 Did you know you don’t have to pay for drinking water in Vienna",
-      "brand": "@wienmermaid",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@wienmermaid/video/7678093781656194326",
-      "reasons": [],
-      "warnings": [],
-      "sourceDate": "2026-08-25T22:05:17.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 2,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "tiktok-ey0lra",
-      "title": "Männer gehen gratis aufs Pissoir, Frauen müssen für das Klo 50 Cent zahlen",
-      "brand": "@orfradiowienheute",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@orfradiowienheute/video/7678309585249127702",
-      "reasons": [],
-      "warnings": [],
-      "sourceDate": "2026-08-26T12:02:42.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 1,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    }
-  ],
+  "allowed": [],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -933,13 +897,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 186,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "events-8-20260222",
@@ -1843,19 +1809,18 @@
       "source": "Freikirchen Wien",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 130,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "freikirche-8-20260419",
@@ -2559,18 +2524,17 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 186,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gemeinde-11-20260222",
@@ -3373,18 +3337,17 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 186,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gottesdienste-19-20260222",
@@ -4026,6 +3989,40 @@
       "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18028410176896525",
+      "title": "August 2026 ⏰ ab 17:00 Uhr 💶 € 59 pro Person (Kinder bis 6 Jahre gratis) Perfekt für einen entspannten Sommerabend mit Freunden und Familie",
+      "brand": "#sommerinwien",
+      "source": "Wien Deals Combined Graph",
+      "url": "https://www.instagram.com/p/Dcf6o9zFUUH/",
+      "reasons": [
+        "ausgeschlossene Quelle (gastro.news)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-08-26T09:42:35.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 1,
+      "expiryDate": "2026-08-29T23:59:59.999Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18437511967135620",
+      "title": "mit Vinz & Marie 🤎💛 TheFork Summer bei: 📍Tandoori Junction Antonigasse 9, 1180 Wien Das Beste daran⁉️ - Ihr bekommt aktuell beim TheFork",
+      "brand": "#vienna",
+      "source": "Wien Deals Combined Graph",
+      "url": "https://www.instagram.com/reel/DciKqAHMCTv/",
+      "reasons": [
+        "ausgeschlossene Quelle (TheFork)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-08-27T06:41:01.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-09-20",
+      "expirySource": "url.dateHints",
       "urlStatus": "HTTP 200"
     }
   ]

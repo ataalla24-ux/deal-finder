@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-27T06:48:32.052Z",
+  "generatedAt": "2026-08-27T06:52:45.336Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 374,
-    "uniqueCandidates": 346,
-    "distinctCandidates": 358,
-    "duplicateClusters": 12,
+    "totalCandidates": 378,
+    "uniqueCandidates": 344,
+    "distinctCandidates": 359,
+    "duplicateClusters": 15,
     "topHealthySources": [
       {
         "sourceKey": "tiktok",
@@ -14,9 +14,15 @@
         "totalDeals": 8
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 73,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 71,
+        "healthScore": 67,
         "totalDeals": 15
       },
       {
@@ -30,15 +36,15 @@
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 65,
         "totalDeals": 23
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "healthScore": 61,
-        "totalDeals": 10
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 79,
+        "totalDeals": 4
+      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
@@ -62,12 +68,6 @@
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
         "missionFitScore": 60,
         "totalDeals": 14
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "missionFitScore": 57,
-        "totalDeals": 10
       }
     ],
     "topCoverageSources": [
@@ -115,6 +115,12 @@
         "totalDeals": 8
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 78,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 73,
@@ -123,7 +129,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 72,
+        "precisionScore": 70,
         "totalDeals": 15
       },
       {
@@ -131,12 +137,6 @@
         "sourceLabel": "Instagram AI Agent",
         "precisionScore": 66,
         "totalDeals": 23
-      },
-      {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "precisionScore": 59,
-        "totalDeals": 14
       }
     ],
     "topWeightedSources": [
@@ -147,9 +147,15 @@
         "totalDeals": 8
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 65,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 62,
+        "sourceWeightScore": 60,
         "totalDeals": 15
       },
       {
@@ -163,12 +169,6 @@
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 57,
         "totalDeals": 23
-      },
-      {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "sourceWeightScore": 53,
-        "totalDeals": 14
       }
     ],
     "topSourcesToFix": [
@@ -236,8 +236,7 @@
         "firecrawl4",
         "food3",
         "gastro2",
-        "power",
-        "wien-combined"
+        "power"
       ]
     }
   },
@@ -307,13 +306,93 @@
       "sourceWeightScore": 70
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 4,
+      "uniqueDeals": 1,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 4,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 3,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "September 2026 🕠 Einlass: 17:30 Uhr 📍 Café-Restaurant Meierei, Hauptallee 3, 1020 Wien 🎟️ Eintritt kostenlos– bring deine Freundinnen mit",
+        "August 2026 ⏰ ab 17:00 Uhr 💶 € 59 pro Person (Kinder bis 6 Jahre gratis) Perfekt für einen entspannten Sommerabend mit Freunden und Familie",
+        "mit Vinz & Marie 🤎💛 TheFork Summer bei: 📍Tandoori Junction Antonigasse 9, 1180 Wien Das Beste daran⁉️ - Ihr bekommt aktuell beim TheFork"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-27T06:50:33.495Z",
+        "finishedAt": "2026-08-27T06:52:19.803Z",
+        "durationMs": 106308,
+        "counts": {
+          "rawCandidates": 146,
+          "normalizedCandidates": 4,
+          "verifiedCandidates": 4,
+          "previousDeals": 0,
+          "acceptedDeals": 4,
+          "rejectedDeals": 127
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 106,
+          "general-recommendation": 11,
+          "missing-vienna-evidence": 2,
+          "missing-text": 7,
+          "excluded-promotion-type": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.8,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        },
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 73,
+      "missionFitScore": 79,
+      "coverageScore": 19,
+      "precisionScore": 78,
+      "sourceWeightScore": 65
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 15,
-      "uniqueDeals": 11,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
+      "uniqueDeals": 8,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
       "fresh1dCount": 9,
       "fresh7dCount": 15,
       "viennaCount": 15,
@@ -326,8 +405,8 @@
         "September 2026 🕠 Einlass: 17:30 Uhr 📍 Café-Restaurant Meierei, Hauptallee 3, 1020 Wien 🎟️ Eintritt kostenlos– bring deine Freundinnen mit"
       ],
       "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
       "fresh1dRate": 0.6,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -372,13 +451,14 @@
         }
       ],
       "issues": [
-        "geringe Food-/Drink-Relevanz"
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 71,
+      "healthScore": 67,
       "missionFitScore": 62,
-      "coverageScore": 37,
-      "precisionScore": 72,
-      "sourceWeightScore": 62
+      "coverageScore": 35,
+      "precisionScore": 70,
+      "sourceWeightScore": 60
     },
     {
       "sourceKey": "food3",
@@ -1978,67 +2058,6 @@
       "missingUrlCount": 0,
       "sampleTitles": [],
       "lastRun": null,
-      "uniqueRate": 0,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 0,
-      "topCategories": [],
-      "topTypes": [],
-      "issues": [
-        "liefert aktuell 0 Deals"
-      ],
-      "healthScore": 0,
-      "missionFitScore": 0,
-      "coverageScore": 0,
-      "precisionScore": 0,
-      "sourceWeightScore": 0
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 0,
-      "uniqueDeals": 0,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-27T06:44:09.836Z",
-        "finishedAt": "2026-08-27T06:45:04.204Z",
-        "durationMs": 54368,
-        "counts": {
-          "rawCandidates": 0,
-          "normalizedCandidates": 0,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 0,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "#wien: Meta Graph 100: (#100) Please read documentation for supported fields.",
-          "#vienna: Meta Graph 100: (#100) Please read documentation for supported fields.",
-          "#viennafood: Meta Graph 100: (#100) Please read documentation for supported fields.",
-          "#wienevents: Meta Graph 100: (#100) Please read documentation for supported fields.",
-          "#wientipps: Meta Graph 100: (#100) Please read documentation for supported fields.",
-          "#wienfamilie: Meta Graph 100: (#100) Please read documentation for supported fields.",
-          "#sommerinwien: Meta Graph 100: (#100) Please read documentation for supported fields.",
-          "#viennaeats: Meta Graph 100: (#100) Please read documentation for supported fields."
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
       "uniqueRate": 0,
       "duplicateRate": 0,
       "fresh1dRate": 0,
