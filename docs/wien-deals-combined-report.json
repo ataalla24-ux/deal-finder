@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-28T21:46:35.303Z",
+  "generatedAt": "2026-08-28T22:35:20.739Z",
   "status": "degraded",
   "message": "4 fresh, evidence-checked Graph hashtag deal(s) found; 2 recovered from media.",
   "hashtags": [
@@ -15,27 +15,36 @@
     "viennaeats"
   ],
   "fetchedPosts": 131,
-  "uniquePosts": 124,
+  "uniquePosts": 127,
   "totalDeals": 4,
-  "rescueEligible": 77,
+  "rescueEligible": 85,
   "rescuedDeals": 2,
   "mediaEvidence": {
     "status": "degraded",
-    "eligible": 51,
+    "eligible": 56,
     "selected": 18,
-    "cached": 26,
+    "cached": 29,
     "analyzed": 18,
-    "withOcrText": 16,
+    "withOcrText": 9,
     "withVisionImages": 18,
     "aiCalls": 18,
     "visionCalls": 18,
-    "aiAccepted": 1,
-    "inputTokens": 74112,
-    "outputTokens": 673,
-    "totalTokens": 74785,
+    "aiAccepted": 0,
+    "inputTokens": 54922,
+    "outputTokens": 597,
+    "totalTokens": 55519,
     "errors": [
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-163VN2/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-bbZcfY/asset-0-ocr.png stdout -l deu+eng --psm 6"
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-PqXAzt/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-kmxVFH/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-jAoYCy/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-leLpye/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-Vw4LZz/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-ODju77/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-nRbuyi/video-0-frame-01.jpg.ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-nRbuyi/video-0-frame-03.jpg.ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-Pmknj2/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-CwWZXk/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-KBsOKe/asset-0-ocr.png stdout -l deu+eng --psm 6 Image too small to scale!! (2x36 vs min width of 3) Line can"
     ],
     "llmConfigured": true,
     "visionConfigured": true,
@@ -128,10 +137,11 @@
     }
   ],
   "rejectionReasons": {
-    "no-concrete-offer": 102,
+    "no-concrete-offer": 109,
     "general-recommendation": 4,
-    "excluded-promotion-type": 7,
-    "missing-text": 4,
-    "missing-vienna-evidence": 3
+    "media-ai-rejected-offer": 1,
+    "excluded-promotion-type": 5,
+    "missing-vienna-evidence": 3,
+    "missing-text": 1
   }
 }
