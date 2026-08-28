@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-28T16:02:39.881Z",
+  "generatedAt": "2026-08-28T16:48:23.020Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 196,
-    "allowed": 0,
-    "blocked": 196,
-    "warnings": 0,
+    "allowed": 2,
+    "blocked": 194,
+    "warnings": 2,
     "reasonCounts": {
       "nicht eindeutig in Wien": 29,
       "älter als 7 Tage (2026-06-27)": 1,
@@ -36,7 +36,7 @@
       "älter als 7 Tage (2026-07-16)": 1,
       "Gottesdienste nur im Wochenlauf": 34,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 15,
+      "URL ungültig (HTTP 404)": 18,
       "ausgeschlossene Quelle (gastro.news)": 12,
       "älter als 7 Tage (2014-10-10)": 7,
       "älter als 7 Tage (2023-11-04)": 1,
@@ -56,21 +56,18 @@
       "Meta-Graph-Widerspruch (non-vienna-location)": 2,
       "abgelaufen (2026-08-22)": 2,
       "älter als 7 Tage (2026-07-01)": 9,
-      "relative Kurz-Aktion abgelaufen (2026-08-27)": 1,
-      "ausgeschlossene Quelle (DieRestaurantWoche)": 1,
-      "kostenlose Infrastruktur statt Deal": 1
+      "relative Kurz-Aktion abgelaufen (2026-08-27)": 1
     },
     "reasonCategoryCounts": {
       "nicht Wien": 29,
       "älter als 7 Tage": 173,
       "abgelaufen": 7,
-      "ausgeschlossene Quelle": 14,
+      "ausgeschlossene Quelle": 13,
       "kein konkreter Deal": 130,
       "kein echtes Post-Datum": 2,
-      "ungültige URL": 17,
+      "ungültige URL": 20,
       "Gottesdienste außerhalb Wochenlauf": 34,
-      "Meta-Graph-Widerspruch": 2,
-      "sonstiges": 1
+      "Meta-Graph-Widerspruch": 2
     },
     "sourceCounts": {
       "Apify Instagram Vienna Food Offers": {
@@ -116,7 +113,7 @@
           "kein konkreter Deal": 32,
           "Gottesdienste außerhalb Wochenlauf": 33,
           "älter als 7 Tage": 33,
-          "ungültige URL": 2
+          "ungültige URL": 3
         }
       },
       "Gutscheine.at": {
@@ -156,7 +153,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 96,
           "älter als 7 Tage": 99,
-          "ungültige URL": 7,
+          "ungültige URL": 9,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "nicht Wien": 1
         }
@@ -190,17 +187,49 @@
       },
       "Wien Deals Combined Graph": {
         "total": 2,
-        "allowed": 0,
-        "blocked": 2,
-        "warnings": 0,
-        "reasonCategoryCounts": {
-          "ausgeschlossene Quelle": 1,
-          "sonstiges": 1
-        }
+        "allowed": 2,
+        "blocked": 0,
+        "warnings": 2,
+        "reasonCategoryCounts": {}
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-17978160270096063",
+      "title": "September, gratis!",
+      "brand": "Vienna Coffee Festival",
+      "source": "Wien Deals Combined Graph",
+      "url": "https://www.instagram.com/reel/DclhoRXsivD/",
+      "reasons": [],
+      "warnings": [
+        "startet am 2026-09-11"
+      ],
+      "sourceDate": "2026-08-28T13:59:29.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-09-13",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-17883096729486579",
+      "title": "Alle Speisen auch zum Mitnehmen ——————————————— From Monday to Friday we serve you our varied lunch special at Restaurant ROTH for only €10.",
+      "brand": "dm",
+      "source": "Wien Deals Combined Graph",
+      "url": "https://www.instagram.com/p/DclaGCVjcJz/",
+      "reasons": [],
+      "warnings": [
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-08-28T12:53:38.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -1774,6 +1803,7 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
@@ -1784,7 +1814,7 @@
       "sourceAgeDays": 131,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "freikirche-7-20260419",
@@ -2472,6 +2502,7 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
@@ -2481,7 +2512,7 @@
       "sourceAgeDays": 187,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -2885,7 +2916,6 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
@@ -2893,7 +2923,7 @@
       "sourceAgeDays": 187,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-30-20260222",
@@ -3285,6 +3315,7 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
@@ -3294,7 +3325,7 @@
       "sourceAgeDays": 187,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gottesdienste-17-20260222",
@@ -3957,42 +3988,6 @@
       "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "meta-ig-17912872149261421",
-      "title": "Restaurantwoche Special.",
-      "brand": "Instagram",
-      "source": "Wien Deals Combined Graph",
-      "url": "https://www.instagram.com/p/DckuYZtDmlw/",
-      "reasons": [
-        "ausgeschlossene Quelle (DieRestaurantWoche)"
-      ],
-      "warnings": [
-        "startet am 2026-08-31"
-      ],
-      "sourceDate": "2026-08-28T06:31:40.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 0,
-      "expiryDate": "2026-09-05",
-      "expirySource": "url.contentHints.title",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "meta-ig-18132091483640371",
-      "title": "Vienna is reviewing whether to make public toilets free for everyone.",
-      "brand": "Instagram",
-      "source": "Wien Deals Combined Graph",
-      "url": "https://www.instagram.com/p/DclS79ZiMtR/",
-      "reasons": [
-        "kostenlose Infrastruktur statt Deal"
-      ],
-      "warnings": [],
-      "sourceDate": "2026-08-28T11:51:06.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 0,
-      "expiryDate": "2026-08-31T12:07:13.711Z",
-      "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     }
   ]
