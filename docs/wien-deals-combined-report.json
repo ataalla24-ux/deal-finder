@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-27T22:32:30.620Z",
+  "generatedAt": "2026-08-28T12:07:13.711Z",
   "status": "degraded",
-  "message": "1 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
+  "message": "5 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
   "hashtags": [
     "wien",
     "vienna",
@@ -14,30 +14,29 @@
     "essenwien",
     "viennaeats"
   ],
-  "fetchedPosts": 140,
-  "uniquePosts": 132,
-  "totalDeals": 1,
-  "rescueEligible": 80,
+  "fetchedPosts": 139,
+  "uniquePosts": 127,
+  "totalDeals": 5,
+  "rescueEligible": 71,
   "rescuedDeals": 0,
   "mediaEvidence": {
     "status": "degraded",
-    "eligible": 58,
+    "eligible": 68,
     "selected": 18,
-    "cached": 22,
+    "cached": 3,
     "analyzed": 18,
-    "withOcrText": 14,
+    "withOcrText": 15,
     "withVisionImages": 18,
     "aiCalls": 18,
     "visionCalls": 18,
-    "aiAccepted": 1,
-    "inputTokens": 69323,
-    "outputTokens": 695,
-    "totalTokens": 70018,
+    "aiAccepted": 0,
+    "inputTokens": 50923,
+    "outputTokens": 624,
+    "totalTokens": 51547,
     "errors": [
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-qCZw1r/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-5zmEG8/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-To5Wfr/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-aaUt6D/asset-0-ocr.png stdout -l deu+eng --psm 6"
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-oUG8hv/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-o5HMqv/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-WVnDgu/asset-0-ocr.png stdout -l deu+eng --psm 6"
     ],
     "llmConfigured": true,
     "visionConfigured": true,
@@ -52,7 +51,7 @@
       "hashtag": "wien",
       "status": "ok",
       "fetched": 30,
-      "accepted": 0,
+      "accepted": 1,
       "mediaFieldMode": "media-url",
       "mediaLimit": 30
     },
@@ -60,7 +59,7 @@
       "hashtag": "vienna",
       "status": "ok",
       "fetched": 30,
-      "accepted": 0,
+      "accepted": 1,
       "mediaFieldMode": "media-url",
       "mediaLimit": 30
     },
@@ -68,22 +67,22 @@
       "hashtag": "viennafood",
       "status": "ok",
       "fetched": 30,
-      "accepted": 1,
+      "accepted": 2,
       "mediaFieldMode": "media-url",
       "mediaLimit": 30
     },
     {
       "hashtag": "wienevents",
       "status": "ok",
-      "fetched": 12,
-      "accepted": 0,
+      "fetched": 11,
+      "accepted": 1,
       "mediaFieldMode": "media-url",
       "mediaLimit": 30
     },
     {
       "hashtag": "wientipps",
       "status": "ok",
-      "fetched": 4,
+      "fetched": 5,
       "accepted": 0,
       "mediaFieldMode": "media-url",
       "mediaLimit": 30
@@ -115,7 +114,7 @@
     {
       "hashtag": "essenwien",
       "status": "ok",
-      "fetched": 1,
+      "fetched": 2,
       "accepted": 0,
       "mediaFieldMode": "media-url",
       "mediaLimit": 30
@@ -123,18 +122,18 @@
     {
       "hashtag": "viennaeats",
       "status": "ok",
-      "fetched": 14,
+      "fetched": 12,
       "accepted": 0,
       "mediaFieldMode": "media-url",
       "mediaLimit": 30
     }
   ],
   "rejectionReasons": {
-    "no-concrete-offer": 114,
-    "excluded-promotion-type": 7,
-    "missing-text": 4,
-    "offer-expired": 1,
-    "general-recommendation": 3,
-    "missing-vienna-evidence": 2
+    "excluded-promotion-type": 6,
+    "no-concrete-offer": 99,
+    "missing-text": 3,
+    "non-vienna-location": 1,
+    "general-recommendation": 10,
+    "missing-vienna-evidence": 3
   }
 }
