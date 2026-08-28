@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-28T18:41:35.575Z",
+  "generatedAt": "2026-08-28T18:57:14.815Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 462,
-    "uniqueCandidates": 448,
-    "distinctCandidates": 454,
+    "totalCandidates": 469,
+    "uniqueCandidates": 455,
+    "distinctCandidates": 461,
     "duplicateClusters": 6,
     "topHealthySources": [
       {
@@ -93,17 +93,17 @@
         "fresh1dCount": 0
       },
       {
+        "sourceKey": "gutscheine",
+        "sourceLabel": "Gutscheine.at",
+        "coverageScore": 30,
+        "totalDeals": 27,
+        "fresh1dCount": 27
+      },
+      {
         "sourceKey": "events",
         "sourceLabel": "Kirchen Events",
         "coverageScore": 25,
         "totalDeals": 35,
-        "fresh1dCount": 0
-      },
-      {
-        "sourceKey": "gemeinde",
-        "sourceLabel": "Kirchen Verzeichnis",
-        "coverageScore": 25,
-        "totalDeals": 34,
         "fresh1dCount": 0
       }
     ],
@@ -1525,6 +1525,78 @@
       "sourceWeightScore": 33
     },
     {
+      "sourceKey": "gutscheine",
+      "file": "deals-pending-gutscheine.json",
+      "sourceLabel": "Gutscheine.at",
+      "totalDeals": 27,
+      "uniqueDeals": 27,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 27,
+      "fresh7dCount": 27,
+      "viennaCount": 0,
+      "foodDrinkCount": 1,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Aldiana Summer-Deals: bis zu 555 € Rabatt",
+        "300 € Gutschein für den Braun NEVO Shaver",
+        "Bis zu 70% Rabatt + 20% extra auf alle Sale-Styles mit dem Code"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 48.1,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 21
+        },
+        {
+          "value": "beauty",
+          "count": 3
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        },
+        {
+          "value": "streaming",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 25
+        },
+        {
+          "value": "gutschein",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 42,
+      "missionFitScore": 22,
+      "coverageScore": 30,
+      "precisionScore": 26,
+      "sourceWeightScore": 30
+    },
+    {
       "sourceKey": "power",
       "file": "deals-pending-power.json",
       "sourceLabel": "Power Scraper",
@@ -1701,67 +1773,6 @@
       "coverageScore": 65,
       "precisionScore": 28,
       "sourceWeightScore": 36
-    },
-    {
-      "sourceKey": "gutscheine",
-      "file": "deals-pending-gutscheine.json",
-      "sourceLabel": "Gutscheine.at",
-      "totalDeals": 20,
-      "uniqueDeals": 20,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 20,
-      "viennaCount": 0,
-      "foodDrinkCount": 1,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "100 € Rabatt auf alle Buchungen",
-        "Mitglieder-Vorteil: 50% Rabattcode für das günstigste Produkt ab 2 Artikeln",
-        "20 € Gutschein für fast alles bei Möbelix"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0.1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 44.2,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 19
-        },
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 18
-        },
-        {
-          "value": "gutschein",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 30,
-      "missionFitScore": 4,
-      "coverageScore": 12,
-      "precisionScore": 16,
-      "sourceWeightScore": 15
     },
     {
       "sourceKey": "flights",
