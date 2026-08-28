@@ -70,6 +70,11 @@ assert.equal(
   true,
   'the inbound-travel exclusion must not block offers departing from Vienna',
 );
+assert.equal(
+  classifyPromotion('Vienna trip from 13 to 15 October for €199. Vienna ti aspetta per un viaggio da sogno. #Viaggiare').accepted,
+  false,
+  'foreign packages whose destination is Vienna are not local Vienna deals',
+);
 assert.equal(classifyPromotion('Die Führungen durch das Parlament sind kostenlos.').type, 'gratis');
 const mixedPriceAndTrial = classifyPromotion('Matcha für 1€ in Wien. Mit der App zwei Monate kostenlos testen.');
 assert.equal(mixedPriceAndTrial.type, 'rabatt', 'the advertised product price wins over a secondary free app trial');
@@ -223,6 +228,50 @@ assert.ok(graphFreeEntryWithIncidentalDrinks.deal);
 assert.equal(graphFreeEntryWithIncidentalDrinks.deal.title, 'Gratis-Eintritt zum Open-Air-Event: Volksgarten Pavillon');
 assert.equal(graphFreeEntryWithIncidentalDrinks.deal.category, 'kultur');
 assert.match(graphFreeEntryWithIncidentalDrinks.deal.promotionEvidence, /free entry/i, 'guaranteed entry outranks chance-based free drinks');
+
+const graphInboundViennaPackage = normalizeGraphMediaItem({
+  id: 'graph-inbound-vienna-package',
+  caption: 'VIENNA, dove l’eleganza incontra la magia. Vienna ti aspetta per un viaggio da sogno. #Viaggiare #boeing777travel',
+  permalink: 'https://www.instagram.com/reel/GRAPHINBOUNDVIENNA/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+  _mediaEvidence: {
+    ai: {
+      isDeal: true,
+      confidence: 0.9,
+      offerText: 'Vienna trip from 13 to 15 October for €199',
+      locationText: 'Vienna',
+      validityText: 'DAL 13 AL 15 OTTOBRE',
+      exclusion: 'none',
+    },
+  },
+}, { sourceType: 'hashtag', sourceName: '#vienna' }, config, now);
+assert.equal(graphInboundViennaPackage.deal, null);
+assert.equal(graphInboundViennaPackage.rejection, 'excluded-promotion-type');
+
+const graphDevaHouseholdOffer = normalizeGraphMediaItem({
+  id: 'graph-deva-household',
+  name: 'Angebote',
+  caption: 'Aktuelle Angebote bei DEVA! 📍Wienerbergstraße 8A, 1120 Wien. Ob Haushalt, Reinigung oder Küche – tolle Produkte zu attraktiven Preisen. #angebote #haushalt #aktion #wien',
+  permalink: 'https://www.instagram.com/p/GRAPHDEVA/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+  _mediaEvidence: {
+    ocrText: 'SLEEPY div. SORTEN 2,99€ statt 4,49€',
+    assetCount: 1,
+    imageCount: 1,
+    ai: {
+      isDeal: true,
+      confidence: 0.9,
+      offerText: 'SLEEPY diverse sorts for 2.99€ (discounted from 4.49€)',
+      locationText: 'Wienerbergstraße 8A, 1120 Wien',
+      validityText: '',
+      exclusion: 'none',
+    },
+  },
+}, { sourceType: 'hashtag', sourceName: '#wien' }, config, now);
+assert.ok(graphDevaHouseholdOffer.deal);
+assert.equal(graphDevaHouseholdOffer.deal.brand, 'DEVA');
+assert.equal(graphDevaHouseholdOffer.deal.category, 'shopping');
+assert.equal(graphDevaHouseholdOffer.deal.title, 'SLEEPY verschiedene Sorten um 2,99 € statt 4,49 €');
 
 const graphEditorialRoundup = normalizeGraphMediaItem({
   id: 'graph-editorial-roundup',

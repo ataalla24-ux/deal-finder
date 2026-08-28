@@ -25,6 +25,7 @@ import { enrichInstagramGraphMedia } from './instagram-media-evidence.js';
 import {
   extractBirthdayEntryOffer,
   getEditorialRoundupPromotionReason,
+  getInboundForeignTravelPromotionReason,
   getInfrastructureOnlyPromotionReason,
   getLeadGenerationOnlyPromotionReason,
   getMembershipOnlyPromotionReason,
@@ -160,7 +161,7 @@ const CATEGORY_HINTS = [
   { category: 'essen', pattern: /\b(?:essen|food|restaurant|pizza|burger|kebab|kebap|döner|doener|sushi|ramen|brunch|eis|gelato|bakery|bäckerei)\b/i },
   { category: 'fitness', pattern: /\b(?:fitness|gym|yoga|pilates|training|workout|probetraining)\b/i },
   { category: 'beauty', pattern: /\b(?:beauty|kosmetik|friseur|salon|wellness|massage)\b/i },
-  { category: 'shopping', pattern: /\b(?:shopping|store|shop|mode|fashion|sale|gutschein|klavier|piano|fl[üu]gel|musikinstrument(?:e)?)\b/i },
+  { category: 'shopping', pattern: /\b(?:shopping|store|shop|mode|fashion|sale|gutschein|klavier|piano|fl[üu]gel|musikinstrument(?:e)?|haushalt|reinigung|küche|kueche|trinkgl[aä]ser|auflaufform|geschirr)\b/i },
   { category: 'kultur', pattern: /\b(?:kino|museum|theater|kultur|ausstellung)\b/i },
 ];
 
@@ -589,6 +590,7 @@ export function classifyPromotion(text) {
   }
   if (getNonGuaranteedPromotionReason(normalized)
       || getEditorialRoundupPromotionReason(normalized)
+      || getInboundForeignTravelPromotionReason(normalized)
       || getInfrastructureOnlyPromotionReason(normalized)
       || getMembershipOnlyPromotionReason(normalized)
       || getLeadGenerationOnlyPromotionReason(normalized)
@@ -655,6 +657,12 @@ function inferTitle(text, brand, promotion) {
       : (brand && !/^#|^instagram$/i.test(brand) ? ` bei ${brand}` : '');
     return `Gratis-Eintritt zum ${eventKind}${context}`;
   }
+  const aiPriceComparison = text.match(/AI-Angebotsbeleg:\s*([^\n]{2,90}?)\s+for\s+(\d{1,3}(?:[,.]\d{1,2})?)\s*€\s*\(\s*(?:discounted\s+from|instead\s+of)\s+(\d{1,3}(?:[,.]\d{1,2})?)\s*€/i);
+  if (aiPriceComparison) {
+    const product = cleanText(aiPriceComparison[1], 90)
+      .replace(/\b(?:diverse|various)\s+(?:sorts|varieties)\b/i, 'verschiedene Sorten');
+    return `${product} um ${aiPriceComparison[2].replace('.', ',')} € statt ${aiPriceComparison[3].replace('.', ',')} €`;
+  }
   const recurringPriceOffer = text.match(/\b(von\s+(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\s+bis\s+(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)|monday\s+to\s+friday)\b[^.!?]{0,150}?\b(mittagsteller|mittagsmen[üu]|lunch\s+special)\b[^.!?]{0,100}?\b(?:f[üu]r\s+(?:nur\s+)?|for\s+only\s+|um\s+)(?:€\s*)?(\d{1,3}(?:[,.]\d{1,2})?)\s*€?/i);
   if (recurringPriceOffer) {
     const schedule = /^monday/i.test(recurringPriceOffer[1])
@@ -687,7 +695,7 @@ function inferTitle(text, brand, promotion) {
   const escapedBrand = String(brand || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const withoutBrand = withoutEvidencePrefix.replace(new RegExp(`^${escapedBrand}\\s*[:–-]?\\s*`, 'i'), '');
   const fallback = promotion.type === 'gratis' ? `Gratis-Angebot bei ${brand}` : `Aktuelles Angebot bei ${brand}`;
-  return cleanText(withoutBrand || fallback, 140);
+  return cleanText(withoutBrand || fallback, 140).replace(/(\d)€/g, '$1 €');
 }
 
 function expiryFromText(text, now, fallbackStop, ttlHours, referenceDate = now) {

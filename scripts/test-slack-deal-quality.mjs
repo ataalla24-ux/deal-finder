@@ -988,6 +988,23 @@ const eventWithOnlineBookingOnly = await validateOne({
 assert.equal(eventWithOnlineBookingOnly.decision.allowed, false);
 assert.match(reasonText(eventWithOnlineBookingOnly), /nicht eindeutig in Wien/);
 
+const inboundViennaPackage = await validateOne({
+  id: 'inbound-vienna-package',
+  brand: 'Foreign Travel',
+  title: 'Vienna trip from 13 to 15 October for €199',
+  description: 'Vienna ti aspetta per un viaggio da sogno. #Viaggiare',
+  url: 'https://www.instagram.com/reel/InboundViennaPackage/',
+  source: 'Instagram',
+  originSource: 'Wien Deals Combined Graph',
+  distance: 'Wien',
+  pubDate: '2026-07-20T08:00:00.000Z',
+  pubDateSource: 'instagram-graph-timestamp',
+  validFrom: '2026-10-13',
+  validUntil: '2026-10-15',
+});
+assert.equal(inboundViennaPackage.decision.allowed, false);
+assert.match(reasonText(inboundViennaPackage), /Reisepaket nach Wien/);
+
 const onlineAustriaOffer = await validateOne({
   id: 'online-austria',
   brand: 'Webshop',

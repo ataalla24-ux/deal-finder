@@ -14,6 +14,7 @@ import {
 } from './instagram-ai-validity-utils.js';
 import {
   getEditorialRoundupPromotionReason,
+  getInboundForeignTravelPromotionReason,
   getInfrastructureOnlyPromotionReason,
   getLeadGenerationOnlyPromotionReason,
   getMembershipOnlyPromotionReason,
@@ -505,6 +506,8 @@ function getConcreteOfferDecision(deal, health = null) {
   if (infrastructurePromotionReason) return { concrete: false, reason: infrastructurePromotionReason };
   const editorialRoundupPromotionReason = getEditorialRoundupPromotionReason(offerText);
   if (editorialRoundupPromotionReason) return { concrete: false, reason: editorialRoundupPromotionReason };
+  const inboundTravelPromotionReason = getInboundForeignTravelPromotionReason(offerText);
+  if (inboundTravelPromotionReason) return { concrete: false, reason: inboundTravelPromotionReason };
   const membershipPromotionReason = getMembershipOnlyPromotionReason(offerText);
   if (membershipPromotionReason) return { concrete: false, reason: membershipPromotionReason };
   const leadGenerationPromotionReason = getLeadGenerationOnlyPromotionReason(offerText);

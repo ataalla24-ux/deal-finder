@@ -143,6 +143,16 @@ const editorialRoundup = build(
 assert.equal(editorialRoundup.deal, null);
 assert.match(editorialRoundup.reason, /Mehrfach-Roundup/);
 
+const inboundViennaPackage = build(
+  'https://www.tiktok.com/@foreigntravel/video/7678002441849425158',
+  postData(
+    'Vienna trip from 13 to 15 October for €199. Vienna ti aspetta per un viaggio da sogno. #Viaggiare',
+    'foreigntravel',
+  ),
+);
+assert.equal(inboundViennaPackage.deal, null);
+assert.match(inboundViennaPackage.reason, /Reisepaket nach Wien/);
+
 const bioMustNotCreateOffer = build(
   'https://www.tiktok.com/@lara_kristiin/video/7676529485998656790',
   postData('Dieses Wochenende findet der Neustifter Kirtag in Wien mit Essen und Musik statt.', 'lara_kristiin'),

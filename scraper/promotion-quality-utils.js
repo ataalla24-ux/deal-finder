@@ -22,6 +22,9 @@ const EDITORIAL_ROUNDUP_PATTERN = /(?:\b\d{1,2}\s+(?:ideen|events?|eventtipps?|t
 const BIRTHDAY_CONTEXT_PATTERN = /\b(?:birthday[-\s]+(?:special|deal|offer)|geburtstag(?:s)?[-\s]+(?:special|deal|angebot|aktion)|du\s+hast\s+geburtstag|wenn\s+du\s+geburtstag\s+hast)\b/i;
 const EURO_AMOUNT_BEFORE_ENTRY_PATTERN = /(?:nur\s+|only\s+|um\s+|für\s+|fuer\s+|jeweils\s+)?(?:€\s*(\d{1,3}(?:[,.]\d{1,2})?)|(\d{1,3}(?:[,.]\d{1,2})?)\s*(?:€|euro\b|eur\b))\s*(?:pro\s+person\s+)?(?:eintritt|entry|admission)\b/i;
 const EURO_AMOUNT_AFTER_ENTRY_PATTERN = /\b(?:eintritt|entry|admission)\b.{0,80}?(?:nur\s+|only\s+|um\s+|für\s+|fuer\s+)?(?:€\s*(\d{1,3}(?:[,.]\d{1,2})?)|(\d{1,3}(?:[,.]\d{1,2})?)\s*(?:€|euro\b|eur\b))/i;
+const VIENNA_DEPARTURE_PATTERN = /\b(?:from|ab|von|departing\s+from|departure\s+from|partenza\s+da|volo\s+da)\s+(?:wien|vienna)\b/i;
+const INBOUND_VIENNA_TRAVEL_PATTERN = /(?:\b(?:trip|reise|viaggio|vacanza|city\s*break|travel\s+package|reisepaket)\s+(?:to|nach|a|in)\s+(?:wien|vienna)\b|\b(?:wien|vienna)\b.{0,180}\b(?:trip|reise|viaggio|vacanza|city\s*break|travel\s+package|reisepaket)\b)/i;
+const TRAVEL_PACKAGE_WINDOW_PATTERN = /(?:\b(?:from|dal|vom)\s+\d{1,2}\b.{0,100}\b(?:to|al|bis)\s+\d{1,2}\b|\b(?:viaggi(?:are|o)?|pacchetto|a\s+soli|volo|hotel)\b.{0,160}(?:€\s*\d|\d\s*€))/i;
 
 export function extractBirthdayEntryOffer(value) {
   const text = cleanPromotionText(value);
@@ -87,4 +90,11 @@ export function getEditorialRoundupPromotionReason(value) {
   const text = cleanPromotionText(value);
   if (!text || !EDITORIAL_ROUNDUP_PATTERN.test(text)) return '';
   return 'redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot';
+}
+
+export function getInboundForeignTravelPromotionReason(value) {
+  const text = cleanPromotionText(value);
+  if (!text || VIENNA_DEPARTURE_PATTERN.test(text)) return '';
+  if (!INBOUND_VIENNA_TRAVEL_PATTERN.test(text) || !TRAVEL_PACKAGE_WINDOW_PATTERN.test(text)) return '';
+  return 'Reisepaket nach Wien statt lokalem Wiener Deal';
 }

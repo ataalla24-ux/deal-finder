@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import {
   getEditorialRoundupPromotionReason,
+  getInboundForeignTravelPromotionReason,
   getInfrastructureOnlyPromotionReason,
   getLeadGenerationOnlyPromotionReason,
   getMembershipOnlyPromotionReason,
@@ -439,6 +440,11 @@ function apifyItemRejectReason(item, timestamp, now, maxPostAgeDays, maxAgeWitho
     item.description,
   ].map(stripInstagramMetaDescriptionPrefix).join(' '));
   if (editorialRoundupReason) return 'editorialRoundup';
+  const inboundTravelReason = getInboundForeignTravelPromotionReason([
+    item.caption,
+    item.description,
+  ].map(stripInstagramMetaDescriptionPrefix).join(' '));
+  if (inboundTravelReason) return 'inboundForeignTravel';
   const leadGenerationReason = getLeadGenerationOnlyPromotionReason([
     item.caption,
     item.description,

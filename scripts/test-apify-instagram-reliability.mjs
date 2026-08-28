@@ -148,6 +148,16 @@ const editorialRoundup = normalizeApifyItem({
 assert.equal(editorialRoundup.deal, null);
 assert.equal(editorialRoundup.rejectReason, 'editorialRoundup');
 
+const inboundViennaPackage = normalizeApifyItem({
+  ...currentItem,
+  postUrl: 'https://www.instagram.com/reel/InboundViennaPackage/',
+  venueName: 'Travel Agency',
+  description: 'Vienna trip from 13 to 15 October for €199. Vienna ti aspetta per un viaggio da sogno. #Viaggiare',
+  caption: 'Vienna trip from 13 to 15 October for €199. Vienna ti aspetta per un viaggio da sogno. #Viaggiare',
+}, { now, maxPostAgeDays: 7 });
+assert.equal(inboundViennaPackage.deal, null);
+assert.equal(inboundViennaPackage.rejectReason, 'inboundForeignTravel');
+
 const trustedAccount = normalizeApifyItem({
   ...currentItem,
   description: 'Heute ein Kaffee gratis',

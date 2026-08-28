@@ -16,6 +16,7 @@ import {
 import {
   extractBirthdayEntryOffer,
   getEditorialRoundupPromotionReason,
+  getInboundForeignTravelPromotionReason,
   getInfrastructureOnlyPromotionReason,
   getLeadGenerationOnlyPromotionReason,
   getMembershipOnlyPromotionReason,
@@ -492,6 +493,7 @@ function getTikTokContentQualityReason(text) {
   if (nonDealRule) return nonDealRule.reason;
   return getNonGuaranteedPromotionReason(signal)
     || getEditorialRoundupPromotionReason(signal)
+    || getInboundForeignTravelPromotionReason(signal)
     || getInfrastructureOnlyPromotionReason(signal)
     || getMembershipOnlyPromotionReason(signal)
     || getLeadGenerationOnlyPromotionReason(signal);
@@ -1024,9 +1026,9 @@ export function buildDealFromPost(url, data, options = {}) {
   const originalViennaEvidence = extractViennaEvidence(originalContextSignal);
   const viennaEvidenceDetail = extractViennaEvidence(contextSignal);
   if (!viennaEvidenceDetail) return { deal: null, reason: 'kein eindeutiges Wien-Signal' };
-  if (!hasStrongDealSignal(offerSignal)) return { deal: null, reason: 'kein starkes Gratis-/Deal-Signal' };
   const contentQualityReason = getTikTokContentQualityReason(offerSignal);
   if (contentQualityReason) return { deal: null, reason: contentQualityReason };
+  if (!hasStrongDealSignal(offerSignal)) return { deal: null, reason: 'kein starkes Gratis-/Deal-Signal' };
   if (isExplicitlyExpired(offerSignal, dateCandidate.date, now)) return { deal: null, reason: 'explizites/relatives Aktionsdatum ist abgelaufen' };
 
   const type = inferType(offerSignal);

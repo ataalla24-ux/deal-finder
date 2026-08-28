@@ -123,6 +123,40 @@ assert.equal(fallbackUpdated.queuePayload.deals[0].brand, 'WIENXTRA');
 assert.equal(fallbackUpdated.queuePayload.deals[0].validFrom, '2026-09-01');
 assert.match(fallbackCalls[0].payload.text, /Gratis Open-Air-Kino Sunset Cinema im Weghuberpark/);
 
+const pianoUrl = 'https://www.instagram.com/reel/DclUJEBAvfc/';
+const pianoQueueDeal = {
+  id: 'meta-ig-piano',
+  brand: 'Instagram',
+  title: 'Jetzt 10 % Rabatt auf alle gebrauchten Pianos & Flügel sichern!',
+  description: 'Schulstart = Klavierstart! Jetzt 10 % Rabatt auf alle gebrauchten Pianos & Flügel sichern!',
+  type: 'rabatt',
+  category: 'shopping',
+  url: pianoUrl,
+  validFrom: '2026-09-01',
+  validUntil: '2026-10-15',
+  expires: '2026-10-15',
+  distance: 'Wien',
+  location: 'Klavier Galerie | Kaiserstraße 10, 1070 Wien',
+  postalCode: '1070',
+  pubDate: '2026-08-28T12:01:37.000Z',
+  slackTs: '101.200',
+  slackThreadTs: '101.100',
+  order: 1,
+};
+const pianoUpdated = await repairQueuedSlackDeal({
+  action: 'update',
+  url: pianoUrl,
+  channel: 'C123',
+  now: NOW,
+  queuePayload: { deals: [pianoQueueDeal], totalDeals: 1 },
+  sourceDeals: { deals: [pianoQueueDeal] },
+  validate: async (deals) => ({ allowedDeals: deals, blockedDeals: [] }),
+  slackApi: async () => ({ ok: true }),
+});
+assert.equal(pianoUpdated.queuePayload.deals[0].brand, 'Klavier Galerie');
+assert.equal(pianoUpdated.queuePayload.deals[0].category, 'shopping');
+assert.equal(pianoUpdated.queuePayload.deals[0].validUntil, '2026-10-15');
+
 await assert.rejects(
   repairQueuedSlackDeal({
     action: 'update',

@@ -81,6 +81,7 @@ const BRAND_RULES = [
   { key: 'spelunke', name: 'Spelunke', logo: '🍽️', category: 'essen', domain: 'spelunke.at' },
   { key: 'klavier galerie', name: 'Klavier Galerie', logo: '🎹', category: 'shopping' },
   { key: 'klaviergalerie', name: 'Klavier Galerie', logo: '🎹', category: 'shopping' },
+  { key: 'deva', name: 'DEVA', logo: '🛒', category: 'shopping' },
   { key: 'hci kitchen', name: 'HCI Kitchen', logo: '🍳', category: 'essen' },
   { key: 'healthy cooking innovation', name: 'HCI Kitchen', logo: '🍳', category: 'essen' },
   { key: 'whatseat', name: 'WhatsEat', logo: '🍽️', category: 'essen' },
@@ -154,6 +155,7 @@ const SOURCE_LIKE_BRANDS = [
   /^restaurant \(wien\)$/i,
   /^gemeinde$/i,
   /^kirche$/i,
+  /^(?:aktuelle\s+)?angebote?$/i,
   /^attraktive preise warten$/i,
 ];
 
@@ -580,6 +582,8 @@ function inferPreferredBrand(deal = {}) {
     deal.viennaEvidence?.detail,
     deal.evidence?.textSample,
     deal.metaGraphCaption,
+    typeof deal.location === 'string' ? deal.location : deal.location?.name,
+    deal.address,
   ].filter(Boolean).join(' '));
   const ownerUsername = cleanUiNoiseText(deal.ownerUsername || deal.instagramHandle || '');
   const explicitLooksLikePublisher = Boolean(

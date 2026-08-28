@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import { canonicalDealUrl, canonicalSocialPostKey } from '../scraper/deal-evidence-utils.js';
+import { normalizeDealRecord } from '../scraper/deal-normalization-utils.js';
 import { buildSlackMessage } from '../scraper/slack-notify.js';
 import { buildDealFromPost } from '../scraper/tiktok-deals-scanner.js';
 
@@ -211,14 +212,16 @@ export async function repairQueuedSlackDeal(options = {}) {
   if (hasHumanSlackEdit(target)) {
     throw new Error('Queued deal has human Slack edits and will not be overwritten');
   }
-  const sourceDeals = ensureDeals(options.sourceDeals).filter((deal) => exactDealKey(deal) === targetKey);
+  const sourceDeals = ensureDeals(options.sourceDeals)
+    .filter((deal) => exactDealKey(deal) === targetKey)
+    .map((deal) => normalizeDealRecord(deal));
   if (sourceDeals.length === 0) {
     const rebuildSource = options.rebuildSource || rebuildTikTokQueuedSource;
     const rebuilt = await rebuildSource(target, {
       now: options.now instanceof Date ? options.now : new Date(),
       fetchImpl: options.fetchImpl,
     });
-    if (rebuilt) sourceDeals.push(rebuilt);
+    if (rebuilt) sourceDeals.push(normalizeDealRecord(rebuilt));
   }
   if (sourceDeals.length === 0) throw new Error(`No current or reconstructable source deal found for ${targetUrl}`);
   const validate = options.validate || validateDealsForSlack;

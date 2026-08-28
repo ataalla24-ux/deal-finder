@@ -112,7 +112,8 @@ const CATEGORY_HINTS = {
   ],
   shopping: [
     'gutschein', 'rabattcode', 'coupon', 'sale', 'shop', 'shopping', 'amazon',
-    'zalando', 'about you', 'ikea', 'möbel', 'moebel'
+    'zalando', 'about you', 'ikea', 'möbel', 'moebel', 'haushalt', 'reinigung',
+    'küche', 'kueche', 'trinkgläser', 'trinkglaeser', 'auflaufform', 'geschirr'
   ]
 };
 
