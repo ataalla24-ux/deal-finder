@@ -241,6 +241,7 @@ export function buildConfig(env = process.env, now = new Date()) {
       .filter((item) => /^[a-z0-9._]{1,30}$/i.test(item)),
     verifiedAccounts,
     maxAccountsPerRun: numberEnv(env, 'META_INSTAGRAM_MAX_ACCOUNTS_PER_RUN', 20, 1, 100),
+    maxAccountBackfill: numberEnv(env, 'META_INSTAGRAM_MAX_ACCOUNT_BACKFILL', 6, 0, 30),
     maxHashtagsPerRun: numberEnv(env, 'META_INSTAGRAM_MAX_HASHTAGS_PER_RUN', 12, 1, 30),
     mediaPerAccount: numberEnv(env, 'META_INSTAGRAM_MEDIA_PER_ACCOUNT', 6, 1, 30),
     mediaPerHashtag: numberEnv(env, 'META_INSTAGRAM_MEDIA_PER_HASHTAG', 20, 1, 50),
@@ -513,7 +514,7 @@ export function selectHashtagShard(hashtags, config, state = {}) {
       const rightRate = Number(rightStats.recentNewAccepted || 0) / Math.max(1, Number(rightStats.recentFetched || 0));
       return rightRate - leftRate || Number(rightStats.recentNewAccepted || 0) - Number(leftStats.recentNewAccepted || 0);
     });
-  highYield.slice(0, Math.min(4, Math.ceil(limit / 3))).forEach(add);
+  highYield.slice(0, Math.min(8, Math.ceil(limit / 2))).forEach(add);
 
   const rotating = unique.filter((tag) => !seen.has(tag));
   const remaining = limit - selected.length;
@@ -1266,20 +1267,38 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
   const hashtagIds = { ...(state?.hashtagIds || {}) };
   const sourceFailures = pruneSourceFailures(state?.sourceFailures, now);
   const availableAccounts = accountCatalog.filter((account) => !sourceOnCooldown(sourceFailures.accounts[account.username], now));
-  const selectedAccounts = selectAccountShard(availableAccounts, config, state, now);
+  const accountTarget = Math.min(config.maxAccountsPerRun, availableAccounts.length);
+  const initialAccounts = selectAccountShard(availableAccounts, config, state, now);
+  const maxAccountBackfill = Math.max(0, Number(config.maxAccountBackfill || 0));
+  const maxAccountAttempts = Math.min(
+    availableAccounts.length,
+    accountTarget + maxAccountBackfill,
+  );
+  const reserveAccounts = selectAccountShard(
+    availableAccounts,
+    { ...config, maxAccountsPerRun: maxAccountAttempts },
+    state,
+    now,
+  ).filter((account) => !initialAccounts.some((selected) => selected.username === account.username));
+  const accountQueue = [...initialAccounts, ...reserveAccounts];
+  const selectedAccounts = [];
   const availableHashtags = config.hashtags.filter((tag) => !sourceOnCooldown(sourceFailures.hashtags[tag], now));
   const selectedHashtags = selectHashtagShard(availableHashtags, config, state);
   const skippedAccounts = accountCatalog.length - availableAccounts.length;
   const skippedHashtags = config.hashtags.length - availableHashtags.length;
   let taggedAttempted = false;
   let globalError = null;
+  let successfulAccounts = 0;
 
-  for (const account of selectedAccounts) {
+  for (const account of accountQueue) {
+    if (successfulAccounts >= accountTarget || selectedAccounts.length >= maxAccountAttempts) break;
+    selectedAccounts.push(account);
     try {
       const response = await fetchInstagramBusinessDiscoveryMedia(config, account, fetchImpl);
       usage.push(response.usage);
       raw.push(...response.entries);
       clearSourceFailure(sourceFailures, 'accounts', account.username);
+      successfulAccounts += 1;
     } catch (error) {
       const errorRow = { source: `@${account.username}`, status: Number(error?.status || 0), code: error?.code || '', message: safeErrorMessage(error, config) };
       errors.push(errorRow);
@@ -1356,6 +1375,8 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
     usage,
     hashtagIds,
     selectedAccounts,
+    successfulAccounts,
+    backfillAttempts: Math.max(0, selectedAccounts.length - initialAccounts.length),
     selectedHashtags,
     sourceFailures,
     skippedAccounts,
@@ -1580,6 +1601,7 @@ export async function runMetaInstagramCollector(options = {}) {
     selectedHashtags: [],
     discoveryBudget: {
       maxAccountsPerRun: config.maxAccountsPerRun,
+      maxAccountBackfill: config.maxAccountBackfill,
       mediaPerAccount: config.mediaPerAccount,
       hashtagPoolSize: config.hashtags.length,
       maxHashtagsPerRun: config.maxHashtagsPerRun,
@@ -1676,6 +1698,9 @@ export async function runMetaInstagramCollector(options = {}) {
       hashtags: result.skippedHashtags,
     };
     report.sources.instagramGraph.fetched = result.raw.length;
+    report.sources.instagramGraph.accountAttempts = result.selectedAccounts.length;
+    report.sources.instagramGraph.successfulAccounts = result.successfulAccounts;
+    report.sources.instagramGraph.backfillAttempts = result.backfillAttempts;
     report.sources.instagramGraph.errors = result.errors;
     report.sources.instagramGraph.globalError = result.globalError || null;
     const requestedSources = result.selectedAccounts.length

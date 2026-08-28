@@ -1,11 +1,24 @@
 import assert from 'node:assert/strict';
 
 import {
+  buildTikTokApiKeywords,
   buildDealFromPost,
   rescueTikTokMediaCandidates,
 } from '../scraper/tiktok-deals-scanner.js';
 
 const REFERENCE_NOW = new Date('2026-08-26T12:00:00.000Z');
+
+const currentSearchKeywords = buildTikTokApiKeywords(REFERENCE_NOW);
+assert.equal(currentSearchKeywords[0], 'wien gratis 26 august 2026');
+assert.ok(currentSearchKeywords.includes('wien neueröffnung august 2026'));
+assert.ok(currentSearchKeywords.includes('wien gratis september 2026'));
+assert.ok(currentSearchKeywords.includes('vienna deals september 2026'));
+assert.ok(
+  currentSearchKeywords.indexOf('wien gratis august 2026') < currentSearchKeywords.indexOf('wien gratis heute'),
+  'current month/year searches must run before generic queries can consume the candidate budget',
+);
+const decemberSearchKeywords = buildTikTokApiKeywords(new Date('2026-12-20T12:00:00.000Z'));
+assert.ok(decemberSearchKeywords.includes('wien gratis januar 2027'), 'future-offer search rolls over the year');
 
 function containsLoneSurrogate(value) {
   for (let index = 0; index < value.length; index += 1) {

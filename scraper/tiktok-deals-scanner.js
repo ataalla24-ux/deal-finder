@@ -128,7 +128,50 @@ const TIKTOK_SEED_ACCOUNT_KEYWORDS = [
   'dishthedirt vienna free',
 ];
 
-const TIKTOK_API_KEYWORDS = [...new Set([...CORE_TIKTOK_API_KEYWORDS, ...TIKTOK_SEED_ACCOUNT_KEYWORDS])];
+const GERMAN_MONTHS = [
+  'januar', 'februar', 'märz', 'april', 'mai', 'juni',
+  'juli', 'august', 'september', 'oktober', 'november', 'dezember',
+];
+const ENGLISH_MONTHS = [
+  'january', 'february', 'march', 'april', 'may', 'june',
+  'july', 'august', 'september', 'october', 'november', 'december',
+];
+
+export function buildTikTokApiKeywords(now = new Date()) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Vienna',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  }).formatToParts(now).filter((part) => part.type !== 'literal').map((part) => [part.type, Number(part.value)]));
+  const year = parts.year;
+  const monthIndex = parts.month - 1;
+  const day = parts.day;
+  const nextMonthIndex = (monthIndex + 1) % 12;
+  const nextYear = monthIndex === 11 ? year + 1 : year;
+  const currentGermanMonth = GERMAN_MONTHS[monthIndex];
+  const currentEnglishMonth = ENGLISH_MONTHS[monthIndex];
+  const nextGermanMonth = GERMAN_MONTHS[nextMonthIndex];
+  const nextEnglishMonth = ENGLISH_MONTHS[nextMonthIndex];
+  const currentQueries = [
+    `wien gratis ${day} ${currentGermanMonth} ${year}`,
+    `wien deal ${day} ${currentGermanMonth} ${year}`,
+    `wien gratis ${currentGermanMonth} ${year}`,
+    `wien aktion ${currentGermanMonth} ${year}`,
+    `wien rabatt ${currentGermanMonth} ${year}`,
+    `wien 1+1 ${currentGermanMonth} ${year}`,
+    `wien neueröffnung ${currentGermanMonth} ${year}`,
+    `vienna deals ${currentEnglishMonth} ${year}`,
+    `vienna free ${currentEnglishMonth} ${year}`,
+    `wien gratis ${nextGermanMonth} ${nextYear}`,
+    `wien deal ${nextGermanMonth} ${nextYear}`,
+    `vienna deals ${nextEnglishMonth} ${nextYear}`,
+    'wien dieses wochenende gratis',
+  ];
+  return [...new Set([...currentQueries, ...CORE_TIKTOK_API_KEYWORDS, ...TIKTOK_SEED_ACCOUNT_KEYWORDS])];
+}
+
+const TIKTOK_API_KEYWORDS = buildTikTokApiKeywords();
 
 const VIENNA_PATTERNS = [
   /\bwien\b/i,

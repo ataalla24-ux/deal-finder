@@ -397,6 +397,24 @@ assert.equal(hashtagShardA[0], 'wientag11');
 assert.equal(hashtagShardB[0], 'wientag11', 'a productive hashtag stays in the exploitation budget');
 assert.notDeepEqual(hashtagShardA, hashtagShardB, 'the remaining hashtag budget explores a different shard');
 
+const productiveHashtagPool = Array.from({ length: 12 }, (_, index) => `productive${index}`);
+const productiveHashtagState = {
+  hashtagPerformance: Object.fromEntries(productiveHashtagPool.slice(0, 6).map((tag, index) => [tag, {
+    recentFetched: 20,
+    recentNewAccepted: 6 - index,
+  }])),
+};
+const productiveHashtagShard = selectHashtagShard(
+  productiveHashtagPool,
+  { maxHashtagsPerRun: 12, shardIndex: 0 },
+  productiveHashtagState,
+);
+assert.deepEqual(
+  productiveHashtagShard.slice(0, 6),
+  productiveHashtagPool.slice(0, 6),
+  'half of the hashtag budget stays reserved for proven net-new yield',
+);
+
 assert.deepEqual(
   extractMentionedUsernames({ caption: 'Deal bei @Merchant.One mit @second_cafe, nicht @freefinderwien.' }),
   ['merchant.one', 'second_cafe'],
@@ -480,6 +498,69 @@ assert.equal(autoDiscoveryRun.report.sources.instagramGraph.identity.status, 'ok
 assert.equal(autoDiscoveryRun.report.sources.instagramGraph.identity.source, 'facebook-managed-pages');
 assert.equal(autoDiscoveryRun.payload.totalDeals, 1, 'Graph discovery collapses identical offer crossposts before dispatch');
 assert.doesNotMatch(JSON.stringify(autoDiscoveryRun), /auto-discovery-(?:user|page)-token/, 'identity discovery tokens must stay out of reports and output');
+
+const backfillConfig = {
+  ...buildConfig({
+    INSTAGRAM_ACCESS_TOKEN: 'backfill-token',
+    INSTAGRAM_USER_ID: 'ig-backfill-user',
+    META_INSTAGRAM_ACCOUNTS: 'a.broken,b.good',
+    META_INSTAGRAM_HASHTAGS: '',
+    META_INSTAGRAM_MAX_ACCOUNTS_PER_RUN: '1',
+    META_INSTAGRAM_MAX_ACCOUNT_BACKFILL: '1',
+    META_INSTAGRAM_SHARD_INDEX: '0',
+    META_INSTAGRAM_MEDIA_OCR_ENABLED: '0',
+    META_INSTAGRAM_MAX_RETRIES: '0',
+  }, now),
+  hashtags: [],
+  outputPath: path.join(tempDir, 'backfill-output.json'),
+  reportPath: path.join(tempDir, 'backfill-report.json'),
+  statePath: path.join(tempDir, 'backfill-state.json'),
+};
+const backfillRun = await runMetaInstagramCollector({
+  now,
+  config: backfillConfig,
+  paths: {
+    watchlistPath: path.join(tempDir, 'missing-watchlist.json'),
+    registryPath: path.join(tempDir, 'missing-registry.json'),
+    candidatePaths: [],
+  },
+  fetchImpl: async (rawUrl) => {
+    const url = new URL(rawUrl);
+    const fields = url.searchParams.get('fields') || '';
+    if (fields.includes('business_discovery.username(a.broken)')) {
+      return new Response(JSON.stringify({
+        error: { message: 'Invalid user id', code: 110 },
+      }), { status: 400, headers: { 'content-type': 'application/json' } });
+    }
+    if (fields.includes('business_discovery.username(b.good)')) {
+      return new Response(JSON.stringify({
+        business_discovery: {
+          username: 'b.good',
+          name: 'Backfill Cafe',
+          media: {
+            data: [{
+              id: 'backfill-media-1',
+              caption: 'Heute in 1020 Wien: 1+1 Kaffee gratis.',
+              permalink: 'https://www.instagram.com/p/BACKFILLPOST1/',
+              timestamp: '2026-07-17T09:00:00.000Z',
+            }],
+          },
+        },
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`unexpected backfill URL: ${rawUrl}`);
+  },
+  write: false,
+});
+assert.deepEqual(
+  backfillRun.report.selectedAccounts.map((account) => account.username),
+  ['a.broken', 'b.good'],
+  'an invalid account is replaced by the next reserve account in the same run',
+);
+assert.equal(backfillRun.report.sources.instagramGraph.accountAttempts, 2);
+assert.equal(backfillRun.report.sources.instagramGraph.successfulAccounts, 1);
+assert.equal(backfillRun.report.sources.instagramGraph.backfillAttempts, 1);
+assert.equal(backfillRun.payload.totalDeals, 1, 'account backfill recovers the deal that a failed slot would have missed');
 
 const candidatePath = path.join(tempDir, 'candidate-accounts.json');
 fs.writeFileSync(candidatePath, JSON.stringify({
