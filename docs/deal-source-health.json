@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-28T19:22:06.306Z",
+  "generatedAt": "2026-08-28T21:37:32.255Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 472,
-    "uniqueCandidates": 458,
-    "distinctCandidates": 464,
+    "totalCandidates": 474,
+    "uniqueCandidates": 460,
+    "distinctCandidates": 466,
     "duplicateClusters": 6,
     "topHealthySources": [
       {
@@ -12,12 +12,6 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 82,
-        "totalDeals": 3
       },
       {
         "sourceKey": "joe",
@@ -36,15 +30,15 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "healthScore": 75,
         "totalDeals": 2
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 74,
+        "totalDeals": 10
       }
     ],
     "topMissionSources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 80,
-        "totalDeals": 3
-      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -68,6 +62,12 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 70,
         "totalDeals": 3
+      },
+      {
+        "sourceKey": "firecrawl4",
+        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+        "missionFitScore": 65,
+        "totalDeals": 15
       }
     ],
     "topCoverageSources": [
@@ -121,12 +121,6 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 82,
-        "totalDeals": 3
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 79,
@@ -137,6 +131,12 @@
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 73,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 71,
+        "totalDeals": 5
       }
     ],
     "topWeightedSources": [
@@ -145,12 +145,6 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 70,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 68,
-        "totalDeals": 3
       },
       {
         "sourceKey": "gastro2",
@@ -169,6 +163,12 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 62,
         "totalDeals": 3
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 59,
+        "totalDeals": 10
       }
     ],
     "topSourcesToFix": [
@@ -287,91 +287,6 @@
       "coverageScore": 16,
       "precisionScore": 88,
       "sourceWeightScore": 70
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 3,
-      "uniqueDeals": 2,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 3,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 3,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Together with YSL Beauty, expect a few extras along the way: a special photobooth, exclusive goodies and a little luck for some free welcome",
-        "Mittagsteller um 10,80 € von Montag bis Freitag",
-        "Jeden Dienstag: 20 % Rabatt auf alle Pasta-Gerichte"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-28T16:59:28.865Z",
-        "finishedAt": "2026-08-28T17:05:20.195Z",
-        "durationMs": 351330,
-        "counts": {
-          "rawCandidates": 135,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
-          "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 122
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 103,
-          "missing-text": 4,
-          "missing-vienna-evidence": 5,
-          "excluded-promotion-type": 6,
-          "general-recommendation": 4
-        },
-        "errors": [
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-g2z9aO/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-lJ2BCz/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-zH5cAp/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-R9blcs/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-e7VlG5/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-Ecd6Q7/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-1CbUdz/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-SBA1wQ/asset-0-ocr.png stdout -l deu+eng --psm 6"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 89,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 82,
-      "missionFitScore": 80,
-      "coverageScore": 15,
-      "precisionScore": 82,
-      "sourceWeightScore": 68
     },
     {
       "sourceKey": "joe",
@@ -653,6 +568,89 @@
       "coverageScore": 19,
       "precisionScore": 73,
       "sourceWeightScore": 59
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 5,
+      "uniqueDeals": 4,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 5,
+      "fresh7dCount": 5,
+      "viennaCount": 5,
+      "foodDrinkCount": 2,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Vienna trip from 13 to 15 October for €199",
+        "Mittagsteller um 10,80 € von Montag bis Freitag",
+        "Jeden Dienstag: 20 % Rabatt auf alle Pasta-Gerichte"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-28T21:33:36.624Z",
+        "finishedAt": "2026-08-28T21:37:07.391Z",
+        "durationMs": 210767,
+        "counts": {
+          "rawCandidates": 131,
+          "normalizedCandidates": 5,
+          "verifiedCandidates": 5,
+          "previousDeals": 0,
+          "acceptedDeals": 5,
+          "rejectedDeals": 119
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 102,
+          "general-recommendation": 4,
+          "excluded-promotion-type": 6,
+          "missing-text": 4,
+          "missing-vienna-evidence": 3
+        },
+        "errors": [
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-kA3Eq6/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-PFzqeM/asset-0-ocr.png stdout -l deu+eng --psm 6"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.2,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.4,
+      "promoRate": 0.4,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 5
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 74,
+      "missionFitScore": 62,
+      "coverageScore": 14,
+      "precisionScore": 71,
+      "sourceWeightScore": 58
     },
     {
       "sourceKey": "tiktok",
