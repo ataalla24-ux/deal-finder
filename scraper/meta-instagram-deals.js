@@ -99,6 +99,7 @@ const DEFAULT_HASHTAGS = [
 ];
 
 const CONCRETE_FREE_PATTERN = /(?<!gluten[- ])(?<!sugar[- ])(?<!lactose[- ])(?<!dairy[- ])(?<!alcohol[- ])(?<!caffeine[- ])(?<!cruelty[- ])(?<!plastic[- ])(?<!smoke[- ])(?<!tax[- ])(?<!risk[- ])(?<!fat[- ])(?<!nut[- ])(?<!gmo[- ])\bfree\b/i;
+const FREE_ENTRY_PATTERN = /\b(?:free\s+entry|entry\s+(?:is\s+)?free|gratis(?:er)?\s+eintritt|eintritt\s+(?:frei|gratis|kostenlos)|kostenlos(?:er)?\s+eintritt)\b/i;
 
 const PROMO_PATTERNS = [
   /\b1\s*\+\s*1\b/i,
@@ -115,6 +116,7 @@ const PROMO_PATTERNS = [
   /\b(?:für|fuer)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)/i,
   /\b(?:f[üu]r|fuer|um|for)\s+(?:nur\s+|only\s+)?€\s*\d{1,3}(?:[,.]\d{1,2})?/i,
   /\b(?:opening|eröffnung|eroeffnung)\s+(?:offer|deal|aktion|special)\b/i,
+  FREE_ENTRY_PATTERN,
   /\bgratis\b/i,
   /\bkostenlos(?:e|er|es|en)?\b/i,
   CONCRETE_FREE_PATTERN,
@@ -626,6 +628,10 @@ export function classifyPromotion(text) {
 }
 
 function inferCategory(text) {
+  if (FREE_ENTRY_PATTERN.test(text)
+      && /\b(?:event|party|open[- ]?air|festival|concert|konzert|music|musik|show|club)\b/i.test(text)) {
+    return 'kultur';
+  }
   const explicit = CATEGORY_HINTS.find((hint) => hint.pattern.test(text));
   return normalizeCategoryForScraper(explicit?.category || '', [text]) || explicit?.category || 'wien';
 }
@@ -640,6 +646,14 @@ function inferTitle(text, brand, promotion) {
       && /\bkostenlos(?:e|er|es|en)?\s+schnupperkurs(?:e|en)?\b/i.test(text)) {
     const brandSuffix = brand && !/^#|^instagram$/i.test(brand) ? ` bei ${brand}` : '';
     return `Kostenlose Schnupperkurse${brandSuffix}`;
+  }
+  if (promotion.type === 'gratis' && FREE_ENTRY_PATTERN.test(text)) {
+    const venue = text.match(/(?:^|[•|])\s*([\p{L}\p{N}][\p{L}\p{N}.'’& -]{1,70}),\s*(?:Vienna|Wien)\b/iu)?.[1]?.trim();
+    const eventKind = /\bopen[- ]?air\b/i.test(text) ? 'Open-Air-Event' : 'Event';
+    const context = venue
+      ? `: ${venue}`
+      : (brand && !/^#|^instagram$/i.test(brand) ? ` bei ${brand}` : '');
+    return `Gratis-Eintritt zum ${eventKind}${context}`;
   }
   const recurringPriceOffer = text.match(/\b(von\s+(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\s+bis\s+(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)|monday\s+to\s+friday)\b[^.!?]{0,150}?\b(mittagsteller|mittagsmen[üu]|lunch\s+special)\b[^.!?]{0,100}?\b(?:f[üu]r\s+(?:nur\s+)?|for\s+only\s+|um\s+)(?:€\s*)?(\d{1,3}(?:[,.]\d{1,2})?)\s*€?/i);
   if (recurringPriceOffer) {

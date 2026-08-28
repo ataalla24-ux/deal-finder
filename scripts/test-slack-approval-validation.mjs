@@ -39,6 +39,19 @@ assert.equal(parsedRoundTrip.url, 'https://www.tiktok.com/@example/video/7678002
 assert.equal(parsedRoundTrip.postalCode, '1010');
 assert.equal(parsedRoundTrip.sourcePublishedAtSource, 'slack.digest-validated-source-date');
 
+const ambiguousDmyRoundTrip = parseDigestDealMessage({
+  text: buildSlackMessage({
+    ...parsedRoundTrip,
+    id: 'ambiguous-dmy-roundtrip',
+    validFrom: '2026-09-11',
+    validUntil: '2026-09-11',
+  }, 1),
+  ts: '1784550000.200',
+  thread_ts: '1784550000.000',
+});
+assert.match(ambiguousDmyRoundTrip.validFrom, /^2026-09-11/, '11.09 must remain 11 September after Slack parsing');
+assert.match(ambiguousDmyRoundTrip.validUntil, /^2026-09-11/, 'an ambiguous DMY end date must not become November 9');
+
 const legacyMessageWithoutLink = roundTripMessage
   .split('\n')
   .filter((line) => !line.includes('Direktlink:') && !line.startsWith('📝'))

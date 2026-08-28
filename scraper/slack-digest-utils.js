@@ -123,17 +123,25 @@ function parseDisplayDate(value) {
   const text = cleanText(value);
   if (!text || text === 'k.A.') return '';
 
-  const direct = toIsoDate(text);
-  if (direct) return direct;
-
   const dmy = text.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-  if (!dmy) return '';
+  if (dmy) {
+    const yyyy = Number(dmy[3]);
+    const mm = Number(dmy[2]);
+    const dd = Number(dmy[1]);
+    const date = new Date(Date.UTC(yyyy, mm - 1, dd, 12, 0, 0));
+    if (
+      date.getUTCFullYear() !== yyyy
+      || date.getUTCMonth() !== mm - 1
+      || date.getUTCDate() !== dd
+    ) {
+      return '';
+    }
+    return date.toISOString();
+  }
 
-  const yyyy = Number(dmy[3]);
-  const mm = Number(dmy[2]);
-  const dd = Number(dmy[1]);
-  const date = new Date(Date.UTC(yyyy, mm - 1, dd, 12, 0, 0));
-  return Number.isNaN(date.getTime()) ? '' : date.toISOString();
+  // Parse Slack's Austrian display format before JavaScript's locale-dependent
+  // parser, which otherwise reads 11.09.2026 as November 9.
+  return toIsoDate(text);
 }
 
 function normalizeDigestLine(line) {

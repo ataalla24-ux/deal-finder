@@ -212,6 +212,18 @@ assert.equal(graphRestaurantRoth.deal.category, 'essen');
 assert.equal(graphRestaurantRoth.deal.title, 'Mittagsteller um 10,80 € von Montag bis Freitag');
 assert.equal(graphRestaurantRoth.deal.expiryKind, 'recurring');
 
+const graphFreeEntryWithIncidentalDrinks = normalizeGraphMediaItem({
+  id: 'graph-free-entry-afterfive',
+  caption: 'After work, into SOUL. This September, SOUL. takes over Volksgarten Pavillon for a Friday afternoon open air. Together with YSL Beauty, expect a special photobooth, exclusive goodies and a little luck for some free welcome drinks at the wheel. SOUL. Friday September 11 • 5 PM – 12 AM • Volksgarten Pavillon, Vienna • House Music · Open Air • Free Entry* *Online registration',
+  permalink: 'https://www.instagram.com/p/GRAPHAFTERFIVE/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+  name: 'Afterfive',
+}, { sourceType: 'hashtag', sourceName: '#vienna' }, config, now);
+assert.ok(graphFreeEntryWithIncidentalDrinks.deal);
+assert.equal(graphFreeEntryWithIncidentalDrinks.deal.title, 'Gratis-Eintritt zum Open-Air-Event: Volksgarten Pavillon');
+assert.equal(graphFreeEntryWithIncidentalDrinks.deal.category, 'kultur');
+assert.match(graphFreeEntryWithIncidentalDrinks.deal.promotionEvidence, /free entry/i, 'guaranteed entry outranks chance-based free drinks');
+
 const graphEditorialRoundup = normalizeGraphMediaItem({
   id: 'graph-editorial-roundup',
   caption: 'SEPTEMBER IN WIEN: 8 IDEEN - TEIL 2. Viele weitere Events findest du auf meinem Blog (link in bio). MUSICALFEST am 19. September, gratis! VIENNA COFFEE FESTIVAL von 11. bis 13. September. TAG DES SPORTS am 26. September, gratis! VEGANMANIA vom 18. bis 20. September, Eintritt kostenlos. #wienevents #wientipps',
