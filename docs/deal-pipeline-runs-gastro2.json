@@ -2,9 +2,121 @@
   "schemaVersion": 1,
   "sourceKey": "gastro2",
   "sourceLabel": "Firecrawl Key 1 - Gastro",
-  "updatedAt": "2026-08-27T11:00:20.600Z",
-  "runCount": 36,
+  "updatedAt": "2026-08-28T12:38:15.261Z",
+  "runCount": 37,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "gastro2-2026-08-28T12:38:15.261Z",
+      "sourceKey": "gastro2",
+      "sourceLabel": "Firecrawl Key 1 - Gastro",
+      "status": "completed-with-errors",
+      "startedAt": "2026-08-28T12:33:37.300Z",
+      "finishedAt": "2026-08-28T12:38:15.261Z",
+      "durationMs": 277961,
+      "outputFile": "docs/deals-pending-gastro2.json",
+      "counts": {
+        "rawCandidates": 2,
+        "normalizedCandidates": 2,
+        "verifiedCandidates": 2,
+        "previousDeals": 2,
+        "acceptedDeals": 2,
+        "rejectedDeals": 2
+      },
+      "rejectedByReason": {
+        "post-verification-rejected": 2
+      },
+      "rejectedSamples": [
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "g2-8mzuo6",
+            "title": "Die Ferien sind noch nicht vorbei! 🙌🏼 Und wir haben ...",
+            "brand": "Die Ferien sind noch nicht vorbei! 🙌🏼 Und wir haben ...",
+            "url": "https://www.instagram.com/p/DcaVys9grJ_/",
+            "source": "Firecrawl Gastro #2 Search",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "g2-1xhn0ks",
+            "title": "Vienna is in that in-between week: one foot still in summer ...",
+            "brand": "Vienna is in that in-between week: one foot still in summer ...",
+            "url": "https://www.instagram.com/p/DcivuvYEfPx/",
+            "source": "Firecrawl Gastro #2 Search",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "configuredSources": 7,
+        "attemptedSources": 4,
+        "completedSources": 2,
+        "targetsPerRun": 4,
+        "agentTimeoutSeconds": 75,
+        "maxCreditsPerTarget": 250,
+        "totalCreditsUsed": 0,
+        "retainedPreviousDeals": 2,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 0,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/schnäppchenwien/",
+            "status": "completed-agent",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "normalizedCandidates": 0,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.1000things.at/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "normalizedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Firecrawl Agent nach 75s abgebrochen"
+          },
+          {
+            "url": "https://www.meinbezirk.at/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "normalizedCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Firecrawl Agent nach 75s abgebrochen"
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/gratiswien/",
+            "status": "completed-search",
+            "rawCandidates": 2,
+            "searchCandidates": 2,
+            "normalizedCandidates": 2,
+            "creditsUsed": 0
+          }
+        ],
+        "verifier": {
+          "statusCounts": {
+            "verified-meta-graph": 2
+          },
+          "verifiedOriginalPosts": 0,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 0
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "1000things.at: Firecrawl Agent nach 75s abgebrochen",
+        "meinbezirk.at: Firecrawl Agent nach 75s abgebrochen"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "gastro2-2026-08-27T11:00:20.600Z",
