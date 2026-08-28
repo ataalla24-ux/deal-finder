@@ -244,6 +244,21 @@ const incidentalBirthdayMention = build(
 assert.equal(incidentalBirthdayMention.deal, null);
 assert.match(incidentalBirthdayMention.reason, /Deal-Signal/);
 
+const sunsetCinema = build(
+  'https://www.tiktok.com/@frishwienxtra/video/7676417793163644182',
+  postData(
+    'Im September geht unser gratis Cinemagic Open-Air-Kino das SUNSET CINEMA in die letzte Runde. Es warten noch 3 Termine auf euch und das natürlich kostenlos. Alle Termine finden im Weghuberpark statt. #wien',
+    'frishwienxtra',
+    72,
+  ),
+);
+assert.ok(sunsetCinema.deal);
+assert.equal(sunsetCinema.deal.brand, 'WIENXTRA');
+assert.equal(sunsetCinema.deal.title, 'Gratis Open-Air-Kino Sunset Cinema im Weghuberpark');
+assert.equal(sunsetCinema.deal.type, 'gratis');
+assert.equal(sunsetCinema.deal.validFrom, '2026-09-01');
+assert.equal(sunsetCinema.deal.validUntil, '2026-09-30');
+
 const expiredWeekdayBridgedRange = buildDealFromPost(
   'https://www.tiktok.com/@chocoberry/video/7678002441849425183',
   postData(

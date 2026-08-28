@@ -103,6 +103,16 @@ assert.equal(
 assert.equal(classifyPromotion('Schönes neues Sommermenü').accepted, false);
 assert.equal(classifyPromotion('Neue gluten-free Pizza jetzt in Wien').accepted, false);
 assert.equal(classifyPromotion('Gluten-free Pizza: heute 20 % Rabatt in Wien').type, 'rabatt');
+assert.equal(
+  classifyPromotion('Vom 14. bis 25. September gibt es kostenlose Schnupperkurse in 1060 Wien.').type,
+  'gratis',
+  'inflected German free terms remain free offers',
+);
+assert.equal(
+  classifyPromotion('Die Mitgliedschaft bei FOODPOINT ist kostenlos und unverbindlich.').accepted,
+  false,
+  'a free membership without a consumer promotion is not a deal',
+);
 const birthdayEntryPromotion = classifyPromotion(
   'Kostenlose Fotobox und gratis Süßigkeiten. Birthday Special: Du hast Geburtstag? Ihr zahlt jeweils nur €10 Eintritt.',
 );
@@ -165,6 +175,22 @@ assert.equal(graphBirthdayEntrySpecial.deal.brand, 'ASIANNIGHT');
 assert.equal(graphBirthdayEntrySpecial.deal.title, 'Birthday-Special: Eintritt um 10 € bei ASIANNIGHT');
 assert.equal(graphBirthdayEntrySpecial.deal.type, 'rabatt');
 assert.equal(graphBirthdayEntrySpecial.deal.validUntil, '2026-09-11T23:59:59.999Z');
+
+const graphFreeCourses = normalizeGraphMediaItem({
+  id: 'free-courses',
+  name: 'Bezirksvorstehung 6. Bezirk',
+  caption: 'Von 14. bis 25. September gibt es kostenlose Schnupperkurse für Jung und Alt in 1060 Wien.',
+  permalink: 'https://www.instagram.com/p/FREECOURSES/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+  username: 'bezirksvorstehung_mariahilf',
+}, {
+  sourceType: 'account',
+  sourceName: '@bezirksvorstehung_mariahilf',
+  account: { username: 'bezirksvorstehung_mariahilf', verifiedVienna: true },
+}, config, now);
+assert.ok(graphFreeCourses.deal);
+assert.equal(graphFreeCourses.deal.type, 'gratis');
+assert.equal(graphFreeCourses.deal.title, 'Kostenlose Schnupperkurse bei Bezirksvorstehung 6. Bezirk');
 
 const graphMissingTimestamp = normalizeGraphMediaItem({
   id: '17890002',
@@ -436,6 +462,11 @@ const autoDiscoveryRun = await runMetaInstagramCollector({
               caption: 'Heute in 1020 Wien: 1+1 Kaffee gratis.',
               permalink: 'https://www.instagram.com/p/AUTO_DISCOVERY_1/',
               timestamp: '2026-07-17T09:00:00.000Z',
+            }, {
+              id: 'auto-media-2',
+              caption: 'Heute in 1020 Wien: 1+1 Kaffee gratis.',
+              permalink: 'https://www.instagram.com/reel/AUTO_DISCOVERY_2/',
+              timestamp: '2026-07-17T09:01:00.000Z',
             }],
           },
         },
@@ -447,7 +478,7 @@ const autoDiscoveryRun = await runMetaInstagramCollector({
 });
 assert.equal(autoDiscoveryRun.report.sources.instagramGraph.identity.status, 'ok');
 assert.equal(autoDiscoveryRun.report.sources.instagramGraph.identity.source, 'facebook-managed-pages');
-assert.equal(autoDiscoveryRun.payload.totalDeals, 1, 'the existing token can activate Graph discovery without a separately configured user id');
+assert.equal(autoDiscoveryRun.payload.totalDeals, 1, 'Graph discovery collapses identical offer crossposts before dispatch');
 assert.doesNotMatch(JSON.stringify(autoDiscoveryRun), /auto-discovery-(?:user|page)-token/, 'identity discovery tokens must stay out of reports and output');
 
 const candidatePath = path.join(tempDir, 'candidate-accounts.json');

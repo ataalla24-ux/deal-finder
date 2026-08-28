@@ -70,6 +70,8 @@ const BRAND_RULES = [
   { key: 'gigafit', name: 'GigaFit', logo: '💪', category: 'fitness' },
   { key: 'datri boxing', name: 'Datri Boxing', logo: '🥊', category: 'fitness' },
   { key: 'asiannight', name: 'ASIANNIGHT', logo: '🎟️', category: 'kultur' },
+  { key: 'frishwienxtra', name: 'WIENXTRA', logo: '🎬', category: 'kultur' },
+  { key: 'wienxtra', name: 'WIENXTRA', logo: '🎬', category: 'kultur' },
   { key: 'ori fusion', name: 'Ori Fusion Kitchen', logo: '🥢', category: 'essen' },
   { key: 'das lugeck', name: 'Das Lugeck', logo: '🍽️', category: 'essen' },
   { key: 'whatseat', name: 'WhatsEat', logo: '🍽️', category: 'essen' },

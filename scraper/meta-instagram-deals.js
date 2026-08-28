@@ -20,6 +20,7 @@ import {
 import { enrichInstagramGraphMedia } from './instagram-media-evidence.js';
 import {
   extractBirthdayEntryOffer,
+  getMembershipOnlyPromotionReason,
   getNonGuaranteedPromotionReason,
 } from './promotion-quality-utils.js';
 
@@ -575,7 +576,9 @@ export function classifyPromotion(text) {
   if (!normalized) {
     return { accepted: false, type: '', reason: 'missing-text' };
   }
-  if (getNonGuaranteedPromotionReason(normalized) || EXCLUDED_PATTERNS.some((pattern) => pattern.test(normalized))) {
+  if (getNonGuaranteedPromotionReason(normalized)
+      || getMembershipOnlyPromotionReason(normalized)
+      || EXCLUDED_PATTERNS.some((pattern) => pattern.test(normalized))) {
     return { accepted: false, type: '', reason: normalized ? 'excluded-promotion-type' : 'missing-text' };
   }
   if (RECOMMENDATION_LANGUAGE_PATTERN.test(normalized)
@@ -597,7 +600,7 @@ export function classifyPromotion(text) {
 
   const bogoMatch = normalized.match(/\b(?:1\s*\+\s*1|2\s*(?:f(?:ü|u|ue)r|for)\s*1|bogo)\b/i);
   let type = 'rabatt';
-  if (strongMatch && (/\b(?:gratis|kostenlos)\b/i.test(strongMatch[0]) || CONCRETE_FREE_PATTERN.test(strongMatch[0]))) {
+  if (strongMatch && (/\bgratis\b|\bkostenlos(?:e|er|es|en)?\b/i.test(strongMatch[0]) || CONCRETE_FREE_PATTERN.test(strongMatch[0]))) {
     type = 'gratis';
   }
   if (birthdayEntryOffer) type = 'rabatt';
@@ -620,6 +623,11 @@ function inferTitle(text, brand, promotion) {
   if (birthdayEntryOffer && promotion.type === 'rabatt') {
     const brandSuffix = brand && !/^#|^instagram$/i.test(brand) ? ` bei ${brand}` : '';
     return `Birthday-Special: Eintritt um ${birthdayEntryOffer.amount} €${brandSuffix}`;
+  }
+  if (promotion.type === 'gratis'
+      && /\bkostenlos(?:e|er|es|en)?\s+schnupperkurs(?:e|en)?\b/i.test(text)) {
+    const brandSuffix = brand && !/^#|^instagram$/i.test(brand) ? ` bei ${brand}` : '';
+    return `Kostenlose Schnupperkurse${brandSuffix}`;
   }
   const segments = String(text || '')
     .split(/(?:\r?\n+|\|+|(?<=[.!?])\s+)/)
@@ -821,6 +829,10 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
       : '';
   const trustedAiLocation = trustedAiOffer ? cleanText(ai.locationText, 240) : '';
   const trustedAiValidity = trustedAiOffer ? cleanText(ai.validityText, 240) : '';
+  const combinedEvidencePromotion = classifyPromotion([
+    captionProse,
+    ocrText ? `Bildtext: ${ocrText}` : '',
+  ].filter(Boolean).join('\n'));
   // OCR frequently turns decorative text into plausible offer words. A post
   // rejected from its caption may only be rescued after a positive AI verdict;
   // raw OCR alone is not reliable enough for the Slack queue.
@@ -830,6 +842,15 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
     return {
       deal: null,
       rejection: ai ? 'media-ai-rejected-offer' : 'media-ai-required-for-ocr-offer',
+    };
+  }
+  if (!captionPromotion.accepted
+      && !ocrPromotion.accepted
+      && combinedEvidencePromotion.accepted
+      && !trustedAiOffer) {
+    return {
+      deal: null,
+      rejection: ai ? 'media-ai-rejected-offer' : 'media-ai-required-for-combined-offer',
     };
   }
   const promotionText = [captionProse, ocrText ? `Bildtext: ${ocrText}` : '', trustedAiOffer ? `AI-Angebotsbeleg: ${trustedAiOffer}` : '']
@@ -1364,13 +1385,34 @@ function canonicalDealKey(deal) {
   return canonicalInstagramPostKey(deal.url) || deal.id;
 }
 
+function semanticDealKey(deal) {
+  const normalize = (value) => cleanText(value, 600)
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+  const brand = normalize(deal.brand);
+  const title = normalize(deal.title);
+  if (!brand || title.length < 24) return '';
+  const validity = cleanText(deal.validUntil || deal.expires, 80).slice(0, 10);
+  return `${brand}|${normalize(deal.type)}|${title}|${validity}`;
+}
+
 function dedupeDeals(deals) {
-  const byKey = new Map();
+  const byCanonicalKey = new Map();
   for (const deal of deals) {
     const key = canonicalDealKey(deal);
-    byKey.set(key, chooseBetterDeal(byKey.get(key), deal));
+    byCanonicalKey.set(key, chooseBetterDeal(byCanonicalKey.get(key), deal));
   }
-  return [...byKey.values()].sort((a, b) =>
+  const bySemanticKey = new Map();
+  const withoutSemanticKey = [];
+  for (const deal of byCanonicalKey.values()) {
+    const key = semanticDealKey(deal);
+    if (!key) withoutSemanticKey.push(deal);
+    else bySemanticKey.set(key, chooseBetterDeal(bySemanticKey.get(key), deal));
+  }
+  return [...bySemanticKey.values(), ...withoutSemanticKey].sort((a, b) =>
     Number(b.qualityScore || 0) - Number(a.qualityScore || 0) ||
     Date.parse(b.pubDate || '') - Date.parse(a.pubDate || '')
   );

@@ -16,6 +16,7 @@ const FREE_INFRASTRUCTURE_PATTERN = new RegExp(
 );
 const PUBLIC_INFRASTRUCTURE_PATTERN = /\b(?:pissoirs?|urinals?|(?:public|öffentlich\w*)\s+(?:klos?|toiletten?|wcs?|drinking[- ]?water|trinkwasser|wasser(?:brunnen|stationen?))|drinking[- ]?water\s+(?:fountains?|stations?)|water\s+(?:fountains?|stations?)|trinkwasserbrunnen)\b/i;
 const INDEPENDENT_PROMOTION_PATTERN = /(?:\b\d{1,2}\s*%\s*(?:rabatt|discount|off)?\b|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\bbogo\b|\b(?:rabatt|gutschein|coupon|voucher|aktionscode|promo(?:code)?|happy\s*hour|halber\s+preis)\b|\b(?:statt|nur|only|um|für|fuer|for)\s+(?:€\s*)?\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)|\b(?:gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)\s+(?:eintritt|entry|admission|ticket|tickets|kaffee|coffee|essen|food|pizza|burger|kebab|kebap|drink|drinks|cocktail|dessert|menü|menue|styling|haarschnitt|goodie|goodies|probe|training|kurs|fotobox|photobox|süßigkeiten|suessigkeiten|lizenz|lizenzen)\b)/i;
+const FREE_MEMBERSHIP_PATTERN = /(?:\b(?:mitgliedschaft|membership|registrierung|registration)\b.{0,100}\b(?:gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)\b|\b(?:gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)\b.{0,100}\b(?:mitgliedschaft|membership|registrierung|registration)\b)/i;
 const BIRTHDAY_CONTEXT_PATTERN = /\b(?:birthday[-\s]+(?:special|deal|offer)|geburtstag(?:s)?[-\s]+(?:special|deal|angebot|aktion)|du\s+hast\s+geburtstag|wenn\s+du\s+geburtstag\s+hast)\b/i;
 const EURO_AMOUNT_BEFORE_ENTRY_PATTERN = /(?:nur\s+|only\s+|um\s+|für\s+|fuer\s+|jeweils\s+)?(?:€\s*(\d{1,3}(?:[,.]\d{1,2})?)|(\d{1,3}(?:[,.]\d{1,2})?)\s*(?:€|euro\b|eur\b))\s*(?:pro\s+person\s+)?(?:eintritt|entry|admission)\b/i;
 const EURO_AMOUNT_AFTER_ENTRY_PATTERN = /\b(?:eintritt|entry|admission)\b.{0,80}?(?:nur\s+|only\s+|um\s+|für\s+|fuer\s+)?(?:€\s*(\d{1,3}(?:[,.]\d{1,2})?)|(\d{1,3}(?:[,.]\d{1,2})?)\s*(?:€|euro\b|eur\b))/i;
@@ -64,4 +65,11 @@ export function getInfrastructureOnlyPromotionReason(value) {
     || PUBLIC_INFRASTRUCTURE_PATTERN.test(text);
   if (!infrastructureSignal || INDEPENDENT_PROMOTION_PATTERN.test(text)) return '';
   return 'kostenlose Infrastruktur statt Deal';
+}
+
+export function getMembershipOnlyPromotionReason(value) {
+  const text = cleanPromotionText(value);
+  if (!text || !FREE_MEMBERSHIP_PATTERN.test(text)) return '';
+  if (INDEPENDENT_PROMOTION_PATTERN.test(text)) return '';
+  return 'kostenlose Mitgliedschaft/Registrierung statt Deal';
 }

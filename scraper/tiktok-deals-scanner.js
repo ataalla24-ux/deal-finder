@@ -15,6 +15,7 @@ import {
 } from './instagram-media-evidence.js';
 import {
   extractBirthdayEntryOffer,
+  getMembershipOnlyPromotionReason,
   getNonGuaranteedPromotionReason,
 } from './promotion-quality-utils.js';
 
@@ -435,7 +436,7 @@ function getTikTokContentQualityReason(text) {
   const signal = cleanText(text, 2600);
   const nonDealRule = NON_DEAL_CONTENT_RULES.find((rule) => rule.pattern.test(signal));
   if (nonDealRule) return nonDealRule.reason;
-  return getNonGuaranteedPromotionReason(signal);
+  return getNonGuaranteedPromotionReason(signal) || getMembershipOnlyPromotionReason(signal);
 }
 
 function inferType(text) {
@@ -504,6 +505,13 @@ function buildOfferTitle(text, brand, type) {
   const birthdayEntryOffer = extractBirthdayEntryOffer(signal);
   if (birthdayEntryOffer && type === 'rabatt') {
     return `Birthday-Special: Eintritt um ${birthdayEntryOffer.amount} €${brand ? ` bei ${brand}` : ''}`;
+  }
+  if (/\b(?:sunset\s+cinema|cinemagic)\b/i.test(signal)
+      && /\b(?:gratis|kostenlos(?:e|er|es|en)?|free)\b/i.test(signal)
+      && /\bopen[- ]?air[- ]?kino\b/i.test(signal)) {
+    return /\bweghuberpark\b/i.test(signal)
+      ? 'Gratis Open-Air-Kino Sunset Cinema im Weghuberpark'
+      : 'Gratis Open-Air-Kino Sunset Cinema';
   }
   if (/\bdyson\b/i.test(signal) && /\b(?:styling\s+tour|pop[- ]?up|hair\s+styled)\b/i.test(signal) && /\bfree\s+drinks?\b/i.test(signal)) {
     return 'Gratis Haarstyling und Drinks beim Dyson Pop-up';

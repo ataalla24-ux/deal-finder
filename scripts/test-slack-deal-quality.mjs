@@ -1031,6 +1031,31 @@ const discountWithFreeParking = await validateOne({
 });
 assert.equal(discountWithFreeParking.decision.allowed, true);
 
+const freeMembershipOnly = await validateOne({
+  id: 'free-membership-only',
+  brand: 'FOODPOINT',
+  title: 'Mitgliedschaft kostenlos',
+  description: 'Die Mitgliedschaft ist kostenlos und unverbindlich. Folge uns für Lieferungen und Neuigkeiten in 1100 Wien.',
+  url: 'https://example.com/free-membership',
+  source: 'Instagram',
+  distance: '1100 Wien',
+  pubDate: '2026-07-20T08:00:00.000Z',
+});
+assert.equal(freeMembershipOnly.decision.allowed, false);
+assert.match(reasonText(freeMembershipOnly), /Mitgliedschaft/);
+
+const freeMembershipWithDiscount = await validateOne({
+  id: 'free-membership-with-discount',
+  brand: 'Vorteilsclub',
+  title: '20 % Rabatt für Mitglieder',
+  description: 'Die Mitgliedschaft ist kostenlos und bringt 20 % Rabatt auf alle Tickets in 1010 Wien.',
+  url: 'https://example.com/free-membership-discount',
+  source: 'Official',
+  distance: '1010 Wien',
+  pubDate: '2026-07-20T08:00:00.000Z',
+});
+assert.equal(freeMembershipWithDiscount.decision.allowed, true);
+
 const veganMarketing = await validateOne({
   id: 'vegan-marketing',
   brand: 'Vegan Bistro',

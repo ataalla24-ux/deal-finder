@@ -268,6 +268,26 @@ assert.equal(
   'a bare OCR percentage without Rabatt/auf/off is rejected before the AI veto is needed',
 );
 
+const splitEvidenceFalsePositive = normalizeGraphMediaItem({
+  id: 'split-evidence-1',
+  caption: 'We are getting ready for something special this Friday, 28.08, in 1060 Vienna.',
+  permalink: 'https://www.instagram.com/reel/SPLITEVIDENCE1/',
+  timestamp: '2026-08-22T09:00:00.000Z',
+  username: 'creative.vienna',
+  _mediaEvidence: {
+    ocrText: 'FRI 28.8 SUMMER STORY 2% FAMILY',
+    assetCount: 2,
+    imageCount: 1,
+    videoFrameCount: 4,
+  },
+}, {
+  sourceType: 'account',
+  sourceName: '@creative.vienna',
+  account: { username: 'creative.vienna', verifiedVienna: true },
+}, config, now);
+assert.equal(splitEvidenceFalsePositive.deal, null, 'soft caption copy and unrelated OCR numbers cannot combine into a deal');
+assert.equal(splitEvidenceFalsePositive.rejection, 'media-ai-required-for-combined-offer');
+
 const unclassifiedOcrFalsePositive = normalizeGraphMediaItem({
   id: 'unclassified-ocr-1',
   caption: 'Kommt vorbei in 1100 Wien und genießt unsere frisch panierten Schnitzel.',
