@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import { canonicalDealUrl, canonicalSocialPostKey } from '../scraper/deal-evidence-utils.js';
 import { buildSlackMessage } from '../scraper/slack-notify.js';
+import { buildDealFromPost } from '../scraper/tiktok-deals-scanner.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), '..');
@@ -65,6 +66,78 @@ function selectBestSource(deals) {
     presentationQualityScore(right) - presentationQualityScore(left)
     || Date.parse(right.pubDate || right.sourcePublishedAt || '') - Date.parse(left.pubDate || left.sourcePublishedAt || '')
   ))[0] || null;
+}
+
+function decodeHtml(value = '') {
+  return String(value || '')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+function htmlAttribute(tag, name) {
+  const escapedName = String(name).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = String(tag).match(new RegExp(`\\b${escapedName}\\s*=\\s*(["'])([\\s\\S]*?)\\1`, 'i'));
+  return decodeHtml(match?.[2] || '');
+}
+
+function htmlMetaContent(html, keys) {
+  for (const tag of String(html || '').match(/<meta\b[^>]*>/gi) || []) {
+    const key = cleanText(htmlAttribute(tag, 'property') || htmlAttribute(tag, 'name')).toLowerCase();
+    if (!keys.includes(key)) continue;
+    const content = cleanText(htmlAttribute(tag, 'content'));
+    if (content) return content;
+  }
+  return '';
+}
+
+function queuedAtDate(deal, fallbackNow) {
+  const seconds = Number(cleanText(deal?.slackTs).split('.')[0]);
+  if (Number.isFinite(seconds) && seconds > 0) {
+    const date = new Date(seconds * 1000);
+    if (!Number.isNaN(date.getTime())) return date;
+  }
+  return fallbackNow;
+}
+
+export async function rebuildTikTokQueuedSource(target, options = {}) {
+  const url = cleanText(target?.url);
+  const match = url.match(/^https?:\/\/(?:www\.)?tiktok\.com\/@([^/]+)\/video\/\d+/i);
+  if (!match) return null;
+  const fetchImpl = options.fetchImpl || fetch;
+  let title = cleanText(target.title);
+  let description = cleanText(target.description);
+  try {
+    const response = await fetchImpl(url, {
+      headers: {
+        'user-agent': 'Mozilla/5.0 (compatible; FreeFinderSlackRepair/1.0; +https://freefinder.at)',
+        'accept-language': 'de-AT,de;q=0.9,en;q=0.8',
+      },
+    });
+    if (response.ok) {
+      const html = await response.text();
+      title = htmlMetaContent(html, ['og:title', 'twitter:title']) || title;
+      description = htmlMetaContent(html, ['og:description', 'description', 'twitter:description']) || description;
+    }
+  } catch {}
+
+  const sourcePublishedAt = cleanText(target.sourcePublishedAt || target.pubDate);
+  if (!sourcePublishedAt || !description) return null;
+  const actualNow = options.now instanceof Date ? options.now : new Date();
+  const reconstructionNow = queuedAtDate(target, actualNow);
+  const rebuilt = buildDealFromPost(url, {
+    accountHandle: match[1],
+    title,
+    description,
+    bodyText: [description, target.distance, target.city, target.postalCode, 'Wien'].filter(Boolean).join(' '),
+    timeDateTime: sourcePublishedAt,
+    jsonLdUploadDate: '',
+    jsonLdDatePublished: '',
+    createTimes: [],
+  }, { now: reconstructionNow });
+  return rebuilt.deal || null;
 }
 
 function preserveQueueMetadata(current, replacement) {
@@ -139,7 +212,15 @@ export async function repairQueuedSlackDeal(options = {}) {
     throw new Error('Queued deal has human Slack edits and will not be overwritten');
   }
   const sourceDeals = ensureDeals(options.sourceDeals).filter((deal) => exactDealKey(deal) === targetKey);
-  if (sourceDeals.length === 0) throw new Error(`No current source deal found for ${targetUrl}`);
+  if (sourceDeals.length === 0) {
+    const rebuildSource = options.rebuildSource || rebuildTikTokQueuedSource;
+    const rebuilt = await rebuildSource(target, {
+      now: options.now instanceof Date ? options.now : new Date(),
+      fetchImpl: options.fetchImpl,
+    });
+    if (rebuilt) sourceDeals.push(rebuilt);
+  }
+  if (sourceDeals.length === 0) throw new Error(`No current or reconstructable source deal found for ${targetUrl}`);
   const validate = options.validate || validateDealsForSlack;
   const validation = await validate(sourceDeals, {
     now: options.now instanceof Date ? options.now : new Date(),

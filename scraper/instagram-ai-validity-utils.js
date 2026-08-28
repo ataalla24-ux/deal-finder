@@ -45,6 +45,7 @@ const MONTH_PATTERN = Object.keys(MONTHS)
   .join('|');
 const DATE_LINK_PATTERN = '(?:-|bis|to|through|until|und|and|&)';
 const WEEKDAY_PATTERN = '(?:mo(?:ntag)?s?|di(?:enstag)?s?|mi(?:ttwoch)?s?|do(?:nnerstag)?s?|fr(?:eitag)?s?|sa(?:mstag)?s?|so(?:nntag)?s?|mon(?:day)?s?|tue(?:sday)?s?|wed(?:nesday)?s?|thu(?:rsday)?s?|fri(?:day)?s?|sat(?:urday)?s?|sun(?:day)?s?)';
+const EVENT_SIGNAL_PATTERN = '(?:strassenfest|spielefest|sportfest|familienfest|ferienfest|festival|event|veranstaltung|konzert|concert|fest|aktionstag|launch\\s+party|opening|eroeffnung)';
 const RELATIVE_WEEKDAYS = {
   sonntag: 0,
   sunday: 0,
@@ -267,12 +268,11 @@ function parseExplicitSingleDate(text, referenceDate) {
 }
 
 function parseEventSingleDate(text, referenceDate) {
-  const eventSignal = '(?:strassenfest|spielefest|sportfest|familienfest|ferienfest|festival|event|veranstaltung|konzert|concert|fest|aktionstag|opening|eroeffnung)';
   const numericDate = '([0-3]?\\d)[./]([01]?\\d)(?:[./](20\\d{2}))?\\.?';
   const namedDate = `([0-3]?\\d)\\.?\\s+(${MONTH_PATTERN})(?:\\s+(20\\d{2}))?`;
   const numericRegexes = [
-    new RegExp(`\\bam\\s+${numericDate}[^!?]{0,120}\\b${eventSignal}\\b`, 'i'),
-    new RegExp(`\\b${eventSignal}\\b[^!?]{0,120}\\bam\\s+${numericDate}`, 'i'),
+    new RegExp(`\\bam\\s+${numericDate}[^!?]{0,120}\\b${EVENT_SIGNAL_PATTERN}\\b`, 'i'),
+    new RegExp(`\\b${EVENT_SIGNAL_PATTERN}\\b[^!?]{0,120}\\bam\\s+${numericDate}`, 'i'),
   ];
   for (const regex of numericRegexes) {
     const match = text.match(regex);
@@ -285,8 +285,8 @@ function parseEventSingleDate(text, referenceDate) {
   }
 
   const namedRegexes = [
-    new RegExp(`\\bam\\s+${namedDate}[^!?]{0,120}\\b${eventSignal}\\b`, 'i'),
-    new RegExp(`\\b${eventSignal}\\b[^!?]{0,120}\\bam\\s+${namedDate}`, 'i'),
+    new RegExp(`\\bam\\s+${namedDate}[^!?]{0,120}\\b${EVENT_SIGNAL_PATTERN}\\b`, 'i'),
+    new RegExp(`\\b${EVENT_SIGNAL_PATTERN}\\b[^!?]{0,120}\\bam\\s+${namedDate}`, 'i'),
   ];
   for (const regex of namedRegexes) {
     const match = text.match(regex);
@@ -295,6 +295,22 @@ function parseEventSingleDate(text, referenceDate) {
     const year = parseYear(match[3], month, referenceDate);
     const endDate = utcDayEnd(year, month, Number(match[1]));
     if (endDate) return buildWindow('single', endDate, endDate, match[0]);
+  }
+  return null;
+}
+
+function parseStandaloneDatedEvent(text, referenceDate) {
+  const namedDate = `([0-3]?\\d)(?:st|nd|rd|th)?\\.?\\s+(${MONTH_PATTERN})\\s+(20\\d{2})`;
+  const regexes = [
+    new RegExp(`\\b${EVENT_SIGNAL_PATTERN}\\b[^!?]{0,180}\\b${namedDate}\\b`, 'i'),
+    new RegExp(`\\b${namedDate}\\b[^!?]{0,180}\\b${EVENT_SIGNAL_PATTERN}\\b`, 'i'),
+  ];
+  for (const regex of regexes) {
+    const match = text.match(regex);
+    if (!match) continue;
+    const month = MONTHS[match[2]];
+    const eventDate = utcDayEnd(Number(match[3]), month, Number(match[1]));
+    if (eventDate) return buildWindow('single', eventDate, eventDate, match[0]);
   }
   return null;
 }
@@ -391,6 +407,7 @@ export function extractActiveOfferWindow(signal, options = {}) {
     || parseExplicitEnd(text, referenceDate)
     || parseDatedWeekday(text, referenceDate)
     || parseEventSingleDate(text, referenceDate)
+    || parseStandaloneDatedEvent(text, referenceDate)
     || parseExplicitSingleDate(text, referenceDate)
     || parseRelativeWeekday(text, referenceDate)
     || parseOfferMonth(text, referenceDate)

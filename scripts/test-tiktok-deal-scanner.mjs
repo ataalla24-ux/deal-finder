@@ -248,6 +248,54 @@ const directMessageWithoutDmStore = build(
 assert.ok(directMessageWithoutDmStore.deal);
 assert.notEqual(directMessageWithoutDmStore.deal.brand, 'dm', 'direct-message instructions are not dm store evidence');
 
+const rhetoricalAlmostFree = postData(
+  '1150 Wien, Mariahilfer Str. 206 #aktion #angebot #sale',
+  'voolehome',
+);
+rhetoricalAlmostFree._mediaEvidence = {
+  analyzedAt: REFERENCE_NOW.toISOString(),
+  visionImageCount: 1,
+  ai: {
+    isDeal: true,
+    confidence: 0.95,
+    offerText: 'Fast gratis! Nur um 499€.',
+    locationText: 'Mariahilfer Straße 206, 1150 Wien',
+    validityText: 'Bis 29. August 2026',
+    exclusion: 'none',
+  },
+};
+const rhetoricalAlmostFreeResult = build(
+  'https://www.tiktok.com/@voolehome/video/7678760854053063958',
+  rhetoricalAlmostFree,
+);
+assert.equal(rhetoricalAlmostFreeResult.deal, null);
+assert.match(rhetoricalAlmostFreeResult.reason, /rhetorische Gratis-Aussage/);
+
+const sipsyLaunchParty = build(
+  'https://www.tiktok.com/@sipsybar.vie/video/7677874481657859350',
+  postData(
+    'Es ist endlich soweit! SIPSY LAUNCH PARTY mit kostenlosen Mocktails, Bowls & Good Vibes. 30. August 2026, Gastgebgasse 4, 1230 Wien.',
+    'sipsybar.vie',
+    24,
+  ),
+);
+assert.ok(sipsyLaunchParty.deal);
+assert.equal(sipsyLaunchParty.deal.brand, 'SIPSY');
+assert.equal(sipsyLaunchParty.deal.title, 'Gratis Mocktails bei der SIPSY Launch Party');
+assert.equal(sipsyLaunchParty.deal.category, 'kaffee');
+assert.equal(sipsyLaunchParty.deal.validFrom, '2026-08-30');
+assert.equal(sipsyLaunchParty.deal.validUntil, '2026-08-30');
+
+const regularAgeTier = build(
+  'https://www.tiktok.com/@sananabeel_3/video/7677205258715532566',
+  postData(
+    'Pakistani breakfast event in Vienna. Children under 5 years are free, 5-12 years 10€, 12 years onwards 20€.',
+    'sananabeel_3',
+  ),
+);
+assert.equal(regularAgeTier.deal, null);
+assert.match(regularAgeTier.reason, /Altersstaffel/);
+
 const weekdayBridgedRange = build(
   'https://www.tiktok.com/@chocoberry/video/7678002441849425160',
   postData(

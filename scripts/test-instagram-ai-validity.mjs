@@ -149,6 +149,13 @@ const futureFamilyEvent = extractActiveOfferWindow(
 assert.equal(futureFamilyEvent?.kind, 'single');
 assert.equal(futureFamilyEvent?.endDate?.toISOString().slice(0, 10), '2026-08-27');
 
+const launchPartyWithoutConnector = extractActiveOfferWindow(
+  'SIPSY LAUNCH PARTY mit kostenlosen Mocktails. 30. August 2026, Gastgebgasse 4, 1230 Wien.',
+  { pubDate: '2026-08-25T07:54:34.000Z', now: new Date('2026-08-28T10:00:00.000Z') },
+);
+assert.equal(launchPartyWithoutConnector?.kind, 'single');
+assert.equal(launchPartyWithoutConnector?.endDate?.toISOString().slice(0, 10), '2026-08-30');
+
 const liveCaptionReference = new Date('2026-08-25T10:33:21.000Z');
 const relativeSaturdayEvent = extractActiveOfferWindow(
   'THIS SATURDAY! SUMMER SPECIAL, entry ONLY 5 euro. Party time: 21.30-01h in 1060 Vienna.',

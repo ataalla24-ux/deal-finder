@@ -263,6 +263,14 @@ const FALSE_POSITIVE_PATTERNS = [
 
 const NON_DEAL_CONTENT_RULES = [
   {
+    reason: 'rhetorische Gratis-Aussage ohne kostenlosen Deal',
+    pattern: /\b(?:fast|quasi|beinahe|almost|nearly)\s+(?:gratis|kostenlos|free)\b/i,
+  },
+  {
+    reason: 'reguläre Altersstaffel statt Sonderaktion',
+    pattern: /\b(?:children|kids|kinder)\b[^.!?]{0,45}\b(?:under|unter|bis)\s*\d{1,2}\b[^.!?]{0,35}\b(?:free|gratis|kostenlos)\b[^.!?]{0,100}\b\d{1,2}\s*[-–]\s*\d{1,2}\s*(?:years?|jahre?)?\b[^.!?]{0,30}\b\d{1,3}\s*(?:€|eur\b|euro\b)/i,
+  },
+  {
     reason: 'kostenlose Infrastruktur statt Deal',
     pattern: /\b(?:(?:gratis|kostenlos(?:e|er|es|en)?|free)\s+(?:kunden[- ]?)?(?:parkpl[aä]tze?|parking|toiletten?|wcs?|ladestationen?|charging\s+stations?)|(?:parkpl[aä]tze?|parking|toiletten?|wcs?|ladestationen?|charging\s+stations?)\s+(?:gratis|kostenlos|free))\b/i,
   },
@@ -299,7 +307,7 @@ const FOREIGN_LOCATION_HANDLE_PATTERNS = [
 ];
 
 const CATEGORY_RULES = [
-  { category: 'kaffee', logo: '☕', pattern: /\b(kaffee|coffee|cafe|café|matcha|espresso|latte|cappuccino|drink|drinks|getränk|getraenk|bubble tea|boba)\b/i },
+  { category: 'kaffee', logo: '☕', pattern: /\b(kaffee|coffee|cafe|café|matcha|espresso|latte|cappuccino|drink|drinks|getränk|getraenk|mocktail|mocktails|bubble tea|boba)\b/i },
   { category: 'essen', logo: '🍽️', pattern: /\b(essen|food|restaurant|pizza|burger|kebab|kebap|döner|doener|sushi|ramen|brunch|croissant|wrap|falafel|eis|gelato|snack|schokolade|chocolate|erdbeer\w*|strawberr(?:y|ies)|dessert|chocoberry)\b/i },
   { category: 'fitness', logo: '💪', pattern: /\b(fitness|gym|probetraining|workout|yoga|pilates|training)\b/i },
   { category: 'beauty', logo: '💄', pattern: /\b(beauty|kosmetik|make.?up|parfum|goodie bag|haare|friseur|barber)\b/i },
@@ -519,6 +527,7 @@ function extractBrand(text, accountHandle) {
     { pattern: /\bchocoberry\b/i, name: 'Chocoberry' },
     { pattern: /\bcafe\s+milano\b/i, name: 'Cafe Milano' },
     { pattern: /\bdyson(?:\s+dach)?\b/i, name: 'Dyson' },
+    { pattern: /\bsipsy\b/i, name: 'SIPSY' },
     { pattern: /\bsoundcube\b/i, name: 'Soundcube' },
     { pattern: /\bpalace\s+of\s+justice\b/i, name: 'Palace of Justice Vienna' },
     { pattern: /@wukvienna\b|\bwuk\s+vienna\b/i, name: 'WUK Wien' },
@@ -577,6 +586,11 @@ function buildOfferTitle(text, brand, type) {
     return /\bkids?[’']?|\bkinder\b|\bage\s*\(?\s*7\s*[-–]\s*12/i.test(signal)
       ? 'Kostenloser Afro-Dance-Kurs für Kinder im Soundcube'
       : 'Kostenloser Afro-Dance-Kurs im Soundcube';
+  }
+  if (/\bsipsy\b/i.test(signal)
+      && /\blaunch\s+party\b/i.test(signal)
+      && /\b(?:kostenlose\w*|gratis|free)\s+mocktails?\b/i.test(signal)) {
+    return 'Gratis Mocktails bei der SIPSY Launch Party';
   }
   if (/\bcafe\s+milano\b/i.test(signal) && /\bhappy\s+hour\b/i.test(signal) && /\b(?:pool|billard)\b[^.!?]{0,24}\b(?:free|gratis|kostenlos)\b/i.test(signal)) {
     return 'Tägliche Happy Hour und gratis Billard bei Cafe Milano';
