@@ -634,9 +634,20 @@ function loadExistingFeaturedDeal(kind) {
     }
 }
 
+function normalizeFeaturedDeal(deal = {}) {
+    const normalized = normalizeDealRecord(deal);
+    if (!Object.prototype.hasOwnProperty.call(deal, 'logoUrl')) return normalized;
+
+    // An empty live logo is intentional after the cache rejected a broken URL.
+    return {
+        ...normalized,
+        logoUrl: cleanText(deal.logoUrl || ''),
+    };
+}
+
 function syncExistingFeaturedDeal(kind, existing, approvedDeal, eligibility = null) {
     if (!approvedDeal) return false;
-    const normalized = normalizeDealRecord(approvedDeal);
+    const normalized = normalizeFeaturedDeal(approvedDeal);
     const canonicalFields = {
         dealId: normalized.id,
         brand: normalized.brand,
@@ -816,7 +827,7 @@ async function selectAutomaticFeaturedDeal(approvedDeals, options = {}) {
 function saveDealOfTheDay(deal, options = {}) {
     const outputPath = path.join(__dirname, '..', 'docs', 'deal-of-the-day.json');
     const today = getViennaDayKey();
-    const normalized = normalizeDealRecord(deal);
+    const normalized = normalizeFeaturedDeal(deal);
     const manualPick = options.manualPick !== false;
 
   const output = {
@@ -843,7 +854,7 @@ function saveDealOfTheDay(deal, options = {}) {
 function saveDealOfTheWeek(deal, options = {}) {
     const outputPath = path.join(__dirname, '..', 'docs', 'deal-of-the-week.json');
     const week = getViennaWeekKey();
-    const normalized = normalizeDealRecord(deal);
+    const normalized = normalizeFeaturedDeal(deal);
     const manualPick = options.manualPick !== false;
 
     const output = {
@@ -1016,6 +1027,7 @@ export {
     getViennaWeekKey,
     isFeaturedDealStillLive,
     isFoodDrinkDeal,
+    normalizeFeaturedDeal,
     selectAutomaticFeaturedDeal,
 };
 

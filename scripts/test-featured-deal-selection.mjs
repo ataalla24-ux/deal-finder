@@ -3,10 +3,26 @@ import assert from 'node:assert/strict';
 import {
   getFeaturedDealEligibility,
   isFoodDrinkDeal,
+  normalizeFeaturedDeal,
   selectAutomaticFeaturedDeal,
 } from '../scraper/set-daily-deal.js';
 
 const now = new Date('2026-06-29T12:00:00.000Z');
+
+const featuredWithoutCachedLogo = normalizeFeaturedDeal({
+  id: 'chocoberry-live',
+  brand: 'Chocoberry',
+  title: '1+1 bei Chocoberry',
+  type: 'bogo',
+  category: 'essen',
+  url: 'https://www.tiktok.com/@chocoberry.at/video/123',
+  logoUrl: '',
+});
+assert.equal(
+  featuredWithoutCachedLogo.logoUrl,
+  '',
+  'featured snapshots must preserve an intentionally empty live logo after cache rejection',
+);
 
 assert.equal(isFoodDrinkDeal({
   brand: 'Apapika',
