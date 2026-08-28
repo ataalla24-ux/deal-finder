@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import { canonicalDealUrl, canonicalSocialPostKey } from '../scraper/deal-evidence-utils.js';
 import { normalizeDealRecord } from '../scraper/deal-normalization-utils.js';
+import { buildConfig as buildMetaConfig, normalizeGraphMediaItem } from '../scraper/meta-instagram-deals.js';
 import { buildSlackMessage } from '../scraper/slack-notify.js';
 import { buildDealFromPost } from '../scraper/tiktok-deals-scanner.js';
 
@@ -141,6 +142,44 @@ export async function rebuildTikTokQueuedSource(target, options = {}) {
   return rebuilt.deal || null;
 }
 
+export function rebuildInstagramQueuedSource(target, options = {}) {
+  const url = cleanText(target?.url);
+  if (!/^https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|tv)\//i.test(url)) return null;
+  const sourcePublishedAt = cleanText(target.sourcePublishedAt || target.pubDate);
+  if (!sourcePublishedAt) return null;
+
+  const now = options.now instanceof Date ? options.now : new Date();
+  const location = typeof target.location === 'object'
+    ? cleanText([target.location.name, target.location.address, target.location.city, target.location.postalCode].filter(Boolean).join(' '))
+    : cleanText(target.location);
+  const validityText = cleanText(
+    target.expiryDisplayText
+      || (target.validFrom && target.validUntil ? `${target.validFrom} bis ${target.validUntil}` : '')
+      || target.validUntil
+      || target.expiresOriginal
+      || target.expires,
+  );
+  const caption = [
+    target.description,
+    target.title,
+    location || target.distance,
+    validityText ? `Gültigkeit: ${validityText}` : '',
+  ].map(cleanText).filter(Boolean).join(' ');
+  const result = normalizeGraphMediaItem({
+    id: cleanText(target.evidence?.mediaId || target.id),
+    caption,
+    permalink: url,
+    timestamp: sourcePublishedAt,
+    username: cleanText(target.ownerUsername || target.evidence?.username),
+    name: cleanText(target.brand),
+    _mediaEvidence: target.evidence?.mediaEvidence || {},
+  }, {
+    sourceType: cleanText(target.evidence?.sourceType) || 'hashtag',
+    sourceName: cleanText(target.evidence?.sourceName) || '#wien',
+  }, buildMetaConfig({}, now), now);
+  return result.deal || null;
+}
+
 function preserveQueueMetadata(current, replacement) {
   const protectedFields = [
     'slackTs',
@@ -215,6 +254,18 @@ export async function repairQueuedSlackDeal(options = {}) {
   const sourceDeals = ensureDeals(options.sourceDeals)
     .filter((deal) => exactDealKey(deal) === targetKey)
     .map((deal) => normalizeDealRecord(deal));
+  const onlySlackRoundTripSources = sourceDeals.length > 0
+    && sourceDeals.every((deal) => /^slack digest$/i.test(cleanText(deal.source)));
+  if (sourceDeals.length === 0 || onlySlackRoundTripSources) {
+    const rebuiltInstagram = rebuildInstagramQueuedSource(target, {
+      now: options.now instanceof Date ? options.now : new Date(),
+    });
+    if (rebuiltInstagram) {
+      const normalizedRebuild = normalizeDealRecord(rebuiltInstagram);
+      if (onlySlackRoundTripSources) sourceDeals.splice(0, sourceDeals.length, normalizedRebuild);
+      else sourceDeals.push(normalizedRebuild);
+    }
+  }
   if (sourceDeals.length === 0) {
     const rebuildSource = options.rebuildSource || rebuildTikTokQueuedSource;
     const rebuilt = await rebuildSource(target, {

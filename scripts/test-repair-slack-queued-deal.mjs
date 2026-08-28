@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 
 import {
+  rebuildInstagramQueuedSource,
   rebuildTikTokQueuedSource,
   repairQueuedSlackDeal,
 } from './repair-slack-queued-deal.mjs';
@@ -131,6 +132,8 @@ const pianoQueueDeal = {
   description: 'Schulstart = Klavierstart! Jetzt 10 % Rabatt auf alle gebrauchten Pianos & Flügel sichern!',
   type: 'rabatt',
   category: 'shopping',
+  source: 'Slack Digest',
+  originSource: 'Wien Deals Combined Graph',
   url: pianoUrl,
   validFrom: '2026-09-01',
   validUntil: '2026-10-15',
@@ -155,7 +158,28 @@ const pianoUpdated = await repairQueuedSlackDeal({
 });
 assert.equal(pianoUpdated.queuePayload.deals[0].brand, 'Klavier Galerie');
 assert.equal(pianoUpdated.queuePayload.deals[0].category, 'shopping');
-assert.equal(pianoUpdated.queuePayload.deals[0].validUntil, '2026-10-15');
+assert.match(pianoUpdated.queuePayload.deals[0].validUntil, /^2026-10-15/);
+assert.equal(pianoUpdated.queuePayload.deals[0].title, '10 % Rabatt auf alle gebrauchten Pianos & Flügel sichern');
+
+const afterfiveUrl = 'https://www.instagram.com/p/Dcl0wLGAliS/';
+const rebuiltAfterfive = rebuildInstagramQueuedSource({
+  id: 'meta-ig-afterfive',
+  brand: 'Afterfive',
+  title: 'Together with YSL Beauty, expect a few extras and some free welcome drinks',
+  description: 'After work, into SOUL. This September, SOUL. takes over Volksgarten Pavillon for a Friday afternoon open air.',
+  type: 'gratis',
+  category: 'essen',
+  url: afterfiveUrl,
+  sourcePublishedAt: '2026-08-28T16:46:35.000Z',
+  location: '• 5 PM – 12 AM • Volksgarten Pavillon, Vienna • House Music · Open Air • Free Entry* *Online registration',
+  expiryDisplayText: '2026-09-11',
+  evidence: { mediaId: 'meta-ig-afterfive', sourceType: 'hashtag', sourceName: '#vienna' },
+}, { now: new Date('2026-08-28T21:00:00.000Z') });
+assert.ok(rebuiltAfterfive);
+assert.equal(rebuiltAfterfive.title, 'Gratis-Eintritt zum Open-Air-Event: Volksgarten Pavillon');
+assert.equal(rebuiltAfterfive.category, 'kultur');
+assert.equal(rebuiltAfterfive.validFrom, '2026-09-11T00:00:00.000Z');
+assert.equal(rebuiltAfterfive.validUntil, '2026-09-11T23:59:59.999Z');
 
 await assert.rejects(
   repairQueuedSlackDeal({
