@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-28T21:37:32.255Z",
+  "generatedAt": "2026-08-28T21:51:39.851Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 474,
-    "uniqueCandidates": 460,
-    "distinctCandidates": 466,
+    "totalCandidates": 473,
+    "uniqueCandidates": 459,
+    "distinctCandidates": 465,
     "duplicateClusters": 6,
     "topHealthySources": [
       {
@@ -12,6 +12,12 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 78,
+        "totalDeals": 4
       },
       {
         "sourceKey": "joe",
@@ -30,12 +36,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "healthScore": 75,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 74,
-        "totalDeals": 10
       }
     ],
     "topMissionSources": [
@@ -64,10 +64,10 @@
         "totalDeals": 3
       },
       {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "missionFitScore": 65,
-        "totalDeals": 15
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 69,
+        "totalDeals": 4
       }
     ],
     "topCoverageSources": [
@@ -127,16 +127,16 @@
         "totalDeals": 3
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 75,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 73,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 71,
-        "totalDeals": 5
       }
     ],
     "topWeightedSources": [
@@ -159,16 +159,16 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 62,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 62,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 59,
-        "totalDeals": 10
       }
     ],
     "topSourcesToFix": [
@@ -287,6 +287,83 @@
       "coverageScore": 16,
       "precisionScore": 88,
       "sourceWeightScore": 70
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 4,
+      "uniqueDeals": 3,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 4,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 2,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Mittagsteller um 10,80 € von Montag bis Freitag",
+        "Jeden Dienstag: 20 % Rabatt auf alle Pasta-Gerichte",
+        "SLEEPY verschiedene Sorten um 2,99 € statt 4,49 €"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-28T21:46:35.303Z",
+        "finishedAt": "2026-08-28T21:51:12.166Z",
+        "durationMs": 276863,
+        "counts": {
+          "rawCandidates": 131,
+          "normalizedCandidates": 4,
+          "verifiedCandidates": 4,
+          "previousDeals": 0,
+          "acceptedDeals": 4,
+          "rejectedDeals": 120
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 102,
+          "general-recommendation": 4,
+          "excluded-promotion-type": 7,
+          "missing-text": 4,
+          "missing-vienna-evidence": 3
+        },
+        "errors": [
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-163VN2/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-bbZcfY/asset-0-ocr.png stdout -l deu+eng --psm 6"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 83,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "shopping",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 4
+        }
+      ],
+      "issues": [],
+      "healthScore": 78,
+      "missionFitScore": 69,
+      "coverageScore": 14,
+      "precisionScore": 75,
+      "sourceWeightScore": 62
     },
     {
       "sourceKey": "joe",
@@ -568,89 +645,6 @@
       "coverageScore": 19,
       "precisionScore": 73,
       "sourceWeightScore": 59
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 5,
-      "uniqueDeals": 4,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 5,
-      "fresh7dCount": 5,
-      "viennaCount": 5,
-      "foodDrinkCount": 2,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Vienna trip from 13 to 15 October for €199",
-        "Mittagsteller um 10,80 € von Montag bis Freitag",
-        "Jeden Dienstag: 20 % Rabatt auf alle Pasta-Gerichte"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-28T21:33:36.624Z",
-        "finishedAt": "2026-08-28T21:37:07.391Z",
-        "durationMs": 210767,
-        "counts": {
-          "rawCandidates": 131,
-          "normalizedCandidates": 5,
-          "verifiedCandidates": 5,
-          "previousDeals": 0,
-          "acceptedDeals": 5,
-          "rejectedDeals": 119
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 102,
-          "general-recommendation": 4,
-          "excluded-promotion-type": 6,
-          "missing-text": 4,
-          "missing-vienna-evidence": 3
-        },
-        "errors": [
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-kA3Eq6/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-PFzqeM/asset-0-ocr.png stdout -l deu+eng --psm 6"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.4,
-      "promoRate": 0.4,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        },
-        {
-          "value": "shopping",
-          "count": 2
-        },
-        {
-          "value": "reisen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 5
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 74,
-      "missionFitScore": 62,
-      "coverageScore": 14,
-      "precisionScore": 71,
-      "sourceWeightScore": 58
     },
     {
       "sourceKey": "tiktok",
