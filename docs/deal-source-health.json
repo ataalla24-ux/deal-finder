@@ -1,17 +1,23 @@
 {
-  "generatedAt": "2026-08-28T12:02:57.692Z",
+  "generatedAt": "2026-08-28T12:11:45.865Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 327,
-    "uniqueCandidates": 311,
-    "distinctCandidates": 318,
-    "duplicateClusters": 7,
+    "totalCandidates": 331,
+    "uniqueCandidates": 317,
+    "distinctCandidates": 323,
+    "duplicateClusters": 6,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 82,
+        "totalDeals": 5
       },
       {
         "sourceKey": "meta-instagram",
@@ -30,12 +36,6 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "healthScore": 75,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "healthScore": 75,
-        "totalDeals": 2
       }
     ],
     "topMissionSources": [
@@ -52,16 +52,16 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 78,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 70,
         "totalDeals": 3
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 69,
+        "totalDeals": 5
       },
       {
         "sourceKey": "firecrawl4",
@@ -121,16 +121,16 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 80,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 79,
         "totalDeals": 3
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 77,
+        "totalDeals": 5
       },
       {
         "sourceKey": "meta-instagram",
@@ -153,16 +153,16 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 65,
+        "totalDeals": 5
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 63,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 62,
-        "totalDeals": 1
       },
       {
         "sourceKey": "tiktok",
@@ -289,6 +289,89 @@
       "coverageScore": 17,
       "precisionScore": 88,
       "sourceWeightScore": 70
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 5,
+      "uniqueDeals": 5,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 5,
+      "fresh7dCount": 5,
+      "viennaCount": 5,
+      "foodDrinkCount": 3,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Jetzt 10 % Rabatt auf alle gebrauchten Pianos & Flügel sichern!",
+        "Restaurantwoche Special.",
+        "Vienna is reviewing whether to make public toilets free for everyone."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-28T12:07:13.710Z",
+        "finishedAt": "2026-08-28T12:11:22.237Z",
+        "durationMs": 248527,
+        "counts": {
+          "rawCandidates": 139,
+          "normalizedCandidates": 5,
+          "verifiedCandidates": 5,
+          "previousDeals": 0,
+          "acceptedDeals": 5,
+          "rejectedDeals": 122
+        },
+        "rejectedByReason": {
+          "excluded-promotion-type": 6,
+          "no-concrete-offer": 99,
+          "missing-text": 3,
+          "non-vienna-location": 1,
+          "general-recommendation": 10,
+          "missing-vienna-evidence": 3
+        },
+        "errors": [
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-oUG8hv/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-o5HMqv/asset-0-ocr.png stdout -l deu+eng --psm 6",
+          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-WVnDgu/asset-0-ocr.png stdout -l deu+eng --psm 6"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.6,
+      "promoRate": 0.4,
+      "missingUrlRate": 0,
+      "averageQualityScore": 83.2,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        },
+        {
+          "value": "shopping",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 3
+        },
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [],
+      "healthScore": 82,
+      "missionFitScore": 69,
+      "coverageScore": 23,
+      "precisionScore": 77,
+      "sourceWeightScore": 65
     },
     {
       "sourceKey": "meta-instagram",
@@ -575,9 +658,9 @@
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 18,
-      "uniqueDeals": 16,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
+      "uniqueDeals": 17,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
       "fresh1dCount": 1,
       "fresh7dCount": 18,
       "viennaCount": 18,
@@ -645,9 +728,9 @@
       ],
       "healthScore": 70,
       "missionFitScore": 54,
-      "coverageScore": 38,
+      "coverageScore": 39,
       "precisionScore": 70,
-      "sourceWeightScore": 58
+      "sourceWeightScore": 59
     },
     {
       "sourceKey": "firecrawl4",
@@ -723,83 +806,6 @@
       "coverageScore": 28,
       "precisionScore": 62,
       "sourceWeightScore": 57
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🍓🍫 1+1 GRATIS BEI CHOCOBERRY!"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-27T22:32:30.619Z",
-        "finishedAt": "2026-08-27T22:37:24.786Z",
-        "durationMs": 294167,
-        "counts": {
-          "rawCandidates": 140,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 1,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 131
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 114,
-          "excluded-promotion-type": 7,
-          "missing-text": 4,
-          "offer-expired": 1,
-          "general-recommendation": 3,
-          "missing-vienna-evidence": 2
-        },
-        "errors": [
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-qCZw1r/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-5zmEG8/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-To5Wfr/asset-0-ocr.png stdout -l deu+eng --psm 6",
-          "media evidence: Command failed: tesseract /tmp/freefinder-meta-ocr-aaUt6D/asset-0-ocr.png stdout -l deu+eng --psm 6"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 91,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 78,
-      "coverageScore": 16,
-      "precisionScore": 80,
-      "sourceWeightScore": 62
     },
     {
       "sourceKey": "joe",

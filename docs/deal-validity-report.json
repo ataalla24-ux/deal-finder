@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-28T06:17:32.839Z",
+  "generatedAt": "2026-08-28T12:12:35.769Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 197,
-    "allowed": 3,
-    "blocked": 194,
+    "total": 205,
+    "allowed": 9,
+    "blocked": 196,
     "warnings": 2,
     "reasonCounts": {
       "nicht eindeutig in Wien": 29,
@@ -30,7 +30,7 @@
       "älter als 7 Tage (2026-04-30)": 1,
       "älter als 7 Tage (2026-04-20)": 1,
       "abgelaufen (2026-04-24)": 1,
-      "älter als 7 Tage (2026-02-22)": 89,
+      "älter als 7 Tage (2026-02-22)": 87,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-07-16)": 1,
@@ -43,8 +43,9 @@
       "älter als 7 Tage (2023-10-31)": 1,
       "älter als 7 Tage (2019-08-02)": 1,
       "älter als 7 Tage (2023-02-24)": 1,
-      "älter als 7 Tage (2026-04-19)": 32,
+      "älter als 7 Tage (2026-04-19)": 31,
       "älter als 7 Tage (2016-10-30)": 3,
+      "älter als 7 Tage (2023-09-21)": 3,
       "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
@@ -55,18 +56,21 @@
       "Meta-Graph-Widerspruch (non-vienna-location)": 2,
       "abgelaufen (2026-08-22)": 2,
       "älter als 7 Tage (2026-07-01)": 9,
-      "relative Kurz-Aktion abgelaufen (2026-08-27)": 1
+      "relative Kurz-Aktion abgelaufen (2026-08-27)": 1,
+      "ausgeschlossene Quelle (DieRestaurantWoche)": 1,
+      "kostenlose Infrastruktur statt Deal": 1
     },
     "reasonCategoryCounts": {
       "nicht Wien": 29,
       "älter als 7 Tage": 173,
       "abgelaufen": 7,
-      "ausgeschlossene Quelle": 13,
+      "ausgeschlossene Quelle": 14,
       "kein konkreter Deal": 130,
       "kein echtes Post-Datum": 2,
       "ungültige URL": 20,
       "Gottesdienste außerhalb Wochenlauf": 34,
-      "Meta-Graph-Widerspruch": 2
+      "Meta-Graph-Widerspruch": 2,
+      "sonstiges": 1
     },
     "sourceCounts": {
       "Apify Instagram Vienna Food Offers": {
@@ -103,6 +107,13 @@
           "älter als 7 Tage": 11
         }
       },
+      "Flights Vienna": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
+      },
       "Freikirchen Wien": {
         "total": 33,
         "allowed": 0,
@@ -116,8 +127,8 @@
         }
       },
       "Gutscheine.at": {
-        "total": 8,
-        "allowed": 0,
+        "total": 9,
+        "allowed": 1,
         "blocked": 8,
         "warnings": 0,
         "reasonCategoryCounts": {
@@ -166,20 +177,6 @@
           "nicht Wien": 2
         }
       },
-      "Meta Instagram Business Discovery": {
-        "total": 2,
-        "allowed": 2,
-        "blocked": 0,
-        "warnings": 2,
-        "reasonCategoryCounts": {}
-      },
-      "Meta Instagram Hashtag API": {
-        "total": 1,
-        "allowed": 1,
-        "blocked": 0,
-        "warnings": 0,
-        "reasonCategoryCounts": {}
-      },
       "Müller": {
         "total": 1,
         "allowed": 0,
@@ -197,56 +194,163 @@
         "reasonCategoryCounts": {
           "älter als 7 Tage": 9
         }
+      },
+      "tiktok-deals-scanner": {
+        "total": 4,
+        "allowed": 4,
+        "blocked": 0,
+        "warnings": 0,
+        "reasonCategoryCounts": {}
+      },
+      "Wien Deals Combined Graph": {
+        "total": 5,
+        "allowed": 3,
+        "blocked": 2,
+        "warnings": 1,
+        "reasonCategoryCounts": {
+          "ausgeschlossene Quelle": 1,
+          "sonstiges": 1
+        }
       }
     }
   },
   "allowed": [
     {
-      "id": "meta-ig-17933098059368799",
-      "title": "4 Hu Br [> Jeder Elternteil ist auf 1 Kind aes =e et beschrankt, das ein Gericht an u” & > kostenlos erhält.",
-      "brand": "Fuego",
-      "source": "Meta Instagram Business Discovery",
-      "url": "https://www.instagram.com/p/DciuTn4CYSG/",
+      "id": "flight-157p76l",
+      "title": "Hin & zurück nach Manchester ab €45.12",
+      "brand": "Ryanair",
+      "source": "Flights Vienna",
+      "url": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=MAN&dateOut=2026-10-02&dateIn=2026-10-07&isReturn=true&discount=0&promoCode=",
       "reasons": [],
       "warnings": [
-        "startet am 2026-08-30"
+        "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-27T11:52:32.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 1,
-      "expiryDate": "2026-08-30",
-      "expirySource": "url.contentHints.title",
+      "sourceDate": "2026-08-24T07:51:34.769Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 4,
+      "expiryDate": "",
+      "expirySource": "",
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "meta-ig-18099776297358829",
-      "title": "Na das ist doch mal ein super Angebot für die StudentInnen unter euch 🎤🎶✨ reserviert euch gerne euren Raum und lasst euch den Spaß und das",
-      "brand": "Fuego",
-      "source": "Meta Instagram Business Discovery",
-      "url": "https://www.instagram.com/p/Dcit91Cq46c/",
+      "id": "gs-500194",
+      "title": "20% EMP Gutschein für Herbst Must-haves",
+      "brand": "EMP",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/emp",
       "reasons": [],
-      "warnings": [
-        "startet am 2026-09-05T00:00:00.000Z"
-      ],
-      "sourceDate": "2026-08-27T11:49:34.000Z",
-      "sourceDateSource": "url.instagramShortcode",
+      "warnings": [],
+      "sourceDate": "2026-08-27T17:51:21.409Z",
+      "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 1,
-      "expiryDate": "2026-09-05T23:59:59.999Z",
+      "expiryDate": "2026-09-01",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "tiktok-1v7nzgb",
+      "title": "Gratis Haarstyling beim Dyson Pop-up",
+      "brand": "Dyson",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@johannasteachervibes/video/7678693667174878486",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-27T12:53:08.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 1,
+      "expiryDate": "2026-08-29",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "meta-ig-18007832435952568",
-      "title": "Juli 2026, 15:00 - 17:00 Uhr Komplett kostenlos & ohne Anmeldung!",
-      "brand": "Instagram",
-      "source": "Meta Instagram Hashtag API",
-      "url": "https://www.instagram.com/p/DcjFgEqlAaW/",
+      "id": "tiktok-z6gxfp",
+      "title": "1150 Wien, Mariahilfer Str",
+      "brand": "@voolehome",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@voolehome/video/7678760854053063958",
       "reasons": [],
       "warnings": [],
-      "sourceDate": "2026-08-27T15:15:13.000Z",
-      "sourceDateSource": "url.instagramShortcode",
+      "sourceDate": "2026-08-27T17:13:52.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
       "sourceAgeDays": 1,
-      "expiryDate": "2026-08-31T06:05:54.310Z",
+      "expiryDate": "2026-08-29",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "tiktok-19gwfjw",
+      "title": "Es ist endlich soweit",
+      "brand": "SIPSY",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@sipsybar.vie/video/7677874481657859350",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-25T07:54:17.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 3,
+      "expiryDate": "2026-08-30",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "tiktok-14kcdyw",
+      "title": "Mark your calendar 🗓️ 30th August 2026 Sunday",
+      "brand": "@sananabeel_3",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@sananabeel_3/video/7677205258715532566",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-23T12:37:21.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 5,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-17991707859043575",
+      "title": "Jetzt 10 % Rabatt auf alle gebrauchten Pianos & Flügel sichern!",
+      "brand": "Instagram",
+      "source": "Wien Deals Combined Graph",
+      "url": "https://www.instagram.com/reel/DclUJEBAvfc/",
+      "reasons": [],
+      "warnings": [
+        "startet am 2026-09-01"
+      ],
+      "sourceDate": "2026-08-28T12:01:37.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-15",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18114355892290492",
+      "title": "Come experience it for yourself, book with us for FREE!",
+      "brand": "Instagram",
+      "source": "Wien Deals Combined Graph",
+      "url": "https://www.instagram.com/reel/Dck8d6uOXpT/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-28T08:34:45.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-08-31T12:07:13.711Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-17984729043107506",
+      "title": "Und weil ihr uns besonders am Herzen liegt: Jeden Dienstag gibt’s 20 % Rabatt auf alle Pasta-Gerichte!🍝 📍Restaurant Bierraum 1170.",
+      "brand": "Instagram",
+      "source": "Wien Deals Combined Graph",
+      "url": "https://www.instagram.com/reel/DclQ8qGpc1R/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-28T11:33:43.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-08-31T12:07:13.711Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     }
@@ -324,9 +428,9 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-27T23:54:56.821Z",
+      "sourceDate": "2026-08-28T10:20:33.463Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -343,9 +447,9 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-27T23:54:56.821Z",
+      "sourceDate": "2026-08-28T10:20:33.463Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -362,9 +466,9 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-27T23:54:56.821Z",
+      "sourceDate": "2026-08-28T10:20:33.463Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -400,9 +504,9 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-27T23:54:56.821Z",
+      "sourceDate": "2026-08-28T10:20:33.463Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -419,9 +523,9 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-27T23:54:56.821Z",
+      "sourceDate": "2026-08-28T10:20:33.463Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1889,15 +1993,13 @@
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 131,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "freikirche-10-20260419",
@@ -2013,17 +2115,15 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-04-19)"
+        "älter als 7 Tage (2023-09-21)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-04-19T08:59:47.145Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 131,
+      "warnings": [],
+      "sourceDate": "2023-09-21T15:18:49.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 1072,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "freikirche-16-20260419",
@@ -2583,17 +2683,15 @@
       "url": "https://www.mennoniten.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2023-09-21)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-02-22T21:12:35.964Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 187,
+      "warnings": [],
+      "sourceDate": "2023-09-21T15:18:49.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 1072,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gemeinde-12-20260222",
@@ -2720,15 +2818,13 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 187,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gemeinde-19-20260222",
@@ -3400,17 +3496,15 @@
       "url": "https://www.mennoniten.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2023-09-21)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-02-22T21:12:35.964Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 187,
+      "warnings": [],
+      "sourceDate": "2023-09-21T15:18:49.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 1072,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gottesdienste-20-20260222",
@@ -3593,15 +3687,13 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 187,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gs-500311",
@@ -4021,6 +4113,42 @@
       "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-17912872149261421",
+      "title": "Restaurantwoche Special.",
+      "brand": "Instagram",
+      "source": "Wien Deals Combined Graph",
+      "url": "https://www.instagram.com/p/DckuYZtDmlw/",
+      "reasons": [
+        "ausgeschlossene Quelle (DieRestaurantWoche)"
+      ],
+      "warnings": [
+        "startet am 2026-08-31"
+      ],
+      "sourceDate": "2026-08-28T06:31:40.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-09-05",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18132091483640371",
+      "title": "Vienna is reviewing whether to make public toilets free for everyone.",
+      "brand": "Instagram",
+      "source": "Wien Deals Combined Graph",
+      "url": "https://www.instagram.com/p/DclS79ZiMtR/",
+      "reasons": [
+        "kostenlose Infrastruktur statt Deal"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-08-28T11:51:06.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-08-31T12:07:13.711Z",
+      "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     }
   ]
