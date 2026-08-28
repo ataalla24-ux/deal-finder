@@ -2,9 +2,82 @@
   "schemaVersion": 1,
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
-  "updatedAt": "2026-08-27T12:39:13.150Z",
-  "runCount": 34,
+  "updatedAt": "2026-08-28T14:16:26.005Z",
+  "runCount": 35,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "food3-2026-08-28T14:16:26.005Z",
+      "sourceKey": "food3",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "status": "completed-with-errors",
+      "startedAt": "2026-08-28T14:10:25.950Z",
+      "finishedAt": "2026-08-28T14:16:26.005Z",
+      "durationMs": 360055,
+      "outputFile": "docs/deals-pending-food3.json",
+      "counts": {
+        "rawCandidates": 0,
+        "normalizedCandidates": 0,
+        "verifiedCandidates": 3,
+        "previousDeals": 3,
+        "acceptedDeals": 3,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "agentStatus": "completed-with-errors",
+        "creditsUsed": 0,
+        "configuredSources": 6,
+        "attemptedSources": 3,
+        "completedSources": 2,
+        "targetsPerRun": 3,
+        "agentTimeoutSeconds": 120,
+        "maxCreditsPerTarget": 300,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/happyhourwien/",
+            "status": "completed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/lunchdealwien/",
+            "status": "completed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "searchError": "timeout of 35000ms exceeded"
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/neueröffnungwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "searchError": "Rate limit exceeded. Consumed (req/min): 15, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 31s, resets at Fri Aug 28 2026 14:14:54 GMT+0000 (Coordinated Universal Time)",
+            "error": "Firecrawl Agent nach 120s abgebrochen"
+          }
+        ],
+        "retainedPreviousDeals": 3,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 0,
+        "verifier": {
+          "statusCounts": {
+            "verified-meta-graph": 3
+          },
+          "verifiedOriginalPosts": 0,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 0
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "https://www.instagram.com/explore/tags/neueröffnungwien/: Firecrawl Agent nach 120s abgebrochen"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "food3-2026-08-27T12:39:13.150Z",
