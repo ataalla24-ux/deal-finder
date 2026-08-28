@@ -3,7 +3,10 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { normalizeDealRecord } from '../scraper/deal-normalization-utils.js';
+import {
+  inferPreferredBrand,
+  normalizeDealRecord,
+} from '../scraper/deal-normalization-utils.js';
 import { repairCachedLogoReference } from './cache-deal-logos.mjs';
 
 const logoTestDir = await fs.mkdtemp(path.join(os.tmpdir(), 'deal-logo-cache-'));
@@ -27,6 +30,25 @@ const unsafeCachedLogo = await repairCachedLogoReference({
 assert.equal(unsafeCachedLogo.invalid, true);
 assert.equal(unsafeCachedLogo.deal.logoUrl, '');
 await fs.rm(logoTestDir, { recursive: true, force: true });
+
+assert.equal(
+  inferPreferredBrand({
+    brand: 'Instagram',
+    description: 'Unser abwechslungsreiches FoodMoments Lunch Special in 1090 Wien.',
+    url: 'https://www.instagram.com/p/FOODMOMENTS/',
+  }),
+  'Instagram',
+  'the letters dm inside FoodMoments must not identify the dm drugstore',
+);
+assert.equal(
+  inferPreferredBrand({
+    brand: 'Instagram',
+    description: 'Bei dm in 1090 Wien gibt es heute 20 % Rabatt.',
+    url: 'https://www.instagram.com/p/DMDEAL/',
+  }),
+  'dm',
+  'an explicit standalone dm mention must still identify the retailer',
+);
 
 function expectNormalizedLogo(name, rawDeal, expected) {
   const normalized = normalizeDealRecord(rawDeal);

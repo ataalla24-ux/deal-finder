@@ -24,6 +24,7 @@ import {
 import { enrichInstagramGraphMedia } from './instagram-media-evidence.js';
 import {
   extractBirthdayEntryOffer,
+  getEditorialRoundupPromotionReason,
   getInfrastructureOnlyPromotionReason,
   getLeadGenerationOnlyPromotionReason,
   getMembershipOnlyPromotionReason,
@@ -112,6 +113,7 @@ const PROMO_PATTERNS = [
   /\bhappy\s*hour\b/i,
   /\b(?:nur|only|um|for)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)/i,
   /\b(?:für|fuer)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)/i,
+  /\b(?:f[üu]r|fuer|um|for)\s+(?:nur\s+|only\s+)?€\s*\d{1,3}(?:[,.]\d{1,2})?/i,
   /\b(?:opening|eröffnung|eroeffnung)\s+(?:offer|deal|aktion|special)\b/i,
   /\bgratis\b/i,
   /\bkostenlos(?:e|er|es|en)?\b/i,
@@ -584,6 +586,7 @@ export function classifyPromotion(text) {
     return { accepted: false, type: '', reason: 'missing-text' };
   }
   if (getNonGuaranteedPromotionReason(normalized)
+      || getEditorialRoundupPromotionReason(normalized)
       || getInfrastructureOnlyPromotionReason(normalized)
       || getMembershipOnlyPromotionReason(normalized)
       || getLeadGenerationOnlyPromotionReason(normalized)
@@ -637,6 +640,14 @@ function inferTitle(text, brand, promotion) {
       && /\bkostenlos(?:e|er|es|en)?\s+schnupperkurs(?:e|en)?\b/i.test(text)) {
     const brandSuffix = brand && !/^#|^instagram$/i.test(brand) ? ` bei ${brand}` : '';
     return `Kostenlose Schnupperkurse${brandSuffix}`;
+  }
+  const recurringPriceOffer = text.match(/\b(von\s+(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\s+bis\s+(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)|monday\s+to\s+friday)\b[^.!?]{0,150}?\b(mittagsteller|mittagsmen[üu]|lunch\s+special)\b[^.!?]{0,100}?\b(?:f[üu]r\s+(?:nur\s+)?|for\s+only\s+|um\s+)(?:€\s*)?(\d{1,3}(?:[,.]\d{1,2})?)\s*€?/i);
+  if (recurringPriceOffer) {
+    const schedule = /^monday/i.test(recurringPriceOffer[1])
+      ? 'von Montag bis Freitag'
+      : recurringPriceOffer[1].replace(/^Von\b/i, 'von');
+    const offer = /mittagsteller/i.test(recurringPriceOffer[2]) ? 'Mittagsteller' : 'Mittagsmenü';
+    return `${offer} um ${recurringPriceOffer[3].replace('.', ',')} € ${schedule}`;
   }
   const recurringPercent = text.match(/\b(jeden\s+(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag))\b[^.!?]{0,70}?\b(\d{1,2}\s*%\s*(?:rabatt(?:code)?\s*)?(?:auf\s+)?[^.!?📍#]{2,70})/i);
   if (recurringPercent) {

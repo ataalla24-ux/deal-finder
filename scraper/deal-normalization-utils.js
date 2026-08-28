@@ -74,6 +74,8 @@ const BRAND_RULES = [
   { key: 'wienxtra', name: 'WIENXTRA', logo: '🎬', category: 'kultur' },
   { key: 'ori fusion', name: 'Ori Fusion Kitchen', logo: '🥢', category: 'essen' },
   { key: 'das lugeck', name: 'Das Lugeck', logo: '🍽️', category: 'essen' },
+  { key: 'restaurant roth', name: 'Restaurant ROTH', logo: '🍽️', category: 'essen' },
+  { key: 'restaurantroth', name: 'Restaurant ROTH', logo: '🍽️', category: 'essen' },
   { key: 'restaurant bierraum', name: 'Restaurant Bierraum', logo: '🍝', category: 'essen' },
   { key: 'bierraum', name: 'Restaurant Bierraum', logo: '🍝', category: 'essen' },
   { key: 'spelunke', name: 'Spelunke', logo: '🍽️', category: 'essen', domain: 'spelunke.at' },
@@ -309,7 +311,12 @@ function findBrandRule(signal) {
     : BRAND_RULES;
   return eligibleRules.find((rule) => escapedWordMatch(rule.key).test(normalized))
     // "sparen", "spare" and "Intersport" are not evidence for the SPAR brand.
-    || eligibleRules.find((rule) => rule.key !== 'spar' && normalized.includes(rule.key));
+    // Very short names such as "dm" must not match inside unrelated hashtags
+    // such as #FoodMoments.
+    || eligibleRules.find((rule) => {
+      const compactKey = normalizeAscii(rule.key).replace(/[^a-z0-9]+/g, '');
+      return rule.key !== 'spar' && compactKey.length >= 4 && normalized.includes(rule.key);
+    });
 }
 
 function extractHostFromUrl(url) {

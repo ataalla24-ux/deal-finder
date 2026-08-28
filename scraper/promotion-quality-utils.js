@@ -18,6 +18,7 @@ const PUBLIC_INFRASTRUCTURE_PATTERN = /\b(?:pissoirs?|urinals?|(?:public|öffent
 const INDEPENDENT_PROMOTION_PATTERN = /(?:\b\d{1,2}\s*%\s*(?:rabatt|discount|off)?\b|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\bbogo\b|\b(?:rabatt|gutschein|coupon|voucher|aktionscode|promo(?:code)?|happy\s*hour|halber\s+preis)\b|\b(?:statt|nur|only|um|für|fuer|for)\s+(?:€\s*)?\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)|\b(?:gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)(?:\s+[A-Za-zÄÖÜäöüß'’-]+){0,2}\s+(?:eintritt|entry|admission|ticket|tickets|kaffee|coffee|essen|food|pizza|burger|kebab|kebap|drink|drinks|cocktail|dessert|menü|menue|styling|haarschnitt|goodie|goodies|probe|training|kurs|class|workshop|tasting|verkostung|fotobox|photobox|süßigkeiten|suessigkeiten|lizenz|lizenzen)\b)/i;
 const FREE_MEMBERSHIP_PATTERN = /(?:\b(?:mitgliedschaft|membership|registrierung|registration)\b.{0,100}\b(?:gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)\b|\b(?:gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)\b.{0,100}\b(?:mitgliedschaft|membership|registrierung|registration)\b)/i;
 const FREE_LEAD_ACTION_PATTERN = /(?:\b(?:book(?:ing|ed)?|reserv(?:e|ation|ierung|ieren)?|register|registration|contact|message|call|schedule|anfrag(?:e|en)?|buch(?:e|en|ung)?|kontakt(?:ier(?:e|en)?)?|meld(?:e|en)?)\b.{0,60}\b(?:for\s+free|gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)\b|\b(?:for\s+free|gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)\b.{0,60}\b(?:booking|reservation|registration|consultation|advice|quote|assessment|appointment|termin|beratung|kostenvoranschlag|buchung|reservierung|anmeldung)\b)/i;
+const EDITORIAL_ROUNDUP_PATTERN = /(?:\b\d{1,2}\s+(?:ideen|events?|eventtipps?|tipps?|things\s+to\s+do)\b|\b(?:weitere|mehr)\s+(?:events?|ideen|tipps?)\b.{0,100}\b(?:blog|link\s+in\s+bio)\b|\b(?:ideen|events?|eventtipps?|tipps?)\b.{0,80}\b(?:teil|part)\s*\d+\b|\b(?:teil|part)\s*\d+\b.{0,80}\b(?:ideen|events?|eventtipps?|tipps?)\b)/i;
 const BIRTHDAY_CONTEXT_PATTERN = /\b(?:birthday[-\s]+(?:special|deal|offer)|geburtstag(?:s)?[-\s]+(?:special|deal|angebot|aktion)|du\s+hast\s+geburtstag|wenn\s+du\s+geburtstag\s+hast)\b/i;
 const EURO_AMOUNT_BEFORE_ENTRY_PATTERN = /(?:nur\s+|only\s+|um\s+|für\s+|fuer\s+|jeweils\s+)?(?:€\s*(\d{1,3}(?:[,.]\d{1,2})?)|(\d{1,3}(?:[,.]\d{1,2})?)\s*(?:€|euro\b|eur\b))\s*(?:pro\s+person\s+)?(?:eintritt|entry|admission)\b/i;
 const EURO_AMOUNT_AFTER_ENTRY_PATTERN = /\b(?:eintritt|entry|admission)\b.{0,80}?(?:nur\s+|only\s+|um\s+|für\s+|fuer\s+)?(?:€\s*(\d{1,3}(?:[,.]\d{1,2})?)|(\d{1,3}(?:[,.]\d{1,2})?)\s*(?:€|euro\b|eur\b))/i;
@@ -80,4 +81,10 @@ export function getLeadGenerationOnlyPromotionReason(value) {
   if (!text || !FREE_LEAD_ACTION_PATTERN.test(text)) return '';
   if (INDEPENDENT_PROMOTION_PATTERN.test(text)) return '';
   return 'kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung';
+}
+
+export function getEditorialRoundupPromotionReason(value) {
+  const text = cleanPromotionText(value);
+  if (!text || !EDITORIAL_ROUNDUP_PATTERN.test(text)) return '';
+  return 'redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot';
 }

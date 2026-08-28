@@ -138,6 +138,16 @@ const freeBookingOnly = normalizeApifyItem({
 assert.equal(freeBookingOnly.deal, null);
 assert.equal(freeBookingOnly.rejectReason, 'freeLeadGenerationOnly');
 
+const editorialRoundup = normalizeApifyItem({
+  ...currentItem,
+  postUrl: 'https://www.instagram.com/reel/EditorialRoundup/',
+  venueName: 'Wien Tipps',
+  description: 'September in Wien: 8 Ideen - Teil 2. Viele weitere Events findest du auf meinem Blog. Musicalfest gratis. Tag des Sports gratis.',
+  caption: 'September in Wien: 8 Ideen - Teil 2. Viele weitere Events findest du auf meinem Blog. Musicalfest gratis. Tag des Sports gratis.',
+}, { now, maxPostAgeDays: 7 });
+assert.equal(editorialRoundup.deal, null);
+assert.equal(editorialRoundup.rejectReason, 'editorialRoundup');
+
 const trustedAccount = normalizeApifyItem({
   ...currentItem,
   description: 'Heute ein Kaffee gratis',

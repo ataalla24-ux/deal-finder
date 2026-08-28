@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import {
+  getEditorialRoundupPromotionReason,
   getInfrastructureOnlyPromotionReason,
   getLeadGenerationOnlyPromotionReason,
   getMembershipOnlyPromotionReason,
@@ -433,6 +434,11 @@ function apifyItemRejectReason(item, timestamp, now, maxPostAgeDays, maxAgeWitho
     item.description,
   ].map(stripInstagramMetaDescriptionPrefix).join(' '));
   if (membershipReason) return 'freeMembershipOnly';
+  const editorialRoundupReason = getEditorialRoundupPromotionReason([
+    item.caption,
+    item.description,
+  ].map(stripInstagramMetaDescriptionPrefix).join(' '));
+  if (editorialRoundupReason) return 'editorialRoundup';
   const leadGenerationReason = getLeadGenerationOnlyPromotionReason([
     item.caption,
     item.description,

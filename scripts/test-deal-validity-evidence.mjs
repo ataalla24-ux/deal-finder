@@ -127,6 +127,17 @@ const bookableFreeClass = await validate({
 });
 assert.equal(bookableFreeClass.decision.allowed, true);
 
+const editorialRoundup = await validate({
+  ...baseSocialDeal,
+  brand: 'Wien Tipps',
+  title: 'September in Wien: 8 Ideen - Teil 2',
+  description: 'Viele weitere Events findest du auf meinem Blog. Musicalfest am 19. September gratis. Vienna Coffee Festival von 11. bis 13. September. Tag des Sports am 26. September gratis.',
+  sourcePublishedAt: '2026-07-16T11:00:00.000Z',
+  sourcePublishedAtSource: 'instagram-graph-timestamp',
+});
+assert.equal(editorialRoundup.decision.allowed, false);
+assert.match(editorialRoundup.decision.reasons.join(' '), /Mehrfach-Roundup/);
+
 const hardSocialAgeClamp = await validate({
   ...baseSocialDeal,
   title: 'Zweiter Kaffee gratis in Wien',

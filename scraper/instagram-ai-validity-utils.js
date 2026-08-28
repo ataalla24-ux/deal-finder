@@ -431,7 +431,7 @@ export function hasRecurringOfferSchedule(signal) {
     `(?:\\b${WEEKDAY_PATTERN}\\s*(?:-|bis|to|through)\\s*${WEEKDAY_PATTERN}\\b|\\b(?:jeden|jede|jeder|every)\\s+${WEEKDAY_PATTERN}\\b|\\b(?:wochentags|werktags|weekdays|taeglich|daily|regelmaessig|weekly|woechentlich|monatlich)\\b|\\b(?:bis\\s+auf\\s+weiteres|until\\s+further\\s+notice|ongoing)\\b)`,
     'i'
   );
-  const offerPattern = /(?:\b(?:gratis|kostenlos|kostenfrei|umsonst|free|rabatt|deal|aktion|angebot|special|happy hour|bogo)\b|\b1\s*[+&]\s*1\b|\b\d+\s*%|\bstatt\s+(?:€\s*)?\d)/i;
+  const offerPattern = /(?:\b(?:gratis|kostenlos|kostenfrei|umsonst|free|rabatt|deal|aktion|angebot|special|happy hour|bogo)\b|\b1\s*[+&]\s*1\b|\b\d+\s*%|\bstatt\s+(?:€\s*)?\d|\b(?:nur|only|fuer\s+nur|for\s+only|um)\s*(?:€\s*)?\d{1,3}(?:[,.]\d{1,2})?)/i;
   return text
     .split(/[.!?;\n]+/)
     .some((segment) => schedulePattern.test(segment) && offerPattern.test(segment));

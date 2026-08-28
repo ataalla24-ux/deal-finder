@@ -133,6 +133,16 @@ const freeBookingOnly = build(
 assert.equal(freeBookingOnly.deal, null);
 assert.match(freeBookingOnly.reason, /kostenlose Buchung\/Kontaktaufnahme/);
 
+const editorialRoundup = build(
+  'https://www.tiktok.com/@wientipps/video/7678002441849425157',
+  postData(
+    'September in Wien: 8 Ideen - Teil 2. Viele weitere Events findest du auf meinem Blog. Musicalfest gratis. Tag des Sports gratis.',
+    'wientipps',
+  ),
+);
+assert.equal(editorialRoundup.deal, null);
+assert.match(editorialRoundup.reason, /Mehrfach-Roundup/);
+
 const bioMustNotCreateOffer = build(
   'https://www.tiktok.com/@lara_kristiin/video/7676529485998656790',
   postData('Dieses Wochenende findet der Neustifter Kirtag in Wien mit Essen und Musik statt.', 'lara_kristiin'),

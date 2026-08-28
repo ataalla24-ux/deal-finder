@@ -15,6 +15,7 @@ import {
 } from './instagram-media-evidence.js';
 import {
   extractBirthdayEntryOffer,
+  getEditorialRoundupPromotionReason,
   getInfrastructureOnlyPromotionReason,
   getLeadGenerationOnlyPromotionReason,
   getMembershipOnlyPromotionReason,
@@ -490,6 +491,7 @@ function getTikTokContentQualityReason(text) {
   const nonDealRule = NON_DEAL_CONTENT_RULES.find((rule) => rule.pattern.test(signal));
   if (nonDealRule) return nonDealRule.reason;
   return getNonGuaranteedPromotionReason(signal)
+    || getEditorialRoundupPromotionReason(signal)
     || getInfrastructureOnlyPromotionReason(signal)
     || getMembershipOnlyPromotionReason(signal)
     || getLeadGenerationOnlyPromotionReason(signal);

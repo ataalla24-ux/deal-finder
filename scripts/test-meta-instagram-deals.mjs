@@ -89,6 +89,16 @@ assert.equal(
   true,
   'recommendation language must not hide an explicit promotion',
 );
+assert.equal(
+  classifyPromotion('Von Montag bis Freitag gibt es den Mittagsteller für nur €10,80 in 1090 Wien.').accepted,
+  true,
+  'a promotional euro-prefix price must work without a later English translation',
+);
+assert.equal(
+  classifyPromotion('SEPTEMBER IN WIEN: 8 IDEEN - TEIL 2. Viele weitere Events findest du auf meinem Blog. Musicalfest am 19. September, gratis! Vienna Coffee Festival von 11. bis 13. September. Tag des Sports am 26. September, gratis! #wientipps').accepted,
+  false,
+  'an editorial multi-event roundup must not combine one event offer with another event date',
+);
 assert.equal(classifyPromotion('Gewinnspiel: Gewinne ein Abendessen').accepted, false);
 assert.equal(
   classifyPromotion('Wer die meisten Teller stapelt, gewinnt den Hauptpreis: einen Monat täglich gratis K-Chicken.').accepted,
@@ -189,6 +199,27 @@ assert.ok(graphPianoDiscount.deal);
 assert.equal(graphPianoDiscount.deal.brand, 'Klavier Galerie');
 assert.equal(graphPianoDiscount.deal.category, 'shopping');
 assert.equal(graphPianoDiscount.deal.title, '10 % Rabatt auf alle gebrauchten Pianos & Flügel sichern');
+
+const graphRestaurantRoth = normalizeGraphMediaItem({
+  id: 'graph-restaurant-roth',
+  caption: 'Von Montag bis Freitag servieren wir Ihnen im Restaurant ROTH unseren abwechslungsreichen Mittagsteller für nur €10,80 – frisch und köstlich. Täglich von 11:30 bis 15:00 Uhr. Restaurant ROTH 📍Währinger Straße 1, 1090 Wien. #RestaurantROTH #ViennaEats #FoodMoments',
+  permalink: 'https://www.instagram.com/p/GRAPHRESTAURANTROTH/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+}, { sourceType: 'hashtag', sourceName: '#viennaeats' }, config, now);
+assert.ok(graphRestaurantRoth.deal);
+assert.equal(graphRestaurantRoth.deal.brand, 'Restaurant ROTH');
+assert.equal(graphRestaurantRoth.deal.category, 'essen');
+assert.equal(graphRestaurantRoth.deal.title, 'Mittagsteller um 10,80 € von Montag bis Freitag');
+assert.equal(graphRestaurantRoth.deal.expiryKind, 'recurring');
+
+const graphEditorialRoundup = normalizeGraphMediaItem({
+  id: 'graph-editorial-roundup',
+  caption: 'SEPTEMBER IN WIEN: 8 IDEEN - TEIL 2. Viele weitere Events findest du auf meinem Blog (link in bio). MUSICALFEST am 19. September, gratis! VIENNA COFFEE FESTIVAL von 11. bis 13. September. TAG DES SPORTS am 26. September, gratis! VEGANMANIA vom 18. bis 20. September, Eintritt kostenlos. #wienevents #wientipps',
+  permalink: 'https://www.instagram.com/reel/GRAPHEDITORIALROUNDUP/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+}, { sourceType: 'hashtag', sourceName: '#wienevents' }, config, now);
+assert.equal(graphEditorialRoundup.deal, null);
+assert.equal(graphEditorialRoundup.rejection, 'excluded-promotion-type');
 
 const graphRecurringBierraum = normalizeGraphMediaItem({
   id: 'graph-recurring-bierraum',
