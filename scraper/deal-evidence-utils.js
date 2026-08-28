@@ -30,6 +30,7 @@ const OFFER_PRODUCT_PATTERNS = [
   ['ramen', /\bramen\b/],
   ['food', /\b(?:essen|eat|speise|gericht|menue|menu|food)\b/],
   ['ticket', /\b(?:ticket|eintritt|admission)\b/],
+  ['hair-styling', /\b(?:haarstyling|hair\s+(?:styled|styling)|styling\s+tour|haare?\b[^.!?]{0,40}\bstylen)\b/],
   ['tour', /\b(?:fuehrung|tour|rundgang)\b/],
   ['fitness', /\b(?:fitness|training|probetraining|sportkurs|yoga)\b/],
   ['parking', /\b(?:parken|parkplatz|garage)\b/],
@@ -133,10 +134,11 @@ function semanticPromotionOfferKey(deal = {}, options = {}) {
     .map(([key]) => key);
   let products = productKeys(signal);
   if (products.length === 0) products = productKeys(context);
+  if (products.includes('hair-styling')) products = ['hair-styling'];
   if (products.length > 1) products = products.filter((product) => product !== 'food');
   products = products.slice(0, 4);
   const concreteMarker = markers.length > 0;
-  const freeMarker = /\b(?:gratis|kostenlos|free)\b/.test(signal || context);
+  const freeMarker = /\b(?:gratis|kostenlos|free)\b/.test(context);
   const dateMarkers = uniqueMatches(context, /\b(20\d{2})[./-](\d{1,2})[./-](\d{1,2})\b|\b(\d{1,2})[./](\d{1,2})(?:[./](20\d{2}))?\b/g,
     (match) => match[0].replace(/\s+/g, ''));
 

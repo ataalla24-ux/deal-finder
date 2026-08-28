@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   buildTikTokApiKeywords,
   buildDealFromPost,
+  dedupeTikTokDeals,
   rescueTikTokMediaCandidates,
 } from '../scraper/tiktok-deals-scanner.js';
 
@@ -73,6 +74,27 @@ assert.equal(creatorPostWithNamedProvider.deal.validFrom, '2026-08-26');
 assert.equal(creatorPostWithNamedProvider.deal.validUntil, '2026-08-29');
 assert.equal(creatorPostWithNamedProvider.deal.postalCode, '1010');
 assert.equal(creatorPostWithNamedProvider.deal.distance, '1010 Wien');
+
+const secondDysonCreatorPost = build(
+  'https://www.tiktok.com/@johannasteachervibes/video/7678693667174878486',
+  postData(
+    'Hab mir heute bei der Vienna Dyson Styling Tour meine Haare einfach gratis stylen lassen. @Dyson DACH, 26 – 29 August 2026, Rathausplatz, 1010 Wien.',
+    'johannasteachervibes',
+  ),
+);
+assert.ok(secondDysonCreatorPost.deal);
+assert.equal(secondDysonCreatorPost.deal.brand, 'Dyson');
+assert.equal(secondDysonCreatorPost.deal.title, 'Gratis Haarstyling beim Dyson Pop-up');
+const dedupedDysonDeals = dedupeTikTokDeals([
+  { ...creatorPostWithNamedProvider.deal, qualityScore: 72 },
+  { ...secondDysonCreatorPost.deal, qualityScore: 74 },
+]);
+assert.equal(dedupedDysonDeals.length, 1, 'creator crossposts of the same event collapse before Slack');
+assert.equal(
+  dedupedDysonDeals[0].url,
+  creatorPostWithNamedProvider.deal.url,
+  'the richer event evidence wins even when the newer crosspost has a higher recency score',
+);
 
 const foreignViennaHandle = build(
   'https://www.tiktok.com/@twofatpanda.vienna/video/7676699636131761415',
@@ -203,6 +225,28 @@ const datriTrial = build(
 assert.ok(datriTrial.deal);
 assert.equal(datriTrial.deal.brand, 'Datri Boxing');
 assert.equal(datriTrial.deal.title, 'Gratis Probetraining bei Datri Boxing');
+
+const soundcubeKidsClass = build(
+  'https://www.tiktok.com/@temibrowncoffee/video/7678068346285346070',
+  postData(
+    'My FREE Kids’ Afro Dance Class is happening this Sunday, 30th August 2026. Age (7-12). Soundcube, Guglgasse 12, Gasometer C, Vienna, Austria. FREE CLASS. Dm to register.',
+    'temibrowncoffee',
+  ),
+);
+assert.ok(soundcubeKidsClass.deal);
+assert.equal(soundcubeKidsClass.deal.brand, 'Soundcube');
+assert.equal(soundcubeKidsClass.deal.title, 'Kostenloser Afro-Dance-Kurs für Kinder im Soundcube');
+assert.equal(soundcubeKidsClass.deal.category, 'freizeit');
+assert.equal(soundcubeKidsClass.deal.logo, '💃');
+assert.equal(soundcubeKidsClass.deal.validFrom, '2026-08-30');
+assert.equal(soundcubeKidsClass.deal.validUntil, '2026-08-30');
+
+const directMessageWithoutDmStore = build(
+  'https://www.tiktok.com/@communitydance/video/7678068346285346071',
+  postData('Free dance class at Guglgasse 12, 1110 Vienna. DM us to register.', 'communitydance'),
+);
+assert.ok(directMessageWithoutDmStore.deal);
+assert.notEqual(directMessageWithoutDmStore.deal.brand, 'dm', 'direct-message instructions are not dm store evidence');
 
 const weekdayBridgedRange = build(
   'https://www.tiktok.com/@chocoberry/video/7678002441849425160',

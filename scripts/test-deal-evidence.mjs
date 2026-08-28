@@ -128,6 +128,30 @@ const crossPlatformWebsite = semanticCrossPlatformOfferKey({
 assert.ok(crossPlatformInstagram);
 assert.equal(crossPlatformInstagram, crossPlatformTikTok);
 assert.equal(crossPlatformInstagram, crossPlatformWebsite, 'one campaign matches across Instagram, TikTok and its direct page');
+
+const descriptiveDysonCrosspost = semanticCrossPlatformOfferKey({
+  brand: 'Dyson',
+  title: 'Gratis Haarstyling und Drinks beim Dyson Pop-up',
+  description: 'Vienna Dyson Styling Tour with free styling, goodies and drinks at Rathausplatz.',
+  validFrom: '2026-08-26',
+  validUntil: '2026-08-29',
+  url: 'https://www.tiktok.com/@kseniainvienna/video/7678002441849425155',
+});
+const genericDysonCrosspost = semanticCrossPlatformOfferKey({
+  brand: 'Dyson',
+  title: 'Dyson Angebot',
+  description: 'Vienna Dyson Styling Tour: Haare gratis stylen lassen am Rathausplatz.',
+  validFrom: '2026-08-26',
+  validUntil: '2026-08-29',
+  url: 'https://www.tiktok.com/@johannasteachervibes/video/7678693667174878486',
+});
+assert.ok(descriptiveDysonCrosspost);
+assert.equal(
+  genericDysonCrosspost,
+  descriptiveDysonCrosspost,
+  'concrete offer evidence in a caption deduplicates an older generic title',
+);
+
 assert.notEqual(crossPlatformWebsite, semanticCrossPlatformOfferKey({
   brand: 'Cafe Roma',
   title: 'Zweiter Kaffee gratis',

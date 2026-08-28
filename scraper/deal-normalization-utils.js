@@ -292,13 +292,17 @@ function normalizeAscii(value) {
 
 function findBrandRule(signal) {
   const normalized = normalizeAscii(signal);
+  const directMessageInstruction = /\bdm\s+(?:me|us|to\b|for\b|your\b|zur\b|fuer\b|für\b|anmeldung|register|details?|info|infos|booking|reserv)/i.test(normalized);
   const escapedWordMatch = (key) => {
     const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
     return new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`, 'i');
   };
-  return BRAND_RULES.find((rule) => escapedWordMatch(rule.key).test(normalized))
+  const eligibleRules = directMessageInstruction
+    ? BRAND_RULES.filter((rule) => rule.key !== 'dm')
+    : BRAND_RULES;
+  return eligibleRules.find((rule) => escapedWordMatch(rule.key).test(normalized))
     // "sparen", "spare" and "Intersport" are not evidence for the SPAR brand.
-    || BRAND_RULES.find((rule) => rule.key !== 'spar' && normalized.includes(rule.key));
+    || eligibleRules.find((rule) => rule.key !== 'spar' && normalized.includes(rule.key));
 }
 
 function extractHostFromUrl(url) {

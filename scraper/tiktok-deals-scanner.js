@@ -489,9 +489,18 @@ function inferType(text) {
   return 'rabatt';
 }
 
+function isDysonStylingOffer(text) {
+  const signal = cleanText(text, 2200);
+  return /\bdyson\b/i.test(signal)
+    && /\b(?:styling\s+tour|styling\s+pop[- ]?up|pop[- ]?up|hair\s+(?:styled|styling)|haarstyling|haare?\b[^.!?]{0,50}\bstylen)\b/i.test(signal);
+}
+
 function inferCategoryAndLogo(text, type) {
-  if (/\bdyson\b/i.test(text) && /\b(?:hair\s+styled|haare?\s+stylen|haarstyling|styling\s+tour|styling\s+pop[- ]?up)\b/i.test(text)) {
+  if (isDysonStylingOffer(text)) {
     return { category: 'beauty', logo: '💇' };
+  }
+  if (/\b(?:afro\s+)?dance\s+class\b|\b(?:afro[- ]?)?tanzkurs\b/i.test(text)) {
+    return { category: 'freizeit', logo: '💃' };
   }
   if (/\b(eintritt|entry|admission|festival|event|museum|garten|botanisch|stadtpark|stift|klosterneuburg)\b/i.test(text)) {
     return { category: 'kultur', logo: '🎟️' };
@@ -510,6 +519,7 @@ function extractBrand(text, accountHandle) {
     { pattern: /\bchocoberry\b/i, name: 'Chocoberry' },
     { pattern: /\bcafe\s+milano\b/i, name: 'Cafe Milano' },
     { pattern: /\bdyson(?:\s+dach)?\b/i, name: 'Dyson' },
+    { pattern: /\bsoundcube\b/i, name: 'Soundcube' },
     { pattern: /\bpalace\s+of\s+justice\b/i, name: 'Palace of Justice Vienna' },
     { pattern: /@wukvienna\b|\bwuk\s+vienna\b/i, name: 'WUK Wien' },
   ];
@@ -556,8 +566,17 @@ function buildOfferTitle(text, brand, type) {
       ? 'Gratis Open-Air-Kino Sunset Cinema im Weghuberpark'
       : 'Gratis Open-Air-Kino Sunset Cinema';
   }
-  if (/\bdyson\b/i.test(signal) && /\b(?:styling\s+tour|pop[- ]?up|hair\s+styled)\b/i.test(signal) && /\bfree\s+drinks?\b/i.test(signal)) {
-    return 'Gratis Haarstyling und Drinks beim Dyson Pop-up';
+  if (isDysonStylingOffer(signal) && /\b(?:gratis|kostenlos(?:e|er|es|en)?|free)\b/i.test(signal)) {
+    return /\bfree\s+drinks?|gratis(?:e|en)?\s+getränke?|kostenlose\s+getränke?/i.test(signal)
+      ? 'Gratis Haarstyling und Drinks beim Dyson Pop-up'
+      : 'Gratis Haarstyling beim Dyson Pop-up';
+  }
+  if (/\bsoundcube\b/i.test(signal)
+      && /\b(?:kids?[’']?\s+)?(?:afro\s+)?dance\s+class\b|\b(?:afro[- ]?)?tanzkurs\b/i.test(signal)
+      && /\b(?:gratis|kostenlos(?:e|er|es|en)?|free)\b/i.test(signal)) {
+    return /\bkids?[’']?|\bkinder\b|\bage\s*\(?\s*7\s*[-–]\s*12/i.test(signal)
+      ? 'Kostenloser Afro-Dance-Kurs für Kinder im Soundcube'
+      : 'Kostenloser Afro-Dance-Kurs im Soundcube';
   }
   if (/\bcafe\s+milano\b/i.test(signal) && /\bhappy\s+hour\b/i.test(signal) && /\b(?:pool|billard)\b[^.!?]{0,24}\b(?:free|gratis|kostenlos)\b/i.test(signal)) {
     return 'Tägliche Happy Hour und gratis Billard bei Cafe Milano';
@@ -1224,10 +1243,37 @@ function normalizeOfferKeyText(value = '') {
 }
 
 function semanticDealKey(deal) {
+  const eventKey = knownEventDealKey(deal);
+  if (eventKey) return eventKey;
   const brand = normalizeOfferKeyText(deal.brand);
   const title = normalizeOfferKeyText(deal.title);
   if (!brand || !title) return '';
   return `${brand}|${title}`;
+}
+
+function normalizedDealDay(value = '') {
+  const match = cleanText(value, 80).match(/\b(20\d{2}-\d{2}-\d{2})\b/);
+  return match?.[1] || '';
+}
+
+function knownEventDealKey(deal) {
+  const signal = [deal.brand, deal.title, deal.description].filter(Boolean).join(' ');
+  if (!isDysonStylingOffer(signal)) return '';
+  const validUntil = normalizedDealDay(deal.validUntil || deal.expires);
+  if (!validUntil) return '';
+  const validFrom = normalizedDealDay(deal.validFrom) || validUntil;
+  return `event|dyson-styling|${validFrom}|${validUntil}`;
+}
+
+function dealEvidenceRichness(deal) {
+  const signal = [deal.title, deal.description, deal.promotionEvidence].filter(Boolean).join(' ');
+  const evidencePatterns = [
+    /\bfree\s+drinks?|gratis(?:e|en)?\s+getränke?|kostenlose\s+getränke?/i,
+    /\b(?:free\s+)?goodies?\b/i,
+    /\b(?:rathausplatz|1(?:0[1-9]|1\d|2[0-3])0\s+wien)\b/i,
+    /\b(?:26\s*[-–]\s*29\s+august|gültig|gueltig|valid)\b/i,
+  ];
+  return evidencePatterns.reduce((score, pattern) => score + (pattern.test(signal) ? 1 : 0), 0);
 }
 
 function hasSpecificExpiry(deal) {
@@ -1240,6 +1286,13 @@ function pickBetterDeal(existing, candidate) {
   const candidateSpecificExpiry = hasSpecificExpiry(candidate);
   if (existingSpecificExpiry !== candidateSpecificExpiry) return candidateSpecificExpiry ? candidate : existing;
 
+  const existingEventKey = knownEventDealKey(existing);
+  if (existingEventKey && existingEventKey === knownEventDealKey(candidate)) {
+    const existingRichness = dealEvidenceRichness(existing);
+    const candidateRichness = dealEvidenceRichness(candidate);
+    if (existingRichness !== candidateRichness) return candidateRichness > existingRichness ? candidate : existing;
+  }
+
   if ((candidate.qualityScore || 0) !== (existing.qualityScore || 0)) {
     return (candidate.qualityScore || 0) > (existing.qualityScore || 0) ? candidate : existing;
   }
@@ -1247,7 +1300,7 @@ function pickBetterDeal(existing, candidate) {
   return Date.parse(candidate.pubDate || '') > Date.parse(existing.pubDate || '') ? candidate : existing;
 }
 
-function dedupeDeals(deals) {
+export function dedupeTikTokDeals(deals) {
   const byUrl = new Map();
   const bySemanticKey = new Map();
   for (const deal of deals) {
@@ -1337,7 +1390,7 @@ async function main() {
     console.log(`  🖼️ ${mediaRescue.deals.length} TikTok-Deal(s) aus Bild-/Videobelegen gerettet`);
   }
 
-  const finalDeals = dedupeDeals(deals);
+  const finalDeals = dedupeTikTokDeals(deals);
   const payload = {
     lastUpdated: new Date().toISOString(),
     source: 'tiktok-deals-scanner',
