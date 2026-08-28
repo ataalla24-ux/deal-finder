@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-28T05:55:38.896Z",
+  "generatedAt": "2026-08-28T06:06:13.251Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 309,
-    "uniqueCandidates": 293,
-    "distinctCandidates": 300,
+    "totalCandidates": 312,
+    "uniqueCandidates": 296,
+    "distinctCandidates": 303,
     "duplicateClusters": 7,
     "topHealthySources": [
       {
@@ -12,12 +12,6 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "healthScore": 79,
-        "totalDeals": 4
       },
       {
         "sourceKey": "wien-combined",
@@ -34,6 +28,12 @@
       {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "healthScore": 75,
+        "totalDeals": 2
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
         "healthScore": 75,
         "totalDeals": 2
       }
@@ -133,10 +133,10 @@
         "totalDeals": 3
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "precisionScore": 77,
-        "totalDeals": 4
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 71,
+        "totalDeals": 2
       }
     ],
     "topWeightedSources": [
@@ -159,16 +159,16 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 63,
-        "totalDeals": 4
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 63,
         "totalDeals": 3
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 60,
+        "totalDeals": 18
       }
     ],
     "topSourcesToFix": [
@@ -289,72 +289,6 @@
       "coverageScore": 17,
       "precisionScore": 88,
       "sourceWeightScore": 70
-    },
-    {
-      "sourceKey": "tiktok",
-      "file": "deals-pending-tiktok.json",
-      "sourceLabel": "TikTok Scanner",
-      "totalDeals": 4,
-      "uniqueDeals": 4,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 2,
-      "fresh7dCount": 4,
-      "viennaCount": 4,
-      "foodDrinkCount": 1,
-      "promoCount": 4,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "1+1 GRATIS BEI CHOCOBERRY",
-        "Gratis Haarstyling und Drinks beim Dyson Pop-up",
-        "Gratis Eintritt bei Mind Entertainment Records"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0.5,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 70,
-      "topCategories": [
-        {
-          "value": "beauty",
-          "count": 1
-        },
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 3
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 79,
-      "missionFitScore": 65,
-      "coverageScore": 21,
-      "precisionScore": 77,
-      "sourceWeightScore": 63
     },
     {
       "sourceKey": "wien-combined",
@@ -597,8 +531,8 @@
       "promoCount": 1,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "🍹 Happy Hour bei Second Street Burger!",
-        "Kostenlose Schnupperkurse bei Bezirksvorstehung 6. Bezirk"
+        "Kostenlose Schnupperkurse bei Bezirksvorstehung 6. Bezirk",
+        "🍹 Happy Hour bei Second Street Burger!"
       ],
       "lastRun": null,
       "uniqueRate": 1,
@@ -636,6 +570,72 @@
       "coverageScore": 15,
       "precisionScore": 71,
       "sourceWeightScore": 57
+    },
+    {
+      "sourceKey": "tiktok",
+      "file": "deals-pending-tiktok.json",
+      "sourceLabel": "TikTok Scanner",
+      "totalDeals": 7,
+      "uniqueDeals": 7,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 3,
+      "fresh7dCount": 7,
+      "viennaCount": 7,
+      "foodDrinkCount": 1,
+      "promoCount": 7,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "1+1 GRATIS BEI CHOCOBERRY",
+        "Dyson Angebot",
+        "Gratis Haarstyling und Drinks beim Dyson Pop-up"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.4,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 67.7,
+      "topCategories": [
+        {
+          "value": "beauty",
+          "count": 3
+        },
+        {
+          "value": "kultur",
+          "count": 2
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 6
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 74,
+      "missionFitScore": 55,
+      "coverageScore": 26,
+      "precisionScore": 71,
+      "sourceWeightScore": 58
     },
     {
       "sourceKey": "instagram-ai",
