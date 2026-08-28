@@ -133,8 +133,8 @@ const descriptiveDysonCrosspost = semanticCrossPlatformOfferKey({
   brand: 'Dyson',
   title: 'Gratis Haarstyling und Drinks beim Dyson Pop-up',
   description: 'Vienna Dyson Styling Tour with free styling, goodies and drinks at Rathausplatz.',
-  validFrom: '2026-08-26',
-  validUntil: '2026-08-29',
+  validFrom: '2026-08-26T12:00:00.000Z',
+  validUntil: '2026-08-29T12:00:00.000Z',
   url: 'https://www.tiktok.com/@kseniainvienna/video/7678002441849425155',
 });
 const genericDysonCrosspost = semanticCrossPlatformOfferKey({

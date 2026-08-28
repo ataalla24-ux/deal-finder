@@ -139,7 +139,7 @@ function semanticPromotionOfferKey(deal = {}, options = {}) {
   products = products.slice(0, 4);
   const concreteMarker = markers.length > 0;
   const freeMarker = /\b(?:gratis|kostenlos|free)\b/.test(context);
-  const dateMarkers = uniqueMatches(context, /\b(20\d{2})[./-](\d{1,2})[./-](\d{1,2})\b|\b(\d{1,2})[./](\d{1,2})(?:[./](20\d{2}))?\b/g,
+  const dateMarkers = uniqueMatches(context, /\b(20\d{2})[./-](\d{1,2})[./-](\d{1,2})(?=$|[^0-9])|\b(\d{1,2})[./](\d{1,2})(?:[./](20\d{2}))?\b/g,
     (match) => match[0].replace(/\s+/g, ''));
 
   if (!concreteMarker && !(freeMarker && products.length > 0 && dateMarkers.length > 0)) return '';
