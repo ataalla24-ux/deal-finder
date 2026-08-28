@@ -67,6 +67,22 @@ assert.equal(
   'removing one itinerary must not suppress every flight from the provider',
 );
 
+const instagramPostUrl = 'https://www.instagram.com/p/DcQ1U7ENZAY/';
+const instagramReelUrl = 'https://instagram.com/reel/DcQ1U7ENZAY/?utm_source=ig_web_copy_link';
+const instagramModeration = {
+  hiddenDeals: [{ url: instagramPostUrl, reason: 'expired Instagram post' }],
+};
+assert.equal(
+  normalizeUrl(instagramPostUrl),
+  normalizeUrl(instagramReelUrl),
+  'Instagram p/reel URL variants must share one moderation identity',
+);
+assert.equal(
+  moderationReasonForDeal({ url: instagramReelUrl }, instagramModeration),
+  'expired Instagram post',
+  'moderation must block every URL variant of the same Instagram shortcode',
+);
+
 function healthyUrl(url, overrides = {}) {
   return {
     status: 200,

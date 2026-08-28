@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { canonicalSocialPostKey } from './deal-evidence-utils.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.join(__dirname, '..');
@@ -25,6 +27,8 @@ function normalizeId(value) {
 function normalizeUrl(value) {
   const text = cleanText(value);
   if (!text) return '';
+  const socialPostKey = canonicalSocialPostKey(text);
+  if (socialPostKey) return socialPostKey;
   try {
     const parsed = new URL(text);
     parsed.hash = '';
