@@ -123,6 +123,16 @@ assert.ok(validProfileContext.deal);
 assert.equal(validProfileContext.deal.viennaEvidence.source, 'tiktok-post');
 assert.match(validProfileContext.deal.viennaEvidence.detail, /Vienna/i);
 
+const freeBookingOnly = build(
+  'https://www.tiktok.com/@hcikitchen/video/7678002441849425156',
+  postData(
+    'Healthy cooking tips and the Saladmaster experience in 1020 Vienna. Contact us and book with us for FREE!',
+    'hcikitchen',
+  ),
+);
+assert.equal(freeBookingOnly.deal, null);
+assert.match(freeBookingOnly.reason, /kostenlose Buchung\/Kontaktaufnahme/);
+
 const bioMustNotCreateOffer = build(
   'https://www.tiktok.com/@lara_kristiin/video/7676529485998656790',
   postData('Dieses Wochenende findet der Neustifter Kirtag in Wien mit Essen und Musik statt.', 'lara_kristiin'),

@@ -107,6 +107,26 @@ const titleEvidence = await validate({
 assert.equal(titleEvidence.decision.allowed, true);
 assert.equal(titleEvidence.decision.sourceDate, '2026-07-16T11:00:00.000Z');
 
+const freeBookingOnly = await validate({
+  ...baseSocialDeal,
+  brand: 'HCI Kitchen',
+  title: 'Come experience it for yourself, book with us for FREE!',
+  description: 'Healthy cooking tips, delicious food and the Saladmaster experience in 1020 Wien. Contact us and book with us for FREE!',
+  sourcePublishedAt: '2026-07-16T11:00:00.000Z',
+  sourcePublishedAtSource: 'instagram-graph-timestamp',
+});
+assert.equal(freeBookingOnly.decision.allowed, false);
+assert.match(freeBookingOnly.decision.reasons.join(' '), /kostenlose Buchung\/Kontaktaufnahme/);
+
+const bookableFreeClass = await validate({
+  ...baseSocialDeal,
+  title: 'Kostenloser Tanzkurs in Wien',
+  description: 'Book your FREE dance class in 1110 Wien. Anmeldung erforderlich.',
+  sourcePublishedAt: '2026-07-16T11:00:00.000Z',
+  sourcePublishedAtSource: 'instagram-graph-timestamp',
+});
+assert.equal(bookableFreeClass.decision.allowed, true);
+
 const hardSocialAgeClamp = await validate({
   ...baseSocialDeal,
   title: 'Zweiter Kaffee gratis in Wien',

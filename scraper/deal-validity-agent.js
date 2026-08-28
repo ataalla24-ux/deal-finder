@@ -14,6 +14,7 @@ import {
 } from './instagram-ai-validity-utils.js';
 import {
   getInfrastructureOnlyPromotionReason,
+  getLeadGenerationOnlyPromotionReason,
   getMembershipOnlyPromotionReason,
   getNonGuaranteedPromotionReason,
 } from './promotion-quality-utils.js';
@@ -503,6 +504,8 @@ function getConcreteOfferDecision(deal, health = null) {
   if (infrastructurePromotionReason) return { concrete: false, reason: infrastructurePromotionReason };
   const membershipPromotionReason = getMembershipOnlyPromotionReason(offerText);
   if (membershipPromotionReason) return { concrete: false, reason: membershipPromotionReason };
+  const leadGenerationPromotionReason = getLeadGenerationOnlyPromotionReason(offerText);
+  if (leadGenerationPromotionReason) return { concrete: false, reason: leadGenerationPromotionReason };
 
   const recommendationLanguage = /\b(?:favou?rite|lieblings(?:restaurant|lokal|platz|spot|ort)|summer\s+spot|things\s+to\s+do|must[-\s]?visit|guide|tipps?|vibe|empfehl\w*|recommend\w*|save\s+(?:this|and)|send\s+this)\b/i;
   const explicitPromotionBeyondGenericFree = /(?:\b\d+\s*%|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b(?:rabatt|gutschein|coupon|deal|aktion|angebot|special|happy\s*hour)\b|\b(?:statt|nur\s+heute|today\s+only)\b|\b(?:gratis|kostenlos|free)\s+(?:zu|zum|bei|with)\b|\b(?:nur|only|um|für|fuer|for)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b))/i;

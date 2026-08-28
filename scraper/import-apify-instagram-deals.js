@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import {
   getInfrastructureOnlyPromotionReason,
+  getLeadGenerationOnlyPromotionReason,
   getMembershipOnlyPromotionReason,
 } from './promotion-quality-utils.js';
 import { stripInstagramMetaDescriptionPrefix } from '../apify/instagram-vienna-food-offers/src/validity-utils.js';
@@ -432,6 +433,11 @@ function apifyItemRejectReason(item, timestamp, now, maxPostAgeDays, maxAgeWitho
     item.description,
   ].map(stripInstagramMetaDescriptionPrefix).join(' '));
   if (membershipReason) return 'freeMembershipOnly';
+  const leadGenerationReason = getLeadGenerationOnlyPromotionReason([
+    item.caption,
+    item.description,
+  ].map(stripInstagramMetaDescriptionPrefix).join(' '));
+  if (leadGenerationReason) return 'freeLeadGenerationOnly';
   if (!hasConcreteOfferSignal(item)) return 'noConcreteOfferSignal';
   if (item.stillValid === false) return 'expiredOrTooOld';
   const validUntil = toIso(item.validUntil);

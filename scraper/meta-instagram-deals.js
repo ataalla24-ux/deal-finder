@@ -11,7 +11,11 @@ import {
   getPublicationEvidence,
 } from './deal-evidence-utils.js';
 import { parseExpiryShape } from './expiry-utils.js';
-import { extractActiveOfferWindow, unicodeSafeTruncate } from './instagram-ai-validity-utils.js';
+import {
+  extractActiveOfferWindow,
+  hasRecurringOfferSchedule,
+  unicodeSafeTruncate,
+} from './instagram-ai-validity-utils.js';
 import {
   buildInstagramGraphEvidencePayload,
   loadInstagramGraphEvidence,
@@ -20,6 +24,8 @@ import {
 import { enrichInstagramGraphMedia } from './instagram-media-evidence.js';
 import {
   extractBirthdayEntryOffer,
+  getInfrastructureOnlyPromotionReason,
+  getLeadGenerationOnlyPromotionReason,
   getMembershipOnlyPromotionReason,
   getNonGuaranteedPromotionReason,
 } from './promotion-quality-utils.js';
@@ -113,7 +119,7 @@ const PROMO_PATTERNS = [
 ];
 
 const SOFT_PROMO_PATTERNS = [
-  /\b(?:aktion|angebot|deal|special|sale)\b/i,
+  /\b(?:aktion|angebot|deal|special|sale|restaurantwoche)\b/i,
   /\b(?:studenten|student|lunch|mittags)[-\s]?(?:deal|angebot|menü|menue)\b/i,
 ];
 
@@ -150,7 +156,7 @@ const CATEGORY_HINTS = [
   { category: 'essen', pattern: /\b(?:essen|food|restaurant|pizza|burger|kebab|kebap|döner|doener|sushi|ramen|brunch|eis|gelato|bakery|bäckerei)\b/i },
   { category: 'fitness', pattern: /\b(?:fitness|gym|yoga|pilates|training|workout|probetraining)\b/i },
   { category: 'beauty', pattern: /\b(?:beauty|kosmetik|friseur|salon|wellness|massage)\b/i },
-  { category: 'shopping', pattern: /\b(?:shopping|store|shop|mode|fashion|sale|gutschein)\b/i },
+  { category: 'shopping', pattern: /\b(?:shopping|store|shop|mode|fashion|sale|gutschein|klavier|piano|fl[üu]gel|musikinstrument(?:e)?)\b/i },
   { category: 'kultur', pattern: /\b(?:kino|museum|theater|kultur|ausstellung)\b/i },
 ];
 
@@ -578,7 +584,9 @@ export function classifyPromotion(text) {
     return { accepted: false, type: '', reason: 'missing-text' };
   }
   if (getNonGuaranteedPromotionReason(normalized)
+      || getInfrastructureOnlyPromotionReason(normalized)
       || getMembershipOnlyPromotionReason(normalized)
+      || getLeadGenerationOnlyPromotionReason(normalized)
       || EXCLUDED_PATTERNS.some((pattern) => pattern.test(normalized))) {
     return { accepted: false, type: '', reason: normalized ? 'excluded-promotion-type' : 'missing-text' };
   }
@@ -630,6 +638,18 @@ function inferTitle(text, brand, promotion) {
     const brandSuffix = brand && !/^#|^instagram$/i.test(brand) ? ` bei ${brand}` : '';
     return `Kostenlose Schnupperkurse${brandSuffix}`;
   }
+  const recurringPercent = text.match(/\b(jeden\s+(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag))\b[^.!?]{0,70}?\b(\d{1,2}\s*%\s*(?:rabatt(?:code)?\s*)?(?:auf\s+)?[^.!?📍#]{2,70})/i);
+  if (recurringPercent) {
+    const schedule = recurringPercent[1].replace(/^./, (char) => char.toUpperCase());
+    const offer = cleanText(recurringPercent[2].replace(/[,:;\s]+$/g, ''), 100);
+    return `${schedule}: ${offer}`;
+  }
+  const percentOffer = text.match(/\b\d{1,2}\s*%\s*(?:rabatt(?:code)?\s*)?(?:auf\s+)?[^.!?📍#]{2,80}/i);
+  if (percentOffer) return cleanText(percentOffer[0].replace(/[,:;\s]+$/g, ''), 120);
+  const restaurantWeekMenu = text.match(/\b(\d{1,2}[- ]g[äa]nge[- ]men[üu])(?=\s|$|[,:;.!?])[^.!?]{0,30}?\b(?:f[üu]r|um)\s*€?\s*(\d{1,3}(?:[,.]\d{1,2})?)/i);
+  if (restaurantWeekMenu && /\brestaurantwoche\b/i.test(text)) {
+    return `${restaurantWeekMenu[1]} um ${restaurantWeekMenu[2].replace('.', ',')} € zur Restaurantwoche`;
+  }
   const segments = String(text || '')
     .split(/(?:\r?\n+|\|+|(?<=[.!?])\s+)/)
     .map((segment) => cleanText(segment, 180))
@@ -675,6 +695,16 @@ function expiryFromText(text, now, fallbackStop, ttlHours, referenceDate = now) 
   }
   if (stop && new Date(stop).getTime() >= now.getTime()) {
     return { expires: stop, validFrom: '', validUntil: stop, expirySource: 'meta-delivery-stop', expiryKind: 'date', dateConfidence: 'high' };
+  }
+  if (shape?.kind === 'recurring' || hasRecurringOfferSchedule(text)) {
+    return {
+      expires: '',
+      validFrom: '',
+      validUntil: '',
+      expirySource: 'recurring-schedule',
+      expiryKind: 'recurring',
+      dateConfidence: 'medium',
+    };
   }
   const ttl = shortTtlIso(now, ttlHours);
   return { expires: ttl, validFrom: '', validUntil: ttl, expirySource: 'short-review-ttl', expiryKind: 'review-ttl', dateConfidence: 'low' };

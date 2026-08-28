@@ -46,6 +46,11 @@ assert.equal(
   'public drinking-water infrastructure is not a promotion',
 );
 assert.equal(
+  classifyPromotion('Vienna is reviewing whether to make public toilets free for everyone.').accepted,
+  false,
+  'free public toilets are infrastructure news, not a consumer deal',
+);
+assert.equal(
   classifyPromotion('In fünf Wiener Parks gibt es kostenlose Ladestationen für Smartphones.').accepted,
   false,
   'public charging infrastructure is not a promotion',
@@ -113,6 +118,16 @@ assert.equal(
   false,
   'a free membership without a consumer promotion is not a deal',
 );
+assert.equal(
+  classifyPromotion('Come experience the HCI Kitchen, contact us and book with us for FREE!').accepted,
+  false,
+  'a free booking action without a stated free service is lead generation, not a deal',
+);
+assert.equal(
+  classifyPromotion('Book your FREE dance class in 1110 Vienna.').accepted,
+  true,
+  'required booking must not hide an independently stated free class',
+);
 const birthdayEntryPromotion = classifyPromotion(
   'Kostenlose Fotobox und gratis Süßigkeiten. Birthday Special: Du hast Geburtstag? Ihr zahlt jeweils nur €10 Eintritt.',
 );
@@ -163,6 +178,50 @@ const graphFresh = normalizeGraphMediaItem({
 assert.ok(graphFresh.deal);
 assert.equal(graphFresh.deal.pubDateSource, 'instagram-graph-timestamp');
 assert.equal(graphFresh.deal.viennaEvidence.source, 'verified-merchant-registry');
+
+const graphPianoDiscount = normalizeGraphMediaItem({
+  id: 'graph-piano-discount',
+  caption: 'Schulstart = Klavierstart! Jetzt 10 % Rabatt auf alle gebrauchten Pianos & Flügel sichern! Nur von 01.09. bis 15.10.2026. 📍 Klavier Galerie | Kaiserstraße 10, 1070 Wien #KlavierGalerie #Wien',
+  permalink: 'https://www.instagram.com/reel/GRAPHPIANO/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+}, { sourceType: 'hashtag', sourceName: '#wien' }, config, now);
+assert.ok(graphPianoDiscount.deal);
+assert.equal(graphPianoDiscount.deal.brand, 'Klavier Galerie');
+assert.equal(graphPianoDiscount.deal.category, 'shopping');
+assert.equal(graphPianoDiscount.deal.title, '10 % Rabatt auf alle gebrauchten Pianos & Flügel sichern');
+
+const graphRecurringBierraum = normalizeGraphMediaItem({
+  id: 'graph-recurring-bierraum',
+  caption: 'Und weil ihr uns besonders am Herzen liegt: Jeden Dienstag gibt es 20 % Rabatt auf alle Pasta-Gerichte! 🍝 📍Restaurant Bierraum 1170. Wattgasse 52 #bierraum #viennafood',
+  permalink: 'https://www.instagram.com/reel/GRAPHBIERRAUM/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+}, { sourceType: 'hashtag', sourceName: '#viennafood' }, config, now);
+assert.ok(graphRecurringBierraum.deal);
+assert.equal(graphRecurringBierraum.deal.brand, 'Restaurant Bierraum');
+assert.equal(graphRecurringBierraum.deal.title, 'Jeden Dienstag: 20 % Rabatt auf alle Pasta-Gerichte');
+assert.equal(graphRecurringBierraum.deal.expiryKind, 'recurring');
+assert.equal(graphRecurringBierraum.deal.expirySource, 'recurring-schedule');
+assert.equal(graphRecurringBierraum.deal.validUntil, '');
+assert.equal(graphRecurringBierraum.deal.expires, '');
+
+const graphRestaurantWeek = normalizeGraphMediaItem({
+  id: 'graph-restaurant-week',
+  caption: 'RESTAURANTWOCHE IN DER SPELUNKE. Von 31.08. bis 05.09.2026 gibt es ein 3-Gänge-Menü für € 39,50 pro Person. Spelunke Handschrift. 📍 Taborstraße 1, 1020 Wien #spelunke #restaurantwoche',
+  permalink: 'https://www.instagram.com/p/GRAPHRESTAURANTWEEK/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+}, { sourceType: 'hashtag', sourceName: '#viennafood' }, config, now);
+assert.ok(graphRestaurantWeek.deal);
+assert.equal(graphRestaurantWeek.deal.brand, 'Spelunke');
+assert.equal(graphRestaurantWeek.deal.title, '3-Gänge-Menü um 39,50 € zur Restaurantwoche');
+
+const graphFreeBookingOnly = normalizeGraphMediaItem({
+  id: 'graph-free-booking-only',
+  caption: 'Here is what happens in the HCI Kitchen: healthy cooking tips, delicious food and the Saladmaster experience. Come experience it for yourself, book with us for FREE! 📍 Franz-Hochedlinger-Gasse 4, 1020 Vienna. #HealthyCookingInnovation',
+  permalink: 'https://www.instagram.com/reel/GRAPHFREEBOOKING/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+}, { sourceType: 'hashtag', sourceName: '#wienevents' }, config, now);
+assert.equal(graphFreeBookingOnly.deal, null);
+assert.equal(graphFreeBookingOnly.rejection, 'excluded-promotion-type');
 
 const graphBirthdayEntrySpecial = normalizeGraphMediaItem({
   id: '18112258564928369',
@@ -348,6 +407,21 @@ assert.equal(ad.deal.pubDate, '2026-07-16T07:00:00.000Z');
 assert.equal(ad.deal.expirySource, 'meta-delivery-stop');
 assert.equal(ad.deal.url, 'https://www.facebook.com/ads/library/?id=998877');
 assert.doesNotMatch(JSON.stringify(ad), /super-secret-token/, 'credential-bearing snapshot URLs must never reach persisted deals');
+
+const recurringAdWithStop = normalizeAdLibraryItem({
+  id: 'recurring-ad-with-stop',
+  page_id: '1122',
+  page_name: 'Pasta Test',
+  ad_delivery_start_time: '2026-07-16T07:00:00.000Z',
+  ad_delivery_stop_time: '2026-07-25T22:00:00.000Z',
+  ad_creative_bodies: ['Jeden Dienstag in Wien: 20 % Rabatt auf alle Pasta-Gerichte.'],
+  ad_snapshot_url: 'https://www.facebook.com/ads/archive/render_ad/?id=recurring-ad-with-stop',
+  publisher_platforms: ['INSTAGRAM'],
+  target_locations: [{ name: 'Vienna' }],
+}, config, now);
+assert.ok(recurringAdWithStop.deal);
+assert.equal(recurringAdWithStop.deal.expirySource, 'meta-delivery-stop');
+assert.equal(recurringAdWithStop.deal.validUntil, '2026-07-25T22:00:00.000Z');
 
 const futureAd = normalizeAdLibraryItem({
   id: 'future-ad',

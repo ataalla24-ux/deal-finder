@@ -128,6 +128,16 @@ assert.equal(current.deal.description, currentItem.description, 'the importer mu
 assert.equal(current.deal.distance, '', 'missing location must not be replaced with synthetic Wien');
 assert.equal(current.deal.viennaEvidence.verified, false, 'a plain text keyword must not masquerade as verified location evidence');
 
+const freeBookingOnly = normalizeApifyItem({
+  ...currentItem,
+  postUrl: 'https://www.instagram.com/reel/FreeBookingOnly/',
+  venueName: 'HCI Kitchen',
+  description: 'Healthy cooking tips and the Saladmaster experience in 1020 Vienna. Contact us and book with us for FREE!',
+  caption: 'Healthy cooking tips and the Saladmaster experience in 1020 Vienna. Contact us and book with us for FREE!',
+}, { now, maxPostAgeDays: 7 });
+assert.equal(freeBookingOnly.deal, null);
+assert.equal(freeBookingOnly.rejectReason, 'freeLeadGenerationOnly');
+
 const trustedAccount = normalizeApifyItem({
   ...currentItem,
   description: 'Heute ein Kaffee gratis',

@@ -74,6 +74,13 @@ const BRAND_RULES = [
   { key: 'wienxtra', name: 'WIENXTRA', logo: '🎬', category: 'kultur' },
   { key: 'ori fusion', name: 'Ori Fusion Kitchen', logo: '🥢', category: 'essen' },
   { key: 'das lugeck', name: 'Das Lugeck', logo: '🍽️', category: 'essen' },
+  { key: 'restaurant bierraum', name: 'Restaurant Bierraum', logo: '🍝', category: 'essen' },
+  { key: 'bierraum', name: 'Restaurant Bierraum', logo: '🍝', category: 'essen' },
+  { key: 'spelunke', name: 'Spelunke', logo: '🍽️', category: 'essen', domain: 'spelunke.at' },
+  { key: 'klavier galerie', name: 'Klavier Galerie', logo: '🎹', category: 'shopping' },
+  { key: 'klaviergalerie', name: 'Klavier Galerie', logo: '🎹', category: 'shopping' },
+  { key: 'hci kitchen', name: 'HCI Kitchen', logo: '🍳', category: 'essen' },
+  { key: 'healthy cooking innovation', name: 'HCI Kitchen', logo: '🍳', category: 'essen' },
   { key: 'whatseat', name: 'WhatsEat', logo: '🍽️', category: 'essen' },
   { key: 'coffee u-boot', name: 'Coffee U-Boot 1060', logo: '☕', category: 'kaffee' },
   { key: 'wolke pizza', name: 'WOLKE Pizza', logo: '🍕', category: 'essen' },
@@ -442,6 +449,52 @@ function isSourceLikeBrand(value) {
   return SOURCE_LIKE_BRANDS.some((pattern) => pattern.test(text));
 }
 
+function isPlausibleCaptionBrand(value) {
+  const text = cleanUiNoiseText(value).replace(/^[^\p{L}]+|[^\p{L}]+$/gu, '');
+  if (!text || text.length < 3 || text.length > 60) return false;
+  if (text.split(/\s+/).length > 7 || /\d/.test(text)) return false;
+  if (/\b(?:stra(?:ß|ss)e|gasse|platz|weg|ring|allee|adresse|austria|wien|vienna)\b/i.test(text)) return false;
+  if (/\b(?:rabatt|gratis|kostenlos|free|angebot|aktion|special|restaurantwoche)\b/i.test(text)) return false;
+  return !isSourceLikeBrand(text) && !isLikelyGenericLocation(text);
+}
+
+function extractPinnedCaptionBrand(value) {
+  const text = cleanUiNoiseText(value);
+  for (const match of text.matchAll(/📍\s*([^|#]{2,90}?)(?=\s*\||\s+\d{4}\b)/gu)) {
+    const candidate = cleanUiNoiseText(match[1]).replace(/[,:;|\s]+$/g, '');
+    if (isPlausibleCaptionBrand(candidate)) return candidate;
+  }
+  return '';
+}
+
+function prettifyBrandHashtag(value) {
+  const raw = cleanUiNoiseText(value).replace(/[_.-]+/g, ' ');
+  const spaced = raw.replace(/([\p{Ll}])([\p{Lu}])/gu, '$1 $2').replace(/\s+/g, ' ').trim();
+  if (!spaced) return '';
+  return spaced === spaced.toLowerCase()
+    ? `${spaced[0].toUpperCase()}${spaced.slice(1)}`
+    : spaced;
+}
+
+function extractRepeatedBrandHashtag(value) {
+  const text = cleanUiNoiseText(value);
+  const prose = text.replace(/#[\p{L}\p{N}_.-]+/gu, ' ');
+  const proseKey = normalizeAscii(prose).replace(/[^a-z0-9]+/g, '');
+  for (const match of text.matchAll(/#([\p{L}\p{N}_.-]{3,50})/gu)) {
+    const raw = match[1];
+    const key = normalizeAscii(raw).replace(/[^a-z0-9]+/g, '');
+    if (!key || /^(?:wien|vienna|food|foodie|foodlover|viennafood|wienisst|wienevent|wienevents|viennaevent|viennaevents|viennaeats|wienergastro|essenwien|restaurantwoche|culinarius|schulstart|aktion|angebot|rabatt|deal|special|fyp|viral|reel|reels)$/.test(key)) continue;
+    if (!proseKey.includes(key)) continue;
+    const candidate = prettifyBrandHashtag(raw);
+    if (isPlausibleCaptionBrand(candidate)) return candidate;
+  }
+  return '';
+}
+
+function extractCaptionBrand(value) {
+  return extractPinnedCaptionBrand(value) || extractRepeatedBrandHashtag(value);
+}
+
 function extractBracketBrand(title) {
   const match = cleanUiNoiseText(title).match(/^\[([^\]]{2,40})\]/);
   return match ? cleanUiNoiseText(match[1]) : '';
@@ -551,6 +604,22 @@ function inferPreferredBrand(deal = {}) {
     return knownInURL.name;
   }
 
+  if (
+    knownInDescription
+    && !knownInDescription.source
+    && (!explicitBrand || explicitLooksLikePublisher || isSourceLikeBrand(explicitBrand) || isLikelyGenericLocation(explicitBrand))
+  ) {
+    return knownInDescription.name;
+  }
+
+  const captionBrand = extractCaptionBrand(descriptionSignal);
+  if (
+    captionBrand
+    && (!explicitBrand || explicitLooksLikePublisher || isSourceLikeBrand(explicitBrand) || isLikelyGenericLocation(explicitBrand))
+  ) {
+    return captionBrand;
+  }
+
   if (explicitBrand && !explicitLooksLikePublisher && !isSourceLikeBrand(explicitBrand) && !isLikelyGenericLocation(explicitBrand)) {
     return explicitBrand;
   }
@@ -567,8 +636,6 @@ function inferPreferredBrand(deal = {}) {
 
   const distanceBrand = extractFromDistance(deal.distance);
   if (distanceBrand) return distanceBrand;
-
-  if (knownInDescription && !knownInDescription.source) return knownInDescription.name;
 
   return explicitBrand || '';
 }
