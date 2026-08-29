@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-29T08:48:32.510Z",
+  "generatedAt": "2026-08-29T09:38:22.907Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 513,
@@ -177,6 +177,7 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "healthScore": 0,
         "issues": [
+          "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
           "liefert aktuell 0 Deals"
         ],
         "sampleTitles": []
@@ -232,6 +233,7 @@
       "reportedSources": 7,
       "failedSources": [],
       "completedWithErrors": [
+        "firecrawl2",
         "gastro2",
         "power"
       ]
@@ -1855,24 +1857,26 @@
       "missingUrlCount": 0,
       "sampleTitles": [],
       "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-28T14:43:26.961Z",
-        "finishedAt": "2026-08-28T14:47:32.048Z",
-        "durationMs": 245087,
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-29T09:34:37.923Z",
+        "finishedAt": "2026-08-29T09:37:55.529Z",
+        "durationMs": 197606,
         "counts": {
-          "rawCandidates": 13,
-          "normalizedCandidates": 7,
-          "verifiedCandidates": 1,
+          "rawCandidates": 15,
+          "normalizedCandidates": 11,
+          "verifiedCandidates": 0,
           "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 12
+          "acceptedDeals": 0,
+          "rejectedDeals": 15
         },
         "rejectedByReason": {
+          "missing-concrete-offer": 3,
           "excluded-giveaway": 1,
-          "missing-concrete-offer": 5,
-          "post-verification-rejected": 6
+          "post-verification-rejected": 11
         },
-        "errors": [],
+        "errors": [
+          "https://www.instagram.com/lidl_oesterreich/: Firecrawl Agent nach 120s abgebrochen"
+        ],
         "reportFile": "deal-pipeline-last-run-firecrawl2.json"
       },
       "uniqueRate": 0,
@@ -1887,6 +1891,7 @@
       "topCategories": [],
       "topTypes": [],
       "issues": [
+        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
         "liefert aktuell 0 Deals"
       ],
       "healthScore": 0,
