@@ -15,6 +15,7 @@ import {
   filterDuplicateDealsInRun,
   loadLiveDealDuplicateKeys,
   loadQueuedDealDuplicateKeys,
+  mergePendingQueue,
   normalizeSeenPostCache,
   normalizeDeal,
   prepareKey4ReviewDeals,
@@ -40,6 +41,14 @@ assert.deepEqual([...postedSeenKeys], ['instagram:reel:JustPosted']);
 assert.equal(addSeenDealsFromThread(postedSeenKeys, [{
   url: 'https://www.instagram.com/reel/JustPosted/',
 }]), 0, 'a confirmed Slack post must enter the seen cache only once');
+
+const mergedSocialQueue = mergePendingQueue([
+  { slackTs: '1.001', url: 'https://www.instagram.com/reel/DupPost/' },
+], [
+  { slackTs: '2.002', url: 'https://instagram.com/reel/DupPost/?utm_source=ig_web_copy_link', title: 'newer presentation' },
+]);
+assert.equal(mergedSocialQueue.length, 1, 'the same Instagram post must occupy one queue row even with different Slack timestamps');
+assert.equal(mergedSocialQueue[0].slackTs, '1.001', 'the existing Slack timestamp remains addressable after the merge');
 
 const freshSeenCache = normalizeSeenPostCache({
   generatedAt: '2026-07-20T11:55:00.000Z',

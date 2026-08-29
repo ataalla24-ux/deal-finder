@@ -78,6 +78,7 @@ const BRAND_RULES = [
   { key: 'restaurantroth', name: 'Restaurant ROTH', logo: '🍽️', category: 'essen' },
   { key: 'restaurant bierraum', name: 'Restaurant Bierraum', logo: '🍝', category: 'essen' },
   { key: 'bierraum', name: 'Restaurant Bierraum', logo: '🍝', category: 'essen' },
+  { key: 'afterfive', name: 'Afterfive', logo: '🎉', category: 'kultur' },
   { key: 'spelunke', name: 'Spelunke', logo: '🍽️', category: 'essen', domain: 'spelunke.at' },
   { key: 'klavier galerie', name: 'Klavier Galerie', logo: '🎹', category: 'shopping' },
   { key: 'klaviergalerie', name: 'Klavier Galerie', logo: '🎹', category: 'shopping' },
@@ -1085,6 +1086,7 @@ function normalizeDealRecord(deal = {}) {
   if (known?.name === 'Dyson' && /\b(?:hair\s+styled|haare?\s+stylen|haarstyling|styling\s+tour|styling\s+pop[- ]?up)\b/i.test(categorySignal)) {
     category = 'beauty';
   }
+  if (known?.name === 'Afterfive') category = 'kultur';
 
   const categoryAsciiSignal = normalizeAscii(categorySignal);
   if (/\bomv\b/.test(categoryAsciiSignal)) {

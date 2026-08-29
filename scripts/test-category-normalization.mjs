@@ -48,6 +48,18 @@ assert.equal(
 );
 
 assert.equal(
+  normalizeDealRecord({
+    brand: 'Afterfive',
+    title: 'Gratis-Eintritt zum Open-Air-Event: Volksgarten Pavillon',
+    description: 'Free Entry, Drinks und House Music am 11.09.2026 im Volksgarten Pavillon Wien.',
+    category: 'essen',
+    type: 'gratis',
+  }).category,
+  'kultur',
+  'Afterfive free-entry events must not be categorized as food because of drink mentions',
+);
+
+assert.equal(
   normalizeCategoryForScraper('shopping', [
     'Tomochan Ramen',
     'Gratis Ramen',

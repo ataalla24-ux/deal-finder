@@ -1380,10 +1380,10 @@ function writePendingAll(deals) {
 }
 
 function queueKey(deal) {
-  const slackTs = cleanText(deal.slackTs);
-  if (slackTs) return `slack:${slackTs}`;
   const postKey = canonicalPostKey(deal.url);
   if (isSocialPostKey(postKey)) return postKey;
+  const slackTs = cleanText(deal.slackTs);
+  if (slackTs) return `slack:${slackTs}`;
   return cleanText(deal.id) || normalizeUrl(deal.url);
 }
 
@@ -1683,6 +1683,7 @@ export {
   pruneStaleQueueDeals,
   revalidateRecentPostedQueue,
   combineFirecrawlReviewSelections,
+  mergePendingQueue,
   selectFirecrawlReviewDeals,
   validateAndDedupeDealsForSlack,
 };
