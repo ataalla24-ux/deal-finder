@@ -121,6 +121,7 @@ function emptyMediaReport(status = 'disabled', error = '') {
     outputTokens: 0,
     totalTokens: 0,
     errors: error ? [cleanText(error, 180)] : [],
+    warnings: [],
   };
 }
 

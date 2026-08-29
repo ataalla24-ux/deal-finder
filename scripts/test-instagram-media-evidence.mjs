@@ -361,7 +361,8 @@ const failedOcr = await analyzeInstagramMediaItem({
   },
 });
 assert.equal(failedOcrCalls, 1, 'non-language OCR failures must not be retried');
-assert.equal(failedOcr.errors.length, 1);
+assert.equal(failedOcr.errors.length, 0, 'a per-image OCR failure is not a pipeline error when the asset was downloaded');
+assert.equal(failedOcr.warnings.length, 1, 'a per-image OCR failure remains visible as a warning');
 assert.equal(failedOcr.visionImages.length, 1, 'a failed OCR pass still leaves visual evidence for the model');
 
 let languageFallbackCalls = 0;

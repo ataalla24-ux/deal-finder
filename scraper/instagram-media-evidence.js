@@ -234,12 +234,12 @@ function mergeOcrParts(parts, maxChars) {
 
 export async function analyzeInstagramMediaItem(item, config, options = {}) {
   const assets = extractInstagramMediaAssets(item).slice(0, config.mediaMaxAssetsPerPost);
-  if (!assets.length) return { ocrText: '', visionImages: [], assetCount: 0, imageCount: 0, videoFrameCount: 0, errors: [] };
+  if (!assets.length) return { ocrText: '', visionImages: [], assetCount: 0, imageCount: 0, videoFrameCount: 0, errors: [], warnings: [] };
   const tools = options.tools || await detectMediaTools(options);
   const visionEnabled = Boolean(config.mediaVisionEnabled);
   const ocrEnabled = config.mediaOcrEnabled !== false && Boolean(tools.tesseract);
   if (!ocrEnabled && !visionEnabled) {
-    return { ocrText: '', visionImages: [], assetCount: 0, imageCount: 0, videoFrameCount: 0, errors: ['tesseract-unavailable'] };
+    return { ocrText: '', visionImages: [], assetCount: 0, imageCount: 0, videoFrameCount: 0, errors: ['tesseract-unavailable'], warnings: [] };
   }
 
   const fetchImpl = options.fetchImpl || fetch;
@@ -248,6 +248,7 @@ export async function analyzeInstagramMediaItem(item, config, options = {}) {
   const textParts = [];
   const visionImages = [];
   const errors = [];
+  const warnings = [];
   let imageCount = 0;
   let videoFrameCount = 0;
   let processedAssets = 0;
@@ -282,7 +283,7 @@ export async function analyzeInstagramMediaItem(item, config, options = {}) {
                 const enhanced = await enhanceImage(framePath, `${framePath}.ocr.png`, tools, config, execImpl);
                 textParts.push(await runTesseract(enhanced, config, execImpl));
               } catch (error) {
-                errors.push(cleanText(error?.message || error, 160));
+                warnings.push(cleanText(error?.message || error, 160));
               }
             }
             videoFrameCount += 1;
@@ -294,7 +295,7 @@ export async function analyzeInstagramMediaItem(item, config, options = {}) {
               const enhanced = await enhanceImage(inputPath, path.join(tempDir, `asset-${index}-ocr.png`), tools, config, execImpl);
               textParts.push(await runTesseract(enhanced, config, execImpl));
             } catch (error) {
-              errors.push(cleanText(error?.message || error, 160));
+              warnings.push(cleanText(error?.message || error, 160));
             }
           }
           imageCount += 1;
@@ -313,6 +314,7 @@ export async function analyzeInstagramMediaItem(item, config, options = {}) {
     imageCount,
     videoFrameCount,
     errors: errors.slice(0, 5),
+    warnings: warnings.slice(0, 5),
   };
 }
 
@@ -486,6 +488,7 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     outputTokens: 0,
     totalTokens: 0,
     errors: [],
+    warnings: [],
     llmConfigured,
     visionConfigured,
   };
@@ -530,7 +533,7 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
         execFileImpl: options.execFileImpl,
       });
     } catch (error) {
-      return { ocrText: '', visionImages: [], assetCount: 0, imageCount: 0, videoFrameCount: 0, errors: [cleanText(error?.message || error, 160)] };
+      return { ocrText: '', visionImages: [], assetCount: 0, imageCount: 0, videoFrameCount: 0, errors: [cleanText(error?.message || error, 160)], warnings: [] };
     }
   });
 
@@ -551,11 +554,13 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
       imageCount: Number(result.imageCount || 0),
       videoFrameCount: Number(result.videoFrameCount || 0),
       errors: Array.isArray(result.errors) ? result.errors.map((value) => cleanText(value, 160)).filter(Boolean).slice(0, 5) : [],
+      warnings: Array.isArray(result.warnings) ? result.warnings.map((value) => cleanText(value, 160)).filter(Boolean).slice(0, 5) : [],
     };
     report.analyzed += 1;
     if (evidence.ocrText) report.withOcrText += 1;
     if (visionImages.length) report.withVisionImages += 1;
     if (evidence.errors.length) report.errors.push(...evidence.errors);
+    if (evidence.warnings.length) report.warnings.push(...evidence.warnings);
 
     const caption = cleanText(entry.item.caption, 3000);
     const visibleViennaText = /\b(?:wien|vienna|1010|1020|1030|1040|1050|1060|1070|1080|1090|1100|1110|1120|1130|1140|1150|1160|1170|1180|1190|1200|1210|1220|1230)\b/i
@@ -587,6 +592,7 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
   }
 
   report.errors = [...new Set(report.errors.filter(Boolean))].slice(0, 20);
+  report.warnings = [...new Set(report.warnings.filter(Boolean))].slice(0, 20);
   report.status = report.errors.length ? 'degraded' : 'ok';
   return { entries: safeEntries, cache: pruneMediaCache(cache, now, config.mediaCacheTtlDays), report };
 }
