@@ -63,6 +63,9 @@ const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 const PENDING_FILE_NAMES = process.env.PENDING_FILE_NAMES || '';
 const SEEN_DEAL_SUPPRESSION_DAYS = Number(process.env.SLACK_SEEN_DEAL_SUPPRESSION_DAYS || 7);
 const MAX_SEEN_REACTION_CHECKS = Number(process.env.SLACK_SEEN_MAX_REACTION_CHECKS || 250);
+const QUEUE_REVALIDATION_INTERVAL_HOURS = Number(
+  process.env.SLACK_QUEUE_REVALIDATION_INTERVAL_HOURS || 6,
+);
 const SLACK_SEEN_CACHE_MAX_AGE_MINUTES = boundedInteger(
   process.env.SLACK_SEEN_CACHE_MAX_AGE_MINUTES,
   10,
@@ -1311,7 +1314,17 @@ async function revalidateRecentPostedQueue(deals, options = {}) {
     // approval workflow still runs the full validator after any edit.
     .filter(({ deal }) => deal.firecrawlReview !== true
       && cleanText(deal.slackTs)
-      && (queueDealAgeDays(deal, now) ?? Infinity) < maxAgeDays);
+      && (queueDealAgeDays(deal, now) ?? Infinity) < maxAgeDays
+      && (() => {
+        const checkedAt = Date.parse(cleanText(deal.queueValidationCheckedAt));
+        const intervalHours = Number.isFinite(Number(options.revalidationIntervalHours))
+          ? Number(options.revalidationIntervalHours)
+          : QUEUE_REVALIDATION_INTERVAL_HOURS;
+        return !Number.isFinite(checkedAt)
+          || !Number.isFinite(intervalHours)
+          || intervalHours <= 0
+          || (now.getTime() - checkedAt) >= intervalHours * 60 * 60 * 1000;
+      })());
   if (entries.length === 0) {
     return { deals, removed: 0, blocked: 0, changed: false, validation: null };
   }
@@ -1335,6 +1348,7 @@ async function revalidateRecentPostedQueue(deals, options = {}) {
     const validated = validatedByIndex.get(index);
     if (validated) {
       const next = { ...deal, ...validated };
+      next.queueValidationCheckedAt = checkedAt;
       delete next.queueValidationBlocked;
       delete next.queueValidationReasons;
       delete next.queueValidationFirstBlockedAt;
@@ -1345,6 +1359,7 @@ async function revalidateRecentPostedQueue(deals, options = {}) {
     if (!blocked) return deal;
     return {
       ...deal,
+      queueValidationCheckedAt: checkedAt,
       queueValidationBlocked: true,
       queueValidationReasons: ensureArray(blocked.decision?.reasons).map(cleanText).filter(Boolean),
       queueValidationFirstBlockedAt: cleanText(deal.queueValidationFirstBlockedAt) || checkedAt,

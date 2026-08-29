@@ -1936,8 +1936,18 @@ assert.deepEqual(
   'blocked and manual-review rows must stay in the recent-post ledger until naturally pruned',
 );
 assert.equal(queueRevalidation.deals[0].queueValidationBlocked, true);
+assert.equal(queueRevalidation.deals[0].queueValidationCheckedAt, now.toISOString());
 assert.match(queueRevalidation.deals[0].queueValidationReasons.join(' | '), /Gewinnspiel/i);
 assert.equal(queueRevalidation.validation?.summary?.total, 2, 'review rows must not be auto-revalidated away');
+
+const queueRevalidationCacheHit = await revalidateRecentPostedQueue(queueRevalidation.deals, {
+  now: new Date('2026-07-20T12:30:00.000Z'),
+  revalidationIntervalHours: 6,
+  inspectDealUrlHealth: async () => { throw new Error('cached queue rows must not be revalidated'); },
+  concurrency: 1,
+});
+assert.equal(queueRevalidationCacheHit.validation, null, 'fresh queue validation timestamps avoid repeated URL checks');
+assert.deepEqual(queueRevalidationCacheHit.deals, queueRevalidation.deals);
 
 const flappingRepostFilter = filterAlreadyQueuedDeals([
   {
