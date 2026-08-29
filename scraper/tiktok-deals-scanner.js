@@ -34,12 +34,12 @@ const MEDIA_CACHE_PATH = path.join(DOCS_DIR, 'tiktok-media-evidence-cache.json')
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CONFIG = {
   maxAgeDays: Math.min(7, Math.max(1, Number(process.env.TIKTOK_MAX_AGE_DAYS || 7) || 7)),
-  maxPostsToVisit: Number(process.env.TIKTOK_MAX_POSTS || 90),
-  maxDeals: Number(process.env.TIKTOK_MAX_DEALS || 45),
+  maxPostsToVisit: Number(process.env.TIKTOK_MAX_POSTS || 120),
+  maxDeals: Number(process.env.TIKTOK_MAX_DEALS || 50),
   minScore: Number(process.env.TIKTOK_MIN_SCORE || 58),
-  apiSearchPages: Number(process.env.TIKTOK_SEARCH_PAGES || 2),
-  apiSearchCount: Number(process.env.TIKTOK_SEARCH_COUNT || 24),
-  maxApiCandidates: Number(process.env.TIKTOK_MAX_API_CANDIDATES || 900),
+  apiSearchPages: Number(process.env.TIKTOK_SEARCH_PAGES || 3),
+  apiSearchCount: Number(process.env.TIKTOK_SEARCH_COUNT || 30),
+  maxApiCandidates: Number(process.env.TIKTOK_MAX_API_CANDIDATES || 1200),
 };
 
 const SEARCH_QUERIES = [

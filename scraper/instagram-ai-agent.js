@@ -57,7 +57,7 @@ loadEnvFile();
 const CONFIG = {
   maxCandidates: numberEnv('INSTAGRAM_AI_MAX_CANDIDATES', 80),
   maxDeals: numberEnv('INSTAGRAM_AI_MAX_DEALS', 35),
-  maxSearchQueries: numberEnv('INSTAGRAM_AI_MAX_SEARCH_QUERIES', 42),
+  maxSearchQueries: numberEnv('INSTAGRAM_AI_MAX_SEARCH_QUERIES', 54),
   maxPreviewFetches: numberEnv('INSTAGRAM_AI_MAX_PREVIEW_FETCHES', 80),
   maxRenderFetches: numberEnv('INSTAGRAM_AI_MAX_RENDER_FETCHES', 80),
   maxProfileAccounts: numberEnv('INSTAGRAM_AI_MAX_PROFILE_ACCOUNTS', 8),
@@ -92,6 +92,14 @@ const BASE_SEARCH_QUERIES = [
   'site:instagram.com/p vienna food deal',
   'site:instagram.com/reel wien gratis drink',
   'site:instagram.com/p vienna free drinks',
+  'site:instagram.com/reel wien gratis eintritt museum event',
+  'site:instagram.com/p wien gratis eintritt museum event',
+  'site:instagram.com/reel wien gratis fitness probetraining',
+  'site:instagram.com/p wien gratis fitness probetraining',
+  'site:instagram.com/reel wien gratis beauty sample',
+  'site:instagram.com/p wien rabatt shopping aktion',
+  'site:instagram.com/reel wien gratis workshop kurs',
+  'site:instagram.com/p vienna free event tickets',
 ];
 
 const LOCAL_DEAL_CORPUS_FILES = [
