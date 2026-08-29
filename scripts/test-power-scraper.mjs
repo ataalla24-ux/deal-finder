@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   extractDealsFromHTML,
   hasConcretePowerDealSignal,
+  shouldUseBrowserFallback,
 } from '../scraper/power-scraper.js';
 
 const source = {
@@ -22,6 +23,9 @@ assert.equal(hasConcretePowerDealSignal('Qualifiziert für Angebot: MacBook ab 1
 assert.equal(hasConcretePowerDealSignal('Kostenlose Ressourcen für Lehrkräfte'), false);
 assert.equal(hasConcretePowerDealSignal('Entdecke Tools von der ersten Zeile Code bis zu deiner ersten App'), false);
 assert.equal(hasConcretePowerDealSignal('Matcha nur 2,50 EUR', source), true);
+assert.equal(shouldUseBrowserFallback(new Error('HTTP 403')), true);
+assert.equal(shouldUseBrowserFallback(new Error('Timeout after 8000ms')), true);
+assert.equal(shouldUseBrowserFallback(new Error('HTTP 404')), false);
 
 const deals = extractDealsFromHTML(`
   <a href="/angebote">Angebote</a>

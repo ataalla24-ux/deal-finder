@@ -30,6 +30,7 @@ const SOURCE_KEY = 'power';
 const SOURCE_LABEL = 'Power Scraper';
 const OUTPUT_PATH = 'docs/deals-pending-power.json';
 const RUN_STARTED_AT = new Date();
+let browserInstance = null;
 // ============================================
 // STATISCHE BASIS-DEALS (Dauerhaft gültig)
 // Stand: Februar 2026
@@ -448,6 +449,33 @@ async function fetchHTML(url, options = {}) {
   }
 }
 
+function shouldUseBrowserFallback(error) {
+  return String(error?.message || error || '').match(/HTTP (?:403|429)|fetch failed|Timeout after/i) !== null;
+}
+
+async function fetchHTMLWithBrowser(url, options = {}) {
+  const { chromium } = await import('playwright');
+  if (!browserInstance) browserInstance = await chromium.launch({ headless: true });
+  const context = await browserInstance.newContext({
+    locale: 'de-AT',
+    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/131 Safari/537.36 FreeFinderPower/5.2',
+  });
+  const page = await context.newPage();
+  const timeoutMs = Number(options.timeoutMs || FETCH_TIMEOUT_MS);
+  try {
+    const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
+    const status = response?.status() || 0;
+    if (status >= 400) throw new Error(`Browser HTTP ${status}`);
+    const html = await page.content();
+    const maxBytes = Number(options.maxBytes || MAX_HTML_BYTES);
+    const buffer = Buffer.from(html);
+    const limited = buffer.length > maxBytes ? buffer.subarray(0, maxBytes).toString('utf8') : html;
+    return { html: limited, finalUrl: page.url() || url, bytes: Buffer.byteLength(limited), browserFallback: true };
+  } finally {
+    await context.close();
+  }
+}
+
 function stableDealId(parts) {
   const hash = crypto.createHash('sha1').update(parts.filter(Boolean).join('|')).digest('hex').slice(0, 12);
   return `power-${hash}`;
@@ -614,7 +642,14 @@ async function main() {
     const sourceStartedAt = Date.now();
     try {
       console.log(`🌐 ${source.name}...`);
-      const response = await fetchHTML(source.url);
+      let response;
+      try {
+        response = await fetchHTML(source.url);
+      } catch (error) {
+        if (String(process.env.POWER_BROWSER_FALLBACK || '') !== '1' || !shouldUseBrowserFallback(error)) throw error;
+        console.log(`   ↪ Browser-Fallback für ${source.name}`);
+        response = await fetchHTMLWithBrowser(source.url);
+      }
       const html = response.html;
       const deals = extractDealsFromHTML(html, source);
       console.log(`   → ${deals.length} Deals gefunden`);
@@ -625,6 +660,7 @@ async function main() {
         status: 'ok',
         deals: deals.length,
         bytes: response.bytes,
+        browserFallback: response.browserFallback === true,
         durationMs: Date.now() - sourceStartedAt,
         rows: deals,
       };
@@ -641,6 +677,10 @@ async function main() {
       };
     }
   });
+  if (browserInstance) {
+    await browserInstance.close();
+    browserInstance = null;
+  }
   const scrapedDeals = sourceResults.flatMap((result) => result.rows);
   
   const normalizedBaseDeals = INCLUDE_BASE_DEALS
@@ -750,4 +790,5 @@ export {
   extractDealsFromHTML,
   fetchHTML,
   hasConcretePowerDealSignal,
+  shouldUseBrowserFallback,
 };
