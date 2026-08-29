@@ -1,7 +1,7 @@
 {
-  "startedAt": "2026-08-28T17:39:57.921Z",
-  "finishedAt": "2026-08-28T17:40:11.884Z",
-  "durationMs": 13963,
+  "startedAt": "2026-08-29T06:02:48.205Z",
+  "finishedAt": "2026-08-29T06:03:08.379Z",
+  "durationMs": 20174,
   "config": {
     "includeBaseDeals": false,
     "sourceCount": 56,
@@ -11,10 +11,10 @@
     "maxDealsPerSource": 10
   },
   "summary": {
-    "healthySources": 29,
-    "failedSources": 27,
-    "rawDeals": 16,
-    "acceptedDeals": 16
+    "healthySources": 38,
+    "failedSources": 18,
+    "rawDeals": 44,
+    "acceptedDeals": 42
   },
   "sources": [
     {
@@ -24,7 +24,8 @@
       "status": "ok",
       "deals": 0,
       "bytes": 94696,
-      "durationMs": 2072
+      "browserFallback": false,
+      "durationMs": 1707
     },
     {
       "source": "Museumsquartier",
@@ -32,23 +33,24 @@
       "finalUrl": "https://www.mqw.at/de/programm/events/",
       "status": "ok",
       "deals": 1,
-      "bytes": 171710,
-      "durationMs": 3157
+      "bytes": 171548,
+      "browserFallback": false,
+      "durationMs": 2971
     },
     {
       "source": "Too Good To Go",
       "url": "https://www.toogoodtogo.com/at",
       "status": "error",
       "deals": 0,
-      "durationMs": 291,
-      "error": "HTTP 429"
+      "durationMs": 2330,
+      "error": "Browser HTTP 429"
     },
     {
       "source": "Foodsharing Wien",
       "url": "https://foodsharing.de/places/14125",
       "status": "error",
       "deals": 0,
-      "durationMs": 864,
+      "durationMs": 1018,
       "error": "HTTP 404"
     },
     {
@@ -58,7 +60,8 @@
       "status": "ok",
       "deals": 0,
       "bytes": 14749,
-      "durationMs": 1253
+      "browserFallback": false,
+      "durationMs": 1013
     },
     {
       "source": "HOFER Aktionen",
@@ -66,8 +69,9 @@
       "finalUrl": "https://www.hofer.at/angebote",
       "status": "ok",
       "deals": 0,
-      "bytes": 638579,
-      "durationMs": 2598
+      "bytes": 638578,
+      "browserFallback": false,
+      "durationMs": 1306
     },
     {
       "source": "BILLA Plus",
@@ -76,7 +80,8 @@
       "status": "ok",
       "deals": 0,
       "bytes": 1228824,
-      "durationMs": 2759
+      "browserFallback": false,
+      "durationMs": 1806
     },
     {
       "source": "Burger King",
@@ -85,14 +90,15 @@
       "status": "ok",
       "deals": 0,
       "bytes": 2261,
-      "durationMs": 1249
+      "browserFallback": false,
+      "durationMs": 903
     },
     {
       "source": "KFC",
       "url": "https://www.kfc.at/angebote",
       "status": "error",
       "deals": 0,
-      "durationMs": 4314,
+      "durationMs": 3424,
       "error": "HTTP 404"
     },
     {
@@ -102,7 +108,8 @@
       "status": "ok",
       "deals": 0,
       "bytes": 35266,
-      "durationMs": 3110
+      "browserFallback": false,
+      "durationMs": 3082
     },
     {
       "source": "John Harris",
@@ -111,7 +118,8 @@
       "status": "ok",
       "deals": 0,
       "bytes": 621654,
-      "durationMs": 1917
+      "browserFallback": false,
+      "durationMs": 1527
     },
     {
       "source": "MediaMarkt",
@@ -120,31 +128,34 @@
       "status": "ok",
       "deals": 0,
       "bytes": 491327,
-      "durationMs": 1924
+      "browserFallback": false,
+      "durationMs": 3235
     },
     {
       "source": "Saturn",
       "url": "https://www.saturn.at/de/campaign/angebote",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 1234,
-      "error": "HTTP 403"
+      "finalUrl": "https://www.mediamarkt.at/?ref=saturn",
+      "status": "ok",
+      "deals": 1,
+      "bytes": 773371,
+      "browserFallback": true,
+      "durationMs": 2402
     },
     {
       "source": "H&M",
       "url": "https://www.hm.com/at/de/angebote/",
       "status": "error",
       "deals": 0,
-      "durationMs": 8000,
-      "error": "Timeout after 8000ms"
+      "durationMs": 8121,
+      "error": "Browser HTTP 403"
     },
     {
       "source": "Zara",
       "url": "https://www.zara.com/at/de/sale",
       "status": "error",
       "deals": 0,
-      "durationMs": 421,
-      "error": "HTTP 403"
+      "durationMs": 195,
+      "error": "Browser HTTP 403"
     },
     {
       "source": "Gutscheine.at",
@@ -152,8 +163,9 @@
       "finalUrl": "https://www.gutscheine.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 905946,
-      "durationMs": 1202
+      "bytes": 906029,
+      "browserFallback": false,
+      "durationMs": 2684
     },
     {
       "source": "Coupons.at",
@@ -162,7 +174,8 @@
       "status": "ok",
       "deals": 0,
       "bytes": 6286,
-      "durationMs": 878
+      "browserFallback": false,
+      "durationMs": 700
     },
     {
       "source": "Nordsee",
@@ -171,14 +184,15 @@
       "status": "ok",
       "deals": 1,
       "bytes": 376110,
-      "durationMs": 1954
+      "browserFallback": false,
+      "durationMs": 1552
     },
     {
       "source": "Wienerwald",
       "url": "https://www.wienerwald.at/aktionen/",
       "status": "error",
       "deals": 0,
-      "durationMs": 931,
+      "durationMs": 317,
       "error": "HTTP 404"
     },
     {
@@ -186,24 +200,24 @@
       "url": "https://www.deananddavid.at/aktionen/",
       "status": "error",
       "deals": 0,
-      "durationMs": 784,
-      "error": "fetch failed"
+      "durationMs": 966,
+      "error": "page.goto: net::ERR_SSL_PROTOCOL_ERROR at https://www.deananddavid.at/aktionen/\nCall log:\n  - navigating to \"https://www.deananddavid.at/aktionen/\", waiting until \"domcontentloaded\"\n"
     },
     {
       "source": "Joe & the Juice",
       "url": "https://www.joeandthejuice.at/",
       "status": "error",
       "deals": 0,
-      "durationMs": 8000,
-      "error": "Timeout after 8000ms"
+      "durationMs": 16035,
+      "error": "page.goto: Timeout 8000ms exceeded.\nCall log:\n  - navigating to \"https://www.joeandthejuice.at/\", waiting until \"domcontentloaded\"\n"
     },
     {
       "source": "My Indigo",
       "url": "https://www.myindigo.at/aktionen/",
       "status": "error",
       "deals": 0,
-      "durationMs": 509,
-      "error": "fetch failed"
+      "durationMs": 700,
+      "error": "page.goto: net::ERR_SSL_UNRECOGNIZED_NAME_ALERT at https://www.myindigo.at/aktionen/\nCall log:\n  - navigating to \"https://www.myindigo.at/aktionen/\", waiting until \"domcontentloaded\"\n"
     },
     {
       "source": "Ströck",
@@ -212,7 +226,8 @@
       "status": "ok",
       "deals": 9,
       "bytes": 581293,
-      "durationMs": 2375
+      "browserFallback": false,
+      "durationMs": 1648
     },
     {
       "source": "Der Mann",
@@ -221,15 +236,18 @@
       "status": "ok",
       "deals": 0,
       "bytes": 64152,
-      "durationMs": 1608
+      "browserFallback": false,
+      "durationMs": 1337
     },
     {
       "source": "Spar",
       "url": "https://www.spar.at/aktionen/",
-      "status": "error",
+      "finalUrl": "https://www.spar.at/aktionen/salzburg",
+      "status": "ok",
       "deals": 0,
-      "durationMs": 570,
-      "error": "HTTP 403"
+      "bytes": 534305,
+      "browserFallback": true,
+      "durationMs": 976
     },
     {
       "source": "Billa",
@@ -237,17 +255,17 @@
       "finalUrl": "https://www.billa.at/unsere-aktionen/aktionen",
       "status": "ok",
       "deals": 0,
-      "bytes": 1228824,
-      "durationMs": 1045
+      "bytes": 1228396,
+      "browserFallback": false,
+      "durationMs": 848
     },
     {
       "source": "Unimarkt",
       "url": "https://www.unimarkt.at/aktionen/",
-      "finalUrl": "https://www.unimarkt.at/aktionen/",
-      "status": "ok",
+      "status": "error",
       "deals": 0,
-      "bytes": 7026,
-      "durationMs": 978
+      "durationMs": 3293,
+      "error": "HTTP 404"
     },
     {
       "source": "dm",
@@ -256,7 +274,8 @@
       "status": "ok",
       "deals": 0,
       "bytes": 11194,
-      "durationMs": 1312
+      "browserFallback": false,
+      "durationMs": 620
     },
     {
       "source": "Müller",
@@ -264,31 +283,32 @@
       "finalUrl": "https://www.mueller.at/aktuelles/aktionen/",
       "status": "ok",
       "deals": 0,
-      "bytes": 335233,
-      "durationMs": 1731
+      "bytes": 335190,
+      "browserFallback": false,
+      "durationMs": 914
     },
     {
       "source": "Douglas",
       "url": "https://www.douglas.at/aktionen/",
       "status": "error",
       "deals": 0,
-      "durationMs": 160,
-      "error": "HTTP 403"
+      "durationMs": 145,
+      "error": "Browser HTTP 403"
     },
     {
       "source": "Sephora",
       "url": "https://www.sephora.at/aktionen/",
       "status": "error",
       "deals": 0,
-      "durationMs": 326,
-      "error": "fetch failed"
+      "durationMs": 569,
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at https://www.sephora.at/aktionen/\nCall log:\n  - navigating to \"https://www.sephora.at/aktionen/\", waiting until \"domcontentloaded\"\n"
     },
     {
       "source": "About You",
       "url": "https://www.aboutyou.at/sale/",
       "status": "error",
       "deals": 0,
-      "durationMs": 510,
+      "durationMs": 387,
       "error": "HTTP 404"
     },
     {
@@ -298,22 +318,23 @@
       "status": "ok",
       "deals": 0,
       "bytes": 13740,
-      "durationMs": 1234
+      "browserFallback": false,
+      "durationMs": 884
     },
     {
       "source": "H&M",
       "url": "https://www.hm.com/at/de/angebote/",
       "status": "error",
       "deals": 0,
-      "durationMs": 8000,
-      "error": "Timeout after 8000ms"
+      "durationMs": 8072,
+      "error": "Browser HTTP 403"
     },
     {
       "source": "Primark",
       "url": "https://www.primark.com/at/de/",
       "status": "error",
       "deals": 0,
-      "durationMs": 914,
+      "durationMs": 1163,
       "error": "HTTP 404"
     },
     {
@@ -323,23 +344,26 @@
       "status": "ok",
       "deals": 0,
       "bytes": 21378,
-      "durationMs": 499
+      "browserFallback": false,
+      "durationMs": 698
     },
     {
       "source": "Cyberport",
       "url": "https://www.cyberport.at/",
       "status": "error",
       "deals": 0,
-      "durationMs": 149,
-      "error": "HTTP 403"
+      "durationMs": 223,
+      "error": "Browser HTTP 403"
     },
     {
       "source": "Conrad",
       "url": "https://www.conrad.at/",
-      "status": "error",
+      "finalUrl": "https://www.conrad.at/",
+      "status": "ok",
       "deals": 0,
-      "durationMs": 157,
-      "error": "HTTP 403"
+      "bytes": 548092,
+      "browserFallback": true,
+      "durationMs": 651
     },
     {
       "source": "Apple Store",
@@ -347,24 +371,29 @@
       "finalUrl": "https://www.apple.com/at-edu/store",
       "status": "ok",
       "deals": 3,
-      "bytes": 551681,
-      "durationMs": 1473
+      "bytes": 551691,
+      "browserFallback": false,
+      "durationMs": 400
     },
     {
       "source": "Decathlon",
       "url": "https://www.decathlon.at/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 170,
-      "error": "HTTP 403"
+      "finalUrl": "https://www.decathlon.at/",
+      "status": "ok",
+      "deals": 1,
+      "bytes": 457973,
+      "browserFallback": true,
+      "durationMs": 672
     },
     {
       "source": "Hervis",
       "url": "https://www.hervis.at/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 496,
-      "error": "HTTP 403"
+      "finalUrl": "https://www.hervis.at/shop/",
+      "status": "ok",
+      "deals": 2,
+      "bytes": 1200117,
+      "browserFallback": true,
+      "durationMs": 1401
     },
     {
       "source": "Sportscheck",
@@ -372,8 +401,9 @@
       "finalUrl": "https://www.sportscheck.at/",
       "status": "ok",
       "deals": 1,
-      "bytes": 794618,
-      "durationMs": 3318
+      "bytes": 780352,
+      "browserFallback": false,
+      "durationMs": 2222
     },
     {
       "source": "Intersport",
@@ -381,64 +411,75 @@
       "finalUrl": "https://www.intersport.at/",
       "status": "ok",
       "deals": 1,
-      "bytes": 369331,
-      "durationMs": 972
+      "bytes": 370493,
+      "browserFallback": false,
+      "durationMs": 980
     },
     {
       "source": "XXXLutz",
       "url": "https://www.xxxlutz.at/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 286,
-      "error": "HTTP 403"
+      "finalUrl": "https://www.xxxlutz.at/",
+      "status": "ok",
+      "deals": 5,
+      "bytes": 882709,
+      "browserFallback": true,
+      "durationMs": 969
     },
     {
       "source": "Möbelix",
       "url": "https://www.moebelix.at/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 147,
-      "error": "HTTP 403"
+      "finalUrl": "https://www.moebelix.at/",
+      "status": "ok",
+      "deals": 5,
+      "bytes": 1017984,
+      "browserFallback": true,
+      "durationMs": 1292
     },
     {
       "source": "Lego Store",
       "url": "https://www.lego.com/at-de/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 26,
-      "error": "HTTP 403"
+      "finalUrl": "https://www.lego.com/de-de",
+      "status": "ok",
+      "deals": 3,
+      "bytes": 721557,
+      "browserFallback": true,
+      "durationMs": 2750
     },
     {
       "source": "Thalia",
       "url": "https://www.thalia.at/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 152,
-      "error": "HTTP 403"
+      "finalUrl": "https://www.thalia.at/",
+      "status": "ok",
+      "deals": 1,
+      "bytes": 367168,
+      "browserFallback": true,
+      "durationMs": 1188
     },
     {
       "source": "Libro",
       "url": "https://www.libro.at/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 309,
-      "error": "HTTP 403"
+      "finalUrl": "https://www.pagro.at/",
+      "status": "ok",
+      "deals": 10,
+      "bytes": 1125247,
+      "browserFallback": true,
+      "durationMs": 1818
     },
     {
       "source": "Sparheld",
       "url": "https://www.sparheld.at/",
       "status": "error",
       "deals": 0,
-      "durationMs": 457,
-      "error": "fetch failed"
+      "durationMs": 569,
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at https://www.sparheld.at/\nCall log:\n  - navigating to \"https://www.sparheld.at/\", waiting until \"domcontentloaded\"\n"
     },
     {
       "source": "Deals",
       "url": "https://www.deals.at/",
       "status": "error",
       "deals": 0,
-      "durationMs": 368,
-      "error": "fetch failed"
+      "durationMs": 9856,
+      "error": "page.goto: net::ERR_CONNECTION_CLOSED at https://www.deals.at/\nCall log:\n  - navigating to \"https://www.deals.at/\", waiting until \"domcontentloaded\"\n"
     },
     {
       "source": "City Bike",
@@ -447,7 +488,8 @@
       "status": "ok",
       "deals": 0,
       "bytes": 107649,
-      "durationMs": 1150
+      "browserFallback": false,
+      "durationMs": 858
     },
     {
       "source": "WienMobil",
@@ -455,8 +497,9 @@
       "finalUrl": "https://www.wienmobil.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 52494,
-      "durationMs": 897
+      "bytes": 52493,
+      "browserFallback": false,
+      "durationMs": 829
     },
     {
       "source": "Therme Wien",
@@ -464,8 +507,9 @@
       "finalUrl": "https://thermewien.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 144306,
-      "durationMs": 1431
+      "bytes": 141056,
+      "browserFallback": false,
+      "durationMs": 1479
     },
     {
       "source": "Erlebniswelt",
@@ -473,8 +517,9 @@
       "finalUrl": "https://www.erlebniswelt.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 370902,
-      "durationMs": 1099
+      "bytes": 370945,
+      "browserFallback": false,
+      "durationMs": 573
     },
     {
       "source": "Tiergarten Schönbrunn",
@@ -482,8 +527,9 @@
       "finalUrl": "https://www.zoovienna.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 105511,
-      "durationMs": 1966
+      "bytes": 106066,
+      "browserFallback": false,
+      "durationMs": 1227
     },
     {
       "source": "Schloss Schönbrunn",
@@ -492,7 +538,8 @@
       "status": "ok",
       "deals": 0,
       "bytes": 652116,
-      "durationMs": 1797
+      "browserFallback": false,
+      "durationMs": 1829
     }
   ]
 }
