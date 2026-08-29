@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-29T10:26:13.924Z",
+  "generatedAt": "2026-08-29T10:53:48.488Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 513,
-    "uniqueCandidates": 490,
+    "totalCandidates": 514,
+    "uniqueCandidates": 489,
     "distinctCandidates": 500,
-    "duplicateClusters": 10,
+    "duplicateClusters": 11,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -183,16 +183,6 @@
         "sampleTitles": []
       },
       {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "healthScore": 0,
-        "issues": [
-          "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
-          "liefert aktuell 0 Deals"
-        ],
-        "sampleTitles": []
-      },
-      {
         "sourceKey": "google",
         "sourceLabel": "Google Deals",
         "healthScore": 0,
@@ -227,6 +217,22 @@
           "liefert aktuell 0 Deals"
         ],
         "sampleTitles": []
+      },
+      {
+        "sourceKey": "flights",
+        "sourceLabel": "Flights Vienna",
+        "healthScore": 28,
+        "issues": [
+          "wenige Deals sind frischer als 1 Tag",
+          "geringe Food-/Drink-Relevanz",
+          "wenige klare Gratis-/Promo-Signale",
+          "Wien-Signal ist zu schwach"
+        ],
+        "sampleTitles": [
+          "Hin & zurück nach Milan ab €29.98",
+          "Hin & zurück nach Manchester ab €45.12",
+          "Hin & zurück nach Bucharest ab €45.39"
+        ]
       }
     ],
     "pipelineRuns": {
@@ -652,83 +658,6 @@
       "sourceWeightScore": 58
     },
     {
-      "sourceKey": "firecrawl4",
-      "file": "deals-pending-firecrawl4.json",
-      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-      "totalDeals": 15,
-      "uniqueDeals": 15,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 1,
-      "foodDrinkCount": 15,
-      "promoCount": 15,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Habibi Hawara: Samstag & Sonntag ist bei uns Brunch-Time",
-        "Dots im Brunnerhof - Speisekarte, Preise, Fotos & 9 ...",
-        "Schweizerhaus - Speisekarte, Preise, Fotos & 32 ..."
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-28T19:16:58.949Z",
-        "finishedAt": "2026-08-28T19:21:40.645Z",
-        "durationMs": 281696,
-        "counts": {
-          "rawCandidates": 16,
-          "normalizedCandidates": 16,
-          "verifiedCandidates": 15,
-          "previousDeals": 12,
-          "acceptedDeals": 15,
-          "rejectedDeals": 12
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 12
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.1,
-      "viennaRate": 0.1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 60,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 14
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 14
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 66,
-      "missionFitScore": 65,
-      "coverageScore": 19,
-      "precisionScore": 63,
-      "sourceWeightScore": 56
-    },
-    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
@@ -801,6 +730,83 @@
       "coverageScore": 20,
       "precisionScore": 62,
       "sourceWeightScore": 49
+    },
+    {
+      "sourceKey": "firecrawl4",
+      "file": "deals-pending-firecrawl4.json",
+      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+      "totalDeals": 15,
+      "uniqueDeals": 14,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 1,
+      "foodDrinkCount": 15,
+      "promoCount": 15,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Habibi Hawara: Samstag & Sonntag ist bei uns Brunch-Time",
+        "Dots im Brunnerhof - Speisekarte, Preise, Fotos & 9 ...",
+        "Schweizerhaus - Speisekarte, Preise, Fotos & 32 ..."
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-28T19:16:58.949Z",
+        "finishedAt": "2026-08-28T19:21:40.645Z",
+        "durationMs": 281696,
+        "counts": {
+          "rawCandidates": 16,
+          "normalizedCandidates": 16,
+          "verifiedCandidates": 15,
+          "previousDeals": 12,
+          "acceptedDeals": 15,
+          "rejectedDeals": 12
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 12
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
+      },
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0.1,
+      "viennaRate": 0.1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 60,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 14
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 14
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 64,
+      "missionFitScore": 65,
+      "coverageScore": 19,
+      "precisionScore": 62,
+      "sourceWeightScore": 55
     },
     {
       "sourceKey": "instagram-ai",
@@ -1609,6 +1615,74 @@
       "sourceWeightScore": 30
     },
     {
+      "sourceKey": "firecrawl5",
+      "file": "deals-pending-firecrawl5.json",
+      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+      "totalDeals": 1,
+      "uniqueDeals": 0,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 1,
+      "viennaCount": 0,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Habibi Hawara: Samstag & Sonntag ist bei uns Brunch-Time"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-29T10:50:40.977Z",
+        "finishedAt": "2026-08-29T10:53:18.427Z",
+        "durationMs": 157450,
+        "counts": {
+          "rawCandidates": 10,
+          "normalizedCandidates": 10,
+          "verifiedCandidates": 1,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 9
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 9
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 80,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 42,
+      "missionFitScore": 63,
+      "coverageScore": 10,
+      "precisionScore": 52,
+      "sourceWeightScore": 44
+    },
+    {
       "sourceKey": "vienna-promo-radar",
       "file": "deals-pending-vienna-promo-radar.json",
       "sourceLabel": "Vienna Promo Radar",
@@ -1878,62 +1952,6 @@
           "https://www.instagram.com/lidl_oesterreich/: Firecrawl Agent nach 120s abgebrochen"
         ],
         "reportFile": "deal-pipeline-last-run-firecrawl2.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 0,
-      "topCategories": [],
-      "topTypes": [],
-      "issues": [
-        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
-        "liefert aktuell 0 Deals"
-      ],
-      "healthScore": 0,
-      "missionFitScore": 0,
-      "coverageScore": 0,
-      "precisionScore": 0,
-      "sourceWeightScore": 0
-    },
-    {
-      "sourceKey": "firecrawl5",
-      "file": "deals-pending-firecrawl5.json",
-      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-      "totalDeals": 0,
-      "uniqueDeals": 0,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-28T15:55:51.086Z",
-        "finishedAt": "2026-08-28T16:00:09.935Z",
-        "durationMs": 258849,
-        "counts": {
-          "rawCandidates": 15,
-          "normalizedCandidates": 14,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 0,
-          "rejectedDeals": 15
-        },
-        "rejectedByReason": {
-          "missing-concrete-offer": 1,
-          "post-verification-rejected": 14
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
       },
       "uniqueRate": 0,
       "duplicateRate": 0,
