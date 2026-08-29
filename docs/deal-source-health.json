@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-29T17:18:44.574Z",
+  "generatedAt": "2026-08-29T18:33:42.265Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 535,
@@ -20,12 +20,6 @@
         "totalDeals": 7
       },
       {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "healthScore": 75,
-        "totalDeals": 10
-      },
-      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "healthScore": 67,
@@ -36,15 +30,15 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "healthScore": 66,
         "totalDeals": 5
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 66,
+        "totalDeals": 3
       }
     ],
     "topMissionSources": [
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "missionFitScore": 79,
-        "totalDeals": 10
-      },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
@@ -68,6 +62,12 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "missionFitScore": 67,
         "totalDeals": 5
+      },
+      {
+        "sourceKey": "firecrawl4",
+        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+        "missionFitScore": 65,
+        "totalDeals": 16
       }
     ],
     "topCoverageSources": [
@@ -147,12 +147,6 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "sourceWeightScore": 64,
-        "totalDeals": 10
-      },
-      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 61,
@@ -169,6 +163,12 @@
         "sourceLabel": "Wien Deals Combined Graph",
         "sourceWeightScore": 58,
         "totalDeals": 4
+      },
+      {
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "sourceWeightScore": 58,
+        "totalDeals": 5
       }
     ],
     "topSourcesToFix": [
@@ -363,68 +363,6 @@
       "coverageScore": 17,
       "precisionScore": 77,
       "sourceWeightScore": 61
-    },
-    {
-      "sourceKey": "joe",
-      "file": "deals-pending-joe.json",
-      "sourceLabel": "jö Bonus Club",
-      "totalDeals": 10,
-      "uniqueDeals": 10,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 10,
-      "fresh7dCount": 10,
-      "viennaCount": 0,
-      "foodDrinkCount": 10,
-      "promoCount": 8,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "jö Äpp Extrem Aktion bei BILLA",
-        "jö Rabattsammler",
-        "jö äpp Day"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84.3,
-      "topCategories": [
-        {
-          "value": "supermarkt",
-          "count": 5
-        },
-        {
-          "value": "kaffee",
-          "count": 4
-        },
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 5
-        },
-        {
-          "value": "rabatt",
-          "count": 5
-        }
-      ],
-      "issues": [
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 75,
-      "missionFitScore": 79,
-      "coverageScore": 20,
-      "precisionScore": 68,
-      "sourceWeightScore": 64
     },
     {
       "sourceKey": "wien-combined",
@@ -821,6 +759,69 @@
       "coverageScore": 27,
       "precisionScore": 62,
       "sourceWeightScore": 49
+    },
+    {
+      "sourceKey": "joe",
+      "file": "deals-pending-joe.json",
+      "sourceLabel": "jö Bonus Club",
+      "totalDeals": 10,
+      "uniqueDeals": 10,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 10,
+      "viennaCount": 0,
+      "foodDrinkCount": 10,
+      "promoCount": 8,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "jö Äpp Extrem Aktion bei BILLA",
+        "jö Rabattsammler",
+        "jö äpp Day"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.3,
+      "topCategories": [
+        {
+          "value": "supermarkt",
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 4
+        },
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 5
+        },
+        {
+          "value": "rabatt",
+          "count": 5
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 61,
+      "missionFitScore": 57,
+      "coverageScore": 15,
+      "precisionScore": 56,
+      "sourceWeightScore": 50
     },
     {
       "sourceKey": "instagram-verified",
