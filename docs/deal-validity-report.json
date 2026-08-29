@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-08-29T07:28:49.376Z",
+  "generatedAt": "2026-08-29T07:34:34.096Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 314,
-    "allowed": 0,
+    "total": 315,
+    "allowed": 1,
     "blocked": 314,
     "warnings": 0,
     "reasonCounts": {
@@ -36,7 +36,7 @@
       "älter als 7 Tage (2026-07-16)": 1,
       "Gottesdienste nur im Wochenlauf": 34,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 13,
+      "URL ungültig (HTTP 404)": 10,
       "ausgeschlossene Quelle (gastro.news)": 25,
       "älter als 7 Tage (2014-10-10)": 9,
       "älter als 7 Tage (2023-11-04)": 1,
@@ -70,7 +70,7 @@
       "ausgeschlossene Quelle": 26,
       "kein konkreter Deal": 212,
       "kein echtes Post-Datum": 109,
-      "ungültige URL": 15,
+      "ungültige URL": 12,
       "Gottesdienste außerhalb Wochenlauf": 34,
       "Meta-Graph-Widerspruch": 4,
       "sonstiges": 2,
@@ -138,7 +138,7 @@
           "kein konkreter Deal": 32,
           "Gottesdienste außerhalb Wochenlauf": 33,
           "älter als 7 Tage": 33,
-          "ungültige URL": 3
+          "ungültige URL": 2
         }
       },
       "Google News RSS": {
@@ -202,7 +202,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 96,
           "älter als 7 Tage": 99,
-          "ungültige URL": 9,
+          "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "nicht Wien": 1
         }
@@ -242,10 +242,33 @@
         "reasonCategoryCounts": {
           "älter als 7 Tage": 1
         }
+      },
+      "Wien Deals Combined Graph": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 0,
+        "reasonCategoryCounts": {}
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-17957518859996596",
+      "title": "10 % auf deinen Aufenthalt im Henriette",
+      "brand": "Schönbrunn",
+      "source": "Wien Deals Combined Graph",
+      "url": "https://www.instagram.com/reel/DcnV5NaBg5U/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-29T06:55:25.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-31",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -1896,18 +1919,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 132,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-8-20260419",
@@ -2628,17 +2652,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 188,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-11-20260222",
@@ -3441,17 +3466,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 188,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-19-20260222",
@@ -4257,15 +4283,13 @@
       "reasons": [
         "älter als 7 Tage (2026-08-21)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-08-21T17:43:56.000Z",
       "sourceDateSource": "url.tiktokVideoId",
       "sourceAgeDays": 8,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "vpr-18t6ffw",
