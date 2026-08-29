@@ -364,6 +364,24 @@ const SOURCES = [
 ];
 
 const DISABLED_SOURCE_NAMES = new Set([
+  // These endpoints are confirmed dead or persistently blocked in the live
+  // report; keep the source list focused on endpoints that can produce data.
+  'Foodsharing Wien',
+  'KFC',
+  'H&M',
+  'Zara',
+  'Wienerwald',
+  'Dean&David',
+  'Joe & the Juice',
+  'My Indigo',
+  'Unimarkt',
+  'Douglas',
+  'Sephora',
+  'About You',
+  'Primark',
+  'Cyberport',
+  'Sparheld',
+  'Deals',
   'Wien Kulturkalender',
   'Lidl Angebote',
   "McDonald's",

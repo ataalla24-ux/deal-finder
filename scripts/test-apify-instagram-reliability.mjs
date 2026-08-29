@@ -9,6 +9,7 @@ import {
   collectDirectPostSeedUrls,
   normalizeApifyItem,
   selectAccountShard,
+  shouldSkipBudgetBlockedRetry,
   toIso,
 } from '../scraper/import-apify-instagram-deals.js';
 import {
@@ -292,6 +293,14 @@ assert.deepEqual(
   'an exhausted external Apify budget is reported without erasing output or creating recurring false outage failures',
 );
 assert.equal(classifyApifyApiFailure({ message: 'too many requests', httpStatus: 429 }).controlled, false);
+assert.equal(shouldSkipBudgetBlockedRetry({
+  operationalStatus: 'budget-blocked',
+  updatedAt: '2026-07-17T10:00:00.000Z',
+}, now, 6), true);
+assert.equal(shouldSkipBudgetBlockedRetry({
+  operationalStatus: 'budget-blocked',
+  updatedAt: '2026-07-17T01:00:00.000Z',
+}, now, 6), false);
 assert.equal(
   classifyApifyRunHealth({ summary: { inspectedPosts: 3, sources: {} }, rawDatasetItems: 0, acceptedDeals: 0 }).operationalStatus,
   'source-unusable',

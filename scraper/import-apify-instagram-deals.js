@@ -43,6 +43,10 @@ const UNKNOWN_EXPIRY_TTL_HOURS = Math.max(
   12,
   Number(process.env.APIFY_INSTAGRAM_UNKNOWN_EXPIRY_TTL_HOURS || 72),
 );
+const BUDGET_BLOCK_RETRY_HOURS = Math.max(
+  1,
+  Number(process.env.APIFY_BUDGET_BLOCK_RETRY_HOURS || 6),
+);
 
 const RESERVED_INSTAGRAM_PATHS = new Set([
   'p', 'reel', 'reels', 'explore', 'accounts', 'stories', 'direct', 'about', 'legal', 'privacy',
@@ -773,6 +777,15 @@ export function classifyApifyApiFailure(error) {
   };
 }
 
+export function shouldSkipBudgetBlockedRetry(report, now = new Date(), retryHours = BUDGET_BLOCK_RETRY_HOURS) {
+  if (report?.operationalStatus !== 'budget-blocked') return false;
+  const updatedAt = Date.parse(String(report.updatedAt || ''));
+  if (!Number.isFinite(updatedAt)) return false;
+  const hours = Number(retryHours);
+  return Number.isFinite(hours) && hours > 0
+    && (now.getTime() - updatedAt) < hours * 60 * 60 * 1000;
+}
+
 export async function main() {
   ensureDir(DOCS_DIR);
 
@@ -781,6 +794,14 @@ export async function main() {
   }
   if (!APIFY_ACTOR_ID) {
     throw new Error('APIFY_INSTAGRAM_VIENNA_ACTOR_ID oder APIFY_ACTOR_ID fehlt');
+  }
+
+  const previousReport = readJsonIfExists(REPORT_PATH, {});
+  if (shouldSkipBudgetBlockedRetry(previousReport)) {
+    console.log(
+      `⏭️ Apify ist wegen Monatslimit blockiert; kein neuer Lauf innerhalb von ${BUDGET_BLOCK_RETRY_HOURS} Stunden`,
+    );
+    return;
   }
 
   const storedBaseInput = readJsonIfExists(DEFAULT_INPUT_PATH, {});
