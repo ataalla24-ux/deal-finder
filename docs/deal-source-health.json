@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-29T08:03:24.305Z",
+  "generatedAt": "2026-08-29T08:05:34.894Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 511,
-    "uniqueCandidates": 489,
-    "distinctCandidates": 499,
+    "totalCandidates": 512,
+    "uniqueCandidates": 490,
+    "distinctCandidates": 500,
     "duplicateClusters": 10,
     "topHealthySources": [
       {
@@ -12,6 +12,12 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "healthScore": 77,
+        "totalDeals": 5
       },
       {
         "sourceKey": "joe",
@@ -30,12 +36,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "healthScore": 72,
         "totalDeals": 5
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "healthScore": 72,
-        "totalDeals": 4
       }
     ],
     "topMissionSources": [
@@ -127,16 +127,16 @@
         "totalDeals": 3
       },
       {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "precisionScore": 76,
+        "totalDeals": 5
+      },
+      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "precisionScore": 72,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "precisionScore": 71,
-        "totalDeals": 4
       }
     ],
     "topWeightedSources": [
@@ -165,10 +165,10 @@
         "totalDeals": 3
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 58,
-        "totalDeals": 3
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 59,
+        "totalDeals": 5
       }
     ],
     "topSourcesToFix": [
@@ -286,6 +286,76 @@
       "coverageScore": 16,
       "precisionScore": 88,
       "sourceWeightScore": 70
+    },
+    {
+      "sourceKey": "tiktok",
+      "file": "deals-pending-tiktok.json",
+      "sourceLabel": "TikTok Scanner",
+      "totalDeals": 5,
+      "uniqueDeals": 5,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 5,
+      "viennaCount": 5,
+      "foodDrinkCount": 2,
+      "promoCount": 5,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "1+1 GRATIS BEI CHOCOBERRY",
+        "Birthday-Special: Eintritt um 10 € bei ASIANNIGHT",
+        "Gratis Haarstyling und Drinks beim Dyson Pop-up"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.2,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.4,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 73.2,
+      "topCategories": [
+        {
+          "value": "beauty",
+          "count": 1
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "freizeit",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 4
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 77,
+      "missionFitScore": 61,
+      "coverageScore": 15,
+      "precisionScore": 76,
+      "sourceWeightScore": 59
     },
     {
       "sourceKey": "joe",
@@ -500,73 +570,6 @@
       "coverageScore": 16,
       "precisionScore": 82,
       "sourceWeightScore": 64
-    },
-    {
-      "sourceKey": "tiktok",
-      "file": "deals-pending-tiktok.json",
-      "sourceLabel": "TikTok Scanner",
-      "totalDeals": 4,
-      "uniqueDeals": 4,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 4,
-      "foodDrinkCount": 1,
-      "promoCount": 4,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "1+1 GRATIS BEI CHOCOBERRY",
-        "Gratis Haarstyling und Drinks beim Dyson Pop-up",
-        "Kostenloser Afro-Dance-Kurs für Kinder im Soundcube"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.8,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 69,
-      "topCategories": [
-        {
-          "value": "beauty",
-          "count": 1
-        },
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "freizeit",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 3
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 72,
-      "missionFitScore": 54,
-      "coverageScore": 14,
-      "precisionScore": 71,
-      "sourceWeightScore": 54
     },
     {
       "sourceKey": "wien-combined",
