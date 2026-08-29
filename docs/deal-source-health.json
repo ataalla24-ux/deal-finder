@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-29T05:59:48.412Z",
+  "generatedAt": "2026-08-29T06:10:33.881Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 495,
-    "uniqueCandidates": 475,
-    "distinctCandidates": 484,
+    "totalCandidates": 521,
+    "uniqueCandidates": 501,
+    "distinctCandidates": 510,
     "duplicateClusters": 9,
     "topHealthySources": [
       {
@@ -1609,103 +1609,6 @@
       "sourceWeightScore": 30
     },
     {
-      "sourceKey": "power",
-      "file": "deals-pending-power.json",
-      "sourceLabel": "Power Scraper",
-      "totalDeals": 16,
-      "uniqueDeals": 16,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 10,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Zum Apple Music Abo für Studierende gibt's Apple TV kostenlos dazu. Fußnote ◊◊ S",
-        "Alaska-Seelachsfilet 1+1",
-        "Führung Freier Eintritt Architektur Kostenlose Führung: Vision und Widerstand Ei"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-28T17:39:57.921Z",
-        "finishedAt": "2026-08-28T17:40:11.884Z",
-        "durationMs": 13963,
-        "counts": {
-          "rawCandidates": 16,
-          "normalizedCandidates": 16,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 16,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "Too Good To Go: HTTP 429",
-          "Foodsharing Wien: HTTP 404",
-          "KFC: HTTP 404",
-          "Saturn: HTTP 403",
-          "H&M: Timeout after 8000ms",
-          "Zara: HTTP 403",
-          "Wienerwald: HTTP 404",
-          "Dean&David: fetch failed"
-        ],
-        "reportFile": "deal-pipeline-last-run-power.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 53.5,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 10
-        },
-        {
-          "value": "technik",
-          "count": 3
-        },
-        {
-          "value": "sport",
-          "count": 2
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 14
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 42,
-      "missionFitScore": 24,
-      "coverageScore": 13,
-      "precisionScore": 31,
-      "sourceWeightScore": 28
-    },
-    {
       "sourceKey": "vienna-promo-radar",
       "file": "deals-pending-vienna-promo-radar.json",
       "sourceLabel": "Vienna Promo Radar",
@@ -1785,6 +1688,112 @@
       "coverageScore": 65,
       "precisionScore": 28,
       "sourceWeightScore": 36
+    },
+    {
+      "sourceKey": "power",
+      "file": "deals-pending-power.json",
+      "sourceLabel": "Power Scraper",
+      "totalDeals": 42,
+      "uniqueDeals": 42,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 10,
+      "promoCount": 5,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis Transporter bei Selbstabholung",
+        "LEGO® Magazine (KOSTENLOS)",
+        "Zum Apple Music Abo für Studierende gibt's Apple TV kostenlos dazu. Fußnote ◊◊ S"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-29T06:02:48.205Z",
+        "finishedAt": "2026-08-29T06:03:08.379Z",
+        "durationMs": 20174,
+        "counts": {
+          "rawCandidates": 44,
+          "normalizedCandidates": 42,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 42,
+          "rejectedDeals": 0
+        },
+        "rejectedByReason": {},
+        "errors": [
+          "Too Good To Go: Browser HTTP 429",
+          "Foodsharing Wien: HTTP 404",
+          "KFC: HTTP 404",
+          "H&M: Browser HTTP 403",
+          "Zara: Browser HTTP 403",
+          "Wienerwald: HTTP 404",
+          "Dean&David: page.goto: net::ERR_SSL_PROTOCOL_ERROR at https://www.deananddavid.at/aktionen/ Call log: - navigating to \"https://www.deananddavid.at/aktionen/\", waiting until \"domcontentloaded\"",
+          "Joe & the Juice: page.goto: Timeout 8000ms exceeded. Call log: - navigating to \"https://www.joeandthejuice.at/\", waiting until \"domcontentloaded\""
+        ],
+        "reportFile": "deal-pipeline-last-run-power.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.2,
+      "promoRate": 0.1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 51.4,
+      "topCategories": [
+        {
+          "value": "bildung",
+          "count": 11
+        },
+        {
+          "value": "essen",
+          "count": 10
+        },
+        {
+          "value": "moebel",
+          "count": 10
+        },
+        {
+          "value": "sport",
+          "count": 4
+        },
+        {
+          "value": "technik",
+          "count": 4
+        },
+        {
+          "value": "spielzeug",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 37
+        },
+        {
+          "value": "gratis",
+          "count": 4
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 34,
+      "missionFitScore": 10,
+      "coverageScore": 26,
+      "precisionScore": 21,
+      "sourceWeightScore": 22
     },
     {
       "sourceKey": "flights",
