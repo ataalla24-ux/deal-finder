@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-29T16:53:01.649Z",
+  "generatedAt": "2026-08-29T16:58:20.162Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 534,
-    "uniqueCandidates": 507,
+    "totalCandidates": 535,
+    "uniqueCandidates": 506,
     "distinctCandidates": 518,
-    "duplicateClusters": 11,
+    "duplicateClusters": 12,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -26,16 +26,16 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 67,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "healthScore": 66,
         "totalDeals": 5
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 66,
-        "totalDeals": 3
       }
     ],
     "topMissionSources": [
@@ -52,6 +52,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 70,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 70,
@@ -62,12 +68,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "missionFitScore": 67,
         "totalDeals": 5
-      },
-      {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "missionFitScore": 65,
-        "totalDeals": 16
       }
     ],
     "topCoverageSources": [
@@ -133,10 +133,10 @@
         "totalDeals": 5
       },
       {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "precisionScore": 68,
-        "totalDeals": 10
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 72,
+        "totalDeals": 4
       }
     ],
     "topWeightedSources": [
@@ -165,10 +165,10 @@
         "totalDeals": 3
       },
       {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
         "sourceWeightScore": 58,
-        "totalDeals": 5
+        "totalDeals": 4
       }
     ],
     "topSourcesToFix": [
@@ -425,6 +425,90 @@
       "coverageScore": 20,
       "precisionScore": 68,
       "sourceWeightScore": 64
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 4,
+      "uniqueDeals": 1,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 4,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 1,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "September 18 - 23 Uhr auf 17 Wiener Märkte, Marktraum am Naschmarkt und 3 Wochenmärkten gratis Programm mit Musik, Showacts und mehr 🛍️ REM",
+        "10 % auf deinen Aufenthalt im Henriette",
+        "👀🍗 Etwas Neues kommt… DUST FREE 🔥"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-29T16:51:35.073Z",
+        "finishedAt": "2026-08-29T16:57:51.787Z",
+        "durationMs": 376714,
+        "counts": {
+          "rawCandidates": 123,
+          "normalizedCandidates": 4,
+          "verifiedCandidates": 4,
+          "previousDeals": 0,
+          "acceptedDeals": 4,
+          "rejectedDeals": 112
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 94,
+          "missing-text": 11,
+          "general-recommendation": 5,
+          "excluded-promotion-type": 2
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.8,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.5,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        },
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 67,
+      "missionFitScore": 70,
+      "coverageScore": 14,
+      "precisionScore": 72,
+      "sourceWeightScore": 58
     },
     {
       "sourceKey": "gastro2",
@@ -743,9 +827,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 23,
-      "uniqueDeals": 17,
-      "duplicateDeals": 6,
-      "duplicateAcrossSources": 3,
+      "uniqueDeals": 16,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 4,
       "fresh1dCount": 8,
       "fresh7dCount": 23,
       "viennaCount": 23,
@@ -759,7 +843,7 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.7,
-      "duplicateRate": 0.1,
+      "duplicateRate": 0.2,
       "fresh1dRate": 0.3,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -813,7 +897,7 @@
       "healthScore": 62,
       "missionFitScore": 47,
       "coverageScore": 25,
-      "precisionScore": 63,
+      "precisionScore": 62,
       "sourceWeightScore": 50
     },
     {
@@ -933,83 +1017,6 @@
       "coverageScore": 11,
       "precisionScore": 52,
       "sourceWeightScore": 44
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 3,
-      "uniqueDeals": 1,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 1,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 2,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "10 % auf deinen Aufenthalt im Henriette",
-        "Mittagsteller um 10,80 € von Montag bis Freitag",
-        "Jeden Dienstag: 20 % Rabatt auf alle Pasta-Gerichte"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-29T07:19:28.361Z",
-        "finishedAt": "2026-08-29T07:28:03.021Z",
-        "durationMs": 514660,
-        "counts": {
-          "rawCandidates": 135,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
-          "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 121
-        },
-        "rejectedByReason": {
-          "missing-text": 14,
-          "no-concrete-offer": 91,
-          "excluded-promotion-type": 9,
-          "missing-vienna-evidence": 3,
-          "general-recommendation": 4
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 0.3,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 58,
-      "missionFitScore": 55,
-      "coverageScore": 12,
-      "precisionScore": 63,
-      "sourceWeightScore": 49
     },
     {
       "sourceKey": "member-benefits",

@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-29T16:53:39.737Z",
+  "generatedAt": "2026-08-29T16:58:53.684Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 326,
-    "allowed": 0,
-    "blocked": 326,
+    "total": 328,
+    "allowed": 1,
+    "blocked": 327,
     "warnings": 0,
     "reasonCounts": {
       "nicht eindeutig in Wien": 44,
@@ -30,11 +30,12 @@
       "älter als 7 Tage (2026-04-30)": 1,
       "älter als 7 Tage (2026-04-20)": 1,
       "abgelaufen (2026-04-24)": 1,
-      "älter als 7 Tage (2026-02-22)": 88,
+      "älter als 7 Tage (2026-02-22)": 87,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-07-16)": 1,
       "Gottesdienste nur im Wochenlauf": 34,
+      "älter als 7 Tage (2025-07-30)": 1,
       "URL ungültig (HTTP 404)": 13,
       "ausgeschlossene Quelle (gastro.news)": 26,
       "älter als 7 Tage (2014-10-10)": 10,
@@ -59,7 +60,7 @@
       "abgelaufen (2026-08-27T07:50:56.351Z)": 1,
       "Meta-Graph-Widerspruch (non-vienna-location)": 2,
       "abgelaufen (2026-08-22)": 2,
-      "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 1,
+      "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 2,
       "älter als 7 Tage (2026-07-01)": 9,
       "kein verlässliches Quell-/Post-Datum gefunden": 107,
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 1
@@ -74,7 +75,7 @@
       "ungültige URL": 15,
       "Gottesdienste außerhalb Wochenlauf": 34,
       "Meta-Graph-Widerspruch": 5,
-      "sonstiges": 7,
+      "sonstiges": 8,
       "Gewinnspiel": 1
     },
     "sourceCounts": {
@@ -253,10 +254,35 @@
         "reasonCategoryCounts": {
           "älter als 7 Tage": 9
         }
+      },
+      "Wien Deals Combined Graph": {
+        "total": 2,
+        "allowed": 1,
+        "blocked": 1,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "sonstiges": 1
+        }
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-17926961739166323",
+      "title": "Eis mit Limunade nur 2,50 €",
+      "brand": "Instagram",
+      "source": "Wien Deals Combined Graph",
+      "url": "https://www.instagram.com/reel/DcoZvMgsBCB/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-29T16:48:14.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-09-01T16:51:35.074Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -1182,18 +1208,17 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2025-07-30)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 500)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-02-22T21:13:07.698Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 188,
+      "sourceDate": "2025-07-30T05:18:47.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 395,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: HTTP 500"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-21-20260222",
@@ -6631,6 +6656,25 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18088455311453679",
+      "title": "September 18 - 23 Uhr auf 17 Wiener Märkte, Marktraum am Naschmarkt und 3 Wochenmärkten gratis Programm mit Musik, Showacts und mehr 🛍️ REM",
+      "brand": "Instagram",
+      "source": "Wien Deals Combined Graph",
+      "url": "https://www.instagram.com/reel/DcoLhTcMk5W/",
+      "reasons": [
+        "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot"
+      ],
+      "warnings": [
+        "startet am 2026-08-31"
+      ],
+      "sourceDate": "2026-08-29T14:44:01.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-09-06",
+      "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
     }
   ]
