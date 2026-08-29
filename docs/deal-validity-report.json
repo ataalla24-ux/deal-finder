@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-29T19:51:06.446Z",
+  "generatedAt": "2026-08-29T20:57:03.724Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 329,
-    "allowed": 3,
+    "total": 328,
+    "allowed": 2,
     "blocked": 326,
-    "warnings": 0,
+    "warnings": 2,
     "reasonCounts": {
       "nicht eindeutig in Wien": 44,
       "älter als 7 Tage (2026-06-27)": 1,
@@ -30,11 +30,12 @@
       "älter als 7 Tage (2026-04-30)": 1,
       "älter als 7 Tage (2026-04-20)": 1,
       "abgelaufen (2026-04-24)": 1,
-      "älter als 7 Tage (2026-02-22)": 88,
+      "älter als 7 Tage (2026-02-22)": 87,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-07-16)": 1,
       "Gottesdienste nur im Wochenlauf": 34,
+      "älter als 7 Tage (2025-07-30)": 1,
       "URL ungültig (HTTP 404)": 13,
       "ausgeschlossene Quelle (gastro.news)": 26,
       "älter als 7 Tage (2014-10-10)": 10,
@@ -238,12 +239,26 @@
       },
       "Meta Instagram Business Discovery": {
         "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
+      },
+      "Meta Instagram Hashtag API": {
+        "total": 1,
         "allowed": 0,
         "blocked": 1,
         "warnings": 0,
         "reasonCategoryCounts": {
           "sonstiges": 1
         }
+      },
+      "Möbelix": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
       },
       "Ströck": {
         "total": 9,
@@ -253,13 +268,6 @@
         "reasonCategoryCounts": {
           "älter als 7 Tage": 9
         }
-      },
-      "tiktok-deals-scanner": {
-        "total": 3,
-        "allowed": 3,
-        "blocked": 0,
-        "warnings": 0,
-        "reasonCategoryCounts": {}
       },
       "Wien Deals Combined Graph": {
         "total": 1,
@@ -274,49 +282,39 @@
   },
   "allowed": [
     {
-      "id": "tiktok-ntfzz7",
-      "title": "🔥 Nur 250 € – GRATIS Lieferung",
-      "brand": "Geblergasse 60",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@herr.wien/video/7679495087184776470",
+      "id": "meta-ig-18112689410095456",
+      "title": "September den ganzen Tag über ein kostenloses Eis zum Schulstart.",
+      "brand": "Blumen Café Vienna • All Day Brunch",
+      "source": "Meta Instagram Business Discovery",
+      "url": "https://www.instagram.com/reel/Dclo-c5tY-y/",
       "reasons": [],
-      "warnings": [],
-      "sourceDate": "2026-08-29T16:43:04.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 0,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "tiktok-8na813",
-      "title": "@diksha.jasrotia Angebot",
-      "brand": "@diksha.jasrotia",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@diksha.jasrotia/video/7679411957081918752",
-      "reasons": [],
-      "warnings": [],
-      "sourceDate": "2026-08-29T11:20:28.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 0,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "tiktok-1au3rca",
-      "title": "33% voucher for YSL fragrances at Marionnaud 🛍️",
-      "brand": "@mariinvienna",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@mariinvienna/video/7679085902328548630",
-      "reasons": [],
-      "warnings": [],
-      "sourceDate": "2026-08-28T14:15:13.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
+      "warnings": [
+        "startet am 2026-09-07T00:00:00.000Z"
+      ],
+      "sourceDate": "2026-08-28T15:03:40.000Z",
+      "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 1,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
+      "expiryDate": "2026-09-07T23:59:59.999Z",
+      "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "power-bf3fbba4ee53",
+      "title": "15% auf viele Möbel 🤩",
+      "brand": "Möbelix",
+      "source": "Möbelix",
+      "url": "https://www.moebelix.at/c/aktion-oss-moebel",
+      "reasons": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.moebelix.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-08-29T11:46:29.052Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.moebelix.at"
     }
   ],
   "blocked": [
@@ -1244,18 +1242,17 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2025-07-30)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-02-22T21:13:07.698Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 188,
+      "sourceDate": "2025-07-30T05:18:47.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 395,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-21-20260222",
@@ -4163,8 +4160,8 @@
     {
       "id": "meta-ig-18088455311453679",
       "title": "September 18 - 23 Uhr auf 17 Wiener Märkte, Marktraum am Naschmarkt und 3 Wochenmärkten gratis Programm mit Musik, Showacts und mehr 🛍️ REM",
-      "brand": "Lara | VIENNA TRAVEL BLOGGER",
-      "source": "Meta Instagram Business Discovery",
+      "brand": "Instagram",
+      "source": "Meta Instagram Hashtag API",
       "url": "https://www.instagram.com/reel/DcoLhTcMk5W/",
       "reasons": [
         "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot"
