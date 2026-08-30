@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-30T14:54:21.987Z",
+  "generatedAt": "2026-08-30T16:42:57.388Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 535,
@@ -725,81 +725,6 @@
       "sourceWeightScore": 57
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 1,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 0,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "September 18 - 23 Uhr auf 17 Wiener Märkte, Marktraum am Naschmarkt und 3 Wochenmärkten gratis Programm mit Musik, Showacts und mehr 🛍️ REM",
-        "👀🍗 Etwas Neues kommt… DUST FREE 🔥"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-30T12:10:59.173Z",
-        "finishedAt": "2026-08-30T12:15:41.693Z",
-        "durationMs": 282520,
-        "counts": {
-          "rawCandidates": 108,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 99
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 87,
-          "missing-text": 6,
-          "excluded-promotion-type": 3,
-          "general-recommendation": 3
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0.5,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 62,
-      "missionFitScore": 54,
-      "coverageScore": 12,
-      "precisionScore": 66,
-      "sourceWeightScore": 50
-    },
-    {
       "sourceKey": "instagram-verified",
       "file": "deals-pending-instagram-verified.json",
       "sourceLabel": "Instagram",
@@ -955,7 +880,7 @@
       "uniqueDeals": 9,
       "duplicateDeals": 7,
       "duplicateAcrossSources": 4,
-      "fresh1dCount": 4,
+      "fresh1dCount": 1,
       "fresh7dCount": 16,
       "viennaCount": 16,
       "foodDrinkCount": 4,
@@ -969,7 +894,7 @@
       "lastRun": null,
       "uniqueRate": 0.6,
       "duplicateRate": 0.3,
-      "fresh1dRate": 0.3,
+      "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
       "foodDrinkRate": 0.3,
@@ -1013,13 +938,90 @@
         }
       ],
       "issues": [
+        "wenige Deals sind frischer als 1 Tag",
         "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 58,
+      "healthScore": 55,
+      "missionFitScore": 39,
+      "coverageScore": 17,
+      "precisionScore": 57,
+      "sourceWeightScore": 43
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 0,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "September 18 - 23 Uhr auf 17 Wiener Märkte, Marktraum am Naschmarkt und 3 Wochenmärkten gratis Programm mit Musik, Showacts und mehr 🛍️ REM",
+        "👀🍗 Etwas Neues kommt… DUST FREE 🔥"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-30T12:10:59.173Z",
+        "finishedAt": "2026-08-30T12:15:41.693Z",
+        "durationMs": 282520,
+        "counts": {
+          "rawCandidates": 108,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 99
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 87,
+          "missing-text": 6,
+          "excluded-promotion-type": 3,
+          "general-recommendation": 3
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 55,
       "missionFitScore": 43,
-      "coverageScore": 19,
-      "precisionScore": 59,
-      "sourceWeightScore": 46
+      "coverageScore": 11,
+      "precisionScore": 60,
+      "sourceWeightScore": 43
     },
     {
       "sourceKey": "member-benefits",
