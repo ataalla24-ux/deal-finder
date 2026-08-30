@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-08-30T08:11:29.253Z",
+  "generatedAt": "2026-08-30T08:19:47.782Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 330,
-    "allowed": 0,
+    "total": 332,
+    "allowed": 2,
     "blocked": 330,
     "warnings": 0,
     "reasonCounts": {
@@ -37,7 +37,7 @@
       "älter als 7 Tage (2026-07-16)": 1,
       "Gottesdienste nur im Wochenlauf": 34,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 10,
+      "URL ungültig (HTTP 404)": 13,
       "ausgeschlossene Quelle (gastro.news)": 26,
       "älter als 7 Tage (2014-10-10)": 10,
       "älter als 7 Tage (2023-11-04)": 1,
@@ -74,7 +74,7 @@
       "ausgeschlossene Quelle": 27,
       "kein konkreter Deal": 213,
       "kein echtes Post-Datum": 109,
-      "ungültige URL": 12,
+      "ungültige URL": 15,
       "Gottesdienste außerhalb Wochenlauf": 34,
       "Meta-Graph-Widerspruch": 5,
       "sonstiges": 7,
@@ -143,7 +143,7 @@
           "kein konkreter Deal": 32,
           "Gottesdienste außerhalb Wochenlauf": 33,
           "älter als 7 Tage": 33,
-          "ungültige URL": 2
+          "ungültige URL": 3
         }
       },
       "Google News RSS": {
@@ -216,7 +216,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 96,
           "älter als 7 Tage": 99,
-          "ungültige URL": 7,
+          "ungültige URL": 9,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "nicht Wien": 1
         }
@@ -239,6 +239,13 @@
           "nicht Wien": 7,
           "sonstiges": 1
         }
+      },
+      "Meta Instagram Business Discovery": {
+        "total": 2,
+        "allowed": 2,
+        "blocked": 0,
+        "warnings": 0,
+        "reasonCategoryCounts": {}
       },
       "Meta Instagram Hashtag API": {
         "total": 1,
@@ -269,7 +276,38 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-18121412288512020",
+      "title": "🍜 Werde kostenlos Vorteilsclub-Mitglied und entdecke deine Stadt neu.",
+      "brand": "Vorteilsclub der Stadt Wien",
+      "source": "Meta Instagram Business Discovery",
+      "url": "https://www.instagram.com/reel/DcqCHMKjRI6/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-30T08:00:17.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-09-02T08:15:53.237Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-18112264718319096",
+      "title": "🍕 WÄHLE 2 PIZZEN NACH DEINER WAHL und wir schenken dir: 🍔 1 BURGER GRATIS ODER 🥤 3 PEPSI GRATIS 📅 Nur Freitag bis Sonntagabend 📍 Nur be",
+      "brand": "Alpizena.pizza",
+      "source": "Meta Instagram Business Discovery",
+      "url": "https://www.instagram.com/reel/DcmEEL4mObU/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-28T19:00:23.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 2,
+      "expiryDate": "2026-09-02T08:15:53.237Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0b544ee7-2ea4-40fe-ae05-2837dc0758b2",
@@ -1972,19 +2010,18 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 133,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "freikirche-7-20260419",
@@ -2341,13 +2378,15 @@
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 133,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-25-20260419",
@@ -2725,18 +2764,17 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 189,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -3539,18 +3577,17 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 189,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gottesdienste-17-20260222",
