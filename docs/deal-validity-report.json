@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-30T08:46:42.375Z",
+  "generatedAt": "2026-08-30T09:51:16.030Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 330,
-    "allowed": 0,
+    "total": 333,
+    "allowed": 3,
     "blocked": 330,
-    "warnings": 0,
+    "warnings": 1,
     "reasonCounts": {
       "abgelaufen (2026-08-29)": 4,
       "nicht eindeutig in Wien": 45,
@@ -31,13 +31,12 @@
       "älter als 7 Tage (2026-04-30)": 1,
       "älter als 7 Tage (2026-04-20)": 1,
       "abgelaufen (2026-04-24)": 1,
-      "älter als 7 Tage (2026-02-22)": 87,
+      "älter als 7 Tage (2026-02-22)": 88,
       "URL ungültig (fehlende Ziel-URL)": 2,
-      "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-07-16)": 1,
       "Gottesdienste nur im Wochenlauf": 34,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 13,
+      "URL ungültig (HTTP 404)": 10,
       "ausgeschlossene Quelle (gastro.news)": 26,
       "älter als 7 Tage (2014-10-10)": 10,
       "älter als 7 Tage (2023-11-04)": 1,
@@ -74,7 +73,7 @@
       "ausgeschlossene Quelle": 27,
       "kein konkreter Deal": 213,
       "kein echtes Post-Datum": 109,
-      "ungültige URL": 15,
+      "ungültige URL": 12,
       "Gottesdienste außerhalb Wochenlauf": 34,
       "Meta-Graph-Widerspruch": 5,
       "sonstiges": 7,
@@ -143,7 +142,7 @@
           "kein konkreter Deal": 32,
           "Gottesdienste außerhalb Wochenlauf": 33,
           "älter als 7 Tage": 33,
-          "ungültige URL": 3
+          "ungültige URL": 2
         }
       },
       "Google News RSS": {
@@ -160,8 +159,8 @@
         }
       },
       "Gutscheine.at": {
-        "total": 3,
-        "allowed": 0,
+        "total": 4,
+        "allowed": 1,
         "blocked": 3,
         "warnings": 0,
         "reasonCategoryCounts": {
@@ -190,10 +189,10 @@
         }
       },
       "instagram-ai-agent": {
-        "total": 4,
-        "allowed": 0,
+        "total": 6,
+        "allowed": 2,
         "blocked": 4,
-        "warnings": 0,
+        "warnings": 1,
         "reasonCategoryCounts": {
           "Meta-Graph-Widerspruch": 3,
           "sonstiges": 4
@@ -216,7 +215,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 96,
           "älter als 7 Tage": 99,
-          "ungültige URL": 9,
+          "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "nicht Wien": 1
         }
@@ -269,7 +268,55 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "gs-449095",
+      "title": "15% Gutschein für alles bei Universal.at",
+      "brand": "Universal.at",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/universal-at",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-29T12:47:49.600Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 1,
+      "expiryDate": "2026-08-31",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "instagram-ai-82ce1e6427b8",
+      "title": "Sein größter Gegenspieler ist das Stresshormon Cortisol",
+      "brand": "Longevitycentervienna",
+      "source": "instagram-ai-agent",
+      "url": "https://www.instagram.com/p/DcYB8e7jDFI/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-08-23T08:12:29.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 7,
+      "expiryDate": "2026-08-31",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "instagram-ai-27ac791f2b05",
+      "title": "Kostenlose Führungen im Parlament Wien",
+      "brand": "Parlament Wien",
+      "source": "instagram-ai-agent",
+      "url": "https://www.instagram.com/p/DcX_zX_Dujh/",
+      "reasons": [],
+      "warnings": [
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-08-23T07:53:46.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 7,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0b544ee7-2ea4-40fe-ae05-2837dc0758b2",
@@ -988,13 +1035,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 189,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "events-8-20260222",
@@ -1137,15 +1186,17 @@
       "url": "https://www.malteser.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2017-04-20)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2017-04-20T11:03:34.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 3419,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 189,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "events-16-20260222",
@@ -1992,18 +2043,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 133,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-8-20260419",
@@ -2760,17 +2812,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 189,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-11-20260222",
@@ -3573,17 +3626,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 189,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-19-20260222",
