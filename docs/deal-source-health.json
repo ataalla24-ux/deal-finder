@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-30T13:12:10.896Z",
+  "generatedAt": "2026-08-30T14:54:21.987Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 537,
+    "totalCandidates": 535,
     "uniqueCandidates": 499,
-    "distinctCandidates": 515,
-    "duplicateClusters": 16,
+    "distinctCandidates": 514,
+    "duplicateClusters": 15,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -64,10 +64,10 @@
         "totalDeals": 5
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 65,
-        "totalDeals": 2
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "missionFitScore": 63,
+        "totalDeals": 1
       }
     ],
     "topCoverageSources": [
@@ -725,6 +725,81 @@
       "sourceWeightScore": 57
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 1,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 0,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "September 18 - 23 Uhr auf 17 Wiener Märkte, Marktraum am Naschmarkt und 3 Wochenmärkten gratis Programm mit Musik, Showacts und mehr 🛍️ REM",
+        "👀🍗 Etwas Neues kommt… DUST FREE 🔥"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-30T12:10:59.173Z",
+        "finishedAt": "2026-08-30T12:15:41.693Z",
+        "durationMs": 282520,
+        "counts": {
+          "rawCandidates": 108,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 99
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 87,
+          "missing-text": 6,
+          "excluded-promotion-type": 3,
+          "general-recommendation": 3
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0.5,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 62,
+      "missionFitScore": 54,
+      "coverageScore": 12,
+      "precisionScore": 66,
+      "sourceWeightScore": 50
+    },
+    {
       "sourceKey": "instagram-verified",
       "file": "deals-pending-instagram-verified.json",
       "sourceLabel": "Instagram",
@@ -876,20 +951,20 @@
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 18,
-      "uniqueDeals": 10,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 5,
-      "fresh1dCount": 5,
-      "fresh7dCount": 18,
-      "viennaCount": 18,
-      "foodDrinkCount": 6,
-      "promoCount": 8,
+      "totalDeals": 16,
+      "uniqueDeals": 9,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 4,
+      "fresh1dCount": 4,
+      "fresh7dCount": 16,
+      "viennaCount": 16,
+      "foodDrinkCount": 4,
+      "promoCount": 7,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "🍜 Werde kostenlos Vorteilsclub-Mitglied und entdecke deine Stadt neu.",
-        "🍕 WÄHLE 2 PIZZEN NACH DEINER WAHL und wir schenken dir: 🍔 1 BURGER GRATIS ODER 🥤 3 PEPSI GRATIS 📅 Nur Freitag bis Sonntagabend 📍 Nur be",
-        "September 18 - 23 Uhr auf 17 Wiener Märkte, Marktraum am Naschmarkt und 3 Wochenmärkten gratis Programm mit Musik, Showacts und mehr 🛍️ REM"
+        "11:00 bis 18:00, Eintritt frei DI 29.9.",
+        "Als Vorteilsclub-Mitglied erhältst du beim Kauf eines dickbrave.official Tickets, ein zweites gratis.",
+        "Kostenlose Schnupperkurse bei Bezirksvorstehung 6. Bezirk"
       ],
       "lastRun": null,
       "uniqueRate": 0.6,
@@ -900,7 +975,7 @@
       "foodDrinkRate": 0.3,
       "promoRate": 0.4,
       "missingUrlRate": 0,
-      "averageQualityScore": 82.5,
+      "averageQualityScore": 82.1,
       "topCategories": [
         {
           "value": "shopping",
@@ -908,7 +983,7 @@
         },
         {
           "value": "essen",
-          "count": 5
+          "count": 3
         },
         {
           "value": "kultur",
@@ -926,11 +1001,11 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 11
+          "count": 10
         },
         {
           "value": "gratis",
-          "count": 6
+          "count": 5
         },
         {
           "value": "bogo",
@@ -942,84 +1017,9 @@
       ],
       "healthScore": 58,
       "missionFitScore": 43,
-      "coverageScore": 20,
+      "coverageScore": 19,
       "precisionScore": 59,
       "sourceWeightScore": 46
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 0,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 2,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 0,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "September 18 - 23 Uhr auf 17 Wiener Märkte, Marktraum am Naschmarkt und 3 Wochenmärkten gratis Programm mit Musik, Showacts und mehr 🛍️ REM",
-        "👀🍗 Etwas Neues kommt… DUST FREE 🔥"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-30T12:10:59.173Z",
-        "finishedAt": "2026-08-30T12:15:41.693Z",
-        "durationMs": 282520,
-        "counts": {
-          "rawCandidates": 108,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 99
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 87,
-          "missing-text": 6,
-          "excluded-promotion-type": 3,
-          "general-recommendation": 3
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 58,
-      "missionFitScore": 65,
-      "coverageScore": 12,
-      "precisionScore": 68,
-      "sourceWeightScore": 53
     },
     {
       "sourceKey": "member-benefits",
