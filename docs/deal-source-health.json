@@ -1,17 +1,23 @@
 {
-  "generatedAt": "2026-08-30T16:57:18.186Z",
+  "generatedAt": "2026-08-30T17:02:39.738Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 535,
-    "uniqueCandidates": 499,
-    "distinctCandidates": 514,
-    "duplicateClusters": 15,
+    "totalCandidates": 536,
+    "uniqueCandidates": 502,
+    "distinctCandidates": 516,
+    "duplicateClusters": 14,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 83,
+        "totalDeals": 3
       },
       {
         "sourceKey": "joe",
@@ -30,12 +36,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "healthScore": 66,
         "totalDeals": 5
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 63,
-        "totalDeals": 31
       }
     ],
     "topMissionSources": [
@@ -52,6 +52,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 70,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 69,
@@ -62,12 +68,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "missionFitScore": 67,
         "totalDeals": 5
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "missionFitScore": 63,
-        "totalDeals": 1
       }
     ],
     "topCoverageSources": [
@@ -115,6 +115,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 77,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "precisionScore": 74,
@@ -131,12 +137,6 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 72,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "precisionScore": 68,
-        "totalDeals": 10
       }
     ],
     "topWeightedSources": [
@@ -145,6 +145,12 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 70,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 64,
+        "totalDeals": 3
       },
       {
         "sourceKey": "joe",
@@ -163,12 +169,6 @@
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 57,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 57,
-        "totalDeals": 4
       }
     ],
     "topSourcesToFix": [
@@ -293,6 +293,86 @@
       "coverageScore": 16,
       "precisionScore": 88,
       "sourceWeightScore": 70
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 3,
+      "uniqueDeals": 3,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 3,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 2,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Kommt vorbei und habt einen super-lustigen Abend mit unseren Comedy-All-Stars 🤩 Mit Kabarett, Standup-Comedy, Musik und ganz viel Spaß 🥳 H",
+        "Sorten 500g für 0,57 Euro statt 0,99 Euro",
+        "10% Code: REINER"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-30T16:56:45.122Z",
+        "finishedAt": "2026-08-30T17:02:11.004Z",
+        "durationMs": 325882,
+        "counts": {
+          "rawCandidates": 109,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 3,
+          "previousDeals": 0,
+          "acceptedDeals": 3,
+          "rejectedDeals": 98
+        },
+        "rejectedByReason": {
+          "general-recommendation": 5,
+          "no-concrete-offer": 82,
+          "missing-vienna-evidence": 1,
+          "missing-text": 6,
+          "excluded-promotion-type": 4
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 85.7,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 2
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 83,
+      "missionFitScore": 70,
+      "coverageScore": 13,
+      "precisionScore": 77,
+      "sourceWeightScore": 64
     },
     {
       "sourceKey": "joe",
@@ -877,9 +957,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 16,
-      "uniqueDeals": 9,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 4,
+      "uniqueDeals": 10,
+      "duplicateDeals": 6,
+      "duplicateAcrossSources": 3,
       "fresh1dCount": 1,
       "fresh7dCount": 16,
       "viennaCount": 16,
@@ -893,7 +973,7 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.6,
-      "duplicateRate": 0.3,
+      "duplicateRate": 0.2,
       "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -943,84 +1023,8 @@
       ],
       "healthScore": 55,
       "missionFitScore": 39,
-      "coverageScore": 17,
-      "precisionScore": 57,
-      "sourceWeightScore": 43
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 1,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 0,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "September 18 - 23 Uhr auf 17 Wiener Märkte, Marktraum am Naschmarkt und 3 Wochenmärkten gratis Programm mit Musik, Showacts und mehr 🛍️ REM",
-        "👀🍗 Etwas Neues kommt… DUST FREE 🔥"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-30T12:10:59.173Z",
-        "finishedAt": "2026-08-30T12:15:41.693Z",
-        "durationMs": 282520,
-        "counts": {
-          "rawCandidates": 108,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 99
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 87,
-          "missing-text": 6,
-          "excluded-promotion-type": 3,
-          "general-recommendation": 3
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 55,
-      "missionFitScore": 43,
-      "coverageScore": 11,
-      "precisionScore": 60,
+      "coverageScore": 18,
+      "precisionScore": 58,
       "sourceWeightScore": 43
     },
     {
