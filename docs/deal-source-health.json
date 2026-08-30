@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-30T19:34:04.953Z",
+  "generatedAt": "2026-08-30T19:55:01.517Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 536,
-    "uniqueCandidates": 500,
-    "distinctCandidates": 515,
+    "totalCandidates": 538,
+    "uniqueCandidates": 502,
+    "distinctCandidates": 517,
     "duplicateClusters": 15,
     "topHealthySources": [
       {
@@ -12,6 +12,12 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "healthScore": 76,
+        "totalDeals": 12
       },
       {
         "sourceKey": "wien-combined",
@@ -23,12 +29,6 @@
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "healthScore": 75,
-        "totalDeals": 10
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "healthScore": 74,
         "totalDeals": 10
       },
       {
@@ -121,16 +121,16 @@
         "totalDeals": 3
       },
       {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "precisionScore": 75,
+        "totalDeals": 12
+      },
+      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "precisionScore": 74,
         "totalDeals": 5
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "precisionScore": 74,
-        "totalDeals": 10
       },
       {
         "sourceKey": "food3",
@@ -159,16 +159,16 @@
         "totalDeals": 3
       },
       {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 60,
+        "totalDeals": 12
+      },
+      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 58,
         "totalDeals": 5
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 57,
-        "totalDeals": 10
       }
     ],
     "topSourcesToFix": [
@@ -293,6 +293,84 @@
       "coverageScore": 16,
       "precisionScore": 88,
       "sourceWeightScore": 70
+    },
+    {
+      "sourceKey": "tiktok",
+      "file": "deals-pending-tiktok.json",
+      "sourceLabel": "TikTok Scanner",
+      "totalDeals": 12,
+      "uniqueDeals": 12,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 3,
+      "fresh7dCount": 12,
+      "viennaCount": 12,
+      "foodDrinkCount": 4,
+      "promoCount": 12,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis Burger bei Jägerstraße 40",
+        "@austriannaa Angebot",
+        "Gratis GETRÄNK bei RECUP"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 72.5,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 4
+        },
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        },
+        {
+          "value": "freizeit",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 10
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 76,
+      "missionFitScore": 60,
+      "coverageScore": 21,
+      "precisionScore": 75,
+      "sourceWeightScore": 60
     },
     {
       "sourceKey": "wien-combined",
@@ -435,81 +513,6 @@
       "coverageScore": 20,
       "precisionScore": 68,
       "sourceWeightScore": 64
-    },
-    {
-      "sourceKey": "tiktok",
-      "file": "deals-pending-tiktok.json",
-      "sourceLabel": "TikTok Scanner",
-      "totalDeals": 10,
-      "uniqueDeals": 10,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 10,
-      "viennaCount": 10,
-      "foodDrinkCount": 4,
-      "promoCount": 10,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis GETRÄNK bei RECUP",
-        "Birthday-Special: Eintritt um 10 € bei ASIANNIGHT",
-        "1+1 GRATIS BEI CHOCOBERRY"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.4,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 70.8,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 3
-        },
-        {
-          "value": "essen",
-          "count": 2
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        },
-        {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "freizeit",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 8
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 74,
-      "missionFitScore": 57,
-      "coverageScore": 18,
-      "precisionScore": 74,
-      "sourceWeightScore": 57
     },
     {
       "sourceKey": "gastro2",
