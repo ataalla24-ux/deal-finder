@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-31T14:17:42.774Z",
+  "generatedAt": "2026-08-31T14:19:10.338Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 533,
-    "uniqueCandidates": 485,
-    "distinctCandidates": 504,
+    "totalCandidates": 528,
+    "uniqueCandidates": 480,
+    "distinctCandidates": 499,
     "duplicateClusters": 19,
     "topHealthySources": [
       {
@@ -93,17 +93,17 @@
         "fresh1dCount": 5
       },
       {
+        "sourceKey": "gutscheine",
+        "sourceLabel": "Gutscheine.at",
+        "coverageScore": 34,
+        "totalDeals": 29,
+        "fresh1dCount": 29
+      },
+      {
         "sourceKey": "power",
         "sourceLabel": "Power Scraper",
         "coverageScore": 28,
         "totalDeals": 41,
-        "fresh1dCount": 0
-      },
-      {
-        "sourceKey": "events",
-        "sourceLabel": "Kirchen Events",
-        "coverageScore": 27,
-        "totalDeals": 35,
         "fresh1dCount": 0
       }
     ],
@@ -1501,6 +1501,78 @@
       "sourceWeightScore": 33
     },
     {
+      "sourceKey": "gutscheine",
+      "file": "deals-pending-gutscheine.json",
+      "sourceLabel": "Gutscheine.at",
+      "totalDeals": 29,
+      "uniqueDeals": 29,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 29,
+      "fresh7dCount": 29,
+      "viennaCount": 0,
+      "foodDrinkCount": 2,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Back to home: Bis zu 65% Rabatt auf über 20.000 Produkte",
+        "100 € Rabatt auf alle Buchungen",
+        "Bis zu 50% Rabatt auf Hotels für myHRS-Mitglieder"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.1,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 46.3,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 23
+        },
+        {
+          "value": "beauty",
+          "count": 3
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "technik",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 26
+        },
+        {
+          "value": "gutschein",
+          "count": 3
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 44,
+      "missionFitScore": 26,
+      "coverageScore": 34,
+      "precisionScore": 28,
+      "sourceWeightScore": 33
+    },
+    {
       "sourceKey": "events",
       "file": "deals-pending-events.json",
       "sourceLabel": "Kirchen Events",
@@ -1805,79 +1877,6 @@
       "coverageScore": 28,
       "precisionScore": 23,
       "sourceWeightScore": 24
-    },
-    {
-      "sourceKey": "gutscheine",
-      "file": "deals-pending-gutscheine.json",
-      "sourceLabel": "Gutscheine.at",
-      "totalDeals": 34,
-      "uniqueDeals": 34,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 34,
-      "viennaCount": 0,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Payday Sale: bis zu 75% Rabatt bei Bulk",
-        "Aldiana Summer-Deals: bis zu 555 € Rabatt",
-        "100 € Rabatt auf alle Buchungen"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 44.2,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 29
-        },
-        {
-          "value": "beauty",
-          "count": 2
-        },
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "streaming",
-          "count": 1
-        },
-        {
-          "value": "technik",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 31
-        },
-        {
-          "value": "gutschein",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 28,
-      "missionFitScore": 0,
-      "coverageScore": 22,
-      "precisionScore": 14,
-      "sourceWeightScore": 15
     },
     {
       "sourceKey": "flights",
