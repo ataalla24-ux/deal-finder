@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-31T06:01:36.252Z",
-  "status": "degraded",
-  "message": "4 fresh, evidence-checked Graph hashtag deal(s) found; 1 recovered from media.",
+  "generatedAt": "2026-08-31T14:05:50.001Z",
+  "status": "healthy",
+  "message": "2 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
   "hashtags": [
     "wien",
     "vienna",
@@ -14,85 +14,67 @@
     "essenwien",
     "viennaeats"
   ],
-  "fetchedPosts": 123,
-  "uniquePosts": 111,
-  "totalDeals": 4,
-  "rescueEligible": 75,
-  "rescuedDeals": 1,
+  "fetchedPosts": 102,
+  "uniquePosts": 93,
+  "totalDeals": 2,
+  "rescueEligible": 0,
+  "rescuedDeals": 0,
   "mediaEvidence": {
-    "status": "degraded",
-    "eligible": 68,
-    "selected": 18,
-    "cached": 7,
-    "analyzed": 18,
-    "withOcrText": 11,
-    "withVisionImages": 17,
-    "aiCalls": 17,
-    "visionCalls": 17,
-    "aiAccepted": 2,
-    "inputTokens": 46963,
-    "outputTokens": 675,
-    "totalTokens": 47638,
-    "errors": [
-      "media exceeds byte limit"
-    ],
-    "warnings": [
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-NfgtRC/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-1p0IAM/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-lOzvRB/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-ZHzsa7/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-J0tRa7/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-NH8rVu/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-fCVLQb/video-0-frame-03.jpg.ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-VoOR1c/video-0-frame-03.jpg.ocr.png stdout -l deu+eng --psm 6"
-    ],
-    "llmConfigured": true,
-    "visionConfigured": true,
-    "tools": {
-      "tesseract": true,
-      "ffmpeg": true
-    },
-    "ocrAvailable": true
+    "status": "not-needed",
+    "eligible": 0,
+    "selected": 0,
+    "cached": 0,
+    "analyzed": 0,
+    "withOcrText": 0,
+    "withVisionImages": 0,
+    "aiCalls": 0,
+    "visionCalls": 0,
+    "aiAccepted": 0,
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "totalTokens": 0,
+    "errors": [],
+    "warnings": []
   },
   "sources": [
     {
       "hashtag": "wien",
       "status": "ok",
-      "fetched": 30,
-      "accepted": 2,
-      "mediaFieldMode": "media-url",
-      "mediaLimit": 30
+      "fetched": 15,
+      "accepted": 0,
+      "mediaFieldMode": "basic",
+      "mediaLimit": 15
     },
     {
       "hashtag": "vienna",
       "status": "ok",
       "fetched": 30,
-      "accepted": 1,
-      "mediaFieldMode": "media-url",
+      "accepted": 0,
+      "mediaFieldMode": "basic",
       "mediaLimit": 30
     },
     {
       "hashtag": "viennafood",
       "status": "ok",
-      "fetched": 30,
+      "fetched": 15,
       "accepted": 0,
-      "mediaFieldMode": "media-url",
-      "mediaLimit": 30
+      "mediaFieldMode": "basic",
+      "mediaLimit": 15
     },
     {
       "hashtag": "wienevents",
       "status": "ok",
-      "fetched": 13,
+      "fetched": 7,
       "accepted": 1,
-      "mediaFieldMode": "media-url",
+      "mediaFieldMode": "basic",
       "mediaLimit": 30
     },
     {
       "hashtag": "wientipps",
       "status": "ok",
-      "fetched": 5,
-      "accepted": 0,
-      "mediaFieldMode": "media-url",
+      "fetched": 7,
+      "accepted": 1,
+      "mediaFieldMode": "basic",
       "mediaLimit": 30
     },
     {
@@ -100,47 +82,2663 @@
       "status": "ok",
       "fetched": 1,
       "accepted": 0,
-      "mediaFieldMode": "media-url",
+      "mediaFieldMode": "basic",
       "mediaLimit": 30
     },
     {
       "hashtag": "sommerinwien",
       "status": "ok",
-      "fetched": 5,
+      "fetched": 9,
       "accepted": 0,
-      "mediaFieldMode": "media-url",
+      "mediaFieldMode": "basic",
       "mediaLimit": 30
     },
     {
       "hashtag": "wienergastro",
       "status": "ok",
-      "fetched": 0,
+      "fetched": 1,
       "accepted": 0,
-      "mediaFieldMode": "media-url",
+      "mediaFieldMode": "basic",
       "mediaLimit": 30
     },
     {
       "hashtag": "essenwien",
       "status": "ok",
-      "fetched": 0,
+      "fetched": 1,
       "accepted": 0,
-      "mediaFieldMode": "media-url",
+      "mediaFieldMode": "basic",
       "mediaLimit": 30
     },
     {
       "hashtag": "viennaeats",
       "status": "ok",
-      "fetched": 9,
+      "fetched": 16,
       "accepted": 0,
-      "mediaFieldMode": "media-url",
+      "mediaFieldMode": "basic",
       "mediaLimit": 30
     }
   ],
   "rejectionReasons": {
-    "no-concrete-offer": 88,
-    "general-recommendation": 8,
+    "no-concrete-offer": 73,
     "missing-text": 4,
+    "general-recommendation": 7,
+    "excluded-promotion-type": 5,
     "missing-vienna-evidence": 1,
-    "excluded-promotion-type": 6
-  }
+    "self-syndicated-deal": 1
+  },
+  "candidateAudit": [
+    {
+      "id": "17900790054584935",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctQr8XjijF/",
+      "title": "3 meseca do isteka zvuči kao mnogo. U praksi, može proći brže nego što misliš!⏳🇦🇹 Jedan dokument kasni. Termin za prevod nemaš odmah. Potvrdu moraš ponovo da tražiš. I odjednom s",
+      "text": "3 meseca do isteka zvuči kao mnogo. U praksi, može proći brže nego što misliš!⏳🇦🇹 Jedan dokument kasni. Termin za prevod nemaš odmah. Potvrdu moraš ponovo da tražiš. I odjednom si mnogo bliže datumu isteka nego što si planirao. Zato produženje boravišne dozvole nije nešto što treba ostaviti za poslednjih nekoliko nedelja. Pogledaj datum na svojoj kartici danas. Ako ti boravišna dozvola ističe u naredna 3 meseca, sada je pravi trenutak da proveriš šta ti je potrebno i kreneš sa pripremom. Piši mi i zajedno ćemo proći kroz tvoju situaciju pre nego što vreme postane problem! 📩 📞 +43 699 100 500 11 #bec #wien #ma35 #viza #boravišnadozvola #radnadozvola",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:05:50+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18088518602194906",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctQcq9oQ0p/",
+      "title": "Markiere deine Freunde, die dir jetzt eine VR-Session schulden! 👇🥽 #ZeroLatency #wien #vienna #WestfieldDonauZentrum #westfieldshoppingcitysüd",
+      "text": "Markiere deine Freunde, die dir jetzt eine VR-Session schulden! 👇🥽 #ZeroLatency #wien #vienna #WestfieldDonauZentrum #westfieldshoppingcitysüd",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:05:00+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien",
+        "vienna"
+      ]
+    },
+    {
+      "id": "18192169978387742",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQnm-iCW1/",
+      "title": "RE:TRAFO — competition entry for Wiener Netze, 2025 For our competition entry RE:TRAFO, we proposed to reuse existing building components that are being removed in renovation and t",
+      "text": "RE:TRAFO — competition entry for Wiener Netze, 2025 For our competition entry RE:TRAFO, we proposed to reuse existing building components that are being removed in renovation and transformation processes as new façades for transformer stations across Vienna. Façade panels currently being dismantled from the former Biocenter at Althangrund served as one example of how materials could move from one building to another — extending their lifespan instead of becoming waste. Rather than treating each station as an isolated object, RE:TRAFO imagines them as a citywide network of small urban prototypes, making material reuse visible in everyday public space. #CircularArchitecture #Reuse #UrbanMining #CircularConstruction #Vienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:04:46+0000",
+      "rejectionReason": "excluded-promotion-type",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "17906847198536416",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQik6jecW/",
+      "title": "#mozart #visitvienna #vienna",
+      "text": "#mozart #visitvienna #vienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:04:05+0000",
+      "rejectionReason": "missing-text",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "17886929580458939",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQfbXD8rF/",
+      "title": "Electric performance meets unmistakable Audi design. The Audi Q6 e-tron® is ready for what’s next. Visit Audi Tysons Corner today. . . . #AudiQ6 #Q6etron #AudiElectric #AudiEV #Aud",
+      "text": "Electric performance meets unmistakable Audi design. The Audi Q6 e-tron® is ready for what’s next. Visit Audi Tysons Corner today. . . . #AudiQ6 #Q6etron #AudiElectric #AudiEV #Audi #AudiTysonsCorner #Vienna #Virginia #VA #Audigramm #AudiCarsOnly #AudiLover #Audizine #FourRings #Auditography #DreamCar #FastCars #AmazingCars",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:03:42+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18124821718873210",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctQcAZig1w/",
+      "title": "Thank you #Vienna Next destination #Linz",
+      "text": "Thank you #Vienna Next destination #Linz",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:03:19+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "17925024039410948",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQaFnFYTl/",
+      "title": "Mit einer neuen Photovoltaikanlage produziert das Austria Center Vienna (ACV) künftig einen Teil seines Stroms selbst. Rund 1.340 Module auf einer Fläche von 2.700 Quadratmetern so",
+      "text": "Mit einer neuen Photovoltaikanlage produziert das Austria Center Vienna (ACV) künftig einen Teil seines Stroms selbst. Rund 1.340 Module auf einer Fläche von 2.700 Quadratmetern sollen dabei jährlich etwa 575.000 Kilowattstunden erneuerbare Energie erzeugen. Die Anlage ist die bisher größte Einzelmaßnahme im Rahmen des laufenden Transformationsprogramms des Austria Center Vienna. #Photovoltaikanlage #Venues #AustriaCenterVienna #Wien #Kongressstandort #Photovoltaik #Kongresszentrum #Eventlocation #ACV #SusanneBaumannSöllner #Eventnachhaltigkeit #BlachReport https://www.blachreport.de/venues/85134-austria-center-vienna-nimmt-neue-photovoltaikanlage-in-betrieb/",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:03:03+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "17948169348268450",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQWzqDXWv/",
+      "title": "Two mates of the Budgerigar (Melopsittacus undulatus) species. It was taken in Haus des meeres in Vienna. Among the many parrot species living there, this was my absolute favorite ",
+      "text": "Two mates of the Budgerigar (Melopsittacus undulatus) species. It was taken in Haus des meeres in Vienna. Among the many parrot species living there, this was my absolute favorite moment. I'm glad I was able to capture it. The universe briefly cooperated. #budgerigarparrot #nikond3000 #300mm #hausdesmeeres res #vienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:02:29+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18109793407986217",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQQGVDDza/",
+      "title": "#viyana #vienna #wien #austria #avusturya #schonbrunn #hofburg #stephansdom #belvederepalace #prater #cityofmusic #visitvienna #viennacity #explorevienna #discovervienna #backpacke",
+      "text": "#viyana #vienna #wien #austria #avusturya #schonbrunn #hofburg #stephansdom #belvederepalace #prater #cityofmusic #visitvienna #viennacity #explorevienna #discovervienna #backpackers #backpackingfamily #backpackersworld #backpackingtrip #sırtçantalıgezgin #sirtcantaligezginler #interrail #interraileurope #interrailturkiye #hostellife #yolaçık #yolaçıkyolaçık #travelgram #gezirehberi",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:01:34+0000",
+      "rejectionReason": "missing-text",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien",
+        "vienna"
+      ]
+    },
+    {
+      "id": "18444283096123387",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQOHcipvj/",
+      "title": "Servus Wien! 👋 Ab heute gibt’s hier deinen Sport-Kompass für die Stadt: jeden Montag die Event-Woche, mittwochs den Run-Club-Radar, freitags die besten Spots und Tipps. Die Idee d",
+      "text": "Servus Wien! 👋 Ab heute gibt’s hier deinen Sport-Kompass für die Stadt: jeden Montag die Event-Woche, mittwochs den Run-Club-Radar, freitags die besten Spots und Tipps. Die Idee dahinter: EIN Ort für alle, die sich in Wien bewegen wollen — egal ob erste Laufrunde am Donaukanal oder Marathon-Vorbereitung. Infos, Community, Austausch. Und weil das nur gemeinsam funktioniert: Du organisierst Events, einen Club oder ein Studio? Markier uns, lad uns ein oder schick uns euren Content — wir testen gern und teilen’s mit der Community. 🤝 Wen soll move.vienna kennenlernen? Tagg die Person, mit der du am liebsten trainierst 👇 · · · #wien #wienläuft #laufenwien #fitvienna #sportwien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:01:18+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "17880963483511313",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQK-boVG1/",
+      "title": "⛰️☀️🥁 #vienna #austria #follwme",
+      "text": "⛰️☀️🥁 #vienna #austria #follwme",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:00:57+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "17945143431326763",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctQFhbkjYv/",
+      "title": "The new #OpelCorsa GSE at the Vienna Dynamic Drive Event was impossible to ignore. 🕶️⚡️ 207 kW (281 hp). Retro-inspired GSE performance seats. And enough electric attitude to make",
+      "text": "The new #OpelCorsa GSE at the Vienna Dynamic Drive Event was impossible to ignore. 🕶️⚡️ 207 kW (281 hp). Retro-inspired GSE performance seats. And enough electric attitude to make security forget what he was actually hired for. 🫡🏁 ⁣ ⁣ #ThisIsOpel #DynamicDriveEvent #Vienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:00:53+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18008848043762878",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQJZfCYy1/",
+      "title": "If customers can’t see what makes you different, you’re just another price tag. We helped one established business sharpen its positioning, stand out, and become the obvious choice",
+      "text": "If customers can’t see what makes you different, you’re just another price tag. We helped one established business sharpen its positioning, stand out, and become the obvious choice. The payoff: 30+ new clients in one year 100,000+ website visitors Page 1 rankings on Google See how smart positioning changed the game, link in bio.",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:00:45+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "17988515979013377",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQI07GyTi/",
+      "title": "Bei der Kinderveranstaltung Wienopolis im Wiener Rathaus sind Wassereis-Produkte mit anzüglichen Aufdrucken an Kinder ausgegeben worden. Sprüche wie „Lutsch Dein Ding“, „Saugen und",
+      "text": "Bei der Kinderveranstaltung Wienopolis im Wiener Rathaus sind Wassereis-Produkte mit anzüglichen Aufdrucken an Kinder ausgegeben worden. Sprüche wie „Lutsch Dein Ding“, „Saugen und Lutschen erlaubt“ oder „Nur hart macht’s Spaß“ lösten zunächst Kritik in sozialen Medien und danach politische Reaktionen von ÖVP und FPÖ aus.⁠ ⁠ Im Zentrum steht inzwischen die Frage, wie die Produkte trotz vorgesehener Kontrollen überhaupt ausgegeben werden konnten. Nach Darstellung des Veranstalters „WienXtra“ waren die betreffenden Eissorten im Laufe der Woche von Mitarbeitenden „konsequent aussortiert“ worden, damit sie nicht an Kinder gelangen. ⁠ ⁠ Gegen Ende der Veranstaltung sei jedoch ein Fehler passiert und genau diese Produkte seien versehentlich ausgegeben worden. Der Veranstalter entschuldigte sich ausdrücklich und bezeichnete den Vorgang als „großen Fehler, der nicht passieren darf“.⁠ ⁠ Mehr dazu liest du im Link in der Bio.⁠ ______⁠ Bild: Screenshot facebook.com Melanie H⁠ ⁠ #rathaus #wien #eis #wassereis #österreich #wienxtra #wienopolis",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:00:38+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18122013058848172",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctPxY4NpNE/",
+      "title": "Hollywood Filmmusik live im Wiener Musikverein Goldener Saal 26.10.26#concert #classichollywood #musikverein #vienna #viennaclassicalmusic",
+      "text": "Hollywood Filmmusik live im Wiener Musikverein Goldener Saal 26.10.26#concert #classichollywood #musikverein #vienna #viennaclassicalmusic",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:00:34+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18103790144337462",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQIjfjakL/",
+      "title": "Eleganz unter freiem Himmel. Mit dem Mercedes-Maybach SL wünschen wir euch einen perfekten Start in die neue Woche! ✨ #wirsindmerbag #merbag #merbagAT #wien #mercedes #mercedesbenz",
+      "text": "Eleganz unter freiem Himmel. Mit dem Mercedes-Maybach SL wünschen wir euch einen perfekten Start in die neue Woche! ✨ #wirsindmerbag #merbag #merbagAT #wien #mercedes #mercedesbenz #maybach #slmaybach #maybachsl680 #SL680",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:00:32+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18126534958702008",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQIUEDb62/",
+      "title": "Our draped leather top, with adjustable back strings for a perfect fit. Paired with the asymmetrically draped a-line leather skirt. 📸 jhammerschmid 🎥 natyferraz_sm Model: leonieb",
+      "text": "Our draped leather top, with adjustable back strings for a perfect fit. Paired with the asymmetrically draped a-line leather skirt. 📸 jhammerschmid 🎥 natyferraz_sm Model: leoniebielesz Hair & Make-up: patricia_lehner Styling: zachstyling Assistant: monicaferrarikrieger Location: funkhaus_official #austriandesiger #handmade #fashion #michelmayer #vienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:00:30+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "17963188617193048",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctQId4h-Yc/",
+      "title": "Okay, so BOOM. Our Vienna performance went a little something like this. Joey Archie Ladies & Gentlemen 🎺🎺🎺🔥🔥🔥🔥 I’m honored to share the stage with amazing musicians and eve",
+      "text": "Okay, so BOOM. Our Vienna performance went a little something like this. Joey Archie Ladies & Gentlemen 🎺🎺🎺🔥🔥🔥🔥 I’m honored to share the stage with amazing musicians and even better human beings. Another Austria tour in the books 🇦🇹🥁 #zildjianfamily #orchestra #bam #jazz #vienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:00:06+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "17924817672180818",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQFaQjdpG/",
+      "title": "A royal necklace. 673 diamonds. And now, stolen. Queen Nazli of Egypt’s legendary Van Cleef & Arpels necklace was stolen from Vienna’s Museum of Applied Arts in a brazen daylight h",
+      "text": "A royal necklace. 673 diamonds. And now, stolen. Queen Nazli of Egypt’s legendary Van Cleef & Arpels necklace was stolen from Vienna’s Museum of Applied Arts in a brazen daylight heist. The platinum necklace, commissioned in 1938, was later sold for $4.3 million at Sotheby’s in 2015. But perhaps its greatest value was never its price tag. It was the history it carried. Are museums still doing enough to protect jewellery this significant? Disclaimer: All images used in this post are for illustrative purposes only. We do not claim ownership of any third-party content. Rights belong to their respective owners. vancleefarpels sothebys #fyp #vienna #queenofnazli #vancleef #news",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:00:06+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18373791568234053",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctQFU-FBGZ/",
+      "title": "✨ Vlad ist aktuell für seinen Europäischen Solidaritätskorps (ESK)-Freiwilligendienst bei der Kindergruppe Butterbrot in Wien aktiv. In der elternverwalteten Kindergruppe werden 14",
+      "text": "✨ Vlad ist aktuell für seinen Europäischen Solidaritätskorps (ESK)-Freiwilligendienst bei der Kindergruppe Butterbrot in Wien aktiv. In der elternverwalteten Kindergruppe werden 14 Kinder im Alter von 1,5 bis 6 Jahren zweisprachig auf Deutsch und Spanisch betreut. Für Vlad bedeutet sein Freiwilligendienst, den Alltag der Kinder mitzuerleben, sie bei verschiedenen Aktivitäten zu begleiten und dabei Einblicke in die pädagogische Arbeit zu gewinnen. 🌱 Das Leben in einem neuen Land und das aktive Engagement vor Ort bringen viele neue Erfahrungen mit sich. Für Vlad ist diese Zeit deshalb nicht nur beruflich, sondern auch persönlich eine wichtige Erfahrung, die ihn nachhaltig begleitet. 🌍🤝 Danke dir, Vlad, für dein Engagement und dafür, dass du deine Erfahrungen mit uns teilst! 🫶 👉 Du hast auch Lust auf einen Freiwilligendienst im Ausland? Entdecke unsere vielfältigen Einsatzstellen und informiere dich über den Link in Bio! ✨ Fotocredits: VIA-Freiwilliger Vlad ✨ #viaev #esk #europäischessolidaritätskorps #freiwilligendienst #internationalerfreiwilligendienst #österreich #wien #kindergarten #pädagogik #engagement #globaleslernen #interkulturelleraustausch #begegnung #deinweginsausland #jetztbewerben",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T14:00:05+0000",
+      "rejectionReason": "excluded-promotion-type",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18059972975615808",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctQASwgtep/",
+      "title": "Und hier ist das Endergebnis… ✨💙 Eine ganz besondere Geburtstagsüberraschung für den kleinen Leon 🥳🎂 Mit viel Liebe handgemacht – und natürlich mit einem kleinen Extra: Lichter,",
+      "text": "Und hier ist das Endergebnis… ✨💙 Eine ganz besondere Geburtstagsüberraschung für den kleinen Leon 🥳🎂 Mit viel Liebe handgemacht – und natürlich mit einem kleinen Extra: Lichter, die die ganze Bilderrahmen zum Strahlen bringen ✨ Wie gefällt euch das Endergebnis? 🥰",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:59:49+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien",
+        "vienna"
+      ]
+    },
+    {
+      "id": "18053611736565372",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctP9YWkc1y/",
+      "title": "Bewässerungsanlage im Herbst installieren? Klingt komisch, macht aber sogar Sinn: Die Erde hat über den Winter Zeit, sich zu setzen, bevor im Frühling alles zu wachsen beginnt und ",
+      "text": "Bewässerungsanlage im Herbst installieren? Klingt komisch, macht aber sogar Sinn: Die Erde hat über den Winter Zeit, sich zu setzen, bevor im Frühling alles zu wachsen beginnt und es wieder heiß wird. Hochsommer und tiefster Winter sind dagegen ungünstig. #grünflächen #bewässerungsanlage #herbst #sommer #wien #mödling",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:59:35+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18059079044790741",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctP-X1jMCz/",
+      "title": "#viyana #vienna #wien #austria #avusturya #schonbrunn #hofburg #stephansdom #belvederepalace #prater #cityofmusic #visitvienna #viennacity #explorevienna #discovervienna #backpacke",
+      "text": "#viyana #vienna #wien #austria #avusturya #schonbrunn #hofburg #stephansdom #belvederepalace #prater #cityofmusic #visitvienna #viennacity #explorevienna #discovervienna #backpackers #backpackingfamily #backpackersworld #backpackingtrip #sırtçantalıgezgin #sirtcantaligezginler #interrail #interraileurope #interrailturkiye #hostellife #yolaçık #yolaçıkyolaçık #travelgram #gezirehberi",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:59:09+0000",
+      "rejectionReason": "missing-text",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien",
+        "vienna"
+      ]
+    },
+    {
+      "id": "18004569098976156",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctP5JGjOtB/",
+      "title": "💖💙🖤 #art #abstractart #vienna",
+      "text": "💖💙🖤 #art #abstractart #vienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:58:26+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "17900969892355425",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctPxOrgas7/",
+      "title": "Come aggiungere fascino ad una chiesa gotica di notte.. #vienna",
+      "text": "Come aggiungere fascino ad una chiesa gotica di notte.. #vienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:58:02+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18238934266311889",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctPcdxtVO2/",
+      "title": "vibe in vienna🇦🇹 #vienna #austria #reels #foryou #viral",
+      "text": "vibe in vienna🇦🇹 #vienna #austria #reels #foryou #viral",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:57:30+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18111608087053136",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctPwQFjAJU/",
+      "title": "#viyana #vienna #wien #austria #avusturya #schonbrunn #hofburg #stephansdom #belvederepalace #prater #cityofmusic #visitvienna #viennacity #explorevienna #discovervienna #backpacke",
+      "text": "#viyana #vienna #wien #austria #avusturya #schonbrunn #hofburg #stephansdom #belvederepalace #prater #cityofmusic #visitvienna #viennacity #explorevienna #discovervienna #backpackers #backpackingfamily #backpackersworld #backpackingtrip #sırtçantalıgezgin #sirtcantaligezginler #interrail #interraileurope #interrailturkiye #hostellife #yolaçık #yolaçıkyolaçık #travelgram #gezirehberi",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:57:13+0000",
+      "rejectionReason": "missing-text",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien",
+        "vienna"
+      ]
+    },
+    {
+      "id": "18186526756405760",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctPhMrqGqx/",
+      "title": "Honda Cb 650R vs Hornet 1000 😈✌🏽#honda #motorcycle #vienna #bikelife #view",
+      "text": "Honda Cb 650R vs Hornet 1000 😈✌🏽#honda #motorcycle #vienna #bikelife #view",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:56:56+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18017138810920897",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctPc8zInwl/",
+      "title": "Just a desi girl at diljitdosanjh concert 😍❤️ #diljitdosanjh #auratour #vienna #austra #concert",
+      "text": "Just a desi girl at diljitdosanjh concert 😍❤️ #diljitdosanjh #auratour #vienna #austra #concert",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:56:50+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18111800879323468",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctPq_RFZrq/",
+      "title": "📸🍦 #grsnaps #grist #ricohgr3 #streetphotography #vienna eissalon_tichy",
+      "text": "📸🍦 #grsnaps #grist #ricohgr3 #streetphotography #vienna eissalon_tichy",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:56:36+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18352518052220114",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctQHNfOl1X/",
+      "title": "Artist Preview: Tapetypo I am an Austrian tape artist combining typography and pixel-based aesthetics. My typography is shaped by the material of adhesive tape itself. Its qualitie",
+      "text": "Artist Preview: Tapetypo I am an Austrian tape artist combining typography and pixel-based aesthetics. My typography is shaped by the material of adhesive tape itself. Its qualities, edges, tension and limitation determine letters, alphabets as well as whole fonts that range from clearly readable to coded and even cryptic forms. I honor tape as an everyday, functional object that can become image, language or surface. Experimenting with pixel characters and styles is a fascination rooted in the visual worlds of the computer games I grew up with. My works are often perceived as fresh and wild visual statements with a sense of discovery for the audience. Many people are drawn by the idea that something as ordinary as tape can produce playful, precise images, typographic systems and bold compositions. Since summer 2025 I have been creating tape works across Austria, the Netherlands and Switzerland. #vienna #artwork #techno",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:56:17+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18369134539243021",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctPeIgsJSx/",
+      "title": "📌 🇦🇹 Viyana’da tarihin izinde… Şehrin sokaklarında yürürken, geçmişin izleri günlük hayatın içine karışıyor. Tramvayların arasından yükselen tarihi binalar, taş sokaklar ve Baro",
+      "text": "📌 🇦🇹 Viyana’da tarihin izinde… Şehrin sokaklarında yürürken, geçmişin izleri günlük hayatın içine karışıyor. Tramvayların arasından yükselen tarihi binalar, taş sokaklar ve Barok mimarinin görkemli detayları… Karşımıza çıkan Peterskirche ise Viyana’nın en etkileyici yapılarından biri. Önündeki Pestsäule ile birlikte şehrin tarihine dair güçlü bir hikâye anlatıyor. Viyana’yı sadece gezmek değil, sokaklarında yürürken tarihini de hissetmek… 📍 Wien, Austria 🇦🇹 #Viyana #Vienna #Wien #Austria #keşfetteyim",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:56:01+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien",
+        "vienna"
+      ]
+    },
+    {
+      "id": "17965462170168199",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctPJt1MIW8/",
+      "title": "Stay tuned ⏳ florincuts x dennyblends #barber #wien #1010 #dominikanerbastei #wollzeile",
+      "text": "Stay tuned ⏳ florincuts x dennyblends #barber #wien #1010 #dominikanerbastei #wollzeile",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:55:56+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "18127284793666311",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctPjV5tp6V/",
+      "title": "POV: you found the most spectacular opera in Austria 🎭✨ Every summer, the historic Steinbruch St. Margarethen transforms into one of Europe’s most spectacular open-air opera stage",
+      "text": "POV: you found the most spectacular opera in Austria 🎭✨ Every summer, the historic Steinbruch St. Margarethen transforms into one of Europe’s most spectacular open-air opera stages. The production changes every year, with each new opera specially created for this incredible setting. This year, it was Puccini’s Tosca — performed beneath the open sky and surrounded by the dramatic walls of the ancient quarry. It honestly feels less like going to the opera and more like stepping into another world. 📍 Oper im Steinbruch, St. Margarethen, Austria Save this for your next summer in Austria 🤍 #Vienna #ViennaAustria #AustriaTravel #ThingsToDoInAustria #OpenAirOpera",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:55:49+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18125746963691641",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctPgPGgq1q/",
+      "title": "this morning at #hutteldorf #vienna",
+      "text": "this morning at #hutteldorf #vienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:55:42+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18111452480087949",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctPUakt9Re/",
+      "title": "Morning rituals at Café Central. Pure cashmere, morning press, and timeless tailoring on the streets of Vienna. . . . ​#vienna #cafecentral #quietluxury #oldmoneyaesthetic #imleova",
+      "text": "Morning rituals at Café Central. Pure cashmere, morning press, and timeless tailoring on the streets of Vienna. . . . ​#vienna #cafecentral #quietluxury #oldmoneyaesthetic #imleovane",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:55:12+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18066923816741615",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctPVLuI5GG/",
+      "title": "📍Thaliastraße 14, 1160 Wien | Worldwide Shipping 📦✈️🚚 #eveningdress #sabraboutique #sabravienna #wien #dresses_lovess",
+      "text": "📍Thaliastraße 14, 1160 Wien | Worldwide Shipping 📦✈️🚚 #eveningdress #sabraboutique #sabravienna #wien #dresses_lovess",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:54:59+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wien"
+      ]
+    },
+    {
+      "id": "17972333294932301",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctPB2iAQj6/",
+      "title": "Любимият ми Тамино от “Вълшебната флейта” на Моцарт ❤️ #mozart #zauberflöte #tenor #vienna #opera",
+      "text": "Любимият ми Тамино от “Вълшебната флейта” на Моцарт ❤️ #mozart #zauberflöte #tenor #vienna #opera",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:54:17+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "18344310718250849",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctOxJ6tXBd/",
+      "title": "So ein Restaurant gibt’s in Wien?! 👀 Im historischen Imperial Riding School versteckt sich mit dem Elstar ein modernes Wiener Restaurant, das österreichische Klassiker mit zeitgem",
+      "text": "So ein Restaurant gibt’s in Wien?! 👀 Im historischen Imperial Riding School versteckt sich mit dem Elstar ein modernes Wiener Restaurant, das österreichische Klassiker mit zeitgemäßer Brasserie-Küche, stylischem Hotel-Ambiente und einem wunderschönen Garten verbindet. Von Wiener Schnitzel über Seafood und Oktopus bis zu Cocktails und Dessert bekommst du hier genau die Mischung aus Wiener Küche, Fine Dining, Hotel Restaurant und Vienna Lifestyle, nach der Foodies suchen. 🇦🇹 Schick das Reel an die Person, mit der du hier unbedingt essen gehen willst. #ViennaFood #FoodieVienna #Wien #WienerKüche #ImperialRidingSchool 📍Ungargasse 60, 1030 Wien Im Imperial Riding School Hotel ⏰ Open Mo-Su 12:00-22:00 🍽️ Wiener Küche, Grill, Seafood, Desserts 🧡 elstarrestaurant Vienna has places like THIS?! 👀 Behind the historic Imperial Riding School you’ll find Elstar, a modern Vienna restaurant serving Austrian classics and international-inspired dishes in one of those locations that instantly feels like a hidden Vienna discovery. From Wiener Schnitzel and seafood to cocktails, dessert and the beautiful hotel interior: if you love Vienna food, Austrian cuisine, luxury hotel dining and Viennese culture, save this for your next trip to Vienna. 🇦🇹 Who would you bring here for dinner? VienneseCuisine FoodieExperience Vienna Wien ImperialRidingSchool",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:49:19+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "18113163361806017",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctKtDKTtKK/",
+      "title": "🍽️ Happy Hour: 1+1 Drink (für 12,50 €) Teilnehmende Standorte – Details prüfen. Laufendes Angebot – Verfügbarkeit prüfen. Alle aktuellen Bedingungen und den Original-Link findest ",
+      "text": "🍽️ Happy Hour: 1+1 Drink (für 12,50 €) Teilnehmende Standorte – Details prüfen. Laufendes Angebot – Verfügbarkeit prüfen. Alle aktuellen Bedingungen und den Original-Link findest du direkt in FreeFinder. #freefinder #wien #gratiswien #wienerdeals #essenwien #sparen #wienliebe",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:13:25+0000",
+      "rejectionReason": "self-syndicated-deal",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "essenwien"
+      ]
+    },
+    {
+      "id": "18005625950980786",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctKomhIMg7/",
+      "title": "Brunch mit Blick über Wien ✨ 160 Meter über der Stadt, mit 360°-Panoramablick und einem Brunch voller Wiener Klassiker, Frühstücksspezialitäten, warmen Speisen und süßen Köstlichke",
+      "text": "Brunch mit Blick über Wien ✨ 160 Meter über der Stadt, mit 360°-Panoramablick und einem Brunch voller Wiener Klassiker, Frühstücksspezialitäten, warmen Speisen und süßen Köstlichkeiten. 🥐☕️ 📍 Donauturm Wien 🥂 Jeden Samstag, Sonntag & an ausgewählten Feiertagen #austrianleadingsights #donauturm #brunch #donauturmwien #viennafood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:13:21+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "18027314714910225",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctJ7BsvJul/",
+      "title": "The pasta you didn’t know you needed until now 🍝😌 #BistrotBertarelliVienna #WhereToEatInVienna #ViennaRestaurants #PastaLovers #ViennaEats",
+      "text": "The pasta you didn’t know you needed until now 🍝😌 #BistrotBertarelliVienna #WhereToEatInVienna #ViennaRestaurants #PastaLovers #ViennaEats",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T13:06:29+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "17929322655402987",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctIPrXtsSk/",
+      "title": "Follow us for more hidden food spots🫶 📍Die Fischerin #vienna #austria #food #wien #viennafood",
+      "text": "Follow us for more hidden food spots🫶 📍Die Fischerin #vienna #austria #food #wien #viennafood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T12:55:53+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "17898151860581259",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctHN4bE3-W/",
+      "title": "Ocean air, salty hair, don’t care. 💦😎🌴",
+      "text": "Ocean air, salty hair, don’t care. 💦😎🌴",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T12:42:37+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "17988724470047696",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctG7sJsUjN/",
+      "title": "Wir sagen dem Sommer noch lange nicht Tschüss.☀️🍹 Solange die Sonne mitspielt, wird im Gastgarten angestoßen, gelacht und jeder warme Abend noch einmal richtig ausgekostet. Auf de",
+      "text": "Wir sagen dem Sommer noch lange nicht Tschüss.☀️🍹 Solange die Sonne mitspielt, wird im Gastgarten angestoßen, gelacht und jeder warme Abend noch einmal richtig ausgekostet. Auf den Spätsommer im Salm Bräu! #salmbräu #gastgarten #sommerinwien #wiengenuss We’re not saying goodbye to summer just yet. ☀️🍹 As long as the sun is out, we’ll be raising our glasses, enjoying the beer garden and making the most of every warm evening. Here’s to late summer at Salm Bräu!",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T12:40:55+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "sommerinwien"
+      ]
+    },
+    {
+      "id": "18091793789639844",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DctG3NyoIPy/",
+      "title": "My Indigo – wir haben es getestet 💚 Und was sollen wir sagen? Das Motto „Eat & Smile“ hat bei uns definitiv ins Schwarze getroffen! 😍 Im Westfield Donau Zentrum (EG) erwarten euc",
+      "text": "My Indigo – wir haben es getestet 💚 Und was sollen wir sagen? Das Motto „Eat & Smile“ hat bei uns definitiv ins Schwarze getroffen! 😍 Im Westfield Donau Zentrum (EG) erwarten euch jede Menge Sitzmöglichkeiten im und vor dem Lokal sowie leckere, gesunde und natürliche Gerichte. Dazu hausgemachte Getränke – was will man mehr? ✨🥗🥤 #westfielddonauzentrum #myindigo #eatandsmile #viennafood #healthyfood #foodie",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T12:40:18+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "18126908725704519",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DctCb4bjfRd/",
+      "title": "Caught in Hong Kong vibes. 🥢✨ Take a seat, enjoy authentic flavours and make today a little more delicious. See you? 👀 #HongKongCafe #HongKongVibes #ViennaFood #WienEssen #Vienna",
+      "text": "Caught in Hong Kong vibes. 🥢✨ Take a seat, enjoy authentic flavours and make today a little more delicious. See you? 👀 #HongKongCafe #HongKongVibes #ViennaFood #WienEssen #ViennaRestaurants",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T12:00:51+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "18617829385029774",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Dcs_4jWjQP3/",
+      "title": "📸✨ MAGIC MOMENT: WIE KOMMT DAS BILD IN DIE KAMERA? ✨📸 Stell dir vor, du baust deine EIGENE Kamera – aus einer simplen Papierrolle! 🤯 Genau das haben wir bei den Summer City Camp",
+      "text": "📸✨ MAGIC MOMENT: WIE KOMMT DAS BILD IN DIE KAMERA? ✨📸 Stell dir vor, du baust deine EIGENE Kamera – aus einer simplen Papierrolle! 🤯 Genau das haben wir bei den Summer City Camps mit dem großartigen Workshop „Camera Obscura“ von Simone Göstl gemacht! 🎨👩‍🎨 Gemeinsam haben wir entdeckt, wie Licht Bilder zaubert – ganz ohne Handy und Bildschirm. 📵☀️ Unter dem schwarzen Tuch von Simones Holz-Großformatkamera konnten alle die Gruppe auf der Mattscheibe entdecken und staunen, wie Fotografie wirklich funktioniert. 🎭📷 Jeder hat seine eigene Lochkamera Schritt für Schritt gebaut und konnte danach sein Wunderwerk gleich ausprobieren. 🛠️✨ Ein unvergessliches Erlebnis für neugierige Kids, die die Welt durch neue Blickwinkel gesehen haben! 👀🌍💫 Mehr Infos zu Simone und ihren tollen Workshops findet ihr auf www.simonegoestl.at. Fotocredits: fotografie_rodinger #SummerCityCamps #CameraObscura #Lochkamera #FotografieFürKinder #WorkshopWien #KinderEntdecken #OhneHandy #LichtUndBild #SimoneGöstl #WienerFerien #BildungWien #KidsCreative #FotografieMagie #SommerInWien #EntdeckenUndStaunen #Rückblick #WorkshopErlebnis",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T11:38:32+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "sommerinwien"
+      ]
+    },
+    {
+      "id": "18103058153245169",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Dcs_0vCCPYq/",
+      "title": "🍷 Die Stammersdorfer Weintage 2026 Was für ein Wochenende! Danke an alle, die dabei waren und gemeinsam mit uns gefeiert, genossen und angestoßen haben. ❤️ Ein besonderes Dankesch",
+      "text": "🍷 Die Stammersdorfer Weintage 2026 Was für ein Wochenende! Danke an alle, die dabei waren und gemeinsam mit uns gefeiert, genossen und angestoßen haben. ❤️ Ein besonderes Dankeschön an: • Bezirksvorsteher Stellvertreter josef_pepi_fischer • Moderatorin Marie-Louise Prinz • wkowien FG Gastronomie Obmann Thomas Peschta • Wiener Weinprinzessin Anna Langes • raiffeisenwien Vorständin Christiane Flehberger • WKO Präsidentin Mag. Margarete Kriz-Zwittkovits • Wiener Landtagspräsident Christian Meidlinger Danke für eure Unterstützung und euren Beitrag zu diesem besonderen Wochenende! 🍇🫶 #stammersdorferweintage #stammersdorf #volxfest #wienevents #wein",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T11:38:01+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienevents"
+      ]
+    },
+    {
+      "id": "18158713309498137",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Dcs-owgsZ1j/",
+      "title": "Pierogi are for everyone. 🥟🌈 Good food, good vibes & everyone is welcome at Tachles. 💖 #QueerVienna #LGBTQVienna #GayVienna #ViennaFood #TachlesWien 📍 Tachles | Karmeliterplatz",
+      "text": "Pierogi are for everyone. 🥟🌈 Good food, good vibes & everyone is welcome at Tachles. 💖 #QueerVienna #LGBTQVienna #GayVienna #ViennaFood #TachlesWien 📍 Tachles | Karmeliterplatz1 | 1020 Wien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T11:27:57+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "17998485848809500",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Dcs-PtEmOl0/",
+      "title": "Es gibt zwei Arten von Menschen. Die einen sehen Mohn in der Vitrine und denken: „Interessant.“ Die anderen wissen sofort: Das wird meine Kugel. 👀 Unsere Wochensorte: Mohn. Für al",
+      "text": "Es gibt zwei Arten von Menschen. Die einen sehen Mohn in der Vitrine und denken: „Interessant.“ Die anderen wissen sofort: Das wird meine Kugel. 👀 Unsere Wochensorte: Mohn. Für alle, die zwischen Pistazie, Schoko und Co. auch mal etwas bestellen, das nicht jeder nimmt. Vielleicht schon dein Favorit. Vielleicht deine neue Überraschung. Wie immer gilt: Montag bis Freitag. Nur diese Woche. Wenn weg, dann weg. Im Eissalon Trento Bortolotti. 💙🍦🩷 #mohn #wochensorte #kaisermühlen #viennaeats #trento22",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T11:24:21+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "18184379716416671",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Dcs865pIq37/",
+      "title": "Dip it, bite it and enjoy the crunch 😍 📍 Alser Straße U-Bahnstation 📍 Urban-Loritz-Platz Stand 5 #friedchicken #fryzwien #alserstrasse #viennaeats urbanloritzplatz",
+      "text": "Dip it, bite it and enjoy the crunch 😍 📍 Alser Straße U-Bahnstation 📍 Urban-Loritz-Platz Stand 5 #friedchicken #fryzwien #alserstrasse #viennaeats urbanloritzplatz",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T11:13:40+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "17961380564982186",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Dcs7s-yMPmj/",
+      "title": "🥳 Schnitzel-Liebe in Wien! 🥳 Lust auf ein richtig gutes Schnitzel? 😍 Bei Schnitzel Fan erwarten dich frisch panierte Schnitzel – außen goldbraun & knusprig, innen saftig und vol",
+      "text": "🥳 Schnitzel-Liebe in Wien! 🥳 Lust auf ein richtig gutes Schnitzel? 😍 Bei Schnitzel Fan erwarten dich frisch panierte Schnitzel – außen goldbraun & knusprig, innen saftig und voller Geschmack! 🤤🍽️ 📍 Wielandgasse 20, 1100 Wien 🕒 Öffnungszeiten: Montag–Samstag: 08:00–22:00 Uhr Sonntag: 10:00–22:00 Uhr ❤️ Schnitzel Fan – Wo Genuss zuhause ist! #wien #vienna #viennaeats #wienliebe #schnitzelwien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T11:02:27+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "18095691443176552",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Dcs7hnTjeHD/",
+      "title": "Take IKO wherever you go. 🥢 Ob Park, Büro oder Zuhause – deine Lieblingsgerichte gibt's auch zum Mitnehmen. Wo genießt du dein IKO Takeaway am liebsten? ☀️ #TakeawayVienna #Picnic",
+      "text": "Take IKO wherever you go. 🥢 Ob Park, Büro oder Zuhause – deine Lieblingsgerichte gibt's auch zum Mitnehmen. Wo genießt du dein IKO Takeaway am liebsten? ☀️ #TakeawayVienna #PicnicTime #ViennaFood #FoodToGo #IKO",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T11:00:28+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "18083904431678487",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Dcs7ZsWCtXv/",
+      "title": "Italienischer Genuss, der nach mehr schmeckt. 🇮🇹🍕 Frische Zutaten, traditioneller Geschmack und ganz viel Leidenschaft – bei La Strada 27/29. ❤️#lastrada2729 #wien #pizza #vienn",
+      "text": "Italienischer Genuss, der nach mehr schmeckt. 🇮🇹🍕 Frische Zutaten, traditioneller Geschmack und ganz viel Leidenschaft – bei La Strada 27/29. ❤️#lastrada2729 #wien #pizza #viennafood #viennarestaurants",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T10:59:22+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "18136750753581411",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Dcs66xSuIxu/",
+      "title": "PLOV PARTY There’s plov — and then there’s plov cooked outdoors, right in front of you. On September 6, our terrace becomes an open kitchen as our chef prepares traditional plov fr",
+      "text": "PLOV PARTY There’s plov — and then there’s plov cooked outdoors, right in front of you. On September 6, our terrace becomes an open kitchen as our chef prepares traditional plov from scratch and shares a few secrets behind its unmistakable flavor. Watch the process, catch the aromas, and taste it fresh — straight from the kazan. 📍 CHAIHONA Universitätsring 10, 1010 Vienna #viennafood #viennaevents #viennarestaurant",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T10:56:40+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "18126465286774114",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Dcs3L01O0-m/",
+      "title": "EN: An unforgettable dining experience at vestibuel.restaurant ✨ Located in the historic Burgtheater, this restaurant combines a fascinating history with a truly wonderful atmosphe",
+      "text": "EN: An unforgettable dining experience at vestibuel.restaurant ✨ Located in the historic Burgtheater, this restaurant combines a fascinating history with a truly wonderful atmosphere. I enjoyed every course of the extraordinary 6-course menu exquisite flavors, beautiful presentation, and so much attention to detail. A very special place in Vienna that I can wholeheartedly recommend! DE: Ein unvergessliches kulinarisches Erlebnis im vestibuel.restaurant ✨ Mitten im historischen Burgtheater verbindet dieses Restaurant eine faszinierende Geschichte mit einer ganz besonderen Atmosphäre. Ich habe jeden Gang des außergewöhnlichen 6-Gänge-Menüs genossen exquisite Aromen, eine wunderschöne Präsentation und viel Liebe zum Detail. Ein ganz besonderer Ort in Wien, den ich von Herzen empfehlen kann!",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T10:28:01+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "18278914645292753",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Dcs2oHwtXmV/",
+      "title": "Just for you or to share with friends. You can pick up yours today and treat yourself. Treat Yourself 🎉💖 📍Ottobauergasse 2 1060 Wien #petipari #viennaeats #dessert #wien #tartes",
+      "text": "Just for you or to share with friends. You can pick up yours today and treat yourself. Treat Yourself 🎉💖 📍Ottobauergasse 2 1060 Wien #petipari #viennaeats #dessert #wien #tartes",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T10:24:30+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "18026259956687269",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Dcs0r5tsVGN/",
+      "title": "Der Nascheck Dance läuft noch! 🕺🧇 Bis 19. September mitmachen und euch euren 100€ Nascheck Gutschein sichern. Kreativster Tanz gewinnt. So machst du mit: - Beitrag oder Story pos",
+      "text": "Der Nascheck Dance läuft noch! 🕺🧇 Bis 19. September mitmachen und euch euren 100€ Nascheck Gutschein sichern. Kreativster Tanz gewinnt. So machst du mit: - Beitrag oder Story posten - nascheckwien markieren Schon bist du dabei! Also mach mit! 🕺🩷 #nascheck #vienna #viennaeats",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T10:00:05+0000",
+      "rejectionReason": "excluded-promotion-type",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "18159327940483384",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Dcsz7sdCsRp/",
+      "title": "Sometimes you just need good food, a cozy atmosphere and a little time for yourself✨ Take a break. You deserve it🥰 📍Praterstrasse 55, 1020 Wien #vienna #austria #japanesefood #ra",
+      "text": "Sometimes you just need good food, a cozy atmosphere and a little time for yourself✨ Take a break. You deserve it🥰 📍Praterstrasse 55, 1020 Wien #vienna #austria #japanesefood #ramen #viennafood",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T09:55:00+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "18085100960261093",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DcsySEjOTJ8/",
+      "title": "Sweet Knödel season in Vienna is here! 🇦🇹✨ Soon it’s time for Topfenknödel with Zwetschkenröster at Café Oberlaa, while Mozartknödel can be enjoyed all year round at Café Mozart.",
+      "text": "Sweet Knödel season in Vienna is here! 🇦🇹✨ Soon it’s time for Topfenknödel with Zwetschkenröster at Café Oberlaa, while Mozartknödel can be enjoyed all year round at Café Mozart. And there’s still time to enjoy one of the best summer classics – Marillenknödel, available at Café Mozart or Café Landtmann. 🍑 Which sweet Knödel would you add to the list? #vienna #viennafood #austrianfood #knödel #foodinvienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T09:41:20+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "18088773119671910",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DcsxzIyhO8w/",
+      "title": "Der Hype ist real. 🥙🔥 Bester Döner in Wien? Was sagt ihr? 👇 ________________________ Video Credits TikTok: dilaraaydinn._ #ferhatdöner #kebab #wienergastro #essenundtrinken",
+      "text": "Der Hype ist real. 🥙🔥 Bester Döner in Wien? Was sagt ihr? 👇 ________________________ Video Credits TikTok: dilaraaydinn._ #ferhatdöner #kebab #wienergastro #essenundtrinken",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T09:35:05+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienergastro"
+      ]
+    },
+    {
+      "id": "18111546452046745",
+      "status": "collector-accepted",
+      "url": "https://www.instagram.com/p/DcswYXUgWdl/",
+      "title": "Eintritt frei",
+      "text": "Das hast du nicht erwartet. 👀 Mitten in Wien gibt es einen Ort, an dem Europa lebendig wird. Im Erlebnis Europa erwarten dich interaktive Stationen, ein beeindruckendes 360°-Kino und spannende Einblicke in Themen, die Europa bewegen. Schau vorbei und entdecke einen Ort, den viele Wiener:innen noch gar nicht kennen. 📍 Rotenturmstraße 19, 1010 Wien | Eintritt frei | Mo–Sa, 10–18 Uhr #ErlebnisEuropa #WienTipps #Europa",
+      "ownerUsername": "",
+      "ownerRole": "unknown",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T09:23:05+0000",
+      "rejectionReason": "",
+      "qualityScore": 88,
+      "viennaVerified": true,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wientipps"
+      ]
+    },
+    {
+      "id": "18122595976891406",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DcsvTnmM1zR/",
+      "title": "Qualität ist kein Zufall. ❤️‍🔥 Bei Limon Kebap Pizza erwartet dich eine große Auswahl an frisch zubereiteten Spezialitäten! 😍 🥩 Hühner-Döner & Steak-Döner 🍗 Schnitzel 🥗 Bowls ",
+      "text": "Qualität ist kein Zufall. ❤️‍🔥 Bei Limon Kebap Pizza erwartet dich eine große Auswahl an frisch zubereiteten Spezialitäten! 😍 🥩 Hühner-Döner & Steak-Döner 🍗 Schnitzel 🥗 Bowls in verschiedenen Sorten 🌯 Lahmacun & Kebap 🍲 Verschiedene Suppen 🥐 Frische Backwaren 🍕 Pizza & vieles mehr Frisch zubereitet, große Auswahl und voller Geschmack – bei uns ist für jeden etwas dabei! 🔥 📍 Quadenstraße 67, 1220 Wien 📍 Louis-Häfliger-Gasse, 1210 Wien Limon Kebap Pizza – Qualität, die man schmeckt. ❤️ #LimonKebapPizza #Wien #1220Wien #1210Wien #ViennaFood ViennaFoodGuide ViennaFoodie DönerWien PizzaWien Lahmacun WienEssen",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T09:15:34+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "18149632003557973",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DcstzzrjeJd/",
+      "title": "From raw potato to golden tray. Every step earns its place. 🕛 Daily 12 PM – 8 PM 📍 Neubaugasse 48 #goldenfrites #doublefried #frites #viennafood #neubaugasse",
+      "text": "From raw potato to golden tray. Every step earns its place. 🕛 Daily 12 PM – 8 PM 📍 Neubaugasse 48 #goldenfrites #doublefried #frites #viennafood #neubaugasse",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T09:00:36+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "17884368519617487",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DcssUKxlqjE/",
+      "title": "Perfektes Wetter, kaltes Bier, freier Eintritt. Dieses Wochenende steigt das Holy Hops Bierfest mit sieben verschiedenen Craft Bieren, gutem Essen und Spielen sowie Hüpfburg für di",
+      "text": "Perfektes Wetter, kaltes Bier, freier Eintritt. Dieses Wochenende steigt das Holy Hops Bierfest mit sieben verschiedenen Craft Bieren, gutem Essen und Spielen sowie Hüpfburg für die Kids. Lass den Sommer ausklingen und genieß ein kühles Bier im Schatten zwischen Leopoldsberg und Donau. PS: BierIG Mitglieder bekommen bei Vorlage des Mitgliedsausweises pro Tag ein Bier gratis. #holyhops #holyhopsbrewing #bierfest #kahlenbergerdorf #leopoldsberg #1190wien #döbling #wien #craftbeer #craftbeeraustria #craftbeerwien #handwerksbier #bierliebe #austrianbeer #brauerei #sommerinwien #wochenendeinwien #ausflugszielwien #familienausflug #wienmitkindern #hüpfburg #eintrittfrei #bierig #donau #bierfestival",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T08:47:53+0000",
+      "rejectionReason": "missing-vienna-evidence",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "sommerinwien"
+      ]
+    },
+    {
+      "id": "18583480234069683",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Dcsq7Icke6C/",
+      "title": "Wenn man ganz genau hinhört … 🔔 Heute ist Ruhetag im The Everest Restaurant. Die Küche bleibt still – dafür erklingt eine nepalesische Klangschale. Ihre sanften Töne und Schwingun",
+      "text": "Wenn man ganz genau hinhört … 🔔 Heute ist Ruhetag im The Everest Restaurant. Die Küche bleibt still – dafür erklingt eine nepalesische Klangschale. Ihre sanften Töne und Schwingungen stehen für Ruhe, Achtsamkeit und neue Energie. Genau die tanken wir heute, damit wir morgen wieder mit voller Freude für euch da sind. 🏔️ If you listen very carefully … 🔔 Today is our day off at The Everest Restaurant. The kitchen is quiet – but a Nepalese singing bowl fills the room with its gentle sound. Its soft tones and vibrations represent calm, mindfulness and renewed energy. That’s exactly what we’re recharging today, so we’ll be back tomorrow with fresh energy and ready to welcome you. 🏔️ #TheEverestRestaurant #NepaleseRestaurant #NepaleseCulture #SingingBowl #MindfulMonday #ViennaFood #ViennaRestaurants #TasteOfNepal",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T08:35:44+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennafood"
+      ]
+    },
+    {
+      "id": "17927455068164210",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DcsonRTFGK_/",
+      "title": "We’re back. 🍜 Ab 31. August sind wir wieder für euch da – mit euren Susuru Favorites, good vibes und natürlich ganz viel Slurp. Reserviert am besten gleich euren Tisch. Wir freuen",
+      "text": "We’re back. 🍜 Ab 31. August sind wir wieder für euch da – mit euren Susuru Favorites, good vibes und natürlich ganz viel Slurp. Reserviert am besten gleich euren Tisch. Wir freuen uns auf euch. 🤍 #susuruwien #viennafood #ramenwien #wienisst #viennaeats #slurpandsip",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T08:15:12+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "17965055967175193",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DcsoGjtgyu5/",
+      "title": "Gutes Essen ist näher, als du denkst. Zwei Konzepte, eine Adresse – GINZA & YOSHI, direkt an der Aspernstraße. 👀 KI generiert #YOSHI #GINZA #ViennaEats #ViennaFood #OpeningSoon",
+      "text": "Gutes Essen ist näher, als du denkst. Zwei Konzepte, eine Adresse – GINZA & YOSHI, direkt an der Aspernstraße. 👀 KI generiert #YOSHI #GINZA #ViennaEats #ViennaFood #OpeningSoon",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T08:13:12+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "18392658310200719",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Dcsm_zUDytb/",
+      "title": "Schimmel entsteht oft schleichend. Welche Info war neu für dich? #schimmel #wohnen #wohnung #wientipps #rudibyuniqa",
+      "text": "Schimmel entsteht oft schleichend. Welche Info war neu für dich? #schimmel #wohnen #wohnung #wientipps #rudibyuniqa",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T08:01:04+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wientipps"
+      ]
+    },
+    {
+      "id": "18063619187779248",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DcrY92wsdoW/",
+      "title": "Der September steht vor der Tür – und unsere Eierschwammerlkarte neigt sich langsam dem Ende zu. 🍄✨ Die perfekte Gelegenheit, eure Favoriten noch einmal zu genießen, bevor neue sa",
+      "text": "Der September steht vor der Tür – und unsere Eierschwammerlkarte neigt sich langsam dem Ende zu. 🍄✨ Die perfekte Gelegenheit, eure Favoriten noch einmal zu genießen, bevor neue saisonale Gerichte auf euch warten. 🍽️ Welches Eierschwammerl-Gericht war euer Favorit? Verratet es uns in den Kommentaren! 💚 #kleeamhanslteich #klee #sommerinwien #wienisst #efeucontent",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T08:00:11+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "sommerinwien"
+      ]
+    },
+    {
+      "id": "17932909929359388",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DcCLfz3NaeB/",
+      "title": "🧇 Waffelliebe in der Eisbude. 💕 Frisch zubereitet, warm & knusprig und mit jeder Menge fruchtigen Toppings – unsere Waffeln sind die perfekte kleine Auszeit für zwischendurch. 🍓",
+      "text": "🧇 Waffelliebe in der Eisbude. 💕 Frisch zubereitet, warm & knusprig und mit jeder Menge fruchtigen Toppings – unsere Waffeln sind die perfekte kleine Auszeit für zwischendurch. 🍓🍫✨ Also: Eis oder Waffel? Bei uns muss man sich zum Glück nicht entscheiden. 😉🍦🧇 Eisliebe. Waffelliebe. Eisbude. 💗 #eisbude #eisliebe #eiscreme #sommerinwien #efeucontent · KI-unterstützte Bildbearbeitung",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T07:55:06+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "sommerinwien"
+      ]
+    },
+    {
+      "id": "18126604096774020",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Dcsljmjutr1/",
+      "title": "EN: A little piece of Tel Aviv in Vienna ✨ I had a wonderful experience at neni.wasser . Delicious food, beautifully presented dishes, and refined Israeli cuisine full of vibrant f",
+      "text": "EN: A little piece of Tel Aviv in Vienna ✨ I had a wonderful experience at neni.wasser . Delicious food, beautifully presented dishes, and refined Israeli cuisine full of vibrant flavors. A truly special atmosphere by the water and definitely a must-visit restaurant in Vienna! DE: Ein kleines Stück Tel Aviv in Wien ✨ Mein Besuch bei neni.wasser war einfach wunderbar. Köstliches Essen, wunderschön präsentierte Gerichte und raffinierte israelische Küche voller besonderer Aromen. Eine einzigartige Atmosphäre direkt am Wasser – definitiv ein Restaurant, das man in Wien unbedingt besuchen sollte!",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T07:51:58+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "18076070162433717",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DcshjEriM5h/",
+      "title": "✨ Bis zum 30. August 2026 habt ihr EXKLUSIV die Chance, diesen magischen Sommer im Augarten LIVE mitzuerleben! Der goldene Abendhimmel über dem Augarten verwandelt sich in eine Büh",
+      "text": "✨ Bis zum 30. August 2026 habt ihr EXKLUSIV die Chance, diesen magischen Sommer im Augarten LIVE mitzuerleben! Der goldene Abendhimmel über dem Augarten verwandelt sich in eine Bühne der Superlative – wir haben monatelang an einem Programm gearbeitet, das euch umhauen wird. Von nächtlichen Freiluft-Kinoabenden auf der größten Leinwand der Stadt bis zu überraschenden Jazz-Sessions im Grünen, wo selbst die alten Platanen im Takt wippen. Freut euch auf brandneue Premieren, die es so nur hier gibt, und auf handverlesene Highlights der Wiener Filmfestivals, darunter Filme, die heuer den österreichischen Medienpreisen die Schau gestohlen haben. Besonders im Fokus stehen zwei absolute Ausnahmetalente: Timothé Chalamet präsentiert sein Regiedebüt in einer exklusiven Preview und Kristen Stewart taucht mit ihrem neuen Projekt tiefer in ihre Rolle als Oscar-prämierte Schauspielerin ein als je zuvor. Mit Workshops, Talk-Runden und spontanen Begegnungen könnt ihr die Stars nicht nur bewundern, sondern hautnah erleben. Glaubt ihr wirklich, dass es auf diesem Planeten mehr als eine Handvoll Filme gibt, die ohne Wiener Kaffeehausatmosphäre entstehen konnten? #augarten #viennafilmfestival #kinoimgrünen #filmpremieren #wien #austriakultur #timothéchalamet #kristenstewart #filmhighlights #openairkino #wienerfilm #austriafilme #kulturprogramm #sommerinwien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T07:13:57+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "sommerinwien"
+      ]
+    },
+    {
+      "id": "18114695519069110",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DcsgtleMI0q/",
+      "title": "A special night at Vienna’s markets. ✨ On September 4, we’re joining Lange Nacht der Wiener Märkte. See you at the market. 💚 #wien #viennaeats #market #langenachtderwienermärkte #",
+      "text": "A special night at Vienna’s markets. ✨ On September 4, we’re joining Lange Nacht der Wiener Märkte. See you at the market. 💚 #wien #viennaeats #market #langenachtderwienermärkte #local",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T07:06:58+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "17992696818040171",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DcsbQ5wCKkI/",
+      "title": "Forever in love with Sunshine & Iced Drinks ☀️🥰 Wem geht’s auch so? 💕 Ich bin so dankbar für die schönen Spätsommertage und dass man noch so viel draußen leben und arbeiten kann.",
+      "text": "Forever in love with Sunshine & Iced Drinks ☀️🥰 Wem geht’s auch so? 💕 Ich bin so dankbar für die schönen Spätsommertage und dass man noch so viel draußen leben und arbeiten kann. Food & Drinks entspannt in der Sonne genießen ist sowieso mein persönliches Highlight (Cafés & Restaurants habe ich immer im jeweiligen Bild für euch markiert). 🥰 Wenn es nach mir ginge, könnte Sommer ja ewig bleiben…❤️☀️ Aber ich weiß, dass sich Viele von euch schon auf den Herbst freuen. Ich bewahre mir einfach die Wärme und Sonne wie immer in meinem Herzen. Sommer passt einfach am allerbesten zu meinem Wesen. ☀️🫶 Genießt ihr noch die letzten Sommertage oder freut ihr euch schon auf den Herbst? ☀️🍂 Happy Wochenstart ihr Lieben! 🥰 ——— #wienliebe #sommerinwien #veganvienna unbeauftragt",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T06:18:33+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "sommerinwien"
+      ]
+    },
+    {
+      "id": "17955308835208453",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DcsZAt-Mb0o/",
+      "title": "✨💇‍♀️ Reasons to get a Bob? 💇‍♀️✨ 💛 Because sometimes a fresh look is all you need! 😍 ✂️ Kurz, stylisch & einfach ein echter Eyecatcher! ✨ Neuer Look, neues Gefühl, neue Vibes!",
+      "text": "✨💇‍♀️ Reasons to get a Bob? 💇‍♀️✨ 💛 Because sometimes a fresh look is all you need! 😍 ✂️ Kurz, stylisch & einfach ein echter Eyecatcher! ✨ Neuer Look, neues Gefühl, neue Vibes! 🔥 💃 Perfekt für alle, die mal etwas Neues ausprobieren wollen! Und jetzt die wichtigste Frage: Würdest du dir einen Bob schneiden lassen? 👀✂️ 🍹✨ Genau wie ein neuer Look sorgt auch unser CocktailChef für frische Vibes auf jedem Event! 🤖🍸 Einfach Cocktail auswählen, Knopf drücken und genießen! 😍🔥 🎉 Ob Party, Event oder Veranstaltung – CocktailChef macht den Moment besonders! 🍹✨ ➡️ Ihr wollt CocktailChef auf eurem Event? Dann meldet euch bei uns und mietet unsere Cocktail-Anlage!💎🍸 Euer Cocktailchef Team 🍹🔥 #cocktails #partydrinks #stadtsfest #CocktailLovers #Wien #Cocktailchef #cocktailanlage #cocktail #eventcaterer #barkeeper #mobilebar #party #hochzeit #geburtstag #jubiläum #betriebsfest #dorffest #sportverein #geschäftseröffnung #happyhour #wienevents #CocktailTime #MixItUp #Cheers #eventservice #cocktails #partysetup #eventplanung #drinks #cocktailmenu",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T05:59:06+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienevents"
+      ]
+    },
+    {
+      "id": "18114379547070121",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DcsW0zONIED/",
+      "title": "If feeding you carbs is wrong, Mamma doesn’t want to be right. 🤌🏼 Pasta first, pizza next, dessert because obviously. Around here, love is served by the plate and saying no to an",
+      "text": "If feeding you carbs is wrong, Mamma doesn’t want to be right. 🤌🏼 Pasta first, pizza next, dessert because obviously. Around here, love is served by the plate and saying no to another bite is simply not very Italian. 🇮🇹🍝🍕 📍 Viva La Mamma, 1010 Vienna #vivalamamma #viennafood #viennaeats #italianfood #pasta",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T05:40:18+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "18032915780849903",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DcsWiYlMS4f/",
+      "title": "A little sip, a little snack, and suddenly staying for one more feels like the only reasonable option. Kinda chic for a place called Spelunke. ✨🍸 #spelunke #viennaeats #viennafood",
+      "text": "A little sip, a little snack, and suddenly staying for one more feels like the only reasonable option. Kinda chic for a place called Spelunke. ✨🍸 #spelunke #viennaeats #viennafood #viennanights #wien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T05:38:02+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "18103595096186637",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DcsO-sfCpjC/",
+      "title": "Alleine etwas zu machen, kostet beim ersten Mal oft mehr Überwindung, als man zugeben möchte. Alleine ins Café? Ins Restaurant? Oder gleich in eine andere Stadt reisen? 👀 Aber gen",
+      "text": "Alleine etwas zu machen, kostet beim ersten Mal oft mehr Überwindung, als man zugeben möchte. Alleine ins Café? Ins Restaurant? Oder gleich in eine andere Stadt reisen? 👀 Aber genau dieses erste Mal kann sich ziemlich gut anfühlen. Niemanden fragen, worauf er Lust hat, keine Kompromisse machen und einfach den eigenen Tag gestalten. Und Wien ist ein ziemlich guter Ort, um damit anzufangen. 💛 5 Tipps für deine Solo-Reise nach Wien: Fang schon vor der Reise klein an ☕ Geh alleine einen Kaffee trinken oder essen. So fühlt es sich im Urlaub nicht mehr ganz so ungewohnt an. Plane ein paar Fixpunkte – aber nicht den ganzen Tag 🗓️ Ein Museum, eine Sehenswürdigkeit oder ein Restaurant reservieren und den Rest einfach auf dich zukommen lassen. Mach dir das Alleinsein schön 🥐 Wiener Kaffeehäuser sind perfekt dafür. Kaffee bestellen, Zeitung oder Buch auspacken und bleiben, solange du möchtest. Entdecke Wien zu Fuß 🚶 Lieblingsplaylist oder Podcast an und los. Ohne Abstimmung kannst du stehen bleiben, abbiegen und weiterziehen, wann immer du willst. Such dir eine Homebase, in der du dich willkommen fühlst 🛏️ Gerade alleine ist es schön, nach einem langen Wien-Tag an einen vertrauten Ort zurückzukommen – und am nächsten Morgen beim Frühstück schon wieder bekannte Gesichter zu sehen. 💛 Vielleicht ist alleine reisen am Ende gar nicht so sehr „alleine sein“ – sondern einfach mal alles genauso machen, wie man selbst möchte. Würdest du alleine nach Wien reisen? #henriettestadthotel #alleinreisen #solotravel #wienurlaub #wientipps",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T05:31:08+0000",
+      "rejectionReason": "excluded-promotion-type",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wientipps"
+      ]
+    },
+    {
+      "id": "17878942686687796",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DcsVxgmsz6R/",
+      "title": "Das 6. Lernjahr im Kindergarten Bibisarah startet! ✨🎓 Ein ganz besonderes Jahr beginnt! 💚🧡🩵💛 👶 Eröffnung unserer neuen Kleinkindergartengruppe 🚌 Tolle Ausflüge & besondere E",
+      "text": "Das 6. Lernjahr im Kindergarten Bibisarah startet! ✨🎓 Ein ganz besonderes Jahr beginnt! 💚🧡🩵💛 👶 Eröffnung unserer neuen Kleinkindergartengruppe 🚌 Tolle Ausflüge & besondere Erlebnisse 🧩 Viele neue Spiele & spannende Lernangebote 👩‍🏫 Neue Pädagogin & Assistenzen 🎒 Unsere neuen Schulkinder 🤗 Eingewöhnung unserer neuen Kinder Ein Jahr voller Entdeckungen, Spaß, Lernen und gemeinsamer Abenteuer wartet auf unsere Kinder! #kindergartenbibisarah #kindergarten #viennakids #jewisheducation #jewishvienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T05:30:04+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wientipps",
+        "wienfamilie"
+      ]
+    },
+    {
+      "id": "18066770969772161",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DcsRPCggjPm/",
+      "title": "Wir starten hinein in die letzte Sommerferien-Woche! 🥰 Bevor der Alltag wieder losgeht, haben wir noch viele coole Events, Empfehlungen und Aktionen für euch, die euch eine feine ",
+      "text": "Wir starten hinein in die letzte Sommerferien-Woche! 🥰 Bevor der Alltag wieder losgeht, haben wir noch viele coole Events, Empfehlungen und Aktionen für euch, die euch eine feine Zeit garantieren! 🥳✨ #wienxtra #ferienspiel #familiewien #sommerinwien #wienliebe",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-31T04:50:55+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "sommerinwien"
+      ]
+    },
+    {
+      "id": "18058530326546395",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DcrXMXzEwFf/",
+      "title": "„LA DOLCE VITA“… 🍷 Wien, ein sonniger Mittwochnachmittag im Mai. Die Luft riecht nach frisch gebackenen Kaiserschmarrn und es hängen diese kleinen, süßen Teilchen in der Luft, die",
+      "text": "„LA DOLCE VITA“… 🍷 Wien, ein sonniger Mittwochnachmittag im Mai. Die Luft riecht nach frisch gebackenen Kaiserschmarrn und es hängen diese kleinen, süßen Teilchen in der Luft, die nur der Frühling in Österreich mit sich bringt. Vor mir dampft eine Tasse melange im Postkarten-Café Central, während draußen die Straßenmusiker „Die Schöne blaue Donau“ auf der Geige spielen. Ein älterer Herr mit Tirolerhut nickt mir zu und bestellt ein Glas Grüner Veltliner – der perfekte Begleiter zu seinem selbstgemachten Apfelstrudel. Die Sonne fällt schräg durch die hohen Fenster und taucht die Marmortische in warmes Gold, als würden sie flüstern: „Bleib noch ein bisschen.“ Was ist der wahre Grund, warum Österreichs Cafékultur nie aus der Mode kommen wird? #vienna #austrianculture #coffeelover #viennacoffee #viennacafe #cultureaustria #österrreichleben #melange #kaischmarrn #viennafoodie #viennaeats #österreichurlaub #feelgood #gemütlich",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-30T20:24:09+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "17969354685134907",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DcrUTiKqPoI/",
+      "title": "Letzte Woche bei DAS MELT: ein besonderer Anlass, ein komplett veganes Menü & ganz viel Liebe zum Detail. 🌱✨ Geburtstag, Weihnachtsfeier oder etwas ganz Besonderes? Gruppenreservi",
+      "text": "Letzte Woche bei DAS MELT: ein besonderer Anlass, ein komplett veganes Menü & ganz viel Liebe zum Detail. 🌱✨ Geburtstag, Weihnachtsfeier oder etwas ganz Besonderes? Gruppenreservierungen sind möglich. 🥂 Mehr Infos über den Link in unserer Bio. #weichnachtsfeier #wien #vienna #viennaeats #event",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-30T20:01:41+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "18002918036991440",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/DcrJ4osRE8Y/",
+      "title": "POV: Du wolltest dieses Jahr endlich mal etwas machen, das nicht aus Essen gehen und Netflix besteht. Unsere HautSinn Workshops sind zurück. Von November bis Ende Jänner findest du",
+      "text": "POV: Du wolltest dieses Jahr endlich mal etwas machen, das nicht aus Essen gehen und Netflix besteht. Unsere HautSinn Workshops sind zurück. Von November bis Ende Jänner findest du uns wieder im 8. Bezirk in Wien – mit Seifenworkshops, Shampoo-Workshops, SIP & SOAP Workshop mit Weinbegleitung und Snacks. Die ersten Termine sind online. Die Plätze sind limitiert. Und mit BECREATIVE sparst du aktuell sogar noch bei der Buchung. Code nur gültig bis 6.9.2026. Schick das jetzt der Person, mit der du unbedingt hinwillst, und bucht euren Termin bevor jemand schneller ist. #WienTipps #WienEvents #WorkshopWien #SeifeSelberMachen #Naturkosmetik",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-30T18:27:30+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienevents",
+        "wientipps"
+      ]
+    },
+    {
+      "id": "18363455263245811",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/DcrDiyUs1yl/",
+      "title": "POV: Dein perfekter Mädels-Tag in Wien sieht so aus… 👀💕 Shoppen, entdecken, genießen & gemeinsam einen wunderschönen Tag verbringen. ✨ Der SCHWESTERN BAZAR WIEN ist zurück! 🛍️🌸",
+      "text": "POV: Dein perfekter Mädels-Tag in Wien sieht so aus… 👀💕 Shoppen, entdecken, genießen & gemeinsam einen wunderschönen Tag verbringen. ✨ Der SCHWESTERN BAZAR WIEN ist zurück! 🛍️🌸 📅 11.10.2026 ⏰ 12:00–20:00 Uhr 📍 Kudlichgasse 3–5, 1100 Wien 💕 Nur für Frauen & Kinder Freut euch auf: 🎁 100 Goodiebags für die ersten Besucherinnen 🎉 tolle Gewinne 🛍️ viele verschiedene Shops 🍴 leckeres Essen & besondere Food-Spots 🎨 verschiedene Workshops ✨ und noch einige Überraschungen, die wir euch bald verraten … Markiere deine Mädels, mit denen du am 11.10. dabei bist. 👯‍♀️💕 Speichert euch den Termin – die ersten Shops, Workshops & Gewinne stellen wir euch schon ganz bald vor. 👀✨ #SchwesternBazar #Wien #WienEvents #FrauenEvent #mädelstag",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-30T17:32:29+0000",
+      "rejectionReason": "excluded-promotion-type",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienevents"
+      ]
+    },
+    {
+      "id": "18114144556771485",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Dcq_9J4kb-v/",
+      "title": "Eine vergessene Geschichte mitten in der Wiener Innenstadt Als Archäologin bin ich darauf trainiert, Spuren zu entdecken. Welches Detail habe ich hier entdeckt? 🔍 Manchmal muss ma",
+      "text": "Eine vergessene Geschichte mitten in der Wiener Innenstadt Als Archäologin bin ich darauf trainiert, Spuren zu entdecken. Welches Detail habe ich hier entdeckt? 🔍 Manchmal muss man in Wien einfach stehen bleiben und genauer hinschauen. 👀 Mitten in der Bräunerstraße befindet sich ein Detail, an dem vermutlich jeden Tag unzählige Menschen vorbeigehen. Ich bin natürlich stehen geblieben. 🔍 Als Archäologin fallen mir solche Spuren sofort ins Auge – und dann möchte ich wissen: Was steckt dahinter? ✨ Ein unscheinbarer Schriftzug führte mich zu einer Geschichte, die ich so nicht erwartet hatte - und die erzähle ich euch morgen im neuen Reel. Also: Augen offen halten. Wien hat noch viele Geschichten zu erzählen. #WienEntdecken #WienerGeschichte #WienTipps #wienfürwiener #WienLiebe 👣👣 👣 Folge mir für Wien abseits der bekannten Wege.",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-30T17:00:02+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wientipps"
+      ]
+    },
+    {
+      "id": "18173622757431860",
+      "status": "rejected",
+      "url": "https://www.instagram.com/reel/Dcq_FiuMD4O/",
+      "title": "Where to eat in Vienna pt.1 📍 Restaurant Mahlzeit - Franzensbrückenstraße 14. Warning!! They come in huge portions 😍 #wheretoeatinvienna #viennaeats #cheapeatsvienna #foodie #vie",
+      "text": "Where to eat in Vienna pt.1 📍 Restaurant Mahlzeit - Franzensbrückenstraße 14. Warning!! They come in huge portions 😍 #wheretoeatinvienna #viennaeats #cheapeatsvienna #foodie #vienna",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-30T16:53:42+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "17982479963886517",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Dcq7rS7E3I8/",
+      "title": "Noch keine Pläne für die erste Septemberwoche? 👀 Wien und Umgebung haben einiges zu bieten! ㅤ Ob beim Flohmarkt nach neuen Lieblingsstücken stöbern, ein gebrauchtes Fahrrad finden",
+      "text": "Noch keine Pläne für die erste Septemberwoche? 👀 Wien und Umgebung haben einiges zu bieten! ㅤ Ob beim Flohmarkt nach neuen Lieblingsstücken stöbern, ein gebrauchtes Fahrrad finden, durch die Wiener Märkte schlendern oder zu elektronischen Beats feiern. Diese Woche ist für ziemlich jede Stimmung etwas dabei. Wer Lust auf eine kleine Zeitreise hat, kann in Carnuntum sogar ins römische Leben eintauchen. ㅤ 👉 Swipe durch unsere Weekly Tipps und speichere dir deine Favoriten für später. ㅤ #WienTipps #WienEvents #Wochenendtipps #FreizeitWien #ferienmessewien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-30T16:23:26+0000",
+      "rejectionReason": "general-recommendation",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienevents",
+        "wientipps"
+      ]
+    },
+    {
+      "id": "18042484337815730",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Dcq5YxTACGS/",
+      "title": "Die Kaiserwiese wirkt noch immer nach 💜🪩 Und während wir bereits mitten in der Planung für 2027 stecken, geht’s mit dem DISCO TRAINING direkt weiter! Am 14.09. feiern wir MIRAGE ",
+      "text": "Die Kaiserwiese wirkt noch immer nach 💜🪩 Und während wir bereits mitten in der Planung für 2027 stecken, geht’s mit dem DISCO TRAINING direkt weiter! Am 14.09. feiern wir MIRAGE VOL. II mit Live DJ, Workout und Club Feeling ganz ohne Hangover ✨ Schnapp dir jetzt dein Ticket über den Link in unserer Bio. Wir sehen uns auf der Tanzfläche! 🔗 #discotraining #wienevents #workoutwien #fitnesswien #miragewien",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-30T16:03:17+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienevents"
+      ]
+    },
+    {
+      "id": "17983533182878474",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Dcq5GlsoR9u/",
+      "title": "☀️ Die letzte Ferienwoche steht an! 🏄‍♂️🌊 Und die nutzen wir nochmal voll aus! 🤙 Diese Woche sind wir zu folgenden Zeiten für euch am Lift: 🏄 Montag–Freitag ab 11 Uhr 🏄 Samsta",
+      "text": "☀️ Die letzte Ferienwoche steht an! 🏄‍♂️🌊 Und die nutzen wir nochmal voll aus! 🤙 Diese Woche sind wir zu folgenden Zeiten für euch am Lift: 🏄 Montag–Freitag ab 11 Uhr 🏄 Samstag ab 12 Uhr 🏄 Sonntag ab 11 Uhr Also: Ferienmodus noch einmal voll auskosten & ab aufs Wasser! 💦☀️ #wakeboard #wakeboardinglife #wakeboarding #sommerinwien #efeucontent",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-30T16:01:31+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "sommerinwien"
+      ]
+    },
+    {
+      "id": "17970818739135727",
+      "status": "rejected",
+      "url": "https://www.instagram.com/p/Dcq289ADYsq/",
+      "title": "✨ Meine August Food Favorites – Part 2 ✨ Und weil ich im August noch so viele weitere tolle Cafés und Restaurants entdeckt habe, gibt’s heute direkt Part 2 meiner August Food Favor",
+      "text": "✨ Meine August Food Favorites – Part 2 ✨ Und weil ich im August noch so viele weitere tolle Cafés und Restaurants entdeckt habe, gibt’s heute direkt Part 2 meiner August Food Favorites. 🥹☕️🍴 Auch diesmal sind wieder einige richtig tolle Food-Spots dabei – darunter auch zahlreiche Neueröffnungen, die ich natürlich direkt für euch getestet habe. 👀✨ Von Frühstück und Kaffee bis hin zu richtig gutem Lunch & Dinner ist wieder alles dabei. 😍 Speichert euch den Beitrag unbedingt ab, wenn ihr noch auf der Suche nach neuen Cafés und Restaurants in Wien seid. 📌✨ Welcher der Spots landet als Nächstes auf eurer Liste? 👀 #veganvienna #viennafood #viennavegan #veganfood #viennaeats",
+      "ownerUsername": "",
+      "ownerRole": "",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-30T15:42:01+0000",
+      "rejectionReason": "no-concrete-offer",
+      "qualityScore": 0,
+      "viennaVerified": false,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "viennaeats"
+      ]
+    },
+    {
+      "id": "18115684492945822",
+      "status": "collector-accepted",
+      "url": "https://www.instagram.com/reel/Dcq1E52AbvC/",
+      "title": "Kommt vorbei und habt einen super-lustigen Abend mit unseren Comedy-All-Stars 🤩 Mit Kabarett, Standup-Comedy, Musik und ganz viel Spaß 🥳 H",
+      "text": "Wir feiern unseren ersten Geburtstag 🥳🤩 Queerlig mit Schmäh ist DIE Comedyshow abseits aller ausgetretenen Pfade, denn wir bringen neue und frische Perspektiven. Wir geben LGBTQ+ und Flinta* -Comedians einen Platz auf unserer Bühne- schon seit einem Jahr 🥳 Und das wollen wir mit euch allen feiern! Kommt vorbei und habt einen super-lustigen Abend mit unseren Comedy-All-Stars 🤩 Mit Kabarett, Standup-Comedy, Musik und ganz viel Spaß 🥳 Hier kostenlos reservieren: https://queerligmitschmaehSeptember2026.eventbrite.at (Oder als PN) Host: bianca__klein_comedy villavidacafe Linke Wienzeile 102, 1060 Wien Beginn: 19:30 Uhr Und hier unser MEGA-LINE-UP: yanathalerofficial vienna_by_val lasasha.at jay_burn_98 toasterbeule alessandradelato karin_uebelbacher sancartoons #wienevents #comedywien #kabarett #standupwien #comedyshowwien",
+      "ownerUsername": "",
+      "ownerRole": "unknown",
+      "scoutUsername": "",
+      "merchantUsername": "",
+      "pubDate": "2026-08-30T15:25:05+0000",
+      "rejectionReason": "",
+      "qualityScore": 91,
+      "viennaVerified": true,
+      "mediaEvidence": {
+        "analyzedAt": "",
+        "ocrText": "",
+        "assetCount": 0,
+        "imageCount": 0,
+        "videoFrameCount": 0,
+        "downloadRetries": 0,
+        "errors": [],
+        "ai": null
+      },
+      "hashtags": [
+        "wienevents"
+      ]
+    }
+  ]
 }
