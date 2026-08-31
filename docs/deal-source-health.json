@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-31T11:37:25.093Z",
+  "generatedAt": "2026-08-31T11:47:56.084Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 525,
-    "uniqueCandidates": 478,
-    "distinctCandidates": 498,
+    "totalCandidates": 530,
+    "uniqueCandidates": 483,
+    "distinctCandidates": 503,
     "duplicateClusters": 20,
     "topHealthySources": [
       {
@@ -12,6 +12,12 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "healthScore": 75,
+        "totalDeals": 10
       },
       {
         "sourceKey": "wien-combined",
@@ -22,23 +28,23 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "healthScore": 73,
-        "totalDeals": 8
+        "healthScore": 71,
+        "totalDeals": 12
       },
       {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "healthScore": 68,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 66,
-        "totalDeals": 6
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "missionFitScore": 79,
+        "totalDeals": 10
+      },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
@@ -62,21 +68,15 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 70,
         "totalDeals": 6
-      },
-      {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
-        "missionFitScore": 66,
-        "totalDeals": 8
       }
     ],
     "topCoverageSources": [
       {
         "sourceKey": "vienna-promo-radar",
         "sourceLabel": "Vienna Promo Radar",
-        "coverageScore": 65,
-        "totalDeals": 100,
-        "fresh1dCount": 0
+        "coverageScore": 66,
+        "totalDeals": 99,
+        "fresh1dCount": 1
       },
       {
         "sourceKey": "member-benefits",
@@ -135,8 +135,8 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "precisionScore": 74,
-        "totalDeals": 8
+        "precisionScore": 72,
+        "totalDeals": 12
       }
     ],
     "topWeightedSources": [
@@ -145,6 +145,12 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 70,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "sourceWeightScore": 64,
+        "totalDeals": 10
       },
       {
         "sourceKey": "wien-combined",
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 59,
         "totalDeals": 6
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 58,
-        "totalDeals": 8
       }
     ],
     "topSourcesToFix": [
@@ -296,6 +296,68 @@
       "sourceWeightScore": 70
     },
     {
+      "sourceKey": "joe",
+      "file": "deals-pending-joe.json",
+      "sourceLabel": "jö Bonus Club",
+      "totalDeals": 10,
+      "uniqueDeals": 10,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 10,
+      "fresh7dCount": 10,
+      "viennaCount": 0,
+      "foodDrinkCount": 10,
+      "promoCount": 8,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "jö Äpp Extrem Aktion bei BILLA",
+        "jö Rabattsammler",
+        "jö äpp Day"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.3,
+      "topCategories": [
+        {
+          "value": "supermarkt",
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 4
+        },
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 5
+        },
+        {
+          "value": "rabatt",
+          "count": 5
+        }
+      ],
+      "issues": [
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 75,
+      "missionFitScore": 79,
+      "coverageScore": 21,
+      "precisionScore": 68,
+      "sourceWeightScore": 64
+    },
+    {
       "sourceKey": "wien-combined",
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
@@ -390,20 +452,20 @@
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
-      "totalDeals": 8,
-      "uniqueDeals": 7,
+      "totalDeals": 12,
+      "uniqueDeals": 11,
       "duplicateDeals": 1,
       "duplicateAcrossSources": 1,
       "fresh1dCount": 1,
-      "fresh7dCount": 8,
-      "viennaCount": 8,
-      "foodDrinkCount": 3,
-      "promoCount": 8,
+      "fresh7dCount": 12,
+      "viennaCount": 12,
+      "foodDrinkCount": 4,
+      "promoCount": 12,
       "missingUrlCount": 0,
       "sampleTitles": [
         "Gratis Burger bei Jägerstraße 40",
-        "Gratis GETRÄNK bei RECUP",
-        "Birthday-Special: Eintritt um 10 € bei ASIANNIGHT"
+        "@austriannaa Angebot",
+        "Gratis GETRÄNK bei RECUP"
       ],
       "lastRun": null,
       "uniqueRate": 0.9,
@@ -411,36 +473,44 @@
       "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.4,
+      "foodDrinkRate": 0.3,
       "promoRate": 1,
       "missingUrlRate": 0,
-      "averageQualityScore": 72.8,
+      "averageQualityScore": 71.8,
       "topCategories": [
         {
           "value": "kultur",
-          "count": 3
+          "count": 4
+        },
+        {
+          "value": "essen",
+          "count": 2
         },
         {
           "value": "kaffee",
           "count": 2
         },
         {
-          "value": "essen",
-          "count": 1
+          "value": "shopping",
+          "count": 2
         },
         {
           "value": "fitness",
           "count": 1
         },
         {
-          "value": "shopping",
+          "value": "freizeit",
           "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "gratis",
-          "count": 7
+          "count": 10
+        },
+        {
+          "value": "bogo",
+          "count": 1
         },
         {
           "value": "rabatt",
@@ -451,11 +521,11 @@
         "wenige Deals sind frischer als 1 Tag",
         "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 73,
-      "missionFitScore": 59,
-      "coverageScore": 17,
-      "precisionScore": 74,
-      "sourceWeightScore": 58
+      "healthScore": 71,
+      "missionFitScore": 56,
+      "coverageScore": 19,
+      "precisionScore": 72,
+      "sourceWeightScore": 56
     },
     {
       "sourceKey": "gastro2",
@@ -622,62 +692,6 @@
       "sourceWeightScore": 59
     },
     {
-      "sourceKey": "instagram-discovery",
-      "file": "deals-pending-instagram-discovery.json",
-      "sourceLabel": "Daily Sync Instagram Discovery",
-      "totalDeals": 8,
-      "uniqueDeals": 5,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 5,
-      "foodDrinkCount": 7,
-      "promoCount": 7,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst...",
-        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst...",
-        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst..."
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0.6,
-      "foodDrinkRate": 0.9,
-      "promoRate": 0.9,
-      "missingUrlRate": 0,
-      "averageQualityScore": 98.5,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 7
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 8
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 65,
-      "missionFitScore": 66,
-      "coverageScore": 16,
-      "precisionScore": 69,
-      "sourceWeightScore": 56
-    },
-    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
@@ -757,56 +771,52 @@
       "sourceWeightScore": 49
     },
     {
-      "sourceKey": "joe",
-      "file": "deals-pending-joe.json",
-      "sourceLabel": "jö Bonus Club",
+      "sourceKey": "instagram-discovery",
+      "file": "deals-pending-instagram-discovery.json",
+      "sourceLabel": "Daily Sync Instagram Discovery",
       "totalDeals": 10,
-      "uniqueDeals": 10,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
+      "uniqueDeals": 7,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
       "fresh1dCount": 0,
-      "fresh7dCount": 10,
-      "viennaCount": 0,
-      "foodDrinkCount": 10,
+      "fresh7dCount": 0,
+      "viennaCount": 5,
+      "foodDrinkCount": 8,
       "promoCount": 8,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "jö Äpp Extrem Aktion bei BILLA",
-        "jö Rabattsammler",
-        "jö äpp Day"
+        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst...",
+        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst...",
+        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst..."
       ],
       "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
       "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
+      "fresh7dRate": 0,
+      "viennaRate": 0.5,
+      "foodDrinkRate": 0.8,
       "promoRate": 0.8,
       "missingUrlRate": 0,
-      "averageQualityScore": 84.3,
+      "averageQualityScore": 94.5,
       "topCategories": [
         {
-          "value": "supermarkt",
-          "count": 5
-        },
-        {
-          "value": "kaffee",
-          "count": 4
-        },
-        {
           "value": "essen",
+          "count": 8
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        },
+        {
+          "value": "freizeit",
           "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "gratis",
-          "count": 5
-        },
-        {
           "value": "rabatt",
-          "count": 5
+          "count": 10
         }
       ],
       "issues": [
@@ -814,10 +824,10 @@
         "Wien-Signal ist zu schwach"
       ],
       "healthScore": 61,
-      "missionFitScore": 57,
-      "coverageScore": 15,
-      "precisionScore": 56,
-      "sourceWeightScore": 50
+      "missionFitScore": 58,
+      "coverageScore": 16,
+      "precisionScore": 62,
+      "sourceWeightScore": 51
     },
     {
       "sourceKey": "instagram-verified",
@@ -1726,15 +1736,15 @@
       "sourceKey": "vienna-promo-radar",
       "file": "deals-pending-vienna-promo-radar.json",
       "sourceLabel": "Vienna Promo Radar",
-      "totalDeals": 100,
-      "uniqueDeals": 94,
+      "totalDeals": 99,
+      "uniqueDeals": 93,
       "duplicateDeals": 6,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
+      "fresh1dCount": 1,
+      "fresh7dCount": 2,
       "viennaCount": 0,
       "foodDrinkCount": 31,
-      "promoCount": 31,
+      "promoCount": 30,
       "missingUrlCount": 0,
       "sampleTitles": [
         "GRATIS: Große Öffi-Aktion – Klimaticket um nur 33 € und 20.000 Gratis-Tageskarten",
@@ -1750,7 +1760,7 @@
       "foodDrinkRate": 0.3,
       "promoRate": 0.3,
       "missingUrlRate": 0,
-      "averageQualityScore": 44.1,
+      "averageQualityScore": 43.8,
       "topCategories": [
         {
           "value": "reisen",
@@ -1758,19 +1768,19 @@
         },
         {
           "value": "kaffee",
-          "count": 19
-        },
-        {
-          "value": "fitness",
-          "count": 12
-        },
-        {
-          "value": "shopping",
-          "count": 12
+          "count": 17
         },
         {
           "value": "essen",
-          "count": 11
+          "count": 13
+        },
+        {
+          "value": "fitness",
+          "count": 13
+        },
+        {
+          "value": "shopping",
+          "count": 10
         },
         {
           "value": "technik",
@@ -1784,7 +1794,11 @@
         },
         {
           "value": "gratis",
-          "count": 28
+          "count": 26
+        },
+        {
+          "value": "freebie",
+          "count": 1
         }
       ],
       "issues": [
@@ -1795,7 +1809,7 @@
       ],
       "healthScore": 37,
       "missionFitScore": 19,
-      "coverageScore": 65,
+      "coverageScore": 66,
       "precisionScore": 28,
       "sourceWeightScore": 35
     },
