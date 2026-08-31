@@ -53,10 +53,12 @@ jobs:
           TIKTOK_MEDIA_MAX_AGE_HOURS: '72'
           TIKTOK_MEDIA_MAX_POSTS_PER_RUN: '16'
           TIKTOK_MEDIA_MAX_ASSETS_PER_POST: '3'
-          TIKTOK_MEDIA_MAX_VIDEO_FRAMES: '4'
-          TIKTOK_MEDIA_LLM_MAX_CALLS_PER_RUN: '12'
+          TIKTOK_MEDIA_MAX_VIDEO_FRAMES: '3'
+          TIKTOK_MEDIA_VISION_MAX_IMAGES_PER_POST: '2'
+          TIKTOK_MEDIA_LLM_MAX_CALLS_PER_RUN: '8'
+          TIKTOK_MEDIA_LLM_CONCURRENCY: '2'
           TIKTOK_MEDIA_LLM_MIN_CONFIDENCE: '0.84'
-          TIKTOK_MEDIA_VISION_DETAIL: 'high'
+          TIKTOK_MEDIA_VISION_DETAIL: 'low'
         run: node scraper/tiktok-deals-scanner.js
 
       - name: Commit TikTok scanner state

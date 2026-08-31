@@ -173,6 +173,40 @@ assert.match(enriched.entries[0].item._mediaEvidence.ocrText, /zweiter Kaffee gr
 assert.equal(enriched.entries[0].item._mediaEvidence.visionImageCount, 1);
 assert.equal('visionImages' in enriched.entries[0].item._mediaEvidence, false, 'raw image data must not be persisted in evidence');
 
+let activeClassifications = 0;
+let peakClassifications = 0;
+const concurrentEntries = Array.from({ length: 3 }, (_, index) => ({
+  item: {
+    id: `concurrent-${index}`,
+    caption: 'Neues Kaffee-Special in Wien',
+    media_type: 'IMAGE',
+    media_url: `https://cdn.example/concurrent-${index}.jpg`,
+    timestamp: '2026-08-22T09:30:00.000Z',
+  },
+  context: { account: { username: `cafe-${index}.wien`, verifiedVienna: true, category: 'food' } },
+}));
+const concurrent = await enrichInstagramGraphMedia(concurrentEntries, config, now, {
+  tools: { tesseract: true, ffmpeg: false },
+  analyzeItem: async () => ({
+    ocrText: 'Zweiter Kaffee gratis',
+    visionImages: [],
+    assetCount: 1,
+    imageCount: 1,
+    videoFrameCount: 0,
+    errors: [],
+  }),
+  classifyOcr: async () => {
+    activeClassifications += 1;
+    peakClassifications = Math.max(peakClassifications, activeClassifications);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    activeClassifications -= 1;
+    return { isDeal: true, confidence: 0.95, offerText: 'Zweiter Kaffee gratis', exclusion: 'none' };
+  },
+});
+assert.equal(concurrent.report.aiConcurrency, 2);
+assert.equal(concurrent.report.aiCalls, 3);
+assert.equal(peakClassifications, 2, 'media classifications should use the configured bounded concurrency');
+
 let visionOnlyClassifications = 0;
 const visionOnly = await enrichInstagramGraphMedia([{
   item: {

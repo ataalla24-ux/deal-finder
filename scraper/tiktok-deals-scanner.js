@@ -393,6 +393,7 @@ function buildTikTokMediaConfig(env = process.env) {
       : 'high',
     mediaLlmModel: cleanText(env.TIKTOK_MEDIA_LLM_MODEL || env.OPENAI_MODEL || 'gpt-4.1-mini', 100),
     mediaLlmMaxCallsPerRun: boundedNumber(env.TIKTOK_MEDIA_LLM_MAX_CALLS_PER_RUN, 12, 0, 20),
+    mediaLlmConcurrency: boundedNumber(env.TIKTOK_MEDIA_LLM_CONCURRENCY, 2, 1, 4),
     mediaLlmMinOcrChars: boundedNumber(env.TIKTOK_MEDIA_LLM_MIN_OCR_CHARS, 12, 5, 200),
     mediaLlmMinConfidence: boundedNumber(env.TIKTOK_MEDIA_LLM_MIN_CONFIDENCE, 0.84, 0.5, 1),
     mediaLlmTimeoutMs: boundedNumber(env.TIKTOK_MEDIA_LLM_TIMEOUT_MS, 30000, 5000, 90000),
@@ -1189,6 +1190,30 @@ function isTikTokMediaRescueCandidate(candidate, config, now) {
   return extractInstagramMediaAssets(tikTokMediaItem(candidate)).length > 0;
 }
 
+function hasTikTokFoodDrinkSignal(value) {
+  return /\b(?:restaurant|gastro|essen|food|lunch|brunch|frühstück|fruehstueck|pizza|burger|kebab|kebap|döner|doener|sushi|ramen|pasta|cafe|café|coffee|kaffee|matcha|cocktail|spritz|drink|bier|wein|eis|gelato|dessert|bakery|bäckerei|buffet|all\s+you\s+can\s+eat)\b/i.test(cleanText(value, 5000));
+}
+
+function shouldClassifyTikTokRescueEvidence({ entry, evidence }, now = new Date()) {
+  const candidate = entry?.candidate || {};
+  const reason = candidate?.initial?.reason || buildDealFromPost(candidate.url, candidate.data || {}, { now }).reason;
+  const originalText = cleanText([candidate.data?.title, candidate.data?.description].filter(Boolean).join(' '), 3600);
+  const combinedText = cleanText(`${originalText} ${evidence?.ocrText || ''}`, 5000);
+  const hasDeal = hasStrongDealSignal(combinedText);
+  const hasVienna = reason === 'kein starkes Gratis-/Deal-Signal'
+    || Boolean(extractViennaEvidence(combinedText));
+  const hasFoodDrink = hasTikTokFoodDrinkSignal(combinedText);
+  const localAccount = /(?:[._]at|wien|vienna|austria|oesterreich)$/i.test(cleanText(candidate.data?.accountHandle, 80));
+
+  if (reason === 'kein eindeutiges Wien-Signal') {
+    return hasDeal && (hasVienna || hasFoodDrink || localAccount);
+  }
+  if (reason === 'kein starkes Gratis-/Deal-Signal') {
+    return hasVienna && (hasDeal || hasFoodDrink);
+  }
+  return false;
+}
+
 function emptyTikTokMediaReport(status, error = '') {
   return {
     status,
@@ -1202,6 +1227,9 @@ function emptyTikTokMediaReport(status, error = '') {
     aiCalls: 0,
     visionCalls: 0,
     aiAccepted: 0,
+    aiSkippedLowIntent: 0,
+    aiSkippedUnrecoverable: 0,
+    aiAcceptedUnusable: 0,
     inputTokens: 0,
     outputTokens: 0,
     totalTokens: 0,
@@ -1246,6 +1274,7 @@ export async function rescueTikTokMediaCandidates(candidates, options = {}) {
       execFileImpl: options.execFileImpl,
       tools: options.mediaTools,
       analyzeItem: options.analyzeMediaItem,
+      shouldClassifyEvidence: (payload) => shouldClassifyTikTokRescueEvidence(payload, now),
       classifyOcr: options.classifyMedia || ((input, classifierConfig, classifierOptions) => (
         classifySocialMediaEvidenceWithOpenAI({ ...input, platform: 'TikTok' }, classifierConfig, classifierOptions)
       )),
@@ -1267,6 +1296,7 @@ export async function rescueTikTokMediaCandidates(candidates, options = {}) {
   const deals = [];
   const rescuedUrls = new Set();
   const evidenceByUrl = new Map();
+  let aiAcceptedUnusable = 0;
   for (const entry of media.entries) {
     if (entry.item?._mediaEvidence) {
       evidenceByUrl.set(normalizeTikTokVideoUrl(entry.candidate.url), entry.item._mediaEvidence);
@@ -1277,7 +1307,16 @@ export async function rescueTikTokMediaCandidates(candidates, options = {}) {
       now,
       mediaMinConfidence: config.mediaLlmMinConfidence,
     });
-    if (!rebuilt.deal) continue;
+    if (!rebuilt.deal) {
+      const ai = entry.item._mediaEvidence.ai;
+      if (ai?.isDeal
+          && Number(ai.confidence || 0) >= config.mediaLlmMinConfidence
+          && ai.exclusion === 'none'
+          && cleanText(ai.offerText, 500)) {
+        aiAcceptedUnusable += 1;
+      }
+      continue;
+    }
     deals.push(rebuilt.deal);
     rescuedUrls.add(entry.candidate.url);
   }
@@ -1292,6 +1331,7 @@ export async function rescueTikTokMediaCandidates(candidates, options = {}) {
       rescueCandidates: unique.size,
       eligible: eligible.length,
       rescuedDeals: deals.length,
+      aiAcceptedUnusable,
     },
   };
 }
@@ -1513,8 +1553,11 @@ async function main() {
       maxAgeHours: mediaConfig.mediaMaxAgeHours,
       maxPostsPerRun: mediaConfig.mediaMaxPostsPerRun,
       maxLlmCallsPerRun: mediaConfig.mediaLlmMaxCallsPerRun,
+      llmConcurrency: mediaConfig.mediaLlmConcurrency,
       minConfidence: mediaConfig.mediaLlmMinConfidence,
       model: mediaConfig.mediaLlmModel,
+      visionDetail: mediaConfig.mediaVisionDetail,
+      visionMaxImages: mediaConfig.mediaVisionMaxImagesPerPost,
       llmEnabled: mediaConfig.mediaLlmEnabled,
       visionEnabled: mediaConfig.mediaVisionEnabled,
     },

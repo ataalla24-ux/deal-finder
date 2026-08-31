@@ -602,6 +602,99 @@ assert.equal(mediaRescue.report.eligible, 1);
 assert.equal(mediaRescue.report.rescuedDeals, 1);
 assert.ok(mediaRescue.rescuedUrls.has(visualOnlyUrl));
 
+let realPipelineClassifications = 0;
+const realPipelineRescue = await rescueTikTokMediaCandidates([
+  { url: visualOnlyUrl, data: visualOnlyData, initial: visualOnlyInitial },
+], {
+  now: REFERENCE_NOW,
+  env: { OPENAI_API_KEY: 'test-openai-key' },
+  cache: {},
+  mediaTools: { tesseract: true, ffmpeg: true, ffprobe: true },
+  analyzeMediaItem: async () => ({
+    ocrText: 'Zweiter Kaffee gratis, Neubaugasse 12, 1070 Wien',
+    visionImages: ['data:image/jpeg;base64,AQID'],
+    assetCount: 1,
+    availableAssetCount: 1,
+    imageCount: 1,
+    videoFrameCount: 1,
+    errors: [],
+    warnings: [],
+  }),
+  classifyMedia: async () => {
+    realPipelineClassifications += 1;
+    return trustedVisualData._mediaEvidence.ai;
+  },
+});
+assert.equal(realPipelineClassifications, 1);
+assert.equal(realPipelineRescue.deals.length, 1, 'a plausible Vienna food post remains eligible for media rescue');
+
+const globalPromoData = postData('20 % Rabatt auf Skechers, nur heute.', 'savingston');
+globalPromoData.bodyText = globalPromoData.description;
+globalPromoData.mediaType = 'VIDEO';
+globalPromoData.mediaUrl = 'https://cdn.example/global-promo.mp4';
+globalPromoData.thumbnailUrl = 'https://cdn.example/global-promo.jpg';
+const globalPromoUrl = 'https://www.tiktok.com/@savingston/video/7678002441849425195';
+const globalPromoInitial = build(globalPromoUrl, globalPromoData);
+assert.equal(globalPromoInitial.reason, 'kein eindeutiges Wien-Signal');
+let globalPromoClassifications = 0;
+const gatedGlobalPromo = await rescueTikTokMediaCandidates([
+  { url: globalPromoUrl, data: globalPromoData, initial: globalPromoInitial },
+], {
+  now: REFERENCE_NOW,
+  env: { OPENAI_API_KEY: 'test-openai-key' },
+  cache: {},
+  mediaTools: { tesseract: true, ffmpeg: true, ffprobe: true },
+  analyzeMediaItem: async () => ({
+    ocrText: '20 % Rabatt auf Skechers',
+    visionImages: ['data:image/jpeg;base64,AQID'],
+    assetCount: 1,
+    availableAssetCount: 1,
+    imageCount: 1,
+    videoFrameCount: 1,
+    errors: [],
+    warnings: [],
+  }),
+  classifyMedia: async () => {
+    globalPromoClassifications += 1;
+    return { isDeal: true, confidence: 0.95, offerText: '20 % Rabatt', exclusion: 'none' };
+  },
+});
+assert.equal(globalPromoClassifications, 0, 'global promos without Vienna, local-account or food evidence skip the LLM');
+assert.equal(gatedGlobalPromo.report.aiSkippedUnrecoverable, 1);
+assert.equal(gatedGlobalPromo.deals.length, 0);
+
+const unusableAiData = {
+  ...globalPromoData,
+  title: '20 % Rabatt auf Burger.',
+  description: '20 % Rabatt auf Burger.',
+  bodyText: '20 % Rabatt auf Burger.',
+};
+const unusableAiUrl = 'https://www.tiktok.com/@savingston/video/7678002441849425196';
+const unusableAiInitial = build(unusableAiUrl, unusableAiData);
+const unusableAiResult = await rescueTikTokMediaCandidates([
+  { url: unusableAiUrl, data: unusableAiData, initial: unusableAiInitial },
+], {
+  now: REFERENCE_NOW,
+  env: { OPENAI_API_KEY: 'test-openai-key' },
+  enrichMedia: async (entries) => {
+    entries[0].item._mediaEvidence = {
+      analyzedAt: REFERENCE_NOW.toISOString(),
+      ocrText: '20 % Rabatt auf Burger',
+      ai: {
+        isDeal: true,
+        confidence: 0.95,
+        offerText: '20 % Rabatt auf Burger',
+        locationText: '',
+        validityText: '',
+        exclusion: 'none',
+      },
+    };
+    return { entries, cache: {}, report: { status: 'ok', aiAccepted: 1, errors: [] } };
+  },
+});
+assert.equal(unusableAiResult.deals.length, 0);
+assert.equal(unusableAiResult.report.aiAcceptedUnusable, 1, 'AI positives that still fail Vienna/deal gates are counted directly');
+
 const mediaOutage = await rescueTikTokMediaCandidates([
   { url: visualOnlyUrl, data: visualOnlyData, initial: visualOnlyInitial },
 ], {

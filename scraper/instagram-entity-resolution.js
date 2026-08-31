@@ -19,7 +19,14 @@ const PLATFORM_USERNAMES = new Set([
 ]);
 
 const CREATOR_USERNAME_PATTERN = /(?:foodie|foodblog|blogger|stories|wientipps|viennatips|insider|guide|entdeckt|discover|eats$)/i;
-const MERCHANT_USERNAME_PATTERN = /(?:restaurant|cafe|coffee|burger|pizza|sushi|ramen|kebab|kebap|doener|döner|grill|bakery|bar\b|bistro|brunch|gelato|kitchen|wirt|gasthaus|foodtruck)/i;
+const MERCHANT_USERNAME_PATTERN = /(?:restaurant|cafe|coffee|burger|pizza|sushi|ramen|kebab|kebap|doener|döner|grill|bakery|bar\b|bistro|brunch|gelato|kitchen|wirt|gasthaus|foodtruck|eyewear|fitness|studio|experience|town|shop|store|market|hotel|salon|spa(?:[._]|$)|museum|theat(?:er|re)|cinema)/i;
+const BARE_HANDLE_STOPWORDS = new Set([
+  'angebot', 'angebote', 'aktion', 'anzeige', 'app', 'austria', 'bei', 'code', 'deal', 'deals',
+  'der', 'die', 'das', 'dem', 'den', 'dies', 'diese', 'diesem', 'diesen', 'dieser', 'dieses',
+  'ein', 'eine', 'einem', 'einer', 'essen', 'food', 'from', 'gratis', 'heute', 'instagram',
+  'jegliche', 'jeglichem', 'jeglichen', 'jeglicher', 'mit', 'neu', 'new', 'nur', 'rabatt',
+  'the', 'und', 'unserem', 'unseren', 'unserer', 'vienna', 'von', 'wien', 'www',
+]);
 
 function cleanText(value, max = 4000) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max);
@@ -73,6 +80,57 @@ export function extractInstagramMentionUsernames(value) {
   return [...usernames];
 }
 
+function plausibleBareMerchantUsername(value) {
+  const username = normalizeInstagramUsername(value);
+  if (username.length < 4 || BARE_HANDLE_STOPWORDS.has(username)) return '';
+  if ((username.match(/[a-z]/g) || []).length < 2) return '';
+  if (/^(?:https?|instagram|facebook|tiktok|youtu|www\d*)$/i.test(username)) return '';
+  return username;
+}
+
+function captionContainsUsername(caption, username) {
+  const escaped = username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(?:^|[^a-z0-9._])@?${escaped}(?=$|[^a-z0-9._])`, 'i').test(caption);
+}
+
+export function extractInstagramBareMerchantUsernames(value, roleIndex = new Map()) {
+  const caption = cleanText(value, 10000);
+  const usernames = new Set();
+  const add = (valueToAdd) => {
+    const username = plausibleBareMerchantUsername(valueToAdd);
+    if (username) usernames.add(username);
+  };
+
+  for (const username of roleIndex instanceof Map ? roleIndex.keys() : []) {
+    if (captionContainsUsername(caption, username)) add(username);
+  }
+
+  const relationPattern = /\b(?:bei|at|from|von|mit|by|für|fuer|through|via)\s+(?:(?:der|dem|den|einem|einer|the)\s+)?@?([a-z0-9][a-z0-9._]{2,29})(?![a-z0-9._äöüß])/gi;
+  for (const match of caption.matchAll(relationPattern)) {
+    const rawUsername = match[1];
+    const username = plausibleBareMerchantUsername(rawUsername);
+    if (!username) continue;
+    const known = roleIndex instanceof Map && roleIndex.has(username);
+    const handleShaped = /[._]/.test(username)
+      || MERCHANT_USERNAME_PATTERN.test(username)
+      || /(?:wien|vienna|austria|official)$/.test(username);
+    if (known || handleShaped) usernames.add(username);
+  }
+
+  const standalonePattern = /(?:^|[\s:|\-–—])@?([a-z0-9][a-z0-9._]{2,29})(?![a-z0-9._äöüß])(?=\s*(?:📍|#|\*(?:anzeige|einladung)|$))/gi;
+  for (const match of caption.matchAll(standalonePattern)) {
+    const username = plausibleBareMerchantUsername(match[1]);
+    if (!username) continue;
+    const known = roleIndex instanceof Map && roleIndex.has(username);
+    const handleShaped = /[._]/.test(username)
+      || MERCHANT_USERNAME_PATTERN.test(username)
+      || /(?:wien|vienna|austria|official)$/.test(username);
+    if (known || handleShaped) usernames.add(username);
+  }
+
+  return [...usernames].slice(0, 12);
+}
+
 export function buildInstagramRoleIndex(accounts = []) {
   const index = new Map();
   for (const account of Array.isArray(accounts) ? accounts : []) {
@@ -96,16 +154,16 @@ export function buildInstagramRoleIndex(accounts = []) {
 }
 
 function merchantCandidateScore(username, account, caption, ownerUsername) {
-  if (!username || username === ownerUsername) return Number.NEGATIVE_INFINITY;
+  if (!plausibleBareMerchantUsername(username) || username === ownerUsername) return Number.NEGATIVE_INFINITY;
   const role = inferInstagramAccountRole(account || { username });
   if (['creator', 'discovery', 'platform'].includes(role)) return Number.NEGATIVE_INFINITY;
   let score = 0;
   if (role === 'merchant') score += 70;
   if (account?.viennaVerified === true || account?.verifiedVienna === true) score += 60;
   if (MERCHANT_USERNAME_PATTERN.test(username)) score += 35;
-  if (/\.(?:wien|vienna|at)$/.test(username)) score += 15;
+  if (/(?:[._](?:wien|vienna|at)|(?:wien|vienna|austria|official))$/.test(username)) score += 15;
   const escaped = username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  if (new RegExp(`(?:bei|at|from|mit|x)\\s+@${escaped}\\b`, 'i').test(caption)) score += 25;
+  if (new RegExp(`(?:bei|at|from|mit|von|by|x)\\s+(?:(?:der|dem|den|einem|einer|the)\\s+)?@?${escaped}\\b`, 'i').test(caption)) score += 25;
   if (new RegExp(`@${escaped}\\b[^@:\\n]{0,30}:`, 'i').test(caption)) score += 20;
   return score;
 }
@@ -120,7 +178,10 @@ export function resolveInstagramPostEntities(input = {}) {
   const caption = cleanText(input.caption || input.text || input.description, 10000);
   const mentionedUsernames = extractInstagramMentionUsernames(caption)
     .filter((username) => username !== ownerUsername);
-  const rankedMentions = mentionedUsernames
+  const bareMerchantUsernames = extractInstagramBareMerchantUsernames(caption, roleIndex)
+    .filter((username) => username !== ownerUsername && !mentionedUsernames.includes(username));
+  const candidateUsernames = [...new Set([...mentionedUsernames, ...bareMerchantUsernames])];
+  const rankedMentions = candidateUsernames
     .map((username) => ({
       username,
       account: roleIndex.get(username) || null,
@@ -152,6 +213,7 @@ export function resolveInstagramPostEntities(input = {}) {
       viennaVerified: candidate.account?.viennaVerified === true || candidate.account?.verifiedVienna === true,
     })),
     mentionedUsernames,
+    bareMerchantUsernames,
   };
 }
 

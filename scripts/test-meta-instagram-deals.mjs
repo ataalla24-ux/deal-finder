@@ -934,10 +934,14 @@ const firstCooldownRun = await runMetaInstagramCollector({
 });
 assert.equal(firstCooldownRun.shouldFail, true);
 assert.equal(firstCooldownRun.state.sourceFailures.accounts['broken.account'].code, '110');
-fs.writeFileSync(cooldownStatePath, JSON.stringify(firstCooldownRun.state));
+assert.equal(firstCooldownRun.state.sourceFailures.accounts['broken.account'].cooldownHours, 720);
+const legacyCooldownState = structuredClone(firstCooldownRun.state);
+legacyCooldownState.sourceFailures.accounts['broken.account'].cooldownHours = 168;
+legacyCooldownState.sourceFailures.accounts['broken.account'].cooldownUntil = new Date(now.getTime() + 168 * 60 * 60 * 1000).toISOString();
+fs.writeFileSync(cooldownStatePath, JSON.stringify(legacyCooldownState));
 let cooldownRequests = 0;
 const secondCooldownRun = await runMetaInstagramCollector({
-  now: new Date(now.getTime() + 60 * 60 * 1000),
+  now: new Date(now.getTime() + 200 * 60 * 60 * 1000),
   config: cooldownConfig,
   paths: {
     watchlistPath: path.join(tempDir, 'missing-watchlist.json'),
@@ -952,12 +956,13 @@ const secondCooldownRun = await runMetaInstagramCollector({
 });
 assert.equal(cooldownRequests, 0);
 assert.equal(secondCooldownRun.report.sources.instagramGraph.skippedCooldown.accounts, 1);
+assert.equal(secondCooldownRun.state.sourceFailures.accounts['broken.account'].cooldownHours, 720, 'legacy weekly code-110 cooldowns migrate to one month');
 assert.equal(secondCooldownRun.report.sources.instagramGraph.status, 'degraded');
 assert.equal(secondCooldownRun.shouldFail, false, 'cooldown is a controlled degraded state, not a total collector outage');
 
 let repeatedFailureRequests = 0;
 const repeatedFailureRun = await runMetaInstagramCollector({
-  now: new Date(now.getTime() + 169 * 60 * 60 * 1000),
+  now: new Date(now.getTime() + 720 * 60 * 60 * 1000),
   config: cooldownConfig,
   paths: {
     watchlistPath: path.join(tempDir, 'missing-watchlist.json'),
@@ -974,7 +979,7 @@ const repeatedFailureRun = await runMetaInstagramCollector({
 });
 assert.equal(repeatedFailureRequests, 1);
 assert.equal(repeatedFailureRun.state.sourceFailures.accounts['broken.account'].count, 2);
-assert.equal(repeatedFailureRun.state.sourceFailures.accounts['broken.account'].cooldownHours, 336, 'repeat failures double the quarantine window');
+assert.equal(repeatedFailureRun.state.sourceFailures.accounts['broken.account'].cooldownHours, 720, 'invalid Graph accounts stay quarantined for one month');
 
 const lastGoodPayload = {
   lastUpdated: '2026-07-16T10:00:00.000Z',

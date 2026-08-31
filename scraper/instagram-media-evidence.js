@@ -636,9 +636,13 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     withOcrText: 0,
     withVisionImages: 0,
     aiCalls: 0,
+    aiConcurrency: Math.max(1, Number(config.mediaLlmConcurrency || 1)),
+    visionDetail: cleanText(config.mediaVisionDetail, 20) || 'high',
+    visionMaxImages: Math.max(1, Number(config.mediaVisionMaxImagesPerPost || 1)),
     visionCalls: 0,
     aiAccepted: 0,
     aiSkippedLowIntent: 0,
+    aiSkippedUnrecoverable: 0,
     inputTokens: 0,
     outputTokens: 0,
     totalTokens: 0,
@@ -705,6 +709,7 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
 
   const classify = options.classifyOcr || classifyInstagramOcrWithOpenAI;
   let remainingAiCalls = config.mediaLlmMaxCallsPerRun;
+  const aiTasks = [];
   for (let index = 0; index < selected.length; index += 1) {
     const entry = selected[index];
     const result = results[index] || {};
@@ -744,27 +749,52 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
       || (visionConfigured && visionImages.length > 0);
     const highIntent = foodDrinkText(`${caption} ${evidence.ocrText} ${entry?.context?.account?.category || ''}`)
       || obviousDealText(`${caption} ${evidence.ocrText}`);
-    if (report.llmConfigured && remainingAiCalls > 0 && hasClassifiableEvidence && needsEvidenceClassification && highIntent) {
+    const passesCollectorGate = typeof options.shouldClassifyEvidence !== 'function'
+      || options.shouldClassifyEvidence({
+        entry,
+        evidence,
+        caption,
+        visionImages,
+        visibleViennaText,
+        trustedAccountLocation,
+        highIntent,
+      }) !== false;
+    if (report.llmConfigured && hasClassifiableEvidence && needsEvidenceClassification && !passesCollectorGate) {
+      report.aiSkippedUnrecoverable += 1;
+    } else if (report.llmConfigured && remainingAiCalls > 0 && hasClassifiableEvidence && needsEvidenceClassification && highIntent) {
       remainingAiCalls -= 1;
       report.aiCalls += 1;
       if (visionImages.length) report.visionCalls += 1;
-      try {
-        evidence.ai = await classify({ caption: entry.item.caption, ocrText: evidence.ocrText, visionImages }, config, {
-          fetchImpl: options.openAiFetchImpl,
-        });
-        report.inputTokens += Math.max(0, Number(evidence.ai?.usage?.inputTokens || 0));
-        report.outputTokens += Math.max(0, Number(evidence.ai?.usage?.outputTokens || 0));
-        report.totalTokens += Math.max(0, Number(evidence.ai?.usage?.totalTokens || 0));
-        if (evidence.ai?.isDeal && evidence.ai.confidence >= config.mediaLlmMinConfidence) report.aiAccepted += 1;
-      } catch (error) {
-        evidence.aiError = cleanText(error?.message || error, 160);
-        report.errors.push(evidence.aiError);
-      }
+      aiTasks.push({ entry, evidence, visionImages });
     } else if (report.llmConfigured && hasClassifiableEvidence && needsEvidenceClassification && !highIntent) {
       report.aiSkippedLowIntent += 1;
     }
     entry.item._mediaEvidence = evidence;
-    if (!evidence.retryableFailure) cache[mediaId(entry.item)] = evidence;
+  }
+
+  await mapWithConcurrency(aiTasks, report.aiConcurrency, async ({ entry, evidence, visionImages }) => {
+    try {
+      evidence.ai = await classify({ caption: entry.item.caption, ocrText: evidence.ocrText, visionImages }, config, {
+        fetchImpl: options.openAiFetchImpl,
+      });
+      report.inputTokens += Math.max(0, Number(evidence.ai?.usage?.inputTokens || 0));
+      report.outputTokens += Math.max(0, Number(evidence.ai?.usage?.outputTokens || 0));
+      report.totalTokens += Math.max(0, Number(evidence.ai?.usage?.totalTokens || 0));
+      if (evidence.ai?.isDeal
+          && evidence.ai.confidence >= config.mediaLlmMinConfidence
+          && evidence.ai.exclusion === 'none'
+          && cleanText(evidence.ai.offerText, 500)) {
+        report.aiAccepted += 1;
+      }
+    } catch (error) {
+      evidence.aiError = cleanText(error?.message || error, 160);
+      report.errors.push(evidence.aiError);
+    }
+  });
+
+  for (const entry of selected) {
+    const evidence = entry.item?._mediaEvidence;
+    if (evidence && !evidence.retryableFailure) cache[mediaId(entry.item)] = evidence;
   }
 
   report.errors = [...new Set(report.errors.filter(Boolean))].slice(0, 20);

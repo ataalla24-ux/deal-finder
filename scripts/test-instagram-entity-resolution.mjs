@@ -48,4 +48,32 @@ const unresolvedCreator = resolveInstagramPostEntities({
 assert.equal(unresolvedCreator.merchantUsername, '');
 assert.equal(unresolvedCreator.resolutionMethod, 'unresolved-scout-post');
 
+const graphCaptionWithoutAt = resolveInstagramPostEntities({
+  ownerUsername: 'shaysfoodblog',
+  caption: 'Neuer Chicken Spot in Wien zum fairen Preis bei eat.hendl im 15 Bezirk.',
+  roleIndex,
+});
+assert.equal(graphCaptionWithoutAt.merchantUsername, 'eat.hendl');
+
+const standaloneGraphHandle = resolveInstagramPostEntities({
+  ownerUsername: 'foodiewien',
+  caption: 'Ramen aus Japan in Wien - ramen.makotoya #ramen #vienna *anzeige',
+  roleIndex,
+});
+assert.equal(standaloneGraphHandle.merchantUsername, 'ramen.makotoya');
+
+const plainViennaHandle = resolveInstagramPostEntities({
+  ownerUsername: 'lisa.maria.b',
+  caption: '10 % Rabatt auf eure Buchung bei magicworldvienna in 1020 Wien.',
+  roleIndex,
+});
+assert.equal(plainViennaHandle.merchantUsername, 'magicworldvienna');
+
+const suspiciousShortHandle = resolveInstagramPostEntities({
+  ownerUsername: 'vorteilsclub.wien',
+  caption: 'Schulstart mit Sparvorteil. Mit dem Vorteilsclub sparst du 20 %. Technischer Text bei @0w.',
+  roleIndex,
+});
+assert.equal(suspiciousShortHandle.merchantUsername, '');
+
 console.log('instagram entity resolution tests passed');

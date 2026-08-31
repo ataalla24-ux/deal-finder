@@ -296,6 +296,7 @@ export function buildConfig(env = process.env, now = new Date()) {
       : 'high',
     mediaLlmModel: cleanText(env.META_INSTAGRAM_MEDIA_LLM_MODEL || env.OPENAI_MODEL || 'gpt-4.1-mini', 100),
     mediaLlmMaxCallsPerRun: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_RUN', 8, 0, 30),
+    mediaLlmConcurrency: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_CONCURRENCY', 2, 1, 4),
     mediaLlmMinOcrChars: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MIN_OCR_CHARS', 20, 5, 500),
     mediaLlmMinConfidence: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MIN_CONFIDENCE', 0.82, 0.5, 1),
     mediaLlmTimeoutMs: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_TIMEOUT_MS', 30000, 5000, 120000),
@@ -1345,10 +1346,23 @@ async function fetchGraphMediaWithFallback(primaryUrl, fallbackUrl, config, fetc
 
 function pruneSourceFailures(value, now) {
   const maxAge = 30 * DAY_MS;
-  const pruneGroup = (group) => Object.fromEntries(Object.entries(group || {}).filter(([, failure]) => {
-    const timestamp = Date.parse(failure?.lastAt || '');
-    return Number.isFinite(timestamp) && now.getTime() - timestamp <= maxAge;
-  }).slice(-500));
+  const pruneGroup = (group) => Object.fromEntries(Object.entries(group || {})
+    .filter(([, failure]) => {
+      const timestamp = Date.parse(failure?.lastAt || '');
+      return Number.isFinite(timestamp) && now.getTime() - timestamp <= maxAge;
+    })
+    .map(([key, failure]) => {
+      if (cleanText(failure?.code, 80) !== '110') return [key, failure];
+      const lastAt = Date.parse(failure.lastAt);
+      const monthlyCooldownUntil = lastAt + 720 * 60 * 60 * 1000;
+      const existingCooldownUntil = Date.parse(failure.cooldownUntil || '');
+      return [key, {
+        ...failure,
+        cooldownHours: 720,
+        cooldownUntil: new Date(Math.max(monthlyCooldownUntil, existingCooldownUntil || 0)).toISOString(),
+      }];
+    })
+    .slice(-500));
   return {
     accounts: pruneGroup(value?.accounts),
     hashtags: pruneGroup(value?.hashtags),
@@ -1369,8 +1383,10 @@ function recordSourceFailure(failures, group, key, error, config, now) {
   if (!['24', '100', '110', 'hashtag-not-found'].includes(code)) return;
   const previous = failures[group][key] || {};
   const count = Number(previous.count || 0) + 1;
-  const baseHours = code === '110' || code === 'hashtag-not-found'
-    ? config.sourceFailureCooldownHours
+  const baseHours = code === '110'
+    ? 720
+    : code === 'hashtag-not-found'
+      ? config.sourceFailureCooldownHours
     : Math.min(config.sourceFailureCooldownHours, 72);
   const cooldownHours = Math.min(720, baseHours * (2 ** Math.min(3, count - 1)));
   failures[group][key] = {

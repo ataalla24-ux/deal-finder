@@ -898,6 +898,7 @@ function selectRotatingAccounts(accounts, limit) {
   };
   const provenBudget = Math.max(1, Math.floor(safeLimit * 0.7));
   const scoutBudget = Math.max(0, Math.floor(safeLimit * 0.2));
+  const discoveryBudget = Math.max(0, safeLimit - provenBudget - scoutBudget);
   sorted
     .filter((account) => inferInstagramAccountRole(account) === 'merchant')
     .slice(0, provenBudget)
@@ -907,16 +908,22 @@ function selectRotatingAccounts(accounts, limit) {
     .slice(0, scoutBudget)
     .forEach(add);
 
-  const remaining = sorted.filter((account) => !seen.has(account.username));
-  const rotating = [
-    ...remaining.filter((account) => inferInstagramAccountRole(account) === 'unknown'),
-    ...remaining.filter((account) => inferInstagramAccountRole(account) !== 'unknown'),
-  ];
-  const start = rotating.length
-    ? (instagramRunBucket() * Math.max(1, safeLimit - selected.length)) % rotating.length
+  const discovery = sorted.filter((account) => (
+    !seen.has(account.username) && inferInstagramAccountRole(account) === 'unknown'
+  ));
+  const discoveryStart = discovery.length
+    ? (instagramRunBucket() * Math.max(1, discoveryBudget)) % discovery.length
     : 0;
-  for (let offset = 0; offset < rotating.length && selected.length < safeLimit; offset += 1) {
-    add(rotating[(start + offset) % rotating.length]);
+  for (let offset = 0; offset < discovery.length && offset < discoveryBudget; offset += 1) {
+    add(discovery[(discoveryStart + offset) % discovery.length]);
+  }
+
+  const remaining = sorted.filter((account) => !seen.has(account.username));
+  const fillStart = remaining.length
+    ? (instagramRunBucket() * Math.max(1, safeLimit - selected.length)) % remaining.length
+    : 0;
+  for (let offset = 0; offset < remaining.length && selected.length < safeLimit; offset += 1) {
+    add(remaining[(fillStart + offset) % remaining.length]);
   }
   return selected;
 }
