@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-31T06:09:47.709Z",
+  "generatedAt": "2026-08-31T06:51:05.245Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 552,
-    "uniqueCandidates": 503,
-    "distinctCandidates": 524,
+    "totalCandidates": 554,
+    "uniqueCandidates": 505,
+    "distinctCandidates": 526,
     "duplicateClusters": 21,
     "topHealthySources": [
       {
@@ -32,10 +32,10 @@
         "totalDeals": 12
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 67,
-        "totalDeals": 4
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "healthScore": 72,
+        "totalDeals": 7
       }
     ],
     "topMissionSources": [
@@ -66,8 +66,8 @@
       {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "missionFitScore": 67,
-        "totalDeals": 5
+        "missionFitScore": 70,
+        "totalDeals": 7
       }
     ],
     "topCoverageSources": [
@@ -121,16 +121,16 @@
         "totalDeals": 4
       },
       {
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "precisionScore": 78,
+        "totalDeals": 7
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 77,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "precisionScore": 74,
-        "totalDeals": 5
       },
       {
         "sourceKey": "tiktok",
@@ -159,16 +159,16 @@
         "totalDeals": 4
       },
       {
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "sourceWeightScore": 62,
+        "totalDeals": 7
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 60,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 59,
-        "totalDeals": 12
       }
     ],
     "topSourcesToFix": [
@@ -527,6 +527,89 @@
       "sourceWeightScore": 59
     },
     {
+      "sourceKey": "gastro2",
+      "file": "deals-pending-gastro2.json",
+      "sourceLabel": "Firecrawl Key 1 - Gastro",
+      "totalDeals": 7,
+      "uniqueDeals": 4,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 0,
+      "fresh7dCount": 7,
+      "viennaCount": 7,
+      "foodDrinkCount": 7,
+      "promoCount": 5,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Munchy am Reumannplatz Leibnizgasse 13: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % ...",
+        "Munchy am Reumannplatz Leibnizgasse 13: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % ...",
+        "Rankgasse 36: schmeckt Wien nach Zuhause. 🇦🇹 📍Rankgasse 36, 1160 ..."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-31T06:46:05.857Z",
+        "finishedAt": "2026-08-31T06:50:34.597Z",
+        "durationMs": 268740,
+        "counts": {
+          "rawCandidates": 11,
+          "normalizedCandidates": 11,
+          "verifiedCandidates": 7,
+          "previousDeals": 5,
+          "acceptedDeals": 7,
+          "rejectedDeals": 7
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 7
+        },
+        "errors": [
+          "1000things.at: Firecrawl Agent nach 75s abgebrochen"
+        ],
+        "reportFile": "deal-pipeline-last-run-gastro2.json"
+      },
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 60.7,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 3
+        },
+        {
+          "value": "rabatt",
+          "count": 3
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 72,
+      "missionFitScore": 70,
+      "coverageScore": 17,
+      "precisionScore": 78,
+      "sourceWeightScore": 62
+    },
+    {
       "sourceKey": "food3",
       "file": "deals-pending-food3.json",
       "sourceLabel": "Firecrawl Key 2 - Food",
@@ -600,86 +683,6 @@
       "coverageScore": 16,
       "precisionScore": 77,
       "sourceWeightScore": 60
-    },
-    {
-      "sourceKey": "gastro2",
-      "file": "deals-pending-gastro2.json",
-      "sourceLabel": "Firecrawl Key 1 - Gastro",
-      "totalDeals": 5,
-      "uniqueDeals": 2,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 0,
-      "fresh7dCount": 5,
-      "viennaCount": 5,
-      "foodDrinkCount": 5,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "MITTAGSMENÜ NUR € 14,90 💛🍽️ Neue Woche, ...",
-        "Munchy am Reumannplatz Leibnizgasse 13: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % ...",
-        "Milk Tea um 1 € : Diesen Samstag im @chastudio.vienna ..."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-30T06:18:39.342Z",
-        "finishedAt": "2026-08-30T06:22:15.262Z",
-        "durationMs": 215920,
-        "counts": {
-          "rawCandidates": 8,
-          "normalizedCandidates": 8,
-          "verifiedCandidates": 5,
-          "previousDeals": 5,
-          "acceptedDeals": 5,
-          "rejectedDeals": 7
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 7
-        },
-        "errors": [
-          "1000things.at: Firecrawl Agent nach 75s abgebrochen",
-          "meinbezirk.at: Firecrawl Agent nach 75s abgebrochen"
-        ],
-        "reportFile": "deal-pipeline-last-run-gastro2.json"
-      },
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 60,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 4
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 3
-        },
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 66,
-      "missionFitScore": 67,
-      "coverageScore": 15,
-      "precisionScore": 74,
-      "sourceWeightScore": 58
     },
     {
       "sourceKey": "instagram-ai",
