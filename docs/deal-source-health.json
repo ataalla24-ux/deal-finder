@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-31T05:44:21.782Z",
+  "generatedAt": "2026-08-31T06:06:58.883Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 549,
-    "uniqueCandidates": 502,
-    "distinctCandidates": 522,
-    "duplicateClusters": 20,
+    "totalCandidates": 552,
+    "uniqueCandidates": 503,
+    "distinctCandidates": 524,
+    "duplicateClusters": 21,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -20,6 +20,12 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 75,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "healthScore": 74,
@@ -30,12 +36,6 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "healthScore": 67,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "healthScore": 66,
-        "totalDeals": 5
       }
     ],
     "topMissionSources": [
@@ -52,6 +52,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 76,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 72,
@@ -62,12 +68,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "missionFitScore": 67,
         "totalDeals": 5
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 65,
-        "totalDeals": 1
       }
     ],
     "topCoverageSources": [
@@ -115,6 +115,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 79,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 77,
@@ -131,12 +137,6 @@
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 74,
         "totalDeals": 12
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "precisionScore": 68,
-        "totalDeals": 10
       }
     ],
     "topWeightedSources": [
@@ -153,6 +153,12 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 64,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 60,
@@ -163,12 +169,6 @@
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 59,
         "totalDeals": 12
-      },
-      {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "sourceWeightScore": 58,
-        "totalDeals": 5
       }
     ],
     "topSourcesToFix": [
@@ -241,7 +241,8 @@
       "completedWithErrors": [
         "firecrawl5",
         "gastro2",
-        "power"
+        "power",
+        "wien-combined"
       ]
     }
   },
@@ -354,6 +355,97 @@
       "missionFitScore": 79,
       "coverageScore": 20,
       "precisionScore": 68,
+      "sourceWeightScore": 64
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 4,
+      "uniqueDeals": 2,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 4,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 1,
+      "promoCount": 4,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Kommt vorbei und habt einen super-lustigen Abend mit unseren Comedy-All-Stars 🤩 Mit Kabarett, Standup-Comedy, Musik und ganz viel Spaß 🥳 H",
+        "Rote Spitzpaprika 1 kg for 1,49 € (was 2,49 €)",
+        "🇦🇹 Austria Visa Service – Complete Assistance for a Hassle-Free Journey!"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-08-31T06:01:36.251Z",
+        "finishedAt": "2026-08-31T06:06:32.635Z",
+        "durationMs": 296384,
+        "counts": {
+          "rawCandidates": 123,
+          "normalizedCandidates": 4,
+          "verifiedCandidates": 4,
+          "previousDeals": 0,
+          "acceptedDeals": 4,
+          "rejectedDeals": 107
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 88,
+          "general-recommendation": 8,
+          "missing-text": 4,
+          "missing-vienna-evidence": 1,
+          "excluded-promotion-type": 6
+        },
+        "errors": [
+          "media evidence: media exceeds byte limit"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.5,
+      "topCategories": [
+        {
+          "value": "beauty",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        },
+        {
+          "value": "supermarkt",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        },
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 75,
+      "missionFitScore": 76,
+      "coverageScore": 16,
+      "precisionScore": 79,
       "sourceWeightScore": 64
     },
     {
@@ -881,9 +973,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 19,
-      "uniqueDeals": 9,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 7,
+      "uniqueDeals": 8,
+      "duplicateDeals": 11,
+      "duplicateAcrossSources": 8,
       "fresh1dCount": 4,
       "fresh7dCount": 19,
       "viennaCount": 19,
@@ -896,7 +988,7 @@
         "🍕 WÄHLE 2 PIZZEN NACH DEINER WAHL und wir schenken dir: 🍔 1 BURGER GRATIS ODER 🥤 3 PEPSI GRATIS 📅 Nur Freitag bis Sonntagabend 📍 Nur be"
       ],
       "lastRun": null,
-      "uniqueRate": 0.5,
+      "uniqueRate": 0.4,
       "duplicateRate": 0.4,
       "fresh1dRate": 0.2,
       "fresh7dRate": 1,
@@ -949,82 +1041,11 @@
         "geringe Food-/Drink-Relevanz",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 58,
+      "healthScore": 56,
       "missionFitScore": 47,
       "coverageScore": 21,
       "precisionScore": 62,
-      "sourceWeightScore": 48
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Kommt vorbei und habt einen super-lustigen Abend mit unseren Comedy-All-Stars 🤩 Mit Kabarett, Standup-Comedy, Musik und ganz viel Spaß 🥳 H"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-30T21:28:43.094Z",
-        "finishedAt": "2026-08-30T21:33:42.921Z",
-        "durationMs": 299827,
-        "counts": {
-          "rawCandidates": 103,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 1,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 96
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 81,
-          "missing-text": 6,
-          "general-recommendation": 5,
-          "missing-vienna-evidence": 1,
-          "excluded-promotion-type": 3
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 91,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 58,
-      "missionFitScore": 65,
-      "coverageScore": 11,
-      "precisionScore": 68,
-      "sourceWeightScore": 53
+      "sourceWeightScore": 47
     },
     {
       "sourceKey": "member-benefits",
