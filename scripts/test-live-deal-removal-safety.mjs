@@ -9,6 +9,7 @@ import {
   normalizeLiveDealEdit,
 } from './live-deal-edits-lib.mjs';
 import {
+  isSafeAutomaticExpiredDeal,
   shouldApplyAutomatedLiveRemoval,
   stableChurchDealId,
 } from '../scraper/normalize-live-deals.js';
@@ -27,6 +28,31 @@ for (const disabledGate of ['apply', 'removalsEnabled', 'automatedRemovalsAllowe
   };
   assert.equal(shouldApplyAutomatedLiveRemoval(gates), false, `${disabledGate} must block automatic removals`);
 }
+
+const expirySafetyNow = new Date('2026-08-31T18:00:00.000Z');
+const strongExpiry = {
+  expiresSource: 'text',
+  expiresPrecision: 'day',
+  dateConfidence: 'high',
+};
+assert.equal(isSafeAutomaticExpiredDeal({
+  ...strongExpiry,
+  expires: '2026-08-31T05:00:00.000Z',
+}, expirySafetyNow), true, 'strong exact expiry older than 12 hours is safe to remove');
+assert.equal(isSafeAutomaticExpiredDeal({
+  ...strongExpiry,
+  expires: '2026-08-31T12:00:00.000Z',
+}, expirySafetyNow), false, 'the 12-hour safety grace must prevent same-day premature removal');
+assert.equal(isSafeAutomaticExpiredDeal({
+  ...strongExpiry,
+  dateConfidence: 'medium',
+  expires: '2026-08-01T12:00:00.000Z',
+}, expirySafetyNow), false, 'age alone must never make uncertain expiry evidence safe');
+assert.equal(isSafeAutomaticExpiredDeal({
+  ...strongExpiry,
+  expires: '2026-08-01T12:00:00.000Z',
+  expiresOriginal: 'Bis ca. 01.08.2026',
+}, expirySafetyNow), false, 'approximate wording must never be eligible for automatic removal');
 
 assert.equal(stableChurchDealId({
   id: 'hillsong-vienna-events-20260824',
@@ -133,6 +159,8 @@ try {
   const oldExpiry = '2025-12-31T23:59:59.999Z';
   const futureStart = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString();
   const futureExpiry = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString();
+  const recentStrongExpiry = new Date(now.getTime() - 6 * 60 * 60 * 1000).toISOString();
+  const oldSocialPubDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const fixtureDeals = [
     {
       id: 'certainly-expired',
@@ -182,13 +210,53 @@ try {
       dateConfidence: 'high',
       pubDate: now.toISOString(),
     },
+    {
+      id: 'strong-expiry-inside-grace',
+      title: 'Gerade beendeter Test-Deal',
+      brand: 'Test Cafe Wien',
+      description: 'Der Deal endete vor wenigen Stunden.',
+      url: 'https://example.com/recent-expiry',
+      expires: recentStrongExpiry,
+      expiresOriginal: recentStrongExpiry.slice(0, 10),
+      expiresSource: 'text',
+      expiresPrecision: 'day',
+      dateConfidence: 'high',
+    },
+    {
+      id: 'old-social-post-without-expiry',
+      title: '20% Rabatt laut Social Post',
+      brand: 'Test Shop Wien',
+      description: '20% Rabatt, aber ohne bestätigtes Enddatum.',
+      url: 'https://www.instagram.com/p/OLDSOCIALPOST/',
+      pubDate: oldSocialPubDate,
+      pubDateSource: 'instagram-graph-timestamp',
+    },
+    {
+      id: 'manually-restored-expired',
+      title: 'Manuell wiederhergestellter Deal',
+      brand: 'Test Cafe Wien',
+      description: 'Dieser Deal wurde aus Offline zurückgeholt.',
+      url: 'https://example.com/restored-expired',
+      expires: oldExpiry,
+      expiresOriginal: '31.12.2025',
+      expiresSource: 'text',
+      expiresPrecision: 'day',
+      dateConfidence: 'high',
+    },
   ];
   fs.writeFileSync(path.join(normalizationDir, 'deals.json'), JSON.stringify({
     deals: fixtureDeals,
     totalDeals: fixtureDeals.length,
     lastUpdated: now.toISOString(),
   }));
-  fs.writeFileSync(path.join(normalizationDir, 'live-deal-edits.json'), JSON.stringify({ edits: [] }));
+  fs.writeFileSync(path.join(normalizationDir, 'live-deal-edits.json'), JSON.stringify({
+    edits: [{
+      dealId: 'manually-restored-expired',
+      forceKeep: true,
+      hidden: false,
+      editedBy: 'slack-live-review',
+    }],
+  }));
   fs.writeFileSync(path.join(normalizationDir, 'deal-candidates-index.json'), JSON.stringify({ deals: [] }));
   for (const file of [
     'deals-pending-church-gemeinde.json',
@@ -220,12 +288,17 @@ try {
   assert.equal(normalizedIds.has('real-free-museum'), true, 'heuristic false positives must remain live');
   assert.equal(normalizedIds.has('uncertain-expiry'), true, 'uncertain recent expiry must remain live for review');
   assert.equal(normalizedIds.has('future-offer'), true, 'future-start offers must remain live');
+  assert.equal(normalizedIds.has('strong-expiry-inside-grace'), true, 'strong expiry inside the safety grace must remain live');
+  assert.equal(normalizedIds.has('old-social-post-without-expiry'), true, 'social post age alone must never remove a live deal');
+  assert.equal(normalizedIds.has('manually-restored-expired'), true, 'a manually restored deal must stay protected from automatic removal');
 
   const validationReport = JSON.parse(fs.readFileSync(path.join(normalizationDir, 'live-deal-validation-report.json'), 'utf8'));
   assert.equal(validationReport.removedCount, 1);
   assert.equal(validationReport.heuristicReviewCandidates, 1);
-  assert.equal(validationReport.expiredReviewCandidates, 1);
-  assert.equal(validationReport.reviewCandidateCount, 2);
+  assert.equal(validationReport.expiredReviewCandidates, 2);
+  assert.equal(validationReport.socialPostAgeReviewCandidates, 1);
+  assert.equal(validationReport.socialPostDateRemovals, 0);
+  assert.equal(validationReport.reviewCandidateCount, 4);
 } finally {
   fs.rmSync(normalizationDir, { recursive: true, force: true });
 }

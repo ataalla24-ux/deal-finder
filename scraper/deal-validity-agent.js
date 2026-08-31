@@ -18,6 +18,7 @@ import {
   getInfrastructureOnlyPromotionReason,
   getLeadGenerationOnlyPromotionReason,
   getMembershipOnlyPromotionReason,
+  getNonOfferContentReason,
   getNonGuaranteedPromotionReason,
 } from './promotion-quality-utils.js';
 
@@ -498,6 +499,8 @@ function getConcreteOfferDecision(deal, health = null) {
   if (socialFallbackReason) return { concrete: false, reason: socialFallbackReason };
   const malformedAggregatorReason = getMalformedAggregatorReason(deal);
   if (malformedAggregatorReason) return { concrete: false, reason: malformedAggregatorReason };
+  const nonOfferContentReason = getNonOfferContentReason(offerText);
+  if (nonOfferContentReason) return { concrete: false, reason: nonOfferContentReason };
   const editorialListingReason = getEditorialPriceListingReason(deal, health);
   if (editorialListingReason) return { concrete: false, reason: editorialListingReason };
   const nonGuaranteedPromotionReason = getNonGuaranteedPromotionReason(offerText);

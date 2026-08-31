@@ -631,6 +631,74 @@ const genericFreeEvents = await validateOne({
 assert.equal(genericFreeEvents.decision.allowed, false);
 assert.match(reasonText(genericFreeEvents), /allgemeine Empfehlung\/Gratis-Event/);
 
+const whatsappRegistrationSpam = await validateOne({
+  id: 'whatsapp-registration-spam',
+  brand: '1150 Wien',
+  title: 'Whatsapp pendaftaran gratis: 0857-3816-1150',
+  description: 'Hubungi nomor WA untuk pendaftaran gratis.',
+  url: 'https://www.tiktok.com/@example/video/7679280468239338772',
+  source: 'TikTok Scanner',
+  originSource: 'tiktok-deals-scanner',
+  distance: '1150 Wien',
+  pubDate: now.toISOString(),
+  pubDateSource: 'time.datetime',
+});
+assert.equal(whatsappRegistrationSpam.decision.allowed, false);
+assert.match(reasonText(whatsappRegistrationSpam), /Registrierungs-\/WhatsApp-Spam/);
+
+const politicalWaterDemand = await validateOne({
+  id: 'political-water-demand',
+  brand: 'SPÖ im Parlament',
+  title: 'Leitungswasser muss gratis sein',
+  description: 'Die Forderung ist klar: Wer konsumiert, soll Leitungswasser kostenlos dazubekommen.',
+  url: 'https://www.instagram.com/p/POLICYPOST/',
+  source: 'Instagram AI Agent',
+  originSource: 'instagram-ai-agent',
+  distance: 'Wien',
+  pubDate: now.toISOString(),
+  pubDateSource: 'instagram-graph-timestamp',
+});
+assert.equal(politicalWaterDemand.decision.allowed, false);
+assert.match(reasonText(politicalWaterDemand), /politische Forderung/);
+
+const hiddenGemsRecommendation = await validateOne({
+  id: 'hidden-gems-recommendation',
+  brand: '@vienna.guide',
+  title: 'Free hidden gems you need to visit',
+  description: 'Vienna best kept secrets and sights you can see for free while wandering through the city.',
+  url: 'https://www.tiktok.com/@vienna.guide/video/7679765096905608470',
+  source: 'TikTok Scanner',
+  originSource: 'tiktok-deals-scanner',
+  distance: 'Wien',
+  pubDate: now.toISOString(),
+  pubDateSource: 'time.datetime',
+});
+assert.equal(hiddenGemsRecommendation.decision.allowed, false);
+assert.match(reasonText(hiddenGemsRecommendation), /Sehenswürdigkeits-\/Freizeitempfehlung/);
+
+const openingTeaser = await validateOne({
+  id: 'opening-teaser',
+  brand: 'New Cafe Vienna',
+  title: 'Opening soon in Vienna',
+  description: 'Stay tuned, we are opening soon.',
+  url: 'https://example.com/new-cafe-vienna',
+  source: 'Power Scraper',
+  originSource: 'power-scraper',
+  distance: 'Wien',
+  pubDate: now.toISOString(),
+  pubDateSource: 'instagram-graph-timestamp',
+});
+assert.equal(openingTeaser.decision.allowed, false);
+assert.match(reasonText(openingTeaser), /Eröffnungs-Teaser/);
+
+const openingWithConcreteDeal = await validateOne({
+  ...openingTeaser.deal,
+  id: 'opening-concrete-deal',
+  title: 'Opening soon: 20% Rabatt am Eröffnungstag',
+  description: 'Am Samstag gibt es 20% Rabatt auf alle Getränke in 1070 Wien.',
+});
+assert.equal(openingWithConcreteDeal.decision.allowed, true, 'a concrete opening discount must remain eligible');
+
 const favouriteRestaurantComparison = await validateOne({
   id: 'favourite-restaurant-comparison',
   brand: '#wienessen',

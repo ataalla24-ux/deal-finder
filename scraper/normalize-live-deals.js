@@ -68,10 +68,6 @@ const FORCE_KEEP_IDS = new Set([
   'g2-17at53u',
   'igx-ovlm4t',
   'icf-wien-kirche-20260406',
-  'joe-omv-viva-free-taste-6qmpsq',
-  'joe-omv-viva-free-taste-flur7',
-  'joe-omv-viva-free-taste-l62fzo',
-  'joe-omv-viva-free-taste-xipghf',
   'joe-omv-146t7m4',
   'joe-omv-1jfthhz',
   'icf-wien-events-20260413',
@@ -85,12 +81,6 @@ const FORCE_KEEP_IDS = new Set([
   'cig-wien-events-20260413',
   'icf-wien-gottesdienste-20260413',
   'jesuszentrum-events-20260413',
-]);
-const PROTECTED_LIVE_RESTORE_IDS = new Set([
-  'joe-omv-viva-free-taste-6qmpsq',
-  'joe-omv-viva-free-taste-flur7',
-  'joe-omv-viva-free-taste-l62fzo',
-  'joe-omv-viva-free-taste-xipghf',
 ]);
 const OMV_VIVA_FREE_TASTE_URLS = new Map([
   ['joe-omv-viva-free-taste-6qmpsq', 'https://www.joe-club.at/partner/omv#coconut-strawberry-sunset'],
@@ -106,7 +96,7 @@ const MAX_LIVE_URL_EXPIRY_REFRESHES = Number(process.env.MAX_LIVE_URL_EXPIRY_REF
 const MAX_LIVE_CONTENT_ENRICHMENTS = Number(process.env.MAX_LIVE_CONTENT_ENRICHMENTS || 120);
 const MAX_OPAQUE_SOCIAL_AGE_DAYS = Math.min(7, Math.max(1, Number(process.env.MAX_LIVE_OPAQUE_SOCIAL_AGE_DAYS || 7) || 7));
 const MAX_SOCIAL_POST_AGE_DAYS = Math.min(7, Math.max(1, Number(process.env.MAX_LIVE_SOCIAL_POST_AGE_DAYS || process.env.DEAL_VALIDITY_MAX_AGE_DAYS || 7) || 7));
-const MAX_EXPIRED_REVIEW_GRACE_DAYS = Number(process.env.MAX_LIVE_EXPIRED_REVIEW_GRACE_DAYS || 7);
+const MIN_AUTOREMOVE_EXPIRY_GRACE_HOURS = Math.max(12, Number(process.env.MIN_LIVE_AUTOREMOVE_EXPIRY_GRACE_HOURS || 12) || 12);
 const APPLY_LIVE_VALIDATION = process.env.LIVE_DEAL_VALIDATION_APPLY === '1';
 const LIVE_DEAL_REMOVALS_ENABLED = process.env.LIVE_DEAL_REMOVALS_ENABLED === '1';
 const AUTOMATED_LIVE_REMOVALS_ALLOWED = process.env.ALLOW_AUTOMATED_LIVE_REMOVALS === '1';
@@ -256,29 +246,28 @@ function isStrongExpiredDealEvidence(deal) {
   const source = cleanText(deal.expiresSource || '').toLowerCase();
   const precision = cleanText(deal.expiresPrecision || '').toLowerCase();
   const confidence = cleanText(deal.dateConfidence || '').toLowerCase();
+  const evidenceText = cleanText(deal.expiresOriginal || deal.expiryDisplayText || '');
   const fromUrl = Boolean(deal.expiresDetectedFromUrl || source === 'url');
   const exactDay = precision === 'day';
   const highConfidence = confidence === 'high';
+  const explicitlyApproximate = /\b(?:ca\.?|circa|etwa|ungefähr|ungefaehr|voraussichtlich|wahrscheinlich|vermutlich)\b/i.test(evidenceText);
 
+  if (explicitlyApproximate) return false;
   if (fromUrl) return exactDay && highConfidence;
   if (source === 'text') return exactDay && highConfidence;
   return false;
 }
 
+function isSafeAutomaticExpiredDeal(deal, now = new Date()) {
+  if (!isExpiredDealRecord(deal, now) || !isStrongExpiredDealEvidence(deal)) return false;
+  const expiredAgeDays = expiredDealAgeDays(deal, now);
+  if (!Number.isFinite(expiredAgeDays)) return false;
+  return expiredAgeDays * 24 >= MIN_AUTOREMOVE_EXPIRY_GRACE_HOURS;
+}
+
 function shouldQueueExpiredDealForReview(deal, now = new Date()) {
   if (!isExpiredDealRecord(deal, now)) return false;
-  if (isSocialUrl(deal.url || '')) {
-    const ageDays = socialPostAgeDays(deal, now);
-    if (Number.isFinite(ageDays) && ageDays > MAX_SOCIAL_POST_AGE_DAYS && hasReliableSocialPubDate(deal)) {
-      return false;
-    }
-    return !isStrongExpiredDealEvidence(deal);
-  }
-  const expiredAgeDays = expiredDealAgeDays(deal, now);
-  if (Number.isFinite(expiredAgeDays) && expiredAgeDays > MAX_EXPIRED_REVIEW_GRACE_DAYS) {
-    return false;
-  }
-  return !isStrongExpiredDealEvidence(deal);
+  return !isSafeAutomaticExpiredDeal(deal, now);
 }
 
 function looksAddressLike(value = '') {
@@ -1090,44 +1079,6 @@ async function loadSupplementalSocialIndex() {
   return supplementalByUrl;
 }
 
-async function loadProtectedLiveDealRestores() {
-  const protectedDealsById = new Map();
-  const pendingFiles = (await readdir(DOCS_DIR))
-    .filter((name) => /^deals-pending-.*\.json$/i.test(name))
-    .map((name) => path.join(DOCS_DIR, name));
-  const sourceFiles = [DEAL_CANDIDATES_INDEX_PATH, ...pendingFiles];
-
-  for (const filePath of sourceFiles) {
-    let bundle;
-    try {
-      bundle = await readJson(filePath);
-    } catch {
-      continue;
-    }
-
-    for (const rawDeal of collectBundleDeals(bundle)) {
-      const id = cleanText(rawDeal?.id || '');
-      if (!PROTECTED_LIVE_RESTORE_IDS.has(id)) continue;
-
-      const candidate = normalizeDealRecord({
-        ...rawDeal,
-        id,
-        url: normalizeVariantTargetUrl({ id, url: rawDeal.url || rawDeal.postUrl || rawDeal.post_url || rawDeal.link || '' }),
-        type: 'gratis',
-        category: 'kaffee',
-        hot: true,
-        forceRestored: true,
-      });
-      const existing = protectedDealsById.get(id);
-      if (!existing || pickBetterNormalizedDeal(existing, candidate) === candidate) {
-        protectedDealsById.set(id, candidate);
-      }
-    }
-  }
-
-  return protectedDealsById;
-}
-
 async function main() {
   const now = new Date();
   const urlCache = new Map();
@@ -1135,7 +1086,6 @@ async function main() {
   const dealsDoc = await readJson(DEALS_PATH);
   await loadDynamicForceKeepDeals();
   const supplementalSocialByUrl = await loadSupplementalSocialIndex();
-  const protectedLiveDealRestores = await loadProtectedLiveDealRestores();
   const totalBefore = Array.isArray(dealsDoc.deals) ? dealsDoc.deals.length : 0;
   const churchDeals = await loadCuratedChurchDeals();
   const curatedChurchIds = getChurchCuratedIds(churchDeals);
@@ -1150,7 +1100,7 @@ async function main() {
   let opaqueSocialShellRemovals = 0;
   let invalidLinkReviewCandidates = 0;
   let opaqueSocialShellReviewCandidates = 0;
-  let socialPostDateRemovals = 0;
+  let socialPostAgeReviewCandidates = 0;
   let socialPostDateFixes = 0;
   let expiryUrlChecksUsed = 0;
   let urlVerifiedExpiryHits = 0;
@@ -1161,7 +1111,6 @@ async function main() {
   let socialPolishFixes = 0;
   let duplicateCollapses = 0;
   let churchDirectoryMerges = 0;
-  let protectedLiveDealRestoresCount = 0;
   let flightUrlCheckSkips = 0;
   let moderationRemovals = 0;
   let freshnessFlagUpdates = 0;
@@ -1270,7 +1219,9 @@ async function main() {
       if (shouldRemoveDeal(original, 'Explizit entfernter Deal')) continue;
     }
     if (!forceKeep && CAN_REMOVE_LIVE_DEALS && curatedChurchIds.has(stableChurchDealId(original))) {
-      if (shouldRemoveDeal(original, 'Wird durch kuratierten Kirche-/Event-Eintrag ersetzt')) continue;
+      // The same stable ID is refreshed from the curated directory below. It
+      // never goes offline and therefore must not enter the Offline report.
+      continue;
     }
 
     let deal = { ...original };
@@ -1371,8 +1322,10 @@ async function main() {
     }
     const socialFreshnessRemovalReason = getSocialPostFreshnessRemovalReason(deal, now);
     if (!forceKeep && socialFreshnessRemovalReason) {
-      socialPostDateRemovals += 1;
-      if (shouldRemoveDeal(deal, socialFreshnessRemovalReason)) continue;
+      socialPostAgeReviewCandidates += 1;
+      markForReview(deal, socialFreshnessRemovalReason, {
+        automaticRemovalEligible: false,
+      });
     }
     if (!forceKeep && shouldDropOpaqueSocialShellDeal(deal, health, now)) {
       opaqueSocialShellReviewCandidates += 1;
@@ -1405,15 +1358,22 @@ async function main() {
       markHeuristicReview(deal, 'Möglicher False Positive Free Deal');
     }
     if (isExpiredDealRecord(deal, now)) {
-      if (!forceKeep && shouldQueueExpiredDealForReview(deal, now)) {
+      if (forceKeep) {
         expiredReviewCandidates += 1;
-        markForReview(deal, 'Ablaufdatum unsicher - bitte manuell prüfen', {
+        markForReview(deal, 'Ablaufdatum überschritten, aber manuell vor Auto-Entfernung geschützt', {
+          automaticRemovalEligible: false,
+          expires: cleanText(deal.expires || ''),
+        });
+      } else if (shouldQueueExpiredDealForReview(deal, now)) {
+        expiredReviewCandidates += 1;
+        markForReview(deal, 'Ablaufdatum nicht sicher genug für Auto-Entfernung - bitte manuell prüfen', {
           expires: cleanText(deal.expires || ''),
           expiresOriginal: cleanText(deal.expiresOriginal || ''),
           expiresSource: cleanText(deal.expiresSource || ''),
           expiresPrecision: cleanText(deal.expiresPrecision || ''),
           dateConfidence: cleanText(deal.dateConfidence || ''),
           expiresDetectedFromUrl: Boolean(deal.expiresDetectedFromUrl),
+          minimumGraceHours: MIN_AUTOREMOVE_EXPIRY_GRACE_HOURS,
         });
       } else if (deal.expiresDetectedFromUrl || deal.expiresSource === 'url') {
         expiredByVerifiedDateRemovals += 1;
@@ -1442,29 +1402,6 @@ async function main() {
     if (isCuratedChurchDeal(deal)) {
       churchIndexById.set(deal.id, remaining.length - 1);
     }
-  }
-
-  for (const [id, restoreDeal] of protectedLiveDealRestores.entries()) {
-    let deal = normalizeDealRecord({ ...restoreDeal });
-    deal.url = normalizeVariantTargetUrl(deal);
-    deal = resetUnsafeUrlExpiry(deal);
-    await normalizeDealExpiry(deal, {
-      now,
-      allowUrlLookup: false,
-      forceUrlLookup: false,
-      urlCache,
-    });
-    deal.expires = sanitizeExpiryText(deal.expires);
-
-    if (isExpiredDealRecord(deal, now)) {
-      if (shouldRemoveDeal(deal, 'Geschützter OMV-VIVA-Deal abgelaufen')) continue;
-    }
-    if (!deal.id) continue;
-    if (seenIds.has(deal.id)) continue;
-
-    seenIds.add(deal.id);
-    remaining.push(deal);
-    protectedLiveDealRestoresCount += 1;
   }
 
   for (const churchDeal of churchDeals) {
@@ -1507,13 +1444,14 @@ async function main() {
     if (isExpiredDealRecord(normalizedChurchDeal, now)) {
       if (shouldQueueExpiredDealForReview(normalizedChurchDeal, now)) {
         expiredReviewCandidates += 1;
-        markForReview(normalizedChurchDeal, 'Kirchen-/Event-Ablaufdatum unsicher - bitte manuell prüfen', {
+        markForReview(normalizedChurchDeal, 'Kirchen-/Event-Ablaufdatum nicht sicher genug für Auto-Entfernung', {
           expires: cleanText(normalizedChurchDeal.expires || ''),
           expiresOriginal: cleanText(normalizedChurchDeal.expiresOriginal || ''),
           expiresSource: cleanText(normalizedChurchDeal.expiresSource || ''),
           expiresPrecision: cleanText(normalizedChurchDeal.expiresPrecision || ''),
           dateConfidence: cleanText(normalizedChurchDeal.dateConfidence || ''),
           expiresDetectedFromUrl: Boolean(normalizedChurchDeal.expiresDetectedFromUrl),
+          minimumGraceHours: MIN_AUTOREMOVE_EXPIRY_GRACE_HOURS,
         });
       } else if (normalizedChurchDeal.expiresDetectedFromUrl || normalizedChurchDeal.expiresSource === 'url') {
         expiredByVerifiedDateRemovals += 1;
@@ -1636,9 +1574,11 @@ async function main() {
     opaqueSocialShellRemovals,
     invalidLinkReviewCandidates,
     opaqueSocialShellReviewCandidates,
-    socialPostDateRemovals,
+    socialPostDateRemovals: 0,
+    socialPostAgeReviewCandidates,
     socialPostDateFixes,
     maxSocialPostAgeDays: MAX_SOCIAL_POST_AGE_DAYS,
+    minimumAutomaticExpiryGraceHours: MIN_AUTOREMOVE_EXPIRY_GRACE_HOURS,
     expiredByVerifiedDateRemovals,
     expiredReviewCandidates,
     heuristicReviewCandidates,
@@ -1652,7 +1592,7 @@ async function main() {
     contentEnrichments,
     maxContentEnrichments: MAX_LIVE_CONTENT_ENRICHMENTS,
     flightUrlCheckSkips,
-    protectedLiveDealRestores: protectedLiveDealRestoresCount,
+    protectedLiveDealRestores: 0,
     socialPolishFixes,
     nativeWeeklyAlignment,
     removalReasons,
@@ -1675,7 +1615,7 @@ async function main() {
   console.log(`Expired review candidates: ${expiredReviewCandidates}`);
   console.log(`Heuristic review candidates: ${heuristicReviewCandidates}`);
   console.log(`Review candidates kept live: ${reviewCandidates.length}`);
-  console.log(`Social post date removals: ${socialPostDateRemovals}`);
+  console.log(`Social post age review candidates: ${socialPostAgeReviewCandidates}`);
   console.log(`Social post date fixes: ${socialPostDateFixes}`);
   console.log(`Social pubDateSource fixes applied: ${socialPubDateSourceFixes}`);
   console.log(`Link health checks: ${linkChecksUsed}/${MAX_LIVE_URL_HEALTH_CHECKS}`);
@@ -1696,6 +1636,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
 export {
   buildStructuredSocialTitle,
   getSocialPostFreshnessRemovalReason,
+  isSafeAutomaticExpiredDeal,
   stableChurchDealId,
   shouldApplyAutomatedLiveRemoval,
 };

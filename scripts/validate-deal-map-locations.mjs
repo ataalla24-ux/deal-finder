@@ -20,18 +20,12 @@ const locationsByChainId = new Map();
 const requiredChainCoverage = [
   {
     chainId: 'omv-vienna',
-    minimumLocations: 21,
     dealCoverage: {
-      'joe-omv-viva-free-taste-l62fzo': 21,
-      'joe-omv-viva-free-taste-flur7': 21,
-      'joe-omv-viva-free-taste-xipghf': 21,
-      'joe-omv-viva-free-taste-6qmpsq': 21,
       'joe-omv-xlrh16': 17
     }
   },
   {
     chainId: 'nordsee-vienna-area',
-    minimumLocations: 12,
     dealCoverage: {
       'g2-1ffpc0f': 12,
       'benefit-drei-plus-aekytk': 12
@@ -39,7 +33,6 @@ const requiredChainCoverage = [
   },
   {
     chainId: 'ikea-vienna-area',
-    minimumLocations: 3,
     dealCoverage: {
       'g2-5ntng7': 3,
       'b1-s5vhj5': 2
@@ -90,16 +83,22 @@ for (const [index, location] of locations.entries()) {
 
 for (const requirement of requiredChainCoverage) {
   const chainLocations = locationsByChainId.get(requirement.chainId) || [];
-  if (chainLocations.length < requirement.minimumLocations) {
+  const activeDealCoverage = Object.entries(requirement.dealCoverage)
+    .filter(([dealId]) => liveDealIds.has(dealId));
+  const minimumLocations = activeDealCoverage.reduce(
+    (maximum, [, dealMinimum]) => Math.max(maximum, dealMinimum),
+    0,
+  );
+  if (chainLocations.length < minimumLocations) {
     errors.push(
-      `${requirement.chainId} must include at least ${requirement.minimumLocations} locations, found ${chainLocations.length}`
+      `${requirement.chainId} must include at least ${minimumLocations} locations for active deals, found ${chainLocations.length}`
     );
   }
-  for (const [dealId, minimumLocations] of Object.entries(requirement.dealCoverage)) {
+  for (const [dealId, dealMinimumLocations] of activeDealCoverage) {
     const actualLocations = coverageByDealId.get(dealId) || 0;
-    if (actualLocations < minimumLocations) {
+    if (actualLocations < dealMinimumLocations) {
       errors.push(
-        `${dealId} must be mapped to at least ${minimumLocations} locations, found ${actualLocations}`
+        `${dealId} must be mapped to at least ${dealMinimumLocations} locations, found ${actualLocations}`
       );
     }
   }

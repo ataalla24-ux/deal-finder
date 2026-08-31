@@ -61,7 +61,7 @@ loadEnvFile();
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 const PENDING_FILE_NAMES = process.env.PENDING_FILE_NAMES || '';
-const SEEN_DEAL_SUPPRESSION_DAYS = Number(process.env.SLACK_SEEN_DEAL_SUPPRESSION_DAYS || 7);
+const SEEN_DEAL_SUPPRESSION_DAYS = Number(process.env.SLACK_SEEN_DEAL_SUPPRESSION_DAYS || 30);
 const MAX_SEEN_REACTION_CHECKS = Number(process.env.SLACK_SEEN_MAX_REACTION_CHECKS || 250);
 const QUEUE_REVALIDATION_INTERVAL_HOURS = Number(
   process.env.SLACK_QUEUE_REVALIDATION_INTERVAL_HOURS || 6,
@@ -982,6 +982,9 @@ function buildDealDuplicateKeys(deal) {
   if (socialPostKey) {
     keys.push(`post:${postKey}`);
   }
+  if (idKey) {
+    keys.push(`deal-id:${idKey}`);
+  }
   const semanticOfferKey = semanticCrossPlatformOfferKey(deal);
   if (semanticOfferKey) keys.push(semanticOfferKey);
   if (postKey && titleKey) {
@@ -1002,6 +1005,9 @@ function buildDealDuplicateKeys(deal) {
 
   if (postKey && /\bgutscheine\s+at\b/.test(crawlerSignal)) {
     keys.push(`gutscheine-url:${postKey}`);
+  }
+  if (postKey && (/^power-/i.test(idKey) || /\bpower\s+scraper\b/.test(crawlerSignal))) {
+    keys.push(`power-url:${postKey}`);
   }
 
   return [...new Set(keys)];
@@ -1397,24 +1403,39 @@ function writePendingAll(deals) {
 function queueKey(deal) {
   const postKey = canonicalPostKey(deal.url);
   if (isSocialPostKey(postKey)) return postKey;
+  const id = cleanText(deal.id);
+  if (id) return `id:${id.toLowerCase()}`;
   const slackTs = cleanText(deal.slackTs);
   if (slackTs) return `slack:${slackTs}`;
-  return cleanText(deal.id) || normalizeUrl(deal.url);
+  return normalizeUrl(deal.url);
 }
 
 function mergePendingQueue(existingDeals, newPostedDeals) {
-  const byKey = new Map();
-  for (const deal of existingDeals) {
-    const key = queueKey(deal);
-    if (!key) continue;
-    byKey.set(key, byKey.has(key) ? mergeDealEvidence(byKey.get(key), deal) : deal);
+  const mergedDeals = [];
+  const keyToIndex = new Map();
+
+  for (const deal of [...existingDeals, ...newPostedDeals]) {
+    const keys = [queueKey(deal), ...buildDealDuplicateKeys(deal)].filter(Boolean);
+    if (keys.length === 0) continue;
+    const existingIndex = keys
+      .map((key) => keyToIndex.get(key))
+      .find((index) => Number.isInteger(index));
+
+    if (Number.isInteger(existingIndex)) {
+      const merged = mergeDealEvidence(mergedDeals[existingIndex], deal);
+      mergedDeals[existingIndex] = merged;
+      for (const key of [queueKey(merged), ...buildDealDuplicateKeys(merged)].filter(Boolean)) {
+        keyToIndex.set(key, existingIndex);
+      }
+      continue;
+    }
+
+    const index = mergedDeals.length;
+    mergedDeals.push(deal);
+    for (const key of keys) keyToIndex.set(key, index);
   }
-  for (const deal of newPostedDeals) {
-    const key = queueKey(deal);
-    if (!key) continue;
-    byKey.set(key, byKey.has(key) ? mergeDealEvidence(byKey.get(key), deal) : deal);
-  }
-  return [...byKey.values()];
+
+  return mergedDeals;
 }
 
 async function main() {
@@ -1467,6 +1488,12 @@ async function main() {
   }
   let existingQueue = moderationQueueFilter.deals;
   let queueChanged = queuePrune.removed > 0 || moderationQueueFilter.removed.length > 0;
+  const deduplicatedQueue = mergePendingQueue(existingQueue, []);
+  if (deduplicatedQueue.length !== existingQueue.length) {
+    console.log(`🔁 Queue cleanup: ${existingQueue.length - deduplicatedQueue.length} alte Dubletten zusammengeführt`);
+    queueChanged = true;
+  }
+  existingQueue = deduplicatedQueue;
   const validityUrlCache = new Map();
   const recentQueueValidation = await revalidateRecentPostedQueue(existingQueue, { urlCache: validityUrlCache });
   existingQueue = recentQueueValidation.deals;

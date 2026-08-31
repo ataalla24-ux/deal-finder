@@ -8,7 +8,12 @@ const {
   prunePendingQueue,
   uniqueDealsByApprovalKey,
 } = await import('../scraper/slack-approve.js');
-const { normalizeDeal: normalizeForSlackNotify } = await import('../scraper/slack-notify.js');
+const {
+  filterAlreadyQueuedDeals,
+  loadQueuedDealDuplicateKeys,
+  mergePendingQueue,
+  normalizeDeal: normalizeForSlackNotify,
+} = await import('../scraper/slack-notify.js');
 
 const pending = normalizeDeal({
   id: 'pending-1',
@@ -145,5 +150,39 @@ const pruned = prunePendingQueue([
   { id: 'same-day-midnight', title: 'Same day midnight', url: 'https://example.com/same-day-midnight', slackTs: fourthFreshSlackTs, expires: '2026-07-17T00:00:00.000Z' },
 ], now);
 assert.deepEqual(pruned.map((deal) => deal.id), ['fresh', 'same-day', 'same-day-midnight']);
+
+const repeatedPowerQueue = mergePendingQueue([
+  {
+    id: 'power-bf3fbba4ee53',
+    title: 'Möbelix Aktion :star-struck:',
+    url: 'https://www.moebelix.at/c/aktion-oss-moebel',
+    source: 'Power Scraper',
+    slackTs: '1784275200.100001',
+  },
+  {
+    id: 'power-bf3fbba4ee53',
+    title: 'Möbelix Aktion 🤩',
+    url: 'https://www.moebelix.at/c/aktion-oss-moebel',
+    source: 'Slack Digest',
+    slackTs: '1784275200.100002',
+  },
+  {
+    id: 'power-c5b1c510a715',
+    title: 'Möbelix Möbelaktion',
+    url: 'https://www.moebelix.at/c/aktion-oss-moebel',
+    source: 'Power Scraper',
+    slackTs: '1784275200.100003',
+  },
+], []);
+assert.equal(repeatedPowerQueue.length, 1, 'same Power campaign URL and repeated ID must collapse across Slack runs');
+
+const queuedPowerKeys = loadQueuedDealDuplicateKeys(repeatedPowerQueue);
+const filteredPowerRepeat = filterAlreadyQueuedDeals([{
+  id: 'power-new-id',
+  title: 'Möbelix Aktion erneut',
+  url: 'https://www.moebelix.at/c/aktion-oss-moebel',
+  source: 'Power Scraper',
+}], queuedPowerKeys);
+assert.equal(filteredPowerRepeat.removed, 1, 'an already queued Power campaign URL must not be reposted');
 
 console.log('slack approval queue tests passed');

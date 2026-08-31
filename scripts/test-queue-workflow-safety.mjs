@@ -90,12 +90,14 @@ assert.deepEqual(queueWriterFiles, [
   'approve-deals.yml',
   'daily-digest.yml',
   'deal-moderation.yml',
+  'repair-slack-queued-deal.yml',
 ]);
 const sharedStateWriters = [
   'approve-deals.yml',
   'daily-digest.yml',
   'deal-moderation.yml',
   'live-deal-edit.yml',
+  'repair-slack-queued-deal.yml',
   'smart-summary.yml',
   'validate-live-deals.yml',
 ];
@@ -116,9 +118,9 @@ assert.ok(
   'manual removals must refresh the feed contract before validation',
 );
 
-for (const [file, stepName] of [
-  ['approve-deals.yml', 'Normalize Live Deals After Approvals'],
-  ['validate-live-deals.yml', 'Validate Live Deals'],
+for (const [file, stepName, expectedRemovalGate] of [
+  ['approve-deals.yml', 'Normalize Live Deals After Approvals', '0'],
+  ['validate-live-deals.yml', 'Validate Live Deals', '1'],
 ]) {
   const text = workflows.get(file) || '';
   const stepStart = text.indexOf(stepName);
@@ -126,8 +128,11 @@ for (const [file, stepName] of [
   assert.ok(stepStart >= 0 && runStart > stepStart, `${file} must run live normalization`);
   const normalizationStep = text.slice(stepStart, runStart);
   assert.match(normalizationStep, /LIVE_DEAL_VALIDATION_APPLY:\s*['"]1['"]/);
-  assert.match(normalizationStep, /LIVE_DEAL_REMOVALS_ENABLED:\s*['"]0['"]/);
-  assert.match(normalizationStep, /ALLOW_AUTOMATED_LIVE_REMOVALS:\s*['"]0['"]/);
+  assert.match(normalizationStep, new RegExp(`LIVE_DEAL_REMOVALS_ENABLED:\\s*['"]${expectedRemovalGate}['"]`));
+  assert.match(normalizationStep, new RegExp(`ALLOW_AUTOMATED_LIVE_REMOVALS:\\s*['"]${expectedRemovalGate}['"]`));
+  if (expectedRemovalGate === '1') {
+    assert.match(normalizationStep, /MIN_LIVE_AUTOREMOVE_EXPIRY_GRACE_HOURS:\s*['"]12['"]/);
+  }
 }
 
 function run(command, args, options = {}) {
