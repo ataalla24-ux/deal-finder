@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-30T21:28:43.095Z",
-  "status": "healthy",
-  "message": "1 fresh, evidence-checked Graph hashtag deal(s) found; 0 recovered from media.",
+  "generatedAt": "2026-08-31T06:01:36.252Z",
+  "status": "degraded",
+  "message": "4 fresh, evidence-checked Graph hashtag deal(s) found; 1 recovered from media.",
   "hashtags": [
     "wien",
     "vienna",
@@ -14,34 +14,37 @@
     "essenwien",
     "viennaeats"
   ],
-  "fetchedPosts": 103,
-  "uniquePosts": 97,
-  "totalDeals": 1,
-  "rescueEligible": 60,
-  "rescuedDeals": 0,
+  "fetchedPosts": 123,
+  "uniquePosts": 111,
+  "totalDeals": 4,
+  "rescueEligible": 75,
+  "rescuedDeals": 1,
   "mediaEvidence": {
-    "status": "ok",
-    "eligible": 57,
+    "status": "degraded",
+    "eligible": 68,
     "selected": 18,
-    "cached": 3,
+    "cached": 7,
     "analyzed": 18,
     "withOcrText": 11,
-    "withVisionImages": 18,
-    "aiCalls": 18,
-    "visionCalls": 18,
-    "aiAccepted": 0,
-    "inputTokens": 49415,
-    "outputTokens": 546,
-    "totalTokens": 49961,
-    "errors": [],
+    "withVisionImages": 17,
+    "aiCalls": 17,
+    "visionCalls": 17,
+    "aiAccepted": 2,
+    "inputTokens": 46963,
+    "outputTokens": 675,
+    "totalTokens": 47638,
+    "errors": [
+      "media exceeds byte limit"
+    ],
     "warnings": [
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-GzsWPY/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-cQocxf/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-mqhA6Q/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-o4GHXr/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-lOuJ3N/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-fOs9E0/asset-0-ocr.png stdout -l deu+eng --psm 6",
-      "Command failed: tesseract /tmp/freefinder-meta-ocr-4AqBkL/asset-0-ocr.png stdout -l deu+eng --psm 6"
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-NfgtRC/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-1p0IAM/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-lOzvRB/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-ZHzsa7/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-J0tRa7/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-NH8rVu/asset-0-ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-fCVLQb/video-0-frame-03.jpg.ocr.png stdout -l deu+eng --psm 6",
+      "Command failed: tesseract /tmp/freefinder-meta-ocr-VoOR1c/video-0-frame-03.jpg.ocr.png stdout -l deu+eng --psm 6"
     ],
     "llmConfigured": true,
     "visionConfigured": true,
@@ -56,7 +59,7 @@
       "hashtag": "wien",
       "status": "ok",
       "fetched": 30,
-      "accepted": 0,
+      "accepted": 2,
       "mediaFieldMode": "media-url",
       "mediaLimit": 30
     },
@@ -64,17 +67,17 @@
       "hashtag": "vienna",
       "status": "ok",
       "fetched": 30,
-      "accepted": 0,
+      "accepted": 1,
       "mediaFieldMode": "media-url",
       "mediaLimit": 30
     },
     {
       "hashtag": "viennafood",
       "status": "ok",
-      "fetched": 15,
+      "fetched": 30,
       "accepted": 0,
       "mediaFieldMode": "media-url",
-      "mediaLimit": 15
+      "mediaLimit": 30
     },
     {
       "hashtag": "wienevents",
@@ -87,7 +90,7 @@
     {
       "hashtag": "wientipps",
       "status": "ok",
-      "fetched": 3,
+      "fetched": 5,
       "accepted": 0,
       "mediaFieldMode": "media-url",
       "mediaLimit": 30
@@ -95,7 +98,7 @@
     {
       "hashtag": "wienfamilie",
       "status": "ok",
-      "fetched": 0,
+      "fetched": 1,
       "accepted": 0,
       "mediaFieldMode": "media-url",
       "mediaLimit": 30
@@ -103,7 +106,7 @@
     {
       "hashtag": "sommerinwien",
       "status": "ok",
-      "fetched": 4,
+      "fetched": 5,
       "accepted": 0,
       "mediaFieldMode": "media-url",
       "mediaLimit": 30
@@ -127,17 +130,17 @@
     {
       "hashtag": "viennaeats",
       "status": "ok",
-      "fetched": 8,
+      "fetched": 9,
       "accepted": 0,
       "mediaFieldMode": "media-url",
       "mediaLimit": 30
     }
   ],
   "rejectionReasons": {
-    "no-concrete-offer": 81,
-    "missing-text": 6,
-    "general-recommendation": 5,
+    "no-concrete-offer": 88,
+    "general-recommendation": 8,
+    "missing-text": 4,
     "missing-vienna-evidence": 1,
-    "excluded-promotion-type": 3
+    "excluded-promotion-type": 6
   }
 }
