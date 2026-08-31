@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-31T13:40:46.134Z",
+  "generatedAt": "2026-08-31T14:09:25.271Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 525,
-    "uniqueCandidates": 481,
-    "distinctCandidates": 500,
+    "totalCandidates": 522,
+    "uniqueCandidates": 478,
+    "distinctCandidates": 497,
     "duplicateClusters": 19,
     "topHealthySources": [
       {
@@ -12,12 +12,6 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 82,
-        "totalDeals": 4
       },
       {
         "sourceKey": "joe",
@@ -36,6 +30,12 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "healthScore": 68,
         "totalDeals": 7
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 66,
+        "totalDeals": 6
       }
     ],
     "topMissionSources": [
@@ -52,12 +52,6 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 76,
-        "totalDeals": 4
-      },
-      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "missionFitScore": 70,
@@ -68,6 +62,12 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 70,
         "totalDeals": 6
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 65,
+        "totalDeals": 2
       }
     ],
     "topCoverageSources": [
@@ -93,17 +93,17 @@
         "fresh1dCount": 0
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "coverageScore": 28,
+        "totalDeals": 30,
+        "fresh1dCount": 1
+      },
+      {
         "sourceKey": "events",
         "sourceLabel": "Kirchen Events",
         "coverageScore": 27,
         "totalDeals": 35,
-        "fresh1dCount": 0
-      },
-      {
-        "sourceKey": "gemeinde",
-        "sourceLabel": "Kirchen Verzeichnis",
-        "coverageScore": 27,
-        "totalDeals": 34,
         "fresh1dCount": 0
       }
     ],
@@ -113,12 +113,6 @@
         "sourceLabel": "Apify Instagram",
         "precisionScore": 88,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 81,
-        "totalDeals": 4
       },
       {
         "sourceKey": "gastro2",
@@ -137,6 +131,12 @@
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 72,
         "totalDeals": 12
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "precisionScore": 68,
+        "totalDeals": 10
       }
     ],
     "topWeightedSources": [
@@ -145,12 +145,6 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 70,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 67,
-        "totalDeals": 4
       },
       {
         "sourceKey": "joe",
@@ -169,6 +163,12 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 59,
         "totalDeals": 6
+      },
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 56,
+        "totalDeals": 12
       }
     ],
     "topSourcesToFix": [
@@ -241,8 +241,7 @@
       "completedWithErrors": [
         "firecrawl2",
         "gastro2",
-        "power",
-        "wien-combined"
+        "power"
       ]
     }
   },
@@ -294,96 +293,6 @@
       "coverageScore": 16,
       "precisionScore": 88,
       "sourceWeightScore": 70
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 4,
-      "uniqueDeals": 3,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 4,
-      "fresh7dCount": 4,
-      "viennaCount": 4,
-      "foodDrinkCount": 1,
-      "promoCount": 4,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Kommt vorbei und habt einen super-lustigen Abend mit unseren Comedy-All-Stars 🤩 Mit Kabarett, Standup-Comedy, Musik und ganz viel Spaß 🥳 H",
-        "Rote Spitzpaprika 1 kg for 1,49 € (was 2,49 €)",
-        "🇦🇹 Austria Visa Service – Complete Assistance for a Hassle-Free Journey!"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-31T06:01:36.251Z",
-        "finishedAt": "2026-08-31T06:06:32.635Z",
-        "durationMs": 296384,
-        "counts": {
-          "rawCandidates": 123,
-          "normalizedCandidates": 4,
-          "verifiedCandidates": 4,
-          "previousDeals": 0,
-          "acceptedDeals": 4,
-          "rejectedDeals": 107
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 88,
-          "general-recommendation": 8,
-          "missing-text": 4,
-          "missing-vienna-evidence": 1,
-          "excluded-promotion-type": 6
-        },
-        "errors": [
-          "media evidence: media exceeds byte limit"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84.5,
-      "topCategories": [
-        {
-          "value": "beauty",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 2
-        },
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 82,
-      "missionFitScore": 76,
-      "coverageScore": 16,
-      "precisionScore": 81,
-      "sourceWeightScore": 67
     },
     {
       "sourceKey": "joe",
@@ -691,13 +600,94 @@
       "sourceWeightScore": 59
     },
     {
+      "sourceKey": "firecrawl4",
+      "file": "deals-pending-firecrawl4.json",
+      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+      "totalDeals": 17,
+      "uniqueDeals": 15,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 0,
+      "fresh7dCount": 3,
+      "viennaCount": 2,
+      "foodDrinkCount": 17,
+      "promoCount": 16,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Landstraßer Hauptstraße 71: anzeige SUMMER DEALS bei Tenno Sushi! ☀️ @tennosushiofficial ...",
+        "Mehrweg: Neubaugasse 21, 1070 Wien täglich um 11 & 13 Uhr RECUP Becher ...",
+        "Dots im Brunnerhof - Speisekarte, Preise, Fotos & 9 ..."
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-30T12:38:09.617Z",
+        "finishedAt": "2026-08-30T12:44:23.034Z",
+        "durationMs": 373417,
+        "counts": {
+          "rawCandidates": 14,
+          "normalizedCandidates": 14,
+          "verifiedCandidates": 19,
+          "previousDeals": 16,
+          "acceptedDeals": 19,
+          "rejectedDeals": 11
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 11
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
+      },
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0.2,
+      "viennaRate": 0.1,
+      "foodDrinkRate": 1,
+      "promoRate": 0.9,
+      "missingUrlRate": 0,
+      "averageQualityScore": 60,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 15
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 15
+        },
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 62,
+      "missionFitScore": 62,
+      "coverageScore": 20,
+      "precisionScore": 60,
+      "sourceWeightScore": 53
+    },
+    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 30,
-      "uniqueDeals": 21,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 9,
+      "uniqueDeals": 22,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 8,
       "fresh1dCount": 1,
       "fresh7dCount": 28,
       "viennaCount": 30,
@@ -765,68 +755,9 @@
       ],
       "healthScore": 61,
       "missionFitScore": 45,
-      "coverageScore": 27,
+      "coverageScore": 28,
       "precisionScore": 62,
       "sourceWeightScore": 49
-    },
-    {
-      "sourceKey": "instagram-discovery",
-      "file": "deals-pending-instagram-discovery.json",
-      "sourceLabel": "Daily Sync Instagram Discovery",
-      "totalDeals": 10,
-      "uniqueDeals": 7,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 5,
-      "foodDrinkCount": 8,
-      "promoCount": 8,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst...",
-        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst...",
-        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst..."
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0.5,
-      "foodDrinkRate": 0.8,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 94.5,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 8
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        },
-        {
-          "value": "freizeit",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 10
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 61,
-      "missionFitScore": 58,
-      "coverageScore": 16,
-      "precisionScore": 62,
-      "sourceWeightScore": 51
     },
     {
       "sourceKey": "instagram-verified",
@@ -892,98 +823,72 @@
       "sourceWeightScore": 45
     },
     {
-      "sourceKey": "firecrawl4",
-      "file": "deals-pending-firecrawl4.json",
-      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-      "totalDeals": 18,
-      "uniqueDeals": 15,
+      "sourceKey": "instagram-discovery",
+      "file": "deals-pending-instagram-discovery.json",
+      "sourceLabel": "Daily Sync Instagram Discovery",
+      "totalDeals": 10,
+      "uniqueDeals": 7,
       "duplicateDeals": 3,
       "duplicateAcrossSources": 3,
       "fresh1dCount": 0,
-      "fresh7dCount": 4,
-      "viennaCount": 3,
-      "foodDrinkCount": 17,
-      "promoCount": 16,
+      "fresh7dCount": 0,
+      "viennaCount": 4,
+      "foodDrinkCount": 8,
+      "promoCount": 8,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Landstraßer Hauptstraße 71: anzeige SUMMER DEALS bei Tenno Sushi! ☀️ @tennosushiofficial ...",
-        "... - Instagram: anzeige 10% Rabatt mit dem Code “LISA” bei ... - Instagram",
-        "Mehrweg: Neubaugasse 21, 1070 Wien täglich um 11 & 13 Uhr RECUP Becher ..."
+        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst...",
+        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst...",
+        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst..."
       ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-08-30T12:38:09.617Z",
-        "finishedAt": "2026-08-30T12:44:23.034Z",
-        "durationMs": 373417,
-        "counts": {
-          "rawCandidates": 14,
-          "normalizedCandidates": 14,
-          "verifiedCandidates": 19,
-          "previousDeals": 16,
-          "acceptedDeals": 19,
-          "rejectedDeals": 11
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 11
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
-      },
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.2,
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
       "fresh1dRate": 0,
-      "fresh7dRate": 0.2,
-      "viennaRate": 0.2,
-      "foodDrinkRate": 0.9,
-      "promoRate": 0.9,
+      "fresh7dRate": 0,
+      "viennaRate": 0.4,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.8,
       "missingUrlRate": 0,
-      "averageQualityScore": 60,
+      "averageQualityScore": 94.5,
       "topCategories": [
         {
           "value": "essen",
-          "count": 15
+          "count": 8
+        },
+        {
+          "value": "fitness",
+          "count": 1
         },
         {
           "value": "freizeit",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "shopping",
           "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 16
-        },
-        {
-          "value": "gratis",
-          "count": 2
+          "count": 10
         }
       ],
       "issues": [
         "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 60,
-      "missionFitScore": 60,
-      "coverageScore": 21,
-      "precisionScore": 59,
-      "sourceWeightScore": 52
+      "healthScore": 59,
+      "missionFitScore": 56,
+      "coverageScore": 16,
+      "precisionScore": 60,
+      "sourceWeightScore": 50
     },
     {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 14,
-      "uniqueDeals": 6,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 8,
+      "uniqueDeals": 5,
+      "duplicateDeals": 9,
+      "duplicateAcrossSources": 9,
       "fresh1dCount": 5,
       "fresh7dCount": 14,
       "viennaCount": 14,
@@ -1050,6 +955,79 @@
       "coverageScore": 19,
       "precisionScore": 62,
       "sourceWeightScore": 49
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 0,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 2,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 0,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Kommt vorbei und habt einen super-lustigen Abend mit unseren Comedy-All-Stars 🤩 Mit Kabarett, Standup-Comedy, Musik und ganz viel Spaß 🥳 H",
+        "Eintritt frei"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-08-31T14:05:50.000Z",
+        "finishedAt": "2026-08-31T14:08:54.098Z",
+        "durationMs": 184098,
+        "counts": {
+          "rawCandidates": 102,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 91
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 73,
+          "missing-text": 4,
+          "general-recommendation": 7,
+          "excluded-promotion-type": 5,
+          "missing-vienna-evidence": 1,
+          "self-syndicated-deal": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 89.5,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 58,
+      "missionFitScore": 65,
+      "coverageScore": 12,
+      "precisionScore": 68,
+      "sourceWeightScore": 53
     },
     {
       "sourceKey": "member-benefits",
