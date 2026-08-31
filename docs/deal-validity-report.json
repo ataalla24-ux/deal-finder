@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-30T22:51:35.718Z",
+  "generatedAt": "2026-08-31T00:21:47.389Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 320,
+    "total": 321,
     "allowed": 1,
-    "blocked": 319,
-    "warnings": 0,
+    "blocked": 320,
+    "warnings": 1,
     "reasonCounts": {
       "abgelaufen (2026-08-29)": 4,
       "nicht eindeutig in Wien": 45,
@@ -31,11 +31,11 @@
       "älter als 7 Tage (2026-04-30)": 1,
       "älter als 7 Tage (2026-04-20)": 1,
       "abgelaufen (2026-04-24)": 1,
-      "älter als 7 Tage (2026-02-22)": 88,
+      "älter als 7 Tage (2026-02-22)": 87,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-07-16)": 1,
-      "Gottesdienste nur im Wochenlauf": 34,
+      "älter als 7 Tage (2025-07-30)": 1,
       "URL ungültig (HTTP 404)": 10,
       "ausgeschlossene Quelle (gastro.news)": 26,
       "älter als 7 Tage (2014-10-10)": 10,
@@ -51,6 +51,7 @@
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-25)": 1,
+      "abgelaufen (2026-08-30)": 1,
       "Meta-Graph-Widerspruch (excluded-promotion-type)": 3,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 1,
       "kostenlose Infrastruktur statt Deal": 1,
@@ -63,14 +64,13 @@
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 1
     },
     "reasonCategoryCounts": {
-      "abgelaufen": 9,
+      "abgelaufen": 10,
       "nicht Wien": 45,
       "älter als 7 Tage": 176,
       "ausgeschlossene Quelle": 27,
       "kein konkreter Deal": 207,
       "kein echtes Post-Datum": 102,
       "ungültige URL": 12,
-      "Gottesdienste außerhalb Wochenlauf": 34,
       "Meta-Graph-Widerspruch": 3,
       "sonstiges": 5,
       "Gewinnspiel": 1
@@ -136,7 +136,6 @@
         "warnings": 0,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 32,
-          "Gottesdienste außerhalb Wochenlauf": 33,
           "älter als 7 Tage": 33,
           "ungültige URL": 2
         }
@@ -155,12 +154,13 @@
         }
       },
       "Gutscheine.at": {
-        "total": 3,
+        "total": 4,
         "allowed": 0,
-        "blocked": 3,
+        "blocked": 4,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "ungültige URL": 3
+          "ungültige URL": 3,
+          "abgelaufen": 1
         }
       },
       "Hervis": {
@@ -209,7 +209,6 @@
           "kein konkreter Deal": 96,
           "älter als 7 Tage": 99,
           "ungültige URL": 7,
-          "Gottesdienste außerhalb Wochenlauf": 1,
           "nicht Wien": 1
         }
       },
@@ -232,11 +231,11 @@
           "sonstiges": 1
         }
       },
-      "Meta Instagram Hashtag API": {
+      "Möbelix": {
         "total": 1,
         "allowed": 1,
         "blocked": 0,
-        "warnings": 0,
+        "warnings": 1,
         "reasonCategoryCounts": {}
       },
       "Ströck": {
@@ -252,19 +251,22 @@
   },
   "allowed": [
     {
-      "id": "meta-ig-18377834989239992",
-      "title": "Gratis-Eintritt zum Event bei ras Mykal",
-      "brand": "ras Mykal",
-      "source": "Meta Instagram Hashtag API",
-      "url": "https://www.instagram.com/p/Dcrk0rltJbh/",
+      "id": "power-bf3fbba4ee53",
+      "title": "15% auf viele Möbel 🤩",
+      "brand": "Möbelix",
+      "source": "Möbelix",
+      "url": "https://www.moebelix.at/c/aktion-oss-moebel",
       "reasons": [],
-      "warnings": [],
-      "sourceDate": "2026-08-30T22:22:50.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 0,
-      "expiryDate": "2026-09-19T23:59:59.999Z",
-      "expirySource": "deal.structured",
-      "urlStatus": "HTTP 200"
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.moebelix.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-08-30T10:38:08.415Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.moebelix.at"
     }
   ],
   "blocked": [
@@ -280,7 +282,7 @@
       "warnings": [],
       "sourceDate": "2026-08-25T15:39:59.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 5,
+      "sourceAgeDays": 6,
       "expiryDate": "2026-08-29",
       "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
@@ -300,7 +302,7 @@
       ],
       "sourceDate": "2026-06-27T16:45:26.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 64,
+      "sourceAgeDays": 65,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -320,7 +322,7 @@
       ],
       "sourceDate": "2026-06-24T15:04:00.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 67,
+      "sourceAgeDays": 68,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -340,7 +342,7 @@
       ],
       "sourceDate": "2026-04-16T22:58:33.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 136,
+      "sourceAgeDays": 137,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -359,7 +361,7 @@
       ],
       "sourceDate": "2026-08-30T22:39:10.467Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -378,7 +380,7 @@
       ],
       "sourceDate": "2026-08-30T22:39:10.467Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -397,7 +399,7 @@
       ],
       "sourceDate": "2026-08-30T22:39:10.467Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -416,7 +418,7 @@
       "warnings": [],
       "sourceDate": "2026-05-23T08:00:46.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 99,
+      "sourceAgeDays": 100,
       "expiryDate": "2026-05-31",
       "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
@@ -435,7 +437,7 @@
       ],
       "sourceDate": "2026-08-30T22:39:10.467Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -454,7 +456,7 @@
       ],
       "sourceDate": "2026-08-30T22:39:10.467Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -475,7 +477,7 @@
       ],
       "sourceDate": "2026-05-20T09:04:18.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 102,
+      "sourceAgeDays": 103,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -493,7 +495,7 @@
       "warnings": [],
       "sourceDate": "2026-08-25T15:39:59.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 5,
+      "sourceAgeDays": 6,
       "expiryDate": "2026-08-29",
       "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
@@ -513,7 +515,7 @@
       ],
       "sourceDate": "2026-08-20T09:00:16.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 10,
+      "sourceAgeDays": 11,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -533,7 +535,7 @@
       ],
       "sourceDate": "2026-07-21T20:31:39.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 40,
+      "sourceAgeDays": 41,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -553,7 +555,7 @@
       ],
       "sourceDate": "2026-07-21T10:27:21.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 40,
+      "sourceAgeDays": 41,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -573,7 +575,7 @@
       ],
       "sourceDate": "2026-06-03T12:35:24.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 88,
+      "sourceAgeDays": 89,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -593,7 +595,7 @@
       ],
       "sourceDate": "2026-07-03T14:49:26.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 58,
+      "sourceAgeDays": 59,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -613,7 +615,7 @@
       ],
       "sourceDate": "2026-06-08T16:44:57.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 83,
+      "sourceAgeDays": 84,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -654,7 +656,7 @@
       ],
       "sourceDate": "2026-05-06T09:38:41.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 116,
+      "sourceAgeDays": 117,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -695,7 +697,7 @@
       ],
       "sourceDate": "2026-06-19T17:00:33.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 72,
+      "sourceAgeDays": 73,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -715,7 +717,7 @@
       ],
       "sourceDate": "2026-06-03T12:35:35.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 88,
+      "sourceAgeDays": 89,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -735,7 +737,7 @@
       ],
       "sourceDate": "2026-06-08T13:18:37.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 83,
+      "sourceAgeDays": 84,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -755,7 +757,7 @@
       ],
       "sourceDate": "2026-06-05T11:10:37.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 86,
+      "sourceAgeDays": 87,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -774,7 +776,7 @@
       ],
       "sourceDate": "2026-05-17T13:33:08.895Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 105,
+      "sourceAgeDays": 106,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -794,7 +796,7 @@
       ],
       "sourceDate": "2026-05-05T18:39:41.161Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 117,
+      "sourceAgeDays": 118,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -814,7 +816,7 @@
       ],
       "sourceDate": "2026-04-30T17:31:40.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 122,
+      "sourceAgeDays": 123,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -833,7 +835,7 @@
       "warnings": [],
       "sourceDate": "2026-04-20T13:28:00.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 132,
+      "sourceAgeDays": 133,
       "expiryDate": "2026-04-24",
       "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
@@ -853,7 +855,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -873,7 +875,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: www.karlskirche.at"
@@ -890,7 +892,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -910,7 +912,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -930,7 +932,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -950,7 +952,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -970,7 +972,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -988,7 +990,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -1006,7 +1008,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -1026,7 +1028,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1044,7 +1046,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -1064,7 +1066,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1084,7 +1086,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1103,7 +1105,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: fehlende Ziel-URL"
@@ -1121,7 +1123,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -1139,7 +1141,7 @@
       "warnings": [],
       "sourceDate": "2017-04-20T11:03:34.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 3419,
+      "sourceAgeDays": 3420,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -1157,7 +1159,7 @@
       "warnings": [],
       "sourceDate": "2026-07-21T00:00:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 40,
+      "sourceAgeDays": 41,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -1177,7 +1179,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1195,7 +1197,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -1213,7 +1215,7 @@
       "warnings": [],
       "sourceDate": "2026-07-16T11:51:02.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 45,
+      "sourceAgeDays": 46,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -1226,19 +1228,17 @@
       "url": "https://www.freikirchen.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2025-07-30)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 500)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-02-22T21:13:07.698Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceDate": "2025-07-30T05:18:47.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 397,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: HTTP 500"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-21-20260222",
@@ -1256,7 +1256,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1277,7 +1277,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "ungültig: fehlende Ziel-URL"
@@ -1298,7 +1298,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1319,7 +1319,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1340,7 +1340,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1361,7 +1361,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1382,7 +1382,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1403,7 +1403,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1424,7 +1424,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1445,7 +1445,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1465,7 +1465,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1486,7 +1486,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1507,7 +1507,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1528,7 +1528,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "ungültig: HTTP 404"
@@ -1548,7 +1548,7 @@
       ],
       "sourceDate": "2014-10-10T08:10:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 4342,
+      "sourceAgeDays": 4343,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1568,7 +1568,7 @@
       ],
       "sourceDate": "2014-10-10T08:10:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 4342,
+      "sourceAgeDays": 4343,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1588,7 +1588,7 @@
       ],
       "sourceDate": "2014-10-10T08:10:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 4342,
+      "sourceAgeDays": 4343,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1608,7 +1608,7 @@
       ],
       "sourceDate": "2014-10-10T08:10:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 4342,
+      "sourceAgeDays": 4343,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1628,7 +1628,7 @@
       ],
       "sourceDate": "2014-10-10T08:10:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 4342,
+      "sourceAgeDays": 4343,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1648,7 +1648,7 @@
       ],
       "sourceDate": "2023-11-04T19:51:43.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1030,
+      "sourceAgeDays": 1031,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1668,7 +1668,7 @@
       ],
       "sourceDate": "2023-10-31T14:55:44.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1034,
+      "sourceAgeDays": 1035,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1688,7 +1688,7 @@
       ],
       "sourceDate": "2019-08-02T00:00:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 2585,
+      "sourceAgeDays": 2586,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1708,7 +1708,7 @@
       ],
       "sourceDate": "2023-02-24T18:21:16.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1283,
+      "sourceAgeDays": 1284,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1728,7 +1728,7 @@
       ],
       "sourceDate": "2014-10-10T08:10:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 4342,
+      "sourceAgeDays": 4343,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1748,7 +1748,7 @@
       ],
       "sourceDate": "2014-10-10T08:10:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 4342,
+      "sourceAgeDays": 4343,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1768,7 +1768,7 @@
       ],
       "sourceDate": "2014-10-10T08:10:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 4342,
+      "sourceAgeDays": 4343,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1788,7 +1788,7 @@
       ],
       "sourceDate": "2014-10-10T08:10:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 4342,
+      "sourceAgeDays": 4343,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1808,7 +1808,7 @@
       ],
       "sourceDate": "2014-10-10T08:10:00.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 4342,
+      "sourceAgeDays": 4343,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1825,7 +1825,7 @@
       "warnings": [],
       "sourceDate": "2026-08-24T14:36:26.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 6,
+      "sourceAgeDays": 7,
       "expiryDate": "2026-08-28",
       "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
@@ -1842,7 +1842,7 @@
       "warnings": [],
       "sourceDate": "2026-08-25T15:39:59.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 5,
+      "sourceAgeDays": 6,
       "expiryDate": "2026-08-29",
       "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
@@ -1855,13 +1855,12 @@
       "url": "https://www.jesuszentrum.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -1875,13 +1874,12 @@
       "reasons": [
         "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
@@ -1894,13 +1892,12 @@
       "url": "https://www.citychurch.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -1912,13 +1909,12 @@
       "source": "Freikirchen Wien",
       "url": "https://www.fcgwien.at",
       "reasons": [
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -1931,13 +1927,12 @@
       "url": "https://www.feg.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2016-10-30)"
       ],
       "warnings": [],
       "sourceDate": "2016-10-30T12:40:41.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 3591,
+      "sourceAgeDays": 3592,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -1950,7 +1945,6 @@
       "url": "https://www.lebensquelle.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -1958,7 +1952,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -1970,18 +1964,16 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "freikirche-7-20260419",
@@ -1990,19 +1982,17 @@
       "source": "Freikirchen Wien",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "freikirche-8-20260419",
@@ -2012,7 +2002,6 @@
       "url": "https://www.echo-gemeinde.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2020,7 +2009,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2033,13 +2022,12 @@
       "url": "https://cgw.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2052,7 +2040,6 @@
       "url": "https://www.hopechurch.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2060,7 +2047,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2073,7 +2060,6 @@
       "url": "https://www.vinechurch.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2081,7 +2067,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2094,7 +2080,6 @@
       "url": "https://www.thebase.wien",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2102,7 +2087,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2115,7 +2100,6 @@
       "url": "https://www.ehc.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2123,7 +2107,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2136,7 +2120,6 @@
       "url": "https://www.methodisten.at/wien",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2144,7 +2127,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2157,13 +2140,12 @@
       "url": "https://www.mennoniten.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2023-09-21)"
       ],
       "warnings": [],
       "sourceDate": "2023-09-21T15:18:49.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1074,
+      "sourceAgeDays": 1075,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2176,13 +2158,12 @@
       "url": "https://www.kreuzkirche.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2195,7 +2176,6 @@
       "url": "https://www.friedenskirche.wien",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2203,7 +2183,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2216,13 +2196,12 @@
       "url": "https://www.erloeserkirche.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2235,7 +2214,6 @@
       "url": "https://www.gustav-adolf-kirche.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2243,7 +2221,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2256,7 +2234,6 @@
       "url": "https://www.johanneskirche.wien",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2264,7 +2241,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2277,16 +2254,17 @@
       "url": "https://www.lutherkirche.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-22-20260419",
@@ -2296,13 +2274,12 @@
       "url": "https://www.gasometer.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2315,7 +2292,6 @@
       "url": "https://www.cig.wien",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2323,7 +2299,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2336,16 +2312,17 @@
       "url": "https://www.4corners.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-25-20260419",
@@ -2355,13 +2332,12 @@
       "url": "https://www.wunderwerk.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2374,7 +2350,6 @@
       "url": "https://www.carolus.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2382,7 +2357,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2395,7 +2370,6 @@
       "url": "https://www.blessed.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2403,7 +2377,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2416,7 +2390,6 @@
       "url": "https://www.mosescommunity.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2424,7 +2397,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2437,7 +2410,6 @@
       "url": "https://www.kaffeehausgemeinde.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2445,7 +2417,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2458,7 +2430,6 @@
       "url": "https://www.liebesbrief.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2466,7 +2437,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2479,7 +2450,6 @@
       "url": "https://www.icfwien.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2487,7 +2457,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2500,7 +2470,6 @@
       "url": "https://www.northsidechurch.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
       "warnings": [
@@ -2508,7 +2477,7 @@
       ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 133,
+      "sourceAgeDays": 134,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2525,7 +2494,7 @@
       "warnings": [],
       "sourceDate": "2026-08-24T14:36:26.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 6,
+      "sourceAgeDays": 7,
       "expiryDate": "2026-08-28",
       "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
@@ -2542,7 +2511,7 @@
       "warnings": [],
       "sourceDate": "2026-08-25T15:39:59.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 5,
+      "sourceAgeDays": 6,
       "expiryDate": "2026-08-29",
       "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
@@ -2561,7 +2530,7 @@
       ],
       "sourceDate": "2026-08-26T09:42:35.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 4,
+      "sourceAgeDays": 5,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -2579,7 +2548,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2597,7 +2566,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2615,7 +2584,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2635,7 +2604,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2655,7 +2624,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2670,13 +2639,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-6-20260222",
@@ -2693,7 +2664,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2711,7 +2682,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2723,17 +2694,16 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -2747,7 +2717,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2759,18 +2729,17 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gemeinde-11-20260222",
@@ -2785,7 +2754,7 @@
       "warnings": [],
       "sourceDate": "2023-09-21T15:18:49.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1074,
+      "sourceAgeDays": 1075,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2805,7 +2774,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2824,7 +2793,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
@@ -2842,7 +2811,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2862,7 +2831,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2880,7 +2849,7 @@
       "warnings": [],
       "sourceDate": "2016-10-30T12:40:41.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 3591,
+      "sourceAgeDays": 3592,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2900,7 +2869,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2918,7 +2887,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -2938,7 +2907,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2958,7 +2927,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2978,7 +2947,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -2998,7 +2967,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3018,7 +2987,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3039,7 +3008,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: evang.at"
@@ -3060,7 +3029,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3081,7 +3050,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3101,7 +3070,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -3122,7 +3091,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3142,7 +3111,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -3163,7 +3132,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3184,7 +3153,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3205,7 +3174,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3226,7 +3195,7 @@
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3244,7 +3213,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3262,7 +3231,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3280,7 +3249,7 @@
       "warnings": [],
       "sourceDate": "2023-07-18T09:23:42.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1139,
+      "sourceAgeDays": 1140,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3300,7 +3269,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: www.karlskirche.at"
@@ -3315,13 +3284,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-5-20260222",
@@ -3336,7 +3307,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3355,7 +3326,7 @@
       "warnings": [],
       "sourceDate": "2009-05-01T09:33:07.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 6330,
+      "sourceAgeDays": 6331,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3373,7 +3344,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3391,7 +3362,7 @@
       "warnings": [],
       "sourceDate": "2014-06-07T10:16:23.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 4467,
+      "sourceAgeDays": 4468,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3409,7 +3380,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3429,7 +3400,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3449,7 +3420,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3464,13 +3435,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-13-20260222",
@@ -3487,7 +3460,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3507,7 +3480,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3525,7 +3498,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3537,17 +3510,16 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gottesdienste-17-20260222",
@@ -3561,7 +3533,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3573,18 +3545,17 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gottesdienste-19-20260222",
@@ -3599,7 +3570,7 @@
       "warnings": [],
       "sourceDate": "2023-09-21T15:18:49.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1074,
+      "sourceAgeDays": 1075,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3619,7 +3590,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3637,7 +3608,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3657,7 +3628,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3675,7 +3646,7 @@
       "warnings": [],
       "sourceDate": "2025-12-25T14:30:51.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 248,
+      "sourceAgeDays": 249,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3694,7 +3665,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
@@ -3712,7 +3683,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3732,7 +3703,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3750,7 +3721,7 @@
       "warnings": [],
       "sourceDate": "2016-10-30T12:40:41.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 3591,
+      "sourceAgeDays": 3592,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3770,7 +3741,7 @@
       ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
@@ -3788,7 +3759,7 @@
       "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 189,
+      "sourceAgeDays": 190,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3805,7 +3776,7 @@
       "warnings": [],
       "sourceDate": "2026-08-30T12:08:59.196Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
@@ -3822,10 +3793,27 @@
       "warnings": [],
       "sourceDate": "2026-08-30T12:08:59.196Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "2026-08-31",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "gs-501810",
+      "title": "End of Month Deal - 13€ Gutschein bei Parfumdreams",
+      "brand": "Parfumdreams",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/parfumdreams",
+      "reasons": [
+        "abgelaufen (2026-08-30)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-08-30T12:08:58.122Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 1,
+      "expiryDate": "2026-08-30",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gs-371234",
@@ -3839,7 +3827,7 @@
       "warnings": [],
       "sourceDate": "2026-08-30T12:08:59.725Z",
       "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
@@ -3859,7 +3847,7 @@
       ],
       "sourceDate": "2026-08-28T08:34:45.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 2,
+      "sourceAgeDays": 3,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -3878,7 +3866,7 @@
       ],
       "sourceDate": "2026-08-25T06:41:11.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 5,
+      "sourceAgeDays": 6,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -3898,7 +3886,7 @@
       ],
       "sourceDate": "2026-08-26T07:22:15.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 4,
+      "sourceAgeDays": 5,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -3918,7 +3906,7 @@
       ],
       "sourceDate": "2026-08-25T20:23:52.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 5,
+      "sourceAgeDays": 6,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -3936,7 +3924,7 @@
       "warnings": [],
       "sourceDate": "2026-08-17T10:59:43.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 13,
+      "sourceAgeDays": 14,
       "expiryDate": "2026-08-27T07:50:56.351Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
@@ -3953,7 +3941,7 @@
       "warnings": [],
       "sourceDate": "2026-08-25T15:26:42.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 5,
+      "sourceAgeDays": 6,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3970,7 +3958,7 @@
       "warnings": [],
       "sourceDate": "2026-08-25T15:26:42.000Z",
       "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 5,
+      "sourceAgeDays": 6,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
@@ -3984,13 +3972,15 @@
       "reasons": [
         "kein konkretes Angebot erkennbar"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-08-30T10:32:09.706Z",
       "sourceDateSource": "deal.sourcePage",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "benefit-drei-plus-eaee5u",
@@ -4156,7 +4146,7 @@
       "warnings": [],
       "sourceDate": "2026-07-01T06:08:33.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 60,
+      "sourceAgeDays": 61,
       "expiryDate": "",
       "expirySource": "url.dateHints",
       "urlStatus": "HTTP 200"
@@ -4173,7 +4163,7 @@
       "warnings": [],
       "sourceDate": "2026-07-01T06:08:33.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 60,
+      "sourceAgeDays": 61,
       "expiryDate": "",
       "expirySource": "url.dateHints",
       "urlStatus": "HTTP 200"
@@ -4190,7 +4180,7 @@
       "warnings": [],
       "sourceDate": "2026-07-01T06:08:33.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 60,
+      "sourceAgeDays": 61,
       "expiryDate": "",
       "expirySource": "url.dateHints",
       "urlStatus": "HTTP 200"
@@ -4207,7 +4197,7 @@
       "warnings": [],
       "sourceDate": "2026-07-01T06:08:33.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 60,
+      "sourceAgeDays": 61,
       "expiryDate": "",
       "expirySource": "url.dateHints",
       "urlStatus": "HTTP 200"
@@ -4224,7 +4214,7 @@
       "warnings": [],
       "sourceDate": "2026-07-01T06:08:33.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 60,
+      "sourceAgeDays": 61,
       "expiryDate": "",
       "expirySource": "url.dateHints",
       "urlStatus": "HTTP 200"
@@ -4241,7 +4231,7 @@
       "warnings": [],
       "sourceDate": "2026-07-01T06:08:33.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 60,
+      "sourceAgeDays": 61,
       "expiryDate": "",
       "expirySource": "url.dateHints",
       "urlStatus": "HTTP 200"
@@ -4258,7 +4248,7 @@
       "warnings": [],
       "sourceDate": "2026-07-01T06:08:33.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 60,
+      "sourceAgeDays": 61,
       "expiryDate": "",
       "expirySource": "url.dateHints",
       "urlStatus": "HTTP 200"
@@ -4275,7 +4265,7 @@
       "warnings": [],
       "sourceDate": "2026-07-01T06:08:33.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 60,
+      "sourceAgeDays": 61,
       "expiryDate": "",
       "expirySource": "url.dateHints",
       "urlStatus": "HTTP 200"
@@ -4292,7 +4282,7 @@
       "warnings": [],
       "sourceDate": "2026-07-01T06:08:33.000Z",
       "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 60,
+      "sourceAgeDays": 61,
       "expiryDate": "",
       "expirySource": "url.dateHints",
       "urlStatus": "HTTP 200"
@@ -4312,7 +4302,7 @@
       ],
       "sourceDate": "2026-08-30T10:38:10.110Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -4332,7 +4322,7 @@
       ],
       "sourceDate": "2026-08-30T10:38:10.114Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -4352,7 +4342,7 @@
       ],
       "sourceDate": "2026-08-30T10:38:10.119Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -4372,7 +4362,7 @@
       ],
       "sourceDate": "2026-08-30T10:38:10.122Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -4392,7 +4382,7 @@
       ],
       "sourceDate": "2026-08-30T10:38:10.128Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -4412,7 +4402,7 @@
       ],
       "sourceDate": "2026-08-30T10:38:10.131Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -4432,7 +4422,7 @@
       ],
       "sourceDate": "2026-08-30T10:38:10.134Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -4452,7 +4442,7 @@
       ],
       "sourceDate": "2026-08-30T10:38:10.137Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -4472,7 +4462,7 @@
       ],
       "sourceDate": "2026-08-30T10:38:10.144Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -4492,7 +4482,7 @@
       ],
       "sourceDate": "2026-08-30T10:38:10.151Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -4512,7 +4502,7 @@
       ],
       "sourceDate": "2026-08-30T10:38:07.821Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 0,
+      "sourceAgeDays": 1,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.hervis.at"
