@@ -11,6 +11,7 @@ import {
   getViennaEvidence,
   mergeDealEvidence,
 } from './deal-evidence-utils.js';
+import { inferInstagramAccountRole } from './instagram-entity-resolution.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,6 +22,7 @@ const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
 const HISTORICAL_SENT_PATH = path.join(DOCS_DIR, 'sent-deal-ids.json');
 const MODERATION_PATH = path.join(DOCS_DIR, 'deal-moderation.json');
 const GRAPH_EVIDENCE_PATH = path.join(DOCS_DIR, 'instagram-graph-post-evidence.json');
+const REVIEW_FEEDBACK_PATH = path.join(DOCS_DIR, 'deal-review-feedback.json');
 
 const FOOD_DRINK_KEYWORDS = [
   'restaurant', 'pizza', 'burger', 'kebab', 'kebap', 'döner', 'doener', 'sushi', 'cafe',
@@ -110,19 +112,14 @@ function isExpiryRemovalReason(value) {
 }
 
 function inferAccountType(account = {}) {
-  const explicit = cleanText(account.accountType || account.kind || account.type).toLowerCase();
-  if (['merchant', 'discovery', 'platform'].includes(explicit)) return explicit;
-  const category = cleanText(account.category).toLowerCase();
-  if (category === 'discovery') return 'discovery';
-  if (['delivery', 'platform', 'media'].includes(category)) return 'platform';
-  return 'merchant';
+  return inferInstagramAccountRole(account);
 }
 
 function ensureEntry(registry, username) {
   if (!registry.has(username)) {
     registry.set(username, {
       username,
-      accountType: 'merchant',
+      accountType: 'unknown',
       watchlist: false,
       watchlistPriority: 0,
       watchlistNote: '',
@@ -133,6 +130,11 @@ function ensureEntry(registry, username) {
       approvedPostKeys: new Set(),
       postedPostKeys: new Set(),
       rejectedPostKeys: new Set(),
+      manualApprovedPostKeys: new Set(),
+      manualRejectedPostKeys: new Set(),
+      scoutSentPostKeys: new Set(),
+      scoutApprovedPostKeys: new Set(),
+      scoutRejectedPostKeys: new Set(),
       legacyApprovedDeals: 0,
       legacyPostedDeals: 0,
       legacyRejectedDeals: 0,
@@ -173,6 +175,10 @@ function rejectedDealCount(entry) {
   return Math.max(entry.legacyRejectedDeals, entry.rejectedPostKeys.size);
 }
 
+function smoothedRate(successes, failures, priorSuccesses = 2, priorFailures = 2) {
+  return (successes + priorSuccesses) / (successes + failures + priorSuccesses + priorFailures);
+}
+
 function incrementMap(map, key) {
   const normalized = cleanUiNoiseText(key || '').toLowerCase();
   if (!normalized) return;
@@ -180,6 +186,13 @@ function incrementMap(map, key) {
 }
 
 function scoreEntry(entry) {
+  const accountRole = inferAccountType({ username: entry.username, accountType: entry.accountType });
+  const qualityApprovals = accountRole === 'merchant'
+    ? approvedDealCount(entry)
+    : entry.scoutApprovedPostKeys.size;
+  const qualityRejections = accountRole === 'merchant'
+    ? rejectedDealCount(entry)
+    : entry.scoutRejectedPostKeys.size;
   const countScore = Math.min(entry.occurrences * 10, 40);
   const liveScore = Math.min(entry.liveOccurrences * 12, 24);
   const promoScore = Math.min(entry.promoHits * 8, 16);
@@ -188,9 +201,9 @@ function scoreEntry(entry) {
   const watchlistScore = entry.watchlist ? 10 : 0;
   const historicalViennaScore = Math.min(entry.historicalViennaHits * 14, 28);
   const historicalAddressScore = Math.min(entry.historicalAddressHits * 8, 16);
-  const approvedScore = Math.min(approvedDealCount(entry) * 20, 40);
+  const approvedScore = Math.min(qualityApprovals * 20, 40);
   const postedScore = Math.min(postedDealCount(entry) * 2, 8);
-  const rejectionPenalty = Math.min(rejectedDealCount(entry) * 10, 30);
+  const rejectionPenalty = Math.min(qualityRejections * 10, 30);
   return Math.max(0, Math.min(100, Math.round(
     countScore
     + liveScore
@@ -211,17 +224,30 @@ function priorityScore(entry) {
   const fresh1dRate = entry.fresh1dHits / entry.occurrences;
   const missionRate = entry.missionHits / entry.occurrences;
   const liveRate = entry.liveOccurrences / entry.occurrences;
-  const approvedDeals = approvedDealCount(entry);
-  const rejectedDeals = rejectedDealCount(entry);
+  const accountRole = inferAccountType({ username: entry.username, accountType: entry.accountType });
+  const approvedDeals = accountRole === 'merchant'
+    ? approvedDealCount(entry)
+    : entry.scoutApprovedPostKeys.size;
+  const rejectedDeals = accountRole === 'merchant'
+    ? rejectedDealCount(entry)
+    : entry.scoutRejectedPostKeys.size;
   const feedbackTotal = approvedDeals + rejectedDeals;
-  const approvalRate = feedbackTotal > 0 ? approvedDeals / feedbackTotal : 0;
+  const approvalRate = smoothedRate(approvedDeals, rejectedDeals);
+  const feedbackStrength = feedbackTotal / (feedbackTotal + 4);
+  const scoutApproved = entry.scoutApprovedPostKeys.size;
+  const scoutRejected = entry.scoutRejectedPostKeys.size;
+  const scoutRate = smoothedRate(scoutApproved, scoutRejected);
+  const scoutStrength = (scoutApproved + scoutRejected) / (scoutApproved + scoutRejected + 4);
+  const learnedFeedbackScore = accountRole === 'merchant'
+    ? (approvalRate - 0.5) * 44 * feedbackStrength
+    : (scoutRate - 0.5) * 34 * scoutStrength;
   const qualityAverage = entry.totalQualityScore > 0 ? entry.totalQualityScore / entry.occurrences : 0;
   const score =
     scoreEntry(entry) * 0.42 +
     missionRate * 26 +
     fresh1dRate * 18 +
     liveRate * 8 +
-    approvalRate * 22 +
+    learnedFeedbackScore +
     Math.min(approvedDeals, 4) * 6 -
     Math.min(rejectedDeals, 4) * 5 +
     Math.min(qualityAverage, 100) * 0.06;
@@ -247,6 +273,62 @@ function seedPreviousFeedback(registry, filePath) {
     }
     for (const key of Array.isArray(account?.rejectedPostKeys) ? account.rejectedPostKeys : []) {
       if (cleanText(key)) entry.rejectedPostKeys.add(cleanText(key));
+    }
+    for (const key of Array.isArray(account?.manualApprovedPostKeys) ? account.manualApprovedPostKeys : []) {
+      if (cleanText(key)) entry.manualApprovedPostKeys.add(cleanText(key));
+    }
+    for (const key of Array.isArray(account?.manualRejectedPostKeys) ? account.manualRejectedPostKeys : []) {
+      if (cleanText(key)) entry.manualRejectedPostKeys.add(cleanText(key));
+    }
+    for (const key of Array.isArray(account?.scoutSentPostKeys) ? account.scoutSentPostKeys : []) {
+      if (cleanText(key)) entry.scoutSentPostKeys.add(cleanText(key));
+    }
+    for (const key of Array.isArray(account?.scoutApprovedPostKeys) ? account.scoutApprovedPostKeys : []) {
+      if (cleanText(key)) entry.scoutApprovedPostKeys.add(cleanText(key));
+    }
+    for (const key of Array.isArray(account?.scoutRejectedPostKeys) ? account.scoutRejectedPostKeys : []) {
+      if (cleanText(key)) entry.scoutRejectedPostKeys.add(cleanText(key));
+    }
+  }
+}
+
+function applyManualReviewFeedback(registry, options = {}) {
+  const feedbackPath = options.reviewFeedbackPath
+    || path.join(options.docsDir || DOCS_DIR, path.basename(REVIEW_FEEDBACK_PATH));
+  const feedback = readJson(feedbackPath, {});
+  for (const event of Array.isArray(feedback?.events) ? feedback.events : []) {
+    const postKey = instagramPostKey(event?.url || event?.postKey);
+    if (!postKey) continue;
+    const decision = cleanText(event?.decision).toLowerCase();
+    const ownerUsername = normalizeRegistryUsername(event?.ownerUsername);
+    const ownerRole = inferAccountType({
+      username: ownerUsername,
+      accountType: event?.sourceAccountType,
+    });
+    const scoutUsername = normalizeRegistryUsername(event?.scoutUsername)
+      || (['creator', 'discovery', 'platform'].includes(ownerRole) ? ownerUsername : '');
+    const merchantUsername = normalizeRegistryUsername(event?.merchantUsername)
+      || (ownerRole === 'merchant' ? ownerUsername : '');
+
+    if (scoutUsername) {
+      const scout = ensureEntry(registry, scoutUsername);
+      if (scout.accountType === 'unknown' || scout.accountType === 'merchant') scout.accountType = ownerRole === 'platform' ? 'platform' : 'creator';
+      if (event?.slackSentAt) scout.scoutSentPostKeys.add(postKey);
+      if (decision === 'approved') scout.scoutApprovedPostKeys.add(postKey);
+      if (decision === 'rejected') scout.scoutRejectedPostKeys.add(postKey);
+    }
+
+    if (merchantUsername) {
+      const merchant = ensureEntry(registry, merchantUsername);
+      if (merchant.accountType === 'unknown') merchant.accountType = 'merchant';
+      if (decision === 'approved') {
+        merchant.approvedPostKeys.add(postKey);
+        merchant.manualApprovedPostKeys.add(postKey);
+      }
+      if (decision === 'rejected') {
+        merchant.rejectedPostKeys.add(postKey);
+        merchant.manualRejectedPostKeys.add(postKey);
+      }
     }
   }
 }
@@ -494,18 +576,39 @@ export function buildInstagramMerchantRegistry(options = {}) {
     const username = deal.__username;
 
     const entry = ensureEntry(registry, username);
+    const inferredRole = inferAccountType({
+      username,
+      accountType: deal?.sourceAccountType
+        || (normalizeRegistryUsername(deal?.scoutUsername) === username ? 'creator' : '')
+        || (normalizeRegistryUsername(deal?.merchantUsername) === username ? 'merchant' : ''),
+      category: deal?.category,
+    });
+    if (entry.accountType === 'unknown' || inferredRole !== 'unknown') entry.accountType = inferredRole;
     const postKey = instagramPostKey(deal?.url || deal?.post_url || deal?.postUrl)
       || registryRecordKey(deal, username);
     entry.occurrences += 1;
     if (deal.__isLive) {
       entry.liveOccurrences += 1;
-      if (postKey) entry.approvedPostKeys.add(postKey);
+      if (postKey && ['creator', 'discovery', 'platform'].includes(inferredRole)) {
+        entry.scoutApprovedPostKeys.add(postKey);
+      } else if (postKey) {
+        entry.approvedPostKeys.add(postKey);
+      }
     } else {
       entry.pendingOccurrences += 1;
     }
     if (deal.__isPosted) {
       entry.postedOccurrences += 1;
       if (postKey) entry.postedPostKeys.add(postKey);
+      if (postKey && ['creator', 'discovery', 'platform'].includes(inferredRole)) {
+        entry.scoutSentPostKeys.add(postKey);
+      }
+    }
+    const resolvedMerchantUsername = normalizeRegistryUsername(deal?.merchantUsername);
+    if (postKey && resolvedMerchantUsername && resolvedMerchantUsername !== username && deal.__isLive) {
+      const merchantEntry = ensureEntry(registry, resolvedMerchantUsername);
+      if (merchantEntry.accountType === 'unknown') merchantEntry.accountType = 'merchant';
+      merchantEntry.approvedPostKeys.add(postKey);
     }
     if (deal.__structuredOwner) entry.structuredOwnerOccurrences += 1;
     if (deal.__verifiedProfile) entry.verifiedProfileOccurrences += 1;
@@ -540,15 +643,22 @@ export function buildInstagramMerchantRegistry(options = {}) {
   }
 
   applyModerationFeedback(registry, records, { ...options, now, moderation });
+  applyManualReviewFeedback(registry, options);
 
   const accounts = [...registry.values()]
     .map((entry) => {
+      const accountType = inferAccountType({
+        username: entry.username,
+        accountType: entry.accountType,
+        category: entry.categories.has('essen') || entry.categories.has('kaffee') ? 'food' : '',
+        note: entry.watchlistNote,
+      });
       const verifiedByCurrentEvidence = entry.structuredOwnerOccurrences > 0
         && (
           (entry.liveOccurrences > 0 && entry.viennaHits > 0)
           || (entry.structuredOwnerOccurrences >= 2 && entry.viennaHits >= 2)
         );
-      const verifiedByHistory = entry.accountType === 'merchant'
+      const verifiedByHistory = accountType === 'merchant'
         && (
           (entry.watchlist && entry.historicalAddressHits >= 1)
           || entry.historicalAddressHits >= 2
@@ -558,12 +668,22 @@ export function buildInstagramMerchantRegistry(options = {}) {
         || entry.username.startsWith(`${provider}.`)
         || entry.username.startsWith(`${provider}_`)
       ));
-      const approvedDeals = approvedDealCount(entry);
+      const approvedDeals = accountType === 'merchant'
+        ? approvedDealCount(entry)
+        : 0;
       const postedDeals = postedDealCount(entry);
-      const rejectedDeals = rejectedDealCount(entry);
+      const rejectedDeals = accountType === 'merchant'
+        ? rejectedDealCount(entry)
+        : 0;
+      const manualApprovedDeals = entry.manualApprovedPostKeys.size;
+      const manualRejectedDeals = entry.manualRejectedPostKeys.size;
+      const feedbackSampleSize = manualApprovedDeals + manualRejectedDeals;
+      const scoutApprovedDeals = entry.scoutApprovedPostKeys.size;
+      const scoutRejectedDeals = entry.scoutRejectedPostKeys.size;
+      const scoutFeedbackSampleSize = scoutApprovedDeals + scoutRejectedDeals;
       return {
         username: entry.username,
-        accountType: entry.accountType,
+        accountType,
         watchlist: entry.watchlist,
         watchlistPriority: entry.watchlistPriority,
         watchlistNote: entry.watchlistNote,
@@ -576,13 +696,30 @@ export function buildInstagramMerchantRegistry(options = {}) {
         postedDeals,
         rejectedOccurrences: rejectedDeals,
         rejectedDeals,
+        manualApprovedDeals,
+        manualRejectedDeals,
+        feedbackSampleSize,
         blockedByModeration,
         approvalRate: approvedDeals + rejectedDeals > 0
           ? Math.round((approvedDeals / (approvedDeals + rejectedDeals)) * 1000) / 1000
           : 0,
+        smoothedApprovalRate: Math.round(smoothedRate(manualApprovedDeals, manualRejectedDeals) * 1000) / 1000,
+        scoutSentDeals: entry.scoutSentPostKeys.size,
+        scoutApprovedDeals,
+        scoutRejectedDeals,
+        scoutFeedbackSampleSize,
+        scoutApprovalRate: scoutFeedbackSampleSize > 0
+          ? Math.round((scoutApprovedDeals / scoutFeedbackSampleSize) * 1000) / 1000
+          : 0,
+        smoothedScoutApprovalRate: Math.round(smoothedRate(scoutApprovedDeals, scoutRejectedDeals) * 1000) / 1000,
         approvedPostKeys: [...entry.approvedPostKeys].slice(-100),
         postedPostKeys: [...entry.postedPostKeys].slice(-100),
         rejectedPostKeys: [...entry.rejectedPostKeys].slice(-100),
+        manualApprovedPostKeys: [...entry.manualApprovedPostKeys].slice(-100),
+        manualRejectedPostKeys: [...entry.manualRejectedPostKeys].slice(-100),
+        scoutSentPostKeys: [...entry.scoutSentPostKeys].slice(-100),
+        scoutApprovedPostKeys: [...entry.scoutApprovedPostKeys].slice(-100),
+        scoutRejectedPostKeys: [...entry.scoutRejectedPostKeys].slice(-100),
         pendingOccurrences: entry.pendingOccurrences,
         foodDrinkHits: entry.foodDrinkHits,
         promoHits: entry.promoHits,
@@ -594,7 +731,7 @@ export function buildInstagramMerchantRegistry(options = {}) {
         verifiedProfileOccurrences: entry.verifiedProfileOccurrences,
         historicalViennaHits: entry.historicalViennaHits,
         historicalAddressHits: entry.historicalAddressHits,
-        viennaVerified: Boolean(entry.accountType === 'merchant' && (verifiedByCurrentEvidence || verifiedByHistory)),
+        viennaVerified: Boolean(accountType === 'merchant' && (verifiedByCurrentEvidence || verifiedByHistory)),
         verificationSource: verifiedByCurrentEvidence
           ? 'structured-current-deal-evidence'
           : (verifiedByHistory ? 'historical-profile-address-evidence' : ''),
@@ -616,6 +753,9 @@ export function buildInstagramMerchantRegistry(options = {}) {
       || entry.historicalViennaHits > 0
       || entry.approvedDeals > 0
       || entry.rejectedDeals > 0
+      || entry.scoutSentDeals > 0
+      || entry.scoutApprovedDeals > 0
+      || entry.scoutRejectedDeals > 0
       || entry.blockedByModeration)
     .sort((a, b) => b.priorityScore - a.priorityScore || b.confidence - a.confidence || b.occurrences - a.occurrences || a.username.localeCompare(b.username));
 

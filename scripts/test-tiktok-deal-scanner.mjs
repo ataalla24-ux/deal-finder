@@ -74,6 +74,11 @@ assert.equal(creatorPostWithNamedProvider.deal.validFrom, '2026-08-26');
 assert.equal(creatorPostWithNamedProvider.deal.validUntil, '2026-08-29');
 assert.equal(creatorPostWithNamedProvider.deal.postalCode, '1010');
 assert.equal(creatorPostWithNamedProvider.deal.distance, '1010 Wien');
+assert.equal(creatorPostWithNamedProvider.deal.sourceAccountType, 'creator');
+assert.equal(creatorPostWithNamedProvider.deal.scoutUsername, 'kseniainvienna');
+assert.equal(creatorPostWithNamedProvider.deal.merchantUsername, 'dyson');
+assert.equal(creatorPostWithNamedProvider.deal.merchantName, 'Dyson');
+assert.equal(creatorPostWithNamedProvider.deal.pipelineLifecycle.stage, 'extracted');
 
 const secondDysonCreatorPost = build(
   'https://www.tiktok.com/@johannasteachervibes/video/7678693667174878486',

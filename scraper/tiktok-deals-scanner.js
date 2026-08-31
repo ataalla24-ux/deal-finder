@@ -6,7 +6,9 @@ import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { inferPreferredBrand } from './deal-normalization-utils.js';
+import { resolveInstagramPostEntities } from './instagram-entity-resolution.js';
 import { extractActiveOfferWindow, unicodeSafeTruncate } from './instagram-ai-validity-utils.js';
 import {
   classifySocialMediaEvidenceWithOpenAI,
@@ -429,6 +431,21 @@ function rejectionReasonCounts(rejected) {
     counts[reason] = (counts[reason] || 0) + 1;
   }
   return Object.fromEntries(Object.entries(counts).sort((left, right) => right[1] - left[1]));
+}
+
+function summarizeTikTokRejection(url, data = {}, reason = '', keyword = '') {
+  const publication = parseDateFromPost(data);
+  return {
+    url: normalizeTikTokVideoUrl(url || data.url || data.finalUrl),
+    keyword: cleanText(keyword, 180),
+    reason: cleanText(reason, 240),
+    title: cleanText(data.title, 500),
+    description: cleanText(data.description, 1200),
+    ownerUsername: cleanText(data.accountHandle, 80),
+    pubDate: publication?.date?.toISOString() || '',
+    pubDateSource: cleanText(publication?.source, 120),
+    mediaType: cleanText(data.mediaType, 40),
+  };
 }
 
 function stableHash(value = '') {
@@ -1034,6 +1051,14 @@ export function buildDealFromPost(url, data, options = {}) {
   const type = inferType(offerSignal);
   const { category, logo } = inferCategoryAndLogo(offerSignal, type);
   const extractedBrand = extractBrand(offerSignal, data.accountHandle);
+  const entities = resolveInstagramPostEntities({
+    ownerUsername: data.accountHandle,
+    caption: offerSignal,
+    account: {
+      username: data.accountHandle,
+      accountType: data.sourceAccountType || '',
+    },
+  });
   const brand = inferPreferredBrand({
     brand: extractedBrand,
     title: offerSignal,
@@ -1056,8 +1081,7 @@ export function buildDealFromPost(url, data, options = {}) {
     ...media.evidence,
     ...(media.ai ? { ai: media.ai } : {}),
   } : null;
-  return {
-    deal: {
+  const rawDeal = {
       id: `tiktok-${stableHash(`${url}|${dateCandidate.date.toISOString()}|${title}`)}`,
       brand,
       logo,
@@ -1086,9 +1110,16 @@ export function buildDealFromPost(url, data, options = {}) {
         source: originalViennaEvidence ? 'tiktok-post' : 'tiktok-media-ai',
         detail: viennaEvidenceDetail,
       },
-      ownerUsername: cleanText(data.accountHandle, 80).replace(/^@/, '').toLowerCase(),
+      ownerUsername: entities.ownerUsername,
+      sourceAccountType: entities.ownerRole,
+      scoutUsername: entities.scoutUsername,
+      merchantUsername: entities.merchantUsername,
+      merchantName: brand,
       promotionEvidence: media.ai?.offerText || '',
-      ...(mediaEvidence ? { evidence: { mediaEvidence } } : {}),
+      evidence: {
+        ...(mediaEvidence ? { mediaEvidence } : {}),
+        entityResolution: entities,
+      },
       hot: type === 'gratis' || type === 'bogo',
       isNew: true,
       votes: type === 'gratis' || type === 'bogo' ? 3 : 2,
@@ -1098,7 +1129,10 @@ export function buildDealFromPost(url, data, options = {}) {
       pubDateSource: dateCandidate.source,
       sourcePublishedAt: dateCandidate.date.toISOString(),
       sourcePublishedAtSource: dateCandidate.source,
-    },
+  };
+  const discovered = advanceDealLifecycle(rawDeal, 'discovered', { at: options.discoveredAt });
+  return {
+    deal: advanceDealLifecycle(discovered, 'extracted', { at: now }),
     reason: '',
   };
 }
@@ -1192,6 +1226,7 @@ export async function rescueTikTokMediaCandidates(candidates, options = {}) {
     return {
       deals: [],
       rescuedUrls: new Set(),
+      evidenceByUrl: new Map(),
       cache,
       report: { ...emptyTikTokMediaReport('disabled'), rescueCandidates: unique.size, eligible: eligible.length },
     };
@@ -1219,6 +1254,7 @@ export async function rescueTikTokMediaCandidates(candidates, options = {}) {
     return {
       deals: [],
       rescuedUrls: new Set(),
+      evidenceByUrl: new Map(),
       cache,
       report: {
         ...emptyTikTokMediaReport('degraded', error?.message || error),
@@ -1230,7 +1266,11 @@ export async function rescueTikTokMediaCandidates(candidates, options = {}) {
 
   const deals = [];
   const rescuedUrls = new Set();
+  const evidenceByUrl = new Map();
   for (const entry of media.entries) {
+    if (entry.item?._mediaEvidence) {
+      evidenceByUrl.set(normalizeTikTokVideoUrl(entry.candidate.url), entry.item._mediaEvidence);
+    }
     if (!entry.item?._mediaEvidence) continue;
     const data = { ...entry.candidate.data, _mediaEvidence: entry.item._mediaEvidence };
     const rebuilt = buildDealFromPost(entry.candidate.url, data, {
@@ -1245,6 +1285,7 @@ export async function rescueTikTokMediaCandidates(candidates, options = {}) {
   return {
     deals,
     rescuedUrls,
+    evidenceByUrl,
     cache: media.cache,
     report: {
       ...media.report,
@@ -1252,6 +1293,25 @@ export async function rescueTikTokMediaCandidates(candidates, options = {}) {
       eligible: eligible.length,
       rescuedDeals: deals.length,
     },
+  };
+}
+
+export function createPlaywrightMediaFetch(context, options = {}) {
+  if (!context?.request?.get) throw new Error('Playwright browser context request API is unavailable');
+  const timeoutMs = Math.max(3000, Number(options.timeoutMs || 25000));
+  return async (url, init = {}) => {
+    const headers = Object.fromEntries(Object.entries(init.headers || {})
+      .map(([key, value]) => [key, String(value || '')])
+      .filter(([, value]) => value));
+    const response = await context.request.get(url, {
+      headers,
+      timeout: timeoutMs,
+      failOnStatusCode: false,
+    });
+    return new Response(await response.body(), {
+      status: response.status(),
+      headers: response.headers(),
+    });
   };
 }
 
@@ -1359,6 +1419,8 @@ async function main() {
   const deals = [];
   const rejected = [];
   const rescuePool = [];
+  const mediaConfig = buildTikTokMediaConfig(process.env);
+  let mediaRescue = null;
   let discovery = { links: [], errors: [] };
   let apiDiscovery = { rows: [], errors: [] };
   try {
@@ -1371,7 +1433,7 @@ async function main() {
         deals.push(deal);
         console.log(`  ✅ ${deal.title}`);
       } else {
-        rejected.push({ url: item.data.url, keyword: item.keyword, reason });
+        rejected.push(summarizeTikTokRejection(item.data.url, item.data, reason, item.keyword));
         rescuePool.push({ url: item.data.url, data: item.data, keyword: item.keyword, initial: { deal, reason } });
       }
     }
@@ -1389,26 +1451,40 @@ async function main() {
           deals.push(deal);
           console.log(`  ✅ ${deal.title}`);
         } else {
-          rejected.push({ url, reason });
+          rejected.push(summarizeTikTokRejection(url, data, reason));
           rescuePool.push({ url, data, initial: { deal, reason } });
         }
       } catch (error) {
-        rejected.push({ url, reason: error.message });
+        rejected.push(summarizeTikTokRejection(url, {}, error.message));
       }
       await page.waitForTimeout(500);
     }
+
+    mediaRescue = await rescueTikTokMediaCandidates(rescuePool, {
+      config: mediaConfig,
+      cache: loadTikTokMediaCache(),
+      mediaFetchImpl: createPlaywrightMediaFetch(context, {
+        timeoutMs: mediaConfig.mediaDownloadTimeoutMs,
+      }),
+    });
   } finally {
     await context.close();
     await browser.close();
   }
 
-  const mediaConfig = buildTikTokMediaConfig(process.env);
-  const mediaRescue = await rescueTikTokMediaCandidates(rescuePool, {
-    config: mediaConfig,
-    cache: loadTikTokMediaCache(),
-  });
+  if (!mediaRescue) {
+    mediaRescue = await rescueTikTokMediaCandidates(rescuePool, {
+      config: mediaConfig,
+      cache: loadTikTokMediaCache(),
+    });
+  }
   deals.push(...mediaRescue.deals);
-  const finalRejected = rejected.filter((item) => !mediaRescue.rescuedUrls.has(normalizeTikTokVideoUrl(item.url)));
+  const finalRejected = rejected
+    .filter((item) => !mediaRescue.rescuedUrls.has(normalizeTikTokVideoUrl(item.url)))
+    .map((item) => {
+      const mediaEvidence = mediaRescue.evidenceByUrl.get(normalizeTikTokVideoUrl(item.url));
+      return mediaEvidence ? { ...item, mediaEvidence } : item;
+    });
   if (mediaRescue.deals.length > 0) {
     console.log(`  🖼️ ${mediaRescue.deals.length} TikTok-Deal(s) aus Bild-/Videobelegen gerettet`);
   }

@@ -19,7 +19,7 @@ async function fetchImpl(url) {
       headers: { 'content-type': 'application/json' },
     });
   }
-  if (parsed.pathname.includes('/recent_media') && String(parsed.searchParams.get('fields') || '').split(',').includes('children')) {
+  if (parsed.pathname.includes('/recent_media') && /children\{/.test(String(parsed.searchParams.get('fields') || ''))) {
     return new Response(JSON.stringify({
       error: { code: 100, message: '(#100) Please read documentation for supported fields.' },
     }), { status: 400, headers: { 'content-type': 'application/json' } });
@@ -168,6 +168,9 @@ assert.equal(result.report.rescueEligible, 1);
 assert.equal(result.report.rescuedDeals, 1);
 assert.equal(result.report.uniquePosts, 5, 'the same Graph post found by two hashtags is analyzed once');
 assert.equal(result.report.mediaEvidence.visionCalls, 1);
+assert.equal(result.report.candidateAudit.length, 5);
+assert.equal(result.report.candidateAudit.filter((row) => row.status === 'collector-accepted').length, 2);
+assert.equal(result.report.candidateAudit.find((row) => row.id === 'image-only-deal')?.mediaEvidence.ai.isDeal, true);
 assert.equal(result.report.status, 'healthy');
 assert.equal(result.report.sources.find((source) => source.hashtag === 'missingtag')?.status, 'not-found');
 assert.equal(result.report.sources.find((source) => source.hashtag === 'gratiswien')?.mediaFieldMode, 'media-url');

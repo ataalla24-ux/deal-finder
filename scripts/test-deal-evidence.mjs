@@ -266,6 +266,30 @@ fs.writeFileSync(path.join(feedbackDocsDir, 'deal-moderation.json'), JSON.string
   ],
 }));
 fs.writeFileSync(path.join(feedbackDocsDir, 'sent-deal-ids.json'), '{}');
+fs.writeFileSync(path.join(feedbackDocsDir, 'deal-review-feedback.json'), JSON.stringify({
+  events: [
+    {
+      key: 'instagram:CREATORAPPROVED',
+      url: 'https://www.instagram.com/reel/CREATORAPPROVED/',
+      ownerUsername: 'lisa.maria.b',
+      sourceAccountType: 'creator',
+      scoutUsername: 'lisa.maria.b',
+      merchantUsername: 'tennosushiofficial',
+      slackSentAt: '2026-07-23T08:00:00.000Z',
+      decision: 'approved',
+    },
+    {
+      key: 'instagram:CREATORREJECTED',
+      url: 'https://www.instagram.com/reel/CREATORREJECTED/',
+      ownerUsername: 'lisa.maria.b',
+      sourceAccountType: 'creator',
+      scoutUsername: 'lisa.maria.b',
+      merchantUsername: 'otherrestaurant',
+      slackSentAt: '2026-07-23T09:00:00.000Z',
+      decision: 'rejected',
+    },
+  ],
+}));
 const feedbackRegistry = buildInstagramMerchantRegistry({
   docsDir: feedbackDocsDir,
   inputFiles: ['deals.json', 'deals-pending-all.json'],
@@ -287,6 +311,14 @@ assert.equal(rejectedFeedback.rejectedDeals, 1, 'quality moderation maps an exac
 assert.equal(expiredFeedback.rejectedDeals, 0, 'normal expiry is not negative account feedback');
 assert.equal(blockedFeedback.blockedByModeration, true);
 assert.equal(feedbackRegistry.accounts.some((entry) => entry.username === 'website.provider'), false, 'generic website owners do not become Instagram targets');
+const creatorFeedback = feedbackRegistry.accounts.find((entry) => entry.username === 'lisa.maria.b');
+const merchantManualFeedback = feedbackRegistry.accounts.find((entry) => entry.username === 'tennosushiofficial');
+assert.equal(creatorFeedback.accountType, 'creator');
+assert.equal(creatorFeedback.scoutApprovedDeals, 1);
+assert.equal(creatorFeedback.scoutRejectedDeals, 1);
+assert.equal(creatorFeedback.approvedDeals, 0, 'creator approvals are not merchant quality feedback');
+assert.equal(merchantManualFeedback.accountType, 'merchant');
+assert.equal(merchantManualFeedback.manualApprovedDeals, 1);
 
 const previousRegistryPath = path.join(feedbackDocsDir, 'previous-registry.json');
 fs.writeFileSync(previousRegistryPath, JSON.stringify(feedbackRegistry));

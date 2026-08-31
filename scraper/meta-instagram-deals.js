@@ -22,6 +22,13 @@ import {
   writeInstagramGraphEvidence,
 } from './instagram-graph-evidence.js';
 import { enrichInstagramGraphMedia } from './instagram-media-evidence.js';
+import { advanceDealLifecycle } from './deal-lifecycle.js';
+import {
+  buildInstagramRoleIndex,
+  inferInstagramAccountRole,
+  normalizeInstagramUsername,
+  resolveInstagramPostEntities,
+} from './instagram-entity-resolution.js';
 import {
   extractBirthdayEntryOffer,
   getEditorialRoundupPromotionReason,
@@ -322,6 +329,7 @@ function hasConflictingOutsideViennaLocation(value) {
 
 function registryAccountIsVerified(account) {
   if (!account || typeof account !== 'object') return false;
+  if (inferInstagramAccountRole(account) !== 'merchant') return false;
   if (account.verifiedVienna === true || account.viennaVerified === true) return true;
   const evidence = [account.address, account.location, account.viennaEvidence, account.verificationEvidence]
     .flat()
@@ -372,14 +380,31 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
       postedDeals: 0,
       rejectedDeals: 0,
       approvalRate: 0,
+      accountType: 'unknown',
+      manualApprovedDeals: 0,
+      manualRejectedDeals: 0,
+      feedbackSampleSize: 0,
+      scoutSentDeals: 0,
+      scoutApprovedDeals: 0,
+      scoutRejectedDeals: 0,
+      scoutFeedbackSampleSize: 0,
     };
     existing.priority = Math.max(existing.priority, Number(raw?.priority || raw?.priorityScore || 0));
     existing.category = cleanText(raw?.category || existing.category, 60);
+    const accountType = inferInstagramAccountRole({ ...raw, username });
+    if (existing.accountType === 'unknown' || accountType !== 'unknown') existing.accountType = accountType;
     existing.verifiedVienna = existing.verifiedVienna || config.verifiedAccounts.has(username) || registryAccountIsVerified(raw);
     existing.approvedDeals = Math.max(existing.approvedDeals, Number(raw?.approvedDeals || raw?.liveOccurrences || 0));
     existing.postedDeals = Math.max(existing.postedDeals, Number(raw?.postedDeals || raw?.postedOccurrences || 0));
     existing.rejectedDeals = Math.max(existing.rejectedDeals, Number(raw?.rejectedDeals || raw?.rejectedOccurrences || 0));
     existing.approvalRate = Math.max(existing.approvalRate, Number(raw?.approvalRate || 0));
+    existing.manualApprovedDeals = Math.max(existing.manualApprovedDeals, Number(raw?.manualApprovedDeals || 0));
+    existing.manualRejectedDeals = Math.max(existing.manualRejectedDeals, Number(raw?.manualRejectedDeals || 0));
+    existing.feedbackSampleSize = Math.max(existing.feedbackSampleSize, Number(raw?.feedbackSampleSize || 0));
+    existing.scoutSentDeals = Math.max(existing.scoutSentDeals, Number(raw?.scoutSentDeals || 0));
+    existing.scoutApprovedDeals = Math.max(existing.scoutApprovedDeals, Number(raw?.scoutApprovedDeals || 0));
+    existing.scoutRejectedDeals = Math.max(existing.scoutRejectedDeals, Number(raw?.scoutRejectedDeals || 0));
+    existing.scoutFeedbackSampleSize = Math.max(existing.scoutFeedbackSampleSize, Number(raw?.scoutFeedbackSampleSize || 0));
     const candidateAt = toIso(raw?.lastCandidateAt || raw?.sourcePublishedAt || raw?.pubDate);
     if (candidateAt && Date.parse(candidateAt) > (Date.parse(existing.lastCandidateAt) || 0)) {
       existing.lastCandidateAt = candidateAt;
@@ -409,6 +434,9 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
         username,
         priority: 104,
         category: deal?.category || '',
+        accountType: deal?.sourceAccountType
+          || (normalizeInstagramUsername(deal?.scoutUsername) === username ? 'creator' : '')
+          || (normalizeInstagramUsername(deal?.merchantUsername) === username ? 'merchant' : ''),
         sourcePublishedAt: publication.sourcePublishedAt,
       }, `candidate:${path.basename(candidatePath)}`);
 
@@ -467,34 +495,52 @@ export function selectAccountShard(accounts, config, state = {}, now = new Date(
     seen.add(account.username);
     selected.push(account);
   };
-  const recentCutoff = now.getTime() - 8 * DAY_MS;
-  const recentCandidates = accounts
-    .filter((account) => (Date.parse(account.lastCandidateAt || '') || 0) >= recentCutoff)
-    .sort((left, right) => Date.parse(right.lastCandidateAt) - Date.parse(left.lastCandidateAt));
-  recentCandidates.slice(0, Math.min(8, Math.ceil(limit / 3))).forEach(add);
-
-  const finalApprovalYield = accounts
-    .filter((account) => Number(account.approvedDeals || 0) > 0)
-    .sort((left, right) => (
-      Number(right.approvalRate || 0) - Number(left.approvalRate || 0)
-      || Number(right.approvedDeals || 0) - Number(left.approvedDeals || 0)
-      || Number(left.rejectedDeals || 0) - Number(right.rejectedDeals || 0)
-    ));
-  finalApprovalYield.slice(0, Math.min(4, Math.ceil(limit / 6))).forEach(add);
-
   const performance = state?.accountPerformance || {};
-  const highYield = accounts
-    .filter((account) => Number(performance[account.username]?.recentNewAccepted || 0) > 0)
-    .sort((left, right) => {
-      const leftStats = performance[left.username] || {};
-      const rightStats = performance[right.username] || {};
-      const leftRate = Number(leftStats.recentNewAccepted || 0) / Math.max(1, Number(leftStats.recentFetched || 0));
-      const rightRate = Number(rightStats.recentNewAccepted || 0) / Math.max(1, Number(rightStats.recentFetched || 0));
-      return rightRate - leftRate || Number(rightStats.recentNewAccepted || 0) - Number(leftStats.recentNewAccepted || 0);
-    });
-  highYield.slice(0, Math.min(4, Math.ceil(limit / 6))).forEach(add);
+  const feedbackScore = (account, scout = false) => {
+    const explicitApproved = Number((scout ? account.scoutApprovedDeals : account.manualApprovedDeals) || 0);
+    const explicitRejected = Number((scout ? account.scoutRejectedDeals : account.manualRejectedDeals) || 0);
+    const hasExplicitFeedback = explicitApproved + explicitRejected > 0;
+    const approved = hasExplicitFeedback ? explicitApproved : Number(account.approvedDeals || 0);
+    const rejected = hasExplicitFeedback ? explicitRejected : Number(account.rejectedDeals || 0);
+    const sample = approved + rejected;
+    const smoothedRate = (approved + 2) / (sample + 4);
+    const sampleStrength = sample / (sample + 4);
+    const stats = performance[account.username] || {};
+    const fetched = Number(stats.recentFetched || 0);
+    const accepted = Number(stats.recentNewAccepted || 0);
+    const collectorYield = (accepted + 1) / (fetched + 6);
+    const recentCandidateBonus = (Date.parse(account.lastCandidateAt || '') || 0) >= now.getTime() - 8 * DAY_MS ? 0.08 : 0;
+    return smoothedRate * 0.62 + sampleStrength * 0.2 + collectorYield * 0.1 + recentCandidateBonus;
+  };
+  const role = (account) => inferInstagramAccountRole(account);
+  const provenBudget = Math.max(1, Math.floor(limit * 0.7));
+  const scoutBudget = Math.max(0, Math.floor(limit * 0.2));
 
-  const rotating = accounts.filter((account) => !seen.has(account.username));
+  const proven = accounts
+    .filter((account) => role(account) === 'merchant' || Number(account.approvedDeals || 0) > 0)
+    .sort((left, right) => (
+      feedbackScore(right) - feedbackScore(left)
+      || Number(right.manualApprovedDeals || right.approvedDeals || 0) - Number(left.manualApprovedDeals || left.approvedDeals || 0)
+      || Number(right.priority || 0) - Number(left.priority || 0)
+      || left.username.localeCompare(right.username)
+    ));
+  proven.slice(0, provenBudget).forEach(add);
+
+  const scouts = accounts
+    .filter((account) => ['creator', 'discovery', 'platform'].includes(role(account)))
+    .sort((left, right) => (
+      feedbackScore(right, true) - feedbackScore(left, true)
+      || Number(right.scoutApprovedDeals || 0) - Number(left.scoutApprovedDeals || 0)
+      || Number(right.priority || 0) - Number(left.priority || 0)
+      || left.username.localeCompare(right.username)
+    ));
+  scouts.slice(0, scoutBudget).forEach(add);
+
+  const remainingAccounts = accounts.filter((account) => !seen.has(account.username));
+  const rotating = [
+    ...remainingAccounts.filter((account) => role(account) === 'unknown'),
+    ...remainingAccounts.filter((account) => role(account) !== 'unknown'),
+  ];
   const start = rotating.length ? (config.shardIndex * Math.max(1, limit - selected.length)) % rotating.length : 0;
   for (let offset = 0; offset < rotating.length && selected.length < limit; offset += 1) {
     add(rotating[(start + offset) % rotating.length]);
@@ -768,7 +814,7 @@ function buildDealBase({ id, brand, title, description, type, category, url, pub
     (type === 'gratis' || type === 'bogo' ? 6 : 3) +
     (pubDate ? 5 : 0)
   );
-  return {
+  const base = {
     id,
     brand: cleanText(brand, 100) || 'Instagram',
     title: cleanText(title, 140),
@@ -804,6 +850,8 @@ function buildDealBase({ id, brand, title, description, type, category, url, pub
     priority: Math.max(5, 25 - Math.round(qualityScore / 5)),
     votes: 1,
   };
+  const discovered = advanceDealLifecycle(base, 'discovered', { at: now });
+  return advanceDealLifecycle(discovered, 'extracted', { at: now });
 }
 
 export function normalizeAdLibraryItem(raw, config, now = new Date()) {
@@ -952,11 +1000,18 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
     return { deal: null, rejection: 'missing-instagram-permalink' };
   }
   const username = normalizedUsername(raw?.username || account?.username);
-  const fallbackBrand = cleanText(raw?.name, 100) || (username ? `@${username}` : 'Instagram');
+  const entities = resolveInstagramPostEntities({
+    ownerUsername: username,
+    caption: contentText,
+    account,
+    roleIndex: config.accountRoleIndex,
+  });
+  const brandUsername = entities.merchantUsername || username;
+  const fallbackBrand = cleanText(raw?.name, 100) || (brandUsername ? `@${brandUsername}` : 'Instagram');
   const brand = inferPreferredBrand({
     brand: fallbackBrand,
     description: contentText,
-    ownerUsername: username,
+    ownerUsername: brandUsername,
     url,
   }) || fallbackBrand;
   const category = inferCategory(contentText);
@@ -983,6 +1038,7 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
       username,
       sourceType: cleanText(context?.sourceType, 30),
       sourceName: cleanText(context?.sourceName, 100),
+      entityResolution: entities,
       mediaEvidence: {
         ocrText,
         assetCount: Number(mediaEvidence.assetCount || 0),
@@ -1001,6 +1057,9 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
   });
   deal.promotionEvidence = promotion.evidence;
   if (username) deal.ownerUsername = username;
+  deal.sourceAccountType = entities.ownerRole;
+  if (entities.scoutUsername) deal.scoutUsername = entities.scoutUsername;
+  if (entities.merchantUsername) deal.merchantUsername = entities.merchantUsername;
   return { deal, rejection: '' };
 }
 
@@ -1618,6 +1677,52 @@ function updateHashtagPerformance(previous, selectedHashtags, outcomes, now) {
   return Object.fromEntries(Object.entries(next).slice(-100));
 }
 
+function graphCandidateAuditRow(entry, outcome, config) {
+  const item = entry?.item || {};
+  const context = entry?.context || {};
+  const mediaEvidence = item?._mediaEvidence && typeof item._mediaEvidence === 'object'
+    ? item._mediaEvidence
+    : {};
+  const ownerUsername = normalizedUsername(item.username || context?.account?.username);
+  const entities = resolveInstagramPostEntities({
+    ownerUsername,
+    caption: item.caption,
+    account: context.account,
+    roleIndex: config.accountRoleIndex,
+  });
+  const vienna = findViennaEvidence({
+    caption: [item.caption, mediaEvidence.ocrText, mediaEvidence.ai?.locationText].filter(Boolean).join(' '),
+    username: ownerUsername,
+  }, context.account, config);
+  return {
+    id: cleanText(item.id, 160),
+    status: outcome?.deal ? 'collector-accepted' : 'rejected',
+    url: cleanText(item.permalink, 1000),
+    title: cleanText(outcome?.deal?.title || item.caption, 180),
+    text: cleanText(item.caption, 1600),
+    ownerUsername,
+    ownerRole: entities.ownerRole,
+    scoutUsername: entities.scoutUsername,
+    merchantUsername: outcome?.deal?.merchantUsername || entities.merchantUsername,
+    pubDate: toIso(item.timestamp),
+    rejectionReason: outcome?.rejection || '',
+    qualityScore: Number(outcome?.deal?.qualityScore || 0),
+    viennaVerified: outcome?.deal?.viennaVerified === true || vienna.verified,
+    mediaEvidence: {
+      analyzedAt: cleanText(mediaEvidence.analyzedAt, 80),
+      ocrText: cleanText(mediaEvidence.ocrText, 1600),
+      assetCount: Number(mediaEvidence.assetCount || 0),
+      imageCount: Number(mediaEvidence.imageCount || 0),
+      videoFrameCount: Number(mediaEvidence.videoFrameCount || 0),
+      downloadRetries: Number(mediaEvidence.downloadRetries || 0),
+      errors: Array.isArray(mediaEvidence.errors) ? mediaEvidence.errors.slice(0, 5) : [],
+      ai: mediaEvidence.ai || null,
+    },
+    sourceType: cleanText(context.sourceType, 40),
+    sourceName: cleanText(context.sourceName, 120),
+  };
+}
+
 export async function runMetaInstagramCollector(options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const env = options.env || process.env;
@@ -1649,6 +1754,7 @@ export async function runMetaInstagramCollector(options = {}) {
     ...state,
     discoveredAccounts: previousDiscoveredAccounts,
   });
+  config.accountRoleIndex = buildInstagramRoleIndex(accountCatalog);
   const configured = {
     adLibrary: Boolean(config.adLibraryToken),
     instagramGraph: Boolean(config.instagramAccessToken),
@@ -1713,6 +1819,7 @@ export async function runMetaInstagramCollector(options = {}) {
 
   const accepted = [];
   const graphEvidenceEntries = [];
+  const candidateAudit = [];
   const discoveredThisRun = new Set();
   const nextState = {
     version: 4,
@@ -1790,6 +1897,7 @@ export async function runMetaInstagramCollector(options = {}) {
     for (const entry of media.entries) {
       const normalized = normalizeGraphMediaItem(entry.item, entry.context, config, now);
       graphEvidenceEntries.push({ entry, outcome: normalized });
+      candidateAudit.push(graphCandidateAuditRow(entry, normalized, config));
       learnGraphAccounts(nextState.discoveredAccounts, entry, normalized, now, discoveredThisRun);
       const isNewAccepted = Boolean(normalized.deal && !previousAcceptedSeenIds[normalized.deal.id]);
       const accountUsername = normalizedUsername(entry.context?.account?.username || (entry.context?.sourceType === 'account' ? entry.item?.username : ''));
@@ -1864,6 +1972,14 @@ export async function runMetaInstagramCollector(options = {}) {
     observed: graphEvidenceEntries.length,
     retained: graphEvidence.totalPosts,
     blocked: graphEvidence.blockedPosts,
+  };
+  report.candidateAudit = candidateAudit
+    .sort((left, right) => Date.parse(right.pubDate || '') - Date.parse(left.pubDate || ''))
+    .slice(0, 500);
+  report.entityResolution = {
+    scoutPosts: candidateAudit.filter((row) => row.scoutUsername).length,
+    resolvedMerchants: candidateAudit.filter((row) => row.merchantUsername).length,
+    unresolvedScoutPosts: candidateAudit.filter((row) => row.scoutUsername && !row.merchantUsername).length,
   };
 
   const allVerifiedDeals = dedupeDeals(accepted);

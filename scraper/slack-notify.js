@@ -27,6 +27,13 @@ import {
   enrichDealWithInstagramGraphEvidence,
   loadInstagramGraphEvidence,
 } from './instagram-graph-evidence.js';
+import { advanceDealLifecycle } from './deal-lifecycle.js';
+import {
+  loadReviewFeedback,
+  upsertReviewFeedback,
+  writeReviewFeedback,
+} from './deal-review-feedback.js';
+import { isHardSocialRejection } from './social-food-audit-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,6 +43,9 @@ const LIVE_DEALS_PATH = path.join(DOCS_DIR, 'deals.json');
 const PENDING_ALL_PATH = path.join(DOCS_DIR, 'deals-pending-all.json');
 const SLACK_SEEN_CACHE_PATH = path.join(DOCS_DIR, 'slack-seen-posts.json');
 const KEY4_REVIEW_PATH = path.join(DOCS_DIR, 'deals-review-firecrawl4.json');
+const SOCIAL_FOOD_REVIEW_PATH = path.join(DOCS_DIR, 'deals-review-social-food.json');
+const SOCIAL_FOOD_REVIEW_STATE_PATH = path.join(DOCS_DIR, 'social-food-review-state.json');
+const REVIEW_FEEDBACK_PATH = path.join(DOCS_DIR, 'deal-review-feedback.json');
 const GRAPH_EVIDENCE_PATH = path.join(DOCS_DIR, 'instagram-graph-post-evidence.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
@@ -96,6 +106,19 @@ const KEY4_REVIEW_ARTIFACT_MAX_AGE_HOURS = boundedInteger(
   48,
   12,
   168,
+);
+const SOCIAL_FOOD_REVIEW_ENABLED = /^(?:1|true|yes)$/i.test(cleanText(process.env.SOCIAL_FOOD_REVIEW_ENABLED));
+const SOCIAL_FOOD_REVIEW_MAX_PER_DAY = boundedInteger(
+  process.env.SOCIAL_FOOD_REVIEW_MAX_PER_DAY,
+  8,
+  1,
+  10,
+);
+const SOCIAL_FOOD_REVIEW_ARTIFACT_MAX_AGE_HOURS = boundedInteger(
+  process.env.SOCIAL_FOOD_REVIEW_ARTIFACT_MAX_AGE_HOURS,
+  12,
+  1,
+  48,
 );
 const EXCLUDED_PENDING_FILES = new Set([
   'deals-pending-all.json',
@@ -575,6 +598,164 @@ function loadKey4ReviewArtifact(options = {}) {
   }
 }
 
+function viennaDayKey(value = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Vienna',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(value);
+  const byType = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${byType.year}-${byType.month}-${byType.day}`;
+}
+
+function prepareSocialFoodReviewDeals(deals, options = {}) {
+  const now = options.now instanceof Date ? options.now : new Date();
+  const maxAgeDays = boundedInteger(options.maxAgeDays, 7, 1, 7);
+  const eligible = [];
+  const rejectionCounts = {};
+  const reject = (reason) => {
+    rejectionCounts[reason] = (rejectionCounts[reason] || 0) + 1;
+  };
+
+  for (const deal of ensureArray(deals)) {
+    const audit = ensureObject(deal?.evidence?.socialFoodAudit);
+    const postKey = canonicalPostKey(deal?.url);
+    const publishedAt = new Date(cleanText(deal?.sourcePublishedAt || deal?.pubDate));
+    const ageDays = Number.isNaN(publishedAt.getTime())
+      ? null
+      : (now.getTime() - publishedAt.getTime()) / (24 * 60 * 60 * 1000);
+    let reason = '';
+    if (deal?.socialFoodReview !== true) reason = 'not-social-food-review';
+    else if (!isSocialPostKey(postKey)) reason = 'not-direct-social-post';
+    else if (ageDays === null) reason = 'missing-post-date';
+    else if (ageDays < -0.05) reason = 'future-post-date';
+    else if (ageDays > maxAgeDays) reason = 'stale-post';
+    else if (Number(audit.foodDrinkScore || 0) <= 0) reason = 'missing-food-signal';
+    else if (audit.dealSignal !== true) reason = 'missing-deal-signal';
+    else if (audit.viennaSignal !== true) reason = 'missing-vienna-signal';
+    else if (audit.hardRejection === true || isHardSocialRejection(deal?.socialFoodReviewReason)) reason = 'hard-rejection';
+    if (reason) {
+      reject(reason);
+      continue;
+    }
+    eligible.push({
+      ...deal,
+      socialFoodReview: true,
+      socialFoodReviewPostAgeDays: Number(ageDays.toFixed(2)),
+    });
+  }
+
+  return {
+    deals: eligible.sort(compareSlackDeals),
+    eligible: eligible.length,
+    discarded: ensureArray(deals).length - eligible.length,
+    rejectionCounts,
+    maxAgeDays,
+  };
+}
+
+function loadSocialFoodReviewArtifact(options = {}) {
+  if (!fs.existsSync(SOCIAL_FOOD_REVIEW_PATH)) {
+    return { deals: [], eligible: 0, discarded: 0, status: 'missing', rejectionCounts: {} };
+  }
+  try {
+    const payload = ensureObject(JSON.parse(fs.readFileSync(SOCIAL_FOOD_REVIEW_PATH, 'utf8')));
+    const generatedAt = new Date(cleanText(payload.generatedAt));
+    const now = options.now instanceof Date ? options.now : new Date();
+    const ageHours = Number.isNaN(generatedAt.getTime())
+      ? Number.POSITIVE_INFINITY
+      : Math.max(0, (now.getTime() - generatedAt.getTime()) / (60 * 60 * 1000));
+    if (ageHours > SOCIAL_FOOD_REVIEW_ARTIFACT_MAX_AGE_HOURS) {
+      return { deals: [], eligible: 0, discarded: 0, status: 'stale', ageHours, rejectionCounts: {} };
+    }
+    const normalized = ensureArray(payload.deals).map((deal) => (
+      normalizeDealWithGraphEvidence(deal, 'social-food-review', options.graphEvidence || new Map())
+    ));
+    return {
+      ...prepareSocialFoodReviewDeals(normalized, {
+        now,
+        maxAgeDays: Math.min(7, Number(payload?.policy?.maxPostAgeDays || 7)),
+      }),
+      status: 'loaded',
+      ageHours,
+    };
+  } catch (error) {
+    return {
+      deals: [],
+      eligible: 0,
+      discarded: 0,
+      status: 'invalid',
+      error: cleanText(error?.message),
+      rejectionCounts: {},
+    };
+  }
+}
+
+function normalizeSocialFoodReviewState(value = {}, now = new Date()) {
+  const day = viennaDayKey(now);
+  if (cleanText(value?.day) !== day) return { version: 1, day, posted: [] };
+  const posted = ensureArray(value?.posted)
+    .filter((entry) => entry && typeof entry === 'object' && cleanText(entry.key))
+    .map((entry) => ({
+      key: cleanText(entry.key, 300),
+      slackTs: cleanText(entry.slackTs, 80),
+      postedAt: toIsoDate(entry.postedAt),
+    }));
+  return { version: 1, day, posted };
+}
+
+function loadSocialFoodReviewState(now = new Date()) {
+  try {
+    return normalizeSocialFoodReviewState(
+      JSON.parse(fs.readFileSync(SOCIAL_FOOD_REVIEW_STATE_PATH, 'utf8')),
+      now,
+    );
+  } catch {
+    return normalizeSocialFoodReviewState({}, now);
+  }
+}
+
+function writeSocialFoodReviewState(state) {
+  const normalized = normalizeSocialFoodReviewState(state);
+  const temporary = `${SOCIAL_FOOD_REVIEW_STATE_PATH}.tmp-${process.pid}-${Date.now()}`;
+  fs.writeFileSync(temporary, `${JSON.stringify(normalized, null, 2)}\n`);
+  fs.renameSync(temporary, SOCIAL_FOOD_REVIEW_STATE_PATH);
+  return normalized;
+}
+
+function selectSocialFoodReviewDeals(deals, state, options = {}) {
+  const maxPerDay = boundedInteger(options.maxPerDay, 8, 1, 10);
+  const normalizedState = normalizeSocialFoodReviewState(state, options.now || new Date());
+  const postedKeys = new Set(normalizedState.posted.map((entry) => entry.key));
+  const remaining = Math.max(0, maxPerDay - normalizedState.posted.length);
+  const selected = ensureArray(deals)
+    .filter((deal) => {
+      const key = canonicalPostKey(deal?.url) || cleanText(deal?.socialFoodAuditKey) || cleanText(deal?.id);
+      return key && !postedKeys.has(key);
+    })
+    .sort(compareSlackDeals)
+    .slice(0, remaining);
+  return {
+    deals: selected,
+    remainingBeforeSelection: remaining,
+    maxPerDay,
+    state: normalizedState,
+  };
+}
+
+function recordSocialFoodReviewPost(state, deal, at = new Date()) {
+  const normalized = normalizeSocialFoodReviewState(state, at);
+  const key = canonicalPostKey(deal?.url) || cleanText(deal?.socialFoodAuditKey) || cleanText(deal?.id);
+  if (!key || normalized.posted.some((entry) => entry.key === key)) return normalized;
+  normalized.posted.push({
+    key,
+    slackTs: cleanText(deal?.slackTs),
+    postedAt: at.toISOString(),
+  });
+  return normalized;
+}
+
 function loadPendingQueue(graphEvidence = new Map()) {
   if (!fs.existsSync(PENDING_ALL_PATH)) return [];
   try {
@@ -684,6 +865,23 @@ function buildFirecrawlReviewMessage(deal, index) {
     '_Mit ✅ freigeben_',
     '_Review: Link prüfen. Wenn der Deal aktuell ist, Datum/Ablauf/Ort mit `edit` belegen und erst danach ✅ setzen._',
   );
+}
+
+function buildSocialFoodReviewMessage(deal, index) {
+  return buildSlackMessage(deal, index).replace(
+    '_Mit ✅ freigeben_',
+    '_Food-Review: Originalpost prüfen, bei Bedarf mit `edit` korrigieren, dann ✅ freigeben oder mit ❌ als unpassend markieren._',
+  );
+}
+
+function markDealSlackSent(deal, slackTs, slackThreadTs, at = new Date()) {
+  const sent = advanceDealLifecycle({
+    ...deal,
+    slackTs,
+    slackThreadTs,
+  }, 'slack-sent', { at });
+  Object.assign(deal, sent);
+  return deal;
 }
 
 async function sleep(ms) {
@@ -1319,6 +1517,7 @@ async function revalidateRecentPostedQueue(deals, options = {}) {
     // factual date/expiry/location evidence before approving them. The
     // approval workflow still runs the full validator after any edit.
     .filter(({ deal }) => deal.firecrawlReview !== true
+      && deal.socialFoodReview !== true
       && cleanText(deal.slackTs)
       && (queueDealAgeDays(deal, now) ?? Infinity) < maxAgeDays
       && (() => {
@@ -1447,8 +1646,11 @@ async function main() {
     process.exit(1);
   }
 
+  const runNow = new Date();
   const pendingFiles = getPendingFiles();
   const moderation = loadDealModeration();
+  let reviewFeedback = loadReviewFeedback(REVIEW_FEEDBACK_PATH);
+  let socialFoodReviewState = loadSocialFoodReviewState(runNow);
   const graphEvidence = loadInstagramGraphEvidence(GRAPH_EVIDENCE_PATH).byKey;
   const loadedPendingDeals = loadPendingDeals(pendingFiles, graphEvidence);
   const graphMatchedDeals = loadedPendingDeals.filter((deal) => deal.metaGraphVerified === true);
@@ -1457,6 +1659,9 @@ async function main() {
   const key4ReviewArtifact = FIRECRAWL_REVIEW_ENABLED
     ? loadKey4ReviewArtifact({ graphEvidence })
     : { deals: [], eligible: 0, discarded: 0, maxAgeDays: 7, status: 'disabled' };
+  const socialFoodReviewArtifact = SOCIAL_FOOD_REVIEW_ENABLED
+    ? loadSocialFoodReviewArtifact({ graphEvidence, now: runNow })
+    : { deals: [], eligible: 0, discarded: 0, status: 'disabled', rejectionCounts: {} };
   const moderationPendingFilter = filterModeratedDeals(loadedPendingDeals, moderation);
   if (moderationPendingFilter.removed.length > 0) {
     console.log(`🛡️ Moderation filter: ${moderationPendingFilter.removed.length} pending Deals vor Slack entfernt`);
@@ -1469,6 +1674,11 @@ async function main() {
     console.log(`🛡️ Key4 review moderation: ${moderationKey4ReviewFilter.removed.length} Kandidaten entfernt`);
   }
   const key4ReviewDeals = moderationKey4ReviewFilter.deals;
+  const moderationSocialFoodReviewFilter = filterModeratedDeals(socialFoodReviewArtifact.deals, moderation);
+  if (moderationSocialFoodReviewFilter.removed.length > 0) {
+    console.log(`🛡️ Social Food review moderation: ${moderationSocialFoodReviewFilter.removed.length} Kandidaten entfernt`);
+  }
+  const socialFoodArtifactDeals = moderationSocialFoodReviewFilter.deals;
   console.log(`📋 Total pending deals loaded: ${pendingDeals.length}`);
   if (FIRECRAWL_REVIEW_ENABLED) {
     console.log(
@@ -1477,6 +1687,16 @@ async function main() {
         ? `, ${key4ReviewArtifact.ageHours.toFixed(1)} Stunden alt`
         : ''),
     );
+  }
+  if (SOCIAL_FOOD_REVIEW_ENABLED) {
+    console.log(
+      `🍽️ Social Food Review-Artefakt: ${socialFoodReviewArtifact.status}, ${socialFoodArtifactDeals.length} Kandidaten`
+      + (Number.isFinite(socialFoodReviewArtifact.ageHours)
+        ? `, ${socialFoodReviewArtifact.ageHours.toFixed(1)} Stunden alt`
+        : ''),
+    );
+    const reviewRejections = formatReasonCategoryCounts(socialFoodReviewArtifact.rejectionCounts);
+    if (reviewRejections) console.log(`🍽️ Social Food Review verworfen: ${reviewRejections}`);
   }
   const queuePrune = pruneStaleQueueDeals(loadPendingQueue(graphEvidence));
   if (queuePrune.removed > 0) {
@@ -1509,7 +1729,7 @@ async function main() {
 
   const seenPostKeys = await loadRecentlySeenPostKeys();
   const preSlackSeenFilter = filterRecentlySeenDeals(
-    [...pendingDeals, ...key4ReviewDeals],
+    [...pendingDeals, ...key4ReviewDeals, ...socialFoodArtifactDeals],
     seenPostKeys,
   );
   if (preSlackSeenFilter.removed > 0) {
@@ -1533,13 +1753,18 @@ async function main() {
   const queuedKey4ReviewDeals = preSlackQueueFilter.deals.filter((deal) => (
     deal.firecrawlReview === true && isKey4ReviewDeal(deal)
   ));
+  const queuedSocialFoodReviewDeals = preSlackQueueFilter.deals.filter((deal) => (
+    deal.socialFoodReview === true
+  ));
   const regularPendingDeals = preSlackQueueFilter.deals.filter((deal) => !(
     deal.firecrawlReview === true && isKey4ReviewDeal(deal)
-  ));
+  ) && deal.socialFoodReview !== true);
   const validatedRun = await validateAndDedupeDealsForSlack(regularPendingDeals, { urlCache: validityUrlCache });
   const validation = validatedRun.validation;
   writeDealValidityReport(validation.report);
-  const freshDeals = validatedRun.allowedDeals;
+  const freshDeals = validatedRun.allowedDeals.map((deal) => (
+    advanceDealLifecycle(deal, 'validator-passed', { at: runNow })
+  ));
   const blockedSummary = formatReasonCategoryCounts(validation.summary.reasonCategoryCounts);
   const validityFirecrawlReview = FIRECRAWL_REVIEW_ENABLED
     ? selectFirecrawlReviewDeals(validation.results, {
@@ -1565,6 +1790,17 @@ async function main() {
       }, validityFirecrawlReview, freshDeals)
     : validityFirecrawlReview;
   const firecrawlReviewDeals = firecrawlReview.deals;
+  const socialFoodReviewDedupe = filterDuplicateDealsInRun(queuedSocialFoodReviewDeals);
+  const socialFoodCrossLaneFilter = filterAlreadyQueuedDeals(
+    socialFoodReviewDedupe.deals,
+    collectDealDuplicateKeys([...freshDeals, ...firecrawlReviewDeals]),
+  );
+  const socialFoodReviewSelection = selectSocialFoodReviewDeals(
+    socialFoodCrossLaneFilter.deals,
+    socialFoodReviewState,
+    { maxPerDay: SOCIAL_FOOD_REVIEW_MAX_PER_DAY, now: runNow },
+  );
+  const socialFoodReviewDeals = socialFoodReviewSelection.deals;
 
   console.log(
     `🧪 Deal validity agent: ${validation.summary.allowed}/${validation.summary.total} allowed, ` +
@@ -1588,8 +1824,18 @@ async function main() {
       console.log(`🔎 Firecrawl Review sources: ${formatReasonCategoryCounts(firecrawlReview.sourceCounts)}`);
     }
   }
+  if (SOCIAL_FOOD_REVIEW_ENABLED) {
+    console.log(
+      `🍽️ Social Food Review: ${socialFoodReviewDeals.length}/${queuedSocialFoodReviewDeals.length} Kandidaten, `
+      + `${socialFoodReviewSelection.remainingBeforeSelection}/${socialFoodReviewSelection.maxPerDay} Tagesplätze vor Auswahl`,
+    );
+    const duplicateReviewsRemoved = socialFoodReviewDedupe.removed + socialFoodCrossLaneFilter.removed;
+    if (duplicateReviewsRemoved > 0) {
+      console.log(`🍽️ Social Food Review: ${duplicateReviewsRemoved} Dublette(n) innerhalb des Laufs oder anderer Slack-Lanes entfernt`);
+    }
+  }
 
-  if (freshDeals.length === 0 && firecrawlReviewDeals.length === 0) {
+  if (freshDeals.length === 0 && firecrawlReviewDeals.length === 0 && socialFoodReviewDeals.length === 0) {
     if (queueChanged) {
       writePendingAll(existingQueue);
       console.log(`💾 pending queue updated after moderation/prune: ${existingQueue.length} deals left`);
@@ -1613,7 +1859,7 @@ async function main() {
       `🆓 ${freeCount} gratis | 💰 ${freshDeals.length - freeCount} rabatt/test\n` +
       `🧪 Gültigkeitscheck: ${validation.summary.allowed}/${validation.summary.total} freigegeben | ${validation.summary.blocked} blockiert (max. ${validation.summary.maxAgeDays} Tage)\n` +
       (blockedSummary ? `🚫 Blockiert: ${blockedSummary}\n` : '') +
-      `_Jeden Deal mit ✅ bestätigen, dann erscheint er in der iOS-App._\n` +
+      `_Jeden Deal mit ✅ bestätigen oder mit ❌ ablehnen. Nur ✅ kann ihn in die iOS-App bringen._\n` +
       `_Bearbeiten vor Freigabe: z. B. edit 3 titel: Gratis Matcha | ort: Neubaugasse 12, 1070 Wien | ablauf: TT.MM.JJJJ_`,
     );
 
@@ -1627,10 +1873,15 @@ async function main() {
       const ts = await postSlackMessage(text, headerTs);
       if (!ts) continue;
 
-      deal.slackTs = ts;
-      deal.slackThreadTs = headerTs;
+      const sentAt = new Date();
+      markDealSlackSent(deal, ts, headerTs, sentAt);
       deal.order = i + 1;
       postedDeals.push(deal);
+      reviewFeedback = upsertReviewFeedback(reviewFeedback, deal, {
+        slackSentAt: sentAt,
+        at: sentAt,
+      });
+      writeReviewFeedback(REVIEW_FEEDBACK_PATH, reviewFeedback);
       if (addSeenDealsFromThread(seenPostKeys, [deal]) > 0) {
         writeSeenPostCache(seenPostKeys);
       }
@@ -1669,11 +1920,16 @@ async function main() {
       const ts = await postSlackMessage(buildFirecrawlReviewMessage(deal, i + 1), reviewHeaderTs);
       if (!ts) continue;
 
-      deal.slackTs = ts;
-      deal.slackThreadTs = reviewHeaderTs;
+      const sentAt = new Date();
+      markDealSlackSent(deal, ts, reviewHeaderTs, sentAt);
       deal.order = i + 1;
-      deal.firecrawlReviewQueuedAt = new Date().toISOString();
+      deal.firecrawlReviewQueuedAt = sentAt.toISOString();
       postedReviewDeals.push(deal);
+      reviewFeedback = upsertReviewFeedback(reviewFeedback, deal, {
+        slackSentAt: sentAt,
+        at: sentAt,
+      });
+      writeReviewFeedback(REVIEW_FEEDBACK_PATH, reviewFeedback);
       if (addSeenDealsFromThread(seenPostKeys, [deal]) > 0) {
         writeSeenPostCache(seenPostKeys);
       }
@@ -1686,12 +1942,58 @@ async function main() {
     }
   }
 
-  const mergedQueue = mergePendingQueue(existingQueue, [...postedDeals, ...postedReviewDeals]);
+  const postedSocialFoodReviewDeals = [];
+  if (socialFoodReviewDeals.length > 0) {
+    const reviewHeaderTs = await postSlackMessage(
+      `🍽️ *FreeFinder Wien – Social Food Review* — ${socialFoodReviewDeals.length} vielversprechende Grenzfälle\n` +
+      `🧪 Maximal ${SOCIAL_FOOD_REVIEW_MAX_PER_DAY} pro Wiener Kalendertag; nur aktuelle direkte Posts mit Food-, Deal- und Wien-Signal.\n` +
+      `_Originalpost prüfen, bei Bedarf per \`edit\` korrigieren, dann ✅ freigeben oder ❌ als unpassend markieren._`,
+    );
+
+    if (!reviewHeaderTs) {
+      throw new Error('Konnte Social-Food-Review-Header nicht senden');
+    }
+
+    for (let i = 0; i < socialFoodReviewDeals.length; i += 1) {
+      const deal = socialFoodReviewDeals[i];
+      const ts = await postSlackMessage(buildSocialFoodReviewMessage(deal, i + 1), reviewHeaderTs);
+      if (!ts) continue;
+
+      const sentAt = new Date();
+      markDealSlackSent(deal, ts, reviewHeaderTs, sentAt);
+      deal.order = i + 1;
+      deal.socialFoodReviewQueuedAt = sentAt.toISOString();
+      postedSocialFoodReviewDeals.push(deal);
+      socialFoodReviewState = recordSocialFoodReviewPost(socialFoodReviewState, deal, sentAt);
+      writeSocialFoodReviewState(socialFoodReviewState);
+      reviewFeedback = upsertReviewFeedback(reviewFeedback, deal, {
+        slackSentAt: sentAt,
+        at: sentAt,
+      });
+      writeReviewFeedback(REVIEW_FEEDBACK_PATH, reviewFeedback);
+      if (addSeenDealsFromThread(seenPostKeys, [deal]) > 0) {
+        writeSeenPostCache(seenPostKeys);
+      }
+      writePendingAll(mergePendingQueue(
+        existingQueue,
+        [...postedDeals, ...postedReviewDeals, ...postedSocialFoodReviewDeals],
+      ));
+      await sleep(600);
+    }
+  }
+
+  const mergedQueue = mergePendingQueue(
+    existingQueue,
+    [...postedDeals, ...postedReviewDeals, ...postedSocialFoodReviewDeals],
+  );
   writePendingAll(mergedQueue);
 
   console.log(`✅ ${postedDeals.length} Deals an Slack gesendet`);
   if (FIRECRAWL_REVIEW_ENABLED) {
     console.log(`🔎 ${postedReviewDeals.length} Firecrawl-Kandidaten zur manuellen Prüfung gesendet`);
+  }
+  if (SOCIAL_FOOD_REVIEW_ENABLED) {
+    console.log(`🍽️ ${postedSocialFoodReviewDeals.length} Social-Food-Kandidaten zur manuellen Prüfung gesendet`);
   }
   console.log(`🗂️ pending queue size: ${mergedQueue.length}`);
   console.log(`💾 saved: ${path.relative(ROOT, PENDING_ALL_PATH)}`);
@@ -1700,6 +2002,9 @@ async function main() {
   }
   if (postedReviewDeals.length !== firecrawlReviewDeals.length) {
     throw new Error(`${firecrawlReviewDeals.length - postedReviewDeals.length} Firecrawl-Review(s) konnten nicht an Slack gesendet werden`);
+  }
+  if (postedSocialFoodReviewDeals.length !== socialFoodReviewDeals.length) {
+    throw new Error(`${socialFoodReviewDeals.length - postedSocialFoodReviewDeals.length} Social-Food-Review(s) konnten nicht an Slack gesendet werden`);
   }
 }
 
@@ -1713,6 +2018,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
 export {
   addSeenDealsFromThread,
   buildFirecrawlReviewMessage,
+  buildSocialFoodReviewMessage,
   buildSlackMessage,
   compareSlackDeals,
   filterAlreadyQueuedDeals,
@@ -1722,10 +2028,12 @@ export {
   normalizeSeenPostCache,
   normalizeDeal,
   prepareKey4ReviewDeals,
+  prepareSocialFoodReviewDeals,
   pruneStaleQueueDeals,
   revalidateRecentPostedQueue,
   combineFirecrawlReviewSelections,
   mergePendingQueue,
   selectFirecrawlReviewDeals,
+  selectSocialFoodReviewDeals,
   validateAndDedupeDealsForSlack,
 };

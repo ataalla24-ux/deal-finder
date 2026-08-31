@@ -11,6 +11,7 @@ import {
   parsePubDate,
   rankCandidatesForScan,
   resolveViennaEvidence,
+  selectRotatingAccounts,
   isTerminalRejection,
 } from '../scraper/instagram-ai-agent.js';
 
@@ -18,6 +19,16 @@ const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
 assert.equal(isTerminalRejection('LLM hat Kandidat abgelehnt'), false, 'LLM judgment is retryable when better evidence appears');
+
+const weightedProfileSelection = selectRotatingAccounts([
+  ...Array.from({ length: 8 }, (_, index) => ({ username: `merchant${index}.cafe`, accountType: 'merchant', priority: 100 - index })),
+  { username: 'foodiewien', accountType: 'creator', priority: 90 },
+  { username: 'viennaeats', accountType: 'discovery', priority: 80 },
+  { username: 'newprofilelead', accountType: 'unknown', priority: 10 },
+], 10);
+assert.equal(weightedProfileSelection.filter((account) => account.accountType === 'merchant').length, 7);
+assert.equal(weightedProfileSelection.filter((account) => ['creator', 'discovery'].includes(account.accountType)).length, 2);
+assert.equal(weightedProfileSelection.filter((account) => account.accountType === 'unknown').length, 1);
 
 function isoAgo(milliseconds) {
   return new Date(Date.now() - milliseconds).toISOString();
@@ -232,6 +243,28 @@ assert.equal(acceptedAiDeal.evidence.postDateSource, acceptedAiDeal.pubDateSourc
 assert.equal(acceptedAiDeal.city, 'Wien');
 assert.equal(acceptedAiDeal.viennaVerified, true);
 assert.deepEqual(acceptedAiDeal.evidence.viennaEvidence, acceptedAiDeal.viennaEvidence);
+
+const softBrandCandidate = candidate({
+  shortcode: 'LlmSoftBrandRescue1',
+  description: 'Heute gibt es 30 % Rabatt auf Sushi in der Taborstraße 1, 1020 Wien.',
+  sourceDeal: { ownerUsername: 'unknownfoodscout' },
+});
+assert.equal(buildHeuristicDeal(softBrandCandidate), null);
+assert.match(softBrandCandidate.rejectionReason, /Marke\/Quelle/);
+const softBrandRescue = mergeAiDeal(softBrandCandidate, {
+  accept: true,
+  confidence: 0.91,
+  brand: 'Sushi Testhaus',
+  title: '30 % Rabatt auf Sushi',
+  description: 'Heute gibt es 30 % Rabatt auf Sushi.',
+  type: 'rabatt',
+  category: 'essen',
+  expires: '',
+  reason: 'Konkreter aktueller Deal; Anbieter aus dem Posttitel aufgelöst.',
+});
+assert.ok(softBrandRescue, 'the LLM may rescue a strong current post whose only soft failure is merchant identity');
+assert.equal(softBrandRescue.brand, 'Sushi Testhaus');
+assert.equal(softBrandCandidate.rejectionReason, '');
 
 const freshRanked = makeCandidate({
   url: 'https://www.instagram.com/reel/FreshRank1/',

@@ -77,11 +77,12 @@ async function commandAvailable(command, args, execImpl) {
 
 export async function detectMediaTools(options = {}) {
   const execImpl = options.execFileImpl || execFileAsync;
-  const [tesseract, ffmpeg] = await Promise.all([
+  const [tesseract, ffmpeg, ffprobe] = await Promise.all([
     commandAvailable('tesseract', ['--version'], execImpl),
     commandAvailable('ffmpeg', ['-version'], execImpl),
+    commandAvailable('ffprobe', ['-version'], execImpl),
   ]);
-  return { tesseract, ffmpeg };
+  return { tesseract, ffmpeg, ffprobe };
 }
 
 function extensionFor(contentType, assetType) {
@@ -96,45 +97,98 @@ function extensionFor(contentType, assetType) {
   return '.jpg';
 }
 
-async function downloadAsset(asset, directory, index, config, fetchImpl) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), config.mediaDownloadTimeoutMs);
-  try {
-    const response = await fetchImpl(asset.url, {
-      signal: controller.signal,
-      headers: {
-        'user-agent': 'FreeFinderWien-MetaMedia/1.0',
-        ...(config.mediaRequestHeaders && typeof config.mediaRequestHeaders === 'object'
-          ? config.mediaRequestHeaders
-          : {}),
-      },
-    });
-    if (!response.ok) throw new Error(`media HTTP ${response.status}`);
-    const announcedBytes = Number(response.headers.get('content-length') || 0);
-    if (announcedBytes > config.mediaMaxBytes) throw new Error('media exceeds byte limit');
-    const chunks = [];
-    let totalBytes = 0;
-    const reader = response.body?.getReader?.();
-    if (!reader) throw new Error('media response has no readable body');
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      totalBytes += value.byteLength;
-      if (totalBytes > config.mediaMaxBytes) {
-        await reader.cancel();
-        throw new Error('media exceeds byte limit');
-      }
-      chunks.push(Buffer.from(value));
+function mediaHeaderAttempts(config, sourceUrl) {
+  const configured = config.mediaRequestHeaders && typeof config.mediaRequestHeaders === 'object'
+    ? config.mediaRequestHeaders
+    : {};
+  const referer = safeHttpsUrl(sourceUrl) || configured.referer || configured.referrer || '';
+  const common = {
+    accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,video/*,*/*;q=0.8',
+    'accept-language': 'de-AT,de;q=0.9,en;q=0.8',
+    referer,
+    ...configured,
+  };
+  return [
+    { 'user-agent': 'FreeFinderWien-MetaMedia/2.0', ...common },
+    {
+      'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+      ...common,
+    },
+    {
+      'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 Version/17.6 Mobile/15E148 Safari/604.1',
+      range: 'bytes=0-',
+      ...common,
+    },
+  ].map((headers) => Object.fromEntries(Object.entries(headers).filter(([, value]) => cleanText(value, 2000))));
+}
+
+function retryableMediaStatus(status) {
+  return [401, 403, 408, 409, 425, 429, 500, 502, 503, 504].includes(Number(status));
+}
+
+async function responseBuffer(response, maxBytes) {
+  const announcedBytes = Number(response.headers.get('content-length') || 0);
+  if (announcedBytes > maxBytes) throw new Error('media exceeds byte limit');
+  const chunks = [];
+  let totalBytes = 0;
+  const reader = response.body?.getReader?.();
+  if (!reader) throw new Error('media response has no readable body');
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    totalBytes += value.byteLength;
+    if (totalBytes > maxBytes) {
+      await reader.cancel();
+      throw new Error('media exceeds byte limit');
     }
-    const buffer = Buffer.concat(chunks, totalBytes);
-    if (!buffer.length) throw new Error('empty media response');
-    if (buffer.length > config.mediaMaxBytes) throw new Error('media exceeds byte limit');
-    const filePath = path.join(directory, `asset-${index}${extensionFor(response.headers.get('content-type'), asset.type)}`);
-    await fs.writeFile(filePath, buffer);
-    return filePath;
-  } finally {
-    clearTimeout(timeout);
+    chunks.push(Buffer.from(value));
   }
+  return Buffer.concat(chunks, totalBytes);
+}
+
+async function downloadAsset(asset, directory, index, config, fetchImpl, sourceUrl = '') {
+  const attempts = mediaHeaderAttempts(config, sourceUrl);
+  let lastError = null;
+  let attemptCount = 0;
+  for (let attempt = 0; attempt < attempts.length; attempt += 1) {
+    attemptCount = attempt + 1;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), config.mediaDownloadTimeoutMs);
+    try {
+      const response = await fetchImpl(asset.url, {
+        signal: controller.signal,
+        redirect: 'follow',
+        headers: attempts[attempt],
+      });
+      if (!response.ok) {
+        const error = new Error(`media HTTP ${response.status}`);
+        error.status = response.status;
+        throw error;
+      }
+      const contentType = cleanText(response.headers.get('content-type'), 120).toLowerCase();
+      if (/^(?:text\/html|application\/json)/i.test(contentType)) {
+        throw new Error(`media returned ${contentType || 'non-media content'}`);
+      }
+      const buffer = await responseBuffer(response, config.mediaMaxBytes);
+      if (!buffer.length) throw new Error('empty media response');
+      const filePath = path.join(directory, `asset-${index}${extensionFor(contentType, asset.type)}`);
+      await fs.writeFile(filePath, buffer);
+      return { filePath, attempts: attempt + 1, contentType };
+    } catch (error) {
+      lastError = error;
+      const retryable = retryableMediaStatus(error?.status)
+        || ['AbortError', 'TimeoutError'].includes(cleanText(error?.name, 40))
+        || /(?:fetch failed|socket|network|timed? out|aborted)/i.test(cleanText(error?.message, 300));
+      if (!retryable || attempt >= attempts.length - 1) break;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+  const suffix = attemptCount > 1 ? ` after ${attemptCount} attempts` : '';
+  const error = new Error(`${cleanText(lastError?.message || lastError || 'media download failed', 180)}${suffix}`);
+  error.status = lastError?.status;
+  error.attempts = attemptCount;
+  throw error;
 }
 
 async function enhanceImage(inputPath, outputPath, tools, config, execImpl) {
@@ -202,8 +256,42 @@ async function runTesseract(imagePath, config, execImpl) {
   }
 }
 
+async function probeVideoDuration(videoPath, tools, config, execImpl) {
+  if (!tools.ffprobe) return 0;
+  try {
+    const result = await execImpl('ffprobe', [
+      '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', videoPath,
+    ], { timeout: config.ocrTimeoutMs, maxBuffer: 1024 * 1024 });
+    const duration = Number.parseFloat(result.stdout);
+    return Number.isFinite(duration) && duration > 0 ? duration : 0;
+  } catch {
+    return 0;
+  }
+}
+
 async function extractVideoFrames(videoPath, directory, assetIndex, tools, config, execImpl) {
   if (!tools.ffmpeg) return [];
+  const duration = await probeVideoDuration(videoPath, tools, config, execImpl);
+  if (duration >= 4) {
+    const frameCount = Math.max(1, Number(config.mediaMaxVideoFrames || 1));
+    const positions = Array.from({ length: frameCount }, (_, index) => (
+      Math.min(Math.max(0.25, duration * ((index + 0.5) / frameCount)), Math.max(0.25, duration - 0.25))
+    ));
+    const files = [];
+    for (let index = 0; index < positions.length; index += 1) {
+      const outputPath = path.join(directory, `video-${assetIndex}-frame-${String(index + 1).padStart(2, '0')}.jpg`);
+      try {
+        await execImpl('ffmpeg', [
+          '-y', '-hide_banner', '-loglevel', 'error', '-ss', positions[index].toFixed(3), '-i', videoPath,
+          '-frames:v', '1', '-vf', "scale='min(1600,iw)':-1:flags=lanczos", '-q:v', '4', outputPath,
+        ], { timeout: config.ocrTimeoutMs, maxBuffer: 4 * 1024 * 1024 });
+        files.push(outputPath);
+      } catch {
+        // A corrupt timestamp should not discard frames extracted at other positions.
+      }
+    }
+    if (files.length) return files;
+  }
   const pattern = path.join(directory, `video-${assetIndex}-frame-%02d.jpg`);
   await execImpl('ffmpeg', [
     '-y', '-hide_banner', '-loglevel', 'error', '-i', videoPath,
@@ -232,14 +320,39 @@ function mergeOcrParts(parts, maxChars) {
   return cleanText(merged.join(' | '), maxChars);
 }
 
+export function selectMediaAssetsForAnalysis(assets, limit) {
+  const safeAssets = Array.isArray(assets) ? assets : [];
+  const max = Math.max(1, Number(limit || 1));
+  if (safeAssets.length <= max) return [...safeAssets];
+  if (max === 1) return [safeAssets[0]];
+  const selectedIndexes = new Set([0, safeAssets.length - 1]);
+  for (let slot = 1; selectedIndexes.size < max && slot < max - 1; slot += 1) {
+    selectedIndexes.add(Math.round((slot / (max - 1)) * (safeAssets.length - 1)));
+  }
+  for (let index = 0; selectedIndexes.size < max && index < safeAssets.length; index += 1) {
+    if (safeAssets[index]?.type === 'video') selectedIndexes.add(index);
+  }
+  return [...selectedIndexes]
+    .sort((left, right) => left - right)
+    .slice(0, max)
+    .map((index) => safeAssets[index]);
+}
+
 export async function analyzeInstagramMediaItem(item, config, options = {}) {
-  const assets = extractInstagramMediaAssets(item).slice(0, config.mediaMaxAssetsPerPost);
-  if (!assets.length) return { ocrText: '', visionImages: [], assetCount: 0, imageCount: 0, videoFrameCount: 0, errors: [], warnings: [] };
+  const allAssets = extractInstagramMediaAssets(item);
+  const assets = selectMediaAssetsForAnalysis(allAssets, config.mediaMaxAssetsPerPost);
+  if (!assets.length) return {
+    ocrText: '', visionImages: [], assetCount: 0, availableAssetCount: 0, imageCount: 0,
+    videoFrameCount: 0, downloadAttempts: 0, downloadRetries: 0, errors: [], warnings: [],
+  };
   const tools = options.tools || await detectMediaTools(options);
   const visionEnabled = Boolean(config.mediaVisionEnabled);
   const ocrEnabled = config.mediaOcrEnabled !== false && Boolean(tools.tesseract);
   if (!ocrEnabled && !visionEnabled) {
-    return { ocrText: '', visionImages: [], assetCount: 0, imageCount: 0, videoFrameCount: 0, errors: ['tesseract-unavailable'], warnings: [] };
+    return {
+      ocrText: '', visionImages: [], assetCount: 0, availableAssetCount: allAssets.length, imageCount: 0,
+      videoFrameCount: 0, downloadAttempts: 0, downloadRetries: 0, errors: ['tesseract-unavailable'], warnings: [],
+    };
   }
 
   const fetchImpl = options.fetchImpl || fetch;
@@ -252,6 +365,8 @@ export async function analyzeInstagramMediaItem(item, config, options = {}) {
   let imageCount = 0;
   let videoFrameCount = 0;
   let processedAssets = 0;
+  let downloadAttempts = 0;
+  let downloadRetries = 0;
   const addVisionImage = async (inputPath, name) => {
     if (!visionEnabled || visionImages.length >= config.mediaVisionMaxImagesPerPost) return;
     try {
@@ -271,7 +386,17 @@ export async function analyzeInstagramMediaItem(item, config, options = {}) {
     for (let index = 0; index < assets.length; index += 1) {
       const asset = assets[index];
       try {
-        const inputPath = await downloadAsset(asset, tempDir, index, config, fetchImpl);
+        const downloaded = await downloadAsset(
+          asset,
+          tempDir,
+          index,
+          config,
+          fetchImpl,
+          item?.permalink || item?.url || '',
+        );
+        const inputPath = downloaded.filePath;
+        downloadAttempts += downloaded.attempts;
+        downloadRetries += Math.max(0, downloaded.attempts - 1);
         processedAssets += 1;
         if (asset.type === 'video') {
           const frames = await extractVideoFrames(inputPath, tempDir, index, tools, config, execImpl);
@@ -301,6 +426,8 @@ export async function analyzeInstagramMediaItem(item, config, options = {}) {
           imageCount += 1;
         }
       } catch (error) {
+        downloadAttempts += Math.max(1, Number(error?.attempts || 1));
+        downloadRetries += Math.max(0, Number(error?.attempts || 1) - 1);
         errors.push(cleanText(error?.message || error, 160));
       }
     }
@@ -311,8 +438,11 @@ export async function analyzeInstagramMediaItem(item, config, options = {}) {
     ocrText: mergeOcrParts(textParts, config.mediaOcrMaxTextChars),
     visionImages,
     assetCount: processedAssets,
+    availableAssetCount: allAssets.length,
     imageCount,
     videoFrameCount,
+    downloadAttempts,
+    downloadRetries,
     errors: errors.slice(0, 5),
     warnings: warnings.slice(0, 5),
   };
@@ -433,12 +563,36 @@ function obviousDealText(value) {
   return /(?:\bgratis\b|\bkostenlos\b|\b1\s*\+\s*1\b|\bbogo\b|\b\d{1,2}\s*%|\b(?:rabatt|gutschein|coupon|happy\s*hour)\b|\b(?:nur|um|ab|für|fuer)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)\b)/i.test(text);
 }
 
+function foodDrinkText(value) {
+  const text = cleanText(value, 6000);
+  return /\b(?:restaurant|gastro|essen|food|lunch|brunch|frühstück|fruehstueck|pizza|burger|kebab|kebap|döner|doener|sushi|ramen|pasta|cafe|café|coffee|kaffee|espresso|latte|matcha|cocktail|spritz|drink|bier|wein|eis|gelato|dessert|bakery|bäckerei)\b/i.test(text);
+}
+
+function retryableMediaEvidence(evidence = {}) {
+  const errors = Array.isArray(evidence.errors) ? evidence.errors.join(' ') : '';
+  return /(?:media HTTP (?:401|403|408|409|425|429|5\d\d)|fetch failed|network|socket|timed? out|aborted|empty media response)/i.test(errors);
+}
+
+function mediaErrorCategory(value) {
+  const text = cleanText(value, 240);
+  const status = text.match(/media HTTP (\d{3})/i)?.[1];
+  if (status) return `http-${status}`;
+  if (/timed? out|abort/i.test(text)) return 'timeout-or-abort';
+  if (/byte limit/i.test(text)) return 'byte-limit';
+  if (/tesseract/i.test(text)) return 'ocr-tool';
+  if (/OpenAI HTTP/i.test(text)) return 'openai-http';
+  if (/fetch|network|socket/i.test(text)) return 'network';
+  return 'other';
+}
+
 function entryMediaPriority(entry, now) {
   const item = entry?.item || {};
   const ageHours = Math.max(0, (now.getTime() - finiteDateMs(item.timestamp)) / (60 * 60 * 1000));
   const caption = cleanText(item.caption, 4000);
   let score = Math.max(0, 72 - ageHours);
-  if (!obviousDealText(caption)) score += 35;
+  if (foodDrinkText(`${caption} ${entry?.context?.account?.category || ''}`)) score += 55;
+  if (obviousDealText(caption)) score += 30;
+  else if (foodDrinkText(caption)) score += 20;
   if (entry?.context?.account?.verifiedVienna) score += 30;
   if (/\b(?:wien|vienna|1\d{3})\b/i.test(caption)) score += 20;
   if (cleanText(item.media_type, 40).toUpperCase() === 'CAROUSEL_ALBUM') score += 12;
@@ -484,11 +638,16 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     aiCalls: 0,
     visionCalls: 0,
     aiAccepted: 0,
+    aiSkippedLowIntent: 0,
     inputTokens: 0,
     outputTokens: 0,
     totalTokens: 0,
     errors: [],
     warnings: [],
+    downloadRetries: 0,
+    retryableFailures: 0,
+    retriedCacheEntries: 0,
+    errorCounts: {},
     llmConfigured,
     visionConfigured,
   };
@@ -508,7 +667,10 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
   for (const entry of safeEntries) {
     const id = mediaId(entry?.item);
     const cached = id ? cache[id] : null;
-    if (cached) {
+    if (cached && retryableMediaEvidence(cached)) {
+      delete cache[id];
+      report.retriedCacheEntries += 1;
+    } else if (cached) {
       entry.item._mediaEvidence = cached;
       report.cached += 1;
       continue;
@@ -533,7 +695,11 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
         execFileImpl: options.execFileImpl,
       });
     } catch (error) {
-      return { ocrText: '', visionImages: [], assetCount: 0, imageCount: 0, videoFrameCount: 0, errors: [cleanText(error?.message || error, 160)], warnings: [] };
+      return {
+        ocrText: '', visionImages: [], assetCount: 0, availableAssetCount: 0, imageCount: 0,
+        videoFrameCount: 0, downloadAttempts: 0, downloadRetries: 0,
+        errors: [cleanText(error?.message || error, 160)], warnings: [],
+      };
     }
   });
 
@@ -551,12 +717,18 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
       ocrText: cleanText(result.ocrText, config.mediaOcrMaxTextChars),
       visionImageCount: visionImages.length,
       assetCount: Number(result.assetCount || 0),
+      availableAssetCount: Number(result.availableAssetCount || 0),
       imageCount: Number(result.imageCount || 0),
       videoFrameCount: Number(result.videoFrameCount || 0),
+      downloadAttempts: Number(result.downloadAttempts || 0),
+      downloadRetries: Number(result.downloadRetries || 0),
       errors: Array.isArray(result.errors) ? result.errors.map((value) => cleanText(value, 160)).filter(Boolean).slice(0, 5) : [],
       warnings: Array.isArray(result.warnings) ? result.warnings.map((value) => cleanText(value, 160)).filter(Boolean).slice(0, 5) : [],
     };
     report.analyzed += 1;
+    report.downloadRetries += evidence.downloadRetries;
+    evidence.retryableFailure = retryableMediaEvidence(evidence);
+    if (evidence.retryableFailure) report.retryableFailures += 1;
     if (evidence.ocrText) report.withOcrText += 1;
     if (visionImages.length) report.withVisionImages += 1;
     if (evidence.errors.length) report.errors.push(...evidence.errors);
@@ -570,7 +742,9 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
       || (visionImages.length > 0 && !visibleViennaText && !trustedAccountLocation);
     const hasClassifiableEvidence = evidence.ocrText.length >= config.mediaLlmMinOcrChars
       || (visionConfigured && visionImages.length > 0);
-    if (report.llmConfigured && remainingAiCalls > 0 && hasClassifiableEvidence && needsEvidenceClassification) {
+    const highIntent = foodDrinkText(`${caption} ${evidence.ocrText} ${entry?.context?.account?.category || ''}`)
+      || obviousDealText(`${caption} ${evidence.ocrText}`);
+    if (report.llmConfigured && remainingAiCalls > 0 && hasClassifiableEvidence && needsEvidenceClassification && highIntent) {
       remainingAiCalls -= 1;
       report.aiCalls += 1;
       if (visionImages.length) report.visionCalls += 1;
@@ -586,13 +760,21 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
         evidence.aiError = cleanText(error?.message || error, 160);
         report.errors.push(evidence.aiError);
       }
+    } else if (report.llmConfigured && hasClassifiableEvidence && needsEvidenceClassification && !highIntent) {
+      report.aiSkippedLowIntent += 1;
     }
     entry.item._mediaEvidence = evidence;
-    cache[mediaId(entry.item)] = evidence;
+    if (!evidence.retryableFailure) cache[mediaId(entry.item)] = evidence;
   }
 
   report.errors = [...new Set(report.errors.filter(Boolean))].slice(0, 20);
   report.warnings = [...new Set(report.warnings.filter(Boolean))].slice(0, 20);
+  const errorCounts = {};
+  for (const error of report.errors) {
+    const category = mediaErrorCategory(error);
+    errorCounts[category] = (errorCounts[category] || 0) + 1;
+  }
+  report.errorCounts = errorCounts;
   report.status = report.errors.length ? 'degraded' : 'ok';
   return { entries: safeEntries, cache: pruneMediaCache(cache, now, config.mediaCacheTtlDays), report };
 }

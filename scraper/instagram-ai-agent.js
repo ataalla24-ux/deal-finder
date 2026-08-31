@@ -13,7 +13,14 @@ import {
 } from './deal-moderation-utils.js';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
+import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { parseExpiryShape } from './expiry-utils.js';
+import {
+  buildInstagramRoleIndex,
+  inferInstagramAccountRole,
+  instagramUsernameDisplayName,
+  resolveInstagramPostEntities,
+} from './instagram-entity-resolution.js';
 import {
   cleanText as cleanDealText,
   isExpiredDealRecord,
@@ -43,6 +50,8 @@ const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
 const SEEDS_PATH = path.join(DOCS_DIR, 'instagram-ai-seeds.json');
 const CANDIDATES_INDEX_PATH = path.join(DOCS_DIR, 'deal-candidates-index.json');
 const MERCHANT_REGISTRY_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
+
+let instagramRoleIndexCache = null;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const HOUR_MS = 60 * 60 * 1000;
@@ -634,6 +643,8 @@ function loadWatchlist() {
       priority: Number(account.priorityScore) || 50,
       category: 'registry',
       note: 'Discovered by merchant registry',
+      accountType: account.accountType,
+      viennaVerified: account.viennaVerified === true,
     }))
     : [];
   const baseAccounts = Array.isArray(parsed.accounts) ? parsed.accounts : [];
@@ -721,6 +732,32 @@ function candidateAccountUsernames(candidate) {
     values.push(match[1]);
   }
   return [...new Set(values.map(normalizeInstagramUsername).filter(Boolean))];
+}
+
+function resolveCandidateEntities(candidate, signal = '') {
+  const sourceDeal = candidate?.sourceDeal || {};
+  const ownerUsername = candidateAccountUsernames(candidate)[0] || '';
+  const ownerAccount = {
+    username: ownerUsername,
+    accountType: sourceDeal.sourceAccountType || sourceDeal.accountType || '',
+    category: sourceDeal.sourceCategory || sourceDeal.category || '',
+    note: sourceDeal.watchlistNote || '',
+    viennaVerified: sourceDeal.viennaVerified === true,
+  };
+  const baseIndex = instagramRoleIndexCache || buildInstagramRoleIndex([ownerAccount]);
+  const roleIndex = new Map(baseIndex);
+  if (ownerUsername && !roleIndex.has(ownerUsername)) {
+    roleIndex.set(ownerUsername, {
+      ...ownerAccount,
+      accountType: buildInstagramRoleIndex([ownerAccount]).get(ownerUsername)?.accountType || 'unknown',
+    });
+  }
+  return resolveInstagramPostEntities({
+    ownerUsername,
+    caption: signal || postSignal(candidate) || candidateSignal(candidate),
+    account: ownerAccount,
+    roleIndex,
+  });
 }
 
 function extractViennaLocation(signal = '') {
@@ -847,19 +884,41 @@ function instagramRunBucket() {
   return Math.floor(Date.now() / (6 * HOUR_MS));
 }
 
-function selectRotatingAccounts(accounts, limit, hotCount = 2) {
+function selectRotatingAccounts(accounts, limit) {
   const sorted = [...accounts]
     .sort((left, right) => (Number(right.priority) || 0) - (Number(left.priority) || 0));
   const safeLimit = Math.max(0, Math.min(Math.floor(limit), sorted.length));
   if (safeLimit === 0) return [];
-  const safeHotCount = Math.min(Math.max(0, hotCount), safeLimit);
-  const hot = sorted.slice(0, safeHotCount);
-  const rest = sorted.slice(safeHotCount);
-  const rotatingLimit = safeLimit - hot.length;
-  if (!rotatingLimit || !rest.length) return hot;
-  const start = (instagramRunBucket() * rotatingLimit) % rest.length;
-  const rotating = [...rest.slice(start), ...rest.slice(0, start)].slice(0, rotatingLimit);
-  return [...hot, ...rotating];
+  const selected = [];
+  const seen = new Set();
+  const add = (account) => {
+    if (!account || seen.has(account.username) || selected.length >= safeLimit) return;
+    seen.add(account.username);
+    selected.push(account);
+  };
+  const provenBudget = Math.max(1, Math.floor(safeLimit * 0.7));
+  const scoutBudget = Math.max(0, Math.floor(safeLimit * 0.2));
+  sorted
+    .filter((account) => inferInstagramAccountRole(account) === 'merchant')
+    .slice(0, provenBudget)
+    .forEach(add);
+  sorted
+    .filter((account) => ['creator', 'discovery', 'platform'].includes(inferInstagramAccountRole(account)))
+    .slice(0, scoutBudget)
+    .forEach(add);
+
+  const remaining = sorted.filter((account) => !seen.has(account.username));
+  const rotating = [
+    ...remaining.filter((account) => inferInstagramAccountRole(account) === 'unknown'),
+    ...remaining.filter((account) => inferInstagramAccountRole(account) !== 'unknown'),
+  ];
+  const start = rotating.length
+    ? (instagramRunBucket() * Math.max(1, safeLimit - selected.length)) % rotating.length
+    : 0;
+  for (let offset = 0; offset < rotating.length && selected.length < safeLimit; offset += 1) {
+    add(rotating[(start + offset) % rotating.length]);
+  }
+  return selected;
 }
 
 function buildWatchlistQueries(accounts) {
@@ -1686,7 +1745,11 @@ function buildHeuristicDeal(candidate) {
   if (candidate.rejectionReason) return null;
 
   const type = inferType(signal);
-  const brand = inferBrand(candidate, signal);
+  const entities = resolveCandidateEntities(candidate, signal);
+  const resolvedMerchantBrand = entities.scoutUsername && entities.merchantUsername
+    ? instagramUsernameDisplayName(entities.merchantUsername)
+    : '';
+  const brand = resolvedMerchantBrand || inferBrand(candidate, signal);
   const category = normalizeCategoryForScraper('', [brand, signal]);
   const pubDate = parsePubDate(candidate);
   if (!pubDate?.date) {
@@ -1730,7 +1793,10 @@ function buildHeuristicDeal(candidate) {
     city: 'Wien',
     viennaVerified: Boolean(viennaEvidence),
     viennaEvidence,
-    ownerUsername: candidateAccountUsernames(candidate)[0] || '',
+    ownerUsername: entities.ownerUsername,
+    sourceAccountType: entities.ownerRole,
+    scoutUsername: entities.scoutUsername,
+    merchantUsername: entities.merchantUsername,
     hot: type === 'gratis' || type === 'bogo',
     isNew: true,
     priority: score >= 78 ? 5 : 4,
@@ -1750,13 +1816,16 @@ function buildHeuristicDeal(candidate) {
       viennaEvidence,
       offerDateSignal: cleanText(dateSignal, 4000),
       offerTiming: timingEvidence,
+      entityResolution: entities,
       textSample: cleanText(signal, 500),
     },
     confidence: Math.min(0.97, Math.max(0.45, score / 100)),
     reviewTier: score >= 78 ? 'high' : 'review',
   };
 
-  const deal = normalizeDealRecord(rawDeal);
+  const normalized = normalizeDealRecord(rawDeal);
+  const discovered = advanceDealLifecycle(normalized, 'discovered', { at: candidate.discoveredAt });
+  const deal = advanceDealLifecycle(discovered, 'extracted');
   if (isExpiredDealRecord(deal) || isFalsePositiveFreeDeal(deal)) {
     candidate.rejectionReason = 'Normalisierung/Validity-Filter blockiert Deal';
     return null;
@@ -1791,9 +1860,17 @@ function buildAiPrompt(candidates) {
     index,
     url: candidate.url,
     heuristicScore: candidate.score,
+    heuristicRejection: cleanText(candidate.rejectionReason, 220),
     evidence: cleanText(candidateSignal(candidate), 1800),
     pubDate: parsePubDate(candidate)?.date?.toISOString() || '',
   }));
+}
+
+function isAiReviewableCandidate(candidate) {
+  if (Number(candidate?.score || 0) < Math.max(40, CONFIG.minScore - 20)) return false;
+  const rejection = cleanText(candidate?.rejectionReason, 240);
+  if (!rejection) return true;
+  return /^(?:keine belastbare Marke\/Quelle|Score zu niedrig \(\d+\))$/i.test(rejection);
 }
 
 function coerceAiType(value) {
@@ -1821,13 +1898,21 @@ function mergeAiDeal(candidate, aiRow) {
 
   const aiValidatedScore = Math.max(candidate.score, Math.round(confidence * 100));
   const hardRejection = getRejectionReason(candidate, signal, aiValidatedScore);
-  if (hardRejection) {
+  const suggestedBrand = cleanText(aiRow.brand, 80);
+  const aiResolvedSoftBrand = /^keine belastbare Marke\/Quelle$/i.test(hardRejection)
+    && suggestedBrand
+    && !isWeakBrand(suggestedBrand);
+  if (hardRejection && !aiResolvedSoftBrand) {
     candidate.rejectionReason = hardRejection;
     return null;
   }
 
   const type = coerceAiType(aiRow.type || inferType(signal));
-  const brand = cleanText(aiRow.brand, 80) || inferBrand(candidate, signal);
+  const entities = resolveCandidateEntities(candidate, signal);
+  const resolvedMerchantBrand = entities.scoutUsername && entities.merchantUsername
+    ? instagramUsernameDisplayName(entities.merchantUsername)
+    : '';
+  const brand = resolvedMerchantBrand || suggestedBrand || inferBrand(candidate, signal);
   const category = normalizeCategoryForScraper(aiRow.category || '', [brand, aiRow.title, aiRow.description, primarySignal]);
   const pubDate = parsePubDate(candidate);
   if (!pubDate?.date) {
@@ -1890,7 +1975,10 @@ function mergeAiDeal(candidate, aiRow) {
     city: 'Wien',
     viennaVerified: Boolean(viennaEvidence),
     viennaEvidence,
-    ownerUsername: candidateAccountUsernames(candidate)[0] || '',
+    ownerUsername: entities.ownerUsername,
+    sourceAccountType: entities.ownerRole,
+    scoutUsername: entities.scoutUsername,
+    merchantUsername: entities.merchantUsername,
     hot: type === 'gratis' || type === 'bogo',
     isNew: true,
     priority: score >= 80 ? 5 : 4,
@@ -1904,6 +1992,7 @@ function mergeAiDeal(candidate, aiRow) {
       heuristicScore: candidate.score,
       heuristicReasons: candidate.reasons,
       aiReason: cleanText(aiRow.reason, 220),
+      aiRescuedSoftRejection: cleanText(candidate.rejectionReason, 220),
       source: candidate.source,
       query: candidate.query,
       previewStatus: candidate.preview?.status || null,
@@ -1912,24 +2001,29 @@ function mergeAiDeal(candidate, aiRow) {
       viennaEvidence,
       offerDateSignal: cleanText(dateSignal, 4000),
       offerTiming: timingEvidence,
+      entityResolution: entities,
       textSample: cleanText(signal, 500),
     },
     confidence,
     reviewTier: confidence >= 0.82 ? 'high' : 'review',
   };
 
-  const deal = normalizeDealRecord(rawDeal);
+  const normalized = normalizeDealRecord(rawDeal);
+  const discovered = advanceDealLifecycle(normalized, 'discovered', { at: candidate.discoveredAt });
+  const deal = advanceDealLifecycle(discovered, 'extracted');
   if (isExpiredDealRecord(deal) || isFalsePositiveFreeDeal(deal)) {
     candidate.rejectionReason = 'Normalisierung/Validity-Filter blockiert LLM-Deal';
     return null;
   }
+  candidate.rejectionReason = '';
   return deal;
 }
 
 async function classifyWithOpenAi(candidates) {
-  if (candidates.length === 0) return { deals: [], errors: [] };
-  if (!CONFIG.aiEnabled) return { deals: [], errors: ['LLM deaktiviert'] };
-  if (!process.env.OPENAI_API_KEY) return { deals: [], errors: ['OPENAI_API_KEY fehlt'] };
+  const emptyUsage = { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
+  if (candidates.length === 0) return { deals: [], errors: [], usage: emptyUsage };
+  if (!CONFIG.aiEnabled) return { deals: [], errors: ['LLM deaktiviert'], usage: emptyUsage };
+  if (!process.env.OPENAI_API_KEY) return { deals: [], errors: ['OPENAI_API_KEY fehlt'], usage: emptyUsage };
 
   const payload = buildAiPrompt(candidates);
   const body = {
@@ -2008,9 +2102,17 @@ async function classifyWithOpenAi(candidates) {
       const deal = mergeAiDeal(candidate, row);
       if (deal) deals.push(deal);
     }
-    return { deals, errors: [] };
+    return {
+      deals,
+      errors: [],
+      usage: {
+        inputTokens: Number(parsed.usage?.prompt_tokens || 0),
+        outputTokens: Number(parsed.usage?.completion_tokens || 0),
+        totalTokens: Number(parsed.usage?.total_tokens || 0),
+      },
+    };
   } catch (error) {
-    return { deals: [], errors: [error.message] };
+    return { deals: [], errors: [error.message], usage: emptyUsage };
   }
 }
 
@@ -2025,6 +2127,7 @@ function rejectionCounts(candidates) {
 
 function summarizeCandidate(candidate) {
   const pubDate = parsePubDate(candidate);
+  const entities = resolveCandidateEntities(candidate);
   return {
     url: candidate.url,
     score: candidate.score,
@@ -2037,6 +2140,10 @@ function summarizeCandidate(candidate) {
     postDateSource: pubDate?.source || '',
     title: cleanText(candidate.preview?.title || candidate.title || candidate.sourceDeal?.title || '', 180),
     textSample: cleanText(postSignal(candidate) || candidateSignal(candidate), 360),
+    ownerUsername: entities.ownerUsername,
+    ownerRole: entities.ownerRole,
+    scoutUsername: entities.scoutUsername,
+    merchantUsername: entities.merchantUsername,
   };
 }
 
@@ -2190,6 +2297,7 @@ async function main() {
   console.log('No Instagram Graph API, no cookies; using public search/preview signals.');
 
   const accounts = loadWatchlist();
+  instagramRoleIndexCache = buildInstagramRoleIndex(accounts);
   const { candidates, stats } = await discoverCandidates(accounts);
   console.log(`Candidates: ${candidates.length} (${stats.existingCandidates} existing, ${stats.searchDiscovered} search hits)`);
 
@@ -2198,9 +2306,13 @@ async function main() {
   const heuristicDealsBeforeAi = candidates.map(buildHeuristicDeal).filter(Boolean);
 
   const aiCandidates = candidates
-    .filter((candidate) => !candidate.rejectionReason && candidate.score >= Math.max(40, CONFIG.minScore - 20))
-    .sort((left, right) => right.score - left.score)
+    .filter(isAiReviewableCandidate)
+    .sort((left, right) => (
+      Number(Boolean(right.rejectionReason)) - Number(Boolean(left.rejectionReason))
+      || right.score - left.score
+    ))
     .slice(0, CONFIG.aiCandidateLimit);
+  for (const candidate of aiCandidates) candidate.aiRescueAttempt = Boolean(candidate.rejectionReason);
   const aiResult = await classifyWithOpenAi(aiCandidates);
 
   const heuristicDeals = filterDealsRejectedByCandidates(heuristicDealsBeforeAi, candidates);
@@ -2231,6 +2343,9 @@ async function main() {
     heuristicAcceptedBeforeAi: heuristicDealsBeforeAi.length,
     heuristicVetoedByAi: heuristicDealsBeforeAi.length - heuristicDeals.length,
     aiAccepted: aiResult.deals.length,
+    aiRescueCandidates: aiCandidates.filter((candidate) => candidate.aiRescueAttempt).length,
+    aiRescued: aiCandidates.filter((candidate) => candidate.aiRescueAttempt && !candidate.rejectionReason).length,
+    aiUsage: aiResult.usage,
     moderation: {
       removed: moderationFilter.removed.length,
       reasons: moderationCounts(moderationFilter.removed),
@@ -2283,4 +2398,5 @@ export {
   parsePubDate,
   rankCandidatesForScan,
   resolveViennaEvidence,
+  selectRotatingAccounts,
 };

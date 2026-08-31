@@ -5,6 +5,7 @@ import {
   classifyInstagramOcrWithOpenAI,
   enrichInstagramGraphMedia,
   extractInstagramMediaAssets,
+  selectMediaAssetsForAnalysis,
 } from '../scraper/instagram-media-evidence.js';
 import { buildConfig, normalizeGraphMediaItem } from '../scraper/meta-instagram-deals.js';
 
@@ -38,6 +39,21 @@ assert.deepEqual(assets, [
   { type: 'image', url: 'https://cdn.example/reel.jpg' },
   { type: 'video', url: 'https://cdn.example/reel.mp4' },
 ]);
+assert.deepEqual(
+  selectMediaAssetsForAnalysis([
+    { type: 'image', url: 'https://cdn.example/slide-1.jpg' },
+    { type: 'image', url: 'https://cdn.example/slide-2.jpg' },
+    { type: 'image', url: 'https://cdn.example/slide-3.jpg' },
+    { type: 'image', url: 'https://cdn.example/slide-4.jpg' },
+    { type: 'image', url: 'https://cdn.example/slide-5.jpg' },
+  ], 3).map((asset) => asset.url),
+  [
+    'https://cdn.example/slide-1.jpg',
+    'https://cdn.example/slide-3.jpg',
+    'https://cdn.example/slide-5.jpg',
+  ],
+  'carousel sampling must include the first, middle and final slide',
+);
 
 let openAiRequest = null;
 const ai = await classifyInstagramOcrWithOpenAI({
@@ -384,6 +400,63 @@ const languageFallback = await analyzeInstagramMediaItem({
 });
 assert.equal(languageFallbackCalls, 2, 'missing language data should retry with the default OCR language');
 assert.match(languageFallback.ocrText, /Kaffee gratis/);
+
+let mediaFetchAttempts = 0;
+const recovered403 = await analyzeInstagramMediaItem({
+  media_type: 'IMAGE',
+  media_url: 'https://cdn.example/temporary-403.jpg',
+  permalink: 'https://www.instagram.com/p/TEMP403/',
+}, config, {
+  tools: { tesseract: false, ffmpeg: false, ffprobe: false },
+  fetchImpl: async () => {
+    mediaFetchAttempts += 1;
+    if (mediaFetchAttempts < 3) return new Response('', { status: 403 });
+    return imageResponse();
+  },
+});
+assert.equal(mediaFetchAttempts, 3, 'temporary media 403s should use alternate request profiles');
+assert.equal(recovered403.assetCount, 1);
+assert.equal(recovered403.downloadRetries, 2);
+assert.equal(recovered403.errors.length, 0);
+
+let retriedCacheAnalyses = 0;
+const retriedCache = await enrichInstagramGraphMedia([{
+  item: {
+    id: 'retry-cached-403',
+    caption: '20 % Rabatt auf Burger in Wien',
+    media_type: 'IMAGE',
+    media_url: 'https://cdn.example/retry.jpg',
+    timestamp: '2026-08-22T09:30:00.000Z',
+  },
+  context: { account: { username: 'burger.wien', verifiedVienna: true, category: 'food' } },
+}], config, now, {
+  tools: { tesseract: true, ffmpeg: false, ffprobe: false },
+  cache: {
+    'retry-cached-403': {
+      analyzedAt: '2026-08-22T09:35:00.000Z',
+      assetCount: 0,
+      errors: ['media HTTP 403 after 3 attempts'],
+    },
+  },
+  analyzeItem: async () => {
+    retriedCacheAnalyses += 1;
+    return {
+      ocrText: '20 % Rabatt auf Burger in 1070 Wien',
+      visionImages: [],
+      assetCount: 1,
+      availableAssetCount: 1,
+      imageCount: 1,
+      videoFrameCount: 0,
+      downloadAttempts: 1,
+      downloadRetries: 0,
+      errors: [],
+      warnings: [],
+    };
+  },
+});
+assert.equal(retriedCacheAnalyses, 1, 'a cached transient 403 must be analyzed again');
+assert.equal(retriedCache.report.retriedCacheEntries, 1);
+assert.equal(retriedCache.report.retryableFailures, 0);
 
 const staleCache = await enrichInstagramGraphMedia([], config, now, {
   tools: { tesseract: true, ffmpeg: true },

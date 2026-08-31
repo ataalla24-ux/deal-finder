@@ -194,6 +194,23 @@ assert.ok(graphFresh.deal);
 assert.equal(graphFresh.deal.pubDateSource, 'instagram-graph-timestamp');
 assert.equal(graphFresh.deal.viennaEvidence.source, 'verified-merchant-registry');
 
+const graphCreatorMerchant = normalizeGraphMediaItem({
+  id: 'graph-creator-merchant',
+  caption: 'Heute 30 % Rabatt auf Sushi bei @tennosushiofficial, Landstraßer Hauptstraße 1, 1030 Wien.',
+  permalink: 'https://www.instagram.com/reel/GRAPHCREATORMERCHANT/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+  username: 'lisa.maria.b',
+}, {
+  sourceType: 'account',
+  sourceName: '@lisa.maria.b',
+  account: { username: 'lisa.maria.b', accountType: 'creator' },
+}, config, now);
+assert.ok(graphCreatorMerchant.deal);
+assert.equal(graphCreatorMerchant.deal.sourceAccountType, 'creator');
+assert.equal(graphCreatorMerchant.deal.scoutUsername, 'lisa.maria.b');
+assert.equal(graphCreatorMerchant.deal.merchantUsername, 'tennosushiofficial');
+assert.notEqual(graphCreatorMerchant.deal.brand, 'lisa.maria.b');
+
 const graphPianoDiscount = normalizeGraphMediaItem({
   id: 'graph-piano-discount',
   caption: 'Schulstart = Klavierstart! Jetzt 10 % Rabatt auf alle gebrauchten Pianos & Flügel sichern! Nur von 01.09. bis 15.10.2026. 📍 Klavier Galerie | Kaiserstraße 10, 1070 Wien #KlavierGalerie #Wien',
@@ -547,6 +564,28 @@ const approvalShard = selectAccountShard(
   { maxAccountsPerRun: 6, shardIndex: 0 },
 );
 assert.equal(approvalShard[0].username, approvalWinner.username, 'final app approvals reserve an account slot before blind rotation');
+
+const weightedAccounts = [
+  ...Array.from({ length: 8 }, (_, index) => ({
+    username: `merchant${index}.cafe`,
+    accountType: 'merchant',
+    manualApprovedDeals: index === 0 ? 1 : 6,
+    manualRejectedDeals: index === 0 ? 0 : 0,
+    priority: 50 - index,
+  })),
+  { username: 'foodiewien', accountType: 'creator', scoutApprovedDeals: 4, scoutRejectedDeals: 1, priority: 80 },
+  { username: 'viennaeats', accountType: 'discovery', scoutApprovedDeals: 3, scoutRejectedDeals: 1, priority: 70 },
+  { username: 'newaccountlead', accountType: 'unknown', priority: 10 },
+];
+const weightedShard = selectAccountShard(weightedAccounts, { maxAccountsPerRun: 10, shardIndex: 0 });
+assert.equal(weightedShard.filter((account) => account.accountType === 'merchant').length, 7);
+assert.equal(weightedShard.filter((account) => ['creator', 'discovery'].includes(account.accountType)).length, 2);
+assert.equal(weightedShard.filter((account) => account.accountType === 'unknown').length, 1);
+assert.notEqual(
+  weightedShard[0].username,
+  'merchant0.cafe',
+  'one approval is smoothed and cannot outrank merchants with a meaningful successful sample',
+);
 
 const hashtagPool = Array.from({ length: 12 }, (_, index) => `wientag${index}`);
 const hashtagState = {

@@ -33,13 +33,14 @@ const RUN_STARTED_AT = new Date();
 const BASIC_HASHTAG_MEDIA_FIELDS = 'id,caption,media_type,permalink,timestamp,like_count,comments_count';
 const HASHTAG_MEDIA_FIELD_VARIANTS = [
   {
-    mode: 'media-url',
-    fields: `${BASIC_HASHTAG_MEDIA_FIELDS},media_url`,
+    mode: 'full-media-with-owner',
+    fields: `${BASIC_HASHTAG_MEDIA_FIELDS},username,media_product_type,media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}`,
   },
   {
     mode: 'supported-media',
-    fields: `${BASIC_HASHTAG_MEDIA_FIELDS},media_url,children`,
+    fields: `${BASIC_HASHTAG_MEDIA_FIELDS},media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}`,
   },
+  { mode: 'media-url', fields: `${BASIC_HASHTAG_MEDIA_FIELDS},media_url,thumbnail_url` },
   { mode: 'basic', fields: BASIC_HASHTAG_MEDIA_FIELDS },
 ];
 const RESCUABLE_REJECTIONS = new Set([
@@ -353,11 +354,41 @@ export async function runWienDealsCombined(options = {}) {
 
   const normalized = [];
   const rejected = [];
+  const candidateAudit = [];
   let rescuedDeals = 0;
   for (const entry of uniqueEntries) {
     const id = cleanText(entry.item?.id, 160);
     const initial = initialOutcomes.get(entry.key);
     const result = normalizeGraphMediaItem(entry.item, entry.context, collectorConfig, now);
+    const mediaEvidence = entry.item?._mediaEvidence && typeof entry.item._mediaEvidence === 'object'
+      ? entry.item._mediaEvidence
+      : {};
+    candidateAudit.push({
+      id,
+      status: result.deal ? 'collector-accepted' : 'rejected',
+      url: cleanText(entry.item?.permalink, 1000),
+      title: cleanText(result.deal?.title || entry.item?.caption, 180),
+      text: cleanText(entry.item?.caption, 1800),
+      ownerUsername: cleanText(result.deal?.ownerUsername || entry.item?.username, 80),
+      ownerRole: cleanText(result.deal?.sourceAccountType, 40),
+      scoutUsername: cleanText(result.deal?.scoutUsername, 80),
+      merchantUsername: cleanText(result.deal?.merchantUsername, 80),
+      pubDate: cleanText(entry.item?.timestamp, 80),
+      rejectionReason: result.rejection || '',
+      qualityScore: Number(result.deal?.qualityScore || 0),
+      viennaVerified: result.deal?.viennaVerified === true,
+      mediaEvidence: {
+        analyzedAt: cleanText(mediaEvidence.analyzedAt, 80),
+        ocrText: cleanText(mediaEvidence.ocrText, 1800),
+        assetCount: Number(mediaEvidence.assetCount || 0),
+        imageCount: Number(mediaEvidence.imageCount || 0),
+        videoFrameCount: Number(mediaEvidence.videoFrameCount || 0),
+        downloadRetries: Number(mediaEvidence.downloadRetries || 0),
+        errors: Array.isArray(mediaEvidence.errors) ? mediaEvidence.errors.slice(0, 5) : [],
+        ai: mediaEvidence.ai || null,
+      },
+      hashtags: [...entry.hashtags],
+    });
     if (result.deal) {
       normalized.push(result.deal);
       if (!initial?.deal) rescuedDeals += 1;
@@ -424,6 +455,9 @@ export async function runWienDealsCombined(options = {}) {
     mediaEvidence: media.report,
     sources: sourceResults,
     rejectionReasons: rejectionCounts(rejected),
+    candidateAudit: candidateAudit
+      .sort((left, right) => Date.parse(right.pubDate || '') - Date.parse(left.pubDate || ''))
+      .slice(0, 500),
   };
   if (options.write !== false) {
     writeJsonAtomic(outputPath, payload);

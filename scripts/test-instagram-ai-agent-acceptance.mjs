@@ -35,6 +35,19 @@ const blueTomato = buildHeuristicDeal(candidate({
 }));
 assert.ok(blueTomato, 'the explicit Vienna branch handle must rescue the Blue Tomato free-coffee post');
 
+const creatorScoutDeal = buildHeuristicDeal(candidate({
+  url: 'https://www.instagram.com/reel/CreatorMerchant1/',
+  sourceDeal: { ownerUsername: 'lisa.maria.b', sourceAccountType: 'creator' },
+  title: 'Sushi Deal in Wien',
+  description: 'Heute 30 % Rabatt auf Sushi bei @tennosushiofficial, Landstraßer Hauptstraße 1, 1030 Wien.',
+}));
+assert.ok(creatorScoutDeal);
+assert.equal(creatorScoutDeal.sourceAccountType, 'creator');
+assert.equal(creatorScoutDeal.scoutUsername, 'lisa.maria.b');
+assert.equal(creatorScoutDeal.merchantUsername, 'tennosushiofficial');
+assert.equal(creatorScoutDeal.brand, 'Tenno Sushi');
+assert.equal(creatorScoutDeal.pipelineLifecycle.stage, 'extracted');
+
 const unverifiedLegacyViennaContext = buildHeuristicDeal(candidate({
   url: 'https://www.instagram.com/p/Das-rG-kVlD/',
   source: 'deals',

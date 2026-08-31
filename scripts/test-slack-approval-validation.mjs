@@ -4,6 +4,7 @@ import {
   applySlackEdits,
   dedupeApprovedDeals,
   filterAlreadyLiveFallbackDeals,
+  mergeParsedDealsWithQueue,
   normalizeDeal as normalizeApprovalDeal,
   normalizePendingDeal,
   validateApprovalCandidates,
@@ -71,6 +72,23 @@ const [legacyRecoveredFromQueue] = extractDealsFromThreadMessages([{
 assert.equal(legacyRecoveredFromQueue.url, parsedRoundTrip.url, 'legacy Slack messages recover their target URL from the queue');
 assert.equal(legacyRecoveredFromQueue.description, 'Vollständige Beschreibung aus der Queue.');
 assert.equal(legacyRecoveredFromQueue.distance, 'Rathausplatz, 1010 Wien');
+
+const [metadataPreserved] = mergeParsedDealsWithQueue([
+  { ...parsedRoundTrip, title: 'Vom Slack-Text korrigierter Titel', slackTs: '1784550000.100' },
+], [{
+  ...parsedRoundTrip,
+  slackTs: '1784550000.100',
+  socialFoodReview: true,
+  sourceAccountType: 'creator',
+  scoutUsername: 'foodiewien',
+  merchantUsername: 'testcafe',
+  pipelineLifecycle: { version: 1, stage: 'slack-sent', slackSentAt: now.toISOString() },
+}]);
+assert.equal(metadataPreserved.title, 'Vom Slack-Text korrigierter Titel');
+assert.equal(metadataPreserved.socialFoodReview, true);
+assert.equal(metadataPreserved.scoutUsername, 'foodiewien');
+assert.equal(metadataPreserved.merchantUsername, 'testcafe');
+assert.equal(metadataPreserved.pipelineLifecycle.stage, 'slack-sent');
 
 const alreadyLiveFallback = filterAlreadyLiveFallbackDeals([
   { ...parsedRoundTrip, slackTs: '1784550000.100' },
