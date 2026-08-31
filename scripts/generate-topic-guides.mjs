@@ -220,6 +220,52 @@ const guides = [
     ],
     related: [['Gutscheine in Wien', 'gutscheine-wien.html'], ['Restaurant-Gutscheine in Wien', 'restaurant-gutscheine-wien.html'], ['Rabatte in Wien', 'rabatte-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
   },
+  {
+    slug: 'magenta-moments-kino-1plus1-wien',
+    title: 'Magenta Moments: 1+1 Kino in Wien',
+    meta: 'Magenta Moments 1+1 Kino in Wien: Kinotickets am Dienstag zum Vorteilspreis sichern, Voraussetzungen prüfen und den Coupon in der MeinMagenta App einlösen.',
+    eyebrow: 'Magenta Moments Wien',
+    headline: '1+1 Kino in Wien mit Magenta Moments richtig nutzen.',
+    intro: 'Magenta nennt in seiner Vorteilswelt ein 1+1-Kinoangebot für Dienstag. So prüfst du als Magenta-Kund:in Verfügbarkeit, Preis und Einlösung in der MeinMagenta App.',
+    published: '2026-08-31', publishedLabel: '31. August 2026', modified: '2026-08-31', modifiedLabel: '31. August 2026',
+    image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
+    imageAlt: 'FreeFinder App mit Wiener Freizeit- und Rabattangeboten',
+    sections: [
+      ['voraussetzungen', 'Wer kann Magenta Moments nutzen?', `<p>Das Angebot richtet sich an <strong>Magenta-Kund:innen</strong> und ist laut offizieller Magenta-Seite Teil der Vorteilswelt in der MeinMagenta App. Ein allgemeiner Kinogutschein für alle Besucher:innen ist es daher nicht.</p><p>Prüfe vor dem Kinobesuch, ob dein Vertrag für Magenta Moments freigeschaltet ist und welche Detailbedingungen in der App beim konkreten Angebot angezeigt werden.</p>`],
+      ['dienstag', '1+1 Kino am Dienstag', `<p>Magenta bewirbt in der Vorteilswelt <strong>jeden Dienstag Kinotickets 1 + 1 gratis</strong>. Die offizielle Übersichtsseite nennt als Beispiel einen Vorteilspreis von 11,50 Euro statt 23 Euro für zwei Tickets. Maßgeblich sind immer der aktuell angezeigte Preis, das ausgewählte Kino und die Bedingungen in der MeinMagenta App.</p><div class="article-note"><strong>Keine pauschale Zusage</strong>Verfügbarkeit, teilnehmende Kinos und Vorstellungszeiten können sich ändern. Öffne den Vorteil am selben Tag vor dem Kauf erneut.</div>`],
+      ['einloesen', 'So löst du den Vorteil ein', `<ol><li>MeinMagenta App öffnen und Magenta Moments auswählen.</li><li>Das aktuelle Kinoangebot und den Dienstagstermin prüfen.</li><li>Teilnehmendes Kino, Vorstellung und mögliche Zuschläge kontrollieren.</li><li>Den Coupon erst unmittelbar vor der Einlösung aktivieren.</li><li>Vor dem Bezahlen prüfen, ob der 1+1-Vorteil korrekt angezeigt wird.</li></ol><p>Speichere keinen Screenshot als Ersatz, wenn die App einen dynamischen Code oder eine direkte Buchung verlangt.</p>`],
+      ['quelle', 'Offizielle Quelle prüfen', `<p>Die <a href="https://www.magenta.at/magenta-moments" rel="noopener">offizielle Magenta-Moments-Seite</a> beschreibt die Vorteilswelt und verweist für die konkreten Angebote auf die MeinMagenta App. FreeFinder übernimmt deshalb keine nicht bestätigten Kino- oder Terminangaben.</p><p>Weitere aktuelle Angebote in Wien findest du in der <a href="/angebote-wien-heute.html">FreeFinder-Übersicht</a>.</p>`],
+    ],
+    faqs: [
+      ['Ist das Magenta-Moments-Kinoangebot für alle verfügbar?', 'Nein. Es ist eine Vorteilswelt für Magenta-Kund:innen. Die konkrete Teilnahme und die Bedingungen stehen in der MeinMagenta App.'],
+      ['An welchem Tag gilt das 1+1-Kinoangebot?', 'Die offizielle Magenta-Übersicht bewirbt das Angebot für Dienstag. Prüfe vor dem Kauf trotzdem die aktuelle Detailseite in der App.'],
+      ['Kann ich jedes Kino in Wien auswählen?', 'Nicht automatisch. Teilnehmende Kinos, Vorstellungen und mögliche Zuschläge werden beim jeweiligen Angebot festgelegt.'],
+    ],
+    related: [['App-Gutscheine in Wien', 'app-gutscheine-wien.html'], ['Gutscheine in Wien', 'gutscheine-wien.html'], ['Kostenlose Freizeitangebote in Wien', 'kostenlose-freizeitangebote-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+  },
+  {
+    slug: 'gratis-pizza-wien-laziz-food',
+    title: 'Gratis Pizza in Wien ab 20 Euro bei Wiener Laziz Food',
+    meta: 'Gratis Pizza in Wien: Wiener Laziz Food bietet eine Pizza Margherita ab 20 Euro Bestellwert. Adresse, Öffnungszeiten und Bedingungen im Überblick.',
+    eyebrow: 'Gratis Pizza Wien',
+    headline: 'Gratis Pizza in Wien ab 20 Euro Bestellwert.',
+    intro: 'Wiener Laziz Food weist auf der eigenen Website eine kostenlose Pizza Margherita ab 20 Euro Bestellwert aus. Hier findest du die bestätigten Bedingungen für den Standort in Meidling.',
+    published: '2026-08-31', publishedLabel: '31. August 2026', modified: '2026-08-31', modifiedLabel: '31. August 2026',
+    image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
+    imageAlt: 'FreeFinder App mit kostenlosen Food-Angeboten in Wien',
+    sections: [
+      ['angebot', 'So funktioniert die Gratis-Pizza-Aktion', `<p>Auf der offiziellen Website von <strong>Wiener Laziz Food</strong> steht: Ab einem Bestellwert von 20 Euro erhältst du eine Pizza Margherita gratis dazu. Der Mindestbestellwert bezieht sich auf die Bestellung beim Restaurant.</p><p>Die Aktion ist damit ein Gratisartikel ab Kauf, kein vollständig kostenloser Restaurantbesuch. Prüfe vor der Bestellung, ob die Aktion noch aktiv ist und wie sie bei deiner Bestellart angewendet wird.</p>`],
+      ['standort', 'Adresse und Öffnungszeiten in Wien', `<p>Der auf der Anbieterwebsite genannte Standort liegt in der <strong>Ratschkygasse 22, 1120 Wien</strong>. Als Öffnungszeiten werden Montag bis Sonntag von 11:00 bis 22:00 Uhr angegeben.</p><p>Bei Lieferung oder Bestellung über einen Drittanbieter können Mindestbestellwert, Liefergebiet und Gebühren abweichen. Frage bei Unsicherheit kurz beim Restaurant nach.</p>`],
+      ['bestellen', 'Vor dem Bezahlen prüfen', `<ol><li>Bestellwert von mindestens 20 Euro erreichen.</li><li>Kontrollieren, ob die Pizza Margherita als Gratisartikel ergänzt wird.</li><li>Liefer-, Service- oder Verpackungsgebühren zum Endpreis addieren.</li><li>Bei Abholung oder Lieferung die konkrete Bestellbestätigung prüfen.</li><li>Bei fehlender Gratispizza vor dem Bezahlen das Restaurant kontaktieren.</li></ol>`],
+      ['quelle', 'Offizielle Restaurantquelle', `<p>Die Angaben stammen direkt von der <a href="https://wienerlazizfood.com/" rel="noopener">offiziellen Website von Wiener Laziz Food</a>. Dort werden neben der Gratispizza ab 20 Euro auch weitere Specials genannt. Da kein fixes Enddatum ausgewiesen ist, solltest du die Verfügbarkeit am selben Tag erneut prüfen.</p><p>Weitere kostenlose Food-Angebote in Wien findest du unter <a href="/angebote-wien-heute.html">Aktuelle Wien-Deals</a> und im Guide <a href="gratis-essen-wien.html">Gratis essen in Wien</a>.</p>`],
+    ],
+    faqs: [
+      ['Ab welchem Bestellwert gibt es die Pizza gratis?', 'Laut der offiziellen Restaurantwebsite ab einem Bestellwert von 20 Euro. Prüfe die Aktion vor der Bestellung erneut.'],
+      ['Welche Pizza ist gratis?', 'Die Website nennt eine Pizza Margherita als Gratisartikel. Andere Pizzen sind nicht automatisch eingeschlossen.'],
+      ['Gilt die Aktion auch bei Lieferung?', 'Das muss für die konkrete Bestellart bestätigt werden. Liefergebiet und zusätzliche Gebühren können abweichen.'],
+    ],
+    related: [['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Restaurant-Gutscheine in Wien', 'restaurant-gutscheine-wien.html'], ['1+1-Aktionen in Wien', 'eins-plus-eins-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+  },
 ];
 
 function escapeHtml(value) {
