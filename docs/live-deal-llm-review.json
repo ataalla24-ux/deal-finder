@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-31T08:02:11.652Z",
+  "generatedAt": "2026-08-31T16:19:34.084Z",
   "source": "github-live-deal-llm-review",
   "model": "gpt-4.1-mini",
   "aiEnabled": true,
@@ -14,21 +14,21 @@
   "reviewedDeals": 59,
   "totalDealsAfter": 59,
   "removedCount": 0,
-  "wouldRemoveCount": 5,
-  "flaggedCount": 9,
+  "wouldRemoveCount": 6,
+  "flaggedCount": 8,
   "policyOverrides": [
     {
       "dealID": "benefit-magenta-moments-oz9vs",
       "from": {
         "decision": "remove",
-        "reason": "weak_evidence",
-        "confidence": 0.7,
-        "message": "Target page blocked, no evidence for deal details or Vienna relevance."
+        "reason": "bad_source",
+        "confidence": 0.9,
+        "message": "Target page blocked or no content, no deal evidence."
       },
       "to": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
+        "confidence": 0.8,
         "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen."
       }
     },
@@ -38,7 +38,7 @@
         "decision": "flag",
         "reason": "weak_evidence",
         "confidence": 0.7,
-        "message": "Target page blocked with HTTP 403, no deal details visible, Vienna location not confirmed."
+        "message": "Target page blocked with HTTP 403, no direct deal evidence but location matches Vienna Marriott."
       },
       "to": {
         "decision": "flag",
@@ -53,7 +53,7 @@
         "decision": "flag",
         "reason": "weak_evidence",
         "confidence": 0.7,
-        "message": "Target page returns HTTP 429 (too many requests), no deal details available."
+        "message": "Target page returns HTTP 429 (too many requests), no direct deal evidence."
       },
       "to": {
         "decision": "flag",
@@ -68,7 +68,7 @@
         "decision": "flag",
         "reason": "weak_evidence",
         "confidence": 0.9,
-        "message": "Target page returns HTTP 403, no deal details visible, cannot confirm deal validity or Vienna relevance."
+        "message": "Target page returns HTTP 403, no valid deal evidence found, but not removed due to transient error."
       },
       "to": {
         "decision": "flag",
@@ -83,7 +83,7 @@
         "decision": "flag",
         "reason": "weak_evidence",
         "confidence": 0.9,
-        "message": "Target page returns HTTP 429, no deal details visible, cannot confirm deal validity or Vienna relevance."
+        "message": "Target page returns HTTP 429 (rate limit), no valid deal evidence found, but not removed due to transient error."
       },
       "to": {
         "decision": "flag",
@@ -98,7 +98,7 @@
         "decision": "flag",
         "reason": "weak_evidence",
         "confidence": 0.9,
-        "message": "Target page blocked by security checkpoint (HTTP 429), no deal details visible, cannot confirm deal validity or Vienna relevance."
+        "message": "Target page blocked by security checkpoint (HTTP 429), no valid deal evidence found, but not removed due to transient error."
       },
       "to": {
         "decision": "flag",
@@ -112,8 +112,8 @@
       "from": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.85,
-        "message": "Target page has no content or deal details visible, cannot confirm deal validity or Vienna relevance."
+        "confidence": 0.9,
+        "message": "Target page empty or no deal evidence found, but not removed due to transient error."
       },
       "to": {
         "decision": "flag",
@@ -141,14 +141,14 @@
   "targetEvidenceErrors": [],
   "errors": [],
   "usage": {
-    "prompt_tokens": 33699,
-    "completion_tokens": 7730,
-    "total_tokens": 41429
+    "prompt_tokens": 33660,
+    "completion_tokens": 7647,
+    "total_tokens": 41307
   },
   "patchSanitization": {
-    "rawFieldCount": 44,
-    "acceptedFieldCount": 3,
-    "droppedFieldCount": 41
+    "rawFieldCount": 32,
+    "acceptedFieldCount": 2,
+    "droppedFieldCount": 30
   },
   "reviewCandidates": [
     {
@@ -164,8 +164,8 @@
       "expires": "2026-10-05T23:59:59.999Z",
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Paris, destination is outside Vienna, no local Vienna deal.",
-      "suggestion": "Remove because deal is for travel destination outside Vienna (Paris).",
+      "message": "Flight deal is for Paris, France, not Vienna local deal.",
+      "suggestion": "Remove because deal is for destination outside Vienna.",
       "proposedPatch": {},
       "decision": "remove",
       "sourceSystem": "llm-live-review-candidate"
@@ -182,9 +182,9 @@
       "pubDate": "2026-08-17T10:31:13.943Z",
       "expires": "",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to blocked page and no deal details.",
+      "suggestion": "Remove due to bad source and no deal evidence.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -203,7 +203,7 @@
       "reason": "weak_evidence",
       "confidence": 0.7,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to blocked page and missing deal details.",
+      "suggestion": "Flag for review due to weak evidence from blocked page.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -219,14 +219,12 @@
       "url": "https://www.sparhamster.at/lieferando-neukunden-rabatt/",
       "pubDate": "2026-08-17T10:31:10.000Z",
       "expires": "2026-08-31T23:59:59.999Z",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "Deal valid and confirmed by sparhamster.at page with valid until 2026-08-31, for Wien & Österreich.",
-      "suggestion": "",
-      "proposedPatch": {
-        "validUntil": "2026-06-30"
-      },
-      "decision": "keep",
+      "reason": "expired",
+      "confidence": 0.95,
+      "message": "Deal expired on 2026-06-30 according to target page validity date, despite later publication date.",
+      "suggestion": "Remove expired deal.",
+      "proposedPatch": {},
+      "decision": "remove",
       "sourceSystem": "llm-live-review-candidate"
     },
     {
@@ -242,8 +240,8 @@
       "expires": "2026-09-19T23:59:59.999Z",
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Milan, destination outside Vienna, no local Vienna deal.",
-      "suggestion": "Remove because deal is for travel destination outside Vienna (Milan).",
+      "message": "Flight deal is for Milan, Italy, not Vienna local deal.",
+      "suggestion": "Remove because deal is for destination outside Vienna.",
       "proposedPatch": {},
       "decision": "remove",
       "sourceSystem": "llm-live-review-candidate"
@@ -262,7 +260,7 @@
       "reason": "weak_evidence",
       "confidence": 0.7,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to HTTP 429 and missing deal details.",
+      "suggestion": "Flag for review due to weak evidence from HTTP 429 response.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -280,8 +278,8 @@
       "expires": "2026-09-27T23:59:59.999Z",
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Ibiza, destination outside Vienna, no local Vienna deal.",
-      "suggestion": "Remove because deal is for travel destination outside Vienna (Ibiza).",
+      "message": "Flight deal is for Ibiza, Spain, not Vienna local deal.",
+      "suggestion": "Remove because deal is for destination outside Vienna.",
       "proposedPatch": {},
       "decision": "remove",
       "sourceSystem": "llm-live-review-candidate"
@@ -299,8 +297,8 @@
       "expires": "2026-09-28T23:59:59.999Z",
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Palma, destination outside Vienna, no local Vienna deal.",
-      "suggestion": "Remove because deal is for travel destination outside Vienna (Palma).",
+      "message": "Flight deal is for Palma, Spain, not Vienna local deal.",
+      "suggestion": "Remove because deal is for destination outside Vienna.",
       "proposedPatch": {},
       "decision": "remove",
       "sourceSystem": "llm-live-review-candidate"
@@ -318,8 +316,8 @@
       "expires": "2026-09-29T23:59:59.999Z",
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Santorini, destination outside Vienna, no local Vienna deal.",
-      "suggestion": "Remove because deal is for travel destination outside Vienna (Santorini).",
+      "message": "Flight deal is for Santorini, Greece, not Vienna local deal.",
+      "suggestion": "Remove because deal is for destination outside Vienna.",
       "proposedPatch": {},
       "decision": "remove",
       "sourceSystem": "llm-live-review-candidate"
@@ -338,26 +336,7 @@
       "reason": "weak_evidence",
       "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Check again later or find alternative source for deal confirmation.",
-      "proposedPatch": {},
-      "decision": "flag",
-      "sourceSystem": "llm-live-review-candidate"
-    },
-    {
-      "id": "tiktok-1onerc4",
-      "title": "Film Festival am Rathausplatz",
-      "brand": "Film Festival am Rathausplatz",
-      "description": "",
-      "category": "kultur",
-      "type": "gratis",
-      "distance": "Wien",
-      "url": "https://www.tiktok.com/@kseniainvienna/video/7658956049524804886",
-      "pubDate": "2026-07-05T11:29:54.000Z",
-      "expires": "",
-      "reason": "weak_evidence",
-      "confidence": 0.9,
-      "message": "Target page is a TikTok video page with no deal details visible, cannot confirm deal validity or Vienna relevance.",
-      "suggestion": "Check again later or find alternative source for deal confirmation.",
+      "suggestion": "Check link later for deal validity.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -374,8 +353,8 @@
       "pubDate": "2026-06-22T12:00:00.000Z",
       "expires": "",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Deal valid until 03.09.2026, IKEA site confirms breakfast offer in IKEA Wien locations.",
+      "confidence": 0.95,
+      "message": "IKEA offer valid until 03.09.2026, confirmed on IKEA Austria site, location IKEA Wien, deal active.",
       "suggestion": "",
       "proposedPatch": {
         "validUntil": "2026-09-03",
@@ -398,7 +377,7 @@
       "reason": "weak_evidence",
       "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Check again later or find alternative source for deal confirmation.",
+      "suggestion": "Check link later for deal validity.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -417,7 +396,7 @@
       "reason": "weak_evidence",
       "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Check again later or find alternative source for deal confirmation.",
+      "suggestion": "Check link later for deal validity.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -436,7 +415,7 @@
       "reason": "weak_evidence",
       "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Check again later or find alternative source for deal confirmation.",
+      "suggestion": "Check link later for deal validity.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -453,9 +432,9 @@
       "pubDate": "2026-03-11T10:37:43.000Z",
       "expires": "",
       "reason": "weak_evidence",
-      "confidence": 0.85,
-      "message": "Target page is a PDF download link with no direct deal page, no expiry or deal details visible.",
-      "suggestion": "Find a direct deal page or better source for confirmation.",
+      "confidence": 0.9,
+      "message": "Target page is a PDF download with no direct deal evidence, but not removed due to weak evidence policy.",
+      "suggestion": "Check source for deal details or better link.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -496,7 +475,44 @@
       "removedAutomatically": false,
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Paris, destination is outside Vienna, no local Vienna deal.",
+      "message": "Flight deal is for Paris, France, not Vienna local deal.",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "g2-qe30qq",
+      "title": "10 € Rabatt ab 20 € Bestellwert",
+      "brand": "Lieferando",
+      "description": "",
+      "category": "essen",
+      "type": "rabatt",
+      "logo": "🛵",
+      "distance": "Wien & Österreich",
+      "url": "https://www.sparhamster.at/lieferando-neukunden-rabatt/",
+      "source": "Slack Digest",
+      "originSource": "Firecrawl Gastro #2",
+      "pubDate": "2026-08-17T10:31:10.000Z",
+      "expires": "2026-08-31T23:59:59.999Z",
+      "expiresOriginal": "2026-08-31",
+      "expiresPrecision": "day",
+      "expiresSource": "url",
+      "expiresDetectedFromUrl": true,
+      "validOn": "",
+      "validFrom": "",
+      "validUntil": "2026-08-31",
+      "expiryKind": "end",
+      "expiryDisplayText": "2026-08-31",
+      "qualityScore": 0,
+      "votes": 1,
+      "priority": 3,
+      "hot": false,
+      "isNew": false,
+      "slackTs": "1786962670.650089",
+      "slackThreadTs": "1786962667.135029",
+      "approvedAt": "2026-08-23T02:50:02.429Z",
+      "removedAutomatically": false,
+      "reason": "expired",
+      "confidence": 0.95,
+      "message": "Deal expired on 2026-06-30 according to target page validity date, despite later publication date.",
       "sourceSystem": "llm-live-review-candidate"
     },
     {
@@ -533,7 +549,7 @@
       "removedAutomatically": false,
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Milan, destination outside Vienna, no local Vienna deal.",
+      "message": "Flight deal is for Milan, Italy, not Vienna local deal.",
       "sourceSystem": "llm-live-review-candidate"
     },
     {
@@ -570,7 +586,7 @@
       "removedAutomatically": false,
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Ibiza, destination outside Vienna, no local Vienna deal.",
+      "message": "Flight deal is for Ibiza, Spain, not Vienna local deal.",
       "sourceSystem": "llm-live-review-candidate"
     },
     {
@@ -607,7 +623,7 @@
       "removedAutomatically": false,
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Palma, destination outside Vienna, no local Vienna deal.",
+      "message": "Flight deal is for Palma, Spain, not Vienna local deal.",
       "sourceSystem": "llm-live-review-candidate"
     },
     {
@@ -644,7 +660,7 @@
       "removedAutomatically": false,
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Santorini, destination outside Vienna, no local Vienna deal.",
+      "message": "Flight deal is for Santorini, Greece, not Vienna local deal.",
       "sourceSystem": "llm-live-review-candidate"
     }
   ],
@@ -683,7 +699,44 @@
       "removedAutomatically": false,
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Paris, destination is outside Vienna, no local Vienna deal.",
+      "message": "Flight deal is for Paris, France, not Vienna local deal.",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "g2-qe30qq",
+      "title": "10 € Rabatt ab 20 € Bestellwert",
+      "brand": "Lieferando",
+      "description": "",
+      "category": "essen",
+      "type": "rabatt",
+      "logo": "🛵",
+      "distance": "Wien & Österreich",
+      "url": "https://www.sparhamster.at/lieferando-neukunden-rabatt/",
+      "source": "Slack Digest",
+      "originSource": "Firecrawl Gastro #2",
+      "pubDate": "2026-08-17T10:31:10.000Z",
+      "expires": "2026-08-31T23:59:59.999Z",
+      "expiresOriginal": "2026-08-31",
+      "expiresPrecision": "day",
+      "expiresSource": "url",
+      "expiresDetectedFromUrl": true,
+      "validOn": "",
+      "validFrom": "",
+      "validUntil": "2026-08-31",
+      "expiryKind": "end",
+      "expiryDisplayText": "2026-08-31",
+      "qualityScore": 0,
+      "votes": 1,
+      "priority": 3,
+      "hot": false,
+      "isNew": false,
+      "slackTs": "1786962670.650089",
+      "slackThreadTs": "1786962667.135029",
+      "approvedAt": "2026-08-23T02:50:02.429Z",
+      "removedAutomatically": false,
+      "reason": "expired",
+      "confidence": 0.95,
+      "message": "Deal expired on 2026-06-30 according to target page validity date, despite later publication date.",
       "sourceSystem": "llm-live-review-candidate"
     },
     {
@@ -720,7 +773,7 @@
       "removedAutomatically": false,
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Milan, destination outside Vienna, no local Vienna deal.",
+      "message": "Flight deal is for Milan, Italy, not Vienna local deal.",
       "sourceSystem": "llm-live-review-candidate"
     },
     {
@@ -757,7 +810,7 @@
       "removedAutomatically": false,
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Ibiza, destination outside Vienna, no local Vienna deal.",
+      "message": "Flight deal is for Ibiza, Spain, not Vienna local deal.",
       "sourceSystem": "llm-live-review-candidate"
     },
     {
@@ -794,7 +847,7 @@
       "removedAutomatically": false,
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Palma, destination outside Vienna, no local Vienna deal.",
+      "message": "Flight deal is for Palma, Spain, not Vienna local deal.",
       "sourceSystem": "llm-live-review-candidate"
     },
     {
@@ -831,7 +884,7 @@
       "removedAutomatically": false,
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Santorini, destination outside Vienna, no local Vienna deal.",
+      "message": "Flight deal is for Santorini, Greece, not Vienna local deal.",
       "sourceSystem": "llm-live-review-candidate"
     }
   ],
@@ -842,7 +895,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid and confirmed by Instagram post with correct location in Vienna and valid until 2026-09-01.",
+      "message": "Deal valid and confirmed on Instagram with correct location in Vienna and valid until 2026-09-01.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -852,7 +905,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid and confirmed by Instagram post with location Neubaugasse 21, 1070 Wien and valid until 2026-09-15.",
+      "message": "Deal valid and confirmed on Instagram with location in Vienna and valid until 2026-09-15.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -862,7 +915,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Deal valid and confirmed by Gutscheine.at page with valid until 2026-09-30, online for Austria (including Vienna).",
+      "message": "Deal valid on Gutscheine.at with 20% JBL Gutschein valid until 2026-09-30, online for Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -871,8 +924,8 @@
       "dealID": "igd-6d23hh",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.95,
-      "message": "Deal valid and confirmed by Instagram post with location Landstraßer Hauptstraße 71, 1030 Wien and valid until 2026-09-30.",
+      "confidence": 0.9,
+      "message": "Deal valid and confirmed on Instagram with location in Vienna and valid until 2026-09-30.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -882,7 +935,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid and confirmed by Instagram post for event in Vienna on 2026-09-04, free guided tour.",
+      "message": "Gratis Führung event confirmed on Instagram with location in Vienna and valid until 2026-09-04.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -892,7 +945,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Deal valid and confirmed by Gutscheine.at page with valid until 2026-08-31, online for Austria.",
+      "message": "Deal valid on Gutscheine.at with 10% Joom Gutschein valid for August 2026, online for Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -902,7 +955,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Deal valid and confirmed by Instagram post for Burger King 1+1 Burger via Foodora, valid until 2026-08-31.",
+      "message": "1+1 Burger King Foodora deal confirmed on Instagram, location Vienna, valid until 2026-08-31.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -912,7 +965,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Deal valid and confirmed by Gutscheine.at page with valid until 2026-12-31, online for Austria.",
+      "message": "Deal valid on Gutscheine.at with 10% Oral-B Gutschein valid until 2026-12-31, online for Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -922,7 +975,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Deal valid and confirmed by Gutscheine.at page with valid until 2026-08-31, online for Austria.",
+      "message": "Deal valid on Gutscheine.at with 15% Matratzen Discount Gutschein valid for August 2026, online for Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -932,8 +985,8 @@
       "decision": "remove",
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Paris, destination is outside Vienna, no local Vienna deal.",
-      "suggestion": "Remove because deal is for travel destination outside Vienna (Paris).",
+      "message": "Flight deal is for Paris, France, not Vienna local deal.",
+      "suggestion": "Remove because deal is for destination outside Vienna.",
       "proposedPatch": {}
     },
     {
@@ -941,9 +994,9 @@
       "dealID": "benefit-magenta-moments-oz9vs",
       "decision": "flag",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to blocked page and no deal details.",
+      "suggestion": "Remove due to bad source and no deal evidence.",
       "proposedPatch": {}
     },
     {
@@ -953,20 +1006,18 @@
       "reason": "weak_evidence",
       "confidence": 0.7,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to blocked page and missing deal details.",
+      "suggestion": "Flag for review due to weak evidence from blocked page.",
       "proposedPatch": {}
     },
     {
       "id": "llm-g2-qe30qq",
       "dealID": "g2-qe30qq",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "Deal valid and confirmed by sparhamster.at page with valid until 2026-08-31, for Wien & Österreich.",
-      "suggestion": "",
-      "proposedPatch": {
-        "validUntil": "2026-06-30"
-      }
+      "decision": "remove",
+      "reason": "expired",
+      "confidence": 0.95,
+      "message": "Deal expired on 2026-06-30 according to target page validity date, despite later publication date.",
+      "suggestion": "Remove expired deal.",
+      "proposedPatch": {}
     },
     {
       "id": "llm-gs-91769",
@@ -974,7 +1025,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Deal valid and confirmed by Gutscheine.at page with valid until 2026-08-31, online for Austria.",
+      "message": "Deal valid on Gutscheine.at with 30% SHEIN Gutschein valid for August 2026, online for Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -984,8 +1035,8 @@
       "decision": "remove",
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Milan, destination outside Vienna, no local Vienna deal.",
-      "suggestion": "Remove because deal is for travel destination outside Vienna (Milan).",
+      "message": "Flight deal is for Milan, Italy, not Vienna local deal.",
+      "suggestion": "Remove because deal is for destination outside Vienna.",
       "proposedPatch": {}
     },
     {
@@ -995,7 +1046,7 @@
       "reason": "weak_evidence",
       "confidence": 0.7,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to HTTP 429 and missing deal details.",
+      "suggestion": "Flag for review due to weak evidence from HTTP 429 response.",
       "proposedPatch": {}
     },
     {
@@ -1004,7 +1055,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Deal valid and confirmed by Wiener Laziz Food homepage with Vienna location and authentic cuisine.",
+      "message": "Deal confirmed on official site with location in Vienna, valid no expiry date.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1014,7 +1065,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Deal valid and confirmed by Gutschein.at page with valid until 2027-07-31, for Vienna.",
+      "message": "Deal valid on Gutschein.at with Essen & Trinken Gutscheine valid until 2027-07-31, location Vienna.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1024,7 +1075,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Deal valid and confirmed by Gutschein.at page with valid until 2026-12-31, multiple locations in Vienna.",
+      "message": "Deal valid on Gutschein.at for Burger King 1+1 Crispy Chicken valid until 2026-12-31, multiple locations in Vienna.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1034,7 +1085,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Deal valid and confirmed by Drei.at page with location alle Pizzamann Filialen in Wien, ongoing every Thursday.",
+      "message": "Deal valid on Drei.at with Pizzamann 2+1 Pizza gratis every Thursday in Vienna.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1044,8 +1095,8 @@
       "decision": "remove",
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Ibiza, destination outside Vienna, no local Vienna deal.",
-      "suggestion": "Remove because deal is for travel destination outside Vienna (Ibiza).",
+      "message": "Flight deal is for Ibiza, Spain, not Vienna local deal.",
+      "suggestion": "Remove because deal is for destination outside Vienna.",
       "proposedPatch": {}
     },
     {
@@ -1054,8 +1105,8 @@
       "decision": "remove",
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Palma, destination outside Vienna, no local Vienna deal.",
-      "suggestion": "Remove because deal is for travel destination outside Vienna (Palma).",
+      "message": "Flight deal is for Palma, Spain, not Vienna local deal.",
+      "suggestion": "Remove because deal is for destination outside Vienna.",
       "proposedPatch": {}
     },
     {
@@ -1064,8 +1115,8 @@
       "decision": "remove",
       "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "Deal is for flights from Vienna to Santorini, destination outside Vienna, no local Vienna deal.",
-      "suggestion": "Remove because deal is for travel destination outside Vienna (Santorini).",
+      "message": "Flight deal is for Santorini, Greece, not Vienna local deal.",
+      "suggestion": "Remove because deal is for destination outside Vienna.",
       "proposedPatch": {}
     },
     {
@@ -1074,7 +1125,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Deal valid and confirmed by Gutscheine.at page with valid until 2026-08-31, online for Austria.",
+      "message": "Deal valid on Gutscheine.at with AEG Gutscheine valid for August 2026, online for Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1084,7 +1135,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid for August 2026, target page confirms 40€ TUI coupon for Austria, no Vienna-specific mention but valid online for Austria.",
+      "message": "Deal valid for August 2026, target page confirms 40€ TUI coupon for top destinations, online for Austria, no Vienna exclusion.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1094,7 +1145,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 31.10.2026, target page confirms 3 months free Lieferando+ for Drei customers in Austria.",
+      "message": "Deal valid until 31.10.2026, Drei site confirms 3 months free Lieferando+ for Drei customers in Austria, no Vienna exclusion.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1103,8 +1154,8 @@
       "dealID": "benefit-drei-plus-1m300u0",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Deal active with no expiry date, Drei site confirms 2+1 pizza offer on Thursdays at Pizzamann in Austria.",
+      "confidence": 0.95,
+      "message": "Deal active, Drei site confirms 1+1 Pizza offer on Thursdays at Pizzamann for Drei customers in Austria, no expiry date.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1113,8 +1164,8 @@
       "dealID": "benefit-drei-plus-1g2bha9",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Deal active with no expiry date, Drei site confirms 1+1 Kinoticket offer every Thursday in Cineplexx or Constantin cinemas in Austria.",
+      "confidence": 0.95,
+      "message": "Deal active, Drei site confirms 1+1 Kinoticket offer on Thursdays for Drei customers in Austria, no expiry date.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1124,7 +1175,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 30.09.2026, Drei site confirms 1+1 Wrap offer at Nordsee in Austria.",
+      "message": "Deal valid until 30.09.2026, Drei site confirms 1+1 Wrap offer at Nordsee for Drei customers in Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1135,17 +1186,17 @@
       "reason": "weak_evidence",
       "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Check again later or find alternative source for deal confirmation.",
+      "suggestion": "Check link later for deal validity.",
       "proposedPatch": {}
     },
     {
       "id": "llm-tiktok-1onerc4",
       "dealID": "tiktok-1onerc4",
-      "decision": "flag",
-      "reason": "weak_evidence",
+      "decision": "keep",
+      "reason": "ok",
       "confidence": 0.9,
-      "message": "Target page is a TikTok video page with no deal details visible, cannot confirm deal validity or Vienna relevance.",
-      "suggestion": "Check again later or find alternative source for deal confirmation.",
+      "message": "TikTok video page accessible, deal is event in Vienna, no expiry, no conflict found.",
+      "suggestion": "",
       "proposedPatch": {}
     },
     {
@@ -1154,7 +1205,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Event valid until 19.09.2026 in Vienna, target page confirms event details and location.",
+      "message": "Event in Vienna on 19.09.2026 confirmed by official site, valid until 19.09.2026.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1163,8 +1214,8 @@
       "dealID": "g2-5ntng7",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Deal valid until 03.09.2026, IKEA site confirms breakfast offer in IKEA Wien locations.",
+      "confidence": 0.95,
+      "message": "IKEA offer valid until 03.09.2026, confirmed on IKEA Austria site, location IKEA Wien, deal active.",
       "suggestion": "",
       "proposedPatch": {
         "validUntil": "2026-09-03",
@@ -1177,7 +1228,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 30.09.2026, Gutschein.at confirms 1+1 Pizza gratis offer in Wien.",
+      "message": "Deal valid until 30.09.2026, Gutschein site confirms 1+1 Pizza nach Wahl gratis in Wien.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1186,8 +1237,8 @@
       "dealID": "benefit-drei-plus-1ivo36q",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Deal active with no expiry date, Drei site confirms 50% Rabatt bei Therme Wien for Drei customers in Austria.",
+      "confidence": 0.95,
+      "message": "Drei site confirms 50% Rabatt bei Therme Wien for Drei customers, no expiry date, valid for Austria including Vienna.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1198,7 +1249,7 @@
       "reason": "weak_evidence",
       "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Check again later or find alternative source for deal confirmation.",
+      "suggestion": "Check link later for deal validity.",
       "proposedPatch": {}
     },
     {
@@ -1206,8 +1257,8 @@
       "dealID": "benefit-drei-plus-1fwwa4y",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Deal active with no expiry date, Drei site confirms 1+1 Ticket gratis at Madame Tussauds Wien for Drei customers in Austria.",
+      "confidence": 0.95,
+      "message": "Drei site confirms 1+1 Ticket gratis bei Madame Tussauds Wien for Drei customers, no expiry date, valid for Austria including Vienna.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1216,8 +1267,8 @@
       "dealID": "g2-1ffpc0f",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Deal active with no expiry date, Nordsee site confirms 10-40% Rabatt coupons valid in Wien Nordsee locations.",
+      "confidence": 0.95,
+      "message": "Nordsee site confirms 10-40% Rabatt auf Menüs with coupons, valid in Wien locations, no expiry date.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1227,7 +1278,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 31.12.2026, EVO Fitness site confirms 7 Tage kostenloses Probetraining in Wien.",
+      "message": "EVO Fitness site confirms 7 Tage kostenloses Probetraining in Wien, valid until 31.12.2026.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1238,7 +1289,7 @@
       "reason": "weak_evidence",
       "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Check again later or find alternative source for deal confirmation.",
+      "suggestion": "Check link later for deal validity.",
       "proposedPatch": {}
     },
     {
@@ -1246,8 +1297,8 @@
       "dealID": "b1-s5vhj5",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "IKEA Family site confirms Gratis Heißgetränk offer at IKEA Wien locations, no expiry date.",
+      "confidence": 0.95,
+      "message": "IKEA Family site confirms Gratis Heißgetränk offer at IKEA Wien locations, no expiry date, valid for Vienna.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1257,7 +1308,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Spotify site confirms 3 Monate Premium gratis offer for Neukunden, valid until 23.09.2026, online offer.",
+      "message": "Spotify site confirms 3 Monate Premium gratis offer for Neukunden, valid until 23.09.2026, online valid for Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1266,8 +1317,8 @@
       "dealID": "top-6",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "foodsharing.at site confirms free food sharing offer in Wien, no expiry date.",
+      "confidence": 0.95,
+      "message": "foodsharing.at site confirms gratis Lebensmittel abholen offer, valid in Wien, no expiry date.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1278,7 +1329,7 @@
       "reason": "weak_evidence",
       "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Check again later or find alternative source for deal confirmation.",
+      "suggestion": "Check link later for deal validity.",
       "proposedPatch": {}
     },
     {
@@ -1287,7 +1338,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid for August 2026, Gutscheine.at confirms 12 € Gutschein for Wolt first order in Austria.",
+      "message": "Gutscheine.at site confirms 12 € Gutschein bei Wolt for Neukunden, valid until 30.12.2026, online for Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1296,9 +1347,9 @@
       "dealID": "joe-omv-xlrh16",
       "decision": "flag",
       "reason": "weak_evidence",
-      "confidence": 0.85,
-      "message": "Target page is a PDF download link with no direct deal page, no expiry or deal details visible.",
-      "suggestion": "Find a direct deal page or better source for confirmation.",
+      "confidence": 0.9,
+      "message": "Target page is a PDF download with no direct deal evidence, but not removed due to weak evidence policy.",
+      "suggestion": "Check source for deal details or better link.",
       "proposedPatch": {}
     },
     {
@@ -1306,8 +1357,8 @@
       "dealID": "gs-uyjace",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Deal valid for August 2026, Gutscheine.at confirms 20% Rabatt at Thalia online in Austria.",
+      "confidence": 0.95,
+      "message": "Gutscheine.at site confirms 20% Rabatt bei Thalia for August 2026, online for Austria, no Vienna exclusion.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1317,7 +1368,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Hillsong Vienna site confirms Gottesdienste in Wien location, no expiry date.",
+      "message": "Hillsong Vienna Gottesdienste confirmed on official site, location in Vienna, no expiry date.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1327,7 +1378,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Zielseite bestätigt Deal mit korrektem Wien-Bezug und Marke. Keine Ablaufdaten, aber Deal ist aktuell und relevant.",
+      "message": "Die Zielseite bestätigt den Deal mit korrektem Wien-Bezug und aktueller Quelle. Keine Ablaufdaten, aber Deal ist eine Kircheninfo, daher dauerhaft relevant.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1337,7 +1388,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Zielseite bestätigt Events in Wien mit korrekter Marke und Ort. Keine Ablaufdaten, Deal ist aktuell.",
+      "message": "Zielseite bestätigt Events in Wien mit korrektem Standort und Quelle. Keine Ablaufdaten, Event-Deal ist aktuell und relevant.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1347,7 +1398,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Zielseite bestätigt Gottesdienste in Wien mit korrektem Ort. Marke teilweise erwähnt, Deal ist aktuell und relevant.",
+      "message": "Zielseite bestätigt Gottesdienste in Wien mit korrektem Standort und Quelle. Keine Ablaufdaten, Deal ist dauerhaft relevant.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1357,7 +1408,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Zielseite bestätigt Kirche in Wien mit korrektem Ort und Beschreibung. Deal ist aktuell und relevant.",
+      "message": "Zielseite bestätigt Kirche in Wien mit korrektem Standort und Quelle. Keine Ablaufdaten, Deal ist dauerhaft relevant.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1367,37 +1418,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Zielseite bestätigt Events in Wien mit korrektem Ort. Deal ist aktuell und relevant.",
-      "suggestion": "",
-      "proposedPatch": {}
-    },
-    {
-      "id": "llm-icf-wien-gottesdienste",
-      "dealID": "icf-wien-gottesdienste",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.95,
-      "message": "Zielseite bestätigt Gottesdienste in Wien mit korrektem Ort. Marke nicht explizit erwähnt, aber Deal passt zum Link und Ort.",
-      "suggestion": "",
-      "proposedPatch": {}
-    },
-    {
-      "id": "llm-icf-wien-kirche",
-      "dealID": "icf-wien-kirche",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.95,
-      "message": "Zielseite bestätigt Kirche in Wien mit korrektem Ort und Beschreibung. Deal ist aktuell und relevant.",
-      "suggestion": "",
-      "proposedPatch": {}
-    },
-    {
-      "id": "llm-icf-wien-events",
-      "dealID": "icf-wien-events",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.95,
-      "message": "Zielseite bestätigt Events in Wien mit korrektem Ort. Deal ist aktuell und relevant.",
+      "message": "Zielseite bestätigt Events in Wien mit korrektem Standort und Quelle. Keine Ablaufdaten, Event-Deal ist aktuell und relevant.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1407,17 +1428,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Zielseite bestätigt Gottesdienste in Wien mit korrektem Ort und Marke. Deal ist aktuell und relevant.",
-      "suggestion": "",
-      "proposedPatch": {}
-    },
-    {
-      "id": "llm-jesuszentrum-kirche",
-      "dealID": "jesuszentrum-kirche",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.95,
-      "message": "Zielseite bestätigt Kirche in Wien mit korrektem Ort und Marke. Deal ist aktuell und relevant.",
+      "message": "Zielseite bestätigt Gottesdienste in Wien mit korrektem Standort und Quelle. Keine Ablaufdaten, Deal ist dauerhaft relevant.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1427,7 +1438,47 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Zielseite bestätigt Events in Wien mit korrektem Ort und Marke. Deal ist aktuell und relevant.",
+      "message": "Zielseite bestätigt Events in Wien mit korrektem Standort und Quelle. Keine Ablaufdaten, Event-Deal ist aktuell und relevant.",
+      "suggestion": "",
+      "proposedPatch": {}
+    },
+    {
+      "id": "llm-jesuszentrum-kirche",
+      "dealID": "jesuszentrum-kirche",
+      "decision": "keep",
+      "reason": "ok",
+      "confidence": 0.95,
+      "message": "Zielseite bestätigt Kirche in Wien mit korrektem Standort und Quelle. Keine Ablaufdaten, Deal ist dauerhaft relevant.",
+      "suggestion": "",
+      "proposedPatch": {}
+    },
+    {
+      "id": "llm-icf-wien-gottesdienste",
+      "dealID": "icf-wien-gottesdienste",
+      "decision": "keep",
+      "reason": "ok",
+      "confidence": 0.95,
+      "message": "Zielseite bestätigt Gottesdienste in Wien mit korrektem Standort und Quelle. Keine Ablaufdaten, Deal ist dauerhaft relevant.",
+      "suggestion": "",
+      "proposedPatch": {}
+    },
+    {
+      "id": "llm-icf-wien-kirche",
+      "dealID": "icf-wien-kirche",
+      "decision": "keep",
+      "reason": "ok",
+      "confidence": 0.95,
+      "message": "Zielseite bestätigt Kirche in Wien mit korrektem Standort und Quelle. Keine Ablaufdaten, Deal ist dauerhaft relevant.",
+      "suggestion": "",
+      "proposedPatch": {}
+    },
+    {
+      "id": "llm-icf-wien-events",
+      "dealID": "icf-wien-events",
+      "decision": "keep",
+      "reason": "ok",
+      "confidence": 0.95,
+      "message": "Zielseite bestätigt Events in Wien mit korrektem Standort und Quelle. Keine Ablaufdaten, Event-Deal ist aktuell und relevant.",
       "suggestion": "",
       "proposedPatch": {}
     }
@@ -1444,15 +1495,15 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:12.361Z",
+      "checkedAt": "2026-08-31T16:19:35.117Z",
       "page": {
         "title": "Munchy am Reumannplatz ® on Instagram: \"🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % österreichischem Rindfleisch & Fries 🍗 Handgesmashter Chicken Burger mit österreichischem Hühnerf",
-        "description": "21 likes, 0 comments - munchyvienna on August 28, 2026: \"🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % österreichischem Rindfleisch & Fries 🍗 Handgesmashter Chicken Burger mit österreichischem Hühnerfleisch & Fries 🌭 Alle Hot Dogs aus unserer Karte Jeweils nur 5 € statt 10,90 €! 📍 Munchy am Reumannplatz Leibnizgasse 13, 1100 Wien Komm hungrig. Geh glücklich. 😋 #Munchy #Reumannp",
+        "description": "22 likes, 0 comments - munchyvienna on August 28, 2026: \"🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % österreichischem Rindfleisch & Fries 🍗 Handgesmashter Chicken Burger mit österreichischem Hühnerfleisch & Fries 🌭 Alle Hot Dogs aus unserer Karte Jeweils nur 5 € statt 10,90 €! 📍 Munchy am Reumannplatz Leibnizgasse 13, 1100 Wien Komm hungrig. Geh glücklich. 😋 #Munchy #Reumannp",
         "heading": "No comments yet.",
         "headings": [
           "No comments yet."
         ],
-        "textSnippet": "Instagram Log In Sign Up Never miss a post from munchyvienna Sign up for Instagram to stay in the loop. Sign up Log in munchyvienna • Follow munchyvienna 2d 🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % österreichischem Rindfleisch & Fries 🍗 Handgesmashter Chicken Burger mit österreichischem Hühnerfleisch & Fries 🌭 Alle Hot Dogs aus unserer Karte Jeweils nur 5 € statt 10,90 €! 📍 Munchy am Reumannplatz Leibnizgasse 13, 1100 Wien Komm hungrig. Geh glücklich. 😋 #Munchy #Reumannplatz #BurgerWien #HotDogWien #StreetfoodWien #WienEssen #FoodDeal No comments yet. Start the conversation. 21 2 days ago Log in to like or comment. More posts from munchyvienna See more posts Meta About Blog Jobs Help API Privacy Consumer Health Privacy Terms Locations Popular Instagram Lite Meta AI Threads Contact Uploading & Non-Users Meta Verified English Afrikaans العربية Č"
+        "textSnippet": "Instagram Log In Sign Up Never miss a post from munchyvienna Sign up for Instagram to stay in the loop. Sign up Log in munchyvienna • Follow munchyvienna 3d 🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % österreichischem Rindfleisch & Fries 🍗 Handgesmashter Chicken Burger mit österreichischem Hühnerfleisch & Fries 🌭 Alle Hot Dogs aus unserer Karte Jeweils nur 5 € statt 10,90 €! 📍 Munchy am Reumannplatz Leibnizgasse 13, 1100 Wien Komm hungrig. Geh glücklich. 😋 #Munchy #Reumannplatz #BurgerWien #HotDogWien #StreetfoodWien #WienEssen #FoodDeal No comments yet. Start the conversation. 22 3 days ago Log in to like or comment. More posts from munchyvienna See more posts Meta About Blog Jobs Help API Privacy Consumer Health Privacy Terms Locations Popular Instagram Lite Meta AI Threads Contact Uploading & Non-Users Meta Verified English Afrikaans العربية Č"
       },
       "dates": {
         "publicationDate": "2026-08-28T23:59:59.999Z",
@@ -1484,13 +1535,13 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:12.460Z",
+      "checkedAt": "2026-08-31T16:19:35.192Z",
       "page": {
         "title": "Pam & Becci | Vienna on Instagram: \"GRATIS GETRÄNK IN WIEN @recup_at 📍 27.08.–02.09. | Neubaugasse 21, 1070 Wien ⏰ täglich um 11 & 13 Uhr 🥤 RECUP Becher mit Gutschein schnappen solange der Vorrat reicht ☕️ Gratis Geträ",
-        "description": "494 likes, 7 comments - pam_becci on August 29, 2026: \"GRATIS GETRÄNK IN WIEN @recup_at 📍 27.08.–02.09. | Neubaugasse 21, 1070 Wien ⏰ täglich um 11 & 13 Uhr 🥤 RECUP Becher mit Gutschein schnappen solange der Vorrat reicht ☕️ Gratis Getränk bis € 5,90 🎟️ Einlösbar bis 15.09.2026 bei teilnehmenden RECUP Partnern RECUP ist ein Mehrweg-Pfandsystem für To-go-Getränke: Statt Einwegbechern werden wiederverwendbare Becher",
+        "description": "512 likes, 8 comments - pam_becci on August 29, 2026: \"GRATIS GETRÄNK IN WIEN @recup_at 📍 27.08.–02.09. | Neubaugasse 21, 1070 Wien ⏰ täglich um 11 & 13 Uhr 🥤 RECUP Becher mit Gutschein schnappen solange der Vorrat reicht ☕️ Gratis Getränk bis € 5,90 🎟️ Einlösbar bis 15.09.2026 bei teilnehmenden RECUP Partnern RECUP ist ein Mehrweg-Pfandsystem für To-go-Getränke: Statt Einwegbechern werden wiederverwendbare Becher",
         "heading": "",
         "headings": [],
-        "textSnippet": "Instagram Log In Sign Up Never miss a post from pam_becci Sign up for Instagram to stay in the loop. Sign up Log in pam_becci and recup_at pam_becci 1d GRATIS GETRÄNK IN WIEN @recup_at 📍 27.08.–02.09. | Neubaugasse 21, 1070 Wien ⏰ täglich um 11 & 13 Uhr 🥤 RECUP Becher mit Gutschein schnappen solange der Vorrat reicht ☕️ Gratis Getränk bis € 5,90 🎟️ Einlösbar bis 15.09.2026 bei teilnehmenden RECUP Partnern RECUP ist ein Mehrweg-Pfandsystem für To-go-Getränke: Statt Einwegbechern werden wiederverwendbare Becher genutzt, die nach der Rückgabe gespült und erneut ausgegeben werden ♻️ Also: Becher schnappen, Gratis-Drink holen und dabei Einwegmüll vermeiden. anz eige #thingstodoinvienna #wien #vienna #coffeetogo #mehrweg kbeiinsta 16h Die hängen da einfach so in der Luft umadum? 🤢 Like Reply defekt8945 20h Totale Abzocke diese Abgenagten Mehrwegbecher. Die dreckigen Becher darf man ja als "
+        "textSnippet": "Instagram Log In Sign Up Never miss a post from pam_becci Sign up for Instagram to stay in the loop. Sign up Log in pam_becci and recup_at pam_becci 2d GRATIS GETRÄNK IN WIEN @recup_at 📍 27.08.–02.09. | Neubaugasse 21, 1070 Wien ⏰ täglich um 11 & 13 Uhr 🥤 RECUP Becher mit Gutschein schnappen solange der Vorrat reicht ☕️ Gratis Getränk bis € 5,90 🎟️ Einlösbar bis 15.09.2026 bei teilnehmenden RECUP Partnern RECUP ist ein Mehrweg-Pfandsystem für To-go-Getränke: Statt Einwegbechern werden wiederverwendbare Becher genutzt, die nach der Rückgabe gespült und erneut ausgegeben werden ♻️ Also: Becher schnappen, Gratis-Drink holen und dabei Einwegmüll vermeiden. anz eige #thingstodoinvienna #wien #vienna #coffeetogo #mehrweg recup_at 6h @pam_becci 🫶🫶 Like Reply kbeiinsta 1d Die hängen da einfach so in der Luft umadum? 🤢 Like Reply defekt8945 1d Totale Abzocke diese Abgenagten Mehrwegbecher. "
       },
       "dates": {
         "publicationDate": "2026-08-29T23:59:59.999Z",
@@ -1522,9 +1573,9 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:13.762Z",
+      "checkedAt": "2026-08-31T16:19:35.464Z",
       "page": {
-        "title": "JBL Gutscheine ▷ 20% Rabatt + 10% Gutschein!",
+        "title": "JBL Gutscheine ▷ 20% Rabatt + 70€ Gutschein!",
         "description": "Aktuelle Top JBL Gutscheine im August 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
         "heading": "Heute aktuell: JBL Gutscheine August 2026",
         "headings": [
@@ -1534,13 +1585,13 @@
           "Kostenlose Gaming-Matte beim Kauf von Quantum Produkten bei JBL",
           "10% Rabatt nach Anmeldung zum Newsletter"
         ],
-        "textSnippet": "JBL Gutscheine ▷ 20% Rabatt + 10% Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 5 von 5 Sternen mit 1 Bewertung für JBL JBL jetzt teilen JBL Gutscheine Ähnliche Gutscheine Newsletter abonnieren JBL Gutscheine 6 Höchster JBL Rabatt € 70,00 Bestandskunden Gutscheine 6 Letztes Update 26.08.2026 Mehr anzeigen Heute aktuell: JBL Gutscheine August 2026 JBL Gutscheincodes & Aktionen in Österreich Alle (6) Gutscheine (2) Angebote (4) Gutschein 20% Rabatt 20% Gutschein für personalisierte Lautsprecher & Kopfhörer ******************** Gutschein anzeigen Geprüft Gültig bis: 30.09.2026 Details Gutschein Gratis Geschenk Kostenlose Gaming-Matte beim Kauf von Quantum Produkten bei JBL ******************** Gutschein anzeige"
+        "textSnippet": "JBL Gutscheine ▷ 20% Rabatt + 70€ Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 5 von 5 Sternen mit 1 Bewertung für JBL JBL jetzt teilen JBL Gutscheine Ähnliche Gutscheine Newsletter abonnieren JBL Gutscheine 6 Höchster JBL Rabatt € 70,00 Bestandskunden Gutscheine 6 Letztes Update 26.08.2026 Mehr anzeigen Heute aktuell: JBL Gutscheine August 2026 JBL Gutscheincodes & Aktionen in Österreich Alle (6) Gutscheine (2) Angebote (4) Gutschein 20% Rabatt 20% Gutschein für personalisierte Lautsprecher & Kopfhörer ******************** Gutschein anzeigen Geprüft Gültig bis: 30.09.2026 Details Gutschein Gratis Geschenk Kostenlose Gaming-Matte beim Kauf von Quantum Produkten bei JBL ******************** Gutschein anzeige"
       },
       "dates": {
         "publicationDate": "",
         "publicationDateSource": "",
         "targetDateSource": "url",
-        "targetDateRaw": "Aktuelle Top JBL Gutscheine im August 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen JBL Gutscheine ▷ 20% Rabatt + 10% Gutschein!",
+        "targetDateRaw": "Aktuelle Top JBL Gutscheine im August 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen JBL Gutscheine ▷ 20% Rabatt + 70€ Gutschein!",
         "targetDateKind": "month",
         "validOn": "",
         "validFrom": "2026-08-01",
@@ -1566,13 +1617,13 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:12.433Z",
+      "checkedAt": "2026-08-31T16:19:35.669Z",
       "page": {
         "title": "Lisa entdeckt 🇦🇹 on Instagram: \"anzeige 🍣 SUMMER DEALS bei Tenno Sushi! ☀️ @tennosushiofficial 📍 Landstraßer Hauptstraße 71, 1030 Wien Sushi-Lover aufgepasst! 😍 Bis 30.09. könnt ihr euch bei Tenno Sushi mit den Summ",
         "description": "64 likes, 12 comments - lisa.maria.b on August 27, 2026: \"anzeige 🍣 SUMMER DEALS bei Tenno Sushi! ☀️ @tennosushiofficial 📍 Landstraßer Hauptstraße 71, 1030 Wien Sushi-Lover aufgepasst! 😍 Bis 30.09. könnt ihr euch bei Tenno Sushi mit den Summer Deals bis zu 50 % sparen. Die Coupons bekommt ihr direkt vor Ort – also einfach hingehen und sparen! 🥢 Außerdem gibt’s die Sushi Experience Deluxe Box mit 48 Stück Sushi in",
         "heading": "",
         "headings": [],
-        "textSnippet": "Instagram Log In Sign Up Never miss a post from lisa.maria.b Sign up for Instagram to stay in the loop. Sign up Log in lisa.maria.b and tennosushiofficial lisa.maria.b 3d anzeige 🍣 SUMMER DEALS bei Tenno Sushi! ☀️ @tennosushiofficial 📍 Landstraßer Hauptstraße 71, 1030 Wien Sushi-Lover aufgepasst! 😍 Bis 30.09. könnt ihr euch bei Tenno Sushi mit den Summer Deals bis zu 50 % sparen. Die Coupons bekommt ihr direkt vor Ort – also einfach hingehen und sparen! 🥢 Außerdem gibt’s die Sushi Experience Deluxe Box mit 48 Stück Sushi in verschiedenen Varianten, Gyoza, Corn Ribs & 4 Getränken – perfekt zum Teilen mit Freunden. 🤤 Einladung just_me_nadja 1d 😍😍😍😍 Like Reply nadjastasteofvienna 2d 🙌🙌🙌🙌 1 like Reply sanela.suman 2d 😍😍😍 1 like Reply sumandenis 2d 😍😍 1 like Reply tennosushiofficial 3d ❤️ 1 like Reply magda.mag.das 3d Sieht so gut aus 😍 1 like Reply lisabackt 3d 🔥 1 like R"
+        "textSnippet": "Instagram"
       },
       "dates": {
         "publicationDate": "2026-08-27T23:59:59.999Z",
@@ -1604,21 +1655,21 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:12.311Z",
+      "checkedAt": "2026-08-31T16:19:34.958Z",
       "page": {
         "title": "Hilfsgemeinschaft der Blinden und Sehschwachen Österreichs on Instagram: \"Wie riecht Kunst? 🤔 Welche Geschichten erzählen Gerüche? Und wie fühlt sich ein Museumsbesuch an, wenn man alle Sinne öffnet? Erlebe das Kunsthis",
-        "description": "18 likes, 0 comments - hilfsgemeinschaft on August 24, 2026: \"Wie riecht Kunst? 🤔 Welche Geschichten erzählen Gerüche? Und wie fühlt sich ein Museumsbesuch an, wenn man alle Sinne öffnet? Erlebe das Kunsthistorische Museum Wien auf eine ganz besondere Weise, mit einer Führung, die Kunst nicht nur zeigt, sondern spürbar, riechbar und fühlbar macht! ✨ 📅 04.09.2026 | 15:00 Uhr 📍 Kunsthistorisches Museum Wien, Maria-T",
+        "description": "20 likes, 0 comments - hilfsgemeinschaft on August 24, 2026: \"Wie riecht Kunst? 🤔 Welche Geschichten erzählen Gerüche? Und wie fühlt sich ein Museumsbesuch an, wenn man alle Sinne öffnet? Erlebe das Kunsthistorische Museum Wien auf eine ganz besondere Weise, mit einer Führung, die Kunst nicht nur zeigt, sondern spürbar, riechbar und fühlbar macht! ✨ 📅 04.09.2026 | 15:00 Uhr 📍 Kunsthistorisches Museum Wien, Maria-T",
         "heading": "No comments yet.",
         "headings": [
           "No comments yet."
         ],
-        "textSnippet": "Instagram Log In Sign Up Never miss a post from hilfsgemeinschaft Sign up for Instagram to stay in the loop. Sign up Log in hilfsgemeinschaft • Follow hilfsgemeinschaft 6d Wie riecht Kunst? 🤔 Welche Geschichten erzählen Gerüche? Und wie fühlt sich ein Museumsbesuch an, wenn man alle Sinne öffnet? Erlebe das Kunsthistorische Museum Wien auf eine ganz besondere Weise, mit einer Führung, die Kunst nicht nur zeigt, sondern spürbar, riechbar und fühlbar macht! ✨ 📅 04.09.2026 | 15:00 Uhr 📍 Kunsthistorisches Museum Wien, Maria-Theresien-Platz, 1010 Wien ⏱ 1 Stunde | 💰 Kostenlos 👩‍🏫 Führung: Magdalena Ölzant 📩 Jetzt anmelden: 📞 01 / 330 35 45 — 0 ✉️ anmeldung@hilfsgemeinschaft.at @kunsthistorischesmuseumvienna #KHM #KunsthistorischesMuseum #MuseumMitAllenSinnen #Inklusion #Barrierefrei #KunstUndKultur #Wien #EventWien #Spezialführung #ElementeInDerKunst #KunstErleben #ZugänglicheKultur #"
+        "textSnippet": "Instagram Log In Sign Up Never miss a post from hilfsgemeinschaft Sign up for Instagram to stay in the loop. Sign up Log in hilfsgemeinschaft • Follow hilfsgemeinschaft 1w Wie riecht Kunst? 🤔 Welche Geschichten erzählen Gerüche? Und wie fühlt sich ein Museumsbesuch an, wenn man alle Sinne öffnet? Erlebe das Kunsthistorische Museum Wien auf eine ganz besondere Weise, mit einer Führung, die Kunst nicht nur zeigt, sondern spürbar, riechbar und fühlbar macht! ✨ 📅 04.09.2026 | 15:00 Uhr 📍 Kunsthistorisches Museum Wien, Maria-Theresien-Platz, 1010 Wien ⏱ 1 Stunde | 💰 Kostenlos 👩‍🏫 Führung: Magdalena Ölzant 📩 Jetzt anmelden: 📞 01 / 330 35 45 — 0 ✉️ anmeldung@hilfsgemeinschaft.at @kunsthistorischesmuseumvienna #KHM #KunsthistorischesMuseum #MuseumMitAllenSinnen #Inklusion #Barrierefrei #KunstUndKultur #Wien #EventWien #Spezialführung #ElementeInDerKunst #KunstErleben #ZugänglicheKultur #"
       },
       "dates": {
         "publicationDate": "2026-08-24T23:59:59.999Z",
         "publicationDateSource": "contextPublished",
         "targetDateSource": "url",
-        "targetDateRaw": "18 likes, 0 comments - hilfsgemeinschaft on August 24, 2026: \"Wie riecht Kunst? 🤔 Welche Geschichten erzählen Gerüche? Und wie fühlt sich ein Museumsbesuch an, wenn man alle Sinne",
+        "targetDateRaw": "20 likes, 0 comments - hilfsgemeinschaft on August 24, 2026: \"Wie riecht Kunst? 🤔 Welche Geschichten erzählen Gerüche? Und wie fühlt sich ein Museumsbesuch an, wenn man alle Sinne",
         "targetDateKind": "single",
         "validOn": "2026-09-04",
         "validFrom": "",
@@ -1644,7 +1695,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:14.068Z",
+      "checkedAt": "2026-08-31T16:19:35.394Z",
       "page": {
         "title": "Joom Gutscheine ▷ 10% Rabatt auf Alles",
         "description": "Aktuelle Top Joom Gutscheine im August 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -1688,13 +1739,13 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:13.297Z",
+      "checkedAt": "2026-08-31T16:19:35.169Z",
       "page": {
         "title": "Shaysfoodblog on Instagram: \"1+1 bei Burgerking nur bei der Foodora App bis zum 31.08. 🥳🥳 #fyp #aktion #birgerking\"",
         "description": "134 likes, 2 comments - shaysfoodblog on August 17, 2026: \"1+1 bei Burgerking nur bei der Foodora App bis zum 31.08. 🥳🥳 #fyp #aktion #birgerking\".",
         "heading": "",
         "headings": [],
-        "textSnippet": "Instagram"
+        "textSnippet": "Instagram Log In Sign Up Never miss a post from shaysfoodblog Sign up for Instagram to stay in the loop. Sign up Log in shaysfoodblog and foodora.at shaysfoodblog Edited • 1w 1+1 bei Burgerking nur bei der Foodora App bis zum 31.08. 🥳🥳 #fyp #aktion #birgerking foodora.at 1w Typischer Wiener 👀 1 like Reply ezzyo88 1w @shaysfoodblog gönnt echt 😍 Like Reply 134 2 August 17 Log in to like or comment. More posts from shaysfoodblog See more posts Meta About Blog Jobs Help API Privacy Consumer Health Privacy Terms Locations Popular Instagram Lite Meta AI Threads Contact Uploading & Non-Users Meta Verified English Afrikaans العربية Čeština Dansk Deutsch Ελληνικά English English (UK) Español (España) Español فارسی Suomi Français עברית Bahasa Indonesia Italiano 日本語 한국어 Bahasa Melayu Norsk Nederlands Polski Português (Brasil) Português (Portugal) Русский Svenska ภาษาไทย Filipino Türkçe 中文(简体) 中"
       },
       "dates": {
         "publicationDate": "2026-08-17T23:59:59.999Z",
@@ -1726,7 +1777,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:16.537Z",
+      "checkedAt": "2026-08-31T16:19:35.939Z",
       "page": {
         "title": "Oral-B Gutscheincode ▷ Exklusiv 10% Rabatt + 7,99€ Gutschein!",
         "description": "Aktuelle Top Oral-B Gutscheine im August 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -1770,7 +1821,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:16.726Z",
+      "checkedAt": "2026-08-31T16:19:38.003Z",
       "page": {
         "title": "Matratzen Discount Gutscheine ▷ Exklusiv 15% Rabatt + 50% Gutschein!",
         "description": "Aktuelle Top Matratzen Discount Gutscheine im August 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -1814,7 +1865,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:13.871Z",
+      "checkedAt": "2026-08-31T16:19:35.927Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -1852,7 +1903,7 @@
       "transientError": true,
       "blockedByProtection": true,
       "reason": "www.magenta.at",
-      "checkedAt": "2026-08-31T08:02:11.652Z",
+      "checkedAt": "2026-08-31T16:19:34.084Z",
       "page": {
         "title": "",
         "description": "",
@@ -1890,7 +1941,7 @@
       "transientError": true,
       "blockedByProtection": true,
       "reason": "www.viennamarriott-restaurants.com",
-      "checkedAt": "2026-08-31T08:02:11.652Z",
+      "checkedAt": "2026-08-31T16:19:34.084Z",
       "page": {
         "title": "",
         "description": "",
@@ -1928,10 +1979,10 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:14.132Z",
+      "checkedAt": "2026-08-31T16:19:36.565Z",
       "page": {
         "title": "Lieferando Neukunden – 10€ Rabatt ab 20€ Bestellwert",
-        "description": "Bis 31. August verlängert! Bei Lieferando.at gibts einen neuen Gutschein für Neukunden. 10€ Rabatt (ab 20€ Bestellwert) könnt ihr euch holen, wenn ihr über die Lieferando App bestellt. Nutzt dafür den Gutscheincode WILLKOMMEN10 im Bestellprozess. Die Aktion ist bis zum 30.06.2026 verfügbar. Dieser Gutscheincode gewährt",
+        "description": "Neukunden können heute noch bei Lieferando sparen - Mahlzeit! Bei Lieferando.at gibts einen neuen Gutschein für Neukunden. 10€ Rabatt (ab 20€ Bestellwert) könnt ihr euch holen, wenn ihr über die Lieferando App bestellt. Nutzt dafür den Gutscheincode WILLKOMMEN10 im Bestellprozess. Die Aktion ist bis zum 30.06.2026 verf",
         "heading": "Passende Deals",
         "headings": [
           "Passende Deals",
@@ -1943,10 +1994,10 @@
         "textSnippet": "Lieferando Neukunden - 10€ Rabatt ab 20€ Bestellwert - Sparhamster.at Zum Hauptinhalt springen [uk-sticky]\",\"boundary\":\".tm-header-mobile .uk-navbar-container\"}\"> Passende Deals Bitte Suchbegriff eingeben. Menü .uk-parent; animation: false\" uk-scrollspy-nav=\"closest: li; scroll: true;\"> Kategorien Technik & Digital Computer & Laptops Smartphones & Tablets TV & Audio Foto & Video Gaming Smart Home Apps & Software Streaming Haushalt & Wohnen Haushalt & Küche Möbel & Einrichtung Garten & Balkon Baumarkt & Werkzeug Fashion & Beauty Fashion & Mode Schuhe & Accessoires Beauty & Kosmetik Schmuck & Uhren Familie & Freizeit Spielzeug & Spiele Baby & Kind Bücher & Medien Sport & Outdoor Fahrrad & E-Bike Freizeit Reisen & Urlaub Auto & Motorrad Essen & Gesundheit Lebensmittel & Getränke Restaurants & Lieferdienste Gesundheit & Wellness Apotheke & Medizin Diverses Gratisproben Österreich Bonus-Deals"
       },
       "dates": {
-        "publicationDate": "2026-07-22T15:20:21.000Z",
+        "publicationDate": "2026-08-31T09:15:21.000Z",
         "publicationDateSource": "timeDatetime",
         "targetDateSource": "url",
-        "targetDateRaw": "Bis 31. August verlängert! Bei Lieferando.at gibts einen neuen Gutschein für Neukunden. 10€ Rabatt (ab 20€ Bestellwert) könnt ihr euch holen, wenn ihr über die Lieferando App beste",
+        "targetDateRaw": "Neukunden können heute noch bei Lieferando sparen - Mahlzeit! Bei Lieferando.at gibts einen neuen Gutschein für Neukunden. 10€ Rabatt (ab 20€ Bestellwert) könnt ihr euch holen, wen",
         "targetDateKind": "end",
         "validOn": "",
         "validFrom": "",
@@ -1972,7 +2023,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:17.399Z",
+      "checkedAt": "2026-08-31T16:19:36.579Z",
       "page": {
         "title": "SHEIN Rabattcode ▷ 30% Rabatt + 70% Gutschein!",
         "description": "Aktuelle Top SHEIN Gutscheine im August 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -2016,7 +2067,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:13.961Z",
+      "checkedAt": "2026-08-31T16:19:36.328Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -2054,7 +2105,7 @@
       "transientError": true,
       "blockedByProtection": false,
       "reason": "HTTP 429",
-      "checkedAt": "2026-08-31T08:02:11.652Z",
+      "checkedAt": "2026-08-31T16:19:34.084Z",
       "page": {
         "title": "",
         "description": "",
@@ -2092,7 +2143,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:14.086Z",
+      "checkedAt": "2026-08-31T16:19:36.115Z",
       "page": {
         "title": "Wiener Laziz Food — Echte Geschmäcker",
         "description": "Authentische Küche aus dem Herzen Wiens – Döner, Pizza, Burger, Pasta & mehr.",
@@ -2136,7 +2187,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:14.916Z",
+      "checkedAt": "2026-08-31T16:19:36.819Z",
       "page": {
         "title": "Essen & Trinken Gutscheine – Österreich sparen",
         "description": "Gutscheine für Restaurants, Cafés und Lieferdienste in Österreich. Jetzt aktuelle Angebote entdecken und beim nächsten Essen bares Geld sparen.",
@@ -2180,7 +2231,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:14.933Z",
+      "checkedAt": "2026-08-31T16:19:36.804Z",
       "page": {
         "title": "Burger King Gutschein: 1+1 Crispy Chicken GRATIS - Gutschein.at",
         "description": "Jetzt bei Burger King Österreich sparen: 2 Crispy Chicken zum Preis von einem. Gutschein online einlösen – gültig bis 31.12.2026. Jetzt sichern!",
@@ -2224,7 +2275,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:15.177Z",
+      "checkedAt": "2026-08-31T16:19:36.902Z",
       "page": {
         "title": "Vorteil Pizzamann: Donnerstags 2 + 1 Pizza gratis | Drei.at",
         "description": "Jeden Donnerstag bekommen alle bei Drei bei PIZZAMANN beim Kauf von 2 Pizzen die g&uuml;nstigere gratis dazu. >> Mehr erfahren",
@@ -2268,7 +2319,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:14.308Z",
+      "checkedAt": "2026-08-31T16:19:36.235Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -2306,7 +2357,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:14.438Z",
+      "checkedAt": "2026-08-31T16:19:36.341Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -2344,7 +2395,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:14.461Z",
+      "checkedAt": "2026-08-31T16:19:36.461Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -2382,7 +2433,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:15.489Z",
+      "checkedAt": "2026-08-31T16:19:37.029Z",
       "page": {
         "title": "AEG Gutscheine ▷ 38% Rabatt + 50% Gutschein!",
         "description": "Aktuelle Top AEG Gutscheine im August 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -2426,7 +2477,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:15.839Z",
+      "checkedAt": "2026-08-31T16:19:37.629Z",
       "page": {
         "title": "TUI Gutscheine ▷ 80€ Rabatt + 40€ Gutschein!",
         "description": "Aktuelle Top TUI Gutscheine im August 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -2470,7 +2521,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:15.447Z",
+      "checkedAt": "2026-08-31T16:19:37.072Z",
       "page": {
         "title": "Lieferando: Vorteil f&uuml;r alle mit Handyvertrag | Drei.at",
         "description": "Dein Plus beim Essenbestellen: 3 Monate keine Liefergeb&uuml;hren im Lieferando+ Abo.",
@@ -2513,7 +2564,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:15.475Z",
+      "checkedAt": "2026-08-31T16:19:37.194Z",
       "page": {
         "title": "Vorteil Pizzamann: Donnerstags 2 + 1 Pizza gratis | Drei.at",
         "description": "Jeden Donnerstag bekommen alle bei Drei bei PIZZAMANN beim Kauf von 2 Pizzen die g&uuml;nstigere gratis dazu. >> Mehr erfahren",
@@ -2556,7 +2607,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:15.460Z",
+      "checkedAt": "2026-08-31T16:19:37.369Z",
       "page": {
         "title": "Drei KinoDonnerstag: 2 Tickets zum Preis von 1 | Drei.at",
         "description": "F&uuml;r alle bei Drei: Zwei Kinotickets zum Preis von einem bekommen - jeden Donnerstag in jedem Cineplexx-Kino oder Constantin-Film Kino. >> Mehr erfahren",
@@ -2599,7 +2650,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:15.727Z",
+      "checkedAt": "2026-08-31T16:19:37.404Z",
       "page": {
         "title": "Nordsee: 1+1 Wrap | Drei.at",
         "description": "Hier erf&auml;hrst du mehr &uuml;ber deinen Vorteil bei Nordsee >> Jetzt informieren.",
@@ -2642,7 +2693,7 @@
       "transientError": true,
       "blockedByProtection": false,
       "reason": "HTTP 403",
-      "checkedAt": "2026-08-31T08:02:11.652Z",
+      "checkedAt": "2026-08-31T16:19:34.084Z",
       "page": {
         "title": "",
         "description": "",
@@ -2680,7 +2731,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:16.058Z",
+      "checkedAt": "2026-08-31T16:19:37.583Z",
       "page": {
         "title": "TikTok - Make Your Day",
         "description": "",
@@ -2718,7 +2769,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:16.368Z",
+      "checkedAt": "2026-08-31T16:19:37.731Z",
       "page": {
         "title": "Marsch für Jesus 2026",
         "description": "Einheit – Sichtbarkeit – Lobpreis | 19. September 2026 in Wien",
@@ -2762,7 +2813,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:17.962Z",
+      "checkedAt": "2026-08-31T16:19:37.935Z",
       "page": {
         "title": "Angebote & Aktionen entdecken",
         "description": "Entdecke die besten Angebote bei IKEA Österreich. Spare jetzt bei Möbeln, Deko und Haushaltsgeräten – alle laufenden Aktionen auf einen Blick!",
@@ -2774,7 +2825,7 @@
           "Aktuelle Food Angebote",
           "IKEA Family Angebot: Gratis Kindermenü*"
         ],
-        "textSnippet": "Angebote & Aktionen entdecken - IKEA Österreich Weiter zum Inhalt DE AT Deutsch Deine PLZ Einrichtungshaus auswählen Produkte Räume Angebote & Mehr Planung & Ideen Services Sucheingabefeld leeren Suchen Suche Hej! Jetzt anmelden. Einkaufsliste Warenkorb Beratung & Bestellung per Telefon Aktuelle Angebote & Aktionen bei IKEA Überspringen Alle IKEA Family Angebote Aktuelle Food Angebote Weitere Aktionen & Neues IKEA Family Mitglied werden Als IKEA Family Mitglied profitierst du vom Treuebonus von IKEA Family , besonderen Angeboten und vielem mehr. Werde noch heute Teil der IKEA Family! Jetzt kostenlos registrieren Aktuelle Food Angebote IKEA Family Angebot: Gratis Kindermenü* *Angebot gültig bis 3.9.2026. Pro Erwachsenem IKEA Family Mitglied, das ein warmes Hauptgericht ab € 4,99 konsumiert, bekommen maximal 2 Kinder (bis 12 Jahre) je ein Kindermenü gratis dazu. Angebot gültig nur im schwe"
+        "textSnippet": "Angebote & Aktionen entdecken - IKEA Österreich Weiter zum Inhalt DE AT Deutsch Deine PLZ Einrichtungshaus auswählen Produkte Räume Angebote & Mehr Planung & Ideen Services Sucheingabefeld leeren Suchen Suche Hej! Jetzt anmelden. Einkaufsliste Warenkorb Jetzt IKEA App herunterladen! ★ ★ ★ ★ ★ Aktuelle Angebote & Aktionen bei IKEA Überspringen Alle IKEA Family Angebote Aktuelle Food Angebote Weitere Aktionen & Neues IKEA Family Mitglied werden Als IKEA Family Mitglied profitierst du vom Treuebonus von IKEA Family , besonderen Angeboten und vielem mehr. Werde noch heute Teil der IKEA Family! Jetzt kostenlos registrieren Aktuelle Food Angebote IKEA Family Angebot: Gratis Kindermenü* *Angebot gültig bis 3.9.2026. Pro Erwachsenem IKEA Family Mitglied, das ein warmes Hauptgericht ab € 4,99 konsumiert, bekommen maximal 2 Kinder (bis 12 Jahre) je ein Kindermenü gratis dazu. Angebot gültig nur im"
       },
       "dates": {
         "publicationDate": "",
@@ -2806,7 +2857,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:16.403Z",
+      "checkedAt": "2026-08-31T16:19:37.702Z",
       "page": {
         "title": "1+1 Pizza nach Wahl GRATIS!",
         "description": "Mit diesem Gutschein erhältst Du bei Konsumation von 2 Pizzen die günstigere oder gleichwertige Pizza GRATIS!",
@@ -2850,7 +2901,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:16.069Z",
+      "checkedAt": "2026-08-31T16:19:37.569Z",
       "page": {
         "title": "Dein Plus bei der reinsten Entspannung | Drei.at",
         "description": "50 % +Ersparnis f&uuml;r die 2. Eintrittskarte in der Therme Wien.",
@@ -2893,7 +2944,7 @@
       "transientError": true,
       "blockedByProtection": false,
       "reason": "HTTP 429",
-      "checkedAt": "2026-08-31T08:02:11.652Z",
+      "checkedAt": "2026-08-31T16:19:34.084Z",
       "page": {
         "title": "",
         "description": "",
@@ -2931,7 +2982,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:16.305Z",
+      "checkedAt": "2026-08-31T16:19:37.784Z",
       "page": {
         "title": "Madame Tussauds Wien: 2 Karten zum Preis von 1 | Drei.at",
         "description": "Ihr Vorteil bei Drei: Hol dir deinen Gutschein f&uuml;r Madame Tussauds Wien: Mit Kaiserin Sisi ein Foto machen, mit David Alaba 11er schie&szlig;en & mit Conchita auf der B&uuml;hne stehen.",
@@ -2974,7 +3025,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:17.244Z",
+      "checkedAt": "2026-08-31T16:19:38.243Z",
       "page": {
         "title": "Rabattcoupons & App - Nordsee",
         "description": "Mit unseren beliebten Coupons & exklusiven Angeboten kannst Du richtig sparen! Jetzt bei NORDSEE entdecken & in der nächsten Filiale einlösen!",
@@ -3012,7 +3063,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:17.525Z",
+      "checkedAt": "2026-08-31T16:19:38.778Z",
       "page": {
         "title": "Teste EVO 7 Tage kostenlos | EVO Fitness",
         "description": "Teste EVO Fitness 7 Tage kostenlos. Entdecke unser hochmodernes Equipment und das elegante Boutique-Design an einem unserer 7 Studios in Wien.",
@@ -3056,7 +3107,7 @@
       "transientError": true,
       "blockedByProtection": true,
       "reason": "Security Checkpoint",
-      "checkedAt": "2026-08-31T08:02:11.652Z",
+      "checkedAt": "2026-08-31T16:19:34.084Z",
       "page": {
         "title": "",
         "description": "",
@@ -3094,7 +3145,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:17.713Z",
+      "checkedAt": "2026-08-31T16:19:38.506Z",
       "page": {
         "title": "IKEA Family Vorteile",
         "description": "Als IKEA Family Mitglied erwarten dich viele exklusive Vorteile. Werde gleich kostenlos Mitglied und profitiere von den tollen Vorteilen.",
@@ -3138,7 +3189,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:17.086Z",
+      "checkedAt": "2026-08-31T16:19:38.080Z",
       "page": {
         "title": "Spotify Premium (Österreich) - 3 Monate für € 0 testen",
         "description": "Spotify Premium ist ein digitaler Musikdienst, der dir Zugriff auf Millionen von Songs ohne Werbeunterbrechungen ermöglicht. 3 Monate für € 0 testen.",
@@ -3182,13 +3233,13 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:17.521Z",
+      "checkedAt": "2026-08-31T16:19:38.597Z",
       "page": {
         "title": "Lebensmittel teilen statt wegwerfen – foodsharing",
         "description": "Auf foodsharing.de kannst du deine Lebensmittel vor dem Verfall an soziale Einrichtungen oder andere Personen abgeben",
         "heading": "",
         "headings": [],
-        "textSnippet": "foodsharing | Rette mit! Neuigkeiten \",\"contentBlock2\":\" Am 26. September ist der Tag der Lebensmittelrettung. An diesem Tag macht foodsharing in vielen Bezirken sichtbar, wie viele genie\\u00dfbare Lebensmittel t\\u00e4glich gerettet werden. Lebensmittelverschwendung hat System. Und deshalb braucht es politische Ver\\u00e4nderung! Wir haben 6 Forderungen an die Politik, um Lebensmittelverschwendung zu reduzieren. In den n\\u00e4chsten Wochen stellen wir diese hier vor. Wir fordern: Lebensmittelverschwendung verringern mit verpflichtenden Regelungen \\u2013 und zwar entlang der gesamten Wertsch\\u00f6pfungskette vom Acker bis zum Teller! Immer noch bleiben Birnen unter den B\\u00e4umen liegen, Kartoffeln werden auf dem Feld untergepfl\\u00fcgt. Auch Transportsch\\u00e4den, unterbrochene K\\u00fchlketten und falsche Lagerung f\\u00fchren dazu, dass Lebensmittel entsorgt werden. Und auch in der Mensa"
+        "textSnippet": "foodsharing | Rette mit! Neuigkeiten \",\"contentBlock2\":\" Am 26. September ist der Tag der Lebensmittelrettung. An diesem Tag macht foodsharing in \\u00fcber 40 Bezirken sichtbar, wie viele genie\\u00dfbare Lebensmittel t\\u00e4glich gerettet werden. Wir laden die Politik ein, vorbeizukommen und mit uns in den Austausch zu gehen. Denn Lebensmittelverschwendung hat System und braucht es politische Ver\\u00e4nderung! \\nDeshalb fordern wir: \\n \\n Verringerung der Lebensmittelverschwendung mittels verpflichtender Regelungen \\u2013 entlang der gesamten Wertsch\\u00f6pfungskette vom Acker bis zum Teller \\n Abschaffen von Handelsnormen zu Gr\\u00f6\\u00dfe, Form und Farbe, damit mehr genie\\u00dfbare Lebensmittel in den Handel gelangen. \\n Wegwerfstopp f\\u00fcr Superm\\u00e4rkte sowie steuerliche Vorteile f\\u00fcr Unternehmen, die Lebensmittel spenden, statt sie wegzuwerfen \\n Mehr Rechtssicherheit f\\u00"
       },
       "dates": {
         "publicationDate": "",
@@ -3220,7 +3271,7 @@
       "transientError": true,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:11.652Z",
+      "checkedAt": "2026-08-31T16:19:34.084Z",
       "page": {
         "title": "",
         "description": "",
@@ -3258,7 +3309,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:18.423Z",
+      "checkedAt": "2026-08-31T16:19:39.327Z",
       "page": {
         "title": "Wolt Gutscheine ▷ Exklusiv 4€ Rabatt + 12€ Gutschein!",
         "description": "Aktuelle Top Wolt Gutscheine im August 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -3302,7 +3353,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:17.437Z",
+      "checkedAt": "2026-08-31T16:19:38.265Z",
       "page": {
         "title": "",
         "description": "",
@@ -3340,7 +3391,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:18.575Z",
+      "checkedAt": "2026-08-31T16:19:39.402Z",
       "page": {
         "title": "Thalia Gutscheine ▷ 60% Rabatt + 40% Gutschein!",
         "description": "Aktuelle Top Thalia Gutscheine im August 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -3384,7 +3435,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:17.517Z",
+      "checkedAt": "2026-08-31T16:19:38.386Z",
       "page": {
         "title": "[:de]Gottesdienste[:en]Church services[:] - Austria",
         "description": "",
@@ -3425,7 +3476,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:17.585Z",
+      "checkedAt": "2026-08-31T16:19:38.375Z",
       "page": {
         "title": "Hillsong Wien - Austria",
         "description": "",
@@ -3469,7 +3520,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:17.580Z",
+      "checkedAt": "2026-08-31T16:19:38.418Z",
       "page": {
         "title": "Events - Austria",
         "description": "",
@@ -3507,7 +3558,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:18.258Z",
+      "checkedAt": "2026-08-31T16:19:39.093Z",
       "page": {
         "title": "Gottesdienste - CIG - Christliche Internationale Gemeinde Wien",
         "description": "CIG WIEN GOTTESDIENSTE CIG Gottesdienste Sonntags 10:30 & 17:00Leebgasse 34, 1100 Wien Livestream Wir wollen uns für dein treues und aufopferndes Geben bedanken. Wir schätzen dieses sehr, nachdem wir ja gemeinsam Sein Königreich bauen. Einfachheitshalber ist hier der Link zu deiner Verwendung: Spende Beten wir weiterhin für unsere Regierung, für unser Land und für die [&hellip;]",
@@ -3551,7 +3602,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:18.243Z",
+      "checkedAt": "2026-08-31T16:19:39.099Z",
       "page": {
         "title": "CIG Wien - Christliche Internationale Gemeinde / Kirche - CIG - Christliche Internationale Gemeinde Wien",
         "description": "Evangelikale, zweisprachige Kirche in Wien. Erlebe lebendige Gottesdienste auf Deutsch & Englisch. Herzlich willkommen in der CIG Wien!",
@@ -3595,7 +3646,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:18.390Z",
+      "checkedAt": "2026-08-31T16:19:39.247Z",
       "page": {
         "title": "Veranstaltungen CIG Wien: Ein Überblick - CIG - Christliche Internationale Gemeinde Wien",
         "description": "Erfahre mehr über die Veranstaltungen CIG Wien: Live Streams, Gebetsmeetings und interessante Kurse in der CIG Wien.",
@@ -3629,138 +3680,6 @@
       }
     },
     {
-      "dealID": "icf-wien-gottesdienste",
-      "sourceUrl": "https://www.icf-wien.at/de/gottesdienste/",
-      "finalUrl": "https://icf.church/wien/de/besuchen/",
-      "finalHost": "icf.church",
-      "status": "ok",
-      "httpStatus": 200,
-      "invalid": false,
-      "transientError": false,
-      "blockedByProtection": false,
-      "reason": "",
-      "checkedAt": "2026-08-31T08:02:19.461Z",
-      "page": {
-        "title": "Unsere Gottesdienste im ICF Wien",
-        "description": "Jeden Sonntag feiern wir Gottesdienste in Wien ✓ um 10, 12 & 18 Uhr ✓ live & online ✓ Kinder-Programm ✓ viele Angebote ► Mehr erfahren!",
-        "heading": "ICF Standorte in deiner Nähe",
-        "headings": [
-          "ICF Standorte in deiner Nähe",
-          "Unsere Gottesdienste",
-          "Celebrations live vor Ort",
-          "Online Church",
-          "Für jedes Alter"
-        ],
-        "textSnippet": "Unsere Gottesdienste im ICF Wien Zum Inhalt springen ICF Conferences Worship College ICF Wien ICF Standorte in deiner Nähe Laden der Standorte Fehler beim Laden der Locations km weitere ICF Locations Bring ICF in deine Nähe ICF Wien ICF Standorte in deiner Nähe Laden der Standorte Fehler beim Laden der Locations km weitere ICF Locations Bring ICF in deine Nähe Besuchen Unser Highlight an jedem Sonntag – die Celebrations – unser wöchentlicher Gottesdienst. Und der darf gern etwas anders sein: laut, fröhlich und leidenschaftlich. Besuchen Besuchen Besuchen Micro Church ICF Kids ICF Youth Besuchen Predigten About ICF Wien ist eine christliche Kirche auf biblischer Grundlage: authentisch, relevant und begeistert vom Leben mit Jesus. About About About ICF Movement Vision Was wir glauben About Finde Anschluss Wir wünschen uns, dass die Kirche für dich zu einer Familie werden kann. Werde Teil u"
-      },
-      "dates": {
-        "publicationDate": "",
-        "publicationDateSource": "",
-        "targetDateSource": "",
-        "targetDateRaw": "",
-        "targetDateKind": "",
-        "validOn": "",
-        "validFrom": "",
-        "validUntil": ""
-      },
-      "signals": {
-        "mentionsVienna": true,
-        "mentionsBrand": false,
-        "mentionsDealTitle": true,
-        "mentionsDealTerms": false,
-        "hasPublicationDate": false,
-        "hasValidityDate": false
-      }
-    },
-    {
-      "dealID": "icf-wien-kirche",
-      "sourceUrl": "https://www.icf-wien.at",
-      "finalUrl": "https://icf.church/wien/de/",
-      "finalHost": "icf.church",
-      "status": "ok",
-      "httpStatus": 200,
-      "invalid": false,
-      "transientError": false,
-      "blockedByProtection": false,
-      "reason": "",
-      "checkedAt": "2026-08-31T08:02:19.552Z",
-      "page": {
-        "title": "ICF Wien - Kirche erleben",
-        "description": "ICF Wien ist eine christliche Freikirche auf biblischer Grundlage ✓ Jeden Sonntag Gottesdienste ✓ authentisch & relevant ► Mehr erfahren!",
-        "heading": "ICF Standorte in deiner Nähe",
-        "headings": [
-          "ICF Standorte in deiner Nähe",
-          "Kirche erleben",
-          "Willkommen im ICF Wien",
-          "Unser Auftrag",
-          "Stay updated"
-        ],
-        "textSnippet": "ICF Wien - Kirche erleben Zum Inhalt springen ICF Conferences Worship College ICF Wien ICF Standorte in deiner Nähe Laden der Standorte Fehler beim Laden der Locations km weitere ICF Locations Bring ICF in deine Nähe ICF Wien ICF Standorte in deiner Nähe Laden der Standorte Fehler beim Laden der Locations km weitere ICF Locations Bring ICF in deine Nähe Besuchen Unser Highlight an jedem Sonntag – die Celebrations – unser wöchentlicher Gottesdienst. Und der darf gern etwas anders sein: laut, fröhlich und leidenschaftlich. Besuchen Besuchen Besuchen Micro Church ICF Kids ICF Youth Besuchen Predigten About ICF Wien ist eine christliche Kirche auf biblischer Grundlage: authentisch, relevant und begeistert vom Leben mit Jesus. About About About ICF Movement Vision Was wir glauben About Finde Anschluss Wir wünschen uns, dass die Kirche für dich zu einer Familie werden kann. Werde Teil unserer "
-      },
-      "dates": {
-        "publicationDate": "",
-        "publicationDateSource": "",
-        "targetDateSource": "",
-        "targetDateRaw": "",
-        "targetDateKind": "",
-        "validOn": "",
-        "validFrom": "",
-        "validUntil": ""
-      },
-      "signals": {
-        "mentionsVienna": true,
-        "mentionsBrand": false,
-        "mentionsDealTitle": false,
-        "mentionsDealTerms": false,
-        "hasPublicationDate": false,
-        "hasValidityDate": false
-      }
-    },
-    {
-      "dealID": "icf-wien-events",
-      "sourceUrl": "https://www.icf-wien.at/de/events/",
-      "finalUrl": "https://icf.church/wien/de/angebote/?type=events",
-      "finalHost": "icf.church",
-      "status": "ok",
-      "httpStatus": 200,
-      "invalid": false,
-      "transientError": false,
-      "blockedByProtection": false,
-      "reason": "",
-      "checkedAt": "2026-08-31T08:02:20.366Z",
-      "page": {
-        "title": "Angebote & Events im ICF Wien",
-        "description": "Entdecke unsere vielseitigen Angebote & Events im ICF Wien ✓ Glauben vertiefen ✓ Neue Leute kennenlernen ► Jetzt entdecken!",
-        "heading": "ICF Standorte in deiner Nähe",
-        "headings": [
-          "ICF Standorte in deiner Nähe",
-          "Angebote & Events",
-          "Besuch uns",
-          "Finde Anschluss",
-          "Stell deine Frage"
-        ],
-        "textSnippet": "Angebote & Events im ICF Wien Zum Inhalt springen ICF Conferences Worship College ICF Wien ICF Standorte in deiner Nähe Laden der Standorte Fehler beim Laden der Locations km weitere ICF Locations Bring ICF in deine Nähe ICF Wien ICF Standorte in deiner Nähe Laden der Standorte Fehler beim Laden der Locations km weitere ICF Locations Bring ICF in deine Nähe Besuchen Unser Highlight an jedem Sonntag – die Celebrations – unser wöchentlicher Gottesdienst. Und der darf gern etwas anders sein: laut, fröhlich und leidenschaftlich. Besuchen Besuchen Besuchen Micro Church ICF Kids ICF Youth Besuchen Predigten About ICF Wien ist eine christliche Kirche auf biblischer Grundlage: authentisch, relevant und begeistert vom Leben mit Jesus. About About About ICF Movement Vision Was wir glauben About Finde Anschluss Wir wünschen uns, dass die Kirche für dich zu einer Familie werden kann. Werde Teil unse"
-      },
-      "dates": {
-        "publicationDate": "",
-        "publicationDateSource": "",
-        "targetDateSource": "",
-        "targetDateRaw": "",
-        "targetDateKind": "",
-        "validOn": "",
-        "validFrom": "",
-        "validUntil": ""
-      },
-      "signals": {
-        "mentionsVienna": true,
-        "mentionsBrand": false,
-        "mentionsDealTitle": true,
-        "mentionsDealTerms": false,
-        "hasPublicationDate": false,
-        "hasValidityDate": false
-      }
-    },
-    {
       "dealID": "jesuszentrum-gottesdienste",
       "sourceUrl": "https://www.jesuszentrum.at",
       "finalUrl": "https://www.jesuszentrum.at/",
@@ -3771,51 +3690,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:18.747Z",
-      "page": {
-        "title": "VCC JesusZentrum",
-        "description": "Willkommen im VCC Jesus Zentrum! Unsere Kirche bietet eine lebendige Gemeinschaft, in der Jesus im Mittelpunkt steht. Egal ob du neu hier bist oder schon länger suchst – bei uns findest du Gebet, Unterstützung und einen Ort zum Wachsen im Glauben. Erfahre mehr über unsere Angebote!",
-        "heading": "Schön, dass du da bist!",
-        "headings": [
-          "Schön, dass du da bist!",
-          "Kirche aktuell, modern, relevant und international",
-          "Neu Hier",
-          "Connect",
-          "Events"
-        ],
-        "textSnippet": "VCC JesusZentrum NEU HIER EVENTS CONNECT ANGEBOTE GEBET MEDIA GEBEN Geben Herzlich Willkommen Schön, dass du da bist! LIVE GOTTESDIENST NEU HIER VCC JesusZentrum Kirche aktuell, modern, relevant und international Wir verbreiten Gottes Liebe, stärken den Glauben und schaffen eine Gemeinschaft voller Hoffnung und Liebe. Neu Hier Erfahre mehr über uns Connect Finde Anschluss bei uns Events Finde unsere neuesten Events und Termine Gebet Schicke dein Gebetsanliegen - wir beten für dich Unsere Pastoren Lerne unsere Pastoren kennen Wir sind ein Team von Pastoren und Leitern. Gemeinsam dienen wir Menschen voller Begeisterung und Liebe. Maria Kisslinger Pastorin Martin Kisslinger Pastor Leitungsteam Über Uns Unsere Kirche Du bist neu hier? Erfahre mehr über uns, wer wir sind, was wir glauben, wie du zu uns findest und connecten kannst. NEU HIER Stay Updated Folge uns auf Social Media Folge dem VC"
-      },
-      "dates": {
-        "publicationDate": "",
-        "publicationDateSource": "",
-        "targetDateSource": "",
-        "targetDateRaw": "",
-        "targetDateKind": "",
-        "validOn": "",
-        "validFrom": "",
-        "validUntil": ""
-      },
-      "signals": {
-        "mentionsVienna": false,
-        "mentionsBrand": true,
-        "mentionsDealTitle": true,
-        "mentionsDealTerms": false,
-        "hasPublicationDate": false,
-        "hasValidityDate": false
-      }
-    },
-    {
-      "dealID": "jesuszentrum-kirche",
-      "sourceUrl": "https://www.jesuszentrum.at",
-      "finalUrl": "https://www.jesuszentrum.at/",
-      "finalHost": "www.jesuszentrum.at",
-      "status": "ok",
-      "httpStatus": 200,
-      "invalid": false,
-      "transientError": false,
-      "blockedByProtection": false,
-      "reason": "",
-      "checkedAt": "2026-08-31T08:02:18.747Z",
+      "checkedAt": "2026-08-31T16:19:39.004Z",
       "page": {
         "title": "VCC JesusZentrum",
         "description": "Willkommen im VCC Jesus Zentrum! Unsere Kirche bietet eine lebendige Gemeinschaft, in der Jesus im Mittelpunkt steht. Egal ob du neu hier bist oder schon länger suchst – bei uns findest du Gebet, Unterstützung und einen Ort zum Wachsen im Glauben. Erfahre mehr über unsere Angebote!",
@@ -3859,7 +3734,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-08-31T08:02:19.041Z",
+      "checkedAt": "2026-08-31T16:19:38.965Z",
       "page": {
         "title": "Events - VCC JesusZentrum",
         "description": "Bleib im VCC Jesus Zentrum immer auf dem Laufenden! Entdecke aktuelle Events, Gottesdienste und Angebote. In unserem Infoscreen findest du alle wichtigen Termine und Neuigkeiten. Erlebe inspirierende Veranstaltungen und sei Teil unserer lebendigen Gemeinschaft.",
@@ -3886,6 +3761,182 @@
       "signals": {
         "mentionsVienna": true,
         "mentionsBrand": true,
+        "mentionsDealTitle": true,
+        "mentionsDealTerms": false,
+        "hasPublicationDate": false,
+        "hasValidityDate": false
+      }
+    },
+    {
+      "dealID": "jesuszentrum-kirche",
+      "sourceUrl": "https://www.jesuszentrum.at",
+      "finalUrl": "https://www.jesuszentrum.at/",
+      "finalHost": "www.jesuszentrum.at",
+      "status": "ok",
+      "httpStatus": 200,
+      "invalid": false,
+      "transientError": false,
+      "blockedByProtection": false,
+      "reason": "",
+      "checkedAt": "2026-08-31T16:19:39.004Z",
+      "page": {
+        "title": "VCC JesusZentrum",
+        "description": "Willkommen im VCC Jesus Zentrum! Unsere Kirche bietet eine lebendige Gemeinschaft, in der Jesus im Mittelpunkt steht. Egal ob du neu hier bist oder schon länger suchst – bei uns findest du Gebet, Unterstützung und einen Ort zum Wachsen im Glauben. Erfahre mehr über unsere Angebote!",
+        "heading": "Schön, dass du da bist!",
+        "headings": [
+          "Schön, dass du da bist!",
+          "Kirche aktuell, modern, relevant und international",
+          "Neu Hier",
+          "Connect",
+          "Events"
+        ],
+        "textSnippet": "VCC JesusZentrum NEU HIER EVENTS CONNECT ANGEBOTE GEBET MEDIA GEBEN Geben Herzlich Willkommen Schön, dass du da bist! LIVE GOTTESDIENST NEU HIER VCC JesusZentrum Kirche aktuell, modern, relevant und international Wir verbreiten Gottes Liebe, stärken den Glauben und schaffen eine Gemeinschaft voller Hoffnung und Liebe. Neu Hier Erfahre mehr über uns Connect Finde Anschluss bei uns Events Finde unsere neuesten Events und Termine Gebet Schicke dein Gebetsanliegen - wir beten für dich Unsere Pastoren Lerne unsere Pastoren kennen Wir sind ein Team von Pastoren und Leitern. Gemeinsam dienen wir Menschen voller Begeisterung und Liebe. Maria Kisslinger Pastorin Martin Kisslinger Pastor Leitungsteam Über Uns Unsere Kirche Du bist neu hier? Erfahre mehr über uns, wer wir sind, was wir glauben, wie du zu uns findest und connecten kannst. NEU HIER Stay Updated Folge uns auf Social Media Folge dem VC"
+      },
+      "dates": {
+        "publicationDate": "",
+        "publicationDateSource": "",
+        "targetDateSource": "",
+        "targetDateRaw": "",
+        "targetDateKind": "",
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": ""
+      },
+      "signals": {
+        "mentionsVienna": false,
+        "mentionsBrand": true,
+        "mentionsDealTitle": true,
+        "mentionsDealTerms": false,
+        "hasPublicationDate": false,
+        "hasValidityDate": false
+      }
+    },
+    {
+      "dealID": "icf-wien-gottesdienste",
+      "sourceUrl": "https://www.icf-wien.at/de/gottesdienste/",
+      "finalUrl": "https://icf.church/wien/de/besuchen/",
+      "finalHost": "icf.church",
+      "status": "ok",
+      "httpStatus": 200,
+      "invalid": false,
+      "transientError": false,
+      "blockedByProtection": false,
+      "reason": "",
+      "checkedAt": "2026-08-31T16:19:43.009Z",
+      "page": {
+        "title": "Unsere Gottesdienste im ICF Wien",
+        "description": "Jeden Sonntag feiern wir Gottesdienste in Wien ✓ um 10, 12 & 18 Uhr ✓ live & online ✓ Kinder-Programm ✓ viele Angebote ► Mehr erfahren!",
+        "heading": "ICF Standorte in deiner Nähe",
+        "headings": [
+          "ICF Standorte in deiner Nähe",
+          "Unsere Gottesdienste",
+          "Celebrations live vor Ort",
+          "Online Church",
+          "Für jedes Alter"
+        ],
+        "textSnippet": "Unsere Gottesdienste im ICF Wien Zum Inhalt springen ICF Conferences Worship College ICF Wien ICF Standorte in deiner Nähe Laden der Standorte Fehler beim Laden der Locations km weitere ICF Locations Bring ICF in deine Nähe ICF Wien ICF Standorte in deiner Nähe Laden der Standorte Fehler beim Laden der Locations km weitere ICF Locations Bring ICF in deine Nähe Besuchen Unser Highlight an jedem Sonntag – die Celebrations – unser wöchentlicher Gottesdienst. Und der darf gern etwas anders sein: laut, fröhlich und leidenschaftlich. Besuchen Besuchen Besuchen Micro Church ICF Kids ICF Youth Besuchen Predigten About ICF Wien ist eine christliche Kirche auf biblischer Grundlage: authentisch, relevant und begeistert vom Leben mit Jesus. About About About ICF Movement Vision Was wir glauben About Finde Anschluss Wir wünschen uns, dass die Kirche für dich zu einer Familie werden kann. Werde Teil u"
+      },
+      "dates": {
+        "publicationDate": "",
+        "publicationDateSource": "",
+        "targetDateSource": "",
+        "targetDateRaw": "",
+        "targetDateKind": "",
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": ""
+      },
+      "signals": {
+        "mentionsVienna": true,
+        "mentionsBrand": false,
+        "mentionsDealTitle": true,
+        "mentionsDealTerms": false,
+        "hasPublicationDate": false,
+        "hasValidityDate": false
+      }
+    },
+    {
+      "dealID": "icf-wien-kirche",
+      "sourceUrl": "https://www.icf-wien.at",
+      "finalUrl": "https://icf.church/wien/de/",
+      "finalHost": "icf.church",
+      "status": "ok",
+      "httpStatus": 200,
+      "invalid": false,
+      "transientError": false,
+      "blockedByProtection": false,
+      "reason": "",
+      "checkedAt": "2026-08-31T16:19:42.652Z",
+      "page": {
+        "title": "ICF Wien - Kirche erleben",
+        "description": "ICF Wien ist eine christliche Freikirche auf biblischer Grundlage ✓ Jeden Sonntag Gottesdienste ✓ authentisch & relevant ► Mehr erfahren!",
+        "heading": "ICF Standorte in deiner Nähe",
+        "headings": [
+          "ICF Standorte in deiner Nähe",
+          "Kirche erleben",
+          "Willkommen im ICF Wien",
+          "Unser Auftrag",
+          "Stay updated"
+        ],
+        "textSnippet": "ICF Wien - Kirche erleben Zum Inhalt springen ICF Conferences Worship College ICF Wien ICF Standorte in deiner Nähe Laden der Standorte Fehler beim Laden der Locations km weitere ICF Locations Bring ICF in deine Nähe ICF Wien ICF Standorte in deiner Nähe Laden der Standorte Fehler beim Laden der Locations km weitere ICF Locations Bring ICF in deine Nähe Besuchen Unser Highlight an jedem Sonntag – die Celebrations – unser wöchentlicher Gottesdienst. Und der darf gern etwas anders sein: laut, fröhlich und leidenschaftlich. Besuchen Besuchen Besuchen Micro Church ICF Kids ICF Youth Besuchen Predigten About ICF Wien ist eine christliche Kirche auf biblischer Grundlage: authentisch, relevant und begeistert vom Leben mit Jesus. About About About ICF Movement Vision Was wir glauben About Finde Anschluss Wir wünschen uns, dass die Kirche für dich zu einer Familie werden kann. Werde Teil unserer "
+      },
+      "dates": {
+        "publicationDate": "",
+        "publicationDateSource": "",
+        "targetDateSource": "",
+        "targetDateRaw": "",
+        "targetDateKind": "",
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": ""
+      },
+      "signals": {
+        "mentionsVienna": true,
+        "mentionsBrand": false,
+        "mentionsDealTitle": false,
+        "mentionsDealTerms": false,
+        "hasPublicationDate": false,
+        "hasValidityDate": false
+      }
+    },
+    {
+      "dealID": "icf-wien-events",
+      "sourceUrl": "https://www.icf-wien.at/de/events/",
+      "finalUrl": "https://icf.church/wien/de/angebote/?type=events",
+      "finalHost": "icf.church",
+      "status": "ok",
+      "httpStatus": 200,
+      "invalid": false,
+      "transientError": false,
+      "blockedByProtection": false,
+      "reason": "",
+      "checkedAt": "2026-08-31T16:19:44.230Z",
+      "page": {
+        "title": "Angebote & Events im ICF Wien",
+        "description": "Entdecke unsere vielseitigen Angebote & Events im ICF Wien ✓ Glauben vertiefen ✓ Neue Leute kennenlernen ► Jetzt entdecken!",
+        "heading": "ICF Standorte in deiner Nähe",
+        "headings": [
+          "ICF Standorte in deiner Nähe",
+          "Angebote & Events",
+          "Besuch uns",
+          "Finde Anschluss",
+          "Stell deine Frage"
+        ],
+        "textSnippet": "Angebote & Events im ICF Wien Zum Inhalt springen ICF Conferences Worship College ICF Wien ICF Standorte in deiner Nähe Laden der Standorte Fehler beim Laden der Locations km weitere ICF Locations Bring ICF in deine Nähe ICF Wien ICF Standorte in deiner Nähe Laden der Standorte Fehler beim Laden der Locations km weitere ICF Locations Bring ICF in deine Nähe Besuchen Unser Highlight an jedem Sonntag – die Celebrations – unser wöchentlicher Gottesdienst. Und der darf gern etwas anders sein: laut, fröhlich und leidenschaftlich. Besuchen Besuchen Besuchen Micro Church ICF Kids ICF Youth Besuchen Predigten About ICF Wien ist eine christliche Kirche auf biblischer Grundlage: authentisch, relevant und begeistert vom Leben mit Jesus. About About About ICF Movement Vision Was wir glauben About Finde Anschluss Wir wünschen uns, dass die Kirche für dich zu einer Familie werden kann. Werde Teil unse"
+      },
+      "dates": {
+        "publicationDate": "",
+        "publicationDateSource": "",
+        "targetDateSource": "",
+        "targetDateRaw": "",
+        "targetDateKind": "",
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": ""
+      },
+      "signals": {
+        "mentionsVienna": true,
+        "mentionsBrand": false,
         "mentionsDealTitle": true,
         "mentionsDealTerms": false,
         "hasPublicationDate": false,
