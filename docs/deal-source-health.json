@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-01T11:37:50.612Z",
+  "generatedAt": "2026-09-01T11:56:35.860Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 645,
-    "uniqueCandidates": 603,
-    "distinctCandidates": 621,
+    "totalCandidates": 655,
+    "uniqueCandidates": 613,
+    "distinctCandidates": 631,
     "duplicateClusters": 18,
     "topHealthySources": [
       {
@@ -12,12 +12,6 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "healthScore": 75,
-        "totalDeals": 10
       },
       {
         "sourceKey": "tiktok",
@@ -36,15 +30,15 @@
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 65,
         "totalDeals": 16
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 64,
+        "totalDeals": 28
       }
     ],
     "topMissionSources": [
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "missionFitScore": 79,
-        "totalDeals": 10
-      },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
@@ -68,6 +62,12 @@
         "sourceLabel": "TikTok Scanner",
         "missionFitScore": 60,
         "totalDeals": 9
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 58,
+        "totalDeals": 3
       }
     ],
     "topCoverageSources": [
@@ -93,17 +93,17 @@
         "fresh1dCount": 48
       },
       {
+        "sourceKey": "gutscheine",
+        "sourceLabel": "Gutscheine.at",
+        "coverageScore": 44,
+        "totalDeals": 38,
+        "fresh1dCount": 38
+      },
+      {
         "sourceKey": "firecrawl4",
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
         "coverageScore": 38,
         "totalDeals": 48,
-        "fresh1dCount": 0
-      },
-      {
-        "sourceKey": "community",
-        "sourceLabel": "Community Submission",
-        "coverageScore": 33,
-        "totalDeals": 42,
         "fresh1dCount": 0
       }
     ],
@@ -133,10 +133,10 @@
         "totalDeals": 3
       },
       {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 68,
-        "totalDeals": 10
+        "totalDeals": 16
       }
     ],
     "topWeightedSources": [
@@ -145,12 +145,6 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 70,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "sourceWeightScore": 64,
-        "totalDeals": 10
       },
       {
         "sourceKey": "tiktok",
@@ -169,6 +163,12 @@
         "sourceLabel": "Wien Deals Combined Graph",
         "sourceWeightScore": 54,
         "totalDeals": 3
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 54,
+        "totalDeals": 16
       }
     ],
     "topSourcesToFix": [
@@ -288,68 +288,6 @@
       "coverageScore": 16,
       "precisionScore": 88,
       "sourceWeightScore": 70
-    },
-    {
-      "sourceKey": "joe",
-      "file": "deals-pending-joe.json",
-      "sourceLabel": "jö Bonus Club",
-      "totalDeals": 10,
-      "uniqueDeals": 10,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 10,
-      "fresh7dCount": 10,
-      "viennaCount": 0,
-      "foodDrinkCount": 10,
-      "promoCount": 8,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "jö Äpp Extrem Aktion bei BILLA",
-        "jö Rabattsammler",
-        "jö äpp Day"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84.3,
-      "topCategories": [
-        {
-          "value": "supermarkt",
-          "count": 5
-        },
-        {
-          "value": "kaffee",
-          "count": 4
-        },
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 5
-        },
-        {
-          "value": "rabatt",
-          "count": 5
-        }
-      ],
-      "issues": [
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 75,
-      "missionFitScore": 79,
-      "coverageScore": 20,
-      "precisionScore": 68,
-      "sourceWeightScore": 64
     },
     {
       "sourceKey": "tiktok",
@@ -936,6 +874,69 @@
       "sourceWeightScore": 56
     },
     {
+      "sourceKey": "joe",
+      "file": "deals-pending-joe.json",
+      "sourceLabel": "jö Bonus Club",
+      "totalDeals": 10,
+      "uniqueDeals": 10,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 10,
+      "viennaCount": 0,
+      "foodDrinkCount": 10,
+      "promoCount": 8,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "jö Äpp Extrem Aktion bei BILLA",
+        "jö Rabattsammler",
+        "jö äpp Day"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.3,
+      "topCategories": [
+        {
+          "value": "supermarkt",
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 4
+        },
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 5
+        },
+        {
+          "value": "rabatt",
+          "count": 5
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 61,
+      "missionFitScore": 57,
+      "coverageScore": 15,
+      "precisionScore": 56,
+      "sourceWeightScore": 50
+    },
+    {
       "sourceKey": "instagram-verified",
       "file": "deals-pending-instagram-verified.json",
       "sourceLabel": "Instagram",
@@ -1344,6 +1345,78 @@
       "sourceWeightScore": 42
     },
     {
+      "sourceKey": "gutscheine",
+      "file": "deals-pending-gutscheine.json",
+      "sourceLabel": "Gutscheine.at",
+      "totalDeals": 38,
+      "uniqueDeals": 38,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 38,
+      "fresh7dCount": 38,
+      "viennaCount": 0,
+      "foodDrinkCount": 2,
+      "promoCount": 4,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "120 € Rabatt auf Shark CryoGlow LED-Maske + Kühlung der Augenpartie",
+        "80 € Rabatt auf TEMPUR® Arch SmartCool™ Schlafkissen",
+        "30 € Gutschein für Ninja Kaltentsafter mit Anti-Verstopfungs-Filter"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.1,
+      "promoRate": 0.1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 45.8,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 34
+        },
+        {
+          "value": "beauty",
+          "count": 2
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 29
+        },
+        {
+          "value": "gutschein",
+          "count": 7
+        },
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 46,
+      "missionFitScore": 28,
+      "coverageScore": 44,
+      "precisionScore": 31,
+      "sourceWeightScore": 37
+    },
+    {
       "sourceKey": "gemeinde",
       "file": "deals-pending-gemeinde.json",
       "sourceLabel": "Kirchen Verzeichnis",
@@ -1558,74 +1631,6 @@
       "coverageScore": 28,
       "precisionScore": 35,
       "sourceWeightScore": 34
-    },
-    {
-      "sourceKey": "gutscheine",
-      "file": "deals-pending-gutscheine.json",
-      "sourceLabel": "Gutscheine.at",
-      "totalDeals": 28,
-      "uniqueDeals": 28,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 28,
-      "fresh7dCount": 28,
-      "viennaCount": 0,
-      "foodDrinkCount": 1,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Back to home: Bis zu 65% Rabatt auf über 20.000 Produkte",
-        "100 € Rabatt auf alle Buchungen",
-        "Bis zu 50% Rabatt auf Hotels für myHRS-Mitglieder"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 46.3,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 23
-        },
-        {
-          "value": "beauty",
-          "count": 3
-        },
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "technik",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 25
-        },
-        {
-          "value": "gutschein",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 42,
-      "missionFitScore": 22,
-      "coverageScore": 32,
-      "precisionScore": 26,
-      "sourceWeightScore": 30
     },
     {
       "sourceKey": "flights",
