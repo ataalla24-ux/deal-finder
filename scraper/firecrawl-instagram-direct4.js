@@ -35,13 +35,14 @@ import {
   buildTargetPrompt,
   selectScrapeTargets,
 } from './firecrawl-instagram-direct4-config.js';
+import { getExcludedGastroDiscoverySource } from './firecrawl-gastro-discovery-policy.js';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY4;
 const SOURCE_KEY = 'firecrawl4';
 const SOURCE_LABEL = 'Firecrawl Key 4 - Gastro Discovery';
 const OUTPUT_PATH = 'docs/deals-pending-firecrawl4.json';
 const RUN_STARTED_AT = new Date();
-const DEFAULT_MAX_CREDITS_PER_TARGET = 500;
+const DEFAULT_MAX_CREDITS_PER_TARGET = 2500;
 const MAX_CREDITS_PER_TARGET = positiveInteger(
   process.env.FIRECRAWL4_MAX_CREDITS_PER_TARGET,
   DEFAULT_MAX_CREDITS_PER_TARGET,
@@ -51,8 +52,8 @@ const MAX_AGENT_FALLBACKS = positiveInteger(process.env.FIRECRAWL4_MAX_AGENT_FAL
 const BROAD_AGENT_PASSES = positiveInteger(process.env.FIRECRAWL4_BROAD_AGENT_PASSES, 2);
 const SCRAPE_TARGETS = selectScrapeTargets(RUN_STARTED_AT);
 const BROAD_DISCOVERY_FOCUSES = [
-  'Durchsuche Instagram, TikTok und das offene Web breit nach Wiener Gastro-Angeboten. Nutze besonders alternative Hashtags, lokale Food-Accounts und Neueröffnungs-Posts; liefere direkte Originalpost- oder Aktionslinks.',
-  'Durchsuche besonders Gutschein.at, Preisjaeger.at, Marktguru, Sparhamster, Wolt, Lieferando und direkte Restaurantseiten nach aktuell nutzbaren Wiener Gratisaktionen, 1+1-Angeboten und Rabatten ab 30 Prozent.',
+  'Suche ausschließlich auf Instagram und TikTok nach neuen Wiener Gastro-Angeboten. Nutze alternative Hashtags, lokale Food-Accounts und Neueröffnungs-Posts; liefere direkte Originalposts und keine Profile oder Web-Sammellisten.',
+  'Durchsuche Gutschein.at, Preisjaeger.at, Marktguru, Sparhamster, Wolt, Lieferando und direkte Restaurantseiten nach aktuell nutzbaren Wiener Gratisaktionen, 1+1-Angeboten und Rabatten ab 30 Prozent. Nutze nur konkrete Detailseiten, keine Buchungsportale oder redaktionellen Sammellisten.',
 ].slice(0, Math.min(BROAD_AGENT_PASSES, 2));
 
 if (!FIRECRAWL_API_KEY) {
@@ -181,7 +182,9 @@ async function main() {
       const searchRows = target.kind.startsWith('instagram-')
         ? await searchFreshInstagramPosts(firecrawl, target.url, { now: RUN_STARTED_AT, limit: 12 })
         : await searchFreshWebDeals(firecrawl, target.url, { now: RUN_STARTED_AT, limit: 12 });
-      const relevantRows = searchRows.filter(isConcreteFirecrawlSearchResult);
+      const relevantRows = searchRows
+        .filter(isConcreteFirecrawlSearchResult)
+        .filter((row) => !getExcludedGastroDiscoverySource(row, row.url));
       stat.searchCandidates = relevantRows.length;
       if (relevantRows.length > 0) {
         for (const row of relevantRows) {
@@ -291,6 +294,19 @@ async function main() {
                   title: d.item_given_away || '',
                   brand: d.brand_or_store || target.label,
                   url: postUrl,
+                },
+              });
+              continue;
+            }
+
+            const excludedSource = getExcludedGastroDiscoverySource(d, targetUrl);
+            if (excludedSource) {
+              rejected.push({
+                reason: `excluded-downstream-source:${excludedSource}`,
+                deal: {
+                  title: d.item_given_away || '',
+                  brand: d.brand_or_store || target.label,
+                  url: targetUrl,
                 },
               });
               continue;
@@ -462,6 +478,19 @@ async function main() {
                   title: d.item_given_away || '',
                   brand: d.brand_or_store || stat.label,
                   url: reportedUrl,
+                },
+              });
+              continue;
+            }
+
+            const excludedSource = getExcludedGastroDiscoverySource(d, targetUrl);
+            if (excludedSource) {
+              rejected.push({
+                reason: `excluded-downstream-source:${excludedSource}`,
+                deal: {
+                  title: d.item_given_away || '',
+                  brand: d.brand_or_store || stat.label,
+                  url: targetUrl,
                 },
               });
               continue;

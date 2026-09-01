@@ -123,7 +123,7 @@ assert.doesNotMatch(key1Source, /\n\s*url: url,/, 'the ignored legacy singular u
 assert.match(key1Source, /searchFreshWebDeals\(/);
 assert.match(key1Workflow, /FIRECRAWL1_BROAD_AGENT_PASSES: 4/);
 assert.match(key1Workflow, /FIRECRAWL1_AGENT_TIMEOUT_SECONDS: 420/);
-assert.match(key1Workflow, /FIRECRAWL1_MAX_CREDITS_PER_TARGET: 500/);
+assert.match(key1Workflow, /FIRECRAWL1_MAX_CREDITS_PER_TARGET: 2500/);
 assert.match(key1Workflow, /timeout-minutes: 40/);
 
 const key4Source = fs.readFileSync('scraper/firecrawl-instagram-direct4.js', 'utf8');

@@ -25,6 +25,10 @@ import {
   searchFreshWebDeals,
 } from './firecrawl-search-utils.js';
 import {
+  GASTRO_DISCOVERY_BASE_PROMPT,
+  getExcludedGastroDiscoverySource,
+} from './firecrawl-gastro-discovery-policy.js';
+import {
   buildPipelineRunReport,
   summarizeVerifiedDeals,
   writeFailedPipelineRunReport,
@@ -37,7 +41,7 @@ const SOURCE_LABEL = 'Firecrawl Key 1 - Gastro';
 const OUTPUT_PATH = 'docs/deals-pending-gastro2.json';
 const RUN_STARTED_AT = new Date();
 const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL1_AGENT_TIMEOUT_SECONDS, 420);
-const MAX_CREDITS_PER_AGENT = positiveInteger(process.env.FIRECRAWL1_MAX_CREDITS_PER_TARGET, 500);
+const MAX_CREDITS_PER_AGENT = positiveInteger(process.env.FIRECRAWL1_MAX_CREDITS_PER_TARGET, 2500);
 const BROAD_AGENT_PASSES = positiveInteger(process.env.FIRECRAWL1_BROAD_AGENT_PASSES, 4);
 
 if (!FIRECRAWL_API_KEY) {
@@ -72,15 +76,15 @@ const SCRAPE_URLS = [
   'https://www.instagram.com/explore/tags/wienessen/',
   'https://www.instagram.com/explore/tags/aktionwien/',
   'https://www.instagram.com/explore/tags/schnäppchenwien/',
-  'https://www.1000things.at/',
+  'https://wolt.com/en/aut/vienna/',
   'https://www.meinbezirk.at/',
 ];
 
 const BROAD_DISCOVERY_FOCUSES = [
-  'Durchsuche Instagram, TikTok und das offene Web breit nach neuen Wiener Gastro-Aktionen. Liefere direkte Social-Post- oder Aktionslinks.',
-  'Durchsuche besonders Gutschein.at, Preisjaeger.at, Marktguru, Sparhamster, GuteGutscheine und Studentenportale nach aktuell nutzbaren Wiener Gastro-Deals.',
-  'Durchsuche besonders Wolt, Lieferando, Restaurant- und Markenwebseiten nach 1+1, Gratisartikeln, Gutscheinen, Neueröffnungen und Rabatten ab 30 Prozent in Wien.',
-  'Suche nach lokalen Wiener Neueröffnungen, zeitlich begrenzten Gastro-Aktionen und Gratisangeboten auf Social Media, Bezirksmedien und Veranstaltungsseiten.',
+  'Suche ausschließlich auf Instagram und TikTok nach neuen Wiener Gastro-Aktionen. Liefere direkte Originalposts statt Profile, Hashtag-Seiten oder Web-Sammellisten.',
+  'Durchsuche Gutschein.at, Preisjaeger.at, Marktguru, Sparhamster, GuteGutscheine und Studentenportale. Nutze nur konkrete Aktions- oder Detailseiten und verteile die Funde über mehrere Domains.',
+  'Durchsuche ausschließlich Wolt, Lieferando sowie direkte Restaurant- und Markenwebseiten nach 1+1, Gratisartikeln, Gutscheinen, Neueröffnungen und Rabatten ab 30 Prozent in Wien. Keine Deal-Aggregatoren verwenden.',
+  'Suche auf Social Media, Bezirksmedien und direkten Veranstalterseiten nach lokalen Wiener Neueröffnungen, zeitlich begrenzten Gastro-Aktionen und Gratisangeboten. Keine Restaurantverzeichnisse, Buchungsportale oder redaktionellen Sammellisten verwenden.',
 ];
 const ACTIVE_BROAD_DISCOVERY_FOCUSES = BROAD_DISCOVERY_FOCUSES.slice(
   0,
@@ -122,27 +126,7 @@ const gastroSchema = z.object({
 // PROMPT
 // ============================================
 
-const PROMPT = `Extrahiere aktuelle und zukünftige Deals in Wien mit höchster Priorität auf Gastronomie-Angebote (Essen & Trinken).
-
-Suche gezielt nach:
-- Starken Rabatten wie Mahlzeiten unter €3
-- Mindestens 50% Preisnachlass (z.B. 1,99€ Döner, 1+1 Aktionen)
-- Kostenlose Freebies
-- Neueröffnungen mit Gratis-Aktionen
-- Starke Rabatte allgemein
-
-Suche primär auf Instagram nach den ersten 50-100 Deals und ergänze diese durch Funde aus dem restlichen Web (z.B. 1000things, meinbezirk.at).
-
-Erfasse für jeden Deal:
-  – Den genauen Namen des Restaurants/Geschäfts/Unternehmens (brand_or_store – NICHT die Website-Domain!)
-- Kategorie
-- Was genau verschenkt/rabattiert wird
-- Den Standort
-- Datum und Uhrzeit der Gültigkeit
-- Die direkte URL zum ursprünglichen Post oder Web-Beitrag
-- Bei Instagram: den echten Account-Handle und das Veröffentlichungsdatum des Original-Posts.
-
-Wichtig: Das Veröffentlichungsdatum des Posts und die Gültigkeit des Angebots sind zwei verschiedene Felder. Gib Jahreszahlen vollständig an. Nimm nur noch laufende oder zukünftige, konkret nutzbare Vorteile auf. Gewinnspiele, reine Empfehlungen, Gratis-Versand und bloße Hinweise ohne Preisvorteil weglassen. Bei Instagram muss die URL direkt auf /p/... oder /reel/... zeigen. Erfinde keine Datumsangaben.`;
+const PROMPT = GASTRO_DISCOVERY_BASE_PROMPT;
 
 // ============================================
 // MAIN
@@ -203,7 +187,9 @@ async function main() {
       const searchRows = isInstagramUrl(url)
         ? await searchFreshInstagramPosts(firecrawl, url, { now: RUN_STARTED_AT, limit: 12 })
         : await searchFreshWebDeals(firecrawl, url, { now: RUN_STARTED_AT, limit: 12 });
-      const relevantRows = searchRows.filter(isConcreteFirecrawlSearchResult);
+      const relevantRows = searchRows
+        .filter(isConcreteFirecrawlSearchResult)
+        .filter((row) => !getExcludedGastroDiscoverySource(row, row.url));
       stat.searchCandidates = relevantRows.length;
       if (relevantRows.length > 0) {
         for (const row of relevantRows) {
@@ -317,6 +303,19 @@ async function main() {
                   title: d.item_given_away || '',
                   brand: d.brand_or_store || 'Unbekannt',
                   url: reportedUrl,
+                },
+              });
+              continue;
+            }
+
+            const excludedSource = getExcludedGastroDiscoverySource(d, postUrl);
+            if (excludedSource) {
+              rejected.push({
+                reason: `excluded-downstream-source:${excludedSource}`,
+                deal: {
+                  title: d.item_given_away || '',
+                  brand: d.brand_or_store || 'Unbekannt',
+                  url: postUrl,
                 },
               });
               continue;

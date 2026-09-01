@@ -9,6 +9,10 @@ import {
   buildTargetPrompt,
   selectScrapeTargets,
 } from '../scraper/firecrawl-instagram-direct4-config.js';
+import {
+  GASTRO_DISCOVERY_BASE_PROMPT,
+  getExcludedGastroDiscoverySource,
+} from '../scraper/firecrawl-gastro-discovery-policy.js';
 import { normalizeInstagramPostUrl } from '../scraper/firecrawl-post-verifier.js';
 
 const KEY4_SOURCE_PATH = 'scraper/firecrawl-instagram-direct4.js';
@@ -83,8 +87,11 @@ assert.notDeepEqual(
   'rotating targets should change between days',
 );
 
-const gastro2Prompt = gastro2Source.match(/const PROMPT = `([\s\S]*?)`;/)?.[1] || '';
-assert.equal(GASTRO2_BASE_PROMPT, gastro2Prompt, 'Key 4 base prompt must stay identical to Gastro2');
+assert.equal(GASTRO2_BASE_PROMPT, GASTRO_DISCOVERY_BASE_PROMPT, 'Key 4 base prompt must stay identical to Gastro2');
+assert.match(gastro2Source, /const PROMPT = GASTRO_DISCOVERY_BASE_PROMPT/);
+assert.equal(getExcludedGastroDiscoverySource({}, 'https://gastro.news/deal/example/'), 'gastro.news');
+assert.equal(getExcludedGastroDiscoverySource({ brand: 'NeoTaste' }, 'https://example.com/deal'), 'NeoTaste');
+assert.equal(getExcludedGastroDiscoverySource({}, 'https://www.gutschein.at/11-crispy-chicken-gratis'), '');
 
 const hashtagPrompt = buildTargetPrompt(selectedByKind('instagram-hashtag')[0]);
 const accountPrompt = buildTargetPrompt(selectedByKind('instagram-account')[0]);
@@ -134,7 +141,7 @@ assert.doesNotMatch(key4Source, /classifyKey4Evidence|dedupeKey4Candidates|FC4_M
 assert.match(workflow, /FIRECRAWL_API_KEY4: \$\{\{ secrets\.FIRECRAWL_API_KEY4 \}\}/);
 assert.doesNotMatch(workflow, /FIRECRAWL_API_KEY(?:1|2|3|5|6):/);
 assert.doesNotMatch(workflow, /^\s+FIRECRAWL_API_KEY:/m);
-assert.match(workflow, /FIRECRAWL4_MAX_CREDITS_PER_TARGET: 500/);
+assert.match(workflow, /FIRECRAWL4_MAX_CREDITS_PER_TARGET: 2500/);
 assert.match(workflow, /FIRECRAWL4_AGENT_TIMEOUT_SECONDS: 360/);
 assert.match(workflow, /FIRECRAWL4_MAX_AGENT_FALLBACKS: 1/);
 assert.match(workflow, /FIRECRAWL4_BROAD_AGENT_PASSES: 2/);
