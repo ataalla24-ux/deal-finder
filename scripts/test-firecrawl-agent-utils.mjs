@@ -123,8 +123,14 @@ assert.doesNotMatch(key1Source, /\n\s*url: url,/, 'the ignored legacy singular u
 assert.match(key1Source, /searchFreshWebDeals\(/);
 assert.match(key1Workflow, /FIRECRAWL1_BROAD_AGENT_PASSES: 4/);
 assert.match(key1Workflow, /FIRECRAWL1_AGENT_TIMEOUT_SECONDS: 420/);
-assert.match(key1Workflow, /FIRECRAWL1_MAX_CREDITS_PER_TARGET: 2500/);
+assert.match(key1Workflow, /FIRECRAWL1_MAX_CREDITS_PER_TARGET: 500/);
 assert.match(key1Workflow, /timeout-minutes: 40/);
+assert.match(key1Workflow, /group: deal-state-writer/);
+assert.match(key1Source, /instagram\.com\/explore\/tags\/gutscheinwien/);
+assert.match(key1Source, /ikea\.com\/at\/de\/offers/);
+assert.match(key1Source, /marktguru\.at\/c\/essensgutscheine/);
+assert.match(key1Source, /höchstens zwei Deals von Wolt und höchstens zwei von Lieferando/);
+assert.match(key1Source, /excluded-downstream-history/);
 
 const key4Source = fs.readFileSync('scraper/firecrawl-instagram-direct4.js', 'utf8');
 assert.match(key4Source, /searchFreshWebDeals\(/);

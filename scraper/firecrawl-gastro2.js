@@ -41,7 +41,7 @@ const SOURCE_LABEL = 'Firecrawl Key 1 - Gastro';
 const OUTPUT_PATH = 'docs/deals-pending-gastro2.json';
 const RUN_STARTED_AT = new Date();
 const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL1_AGENT_TIMEOUT_SECONDS, 420);
-const MAX_CREDITS_PER_AGENT = positiveInteger(process.env.FIRECRAWL1_MAX_CREDITS_PER_TARGET, 2500);
+const MAX_CREDITS_PER_AGENT = positiveInteger(process.env.FIRECRAWL1_MAX_CREDITS_PER_TARGET, 500);
 const BROAD_AGENT_PASSES = positiveInteger(process.env.FIRECRAWL1_BROAD_AGENT_PASSES, 4);
 
 if (!FIRECRAWL_API_KEY) {
@@ -76,15 +76,20 @@ const SCRAPE_URLS = [
   'https://www.instagram.com/explore/tags/wienessen/',
   'https://www.instagram.com/explore/tags/aktionwien/',
   'https://www.instagram.com/explore/tags/schnäppchenwien/',
-  'https://wolt.com/en/aut/vienna/',
-  'https://www.meinbezirk.at/',
+  'https://www.instagram.com/explore/tags/gutscheinwien/',
+  'https://www.instagram.com/explore/tags/wiengutschein/',
+  'https://www.instagram.com/explore/tags/essensangebotwien/',
+  'https://www.instagram.com/explore/tags/restaurantangebotwien/',
+  'https://www.instagram.com/explore/tags/foodaktionwien/',
+  'https://www.ikea.com/at/de/offers/',
+  'https://www.marktguru.at/c/essensgutscheine',
 ];
 
 const BROAD_DISCOVERY_FOCUSES = [
   'Suche ausschließlich auf Instagram und TikTok nach neuen Wiener Gastro-Aktionen. Liefere direkte Originalposts statt Profile, Hashtag-Seiten oder Web-Sammellisten.',
   'Durchsuche Gutschein.at, Preisjaeger.at, Marktguru, Sparhamster, GuteGutscheine und Studentenportale. Nutze nur konkrete Aktions- oder Detailseiten und verteile die Funde über mehrere Domains.',
-  'Durchsuche ausschließlich Wolt, Lieferando sowie direkte Restaurant- und Markenwebseiten nach 1+1, Gratisartikeln, Gutscheinen, Neueröffnungen und Rabatten ab 30 Prozent in Wien. Keine Deal-Aggregatoren verwenden.',
-  'Suche auf Social Media, Bezirksmedien und direkten Veranstalterseiten nach lokalen Wiener Neueröffnungen, zeitlich begrenzten Gastro-Aktionen und Gratisangeboten. Keine Restaurantverzeichnisse, Buchungsportale oder redaktionellen Sammellisten verwenden.',
+  'Suche auf Social Media, direkten Restaurant- und Markenwebseiten sowie lokalen Veranstalterseiten nach Wiener Neueröffnungen, zeitlich begrenzten Gastro-Aktionen und Gratisangeboten. Keine Restaurantverzeichnisse, Buchungsportale oder redaktionellen Sammellisten verwenden.',
+  'Durchsuche Wolt und Lieferando sowie direkte Restaurantseiten nach 1+1, Gratisartikeln und Rabatten ab 30 Prozent in Wien. Liefere höchstens zwei Deals von Wolt und höchstens zwei von Lieferando und bevorzuge unterschiedliche Restaurants mit konkret sichtbarem Angebot.',
 ];
 const ACTIVE_BROAD_DISCOVERY_FOCUSES = BROAD_DISCOVERY_FOCUSES.slice(
   0,
@@ -372,10 +377,21 @@ async function main() {
   console.log();
   console.log('📊 ERGEBNIS:');
   console.log(`   📦 Deals: ${allDeals.length}`);
-  const history = mergeFirecrawlDealHistory(allDeals, previousOutput.deals, {
+  const eligiblePreviousDeals = [];
+  let excludedPreviousDeals = 0;
+  for (const deal of previousOutput.deals) {
+    const excludedSource = getExcludedGastroDiscoverySource(deal, deal.url);
+    if (excludedSource) {
+      excludedPreviousDeals += 1;
+      rejected.push({ reason: `excluded-downstream-history:${excludedSource}`, deal });
+      continue;
+    }
+    eligiblePreviousDeals.push(deal);
+  }
+  const history = mergeFirecrawlDealHistory(allDeals, eligiblePreviousDeals, {
     now: RUN_STARTED_AT,
   });
-  console.log(`🛡️ Fresh history: ${history.retainedPreviousDeals}/${history.previousDeals}; exact duplicates merged: ${history.duplicateCount}`);
+  console.log(`🛡️ Fresh history: ${history.retainedPreviousDeals}/${history.previousDeals}; excluded history pruned: ${excludedPreviousDeals}; exact duplicates merged: ${history.duplicateCount}`);
   const finalDeals = await verifyFirecrawlDeals(history.deals, {
     sourceKey: 'firecrawl-key1-gastro',
     now: RUN_STARTED_AT,
@@ -420,6 +436,7 @@ async function main() {
       totalCreditsUsed,
       retainedPreviousDeals: history.retainedPreviousDeals,
       prunedPreviousDeals: history.prunedPreviousDeals,
+      excludedPreviousDeals,
       duplicateCandidatesMerged: history.duplicateCount,
       sourceStats,
       verifier: summarizeVerifiedDeals(finalDeals),
