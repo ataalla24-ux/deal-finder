@@ -6,7 +6,9 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: firecrawl-gastro-key1
+  # Gastro 2 and the central dispatcher both update the Gastro 2 pending file.
+  # Serialize them so central reverification cannot invalidate the scraper commit.
+  group: deal-state-writer
   cancel-in-progress: false
 
 jobs:
