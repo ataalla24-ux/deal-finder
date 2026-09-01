@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-01T21:19:34.736Z",
+  "generatedAt": "2026-09-01T21:22:55.224Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 663,
-    "uniqueCandidates": 621,
-    "distinctCandidates": 640,
-    "duplicateClusters": 19,
+    "totalCandidates": 667,
+    "uniqueCandidates": 619,
+    "distinctCandidates": 641,
+    "duplicateClusters": 22,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -28,14 +28,14 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 67,
+        "healthScore": 65,
         "totalDeals": 22
       },
       {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
-        "healthScore": 63,
-        "totalDeals": 9
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 65,
+        "totalDeals": 8
       }
     ],
     "topMissionSources": [
@@ -44,6 +44,12 @@
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 78,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 65,
+        "totalDeals": 8
       },
       {
         "sourceKey": "food3",
@@ -62,12 +68,6 @@
         "sourceLabel": "Daily Sync Instagram Discovery",
         "missionFitScore": 63,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 62,
-        "totalDeals": 4
       }
     ],
     "topCoverageSources": [
@@ -133,10 +133,10 @@
         "totalDeals": 22
       },
       {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
-        "precisionScore": 67,
-        "totalDeals": 9
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 68,
+        "totalDeals": 8
       }
     ],
     "topWeightedSources": [
@@ -147,15 +147,21 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 59,
-        "totalDeals": 22
-      },
-      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 58,
+        "totalDeals": 8
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 58,
+        "totalDeals": 22
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 56,
         "totalDeals": 8
       },
       {
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 55,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 54,
-        "totalDeals": 24
       }
     ],
     "topSourcesToFix": [
@@ -438,9 +438,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 22,
-      "uniqueDeals": 12,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 10,
+      "uniqueDeals": 9,
+      "duplicateDeals": 13,
+      "duplicateAcrossSources": 13,
       "fresh1dCount": 12,
       "fresh7dCount": 22,
       "viennaCount": 22,
@@ -453,8 +453,8 @@
         "Gratis-Eintritt zum Event"
       ],
       "lastRun": null,
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
+      "uniqueRate": 0.4,
+      "duplicateRate": 0.6,
       "fresh1dRate": 0.5,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -501,11 +501,100 @@
       "issues": [
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 67,
+      "healthScore": 65,
       "missionFitScore": 63,
       "coverageScore": 28,
       "precisionScore": 71,
-      "sourceWeightScore": 59
+      "sourceWeightScore": 58
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 8,
+      "uniqueDeals": 2,
+      "duplicateDeals": 6,
+      "duplicateAcrossSources": 6,
+      "fresh1dCount": 8,
+      "fresh7dCount": 8,
+      "viennaCount": 8,
+      "foodDrinkCount": 3,
+      "promoCount": 4,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis-Eintritt zum Event bei Liveim25",
+        "🎒✨ Back to School bei Khansaa Beauty ✨🎒 Zum Schulstart ♥️ Besonderer Rabatt für kurze Zeit ✨ 📅 Vom 02.09.",
+        "📅 Jeden Donnerstag · 17:00–23:00 Uhr 📍 Kunstpause · Arsenal Objekt 19, 1030 Wien ✨ Afterwork Special 🕔 17:00–19:00 Uhr 🍕 Pizza + Getränk"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-01T21:17:36.138Z",
+        "finishedAt": "2026-09-01T21:19:30.237Z",
+        "durationMs": 114099,
+        "counts": {
+          "rawCandidates": 130,
+          "normalizedCandidates": 8,
+          "verifiedCandidates": 8,
+          "previousDeals": 0,
+          "acceptedDeals": 8,
+          "rejectedDeals": 114
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 97,
+          "missing-text": 6,
+          "excluded-promotion-type": 5,
+          "general-recommendation": 5,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.8,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.4,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.1,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        },
+        {
+          "value": "kultur",
+          "count": 3
+        },
+        {
+          "value": "beauty",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 5
+        },
+        {
+          "value": "gratis",
+          "count": 3
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 65,
+      "missionFitScore": 65,
+      "coverageScore": 17,
+      "precisionScore": 68,
+      "sourceWeightScore": 56
     },
     {
       "sourceKey": "instagram-discovery",
@@ -640,92 +729,6 @@
       "coverageScore": 14,
       "precisionScore": 71,
       "sourceWeightScore": 55
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 4,
-      "uniqueDeals": 1,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 4,
-      "fresh7dCount": 4,
-      "viennaCount": 4,
-      "foodDrinkCount": 1,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Ihr interessiert euch für einen Deal?",
-        "🎶 Unser September ist voller Musik – 6 Konzerte, Eintritt frei!",
-        "🌿 𝗗𝗘𝗧𝗢𝗫-𝗪𝗼𝗰𝗵𝗲 𝗶𝗺 𝗠𝗘𝗥𝗖𝗨𝗥𝗜𝗢 🌿 𝗙𝗮𝘀𝘁𝗲𝗻 𝗶𝗺 𝗔𝗹𝗹𝘁𝗮𝗴 – 𝗽𝗲𝗿𝘀ö𝗻𝗹𝗶𝗰𝗵 𝗯𝗲𝗴𝗹𝗲𝗶𝘁𝗲𝘁 𝘂𝗻𝗱 𝗮𝗹𝗹𝘁𝗮"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-01T16:52:45.719Z",
-        "finishedAt": "2026-09-01T16:55:23.270Z",
-        "durationMs": 157551,
-        "counts": {
-          "rawCandidates": 128,
-          "normalizedCandidates": 4,
-          "verifiedCandidates": 4,
-          "previousDeals": 0,
-          "acceptedDeals": 4,
-          "rejectedDeals": 118
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 96,
-          "excluded-promotion-type": 7,
-          "missing-text": 8,
-          "non-vienna-location": 1,
-          "general-recommendation": 5,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.8,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 85.5,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 2
-        },
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 3
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 63,
-      "missionFitScore": 62,
-      "coverageScore": 13,
-      "precisionScore": 66,
-      "sourceWeightScore": 53
     },
     {
       "sourceKey": "joe",
