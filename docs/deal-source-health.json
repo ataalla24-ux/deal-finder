@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-01T11:36:31.216Z",
+  "generatedAt": "2026-09-01T11:37:50.612Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 649,
-    "uniqueCandidates": 604,
-    "distinctCandidates": 623,
-    "duplicateClusters": 19,
+    "totalCandidates": 645,
+    "uniqueCandidates": 603,
+    "distinctCandidates": 621,
+    "duplicateClusters": 18,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -26,16 +26,16 @@
         "totalDeals": 9
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 67,
-        "totalDeals": 20
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 69,
+        "totalDeals": 3
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 64,
-        "totalDeals": 28
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 65,
+        "totalDeals": 16
       }
     ],
     "topMissionSources": [
@@ -64,10 +64,10 @@
         "totalDeals": 9
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
         "missionFitScore": 60,
-        "totalDeals": 20
+        "totalDeals": 9
       }
     ],
     "topCoverageSources": [
@@ -127,10 +127,10 @@
         "totalDeals": 5
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
         "precisionScore": 70,
-        "totalDeals": 20
+        "totalDeals": 3
       },
       {
         "sourceKey": "joe",
@@ -159,16 +159,16 @@
         "totalDeals": 9
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 57,
-        "totalDeals": 20
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 56,
         "totalDeals": 5
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 54,
+        "totalDeals": 3
       }
     ],
     "topSourcesToFix": [
@@ -422,38 +422,117 @@
       "sourceWeightScore": 59
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 3,
+      "uniqueDeals": 2,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 2,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 0,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "The opening reception will be held on 24 September at 5:00 PM, with free admission.",
+        "Eintritt frei",
+        "The Arbeiterkammer is stepping in to fix this by offering free rent checks for older privately rented flats at Wallensteinplatz from August"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-09-01T05:34:53.386Z",
+        "finishedAt": "2026-09-01T05:37:18.841Z",
+        "durationMs": 145455,
+        "counts": {
+          "rawCandidates": 125,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 3,
+          "previousDeals": 0,
+          "acceptedDeals": 3,
+          "rejectedDeals": 113
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 99,
+          "excluded-promotion-type": 3,
+          "missing-text": 5,
+          "missing-vienna-evidence": 2,
+          "general-recommendation": 3,
+          "self-syndicated-deal": 1
+        },
+        "errors": [
+          "#wienevents: Meta Graph 2: An unexpected error has occurred. Please retry your request later."
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.7,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.7,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 3
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 69,
+      "missionFitScore": 58,
+      "coverageScore": 13,
+      "precisionScore": 70,
+      "sourceWeightScore": 54
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 20,
-      "uniqueDeals": 11,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 9,
+      "totalDeals": 16,
+      "uniqueDeals": 9,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
       "fresh1dCount": 4,
-      "fresh7dCount": 19,
-      "viennaCount": 20,
-      "foodDrinkCount": 11,
-      "promoCount": 13,
+      "fresh7dCount": 16,
+      "viennaCount": 16,
+      "foodDrinkCount": 8,
+      "promoCount": 9,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "The Arbeiterkammer is stepping in to fix this by offering free rent checks for older privately rented flats at Wallensteinplatz from August",
+        "🌿 𝗗𝗘𝗧𝗢𝗫-𝗪𝗼𝗰𝗵𝗲 𝗶𝗺 𝗠𝗘𝗥𝗖𝗨𝗥𝗜𝗢 🌿 𝗙𝗮𝘀𝘁𝗲𝗻 𝗶𝗺 𝗔𝗹𝗹𝘁𝗮𝗴 – 𝗽𝗲𝗿𝘀ö𝗻𝗹𝗶𝗰𝗵 𝗯𝗲𝗴𝗹𝗲𝗶𝘁𝗲𝘁 𝘂𝗻𝗱 𝗮𝗹𝗹𝘁𝗮",
         "Gratis-Eintritt zum Event bei VHS Floridsdorf, Angererstrasse 14",
         "GRATIS!"
       ],
       "lastRun": null,
       "uniqueRate": 0.6,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0.2,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0.3,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.7,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.6,
       "missingUrlRate": 0,
-      "averageQualityScore": 86.7,
+      "averageQualityScore": 86.6,
       "topCategories": [
         {
           "value": "essen",
-          "count": 11
+          "count": 8
         },
         {
           "value": "shopping",
@@ -461,17 +540,17 @@
         },
         {
           "value": "kultur",
-          "count": 2
+          "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "gratis",
-          "count": 10
-        },
-        {
           "value": "rabatt",
           "count": 9
+        },
+        {
+          "value": "gratis",
+          "count": 6
         },
         {
           "value": "bogo",
@@ -481,11 +560,11 @@
       "issues": [
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 67,
-      "missionFitScore": 60,
-      "coverageScore": 24,
-      "precisionScore": 70,
-      "sourceWeightScore": 57
+      "healthScore": 65,
+      "missionFitScore": 56,
+      "coverageScore": 21,
+      "precisionScore": 68,
+      "sourceWeightScore": 54
     },
     {
       "sourceKey": "instagram-ai",
@@ -918,86 +997,6 @@
       "coverageScore": 12,
       "precisionScore": 56,
       "sourceWeightScore": 45
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 3,
-      "uniqueDeals": 1,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 2,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 0,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "The opening reception will be held on 24 September at 5:00 PM, with free admission.",
-        "Eintritt frei",
-        "The Arbeiterkammer is stepping in to fix this by offering free rent checks for older privately rented flats at Wallensteinplatz from August"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-09-01T05:34:53.386Z",
-        "finishedAt": "2026-09-01T05:37:18.841Z",
-        "durationMs": 145455,
-        "counts": {
-          "rawCandidates": 125,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
-          "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 113
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 99,
-          "excluded-promotion-type": 3,
-          "missing-text": 5,
-          "missing-vienna-evidence": 2,
-          "general-recommendation": 3,
-          "self-syndicated-deal": 1
-        },
-        "errors": [
-          "#wienevents: Meta Graph 2: An unexpected error has occurred. Please retry your request later."
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 0.7,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86.7,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 2
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 60,
-      "missionFitScore": 58,
-      "coverageScore": 12,
-      "precisionScore": 67,
-      "sourceWeightScore": 51
     },
     {
       "sourceKey": "firecrawl4",
