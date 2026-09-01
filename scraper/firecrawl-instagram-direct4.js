@@ -31,6 +31,7 @@ import {
   writePipelineRunReport,
 } from './pipeline-run-report-utils.js';
 import {
+  GASTRO2_BASE_PROMPT,
   buildTargetPrompt,
   selectScrapeTargets,
 } from './firecrawl-instagram-direct4-config.js';
@@ -40,14 +41,19 @@ const SOURCE_KEY = 'firecrawl4';
 const SOURCE_LABEL = 'Firecrawl Key 4 - Gastro Discovery';
 const OUTPUT_PATH = 'docs/deals-pending-firecrawl4.json';
 const RUN_STARTED_AT = new Date();
-const DEFAULT_MAX_CREDITS_PER_TARGET = 350;
+const DEFAULT_MAX_CREDITS_PER_TARGET = 500;
 const MAX_CREDITS_PER_TARGET = positiveInteger(
   process.env.FIRECRAWL4_MAX_CREDITS_PER_TARGET,
   DEFAULT_MAX_CREDITS_PER_TARGET,
 );
-const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL4_AGENT_TIMEOUT_SECONDS, 90);
-const MAX_AGENT_FALLBACKS = positiveInteger(process.env.FIRECRAWL4_MAX_AGENT_FALLBACKS, 3);
+const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL4_AGENT_TIMEOUT_SECONDS, 360);
+const MAX_AGENT_FALLBACKS = positiveInteger(process.env.FIRECRAWL4_MAX_AGENT_FALLBACKS, 1);
+const BROAD_AGENT_PASSES = positiveInteger(process.env.FIRECRAWL4_BROAD_AGENT_PASSES, 2);
 const SCRAPE_TARGETS = selectScrapeTargets(RUN_STARTED_AT);
+const BROAD_DISCOVERY_FOCUSES = [
+  'Durchsuche Instagram, TikTok und das offene Web breit nach Wiener Gastro-Angeboten. Nutze besonders alternative Hashtags, lokale Food-Accounts und Neueröffnungs-Posts; liefere direkte Originalpost- oder Aktionslinks.',
+  'Durchsuche besonders Gutschein.at, Preisjaeger.at, Marktguru, Sparhamster, Wolt, Lieferando und direkte Restaurantseiten nach aktuell nutzbaren Wiener Gratisaktionen, 1+1-Angeboten und Rabatten ab 30 Prozent.',
+].slice(0, Math.min(BROAD_AGENT_PASSES, 2));
 
 if (!FIRECRAWL_API_KEY) {
   const error = new Error('FIRECRAWL_API_KEY4 nicht gesetzt');
@@ -146,6 +152,7 @@ async function main() {
   let completedSources = 0;
   let totalCreditsUsed = 0;
   let agentFallbacks = 0;
+  let creditLimitReached = false;
 
   console.log(`🔍 Scrape ${SCRAPE_TARGETS.length} echte Ziele (Gastro Focus)...`);
   console.log(`💳 Maximal ${MAX_CREDITS_PER_TARGET} Credits und ${AGENT_TIMEOUT_SECONDS}s pro Ziel`);
@@ -372,6 +379,7 @@ async function main() {
       if (isFirecrawlRateOrCreditError(e.message)) {
         console.log('      → Stoppe Run frühzeitig wegen API-Limit/Credits');
         stopAfterTarget = true;
+        creditLimitReached = true;
       }
     }
 
@@ -382,6 +390,134 @@ async function main() {
     if (stopAfterTarget) break;
 
     await new Promise(r => setTimeout(r, 2000));
+  }
+
+  if (!creditLimitReached) {
+    console.log();
+    console.log(`🌐 ${BROAD_DISCOVERY_FOCUSES.length} ergänzende breite Agent-Suchen...`);
+
+    for (let i = 0; i < BROAD_DISCOVERY_FOCUSES.length; i++) {
+      const focus = BROAD_DISCOVERY_FOCUSES[i];
+      const normalizedBefore = allDeals.length;
+      const rejectedBefore = rejected.length;
+      const stat = {
+        id: `broad-agent:${i + 1}`,
+        kind: 'broad-agent',
+        label: `Breite Ergänzung ${i + 1}`,
+        status: 'started',
+        rawCandidates: 0,
+        normalizedCandidates: 0,
+        rejectedCandidates: 0,
+        creditsUsed: 0,
+      };
+      let stopAfterPass = false;
+
+      console.log(`   [${i + 1}/${BROAD_DISCOVERY_FOCUSES.length}] ${stat.label}...`);
+
+      try {
+        const result = await runAgent({
+          prompt: `${GASTRO2_BASE_PROMPT}\n\nSchwerpunkt dieses Durchlaufs: ${focus}\nDiese Suche ist absichtlich offen und nicht auf eine einzelne Start-URL beschränkt.`,
+          schema: gastroSchema,
+          model: 'spark-1-pro',
+        });
+        stat.creditsUsed = Number(result?.creditsUsed || result?.credits_used || 0);
+        totalCreditsUsed += stat.creditsUsed;
+
+        let data = result?.data;
+        if (typeof data === 'string') {
+          try {
+            data = JSON.parse(data);
+          } catch (error) {
+            throw new Error(`Ungültige Agent-Antwort: ${error.message}`);
+          }
+        }
+
+        if (data?.deals && Array.isArray(data.deals)) {
+          completedSources += 1;
+          rawCandidateCount += data.deals.length;
+          stat.status = 'completed-agent';
+          stat.rawCandidates = data.deals.length;
+          console.log(`      → ${data.deals.length} Deals gefunden`);
+
+          for (const d of data.deals) {
+            const reportedUrl = (d.post_url || '').trim();
+            if (!reportedUrl) {
+              rejected.push({
+                reason: 'missing-target-url',
+                deal: {
+                  title: d.item_given_away || '',
+                  brand: d.brand_or_store || stat.label,
+                },
+              });
+              continue;
+            }
+
+            const targetUrl = isInstagramUrl(reportedUrl)
+              ? normalizeInstagramPostUrl(reportedUrl)
+              : reportedUrl;
+            if (!targetUrl) {
+              rejected.push({
+                reason: 'instagram-profile-not-post',
+                deal: {
+                  title: d.item_given_away || '',
+                  brand: d.brand_or_store || stat.label,
+                  url: reportedUrl,
+                },
+              });
+              continue;
+            }
+
+            const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
+            const brand = d.brand_or_store || stat.label;
+            const title = d.item_given_away?.substring(0, 60) || 'Gastro Deal';
+            const ownerUsername = (d.owner_username || '').replace(/^@/, '').trim().toLowerCase();
+
+            allDeals.push({
+              id: dealId('fc4g', brand, title, targetUrl),
+              brand,
+              title,
+              description: [d.item_given_away, d.location].filter(Boolean).join(' – '),
+              type: isGratis ? 'gratis' : 'rabatt',
+              category: 'essen',
+              source: 'Firecrawl Gastro #4',
+              url: targetUrl,
+              expires: `${d.validity_date || ''} ${d.validity_time || ''}`.trim(),
+              distance: d.location || '',
+              hot: true,
+              isNew: true,
+              priority: isGratis ? 2 : 3,
+              votes: 1,
+              qualityScore: 65,
+              ownerUsername,
+              reportedPostDate: d.post_date || '',
+              expiresOriginal: `${d.validity_date || ''} ${d.validity_time || ''}`.trim(),
+              discoveryTarget: stat.id,
+              discoveryTargetLabel: stat.label,
+              discoveryMethod: 'firecrawl-agent',
+            });
+          }
+        } else {
+          stat.status = 'no-data';
+          console.log('      → Keine strukturierte Deal-Liste erhalten');
+        }
+      } catch (error) {
+        console.log(`      → Error: ${error.message}`);
+        stat.status = 'failed';
+        stat.error = error.message;
+        stat.creditsUsed = Number(error?.creditsUsed || 0);
+        totalCreditsUsed += stat.creditsUsed;
+        runErrors.push(`${stat.label}: ${error.message}`);
+        if (isFirecrawlRateOrCreditError(error.message)) {
+          console.log('      → Stoppe Run frühzeitig wegen API-Limit/Credits');
+          stopAfterPass = true;
+        }
+      }
+
+      stat.normalizedCandidates = allDeals.length - normalizedBefore;
+      stat.rejectedCandidates = rejected.length - rejectedBefore;
+      sourceStats.push(stat);
+      if (stopAfterPass) break;
+    }
   }
 
   console.log();
@@ -426,12 +562,13 @@ async function main() {
     acceptedDeals: outputDeals.length,
     rejected,
     diagnostics: {
-      configuredSources: SCRAPE_TARGETS.length,
+      configuredSources: SCRAPE_TARGETS.length + BROAD_DISCOVERY_FOCUSES.length,
       attemptedSources: sourceStats.length,
       completedSources,
       agentTimeoutSeconds: AGENT_TIMEOUT_SECONDS,
       maxAgentFallbacks: MAX_AGENT_FALLBACKS,
       agentFallbacks,
+      broadAgentPasses: BROAD_DISCOVERY_FOCUSES.length,
       maxCreditsPerTarget: MAX_CREDITS_PER_TARGET,
       totalCreditsUsed,
       retainedPreviousDeals: history.retainedPreviousDeals,

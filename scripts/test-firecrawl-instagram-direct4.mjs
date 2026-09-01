@@ -61,6 +61,9 @@ const configuredAccounts = [
 assert.deepEqual(new Set(configuredHashtags), new Set(expectedHashtags));
 assert.deepEqual(new Set(configuredAccounts), new Set(expectedAccounts));
 assert.equal(WEB_TARGETS.length, 2);
+assert.ok(WEB_TARGETS.some((target) => target.url.includes('gutschein.at')));
+assert.ok(WEB_TARGETS.some((target) => target.url.includes('preisjaeger.at')));
+assert.ok(WEB_TARGETS.every((target) => !target.url.includes('gastro.news')));
 
 assert.equal(selectedTargets.length, 10, 'Key 4 should run ten real, bounded targets');
 assert.equal(new Set(selectedUrls).size, selectedTargets.length, 'selected targets must be unique');
@@ -124,18 +127,21 @@ assert.match(key4Source, /FIRECRAWL4_AGENT_TIMEOUT_SECONDS/);
 assert.match(key4Source, /searchFreshInstagramPosts/);
 assert.match(key4Source, /searchFreshWebDeals/);
 assert.match(key4Source, /MAX_AGENT_FALLBACKS/);
+assert.match(key4Source, /FIRECRAWL4_BROAD_AGENT_PASSES/);
+assert.match(key4Source, /Diese Suche ist absichtlich offen/);
 assert.doesNotMatch(key4Source, /classifyKey4Evidence|dedupeKey4Candidates|FC4_MAX_AGE_DAYS/);
 
 assert.match(workflow, /FIRECRAWL_API_KEY4: \$\{\{ secrets\.FIRECRAWL_API_KEY4 \}\}/);
 assert.doesNotMatch(workflow, /FIRECRAWL_API_KEY(?:1|2|3|5|6):/);
 assert.doesNotMatch(workflow, /^\s+FIRECRAWL_API_KEY:/m);
-assert.match(workflow, /FIRECRAWL4_MAX_CREDITS_PER_TARGET: 350/);
-assert.match(workflow, /FIRECRAWL4_AGENT_TIMEOUT_SECONDS: 90/);
-assert.match(workflow, /FIRECRAWL4_MAX_AGENT_FALLBACKS: 3/);
+assert.match(workflow, /FIRECRAWL4_MAX_CREDITS_PER_TARGET: 500/);
+assert.match(workflow, /FIRECRAWL4_AGENT_TIMEOUT_SECONDS: 360/);
+assert.match(workflow, /FIRECRAWL4_MAX_AGENT_FALLBACKS: 1/);
+assert.match(workflow, /FIRECRAWL4_BROAD_AGENT_PASSES: 2/);
 assert.match(workflow, /FIRECRAWL_POST_VERIFY_MAX: 60/);
 assert.match(workflow, /FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 7/);
 assert.match(workflow, /FIRECRAWL_POST_MAX_ACCEPTED_AGE_DAYS: 7/);
-assert.match(workflow, /timeout-minutes: 20/);
+assert.match(workflow, /timeout-minutes: 35/);
 assert.doesNotMatch(workflow, /deals-(?:raw|review|rejected)-firecrawl4\.json/);
 
 console.log('Firecrawl Key 4 targeted Gastro2-clone regression tests passed.');

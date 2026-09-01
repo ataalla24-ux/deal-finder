@@ -12,7 +12,7 @@ concurrency:
 jobs:
   gastro:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     permissions:
       contents: write
     steps:
@@ -33,9 +33,10 @@ jobs:
           FIRECRAWL_POST_MAX_ACCEPTED_AGE_DAYS: 7
           FIRECRAWL_POST_VERIFY_CONCURRENCY: 4
           FIRECRAWL_POST_VERIFY_TIMEOUT_MS: 6000
-          FIRECRAWL4_AGENT_TIMEOUT_SECONDS: 90
-          FIRECRAWL4_MAX_AGENT_FALLBACKS: 3
-          FIRECRAWL4_MAX_CREDITS_PER_TARGET: 350
+          FIRECRAWL4_AGENT_TIMEOUT_SECONDS: 360
+          FIRECRAWL4_MAX_AGENT_FALLBACKS: 1
+          FIRECRAWL4_MAX_CREDITS_PER_TARGET: 500
+          FIRECRAWL4_BROAD_AGENT_PASSES: 2
         run: node scraper/firecrawl-instagram-direct4.js
 
       - name: Commit deals

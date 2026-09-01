@@ -115,9 +115,16 @@ for (const [sourcePath, workflowPath, timeoutVariable, creditVariable] of scrape
 }
 
 const key1Source = fs.readFileSync('scraper/firecrawl-gastro2.js', 'utf8');
-assert.match(key1Source, /urls: \[url\]/, 'Key 1 must pass each real target through the v2 urls field');
+const key1Workflow = fs.readFileSync('.github/workflows/firecrawl-gastro-key1.yml', 'utf8');
+assert.match(key1Source, /FIRECRAWL1_BROAD_AGENT_PASSES/);
+assert.match(key1Source, /kind: 'broad-agent'/);
+assert.doesNotMatch(key1Source, /urls: \[url\]/, 'Key 1 broad discovery must not be constrained to one seed URL');
 assert.doesNotMatch(key1Source, /\n\s*url: url,/, 'the ignored legacy singular url field must not return');
 assert.match(key1Source, /searchFreshWebDeals\(/);
+assert.match(key1Workflow, /FIRECRAWL1_BROAD_AGENT_PASSES: 4/);
+assert.match(key1Workflow, /FIRECRAWL1_AGENT_TIMEOUT_SECONDS: 420/);
+assert.match(key1Workflow, /FIRECRAWL1_MAX_CREDITS_PER_TARGET: 500/);
+assert.match(key1Workflow, /timeout-minutes: 40/);
 
 const key4Source = fs.readFileSync('scraper/firecrawl-instagram-direct4.js', 'utf8');
 assert.match(key4Source, /searchFreshWebDeals\(/);

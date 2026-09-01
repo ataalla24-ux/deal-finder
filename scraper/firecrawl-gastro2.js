@@ -9,6 +9,7 @@ import { z } from 'zod';
 import fs from 'fs';
 import {
   mergeFirecrawlDealHistory,
+  normalizeInstagramPostUrl,
   readFirecrawlDealOutput,
   verifyFirecrawlDeals,
 } from './firecrawl-post-verifier.js';
@@ -16,7 +17,6 @@ import {
   isFirecrawlRateOrCreditError,
   positiveInteger,
   runBoundedFirecrawlAgent,
-  selectRotatingFirecrawlTargets,
 } from './firecrawl-agent-utils.js';
 import {
   inferFirecrawlSearchDealType,
@@ -36,9 +36,9 @@ const SOURCE_KEY = 'gastro2';
 const SOURCE_LABEL = 'Firecrawl Key 1 - Gastro';
 const OUTPUT_PATH = 'docs/deals-pending-gastro2.json';
 const RUN_STARTED_AT = new Date();
-const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL1_AGENT_TIMEOUT_SECONDS, 75);
-const MAX_CREDITS_PER_TARGET = positiveInteger(process.env.FIRECRAWL1_MAX_CREDITS_PER_TARGET, 250);
-const TARGETS_PER_RUN = positiveInteger(process.env.FIRECRAWL1_TARGETS_PER_RUN, 4);
+const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL1_AGENT_TIMEOUT_SECONDS, 420);
+const MAX_CREDITS_PER_AGENT = positiveInteger(process.env.FIRECRAWL1_MAX_CREDITS_PER_TARGET, 500);
+const BROAD_AGENT_PASSES = positiveInteger(process.env.FIRECRAWL1_BROAD_AGENT_PASSES, 4);
 
 if (!FIRECRAWL_API_KEY) {
   const error = new Error('FIRECRAWL_API_KEY1 oder FIRECRAWL_API_KEY nicht gesetzt');
@@ -58,7 +58,7 @@ const firecrawl = new Firecrawl({ apiKey: FIRECRAWL_API_KEY });
 async function runAgent(payload) {
   return runBoundedFirecrawlAgent(firecrawl, payload, {
     timeoutSeconds: AGENT_TIMEOUT_SECONDS,
-    maxCredits: MAX_CREDITS_PER_TARGET,
+    maxCredits: MAX_CREDITS_PER_AGENT,
   });
 }
 
@@ -75,7 +75,17 @@ const SCRAPE_URLS = [
   'https://www.1000things.at/',
   'https://www.meinbezirk.at/',
 ];
-const ACTIVE_SCRAPE_URLS = selectRotatingFirecrawlTargets(SCRAPE_URLS, TARGETS_PER_RUN, RUN_STARTED_AT);
+
+const BROAD_DISCOVERY_FOCUSES = [
+  'Durchsuche Instagram, TikTok und das offene Web breit nach neuen Wiener Gastro-Aktionen. Liefere direkte Social-Post- oder Aktionslinks.',
+  'Durchsuche besonders Gutschein.at, Preisjaeger.at, Marktguru, Sparhamster, GuteGutscheine und Studentenportale nach aktuell nutzbaren Wiener Gastro-Deals.',
+  'Durchsuche besonders Wolt, Lieferando, Restaurant- und Markenwebseiten nach 1+1, Gratisartikeln, Gutscheinen, Neueröffnungen und Rabatten ab 30 Prozent in Wien.',
+  'Suche nach lokalen Wiener Neueröffnungen, zeitlich begrenzten Gastro-Aktionen und Gratisangeboten auf Social Media, Bezirksmedien und Veranstaltungsseiten.',
+];
+const ACTIVE_BROAD_DISCOVERY_FOCUSES = BROAD_DISCOVERY_FOCUSES.slice(
+  0,
+  Math.min(BROAD_AGENT_PASSES, BROAD_DISCOVERY_FOCUSES.length),
+);
 
 function isInstagramUrl(url) {
   return (url || '').includes('instagram.com');
@@ -114,8 +124,6 @@ const gastroSchema = z.object({
 
 const PROMPT = `Extrahiere aktuelle und zukünftige Deals in Wien mit höchster Priorität auf Gastronomie-Angebote (Essen & Trinken).
 
-Instagram-Freshness ist zwingend: Nimm nur Originalposts auf, die in den letzten 7 Tagen veröffentlicht wurden. Ein Angebot darf in der Zukunft beginnen, aber der Instagram-Post selbst darf trotzdem nicht älter als 7 Tage sein. Bekanntermaßen ältere Posts, Reposts ohne Originalquelle und Posts aus vergangenen Jahren weglassen.
-
 Suche gezielt nach:
 - Starken Rabatten wie Mahlzeiten unter €3
 - Mindestens 50% Preisnachlass (z.B. 1,99€ Döner, 1+1 Aktionen)
@@ -134,7 +142,7 @@ Erfasse für jeden Deal:
 - Die direkte URL zum ursprünglichen Post oder Web-Beitrag
 - Bei Instagram: den echten Account-Handle und das Veröffentlichungsdatum des Original-Posts.
 
-Wichtig: Das Veröffentlichungsdatum des Posts und die Gültigkeit des Angebots sind zwei verschiedene Felder. Gib Jahreszahlen vollständig an. Nur konkrete direkt nutzbare Vorteile in Wien aufnehmen; Gewinnspiele, reine Empfehlungen, Gratis-Versand und bloße Hinweise ohne Preisvorteil weglassen. Bei Instagram muss die URL direkt auf /p/... oder /reel/... zeigen.`;
+Wichtig: Das Veröffentlichungsdatum des Posts und die Gültigkeit des Angebots sind zwei verschiedene Felder. Gib Jahreszahlen vollständig an. Nimm nur noch laufende oder zukünftige, konkret nutzbare Vorteile auf. Gewinnspiele, reine Empfehlungen, Gratis-Versand und bloße Hinweise ohne Preisvorteil weglassen. Bei Instagram muss die URL direkt auf /p/... oder /reel/... zeigen. Erfinde keine Datumsangaben.`;
 
 // ============================================
 // MAIN
@@ -172,17 +180,24 @@ async function main() {
   let completedSources = 0;
   let totalCreditsUsed = 0;
   
-  console.log(`🔍 Scrape ${ACTIVE_SCRAPE_URLS.length}/${SCRAPE_URLS.length} rotierende Ziele (Gastro Focus)...`);
-  console.log(`💳 Maximal ${MAX_CREDITS_PER_TARGET} Credits und ${AGENT_TIMEOUT_SECONDS}s pro Ziel`);
-  
-  for (let i = 0; i < ACTIVE_SCRAPE_URLS.length; i++) {
-    const url = ACTIVE_SCRAPE_URLS[i];
+  console.log(`🔎 Ergänzende Fresh Search über ${SCRAPE_URLS.length} Ziele...`);
+
+  for (let i = 0; i < SCRAPE_URLS.length; i++) {
+    const url = SCRAPE_URLS[i];
     const source = new URL(url).hostname.replace('www.', '');
-    const stat = { url, status: 'started', rawCandidates: 0, searchCandidates: 0, normalizedCandidates: 0, creditsUsed: 0 };
+    const stat = {
+      id: `search:${i + 1}`,
+      kind: 'fresh-search',
+      url,
+      status: 'started',
+      rawCandidates: 0,
+      searchCandidates: 0,
+      normalizedCandidates: 0,
+      creditsUsed: 0,
+    };
     const normalizedBefore = allDeals.length;
-    let stopAfterTarget = false;
-    
-    console.log(`   [${i + 1}/${ACTIVE_SCRAPE_URLS.length}] ${source}...`);
+
+    console.log(`   [${i + 1}/${SCRAPE_URLS.length}] ${source}...`);
 
     try {
       const searchRows = isInstagramUrl(url)
@@ -216,28 +231,48 @@ async function main() {
             discoveryMethod: row.discoveryMethod,
           });
         }
-        rawCandidateCount += relevantRows.length;
-        completedSources += 1;
-        stat.status = 'completed-search';
-        stat.rawCandidates = relevantRows.length;
-        stat.normalizedCandidates = allDeals.length - normalizedBefore;
-        sourceStats.push(stat);
         console.log(`      → ${relevantRows.length} direkte Treffer via Firecrawl Search`);
-        continue;
       }
+      rawCandidateCount += relevantRows.length;
+      completedSources += 1;
+      stat.status = 'completed-search';
+      stat.rawCandidates = relevantRows.length;
     } catch (error) {
+      stat.status = 'failed-search';
       stat.searchError = error.message;
+      runErrors.push(`${source} Search: ${error.message}`);
       console.log(`      → Search-Warnung: ${error.message}`);
     }
-    
+
+    stat.normalizedCandidates = allDeals.length - normalizedBefore;
+    sourceStats.push(stat);
+  }
+
+  console.log();
+  console.log(`🌐 ${ACTIVE_BROAD_DISCOVERY_FOCUSES.length} breite Agent-Suchen wie im erfolgreichen August-Setup...`);
+  console.log(`💳 Maximal ${MAX_CREDITS_PER_AGENT} Credits und ${AGENT_TIMEOUT_SECONDS}s pro Agent-Suche`);
+
+  for (let i = 0; i < ACTIVE_BROAD_DISCOVERY_FOCUSES.length; i++) {
+    const focus = ACTIVE_BROAD_DISCOVERY_FOCUSES[i];
+    const normalizedBefore = allDeals.length;
+    const stat = {
+      id: `broad-agent:${i + 1}`,
+      kind: 'broad-agent',
+      label: `Breite Suche ${i + 1}`,
+      status: 'started',
+      rawCandidates: 0,
+      normalizedCandidates: 0,
+      creditsUsed: 0,
+    };
+    let stopAfterPass = false;
+
+    console.log(`   [${i + 1}/${ACTIVE_BROAD_DISCOVERY_FOCUSES.length}] Breite Suche ${i + 1}...`);
+
     try {
       const result = await runAgent({
-        urls: [url],
-        prompt: isInstagramUrl(url)
-          ? `${PROMPT}\n\nDieser Durchlauf startet auf Instagram. Liefere ausschließlich direkte Instagram-Originalposts von diesem Ziel; weiche nicht auf allgemeine Deal-Webseiten aus.`
-          : PROMPT,
+        prompt: `${PROMPT}\n\nSchwerpunkt dieses Durchlaufs: ${focus}\nLiefere möglichst andere konkrete Deals als in naheliegenden Standardsuchen.`,
         schema: gastroSchema,
-        model: isInstagramUrl(url) ? 'spark-1-mini' : 'spark-1-pro',
+        model: 'spark-1-pro',
       });
       stat.creditsUsed = Number(result?.creditsUsed || result?.credits_used || 0);
       totalCreditsUsed += stat.creditsUsed;
@@ -259,46 +294,36 @@ async function main() {
           console.log(`      → ${data.deals.length} Deals gefunden`);
           
           for (const d of data.deals) {
-            const postUrl = d.post_url || '';
+            const reportedUrl = (d.post_url || '').trim();
             
-            if (!postUrl) {
+            if (!reportedUrl) {
               rejected.push({
                 reason: 'missing-target-url',
                 deal: {
                   title: d.item_given_away || '',
-                  brand: d.brand_or_store || source,
+                  brand: d.brand_or_store || 'Unbekannt',
                 },
               });
               continue;
             }
-            if (isInstagramUrl(url) && !isInstagramUrl(postUrl)) {
+
+            const postUrl = isInstagramUrl(reportedUrl)
+              ? normalizeInstagramPostUrl(reportedUrl)
+              : reportedUrl;
+            if (!postUrl) {
               rejected.push({
-                reason: 'instagram-target-returned-web-result',
+                reason: 'instagram-profile-not-post',
                 deal: {
                   title: d.item_given_away || '',
-                  brand: d.brand_or_store || source,
-                  url: postUrl,
-                },
-              });
-              continue;
-            }
-            if (!isConcreteFirecrawlSearchResult({
-              title: d.item_given_away,
-              description: `${d.category || ''} ${d.validity_date || ''} ${d.validity_time || ''}`,
-            })) {
-              rejected.push({
-                reason: 'missing-concrete-offer-or-giveaway',
-                deal: {
-                  title: d.item_given_away || '',
-                  brand: d.brand_or_store || source,
-                  url: postUrl,
+                  brand: d.brand_or_store || 'Unbekannt',
+                  url: reportedUrl,
                 },
               });
               continue;
             }
             
             const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
-            const brand = d.brand_or_store || source;
+            const brand = d.brand_or_store || 'Unbekannt';
             const title = d.item_given_away?.substring(0, 60) || 'Gastro Deal';
             const ownerUsername = (d.owner_username || '').replace(/^@/, '').trim().toLowerCase();
             
@@ -321,7 +346,8 @@ async function main() {
               ownerUsername,
               reportedPostDate: d.post_date || '',
               expiresOriginal: `${d.validity_date || ''} ${d.validity_time || ''}`.trim(),
-              discoveryTarget: url,
+              discoveryTarget: stat.id,
+              discoveryTargetLabel: stat.label,
               discoveryMethod: 'firecrawl-agent',
             });
           }
@@ -333,15 +359,15 @@ async function main() {
       stat.error = e.message;
       stat.creditsUsed = Number(e?.creditsUsed || 0);
       totalCreditsUsed += stat.creditsUsed;
-      runErrors.push(`${source}: ${e.message}`);
+      runErrors.push(`${stat.label}: ${e.message}`);
       if (isFirecrawlRateOrCreditError(e.message)) {
         console.log('      → Stoppe Run frühzeitig wegen API-Limit/Credits');
-        stopAfterTarget = true;
+        stopAfterPass = true;
       }
     }
     stat.normalizedCandidates = allDeals.length - normalizedBefore;
     sourceStats.push(stat);
-    if (stopAfterTarget) break;
+    if (stopAfterPass) break;
   }
 
   console.log();
@@ -385,12 +411,13 @@ async function main() {
     acceptedDeals: finalDeals.length,
     rejected,
     diagnostics: {
-      configuredSources: SCRAPE_URLS.length,
+      configuredSources: SCRAPE_URLS.length + ACTIVE_BROAD_DISCOVERY_FOCUSES.length,
       attemptedSources: sourceStats.length,
       completedSources,
-      targetsPerRun: TARGETS_PER_RUN,
+      searchTargets: SCRAPE_URLS.length,
+      broadAgentPasses: ACTIVE_BROAD_DISCOVERY_FOCUSES.length,
       agentTimeoutSeconds: AGENT_TIMEOUT_SECONDS,
-      maxCreditsPerTarget: MAX_CREDITS_PER_TARGET,
+      maxCreditsPerAgent: MAX_CREDITS_PER_AGENT,
       totalCreditsUsed,
       retainedPreviousDeals: history.retainedPreviousDeals,
       prunedPreviousDeals: history.prunedPreviousDeals,

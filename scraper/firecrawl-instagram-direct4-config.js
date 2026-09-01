@@ -41,22 +41,20 @@ export const ROTATING_ACCOUNT_TARGETS = [
 
 export const WEB_TARGETS = [
   {
-    id: 'web:gastro-news-deals',
+    id: 'web:gutschein-at-food',
     kind: 'web-deal-list',
-    label: 'Gastro.News Restaurant Deals',
-    url: 'https://gastro.news/die-besten-restaurant-deals/',
+    label: 'Gutschein.at Essen & Trinken',
+    url: 'https://www.gutschein.at/essen-trinken',
   },
   {
-    id: 'web:thefork-vienna-offers',
+    id: 'web:preisjaeger-food',
     kind: 'web-deal-list',
-    label: 'TheFork Wien Angebote',
-    url: 'https://www.thefork.at/restaurants/wien-c597321/angebote',
+    label: 'Preisjäger Lebensmittel & Gastro',
+    url: 'https://www.preisjaeger.at/gruppe/lebensmittel',
   },
 ];
 
 export const GASTRO2_BASE_PROMPT = `Extrahiere aktuelle und zukünftige Deals in Wien mit höchster Priorität auf Gastronomie-Angebote (Essen & Trinken).
-
-Instagram-Freshness ist zwingend: Nimm nur Originalposts auf, die in den letzten 7 Tagen veröffentlicht wurden. Ein Angebot darf in der Zukunft beginnen, aber der Instagram-Post selbst darf trotzdem nicht älter als 7 Tage sein. Bekanntermaßen ältere Posts, Reposts ohne Originalquelle und Posts aus vergangenen Jahren weglassen.
 
 Suche gezielt nach:
 - Starken Rabatten wie Mahlzeiten unter €3
@@ -76,7 +74,7 @@ Erfasse für jeden Deal:
 - Die direkte URL zum ursprünglichen Post oder Web-Beitrag
 - Bei Instagram: den echten Account-Handle und das Veröffentlichungsdatum des Original-Posts.
 
-Wichtig: Das Veröffentlichungsdatum des Posts und die Gültigkeit des Angebots sind zwei verschiedene Felder. Gib Jahreszahlen vollständig an. Nur konkrete direkt nutzbare Vorteile in Wien aufnehmen; Gewinnspiele, reine Empfehlungen, Gratis-Versand und bloße Hinweise ohne Preisvorteil weglassen. Bei Instagram muss die URL direkt auf /p/... oder /reel/... zeigen.`;
+Wichtig: Das Veröffentlichungsdatum des Posts und die Gültigkeit des Angebots sind zwei verschiedene Felder. Gib Jahreszahlen vollständig an. Nimm nur noch laufende oder zukünftige, konkret nutzbare Vorteile auf. Gewinnspiele, reine Empfehlungen, Gratis-Versand und bloße Hinweise ohne Preisvorteil weglassen. Bei Instagram muss die URL direkt auf /p/... oder /reel/... zeigen. Erfinde keine Datumsangaben.`;
 
 function rotatingWindow(items, count, dayNumber, offset = 0) {
   if (items.length === 0 || count <= 0) return [];
