@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-01T10:13:32.790Z",
+  "generatedAt": "2026-09-01T10:23:55.051Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 400,
+    "total": 402,
     "allowed": 1,
-    "blocked": 399,
-    "warnings": 0,
+    "blocked": 401,
+    "warnings": 1,
     "reasonCounts": {
       "abgelaufen (2026-08-29)": 5,
       "nicht eindeutig in Wien": 37,
@@ -21,7 +21,7 @@
       "älter als 7 Tage (2026-06-03)": 2,
       "älter als 7 Tage (2026-07-03)": 1,
       "älter als 7 Tage (2026-06-08)": 2,
-      "kein konkretes Angebot erkennbar": 239,
+      "kein konkretes Angebot erkennbar": 241,
       "kein echtes Social-Post-Datum gefunden": 2,
       "älter als 7 Tage (2026-05-06)": 1,
       "älter als 7 Tage (2026-06-19)": 1,
@@ -71,7 +71,7 @@
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-03-11)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-03-13)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-02-23)": 2,
-      "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2025-06-30)": 3,
+      "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2025-06-30)": 2,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2025-08-01)": 2,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2025-07-01)": 2,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2025-06-27)": 2,
@@ -124,9 +124,9 @@
     "reasonCategoryCounts": {
       "abgelaufen": 41,
       "nicht Wien": 37,
-      "älter als 7 Tage": 232,
+      "älter als 7 Tage": 231,
       "ausgeschlossene Quelle": 111,
-      "kein konkreter Deal": 239,
+      "kein konkreter Deal": 241,
       "kein echtes Post-Datum": 100,
       "ungültige URL": 20,
       "Gottesdienste außerhalb Wochenlauf": 34,
@@ -176,7 +176,7 @@
         "warnings": 0,
         "reasonCategoryCounts": {
           "ausgeschlossene Quelle": 63,
-          "älter als 7 Tage": 44,
+          "älter als 7 Tage": 43,
           "kein konkreter Deal": 25,
           "abgelaufen": 22,
           "Gewinnspiel": 1,
@@ -252,6 +252,15 @@
           "kein konkreter Deal": 1
         }
       },
+      "Hervis": {
+        "total": 2,
+        "allowed": 0,
+        "blocked": 2,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "kein konkreter Deal": 2
+        }
+      },
       "instagram-ai-agent": {
         "total": 6,
         "allowed": 0,
@@ -321,30 +330,33 @@
           "älter als 7 Tage": 9
         }
       },
-      "tiktok-deals-scanner": {
+      "Thalia": {
         "total": 1,
         "allowed": 1,
         "blocked": 0,
-        "warnings": 0,
+        "warnings": 1,
         "reasonCategoryCounts": {}
       }
     }
   },
   "allowed": [
     {
-      "id": "tiktok-qws0wu",
-      "title": "1+1 auf den pass gibt (danke @oeticket 🫶) zahlst nur eine",
-      "brand": "Festival",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@nastyaunterwegs/video/7680206815728012566",
+      "id": "power-0f9b8e6bc7f0",
+      "title": "15% Rabatt auf englische Bücher nur in der",
+      "brand": "Thalia",
+      "source": "Thalia",
+      "url": "https://www.thalia.at/vorteile/thalia",
       "reasons": [],
-      "warnings": [],
-      "sourceDate": "2026-08-31T14:44:56.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 1,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-01T10:22:46.631Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
       "expiryDate": "",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "expirySource": "",
+      "urlStatus": "unklar: HTTP 403"
     }
   ],
   "blocked": [
@@ -3507,16 +3519,18 @@
       "url": "https://dierestaurantwoche.at/diningruhm/",
       "reasons": [
         "ausgeschlossene Quelle (DieRestaurantWoche)",
-        "kein konkretes Angebot erkennbar",
-        "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2025-06-30)"
+        "kein konkretes Angebot erkennbar"
       ],
-      "warnings": [],
-      "sourceDate": "2025-06-30T08:23:39.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 428,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
       "expiryDate": "2026-09-06",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "g2-6u5cso",
@@ -4755,7 +4769,6 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
@@ -4763,7 +4776,7 @@
       "sourceAgeDays": 191,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-28-20260222",
@@ -5292,15 +5305,13 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 191,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gottesdienste-22-20260222",
@@ -5970,6 +5981,26 @@
       "urlStatus": "HTTP 200"
     },
     {
+      "id": "power-1e1f9847ada7",
+      "title": "SEBORGA Wanderjacke -11% Current price 79.99 79. 99 Original price UVP € 119.99",
+      "brand": "Hervis",
+      "source": "Hervis",
+      "url": "https://www.hervis.at/shop/Bekleidung/Jacken-&-M%C3%A4ntel/Outdoor-&-Klettern/Kilimanjaro/SEBORGA/p/COLOR-3524285",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.hervis.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-01T10:22:44.814Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.hervis.at"
+    },
+    {
       "id": "power-5453fdb4bd49",
       "title": "50% ausgew. hochwertige Schreibwaren",
       "brand": "Libro",
@@ -5982,9 +6013,9 @@
         "URL nicht eindeutig prüfbar (www.pagro.at)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-31T11:47:45.210Z",
+      "sourceDate": "2026-09-01T10:22:47.553Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -6002,9 +6033,9 @@
         "URL nicht eindeutig prüfbar (www.pagro.at)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-31T11:47:45.214Z",
+      "sourceDate": "2026-09-01T10:22:47.557Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -6022,9 +6053,9 @@
         "URL nicht eindeutig prüfbar (www.pagro.at)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-31T11:47:45.217Z",
+      "sourceDate": "2026-09-01T10:22:47.561Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -6042,9 +6073,9 @@
         "URL nicht eindeutig prüfbar (www.pagro.at)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-31T11:47:45.220Z",
+      "sourceDate": "2026-09-01T10:22:47.564Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -6062,9 +6093,9 @@
         "URL nicht eindeutig prüfbar (www.pagro.at)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-31T11:47:45.227Z",
+      "sourceDate": "2026-09-01T10:22:47.571Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -6082,9 +6113,9 @@
         "URL nicht eindeutig prüfbar (www.pagro.at)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-31T11:47:45.230Z",
+      "sourceDate": "2026-09-01T10:22:47.574Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -6102,9 +6133,9 @@
         "URL nicht eindeutig prüfbar (www.pagro.at)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-31T11:47:45.234Z",
+      "sourceDate": "2026-09-01T10:22:47.577Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -6122,9 +6153,9 @@
         "URL nicht eindeutig prüfbar (www.pagro.at)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-31T11:47:45.238Z",
+      "sourceDate": "2026-09-01T10:22:47.580Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -6142,9 +6173,9 @@
         "URL nicht eindeutig prüfbar (www.pagro.at)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-31T11:47:45.244Z",
+      "sourceDate": "2026-09-01T10:22:47.586Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
@@ -6162,12 +6193,32 @@
         "URL nicht eindeutig prüfbar (www.pagro.at)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-08-31T11:47:45.251Z",
+      "sourceDate": "2026-09-01T10:22:47.593Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.pagro.at"
+    },
+    {
+      "id": "power-67481c77d72a",
+      "title": "Pouring Adventure III Jacket Wanderjacke -12% Current price 69.99 69. 99 Origina",
+      "brand": "Hervis",
+      "source": "Hervis",
+      "url": "https://www.hervis.at/shop/Bekleidung/Jacken-&-M%C3%A4ntel/Fleecejacken/Columbia/Pouring-Adventure-III-Jacket/p/COLOR-3464581",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.hervis.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-01T10:22:44.776Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.hervis.at"
     },
     {
       "id": "vpr-dt9qpd",
