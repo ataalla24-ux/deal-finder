@@ -17,7 +17,9 @@ const config = buildConfig({
   META_INSTAGRAM_MEDIA_LLM_ENABLED: '1',
   META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_RUN: '3',
   META_INSTAGRAM_MEDIA_LLM_MIN_CONFIDENCE: '0.82',
+  META_INSTAGRAM_MEDIA_TESSERACT_TIMEOUT_MS: '8123',
 }, now);
+assert.equal(config.mediaTesseractTimeoutMs, 8123);
 
 const assets = extractInstagramMediaAssets({
   id: 'carousel-1',
@@ -54,6 +56,30 @@ assert.deepEqual(
   ],
   'carousel sampling must include the first, middle and final slide',
 );
+
+let observedTesseractTimeout = 0;
+const timeoutEvidence = await analyzeInstagramMediaItem({
+  id: 'ocr-timeout',
+  media_type: 'IMAGE',
+  media_url: 'https://cdn.example/ocr-timeout.jpg',
+  permalink: 'https://www.instagram.com/p/OCRTIMEOUT/',
+}, { ...config, mediaVisionEnabled: false }, {
+  tools: { tesseract: true, ffmpeg: false, ffprobe: false },
+  fetchImpl: async () => new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xd9]), {
+    status: 200,
+    headers: { 'content-type': 'image/jpeg' },
+  }),
+  execFileImpl: async (command, _args, options) => {
+    assert.equal(command, 'tesseract');
+    observedTesseractTimeout = options.timeout;
+    const error = new Error('Command failed: tesseract');
+    error.killed = true;
+    error.signal = 'SIGTERM';
+    throw error;
+  },
+});
+assert.equal(observedTesseractTimeout, 8123);
+assert.deepEqual(timeoutEvidence.warnings, ['tesseract timeout after 8123ms']);
 
 let openAiRequest = null;
 const ai = await classifyInstagramOcrWithOpenAI({
@@ -144,6 +170,7 @@ const enriched = await enrichInstagramGraphMedia(entries, config, now, {
       imageCount: 1,
       videoFrameCount: 0,
       errors: [],
+      warnings: ['tesseract timeout after 8123ms'],
     };
   },
   classifyOcr: async (input) => {
@@ -163,11 +190,14 @@ assert.equal(classifications, 1, 'caption-ambiguous OCR should receive one AI cl
 assert.equal(enriched.report.cached, 1);
 assert.equal(enriched.report.analyzed, 1);
 assert.equal(enriched.report.aiAccepted, 1);
+assert.equal(enriched.report.analysisConcurrency, 2);
+assert.equal(enriched.report.tesseractTimeoutMs, 8123);
 assert.equal(enriched.report.withVisionImages, 1);
 assert.equal(enriched.report.visionCalls, 1);
 assert.equal(enriched.report.inputTokens, 200);
 assert.equal(enriched.report.outputTokens, 30);
 assert.equal(enriched.report.totalTokens, 230);
+assert.deepEqual(enriched.report.warningCounts, { 'ocr-tool': 1 });
 assert.equal(classificationInput.visionImages.length, 1);
 assert.match(enriched.entries[0].item._mediaEvidence.ocrText, /zweiter Kaffee gratis/);
 assert.equal(enriched.entries[0].item._mediaEvidence.visionImageCount, 1);
@@ -206,6 +236,11 @@ const concurrent = await enrichInstagramGraphMedia(concurrentEntries, config, no
 assert.equal(concurrent.report.aiConcurrency, 2);
 assert.equal(concurrent.report.aiCalls, 3);
 assert.equal(peakClassifications, 2, 'media classifications should use the configured bounded concurrency');
+assert.ok(concurrent.report.analysisWallTimeMs >= 0);
+assert.ok(concurrent.report.analysisTotalItemTimeMs >= concurrent.report.analysisMaxItemTimeMs);
+assert.ok(concurrent.report.aiWallTimeMs > 0);
+assert.ok(concurrent.report.aiTotalRequestTimeMs >= concurrent.report.aiMaxRequestTimeMs);
+assert.ok(concurrent.report.aiMaxRequestTimeMs > 0);
 
 let visionOnlyClassifications = 0;
 const visionOnly = await enrichInstagramGraphMedia([{

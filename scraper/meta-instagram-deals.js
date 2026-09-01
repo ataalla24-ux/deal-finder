@@ -286,6 +286,7 @@ export function buildConfig(env = process.env, now = new Date()) {
     mediaOcrConcurrency: numberEnv(env, 'META_INSTAGRAM_MEDIA_OCR_CONCURRENCY', 2, 1, 6),
     mediaOcrMaxTextChars: numberEnv(env, 'META_INSTAGRAM_MEDIA_OCR_MAX_TEXT_CHARS', 4000, 500, 12000),
     ocrTimeoutMs: numberEnv(env, 'META_INSTAGRAM_MEDIA_OCR_TIMEOUT_MS', 30000, 5000, 120000),
+    mediaTesseractTimeoutMs: numberEnv(env, 'META_INSTAGRAM_MEDIA_TESSERACT_TIMEOUT_MS', 10000, 2000, 60000),
     mediaCacheTtlDays: numberEnv(env, 'META_INSTAGRAM_MEDIA_CACHE_TTL_DAYS', 7, 1, 30),
     mediaLlmEnabled: booleanEnv(env, 'META_INSTAGRAM_MEDIA_LLM_ENABLED', Boolean(cleanText(env.OPENAI_API_KEY, 700))),
     mediaVisionEnabled: booleanEnv(env, 'META_INSTAGRAM_MEDIA_VISION_ENABLED', Boolean(cleanText(env.OPENAI_API_KEY, 700))),

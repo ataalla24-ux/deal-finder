@@ -2,12 +2,21 @@ import assert from 'node:assert/strict';
 
 import {
   buildTikTokApiKeywords,
+  buildTikTokMediaConfig,
   buildDealFromPost,
   dedupeTikTokDeals,
   rescueTikTokMediaCandidates,
 } from '../scraper/tiktok-deals-scanner.js';
 
 const REFERENCE_NOW = new Date('2026-08-26T12:00:00.000Z');
+
+assert.equal(buildTikTokMediaConfig({}).mediaTesseractTimeoutMs, 8000);
+assert.equal(buildTikTokMediaConfig({
+  TIKTOK_MEDIA_TESSERACT_TIMEOUT_MS: '12000',
+}).mediaTesseractTimeoutMs, 12000);
+assert.equal(buildTikTokMediaConfig({
+  TIKTOK_MEDIA_TESSERACT_TIMEOUT_MS: '99999',
+}).mediaTesseractTimeoutMs, 30000);
 
 const currentSearchKeywords = buildTikTokApiKeywords(REFERENCE_NOW);
 assert.equal(currentSearchKeywords[0], 'wien gratis 26 august 2026');

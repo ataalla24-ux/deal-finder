@@ -238,20 +238,29 @@ async function imageDataUrl(filePath, maxBytes) {
 }
 
 async function runTesseract(imagePath, config, execImpl) {
+  const timeoutMs = Math.max(1, Number(config.mediaTesseractTimeoutMs || config.ocrTimeoutMs || 30000));
   const baseArgs = [imagePath, 'stdout', '--psm', '6'];
+  const execute = async (args) => {
+    try {
+      return await execImpl('tesseract', args, {
+        timeout: timeoutMs,
+        maxBuffer: 4 * 1024 * 1024,
+      });
+    } catch (error) {
+      const detail = cleanText(`${error?.message || ''} ${error?.code || ''} ${error?.signal || ''}`, 500);
+      if (error?.killed === true || /(?:timed?\s*out|etimedout|sigterm|sigkill)/i.test(detail)) {
+        throw new Error(`tesseract timeout after ${timeoutMs}ms`);
+      }
+      throw error;
+    }
+  };
   try {
-    const result = await execImpl('tesseract', [imagePath, 'stdout', '-l', 'deu+eng', '--psm', '6'], {
-      timeout: config.ocrTimeoutMs,
-      maxBuffer: 4 * 1024 * 1024,
-    });
+    const result = await execute([imagePath, 'stdout', '-l', 'deu+eng', '--psm', '6']);
     return cleanText(result.stdout, config.mediaOcrMaxTextChars);
   } catch (error) {
     const detail = `${error?.message || ''}\n${error?.stderr || ''}`;
     if (!/(?:failed loading language|error opening data file|could not initialize tesseract)/i.test(detail)) throw error;
-    const result = await execImpl('tesseract', baseArgs, {
-      timeout: config.ocrTimeoutMs,
-      maxBuffer: 4 * 1024 * 1024,
-    });
+    const result = await execute(baseArgs);
     return cleanText(result.stdout, config.mediaOcrMaxTextChars);
   }
 }
@@ -636,6 +645,8 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     withOcrText: 0,
     withVisionImages: 0,
     aiCalls: 0,
+    analysisConcurrency: Math.max(1, Number(config.mediaOcrConcurrency || 1)),
+    tesseractTimeoutMs: Math.max(1, Number(config.mediaTesseractTimeoutMs || config.ocrTimeoutMs || 30000)),
     aiConcurrency: Math.max(1, Number(config.mediaLlmConcurrency || 1)),
     visionDetail: cleanText(config.mediaVisionDetail, 20) || 'high',
     visionMaxImages: Math.max(1, Number(config.mediaVisionMaxImagesPerPost || 1)),
@@ -643,6 +654,12 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     aiAccepted: 0,
     aiSkippedLowIntent: 0,
     aiSkippedUnrecoverable: 0,
+    analysisWallTimeMs: 0,
+    analysisTotalItemTimeMs: 0,
+    analysisMaxItemTimeMs: 0,
+    aiWallTimeMs: 0,
+    aiTotalRequestTimeMs: 0,
+    aiMaxRequestTimeMs: 0,
     inputTokens: 0,
     outputTokens: 0,
     totalTokens: 0,
@@ -652,6 +669,7 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     retryableFailures: 0,
     retriedCacheEntries: 0,
     errorCounts: {},
+    warningCounts: {},
     llmConfigured,
     visionConfigured,
   };
@@ -691,7 +709,9 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     .slice(0, config.mediaMaxPostsPerRun);
   report.selected = selected.length;
   const analyzeItem = options.analyzeItem || analyzeInstagramMediaItem;
+  const analysisStartedAt = Date.now();
   const results = await mapWithConcurrency(selected, config.mediaOcrConcurrency, async (entry) => {
+    const itemStartedAt = Date.now();
     try {
       return await analyzeItem(entry.item, { ...config, mediaVisionEnabled: visionConfigured }, {
         tools,
@@ -704,8 +724,13 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
         videoFrameCount: 0, downloadAttempts: 0, downloadRetries: 0,
         errors: [cleanText(error?.message || error, 160)], warnings: [],
       };
+    } finally {
+      const itemTimeMs = Date.now() - itemStartedAt;
+      report.analysisTotalItemTimeMs += itemTimeMs;
+      report.analysisMaxItemTimeMs = Math.max(report.analysisMaxItemTimeMs, itemTimeMs);
     }
   });
+  report.analysisWallTimeMs = Date.now() - analysisStartedAt;
 
   const classify = options.classifyOcr || classifyInstagramOcrWithOpenAI;
   let remainingAiCalls = config.mediaLlmMaxCallsPerRun;
@@ -772,7 +797,9 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     entry.item._mediaEvidence = evidence;
   }
 
+  const aiStartedAt = Date.now();
   await mapWithConcurrency(aiTasks, report.aiConcurrency, async ({ entry, evidence, visionImages }) => {
+    const requestStartedAt = Date.now();
     try {
       evidence.ai = await classify({ caption: entry.item.caption, ocrText: evidence.ocrText, visionImages }, config, {
         fetchImpl: options.openAiFetchImpl,
@@ -789,8 +816,13 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     } catch (error) {
       evidence.aiError = cleanText(error?.message || error, 160);
       report.errors.push(evidence.aiError);
+    } finally {
+      const requestTimeMs = Date.now() - requestStartedAt;
+      report.aiTotalRequestTimeMs += requestTimeMs;
+      report.aiMaxRequestTimeMs = Math.max(report.aiMaxRequestTimeMs, requestTimeMs);
     }
   });
+  report.aiWallTimeMs = Date.now() - aiStartedAt;
 
   for (const entry of selected) {
     const evidence = entry.item?._mediaEvidence;
@@ -805,6 +837,12 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     errorCounts[category] = (errorCounts[category] || 0) + 1;
   }
   report.errorCounts = errorCounts;
+  const warningCounts = {};
+  for (const warning of report.warnings) {
+    const category = mediaErrorCategory(warning);
+    warningCounts[category] = (warningCounts[category] || 0) + 1;
+  }
+  report.warningCounts = warningCounts;
   report.status = report.errors.length ? 'degraded' : 'ok';
   return { entries: safeEntries, cache: pruneMediaCache(cache, now, config.mediaCacheTtlDays), report };
 }

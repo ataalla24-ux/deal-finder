@@ -366,7 +366,7 @@ function booleanEnv(env, name, fallback) {
   return !['0', 'false', 'no', 'off'].includes(raw);
 }
 
-function buildTikTokMediaConfig(env = process.env) {
+export function buildTikTokMediaConfig(env = process.env) {
   const openAiApiKey = cleanText(env.OPENAI_API_KEY, 700);
   const mediaLlmEnabled = booleanEnv(env, 'TIKTOK_MEDIA_LLM_ENABLED', Boolean(openAiApiKey)) && Boolean(openAiApiKey);
   const mediaVisionEnabled = booleanEnv(env, 'TIKTOK_MEDIA_VISION_ENABLED', mediaLlmEnabled) && mediaLlmEnabled;
@@ -383,6 +383,7 @@ function buildTikTokMediaConfig(env = process.env) {
     mediaOcrConcurrency: boundedNumber(env.TIKTOK_MEDIA_OCR_CONCURRENCY, 2, 1, 4),
     mediaOcrMaxTextChars: boundedNumber(env.TIKTOK_MEDIA_OCR_MAX_TEXT_CHARS, 4000, 500, 8000),
     ocrTimeoutMs: boundedNumber(env.TIKTOK_MEDIA_OCR_TIMEOUT_MS, 30000, 5000, 90000),
+    mediaTesseractTimeoutMs: boundedNumber(env.TIKTOK_MEDIA_TESSERACT_TIMEOUT_MS, 8000, 2000, 30000),
     mediaCacheTtlDays: boundedNumber(env.TIKTOK_MEDIA_CACHE_TTL_DAYS, 7, 1, 14),
     mediaLlmEnabled,
     mediaVisionEnabled,
@@ -1444,6 +1445,13 @@ export function dedupeTikTokDeals(deals) {
 }
 
 async function main() {
+  const scannerStartedAt = Date.now();
+  const timings = {
+    apiDiscoveryMs: 0,
+    searchDiscoveryMs: 0,
+    mediaRescueMs: 0,
+    totalScannerMs: 0,
+  };
   console.log('🎵 TIKTOK DEAL SCANNER (STRICT CURRENT)');
   console.log('========================================');
   console.log(` freshness: max ${CONFIG.maxAgeDays} Tage, ohne Post-Datum blockiert`);
@@ -1464,8 +1472,10 @@ async function main() {
   let discovery = { links: [], errors: [] };
   let apiDiscovery = { rows: [], errors: [] };
   try {
+    const apiDiscoveryStartedAt = Date.now();
     const apiPage = await prepareTikTokSession(context);
     apiDiscovery = await fetchTikTokApiCandidates(apiPage);
+    timings.apiDiscoveryMs = Date.now() - apiDiscoveryStartedAt;
     console.log(`🔎 TikTok API candidates: ${apiDiscovery.rows.length}`);
     for (const item of apiDiscovery.rows) {
       const { deal, reason } = buildDealFromPost(item.data.url, item.data);
@@ -1478,6 +1488,7 @@ async function main() {
       }
     }
 
+    const searchDiscoveryStartedAt = Date.now();
     discovery = await discoverTikTokLinksViaDuckDuckGo();
     const knownUrls = new Set(apiDiscovery.rows.map((item) => item.data.url));
     const urls = discovery.links.filter((url) => !knownUrls.has(url)).slice(0, CONFIG.maxPostsToVisit);
@@ -1499,24 +1510,35 @@ async function main() {
       }
       await page.waitForTimeout(500);
     }
+    timings.searchDiscoveryMs = Date.now() - searchDiscoveryStartedAt;
 
-    mediaRescue = await rescueTikTokMediaCandidates(rescuePool, {
-      config: mediaConfig,
-      cache: loadTikTokMediaCache(),
-      mediaFetchImpl: createPlaywrightMediaFetch(context, {
-        timeoutMs: mediaConfig.mediaDownloadTimeoutMs,
-      }),
-    });
+    const mediaRescueStartedAt = Date.now();
+    try {
+      mediaRescue = await rescueTikTokMediaCandidates(rescuePool, {
+        config: mediaConfig,
+        cache: loadTikTokMediaCache(),
+        mediaFetchImpl: createPlaywrightMediaFetch(context, {
+          timeoutMs: mediaConfig.mediaDownloadTimeoutMs,
+        }),
+      });
+    } finally {
+      timings.mediaRescueMs += Date.now() - mediaRescueStartedAt;
+    }
   } finally {
     await context.close();
     await browser.close();
   }
 
   if (!mediaRescue) {
-    mediaRescue = await rescueTikTokMediaCandidates(rescuePool, {
-      config: mediaConfig,
-      cache: loadTikTokMediaCache(),
-    });
+    const mediaRescueStartedAt = Date.now();
+    try {
+      mediaRescue = await rescueTikTokMediaCandidates(rescuePool, {
+        config: mediaConfig,
+        cache: loadTikTokMediaCache(),
+      });
+    } finally {
+      timings.mediaRescueMs += Date.now() - mediaRescueStartedAt;
+    }
   }
   deals.push(...mediaRescue.deals);
   const finalRejected = rejected
@@ -1530,6 +1552,7 @@ async function main() {
   }
 
   const finalDeals = dedupeTikTokDeals(deals);
+  timings.totalScannerMs = Date.now() - scannerStartedAt;
   const payload = {
     lastUpdated: new Date().toISOString(),
     source: 'tiktok-deals-scanner',
@@ -1551,6 +1574,7 @@ async function main() {
     rejectionReasons: rejectionReasonCounts(finalRejected),
     mediaConfig: {
       maxAgeHours: mediaConfig.mediaMaxAgeHours,
+      tesseractTimeoutMs: mediaConfig.mediaTesseractTimeoutMs,
       maxPostsPerRun: mediaConfig.mediaMaxPostsPerRun,
       maxLlmCallsPerRun: mediaConfig.mediaLlmMaxCallsPerRun,
       llmConcurrency: mediaConfig.mediaLlmConcurrency,
@@ -1562,6 +1586,7 @@ async function main() {
       visionEnabled: mediaConfig.mediaVisionEnabled,
     },
     mediaEvidence: mediaRescue.report,
+    timings,
     discoveryErrors: discovery.errors,
     apiErrors: apiDiscovery.errors,
     rejected: finalRejected.slice(0, 250),
