@@ -266,6 +266,30 @@ const guides = [
     ],
     related: [['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Restaurant-Gutscheine in Wien', 'restaurant-gutscheine-wien.html'], ['1+1-Aktionen in Wien', 'eins-plus-eins-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
   },
+  {
+    slug: 'gratis-heissgetraenk-ikea-wien',
+    title: 'Gratis Heißgetränk bei IKEA in Wien mit IKEA Family',
+    meta: 'Gratis Heißgetränk bei IKEA in Wien: IKEA Family Mitglieder erhalten Kaffee, Tee oder heiße Schokolade im Restaurant. Voraussetzungen und Ablauf.',
+    eyebrow: 'Gratis Kaffee Wien',
+    headline: 'Gratis Kaffee, Tee oder heiße Schokolade bei IKEA.',
+    intro: 'IKEA Österreich lädt IKEA Family Mitglieder bei jedem Besuch im Einrichtungshaus auf ein Heißgetränk im Restaurant ein. So funktioniert der kostenlose Vorteil in Wien.',
+    published: '2026-09-01', publishedLabel: '1. September 2026', modified: '2026-09-01', modifiedLabel: '1. September 2026',
+    image: '/assets/blog/omv-viva-eiskaffee-gratis.jpg', imageAvif: '/assets/blog/omv-viva-eiskaffee-gratis-800.avif 800w, /assets/blog/omv-viva-eiskaffee-gratis-1600.avif 1600w', imageWidth: 1600, imageHeight: 900,
+    imageAlt: 'Heißgetränk als Beispiel für einen kostenlosen Kaffeevorteil in Wien',
+    sections: [
+      ['vorteil', 'Was ist bei IKEA gratis?', `<p>Als <strong>IKEA Family Mitglied</strong> erhältst du laut IKEA Österreich bei jedem Besuch im Einrichtungshaus ein Heißgetränk im Restaurant kostenlos. Genannt werden Kaffee, Tee und heiße Schokolade.</p><p>Der Vorteil gilt für das Getränk im IKEA-Restaurant. Er ist kein allgemeiner Rabatt auf den gesamten Einkauf und kann nicht automatisch auf andere Speisen oder To-go-Produkte übertragen werden.</p>`],
+      ['voraussetzungen', 'Welche Voraussetzung gibt es?', `<p>Du brauchst eine kostenlose IKEA Family Mitgliedschaft und musst deine digitale oder physische Karte an der Restaurantkasse vorzeigen. Die Mitgliedschaft kannst du direkt über IKEA Österreich anmelden oder in der IKEA App verwalten.</p><div class="article-note"><strong>Verfügbarkeit beachten</strong>IKEA weist darauf hin, dass Vorteile nach Datum, Saison und Region variieren können. Prüfe deshalb vor dem Besuch die aktuelle Vorteilseite und das gewünschte Wiener Einrichtungshaus.</div>`],
+      ['wien', 'IKEA-Standorte in und rund um Wien prüfen', `<p>Öffne vor der Fahrt die offizielle Standortseite des gewünschten Einrichtungshauses und kontrolliere Restaurantöffnungszeiten sowie eventuelle Hinweise zur Ausgabe. Die konkrete Verfügbarkeit kann vom Restaurantbetrieb und der Tagesauslastung abhängen.</p><p>Weitere aktuelle Gratis- und Rabattaktionen in Wien findest du in der <a href="/angebote-wien-heute.html">FreeFinder-Übersicht</a> und im Guide <a href="gratis-kaffee-wien.html">Gratis Kaffee in Wien</a>.</p>`],
+      ['einloesen', 'So löst du den Vorteil ein', `<ol><li>IKEA Family Karte in der App öffnen oder Karte bereithalten.</li><li>Im IKEA-Restaurant ein Heißgetränk auswählen.</li><li>Die Karte vor dem Bezahlen an der Kasse vorzeigen.</li><li>Prüfen, ob der Getränkepreis auf null gesetzt wird.</li><li>Bei Unklarheiten vor der Bestellung kurz beim Restaurant nachfragen.</li></ol>`],
+      ['quelle', 'Offizielle IKEA-Quelle', `<p>Die Angaben stammen direkt aus den <a href="https://www.ikea.com/at/de/ikea-family/benefits/" rel="noopener">IKEA Family Vorteilen Österreich</a>. Dort nennt IKEA den kostenlosen Kaffee, Tee oder die heiße Schokolade und weist auf mögliche regionale oder zeitliche Änderungen hin.</p>`],
+    ],
+    faqs: [
+      ['Wer bekommt das gratis Heißgetränk bei IKEA?', 'IKEA Family Mitglieder erhalten den Vorteil beim Besuch im Einrichtungshaus. Die Karte muss an der Restaurantkasse vorgezeigt werden.'],
+      ['Welche Getränke sind gratis?', 'IKEA nennt Kaffee, Tee und heiße Schokolade als kostenlose Heißgetränke. Die aktuelle Auswahl kann je Standort variieren.'],
+      ['Muss ich etwas kaufen?', 'Die offizielle Vorteilbeschreibung nennt den Besuch im Einrichtungshaus und die IKEA-Family-Karte, aber keinen verpflichtenden zusätzlichen Einkauf. Prüfe die aktuelle Ausgabe vor Ort.'],
+    ],
+    related: [['Gratis Kaffee in Wien', 'gratis-kaffee-wien.html'], ['Kostenlose Angebote in Wien', 'kostenlose-angebote-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+  },
 ];
 
 function escapeHtml(value) {
