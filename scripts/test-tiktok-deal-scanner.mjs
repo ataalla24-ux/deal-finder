@@ -444,6 +444,41 @@ const datedBulletRoundup = build(
 assert.equal(datedBulletRoundup.deal, null);
 assert.match(datedBulletRoundup.reason, /Mehrfach-Roundup/);
 
+const burgerWithSecondaryDrink = build(
+  'https://www.tiktok.com/@eatinvienna/video/7679837905421929750',
+  postData(
+    'Gratis Burger für Schüler und Studenten am 07.09 10-13 Uhr. Danach Mittagsmenü mit Burger, Pommes und Getränk für 9,90 €. Jägerstraße 40, 1200 Wien.',
+    'eatinvienna',
+  ),
+);
+assert.ok(burgerWithSecondaryDrink.deal);
+assert.equal(burgerWithSecondaryDrink.deal.category, 'essen');
+assert.equal(burgerWithSecondaryDrink.deal.validFrom, '2026-09-07');
+assert.equal(burgerWithSecondaryDrink.deal.validUntil, '2026-09-07');
+
+const woaSchoolDeal = build(
+  'https://www.tiktok.com/@woa.vienna/video/7680472988856143126',
+  postData(
+    'School’s back. Sushi’s on us. Deshalb gibt’s für alle Schüler:innen am Montag, den 7. September ein Gratis All-you-can-eat bei WOA. Am Graben 29a, 1010 Wien.',
+    'woa.vienna',
+  ),
+);
+assert.ok(woaSchoolDeal.deal);
+assert.equal(woaSchoolDeal.deal.title, 'Gratis All-you-can-eat für Schüler:innen bei WOA');
+assert.equal(woaSchoolDeal.deal.category, 'essen');
+assert.equal(woaSchoolDeal.deal.validUntil, '2026-09-07');
+
+const datedCinemaProgram = build(
+  'https://www.tiktok.com/@frishwienxtra/video/7679219452889599234',
+  postData(
+    'Gratis Open-Air-Kino im Weghuberpark, 1070 Wien. Programm: 1.9. – Star Trek, 2.9. – Bibi & Tina, 3.9. – MAMMA MIA! Der Eintritt ist gratis.',
+    'frishwienxtra',
+  ),
+);
+assert.ok(datedCinemaProgram.deal);
+assert.equal(datedCinemaProgram.deal.validFrom, '2026-09-01');
+assert.equal(datedCinemaProgram.deal.validUntil, '2026-09-03');
+
 const birthdayEntrySpecial = build(
   'https://www.tiktok.com/@asiannight/video/7678762157336546582',
   postData(

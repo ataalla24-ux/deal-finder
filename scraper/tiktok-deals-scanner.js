@@ -558,6 +558,12 @@ function inferCategoryAndLogo(text, type) {
   if (/\b(eintritt|entry|admission|festival|event|museum|garten|botanisch|stadtpark|stift|klosterneuburg)\b/i.test(text)) {
     return { category: 'kultur', logo: '🎟️' };
   }
+  const concreteFoodIndex = text.search(/\b(?:pizza|burger|kebab|kebap|döner|doener|sushi|ramen|pasta|taco|falafel|croissant|eis|gelato|dessert|all[-\s]?you[-\s]?can[-\s]?eat)\b/i);
+  const concreteDrinkIndex = text.search(/\b(?:kaffee|coffee|cafe|café|matcha|espresso|latte|cappuccino|drink|drinks|getränk|getraenk|mocktail|cocktail|bubble\s*tea|boba)\b/i);
+  if (concreteFoodIndex >= 0 && (concreteDrinkIndex < 0 || concreteFoodIndex < concreteDrinkIndex)) {
+    return { category: 'essen', logo: '🍽️' };
+  }
+  if (concreteDrinkIndex >= 0) return { category: 'kaffee', logo: '☕' };
   for (const rule of CATEGORY_RULES) {
     if (rule.pattern.test(text)) return { category: rule.category, logo: rule.logo };
   }
@@ -612,6 +618,10 @@ function buildOfferTitle(text, brand, type) {
   const birthdayEntryOffer = extractBirthdayEntryOffer(signal);
   if (birthdayEntryOffer && type === 'rabatt') {
     return `Birthday-Special: Eintritt um ${birthdayEntryOffer.amount} €${brand ? ` bei ${brand}` : ''}`;
+  }
+  if (/\bgratis(?:es|er|en)?\s+all[-\s]?you[-\s]?can[-\s]?eat\b/i.test(signal)
+      && /\bschüler(?::innen|innen)?\b/i.test(signal)) {
+    return `Gratis All-you-can-eat für Schüler:innen${brand ? ` bei ${brand}` : ''}`;
   }
   if (/\b(?:sunset\s+cinema|cinemagic)\b/i.test(signal)
       && /\b(?:gratis|kostenlos(?:e|er|es|en)?|free)\b/i.test(signal)
@@ -668,7 +678,7 @@ function buildOfferTitle(text, brand, type) {
     return `Gratis Eintritt${brand ? ` bei ${brand}` : ''}`;
   }
 
-  const items = 'kaffee|coffee|drink|drinks|getränk|getraenk|pizza|burger|kebab|kebap|döner|doener|eis|gelato|eintritt|entry|admission|ticket|kino|goodie bag|probetraining|brunch|croissant|matcha|boba|bubble tea';
+  const items = 'all[-\\s]?you[-\\s]?can[-\\s]?eat|kaffee|coffee|drink|drinks|getränk|getraenk|pizza|burger|kebab|kebap|döner|doener|sushi|ramen|pasta|eis|gelato|eintritt|entry|admission|ticket|kino|goodie bag|probetraining|brunch|croissant|matcha|boba|bubble tea';
   let match = signal.match(new RegExp(`\\b(?:gratis|kostenlos(?:e|er|es|en)?|free)\\s+(?:einen?|eine|ein)?\\s*(${items})`, 'i'));
   if (match) return `Gratis ${cleanText(match[1], 40).replace(/^./, (c) => c.toUpperCase())}${brand ? ` bei ${brand}` : ''}`;
   match = signal.match(new RegExp(`\\b(${items})\\s+(?:ist\\s+)?(?:gratis|kostenlos(?:e|er|es|en)?|free)\\b`, 'i'));
@@ -835,6 +845,55 @@ function viennaIsoDay(value) {
   }).formatToParts(value);
   const byType = Object.fromEntries(parts.map((part) => [part.type, part.value]));
   return `${byType.year}-${byType.month}-${byType.day}`;
+}
+
+function dateFromNumericDayMonth(day, month, referenceDate, explicitYear = '') {
+  const numericDay = Number(day);
+  const numericMonth = Number(month);
+  if (numericDay < 1 || numericDay > 31 || numericMonth < 1 || numericMonth > 12) return null;
+  let year = explicitYear
+    ? (Number(explicitYear) < 100 ? 2000 + Number(explicitYear) : Number(explicitYear))
+    : referenceDate.getUTCFullYear();
+  if (!explicitYear && numericMonth < referenceDate.getUTCMonth() + 1 - 6) year += 1;
+  const endDate = endOfViennaDay(year, numericMonth, numericDay);
+  if (endDate.getUTCDate() !== numericDay || endDate.getUTCMonth() + 1 !== numericMonth) return null;
+  return endDate;
+}
+
+function extractTikTokFallbackOfferWindow(text, referenceDate = new Date()) {
+  const signal = cleanText(text, 2600);
+  const namedSingleOfferDate = signal.match(/\b(?:am|nur\s+am)\s+(?:(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\s*,?\s*(?:den\s+)?)?(\d{1,2})\.?\s*(jänner|jaenner|januar|februar|märz|maerz|april|mai|maj|maja|juni|juli|august|september|oktober|november|dezember)(?:\s+(\d{4}))?\b[^.!?]{0,120}\b(?:gratis|kostenlos|1\s*\+\s*1|2\s*(?:für|fuer)\s*1)\b/i);
+  if (namedSingleOfferDate) {
+    const endDate = dateFromNumericDayMonth(
+      namedSingleOfferDate[1],
+      monthFromName(namedSingleOfferDate[2]),
+      referenceDate,
+      namedSingleOfferDate[3],
+    );
+    if (endDate) return { kind: 'single-date', startDate: endDate, endDate, evidence: namedSingleOfferDate[0] };
+  }
+
+  const singleOfferDate = signal.match(/\b(?:am|nur\s+am)\s+(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?\b[^.!?]{0,120}\b(?:gratis|kostenlos|1\s*\+\s*1|2\s*(?:für|fuer)\s*1)\b/i)
+    || signal.match(/\b(?:gratis|kostenlos|1\s*\+\s*1|2\s*(?:für|fuer)\s*1)\b[^.!?]{0,120}\b(?:am|nur\s+am)\s+(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?\b/i);
+  if (singleOfferDate) {
+    const endDate = dateFromNumericDayMonth(singleOfferDate[1], singleOfferDate[2], referenceDate, singleOfferDate[3]);
+    if (endDate) return { kind: 'single-date', startDate: endDate, endDate, evidence: singleOfferDate[0] };
+  }
+
+  const programIndex = signal.search(/\b(?:programm|termine|dates)\s*:/i);
+  if (programIndex < 0) return null;
+  const programText = signal.slice(programIndex, programIndex + 700);
+  const dates = [...programText.matchAll(/\b(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?\b/g)]
+    .map((match) => dateFromNumericDayMonth(match[1], match[2], referenceDate, match[3]))
+    .filter(Boolean)
+    .sort((left, right) => left.getTime() - right.getTime());
+  if (!dates.length) return null;
+  return {
+    kind: dates.length > 1 ? 'date-list' : 'single-date',
+    startDate: dates[0],
+    endDate: dates[dates.length - 1],
+    evidence: programText,
+  };
 }
 
 function extractExpiryText(text) {
@@ -1081,7 +1140,7 @@ export function buildDealFromPost(url, data, options = {}) {
   const offerWindow = extractActiveOfferWindow(offerSignal, {
     pubDate: dateCandidate.date,
     now,
-  });
+  }) || extractTikTokFallbackOfferWindow(offerSignal, dateCandidate.date);
   if (offerWindow?.endDate && viennaIsoDay(offerWindow.endDate) < viennaIsoDay(now)) {
     return { deal: null, reason: `explizites Aktionsdatum ist abgelaufen (${viennaIsoDay(offerWindow.endDate)})` };
   }
