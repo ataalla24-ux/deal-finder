@@ -125,6 +125,40 @@ const losAngelesKeywordLeak = build(
 assert.equal(losAngelesKeywordLeak.deal, null);
 assert.match(losAngelesKeywordLeak.reason, /Wien-Signal/);
 
+const viennaVirginia = build(
+  'https://www.tiktok.com/@snickolas/video/7679922843357826318',
+  postData(
+    "Let's try Bakeshop in Vienna, VA! Vietnamese iced coffee pie and a gluten-free brownie.",
+    'snickolas',
+  ),
+);
+assert.equal(viennaVirginia.deal, null);
+assert.match(viennaVirginia.reason, /Wien-Signal/);
+
+const northernVirginiaVenues = build(
+  'https://www.tiktok.com/@dermestetics/video/7680266392960126239',
+  postData(
+    'Daxxify for $12 a unit, one day only. Reston, Gainesville, Warrenton, Vienna, Arlington and McLean. #dmv',
+    'dermestetics',
+  ),
+);
+assert.equal(northernVirginiaVenues.deal, null);
+assert.match(northernVirginiaVenues.reason, /Wien-Signal/);
+
+const glutenFreeAttribute = build(
+  'https://www.tiktok.com/@bakery.wien/video/7678002441849425197',
+  postData('Neue Bakery in 1070 Wien. Der Brownie ist gluten free.', 'bakery.wien'),
+);
+assert.equal(glutenFreeAttribute.deal, null);
+assert.match(glutenFreeAttribute.reason, /kein starkes Gratis-\/Deal-Signal/);
+
+const realDealWithGlutenFreeAttribute = build(
+  'https://www.tiktok.com/@bakery.wien/video/7678002441849425198',
+  postData('1+1 gratis auf gluten-free Brownies bei Brownie Bar, 1070 Wien.', 'bakery.wien'),
+);
+assert.ok(realDealWithGlutenFreeAttribute.deal);
+assert.equal(realDealWithGlutenFreeAttribute.deal.type, 'bogo');
+
 const verifiedProfileContext = postData(
   'Sichere dir dein kostenloses Probetraining mit Coach Isa. #BoxenWien',
   'datriboxing',

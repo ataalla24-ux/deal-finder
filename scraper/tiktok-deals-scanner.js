@@ -211,6 +211,9 @@ const CONFLICT_LOCATION_PATTERNS = [
   /\bsan\s+(?:francisco|diego|jose)\b/i,
   /\bnew\s+york\b/i,
   /\b(?:chicago|miami|boston|seattle|houston|dallas|las\s+vegas)\b/i,
+  /\bvienna\s*,?\s*(?:va|virginia)\b/i,
+  /\b(?:northern\s+virginia|reston|gainesville|warrenton|arlington|mclean|fairfax)\b/i,
+  /(?:#dmv\b|\bwashington\s*,?\s*d\.?c\.?\b)/i,
   /\bindonesien\b/i,
   /\bindonesia\b/i,
   /\bunited\s+states\b/i,
@@ -490,6 +493,12 @@ function extractViennaEvidence(text) {
   return cleanText(signal.slice(start, end), 220);
 }
 
+function withoutNonOfferFreeTerms(value) {
+  return cleanText(value, 2600)
+    .replace(/\b(?:gluten|sugar|zucker|alcohol|alkohol|dairy|lactose|laktose|cruelty|fat|caffeine|koffein|plastic|smoke|tax|risk|nut|gmo)[-\s]?free\b/gi, ' ')
+    .replace(/\b(?:feel\s+free|free[-\s]?flow)\b/gi, ' ');
+}
+
 function hasSpecificViennaEvidence(text) {
   const signal = cleanText(text, 2600).replace(/#[\w.äöüß-]+/gi, ' ');
   return /\b1(?:0[1-9]0|1[0-9]0|2[0-3]0)\b/i.test(signal)
@@ -499,7 +508,7 @@ function hasSpecificViennaEvidence(text) {
 
 function hasStrongDealSignal(text) {
   const signal = cleanText(text, 2600);
-  const offerText = signal.replace(/#[\w.äöüß-]+/gi, ' ');
+  const offerText = withoutNonOfferFreeTerms(signal).replace(/#[\w.äöüß-]+/gi, ' ');
   if (!extractBirthdayEntryOffer(offerText)
       && !STRONG_DEAL_PATTERNS.some((pattern) => pattern.test(offerText))) return false;
   if (FALSE_POSITIVE_PATTERNS.some((pattern) => pattern.test(signal))) return false;
@@ -519,9 +528,10 @@ function getTikTokContentQualityReason(text) {
 }
 
 function inferType(text) {
-  if (/\b1\s*\+\s*1\b|\b2\s*(?:für|fuer)\s*1\b|\bbogo\b/i.test(text)) return 'bogo';
-  if (extractBirthdayEntryOffer(text)) return 'rabatt';
-  if (/\bgratis\b|\bkostenlos|\bfree\b|\b0\s*€/i.test(text)) return 'gratis';
+  const signal = withoutNonOfferFreeTerms(text);
+  if (/\b1\s*\+\s*1\b|\b2\s*(?:für|fuer)\s*1\b|\bbogo\b/i.test(signal)) return 'bogo';
+  if (extractBirthdayEntryOffer(signal)) return 'rabatt';
+  if (/\bgratis\b|\bkostenlos|\bfree\b|\b0\s*€/i.test(signal)) return 'gratis';
   return 'rabatt';
 }
 
@@ -1140,12 +1150,13 @@ export function buildDealFromPost(url, data, options = {}) {
 }
 
 function buildQualityScore(signal, postDate, type, category, now = new Date()) {
+  const concreteSignal = withoutNonOfferFreeTerms(signal);
   let score = 0;
   if (type === 'gratis') score += 34;
   else if (type === 'bogo') score += 30;
   else score += 18;
 
-  if (/\bgratis|kostenlos|free|0\s*€/i.test(signal)) score += 16;
+  if (/\bgratis|kostenlos|free|0\s*€/i.test(concreteSignal)) score += 16;
   if (/\b1\s*\+\s*1|2\s*(?:für|fuer)\s*1|bogo/i.test(signal)) score += 14;
   if (type === 'rabatt' && extractBirthdayEntryOffer(signal)) score += 32;
   if (/\bkaffee|coffee|pizza|burger|drink|goodie|ticket|probetraining/i.test(signal)) score += 10;
