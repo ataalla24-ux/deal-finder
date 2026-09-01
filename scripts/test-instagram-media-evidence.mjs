@@ -170,7 +170,10 @@ const enriched = await enrichInstagramGraphMedia(entries, config, now, {
       imageCount: 1,
       videoFrameCount: 0,
       errors: [],
-      warnings: ['tesseract timeout after 8123ms'],
+      warnings: [
+        'tesseract timeout after 8123ms',
+        'tesseract timeout after 8123ms',
+      ],
     };
   },
   classifyOcr: async (input) => {
@@ -197,7 +200,8 @@ assert.equal(enriched.report.visionCalls, 1);
 assert.equal(enriched.report.inputTokens, 200);
 assert.equal(enriched.report.outputTokens, 30);
 assert.equal(enriched.report.totalTokens, 230);
-assert.deepEqual(enriched.report.warningCounts, { 'ocr-tool': 1 });
+assert.deepEqual(enriched.report.warningCounts, { 'ocr-tool': 2 });
+assert.deepEqual(enriched.report.warnings, ['tesseract timeout after 8123ms']);
 assert.equal(classificationInput.visionImages.length, 1);
 assert.match(enriched.entries[0].item._mediaEvidence.ocrText, /zweiter Kaffee gratis/);
 assert.equal(enriched.entries[0].item._mediaEvidence.visionImageCount, 1);
@@ -241,6 +245,48 @@ assert.ok(concurrent.report.analysisTotalItemTimeMs >= concurrent.report.analysi
 assert.ok(concurrent.report.aiWallTimeMs > 0);
 assert.ok(concurrent.report.aiTotalRequestTimeMs >= concurrent.report.aiMaxRequestTimeMs);
 assert.ok(concurrent.report.aiMaxRequestTimeMs > 0);
+
+const analyzedPriorityIds = [];
+await enrichInstagramGraphMedia([{
+  item: {
+    id: 'low-priority-media',
+    caption: 'Unser Wochenplan',
+    media_type: 'IMAGE',
+    media_url: 'https://cdn.example/low-priority.jpg',
+    timestamp: '2026-08-22T09:30:00.000Z',
+  },
+  context: { mediaPriorityBoost: -200 },
+}, {
+  item: {
+    id: 'high-priority-media',
+    caption: 'Unser Wochenplan',
+    media_type: 'IMAGE',
+    media_url: 'https://cdn.example/high-priority.jpg',
+    timestamp: '2026-08-22T09:30:00.000Z',
+  },
+  context: { mediaPriorityBoost: 200 },
+}], {
+  ...config,
+  mediaMaxPostsPerRun: 1,
+  mediaLlmEnabled: false,
+  mediaVisionEnabled: false,
+  openAiApiKey: '',
+}, now, {
+  tools: { tesseract: true, ffmpeg: false },
+  analyzeItem: async (item) => {
+    analyzedPriorityIds.push(item.id);
+    return {
+      ocrText: '',
+      visionImages: [],
+      assetCount: 1,
+      imageCount: 1,
+      videoFrameCount: 0,
+      errors: [],
+      warnings: [],
+    };
+  },
+});
+assert.deepEqual(analyzedPriorityIds, ['high-priority-media']);
 
 let visionOnlyClassifications = 0;
 const visionOnly = await enrichInstagramGraphMedia([{

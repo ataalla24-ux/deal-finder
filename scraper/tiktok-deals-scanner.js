@@ -377,7 +377,7 @@ export function buildTikTokMediaConfig(env = process.env) {
     mediaOcrEnabled: booleanEnv(env, 'TIKTOK_MEDIA_OCR_ENABLED', mediaLlmEnabled) && mediaLlmEnabled,
     mediaMaxPostsPerRun: boundedNumber(env.TIKTOK_MEDIA_MAX_POSTS_PER_RUN, 16, 0, 30),
     mediaMaxAssetsPerPost: boundedNumber(env.TIKTOK_MEDIA_MAX_ASSETS_PER_POST, 2, 1, 4),
-    mediaMaxVideoFrames: boundedNumber(env.TIKTOK_MEDIA_MAX_VIDEO_FRAMES, 3, 1, 6),
+    mediaMaxVideoFrames: boundedNumber(env.TIKTOK_MEDIA_MAX_VIDEO_FRAMES, 2, 1, 6),
     mediaMaxBytes: boundedNumber(env.TIKTOK_MEDIA_MAX_BYTES, 25 * 1024 * 1024, 1024 * 1024, 50 * 1024 * 1024),
     mediaDownloadTimeoutMs: boundedNumber(env.TIKTOK_MEDIA_DOWNLOAD_TIMEOUT_MS, 20000, 3000, 60000),
     mediaOcrConcurrency: boundedNumber(env.TIKTOK_MEDIA_OCR_CONCURRENCY, 2, 1, 4),
@@ -1195,6 +1195,57 @@ function hasTikTokFoodDrinkSignal(value) {
   return /\b(?:restaurant|gastro|essen|food|lunch|brunch|frühstück|fruehstueck|pizza|burger|kebab|kebap|döner|doener|sushi|ramen|pasta|cafe|café|coffee|kaffee|matcha|cocktail|spritz|drink|bier|wein|eis|gelato|dessert|bakery|bäckerei|buffet|all\s+you\s+can\s+eat)\b/i.test(cleanText(value, 5000));
 }
 
+function tikTokCandidateHandle(candidate) {
+  const configured = cleanText(candidate?.data?.accountHandle, 80).replace(/^@/, '');
+  if (configured) return configured;
+  const url = cleanText(candidate?.url || candidate?.data?.url || candidate?.data?.finalUrl, 1200);
+  return cleanText(url.match(/tiktok\.com\/@([^/]+)/i)?.[1], 80);
+}
+
+function compactTikTokMediaRescueCandidates(candidates) {
+  const compact = [];
+  const seenContent = new Set();
+  for (const candidate of candidates) {
+    const data = candidate?.data || {};
+    const content = cleanText(data.title || data.description, 1800)
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '');
+    const key = content.length >= 20 ? `${tikTokCandidateHandle(candidate).toLowerCase()}|${content}` : '';
+    if (key && seenContent.has(key)) continue;
+    if (key) seenContent.add(key);
+    compact.push(candidate);
+  }
+  return compact;
+}
+
+function tikTokMediaPriorityContext(candidate, now) {
+  const data = candidate?.data || {};
+  const text = cleanText([data.title, data.description].filter(Boolean).join(' '), 5000);
+  const handle = tikTokCandidateHandle(candidate);
+  const hasFoodDrink = hasTikTokFoodDrinkSignal(text);
+  const hasVienna = Boolean(extractViennaEvidence(text));
+  const localAccount = /(?:[._]at|wien|vienna|austria|oesterreich)$/i.test(handle);
+  const reason = cleanText(candidate?.initial?.reason, 160)
+    || buildDealFromPost(candidate?.url || data.url, data, { now }).reason;
+  let mediaPriorityBoost = 0;
+  if (hasFoodDrink) mediaPriorityBoost += 180;
+  if (hasVienna) mediaPriorityBoost += 120;
+  if (localAccount) mediaPriorityBoost += 70;
+  if (reason === 'kein starkes Gratis-/Deal-Signal') mediaPriorityBoost += 30;
+  if (reason === 'kein eindeutiges Wien-Signal' && !hasFoodDrink && !hasVienna && !localAccount) {
+    mediaPriorityBoost -= 220;
+  }
+  return {
+    mediaPriorityBoost,
+    account: {
+      username: handle,
+      verifiedVienna: hasVienna,
+      category: hasFoodDrink ? 'food' : '',
+    },
+  };
+}
+
 function shouldClassifyTikTokRescueEvidence({ entry, evidence }, now = new Date()) {
   const candidate = entry?.candidate || {};
   const reason = candidate?.initial?.reason || buildDealFromPost(candidate.url, candidate.data || {}, { now }).reason;
@@ -1220,6 +1271,8 @@ function emptyTikTokMediaReport(status, error = '') {
     status,
     rescueCandidates: 0,
     eligible: 0,
+    deduplicatedEligible: 0,
+    duplicateCandidatesSkipped: 0,
     selected: 0,
     cached: 0,
     analyzed: 0,
@@ -1251,21 +1304,36 @@ export async function rescueTikTokMediaCandidates(candidates, options = {}) {
     unique.set(url, { ...candidate, url });
   }
   const eligible = [...unique.values()].filter((candidate) => isTikTokMediaRescueCandidate(candidate, config, now));
+  const analysisCandidates = compactTikTokMediaRescueCandidates(eligible);
   if (!config.mediaLlmEnabled || (!config.mediaOcrEnabled && !config.mediaVisionEnabled)) {
     return {
       deals: [],
       rescuedUrls: new Set(),
       evidenceByUrl: new Map(),
       cache,
-      report: { ...emptyTikTokMediaReport('disabled'), rescueCandidates: unique.size, eligible: eligible.length },
+      report: {
+        ...emptyTikTokMediaReport('disabled'),
+        rescueCandidates: unique.size,
+        eligible: eligible.length,
+        deduplicatedEligible: analysisCandidates.length,
+        duplicateCandidatesSkipped: eligible.length - analysisCandidates.length,
+      },
     };
   }
 
-  const entries = eligible.map((candidate) => ({
-    item: tikTokMediaItem(candidate),
-    context: { sourceType: 'tiktok', sourceName: `@${cleanText(candidate.data?.accountHandle, 80)}`, account: null },
-    candidate,
-  }));
+  const entries = analysisCandidates.map((candidate) => {
+    const priority = tikTokMediaPriorityContext(candidate, now);
+    return {
+      item: tikTokMediaItem(candidate),
+      context: {
+        sourceType: 'tiktok',
+        sourceName: `@${tikTokCandidateHandle(candidate)}`,
+        account: priority.account,
+        mediaPriorityBoost: priority.mediaPriorityBoost,
+      },
+      candidate,
+    };
+  });
   let media;
   try {
     media = await (options.enrichMedia || enrichInstagramGraphMedia)(entries, config, now, {
@@ -1290,6 +1358,8 @@ export async function rescueTikTokMediaCandidates(candidates, options = {}) {
         ...emptyTikTokMediaReport('degraded', error?.message || error),
         rescueCandidates: unique.size,
         eligible: eligible.length,
+        deduplicatedEligible: analysisCandidates.length,
+        duplicateCandidatesSkipped: eligible.length - analysisCandidates.length,
       },
     };
   }
@@ -1331,6 +1401,8 @@ export async function rescueTikTokMediaCandidates(candidates, options = {}) {
       ...media.report,
       rescueCandidates: unique.size,
       eligible: eligible.length,
+      deduplicatedEligible: analysisCandidates.length,
+      duplicateCandidatesSkipped: eligible.length - analysisCandidates.length,
       rescuedDeals: deals.length,
       aiAcceptedUnusable,
     },
@@ -1576,6 +1648,7 @@ async function main() {
       maxAgeHours: mediaConfig.mediaMaxAgeHours,
       tesseractTimeoutMs: mediaConfig.mediaTesseractTimeoutMs,
       maxPostsPerRun: mediaConfig.mediaMaxPostsPerRun,
+      maxVideoFrames: mediaConfig.mediaMaxVideoFrames,
       maxLlmCallsPerRun: mediaConfig.mediaLlmMaxCallsPerRun,
       llmConcurrency: mediaConfig.mediaLlmConcurrency,
       minConfidence: mediaConfig.mediaLlmMinConfidence,

@@ -11,6 +11,7 @@ import {
 const REFERENCE_NOW = new Date('2026-08-26T12:00:00.000Z');
 
 assert.equal(buildTikTokMediaConfig({}).mediaTesseractTimeoutMs, 8000);
+assert.equal(buildTikTokMediaConfig({}).mediaMaxVideoFrames, 2);
 assert.equal(buildTikTokMediaConfig({
   TIKTOK_MEDIA_TESSERACT_TIMEOUT_MS: '12000',
 }).mediaTesseractTimeoutMs, 12000);
@@ -562,6 +563,11 @@ const mediaRescue = await rescueTikTokMediaCandidates([
   { url: visualOnlyUrl, data: visualOnlyData, initial: visualOnlyInitial },
   { url: visualOnlyUrl, data: visualOnlyData, initial: visualOnlyInitial },
   {
+    url: 'https://www.tiktok.com/@visual.cafe.wien/video/7678002441849425199',
+    data: visualOnlyData,
+    initial: visualOnlyInitial,
+  },
+  {
     url: 'https://www.tiktok.com/@visual.cafe.wien/video/7678002441849425191',
     data: staleVisualData,
   },
@@ -585,6 +591,8 @@ const mediaRescue = await rescueTikTokMediaCandidates([
     assert.equal(entries.length, 1, 'only one unique, fresh, non-excluded media candidate is analyzed');
     assert.equal(entries[0].item.media_type, 'VIDEO');
     assert.equal(entries[0].item.thumbnail_url, 'https://cdn.example/visual-cafe.jpg');
+    assert.ok(entries[0].context.mediaPriorityBoost > 0);
+    assert.equal(entries[0].context.account.username, 'visual.cafe.wien');
     entries[0].item._mediaEvidence = trustedVisualData._mediaEvidence;
     return {
       entries,
@@ -606,8 +614,10 @@ const mediaRescue = await rescueTikTokMediaCandidates([
 });
 assert.equal(rescueEntries.length, 1);
 assert.equal(mediaRescue.deals.length, 1);
-assert.equal(mediaRescue.report.rescueCandidates, 4, 'duplicate URLs are removed before analysis');
-assert.equal(mediaRescue.report.eligible, 1);
+assert.equal(mediaRescue.report.rescueCandidates, 5, 'duplicate URLs are removed before analysis');
+assert.equal(mediaRescue.report.eligible, 2);
+assert.equal(mediaRescue.report.deduplicatedEligible, 1);
+assert.equal(mediaRescue.report.duplicateCandidatesSkipped, 1);
 assert.equal(mediaRescue.report.rescuedDeals, 1);
 assert.ok(mediaRescue.rescuedUrls.has(visualOnlyUrl));
 

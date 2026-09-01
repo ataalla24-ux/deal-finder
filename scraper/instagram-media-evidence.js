@@ -605,6 +605,8 @@ function entryMediaPriority(entry, now) {
   if (entry?.context?.account?.verifiedVienna) score += 30;
   if (/\b(?:wien|vienna|1\d{3})\b/i.test(caption)) score += 20;
   if (cleanText(item.media_type, 40).toUpperCase() === 'CAROUSEL_ALBUM') score += 12;
+  const sourceBoost = Number(entry?.context?.mediaPriorityBoost || 0);
+  if (Number.isFinite(sourceBoost)) score += Math.max(-500, Math.min(500, sourceBoost));
   return score;
 }
 
@@ -829,20 +831,20 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     if (evidence && !evidence.retryableFailure) cache[mediaId(entry.item)] = evidence;
   }
 
-  report.errors = [...new Set(report.errors.filter(Boolean))].slice(0, 20);
-  report.warnings = [...new Set(report.warnings.filter(Boolean))].slice(0, 20);
   const errorCounts = {};
-  for (const error of report.errors) {
+  for (const error of report.errors.filter(Boolean)) {
     const category = mediaErrorCategory(error);
     errorCounts[category] = (errorCounts[category] || 0) + 1;
   }
   report.errorCounts = errorCounts;
   const warningCounts = {};
-  for (const warning of report.warnings) {
+  for (const warning of report.warnings.filter(Boolean)) {
     const category = mediaErrorCategory(warning);
     warningCounts[category] = (warningCounts[category] || 0) + 1;
   }
   report.warningCounts = warningCounts;
+  report.errors = [...new Set(report.errors.filter(Boolean))].slice(0, 20);
+  report.warnings = [...new Set(report.warnings.filter(Boolean))].slice(0, 20);
   report.status = report.errors.length ? 'degraded' : 'ok';
   return { entries: safeEntries, cache: pruneMediaCache(cache, now, config.mediaCacheTtlDays), report };
 }
