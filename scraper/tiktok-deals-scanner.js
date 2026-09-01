@@ -22,6 +22,7 @@ import {
   getInfrastructureOnlyPromotionReason,
   getLeadGenerationOnlyPromotionReason,
   getMembershipOnlyPromotionReason,
+  getNonOfferContentReason,
   getNonGuaranteedPromotionReason,
 } from './promotion-quality-utils.js';
 
@@ -237,9 +238,6 @@ const STRONG_DEAL_PATTERNS = [
 ];
 
 const FALSE_POSITIVE_PATTERNS = [
-  /\bgratis versand\b/i,
-  /\bkostenlose lieferung\b/i,
-  /\bfree shipping\b/i,
   /\bgewinnspiel\b/i,
   /\bverlosung\b/i,
   /\bjob\b/i,
@@ -495,6 +493,7 @@ function extractViennaEvidence(text) {
 
 function withoutNonOfferFreeTerms(value) {
   return cleanText(value, 2600)
+    .replace(/\b(?:(?:gratis|kostenlos(?:e[rmns]?|en)?|free)\s+(?:lieferung|versand|zustellung|shipping|delivery)|(?:lieferung|versand|zustellung|shipping|delivery)\s+(?:gratis|kostenlos|free))(?:\s+(?:in|nach|innerhalb)\s+[^.!?,;]{0,60})?/gi, ' ')
     .replace(/\b(?:gluten|sugar|zucker|alcohol|alkohol|dairy|lactose|laktose|cruelty|fat|caffeine|koffein|plastic|smoke|tax|risk|nut|gmo)[-\s]?free\b/gi, ' ')
     .replace(/\b(?:feel\s+free|free[-\s]?flow)\b/gi, ' ');
 }
@@ -517,9 +516,17 @@ function hasStrongDealSignal(text) {
 
 function getTikTokContentQualityReason(text) {
   const signal = cleanText(text, 2600);
+  const signalWithoutNonOfferFreeTerms = withoutNonOfferFreeTerms(signal);
+  const hasShippingBenefit = /\b(?:(?:gratis|kostenlos(?:e[rmns]?|en)?|free)\s+(?:lieferung|versand|zustellung|shipping|delivery)|(?:lieferung|versand|zustellung|shipping|delivery)\s+(?:gratis|kostenlos|free))\b/i.test(signal);
+  if (hasShippingBenefit
+      && !extractBirthdayEntryOffer(signalWithoutNonOfferFreeTerms)
+      && !STRONG_DEAL_PATTERNS.some((pattern) => pattern.test(signalWithoutNonOfferFreeTerms))) {
+    return 'nur Gratis-Lieferung/Versand, kein eigentlicher Deal';
+  }
   const nonDealRule = NON_DEAL_CONTENT_RULES.find((rule) => rule.pattern.test(signal));
   if (nonDealRule) return nonDealRule.reason;
-  return getNonGuaranteedPromotionReason(signal)
+  return getNonOfferContentReason(signal)
+    || getNonGuaranteedPromotionReason(signal)
     || getEditorialRoundupPromotionReason(signal)
     || getInboundForeignTravelPromotionReason(signal)
     || getInfrastructureOnlyPromotionReason(signal)
@@ -740,7 +747,7 @@ function parseExplicitOfferEndDate(text, referenceDate = new Date()) {
     return endOfViennaDay(parsedYear, endMonth, Number(match[4]));
   }
 
-  match = signal.match(/\b(?:bis|gültig bis|gueltig bis|nur bis|noch bis)\s+(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?/i);
+  match = signal.match(/\b(?:bis|gültig bis|gueltig bis|nur bis|noch bis)\s+(?:(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\s*,?\s*)?(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?/i);
   if (match) {
     const parsedYear = match[3] ? (Number(match[3]) < 100 ? 2000 + Number(match[3]) : Number(match[3])) : year;
     return endOfViennaDay(parsedYear, Number(match[2]), Number(match[1]));
@@ -817,6 +824,17 @@ function isExplicitlyExpired(text, postDate = null, now = new Date()) {
     if (/\bersten?\s+sonntag\s+des\s+monats\b/i.test(signal) && firstSundayOfMonth(postDate).getTime() < now.getTime()) return true;
   }
   return false;
+}
+
+function viennaIsoDay(value) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Vienna',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(value);
+  const byType = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${byType.year}-${byType.month}-${byType.day}`;
 }
 
 function extractExpiryText(text) {
@@ -1060,6 +1078,14 @@ export function buildDealFromPost(url, data, options = {}) {
   if (!hasStrongDealSignal(offerSignal)) return { deal: null, reason: 'kein starkes Gratis-/Deal-Signal' };
   if (isExplicitlyExpired(offerSignal, dateCandidate.date, now)) return { deal: null, reason: 'explizites/relatives Aktionsdatum ist abgelaufen' };
 
+  const offerWindow = extractActiveOfferWindow(offerSignal, {
+    pubDate: dateCandidate.date,
+    now,
+  });
+  if (offerWindow?.endDate && viennaIsoDay(offerWindow.endDate) < viennaIsoDay(now)) {
+    return { deal: null, reason: `explizites Aktionsdatum ist abgelaufen (${viennaIsoDay(offerWindow.endDate)})` };
+  }
+
   const type = inferType(offerSignal);
   const { category, logo } = inferCategoryAndLogo(offerSignal, type);
   const extractedBrand = extractBrand(offerSignal, data.accountHandle);
@@ -1081,10 +1107,6 @@ export function buildDealFromPost(url, data, options = {}) {
   const title = buildOfferTitle(offerSignal, brand, type);
   const score = buildQualityScore(offerSignal, dateCandidate.date, type, category, now);
   if (score < CONFIG.minScore) return { deal: null, reason: `Score zu niedrig (${score})` };
-  const offerWindow = extractActiveOfferWindow(offerSignal, {
-    pubDate: dateCandidate.date,
-    now,
-  });
   const validFrom = offerWindow?.startDate?.toISOString().slice(0, 10) || '';
   const validUntil = offerWindow?.endDate?.toISOString().slice(0, 10) || '';
   const postalCode = contextSignal.match(/\b(1(?:0[1-9]|1\d|2[0-3])0)\b/)?.[1] || '';
@@ -1158,6 +1180,7 @@ function buildQualityScore(signal, postDate, type, category, now = new Date()) {
 
   if (/\bgratis|kostenlos|free|0\s*€/i.test(concreteSignal)) score += 16;
   if (/\b1\s*\+\s*1|2\s*(?:für|fuer)\s*1|bogo/i.test(signal)) score += 14;
+  if (/\b\d{1,2}\s*%\s*(?:rabatt|discount|off)\b/i.test(signal)) score += 16;
   if (type === 'rabatt' && extractBirthdayEntryOffer(signal)) score += 32;
   if (/\bkaffee|coffee|pizza|burger|drink|goodie|ticket|probetraining/i.test(signal)) score += 10;
   if (category === 'kaffee' || category === 'essen') score += 8;

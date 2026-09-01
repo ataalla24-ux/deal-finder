@@ -33,7 +33,13 @@ import {
   upsertReviewFeedback,
   writeReviewFeedback,
 } from './deal-review-feedback.js';
-import { isHardSocialRejection } from './social-food-audit-utils.js';
+import {
+  isExpiredSocialFoodReviewContent,
+  isFreeFinderSocialAccount,
+  isHardSocialRejection,
+  hasTrustedSocialFoodViennaSignal,
+  isUnsafeSocialFoodReviewContent,
+} from './social-food-audit-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -625,6 +631,11 @@ function prepareSocialFoodReviewDeals(deals, options = {}) {
     const ageDays = Number.isNaN(publishedAt.getTime())
       ? null
       : (now.getTime() - publishedAt.getTime()) / (24 * 60 * 60 * 1000);
+    const reviewText = cleanText([
+      deal?.title,
+      deal?.description,
+      deal?.promotionEvidence,
+    ].filter(Boolean).join(' '), 8000);
     let reason = '';
     if (deal?.socialFoodReview !== true) reason = 'not-social-food-review';
     else if (!isSocialPostKey(postKey)) reason = 'not-direct-social-post';
@@ -634,6 +645,18 @@ function prepareSocialFoodReviewDeals(deals, options = {}) {
     else if (Number(audit.foodDrinkScore || 0) <= 0) reason = 'missing-food-signal';
     else if (audit.dealSignal !== true) reason = 'missing-deal-signal';
     else if (audit.viennaSignal !== true) reason = 'missing-vienna-signal';
+    else if (audit.ownAccount === true || isFreeFinderSocialAccount(deal?.ownerUsername)) reason = 'freefinder-self-post';
+    else if (audit.unsafeContent === true || isUnsafeSocialFoodReviewContent(reviewText)) reason = 'unsafe-review-content';
+    else if (audit.contentViennaSignal !== true
+      && audit.explicitViennaSignal !== true
+      && audit.verifiedViennaSignal !== true
+      && !hasTrustedSocialFoodViennaSignal(reviewText)) reason = 'untrusted-vienna-signal';
+    else if (audit.expiredOfferWindow === true || isExpiredSocialFoodReviewContent(
+      reviewText,
+      publishedAt,
+      now,
+      deal?.validUntil || deal?.expires,
+    )) reason = 'expired-offer';
     else if (audit.hardRejection === true || isHardSocialRejection(deal?.socialFoodReviewReason)) reason = 'hard-rejection';
     if (reason) {
       reject(reason);

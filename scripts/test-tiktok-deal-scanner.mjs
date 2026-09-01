@@ -399,6 +399,51 @@ assert.ok(weekdayBeforeNumericEnd.deal);
 assert.equal(weekdayBeforeNumericEnd.deal.validUntil, '2026-08-28');
 assert.equal(weekdayBeforeNumericEnd.deal.expires, '2026-08-28');
 
+const expiredWeekdayBeforeNumericEnd = buildDealFromPost(
+  'https://www.tiktok.com/@chocoberry.at/video/7678679890975051030',
+  postData(
+    '1+1 GRATIS BEI CHOCOBERRY! Verlängert bis Freitag 28.08. Kauf 1 Becher und erhalte den 2. gratis. Copa Beach Wien.',
+    'chocoberry.at',
+  ),
+  { now: new Date('2026-09-01T12:00:00.000Z') },
+);
+assert.equal(expiredWeekdayBeforeNumericEnd.deal, null);
+assert.match(expiredWeekdayBeforeNumericEnd.reason, /abgelaufen/);
+
+const shippingOnly = build(
+  'https://www.tiktok.com/@herr.wien/video/7679495087184776470',
+  postData('Nur 250 € und GRATIS Lieferung. Geblergasse 60, 1170 Wien.', 'herr.wien'),
+);
+assert.equal(shippingOnly.deal, null);
+assert.match(shippingOnly.reason, /Gratis-Lieferung\/Versand/);
+
+const discountWithShipping = build(
+  'https://www.tiktok.com/@shop.wien/video/7679495087184776471',
+  postData('30% Rabatt auf alle Burger plus gratis Lieferung bis 30.08. in 1070 Wien.', 'shop.wien'),
+);
+assert.ok(discountWithShipping.deal, 'an independent discount remains valid when shipping is also free');
+assert.equal(discountWithShipping.deal.type, 'rabatt');
+
+const tourismGuide = build(
+  'https://www.tiktok.com/@austriannaa/video/7679765096905608470',
+  postData(
+    "Exploring Vienna's Best Kept Secrets: Free Hidden Gems You Need to Visit. Wander the park and see the golden dome completely free.",
+    'austriannaa',
+  ),
+);
+assert.equal(tourismGuide.deal, null);
+assert.match(tourismGuide.reason, /Sehenswürdigkeits|Freizeitempfehlung/);
+
+const datedBulletRoundup = build(
+  'https://www.tiktok.com/@austriannaa/video/7679384436122586390',
+  postData(
+    'Free Vienna events: • Film Festival at Rathausplatz (Until September 6, 2026), free screenings. • Long Night of Vienna Markets (September 4, 2026), free entry.',
+    'austriannaa',
+  ),
+);
+assert.equal(datedBulletRoundup.deal, null);
+assert.match(datedBulletRoundup.reason, /Mehrfach-Roundup/);
+
 const birthdayEntrySpecial = build(
   'https://www.tiktok.com/@asiannight/video/7678762157336546582',
   postData(

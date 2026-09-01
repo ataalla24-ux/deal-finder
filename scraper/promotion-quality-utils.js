@@ -19,6 +19,7 @@ const INDEPENDENT_PROMOTION_PATTERN = /(?:\b\d{1,2}\s*%\s*(?:rabatt|discount|off
 const FREE_MEMBERSHIP_PATTERN = /(?:\b(?:mitgliedschaft|membership|registrierung|registration)\b.{0,100}\b(?:gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)\b|\b(?:gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)\b.{0,100}\b(?:mitgliedschaft|membership|registrierung|registration)\b)/i;
 const FREE_LEAD_ACTION_PATTERN = /(?:\b(?:book(?:ing|ed)?|reserv(?:e|ation|ierung|ieren)?|register|registration|contact|message|call|schedule|anfrag(?:e|en)?|buch(?:e|en|ung)?|kontakt(?:ier(?:e|en)?)?|meld(?:e|en)?)\b.{0,60}\b(?:for\s+free|gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)\b|\b(?:for\s+free|gratis|kostenlos(?:e|er|es|en)?|kostenfrei|free)\b.{0,60}\b(?:booking|reservation|registration|consultation|advice|quote|assessment|appointment|termin|beratung|kostenvoranschlag|buchung|reservierung|anmeldung)\b)/i;
 const EDITORIAL_ROUNDUP_PATTERN = /(?:\b\d{1,2}\s+(?:ideen|events?|eventtipps?|tipps?|things\s+to\s+do)\b|\b(?:free|gratis|kostenlose?)\s+events?\s+(?:in|für|fuer)\s+(?:wien|vienna)\b|\bevents?\s+(?:in|für|fuer)\s+(?:wien|vienna)\b.{0,80}\b(?:nächste|naechste|kommende|this|next)\s+woche\b|\b(?:weitere|mehr)\s+(?:events?|ideen|tipps?)\b.{0,100}\b(?:blog|link\s+in\s+bio)\b|\b(?:ideen|events?|eventtipps?|tipps?)\b.{0,80}\b(?:teil|part)\s*\d+\b|\b(?:teil|part)\s*\d+\b.{0,80}\b(?:ideen|events?|eventtipps?|tipps?)\b)/i;
+const EDITORIAL_BULLET_DATE_PATTERN = /(?:\b(?:until|through|bis|am|on)\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)?\s*,?\s*(?:\d{1,2}[./-])?\s*(?:january|february|march|april|may|june|july|august|september|october|november|december|jänner|jaenner|januar|februar|märz|maerz|mai|juni|juli|oktober|november|dezember)?\s*\d{1,2}(?:,?\s*20\d{2})?\b|\b(?:january|february|march|april|may|june|july|august|september|october|november|december|jänner|jaenner|januar|februar|märz|maerz|mai|juni|juli|oktober|november|dezember)\s+\d{1,2}(?:,?\s*20\d{2})?\b|\b\d{1,2}[./-]\d{1,2}(?:[./-]20\d{2})?\b)/i;
 const FOREIGN_REGISTRATION_SPAM_PATTERN = /\b(?:pendaftaran|daftar|hubungi|nomor\s+wa)\b.{0,160}\b(?:whats?app|wa|gratis)\b|\bwhats?app\s+pendaftaran\s+gratis\b/i;
 const PUBLIC_POLICY_POST_PATTERN = /\b(?:spö|spoe|parlament|politik|forderung|fordern|muss|soll)\b.{0,180}\b(?:leitungswasser|wasser)\b.{0,100}\b(?:gratis|kostenlos|grundbedürfnis|grundbeduerfnis)\b|\b(?:leitungswasser|wasser)\b.{0,100}\b(?:muss|soll)\b.{0,40}\bgratis\s+sein\b/i;
 const OPENING_TEASER_PATTERN = /\b(?:opening\s+soon|coming\s+soon|stay\s+tuned|eröffnung\s+bald|eroeffnung\s+bald|öffnet\s+bald|oeffnet\s+bald|bald\s+in\s+wien)\b/i;
@@ -94,7 +95,13 @@ export function getLeadGenerationOnlyPromotionReason(value) {
 
 export function getEditorialRoundupPromotionReason(value) {
   const text = cleanPromotionText(value);
-  if (!text || !EDITORIAL_ROUNDUP_PATTERN.test(text)) return '';
+  if (!text) return '';
+  const datedBulletEntries = text
+    .split(/[•▪◦]/)
+    .slice(1)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length >= 20 && EDITORIAL_BULLET_DATE_PATTERN.test(entry));
+  if (!EDITORIAL_ROUNDUP_PATTERN.test(text) && datedBulletEntries.length < 2) return '';
   return 'redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot';
 }
 

@@ -67,6 +67,55 @@ const virginia = normalizeSocialAuditCandidate({
 }, { source: 'meta-instagram' }, now);
 assert.equal(virginia.reviewEligible, false);
 
+const contaminatedDiscoveryKeyword = normalizeSocialAuditCandidate({
+  url: 'https://www.tiktok.com/@tri.cities.foodie/video/7680426812756790559',
+  title: 'Kids eat free in Richland WA',
+  textSample: 'Food vendors at 815 George Washington Way, Richland WA. Kids enter free.',
+  keyword: 'wien gratis 1 september 2026',
+  ownerUsername: 'tri.cities.foodie',
+  pubDate: '2026-08-31T12:00:00.000Z',
+  reason: 'kein eindeutiges Wien-Signal',
+  status: 'rejected',
+}, { source: 'tiktok' }, now);
+assert.equal(contaminatedDiscoveryKeyword.viennaSignal, false, 'search keywords are not location evidence');
+assert.equal(contaminatedDiscoveryKeyword.reviewEligible, false);
+
+const ownFreeFinderPost = normalizeSocialAuditCandidate({
+  url: 'https://www.tiktok.com/@freefinder.at/video/7678424923206929686',
+  title: 'Gratis Iced Matcha Latte in Wien',
+  textSample: 'Gratis Iced Matcha Latte in Wien bis 1. September.',
+  ownerUsername: 'freefinder.at',
+  pubDate: '2026-08-30T12:00:00.000Z',
+  reason: 'kein starkes Gratis-/Deal-Signal',
+  status: 'rejected',
+}, { source: 'tiktok' }, now);
+assert.equal(ownFreeFinderPost.ownAccount, true);
+assert.equal(ownFreeFinderPost.reviewEligible, false);
+
+const expiredReviewCandidate = normalizeSocialAuditCandidate({
+  url: 'https://www.tiktok.com/@chocoberry.at/video/7678679890975051030',
+  title: '1+1 gratis bei ChocoBerry',
+  textSample: '1+1 gratis bei ChocoBerry, verlängert bis Freitag 28.08., Copa Beach Wien.',
+  ownerUsername: 'chocoberry.at',
+  pubDate: '2026-08-27T12:00:00.000Z',
+  reason: 'kein eindeutiges Wien-Signal',
+  status: 'rejected',
+}, { source: 'tiktok' }, new Date('2026-09-01T12:00:00.000Z'));
+assert.equal(expiredReviewCandidate.expiredOfferWindow, true);
+assert.equal(expiredReviewCandidate.reviewEligible, false);
+
+const reviewRoundup = normalizeSocialAuditCandidate({
+  url: 'https://www.instagram.com/reel/ROUNDUP1/',
+  title: 'Free events in Vienna',
+  textSample: '• Food Festival (September 2, 2026), free entry. • Coffee Market (September 3, 2026), free tasting in Vienna.',
+  ownerUsername: 'vienna.guide',
+  pubDate: '2026-08-30T12:00:00.000Z',
+  reason: 'no-concrete-offer',
+  status: 'rejected',
+}, { source: 'meta-instagram' }, now);
+assert.equal(reviewRoundup.unsafeContent, true);
+assert.equal(reviewRoundup.reviewEligible, false);
+
 const rows = [];
 for (let index = 0; index < 120; index += 1) {
   rows.push(normalizeSocialAuditCandidate({

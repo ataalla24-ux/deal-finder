@@ -19,6 +19,7 @@ import {
   normalizeSeenPostCache,
   normalizeDeal,
   prepareKey4ReviewDeals,
+  prepareSocialFoodReviewDeals,
   pruneStaleQueueDeals,
   revalidateRecentPostedQueue,
   selectFirecrawlReviewDeals,
@@ -2089,5 +2090,86 @@ const slackDisplay = buildSlackMessage({
 assert.match(slackDisplay, /Angebotsdatum: k\.A\./);
 assert.match(slackDisplay, /Gültig bis: 31\.8\.2026/);
 assert.doesNotMatch(slackDisplay, /Gültig bis: 1\.7\.2026/);
+
+const socialReviewBase = {
+  id: 'social-food-review-safe',
+  title: '20% Burger Rabatt in Wien',
+  description: '20% Rabatt auf Burger in 1070 Wien bis 25. Juli.',
+  url: 'https://www.instagram.com/reel/SOCIALSAFE1/',
+  ownerUsername: 'burger.wien',
+  sourcePublishedAt: '2026-07-19T08:00:00.000Z',
+  validUntil: '2026-07-25',
+  socialFoodReview: true,
+  socialFoodReviewReason: 'kein starkes Gratis-/Deal-Signal',
+  evidence: {
+    socialFoodAudit: {
+      foodDrinkScore: 2,
+      dealSignal: true,
+      viennaSignal: true,
+      contentViennaSignal: true,
+      hardRejection: false,
+      ownAccount: false,
+      unsafeContent: false,
+      expiredOfferWindow: false,
+    },
+  },
+};
+const safeSocialReview = prepareSocialFoodReviewDeals([socialReviewBase], { now });
+assert.equal(safeSocialReview.eligible, 1);
+
+const unsafeLegacyReview = prepareSocialFoodReviewDeals([{
+  ...socialReviewBase,
+  id: 'social-food-review-richland',
+  title: 'Kids eat free in Richland WA',
+  description: 'Food vendors at 815 George Washington Way, Richland WA. Kids enter free. wien gratis juli 2026',
+  url: 'https://www.tiktok.com/@tri.cities.foodie/video/7680426812756790559',
+  ownerUsername: 'tri.cities.foodie',
+  evidence: {
+    socialFoodAudit: {
+      foodDrinkScore: 2,
+      dealSignal: true,
+      viennaSignal: true,
+      hardRejection: false,
+    },
+  },
+}], { now });
+assert.equal(unsafeLegacyReview.eligible, 0, 'Slack rechecks unsafe content from older review artifacts');
+assert.equal(unsafeLegacyReview.rejectionCounts['unsafe-review-content'], 1);
+
+const keywordOnlyLegacyReview = prepareSocialFoodReviewDeals([{
+  ...socialReviewBase,
+  id: 'social-food-review-keyword-only',
+  title: 'Monday chicken menu',
+  description: 'Free chicken menu today in Jakarta. wien gratis juli 2026',
+  url: 'https://www.tiktok.com/@global.food/video/7680426812756790560',
+  ownerUsername: 'global.food',
+  evidence: {
+    socialFoodAudit: {
+      foodDrinkScore: 2,
+      dealSignal: true,
+      viennaSignal: true,
+      hardRejection: false,
+    },
+  },
+}], { now });
+assert.equal(keywordOnlyLegacyReview.eligible, 0);
+assert.equal(keywordOnlyLegacyReview.rejectionCounts['untrusted-vienna-signal'], 1);
+
+const selfReview = prepareSocialFoodReviewDeals([{
+  ...socialReviewBase,
+  id: 'social-food-review-self',
+  url: 'https://www.tiktok.com/@freefinder.at/video/7678424923206929686',
+  ownerUsername: 'freefinder.at',
+}], { now });
+assert.equal(selfReview.eligible, 0);
+assert.equal(selfReview.rejectionCounts['freefinder-self-post'], 1);
+
+const expiredSocialReview = prepareSocialFoodReviewDeals([{
+  ...socialReviewBase,
+  id: 'social-food-review-expired',
+  validUntil: '2026-07-18',
+}], { now });
+assert.equal(expiredSocialReview.eligible, 0);
+assert.equal(expiredSocialReview.rejectionCounts['expired-offer'], 1);
 
 console.log('slack deal quality ok');

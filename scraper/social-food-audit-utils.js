@@ -6,6 +6,10 @@ import {
   instagramUsernameDisplayName,
   normalizeInstagramUsername,
 } from './instagram-entity-resolution.js';
+import {
+  getEditorialRoundupPromotionReason,
+  getNonOfferContentReason,
+} from './promotion-quality-utils.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -43,12 +47,19 @@ const HARD_REJECTION_PATTERNS = [
 const UNSAFE_REVIEW_CONTENT_PATTERNS = [
   /\b(?:top\s*\d+|bucket\s*list|must[- ]?visit|favourites?|favorites?|recommendations?|restaurant\s+tipps?)\b/i,
   /\b(?:vienna,?\s*(?:va|virginia)|northern\s+virginia|tysons|washingtonian|washington\s*dc)\b/i,
+  /\b(?:richland\s*,?\s*(?:wa|washington)|george\s+washington\s+way|tri[.\s-]*cities[.\s-]*foodie)\b/i,
   /\b(?:dog|hund|hunde|napf|näpfe|tierbedarf|pet)\b/i,
   /\b(?:hotel|stay|übernachtung|uebernachtung)\b.{0,120}\b(?:save|rabatt|discount|\d{1,2}\s*%)\b/i,
   /\b(?:concert|konzert|event|workshop|ticket|eintritt)\b.{0,100}\b(?:drink|brunch|coffee|kaffee)\b/i,
   /\b(?:sorry|entschuldigung|leider ausverkauft|replacement|compensation)\b.{0,120}\b(?:gratis|kostenlos|free)\b/i,
   /\b(?:anna|kunde|kundin|customer)\b.{0,80}\bbekommt\b.{0,80}\bgratis\b/i,
 ];
+
+const FREEFINDER_ACCOUNT_KEYS = new Set([
+  'freefinder',
+  'freefinderat',
+  'freefinderwien',
+]);
 
 function cleanText(value, max = 4000) {
   return String(value || '')
@@ -82,7 +93,9 @@ function patternHits(value, patterns) {
 }
 
 function textWithoutHashtags(value) {
-  return cleanText(value, 8000).replace(/#[\p{L}\p{N}_.-]+/gu, ' ');
+  return cleanText(value, 8000)
+    .replace(/#[\p{L}\p{N}_.-]+/gu, ' ')
+    .replace(/\b(?:wien|vienna)\s+(?:gratis|kostenlos|free|deal|deals|aktion|rabatt|1\s*\+\s*1|neueröffnung|neueroeffnung)\s+(?:\d{1,2}\s+)?(?:january|february|march|april|may|june|july|august|september|october|november|december|jänner|jaenner|januar|februar|märz|maerz|mai|juni|juli|oktober|november|dezember)\s+20\d{2}\b/gi, ' ');
 }
 
 export function foodDrinkScore(value) {
@@ -95,6 +108,10 @@ export function hasDealSignal(value) {
 
 export function hasViennaSignal(value) {
   return patternHits(value, VIENNA_PATTERNS) > 0;
+}
+
+export function hasTrustedSocialFoodViennaSignal(value) {
+  return hasViennaSignal(textWithoutHashtags(value));
 }
 
 export function normalizeLossReason(value) {
@@ -123,7 +140,39 @@ export function isHardSocialRejection(value) {
 
 export function isUnsafeSocialFoodReviewContent(value) {
   const text = cleanText(value, 8000);
-  return UNSAFE_REVIEW_CONTENT_PATTERNS.some((pattern) => pattern.test(text));
+  return UNSAFE_REVIEW_CONTENT_PATTERNS.some((pattern) => pattern.test(text))
+    || Boolean(getEditorialRoundupPromotionReason(text))
+    || Boolean(getNonOfferContentReason(text));
+}
+
+export function isFreeFinderSocialAccount(value) {
+  const key = normalizeUsername(value).replace(/[^a-z0-9]/g, '');
+  return FREEFINDER_ACCOUNT_KEYS.has(key);
+}
+
+function viennaIsoDay(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Vienna',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const byType = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${byType.year}-${byType.month}-${byType.day}`;
+}
+
+export function isExpiredSocialFoodReviewContent(value, pubDate, now = new Date(), explicitValidUntil = '') {
+  const today = viennaIsoDay(now);
+  const explicitEndDay = viennaIsoDay(explicitValidUntil);
+  if (today && explicitEndDay && explicitEndDay < today) return true;
+
+  const publication = new Date(pubDate);
+  if (Number.isNaN(publication.getTime())) return false;
+  const offerWindow = extractActiveOfferWindow(cleanText(value, 8000), { now, pubDate: publication });
+  const extractedEndDay = viennaIsoDay(offerWindow?.endDate);
+  return Boolean(today && extractedEndDay && extractedEndDay < today);
 }
 
 function candidateText(input = {}) {
@@ -135,7 +184,18 @@ function candidateText(input = {}) {
     input.title,
     input.brand,
     input.source,
-    input.keyword,
+    input.mediaEvidence?.ocrText,
+    input.mediaEvidence?.ai?.offerText,
+  ].filter(Boolean).join(' '), 8000);
+}
+
+function candidateEvidenceText(input = {}) {
+  return cleanText([
+    input.text,
+    input.textSample,
+    input.caption,
+    input.description,
+    input.title,
     input.mediaEvidence?.ocrText,
     input.mediaEvidence?.ai?.offerText,
   ].filter(Boolean).join(' '), 8000);
@@ -185,25 +245,34 @@ export function normalizeSocialAuditCandidate(input = {}, defaults = {}, now = n
   );
   const merchantUsername = normalizeUsername(input.merchantUsername || input.providerUsername);
   const foodScore = foodDrinkScore(text);
-  const prose = textWithoutHashtags(text);
-  const viennaSignal = input.viennaVerified === true || hasViennaSignal([
-    prose,
+  const evidenceText = candidateEvidenceText(input);
+  const prose = textWithoutHashtags(evidenceText);
+  const contentViennaSignal = hasViennaSignal(prose);
+  const explicitViennaSignal = hasViennaSignal([
     input.location,
     input.distance,
     input.viennaEvidence?.detail,
+    input.mediaEvidence?.ai?.locationText,
   ].filter(Boolean).join(' '));
+  const verifiedViennaSignal = input.viennaVerified === true;
+  const viennaSignal = verifiedViennaSignal || contentViennaSignal || explicitViennaSignal;
   const dealSignal = hasDealSignal(prose);
   const media = mediaAudit(input);
   const directPostUrl = /^https:\/\/(?:www\.|m\.)?(?:instagram\.com\/(?:p|reel|tv)\/|tiktok\.com\/@[^/]+\/video\/)/i.test(url);
   const fresh = typeof ageDays === 'number' && ageDays >= -0.05 && ageDays <= 7;
+  const ownAccount = isFreeFinderSocialAccount(ownerUsername);
+  const unsafeContent = isUnsafeSocialFoodReviewContent(evidenceText);
+  const expiredOfferWindow = isExpiredSocialFoodReviewContent(evidenceText, pubDate, now);
   const reviewEligible = status === 'rejected'
     && directPostUrl
     && fresh
     && foodScore > 0
     && dealSignal
     && viennaSignal
-    && !isHardSocialRejection(rejectionReason)
-    && !isUnsafeSocialFoodReviewContent(text);
+    && !ownAccount
+    && !unsafeContent
+    && !expiredOfferWindow
+    && !isHardSocialRejection(rejectionReason);
   const canonicalKey = canonicalSocialPostKey(url) || `${source}:${stableHash(`${url}|${input.id || ''}|${text.slice(0, 300)}`)}`;
 
   return {
@@ -229,6 +298,12 @@ export function normalizeSocialAuditCandidate(input = {}, defaults = {}, now = n
     foodDrinkRelevant: foodScore > 0,
     dealSignal,
     viennaSignal,
+    contentViennaSignal,
+    explicitViennaSignal,
+    verifiedViennaSignal,
+    ownAccount,
+    unsafeContent,
+    expiredOfferWindow,
     media,
     reviewEligible,
   };
@@ -433,6 +508,12 @@ export function buildSocialFoodReviewDeal(row, now = new Date()) {
         foodDrinkScore: row.foodDrinkScore,
         dealSignal: row.dealSignal,
         viennaSignal: row.viennaSignal,
+        contentViennaSignal: row.contentViennaSignal,
+        explicitViennaSignal: row.explicitViennaSignal,
+        verifiedViennaSignal: row.verifiedViennaSignal,
+        ownAccount: row.ownAccount,
+        unsafeContent: row.unsafeContent,
+        expiredOfferWindow: row.expiredOfferWindow,
         hardRejection: isHardSocialRejection(row.rejectionReason),
         media: row.media,
       },
