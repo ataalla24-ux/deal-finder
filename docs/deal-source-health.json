@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-01T06:19:40.402Z",
+  "generatedAt": "2026-09-01T06:27:31.525Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 613,
-    "uniqueCandidates": 566,
-    "distinctCandidates": 585,
-    "duplicateClusters": 19,
+    "totalCandidates": 603,
+    "uniqueCandidates": 556,
+    "distinctCandidates": 576,
+    "duplicateClusters": 20,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -16,7 +16,7 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "healthScore": 77,
+        "healthScore": 75,
         "totalDeals": 11
       },
       {
@@ -32,10 +32,10 @@
         "totalDeals": 20
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
         "healthScore": 65,
-        "totalDeals": 3
+        "totalDeals": 28
       }
     ],
     "topMissionSources": [
@@ -100,11 +100,11 @@
         "fresh1dCount": 23
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 37,
-        "totalDeals": 38,
-        "fresh1dCount": 6
+        "sourceKey": "firecrawl4",
+        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+        "coverageScore": 35,
+        "totalDeals": 44,
+        "fresh1dCount": 0
       }
     ],
     "topPrecisionSources": [
@@ -117,7 +117,7 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "precisionScore": 77,
+        "precisionScore": 76,
         "totalDeals": 11
       },
       {
@@ -155,7 +155,7 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 61,
+        "sourceWeightScore": 60,
         "totalDeals": 11
       },
       {
@@ -299,9 +299,9 @@
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
       "totalDeals": 11,
-      "uniqueDeals": 11,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
+      "uniqueDeals": 10,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
       "fresh1dCount": 1,
       "fresh7dCount": 11,
       "viennaCount": 11,
@@ -314,8 +314,8 @@
         "@austriannaa Angebot"
       ],
       "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
       "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -358,11 +358,11 @@
       "issues": [
         "wenige Deals sind frischer als 1 Tag"
       ],
-      "healthScore": 77,
+      "healthScore": 75,
       "missionFitScore": 63,
       "coverageScore": 20,
-      "precisionScore": 77,
-      "sourceWeightScore": 61
+      "precisionScore": 76,
+      "sourceWeightScore": 60
     },
     {
       "sourceKey": "joe",
@@ -493,6 +493,84 @@
       "sourceWeightScore": 60
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 28,
+      "uniqueDeals": 21,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
+      "fresh1dCount": 8,
+      "fresh7dCount": 28,
+      "viennaCount": 28,
+      "foodDrinkCount": 7,
+      "promoCount": 17,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "4+1 Brunch-Aktion samstags",
+        "Soul Lover Tickets um 5 € bis 03.09.",
+        "Lunch Deal Montag bis Freitag 12:00-15:00"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 83.3,
+      "topCategories": [
+        {
+          "value": "food/drink",
+          "count": 8
+        },
+        {
+          "value": "shopping",
+          "count": 5
+        },
+        {
+          "value": "service",
+          "count": 4
+        },
+        {
+          "value": "supermarkt",
+          "count": 4
+        },
+        {
+          "value": "event",
+          "count": 3
+        },
+        {
+          "value": "essen",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 14
+        },
+        {
+          "value": "gratis",
+          "count": 12
+        },
+        {
+          "value": "bogo",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 65,
+      "missionFitScore": 49,
+      "coverageScore": 32,
+      "precisionScore": 64,
+      "sourceWeightScore": 53
+    },
+    {
       "sourceKey": "wien-combined",
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
@@ -571,84 +649,6 @@
       "coverageScore": 14,
       "precisionScore": 70,
       "sourceWeightScore": 56
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 38,
-      "uniqueDeals": 30,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 8,
-      "fresh1dCount": 6,
-      "fresh7dCount": 38,
-      "viennaCount": 38,
-      "foodDrinkCount": 12,
-      "promoCount": 24,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "4+1 Brunch-Aktion samstags",
-        "Burger und Hot Dog für 5 €",
-        "Burger und Hot Dog für 5 €"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 0.2,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 85.3,
-      "topCategories": [
-        {
-          "value": "food/drink",
-          "count": 11
-        },
-        {
-          "value": "shopping",
-          "count": 6
-        },
-        {
-          "value": "event",
-          "count": 5
-        },
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "supermarkt",
-          "count": 3
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 19
-        },
-        {
-          "value": "gratis",
-          "count": 17
-        },
-        {
-          "value": "bogo",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 47,
-      "coverageScore": 37,
-      "precisionScore": 63,
-      "sourceWeightScore": 53
     },
     {
       "sourceKey": "church-events",
@@ -810,7 +810,7 @@
       "totalDeals": 9,
       "uniqueDeals": 6,
       "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
+      "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
       "fresh7dCount": 0,
       "viennaCount": 4,
@@ -824,7 +824,7 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
+      "duplicateRate": 0,
       "fresh1dRate": 0,
       "fresh7dRate": 0,
       "viennaRate": 0.4,
@@ -855,7 +855,7 @@
       "healthScore": 63,
       "missionFitScore": 63,
       "coverageScore": 16,
-      "precisionScore": 64,
+      "precisionScore": 67,
       "sourceWeightScore": 54
     },
     {
