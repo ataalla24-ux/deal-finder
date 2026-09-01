@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-01T20:03:59.589Z",
+  "generatedAt": "2026-09-01T21:01:46.206Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 659,
-    "uniqueCandidates": 615,
-    "distinctCandidates": 635,
+    "totalCandidates": 664,
+    "uniqueCandidates": 620,
+    "distinctCandidates": 640,
     "duplicateClusters": 20,
     "topHealthySources": [
       {
@@ -26,16 +26,16 @@
         "totalDeals": 24
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 67,
+        "totalDeals": 22
+      },
+      {
         "sourceKey": "instagram-discovery",
         "sourceLabel": "Daily Sync Instagram Discovery",
         "healthScore": 63,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 63,
-        "totalDeals": 4
       }
     ],
     "topMissionSources": [
@@ -52,6 +52,12 @@
         "totalDeals": 4
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 63,
+        "totalDeals": 22
+      },
+      {
         "sourceKey": "instagram-discovery",
         "sourceLabel": "Daily Sync Instagram Discovery",
         "missionFitScore": 63,
@@ -62,12 +68,6 @@
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 62,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "missionFitScore": 59,
-        "totalDeals": 8
       }
     ],
     "topCoverageSources": [
@@ -127,16 +127,16 @@
         "totalDeals": 4
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 71,
+        "totalDeals": 22
+      },
+      {
         "sourceKey": "instagram-discovery",
         "sourceLabel": "Daily Sync Instagram Discovery",
         "precisionScore": 67,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 67,
-        "totalDeals": 17
       }
     ],
     "topWeightedSources": [
@@ -145,6 +145,12 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 70,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 59,
+        "totalDeals": 22
       },
       {
         "sourceKey": "tiktok",
@@ -163,12 +169,6 @@
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 54,
         "totalDeals": 24
-      },
-      {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
-        "sourceWeightScore": 54,
-        "totalDeals": 9
       }
     ],
     "topSourcesToFix": [
@@ -368,7 +368,7 @@
       "duplicateDeals": 6,
       "duplicateAcrossSources": 6,
       "fresh1dCount": 2,
-      "fresh7dCount": 24,
+      "fresh7dCount": 22,
       "viennaCount": 24,
       "foodDrinkCount": 11,
       "promoCount": 15,
@@ -382,7 +382,7 @@
       "uniqueRate": 0.8,
       "duplicateRate": 0.3,
       "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
+      "fresh7dRate": 0.9,
       "viennaRate": 1,
       "foodDrinkRate": 0.5,
       "promoRate": 0.6,
@@ -432,6 +432,80 @@
       "coverageScore": 25,
       "precisionScore": 66,
       "sourceWeightScore": 54
+    },
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 22,
+      "uniqueDeals": 12,
+      "duplicateDeals": 10,
+      "duplicateAcrossSources": 10,
+      "fresh1dCount": 12,
+      "fresh7dCount": 22,
+      "viennaCount": 22,
+      "foodDrinkCount": 10,
+      "promoCount": 15,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🎟️ FREE ✨Diversity Ball The ball celebrates diversity, inclusion and equality.",
+        "Gratis-Eintritt zum Event bei Vienna Coffee Festival",
+        "Gratis-Eintritt zum Event"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0.5,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88.3,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 8
+        },
+        {
+          "value": "shopping",
+          "count": 8
+        },
+        {
+          "value": "kultur",
+          "count": 4
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 11
+        },
+        {
+          "value": "rabatt",
+          "count": 9
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "gewinnspiel",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 67,
+      "missionFitScore": 63,
+      "coverageScore": 28,
+      "precisionScore": 71,
+      "sourceWeightScore": 59
     },
     {
       "sourceKey": "instagram-discovery",
@@ -652,76 +726,6 @@
       "coverageScore": 13,
       "precisionScore": 66,
       "sourceWeightScore": 53
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 17,
-      "uniqueDeals": 7,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 10,
-      "fresh1dCount": 7,
-      "fresh7dCount": 17,
-      "viennaCount": 17,
-      "foodDrinkCount": 8,
-      "promoCount": 11,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "September ein Gratis All-you-can-eat bei WOA.",
-        "50% Nachlass auf die Karaoke Räume jetzt den Tag sichern und buchen fuego",
-        "Ihr interessiert euch für einen Deal?"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 0.4,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.9,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 8
-        },
-        {
-          "value": "shopping",
-          "count": 7
-        },
-        {
-          "value": "kultur",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 8
-        },
-        {
-          "value": "gratis",
-          "count": 7
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 62,
-      "missionFitScore": 58,
-      "coverageScore": 22,
-      "precisionScore": 67,
-      "sourceWeightScore": 54
     },
     {
       "sourceKey": "joe",
