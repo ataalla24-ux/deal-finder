@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-01T05:55:23.664Z",
+  "generatedAt": "2026-09-01T05:57:45.545Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 541,
-    "uniqueCandidates": 498,
-    "distinctCandidates": 515,
-    "duplicateClusters": 17,
+    "totalCandidates": 582,
+    "uniqueCandidates": 537,
+    "distinctCandidates": 555,
+    "duplicateClusters": 18,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -14,14 +14,14 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "healthScore": 75,
-        "totalDeals": 10
-      },
-      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
+        "healthScore": 77,
+        "totalDeals": 11
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
         "healthScore": 75,
         "totalDeals": 10
       },
@@ -32,10 +32,10 @@
         "totalDeals": 20
       },
       {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "healthScore": 66,
-        "totalDeals": 6
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 65,
+        "totalDeals": 3
       }
     ],
     "topMissionSources": [
@@ -52,12 +52,6 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "missionFitScore": 70,
-        "totalDeals": 6
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 67,
@@ -68,6 +62,12 @@
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 65,
         "totalDeals": 3
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 64,
+        "totalDeals": 20
       }
     ],
     "topCoverageSources": [
@@ -115,16 +115,10 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "precisionScore": 76,
-        "totalDeals": 6
-      },
-      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "precisionScore": 75,
-        "totalDeals": 10
+        "precisionScore": 77,
+        "totalDeals": 11
       },
       {
         "sourceKey": "food3",
@@ -137,6 +131,12 @@
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 73,
         "totalDeals": 20
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 70,
+        "totalDeals": 3
       }
     ],
     "topWeightedSources": [
@@ -153,22 +153,22 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 61,
+        "totalDeals": 11
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 60,
         "totalDeals": 20
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 59,
-        "totalDeals": 10
-      },
-      {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "sourceWeightScore": 59,
-        "totalDeals": 6
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 56,
+        "totalDeals": 3
       }
     ],
     "topSourcesToFix": [
@@ -240,7 +240,6 @@
       "failedSources": [],
       "completedWithErrors": [
         "firecrawl2",
-        "gastro2",
         "power",
         "wien-combined"
       ]
@@ -294,6 +293,76 @@
       "coverageScore": 16,
       "precisionScore": 88,
       "sourceWeightScore": 70
+    },
+    {
+      "sourceKey": "tiktok",
+      "file": "deals-pending-tiktok.json",
+      "sourceLabel": "TikTok Scanner",
+      "totalDeals": 11,
+      "uniqueDeals": 11,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 11,
+      "viennaCount": 11,
+      "foodDrinkCount": 5,
+      "promoCount": 11,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Let’s try Bakeshop in Vienna, VA",
+        "Gratis Burger bei Jägerstraße 40",
+        "@austriannaa Angebot"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 74.4,
+      "topCategories": [
+        {
+          "value": "kaffee",
+          "count": 3
+        },
+        {
+          "value": "kultur",
+          "count": 3
+        },
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 10
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 77,
+      "missionFitScore": 63,
+      "coverageScore": 20,
+      "precisionScore": 77,
+      "sourceWeightScore": 61
     },
     {
       "sourceKey": "joe",
@@ -356,81 +425,6 @@
       "coverageScore": 24,
       "precisionScore": 68,
       "sourceWeightScore": 65
-    },
-    {
-      "sourceKey": "tiktok",
-      "file": "deals-pending-tiktok.json",
-      "sourceLabel": "TikTok Scanner",
-      "totalDeals": 10,
-      "uniqueDeals": 10,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
-      "fresh7dCount": 10,
-      "viennaCount": 10,
-      "foodDrinkCount": 4,
-      "promoCount": 10,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis Burger bei Jägerstraße 40",
-        "@austriannaa Angebot",
-        "Gratis GETRÄNK bei RECUP"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.4,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 71.4,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        },
-        {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "shopping",
-          "count": 2
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        },
-        {
-          "value": "freizeit",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 9
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 75,
-      "missionFitScore": 59,
-      "coverageScore": 19,
-      "precisionScore": 75,
-      "sourceWeightScore": 59
     },
     {
       "sourceKey": "meta-instagram",
@@ -497,89 +491,6 @@
       "coverageScore": 29,
       "precisionScore": 73,
       "sourceWeightScore": 60
-    },
-    {
-      "sourceKey": "gastro2",
-      "file": "deals-pending-gastro2.json",
-      "sourceLabel": "Firecrawl Key 1 - Gastro",
-      "totalDeals": 6,
-      "uniqueDeals": 2,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
-      "fresh1dCount": 0,
-      "fresh7dCount": 6,
-      "viennaCount": 6,
-      "foodDrinkCount": 6,
-      "promoCount": 4,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Munchy am Reumannplatz Leibnizgasse 13: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % ...",
-        "Munchy am Reumannplatz Leibnizgasse 13: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % ...",
-        "Rankgasse 36: schmeckt Wien nach Zuhause. 🇦🇹 📍Rankgasse 36, 1160 ..."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-08-31T06:46:05.857Z",
-        "finishedAt": "2026-08-31T06:50:34.597Z",
-        "durationMs": 268740,
-        "counts": {
-          "rawCandidates": 11,
-          "normalizedCandidates": 11,
-          "verifiedCandidates": 7,
-          "previousDeals": 5,
-          "acceptedDeals": 7,
-          "rejectedDeals": 7
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 7
-        },
-        "errors": [
-          "1000things.at: Firecrawl Agent nach 75s abgebrochen"
-        ],
-        "reportFile": "deal-pipeline-last-run-gastro2.json"
-      },
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 60.8,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 4
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 3
-        },
-        {
-          "value": "gratis",
-          "count": 2
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 66,
-      "missionFitScore": 70,
-      "coverageScore": 16,
-      "precisionScore": 76,
-      "sourceWeightScore": 59
     },
     {
       "sourceKey": "wien-combined",
@@ -1092,95 +1003,6 @@
       "sourceWeightScore": 45
     },
     {
-      "sourceKey": "firecrawl4",
-      "file": "deals-pending-firecrawl4.json",
-      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-      "totalDeals": 44,
-      "uniqueDeals": 42,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 2,
-      "foodDrinkCount": 44,
-      "promoCount": 28,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Frühstück für 1,00 € statt 2,99 €",
-        "Grönsaksris (orientalischer Gemüsereis) für 3,99 €",
-        "Pasta-Kindermenü mit Tomatensauce für 2,49 €"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-01T05:47:22.523Z",
-        "finishedAt": "2026-09-01T05:54:51.740Z",
-        "durationMs": 449217,
-        "counts": {
-          "rawCandidates": 37,
-          "normalizedCandidates": 37,
-          "verifiedCandidates": 44,
-          "previousDeals": 27,
-          "acceptedDeals": 44,
-          "rejectedDeals": 20
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 20
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.1,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 61.9,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 42
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 35
-        },
-        {
-          "value": "bogo",
-          "count": 4
-        },
-        {
-          "value": "gratis",
-          "count": 4
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 58,
-      "missionFitScore": 52,
-      "coverageScore": 36,
-      "precisionScore": 51,
-      "sourceWeightScore": 50
-    },
-    {
       "sourceKey": "member-benefits",
       "file": "deals-pending-member-benefits.json",
       "sourceLabel": "Member Benefits",
@@ -1254,6 +1076,181 @@
       "coverageScore": 38,
       "precisionScore": 46,
       "sourceWeightScore": 48
+    },
+    {
+      "sourceKey": "firecrawl4",
+      "file": "deals-pending-firecrawl4.json",
+      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+      "totalDeals": 44,
+      "uniqueDeals": 41,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 0,
+      "fresh7dCount": 3,
+      "viennaCount": 2,
+      "foodDrinkCount": 44,
+      "promoCount": 28,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Frühstück für 1,00 € statt 2,99 €",
+        "Grönsaksris (orientalischer Gemüsereis) für 3,99 €",
+        "Pasta-Kindermenü mit Tomatensauce für 2,49 €"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-01T05:47:22.523Z",
+        "finishedAt": "2026-09-01T05:54:51.740Z",
+        "durationMs": 449217,
+        "counts": {
+          "rawCandidates": 37,
+          "normalizedCandidates": 37,
+          "verifiedCandidates": 44,
+          "previousDeals": 27,
+          "acceptedDeals": 44,
+          "rejectedDeals": 20
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 20
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
+      },
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0.1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 61.9,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 42
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 35
+        },
+        {
+          "value": "bogo",
+          "count": 4
+        },
+        {
+          "value": "gratis",
+          "count": 4
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 55,
+      "missionFitScore": 52,
+      "coverageScore": 36,
+      "precisionScore": 50,
+      "sourceWeightScore": 49
+    },
+    {
+      "sourceKey": "gastro2",
+      "file": "deals-pending-gastro2.json",
+      "sourceLabel": "Firecrawl Key 1 - Gastro",
+      "totalDeals": 46,
+      "uniqueDeals": 41,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 0,
+      "fresh7dCount": 6,
+      "viennaCount": 6,
+      "foodDrinkCount": 45,
+      "promoCount": 7,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Munchy am Reumannplatz Leibnizgasse 13: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % ...",
+        "Munchy am Reumannplatz Leibnizgasse 13: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % ...",
+        "Rankgasse 36: schmeckt Wien nach Zuhause. 🇦🇹 📍Rankgasse 36, 1160 ..."
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-01T05:47:22.300Z",
+        "finishedAt": "2026-09-01T05:57:14.239Z",
+        "durationMs": 591939,
+        "counts": {
+          "rawCandidates": 59,
+          "normalizedCandidates": 59,
+          "verifiedCandidates": 47,
+          "previousDeals": 6,
+          "acceptedDeals": 47,
+          "rejectedDeals": 18
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 18
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-gastro2.json"
+      },
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0.1,
+      "viennaRate": 0.1,
+      "foodDrinkRate": 1,
+      "promoRate": 0.2,
+      "missingUrlRate": 0,
+      "averageQualityScore": 64.3,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 43
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "technik",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 40
+        },
+        {
+          "value": "gratis",
+          "count": 4
+        },
+        {
+          "value": "bogo",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 51,
+      "missionFitScore": 42,
+      "coverageScore": 35,
+      "precisionScore": 44,
+      "sourceWeightScore": 44
     },
     {
       "sourceKey": "community",
