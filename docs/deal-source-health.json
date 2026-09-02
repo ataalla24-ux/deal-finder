@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-02T05:39:32.906Z",
+  "generatedAt": "2026-09-02T05:59:58.287Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 621,
-    "uniqueCandidates": 572,
-    "distinctCandidates": 594,
-    "duplicateClusters": 22,
+    "totalCandidates": 628,
+    "uniqueCandidates": 576,
+    "distinctCandidates": 599,
+    "duplicateClusters": 23,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -16,20 +16,20 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "healthScore": 73,
+        "healthScore": 75,
         "totalDeals": 8
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 66,
+        "totalDeals": 35
       },
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 66,
         "totalDeals": 24
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 65,
-        "totalDeals": 28
       },
       {
         "sourceKey": "instagram-discovery",
@@ -117,7 +117,7 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "precisionScore": 74,
+        "precisionScore": 75,
         "totalDeals": 8
       },
       {
@@ -133,10 +133,10 @@
         "totalDeals": 4
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 67,
-        "totalDeals": 9
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 68,
+        "totalDeals": 35
       }
     ],
     "topWeightedSources": [
@@ -159,16 +159,16 @@
         "totalDeals": 8
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 56,
+        "totalDeals": 35
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 55,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
-        "sourceWeightScore": 54,
-        "totalDeals": 9
       }
     ],
     "topSourcesToFix": [
@@ -293,9 +293,9 @@
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
       "totalDeals": 8,
-      "uniqueDeals": 7,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
+      "uniqueDeals": 8,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
       "fresh1dCount": 1,
       "fresh7dCount": 8,
       "viennaCount": 8,
@@ -308,8 +308,8 @@
         "Gratis All-you-can-eat für Schüler:innen bei Allyoucaneat"
       ],
       "lastRun": null,
-      "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
       "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -353,11 +353,89 @@
         "wenige Deals sind frischer als 1 Tag",
         "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 73,
+      "healthScore": 75,
       "missionFitScore": 59,
-      "coverageScore": 17,
-      "precisionScore": 74,
+      "coverageScore": 18,
+      "precisionScore": 75,
       "sourceWeightScore": 58
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 35,
+      "uniqueDeals": 26,
+      "duplicateDeals": 9,
+      "duplicateAcrossSources": 9,
+      "fresh1dCount": 4,
+      "fresh7dCount": 35,
+      "viennaCount": 35,
+      "foodDrinkCount": 18,
+      "promoCount": 25,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis All-you-can-eat für Schüler:innen am 7. September",
+        "Gratis All-you-can-eat für Schüler:innen bis 12 Jahre am 07.09.2026 bei WOA Am Graben 29a, 1010 Wien, in Begle",
+        "Solid Soul Afterwork: Instagram-Deal in Wien"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 82.7,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 12
+        },
+        {
+          "value": "shopping",
+          "count": 8
+        },
+        {
+          "value": "supermarkt",
+          "count": 4
+        },
+        {
+          "value": "reisen",
+          "count": 3
+        },
+        {
+          "value": "drink",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 17
+        },
+        {
+          "value": "rabatt",
+          "count": 17
+        },
+        {
+          "value": "gutschein",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 66,
+      "missionFitScore": 54,
+      "coverageScore": 33,
+      "precisionScore": 68,
+      "sourceWeightScore": 56
     },
     {
       "sourceKey": "meta-instagram",
@@ -432,84 +510,6 @@
       "coverageScore": 29,
       "precisionScore": 72,
       "sourceWeightScore": 59
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 28,
-      "uniqueDeals": 21,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 7,
-      "fresh1dCount": 1,
-      "fresh7dCount": 28,
-      "viennaCount": 28,
-      "foodDrinkCount": 15,
-      "promoCount": 17,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "2for1 Gutschein für Rindsuppe, Schnitzeldreier & Palatschinke",
-        "Gratis All-you-can-eat für Schüler:innen am 7. September",
-        "Burger-Deal bei Munchy am Reumannplatz"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 85.6,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 11
-        },
-        {
-          "value": "service",
-          "count": 4
-        },
-        {
-          "value": "shopping",
-          "count": 4
-        },
-        {
-          "value": "supermarkt",
-          "count": 4
-        },
-        {
-          "value": "event",
-          "count": 3
-        },
-        {
-          "value": "kultur",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 16
-        },
-        {
-          "value": "gratis",
-          "count": 11
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 65,
-      "missionFitScore": 49,
-      "coverageScore": 27,
-      "precisionScore": 65,
-      "sourceWeightScore": 52
     },
     {
       "sourceKey": "instagram-discovery",
@@ -776,9 +776,9 @@
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
       "totalDeals": 9,
-      "uniqueDeals": 1,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 8,
+      "uniqueDeals": 0,
+      "duplicateDeals": 9,
+      "duplicateAcrossSources": 9,
       "fresh1dCount": 9,
       "fresh7dCount": 9,
       "viennaCount": 9,
@@ -813,8 +813,8 @@
         "errors": [],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
-      "uniqueRate": 0.1,
-      "duplicateRate": 0.9,
+      "uniqueRate": 0,
+      "duplicateRate": 1,
       "fresh1dRate": 1,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -850,11 +850,11 @@
         "geringe Food-/Drink-Relevanz",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 60,
+      "healthScore": 58,
       "missionFitScore": 64,
-      "coverageScore": 18,
-      "precisionScore": 67,
-      "sourceWeightScore": 54
+      "coverageScore": 17,
+      "precisionScore": 66,
+      "sourceWeightScore": 53
     },
     {
       "sourceKey": "firecrawl4",
@@ -950,9 +950,9 @@
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
       "totalDeals": 39,
-      "uniqueDeals": 36,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
+      "uniqueDeals": 35,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
       "fresh1dCount": 0,
       "fresh7dCount": 5,
       "viennaCount": 5,
@@ -1048,7 +1048,7 @@
       ],
       "healthScore": 56,
       "missionFitScore": 50,
-      "coverageScore": 33,
+      "coverageScore": 32,
       "precisionScore": 51,
       "sourceWeightScore": 48
     },
