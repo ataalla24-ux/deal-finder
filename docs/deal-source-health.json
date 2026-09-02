@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-02T09:39:47.051Z",
+  "generatedAt": "2026-09-02T09:49:48.163Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 625,
-    "uniqueCandidates": 573,
-    "distinctCandidates": 596,
+    "totalCandidates": 624,
+    "uniqueCandidates": 572,
+    "distinctCandidates": 595,
     "duplicateClusters": 23,
     "topHealthySources": [
       {
@@ -46,12 +46,6 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "missionFitScore": 64,
-        "totalDeals": 4
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "missionFitScore": 63,
@@ -68,6 +62,12 @@
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 62,
         "totalDeals": 9
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "missionFitScore": 58,
+        "totalDeals": 3
       }
     ],
     "topCoverageSources": [
@@ -121,12 +121,6 @@
         "totalDeals": 8
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 71,
-        "totalDeals": 4
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 71,
@@ -137,6 +131,12 @@
         "sourceLabel": "Instagram AI Agent",
         "precisionScore": 68,
         "totalDeals": 35
+      },
+      {
+        "sourceKey": "instagram-discovery",
+        "sourceLabel": "Daily Sync Instagram Discovery",
+        "precisionScore": 67,
+        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
@@ -165,10 +165,10 @@
         "totalDeals": 35
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 55,
-        "totalDeals": 4
+        "sourceKey": "instagram-discovery",
+        "sourceLabel": "Daily Sync Instagram Discovery",
+        "sourceWeightScore": 54,
+        "totalDeals": 9
       }
     ],
     "topSourcesToFix": [
@@ -315,7 +315,7 @@
       "foodDrinkRate": 0.4,
       "promoRate": 1,
       "missingUrlRate": 0,
-      "averageQualityScore": 72.3,
+      "averageQualityScore": 71.8,
       "topCategories": [
         {
           "value": "kultur",
@@ -367,7 +367,7 @@
       "duplicateDeals": 9,
       "duplicateAcrossSources": 9,
       "fresh1dCount": 2,
-      "fresh7dCount": 34,
+      "fresh7dCount": 33,
       "viennaCount": 35,
       "foodDrinkCount": 18,
       "promoCount": 25,
@@ -381,7 +381,7 @@
       "uniqueRate": 0.7,
       "duplicateRate": 0.3,
       "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
+      "fresh7dRate": 0.9,
       "viennaRate": 1,
       "foodDrinkRate": 0.5,
       "promoRate": 0.7,
@@ -564,83 +564,6 @@
       "coverageScore": 16,
       "precisionScore": 67,
       "sourceWeightScore": 54
-    },
-    {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 4,
-      "uniqueDeals": 1,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 0,
-      "fresh7dCount": 4,
-      "viennaCount": 4,
-      "foodDrinkCount": 4,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Munchy am Reumannplatz Leibnizgasse 13: Instagram: NUR 5 €! Handgesmashter Beef Burger mit 100 % österreichischem ...",
-        "Munchy am Reumannplatz Leibnizgasse 13: Instagram: NUR 5 €! Handgesmashter Beef Burger mit 100 % österreichischem ...",
-        "Rankgasse 36: Instagram: Klassische Wiener Wirtshauskultur, herzliche Gastlichkeit ... - Instagram"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-02T06:57:27.133Z",
-        "finishedAt": "2026-09-02T06:58:18.301Z",
-        "durationMs": 51168,
-        "counts": {
-          "rawCandidates": 13,
-          "normalizedCandidates": 13,
-          "verifiedCandidates": 4,
-          "previousDeals": 4,
-          "acceptedDeals": 4,
-          "rejectedDeals": 13
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 13
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-food3.json"
-      },
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.8,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 61.5,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 4
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 63,
-      "missionFitScore": 64,
-      "coverageScore": 14,
-      "precisionScore": 71,
-      "sourceWeightScore": 55
     },
     {
       "sourceKey": "joe",
@@ -1048,6 +971,80 @@
       "coverageScore": 17,
       "precisionScore": 65,
       "sourceWeightScore": 52
+    },
+    {
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 3,
+      "uniqueDeals": 0,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 0,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 3,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Munchy am Reumannplatz Leibnizgasse 13: Instagram: NUR 5 €! Handgesmashter Beef Burger mit 100 % österreichischem ...",
+        "Munchy am Reumannplatz Leibnizgasse 13: Instagram: NUR 5 €! Handgesmashter Beef Burger mit 100 % österreichischem ...",
+        "Rankgasse 36: Instagram: Klassische Wiener Wirtshauskultur, herzliche Gastlichkeit ... - Instagram"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-02T06:57:27.133Z",
+        "finishedAt": "2026-09-02T06:58:18.301Z",
+        "durationMs": 51168,
+        "counts": {
+          "rawCandidates": 13,
+          "normalizedCandidates": 13,
+          "verifiedCandidates": 4,
+          "previousDeals": 4,
+          "acceptedDeals": 4,
+          "rejectedDeals": 13
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 13
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-food3.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 58,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 2
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 53,
+      "missionFitScore": 58,
+      "coverageScore": 13,
+      "precisionScore": 65,
+      "sourceWeightScore": 49
     },
     {
       "sourceKey": "community",
