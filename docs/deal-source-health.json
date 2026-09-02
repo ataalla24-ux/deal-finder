@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-02T12:58:55.057Z",
+  "generatedAt": "2026-09-02T16:33:29.805Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 597,
-    "uniqueCandidates": 553,
-    "distinctCandidates": 572,
-    "duplicateClusters": 19,
+    "totalCandidates": 591,
+    "uniqueCandidates": 552,
+    "distinctCandidates": 568,
+    "duplicateClusters": 16,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -20,10 +20,10 @@
         "totalDeals": 8
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 69,
-        "totalDeals": 24
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 67,
+        "totalDeals": 11
       },
       {
         "sourceKey": "instagram-ai",
@@ -32,10 +32,10 @@
         "totalDeals": 13
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 64,
-        "totalDeals": 11
+        "sourceKey": "instagram-discovery",
+        "sourceLabel": "Daily Sync Instagram Discovery",
+        "healthScore": 63,
+        "totalDeals": 9
       }
     ],
     "topMissionSources": [
@@ -48,20 +48,20 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 67,
+        "missionFitScore": 63,
         "totalDeals": 11
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 65,
-        "totalDeals": 24
       },
       {
         "sourceKey": "instagram-discovery",
         "sourceLabel": "Daily Sync Instagram Discovery",
         "missionFitScore": 63,
         "totalDeals": 9
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 58,
+        "totalDeals": 18
       },
       {
         "sourceKey": "food3",
@@ -121,15 +121,9 @@
         "totalDeals": 8
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 73,
-        "totalDeals": 24
-      },
-      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 72,
+        "precisionScore": 70,
         "totalDeals": 11
       },
       {
@@ -137,6 +131,12 @@
         "sourceLabel": "Daily Sync Instagram Discovery",
         "precisionScore": 67,
         "totalDeals": 9
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 66,
+        "totalDeals": 18
       }
     ],
     "topWeightedSources": [
@@ -147,28 +147,28 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 61,
-        "totalDeals": 24
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 58,
-        "totalDeals": 11
-      },
-      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 57,
         "totalDeals": 8
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 57,
+        "totalDeals": 11
+      },
+      {
         "sourceKey": "instagram-discovery",
         "sourceLabel": "Daily Sync Instagram Discovery",
         "sourceWeightScore": 54,
         "totalDeals": 9
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 54,
+        "totalDeals": 18
       }
     ],
     "topSourcesToFix": [
@@ -359,50 +359,68 @@
       "sourceWeightScore": 57
     },
     {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 24,
-      "uniqueDeals": 12,
-      "duplicateDeals": 12,
-      "duplicateAcrossSources": 12,
-      "fresh1dCount": 14,
-      "fresh7dCount": 24,
-      "viennaCount": 24,
-      "foodDrinkCount": 13,
-      "promoCount": 16,
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 11,
+      "uniqueDeals": 5,
+      "duplicateDeals": 6,
+      "duplicateAcrossSources": 6,
+      "fresh1dCount": 9,
+      "fresh7dCount": 11,
+      "viennaCount": 11,
+      "foodDrinkCount": 3,
+      "promoCount": 8,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4",
-        "🍧Free ice cream and balloons for kids 🎈 🍭Kids activities 🥟Caucasian food for the whole family Because the first days of school deserve s",
-        "10 % Rabatt für Schüler*innen 🫶 Tag your Bubble-Tea-Bestie & let’s celebrate"
+        "Gratis-Eintritt zum Event bei Arabic Night",
+        "Gratis-Eintritt zum Event bei Arabic Night",
+        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4"
       ],
-      "lastRun": null,
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-02T11:40:20.849Z",
+        "finishedAt": "2026-09-02T11:43:01.950Z",
+        "durationMs": 161101,
+        "counts": {
+          "rawCandidates": 139,
+          "normalizedCandidates": 11,
+          "verifiedCandidates": 11,
+          "previousDeals": 0,
+          "acceptedDeals": 11,
+          "rejectedDeals": 112
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 94,
+          "general-recommendation": 11,
+          "excluded-promotion-type": 3,
+          "missing-text": 3,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
       "uniqueRate": 0.5,
       "duplicateRate": 0.5,
-      "fresh1dRate": 0.6,
+      "fresh1dRate": 0.8,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.5,
+      "foodDrinkRate": 0.3,
       "promoRate": 0.7,
       "missingUrlRate": 0,
-      "averageQualityScore": 88,
+      "averageQualityScore": 87.3,
       "topCategories": [
-        {
-          "value": "essen",
-          "count": 10
-        },
         {
           "value": "kultur",
           "count": 6
         },
         {
-          "value": "shopping",
-          "count": 4
+          "value": "essen",
+          "count": 3
         },
         {
-          "value": "kaffee",
-          "count": 3
+          "value": "gottesdienste",
+          "count": 1
         },
         {
           "value": "reisen",
@@ -412,29 +430,22 @@
       "topTypes": [
         {
           "value": "gratis",
-          "count": 13
+          "count": 7
         },
         {
           "value": "rabatt",
-          "count": 9
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 1
+          "count": 4
         }
       ],
       "issues": [
+        "geringe Food-/Drink-Relevanz",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 69,
-      "missionFitScore": 65,
-      "coverageScore": 31,
-      "precisionScore": 73,
-      "sourceWeightScore": 61
+      "healthScore": 67,
+      "missionFitScore": 63,
+      "coverageScore": 20,
+      "precisionScore": 70,
+      "sourceWeightScore": 57
     },
     {
       "sourceKey": "instagram-ai",
@@ -512,95 +523,6 @@
       "sourceWeightScore": 51
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 11,
-      "uniqueDeals": 2,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 7,
-      "fresh1dCount": 11,
-      "fresh7dCount": 11,
-      "viennaCount": 11,
-      "foodDrinkCount": 3,
-      "promoCount": 8,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis-Eintritt zum Event bei Arabic Night",
-        "Gratis-Eintritt zum Event bei Arabic Night",
-        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-02T11:40:20.849Z",
-        "finishedAt": "2026-09-02T11:43:01.950Z",
-        "durationMs": 161101,
-        "counts": {
-          "rawCandidates": 139,
-          "normalizedCandidates": 11,
-          "verifiedCandidates": 11,
-          "previousDeals": 0,
-          "acceptedDeals": 11,
-          "rejectedDeals": 112
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 94,
-          "general-recommendation": 11,
-          "excluded-promotion-type": 3,
-          "missing-text": 3,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.2,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.3,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 6
-        },
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "gottesdienste",
-          "count": 1
-        },
-        {
-          "value": "reisen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 7
-        },
-        {
-          "value": "rabatt",
-          "count": 4
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 67,
-      "coverageScore": 20,
-      "precisionScore": 72,
-      "sourceWeightScore": 58
-    },
-    {
       "sourceKey": "instagram-discovery",
       "file": "deals-pending-instagram-discovery.json",
       "sourceLabel": "Daily Sync Instagram Discovery",
@@ -653,6 +575,84 @@
       "missionFitScore": 63,
       "coverageScore": 16,
       "precisionScore": 67,
+      "sourceWeightScore": 54
+    },
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 18,
+      "uniqueDeals": 8,
+      "duplicateDeals": 10,
+      "duplicateAcrossSources": 10,
+      "fresh1dCount": 9,
+      "fresh7dCount": 18,
+      "viennaCount": 18,
+      "foodDrinkCount": 9,
+      "promoCount": 9,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4",
+        "Gratis-Eintritt zum Event bei Arabic Night",
+        "bekommst du dein Ticket noch für € 17."
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.4,
+      "duplicateRate": 0.6,
+      "fresh1dRate": 0.5,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.5,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 8
+        },
+        {
+          "value": "kultur",
+          "count": 4
+        },
+        {
+          "value": "shopping",
+          "count": 3
+        },
+        {
+          "value": "reisen",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 8
+        },
+        {
+          "value": "rabatt",
+          "count": 8
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "gewinnspiel",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 62,
+      "missionFitScore": 58,
+      "coverageScore": 24,
+      "precisionScore": 66,
       "sourceWeightScore": 54
     },
     {
