@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-02T03:55:36.870Z",
+  "generatedAt": "2026-09-02T04:24:24.013Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 672,
-    "uniqueCandidates": 621,
-    "distinctCandidates": 644,
+    "totalCandidates": 673,
+    "uniqueCandidates": 622,
+    "distinctCandidates": 645,
     "duplicateClusters": 23,
     "topHealthySources": [
       {
@@ -20,22 +20,22 @@
         "totalDeals": 8
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 65,
-        "totalDeals": 8
-      },
-      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "healthScore": 64,
+        "healthScore": 67,
         "totalDeals": 28
       },
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 66,
+        "totalDeals": 24
+      },
+      {
+        "sourceKey": "instagram-discovery",
+        "sourceLabel": "Daily Sync Instagram Discovery",
         "healthScore": 63,
-        "totalDeals": 23
+        "totalDeals": 9
       }
     ],
     "topMissionSources": [
@@ -44,6 +44,12 @@
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 78,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 65,
+        "totalDeals": 24
       },
       {
         "sourceKey": "wien-combined",
@@ -62,12 +68,6 @@
         "sourceLabel": "Daily Sync Instagram Discovery",
         "missionFitScore": 63,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 60,
-        "totalDeals": 23
       }
     ],
     "topCoverageSources": [
@@ -121,6 +121,12 @@
         "totalDeals": 8
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 72,
+        "totalDeals": 24
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 71,
@@ -129,14 +135,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 68,
+        "precisionScore": 67,
         "totalDeals": 8
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 68,
-        "totalDeals": 23
       }
     ],
     "topWeightedSources": [
@@ -147,28 +147,28 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 60,
+        "totalDeals": 24
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 58,
         "totalDeals": 8
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 56,
-        "totalDeals": 8
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 56,
-        "totalDeals": 23
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 55,
         "totalDeals": 4
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 54,
+        "totalDeals": 28
       }
     ],
     "topSourcesToFix": [
@@ -360,102 +360,13 @@
       "sourceWeightScore": 58
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 8,
-      "uniqueDeals": 2,
-      "duplicateDeals": 6,
-      "duplicateAcrossSources": 6,
-      "fresh1dCount": 8,
-      "fresh7dCount": 8,
-      "viennaCount": 8,
-      "foodDrinkCount": 3,
-      "promoCount": 4,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis-Eintritt zum Event bei Liveim25",
-        "🎒✨ Back to School bei Khansaa Beauty ✨🎒 Zum Schulstart ♥️ Besonderer Rabatt für kurze Zeit ✨ 📅 Vom 02.09.",
-        "📅 Jeden Donnerstag · 17:00–23:00 Uhr 📍 Kunstpause · Arsenal Objekt 19, 1030 Wien ✨ Afterwork Special 🕔 17:00–19:00 Uhr 🍕 Pizza + Getränk"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-01T21:17:36.138Z",
-        "finishedAt": "2026-09-01T21:19:30.237Z",
-        "durationMs": 114099,
-        "counts": {
-          "rawCandidates": 130,
-          "normalizedCandidates": 8,
-          "verifiedCandidates": 8,
-          "previousDeals": 0,
-          "acceptedDeals": 8,
-          "rejectedDeals": 114
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 97,
-          "missing-text": 6,
-          "excluded-promotion-type": 5,
-          "general-recommendation": 5,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.8,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.4,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.1,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "kultur",
-          "count": 3
-        },
-        {
-          "value": "beauty",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 5
-        },
-        {
-          "value": "gratis",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 65,
-      "missionFitScore": 65,
-      "coverageScore": 17,
-      "precisionScore": 68,
-      "sourceWeightScore": 56
-    },
-    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 28,
-      "uniqueDeals": 20,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 8,
+      "uniqueDeals": 21,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
       "fresh1dCount": 2,
       "fresh7dCount": 28,
       "viennaCount": 28,
@@ -468,7 +379,7 @@
         "Burger-Deal bei Munchy am Reumannplatz"
       ],
       "lastRun": null,
-      "uniqueRate": 0.7,
+      "uniqueRate": 0.8,
       "duplicateRate": 0.3,
       "fresh1dRate": 0.1,
       "fresh7dRate": 1,
@@ -520,49 +431,49 @@
       "issues": [
         "wenige Deals sind frischer als 1 Tag"
       ],
-      "healthScore": 64,
+      "healthScore": 67,
       "missionFitScore": 52,
       "coverageScore": 28,
       "precisionScore": 66,
-      "sourceWeightScore": 53
+      "sourceWeightScore": 54
     },
     {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 23,
-      "uniqueDeals": 9,
+      "totalDeals": 24,
+      "uniqueDeals": 10,
       "duplicateDeals": 14,
       "duplicateAcrossSources": 14,
-      "fresh1dCount": 12,
-      "fresh7dCount": 23,
-      "viennaCount": 23,
-      "foodDrinkCount": 10,
+      "fresh1dCount": 14,
+      "fresh7dCount": 24,
+      "viennaCount": 24,
+      "foodDrinkCount": 11,
       "promoCount": 16,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "40 FT High Cube Seecontainer in Aktion.",
-        "🎟️ FREE ✨Diversity Ball The ball celebrates diversity, inclusion and equality.",
-        "Gratis-Eintritt zum Event bei Vienna Coffee Festival"
+        "Vielleicht ist genau jetzt der richtige Moment für einen neuen Platz.",
+        "The food was lovely, the atmosphere felt special, and it’s such a beautiful way to experience one of Vienna’s iconic locations.",
+        "🎟️ FREE ✨Diversity Ball The ball celebrates diversity, inclusion and equality."
       ],
       "lastRun": null,
       "uniqueRate": 0.4,
       "duplicateRate": 0.6,
-      "fresh1dRate": 0.5,
+      "fresh1dRate": 0.6,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.4,
+      "foodDrinkRate": 0.5,
       "promoRate": 0.7,
       "missingUrlRate": 0,
-      "averageQualityScore": 87.9,
+      "averageQualityScore": 87.6,
       "topCategories": [
         {
-          "value": "shopping",
+          "value": "essen",
           "count": 9
         },
         {
-          "value": "essen",
-          "count": 8
+          "value": "shopping",
+          "count": 9
         },
         {
           "value": "kultur",
@@ -576,7 +487,7 @@
       "topTypes": [
         {
           "value": "gratis",
-          "count": 11
+          "count": 12
         },
         {
           "value": "rabatt",
@@ -592,14 +503,13 @@
         }
       ],
       "issues": [
-        "geringe Food-/Drink-Relevanz",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 63,
-      "missionFitScore": 60,
-      "coverageScore": 28,
-      "precisionScore": 68,
-      "sourceWeightScore": 56
+      "healthScore": 66,
+      "missionFitScore": 65,
+      "coverageScore": 30,
+      "precisionScore": 72,
+      "sourceWeightScore": 60
     },
     {
       "sourceKey": "instagram-discovery",
@@ -860,6 +770,95 @@
       "coverageScore": 12,
       "precisionScore": 56,
       "sourceWeightScore": 45
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 8,
+      "uniqueDeals": 1,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
+      "fresh1dCount": 8,
+      "fresh7dCount": 8,
+      "viennaCount": 8,
+      "foodDrinkCount": 3,
+      "promoCount": 4,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis-Eintritt zum Event bei Liveim25",
+        "🎒✨ Back to School bei Khansaa Beauty ✨🎒 Zum Schulstart ♥️ Besonderer Rabatt für kurze Zeit ✨ 📅 Vom 02.09.",
+        "📅 Jeden Donnerstag · 17:00–23:00 Uhr 📍 Kunstpause · Arsenal Objekt 19, 1030 Wien ✨ Afterwork Special 🕔 17:00–19:00 Uhr 🍕 Pizza + Getränk"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-01T21:17:36.138Z",
+        "finishedAt": "2026-09-01T21:19:30.237Z",
+        "durationMs": 114099,
+        "counts": {
+          "rawCandidates": 130,
+          "normalizedCandidates": 8,
+          "verifiedCandidates": 8,
+          "previousDeals": 0,
+          "acceptedDeals": 8,
+          "rejectedDeals": 114
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 97,
+          "missing-text": 6,
+          "excluded-promotion-type": 5,
+          "general-recommendation": 5,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.1,
+      "duplicateRate": 0.9,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.4,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.1,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        },
+        {
+          "value": "kultur",
+          "count": 3
+        },
+        {
+          "value": "beauty",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 5
+        },
+        {
+          "value": "gratis",
+          "count": 3
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 60,
+      "missionFitScore": 65,
+      "coverageScore": 17,
+      "precisionScore": 67,
+      "sourceWeightScore": 54
     },
     {
       "sourceKey": "firecrawl4",
