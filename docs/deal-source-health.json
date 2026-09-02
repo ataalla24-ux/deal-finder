@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-02T11:42:29.920Z",
+  "generatedAt": "2026-09-02T11:43:30.860Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 617,
+    "totalCandidates": 619,
     "uniqueCandidates": 573,
-    "distinctCandidates": 592,
-    "duplicateClusters": 19,
+    "distinctCandidates": 593,
+    "duplicateClusters": 20,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -20,22 +20,22 @@
         "totalDeals": 8
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 70,
+        "totalDeals": 35
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 69,
         "totalDeals": 24
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 68,
-        "totalDeals": 35
-      },
-      {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
-        "healthScore": 63,
-        "totalDeals": 9
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 64,
+        "totalDeals": 11
       }
     ],
     "topMissionSources": [
@@ -44,6 +44,12 @@
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 78,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 67,
+        "totalDeals": 11
       },
       {
         "sourceKey": "meta-instagram",
@@ -55,12 +61,6 @@
         "sourceKey": "instagram-discovery",
         "sourceLabel": "Daily Sync Instagram Discovery",
         "missionFitScore": 63,
-        "totalDeals": 9
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 62,
         "totalDeals": 9
       },
       {
@@ -127,16 +127,16 @@
         "totalDeals": 24
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 69,
-        "totalDeals": 35
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 72,
+        "totalDeals": 11
       },
       {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
-        "precisionScore": 67,
-        "totalDeals": 9
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 70,
+        "totalDeals": 35
       }
     ],
     "topWeightedSources": [
@@ -153,6 +153,12 @@
         "totalDeals": 24
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 58,
+        "totalDeals": 11
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 57,
@@ -163,12 +169,6 @@
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 57,
         "totalDeals": 35
-      },
-      {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
-        "sourceWeightScore": 54,
-        "totalDeals": 9
       }
     ],
     "topSourcesToFix": [
@@ -359,13 +359,91 @@
       "sourceWeightScore": 57
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 35,
+      "uniqueDeals": 30,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 2,
+      "fresh7dCount": 32,
+      "viennaCount": 35,
+      "foodDrinkCount": 18,
+      "promoCount": 25,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis All-you-can-eat für Schüler:innen am 7. September",
+        "Gratis All-you-can-eat für Schüler:innen bis 12 Jahre am 07.09.2026 bei WOA Am Graben 29a, 1010 Wien, in Begle",
+        "Solid Soul Afterwork: Instagram-Deal in Wien"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 0.9,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 82.7,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 12
+        },
+        {
+          "value": "shopping",
+          "count": 8
+        },
+        {
+          "value": "supermarkt",
+          "count": 4
+        },
+        {
+          "value": "reisen",
+          "count": 3
+        },
+        {
+          "value": "drink",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 17
+        },
+        {
+          "value": "rabatt",
+          "count": 17
+        },
+        {
+          "value": "gutschein",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 70,
+      "missionFitScore": 54,
+      "coverageScore": 33,
+      "precisionScore": 70,
+      "sourceWeightScore": 57
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 24,
-      "uniqueDeals": 13,
-      "duplicateDeals": 11,
-      "duplicateAcrossSources": 11,
+      "uniqueDeals": 11,
+      "duplicateDeals": 13,
+      "duplicateAcrossSources": 13,
       "fresh1dCount": 14,
       "fresh7dCount": 24,
       "viennaCount": 24,
@@ -432,87 +510,98 @@
       ],
       "healthScore": 69,
       "missionFitScore": 65,
-      "coverageScore": 31,
+      "coverageScore": 30,
       "precisionScore": 73,
       "sourceWeightScore": 61
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 35,
-      "uniqueDeals": 28,
-      "duplicateDeals": 7,
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 11,
+      "uniqueDeals": 2,
+      "duplicateDeals": 9,
       "duplicateAcrossSources": 7,
-      "fresh1dCount": 2,
-      "fresh7dCount": 32,
-      "viennaCount": 35,
-      "foodDrinkCount": 18,
-      "promoCount": 25,
+      "fresh1dCount": 11,
+      "fresh7dCount": 11,
+      "viennaCount": 11,
+      "foodDrinkCount": 3,
+      "promoCount": 8,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Gratis All-you-can-eat für Schüler:innen am 7. September",
-        "Gratis All-you-can-eat für Schüler:innen bis 12 Jahre am 07.09.2026 bei WOA Am Graben 29a, 1010 Wien, in Begle",
-        "Solid Soul Afterwork: Instagram-Deal in Wien"
+        "Gratis-Eintritt zum Event bei Arabic Night",
+        "Gratis-Eintritt zum Event bei Arabic Night",
+        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4"
       ],
-      "lastRun": null,
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 0.9,
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-02T11:40:20.849Z",
+        "finishedAt": "2026-09-02T11:43:01.950Z",
+        "durationMs": 161101,
+        "counts": {
+          "rawCandidates": 139,
+          "normalizedCandidates": 11,
+          "verifiedCandidates": 11,
+          "previousDeals": 0,
+          "acceptedDeals": 11,
+          "rejectedDeals": 112
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 94,
+          "general-recommendation": 11,
+          "excluded-promotion-type": 3,
+          "missing-text": 3,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.2,
+      "duplicateRate": 0.6,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.5,
+      "foodDrinkRate": 0.3,
       "promoRate": 0.7,
       "missingUrlRate": 0,
-      "averageQualityScore": 82.7,
+      "averageQualityScore": 87.3,
       "topCategories": [
         {
+          "value": "kultur",
+          "count": 6
+        },
+        {
           "value": "essen",
-          "count": 12
-        },
-        {
-          "value": "shopping",
-          "count": 8
-        },
-        {
-          "value": "supermarkt",
-          "count": 4
-        },
-        {
-          "value": "reisen",
           "count": 3
         },
         {
-          "value": "drink",
-          "count": 2
+          "value": "gottesdienste",
+          "count": 1
         },
         {
-          "value": "kaffee",
-          "count": 2
+          "value": "reisen",
+          "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "gratis",
-          "count": 17
+          "count": 7
         },
         {
           "value": "rabatt",
-          "count": 17
-        },
-        {
-          "value": "gutschein",
-          "count": 1
+          "count": 4
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag"
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 68,
-      "missionFitScore": 54,
-      "coverageScore": 33,
-      "precisionScore": 69,
-      "sourceWeightScore": 57
+      "healthScore": 64,
+      "missionFitScore": 67,
+      "coverageScore": 20,
+      "precisionScore": 72,
+      "sourceWeightScore": 58
     },
     {
       "sourceKey": "instagram-discovery",
@@ -631,91 +720,6 @@
       "coverageScore": 15,
       "precisionScore": 56,
       "sourceWeightScore": 50
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 9,
-      "uniqueDeals": 2,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 7,
-      "fresh1dCount": 8,
-      "fresh7dCount": 9,
-      "viennaCount": 9,
-      "foodDrinkCount": 3,
-      "promoCount": 5,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis-Eintritt zum Event bei Liveim25",
-        "‼️VIENNA TO MUNICH PROMO‼️ Slots are already limited for our November 12 departure so don't miss out and book now!",
-        "📅 Jeden Donnerstag · 17:00–23:00 Uhr 📍 Kunstpause · Arsenal Objekt 19, 1030 Wien ✨ Afterwork Special 🕔 17:00–19:00 Uhr 🍕 Pizza + Getränk"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-02T04:59:31.786Z",
-        "finishedAt": "2026-09-02T05:01:13.569Z",
-        "durationMs": 101783,
-        "counts": {
-          "rawCandidates": 130,
-          "normalizedCandidates": 9,
-          "verifiedCandidates": 9,
-          "previousDeals": 0,
-          "acceptedDeals": 9,
-          "rejectedDeals": 115
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 96,
-          "missing-text": 6,
-          "general-recommendation": 9,
-          "excluded-promotion-type": 3,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.2,
-      "duplicateRate": 0.8,
-      "fresh1dRate": 0.9,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86.4,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "kultur",
-          "count": 3
-        },
-        {
-          "value": "shopping",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 5
-        },
-        {
-          "value": "gratis",
-          "count": 4
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 61,
-      "missionFitScore": 62,
-      "coverageScore": 18,
-      "precisionScore": 67,
-      "sourceWeightScore": 54
     },
     {
       "sourceKey": "instagram-verified",
