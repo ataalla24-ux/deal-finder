@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-02T19:54:48.659Z",
+  "generatedAt": "2026-09-02T21:01:27.739Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 579,
-    "uniqueCandidates": 541,
-    "distinctCandidates": 556,
-    "duplicateClusters": 15,
+    "uniqueCandidates": 543,
+    "distinctCandidates": 557,
+    "duplicateClusters": 14,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -20,16 +20,16 @@
         "totalDeals": 6
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 63,
+        "totalDeals": 18
+      },
+      {
         "sourceKey": "instagram-discovery",
         "sourceLabel": "Daily Sync Instagram Discovery",
         "healthScore": 63,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 61,
-        "totalDeals": 18
       },
       {
         "sourceKey": "joe",
@@ -133,10 +133,10 @@
         "totalDeals": 3
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 65,
-        "totalDeals": 18
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 64,
+        "totalDeals": 12
       }
     ],
     "topWeightedSources": [
@@ -161,14 +161,14 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 51,
+        "sourceWeightScore": 52,
         "totalDeals": 18
       },
       {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "sourceWeightScore": 50,
-        "totalDeals": 10
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 51,
+        "totalDeals": 12
       }
     ],
     "topSourcesToFix": [
@@ -354,6 +354,85 @@
       "sourceWeightScore": 59
     },
     {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 18,
+      "uniqueDeals": 10,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 8,
+      "fresh1dCount": 7,
+      "fresh7dCount": 18,
+      "viennaCount": 18,
+      "foodDrinkCount": 8,
+      "promoCount": 9,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🍹🌴🔥 🎶 MUSIK 💃 Salsa • 🩷 Bachata • 🔥 Reggaeton & Latin Hits ✨ HIGHLIGHTS 🆓 Gratis Salsa-Schnupperkurs für Anfänger – 18:00 Uhr 💃 Ani",
+        "10 % auf deinen Aufenthalt im Henriette",
+        "10% auf deinen Henriette Aufenthalt"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0.4,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.4,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.5,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 7
+        },
+        {
+          "value": "shopping",
+          "count": 5
+        },
+        {
+          "value": "kultur",
+          "count": 3
+        },
+        {
+          "value": "reisen",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 9
+        },
+        {
+          "value": "gratis",
+          "count": 7
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "gewinnspiel",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 63,
+      "missionFitScore": 52,
+      "coverageScore": 23,
+      "precisionScore": 64,
+      "sourceWeightScore": 52
+    },
+    {
       "sourceKey": "instagram-discovery",
       "file": "deals-pending-instagram-discovery.json",
       "sourceLabel": "Daily Sync Instagram Discovery",
@@ -407,84 +486,6 @@
       "coverageScore": 16,
       "precisionScore": 67,
       "sourceWeightScore": 54
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 18,
-      "uniqueDeals": 9,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 9,
-      "fresh1dCount": 6,
-      "fresh7dCount": 18,
-      "viennaCount": 18,
-      "foodDrinkCount": 9,
-      "promoCount": 9,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4",
-        "Gratis-Eintritt zum Event bei Arabic Night",
-        "bekommst du dein Ticket noch für € 17."
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0.3,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.5,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 8
-        },
-        {
-          "value": "kultur",
-          "count": 4
-        },
-        {
-          "value": "shopping",
-          "count": 3
-        },
-        {
-          "value": "reisen",
-          "count": 2
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 8
-        },
-        {
-          "value": "rabatt",
-          "count": 8
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 61,
-      "missionFitScore": 53,
-      "coverageScore": 22,
-      "precisionScore": 65,
-      "sourceWeightScore": 51
     },
     {
       "sourceKey": "joe",
@@ -613,67 +614,13 @@
       "sourceWeightScore": 45
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "40 FT High Cube Seecontainer in Aktion. Gebraucht, nicht neu lackiert und mit sichtbaren Gebrauchsspuren",
-        "Und ganz nebenbei wartet hier wohl ein"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 73.5,
-      "topCategories": [
-        {
-          "value": "reisen",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 58,
-      "missionFitScore": 29,
-      "coverageScore": 9,
-      "precisionScore": 53,
-      "sourceWeightScore": 38
-    },
-    {
       "sourceKey": "wien-combined",
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
       "totalDeals": 12,
-      "uniqueDeals": 2,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 10,
+      "uniqueDeals": 4,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 8,
       "fresh1dCount": 9,
       "fresh7dCount": 12,
       "viennaCount": 12,
@@ -707,8 +654,8 @@
         "errors": [],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
-      "uniqueRate": 0.2,
-      "duplicateRate": 0.8,
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
       "fresh1dRate": 0.8,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -748,11 +695,11 @@
         "geringe Food-/Drink-Relevanz",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 57,
+      "healthScore": 59,
       "missionFitScore": 56,
       "coverageScore": 19,
-      "precisionScore": 63,
-      "sourceWeightScore": 50
+      "precisionScore": 64,
+      "sourceWeightScore": 51
     },
     {
       "sourceKey": "firecrawl4",
@@ -1349,6 +1296,61 @@
       "coverageScore": 7,
       "precisionScore": 42,
       "sourceWeightScore": 29
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 0,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "40 FT High Cube Seecontainer in Aktion. Gebraucht, nicht neu lackiert und mit sichtbaren Gebrauchsspuren",
+        "Und ganz nebenbei wartet hier wohl ein"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 73.5,
+      "topCategories": [
+        {
+          "value": "reisen",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 47,
+      "missionFitScore": 29,
+      "coverageScore": 9,
+      "precisionScore": 49,
+      "sourceWeightScore": 34
     },
     {
       "sourceKey": "gemeinde",
