@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-02T21:59:37.985Z",
+  "generatedAt": "2026-09-02T22:03:03.981Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 575,
-    "uniqueCandidates": 539,
-    "distinctCandidates": 553,
-    "duplicateClusters": 14,
+    "totalCandidates": 576,
+    "uniqueCandidates": 541,
+    "distinctCandidates": 554,
+    "duplicateClusters": 13,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -20,6 +20,12 @@
         "totalDeals": 6
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 69,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 63,
@@ -30,12 +36,6 @@
         "sourceLabel": "Daily Sync Instagram Discovery",
         "healthScore": 63,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "healthScore": 61,
-        "totalDeals": 10
       }
     ],
     "topMissionSources": [
@@ -64,9 +64,9 @@
         "totalDeals": 8
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "missionFitScore": 58,
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "missionFitScore": 59,
         "totalDeals": 3
       }
     ],
@@ -121,6 +121,12 @@
         "totalDeals": 6
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 72,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "instagram-discovery",
         "sourceLabel": "Daily Sync Instagram Discovery",
         "precisionScore": 67,
@@ -131,12 +137,6 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 65,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 64,
-        "totalDeals": 8
       }
     ],
     "topWeightedSources": [
@@ -153,6 +153,12 @@
         "totalDeals": 6
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 55,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "instagram-discovery",
         "sourceLabel": "Daily Sync Instagram Discovery",
         "sourceWeightScore": 54,
@@ -163,12 +169,6 @@
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 52,
         "totalDeals": 18
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "sourceWeightScore": 50,
-        "totalDeals": 10
       }
     ],
     "topSourcesToFix": [
@@ -354,13 +354,75 @@
       "sourceWeightScore": 59
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 3,
+      "uniqueDeals": 2,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 2,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "2for1 Gutschein for Rindsuppe, Schnitzeldreier & Palatschinke",
+        "Gratis Getränk Gutschein Aktion in Neubaugasse 21",
+        "10 € Rabatt auf ersten Termin"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 95,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "service",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 69,
+      "missionFitScore": 59,
+      "coverageScore": 14,
+      "precisionScore": 72,
+      "sourceWeightScore": 55
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 18,
-      "uniqueDeals": 10,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 8,
+      "uniqueDeals": 11,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
       "fresh1dCount": 7,
       "fresh7dCount": 18,
       "viennaCount": 18,
@@ -1289,61 +1351,6 @@
       "coverageScore": 7,
       "precisionScore": 42,
       "sourceWeightScore": 29
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 2,
-      "uniqueDeals": 1,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "40 FT High Cube Seecontainer in Aktion. Gebraucht, nicht neu lackiert und mit sichtbaren Gebrauchsspuren",
-        "Und ganz nebenbei wartet hier wohl ein"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 73.5,
-      "topCategories": [
-        {
-          "value": "reisen",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 47,
-      "missionFitScore": 29,
-      "coverageScore": 9,
-      "precisionScore": 49,
-      "sourceWeightScore": 34
     },
     {
       "sourceKey": "gemeinde",
