@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-03T04:20:59.056Z",
+  "generatedAt": "2026-09-03T05:00:20.933Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 573,
-    "uniqueCandidates": 540,
-    "distinctCandidates": 552,
+    "totalCandidates": 574,
+    "uniqueCandidates": 541,
+    "distinctCandidates": 553,
     "duplicateClusters": 12,
     "topHealthySources": [
       {
@@ -61,7 +61,7 @@
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 59,
-        "totalDeals": 8
+        "totalDeals": 9
       },
       {
         "sourceKey": "instagram-ai",
@@ -675,6 +675,91 @@
       "sourceWeightScore": 45
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 9,
+      "uniqueDeals": 1,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 8,
+      "fresh1dCount": 9,
+      "fresh7dCount": 9,
+      "viennaCount": 9,
+      "foodDrinkCount": 0,
+      "promoCount": 7,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4",
+        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4",
+        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-03T04:57:20.592Z",
+        "finishedAt": "2026-09-03T04:59:50.875Z",
+        "durationMs": 150283,
+        "counts": {
+          "rawCandidates": 141,
+          "normalizedCandidates": 9,
+          "verifiedCandidates": 9,
+          "previousDeals": 0,
+          "acceptedDeals": 9,
+          "rejectedDeals": 121
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 96,
+          "missing-vienna-evidence": 1,
+          "missing-text": 11,
+          "general-recommendation": 9,
+          "excluded-promotion-type": 4
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.1,
+      "duplicateRate": 0.9,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88.1,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 6
+        },
+        {
+          "value": "reisen",
+          "count": 2
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 7
+        },
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 57,
+      "missionFitScore": 59,
+      "coverageScore": 17,
+      "precisionScore": 64,
+      "sourceWeightScore": 51
+    },
+    {
       "sourceKey": "gastro2",
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
@@ -780,87 +865,6 @@
       "coverageScore": 32,
       "precisionScore": 51,
       "sourceWeightScore": 48
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 8,
-      "uniqueDeals": 0,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 8,
-      "fresh1dCount": 8,
-      "fresh7dCount": 8,
-      "viennaCount": 8,
-      "foodDrinkCount": 0,
-      "promoCount": 6,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4",
-        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4",
-        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-02T21:14:35.792Z",
-        "finishedAt": "2026-09-02T21:16:36.713Z",
-        "durationMs": 120921,
-        "counts": {
-          "rawCandidates": 140,
-          "normalizedCandidates": 8,
-          "verifiedCandidates": 8,
-          "previousDeals": 0,
-          "acceptedDeals": 8,
-          "rejectedDeals": 125
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 107,
-          "general-recommendation": 7,
-          "missing-text": 7,
-          "missing-vienna-evidence": 1,
-          "excluded-promotion-type": 3
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 89,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 6
-        },
-        {
-          "value": "reisen",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 6
-        },
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 55,
-      "missionFitScore": 59,
-      "coverageScore": 16,
-      "precisionScore": 64,
-      "sourceWeightScore": 50
     },
     {
       "sourceKey": "firecrawl4",
