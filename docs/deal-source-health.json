@@ -1,23 +1,17 @@
 {
-  "generatedAt": "2026-09-03T21:19:49.470Z",
+  "generatedAt": "2026-09-03T21:54:04.384Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 619,
-    "uniqueCandidates": 579,
-    "distinctCandidates": 596,
-    "duplicateClusters": 17,
+    "uniqueCandidates": 577,
+    "distinctCandidates": 595,
+    "duplicateClusters": 18,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 79,
-        "totalDeals": 2
       },
       {
         "sourceKey": "tiktok",
@@ -28,23 +22,23 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 73,
+        "healthScore": 71,
         "totalDeals": 20
       },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "healthScore": 71,
+        "healthScore": 70,
         "totalDeals": 37
+      },
+      {
+        "sourceKey": "instagram-discovery",
+        "sourceLabel": "Daily Sync Instagram Discovery",
+        "healthScore": 63,
+        "totalDeals": 9
       }
     ],
     "topMissionSources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 83,
-        "totalDeals": 2
-      },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
@@ -56,6 +50,12 @@
         "sourceLabel": "Meta Instagram Graph",
         "missionFitScore": 70,
         "totalDeals": 20
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 69,
+        "totalDeals": 2
       },
       {
         "sourceKey": "tiktok",
@@ -104,7 +104,7 @@
         "sourceLabel": "Instagram AI Agent",
         "coverageScore": 38,
         "totalDeals": 37,
-        "fresh1dCount": 10
+        "fresh1dCount": 9
       }
     ],
     "topPrecisionSources": [
@@ -113,12 +113,6 @@
         "sourceLabel": "Apify Instagram",
         "precisionScore": 88,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 84,
-        "totalDeals": 2
       },
       {
         "sourceKey": "tiktok",
@@ -135,8 +129,14 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 71,
+        "precisionScore": 70,
         "totalDeals": 37
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 69,
+        "totalDeals": 2
       }
     ],
     "topWeightedSources": [
@@ -147,15 +147,9 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 68,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 64,
+        "sourceWeightScore": 63,
         "totalDeals": 20
       },
       {
@@ -167,8 +161,14 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 61,
+        "sourceWeightScore": 59,
         "totalDeals": 37
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 55,
+        "totalDeals": 2
       }
     ],
     "topSourcesToFix": [
@@ -288,81 +288,6 @@
       "sourceWeightScore": 70
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 1,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 2,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 1,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "gratis Kürbisschnitzen, über 200 Kürbissorten, Drachen basteln, Bauernmarkt mit steirischen Kürbisbauern & Essensstände.",
-        "All free to walk into, all full of locals on a warm afternoon."
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-03T16:39:17.384Z",
-        "finishedAt": "2026-09-03T16:42:36.865Z",
-        "durationMs": 199481,
-        "counts": {
-          "rawCandidates": 104,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 95
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 75,
-          "missing-vienna-evidence": 3,
-          "missing-text": 2,
-          "excluded-promotion-type": 5,
-          "general-recommendation": 10
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86,
-      "topCategories": [
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 79,
-      "missionFitScore": 83,
-      "coverageScore": 15,
-      "precisionScore": 84,
-      "sourceWeightScore": 68
-    },
-    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -429,10 +354,10 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 20,
-      "uniqueDeals": 11,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 9,
-      "fresh1dCount": 10,
+      "uniqueDeals": 10,
+      "duplicateDeals": 10,
+      "duplicateAcrossSources": 10,
+      "fresh1dCount": 9,
       "fresh7dCount": 20,
       "viennaCount": 20,
       "foodDrinkCount": 14,
@@ -444,7 +369,7 @@
         "Challenge Noch umbekannt 😳 Eine Challenge geschafft: Essen des Tages kostenlos."
       ],
       "lastRun": null,
-      "uniqueRate": 0.6,
+      "uniqueRate": 0.5,
       "duplicateRate": 0.5,
       "fresh1dRate": 0.5,
       "fresh7dRate": 1,
@@ -496,11 +421,11 @@
       "issues": [
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 73,
+      "healthScore": 71,
       "missionFitScore": 70,
-      "coverageScore": 28,
+      "coverageScore": 27,
       "precisionScore": 76,
-      "sourceWeightScore": 64
+      "sourceWeightScore": 63
     },
     {
       "sourceKey": "instagram-ai",
@@ -510,7 +435,7 @@
       "uniqueDeals": 29,
       "duplicateDeals": 8,
       "duplicateAcrossSources": 8,
-      "fresh1dCount": 10,
+      "fresh1dCount": 9,
       "fresh7dCount": 37,
       "viennaCount": 37,
       "foodDrinkCount": 19,
@@ -524,7 +449,7 @@
       "lastRun": null,
       "uniqueRate": 0.8,
       "duplicateRate": 0.2,
-      "fresh1dRate": 0.3,
+      "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 1,
       "foodDrinkRate": 0.5,
@@ -572,11 +497,11 @@
         }
       ],
       "issues": [],
-      "healthScore": 71,
-      "missionFitScore": 59,
+      "healthScore": 70,
+      "missionFitScore": 56,
       "coverageScore": 38,
-      "precisionScore": 71,
-      "sourceWeightScore": 61
+      "precisionScore": 70,
+      "sourceWeightScore": 59
     },
     {
       "sourceKey": "instagram-discovery",
@@ -758,6 +683,85 @@
       "coverageScore": 12,
       "precisionScore": 56,
       "sourceWeightScore": 45
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 0,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 2,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "gratis Kürbisschnitzen, über 200 Kürbissorten, Drachen basteln, Bauernmarkt mit steirischen Kürbisbauern & Essensstände.",
+        "Hast du mal wieder Lust auf einen vergnüglichen und unbeschwerten Theaterabend in Wien?"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-03T21:17:42.964Z",
+        "finishedAt": "2026-09-03T21:19:55.512Z",
+        "durationMs": 132548,
+        "counts": {
+          "rawCandidates": 128,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 116
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 97,
+          "missing-text": 3,
+          "general-recommendation": 12,
+          "excluded-promotion-type": 3,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 89.5,
+      "topCategories": [
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 60,
+      "missionFitScore": 69,
+      "coverageScore": 12,
+      "precisionScore": 69,
+      "sourceWeightScore": 55
     },
     {
       "sourceKey": "firecrawl4",
