@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-03T11:42:35.912Z",
+  "generatedAt": "2026-09-03T11:43:54.808Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 592,
-    "uniqueCandidates": 551,
+    "totalCandidates": 590,
+    "uniqueCandidates": 552,
     "distinctCandidates": 567,
-    "duplicateClusters": 16,
+    "duplicateClusters": 15,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -26,16 +26,16 @@
         "totalDeals": 6
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 67,
+        "totalDeals": 7
+      },
+      {
         "sourceKey": "instagram-discovery",
         "sourceLabel": "Daily Sync Instagram Discovery",
         "healthScore": 63,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "healthScore": 61,
-        "totalDeals": 10
       }
     ],
     "topMissionSources": [
@@ -44,6 +44,12 @@
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 78,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 66,
+        "totalDeals": 7
       },
       {
         "sourceKey": "meta-instagram",
@@ -62,12 +68,6 @@
         "sourceLabel": "Daily Sync Instagram Discovery",
         "missionFitScore": 63,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "missionFitScore": 57,
-        "totalDeals": 10
       }
     ],
     "topCoverageSources": [
@@ -121,6 +121,12 @@
         "totalDeals": 21
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 71,
+        "totalDeals": 7
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 69,
@@ -131,12 +137,6 @@
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 68,
         "totalDeals": 6
-      },
-      {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
-        "precisionScore": 67,
-        "totalDeals": 9
       }
     ],
     "topWeightedSources": [
@@ -153,6 +153,12 @@
         "totalDeals": 21
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 57,
+        "totalDeals": 7
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 54,
@@ -163,12 +169,6 @@
         "sourceLabel": "Daily Sync Instagram Discovery",
         "sourceWeightScore": 54,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 53,
-        "totalDeals": 4
       }
     ],
     "topSourcesToFix": [
@@ -430,6 +430,95 @@
       "coverageScore": 15,
       "precisionScore": 68,
       "sourceWeightScore": 54
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 7,
+      "uniqueDeals": 3,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
+      "fresh1dCount": 7,
+      "fresh7dCount": 7,
+      "viennaCount": 7,
+      "foodDrinkCount": 1,
+      "promoCount": 6,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Dort kommst du in Wien aktuell gratis ins Museum: * Sonderausstellungen im wienmuseum diesen Sonntag, 6.9.",
+        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4",
+        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-03T11:40:11.965Z",
+        "finishedAt": "2026-09-03T11:42:58.942Z",
+        "durationMs": 166977,
+        "counts": {
+          "rawCandidates": 102,
+          "normalizedCandidates": 7,
+          "verifiedCandidates": 7,
+          "previousDeals": 0,
+          "acceptedDeals": 7,
+          "rejectedDeals": 90
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 76,
+          "missing-vienna-evidence": 2,
+          "missing-text": 1,
+          "general-recommendation": 5,
+          "excluded-promotion-type": 6
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.4,
+      "duplicateRate": 0.6,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.1,
+      "promoRate": 0.9,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.3,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 4
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        },
+        {
+          "value": "technik",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 5
+        },
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 67,
+      "missionFitScore": 66,
+      "coverageScore": 17,
+      "precisionScore": 71,
+      "sourceWeightScore": 57
     },
     {
       "sourceKey": "instagram-discovery",
@@ -969,91 +1058,6 @@
       "coverageScore": 14,
       "precisionScore": 69,
       "sourceWeightScore": 53
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 9,
-      "uniqueDeals": 2,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 5,
-      "fresh1dCount": 5,
-      "fresh7dCount": 9,
-      "viennaCount": 9,
-      "foodDrinkCount": 0,
-      "promoCount": 7,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4",
-        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4",
-        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-03T04:57:20.592Z",
-        "finishedAt": "2026-09-03T04:59:50.875Z",
-        "durationMs": 150283,
-        "counts": {
-          "rawCandidates": 141,
-          "normalizedCandidates": 9,
-          "verifiedCandidates": 9,
-          "previousDeals": 0,
-          "acceptedDeals": 9,
-          "rejectedDeals": 121
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 96,
-          "missing-vienna-evidence": 1,
-          "missing-text": 11,
-          "general-recommendation": 9,
-          "excluded-promotion-type": 4
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.2,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 0.6,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88.1,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 6
-        },
-        {
-          "value": "reisen",
-          "count": 2
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 7
-        },
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 54,
-      "missionFitScore": 51,
-      "coverageScore": 16,
-      "precisionScore": 62,
-      "sourceWeightScore": 47
     },
     {
       "sourceKey": "community",
