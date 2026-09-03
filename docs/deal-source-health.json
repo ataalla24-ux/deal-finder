@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-03T16:40:46.675Z",
+  "generatedAt": "2026-09-03T16:45:33.009Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 618,
-    "uniqueCandidates": 576,
-    "distinctCandidates": 593,
-    "duplicateClusters": 17,
+    "totalCandidates": 613,
+    "uniqueCandidates": 574,
+    "distinctCandidates": 590,
+    "duplicateClusters": 16,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -14,9 +14,15 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 79,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 76,
+        "healthScore": 73,
         "totalDeals": 20
       },
       {
@@ -28,17 +34,17 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "healthScore": 64,
+        "healthScore": 66,
         "totalDeals": 32
-      },
-      {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
-        "healthScore": 63,
-        "totalDeals": 9
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 83,
+        "totalDeals": 2
+      },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
@@ -62,12 +68,6 @@
         "sourceLabel": "Daily Sync Instagram Discovery",
         "missionFitScore": 63,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "missionFitScore": 57,
-        "totalDeals": 10
       }
     ],
     "topCoverageSources": [
@@ -115,6 +115,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 84,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 77,
@@ -125,12 +131,6 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 69,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 68,
-        "totalDeals": 7
       },
       {
         "sourceKey": "instagram-discovery",
@@ -147,28 +147,28 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 68,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 65,
+        "sourceWeightScore": 64,
         "totalDeals": 20
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 54,
+        "totalDeals": 32
       },
       {
         "sourceKey": "instagram-discovery",
         "sourceLabel": "Daily Sync Instagram Discovery",
         "sourceWeightScore": 54,
         "totalDeals": 9
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 53,
-        "totalDeals": 32
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 53,
-        "totalDeals": 4
       }
     ],
     "topSourcesToFix": [
@@ -288,13 +288,88 @@
       "sourceWeightScore": 70
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 2,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 1,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "gratis Kürbisschnitzen, über 200 Kürbissorten, Drachen basteln, Bauernmarkt mit steirischen Kürbisbauern & Essensstände.",
+        "All free to walk into, all full of locals on a warm afternoon."
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-03T16:39:17.384Z",
+        "finishedAt": "2026-09-03T16:42:36.865Z",
+        "durationMs": 199481,
+        "counts": {
+          "rawCandidates": 104,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 95
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 75,
+          "missing-vienna-evidence": 3,
+          "missing-text": 2,
+          "excluded-promotion-type": 5,
+          "general-recommendation": 10
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86,
+      "topCategories": [
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 79,
+      "missionFitScore": 83,
+      "coverageScore": 15,
+      "precisionScore": 84,
+      "sourceWeightScore": 68
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 20,
-      "uniqueDeals": 13,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 7,
+      "uniqueDeals": 12,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 8,
       "fresh1dCount": 9,
       "fresh7dCount": 20,
       "viennaCount": 20,
@@ -307,7 +382,7 @@
         "40% · Limited availability Join the waitlist to get first access"
       ],
       "lastRun": null,
-      "uniqueRate": 0.7,
+      "uniqueRate": 0.6,
       "duplicateRate": 0.4,
       "fresh1dRate": 0.5,
       "fresh7dRate": 1,
@@ -359,11 +434,11 @@
       "issues": [
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 76,
+      "healthScore": 73,
       "missionFitScore": 70,
-      "coverageScore": 28,
+      "coverageScore": 27,
       "precisionScore": 77,
-      "sourceWeightScore": 65
+      "sourceWeightScore": 64
     },
     {
       "sourceKey": "tiktok",
@@ -436,9 +511,9 @@
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 32,
-      "uniqueDeals": 23,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 9,
+      "uniqueDeals": 24,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 8,
       "fresh1dCount": 6,
       "fresh7dCount": 32,
       "viennaCount": 32,
@@ -451,7 +526,7 @@
         "Afterwork 1+1 Drinks bei Munchy am Schottenring"
       ],
       "lastRun": null,
-      "uniqueRate": 0.7,
+      "uniqueRate": 0.8,
       "duplicateRate": 0.3,
       "fresh1dRate": 0.2,
       "fresh7dRate": 1,
@@ -503,11 +578,11 @@
       "issues": [
         "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 64,
+      "healthScore": 66,
       "missionFitScore": 50,
-      "coverageScore": 31,
+      "coverageScore": 32,
       "precisionScore": 65,
-      "sourceWeightScore": 53
+      "sourceWeightScore": 54
     },
     {
       "sourceKey": "instagram-discovery",
@@ -689,94 +764,6 @@
       "coverageScore": 12,
       "precisionScore": 56,
       "sourceWeightScore": 45
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 7,
-      "uniqueDeals": 3,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 3,
-      "fresh7dCount": 7,
-      "viennaCount": 7,
-      "foodDrinkCount": 1,
-      "promoCount": 6,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Dort kommst du in Wien aktuell gratis ins Museum: * Sonderausstellungen im wienmuseum diesen Sonntag, 6.9.",
-        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4",
-        "Gratis-Eintritt zum Event bei IGNIS ET NOX CLUB Salzgries 4"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-03T11:40:11.965Z",
-        "finishedAt": "2026-09-03T11:42:58.942Z",
-        "durationMs": 166977,
-        "counts": {
-          "rawCandidates": 102,
-          "normalizedCandidates": 7,
-          "verifiedCandidates": 7,
-          "previousDeals": 0,
-          "acceptedDeals": 7,
-          "rejectedDeals": 90
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 76,
-          "missing-vienna-evidence": 2,
-          "missing-text": 1,
-          "general-recommendation": 5,
-          "excluded-promotion-type": 6
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.1,
-      "fresh1dRate": 0.4,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.1,
-      "promoRate": 0.9,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.3,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 4
-        },
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "reisen",
-          "count": 1
-        },
-        {
-          "value": "technik",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 5
-        },
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 59,
-      "missionFitScore": 53,
-      "coverageScore": 15,
-      "precisionScore": 68,
-      "sourceWeightScore": 50
     },
     {
       "sourceKey": "firecrawl4",
