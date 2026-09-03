@@ -2,9 +2,41 @@
   "schemaVersion": 1,
   "sourceKey": "power",
   "sourceLabel": "Power Scraper",
-  "updatedAt": "2026-09-02T09:51:26.324Z",
-  "runCount": 17,
+  "updatedAt": "2026-09-03T10:02:42.527Z",
+  "runCount": 18,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "power-2026-09-03T10:02:42.527Z",
+      "sourceKey": "power",
+      "sourceLabel": "Power Scraper",
+      "status": "completed-with-errors",
+      "startedAt": "2026-09-03T10:02:31.775Z",
+      "finishedAt": "2026-09-03T10:02:42.527Z",
+      "durationMs": 10752,
+      "outputFile": "docs/deals-pending-power.json",
+      "counts": {
+        "rawCandidates": 45,
+        "normalizedCandidates": 41,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 41,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "healthySources": 38,
+        "failedSources": 1,
+        "sourceCount": 39,
+        "concurrency": 8,
+        "timeoutMs": 8000
+      },
+      "constraints": {},
+      "errors": [
+        "Too Good To Go: Browser HTTP 429"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "power-2026-09-02T09:51:26.324Z",
