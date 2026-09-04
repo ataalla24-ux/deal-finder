@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-04T19:10:24.552Z",
+  "generatedAt": "2026-09-04T19:41:38.702Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 612,
-    "uniqueCandidates": 583,
-    "distinctCandidates": 597,
+    "totalCandidates": 613,
+    "uniqueCandidates": 584,
+    "distinctCandidates": 598,
     "duplicateClusters": 14,
     "topHealthySources": [
       {
@@ -12,12 +12,6 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "healthScore": 76,
-        "totalDeals": 8
       },
       {
         "sourceKey": "joe",
@@ -36,6 +30,12 @@
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 71,
         "totalDeals": 33
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 70,
+        "totalDeals": 4
       }
     ],
     "topMissionSources": [
@@ -127,16 +127,16 @@
         "totalDeals": 4
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "precisionScore": 75,
-        "totalDeals": 8
-      },
-      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "precisionScore": 74,
         "totalDeals": 7
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 72,
+        "totalDeals": 33
       }
     ],
     "topWeightedSources": [
@@ -287,76 +287,6 @@
       "coverageScore": 16,
       "precisionScore": 88,
       "sourceWeightScore": 70
-    },
-    {
-      "sourceKey": "tiktok",
-      "file": "deals-pending-tiktok.json",
-      "sourceLabel": "TikTok Scanner",
-      "totalDeals": 8,
-      "uniqueDeals": 8,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
-      "fresh7dCount": 8,
-      "viennaCount": 8,
-      "foodDrinkCount": 4,
-      "promoCount": 7,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis Burger bei Centimeter Wien",
-        "Gratis Burger bei Jägerstraße 40",
-        "Gratis All-you-can-eat für Schüler:innen bei Allyoucaneat"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.9,
-      "missingUrlRate": 0,
-      "averageQualityScore": 67.5,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "kultur",
-          "count": 3
-        },
-        {
-          "value": "shopping",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 5
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 76,
-      "missionFitScore": 60,
-      "coverageScore": 19,
-      "precisionScore": 75,
-      "sourceWeightScore": 59
     },
     {
       "sourceKey": "joe",
@@ -645,6 +575,81 @@
       "coverageScore": 15,
       "precisionScore": 75,
       "sourceWeightScore": 62
+    },
+    {
+      "sourceKey": "tiktok",
+      "file": "deals-pending-tiktok.json",
+      "sourceLabel": "TikTok Scanner",
+      "totalDeals": 9,
+      "uniqueDeals": 9,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 9,
+      "viennaCount": 7,
+      "foodDrinkCount": 4,
+      "promoCount": 8,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis Burger bei Centimeter Wien",
+        "Gratis Burger bei Jägerstraße 40",
+        "Gratis All-you-can-eat für Schüler:innen bei Allyoucaneat"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 0.8,
+      "foodDrinkRate": 0.4,
+      "promoRate": 0.9,
+      "missingUrlRate": 0,
+      "averageQualityScore": 67.1,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 4
+        },
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 6
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 69,
+      "missionFitScore": 53,
+      "coverageScore": 18,
+      "precisionScore": 67,
+      "sourceWeightScore": 53
     },
     {
       "sourceKey": "food3",
