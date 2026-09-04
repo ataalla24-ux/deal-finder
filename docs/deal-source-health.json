@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-04T21:01:45.815Z",
+  "generatedAt": "2026-09-04T21:03:17.995Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 616,
-    "uniqueCandidates": 587,
-    "distinctCandidates": 601,
+    "totalCandidates": 612,
+    "uniqueCandidates": 583,
+    "distinctCandidates": 597,
     "duplicateClusters": 14,
     "topHealthySources": [
       {
@@ -32,13 +32,19 @@
         "totalDeals": 33
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 73,
-        "totalDeals": 7
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "healthScore": 69,
+        "totalDeals": 9
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 80,
+        "totalDeals": 3
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -61,12 +67,6 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "missionFitScore": 74,
-        "totalDeals": 7
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 68,
         "totalDeals": 7
       }
     ],
@@ -121,16 +121,16 @@
         "totalDeals": 7
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 77,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 76,
         "totalDeals": 5
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 73,
-        "totalDeals": 7
       },
       {
         "sourceKey": "instagram-ai",
@@ -159,16 +159,16 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 63,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 62,
         "totalDeals": 33
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 61,
-        "totalDeals": 5
       }
     ],
     "topSourcesToFix": [
@@ -485,95 +485,6 @@
       "sourceWeightScore": 62
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 7,
-      "uniqueDeals": 4,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 6,
-      "fresh7dCount": 7,
-      "viennaCount": 7,
-      "foodDrinkCount": 5,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "20 % mit dem Vorteilsclub Wien 🎧 Audioguide: gratis über das Smartphone",
-        "40% · Limited availability Join the waitlist to get first access",
-        "Mittagsteller um 10,80 € von Montag bis Freitag"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-04T16:34:43.398Z",
-        "finishedAt": "2026-09-04T16:37:16.266Z",
-        "durationMs": 152868,
-        "counts": {
-          "rawCandidates": 127,
-          "normalizedCandidates": 7,
-          "verifiedCandidates": 7,
-          "previousDeals": 0,
-          "acceptedDeals": 7,
-          "rejectedDeals": 114
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 94,
-          "missing-text": 7,
-          "excluded-promotion-type": 1,
-          "general-recommendation": 9,
-          "missing-vienna-evidence": 3
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.9,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 85.6,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 5
-        },
-        {
-          "value": "gratis",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 73,
-      "missionFitScore": 68,
-      "coverageScore": 18,
-      "precisionScore": 73,
-      "sourceWeightScore": 60
-    },
-    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -647,6 +558,87 @@
       "coverageScore": 18,
       "precisionScore": 67,
       "sourceWeightScore": 53
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 3,
+      "uniqueDeals": 0,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 3,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 3,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "20 % mit dem Vorteilsclub Wien 🎧 Audioguide: gratis über das Smartphone",
+        "Mittagsteller um 10,80 € von Montag bis Freitag",
+        "Soul Mate Tickets um 7 € erhältlich bis 24.09."
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-04T21:00:09.658Z",
+        "finishedAt": "2026-09-04T21:02:47.817Z",
+        "durationMs": 158159,
+        "counts": {
+          "rawCandidates": 79,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 3,
+          "previousDeals": 0,
+          "acceptedDeals": 3,
+          "rejectedDeals": 72
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 52,
+          "missing-text": 5,
+          "general-recommendation": 9,
+          "excluded-promotion-type": 2,
+          "missing-vienna-evidence": 4
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 89,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 2
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 67,
+      "missionFitScore": 80,
+      "coverageScore": 14,
+      "precisionScore": 77,
+      "sourceWeightScore": 63
     },
     {
       "sourceKey": "food3",
