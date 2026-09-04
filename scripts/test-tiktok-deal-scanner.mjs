@@ -459,12 +459,13 @@ assert.equal(burgerWithSecondaryDrink.deal.validUntil, '2026-09-07');
 const woaSchoolDeal = build(
   'https://www.tiktok.com/@woa.vienna/video/7680472988856143126',
   postData(
-    'School’s back. Sushi’s on us. Deshalb gibt’s für alle Schüler:innen am Montag, den 7. September ein Gratis All-you-can-eat bei WOA. Am Graben 29a, 1010 Wien.',
+    'School’s back. Sushi’s on us. Deshalb gibt’s für alle Schüler:innen am Montag, den 7. September ein Gratis All-you-can-eat bei WOA. Am Graben 29a, 1010 Wien. #woa #woaamgraben #vienna #allyoucaneat #asianfood',
     'woa.vienna',
   ),
 );
 assert.ok(woaSchoolDeal.deal);
 assert.equal(woaSchoolDeal.deal.title, 'Gratis All-you-can-eat für Schüler:innen bei WOA');
+assert.equal(woaSchoolDeal.deal.merchantName, 'WOA');
 assert.equal(woaSchoolDeal.deal.category, 'essen');
 assert.equal(woaSchoolDeal.deal.validUntil, '2026-09-07');
 

@@ -573,6 +573,9 @@ function inferCategoryAndLogo(text, type) {
 
 function extractBrand(text, accountHandle) {
   const signal = cleanText(text, 800);
+  if (/^woa(?:\.vienna)?$/i.test(String(accountHandle || '').replace(/^@/, '').trim())) {
+    return 'WOA';
+  }
   const knownProviders = [
     { pattern: /\bdatri\s+boxing\b/i, name: 'Datri Boxing' },
     { pattern: /\bchocoberry\b/i, name: 'Chocoberry' },
@@ -1156,13 +1159,14 @@ export function buildDealFromPost(url, data, options = {}) {
       accountType: data.sourceAccountType || '',
     },
   });
-  const brand = inferPreferredBrand({
+  const inferredBrand = inferPreferredBrand({
     brand: extractedBrand,
     title: offerSignal,
     description: offerSignal,
     ownerUsername: data.accountHandle,
     url,
   }) || extractedBrand;
+  const brand = extractedBrand === 'WOA' ? extractedBrand : inferredBrand;
   const title = buildOfferTitle(offerSignal, brand, type);
   const score = buildQualityScore(offerSignal, dateCandidate.date, type, category, now);
   if (score < CONFIG.minScore) return { deal: null, reason: `Score zu niedrig (${score})` };
