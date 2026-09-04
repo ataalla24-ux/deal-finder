@@ -61,6 +61,13 @@ assert.equal(selected.remainingBeforeSelection, 1);
 assert.equal(selected.deals.length, 1);
 assert.equal(selected.deals[0].url, 'https://www.instagram.com/reel/CurrentFood1/');
 
+const expandedDailySelection = selectSocialFoodReviewDeals(
+  Array.from({ length: 18 }, (_, index) => reviewDeal(`ExpandedFood${index}`, { qualityScore: 80 - index })),
+  { day: '2026-08-31', posted: [] },
+  { now, maxPerDay: 16 },
+);
+assert.equal(expandedDailySelection.deals.length, 16, 'the review lane supports sixteen daily food candidates');
+
 const crossLaneFiltered = filterAlreadyQueuedDeals(
   [reviewDeal('CurrentFood1')],
   new Set(['post:instagram:CurrentFood1']),

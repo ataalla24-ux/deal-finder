@@ -116,9 +116,9 @@ const KEY4_REVIEW_ARTIFACT_MAX_AGE_HOURS = boundedInteger(
 const SOCIAL_FOOD_REVIEW_ENABLED = /^(?:1|true|yes)$/i.test(cleanText(process.env.SOCIAL_FOOD_REVIEW_ENABLED));
 const SOCIAL_FOOD_REVIEW_MAX_PER_DAY = boundedInteger(
   process.env.SOCIAL_FOOD_REVIEW_MAX_PER_DAY,
-  8,
+  16,
   1,
-  10,
+  30,
 );
 const SOCIAL_FOOD_REVIEW_ARTIFACT_MAX_AGE_HOURS = boundedInteger(
   process.env.SOCIAL_FOOD_REVIEW_ARTIFACT_MAX_AGE_HOURS,
@@ -748,7 +748,7 @@ function writeSocialFoodReviewState(state) {
 }
 
 function selectSocialFoodReviewDeals(deals, state, options = {}) {
-  const maxPerDay = boundedInteger(options.maxPerDay, 8, 1, 10);
+  const maxPerDay = boundedInteger(options.maxPerDay, 16, 1, 30);
   const normalizedState = normalizeSocialFoodReviewState(state, options.now || new Date());
   const postedKeys = new Set(normalizedState.posted.map((entry) => entry.key));
   const remaining = Math.max(0, maxPerDay - normalizedState.posted.length);

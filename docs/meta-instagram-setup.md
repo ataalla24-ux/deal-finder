@@ -47,6 +47,8 @@ The existing GitHub workflow is already wired. If it reports `Bad signature`, th
 - `META_AD_LIBRARY_SEARCH_TERMS` as a comma/newline separated list.
 - `META_INSTAGRAM_HASHTAGS` as the high-intent comma/newline separated list, without `#`.
 - `META_INSTAGRAM_MAX_HASHTAGS_PER_RUN` controls how many high-intent tags are selected per run.
+- `META_INSTAGRAM_ACCOUNT_RESCAN_HOURS` controls when recently scanned accounts yield their reserved
+  slots to accounts that have not been checked yet (six hours in the workflow).
 - `WIEN_COMBINED_GRAPH_HASHTAGS` is a separate broad Vienna discovery pool for the daily combined scan.
 - `META_INSTAGRAM_ACCOUNTS` for additional Business Discovery usernames.
 - `META_INSTAGRAM_VERIFIED_ACCOUNTS` for accounts whose Vienna address has been checked outside the post.
@@ -67,7 +69,8 @@ A result is emitted only when all three facts are present:
 - a concrete deal such as a discount, free item, BOGO, coupon or explicit deal price;
 - Vienna evidence in the content, EU ad target locations or the verified merchant list.
 
-Organic posts are accepted for 72 hours. Posts up to seven days old require an explicit future expiry.
+Organic posts are accepted for 72 hours. Posts up to seven days old require an explicit future expiry
+or a clearly recurring weekday schedule. Seven days remains the hard source-post age ceiling.
 When an active ad or fresh post has no stated expiry, the emitted deal receives a transparent 72-hour
 review TTL (`expirySource=short-review-ttl`) instead of pretending that an expiry was published.
 
@@ -89,7 +92,9 @@ added as discovery candidates. Final app approvals reserve recurring account slo
 lowers account priority, and blocked providers are excluded. Normal expiry does not count as a quality
 rejection.
 
-The high-intent pool rotates every two hours while preserving proven tags. Repeatedly invalid accounts
+The high-intent pool rotates every two hours while preserving proven tags. Merchant and scout slots
+prefer accounts outside the six-hour rescan window, so the same top profiles no longer consume every
+run. Repeatedly invalid accounts
 and hashtags receive exponentially longer cooldowns instead of consuming API quota every run. Keep the
 union of `META_INSTAGRAM_HASHTAGS` and `WIEN_COMBINED_GRAPH_HASHTAGS` bounded so the two workflows use
 complementary rather than duplicate Graph hashtag searches.

@@ -16,6 +16,13 @@ import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { parseExpiryShape } from './expiry-utils.js';
 import {
+  applyInstagramCookies,
+  instagramAuthCircuitStatus,
+  instagramAuthSummary,
+  instagramCookieHeader,
+  loadInstagramCookieHints,
+} from './instagram-auth-utils.js';
+import {
   buildInstagramRoleIndex,
   inferInstagramAccountRole,
   instagramUsernameDisplayName,
@@ -50,6 +57,7 @@ const WATCHLIST_PATH = path.join(DOCS_DIR, 'instagram-watchlist.json');
 const SEEDS_PATH = path.join(DOCS_DIR, 'instagram-ai-seeds.json');
 const CANDIDATES_INDEX_PATH = path.join(DOCS_DIR, 'deal-candidates-index.json');
 const MERCHANT_REGISTRY_PATH = path.join(DOCS_DIR, 'instagram-merchant-registry.json');
+const INSTAGRAM_AUTH_HEALTH_PATH = path.join(DOCS_DIR, 'instagram-auth-health.json');
 
 let instagramRoleIndexCache = null;
 
@@ -84,6 +92,39 @@ const CONFIG = {
   model: process.env.OPENAI_MODEL || process.env.INSTAGRAM_AI_MODEL || 'gpt-4.1-mini',
 };
 
+const INSTAGRAM_COOKIE_HINTS = loadInstagramCookieHints();
+const INSTAGRAM_AUTH = instagramAuthSummary(INSTAGRAM_COOKIE_HINTS);
+const INSTAGRAM_AUTH_CIRCUIT = instagramAuthCircuitStatus(readJson(INSTAGRAM_AUTH_HEALTH_PATH, {}));
+let instagramCookieAccessEnabled = INSTAGRAM_AUTH.authenticatedSession && INSTAGRAM_AUTH_CIRCUIT.allowed;
+let instagramRateLimitedDuringRun = false;
+let instagramRuntimeCircuitReason = INSTAGRAM_AUTH_CIRCUIT.reason;
+
+function activeInstagramCookies() {
+  return instagramCookieAccessEnabled ? INSTAGRAM_COOKIE_HINTS : [];
+}
+
+function activeInstagramCookieHeader() {
+  return instagramCookieAccessEnabled ? instagramCookieHeader(INSTAGRAM_COOKIE_HINTS) : '';
+}
+
+function openInstagramRuntimeCircuit(reason, options = {}) {
+  instagramCookieAccessEnabled = false;
+  instagramRuntimeCircuitReason = cleanText(reason, 100);
+  if (options.rateLimited) instagramRateLimitedDuringRun = true;
+}
+
+function instagramRuntimeAuthSummary() {
+  return {
+    ...INSTAGRAM_AUTH,
+    cookieAccessEnabledAtStart: INSTAGRAM_AUTH.authenticatedSession && INSTAGRAM_AUTH_CIRCUIT.allowed,
+    cookieAccessEnabledAtEnd: instagramCookieAccessEnabled,
+    healthCircuitOpen: !INSTAGRAM_AUTH_CIRCUIT.allowed,
+    healthNextRetryAt: INSTAGRAM_AUTH_CIRCUIT.nextRetryAt,
+    runtimeCircuitReason: instagramRuntimeCircuitReason,
+    rateLimitedDuringRun: instagramRateLimitedDuringRun,
+  };
+}
+
 const BASE_SEARCH_QUERIES = [
   'site:instagram.com/reel wien gratis essen',
   'site:instagram.com/p wien gratis essen',
@@ -101,14 +142,14 @@ const BASE_SEARCH_QUERIES = [
   'site:instagram.com/p vienna food deal',
   'site:instagram.com/reel wien gratis drink',
   'site:instagram.com/p vienna free drinks',
-  'site:instagram.com/reel wien gratis eintritt museum event',
-  'site:instagram.com/p wien gratis eintritt museum event',
-  'site:instagram.com/reel wien gratis fitness probetraining',
-  'site:instagram.com/p wien gratis fitness probetraining',
-  'site:instagram.com/reel wien gratis beauty sample',
-  'site:instagram.com/p wien rabatt shopping aktion',
-  'site:instagram.com/reel wien gratis workshop kurs',
-  'site:instagram.com/p vienna free event tickets',
+  'site:instagram.com/reel wien gratis kebab döner',
+  'site:instagram.com/p wien kebab angebot',
+  'site:instagram.com/reel wien 1+1 pizza',
+  'site:instagram.com/p wien zweiter kaffee gratis',
+  'site:instagram.com/reel wien gratis burger neueröffnung',
+  'site:instagram.com/p wien mittagsmenü angebot',
+  'site:instagram.com/reel wien schüler studenten essen gratis',
+  'site:instagram.com/p vienna brunch deal',
 ];
 
 const LOCAL_DEAL_CORPUS_FILES = [
@@ -164,10 +205,13 @@ const STRONG_DEAL_PATTERNS = [
   /\b(?:neuer(?:o)?effnung|opening offer|opening deal)\b/i,
   /\b(?:nur heute|heute gratis|this week only|limited offer)\b/i,
   /\b(?:nur|only|um|for just|for only)\s+\d{1,2}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)?\b/i,
+  /\b(?:nur|only|um|for just|for only)\s+€\s*\d{1,3}(?:[,.]\d{1,2})?\b/i,
   /\b\d{1,2}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)\s*(?:angebot|aktion|special|deal)\b/i,
   /\b\d{1,2}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)\s*(?:doner|doener|kebab|kebap|durum|burger|pizza|kaffee|coffee|drink|taco|wrap|falafel|croissant|baklava|menu|menue)\b/i,
   /\b\d{1,2}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)\s*(?:matcha|latte|espresso|cappuccino)\b/i,
   /(?:€\s*)\d{1,3}(?:[,.]\d{1,2})?\s+statt\s+(?:€\s*)?\d{1,3}(?:[,.]\d{1,2})?/i,
+  /\b\d{1,3}(?:[,.]\d{1,2})?\s*€\s+statt\s+(?:€\s*)?\d{1,3}(?:[,.]\d{1,2})?\s*€/i,
+  /\b(?:starter|vorspeise|kaffee|coffee|espresso|drink|pizza|burger|kebab|döner|doener|dessert)\b.{0,35}\b(?:on us|aufs haus)\b/i,
   /\b\d{1,2}\s*%\s*(?:rabatt|off|discount)\b/i,
   /\b(?:mittag(?:s)?deal|lunch deal|student(?:en)?deal|special price|spezialpreis)\b/i,
 ];
@@ -899,20 +943,36 @@ function selectRotatingAccounts(accounts, limit) {
   const provenBudget = Math.max(1, Math.floor(safeLimit * 0.7));
   const scoutBudget = Math.max(0, Math.floor(safeLimit * 0.2));
   const discoveryBudget = Math.max(0, safeLimit - provenBudget - scoutBudget);
-  sorted
-    .filter((account) => inferInstagramAccountRole(account) === 'merchant')
-    .slice(0, provenBudget)
-    .forEach(add);
-  sorted
-    .filter((account) => ['creator', 'discovery', 'platform'].includes(inferInstagramAccountRole(account)))
-    .slice(0, scoutBudget)
-    .forEach(add);
+  const bucket = instagramRunBucket();
+  const addRotating = (pool, count, fixedRatio = 0.5) => {
+    if (count <= 0 || pool.length === 0) return;
+    const selectedBefore = selected.length;
+    const fixedCount = Math.min(count, Math.max(1, Math.floor(count * fixedRatio)));
+    pool.slice(0, fixedCount).forEach(add);
+    const rotatingPool = pool.slice(fixedCount).filter((account) => !seen.has(account.username));
+    const rotatingCount = Math.max(0, count - fixedCount);
+    const start = rotatingPool.length ? (bucket * Math.max(1, rotatingCount)) % rotatingPool.length : 0;
+    for (let offset = 0; offset < rotatingPool.length && offset < rotatingCount; offset += 1) {
+      add(rotatingPool[(start + offset) % rotatingPool.length]);
+    }
+    for (const account of pool) {
+      if (selected.length - selectedBefore >= count) break;
+      add(account);
+    }
+  };
+
+  const merchants = sorted.filter((account) => inferInstagramAccountRole(account) === 'merchant');
+  const scouts = sorted.filter((account) => (
+    ['creator', 'discovery', 'platform'].includes(inferInstagramAccountRole(account))
+  ));
+  addRotating(merchants, provenBudget, 0.5);
+  addRotating(scouts, scoutBudget, 0.5);
 
   const discovery = sorted.filter((account) => (
     !seen.has(account.username) && inferInstagramAccountRole(account) === 'unknown'
   ));
   const discoveryStart = discovery.length
-    ? (instagramRunBucket() * Math.max(1, discoveryBudget)) % discovery.length
+    ? (bucket * Math.max(1, discoveryBudget)) % discovery.length
     : 0;
   for (let offset = 0; offset < discovery.length && offset < discoveryBudget; offset += 1) {
     add(discovery[(discoveryStart + offset) % discovery.length]);
@@ -920,7 +980,7 @@ function selectRotatingAccounts(accounts, limit) {
 
   const remaining = sorted.filter((account) => !seen.has(account.username));
   const fillStart = remaining.length
-    ? (instagramRunBucket() * Math.max(1, safeLimit - selected.length)) % remaining.length
+    ? (bucket * Math.max(1, safeLimit - selected.length)) % remaining.length
     : 0;
   for (let offset = 0; offset < remaining.length && selected.length < safeLimit; offset += 1) {
     add(remaining[(fillStart + offset) % remaining.length]);
@@ -973,6 +1033,9 @@ async function discoverProfileCandidates(accounts, map) {
     discovered: 0,
     blocked: 0,
     noPostLinks: 0,
+    rateLimited: false,
+    stoppedEarly: false,
+    stoppedReason: '',
     errors: [],
   };
   if (!CONFIG.profileDiscoveryEnabled || accounts.length === 0) return stats;
@@ -986,9 +1049,15 @@ async function discoverProfileCandidates(accounts, map) {
     locale: 'de-AT',
     timezoneId: 'Europe/Vienna',
   });
+  await applyInstagramCookies(context, activeInstagramCookies());
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+  });
 
   try {
+    let consecutiveUnavailable = 0;
     for (const account of selected) {
+      let stopProfileScan = false;
       const username = cleanText(account.username, 80);
       if (!username) continue;
       const page = await context.newPage();
@@ -1000,7 +1069,17 @@ async function discoverProfileCandidates(accounts, map) {
           `https://www.instagram.com/${username}/?hl=en`,
         ];
         for (const profileUrl of profileUrls) {
-          await page.goto(profileUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+          const navigation = await page.goto(profileUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+          if (navigation?.status() === 429) {
+            stats.blocked += 1;
+            stats.rateLimited = true;
+            stats.stoppedEarly = true;
+            stats.stoppedReason = 'instagram-http-429';
+            openInstagramRuntimeCircuit('profile-http-429', { rateLimited: true });
+            await context.clearCookies();
+            stopProfileScan = true;
+            break;
+          }
           await page.waitForTimeout(4500);
           await page.mouse.wheel(0, 900).catch(() => {});
           await page.waitForTimeout(700);
@@ -1014,8 +1093,15 @@ async function discoverProfileCandidates(accounts, map) {
         }
 
         if (urls.length === 0) {
-          if (isProfileUnavailable(data)) stats.blocked += 1;
-          else stats.noPostLinks += 1;
+          if (isProfileUnavailable(data)) {
+            stats.blocked += 1;
+            consecutiveUnavailable += 1;
+          } else {
+            stats.noPostLinks += 1;
+            consecutiveUnavailable = 0;
+          }
+        } else {
+          consecutiveUnavailable = 0;
         }
 
         for (const url of urls) {
@@ -1036,11 +1122,19 @@ async function discoverProfileCandidates(accounts, map) {
         }
         stats.accountsVisited += 1;
         stats.discovered += urls.length;
+        if (!stopProfileScan && consecutiveUnavailable >= 3) {
+          stats.stoppedEarly = true;
+          stats.stoppedReason = 'three-consecutive-profile-blocks';
+          openInstagramRuntimeCircuit('three-consecutive-profile-blocks');
+          await context.clearCookies();
+          stopProfileScan = true;
+        }
       } catch (error) {
         stats.errors.push({ account: username, error: error.message });
       } finally {
         await page.close();
       }
+      if (stopProfileScan) break;
       await sleep(250);
     }
   } finally {
@@ -1136,17 +1230,20 @@ function extractDateFromHtml(html) {
 }
 
 async function fetchInstagramPreview(url) {
+  const cookieHeader = activeInstagramCookieHeader();
   const response = await fetch(url, {
     redirect: 'follow',
     headers: {
       'user-agent': USER_AGENT,
       'accept-language': 'de-AT,de;q=0.9,en;q=0.8',
       accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      ...(cookieHeader ? { cookie: cookieHeader } : {}),
     },
   });
   const html = await response.text();
   const finalUrl = response.url || url;
   const status = response.status;
+  if (status === 429) openInstagramRuntimeCircuit('preview-http-429', { rateLimited: true });
   const loginWall = /\/accounts\/login|login \u2022 instagram|log in to instagram|sign in to view/i.test(`${finalUrl} ${html.slice(0, 5000)}`);
   const preview = {
     status,
@@ -1157,6 +1254,7 @@ async function fetchInstagramPreview(url) {
     image: '',
     jsonLdText: '',
     pubDate: '',
+    rateLimited: status === 429,
   };
 
   if (response.ok && !loginWall) {
@@ -1474,8 +1572,10 @@ function freshnessRejectionReason(candidate, dateSignal = offerDateSignal(candid
 
 function inferType(signal) {
   const text = stripFreeFromClaims(normalizeAscii(signal));
-  if (/\b1\s*\+\s*1\b|\b2\s*(?:fuer|fur)\s*1\b|\bbogo\b/.test(text)) return 'bogo';
-  if (/\bgratis\b|\bkostenlos\w*\b|\b0\s*(?:euro|eur)\b/.test(text) || CONCRETE_FREE_PATTERN.test(text)) return 'gratis';
+  if (/\b1\s*\+\s*1\b|\b2\s*(?:fuer|fur)\s*1\b|\bbogo\b/.test(text)
+      || /\b(?:zweite(?:r|s|n)?|second)\s+\w+[^.!?]{0,45}\b(?:gratis|kostenlos|free|on\s+us|aufs\s+haus)\b/.test(text)) return 'bogo';
+  if (/\bgratis\b|\bkostenlos\w*\b|\b0\s*(?:euro|eur)\b|\bon\s+us\b|\baufs\s+haus\b/.test(text)
+      || CONCRETE_FREE_PATTERN.test(text)) return 'gratis';
   if (/\bgutschein|coupon|voucher\b/.test(text)) return 'gutschein';
   return 'rabatt';
 }
@@ -2243,12 +2343,19 @@ async function discoverCandidates(accounts) {
 async function enrichPreviews(candidates) {
   const errors = [];
   if (!CONFIG.previewFetchEnabled) return errors;
+  if (instagramRateLimitedDuringRun) {
+    return [{ url: '', error: 'Instagram preview fetch skipped after HTTP 429' }];
+  }
 
   let fetched = 0;
   for (const candidate of candidates) {
     if (fetched >= CONFIG.maxPreviewFetches) break;
     try {
       candidate.preview = await fetchInstagramPreview(candidate.url);
+      if (candidate.preview.rateLimited) {
+        errors.push({ url: candidate.url, error: 'Instagram HTTP 429; remaining preview requests skipped' });
+        break;
+      }
     } catch (error) {
       candidate.preview = { status: 0, finalUrl: candidate.url, loginWall: false, title: '', description: '', image: '', jsonLdText: '', pubDate: '' };
       errors.push({ url: candidate.url, error: error.message });
@@ -2262,6 +2369,9 @@ async function enrichPreviews(candidates) {
 async function enrichRenderedPreviews(candidates) {
   const errors = [];
   if (!CONFIG.renderFetchEnabled) return errors;
+  if (instagramRateLimitedDuringRun) {
+    return [{ url: '', error: 'Instagram rendered previews skipped after HTTP 429' }];
+  }
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
@@ -2269,6 +2379,10 @@ async function enrichRenderedPreviews(candidates) {
     userAgent: USER_AGENT,
     locale: 'de-AT',
     timezoneId: 'Europe/Vienna',
+  });
+  await applyInstagramCookies(context, activeInstagramCookies());
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
   });
 
   let fetched = 0;
@@ -2301,7 +2415,9 @@ async function enrichRenderedPreviews(candidates) {
 
 async function main() {
   console.log('Instagram AI Agent');
-  console.log('No Instagram Graph API, no cookies; using public search/preview signals.');
+  console.log(
+    `Discovery sources: public search/preview plus ${instagramCookieAccessEnabled ? 'authenticated' : 'public'} Instagram profiles.`,
+  );
 
   const accounts = loadWatchlist();
   instagramRoleIndexCache = buildInstagramRoleIndex(accounts);
@@ -2342,6 +2458,7 @@ async function main() {
       aiEnabled: Boolean(CONFIG.aiEnabled && process.env.OPENAI_API_KEY),
       openAiKeyPresent: Boolean(process.env.OPENAI_API_KEY),
     },
+    instagramAuth: instagramRuntimeAuthSummary(),
     watchlistAccounts: accounts.length,
     discoveredCandidates: candidates.length,
     acceptedDeals: finalDeals.length,

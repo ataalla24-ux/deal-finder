@@ -96,6 +96,24 @@ const freeAttributeNotOffer = candidate({
 });
 assert.equal(buildHeuristicDeal(freeAttributeNotOffer), null, 'gluten-free is a product attribute, not a free deal');
 
+const euroPrefixFoodDeal = candidate({
+  shortcode: 'EuroPrefixFoodDeal1',
+  description: '@ugisvienna: Die Studenten-Combo in 1070 Wien gibt es für nur €9,90.',
+});
+assert.equal(buildHeuristicDeal(euroPrefixFoodDeal)?.type, 'rabatt');
+
+const secondCoffeeOnUs = candidate({
+  shortcode: 'SecondCoffeeOnUs1',
+  description: '@ugisvienna: Diese Woche ist der zweite Kaffee in 1070 Wien on us.',
+});
+assert.equal(buildHeuristicDeal(secondCoffeeOnUs)?.type, 'bogo');
+
+const starterOnTheHouse = candidate({
+  shortcode: 'StarterOnTheHouse1',
+  description: '@ugisvienna: Diese Woche geht die Vorspeise in 1070 Wien aufs Haus.',
+});
+assert.equal(buildHeuristicDeal(starterOnTheHouse)?.type, 'gratis');
+
 const discoveryAccountLocation = candidate({
   shortcode: 'DiscoveryAccountMunich1',
   description: 'Nur heute in München: Burger gratis.',

@@ -18,6 +18,7 @@ const DOCS_DIR = path.join(ROOT, 'docs');
 const DEFAULT_AUDIT_PATH = path.join(DOCS_DIR, 'social-food-candidate-audit.json');
 const DEFAULT_REVIEW_PATH = path.join(DOCS_DIR, 'deals-review-social-food.json');
 const DEFAULT_FEEDBACK_PATH = path.join(DOCS_DIR, 'deal-review-feedback.json');
+const DEFAULT_REVIEW_POSTS_PER_DAY = 16;
 
 const SOURCE_SPECS = [
   {
@@ -79,13 +80,40 @@ function pendingDeals(payload = {}) {
   return Array.isArray(payload.deals) ? payload.deals : [];
 }
 
-function flattenCandidate(row = {}, status) {
+function normalizeUsername(value) {
+  return cleanText(value, 80).replace(/^@/, '').toLowerCase();
+}
+
+function verifiedMerchantRegistry(docsDir) {
+  const registry = readJson(path.join(docsDir, 'instagram-merchant-registry.json'), {});
+  return new Map((Array.isArray(registry?.accounts) ? registry.accounts : [])
+    .filter((account) => (
+      account?.accountType === 'merchant'
+      && account?.viennaVerified === true
+      && account?.blockedByModeration !== true
+    ))
+    .map((account) => [normalizeUsername(account.username), account])
+    .filter(([username]) => username));
+}
+
+function flattenCandidate(row = {}, status, merchantRegistry = new Map()) {
+  const ownerUsername = normalizeUsername(
+    row.ownerUsername || row.accountHandle || row.username || row.sourceAccount,
+  );
+  const verifiedMerchant = merchantRegistry.get(ownerUsername);
   return {
     ...row,
     status,
     rejectionReason: row.rejectionReason || row.reason,
     text: row.text || row.textSample || row.caption || row.description,
     mediaEvidence: row.mediaEvidence || row.evidence?.mediaEvidence || row.evidence?.socialMediaEvidence,
+    ...(verifiedMerchant ? {
+      ownerUsername,
+      ownerRole: 'merchant',
+      merchantUsername: row.merchantUsername || ownerUsername,
+      viennaVerified: true,
+      registryViennaEvidence: verifiedMerchant.verificationSource || 'verified-merchant-registry',
+    } : {}),
   };
 }
 
@@ -125,20 +153,21 @@ export function collectSocialFoodObservations(options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const observations = [];
   const runMetrics = [];
+  const merchantRegistry = verifiedMerchantRegistry(docsDir);
   for (const spec of options.sourceSpecs || SOURCE_SPECS) {
     const report = readJson(path.join(docsDir, spec.report), {});
     const output = readJson(path.join(docsDir, spec.output), {});
     const defaults = { source: spec.key, sourceLabel: spec.label };
     for (const row of sourceRejectedRows(report)) {
       observations.push(normalizeSocialAuditCandidate({
-        ...flattenCandidate(row, 'rejected'),
+        ...flattenCandidate(row, 'rejected', merchantRegistry),
         auditSource: spec.key,
         sourceLabel: spec.label,
       }, defaults, now));
     }
     for (const row of sourceAcceptedAuditRows(report)) {
       observations.push(normalizeSocialAuditCandidate({
-        ...flattenCandidate(row, 'collector-accepted'),
+        ...flattenCandidate(row, 'collector-accepted', merchantRegistry),
         auditSource: spec.key,
         sourceLabel: spec.label,
       }, defaults, now));
@@ -149,7 +178,7 @@ export function collectSocialFoodObservations(options = {}) {
     for (const deal of pendingDeals(output)) {
       if (acceptedAuditKeys.has(cleanText(deal.url, 1200))) continue;
       observations.push(normalizeSocialAuditCandidate({
-        ...flattenCandidate(deal, 'collector-accepted'),
+        ...flattenCandidate(deal, 'collector-accepted', merchantRegistry),
         auditSource: spec.key,
         sourceLabel: spec.label,
       }, defaults, now));
@@ -289,7 +318,7 @@ export function buildSocialFoodArtifacts(options = {}) {
     source: 'social-food-review',
     totalDeals: reviewDeals.length,
     policy: {
-      maxSlackPostsPerDay: 8,
+      maxSlackPostsPerDay: DEFAULT_REVIEW_POSTS_PER_DAY,
       maxPostAgeDays: 7,
       requiresFoodDrinkSignal: true,
       requiresDealSignal: true,

@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/instagram-ai-agent.yml'
       - 'scraper/instagram-ai-agent.js'
+      - 'scraper/instagram-auth-utils.js'
       - 'docs/instagram-watchlist.json'
       - 'docs/instagram-ai-seeds.json'
       - 'docs/instagram-merchant-registry.json'
@@ -44,10 +45,12 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
+          INSTAGRAM_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
           INSTAGRAM_AI_MAX_CANDIDATES: 120
           INSTAGRAM_AI_MAX_PREVIEW_FETCHES: 120
           INSTAGRAM_AI_MAX_RENDER_FETCHES: 120
-          INSTAGRAM_AI_MAX_PROFILE_ACCOUNTS: 16
+          INSTAGRAM_AI_MAX_PROFILE_ACCOUNTS: 20
           INSTAGRAM_AI_MAX_PROFILE_POSTS: 6
           INSTAGRAM_AI_MAX_DEALS: 50
           INSTAGRAM_AI_MAX_AGE_DAYS: 7

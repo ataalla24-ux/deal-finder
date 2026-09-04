@@ -108,6 +108,8 @@ const DEFAULT_HASHTAGS = [
 
 const CONCRETE_FREE_PATTERN = /(?<!gluten[- ])(?<!sugar[- ])(?<!lactose[- ])(?<!dairy[- ])(?<!alcohol[- ])(?<!caffeine[- ])(?<!cruelty[- ])(?<!plastic[- ])(?<!smoke[- ])(?<!tax[- ])(?<!risk[- ])(?<!fat[- ])(?<!nut[- ])(?<!gmo[- ])\bfree\b/i;
 const FREE_ENTRY_PATTERN = /\b(?:free\s+entry|entry\s+(?:is\s+)?free|gratis(?:er)?\s+eintritt|eintritt\s+(?:frei|gratis|kostenlos)|kostenlos(?:er)?\s+eintritt)\b/i;
+const COMPLIMENTARY_FOOD_PATTERN = /\b(?:starter|vorspeise|kaffee|coffee|espresso|drink|pizza|burger|kebab|döner|doener|dessert)\b.{0,45}\b(?:on\s+us|aufs\s+haus)\b/i;
+const SECOND_ITEM_FREE_PATTERN = /\b(?:zweite(?:r|s|n)?|second)\s+(?:kaffee|coffee|espresso|drink|pizza|burger|kebab|döner|doener|dessert|portion)\b.{0,35}\b(?:gratis|kostenlos|free|on\s+us|aufs\s+haus)\b/i;
 
 const PROMO_PATTERNS = [
   /\b1\s*\+\s*1\b/i,
@@ -121,9 +123,12 @@ const PROMO_PATTERNS = [
   /\b(?:rabatt(?:code)?|discount|gutschein|voucher|coupon|promo(?:code)?|aktionscode)\b/i,
   /\bhappy\s*hour\b/i,
   /\b(?:nur|only|um|for)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)/i,
+  /\b(?:nur|only|um|for)\s+€\s*\d{1,3}(?:[,.]\d{1,2})?\b/i,
   /\b(?:für|fuer)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)/i,
   /\b(?:f[üu]r|fuer|um|for)\s+(?:nur\s+|only\s+)?€\s*\d{1,3}(?:[,.]\d{1,2})?/i,
   /\b(?:opening|eröffnung|eroeffnung)\s+(?:offer|deal|aktion|special)\b/i,
+  COMPLIMENTARY_FOOD_PATTERN,
+  SECOND_ITEM_FREE_PATTERN,
   FREE_ENTRY_PATTERN,
   /\bgratis\b/i,
   /\bkostenlos(?:e|er|es|en)?\b/i,
@@ -146,7 +151,7 @@ const EXCLUDED_PATTERNS = [
 ];
 
 const RECOMMENDATION_LANGUAGE_PATTERN = /\b(?:favou?rite|lieblings(?:restaurant|lokal|platz|spot|ort)|summer\s+spot|things\s+to\s+do|must[-\s]?visit|guide|tipps?|vibe|empfehl\w*|recommend\w*|save\s+(?:this|and)|send\s+this)\b/i;
-const EXPLICIT_PROMOTION_BEYOND_GENERIC_FREE_PATTERN = /(?:\b\d{1,2}\s*%|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b(?:rabatt|gutschein|coupon|deal|aktion|angebot|special|happy\s*hour)\b|\b(?:statt|nur\s+heute|today\s+only)\b|\b(?:gratis|kostenlos|free)\s+(?:zu|zum|bei|with)\b|\b(?:nur|only|um|für|fuer|for)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b))/i;
+const EXPLICIT_PROMOTION_BEYOND_GENERIC_FREE_PATTERN = /(?:\b\d{1,2}\s*%|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b(?:rabatt|gutschein|coupon|deal|aktion|angebot|special|happy\s*hour)\b|\b(?:statt|nur\s+heute|today\s+only)\b|\b(?:gratis|kostenlos|free)\s+(?:zu|zum|bei|with)\b|\b(?:nur|only|um|für|fuer|for)\s+(?:nur\s+|only\s+)?(?:€\s*\d{1,3}(?:[,.]\d{1,2})?|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b)))/i;
 
 const SELF_SYNDICATION_PATTERNS = [
   /\boriginal[- ]?link\b.{0,140}\b(?:direkt\s+)?in\s+freefinder\b/i,
@@ -164,6 +169,7 @@ const VIENNA_PATTERNS = [
 ];
 
 const CATEGORY_HINTS = [
+  { category: 'reisen', pattern: /\b(?:flug|flüge|fluege|flight|reise|reisepaket|travel\s+package|umrah|hotel\s*[•·+]\s*(?:transfer|flug))\b/i },
   { category: 'kaffee', pattern: /\b(?:kaffee|coffee|cafe|espresso|latte|matcha|boba|bubble tea)\b/i },
   { category: 'essen', pattern: /\b(?:essen|food|restaurant|pizza|burger|kebab|kebap|döner|doener|sushi|ramen|brunch|eis|gelato|bakery|bäckerei)\b/i },
   { category: 'fitness', pattern: /\b(?:fitness|gym|yoga|pilates|training|workout|probetraining)\b/i },
@@ -260,6 +266,7 @@ export function buildConfig(env = process.env, now = new Date()) {
     verifiedAccounts,
     maxAccountsPerRun: numberEnv(env, 'META_INSTAGRAM_MAX_ACCOUNTS_PER_RUN', 20, 1, 100),
     maxAccountBackfill: numberEnv(env, 'META_INSTAGRAM_MAX_ACCOUNT_BACKFILL', 6, 0, 30),
+    accountRescanHours: numberEnv(env, 'META_INSTAGRAM_ACCOUNT_RESCAN_HOURS', 6, 1, 24),
     maxHashtagsPerRun: numberEnv(env, 'META_INSTAGRAM_MAX_HASHTAGS_PER_RUN', 12, 1, 30),
     mediaPerAccount: numberEnv(env, 'META_INSTAGRAM_MEDIA_PER_ACCOUNT', 6, 1, 30),
     mediaPerHashtag: numberEnv(env, 'META_INSTAGRAM_MEDIA_PER_HASHTAG', 20, 1, 50),
@@ -515,13 +522,20 @@ export function selectAccountShard(accounts, config, state = {}, now = new Date(
     return smoothedRate * 0.62 + sampleStrength * 0.2 + collectorYield * 0.1 + recentCandidateBonus;
   };
   const role = (account) => inferInstagramAccountRole(account);
+  const accountIsDue = (account) => {
+    const lastRunAt = Date.parse(performance[account.username]?.lastRunAt || '');
+    if (!Number.isFinite(lastRunAt)) return true;
+    const rescanHours = Math.max(1, Number(config.accountRescanHours || 6));
+    return now.getTime() - lastRunAt >= rescanHours * 60 * 60 * 1000;
+  };
   const provenBudget = Math.max(1, Math.floor(limit * 0.7));
   const scoutBudget = Math.max(0, Math.floor(limit * 0.2));
 
   const proven = accounts
     .filter((account) => role(account) === 'merchant' || Number(account.approvedDeals || 0) > 0)
     .sort((left, right) => (
-      feedbackScore(right) - feedbackScore(left)
+      Number(accountIsDue(right)) - Number(accountIsDue(left))
+      || feedbackScore(right) - feedbackScore(left)
       || Number(right.manualApprovedDeals || right.approvedDeals || 0) - Number(left.manualApprovedDeals || left.approvedDeals || 0)
       || Number(right.priority || 0) - Number(left.priority || 0)
       || left.username.localeCompare(right.username)
@@ -531,7 +545,8 @@ export function selectAccountShard(accounts, config, state = {}, now = new Date(
   const scouts = accounts
     .filter((account) => ['creator', 'discovery', 'platform'].includes(role(account)))
     .sort((left, right) => (
-      feedbackScore(right, true) - feedbackScore(left, true)
+      Number(accountIsDue(right)) - Number(accountIsDue(left))
+      || feedbackScore(right, true) - feedbackScore(left, true)
       || Number(right.scoutApprovedDeals || 0) - Number(left.scoutApprovedDeals || 0)
       || Number(right.priority || 0) - Number(left.priority || 0)
       || left.username.localeCompare(right.username)
@@ -646,7 +661,9 @@ export function classifyPromotion(text) {
     return { accepted: false, type: '', reason: normalized ? 'excluded-promotion-type' : 'missing-text' };
   }
   if (RECOMMENDATION_LANGUAGE_PATTERN.test(normalized)
-      && !EXPLICIT_PROMOTION_BEYOND_GENERIC_FREE_PATTERN.test(normalized)) {
+      && !EXPLICIT_PROMOTION_BEYOND_GENERIC_FREE_PATTERN.test(normalized)
+      && !COMPLIMENTARY_FOOD_PATTERN.test(normalized)
+      && !SECOND_ITEM_FREE_PATTERN.test(normalized)) {
     return { accepted: false, type: '', reason: 'general-recommendation' };
   }
   // Pattern order is intentional: explicit savings beat regular prices and
@@ -662,9 +679,13 @@ export function classifyPromotion(text) {
     return { accepted: false, type: '', reason: 'no-concrete-offer' };
   }
 
-  const bogoMatch = normalized.match(/\b(?:1\s*\+\s*1|2\s*(?:f(?:ü|u|ue)r|for)\s*1|bogo)\b/i);
+  const bogoMatch = normalized.match(/\b(?:1\s*\+\s*1|2\s*(?:f(?:ü|u|ue)r|for)\s*1|bogo)\b/i)
+    || normalized.match(SECOND_ITEM_FREE_PATTERN);
   let type = 'rabatt';
-  if (strongMatch && (/\bgratis\b|\bkostenlos(?:e|er|es|en)?\b/i.test(strongMatch[0]) || CONCRETE_FREE_PATTERN.test(strongMatch[0]))) {
+  if (COMPLIMENTARY_FOOD_PATTERN.test(normalized) || (strongMatch && (
+    /\bgratis\b|\bkostenlos(?:e|er|es|en)?\b/i.test(strongMatch[0])
+    || CONCRETE_FREE_PATTERN.test(strongMatch[0])
+  ))) {
     type = 'gratis';
   }
   if (birthdayEntryOffer) type = 'rabatt';
@@ -683,6 +704,7 @@ function inferCategory(text) {
     return 'kultur';
   }
   const explicit = CATEGORY_HINTS.find((hint) => hint.pattern.test(text));
+  if (explicit?.category === 'reisen') return 'reisen';
   return normalizeCategoryForScraper(explicit?.category || '', [text]) || explicit?.category || 'wien';
 }
 
@@ -803,6 +825,9 @@ function isOrganicFresh(sourcePublishedAt, expiry, now, config) {
   if (!Number.isFinite(publishedMs) || publishedMs > now.getTime() + 10 * 60 * 1000) return false;
   const ageMs = now.getTime() - publishedMs;
   if (ageMs <= config.maxOrganicAgeHours * 60 * 60 * 1000) return true;
+  if (expiry?.expiryKind === 'recurring') {
+    return ageMs <= config.maxOrganicAgeWithExpiryDays * DAY_MS;
+  }
   const expiryMs = Date.parse(expiry?.expires || '');
   const hasExplicitFutureExpiry = expiry?.expirySource !== 'short-review-ttl' && Number.isFinite(expiryMs) && expiryMs >= now.getTime();
   return ageMs <= config.maxOrganicAgeWithExpiryDays * DAY_MS && hasExplicitFutureExpiry;
@@ -1788,6 +1813,7 @@ export async function runMetaInstagramCollector(options = {}) {
     discoveryBudget: {
       maxAccountsPerRun: config.maxAccountsPerRun,
       maxAccountBackfill: config.maxAccountBackfill,
+      accountRescanHours: config.accountRescanHours,
       mediaPerAccount: config.mediaPerAccount,
       hashtagPoolSize: config.hashtags.length,
       maxHashtagsPerRun: config.maxHashtagsPerRun,

@@ -67,6 +67,22 @@ Gehe zu deinem GitHub Repo → Settings → Secrets and variables → Actions
 | **16:00** | Approve-Workflow liest ✅ Reactions |
 | **16:05** | Genehmigte Deals sind live! |
 
+## Instagram Food Review
+
+Der zentrale Dispatch baut zusätzlich eine eigene Review-Spur für aktuelle Food-&-Drink-Grenzfälle.
+Sie läuft alle 15 Minuten sowie nach erfolgreichen Collector-Läufen und stellt höchstens 16 neue
+Kandidaten pro Wiener Kalendertag in Slack bereit.
+
+In diese Spur kommen nur direkte Instagram-/TikTok-Posts, die höchstens sieben Tage alt sind und
+gleichzeitig ein Food-, Deal- und Wien-Signal haben. Abgelaufene Aktionen, Gewinnspiele,
+Reiseangebote mit beiläufigem Essensbezug und FreeFinder-Eigenposts bleiben ausgeschlossen. Fehlt ein
+publiziertes Enddatum, bekommt der Review-Kandidat eine kurze Sicherheits-TTL von höchstens 72 Stunden
+und niemals über den siebten Tag nach Veröffentlichung hinaus.
+
+Der Instagram-AI-Lauf kann `INSTAGRAM_SESSIONID` und `INSTAGRAM_COOKIES` aus GitHub Secrets für die
+Profilansicht verwenden. Bei HTTP 429 oder mehreren aufeinanderfolgenden Login-Walls beendet er die
+Profilrunde frühzeitig und fällt auf öffentliche Suchsignale zurück.
+
 ## Slack Nachrichten Format
 
 ### Summary

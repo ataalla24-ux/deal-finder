@@ -95,10 +95,22 @@ assert.equal(
   'recommendation language must not hide an explicit promotion',
 );
 assert.equal(
+  classifyPromotion('Food-Tipp in Wien: Die Schüler-Combo gibt es für nur €9,90.').accepted,
+  true,
+  'recommendation language must not hide an explicit euro-prefix offer',
+);
+assert.equal(
   classifyPromotion('Von Montag bis Freitag gibt es den Mittagsteller für nur €10,80 in 1090 Wien.').accepted,
   true,
   'a promotional euro-prefix price must work without a later English translation',
 );
+assert.equal(
+  classifyPromotion('Mittagsangebot in Wien: Hauptspeise um nur €12,90. Reservierung per Telefon.').accepted,
+  true,
+  'reservation wording must not suppress an independently priced food offer',
+);
+assert.equal(classifyPromotion('Diese Woche ist der zweite Kaffee on us.').type, 'bogo');
+assert.equal(classifyPromotion('Heute geht die Vorspeise aufs Haus.').type, 'gratis');
 assert.equal(
   classifyPromotion('SEPTEMBER IN WIEN: 8 IDEEN - TEIL 2. Viele weitere Events findest du auf meinem Blog. Musicalfest am 19. September, gratis! Vienna Coffee Festival von 11. bis 13. September. Tag des Sports am 26. September, gratis! #wientipps').accepted,
   false,
@@ -265,6 +277,15 @@ const graphInboundViennaPackage = normalizeGraphMediaItem({
 assert.equal(graphInboundViennaPackage.deal, null);
 assert.equal(graphInboundViennaPackage.rejection, 'excluded-promotion-type');
 
+const graphOutboundTravelPackage = normalizeGraphMediaItem({
+  id: 'graph-outbound-travel-package',
+  caption: 'UMRAH ab Wien: Hotel, Transfer und Flug nach Mekka & Medina für nur €890. Wie teuer ist das Essen dort?',
+  permalink: 'https://www.instagram.com/reel/GRAPHOUTBOUNDTRAVEL/',
+  timestamp: '2026-07-17T08:30:00.000Z',
+}, { sourceType: 'hashtag', sourceName: '#wien' }, config, now);
+assert.ok(graphOutboundTravelPackage.deal);
+assert.equal(graphOutboundTravelPackage.deal.category, 'reisen', 'incidental food/OCR text must not classify a travel package as food');
+
 const graphDevaHouseholdOffer = normalizeGraphMediaItem({
   id: 'graph-deva-household',
   name: 'Angebote',
@@ -312,6 +333,44 @@ assert.equal(graphRecurringBierraum.deal.expiryKind, 'recurring');
 assert.equal(graphRecurringBierraum.deal.expirySource, 'recurring-schedule');
 assert.equal(graphRecurringBierraum.deal.validUntil, '');
 assert.equal(graphRecurringBierraum.deal.expires, '');
+
+const graphRecurringOlderThanThreeDays = normalizeGraphMediaItem({
+  id: 'graph-recurring-older-than-three-days',
+  caption: 'Jeden Dienstag gibt es 20 % Rabatt auf alle Pasta-Gerichte. Restaurant Bierraum, Wattgasse 52, 1170 Wien.',
+  permalink: 'https://www.instagram.com/reel/GRAPHRECURRINGOLD/',
+  timestamp: '2026-07-13T08:30:00.000Z',
+  username: 'ciosgrill',
+}, {
+  sourceType: 'account',
+  sourceName: '@ciosgrill',
+  account: { username: 'ciosgrill', verifiedVienna: true },
+}, config, now);
+assert.ok(
+  graphRecurringOlderThanThreeDays.deal,
+  'a recurring offer posted 3–7 days ago remains current without weakening the seven-day hard cap',
+);
+
+const rotatingAccountConfig = buildConfig({
+  META_INSTAGRAM_MAX_ACCOUNTS_PER_RUN: '4',
+  META_INSTAGRAM_ACCOUNT_RESCAN_HOURS: '6',
+  META_INSTAGRAM_SHARD_INDEX: '0',
+}, now);
+const rotatingMerchantAccounts = Array.from({ length: 6 }, (_, index) => ({
+  username: `rotationmerchant${index}`,
+  accountType: 'merchant',
+  priority: 100 - index,
+}));
+const selectedAfterCooldown = selectAccountShard(rotatingMerchantAccounts, rotatingAccountConfig, {
+  accountPerformance: Object.fromEntries(rotatingMerchantAccounts.slice(0, 4).map((account) => [
+    account.username,
+    { lastRunAt: now.toISOString(), recentFetched: 20, recentNewAccepted: 4 },
+  ])),
+}, now);
+assert.deepEqual(
+  selectedAfterCooldown.slice(0, 2).map((account) => account.username).sort(),
+  ['rotationmerchant4', 'rotationmerchant5'],
+  'accounts not scanned inside the cooldown window get the proven-account slots first',
+);
 
 const graphRestaurantWeek = normalizeGraphMediaItem({
   id: 'graph-restaurant-week',

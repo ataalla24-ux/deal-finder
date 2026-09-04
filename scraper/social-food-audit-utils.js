@@ -14,10 +14,10 @@ import {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const FOOD_PATTERNS = [
-  /\b(?:restaurant|lokal|gastronomie|gastro|essen|food|meal|lunch|dinner|brunch|fruehstueck|fruhstuck|frühstück)\b/i,
-  /\b(?:pizza|burger|kebab|kebap|doener|döner|sushi|ramen|pasta|taco|falafel|huhn|chicken|steak)\b/i,
-  /\b(?:cafe|café|coffee|kaffee|espresso|latte|matcha|boba|bubble\s*tea|cocktail|spritz|drink|bier|wein)\b/i,
-  /\b(?:eis|gelato|dessert|kuchen|croissant|baeckerei|bäckerei|bakery|snack|menu|menue|menü)\b/i,
+  /\b(?:restaurant|lokal|gastronomie|gastro|essen|food|meal|lunch|dinner|brunch|fruehstueck|fruhstuck|frühstück|mittag(?:s)?(?:essen|steller|menü|menue))\b/i,
+  /\b(?:pizza|burger|kebab|kebap|doener|döner|dürüm|durum|sushi|ramen|pasta|taco|falafel|huhn|chicken|steak|schnitzel|hotdog|wrap|burrito|bowl|sandwich|pommes|fries)\b/i,
+  /\b(?:cafe|café|coffee|kaffee|espresso|latte|matcha|boba|bubble\s*tea|cocktail|spritz|drink|getränk|getraenk|bier|wein|saft|juice|limonade)\b/i,
+  /\b(?:eis|gelato|dessert|kuchen|croissant|baeckerei|bäckerei|bakery|snack|menu|menue|menü|hauptspeise|vorspeise)\b/i,
 ];
 
 const DEAL_PATTERNS = [
@@ -26,6 +26,9 @@ const DEAL_PATTERNS = [
   /\b(?:1\s*[+x:]\s*1|2\s*(?:fuer|für|for)\s*1|bogo)\b/i,
   /\b\d{1,2}\s*%\b/i,
   /\b(?:nur|only|statt|save|spare?n?|deal|angebot|aktion|special|menu|menue|menü)\b.{0,45}(?:€\s*)?\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)\b/i,
+  /\b(?:nur|only|um|for)\s+€\s*\d{1,3}(?:[,.]\d{1,2})?\b/i,
+  /\b(?:starter|vorspeise|kaffee|coffee|espresso|drink|pizza|burger|kebab|döner|doener|dessert)\b.{0,45}\b(?:on\s+us|aufs\s+haus)\b/i,
+  /\b(?:zweite(?:r|s|n)?|second)\s+(?:kaffee|coffee|espresso|drink|pizza|burger|kebab|döner|doener|dessert|portion)\b.{0,35}\b(?:gratis|kostenlos|free|on\s+us|aufs\s+haus)\b/i,
 ];
 
 const VIENNA_PATTERNS = [
@@ -36,12 +39,12 @@ const VIENNA_PATTERNS = [
 
 const HARD_REJECTION_PATTERNS = [
   /(?:expired|abgelaufen|offer-expired|ad-inactive|aktion galt|kurz-aktion ist abgelaufen)/i,
-  /(?:post-too-old|zu alt|liegt außerhalb|older than|terminal)/i,
+  /(?:terminal)/i,
   /(?:non-vienna|nicht wien|wrong.location|außerhalb wien|ausserhalb wien)/i,
   /(?:giveaway|gewinnspiel|verlosung|excluded-promotion|personal.compensation|job|property)/i,
   /(?:self-syndicated|selbst syndiziert|future.clock|unplausibel in der zukunft)/i,
   /(?:missing.source.published|kein echtes .*postdatum|missing.*date|ohne post-datum)/i,
-  /(?:general-recommendation|generic-content|editorial|roundup)/i,
+  /(?:generic-content|editorial|roundup)/i,
 ];
 
 const UNSAFE_REVIEW_CONTENT_PATTERNS = [
@@ -50,6 +53,7 @@ const UNSAFE_REVIEW_CONTENT_PATTERNS = [
   /\b(?:richland\s*,?\s*(?:wa|washington)|george\s+washington\s+way|tri[.\s-]*cities[.\s-]*foodie)\b/i,
   /\b(?:dog|hund|hunde|napf|näpfe|tierbedarf|pet)\b/i,
   /\b(?:hotel|stay|übernachtung|uebernachtung)\b.{0,120}\b(?:save|rabatt|discount|\d{1,2}\s*%)\b/i,
+  /\b(?:umrah|mekka|medina|flug|flight|reisepaket|travel\s+package|hotel\s*[•·+]\s*(?:transfer|flug))\b.{0,220}(?:€\s*\d|\d\s*€|\b(?:deal|angebot|rabatt|discount)\b)/i,
   /\b(?:concert|konzert|event|workshop|ticket|eintritt)\b.{0,100}\b(?:drink|brunch|coffee|kaffee)\b/i,
   /\b(?:sorry|entschuldigung|leider ausverkauft|replacement|compensation)\b.{0,120}\b(?:gratis|kostenlos|free)\b/i,
   /\b(?:anna|kunde|kundin|customer)\b.{0,80}\bbekommt\b.{0,80}\bgratis\b/i,
@@ -170,6 +174,17 @@ export function isExpiredSocialFoodReviewContent(value, pubDate, now = new Date(
 
   const publication = new Date(pubDate);
   if (Number.isNaN(publication.getTime())) return false;
+  const publicationDay = viennaIsoDay(publication);
+  const text = cleanText(value, 8000);
+  if (publicationDay && today && publicationDay < today
+      && /\b(?:nur\s+heute|heute\s+(?:gratis|kostenlos|aktion)|today\s+only|free\s+today)\b/i.test(text)) {
+    return true;
+  }
+  if (publicationDay && today && /\b(?:dieses\s+wochenende|this\s+weekend)\b/i.test(text)) {
+    const publicationDate = new Date(`${publicationDay}T12:00:00.000Z`);
+    const sunday = new Date(publicationDate.getTime() + ((7 - publicationDate.getUTCDay()) % 7) * DAY_MS);
+    if (today > sunday.toISOString().slice(0, 10)) return true;
+  }
   const offerWindow = extractActiveOfferWindow(cleanText(value, 8000), { now, pubDate: publication });
   const extractedEndDay = viennaIsoDay(offerWindow?.endDate);
   return Boolean(today && extractedEndDay && extractedEndDay < today);
@@ -402,8 +417,9 @@ export function buildSocialFoodFunnel(rows, feedbackEvents = []) {
 
 function inferredReviewType(row) {
   const text = row.textSample;
-  if (/\b(?:1\s*[+x:]\s*1|2\s*(?:fuer|für|for)\s*1|bogo)\b/i.test(text)) return 'bogo';
-  if (/\b(?:gratis|kostenlos|freebie|geschenkt)\b/i.test(text)) return 'gratis';
+  if (/\b(?:1\s*[+x:]\s*1|2\s*(?:fuer|für|for)\s*1|bogo)\b/i.test(text)
+      || /\b(?:zweite(?:r|s|n)?|second)\s+\p{L}[^.!?]{0,45}\b(?:gratis|kostenlos|free|on\s+us|aufs\s+haus)\b/iu.test(text)) return 'bogo';
+  if (/\b(?:gratis|kostenlos|freebie|geschenkt|on\s+us|aufs\s+haus)\b/i.test(text)) return 'gratis';
   return 'rabatt';
 }
 
@@ -421,7 +437,15 @@ function inferredReviewIdentity(row) {
   const merchantUsername = normalizeInstagramUsername(row.merchantUsername)
     || (inferInstagramAccountRole({ username: ownerUsername }) === 'merchant' ? ownerUsername : '');
   const headingBrand = cleanText(row.title, 180).match(/^(.{2,90}?)\s+(?:auf|on)\s+Instagram\s*:/i)?.[1] || '';
-  let brand = merchantUsername ? instagramUsernameDisplayName(merchantUsername) : cleanText(headingBrand, 90);
+  const locationBrandCandidate = cleanText(row.textSample.match(/📍\s*([^|,\n]{2,60})\s*(?:[|,])/u)?.[1], 60);
+  const locationBrand = locationBrandCandidate && !/\d|^(?:wien|vienna)$/i.test(locationBrandCandidate)
+    ? locationBrandCandidate
+    : '';
+  const uppercaseBrand = row.textSample.match(/\b[Bb]ei\s+([A-ZÄÖÜ][A-ZÄÖÜ0-9][A-ZÄÖÜ0-9&.'’_-]{1,38})\b/u)?.[1] || '';
+  let brand = locationBrand || (merchantUsername
+    ? instagramUsernameDisplayName(merchantUsername)
+    : cleanText(headingBrand || uppercaseBrand, 90));
+  if (uppercaseBrand && brand === uppercaseBrand) brand = instagramUsernameDisplayName(uppercaseBrand.toLowerCase());
   if (/^2[‘'’]?nd\s+street\s+burger$/i.test(brand)) brand = '2nd Street Burger';
   if (!brand) brand = ownerUsername ? instagramUsernameDisplayName(ownerUsername) : 'Social Food Fund';
   return { ownerUsername, merchantUsername, brand };
@@ -438,6 +462,8 @@ function inferredReviewTitle(row, brand) {
   }
   const happyHour = row.textSample.match(/\b(Happy\s+Hour[^.!?📍#]{0,85})/i)?.[1];
   if (happyHour) return `${cleanText(happyHour, 100)} bei ${brand}`;
+  const priceOffer = row.textSample.match(/\b((?:[\p{L}\p{N}&+.'’_-]+\s+){0,6}(?:für\s+|fuer\s+|for\s+)?nur\s+€\s*\d{1,3}(?:[,.]\d{1,2})?)/iu)?.[1];
+  if (priceOffer) return `${cleanText(priceOffer, 105)} bei ${brand}`;
   const titleSignal = cleanText(row.title, 130);
   return titleSignal && !/\s(?:auf|on)\s+Instagram\s*:/i.test(titleSignal)
     ? titleSignal
@@ -464,8 +490,19 @@ export function buildSocialFoodReviewDeal(row, now = new Date()) {
       evidence: `ab heute ${durationWeeks} Wochen lang`,
     };
   }
+  const fallbackReviewEnd = Number.isNaN(pubDate.getTime())
+    ? null
+    : new Date(Math.min(
+      now.getTime() + 72 * 60 * 60 * 1000,
+      pubDate.getTime() + 7 * DAY_MS,
+    ));
+  const hasExplicitEnd = Boolean(offerWindow?.endDate);
   const validFrom = offerWindow?.startDate?.toISOString().slice(0, 10) || '';
-  const validUntil = offerWindow?.endDate?.toISOString() || '';
+  const validUntil = hasExplicitEnd
+    ? offerWindow.endDate.toISOString()
+    : (fallbackReviewEnd && fallbackReviewEnd.getTime() > now.getTime() ? fallbackReviewEnd.toISOString() : '');
+  const expiryKind = hasExplicitEnd ? offerWindow.kind : (validUntil ? 'review-ttl' : '');
+  const expirySource = hasExplicitEnd ? 'social-post-content-date' : (validUntil ? 'short-review-ttl' : '');
   const extracted = advanceDealLifecycle({
     id: `social-food-review-${stableHash(row.key)}`,
     title,
@@ -484,10 +521,10 @@ export function buildSocialFoodReviewDeal(row, now = new Date()) {
     expires: validUntil,
     validFrom,
     validUntil,
-    expiryKind: offerWindow?.kind || '',
-    expirySource: offerWindow ? 'social-post-content-date' : '',
-    expiresSource: offerWindow ? 'social-post-content-date' : '',
-    dateConfidence: offerWindow ? 'high' : '',
+    expiryKind,
+    expirySource,
+    expiresSource: expirySource,
+    dateConfidence: hasExplicitEnd ? 'high' : (validUntil ? 'low' : ''),
     distance: 'Wien - manuell pruefen',
     location: 'Wien',
     city: 'Wien',
