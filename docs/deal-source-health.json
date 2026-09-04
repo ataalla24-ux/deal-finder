@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-04T12:07:28.517Z",
+  "generatedAt": "2026-09-04T12:19:35.619Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 637,
-    "uniqueCandidates": 590,
+    "totalCandidates": 642,
+    "uniqueCandidates": 587,
     "distinctCandidates": 611,
-    "duplicateClusters": 21,
+    "duplicateClusters": 24,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -26,10 +26,10 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
         "healthScore": 67,
-        "totalDeals": 6
+        "totalDeals": 40
       },
       {
         "sourceKey": "meta-instagram",
@@ -81,7 +81,7 @@
       {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "coverageScore": 65,
+        "coverageScore": 64,
         "totalDeals": 73,
         "fresh1dCount": 1
       },
@@ -133,10 +133,10 @@
         "totalDeals": 23
       },
       {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "precisionScore": 68,
-        "totalDeals": 10
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 69,
+        "totalDeals": 40
       }
     ],
     "topWeightedSources": [
@@ -159,16 +159,16 @@
         "totalDeals": 8
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 59,
+        "totalDeals": 40
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 59,
         "totalDeals": 23
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 58,
-        "totalDeals": 6
       }
     ],
     "topSourcesToFix": [
@@ -419,101 +419,95 @@
       "sourceWeightScore": 64
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 6,
-      "uniqueDeals": 2,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
-      "fresh1dCount": 6,
-      "fresh7dCount": 6,
-      "viennaCount": 6,
-      "foodDrinkCount": 3,
-      "promoCount": 3,
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 40,
+      "uniqueDeals": 26,
+      "duplicateDeals": 14,
+      "duplicateAcrossSources": 14,
+      "fresh1dCount": 8,
+      "fresh7dCount": 40,
+      "viennaCount": 40,
+      "foodDrinkCount": 20,
+      "promoCount": 29,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "gratis Kürbisschnitzen, über 200 Kürbissorten, Drachen basteln, Bauernmarkt mit steirischen Kürbisbauern & Essensstände.",
-        "Mittagsteller um 10,80 € von Montag bis Freitag",
-        "Soul Mate Tickets um 7 € erhältlich bis 24.09."
+        "Gratis Kürbisschnitzen und Bauernmarkt am Kürbisfest",
+        "EBI 3.0 DOUBLE CHALLENGE mit kostenlosem Essen bei Erfolg",
+        "2for1 Gutschein für Rindsuppe, Schnitzeldreier & Palatschinke"
       ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-04T11:47:57.828Z",
-        "finishedAt": "2026-09-04T11:50:22.100Z",
-        "durationMs": 144272,
-        "counts": {
-          "rawCandidates": 134,
-          "normalizedCandidates": 6,
-          "verifiedCandidates": 6,
-          "previousDeals": 0,
-          "acceptedDeals": 6,
-          "rejectedDeals": 119
-        },
-        "rejectedByReason": {
-          "missing-text": 4,
-          "no-concrete-offer": 101,
-          "general-recommendation": 11,
-          "missing-vienna-evidence": 2,
-          "excluded-promotion-type": 1
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 1,
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 1,
       "foodDrinkRate": 0.5,
-      "promoRate": 0.5,
+      "promoRate": 0.7,
       "missingUrlRate": 0,
-      "averageQualityScore": 85.7,
+      "averageQualityScore": 84.2,
       "topCategories": [
         {
           "value": "essen",
+          "count": 14
+        },
+        {
+          "value": "shopping",
+          "count": 8
+        },
+        {
+          "value": "event",
+          "count": 6
+        },
+        {
+          "value": "supermarkt",
+          "count": 5
+        },
+        {
+          "value": "reisen",
           "count": 2
         },
         {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
+          "value": "beauty",
           "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 4
+          "count": 19
         },
         {
           "value": "gratis",
+          "count": 18
+        },
+        {
+          "value": "bogo",
           "count": 2
+        },
+        {
+          "value": "freebie",
+          "count": 1
         }
       ],
       "issues": [
         "hohe Überschneidung mit anderen Quellen"
       ],
       "healthScore": 67,
-      "missionFitScore": 69,
-      "coverageScore": 17,
-      "precisionScore": 71,
-      "sourceWeightScore": 58
+      "missionFitScore": 56,
+      "coverageScore": 43,
+      "precisionScore": 69,
+      "sourceWeightScore": 59
     },
     {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 23,
-      "uniqueDeals": 12,
-      "duplicateDeals": 11,
-      "duplicateAcrossSources": 11,
+      "uniqueDeals": 11,
+      "duplicateDeals": 12,
+      "duplicateAcrossSources": 12,
       "fresh1dCount": 10,
       "fresh7dCount": 23,
       "viennaCount": 23,
@@ -589,83 +583,92 @@
       "sourceWeightScore": 59
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 35,
-      "uniqueDeals": 26,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 9,
-      "fresh1dCount": 4,
-      "fresh7dCount": 34,
-      "viennaCount": 35,
-      "foodDrinkCount": 13,
-      "promoCount": 23,
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 6,
+      "uniqueDeals": 1,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 6,
+      "fresh7dCount": 6,
+      "viennaCount": 6,
+      "foodDrinkCount": 3,
+      "promoCount": 3,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Gratis Kürbisschnitzen und Bauernmarkt am Kürbisfest am Himmel",
-        "EBI 3.0 DOUBLE CHALLENGE mit kostenlosem Essen des Tages bei Erfolg",
-        "1+1 Gratis Smashburger auf Wolt"
+        "gratis Kürbisschnitzen, über 200 Kürbissorten, Drachen basteln, Bauernmarkt mit steirischen Kürbisbauern & Essensstände.",
+        "Mittagsteller um 10,80 € von Montag bis Freitag",
+        "Soul Mate Tickets um 7 € erhältlich bis 24.09."
       ],
-      "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0.1,
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-04T11:47:57.828Z",
+        "finishedAt": "2026-09-04T11:50:22.100Z",
+        "durationMs": 144272,
+        "counts": {
+          "rawCandidates": 134,
+          "normalizedCandidates": 6,
+          "verifiedCandidates": 6,
+          "previousDeals": 0,
+          "acceptedDeals": 6,
+          "rejectedDeals": 119
+        },
+        "rejectedByReason": {
+          "missing-text": 4,
+          "no-concrete-offer": 101,
+          "general-recommendation": 11,
+          "missing-vienna-evidence": 2,
+          "excluded-promotion-type": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.2,
+      "duplicateRate": 0.8,
+      "fresh1dRate": 1,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.4,
-      "promoRate": 0.7,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.5,
       "missingUrlRate": 0,
       "averageQualityScore": 85.7,
       "topCategories": [
         {
           "value": "essen",
-          "count": 10
-        },
-        {
-          "value": "shopping",
-          "count": 6
-        },
-        {
-          "value": "event",
-          "count": 5
-        },
-        {
-          "value": "grocery",
-          "count": 4
-        },
-        {
-          "value": "supermarkt",
-          "count": 3
-        },
-        {
-          "value": "drink",
           "count": 2
+        },
+        {
+          "value": "kultur",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 17
+          "count": 4
         },
         {
           "value": "gratis",
-          "count": 14
-        },
-        {
-          "value": "bogo",
-          "count": 4
+          "count": 2
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
+        "hohe Überschneidung mit anderen Quellen"
       ],
       "healthScore": 64,
-      "missionFitScore": 51,
-      "coverageScore": 38,
-      "precisionScore": 66,
-      "sourceWeightScore": 55
+      "missionFitScore": 69,
+      "coverageScore": 16,
+      "precisionScore": 71,
+      "sourceWeightScore": 57
     },
     {
       "sourceKey": "instagram-verified",
@@ -735,9 +738,9 @@
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
       "totalDeals": 73,
-      "uniqueDeals": 66,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 7,
+      "uniqueDeals": 65,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 8,
       "fresh1dCount": 1,
       "fresh7dCount": 6,
       "viennaCount": 6,
@@ -834,7 +837,7 @@
       ],
       "healthScore": 56,
       "missionFitScore": 51,
-      "coverageScore": 65,
+      "coverageScore": 64,
       "precisionScore": 51,
       "sourceWeightScore": 55
     },
