@@ -1,53 +1,23 @@
 {
   "schemaVersion": 1,
-  "runId": "gastro2-2026-09-03T05:40:13.465Z",
+  "runId": "gastro2-2026-09-04T05:17:34.500Z",
   "sourceKey": "gastro2",
   "sourceLabel": "Firecrawl Key 1 - Gastro",
   "status": "completed-with-errors",
-  "startedAt": "2026-09-03T05:31:48.613Z",
-  "finishedAt": "2026-09-03T05:40:13.465Z",
-  "durationMs": 504852,
+  "startedAt": "2026-09-04T05:05:33.183Z",
+  "finishedAt": "2026-09-04T05:17:34.500Z",
+  "durationMs": 721317,
   "outputFile": "docs/deals-pending-gastro2.json",
   "counts": {
-    "rawCandidates": 14,
-    "normalizedCandidates": 13,
-    "verifiedCandidates": 50,
-    "previousDeals": 39,
-    "acceptedDeals": 50,
-    "rejectedDeals": 2
+    "rawCandidates": 26,
+    "normalizedCandidates": 26,
+    "verifiedCandidates": 73,
+    "previousDeals": 50,
+    "acceptedDeals": 73,
+    "rejectedDeals": 0
   },
-  "rejectedByReason": {
-    "excluded-downstream-source:DieRestaurantWoche": 1,
-    "post-verification-rejected": 1
-  },
-  "rejectedSamples": [
-    {
-      "reason": "excluded-downstream-source:DieRestaurantWoche",
-      "deal": {
-        "id": "",
-        "title": "Vergünstigte Mehrgang-Menüs in über 100 Wiener Lokalen: Lunch ab 19,50 € (2 Gänge), Dinner ab 39,50 € (3 Gänge)",
-        "brand": "Restaurantwoche Wien / Culinarius",
-        "url": "https://www.sparhamster.at/restaurantwoche-wien/",
-        "source": "",
-        "pubDate": "",
-        "expires": "",
-        "postVerificationStatus": ""
-      }
-    },
-    {
-      "reason": "post-verification-rejected",
-      "deal": {
-        "id": "g2-mq4hhn",
-        "title": "Garden-Restaurant-Angebot für 18,90 € (im Beitrag als Angebo",
-        "brand": "Garden Restaurant Wien",
-        "url": "https://www.instagram.com/reel/DcDhEtlq7sv/",
-        "source": "Firecrawl Gastro #2",
-        "pubDate": "15.08.2026",
-        "expires": "Gültig bis 15.09.2026 Nicht angegeben",
-        "postVerificationStatus": ""
-      }
-    }
-  ],
+  "rejectedByReason": {},
+  "rejectedSamples": [],
   "diagnostics": {
     "configuredSources": 16,
     "attemptedSources": 16,
@@ -57,10 +27,10 @@
     "agentTimeoutSeconds": 420,
     "maxCreditsPerAgent": 500,
     "totalCreditsUsed": 0,
-    "retainedPreviousDeals": 39,
+    "retainedPreviousDeals": 50,
     "prunedPreviousDeals": 0,
     "excludedPreviousDeals": 0,
-    "duplicateCandidatesMerged": 1,
+    "duplicateCandidatesMerged": 3,
     "sourceStats": [
       {
         "id": "search:1",
@@ -181,7 +151,7 @@
         "searchCandidates": 0,
         "normalizedCandidates": 0,
         "creditsUsed": 0,
-        "searchError": "Rate limit exceeded. Consumed (req/min): 11, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Thu Sep 03 2026 05:32:48 GMT+0000 (Coordinated Universal Time)"
+        "searchError": "Rate limit exceeded. Consumed (req/min): 11, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:06:33 GMT+0000 (Coordinated Universal Time)"
       },
       {
         "id": "search:12",
@@ -192,15 +162,15 @@
         "searchCandidates": 0,
         "normalizedCandidates": 0,
         "creditsUsed": 0,
-        "searchError": "Rate limit exceeded. Consumed (req/min): 12, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Thu Sep 03 2026 05:32:48 GMT+0000 (Coordinated Universal Time)"
+        "searchError": "Rate limit exceeded. Consumed (req/min): 12, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:06:33 GMT+0000 (Coordinated Universal Time)"
       },
       {
         "id": "broad-agent:1",
         "kind": "broad-agent",
         "label": "Breite Suche 1",
         "status": "completed-agent",
-        "rawCandidates": 2,
-        "normalizedCandidates": 2,
+        "rawCandidates": 1,
+        "normalizedCandidates": 1,
         "creditsUsed": 0
       },
       {
@@ -208,8 +178,8 @@
         "kind": "broad-agent",
         "label": "Breite Suche 2",
         "status": "completed-agent",
-        "rawCandidates": 6,
-        "normalizedCandidates": 5,
+        "rawCandidates": 11,
+        "normalizedCandidates": 11,
         "creditsUsed": 0
       },
       {
@@ -226,20 +196,20 @@
         "kind": "broad-agent",
         "label": "Breite Suche 4",
         "status": "completed-agent",
-        "rawCandidates": 3,
-        "normalizedCandidates": 3,
+        "rawCandidates": 11,
+        "normalizedCandidates": 11,
         "creditsUsed": 0
       }
     ],
     "verifier": {
       "statusCounts": {
-        "verified-meta-graph": 6,
-        "not-recorded": 44
+        "not-recorded": 67,
+        "verified-meta-graph": 6
       },
       "verifiedOriginalPosts": 0,
       "timestampOnlyPosts": 0,
       "unavailableOriginalPosts": 0,
-      "registryViennaEvidence": 0
+      "registryViennaEvidence": 1
     }
   },
   "constraints": {},
@@ -254,7 +224,7 @@
     "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
     "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
     "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
-    "ikea.com Search: Rate limit exceeded. Consumed (req/min): 11, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Thu Sep 03 2026 05:32:48 GMT+0000 (Coordinated Universal Time)",
-    "marktguru.at Search: Rate limit exceeded. Consumed (req/min): 12, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Thu Sep 03 2026 05:32:48 GMT+0000 (Coordinated Universal Time)"
+    "ikea.com Search: Rate limit exceeded. Consumed (req/min): 11, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:06:33 GMT+0000 (Coordinated Universal Time)",
+    "marktguru.at Search: Rate limit exceeded. Consumed (req/min): 12, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:06:33 GMT+0000 (Coordinated Universal Time)"
   ]
 }
