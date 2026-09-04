@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-04T05:15:32.237Z",
+  "generatedAt": "2026-09-04T05:20:53.324Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 620,
-    "uniqueCandidates": 578,
-    "distinctCandidates": 596,
-    "duplicateClusters": 18,
+    "totalCandidates": 643,
+    "uniqueCandidates": 599,
+    "distinctCandidates": 618,
+    "duplicateClusters": 19,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -86,17 +86,17 @@
         "fresh1dCount": 45
       },
       {
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "coverageScore": 54,
+        "totalDeals": 73,
+        "fresh1dCount": 0
+      },
+      {
         "sourceKey": "firecrawl4",
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
         "coverageScore": 49,
         "totalDeals": 65,
-        "fresh1dCount": 0
-      },
-      {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "coverageScore": 39,
-        "totalDeals": 50,
         "fresh1dCount": 0
       },
       {
@@ -704,22 +704,22 @@
       ],
       "lastRun": {
         "status": "completed",
-        "startedAt": "2026-09-03T21:17:42.964Z",
-        "finishedAt": "2026-09-03T21:19:55.512Z",
-        "durationMs": 132548,
+        "startedAt": "2026-09-04T05:06:09.611Z",
+        "finishedAt": "2026-09-04T05:08:40.237Z",
+        "durationMs": 150626,
         "counts": {
-          "rawCandidates": 128,
+          "rawCandidates": 98,
           "normalizedCandidates": 2,
           "verifiedCandidates": 2,
           "previousDeals": 0,
           "acceptedDeals": 2,
-          "rejectedDeals": 116
+          "rejectedDeals": 90
         },
         "rejectedByReason": {
-          "no-concrete-offer": 97,
-          "missing-text": 3,
-          "general-recommendation": 12,
-          "excluded-promotion-type": 3,
+          "no-concrete-offer": 67,
+          "excluded-promotion-type": 4,
+          "missing-text": 8,
+          "general-recommendation": 10,
           "missing-vienna-evidence": 1
         },
         "errors": [],
@@ -764,13 +764,121 @@
       "sourceWeightScore": 55
     },
     {
+      "sourceKey": "gastro2",
+      "file": "deals-pending-gastro2.json",
+      "sourceLabel": "Firecrawl Key 1 - Gastro",
+      "totalDeals": 73,
+      "uniqueDeals": 66,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
+      "fresh1dCount": 0,
+      "fresh7dCount": 6,
+      "viennaCount": 6,
+      "foodDrinkCount": 70,
+      "promoCount": 40,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Dessert-&-Grill-Angebot für 18,90 €",
+        "2 Crispy Chicken zum Preis von 1 (1+1 gratis)",
+        "10 € Rabatt ab 50 € Konsumation"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-09-04T05:05:33.183Z",
+        "finishedAt": "2026-09-04T05:17:34.500Z",
+        "durationMs": 721317,
+        "counts": {
+          "rawCandidates": 26,
+          "normalizedCandidates": 26,
+          "verifiedCandidates": 73,
+          "previousDeals": 50,
+          "acceptedDeals": 73,
+          "rejectedDeals": 0
+        },
+        "rejectedByReason": {},
+        "errors": [
+          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
+          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
+          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
+          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
+          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
+          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
+          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
+          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+        ],
+        "reportFile": "deal-pipeline-last-run-gastro2.json"
+      },
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0.1,
+      "viennaRate": 0.1,
+      "foodDrinkRate": 1,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 64.6,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 65
+        },
+        {
+          "value": "supermarkt",
+          "count": 3
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        },
+        {
+          "value": "technik",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 40
+        },
+        {
+          "value": "bogo",
+          "count": 21
+        },
+        {
+          "value": "gratis",
+          "count": 11
+        },
+        {
+          "value": "gutschein",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 56,
+      "missionFitScore": 51,
+      "coverageScore": 54,
+      "precisionScore": 51,
+      "sourceWeightScore": 53
+    },
+    {
       "sourceKey": "firecrawl4",
       "file": "deals-pending-firecrawl4.json",
       "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
       "totalDeals": 65,
-      "uniqueDeals": 64,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
+      "uniqueDeals": 63,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
       "fresh1dCount": 0,
       "fresh7dCount": 1,
       "viennaCount": 1,
@@ -859,113 +967,6 @@
       "coverageScore": 49,
       "precisionScore": 49,
       "sourceWeightScore": 51
-    },
-    {
-      "sourceKey": "gastro2",
-      "file": "deals-pending-gastro2.json",
-      "sourceLabel": "Firecrawl Key 1 - Gastro",
-      "totalDeals": 50,
-      "uniqueDeals": 44,
-      "duplicateDeals": 6,
-      "duplicateAcrossSources": 6,
-      "fresh1dCount": 0,
-      "fresh7dCount": 6,
-      "viennaCount": 6,
-      "foodDrinkCount": 47,
-      "promoCount": 30,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Eiertomaten (Yamurt Domates), 1 kg für 1,29 € (zuvor 1,49 €)",
-        "Eine kleine Portion Pommes gratis, personalisiert in der McD",
-        "Fries für 0,01 € statt 6 €"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-09-03T05:31:48.613Z",
-        "finishedAt": "2026-09-03T05:40:13.465Z",
-        "durationMs": 504852,
-        "counts": {
-          "rawCandidates": 14,
-          "normalizedCandidates": 13,
-          "verifiedCandidates": 50,
-          "previousDeals": 39,
-          "acceptedDeals": 50,
-          "rejectedDeals": 2
-        },
-        "rejectedByReason": {
-          "excluded-downstream-source:DieRestaurantWoche": 1,
-          "post-verification-rejected": 1
-        },
-        "errors": [
-          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
-          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
-          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
-          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
-          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
-          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
-          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
-          "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
-        ],
-        "reportFile": "deal-pipeline-last-run-gastro2.json"
-      },
-      "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.1,
-      "viennaRate": 0.1,
-      "foodDrinkRate": 0.9,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 64.4,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 44
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        },
-        {
-          "value": "technik",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 26
-        },
-        {
-          "value": "bogo",
-          "count": 16
-        },
-        {
-          "value": "gratis",
-          "count": 8
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 56,
-      "missionFitScore": 50,
-      "coverageScore": 39,
-      "precisionScore": 51,
-      "sourceWeightScore": 50
     },
     {
       "sourceKey": "food3",
