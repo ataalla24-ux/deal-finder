@@ -39,6 +39,7 @@ const remoteDir = path.join(tempDir, 'remote.git');
 const localDir = path.join(tempDir, 'local');
 const concurrentDir = path.join(tempDir, 'concurrent');
 const verifyDir = path.join(tempDir, 'verify');
+const replaceVerifyDir = path.join(tempDir, 'replace-verify');
 
 try {
   fs.mkdirSync(seedDir, { recursive: true });
@@ -83,6 +84,32 @@ try {
   const payload = JSON.parse(fs.readFileSync(path.join(verifyDir, 'docs/deals-pending-all.json'), 'utf8'));
   assert.deepEqual(payload.deals.map((deal) => deal.id).sort(), ['local-new', 'remote-new']);
   assert.equal(payload.totalDeals, 2);
+
+  // A source-owned collector may intentionally replace its own generated file
+  // even if a verifier enriched the previous version while the collector ran.
+  writeQueue(verifyDir, [{ id: 'remote-verification', title: 'Concurrent verifier output' }], '2026-08-22T12:00:00.000Z');
+  run('git', ['add', 'docs/deals-pending-all.json'], verifyDir);
+  run('git', ['commit', '-m', 'concurrent verifier output'], verifyDir);
+  run('git', ['push', 'origin', 'main'], verifyDir);
+
+  writeQueue(localDir, [{ id: 'source-owned', title: 'Fresh collector output' }], '2026-08-22T13:00:00.000Z');
+  run(process.execPath, [
+    SCRIPT_PATH,
+    '--replace-conflicts',
+    '--message',
+    'replace source-owned generated state',
+    '--remote',
+    'origin',
+    '--branch',
+    'main',
+    '--files',
+    'docs/deals-pending-all.json',
+  ], localDir);
+
+  run('git', ['clone', '--branch', 'main', remoteDir, replaceVerifyDir], tempDir);
+  const replacedPayload = JSON.parse(fs.readFileSync(path.join(replaceVerifyDir, 'docs/deals-pending-all.json'), 'utf8'));
+  assert.deepEqual(replacedPayload.deals.map((deal) => deal.id), ['source-owned']);
+  assert.equal(replacedPayload.totalDeals, 1);
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }

@@ -44,6 +44,7 @@ function parseArgs(argv) {
     branch: DEFAULT_BRANCH,
     retries: Number.isFinite(DEFAULT_RETRIES) && DEFAULT_RETRIES >= 0 ? DEFAULT_RETRIES : 4,
     skipConflicts: false,
+    replaceConflicts: false,
     patterns: [],
   };
 
@@ -64,6 +65,8 @@ function parseArgs(argv) {
       i += 1;
     } else if (arg === '--skip-conflicts') {
       parsed.skipConflicts = true;
+    } else if (arg === '--replace-conflicts') {
+      parsed.replaceConflicts = true;
     } else if (arg === '--files') {
       continue;
     } else {
@@ -306,10 +309,16 @@ function resolveSameFileRemoteChanges(states, baseRef, headRef, options = {}) {
   const conflicts = [];
   const safeStates = [];
   const mergedFiles = [];
+  const replacedFiles = [];
 
   for (const state of states) {
     const changedRemotely = pathChangedBetween(baseRef, headRef, state.path);
     if (changedRemotely && !capturedMatchesRemote(state, headRef)) {
+      if (options.replaceConflicts) {
+        safeStates.push(state);
+        replacedFiles.push(state.path);
+        continue;
+      }
       if (options.skipConflicts) {
         const mergedState = mergeKnownGeneratedJson(state, headRef, baseRef);
         if (mergedState) {
@@ -335,6 +344,9 @@ function resolveSameFileRemoteChanges(states, baseRef, headRef, options = {}) {
   }
   if (mergedFiles.length > 0) {
     console.log(`Merged concurrent generated state for: ${mergedFiles.join(', ')}`);
+  }
+  if (replacedFiles.length > 0) {
+    console.log(`Replacing concurrent generated state for source-owned file(s): ${replacedFiles.join(', ')}`);
   }
   return safeStates;
 }
@@ -432,6 +444,7 @@ async function main() {
       const headRef = remoteRef(options.remote, options.branch);
       const safeStates = resolveSameFileRemoteChanges(states, baseRef, headRef, {
         skipConflicts: options.skipConflicts,
+        replaceConflicts: options.replaceConflicts,
       });
       if (safeStates.length === 0) {
         console.log('All generated changes were already superseded on remote main');
