@@ -2,9 +2,42 @@
   "schemaVersion": 1,
   "sourceKey": "power",
   "sourceLabel": "Power Scraper",
-  "updatedAt": "2026-09-03T10:02:42.527Z",
-  "runCount": 18,
+  "updatedAt": "2026-09-04T09:53:36.079Z",
+  "runCount": 19,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "power-2026-09-04T09:53:36.079Z",
+      "sourceKey": "power",
+      "sourceLabel": "Power Scraper",
+      "status": "completed-with-errors",
+      "startedAt": "2026-09-04T09:53:24.578Z",
+      "finishedAt": "2026-09-04T09:53:36.079Z",
+      "durationMs": 11501,
+      "outputFile": "docs/deals-pending-power.json",
+      "counts": {
+        "rawCandidates": 46,
+        "normalizedCandidates": 42,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 42,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "healthySources": 37,
+        "failedSources": 2,
+        "sourceCount": 39,
+        "concurrency": 8,
+        "timeoutMs": 8000
+      },
+      "constraints": {},
+      "errors": [
+        "Too Good To Go: Browser HTTP 429",
+        "Coupons.at: page.goto: Timeout 8000ms exceeded. Call log: - navigating to \"https://www.coupons.at/\", waiting until \"domcontentloaded\""
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "power-2026-09-03T10:02:42.527Z",
