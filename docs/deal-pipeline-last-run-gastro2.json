@@ -1,36 +1,36 @@
 {
   "schemaVersion": 1,
-  "runId": "gastro2-2026-09-04T05:17:34.500Z",
+  "runId": "gastro2-2026-09-04T05:44:41.137Z",
   "sourceKey": "gastro2",
   "sourceLabel": "Firecrawl Key 1 - Gastro",
   "status": "completed-with-errors",
-  "startedAt": "2026-09-04T05:05:33.183Z",
-  "finishedAt": "2026-09-04T05:17:34.500Z",
-  "durationMs": 721317,
+  "startedAt": "2026-09-04T05:40:45.788Z",
+  "finishedAt": "2026-09-04T05:44:41.137Z",
+  "durationMs": 235349,
   "outputFile": "docs/deals-pending-gastro2.json",
   "counts": {
-    "rawCandidates": 26,
-    "normalizedCandidates": 26,
-    "verifiedCandidates": 73,
-    "previousDeals": 50,
-    "acceptedDeals": 73,
+    "rawCandidates": 1,
+    "normalizedCandidates": 1,
+    "verifiedCandidates": 74,
+    "previousDeals": 73,
+    "acceptedDeals": 74,
     "rejectedDeals": 0
   },
   "rejectedByReason": {},
   "rejectedSamples": [],
   "diagnostics": {
     "configuredSources": 16,
-    "attemptedSources": 16,
-    "completedSources": 4,
+    "attemptedSources": 14,
+    "completedSources": 1,
     "searchTargets": 12,
     "broadAgentPasses": 4,
     "agentTimeoutSeconds": 420,
     "maxCreditsPerAgent": 500,
     "totalCreditsUsed": 0,
-    "retainedPreviousDeals": 50,
+    "retainedPreviousDeals": 73,
     "prunedPreviousDeals": 0,
     "excludedPreviousDeals": 0,
-    "duplicateCandidatesMerged": 3,
+    "duplicateCandidatesMerged": 0,
     "sourceStats": [
       {
         "id": "search:1",
@@ -151,7 +151,7 @@
         "searchCandidates": 0,
         "normalizedCandidates": 0,
         "creditsUsed": 0,
-        "searchError": "Rate limit exceeded. Consumed (req/min): 11, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:06:33 GMT+0000 (Coordinated Universal Time)"
+        "searchError": "Rate limit exceeded. Consumed (req/min): 11, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:41:46 GMT+0000 (Coordinated Universal Time)"
       },
       {
         "id": "search:12",
@@ -162,7 +162,7 @@
         "searchCandidates": 0,
         "normalizedCandidates": 0,
         "creditsUsed": 0,
-        "searchError": "Rate limit exceeded. Consumed (req/min): 12, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:06:33 GMT+0000 (Coordinated Universal Time)"
+        "searchError": "Rate limit exceeded. Consumed (req/min): 12, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:41:46 GMT+0000 (Coordinated Universal Time)"
       },
       {
         "id": "broad-agent:1",
@@ -177,36 +177,20 @@
         "id": "broad-agent:2",
         "kind": "broad-agent",
         "label": "Breite Suche 2",
-        "status": "completed-agent",
-        "rawCandidates": 11,
-        "normalizedCandidates": 11,
-        "creditsUsed": 0
-      },
-      {
-        "id": "broad-agent:3",
-        "kind": "broad-agent",
-        "label": "Breite Suche 3",
-        "status": "completed-agent",
-        "rawCandidates": 3,
-        "normalizedCandidates": 3,
-        "creditsUsed": 0
-      },
-      {
-        "id": "broad-agent:4",
-        "kind": "broad-agent",
-        "label": "Breite Suche 4",
-        "status": "completed-agent",
-        "rawCandidates": 11,
-        "normalizedCandidates": 11,
-        "creditsUsed": 0
+        "status": "failed",
+        "rawCandidates": 0,
+        "normalizedCandidates": 0,
+        "creditsUsed": 0,
+        "error": "Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
       }
     ],
     "verifier": {
       "statusCounts": {
+        "verified-original-post": 1,
         "not-recorded": 67,
         "verified-meta-graph": 6
       },
-      "verifiedOriginalPosts": 0,
+      "verifiedOriginalPosts": 1,
       "timestampOnlyPosts": 0,
       "unavailableOriginalPosts": 0,
       "registryViennaEvidence": 1
@@ -224,7 +208,8 @@
     "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
     "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
     "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
-    "ikea.com Search: Rate limit exceeded. Consumed (req/min): 11, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:06:33 GMT+0000 (Coordinated Universal Time)",
-    "marktguru.at Search: Rate limit exceeded. Consumed (req/min): 12, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:06:33 GMT+0000 (Coordinated Universal Time)"
+    "ikea.com Search: Rate limit exceeded. Consumed (req/min): 11, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:41:46 GMT+0000 (Coordinated Universal Time)",
+    "marktguru.at Search: Rate limit exceeded. Consumed (req/min): 12, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:41:46 GMT+0000 (Coordinated Universal Time)",
+    "Breite Suche 2: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
   ]
 }
