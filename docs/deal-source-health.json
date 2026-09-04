@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-04T17:04:14.574Z",
+  "generatedAt": "2026-09-04T17:57:51.910Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 629,
-    "uniqueCandidates": 588,
-    "distinctCandidates": 607,
-    "duplicateClusters": 19,
+    "totalCandidates": 612,
+    "uniqueCandidates": 583,
+    "distinctCandidates": 597,
+    "duplicateClusters": 14,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -16,7 +16,7 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "healthScore": 79,
+        "healthScore": 76,
         "totalDeals": 8
       },
       {
@@ -26,16 +26,16 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 75,
+        "totalDeals": 7
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 71,
         "totalDeals": 33
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 68,
-        "totalDeals": 7
       }
     ],
     "topMissionSources": [
@@ -58,16 +58,16 @@
         "totalDeals": 5
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 75,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 68,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "missionFitScore": 64,
-        "totalDeals": 8
       }
     ],
     "topCoverageSources": [
@@ -115,12 +115,6 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "precisionScore": 77,
-        "totalDeals": 8
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 76,
@@ -129,14 +123,20 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 72,
-        "totalDeals": 21
+        "precisionScore": 75,
+        "totalDeals": 4
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 72,
-        "totalDeals": 33
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "precisionScore": 75,
+        "totalDeals": 8
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 74,
+        "totalDeals": 7
       }
     ],
     "topWeightedSources": [
@@ -153,22 +153,22 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 62,
-        "totalDeals": 8
+        "totalDeals": 4
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 61,
+        "totalDeals": 7
       },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 61,
         "totalDeals": 33
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 61,
-        "totalDeals": 5
       }
     ],
     "topSourcesToFix": [
@@ -296,7 +296,7 @@
       "uniqueDeals": 8,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 2,
+      "fresh1dCount": 1,
       "fresh7dCount": 8,
       "viennaCount": 8,
       "foodDrinkCount": 4,
@@ -310,7 +310,7 @@
       "lastRun": null,
       "uniqueRate": 1,
       "duplicateRate": 0,
-      "fresh1dRate": 0.3,
+      "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
       "foodDrinkRate": 0.5,
@@ -349,12 +349,14 @@
           "count": 1
         }
       ],
-      "issues": [],
-      "healthScore": 79,
-      "missionFitScore": 64,
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 76,
+      "missionFitScore": 60,
       "coverageScore": 19,
-      "precisionScore": 77,
-      "sourceWeightScore": 62
+      "precisionScore": 75,
+      "sourceWeightScore": 59
     },
     {
       "sourceKey": "joe",
@@ -419,14 +421,102 @@
       "sourceWeightScore": 64
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 7,
+      "uniqueDeals": 5,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 6,
+      "fresh7dCount": 7,
+      "viennaCount": 7,
+      "foodDrinkCount": 5,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "20 % mit dem Vorteilsclub Wien 🎧 Audioguide: gratis über das Smartphone",
+        "40% · Limited availability Join the waitlist to get first access",
+        "Mittagsteller um 10,80 € von Montag bis Freitag"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-04T16:34:43.398Z",
+        "finishedAt": "2026-09-04T16:37:16.266Z",
+        "durationMs": 152868,
+        "counts": {
+          "rawCandidates": 127,
+          "normalizedCandidates": 7,
+          "verifiedCandidates": 7,
+          "previousDeals": 0,
+          "acceptedDeals": 7,
+          "rejectedDeals": 114
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 94,
+          "missing-text": 7,
+          "excluded-promotion-type": 1,
+          "general-recommendation": 9,
+          "missing-vienna-evidence": 3
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.9,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 85.6,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 5
+        },
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 75,
+      "missionFitScore": 68,
+      "coverageScore": 18,
+      "precisionScore": 74,
+      "sourceWeightScore": 61
+    },
+    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 33,
-      "uniqueDeals": 25,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 8,
-      "fresh1dCount": 6,
+      "uniqueDeals": 28,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 5,
       "fresh7dCount": 33,
       "viennaCount": 33,
       "foodDrinkCount": 18,
@@ -494,180 +584,71 @@
       "issues": [],
       "healthScore": 71,
       "missionFitScore": 59,
-      "coverageScore": 38,
+      "coverageScore": 39,
       "precisionScore": 72,
       "sourceWeightScore": 61
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 7,
-      "uniqueDeals": 3,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
-      "fresh1dCount": 6,
-      "fresh7dCount": 7,
-      "viennaCount": 7,
-      "foodDrinkCount": 5,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "20 % mit dem Vorteilsclub Wien 🎧 Audioguide: gratis über das Smartphone",
-        "40% · Limited availability Join the waitlist to get first access",
-        "Mittagsteller um 10,80 € von Montag bis Freitag"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-04T16:34:43.398Z",
-        "finishedAt": "2026-09-04T16:37:16.266Z",
-        "durationMs": 152868,
-        "counts": {
-          "rawCandidates": 127,
-          "normalizedCandidates": 7,
-          "verifiedCandidates": 7,
-          "previousDeals": 0,
-          "acceptedDeals": 7,
-          "rejectedDeals": 114
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 94,
-          "missing-text": 7,
-          "excluded-promotion-type": 1,
-          "general-recommendation": 9,
-          "missing-vienna-evidence": 3
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 0.9,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 85.6,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 5
-        },
-        {
-          "value": "gratis",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 68,
-      "missionFitScore": 68,
-      "coverageScore": 17,
-      "precisionScore": 71,
-      "sourceWeightScore": 58
     },
     {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 21,
-      "uniqueDeals": 11,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 10,
-      "fresh1dCount": 7,
-      "fresh7dCount": 21,
-      "viennaCount": 21,
-      "foodDrinkCount": 14,
-      "promoCount": 13,
+      "totalDeals": 4,
+      "uniqueDeals": 1,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 3,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 3,
+      "promoCount": 2,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "20 % mit dem Vorteilsclub Wien 🎧 Audioguide: gratis über das Smartphone",
-        "40% · Limited availability Join the waitlist to get first access",
-        "☕️ FREE COFFEE + PROFESSIONAL BARISTA COMPETITIONS?!"
+        "Kalbs-Kebab für nur 1 € 👋🏽 (Solange der Vorrat reicht) Kommt und überzeugt euch selber!",
+        "10 % auf deinen Aufenthalt im Henriette",
+        "20 % mit dem Vorteilsclub Wien 🎧 Audioguide: gratis über das Smartphone"
       ],
       "lastRun": null,
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0.3,
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.8,
+      "fresh1dRate": 0.8,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0.6,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.5,
       "missingUrlRate": 0,
-      "averageQualityScore": 86.9,
+      "averageQualityScore": 88.8,
       "topCategories": [
         {
           "value": "essen",
-          "count": 8
-        },
-        {
-          "value": "kultur",
-          "count": 4
-        },
-        {
-          "value": "supermarkt",
-          "count": 4
+          "count": 2
         },
         {
           "value": "kaffee",
-          "count": 2
+          "count": 1
         },
         {
           "value": "shopping",
-          "count": 2
-        },
-        {
-          "value": "beauty",
           "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "gratis",
-          "count": 10
-        },
-        {
           "value": "rabatt",
-          "count": 9
+          "count": 3
         },
         {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "gewinnspiel",
+          "value": "gratis",
           "count": 1
         }
       ],
       "issues": [
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 67,
-      "missionFitScore": 63,
-      "coverageScore": 29,
-      "precisionScore": 72,
-      "sourceWeightScore": 59
+      "healthScore": 70,
+      "missionFitScore": 75,
+      "coverageScore": 15,
+      "precisionScore": 75,
+      "sourceWeightScore": 62
     },
     {
       "sourceKey": "food3",
