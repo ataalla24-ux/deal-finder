@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-04T09:48:42.772Z",
+  "generatedAt": "2026-09-04T09:51:43.013Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 644,
-    "uniqueCandidates": 599,
-    "distinctCandidates": 618,
-    "duplicateClusters": 19,
+    "totalCandidates": 616,
+    "uniqueCandidates": 576,
+    "distinctCandidates": 593,
+    "duplicateClusters": 17,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -20,6 +20,12 @@
         "totalDeals": 8
       },
       {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "healthScore": 75,
+        "totalDeals": 10
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 70,
@@ -30,15 +36,15 @@
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 65,
         "totalDeals": 35
-      },
-      {
-        "sourceKey": "instagram-discovery",
-        "sourceLabel": "Daily Sync Instagram Discovery",
-        "healthScore": 63,
-        "totalDeals": 9
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "missionFitScore": 79,
+        "totalDeals": 10
+      },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
@@ -62,49 +68,43 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 65,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "missionFitScore": 64,
-        "totalDeals": 8
       }
     ],
     "topCoverageSources": [
       {
         "sourceKey": "vienna-promo-radar",
         "sourceLabel": "Vienna Promo Radar",
-        "coverageScore": 65,
-        "totalDeals": 98,
-        "fresh1dCount": 0
-      },
-      {
-        "sourceKey": "member-benefits",
-        "sourceLabel": "Member Benefits",
-        "coverageScore": 55,
-        "totalDeals": 45,
-        "fresh1dCount": 45
+        "coverageScore": 66,
+        "totalDeals": 79,
+        "fresh1dCount": 1
       },
       {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "coverageScore": 54,
+        "coverageScore": 65,
         "totalDeals": 73,
         "fresh1dCount": 1
       },
       {
+        "sourceKey": "member-benefits",
+        "sourceLabel": "Member Benefits",
+        "coverageScore": 62,
+        "totalDeals": 45,
+        "fresh1dCount": 45
+      },
+      {
         "sourceKey": "firecrawl4",
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "coverageScore": 49,
+        "coverageScore": 59,
         "totalDeals": 65,
         "fresh1dCount": 0
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 34,
-        "totalDeals": 35,
-        "fresh1dCount": 7
+        "sourceKey": "community",
+        "sourceLabel": "Community Submission",
+        "coverageScore": 39,
+        "totalDeals": 41,
+        "fresh1dCount": 0
       }
     ],
     "topPrecisionSources": [
@@ -133,10 +133,10 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
         "precisionScore": 68,
-        "totalDeals": 7
+        "totalDeals": 10
       }
     ],
     "topWeightedSources": [
@@ -145,6 +145,12 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 70,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "sourceWeightScore": 64,
+        "totalDeals": 10
       },
       {
         "sourceKey": "tiktok",
@@ -161,14 +167,8 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 55,
+        "sourceWeightScore": 56,
         "totalDeals": 35
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 55,
-        "totalDeals": 2
       }
     ],
     "topSourcesToFix": [
@@ -202,6 +202,15 @@
         "sampleTitles": []
       },
       {
+        "sourceKey": "instagram-discovery",
+        "sourceLabel": "Daily Sync Instagram Discovery",
+        "healthScore": 0,
+        "issues": [
+          "liefert aktuell 0 Deals"
+        ],
+        "sampleTitles": []
+      },
+      {
         "sourceKey": "instagram-web",
         "sourceLabel": "Daily Sync Instagram Web",
         "healthScore": 0,
@@ -213,15 +222,6 @@
       {
         "sourceKey": "telegram",
         "sourceLabel": "telegram",
-        "healthScore": 0,
-        "issues": [
-          "liefert aktuell 0 Deals"
-        ],
-        "sampleTitles": []
-      },
-      {
-        "sourceKey": "twitter",
-        "sourceLabel": "twitter",
         "healthScore": 0,
         "issues": [
           "liefert aktuell 0 Deals"
@@ -352,9 +352,71 @@
       "issues": [],
       "healthScore": 79,
       "missionFitScore": 64,
-      "coverageScore": 18,
+      "coverageScore": 19,
       "precisionScore": 77,
       "sourceWeightScore": 62
+    },
+    {
+      "sourceKey": "joe",
+      "file": "deals-pending-joe.json",
+      "sourceLabel": "jö Bonus Club",
+      "totalDeals": 10,
+      "uniqueDeals": 10,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 10,
+      "fresh7dCount": 10,
+      "viennaCount": 0,
+      "foodDrinkCount": 10,
+      "promoCount": 8,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "jö Äpp Extrem Aktion bei BILLA",
+        "jö Rabattsammler",
+        "jö äpp Day"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.3,
+      "topCategories": [
+        {
+          "value": "supermarkt",
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 4
+        },
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 5
+        },
+        {
+          "value": "rabatt",
+          "count": 5
+        }
+      ],
+      "issues": [
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 75,
+      "missionFitScore": 79,
+      "coverageScore": 22,
+      "precisionScore": 68,
+      "sourceWeightScore": 64
     },
     {
       "sourceKey": "meta-instagram",
@@ -430,7 +492,7 @@
       ],
       "healthScore": 70,
       "missionFitScore": 68,
-      "coverageScore": 26,
+      "coverageScore": 28,
       "precisionScore": 75,
       "sourceWeightScore": 62
     },
@@ -508,127 +570,9 @@
       ],
       "healthScore": 65,
       "missionFitScore": 53,
-      "coverageScore": 34,
+      "coverageScore": 39,
       "precisionScore": 67,
-      "sourceWeightScore": 55
-    },
-    {
-      "sourceKey": "instagram-discovery",
-      "file": "deals-pending-instagram-discovery.json",
-      "sourceLabel": "Daily Sync Instagram Discovery",
-      "totalDeals": 9,
-      "uniqueDeals": 6,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 4,
-      "foodDrinkCount": 8,
-      "promoCount": 8,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst...",
-        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst...",
-        "🔥 DREIMAL HUNGER. EIN PREIS: NUR 5 €! 🔥 🍔 Handgesmashter Beef Burger mit 100 % öst..."
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0.4,
-      "foodDrinkRate": 0.9,
-      "promoRate": 0.9,
-      "missingUrlRate": 0,
-      "averageQualityScore": 96.6,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 8
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 9
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 63,
-      "missionFitScore": 63,
-      "coverageScore": 16,
-      "precisionScore": 67,
-      "sourceWeightScore": 54
-    },
-    {
-      "sourceKey": "joe",
-      "file": "deals-pending-joe.json",
-      "sourceLabel": "jö Bonus Club",
-      "totalDeals": 10,
-      "uniqueDeals": 10,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 10,
-      "viennaCount": 0,
-      "foodDrinkCount": 10,
-      "promoCount": 8,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "jö Äpp Extrem Aktion bei BILLA",
-        "jö Rabattsammler",
-        "jö äpp Day"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84.3,
-      "topCategories": [
-        {
-          "value": "supermarkt",
-          "count": 5
-        },
-        {
-          "value": "kaffee",
-          "count": 4
-        },
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 5
-        },
-        {
-          "value": "rabatt",
-          "count": 5
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 61,
-      "missionFitScore": 57,
-      "coverageScore": 15,
-      "precisionScore": 56,
-      "sourceWeightScore": 50
+      "sourceWeightScore": 56
     },
     {
       "sourceKey": "food3",
@@ -708,9 +652,9 @@
       ],
       "healthScore": 61,
       "missionFitScore": 65,
-      "coverageScore": 15,
+      "coverageScore": 16,
       "precisionScore": 68,
-      "sourceWeightScore": 54
+      "sourceWeightScore": 55
     },
     {
       "sourceKey": "instagram-verified",
@@ -771,9 +715,9 @@
       ],
       "healthScore": 61,
       "missionFitScore": 46,
-      "coverageScore": 12,
+      "coverageScore": 13,
       "precisionScore": 56,
-      "sourceWeightScore": 45
+      "sourceWeightScore": 46
     },
     {
       "sourceKey": "wien-combined",
@@ -958,9 +902,9 @@
       ],
       "healthScore": 56,
       "missionFitScore": 51,
-      "coverageScore": 54,
+      "coverageScore": 65,
       "precisionScore": 51,
-      "sourceWeightScore": 53
+      "sourceWeightScore": 55
     },
     {
       "sourceKey": "firecrawl4",
@@ -1055,9 +999,9 @@
       ],
       "healthScore": 56,
       "missionFitScore": 48,
-      "coverageScore": 49,
+      "coverageScore": 59,
       "precisionScore": 49,
-      "sourceWeightScore": 51
+      "sourceWeightScore": 53
     },
     {
       "sourceKey": "community",
@@ -1138,9 +1082,9 @@
       ],
       "healthScore": 51,
       "missionFitScore": 40,
-      "coverageScore": 33,
+      "coverageScore": 39,
       "precisionScore": 44,
-      "sourceWeightScore": 42
+      "sourceWeightScore": 44
     },
     {
       "sourceKey": "member-benefits",
@@ -1209,9 +1153,9 @@
       ],
       "healthScore": 50,
       "missionFitScore": 37,
-      "coverageScore": 55,
+      "coverageScore": 62,
       "precisionScore": 37,
-      "sourceWeightScore": 44
+      "sourceWeightScore": 46
     },
     {
       "sourceKey": "church-events",
@@ -1421,9 +1365,9 @@
       ],
       "healthScore": 44,
       "missionFitScore": 28,
-      "coverageScore": 27,
+      "coverageScore": 32,
       "precisionScore": 36,
-      "sourceWeightScore": 34
+      "sourceWeightScore": 35
     },
     {
       "sourceKey": "freikirchen",
@@ -1473,9 +1417,9 @@
       ],
       "healthScore": 44,
       "missionFitScore": 28,
-      "coverageScore": 26,
+      "coverageScore": 31,
       "precisionScore": 36,
-      "sourceWeightScore": 34
+      "sourceWeightScore": 35
     },
     {
       "sourceKey": "gottesdienste",
@@ -1525,9 +1469,9 @@
       ],
       "healthScore": 44,
       "missionFitScore": 28,
-      "coverageScore": 24,
+      "coverageScore": 29,
       "precisionScore": 36,
-      "sourceWeightScore": 33
+      "sourceWeightScore": 34
     },
     {
       "sourceKey": "events",
@@ -1581,9 +1525,9 @@
       ],
       "healthScore": 43,
       "missionFitScore": 28,
-      "coverageScore": 28,
+      "coverageScore": 33,
       "precisionScore": 35,
-      "sourceWeightScore": 34
+      "sourceWeightScore": 35
     },
     {
       "sourceKey": "gutscheine",
@@ -1653,27 +1597,27 @@
       ],
       "healthScore": 42,
       "missionFitScore": 22,
-      "coverageScore": 31,
+      "coverageScore": 35,
       "precisionScore": 26,
-      "sourceWeightScore": 30
+      "sourceWeightScore": 31
     },
     {
       "sourceKey": "vienna-promo-radar",
       "file": "deals-pending-vienna-promo-radar.json",
       "sourceLabel": "Vienna Promo Radar",
-      "totalDeals": 98,
-      "uniqueDeals": 92,
-      "duplicateDeals": 6,
+      "totalDeals": 79,
+      "uniqueDeals": 75,
+      "duplicateDeals": 4,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
+      "fresh1dCount": 1,
       "fresh7dCount": 2,
       "viennaCount": 0,
-      "foodDrinkCount": 31,
-      "promoCount": 29,
+      "foodDrinkCount": 23,
+      "promoCount": 23,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "GRATIS: Große Öffi-Aktion – Klimaticket um nur 33 € und 20.000 Gratis-Tageskarten",
-        "GRATIS: Neuer Sport-Store – Decathlon eröffnet – diese Kunden bekommen Gratis-Bonus",
+        "GRATIS: Bei der SCN: Floridsdorfs erste Boulderhalle startet mit gratis Angebot",
+        "GRATIS: Gratis-Getränk-Aktion: Starbucks eröffnet neuen Standort in Wien",
         "GRATIS: Gratis-Getränk-Aktion: Starbucks eröffnet neuen Standort in Wien"
       ],
       "lastRun": null,
@@ -1685,41 +1629,45 @@
       "foodDrinkRate": 0.3,
       "promoRate": 0.3,
       "missingUrlRate": 0,
-      "averageQualityScore": 43.6,
+      "averageQualityScore": 43.2,
       "topCategories": [
         {
           "value": "reisen",
-          "count": 35
+          "count": 34
         },
         {
           "value": "kaffee",
-          "count": 17
-        },
-        {
-          "value": "essen",
-          "count": 13
-        },
-        {
-          "value": "fitness",
-          "count": 12
+          "count": 14
         },
         {
           "value": "shopping",
-          "count": 10
+          "count": 9
+        },
+        {
+          "value": "essen",
+          "count": 8
+        },
+        {
+          "value": "fitness",
+          "count": 7
         },
         {
           "value": "technik",
-          "count": 6
+          "count": 5
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 72
+          "count": 58
         },
         {
           "value": "gratis",
-          "count": 26
+          "count": 20
+        },
+        {
+          "value": "freebie",
+          "count": 1
         }
       ],
       "issues": [
@@ -1730,7 +1678,7 @@
       ],
       "healthScore": 37,
       "missionFitScore": 19,
-      "coverageScore": 65,
+      "coverageScore": 66,
       "precisionScore": 28,
       "sourceWeightScore": 35
     },
@@ -1829,9 +1777,9 @@
       ],
       "healthScore": 37,
       "missionFitScore": 16,
-      "coverageScore": 29,
+      "coverageScore": 35,
       "precisionScore": 26,
-      "sourceWeightScore": 26
+      "sourceWeightScore": 28
     },
     {
       "sourceKey": "flights",
@@ -1882,7 +1830,7 @@
       ],
       "healthScore": 28,
       "missionFitScore": 0,
-      "coverageScore": 10,
+      "coverageScore": 12,
       "precisionScore": 14,
       "sourceWeightScore": 13
     },
@@ -2004,6 +1952,42 @@
       "sourceKey": "google",
       "file": "deals-pending-google.json",
       "sourceLabel": "Google Deals",
+      "totalDeals": 0,
+      "uniqueDeals": 0,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [],
+      "lastRun": null,
+      "uniqueRate": 0,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 0,
+      "topCategories": [],
+      "topTypes": [],
+      "issues": [
+        "liefert aktuell 0 Deals"
+      ],
+      "healthScore": 0,
+      "missionFitScore": 0,
+      "coverageScore": 0,
+      "precisionScore": 0,
+      "sourceWeightScore": 0
+    },
+    {
+      "sourceKey": "instagram-discovery",
+      "file": "deals-pending-instagram-discovery.json",
+      "sourceLabel": "Daily Sync Instagram Discovery",
       "totalDeals": 0,
       "uniqueDeals": 0,
       "duplicateDeals": 0,
