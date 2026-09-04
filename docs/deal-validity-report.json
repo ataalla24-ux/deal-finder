@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-04T21:31:40.648Z",
+  "generatedAt": "2026-09-04T23:15:33.103Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 302,
-    "allowed": 0,
+    "total": 305,
+    "allowed": 3,
     "blocked": 302,
-    "warnings": 0,
+    "warnings": 1,
     "reasonCounts": {
       "nicht eindeutig in Wien": 40,
       "älter als 7 Tage (2026-06-27)": 1,
@@ -30,13 +30,14 @@
       "älter als 7 Tage (2026-04-30)": 1,
       "älter als 7 Tage (2026-04-20)": 1,
       "abgelaufen (2026-04-24)": 1,
-      "älter als 7 Tage (2026-02-22)": 88,
+      "älter als 7 Tage (2026-02-22)": 87,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-07-23)": 1,
       "älter als 7 Tage (2026-07-16)": 1,
       "Gottesdienste nur im Wochenlauf": 34,
-      "URL ungültig (HTTP 404)": 20,
+      "älter als 7 Tage (2025-07-30)": 1,
+      "URL ungültig (HTTP 404)": 17,
       "älter als 7 Tage (2026-07-30)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2020-12-18)": 1,
       "älter als 7 Tage (2026-08-15)": 2,
@@ -87,7 +88,7 @@
       "ausgeschlossene Quelle": 31,
       "kein konkreter Deal": 209,
       "kein echtes Post-Datum": 80,
-      "ungültige URL": 24,
+      "ungültige URL": 21,
       "Gottesdienste außerhalb Wochenlauf": 34,
       "Gewinnspiel": 1
     },
@@ -117,8 +118,8 @@
         }
       },
       "Firecrawl Gastro #2": {
-        "total": 8,
-        "allowed": 0,
+        "total": 9,
+        "allowed": 1,
         "blocked": 8,
         "warnings": 0,
         "reasonCategoryCounts": {
@@ -139,10 +140,10 @@
         }
       },
       "Firecrawl Gastro #4": {
-        "total": 13,
-        "allowed": 0,
+        "total": 14,
+        "allowed": 1,
         "blocked": 13,
-        "warnings": 0,
+        "warnings": 1,
         "reasonCategoryCounts": {
           "älter als 7 Tage": 9,
           "kein konkreter Deal": 2,
@@ -171,7 +172,7 @@
           "kein konkreter Deal": 32,
           "Gottesdienste außerhalb Wochenlauf": 33,
           "älter als 7 Tage": 33,
-          "ungültige URL": 3
+          "ungültige URL": 2
         }
       },
       "Google News RSS": {
@@ -188,8 +189,8 @@
         }
       },
       "Gutscheine.at": {
-        "total": 10,
-        "allowed": 0,
+        "total": 11,
+        "allowed": 1,
         "blocked": 10,
         "warnings": 0,
         "reasonCategoryCounts": {
@@ -213,7 +214,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 96,
           "älter als 7 Tage": 99,
-          "ungültige URL": 9,
+          "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "nicht Wien": 1
         }
@@ -266,7 +267,55 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "fc4g-17niaxz",
+      "title": "Frühstück für 1,00 € statt 2,99 €",
+      "brand": "IKEA Restaurant",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.ikea.com/at/de/food/",
+      "reasons": [],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-g5s1ii",
+      "title": "Eiertomaten (Yamurt Domates), 1 kg für 1,29 € (zuvor 1,49 €)",
+      "brand": "Mega-Supermarkt",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.instagram.com/p/DcxNGvqisGK/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-09-02T02:51:02.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 2,
+      "expiryDate": "2026-09-04T23:59:59.999Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "gs-506433",
+      "title": "25% Gutschein für Back-to-School-Produkte",
+      "brand": "Nike",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/nike",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-09-04T11:41:09.827Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-09-04",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -340,7 +389,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-04T20:47:05.593Z",
+      "sourceDate": "2026-09-04T22:34:13.549Z",
       "sourceDateSource": "deal.submittedAt",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -359,7 +408,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-04T20:47:05.593Z",
+      "sourceDate": "2026-09-04T22:34:13.549Z",
       "sourceDateSource": "deal.submittedAt",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -378,7 +427,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-04T20:47:05.593Z",
+      "sourceDate": "2026-09-04T22:34:13.549Z",
       "sourceDateSource": "deal.submittedAt",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -416,7 +465,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-04T20:47:05.593Z",
+      "sourceDate": "2026-09-04T22:34:13.549Z",
       "sourceDateSource": "deal.submittedAt",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -435,7 +484,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-04T20:47:05.593Z",
+      "sourceDate": "2026-09-04T22:34:13.549Z",
       "sourceDateSource": "deal.submittedAt",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1172,18 +1221,17 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2025-07-30)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 500)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-02-22T21:13:07.698Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 194,
+      "sourceDate": "2025-07-30T05:18:47.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 401,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: HTTP 500"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-21-20260222",
@@ -2148,18 +2196,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 138,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-8-20260419",
@@ -3051,17 +3100,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 194,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-11-20260222",
@@ -3390,6 +3440,7 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
@@ -3397,7 +3448,7 @@
       "sourceAgeDays": 194,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "extra-28-20260222",
@@ -3626,13 +3677,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 194,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-6-20260222",
@@ -3866,17 +3919,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.adventisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 194,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-19-20260222",
@@ -3926,13 +3980,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 194,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-22-20260222",
