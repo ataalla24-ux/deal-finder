@@ -458,6 +458,14 @@ const explicitlyEndedOffer = candidate({
 assert.equal(buildHeuristicDeal(explicitlyEndedOffer), null, 'an explicitly ended promotion remains blocked');
 assert.match(explicitlyEndedOffer.rejectionReason, /abgelaufen|vorbei/i);
 
+const explicitlyInvalidOffer = candidate({
+  shortcode: 'ExplicitlyInvalid1',
+  description: 'Test Café Wien: Das Angebot ist nicht mehr gültig. Es gab 20% Rabatt auf Kaffee in 1070 Wien.',
+  sourceDeal: { ownerUsername: 'testcafe', brand: 'Test Café' },
+});
+assert.equal(buildHeuristicDeal(explicitlyInvalidOffer), null, 'nicht mehr gültig remains a hard expiry signal');
+assert.match(explicitlyInvalidOffer.rejectionReason, /abgelaufen|vorbei/i);
+
 const staleDerivedExpiryMetadata = candidate({
   shortcode: 'StaleDerivedExpiry1',
   ageMs: 2 * DAY_MS,

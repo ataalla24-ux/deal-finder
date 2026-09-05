@@ -250,7 +250,7 @@ const DISCOVERY_ACCOUNT_PATTERNS = [
 ];
 
 const EXPLICIT_EXPIRY_PATTERNS = [
-  /\b(?:abgelaufen|beendet|nicht mehr gueltig|expired|offer ended|promotion ended|deal ended)\b/i,
+  /\b(?:abgelaufen|beendet|nicht mehr g(?:ue|u)ltig|expired|offer ended|promotion ended|deal ended)\b/i,
   /\b(?:aktion|angebot|deal|promo(?:tion)?|event|veranstaltung)\b.{0,30}\b(?:ist|war|sei|schon|bereits|nun|jetzt)?\s*vorbei\b/i,
   /\b(?:ist|war|sei|schon|bereits)\s+(?:leider\s+)?vorbei\b/i,
   /(?:^|[.!?]\s+)vorbei(?:[.!?]|$)/i,
