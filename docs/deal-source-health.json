@@ -1,17 +1,23 @@
 {
-  "generatedAt": "2026-09-05T17:32:32.832Z",
+  "generatedAt": "2026-09-05T18:17:16.313Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 648,
-    "uniqueCandidates": 610,
-    "distinctCandidates": 627,
-    "duplicateClusters": 17,
+    "totalCandidates": 658,
+    "uniqueCandidates": 623,
+    "distinctCandidates": 638,
+    "duplicateClusters": 15,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 75,
+        "totalDeals": 17
       },
       {
         "sourceKey": "tiktok",
@@ -30,12 +36,6 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "healthScore": 67,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 66,
-        "totalDeals": 4
       }
     ],
     "topMissionSources": [
@@ -52,6 +52,12 @@
         "totalDeals": 4
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 69,
+        "totalDeals": 17
+      },
+      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 67,
@@ -62,12 +68,6 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "missionFitScore": 64,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "missionFitScore": 57,
-        "totalDeals": 10
       }
     ],
     "topCoverageSources": [
@@ -81,7 +81,7 @@
       {
         "sourceKey": "firecrawl4",
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "coverageScore": 64,
+        "coverageScore": 65,
         "totalDeals": 79,
         "fresh1dCount": 0
       },
@@ -115,6 +115,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 79,
+        "totalDeals": 17
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 76,
@@ -127,15 +133,9 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "precisionScore": 71,
-        "totalDeals": 13
-      },
-      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 69,
+        "precisionScore": 71,
         "totalDeals": 3
       }
     ],
@@ -145,6 +145,12 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 70,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 64,
+        "totalDeals": 17
       },
       {
         "sourceKey": "food3",
@@ -163,12 +169,6 @@
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 57,
         "totalDeals": 13
-      },
-      {
-        "sourceKey": "firecrawl2",
-        "sourceLabel": "Firecrawl Key 3 - Consumables",
-        "sourceWeightScore": 57,
-        "totalDeals": 2
       }
     ],
     "topSourcesToFix": [
@@ -288,6 +288,78 @@
       "sourceWeightScore": 70
     },
     {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 17,
+      "uniqueDeals": 12,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 5,
+      "fresh7dCount": 17,
+      "viennaCount": 17,
+      "foodDrinkCount": 13,
+      "promoCount": 12,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis-Eintritt zum Event bei Arabic Night",
+        "Mit unserem Rabattcode SIMULATORENNEWS spart ihr im offiziellen CTS-Shop zusätzlich 5 %.",
+        "Back 2 School und wir haben ein tolles Angebot für euch 😍 am 7."
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.2,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.6,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 12
+        },
+        {
+          "value": "kultur",
+          "count": 2
+        },
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 8
+        },
+        {
+          "value": "rabatt",
+          "count": 6
+        },
+        {
+          "value": "freebie",
+          "count": 2
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [],
+      "healthScore": 75,
+      "missionFitScore": 69,
+      "coverageScore": 26,
+      "precisionScore": 79,
+      "sourceWeightScore": 64
+    },
+    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -362,9 +434,9 @@
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 43,
-      "uniqueDeals": 35,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 8,
+      "uniqueDeals": 36,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
       "fresh1dCount": 4,
       "fresh7dCount": 43,
       "viennaCount": 43,
@@ -591,6 +663,90 @@
       "sourceWeightScore": 61
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 3,
+      "uniqueDeals": 1,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 3,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 1,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Es sind noch Plätze frei!",
+        "🥭 Und für alle, die lieber zu Hause genießen: Bei jeder selbst abgeholten Bestellung ab 35 € gibt’s 0,3 Liter Mango-Lassi gratis dazu.",
+        "20 % auf den Pasta Workshop, buon appetito"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-05T15:30:16.520Z",
+        "finishedAt": "2026-09-05T15:32:25.449Z",
+        "durationMs": 128929,
+        "counts": {
+          "rawCandidates": 93,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 3,
+          "previousDeals": 0,
+          "acceptedDeals": 3,
+          "rejectedDeals": 86
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 70,
+          "missing-text": 9,
+          "general-recommendation": 5,
+          "excluded-promotion-type": 2
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 83.3,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "freebie",
+          "count": 1
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 66,
+      "missionFitScore": 67,
+      "coverageScore": 13,
+      "precisionScore": 71,
+      "sourceWeightScore": 57
+    },
+    {
       "sourceKey": "joe",
       "file": "deals-pending-joe.json",
       "sourceLabel": "jö Bonus Club",
@@ -717,152 +873,6 @@
       "sourceWeightScore": 46
     },
     {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 7,
-      "uniqueDeals": 2,
-      "duplicateDeals": 5,
-      "duplicateAcrossSources": 5,
-      "fresh1dCount": 3,
-      "fresh7dCount": 7,
-      "viennaCount": 7,
-      "foodDrinkCount": 4,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Es sind noch Plätze frei!",
-        "10% Rabatt in unseren Lokalen",
-        "🧀🥐 Süt Diyarı Piknik Çiftlik Peyniri für nur 5,49 €!"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 0.4,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.4,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84.6,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 4
-        },
-        {
-          "value": "shopping",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 5
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 59,
-      "missionFitScore": 56,
-      "coverageScore": 15,
-      "precisionScore": 64,
-      "sourceWeightScore": 50
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 3,
-      "uniqueDeals": 0,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 3,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 1,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Es sind noch Plätze frei!",
-        "🥭 Und für alle, die lieber zu Hause genießen: Bei jeder selbst abgeholten Bestellung ab 35 € gibt’s 0,3 Liter Mango-Lassi gratis dazu.",
-        "20 % auf den Pasta Workshop, buon appetito"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-05T15:30:16.520Z",
-        "finishedAt": "2026-09-05T15:32:25.449Z",
-        "durationMs": 128929,
-        "counts": {
-          "rawCandidates": 93,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
-          "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 86
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 70,
-          "missing-text": 9,
-          "general-recommendation": 5,
-          "excluded-promotion-type": 2
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 83.3,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 2
-        },
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "freebie",
-          "count": 1
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 59,
-      "missionFitScore": 67,
-      "coverageScore": 13,
-      "precisionScore": 69,
-      "sourceWeightScore": 54
-    },
-    {
       "sourceKey": "gastro2",
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
@@ -978,9 +988,9 @@
       "file": "deals-pending-firecrawl4.json",
       "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
       "totalDeals": 79,
-      "uniqueDeals": 71,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 8,
+      "uniqueDeals": 72,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
       "fresh1dCount": 0,
       "fresh7dCount": 11,
       "viennaCount": 9,
@@ -1074,7 +1084,7 @@
       ],
       "healthScore": 56,
       "missionFitScore": 50,
-      "coverageScore": 64,
+      "coverageScore": 65,
       "precisionScore": 51,
       "sourceWeightScore": 55
     },
