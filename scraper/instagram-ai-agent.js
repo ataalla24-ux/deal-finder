@@ -249,8 +249,11 @@ const DISCOVERY_ACCOUNT_PATTERNS = [
   /\b(?:eatinvienna|foodiewien|tastyfood|viennafood|viennaeats|viennarestaurants|viennas_joy|1000things|foodspots|shaysfoodblog|lisapestschansky)\b/i,
 ];
 
-const EXPIRY_PATTERNS = [
-  /\b(?:abgelaufen|vorbei|nicht mehr gueltig|expired|ended)\b/i,
+const EXPLICIT_EXPIRY_PATTERNS = [
+  /\b(?:abgelaufen|beendet|nicht mehr gueltig|expired|offer ended|promotion ended|deal ended)\b/i,
+  /\b(?:aktion|angebot|deal|promo(?:tion)?|event|veranstaltung)\b.{0,30}\b(?:ist|war|sei|schon|bereits|nun|jetzt)?\s*vorbei\b/i,
+  /\b(?:ist|war|sei|schon|bereits)\s+(?:leider\s+)?vorbei\b/i,
+  /(?:^|[.!?]\s+)vorbei(?:[.!?]|$)/i,
 ];
 
 const SYNTHETIC_POST_DATE_SOURCE_PATTERN = /(?:agent[-_ ]?run|instagram[-_ ]?ai[-_ ]?agent|ai[-_ ]?agent|firecrawl.*run|current[-_ ]?language|discover(?:ed|y)|crawl(?:ed|er)?(?:at|time)?|scrap(?:ed|er)?(?:at|time)?|generated(?:at|time)?|communitysubmission|submittedat|import(?:ed|er)?(?:at|time)?)/i;
@@ -613,7 +616,7 @@ function mergeCandidate(existing, candidate) {
     snippet: cleanText([existing.snippet, candidate.snippet].filter(Boolean).join(' '), 1600),
     source: [...new Set([existing.source, candidate.source].filter(Boolean))].join(', '),
     query: cleanText([...new Set([existing.query, candidate.query].filter(Boolean))].join(' | '), 500),
-    sourceDeal: existing.sourceDeal || candidate.sourceDeal,
+    sourceDeal: preferredSourceDeal,
     sourceAccount: existing.sourceAccount || candidate.sourceAccount,
     sourceCategory: existing.sourceCategory || candidate.sourceCategory,
     sourcePublishedAt: candidateSourceDate?.date?.toISOString()
@@ -1337,8 +1340,20 @@ function candidateSignal(candidate) {
     deal.description,
     deal.brand,
     deal.distance,
-    deal.expires,
+    trustedSourceDealExpirySignal(deal),
   ].map((part) => cleanText(part, 1800)).filter(Boolean).join(' ');
+}
+
+function trustedSourceDealExpirySignal(deal = {}) {
+  const value = cleanText(deal.expires, 180);
+  if (!value) return '';
+  const provenance = normalizeAscii([
+    deal.expiresSource,
+    deal.expirySource,
+    deal.evidence?.offerTiming?.source,
+  ].filter(Boolean).join(' '));
+  if (!provenance || /(?:review|fallback|synthetic|ttl|agent-run|relative-post-date)/i.test(provenance)) return '';
+  return /(?:caption|ocr|content[- ]?date|original[- ]?post|manual)/i.test(provenance) ? value : '';
 }
 
 function postSignal(candidate) {
@@ -1379,7 +1394,7 @@ function offerDateSignal(candidate) {
     preview.jsonLdText,
     deal.title,
     deal.description,
-    deal.expires,
+    trustedSourceDealExpirySignal(deal),
   ].map((part) => cleanText(part, 1200)).filter(Boolean).join(' ');
 }
 
@@ -1388,6 +1403,10 @@ function hasPattern(patterns, value) {
     ? stripFreeFromClaims(normalizeAscii(value))
     : normalizeAscii(value);
   return patterns.some((pattern) => pattern.test(normalized));
+}
+
+function hasExplicitExpiryLanguage(value) {
+  return hasPattern(EXPLICIT_EXPIRY_PATTERNS, value);
 }
 
 function stripFreeFromClaims(value = '') {
@@ -1781,7 +1800,7 @@ function buildQualityScore(candidate, signal) {
     score -= 28;
     reasons.push('false-positive-language');
   }
-  if (hasPattern(EXPIRY_PATTERNS, primarySignal)) {
+  if (hasExplicitExpiryLanguage(primarySignal)) {
     score -= 20;
     reasons.push('expired-language');
   }
@@ -1838,7 +1857,7 @@ function getRejectionReason(candidate, signal, score) {
   if (!hasPattern(STRONG_DEAL_PATTERNS, primarySignal)) return 'kein starkes Gratis-/Deal-Signal im Instagram-Post';
   if (!hasSpecificBrand(candidate, signal)) return 'keine belastbare Marke/Quelle';
   if (hasPattern(FALSE_POSITIVE_PATTERNS, primarySignal)) return 'Gewinnspiel/Versand/Guide/sonstiges False-Positive-Signal';
-  if (hasPattern(EXPIRY_PATTERNS, primarySignal)) return 'explizit abgelaufen oder vorbei';
+  if (hasExplicitExpiryLanguage(primarySignal)) return 'explizit abgelaufen oder vorbei';
   if (score < CONFIG.minScore) return `Score zu niedrig (${score})`;
   return '';
 }
@@ -1963,14 +1982,43 @@ function filterDealsRejectedByCandidates(deals, candidates) {
 }
 
 function buildAiPrompt(candidates) {
-  return candidates.map((candidate, index) => ({
-    index,
-    url: candidate.url,
-    heuristicScore: candidate.score,
-    heuristicRejection: cleanText(candidate.rejectionReason, 220),
-    evidence: cleanText(candidateSignal(candidate), 1800),
-    pubDate: parsePubDate(candidate)?.date?.toISOString() || '',
-  }));
+  return candidates.map((candidate, index) => {
+    const pubDate = parsePubDate(candidate)?.date || null;
+    return {
+      index,
+      url: candidate.url,
+      heuristicScore: candidate.score,
+      heuristicRejection: cleanText(candidate.rejectionReason, 220),
+      evidence: cleanText(candidateSignal(candidate), 1800),
+      pubDate: pubDate?.toISOString() || '',
+      postAgeDays: pubDate ? Number(ageDaysExact(pubDate).toFixed(2)) : null,
+      maxPostAgeDays: Math.min(CONFIG.maxAgeDays, ABSOLUTE_MAX_POST_AGE_DAYS),
+    };
+  });
+}
+
+function isContradictedAiFreshnessRejection(candidate, reason) {
+  const text = normalizeAscii(reason);
+  const claimsPostIsOld = /(?:\bpost(?: date)?\b.{0,90}\b(?:older than|more than|over)\s+(?:7|seven)\s+days\b|\b(?:older than|more than|over)\s+(?:7|seven)\s+days\b.{0,50}\bpost\b|\bpost\b.{0,45}\btoo old\b|\b(?:post|beitrag)\b.{0,70}\b(?:aelter als|alter als)\s*7\s*tage\b)/i.test(text);
+  if (!claimsPostIsOld) return false;
+
+  const pubDate = parsePubDate(candidate);
+  if (!pubDate?.date) return false;
+  const dateSignal = offerDateSignal(candidate) || postSignal(candidate) || candidateSignal(candidate);
+  const timing = evaluateInstagramOfferTiming({
+    signal: dateSignal,
+    pubDate: pubDate.date,
+    maxAgeDays: CONFIG.maxAgeDays,
+    activeOfferMaxAgeDays: CONFIG.activeOfferMaxAgeDays,
+    futureSkewMinutes: CONFIG.publicationFutureSkewMinutes,
+  });
+  return Boolean(
+    timing.eligibleByAge
+    && !timing.futurePublication
+    && !timing.explicitExpired
+    && !timing.yesterdayOnly
+    && !hasExpiredRelativeOfferDate(dateSignal, pubDate.date)
+  );
 }
 
 function isAiReviewableCandidate(candidate) {
@@ -1994,6 +2042,11 @@ function mergeAiDeal(candidate, aiRow) {
   const confidence = Math.max(0, Math.min(1, Number(aiRow.confidence) || 0));
   if (!aiRow.accept || confidence < 0.58) {
     const reason = cleanText(aiRow.reason, 180);
+    if (!aiRow.accept && isContradictedAiFreshnessRejection(candidate, reason)) {
+      candidate.aiFreshnessVetoIgnored = true;
+      candidate.aiFreshnessVetoReason = reason;
+      return null;
+    }
     candidate.rejectionReason = `LLM hat Kandidat abgelehnt${reason ? `: ${reason}` : ''}`;
     candidate.llmRejected = true;
     return null;
@@ -2133,6 +2186,13 @@ async function classifyWithOpenAi(candidates) {
   if (!process.env.OPENAI_API_KEY) return { deals: [], errors: ['OPENAI_API_KEY fehlt'], usage: emptyUsage };
 
   const payload = buildAiPrompt(candidates);
+  const viennaDateParts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Vienna',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date()).map((part) => [part.type, part.value]));
+  const currentDateVienna = `${viennaDateParts.year}-${viennaDateParts.month}-${viennaDateParts.day}`;
   const body = {
     model: CONFIG.model,
     temperature: 0.1,
@@ -2175,8 +2235,10 @@ async function classifyWithOpenAi(candidates) {
         role: 'system',
         content: [
           'You classify public Instagram/search snippets for FreeFinder Wien.',
+          `The current calendar date in Vienna is ${currentDateVienna}.`,
           'Accept only concrete current deals in Vienna: free items, 1+1/BOGO, food/drink promos, vouchers, opening offers, or similar.',
           'Reject every post older than 7 days, even when it describes an active or recurring offer. A future offer start is allowed only when the post itself is fresh.',
+          'The supplied pubDate and postAgeDays are authoritative and already validated. Never recalculate or guess post age. Never reject a candidate as older than 7 days when postAgeDays is 7 or less.',
           'Reject giveaways, free shipping, generic guides, expired offers, non-Vienna offers, and vague brand marketing.',
           'Use only the supplied evidence. Do not invent dates, prices, brands, or locations.',
         ].join(' '),
@@ -2466,6 +2528,7 @@ async function main() {
     heuristicAccepted: heuristicDeals.length,
     heuristicAcceptedBeforeAi: heuristicDealsBeforeAi.length,
     heuristicVetoedByAi: heuristicDealsBeforeAi.length - heuristicDeals.length,
+    aiFreshnessVetoesIgnored: candidates.filter((candidate) => candidate.aiFreshnessVetoIgnored).length,
     aiAccepted: aiResult.deals.length,
     aiRescueCandidates: aiCandidates.filter((candidate) => candidate.aiRescueAttempt).length,
     aiRescued: aiCandidates.filter((candidate) => candidate.aiRescueAttempt && !candidate.rejectionReason).length,

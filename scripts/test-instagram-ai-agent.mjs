@@ -238,6 +238,50 @@ assert.deepEqual(
   'an LLM rejection must veto a heuristic deal for the same post',
 );
 
+const contradictedFreshnessVetoCandidate = candidate({
+  shortcode: 'FreshLlmDate1',
+  ageMs: 2 * DAY_MS,
+  description: 'Chaihona Restaurant Wien: Am 7. September gibt es in 1020 Wien gratis Eis für Kinder.',
+  sourceDeal: { ownerUsername: 'chaihona', brand: 'Chaihona Restaurant Wien' },
+});
+const heuristicBeforeFreshnessVeto = buildHeuristicDeal(contradictedFreshnessVetoCandidate);
+assert.ok(heuristicBeforeFreshnessVeto);
+assert.equal(mergeAiDeal(contradictedFreshnessVetoCandidate, {
+  accept: false,
+  confidence: 0.91,
+  reason: 'Offer start is in the future, but the post is older than 7 days.',
+}), null);
+assert.equal(
+  contradictedFreshnessVetoCandidate.rejectionReason,
+  '',
+  'the LLM must not overrule an authoritative two-day post date with a contradictory age claim',
+);
+assert.equal(contradictedFreshnessVetoCandidate.aiFreshnessVetoIgnored, true);
+assert.deepEqual(
+  filterDealsRejectedByCandidates([heuristicBeforeFreshnessVeto], [contradictedFreshnessVetoCandidate]),
+  [heuristicBeforeFreshnessVeto],
+  'a deterministic fresh heuristic deal survives a hallucinated LLM age veto',
+);
+
+const genuinelyOldAiCandidate = candidate({
+  shortcode: 'ActuallyOldLlmDate1',
+  ageMs: 8 * DAY_MS,
+  description: 'Test Café Wien: In 1070 Wien gab es einen Kaffee gratis.',
+  sourceDeal: { ownerUsername: 'testcafe', brand: 'Test Café' },
+});
+assert.equal(buildHeuristicDeal(genuinelyOldAiCandidate), null);
+mergeAiDeal(genuinelyOldAiCandidate, {
+  accept: false,
+  confidence: 0.91,
+  reason: 'The post is older than 7 days.',
+});
+assert.notEqual(
+  genuinelyOldAiCandidate.aiFreshnessVetoIgnored,
+  true,
+  'a genuinely old post must not receive the contradictory-freshness exception',
+);
+assert.match(genuinelyOldAiCandidate.rejectionReason, /^LLM hat Kandidat abgelehnt/);
+
 const acceptedAiCandidate = candidate({
   shortcode: 'LlmAcceptedVienna1',
   description: 'Test Café: Diese Woche gibt es in der Taborstraße 1, 1020 Wien einen Kaffee gratis.',
@@ -396,6 +440,51 @@ const openedYesterday = candidate({
   sourceDeal: { ownerUsername: 'testcafe', brand: 'Test Café' },
 });
 assert.ok(buildHeuristicDeal(openedYesterday), 'Gestern eröffnet does not mean the current promotion expired yesterday');
+
+const instagramVisitBoilerplate = candidate({
+  shortcode: 'VisitBoilerplate1',
+  description: 'Restaurant ROTH Wien: Von Montag bis Freitag gibt es den Mittagsteller für nur €10,80. Kommen Sie vorbei und gönnen Sie sich Genuss. Verpasse keinen Beitrag mehr von Restaurant ROTH.',
+  sourceDeal: { ownerUsername: 'restaurantroth', brand: 'Restaurant ROTH' },
+});
+const visitBoilerplateDeal = buildHeuristicDeal(instagramVisitBoilerplate);
+assert.ok(visitBoilerplateDeal, 'Kommt/Kommen Sie vorbei is an invitation, not expired-language');
+assert.equal(instagramVisitBoilerplate.reasons.includes('expired-language'), false);
+
+const explicitlyEndedOffer = candidate({
+  shortcode: 'ExplicitlyEnded1',
+  description: 'Test Café Wien: Diese Aktion ist leider vorbei. Es gab 20% Rabatt auf Kaffee in 1070 Wien.',
+  sourceDeal: { ownerUsername: 'testcafe', brand: 'Test Café' },
+});
+assert.equal(buildHeuristicDeal(explicitlyEndedOffer), null, 'an explicitly ended promotion remains blocked');
+assert.match(explicitlyEndedOffer.rejectionReason, /abgelaufen|vorbei/i);
+
+const staleDerivedExpiryMetadata = candidate({
+  shortcode: 'StaleDerivedExpiry1',
+  ageMs: 2 * DAY_MS,
+  description: 'Aahar Wien: Diese Woche gibt es in 1070 Wien 15% Rabatt auf das Mittagsmenü.',
+  sourceDeal: {
+    ownerUsername: 'aaharwien',
+    brand: 'Aahar Wien',
+    expires: 'Nur heute (Aktionstag) 18:00 Uhr',
+  },
+});
+assert.ok(
+  buildHeuristicDeal(staleDerivedExpiryMetadata),
+  'unproven derived expiry metadata must not override current original-post evidence',
+);
+
+const expiredTodayInOriginalPost = candidate({
+  shortcode: 'ExpiredTodayOriginal1',
+  ageMs: 2 * DAY_MS,
+  description: 'Aahar Wien: Nur heute gibt es in 1070 Wien 15% Rabatt auf das Mittagsmenü.',
+  sourceDeal: { ownerUsername: 'aaharwien', brand: 'Aahar Wien' },
+});
+assert.equal(
+  buildHeuristicDeal(expiredTodayInOriginalPost),
+  null,
+  'a relative one-day offer in the original post must still expire against its publication date',
+);
+assert.match(expiredTodayInOriginalPost.rejectionReason, /Kurz-Aktion|abgelaufen/i);
 
 const withinClockSkew = candidate({
   shortcode: 'ClockSkew9m1',
