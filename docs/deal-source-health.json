@@ -1,23 +1,17 @@
 {
-  "generatedAt": "2026-09-05T21:28:33.743Z",
+  "generatedAt": "2026-09-05T22:05:25.832Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 669,
-    "uniqueCandidates": 632,
-    "distinctCandidates": 648,
-    "duplicateClusters": 16,
+    "totalCandidates": 661,
+    "uniqueCandidates": 624,
+    "distinctCandidates": 641,
+    "duplicateClusters": 17,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 73,
-        "totalDeals": 17
       },
       {
         "sourceKey": "instagram-ai",
@@ -32,10 +26,16 @@
         "totalDeals": 15
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 68,
-        "totalDeals": 5
+        "sourceKey": "firecrawl2",
+        "sourceLabel": "Firecrawl Key 3 - Consumables",
+        "healthScore": 67,
+        "totalDeals": 2
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 66,
+        "totalDeals": 4
       }
     ],
     "topMissionSources": [
@@ -52,12 +52,6 @@
         "totalDeals": 4
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 69,
-        "totalDeals": 17
-      },
-      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 66,
@@ -68,6 +62,12 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "missionFitScore": 64,
         "totalDeals": 2
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "missionFitScore": 58,
+        "totalDeals": 50
       }
     ],
     "topCoverageSources": [
@@ -115,12 +115,6 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 78,
-        "totalDeals": 17
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 76,
@@ -133,9 +127,15 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 72,
+        "totalDeals": 50
+      },
+      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 72,
+        "precisionScore": 70,
         "totalDeals": 5
       }
     ],
@@ -145,12 +145,6 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 70,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 63,
-        "totalDeals": 17
       },
       {
         "sourceKey": "instagram-ai",
@@ -165,10 +159,16 @@
         "totalDeals": 4
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 58,
-        "totalDeals": 5
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 57,
+        "totalDeals": 15
+      },
+      {
+        "sourceKey": "firecrawl2",
+        "sourceLabel": "Firecrawl Key 3 - Consumables",
+        "sourceWeightScore": 57,
+        "totalDeals": 2
       }
     ],
     "topSourcesToFix": [
@@ -286,78 +286,6 @@
       "coverageScore": 16,
       "precisionScore": 88,
       "sourceWeightScore": 70
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 17,
-      "uniqueDeals": 10,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 5,
-      "fresh1dCount": 5,
-      "fresh7dCount": 17,
-      "viennaCount": 17,
-      "foodDrinkCount": 13,
-      "promoCount": 12,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis-Eintritt zum Event bei Arabic Night",
-        "Mit unserem Rabattcode SIMULATORENNEWS spart ihr im offiziellen CTS-Shop zusätzlich 5 %.",
-        "Back 2 School und wir haben ein tolles Angebot für euch 😍 am 7."
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0.3,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.8,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86.6,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 12
-        },
-        {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "shopping",
-          "count": 2
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 8
-        },
-        {
-          "value": "rabatt",
-          "count": 6
-        },
-        {
-          "value": "freebie",
-          "count": 2
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [],
-      "healthScore": 73,
-      "missionFitScore": 69,
-      "coverageScore": 26,
-      "precisionScore": 78,
-      "sourceWeightScore": 63
     },
     {
       "sourceKey": "instagram-ai",
@@ -512,95 +440,6 @@
       "sourceWeightScore": 57
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 5,
-      "uniqueDeals": 2,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 5,
-      "fresh7dCount": 5,
-      "viennaCount": 5,
-      "foodDrinkCount": 1,
-      "promoCount": 4,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Why join: → Meet Europe's top communicators → Real event production experience → Free access to session → Boost your professional network",
-        "Free to apply.",
-        "Gratis-Eintritt zum Event bei Arabic Night"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-05T20:40:39.122Z",
-        "finishedAt": "2026-09-05T20:43:03.709Z",
-        "durationMs": 144587,
-        "counts": {
-          "rawCandidates": 91,
-          "normalizedCandidates": 5,
-          "verifiedCandidates": 5,
-          "previousDeals": 0,
-          "acceptedDeals": 5,
-          "rejectedDeals": 81
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 60,
-          "missing-text": 13,
-          "general-recommendation": 4,
-          "excluded-promotion-type": 3,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.2,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86.4,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 3
-        },
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 3
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 68,
-      "missionFitScore": 66,
-      "coverageScore": 15,
-      "precisionScore": 72,
-      "sourceWeightScore": 58
-    },
-    {
       "sourceKey": "firecrawl2",
       "file": "deals-pending-firecrawl2.json",
       "sourceLabel": "Firecrawl Key 3 - Consumables",
@@ -750,6 +589,95 @@
       "coverageScore": 16,
       "precisionScore": 76,
       "sourceWeightScore": 61
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 5,
+      "uniqueDeals": 1,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
+      "fresh1dCount": 5,
+      "fresh7dCount": 5,
+      "viennaCount": 5,
+      "foodDrinkCount": 1,
+      "promoCount": 4,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Why join: → Meet Europe's top communicators → Real event production experience → Free access to session → Boost your professional network",
+        "Free to apply.",
+        "Gratis-Eintritt zum Event bei Arabic Night"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-05T20:40:39.122Z",
+        "finishedAt": "2026-09-05T20:43:03.709Z",
+        "durationMs": 144587,
+        "counts": {
+          "rawCandidates": 91,
+          "normalizedCandidates": 5,
+          "verifiedCandidates": 5,
+          "previousDeals": 0,
+          "acceptedDeals": 5,
+          "rejectedDeals": 81
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 60,
+          "missing-text": 13,
+          "general-recommendation": 4,
+          "excluded-promotion-type": 3,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.2,
+      "duplicateRate": 0.8,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.2,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.4,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 3
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 3
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 63,
+      "missionFitScore": 66,
+      "coverageScore": 15,
+      "precisionScore": 70,
+      "sourceWeightScore": 56
     },
     {
       "sourceKey": "joe",
@@ -989,13 +917,80 @@
       "sourceWeightScore": 57
     },
     {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 9,
+      "uniqueDeals": 4,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 3,
+      "fresh7dCount": 9,
+      "viennaCount": 9,
+      "foodDrinkCount": 5,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Ganze 10 kg Joghurt für nur 14,99 €!",
+        "0% 5 ee | IV Sy LEN \\v 3 STUNDEN / PRIVATE ne va",
+        "10% Rabatt in unseren Lokalen"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.4,
+      "duplicateRate": 0.6,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.6,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.2,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 5
+        },
+        {
+          "value": "shopping",
+          "count": 3
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 7
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 58,
+      "missionFitScore": 51,
+      "coverageScore": 16,
+      "precisionScore": 62,
+      "sourceWeightScore": 48
+    },
+    {
       "sourceKey": "firecrawl4",
       "file": "deals-pending-firecrawl4.json",
       "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
       "totalDeals": 79,
-      "uniqueDeals": 73,
-      "duplicateDeals": 6,
-      "duplicateAcrossSources": 6,
+      "uniqueDeals": 72,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
       "fresh1dCount": 0,
       "fresh7dCount": 11,
       "viennaCount": 9,
