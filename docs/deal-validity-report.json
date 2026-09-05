@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-05T16:29:05.201Z",
+  "generatedAt": "2026-09-05T17:35:16.626Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 303,
-    "allowed": 1,
-    "blocked": 302,
-    "warnings": 1,
+    "total": 304,
+    "allowed": 3,
+    "blocked": 301,
+    "warnings": 2,
     "reasonCounts": {
       "nicht eindeutig in Wien": 40,
       "älter als 7 Tage (2026-06-27)": 1,
@@ -38,13 +38,13 @@
       "älter als 7 Tage (2026-07-16)": 1,
       "Gottesdienste nur im Wochenlauf": 34,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 13,
+      "URL ungültig (HTTP 404)": 10,
       "älter als 7 Tage (2026-07-30)": 1,
       "abgelaufen (2026-09-04)": 1,
-      "abgelaufen (2026-09-01)": 3,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2020-12-18)": 2,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-07-01)": 4,
       "älter als 7 Tage (2026-08-15)": 2,
+      "abgelaufen (2026-09-01)": 2,
       "ausgeschlossene Quelle (gastro.news)": 25,
       "älter als 7 Tage (2026-08-11)": 1,
       "abgelaufen (2026-08-11)": 1,
@@ -87,11 +87,11 @@
     "reasonCategoryCounts": {
       "nicht Wien": 40,
       "älter als 7 Tage": 183,
-      "abgelaufen": 15,
+      "abgelaufen": 14,
       "ausgeschlossene Quelle": 29,
       "kein konkreter Deal": 209,
       "kein echtes Post-Datum": 82,
-      "ungültige URL": 17,
+      "ungültige URL": 14,
       "Gottesdienste außerhalb Wochenlauf": 34,
       "Gewinnspiel": 1
     },
@@ -144,12 +144,12 @@
         }
       },
       "Firecrawl Gastro #4": {
-        "total": 17,
-        "allowed": 0,
-        "blocked": 17,
-        "warnings": 0,
+        "total": 18,
+        "allowed": 2,
+        "blocked": 16,
+        "warnings": 2,
         "reasonCategoryCounts": {
-          "abgelaufen": 9,
+          "abgelaufen": 8,
           "älter als 7 Tage": 11,
           "kein konkreter Deal": 2,
           "ausgeschlossene Quelle": 9
@@ -176,7 +176,7 @@
           "kein konkreter Deal": 32,
           "Gottesdienste außerhalb Wochenlauf": 33,
           "älter als 7 Tage": 33,
-          "ungültige URL": 3
+          "ungültige URL": 2
         }
       },
       "Google News RSS": {
@@ -193,8 +193,8 @@
         }
       },
       "Gutscheine.at": {
-        "total": 3,
-        "allowed": 0,
+        "total": 4,
+        "allowed": 1,
         "blocked": 3,
         "warnings": 0,
         "reasonCategoryCounts": {
@@ -210,13 +210,6 @@
           "kein konkreter Deal": 2
         }
       },
-      "instagram-ai-agent": {
-        "total": 1,
-        "allowed": 1,
-        "blocked": 0,
-        "warnings": 1,
-        "reasonCategoryCounts": {}
-      },
       "Kirchen Verzeichnis": {
         "total": 99,
         "allowed": 0,
@@ -225,7 +218,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 96,
           "älter als 7 Tage": 99,
-          "ungültige URL": 9,
+          "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "nicht Wien": 1
         }
@@ -261,20 +254,53 @@
   },
   "allowed": [
     {
-      "id": "instagram-ai-7ef7d82f5012",
-      "title": "Dürüm für 2,99 € bei DERGAST",
-      "brand": "DERGAST Wien",
-      "source": "instagram-ai-agent",
-      "url": "https://www.instagram.com/p/Dcvfr0Ns7We/",
+      "id": "fc4g-220bs6",
+      "title": "2-for-1 auf das jeweilige qualifizierende Subway-Angebot: ei",
+      "brand": "Subway",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.lieferando.at/speisekarte/subway-wien-wagramer-strasse?c_id=79128df7-6dac-4646-8de2-154ca7827817",
       "reasons": [],
       "warnings": [
-        "kein Ablaufdatum gefunden"
+        "URL nicht eindeutig prüfbar (www.lieferando.at)",
+        "kein Quell-/Post-Datum gefunden"
       ],
-      "sourceDate": "2026-09-01T10:54:54.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 4,
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "2026-09-05",
+      "expirySource": "deal.expires",
+      "urlStatus": "unklar: www.lieferando.at"
+    },
+    {
+      "id": "fc4g-17niaxz",
+      "title": "Frühstück für 1,00 € statt 2,99 €",
+      "brand": "IKEA Restaurant",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.ikea.com/at/de/food/",
+      "reasons": [],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
       "expiryDate": "",
-      "expirySource": "",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "gs-507194",
+      "title": "11% Parfumdreams Gutschein für alles",
+      "brand": "Parfumdreams",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/parfumdreams",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-09-05T10:51:17.448Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-09-05",
+      "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
     }
   ],
@@ -351,7 +377,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-05T15:29:08.147Z",
+      "sourceDate": "2026-09-05T17:31:36.213Z",
       "sourceDateSource": "deal.submittedAt",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -370,7 +396,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-05T15:29:08.147Z",
+      "sourceDate": "2026-09-05T17:31:36.213Z",
       "sourceDateSource": "deal.submittedAt",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -389,7 +415,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-05T15:29:08.147Z",
+      "sourceDate": "2026-09-05T17:31:36.213Z",
       "sourceDateSource": "deal.submittedAt",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -427,7 +453,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-05T15:29:08.147Z",
+      "sourceDate": "2026-09-05T17:31:36.213Z",
       "sourceDateSource": "deal.submittedAt",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -446,7 +472,7 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-05T15:29:08.147Z",
+      "sourceDate": "2026-09-05T17:31:36.213Z",
       "sourceDateSource": "deal.submittedAt",
       "sourceAgeDays": 0,
       "expiryDate": "",
@@ -1544,23 +1570,6 @@
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "fc4g-vc0zxq",
-      "title": "Dürüm für 2,99 € (Angebotspreis).",
-      "brand": "DERGAST",
-      "source": "Firecrawl Gastro #4",
-      "url": "https://www.instagram.com/p/Dcvfr0Ns7We/",
-      "reasons": [
-        "abgelaufen (2026-09-01)"
-      ],
-      "warnings": [],
-      "sourceDate": "2026-09-01T10:54:54.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 4,
-      "expiryDate": "2026-09-01",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    },
-    {
       "id": "fc4g-advozs",
       "title": "10 € Rabatt ab 25 € Bestellwert, für Neu- und Bestandskunden",
       "brand": "Lieferando",
@@ -2185,7 +2194,6 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
@@ -2196,7 +2204,7 @@
       "sourceAgeDays": 139,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "freikirche-7-20260419",
@@ -3175,7 +3183,6 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
@@ -3185,7 +3192,7 @@
       "sourceAgeDays": 195,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -3990,7 +3997,6 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
@@ -4000,7 +4006,7 @@
       "sourceAgeDays": 195,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gottesdienste-17-20260222",
