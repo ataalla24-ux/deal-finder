@@ -1095,7 +1095,7 @@ async function discoverProfileCandidates(accounts, map) {
           if (urls.length > 0 || !isProfileUnavailable(data)) break;
         }
 
-        if (urls.length === 0) {
+        if (!stopProfileScan && urls.length === 0) {
           if (isProfileUnavailable(data)) {
             stats.blocked += 1;
             consecutiveUnavailable += 1;
