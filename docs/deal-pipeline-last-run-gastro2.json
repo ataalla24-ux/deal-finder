@@ -1,36 +1,79 @@
 {
   "schemaVersion": 1,
-  "runId": "gastro2-2026-09-04T05:44:41.137Z",
+  "runId": "gastro2-2026-09-05T05:30:11.274Z",
   "sourceKey": "gastro2",
   "sourceLabel": "Firecrawl Key 1 - Gastro",
   "status": "completed-with-errors",
-  "startedAt": "2026-09-04T05:40:45.788Z",
-  "finishedAt": "2026-09-04T05:44:41.137Z",
-  "durationMs": 235349,
+  "startedAt": "2026-09-05T05:21:14.307Z",
+  "finishedAt": "2026-09-05T05:30:11.274Z",
+  "durationMs": 536967,
   "outputFile": "docs/deals-pending-gastro2.json",
   "counts": {
-    "rawCandidates": 1,
-    "normalizedCandidates": 1,
-    "verifiedCandidates": 74,
-    "previousDeals": 73,
-    "acceptedDeals": 74,
-    "rejectedDeals": 0
+    "rawCandidates": 20,
+    "normalizedCandidates": 19,
+    "verifiedCandidates": 86,
+    "previousDeals": 70,
+    "acceptedDeals": 86,
+    "rejectedDeals": 3
   },
-  "rejectedByReason": {},
-  "rejectedSamples": [],
+  "rejectedByReason": {
+    "excluded-downstream-source:DieRestaurantWoche": 1,
+    "post-verification-rejected": 2
+  },
+  "rejectedSamples": [
+    {
+      "reason": "excluded-downstream-source:DieRestaurantWoche",
+      "deal": {
+        "id": "",
+        "title": "Vergünstigte Mehrgang-Menüs: 2-Gänge-Lunch ab 19,50 € bzw. 3-Gänge-Dinner ab 39,50 € in über 100 Wiener Restaurants",
+        "brand": "Culinarius / Restaurantwoche Wien",
+        "url": "https://www.sparhamster.at/restaurantwoche-wien/",
+        "source": "",
+        "pubDate": "",
+        "expires": "",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "post-verification-rejected",
+      "deal": {
+        "id": "g2-1xbm0fq",
+        "title": "Amerikanischer Smashburger mit Fries und Getränk für 5 €; Vo",
+        "brand": "Smashly Burger",
+        "url": "https://www.instagram.com/p/Dc1UZr1sb6Y/",
+        "source": "Firecrawl Gastro #2",
+        "pubDate": "4. September 2026 (Instagram zeigte beim Abruf „1d“)",
+        "expires": "7. September 2026 ab 12:00 Uhr; Endzeit nicht angegeben",
+        "postVerificationStatus": ""
+      }
+    },
+    {
+      "reason": "post-verification-rejected",
+      "deal": {
+        "id": "g2-etzitd",
+        "title": "Eine Kugel AÏDA-Eis gratis zu jedem Kaffee, sobald am Wiener",
+        "brand": "AÏDA Café-Konditorei",
+        "url": "https://www.instagram.com/p/DaGLVgNjEeQ/",
+        "source": "Firecrawl Gastro #2",
+        "pubDate": "27. Juni 2026",
+        "expires": "Ab Erreichen von 35 °C am Wiener Stephansplatz, den ganzen Sommer 2026; Auslösetag wird von AÏDA in Echtzeit bekanntgegeben Vom Auslösen bis zur Sperrstunde am ",
+        "postVerificationStatus": ""
+      }
+    }
+  ],
   "diagnostics": {
     "configuredSources": 16,
-    "attemptedSources": 14,
-    "completedSources": 1,
+    "attemptedSources": 16,
+    "completedSources": 4,
     "searchTargets": 12,
     "broadAgentPasses": 4,
     "agentTimeoutSeconds": 420,
     "maxCreditsPerAgent": 500,
     "totalCreditsUsed": 0,
-    "retainedPreviousDeals": 73,
+    "retainedPreviousDeals": 70,
     "prunedPreviousDeals": 0,
     "excludedPreviousDeals": 0,
-    "duplicateCandidatesMerged": 0,
+    "duplicateCandidatesMerged": 2,
     "sourceStats": [
       {
         "id": "search:1",
@@ -151,7 +194,7 @@
         "searchCandidates": 0,
         "normalizedCandidates": 0,
         "creditsUsed": 0,
-        "searchError": "Rate limit exceeded. Consumed (req/min): 11, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:41:46 GMT+0000 (Coordinated Universal Time)"
+        "searchError": "Rate limit exceeded. Consumed (req/min): 11, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Sat Sep 05 2026 05:22:14 GMT+0000 (Coordinated Universal Time)"
       },
       {
         "id": "search:12",
@@ -162,33 +205,50 @@
         "searchCandidates": 0,
         "normalizedCandidates": 0,
         "creditsUsed": 0,
-        "searchError": "Rate limit exceeded. Consumed (req/min): 12, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:41:46 GMT+0000 (Coordinated Universal Time)"
+        "searchError": "Rate limit exceeded. Consumed (req/min): 12, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Sat Sep 05 2026 05:22:14 GMT+0000 (Coordinated Universal Time)"
       },
       {
         "id": "broad-agent:1",
         "kind": "broad-agent",
         "label": "Breite Suche 1",
         "status": "completed-agent",
-        "rawCandidates": 1,
-        "normalizedCandidates": 1,
+        "rawCandidates": 4,
+        "normalizedCandidates": 4,
         "creditsUsed": 0
       },
       {
         "id": "broad-agent:2",
         "kind": "broad-agent",
         "label": "Breite Suche 2",
-        "status": "failed",
-        "rawCandidates": 0,
-        "normalizedCandidates": 0,
-        "creditsUsed": 0,
-        "error": "Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+        "status": "completed-agent",
+        "rawCandidates": 4,
+        "normalizedCandidates": 3,
+        "creditsUsed": 0
+      },
+      {
+        "id": "broad-agent:3",
+        "kind": "broad-agent",
+        "label": "Breite Suche 3",
+        "status": "completed-agent",
+        "rawCandidates": 5,
+        "normalizedCandidates": 5,
+        "creditsUsed": 0
+      },
+      {
+        "id": "broad-agent:4",
+        "kind": "broad-agent",
+        "label": "Breite Suche 4",
+        "status": "completed-agent",
+        "rawCandidates": 7,
+        "normalizedCandidates": 7,
+        "creditsUsed": 0
       }
     ],
     "verifier": {
       "statusCounts": {
+        "verified-meta-graph": 4,
         "verified-original-post": 1,
-        "not-recorded": 67,
-        "verified-meta-graph": 6
+        "not-recorded": 81
       },
       "verifiedOriginalPosts": 1,
       "timestampOnlyPosts": 0,
@@ -208,8 +268,7 @@
     "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
     "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
     "instagram.com Search: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value.",
-    "ikea.com Search: Rate limit exceeded. Consumed (req/min): 11, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:41:46 GMT+0000 (Coordinated Universal Time)",
-    "marktguru.at Search: Rate limit exceeded. Consumed (req/min): 12, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Fri Sep 04 2026 05:41:46 GMT+0000 (Coordinated Universal Time)",
-    "Breite Suche 2: Insufficient credits to perform this request. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing or try changing the request limit to a lower value."
+    "ikea.com Search: Rate limit exceeded. Consumed (req/min): 11, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Sat Sep 05 2026 05:22:14 GMT+0000 (Coordinated Universal Time)",
+    "marktguru.at Search: Rate limit exceeded. Consumed (req/min): 12, Remaining (req/min): 0. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after 58s, resets at Sat Sep 05 2026 05:22:14 GMT+0000 (Coordinated Universal Time)"
   ]
 }
