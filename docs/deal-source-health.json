@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-05T20:42:30.124Z",
+  "generatedAt": "2026-09-05T20:46:37.178Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 660,
-    "uniqueCandidates": 625,
-    "distinctCandidates": 640,
+    "totalCandidates": 662,
+    "uniqueCandidates": 627,
+    "distinctCandidates": 642,
     "duplicateClusters": 15,
     "topHealthySources": [
       {
@@ -16,7 +16,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 75,
+        "healthScore": 73,
         "totalDeals": 17
       },
       {
@@ -26,16 +26,16 @@
         "totalDeals": 15
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 69,
-        "totalDeals": 43
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 72,
+        "totalDeals": 5
       },
       {
-        "sourceKey": "firecrawl2",
-        "sourceLabel": "Firecrawl Key 3 - Consumables",
-        "healthScore": 67,
-        "totalDeals": 2
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 71,
+        "totalDeals": 43
       }
     ],
     "topMissionSources": [
@@ -60,8 +60,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 67,
-        "totalDeals": 3
+        "missionFitScore": 66,
+        "totalDeals": 5
       },
       {
         "sourceKey": "firecrawl2",
@@ -127,16 +127,16 @@
         "totalDeals": 4
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 73,
+        "totalDeals": 5
+      },
+      {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "precisionScore": 73,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 71,
-        "totalDeals": 3
       }
     ],
     "topWeightedSources": [
@@ -161,14 +161,14 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 59,
+        "sourceWeightScore": 60,
         "totalDeals": 43
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 57,
-        "totalDeals": 15
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 59,
+        "totalDeals": 5
       }
     ],
     "topSourcesToFix": [
@@ -292,9 +292,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 17,
-      "uniqueDeals": 12,
-      "duplicateDeals": 5,
-      "duplicateAcrossSources": 3,
+      "uniqueDeals": 11,
+      "duplicateDeals": 6,
+      "duplicateAcrossSources": 4,
       "fresh1dCount": 5,
       "fresh7dCount": 17,
       "viennaCount": 17,
@@ -307,7 +307,7 @@
         "Back 2 School und wir haben ein tolles Angebot für euch 😍 am 7."
       ],
       "lastRun": null,
-      "uniqueRate": 0.7,
+      "uniqueRate": 0.6,
       "duplicateRate": 0.2,
       "fresh1dRate": 0.3,
       "fresh7dRate": 1,
@@ -353,7 +353,7 @@
         }
       ],
       "issues": [],
-      "healthScore": 75,
+      "healthScore": 73,
       "missionFitScore": 69,
       "coverageScore": 26,
       "precisionScore": 79,
@@ -430,13 +430,102 @@
       "sourceWeightScore": 57
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 5,
+      "uniqueDeals": 3,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 5,
+      "fresh7dCount": 5,
+      "viennaCount": 5,
+      "foodDrinkCount": 1,
+      "promoCount": 4,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Why join: → Meet Europe's top communicators → Real event production experience → Free access to session → Boost your professional network",
+        "Free to apply.",
+        "Gratis-Eintritt zum Event bei Arabic Night"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-05T20:40:39.122Z",
+        "finishedAt": "2026-09-05T20:43:03.709Z",
+        "durationMs": 144587,
+        "counts": {
+          "rawCandidates": 91,
+          "normalizedCandidates": 5,
+          "verifiedCandidates": 5,
+          "previousDeals": 0,
+          "acceptedDeals": 5,
+          "rejectedDeals": 81
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 60,
+          "missing-text": 13,
+          "general-recommendation": 4,
+          "excluded-promotion-type": 3,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.2,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.4,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 3
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 3
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 72,
+      "missionFitScore": 66,
+      "coverageScore": 16,
+      "precisionScore": 73,
+      "sourceWeightScore": 59
+    },
+    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 43,
-      "uniqueDeals": 36,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 7,
+      "uniqueDeals": 37,
+      "duplicateDeals": 6,
+      "duplicateAcrossSources": 6,
       "fresh1dCount": 4,
       "fresh7dCount": 43,
       "viennaCount": 43,
@@ -449,8 +538,8 @@
         "EBI 3.0 DOUBLE CHALLENGE: Essen des Tages kostenlos bei erfolgreicher Challenge"
       ],
       "lastRun": null,
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.2,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
       "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -505,11 +594,11 @@
       "issues": [
         "wenige Deals sind frischer als 1 Tag"
       ],
-      "healthScore": 69,
+      "healthScore": 71,
       "missionFitScore": 55,
       "coverageScore": 43,
-      "precisionScore": 69,
-      "sourceWeightScore": 59
+      "precisionScore": 70,
+      "sourceWeightScore": 60
     },
     {
       "sourceKey": "firecrawl2",
@@ -661,90 +750,6 @@
       "coverageScore": 16,
       "precisionScore": 76,
       "sourceWeightScore": 61
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 3,
-      "uniqueDeals": 1,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 3,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 1,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Es sind noch Plätze frei!",
-        "🥭 Und für alle, die lieber zu Hause genießen: Bei jeder selbst abgeholten Bestellung ab 35 € gibt’s 0,3 Liter Mango-Lassi gratis dazu.",
-        "20 % auf den Pasta Workshop, buon appetito"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-05T15:30:16.520Z",
-        "finishedAt": "2026-09-05T15:32:25.449Z",
-        "durationMs": 128929,
-        "counts": {
-          "rawCandidates": 93,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
-          "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 86
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 70,
-          "missing-text": 9,
-          "general-recommendation": 5,
-          "excluded-promotion-type": 2
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 83.3,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 2
-        },
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "freebie",
-          "count": 1
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 66,
-      "missionFitScore": 67,
-      "coverageScore": 13,
-      "precisionScore": 71,
-      "sourceWeightScore": 57
     },
     {
       "sourceKey": "joe",
