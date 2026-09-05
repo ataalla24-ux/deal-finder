@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-05T05:32:43.074Z",
+  "generatedAt": "2026-09-05T05:56:05.023Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -82,7 +82,7 @@
     },
     "deals-pending-gastro2.json": {
       "deals": 86,
-      "candidates": 1
+      "candidates": 0
     },
     "deals-pending-gemeinde.json": {
       "deals": 34,
@@ -101,8 +101,8 @@
       "candidates": 0
     },
     "deals-pending-instagram-ai.json": {
-      "deals": 19,
-      "candidates": 1
+      "deals": 39,
+      "candidates": 3
     },
     "deals-pending-instagram-apify.json": {
       "deals": 1,
@@ -157,12 +157,16 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 2,
-  "candidateAccounts": 2,
+  "candidatePosts": 3,
+  "candidateAccounts": 3,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
-      "username": "urbans_lounge_restaurant",
+      "username": "travel972026",
+      "candidates": 1
+    },
+    {
+      "username": "foodiewien",
       "candidates": 1
     },
     {
@@ -173,7 +177,12 @@
   "fetchedPosts": 50,
   "exactMatches": 2,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "travel972026",
+      "message": "Meta API 400 for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28travel972026%29%7Busername%2Cname%2Cmedia.limit%2825%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted] Invalid user id"
+    }
+  ],
   "accountFailures": {
     "notarunclub_vienna": {
       "count": 2,
@@ -184,9 +193,14 @@
       "count": 1,
       "lastAt": "2026-08-25T08:25:01.247Z",
       "cooldownUntil": "2026-08-26T08:25:01.247Z"
+    },
+    "travel972026": {
+      "count": 1,
+      "lastAt": "2026-09-05T05:56:05.023Z",
+      "cooldownUntil": "2026-09-06T05:56:05.023Z"
     }
   },
   "blockedEvidencePosts": 77,
-  "unmatchedCandidatePosts": 0,
-  "message": "2/2 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 1,
+  "message": "2/3 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
