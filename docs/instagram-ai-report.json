@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-05T06:46:50.830Z",
+  "lastUpdated": "2026-09-05T06:49:07.608Z",
   "config": {
     "maxCandidates": 120,
     "maxDeals": 50,
@@ -32,7 +32,7 @@
     "rateLimitedDuringRun": true
   },
   "watchlistAccounts": 95,
-  "discoveredCandidates": 90,
+  "discoveredCandidates": 95,
   "acceptedDeals": 22,
   "acceptedBeforeModeration": 22,
   "heuristicAccepted": 21,
@@ -44,8 +44,8 @@
   "aiRescued": 1,
   "aiUsage": {
     "inputTokens": 14790,
-    "outputTokens": 3196,
-    "totalTokens": 17986
+    "outputTokens": 3204,
+    "totalTokens": 17994
   },
   "moderation": {
     "removed": 0,
@@ -89,31 +89,31 @@
       "site:instagram.com/meat_point_smashburgerbar vienna deal",
       "site:instagram.com/zushimarket wien gratis",
       "site:instagram.com/zushimarket vienna deal",
-      "site:instagram.com/thedistrictkebab wien gratis",
-      "site:instagram.com/thedistrictkebab vienna deal",
-      "site:instagram.com/xo_grill wien gratis",
-      "site:instagram.com/xo_grill vienna deal",
-      "site:instagram.com/doenerwerkwien wien gratis",
-      "site:instagram.com/doenerwerkwien vienna deal",
-      "site:instagram.com/lorenzos_bar_lounge wien gratis",
-      "site:instagram.com/lorenzos_bar_lounge vienna deal",
-      "site:instagram.com/seelokaya wien gratis",
-      "site:instagram.com/seelokaya vienna deal",
-      "site:instagram.com/2ndstreetburger wien gratis",
-      "site:instagram.com/2ndstreetburger vienna deal",
+      "site:instagram.com/birbsbagel wien gratis",
+      "site:instagram.com/birbsbagel vienna deal",
+      "site:instagram.com/blumencafe.wien wien gratis",
+      "site:instagram.com/blumencafe.wien vienna deal",
+      "site:instagram.com/ghettosmash_ wien gratis",
+      "site:instagram.com/ghettosmash_ vienna deal",
+      "site:instagram.com/naanbrueder wien gratis",
+      "site:instagram.com/naanbrueder vienna deal",
+      "site:instagram.com/framburi_fries wien gratis",
+      "site:instagram.com/framburi_fries vienna deal",
+      "site:instagram.com/burgerbrothers20 wien gratis",
+      "site:instagram.com/burgerbrothers20 vienna deal",
       "site:instagram.com/tastyfood.vienna wien gratis",
       "site:instagram.com/tastyfood.vienna vienna deal",
-      "site:instagram.com/eatinvienna_ wien gratis",
-      "site:instagram.com/eatinvienna_ vienna deal",
-      "site:instagram.com/wolt.oesterreich wien gratis",
-      "site:instagram.com/wolt.oesterreich vienna deal",
-      "site:instagram.com/huhu.hotpot_vienna wien gratis",
-      "site:instagram.com/huhu.hotpot_vienna vienna deal"
+      "site:instagram.com/behalal.official wien gratis",
+      "site:instagram.com/behalal.official vienna deal",
+      "site:instagram.com/vienna.coffee wien gratis",
+      "site:instagram.com/vienna.coffee vienna deal",
+      "site:instagram.com/oakbrewcoffee wien gratis",
+      "site:instagram.com/oakbrewcoffee vienna deal"
     ],
     "discovered": 40,
     "errors": [
       {
-        "query": "site:instagram.com/huhu.hotpot_vienna vienna deal",
+        "query": "site:instagram.com/oakbrewcoffee vienna deal",
         "error": "HTTP 403: If this persists, please <a href=\"mailto:error-lite+9318@duckduckgo.com?subject=Error getting results\">email us</a>.<br />\nOur support email address includes an"
       }
     ]
@@ -121,19 +121,14 @@
   "existingCandidates": 283,
   "seedUrls": 0,
   "profileDiscovery": {
-    "accountsVisited": 1,
+    "accountsVisited": 2,
     "discovered": 0,
     "blocked": 1,
     "noPostLinks": 1,
     "rateLimited": true,
     "stoppedEarly": true,
     "stoppedReason": "instagram-http-429",
-    "errors": [
-      {
-        "account": "corner_xvi",
-        "error": "Cannot read properties of null (reading 'title')"
-      }
-    ]
+    "errors": []
   },
   "previewErrors": [
     {
@@ -149,19 +144,20 @@
   ],
   "aiErrors": [],
   "rejectionReasons": {
-    "kein echtes Instagram-Postdatum": 35,
+    "kein echtes Instagram-Postdatum": 40,
     "kein starkes Gratis-/Deal-Signal im Instagram-Post": 9,
     "kein eindeutiges Wien-Signal im Post oder verifiziertem Account-Kontext": 8,
-    "Normalisierung/Validity-Filter blockiert LLM-Deal": 4,
+    "Normalisierung/Validity-Filter blockiert LLM-Deal": 3,
     "Normalisierung/Validity-Filter blockiert Deal": 2,
-    "LLM hat Kandidat abgelehnt: No concrete discount or free deal described, vague offer.": 2,
-    "LLM hat Kandidat abgelehnt: Offer start in future (Sep 30) but post is recent; however, no concrete deal details or voucher code; location and brand unclear.": 1,
-    "LLM hat Kandidat abgelehnt: Event with paid tickets, no free or discount deal, and event date in future.": 1,
-    "LLM hat Kandidat abgelehnt: Event date in future, post recent but event not current, limited free tickets.": 1,
-    "LLM hat Kandidat abgelehnt: Event date in future, post recent but event not current.": 1,
-    "LLM hat Kandidat abgelehnt: No free or discount deal, price offer only.": 1,
-    "LLM hat Kandidat abgelehnt: No free or discount deal, product sale only.": 1,
-    "LLM hat Kandidat abgelehnt: Vague and unclear deal, no concrete offer or location.": 1,
+    "LLM hat Kandidat abgelehnt: Offer vague, no concrete discount or free item detailed, so reject.": 2,
+    "LLM hat Kandidat abgelehnt: Offer start date in future beyond 7 days, post is fresh but offer not current yet.": 1,
+    "LLM hat Kandidat abgelehnt: Offer includes discount and free item but from a nail studio, not food/drink or typical FreeFinder category; borderline but accepted only if clearly food/drink or voucher; here rej": 1,
+    "LLM hat Kandidat abgelehnt: Offer includes free item with purchase but not a clear discount or free standalone item; borderline but reject due to insufficient clarity.": 1,
+    "LLM hat Kandidat abgelehnt: Offer is travel related and for November 2026, not a current deal or promo for Vienna local free or discount items.": 1,
+    "LLM hat Kandidat abgelehnt: Offer is a service unrelated to free items, food, drink or vouchers for consumer deals.": 1,
+    "LLM hat Kandidat abgelehnt: No free or discount offer, just price info, reject.": 1,
+    "LLM hat Kandidat abgelehnt: Not a consumer deal or free item offer, reject.": 1,
+    "LLM hat Kandidat abgelehnt: Offer vague and unclear, no concrete current deal.": 1,
     "explizites Aktionsende liegt in der Vergangenheit": 1
   },
   "terminalRejected": [
@@ -15697,10 +15693,10 @@
   ],
   "freshRejected": [
     {
-      "url": "https://www.instagram.com/p/Dc3Dqsrl4Ql/",
+      "url": "https://www.instagram.com/reel/Dc3P-ENKTgj/",
       "score": 88,
-      "source": "instagram-ai, meta-instagram, wien-combined, meta-instagram",
-      "reason": "LLM hat Kandidat abgelehnt: Event with paid tickets, no free or discount deal, and event date in future.",
+      "source": "instagram-ai, all",
+      "reason": "LLM hat Kandidat abgelehnt: Offer includes discount and free item but from a nail studio, not food/drink or typical FreeFinder category; borderline but accepted only if clearly food/drink or voucher; here rej",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -15709,22 +15705,46 @@
         "known-source",
         "age-0d"
       ],
-      "pubDate": "2026-09-04T09:24:00.000Z",
+      "pubDate": "2026-09-04T11:13:58.000Z",
       "ageDays": 0,
-      "ageDaysExact": 0.89,
+      "ageDaysExact": 0.82,
       "postDateSource": "instagram-graph-timestamp",
-      "title": "In knapp drei Wochen startet die Soul-Saison in die nächste Runde, Do 24.09. um 18 Uhr in der Rooftop Bar mari",
-      "textSample": "In knapp drei Wochen startet die Soul-Saison in die nächste Runde, Do 24.09. um 18 Uhr in der Rooftop Bar mari In knapp drei Wochen startet die Soul-Saison in die nächste Runde, Do 24.09. um 18 Uhr in der Rooftop Bar maria_trink im Jaz In The City Vienna. Get down and party with us! Soul, Funk & RnB Musik aus den 60/70ern, Vinyl only, gepaart mit feinstem Es",
+      "title": "zebra_face::purple_heart::leopard::green_heart:free Matcha & Code: DILAN10 to get -10% off .. this is not an a",
+      "textSample": "zebra_face::purple_heart::leopard::green_heart:free Matcha & Code: DILAN10 to get -10% off .. this is not an a Dilan Polat auf Instagram: \"🦓💜🐆💚free Matcha & Code: DILAN10 to get -10% off .. this is not an average nail studio... this place is on a freaky level and I am freaky too always going for fresh and simple mani & pedi at this crazy place 😂 @abfab.",
       "ownerUsername": "",
-      "ownerRole": "merchant",
+      "ownerRole": "unknown",
       "scoutUsername": "",
+      "merchantUsername": "abfab.vienna"
+    },
+    {
+      "url": "https://www.instagram.com/reel/DcqhBUou-qn/",
+      "score": 82,
+      "source": "instagram-ai, meta-instagram, all, meta-instagram",
+      "reason": "LLM hat Kandidat abgelehnt: Offer is travel related and for November 2026, not a current deal or promo for Vienna local free or discount items.",
+      "reasons": [
+        "vienna-instagram-post",
+        "deal-signal",
+        "food-drink",
+        "existing-source-context",
+        "known-source",
+        "age-5d"
+      ],
+      "pubDate": "2026-08-30T12:31:53.000Z",
+      "ageDays": 5,
+      "ageDaysExact": 5.76,
+      "postDateSource": "instagram-graph-timestamp",
+      "title": "✈️ Flug 🕋 Mekka & Medina 💶 Nur € 890,- Wir organisieren alles",
+      "textSample": "November 2026 :hotel: Hotel • :bus: Transfer • :airplane: Flug :kaaba: Mekka & Medina :euro: Nur € 890,- Wir organisieren alles – du konzentrierst dich auf deine Iba 🕋 UMRAH November 2026 🤍 ✈️ Gemeinsam von Wien 📅 16.–23. November 2026 🏨 Hotel • 🚌 Transfer • ✈️ Flug 🕋 Mekka & Medina 💶 Nur € 890,- Wir organisieren alles – du konzentrierst dich auf dein",
+      "ownerUsername": "behalal.official",
+      "ownerRole": "creator",
+      "scoutUsername": "behalal.official",
       "merchantUsername": ""
     },
     {
       "url": "https://www.instagram.com/p/Dcs5bzujGll/",
       "score": 82,
       "source": "instagram-ai, all",
-      "reason": "LLM hat Kandidat abgelehnt: No concrete discount or free deal described, vague offer.",
+      "reason": "LLM hat Kandidat abgelehnt: Offer vague, no concrete discount or free item detailed, so reject.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -15771,7 +15791,7 @@
       "url": "https://www.instagram.com/reel/DcsuLLCICmT/",
       "score": 78,
       "source": "all",
-      "reason": "LLM hat Kandidat abgelehnt: No concrete discount or free deal described, vague offer.",
+      "reason": "LLM hat Kandidat abgelehnt: Offer vague, no concrete discount or free item detailed, so reject.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -15781,7 +15801,7 @@
       ],
       "pubDate": "2026-08-31T09:05:13.000Z",
       "ageDays": 4,
-      "ageDaysExact": 4.9,
+      "ageDaysExact": 4.91,
       "postDateSource": "instagram-graph-timestamp",
       "title": "Ramen aus Japan in Wien - @ramen.makotoya #ramen #vienna #japan #asian *anzeige",
       "textSample": "Ramen aus Japan in Wien - @ramen.makotoya #ramen #vienna #japan #asian *anzeige Ramen-Deal bei Mahnoor in Wien",
@@ -15794,7 +15814,7 @@
       "url": "https://www.instagram.com/reel/DcrOtjVsah8/",
       "score": 78,
       "source": "all",
-      "reason": "LLM hat Kandidat abgelehnt: Vague and unclear deal, no concrete offer or location.",
+      "reason": "LLM hat Kandidat abgelehnt: Offer vague and unclear, no concrete current deal.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -15804,7 +15824,7 @@
       ],
       "pubDate": "2026-08-30T19:10:03.000Z",
       "ageDays": 5,
-      "ageDaysExact": 5.48,
+      "ageDaysExact": 5.49,
       "postDateSource": "instagram-graph-timestamp",
       "title": "Was würdest du nehmen ? #assalburger #lotus #wien #burger",
       "textSample": "Was würdest du nehmen ? #assalburger #lotus #wien #burger Was würdest du nehmen ? #assalburger #lotus #wien #burger Was würdest du nehmen ? #assalburger #lotus #wien #burger Willst du lieber hausgemachten totus GRATIS oder 1.000 €? ++ = ‘",
@@ -15817,7 +15837,7 @@
       "url": "https://www.instagram.com/reel/Dc3mIZAOzBD/",
       "score": 76,
       "source": "meta-instagram, wien-combined, all, meta-instagram",
-      "reason": "LLM hat Kandidat abgelehnt: Offer start in future (Sep 30) but post is recent; however, no concrete deal details or voucher code; location and brand unclear.",
+      "reason": "LLM hat Kandidat abgelehnt: Offer start date in future beyond 7 days, post is fresh but offer not current yet.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -15837,56 +15857,33 @@
       "merchantUsername": ""
     },
     {
-      "url": "https://www.instagram.com/p/Dc22sNhF7MV/",
-      "score": 76,
-      "source": "instagram-ai, all",
-      "reason": "LLM hat Kandidat abgelehnt: Event date in future, post recent but event not current, limited free tickets.",
+      "url": "https://www.instagram.com/reel/Dc0N1oMul8R/",
+      "score": 73,
+      "source": "firecrawl4, food3, instagram-ai, all, firecrawl4",
+      "reason": "LLM hat Kandidat abgelehnt: Offer includes free item with purchase but not a clear discount or free standalone item; borderline but reject due to insufficient clarity.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
         "existing-source-context",
         "known-source",
-        "age-0d"
+        "age-1d"
       ],
-      "pubDate": "2026-09-04T07:30:37.000Z",
-      "ageDays": 0,
-      "ageDaysExact": 0.97,
+      "pubDate": "2026-09-03T06:57:39.000Z",
+      "ageDays": 1,
+      "ageDaysExact": 1.99,
       "postDateSource": "instagram-graph-timestamp",
-      "title": "LIMITED FREE TICKETS ARE LIVE :sparkles: Für SELECT x WEDDING Sparkle am 13. September im 25hours Hotel Wien h",
-      "textSample": "LIMITED FREE TICKETS ARE LIVE :sparkles: Für SELECT x WEDDING Sparkle am 13. September im 25hours Hotel Wien h SELECT Events - formerly MINI MARKT auf Instagram: \"LIMITED FREE TICKETS ARE LIVE ✨ Für SELECT x WEDDING Sparkle am 13. September im 25hours Hotel Wien haben wir jetzt eine limitierte Anzahl an Gratistickets freigeschaltet. Wenn du Lust auf einen So",
-      "ownerUsername": "",
-      "ownerRole": "unknown",
+      "title": "Adlerhof: A new limited-edition dessert to try in Vienna ... - Instagram",
+      "textSample": "A new limited-edition dessert to try in Vienna 🍒✨ adlerhof_wien & lancomeofficial created a dessert inspired by the new La vie est belle Very Cherry fragrance — with buttery pastry, cream & real cherries. 🍒 Buy the dessert → get a Lancôme luxury mini fragrance FREE 🎀 While supplies last. 📍 Adlerhof, Vienna 🛍 The Very Cherry fragrance is available at mar",
+      "ownerUsername": "viennabyaleksa",
+      "ownerRole": "merchant",
       "scoutUsername": "",
-      "merchantUsername": ""
-    },
-    {
-      "url": "https://www.instagram.com/p/Dcu1LVptC7F/",
-      "score": 70,
-      "source": "instagram-ai, all",
-      "reason": "LLM hat Kandidat abgelehnt: Event date in future, post recent but event not current.",
-      "reasons": [
-        "vienna-instagram-post",
-        "deal-signal",
-        "existing-source-context",
-        "known-source",
-        "age-4d"
-      ],
-      "pubDate": "2026-09-01T04:43:31.000Z",
-      "ageDays": 4,
-      "ageDaysExact": 4.09,
-      "postDateSource": "instagram-graph-timestamp",
-      "title": "The opening reception will be held on 24 September at 5:00 PM, with free admission.",
-      "textSample": "The opening reception will be held on 24 September at 5:00 PM, with free admission. Silvie Kořistková art auf Instagram: \"Slowly completing new works from my Interspace series – structured abstract paintings created for the upcoming international contemporary art exhibition BID4CONNECTION in Vienna. Some of the works are already taking their final form, whil",
-      "ownerUsername": "",
-      "ownerRole": "unknown",
-      "scoutUsername": "",
-      "merchantUsername": ""
+      "merchantUsername": "viennabyaleksa"
     },
     {
       "url": "https://www.instagram.com/p/Dcu5FbDjce9/",
       "score": 70,
       "source": "instagram-ai, all",
-      "reason": "Normalisierung/Validity-Filter blockiert LLM-Deal",
+      "reason": "LLM hat Kandidat abgelehnt: Offer is a service unrelated to free items, food, drink or vouchers for consumer deals.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -15909,7 +15906,7 @@
       "url": "https://www.instagram.com/reel/DcswfBPCtFK/",
       "score": 70,
       "source": "instagram-ai, all",
-      "reason": "LLM hat Kandidat abgelehnt: No free or discount deal, price offer only.",
+      "reason": "LLM hat Kandidat abgelehnt: No free or discount offer, just price info, reject.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -15932,7 +15929,7 @@
       "url": "https://www.instagram.com/reel/DcsYPodoMvA/",
       "score": 70,
       "source": "instagram-ai, all",
-      "reason": "LLM hat Kandidat abgelehnt: No free or discount deal, product sale only.",
+      "reason": "LLM hat Kandidat abgelehnt: Not a consumer deal or free item offer, reject.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -16077,7 +16074,7 @@
       ],
       "pubDate": "2026-09-03T11:00:50.000Z",
       "ageDays": 1,
-      "ageDaysExact": 1.82,
+      "ageDaysExact": 1.83,
       "postDateSource": "instagram-graph-timestamp",
       "title": "River Cruise: Gratis-Aktion in Wien",
       "textSample": "sparkles: :spiral_calendar_pad: 29TH JUNE 2027 :airplane: FLIGHTS FROM EDINBURGH :ship: 5★ RIVER CRUISE SHIP :anchor: OPERATOR: RIVIERA TRAVEL :crescent_moon: 8 DAYS :knife_fork_plate: FULL BOARD DINING :clinking_glasses: FREE A Bonny Travel auf Instagram: \"🚢 THE BLUE DANUBE RIVER CRUISE ✨ 8 DAYS OF BEAUTIFUL RIVERSIDE SCENERY, CULTURE & HISTORY! ✨ 🗓️ 29TH",
@@ -16253,7 +16250,7 @@
       ],
       "pubDate": "2026-09-03T17:01:05.000Z",
       "ageDays": 1,
-      "ageDaysExact": 1.57,
+      "ageDaysExact": 1.58,
       "postDateSource": "instagram-graph-timestamp",
       "title": "Hast du mal wieder Lust auf einen vergnüglichen und unbeschwerten Theaterabend in Wien",
       "textSample": "Hast du mal wieder Lust auf einen vergnüglichen und unbeschwerten Theaterabend in Wien? @ticketoase.at auf Instagram: \"Hast du mal wieder Lust auf einen vergnüglichen und unbeschwerten Theaterabend in Wien? 🎭 Warum den regulären Preis bezahlen, wenn du bei der Ticketoase die besten Komödien und Kabaretts der Stadt zu exklusiven Sonderpreisen genießen kannst",
@@ -16424,7 +16421,7 @@
       ],
       "pubDate": "2026-08-30T15:18:18.000Z",
       "ageDays": 5,
-      "ageDaysExact": 5.64,
+      "ageDaysExact": 5.65,
       "postDateSource": "instagram-graph-timestamp",
       "title": "MEGA Wie ROFFNUNGS GÜLTIG NEUE E MONTAG 31.08.2026 ANGEBOT SAMSTAG 05.09.2026 IEBETAGWIRZSONNG",
       "textSample": "MEGA Wie ROFFNUNGS GÜLTIG NEUE E MONTAG 31.08.2026 ANGEBOT SAMSTAG 05.09.2026 IEBETAGWIRZSONNG tada: Eröffnung feiern & sparen! :shopping_trolley::green_heart: Zur Eröffnung unserer neuen MEGA SUPERMARKT Filiale warten besondere Eröffnungsangebote auf euch! :round_pushpin: Dresdner Str. 55, 1200 Wien :point_right: megasupermark",
@@ -16439,7 +16436,7 @@
       "url": "https://www.instagram.com/reel/Dc3mIZAOzBD/",
       "score": 76,
       "source": "meta-instagram, wien-combined, all, meta-instagram",
-      "reason": "LLM hat Kandidat abgelehnt: Offer start in future (Sep 30) but post is recent; however, no concrete deal details or voucher code; location and brand unclear.",
+      "reason": "LLM hat Kandidat abgelehnt: Offer start date in future beyond 7 days, post is fresh but offer not current yet.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -16459,10 +16456,10 @@
       "merchantUsername": ""
     },
     {
-      "url": "https://www.instagram.com/p/Dc3Dqsrl4Ql/",
+      "url": "https://www.instagram.com/reel/Dc3P-ENKTgj/",
       "score": 88,
-      "source": "instagram-ai, meta-instagram, wien-combined, meta-instagram",
-      "reason": "LLM hat Kandidat abgelehnt: Event with paid tickets, no free or discount deal, and event date in future.",
+      "source": "instagram-ai, all",
+      "reason": "LLM hat Kandidat abgelehnt: Offer includes discount and free item but from a nail studio, not food/drink or typical FreeFinder category; borderline but accepted only if clearly food/drink or voucher; here rej",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -16471,39 +16468,16 @@
         "known-source",
         "age-0d"
       ],
-      "pubDate": "2026-09-04T09:24:00.000Z",
+      "pubDate": "2026-09-04T11:13:58.000Z",
       "ageDays": 0,
-      "ageDaysExact": 0.89,
+      "ageDaysExact": 0.82,
       "postDateSource": "instagram-graph-timestamp",
-      "title": "In knapp drei Wochen startet die Soul-Saison in die nächste Runde, Do 24.09. um 18 Uhr in der Rooftop Bar mari",
-      "textSample": "In knapp drei Wochen startet die Soul-Saison in die nächste Runde, Do 24.09. um 18 Uhr in der Rooftop Bar mari In knapp drei Wochen startet die Soul-Saison in die nächste Runde, Do 24.09. um 18 Uhr in der Rooftop Bar maria_trink im Jaz In The City Vienna. Get down and party with us! Soul, Funk & RnB Musik aus den 60/70ern, Vinyl only, gepaart mit feinstem Es",
-      "ownerUsername": "",
-      "ownerRole": "merchant",
-      "scoutUsername": "",
-      "merchantUsername": ""
-    },
-    {
-      "url": "https://www.instagram.com/p/Dc22sNhF7MV/",
-      "score": 76,
-      "source": "instagram-ai, all",
-      "reason": "LLM hat Kandidat abgelehnt: Event date in future, post recent but event not current, limited free tickets.",
-      "reasons": [
-        "vienna-instagram-post",
-        "deal-signal",
-        "existing-source-context",
-        "known-source",
-        "age-0d"
-      ],
-      "pubDate": "2026-09-04T07:30:37.000Z",
-      "ageDays": 0,
-      "ageDaysExact": 0.97,
-      "postDateSource": "instagram-graph-timestamp",
-      "title": "LIMITED FREE TICKETS ARE LIVE :sparkles: Für SELECT x WEDDING Sparkle am 13. September im 25hours Hotel Wien h",
-      "textSample": "LIMITED FREE TICKETS ARE LIVE :sparkles: Für SELECT x WEDDING Sparkle am 13. September im 25hours Hotel Wien h SELECT Events - formerly MINI MARKT auf Instagram: \"LIMITED FREE TICKETS ARE LIVE ✨ Für SELECT x WEDDING Sparkle am 13. September im 25hours Hotel Wien haben wir jetzt eine limitierte Anzahl an Gratistickets freigeschaltet. Wenn du Lust auf einen So",
+      "title": "zebra_face::purple_heart::leopard::green_heart:free Matcha & Code: DILAN10 to get -10% off .. this is not an a",
+      "textSample": "zebra_face::purple_heart::leopard::green_heart:free Matcha & Code: DILAN10 to get -10% off .. this is not an a Dilan Polat auf Instagram: \"🦓💜🐆💚free Matcha & Code: DILAN10 to get -10% off .. this is not an average nail studio... this place is on a freaky level and I am freaky too always going for fresh and simple mani & pedi at this crazy place 😂 @abfab.",
       "ownerUsername": "",
       "ownerRole": "unknown",
       "scoutUsername": "",
-      "merchantUsername": ""
+      "merchantUsername": "abfab.vienna"
     },
     {
       "url": "https://www.instagram.com/reel/Dc1TJN5AYSJ/",
@@ -16518,7 +16492,7 @@
       ],
       "pubDate": "2026-09-03T17:01:05.000Z",
       "ageDays": 1,
-      "ageDaysExact": 1.57,
+      "ageDaysExact": 1.58,
       "postDateSource": "instagram-graph-timestamp",
       "title": "Hast du mal wieder Lust auf einen vergnüglichen und unbeschwerten Theaterabend in Wien",
       "textSample": "Hast du mal wieder Lust auf einen vergnüglichen und unbeschwerten Theaterabend in Wien? @ticketoase.at auf Instagram: \"Hast du mal wieder Lust auf einen vergnüglichen und unbeschwerten Theaterabend in Wien? 🎭 Warum den regulären Preis bezahlen, wenn du bei der Ticketoase die besten Komödien und Kabaretts der Stadt zu exklusiven Sonderpreisen genießen kannst",
@@ -16584,7 +16558,7 @@
       ],
       "pubDate": "2026-09-03T11:00:50.000Z",
       "ageDays": 1,
-      "ageDaysExact": 1.82,
+      "ageDaysExact": 1.83,
       "postDateSource": "instagram-graph-timestamp",
       "title": "River Cruise: Gratis-Aktion in Wien",
       "textSample": "sparkles: :spiral_calendar_pad: 29TH JUNE 2027 :airplane: FLIGHTS FROM EDINBURGH :ship: 5★ RIVER CRUISE SHIP :anchor: OPERATOR: RIVIERA TRAVEL :crescent_moon: 8 DAYS :knife_fork_plate: FULL BOARD DINING :clinking_glasses: FREE A Bonny Travel auf Instagram: \"🚢 THE BLUE DANUBE RIVER CRUISE ✨ 8 DAYS OF BEAUTIFUL RIVERSIDE SCENERY, CULTURE & HISTORY! ✨ 🗓️ 29TH",
@@ -16592,6 +16566,29 @@
       "ownerRole": "merchant",
       "scoutUsername": "",
       "merchantUsername": ""
+    },
+    {
+      "url": "https://www.instagram.com/reel/Dc0N1oMul8R/",
+      "score": 73,
+      "source": "firecrawl4, food3, instagram-ai, all, firecrawl4",
+      "reason": "LLM hat Kandidat abgelehnt: Offer includes free item with purchase but not a clear discount or free standalone item; borderline but reject due to insufficient clarity.",
+      "reasons": [
+        "vienna-instagram-post",
+        "deal-signal",
+        "existing-source-context",
+        "known-source",
+        "age-1d"
+      ],
+      "pubDate": "2026-09-03T06:57:39.000Z",
+      "ageDays": 1,
+      "ageDaysExact": 1.99,
+      "postDateSource": "instagram-graph-timestamp",
+      "title": "Adlerhof: A new limited-edition dessert to try in Vienna ... - Instagram",
+      "textSample": "A new limited-edition dessert to try in Vienna 🍒✨ adlerhof_wien & lancomeofficial created a dessert inspired by the new La vie est belle Very Cherry fragrance — with buttery pastry, cream & real cherries. 🍒 Buy the dessert → get a Lancôme luxury mini fragrance FREE 🎀 While supplies last. 📍 Adlerhof, Vienna 🛍 The Very Cherry fragrance is available at mar",
+      "ownerUsername": "viennabyaleksa",
+      "ownerRole": "merchant",
+      "scoutUsername": "",
+      "merchantUsername": "viennabyaleksa"
     },
     {
       "url": "https://www.instagram.com/reel/DczKAyBtDKi/",
@@ -16706,20 +16703,19 @@
       "merchantUsername": ""
     },
     {
-      "url": "https://www.instagram.com/reel/DctwkdXgh9O/",
+      "url": "https://www.instagram.com/p/DcyAHv9IRv-/",
       "score": 0,
       "source": "duckduckgo",
       "reason": "kein echtes Instagram-Postdatum",
       "reasons": [
-        "deal-signal",
         "unknown-date"
       ],
       "pubDate": "",
       "ageDays": null,
       "ageDaysExact": null,
       "postDateSource": "",
-      "title": "Toby Romeo | free pop up in viennaaaa, are you ready ... - Instagram",
-      "textSample": "Toby Romeo | free pop up in viennaaaa, are you ready ... - Instagram tobyromeomusic on August 31, 2026: \"free pop up in viennaaaa, are you ready? comment „location\" and i'll send you the details #vienna #popup #dj # wien",
+      "title": "verziert&veredelt | Jessie | Das Lichtspiel macht den Unterschied! ...",
+      "textSample": "verziert&veredelt | Jessie | Das Lichtspiel macht den Unterschied! ... 9 likes, 6 comments - verziert_und_veredelt on September 2, 2026: \"Das Lichtspiel macht den Unterschied! Bei diesem Refill gab es ein richtiges Full-Cover-Highlight für meine Kundin: Nach dem perfekten Aufbau mit dem Camouflage One Fiberglasgel haben wir den UV Shellac Cat Eye Jungle Glea",
       "ownerUsername": "",
       "ownerRole": "unknown",
       "scoutUsername": "",
@@ -16742,19 +16738,40 @@
       "ageDaysExact": null,
       "postDateSource": "",
       "title": "Gratis-Getränk mit RECUP-Gutschein",
-      "textSample": "Gratis-Getränk mit RECUP-Gutschein Becher mit Gutschein bis 02.09.2026 täglich um 11 und 13 Uhr abholen; Gratis-Getränk bis 5,90 € bei teilnehmenden RECUP-Partnern bis 15.09.2026 einlösen. RECUP Neubaugasse 21, 1070 Wien 2026-09-15T23:59:59.999Z 589 likes, 8 comments - pam_becci on August 29, 2026: \" GRATIS Gratis-Getränk mit RECUP-Gutschein Becher mit Gutsc",
+      "textSample": "Gratis-Getränk mit RECUP-Gutschein Becher mit Gutschein bis 02.09.2026 täglich um 11 und 13 Uhr abholen; Gratis-Getränk bis 5,90 € bei teilnehmenden RECUP-Partnern bis 15.09.2026 einlösen. RECUP Neubaugasse 21, 1070 Wien 2026-09-15T23:59:59.999Z 590 likes, 8 comments - pam_becci on August 29, 2026: \" GRATIS Gratis-Getränk mit RECUP-Gutschein Becher mit Gutsc",
       "ownerUsername": "pam_becci",
       "ownerRole": "merchant",
       "scoutUsername": "",
       "merchantUsername": "pam_becci"
     },
     {
-      "url": "https://www.instagram.com/p/DcDG5ukDSLk/",
+      "url": "https://www.instagram.com/p/DclvdDqlX66/",
       "score": 0,
       "source": "duckduckgo",
       "reason": "kein echtes Instagram-Postdatum",
       "reasons": [
         "food-drink",
+        "unknown-date",
+        "false-positive-language"
+      ],
+      "pubDate": "",
+      "ageDays": null,
+      "ageDaysExact": null,
+      "postDateSource": "",
+      "title": "BURGER KING® Österreich | GIVEAWAY Der Sommer ist noch nicht vorbei ...",
+      "textSample": "BURGER KING® Österreich | GIVEAWAY Der Sommer ist noch nicht vorbei ... 205 likes, 138 comments - burgerkingaustria on August 28, 2026: \" GIVEAWAY Der Sommer ist noch nicht vorbei - und wir haben da noch etwas für euch. Mit etwas Glück gewinnt ihr einen von 10 exklusiven Burger King Hoodies. So könnt ihr teilnehmen: Folgt unserem Account. Liked diesen Beitra",
+      "ownerUsername": "",
+      "ownerRole": "unknown",
+      "scoutUsername": "",
+      "merchantUsername": ""
+    },
+    {
+      "url": "https://www.instagram.com/p/Db2_bWzDfGT/",
+      "score": 0,
+      "source": "duckduckgo",
+      "reason": "kein echtes Instagram-Postdatum",
+      "reasons": [
+        "deal-signal",
         "current-language",
         "unknown-date",
         "past-offer-date"
@@ -16763,28 +16780,86 @@
       "ageDays": null,
       "ageDaysExact": null,
       "postDateSource": "",
-      "title": "Alexander Leitner | BREAKING NEWS AUS DEM CAFÉ LEITNER Samstag, 15.08. ...",
-      "textSample": "Alexander Leitner | BREAKING NEWS AUS DEM CAFÉ LEITNER Samstag, 15.08. ... BREAKING NEWS AUS DEM CAFÉ LEITNER SAMSTAG, 15.08.2026 MARIÄ HIMMELFAHRT MMCLTA WIR HABEN GEÖFFNET 11:30-23:00 UHR TAGESGERICHT SELCHFLEISCHKNÖDEL MT KRAUT & BRATENSAFT € 9,90 LEITNER'S GASTRO ZIRKUS BIS SONNTAG N PFAFFSTÄTTEN KOPPSTRASSE 95A 1160 WIEN",
+      "title": "Kultursommer Wien | Wenn Dark Wave auf Straßenrap trifft ... - Instagram",
+      "textSample": "Kultursommer Wien | Wenn Dark Wave auf Straßenrap trifft ... - Instagram 45 likes, 0 comments - kultursommerwien on August 10, 2026: \"Wenn Dark Wave auf Straßenrap trifft und der ganze Park dazu abgeht, dann muss es Kultursommer sein! Wo habt ihr am letzten Wochenende gefeiert? Nicht verpassen: Bis 16.8. gibt es noch gratis",
       "ownerUsername": "",
       "ownerRole": "unknown",
       "scoutUsername": "",
       "merchantUsername": ""
     },
     {
-      "url": "https://www.instagram.com/reel/DbbOwzuR03A/",
+      "url": "https://www.instagram.com/p/DbqTx0MnPwb/",
       "score": 0,
       "source": "duckduckgo",
       "reason": "kein echtes Instagram-Postdatum",
       "reasons": [
-        "deal-signal",
         "unknown-date"
       ],
       "pubDate": "",
       "ageDays": null,
       "ageDaysExact": null,
       "postDateSource": "",
-      "title": "Goodnight.at Wien | Gratis tanzen mitten in Wien? Ja ... - Instagram",
-      "textSample": "Goodnight.at Wien | Gratis tanzen mitten in Wien? Ja ... - Instagram 238 likes, 6 comments - goodnight.at_wien on July 30, 2026: \" Gratis",
+      "title": "Vorteilsclub der Stadt Wien | Mach jetzt mit und gewinne 2 ... - Instagram",
+      "textSample": "Vorteilsclub der Stadt Wien | Mach jetzt mit und gewinne 2 ... - Instagram 74 likes, 54 comments - vorteilsclub. wien",
+      "ownerUsername": "",
+      "ownerRole": "unknown",
+      "scoutUsername": "",
+      "merchantUsername": ""
+    },
+    {
+      "url": "https://www.instagram.com/reel/DZF0dnwKlxy/",
+      "score": 0,
+      "source": "duckduckgo",
+      "reason": "kein echtes Instagram-Postdatum",
+      "reasons": [
+        "unknown-date"
+      ],
+      "pubDate": "",
+      "ageDays": null,
+      "ageDaysExact": null,
+      "postDateSource": "",
+      "title": "Taste of Vienna | Wiens erstes All-You-Can-Eat ... - Instagram",
+      "textSample": "Taste of Vienna | Wiens erstes All-You-Can-Eat ... - Instagram 811 likes, 26 comments - tasteofviennaa on June 2, 2026: \"數 Wiens",
+      "ownerUsername": "",
+      "ownerRole": "unknown",
+      "scoutUsername": "",
+      "merchantUsername": ""
+    },
+    {
+      "url": "https://www.instagram.com/p/DY9ZTwGiHnx/",
+      "score": 0,
+      "source": "duckduckgo",
+      "reason": "kein echtes Instagram-Postdatum",
+      "reasons": [
+        "food-drink",
+        "unknown-date"
+      ],
+      "pubDate": "",
+      "ageDays": null,
+      "ageDaysExact": null,
+      "postDateSource": "",
+      "title": "Anna ️ | Photo Dump: Wings Edition 1. Type Rating diaries ... - Instagram",
+      "textSample": "Anna ️ | Photo Dump: Wings Edition 1. Type Rating diaries ... - Instagram Open app anna_klhsr Follow Essen",
+      "ownerUsername": "",
+      "ownerRole": "unknown",
+      "scoutUsername": "",
+      "merchantUsername": ""
+    },
+    {
+      "url": "https://www.instagram.com/p/DTfRyBqiGkC/",
+      "score": 0,
+      "source": "duckduckgo",
+      "reason": "kein echtes Instagram-Postdatum",
+      "reasons": [
+        "unknown-date",
+        "past-offer-date"
+      ],
+      "pubDate": "",
+      "ageDays": null,
+      "ageDaysExact": null,
+      "postDateSource": "",
+      "title": "BRASIL GRILL|Brazilian Steakhouse | Live Musik im Brasil Grill Am ...",
+      "textSample": "BRASIL GRILL|Brazilian Steakhouse | Live Musik im Brasil Grill Am ... 26 likes, 0 comments - brasil_grill on January 14, 2026: \" Live Musik im Brasil Grill Am Freitag, 16.01. und Samstag, 17.01.2026, jeweils ab 19:00 Uhr, erwartet Sie ein ganz besonderes musikalisches Erlebnis im Brasil Grill. Leandro Ferraz @leandro.ferraz.cantor - live mit Gesang und Gitar",
       "ownerUsername": "",
       "ownerRole": "unknown",
       "scoutUsername": "",
@@ -16812,20 +16887,40 @@
       "merchantUsername": ""
     },
     {
-      "url": "https://www.instagram.com/p/C9-jI7IMnKE/",
-      "score": 0,
+      "url": "https://www.instagram.com/reel/DJl5xWNsPxs/",
+      "score": 10,
       "source": "duckduckgo",
       "reason": "kein echtes Instagram-Postdatum",
       "reasons": [
-        "food-drink",
+        "deal-signal",
+        "current-language",
         "unknown-date"
       ],
       "pubDate": "",
       "ageDays": null,
       "ageDaysExact": null,
       "postDateSource": "",
-      "title": "Center Parcs Park Nordseeküste | Buffet-Angebot im Sommer: Kinder ...",
-      "textSample": "Center Parcs Park Nordseeküste | Buffet-Angebot im Sommer: Kinder ... 37 likes, 0 comments - centerparcsnordseekueste on July 28, 2024: \"Buffet-Angebot im Sommer: Kinder essen",
+      "title": "Goodnight.at Wien | Dein Lieblingsguide fürs Wiener ... - Instagram",
+      "textSample": "Goodnight.at Wien | Dein Lieblingsguide fürs Wiener ... - Instagram 258 likes, 14 comments - goodnight.at_wien on May 13, 2025: \"Dein Lieblingsguide fürs Wiener Stadtleben ist zurück - druckfrisch, voller Geheimtipps und natürlich kostenlos! 拾 欄 Wenn du also mal wieder planlos bist, was du heute Abend oder am Wochenende in Wien",
+      "ownerUsername": "",
+      "ownerRole": "unknown",
+      "scoutUsername": "",
+      "merchantUsername": ""
+    },
+    {
+      "url": "https://www.instagram.com/p/C29tyaYNrb9/",
+      "score": 0,
+      "source": "duckduckgo",
+      "reason": "kein echtes Instagram-Postdatum",
+      "reasons": [
+        "unknown-date"
+      ],
+      "pubDate": "",
+      "ageDays": null,
+      "ageDaysExact": null,
+      "postDateSource": "",
+      "title": "Silberregion Karwendel | #tirolerball Auch der Sonntag in Wien war ...",
+      "textSample": "Silberregion Karwendel | #tirolerball Auch der Sonntag in Wien war ... Auch der Sonntag in Wien",
       "ownerUsername": "",
       "ownerRole": "unknown",
       "scoutUsername": "",
@@ -16919,29 +17014,6 @@
       "merchantUsername": ""
     },
     {
-      "url": "https://www.instagram.com/p/Dcu1LVptC7F/",
-      "score": 70,
-      "source": "instagram-ai, all",
-      "reason": "LLM hat Kandidat abgelehnt: Event date in future, post recent but event not current.",
-      "reasons": [
-        "vienna-instagram-post",
-        "deal-signal",
-        "existing-source-context",
-        "known-source",
-        "age-4d"
-      ],
-      "pubDate": "2026-09-01T04:43:31.000Z",
-      "ageDays": 4,
-      "ageDaysExact": 4.09,
-      "postDateSource": "instagram-graph-timestamp",
-      "title": "The opening reception will be held on 24 September at 5:00 PM, with free admission.",
-      "textSample": "The opening reception will be held on 24 September at 5:00 PM, with free admission. Silvie Kořistková art auf Instagram: \"Slowly completing new works from my Interspace series – structured abstract paintings created for the upcoming international contemporary art exhibition BID4CONNECTION in Vienna. Some of the works are already taking their final form, whil",
-      "ownerUsername": "",
-      "ownerRole": "unknown",
-      "scoutUsername": "",
-      "merchantUsername": ""
-    },
-    {
       "url": "https://www.instagram.com/reel/Dct6Gtityc5/",
       "score": 66,
       "source": "all",
@@ -17007,6 +17079,30 @@
       "merchantUsername": ""
     },
     {
+      "url": "https://www.instagram.com/reel/DcqhBUou-qn/",
+      "score": 82,
+      "source": "instagram-ai, meta-instagram, all, meta-instagram",
+      "reason": "LLM hat Kandidat abgelehnt: Offer is travel related and for November 2026, not a current deal or promo for Vienna local free or discount items.",
+      "reasons": [
+        "vienna-instagram-post",
+        "deal-signal",
+        "food-drink",
+        "existing-source-context",
+        "known-source",
+        "age-5d"
+      ],
+      "pubDate": "2026-08-30T12:31:53.000Z",
+      "ageDays": 5,
+      "ageDaysExact": 5.76,
+      "postDateSource": "instagram-graph-timestamp",
+      "title": "✈️ Flug 🕋 Mekka & Medina 💶 Nur € 890,- Wir organisieren alles",
+      "textSample": "November 2026 :hotel: Hotel • :bus: Transfer • :airplane: Flug :kaaba: Mekka & Medina :euro: Nur € 890,- Wir organisieren alles – du konzentrierst dich auf deine Iba 🕋 UMRAH November 2026 🤍 ✈️ Gemeinsam von Wien 📅 16.–23. November 2026 🏨 Hotel • 🚌 Transfer • ✈️ Flug 🕋 Mekka & Medina 💶 Nur € 890,- Wir organisieren alles – du konzentrierst dich auf dein",
+      "ownerUsername": "behalal.official",
+      "ownerRole": "creator",
+      "scoutUsername": "behalal.official",
+      "merchantUsername": ""
+    },
+    {
       "url": "https://www.instagram.com/reel/DcwbJlCgfg4/",
       "score": 50,
       "source": "all",
@@ -17054,7 +17150,7 @@
       "url": "https://www.instagram.com/p/Dcu5FbDjce9/",
       "score": 70,
       "source": "instagram-ai, all",
-      "reason": "Normalisierung/Validity-Filter blockiert LLM-Deal",
+      "reason": "LLM hat Kandidat abgelehnt: Offer is a service unrelated to free items, food, drink or vouchers for consumer deals.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -17077,7 +17173,7 @@
       "url": "https://www.instagram.com/p/Dcs5bzujGll/",
       "score": 82,
       "source": "instagram-ai, all",
-      "reason": "LLM hat Kandidat abgelehnt: No concrete discount or free deal described, vague offer.",
+      "reason": "LLM hat Kandidat abgelehnt: Offer vague, no concrete discount or free item detailed, so reject.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -17101,7 +17197,7 @@
       "url": "https://www.instagram.com/reel/DcswfBPCtFK/",
       "score": 70,
       "source": "instagram-ai, all",
-      "reason": "LLM hat Kandidat abgelehnt: No free or discount deal, price offer only.",
+      "reason": "LLM hat Kandidat abgelehnt: No free or discount offer, just price info, reject.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -17145,7 +17241,7 @@
       "url": "https://www.instagram.com/reel/DcsuLLCICmT/",
       "score": 78,
       "source": "all",
-      "reason": "LLM hat Kandidat abgelehnt: No concrete discount or free deal described, vague offer.",
+      "reason": "LLM hat Kandidat abgelehnt: Offer vague, no concrete discount or free item detailed, so reject.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -17155,7 +17251,7 @@
       ],
       "pubDate": "2026-08-31T09:05:13.000Z",
       "ageDays": 4,
-      "ageDaysExact": 4.9,
+      "ageDaysExact": 4.91,
       "postDateSource": "instagram-graph-timestamp",
       "title": "Ramen aus Japan in Wien - @ramen.makotoya #ramen #vienna #japan #asian *anzeige",
       "textSample": "Ramen aus Japan in Wien - @ramen.makotoya #ramen #vienna #japan #asian *anzeige Ramen-Deal bei Mahnoor in Wien",
@@ -17212,7 +17308,7 @@
       "url": "https://www.instagram.com/reel/DcsYPodoMvA/",
       "score": 70,
       "source": "instagram-ai, all",
-      "reason": "LLM hat Kandidat abgelehnt: No free or discount deal, product sale only.",
+      "reason": "LLM hat Kandidat abgelehnt: Not a consumer deal or free item offer, reject.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -17257,7 +17353,7 @@
       "url": "https://www.instagram.com/reel/DcrOtjVsah8/",
       "score": 78,
       "source": "all",
-      "reason": "LLM hat Kandidat abgelehnt: Vague and unclear deal, no concrete offer or location.",
+      "reason": "LLM hat Kandidat abgelehnt: Offer vague and unclear, no concrete current deal.",
       "reasons": [
         "vienna-instagram-post",
         "deal-signal",
@@ -17267,7 +17363,7 @@
       ],
       "pubDate": "2026-08-30T19:10:03.000Z",
       "ageDays": 5,
-      "ageDaysExact": 5.48,
+      "ageDaysExact": 5.49,
       "postDateSource": "instagram-graph-timestamp",
       "title": "Was würdest du nehmen ? #assalburger #lotus #wien #burger",
       "textSample": "Was würdest du nehmen ? #assalburger #lotus #wien #burger Was würdest du nehmen ? #assalburger #lotus #wien #burger Was würdest du nehmen ? #assalburger #lotus #wien #burger Willst du lieber hausgemachten totus GRATIS oder 1.000 €? ++ = ‘",
@@ -17289,7 +17385,7 @@
       ],
       "pubDate": "2026-08-30T15:18:18.000Z",
       "ageDays": 5,
-      "ageDaysExact": 5.64,
+      "ageDaysExact": 5.65,
       "postDateSource": "instagram-graph-timestamp",
       "title": "MEGA Wie ROFFNUNGS GÜLTIG NEUE E MONTAG 31.08.2026 ANGEBOT SAMSTAG 05.09.2026 IEBETAGWIRZSONNG",
       "textSample": "MEGA Wie ROFFNUNGS GÜLTIG NEUE E MONTAG 31.08.2026 ANGEBOT SAMSTAG 05.09.2026 IEBETAGWIRZSONNG tada: Eröffnung feiern & sparen! :shopping_trolley::green_heart: Zur Eröffnung unserer neuen MEGA SUPERMARKT Filiale warten besondere Eröffnungsangebote auf euch! :round_pushpin: Dresdner Str. 55, 1200 Wien :point_right: megasupermark",
