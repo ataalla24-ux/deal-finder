@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-05T11:18:51.166Z",
+  "generatedAt": "2026-09-05T12:45:19.528Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 656,
@@ -26,16 +26,16 @@
         "totalDeals": 25
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 71,
-        "totalDeals": 28
-      },
-      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "healthScore": 71,
         "totalDeals": 8
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 70,
+        "totalDeals": 28
       }
     ],
     "topMissionSources": [
@@ -159,16 +159,16 @@
         "totalDeals": 4
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 60,
-        "totalDeals": 28
-      },
-      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "sourceWeightScore": 60,
         "totalDeals": 8
+      },
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 59,
+        "totalDeals": 13
       }
     ],
     "topSourcesToFix": [
@@ -436,82 +436,6 @@
       "sourceWeightScore": 64
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 28,
-      "uniqueDeals": 21,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 7,
-      "fresh1dCount": 5,
-      "fresh7dCount": 28,
-      "viennaCount": 28,
-      "foodDrinkCount": 15,
-      "promoCount": 21,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "EBI 3.0 DOUBLE CHALLENGE - Essen des Tages kostenlos",
-        "Smash Dürum um 4 € Aktion zu Schulbeginn",
-        "Gratis Kaffee und Barista Wettbewerbe in Wien"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0.2,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 79,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 8
-        },
-        {
-          "value": "event",
-          "count": 6
-        },
-        {
-          "value": "shopping",
-          "count": 6
-        },
-        {
-          "value": "supermarkt",
-          "count": 5
-        },
-        {
-          "value": "reisen",
-          "count": 2
-        },
-        {
-          "value": "service",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 15
-        },
-        {
-          "value": "gratis",
-          "count": 12
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [],
-      "healthScore": 71,
-      "missionFitScore": 59,
-      "coverageScore": 33,
-      "precisionScore": 72,
-      "sourceWeightScore": 60
-    },
-    {
       "sourceKey": "wien-combined",
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
@@ -607,6 +531,84 @@
       "coverageScore": 19,
       "precisionScore": 73,
       "sourceWeightScore": 60
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 28,
+      "uniqueDeals": 21,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
+      "fresh1dCount": 4,
+      "fresh7dCount": 27,
+      "viennaCount": 28,
+      "foodDrinkCount": 15,
+      "promoCount": 21,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "EBI 3.0 DOUBLE CHALLENGE - Essen des Tages kostenlos",
+        "Smash Dürum um 4 € Aktion zu Schulbeginn",
+        "Gratis Kaffee und Barista Wettbewerbe in Wien"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 79,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 8
+        },
+        {
+          "value": "event",
+          "count": 6
+        },
+        {
+          "value": "shopping",
+          "count": 6
+        },
+        {
+          "value": "supermarkt",
+          "count": 5
+        },
+        {
+          "value": "reisen",
+          "count": 2
+        },
+        {
+          "value": "service",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 15
+        },
+        {
+          "value": "gratis",
+          "count": 12
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 70,
+      "missionFitScore": 57,
+      "coverageScore": 32,
+      "precisionScore": 70,
+      "sourceWeightScore": 58
     },
     {
       "sourceKey": "firecrawl2",
