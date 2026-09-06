@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-06T05:46:45.390Z",
+  "generatedAt": "2026-09-06T05:55:26.416Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 680,
-    "uniqueCandidates": 642,
-    "distinctCandidates": 659,
-    "duplicateClusters": 17,
+    "totalCandidates": 647,
+    "uniqueCandidates": 612,
+    "distinctCandidates": 628,
+    "duplicateClusters": 16,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -14,16 +14,16 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 72,
-        "totalDeals": 50
-      },
-      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "healthScore": 72,
         "totalDeals": 15
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 68,
+        "totalDeals": 17
       },
       {
         "sourceKey": "firecrawl2",
@@ -32,10 +32,10 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
         "healthScore": 66,
-        "totalDeals": 4
+        "totalDeals": 13
       }
     ],
     "topMissionSources": [
@@ -100,11 +100,11 @@
         "fresh1dCount": 0
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 43,
-        "totalDeals": 50,
-        "fresh1dCount": 6
+        "sourceKey": "gutscheine",
+        "sourceLabel": "Gutscheine.at",
+        "coverageScore": 35,
+        "totalDeals": 31,
+        "fresh1dCount": 31
       }
     ],
     "topPrecisionSources": [
@@ -127,16 +127,16 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 72,
-        "totalDeals": 50
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 71,
         "totalDeals": 13
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 71,
+        "totalDeals": 17
       }
     ],
     "topWeightedSources": [
@@ -145,12 +145,6 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 70,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 62,
-        "totalDeals": 50
       },
       {
         "sourceKey": "food3",
@@ -169,6 +163,12 @@
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 56,
         "totalDeals": 15
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 56,
+        "totalDeals": 17
       }
     ],
     "topSourcesToFix": [
@@ -288,88 +288,6 @@
       "sourceWeightScore": 70
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 50,
-      "uniqueDeals": 43,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 7,
-      "fresh1dCount": 6,
-      "fresh7dCount": 50,
-      "viennaCount": 50,
-      "foodDrinkCount": 31,
-      "promoCount": 34,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "EBI 3.0 DOUBLE CHALLENGE: Essen des Tages kostenlos bei erfolgreicher Challenge",
-        "20% Rabatt mit Vorteilsclub Wien und kostenloser Audioguide in der Klimt Villa",
-        "Gratis Kürbisschnitzen und Bauernmarkt beim Kürbisfest am Himmel"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 85,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 21
-        },
-        {
-          "value": "shopping",
-          "count": 11
-        },
-        {
-          "value": "supermarkt",
-          "count": 6
-        },
-        {
-          "value": "event",
-          "count": 3
-        },
-        {
-          "value": "reisen",
-          "count": 3
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 25
-        },
-        {
-          "value": "rabatt",
-          "count": 23
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 72,
-      "missionFitScore": 58,
-      "coverageScore": 43,
-      "precisionScore": 72,
-      "sourceWeightScore": 62
-    },
-    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -437,6 +355,80 @@
       "missionFitScore": 55,
       "coverageScore": 22,
       "precisionScore": 70,
+      "sourceWeightScore": 56
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 17,
+      "uniqueDeals": 12,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 1,
+      "fresh7dCount": 17,
+      "viennaCount": 17,
+      "foodDrinkCount": 11,
+      "promoCount": 12,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis Mango-Lassi bei Selbstabholung ab 35 € Bestellwert",
+        "Gratis Kaffee und Barista Wettbewerbe in Wien",
+        "Smashburger-Menü für 5 € bei Smashly Burger"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.6,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 83,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 9
+        },
+        {
+          "value": "shopping",
+          "count": 4
+        },
+        {
+          "value": "supermarkt",
+          "count": 2
+        },
+        {
+          "value": "drink",
+          "count": 1
+        },
+        {
+          "value": "event",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 8
+        },
+        {
+          "value": "rabatt",
+          "count": 8
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 68,
+      "missionFitScore": 58,
+      "coverageScore": 21,
+      "precisionScore": 71,
       "sourceWeightScore": 56
     },
     {
@@ -511,6 +503,68 @@
       "missionFitScore": 64,
       "coverageScore": 13,
       "precisionScore": 73,
+      "sourceWeightScore": 56
+    },
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 13,
+      "uniqueDeals": 6,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 3,
+      "fresh7dCount": 13,
+      "viennaCount": 13,
+      "foodDrinkCount": 10,
+      "promoCount": 6,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "September gibt es ein Gratis All-you-can-eat bei WOA.",
+        "URBAN’s SCHULSTART-SPECIAL FÜR ALLE ERSTKLÄSSLER 🎒✏️ Der erste Schultag gehört gefeiert!",
+        "September ein Gratis All-you-can-eat bei WOA."
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0.2,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.8,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 10
+        },
+        {
+          "value": "shopping",
+          "count": 3
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 7
+        },
+        {
+          "value": "gratis",
+          "count": 4
+        },
+        {
+          "value": "freebie",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 66,
+      "missionFitScore": 61,
+      "coverageScore": 19,
+      "precisionScore": 71,
       "sourceWeightScore": 56
     },
     {
@@ -589,68 +643,6 @@
       "coverageScore": 16,
       "precisionScore": 76,
       "sourceWeightScore": 61
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 13,
-      "uniqueDeals": 5,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 6,
-      "fresh1dCount": 3,
-      "fresh7dCount": 13,
-      "viennaCount": 13,
-      "foodDrinkCount": 10,
-      "promoCount": 6,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "September gibt es ein Gratis All-you-can-eat bei WOA.",
-        "URBAN’s SCHULSTART-SPECIAL FÜR ALLE ERSTKLÄSSLER 🎒✏️ Der erste Schultag gehört gefeiert!",
-        "September ein Gratis All-you-can-eat bei WOA."
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0.2,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.8,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84.8,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 10
-        },
-        {
-          "value": "shopping",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 7
-        },
-        {
-          "value": "gratis",
-          "count": 4
-        },
-        {
-          "value": "freebie",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 61,
-      "coverageScore": 19,
-      "precisionScore": 71,
-      "sourceWeightScore": 55
     },
     {
       "sourceKey": "joe",
