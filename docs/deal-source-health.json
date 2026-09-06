@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-06T07:27:52.839Z",
+  "generatedAt": "2026-09-06T08:24:45.106Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 649,
-    "uniqueCandidates": 614,
-    "distinctCandidates": 630,
+    "totalCandidates": 651,
+    "uniqueCandidates": 615,
+    "distinctCandidates": 631,
     "duplicateClusters": 16,
     "topHealthySources": [
       {
@@ -173,16 +173,6 @@
     ],
     "topSourcesToFix": [
       {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "healthScore": 0,
-        "issues": [
-          "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
-          "liefert aktuell 0 Deals"
-        ],
-        "sampleTitles": []
-      },
-      {
         "sourceKey": "google",
         "sourceLabel": "Google Deals",
         "healthScore": 0,
@@ -226,6 +216,22 @@
           "liefert aktuell 0 Deals"
         ],
         "sampleTitles": []
+      },
+      {
+        "sourceKey": "flights",
+        "sourceLabel": "Flights Vienna",
+        "healthScore": 28,
+        "issues": [
+          "wenige Deals sind frischer als 1 Tag",
+          "geringe Food-/Drink-Relevanz",
+          "wenige klare Gratis-/Promo-Signale",
+          "Wien-Signal ist zu schwach"
+        ],
+        "sampleTitles": [
+          "Hin & zurück nach Krakow ab €29.98",
+          "Hin & zurück nach Banja Luka ab €32.74",
+          "Hin & zurück nach Charleroi ab €33.98"
+        ]
       }
     ],
     "pipelineRuns": {
@@ -233,7 +239,6 @@
       "failedSources": [],
       "completedWithErrors": [
         "firecrawl2",
-        "firecrawl5",
         "gastro2",
         "power"
       ]
@@ -1681,6 +1686,79 @@
       "sourceWeightScore": 33
     },
     {
+      "sourceKey": "firecrawl5",
+      "file": "deals-pending-firecrawl5.json",
+      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 0,
+      "foodDrinkCount": 1,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Spee: 1. Challenge 3 KG Sashimi & Maki ⏱️ 30 Minuten Hydration Break 2 ...",
+        "Travel: Where to eat in Vienna Golden Frites Comment “VIENNA ... - Instagram"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-06T08:24:05.773Z",
+        "finishedAt": "2026-09-06T08:24:13.049Z",
+        "durationMs": 7276,
+        "counts": {
+          "rawCandidates": 21,
+          "normalizedCandidates": 21,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 19
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 19
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.5,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 80,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 43,
+      "missionFitScore": 46,
+      "coverageScore": 8,
+      "precisionScore": 44,
+      "sourceWeightScore": 37
+    },
+    {
       "sourceKey": "vienna-promo-radar",
       "file": "deals-pending-vienna-promo-radar.json",
       "sourceLabel": "Vienna Promo Radar",
@@ -1912,63 +1990,6 @@
       "coverageScore": 9,
       "precisionScore": 14,
       "sourceWeightScore": 12
-    },
-    {
-      "sourceKey": "firecrawl5",
-      "file": "deals-pending-firecrawl5.json",
-      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-      "totalDeals": 0,
-      "uniqueDeals": 0,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-09-05T08:05:59.598Z",
-        "finishedAt": "2026-09-05T08:08:05.250Z",
-        "durationMs": 125652,
-        "counts": {
-          "rawCandidates": 5,
-          "normalizedCandidates": 5,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 0,
-          "rejectedDeals": 5
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 5
-        },
-        "errors": [
-          "https://www.instagram.com/mosquito_mexican/: Firecrawl Agent nach 120s abgebrochen"
-        ],
-        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 0,
-      "topCategories": [],
-      "topTypes": [],
-      "issues": [
-        "letzter Lauf fand Kandidaten, aber akzeptierte keinen Deal",
-        "liefert aktuell 0 Deals"
-      ],
-      "healthScore": 0,
-      "missionFitScore": 0,
-      "coverageScore": 0,
-      "precisionScore": 0,
-      "sourceWeightScore": 0
     },
     {
       "sourceKey": "google",
