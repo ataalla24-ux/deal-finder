@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-06T15:45:12.816Z",
+  "generatedAt": "2026-09-06T15:49:05.959Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 675,
+    "totalCandidates": 677,
     "uniqueCandidates": 641,
-    "distinctCandidates": 655,
-    "duplicateClusters": 14,
+    "distinctCandidates": 656,
+    "duplicateClusters": 15,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -20,16 +20,16 @@
         "totalDeals": 13
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 72,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 69,
         "totalDeals": 46
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 69,
-        "totalDeals": 2
       },
       {
         "sourceKey": "firecrawl2",
@@ -46,16 +46,16 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 70,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 69,
         "totalDeals": 5
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 65,
-        "totalDeals": 2
       },
       {
         "sourceKey": "firecrawl2",
@@ -115,6 +115,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 75,
+        "totalDeals": 4
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 73,
@@ -124,12 +130,6 @@
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "precisionScore": 73,
-        "totalDeals": 2
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 72,
         "totalDeals": 2
       },
       {
@@ -145,6 +145,12 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 70,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 61,
+        "totalDeals": 4
       },
       {
         "sourceKey": "food3",
@@ -163,12 +169,6 @@
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 57,
         "totalDeals": 46
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 57,
-        "totalDeals": 2
       }
     ],
     "topSourcesToFix": [
@@ -361,6 +361,92 @@
       "sourceWeightScore": 57
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 4,
+      "uniqueDeals": 2,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 4,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 1,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "hello@transv.at 👥 Ab 4 angemeldeten Personen 💜 Teilnahme kostenlos",
+        "Am Donnerstag ist es schon so weit: unsere Comedyshow Queerlig mit Schmäh feiert den ersten Geburtstag 🥳🤘🏻 Unsere Allstars des letzten Ja",
+        "5% on all tickets at GetYourGuide with code TRAVELESCAPEVIENNA5 PS: save this r"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-06T15:43:26.538Z",
+        "finishedAt": "2026-09-06T15:46:02.738Z",
+        "durationMs": 156200,
+        "counts": {
+          "rawCandidates": 133,
+          "normalizedCandidates": 4,
+          "verifiedCandidates": 4,
+          "previousDeals": 0,
+          "acceptedDeals": 4,
+          "rejectedDeals": 116
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 95,
+          "excluded-promotion-type": 5,
+          "missing-text": 6,
+          "general-recommendation": 8,
+          "offer-expired": 1,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 89.5,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 2
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 3
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 72,
+      "missionFitScore": 70,
+      "coverageScore": 15,
+      "precisionScore": 75,
+      "sourceWeightScore": 61
+    },
+    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
@@ -436,79 +522,6 @@
       "missionFitScore": 52,
       "coverageScore": 39,
       "precisionScore": 68,
-      "sourceWeightScore": 57
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 1,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 2,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 0,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Am Donnerstag ist es schon so weit: unsere Comedyshow Queerlig mit Schmäh feiert den ersten Geburtstag 🥳🤘🏻 Unsere Allstars des letzten Ja",
-        "Oktober 2026 🕕 18:00–21:00 Uhr 📍 Keplerplatz 5, 1100 Wien 🎟️ Eintritt frei"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-06T11:18:04.378Z",
-        "finishedAt": "2026-09-06T11:20:29.052Z",
-        "durationMs": 144674,
-        "counts": {
-          "rawCandidates": 127,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 116
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 88,
-          "missing-text": 10,
-          "general-recommendation": 9,
-          "excluded-promotion-type": 7,
-          "offer-expired": 1,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 89.5,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 69,
-      "missionFitScore": 65,
-      "coverageScore": 12,
-      "precisionScore": 72,
       "sourceWeightScore": 57
     },
     {
@@ -732,77 +745,6 @@
       "sourceWeightScore": 50
     },
     {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 9,
-      "uniqueDeals": 5,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
-      "fresh1dCount": 3,
-      "fresh7dCount": 9,
-      "viennaCount": 9,
-      "foodDrinkCount": 3,
-      "promoCount": 5,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Freut euch auf klassische Spritzer um nur 3 Euro und unsere Special-Spritzer um 5 Euro.",
-        "Kostenlos für Schulklassen.",
-        "🍧Free ice cream and balloons for kids 🎈 🍭Kids activities 🥟Caucasian food for the whole family Because the first days of school deserve s"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.3,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.9,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 3
-        },
-        {
-          "value": "shopping",
-          "count": 3
-        },
-        {
-          "value": "essen",
-          "count": 2
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 4
-        },
-        {
-          "value": "rabatt",
-          "count": 4
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 61,
-      "missionFitScore": 49,
-      "coverageScore": 16,
-      "precisionScore": 63,
-      "sourceWeightScore": 49
-    },
-    {
       "sourceKey": "instagram-verified",
       "file": "deals-pending-instagram-verified.json",
       "sourceLabel": "Instagram",
@@ -975,6 +917,77 @@
       "coverageScore": 70,
       "precisionScore": 51,
       "sourceWeightScore": 57
+    },
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 9,
+      "uniqueDeals": 4,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 3,
+      "fresh7dCount": 9,
+      "viennaCount": 9,
+      "foodDrinkCount": 3,
+      "promoCount": 5,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Freut euch auf klassische Spritzer um nur 3 Euro und unsere Special-Spritzer um 5 Euro.",
+        "Kostenlos für Schulklassen.",
+        "🍧Free ice cream and balloons for kids 🎈 🍭Kids activities 🥟Caucasian food for the whole family Because the first days of school deserve s"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.4,
+      "duplicateRate": 0.6,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.9,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 3
+        },
+        {
+          "value": "shopping",
+          "count": 3
+        },
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 4
+        },
+        {
+          "value": "rabatt",
+          "count": 4
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 57,
+      "missionFitScore": 49,
+      "coverageScore": 15,
+      "precisionScore": 61,
+      "sourceWeightScore": 47
     },
     {
       "sourceKey": "firecrawl4",
