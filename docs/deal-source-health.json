@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-06T20:29:04.578Z",
+  "generatedAt": "2026-09-06T20:48:03.708Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 675,
-    "uniqueCandidates": 631,
-    "distinctCandidates": 650,
+    "totalCandidates": 674,
+    "uniqueCandidates": 630,
+    "distinctCandidates": 649,
     "duplicateClusters": 19,
     "topHealthySources": [
       {
@@ -20,12 +20,6 @@
         "totalDeals": 17
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 72,
-        "totalDeals": 4
-      },
-      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 68,
@@ -36,6 +30,12 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "healthScore": 67,
         "totalDeals": 2
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 65,
+        "totalDeals": 15
       }
     ],
     "topMissionSources": [
@@ -46,16 +46,16 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 70,
-        "totalDeals": 4
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 69,
         "totalDeals": 5
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 65,
+        "totalDeals": 3
       },
       {
         "sourceKey": "firecrawl2",
@@ -115,12 +115,6 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 75,
-        "totalDeals": 4
-      },
-      {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "precisionScore": 73,
@@ -137,6 +131,12 @@
         "sourceLabel": "Instagram AI Agent",
         "precisionScore": 71,
         "totalDeals": 34
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 70,
+        "totalDeals": 3
       }
     ],
     "topWeightedSources": [
@@ -145,12 +145,6 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 70,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 61,
-        "totalDeals": 4
       },
       {
         "sourceKey": "instagram-ai",
@@ -169,6 +163,12 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 57,
         "totalDeals": 103
+      },
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 56,
+        "totalDeals": 17
       }
     ],
     "topSourcesToFix": [
@@ -373,92 +373,6 @@
       "sourceWeightScore": 56
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 4,
-      "uniqueDeals": 2,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 4,
-      "fresh7dCount": 4,
-      "viennaCount": 4,
-      "foodDrinkCount": 1,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "hello@transv.at 👥 Ab 4 angemeldeten Personen 💜 Teilnahme kostenlos",
-        "Am Donnerstag ist es schon so weit: unsere Comedyshow Queerlig mit Schmäh feiert den ersten Geburtstag 🥳🤘🏻 Unsere Allstars des letzten Ja",
-        "5% on all tickets at GetYourGuide with code TRAVELESCAPEVIENNA5 PS: save this r"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-06T15:43:26.538Z",
-        "finishedAt": "2026-09-06T15:46:02.738Z",
-        "durationMs": 156200,
-        "counts": {
-          "rawCandidates": 133,
-          "normalizedCandidates": 4,
-          "verifiedCandidates": 4,
-          "previousDeals": 0,
-          "acceptedDeals": 4,
-          "rejectedDeals": 116
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 95,
-          "excluded-promotion-type": 5,
-          "missing-text": 6,
-          "general-recommendation": 8,
-          "offer-expired": 1,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 89.5,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 3
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 72,
-      "missionFitScore": 70,
-      "coverageScore": 15,
-      "precisionScore": 75,
-      "sourceWeightScore": 61
-    },
-    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
@@ -466,7 +380,7 @@
       "uniqueDeals": 25,
       "duplicateDeals": 9,
       "duplicateAcrossSources": 9,
-      "fresh1dCount": 3,
+      "fresh1dCount": 2,
       "fresh7dCount": 34,
       "viennaCount": 34,
       "foodDrinkCount": 21,
@@ -532,7 +446,7 @@
       ],
       "healthScore": 68,
       "missionFitScore": 58,
-      "coverageScore": 32,
+      "coverageScore": 31,
       "precisionScore": 71,
       "sourceWeightScore": 58
     },
@@ -683,6 +597,79 @@
       "healthScore": 65,
       "missionFitScore": 60,
       "coverageScore": 21,
+      "precisionScore": 70,
+      "sourceWeightScore": 56
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 3,
+      "uniqueDeals": 1,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 3,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 0,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Am Donnerstag ist es schon so weit: unsere Comedyshow Queerlig mit Schmäh feiert den ersten Geburtstag 🥳🤘🏻 Unsere Allstars des letzten Ja",
+        "Kostenlos für Schulklassen.",
+        "Admission is free, but it gets very busy, so it’s best to arrive early."
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-06T20:45:31.893Z",
+        "finishedAt": "2026-09-06T20:47:36.185Z",
+        "durationMs": 124292,
+        "counts": {
+          "rawCandidates": 117,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 3,
+          "previousDeals": 0,
+          "acceptedDeals": 3,
+          "rejectedDeals": 105
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 86,
+          "missing-text": 5,
+          "excluded-promotion-type": 5,
+          "general-recommendation": 8,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.7,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 3
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 3
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 65,
+      "missionFitScore": 65,
+      "coverageScore": 13,
       "precisionScore": 70,
       "sourceWeightScore": 56
     },
