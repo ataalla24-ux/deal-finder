@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-06T09:39:08.932Z",
+  "generatedAt": "2026-09-06T10:53:41.034Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 649,
-    "uniqueCandidates": 613,
-    "distinctCandidates": 629,
-    "duplicateClusters": 16,
+    "totalCandidates": 650,
+    "uniqueCandidates": 617,
+    "distinctCandidates": 632,
+    "duplicateClusters": 15,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -16,8 +16,14 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "healthScore": 75,
+        "healthScore": 73,
         "totalDeals": 13
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 68,
+        "totalDeals": 14
       },
       {
         "sourceKey": "instagram-ai",
@@ -30,12 +36,6 @@
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "healthScore": 67,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 65,
-        "totalDeals": 6
       }
     ],
     "topMissionSources": [
@@ -58,15 +58,15 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "missionFitScore": 60,
-        "totalDeals": 13
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 59,
+        "missionFitScore": 62,
+        "totalDeals": 14
+      },
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "missionFitScore": 58,
         "totalDeals": 13
       }
     ],
@@ -100,11 +100,11 @@
         "fresh1dCount": 0
       },
       {
-        "sourceKey": "gutscheine",
-        "sourceLabel": "Gutscheine.at",
-        "coverageScore": 35,
-        "totalDeals": 31,
-        "fresh1dCount": 31
+        "sourceKey": "community",
+        "sourceLabel": "Community Submission",
+        "coverageScore": 31,
+        "totalDeals": 41,
+        "fresh1dCount": 0
       }
     ],
     "topPrecisionSources": [
@@ -115,6 +115,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 74,
+        "totalDeals": 14
+      },
+      {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "precisionScore": 73,
@@ -123,7 +129,7 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "precisionScore": 73,
+        "precisionScore": 72,
         "totalDeals": 13
       },
       {
@@ -131,12 +137,6 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 71,
         "totalDeals": 6
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 70,
-        "totalDeals": 13
       }
     ],
     "topWeightedSources": [
@@ -147,9 +147,15 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 58,
+        "totalDeals": 14
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 59,
+        "sourceWeightScore": 57,
         "totalDeals": 13
       },
       {
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 57,
         "totalDeals": 103
-      },
-      {
-        "sourceKey": "firecrawl2",
-        "sourceLabel": "Firecrawl Key 3 - Consumables",
-        "sourceWeightScore": 56,
-        "totalDeals": 2
       }
     ],
     "topSourcesToFix": [
@@ -301,7 +301,7 @@
       "uniqueDeals": 13,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 2,
+      "fresh1dCount": 1,
       "fresh7dCount": 13,
       "viennaCount": 12,
       "foodDrinkCount": 5,
@@ -315,7 +315,7 @@
       "lastRun": null,
       "uniqueRate": 1,
       "duplicateRate": 0,
-      "fresh1dRate": 0.2,
+      "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 0.9,
       "foodDrinkRate": 0.4,
@@ -351,13 +351,84 @@
         }
       ],
       "issues": [
+        "wenige Deals sind frischer als 1 Tag",
         "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 75,
-      "missionFitScore": 60,
+      "healthScore": 73,
+      "missionFitScore": 58,
       "coverageScore": 20,
-      "precisionScore": 73,
-      "sourceWeightScore": 59
+      "precisionScore": 72,
+      "sourceWeightScore": 57
+    },
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 14,
+      "uniqueDeals": 9,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 2,
+      "fresh7dCount": 14,
+      "viennaCount": 14,
+      "foodDrinkCount": 11,
+      "promoCount": 8,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Am Donnerstag ist es schon so weit: unsere Comedyshow Queerlig mit Schmäh feiert den ersten Geburtstag 🥳🤘🏻 Unsere Allstars des letzten Ja",
+        "12:00–15:00 Uhr 🌿 Genussvolle Mittagspause mitten in Wien 🍽️ Suppe oder Dessert + Hauptspeise um nur € 12,90 Suppe + Hauptspeise + Dessert",
+        "SUBS FÜR NUR 2,50 € UND FOOTLONGS FÜR 5 € 🤯🥖 Subway eröffnet am 07.09 eine neue Filiale im 12."
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.2,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.9,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 10
+        },
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 7
+        },
+        {
+          "value": "gratis",
+          "count": 6
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 68,
+      "missionFitScore": 62,
+      "coverageScore": 20,
+      "precisionScore": 74,
+      "sourceWeightScore": 58
     },
     {
       "sourceKey": "instagram-ai",
@@ -590,69 +661,6 @@
       "coverageScore": 15,
       "precisionScore": 71,
       "sourceWeightScore": 57
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 13,
-      "uniqueDeals": 6,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 5,
-      "fresh1dCount": 1,
-      "fresh7dCount": 13,
-      "viennaCount": 13,
-      "foodDrinkCount": 10,
-      "promoCount": 6,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "September gibt es ein Gratis All-you-can-eat bei WOA.",
-        "URBAN’s SCHULSTART-SPECIAL FÜR ALLE ERSTKLÄSSLER 🎒✏️ Der erste Schultag gehört gefeiert!",
-        "September ein Gratis All-you-can-eat bei WOA."
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.8,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84.8,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 10
-        },
-        {
-          "value": "shopping",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 7
-        },
-        {
-          "value": "gratis",
-          "count": 4
-        },
-        {
-          "value": "freebie",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 59,
-      "coverageScore": 18,
-      "precisionScore": 70,
-      "sourceWeightScore": 54
     },
     {
       "sourceKey": "joe",
@@ -890,6 +898,87 @@
       "coverageScore": 70,
       "precisionScore": 51,
       "sourceWeightScore": 57
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🥭 Und für alle, die lieber zu Hause genießen: Bei jeder selbst abgeholten Bestellung ab 35 € gibt’s 0,3 Liter Mango-Lassi gratis dazu.",
+        "20 % auf den Pasta Workshop, buon appetito"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-06T05:02:05.690Z",
+        "finishedAt": "2026-09-06T05:04:07.372Z",
+        "durationMs": 121682,
+        "counts": {
+          "rawCandidates": 119,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 112
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 82,
+          "missing-text": 21,
+          "excluded-promotion-type": 4,
+          "general-recommendation": 3,
+          "offer-expired": 1,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 79.5,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "freebie",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 57,
+      "missionFitScore": 47,
+      "coverageScore": 11,
+      "precisionScore": 61,
+      "sourceWeightScore": 45
     },
     {
       "sourceKey": "firecrawl4",
@@ -1315,87 +1404,6 @@
       "sourceWeightScore": 29
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 0,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🥭 Und für alle, die lieber zu Hause genießen: Bei jeder selbst abgeholten Bestellung ab 35 € gibt’s 0,3 Liter Mango-Lassi gratis dazu.",
-        "20 % auf den Pasta Workshop, buon appetito"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-06T05:02:05.690Z",
-        "finishedAt": "2026-09-06T05:04:07.372Z",
-        "durationMs": 121682,
-        "counts": {
-          "rawCandidates": 119,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 112
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 82,
-          "missing-text": 21,
-          "excluded-promotion-type": 4,
-          "general-recommendation": 3,
-          "offer-expired": 1,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 79.5,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "freebie",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 46,
-      "missionFitScore": 47,
-      "coverageScore": 11,
-      "precisionScore": 57,
-      "sourceWeightScore": 42
-    },
-    {
       "sourceKey": "gemeinde",
       "file": "deals-pending-gemeinde.json",
       "sourceLabel": "Kirchen Verzeichnis",
@@ -1501,78 +1509,6 @@
       "missionFitScore": 28,
       "coverageScore": 25,
       "precisionScore": 36,
-      "sourceWeightScore": 33
-    },
-    {
-      "sourceKey": "gutscheine",
-      "file": "deals-pending-gutscheine.json",
-      "sourceLabel": "Gutscheine.at",
-      "totalDeals": 31,
-      "uniqueDeals": 31,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 31,
-      "fresh7dCount": 31,
-      "viennaCount": 0,
-      "foodDrinkCount": 3,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Bis zu 60% Rabatt auf Handtaschen",
-        "Bis zu 80% Rabatt im Sale",
-        "Bis zu 600 € Samsung Cashback sichern"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0.1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 49.1,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 25
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        },
-        {
-          "value": "technik",
-          "count": 2
-        },
-        {
-          "value": "beauty",
-          "count": 1
-        },
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 30
-        },
-        {
-          "value": "gutschein",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 44,
-      "missionFitScore": 26,
-      "coverageScore": 35,
-      "precisionScore": 28,
       "sourceWeightScore": 33
     },
     {
@@ -1936,6 +1872,79 @@
       "coverageScore": 28,
       "precisionScore": 21,
       "sourceWeightScore": 23
+    },
+    {
+      "sourceKey": "gutscheine",
+      "file": "deals-pending-gutscheine.json",
+      "sourceLabel": "Gutscheine.at",
+      "totalDeals": 31,
+      "uniqueDeals": 31,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 31,
+      "viennaCount": 0,
+      "foodDrinkCount": 3,
+      "promoCount": 0,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Bis zu 60% Rabatt auf Handtaschen",
+        "Bis zu 80% Rabatt im Sale",
+        "Bis zu 600 € Samsung Cashback sichern"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.1,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 49.1,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 25
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "technik",
+          "count": 2
+        },
+        {
+          "value": "beauty",
+          "count": 1
+        },
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 30
+        },
+        {
+          "value": "gutschein",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 30,
+      "missionFitScore": 4,
+      "coverageScore": 19,
+      "precisionScore": 16,
+      "sourceWeightScore": 17
     },
     {
       "sourceKey": "flights",
