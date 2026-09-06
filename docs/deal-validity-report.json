@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-06T00:48:27.504Z",
+  "generatedAt": "2026-09-06T04:35:29.527Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 302,
-    "allowed": 0,
-    "blocked": 302,
-    "warnings": 0,
+    "total": 306,
+    "allowed": 1,
+    "blocked": 305,
+    "warnings": 1,
     "reasonCounts": {
       "nicht eindeutig in Wien": 40,
       "älter als 7 Tage (2026-06-27)": 1,
@@ -21,7 +21,7 @@
       "älter als 7 Tage (2026-06-03)": 2,
       "älter als 7 Tage (2026-07-03)": 1,
       "älter als 7 Tage (2026-06-08)": 2,
-      "kein konkretes Angebot erkennbar": 206,
+      "kein konkretes Angebot erkennbar": 207,
       "kein echtes Social-Post-Datum gefunden": 4,
       "älter als 7 Tage (2026-05-06)": 1,
       "älter als 7 Tage (2026-06-19)": 1,
@@ -41,6 +41,7 @@
       "URL ungültig (HTTP 404)": 13,
       "älter als 7 Tage (2026-07-30)": 1,
       "abgelaufen (2026-09-04)": 1,
+      "abgelaufen (2026-09-05)": 5,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2020-12-18)": 2,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-07-01)": 4,
       "älter als 7 Tage (2026-08-15)": 2,
@@ -80,24 +81,25 @@
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-25)": 1,
-      "abgelaufen (2026-09-05)": 3,
       "abgelaufen (2026-08-27T07:50:56.351Z)": 1,
-      "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 2,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 2,
       "kein verlässliches Quell-/Post-Datum gefunden": 78,
-      "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 1
+      "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 1,
+      "Meta-Graph-Widerspruch (offer-expired)": 1,
+      "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 1
     },
     "reasonCategoryCounts": {
       "nicht Wien": 40,
       "älter als 7 Tage": 184,
-      "abgelaufen": 17,
+      "abgelaufen": 19,
       "ausgeschlossene Quelle": 29,
-      "kein konkreter Deal": 208,
+      "kein konkreter Deal": 209,
       "kein echtes Post-Datum": 82,
       "ungültige URL": 17,
       "Gottesdienste außerhalb Wochenlauf": 34,
-      "sonstiges": 2,
-      "Gewinnspiel": 1
+      "Gewinnspiel": 1,
+      "Meta-Graph-Widerspruch": 1,
+      "sonstiges": 1
     },
     "sourceCounts": {
       "Apify Instagram Vienna Food Offers": {
@@ -149,14 +151,14 @@
         }
       },
       "Firecrawl Gastro #4": {
-        "total": 16,
-        "allowed": 0,
-        "blocked": 16,
-        "warnings": 0,
+        "total": 19,
+        "allowed": 1,
+        "blocked": 18,
+        "warnings": 1,
         "reasonCategoryCounts": {
-          "abgelaufen": 8,
+          "abgelaufen": 9,
           "älter als 7 Tage": 11,
-          "kein konkreter Deal": 2,
+          "kein konkreter Deal": 3,
           "ausgeschlossene Quelle": 9
         }
       },
@@ -198,13 +200,13 @@
         }
       },
       "Gutscheine.at": {
-        "total": 3,
+        "total": 4,
         "allowed": 0,
-        "blocked": 3,
+        "blocked": 4,
         "warnings": 0,
         "reasonCategoryCounts": {
           "ungültige URL": 3,
-          "abgelaufen": 1
+          "abgelaufen": 2
         }
       },
       "Hervis": {
@@ -214,6 +216,15 @@
         "warnings": 0,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 2
+        }
+      },
+      "instagram-ai-agent": {
+        "total": 1,
+        "allowed": 0,
+        "blocked": 1,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "abgelaufen": 1
         }
       },
       "Kirchen Verzeichnis": {
@@ -247,16 +258,6 @@
           "nicht Wien": 2
         }
       },
-      "Meta Instagram Hashtag API": {
-        "total": 1,
-        "allowed": 0,
-        "blocked": 1,
-        "warnings": 0,
-        "reasonCategoryCounts": {
-          "sonstiges": 1,
-          "abgelaufen": 1
-        }
-      },
       "tiktok-deals-scanner": {
         "total": 1,
         "allowed": 0,
@@ -272,13 +273,32 @@
         "blocked": 1,
         "warnings": 0,
         "reasonCategoryCounts": {
+          "Meta-Graph-Widerspruch": 1,
           "sonstiges": 1,
           "abgelaufen": 1
         }
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "fc4g-17niaxz",
+      "title": "Frühstück für 1,00 € statt 2,99 €",
+      "brand": "IKEA Restaurant",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.ikea.com/at/de/food/",
+      "reasons": [],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -352,9 +372,9 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-05T23:21:37.090Z",
+      "sourceDate": "2026-09-06T01:15:41.086Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -371,9 +391,9 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-05T23:21:37.090Z",
+      "sourceDate": "2026-09-06T01:15:41.086Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -390,9 +410,9 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-05T23:21:37.090Z",
+      "sourceDate": "2026-09-06T01:15:41.086Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -428,9 +448,9 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-05T23:21:37.090Z",
+      "sourceDate": "2026-09-06T01:15:41.086Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -447,9 +467,9 @@
       "warnings": [
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-05T23:21:37.090Z",
+      "sourceDate": "2026-09-06T01:15:41.086Z",
       "sourceDateSource": "deal.submittedAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
@@ -1547,6 +1567,26 @@
       "urlStatus": "HTTP 200"
     },
     {
+      "id": "fc4g-220bs6",
+      "title": "2-for-1 auf das jeweilige qualifizierende Subway-Angebot: ei",
+      "brand": "Subway",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.lieferando.at/speisekarte/subway-wien-wagramer-strasse?c_id=79128df7-6dac-4646-8de2-154ca7827817",
+      "reasons": [
+        "abgelaufen (2026-09-05)"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.lieferando.at)",
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "2026-09-05",
+      "expirySource": "deal.expires",
+      "urlStatus": "unklar: www.lieferando.at"
+    },
+    {
       "id": "fc4g-advozs",
       "title": "10 € Rabatt ab 25 € Bestellwert, für Neu- und Bestandskunden",
       "brand": "Lieferando",
@@ -1654,6 +1694,25 @@
       "expiryDate": "2026-09-01",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: www.lieferando.at"
+    },
+    {
+      "id": "fc4g-11yx3jc",
+      "title": "Pasta-Kindermenü mit Tomatensauce für 2,49 €",
+      "brand": "IKEA Restaurant",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.ikea.com/at/de/food/",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "fc4g-17xgrxt",
@@ -4254,6 +4313,23 @@
       "urlStatus": "ungültig: HTTP 404"
     },
     {
+      "id": "gs-507194",
+      "title": "11% Parfumdreams Gutschein für alles",
+      "brand": "Parfumdreams",
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/parfumdreams",
+      "reasons": [
+        "abgelaufen (2026-09-05)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-09-05T10:51:17.448Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 1,
+      "expiryDate": "2026-09-05",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "gs-507126",
       "title": "20% Rabatt auf den Joie Buggy Pact Pro",
       "brand": "babymarkt",
@@ -4287,6 +4363,23 @@
       "expiryDate": "2026-09-06",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "instagram-ai-56165e4e7b4f",
+      "title": "fire: KIZILAY im MEGA Angebot! KIZILAY Mineralwasser, verschiedene Sorten, 6er-Pack nur 1,99 € statt 3,49 €.",
+      "brand": "MEGA Supermarkt",
+      "source": "instagram-ai-agent",
+      "url": "https://www.instagram.com/p/DczMotrGpQD/",
+      "reasons": [
+        "abgelaufen (2026-09-05)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-09-02T21:25:24.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 4,
+      "expiryDate": "2026-09-05",
+      "expirySource": "deal.evidence.offerTiming",
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "igap-oinu8c",
@@ -4342,24 +4435,6 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "meta-ig-17877295116626907",
-      "title": "Gratis-Eintritt zum Event bei Arabic Night",
-      "brand": "Arabic Night",
-      "source": "Meta Instagram Hashtag API",
-      "url": "https://www.instagram.com/reel/Dc6e0j9IPgE/",
-      "reasons": [
-        "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot",
-        "abgelaufen (2026-09-05)"
-      ],
-      "warnings": [],
-      "sourceDate": "2026-09-05T17:19:00.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 1,
-      "expiryDate": "2026-09-05",
-      "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
     },
     {
@@ -6179,6 +6254,7 @@
       "source": "Wien Deals Combined Graph",
       "url": "https://www.instagram.com/reel/Dc6e0j9IPgE/",
       "reasons": [
+        "Meta-Graph-Widerspruch (offer-expired)",
         "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot",
         "abgelaufen (2026-09-05)"
       ],
