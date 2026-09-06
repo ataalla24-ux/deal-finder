@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T07:00:04.499Z",
+  "generatedAt": "2026-09-06T07:27:52.839Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 649,
@@ -16,7 +16,7 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "healthScore": 72,
+        "healthScore": 71,
         "totalDeals": 15
       },
       {
@@ -159,16 +159,16 @@
         "totalDeals": 103
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 56,
-        "totalDeals": 15
-      },
-      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 56,
         "totalDeals": 17
+      },
+      {
+        "sourceKey": "firecrawl2",
+        "sourceLabel": "Firecrawl Key 3 - Consumables",
+        "sourceWeightScore": 56,
+        "totalDeals": 2
       }
     ],
     "topSourcesToFix": [
@@ -232,6 +232,7 @@
       "reportedSources": 7,
       "failedSources": [],
       "completedWithErrors": [
+        "firecrawl2",
         "firecrawl5",
         "gastro2",
         "power"
@@ -295,7 +296,7 @@
       "uniqueDeals": 15,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
-      "fresh1dCount": 4,
+      "fresh1dCount": 3,
       "fresh7dCount": 15,
       "viennaCount": 14,
       "foodDrinkCount": 3,
@@ -309,7 +310,7 @@
       "lastRun": null,
       "uniqueRate": 1,
       "duplicateRate": 0,
-      "fresh1dRate": 0.3,
+      "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 0.9,
       "foodDrinkRate": 0.2,
@@ -351,11 +352,11 @@
       "issues": [
         "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 72,
-      "missionFitScore": 55,
-      "coverageScore": 22,
-      "precisionScore": 70,
-      "sourceWeightScore": 56
+      "healthScore": 71,
+      "missionFitScore": 53,
+      "coverageScore": 21,
+      "precisionScore": 68,
+      "sourceWeightScore": 55
     },
     {
       "sourceKey": "instagram-ai",
@@ -450,24 +451,26 @@
         "Burger Brothers: Gratis-Zugabe zum Burger: Dipper Fries und ein Getränk nach Wahl kostenlos"
       ],
       "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-05T07:13:35.304Z",
-        "finishedAt": "2026-09-05T07:14:54.750Z",
-        "durationMs": 79446,
+        "status": "completed-with-errors",
+        "startedAt": "2026-09-06T07:25:45.642Z",
+        "finishedAt": "2026-09-06T07:27:21.405Z",
+        "durationMs": 95763,
         "counts": {
           "rawCandidates": 17,
-          "normalizedCandidates": 14,
+          "normalizedCandidates": 9,
           "verifiedCandidates": 2,
-          "previousDeals": 0,
+          "previousDeals": 2,
           "acceptedDeals": 2,
-          "rejectedDeals": 15
+          "rejectedDeals": 17
         },
         "rejectedByReason": {
-          "missing-concrete-offer": 1,
-          "excluded-giveaway": 2,
-          "post-verification-rejected": 12
+          "missing-concrete-offer": 5,
+          "excluded-giveaway": 3,
+          "post-verification-rejected": 9
         },
-        "errors": [],
+        "errors": [
+          "https://www.instagram.com/lidl_oesterreich/: Refusal: Die angegebene Instagram-Quelle ist in diesem Durchlauf nicht zugänglich: Instagram zeigt für https://www.instagram.com/lidl_oesterreich/ ausschließlich „Profile isn't available / The link may be broken, or the profile may have been removed“ und die öffentliche Profile-API antwortet mit HTTP 401 („Please wait a few minutes before you try again“, require_login). Dadurch sind weder aktuelle Originalposts noch Veröffentlichungs- und Angebotszeiträume verifizierbar; ich kann keine belastbar"
+        ],
         "reportFile": "deal-pipeline-last-run-firecrawl2.json"
       },
       "uniqueRate": 0.5,
