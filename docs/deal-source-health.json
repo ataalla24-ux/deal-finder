@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-06T04:32:00.335Z",
+  "generatedAt": "2026-09-06T05:04:35.209Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 665,
-    "uniqueCandidates": 625,
-    "distinctCandidates": 643,
-    "duplicateClusters": 18,
+    "totalCandidates": 662,
+    "uniqueCandidates": 624,
+    "distinctCandidates": 641,
+    "duplicateClusters": 17,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -14,28 +14,28 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 72,
+        "totalDeals": 50
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "healthScore": 72,
         "totalDeals": 15
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 70,
-        "totalDeals": 50
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 68,
-        "totalDeals": 5
-      },
-      {
         "sourceKey": "firecrawl2",
         "sourceLabel": "Firecrawl Key 3 - Consumables",
         "healthScore": 67,
         "totalDeals": 2
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 66,
+        "totalDeals": 4
       }
     ],
     "topMissionSources": [
@@ -54,8 +54,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 66,
-        "totalDeals": 5
+        "missionFitScore": 69,
+        "totalDeals": 2
       },
       {
         "sourceKey": "firecrawl2",
@@ -127,10 +127,10 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
         "precisionScore": 72,
-        "totalDeals": 5
+        "totalDeals": 50
       },
       {
         "sourceKey": "meta-instagram",
@@ -149,7 +149,7 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 62,
+        "sourceWeightScore": 63,
         "totalDeals": 50
       },
       {
@@ -159,16 +159,16 @@
         "totalDeals": 4
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 58,
-        "totalDeals": 5
-      },
-      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 57,
         "totalDeals": 15
+      },
+      {
+        "sourceKey": "firecrawl2",
+        "sourceLabel": "Firecrawl Key 3 - Consumables",
+        "sourceWeightScore": 57,
+        "totalDeals": 2
       }
     ],
     "topSourcesToFix": [
@@ -288,6 +288,88 @@
       "sourceWeightScore": 70
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 50,
+      "uniqueDeals": 43,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
+      "fresh1dCount": 7,
+      "fresh7dCount": 50,
+      "viennaCount": 50,
+      "foodDrinkCount": 31,
+      "promoCount": 34,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "EBI 3.0 DOUBLE CHALLENGE: Essen des Tages kostenlos bei erfolgreicher Challenge",
+        "20% Rabatt mit Vorteilsclub Wien und kostenloser Audioguide in der Klimt Villa",
+        "Gratis Kürbisschnitzen und Bauernmarkt beim Kürbisfest am Himmel"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.6,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 85,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 21
+        },
+        {
+          "value": "shopping",
+          "count": 11
+        },
+        {
+          "value": "supermarkt",
+          "count": 6
+        },
+        {
+          "value": "event",
+          "count": 3
+        },
+        {
+          "value": "reisen",
+          "count": 3
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 25
+        },
+        {
+          "value": "rabatt",
+          "count": 23
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 72,
+      "missionFitScore": 58,
+      "coverageScore": 50,
+      "precisionScore": 72,
+      "sourceWeightScore": 63
+    },
+    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -356,177 +438,6 @@
       "coverageScore": 24,
       "precisionScore": 70,
       "sourceWeightScore": 57
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 50,
-      "uniqueDeals": 42,
-      "duplicateDeals": 8,
-      "duplicateAcrossSources": 8,
-      "fresh1dCount": 7,
-      "fresh7dCount": 50,
-      "viennaCount": 50,
-      "foodDrinkCount": 31,
-      "promoCount": 34,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "EBI 3.0 DOUBLE CHALLENGE: Essen des Tages kostenlos bei erfolgreicher Challenge",
-        "20% Rabatt mit Vorteilsclub Wien und kostenloser Audioguide in der Klimt Villa",
-        "Gratis Kürbisschnitzen und Bauernmarkt beim Kürbisfest am Himmel"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 85,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 21
-        },
-        {
-          "value": "shopping",
-          "count": 11
-        },
-        {
-          "value": "supermarkt",
-          "count": 6
-        },
-        {
-          "value": "event",
-          "count": 3
-        },
-        {
-          "value": "reisen",
-          "count": 3
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 25
-        },
-        {
-          "value": "rabatt",
-          "count": 23
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 70,
-      "missionFitScore": 58,
-      "coverageScore": 50,
-      "precisionScore": 71,
-      "sourceWeightScore": 62
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 5,
-      "uniqueDeals": 2,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 5,
-      "fresh7dCount": 5,
-      "viennaCount": 5,
-      "foodDrinkCount": 1,
-      "promoCount": 4,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Why join: → Meet Europe's top communicators → Real event production experience → Free access to session → Boost your professional network",
-        "Free to apply.",
-        "Gratis-Eintritt zum Event bei Arabic Night"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-05T20:40:39.122Z",
-        "finishedAt": "2026-09-05T20:43:03.709Z",
-        "durationMs": 144587,
-        "counts": {
-          "rawCandidates": 91,
-          "normalizedCandidates": 5,
-          "verifiedCandidates": 5,
-          "previousDeals": 0,
-          "acceptedDeals": 5,
-          "rejectedDeals": 81
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 60,
-          "missing-text": 13,
-          "general-recommendation": 4,
-          "excluded-promotion-type": 3,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.2,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86.4,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 3
-        },
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 3
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 68,
-      "missionFitScore": 66,
-      "coverageScore": 15,
-      "precisionScore": 72,
-      "sourceWeightScore": 58
     },
     {
       "sourceKey": "firecrawl2",
@@ -866,6 +777,86 @@
       "coverageScore": 13,
       "precisionScore": 56,
       "sourceWeightScore": 46
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 0,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 2,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🥭 Und für alle, die lieber zu Hause genießen: Bei jeder selbst abgeholten Bestellung ab 35 € gibt’s 0,3 Liter Mango-Lassi gratis dazu.",
+        "20 % auf den Pasta Workshop, buon appetito"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-06T05:02:05.690Z",
+        "finishedAt": "2026-09-06T05:04:07.372Z",
+        "durationMs": 121682,
+        "counts": {
+          "rawCandidates": 119,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 112
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 82,
+          "missing-text": 21,
+          "excluded-promotion-type": 4,
+          "general-recommendation": 3,
+          "offer-expired": 1,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 79.5,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "freebie",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 60,
+      "missionFitScore": 69,
+      "coverageScore": 12,
+      "precisionScore": 69,
+      "sourceWeightScore": 55
     },
     {
       "sourceKey": "gastro2",
