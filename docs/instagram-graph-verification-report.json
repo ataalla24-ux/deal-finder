@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-07T19:06:11.140Z",
+  "generatedAt": "2026-09-07T20:41:20.629Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -141,7 +141,7 @@
       "candidates": 0
     },
     "deals-pending-tiktok.json": {
-      "deals": 21,
+      "deals": 19,
       "candidates": 0
     },
     "deals-pending-twitter.json": {
@@ -182,10 +182,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 111,
-  "exactMatches": 6,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "munchy.theurbankitchen",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "markedvlogblueprints": {
       "count": 1,
@@ -198,7 +203,21 @@
       "cooldownUntil": "2026-09-06T05:56:05.023Z"
     }
   },
+  "sharedQuota": {
+    "limitPerHour": 150,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0
+  },
+  "globalError": {
+    "username": "munchy.theurbankitchen",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 109,
-  "unmatchedCandidatePosts": 0,
-  "message": "6/6 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 6,
+  "message": "0/6 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
