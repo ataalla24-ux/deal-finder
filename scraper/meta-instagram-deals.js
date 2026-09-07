@@ -1,5 +1,7 @@
 import '../sentry/instrument.mjs';
 
+import { createGraphRequestBudget, createGraphScanStore, scanGraphSource, scanGraphPages, graphCursor } from './instagram-graph-scan.js';
+
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -268,8 +270,13 @@ export function buildConfig(env = process.env, now = new Date()) {
     maxAccountBackfill: numberEnv(env, 'META_INSTAGRAM_MAX_ACCOUNT_BACKFILL', 6, 0, 30),
     accountRescanHours: numberEnv(env, 'META_INSTAGRAM_ACCOUNT_RESCAN_HOURS', 6, 1, 24),
     maxHashtagsPerRun: numberEnv(env, 'META_INSTAGRAM_MAX_HASHTAGS_PER_RUN', 12, 1, 30),
-    mediaPerAccount: numberEnv(env, 'META_INSTAGRAM_MEDIA_PER_ACCOUNT', 6, 1, 30),
+    mediaPerAccount: numberEnv(env, 'META_INSTAGRAM_MEDIA_PER_ACCOUNT', 25, 1, 25),
     mediaPerHashtag: numberEnv(env, 'META_INSTAGRAM_MEDIA_PER_HASHTAG', 20, 1, 50),
+    maxPagesPerSource: numberEnv(env, 'META_INSTAGRAM_MAX_PAGES_PER_SOURCE', 3, 1, 3),
+    maxGraphRequests: numberEnv(env, 'META_INSTAGRAM_MAX_GRAPH_REQUESTS', 120, 1, 300),
+    graphUsageThreshold: numberEnv(env, 'META_INSTAGRAM_GRAPH_USAGE_THRESHOLD', 85, 20, 95),
+    scanCacheMinutes: numberEnv(env, 'META_INSTAGRAM_SCAN_CACHE_MINUTES', 30, 0, 60),
+    scanRefreshHours: numberEnv(env, 'META_INSTAGRAM_SCAN_REFRESH_HOURS', 6, 1, 24),
     maxAdPagesPerTerm: numberEnv(env, 'META_AD_LIBRARY_MAX_PAGES_PER_TERM', 2, 1, 10),
     maxAdAgeDays: numberEnv(env, 'META_AD_LIBRARY_MAX_AGE_DAYS', 30, 1, 365),
     seenTtlDays: numberEnv(env, 'META_INSTAGRAM_SEEN_TTL_DAYS', 7, 1, 45),
@@ -398,6 +405,8 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
       scoutRejectedDeals: 0,
       scoutFeedbackSampleSize: 0,
     };
+    const openingAt = toIso(raw?.nextOpeningAt);
+    if (openingAt) existing.nextOpeningAt = openingAt;
     existing.priority = Math.max(existing.priority, Number(raw?.priority || raw?.priorityScore || 0));
     existing.category = cleanText(raw?.category || existing.category, 60);
     const accountType = inferInstagramAccountRole({ ...raw, username });
@@ -446,6 +455,7 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
         accountType: deal?.sourceAccountType
           || (normalizeInstagramUsername(deal?.scoutUsername) === username ? 'creator' : '')
           || (normalizeInstagramUsername(deal?.merchantUsername) === username ? 'merchant' : ''),
+        nextOpeningAt: /(?:eröffnung|eroeffnung|opening)/i.test(`${deal.title || ''} ${deal.description || ''}`) && ['content-date', 'text', 'deal.structured'].includes(deal.expirySource || deal.expiresSource) ? (deal.validFrom || deal.validOn || '') : '',
         sourcePublishedAt: publication.sourcePublishedAt,
       }, `candidate:${path.basename(candidatePath)}`);
 
@@ -455,6 +465,7 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
           username: mentionedUsername,
           priority: 82,
           category: deal?.category || '',
+          nextOpeningAt: /(?:eröffnung|eroeffnung|opening)/i.test(`${deal.title || ''} ${deal.description || ''}`) && ['content-date', 'text', 'deal.structured'].includes(deal.expirySource || deal.expiresSource) ? (deal.validFrom || deal.validOn || '') : '',
           sourcePublishedAt: publication.sourcePublishedAt,
         }, `mention:${path.basename(candidatePath)}`);
       }
@@ -525,7 +536,11 @@ export function selectAccountShard(accounts, config, state = {}, now = new Date(
   const accountIsDue = (account) => {
     const lastRunAt = Date.parse(performance[account.username]?.lastRunAt || '');
     if (!Number.isFinite(lastRunAt)) return true;
-    const rescanHours = Math.max(1, Number(config.accountRescanHours || 6));
+    const food = ['food', 'drinks', 'essen', 'kaffee', 'restaurant'].includes(account.category);
+    const opening = Date.parse(account.nextOpeningAt || '');
+    const upcoming = food && opening >= now.getTime() - DAY_MS && opening <= now.getTime() + 7 * DAY_MS;
+    const provenFood = food && Number(account.manualApprovedDeals || account.approvedDeals || 0) > 0;
+    const rescanHours = upcoming ? 1 : provenFood ? 2 : Math.max(1, Number(config.accountRescanHours || 6));
     return now.getTime() - lastRunAt >= rescanHours * 60 * 60 * 1000;
   };
   const provenBudget = Math.max(1, Math.floor(limit * 0.7));
@@ -1171,7 +1186,7 @@ async function fetchMetaJson(url, config, fetchImpl = fetch) {
       await sleep(retryDelayMs(response, attempt));
     } catch (error) {
       lastError = error;
-      if (attempt >= config.maxRetries || (error?.status && ![429, 500, 502, 503, 504].includes(error.status))) throw error;
+      if (error?.code === 'SCAN_BUDGET' || attempt >= config.maxRetries || (error?.status && ![429, 500, 502, 503, 504].includes(error.status))) throw error;
       await sleep(Math.min(30000, 1000 * (2 ** attempt)) + Math.floor(Math.random() * 500));
     }
   }
@@ -1311,19 +1326,20 @@ function instagramHashtagSearchUrl(config, tag) {
 const BASIC_INSTAGRAM_MEDIA_FIELDS = 'id,caption,media_type,permalink,timestamp,like_count,comments_count';
 const OCR_INSTAGRAM_MEDIA_FIELDS = `${BASIC_INSTAGRAM_MEDIA_FIELDS},media_product_type,media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}`;
 
-function instagramHashtagMediaUrl(config, hashtagId, includeMedia = true) {
+function instagramHashtagMediaUrl(config, hashtagId, includeMedia = true, after = '') {
   const url = new URL(`https://graph.facebook.com/${config.graphVersion}/${hashtagId}/recent_media`);
   url.searchParams.set('user_id', config.instagramUserId);
   url.searchParams.set('fields', includeMedia ? OCR_INSTAGRAM_MEDIA_FIELDS : BASIC_INSTAGRAM_MEDIA_FIELDS);
   url.searchParams.set('limit', String(config.mediaPerHashtag));
+  if (after) url.searchParams.set('after', graphCursor(after));
   url.searchParams.set('access_token', config.instagramAccessToken);
   return url.toString();
 }
 
-function instagramBusinessDiscoveryUrl(config, username, includeMedia = true) {
+function instagramBusinessDiscoveryUrl(config, username, includeMedia = true, after = '') {
   const url = new URL(`https://graph.facebook.com/${config.graphVersion}/${config.instagramUserId}`);
   const fields = includeMedia ? OCR_INSTAGRAM_MEDIA_FIELDS : BASIC_INSTAGRAM_MEDIA_FIELDS;
-  url.searchParams.set('fields', `business_discovery.username(${username}){username,name,media.limit(${config.mediaPerAccount}){${fields}}}`);
+  url.searchParams.set('fields', `business_discovery.username(${username}){username,name,media.limit(${config.mediaPerAccount})${after ? `.after(${graphCursor(after)})` : ''}{${fields}}}`);
   url.searchParams.set('access_token', config.instagramAccessToken);
   return url.toString();
 }
@@ -1339,25 +1355,28 @@ function instagramTaggedMediaUrl(config, includeMedia = true) {
 export async function fetchInstagramBusinessDiscoveryMedia(config, account, fetchImpl = fetch) {
   const username = normalizedUsername(account?.username || account);
   if (!username) throw new Error('A valid Instagram Business Discovery username is required.');
-  const response = await fetchGraphMediaWithFallback(
-    instagramBusinessDiscoveryUrl(config, username, true),
-    instagramBusinessDiscoveryUrl(config, username, false),
-    config,
-    fetchImpl,
-  );
-  const business = response.payload?.business_discovery || {};
-  const resolvedAccount = typeof account === 'object' && account
-    ? account
-    : { username };
-  const media = Array.isArray(business?.media?.data) ? business.media.data : [];
+  let businessName = '';
+  let usage = {};
+  const fetchPage = async (after) => {
+    const response = await fetchGraphMediaWithFallback(
+      instagramBusinessDiscoveryUrl(config, username, true, after),
+      instagramBusinessDiscoveryUrl(config, username, false, after), config, fetchImpl,
+    );
+    usage = response.usage;
+    const business = response.payload?.business_discovery || {};
+    if (!business.media || !Array.isArray(business.media.data)) throw new Error('Meta Business Discovery returned no media collection');
+    businessName = business.name || businessName;
+    return { ...business.media, data: business.media.data.map((item) => ({ ...item, username: business.username || username, name: business.name || '' })) };
+  };
+  const scanOptions = { fetchPage, now: config.scanNow || new Date(), maxPages: config.maxPagesPerSource || 3, refreshHours: config.scanRefreshHours || 6 };
+  const result = config.scanStore
+    ? await scanGraphSource({ ...scanOptions, key: `account:${username}`, store: config.scanStore, cacheMinutes: config.scanCacheMinutes })
+    : await scanGraphPages(scanOptions);
+  const resolvedAccount = typeof account === 'object' && account ? account : { username };
   return {
-    entries: media.map((item) => ({
-      item: { ...item, username: business.username || username, name: business.name || '' },
-      context: { sourceType: 'account', sourceName: `@${username}`, account: resolvedAccount },
-    })),
-    usage: response.usage,
-    username: normalizedUsername(business.username || username),
-    name: cleanText(business.name, 100),
+    entries: result.rows.map((item) => ({ item, context: { sourceType: 'account', sourceName: `@${username}`, account: resolvedAccount } })),
+    usage, username, name: businessName || result.rows[0]?.name || '',
+    scan: result.report, pageError: result.pageError,
   };
 }
 
@@ -1427,6 +1446,9 @@ function recordSourceFailure(failures, group, key, error, config, now) {
 async function collectInstagramGraph(config, accountCatalog, state, now, fetchImpl) {
   const raw = [];
   const errors = [];
+  const coverage = [];
+  const budget = createGraphRequestBudget(fetchImpl, { maxRequests: config.maxGraphRequests, usageThreshold: config.graphUsageThreshold });
+  fetchImpl = budget.fetch;
   const usage = [];
   const hashtagIds = { ...(state?.hashtagIds || {}) };
   const sourceFailures = pruneSourceFailures(state?.sourceFailures, now);
@@ -1455,12 +1477,18 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
   let successfulAccounts = 0;
 
   for (const account of accountQueue) {
+    if (budget.stats.stopped || globalError) break;
     if (successfulAccounts >= accountTarget || selectedAccounts.length >= maxAccountAttempts) break;
     selectedAccounts.push(account);
     try {
       const response = await fetchInstagramBusinessDiscoveryMedia(config, account, fetchImpl);
       usage.push(response.usage);
       raw.push(...response.entries);
+      coverage.push({ source: `@${account.username}`, ...response.scan });
+      if (response.pageError) {
+        errors.push({ source: `@${account.username}`, message: safeErrorMessage(response.pageError, config) });
+        if (isGlobalMetaGraphError(response.pageError)) globalError = errors.at(-1);
+      }
       clearSourceFailure(sourceFailures, 'accounts', account.username);
       successfulAccounts += 1;
     } catch (error) {
@@ -1474,7 +1502,7 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
     }
   }
 
-  if (config.taggedMediaEnabled && !globalError) {
+  if (config.taggedMediaEnabled && !globalError && !budget.stats.stopped) {
     taggedAttempted = true;
     try {
       const response = await fetchGraphMediaWithFallback(
@@ -1495,7 +1523,7 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
   }
 
   for (const tag of selectedHashtags) {
-    if (globalError) break;
+    if (globalError || budget.stats.stopped) break;
     try {
       let hashtagId = cleanText(hashtagIds[tag], 100);
       if (!hashtagId) {
@@ -1510,14 +1538,26 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
         recordSourceFailure(sourceFailures, 'hashtags', tag, error, config, now);
         continue;
       }
-      const response = await fetchGraphMediaWithFallback(
-        instagramHashtagMediaUrl(config, hashtagId, true),
-        instagramHashtagMediaUrl(config, hashtagId, false),
-        config,
-        fetchImpl,
-      );
-      usage.push(response.usage);
-      for (const item of Array.isArray(response.payload?.data) ? response.payload.data : []) {
+      const response = await scanGraphSource({
+        key: `hashtag:${tag}`, store: config.scanStore, now,
+        cacheMinutes: config.scanCacheMinutes, maxPages: config.maxPagesPerSource,
+        refreshHours: config.scanRefreshHours,
+        fetchPage: async (after) => {
+          const page = await fetchGraphMediaWithFallback(
+            instagramHashtagMediaUrl(config, hashtagId, true, after),
+            instagramHashtagMediaUrl(config, hashtagId, false, after), config, fetchImpl,
+          );
+          usage.push(page.usage);
+          if (!Array.isArray(page.payload?.data)) throw new Error('Meta hashtag returned no media collection');
+          return page.payload;
+        },
+      });
+      coverage.push({ source: `#${tag}`, ...response.report });
+      if (response.pageError) {
+        errors.push({ source: `#${tag}`, message: safeErrorMessage(response.pageError, config) });
+        if (isGlobalMetaGraphError(response.pageError)) globalError = errors.at(-1);
+      }
+      for (const item of response.rows) {
         raw.push({ item, context: { sourceType: 'hashtag', sourceName: `#${tag}`, account: null } });
       }
       clearSourceFailure(sourceFailures, 'hashtags', tag);
@@ -1546,6 +1586,8 @@ async function collectInstagramGraph(config, accountCatalog, state, now, fetchIm
     skippedAccounts,
     skippedHashtags,
     taggedAttempted,
+    coverage,
+    requestBudget: budget.stats,
     globalError,
   };
 }
@@ -1770,6 +1812,7 @@ export async function runMetaInstagramCollector(options = {}) {
   const env = options.env || process.env;
   const config = { ...(options.config || buildConfig(env, now)) };
   const fetchImpl = options.fetchImpl || fetch;
+  config.scanNow = now;
   const state = readJson(config.statePath, {
     version: 4,
     hashtagIds: {},
@@ -1818,6 +1861,8 @@ export async function runMetaInstagramCollector(options = {}) {
       hashtagPoolSize: config.hashtags.length,
       maxHashtagsPerRun: config.maxHashtagsPerRun,
       mediaPerHashtag: config.mediaPerHashtag,
+      maxPagesPerSource: config.maxPagesPerSource,
+      maxGraphRequests: config.maxGraphRequests,
     },
     sources: {
       adLibrary: { status: configured.adLibrary ? 'pending' : 'not-configured', fetched: 0, accepted: 0, newAccepted: 0, errors: [] },
@@ -1895,7 +1940,14 @@ export async function runMetaInstagramCollector(options = {}) {
   }
 
   if (configured.instagramGraph && config.instagramUserId) {
+    config.scanStore = createGraphScanStore({
+      ownPath: options.scanStatePath || path.join(DOCS_DIR, 'meta-instagram-scan-state.json'),
+      peerPath: options.peerScanStatePath || path.join(DOCS_DIR, 'wien-combined-scan-state.json'),
+      scope: `${config.graphVersion}:${config.instagramUserId}`, now, write: options.write !== false, state: options.scanState,
+    });
     const result = await collectInstagramGraph(config, accountCatalog, state, now, fetchImpl);
+    report.sources.instagramGraph.coverage = result.coverage;
+    report.sources.instagramGraph.requestBudget = result.requestBudget;
     nextState.hashtagIds = result.hashtagIds;
     nextState.sourceFailures = result.sourceFailures;
     report.selectedAccounts = result.selectedAccounts.map((account) => ({
@@ -1924,6 +1976,7 @@ export async function runMetaInstagramCollector(options = {}) {
       : (requestedSources === 0
           ? ((result.skippedAccounts || result.skippedHashtags) ? 'degraded' : 'ok')
           : (result.errors.length >= requestedSources && !result.raw.length ? 'failed' : (result.errors.length ? 'degraded' : 'ok')));
+    if (result.requestBudget.stopped && report.sources.instagramGraph.status === 'ok') report.sources.instagramGraph.status = 'degraded';
     const media = await (options.enrichGraphMedia || enrichInstagramGraphMedia)(result.raw, config, now, {
       cache: state?.mediaEvidence,
       mediaFetchImpl: options.mediaFetchImpl,
@@ -2097,6 +2150,7 @@ export async function runMetaInstagramCollector(options = {}) {
     writeJsonAtomic(config.outputPath, payload);
     writeJsonAtomic(config.reportPath, report);
     writeJsonAtomic(config.statePath, nextState);
+    config.scanStore?.save();
     if (configured.instagramGraph) writeInstagramGraphEvidence(graphEvidence, config.graphEvidencePath);
   }
   return { payload, report, state: nextState, graphEvidence, shouldFail: allFailed };

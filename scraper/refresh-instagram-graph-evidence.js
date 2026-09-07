@@ -214,7 +214,7 @@ export async function refreshInstagramGraphEvidence(options = {}) {
   const fetchAccount = options.fetchAccount || fetchInstagramBusinessDiscoveryMedia;
   for (const [username] of selectedAccounts) {
     try {
-      const response = await fetchAccount(config, { username }, options.fetchImpl || fetch);
+      const response = await fetchAccount({ ...config, maxPagesPerSource: 1 }, { username }, options.fetchImpl || fetch);
       fetchedEntries.push(...response.entries);
       report.fetchedPosts += response.entries.length;
       delete accountFailures[username];

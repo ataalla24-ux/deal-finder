@@ -1,0 +1,36 @@
+name: Instagram Graph Coverage Tests
+
+on:
+  pull_request:
+    paths:
+      - 'scraper/**'
+      - 'scripts/test-instagram-graph*.mjs'
+      - 'scripts/test-meta-instagram-deals.mjs'
+      - 'scripts/test-wien-deals-combined.mjs'
+      - '.github/workflows/*instagram*'
+      - '.github/workflows/wien-deals-combined.yml'
+      - 'package*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SENTRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Test pagination and both collector integrations without network credentials
+        run: |
+          npm run test:instagram-graph-scan
+          node scripts/test-meta-instagram-deals.mjs
+          npm run test:wien-deals-combined
+          npm run test:instagram-graph-refresh
