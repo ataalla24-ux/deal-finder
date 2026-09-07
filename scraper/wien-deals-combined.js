@@ -1,3 +1,4 @@
+import { sharedInstagramFetch } from './instagram-shared-quota.js';
 import '../sentry/instrument.mjs';
 
 import { createGraphRequestBudget, createGraphScanStore, scanGraphSource, boundedInteger } from './instagram-graph-scan.js';
@@ -224,7 +225,7 @@ export async function runWienDealsCombined(options = {}) {
   const maxMediaPerHashtag = Math.max(5, Math.min(50, Number(env.WIEN_COMBINED_MEDIA_PER_HASHTAG || 30)));
   const maxDeals = Math.max(1, Math.min(80, Number(env.WIEN_COMBINED_MAX_DEALS || 40)));
   const timeoutMs = Math.max(3000, Number(env.WIEN_COMBINED_GRAPH_TIMEOUT_MS || 12000));
-  const fetchImpl = options.fetchImpl || globalThis.fetch;
+  const fetchImpl = sharedInstagramFetch(options.fetchImpl || globalThis.fetch, env);
   const outputPath = options.outputPath || OUTPUT_PATH;
   const reportPath = options.reportPath || REPORT_PATH;
   const mediaCachePath = options.mediaCachePath || MEDIA_CACHE_PATH;
@@ -474,6 +475,7 @@ export async function runWienDealsCombined(options = {}) {
     rescuedDeals,
     mediaEvidence: media.report,
     requestBudget: budget.stats,
+    sharedQuota: fetchImpl.quotaStats || null,
     sources: sourceResults,
     rejectionReasons: rejectionCounts(rejected),
     candidateAudit: candidateAudit

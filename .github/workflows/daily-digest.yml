@@ -56,10 +56,12 @@ jobs:
 
       - name: Verify fresh Instagram candidates via Graph API
         env:
+          INSTAGRAM_SHARED_QUOTA_ENABLED: '1'
+          GH_TOKEN: ${{ github.token }}
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
-          INSTAGRAM_GRAPH_VERIFY_MAX_ACCOUNTS: "24"
+          INSTAGRAM_GRAPH_VERIFY_MAX_ACCOUNTS: "6"
           INSTAGRAM_GRAPH_VERIFY_MEDIA_PER_ACCOUNT: "25"
           INSTAGRAM_GRAPH_VERIFY_MAX_AGE_DAYS: "7"
         run: npm run instagram:graph:verify

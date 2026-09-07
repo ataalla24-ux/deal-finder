@@ -1,3 +1,4 @@
+import { sharedInstagramFetch } from './instagram-shared-quota.js';
 import '../sentry/instrument.mjs';
 
 import { createGraphRequestBudget, createGraphScanStore, scanGraphSource, scanGraphPages, graphCursor } from './instagram-graph-scan.js';
@@ -1134,7 +1135,7 @@ export function isGlobalMetaGraphError(error) {
   const status = Number(error?.status || 0);
   const code = Number(error?.code || 0);
   const message = cleanText(error?.message || error, 1000);
-  return [401, 403, 429].includes(status)
+  return error?.code === 'SCAN_BUDGET' || [401, 403, 429].includes(status)
     || status >= 500
     || [4, 10, 17, 32, 190, 200].includes(code)
     || /(?:invalid|expired|malformed).{0,30}(?:oauth|access token)|rate limit|too many calls|permission/i.test(message);
@@ -1811,7 +1812,7 @@ export async function runMetaInstagramCollector(options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const env = options.env || process.env;
   const config = { ...(options.config || buildConfig(env, now)) };
-  const fetchImpl = options.fetchImpl || fetch;
+  const fetchImpl = sharedInstagramFetch(options.fetchImpl || fetch, env);
   config.scanNow = now;
   const state = readJson(config.statePath, {
     version: 4,
@@ -1948,6 +1949,7 @@ export async function runMetaInstagramCollector(options = {}) {
     const result = await collectInstagramGraph(config, accountCatalog, state, now, fetchImpl);
     report.sources.instagramGraph.coverage = result.coverage;
     report.sources.instagramGraph.requestBudget = result.requestBudget;
+    report.sources.instagramGraph.sharedQuota = fetchImpl.quotaStats || null;
     nextState.hashtagIds = result.hashtagIds;
     nextState.sourceFailures = result.sourceFailures;
     report.selectedAccounts = result.selectedAccounts.map((account) => ({

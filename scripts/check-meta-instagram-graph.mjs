@@ -1,3 +1,4 @@
+import { sharedInstagramFetch } from '../scraper/instagram-shared-quota.js';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -146,7 +147,7 @@ function addCheck(report, check) {
 
 async function runCheck(options = {}) {
   const env = { ...loadEnvFile(), ...process.env, ...(options.env || {}) };
-  const fetchImpl = options.fetchImpl || fetch;
+  const fetchImpl = sharedInstagramFetch(options.fetchImpl || fetch, env);
   const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
   const config = {
     graphVersion: cleanText(env.META_GRAPH_VERSION || env.INSTAGRAM_GRAPH_VERSION || 'v26.0', 20),
