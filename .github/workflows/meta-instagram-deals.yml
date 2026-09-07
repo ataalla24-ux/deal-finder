@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test bounded Graph coverage
+        run: npm run test:instagram-graph-scan
+
       - name: Refresh Instagram merchant registry
         run: npm run instagram:merchant-registry
 
@@ -77,7 +80,10 @@ jobs:
           META_INSTAGRAM_MAX_ACCOUNT_BACKFILL: '6'
           META_INSTAGRAM_ACCOUNT_RESCAN_HOURS: '6'
           META_INSTAGRAM_MAX_HASHTAGS_PER_RUN: '12'
-          META_INSTAGRAM_MEDIA_PER_ACCOUNT: '9'
+          META_INSTAGRAM_MEDIA_PER_ACCOUNT: '25'
+          META_INSTAGRAM_MAX_PAGES_PER_SOURCE: '3'
+          META_INSTAGRAM_MAX_GRAPH_REQUESTS: '120'
+          META_INSTAGRAM_GRAPH_USAGE_THRESHOLD: '85'
           META_INSTAGRAM_MAX_POST_AGE_HOURS: '72'
           META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS: '7'
           META_INSTAGRAM_UNKNOWN_EXPIRY_TTL_HOURS: '72'
@@ -106,4 +112,4 @@ jobs:
       - name: Commit collector state
         if: always()
         run: |
-          node scripts/commit-generated.mjs --skip-conflicts --message "Meta Instagram deals $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-meta-instagram.json docs/meta-instagram-report.json docs/meta-instagram-auth-health.json docs/meta-instagram-alert-state.json docs/meta-instagram-state.json docs/instagram-merchant-registry.json docs/instagram-graph-post-evidence.json
+          node scripts/commit-generated.mjs --skip-conflicts --message "Meta Instagram deals $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-meta-instagram.json docs/meta-instagram-report.json docs/meta-instagram-auth-health.json docs/meta-instagram-alert-state.json docs/meta-instagram-state.json docs/meta-instagram-scan-state.json docs/instagram-merchant-registry.json docs/instagram-graph-post-evidence.json

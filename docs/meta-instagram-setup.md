@@ -110,3 +110,8 @@ The state file caches hashtag IDs, account and hashtag yield, recent OCR evidenc
 recently observed Meta object IDs for diagnostics and fair batch rotation. Observed IDs move behind not-yet-observed rows but
 never suppress collector output, because collection alone does not prove that Slack delivery succeeded.
 The state file never contains access tokens.
+
+## Bounded pagination and request budgets
+
+See [Instagram Graph coverage](instagram-graph-coverage.md) for per-source paging,
+shared checkpoints, request limits, validation and rollback settings.

@@ -1,5 +1,7 @@
 import '../sentry/instrument.mjs';
 
+import { createGraphRequestBudget, createGraphScanStore, scanGraphSource, boundedInteger } from './instagram-graph-scan.js';
+
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -245,12 +247,19 @@ export async function runWienDealsCombined(options = {}) {
     META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_RUN: env.WIEN_COMBINED_MEDIA_LLM_MAX_CALLS_PER_RUN || '8',
     META_INSTAGRAM_MEDIA_LLM_MIN_CONFIDENCE: env.WIEN_COMBINED_MEDIA_LLM_MIN_CONFIDENCE || '0.84',
   }, now);
-  const requestOptions = { accessToken, graphVersion, fetchImpl, timeoutMs };
+  const budget = createGraphRequestBudget(fetchImpl, { maxRequests: boundedInteger(env.WIEN_COMBINED_MAX_GRAPH_REQUESTS, 80, 1, 300), usageThreshold: collectorConfig.graphUsageThreshold });
+  const scanStore = createGraphScanStore({
+    ownPath: options.scanStatePath || path.join(DOCS_DIR, 'wien-combined-scan-state.json'),
+    peerPath: options.peerScanStatePath || path.join(DOCS_DIR, 'meta-instagram-scan-state.json'),
+    scope: `${graphVersion}:${userId}`, now, write: options.write !== false, state: options.scanState,
+  });
+  const requestOptions = { accessToken, graphVersion, fetchImpl: budget.fetch, timeoutMs };
   const sourceResults = [];
   const graphEntries = new Map();
   let fetchedPosts = 0;
 
   for (const hashtag of hashtags) {
+    if (budget.stats.stopped) break;
     try {
       const search = await graphRequest('ig_hashtag_search', { user_id: userId, q: hashtag }, requestOptions);
       const hashtagId = cleanText(search?.data?.[0]?.id, 120);
@@ -258,11 +267,20 @@ export async function runWienDealsCombined(options = {}) {
         sourceResults.push({ hashtag, status: 'not-found', fetched: 0, accepted: 0 });
         continue;
       }
-      const mediaResponse = await graphHashtagMediaRequestWithAdaptiveLimit(`${hashtagId}/recent_media`, {
-        user_id: userId,
-        limit: maxMediaPerHashtag,
-      }, requestOptions);
-      const rows = Array.isArray(mediaResponse.payload?.data) ? mediaResponse.payload.data : [];
+      const scan = await scanGraphSource({
+        key: `hashtag:${hashtag}`, store: scanStore, now,
+        cacheMinutes: collectorConfig.scanCacheMinutes, maxPages: collectorConfig.maxPagesPerSource,
+        refreshHours: collectorConfig.scanRefreshHours,
+        fetchPage: async (after) => {
+          const response = await graphHashtagMediaRequestWithAdaptiveLimit(`${hashtagId}/recent_media`, {
+            user_id: userId, limit: maxMediaPerHashtag, ...(after ? { after } : {}),
+          }, requestOptions);
+          if (!Array.isArray(response.payload?.data)) throw new Error('Meta hashtag returned no media collection');
+          return { ...response.payload, fieldMode: response.fieldMode, appliedLimit: response.appliedLimit };
+        },
+      });
+      const mediaResponse = scan.lastResponse;
+      const rows = scan.rows;
       fetchedPosts += rows.length;
       for (const raw of rows) {
         const key = canonicalInstagramPostKey(raw?.permalink) || cleanText(raw?.id, 160);
@@ -281,7 +299,9 @@ export async function runWienDealsCombined(options = {}) {
       }
       sourceResults.push({
         hashtag,
-        status: 'ok',
+        status: scan.pageError ? 'partial' : 'ok',
+        coverage: scan.report,
+        ...(scan.pageError ? { error: cleanText(scan.pageError.message, 500) } : {}),
         fetched: rows.length,
         accepted: 0,
         mediaFieldMode: mediaResponse.fieldMode,
@@ -301,8 +321,8 @@ export async function runWienDealsCombined(options = {}) {
     }
   }
 
-  const successfulSources = sourceResults.filter((source) => source.status === 'ok').length;
-  const failedSources = sourceResults.filter((source) => source.status === 'error');
+  const successfulSources = sourceResults.filter((source) => ['ok', 'partial'].includes(source.status)).length;
+  const failedSources = sourceResults.filter((source) => ['error', 'partial'].includes(source.status));
   if (successfulSources === 0) {
     const report = {
       generatedAt: now.toISOString(),
@@ -426,7 +446,7 @@ export async function runWienDealsCombined(options = {}) {
       || Date.parse(right.pubDate || 0) - Date.parse(left.pubDate || 0))
     .slice(0, maxDeals);
   const mediaDegraded = rescueCandidates.length > 0 && ['degraded', 'unavailable'].includes(media.report?.status);
-  const status = failedSources.length > 0 || fetchedPosts === 0 || mediaDegraded ? 'degraded' : 'healthy';
+  const status = failedSources.length > 0 || budget.stats.stopped || fetchedPosts === 0 || mediaDegraded ? 'degraded' : 'healthy';
   const payload = {
     lastUpdated: now.toISOString(),
     source: SOURCE_KEY,
@@ -453,6 +473,7 @@ export async function runWienDealsCombined(options = {}) {
     rescueEligible: rescueCandidates.length,
     rescuedDeals,
     mediaEvidence: media.report,
+    requestBudget: budget.stats,
     sources: sourceResults,
     rejectionReasons: rejectionCounts(rejected),
     candidateAudit: candidateAudit
@@ -461,6 +482,7 @@ export async function runWienDealsCombined(options = {}) {
   };
   if (options.write !== false) {
     writeJsonAtomic(outputPath, payload);
+    scanStore.save();
     writeJsonAtomic(reportPath, report);
     writeJsonAtomic(mediaCachePath, {
       version: 1,
