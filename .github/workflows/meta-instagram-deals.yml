@@ -39,6 +39,8 @@ jobs:
         continue-on-error: true
         env:
           META_AD_LIBRARY_ACCESS_TOKEN: ${{ secrets.META_AD_LIBRARY_ACCESS_TOKEN }}
+          INSTAGRAM_SHARED_QUOTA_ENABLED: '1'
+          GH_TOKEN: ${{ github.token }}
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
@@ -66,6 +68,8 @@ jobs:
       - name: Collect official Meta Instagram deals
         env:
           META_AD_LIBRARY_ACCESS_TOKEN: ${{ secrets.META_AD_LIBRARY_ACCESS_TOKEN }}
+          INSTAGRAM_SHARED_QUOTA_ENABLED: '1'
+          GH_TOKEN: ${{ github.token }}
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -82,7 +86,7 @@ jobs:
           META_INSTAGRAM_MAX_HASHTAGS_PER_RUN: '12'
           META_INSTAGRAM_MEDIA_PER_ACCOUNT: '25'
           META_INSTAGRAM_MAX_PAGES_PER_SOURCE: '3'
-          META_INSTAGRAM_MAX_GRAPH_REQUESTS: '120'
+          META_INSTAGRAM_MAX_GRAPH_REQUESTS: '100'
           META_INSTAGRAM_GRAPH_USAGE_THRESHOLD: '85'
           META_INSTAGRAM_MAX_POST_AGE_HOURS: '72'
           META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS: '7'

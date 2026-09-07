@@ -5,6 +5,9 @@ on:
     paths:
       - 'scraper/**'
       - 'scripts/test-instagram-graph*.mjs'
+      - 'scripts/test-instagram-shared-quota.mjs'
+      - 'scripts/check-meta-instagram-graph.mjs'
+      - '.github/workflows/daily-digest.yml'
       - 'scripts/test-meta-instagram-deals.mjs'
       - 'scripts/test-wien-deals-combined.mjs'
       - '.github/workflows/*instagram*'
@@ -30,7 +33,30 @@ jobs:
       - run: npm ci
       - name: Test pagination and both collector integrations without network credentials
         run: |
+          npm run test:instagram-shared-quota
           npm run test:instagram-graph-scan
           node scripts/test-meta-instagram-deals.mjs
           npm run test:wien-deals-combined
           npm run test:instagram-graph-refresh
+
+  quota-storage:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify shared quota storage without calling Instagram
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'JS'
+          import { githubQuotaStore } from './scraper/instagram-shared-quota.js';
+          const store = githubQuotaStore(process.env);
+          const { state } = await store.read();
+          console.log(JSON.stringify({ storage: 'available', pausedUntil: new Date(state.pausedUntil).toISOString(), reservations: state.reservations.length }));
+          JS

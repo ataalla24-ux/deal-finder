@@ -1,3 +1,4 @@
+import { sharedInstagramFetch } from './instagram-shared-quota.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -212,9 +213,11 @@ export async function refreshInstagramGraphEvidence(options = {}) {
   const fetchedEntries = [];
   const candidateKeys = new Set(inventory.candidates.map((candidate) => candidate.postKey));
   const fetchAccount = options.fetchAccount || fetchInstagramBusinessDiscoveryMedia;
+  const fetchImpl = sharedInstagramFetch(options.fetchImpl || fetch, env);
+  report.sharedQuota = fetchImpl.quotaStats || null;
   for (const [username] of selectedAccounts) {
     try {
-      const response = await fetchAccount({ ...config, maxPagesPerSource: 1 }, { username }, options.fetchImpl || fetch);
+      const response = await fetchAccount({ ...config, maxPagesPerSource: 1 }, { username }, fetchImpl);
       fetchedEntries.push(...response.entries);
       report.fetchedPosts += response.entries.length;
       delete accountFailures[username];
