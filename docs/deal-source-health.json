@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-08T16:50:41.851Z",
+  "generatedAt": "2026-09-08T17:15:52.052Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 651,
-    "uniqueCandidates": 614,
-    "distinctCandidates": 630,
-    "duplicateClusters": 16,
+    "totalCandidates": 626,
+    "uniqueCandidates": 596,
+    "distinctCandidates": 609,
+    "duplicateClusters": 13,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -16,7 +16,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 75,
+        "healthScore": 79,
         "totalDeals": 8
       },
       {
@@ -28,14 +28,14 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "healthScore": 68,
-        "totalDeals": 45
+        "healthScore": 70,
+        "totalDeals": 20
       },
       {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "healthScore": 64,
-        "totalDeals": 1
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 67,
+        "totalDeals": 4
       }
     ],
     "topMissionSources": [
@@ -64,10 +64,10 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
         "missionFitScore": 57,
-        "totalDeals": 10
+        "totalDeals": 20
       }
     ],
     "topCoverageSources": [
@@ -93,18 +93,18 @@
         "fresh1dCount": 29
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 35,
-        "totalDeals": 45,
-        "fresh1dCount": 5
-      },
-      {
         "sourceKey": "gutscheine",
         "sourceLabel": "Gutscheine.at",
         "coverageScore": 34,
         "totalDeals": 26,
         "fresh1dCount": 26
+      },
+      {
+        "sourceKey": "firecrawl4",
+        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+        "coverageScore": 31,
+        "totalDeals": 50,
+        "fresh1dCount": 0
       }
     ],
     "topPrecisionSources": [
@@ -117,13 +117,13 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 77,
+        "precisionScore": 78,
         "totalDeals": 8
       },
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 72,
+        "precisionScore": 74,
         "totalDeals": 4
       },
       {
@@ -135,8 +135,8 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 69,
-        "totalDeals": 45
+        "precisionScore": 70,
+        "totalDeals": 20
       }
     ],
     "topWeightedSources": [
@@ -149,8 +149,14 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 63,
+        "sourceWeightScore": 64,
         "totalDeals": 8
+      },
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceWeightScore": 59,
+        "totalDeals": 4
       },
       {
         "sourceKey": "tiktok",
@@ -159,16 +165,10 @@
         "totalDeals": 18
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
+        "sourceKey": "gastro2",
+        "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 57,
-        "totalDeals": 45
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 57,
-        "totalDeals": 4
+        "totalDeals": 131
       }
     ],
     "topSourcesToFix": [
@@ -292,9 +292,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 8,
-      "uniqueDeals": 5,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
+      "uniqueDeals": 6,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
       "fresh1dCount": 7,
       "fresh7dCount": 8,
       "viennaCount": 8,
@@ -307,8 +307,8 @@
         "🍂 MITTAGSMENÜ NUR € 14,90 🍁🍽️ Der Herbst ist da – und mit ihm eine neue Woche voller Lieblingsgerichte!"
       ],
       "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.3,
       "fresh1dRate": 0.9,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -349,14 +349,13 @@
         }
       ],
       "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
+        "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 75,
+      "healthScore": 79,
       "missionFitScore": 71,
       "coverageScore": 20,
-      "precisionScore": 77,
-      "sourceWeightScore": 63
+      "precisionScore": 78,
+      "sourceWeightScore": 64
     },
     {
       "sourceKey": "tiktok",
@@ -441,75 +440,150 @@
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 45,
-      "uniqueDeals": 36,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 9,
-      "fresh1dCount": 5,
-      "fresh7dCount": 44,
-      "viennaCount": 45,
-      "foodDrinkCount": 24,
-      "promoCount": 30,
+      "totalDeals": 20,
+      "uniqueDeals": 15,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 3,
+      "fresh7dCount": 20,
+      "viennaCount": 20,
+      "foodDrinkCount": 11,
+      "promoCount": 12,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "3 kg Sashimi & Maki Challenge: Essen gratis bei Erfolg",
+        "EBI 3.0 DOUBLE CHALLENGE: 3 KG Sashimi & Maki in 30 Minuten essen, Essen des Tages gratis bei Erfolg",
         "20% Rabatt auf Smartphone Audioguide Klimt Villa Wien",
-        "Gratis Softdrink zu jedem Mittagsmenü für Schulkind"
+        "50% Rabatt auf ausgewählte private Karaoke-Räume und Speisen"
       ],
       "lastRun": null,
       "uniqueRate": 0.8,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 0.1,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.7,
+      "foodDrinkRate": 0.6,
+      "promoRate": 0.6,
       "missingUrlRate": 0,
-      "averageQualityScore": 83.9,
+      "averageQualityScore": 87.3,
       "topCategories": [
         {
           "value": "essen",
-          "count": 21
-        },
-        {
-          "value": "shopping",
-          "count": 10
+          "count": 9
         },
         {
           "value": "event",
-          "count": 4
-        },
-        {
-          "value": "reisen",
-          "count": 3
+          "count": 5
         },
         {
           "value": "beauty",
+          "count": 3
+        },
+        {
+          "value": "kultur",
           "count": 2
         },
         {
-          "value": "fitness",
+          "value": "supermarkt",
           "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "gratis",
-          "count": 28
+          "count": 10
         },
         {
           "value": "rabatt",
-          "count": 17
+          "count": 8
+        },
+        {
+          "value": "freebie",
+          "count": 2
+        }
+      ],
+      "issues": [],
+      "healthScore": 70,
+      "missionFitScore": 57,
+      "coverageScore": 22,
+      "precisionScore": 70,
+      "sourceWeightScore": 56
+    },
+    {
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 4,
+      "uniqueDeals": 2,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 0,
+      "fresh7dCount": 4,
+      "viennaCount": 3,
+      "foodDrinkCount": 4,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "End Of Summer Sale: END OF SUMMER SALE ☀️ Bis zu 30 % Rabatt auf ... - Instagram",
+        "Wolt: 1 kaufen. 1 gratis. Doppelt Munchy für dich: Bestell deinen Smashburger ...",
+        "Döner: Zu jedem Döner oder Dürüm eine Dose (0,33l) gratis dazu ❤️ Viel ..."
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-08T07:04:31.057Z",
+        "finishedAt": "2026-09-08T07:04:36.971Z",
+        "durationMs": 5914,
+        "counts": {
+          "rawCandidates": 12,
+          "normalizedCandidates": 12,
+          "verifiedCandidates": 5,
+          "previousDeals": 5,
+          "acceptedDeals": 5,
+          "rejectedDeals": 8
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 8
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-food3.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0.8,
+      "foodDrinkRate": 1,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 68.5,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 4
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag"
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 68,
-      "missionFitScore": 54,
-      "coverageScore": 35,
-      "precisionScore": 69,
-      "sourceWeightScore": 57
+      "healthScore": 67,
+      "missionFitScore": 69,
+      "coverageScore": 15,
+      "precisionScore": 74,
+      "sourceWeightScore": 59
     },
     {
       "sourceKey": "firecrawl5",
@@ -579,83 +653,6 @@
       "coverageScore": 10,
       "precisionScore": 60,
       "sourceWeightScore": 52
-    },
-    {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 4,
-      "uniqueDeals": 1,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 0,
-      "fresh7dCount": 4,
-      "viennaCount": 3,
-      "foodDrinkCount": 4,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "End Of Summer Sale: END OF SUMMER SALE ☀️ Bis zu 30 % Rabatt auf ... - Instagram",
-        "Wolt: 1 kaufen. 1 gratis. Doppelt Munchy für dich: Bestell deinen Smashburger ...",
-        "Döner: Zu jedem Döner oder Dürüm eine Dose (0,33l) gratis dazu ❤️ Viel ..."
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-08T07:04:31.057Z",
-        "finishedAt": "2026-09-08T07:04:36.971Z",
-        "durationMs": 5914,
-        "counts": {
-          "rawCandidates": 12,
-          "normalizedCandidates": 12,
-          "verifiedCandidates": 5,
-          "previousDeals": 5,
-          "acceptedDeals": 5,
-          "rejectedDeals": 8
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 8
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-food3.json"
-      },
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.8,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0.8,
-      "foodDrinkRate": 1,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 68.5,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 4
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 2
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 63,
-      "missionFitScore": 69,
-      "coverageScore": 14,
-      "precisionScore": 72,
-      "sourceWeightScore": 57
     },
     {
       "sourceKey": "joe",
@@ -890,9 +887,9 @@
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
       "totalDeals": 6,
-      "uniqueDeals": 4,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
+      "uniqueDeals": 5,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
       "fresh1dCount": 0,
       "fresh7dCount": 6,
       "viennaCount": 6,
@@ -927,8 +924,8 @@
         "errors": [],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.2,
       "fresh1dRate": 0,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -965,11 +962,11 @@
         "geringe Food-/Drink-Relevanz",
         "wenige klare Gratis-/Promo-Signale"
       ],
-      "healthScore": 54,
+      "healthScore": 56,
       "missionFitScore": 34,
       "coverageScore": 11,
-      "precisionScore": 53,
-      "sourceWeightScore": 39
+      "precisionScore": 54,
+      "sourceWeightScore": 40
     },
     {
       "sourceKey": "firecrawl4",
