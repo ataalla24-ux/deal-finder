@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-09T13:57:59.126Z",
+  "generatedAt": "2026-09-09T16:41:11.892Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 625,
-    "uniqueCandidates": 592,
-    "distinctCandidates": 607,
-    "duplicateClusters": 15,
+    "totalCandidates": 618,
+    "uniqueCandidates": 591,
+    "distinctCandidates": 603,
+    "duplicateClusters": 12,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
@@ -14,9 +14,15 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 72,
+        "totalDeals": 7
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "healthScore": 70,
+        "healthScore": 68,
         "totalDeals": 18
       },
       {
@@ -28,14 +34,8 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "healthScore": 62,
+        "healthScore": 63,
         "totalDeals": 23
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 62,
-        "totalDeals": 5
       }
     ],
     "topMissionSources": [
@@ -44,6 +44,12 @@
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 78,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 66,
+        "totalDeals": 7
       },
       {
         "sourceKey": "food3",
@@ -62,12 +68,6 @@
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 57,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "missionFitScore": 53,
-        "totalDeals": 36
       }
     ],
     "topCoverageSources": [
@@ -115,6 +115,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 76,
+        "totalDeals": 7
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 69,
@@ -123,20 +129,14 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "precisionScore": 69,
+        "precisionScore": 68,
         "totalDeals": 18
       },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 63,
+        "precisionScore": 62,
         "totalDeals": 23
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "precisionScore": 60,
-        "totalDeals": 1
       }
     ],
     "topWeightedSources": [
@@ -147,16 +147,16 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 60,
+        "totalDeals": 7
+      },
+      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 57,
         "totalDeals": 112
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 55,
-        "totalDeals": 18
       },
       {
         "sourceKey": "food3",
@@ -165,10 +165,10 @@
         "totalDeals": 5
       },
       {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "sourceWeightScore": 52,
-        "totalDeals": 1
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 53,
+        "totalDeals": 18
       }
     ],
     "topSourcesToFix": [
@@ -218,18 +218,19 @@
         "sampleTitles": []
       },
       {
-        "sourceKey": "firecrawl2",
-        "sourceLabel": "Firecrawl Key 3 - Consumables",
-        "healthScore": 25,
+        "sourceKey": "flights",
+        "sourceLabel": "Flights Vienna",
+        "healthScore": 28,
         "issues": [
           "wenige Deals sind frischer als 1 Tag",
           "geringe Food-/Drink-Relevanz",
-          "Wien-Signal ist zu schwach",
-          "hohe Überschneidung mit anderen Quellen"
+          "wenige klare Gratis-/Promo-Signale",
+          "Wien-Signal ist zu schwach"
         ],
         "sampleTitles": [
-          "bipa: 22 hours ago · *Der Gutschein ist ausschließlich an der BIPA Kassa bis 02.11.2026 erhältlich und in der Therme Wien bis 31.05.2027 jew",
-          "Stadt Navi: 19 hours ago · ... Gratis-Aktionen für Groß & Klein Nachbarschaft & Gemeinschaft Feste ... #Stadt Navi #Wien #WienTipps #WienGrati"
+          "Hin & zurück nach Milan ab €29.98",
+          "Hin & zurück nach Krakow ab €29.98",
+          "Hin & zurück nach Pula ab €32.98"
         ]
       }
     ],
@@ -292,6 +293,68 @@
       "sourceWeightScore": 70
     },
     {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 7,
+      "uniqueDeals": 5,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 1,
+      "fresh7dCount": 7,
+      "viennaCount": 7,
+      "foodDrinkCount": 6,
+      "promoCount": 4,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🌞 Das komplette Programm der Veganmania ist kostenlos!",
+        "5% on all tickets at GetYourGuide with code TRAVELESCAPEVIENNA5 PS: save this r",
+        "14% Ng {il a yh He k aut a ="
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.9,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88.3,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 4
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 4
+        },
+        {
+          "value": "rabatt",
+          "count": 3
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 72,
+      "missionFitScore": 66,
+      "coverageScore": 16,
+      "precisionScore": 76,
+      "sourceWeightScore": 60
+    },
+    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -299,7 +362,7 @@
       "uniqueDeals": 17,
       "duplicateDeals": 1,
       "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
+      "fresh1dCount": 0,
       "fresh7dCount": 18,
       "viennaCount": 18,
       "foodDrinkCount": 6,
@@ -313,7 +376,7 @@
       "lastRun": null,
       "uniqueRate": 0.9,
       "duplicateRate": 0.1,
-      "fresh1dRate": 0.1,
+      "fresh1dRate": 0,
       "fresh7dRate": 1,
       "viennaRate": 1,
       "foodDrinkRate": 0.3,
@@ -360,11 +423,11 @@
         "wenige Deals sind frischer als 1 Tag",
         "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 70,
-      "missionFitScore": 53,
+      "healthScore": 68,
+      "missionFitScore": 51,
       "coverageScore": 21,
-      "precisionScore": 69,
-      "sourceWeightScore": 55
+      "precisionScore": 68,
+      "sourceWeightScore": 53
     },
     {
       "sourceKey": "firecrawl5",
@@ -438,10 +501,10 @@
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 23,
-      "uniqueDeals": 17,
-      "duplicateDeals": 6,
-      "duplicateAcrossSources": 6,
-      "fresh1dCount": 4,
+      "uniqueDeals": 19,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
+      "fresh1dCount": 2,
       "fresh7dCount": 23,
       "viennaCount": 23,
       "foodDrinkCount": 10,
@@ -453,9 +516,9 @@
         "Hühner-Kebab + Coca-Cola for €5.50 instead of €8.75"
       ],
       "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0.2,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.2,
+      "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
       "foodDrinkRate": 0.4,
@@ -495,13 +558,14 @@
         }
       ],
       "issues": [
+        "wenige Deals sind frischer als 1 Tag",
         "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 62,
-      "missionFitScore": 47,
+      "healthScore": 63,
+      "missionFitScore": 45,
       "coverageScore": 23,
-      "precisionScore": 63,
-      "sourceWeightScore": 50
+      "precisionScore": 62,
+      "sourceWeightScore": 49
     },
     {
       "sourceKey": "food3",
@@ -705,85 +769,6 @@
       "coverageScore": 12,
       "precisionScore": 56,
       "sourceWeightScore": 45
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 14,
-      "uniqueDeals": 9,
-      "duplicateDeals": 5,
-      "duplicateAcrossSources": 5,
-      "fresh1dCount": 3,
-      "fresh7dCount": 14,
-      "viennaCount": 14,
-      "foodDrinkCount": 7,
-      "promoCount": 4,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Dazu erwartet Sie ein buntes Programm: 🎤 Talks & Diskussionsrunden 🎶 Live-Musik, DJ & Tanz 🎁 Mitmachaktionen & Glücksrad 🎨 Kinderschmink",
-        "*Der Gutschein ist ausschließlich an der BIPA Kassa bis 02.11.2026 erhältlich und in der Therme Wien bis 31.05.2027 jeweils Montag bis Sonnt",
-        "50% OFF Schnitzel at Kaiser’s Vienna"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.2,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.4,
-      "topCategories": [
-        {
-          "value": "beauty",
-          "count": 4
-        },
-        {
-          "value": "essen",
-          "count": 4
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        },
-        {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 10
-        },
-        {
-          "value": "gratis",
-          "count": 3
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 59,
-      "missionFitScore": 45,
-      "coverageScore": 17,
-      "precisionScore": 60,
-      "sourceWeightScore": 46
     },
     {
       "sourceKey": "gastro2",
@@ -1846,6 +1831,85 @@
       "sourceWeightScore": 25
     },
     {
+      "sourceKey": "firecrawl2",
+      "file": "deals-pending-firecrawl2.json",
+      "sourceLabel": "Firecrawl Key 3 - Consumables",
+      "totalDeals": 2,
+      "uniqueDeals": 2,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "bipa: 22 hours ago · *Der Gutschein ist ausschließlich an der BIPA Kassa bis 02.11.2026 erhältlich und in der Therme Wien bis 31.05.2027 jew",
+        "Stadt Navi: 19 hours ago · ... Gratis-Aktionen für Groß & Klein Nachbarschaft & Gemeinschaft Feste ... #Stadt Navi #Wien #WienTipps #WienGrati"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-09T07:41:13.423Z",
+        "finishedAt": "2026-09-09T07:42:11.742Z",
+        "durationMs": 58319,
+        "counts": {
+          "rawCandidates": 22,
+          "normalizedCandidates": 17,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 20
+        },
+        "rejectedByReason": {
+          "missing-concrete-offer": 3,
+          "excluded-giveaway": 2,
+          "post-verification-rejected": 15
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl2.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 73,
+      "topCategories": [
+        {
+          "value": "beauty",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 36,
+      "missionFitScore": 14,
+      "coverageScore": 4,
+      "precisionScore": 25,
+      "sourceWeightScore": 20
+    },
+    {
       "sourceKey": "flights",
       "file": "deals-pending-flights.json",
       "sourceLabel": "Flights Vienna",
@@ -1897,86 +1961,6 @@
       "coverageScore": 8,
       "precisionScore": 14,
       "sourceWeightScore": 12
-    },
-    {
-      "sourceKey": "firecrawl2",
-      "file": "deals-pending-firecrawl2.json",
-      "sourceLabel": "Firecrawl Key 3 - Consumables",
-      "totalDeals": 2,
-      "uniqueDeals": 1,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "bipa: 22 hours ago · *Der Gutschein ist ausschließlich an der BIPA Kassa bis 02.11.2026 erhältlich und in der Therme Wien bis 31.05.2027 jew",
-        "Stadt Navi: 19 hours ago · ... Gratis-Aktionen für Groß & Klein Nachbarschaft & Gemeinschaft Feste ... #Stadt Navi #Wien #WienTipps #WienGrati"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-09T07:41:13.423Z",
-        "finishedAt": "2026-09-09T07:42:11.742Z",
-        "durationMs": 58319,
-        "counts": {
-          "rawCandidates": 22,
-          "normalizedCandidates": 17,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 20
-        },
-        "rejectedByReason": {
-          "missing-concrete-offer": 3,
-          "excluded-giveaway": 2,
-          "post-verification-rejected": 15
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl2.json"
-      },
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 73,
-      "topCategories": [
-        {
-          "value": "beauty",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "Wien-Signal ist zu schwach",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 25,
-      "missionFitScore": 14,
-      "coverageScore": 3,
-      "precisionScore": 21,
-      "sourceWeightScore": 16
     },
     {
       "sourceKey": "google",
