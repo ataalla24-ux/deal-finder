@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-09T11:50:38.990Z",
+  "generatedAt": "2026-09-09T12:19:51.455Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 284,
-    "allowed": 0,
-    "blocked": 284,
-    "warnings": 0,
+    "allowed": 1,
+    "blocked": 283,
+    "warnings": 1,
     "reasonCounts": {
       "nicht eindeutig in Wien": 38,
       "älter als 7 Tage (2026-06-27)": 1,
@@ -31,19 +31,19 @@
       "älter als 7 Tage (2026-04-30)": 1,
       "älter als 7 Tage (2026-04-20)": 1,
       "abgelaufen (2026-04-24)": 1,
-      "älter als 7 Tage (2026-02-22)": 88,
+      "älter als 7 Tage (2026-02-22)": 87,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-07-16)": 1,
       "Gottesdienste nur im Wochenlauf": 34,
+      "älter als 7 Tage (2025-07-30)": 1,
       "URL ungültig (HTTP 404)": 15,
-      "älter als 7 Tage (2026-08-15)": 4,
+      "älter als 7 Tage (2026-07-30)": 1,
+      "älter als 7 Tage (2026-08-15)": 3,
       "älter als 7 Tage (2026-08-17)": 2,
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 4,
-      "älter als 7 Tage (2026-07-30)": 1,
       "abgelaufen (2026-09-05)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2020-12-18)": 4,
-      "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-07-01)": 2,
       "älter als 7 Tage (2026-04-19)": 31,
       "älter als 7 Tage (2016-10-30)": 3,
       "älter als 7 Tage (2023-09-21)": 3,
@@ -52,6 +52,7 @@
       "abgelaufen (2026-07-01)": 1,
       "älter als 7 Tage (2021-03-18)": 2,
       "abgelaufen (2026-09-06)": 2,
+      "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-07-01)": 1,
       "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
@@ -64,7 +65,7 @@
     },
     "reasonCategoryCounts": {
       "nicht Wien": 38,
-      "älter als 7 Tage": 168,
+      "älter als 7 Tage": 166,
       "abgelaufen": 11,
       "ausgeschlossene Quelle": 8,
       "kein konkreter Deal": 203,
@@ -113,23 +114,24 @@
         }
       },
       "Firecrawl Gastro #4": {
-        "total": 8,
-        "allowed": 0,
-        "blocked": 8,
-        "warnings": 0,
+        "total": 7,
+        "allowed": 1,
+        "blocked": 6,
+        "warnings": 1,
         "reasonCategoryCounts": {
-          "älter als 7 Tage": 6,
-          "kein konkreter Deal": 2,
+          "älter als 7 Tage": 4,
+          "kein konkreter Deal": 1,
           "Gewinnspiel": 1,
           "abgelaufen": 1
         }
       },
       "Firecrawl Gastro #4 Search": {
-        "total": 1,
+        "total": 2,
         "allowed": 0,
-        "blocked": 1,
+        "blocked": 2,
         "warnings": 0,
         "reasonCategoryCounts": {
+          "kein konkreter Deal": 1,
           "nicht Wien": 1,
           "älter als 7 Tage": 1
         }
@@ -237,7 +239,27 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "fc4g-vypgtq",
+      "title": "1+1 gratis Pommes",
+      "brand": "McDonald's",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.lieferando.at/speisekarte/mcdonalds-fast-food",
+      "reasons": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.lieferando.at)",
+        "kein Quell-/Post-Datum gefunden",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.lieferando.at"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -1163,18 +1185,17 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2025-07-30)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-02-22T21:13:07.698Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 199,
+      "sourceDate": "2025-07-30T05:18:47.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 406,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-21-20260222",
@@ -1470,6 +1491,45 @@
       "urlStatus": "ungültig: HTTP 404"
     },
     {
+      "id": "fc4g-1ajra1j",
+      "title": "travelescape_vienna: Vienna Christmas Markets 2026/27 save the list & opening time .. & stay ...",
+      "brand": "travelescape_vienna",
+      "source": "Firecrawl Gastro #4 Search",
+      "url": "https://www.instagram.com/p/Dc82kgoN6pt/",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "startet am 2026-12-25"
+      ],
+      "sourceDate": "2026-09-06T15:25:00.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 3,
+      "expiryDate": "2026-12-26",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "fc4g-4dshbl",
+      "title": "well-one Privat Spa: 30% Rabatt auf alle Buchungen - Preisjäger",
+      "brand": "well-one Privat Spa: 30% Rabatt auf alle Buchungen - Preisjäger",
+      "source": "Firecrawl Gastro #4 Search",
+      "url": "https://www.preisjaeger.at/gutschein/well-one-privat-spa-30-rabatt-auf-alle-buchungen-auch-im-winter-moglich-367251",
+      "reasons": [
+        "nicht eindeutig in Wien",
+        "älter als 7 Tage (2026-07-30)"
+      ],
+      "warnings": [
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-07-30T09:54:22.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 41,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "fc4g-b7oaxs",
       "title": "Dessert-&-Grill-Angebot für 18,90 €",
       "brand": "Garden Restaurant",
@@ -1539,26 +1599,6 @@
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "fc4g-4dshbl",
-      "title": "well-one Privat Spa: 30% Rabatt auf alle Buchungen - Preisjäger",
-      "brand": "well-one Privat Spa: 30% Rabatt auf alle Buchungen - Preisjäger",
-      "source": "Firecrawl Gastro #4 Search",
-      "url": "https://www.preisjaeger.at/gutschein/well-one-privat-spa-30-rabatt-auf-alle-buchungen-auch-im-winter-moglich-367251",
-      "reasons": [
-        "nicht eindeutig in Wien",
-        "älter als 7 Tage (2026-07-30)"
-      ],
-      "warnings": [
-        "kein Ablaufdatum gefunden"
-      ],
-      "sourceDate": "2026-07-30T09:54:22.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 41,
-      "expiryDate": "",
-      "expirySource": "",
-      "urlStatus": "HTTP 200"
-    },
-    {
       "id": "fc4g-220bs6",
       "title": "2-for-1 auf das jeweilige qualifizierende Subway-Angebot: ei",
       "brand": "Subway",
@@ -1592,41 +1632,6 @@
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 2091,
       "expiryDate": "2026-09-13",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "fc4g-1venook",
-      "title": "1+1 Spritzer; einmal pro Woche einlösbar",
-      "brand": "Vapiano (über Magenta Moments)",
-      "source": "Firecrawl Gastro #4",
-      "url": "https://www.preisjaeger.at/deals/magenta-moments-1-1-spritzer-bei-vapiano-365978",
-      "reasons": [
-        "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-07-01)"
-      ],
-      "warnings": [],
-      "sourceDate": "2026-07-01T19:36:21.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 70,
-      "expiryDate": "2026-09-30",
-      "expirySource": "url.dateHints",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "fc4g-199k8e2",
-      "title": "Sonderangebot für Dessert und Grillgerichte um 18,90 € (Buch",
-      "brand": "Garden Restaurant",
-      "source": "Firecrawl Gastro #4",
-      "url": "https://www.tiktok.com/@foodiewien/video/7674180482216594710",
-      "reasons": [
-        "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-08-15)"
-      ],
-      "warnings": [],
-      "sourceDate": "2026-08-15T08:59:41.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 25,
-      "expiryDate": "2026-09-15",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
     },
