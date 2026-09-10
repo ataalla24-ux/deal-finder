@@ -1,17 +1,23 @@
 {
-  "generatedAt": "2026-09-10T12:11:47.994Z",
+  "generatedAt": "2026-09-10T12:15:28.817Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 670,
-    "uniqueCandidates": 622,
-    "distinctCandidates": 645,
-    "duplicateClusters": 23,
+    "totalCandidates": 637,
+    "uniqueCandidates": 604,
+    "distinctCandidates": 620,
+    "duplicateClusters": 16,
     "topHealthySources": [
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "healthScore": 86,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 70,
+        "totalDeals": 20
       },
       {
         "sourceKey": "tiktok",
@@ -23,19 +29,13 @@
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 64,
-        "totalDeals": 50
+        "totalDeals": 17
       },
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "healthScore": 64,
         "totalDeals": 6
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 63,
-        "totalDeals": 20
       }
     ],
     "topMissionSources": [
@@ -93,18 +93,18 @@
         "fresh1dCount": 0
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 37,
-        "totalDeals": 50,
-        "fresh1dCount": 7
-      },
-      {
         "sourceKey": "gutscheine",
         "sourceLabel": "Gutscheine.at",
         "coverageScore": 36,
         "totalDeals": 34,
         "fresh1dCount": 34
+      },
+      {
+        "sourceKey": "community",
+        "sourceLabel": "Community Submission",
+        "coverageScore": 27,
+        "totalDeals": 41,
+        "fresh1dCount": 0
       }
     ],
     "topPrecisionSources": [
@@ -121,22 +121,22 @@
         "totalDeals": 6
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 67,
+        "totalDeals": 20
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 67,
         "totalDeals": 17
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 66,
-        "totalDeals": 20
-      },
-      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 66,
-        "totalDeals": 50
+        "precisionScore": 65,
+        "totalDeals": 17
       }
     ],
     "topWeightedSources": [
@@ -147,10 +147,10 @@
         "totalDeals": 1
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 55,
-        "totalDeals": 50
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 56,
+        "totalDeals": 20
       },
       {
         "sourceKey": "food3",
@@ -165,10 +165,10 @@
         "totalDeals": 122
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 53,
-        "totalDeals": 20
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 52,
+        "totalDeals": 17
       }
     ],
     "topSourcesToFix": [
@@ -287,6 +287,84 @@
       "sourceWeightScore": 70
     },
     {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 20,
+      "uniqueDeals": 15,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 11,
+      "fresh7dCount": 20,
+      "viennaCount": 20,
+      "foodDrinkCount": 6,
+      "promoCount": 12,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "❤️ 🍻 Würstel & Bier 🌱 Veggie Griller ☕ Café & Kuchen 🥂 Sektstand 🎈 Hüpfburg & Kinderprogramm 🧃 Kindergetränke gratis!",
+        "Salon Sacher The exclusive CHANEL Pop-up Café Mademoiselle — fragrances, coffee & special creations.",
+        "Salon Sacher The exclusive CHANEL Pop-up Café Mademoiselle sacherhotels — fragrances, coffee & special creations."
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.6,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.7,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 6
+        },
+        {
+          "value": "beauty",
+          "count": 4
+        },
+        {
+          "value": "essen",
+          "count": 4
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "kultur",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 11
+        },
+        {
+          "value": "rabatt",
+          "count": 8
+        },
+        {
+          "value": "gewinnspiel",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 70,
+      "missionFitScore": 56,
+      "coverageScore": 24,
+      "precisionScore": 67,
+      "sourceWeightScore": 56
+    },
+    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -369,76 +447,71 @@
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 50,
-      "uniqueDeals": 37,
-      "duplicateDeals": 13,
-      "duplicateAcrossSources": 13,
-      "fresh1dCount": 7,
-      "fresh7dCount": 47,
-      "viennaCount": 50,
-      "foodDrinkCount": 19,
-      "promoCount": 35,
+      "totalDeals": 17,
+      "uniqueDeals": 12,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 4,
+      "fresh7dCount": 17,
+      "viennaCount": 17,
+      "foodDrinkCount": 6,
+      "promoCount": 11,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Free soft drink for schoolchildren with lunch menu",
-        "gratis Kürbisschnitzen, über 200 Kürbissorten, Drachen basteln, Bauernmarkt mit steirischen Kürbisbauern & Ess",
-        "20% discount for students on AllYouCanEat HOTPOT"
+        "10% off food at Kaiserstraße 121 Vegan Vietnamese food",
+        "Free entrance to Prater park",
+        "Eight free activities and excursions in Vienna"
       ],
       "lastRun": null,
       "uniqueRate": 0.7,
       "duplicateRate": 0.3,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 0.9,
+      "fresh1dRate": 0.2,
+      "fresh7dRate": 1,
       "viennaRate": 1,
       "foodDrinkRate": 0.4,
-      "promoRate": 0.7,
+      "promoRate": 0.6,
       "missingUrlRate": 0,
-      "averageQualityScore": 84,
+      "averageQualityScore": 86.5,
       "topCategories": [
         {
-          "value": "shopping",
-          "count": 21
+          "value": "event",
+          "count": 7
         },
         {
           "value": "essen",
-          "count": 16
+          "count": 6
         },
         {
-          "value": "kultur",
-          "count": 5
+          "value": "service",
+          "count": 2
         },
         {
           "value": "beauty",
-          "count": 3
+          "count": 1
         },
         {
-          "value": "kaffee",
-          "count": 3
-        },
-        {
-          "value": "fitness",
+          "value": "gottesdienste",
           "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "gratis",
-          "count": 35
+          "count": 10
         },
         {
           "value": "rabatt",
-          "count": 15
+          "count": 7
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag",
         "geringe Food-/Drink-Relevanz"
       ],
       "healthScore": 64,
-      "missionFitScore": 51,
-      "coverageScore": 37,
-      "precisionScore": 66,
-      "sourceWeightScore": 55
+      "missionFitScore": 50,
+      "coverageScore": 20,
+      "precisionScore": 65,
+      "sourceWeightScore": 51
     },
     {
       "sourceKey": "food3",
@@ -517,85 +590,6 @@
       "coverageScore": 14,
       "precisionScore": 69,
       "sourceWeightScore": 55
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 20,
-      "uniqueDeals": 10,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 10,
-      "fresh1dCount": 11,
-      "fresh7dCount": 20,
-      "viennaCount": 20,
-      "foodDrinkCount": 6,
-      "promoCount": 12,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "❤️ 🍻 Würstel & Bier 🌱 Veggie Griller ☕ Café & Kuchen 🥂 Sektstand 🎈 Hüpfburg & Kinderprogramm 🧃 Kindergetränke gratis!",
-        "Salon Sacher The exclusive CHANEL Pop-up Café Mademoiselle — fragrances, coffee & special creations.",
-        "Salon Sacher The exclusive CHANEL Pop-up Café Mademoiselle sacherhotels — fragrances, coffee & special creations."
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0.6,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.7,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 6
-        },
-        {
-          "value": "beauty",
-          "count": 4
-        },
-        {
-          "value": "essen",
-          "count": 4
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        },
-        {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 11
-        },
-        {
-          "value": "rabatt",
-          "count": 8
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 63,
-      "missionFitScore": 56,
-      "coverageScore": 23,
-      "precisionScore": 66,
-      "sourceWeightScore": 53
     },
     {
       "sourceKey": "joe",
@@ -722,6 +716,92 @@
       "coverageScore": 12,
       "precisionScore": 56,
       "sourceWeightScore": 45
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 6,
+      "uniqueDeals": 6,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 6,
+      "viennaCount": 6,
+      "foodDrinkCount": 2,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "um 21:50) 📍 Vor der Karlskirche Wien 🎟️ FREE!",
+        "✨ Neue arabische Düfte – jetzt nur 10 €!",
+        "30% off"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-07T12:58:11.813Z",
+        "finishedAt": "2026-09-07T13:00:42.937Z",
+        "durationMs": 151124,
+        "counts": {
+          "rawCandidates": 129,
+          "normalizedCandidates": 6,
+          "verifiedCandidates": 6,
+          "previousDeals": 0,
+          "acceptedDeals": 6,
+          "rejectedDeals": 112
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 99,
+          "missing-text": 2,
+          "general-recommendation": 6,
+          "excluded-promotion-type": 2,
+          "missing-vienna-evidence": 3
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88.5,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 3
+        },
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "beauty",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 5
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 61,
+      "missionFitScore": 34,
+      "coverageScore": 11,
+      "precisionScore": 56,
+      "sourceWeightScore": 41
     },
     {
       "sourceKey": "gastro2",
@@ -913,92 +993,6 @@
       "coverageScore": 26,
       "precisionScore": 52,
       "sourceWeightScore": 48
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 6,
-      "uniqueDeals": 4,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 0,
-      "fresh7dCount": 6,
-      "viennaCount": 6,
-      "foodDrinkCount": 2,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "um 21:50) 📍 Vor der Karlskirche Wien 🎟️ FREE!",
-        "✨ Neue arabische Düfte – jetzt nur 10 €!",
-        "30% off"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-07T12:58:11.813Z",
-        "finishedAt": "2026-09-07T13:00:42.937Z",
-        "durationMs": 151124,
-        "counts": {
-          "rawCandidates": 129,
-          "normalizedCandidates": 6,
-          "verifiedCandidates": 6,
-          "previousDeals": 0,
-          "acceptedDeals": 6,
-          "rejectedDeals": 112
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 99,
-          "missing-text": 2,
-          "general-recommendation": 6,
-          "excluded-promotion-type": 2,
-          "missing-vienna-evidence": 3
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88.5,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 3
-        },
-        {
-          "value": "essen",
-          "count": 2
-        },
-        {
-          "value": "beauty",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 5
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 54,
-      "missionFitScore": 34,
-      "coverageScore": 11,
-      "precisionScore": 53,
-      "sourceWeightScore": 39
     },
     {
       "sourceKey": "member-benefits",
