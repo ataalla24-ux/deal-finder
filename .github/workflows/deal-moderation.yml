@@ -48,6 +48,7 @@ on:
 concurrency:
   group: deal-state-writer
   cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: write
@@ -99,7 +100,7 @@ jobs:
         run: npm run map:sync
 
       - name: Refresh featured deal snapshots
-        run: node scraper/set-daily-deal.js
+        run: node scripts/sync-featured-deal-references.mjs
 
       - name: Stamp live deal feed
         run: npm run deals:stamp

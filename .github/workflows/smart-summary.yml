@@ -8,6 +8,7 @@ on:
 concurrency:
   group: deal-state-writer
   cancel-in-progress: false
+  queue: max
 
 jobs:
   smart-summary:

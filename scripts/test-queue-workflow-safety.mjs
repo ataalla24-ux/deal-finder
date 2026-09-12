@@ -16,6 +16,16 @@ const workflows = new Map(workflowFiles.map((file) => [
   fs.readFileSync(path.join(workflowsDir, file), 'utf8'),
 ]));
 
+for (const [file, source] of workflows) {
+  if (source.includes('group: deal-state-writer')) {
+    assert.match(source, /cancel-in-progress: false\s+queue: max/, `${file} must retain pending manual actions`);
+  }
+}
+const removalWorkflow = workflows.get('deal-moderation.yml');
+assert.ok(removalWorkflow.indexOf('node scripts/sync-featured-deal-references.mjs') >= 0);
+assert.ok(removalWorkflow.indexOf('node scripts/sync-featured-deal-references.mjs')
+  < removalWorkflow.indexOf('npm run test:production-feed'), 'Featured references must be repaired before validation');
+
 function concurrencyFor(file) {
   const text = workflows.get(file) || '';
   const match = text.match(/(?:^|\n)concurrency:\s*\n\s+group:\s*([^\n]+)\n\s+cancel-in-progress:\s*([^\n]+)/);
