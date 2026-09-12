@@ -19,6 +19,12 @@ const [feed, map, weekly, daily] = await Promise.all([
 ]);
 
 const deals = Array.isArray(feed.deals) ? feed.deals : [];
+// Removal-only runs may retain existing bad records, but must not introduce or
+// change records to bypass validation. Feed/map/featured integrity stays strict.
+const baselineIndex = process.argv.indexOf('--removal-baseline');
+const baseline = baselineIndex < 0 ? null : JSON.parse(await readFile(process.argv[baselineIndex + 1], 'utf8'));
+if (baseline && !Array.isArray(baseline.deals)) throw new Error('Invalid removal baseline');
+const baselineDeals = new Map((baseline?.deals || []).map((deal) => [deal.id, JSON.stringify(deal)]));
 const allowedCategories = new Set([
   'essen', 'kaffee', 'trinken', 'getränke', 'getraenke', 'supermarkt', 'shopping',
   'beauty', 'fitness', 'reisen', 'kultur', 'events', 'kirche', 'gottesdienste',
@@ -99,10 +105,13 @@ let validMissing = 0;
 for (const [index, deal] of deals.entries()) {
   const label = `deals[${index}]`;
   const id = clean(deal.id);
+  if (ids.has(id)) errors.push(`${label}.id is duplicated: ${id}`);
+  const unchanged = baselineDeals.get(deal.id) === JSON.stringify(deal);
+  if (baseline && !unchanged) errors.push(`${id} was added or changed during a removal-only run`);
+  const recordErrorsStart = errors.length;
   for (const field of ['id', 'brand', 'title', 'url', 'category', 'type']) {
     if (!clean(deal[field])) errors.push(`${label}.${field} is required`);
   }
-  if (ids.has(id)) errors.push(`${label}.id is duplicated: ${id}`);
   ids.add(id);
 
   try {
@@ -159,6 +168,9 @@ for (const [index, deal] of deals.entries()) {
     else localBrandLogoFiles.add(fileName);
   } else if (logoUrl) {
     warnings.push(`${id} still loads its logo from an external host`);
+  }
+  if (baseline && unchanged) {
+    warnings.push(...errors.splice(recordErrorsStart).map((error) => `Existing unchanged record: ${error}`));
   }
 }
 
