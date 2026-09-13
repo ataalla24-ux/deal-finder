@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-13T10:24:13.288Z",
+  "generatedAt": "2026-09-13T10:33:55.475Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 661,
-    "uniqueCandidates": 622,
-    "distinctCandidates": 641,
+    "totalCandidates": 649,
+    "uniqueCandidates": 610,
+    "distinctCandidates": 629,
     "duplicateClusters": 19,
     "topHealthySources": [
       {
@@ -1778,6 +1778,108 @@
       "sourceWeightScore": 33
     },
     {
+      "sourceKey": "power",
+      "file": "deals-pending-power.json",
+      "sourceLabel": "Power Scraper",
+      "totalDeals": 23,
+      "uniqueDeals": 23,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 11,
+      "promoCount": 5,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "BILLA auf WhatsApp Nie wieder Angebote verpassen! Der BILLA WhatsApp Chat bringt",
+        "SPAR free from",
+        "LEGO® Magazine (KOSTENLOS)"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-09-13T10:33:17.274Z",
+        "finishedAt": "2026-09-13T10:33:27.227Z",
+        "durationMs": 9953,
+        "counts": {
+          "rawCandidates": 26,
+          "normalizedCandidates": 23,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 23,
+          "rejectedDeals": 0
+        },
+        "rejectedByReason": {},
+        "errors": [
+          "Too Good To Go: Browser HTTP 429",
+          "Müller: Browser HTTP 403",
+          "XXXLutz: Browser HTTP 403",
+          "Thalia: Browser HTTP 403",
+          "Libro: Browser HTTP 403"
+        ],
+        "reportFile": "deal-pipeline-last-run-power.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.2,
+      "missingUrlRate": 0,
+      "averageQualityScore": 52.3,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 9
+        },
+        {
+          "value": "technik",
+          "count": 4
+        },
+        {
+          "value": "moebel",
+          "count": 3
+        },
+        {
+          "value": "sport",
+          "count": 3
+        },
+        {
+          "value": "spielzeug",
+          "count": 2
+        },
+        {
+          "value": "supermarkt",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 18
+        },
+        {
+          "value": "gratis",
+          "count": 4
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 41,
+      "missionFitScore": 23,
+      "coverageScore": 16,
+      "precisionScore": 30,
+      "sourceWeightScore": 28
+    },
+    {
       "sourceKey": "vienna-promo-radar",
       "file": "deals-pending-vienna-promo-radar.json",
       "sourceLabel": "Vienna Promo Radar",
@@ -1853,107 +1955,6 @@
       "coverageScore": 43,
       "precisionScore": 28,
       "sourceWeightScore": 31
-    },
-    {
-      "sourceKey": "power",
-      "file": "deals-pending-power.json",
-      "sourceLabel": "Power Scraper",
-      "totalDeals": 35,
-      "uniqueDeals": 35,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 11,
-      "promoCount": 6,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "BILLA auf WhatsApp Nie wieder Angebote verpassen! Der BILLA WhatsApp Chat bringt",
-        "SPAR free from",
-        "Gratis Transporter bei Selbstabholung"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-09-12T09:32:25.613Z",
-        "finishedAt": "2026-09-12T09:32:34.381Z",
-        "durationMs": 8768,
-        "counts": {
-          "rawCandidates": 38,
-          "normalizedCandidates": 35,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 35,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "Too Good To Go: Browser HTTP 429",
-          "Müller: Browser HTTP 403",
-          "Apple Store: HTTP 503"
-        ],
-        "reportFile": "deal-pipeline-last-run-power.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.2,
-      "missingUrlRate": 0,
-      "averageQualityScore": 52.7,
-      "topCategories": [
-        {
-          "value": "bildung",
-          "count": 10
-        },
-        {
-          "value": "essen",
-          "count": 9
-        },
-        {
-          "value": "moebel",
-          "count": 8
-        },
-        {
-          "value": "sport",
-          "count": 3
-        },
-        {
-          "value": "spielzeug",
-          "count": 2
-        },
-        {
-          "value": "supermarkt",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 29
-        },
-        {
-          "value": "gratis",
-          "count": 5
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 37,
-      "missionFitScore": 16,
-      "coverageScore": 21,
-      "precisionScore": 26,
-      "sourceWeightScore": 25
     },
     {
       "sourceKey": "flights",
