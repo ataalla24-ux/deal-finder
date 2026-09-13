@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-13T07:49:10.440Z",
+  "generatedAt": "2026-09-13T09:03:54.706Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -58,15 +58,15 @@
     },
     "deals-pending-firecrawl2.json": {
       "deals": 5,
-      "candidates": 1
+      "candidates": 0
     },
     "deals-pending-firecrawl4.json": {
       "deals": 52,
       "candidates": 6
     },
     "deals-pending-firecrawl5.json": {
-      "deals": 2,
-      "candidates": 1
+      "deals": 5,
+      "candidates": 3
     },
     "deals-pending-flights.json": {
       "deals": 14,
@@ -170,7 +170,7 @@
       "candidates": 2
     },
     {
-      "username": "1000thingsinvienna",
+      "username": "neotaste.wien",
       "candidates": 1
     },
     {
@@ -186,10 +186,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 5,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "duruvienna",
+      "message": "Instagram shared quota paused: quota reservation unavailable"
+    }
+  ],
   "accountFailures": {
     "travel972026": {
       "count": 1,
@@ -204,13 +209,19 @@
   },
   "sharedQuota": {
     "limitPerHour": 150,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 6
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: quota reservation unavailable",
+    "highestUsagePercent": 0
+  },
+  "globalError": {
+    "username": "duruvienna",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: quota reservation unavailable"
   },
   "blockedEvidencePosts": 187,
-  "unmatchedCandidatePosts": 10,
-  "message": "5/15 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 15,
+  "message": "0/15 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
