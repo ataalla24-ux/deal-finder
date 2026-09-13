@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-09-13T12:38:35.796Z",
+  "generatedAt": "2026-09-13T13:01:59.648Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 676,
-    "uniqueCandidates": 610,
-    "distinctCandidates": 642,
-    "duplicateClusters": 32,
+    "totalCandidates": 699,
+    "uniqueCandidates": 617,
+    "distinctCandidates": 656,
+    "duplicateClusters": 39,
     "topHealthySources": [
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "healthScore": 73,
+        "healthScore": 71,
         "totalDeals": 12
       },
       {
@@ -127,16 +127,16 @@
         "totalDeals": 6
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 60,
+        "totalDeals": 50
+      },
+      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 56,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "instagram-verified",
-        "sourceLabel": "Instagram",
-        "precisionScore": 56,
-        "totalDeals": 6
       }
     ],
     "topWeightedSources": [
@@ -249,9 +249,9 @@
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
       "totalDeals": 12,
-      "uniqueDeals": 12,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
+      "uniqueDeals": 11,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
       "fresh1dCount": 1,
       "fresh7dCount": 12,
       "viennaCount": 12,
@@ -264,8 +264,8 @@
         "Nonalcoholic Angebot"
       ],
       "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
       "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -309,7 +309,7 @@
         "wenige Deals sind frischer als 1 Tag",
         "geringe Food-/Drink-Relevanz"
       ],
-      "healthScore": 73,
+      "healthScore": 71,
       "missionFitScore": 56,
       "coverageScore": 18,
       "precisionScore": 72,
@@ -864,81 +864,84 @@
       "sourceWeightScore": 55
     },
     {
-      "sourceKey": "firecrawl5",
-      "file": "deals-pending-firecrawl5.json",
-      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-      "totalDeals": 3,
-      "uniqueDeals": 2,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 1,
-      "foodDrinkCount": 2,
-      "promoCount": 2,
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 50,
+      "uniqueDeals": 26,
+      "duplicateDeals": 24,
+      "duplicateAcrossSources": 24,
+      "fresh1dCount": 3,
+      "fresh7dCount": 50,
+      "viennaCount": 50,
+      "foodDrinkCount": 22,
+      "promoCount": 26,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "tastyfood.vienna: WAMP goes Streetfood! Was wäre ein WAMP ohne gutes Essen und ...",
-        "eatinwien: When the craving hits for something crispy, juicy and seriously satisfying ...",
-        "Businessowner: Social Sis | AI Strategist | Business owners: Do you even know what ..."
+        "Gratis Getränk zu Sandwich oder Teller vom 8. bis 30. September 2026",
+        "Gratis Getränk zu Sandwich oder Teller vom 8. bis 30. September 2026",
+        "Gratis Softdrink zu jedem Mittagsmenü für Schulkind"
       ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-13T09:02:59.987Z",
-        "finishedAt": "2026-09-13T09:03:05.044Z",
-        "durationMs": 5057,
-        "counts": {
-          "rawCandidates": 15,
-          "normalizedCandidates": 15,
-          "verifiedCandidates": 5,
-          "previousDeals": 2,
-          "acceptedDeals": 5,
-          "rejectedDeals": 11
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 11
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
-      },
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0,
+      "lastRun": null,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0.1,
       "fresh7dRate": 1,
-      "viennaRate": 0.3,
-      "foodDrinkRate": 0.7,
-      "promoRate": 0.7,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.4,
+      "promoRate": 0.5,
       "missingUrlRate": 0,
-      "averageQualityScore": 80,
+      "averageQualityScore": 83,
       "topCategories": [
         {
           "value": "essen",
-          "count": 2
+          "count": 18
         },
         {
           "value": "shopping",
-          "count": 1
+          "count": 16
+        },
+        {
+          "value": "event",
+          "count": 5
+        },
+        {
+          "value": "reisen",
+          "count": 4
+        },
+        {
+          "value": "beauty",
+          "count": 3
+        },
+        {
+          "value": "kaffee",
+          "count": 2
         }
       ],
       "topTypes": [
         {
-          "value": "gratis",
-          "count": 2
+          "value": "rabatt",
+          "count": 25
         },
         {
-          "value": "rabatt",
+          "value": "gratis",
+          "count": 24
+        },
+        {
+          "value": "freebie",
           "count": 1
         }
       ],
       "issues": [
         "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 53,
-      "missionFitScore": 49,
-      "coverageScore": 10,
-      "precisionScore": 52,
-      "sourceWeightScore": 43
+      "healthScore": 56,
+      "missionFitScore": 45,
+      "coverageScore": 32,
+      "precisionScore": 60,
+      "sourceWeightScore": 48
     },
     {
       "sourceKey": "member-benefits",
@@ -1014,82 +1017,6 @@
       "coverageScore": 50,
       "precisionScore": 39,
       "sourceWeightScore": 45
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 27,
-      "uniqueDeals": 12,
-      "duplicateDeals": 15,
-      "duplicateAcrossSources": 15,
-      "fresh1dCount": 2,
-      "fresh7dCount": 27,
-      "viennaCount": 27,
-      "foodDrinkCount": 7,
-      "promoCount": 10,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "TU Wien Welcome Days mit kostenlosem Essen am 14-15 September 2026",
-        "Gratis Getränk zu Sandwich oder Teller vom 8. bis 30. September 2026 in Wien 1020",
-        "Gratis Getränk zu Sandwich oder Teller vom 8. bis 30. September 2026 in Wien 1020"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.4,
-      "missingUrlRate": 0,
-      "averageQualityScore": 78.7,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 14
-        },
-        {
-          "value": "essen",
-          "count": 5
-        },
-        {
-          "value": "veranstaltung",
-          "count": 3
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "kunst",
-          "count": 1
-        },
-        {
-          "value": "reisen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 17
-        },
-        {
-          "value": "gratis",
-          "count": 10
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 51,
-      "missionFitScore": 39,
-      "coverageScore": 21,
-      "precisionScore": 54,
-      "sourceWeightScore": 42
     },
     {
       "sourceKey": "church-events",
@@ -1335,175 +1262,6 @@
       "sourceWeightScore": 41
     },
     {
-      "sourceKey": "firecrawl2",
-      "file": "deals-pending-firecrawl2.json",
-      "sourceLabel": "Firecrawl Key 3 - Consumables",
-      "totalDeals": 5,
-      "uniqueDeals": 2,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 0,
-      "fresh7dCount": 5,
-      "viennaCount": 4,
-      "foodDrinkCount": 1,
-      "promoCount": 4,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "bipa: 22 hours ago · *Der Gutschein ist ausschließlich an der BIPA Kassa bis 02.11.2026 erhältlich und in der Therme Wien bis 31.05.2027 jew",
-        "Stadt Navi: 19 hours ago · ... Gratis-Aktionen für Groß & Klein Nachbarschaft & Gemeinschaft Feste ... #Stadt Navi #Wien #WienTipps #WienGrati",
-        "1000thingsinvienna: 2 days ago · ... kostenlos entdecken, ganz ohne Voranmeldung. Alle Infos findet ihr im ... #wien #wienliebe #wiengratis"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-13T07:47:55.203Z",
-        "finishedAt": "2026-09-13T07:48:46.898Z",
-        "durationMs": 51695,
-        "counts": {
-          "rawCandidates": 20,
-          "normalizedCandidates": 15,
-          "verifiedCandidates": 5,
-          "previousDeals": 3,
-          "acceptedDeals": 5,
-          "rejectedDeals": 18
-        },
-        "rejectedByReason": {
-          "missing-concrete-offer": 3,
-          "excluded-giveaway": 2,
-          "post-verification-rejected": 13
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl2.json"
-      },
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0.8,
-      "foodDrinkRate": 0.2,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 79.6,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "beauty",
-          "count": 1
-        },
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "reisen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 4
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 49,
-      "missionFitScore": 41,
-      "coverageScore": 11,
-      "precisionScore": 54,
-      "sourceWeightScore": 40
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 34,
-      "uniqueDeals": 13,
-      "duplicateDeals": 21,
-      "duplicateAcrossSources": 19,
-      "fresh1dCount": 1,
-      "fresh7dCount": 34,
-      "viennaCount": 34,
-      "foodDrinkCount": 8,
-      "promoCount": 11,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Morgen startet die Anmeldung!🏛️ Ende September öffnen in Wien gleich zwei kostenlose Events Türen, die sonst meistens verschlossen bleiben",
-        "Kürbisfest am Himmel with Kürbis-Gourmetstraße, Bauernmarkt & herbstliche Schmankerl, Kinderprogramm, Eintritt frei",
-        "20 % RABATT 🌯"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.2,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86.5,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 17
-        },
-        {
-          "value": "beauty",
-          "count": 5
-        },
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "kaffee",
-          "count": 3
-        },
-        {
-          "value": "kultur",
-          "count": 3
-        },
-        {
-          "value": "supermarkt",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 22
-        },
-        {
-          "value": "gratis",
-          "count": 11
-        },
-        {
-          "value": "gewinnspiel",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 46,
-      "missionFitScore": 30,
-      "coverageScore": 22,
-      "precisionScore": 49,
-      "sourceWeightScore": 37
-    },
-    {
       "sourceKey": "gutscheine",
       "file": "deals-pending-gutscheine.json",
       "sourceLabel": "Gutscheine.at",
@@ -1744,6 +1502,84 @@
       "sourceWeightScore": 33
     },
     {
+      "sourceKey": "firecrawl5",
+      "file": "deals-pending-firecrawl5.json",
+      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+      "totalDeals": 3,
+      "uniqueDeals": 1,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 0,
+      "fresh7dCount": 3,
+      "viennaCount": 1,
+      "foodDrinkCount": 2,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "tastyfood.vienna: WAMP goes Streetfood! Was wäre ein WAMP ohne gutes Essen und ...",
+        "eatinwien: When the craving hits for something crispy, juicy and seriously satisfying ...",
+        "Businessowner: Social Sis | AI Strategist | Business owners: Do you even know what ..."
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-13T09:02:59.987Z",
+        "finishedAt": "2026-09-13T09:03:05.044Z",
+        "durationMs": 5057,
+        "counts": {
+          "rawCandidates": 15,
+          "normalizedCandidates": 15,
+          "verifiedCandidates": 5,
+          "previousDeals": 2,
+          "acceptedDeals": 5,
+          "rejectedDeals": 11
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 11
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0.3,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 80,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "Wien-Signal ist zu schwach",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 44,
+      "missionFitScore": 49,
+      "coverageScore": 10,
+      "precisionScore": 49,
+      "sourceWeightScore": 40
+    },
+    {
       "sourceKey": "events",
       "file": "deals-pending-events.json",
       "sourceLabel": "Kirchen Events",
@@ -1798,6 +1634,87 @@
       "coverageScore": 23,
       "precisionScore": 35,
       "sourceWeightScore": 33
+    },
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 34,
+      "uniqueDeals": 10,
+      "duplicateDeals": 24,
+      "duplicateAcrossSources": 22,
+      "fresh1dCount": 1,
+      "fresh7dCount": 34,
+      "viennaCount": 34,
+      "foodDrinkCount": 8,
+      "promoCount": 11,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Morgen startet die Anmeldung!🏛️ Ende September öffnen in Wien gleich zwei kostenlose Events Türen, die sonst meistens verschlossen bleiben",
+        "Kürbisfest am Himmel with Kürbis-Gourmetstraße, Bauernmarkt & herbstliche Schmankerl, Kinderprogramm, Eintritt frei",
+        "20 % RABATT 🌯"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.6,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.2,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.5,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 17
+        },
+        {
+          "value": "beauty",
+          "count": 5
+        },
+        {
+          "value": "essen",
+          "count": 3
+        },
+        {
+          "value": "kaffee",
+          "count": 3
+        },
+        {
+          "value": "kultur",
+          "count": 3
+        },
+        {
+          "value": "supermarkt",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 22
+        },
+        {
+          "value": "gratis",
+          "count": 11
+        },
+        {
+          "value": "gewinnspiel",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 43,
+      "missionFitScore": 30,
+      "coverageScore": 21,
+      "precisionScore": 49,
+      "sourceWeightScore": 36
     },
     {
       "sourceKey": "power",
@@ -1900,6 +1817,94 @@
       "coverageScore": 16,
       "precisionScore": 30,
       "sourceWeightScore": 28
+    },
+    {
+      "sourceKey": "firecrawl2",
+      "file": "deals-pending-firecrawl2.json",
+      "sourceLabel": "Firecrawl Key 3 - Consumables",
+      "totalDeals": 5,
+      "uniqueDeals": 0,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 0,
+      "fresh7dCount": 5,
+      "viennaCount": 4,
+      "foodDrinkCount": 1,
+      "promoCount": 4,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "bipa: 22 hours ago · *Der Gutschein ist ausschließlich an der BIPA Kassa bis 02.11.2026 erhältlich und in der Therme Wien bis 31.05.2027 jew",
+        "Stadt Navi: 19 hours ago · ... Gratis-Aktionen für Groß & Klein Nachbarschaft & Gemeinschaft Feste ... #Stadt Navi #Wien #WienTipps #WienGrati",
+        "1000thingsinvienna: 2 days ago · ... kostenlos entdecken, ganz ohne Voranmeldung. Alle Infos findet ihr im ... #wien #wienliebe #wiengratis"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-13T07:47:55.203Z",
+        "finishedAt": "2026-09-13T07:48:46.898Z",
+        "durationMs": 51695,
+        "counts": {
+          "rawCandidates": 20,
+          "normalizedCandidates": 15,
+          "verifiedCandidates": 5,
+          "previousDeals": 3,
+          "acceptedDeals": 5,
+          "rejectedDeals": 18
+        },
+        "rejectedByReason": {
+          "missing-concrete-offer": 3,
+          "excluded-giveaway": 2,
+          "post-verification-rejected": 13
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl2.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0.8,
+      "foodDrinkRate": 0.2,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 79.6,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 2
+        },
+        {
+          "value": "beauty",
+          "count": 1
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 4
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 40,
+      "missionFitScore": 41,
+      "coverageScore": 11,
+      "precisionScore": 51,
+      "sourceWeightScore": 37
     },
     {
       "sourceKey": "vienna-promo-radar",
