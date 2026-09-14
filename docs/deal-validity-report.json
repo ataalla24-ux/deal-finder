@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-14T10:48:47.377Z",
+  "generatedAt": "2026-09-14T10:57:33.897Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 269,
-    "allowed": 0,
-    "blocked": 269,
-    "warnings": 0,
+    "total": 280,
+    "allowed": 1,
+    "blocked": 279,
+    "warnings": 1,
     "reasonCounts": {
       "nicht eindeutig in Wien": 42,
       "älter als 7 Tage (2026-06-27)": 1,
@@ -15,7 +15,7 @@
       "abgelaufen (2026-05-31)": 1,
       "ausgeschlossene Quelle (Neotaste)": 1,
       "älter als 7 Tage (2026-05-20)": 2,
-      "kein konkretes Angebot erkennbar": 191,
+      "kein konkretes Angebot erkennbar": 201,
       "älter als 7 Tage (2026-08-20)": 1,
       "älter als 7 Tage (2026-07-21)": 2,
       "älter als 7 Tage (2026-06-03)": 2,
@@ -30,13 +30,13 @@
       "älter als 7 Tage (2026-04-30)": 1,
       "älter als 7 Tage (2026-04-20)": 1,
       "abgelaufen (2026-04-24)": 1,
-      "älter als 7 Tage (2026-02-22)": 87,
+      "älter als 7 Tage (2026-02-22)": 88,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-09-01)": 1,
       "älter als 7 Tage (2026-07-16)": 1,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 17,
+      "URL ungültig (HTTP 404)": 14,
       "URL ungültig (Angebot abgelaufen)": 3,
       "abgelaufen (2026-09-13)": 3,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 1,
@@ -58,7 +58,6 @@
       "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
-      "älter als 7 Tage (2025-12-25)": 1,
       "kein verlässliches Quell-/Post-Datum gefunden": 78,
       "ausgeschlossene Quelle (gastro.news)": 7,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 1
@@ -68,9 +67,9 @@
       "älter als 7 Tage": 163,
       "abgelaufen": 6,
       "ausgeschlossene Quelle": 10,
-      "kein konkreter Deal": 192,
+      "kein konkreter Deal": 202,
       "kein echtes Post-Datum": 80,
-      "ungültige URL": 22,
+      "ungültige URL": 19,
       "sonstiges": 3,
       "Gewinnspiel": 2
     },
@@ -88,6 +87,13 @@
           "kein konkreter Deal": 3,
           "kein echtes Post-Datum": 2
         }
+      },
+      "Decathlon": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
       },
       "Firecrawl Food #2": {
         "total": 1,
@@ -144,7 +150,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 32,
           "älter als 7 Tage": 33,
-          "ungültige URL": 3
+          "ungültige URL": 2
         }
       },
       "Google News RSS": {
@@ -177,8 +183,17 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 96,
           "älter als 7 Tage": 99,
-          "ungültige URL": 9,
+          "ungültige URL": 7,
           "nicht Wien": 1
+        }
+      },
+      "Libro": {
+        "total": 10,
+        "allowed": 0,
+        "blocked": 10,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "kein konkreter Deal": 10
         }
       },
       "member-benefits-scraper": {
@@ -210,7 +225,26 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "power-ad26e959a0e4",
+      "title": "10% Rabatt im Team Shop",
+      "brand": "Decathlon",
+      "source": "Decathlon",
+      "url": "https://www.decathlon.at/9463-decathlon-cma-cgm-team",
+      "reasons": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.decathlon.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-14T10:56:05.241Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.decathlon.at"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -1389,6 +1423,7 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
@@ -1396,7 +1431,7 @@
       "sourceAgeDays": 204,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "extra-32-20260222",
@@ -1761,7 +1796,6 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-04-19)"
       ],
@@ -1771,7 +1805,7 @@
       "sourceAgeDays": 148,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "freikirche-7-20260419",
@@ -2569,7 +2603,6 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
@@ -2579,7 +2612,7 @@
       "sourceAgeDays": 204,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -3384,7 +3417,6 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
@@ -3394,7 +3426,7 @@
       "sourceAgeDays": 204,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gottesdienste-17-20260222",
@@ -3516,15 +3548,17 @@
       "url": "https://www.orthodoxie.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2025-12-25)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2025-12-25T14:30:51.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 263,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 204,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-24-20260222",
@@ -3886,6 +3920,206 @@
       "expiryDate": "2026-09-26T23:59:59.999Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "power-5453fdb4bd49",
+      "title": "50% ausgew. hochwertige Schreibwaren",
+      "brand": "Libro",
+      "source": "Libro",
+      "url": "https://www.pagro.at/angebote/angebote-buero-schule/50-ausgew-hochwertige-schreibwaren",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.pagro.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-14T10:56:07.959Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.pagro.at"
+    },
+    {
+      "id": "power-dcfea433f9f9",
+      "title": "25% Kalender & Schülerkalender",
+      "brand": "Libro",
+      "source": "Libro",
+      "url": "https://www.pagro.at/angebote/angebote-buero-schule/25-kalender-schuelerkalender",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.pagro.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-14T10:56:07.963Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.pagro.at"
+    },
+    {
+      "id": "power-ed329ccc8a4a",
+      "title": "25% NOVOOO Schulhefte",
+      "brand": "Libro",
+      "source": "Libro",
+      "url": "https://www.pagro.at/angebote/angebote-buero-schule/25-novooo-schulhefte",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.pagro.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-14T10:56:07.967Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.pagro.at"
+    },
+    {
+      "id": "power-f935f1c73960",
+      "title": "25 % Schultaschen & Rucksäcke",
+      "brand": "Libro",
+      "source": "Libro",
+      "url": "https://www.pagro.at/schultaschen-aktion",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.pagro.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-14T10:56:07.971Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.pagro.at"
+    },
+    {
+      "id": "power-88ffcdf2694a",
+      "title": "20% bedruckbare Etiketten ab 2 Pkg.",
+      "brand": "Libro",
+      "source": "Libro",
+      "url": "https://www.pagro.at/angebote/angebote-buero-schule/20-bedruckbare-etiketten-ab-2-pkg",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.pagro.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-14T10:56:07.974Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.pagro.at"
+    },
+    {
+      "id": "power-13c783d3444f",
+      "title": "20% BENE Briefkörbe & Stehsamler ab 2 Stk.",
+      "brand": "Libro",
+      "source": "Libro",
+      "url": "https://www.pagro.at/angebote/angebote-buero-schule/20-bene-briefkoerbe-stehsamler-ab-2-stk",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.pagro.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-14T10:56:07.978Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.pagro.at"
+    },
+    {
+      "id": "power-91118a737e8b",
+      "title": "20% Fotopapier ab 2 Pkg.",
+      "brand": "Libro",
+      "source": "Libro",
+      "url": "https://www.pagro.at/angebote/angebote-buero-schule/20-fotopapier-ab-2-pkg",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.pagro.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-14T10:56:07.981Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.pagro.at"
+    },
+    {
+      "id": "power-6a50c02d5226",
+      "title": "20% Notizbücher ab 2 Stk.",
+      "brand": "Libro",
+      "source": "Libro",
+      "url": "https://www.pagro.at/angebote/angebote-buero-schule/20-notizbuecher-ab-2-stk",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.pagro.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-14T10:56:07.984Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.pagro.at"
+    },
+    {
+      "id": "power-d4a9d53161c4",
+      "title": "15% NOVOOO Trennstreifen",
+      "brand": "Libro",
+      "source": "Libro",
+      "url": "https://www.pagro.at/angebote/angebote-buero-schule/15-novooo-trennstreifen",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.pagro.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-14T10:56:07.991Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.pagro.at"
+    },
+    {
+      "id": "power-ee4c78baea2c",
+      "title": "15% Ringmappen aus Karton ab 2 Stk.",
+      "brand": "Libro",
+      "source": "Libro",
+      "url": "https://www.pagro.at/angebote/angebote-buero-schule/15-ringmappen-aus-karton-ab-2-stk",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.pagro.at)",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-14T10:56:07.994Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.pagro.at"
     },
     {
       "id": "vpr-1iytl0u",
