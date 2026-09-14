@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-09-14T04:59:07.933Z",
+  "generatedAt": "2026-09-14T05:11:42.998Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 278,
-    "allowed": 0,
-    "blocked": 278,
-    "warnings": 0,
+    "total": 294,
+    "allowed": 12,
+    "blocked": 282,
+    "warnings": 10,
     "reasonCounts": {
-      "nicht eindeutig in Wien": 41,
+      "nicht eindeutig in Wien": 42,
       "älter als 7 Tage (2026-06-27)": 1,
       "älter als 7 Tage (2026-06-24)": 1,
       "älter als 7 Tage (2026-04-16)": 1,
@@ -15,7 +15,7 @@
       "abgelaufen (2026-05-31)": 1,
       "ausgeschlossene Quelle (Neotaste)": 1,
       "älter als 7 Tage (2026-05-20)": 2,
-      "kein konkretes Angebot erkennbar": 194,
+      "kein konkretes Angebot erkennbar": 196,
       "älter als 7 Tage (2026-08-25)": 1,
       "älter als 7 Tage (2026-08-20)": 1,
       "älter als 7 Tage (2026-07-21)": 1,
@@ -39,7 +39,7 @@
       "älter als 7 Tage (2025-07-30)": 1,
       "URL ungültig (HTTP 404)": 19,
       "URL ungültig (Angebot abgelaufen)": 3,
-      "abgelaufen (2026-09-13)": 4,
+      "abgelaufen (2026-09-13)": 6,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2021-02-05)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-05-20)": 1,
@@ -47,7 +47,7 @@
       "älter als 7 Tage (2026-08-15)": 2,
       "älter als 7 Tage (2026-08-17)": 1,
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 3,
-      "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 1,
+      "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 2,
       "älter als 7 Tage (2026-04-19)": 31,
       "älter als 7 Tage (2016-10-30)": 3,
       "älter als 7 Tage (2023-09-21)": 3,
@@ -61,6 +61,7 @@
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-25)": 1,
+      "Meta-Graph-Widerspruch (offer-expired)": 2,
       "abgelaufen (2026-09-09)": 1,
       "relative Kurz-Aktion abgelaufen (2026-09-01)": 1,
       "kein verlässliches Quell-/Post-Datum gefunden": 78,
@@ -69,17 +70,29 @@
       "abgelaufen (2026-09-10)": 1
     },
     "reasonCategoryCounts": {
-      "nicht Wien": 41,
+      "nicht Wien": 42,
       "älter als 7 Tage": 166,
-      "abgelaufen": 14,
+      "abgelaufen": 16,
       "ausgeschlossene Quelle": 9,
-      "kein konkreter Deal": 195,
+      "kein konkreter Deal": 197,
       "kein echtes Post-Datum": 80,
       "ungültige URL": 24,
-      "sonstiges": 3,
-      "Gewinnspiel": 3
+      "sonstiges": 4,
+      "Gewinnspiel": 3,
+      "Meta-Graph-Widerspruch": 2
     },
     "sourceCounts": {
+      "Apify Instagram Vienna Food Offers": {
+        "total": 1,
+        "allowed": 0,
+        "blocked": 1,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "Meta-Graph-Widerspruch": 1,
+          "nicht Wien": 1,
+          "abgelaufen": 1
+        }
+      },
       "community-submission": {
         "total": 28,
         "allowed": 0,
@@ -105,11 +118,12 @@
         }
       },
       "Firecrawl Gastro #2": {
-        "total": 9,
-        "allowed": 0,
-        "blocked": 9,
-        "warnings": 0,
+        "total": 22,
+        "allowed": 11,
+        "blocked": 11,
+        "warnings": 10,
         "reasonCategoryCounts": {
+          "kein konkreter Deal": 2,
           "sonstiges": 1,
           "älter als 7 Tage": 6,
           "ausgeschlossene Quelle": 1,
@@ -120,8 +134,8 @@
         }
       },
       "Firecrawl Gastro #4": {
-        "total": 9,
-        "allowed": 0,
+        "total": 10,
+        "allowed": 1,
         "blocked": 9,
         "warnings": 0,
         "reasonCategoryCounts": {
@@ -175,6 +189,17 @@
           "ungültige URL": 9,
           "abgelaufen": 1,
           "kein konkreter Deal": 1
+        }
+      },
+      "instagram-ai-agent": {
+        "total": 1,
+        "allowed": 0,
+        "blocked": 1,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "Meta-Graph-Widerspruch": 1,
+          "sonstiges": 1,
+          "abgelaufen": 1
         }
       },
       "jö Bonus Club": {
@@ -256,7 +281,209 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "fc4g-197nymn",
+      "title": "Tagesgerichte Montag bis Samstag um 9 € (bis zu 55 % Rabatt)",
+      "brand": "XXXLutz Restaurant",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.preisjaeger.at/deals/xxxlutz-restaurant-gourmetwochen-tagesgericht-um-9-eur-mo-sa-diverse-gutscheine-bis-3102026-369077",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-09-12T13:14:20.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 2,
+      "expiryDate": "2026-10-03",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-zrwevs",
+      "title": "1+1-Aktion: Beim Kauf eines ausgewählten Menüs ist ein zweit",
+      "brand": "IKEA Restaurant",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.preisjaeger.at/deals/ikea-11-gratis-menu-mo-fr-11-14-bis-2909-368748",
+      "reasons": [],
+      "warnings": [
+        "Post ist 10 Tage alt; zugelassen wegen ausdrücklich noch aktive Gültigkeit"
+      ],
+      "sourceDate": "2026-09-04T11:17:44.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 10,
+      "expiryDate": "2026-09-25",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-1tr3fq0",
+      "title": "September-Aktion: Piccata Milanese, Lady-Steak und Backhendl",
+      "brand": "mömax / Mia Cucina",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.preisjaeger.at/deals/momax-restaurant-auswarts-essen-zu-bestpreisen-september-2026-zb-hauptgerichte-um-7-eur-fruhstuck-um-3-eur-369076",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-09-12T13:08:30.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 2,
+      "expiryDate": "2026-09-30",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-innqhw",
+      "title": "IKEA Family-Mitglieder erhalten beim Kauf ausgewählter warme",
+      "brand": "IKEA Wien Westbahnhof – Schwedisches Restaurant",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.ikea.com/at/de/stores/wien-westbahnhof/ikea-wien-westbahnhof-angebote-pub1aba7a60/",
+      "reasons": [],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-yeodhh",
+      "title": "Zu jedem Kindermenü um 3,99 € gibt es ein SANDLÖPARE-Stoffti",
+      "brand": "IKEA Wien Westbahnhof – Schwedisches Restaurant",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.ikea.com/at/de/stores/wien-westbahnhof/ikea-wien-westbahnhof-angebote-pub1aba7a60/",
+      "reasons": [],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-wn75d0",
+      "title": "Frühstück für 1,00 € statt 2,99 € (rund 67 % günstiger).",
+      "brand": "IKEA Wien Westbahnhof – Schwedisches Restaurant",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.ikea.com/at/de/stores/wien-westbahnhof/ikea-wien-westbahnhof-angebote-pub1aba7a60/",
+      "reasons": [],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-fhkcs9",
+      "title": "Hot Dog mit Schwedenkracherl um 3,00 € statt 3,49 €, inklusi",
+      "brand": "IKEA Wien Westbahnhof – Schwedisches Bistro",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.ikea.com/at/de/stores/wien-westbahnhof/ikea-wien-westbahnhof-angebote-pub1aba7a60/",
+      "reasons": [],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-1bkuuv8",
+      "title": "Gratis Happy Meal oder gratis Klassiker-McMenü; das McMenü e",
+      "brand": "McDonald's Österreich",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.mcdonalds.at/mission-aufraeumen",
+      "reasons": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.mcdonalds.at)",
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "unklar: www.mcdonalds.at"
+    },
+    {
+      "id": "g2-mk34u9",
+      "title": "Tagesgerichte für 9,00 €: u.a. Mittwoch Tafelspitz statt 18,",
+      "brand": "XXXL Restaurant MaHü (XXXLutz)",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.preisjaeger.at/deals/xxxlutz-restaurant-gourmetwochen-tagesgericht-um-9-eur-mo-sa-diverse-gutscheine-bis-3102026-369077",
+      "reasons": [],
+      "warnings": [
+        "startet am 2026-10-03"
+      ],
+      "sourceDate": "2026-09-12T13:14:20.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 2,
+      "expiryDate": "2026-10-03",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-11t8fav",
+      "title": "SANDLÖPARE Stofftier gratis zu jedem Kindermenü (Kindermenü",
+      "brand": "IKEA Wien Nord",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.ikea.com/at/de/stores/wien-nord/ikea-wien-nord-angebote-pub8b612eff/",
+      "reasons": [],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "2026-12-31",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-w52lsw",
+      "title": "Frühstück im IKEA-Restaurant um 1 € statt 2,99 €",
+      "brand": "IKEA Wien Westbahnhof",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.ikea.com/at/de/stores/wien-westbahnhof/ikea-wien-westbahnhof-angebote-pub1aba7a60/",
+      "reasons": [],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-1e3heqx",
+      "title": "Hot Dog mit Schwedenkracherl inklusive Getränkenachfüllung u",
+      "brand": "IKEA Wien Westbahnhof",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.ikea.com/at/de/stores/wien-westbahnhof/ikea-wien-westbahnhof-angebote-pub1aba7a60/",
+      "reasons": [],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -2023,13 +2250,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 148,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-17-20260419",
@@ -2340,6 +2569,42 @@
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "unklar: temporärer URL-Fehler"
+    },
+    {
+      "id": "g2-1uzn3sx",
+      "title": "Tagesgericht für 9 € von Montag bis Samstag (je nach Wochent",
+      "brand": "XXXLutz Restaurant",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.preisjaeger.at/deals/xxxlutz-restaurant-gourmetwochen-tagesgericht-um-9-eur-mo-sa-diverse-gutscheine-bis-3102026-369077",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-09-12T13:14:20.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 2,
+      "expiryDate": "2026-10-03",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-1e4k1j7",
+      "title": "Hot Dog für 1,00 €.",
+      "brand": "IKEA Wien Westbahnhof – Schwedisches Bistro",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.ikea.com/at/de/stores/wien-westbahnhof/ikea-wien-westbahnhof-angebote-pub1aba7a60/",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "g2-pj5f2n",
@@ -3353,13 +3618,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 204,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-10-20260222",
@@ -3895,6 +4162,44 @@
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "instagram-ai-d40c13b38693",
+      "title": "Gratis Waffle & Matcha/Kaffee vom 10.09 bis 13.09 in Wien 1060 Gratis Waffle und Matcha oder Kaffee",
+      "brand": "Getreidemarkt 13",
+      "source": "instagram-ai-agent",
+      "url": "https://www.instagram.com/reel/DdGXEmth-LN/",
+      "reasons": [
+        "Meta-Graph-Widerspruch (offer-expired)",
+        "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot",
+        "abgelaufen (2026-09-13)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-09-10T08:02:10.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 4,
+      "expiryDate": "2026-09-13",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "igap-1bjhwtd",
+      "title": "foodiewien on September 10, 2026: \"Einaldung| Neu in Wien Waffle & Matcha - 📍Getreidemarkt 13, 1060 Wien 10.0",
+      "brand": "Mahnoor on Instagram",
+      "source": "Apify Instagram Vienna Food Offers",
+      "url": "https://www.instagram.com/reel/DdGXEmth-LN/",
+      "reasons": [
+        "Meta-Graph-Widerspruch (offer-expired)",
+        "nicht eindeutig in Wien",
+        "abgelaufen (2026-09-13)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-09-10T08:02:10.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 4,
+      "expiryDate": "2026-09-13",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "joe-xr17da",
