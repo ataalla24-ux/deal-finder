@@ -63,6 +63,8 @@ assert.equal(isConcreteFirecrawlSearchResult({ description: '20% Rabatt vor Ort 
 assert.equal(inferFirecrawlSearchDealType({ description: '1+1 gratis Pizza' }), 'bogo');
 assert.equal(inferFirecrawlSearchDealType({ description: 'Gratis Kaffee' }), 'gratis');
 assert.equal(inferFirecrawlSearchDealType({ description: '20% Rabatt' }), 'rabatt');
+assert.equal(inferFirecrawlSearchDealType('Hot Dog um 3 EUR statt 3,49 EUR inklusive Gratis-Nachfüllung'), 'rabatt');
+assert.equal(inferFirecrawlSearchDealType('Zweiter Teller gratis für Mitglieder'), 'bogo');
 
 const webQuery = buildFreshWebDealSearchQuery('https://www.1000things.at/', { now });
 assert.match(webQuery, /site:1000things\.at/);

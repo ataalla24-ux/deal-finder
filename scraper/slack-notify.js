@@ -1126,6 +1126,8 @@ async function loadRecentlySeenPostKeys(options = {}) {
   for (const threadTs of threadTsList) {
     const messages = await getThreadMessages(threadTs);
     const deals = extractDealsFromThreadMessages(messages);
+    // Delivery, not a human reaction, is what makes an offer already sent.
+    addSeenDealsFromThread(seenKeys, deals);
     const dealByTs = new Map(deals.map((deal) => [cleanText(deal.slackTs), deal]).filter(([ts]) => ts));
     const headerMessage = messages.find((message) => cleanText(message?.ts) === cleanText(threadTs));
     let headerReactions = ensureArray(headerMessage?.reactions);
@@ -1217,6 +1219,10 @@ function buildDealDuplicateKeys(deal) {
 
   const crawlerSignal = normalizeLooseText([deal.source, deal.originSource].map(cleanText).join(' '));
   if (postKey && /\b(?:firecrawl|crawler)\b/.test(crawlerSignal)) {
+    const offer = normalizeLooseText(`${deal.title || ''} ${deal.description || ''}`);
+    if (/\bikea\b/i.test(deal.brand || '') && /\bhot\s*dog\b/.test(offer)) {
+      keys.push(`crawler-ikea-hotdog:${postKey}`);
+    }
     const brandKey = normalizeLooseText(deal.brand)
       .replace(/\b(?:wien|vienna|österreich|oesterreich|austria)\b/g, ' ')
       .replace(/\s+/g, ' ')
@@ -2039,6 +2045,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
 }
 
 export {
+  filterRecentlySeenDeals,
   addSeenDealsFromThread,
   buildFirecrawlReviewMessage,
   buildSocialFoodReviewMessage,

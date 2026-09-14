@@ -326,9 +326,10 @@ async function main() {
               continue;
             }
             
-            const isGratis = /gratis|kostenlos|free|0€|umsonst/i.test(d.item_given_away || '');
+            const type = inferFirecrawlSearchDealType(d.item_given_away || '');
+            const isGratis = type === 'gratis';
             const brand = d.brand_or_store || 'Unbekannt';
-            const title = d.item_given_away?.substring(0, 60) || 'Gastro Deal';
+            const title = String(d.item_given_away || '').replace(/\s+/g, ' ').trim() || 'Gastro Deal';
             const ownerUsername = (d.owner_username || '').replace(/^@/, '').trim().toLowerCase();
             
             allDeals.push({
@@ -336,7 +337,7 @@ async function main() {
               brand,
               title,
               description: [d.item_given_away, d.location].filter(Boolean).join(' – '),
-              type: isGratis ? 'gratis' : 'rabatt',
+              type,
               category: 'essen',
               source: 'Firecrawl Gastro #2',
               url: postUrl,

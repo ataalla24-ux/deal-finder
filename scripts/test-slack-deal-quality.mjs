@@ -12,6 +12,7 @@ import {
   buildSlackMessage,
   combineFirecrawlReviewSelections,
   filterAlreadyQueuedDeals,
+  filterRecentlySeenDeals,
   filterDuplicateDealsInRun,
   loadLiveDealDuplicateKeys,
   loadQueuedDealDuplicateKeys,
@@ -35,6 +36,15 @@ assert.deepEqual(
 );
 
 const postedSeenKeys = new Set();
+const ikeaUrl = 'https://www.ikea.com/at/de/stores/wien-westbahnhof/angebote/';
+const ikeaRows = [
+  { id: 'g2-one', brand: 'IKEA Wien Westbahnhof', title: 'Hot Dog mit Getränk um 3 EUR', url: ikeaUrl, source: 'Firecrawl Gastro #2' },
+  { id: 'g2-two', brand: 'IKEA Wien Westbahnhof - Schwedisches Bistro', title: 'Hot Dog inklusive Nachfüllung', url: ikeaUrl, source: 'Firecrawl Gastro #2' },
+];
+const ikeaSeen = new Set();
+addSeenDealsFromThread(ikeaSeen, [ikeaRows[0]]);
+assert.equal(filterRecentlySeenDeals(ikeaRows, ikeaSeen).deals.length, 0, 'Unreacted delivered offers must not be sent again');
+assert.equal(filterDuplicateDealsInRun(ikeaRows).deals.length, 1, 'IKEA Hot Dog brand variants are one offer');
 assert.equal(addSeenDealsFromThread(postedSeenKeys, [{
   url: 'https://www.instagram.com/reel/JustPosted/?utm_source=ig_web_copy_link',
 }]), 1);

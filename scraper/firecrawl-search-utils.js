@@ -46,8 +46,8 @@ export function inferFirecrawlSearchDealType(row = {}) {
   const signal = cleanText(
     typeof row === 'string' ? row : `${row?.title || ''} ${row?.description || ''}`,
     2600,
-  ).replace(NON_OFFER_FREE_PATTERN, '');
-  if (/(?:\b1\s*[+&]\s*1\b|\b2\s*(?:für|for)\s*1\b|\bbogo\b|\bbuy one get one\b)/i.test(signal)) return 'bogo';
+  ).replace(NON_OFFER_FREE_PATTERN, '').replace(/(?:gratis|kostenlose?|free)[ -]*(?:nachfüllung|refills?)\b/gi, '');
+  if (/(?:\b1\s*[+&]\s*1\b|\b2\s*(?:für|for)\s*1\b|\bbogo\b|\bbuy one get one\b|\bzweite[rsn]?\s+(?:gleiche[rsn]?\s+)?(?:teller|menü|gericht)\s+gratis)/i.test(signal)) return 'bogo';
   if (/(?:\bgratis\b|\bkostenlos\b|\bfree\b|\bumsonst\b|\b0\s*€)/i.test(signal)) return 'gratis';
   return 'rabatt';
 }
