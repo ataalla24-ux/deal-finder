@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-14T08:26:03.214Z",
+  "generatedAt": "2026-09-14T09:43:17.275Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 269,
-    "allowed": 0,
+    "total": 270,
+    "allowed": 1,
     "blocked": 269,
-    "warnings": 0,
+    "warnings": 1,
     "reasonCounts": {
       "nicht eindeutig in Wien": 41,
       "älter als 7 Tage (2026-06-27)": 1,
@@ -30,13 +30,12 @@
       "älter als 7 Tage (2026-04-30)": 1,
       "älter als 7 Tage (2026-04-20)": 1,
       "abgelaufen (2026-04-24)": 1,
-      "älter als 7 Tage (2026-02-22)": 87,
+      "älter als 7 Tage (2026-02-22)": 89,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-09-01)": 1,
       "älter als 7 Tage (2026-07-16)": 1,
-      "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 14,
+      "URL ungültig (HTTP 404)": 17,
       "URL ungültig (Angebot abgelaufen)": 3,
       "abgelaufen (2026-09-13)": 3,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 1,
@@ -55,7 +54,6 @@
       "älter als 7 Tage (2024-12-19)": 2,
       "kostenlose Mitgliedschaft/Registrierung statt Deal": 1,
       "älter als 7 Tage (2025-11-09)": 1,
-      "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-25)": 1,
@@ -70,7 +68,7 @@
       "ausgeschlossene Quelle": 10,
       "kein konkreter Deal": 193,
       "kein echtes Post-Datum": 80,
-      "ungültige URL": 19,
+      "ungültige URL": 22,
       "sonstiges": 3,
       "Gewinnspiel": 2
     },
@@ -136,6 +134,13 @@
           "sonstiges": 1
         }
       },
+      "Firecrawl Instagram Gastro #5": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
+      },
       "Freikirchen Wien": {
         "total": 33,
         "allowed": 0,
@@ -144,7 +149,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 32,
           "älter als 7 Tage": 33,
-          "ungültige URL": 2
+          "ungültige URL": 3
         }
       },
       "Google News RSS": {
@@ -177,7 +182,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 96,
           "älter als 7 Tage": 99,
-          "ungültige URL": 7,
+          "ungültige URL": 9,
           "nicht Wien": 1
         }
       },
@@ -219,7 +224,25 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "fc5-vvqpng",
+      "title": "tokki_korean_bbq: All You Can Eat + Free Drink bei Tokki Mo-Fr 12-17 Uhr #allyoucaneat ...",
+      "brand": "tokki_korean_bbq",
+      "source": "Firecrawl Instagram Gastro #5",
+      "url": "https://www.instagram.com/p/DdLgGb3ierH/",
+      "reasons": [],
+      "warnings": [
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-12T07:57:16.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 2,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -1145,17 +1168,18 @@
       "url": "https://www.freikirchen.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2025-07-30)"
+        "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2025-07-30T05:18:47.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 411,
+      "sourceDate": "2026-02-22T21:13:07.698Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 204,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "extra-21-20260222",
@@ -1751,6 +1775,7 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-04-19)"
       ],
@@ -1760,7 +1785,7 @@
       "sourceAgeDays": 148,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "freikirche-7-20260419",
@@ -2558,6 +2583,7 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
@@ -2567,7 +2593,7 @@
       "sourceAgeDays": 204,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -2869,7 +2895,7 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
+        "URL nicht eindeutig prüfbar (evang.at)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
@@ -2877,7 +2903,7 @@
       "sourceAgeDays": 204,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "unklar: evang.at"
     },
     {
       "id": "extra-25-20260222",
@@ -3110,15 +3136,17 @@
       "url": "https://www.stephansdom.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2023-07-18)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2023-07-18T09:23:42.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1154,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 204,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-3-20260222",
@@ -3372,6 +3400,7 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
@@ -3381,7 +3410,7 @@
       "sourceAgeDays": 204,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gottesdienste-17-20260222",
