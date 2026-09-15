@@ -1,23 +1,23 @@
 {
-  "generatedAt": "2026-09-15T12:14:39.824Z",
+  "generatedAt": "2026-09-15T12:38:41.759Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 732,
-    "uniqueCandidates": 652,
-    "distinctCandidates": 690,
-    "duplicateClusters": 38,
+    "totalCandidates": 727,
+    "uniqueCandidates": 648,
+    "distinctCandidates": 685,
+    "duplicateClusters": 37,
     "topHealthySources": [
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 78,
-        "totalDeals": 2
-      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "healthScore": 77,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "firecrawl2",
+        "sourceLabel": "Firecrawl Key 3 - Consumables",
+        "healthScore": 76,
+        "totalDeals": 2
       },
       {
         "sourceKey": "joe",
@@ -26,10 +26,10 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "firecrawl2",
-        "sourceLabel": "Firecrawl Key 3 - Consumables",
-        "healthScore": 65,
-        "totalDeals": 3
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 67,
+        "totalDeals": 2
       },
       {
         "sourceKey": "church-events",
@@ -58,16 +58,16 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "firecrawl2",
+        "sourceLabel": "Firecrawl Key 3 - Consumables",
+        "missionFitScore": 61,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 59,
         "totalDeals": 6
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "missionFitScore": 59,
-        "totalDeals": 5
       }
     ],
     "topCoverageSources": [
@@ -95,9 +95,9 @@
       {
         "sourceKey": "firecrawl4",
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "coverageScore": 37,
-        "totalDeals": 62,
-        "fresh1dCount": 0
+        "coverageScore": 36,
+        "totalDeals": 58,
+        "fresh1dCount": 1
       },
       {
         "sourceKey": "gutscheine",
@@ -115,16 +115,16 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 77,
+        "sourceKey": "firecrawl2",
+        "sourceLabel": "Firecrawl Key 3 - Consumables",
+        "precisionScore": 76,
         "totalDeals": 2
       },
       {
-        "sourceKey": "firecrawl2",
-        "sourceLabel": "Firecrawl Key 3 - Consumables",
-        "precisionScore": 69,
-        "totalDeals": 3
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "precisionScore": 73,
+        "totalDeals": 2
       },
       {
         "sourceKey": "joe",
@@ -153,9 +153,15 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "firecrawl2",
+        "sourceLabel": "Firecrawl Key 3 - Consumables",
+        "sourceWeightScore": 59,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 60,
+        "sourceWeightScore": 56,
         "totalDeals": 2
       },
       {
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 53,
         "totalDeals": 129
-      },
-      {
-        "sourceKey": "firecrawl2",
-        "sourceLabel": "Firecrawl Key 3 - Consumables",
-        "sourceWeightScore": 52,
-        "totalDeals": 3
       }
     ],
     "topSourcesToFix": [
@@ -238,83 +238,13 @@
       "reportedSources": 7,
       "failedSources": [],
       "completedWithErrors": [
+        "firecrawl4",
         "gastro2",
         "power"
       ]
     }
   },
   "sources": [
-    {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 2,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Lieferando: anzeige Pizza-Spot im 2. Bezirk 30% Rabatt mit den Super Deals bei ...",
-        "foodora: MITTAGSMENÜ NUR € 14,90 🍽️ Der Herbst ist da – und mit ihm eine ..."
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-15T07:27:58.402Z",
-        "finishedAt": "2026-09-15T07:28:54.130Z",
-        "durationMs": 55728,
-        "counts": {
-          "rawCandidates": 3,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 2,
-          "previousDeals": 2,
-          "acceptedDeals": 2,
-          "rejectedDeals": 3
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 3
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-food3.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 65,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 78,
-      "missionFitScore": 64,
-      "coverageScore": 13,
-      "precisionScore": 77,
-      "sourceWeightScore": 60
-    },
     {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
@@ -384,6 +314,79 @@
       "sourceWeightScore": 62
     },
     {
+      "sourceKey": "firecrawl2",
+      "file": "deals-pending-firecrawl2.json",
+      "sourceLabel": "Firecrawl Key 3 - Consumables",
+      "totalDeals": 2,
+      "uniqueDeals": 2,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 1,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "1000thingsinvienna: Instagram: 4 days ago · ... kostenlos entdecken, ganz ohne Voranmeldung. Alle Infos findet ihr im ... #wien #wienliebe #",
+        "Stadt Navi: 20 hours ago · ... kostenlos. Also nicht immer nur dorthin, wo schon alle sind. Manchmal ... #Stadt Navi #Wien #WienTipps #WienGra"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-15T08:11:16.484Z",
+        "finishedAt": "2026-09-15T08:12:20.008Z",
+        "durationMs": 63524,
+        "counts": {
+          "rawCandidates": 16,
+          "normalizedCandidates": 14,
+          "verifiedCandidates": 5,
+          "previousDeals": 5,
+          "acceptedDeals": 5,
+          "rejectedDeals": 16
+        },
+        "rejectedByReason": {
+          "excluded-giveaway": 1,
+          "missing-concrete-offer": 1,
+          "post-verification-rejected": 14
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl2.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 76,
+      "missionFitScore": 61,
+      "coverageScore": 13,
+      "precisionScore": 76,
+      "sourceWeightScore": 59
+    },
+    {
       "sourceKey": "joe",
       "file": "deals-pending-joe.json",
       "sourceLabel": "jö Bonus Club",
@@ -446,79 +449,76 @@
       "sourceWeightScore": 64
     },
     {
-      "sourceKey": "firecrawl2",
-      "file": "deals-pending-firecrawl2.json",
-      "sourceLabel": "Firecrawl Key 3 - Consumables",
-      "totalDeals": 3,
-      "uniqueDeals": 2,
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
       "duplicateDeals": 1,
       "duplicateAcrossSources": 1,
       "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 1,
-      "promoCount": 3,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 2,
+      "promoCount": 1,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Stadt Navi: 19 hours ago · ... Gratis-Aktionen für Groß & Klein Nachbarschaft & Gemeinschaft Feste ... #Stadt Navi #Wien #WienTipps #WienGrati",
-        "1000thingsinvienna: Instagram: 4 days ago · ... kostenlos entdecken, ganz ohne Voranmeldung. Alle Infos findet ihr im ... #wien #wienliebe #",
-        "Stadt Navi: 20 hours ago · ... kostenlos. Also nicht immer nur dorthin, wo schon alle sind. Manchmal ... #Stadt Navi #Wien #WienTipps #WienGra"
+        "Lieferando: anzeige Pizza-Spot im 2. Bezirk 30% Rabatt mit den Super Deals bei ...",
+        "foodora: MITTAGSMENÜ NUR € 14,90 🍽️ Der Herbst ist da – und mit ihm eine ..."
       ],
       "lastRun": {
         "status": "completed",
-        "startedAt": "2026-09-15T08:11:16.484Z",
-        "finishedAt": "2026-09-15T08:12:20.008Z",
-        "durationMs": 63524,
+        "startedAt": "2026-09-15T07:27:58.402Z",
+        "finishedAt": "2026-09-15T07:28:54.130Z",
+        "durationMs": 55728,
         "counts": {
-          "rawCandidates": 16,
-          "normalizedCandidates": 14,
-          "verifiedCandidates": 5,
-          "previousDeals": 5,
-          "acceptedDeals": 5,
-          "rejectedDeals": 16
+          "rawCandidates": 3,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 2,
+          "previousDeals": 2,
+          "acceptedDeals": 2,
+          "rejectedDeals": 3
         },
         "rejectedByReason": {
-          "excluded-giveaway": 1,
-          "missing-concrete-offer": 1,
-          "post-verification-rejected": 14
+          "post-verification-rejected": 3
         },
         "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl2.json"
+        "reportFile": "deal-pipeline-last-run-food3.json"
       },
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
       "fresh1dRate": 0,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 0.5,
       "missingUrlRate": 0,
-      "averageQualityScore": 84,
+      "averageQualityScore": 65,
       "topCategories": [
         {
-          "value": "kultur",
-          "count": 2
-        },
-        {
           "value": "essen",
-          "count": 1
+          "count": 2
         }
       ],
       "topTypes": [
         {
           "value": "gratis",
-          "count": 3
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
         }
       ],
       "issues": [
         "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
+        "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 65,
-      "missionFitScore": 54,
+      "healthScore": 67,
+      "missionFitScore": 64,
       "coverageScore": 13,
-      "precisionScore": 69,
-      "sourceWeightScore": 52
+      "precisionScore": 73,
+      "sourceWeightScore": 56
     },
     {
       "sourceKey": "church-events",
@@ -827,6 +827,81 @@
       "sourceWeightScore": 41
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 50,
+      "uniqueDeals": 23,
+      "duplicateDeals": 27,
+      "duplicateAcrossSources": 27,
+      "fresh1dCount": 3,
+      "fresh7dCount": 48,
+      "viennaCount": 50,
+      "foodDrinkCount": 24,
+      "promoCount": 28,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Come watch American Improv students take the stage and create scenes, characters, stories, an",
+        "🥪🔥 AB HEUTE GIBT’S WAS GESCHENKT KAYA Bites auf Instagram: \"🥪🔥 AB HEUTE GIBT’S WAS GESCHENKT",
+        "We got you 🥟✨ Juridicum, Hauptuni, MedUni Wien or the Faculty of Mathematics → dumplings in"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 83.9,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 19
+        },
+        {
+          "value": "shopping",
+          "count": 18
+        },
+        {
+          "value": "beauty",
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 5
+        },
+        {
+          "value": "kultur",
+          "count": 2
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 27
+        },
+        {
+          "value": "gratis",
+          "count": 23
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 60,
+      "missionFitScore": 52,
+      "coverageScore": 31,
+      "precisionScore": 64,
+      "sourceWeightScore": 52
+    },
+    {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
@@ -886,79 +961,107 @@
       "sourceWeightScore": 50
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 50,
-      "uniqueDeals": 22,
-      "duplicateDeals": 28,
-      "duplicateAcrossSources": 28,
-      "fresh1dCount": 5,
-      "fresh7dCount": 49,
-      "viennaCount": 50,
-      "foodDrinkCount": 24,
-      "promoCount": 28,
+      "sourceKey": "firecrawl4",
+      "file": "deals-pending-firecrawl4.json",
+      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+      "totalDeals": 58,
+      "uniqueDeals": 51,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
+      "fresh1dCount": 1,
+      "fresh7dCount": 7,
+      "viennaCount": 5,
+      "foodDrinkCount": 53,
+      "promoCount": 39,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Come watch American Improv students take the stage and create scenes, characters, stories, an",
-        "🥪🔥 AB HEUTE GIBT’S WAS GESCHENKT KAYA Bites auf Instagram: \"🥪🔥 AB HEUTE GIBT’S WAS GESCHENKT",
-        "We got you 🥟✨ Juridicum, Hauptuni, MedUni Wien or the Faculty of Mathematics → dumplings in"
+        "Travel: Where to eat in Vienna @habibi.at Comment “VIENNA” for ... - Instagram",
+        "tastyfood.vienna: WAMP goes Streetfood! Was wäre ein WAMP ohne gutes Essen und ...",
+        "Lieferando: anzeige Pizza-Spot im 2. Bezirk 30% Rabatt mit den Super Deals bei ..."
       ],
-      "lastRun": null,
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.6,
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-09-15T12:29:31.447Z",
+        "finishedAt": "2026-09-15T12:38:09.718Z",
+        "durationMs": 518271,
+        "counts": {
+          "rawCandidates": 21,
+          "normalizedCandidates": 21,
+          "verifiedCandidates": 58,
+          "previousDeals": 62,
+          "acceptedDeals": 58,
+          "rejectedDeals": 11
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 11
+        },
+        "errors": [
+          "Breite Ergänzung 2: Firecrawl Agent nach 360s abgebrochen"
+        ],
+        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
+      },
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0.1,
+      "viennaRate": 0.1,
+      "foodDrinkRate": 0.9,
+      "promoRate": 0.7,
       "missingUrlRate": 0,
-      "averageQualityScore": 83.9,
+      "averageQualityScore": 63.9,
       "topCategories": [
         {
           "value": "essen",
-          "count": 19
-        },
-        {
-          "value": "shopping",
-          "count": 18
-        },
-        {
-          "value": "beauty",
-          "count": 5
-        },
-        {
-          "value": "kaffee",
-          "count": 5
+          "count": 52
         },
         {
           "value": "kultur",
-          "count": 2
+          "count": 3
         },
         {
-          "value": "reisen",
+          "value": "beauty",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "shopping",
           "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "rabatt",
-          "count": 27
-        },
-        {
           "value": "gratis",
           "count": 23
+        },
+        {
+          "value": "rabatt",
+          "count": 19
+        },
+        {
+          "value": "bogo",
+          "count": 14
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        },
+        {
+          "value": "gutschein",
+          "count": 1
         }
       ],
       "issues": [
         "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
+        "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 58,
-      "missionFitScore": 52,
-      "coverageScore": 32,
-      "precisionScore": 64,
-      "sourceWeightScore": 52
+      "healthScore": 57,
+      "missionFitScore": 53,
+      "coverageScore": 36,
+      "precisionScore": 53,
+      "sourceWeightScore": 51
     },
     {
       "sourceKey": "firecrawl5",
@@ -1041,114 +1144,13 @@
       "sourceWeightScore": 50
     },
     {
-      "sourceKey": "firecrawl4",
-      "file": "deals-pending-firecrawl4.json",
-      "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-      "totalDeals": 62,
-      "uniqueDeals": 56,
-      "duplicateDeals": 6,
-      "duplicateAcrossSources": 6,
-      "fresh1dCount": 0,
-      "fresh7dCount": 5,
-      "viennaCount": 3,
-      "foodDrinkCount": 57,
-      "promoCount": 42,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Travel: Where to eat in Vienna @habibi.at Comment “VIENNA” for ... - Instagram",
-        "tastyfood.vienna: WAMP goes Streetfood! Was wäre ein WAMP ohne gutes Essen und ...",
-        "Allyoucaneat: All You Can Eat + Free Drink bei Tokki Mo-Fr 12-17 Uhr #allyoucaneat ..."
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-14T13:42:13.313Z",
-        "finishedAt": "2026-09-14T13:47:22.823Z",
-        "durationMs": 309510,
-        "counts": {
-          "rawCandidates": 32,
-          "normalizedCandidates": 32,
-          "verifiedCandidates": 63,
-          "previousDeals": 56,
-          "acceptedDeals": 63,
-          "rejectedDeals": 15
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 15
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl4.json"
-      },
-      "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0.9,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 64,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 56
-        },
-        {
-          "value": "kultur",
-          "count": 3
-        },
-        {
-          "value": "beauty",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 25
-        },
-        {
-          "value": "rabatt",
-          "count": 20
-        },
-        {
-          "value": "bogo",
-          "count": 15
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        },
-        {
-          "value": "gutschein",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 55,
-      "missionFitScore": 51,
-      "coverageScore": 37,
-      "precisionScore": 50,
-      "sourceWeightScore": 49
-    },
-    {
       "sourceKey": "gastro2",
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
       "totalDeals": 129,
-      "uniqueDeals": 126,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
+      "uniqueDeals": 127,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
       "fresh1dCount": 0,
       "fresh7dCount": 2,
       "viennaCount": 1,
@@ -1323,78 +1325,6 @@
       "sourceWeightScore": 45
     },
     {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 35,
-      "uniqueDeals": 9,
-      "duplicateDeals": 26,
-      "duplicateAcrossSources": 24,
-      "fresh1dCount": 9,
-      "fresh7dCount": 35,
-      "viennaCount": 35,
-      "foodDrinkCount": 12,
-      "promoCount": 11,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "☀️ 🥐 Brunch-Buffet: € 17,90 pro Person 🥂 Bottomless Prosecco inklusive 🎶 Live Jazz ab 11:00 Uhr 👧 Kinder bis 6 Jahre gratis Die Plätze s",
-        "🌿 FREE BEAUTY EXPERIENCE IN VIENNA 🌿 Dr.",
-        "❤️‍🔥 FORBIDDEN, presented by aj.vienna , is bringing a special House Night to Mirage Vienna — and this one definitely caught my attention."
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.3,
-      "duplicateRate": 0.7,
-      "fresh1dRate": 0.3,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.3,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 17
-        },
-        {
-          "value": "essen",
-          "count": 8
-        },
-        {
-          "value": "kaffee",
-          "count": 4
-        },
-        {
-          "value": "reisen",
-          "count": 4
-        },
-        {
-          "value": "beauty",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 26
-        },
-        {
-          "value": "gratis",
-          "count": 9
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 50,
-      "missionFitScore": 41,
-      "coverageScore": 25,
-      "precisionScore": 54,
-      "sourceWeightScore": 43
-    },
-    {
       "sourceKey": "community",
       "file": "deals-pending-community.json",
       "sourceLabel": "Community Submission",
@@ -1475,6 +1405,78 @@
       "missionFitScore": 40,
       "coverageScore": 26,
       "precisionScore": 44,
+      "sourceWeightScore": 41
+    },
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 35,
+      "uniqueDeals": 9,
+      "duplicateDeals": 26,
+      "duplicateAcrossSources": 24,
+      "fresh1dCount": 8,
+      "fresh7dCount": 35,
+      "viennaCount": 35,
+      "foodDrinkCount": 12,
+      "promoCount": 11,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "☀️ 🥐 Brunch-Buffet: € 17,90 pro Person 🥂 Bottomless Prosecco inklusive 🎶 Live Jazz ab 11:00 Uhr 👧 Kinder bis 6 Jahre gratis Die Plätze s",
+        "🌿 FREE BEAUTY EXPERIENCE IN VIENNA 🌿 Dr.",
+        "❤️‍🔥 FORBIDDEN, presented by aj.vienna , is bringing a special House Night to Mirage Vienna — and this one definitely caught my attention."
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
+      "fresh1dRate": 0.2,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.3,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 17
+        },
+        {
+          "value": "essen",
+          "count": 8
+        },
+        {
+          "value": "kaffee",
+          "count": 4
+        },
+        {
+          "value": "reisen",
+          "count": 4
+        },
+        {
+          "value": "beauty",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 26
+        },
+        {
+          "value": "gratis",
+          "count": 9
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 48,
+      "missionFitScore": 38,
+      "coverageScore": 24,
+      "precisionScore": 53,
       "sourceWeightScore": 41
     },
     {
