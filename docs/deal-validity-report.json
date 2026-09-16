@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-16T06:20:54.897Z",
+  "generatedAt": "2026-09-16T07:33:45.127Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 291,
-    "allowed": 0,
-    "blocked": 291,
-    "warnings": 0,
+    "total": 293,
+    "allowed": 1,
+    "blocked": 292,
+    "warnings": 1,
     "reasonCounts": {
       "nicht eindeutig in Wien": 42,
       "älter als 7 Tage (2026-06-27)": 1,
@@ -47,6 +47,7 @@
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-05-20)": 1,
       "älter als 7 Tage (2026-08-15)": 1,
       "abgelaufen (2026-09-15)": 1,
+      "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 2,
       "älter als 7 Tage (2026-04-19)": 31,
       "älter als 7 Tage (2016-10-30)": 3,
       "älter als 7 Tage (2023-09-21)": 3,
@@ -60,7 +61,6 @@
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-25)": 1,
-      "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 1,
       "kein verlässliches Quell-/Post-Datum gefunden": 106,
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 2,
       "ausgeschlossene Quelle (gastro.news)": 16
@@ -74,7 +74,7 @@
       "kein echtes Post-Datum": 109,
       "ungültige URL": 14,
       "Gottesdienste außerhalb Wochenlauf": 34,
-      "sonstiges": 4,
+      "sonstiges": 5,
       "Gewinnspiel": 2
     },
     "sourceCounts": {
@@ -90,6 +90,15 @@
           "ausgeschlossene Quelle": 1,
           "kein konkreter Deal": 3,
           "kein echtes Post-Datum": 2
+        }
+      },
+      "Firecrawl Food #2": {
+        "total": 2,
+        "allowed": 1,
+        "blocked": 1,
+        "warnings": 1,
+        "reasonCategoryCounts": {
+          "sonstiges": 1
         }
       },
       "Firecrawl Gastro #2": {
@@ -208,7 +217,25 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "food3-1vvjs09",
+      "title": "cicekcigkofte: UNSCHLAGBAR GÜNSTIG! Unser leckerer Çiğköfte Dürüm jetzt nur 3 ...",
+      "brand": "cicekcigkofte",
+      "source": "Firecrawl Food #2",
+      "url": "https://www.instagram.com/p/DdTu4_JMjyR/",
+      "reasons": [],
+      "warnings": [
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-15T12:40:25.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -1630,6 +1657,23 @@
       "sourceAgeDays": 32,
       "expiryDate": "2026-09-15",
       "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "food3-etc5k2",
+      "title": "Instagram: MITTAGSMENÜ NUR € 14,90 🍽️ Der September schmeckt nach ...",
+      "brand": "Instagram",
+      "source": "Firecrawl Food #2",
+      "url": "https://www.instagram.com/reel/DdRmxbAsoTK/",
+      "reasons": [
+        "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-09-14T16:51:00.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 2,
+      "expiryDate": "2026-09-18",
+      "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
     },
     {
