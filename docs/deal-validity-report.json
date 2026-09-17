@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-17T08:18:07.916Z",
+  "generatedAt": "2026-09-17T09:19:15.722Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 296,
@@ -37,7 +37,6 @@
       "älter als 7 Tage (2026-07-16)": 1,
       "Gottesdienste nur im Wochenlauf": 34,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 8,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 2,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 2,
       "älter als 7 Tage (2025-07-31)": 1,
@@ -50,6 +49,7 @@
       "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 2,
       "älter als 7 Tage (2026-04-19)": 30,
       "älter als 7 Tage (2016-10-30)": 3,
+      "URL ungültig (HTTP 404)": 7,
       "älter als 7 Tage (2023-09-21)": 3,
       "kostenlose Infrastruktur statt Deal": 3,
       "älter als 7 Tage (2024-03-18)": 3,
@@ -77,7 +77,7 @@
       "ausgeschlossene Quelle": 19,
       "kein konkreter Deal": 205,
       "kein echtes Post-Datum": 109,
-      "ungültige URL": 11,
+      "ungültige URL": 10,
       "Gottesdienste außerhalb Wochenlauf": 34,
       "sonstiges": 8,
       "Gewinnspiel": 2
@@ -197,7 +197,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 94,
           "älter als 7 Tage": 99,
-          "ungültige URL": 7,
+          "ungültige URL": 6,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "nicht Wien": 1
@@ -1480,11 +1480,11 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.caritas-wien.at/concerts",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
@@ -1492,7 +1492,7 @@
       "sourceAgeDays": 207,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "fc4g-rgkse1",
@@ -1742,18 +1742,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.hillsong.com/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 151,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-2-20260419",
@@ -1841,19 +1842,18 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 151,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "freikirche-7-20260419",
@@ -2724,18 +2724,17 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 207,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -2818,17 +2817,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.hillsong.com/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 207,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-14-20260222",
@@ -3540,18 +3540,17 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 207,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "gottesdienste-17-20260222",
@@ -3690,17 +3689,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.hillsong.com/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 207,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-25-20260222",
