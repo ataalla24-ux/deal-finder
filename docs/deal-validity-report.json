@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-19T09:38:24.763Z",
+  "generatedAt": "2026-09-19T09:39:56.090Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 295,
-    "allowed": 0,
-    "blocked": 295,
+    "total": 298,
+    "allowed": 1,
+    "blocked": 297,
     "warnings": 0,
     "reasonCounts": {
       "nicht eindeutig in Wien": 40,
@@ -40,8 +40,10 @@
       "URL ungültig (HTTP 404)": 11,
       "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 2,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 1,
+      "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-12)": 2,
+      "älter als 7 Tage (2016-09-12)": 1,
+      "abgelaufen (2026-09-16)": 3,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-08-30)": 3,
-      "abgelaufen (2026-09-16)": 2,
       "älter als 7 Tage (2025-07-31)": 1,
       "URL ungültig (Angebot abgelaufen)": 1,
       "abgelaufen (2026-09-13)": 1,
@@ -53,7 +55,6 @@
       "kostenlose Infrastruktur statt Deal": 3,
       "älter als 7 Tage (2024-03-18)": 3,
       "abgelaufen (2026-05-01)": 1,
-      "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-12)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2025-04-16)": 1,
       "ausgeschlossene Quelle (DieRestaurantWoche)": 1,
@@ -69,8 +70,8 @@
     },
     "reasonCategoryCounts": {
       "nicht Wien": 40,
-      "älter als 7 Tage": 163,
-      "abgelaufen": 6,
+      "älter als 7 Tage": 165,
+      "abgelaufen": 7,
       "ausgeschlossene Quelle": 18,
       "kein konkreter Deal": 207,
       "kein echtes Post-Datum": 109,
@@ -109,13 +110,13 @@
         }
       },
       "Firecrawl Gastro #4": {
-        "total": 7,
+        "total": 9,
         "allowed": 0,
-        "blocked": 7,
+        "blocked": 9,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "älter als 7 Tage": 5,
-          "abgelaufen": 2,
+          "älter als 7 Tage": 7,
+          "abgelaufen": 3,
           "ungültige URL": 1
         }
       },
@@ -215,10 +216,33 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 2
         }
+      },
+      "tiktok-deals-scanner": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 0,
+        "reasonCategoryCounts": {}
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "tiktok-lsev80",
+      "title": "Make photos and get FREE perfume from Max&Mara",
+      "brand": "@elyusick",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@elyusick/video/7686826673706257684",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-09-18T10:53:22.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -1508,6 +1532,41 @@
       "sourceAgeDays": 6,
       "expiryDate": "",
       "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "fc4g-ma422z",
+      "title": "1+1 gratis auf 6er Chicken Nuggets; außerdem 2 Klassiker um",
+      "brand": "McDonald's",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.sparhamster.at/mcdonalds-gutscheine-oesterreich/",
+      "reasons": [
+        "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-12)"
+      ],
+      "warnings": [],
+      "sourceDate": "2016-09-12T20:15:48.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 3659,
+      "expiryDate": "2026-10-08",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "fc4g-lslpri",
+      "title": "App-Gutscheine: 1+1 gratis auf 6er Chicken Nuggets; 2 Klassi",
+      "brand": "McDonald’s",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.sparhamster.at/mcdonalds-gutscheine-oesterreich/",
+      "reasons": [
+        "älter als 7 Tage (2016-09-12)",
+        "abgelaufen (2026-09-16)"
+      ],
+      "warnings": [],
+      "sourceDate": "2016-09-12T20:15:48.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 3659,
+      "expiryDate": "2026-09-16",
+      "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
     },
     {
