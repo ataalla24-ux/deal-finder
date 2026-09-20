@@ -8,6 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { extractLowFoodPrice, isFoodDrinkSource } from './food-discovery-utils.js';
 import { inferPreferredBrand } from './deal-normalization-utils.js';
 import {
   canonicalInstagramPostKey,
@@ -69,14 +70,18 @@ const CANDIDATE_ACCOUNT_PATHS = [
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_AD_SEARCH_TERMS = [
-  'Wien Aktion',
-  'Wien Rabatt',
-  'Wien gratis',
-  'Wien Gutschein',
+  'Wien Kebab',
+  'Wien Döner',
+  'Wien Kebap',
+  'Wien gratis Kaffee',
+  'Wien gratis Essen',
+  'Wien gratis Getränke',
+  'Wien Burger Aktion',
+  'Wien Pizza Angebot',
+  'Wien Kaffee 1+1',
+  'Wien Restaurant Eröffnung',
   'Wien Happy Hour',
-  'Wien 2 für 1',
-  'Vienna deal',
-  'Vienna opening offer',
+  'Vienna free coffee',
 ];
 const DEFAULT_HASHTAGS = [
   'gratiswien',
@@ -255,7 +260,9 @@ export function buildConfig(env = process.env, now = new Date()) {
   );
   return {
     graphVersion: cleanText(env.META_GRAPH_VERSION || env.INSTAGRAM_GRAPH_VERSION || 'v26.0', 20),
-    adLibraryToken: cleanText(env.META_AD_LIBRARY_ACCESS_TOKEN || '', 700),
+    adLibraryToken: cleanText(env.META_AD_LIBRARY_ACCESS_TOKEN || (booleanEnv(env, 'META_AD_LIBRARY_TRY_INSTAGRAM_TOKEN', false) ? (env.INSTAGRAM_ACCESS_TOKEN || env.META_INSTAGRAM_ACCESS_TOKEN) : '') || '', 700),
+    adLibraryFoodOnly: booleanEnv(env, 'META_AD_LIBRARY_FOOD_ONLY', true),
+    maxAdTermsPerRun: numberEnv(env, 'META_AD_LIBRARY_MAX_TERMS_PER_RUN', 4, 1, 30),
     instagramAccessToken: cleanText(env.INSTAGRAM_ACCESS_TOKEN || env.META_INSTAGRAM_ACCESS_TOKEN || '', 700),
     instagramUserId: cleanText(env.INSTAGRAM_USER_ID || env.IG_USER_ID || '', 100),
     adSearchTerms: parseList(env.META_AD_LIBRARY_SEARCH_TERMS, DEFAULT_AD_SEARCH_TERMS).slice(0, 30),
@@ -268,6 +275,7 @@ export function buildConfig(env = process.env, now = new Date()) {
       .filter((item) => /^[a-z0-9._]{1,30}$/i.test(item)),
     verifiedAccounts,
     maxAccountsPerRun: numberEnv(env, 'META_INSTAGRAM_MAX_ACCOUNTS_PER_RUN', 20, 1, 100),
+    foodAccountShare: numberEnv(env, 'META_INSTAGRAM_FOOD_ACCOUNT_SHARE', 0.8, 0, 1),
     maxAccountBackfill: numberEnv(env, 'META_INSTAGRAM_MAX_ACCOUNT_BACKFILL', 6, 0, 30),
     accountRescanHours: numberEnv(env, 'META_INSTAGRAM_ACCOUNT_RESCAN_HOURS', 6, 1, 24),
     maxHashtagsPerRun: numberEnv(env, 'META_INSTAGRAM_MAX_HASHTAGS_PER_RUN', 12, 1, 30),
@@ -508,6 +516,18 @@ export function extractMentionedUsernames(deal = {}) {
 
 export function selectAccountShard(accounts, config, state = {}, now = new Date()) {
   if (!accounts.length) return [];
+  // Reserve most slots for food, while retaining exploration and the existing
+  // merchant/scout/feedback weighting within each pool.
+  const foodShare = Number(config.foodAccountShare || 0);
+  if (foodShare > 0) {
+    const limit = Math.min(config.maxAccountsPerRun, accounts.length);
+    const food = accounts.filter(isFoodDrinkSource);
+    const foodBudget = Math.min(food.length, Math.ceil(limit * foodShare));
+    const focused = selectAccountShard(food, { ...config, foodAccountShare: 0, maxAccountsPerRun: foodBudget }, state, now);
+    const seen = new Set(focused.map((account) => account.username));
+    const other = selectAccountShard(accounts.filter((account) => !seen.has(account.username)), { ...config, foodAccountShare: 0, maxAccountsPerRun: limit - focused.length }, state, now);
+    return [...focused, ...other];
+  }
   const limit = Math.min(config.maxAccountsPerRun, accounts.length);
   const selected = [];
   const seen = new Set();
@@ -537,7 +557,7 @@ export function selectAccountShard(accounts, config, state = {}, now = new Date(
   const accountIsDue = (account) => {
     const lastRunAt = Date.parse(performance[account.username]?.lastRunAt || '');
     if (!Number.isFinite(lastRunAt)) return true;
-    const food = ['food', 'drinks', 'essen', 'kaffee', 'restaurant'].includes(account.category);
+    const food = isFoodDrinkSource(account);
     const opening = Date.parse(account.nextOpeningAt || '');
     const upcoming = food && opening >= now.getTime() - DAY_MS && opening <= now.getTime() + 7 * DAY_MS;
     const provenFood = food && Number(account.manualApprovedDeals || account.approvedDeals || 0) > 0;
@@ -605,6 +625,14 @@ export function selectHashtagShard(hashtags, config, state = {}) {
       return rightRate - leftRate || Number(rightStats.recentNewAccepted || 0) - Number(leftStats.recentNewAccepted || 0);
     });
   highYield.slice(0, Math.min(8, Math.ceil(limit / 2))).forEach(add);
+
+  // Prefer existing food tags; do not silently spend Meta's rolling unique-tag
+  // allowance by replacing the configured pool with new searches.
+  const foodTags = unique.filter((tag) => isFoodDrinkSource(tag) && !seen.has(tag));
+  const foodSlots = Math.min(Math.ceil(limit / 3), limit - selected.length);
+  for (let offset = 0; offset < foodSlots && foodTags.length; offset += 1) {
+    add(foodTags[(Number(config.shardIndex || 0) * foodSlots + offset) % foodTags.length]);
+  }
 
   const rotating = unique.filter((tag) => !seen.has(tag));
   const remaining = limit - selected.length;
@@ -676,7 +704,9 @@ export function classifyPromotion(text) {
       || EXCLUDED_PATTERNS.some((pattern) => pattern.test(normalized))) {
     return { accepted: false, type: '', reason: normalized ? 'excluded-promotion-type' : 'missing-text' };
   }
+  const lowPrice = extractLowFoodPrice(normalized);
   if (RECOMMENDATION_LANGUAGE_PATTERN.test(normalized)
+      && !lowPrice
       && !EXPLICIT_PROMOTION_BEYOND_GENERIC_FREE_PATTERN.test(normalized)
       && !COMPLIMENTARY_FOOD_PATTERN.test(normalized)
       && !SECOND_ITEM_FREE_PATTERN.test(normalized)) {
@@ -691,7 +721,7 @@ export function classifyPromotion(text) {
   const strong = Boolean(strongMatch);
   const soft = Boolean(softMatch);
   const hasConcreteNumber = /(?:\d{1,3}\s*%|€\s*\d{1,3}(?:[,.]\d{1,2})?|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|euro|eur)|\b\d\s*\+\s*\d\b)/i.test(normalized);
-  if (!strong && !birthdayEntryOffer && !(soft && hasConcreteNumber)) {
+  if (!strong && !birthdayEntryOffer && !lowPrice && !(soft && hasConcreteNumber)) {
     return { accepted: false, type: '', reason: 'no-concrete-offer' };
   }
 
@@ -706,11 +736,14 @@ export function classifyPromotion(text) {
   }
   if (birthdayEntryOffer) type = 'rabatt';
   if (bogoMatch) type = 'bogo';
+  const priceOnly = lowPrice && type === 'rabatt'
+    && !/\b(?:rabatt|discount|off|gutschein|coupon|aktion|angebot|special|deal|statt|happy\s*hour)\b|\d\s*%/i.test(normalized);
   return {
     accepted: true,
     type,
     reason: '',
-    evidence: cleanText(bogoMatch?.[0] || birthdayEntryOffer?.evidence || strongMatch?.[0] || softMatch?.[0], 120),
+    evidence: cleanText(bogoMatch?.[0] || birthdayEntryOffer?.evidence || (priceOnly && lowPrice.evidence) || strongMatch?.[0] || softMatch?.[0] || lowPrice?.evidence, 120),
+    ...(priceOnly ? { lowPrice, offerKind: 'low-price' } : {}),
   };
 }
 
@@ -725,6 +758,9 @@ function inferCategory(text) {
 }
 
 function inferTitle(text, brand, promotion) {
+  if (promotion.offerKind === 'low-price') {
+    return `Preis-Tipp: ${promotion.lowPrice.product} um ${String(promotion.lowPrice.amount).replace('.', ',')} € bei ${brand}`;
+  }
   const birthdayEntryOffer = extractBirthdayEntryOffer(text);
   if (birthdayEntryOffer && promotion.type === 'rabatt') {
     const brandSuffix = brand && !/^#|^instagram$/i.test(brand) ? ` bei ${brand}` : '';
@@ -904,6 +940,8 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
     ...(Array.isArray(raw?.ad_creative_link_descriptions) ? raw.ad_creative_link_descriptions : []),
     ...(Array.isArray(raw?.ad_creative_link_captions) ? raw.ad_creative_link_captions : []),
   ].map((part) => cleanText(part, 1800)).filter(Boolean).join('\n');
+  if (Array.isArray(raw?.publisher_platforms) && !raw.publisher_platforms.some((platform) => String(platform).toLowerCase() === 'instagram')) return { deal: null, rejection: 'not-instagram-ad' };
+  if (config.adLibraryFoodOnly && !isFoodDrinkSource(text)) return { deal: null, rejection: 'non-food-ad' };
   const promotion = classifyPromotion(text);
   if (!promotion.accepted) return { deal: null, rejection: promotion.reason };
 
@@ -922,6 +960,9 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
     targetLocations: raw?.target_locations,
   }, null, config);
   if (!viennaEvidence.verified) return { deal: null, rejection: 'missing-vienna-evidence' };
+
+  // Ad targeting describes the audience, not where the offer is redeemable.
+  if (viennaEvidence.source === 'meta-target-location' || hasConflictingOutsideViennaLocation(text)) return { deal: null, rejection: 'missing-vienna-redemption-evidence' };
 
   const adId = cleanText(raw?.id, 120);
   const snapshotUrl = cleanText(raw?.ad_snapshot_url, 1000);
@@ -958,6 +999,7 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
     },
   });
   deal.promotionEvidence = promotion.evidence;
+  if (promotion.lowPrice) { deal.offerKind = promotion.offerKind; deal.priceEvidence = promotion.lowPrice; }
   return { deal, rejection: '' };
 }
 
@@ -1099,6 +1141,7 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
     },
   });
   deal.promotionEvidence = promotion.evidence;
+  if (promotion.lowPrice) { deal.offerKind = promotion.offerKind; deal.priceEvidence = promotion.lowPrice; }
   if (username) deal.ownerUsername = username;
   deal.sourceAccountType = entities.ownerRole;
   if (entities.scoutUsername) deal.scoutUsername = entities.scoutUsername;
@@ -1178,7 +1221,7 @@ async function fetchMetaJson(url, config, fetchImpl = fetch) {
         };
       }
 
-      const error = new Error(`Meta API ${response.status} for ${safeUrl(url)}: ${cleanText(payload?.error?.message || payload?.raw || 'request failed', 300)}`);
+      const error = new Error(`Meta API ${response.status}: ${cleanText(payload?.error?.message || payload?.raw || 'request failed', 300)} for ${safeUrl(url)}`);
       error.status = response.status;
       error.code = payload?.error?.code;
       error.retryAfter = response.headers.get('retry-after') || '';
@@ -1293,27 +1336,51 @@ function adLibraryUrl(config, searchTerm) {
   return url.toString();
 }
 
-async function collectAdLibrary(config, now, fetchImpl) {
+async function collectAdLibrary(config, now, fetchImpl, previousFailure = null) {
   const raw = [];
   const errors = [];
   const usage = [];
-  for (const term of config.adSearchTerms) {
+  const terms = config.adSearchTerms;
+  const count = Math.min(config.maxAdTermsPerRun || 4, terms.length);
+  const selectedTerms = Array.from({ length: count }, (_, index) => terms[(Number(config.shardIndex || 0) * count + index) % terms.length]);
+  if (Date.parse(previousFailure?.retryAt || '') > now.getTime()) return { raw, errors: [previousFailure], usage, selectedTerms, failure: previousFailure, cooldown: true };
+  const seen = new Set();
+  for (const term of selectedTerms) {
     let next = adLibraryUrl(config, term);
     for (let page = 0; page < config.maxAdPagesPerTerm && next; page += 1) {
       try {
         const response = await fetchMetaJson(next, config, fetchImpl);
         usage.push(response.usage);
         for (const item of Array.isArray(response.payload?.data) ? response.payload.data : []) {
+          if (item.id && seen.has(item.id)) continue;
+          if (item.id) seen.add(item.id);
           raw.push({ ...item, _searchTerm: term });
         }
-        next = cleanText(response.payload?.paging?.next, 3000);
-      } catch (error) {
-        errors.push({ term, status: Number(error?.status || 0), code: error?.code || '', message: safeErrorMessage(error, config) });
+        const nextPage = cleanText(response.payload?.paging?.next, 3000);
         next = '';
+        if (nextPage) {
+          const parsed = new URL(nextPage);
+          if (parsed.origin !== 'https://graph.facebook.com' || !parsed.pathname.endsWith('/ads_archive')) throw new Error('Untrusted Ad Library pagination URL');
+          const cursor = graphCursor(parsed.searchParams.get('after') || response.payload?.paging?.cursors?.after);
+          if (cursor) {
+            const pageUrl = new URL(adLibraryUrl(config, term));
+            pageUrl.searchParams.set('after', cursor);
+            next = pageUrl.toString();
+          }
+        }
+      } catch (error) {
+        const failure = {
+          term, status: Number(error?.status || 0), code: error?.code || '', message: safeErrorMessage(error, config),
+          retryAt: new Date(now.getTime() + 6 * 60 * 60 * 1000).toISOString(),
+        };
+        errors.push(failure);
+        // The same credentials/fields are used by every term. Stop on the first
+        // failure rather than spending a full search rotation on a blocked API.
+        return { raw, errors, usage, selectedTerms, failure };
       }
     }
   }
-  return { raw, errors, usage };
+  return { raw, errors, usage, selectedTerms, failure: null };
 }
 
 function instagramHashtagSearchUrl(config, tag) {
@@ -1921,13 +1988,18 @@ export async function runMetaInstagramCollector(options = {}) {
     accountPerformance: { ...(state?.accountPerformance || {}) },
     hashtagPerformance: { ...(state?.hashtagPerformance || {}) },
     discoveredAccounts: { ...previousDiscoveredAccounts },
+    adLibraryFailure: state?.adLibraryFailure || null,
   };
 
   if (configured.adLibrary) {
-    const result = await collectAdLibrary(config, now, fetchImpl);
+    const result = await collectAdLibrary(config, now, fetchImpl, state?.adLibraryFailure);
+    nextState.adLibraryFailure = result.failure;
     report.sources.adLibrary.fetched = result.raw.length;
     report.sources.adLibrary.errors = result.errors;
-    report.sources.adLibrary.status = result.errors.length === config.adSearchTerms.length && !result.raw.length ? 'failed' : (result.errors.length ? 'degraded' : 'ok');
+    report.sources.adLibrary.selectedTerms = result.selectedTerms;
+    report.sources.adLibrary.cooldown = result.cooldown === true;
+    report.sources.adLibrary.retryAt = result.failure?.retryAt || null;
+    report.sources.adLibrary.status = result.errors.length && !result.raw.length ? 'failed' : (result.errors.length ? 'degraded' : 'ok');
     for (const raw of result.raw) {
       const normalized = normalizeAdLibraryItem(raw, config, now);
       if (!normalized.deal) {
@@ -1954,6 +2026,8 @@ export async function runMetaInstagramCollector(options = {}) {
     nextState.sourceFailures = result.sourceFailures;
     report.selectedAccounts = result.selectedAccounts.map((account) => ({
       username: account.username,
+      category: account.category,
+      foodFocused: isFoodDrinkSource(account),
       priority: account.priority,
       verifiedVienna: account.verifiedVienna,
       approvedDeals: Number(account.approvedDeals || 0),
@@ -1987,6 +2061,10 @@ export async function runMetaInstagramCollector(options = {}) {
       tools: options.mediaTools,
       analyzeItem: options.analyzeMediaItem,
       classifyOcr: options.classifyOcr,
+      shouldAnalyzeEntry: (entry) => {
+        const decision = normalizeGraphMediaItem(entry.item, entry.context, config, now);
+        return !decision.deal && ['missing-text', 'no-concrete-offer', 'general-recommendation', 'missing-vienna-evidence', 'media-ai-required-for-ocr-offer', 'media-ai-required-for-combined-offer'].includes(decision.rejection);
+      },
     });
     nextState.mediaEvidence = media.cache;
     report.sources.instagramGraph.mediaEvidence = media.report;
@@ -2107,6 +2185,14 @@ export async function runMetaInstagramCollector(options = {}) {
   report.newVerifiedBeforeLimit = allVerifiedDeals.filter((deal) => !previousAcceptedSeenIds[deal.id]).length;
   report.verifiedBeforeLimit = allVerifiedDeals.length;
   report.outputLimit = config.maxDealsPerRun;
+  report.foodDiscovery = {
+    selectedFoodAccounts: (report.selectedAccounts || []).filter((account) => account.foodFocused).length,
+    selectedAccounts: (report.selectedAccounts || []).length,
+    foodDeals: deals.filter((deal) => isFoodDrinkSource(deal)).length,
+    newFoodDeals: newDeals.filter((deal) => isFoodDrinkSource(deal)).length,
+    lowPriceDeals: deals.filter((deal) => deal.offerKind === 'low-price').length,
+    note: 'Collector candidates, not Slack deliveries or manual approvals.',
+  };
   report.freshPostsFetched = report.sources.instagramGraph.fetched;
   report.verifiedDeals = deals.length;
   report.message = deals.length
@@ -2132,9 +2218,10 @@ export async function runMetaInstagramCollector(options = {}) {
   if (allFailed) {
     report.preservedDeals = lastGoodPayload?.deals?.length || 0;
     report.message = `All configured Meta sources failed; preserved ${report.preservedDeals} last-good deal(s).`;
-    const sourceFailuresChanged = JSON.stringify(nextState.sourceFailures) !== JSON.stringify(pruneSourceFailures(state?.sourceFailures, now));
+    const sourceFailuresChanged = JSON.stringify(nextState.sourceFailures) !== JSON.stringify(pruneSourceFailures(state?.sourceFailures, now))
+      || JSON.stringify(nextState.adLibraryFailure) !== JSON.stringify(state?.adLibraryFailure || null);
     const failedState = sourceFailuresChanged
-      ? { ...state, version: 4, updatedAt: now.toISOString(), sourceFailures: nextState.sourceFailures }
+      ? { ...state, version: 4, updatedAt: now.toISOString(), sourceFailures: nextState.sourceFailures, adLibraryFailure: nextState.adLibraryFailure }
       : state;
     if (options.write !== false) {
       writeJsonAtomic(config.reportPath, report);

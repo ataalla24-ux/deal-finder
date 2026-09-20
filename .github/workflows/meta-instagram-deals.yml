@@ -29,7 +29,9 @@ jobs:
         run: npm ci
 
       - name: Test bounded Graph coverage
-        run: npm run test:instagram-graph-scan
+        run: |
+          npm run test:instagram-graph-scan
+          npm run test:instagram-food-discovery
 
       - name: Refresh Instagram merchant registry
         run: npm run instagram:merchant-registry
@@ -68,6 +70,10 @@ jobs:
       - name: Collect official Meta Instagram deals
         env:
           META_AD_LIBRARY_ACCESS_TOKEN: ${{ secrets.META_AD_LIBRARY_ACCESS_TOKEN }}
+          META_AD_LIBRARY_TRY_INSTAGRAM_TOKEN: '1'
+          META_AD_LIBRARY_FOOD_ONLY: '1'
+          META_AD_LIBRARY_MAX_TERMS_PER_RUN: '4'
+          META_AD_LIBRARY_MAX_PAGES_PER_TERM: '1'
           INSTAGRAM_SHARED_QUOTA_ENABLED: '1'
           GH_TOKEN: ${{ github.token }}
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
@@ -81,6 +87,7 @@ jobs:
           META_INSTAGRAM_VERIFIED_ACCOUNTS: ${{ vars.META_INSTAGRAM_VERIFIED_ACCOUNTS }}
           META_INSTAGRAM_TAGGED_MEDIA_ENABLED: ${{ vars.META_INSTAGRAM_TAGGED_MEDIA_ENABLED }}
           META_INSTAGRAM_MAX_ACCOUNTS_PER_RUN: '24'
+          META_INSTAGRAM_FOOD_ACCOUNT_SHARE: '0.8'
           META_INSTAGRAM_MAX_ACCOUNT_BACKFILL: '6'
           META_INSTAGRAM_ACCOUNT_RESCAN_HOURS: '6'
           META_INSTAGRAM_MAX_HASHTAGS_PER_RUN: '12'
@@ -107,7 +114,7 @@ jobs:
           META_INSTAGRAM_MEDIA_VISION_MAX_IMAGES_PER_POST: '2'
           META_INSTAGRAM_MEDIA_VISION_DETAIL: 'low'
           META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_RUN: '10'
-          META_INSTAGRAM_MEDIA_LLM_CONCURRENCY: '2'
+          META_INSTAGRAM_MEDIA_LLM_CONCURRENCY: '1'
         run: node scraper/meta-instagram-deals.js
 
       - name: Verify factual collector status

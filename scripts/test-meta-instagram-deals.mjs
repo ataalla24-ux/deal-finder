@@ -1086,7 +1086,10 @@ const failedPreserved = await runMetaInstagramCollector({
 assert.equal(failedPreserved.report.status, 'failed');
 assert.equal(failedPreserved.shouldFail, true);
 assert.deepEqual(JSON.parse(fs.readFileSync(outputPath, 'utf8')), lastGoodPayload, 'an all-source failure must preserve last-good output');
-assert.deepEqual(JSON.parse(fs.readFileSync(statePath, 'utf8')), lastGoodState, 'an all-source failure must preserve delivery state');
+const failedDeliveryState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+assert.deepEqual(failedDeliveryState.seenIds, lastGoodState.seenIds, 'an all-source failure must preserve delivery state');
+assert.deepEqual(failedDeliveryState.hashtagIds, lastGoodState.hashtagIds);
+assert.equal(failedDeliveryState.adLibraryFailure.status, 503, 'API cooldown is retained without marking any deal delivered');
 
 const apiRun = await runMetaInstagramCollector({
   now,
