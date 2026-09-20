@@ -17,6 +17,9 @@ location and concrete-offer checks. Particularly cheap regular prices can now
 qualify without an explicit sale. Conservative review thresholds in
 `scraper/food-discovery-utils.js` are EUR 4 for kebab/wrap/burger, EUR 5 for pizza,
 EUR 6 for a main meal, EUR 2 for coffee/drinks, EUR 1.50 for selected snacks.
+Buffets qualify on price alone only up to EUR 10; higher ordinary buffet prices
+need an actual promotion. Generic loyalty announcements without a named reward
+are rejected in both the collector and the Slack gate.
 These are product-review policy thresholds, not asserted market comparisons.
 Price tips keep the quoted product and amount; the title does not invent a
 discount, prior price, or permanent availability. Add-ons, partial portions,
@@ -93,3 +96,15 @@ Restoring access is still required before claiming image-AI or ads discovery is
 fully operational. Candidate counts alone do not establish improved deal quality
 or delivery: the first new-food sample included loyalty promotions and an ordinary
 buffet price. Slack dispatch and manual approval remain the outcome measures.
+
+[Follow-up collector run](https://github.com/ataalla24-ux/deal-finder/actions/runs/35525604584)
+verified the corrected source selection: 20 of 24 accounts were food-focused,
+all 24 analyzed posts yielded OCR text without timeouts, and the persisted
+provider cooldowns prevented further doomed AI/Ad Library requests. This immediate
+follow-up found no additional new food candidate; more volume alone is not success.
+
+[Central dispatch](https://github.com/ataalla24-ux/deal-finder/actions/runs/35525440462)
+confirmed delivery of four new cards from the first run. Inspection identified
+two weak cards (generic loyalty announcement and ordinary buffet price), which
+are now negative regression fixtures for both collector and Slack validation.
+Those already delivered review cards were not deleted or manually approved.

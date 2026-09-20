@@ -1097,6 +1097,7 @@ const apiRun = await runMetaInstagramCollector({
     META_AD_LIBRARY_ACCESS_TOKEN: 'test-token',
     META_AD_LIBRARY_SEARCH_TERMS: 'Wien gratis',
     META_AD_LIBRARY_MAX_PAGES_PER_TERM: '1',
+    META_INSTAGRAM_STATE_PATH: path.join(tempDir, 'isolated-ad-state.json'),
   },
   fetchImpl: async (url) => {
     assert.match(String(url), /ads_archive/);
@@ -1129,6 +1130,7 @@ const thrownNetworkFailure = await runMetaInstagramCollector({
     META_AD_LIBRARY_SEARCH_TERMS: 'Wien gratis',
     META_AD_LIBRARY_MAX_PAGES_PER_TERM: '1',
     META_INSTAGRAM_MAX_RETRIES: '0',
+    META_INSTAGRAM_STATE_PATH: path.join(tempDir, 'isolated-ad-state.json'),
   },
   fetchImpl: async (url) => {
     throw new Error(`network failure for ${url}`);

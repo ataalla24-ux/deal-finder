@@ -4,6 +4,7 @@ export const FOOD_PRICE_LIMITS = [
   { product: 'pizza', pattern: /\bpizza\b/gi, max: 5 },
   { product: 'burger', pattern: /\b(?:burger|falafelwrap|wrap)\b/gi, max: 4 },
   { product: 'meal', pattern: /\b(?:mittagsmen\u00fc|mittagsmenue|mittagsteller|hauptspeise|lunch\s+menu|bowl|ramen)\b/gi, max: 6 },
+  { product: 'buffet', pattern: /\b(?:buffet|all[ -]you[ -]can[ -]eat)\b/gi, max: 10 },
   { product: 'coffee', pattern: /\b(?:kaffee|coffee|espresso|cappuccino|latte|matcha)\b/gi, max: 2 },
   { product: 'drink', pattern: /\b(?:limonade|lemonade|softdrink|ayran|spritzer|bier)\b/gi, max: 2 },
   { product: 'snack', pattern: /\b(?:croissant|baklava|cannoli|eiskugel|kugel\s+eis)\b/gi, max: 1.5 },
@@ -47,4 +48,19 @@ export function extractLowFoodPrice(value) {
     }
   }
   return null;
+}
+
+export function weakFoodPromotionReason(value) {
+  const text = String(value || '').replace(/#[\p{L}\p{N}_]+/gu, ' ').replace(/\s+/g, ' ');
+  const explicitBenefit = /(?:\d\s*%|\b1\s*\+\s*1\b|\b(?:rabatt|discount|coupon|gutschein|statt|aktion|er\u00f6ffnung|eroeffnung|opening|happy\s*hour)\b|\b(?:pay\s+what\s+you\s+want|zahl\w*\s+was\s+du\s+willst)\b)/i;
+  if (/\b(?:stempelkarte|treuekarte|loyalty)\b/i.test(text)
+      && /\b(?:gratis[ -]pr\u00e4mien|free\s+rewards|tolle\s+pr\u00e4mien)\b/i.test(text)
+      && !/\b(?:gratis|kostenlos|free)[ -](?:kaffee|coffee|waffle|waffel|hei\u00dfgetr\u00e4nk|eisbecher|drink)\b/i.test(text)
+      && !explicitBenefit.test(text)) return 'kein konkretes Angebot: Treueprogramm ohne benannte Gegenleistung';
+  if (/\b(?:all[ -]you[ -]can[ -]eat|buffet)\b/i.test(text)
+      && /(?:\u20ac\s*\d|\d\s*(?:\u20ac|EUR\b|Euro\b))/i.test(text)
+      && !explicitBenefit.test(text)
+      && !/\b(?:gratis|kostenlos|free|geschenkt|on\s+us|aufs\s+haus)\b/i.test(text)
+      && !extractLowFoodPrice(text)) return 'kein konkretes Angebot: Buffet-Normalpreis ohne belegte Aktion oder besonders niedrigen Preis';
+  return '';
 }

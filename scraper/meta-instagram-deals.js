@@ -8,7 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
-import { extractLowFoodPrice, isFoodDrinkSource } from './food-discovery-utils.js';
+import { extractLowFoodPrice, isFoodDrinkSource, weakFoodPromotionReason } from './food-discovery-utils.js';
 import { inferPreferredBrand } from './deal-normalization-utils.js';
 import {
   canonicalInstagramPostKey,
@@ -701,6 +701,7 @@ export function classifyPromotion(text) {
   if (!normalized) {
     return { accepted: false, type: '', reason: 'missing-text' };
   }
+  if (weakFoodPromotionReason(normalized)) return { accepted: false, type: '', reason: 'weak-food-offer' };
   if (getNonGuaranteedPromotionReason(normalized)
       || getEditorialRoundupPromotionReason(normalized)
       || getInboundForeignTravelPromotionReason(normalized)

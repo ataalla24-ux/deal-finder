@@ -55,6 +55,20 @@ assert.equal(normalizeGraphMediaItem({ ...post, caption: 'Kebab 1 EUR in Wien am
 assert.equal(normalizeGraphMediaItem({ ...post, caption: 'Kebab 1 EUR in Wien bis 19.09.2026.' }, context, config, now).rejection, 'offer-expired');
 assert.equal(normalizeGraphMediaItem({ ...post, caption: 'Kebab 1 EUR in Graz.' }, context, config, now).deal, null);
 assert.equal(classifyPromotion('Gewinnspiel: Kebab 1 EUR gewinnen').accepted, false);
+for (const text of [
+  'All You Can Eat a la carte fuer nur 22,90 EUR pro Person in Wien.',
+  'Deine digitale Stempelkarte: sammle wie gewohnt Stempel fuer tolle Gratis-Pr\u00e4mien in Wien.',
+]) {
+  assert.equal(classifyPromotion(text).accepted, false, text);
+  const rejected = await validateDealsForSlack([{ ...deal, title: text, description: text, offerKind: undefined, promotionEvidence: '', priceEvidence: undefined }], {
+    now, inspectDealUrlHealth: async (url) => ({ status: 200, finalUrl: url, contentHints: {} }),
+  });
+  assert.equal(rejected.allowedDeals.length, 0, text);
+}
+assert.equal(classifyPromotion('Buffet 8 EUR in Wien').accepted, true);
+assert.equal(classifyPromotion('Heute 20% Rabatt auf das Buffet fuer 22,90 EUR in Wien').accepted, true);
+assert.equal(classifyPromotion('All You Can Eat 22,90 EUR und zweiter Drink gratis in Wien').accepted, true);
+assert.equal(classifyPromotion('8 Stempel = eine gratis Bubble Waffle oder 10 Stempel fuer ein Gratis-Heissgetraenk in Wien').accepted, true);
 
 const accounts = Array.from({ length: 50 }, (_, i) => ({ username: `food${i}`, category: 'food', accountType: 'merchant', priority: 1 }));
 accounts.push(...Array.from({ length: 40 }, (_, i) => ({ username: `travel${i}`, category: 'reisen', accountType: 'merchant', priority: 500, manualApprovedDeals: 10 })));

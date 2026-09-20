@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { extractLowFoodPrice } from './food-discovery-utils.js';
+import { extractLowFoodPrice, weakFoodPromotionReason } from './food-discovery-utils.js';
 
 import { inspectDealUrlHealth, parseExpiryShape } from './expiry-utils.js';
 import {
@@ -504,6 +504,8 @@ function getConcreteOfferDecision(deal, health = null) {
   if (nonOfferContentReason) return { concrete: false, reason: nonOfferContentReason };
   const editorialListingReason = getEditorialPriceListingReason(deal, health);
   if (editorialListingReason) return { concrete: false, reason: editorialListingReason };
+  const weakFoodReason = weakFoodPromotionReason(offerText);
+  if (weakFoodReason) return { concrete: false, reason: weakFoodReason };
   const nonGuaranteedPromotionReason = getNonGuaranteedPromotionReason(offerText);
   if (nonGuaranteedPromotionReason) return { concrete: false, reason: nonGuaranteedPromotionReason };
   const infrastructurePromotionReason = getInfrastructureOnlyPromotionReason(offerText);
