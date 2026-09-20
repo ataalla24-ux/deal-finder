@@ -2117,7 +2117,7 @@ function mergeAiDeal(candidate, aiRow) {
     brand,
     logo: 'IG',
     title: cleanText(aiRow.title, 110) || buildOfferTitle(brand, type, signal, candidate),
-    description: cleanText(aiRow.description, 520) || cleanText(`${unicodeSafeTruncate(signal, 360)} Quelle: Instagram/Public Search.`, 520),
+    description: cleanText(aiRow.description, 12000) || cleanText(signal, 12000),
     type,
     category,
     source: 'Instagram AI Agent',
@@ -2241,6 +2241,7 @@ async function classifyWithOpenAi(candidates) {
           'The supplied pubDate and postAgeDays are authoritative and already validated. Never recalculate or guess post age. Never reject a candidate as older than 7 days when postAgeDays is 7 or less.',
           'Reject giveaways, free shipping, generic guides, expired offers, non-Vienna offers, and vague brand marketing.',
           'Use only the supplied evidence. Do not invent dates, prices, brands, or locations.',
+          'Write description in German as a self-contained redemption guide: preserve every evidenced offer detail, price, quantity, exact address or participating branches, validity date and time, coupon code, required app or membership, purchase requirement, reservation step, exclusions and availability limit. The reader must be able to understand where, when, what and how to redeem without opening Instagram. Do not replace these facts with "see post" or a generic summary. Explicitly say when essential location or validity information is missing; do not guess it. Omit hashtags, engagement requests and repeated marketing copy.',
         ].join(' '),
       },
       {

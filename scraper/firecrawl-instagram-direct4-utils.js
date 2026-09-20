@@ -564,7 +564,7 @@ function toDeal(evidence, decision, now, timing, confidence) {
     id: `fc4-${stableHash(evidence.url)}`,
     brand,
     title: cleanText(`${brand}: ${summary}`, 220),
-    description: summary,
+    description: evidence.postCaption || signal,
     offerEvidenceText: evidence.postCaption ? summary : cleanText(evidence.discoverySnippet, 260),
     descriptionSource: evidence.postCaption ? 'instagram-original-post' : 'firecrawl-search-review',
     type: offerType(signal),

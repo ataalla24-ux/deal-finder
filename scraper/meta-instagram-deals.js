@@ -861,7 +861,7 @@ function buildDealBase({ id, brand, title, description, type, category, url, pub
     id,
     brand: cleanText(brand, 100) || 'Instagram',
     title: cleanText(title, 140),
-    description: cleanText(description, 500),
+    description: cleanText(description, 12000),
     type,
     category,
     source,

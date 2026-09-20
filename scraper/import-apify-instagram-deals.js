@@ -337,7 +337,7 @@ function buildTitle(item, brand) {
 
 function buildDescription(item, brand, type) {
   const caption = normalizeText(stripInstagramMetaDescriptionPrefix(item.caption || item.description));
-  if (caption) return caption.slice(0, 700);
+  if (caption) return caption;
   const location = normalizeText(item.locationText);
   const dateText = formatDateDisplay(item.validUntil);
   const lead = type === 'bogo'
