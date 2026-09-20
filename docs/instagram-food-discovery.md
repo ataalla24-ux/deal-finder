@@ -6,6 +6,9 @@ The collector prioritizes current, directly usable Vienna food and drink offers.
 At least 80% of account slots are reserved for food/drink when the catalog has
 enough eligible accounts. Existing merchant/scout weighting, moderation blocks,
 source cooldowns, discovery rotation and shared Graph quotas remain in force.
+Categories inherited only from a mention in somebody else's food post do not
+qualify that account as a food source. Owned-post/registry/watchlist evidence or
+an explicit food business name is used instead.
 Food hashtags are prioritized inside the existing pool, without expanding the
 rolling unique-hashtag allowance. Firecrawl collectors are unchanged.
 
@@ -18,6 +21,7 @@ These are product-review policy thresholds, not asserted market comparisons.
 Price tips keep the quoted product and amount; the title does not invent a
 discount, prior price, or permanent availability. Add-ons, partial portions,
 from-prices and weight prices cannot qualify through this new rule.
+Slack labels these cards as price tips, without claiming a discount.
 
 Post timestamps and explicit offer dates (including year) are still checked.
 An undated regular price is not automatically made evergreen. Existing short
@@ -63,3 +67,29 @@ single writer for Slack with its existing validation and deduplication.
 
 Official references: [Meta Ad Library API](https://www.facebook.com/ads/library/api/)
 and [OpenAI API error codes](https://developers.openai.com/api/docs/guides/error-codes).
+
+## First Live Check, 20 September 2026
+
+[Collector run](https://github.com/ataalla24-ux/deal-finder/actions/runs/35525122004)
+completed successfully but correctly reports degraded provider capabilities.
+It fetched 655 posts, extracted 11 candidates (10 food-related, 3 newly observed
+food candidates), and obtained OCR text for all 24 analyzed posts with no OCR
+timeouts. Ten duplicate media entries were collapsed and 19 resolved/non-rescuable
+posts skipped. These are different inputs from the previous run, not a controlled
+performance benchmark. The source-category provenance correction was published
+after this run began and has a separate follow-up live check.
+
+Two external blockers were confirmed rather than inferred from a generic status:
+
+- OpenAI returned `insufficient_quota`. Available API credits/project limits must
+  be restored by the account owner. The system must not silently buy credits or
+  bypass this by accepting uncorroborated OCR.
+- Meta returned permission error 10 for Ad Library. The Meta app/user needs Ad
+  Library authorization and an appropriately authorized token, preferably stored
+  in `META_AD_LIBRARY_ACCESS_TOKEN`. Organic Instagram token health passed.
+
+Both integrations back off without stopping caption-confirmed organic deals.
+Restoring access is still required before claiming image-AI or ads discovery is
+fully operational. Candidate counts alone do not establish improved deal quality
+or delivery: the first new-food sample included loyalty promotions and an ordinary
+buffet price. Slack dispatch and manual approval remain the outcome measures.
