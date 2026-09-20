@@ -1,0 +1,46 @@
+name: Instagram AI Access Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      recover:
+        description: Retry failed Meta Instagram AI evidence after a successful access check
+        type: boolean
+        default: false
+
+concurrency:
+  group: meta-instagram-scan
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Test recovery safety without API requests
+        env:
+          SENTRY_DISABLED: '1'
+        run: node scripts/test-instagram-ai-access.mjs
+      - name: Verify one synthetic image request without Slack delivery
+        env:
+          SENTRY_DISABLED: '1'
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          RECOVER: ${{ inputs.recover }}
+        run: |
+          if [ "$RECOVER" = "true" ]; then
+            node scripts/check-instagram-ai-access.mjs --recover
+          else
+            node scripts/check-instagram-ai-access.mjs
+          fi
+      - name: Persist successfully recovered evidence state
+        if: inputs.recover
+        run: node scripts/commit-generated.mjs --message "Recover Instagram AI evidence after successful access check" --files docs/meta-instagram-state.json
