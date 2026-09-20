@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-20T11:02:19.868Z",
+  "generatedAt": "2026-09-20T11:19:29.235Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 765,
-    "uniqueCandidates": 709,
-    "distinctCandidates": 736,
-    "duplicateClusters": 27,
+    "totalCandidates": 747,
+    "uniqueCandidates": 720,
+    "distinctCandidates": 733,
+    "duplicateClusters": 13,
     "topHealthySources": [
       {
         "sourceKey": "tiktok",
@@ -20,6 +20,12 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 74,
+        "totalDeals": 10
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "healthScore": 69,
@@ -30,12 +36,6 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 64,
         "totalDeals": 6
-      },
-      {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "healthScore": 64,
-        "totalDeals": 1
       }
     ],
     "topMissionSources": [
@@ -64,10 +64,10 @@
         "totalDeals": 8
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "missionFitScore": 59,
-        "totalDeals": 24
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 60,
+        "totalDeals": 10
       }
     ],
     "topCoverageSources": [
@@ -127,16 +127,16 @@
         "totalDeals": 8
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 71,
+        "totalDeals": 10
+      },
+      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 68,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "precisionScore": 64,
-        "totalDeals": 6
       }
     ],
     "topWeightedSources": [
@@ -165,10 +165,10 @@
         "totalDeals": 8
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 54,
-        "totalDeals": 6
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 57,
+        "totalDeals": 10
       }
     ],
     "topSourcesToFix": [
@@ -378,6 +378,68 @@
       "coverageScore": 18,
       "precisionScore": 68,
       "sourceWeightScore": 63
+    },
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 10,
+      "uniqueDeals": 9,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 5,
+      "fresh7dCount": 10,
+      "viennaCount": 10,
+      "foodDrinkCount": 9,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🍕 Jede Pizzaschnitte nur 1 €!",
+        "🍔🔥 BURGER-LIEBE FÜR NUR 6,49 €!",
+        "20 % RABATT AUF JEDE PIZZA"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0.5,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.9,
+      "promoRate": 0.1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.3,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 8
+        },
+        {
+          "value": "freizeit",
+          "count": 1
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 9
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 74,
+      "missionFitScore": 60,
+      "coverageScore": 16,
+      "precisionScore": 71,
+      "sourceWeightScore": 57
     },
     {
       "sourceKey": "food3",
@@ -732,79 +794,80 @@
       "sourceWeightScore": 41
     },
     {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 28,
-      "uniqueDeals": 12,
-      "duplicateDeals": 16,
-      "duplicateAcrossSources": 16,
-      "fresh1dCount": 7,
-      "fresh7dCount": 27,
-      "viennaCount": 28,
-      "foodDrinkCount": 17,
-      "promoCount": 6,
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 44,
+      "uniqueDeals": 39,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 2,
+      "fresh7dCount": 43,
+      "viennaCount": 44,
+      "foodDrinkCount": 14,
+      "promoCount": 12,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Mit dabei: Veganer Leberkäse, Süßigkeiten& Matcha - alles kostenlos zum Probieren.",
-        "September erhalten Sie bei uns als Dankeschön einen hausgemachten Mondkuchen gratis.",
-        "2+1 Döner / Dürüm Aktion bei dahabdoener 🥙🔥"
+        "Pakistanifood: Gratis-Aktion in Wien Entry: Absolutely FREE Haya Institute Charity Bazar in Vienna",
+        "Mega Aktion: 2 + 1 GRATIS auf alle Dönersorten🔥 ⏰ Wann? 20.9 von 10 Uhr bis 1 Uhr 📍 Wo? Wagramer Straße 126",
+        "2+1 Döner / Dürüm Aktion bei dahabdoener :stuffed_flatbread::fire 2+1 Döner / Dürüm Aktion bei dahabdoener 🥙"
       ],
       "lastRun": null,
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 0.3,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.2,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.3,
       "missingUrlRate": 0,
-      "averageQualityScore": 87.7,
+      "averageQualityScore": 74.4,
       "topCategories": [
+        {
+          "value": "shopping",
+          "count": 23
+        },
         {
           "value": "essen",
           "count": 8
         },
         {
-          "value": "shopping",
-          "count": 8
-        },
-        {
           "value": "supermarkt",
-          "count": 7
+          "count": 4
         },
         {
           "value": "beauty",
+          "count": 3
+        },
+        {
+          "value": "fitness",
           "count": 2
         },
         {
           "value": "kaffee",
           "count": 2
-        },
-        {
-          "value": "freizeit",
-          "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 23
+          "count": 36
         },
         {
           "value": "gratis",
-          "count": 5
+          "count": 8
         }
       ],
       "issues": [
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale"
       ],
-      "healthScore": 56,
-      "missionFitScore": 48,
-      "coverageScore": 20,
-      "precisionScore": 60,
-      "sourceWeightScore": 47
+      "healthScore": 59,
+      "missionFitScore": 34,
+      "coverageScore": 24,
+      "precisionScore": 55,
+      "sourceWeightScore": 43
     },
     {
       "sourceKey": "gastro2",
@@ -911,83 +974,6 @@
       "coverageScore": 69,
       "precisionScore": 47,
       "sourceWeightScore": 53
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 44,
-      "uniqueDeals": 25,
-      "duplicateDeals": 19,
-      "duplicateAcrossSources": 19,
-      "fresh1dCount": 3,
-      "fresh7dCount": 43,
-      "viennaCount": 44,
-      "foodDrinkCount": 14,
-      "promoCount": 12,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Pakistanifood: Gratis-Aktion in Wien Entry: Absolutely FREE Haya Institute Charity Bazar in Vienna",
-        "Mega Aktion: 2 + 1 GRATIS auf alle Dönersorten🔥 ⏰ Wann? 20.9 von 10 Uhr bis 1 Uhr 📍 Wo? Wagramer Straße 126",
-        "2+1 Döner / Dürüm Aktion bei dahabdoener :stuffed_flatbread::fire 2+1 Döner / Dürüm Aktion bei dahabdoener 🥙"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 74.4,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 23
-        },
-        {
-          "value": "essen",
-          "count": 8
-        },
-        {
-          "value": "supermarkt",
-          "count": 4
-        },
-        {
-          "value": "beauty",
-          "count": 3
-        },
-        {
-          "value": "fitness",
-          "count": 2
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 36
-        },
-        {
-          "value": "gratis",
-          "count": 8
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 53,
-      "missionFitScore": 36,
-      "coverageScore": 23,
-      "precisionScore": 54,
-      "sourceWeightScore": 42
     },
     {
       "sourceKey": "firecrawl4",
