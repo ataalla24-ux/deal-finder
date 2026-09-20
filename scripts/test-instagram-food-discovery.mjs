@@ -6,6 +6,7 @@ import { extractLowFoodPrice, isFoodDrinkSource } from '../scraper/food-discover
 import { buildConfig, classifyPromotion, loadAccountCatalog, normalizeGraphMediaItem, normalizeAdLibraryItem, selectAccountShard, selectHashtagShard, runMetaInstagramCollector } from '../scraper/meta-instagram-deals.js';
 import { enrichInstagramGraphMedia, classifyInstagramOcrWithOpenAI } from '../scraper/instagram-media-evidence.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
+import { buildSlackMessage, normalizeDeal } from '../scraper/slack-notify.js';
 
 const now = new Date('2026-09-20T12:00:00Z');
 const config = buildConfig({ OPENAI_API_KEY: 'test-key', META_INSTAGRAM_MEDIA_LLM_CONCURRENCY: '1' }, now);
@@ -43,6 +44,7 @@ assert.equal(deal.offerKind, 'low-price');
 assert.equal(deal.priceEvidence.amount, 2);
 assert.match(deal.title, /Preis-Tipp/);
 assert.doesNotMatch(deal.title, /Rabatt|statt|%/i);
+assert.match(buildSlackMessage(normalizeDeal(deal, 'meta-instagram'), 1), /Typ: Preis-Tipp \(kein Rabatt behauptet\)/);
 const slack = await validateDealsForSlack([deal], {
   now,
   inspectDealUrlHealth: async (url) => ({ ok: true, status: 200, finalUrl: url, fetchedAt: now.toISOString(), contentHints: {} }),

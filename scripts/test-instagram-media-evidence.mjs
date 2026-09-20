@@ -71,6 +71,7 @@ const timeoutEvidence = await analyzeInstagramMediaItem({
   }),
   execFileImpl: async (command, _args, options) => {
     assert.equal(command, 'tesseract');
+    assert.equal(options.env.OMP_THREAD_LIMIT, '1', 'parallel OCR jobs must not oversubscribe runner CPU');
     observedTesseractTimeout = options.timeout;
     const error = new Error('Command failed: tesseract');
     error.killed = true;

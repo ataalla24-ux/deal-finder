@@ -855,6 +855,7 @@ function formatReasonCategoryCounts(counts) {
 
 function buildSlackMessage(deal, index) {
   const validity = ensureObject(deal.validity);
+  const displayedType = deal.offerKind === 'low-price' ? 'Preis-Tipp (kein Rabatt behauptet)' : deal.type;
   const displayedOfferDate = validity.status ? validity.sourceDate : deal.pubDate;
   const displayedStart = deal.validFrom || (deal.expiryKind === 'single' ? deal.validOn : '');
   const displayedExpiry = validity.expiryDate || deal.validUntil || deal.validOn || deal.expires;
@@ -871,7 +872,7 @@ function buildSlackMessage(deal, index) {
     `📅 Angebotsdatum: ${formatDate(displayedOfferDate)}`,
     ...(displayedStart ? [`🚀 Startet am: ${formatDate(displayedStart)}`] : []),
     `⏳ Gültig bis: ${displayedExpiry ? formatDate(displayedExpiry) : 'k.A.'}`,
-    `🧭 Kategorie: ${deal.category} | Typ: ${deal.type}`,
+    `🧭 Kategorie: ${deal.category} | Typ: ${displayedType}`,
     `🧩 Ursprung intern: ${deal.originSource || deal.source || 'k.A.'}`,
     `🔗 Direktlink: ${link}`,
     `🆔 Deal-ID: ${deal.id}`,
