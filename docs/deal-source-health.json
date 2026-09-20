@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-09-20T16:47:37.352Z",
+  "generatedAt": "2026-09-20T17:18:42.808Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 790,
-    "uniqueCandidates": 728,
-    "distinctCandidates": 758,
-    "duplicateClusters": 30,
+    "totalCandidates": 771,
+    "uniqueCandidates": 740,
+    "distinctCandidates": 755,
+    "duplicateClusters": 15,
     "topHealthySources": [
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 81,
+        "totalDeals": 11
+      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
@@ -30,12 +36,6 @@
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "healthScore": 64,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "healthScore": 62,
-        "totalDeals": 5
       }
     ],
     "topMissionSources": [
@@ -52,6 +52,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 69,
+        "totalDeals": 11
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 68,
@@ -62,12 +68,6 @@
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 67,
         "totalDeals": 5
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "missionFitScore": 59,
-        "totalDeals": 24
       }
     ],
     "topCoverageSources": [
@@ -115,6 +115,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 78,
+        "totalDeals": 11
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 75,
@@ -131,15 +137,15 @@
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 68,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "precisionScore": 61,
-        "totalDeals": 5
       }
     ],
     "topWeightedSources": [
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 64,
+        "totalDeals": 11
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 59,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 53,
-        "totalDeals": 5
       }
     ],
     "topSourcesToFix": [
@@ -239,6 +239,70 @@
   },
   "sources": [
     {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 11,
+      "uniqueDeals": 11,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 5,
+      "fresh7dCount": 11,
+      "viennaCount": 11,
+      "foodDrinkCount": 10,
+      "promoCount": 4,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis-Eintritt zum Event bei Kudlichgasse 3–5",
+        "Digital & Clever – Deine Alba.Wien Stempelkarte jetzt aufs Handy holen!",
+        "🍣✨ Bei Zushi Market beim DC Tower bekommst du All You Can Eat à la carte für nur 22,90 € pro Person."
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.5,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.9,
+      "promoRate": 0.4,
+      "missingUrlRate": 0,
+      "averageQualityScore": 83.4,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 8
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        },
+        {
+          "value": "technik",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 8
+        },
+        {
+          "value": "gratis",
+          "count": 3
+        }
+      ],
+      "issues": [],
+      "healthScore": 81,
+      "missionFitScore": 69,
+      "coverageScore": 18,
+      "precisionScore": 78,
+      "sourceWeightScore": 64
+    },
+    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -246,7 +310,7 @@
       "uniqueDeals": 23,
       "duplicateDeals": 1,
       "duplicateAcrossSources": 1,
-      "fresh1dCount": 3,
+      "fresh1dCount": 2,
       "fresh7dCount": 22,
       "viennaCount": 24,
       "foodDrinkCount": 10,
@@ -520,6 +584,82 @@
       "sourceWeightScore": 62
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 50,
+      "uniqueDeals": 43,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
+      "fresh1dCount": 3,
+      "fresh7dCount": 50,
+      "viennaCount": 50,
+      "foodDrinkCount": 19,
+      "promoCount": 16,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🇦🇹🇵🇰✨ If you are missing Pakistani food and local market vibes in Austria",
+        "Neu ab Montag: unser Wochenmenü um € 10,90 🍽️ Jeden Tag frisch gekocht",
+        "Aura Döner auf Instagram: \"🍕 Jede Pizzaschnitte nur 1 €! 🔥 Knusprig. Frisch. Unwiderstehlich. 🤤 Bald bei Aur"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.4,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 74.8,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 24
+        },
+        {
+          "value": "essen",
+          "count": 11
+        },
+        {
+          "value": "supermarkt",
+          "count": 5
+        },
+        {
+          "value": "beauty",
+          "count": 4
+        },
+        {
+          "value": "kaffee",
+          "count": 3
+        },
+        {
+          "value": "fitness",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 41
+        },
+        {
+          "value": "gratis",
+          "count": 9
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale"
+      ],
+      "healthScore": 62,
+      "missionFitScore": 40,
+      "coverageScore": 27,
+      "precisionScore": 59,
+      "sourceWeightScore": 47
+    },
+    {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
@@ -725,158 +865,6 @@
       "coverageScore": 10,
       "precisionScore": 56,
       "sourceWeightScore": 41
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 50,
-      "uniqueDeals": 28,
-      "duplicateDeals": 22,
-      "duplicateAcrossSources": 22,
-      "fresh1dCount": 3,
-      "fresh7dCount": 50,
-      "viennaCount": 50,
-      "foodDrinkCount": 19,
-      "promoCount": 16,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🇦🇹🇵🇰✨ If you are missing Pakistani food and local market vibes in Austria",
-        "Neu ab Montag: unser Wochenmenü um € 10,90 🍽️ Jeden Tag frisch gekocht",
-        "Aura Döner auf Instagram: \"🍕 Jede Pizzaschnitte nur 1 €! 🔥 Knusprig. Frisch. Unwiderstehlich. 🤤 Bald bei Aur"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.4,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 74.8,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 24
-        },
-        {
-          "value": "essen",
-          "count": 11
-        },
-        {
-          "value": "supermarkt",
-          "count": 5
-        },
-        {
-          "value": "beauty",
-          "count": 4
-        },
-        {
-          "value": "kaffee",
-          "count": 3
-        },
-        {
-          "value": "fitness",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 41
-        },
-        {
-          "value": "gratis",
-          "count": 9
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 55,
-      "missionFitScore": 40,
-      "coverageScore": 25,
-      "precisionScore": 56,
-      "sourceWeightScore": 44
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 30,
-      "uniqueDeals": 14,
-      "duplicateDeals": 16,
-      "duplicateAcrossSources": 16,
-      "fresh1dCount": 6,
-      "fresh7dCount": 30,
-      "viennaCount": 30,
-      "foodDrinkCount": 19,
-      "promoCount": 4,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Prüf deinen Anspruch kostenlos in 2 Minuten auf flugninja.at – 100 % risikofrei, keine Vorkosten.",
-        "1 Stunde *Treffpunkt:* Klosterladen im Schottenstift *Eintritt:* € 12,- (mit NÖ-Card nur € 8,-) *Anmeldung:* Bitte melden Sie sich vorab an",
-        "ALL YOU CAN EAT - JEDEN SONNTAG bei QiYe (齐爷) 🤍🔥 Für nur €19,90 p.P."
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0.2,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86.6,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 11
-        },
-        {
-          "value": "shopping",
-          "count": 7
-        },
-        {
-          "value": "supermarkt",
-          "count": 7
-        },
-        {
-          "value": "beauty",
-          "count": 2
-        },
-        {
-          "value": "freizeit",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 27
-        },
-        {
-          "value": "gratis",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 55,
-      "missionFitScore": 43,
-      "coverageScore": 20,
-      "precisionScore": 57,
-      "sourceWeightScore": 45
     },
     {
       "sourceKey": "gastro2",
