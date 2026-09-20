@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-20T17:41:14.230Z",
+  "generatedAt": "2026-09-20T18:03:44.920Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -102,7 +102,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 50,
-      "candidates": 8
+      "candidates": 2
     },
     "deals-pending-instagram-apify.json": {
       "deals": 5,
@@ -129,7 +129,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 9,
+      "deals": 6,
       "candidates": 0
     },
     "deals-pending-power.json": {
@@ -157,19 +157,24 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 8,
+  "candidatePosts": 2,
   "candidateAccounts": 1,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "extrasale_austria",
-      "candidates": 8
+      "candidates": 2
     }
   ],
-  "fetchedPosts": 25,
+  "fetchedPosts": 0,
   "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "extrasale_austria",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "swanyyan": {
       "count": 1,
@@ -179,13 +184,19 @@
   },
   "sharedQuota": {
     "limitPerHour": 150,
-    "requests": 1,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 73
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0
   },
-  "blockedEvidencePosts": 79,
-  "unmatchedCandidatePosts": 8,
-  "message": "0/8 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "extrasale_austria",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 80,
+  "unmatchedCandidatePosts": 2,
+  "message": "0/2 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
