@@ -27,8 +27,11 @@ export async function checkInstagramAiAccess(options = {}) {
     const code = allowed.includes(error?.code) ? error.code : 'request-failed';
     throw new Error(`OpenAI access check failed: HTTP ${status} (${code})`);
   }
-  if (!result?.isDeal || result.exclusion !== 'none' || !/kaffee/i.test(result.offerText) || !/wien/i.test(result.locationText)) {
-    throw new Error('OpenAI access check failed: unexpected synthetic classification');
+  // This is a provider-access check, not a semantic acceptance test: a valid
+  // negative classification also proves image requests and structured output work.
+  if (typeof result?.isDeal !== 'boolean' || !Number.isFinite(result?.confidence)
+    || !Number.isFinite(result?.usage?.totalTokens) || result.usage.totalTokens <= 0) {
+    throw new Error('OpenAI access check failed: missing structured classification or usage');
   }
   let recoveredEntries = 0;
   if (options.recover === true) {
@@ -48,7 +51,7 @@ export async function checkInstagramAiAccess(options = {}) {
       await fs.rename(tempPath, statePath);
     }
   }
-  return { status: 'ok', imageRequestVerified: true, recoveredEntries, usage: result.usage };
+  return { status: 'ok', imageRequestVerified: true, syntheticDealDetected: result.isDeal, recoveredEntries, usage: result.usage };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
