@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-20T18:01:24.513Z",
+  "generatedAt": "2026-09-20T18:43:29.802Z",
   "source": "meta-instagram-auth-health",
   "graphVersion": "v26.0",
-  "status": "ok",
+  "status": "meta-api-error",
   "configured": {
     "instagramGraph": true,
     "instagramUserId": true,
@@ -16,51 +16,15 @@
     },
     {
       "name": "token-basic",
-      "status": "ok",
-      "detail": "Token resolved /me."
-    },
-    {
-      "name": "token-permissions",
-      "status": "ok",
-      "detail": "5 granted permission(s): pages_show_list, instagram_basic, instagram_manage_insights, pages_read_engagement, public_profile."
-    },
-    {
-      "name": "instagram-user-id",
-      "status": "configured",
-      "detail": "Using INSTAGRAM_USER_ID=17841438552673858."
-    },
-    {
-      "name": "own-media",
-      "status": "ok",
-      "detail": "Read 3 recent media row(s); timestamp/permalink fields are available."
-    },
-    {
-      "name": "tagged-media",
-      "status": "skipped",
-      "detail": "Set META_INSTAGRAM_TAGGED_MEDIA_ENABLED=1 after the endpoint healthcheck succeeds."
-    },
-    {
-      "name": "business-discovery",
-      "status": "ok",
-      "detail": "Business Discovery works for @ciosgrill; 1 media row(s) returned."
-    },
-    {
-      "name": "hashtag-search",
-      "status": "skipped",
-      "detail": "Set META_INSTAGRAM_HEALTHCHECK_HASHTAG to test hashtag access; this counts toward Meta hashtag limits."
+      "status": "meta-api-error",
+      "detail": "Instagram shared quota paused: shared cooldown",
+      "code": "SCAN_BUDGET"
     }
   ],
-  "nextAction": "Meta Instagram Graph is ready for the deal collector.",
+  "nextAction": "Check the token type and Meta app permissions.",
   "tokenExpiry": {
     "expiresAt": "2026-10-21T00:00:00.000Z",
     "daysRemaining": 30.2,
     "status": "ok"
-  },
-  "grantedPermissions": [
-    "pages_show_list",
-    "instagram_basic",
-    "instagram_manage_insights",
-    "pages_read_engagement",
-    "public_profile"
-  ]
+  }
 }
