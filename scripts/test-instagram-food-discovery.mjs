@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { extractLowFoodPrice, isFoodDrinkSource } from '../scraper/food-discovery-utils.js';
-import { buildConfig, classifyPromotion, normalizeGraphMediaItem, normalizeAdLibraryItem, selectAccountShard, selectHashtagShard, runMetaInstagramCollector } from '../scraper/meta-instagram-deals.js';
+import { buildConfig, classifyPromotion, loadAccountCatalog, normalizeGraphMediaItem, normalizeAdLibraryItem, selectAccountShard, selectHashtagShard, runMetaInstagramCollector } from '../scraper/meta-instagram-deals.js';
 import { enrichInstagramGraphMedia, classifyInstagramOcrWithOpenAI } from '../scraper/instagram-media-evidence.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 
@@ -26,6 +26,8 @@ for (const caption of [
 ]) assert.equal(extractLowFoodPrice(caption), null, caption);
 assert.equal(isFoodDrinkSource({ category: 'drinks' }), true);
 assert.equal(isFoodDrinkSource({ category: 'reisen', username: 'flugninja.at' }), false);
+assert.equal(isFoodDrinkSource({ category: 'kaffee', username: 'drhauschka.at', foodCategoryFromMention: true }), false);
+assert.equal(isFoodDrinkSource({ category: '', username: 'takisushi.at', foodCategoryFromMention: true }), true);
 
 const context = { sourceType: 'account', sourceName: '@testcafe', account: { username: 'testcafe', category: 'food', verifiedVienna: true } };
 let numericMediaId = (BigInt(Date.parse('2026-09-20T09:00:00Z')) - 1314220021300n) << 23n;
@@ -130,6 +132,12 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'instagram-food-test-'));
 try {
   const env = { META_AD_LIBRARY_ACCESS_TOKEN: 'fake-token', META_AD_LIBRARY_SEARCH_TERMS: 'Wien Kebab,Wien Kaffee,Wien Pizza', META_INSTAGRAM_MAX_RETRIES: '0', META_INSTAGRAM_OUTPUT_PATH: path.join(tmp, 'output.json'), META_INSTAGRAM_REPORT_PATH: path.join(tmp, 'report.json'), META_INSTAGRAM_STATE_PATH: path.join(tmp, 'state.json') };
   const paths = { watchlistPath: path.join(tmp, 'none'), registryPath: path.join(tmp, 'none'), candidatePaths: [] };
+  const discoveredCatalog = loadAccountCatalog(config, paths, { discoveredAccounts: {
+    'beauty.account': { username: 'beauty.account', category: 'kaffee' },
+    'takisushi.at': { username: 'takisushi.at', category: '' },
+  } });
+  assert.equal(isFoodDrinkSource(discoveredCatalog.find((account) => account.username === 'beauty.account')), false);
+  assert.equal(isFoodDrinkSource(discoveredCatalog.find((account) => account.username === 'takisushi.at')), true);
   let requests = 0;
   const inaccessible = await runMetaInstagramCollector({ env, now, paths, fetchImpl: async () => { requests += 1; return Response.json({ error: { code: 10, message: 'Ad Library permission missing' } }, { status: 400 }); } });
   assert.equal(requests, 1, 'stop the ad search rotation on an authorization failure');

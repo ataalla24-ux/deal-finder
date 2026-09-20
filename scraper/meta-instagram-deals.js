@@ -397,6 +397,7 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
       username,
       priority: 0,
       category: '',
+      foodCategoryFromMention: true,
       verifiedVienna: false,
       evidence: [],
       origins: [],
@@ -417,7 +418,12 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
     const openingAt = toIso(raw?.nextOpeningAt);
     if (openingAt) existing.nextOpeningAt = openingAt;
     existing.priority = Math.max(existing.priority, Number(raw?.priority || raw?.priorityScore || 0));
-    existing.category = cleanText(raw?.category || existing.category, 60);
+    const sourceCategory = raw?.category || (origin === 'registry' ? raw?.topCategories?.[0]?.value : '') || '';
+    if (sourceCategory) {
+      const ownSource = origin === 'watchlist' || origin === 'registry' || origin.startsWith('candidate:');
+      if (ownSource || existing.foodCategoryFromMention) existing.category = cleanText(sourceCategory, 60);
+      if (ownSource) existing.foodCategoryFromMention = false;
+    }
     const accountType = inferInstagramAccountRole({ ...raw, username });
     if (existing.accountType === 'unknown' || accountType !== 'unknown') existing.accountType = accountType;
     existing.verifiedVienna = existing.verifiedVienna || config.verifiedAccounts.has(username) || registryAccountIsVerified(raw);

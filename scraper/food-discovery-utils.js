@@ -10,8 +10,9 @@ export const FOOD_PRICE_LIMITS = [
 ];
 
 export function isFoodDrinkSource(value) {
+  if (value && typeof value === 'object' && /(?:pizza|sushi|doener|doner|kebab|kebap|coffee|foodie|burger|falafel)/i.test(value.username || '')) return true;
   const text = typeof value === 'object' && value
-    ? [value.category, value.username, value.name, value.description].filter(Boolean).join(' ')
+    ? [value.foodCategoryFromMention ? '' : value.category, value.username, value.name, value.description].filter(Boolean).join(' ')
     : String(value || '');
   return /(?:\b(?:food|drinks?|essen|trinken|getr\u00e4nke?|getraenke?|kaffee|restaurants?|gastro|lunch|brunch|fr\u00fchst\u00fcck|fruehstueck|pizza|burger|kebab|kebap|d\u00f6ner|doener|doner|d\u00fcr\u00fcm|dueruem|sushi|ramen|pasta|cafe|caf\u00e9|coffee|espresso|cappuccino|latte|matcha|cocktails?|spritz|bier|wein|eis|gelato|desserts?|bakery|b\u00e4ckerei|baeckerei|schnitzel|falafel|wrap|sandwich|ayran|limonade|softdrink|verkostung|croissant|krapfen)\b|(?:food|gastro|kaffee|streetfood|restaurants|eats)(?:wien|vienna)|(?:wien(?:er)?|vienna)(?:food|gastro|kaffee|streetfood|restaurants|eats|essen))/i.test(text.replace(/[_.-]/g, ' '));
 }
