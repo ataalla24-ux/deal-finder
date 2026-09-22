@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-09-22T06:03:49.580Z",
+  "generatedAt": "2026-09-22T06:25:25.917Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 780,
-    "uniqueCandidates": 757,
-    "distinctCandidates": 768,
-    "duplicateClusters": 11,
+    "uniqueCandidates": 759,
+    "distinctCandidates": 769,
+    "duplicateClusters": 10,
     "topHealthySources": [
+      {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "healthScore": 86,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
@@ -20,22 +26,16 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 74,
-        "totalDeals": 5
-      },
-      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "healthScore": 73,
         "totalDeals": 15
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 67,
-        "totalDeals": 50
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 70,
+        "totalDeals": 5
       }
     ],
     "topMissionSources": [
@@ -109,21 +109,21 @@
     ],
     "topPrecisionSources": [
       {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "precisionScore": 88,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 84,
         "totalDeals": 14
       },
       {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "precisionScore": 80,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 76,
+        "precisionScore": 75,
         "totalDeals": 5
       },
       {
@@ -141,6 +141,12 @@
     ],
     "topWeightedSources": [
       {
+        "sourceKey": "firecrawl5",
+        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+        "sourceWeightScore": 70,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 69,
@@ -153,15 +159,9 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "firecrawl5",
-        "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-        "sourceWeightScore": 62,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 61,
+        "sourceWeightScore": 59,
         "totalDeals": 5
       },
       {
@@ -239,6 +239,72 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "firecrawl5",
+      "file": "deals-pending-firecrawl5.json",
+      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "zushimarket: It was free yesterday. Sure it was. - Instagram"
+      ],
+      "lastRun": {
+        "status": "completed",
+        "startedAt": "2026-09-21T09:39:29.121Z",
+        "finishedAt": "2026-09-21T09:41:07.633Z",
+        "durationMs": 98512,
+        "counts": {
+          "rawCandidates": 12,
+          "normalizedCandidates": 12,
+          "verifiedCandidates": 1,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 11
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 11
+        },
+        "errors": [],
+        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 80,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 86,
+      "missionFitScore": 78,
+      "coverageScore": 15,
+      "precisionScore": 88,
+      "sourceWeightScore": 70
+    },
     {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
@@ -374,80 +440,6 @@
       "sourceWeightScore": 64
     },
     {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 5,
-      "uniqueDeals": 4,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 5,
-      "viennaCount": 4,
-      "foodDrinkCount": 5,
-      "promoCount": 4,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gastrotipps: Unsere Gastro-Tipps des Monats ​ ​ Von klassischer Wiener Küche bis ...",
-        "Zieglergasse 42: Live Violin Duo Am 19.09 von 19.00 bis 20.00 Uhr! Diesen Samstag ...",
-        "Dancing Noodles: Chinesisches Mondfest bei Dancing Noodles! Am 24. und 25 ... - Instagram"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-09-21T07:47:40.093Z",
-        "finishedAt": "2026-09-21T07:49:45.473Z",
-        "durationMs": 125380,
-        "counts": {
-          "rawCandidates": 4,
-          "normalizedCandidates": 4,
-          "verifiedCandidates": 7,
-          "previousDeals": 7,
-          "acceptedDeals": 7,
-          "rejectedDeals": 4
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 4
-        },
-        "errors": [
-          "https://www.instagram.com/explore/tags/neueröffnungwien/: Firecrawl Agent nach 120s abgebrochen"
-        ],
-        "reportFile": "deal-pipeline-last-run-food3.json"
-      },
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0.8,
-      "foodDrinkRate": 1,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 60.8,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 5
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 4
-        },
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 74,
-      "missionFitScore": 69,
-      "coverageScore": 15,
-      "precisionScore": 76,
-      "sourceWeightScore": 61
-    },
-    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -523,17 +515,92 @@
       "sourceWeightScore": 56
     },
     {
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 5,
+      "uniqueDeals": 3,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 0,
+      "fresh7dCount": 5,
+      "viennaCount": 4,
+      "foodDrinkCount": 5,
+      "promoCount": 4,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gastrotipps: Unsere Gastro-Tipps des Monats ​ ​ Von klassischer Wiener Küche bis ...",
+        "Zieglergasse 42: Live Violin Duo Am 19.09 von 19.00 bis 20.00 Uhr! Diesen Samstag ...",
+        "Dancing Noodles: Chinesisches Mondfest bei Dancing Noodles! Am 24. und 25 ... - Instagram"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-09-21T07:47:40.093Z",
+        "finishedAt": "2026-09-21T07:49:45.473Z",
+        "durationMs": 125380,
+        "counts": {
+          "rawCandidates": 4,
+          "normalizedCandidates": 4,
+          "verifiedCandidates": 7,
+          "previousDeals": 7,
+          "acceptedDeals": 7,
+          "rejectedDeals": 4
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 4
+        },
+        "errors": [
+          "https://www.instagram.com/explore/tags/neueröffnungwien/: Firecrawl Agent nach 120s abgebrochen"
+        ],
+        "reportFile": "deal-pipeline-last-run-food3.json"
+      },
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0.8,
+      "foodDrinkRate": 1,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 60.8,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 5
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 4
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 70,
+      "missionFitScore": 69,
+      "coverageScore": 14,
+      "precisionScore": 75,
+      "sourceWeightScore": 59
+    },
+    {
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 50,
-      "uniqueDeals": 44,
-      "duplicateDeals": 6,
-      "duplicateAcrossSources": 6,
-      "fresh1dCount": 4,
+      "uniqueDeals": 45,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
+      "fresh1dCount": 5,
       "fresh7dCount": 50,
       "viennaCount": 50,
-      "foodDrinkCount": 25,
+      "foodDrinkCount": 29,
       "promoCount": 23,
       "missingUrlCount": 0,
       "sampleTitles": [
@@ -547,44 +614,44 @@
       "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.5,
+      "foodDrinkRate": 0.6,
       "promoRate": 0.5,
       "missingUrlRate": 0,
-      "averageQualityScore": 82.3,
+      "averageQualityScore": 84.2,
       "topCategories": [
         {
           "value": "essen",
-          "count": 20
+          "count": 22
         },
         {
           "value": "shopping",
-          "count": 16
+          "count": 11
         },
         {
           "value": "supermarkt",
           "count": 5
         },
         {
-          "value": "beauty",
+          "value": "reisen",
           "count": 3
         },
         {
-          "value": "fitness",
-          "count": 3
+          "value": "beauty",
+          "count": 2
         },
         {
           "value": "event",
-          "count": 1
+          "count": 2
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 34
+          "count": 32
         },
         {
           "value": "gratis",
-          "count": 14
+          "count": 16
         },
         {
           "value": "bogo",
@@ -598,11 +665,11 @@
       "issues": [
         "wenige Deals sind frischer als 1 Tag"
       ],
-      "healthScore": 67,
-      "missionFitScore": 49,
-      "coverageScore": 28,
-      "precisionScore": 65,
-      "sourceWeightScore": 53
+      "healthScore": 69,
+      "missionFitScore": 52,
+      "coverageScore": 30,
+      "precisionScore": 68,
+      "sourceWeightScore": 56
     },
     {
       "sourceKey": "church-events",
@@ -760,73 +827,6 @@
       "coverageScore": 9,
       "precisionScore": 54,
       "sourceWeightScore": 42
-    },
-    {
-      "sourceKey": "firecrawl5",
-      "file": "deals-pending-firecrawl5.json",
-      "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "zushimarket: It was free yesterday. Sure it was. - Instagram"
-      ],
-      "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-09-21T09:39:29.121Z",
-        "finishedAt": "2026-09-21T09:41:07.633Z",
-        "durationMs": 98512,
-        "counts": {
-          "rawCandidates": 12,
-          "normalizedCandidates": 12,
-          "verifiedCandidates": 1,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 11
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 11
-        },
-        "errors": [],
-        "reportFile": "deal-pipeline-last-run-firecrawl5.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 80,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 78,
-      "coverageScore": 15,
-      "precisionScore": 80,
-      "sourceWeightScore": 62
     },
     {
       "sourceKey": "instagram-verified",
@@ -1088,9 +1088,9 @@
       "file": "deals-pending-firecrawl4.json",
       "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
       "totalDeals": 75,
-      "uniqueDeals": 73,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
+      "uniqueDeals": 74,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
       "fresh1dCount": 0,
       "fresh7dCount": 3,
       "viennaCount": 1,
