@@ -88,6 +88,8 @@ assert.ok(!issueCodes({ ...original, metaGraphCaption: 'Thalia eröffnet in der 
 assert.ok(issueCodes({ ...original, description: '', metaGraphCaption: 'Nur per App. Pro Person ein Gutschein.' }).includes('source-condition-missing'));
 assert.ok(issueCodes({ ...original, sourceAccountType: 'creator', merchantUsername: '' }).includes('unresolved-merchant'));
 assert.ok(issueCodes({ ...original, expires: '', distance: 'Wien' }).includes('validity-unspecified'));
+assert.ok(issueCodes({ ...original, expires: '', expiryDisplayText: 'Bis Saisonende; genaues Datum nicht genannt' }).includes('validity-unspecified'));
+assert.ok(!issueCodes({ ...corrected, description: 'Ausschließlich bei Duru in der Thaliastraße 23.', metaGraphCaption: 'Ausschließlich in unserer Filiale Thaliastraße 23.' }).includes('source-condition-missing'));
 assert.ok(issueCodes({ ...original, distance: 'Wien' }).includes('location-unspecific'));
 assert.deepEqual(original, bundle.deals[0], 'review checks and edits do not mutate the source object');
 const approval = await validateDealsForSlack([{ ...original,

@@ -43,14 +43,16 @@ export function inspectDealContentQuality(deal = {}) {
   if (social && !onlineOnly && (!location || /^(?:wien|vienna|osterreich|österreich)(?:\s+(?:wien|vienna))*$/.test(location))) {
     add('location-unspecific', 'Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen');
   }
-  if (social && ![deal.validOn, deal.validFrom, deal.validUntil, deal.expires, deal.expiryDisplayText].some(cleanText)) {
+  const structuredValidity = [deal.validOn, deal.validFrom, deal.validUntil, deal.expires].some(cleanText);
+  if (social && !structuredValidity && (!cleanText(deal.expiryDisplayText)
+      || /saisonende|datum (?:nicht|unbekannt)|nicht genannt/i.test(deal.expiryDisplayText))) {
     add('validity-unspecified', 'Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln');
   }
   const conditions = [
     [/\bpro person\b/, 'Personenlimit'],
-    [/\b(?:app|coupon|gutschein)\b/, 'App-/Gutscheinbedingung'],
+    [/\b(?:app|coupon|gutschein)\b/, 'App-/Gutscheinangabe'],
     [/\b(?:neukunden|neukundinnen)\b/, 'Neukundenbedingung'],
-    [/\bnur (?:vor ort|in dieser filiale)|\bausschlie(?:ss|ß)lich in/, 'Filial-/Vor-Ort-Beschränkung'],
+    [/\bnur (?:vor ort|in dieser filiale)|\bausschlie(?:ss|ß)lich (?:in|bei)/, 'Filial-/Vor-Ort-Beschränkung'],
     [/\b(?:mindestbestellwert|mindestumsatz)\b/, 'Mindestbetrag'],
   ];
   for (const [pattern, label] of conditions) {
