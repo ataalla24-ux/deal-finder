@@ -1,3 +1,4 @@
+import { officialFoodOfferKey } from './power-food-sources.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -174,6 +175,10 @@ function normalizeUrl(url) {
   if (!text) return '';
   if (!/^https?:\/\//i.test(text)) return '';
   return text;
+}
+
+function dealPostKey(deal) {
+  return officialFoodOfferKey(deal) || canonicalPostKey(deal?.url);
 }
 
 function canonicalPostKey(url) {
@@ -522,7 +527,7 @@ function formatKey4ReviewReason(reason) {
 function isKey4ReviewDeal(deal) {
   return cleanText(deal?.key4Decision?.status).toLowerCase() === 'review'
     && /(?:^|\b)firecrawl4\b/i.test(cleanText(deal?.originSource))
-    && /^instagram:/i.test(canonicalPostKey(deal?.url));
+    && /^instagram:/i.test(dealPostKey(deal));
 }
 
 function prepareKey4ReviewDeals(deals, options = {}) {
@@ -626,7 +631,7 @@ function prepareSocialFoodReviewDeals(deals, options = {}) {
 
   for (const deal of ensureArray(deals)) {
     const audit = ensureObject(deal?.evidence?.socialFoodAudit);
-    const postKey = canonicalPostKey(deal?.url);
+    const postKey = dealPostKey(deal);
     const publishedAt = new Date(cleanText(deal?.sourcePublishedAt || deal?.pubDate));
     const ageDays = Number.isNaN(publishedAt.getTime())
       ? null
@@ -754,7 +759,7 @@ function selectSocialFoodReviewDeals(deals, state, options = {}) {
   const remaining = Math.max(0, maxPerDay - normalizedState.posted.length);
   const selected = ensureArray(deals)
     .filter((deal) => {
-      const key = canonicalPostKey(deal?.url) || cleanText(deal?.socialFoodAuditKey) || cleanText(deal?.id);
+      const key = dealPostKey(deal) || cleanText(deal?.socialFoodAuditKey) || cleanText(deal?.id);
       return key && !postedKeys.has(key);
     })
     .sort(compareSlackDeals)
@@ -769,7 +774,7 @@ function selectSocialFoodReviewDeals(deals, state, options = {}) {
 
 function recordSocialFoodReviewPost(state, deal, at = new Date()) {
   const normalized = normalizeSocialFoodReviewState(state, at);
-  const key = canonicalPostKey(deal?.url) || cleanText(deal?.socialFoodAuditKey) || cleanText(deal?.id);
+  const key = dealPostKey(deal) || cleanText(deal?.socialFoodAuditKey) || cleanText(deal?.id);
   if (!key || normalized.posted.some((entry) => entry.key === key)) return normalized;
   normalized.posted.push({
     key,
@@ -1038,7 +1043,7 @@ async function getReactions(messageTs) {
 function addSeenDealsFromThread(seenKeys, deals) {
   let added = 0;
   for (const deal of deals) {
-    const key = canonicalPostKey(deal.url);
+    const key = dealPostKey(deal);
     if (!key || seenKeys.has(key)) continue;
     seenKeys.add(key);
     added += 1;
@@ -1165,7 +1170,7 @@ async function loadRecentlySeenPostKeys(options = {}) {
         await sleep(150);
       }
       if (!hasHumanCheckReaction(reactions, botUserId)) continue;
-      const key = canonicalPostKey(deal.url);
+      const key = dealPostKey(deal);
       if (key && !seenKeys.has(key)) {
         seenKeys.add(key);
         checkedDeals += 1;
@@ -1185,7 +1190,7 @@ async function loadRecentlySeenPostKeys(options = {}) {
 function filterRecentlySeenDeals(deals, seenKeys) {
   if (!seenKeys || seenKeys.size === 0) return { deals, removed: 0 };
   const filtered = deals.filter((deal) => {
-    const key = canonicalPostKey(deal.url);
+    const key = dealPostKey(deal);
     return !key || !seenKeys.has(key);
   });
   return { deals: filtered, removed: deals.length - filtered.length };
@@ -1198,7 +1203,7 @@ function isSocialPostKey(key) {
 function buildDealDuplicateKeys(deal) {
   const keys = [];
   const socialPostKey = canonicalSocialPostKey(deal.url);
-  const postKey = socialPostKey || canonicalPostKey(deal.url);
+  const postKey = socialPostKey || dealPostKey(deal);
   const titleKey = normalizeLooseText(deal.title);
   const sourceKey = normalizeLooseText(deal.source || deal.originSource);
   const idKey = cleanText(deal.id).toLowerCase();
@@ -1234,7 +1239,7 @@ function buildDealDuplicateKeys(deal) {
   if (postKey && /\bgutscheine\s+at\b/.test(crawlerSignal)) {
     keys.push(`gutscheine-url:${postKey}`);
   }
-  if (postKey && (/^power-/i.test(idKey) || /\bpower\s+scraper\b/.test(crawlerSignal))) {
+  if (!officialFoodOfferKey(deal) && postKey && (/^power-/i.test(idKey) || /\bpower\s+scraper\b/.test(crawlerSignal))) {
     keys.push(`power-url:${postKey}`);
   }
 
@@ -1436,7 +1441,7 @@ function selectFirecrawlReviewDeals(results, options = {}) {
 function combineFirecrawlReviewSelections(key4Selection, validitySelection, allowedDeals = []) {
   const excludedKeys = new Set(ensureArray(allowedDeals).flatMap(buildDealDuplicateKeys));
   const excludedPostKeys = new Set(
-    ensureArray(allowedDeals).map((deal) => canonicalPostKey(deal?.url)).filter(Boolean),
+    ensureArray(allowedDeals).map((deal) => dealPostKey(deal)).filter(Boolean),
   );
   const selectedKeys = new Set();
   const selectedPostKeys = new Set();
@@ -1448,7 +1453,7 @@ function combineFirecrawlReviewSelections(key4Selection, validitySelection, allo
     ...ensureArray(validitySelection?.deals),
   ]) {
     const keys = buildDealDuplicateKeys(deal);
-    const postKey = canonicalPostKey(deal?.url);
+    const postKey = dealPostKey(deal);
     if ((postKey && (excludedPostKeys.has(postKey) || selectedPostKeys.has(postKey)))
       || keys.some((key) => excludedKeys.has(key) || selectedKeys.has(key))) {
       duplicateRemoved += 1;
@@ -1521,7 +1526,7 @@ function pruneStaleQueueDeals(deals, options = {}) {
   let removed = 0;
 
   for (const deal of deals) {
-    const postKey = canonicalPostKey(deal.url);
+    const postKey = dealPostKey(deal);
     const socialSignal = normalizeLooseText([deal.url, deal.source, deal.originSource, deal.id].map(cleanText).join(' '));
     const isSocialQueueDeal = isSocialPostKey(postKey) || /\b(instagram|tiktok)\b/i.test(socialSignal);
     const age = queueDealAgeDays(deal, now);
@@ -1630,7 +1635,7 @@ function writePendingAll(deals) {
 }
 
 function queueKey(deal) {
-  const postKey = canonicalPostKey(deal.url);
+  const postKey = dealPostKey(deal);
   if (isSocialPostKey(postKey)) return postKey;
   const id = cleanText(deal.id);
   if (id) return `id:${id.toLowerCase()}`;

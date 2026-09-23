@@ -1,3 +1,4 @@
+import { officialFoodOfferKey } from './power-food-sources.js';
 import '../sentry/instrument.mjs';
 import fs from 'fs';
 import path from 'path';
@@ -354,6 +355,8 @@ function getCanonicalUrlBrandKey(deal) {
 }
 
 function getSameUrlVariantKey(deal) {
+  const officialKey = officialFoodOfferKey(deal);
+  if (officialKey) return officialKey;
   const id = cleanText(deal?.id).toLowerCase();
   const brand = normalizeBrandSignature(deal?.brand);
   const url = normalizeUrl(deal?.url).toLowerCase();
@@ -749,6 +752,9 @@ async function normalizeApprovedDealExpiries(approvedDeals) {
   let urlExpiryHits = 0;
 
   for (const deal of approvedDeals) {
+    // Revalidated merchant blocks already have offer-specific dates; a shared
+    // page lookup here could replace them with another campaign's expiry.
+    if (officialFoodOfferKey(deal) && deal.officialFoodReverifiedAt) continue;
     const rawExpiry = cleanText(deal.expires);
     const parsedExpiry = parseExpiryDetails(rawExpiry, { now });
     const wantsUrlLookup = Boolean(
@@ -1469,4 +1475,5 @@ export {
   prunePendingQueue,
   uniqueDealsByApprovalKey,
   validateApprovalCandidates,
+  normalizeApprovedDealExpiries,
 };

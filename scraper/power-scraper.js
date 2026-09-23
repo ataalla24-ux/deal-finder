@@ -4,6 +4,9 @@ import '../sentry/instrument.mjs';
 // Für aktuelle Deals in Wien
 // ============================================
 
+import { POWER_FOOD_SOURCES } from './power-food-sources.js';
+import { crawlFoodSource } from './power-food-crawler.js';
+import { fetchOfficialFoodPage } from './power-food-verification.js';
 import crypto from 'crypto';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -21,7 +24,7 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const INCLUDE_BASE_DEALS = String(process.env.POWER_INCLUDE_BASE_DEALS || '1') !== '0';
+const INCLUDE_BASE_DEALS = String(process.env.POWER_INCLUDE_BASE_DEALS || '0') !== '0';
 const FETCH_TIMEOUT_MS = Math.max(3000, Number(process.env.POWER_FETCH_TIMEOUT_MS || 12000));
 const FETCH_CONCURRENCY = Math.max(1, Math.min(12, Number(process.env.POWER_FETCH_CONCURRENCY || 6)));
 const MAX_HTML_BYTES = Math.max(250000, Number(process.env.POWER_MAX_HTML_BYTES || 2500000));
@@ -413,7 +416,11 @@ const DISABLED_SOURCE_NAMES = new Set([
   'La pura',
 ]);
 
-const ACTIVE_SOURCES = SOURCES.filter((source) => !DISABLED_SOURCE_NAMES.has(source.name));
+const replacedFoodNames = new Set(['Burger King', 'Nordsee', 'Ströck', 'Der Mann']);
+const ACTIVE_SOURCES = [
+  ...SOURCES.filter(source => !DISABLED_SOURCE_NAMES.has(source.name) && !replacedFoodNames.has(source.name) && source.name !== 'Billa'),
+  ...POWER_FOOD_SOURCES.map(source => ({ ...source, officialFood: true })),
+].filter(source => process.env.POWER_FOOD_ONLY !== '1' || source.officialFood);
 
 // ============================================
 // HELPER: Fetch HTML
@@ -468,7 +475,7 @@ async function fetchHTML(url, options = {}) {
 }
 
 function shouldUseBrowserFallback(error) {
-  return String(error?.message || error || '').match(/HTTP (?:403|429)|fetch failed|Timeout after/i) !== null;
+  return String(error?.message || error || '').match(/HTTP 403|fetch failed|Timeout after/i) !== null;
 }
 
 async function fetchHTMLWithBrowser(url, options = {}) {
@@ -658,6 +665,16 @@ async function main() {
   
   const sourceResults = await mapWithConcurrency(ACTIVE_SOURCES, FETCH_CONCURRENCY, async (source) => {
     const sourceStartedAt = Date.now();
+    if (source.officialFood) {
+      const result = await crawlFoodSource(source, {
+        fetchPage: url => fetchOfficialFoodPage(url, source),
+        renderPage: process.env.POWER_BROWSER_FALLBACK === '1' ? fetchHTMLWithBrowser : undefined,
+        maxPages: Number(process.env.POWER_FOOD_MAX_PAGES || 5),
+        maxDeals: MAX_DEALS_PER_SOURCE,
+      });
+      console.log(`🍽️ ${source.name}: ${result.deals} Kandidaten (${result.operationalStatus})`);
+      return result;
+    }
     try {
       console.log(`🌐 ${source.name}...`);
       let response;
@@ -733,9 +750,11 @@ async function main() {
     deals: finalDeals
   };
   
-  const outputPath = path.join(__dirname, '..', 'docs', 'deals-pending-power.json');
+  const outputDir = process.env.POWER_OUTPUT_DIR || path.join(__dirname, '..', 'docs');
+  fs.mkdirSync(outputDir, { recursive: true });
+  const outputPath = path.join(outputDir, 'deals-pending-power.json');
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
-  const reportPath = path.join(__dirname, '..', 'docs', 'power-scraper-report.json');
+  const reportPath = path.join(outputDir, 'power-scraper-report.json');
   const sourceReport = sourceResults.map(({ rows, ...result }) => result);
   const report = {
     startedAt: startedAt.toISOString(),
@@ -754,12 +773,16 @@ async function main() {
       failedSources: sourceReport.filter((result) => result.status === 'error').length,
       rawDeals: scrapedDeals.length,
       acceptedDeals: finalDeals.length,
+      officialFoodSources: sourceReport.filter(result => result.sourceKind === 'official-food').length,
+      productiveFoodSources: sourceReport.filter(result => result.sourceKind === 'official-food' && result.deals > 0).length,
+      degradedSources: sourceReport.filter(result => ['degraded', 'rate-limited'].includes(result.operationalStatus)).length,
+      note: 'Collector candidates only; publication still requires central validation and manual approval.',
     },
     sources: sourceReport,
   };
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-  const failedSources = sourceReport.filter((result) => result.status === 'error');
-  writePipelineRunReport(buildPipelineRunReport({
+  const failedSources = sourceReport.filter((result) => result.status === 'error' || result.operationalStatus === 'degraded');
+  if (!process.env.POWER_OUTPUT_DIR) writePipelineRunReport(buildPipelineRunReport({
     sourceKey: SOURCE_KEY,
     sourceLabel: SOURCE_LABEL,
     status: failedSources.length > 0 ? 'completed-with-errors' : 'completed',
@@ -792,7 +815,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
   main()
     .then(() => process.exit(0))
     .catch((error) => {
-      writeFailedPipelineRunReport({
+      if (!process.env.POWER_OUTPUT_DIR) writeFailedPipelineRunReport({
         sourceKey: SOURCE_KEY,
         sourceLabel: SOURCE_LABEL,
         startedAt: RUN_STARTED_AT,
@@ -805,6 +828,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
 }
 
 export {
+  ACTIVE_SOURCES,
   extractDealsFromHTML,
   fetchHTML,
   hasConcretePowerDealSignal,
