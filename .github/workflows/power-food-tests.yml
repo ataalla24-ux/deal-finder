@@ -1,0 +1,44 @@
+name: Power Food Discovery Tests
+on:
+  pull_request:
+    paths:
+      - "scraper/power-*.js"
+      - "scraper/deal-validity-agent.js"
+      - "scraper/slack-notify.js"
+      - "scraper/slack-approve.js"
+      - "scripts/test-power-*.mjs"
+      - "package*.json"
+      - ".github/workflows/power*.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scraper/power-*.js"
+      - "scraper/deal-validity-agent.js"
+      - "scraper/slack-notify.js"
+      - "scraper/slack-approve.js"
+      - "scripts/test-power-*.mjs"
+      - "package*.json"
+      - ".github/workflows/power*.yml"
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SENTRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci
+      - run: |
+          node scripts/test-power-scraper.mjs
+          node scripts/test-power-food.mjs
+          node scripts/test-deal-validity-evidence.mjs
+          node scripts/test-slack-approval-validation.mjs
+          node scripts/test-source-backed-content.mjs
+          node scripts/test-live-deal-removal-safety.mjs
+          node scripts/test-slack-deal-quality.mjs
+          node scripts/test-social-post-validity.mjs

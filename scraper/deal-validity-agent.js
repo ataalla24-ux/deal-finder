@@ -1,3 +1,4 @@
+import { verifyOfficialFoodDeal } from './power-food-verification.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -1021,19 +1022,30 @@ async function validateDeal(deal, context) {
   const checkedAt = new Date().toISOString();
   const url = normalizeUrl(deal.url);
   const health = await inspectUrlWithCache(url, context.urlCache, context.urlOptions);
+  const officialFood = await verifyOfficialFoodDeal(deal, { now, cache: context.officialFoodCache, fetchPage: context.fetchOfficialFoodPage });
+  if (officialFood?.ok) {
+    // Restore extracted facts before checking and forwarding the candidate.
+    // Caller-supplied location or dates cannot survive an evidence refresh.
+    for (const field of ['validOn', 'validFrom', 'validUntil', 'expires', 'address', 'city', 'distance']) {
+      deal = { ...deal, [field]: officialFood.deal[field] };
+    }
+  }
+  // A live, exact merchant block supplies its own dates. Page-level dates may
+  // refer to a different offer or the original creation of an evergreen page.
+  const evidenceHealth = officialFood?.ok ? { ...health, dateHints: {} } : health;
   const excludedSource = getExcludedSourceMatch(deal, health);
   const socialPostDeal = isSocialPostDeal(deal);
   const selfSyndicatedSocialDeal = socialPostDeal && isSelfSyndicatedSocialDeal(deal, health);
   const newsAggregatorDeal = isNewsAggregatorDeal(deal);
   const sharedBenefitPageDeal = isSharedBenefitPageDeal(deal);
   const freshnessSensitive = socialPostDeal || newsAggregatorDeal || isCrawlerDeal(deal);
-  const expiryCandidates = collectExpiryCandidates(deal, health, now);
+  const expiryCandidates = collectExpiryCandidates(officialFood?.ok ? officialFood.deal : deal, evidenceHealth, now);
   const expiry = getExpiryDecision(expiryCandidates, now);
   const recurring = hasRecurringSchedule(deal, expiryCandidates);
   const activeValidity = hasActiveExplicitValidity(deal, expiry, now);
   const publicationCandidates = getPublicationCandidates(deal, health, {
     freshnessSensitive,
-    ignoreUrlPublicationDate: sharedBenefitPageDeal,
+    ignoreUrlPublicationDate: sharedBenefitPageDeal || officialFood?.current === true,
     socialPost: socialPostDeal,
   });
   const freshnessMaxAgeDays = socialPostDeal
@@ -1055,9 +1067,12 @@ async function validateDeal(deal, context) {
     health,
     recurring,
   });
-  const offer = getConcreteOfferDecision(deal, health);
+  let offer = getConcreteOfferDecision(deal, health);
+  if (officialFood?.ok && offer.reason === 'kein konkretes Angebot erkennbar') offer = { concrete: true };
   const reasons = [];
   const warnings = [];
+  if (officialFood && !officialFood.ok) reasons.push(`Offizielle Aktion nicht erneut bestätigt (${officialFood.reason})`);
+  if (officialFood?.current) warnings.push('Aktueller Angebotsblock auf offizieller Anbieterseite erneut bestätigt; Abrufdatum ist kein Veröffentlichungsdatum');
 
   const graphBlockingReason = cleanText(deal.metaGraphBlockingReason);
   if (graphBlockingReason) {
@@ -1079,9 +1094,13 @@ async function validateDeal(deal, context) {
   }
 
   const legacyFirecrawlDeal = isLegacyFirecrawlDeal(deal);
-  const viennaConfirmed = socialPostDeal && !legacyFirecrawlDeal
+  const viennaConfirmed = Boolean(officialFood?.viennaBranchEvidence) || (socialPostDeal && !legacyFirecrawlDeal
     ? hasSocialViennaEvidence(deal, context)
-    : isExplicitlyUsableInVienna(deal, health);
+    : isExplicitlyUsableInVienna(deal, health));
+  if (officialFood?.viennaBranchEvidence) {
+    warnings.push('Wiener Filialnetz auf offizieller Seite bestätigt; Teilnahme der gewünschten Filiale prüfen');
+    deal = { ...deal, distance: 'Wien – teilnehmende Filialen laut Anbieter', merchantLocationEvidence: { url: officialFood.branchEvidenceUrl, text: officialFood.viennaBranchEvidence }, missingFields: [...new Set([...(deal.missingFields || []).filter(field => field !== 'Ort'), 'Filialteilnahme'])] };
+  }
   if (context.requireVienna && !viennaConfirmed) {
     reasons.push('nicht eindeutig in Wien');
   }
@@ -1142,6 +1161,7 @@ async function validateDeal(deal, context) {
     ...deal,
     url: url || deal.url,
     validity: buildPublicValidationMeta(decision),
+    ...(officialFood?.ok ? { officialFoodReverifiedAt: now.toISOString() } : {}),
   };
 
   if (selectedDate?.iso && (
@@ -1162,7 +1182,7 @@ async function validateDeal(deal, context) {
     if (selectedExpiry.validOn) nextDeal.validOn = selectedExpiry.validOn;
     if (selectedExpiry.validFrom) nextDeal.validFrom = selectedExpiry.validFrom;
     if (selectedExpiry.validUntil) nextDeal.validUntil = selectedExpiry.validUntil;
-    nextDeal.expires = selectedExpiry.validUntil || selectedExpiry.validOn;
+    nextDeal.expires = selectedExpiry.validUntil || selectedExpiry.validOn || nextDeal.expires;
     nextDeal.expiresSource = selectedExpiry.evidenceSource || selectedExpiry.source;
     nextDeal.expirySource = selectedExpiry.evidenceSource || selectedExpiry.source;
   }
@@ -1281,6 +1301,8 @@ async function validateDealsForSlack(deals, options = {}) {
     allowChurchThisRun: options.allowChurchThisRun ?? shouldAllowChurchThisRun(now, options),
     registryUsernames: options.registryUsernames instanceof Set ? options.registryUsernames : new Set(),
     urlCache,
+    officialFoodCache: new Map(),
+    fetchOfficialFoodPage: options.fetchOfficialFoodPage,
     urlOptions: {
       now,
       timeoutMs,

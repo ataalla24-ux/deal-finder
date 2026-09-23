@@ -2,7 +2,7 @@ name: "Power Scraper"
 
 on:
   schedule:
-    - cron: '30 5 * * *' # Curated morning refresh before the daily digest window
+    - cron: '30 5,13 * * *' # Morning and afternoon refresh (UTC)
   workflow_dispatch:
 
 concurrency:
@@ -28,12 +28,20 @@ jobs:
       - name: Install Playwright browser fallback
         run: npx playwright install --with-deps chromium chromium-headless-shell
 
+      - name: Test official food discovery
+        env:
+          SENTRY_DISABLED: '1'
+        run: |
+          node scripts/test-power-scraper.mjs
+          node scripts/test-power-food.mjs
+
       - name: Run Power Scraper
         env:
           POWER_INCLUDE_BASE_DEALS: '0'
           POWER_FETCH_TIMEOUT_MS: '8000'
-          POWER_FETCH_CONCURRENCY: '8'
-          POWER_MAX_DEALS_PER_SOURCE: '10'
+          POWER_FETCH_CONCURRENCY: '4'
+          POWER_MAX_DEALS_PER_SOURCE: '25'
+          POWER_FOOD_MAX_PAGES: '5'
           POWER_BROWSER_FALLBACK: '1'
         run: node scraper/power-scraper.js
 
