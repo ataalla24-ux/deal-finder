@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-09-23T17:31:59.665Z",
+  "generatedAt": "2026-09-23T18:31:51.219Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 314,
-    "allowed": 0,
+    "total": 316,
+    "allowed": 2,
     "blocked": 314,
-    "warnings": 0,
+    "warnings": 2,
     "reasonCounts": {
-      "nicht eindeutig in Wien": 39,
+      "nicht eindeutig in Wien": 40,
       "älter als 7 Tage (2026-06-27)": 1,
       "älter als 7 Tage (2026-06-24)": 1,
       "älter als 7 Tage (2026-04-16)": 1,
@@ -31,7 +31,7 @@
       "älter als 7 Tage (2026-04-30)": 1,
       "älter als 7 Tage (2026-04-20)": 1,
       "abgelaufen (2026-04-24)": 1,
-      "älter als 7 Tage (2026-02-22)": 86,
+      "älter als 7 Tage (2026-02-22)": 85,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-09-09)": 1,
@@ -61,6 +61,7 @@
       "abgelaufen (2026-07-01)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2025-04-16)": 1,
       "älter als 7 Tage (2023-07-18)": 1,
+      "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-30)": 1,
       "Engagement-Aktion ohne garantierte Gegenleistung": 1,
@@ -73,7 +74,7 @@
       "ausgeschlossene Quelle (DieRestaurantWoche)": 1
     },
     "reasonCategoryCounts": {
-      "nicht Wien": 39,
+      "nicht Wien": 40,
       "älter als 7 Tage": 176,
       "abgelaufen": 13,
       "ausgeschlossene Quelle": 13,
@@ -195,7 +196,8 @@
           "älter als 7 Tage": 99,
           "ungültige URL": 9,
           "Gottesdienste außerhalb Wochenlauf": 1,
-          "sonstiges": 2
+          "sonstiges": 2,
+          "nicht Wien": 1
         }
       },
       "member-benefits-scraper": {
@@ -209,19 +211,19 @@
         }
       },
       "Meta Instagram Business Discovery": {
-        "total": 2,
-        "allowed": 0,
+        "total": 3,
+        "allowed": 1,
         "blocked": 2,
-        "warnings": 0,
+        "warnings": 1,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 2
         }
       },
       "Meta Instagram Hashtag API": {
-        "total": 1,
-        "allowed": 0,
+        "total": 2,
+        "allowed": 1,
         "blocked": 1,
-        "warnings": 0,
+        "warnings": 1,
         "reasonCategoryCounts": {
           "ausgeschlossene Quelle": 1
         }
@@ -237,7 +239,44 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-18132473737776824",
+      "title": "Wer sich über den Link in der Bio anmeldet, checkt sich schon mal den Gratis-Shot.",
+      "brand": "Instagram",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/p/DdowEX6gt8r/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text",
+        "startet am 2026-10-09T00:00:00.000Z"
+      ],
+      "sourceDate": "2026-09-23T16:34:46.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-09T23:59:59.999Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-17959951428258283",
+      "title": "📍 Königseggasse 10, 1060 Wien 🕒 Di, 29.9., 15–18 Uhr Eintritt frei ______",
+      "brand": "Bezirksvorstehung 6. Bezirk",
+      "source": "Meta Instagram Business Discovery",
+      "url": "https://www.instagram.com/p/DdoZ0OdFRfb/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text",
+        "startet am 2026-09-29"
+      ],
+      "sourceDate": "2026-09-23T13:20:19.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-09-29",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -3501,18 +3540,17 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://de.wikipedia.org/wiki/Ruprechtskirche",
       "reasons": [
+        "nicht eindeutig in Wien",
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2009-05-01)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-02-22T21:12:35.964Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 213,
+      "warnings": [],
+      "sourceDate": "2009-05-01T09:33:07.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 6354,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gottesdienste-7-20260222",
@@ -4148,6 +4186,25 @@
       "urlStatus": "HTTP 200"
     },
     {
+      "id": "meta-ig-18202178041375274",
+      "title": "Countdown is on for the ayvie.festival Dynamic Edition 🔥October 16-18 in Vienna trap_circus_centre_vienna Our teachers this year teaching y",
+      "brand": "Acroyoga Vienna",
+      "source": "Meta Instagram Business Discovery",
+      "url": "https://www.instagram.com/p/Ddn-rDYDjWq/",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten"
+      ],
+      "sourceDate": "2026-09-23T09:23:08.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-16T23:59:59.999Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "meta-ig-17974885478932983",
       "title": "Wer sich über Gastro.News anmeldet, kann sich außerdem einen Gratis Shot sichern.",
       "brand": "Wildling",
@@ -4184,23 +4241,6 @@
       "sourceAgeDays": 2,
       "expiryDate": "2026-09-30",
       "expirySource": "url.contentHints.title",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "meta-ig-18072299981746082",
-      "title": "20% bis Ende des Monats",
-      "brand": "Shaysfoodblog",
-      "source": "Meta Instagram Business Discovery",
-      "url": "https://www.instagram.com/reel/Ddg8dheIerv/",
-      "reasons": [
-        "kein konkretes Angebot erkennbar"
-      ],
-      "warnings": [],
-      "sourceDate": "2026-09-20T15:49:08.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 3,
-      "expiryDate": "2026-09-26T13:35:53.239Z",
-      "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
     {
