@@ -10,6 +10,28 @@ const PUBLISHED_LABEL = '17. August 2026';
 
 const guides = [
   {
+    slug: 'duru-doener-350-wien-2026',
+    title: 'Duru Döner für 3,50 Euro in Wien',
+    meta: 'Duru Döner in Wien: Hühnerdöner für 3,50 Euro am 23. September 2026 in der Filiale Thaliastraße 23. Uhrzeit, Bedingungen und Originalquelle prüfen.',
+    eyebrow: 'Döner-Aktion Wien',
+    headline: 'Duru Döner für 3,50 Euro in der Thaliastraße.',
+    intro: 'Duru bewirbt zum 15-jährigen Bestehen am 23. September 2026 einen Hühnerdöner für 3,50 Euro in der Filiale Thaliastraße 23. Die Aktion gilt laut Originalbeitrag von 09:00 bis 18:00 Uhr.',
+    published: '2026-09-23', publishedLabel: '23. September 2026', modified: '2026-09-23', modifiedLabel: '23. September 2026',
+    image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
+    imageAlt: 'FreeFinder App mit Döner- und Kebab-Angeboten in Wien',
+    sections: [
+      ['angebot', 'Was kostet der Duru-Döner?', `<p>Der Originalbeitrag von Duru nennt für den <strong>23. September 2026</strong> einen Hühnerdöner für <strong>3,50 Euro</strong>. Zusätzlich werden Kalbdöner für 4,50 Euro und Adana Kebab für 8 Euro genannt.</p><p>Die Aktion ist laut Beitrag auf einen Döner pro Person begrenzt und gilt ausschließlich in der Filiale Thaliastraße 23.</p>`],
+      ['einloesen', 'So prüfst du die Aktion', `<ol><li>Vor dem Besuch den <a href="https://www.instagram.com/reel/DdhLB_mtmGy/" rel="noopener">Originalbeitrag von Duru</a> öffnen.</li><li>Am 23. September zwischen 09:00 und 18:00 Uhr zur Thaliastraße 23, 1160 Wien gehen.</li><li>Den gewünschten Aktions-Döner bestellen.</li><li>Beachten, dass pro Person nur ein Döner zum Aktionspreis gilt.</li><li>Vor dem Bezahlen prüfen, ob der richtige Aktionspreis aufscheint.</li></ol><div class="article-note"><strong>Nur am Aktionstag</strong>Die Angaben gelten laut Originalbeitrag für den 23. September 2026 und können nach Ende der Aktion nicht mehr eingelöst werden.</div>`],
+      ['quelle', 'Originalquelle und Bedingungen', `<p>Quelle ist der <a href="https://www.instagram.com/reel/DdhLB_mtmGy/" rel="noopener">Originalbeitrag von Duru</a>. Dort stehen Filiale, Uhrzeit, Preise und die Begrenzung auf einen Döner pro Person. Prüfe die Angaben vor der Anreise erneut.</p><p>Weitere aktuelle Kebab-Angebote findest du in der <a href="/angebote-wien-heute.html">FreeFinder-Übersicht</a>.</p>`],
+    ],
+    faqs: [
+      ['Wie viel kostet der Hühnerdöner?', 'Laut Originalbeitrag 3,50 Euro am 23. September 2026.'],
+      ['Wo gilt die Aktion?', 'In der Duru-Filiale Thaliastraße 23, 1160 Wien.'],
+      ['Wie lange gilt sie?', 'Der Beitrag nennt 09:00 bis 18:00 Uhr am 23. September 2026 und einen Döner pro Person.'],
+    ],
+    related: [['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Kebab-Angebote in Wien', 'duru-kebab-wien-wolt-rabatt.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+  },
+  {
     slug: 'gratis-gemuese-kebab-h11-wien',
     title: 'Gratis Gemüse-Kebab bei H11 in Wien',
     meta: 'Gratis Gemüse-Kebab in Wien bei H11: Berliner-Style Gemüse-Kebab am 23. September 2026 ab 12 Uhr, solange der Vorrat reicht. Quelle und Hinweise zur Einlösung.',
