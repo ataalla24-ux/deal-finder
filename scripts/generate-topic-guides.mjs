@@ -10,6 +10,50 @@ const PUBLISHED_LABEL = '17. August 2026';
 
 const guides = [
   {
+    slug: 'gratis-gemuese-kebab-h11-wien',
+    title: 'Gratis Gemüse-Kebab bei H11 in Wien',
+    meta: 'Gratis Gemüse-Kebab in Wien bei H11: Berliner-Style Gemüse-Kebab am 23. September 2026 ab 12 Uhr, solange der Vorrat reicht. Quelle und Hinweise zur Einlösung.',
+    eyebrow: 'Gratis Kebab Wien',
+    headline: 'Gratis Berliner-Style Gemüse-Kebab bei H11.',
+    intro: 'H11 Döner & Pizza bewirbt für den 23. September 2026 einen Berliner-Style Gemüse-Kebab gratis ab 12 Uhr. Die Aktion gilt nur, solange der Vorrat reicht.',
+    published: '2026-09-23', publishedLabel: '23. September 2026', modified: '2026-09-23', modifiedLabel: '23. September 2026',
+    image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
+    imageAlt: 'FreeFinder App mit gratis Kebab- und Food-Angeboten in Wien',
+    sections: [
+      ['angebot', 'Was ist bei H11 gratis?', `<p>H11 Döner & Pizza kündigt einen <strong>Berliner-Style Gemüse-Kebab gratis</strong> an. Laut dem veröffentlichten Angebot startet die Aktion am <strong>23. September 2026 ab 12:00 Uhr</strong>.</p><p>Es handelt sich um eine Ausgabeaktion für Gemüse-Kebab und nicht um einen dauerhaft kostenlosen Menüpunkt. Der Vorrat ist begrenzt.</p>`],
+      ['einloesen', 'So prüfst du die Aktion vor Ort', `<ol><li>Vor dem Besuch die Originalquelle öffnen und prüfen, ob die Aktion noch aktiv ist.</li><li>H11 am 23. September ab 12:00 Uhr aufsuchen.</li><li>Nach dem Berliner-Style Gemüse-Kebab fragen.</li><li>Beachten, dass die Ausgabe endet, sobald der Vorrat aufgebraucht ist.</li></ol><div class="article-note"><strong>Wichtig</strong>Bei Aktionen mit begrenztem Vorrat kann die Ausgabe vor dem genannten Tagesende enden.</div>`],
+      ['quelle', 'Originalquelle und Aktualität', `<p>Die Angaben stammen aus dem <a href="https://www.instagram.com/reel/DdlWabRNluS/" rel="noopener">Originalbeitrag von H11 Döner &amp; Pizza</a>. Prüfe dort vor der Anreise Ort, Startzeit und Verfügbarkeit erneut.</p><p>Weitere aktuelle Kebab- und Food-Angebote findest du unter <a href="/angebote-wien-heute.html">Aktuelle Wien-Deals</a>.</p>`],
+    ],
+    faqs: [
+      ['Wann gibt es den gratis Gemüse-Kebab?', 'Laut dem H11-Angebot am 23. September 2026 ab 12:00 Uhr.'],
+      ['Ist der Kebab den ganzen Tag verfügbar?', 'Nein. Die Aktion gilt nur, solange der Vorrat reicht.'],
+      ['Muss ich etwas kaufen?', 'Das veröffentlichte Angebot nennt eine Gratis-Ausgabe. Prüfe die konkreten Bedingungen vor Ort erneut.'],
+    ],
+    related: [['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Restaurant-Gutscheine in Wien', 'restaurant-gutscheine-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+  },
+  {
+    slug: 'dahab-doener-1plus1-wien',
+    title: '1+1 Döner bei Dahab in Wien',
+    meta: '1+1 Döner bei Dahab Döner in Wien: Beim Kauf von zwei Dönern gibt es einen weiteren gratis. Wagramer Straße 126, Bedingungen und Zeitraum prüfen.',
+    eyebrow: '1+1 Döner Wien',
+    headline: '1+1 Döner bei Dahab Döner in Wien.',
+    intro: 'Dahab Döner verlängert laut Originalbeitrag eine 1+1-Aktion: Beim Kauf von zwei Dönern gibt es einen dritten Döner gratis. Die Aktion ist bis 25. September 2026 angekündigt.',
+    published: '2026-09-23', publishedLabel: '23. September 2026', modified: '2026-09-23', modifiedLabel: '23. September 2026',
+    image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
+    imageAlt: 'FreeFinder App mit 1+1-Döner-Angeboten in Wien',
+    sections: [
+      ['angebot', 'So funktioniert die Dahab-Aktion', `<p>Beim <strong>1+1-Angebot von Dahab Döner</strong> kaufst du zwei Döner und erhältst einen weiteren Döner gratis. Der Originalbeitrag nennt den Zeitraum <strong>Montag, 21. September bis Freitag, 25. September 2026</strong>.</p><p>Das Angebot gilt laut Beitrag bei Dahab Döner in der <strong>Wagramer Straße 126, 1220 Wien</strong>. Prüfe vor der Bestellung, welche Dönerarten eingeschlossen sind.</p>`],
+      ['einloesen', 'Vor Ort richtig einlösen', `<ol><li>Vor dem Besuch den <a href="https://www.instagram.com/reel/Ddhgq4YO5av/" rel="noopener">Originalbeitrag von Dahab Döner</a> öffnen.</li><li>Zur Filiale in der Wagramer Straße 126, 1220 Wien gehen.</li><li>Zwei Döner bestellen und die 1+1-Aktion angeben.</li><li>Vor dem Bezahlen kontrollieren, dass der dritte Döner korrekt gratis berücksichtigt wird.</li></ol><div class="article-note"><strong>Gültigkeit prüfen</strong>Der Beitrag nennt den Zeitraum bis 25. September 2026. Öffnungszeiten und Verfügbarkeit können sich ändern.</div>`],
+      ['quelle', 'Originalquelle und Bedingungen', `<p>Quelle ist der <a href="https://www.instagram.com/reel/Ddhgq4YO5av/" rel="noopener">Originalbeitrag von Dahab Döner</a>. Da Social-Media-Aktionen kurzfristig geändert oder vorzeitig beendet werden können, solltest du den Beitrag und die Bedingungen am selben Tag erneut prüfen.</p><p>Weitere Kebab- und Food-Angebote findest du in der <a href="/angebote-wien-heute.html">aktuellen Wien-Deals-Übersicht</a>.</p>`],
+    ],
+    faqs: [
+      ['Wie viele Döner bekomme ich?', 'Laut dem Angebot gibt es beim Kauf von zwei Dönern einen dritten gratis.'],
+      ['Wo gilt die Aktion?', 'Der Beitrag nennt Dahab Döner, Wagramer Straße 126, 1220 Wien.'],
+      ['Wie lange gilt die Aktion?', 'Angekündigt ist sie vom 21. bis 25. September 2026. Prüfe die aktuelle Verfügbarkeit vor Ort.'],
+    ],
+    related: [['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['1+1-Aktionen in Wien', 'eins-plus-eins-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+  },
+  {
     slug: 'gratis-kaffee-wien',
     title: 'Gratis Kaffee in Wien heute finden',
     meta: 'Gratis Kaffee in Wien heute finden: Aktionen, Kostproben und App-Gutscheine an Quelle, Filiale und Kontingent richtig prüfen.',
