@@ -11,6 +11,16 @@ on:
       - "docs/deal-of-the-week.json"
       - "scripts/validate-production-feed.mjs"
       - "scripts/validate-deal-map-locations.mjs"
+      - "scraper/deal-normalization-utils.js"
+      - "scraper/deal-content-quality-utils.js"
+      - "scraper/deal-validity-agent.js"
+      - "scraper/normalize-live-deals.js"
+      - "scraper/slack-digest-utils.js"
+      - "scripts/live-deal-edits-lib.mjs"
+      - "scripts/test-source-backed-content.mjs"
+      - "scripts/apply-reviewed-content.mjs"
+      - "reviews/**"
+      - ".github/workflows/production-feed-integrity.yml"
 
 permissions:
   contents: read
@@ -32,6 +42,16 @@ jobs:
 
       - name: Validate live feed contract
         run: npm run test:feed-contract
+
+      - name: Protect source-backed content and manual review
+        env:
+          SENTRY_DISABLED: '1'
+        run: |
+          node scripts/test-source-backed-content.mjs
+          node scripts/test-deal-logo-normalization.mjs
+          node scripts/test-live-deal-removal-safety.mjs
+          node scripts/test-slack-deal-quality.mjs
+          node scripts/test-slack-approval-validation.mjs
 
       - name: Validate production feed and derived data
         run: npm run test:production-feed

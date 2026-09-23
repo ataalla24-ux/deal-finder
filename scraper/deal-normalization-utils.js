@@ -3,6 +3,9 @@ import { normalizeCategoryForScraper } from './category-utils.js';
 const PUBLIC_BRAND_LOGO_BASE_URL = 'https://freefinder.at/assets/brand-logos';
 
 const BRAND_RULES = [
+  { key: 'duruvienna', name: 'Duru Döner', logo: '🌯', category: 'essen' },
+  { key: 'duru döner', name: 'Duru Döner', logo: '🌯', category: 'essen' },
+  { key: 'duru kebap', name: 'Duru Döner', logo: '🌯', category: 'essen' },
   { key: 'centimeter_vienna', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at', logoFile: 'centimeter-vienna-centimeter-at.png' },
   { key: 'centimeter vienna', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at', logoFile: 'centimeter-vienna-centimeter-at.png' },
   { key: 'centimeter', name: 'Centimeter Wien', logo: '🍽️', category: 'essen', domain: 'centimeter.at', logoFile: 'centimeter-vienna-centimeter-at.png' },
@@ -16,6 +19,7 @@ const BRAND_RULES = [
   { key: 'oh mensa', name: 'ÖH Mensa Wien', logo: '🍽️', category: 'essen', domain: 'oeh.ac.at', logoFile: 'oh-mensa-wien-oeh-ac-at.png' },
   { key: 'raiffeisen raiffeistag', name: 'Raiffeisen RaiffEIStag', logo: '🍦', category: 'essen', domain: 'raiffeisen.at', logoFile: 'raiffeisen-raiffeistag-raiffeisen-at.png' },
   { key: 'mcdonald', name: "McDonald's", logo: '🍟', category: 'essen', domain: 'mcdonalds.at', logoFile: 'mcdonald-s-mcdonalds-at.png' },
+  { key: 'mcdonalds', name: "McDonald's", logo: '🍟', category: 'essen', domain: 'mcdonalds.at', logoFile: 'mcdonald-s-mcdonalds-at.png' },
   { key: 'burger king', name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at', logoFile: 'burger-king-burgerking-at.png' },
   { key: 'burgerking', name: 'Burger King', logo: '🍔', category: 'essen', domain: 'burgerking.at', logoFile: 'burger-king-burgerking-at.png' },
   { key: 'kfc', name: 'KFC', logo: '🍗', category: 'essen', domain: 'kfc.at', logoFile: 'kfc-wien-kfc-at.png' },
@@ -27,6 +31,7 @@ const BRAND_RULES = [
   { key: 'balls and clubs', name: 'Balls & Clubs', logo: '⛳', category: 'freizeit', domain: 'ballsandclubs.at', logoFile: 'balls-and-clubs-ballsandclubs-at.png' },
   { key: 'ballsandclubs', name: 'Balls & Clubs', logo: '⛳', category: 'freizeit', domain: 'ballsandclubs.at', logoFile: 'balls-and-clubs-ballsandclubs-at.png' },
   { key: 'domino', name: "Domino's Pizza", logo: '🍕', category: 'essen', domain: 'dominos.at' },
+  { key: 'dominos', name: "Domino's Pizza", logo: '🍕', category: 'essen', domain: 'dominos.at' },
   { key: 'dunkin', name: "Dunkin'", logo: '☕', category: 'kaffee', domain: 'dunkin.at', logoFile: 'dunkin-dunkin-at.png' },
   { key: 'tchibo', name: 'Tchibo', logo: '☕', category: 'kaffee', domain: 'tchibo.at' },
   { key: 'nespresso', name: 'Nespresso', logo: '☕', category: 'kaffee', domain: 'nespresso.com' },
@@ -89,8 +94,8 @@ const BRAND_RULES = [
   { key: 'coffee u-boot', name: 'Coffee U-Boot 1060', logo: '☕', category: 'kaffee' },
   { key: 'wolke pizza', name: 'WOLKE Pizza', logo: '🍕', category: 'essen' },
   { key: 'makotoya', name: 'Ramen Makotoya', logo: '🍜', category: 'essen' },
-  { key: 'crepes', name: "Mama's Crêpes & Shakes", logo: '🥞', category: 'essen' },
-  { key: 'crêpes', name: "Mama's Crêpes & Shakes", logo: '🥞', category: 'essen' },
+  { key: "mama's crepes", name: "Mama's Crêpes & Shakes", logo: '🥞', category: 'essen' },
+  { key: 'mamas crepes', name: "Mama's Crêpes & Shakes", logo: '🥞', category: 'essen' },
   { key: 'rafas', name: 'RAFAS', logo: '🥐', category: 'essen' },
   { key: 'chasen brew', name: 'Chasen Brew', logo: '🍵', category: 'kaffee' },
   { key: 'wiener eistraum', name: 'Wiener Eistraum', logo: '⛸️', category: 'events' },
@@ -235,8 +240,6 @@ function cleanUiNoiseText(value) {
   const junkPatterns = [
     /\balle anzeigen\b/gi,
     /\bkategorien\b/gi,
-    /\bapp\b/gi,
-    /\bap\b/gi,
   ];
   junkPatterns.forEach((pattern) => {
     text = text.replace(pattern, ' ');
@@ -306,20 +309,15 @@ function findBrandRule(signal) {
   const normalized = normalizeAscii(signal);
   const directMessageInstruction = /\bdm\s+(?:me|us|to\b|for\b|your\b|zur\b|fuer\b|für\b|anmeldung|register|details?|info|infos|booking|reserv)/i.test(normalized);
   const escapedWordMatch = (key) => {
-    const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
-    return new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`, 'i');
+    const escaped = normalizeAscii(key).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+    return new RegExp(`(?:^|[^\\p{L}\\p{N}])${escaped}(?:$|[^\\p{L}\\p{N}])`, 'iu');
   };
   const eligibleRules = directMessageInstruction
     ? BRAND_RULES.filter((rule) => rule.key !== 'dm')
     : BRAND_RULES;
-  return eligibleRules.find((rule) => escapedWordMatch(rule.key).test(normalized))
-    // "sparen", "spare" and "Intersport" are not evidence for the SPAR brand.
-    // Very short names such as "dm" must not match inside unrelated hashtags
-    // such as #FoodMoments.
-    || eligibleRules.find((rule) => {
-      const compactKey = normalizeAscii(rule.key).replace(/[^a-z0-9]+/g, '');
-      return rule.key !== 'spar' && compactKey.length >= 4 && normalized.includes(rule.key);
-    });
+  // A street (Thaliastraße) or hashtag substring is not merchant evidence.
+  // Compound brand spellings must be explicit aliases in BRAND_RULES.
+  return eligibleRules.find((rule) => escapedWordMatch(rule.key).test(normalized));
 }
 
 function extractHostFromUrl(url) {
@@ -566,7 +564,7 @@ function replaceBrandMention(text, fromBrand, toBrand) {
   if (!value || !from || !to || sameBrandText(from, to)) return value;
 
   const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return value.replace(new RegExp(escaped, 'gi'), to).replace(/\s+/g, ' ').trim();
+  return value.replace(new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, 'giu'), () => to).replace(/\s+/g, ' ').trim();
 }
 
 function inferPreferredBrand(deal = {}) {
@@ -594,6 +592,12 @@ function inferPreferredBrand(deal = {}) {
   const knownInTitle = findBrandRule(titleSignal);
   const knownInDescription = findBrandRule(descriptionSignal);
   const knownInURL = findBrandRule([deal.url, deal.post_url].filter(Boolean).join(' '));
+  const merchantUsername = cleanUiNoiseText(deal.merchantUsername || '');
+  const knownMerchant = merchantUsername && findBrandRule(merchantUsername);
+  if (deal.metaGraphVerified === true && deal.sourceAccountType === 'merchant'
+      && sameBrandText(ownerUsername, merchantUsername) && knownMerchant && !knownMerchant.source) {
+    return knownMerchant.name;
+  }
 
   if (
     knownInTitle &&
@@ -1047,6 +1051,7 @@ function isFalsePositiveFreeDeal(deal = {}) {
 }
 
 function normalizeDealRecord(deal = {}) {
+  const editedFields = new Set(Array.isArray(deal.liveEditedFields) ? deal.liveEditedFields : []);
   let title = cleanTitleForDisplay(deal.title || '');
   let description = cleanUiNoiseText(deal.description || '');
   const auxiliaryEvidenceSignal = cleanUiNoiseText([
@@ -1055,9 +1060,9 @@ function normalizeDealRecord(deal = {}) {
     deal.metaGraphCaption,
   ].filter(Boolean).join(' '));
   const explicitBrand = cleanUiNoiseText(deal.brand || '');
-  const brand = inferPreferredBrand({ ...deal, title, description });
+  const brand = editedFields.has('brand') ? cleanText(deal.brand) : inferPreferredBrand({ ...deal, title, description });
   title = polishKnownDealTitle(title, brand, [title, description, auxiliaryEvidenceSignal].filter(Boolean).join(' '));
-  const type = inferPreferredType({ ...deal, title, description, brand });
+  const type = editedFields.has('type') ? deal.type : inferPreferredType({ ...deal, title, description, brand });
   const known = findBrandRule([brand, title, description, deal.distance, deal.url, deal.post_url].filter(Boolean).join(' '));
   const currentCategory = cleanUiNoiseText(deal.category || '').toLowerCase();
   const categorySignal = [brand, title, description, auxiliaryEvidenceSignal, deal.distance, deal.url, deal.post_url, currentCategory].filter(Boolean).join(' ');
@@ -1113,7 +1118,7 @@ function normalizeDealRecord(deal = {}) {
   if (!description) {
     description = '';
   }
-  return {
+  const normalized = {
     ...deal,
     title,
     description,
@@ -1128,6 +1133,13 @@ function normalizeDealRecord(deal = {}) {
     logo: inferLogo({ ...deal, title, description, type, category }, brand),
     logoUrl: inferLogoUrl({ ...deal, title, description, type, category }, brand),
   };
+  // Replayed Slack/source-reviewed edits remain authoritative in later logo and
+  // normalization passes. Only explicitly edited content fields are protected.
+  for (const field of ['brand', 'title', 'description', 'type', 'category', 'distance', 'location', 'address', 'pubDate', 'expires', 'expiresOriginal', 'expiryKind', 'validOn', 'validFrom', 'validUntil', 'expiryDisplayText']) {
+    if (editedFields.has(field) && Object.hasOwn(deal, field)) normalized[field] = deal[field];
+  }
+  if (editedFields.has('logo') && deal.logo) normalized.logo = deal.logo;
+  return normalized;
 }
 
 export {

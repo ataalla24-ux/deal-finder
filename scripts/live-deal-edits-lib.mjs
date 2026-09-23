@@ -8,6 +8,10 @@ export const LIVE_DEAL_EDIT_FIELDS = [
   'category',
   'type',
   'distance',
+  'location',
+  'address',
+  'logo',
+  'logoUrl',
   'pubDate',
   'expires',
   'expiresOriginal',
@@ -312,6 +316,17 @@ function applyEditToDeal(deal, edit, checkedAt) {
   if (setIfPresent(next, edit, 'category', { normalize: (value) => cleanText(value).toLowerCase() })) changed.push('category');
   if (setIfPresent(next, edit, 'type', { normalize: (value) => cleanText(value).toLowerCase() })) changed.push('type');
   if (setIfPresent(next, edit, 'distance')) changed.push('distance');
+  for (const field of ['location', 'address', 'logo', 'logoUrl']) {
+    if (setIfPresent(next, edit, field, { skipEmpty: false })) changed.push(field);
+  }
+  if (changed.includes('brand')) {
+    for (const field of ['logo', 'logoUrl']) {
+      if (!Object.hasOwn(edit, field) && next[field]) {
+        next[field] = '';
+        changed.push(field);
+      }
+    }
+  }
   if (setIfPresent(next, edit, 'pubDate', { normalize: (value) => isoDateTime(value, false) })) changed.push('pubDate');
   if (setIfPresent(next, edit, 'expires', { normalize: (value) => isoDateTime(value, true) })) changed.push('expires');
   if (setIfPresent(next, edit, 'expiresOriginal')) changed.push('expiresOriginal');
@@ -336,7 +351,7 @@ function applyEditToDeal(deal, edit, checkedAt) {
         next.validUntil = nextValidUntil;
         changed.push('validUntil');
       }
-      if (next.expiryKind !== 'end') {
+      if (!edit.expiryKind && next.expiryKind !== 'end') {
         next.expiryKind = 'end';
         changed.push('expiryKind');
       }
@@ -347,12 +362,19 @@ function applyEditToDeal(deal, edit, checkedAt) {
     }
   }
 
+  const editedFields = [...new Set([
+    ...(Array.isArray(deal.liveEditedFields) ? deal.liveEditedFields : []),
+    ...LIVE_DEAL_EDIT_FIELDS.filter((field) => Object.hasOwn(edit, field) && edit[field] !== undefined
+      && (cleanText(edit[field]) || ['location', 'address', 'logo', 'logoUrl'].includes(field))),
+    ...changed,
+  ])].sort();
+  if (JSON.stringify(editedFields) !== JSON.stringify(deal.liveEditedFields)) changed.push('liveEditedFields');
   const uniqueChanged = [...new Set(changed)];
   if (uniqueChanged.length === 0) return { deal, changedFields: [], removed: false };
 
   next.liveEditedAt = cleanText(edit.updatedAt) || checkedAt;
   next.liveEditedBy = cleanText(edit.editedBy) || 'live-review';
-  next.liveEditedFields = uniqueChanged;
+  next.liveEditedFields = editedFields;
   return { deal: next, changedFields: uniqueChanged, removed: false };
 }
 

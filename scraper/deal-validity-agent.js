@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { extractLowFoodPrice, weakFoodPromotionReason } from './food-discovery-utils.js';
+import { inspectDealContentQuality } from './deal-content-quality-utils.js';
 
 import { inspectDealUrlHealth, parseExpiryShape } from './expiry-utils.js';
 import {
@@ -1113,6 +1114,15 @@ async function validateDeal(deal, context) {
 
   const selectedExpiry = expiry.candidate || null;
   const selectedDate = freshness.selected || null;
+  const contentIssues = inspectDealContentQuality({
+    ...deal,
+    validOn: selectedExpiry?.validOn || deal.validOn,
+    validFrom: selectedExpiry?.validFrom || deal.validFrom,
+    validUntil: selectedExpiry?.validUntil || deal.validUntil,
+  });
+  if (contentIssues.length) {
+    warnings.unshift(`Inhalt prüfen: ${contentIssues.map((issue) => issue.message).join('; ')}`);
+  }
   const allowed = reasons.length === 0;
   const decision = {
     allowed,

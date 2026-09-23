@@ -23,6 +23,7 @@ import {
   normalizeDealFreshnessFlags,
 } from './deal-freshness-utils.js';
 import { alignNativeWeeklyDealRotation } from './native-weekly-utils.js';
+import { inspectDealContentQuality } from './deal-content-quality-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -560,7 +561,7 @@ function normalizeSocialDeal(deal) {
   const next = { ...deal };
   const editedFields = getSlackEditedFieldSet(next);
   const socialTitle = tidySocialSummary(next.title, 96);
-  const socialDescription = localizeFreeText(tidySocialSummary(next.description, 160));
+  const socialDescription = localizeFreeText(tidySocialSummary(next.description, Infinity));
   const inferredBrand = cleanUiNoiseText(inferPreferredBrand(next));
   const handleBrand = prettifySocialHandle(extractSocialHandle(`${next.title || ''} ${next.description || ''}`));
   const combinedText = [next.brand, socialTitle, socialDescription, next.distance].filter(Boolean).join(' ');
@@ -596,11 +597,11 @@ function normalizeSocialDeal(deal) {
         category: next.category,
         type: next.type,
       });
-      next.description = buildNaturalSocialDescription(next, socialDescription) || socialDescription || fallbackDescription || localizeFreeText(next.description);
+      next.description = socialDescription || fallbackDescription || localizeFreeText(next.description);
     } else if (socialDescription && /(?:auf|on)\s+(?:instagram|tiktok)\s*:/i.test(next.description || '')) {
-      next.description = buildNaturalSocialDescription(next, socialDescription) || socialDescription;
+      next.description = socialDescription;
     } else {
-      next.description = buildNaturalSocialDescription(next, socialDescription) || localizeFreeText(next.description);
+      next.description = localizeFreeText(next.description);
     }
     next.description = collapseRepeatedBrandLocation(next.description, next.brand, next.distance);
   }
@@ -740,7 +741,6 @@ function isSlackEditedField(deal, field) {
 
 function normalizeHintText(value, maxLength = 180) {
   const text = stripSiteSuffix(value)
-    .replace(/\b(jetzt|heute|aktuell|neu)\b/gi, ' ')
     .replace(/\s+/g, ' ')
     .trim();
   if (!text) return '';
@@ -752,7 +752,7 @@ function normalizeHintText(value, maxLength = 180) {
 
 function maybeEnrichDealCopy(deal, contentHints = {}) {
   const hintTitle = normalizeHintText(contentHints.title || '', 120);
-  const hintDescription = normalizeHintText(contentHints.description || '', 180);
+  const hintDescription = normalizeHintText(contentHints.description || '', Infinity);
   let changed = false;
 
   if (!isSlackEditedField(deal, 'description') && isWeakDescription(deal.description)) {
@@ -1214,6 +1214,11 @@ async function main() {
 
   for (const original of dealsDoc.deals || []) {
     if (!original || typeof original !== 'object') continue;
+    const inputCopyIssues = inspectDealContentQuality(original).filter((issue) => issue.code === 'truncated-copy');
+    if (inputCopyIssues.length) markForReview(original, 'Eingangstext abgeschnitten; vollständige Quelle prüfen', {
+      automaticRemovalEligible: false,
+      inputContentIssues: inputCopyIssues,
+    });
     const forceKeep = shouldForceKeepDeal(original);
     if (!forceKeep && shouldDropExplicitlyRemovedDeal(original)) {
       if (shouldRemoveDeal(original, 'Explizit entfernter Deal')) continue;
@@ -1512,6 +1517,13 @@ async function main() {
   freshnessFlagUpdates = freshness.changed;
   freshDealCount = freshness.freshCount;
   const reviewCandidateSourceDeals = APPLY_LIVE_VALIDATION ? finalRemaining : (Array.isArray(dealsDoc.deals) ? dealsDoc.deals : []);
+  for (const deal of reviewCandidateSourceDeals) {
+    const issues = inspectDealContentQuality(deal);
+    if (issues.length) markForReview(deal, `Inhalt prüfen: ${issues.map((issue) => issue.message).join('; ')}`, {
+      automaticRemovalEligible: false,
+      contentIssues: issues,
+    });
+  }
   const finalDealKeys = new Set(reviewCandidateSourceDeals.map((deal) => reviewCandidateKey(deal)).filter(Boolean));
   const reviewCandidates = Array.from(reviewCandidatesByKey.values())
     .filter((candidate) => finalDealKeys.has(reviewCandidateKey(candidate)))
@@ -1634,6 +1646,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
 }
 
 export {
+  normalizeSocialDeal,
+  maybeEnrichDealCopy,
   buildStructuredSocialTitle,
   getSocialPostFreshnessRemovalReason,
   isSafeAutomaticExpiredDeal,

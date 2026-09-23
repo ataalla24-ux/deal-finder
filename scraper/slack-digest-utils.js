@@ -331,6 +331,16 @@ function mergeDealsById(primaryDeals, fallbackDeals) {
       if (isMissingParsedValue(deal[field])) merged[field] = value;
     }
 
+    // Slack cards are previews, not the source of truth for full conditions.
+    // Restore only a demonstrable prefix truncation, never a different edit.
+    for (const field of ['title', 'description']) {
+      const preview = cleanText(deal[field]).replace(/(?:\.\.\.|…)$/, '').trim();
+      const fullText = cleanText(fallback[field]);
+      if (preview.length >= 24 && fullText.length > preview.length && fullText.startsWith(preview)) {
+        merged[field] = fallback[field];
+      }
+    }
+
     const parsedDistance = cleanText(deal.distance);
     const fallbackDistance = cleanText(fallback.distance);
     if ((!parsedDistance || /^wien$/i.test(parsedDistance)) && fallbackDistance) {
