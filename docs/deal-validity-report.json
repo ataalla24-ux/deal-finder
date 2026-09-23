@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-23T10:06:55.794Z",
+  "generatedAt": "2026-09-23T10:15:42.138Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 308,
-    "allowed": 2,
+    "total": 307,
+    "allowed": 1,
     "blocked": 306,
-    "warnings": 2,
+    "warnings": 1,
     "reasonCounts": {
       "nicht eindeutig in Wien": 39,
       "älter als 7 Tage (2026-06-27)": 1,
@@ -31,7 +31,7 @@
       "älter als 7 Tage (2026-04-30)": 1,
       "älter als 7 Tage (2026-04-20)": 1,
       "abgelaufen (2026-04-24)": 1,
-      "älter als 7 Tage (2026-02-22)": 85,
+      "älter als 7 Tage (2026-02-22)": 86,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-09-09)": 1,
@@ -46,9 +46,8 @@
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-12)": 3,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-08-30)": 3,
       "älter als 7 Tage (2026-09-15)": 1,
-      "älter als 7 Tage (2026-04-19)": 30,
+      "älter als 7 Tage (2026-04-19)": 31,
       "älter als 7 Tage (2016-10-30)": 3,
-      "älter als 7 Tage (2023-09-21)": 3,
       "kostenlose Infrastruktur statt Deal": 3,
       "älter als 7 Tage (2024-03-18)": 3,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 1,
@@ -57,6 +56,7 @@
       "älter als 7 Tage (2026-08-05)": 1,
       "abgelaufen (2026-07-01)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2025-04-16)": 1,
+      "älter als 7 Tage (2023-09-21)": 1,
       "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
@@ -214,11 +214,18 @@
           "kein konkreter Deal": 2
         }
       },
+      "Thalia": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
+      },
       "tiktok-deals-scanner": {
-        "total": 3,
-        "allowed": 2,
+        "total": 1,
+        "allowed": 0,
         "blocked": 1,
-        "warnings": 2,
+        "warnings": 0,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 1
         }
@@ -227,38 +234,22 @@
   },
   "allowed": [
     {
-      "id": "tiktok-mddxus",
-      "title": "Nacht Angebot",
-      "brand": "Nacht",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@joyn_reality/video/7688417439658413344",
+      "id": "power-49c11e6f5a8f",
+      "title": "15% Rabatt auf alles außer Bücher ab 30 € Mindestbestellwert",
+      "brand": "Thalia",
+      "source": "Thalia",
+      "url": "https://www.thalia.at/gutscheine/gutschein",
       "reasons": [],
       "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text; Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+        "URL nicht eindeutig prüfbar (HTTP 403)",
+        "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-22T17:46:21.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 1,
+      "sourceDate": "2026-09-23T10:14:40.381Z",
+      "sourceDateSource": "deal.discoveredAt",
+      "sourceAgeDays": 0,
       "expiryDate": "",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "tiktok-k3t23n",
-      "title": "Hermesvilla, Lainzer Tiergarten Angebot",
-      "brand": "Hermesvilla, Lainzer Tiergarten",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@martina_mannino02/video/7686552258544291104",
-      "reasons": [],
-      "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
-      ],
-      "sourceDate": "2026-09-17T17:08:29.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 6,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "expirySource": "",
+      "urlStatus": "unklar: HTTP 403"
     }
   ],
   "blocked": [
@@ -2039,15 +2030,17 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2023-09-21)"
+        "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
-      "sourceDate": "2023-09-21T15:18:49.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1098,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-04-19T08:59:47.145Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 157,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-16-20260419",
@@ -3640,15 +3633,17 @@
       "url": "https://www.mennoniten.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2023-09-21)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2023-09-21T15:18:49.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1098,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 213,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-20-20260222",
@@ -4089,9 +4084,9 @@
         "URL nicht eindeutig prüfbar (www.hervis.at)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-09-22T10:15:36.735Z",
+      "sourceDate": "2026-09-23T10:14:39.006Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.hervis.at"
