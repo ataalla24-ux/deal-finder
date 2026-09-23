@@ -43,6 +43,7 @@ const RUN_STARTED_AT = new Date();
 const AGENT_TIMEOUT_SECONDS = positiveInteger(process.env.FIRECRAWL1_AGENT_TIMEOUT_SECONDS, 420);
 const MAX_CREDITS_PER_AGENT = positiveInteger(process.env.FIRECRAWL1_MAX_CREDITS_PER_TARGET, 500);
 const BROAD_AGENT_PASSES = positiveInteger(process.env.FIRECRAWL1_BROAD_AGENT_PASSES, 4);
+const SEARCH_ONLY = process.env.FIRECRAWL1_SEARCH_ONLY === '1';
 
 if (!FIRECRAWL_API_KEY) {
   const error = new Error('FIRECRAWL_API_KEY1 oder FIRECRAWL_API_KEY nicht gesetzt');
@@ -91,7 +92,7 @@ const BROAD_DISCOVERY_FOCUSES = [
   'Suche auf Social Media, direkten Restaurant- und Markenwebseiten sowie lokalen Veranstalterseiten nach Wiener Neueröffnungen, zeitlich begrenzten Gastro-Aktionen und Gratisangeboten. Keine Restaurantverzeichnisse, Buchungsportale oder redaktionellen Sammellisten verwenden.',
   'Durchsuche Wolt und Lieferando sowie direkte Restaurantseiten nach 1+1, Gratisartikeln und Rabatten ab 30 Prozent in Wien. Liefere höchstens zwei Deals von Wolt und höchstens zwei von Lieferando und bevorzuge unterschiedliche Restaurants mit konkret sichtbarem Angebot.',
 ];
-const ACTIVE_BROAD_DISCOVERY_FOCUSES = BROAD_DISCOVERY_FOCUSES.slice(
+const ACTIVE_BROAD_DISCOVERY_FOCUSES = SEARCH_ONLY ? [] : BROAD_DISCOVERY_FOCUSES.slice(
   0,
   Math.min(BROAD_AGENT_PASSES, BROAD_DISCOVERY_FOCUSES.length),
 );
@@ -190,8 +191,8 @@ async function main() {
 
     try {
       const searchRows = isInstagramUrl(url)
-        ? await searchFreshInstagramPosts(firecrawl, url, { now: RUN_STARTED_AT, limit: 12 })
-        : await searchFreshWebDeals(firecrawl, url, { now: RUN_STARTED_AT, limit: 12 });
+        ? await searchFreshInstagramPosts(firecrawl, url, { now: RUN_STARTED_AT, limit: 12, foodFocus: true })
+        : await searchFreshWebDeals(firecrawl, url, { now: RUN_STARTED_AT, limit: 12, foodFocus: true });
       const relevantRows = searchRows
         .filter(isConcreteFirecrawlSearchResult)
         .filter((row) => !getExcludedGastroDiscoverySource(row, row.url));
@@ -427,6 +428,7 @@ async function main() {
     acceptedDeals: finalDeals.length,
     rejected,
     diagnostics: {
+      searchOnly: SEARCH_ONLY,
       configuredSources: SCRAPE_URLS.length + ACTIVE_BROAD_DISCOVERY_FOCUSES.length,
       attemptedSources: sourceStats.length,
       completedSources,

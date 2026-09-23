@@ -1,4 +1,13 @@
 import { normalizeInstagramPostUrl } from './firecrawl-post-verifier.js';
+import { createFirecrawlSearch } from './firecrawl-search-client.js';
+
+const searchClients = new WeakMap();
+const FOOD_SEARCH_SCOPE = '(Essen OR Trinken OR Restaurant OR Kaffee OR Pizza OR Burger OR Kebab OR Kebap OR Döner OR Sushi OR Frühstück OR Matcha OR Getränke OR Eis)';
+
+function search(client, query, params) {
+  if (!searchClients.has(client)) searchClients.set(client, createFirecrawlSearch(client));
+  return searchClients.get(client)(query, params);
+}
 
 const OFFER_SIGNAL_PATTERN = /(?:\bgratis\b|\bkostenlos\b|\bfree\b|\bumsonst\b|\b0\s*€|\b1\s*[+&]\s*1\b|\b2\s*(?:für|for)\s*1\b|\bbogo\b|\b\d{1,2}\s*%|\brabatt\b|\baktion\b|\bangebot\b|\bdeal\b|\bcoupon\b|\bgutschein\b|\bhappy hour\b|\bstatt\s+(?:€\s*)?\d)/i;
 const GIVEAWAY_PATTERN = /(?:\bgewinnspiel\b|\bgiveaway\b|\bverlos(?:ung|en)\b|\bgewinn(?:e|en|st|t)?\b|\bzu gewinnen\b|\blostopf\b|\btagge\b|\bmarkiere\b.*\bfreund|\bkommentiere\b.*\bgewinn)/i;
@@ -59,7 +68,9 @@ export function buildFreshInstagramDealSearchQuery(targetUrl, options = {}) {
   const scope = target.kind === 'hashtag'
     ? `("#${target.value}" OR "${target.value}")`
     : `("@${target.value}" OR "${target.value}")`;
-  return `(site:instagram.com/p/ OR site:instagram.com/reel/) ${scope} (gratis OR kostenlos OR free OR "1+1" OR "2 für 1" OR rabatt OR aktion OR angebot OR coupon OR gutschein) after:${since}`;
+  const foodScope = options.foodFocus && target.kind !== 'account'
+    ? ` (Wien OR Vienna) ${FOOD_SEARCH_SCOPE}` : '';
+  return `(site:instagram.com/p/ OR site:instagram.com/reel/) ${scope}${foodScope} (gratis OR kostenlos OR free OR "1+1" OR "2 für 1" OR rabatt OR aktion OR angebot OR coupon OR gutschein) after:${since}`;
 }
 
 export function buildFreshWebDealSearchQuery(targetUrl, options = {}) {
@@ -71,7 +82,8 @@ export function buildFreshWebDealSearchQuery(targetUrl, options = {}) {
   } catch {
     hostname = cleanText(targetUrl, 200);
   }
-  return `site:${hostname} (Wien OR Vienna) (gratis OR kostenlos OR "1+1" OR "2 für 1" OR rabatt OR aktion OR angebot OR coupon OR gutschein) after:${since}`;
+  const foodScope = options.foodFocus ? ` ${FOOD_SEARCH_SCOPE}` : '';
+  return `site:${hostname} (Wien OR Vienna)${foodScope} (gratis OR kostenlos OR "1+1" OR "2 für 1" OR rabatt OR aktion OR angebot OR coupon OR gutschein) after:${since}`;
 }
 
 function ownerUsernameFromTitle(title) {
@@ -93,7 +105,7 @@ export async function searchFreshInstagramPosts(client, targetUrl, options = {})
   if (!client?.search) throw new TypeError('Firecrawl client must support search()');
   const query = buildFreshInstagramDealSearchQuery(targetUrl, options);
   const target = targetIdentity(targetUrl);
-  const response = await client.search(query, {
+  const response = await search(client, query, {
     sources: ['web'],
     limit: Math.max(1, Number(options.limit) || 10),
     tbs: 'qdr:w',
@@ -130,7 +142,7 @@ export async function searchFreshWebDeals(client, targetUrl, options = {}) {
   if (!client?.search) throw new TypeError('Firecrawl client must support search()');
   const targetHost = new URL(targetUrl).hostname.replace(/^www\./, '');
   const query = buildFreshWebDealSearchQuery(targetUrl, options);
-  const response = await client.search(query, {
+  const response = await search(client, query, {
     sources: ['web'],
     limit: Math.max(1, Number(options.limit) || 10),
     tbs: 'qdr:w',

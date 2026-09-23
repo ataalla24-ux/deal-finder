@@ -14,6 +14,14 @@ const targetUrl = 'https://www.instagram.com/ciosgrill/';
 const query = buildFreshInstagramDealSearchQuery(targetUrl, { now });
 assert.match(query, /"@ciosgrill"/);
 assert.match(query, /after:2026-08-16/);
+const foodQuery = buildFreshInstagramDealSearchQuery('https://www.instagram.com/explore/tags/gratiswien/', { now, foodFocus: true });
+assert.match(foodQuery, /\(Wien OR Vienna\)/);
+assert.match(foodQuery, /Restaurant OR Kaffee OR Pizza/);
+assert.match(foodQuery, /after:2026-08-16/);
+assert.equal(buildFreshInstagramDealSearchQuery(targetUrl, { now, foodFocus: true }), query,
+  'known merchant accounts must retain their exact account search');
+assert.doesNotMatch(query, /Restaurant OR Kaffee/);
+assert.match(buildFreshWebDealSearchQuery('https://www.ikea.com/at/de/offers/', { now, foodFocus: true }), /Restaurant OR Kaffee/);
 
 let capturedQuery = '';
 let capturedOptions = null;

@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 1 * * *' # Start stagger 1: 02:00 Vienna winter / 03:00 summer
   workflow_dispatch:
+    inputs:
+      search_only:
+        description: 'Only the 12 bounded searches, without broad AI agent passes'
+        type: boolean
+        default: false
 
 concurrency:
   group: firecrawl-gastro-key1
@@ -32,6 +37,7 @@ jobs:
           FIRECRAWL1_AGENT_TIMEOUT_SECONDS: 420
           FIRECRAWL1_MAX_CREDITS_PER_TARGET: 500
           FIRECRAWL1_BROAD_AGENT_PASSES: 4
+          FIRECRAWL1_SEARCH_ONLY: ${{ inputs.search_only && '1' || '0' }}
           FIRECRAWL_POST_VERIFY_MAX: 60
           FIRECRAWL_POST_VERIFY_MAX_AGE_DAYS: 7
           FIRECRAWL_POST_MAX_ACCEPTED_AGE_DAYS: 7

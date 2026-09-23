@@ -20,6 +20,12 @@ on:
       - "scripts/test-source-backed-content.mjs"
       - "scripts/apply-reviewed-content.mjs"
       - "reviews/**"
+      - "scraper/firecrawl-search-*.js"
+      - "scraper/firecrawl-gastro2.js"
+      - "scraper/firecrawl-food3.js"
+      - "scraper/firecrawl-instagram-direct4.js"
+      - "scripts/test-firecrawl-*.mjs"
+      - ".github/workflows/firecrawl-gastro-key1.yml"
       - ".github/workflows/production-feed-integrity.yml"
 
 permissions:
@@ -52,6 +58,14 @@ jobs:
           node scripts/test-live-deal-removal-safety.mjs
           node scripts/test-slack-deal-quality.mjs
           node scripts/test-slack-approval-validation.mjs
+
+      - name: Protect bounded food discovery
+        run: |
+          node scripts/test-firecrawl-search-client.mjs
+          node scripts/test-firecrawl-search-utils.mjs
+          node scripts/test-firecrawl-agent-utils.mjs
+          node scripts/test-firecrawl-instagram-direct4.mjs
+          node scripts/test-firecrawl-post-verifier.mjs
 
       - name: Validate production feed and derived data
         run: npm run test:production-feed

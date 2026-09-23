@@ -117,6 +117,10 @@ for (const [sourcePath, workflowPath, timeoutVariable, creditVariable] of scrape
 const key1Source = fs.readFileSync('scraper/firecrawl-gastro2.js', 'utf8');
 const key1Workflow = fs.readFileSync('.github/workflows/firecrawl-gastro-key1.yml', 'utf8');
 assert.match(key1Source, /FIRECRAWL1_BROAD_AGENT_PASSES/);
+assert.match(key1Source, /SEARCH_ONLY \? \[\] : BROAD_DISCOVERY_FOCUSES/);
+assert.match(key1Source, /searchOnly: SEARCH_ONLY/);
+assert.match(key1Workflow, /search_only:[\s\S]*type: boolean[\s\S]*default: false/);
+assert.match(key1Workflow, /FIRECRAWL1_SEARCH_ONLY:/);
 assert.match(key1Source, /kind: 'broad-agent'/);
 assert.doesNotMatch(key1Source, /urls: \[url\]/, 'Key 1 broad discovery must not be constrained to one seed URL');
 assert.doesNotMatch(key1Source, /\n\s*url: url,/, 'the ignored legacy singular url field must not return');

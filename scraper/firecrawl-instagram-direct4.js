@@ -180,8 +180,8 @@ async function main() {
 
     try {
       const searchRows = target.kind.startsWith('instagram-')
-        ? await searchFreshInstagramPosts(firecrawl, target.url, { now: RUN_STARTED_AT, limit: 12 })
-        : await searchFreshWebDeals(firecrawl, target.url, { now: RUN_STARTED_AT, limit: 12 });
+        ? await searchFreshInstagramPosts(firecrawl, target.url, { now: RUN_STARTED_AT, limit: 12, foodFocus: true })
+        : await searchFreshWebDeals(firecrawl, target.url, { now: RUN_STARTED_AT, limit: 12, foodFocus: true });
       const relevantRows = searchRows
         .filter(isConcreteFirecrawlSearchResult)
         .filter((row) => !getExcludedGastroDiscoverySource(row, row.url));

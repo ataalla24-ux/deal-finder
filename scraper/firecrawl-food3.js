@@ -170,6 +170,7 @@ async function main() {
       const searchPosts = (await searchFreshInstagramPosts(firecrawl, targetUrl, {
         now: RUN_STARTED_AT,
         limit: 12,
+        foodFocus: true,
       })).filter(isConcreteFirecrawlSearchResult);
       stat.searchCandidates = searchPosts.length;
       if (searchPosts.length > 0) {
