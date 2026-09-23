@@ -1,20 +1,24 @@
 {
-  "startedAt": "2026-09-23T10:14:31.606Z",
-  "finishedAt": "2026-09-23T10:14:42.280Z",
-  "durationMs": 10674,
+  "startedAt": "2026-09-23T21:18:34.292Z",
+  "finishedAt": "2026-09-23T21:18:57.329Z",
+  "durationMs": 23037,
   "config": {
     "includeBaseDeals": false,
-    "sourceCount": 39,
-    "concurrency": 8,
+    "sourceCount": 51,
+    "concurrency": 4,
     "timeoutMs": 8000,
     "maxHtmlBytes": 2500000,
-    "maxDealsPerSource": 10
+    "maxDealsPerSource": 25
   },
   "summary": {
-    "healthySources": 36,
-    "failedSources": 3,
-    "rawDeals": 35,
-    "acceptedDeals": 30
+    "healthySources": 41,
+    "failedSources": 10,
+    "rawDeals": 36,
+    "acceptedDeals": 35,
+    "officialFoodSources": 17,
+    "productiveFoodSources": 11,
+    "degradedSources": 2,
+    "note": "Collector candidates only; publication still requires central validation and manual approval."
   },
   "sources": [
     {
@@ -25,7 +29,7 @@
       "deals": 0,
       "bytes": 94666,
       "browserFallback": false,
-      "durationMs": 2183
+      "durationMs": 3136
     },
     {
       "source": "Museumsquartier",
@@ -35,15 +39,15 @@
       "deals": 0,
       "bytes": 169109,
       "browserFallback": false,
-      "durationMs": 3371
+      "durationMs": 2986
     },
     {
       "source": "Too Good To Go",
       "url": "https://www.toogoodtogo.com/at",
       "status": "error",
       "deals": 0,
-      "durationMs": 1397,
-      "error": "Browser HTTP 429"
+      "durationMs": 892,
+      "error": "HTTP 429"
     },
     {
       "source": "Foodsharing AT",
@@ -51,9 +55,9 @@
       "finalUrl": "https://foodsharing.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 21442,
+      "bytes": 10927,
       "browserFallback": false,
-      "durationMs": 1205
+      "durationMs": 1548
     },
     {
       "source": "HOFER Aktionen",
@@ -61,9 +65,9 @@
       "finalUrl": "https://www.hofer.at/angebote",
       "status": "ok",
       "deals": 0,
-      "bytes": 685418,
+      "bytes": 776465,
       "browserFallback": false,
-      "durationMs": 3568
+      "durationMs": 1347
     },
     {
       "source": "BILLA Plus",
@@ -71,19 +75,9 @@
       "finalUrl": "https://www.billa.at/unsere-aktionen/aktionen",
       "status": "ok",
       "deals": 1,
-      "bytes": 1180907,
+      "bytes": 1369989,
       "browserFallback": false,
-      "durationMs": 2884
-    },
-    {
-      "source": "Burger King",
-      "url": "https://www.burgerking.at/angebote",
-      "finalUrl": "https://www.burgerking.at/angebote",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 2261,
-      "browserFallback": false,
-      "durationMs": 2513
+      "durationMs": 2013
     },
     {
       "source": "FitInn",
@@ -93,7 +87,7 @@
       "deals": 0,
       "bytes": 36170,
       "browserFallback": false,
-      "durationMs": 4603
+      "durationMs": 3828
     },
     {
       "source": "John Harris",
@@ -103,14 +97,14 @@
       "deals": 0,
       "bytes": 621654,
       "browserFallback": false,
-      "durationMs": 1743
+      "durationMs": 1530
     },
     {
       "source": "MediaMarkt",
       "url": "https://www.mediamarkt.at/de/campaign/angebote",
       "status": "error",
       "deals": 0,
-      "durationMs": 2332,
+      "durationMs": 825,
       "error": "HTTP 404"
     },
     {
@@ -119,9 +113,9 @@
       "finalUrl": "https://www.mediamarkt.at/?ref=saturn",
       "status": "ok",
       "deals": 0,
-      "bytes": 817581,
+      "bytes": 819621,
       "browserFallback": true,
-      "durationMs": 3241
+      "durationMs": 3235
     },
     {
       "source": "Gutscheine.at",
@@ -129,9 +123,9 @@
       "finalUrl": "https://www.gutscheine.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 901853,
+      "bytes": 902416,
       "browserFallback": false,
-      "durationMs": 2970
+      "durationMs": 1119
     },
     {
       "source": "Coupons.at",
@@ -141,37 +135,7 @@
       "deals": 0,
       "bytes": 6286,
       "browserFallback": false,
-      "durationMs": 713
-    },
-    {
-      "source": "Nordsee",
-      "url": "https://www.nordsee.at/aktionen/",
-      "finalUrl": "https://www.nordsee.com/at",
-      "status": "ok",
-      "deals": 1,
-      "bytes": 369472,
-      "browserFallback": false,
-      "durationMs": 2826
-    },
-    {
-      "source": "Ströck",
-      "url": "https://www.stroeck.at/",
-      "finalUrl": "https://stroeck.at/",
-      "status": "ok",
-      "deals": 8,
-      "bytes": 580269,
-      "browserFallback": false,
-      "durationMs": 3884
-    },
-    {
-      "source": "Der Mann",
-      "url": "https://www.dermann.at/",
-      "finalUrl": "https://www.dermann.at/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 102299,
-      "browserFallback": false,
-      "durationMs": 1851
+      "durationMs": 593
     },
     {
       "source": "Spar",
@@ -179,19 +143,9 @@
       "finalUrl": "https://www.spar.at/aktionen/salzburg",
       "status": "ok",
       "deals": 0,
-      "bytes": 1116794,
+      "bytes": 1116650,
       "browserFallback": true,
-      "durationMs": 2189
-    },
-    {
-      "source": "Billa",
-      "url": "https://www.billa.at/aktionen/",
-      "finalUrl": "https://www.billa.at/unsere-aktionen/aktionen",
-      "status": "ok",
-      "deals": 1,
-      "bytes": 1180907,
-      "browserFallback": false,
-      "durationMs": 1162
+      "durationMs": 1498
     },
     {
       "source": "dm",
@@ -201,7 +155,7 @@
       "deals": 0,
       "bytes": 11313,
       "browserFallback": false,
-      "durationMs": 497
+      "durationMs": 720
     },
     {
       "source": "Müller",
@@ -209,9 +163,9 @@
       "finalUrl": "https://www.mueller.at/aktuelles/aktionen/",
       "status": "ok",
       "deals": 0,
-      "bytes": 338978,
+      "bytes": 338951,
       "browserFallback": false,
-      "durationMs": 2194
+      "durationMs": 1029
     },
     {
       "source": "New Yorker",
@@ -221,7 +175,7 @@
       "deals": 0,
       "bytes": 13740,
       "browserFallback": false,
-      "durationMs": 1915
+      "durationMs": 1003
     },
     {
       "source": "Deichmann",
@@ -231,17 +185,15 @@
       "deals": 0,
       "bytes": 21851,
       "browserFallback": false,
-      "durationMs": 1443
+      "durationMs": 695
     },
     {
       "source": "Conrad",
       "url": "https://www.conrad.at/",
-      "finalUrl": "https://www.conrad.at/",
-      "status": "ok",
-      "deals": 2,
-      "bytes": 538091,
-      "browserFallback": true,
-      "durationMs": 1139
+      "status": "error",
+      "deals": 0,
+      "durationMs": 352,
+      "error": "Browser HTTP 403"
     },
     {
       "source": "Apple Store",
@@ -249,19 +201,17 @@
       "finalUrl": "https://www.apple.com/at-edu/store",
       "status": "ok",
       "deals": 3,
-      "bytes": 573083,
+      "bytes": 573032,
       "browserFallback": false,
-      "durationMs": 1004
+      "durationMs": 847
     },
     {
       "source": "Decathlon",
       "url": "https://www.decathlon.at/",
-      "finalUrl": "https://www.decathlon.at/",
-      "status": "ok",
-      "deals": 1,
-      "bytes": 474323,
-      "browserFallback": true,
-      "durationMs": 1239
+      "status": "error",
+      "deals": 0,
+      "durationMs": 650,
+      "error": "Browser HTTP 403"
     },
     {
       "source": "Hervis",
@@ -271,7 +221,7 @@
       "deals": 2,
       "bytes": 1070457,
       "browserFallback": true,
-      "durationMs": 1479
+      "durationMs": 1422
     },
     {
       "source": "Sportscheck",
@@ -281,7 +231,7 @@
       "deals": 1,
       "bytes": 565964,
       "browserFallback": false,
-      "durationMs": 1882
+      "durationMs": 4994
     },
     {
       "source": "Intersport",
@@ -289,56 +239,48 @@
       "finalUrl": "https://www.intersport.at/",
       "status": "ok",
       "deals": 1,
-      "bytes": 337669,
+      "bytes": 338737,
       "browserFallback": false,
-      "durationMs": 1305
+      "durationMs": 1130
     },
     {
       "source": "XXXLutz",
       "url": "https://www.xxxlutz.at/",
-      "finalUrl": "https://www.xxxlutz.at/",
-      "status": "ok",
-      "deals": 5,
-      "bytes": 841173,
-      "browserFallback": true,
-      "durationMs": 803
+      "status": "error",
+      "deals": 0,
+      "durationMs": 335,
+      "error": "Browser HTTP 403"
     },
     {
       "source": "Möbelix",
       "url": "https://www.moebelix.at/",
-      "finalUrl": "https://www.moebelix.at/",
-      "status": "ok",
-      "deals": 4,
-      "bytes": 973494,
-      "browserFallback": true,
-      "durationMs": 1130
+      "status": "error",
+      "deals": 0,
+      "durationMs": 355,
+      "error": "Browser HTTP 403"
     },
     {
       "source": "Lego Store",
       "url": "https://www.lego.com/at-de/",
-      "finalUrl": "https://www.lego.com/de-de",
-      "status": "ok",
-      "deals": 4,
-      "bytes": 1005895,
-      "browserFallback": true,
-      "durationMs": 1889
+      "status": "error",
+      "deals": 0,
+      "durationMs": 318,
+      "error": "Browser HTTP 403"
     },
     {
       "source": "Thalia",
       "url": "https://www.thalia.at/",
-      "finalUrl": "https://www.thalia.at/",
-      "status": "ok",
-      "deals": 1,
-      "bytes": 371969,
-      "browserFallback": true,
-      "durationMs": 1552
+      "status": "error",
+      "deals": 0,
+      "durationMs": 324,
+      "error": "Browser HTTP 403"
     },
     {
       "source": "Libro",
       "url": "https://www.libro.at/",
       "status": "error",
       "deals": 0,
-      "durationMs": 619,
+      "durationMs": 346,
       "error": "Browser HTTP 403"
     },
     {
@@ -347,9 +289,9 @@
       "finalUrl": "https://citybikewien.at/de",
       "status": "ok",
       "deals": 0,
-      "bytes": 107649,
+      "bytes": 107647,
       "browserFallback": false,
-      "durationMs": 2066
+      "durationMs": 1837
     },
     {
       "source": "WienMobil",
@@ -359,7 +301,7 @@
       "deals": 0,
       "bytes": 52496,
       "browserFallback": false,
-      "durationMs": 1053
+      "durationMs": 1062
     },
     {
       "source": "Therme Wien",
@@ -369,7 +311,7 @@
       "deals": 0,
       "bytes": 140603,
       "browserFallback": false,
-      "durationMs": 2256
+      "durationMs": 1613
     },
     {
       "source": "Erlebniswelt",
@@ -377,9 +319,9 @@
       "finalUrl": "https://www.erlebniswelt.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 370893,
+      "bytes": 370938,
       "browserFallback": false,
-      "durationMs": 1092
+      "durationMs": 797
     },
     {
       "source": "Tiergarten Schönbrunn",
@@ -387,9 +329,9 @@
       "finalUrl": "https://www.zoovienna.at/",
       "status": "ok",
       "deals": 0,
-      "bytes": 105926,
+      "bytes": 105907,
       "browserFallback": false,
-      "durationMs": 1896
+      "durationMs": 1858
     },
     {
       "source": "Schloss Schönbrunn",
@@ -399,7 +341,467 @@
       "deals": 0,
       "bytes": 653147,
       "browserFallback": false,
-      "durationMs": 2133
+      "durationMs": 1886
+    },
+    {
+      "source": "IKEA Food",
+      "url": "https://www.ikea.com/at/de/food/",
+      "status": "ok",
+      "operationalStatus": "candidates-found",
+      "deals": 4,
+      "pages": [
+        {
+          "url": "https://www.ikea.com/at/de/food/",
+          "finalUrl": "https://www.ikea.com/at/de/food/",
+          "status": "ok",
+          "candidates": 4,
+          "bytes": 986514
+        },
+        {
+          "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
+          "finalUrl": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
+          "status": "ok",
+          "candidates": 0,
+          "bytes": 1272682
+        },
+        {
+          "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/?categories=SC017",
+          "finalUrl": "https://www.ikea.com/at/de/food/salesareas/restaurant/?categories=SC017",
+          "status": "ok",
+          "candidates": 0,
+          "bytes": 1272682
+        },
+        {
+          "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
+          "finalUrl": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
+          "status": "ok",
+          "candidates": 0,
+          "bytes": 1440203
+        },
+        {
+          "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
+          "finalUrl": "https://www.ikea.com/at/de/food/salesareas/bistro/",
+          "status": "ok",
+          "candidates": 0,
+          "bytes": 1142604
+        }
+      ],
+      "rejected": [
+        {
+          "reason": "non-food-redemption",
+          "title": "Hot Dog Party Paket + € 10,- Gutschein*",
+          "text": "Hot Dog Party Paket + € 10,- Gutschein* *Hot Dog Party Paket Gutschein: Du kannst diesen €10,- IKEA Gutschein von 3.7. bis 30.9.2026 bei deinem nächsten Einkauf ab einem Warenwert von €50,- in einem IKEA Einrichtungshaus"
+        }
+      ],
+      "rejectedCount": 1,
+      "sourceKind": "official-food",
+      "durationMs": 4475
+    },
+    {
+      "source": "Ströck",
+      "url": "https://stroeck.at/",
+      "status": "ok",
+      "operationalStatus": "candidates-found",
+      "deals": 8,
+      "pages": [
+        {
+          "url": "https://stroeck.at/",
+          "finalUrl": "https://stroeck.at/",
+          "status": "ok",
+          "candidates": 8,
+          "bytes": 579828
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 1724
+    },
+    {
+      "source": "Der Mann",
+      "url": "https://www.dermann.at/",
+      "status": "ok",
+      "operationalStatus": "candidates-found",
+      "deals": 2,
+      "pages": [
+        {
+          "url": "https://www.dermann.at/",
+          "finalUrl": "https://www.dermann.at/",
+          "status": "ok",
+          "candidates": 0,
+          "bytes": 102238
+        },
+        {
+          "url": "https://l.dermann.at/rabattmarkerl/",
+          "finalUrl": "https://l.dermann.at/rabattmarkerl/",
+          "status": "ok",
+          "candidates": 1,
+          "bytes": 140973
+        },
+        {
+          "url": "https://www.dermann.at/aktion/voellig-verdrittelt/",
+          "finalUrl": "https://www.dermann.at/aktion/voellig-verdrittelt/",
+          "status": "ok",
+          "candidates": 1,
+          "bytes": 82409
+        },
+        {
+          "url": "https://dermann.at/rabattmarkerl/",
+          "finalUrl": "https://l.dermann.at/rabattmarkerl/",
+          "status": "ok",
+          "candidates": 1,
+          "bytes": 140973
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 7919
+    },
+    {
+      "source": "ANKER",
+      "url": "https://www.ankerbrot.at/aktionen",
+      "status": "ok",
+      "operationalStatus": "candidates-found",
+      "deals": 3,
+      "pages": [
+        {
+          "url": "https://www.ankerbrot.at/aktionen",
+          "finalUrl": "https://www.ankerbrot.at/aktionen",
+          "status": "ok",
+          "candidates": 3,
+          "bytes": 54200
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 1425
+    },
+    {
+      "source": "Vapiano",
+      "url": "https://www.vapiano.at/news/",
+      "status": "ok",
+      "operationalStatus": "candidates-found",
+      "deals": 2,
+      "pages": [
+        {
+          "url": "https://www.vapiano.at/news/",
+          "finalUrl": "https://www.vapiano.at/news/",
+          "status": "ok",
+          "candidates": 0,
+          "bytes": 18848
+        },
+        {
+          "url": "https://www.vapiano.at/vapiano-happy-hour/",
+          "finalUrl": "https://www.vapiano.at/vapiano-happy-hour/",
+          "status": "ok",
+          "candidates": 1,
+          "bytes": 16504
+        },
+        {
+          "url": "https://www.vapiano.at/aufgepassta-jeder-tag-ist-pasta-tag/",
+          "finalUrl": "https://www.vapiano.at/aufgepassta-jeder-tag-ist-pasta-tag/",
+          "status": "ok",
+          "candidates": 1,
+          "bytes": 33061
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 1473
+    },
+    {
+      "source": "Bäckerei Schwarz",
+      "url": "https://www.bswien.at/aktionen",
+      "status": "ok",
+      "operationalStatus": "candidates-found",
+      "deals": 4,
+      "pages": [
+        {
+          "url": "https://www.bswien.at/aktionen",
+          "finalUrl": "https://www.bswien.at/aktionen",
+          "status": "ok",
+          "candidates": 4,
+          "bytes": 792571
+        }
+      ],
+      "rejected": [
+        {
+          "reason": "no-concrete-benefit",
+          "title": "",
+          "text": "Fougasse Unser Fougasse ist ein absolutes MUSS bei jeder Grillerei. Die perfekte Kombination aus Rosmarin, Meersalz, Tomatenmark und getrockneten Tomaten in einem französischen Baguetteteig versetzen einen in die perfekt"
+        },
+        {
+          "reason": "no-concrete-benefit",
+          "title": "",
+          "text": "Frühstück to go Unsere Frühstücke gibt es jetzt auch to go! Alles was das Herz begehrt, vom süßen Plunderfrühstück bis zum Business Frühstück mit einem belegten Weckerl. Und natürlich ist bei jedem Frühstück auch ein Kaf"
+        },
+        {
+          "reason": "no-concrete-benefit",
+          "title": "",
+          "text": "Familienaktion Die Familienaktion ist perfekt um der ganzen Familie eine Freude zu machen und das zu einem SonderpreisInkludiert sind ein Brot* und 8 Stück Gebäck** nach Wahl. *Brotauswahl max. 1 Stück/max. 1 kg. **Gebäc"
+        }
+      ],
+      "rejectedCount": 3,
+      "sourceKind": "official-food",
+      "durationMs": 705
+    },
+    {
+      "source": "NORDSEE",
+      "url": "https://www.nordsee.com/at/coupons",
+      "status": "ok",
+      "operationalStatus": "degraded",
+      "deals": 0,
+      "pages": [
+        {
+          "url": "https://www.nordsee.com/at/coupons",
+          "finalUrl": "https://www.nordsee.com/at/coupons",
+          "status": "ok",
+          "candidates": 0,
+          "bytes": 47722
+        },
+        {
+          "url": "https://www.nordsee.com/at/coupons/pdf",
+          "status": "error",
+          "candidates": 0,
+          "error": "Not HTML"
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 2647,
+      "error": "Not HTML"
+    },
+    {
+      "source": "McDonald's",
+      "url": "https://www.mcdonalds.at/mymcdonalds",
+      "status": "ok",
+      "operationalStatus": "candidates-found",
+      "deals": 1,
+      "pages": [
+        {
+          "url": "https://www.mcdonalds.at/mymcdonalds",
+          "finalUrl": "https://www.mcdonalds.at/mymcdonalds",
+          "status": "ok",
+          "candidates": 1,
+          "bytes": 1426860
+        }
+      ],
+      "rejected": [
+        {
+          "reason": "not-food-drink",
+          "title": "My McDonalds",
+          "text": "My McDonalds Belohnt jeden Besuch! Als MyMcDonald’s Mitglied sammelst du Ms, die du ganz einfach gegen heißgeliebte Klassiker, saftige Prämien oder freshen Merch einlösen kannst. Deal?"
+        },
+        {
+          "reason": "not-food-drink",
+          "title": "Du liebst Gutscheine?",
+          "text": "Du liebst Gutscheine? Wir auch. Umso besser, dass die MyMcDonald’s Rabattwochen zurück sind! Also, worauf wartest du? Öffne jetzt die McDonald’s App und spare mit jeder Menge Gutscheinen! App geht’s!"
+        },
+        {
+          "reason": "not-food-drink",
+          "title": "So einfach geht's:",
+          "text": "So einfach geht's:"
+        },
+        {
+          "reason": "Gewinnspiel/Verlosung statt direkt nutzbarem Deal",
+          "title": "Sammle Ms und hole dir Big Mac, Pommes, Merch & Co gratis*!",
+          "text": "Sammle Ms und hole dir Big Mac, Pommes, Merch & Co gratis*! * Nähere Infos findest du in den App-AGB. Gratis bedeutet, dass die Produkte ohne Zuzahlung eines Geldbetrages, nur durch Einlösung von Punkten bezogen werden k"
+        }
+      ],
+      "rejectedCount": 4,
+      "sourceKind": "official-food",
+      "durationMs": 1579
+    },
+    {
+      "source": "Burger King",
+      "url": "https://www.burgerking.at/de/bkapp",
+      "status": "ok",
+      "operationalStatus": "no-offers",
+      "deals": 0,
+      "pages": [
+        {
+          "url": "https://www.burgerking.at/de/bkapp",
+          "finalUrl": "https://www.burgerking.at/de/bkapp",
+          "status": "ok",
+          "candidates": 0,
+          "bytes": 2268
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 1123
+    },
+    {
+      "source": "KFC",
+      "url": "https://www.kfc.co.at/",
+      "status": "ok",
+      "operationalStatus": "no-offers",
+      "deals": 0,
+      "pages": [
+        {
+          "url": "https://www.kfc.co.at/",
+          "finalUrl": "https://www.kfc.co.at/",
+          "status": "ok",
+          "candidates": 0,
+          "bytes": 1553542
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 1486
+    },
+    {
+      "source": "BackWerk",
+      "url": "https://www.back-werk.at/de/home/",
+      "status": "error",
+      "operationalStatus": "degraded",
+      "deals": 0,
+      "pages": [
+        {
+          "url": "https://www.back-werk.at/de/home/",
+          "status": "error",
+          "candidates": 0,
+          "error": "fetch failed"
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 984,
+      "error": "fetch failed"
+    },
+    {
+      "source": "Shibuya",
+      "url": "https://www.shibuya.at/",
+      "status": "ok",
+      "operationalStatus": "candidates-found",
+      "deals": 1,
+      "pages": [
+        {
+          "url": "https://www.shibuya.at/",
+          "finalUrl": "https://www.shibuya.at/",
+          "status": "ok",
+          "candidates": 1,
+          "bytes": 24762
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 328
+    },
+    {
+      "source": "Santos",
+      "url": "https://www.santos-bar.com/en/dirty-drinks/behind-the-scenes.html",
+      "status": "ok",
+      "operationalStatus": "candidates-found",
+      "deals": 1,
+      "pages": [
+        {
+          "url": "https://www.santos-bar.com/en/dirty-drinks/behind-the-scenes.html",
+          "finalUrl": "https://www.santos-bar.com/en/dirty-drinks/behind-the-scenes.html",
+          "status": "ok",
+          "candidates": 1,
+          "bytes": 127247
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 1092
+    },
+    {
+      "source": "Bùi Viện Street",
+      "url": "https://buivien-restaurant.at/",
+      "status": "ok",
+      "operationalStatus": "candidates-found",
+      "deals": 1,
+      "pages": [
+        {
+          "url": "https://buivien-restaurant.at/",
+          "finalUrl": "https://buivien-restaurant.at/",
+          "status": "ok",
+          "candidates": 1,
+          "bytes": 134309
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 891
+    },
+    {
+      "source": "Eva & Adam",
+      "url": "https://evaundadam.bar/",
+      "status": "ok",
+      "operationalStatus": "candidates-found",
+      "deals": 1,
+      "pages": [
+        {
+          "url": "https://evaundadam.bar/",
+          "finalUrl": "https://evaundadam.bar/",
+          "status": "ok",
+          "candidates": 1,
+          "bytes": 236086
+        },
+        {
+          "url": "https://evaundadam.bar/happy-hour-cocktailbar-wien/",
+          "finalUrl": "https://evaundadam.bar/happy-hour-cocktailbar-wien/",
+          "status": "ok",
+          "candidates": 1,
+          "bytes": 172285
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 4933
+    },
+    {
+      "source": "Cuadro",
+      "url": "https://cuadro.at/",
+      "status": "ok",
+      "operationalStatus": "no-offers",
+      "deals": 0,
+      "pages": [
+        {
+          "url": "https://cuadro.at/",
+          "finalUrl": "https://cuadro.at/",
+          "status": "ok",
+          "candidates": 0,
+          "bytes": 21951
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 976
+    },
+    {
+      "source": "MABEL'S No90",
+      "url": "https://mabels.at/",
+      "status": "ok",
+      "operationalStatus": "no-offers",
+      "deals": 0,
+      "pages": [
+        {
+          "url": "https://mabels.at/",
+          "finalUrl": "https://mabels.at/",
+          "status": "ok",
+          "candidates": 0,
+          "bytes": 54380
+        }
+      ],
+      "rejected": [],
+      "rejectedCount": 0,
+      "sourceKind": "official-food",
+      "durationMs": 827
     }
   ]
 }
