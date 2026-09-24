@@ -108,12 +108,42 @@ assert.equal(applyReviewedContent(bundle, { edits: [] }, manifest).bundle.deals[
 assert.throws(() => applyReviewedContent(bundle, { edits: [] }, { ...manifest, reviews: [{ ...manifest.reviews[0], sourceUrl: 'https://wrong.example/' }] }));
 assert.throws(() => applyReviewedContent(bundle, { edits: [] }, { ...manifest, reviews: [{ ...manifest.reviews[0], patch: { hidden: 'true' } }] }));
 
+const cheesecakeManifest = JSON.parse(fs.readFileSync(new URL('../reviews/2026-09-24-cheesecake.json', import.meta.url)));
+const cheesecakeReview = cheesecakeManifest.reviews[0];
+const cheesecakeOriginal = {
+  id: cheesecakeReview.dealId, url: cheesecakeReview.sourceUrl,
+  brand: 'Cheesecake', merchantName: 'Cheesecake',
+  title: 'rotating_light: First come, first served',
+  description: 'Get ready, #cheesecake lovers! :cake:',
+  category: 'reisen', type: 'gratis', logo: '✈️', logoUrl: '',
+  pubDate: '2026-09-23T10:44:12.000Z', votes: 1,
+  expires: '2026-09-26T23:59:59.999Z', validOn: '2026-09-26',
+};
+const cheesecakeResult = applyReviewedContent({ deals: [cheesecakeOriginal, untouched] }, { edits: [] }, cheesecakeManifest);
+const cheesecake = cheesecakeResult.bundle.deals[0];
+let normalizedCheesecake = cheesecake;
+for (let i = 0; i < 3; i++) {
+  normalizedCheesecake = normalizeDealRecord(normalizeSocialDeal(normalizeDealRecord(normalizedCheesecake)));
+}
+for (const [field, expected] of Object.entries(cheesecakeReview.patch)) {
+  assert.equal(normalizedCheesecake[field], expected, `reviewed cheesecake ${field} survives normalization`);
+}
+for (const field of ['id', 'url', 'pubDate', 'votes', 'expires']) {
+  assert.equal(cheesecake[field], cheesecakeOriginal[field], `cheesecake correction preserves ${field}`);
+}
+assert.deepEqual(cheesecakeResult.bundle.deals[1], untouched);
+assert.match(cheesecake.description, /Keine Anmeldung oder Reservierung erforderlich/);
+assert.match(cheesecake.expiryDisplayText, /ab 12 Uhr/);
+assert.ok(!issueCodes(cheesecake).includes('location-unspecific'));
+assert.equal(applyReviewedContent(cheesecakeResult.bundle, cheesecakeResult.store, cheesecakeManifest).changed, false);
+
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'freefinder-content-regression-'));
 try {
   const needsReview = { ...original, id: 'needs-review', brand: 'Mahnoor', sourceAccountType: 'creator', merchantUsername: '', location: '', distance: 'Wien', description: 'Angebot', metaGraphCaption: 'Nur per App. Pro Person ein Gutschein.' };
-  const fixture = { deals: [corrected, needsReview], totalDeals: 2 };
+  const fixture = { deals: [corrected, needsReview, cheesecake], totalDeals: 3 };
+  const reviewedEdits = [edit, ...cheesecakeResult.store.edits];
   fs.writeFileSync(path.join(temp, 'deals.json'), JSON.stringify(fixture));
-  fs.writeFileSync(path.join(temp, 'live-deal-edits.json'), JSON.stringify({ edits: [edit] }));
+  fs.writeFileSync(path.join(temp, 'live-deal-edits.json'), JSON.stringify({ edits: reviewedEdits }));
   fs.writeFileSync(path.join(temp, 'deal-candidates-index.json'), JSON.stringify({ deals: [] }));
   for (const name of ['gemeinde', 'gottesdienste', 'events']) {
     fs.writeFileSync(path.join(temp, `deals-pending-church-${name}.json`), JSON.stringify({ deals: [] }));
@@ -126,8 +156,12 @@ try {
   });
   assert.equal(run.status, 0, run.stderr);
   const normalized = JSON.parse(fs.readFileSync(path.join(temp, 'deals.json')));
-  assert.deepEqual(normalized.deals.map((deal) => deal.id).sort(), ['duru', 'needs-review']);
-  const reapply = applyLiveDealEditsToBundle(normalized, { edits: [edit] }).bundle;
+  assert.deepEqual(normalized.deals.map((deal) => deal.id).sort(), ['duru', 'needs-review', cheesecake.id]);
+  const reapply = applyLiveDealEditsToBundle(normalized, { edits: reviewedEdits }).bundle;
+  const finalCheesecake = normalizeDealRecord(reapply.deals.find((deal) => deal.id === cheesecake.id));
+  for (const [field, expected] of Object.entries(cheesecakeReview.patch)) {
+    assert.equal(finalCheesecake[field], expected, `full pipeline preserves cheesecake ${field}`);
+  }
   const afterLogoPass = normalizeDealRecord(reapply.deals.find((deal) => deal.id === 'duru'));
   for (const field of ['brand', 'title', 'description', 'address', 'validOn', 'expiryDisplayText']) {
     assert.equal(afterLogoPass[field], corrected[field], `full pipeline preserves ${field}`);
