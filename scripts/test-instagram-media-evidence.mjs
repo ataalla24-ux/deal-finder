@@ -339,7 +339,9 @@ const imageOnlyDeal = normalizeGraphMediaItem({
   account: { username: 'wiencafe', verifiedVienna: true },
 }, config, now);
 assert.ok(imageOnlyDeal.deal, 'an image-only deal must survive normalization');
-assert.match(imageOnlyDeal.deal.description, /Bildtext:/);
+assert.match(imageOnlyDeal.deal.description, /Zweiter Kaffee gratis in 1070 Wien/);
+assert.doesNotMatch(imageOnlyDeal.deal.description, /Bildtext:|AI-Angebotsbeleg:/);
+assert.equal(imageOnlyDeal.deal.evidence.mediaEvidence.ocrText, enriched.entries[0].item._mediaEvidence.ocrText);
 assert.equal(imageOnlyDeal.deal.evidence.mediaEvidence.ai.isDeal, true);
 assert.equal(imageOnlyDeal.deal.pubDateSource, 'instagram-graph-timestamp');
 

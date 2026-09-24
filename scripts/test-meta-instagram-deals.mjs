@@ -310,6 +310,36 @@ assert.ok(graphDevaHouseholdOffer.deal);
 assert.equal(graphDevaHouseholdOffer.deal.brand, 'DEVA');
 assert.equal(graphDevaHouseholdOffer.deal.category, 'shopping');
 assert.equal(graphDevaHouseholdOffer.deal.title, 'SLEEPY verschiedene Sorten um 2,99 € statt 4,49 €');
+assert.doesNotMatch(graphDevaHouseholdOffer.deal.description, /Bildtext:|AI-Angebotsbeleg:/);
+assert.match(graphDevaHouseholdOffer.deal.description, /SLEEPY/);
+
+const brokenOcr = 'oe N ! F > j . ! In li 1% u | f B | N je Se a J P = | Pr ce EB a gif ee A eee IL 7 Zz a al | g > [je =a p>';
+const captionWithOffer = 'GRATIS BERLINER STYLE GEMÜSE-KEBAB! Am 23.09.2026 ab 12:00 Uhr gibt es Gemüse-Kebap GRATIS. Solange der Vorrat reicht! Neubaugasse 9, 1070 Wien.';
+const h11Graph = normalizeGraphMediaItem({
+  id: 'h11-caption-with-noisy-ocr', username: 'h11_grill', name: 'H11 Döner & Pizza',
+  caption: captionWithOffer, permalink: 'https://www.instagram.com/reel/DdlWabRNluS/',
+  timestamp: '2026-09-22T08:52:52.000Z', _mediaEvidence: { ocrText: brokenOcr, imageCount: 1 },
+}, { sourceType: 'account', sourceName: '@h11_grill' }, config, new Date('2026-09-23T09:00:00Z'));
+assert.ok(h11Graph.deal);
+assert.match(h11Graph.deal.title, /GRATIS BERLINER STYLE GEMÜSE-KEBAB/);
+assert.doesNotMatch(h11Graph.deal.title, /1%|\| f B/);
+assert.equal(h11Graph.deal.type, 'gratis');
+assert.equal(h11Graph.deal.category, 'essen');
+assert.equal(h11Graph.deal.description, captionWithOffer);
+assert.equal(h11Graph.deal.evidence.mediaEvidence.ocrText, brokenOcr, 'Raw OCR is retained for review, never discarded');
+const imageOfferWithNoise = normalizeGraphMediaItem({
+  id: 'confirmed-image-with-noisy-ocr', username: 'h11_grill',
+  caption: 'Unser neuer Wochenplan in 1070 Wien.', permalink: 'https://www.instagram.com/reel/CONFIRMEDIMAGE/',
+  timestamp: '2026-09-22T08:52:52.000Z',
+  _mediaEvidence: { ocrText: brokenOcr, ai: { isDeal: true, confidence: 0.95,
+    offerText: 'Gemüse-Kebab gratis', locationText: 'Neubaugasse 9, 1070 Wien',
+    validityText: '23.09.2026 ab 12 Uhr, solange der Vorrat reicht', exclusion: 'none' } },
+}, { sourceType: 'account', sourceName: '@h11_grill' }, config, new Date('2026-09-23T09:00:00Z'));
+assert.ok(imageOfferWithNoise.deal);
+assert.equal(imageOfferWithNoise.deal.title, 'Gemüse-Kebab gratis');
+assert.equal(imageOfferWithNoise.deal.type, 'gratis');
+assert.match(imageOfferWithNoise.deal.description, /solange der Vorrat reicht/);
+assert.doesNotMatch(imageOfferWithNoise.deal.description, /1%|Bildtext:/);
 
 const graphEditorialRoundup = normalizeGraphMediaItem({
   id: 'graph-editorial-roundup',

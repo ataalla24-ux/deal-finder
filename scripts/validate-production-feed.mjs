@@ -38,7 +38,7 @@ const foodSignals = /\b(essen|food|drink|getränk|kaffee|espresso|latte|matcha|t
 const htmlEntityPattern = /&(?:[a-z][a-z0-9]+|#\d+|#x[a-f0-9]+);/i;
 const brandLogoUrlPrefix = 'https://freefinder.at/assets/brand-logos/';
 const minimumBrandLogoDimension = 160;
-const localBrandLogoFiles = new Set();
+const localBrandLogoFiles = new Map();
 
 function clean(value) {
   return String(value ?? '').replace(/\s+/g, ' ').trim();
@@ -165,7 +165,7 @@ for (const [index, deal] of deals.entries()) {
   if (logoUrl.startsWith(brandLogoUrlPrefix)) {
     const fileName = decodeURIComponent(logoUrl.slice(brandLogoUrlPrefix.length));
     if (!fileName || path.basename(fileName) !== fileName) errors.push(`${id} has an unsafe local logo path`);
-    else localBrandLogoFiles.add(fileName);
+    else localBrandLogoFiles.set(fileName, unchanged && localBrandLogoFiles.get(fileName) !== false);
   } else if (logoUrl) {
     warnings.push(`${id} still loads its logo from an external host`);
   }
@@ -174,16 +174,22 @@ for (const [index, deal] of deals.entries()) {
   }
 }
 
-for (const fileName of localBrandLogoFiles) {
+for (const [fileName, unchangedReferences] of localBrandLogoFiles) {
+  // A removal-only workflow does not edit assets. Existing broken logos must
+  // not prevent a manual removal of an unrelated deal.
+  const logoError = (message) => {
+    if (baseline && unchangedReferences) warnings.push(`Existing unchanged logo reference: ${message}`);
+    else errors.push(message);
+  };
   try {
     const buffer = await readFile(path.join(docs, 'assets', 'brand-logos', fileName));
     const dimensions = imageDimensions(buffer);
-    if (!dimensions) errors.push(`brand logo has an unsupported image format: ${fileName}`);
+    if (!dimensions) logoError(`brand logo has an unsupported image format: ${fileName}`);
     else if (dimensions.width < minimumBrandLogoDimension || dimensions.height < minimumBrandLogoDimension) {
-      errors.push(`brand logo is too small (${dimensions.width}x${dimensions.height}): ${fileName}`);
+      logoError(`brand logo is too small (${dimensions.width}x${dimensions.height}): ${fileName}`);
     }
   } catch {
-    errors.push(`brand logo file is missing: ${fileName}`);
+    logoError(`brand logo file is missing: ${fileName}`);
   }
 }
 

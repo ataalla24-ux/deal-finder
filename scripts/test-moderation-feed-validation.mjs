@@ -46,7 +46,27 @@ try {
   reset();
   write('docs/deals.json', { ...stampDealsFeedBundle({ deals: [good, old] }), feedVersion: 'stale' });
   assert.notEqual(run().status, 0, 'Feed version must remain strict');
-  console.log('Moderation feed validation: 8 checks passed');
+  const logoDeal = { ...old, logoUrl: 'https://freefinder.at/assets/brand-logos/existing.png' };
+  write('baseline.json', { deals: [good, logoDeal, removed] });
+  reset([good, logoDeal]);
+  assert.equal(run().status, 0, 'An existing missing logo must not block unrelated removal');
+  assert.match(run().stderr, /Existing unchanged logo reference: brand logo file is missing/);
+  assert.notEqual(run([]).status, 0, 'Missing logos still fail normal production validation');
+  reset([good, { ...logoDeal, logoUrl: 'https://freefinder.at/assets/brand-logos/new.png' }]);
+  assert.notEqual(run().status, 0, 'A newly introduced broken logo must fail removal validation');
+  reset([good, logoDeal]);
+  fs.mkdirSync(path.join(temp, 'docs/assets/brand-logos'), { recursive: true });
+  fs.writeFileSync(path.join(temp, 'docs/assets/brand-logos/existing.png'), 'invalid image');
+  assert.equal(run().status, 0, 'An existing unreadable logo must not block unrelated removal');
+  assert.notEqual(run([]).status, 0, 'Unreadable logos still fail normal production validation');
+  const smallPng = Buffer.alloc(24);
+  smallPng.write('PNG', 1, 'ascii');
+  smallPng.writeUInt32BE(16, 16);
+  smallPng.writeUInt32BE(16, 20);
+  fs.writeFileSync(path.join(temp, 'docs/assets/brand-logos/existing.png'), smallPng);
+  assert.equal(run().status, 0, 'An existing low-resolution logo must not block unrelated removal');
+  assert.notEqual(run([]).status, 0, 'Low-resolution logos still fail normal production validation');
+  console.log('Moderation feed validation: 15 checks passed');
 } finally {
   fs.rmSync(temp, { recursive: true, force: true });
 }

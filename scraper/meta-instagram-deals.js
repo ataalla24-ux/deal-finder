@@ -1057,10 +1057,10 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
       rejection: ai ? 'media-ai-rejected-offer' : 'media-ai-required-for-combined-offer',
     };
   }
-  const promotionText = [captionProse, ocrText ? `Bildtext: ${ocrText}` : '', trustedAiOffer ? `AI-Angebotsbeleg: ${trustedAiOffer}` : '']
+  const promotionText = [captionProse, trustedAiOffer ? `AI-Angebotsbeleg: ${trustedAiOffer}` : '']
     .filter(Boolean)
     .join('\n');
-  const promotion = classifyPromotion(promotionText);
+  const promotion = captionPromotion.accepted ? captionPromotion : classifyPromotion(promotionText);
   if (!promotion.accepted) return { deal: null, rejection: promotion.reason };
   const contentText = [
     caption,
@@ -1106,13 +1106,19 @@ export function normalizeGraphMediaItem(raw, context, config, now = new Date()) 
     ownerUsername: brandUsername,
     url,
   }) || fallbackBrand;
-  const category = inferCategory(contentText);
-  const title = inferTitle(promotionText, brand, promotion);
+  // Keep raw OCR as evidence, not customer-facing copy. A stray "1%" from a
+  // noisy video frame must not outrank a clear free-offer caption.
+  const titleText = captionPromotion.accepted
+    ? captionProse
+    : promotionText;
+  const displayText = [...new Set([caption, trustedAiOffer, trustedAiLocation, trustedAiValidity].filter(Boolean))].join('\n');
+  const category = inferCategory(displayText);
+  const title = inferTitle(titleText, brand, promotion);
   const deal = buildDealBase({
     id: `meta-ig-${cleanText(raw?.id, 120) || stableHash(url)}`,
     brand,
     title,
-    description: contentText,
+    description: displayText,
     type: promotion.type,
     category,
     url,
