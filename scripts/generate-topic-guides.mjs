@@ -10,6 +10,30 @@ const PUBLISHED_LABEL = '17. August 2026';
 
 const guides = [
   {
+    slug: 'interpolburger-2-euro-wien',
+    title: '2-Euro-Burger mit Pommes bei Interpolburger Wien',
+    meta: 'Interpolburger Wien: Burger mit Pommes für 2 Euro am 25. September 2026 ab 15 Uhr am Südtiroler Platz. Nur solange der Vorrat reicht.',
+    eyebrow: '2-Euro-Burger Wien',
+    headline: 'Burger mit Pommes für 2 Euro bei Interpolburger.',
+    intro: 'Interpolburger Wien kündigt am 25. September 2026 ab 15 Uhr Burger mit Pommes für 2 Euro an. Die Aktion findet am Südtiroler Platz 1 statt und gilt nur, solange der Vorrat reicht.',
+    published: '2026-09-25', publishedLabel: '25. September 2026', modified: '2026-09-25', modifiedLabel: '25. September 2026',
+    image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
+    imageAlt: 'FreeFinder App mit Burger- und Food-Angeboten in Wien',
+    sections: [
+      ['angebot', 'Was gibt es für 2 Euro?', `<p>Bei Interpolburger Wien gibt es laut dem veröffentlichten Angebot einen <strong>Burger mit Pommes für 2 Euro</strong>. Die Aktion startet am <strong>25. September 2026 ab 15:00 Uhr</strong>.</p><p>Das Angebot ist eine begrenzte Tagesaktion. Es gilt nur, solange der Vorrat reicht, und kann deshalb vor dem Ende des Tages ausverkauft sein.</p>`],
+      ['ort', 'Adresse und Einlösung', `<p>Die Aktion ist am <strong>Südtiroler Platz 1, 1040 Wien</strong> angekündigt. Komm ab 15:00 Uhr vorbei und frage vor der Bestellung nach dem Aktionsangebot.</p><ol><li>Originalbeitrag vor dem Weg öffnen.</li><li>Zum Südtiroler Platz 1, 1040 Wien gehen.</li><li>Burger mit Pommes als Aktionsangebot bestellen.</li><li>Vor dem Bezahlen prüfen, ob der Preis von 2 Euro korrekt angezeigt wird.</li></ol>`],
+      ['bedingungen', 'Wichtige Bedingungen', `<div class="article-note"><strong>Begrenzter Vorrat</strong>Die Quelle nennt keinen garantierten Bestand und kein fixes Ende innerhalb des Abends. Wenn der Vorrat aufgebraucht ist, kann die Aktion vorzeitig enden.</div><p>Prüfe deshalb den <a href="https://www.instagram.com/reel/DdoBViXIKVI/" rel="noopener">Originalbeitrag</a> unmittelbar vor der Anreise. FreeFinder übernimmt die Angaben aus der bestätigten Dealquelle, ersetzt aber keine Auskunft des Lokals.</p>`],
+      ['quelle', 'Quelle und Aktualität', `<p>Die Angaben stammen aus dem <a href="https://www.instagram.com/reel/DdoBViXIKVI/" rel="noopener">Instagram-Originalbeitrag zum Interpolburger-Angebot</a>. Dort werden Preis, Startzeit, Adresse und der Hinweis „solange der Vorrat reicht“ genannt.</p><p>Weitere aktuelle Burger- und Food-Angebote findest du in der <a href="/angebote-wien-heute.html">FreeFinder-Übersicht</a>.</p>`],
+    ],
+    faqs: [
+      ['Wie viel kostet Burger mit Pommes?', 'Laut Dealquelle 2 Euro am 25. September 2026.'],
+      ['Wann startet die Aktion?', 'Am 25. September 2026 ab 15:00 Uhr.'],
+      ['Wo findet die Aktion statt?', 'Südtiroler Platz 1, 1040 Wien.'],
+      ['Wie lange gilt das Angebot?', 'Nur solange der Vorrat reicht. Es kann daher vorzeitig enden.'],
+    ],
+    related: [['Duru Kebab in Wien', 'duru-kebab-wien-wolt-rabatt.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+  },
+  {
     slug: 'duru-doener-350-wien-2026',
     title: 'Duru Döner für 3,50 Euro in Wien',
     meta: 'Duru Döner in Wien: Hühnerdöner für 3,50 Euro am 23. September 2026 in der Filiale Thaliastraße 23. Uhrzeit, Bedingungen und Originalquelle prüfen.',
