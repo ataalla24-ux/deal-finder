@@ -10,6 +10,7 @@ function cleanText(value) {
 }
 
 const CATEGORY_ALIASES = {
+  gottesdienste: 'kirche',
   church: 'kirche',
   christlich: 'kirche',
   christlichevents: 'events',
@@ -155,7 +156,7 @@ function inferCategoryFromText(parts = []) {
   if (!text) return null;
 
   if (isChristianText(text)) {
-    if (hasServiceContext(text)) return 'gottesdienste';
+    if (hasServiceContext(text)) return 'kirche';
     if (isChristianEvent(text)) return 'events';
     return 'kirche';
   }
@@ -182,7 +183,7 @@ function normalizeCategoryForScraper(rawCategory, parts = []) {
   const text = buildSignalText([category, ...parts]);
 
   if (category === 'events') return isChristianText(text) ? 'events' : (inferred || 'kultur');
-  if (category === 'gottesdienste' || (isChristianText(text) && hasServiceContext(text))) return 'gottesdienste';
+  if (isChristianText(text) && hasServiceContext(text)) return 'kirche';
   if (category === 'kirche') return 'kirche';
 
   if (['essen', 'kaffee'].includes(category) && ['fitness', 'freizeit', 'kultur', 'reisen', 'beauty'].includes(inferred)) {

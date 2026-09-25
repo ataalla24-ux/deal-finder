@@ -163,3 +163,12 @@ assert.equal(
 );
 
 console.log('Category normalization checks passed.');
+
+assert.equal(normalizeCategoryForScraper('gottesdienste', ['ICF Wien']), 'kirche');
+assert.equal(normalizeCategoryForScraper('shopping', ['ICF Wien Gottesdienst am Sonntag']), 'kirche');
+assert.equal(normalizeCategoryForScraper('', ['Gottesdienst am Sonntag']), 'kirche');
+assert.equal(normalizeCategoryForScraper('kirche', ['CIG Wien Gottesdienste']), 'kirche');
+assert.equal(normalizeCategoryForScraper('essen', ['Burger King: zum Preis von einem, jetzt sparen']), 'essen');
+assert.equal(normalizeCategoryForScraper('shopping', ['NORDSEE Menue und Schnitzel']), 'essen');
+assert.equal(normalizeCategoryForScraper('gewinnspiel', ['Gutschein gewinnen']), 'gewinnspiel');
+console.log('Unified church and price/savings category regression checks passed.');
