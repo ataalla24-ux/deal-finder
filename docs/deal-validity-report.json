@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-25T12:12:44.013Z",
+  "generatedAt": "2026-09-25T12:46:43.328Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 320,
-    "allowed": 0,
-    "blocked": 320,
+    "total": 324,
+    "allowed": 2,
+    "blocked": 322,
     "warnings": 0,
     "reasonCounts": {
       "nicht eindeutig in Wien": 43,
@@ -39,14 +39,17 @@
       "Gottesdienste nur im Wochenlauf": 33,
       "älter als 7 Tage (2025-07-30)": 1,
       "URL ungültig (HTTP 404)": 15,
+      "Quell-/Post-Datum liegt in der Zukunft (2026-09-25)": 1,
+      "älter als 7 Tage (2026-07-17)": 1,
+      "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)": 5,
+      "älter als 7 Tage (2026-08-05)": 2,
+      "abgelaufen (2026-07-01)": 2,
       "abgelaufen (2026-09-22)": 2,
       "älter als 7 Tage (2026-09-07)": 1,
       "ausgeschlossene Quelle (TheFork)": 2,
-      "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)": 5,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2021-02-05)": 4,
       "älter als 7 Tage (2016-09-12)": 2,
       "abgelaufen (2026-09-16)": 2,
-      "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-12)": 2,
       "älter als 7 Tage (2026-04-19)": 29,
       "älter als 7 Tage (2016-10-30)": 3,
       "älter als 7 Tage (2023-09-21)": 3,
@@ -58,9 +61,8 @@
       "abgelaufen (2026-09-23)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-08-30)": 2,
       "älter als 7 Tage (2026-03-06)": 1,
+      "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-12)": 1,
       "abgelaufen (2026-05-01)": 1,
-      "älter als 7 Tage (2026-08-05)": 1,
-      "abgelaufen (2026-07-01)": 1,
       "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
@@ -74,13 +76,14 @@
     },
     "reasonCategoryCounts": {
       "nicht Wien": 43,
-      "älter als 7 Tage": 169,
-      "abgelaufen": 14,
+      "älter als 7 Tage": 170,
+      "abgelaufen": 15,
       "ausgeschlossene Quelle": 21,
       "kein konkreter Deal": 209,
       "kein echtes Post-Datum": 114,
       "ungültige URL": 19,
       "Gottesdienste außerhalb Wochenlauf": 33,
+      "Post-Datum in Zukunft": 1,
       "sonstiges": 4,
       "Gewinnspiel": 2
     },
@@ -131,15 +134,24 @@
         }
       },
       "Firecrawl Gastro #4": {
-        "total": 12,
-        "allowed": 0,
-        "blocked": 12,
+        "total": 15,
+        "allowed": 2,
+        "blocked": 13,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "abgelaufen": 3,
+          "älter als 7 Tage": 11,
+          "abgelaufen": 4,
           "kein konkreter Deal": 1,
-          "älter als 7 Tage": 10,
           "ausgeschlossene Quelle": 1
+        }
+      },
+      "Firecrawl Gastro #4 Search": {
+        "total": 1,
+        "allowed": 0,
+        "blocked": 1,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "Post-Datum in Zukunft": 1
         }
       },
       "Freikirchen Wien": {
@@ -257,7 +269,38 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "fc4g-fof0w2",
+      "title": "Beim Kauf von zwei Dönern gibt es einen weiteren Döner grati",
+      "brand": "Dahab Döner",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.tiktok.com/@dahabdoener/video/7689133342318415126",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-09-24T16:04:25.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 1,
+      "expiryDate": "2026-09-26",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "fc4g-1ihndu",
+      "title": "20 % Rabatt auf das Angebot zur Neueröffnung",
+      "brand": "Anars",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.tiktok.com/@foodiewien/video/7687895446928297239",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-09-21T08:00:45.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 4,
+      "expiryDate": "2026-09-30",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "community:0d1b5d94-b150-4eef-8bff-67ee25bf7cb1",
@@ -1654,6 +1697,79 @@
       "urlStatus": "ungültig: HTTP 404"
     },
     {
+      "id": "fc4g-1w40b0j",
+      "title": "Lotterien Tag: Gratisins KunstHaus Wien – Hundertwasser ... - Preisjäger",
+      "brand": "Lotterien Tag: Gratisins KunstHaus Wien – Hundertwasser ... - Preisjäger",
+      "source": "Firecrawl Gastro #4 Search",
+      "url": "https://www.preisjaeger.at/deals/lotterien-tag-2509-gratis-ins-kunsthaus-wien-museum-hundertwasser-mit-lotterie-produkt-369675",
+      "reasons": [
+        "Quell-/Post-Datum liegt in der Zukunft (2026-09-25)"
+      ],
+      "warnings": [
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-09-25T23:59:59.999Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "fc4g-15gypvs",
+      "title": "Der Rechnungsbetrag wird als Gutschein für einen späteren Ei",
+      "brand": "Tomo Chan Ramen",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.tiktok.com/@tomochanvienna/video/7663408276905807126",
+      "reasons": [
+        "älter als 7 Tage (2026-07-17)"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-07-17T08:18:01.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 70,
+      "expiryDate": "2026-10-31",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "fc4g-lc0qd1",
+      "title": "Backfisch-Baguette 1+1 gratis",
+      "brand": "NORDSEE",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.sparhamster.at/nordsee-gutscheine-oesterreich/",
+      "reasons": [
+        "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)"
+      ],
+      "warnings": [],
+      "sourceDate": "2016-09-01T14:27:59.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 3676,
+      "expiryDate": "2026-11-30",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "fc4g-yp0i3r",
+      "title": "1+1 gratis All-you-can-eat-Essen für Geburtstagskinder bei e",
+      "brand": "Sajado BBQ",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.preisjaeger.at/deals/11-gratis-essen-im-sajado-bbq-korean-all-you-can-eat-in-1200-wien-fur-geburtstags-kinder-367507",
+      "reasons": [
+        "älter als 7 Tage (2026-08-05)",
+        "abgelaufen (2026-07-01)"
+      ],
+      "warnings": [],
+      "sourceDate": "2026-08-05T07:57:09.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 51,
+      "expiryDate": "2026-07-01",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "fc4g-1dagg4u",
       "title": "20 % Rabatt auf das gesamte Angebot zur Neueröffnung",
       "brand": "Anars",
@@ -1812,23 +1928,6 @@
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "fc4g-1m605f9",
-      "title": "Backfisch-Baguette 1+1 gratis",
-      "brand": "Nordsee",
-      "source": "Firecrawl Gastro #4",
-      "url": "https://www.sparhamster.at/nordsee-gutscheine-oesterreich/",
-      "reasons": [
-        "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)"
-      ],
-      "warnings": [],
-      "sourceDate": "2016-09-01T14:27:59.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 3676,
-      "expiryDate": "2026-11-30",
-      "expirySource": "url.dateHints",
-      "urlStatus": "HTTP 200"
-    },
-    {
       "id": "fc4g-kszl2w",
       "title": "Garnelen Box normal um 7,49 €",
       "brand": "Nordsee",
@@ -1843,23 +1942,6 @@
       "sourceAgeDays": 3676,
       "expiryDate": "2026-11-30",
       "expirySource": "url.dateHints",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "fc4g-ma422z",
-      "title": "1+1 gratis auf 6er Chicken Nuggets; außerdem 2 Klassiker um",
-      "brand": "McDonald's",
-      "source": "Firecrawl Gastro #4",
-      "url": "https://www.sparhamster.at/mcdonalds-gutscheine-oesterreich/",
-      "reasons": [
-        "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-12)"
-      ],
-      "warnings": [],
-      "sourceDate": "2016-09-12T20:15:48.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 3665,
-      "expiryDate": "2026-10-08",
-      "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
     },
     {
