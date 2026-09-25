@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-25T18:01:30.612Z",
+  "generatedAt": "2026-09-25T18:10:37.816Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 753,
-    "uniqueCandidates": 722,
-    "distinctCandidates": 736,
-    "duplicateClusters": 14,
+    "totalCandidates": 764,
+    "uniqueCandidates": 726,
+    "distinctCandidates": 743,
+    "duplicateClusters": 17,
     "topHealthySources": [
       {
         "sourceKey": "joe",
@@ -16,7 +16,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 74,
+        "healthScore": 72,
         "totalDeals": 12
       },
       {
@@ -32,10 +32,10 @@
         "totalDeals": 3
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
         "healthScore": 68,
-        "totalDeals": 7
+        "totalDeals": 41
       }
     ],
     "topMissionSources": [
@@ -64,10 +64,10 @@
         "totalDeals": 7
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "missionFitScore": 52,
-        "totalDeals": 17
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "missionFitScore": 54,
+        "totalDeals": 41
       }
     ],
     "topCoverageSources": [
@@ -100,18 +100,18 @@
         "fresh1dCount": 1
       },
       {
-        "sourceKey": "gutscheine",
-        "sourceLabel": "Gutscheine.at",
-        "coverageScore": 28,
-        "totalDeals": 31,
-        "fresh1dCount": 31
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "coverageScore": 29,
+        "totalDeals": 41,
+        "fresh1dCount": 5
       }
     ],
     "topPrecisionSources": [
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 82,
+        "precisionScore": 81,
         "totalDeals": 12
       },
       {
@@ -119,6 +119,12 @@
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "precisionScore": 80,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 70,
+        "totalDeals": 41
       },
       {
         "sourceKey": "tiktok",
@@ -131,26 +137,20 @@
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 68,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 66,
-        "totalDeals": 3
       }
     ],
     "topWeightedSources": [
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 64,
-        "totalDeals": 12
-      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 63,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 63,
+        "totalDeals": 12
       },
       {
         "sourceKey": "firecrawl5",
@@ -165,10 +165,10 @@
         "totalDeals": 157
       },
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 54,
-        "totalDeals": 17
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 56,
+        "totalDeals": 41
       }
     ],
     "topSourcesToFix": [
@@ -304,9 +304,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 12,
-      "uniqueDeals": 7,
-      "duplicateDeals": 5,
-      "duplicateAcrossSources": 1,
+      "uniqueDeals": 6,
+      "duplicateDeals": 6,
+      "duplicateAcrossSources": 2,
       "fresh1dCount": 4,
       "fresh7dCount": 12,
       "viennaCount": 12,
@@ -319,8 +319,8 @@
         "Ein paar Eindrücke von unserer Gratis Berliner Style Gemüse-Kebab-Aktion!"
       ],
       "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.1,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.2,
       "fresh1dRate": 0.3,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -357,11 +357,11 @@
         }
       ],
       "issues": [],
-      "healthScore": 74,
+      "healthScore": 72,
       "missionFitScore": 72,
       "coverageScore": 19,
-      "precisionScore": 82,
-      "sourceWeightScore": 64
+      "precisionScore": 81,
+      "sourceWeightScore": 63
     },
     {
       "sourceKey": "tiktok",
@@ -504,13 +504,91 @@
       "sourceWeightScore": 51
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 41,
+      "uniqueDeals": 33,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 6,
+      "fresh1dCount": 5,
+      "fresh7dCount": 41,
+      "viennaCount": 41,
+      "foodDrinkCount": 22,
+      "promoCount": 27,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Eröffnungsangebot: Jede Pizza für 9,90 € am 25. September",
+        "Soft Opening mit gratis Sushi Fingerfood und Welcome Shots am 25.09.",
+        "10% Rabatt auf Kuchen und Brownies bei Erwähnung des Videos"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.5,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 21
+        },
+        {
+          "value": "shopping",
+          "count": 12
+        },
+        {
+          "value": "reisen",
+          "count": 3
+        },
+        {
+          "value": "event",
+          "count": 2
+        },
+        {
+          "value": "food & drink",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 24
+        },
+        {
+          "value": "rabatt",
+          "count": 15
+        },
+        {
+          "value": "bogo",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 68,
+      "missionFitScore": 54,
+      "coverageScore": 29,
+      "precisionScore": 70,
+      "sourceWeightScore": 56
+    },
+    {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
       "totalDeals": 7,
-      "uniqueDeals": 7,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
+      "uniqueDeals": 6,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
       "fresh1dCount": 0,
       "fresh7dCount": 5,
       "viennaCount": 3,
@@ -523,8 +601,8 @@
         "🚨 Fast 7 Stunden zu spät: Ryanair-Flug FR 500 Wien → Palma de Mallorca landete am 16.09. erst um 17:14 statt"
       ],
       "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
       "fresh1dRate": 0,
       "fresh7dRate": 0.7,
       "viennaRate": 0.4,
@@ -556,11 +634,11 @@
         "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 68,
+      "healthScore": 66,
       "missionFitScore": 61,
       "coverageScore": 13,
-      "precisionScore": 65,
-      "sourceWeightScore": 54
+      "precisionScore": 64,
+      "sourceWeightScore": 53
     },
     {
       "sourceKey": "firecrawl5",
@@ -631,85 +709,6 @@
       "coverageScore": 15,
       "precisionScore": 80,
       "sourceWeightScore": 62
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 30,
-      "uniqueDeals": 27,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 1,
-      "fresh7dCount": 28,
-      "viennaCount": 30,
-      "foodDrinkCount": 10,
-      "promoCount": 17,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Soft Opening mit gratis Sushi Fingerfood und Welcome Shots",
-        "Eröffnungsangebot: Jede Pizza für 9,90 € am 25. September",
-        "Eröffnung mit 100 Gratis-Menüs am 26. September"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.9,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 83.7,
-      "topCategories": [
-        {
-          "value": "food/drink",
-          "count": 15
-        },
-        {
-          "value": "shopping",
-          "count": 9
-        },
-        {
-          "value": "event",
-          "count": 2
-        },
-        {
-          "value": "bars",
-          "count": 1
-        },
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 14
-        },
-        {
-          "value": "rabatt",
-          "count": 14
-        },
-        {
-          "value": "bogo",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 63,
-      "missionFitScore": 42,
-      "coverageScore": 21,
-      "precisionScore": 62,
-      "sourceWeightScore": 48
     },
     {
       "sourceKey": "instagram-verified",
