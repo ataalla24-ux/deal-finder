@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-26T17:19:39.704Z",
+  "generatedAt": "2026-09-26T17:25:12.077Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 745,
-    "uniqueCandidates": 707,
-    "distinctCandidates": 724,
-    "duplicateClusters": 17,
+    "totalCandidates": 755,
+    "uniqueCandidates": 710,
+    "distinctCandidates": 730,
+    "duplicateClusters": 20,
     "topHealthySources": [
       {
         "sourceKey": "tiktok",
@@ -14,22 +14,22 @@
         "totalDeals": 23
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 69,
+        "totalDeals": 46
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 71,
+        "healthScore": 69,
         "totalDeals": 17
       },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
-        "healthScore": 68,
+        "healthScore": 66,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 67,
-        "totalDeals": 36
       },
       {
         "sourceKey": "food3",
@@ -100,11 +100,11 @@
         "fresh1dCount": 28
       },
       {
-        "sourceKey": "gutscheine",
-        "sourceLabel": "Gutscheine.at",
-        "coverageScore": 31,
-        "totalDeals": 25,
-        "fresh1dCount": 25
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "coverageScore": 33,
+        "totalDeals": 46,
+        "fresh1dCount": 6
       }
     ],
     "topPrecisionSources": [
@@ -117,7 +117,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 78,
+        "precisionScore": 76,
         "totalDeals": 17
       },
       {
@@ -135,8 +135,8 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 67,
-        "totalDeals": 36
+        "precisionScore": 69,
+        "totalDeals": 46
       }
     ],
     "topWeightedSources": [
@@ -149,7 +149,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 61,
+        "sourceWeightScore": 60,
         "totalDeals": 17
       },
       {
@@ -159,16 +159,16 @@
         "totalDeals": 23
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 57,
+        "totalDeals": 46
+      },
+      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 55,
         "totalDeals": 155
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 54,
-        "totalDeals": 7
       }
     ],
     "topSourcesToFix": [
@@ -316,13 +316,95 @@
       "sourceWeightScore": 57
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 46,
+      "uniqueDeals": 35,
+      "duplicateDeals": 11,
+      "duplicateAcrossSources": 11,
+      "fresh1dCount": 6,
+      "fresh7dCount": 46,
+      "viennaCount": 46,
+      "foodDrinkCount": 26,
+      "promoCount": 29,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Lancôme Kirsch-Törtchen mit gratis Lancôme Miniaturduft bis Ende September",
+        "Samstag Brunch, Sonntag Schnitzel",
+        "2+1 GRATIS Döner auf alle Dönersorten vom 27.9. bis 4.10."
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.2,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.6,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.5,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 26
+        },
+        {
+          "value": "shopping",
+          "count": 13
+        },
+        {
+          "value": "event",
+          "count": 4
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        },
+        {
+          "value": "freizeit",
+          "count": 1
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 23
+        },
+        {
+          "value": "rabatt",
+          "count": 20
+        },
+        {
+          "value": "bogo",
+          "count": 2
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 69,
+      "missionFitScore": 55,
+      "coverageScore": 33,
+      "precisionScore": 69,
+      "sourceWeightScore": 57
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 17,
-      "uniqueDeals": 11,
-      "duplicateDeals": 6,
-      "duplicateAcrossSources": 2,
+      "uniqueDeals": 9,
+      "duplicateDeals": 8,
+      "duplicateAcrossSources": 6,
       "fresh1dCount": 4,
       "fresh7dCount": 17,
       "viennaCount": 17,
@@ -335,8 +417,8 @@
         "Aufgepasst, Wien!🚨 Bei Yi Pin Bu Yi gibt’s ALLE Spieße für nur 1,50 €.🍢🥗🥩 📍Westbahnstraße 14, 1070 Wien"
       ],
       "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.1,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.4,
       "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -376,21 +458,23 @@
           "count": 2
         }
       ],
-      "issues": [],
-      "healthScore": 71,
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 69,
       "missionFitScore": 67,
-      "coverageScore": 22,
-      "precisionScore": 78,
-      "sourceWeightScore": 61
+      "coverageScore": 21,
+      "precisionScore": 76,
+      "sourceWeightScore": 60
     },
     {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
       "totalDeals": 7,
-      "uniqueDeals": 7,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
+      "uniqueDeals": 6,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
       "fresh1dCount": 0,
       "fresh7dCount": 3,
       "viennaCount": 3,
@@ -403,8 +487,8 @@
         "🚨 Fast 7 Stunden zu spät: Ryanair-Flug FR 500 Wien → Palma de Mallorca landete am 16.09. erst um 17:14 statt"
       ],
       "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
       "fresh1dRate": 0,
       "fresh7dRate": 0.4,
       "viennaRate": 0.4,
@@ -436,89 +520,11 @@
         "wenige Deals sind frischer als 1 Tag",
         "Wien-Signal ist zu schwach"
       ],
-      "healthScore": 68,
+      "healthScore": 66,
       "missionFitScore": 61,
       "coverageScore": 13,
-      "precisionScore": 65,
-      "sourceWeightScore": 54
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 36,
-      "uniqueDeals": 29,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 7,
-      "fresh1dCount": 2,
-      "fresh7dCount": 35,
-      "viennaCount": 36,
-      "foodDrinkCount": 17,
-      "promoCount": 22,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis Cheesecake-Verkostung am Samstag ab 12 Uhr",
-        "Mittagsteller für 10,80 € von Montag bis Freitag",
-        "10% Rabatt auf Kuchen und Brownies bei Erwähnung des Videos"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 81.2,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 17
-        },
-        {
-          "value": "shopping",
-          "count": 12
-        },
-        {
-          "value": "event",
-          "count": 4
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        },
-        {
-          "value": "freizeit",
-          "count": 1
-        },
-        {
-          "value": "reisen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 18
-        },
-        {
-          "value": "rabatt",
-          "count": 16
-        },
-        {
-          "value": "bogo",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 67,
-      "missionFitScore": 52,
-      "coverageScore": 26,
-      "precisionScore": 67,
-      "sourceWeightScore": 54
+      "precisionScore": 64,
+      "sourceWeightScore": 53
     },
     {
       "sourceKey": "food3",
