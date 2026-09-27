@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-27T17:37:35.178Z",
+  "generatedAt": "2026-09-27T17:44:15.379Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 749,
-    "uniqueCandidates": 715,
-    "distinctCandidates": 730,
-    "duplicateClusters": 15,
+    "totalCandidates": 743,
+    "uniqueCandidates": 711,
+    "distinctCandidates": 725,
+    "duplicateClusters": 14,
     "topHealthySources": [
       {
         "sourceKey": "meta-instagram",
@@ -26,16 +26,16 @@
         "totalDeals": 20
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 69,
+        "totalDeals": 21
+      },
+      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "healthScore": 68,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 68,
-        "totalDeals": 3
       }
     ],
     "topMissionSources": [
@@ -58,16 +58,16 @@
         "totalDeals": 7
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "missionFitScore": 60,
+        "totalDeals": 21
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 58,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "missionFitScore": 54,
-        "totalDeals": 20
       }
     ],
     "topCoverageSources": [
@@ -95,7 +95,7 @@
       {
         "sourceKey": "firecrawl4",
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "coverageScore": 35,
+        "coverageScore": 36,
         "totalDeals": 72,
         "fresh1dCount": 0
       },
@@ -115,6 +115,12 @@
         "totalDeals": 12
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 72,
+        "totalDeals": 21
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 71,
@@ -131,12 +137,6 @@
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 68,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "precisionScore": 65,
-        "totalDeals": 7
       }
     ],
     "topWeightedSources": [
@@ -153,6 +153,12 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 57,
+        "totalDeals": 21
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 56,
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 55,
         "totalDeals": 157
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 54,
-        "totalDeals": 7
       }
     ],
     "topSourcesToFix": [
@@ -437,6 +437,80 @@
       "sourceWeightScore": 56
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 21,
+      "uniqueDeals": 15,
+      "duplicateDeals": 6,
+      "duplicateAcrossSources": 6,
+      "fresh1dCount": 0,
+      "fresh7dCount": 21,
+      "viennaCount": 21,
+      "foodDrinkCount": 16,
+      "promoCount": 12,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis Lancôme Miniaturduft zu Lancôme Kirsch-Törtchen im Café Adlerhof",
+        "10% Rabatt auf Kuchen und Brownies bei Noor’s KuchenGlück",
+        "Afterwork Event mit Specialty Coffee, Mehlspeisen und Drinks im cottageroasters"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.1,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 14
+        },
+        {
+          "value": "event",
+          "count": 3
+        },
+        {
+          "value": "shopping",
+          "count": 3
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 9
+        },
+        {
+          "value": "gratis",
+          "count": 8
+        },
+        {
+          "value": "bogo",
+          "count": 2
+        },
+        {
+          "value": "freebie",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 69,
+      "missionFitScore": 60,
+      "coverageScore": 19,
+      "precisionScore": 72,
+      "sourceWeightScore": 57
+    },
+    {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
@@ -570,80 +644,6 @@
       "coverageScore": 13,
       "precisionScore": 70,
       "sourceWeightScore": 54
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 27,
-      "uniqueDeals": 20,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 7,
-      "fresh1dCount": 0,
-      "fresh7dCount": 26,
-      "viennaCount": 27,
-      "foodDrinkCount": 15,
-      "promoCount": 14,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Lancôme Kirsch-Törtchen mit gratis Miniaturduft im Café Adlerhof",
-        "All You Can Eat chinesisches Street-Food jeden Sonntag bei QiYe",
-        "3+3 Bud Bucket Aktion bis 30. September 2026"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 82.7,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 13
-        },
-        {
-          "value": "shopping",
-          "count": 11
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        },
-        {
-          "value": "freizeit",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 14
-        },
-        {
-          "value": "gratis",
-          "count": 10
-        },
-        {
-          "value": "bogo",
-          "count": 2
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 63,
-      "missionFitScore": 50,
-      "coverageScore": 20,
-      "precisionScore": 65,
-      "sourceWeightScore": 51
     },
     {
       "sourceKey": "instagram-verified",
@@ -892,9 +892,9 @@
       "file": "deals-pending-firecrawl4.json",
       "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
       "totalDeals": 72,
-      "uniqueDeals": 67,
-      "duplicateDeals": 5,
-      "duplicateAcrossSources": 3,
+      "uniqueDeals": 68,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 2,
       "fresh1dCount": 0,
       "fresh7dCount": 6,
       "viennaCount": 6,
@@ -987,7 +987,7 @@
       ],
       "healthScore": 54,
       "missionFitScore": 47,
-      "coverageScore": 35,
+      "coverageScore": 36,
       "precisionScore": 49,
       "sourceWeightScore": 47
     },
