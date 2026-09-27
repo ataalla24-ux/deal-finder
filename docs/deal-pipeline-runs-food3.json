@@ -2,9 +2,112 @@
   "schemaVersion": 1,
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
-  "updatedAt": "2026-09-26T07:21:39.298Z",
-  "runCount": 63,
+  "updatedAt": "2026-09-27T07:54:57.053Z",
+  "runCount": 64,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "food3-2026-09-27T07:54:57.053Z",
+      "sourceKey": "food3",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "status": "completed-with-errors",
+      "startedAt": "2026-09-27T07:50:45.786Z",
+      "finishedAt": "2026-09-27T07:54:57.053Z",
+      "durationMs": 251267,
+      "outputFile": "docs/deals-pending-food3.json",
+      "counts": {
+        "rawCandidates": 2,
+        "normalizedCandidates": 2,
+        "verifiedCandidates": 4,
+        "previousDeals": 4,
+        "acceptedDeals": 4,
+        "rejectedDeals": 2
+      },
+      "rejectedByReason": {
+        "post-verification-rejected": 2
+      },
+      "rejectedSamples": [
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-txdglh",
+            "title": "Instagram: Happy hour every day from 5-9 PM Join us for good drinks ... - Instagram",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DdmqKXtuOV8/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-11vnb98",
+            "title": "Instagram: DRINKS · DJ · FOOD AFTERWORK, THE 748 WAY. THURSDAY 5PM ist ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/Ddlug1DlVVw/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "agentStatus": "completed-with-errors",
+        "creditsUsed": 0,
+        "configuredSources": 6,
+        "attemptedSources": 3,
+        "completedSources": 1,
+        "targetsPerRun": 3,
+        "agentTimeoutSeconds": 120,
+        "maxCreditsPerTarget": 300,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/happyhourwien/",
+            "status": "completed-search",
+            "rawCandidates": 2,
+            "searchCandidates": 2,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/lunchdealwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Firecrawl Agent nach 120s abgebrochen"
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/neueröffnungwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Firecrawl Agent nach 120s abgebrochen"
+          }
+        ],
+        "retainedPreviousDeals": 4,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 0,
+        "verifier": {
+          "statusCounts": {
+            "verified-meta-graph": 3,
+            "verified-original-post": 1
+          },
+          "verifiedOriginalPosts": 1,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 1
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "https://www.instagram.com/explore/tags/lunchdealwien/: Firecrawl Agent nach 120s abgebrochen",
+        "https://www.instagram.com/explore/tags/neueröffnungwien/: Firecrawl Agent nach 120s abgebrochen"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "food3-2026-09-26T07:21:39.298Z",
