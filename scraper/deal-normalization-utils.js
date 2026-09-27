@@ -1,4 +1,5 @@
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { concreteFoodOfferTitle, isPromotionalIntro, stripSlackEmojiCodes } from './offer-title-utils.js';
 
 const PUBLIC_BRAND_LOGO_BASE_URL = 'https://freefinder.at/assets/brand-logos';
 
@@ -235,7 +236,7 @@ function repairMojibake(value) {
 }
 
 function cleanUiNoiseText(value) {
-  let text = cleanText(value);
+  let text = stripSlackEmojiCodes(cleanText(value));
   if (!text) return '';
   const junkPatterns = [
     /\balle anzeigen\b/gi,
@@ -454,6 +455,7 @@ function isLikelyGenericLocation(value) {
 function isSourceLikeBrand(value) {
   const text = cleanUiNoiseText(value);
   if (!text) return true;
+  if (/^\d{4}\s+(?:wien|vienna)$/i.test(text)) return true;
   return SOURCE_LIKE_BRANDS.some((pattern) => pattern.test(text));
 }
 
@@ -500,6 +502,8 @@ function extractRepeatedBrandHashtag(value) {
 }
 
 function extractCaptionBrand(value) {
+  const namedVenue = cleanUiNoiseText(value).match(/\b[Bb]ei\s+([\p{Lu}][\p{L}\p{N}&' -]{1,40}?)\s+gibt es\b/u)?.[1];
+  if (namedVenue && !/\b(?:wien|vienna|uns|euch)\b/i.test(namedVenue)) return namedVenue;
   return extractPinnedCaptionBrand(value) || extractRepeatedBrandHashtag(value);
 }
 
@@ -1054,6 +1058,9 @@ function normalizeDealRecord(deal = {}) {
   const editedFields = new Set(Array.isArray(deal.liveEditedFields) ? deal.liveEditedFields : []);
   let title = cleanTitleForDisplay(deal.title || '');
   let description = cleanUiNoiseText(deal.description || '');
+  if (!editedFields.has('title') && isPromotionalIntro(title)) {
+    title = concreteFoodOfferTitle(description) || title;
+  }
   const auxiliaryEvidenceSignal = cleanUiNoiseText([
     deal.viennaEvidence?.detail,
     deal.evidence?.textSample,

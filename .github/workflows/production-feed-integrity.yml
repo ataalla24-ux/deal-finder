@@ -16,6 +16,8 @@ on:
       - "scraper/deal-validity-agent.js"
       - "scraper/normalize-live-deals.js"
       - "scraper/slack-digest-utils.js"
+      - "scraper/offer-title-utils.js"
+      - "scripts/test-offer-title.mjs"
       - "scripts/live-deal-edits-lib.mjs"
       - "scripts/test-source-backed-content.mjs"
       - "scripts/apply-reviewed-content.mjs"
@@ -54,6 +56,7 @@ jobs:
           SENTRY_DISABLED: '1'
         run: |
           node scripts/test-source-backed-content.mjs
+          node scripts/test-offer-title.mjs
           node scripts/test-deal-logo-normalization.mjs
           node scripts/test-live-deal-removal-safety.mjs
           node scripts/test-slack-deal-quality.mjs

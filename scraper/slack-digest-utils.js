@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { isGenericJunkDeal, normalizeDealRecord } from './deal-normalization-utils.js';
+import { stripSlackEmojiCodes } from './offer-title-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -334,8 +335,11 @@ function mergeDealsById(primaryDeals, fallbackDeals) {
     // Slack cards are previews, not the source of truth for full conditions.
     // Restore only a demonstrable prefix truncation, never a different edit.
     for (const field of ['title', 'description']) {
-      const preview = cleanText(deal[field]).replace(/(?:\.\.\.|…)$/, '').trim();
-      const fullText = cleanText(fallback[field]);
+      const comparable = (value) => stripSlackEmojiCodes(cleanText(value))
+        .replace(/\p{Extended_Pictographic}|\p{Emoji_Modifier}|\uFE0F/gu, ' ')
+        .replace(/\s+/g, ' ').replace(/(?:\.\.\.|…)$/, '').trim();
+      const preview = comparable(deal[field]);
+      const fullText = comparable(fallback[field]);
       if (preview.length >= 24 && fullText.length > preview.length && fullText.startsWith(preview)) {
         merged[field] = fallback[field];
       }
@@ -356,7 +360,7 @@ function mergeDealsById(primaryDeals, fallbackDeals) {
 
     merged.slackTs = deal.slackTs || fallback.slackTs || '';
     merged.slackThreadTs = deal.slackThreadTs || fallback.slackThreadTs || '';
-    return merged;
+    return normalizeDealRecord(merged);
   });
 }
 

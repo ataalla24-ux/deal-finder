@@ -8,6 +8,7 @@ import { chromium } from 'playwright';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { inferPreferredBrand } from './deal-normalization-utils.js';
+import { concreteFoodOfferTitle } from './offer-title-utils.js';
 import { resolveInstagramPostEntities } from './instagram-entity-resolution.js';
 import { extractActiveOfferWindow, unicodeSafeTruncate } from './instagram-ai-validity-utils.js';
 import {
@@ -616,6 +617,8 @@ function isWeakBrandCandidate(value) {
 
 function buildOfferTitle(text, brand, type) {
   const signal = cleanText(text, 1200);
+  const foodOffer = concreteFoodOfferTitle(signal);
+  if (foodOffer) return foodOffer;
   const venueMatch = signal.match(/\b(?:beim?|bei)\s+(Stift Klosterneuburg)\b/i);
   const venue = cleanText(venueMatch?.[1] || '', 80);
   const birthdayEntryOffer = extractBirthdayEntryOffer(signal);
