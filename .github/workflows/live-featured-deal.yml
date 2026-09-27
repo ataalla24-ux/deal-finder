@@ -1,0 +1,30 @@
+name: Live Review Featured Selection
+on:
+  workflow_dispatch:
+    inputs:
+      pick_payload:
+        description: Signed live-review selection
+        required: true
+        type: string
+concurrency:
+  group: deal-state-writer
+  cancel-in-progress: false
+  queue: max
+permissions:
+  contents: write
+jobs:
+  select:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: node scripts/test-live-review-admin.mjs
+      - run: node scripts/set-live-featured-deal.mjs
+        env:
+          FEATURED_PICK_PAYLOAD: ${{ inputs.pick_payload }}
+      - run: node scripts/commit-generated.mjs --message "Select featured deal from live review" --files docs/deal-of-the-day.json docs/deal-of-the-week.json

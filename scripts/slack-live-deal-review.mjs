@@ -324,7 +324,8 @@ function signedRemovalUrl(deal) {
 }
 
 function signedEditUrl(deal, reviewCandidate = null) {
-  return signedWorkerUrl('/api/deals/admin/edit-link', editValue(deal, reviewCandidate));
+  // Load current content on opening; long descriptions must not exceed Slack's URL limit.
+  return signedWorkerUrl('/api/deals/admin/edit-link', JSON.stringify({ dealId: deal.id }));
 }
 
 function signedRestoreUrl(deal) {
@@ -366,6 +367,12 @@ function dealBlocks(deal, index, reviewCandidate = null) {
   ].filter(Boolean).join('\n');
 
   const elements = [
+    ...[['daily', 'Als Tagesdeal'], ['weekly', 'Als Wochendeal']].map(([kind, label]) => ({
+      type: 'button',
+      text: { type: 'plain_text', text: label },
+      action_id: `freefinder_feature_${kind}`,
+      url: signedWorkerUrl('/api/deals/admin/feature-link', JSON.stringify({ dealId: deal.id, kind, title: deal.title })),
+    })),
     {
       type: 'button',
       text: { type: 'plain_text', text: 'Bearbeiten' },

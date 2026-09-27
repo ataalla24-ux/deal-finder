@@ -1,3 +1,5 @@
+import { isFoodOrDrinkDeal } from '../../scraper/native-weekly-utils.js';
+
 const JSON_HEADERS = {
   'content-type': 'application/json; charset=utf-8',
   'access-control-allow-origin': '*',
@@ -724,6 +726,7 @@ function normalizeDealOverrideInput(body, existing = null) {
     validFrom: cleanShortText(body?.validFrom, 32),
     validUntil: cleanShortText(body?.validUntil, 32),
     expiryDisplayText: cleanShortText(body?.expiryDisplayText, 180),
+    clearFields: Array.isArray(body?.clearFields) ? body.clearFields.filter(key => ['description','validOn','validFrom','validUntil','expires','expiresOriginal','expiryDisplayText'].includes(key)) : [],
     updatedAt: Date.now(),
     createdAt: existing?.createdAt || Date.now(),
   };
@@ -1916,6 +1919,7 @@ async function triggerDealEditWorkflow(env, edit) {
     validFrom: edit.validFrom || '',
     validUntil: edit.validUntil || '',
     expiryDisplayText: edit.expiryDisplayText || '',
+    clearFields: edit.clearFields || [],
     pinnedRank: edit.pinnedRank ?? '',
     hidden: edit.hidden === true,
     forceKeep: edit.forceKeep === true,
@@ -2137,13 +2141,18 @@ function dealRemovalHtml(title, body, status = 200) {
   });
 }
 
+function reviewActionConfirmation(label, title, payload, sig) {
+  return new Response(`<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(label)}</title><body style="font-family:system-ui;max-width:640px;margin:32px auto;padding:16px"><h1>${escapeHtml(label)}?</h1><p>${escapeHtml(title)}</p><form method="post"><input type="hidden" name="payload" value="${escapeHtml(payload)}"><input type="hidden" name="sig" value="${escapeHtml(sig)}"><button type="submit" style="padding:12px">${escapeHtml(label)}</button></form></body></html>`, { headers: { 'content-type':'text/html; charset=utf-8', 'cache-control':'no-store' } });
+}
+
 async function handleSignedDealRemoveLink(request, env) {
   const url = new URL(request.url);
   const secret = envString(env, 'DEAL_REMOVE_LINK_SECRET');
   if (!secret) return dealRemovalHtml('Nicht konfiguriert', 'DEAL_REMOVE_LINK_SECRET fehlt im Worker.', 500);
 
-  const payload = cleanShortText(url.searchParams.get('payload'), 5000);
-  const sig = cleanShortText(url.searchParams.get('sig'), 128).toLowerCase();
+  const params = request.method === 'POST' ? await request.formData().catch(() => new FormData()) : url.searchParams;
+  const payload = cleanShortText(params.get('payload'), 16000);
+  const sig = cleanShortText(params.get('sig'), 128).toLowerCase();
   if (!payload || !sig) return dealRemovalHtml('Ungueltiger Link', 'Dieser Entfernen-Link ist unvollstaendig.', 400);
 
   const expected = await signedDealRemovalUrlSignature(secret, payload);
@@ -2154,6 +2163,7 @@ async function handleSignedDealRemoveLink(request, env) {
   const removal = normalizeDealRemovalInput(decodeBase64UrlJson(payload));
   if (!removal) return dealRemovalHtml('Ungueltiger Deal', 'Der Entfernen-Link enthaelt keine gueltige Deal-ID oder URL.', 400);
   const label = cleanShortText(removal.title || removal.brand || removal.dealId || removal.dealUrl, 160);
+  if (request.method === 'GET') return reviewActionConfirmation('Deal entfernen', label, payload, sig);
 
   try {
     await triggerDealModerationWorkflow(env, removal);
@@ -2168,8 +2178,9 @@ async function handleSignedDealRestoreLink(request, env) {
   const secret = envString(env, 'DEAL_REMOVE_LINK_SECRET');
   if (!secret) return dealRemovalHtml('Nicht konfiguriert', 'DEAL_REMOVE_LINK_SECRET fehlt im Worker.', 500);
 
-  const payload = cleanShortText(url.searchParams.get('payload'), 5000);
-  const sig = cleanShortText(url.searchParams.get('sig'), 128).toLowerCase();
+  const params = request.method === 'POST' ? await request.formData().catch(() => new FormData()) : url.searchParams;
+  const payload = cleanShortText(params.get('payload'), 16000);
+  const sig = cleanShortText(params.get('sig'), 128).toLowerCase();
   if (!payload || !sig) return dealRemovalHtml('Ungueltiger Link', 'Dieser Offline-Link ist unvollstaendig.', 400);
 
   const expected = await signedDealRemovalUrlSignature(secret, payload);
@@ -2179,6 +2190,7 @@ async function handleSignedDealRestoreLink(request, env) {
 
   const restore = normalizeDealRestoreInput(decodeBase64UrlJson(payload));
   if (!restore) return dealRemovalHtml('Ungueltiger Deal', 'Der Offline-Link enthaelt keinen gueltigen Deal.', 400);
+  if (request.method === 'GET') return reviewActionConfirmation('Deal wiederherstellen', restore.title || restore.dealId, payload, sig);
 
   try {
     await putJsonKV(env, dealOverrideKey(restore.dealId), normalizeDealOverrideInput(restore) || {
@@ -2247,12 +2259,12 @@ async function readSignedDealEditRequest(request, env) {
   if (request.method === 'POST') {
     const form = await request.formData().catch(() => null);
     if (!form) return { error: 'Formular konnte nicht gelesen werden.', status: 400 };
-    payload = cleanShortText(form.get('payload'), 5000);
+    payload = cleanShortText(form.get('payload'), 16000);
     sig = cleanShortText(form.get('sig'), 128).toLowerCase();
     fields = Object.fromEntries(form.entries());
   } else {
     const url = new URL(request.url);
-    payload = cleanShortText(url.searchParams.get('payload'), 5000);
+    payload = cleanShortText(url.searchParams.get('payload'), 16000);
     sig = cleanShortText(url.searchParams.get('sig'), 128).toLowerCase();
   }
 
@@ -2289,7 +2301,7 @@ function dealEditFormHtml({ edit, payload, sig, saved = false, error = '', workf
   <style>
     body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #fff8ef; color: #211b16; }
     main { width: min(760px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 42px; }
-    h1 { margin: 0 0 8px; font-size: clamp(32px, 8vw, 54px); line-height: .98; letter-spacing: 0; }
+    h1 { margin: 0 0 8px; font-size: 28px; line-height: 1.2; letter-spacing: 0; }
     p { margin: 0 0 20px; color: #70665e; font-size: 17px; line-height: 1.4; }
     form { display: grid; gap: 14px; }
     label { display: grid; gap: 7px; color: #5f574f; font-weight: 800; }
@@ -2317,9 +2329,6 @@ function dealEditFormHtml({ edit, payload, sig, saved = false, error = '', workf
     <form method="post">
       <input type="hidden" name="payload" value="${escapeHtml(payload)}">
       <input type="hidden" name="sig" value="${escapeHtml(sig)}">
-      <label>Deal-ID
-        <input class="readonly" name="dealId" value="${value('dealId')}" readonly>
-      </label>
       <div class="grid">
         <label>Titel
           <input name="title" value="${value('title')}" placeholder="Deal-Titel">
@@ -2328,15 +2337,15 @@ function dealEditFormHtml({ edit, payload, sig, saved = false, error = '', workf
           <input name="brand" value="${value('brand')}" placeholder="Anbieter">
         </label>
       </div>
-      <label>Beschreibung
+      <label>Details und Bedingungen
         <textarea name="description" placeholder="Details">${value('description')}</textarea>
       </label>
       <div class="grid">
         <label>Kategorie
-          <input name="category" value="${value('category')}" placeholder="z.B. essen, kaffee, shopping">
+          <select name="category">${['essen','kaffee','trinken','supermarkt','shopping','beauty','fitness','reisen','kultur','events','kirche','technik','streaming','freizeit','bars', edit?.category].filter((v,i,a)=>v && a.indexOf(v)===i).map(v=>`<option value="${escapeHtml(v)}"${v===edit?.category?' selected':''}>${escapeHtml(v)}</option>`).join('')}</select>
         </label>
         <label>Deal-Typ
-          <input name="type" value="${value('type')}" placeholder="z.B. gratis, rabatt, bogo">
+          <select name="type">${[['gratis','Gratis'],['rabatt','Rabatt'],['bogo','1+1 / 2 fuer 1'],['gutschein','Gutschein'],['event','Veranstaltung'],['info','Information']].map(([v,label])=>`<option value="${v}"${v===edit?.type?' selected':''}>${label}</option>`).join('')}</select>
         </label>
       </div>
       <div class="grid">
@@ -2344,47 +2353,25 @@ function dealEditFormHtml({ edit, payload, sig, saved = false, error = '', workf
           <input name="distance" value="${value('distance')}" placeholder="Adresse, Bezirk oder Wien">
         </label>
         <label>Quelle
-          <input class="readonly" value="${value('url')}" readonly>
+          <input type="url" name="url" value="${value('url')}" required>
         </label>
       </div>
       <div class="grid">
-        <label>Angebotsdatum
-          <input name="pubDate" value="${value('pubDate')}" placeholder="TT.MM.JJJJ oder ISO">
+        <label>Gueltig ab
+          <input type="date" name="validFrom" value="${edit?.validOn ? '' : value('validFrom')}">
         </label>
         <label>Gueltig bis
-          <input name="expires" value="${value('expires')}" placeholder="TT.MM.JJJJ oder Text">
+          <input type="date" name="validUntil" value="${edit?.validOn ? '' : escapeHtml(edit?.validUntil || (/^\d{4}-\d{2}-\d{2}/.exec(edit?.expires || '')?.[0] || ''))}">
         </label>
       </div>
       <div class="grid">
-        <label>Valid from
-          <input name="validFrom" value="${value('validFrom')}" placeholder="YYYY-MM-DD">
+        <label>Nur an diesem Tag
+          <input type="date" name="validOn" value="${value('validOn')}">
         </label>
-        <label>Valid until
-          <input name="validUntil" value="${value('validUntil')}" placeholder="YYYY-MM-DD">
-        </label>
-      </div>
-      <div class="grid">
-        <label>Valid on
-          <input name="validOn" value="${value('validOn')}" placeholder="YYYY-MM-DD">
-        </label>
-        <label>Anzeige-Text Ablauf
-          <input name="expiryDisplayText" value="${value('expiryDisplayText')}" placeholder="z.B. Nur heute">
+        <label>Zeiten / Gueltigkeitshinweis
+          <input name="expiryDisplayText" value="${value('expiryDisplayText')}" placeholder="z.B. jeden Dienstag, 14-16 Uhr">
         </label>
       </div>
-      <div class="grid">
-        <label>Ablauf-Art
-          <select name="expiryKind">
-            <option value=""${edit?.expiryKind ? '' : ' selected'}>Automatisch</option>
-            <option value="date"${edit?.expiryKind === 'date' ? ' selected' : ''}>Datum</option>
-            <option value="range"${edit?.expiryKind === 'range' ? ' selected' : ''}>Zeitraum</option>
-            <option value="text"${edit?.expiryKind === 'text' ? ' selected' : ''}>Text</option>
-          </select>
-        </label>
-        <label>Pin-Rang
-          <input name="pinnedRank" inputmode="numeric" value="${value('pinnedRank')}" placeholder="0">
-        </label>
-      </div>
-      <label class="check"><input type="checkbox" name="hidden"${checked}> Deal verstecken</label>
       <div class="row">
         <button type="submit">Aenderung speichern</button>
         ${sourceLink}
@@ -2402,6 +2389,44 @@ function dealEditFormHtml({ edit, payload, sig, saved = false, error = '', workf
   });
 }
 
+async function handleSignedFeaturedLink(request, env) {
+  const signed = await readSignedDealEditRequest(request, env);
+  if (signed.error) return dealRemovalHtml('Auswahl nicht moeglich', signed.error, signed.status);
+  const raw = decodeBase64UrlJson(signed.payload);
+  const kind = raw?.kind;
+  if (!['daily','weekly'].includes(kind)) return dealRemovalHtml('Ungueltige Auswahl', 'Tages- oder Wochendeal fehlt.', 400);
+  const label = kind === 'daily' ? 'Tagesdeal' : 'Wochendeal';
+  let deal;
+  try {
+    const response = await fetch(`${WEBSITE_DEALS_JSON_URL}?feature=${Date.now()}`, { headers: { 'cache-control': 'no-cache' } });
+    if (!response.ok) throw new Error('Feed unavailable');
+    const feed = await response.json();
+    deal = feed.deals?.find(row => row.id === signed.base.dealId);
+  } catch { return dealRemovalHtml('Bitte erneut versuchen', 'Live-Daten nicht erreichbar.', 502); }
+  if (!deal) return dealRemovalHtml('Nicht mehr live', 'Dieser Deal ist nicht mehr im Live-Feed.', 409);
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone:'Europe/Vienna', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+  const end = [deal.validOn, deal.validUntil, deal.expires].find(value => /^\d{4}-\d{2}-\d{2}/.test(value || ''));
+  if (end && end.slice(0,10) < today || deal.validFrom && /^\d{4}-\d{2}-\d{2}$/.test(deal.validFrom) && deal.validFrom > today) {
+    return dealRemovalHtml('Nicht aktuell gueltig', 'Bitte einen aktuell gueltigen Deal auswaehlen.', 409);
+  }
+  if (kind === 'weekly' && !isFoodOrDrinkDeal(deal)) return dealRemovalHtml('Nicht als Wochendeal geeignet', 'Der Wochendeal ist fuer Essen und Getraenke vorgesehen.', 400);
+  if (request.method === 'GET') {
+    return new Response(`<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${label} festlegen</title><body style="font-family:system-ui;max-width:640px;margin:32px auto;padding:16px"><h1>Als ${label} festlegen?</h1><p>${escapeHtml(deal.title)}</p><p>${kind === 'daily' ? 'Fuer heute' : 'Fuer diese Woche'} (Wiener Zeit).</p><form method="post"><input type="hidden" name="payload" value="${escapeHtml(signed.payload)}"><input type="hidden" name="sig" value="${escapeHtml(signed.sig)}"><button type="submit" style="padding:12px">${label} bestaetigen</button></form></body></html>`, { headers: { 'content-type':'text/html; charset=utf-8', 'cache-control':'no-store' } });
+  }
+  const token = envString(env, 'GITHUB_WORKFLOW_TOKEN') || envString(env, 'GITHUB_TOKEN');
+  if (!token) return dealRemovalHtml('Nicht konfiguriert', 'GitHub-Zugang fehlt.', 500);
+  try {
+    const owner = envString(env,'GITHUB_OWNER') || 'ataalla24-ux';
+    const repo = envString(env,'GITHUB_REPO') || 'deal-finder';
+    const response = await fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/workflows/live-featured-deal.yml/dispatches`, {
+      method:'POST', headers:{ authorization:`Bearer ${token}`, accept:'application/vnd.github+json', 'content-type':'application/json', 'user-agent':'freefinder-referrals-worker' },
+      body:JSON.stringify({ ref:envString(env,'GITHUB_REF') || 'main', inputs:{ pick_payload:JSON.stringify({ dealId:deal.id, kind }) } }),
+    });
+    if (response.status !== 204) throw new Error(`GitHub HTTP ${response.status}`);
+    return dealRemovalHtml('Auswahl gestartet', `${deal.title} wird als ${label} geprueft und veroeffentlicht. Abgelaufene oder ungeeignete Deals werden nicht uebernommen.`);
+  } catch (error) { return dealRemovalHtml('Auswahl fehlgeschlagen', error.message, 502); }
+}
+
 async function handleSignedDealEditLink(request, env) {
   if (!env.REFERRAL_KV) return dealRemovalHtml('Nicht konfiguriert', 'REFERRAL_KV binding fehlt im Worker.', 500);
 
@@ -2416,11 +2441,22 @@ async function handleSignedDealEditLink(request, env) {
   }
 
   const existing = await getJsonKV(env, dealOverrideKey(signed.base.dealId));
+  let live;
+  try {
+    const response = await fetch(`${WEBSITE_DEALS_JSON_URL}?edit=${Date.now()}`, { headers: { 'cache-control': 'no-cache' } });
+    if (!response.ok) throw new Error('Live-Daten nicht erreichbar');
+    const feed = await response.json();
+    live = feed.deals?.find(deal => deal.id === signed.base.dealId);
+    if (!live) return dealRemovalHtml('Nicht mehr live', 'Dieser Deal ist nicht mehr im Live-Feed.', 409);
+  } catch {
+    return dealRemovalHtml('Bitte erneut versuchen', 'Aktuelle Deal-Daten konnten nicht geladen werden.', 502);
+  }
   const edit = {
     ...signed.base,
+    ...live,
     ...(existing || {}),
     dealId: signed.base.dealId,
-    url: signed.base.url,
+    url: existing?.url || live.url || signed.base.url,
   };
 
   if (request.method === 'GET') {
@@ -2429,24 +2465,36 @@ async function handleSignedDealEditLink(request, env) {
 
   const body = {
     dealId: signed.base.dealId,
-    url: signed.base.url,
+    url: normalizeSubmissionUrl(signed.fields.url || edit.url),
     title: signed.fields.title,
     brand: signed.fields.brand,
     description: signed.fields.description,
     category: signed.fields.category,
     type: signed.fields.type,
     distance: signed.fields.distance,
-    pubDate: signed.fields.pubDate,
-    expires: signed.fields.expires,
-    expiresOriginal: signed.fields.expiresOriginal || signed.fields.expires,
-    expiryKind: signed.fields.expiryKind,
+    pubDate: edit.pubDate,
+    expires: signed.fields.validOn || signed.fields.validUntil || '',
+    expiresOriginal: signed.fields.validOn || signed.fields.validUntil || signed.fields.expiryDisplayText || '',
+    expiryKind: signed.fields.validOn ? 'single' : (signed.fields.validFrom && signed.fields.validUntil ? 'range' : (signed.fields.validUntil ? 'end' : 'unknown')),
     validOn: signed.fields.validOn,
     validFrom: signed.fields.validFrom,
     validUntil: signed.fields.validUntil,
     expiryDisplayText: signed.fields.expiryDisplayText,
-    pinnedRank: signed.fields.pinnedRank,
-    hidden: signed.fields.hidden === 'on',
+    pinnedRank: edit.pinnedRank,
+    hidden: edit.hidden === true,
   };
+  body.clearFields = ['description','validOn','validFrom','validUntil','expires','expiresOriginal','expiryDisplayText']
+    .filter(key => body[key] === '');
+  const invalidDate = ['validOn','validFrom','validUntil'].some(key => {
+    const value = body[key];
+    return value && (!/^\d{4}-\d{2}-\d{2}$/.test(value) || !Number.isFinite(Date.parse(value)) || new Date(value).toISOString().slice(0,10) !== value);
+  });
+  const invalidRange = body.validOn && (body.validFrom || body.validUntil)
+    || body.validFrom && body.validUntil && body.validFrom > body.validUntil;
+  if (!body.url || !cleanShortText(body.title,240) || !cleanShortText(body.brand,120) || invalidDate || invalidRange) {
+    return dealEditFormHtml({ edit: {...edit,...body}, payload: signed.payload, sig: signed.sig,
+      error: 'Titel und Anbieter sind erforderlich. Bitte entweder einen einzelnen Tag oder einen gueltigen Zeitraum angeben.' }, 400);
+  }
   if (body.hidden && !liveDealRemovalsEnabled(env)) {
     return dealEditFormHtml({
       edit: {
@@ -2473,7 +2521,7 @@ async function handleSignedDealEditLink(request, env) {
       edit: {
         ...signed.base,
         ...next,
-        url: signed.base.url,
+        url: next.url,
       },
       payload: signed.payload,
       sig: signed.sig,
@@ -2485,7 +2533,7 @@ async function handleSignedDealEditLink(request, env) {
     edit: {
       ...signed.base,
       ...next,
-      url: signed.base.url,
+      url: next.url,
     },
     payload: signed.payload,
     sig: signed.sig,
@@ -4133,16 +4181,20 @@ export default {
       return handleDealAdminRemove(request, env);
     }
 
-    if (path === '/api/deals/admin/remove-link' && request.method === 'GET') {
+    if (path === '/api/deals/admin/remove-link' && ['GET','POST'].includes(request.method)) {
       return handleSignedDealRemoveLink(request, env);
     }
 
-    if (path === '/api/deals/admin/restore-link' && request.method === 'GET') {
+    if (path === '/api/deals/admin/restore-link' && ['GET','POST'].includes(request.method)) {
       return handleSignedDealRestoreLink(request, env);
     }
 
     if (path === '/api/deals/admin/edit-link' && (request.method === 'GET' || request.method === 'POST')) {
       return handleSignedDealEditLink(request, env);
+    }
+
+    if (path === '/api/deals/admin/feature-link' && (request.method === 'GET' || request.method === 'POST')) {
+      return handleSignedFeaturedLink(request, env);
     }
 
     if (!env.REFERRAL_KV) {

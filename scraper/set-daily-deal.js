@@ -690,6 +690,8 @@ async function isExistingFeaturedDealCurrent(kind, approvedDeals) {
         url: existing.url || '',
     });
 
+    if (!approvedDeal) return false;
+
     if (kind === 'weekly' && existing.manualPick) {
         const manualEligibility = await getFeaturedDealEligibility(approvedDeal || existing, kind, { llmEnabled: false });
         if (!manualEligibility.eligible) {
@@ -943,6 +945,9 @@ async function main() {
   const maxOrder = deals.reduce((max, current) => Math.max(max, Number(current?.order) || 0), 0);
 
   async function maybePersistPick(kind, pickNumber) {
+    const current = loadExistingFeaturedDeal(kind);
+    if (current?.selectionReason === 'slack-live-review'
+      && await isExistingFeaturedDealCurrent(kind, approvedDeals)) return true;
     if (!pickNumber || deals.length === 0) return false;
     const deal = findPickedDeal(deals, pickNumber);
     if (!deal) {

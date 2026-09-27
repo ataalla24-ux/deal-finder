@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 export const LIVE_DEAL_EDIT_FIELDS = [
+  'url',
   'title',
   'brand',
   'description',
@@ -223,6 +224,8 @@ export function normalizeLiveDealEdit(raw = {}, options = {}) {
   const updatedAt = cleanText(raw.updatedAt || raw.updated_at || raw.updatedAtIso)
     || (sourceUpdatedAt > 0 ? new Date(sourceUpdatedAt).toISOString() : nowIso);
   const edit = {
+    clearFields: (Array.isArray(raw.clearFields) ? raw.clearFields : existing.clearFields || [])
+      .filter(key => ['description','validOn','validFrom','validUntil','expires','expiresOriginal','expiryDisplayText'].includes(key)),
     dealId,
     url: cleanText(raw.url || raw.dealUrl || raw.deal_url || existing.url || ''),
     hidden: parseBoolean(raw.hidden),
@@ -310,6 +313,7 @@ function applyEditToDeal(deal, edit, checkedAt) {
 
   const next = { ...deal };
   const changed = [];
+  if (setIfPresent(next, edit, 'url')) changed.push('url');
   if (setIfPresent(next, edit, 'title')) changed.push('title');
   if (setIfPresent(next, edit, 'brand')) changed.push('brand');
   if (setIfPresent(next, edit, 'description')) changed.push('description');
@@ -362,7 +366,19 @@ function applyEditToDeal(deal, edit, checkedAt) {
     }
   }
 
+  for (const field of edit.clearFields || []) {
+    if (next[field] !== '') { next[field] = ''; changed.push(field); }
+  }
+  if (changed.some(field => ['expires','validOn','validUntil'].includes(field))) {
+    next.validity = { ...next.validity, expiryDate: next.validOn || next.validUntil || next.expires || '', expirySource: 'manual' };
+    next.expiresSource = 'manual';
+    next.expirySource = 'manual';
+    next.expiresDetectedFromUrl = false;
+    next.expiresPrecision = next.validOn || next.validUntil ? 'day' : '';
+    changed.push('validity','expiresSource','expirySource','expiresDetectedFromUrl','expiresPrecision');
+  }
   const editedFields = [...new Set([
+    ...(edit.clearFields || []),
     ...(Array.isArray(deal.liveEditedFields) ? deal.liveEditedFields : []),
     ...LIVE_DEAL_EDIT_FIELDS.filter((field) => Object.hasOwn(edit, field) && edit[field] !== undefined
       && (cleanText(edit[field]) || ['location', 'address', 'logo', 'logoUrl'].includes(field))),

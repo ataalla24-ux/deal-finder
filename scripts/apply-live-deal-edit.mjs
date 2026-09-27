@@ -76,6 +76,7 @@ if (hiddenRequested && !manualActionAuthorized) {
 }
 
 const rawEdit = {
+  clearFields: payload.clearFields,
   dealId,
   url: payloadValue(payload, 'url', 'LIVE_DEAL_EDIT_URL'),
   title: payloadValue(payload, 'title', 'LIVE_DEAL_EDIT_TITLE'),
