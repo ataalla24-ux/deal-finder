@@ -287,6 +287,7 @@ async function findYourPicks(threadTs) {
         if (!parsed) continue;
         if (!picks[parsed.kind]) {
             picks[parsed.kind] = parsed.number;
+            picks[`${parsed.kind}PickedAt`] = new Date(Number(msg.ts) * 1000).toISOString();
             console.log(`Found ${parsed.kind} pick:`, parsed.number, 'from message:', msg.text);
         }
         if (picks.daily && picks.weekly) break;
@@ -946,7 +947,7 @@ async function main() {
 
   async function maybePersistPick(kind, pickNumber) {
     const current = loadExistingFeaturedDeal(kind);
-    if (current?.selectionReason === 'slack-live-review'
+    if (shouldPreserveManualPick(current, picks[`${kind}PickedAt`])
       && await isExistingFeaturedDealCurrent(kind, approvedDeals)) return true;
     if (!pickNumber || deals.length === 0) return false;
     const deal = findPickedDeal(deals, pickNumber);
@@ -1026,7 +1027,16 @@ async function main() {
   console.log('Done!');
 }
 
+// Replayed digest replies must not replace a newer manual selection.
+function shouldPreserveManualPick(current, incomingPickedAt) {
+    if (!current?.manualPick) return false;
+    const incomingTime = Date.parse(incomingPickedAt || '');
+    const currentTime = Date.parse(current.pickedAt || '');
+    return !Number.isFinite(incomingTime) || !Number.isFinite(currentTime) || incomingTime <= currentTime;
+}
+
 export {
+    shouldPreserveManualPick,
     getFeaturedDealEligibility,
     getViennaDayKey,
     getViennaWeekKey,

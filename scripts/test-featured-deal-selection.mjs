@@ -5,9 +5,22 @@ import {
   isFoodDrinkDeal,
   normalizeFeaturedDeal,
   selectAutomaticFeaturedDeal,
+  shouldPreserveManualPick,
+  getViennaWeekKey,
 } from '../scraper/set-daily-deal.js';
 
 const now = new Date('2026-06-29T12:00:00.000Z');
+
+for (const selectionReason of ['slack-pick', 'slack-live-review']) {
+  const pick = { manualPick: true, selectionReason, pickedAt: '2026-06-29T12:00:00Z' };
+  assert.equal(shouldPreserveManualPick(pick), true, 'next daily run preserves manual weekly choice');
+  assert.equal(shouldPreserveManualPick(pick, '2026-06-29T11:00:00Z'), true, 'old reply cannot overwrite choice');
+  assert.equal(shouldPreserveManualPick(pick, pick.pickedAt), true, 'reply replay is idempotent');
+  assert.equal(shouldPreserveManualPick(pick, '2026-06-30T12:00:00Z'), false, 'new explicit selection remains possible');
+}
+assert.equal(shouldPreserveManualPick({ manualPick: false }), false);
+assert.equal(getViennaWeekKey('2026-09-22T21:59:00Z'), getViennaWeekKey('2026-09-22T22:01:00Z'), 'Vienna midnight does not rotate a weekly pick');
+assert.notEqual(getViennaWeekKey('2026-09-27T21:59:00Z'), getViennaWeekKey('2026-09-27T22:01:00Z'), 'Monday starts a new Vienna calendar week');
 
 const featuredWithoutCachedLogo = normalizeFeaturedDeal({
   id: 'chocoberry-live',
