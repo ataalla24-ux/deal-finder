@@ -1,23 +1,17 @@
 {
-  "generatedAt": "2026-09-27T13:01:47.040Z",
+  "generatedAt": "2026-09-27T13:07:50.532Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 719,
-    "uniqueCandidates": 694,
-    "distinctCandidates": 706,
-    "duplicateClusters": 12,
+    "totalCandidates": 742,
+    "uniqueCandidates": 700,
+    "distinctCandidates": 719,
+    "duplicateClusters": 19,
     "topHealthySources": [
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "healthScore": 75,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 75,
-        "totalDeals": 4
       },
       {
         "sourceKey": "tiktok",
@@ -36,6 +30,12 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 68,
         "totalDeals": 7
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 61,
+        "totalDeals": 27
       }
     ],
     "topMissionSources": [
@@ -52,12 +52,6 @@
         "totalDeals": 7
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "missionFitScore": 58,
-        "totalDeals": 4
-      },
-      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 58,
@@ -68,6 +62,12 @@
         "sourceLabel": "Meta Instagram Graph",
         "missionFitScore": 55,
         "totalDeals": 17
+      },
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "missionFitScore": 54,
+        "totalDeals": 20
       }
     ],
     "topCoverageSources": [
@@ -109,12 +109,6 @@
     ],
     "topPrecisionSources": [
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 73,
-        "totalDeals": 4
-      },
-      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 71,
@@ -127,16 +121,22 @@
         "totalDeals": 4
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 69,
-        "totalDeals": 17
-      },
-      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 68,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 68,
+        "totalDeals": 17
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "precisionScore": 65,
+        "totalDeals": 7
       }
     ],
     "topWeightedSources": [
@@ -145,12 +145,6 @@
         "sourceLabel": "jö Bonus Club",
         "sourceWeightScore": 63,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 57,
-        "totalDeals": 4
       },
       {
         "sourceKey": "tiktok",
@@ -169,6 +163,12 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 55,
         "totalDeals": 158
+      },
+      {
+        "sourceKey": "instagram-apify",
+        "sourceLabel": "Apify Instagram",
+        "sourceWeightScore": 54,
+        "totalDeals": 7
       }
     ],
     "topSourcesToFix": [
@@ -301,61 +301,6 @@
       "coverageScore": 18,
       "precisionScore": 68,
       "sourceWeightScore": 63
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 4,
-      "uniqueDeals": 4,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 4,
-      "viennaCount": 4,
-      "foodDrinkCount": 4,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "10% Rabatt auf Kuchen und Brownies bei Noor’s KuchenGlück",
-        "3+3 Bud Bucket Aktion zu Burgern, Burritos und ähnlichen Speisen",
-        "20 % Rabatt auf Speisen im Jiu Ding Lou"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0.3,
-      "missingUrlRate": 0,
-      "averageQualityScore": 90,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 4
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 3
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 75,
-      "missionFitScore": 58,
-      "coverageScore": 13,
-      "precisionScore": 73,
-      "sourceWeightScore": 57
     },
     {
       "sourceKey": "tiktok",
@@ -563,146 +508,79 @@
       "sourceWeightScore": 54
     },
     {
-      "sourceKey": "firecrawl2",
-      "file": "deals-pending-firecrawl2.json",
-      "sourceLabel": "Firecrawl Key 3 - Consumables",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 27,
+      "uniqueDeals": 17,
+      "duplicateDeals": 10,
+      "duplicateAcrossSources": 10,
       "fresh1dCount": 0,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
+      "fresh7dCount": 27,
+      "viennaCount": 27,
+      "foodDrinkCount": 15,
+      "promoCount": 14,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Mausflug: 2 days ago · ausflugtipps | ausflugziele | freizeittipps | erlebnisse | kostenlos | wienguide | gratis ... #wien #wienliebe #wi"
+        "Lancôme Kirsch-Törtchen mit gratis Miniaturduft im Café Adlerhof",
+        "All You Can Eat chinesisches Street-Food jeden Sonntag bei QiYe",
+        "3+3 Bud Bucket Aktion bis 30. September 2026"
       ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-09-27T08:43:30.058Z",
-        "finishedAt": "2026-09-27T08:47:50.127Z",
-        "durationMs": 260069,
-        "counts": {
-          "rawCandidates": 17,
-          "normalizedCandidates": 10,
-          "verifiedCandidates": 1,
-          "previousDeals": 1,
-          "acceptedDeals": 1,
-          "rejectedDeals": 17
-        },
-        "rejectedByReason": {
-          "excluded-giveaway": 1,
-          "missing-concrete-offer": 6,
-          "post-verification-rejected": 10
-        },
-        "errors": [
-          "https://www.instagram.com/explore/tags/wiengratis/: Firecrawl Agent nach 120s abgebrochen",
-          "https://www.instagram.com/explore/tags/kostenloswien/: Firecrawl Agent nach 120s abgebrochen"
-        ],
-        "reportFile": "deal-pipeline-last-run-firecrawl2.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
+      "lastRun": null,
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
       "fresh1dRate": 0,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
+      "foodDrinkRate": 0.6,
+      "promoRate": 0.5,
       "missingUrlRate": 0,
-      "averageQualityScore": 84,
+      "averageQualityScore": 82.7,
       "topCategories": [
         {
+          "value": "essen",
+          "count": 13
+        },
+        {
           "value": "shopping",
+          "count": 11
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "freizeit",
           "count": 1
         }
       ],
       "topTypes": [
         {
+          "value": "rabatt",
+          "count": 14
+        },
+        {
           "value": "gratis",
+          "count": 10
+        },
+        {
+          "value": "bogo",
+          "count": 2
+        },
+        {
+          "value": "freebie",
           "count": 1
         }
       ],
       "issues": [
         "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
+        "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 66,
-      "missionFitScore": 43,
-      "coverageScore": 10,
+      "healthScore": 61,
+      "missionFitScore": 50,
+      "coverageScore": 20,
       "precisionScore": 64,
-      "sourceWeightScore": 47
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 17,
-      "uniqueDeals": 10,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 2,
-      "fresh7dCount": 17,
-      "viennaCount": 17,
-      "foodDrinkCount": 11,
-      "promoCount": 10,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "1 Stunde *Treffpunkt:* Klosterladen im Schottenstift *Eintritt:* € 12,- (mit NÖ-Card nur € 8,-) *Anmeldung:* Bitte melden Sie sich vorab an",
-        "10% Rabatt mit meinem Code LISA10 bei crimeclub_alleskrimi Was passiert, wenn ein echtes Ve",
-        "10 % Rabatt auf eure Tickets bei crimeclub_alleskrimi"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86.5,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 10
-        },
-        {
-          "value": "shopping",
-          "count": 5
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 8
-        },
-        {
-          "value": "rabatt",
-          "count": 7
-        },
-        {
-          "value": "freebie",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 55,
-      "coverageScore": 18,
-      "precisionScore": 69,
-      "sourceWeightScore": 53
+      "sourceWeightScore": 50
     },
     {
       "sourceKey": "instagram-verified",
@@ -854,13 +732,84 @@
       "sourceWeightScore": 41
     },
     {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 17,
+      "uniqueDeals": 7,
+      "duplicateDeals": 10,
+      "duplicateAcrossSources": 6,
+      "fresh1dCount": 2,
+      "fresh7dCount": 17,
+      "viennaCount": 17,
+      "foodDrinkCount": 11,
+      "promoCount": 10,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "1 Stunde *Treffpunkt:* Klosterladen im Schottenstift *Eintritt:* € 12,- (mit NÖ-Card nur € 8,-) *Anmeldung:* Bitte melden Sie sich vorab an",
+        "10% Rabatt mit meinem Code LISA10 bei crimeclub_alleskrimi Was passiert, wenn ein echtes Ve",
+        "10 % Rabatt auf eure Tickets bei crimeclub_alleskrimi"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.4,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.6,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.5,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 10
+        },
+        {
+          "value": "shopping",
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 8
+        },
+        {
+          "value": "rabatt",
+          "count": 7
+        },
+        {
+          "value": "freebie",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 60,
+      "missionFitScore": 55,
+      "coverageScore": 17,
+      "precisionScore": 68,
+      "sourceWeightScore": 51
+    },
+    {
       "sourceKey": "gastro2",
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
       "totalDeals": 158,
-      "uniqueDeals": 156,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
+      "uniqueDeals": 154,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
       "fresh1dCount": 0,
       "fresh7dCount": 9,
       "viennaCount": 6,
@@ -951,9 +900,9 @@
       "file": "deals-pending-firecrawl4.json",
       "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
       "totalDeals": 72,
-      "uniqueDeals": 68,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 2,
+      "uniqueDeals": 67,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 3,
       "fresh1dCount": 0,
       "fresh7dCount": 6,
       "viennaCount": 6,
@@ -1563,6 +1512,79 @@
       "sourceWeightScore": 32
     },
     {
+      "sourceKey": "firecrawl2",
+      "file": "deals-pending-firecrawl2.json",
+      "sourceLabel": "Firecrawl Key 3 - Consumables",
+      "totalDeals": 1,
+      "uniqueDeals": 0,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 0,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Mausflug: 2 days ago · ausflugtipps | ausflugziele | freizeittipps | erlebnisse | kostenlos | wienguide | gratis ... #wien #wienliebe #wi"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-09-27T08:43:30.058Z",
+        "finishedAt": "2026-09-27T08:47:50.127Z",
+        "durationMs": 260069,
+        "counts": {
+          "rawCandidates": 17,
+          "normalizedCandidates": 10,
+          "verifiedCandidates": 1,
+          "previousDeals": 1,
+          "acceptedDeals": 1,
+          "rejectedDeals": 17
+        },
+        "rejectedByReason": {
+          "excluded-giveaway": 1,
+          "missing-concrete-offer": 6,
+          "post-verification-rejected": 10
+        },
+        "errors": [
+          "https://www.instagram.com/explore/tags/wiengratis/: Firecrawl Agent nach 120s abgebrochen",
+          "https://www.instagram.com/explore/tags/kostenloswien/: Firecrawl Agent nach 120s abgebrochen"
+        ],
+        "reportFile": "deal-pipeline-last-run-firecrawl2.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 44,
+      "missionFitScore": 43,
+      "coverageScore": 10,
+      "precisionScore": 56,
+      "sourceWeightScore": 39
+    },
+    {
       "sourceKey": "community",
       "file": "deals-pending-community.json",
       "sourceLabel": "Community Submission",
@@ -1638,7 +1660,7 @@
       ],
       "healthScore": 43,
       "missionFitScore": 30,
-      "coverageScore": 18,
+      "coverageScore": 19,
       "precisionScore": 37,
       "sourceWeightScore": 33
     },
