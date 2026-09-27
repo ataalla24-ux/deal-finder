@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-09-27T13:07:50.532Z",
+  "generatedAt": "2026-09-27T13:58:31.201Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 742,
-    "uniqueCandidates": 700,
-    "distinctCandidates": 719,
-    "duplicateClusters": 19,
+    "totalCandidates": 751,
+    "uniqueCandidates": 717,
+    "distinctCandidates": 732,
+    "duplicateClusters": 15,
     "topHealthySources": [
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 76,
+        "totalDeals": 12
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -30,12 +36,6 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 68,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 61,
-        "totalDeals": 27
       }
     ],
     "topMissionSources": [
@@ -44,6 +44,12 @@
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 79,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 72,
+        "totalDeals": 12
       },
       {
         "sourceKey": "instagram-apify",
@@ -56,12 +62,6 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "missionFitScore": 58,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 55,
-        "totalDeals": 17
       },
       {
         "sourceKey": "tiktok",
@@ -109,6 +109,12 @@
     ],
     "topPrecisionSources": [
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 81,
+        "totalDeals": 12
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 71,
@@ -127,12 +133,6 @@
         "totalDeals": 10
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 68,
-        "totalDeals": 17
-      },
-      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "precisionScore": 65,
@@ -140,6 +140,12 @@
       }
     ],
     "topWeightedSources": [
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 64,
+        "totalDeals": 12
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 55,
         "totalDeals": 158
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 54,
-        "totalDeals": 7
       }
     ],
     "topSourcesToFix": [
@@ -240,6 +240,70 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 12,
+      "uniqueDeals": 8,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 3,
+      "fresh7dCount": 12,
+      "viennaCount": 12,
+      "foodDrinkCount": 9,
+      "promoCount": 9,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🚀 🎟 Gleich Ticket sichern: Hinweis zur Anmeldung: - Für unsere Mitglieder ist die Teilnahme kostenlos.",
+        "🔥🍔 Doppelter Patty Burger 🍔 mit knusprigen Pommes 🍟 Nur € 9,90!",
+        "Von der Napoleon Villa in Graz über die Heiligen-Geist-Kapelle Bruck an der Mur bis hin zum Bahnhof Neuberg an der Mürz: Mehr als 20 faszini"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.2,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.3,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 9
+        },
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 7
+        },
+        {
+          "value": "rabatt",
+          "count": 4
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        }
+      ],
+      "issues": [],
+      "healthScore": 76,
+      "missionFitScore": 72,
+      "coverageScore": 19,
+      "precisionScore": 81,
+      "sourceWeightScore": 64
+    },
     {
       "sourceKey": "joe",
       "file": "deals-pending-joe.json",
@@ -512,9 +576,9 @@
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 27,
-      "uniqueDeals": 17,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 10,
+      "uniqueDeals": 20,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
       "fresh1dCount": 0,
       "fresh7dCount": 27,
       "viennaCount": 27,
@@ -527,8 +591,8 @@
         "3+3 Bud Bucket Aktion bis 30. September 2026"
       ],
       "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
       "fresh1dRate": 0,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -573,14 +637,13 @@
         }
       ],
       "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
+        "wenige Deals sind frischer als 1 Tag"
       ],
-      "healthScore": 61,
+      "healthScore": 63,
       "missionFitScore": 50,
       "coverageScore": 20,
-      "precisionScore": 64,
-      "sourceWeightScore": 50
+      "precisionScore": 65,
+      "sourceWeightScore": 51
     },
     {
       "sourceKey": "instagram-verified",
@@ -730,77 +793,6 @@
       "coverageScore": 10,
       "precisionScore": 56,
       "sourceWeightScore": 41
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 17,
-      "uniqueDeals": 7,
-      "duplicateDeals": 10,
-      "duplicateAcrossSources": 6,
-      "fresh1dCount": 2,
-      "fresh7dCount": 17,
-      "viennaCount": 17,
-      "foodDrinkCount": 11,
-      "promoCount": 10,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "1 Stunde *Treffpunkt:* Klosterladen im Schottenstift *Eintritt:* € 12,- (mit NÖ-Card nur € 8,-) *Anmeldung:* Bitte melden Sie sich vorab an",
-        "10% Rabatt mit meinem Code LISA10 bei crimeclub_alleskrimi Was passiert, wenn ein echtes Ve",
-        "10 % Rabatt auf eure Tickets bei crimeclub_alleskrimi"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86.5,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 10
-        },
-        {
-          "value": "shopping",
-          "count": 5
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 8
-        },
-        {
-          "value": "rabatt",
-          "count": 7
-        },
-        {
-          "value": "freebie",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 60,
-      "missionFitScore": 55,
-      "coverageScore": 17,
-      "precisionScore": 68,
-      "sourceWeightScore": 51
     },
     {
       "sourceKey": "gastro2",
@@ -1288,6 +1280,90 @@
       "sourceWeightScore": 34
     },
     {
+      "sourceKey": "community",
+      "file": "deals-pending-community.json",
+      "sourceLabel": "Community Submission",
+      "totalDeals": 49,
+      "uniqueDeals": 46,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 0,
+      "viennaCount": 0,
+      "foodDrinkCount": 20,
+      "promoCount": 33,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis 2. Schnitzel mit Schulzeugnis",
+        "Gratis Eis",
+        "Gratis Energy Drink 9L"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 0,
+      "viennaRate": 0,
+      "foodDrinkRate": 0.4,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 0,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 16
+        },
+        {
+          "value": "essen",
+          "count": 14
+        },
+        {
+          "value": "wien",
+          "count": 9
+        },
+        {
+          "value": "kaffee",
+          "count": 6
+        },
+        {
+          "value": "kultur",
+          "count": 2
+        },
+        {
+          "value": "events",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 32
+        },
+        {
+          "value": "gratis",
+          "count": 12
+        },
+        {
+          "value": "bogo",
+          "count": 4
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 45,
+      "missionFitScore": 34,
+      "coverageScore": 24,
+      "precisionScore": 39,
+      "sourceWeightScore": 36
+    },
+    {
       "sourceKey": "gutscheine",
       "file": "deals-pending-gutscheine.json",
       "sourceLabel": "Gutscheine.at",
@@ -1583,86 +1659,6 @@
       "coverageScore": 10,
       "precisionScore": 56,
       "sourceWeightScore": 39
-    },
-    {
-      "sourceKey": "community",
-      "file": "deals-pending-community.json",
-      "sourceLabel": "Community Submission",
-      "totalDeals": 35,
-      "uniqueDeals": 33,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 0,
-      "viennaCount": 0,
-      "foodDrinkCount": 9,
-      "promoCount": 23,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis Eis",
-        "Gratis Energy Drink 9L",
-        "Bitte prüfen Deal"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.9,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0,
-      "viennaRate": 0,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 0,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 14
-        },
-        {
-          "value": "wien",
-          "count": 9
-        },
-        {
-          "value": "essen",
-          "count": 5
-        },
-        {
-          "value": "kaffee",
-          "count": 4
-        },
-        {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "reisen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 27
-        },
-        {
-          "value": "gratis",
-          "count": 7
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 43,
-      "missionFitScore": 30,
-      "coverageScore": 19,
-      "precisionScore": 37,
-      "sourceWeightScore": 33
     },
     {
       "sourceKey": "events",
