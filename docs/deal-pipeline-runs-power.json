@@ -2,9 +2,48 @@
   "schemaVersion": 1,
   "sourceKey": "power",
   "sourceLabel": "Power Scraper",
-  "updatedAt": "2026-09-28T11:51:18.041Z",
-  "runCount": 48,
+  "updatedAt": "2026-09-28T20:11:14.507Z",
+  "runCount": 49,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "power-2026-09-28T20:11:14.507Z",
+      "sourceKey": "power",
+      "sourceLabel": "Power Scraper",
+      "status": "completed-with-errors",
+      "startedAt": "2026-09-28T20:10:47.338Z",
+      "finishedAt": "2026-09-28T20:11:14.507Z",
+      "durationMs": 27169,
+      "outputFile": "docs/deals-pending-power.json",
+      "counts": {
+        "rawCandidates": 42,
+        "normalizedCandidates": 39,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 39,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "healthySources": 44,
+        "failedSources": 8,
+        "sourceCount": 51,
+        "concurrency": 4,
+        "timeoutMs": 8000
+      },
+      "constraints": {},
+      "errors": [
+        "Too Good To Go: HTTP 429",
+        "MediaMarkt: HTTP 404",
+        "Conrad: Browser HTTP 403",
+        "Möbelix: Browser HTTP 403",
+        "Thalia: Browser HTTP 403",
+        "Libro: Browser HTTP 400",
+        "NORDSEE: Not HTML",
+        "BackWerk: fetch failed"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "power-2026-09-28T11:51:18.041Z",
