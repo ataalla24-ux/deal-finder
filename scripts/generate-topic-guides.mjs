@@ -10,6 +10,30 @@ const PUBLISHED_LABEL = '17. August 2026';
 
 const guides = [
   {
+    slug: 'foodora-60-prozent-rabatt-genuss-wien',
+    title: 'Foodora 60 Prozent Rabatt mit Gutscheincode GENUSS',
+    meta: 'Foodora Rabatt in Wien: 60 Prozent mit dem Gutscheincode GENUSS sichern. So löst du den Foodora-Gutschein ein und prüfst Mindestbestellwert und Teilnahmebedingungen.',
+    eyebrow: 'Foodora Gutschein Wien',
+    headline: '60 Prozent Foodora-Rabatt mit dem Code GENUSS.',
+    intro: 'Der Gutscheincode GENUSS gewährt laut aktuellem FreeFinder-Eintrag 60 Prozent Rabatt bei Foodora. Der Code wurde am 28. September 2026 erneut erfolgreich getestet und hat aktuell kein fest eingetragenes Ablaufdatum.',
+    published: '2026-09-28', publishedLabel: '28. September 2026', modified: '2026-09-28', modifiedLabel: '28. September 2026',
+    image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
+    imageAlt: 'FreeFinder App mit Foodora-Rabatt und kostenlosen Angeboten in Wien',
+    sections: [
+      ['rabatt', 'Wie viel spart der Foodora-Code GENUSS?', `<p>Mit dem Gutscheincode <strong>GENUSS</strong> sind laut dem aktuellen Deal <strong>60 Prozent Rabatt</strong> bei Foodora möglich. Der Vorteil kann für Bestellungen bei teilnehmenden Restaurants und Shops angezeigt werden.</p><p>Der Code wurde am 28. September 2026 erneut erfolgreich verwendet. Da Foodora Gutscheine nach Konto, Liefergebiet, Warenkorb oder Kampagne ausspielen kann, sollte der Rabatt vor dem Absenden der Bestellung im Warenkorb sichtbar sein.</p>`],
+      ['einloesen', 'Foodora-Gutscheincode GENUSS einlösen', `<ol><li>Foodora öffnen und ein Restaurant oder einen Shop auswählen.</li><li>Artikel in den Warenkorb legen und die Lieferadresse prüfen.</li><li>Im Bereich für Gutscheine oder Promo-Codes <strong>GENUSS</strong> eingeben.</li><li>Auf „Anwenden“ tippen und kontrollieren, ob 60 Prozent Rabatt abgezogen werden.</li><li>Erst danach bestellen und den Endbetrag inklusive Liefer- und Servicegebühren prüfen.</li></ol><div class="article-note"><strong>Wichtig</strong>Der Code ist nur erfolgreich eingelöst, wenn die Ermäßigung im Warenkorb tatsächlich angezeigt wird. Ein sichtbares Eingabefeld allein garantiert keinen Rabatt.</div>`],
+      ['bedingungen', 'Welche Bedingungen solltest du prüfen?', `<p>Im aktuellen Eintrag ist <strong>kein festes Ablaufdatum</strong> hinterlegt. Trotzdem können Foodora-Kampagnen jederzeit geändert oder auf bestimmte Konten, Neukunden, Restaurants, Mindestbestellwerte oder Liefergebiete beschränkt werden.</p><ul><li>Gilt der Code für dein Konto?</li><li>Wird ein Mindestbestellwert verlangt?</li><li>Sind Liefer-, Service- oder Verpackungsgebühren vom Rabatt ausgenommen?</li><li>Gilt der Rabatt für alle Restaurants oder nur teilnehmende Anbieter?</li><li>Wird der Endpreis nach dem Einlösen wirklich um 60 Prozent reduziert?</li></ul>`],
+      ['quelle', 'Aktualität des Foodora-Rabatts', `<p>Die FreeFinder-App führt den Deal mit dem Code <strong>GENUSS</strong> und verlinkt direkt zur <a href="https://www.foodora.at/campaigns?lat=48.20807&amp;lng=16.37122&amp;url_key=AT_food_HVA1_loggedout" rel="noopener">Foodora-Kampagnenübersicht</a>. Die erfolgreiche Verwendung am 28. September 2026 bestätigt, dass der Code aktuell funktioniert.</p><p>Da Foodora die Teilnahmebedingungen dynamisch pro Bestellung prüfen kann, solltest du den Rabatt auch bei jeder späteren Bestellung direkt im Warenkorb kontrollieren.</p>`],
+    ],
+    faqs: [
+      ['Wie lautet der Foodora-Gutscheincode?', 'Der aktuelle Code lautet GENUSS.'],
+      ['Wie viel Rabatt gibt es mit GENUSS?', 'Laut aktuellem Deal 60 Prozent Rabatt. Kontrolliere die tatsächliche Ermäßigung im Warenkorb.'],
+      ['Hat der Foodora-Code ein Ablaufdatum?', 'Aktuell ist kein festes Ablaufdatum eingetragen. Foodora kann den Code trotzdem jederzeit ändern oder einschränken.'],
+      ['Gilt der Code für jede Bestellung?', 'Nicht garantiert. Konto, Restaurant, Liefergebiet, Mindestbestellwert und Gebühren können die Einlösung beeinflussen.'],
+    ],
+    related: [['App-Gutscheine in Wien', 'app-gutscheine-wien.html'], ['Rabatte in Wien', 'rabatte-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+  },
+  {
     slug: 'interpolburger-2-euro-wien',
     title: '2-Euro-Burger mit Pommes bei Interpolburger Wien',
     meta: 'Interpolburger Wien: Burger mit Pommes für 2 Euro am 25. September 2026 ab 15 Uhr am Südtiroler Platz. Nur solange der Vorrat reicht.',
