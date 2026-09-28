@@ -1,17 +1,23 @@
 {
-  "generatedAt": "2026-09-28T11:52:28.268Z",
+  "generatedAt": "2026-09-28T13:50:58.529Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 736,
-    "uniqueCandidates": 701,
-    "distinctCandidates": 718,
-    "duplicateClusters": 17,
+    "uniqueCandidates": 705,
+    "distinctCandidates": 720,
+    "duplicateClusters": 15,
     "topHealthySources": [
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "healthScore": 75,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 74,
+        "totalDeals": 19
       },
       {
         "sourceKey": "food3",
@@ -30,12 +36,6 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 68,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 66,
-        "totalDeals": 17
       }
     ],
     "topMissionSources": [
@@ -44,6 +44,12 @@
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 79,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "missionFitScore": 63,
+        "totalDeals": 19
       },
       {
         "sourceKey": "instagram-apify",
@@ -58,12 +64,6 @@
         "totalDeals": 17
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 56,
-        "totalDeals": 19
-      },
-      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "missionFitScore": 54,
@@ -75,20 +75,20 @@
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "coverageScore": 70,
-        "totalDeals": 156,
+        "totalDeals": 155,
         "fresh1dCount": 0
       },
       {
         "sourceKey": "vienna-promo-radar",
         "sourceLabel": "Vienna Promo Radar",
-        "coverageScore": 46,
+        "coverageScore": 47,
         "totalDeals": 110,
         "fresh1dCount": 0
       },
       {
         "sourceKey": "member-benefits",
         "sourceLabel": "Member Benefits",
-        "coverageScore": 44,
+        "coverageScore": 45,
         "totalDeals": 46,
         "fresh1dCount": 46
       },
@@ -100,14 +100,20 @@
         "fresh1dCount": 0
       },
       {
-        "sourceKey": "gutscheine",
-        "sourceLabel": "Gutscheine.at",
-        "coverageScore": 31,
-        "totalDeals": 34,
-        "fresh1dCount": 34
+        "sourceKey": "community",
+        "sourceLabel": "Community Submission",
+        "coverageScore": 25,
+        "totalDeals": 50,
+        "fresh1dCount": 0
       }
     ],
     "topPrecisionSources": [
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 73,
+        "totalDeals": 19
+      },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
@@ -125,12 +131,6 @@
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 68,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 68,
-        "totalDeals": 19
       },
       {
         "sourceKey": "food3",
@@ -147,10 +147,16 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 60,
+        "totalDeals": 19
+      },
+      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 55,
-        "totalDeals": 156
+        "totalDeals": 155
       },
       {
         "sourceKey": "tiktok",
@@ -163,12 +169,6 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 54,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 54,
-        "totalDeals": 17
       }
     ],
     "topSourcesToFix": [
@@ -299,6 +299,78 @@
       "coverageScore": 18,
       "precisionScore": 68,
       "sourceWeightScore": 63
+    },
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 19,
+      "uniqueDeals": 15,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
+      "fresh1dCount": 12,
+      "fresh7dCount": 19,
+      "viennaCount": 19,
+      "foodDrinkCount": 10,
+      "promoCount": 12,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis in Wien diese Woche: Block Party am Würstelstand.",
+        "Gratis-Eintritt zum Event bei @events.eventjet.at",
+        "Oktober · 20:30 · Eintritt frei Jazz & Neo-Soul am Schottenring: Carla Kaltenböck (Vocals), Tom Silver (Piano), Azin Seraj (Kontrabass) und"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.2,
+      "fresh1dRate": 0.6,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.8,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 7
+        },
+        {
+          "value": "shopping",
+          "count": 6
+        },
+        {
+          "value": "kaffee",
+          "count": 3
+        },
+        {
+          "value": "kultur",
+          "count": 2
+        },
+        {
+          "value": "events",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 9
+        },
+        {
+          "value": "rabatt",
+          "count": 9
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        }
+      ],
+      "issues": [],
+      "healthScore": 74,
+      "missionFitScore": 63,
+      "coverageScore": 24,
+      "precisionScore": 73,
+      "sourceWeightScore": 60
     },
     {
       "sourceKey": "food3",
@@ -506,9 +578,9 @@
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 17,
-      "uniqueDeals": 10,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 7,
+      "uniqueDeals": 11,
+      "duplicateDeals": 6,
+      "duplicateAcrossSources": 6,
       "fresh1dCount": 3,
       "fresh7dCount": 15,
       "viennaCount": 17,
@@ -569,78 +641,6 @@
       "missionFitScore": 57,
       "coverageScore": 18,
       "precisionScore": 69,
-      "sourceWeightScore": 54
-    },
-    {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 19,
-      "uniqueDeals": 12,
-      "duplicateDeals": 7,
-      "duplicateAcrossSources": 5,
-      "fresh1dCount": 6,
-      "fresh7dCount": 17,
-      "viennaCount": 19,
-      "foodDrinkCount": 10,
-      "promoCount": 12,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "10% Rabatt mit dem Code “wienmalanders11” bei wienmalanders (auf alle original Erlebnisse)�",
-        "Etli ekmek or lahmacun takeaway for 7,99 € with free salad and ayran",
-        "10% Rabatt mit meinem Code LISA10 bei crimeclub_alleskrimi Was passiert, wenn ein echtes Ve"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0.3,
-      "fresh7dRate": 0.9,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86.6,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 10
-        },
-        {
-          "value": "shopping",
-          "count": 6
-        },
-        {
-          "value": "events",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        },
-        {
-          "value": "reisen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 10
-        },
-        {
-          "value": "rabatt",
-          "count": 8
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        }
-      ],
-      "issues": [],
-      "healthScore": 65,
-      "missionFitScore": 56,
-      "coverageScore": 20,
-      "precisionScore": 68,
       "sourceWeightScore": 54
     },
     {
@@ -796,15 +796,15 @@
       "sourceKey": "gastro2",
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
-      "totalDeals": 156,
-      "uniqueDeals": 153,
+      "totalDeals": 155,
+      "uniqueDeals": 152,
       "duplicateDeals": 3,
       "duplicateAcrossSources": 3,
       "fresh1dCount": 0,
-      "fresh7dCount": 8,
+      "fresh7dCount": 7,
       "viennaCount": 3,
-      "foodDrinkCount": 154,
-      "promoCount": 74,
+      "foodDrinkCount": 153,
+      "promoCount": 73,
       "missingUrlCount": 0,
       "sampleTitles": [
         "Stempelkarte: Deine digitale Stempelkarte bei Stempelkarte – Schneller zum Gratis ...",
@@ -833,7 +833,7 @@
       "uniqueRate": 1,
       "duplicateRate": 0,
       "fresh1dRate": 0,
-      "fresh7dRate": 0.1,
+      "fresh7dRate": 0,
       "viennaRate": 0,
       "foodDrinkRate": 1,
       "promoRate": 0.5,
@@ -842,7 +842,7 @@
       "topCategories": [
         {
           "value": "essen",
-          "count": 145
+          "count": 144
         },
         {
           "value": "supermarkt",
@@ -868,7 +868,7 @@
         },
         {
           "value": "bogo",
-          "count": 48
+          "count": 47
         },
         {
           "value": "gratis",
@@ -1064,7 +1064,7 @@
       ],
       "healthScore": 52,
       "missionFitScore": 40,
-      "coverageScore": 44,
+      "coverageScore": 45,
       "precisionScore": 39,
       "sourceWeightScore": 44
     },
@@ -1181,7 +1181,7 @@
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
-      "fresh7dCount": 4,
+      "fresh7dCount": 0,
       "viennaCount": 4,
       "foodDrinkCount": 0,
       "promoCount": 0,
@@ -1195,7 +1195,7 @@
       "uniqueRate": 1,
       "duplicateRate": 0,
       "fresh1dRate": 0,
-      "fresh7dRate": 1,
+      "fresh7dRate": 0,
       "viennaRate": 1,
       "foodDrinkRate": 0,
       "promoRate": 0,
@@ -1233,7 +1233,7 @@
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
-      "fresh7dCount": 3,
+      "fresh7dCount": 0,
       "viennaCount": 3,
       "foodDrinkCount": 0,
       "promoCount": 0,
@@ -1247,7 +1247,7 @@
       "uniqueRate": 1,
       "duplicateRate": 0,
       "fresh1dRate": 0,
-      "fresh7dRate": 1,
+      "fresh7dRate": 0,
       "viennaRate": 1,
       "foodDrinkRate": 0,
       "promoRate": 0,
@@ -1280,8 +1280,8 @@
       "sourceKey": "community",
       "file": "deals-pending-community.json",
       "sourceLabel": "Community Submission",
-      "totalDeals": 49,
-      "uniqueDeals": 46,
+      "totalDeals": 50,
+      "uniqueDeals": 47,
       "duplicateDeals": 3,
       "duplicateAcrossSources": 1,
       "fresh1dCount": 0,
@@ -1316,7 +1316,7 @@
         },
         {
           "value": "wien",
-          "count": 9
+          "count": 10
         },
         {
           "value": "kaffee",
@@ -1334,7 +1334,7 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 32
+          "count": 33
         },
         {
           "value": "gratis",
@@ -1359,74 +1359,6 @@
       "coverageScore": 25,
       "precisionScore": 39,
       "sourceWeightScore": 36
-    },
-    {
-      "sourceKey": "gutscheine",
-      "file": "deals-pending-gutscheine.json",
-      "sourceLabel": "Gutscheine.at",
-      "totalDeals": 34,
-      "uniqueDeals": 34,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 34,
-      "fresh7dCount": 34,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "40 € TUI Coupon für Top-Reiseziele",
-        "Bis zu 65% Rabatt auf Haushaltelektronik",
-        "Bis zu 60% Rabatt auf TV und Audio"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0.1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 53.3,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 31
-        },
-        {
-          "value": "beauty",
-          "count": 2
-        },
-        {
-          "value": "reisen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 29
-        },
-        {
-          "value": "gratis",
-          "count": 3
-        },
-        {
-          "value": "gutschein",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 44,
-      "missionFitScore": 25,
-      "coverageScore": 31,
-      "precisionScore": 28,
-      "sourceWeightScore": 32
     },
     {
       "sourceKey": "gemeinde",
@@ -1787,9 +1719,78 @@
       ],
       "healthScore": 39,
       "missionFitScore": 22,
-      "coverageScore": 46,
+      "coverageScore": 47,
       "precisionScore": 30,
       "sourceWeightScore": 33
+    },
+    {
+      "sourceKey": "gutscheine",
+      "file": "deals-pending-gutscheine.json",
+      "sourceLabel": "Gutscheine.at",
+      "totalDeals": 34,
+      "uniqueDeals": 34,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 34,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "40 € TUI Coupon für Top-Reiseziele",
+        "Bis zu 65% Rabatt auf Haushaltelektronik",
+        "Bis zu 60% Rabatt auf TV und Audio"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0.1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 53.3,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 31
+        },
+        {
+          "value": "beauty",
+          "count": 2
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 29
+        },
+        {
+          "value": "gratis",
+          "count": 3
+        },
+        {
+          "value": "gutschein",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 30,
+      "missionFitScore": 3,
+      "coverageScore": 14,
+      "precisionScore": 16,
+      "sourceWeightScore": 15
     },
     {
       "sourceKey": "flights",
@@ -1800,7 +1801,7 @@
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
-      "fresh7dCount": 14,
+      "fresh7dCount": 0,
       "viennaCount": 0,
       "foodDrinkCount": 0,
       "promoCount": 0,
@@ -1814,7 +1815,7 @@
       "uniqueRate": 1,
       "duplicateRate": 0,
       "fresh1dRate": 0,
-      "fresh7dRate": 1,
+      "fresh7dRate": 0,
       "viennaRate": 0,
       "foodDrinkRate": 0,
       "promoRate": 0,
