@@ -164,9 +164,9 @@ function renderPage(feed, deals, now) {
     '@graph': [
       {
         '@type': 'CollectionPage',
-        name: 'Aktuelle Angebote in Wien heute',
+        name: 'Aktuelle Angebote Wien heute: Gratis, 1+1 & Gutscheine',
         url: 'https://freefinder.at/angebote-wien-heute.html',
-        description: 'Aktuelle kostenlose Angebote, 1+1-Aktionen und Rabatte aus der FreeFinder-App mit eindeutigem Enddatum.',
+        description: 'Aktuelle Gratis-Angebote, Restaurant-Gutscheine, 1+1-Aktionen und Rabatte in Wien mit eindeutigem Enddatum.',
         inLanguage: 'de-AT',
         dateModified: modified,
         mainEntity: { '@type': 'ItemList', numberOfItems: deals.length, itemListElement: itemList },
@@ -196,12 +196,12 @@ function renderPage(feed, deals, now) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Aktuelle Angebote in Wien heute | FreeFinder</title>
-  <meta name="description" content="Aktuelle Gratis-Angebote, 1+1-Aktionen und Rabatte in Wien mit Enddatum und Link zu den Bedingungen beim Anbieter.">
+  <title>Aktuelle Angebote Wien heute: Gratis, 1+1 &amp; Gutscheine | FreeFinder</title>
+  <meta name="description" content="Aktuelle Gratis-Angebote, Restaurant-Gutscheine, 1+1-Aktionen und Rabatte in Wien – mit Enddatum und Link zu den Bedingungen.">
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
   <link rel="canonical" href="https://freefinder.at/angebote-wien-heute.html">
-  <meta property="og:title" content="Aktuelle Angebote in Wien heute">
-  <meta property="og:description" content="Gratis-Angebote, 1+1-Aktionen und Rabatte aus der FreeFinder-App mit klaren Enddaten.">
+  <meta property="og:title" content="Aktuelle Angebote Wien heute: Gratis, 1+1 &amp; Gutscheine">
+  <meta property="og:description" content="Aktuelle Gratis-Angebote, Restaurant-Gutscheine, 1+1-Aktionen und Rabatte mit klaren Enddaten.">
   <meta property="og:image" content="https://freefinder.at/og-preview-stores.png">
   <meta property="og:url" content="https://freefinder.at/angebote-wien-heute.html">
   <meta property="og:type" content="website">
@@ -222,7 +222,7 @@ function renderPage(feed, deals, now) {
   <!-- Generated from docs/deals.json by scripts/generate-seo-deals-page.mjs. -->
   <header class="site-header"><nav class="nav" aria-label="Hauptnavigation"><a class="brand" href="/"><img class="brand-mark" src="/icon-192.svg" alt="" width="38" height="38">FreeFinder</a><div class="nav-links"><a href="/angebote-wien-heute.html">Aktuelle Deals</a><a href="/blog/">Blog</a><a class="nav-download" href="/#download">App laden</a></div></nav></header>
   <main>
-    <header class="article-hero"><div class="hero-inner"><p class="eyebrow">Heute in Wien</p><h1>Aktuelle kostenlose Angebote und Rabatte in Wien.</h1><p class="hero-copy">${deals.length} ausgewählte App-Deals mit eindeutigem, noch gültigem Enddatum. Öffne vor der Einlösung immer die verlinkten Bedingungen des Anbieters.</p><div class="article-meta"><span>App-Daten aktualisiert: ${escapeHtml(formatDate(updated))}</span><span>${deals.length} aktuelle Treffer</span></div><div class="article-byline"><span>Geprüfte Datenbasis der <a href="/about.html">FreeFinder Redaktion</a></span></div></div></header>
+    <header class="article-hero"><div class="hero-inner"><p class="eyebrow">Heute in Wien</p><h1>Aktuelle Angebote in Wien: Gratis, 1+1 und Gutscheine.</h1><p class="hero-copy">${deals.length} ausgewählte Gratis-Angebote, Restaurant-Gutscheine, 1+1-Aktionen und Rabatte mit eindeutigem, noch gültigem Enddatum. Öffne vor der Einlösung immer die verlinkten Bedingungen des Anbieters.</p><div class="article-meta"><span>App-Daten aktualisiert: ${escapeHtml(formatDate(updated))}</span><span>${deals.length} aktuelle Treffer</span></div><div class="article-byline"><span>Geprüfte Datenbasis der <a href="/about.html">FreeFinder Redaktion</a></span></div></div></header>
     <section class="deal-hub" aria-labelledby="dealHubTitle">
       <div class="deal-hub-head"><div><p class="eyebrow">Aktive Deals</p><h2 id="dealHubTitle">Angebote mit bekanntem Enddatum</h2></div><p>Die Übersicht enthält nur nicht abgelaufene Wien-Treffer mit eingetragenem Ablaufdatum. Verfügbarkeit und Teilnahme können sich kurzfristig ändern.</p></div>
       <div class="live-deal-grid">${cards}
