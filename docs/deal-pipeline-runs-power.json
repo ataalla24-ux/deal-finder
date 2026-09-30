@@ -2,9 +2,49 @@
   "schemaVersion": 1,
   "sourceKey": "power",
   "sourceLabel": "Power Scraper",
-  "updatedAt": "2026-09-29T18:46:14.855Z",
-  "runCount": 51,
+  "updatedAt": "2026-09-30T11:16:06.383Z",
+  "runCount": 52,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "power-2026-09-30T11:16:06.383Z",
+      "sourceKey": "power",
+      "sourceLabel": "Power Scraper",
+      "status": "completed-with-errors",
+      "startedAt": "2026-09-30T11:15:40.316Z",
+      "finishedAt": "2026-09-30T11:16:06.383Z",
+      "durationMs": 26067,
+      "outputFile": "docs/deals-pending-power.json",
+      "counts": {
+        "rawCandidates": 40,
+        "normalizedCandidates": 39,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 39,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "healthySources": 43,
+        "failedSources": 9,
+        "sourceCount": 51,
+        "concurrency": 4,
+        "timeoutMs": 8000
+      },
+      "constraints": {},
+      "errors": [
+        "Too Good To Go: HTTP 429",
+        "MediaMarkt: HTTP 404",
+        "Decathlon: Browser HTTP 403",
+        "Lego Store: Browser HTTP 403",
+        "Thalia: Browser HTTP 403",
+        "Libro: Browser HTTP 403",
+        "NORDSEE: Not HTML",
+        "KFC: Untrusted official-food URL",
+        "BackWerk: fetch failed"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "power-2026-09-29T18:46:14.855Z",
