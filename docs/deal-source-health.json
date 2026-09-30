@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-09-30T23:35:53.182Z",
+  "generatedAt": "2026-09-30T23:46:39.321Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 713,
-    "uniqueCandidates": 670,
-    "distinctCandidates": 689,
-    "duplicateClusters": 19,
+    "totalCandidates": 703,
+    "uniqueCandidates": 666,
+    "distinctCandidates": 682,
+    "duplicateClusters": 16,
     "topHealthySources": [
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "healthScore": 76,
+        "totalDeals": 15
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -20,12 +26,6 @@
         "totalDeals": 13
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 71,
-        "totalDeals": 25
-      },
-      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "healthScore": 68,
@@ -34,7 +34,7 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "healthScore": 64,
+        "healthScore": 66,
         "totalDeals": 38
       }
     ],
@@ -48,8 +48,8 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 66,
-        "totalDeals": 25
+        "missionFitScore": 75,
+        "totalDeals": 15
       },
       {
         "sourceKey": "tiktok",
@@ -109,16 +109,16 @@
     ],
     "topPrecisionSources": [
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 79,
+        "totalDeals": 15
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 78,
         "totalDeals": 13
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 74,
-        "totalDeals": 25
       },
       {
         "sourceKey": "joe",
@@ -133,13 +133,19 @@
         "totalDeals": 5
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "precisionScore": 65,
-        "totalDeals": 7
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 66,
+        "totalDeals": 38
       }
     ],
     "topWeightedSources": [
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 66,
+        "totalDeals": 15
+      },
       {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
@@ -153,12 +159,6 @@
         "totalDeals": 13
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 61,
-        "totalDeals": 25
-      },
-      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 54,
@@ -167,7 +167,7 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 53,
+        "sourceWeightScore": 54,
         "totalDeals": 38
       }
     ],
@@ -239,6 +239,84 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "meta-instagram",
+      "file": "deals-pending-meta-instagram.json",
+      "sourceLabel": "Meta Instagram Graph",
+      "totalDeals": 15,
+      "uniqueDeals": 9,
+      "duplicateDeals": 6,
+      "duplicateAcrossSources": 6,
+      "fresh1dCount": 10,
+      "fresh7dCount": 15,
+      "viennaCount": 15,
+      "foodDrinkCount": 11,
+      "promoCount": 11,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Du kannst 1× kostenlos am 6.10.26 schnuppern kommen.",
+        "🍦☕🧇 Aktuell gibt es 4 digitale Stempelkarten: 🍨 Eisboxen: Stempel sammeln → 0,75 L Eisbox gratis ☕ Heiße Getränke: Stempel sammeln → 1 He",
+        "Free admission for audience members."
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0.7,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.2,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 8
+        },
+        {
+          "value": "beauty",
+          "count": 2
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        },
+        {
+          "value": "supermarkt",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 7
+        },
+        {
+          "value": "rabatt",
+          "count": 6
+        },
+        {
+          "value": "freebie",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 76,
+      "missionFitScore": 75,
+      "coverageScore": 26,
+      "precisionScore": 79,
+      "sourceWeightScore": 66
+    },
     {
       "sourceKey": "joe",
       "file": "deals-pending-joe.json",
@@ -374,88 +452,6 @@
       "sourceWeightScore": 61
     },
     {
-      "sourceKey": "meta-instagram",
-      "file": "deals-pending-meta-instagram.json",
-      "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 25,
-      "uniqueDeals": 16,
-      "duplicateDeals": 9,
-      "duplicateAcrossSources": 9,
-      "fresh1dCount": 9,
-      "fresh7dCount": 25,
-      "viennaCount": 25,
-      "foodDrinkCount": 19,
-      "promoCount": 12,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Free admission for audience members.",
-        "📍 Tag der Psychologie 2026 – Future of Mind Der Tag der Psychologie bringt im Wiener Rathaus ein kostenloses öffentliches Programm zu Digit",
-        "Oktober · 18:30–22:00, La Maison, Wien „ANDREA-20“ für 20 € Rabatt (Gilt nur für die ersten 10 Personen Mit Instax Mini 99 von instax.at FUJ"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.4,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.8,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86.6,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 15
-        },
-        {
-          "value": "kaffee",
-          "count": 3
-        },
-        {
-          "value": "shopping",
-          "count": 3
-        },
-        {
-          "value": "beauty",
-          "count": 2
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        },
-        {
-          "value": "supermarkt",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 17
-        },
-        {
-          "value": "gratis",
-          "count": 5
-        },
-        {
-          "value": "freebie",
-          "count": 2
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 71,
-      "missionFitScore": 66,
-      "coverageScore": 28,
-      "precisionScore": 74,
-      "sourceWeightScore": 61
-    },
-    {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
@@ -519,9 +515,9 @@
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
       "totalDeals": 38,
-      "uniqueDeals": 26,
-      "duplicateDeals": 12,
-      "duplicateAcrossSources": 12,
+      "uniqueDeals": 29,
+      "duplicateDeals": 9,
+      "duplicateAcrossSources": 9,
       "fresh1dCount": 6,
       "fresh7dCount": 38,
       "viennaCount": 38,
@@ -534,8 +530,8 @@
         "Schülerangebot: Hühnersandwich + Pepsi oder Ayran für 5,99 €"
       ],
       "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
+      "uniqueRate": 0.8,
+      "duplicateRate": 0.2,
       "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -588,11 +584,11 @@
         }
       ],
       "issues": [],
-      "healthScore": 64,
+      "healthScore": 66,
       "missionFitScore": 51,
-      "coverageScore": 29,
-      "precisionScore": 65,
-      "sourceWeightScore": 53
+      "coverageScore": 30,
+      "precisionScore": 66,
+      "sourceWeightScore": 54
     },
     {
       "sourceKey": "food3",
