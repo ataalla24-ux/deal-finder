@@ -145,11 +145,14 @@ try {
   fs.writeFileSync(path.join(temp, 'deals.json'), JSON.stringify(fixture));
   fs.writeFileSync(path.join(temp, 'live-deal-edits.json'), JSON.stringify({ edits: reviewedEdits }));
   fs.writeFileSync(path.join(temp, 'deal-candidates-index.json'), JSON.stringify({ deals: [] }));
+  const moderationPath = path.join(temp, 'deal-moderation.json');
+  fs.writeFileSync(moderationPath, JSON.stringify({ hiddenDeals: [] }));
   for (const name of ['gemeinde', 'gottesdienste', 'events']) {
     fs.writeFileSync(path.join(temp, `deals-pending-church-${name}.json`), JSON.stringify({ deals: [] }));
   }
   const run = spawnSync(process.execPath, ['scraper/normalize-live-deals.js'], {
     env: { ...process.env, SENTRY_DISABLED: '1', LIVE_DEAL_DOCS_DIR: temp,
+      DEAL_MODERATION_PATH: '',
       LIVE_DEAL_VALIDATION_APPLY: '1', LIVE_DEAL_REMOVALS_ENABLED: '0', ALLOW_AUTOMATED_LIVE_REMOVALS: '0',
       MAX_LIVE_URL_HEALTH_CHECKS: '0', MAX_LIVE_URL_EXPIRY_REFRESHES: '0', MAX_LIVE_CONTENT_ENRICHMENTS: '0' },
     encoding: 'utf8', timeout: 30000,
@@ -170,6 +173,21 @@ try {
   const flagged = review.candidates.find((candidate) => candidate.id === 'needs-review');
   assert.ok(flagged.details.contentIssues.some((issue) => issue.code === 'unresolved-merchant'));
   assert.equal(flagged.details.automaticRemovalEligible, false);
+  // Manual Slack removal must still win over reviewed content, even while
+  // automated removals are paused. Keep this fixture independent of live data.
+  fs.writeFileSync(moderationPath, JSON.stringify({ hiddenDeals: [{
+    id: cheesecake.id, reason: 'test manual Slack removal',
+  }] }));
+  const moderatedRun = spawnSync(process.execPath, ['scraper/normalize-live-deals.js'], {
+    env: { ...process.env, SENTRY_DISABLED: '1', LIVE_DEAL_DOCS_DIR: temp,
+      DEAL_MODERATION_PATH: moderationPath,
+      LIVE_DEAL_VALIDATION_APPLY: '1', LIVE_DEAL_REMOVALS_ENABLED: '0', ALLOW_AUTOMATED_LIVE_REMOVALS: '0',
+      MAX_LIVE_URL_HEALTH_CHECKS: '0', MAX_LIVE_URL_EXPIRY_REFRESHES: '0', MAX_LIVE_CONTENT_ENRICHMENTS: '0' },
+    encoding: 'utf8', timeout: 30000,
+  });
+  assert.equal(moderatedRun.status, 0, moderatedRun.stderr);
+  const moderated = JSON.parse(fs.readFileSync(path.join(temp, 'deals.json')));
+  assert.deepEqual(moderated.deals.map(deal => deal.id).sort(), ['duru', 'needs-review']);
 } finally {
   fs.rmSync(temp, { recursive: true, force: true });
 }

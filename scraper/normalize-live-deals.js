@@ -1501,7 +1501,7 @@ async function main() {
     }
   }
 
-  const moderation = loadDealModeration();
+  const moderation = loadDealModeration(process.env.DEAL_MODERATION_PATH || path.join(DOCS_DIR, 'deal-moderation.json'));
   const moderationFilter = filterModeratedDeals(dedupedRemaining, moderation);
   moderationRemovals = moderationFilter.removed.length;
   for (const deal of moderationFilter.removed) {
