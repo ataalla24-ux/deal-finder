@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-30T06:30:14.228Z",
+  "generatedAt": "2026-09-30T06:53:17.685Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 696,
-    "uniqueCandidates": 671,
-    "distinctCandidates": 683,
-    "duplicateClusters": 12,
+    "totalCandidates": 710,
+    "uniqueCandidates": 679,
+    "distinctCandidates": 693,
+    "duplicateClusters": 14,
     "topHealthySources": [
       {
         "sourceKey": "joe",
@@ -64,10 +64,10 @@
         "totalDeals": 12
       },
       {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "missionFitScore": 50,
-        "totalDeals": 71
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "missionFitScore": 54,
+        "totalDeals": 25
       }
     ],
     "topCoverageSources": [
@@ -127,16 +127,16 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 67,
+        "totalDeals": 25
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 66,
         "totalDeals": 3
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "precisionScore": 65,
-        "totalDeals": 7
       }
     ],
     "topWeightedSources": [
@@ -165,10 +165,10 @@
         "totalDeals": 7
       },
       {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "sourceWeightScore": 53,
-        "totalDeals": 144
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 54,
+        "totalDeals": 25
       }
     ],
     "topSourcesToFix": [
@@ -305,9 +305,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 21,
-      "uniqueDeals": 17,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
+      "uniqueDeals": 16,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
       "fresh1dCount": 9,
       "fresh7dCount": 21,
       "viennaCount": 21,
@@ -579,67 +579,81 @@
       "sourceKey": "instagram-ai",
       "file": "deals-pending-instagram-ai.json",
       "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 11,
-      "uniqueDeals": 8,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 1,
-      "fresh7dCount": 11,
-      "viennaCount": 11,
-      "foodDrinkCount": 5,
-      "promoCount": 6,
+      "totalDeals": 25,
+      "uniqueDeals": 18,
+      "duplicateDeals": 7,
+      "duplicateAcrossSources": 7,
+      "fresh1dCount": 5,
+      "fresh7dCount": 25,
+      "viennaCount": 25,
+      "foodDrinkCount": 13,
+      "promoCount": 15,
       "missingUrlCount": 0,
       "sampleTitles": [
         "Gratis Block Party und weitere Gratis-Events in Wien",
-        "2+1 Aktion auf neues paniertes Brot Döner",
-        "2+1 gratis auf alle Dönersorten"
+        "Lancôme Kirsch-Törtchen mit gratis Miniaturduft im Café Adlerhof",
+        "Gutscheine für Smash It Burger in Brünnerstraße 21, 1210 Wien"
       ],
       "lastRun": null,
       "uniqueRate": 0.7,
       "duplicateRate": 0.3,
-      "fresh1dRate": 0.1,
+      "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 1,
       "foodDrinkRate": 0.5,
-      "promoRate": 0.5,
+      "promoRate": 0.6,
       "missingUrlRate": 0,
-      "averageQualityScore": 87.3,
+      "averageQualityScore": 86,
       "topCategories": [
         {
-          "value": "shopping",
-          "count": 6
-        },
-        {
           "value": "essen",
-          "count": 4
+          "count": 12
         },
         {
-          "value": "kaffee",
+          "value": "shopping",
+          "count": 7
+        },
+        {
+          "value": "event",
+          "count": 3
+        },
+        {
+          "value": "bars",
+          "count": 1
+        },
+        {
+          "value": "events",
+          "count": 1
+        },
+        {
+          "value": "reisen",
           "count": 1
         }
       ],
       "topTypes": [
         {
-          "value": "rabatt",
-          "count": 5
+          "value": "gratis",
+          "count": 11
         },
         {
-          "value": "gratis",
-          "count": 4
+          "value": "rabatt",
+          "count": 11
         },
         {
           "value": "bogo",
           "count": 2
+        },
+        {
+          "value": "gutschein",
+          "count": 1
         }
       ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 63,
-      "missionFitScore": 49,
-      "coverageScore": 15,
-      "precisionScore": 64,
-      "sourceWeightScore": 49
+      "issues": [],
+      "healthScore": 66,
+      "missionFitScore": 54,
+      "coverageScore": 24,
+      "precisionScore": 67,
+      "sourceWeightScore": 54
     },
     {
       "sourceKey": "instagram-verified",
@@ -896,9 +910,9 @@
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
       "totalDeals": 144,
-      "uniqueDeals": 143,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
+      "uniqueDeals": 142,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
       "fresh1dCount": 0,
       "fresh7dCount": 4,
       "viennaCount": 3,
