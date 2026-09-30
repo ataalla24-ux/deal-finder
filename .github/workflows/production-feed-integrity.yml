@@ -11,6 +11,9 @@ on:
       - "docs/deal-of-the-week.json"
       - "scripts/validate-production-feed.mjs"
       - "scripts/validate-deal-map-locations.mjs"
+      - "scripts/deal-map-enrichment.mjs"
+      - "scripts/enrich-deal-map.mjs"
+      - "scripts/test-deal-map-enrichment.mjs"
       - "scraper/deal-normalization-utils.js"
       - "scraper/deal-content-quality-utils.js"
       - "scraper/deal-validity-agent.js"
@@ -74,4 +77,6 @@ jobs:
         run: npm run test:production-feed
 
       - name: Validate map coverage contract
-        run: npm run test:deal-map
+        run: |
+          node scripts/test-deal-map-enrichment.mjs
+          npm run test:deal-map

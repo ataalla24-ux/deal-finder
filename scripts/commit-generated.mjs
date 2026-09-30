@@ -401,6 +401,14 @@ async function main() {
     .map(normalizeRepoPath)
     .includes(dealsPath);
   if (includesDealsFeed && statusChanged(dealsPath)) {
+    const mapSync = spawnSync(process.execPath, ['scripts/enrich-deal-map.mjs'], {
+      cwd: process.cwd(), env: process.env, encoding: 'utf8',
+    });
+    if (mapSync.status !== 0) {
+      throw new Error(`Map enrichment failed: ${cleanText(mapSync.stderr || mapSync.stdout)}`);
+    }
+    if (cleanText(mapSync.stdout)) console.log(cleanText(mapSync.stdout));
+    options.patterns.push('docs/deal-map-locations.json', 'reviews/map-geocode-cache.json', 'reviews/map-coverage.json');
     const featuredSync = spawnSync(process.execPath, ['scripts/sync-featured-deal-references.mjs'], {
       cwd: process.cwd(),
       env: process.env,
