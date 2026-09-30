@@ -42,3 +42,11 @@ exact geocoder match. Resolve these with evidence rather than nearby guesses.
 Verification: map enrichment regression suite and existing map validator.
 No iOS/Android source changes, native build, store resubmission, or new device
 runtime test in this task. Existing September 29 reviews are left untouched.
+
+Published: commit 147bcb2b0dfd on main; GitHub Pages deployment succeeded.
+Live freefinder.at/deal-map-locations.json verified with 49 locations / 25
+linked deals, including Dahab at Wagramer Strasse 126 only.
+The wider integrity workflow fails before map tests at the unchanged
+test-source-backed-content.mjs:159 assertion expecting tiktok-1l9p5mu in a
+fixture. Map validation is now independent of preceding test failures; this
+does not suppress the failing assertion or make the overall pipeline green.
