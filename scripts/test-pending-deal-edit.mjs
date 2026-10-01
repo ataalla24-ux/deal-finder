@@ -24,7 +24,7 @@ const sig = createHmac('sha256','test').update(payload).digest('hex');
 const originalFetch = globalThis.fetch;
 const dispatches = [];
 globalThis.fetch = async (url, init) => {
-  if (String(url).includes('api.github.com')) {dispatches.push(String(url)); return new Response(null,{status:204});}
+  if (String(url).includes('/dispatches')) {dispatches.push(String(url)); return new Response(null,{status:204});}
   return Response.json(doc);
 };
 try {

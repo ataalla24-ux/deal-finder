@@ -2434,7 +2434,12 @@ async function handlePendingDealEdit(request, env) {
   if (signed.error) return dealRemovalHtml('Bearbeiten nicht moeglich', signed.error, signed.status);
   let deal;
   try {
-    const response = await fetch(`https://freefinder.at/deals-pending-all.json?t=${Date.now()}`, { headers: { 'cache-control': 'no-cache' } });
+    const owner = envString(env, 'GITHUB_OWNER') || 'ataalla24-ux';
+    const repo = envString(env, 'GITHUB_REPO') || 'deal-finder';
+    const response = await fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/docs/deals-pending-all.json?ref=main`, { headers: {
+      authorization: `Bearer ${envString(env, 'GITHUB_WORKFLOW_TOKEN') || envString(env, 'GITHUB_TOKEN')}`,
+      accept: 'application/vnd.github.raw+json', 'user-agent': 'freefinder-referrals-worker', 'cache-control': 'no-cache',
+    } });
     if (!response.ok) throw new Error('Unavailable');
     deal = (await response.json()).deals?.find(item => item.id === signed.base.dealId);
   } catch { return dealRemovalHtml('Bitte erneut versuchen', 'Entwurf konnte nicht geladen werden.', 502); }
