@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-01T14:37:51.696Z",
+  "generatedAt": "2026-10-01T16:17:31.318Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -170,18 +170,29 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 50,
+  "fetchedPosts": 0,
   "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "maeaurel",
+      "message": "Instagram shared quota paused: quota reservation unavailable"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
     "limitPerHour": 150,
-    "requests": 2,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 2
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: quota reservation unavailable",
+    "highestUsagePercent": 0
+  },
+  "globalError": {
+    "username": "maeaurel",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: quota reservation unavailable"
   },
   "blockedEvidencePosts": 107,
   "unmatchedCandidatePosts": 2,
