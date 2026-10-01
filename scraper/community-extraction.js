@@ -42,7 +42,7 @@ export function applyExtraction(deal, result, evidence) {
   }
   next.missingFields = [];
   if (!title && (!deal.title || /Community-Deal|Instagram|TikTok/i.test(deal.title))) next.missingFields.push('Angebot/Titel');
-  if (!brand && (!deal.brand || /Community Fund/i.test(deal.brand))) next.missingFields.push('Anbieter');
+  if (!brand && (!deal.brand || /^(Community Fund|Instagram|TikTok|Facebook)$/i.test(deal.brand))) next.missingFields.push('Anbieter');
   if (!description && (!deal.description || deal.description.includes('Von der Community eingereicht'))) next.missingFields.push('Beschreibung/Bedingungen');
   if (!address && (!deal.distance || /^(Wien|Bitte prüfen)$/i.test(deal.distance))) next.missingFields.push('Genaue Adresse/Standorte');
   if (!validity && !deal.expires) next.missingFields.push('Gültigkeit');
