@@ -2,6 +2,8 @@ import '../sentry/instrument.mjs';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { extractCommunityDeal, extractionKey } from './community-extraction.js';
+import { loadInstagramGraphEvidence } from './instagram-graph-evidence.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -121,8 +123,33 @@ async function main() {
   }
 
   const submissions = ensureArray(body.submissions);
-  const deals = submissions
-    .map(normalizeSubmissionDeal);
+  let previous = [];
+  try { previous = JSON.parse(fs.readFileSync(OUTPUT_PATH, 'utf8')).deals || []; } catch {}
+  const cached = new Map(previous.map(d => [d.submissionId, d]));
+  const graphEvidence = loadInstagramGraphEvidence().byKey;
+  const deals = new Array(submissions.length);
+  let cursor = 0;
+  async function worker() {
+    while (cursor < submissions.length) {
+      const index = cursor++;
+      const submission = submissions[index];
+      const key = extractionKey(submission);
+      const old = cached.get(cleanText(submission.id));
+      const age = Date.now() - Date.parse(old?.communityExtraction?.checkedAt || '');
+      if (old?.communityExtraction?.key === key && age >= 0 && age < 6 * 60 * 60 * 1000) {
+        deals[index] = old;
+        continue;
+      }
+      const base = normalizeSubmissionDeal(submission);
+      const extracted = await extractCommunityDeal(submission, base, { graphEvidence });
+      extracted.communityExtraction = { ...extracted.communityExtraction, key, checkedAt: new Date().toISOString() };
+      // Preserve submitted facts for review even when the model rewrites a title.
+      extracted.submittedContent = Object.fromEntries(['brand', 'title', 'description', 'distance', 'expires'].map(k => [k, cleanText(submission[k])]));
+      deals[index] = extracted;
+    }
+  }
+  await Promise.all([worker(), worker(), worker()]);
+  console.log(`Community extraction: ${deals.filter(d => d.communityExtraction?.status === 'draft').length} drafts; ${deals.filter(d => d.communityExtraction?.status !== 'draft').length} need review`);
 
   const payload = {
     deals,

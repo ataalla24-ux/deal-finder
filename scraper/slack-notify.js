@@ -865,7 +865,7 @@ function buildSlackMessage(deal, index) {
   const displayedStart = deal.validFrom || (deal.expiryKind === 'single' ? deal.validOn : '');
   const displayedExpiry = validity.expiryDate || deal.validUntil || deal.validOn || deal.expires;
   const link = deal.url ? `<${deal.url}|Zum Angebot>` : '⚠️ FEHLT';
-  const desc = deal.description ? `\n📝 ${deal.description.slice(0, 180)}` : '';
+  const desc = deal.description ? `\n📝 ${deal.description.slice(0, isCommunitySubmission(deal) ? 6000 : 180)}` : '';
   const missingNote = Array.isArray(deal.missingFields) && deal.missingFields.length > 0
     ? `\n⚠️ FEHLT: ${deal.missingFields.join(', ')}`
     : '';
@@ -874,7 +874,11 @@ function buildSlackMessage(deal, index) {
     `*${index}. ${deal.title}*`,
     `🏷️ Marke/Restaurant: ${deal.brand || 'k.A.'}`,
     `📍 Ort: ${deal.distance || 'k.A.'}`,
-    `📅 Angebotsdatum: ${formatDate(displayedOfferDate)}`,
+    isCommunitySubmission(deal)
+      ? `📨 Eingereicht: ${formatDate(deal.submittedAt || deal.pubDate)} (kein Aktionsdatum)`
+      : `📅 Angebotsdatum: ${formatDate(displayedOfferDate)}`,
+    ...(isCommunitySubmission(deal) && deal.expiresOriginal
+      ? [`🗓️ Gültigkeit laut Text: ${deal.expiresOriginal}`] : []),
     ...(displayedStart ? [`🚀 Startet am: ${formatDate(displayedStart)}`] : []),
     `⏳ Gültig bis: ${displayedExpiry ? formatDate(displayedExpiry) : 'k.A.'}`,
     `🧭 Kategorie: ${deal.category} | Typ: ${displayedType}`,

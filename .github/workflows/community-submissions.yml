@@ -27,9 +27,16 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Test community extraction and manual review
+        run: |
+          node scripts/test-community-extraction.mjs
+          node scripts/test-community-review.mjs
+
       - name: Fetch community submissions
         env:
           COMMUNITY_SYNC_TOKEN: ${{ secrets.COMMUNITY_SYNC_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: node scraper/fetch-community-submissions.js
 
       - name: Commit intake state
