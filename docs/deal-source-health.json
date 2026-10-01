@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-01T14:22:07.934Z",
+  "generatedAt": "2026-10-01T14:37:59.150Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 701,
-    "uniqueCandidates": 656,
-    "distinctCandidates": 676,
-    "duplicateClusters": 20,
+    "totalCandidates": 714,
+    "uniqueCandidates": 666,
+    "distinctCandidates": 687,
+    "duplicateClusters": 21,
     "topHealthySources": [
       {
         "sourceKey": "firecrawl5",
@@ -28,14 +28,14 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 72,
+        "healthScore": 70,
         "totalDeals": 32
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
         "healthScore": 68,
-        "totalDeals": 7
+        "totalDeals": 49
       }
     ],
     "topMissionSources": [
@@ -93,18 +93,18 @@
         "fresh1dCount": 32
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "coverageScore": 37,
+        "totalDeals": 49,
+        "fresh1dCount": 10
+      },
+      {
         "sourceKey": "firecrawl4",
         "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
         "coverageScore": 36,
         "totalDeals": 65,
         "fresh1dCount": 0
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 35,
-        "totalDeals": 32,
-        "fresh1dCount": 16
       }
     ],
     "topPrecisionSources": [
@@ -123,20 +123,20 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 73,
+        "precisionScore": 72,
         "totalDeals": 32
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 70,
+        "totalDeals": 49
       },
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 69,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "precisionScore": 68,
-        "totalDeals": 10
       }
     ],
     "topWeightedSources": [
@@ -161,14 +161,14 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 62,
+        "sourceWeightScore": 61,
         "totalDeals": 32
       },
       {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 54,
-        "totalDeals": 7
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 59,
+        "totalDeals": 49
       }
     ],
     "topSourcesToFix": [
@@ -451,9 +451,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 32,
-      "uniqueDeals": 21,
-      "duplicateDeals": 11,
-      "duplicateAcrossSources": 11,
+      "uniqueDeals": 20,
+      "duplicateDeals": 12,
+      "duplicateAcrossSources": 12,
       "fresh1dCount": 16,
       "fresh7dCount": 32,
       "viennaCount": 32,
@@ -466,8 +466,8 @@
         "🍂 HERBST-AKTION: 1+1 Loving Hut-dog!"
       ],
       "lastRun": null,
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
       "fresh1dRate": 0.5,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -519,12 +519,98 @@
           "count": 2
         }
       ],
-      "issues": [],
-      "healthScore": 72,
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 70,
       "missionFitScore": 64,
       "coverageScore": 35,
-      "precisionScore": 73,
-      "sourceWeightScore": 62
+      "precisionScore": 72,
+      "sourceWeightScore": 61
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 49,
+      "uniqueDeals": 34,
+      "duplicateDeals": 15,
+      "duplicateAcrossSources": 15,
+      "fresh1dCount": 10,
+      "fresh7dCount": 49,
+      "viennaCount": 49,
+      "foodDrinkCount": 29,
+      "promoCount": 28,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gutschein für Smash It Burger in Floridsdorf",
+        "Mehrere kostenlose Events in Wien vom 30.09. bis 04.10.2026",
+        "Schülerangebot Hühnersandwich + Pepsi oder Ayran für 5,99 €"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.2,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.6,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 86.4,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 25
+        },
+        {
+          "value": "shopping",
+          "count": 8
+        },
+        {
+          "value": "event",
+          "count": 5
+        },
+        {
+          "value": "reisen",
+          "count": 4
+        },
+        {
+          "value": "fitness",
+          "count": 2
+        },
+        {
+          "value": "kultur",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 24
+        },
+        {
+          "value": "gratis",
+          "count": 18
+        },
+        {
+          "value": "bogo",
+          "count": 4
+        },
+        {
+          "value": "freebie",
+          "count": 2
+        },
+        {
+          "value": "gewinnspiel",
+          "count": 1
+        }
+      ],
+      "issues": [],
+      "healthScore": 68,
+      "missionFitScore": 57,
+      "coverageScore": 37,
+      "precisionScore": 70,
+      "sourceWeightScore": 59
     },
     {
       "sourceKey": "instagram-apify",
@@ -660,89 +746,6 @@
       "coverageScore": 13,
       "precisionScore": 69,
       "sourceWeightScore": 53
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 36,
-      "uniqueDeals": 23,
-      "duplicateDeals": 13,
-      "duplicateAcrossSources": 13,
-      "fresh1dCount": 5,
-      "fresh7dCount": 36,
-      "viennaCount": 36,
-      "foodDrinkCount": 19,
-      "promoCount": 19,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gutschein für Smash It Burger in Floridsdorf",
-        "Mehrere kostenlose Events in Wien vom 30.09. bis 04.10.2026",
-        "Schülerangebot Hühnersandwich + Pepsi oder Ayran für 5,99 €"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 86.3,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 17
-        },
-        {
-          "value": "shopping",
-          "count": 8
-        },
-        {
-          "value": "event",
-          "count": 6
-        },
-        {
-          "value": "reisen",
-          "count": 3
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 20
-        },
-        {
-          "value": "gratis",
-          "count": 13
-        },
-        {
-          "value": "freebie",
-          "count": 2
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 61,
-      "missionFitScore": 49,
-      "coverageScore": 27,
-      "precisionScore": 63,
-      "sourceWeightScore": 51
     },
     {
       "sourceKey": "instagram-verified",
@@ -968,7 +971,7 @@
       ],
       "healthScore": 57,
       "missionFitScore": 51,
-      "coverageScore": 19,
+      "coverageScore": 18,
       "precisionScore": 56,
       "sourceWeightScore": 47
     },
@@ -977,9 +980,9 @@
       "file": "deals-pending-firecrawl4.json",
       "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
       "totalDeals": 65,
-      "uniqueDeals": 61,
-      "duplicateDeals": 4,
-      "duplicateAcrossSources": 4,
+      "uniqueDeals": 60,
+      "duplicateDeals": 5,
+      "duplicateAcrossSources": 5,
       "fresh1dCount": 0,
       "fresh7dCount": 7,
       "viennaCount": 7,
@@ -1149,9 +1152,9 @@
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
       "totalDeals": 141,
-      "uniqueDeals": 138,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
+      "uniqueDeals": 139,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
       "fresh1dCount": 0,
       "fresh7dCount": 4,
       "viennaCount": 3,
@@ -1726,7 +1729,7 @@
       ],
       "healthScore": 43,
       "missionFitScore": 28,
-      "coverageScore": 21,
+      "coverageScore": 20,
       "precisionScore": 35,
       "sourceWeightScore": 32
     },
