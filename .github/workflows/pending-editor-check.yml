@@ -1,0 +1,31 @@
+name: Check Pending Editor
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: node scripts/test-pending-deal-edit.mjs
+      - name: Verify live read-only form
+        env:
+          DEAL_REMOVE_LINK_SECRET: ${{ secrets.DEAL_REMOVE_LINK_SECRET }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          const deal = JSON.parse(fs.readFileSync('docs/deals-pending-all.json','utf8')).deals.find(d=>d.slackTs);
+          if (!deal) throw new Error('No pending sample');
+          const payload = Buffer.from(JSON.stringify({dealId:deal.id,scope:'pending-edit'})).toString('base64url');
+          const sig = crypto.createHmac('sha256',process.env.DEAL_REMOVE_LINK_SECRET).update(payload).digest('hex');
+          const response = await fetch(`https://freefinder-referrals.freefinder-stefan.workers.dev/api/deals/admin/pending-edit?payload=${payload}&sig=${sig}`);
+          const html = await response.text();
+          if (response.status !== 200 || !html.includes('name="description"') || !html.includes('Entwurf speichern')) throw new Error(`Live form unavailable: ${response.status}`);
+          console.log('Live signed form opens successfully. No deal was changed or approved.');
+          JS
