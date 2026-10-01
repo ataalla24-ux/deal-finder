@@ -239,6 +239,7 @@ function applySlackEdits(deals, threadMessages) {
       continue;
     }
 
+    if (Number(message.ts) <= Number(editedDeals[targetIndex].slackFormEditTs || 0)) continue;
     editedDeals[targetIndex] = applyEditChangesToDeal(editedDeals[targetIndex], parsed.changes, message);
     appliedCount += 1;
   }
@@ -261,6 +262,10 @@ function mergeParsedDealsWithQueue(parsedDeals, queuedDeals) {
     return {
       ...queued,
       ...parsed,
+      ...(queued.slackFormEditTs ? Object.fromEntries([
+        ...ensureArray(queued.slackEditedFields), 'validOn', 'validFrom', 'validUntil',
+        'expiresOriginal', 'expiryKind', 'expiryDisplayText',
+      ].map(field => [field, queued[field] ?? ''])) : {}),
       pipelineLifecycle: queued.pipelineLifecycle,
       socialFoodReview: queued.socialFoodReview === true,
       firecrawlReview: queued.firecrawlReview === true,

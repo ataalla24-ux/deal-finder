@@ -1,0 +1,47 @@
+name: Pending Deal Edit
+on:
+  workflow_dispatch:
+    inputs:
+      edit_payload:
+        required: true
+        type: string
+concurrency:
+  group: deal-state-writer
+  cancel-in-progress: false
+  queue: max
+permissions:
+  contents: write
+jobs:
+  edit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Edit pending draft only
+        env:
+          PENDING_DEAL_EDIT_PAYLOAD: ${{ inputs.edit_payload }}
+        run: node scripts/apply-pending-deal-edit.mjs
+      - name: Save draft
+        run: node scripts/commit-generated.mjs --message "Update Slack draft" --files docs/deals-pending-all.json
+      - name: Confirm saved draft in Slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          EDIT_PAYLOAD: ${{ inputs.edit_payload }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const edit = JSON.parse(process.env.EDIT_PAYLOAD);
+          const deal = JSON.parse(fs.readFileSync('docs/deals-pending-all.json','utf8')).deals.find(d => d.id === edit.dealId);
+          if (!deal?.slackThreadTs) throw new Error('Missing Slack thread');
+          const response = await fetch('https://slack.com/api/chat.postMessage', {
+            method: 'POST', headers: {Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`, 'Content-Type':'application/json'},
+            body: JSON.stringify({channel:process.env.SLACK_CHANNEL_ID,thread_ts:deal.slackThreadTs,
+              text:`Entwurf gespeichert: ${deal.title}\nAnbieter: ${deal.brand}\nOrt: ${deal.distance}\nGueltig bis: ${deal.expires || 'offen'}\n${deal.description}\nDeal-ID: ${deal.id}\nJetzt kann die urspruengliche Deal-Nachricht separat freigegeben werden.`,unfurl_links:false,unfurl_media:false})
+          });
+          if (!(await response.json()).ok) throw new Error('Slack confirmation failed');
+          JS

@@ -84,6 +84,7 @@ jobs:
       - name: Send validated new deals to Slack
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          DEAL_REMOVE_LINK_SECRET: ${{ secrets.DEAL_REMOVE_LINK_SECRET }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
           SLACK_SEEN_CACHE_MAX_AGE_MINUTES: "10"
           SLACK_SEEN_DEAL_SUPPRESSION_DAYS: "30"

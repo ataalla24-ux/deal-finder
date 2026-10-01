@@ -1,5 +1,6 @@
 import { officialFoodOfferKey } from './power-food-sources.js';
 import fs from 'fs';
+import crypto from 'node:crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -921,8 +922,24 @@ async function sleep(ms) {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function pendingEditBlocks(text) {
+  const dealId = text.match(/Deal-ID:\s*([^\s]+)/)?.[1];
+  const secret = process.env.DEAL_REMOVE_LINK_SECRET;
+  if (dealId && secret) {
+    const signed = Buffer.from(JSON.stringify({ dealId, scope: 'pending-edit' })).toString('base64url');
+    const sig = crypto.createHmac('sha256', secret).update(signed).digest('hex');
+    return [
+      ...text.match(/[\s\S]{1,2900}/g).map(part => ({ type: 'section', text: { type: 'mrkdwn', text: part } })),
+      { type: 'actions', elements: [{ type: 'button', action_id: 'freefinder_edit_pending',
+        text: { type: 'plain_text', text: 'Bearbeiten' },
+        url: `https://freefinder-referrals.freefinder-stefan.workers.dev/api/deals/admin/pending-edit?payload=${signed}&sig=${sig}` }] },
+    ];
+  }
+  return undefined;
+}
+
 async function postSlackMessage(text, threadTs = null, attempt = 0) {
-  const payload = { channel: SLACK_CHANNEL_ID, text };
+  const payload = { channel: SLACK_CHANNEL_ID, text, blocks: pendingEditBlocks(text) };
   if (threadTs) payload.thread_ts = threadTs;
 
   const response = await fetch('https://slack.com/api/chat.postMessage', {
@@ -2075,6 +2092,7 @@ export {
   buildFirecrawlReviewMessage,
   buildSocialFoodReviewMessage,
   buildSlackMessage,
+  pendingEditBlocks,
   compareSlackDeals,
   filterAlreadyQueuedDeals,
   filterDuplicateDealsInRun,
