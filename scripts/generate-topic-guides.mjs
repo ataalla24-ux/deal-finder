@@ -5,6 +5,18 @@ import { fileURLToPath } from 'url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BLOG_DIR = path.join(ROOT, 'docs', 'blog');
+const dealGuides = JSON.parse(fs.readFileSync(path.join(ROOT, 'reviews/deal-guides.json'), 'utf8')).guides;
+
+function quickDeal(guide) {
+  const reviewed = dealGuides.find(item => item.slug === guide.slug);
+  if (!reviewed) return '';
+  return `<section class="article-note" data-guide-reviewed="${escapeHtml(reviewed.reviewedAt)}" aria-label="Deal auf einen Blick">
+    <h2>Dein Deal auf einen Blick</h2>
+    <dl>${[['Was', reviewed.what], ['Wo', reviewed.where], ['Wann', reviewed.when], ['So geht es', reviewed.how]].map(([key, value]) => `<dt><strong>${key}</strong></dt><dd>${escapeHtml(value)}</dd>`).join('')}</dl>
+    <p><a href="${escapeHtml(reviewed.sourceUrl)}" rel="noopener" data-track="deal_outbound">Angebot und Bedingungen bei IKEA öffnen →</a></p>
+    <p>Quelle geprüft: ${escapeHtml(reviewed.reviewedAt)}. Verfügbarkeit vor dem Besuch beim Anbieter prüfen.</p>
+  </section>`;
+}
 const PUBLISHED = '2026-08-17';
 const PUBLISHED_LABEL = '17. August 2026';
 
@@ -632,6 +644,7 @@ function renderGuide(guide) {
     <header class="article-hero"><div class="hero-inner"><p class="eyebrow">${escapeHtml(guide.eyebrow)}</p><h1>${escapeHtml(guide.headline)}</h1><p class="hero-copy">${escapeHtml(guide.intro)}</p><div class="article-meta"><span>Aktualisiert am ${guide.modifiedLabel || publishedLabel}</span><span>${readingMinutes} Minuten Lesezeit</span></div><div class="article-byline"><span>Von <a href="/about.html">FreeFinder Redaktion</a></span><span>Verantwortlich: Stefan Ataalla</span></div></div></header>
     <div class="article-layout">
       <article class="article-body">
+        ${quickDeal(guide)}
         <picture>${guide.imageAvif ? `<source type="image/avif" srcset="${guide.imageAvif}" sizes="(max-width: 860px) 100vw, 710px">` : ''}<img class="article-image" src="${guide.image}" alt="${escapeHtml(guide.imageAlt)}" width="${guide.imageWidth}" height="${guide.imageHeight}"${guide.imagePosition ? ` style="object-position:${escapeHtml(guide.imagePosition)}"` : ''} loading="eager" decoding="async"></picture>
         ${sections}
         <h2 id="faq">Häufige Fragen</h2>
@@ -649,13 +662,15 @@ function renderGuide(guide) {
 `;
 }
 
-for (const guide of guides) {
+const selectedSlugs = process.argv.slice(2);
+const selectedGuides = guides.filter(g => selectedSlugs.length === 0 || selectedSlugs.includes(g.slug));
+for (const guide of selectedGuides) {
   fs.writeFileSync(path.join(BLOG_DIR, `${guide.slug}.html`), renderGuide(guide));
 }
 
 const sitemapPath = path.join(ROOT, 'docs', 'sitemap.xml');
 let sitemap = fs.readFileSync(sitemapPath, 'utf8');
-for (const guide of guides.filter((guide) => guide.modified)) {
+for (const guide of selectedGuides.filter((guide) => guide.modified)) {
   const url = `https://freefinder.at/blog/${guide.slug}.html`;
   const entryPattern = new RegExp(`(<loc>${url}</loc>\\s*<lastmod>)[^<]+(</lastmod>)`);
   if (!entryPattern.test(sitemap)) throw new Error(`Sitemap entry missing for ${guide.slug}`);

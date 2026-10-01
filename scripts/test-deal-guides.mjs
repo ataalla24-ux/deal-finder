@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import { applyGuides } from './sync-deal-guides.mjs';
+const deal = { id: 'a', title: 'Coffee', url: 'https://example.com/offer', approvedAt: '2026-10-01' };
+const guide = { ...deal, sourceUrl: deal.url, slug: 'coffee', reviewUntil: '2026-10-15T00:00:00Z' };
+const apply = (d = deal, g = guide, available = new Set(['coffee'])) => applyGuides([d], [g], available, Date.parse('2026-10-01'))[0];
+assert.equal(apply().guideUrl, 'https://freefinder.at/blog/coffee.html');
+assert.equal(apply().url, deal.url);
+assert.equal(apply({ ...deal, approvedAt: null }).guideUrl, undefined);
+assert.equal(apply({ ...deal, title: 'Different offer' }).guideUrl, undefined);
+assert.equal(apply({ ...deal, url: 'https://example.com/other' }).guideUrl, undefined);
+assert.equal(apply(deal, guide, new Set()).guideUrl, undefined);
+assert.equal(apply(deal, { ...guide, slug: '../outside' }).guideUrl, undefined);
+assert.equal(apply({ ...deal, guideUrl: 'old' }, { ...guide, reviewUntil: '2026-09-01' }).guideUrl, undefined);
+console.log('Deal guide routing regression checks passed');

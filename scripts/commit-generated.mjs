@@ -401,6 +401,11 @@ async function main() {
     .map(normalizeRepoPath)
     .includes(dealsPath);
   if (includesDealsFeed && statusChanged(dealsPath)) {
+    const guideSync = spawnSync(process.execPath, ['scripts/sync-deal-guides.mjs'], {
+      cwd: process.cwd(), env: process.env, encoding: 'utf8',
+    });
+    if (guideSync.status !== 0) throw new Error(`Guide sync failed: ${cleanText(guideSync.stderr || guideSync.stdout)}`);
+    options.patterns.push('reviews/deal-guide-candidates.json');
     const mapSync = spawnSync(process.execPath, ['scripts/enrich-deal-map.mjs'], {
       cwd: process.cwd(), env: process.env, encoding: 'utf8',
     });

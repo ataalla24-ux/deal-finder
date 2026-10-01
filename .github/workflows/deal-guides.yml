@@ -1,0 +1,25 @@
+name: Reviewed Deal Guides
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '41 5 * * *'
+concurrency:
+  group: deal-state-writer
+  cancel-in-progress: false
+  queue: max
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: node scripts/test-deal-guides.mjs
+      - run: node scripts/sync-deal-guides.mjs
+      - run: node scripts/commit-generated.mjs --skip-conflicts --message "Sync reviewed deal guide destinations" --files docs/deals.json reviews/deal-guide-candidates.json
