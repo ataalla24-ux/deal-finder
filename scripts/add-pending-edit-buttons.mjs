@@ -3,9 +3,10 @@ import { pendingEditBlocks } from '../scraper/slack-notify.js';
 const deals = JSON.parse(fs.readFileSync('docs/deals-pending-all.json','utf8')).deals;
 if (!process.env.DEAL_REMOVE_LINK_SECRET) throw new Error('Missing link secret');
 async function api(method, body) {
-  const response = await fetch(`https://slack.com/api/${method}`, {
-    method:'POST', headers:{Authorization:`Bearer ${process.env.SLACK_BOT_TOKEN}`,'Content-Type':'application/json'},
-    body:JSON.stringify(body),
+  const read = method === 'conversations.replies';
+  const response = await fetch(`https://slack.com/api/${method}${read ? '?' + new URLSearchParams(body) : ''}`, {
+    method:read ? 'GET' : 'POST', headers:{Authorization:`Bearer ${process.env.SLACK_BOT_TOKEN}`,'Content-Type':'application/json'},
+    ...(read ? {} : {body:JSON.stringify(body)}),
   });
   const result = await response.json();
   if (!result.ok) throw new Error(result.error);
