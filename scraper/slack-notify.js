@@ -1541,6 +1541,12 @@ function pruneStaleQueueDeals(deals, options = {}) {
   return { deals: filtered, removed };
 }
 
+function isCommunitySubmission(deal) {
+  return String(deal?.id || '').startsWith('community:')
+    && Boolean(String(deal?.submissionId || '').trim())
+    && deal?.originSource === 'community-submission';
+}
+
 async function revalidateRecentPostedQueue(deals, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const maxAgeDays = Number.isFinite(Number(options.revalidationDays))
@@ -1553,6 +1559,7 @@ async function revalidateRecentPostedQueue(deals, options = {}) {
     // approval workflow still runs the full validator after any edit.
     .filter(({ deal }) => deal.firecrawlReview !== true
       && deal.socialFoodReview !== true
+      && !isCommunitySubmission(deal)
       && cleanText(deal.slackTs)
       && (queueDealAgeDays(deal, now) ?? Infinity) < maxAgeDays
       && (() => {
@@ -1791,7 +1798,8 @@ async function main() {
   const queuedSocialFoodReviewDeals = preSlackQueueFilter.deals.filter((deal) => (
     deal.socialFoodReview === true
   ));
-  const regularPendingDeals = preSlackQueueFilter.deals.filter((deal) => !(
+  const communityReviewDeals = preSlackQueueFilter.deals.filter(isCommunitySubmission);
+  const regularPendingDeals = preSlackQueueFilter.deals.filter((deal) => !isCommunitySubmission(deal) && !(
     deal.firecrawlReview === true && isKey4ReviewDeal(deal)
   ) && deal.socialFoodReview !== true);
   const validatedRun = await validateAndDedupeDealsForSlack(regularPendingDeals, { urlCache: validityUrlCache });
@@ -1800,6 +1808,10 @@ async function main() {
   const freshDeals = validatedRun.allowedDeals.map((deal) => (
     advanceDealLifecycle(deal, 'validator-passed', { at: runNow })
   ));
+  // User submissions are requests for human review, not scraper assertions.
+  // Keep moderation/deduplication above, but do not require readable social media.
+  freshDeals.push(...communityReviewDeals);
+  console.log(`Community submissions for manual review: ${communityReviewDeals.length}`);
   const blockedSummary = formatReasonCategoryCounts(validation.summary.reasonCategoryCounts);
   const validityFirecrawlReview = FIRECRAWL_REVIEW_ENABLED
     ? selectFirecrawlReviewDeals(validation.results, {
@@ -1893,6 +1905,7 @@ async function main() {
       `🎯 *FreeFinder Wien* — ${freshDeals.length} neue Deals\n` +
       `🆓 ${freeCount} gratis | 💰 ${freshDeals.length - freeCount} rabatt/test\n` +
       `🧪 Gültigkeitscheck: ${validation.summary.allowed}/${validation.summary.total} freigegeben | ${validation.summary.blocked} blockiert (max. ${validation.summary.maxAgeDays} Tage)\n` +
+      `Manuelle Community-Einreichungen: ${communityReviewDeals.length} (ungeprüft; Quelle, Angebot, Ort und Datum prüfen)\n` +
       (blockedSummary ? `🚫 Blockiert: ${blockedSummary}\n` : '') +
       `_Jeden Deal mit ✅ bestätigen oder mit ❌ ablehnen. Nur ✅ kann ihn in die iOS-App bringen._\n` +
       `_Bearbeiten vor Freigabe: z. B. edit 3 titel: Gratis Matcha | ort: Neubaugasse 12, 1070 Wien | ablauf: TT.MM.JJJJ_`,
@@ -1904,7 +1917,8 @@ async function main() {
 
     for (let i = 0; i < freshDeals.length; i += 1) {
       const deal = freshDeals[i];
-      const text = buildSlackMessage(deal, i + 1);
+      const text = (isCommunitySubmission(deal)
+        ? '*Community-Einreichung – noch nicht geprüft*\n' : '') + buildSlackMessage(deal, i + 1);
       const ts = await postSlackMessage(text, headerTs);
       if (!ts) continue;
 
@@ -2051,6 +2065,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
 }
 
 export {
+  isCommunitySubmission,
   filterRecentlySeenDeals,
   addSeenDealsFromThread,
   buildFirecrawlReviewMessage,
