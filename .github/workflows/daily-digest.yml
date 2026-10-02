@@ -82,6 +82,11 @@ jobs:
         run: npm run social-food:audit
 
       - name: Send validated new deals to Slack
+        # Keep malformed Unicode out of Slack block payloads.
+        # The regression test runs before any message is sent.
+        run: node scripts/test-slack-unicode.mjs
+
+      - name: Deliver validated new deals to Slack
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           DEAL_REMOVE_LINK_SECRET: ${{ secrets.DEAL_REMOVE_LINK_SECRET }}

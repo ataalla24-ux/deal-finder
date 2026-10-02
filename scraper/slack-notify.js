@@ -859,6 +859,10 @@ function formatReasonCategoryCounts(counts) {
   return entries.map(([reason, count]) => `${count} ${reason}`).join(' | ');
 }
 
+function slackTextPrefix(text, limit) {
+  return Array.from(String(text).toWellFormed()).slice(0, limit).join('');
+}
+
 function buildSlackMessage(deal, index) {
   const validity = ensureObject(deal.validity);
   const displayedType = deal.offerKind === 'low-price' ? 'Preis-Tipp (kein Rabatt behauptet)' : deal.type;
@@ -866,7 +870,7 @@ function buildSlackMessage(deal, index) {
   const displayedStart = deal.validFrom || (deal.expiryKind === 'single' ? deal.validOn : '');
   const displayedExpiry = validity.expiryDate || deal.validUntil || deal.validOn || deal.expires;
   const link = deal.url ? `<${deal.url}|Zum Angebot>` : '⚠️ FEHLT';
-  const desc = deal.description ? `\n📝 ${deal.description.slice(0, isCommunitySubmission(deal) ? 6000 : 180)}` : '';
+  const desc = deal.description ? `\n📝 ${slackTextPrefix(deal.description, isCommunitySubmission(deal) ? 6000 : 180)}` : '';
   const missingNote = Array.isArray(deal.missingFields) && deal.missingFields.length > 0
     ? `\n⚠️ FEHLT: ${deal.missingFields.join(', ')}`
     : '';
@@ -923,13 +927,14 @@ async function sleep(ms) {
 }
 
 function pendingEditBlocks(text) {
+  text = String(text).toWellFormed();
   const dealId = text.match(/Deal-ID:\s*([^\s]+)/)?.[1];
   const secret = process.env.DEAL_REMOVE_LINK_SECRET;
   if (dealId && secret) {
     const signed = Buffer.from(JSON.stringify({ dealId, scope: 'pending-edit' })).toString('base64url');
     const sig = crypto.createHmac('sha256', secret).update(signed).digest('hex');
     return [
-      ...text.match(/[\s\S]{1,2900}/g).map(part => ({ type: 'section', text: { type: 'mrkdwn', text: part } })),
+      ...text.match(/[\s\S]{1,2900}/gu).map(part => ({ type: 'section', text: { type: 'mrkdwn', text: part } })),
       { type: 'actions', elements: [{ type: 'button', action_id: 'freefinder_edit_pending',
         text: { type: 'plain_text', text: 'Bearbeiten' },
         url: `https://freefinder-referrals.freefinder-stefan.workers.dev/api/deals/admin/pending-edit?payload=${signed}&sig=${sig}` }] },
@@ -939,6 +944,7 @@ function pendingEditBlocks(text) {
 }
 
 async function postSlackMessage(text, threadTs = null, attempt = 0) {
+  text = String(text).toWellFormed();
   const payload = { channel: SLACK_CHANNEL_ID, text, blocks: pendingEditBlocks(text) };
   if (threadTs) payload.thread_ts = threadTs;
 
@@ -955,7 +961,7 @@ async function postSlackMessage(text, threadTs = null, attempt = 0) {
   if (data.ok) return data.ts;
 
   if (data.error === 'ratelimited' && attempt < 5) {
-    const retryMs = (Number(data.retry_after) || 2) * 1000;
+    const retryMs = Math.max(1000, Number(response.headers.get('retry-after') || data.retry_after || 2) * 1000);
     console.log(`  ⏳ Rate limited, waiting ${retryMs}ms...`);
     await sleep(retryMs);
     return postSlackMessage(text, threadTs, attempt + 1);
@@ -963,6 +969,25 @@ async function postSlackMessage(text, threadTs = null, attempt = 0) {
 
   console.log(`❌ Slack post failed: ${data.error || 'unknown_error'}`);
   return null;
+}
+
+function deliverySummary(label, sent, total) {
+  return `*FreeFinder Wien${label ? ` – ${label}` : ''}* — ${sent} von ${total} Deal-Nachrichten gesendet\n`
+    + (sent ? 'Deals stehen in diesem Thread. Bearbeiten und danach separat mit ✅ freigeben.\n' : 'Noch keine Deal-Nachricht zugestellt.\n')
+    + (sent < total ? `${total - sent} Nachricht(en) konnten nicht zugestellt werden; sie bleiben fuer einen erneuten Versand vorgemerkt.` : 'Versand abgeschlossen.');
+}
+
+async function updateDeliverySummary(ts, label, sent, total, attempt = 0) {
+  const response = await fetch('https://slack.com/api/chat.update', {
+    method: 'POST', headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ channel: SLACK_CHANNEL_ID, ts, text: deliverySummary(label, sent, total) }),
+  });
+  const result = await response.json();
+  if (result.error === 'ratelimited' && attempt < 5) {
+    await sleep(Math.max(1000, Number(response.headers.get('retry-after') || 2) * 1000));
+    return updateDeliverySummary(ts, label, sent, total, attempt + 1);
+  }
+  if (!result.ok) throw new Error(`Slack delivery summary failed: ${result.error || response.status}`);
 }
 
 async function slackApi(url, attempt = 0) {
@@ -1923,7 +1948,7 @@ async function main() {
   if (freshDeals.length > 0) {
     const freeCount = freshDeals.filter((d) => d.type === 'gratis').length;
     const headerTs = await postSlackMessage(
-      `🎯 *FreeFinder Wien* — ${freshDeals.length} neue Deals\n` +
+      `🎯 *FreeFinder Wien* — Versand laeuft (${freshDeals.length} Deals vorgesehen)\n` +
       `🆓 ${freeCount} gratis | 💰 ${freshDeals.length - freeCount} rabatt/test\n` +
       `🧪 Gültigkeitscheck: ${validation.summary.allowed}/${validation.summary.total} freigegeben | ${validation.summary.blocked} blockiert (max. ${validation.summary.maxAgeDays} Tage)\n` +
       `Manuelle Community-Einreichungen: ${communityReviewDeals.length} (ungeprüft; Quelle, Angebot, Ort und Datum prüfen)\n` +
@@ -1966,6 +1991,7 @@ async function main() {
       }
       await sleep(600);
     }
+    await updateDeliverySummary(headerTs, '', postedDeals.length, freshDeals.length);
   }
 
   const postedReviewDeals = [];
@@ -1974,7 +2000,7 @@ async function main() {
       .map(([source, count]) => `${source.replace(/^Firecrawl\s*/i, '')}: ${count}`)
       .join(' | ');
     const reviewHeaderTs = await postSlackMessage(
-      `🔎 *FreeFinder Wien – Firecrawl Review* — ${firecrawlReviewDeals.length} unsichere Kandidaten\n` +
+      `🔎 *FreeFinder Wien – Firecrawl Review* — Versand laeuft (${firecrawlReviewDeals.length} Kandidaten vorgesehen)\n` +
       `📦 ${reviewSources || 'Firecrawl'}\n` +
       `🛡️ Key4-markierte Reviews sowie weiche Zweifelsfälle: Originalbeleg, Wien-Nachweis, Datum oder Dealtext prüfen.\n` +
       `_Eindeutig abgelaufene, Nicht-Wien-, Gewinnspiel-, ungültige und ausgeschlossene Quellen bleiben blockiert._\n` +
@@ -2010,12 +2036,13 @@ async function main() {
       }
       await sleep(600);
     }
+    await updateDeliverySummary(reviewHeaderTs, 'Firecrawl Review', postedReviewDeals.length, firecrawlReviewDeals.length);
   }
 
   const postedSocialFoodReviewDeals = [];
   if (socialFoodReviewDeals.length > 0) {
     const reviewHeaderTs = await postSlackMessage(
-      `🍽️ *FreeFinder Wien – Social Food Review* — ${socialFoodReviewDeals.length} vielversprechende Grenzfälle\n` +
+      `🍽️ *FreeFinder Wien – Social Food Review* — Versand laeuft (${socialFoodReviewDeals.length} Kandidaten vorgesehen)\n` +
       `🧪 Maximal ${SOCIAL_FOOD_REVIEW_MAX_PER_DAY} pro Wiener Kalendertag; nur aktuelle direkte Posts mit Food-, Deal- und Wien-Signal.\n` +
       `_Originalpost prüfen, bei Bedarf per \`edit\` korrigieren, dann ✅ freigeben oder ❌ als unpassend markieren._`,
     );
@@ -2050,6 +2077,7 @@ async function main() {
       ));
       await sleep(600);
     }
+    await updateDeliverySummary(reviewHeaderTs, 'Social Food Review', postedSocialFoodReviewDeals.length, socialFoodReviewDeals.length);
   }
 
   const mergedQueue = mergePendingQueue(
@@ -2093,6 +2121,7 @@ export {
   buildSocialFoodReviewMessage,
   buildSlackMessage,
   pendingEditBlocks,
+  deliverySummary,
   compareSlackDeals,
   filterAlreadyQueuedDeals,
   filterDuplicateDealsInRun,
