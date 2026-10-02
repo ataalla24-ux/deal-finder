@@ -2656,6 +2656,7 @@ async function handleSlackEvent(request, env) {
   const expectedChannel = envString(env, 'SLACK_CHANNEL_ID');
   const eventChannel = cleanShortText(event.item?.channel || event.channel, 120);
   if (expectedChannel && eventChannel !== expectedChannel) {
+    console.warn('Slack approval ignored: wrong channel', { expectedChannel, eventChannel });
     return json({ ok: true, ignored: true, reason: 'wrong-channel' });
   }
 
@@ -2670,6 +2671,12 @@ async function handleSlackEvent(request, env) {
     reaction: cleanShortText(event.reaction, 80),
     ...(verification.verified ? { reaction_user: cleanShortText(event.user, 120) } : {}),
   });
+  if (!workflow?.ok) {
+    console.error('Slack approval dispatch failed', workflow?.error || 'unknown error');
+    // Acknowledge only successful dispatches so Slack can retry transient failures.
+    return json({ ok: false, error: 'approval-dispatch-failed' }, 503);
+  }
+  console.info('Slack approval dispatch', { skipped: workflow.skipped || null });
   return json({
     ok: true,
     approveTriggered: Boolean(workflow?.ok && !workflow?.skipped),

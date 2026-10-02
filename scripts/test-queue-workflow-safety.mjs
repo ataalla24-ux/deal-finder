@@ -92,14 +92,14 @@ for (const [file, expectedGroup] of collectors) {
 
 const queueWriterFiles = workflowFiles.filter((file) => {
   const text = workflows.get(file);
-  return text.includes('docs/deals-pending-all.json')
-    || /docs\/deals-pending-\*\.json/.test(text);
+  return /commit-generated\.mjs[^\n]*docs\/deals-pending-(?:all|\*)\.json/.test(text);
 });
 
 assert.deepEqual(queueWriterFiles, [
   'approve-deals.yml',
   'daily-digest.yml',
   'deal-moderation.yml',
+  'pending-deal-edit.yml',
   'repair-slack-queued-deal.yml',
 ]);
 const sharedStateWriters = [
@@ -107,6 +107,7 @@ const sharedStateWriters = [
   'daily-digest.yml',
   'deal-moderation.yml',
   'live-deal-edit.yml',
+  'pending-deal-edit.yml',
   'repair-slack-queued-deal.yml',
   'smart-summary.yml',
   'validate-live-deals.yml',
