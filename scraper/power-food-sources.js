@@ -2,6 +2,29 @@
 // proof that every promotion on the domain applies in Vienna.
 export const POWER_FOOD_SOURCES = [
   {
+    name: 'Cafe Hummel',
+    brand: 'Cafe Hummel',
+    url: 'https://cafehummel.at/',
+    allowedHosts: ['cafehummel.at', 'www.cafehummel.at'],
+    selector: '.x-card-outer',
+    address: 'Josefstädter Straße 66, 1080 Wien',
+    locationEvidenceUrl: 'https://cafehummel.at/',
+    linkPattern: /\/aktionen\//,
+    category: 'kaffee',
+  },
+  {
+    name: 'Wunderkammer Wien',
+    brand: 'Wunderkammer',
+    url: 'https://www.marriott.com/de/hotels/viehw-renaissance-vienna-schonbrunn-hotel/dining/wunderkammer-restaurant/',
+    allowedHosts: ['www.marriott.com'],
+    selector: '.cd-cl__heading',
+    address: 'Ullmannstraße 71, 1150 Wien',
+    locationEvidenceUrl: 'https://www.marriott.com/de/hotels/viehw-renaissance-vienna-schonbrunn-hotel/overview/',
+    pathPrefix: '/de/hotels/viehw-renaissance-vienna-schonbrunn-hotel/dining/',
+    linkPattern: /\/dining\/wunderkammer-restaurant\//,
+    category: 'trinken',
+  },
+  {
     name: "IKEA Food",
     brand: "IKEA",
     url: "https://www.ikea.com/at/de/food/",

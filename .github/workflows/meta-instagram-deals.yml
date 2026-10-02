@@ -32,6 +32,7 @@ jobs:
         run: |
           npm run test:instagram-graph-scan
           npm run test:instagram-food-discovery
+          SENTRY_DISABLED=1 node scripts/test-vienna-merchant-discovery.mjs
 
       - name: Refresh Instagram merchant registry
         run: npm run instagram:merchant-registry

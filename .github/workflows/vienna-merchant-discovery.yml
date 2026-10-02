@@ -1,0 +1,36 @@
+name: Vienna Merchant Discovery
+on:
+  schedule:
+    - cron: '15 3 * * *'
+  workflow_dispatch:
+concurrency:
+  group: vienna-merchant-discovery
+  cancel-in-progress: false
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Test directory isolation and source safety
+        env:
+          SENTRY_DISABLED: '1'
+        run: node scripts/test-vienna-merchant-discovery.mjs
+      - name: Refresh directory and rotate website discovery
+        env:
+          VIENNA_WEBSITE_BUDGET: '200'
+        run: node scripts/discover-vienna-merchants.mjs
+      - name: Save discovery sources only
+        run: >-
+          node scripts/commit-generated.mjs
+          --message "Refresh Vienna merchant discovery"
+          --files reviews/vienna-merchant-directory.json
+          reviews/vienna-merchant-website-state.json
+          reviews/vienna-merchant-discovery-report.json
+          docs/vienna-discovery-accounts.json

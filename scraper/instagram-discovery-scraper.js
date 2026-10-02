@@ -91,6 +91,11 @@ const EXTRA_SEARCH_QUERIES = [
   'site:instagram.com/p vienna free drink',
   'site:instagram.com/reel wien gratis eis',
   'site:instagram.com/p wien 1+1 restaurant',
+  'site:instagram.com/p Wien Fruehstueck Aktion',
+  'site:instagram.com/reel Wien Mittagsmenue Angebot',
+  'site:instagram.com/p Wien Eroeffnung Kebap Euro',
+  'site:instagram.com/reel Wien Pizza "2 fuer 1"',
+  'site:instagram.com/p Wien Kaffee Kuchen Aktion',
 ];
 
 const ACCOUNT_SEARCH_QUERIES = [

@@ -1,4 +1,5 @@
 import { sharedInstagramFetch } from './instagram-shared-quota.js';
+import { selectDiscoveryAccounts } from './vienna-merchant-discovery.js';
 import '../sentry/instrument.mjs';
 
 import { createGraphRequestBudget, createGraphScanStore, scanGraphSource, scanGraphPages, graphCursor } from './instagram-graph-scan.js';
@@ -420,7 +421,7 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
     existing.priority = Math.max(existing.priority, Number(raw?.priority || raw?.priorityScore || 0));
     const sourceCategory = raw?.category || (origin === 'registry' ? raw?.topCategories?.[0]?.value : '') || '';
     if (sourceCategory) {
-      const ownSource = origin === 'watchlist' || origin === 'registry' || origin.startsWith('candidate:');
+      const ownSource = origin === 'watchlist' || origin === 'registry' || origin === 'vienna-directory' || origin.startsWith('candidate:');
       if (ownSource || existing.foodCategoryFromMention) existing.category = cleanText(sourceCategory, 60);
       if (ownSource) existing.foodCategoryFromMention = false;
     }
@@ -450,6 +451,15 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
 
   for (const account of Array.isArray(watchlist?.accounts) ? watchlist.accounts : []) add(account, 'watchlist');
   for (const account of Array.isArray(registry?.accounts) ? registry.accounts : []) add(account, 'registry');
+  // Directory leads are lower-priority exploration, never location verification.
+  // Explicit test catalogs stay isolated unless a discovery path is supplied.
+  const discoveryPath = paths.discoveryPath || (!paths.watchlistPath && !paths.registryPath
+    ? path.join(DOCS_DIR, 'vienna-discovery-accounts.json') : '');
+  if (discoveryPath) {
+    for (const account of selectDiscoveryAccounts(readJson(discoveryPath, {}))) {
+      if (!byUsername.has(account.username)) add(account, 'vienna-directory');
+    }
+  }
   for (const account of Object.values(state?.discoveredAccounts || {})) add(account, 'graph-discovery');
   const candidatePaths = Array.isArray(paths.candidatePaths) ? paths.candidatePaths : CANDIDATE_ACCOUNT_PATHS;
   for (const candidatePath of candidatePaths) {
