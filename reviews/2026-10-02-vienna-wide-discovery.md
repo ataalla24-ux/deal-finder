@@ -69,3 +69,14 @@ These are discovery counts, not approved offers or confirmed active businesses.
 Publication is scoped to the source expansion files and its data only; unrelated
 dirty native/pipeline files are excluded. A production run still needs to verify
 the scheduled workflow after the push.
+
+## Production Verification
+
+Published to main in commit 59ed9bc85340. GitHub run 37004623065 completed
+successfully, including regression tests, discovery and data publication.
+Updated data commit: 053c172a7. Final production totals: 7,177 venue records,
+3,041 website URLs, 800 websites attempted, 575 readable, 621 Instagram source
+leads, of which 331 have website-link evidence. This confirms the discovery job,
+not that all 621 profiles have been scanned or any resulting deal approved.
+Daily schedule: 03:15 UTC. Existing Meta collector continues on its own schedule.
+Live-removal safety regression also passed; no removal setting was changed.
