@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-03T05:48:40.290Z",
+  "generatedAt": "2026-10-03T06:22:04.776Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 281,
-    "allowed": 0,
-    "blocked": 281,
-    "warnings": 0,
+    "total": 286,
+    "allowed": 2,
+    "blocked": 284,
+    "warnings": 2,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 202,
       "älter als 7 Tage (2026-02-22)": 84,
@@ -17,7 +17,7 @@
       "URL ungültig (HTTP 404)": 12,
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 3,
       "älter als 7 Tage (2026-08-03)": 1,
-      "abgelaufen (2026-10-01)": 2,
+      "abgelaufen (2026-10-01)": 3,
       "älter als 7 Tage (2015-07-28)": 1,
       "abgelaufen (2026-09-30)": 4,
       "älter als 7 Tage (2026-08-15)": 1,
@@ -26,6 +26,9 @@
       "älter als 7 Tage (2023-09-21)": 3,
       "kostenlose Infrastruktur statt Deal": 3,
       "älter als 7 Tage (2024-03-18)": 3,
+      "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)": 3,
+      "abgelaufen (2026-10-02)": 2,
+      "relative Kurz-Aktion abgelaufen (2026-10-02)": 1,
       "nicht eindeutig in Wien": 13,
       "abgelaufen (2026-08-01)": 2,
       "älter als 7 Tage (2024-12-20)": 1,
@@ -35,23 +38,21 @@
       "älter als 7 Tage (2021-02-05)": 1,
       "älter als 7 Tage (2026-03-21)": 1,
       "älter als 7 Tage (2025-10-29)": 1,
-      "älter als 7 Tage (2018-03-05)": 2,
       "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "abgelaufen (2026-08-30)": 4,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 1,
-      "abgelaufen (2026-10-02)": 1,
       "kein verlässliches Quell-/Post-Datum gefunden": 112,
       "ausgeschlossene Quelle (gastro.news)": 16
     },
     "reasonCategoryCounts": {
       "kein konkreter Deal": 203,
-      "älter als 7 Tage": 138,
+      "älter als 7 Tage": 139,
       "ungültige URL": 22,
       "Gottesdienste außerhalb Wochenlauf": 33,
       "Gewinnspiel": 3,
-      "abgelaufen": 14,
+      "abgelaufen": 17,
       "sonstiges": 3,
       "nicht Wien": 13,
       "kein echtes Post-Datum": 112,
@@ -59,15 +60,15 @@
     },
     "sourceCounts": {
       "Firecrawl Gastro #2": {
-        "total": 19,
-        "allowed": 0,
-        "blocked": 19,
-        "warnings": 0,
+        "total": 24,
+        "allowed": 2,
+        "blocked": 22,
+        "warnings": 2,
         "reasonCategoryCounts": {
+          "älter als 7 Tage": 8,
+          "abgelaufen": 9,
           "nicht Wien": 1,
-          "abgelaufen": 6,
           "kein konkreter Deal": 3,
-          "älter als 7 Tage": 7,
           "ungültige URL": 8
         }
       },
@@ -190,7 +191,44 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "g2-1bb8jyv",
+      "title": "12 € Rabatt auf die erste Bestellung für Neukundinnen und Neukunden",
+      "brand": "Wolt",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.gutscheine.at/wolt",
+      "reasons": [],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "2026-12-30",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-infl8r",
+      "title": "1+1 gratis bei McDonald's; die Lieferando-Angebotskarte zeigt das konkrete Gratisprodukt als Pommes-Symbol",
+      "brand": "McDonald's",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.lieferando.at/speisekarte/mcdonalds-wien-julius-tandler-platz-1",
+      "reasons": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.lieferando.at)",
+        "kein Quell-/Post-Datum gefunden",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "unklar: www.lieferando.at"
+    }
+  ],
   "blocked": [
     {
       "id": "events-0-20260222",
@@ -1629,6 +1667,96 @@
       "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
+      "id": "g2-1j047zs",
+      "title": "Garnelen Box normal um 7,49 €",
+      "brand": "NORDSEE",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.sparhamster.at/nordsee-gutscheine-oesterreich/",
+      "reasons": [
+        "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)"
+      ],
+      "warnings": [],
+      "sourceDate": "2016-09-01T14:27:59.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 3684,
+      "expiryDate": "2026-11-30",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-m7cfc9",
+      "title": "2x Fish & Chips um 10,49 €",
+      "brand": "NORDSEE",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.sparhamster.at/nordsee-gutscheine-oesterreich/",
+      "reasons": [
+        "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)"
+      ],
+      "warnings": [],
+      "sourceDate": "2016-09-01T14:27:59.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 3684,
+      "expiryDate": "2026-11-30",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-wt19yv",
+      "title": "Superfang: 2 Gerichte inklusive 2 Softdrinks um 17,99 €",
+      "brand": "NORDSEE",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.sparhamster.at/nordsee-gutscheine-oesterreich/",
+      "reasons": [
+        "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)"
+      ],
+      "warnings": [],
+      "sourceDate": "2016-09-01T14:27:59.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 3684,
+      "expiryDate": "2026-11-30",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-knqi5h",
+      "title": "Beim Kauf eines Subs nach Wahl gibt es ein zweites Sub gleicher Größe und Sorte gratis (1+1). Aktivierung über Magenta Moments erforderlich.",
+      "brand": "Subway",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.preisjaeger.at/deals/subway-11-gratis-sub-fur-magenta-moments-kunden-369943",
+      "reasons": [
+        "abgelaufen (2026-10-01)"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten"
+      ],
+      "sourceDate": "2026-10-01T08:34:46.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 2,
+      "expiryDate": "2026-10-01",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "g2-fqq6c9",
+      "title": "Tagliatelle Garnelen um 0,50 € statt 14,90 € (rund 97 % Rabatt); Gutschein aus der Heute-Zeitung vom 02.10. erforderlich",
+      "brand": "mömax Restaurant",
+      "source": "Firecrawl Gastro #2",
+      "url": "https://www.preisjaeger.at/deals/momax-restaurant-tagliatelle-garnelen-um-050-eur-am-02-und-0310-370022",
+      "reasons": [
+        "abgelaufen (2026-10-02)",
+        "relative Kurz-Aktion abgelaufen (2026-10-02)"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten"
+      ],
+      "sourceDate": "2026-10-02T11:19:26.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 1,
+      "expiryDate": "2026-10-02",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "g2-1u48i2w",
       "title": "1+1 Gratis-Sub: beim Kauf eines Subs nach Wahl ein zweites Sub gleicher Größe und Sorte gratis, einmal im Aktionszeitraum",
       "brand": "Subway",
@@ -1946,45 +2074,6 @@
       "sourceDate": "2025-10-29T00:00:00.000Z",
       "sourceDateSource": "url.publicationDate",
       "sourceAgeDays": 339,
-      "expiryDate": "",
-      "expirySource": "",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "g2-18hh76n",
-      "title": "Geburtstagskind isst und trinkt gratis, wenn mindestens eine voll zahlende Begleitperson mitkommt; Reservierung erforderlich",
-      "brand": "Watertuin",
-      "source": "Firecrawl Gastro #2",
-      "url": "https://www.sparhamster.at/geburtstagsgeschenke-oesterreich/",
-      "reasons": [
-        "älter als 7 Tage (2018-03-05)"
-      ],
-      "warnings": [
-        "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten",
-        "kein Ablaufdatum gefunden"
-      ],
-      "sourceDate": "2018-03-05T19:08:35.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 3134,
-      "expiryDate": "",
-      "expirySource": "",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "g2-itg7yc",
-      "title": "1+1 gratis am Geburtstag für das All-you-can-eat-Buffet",
-      "brand": "Sajado BBQ",
-      "source": "Firecrawl Gastro #2",
-      "url": "https://www.sparhamster.at/geburtstagsgeschenke-oesterreich/",
-      "reasons": [
-        "älter als 7 Tage (2018-03-05)"
-      ],
-      "warnings": [
-        "kein Ablaufdatum gefunden"
-      ],
-      "sourceDate": "2018-03-05T19:08:35.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 3134,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
