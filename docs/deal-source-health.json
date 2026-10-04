@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-04T12:01:00.938Z",
+  "generatedAt": "2026-10-04T12:46:26.147Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 648,
-    "uniqueCandidates": 629,
-    "distinctCandidates": 637,
+    "totalCandidates": 654,
+    "uniqueCandidates": 635,
+    "distinctCandidates": 643,
     "duplicateClusters": 8,
     "topHealthySources": [
       {
@@ -100,11 +100,11 @@
         "fresh1dCount": 0
       },
       {
-        "sourceKey": "power",
-        "sourceLabel": "Power Scraper",
-        "coverageScore": 27,
-        "totalDeals": 41,
-        "fresh1dCount": 0
+        "sourceKey": "gutscheine",
+        "sourceLabel": "Gutscheine.at",
+        "coverageScore": 33,
+        "totalDeals": 33,
+        "fresh1dCount": 33
       }
     ],
     "topPrecisionSources": [
@@ -1638,6 +1638,74 @@
       "sourceWeightScore": 33
     },
     {
+      "sourceKey": "gutscheine",
+      "file": "deals-pending-gutscheine.json",
+      "sourceLabel": "Gutscheine.at",
+      "totalDeals": 33,
+      "uniqueDeals": 33,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 33,
+      "fresh7dCount": 33,
+      "viennaCount": 0,
+      "foodDrinkCount": 0,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "myTUI Deals inkl. Flug: Bis zu 300 € auf Pauschalreisen sparen",
+        "35 € Gutschein für alles",
+        "5 Hemden oder Polos für 170 € mit Charles Tyrwhitt Gutscheincode"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 0,
+      "promoRate": 0,
+      "missingUrlRate": 0,
+      "averageQualityScore": 51.5,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 30
+        },
+        {
+          "value": "technik",
+          "count": 2
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 27
+        },
+        {
+          "value": "gutschein",
+          "count": 5
+        },
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 42,
+      "missionFitScore": 22,
+      "coverageScore": 33,
+      "precisionScore": 26,
+      "sourceWeightScore": 31
+    },
+    {
       "sourceKey": "vienna-promo-radar",
       "file": "deals-pending-vienna-promo-radar.json",
       "sourceLabel": "Vienna Promo Radar",
@@ -1791,71 +1859,6 @@
       "coverageScore": 8,
       "precisionScore": 44,
       "sourceWeightScore": 35
-    },
-    {
-      "sourceKey": "gutscheine",
-      "file": "deals-pending-gutscheine.json",
-      "sourceLabel": "Gutscheine.at",
-      "totalDeals": 27,
-      "uniqueDeals": 27,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 27,
-      "viennaCount": 0,
-      "foodDrinkCount": 0,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Bis zu 40 € Prämie auf Bridgestone-Reifen",
-        "180 € Rabatt auf Shark PowerDetect kabelloser Staubsauger",
-        "150 € Rabatt auf Shark Stratos Akku-Staubsauger"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 0,
-      "promoRate": 0.1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 48.5,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 22
-        },
-        {
-          "value": "technik",
-          "count": 5
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 19
-        },
-        {
-          "value": "gutschein",
-          "count": 6
-        },
-        {
-          "value": "gratis",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 30,
-      "missionFitScore": 3,
-      "coverageScore": 14,
-      "precisionScore": 16,
-      "sourceWeightScore": 15
     },
     {
       "sourceKey": "flights",
