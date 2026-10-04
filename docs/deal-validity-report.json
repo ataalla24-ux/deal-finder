@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-04T12:52:57.958Z",
+  "generatedAt": "2026-10-04T13:14:16.482Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 298,
-    "allowed": 0,
+    "total": 300,
+    "allowed": 2,
     "blocked": 298,
-    "warnings": 0,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 208,
       "älter als 7 Tage (2026-02-22)": 84,
@@ -14,15 +14,16 @@
       "älter als 7 Tage (2026-09-14)": 1,
       "Gottesdienste nur im Wochenlauf": 33,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 17,
+      "URL ungültig (HTTP 404)": 16,
       "abgelaufen (2026-10-02)": 2,
+      "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)": 4,
       "älter als 7 Tage (2023-09-11)": 1,
       "abgelaufen (2026-10-03)": 1,
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 4,
       "älter als 7 Tage (2026-08-03)": 1,
       "abgelaufen (2026-10-01)": 4,
       "älter als 7 Tage (2015-07-28)": 1,
-      "abgelaufen (2026-09-30)": 4,
+      "abgelaufen (2026-09-30)": 3,
       "älter als 7 Tage (2026-04-19)": 29,
       "älter als 7 Tage (2016-10-30)": 3,
       "älter als 7 Tage (2023-09-21)": 3,
@@ -34,7 +35,6 @@
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-06-15)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-06-26)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-06-16)": 1,
-      "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)": 3,
       "relative Kurz-Aktion abgelaufen (2026-10-02)": 1,
       "nicht eindeutig in Wien": 13,
       "abgelaufen (2026-08-01)": 2,
@@ -54,10 +54,10 @@
     },
     "reasonCategoryCounts": {
       "kein konkreter Deal": 208,
-      "älter als 7 Tage": 142,
-      "ungültige URL": 27,
+      "älter als 7 Tage": 143,
+      "ungültige URL": 26,
       "Gottesdienste außerhalb Wochenlauf": 33,
-      "abgelaufen": 20,
+      "abgelaufen": 19,
       "Gewinnspiel": 4,
       "sonstiges": 5,
       "nicht Wien": 13,
@@ -79,17 +79,23 @@
         }
       },
       "Firecrawl Gastro #4": {
-        "total": 6,
-        "allowed": 0,
+        "total": 7,
+        "allowed": 1,
         "blocked": 6,
         "warnings": 0,
         "reasonCategoryCounts": {
+          "älter als 7 Tage": 4,
           "kein konkreter Deal": 2,
-          "älter als 7 Tage": 3,
-          "abgelaufen": 4,
-          "Gewinnspiel": 1,
-          "ungültige URL": 1
+          "abgelaufen": 3,
+          "Gewinnspiel": 1
         }
+      },
+      "Firecrawl Gastro #4 Search": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
       },
       "Firecrawl Key 3 - Consumables": {
         "total": 1,
@@ -207,7 +213,41 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "fc4g-1836qok",
+      "title": "Besondere Momente verschenken - Meliá Vienna - Gutschein.at",
+      "brand": "Besondere Momente verschenken - Meliá Vienna - Gutschein.at",
+      "source": "Firecrawl Gastro #4 Search",
+      "url": "https://www.gutschein.at/melia-vienna/besondere-momente-verschenken",
+      "reasons": [],
+      "warnings": [
+        "kein Quell-/Post-Datum gefunden",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "fc4g-48an2b",
+      "title": "1+1 gratis: beim Kauf eines Subs nach Wahl gibt es ein zweit",
+      "brand": "Subway",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.preisjaeger.at/deals/subway-11-gratis-sub-fur-magenta-moments-kunden-369943",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-10-01T08:34:46.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 3,
+      "expiryDate": "2027-01-01",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "events-0-20260222",
@@ -922,6 +962,23 @@
       "urlStatus": "HTTP 200"
     },
     {
+      "id": "fc4g-1sz1ixa",
+      "title": "Backfisch-Baguette 1+1 gratis; außerdem 2x Fish & Chips um 1",
+      "brand": "Nordsee",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.sparhamster.at/nordsee-gutscheine-oesterreich/",
+      "reasons": [
+        "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)"
+      ],
+      "warnings": [],
+      "sourceDate": "2016-09-01T14:27:59.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 3685,
+      "expiryDate": "2026-11-30",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "fc4g-kqdj14",
       "title": "La Fines de Claires Austern für 1 € pro Stück (Gold Selectio",
       "brand": "Oysterini Cafe",
@@ -1013,26 +1070,6 @@
       "expiryDate": "2026-09-30",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "fc4g-fxkh66",
-      "title": "Bei zwei Pizzen ist die günstigere oder gleichwertige Pizza",
-      "brand": "Osteria Da Contessa",
-      "source": "Firecrawl Gastro #4",
-      "url": "https://www.heurigen.gutschein.at/11-pizza-nach-wahl-gratis-1",
-      "reasons": [
-        "URL ungültig (HTTP 404)",
-        "abgelaufen (2026-09-30)"
-      ],
-      "warnings": [
-        "kein Quell-/Post-Datum gefunden"
-      ],
-      "sourceDate": "",
-      "sourceDateSource": "",
-      "sourceAgeDays": null,
-      "expiryDate": "2026-09-30",
-      "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "freikirche-1-20260419",
