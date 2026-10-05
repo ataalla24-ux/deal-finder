@@ -1785,7 +1785,7 @@ async function notifySlackCampaign(env, campaign) {
     `Quelle: ${campaign.paymentProvider || campaign.platform || "unknown"}`,
   ].filter(Boolean);
 
-  const heading = campaign.paymentProvider === 'promo' ? 'Neue Business-Anzeige: kostenloser Starter Boost' : 'Neue Business-Anzeige bezahlt';
+  const heading = campaign.paymentProvider === 'promo' ? 'Neue Business-Anzeige: Promo-Code eingelöst' : 'Neue Business-Anzeige bezahlt';
   const payload = {
     text: `${heading}: ${campaign.restaurantName} - ${campaign.dealTitle}`,
     blocks: [

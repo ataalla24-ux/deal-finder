@@ -59,10 +59,12 @@ test('promo ledger integration with real SQLite Durable Object', async t => {
     assert.equal(response.status, 200); return (await response.json()).campaigns;
   }
 
-  await t.test('administration is protected; only starter and bounded expiry allowed', async () => {
+  await t.test('administration is protected; only known packages and bounded expiry allowed', async () => {
     assert.equal((await call('/admin/codes')).status, 401);
     assert.equal((await call('/admin/codes', {}, { authorization: 'Bearer wrong' })).status, 401);
-    assert.equal((await call('/admin/codes', { packageId: 'city' }, admin)).status, 400);
+    for (const packageId of ['unknown', '', 'toString', 8]) {
+      assert.equal((await call('/admin/codes', { packageId }, admin)).status, 400);
+    }
     for (const days of [0, 91, 1.5, '30']) assert.equal((await call('/admin/codes', { expiresInDays: days }, admin)).status, 400);
     assert.equal((await call('/admin/unknown', {}, admin)).status, 404);
     assert.equal((await call('/check')).status, 405);
@@ -188,6 +190,51 @@ test('promo ledger integration with real SQLite Durable Object', async t => {
       assert.equal((await call('/redeem', { ...draft, address, code: code.code, requestId: crypto.randomUUID() })).status, 400);
     }
     assert.equal((await call('/check', { code: code.code })).status, 200);
+  });
+  await t.test('each package has an independent once-per-restaurant claim and exact server-owned duration', async () => {
+    for (const [packageId, days, name] of [['starter', 1, 'Starter Boost'], ['spotlight', 3, 'Spotlight Boost'], ['city', 8, 'City Push']]) {
+      const code = await create({ kind: 'shared', code: `${packageId}PACKAGETEST`, packageId });
+      assert.deepEqual(code.package, { id: packageId, name, durationDays: days });
+      assert.equal(code.expiresAt, null);
+      const checked = await call('/check', { code: code.code });
+      assert.equal(checked.status, 200);
+      assert.deepEqual(checked.body.package, code.package);
+      assert.equal(checked.body.amount, 0);
+      assert.equal(checked.body.currency, 'EUR');
+      const payload = { ...draft, code: code.code, requestId: crypto.randomUUID(), packageId: 'tampered', amount: 999, durationDays: 90, endsAt: Date.now() + 90 * DAY };
+      const claims = await Promise.all([
+        call('/redeem', { ...payload, platform: 'ios' }),
+        call('/redeem', { ...payload, platform: 'android', requestId: crypto.randomUUID() }),
+      ]);
+      assert.deepEqual(claims.map(item => item.status).sort(), [201, 409]);
+      const winner = claims.findIndex(item => item.status === 201);
+      const campaign = claims[winner].body.campaign;
+      assert.equal(campaign.packageId, packageId);
+      assert.equal(campaign.packageName, name);
+      assert.equal(campaign.endsAt - campaign.startsAt, days * DAY);
+      assert.equal(campaign.amount, 0);
+      assert.equal(campaign.currency, 'EUR');
+      assert.equal((await call('/redeem', { ...payload, requestId: crypto.randomUUID() })).status, 409);
+      const other = await call('/redeem', { ...payload, restaurantName: 'Other Package Restaurant', requestId: crypto.randomUUID() });
+      assert.equal(other.status, 201);
+      assert.equal(other.body.campaign.endsAt - other.body.campaign.startsAt, days * DAY);
+      if (winner === 0) {
+        await call('/admin/revoke', { id: code.id }, admin);
+        assert.deepEqual((await call('/redeem', payload)).body.campaign, campaign);
+      }
+    }
+  });
+  await t.test('legacy codes without package ID stay Starter; corrupt package IDs fail closed', async () => {
+    const legacy = await create();
+    await patch(legacy.id, { packageId: null });
+    assert.equal((await call('/check', { code: legacy.code })).body.package.id, 'starter');
+    const receipt = await call('/redeem', { ...draft, code: legacy.code, requestId: crypto.randomUUID() });
+    assert.equal(receipt.status, 201);
+    assert.equal(receipt.body.campaign.endsAt - receipt.body.campaign.startsAt, DAY);
+    const corrupt = await create();
+    await patch(corrupt.id, { packageId: 'unknown' });
+    assert.equal((await call('/check', { code: corrupt.code })).status, 400);
+    assert.equal((await call('/redeem', { ...draft, code: corrupt.code, requestId: crypto.randomUUID() })).status, 400);
   });
   await t.test('malformed and oversized public requests are rejected', async () => {
     assert.equal((await call('/check', { code: 'a'.repeat(17000) })).status, 413);

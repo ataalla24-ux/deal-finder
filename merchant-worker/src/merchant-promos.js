@@ -1,5 +1,9 @@
 const DAY = 86400000;
-const PACKAGE = { id: 'starter', name: 'Starter Boost', durationDays: 1 };
+const PACKAGES = [
+  { id: 'starter', name: 'Starter Boost', durationDays: 1 },
+  { id: 'spotlight', name: 'Spotlight Boost', durationDays: 3 },
+  { id: 'city', name: 'City Push', durationDays: 8 },
+];
 const PREFIX = '/api/merchant/promos';
 const headers = {
   'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store',
@@ -15,6 +19,12 @@ export async function promoHash(value) {
 }
 class PromoError extends Error {
   constructor(message, status = 400) { super(message); this.status = status; }
+}
+function packageFor(id) {
+  // Codes created before package selection always granted Starter Boost.
+  const pack = PACKAGES.find(item => item.id === (id ?? 'starter'));
+  if (!pack) throw new PromoError('Unbekanntes Business-Paket.');
+  return pack;
 }
 async function body(request) {
   if (!request.headers.get('content-type')?.includes('application/json')) throw new PromoError('JSON erwartet.', 415);
@@ -87,7 +97,7 @@ export function restaurantIdentity(name, address) {
 function publicCode(record) {
   return {
     id: record.id, label: record.label, restaurantName: record.restaurantName,
-    suffix: record.suffix, package: PACKAGE, createdAt: record.createdAt,
+    suffix: record.suffix, package: packageFor(record.packageId), createdAt: record.createdAt,
     expiresAt: record.expiresAt, redeemedAt: record.campaign?.createdAt || null,
     campaignId: record.campaign?.id || null, revokedAt: record.revokedAt || null,
     kind: record.kind || 'individual', redemptionCount: record.redemptionCount || (record.campaign ? 1 : 0),
@@ -114,7 +124,7 @@ export class MerchantPromoLedger {
       }
       const payload = await body(request);
       if (path === '/codes') {
-        if (payload.packageId && payload.packageId !== PACKAGE.id) throw new PromoError('Aktuell nur Starter Boost (1 Tag).');
+        const pack = packageFor(payload.packageId);
         const shared = payload.kind === 'shared';
         if (payload.kind && !['shared', 'individual'].includes(payload.kind)) throw new PromoError('Ungültige Code-Art.');
         const restaurantName = shared ? '' : field(payload.restaurantName, 'Restaurant', 90, false);
@@ -125,7 +135,7 @@ export class MerchantPromoLedger {
         if (!validCode(normalizeCode(code))) throw new PromoError('Gemeinsamer Code: 6 bis 32 Buchstaben oder Ziffern.');
         const id = await promoHash(normalizeCode(code));
         const now = Date.now();
-        const record = { id, kind: shared ? 'shared' : 'individual', restaurantName, label, suffix: code.slice(-4), createdAt: now, expiresAt: shared ? null : now + expiresInDays * DAY };
+        const record = { id, kind: shared ? 'shared' : 'individual', packageId: pack.id, restaurantName, label, suffix: code.slice(-4), createdAt: now, expiresAt: shared ? null : now + expiresInDays * DAY };
         await this.storage.transaction(async txn => {
           if (await txn.get(`code:${id}`)) throw new PromoError('Dieser Code existiert bereits. Einlösungen werden nicht zurückgesetzt.', 409);
           await txn.put(`code:${id}`, record);
@@ -165,7 +175,7 @@ export class MerchantPromoLedger {
       if (path === '/check') {
         const record = await this.storage.get(key);
         requireAvailable(record, Date.now());
-        return json({ ok: true, restaurantName: record.restaurantName, kind: record.kind || 'individual', package: PACKAGE, expiresAt: record.expiresAt, amount: 0, currency: 'EUR' });
+        return json({ ok: true, restaurantName: record.restaurantName, kind: record.kind || 'individual', package: packageFor(record.packageId), expiresAt: record.expiresAt, amount: 0, currency: 'EUR' });
       }
       const requestId = text(payload.requestId);
       if (!/^[a-f0-9-]{32,36}$/i.test(requestId)) throw new PromoError('Ungültige Anfrage-ID.');
@@ -186,11 +196,12 @@ export class MerchantPromoLedger {
         }
         const now = Date.now();
         requireAvailable(current, now);
-        if (redeemed?.campaign) throw new PromoError('Dieses Restaurant hat den kostenlosen Starter-Tag bereits genutzt.', 409);
+        if (redeemed?.campaign) throw new PromoError('Dieses Restaurant hat diesen Promo-Code bereits genutzt.', 409);
+        const pack = packageFor(current.packageId);
         const campaign = {
           ...draft, id: crypto.randomUUID(), status: 'sponsored', platform: ['ios', 'android'].includes(payload.platform) ? payload.platform : 'web', paymentProvider: 'promo',
-          packageId: PACKAGE.id, packageName: PACKAGE.name, amount: 0, currency: 'EUR',
-          createdAt: now, startsAt: now, endsAt: now + PACKAGE.durationDays * DAY,
+          packageId: pack.id, packageName: pack.name, amount: 0, currency: 'EUR',
+          createdAt: now, startsAt: now, endsAt: now + pack.durationDays * DAY,
         };
         await txn.put(redemptionKey, { ...(redemptionKey === key ? current : {}), campaign, fingerprint, requestHash });
         if (redemptionKey !== key) await txn.put(key, { ...current, redemptionCount: (current.redemptionCount || 0) + 1 });

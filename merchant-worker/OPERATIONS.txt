@@ -1,6 +1,7 @@
 FreeFinder restaurant gift codes
 
-Scope: one Starter Boost, 24 hours from activation, EUR 0, no payment and no
+Scope: Starter Boost (1 day), Spotlight Boost (3 days) or City Push (8 days)
+from activation, EUR 0, no payment and no
 subscription. Individual codes are redeemable once, default to 30 days before
 expiry and are bound to the supplied restaurant name. Redemption is available
 in the native Business ads screens (requires the new app update) and on:
@@ -8,10 +9,13 @@ https://freefinder.at/business-promo.html
 
 Shared evergreen code:
   npm run promos -- create --shared STARTERGRATIS --label "Native Starter Aktion"
+  npm run promos -- create --shared SPOTLIGHTGRATIS --package spotlight --label "Native Spotlight Aktion"
+  npm run promos -- create --shared CITYGRATIS --package city --label "Native City Aktion"
 Create it only once. Re-creating an existing code is rejected and never resets
 prior redemptions. One redemption per normalized restaurant name and full
-address, shared across iOS, Android and web. Code does not expire; the ad still
-lasts exactly 24 hours. The shared code can be passed to selected restaurants;
+address PER CODE, shared across iOS, Android and web. Each restaurant may use
+each of these three codes once. Code does not expire; the ad lasts exactly
+24, 72 or 192 hours according to the code's stored package. The shared code can be passed to selected restaurants;
 it is not an authentication secret and can be forwarded by its recipients.
 Without verified merchant accounts, self-declared identity cannot reliably
 prevent deliberate impersonation, misspellings or changed addresses. The
@@ -21,6 +25,11 @@ Admin list includes the total redemption count, not restaurant contact data.
 
 Create a code:
   npm run promos -- create --restaurant "Restaurantname" --label "Kontakt"
+Add --package spotlight or --package city for the longer packages. The default
+remains starter, including legacy stored records without packageId. --days
+controls an individual CODE's validity, not the ad duration. Clients cannot
+override duration, package or price. Native clients need the package-support
+update to redeem 3/8-day codes; earlier Starter-only clients reject them.
 The response contains a private code and ready-to-share redemption link. Keep
 them out of Git, screenshots, public tickets and analytics. The full code is
 returned once; the server only stores a hash and the final four characters.
@@ -45,7 +54,7 @@ Do not roll back to a pre-promo Worker blindly after this storage migration.
 Campaigns are merged with the existing paid merchant feed. Native iOS and
 Android already consume its schema. Paid purchase validation remains unchanged;
 the regular deals.json, subscriptions and QR destination are not changed.
-Expired gift ads leave this separate campaign feed after 24 hours;
+Expired gift ads leave this separate campaign feed after their selected duration;
 this does not change automatic-removal policy for ordinary deals.
 
 The website keeps the request ID in session storage to retry an interrupted
