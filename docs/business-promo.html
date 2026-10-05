@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Business-Promo einlösen | FreeFinder</title>
+  <link rel="icon" href="icon-192.svg">
+  <link rel="stylesheet" href="business-promo.css">
+  <script src="business-promo.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/"><img src="icon-192.svg" width="36" height="36" alt="">FreeFinder</a><span>Business</span></header>
+  <main>
+    <section class="heading"><p class="eyebrow">DEIN STARTER BOOST</p><h1>Business-Anzeige</h1><p>1 Tag sichtbar. Mit deinem Geschenkcode kostenlos.</p></section>
+    <section class="code-section" aria-labelledby="code-heading">
+      <h2 id="code-heading">Promo-Code</h2>
+      <form id="code-form"><label for="code">Dein Code</label><div class="code-row"><input id="code" name="code" autocomplete="off" autocapitalize="characters" spellcheck="false" required maxlength="60" placeholder="FF-…"><button id="check" type="submit">Code prüfen</button></div></form>
+      <p id="code-status" role="status" aria-live="polite"></p>
+    </section>
+    <div id="editor" hidden>
+      <div class="offer-line"><div><strong>Starter Boost</strong><span>24 Stunden ab Aktivierung</span></div><strong class="price">0 €</strong></div>
+      <div class="workspace">
+        <form id="ad-form">
+          <h2>Dein Angebot</h2>
+          <div class="field"><label for="restaurant">Restaurant</label><input id="restaurant" name="restaurantName" maxlength="90" autocomplete="organization" required></div>
+          <div class="field"><label for="title">Deal-Titel</label><input id="title" name="dealTitle" maxlength="110" placeholder="Zum Beispiel: 2 Pizzen zum Preis von 1" required></div>
+          <div class="field"><label for="address">Adresse mit Postleitzahl und Ort</label><input id="address" name="address" maxlength="140" autocomplete="street-address" required></div>
+          <div class="field"><label for="link">Link zum Angebot oder Restaurant</label><input id="link" name="ctaURL" type="url" maxlength="1000" placeholder="https://…" required></div>
+          <div class="two-fields"><div class="field"><label for="old-price">Normalpreis <span>(optional)</span></label><input id="old-price" name="oldPrice" maxlength="40" placeholder="14,90 €"></div><div class="field"><label for="deal-price">Dealpreis <span>(optional)</span></label><input id="deal-price" name="dealPrice" maxlength="40" placeholder="9,90 €"></div></div>
+          <div class="field"><label for="details">Details und Bedingungen</label><textarea id="details" name="description" rows="5" maxlength="360" placeholder="Was gibt es? Wann gilt es? Wie wird es eingelöst?" required></textarea><small id="count">0 / 360</small></div>
+          <label class="consent"><input id="consent" type="checkbox" required><span>Ich darf für dieses Restaurant werben und bestätige, dass Angebot und Angaben stimmen.</span></label>
+          <p class="terms">Einmalig 0 €. Keine Zahlungsdaten, kein Abo und keine automatische Verlängerung. Die Anzeige endet nach 24 Stunden.</p>
+          <button id="activate" type="submit">Anzeige kostenlos aktivieren</button>
+          <p id="ad-status" role="status" aria-live="polite"></p>
+        </form>
+        <aside aria-label="Anzeigenvorschau"><h2>Vorschau</h2><article class="preview"><span class="badge">BUSINESS-ANZEIGE</span><p id="preview-restaurant">Dein Restaurant</p><h3 id="preview-title">Dein Angebot</h3><p id="preview-description">Details und Bedingungen</p><p id="preview-price"></p><div class="preview-location" id="preview-address">Adresse</div><span class="preview-link">Zum Deal ↗</span></article></aside>
+      </div>
+    </div>
+    <section id="success" hidden tabindex="-1"><span class="success-mark" aria-hidden="true">✓</span><h2>Deine Anzeige ist aktiviert.</h2><p id="receipt-title"></p><p id="receipt-period"></p><p>Gesamtbetrag: <strong>0 €</strong>. Die Anzeige endet automatisch.</p><a class="back-link" href="/">Zu FreeFinder</a></section>
+    <noscript><p>Für die Einlösung muss JavaScript aktiviert sein.</p></noscript>
+  </main>
+  <footer><a href="privacy.html">Datenschutz</a><a href="about.html">Über FreeFinder</a><a href="support.html">Kontakt</a></footer>
+</body>
+</html>

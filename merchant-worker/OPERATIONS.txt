@@ -1,0 +1,46 @@
+FreeFinder restaurant gift codes
+
+Scope: one Starter Boost, 24 hours from activation, EUR 0, no payment and no
+subscription. Each code is redeemable once, defaults to 30 days before expiry,
+and is bound to the supplied restaurant name. Restaurants redeem on:
+https://freefinder.at/business-promo.html
+
+Create a code:
+  npm run promos -- create --restaurant "Restaurantname" --label "Kontakt"
+The response contains a private code and ready-to-share redemption link. Keep
+them out of Git, screenshots, public tickets and analytics. The full code is
+returned once; the server only stores a hash and the final four characters.
+
+List status / revoke an unused code:
+  npm run promos -- list
+  npm run promos -- revoke --id CODE_ID
+
+Administration requires MERCHANT_PROMO_ADMIN_SECRET. The CLI also reads the
+macOS Keychain entry service=freefinder-merchant-promo-admin, account=freefinder.
+No credential belongs in the repository or frontend. Never reuse store keys.
+
+Deployment:
+  npm ci
+  npm test
+  npm run deploy
+Keep existing Worker secrets and vars. MERCHANT_PROMOS is a SQLite Durable
+Object, owning both redemption and campaign creation in one transaction.
+Do not remove its binding, migration or class during future deployments.
+Do not roll back to a pre-promo Worker blindly after this storage migration.
+
+Campaigns are merged with the existing paid merchant feed. Native iOS and
+Android already consume its schema. Paid purchase validation remains unchanged;
+the regular deals.json, subscriptions, QR destination and native files are not
+changed. Expired gift ads leave this separate campaign feed after 24 hours;
+this does not change automatic-removal policy for ordinary deals.
+
+The website keeps the request ID in session storage to retry an interrupted
+submission without creating a second ad or extending its lifetime. Reusing the
+same request ID with changed data is rejected. Do not change the draft after
+an ambiguous network result; retry it unchanged first. If the tab was closed,
+the administrator can inspect redemption status with the list command.
+
+Slack notification uses the existing campaign notifier, without blocking ad
+activation. Notification delivery is best effort, not publication approval.
+No fake campaign should be redeemed in production for a smoke test. Create,
+check, revoke and verify rejection instead; full redemption tests run locally.

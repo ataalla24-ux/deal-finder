@@ -1,0 +1,19 @@
+name = "freefinder-merchant-backend"
+main = "src/index.js"
+compatibility_date = "2025-12-01"
+workers_dev = true
+
+[vars]
+APP_STORE_BUNDLE_ID = "com.stefanataalla.freefinderwien"
+
+[[kv_namespaces]]
+binding = "MERCHANT_CAMPAIGNS"
+id = "2c6156c0bb9a41c7afd5e87b199904ec"
+
+[[durable_objects.bindings]]
+name = "MERCHANT_PROMOS"
+class_name = "MerchantPromoLedger"
+
+[[migrations]]
+tag = "merchant-promos-v1"
+new_sqlite_classes = ["MerchantPromoLedger"]
