@@ -979,7 +979,10 @@ async function getThreadMessages(threadTs) {
 
     const url = `https://slack.com/api/conversations.replies?${query.toString()}`;
     const data = await slackApi(url);
-    if (!data.ok) break;
+    if (!data.ok) {
+      console.warn(`Slack thread ${threadTs} could not be read: ${data.error || 'unknown_error'}`);
+      break;
+    }
 
     const pageMessages = ensureArray(data.messages);
     messages.push(...pageMessages);
@@ -1120,13 +1123,17 @@ async function runTargetedApproval({ moderation, botUserId }) {
       return true;
     }
     if (event?.originSource === 'community-submission' && event.slackThreadTs) {
-      const messages = await getThreadMessages(event.slackThreadTs);
-      const message = messages.find(item => item.ts === APPROVE_SLACK_MESSAGE_TS);
+      // reactions.get includes the exact message and works with bot tokens
+      // whose scopes do not permit reading a channel's full reply history.
+      const reactionData = await slackApi(`https://slack.com/api/reactions.get?channel=${encodeURIComponent(targetChannel)}&timestamp=${encodeURIComponent(APPROVE_SLACK_MESSAGE_TS)}`);
+      const message = reactionData.ok ? reactionData.message : null;
       const recovered = recoverTargetedCommunityDeal(message, event,
         ensureArray(loadJson(path.join(DOCS_DIR, 'deals-pending-community.json'), {}).deals), botUserId);
       if (recovered) {
         targetDeal = filterModeratedDeals([recovered], moderation).deals[0];
         if (targetDeal) queuedDeals.push(targetDeal);
+      } else {
+        console.warn(`Community queue recovery could not match the recorded bot message: ${reactionData.error || 'message_or_source_mismatch'}`);
       }
     }
   }

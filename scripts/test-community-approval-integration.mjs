@@ -31,13 +31,15 @@ try {
     slackTs: '1791203010.645859', slackThreadTs: '1791203007.871219',
   };
   let reactions = [{ name: 'white_check_mark', users: ['U_REVIEWER'] }];
+  let repliesAllowed = true;
   let message = { ts: source.slackTs, thread_ts: source.slackThreadTs, user: 'BOT', text: 'fixture' };
   const notices = [];
   globalThis.fetch = async (url, init = {}) => {
     const target = new URL(url);
     if (target.hostname !== 'slack.com') return new Response('Forbidden', { status: 403 });
     if (target.pathname.endsWith('/auth.test')) return Response.json({ ok: true, user_id: 'BOT' });
-    if (target.pathname.endsWith('/conversations.replies')) return Response.json({ ok: true, messages: [message] });
+    if (target.pathname.endsWith('/conversations.replies')) return Response.json(repliesAllowed
+      ? { ok: true, messages: [message] } : { ok: false, error: 'missing_scope' });
     if (target.pathname.endsWith('/reactions.get')) return Response.json({ ok: true, message: { ...message, reactions } });
     if (/\/chat\.(?:postMessage|update)$/.test(target.pathname)) {
       notices.push(JSON.parse(init.body));
@@ -78,6 +80,7 @@ try {
   write('deals.json', { deals: [], totalDeals: 0 });
   write('deals-pending-community.json', { deals: [recoverable] });
   message.text = '*Community-Einreichung – noch nicht geprüft*\n' + buildSlackMessage(recoverable, 1);
+  repliesAllowed = false;
   await main();
   assert.equal(read('deals.json').deals.length, 1, 'lost queue entry can be recovered');
   assert.equal(read('deals.json').deals[0].title, source.title);
