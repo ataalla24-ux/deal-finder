@@ -174,7 +174,7 @@ const repeatedPowerQueue = mergePendingQueue([
     slackTs: '1784275200.100003',
   },
 ], []);
-assert.equal(repeatedPowerQueue.length, 1, 'same Power campaign URL and repeated ID must collapse across Slack runs');
+assert.equal(repeatedPowerQueue.length, 3, 'posted messages must stay addressable even when the offer is duplicated');
 
 const queuedPowerKeys = loadQueuedDealDuplicateKeys(repeatedPowerQueue);
 const filteredPowerRepeat = filterAlreadyQueuedDeals([{

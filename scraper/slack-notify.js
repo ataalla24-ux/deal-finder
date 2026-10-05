@@ -1,4 +1,5 @@
 import { officialFoodOfferKey } from './power-food-sources.js';
+import { isCommunitySubmission } from './community-review-utils.js';
 import { createCardEditor } from './deal-card-editor.js';
 import fs from 'fs';
 import crypto from 'node:crypto';
@@ -1586,7 +1587,7 @@ function pruneStaleQueueDeals(deals, options = {}) {
     const socialSignal = normalizeLooseText([deal.url, deal.source, deal.originSource, deal.id].map(cleanText).join(' '));
     const isSocialQueueDeal = isSocialPostKey(postKey) || /\b(instagram|tiktok)\b/i.test(socialSignal);
     const age = queueDealAgeDays(deal, now);
-    if ((isSocialQueueDeal && age === null) || (age !== null && age >= maxAgeDays)) {
+    if (!deal.approvalBlock && ((isSocialQueueDeal && age === null) || (age !== null && age >= maxAgeDays))) {
       removed += 1;
       continue;
     }
@@ -1595,12 +1596,6 @@ function pruneStaleQueueDeals(deals, options = {}) {
   }
 
   return { deals: filtered, removed };
-}
-
-function isCommunitySubmission(deal) {
-  return String(deal?.id || '').startsWith('community:')
-    && Boolean(String(deal?.submissionId || '').trim())
-    && deal?.originSource === 'community-submission';
 }
 
 async function revalidateRecentPostedQueue(deals, options = {}) {
@@ -1616,6 +1611,7 @@ async function revalidateRecentPostedQueue(deals, options = {}) {
     .filter(({ deal }) => deal.firecrawlReview !== true
       && deal.socialFoodReview !== true
       && !isCommunitySubmission(deal)
+      && !deal.approvalBlock
       && cleanText(deal.slackTs)
       && (queueDealAgeDays(deal, now) ?? Infinity) < maxAgeDays
       && (() => {
@@ -1712,7 +1708,10 @@ function mergePendingQueue(existingDeals, newPostedDeals) {
   const keyToIndex = new Map();
 
   for (const deal of [...existingDeals, ...newPostedDeals]) {
-    const keys = [queueKey(deal), ...buildDealDuplicateKeys(deal)].filter(Boolean);
+    // Once sent, every Slack message must remain addressable for edits/reactions.
+    // Offer deduplication belongs before sending and at the live-feed merge.
+    const keys = cleanText(deal.slackTs) ? [`slack:${deal.slackTs}`]
+      : [queueKey(deal), ...buildDealDuplicateKeys(deal)].filter(Boolean);
     if (keys.length === 0) continue;
     const existingIndex = keys
       .map((key) => keyToIndex.get(key))
@@ -1721,7 +1720,7 @@ function mergePendingQueue(existingDeals, newPostedDeals) {
     if (Number.isInteger(existingIndex)) {
       const merged = mergeDealEvidence(mergedDeals[existingIndex], deal);
       mergedDeals[existingIndex] = merged;
-      for (const key of [queueKey(merged), ...buildDealDuplicateKeys(merged)].filter(Boolean)) {
+      for (const key of keys) {
         keyToIndex.set(key, existingIndex);
       }
       continue;
@@ -1866,7 +1865,7 @@ async function main() {
   ));
   // User submissions are requests for human review, not scraper assertions.
   // Keep moderation/deduplication above, but do not require readable social media.
-  freshDeals.push(...communityReviewDeals);
+  freshDeals.push(...filterDuplicateDealsInRun(communityReviewDeals).deals);
   console.log(`Community submissions for manual review: ${communityReviewDeals.length}`);
   const blockedSummary = formatReasonCategoryCounts(validation.summary.reasonCategoryCounts);
   const validityFirecrawlReview = FIRECRAWL_REVIEW_ENABLED

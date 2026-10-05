@@ -160,7 +160,8 @@ function parseDigestDealMessage(message, fallbackIndex = 0) {
   const lines = text.split('\n').map((line) => line.trim()).filter(Boolean);
   if (lines.length === 0) return null;
 
-  const titleMatch = lines[0].match(/^\*?(\d+)\.\s+(.+?)\*?$/);
+  const titleLine = lines.find(line => /^\*?\d+\.\s+/.test(line)) || lines[0];
+  const titleMatch = titleLine.match(/^\*?(\d+)\.\s+(.+?)\*?$/);
   const order = titleMatch ? Number(titleMatch[1]) : fallbackIndex + 1;
   const title = cleanText(titleMatch ? titleMatch[2] : lines[0].replace(/^\*/, '').replace(/\*$/, ''));
 

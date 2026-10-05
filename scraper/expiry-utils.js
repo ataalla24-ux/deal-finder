@@ -1599,6 +1599,11 @@ export async function inspectDealUrlHealth(url, options = {}) {
 }
 
 export async function normalizeDealExpiry(deal, options = {}) {
+  // A reviewed community window must not be replaced by a profile-page date
+  // or by parsing just the first day of a literal such as "09.10 und 10.10".
+  if (deal.communityDateReview && deal.pipelineLifecycle?.manualDecision === 'approved'
+      && deal.expiresSource === 'slack.community-human-review'
+      && /^\d{4}-\d{2}-\d{2}$/.test(deal.validUntil || deal.validOn || '')) return deal;
   const now = options.now instanceof Date ? options.now : new Date();
   const allowUrlLookup = options.allowUrlLookup !== false;
   const forceUrlLookup = options.forceUrlLookup === true;

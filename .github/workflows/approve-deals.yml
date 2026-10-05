@@ -44,7 +44,10 @@ jobs:
         run: npm ci
 
       - name: Test immediate approval safeguards
-        run: SENTRY_DISABLED=1 node scripts/test-slack-fast-approval.mjs
+        run: |
+          SENTRY_DISABLED=1 node scripts/test-slack-fast-approval.mjs
+          SENTRY_DISABLED=1 node scripts/test-community-approval.mjs
+          SENTRY_DISABLED=1 node scripts/test-community-approval-integration.mjs
 
       - name: ✅ Read Slack ✅ Reactions & Approve
         id: approval

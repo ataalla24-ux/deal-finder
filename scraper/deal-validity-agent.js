@@ -6,6 +6,7 @@ import { extractLowFoodPrice, weakFoodPromotionReason } from './food-discovery-u
 import { inspectDealContentQuality } from './deal-content-quality-utils.js';
 
 import { inspectDealUrlHealth, parseExpiryShape } from './expiry-utils.js';
+import { isHumanReviewedCommunity } from './community-review-utils.js';
 import {
   decodeInstagramShortcodeDate,
   getPublicationEvidence,
@@ -647,6 +648,7 @@ function collectExpiryCandidates(deal, health, now) {
       validFrom: cleanText(parsedShape.validFrom),
       validUntil: cleanText(parsedShape.validUntil),
       confidence: cleanText(parsedShape.confidence),
+      evidenceSource: cleanText(parsedShape.evidenceSource),
       rank,
     });
   };
@@ -705,6 +707,8 @@ function collectExpiryCandidates(deal, health, now) {
       validFrom: deal.validFrom || '',
       validUntil: deal.validUntil || '',
       confidence: deal.dateConfidence || '',
+      evidenceSource: deal.communityDateReview && deal.expirySource === 'slack.community-human-review'
+        ? deal.expirySource : '',
     }, lowConfidenceReviewTtl ? 40 : 90);
   }
 
@@ -1043,6 +1047,7 @@ async function validateDeal(deal, context) {
   const expiry = getExpiryDecision(expiryCandidates, now);
   const recurring = hasRecurringSchedule(deal, expiryCandidates);
   const activeValidity = hasActiveExplicitValidity(deal, expiry, now);
+  const reviewedCommunity = context.communityApproval === true && isHumanReviewedCommunity(deal);
   const publicationCandidates = getPublicationCandidates(deal, health, {
     freshnessSensitive,
     ignoreUrlPublicationDate: sharedBenefitPageDeal || officialFood?.current === true,
@@ -1053,12 +1058,15 @@ async function validateDeal(deal, context) {
     : context.maxAgeDays;
   const freshness = getFreshnessDecision(publicationCandidates, freshnessMaxAgeDays, now, {
     // Crawler run timestamps are ignored, but an official non-social offer
-    // page may legitimately have no publication date. Social posts always
-    // need a recent platform timestamp; a future offer window must not revive
-    // an old Instagram or TikTok post.
+    // page may legitimately have no publication date. Scraped social posts
+    // still need a recent platform timestamp.
     requireDate: socialPostDeal || newsAggregatorDeal,
     socialPost: socialPostDeal,
-    activeValidity: socialPostDeal ? false : activeValidity,
+    // A human-reviewed community offer with a concrete calendar window does
+    // not need a platform post timestamp. Old dated social posts stay blocked.
+    activeValidity: socialPostDeal
+      ? reviewedCommunity && !publicationCandidates.length && activeValidity
+      : activeValidity,
     recurring: socialPostDeal ? false : recurring,
     extendedMaxAgeDays: context.extendedMaxAgeDays,
   });
@@ -1071,6 +1079,7 @@ async function validateDeal(deal, context) {
   if (officialFood?.ok && offer.reason === 'kein konkretes Angebot erkennbar') offer = { concrete: true };
   const reasons = [];
   const warnings = [];
+  if (reviewedCommunity && deal.communityApprovalIssue) reasons.push(deal.communityApprovalIssue);
   if (officialFood && !officialFood.ok) reasons.push(`Offizielle Aktion nicht erneut bestätigt (${officialFood.reason})`);
   if (officialFood?.current) warnings.push('Aktueller Angebotsblock auf offizieller Anbieterseite erneut bestätigt; Abrufdatum ist kein Veröffentlichungsdatum');
 
@@ -1294,6 +1303,7 @@ async function validateDealsForSlack(deals, options = {}) {
   const urlCache = options.urlCache || new Map();
   const requireVienna = options.requireVienna ?? process.env.DEAL_VALIDITY_REQUIRE_VIENNA !== '0';
   const context = {
+    communityApproval: options.communityApproval === true,
     now,
     maxAgeDays,
     extendedMaxAgeDays,

@@ -1,0 +1,37 @@
+{
+  "incident": "Pizza Rando community approvals did not reach the live feed",
+  "date": "2026-10-05",
+  "dealIds": ["community:012ad799-c871-45d9-a31c-905b7224430d", "community:9ea28b1b-63ca-4ac9-a584-6f87e302e294"],
+  "targetSlackTs": "1791203010.645859",
+  "evidenceRuns": [37309357319, 37311808853],
+  "causes": [
+    "Approval reused social scraper freshness checks even for manually approved community offers",
+    "A blocked approval dropped its queue row",
+    "Dispatch deduplication merged already-posted rows and lost newer Slack timestamps",
+    "Community heading could replace the deal title during fallback parsing"
+  ],
+  "changes": [
+    "Allow missing post dates only for human-approved community submissions with an explicit active calendar window",
+    "Yearless numeric dates require a submission no older than 14 days, a current human review, and dates within 60 days of submission; disjoint dates, ambiguous and invalid periods remain blocked",
+    "Preserve both adjacent offer days through subsequent normalization; record review provenance without inventing a source publication date",
+    "Retain blocked candidates for editing; send/update one Slack explanation per failure state",
+    "Keep each posted Slack message addressable and deduplicate community offers before posting",
+    "Recover orphaned community rows only from a recorded bot message plus its original community source record",
+    "Already-published targeted retries leave the feed unchanged"
+  ],
+  "verification": {
+    "regressionSuites": 19,
+    "passed": 19,
+    "realSourceReadOnly": {
+      "url": "https://www.tiktok.com/@pizzarando",
+      "httpStatus": 200,
+      "validFrom": "2026-10-09",
+      "validUntil": "2026-10-10",
+      "allowed": true,
+      "basis": "Existing submitted text and human Slack approval; HTTP 200 is not independent offer confirmation"
+    }
+  },
+  "unchanged": ["Scraper social age policy", "TheFork exclusion", "Live removal gates", "Native app code", "Subscriptions", "QR links", "Store screenshots"],
+  "localWorktree": "/tmp/freefinder-community-approval-20261005",
+  "productionRecovery": "After deployment, rerun only the target approval with the actual existing Slack reaction. Verify Pages and the public feed before claiming live."
+}

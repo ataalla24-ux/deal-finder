@@ -58,8 +58,9 @@ const mergedSocialQueue = mergePendingQueue([
 ], [
   { slackTs: '2.002', url: 'https://instagram.com/reel/DupPost/?utm_source=ig_web_copy_link', title: 'newer presentation' },
 ]);
-assert.equal(mergedSocialQueue.length, 1, 'the same Instagram post must occupy one queue row even with different Slack timestamps');
+assert.equal(mergedSocialQueue.length, 2, 'both posted Slack messages must remain addressable even for the same Instagram post');
 assert.equal(mergedSocialQueue[0].slackTs, '1.001', 'the existing Slack timestamp remains addressable after the merge');
+assert.equal(mergedSocialQueue[1].slackTs, '2.002', 'the newer Slack timestamp must not become an orphan');
 
 const freshSeenCache = normalizeSeenPostCache({
   generatedAt: '2026-07-20T11:55:00.000Z',
