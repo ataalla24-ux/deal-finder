@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import { mergeParsedDealsWithQueue, applySlackEdits } from '../scraper/slack-approve.js';
+import { buildSlackMessage } from '../scraper/slack-notify.js';
+const queued = { id: 'a', slackTs: '123', title: 'Chicken Döner für 3,50 €', description: 'Full conditions '.repeat(100), cardEditorial: { version: 1, warnings: ['Datum prüfen'], suggestions: { when: '26.09.2026' } } };
+const [merged] = mergeParsedDealsWithQueue([{ id: 'a', slackTs: '123', title: 'Preview', description: 'truncated' }], [queued]);
+assert.equal(merged.description, queued.description);
+assert.equal(merged.title, queued.title);
+const edited = applySlackEdits([merged], [{ ts: '124', text: 'edit a titel: Manuell korrigiert' }]);
+assert.equal(edited.deals[0].title, 'Manuell korrigiert');
+const message = buildSlackMessage(queued, 1);
+assert.ok(message.includes('Datum prüfen'));
+assert.ok(message.includes('Wann (Beleg): 26.09.2026'));
+console.log('Editorial full text, human override and Slack review passed');

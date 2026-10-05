@@ -1,4 +1,5 @@
 import { officialFoodOfferKey } from './power-food-sources.js';
+import { createCardEditor } from './deal-card-editor.js';
 import fs from 'fs';
 import crypto from 'node:crypto';
 import path from 'path';
@@ -875,6 +876,14 @@ function buildSlackMessage(deal, index) {
     ? `\n⚠️ FEHLT: ${deal.missingFields.join(', ')}`
     : '';
   const validationDetails = formatValidationDetails(deal);
+  const editorial = deal.cardEditorial;
+  const editorialNote = editorial ? [
+    '\n✍️ Textentwurf: manuell prüfen, keine bestätigte Gültigkeit',
+    editorial.suggestions?.where ? `Wo (Beleg): ${slackTextPrefix(editorial.suggestions.where, 500)}` : '',
+    editorial.suggestions?.when ? `Wann (Beleg): ${slackTextPrefix(editorial.suggestions.when, 500)}` : '',
+    editorial.suggestions?.conditions ? `Bedingungen (Beleg): ${slackTextPrefix(editorial.suggestions.conditions, 1800)}` : '',
+    ...(editorial.warnings || []).map(warning => `⚠️ ${warning}`),
+  ].filter(Boolean).join('\n') : '';
   return [
     `*${index}. ${deal.title}*`,
     `🏷️ Marke/Restaurant: ${deal.brand || 'k.A.'}`,
@@ -891,6 +900,7 @@ function buildSlackMessage(deal, index) {
     `🔗 Direktlink: ${link}`,
     `🆔 Deal-ID: ${deal.id}`,
     validationDetails,
+    editorialNote,
     missingNote,
     desc,
     `✏️ Bearbeiten: \`edit ${index} titel: Neuer Titel | datum: TT.MM.JJJJ | ablauf: TT.MM.JJJJ | ort: Adresse | link: https://... | quelle: Quelle\``,
@@ -1945,6 +1955,19 @@ async function main() {
   });
 
   const postedDeals = [];
+  const editorialCachePath = path.join(DOCS_DIR, 'deal-card-editor-cache.json');
+  let editorialCache = {};
+  try { editorialCache = JSON.parse(fs.readFileSync(editorialCachePath, 'utf8')); }
+  catch (error) { if (error.code !== 'ENOENT') console.warn('Text editor cache unreadable; starting fresh'); }
+  const editCard = createCardEditor({
+    cache: editorialCache,
+    onCache: cache => {
+      const entries = Object.entries(cache).slice(-1000);
+      const temp = `${editorialCachePath}.tmp`;
+      fs.writeFileSync(temp, `${JSON.stringify(Object.fromEntries(entries), null, 2)}\n`);
+      fs.renameSync(temp, editorialCachePath);
+    },
+  });
   if (freshDeals.length > 0) {
     const freeCount = freshDeals.filter((d) => d.type === 'gratis').length;
     const headerTs = await postSlackMessage(
@@ -1962,7 +1985,7 @@ async function main() {
     }
 
     for (let i = 0; i < freshDeals.length; i += 1) {
-      const deal = freshDeals[i];
+      const deal = await editCard(freshDeals[i]);
       const text = (isCommunitySubmission(deal)
         ? '*Community-Einreichung – noch nicht geprüft*\n' : '') + buildSlackMessage(deal, i + 1);
       const ts = await postSlackMessage(text, headerTs);
@@ -2012,7 +2035,7 @@ async function main() {
     }
 
     for (let i = 0; i < firecrawlReviewDeals.length; i += 1) {
-      const deal = firecrawlReviewDeals[i];
+      const deal = await editCard(firecrawlReviewDeals[i]);
       const ts = await postSlackMessage(buildFirecrawlReviewMessage(deal, i + 1), reviewHeaderTs);
       if (!ts) continue;
 
@@ -2052,7 +2075,7 @@ async function main() {
     }
 
     for (let i = 0; i < socialFoodReviewDeals.length; i += 1) {
-      const deal = socialFoodReviewDeals[i];
+      const deal = await editCard(socialFoodReviewDeals[i]);
       const ts = await postSlackMessage(buildSocialFoodReviewMessage(deal, i + 1), reviewHeaderTs);
       if (!ts) continue;
 

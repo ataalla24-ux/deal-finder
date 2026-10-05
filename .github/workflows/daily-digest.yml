@@ -84,10 +84,14 @@ jobs:
       - name: Send validated new deals to Slack
         # Keep malformed Unicode out of Slack block payloads.
         # The regression test runs before any message is sent.
-        run: node scripts/test-slack-unicode.mjs
+        run: |
+          node scripts/test-slack-unicode.mjs
+          node --test scripts/test-deal-card-editor.mjs
+          node scripts/test-card-editor-approval.mjs
 
       - name: Deliver validated new deals to Slack
         env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           DEAL_REMOVE_LINK_SECRET: ${{ secrets.DEAL_REMOVE_LINK_SECRET }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
@@ -110,4 +114,4 @@ jobs:
       - name: Commit dispatch state
         if: always()
         run: |
-          node scripts/commit-generated.mjs --skip-conflicts --message "Central deal dispatch $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-all.json docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-firecrawl4.json docs/deals-pending-firecrawl5.json docs/deal-candidates-index.json docs/deal-source-health.json docs/deal-validity-report.json docs/instagram-merchant-registry.json docs/instagram-graph-post-evidence.json docs/instagram-graph-verification-report.json docs/slack-seen-posts.json docs/social-food-candidate-audit.json docs/deals-review-social-food.json docs/social-food-review-state.json docs/deal-review-feedback.json
+          node scripts/commit-generated.mjs --skip-conflicts --message "Central deal dispatch $(date +%Y-%m-%dT%H:%MZ)" --files docs/deals-pending-all.json docs/deals-pending-gastro2.json docs/deals-pending-food3.json docs/deals-pending-firecrawl2.json docs/deals-pending-firecrawl4.json docs/deals-pending-firecrawl5.json docs/deal-candidates-index.json docs/deal-source-health.json docs/deal-validity-report.json docs/instagram-merchant-registry.json docs/instagram-graph-post-evidence.json docs/instagram-graph-verification-report.json docs/slack-seen-posts.json docs/social-food-candidate-audit.json docs/deals-review-social-food.json docs/social-food-review-state.json docs/deal-review-feedback.json docs/deal-card-editor-cache.json
