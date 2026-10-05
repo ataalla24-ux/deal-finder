@@ -140,6 +140,55 @@ test('promo ledger integration with real SQLite Durable Object', async t => {
     for (let i = 0; i < 31; i++) statuses.push((await call('/check', { code: 'INVALID' }, { 'cf-connecting-ip': '203.0.113.7' })).status);
     assert.equal(statuses[29], 404); assert.equal(statuses[30], 429);
   });
+  await t.test('shared code is evergreen, non-consuming checks and independent restaurant claims', async () => {
+    const code = await create({ kind: 'shared', code: 'STARTER-GRATIS' });
+    assert.equal(code.expiresAt, null);
+    assert.equal(code.restaurantName, '');
+    const first = await call('/redeem', { ...draft, code: 'starter gratis', platform: 'ios', requestId: crypto.randomUUID() });
+    const second = await call('/redeem', { ...draft, restaurantName: 'Other Restaurant', code: code.code, platform: 'android', requestId: crypto.randomUUID() });
+    assert.equal(first.status, 201); assert.equal(second.status, 201);
+    assert.equal(first.body.campaign.platform, 'ios'); assert.equal(second.body.campaign.platform, 'android');
+    assert.equal(first.body.campaign.endsAt - first.body.campaign.startsAt, DAY);
+    const checked = await call('/check', { code: code.code });
+    assert.equal(checked.status, 200); assert.equal(checked.body.kind, 'shared');
+    const list = await call('/admin/codes', undefined, admin);
+    assert.equal(list.body.codes.find(item => item.id === code.id).redemptionCount, 2);
+    assert.equal((await call('/admin/codes', { kind: 'shared', code: code.code }, admin)).status, 409);
+    for (const campaign of [first.body.campaign, second.body.campaign]) {
+      assert.equal((await campaigns()).filter(item => item.id === campaign.id).length, 1);
+    }
+  });
+  await t.test('shared claims are device-independent and normalized; concurrent claims only create one ad', async () => {
+    const code = await create({ kind: 'shared', code: 'SHAREDTEST2' });
+    const payload = { ...draft, restaurantName: 'Caf\u00e9 M\u00fcller', address: 'Musterstra\u00dfe 1, 1010 Wien', code: code.code };
+    const results = await Promise.all([
+      call('/redeem', { ...payload, platform: 'ios', requestId: crypto.randomUUID() }),
+      call('/redeem', { ...payload, restaurantName: 'CAFE MUELLER', address: 'Musterstr. 1 / 1010 Vienna', platform: 'android', requestId: crypto.randomUUID() }),
+    ]);
+    assert.deepEqual(results.map(item => item.status).sort(), [201, 409]);
+    assert.equal((await call('/redeem', { ...payload, requestId: crypto.randomUUID() })).status, 409);
+  });
+  await t.test('shared retries recover the same receipt, including after revocation, without extending the ad', async () => {
+    const code = await create({ kind: 'shared', code: 'SHAREDTEST3' });
+    const payload = { ...draft, code: code.code, requestId: crypto.randomUUID() };
+    const first = await call('/redeem', payload);
+    assert.equal(first.status, 201);
+    const retry = await call('/redeem', payload);
+    assert.equal(retry.status, 200); assert.deepEqual(retry.body.campaign, first.body.campaign);
+    assert.equal((await call('/redeem', { ...payload, dealTitle: 'Changed' })).status, 409);
+    assert.equal((await call('/admin/revoke', { id: code.id }, admin)).status, 200);
+    assert.equal((await call('/check', { code: code.code })).status, 409);
+    assert.equal((await call('/redeem', { ...payload, restaurantName: 'Another Restaurant' })).status, 409);
+    assert.deepEqual((await call('/redeem', payload)).body.campaign, first.body.campaign);
+    assert.ok((await campaigns()).some(item => item.id === first.body.campaign.id));
+  });
+  await t.test('shared identity requires house number and postcode before any claim', async () => {
+    const code = await create({ kind: 'shared', code: 'SHAREDTEST4' });
+    for (const address of ['Wien', '1010 Wien', 'Testgasse Wien', 'Testgasse 1, Wien']) {
+      assert.equal((await call('/redeem', { ...draft, address, code: code.code, requestId: crypto.randomUUID() })).status, 400);
+    }
+    assert.equal((await call('/check', { code: code.code })).status, 200);
+  });
   await t.test('malformed and oversized public requests are rejected', async () => {
     assert.equal((await call('/check', { code: 'a'.repeat(17000) })).status, 413);
     for (const [headers, body, expected] of [[{}, '{}', 415], [{ 'content-type': 'application/json' }, '{', 400]]) {
