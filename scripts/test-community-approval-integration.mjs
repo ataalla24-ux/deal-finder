@@ -80,10 +80,13 @@ try {
   write('deals.json', { deals: [], totalDeals: 0 });
   write('deals-pending-community.json', { deals: [recoverable] });
   message.text = '*Community-Einreichung – noch nicht geprüft*\n' + buildSlackMessage(recoverable, 1);
+  message.blocks = [{ type: 'section', text: { type: 'mrkdwn', text: message.text } }];
+  message.text = message.text.replace(/\n/g, ' ');
   repliesAllowed = false;
   await main();
   assert.equal(read('deals.json').deals.length, 1, 'lost queue entry can be recovered');
   assert.equal(read('deals.json').deals[0].title, source.title);
+  assert.equal(read('deals.json').deals[0].type, 'bogo');
   const published = read('deals.json');
   await main();
   assert.deepEqual(read('deals.json'), published, 'repeated approval must not duplicate or refresh the live deal');

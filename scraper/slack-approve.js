@@ -762,13 +762,8 @@ function recoverTargetedCommunityDeal(message, event, sourceDeals, botUserId) {
   }
   const [parsed] = extractDealsFromThreadMessages([message], { pendingQueue: [source] });
   if (parsed?.id !== source.id || parsed.originSource !== 'community-submission') {
-    const lines = extractSlackMessageText(message).split('\n');
     console.warn('Community recovery parse mismatch', {
       parsedId: parsed?.id, expectedId: source.id, origin: parsed?.originSource,
-      textLength: message?.text?.length, lines: lines.length,
-      titleLine: lines.find(line => /\d+\./.test(line)),
-      idLine: lines.find(line => line.includes('Deal-ID:')),
-      originLine: lines.find(line => line.includes('Ursprung intern:')),
     });
     return null;
   }

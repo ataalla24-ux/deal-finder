@@ -9,7 +9,7 @@ import { buildSlackMessage, mergePendingQueue, pruneStaleQueueDeals, revalidateR
 const now = new Date('2026-10-05T12:46:00Z');
 const source = {
   id: 'community:rando', submissionId: 'rando', originSource: 'community-submission', source: 'Community Submission',
-  brand: 'Pizza Rando', title: '3 Döner zum Preis von 2',
+  brand: 'Pizza Rando', title: '3 Döner zum Preis von 2', type: 'rabatt',
   description: 'Am 09.10 und 10.10 bei Kauf von 2 Dönern den 3. Döner gratis.',
   distance: 'Dresdnerstraße 115, 1200 Wien', address: 'Dresdnerstraße 115, 1200 Wien',
   url: 'https://www.tiktok.com/@pizzarando', expiresOriginal: '09.10 und 10.10',
@@ -69,6 +69,14 @@ const recovered = recoverTargetedCommunityDeal(message, event, [source], 'BOT');
 assert.equal(recovered.title, source.title, 'community heading is not the deal title');
 assert.equal(recovered.expiresOriginal, source.expiresOriginal);
 assert.equal(recovered.pubDate, '', 'Slack timestamps cannot masquerade as post timestamps');
+const slackApiMessage = { ...message,
+  text: message.text.replace(/\n/g, ' '),
+  blocks: [{ type: 'section', text: { type: 'mrkdwn', text: message.text } }],
+};
+const recoveredBlocks = recoverTargetedCommunityDeal(slackApiMessage, event, [source], 'BOT');
+assert.equal(recoveredBlocks.id, source.id, 'recover from Block Kit when Slack flattens the fallback text');
+assert.equal(recoveredBlocks.url, source.url, 'preserve Slack angle-bracket links in blocks');
+assert.equal(recoveredBlocks.type, 'bogo', 'a conditional free third item is not a fully free offer');
 assert.equal(recoverTargetedCommunityDeal({ ...message, user: 'USER' }, event, [source], 'BOT'), null);
 assert.equal(recoverTargetedCommunityDeal(message, { ...event, dealId: 'wrong' }, [source], 'BOT'), null);
 

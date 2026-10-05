@@ -740,7 +740,8 @@ function inferPreferredType(deal = {}) {
     return 'gewinnspiel';
   }
 
-  if (/\b(1\+1|2for1|2 for 1|2f[üu]r1|2 f[üu]r 1|bogo)\b/i.test(title)) {
+  if (/\b(1\+1|2for1|2 for 1|2f[üu]r1|2 f[üu]r 1|bogo)\b/i.test(title)
+      || /\b3\b[^.!?]{0,40}\bzum preis von\s*2\b/i.test(title)) {
     return 'bogo';
   }
 

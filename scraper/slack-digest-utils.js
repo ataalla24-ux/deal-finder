@@ -60,14 +60,16 @@ function flattenSlackNode(node, parts) {
     return;
   }
   if (typeof node === 'string') {
-    const text = cleanText(node);
+    const text = String(node).trim();
     if (text) parts.push(text);
     return;
   }
   if (typeof node !== 'object') return;
 
   if (node.type === 'text' || node.type === 'plain_text' || node.type === 'mrkdwn') {
-    const text = cleanText(node.text);
+    // Block Kit contains the original multiline fields and Slack links; the
+    // top-level accessibility fallback may have flattened them into one line.
+    const text = String(node.text || '').trim();
     if (text) parts.push(text);
   } else if (node.type === 'link') {
     const url = cleanText(node.url);
@@ -98,12 +100,12 @@ function flattenSlackNode(node, parts) {
 
 function extractSlackMessageText(message) {
   const direct = String(message?.text || '');
-  if (direct.includes('Deal-ID:')) return direct;
+  if (direct.includes('Deal-ID:') && direct.includes('\n')) return direct;
 
   const parts = [];
   flattenSlackNode(message?.blocks || [], parts);
   const blockText = parts.join('\n').replace(/\n{3,}/g, '\n\n').trim();
-  return blockText || direct;
+  return blockText.includes('Deal-ID:') ? blockText : direct || blockText;
 }
 
 function parseSlackLink(raw) {
