@@ -7,6 +7,57 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BLOG_DIR = path.join(ROOT, 'docs', 'blog');
 const dealGuides = JSON.parse(fs.readFileSync(path.join(ROOT, 'reviews/deal-guides.json'), 'utf8')).guides;
 
+const timelyGuides = [
+  {
+    slug: 'lugner-city-50-prozent-gastronomie-5-oktober-2026',
+    title: 'Heute 50 Prozent Rabatt in der Lugner City Wien',
+    meta: 'Heute, 5. Oktober 2026: 50 Prozent Rabatt auf alles in den Gastronomielokalen der Lugner City Wien. Bedingungen, teilnehmende Lokale und Quelle prüfen.',
+    eyebrow: 'Heute in Wien · Lugner City',
+    headline: 'Heute 50 Prozent Rabatt in den Lugner-City-Gastronomielokalen.',
+    intro: 'Nur heute, am 5. Oktober 2026, sind laut Dealquelle 50 Prozent Rabatt auf alles in den Gastronomielokalen der Lugner City angekündigt. Dieser Tagesdeal eignet sich besonders zum schnellen Teilen, weil Datum, Ort und Vorteil sofort klar sind.',
+    published: '2026-10-05', publishedLabel: '5. Oktober 2026', modified: '2026-10-05', modifiedLabel: '5. Oktober 2026',
+    image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
+    imageAlt: 'FreeFinder App mit aktuellen Restaurant- und Rabattangeboten in Wien',
+    sections: [
+      ['deal', 'Was ist heute in der Lugner City günstiger?', `<p>Am <strong>5. Oktober 2026</strong> gibt es laut der geprüften Dealquelle <strong>50 Prozent Rabatt auf alles in allen Gastronomielokalen der Lugner City</strong>. Damit zählen potenziell mehrere Restaurants, Cafés und Food-Angebote im Einkaufszentrum zu dieser Tagesaktion.</p><p>Die konkrete Einlösung kann je nach Lokal, Kassa und Aktionsbedingungen abweichen. Prüfe vor dem Bestellen, ob das gewünschte Lokal tatsächlich teilnimmt.</p>`],
+      ['einloesen', 'So nutzt du den 50-Prozent-Deal', `<ol><li>Zur Lugner City in Wien gehen und das gewünschte Gastronomielokal auswählen.</li><li>Vor der Bestellung kurz nachfragen, ob die 50-Prozent-Aktion dort gilt.</li><li>Beim Bezahlen kontrollieren, ob der Rabatt korrekt abgezogen wurde.</li><li>Den Kassenbon oder Endbetrag vor dem Verlassen prüfen.</li></ol><div class="article-note"><strong>Nur heute</strong>Der Deal ist bis 5. Oktober 2026 gelistet. Die Aktion kann je nach Lokal, Bestand oder interner Abwicklung abweichend sein.</div>`],
+      ['teilen', 'Warum du diesen Wien-Deal heute teilen solltest', `<p>Der Vorteil ist leicht verständlich: <strong>50 Prozent Rabatt, Lugner City, nur heute</strong>. Wenn du Freunde oder Familie in Wien hast, schicke ihnen den Link am besten direkt mit dem Datum und dem Hinweis, die Teilnahme des Lokals vor der Bestellung zu bestätigen.</p><p>Teile keine abgelaufene Version als aktuellen Deal: Nach Mitternacht sollte die Angebotsseite nur noch als Archiv oder Quelle für die Tagesaktion dienen.</p>`],
+      ['quelle', 'Quelle und Aktualität', `<p>Die Angaben stammen aus dem <a href="https://www.preisjaeger.at/gutschein/lugner-city-50-in-allen-gastronomielokalen-370071" rel="noopener">öffentlichen Dealbeitrag zur Lugner City</a>. Dort ist der 5. Oktober 2026 als Gültigkeitstag angegeben. Prüfe vor Ort die konkrete Teilnahme des gewünschten Gastronomielokals.</p><p>Weitere aktuelle Rabatte in Wien findest du in der <a href="/angebote-wien-heute.html">FreeFinder-Deals-Übersicht</a>.</p>`],
+    ],
+    faqs: [
+      ['Wie viel Rabatt gibt es heute in der Lugner City?', 'Laut Dealquelle 50 Prozent Rabatt auf alles in den teilnehmenden Gastronomielokalen.'],
+      ['An welchem Tag gilt der Deal?', 'Am 5. Oktober 2026.'],
+      ['Gilt der Rabatt in jedem Lokal?', 'Der Deal nennt alle Gastronomielokale, trotzdem solltest du die Teilnahme vor der Bestellung direkt beim gewünschten Lokal prüfen.'],
+      ['Kann ich den Deal morgen noch nutzen?', 'Das ist nicht zugesichert. Der Deal ist nur für den 5. Oktober 2026 gelistet.'],
+    ],
+    related: [['Aktuelle Wien-Deals', '/angebote-wien-heute.html'], ['Restaurant-Gutscheine in Wien', 'restaurant-gutscheine-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html']],
+  },
+  {
+    slug: 'papa-duck-bowl-wien-1plus1-gratis',
+    title: 'Papa Duck Wien: 1+1 Bowl gratis nach dem Folgen',
+    meta: 'Papa Duck in Wien: Eine Bowl bestellen und eine zweite Bowl gratis erhalten. TikTok-Account folgen, Barnabitengasse 1 in 1060 Wien und Bedingungen prüfen.',
+    eyebrow: 'Gratis Bowl Wien',
+    headline: 'Eine Bowl bestellen, eine Bowl gratis bei Papa Duck.',
+    intro: 'Papa Duck bewirbt aktuell eine 1+1-Bowl-Aktion in Wien: Nach dem Folgen des Accounts gibt es beim Bestellen einer Bowl eine zweite Bowl gratis dazu. Die Bowls sollen frei kombinierbar sein.',
+    published: '2026-10-05', publishedLabel: '5. Oktober 2026', modified: '2026-10-05', modifiedLabel: '5. Oktober 2026',
+    image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
+    imageAlt: 'FreeFinder App mit kostenlosen Food-Angeboten in Wien',
+    sections: [
+      ['angebot', 'Wie funktioniert die Papa-Duck-Bowl-Aktion?', `<p>Bei Papa Duck in Wien gilt laut dem aktuellen Beitrag: <strong>Eine Bowl bestellen, eine zweite Bowl gratis dazu erhalten</strong>. Die Bowls sind laut Dealtext <strong>frei kombinierbar</strong>.</p><p>Als Voraussetzung wird genannt, Papa Duck zu folgen. Da kein fixes Ablaufdatum angegeben ist, solltest du die Aktion vor der Bestellung direkt beim Lokal oder im Originalbeitrag bestätigen.</p>`],
+      ['einloesen', 'So löst du die 1+1-Bowl ein', `<ol><li>Den <a href="https://www.tiktok.com/@papa.duck.at/video/7692719026811850006" rel="noopener">Originalbeitrag von Papa Duck</a> öffnen.</li><li>Dem angegebenen Papa-Duck-Account folgen.</li><li>Zu Papa Duck, Barnabitengasse 1, 1060 Wien gehen.</li><li>Eine Bowl bestellen und die 1+1-Aktion vor dem Bezahlen angeben.</li><li>Prüfen, ob die zweite Bowl tatsächlich mit 0 Euro berechnet wird.</li></ol><div class="article-note"><strong>Aktualität prüfen</strong>Der Beitrag nennt „nur für kurze Zeit“, aber kein konkretes Enddatum. Frage deshalb vor der Bestellung nach der aktuellen Gültigkeit.</div>`],
+      ['bedingungen', 'Worauf solltest du achten?', `<p>Die Aktion ist kein allgemeiner Gutschein für jede Bestellung. Entscheidend ist, ob das Folgen des Accounts nachweisbar sein muss, welche Bowl-Größen eingeschlossen sind und ob die Aktion nur vor Ort gilt.</p><ul><li>Account vor der Bestellung folgen.</li><li>Frei kombinierbare Bowls bestätigen.</li><li>Teilnahme und mögliche Zeitfenster beim Personal prüfen.</li><li>Auf dem Bon kontrollieren, ob eine Bowl gratis ist.</li></ul>`],
+      ['quelle', 'Originalquelle und Standort', `<p>Quelle ist der <a href="https://www.tiktok.com/@papa.duck.at/video/7692719026811850006" rel="noopener">TikTok-Beitrag von Papa Duck</a>. Der Feed nennt als Standort <strong>Barnabitengasse 1, 1060 Wien</strong>. Da der Beitrag „nur für kurze Zeit“ sagt, kann sich die Verfügbarkeit ohne Vorankündigung ändern.</p><p>Weitere Gratis- und 1+1-Food-Angebote findest du in der <a href="/angebote-wien-heute.html">aktuellen Wien-Deals-Übersicht</a>.</p>`],
+    ],
+    faqs: [
+      ['Was ist bei Papa Duck gratis?', 'Beim Bestellen einer Bowl gibt es laut Dealquelle eine zweite Bowl gratis dazu.'],
+      ['Muss ich Papa Duck folgen?', 'Ja, das Folgen des Accounts wird im Deal als Voraussetzung genannt.'],
+      ['Wo ist Papa Duck?', 'Barnabitengasse 1, 1060 Wien.'],
+      ['Wie lange gilt die Aktion?', 'Es ist kein fixes Enddatum angegeben; der Beitrag spricht von „nur für kurze Zeit“.'],
+    ],
+    related: [['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['1+1-Aktionen in Wien', 'eins-plus-eins-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+  },
+];
+
 function quickDeal(guide) {
   const reviewed = dealGuides.find(item => item.slug === guide.slug);
   if (!reviewed) return '';
@@ -20,7 +71,7 @@ function quickDeal(guide) {
 const PUBLISHED = '2026-08-17';
 const PUBLISHED_LABEL = '17. August 2026';
 
-const guides = [
+const guides = [...timelyGuides, ...[
   {
     slug: 'foodora-60-prozent-rabatt-genuss-wien',
     title: 'Foodora 60 Prozent Rabatt mit Gutscheincode GENUSS',
@@ -573,7 +624,7 @@ const guides = [
     ],
     related: [['Kostenlose Freizeitangebote in Wien', 'kostenlose-freizeitangebote-wien.html'], ['Kostenlose Angebote in Wien', 'kostenlose-angebote-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
   },
-];
+]];
 
 function escapeHtml(value) {
   return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
