@@ -53,6 +53,21 @@ function loadReviewCandidates() {
   try {
     let checkedAt = '';
     const candidates = [];
+    const expiryPath = path.join(ROOT, 'docs', 'verified-expiry-review.json');
+    if (fs.existsSync(expiryPath)) {
+      const expiry = JSON.parse(fs.readFileSync(expiryPath, 'utf8'));
+      const age = Date.now() - Date.parse(expiry.checkedAt);
+      if (age >= 0 && age < 48 * 3600_000 && expiry.mode === 'shadow') {
+        checkedAt = newestTimestamp(checkedAt, expiry.checkedAt);
+        candidates.push(...(expiry.entries || []).filter(entry => ['review', 'expiry_candidate'].includes(entry.status)).map(entry => ({
+          id: entry.id,
+          title: entry.title,
+          url: entry.url,
+          reason: `Quellen-Ablaufprüfung: ${entry.reason}${entry.validUntil ? ` (${entry.validUntil})` : ''}`,
+          details: { sourceSystem: 'verified-expiry-shadow', sourceUrl: entry.sourceUrl, evidenceHash: entry.evidenceHash },
+        })));
+      }
+    }
     if (fs.existsSync(REVIEW_CANDIDATES_PATH)) {
       const parsed = JSON.parse(fs.readFileSync(REVIEW_CANDIDATES_PATH, 'utf8'));
       checkedAt = newestTimestamp(checkedAt, parsed.checkedAt);

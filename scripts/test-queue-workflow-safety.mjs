@@ -131,7 +131,7 @@ assert.ok(
 
 for (const [file, stepName, expectedRemovalGate] of [
   ['approve-deals.yml', 'Normalize Live Deals After Approvals', '0'],
-  ['validate-live-deals.yml', 'Validate Live Deals', '1'],
+  ['validate-live-deals.yml', 'Validate Live Deals', '0'],
 ]) {
   const text = workflows.get(file) || '';
   const stepStart = text.indexOf(stepName);
