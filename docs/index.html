@@ -12,17 +12,17 @@
   <meta name="apple-itunes-app" content="app-id=6758958213">
   <meta property="og:title" content="Aktuelle Angebote &amp; Rabatte in Wien | FreeFinder">
   <meta property="og:description" content="Täglich aktuelle Gratis-Angebote, Restaurant-Gutscheine, 1+1-Aktionen und Rabatte in Wien entdecken.">
-  <meta property="og:image" content="https://freefinder.at/og-preview-stores.png">
-  <meta property="og:image:secure_url" content="https://freefinder.at/og-preview-stores.png">
+  <meta property="og:image" content="https://freefinder.at/assets/pro/freefinder-pro-preview.png">
+  <meta property="og:image:secure_url" content="https://freefinder.at/assets/pro/freefinder-pro-preview.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="FreeFinder App mit kostenlosen Angeboten in Wien sowie Download für App Store und Google Play">
+  <meta property="og:image:alt" content="FreeFinder Pro: Karte, Empfehlungen, Tagesdeal und Sparstatistiken">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Aktuelle Angebote &amp; Rabatte in Wien | FreeFinder">
   <meta name="twitter:description" content="Täglich aktuelle Gratis-Angebote, Restaurant-Gutscheine, 1+1-Aktionen und Rabatte in Wien entdecken.">
-  <meta name="twitter:image" content="https://freefinder.at/og-preview-stores.png">
-  <meta name="twitter:image:alt" content="FreeFinder App mit kostenlosen Angeboten in Wien sowie Download für App Store und Google Play">
+  <meta name="twitter:image" content="https://freefinder.at/assets/pro/freefinder-pro-preview.png">
+  <meta name="twitter:image:alt" content="FreeFinder Pro: Karte, Empfehlungen, Tagesdeal und Sparstatistiken">
   <meta property="og:url" content="https://freefinder.at/">
   <meta property="og:site_name" content="FreeFinder Wien">
   <meta property="og:type" content="website">
@@ -78,7 +78,7 @@
           "operatingSystem": ["iOS", "Android"],
           "inLanguage": "de-AT",
           "isAccessibleForFree": true,
-          "image": "https://freefinder.at/og-preview-stores.png",
+          "image": "https://freefinder.at/assets/pro/freefinder-pro-preview.png",
           "downloadUrl": [
             "https://apps.apple.com/app/id6758958213",
             "https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien"
@@ -879,9 +879,46 @@
       margin-top: 28px;
     }
 
-    .pro-phone {
-      justify-self: center;
-      width: min(100%, 328px);
+    .pro-actions .button-warm {
+      color: var(--ink);
+    }
+
+    .pro-actions .button-ghost {
+      padding-inline: 18px;
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    .pro-benefits {
+      padding: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .pro-benefits h3 {
+      margin: 0 0 20px;
+      color: var(--orange);
+      font-size: 25px;
+    }
+
+    .pro-benefits ul {
+      padding-left: 20px;
+      margin: 0;
+      display: grid;
+      gap: 16px;
+      color: rgba(255, 255, 255, 0.86);
+      line-height: 1.5;
+    }
+
+    .pro-benefits p {
+      margin: 24px 0 0;
+      color: rgba(255, 255, 255, 0.78);
+      line-height: 1.6;
+    }
+
+    .pro-section .payment-note {
+      color: rgba(255, 255, 255, 0.78);
     }
 
     .business-section {
@@ -1543,10 +1580,6 @@
         min-height: 650px;
       }
 
-      .pro-phone {
-        order: -1;
-      }
-
       .support-band {
         grid-template-columns: 1fr;
       }
@@ -1756,7 +1789,7 @@
         <div class="nav-links" id="navLinks">
           <a href="#app">App</a>
           <a href="angebote-wien-heute.html">Deals</a>
-          <a href="#pro">PRO</a>
+          <a href="#pro">Pro</a>
           <a href="#business">Business</a>
           <a href="blog/">Blog</a>
           <a href="support.html">Support</a>
@@ -1840,7 +1873,7 @@
             <picture><source type="image/avif" srcset="assets/current-ios/deals-home-400.avif 400w, assets/current-ios/deals-home-736.avif 736w" sizes="300px"><img src="assets/current-ios/deals-home.jpg" width="736" height="1600" alt="FreeFinder Startscreen mit kostenlosen Angeboten in Wien" decoding="async" fetchpriority="high"></picture>
           </div>
           <div class="phone-frame phone-side right">
-            <picture><source type="image/avif" srcset="assets/current-ios/stats-plus.avif"><img src="assets/current-ios/stats-plus.jpg" width="368" height="800" alt="FreeFinder PLUS Statistiken" decoding="async"></picture>
+            <img src="assets/current-ios/favorites-empty.jpg" width="368" height="800" alt="FreeFinder Favoritenansicht" decoding="async">
           </div>
         </div>
         <div class="next-strip" aria-hidden="true">
@@ -1860,7 +1893,7 @@
             </div>
             <div class="quick-link">
               <svg viewBox="0 0 24 24" fill="none"><path d="M8 21h8M12 17v4M7 4l2.2 5.2L12 3l2.8 6.2L17 4l2 10H5L7 4Z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <div><strong>PRO und PLUS</strong><span>Mehr sehen, mehr sparen.</span></div>
+              <div><strong>FreeFinder Pro</strong><span>Ein Abo, alle Pro-Funktionen.</span></div>
             </div>
           </div>
         </div>
@@ -1914,7 +1947,7 @@
               </div>
               <div class="feature-row">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M3 20h18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-                <div><strong>Spar- und Deal-Stats</strong><span>PLUS zeigt Ersparnis, Einlösungen und Aktivität.</span></div>
+                <div><strong>Sparstatistiken mit Pro</strong><span>Detaillierte Auswertungen und Jahresübersicht; deine geschätzte Gesamtersparnis bleibt kostenlos.</span></div>
               </div>
             </div>
           </div>
@@ -1924,38 +1957,46 @@
       <section class="pro-section" id="pro" aria-labelledby="proTitle">
         <div class="pro-grid">
           <div>
-            <h2 class="section-title" id="proTitle">Mehr Wien-Deals mit FreeFinder PRO und PLUS.</h2>
-            <p class="section-copy">Schalte Deal des Tages, Top-Deal-Benachrichtigungen, Standortfilter und erweiterte Stats frei.</p>
+            <h2 class="section-title" id="proTitle">Mehr Überblick mit FreeFinder Pro.</h2>
+            <p class="section-copy">Ein Pro-Abo für Karte und Angebote in deiner Nähe, persönliche Empfehlungen, den kuratierten Tagesdeal und detaillierte Sparstatistiken. Monatlich oder jährlich – mit denselben Pro-Funktionen.</p>
             <div class="plans">
               <article class="plan featured">
-                <h3>PRO</h3>
+                <h3>Pro monatlich</h3>
                 <ul>
-                  <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Deal des Tages</li>
-                  <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Top-Deal Notifications</li>
-                  <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Kostenlos mit 2 Einladungen</li>
+                  <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Alle Pro-Funktionen</li>
+                  <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Monatliche Abrechnung</li>
+                  <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Ein Gratis-Monat bei Berechtigung</li>
                 </ul>
-                <div class="price">3,99 € <span>/ Monat</span></div>
+                <div class="price">4,99 € <span>/ Monat</span></div>
               </article>
               <article class="plan">
-                <h3>PLUS</h3>
+                <h3>Pro jährlich</h3>
                 <ul>
-                  <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Standortfilter</li>
-                  <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Jahresübersicht</li>
-                  <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Smartere Empfehlungen</li>
+                  <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Alle Pro-Funktionen</li>
+                  <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Jährliche Abrechnung</li>
+                  <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10 4 4 8-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Ein Gratis-Monat bei Berechtigung</li>
                 </ul>
-                <div class="price">12,99 € <span>/ Monat</span></div>
+                <div class="price">34,99 € <span>/ Jahr</span></div>
               </article>
             </div>
             <div class="pro-actions">
-              <button class="button button-warm" type="button" data-checkout-plan="pro">PRO mit Stripe starten</button>
-              <button class="button button-ghost" type="button" data-checkout-plan="plus">PLUS mit Stripe starten</button>
+              <a class="button button-warm" href="https://apps.apple.com/app/id6758958213">Pro in der iPhone-App ansehen</a>
+              <a class="button button-ghost" href="https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien">Pro in der Android-App ansehen</a>
               <a class="button button-ghost" id="shareAppButton" href="https://freefinder.at/">Freunde einladen</a>
             </div>
-            <p class="payment-note">Web-Zahlung über Stripe Checkout mit den in Stripe aktivierten Methoden, z.B. Apple Pay, Karte, PayPal, Klarna/Sofort, SEPA oder Google Pay.</p>
+            <p class="payment-note">Berechtigte Neukunden in Österreich und Deutschland können beide Laufzeiten einen Monat kostenlos testen. Danach verlängert sich das gewählte Abo automatisch für 4,99 € pro Monat oder 34,99 € pro Jahr, sofern du es nicht rechtzeitig im jeweiligen Store kündigst. Die App zeigt vor dem Kauf Berechtigung, Gesamtpreis und Bedingungen; die Store-Bestätigung ist maßgeblich.</p>
+            <p class="payment-note">Das Jahresabo spart 24,89 € gegenüber zwölf regulären Monatszahlungen von zusammen 59,88 €. Der Vergleich enthält keine Gratisphase und ist kein früherer Jahrespreis. Die App bleibt auch ohne Pro nutzbar.</p>
           </div>
-          <div class="phone-frame pro-phone">
-            <picture><source type="image/avif" srcset="assets/current-ios/pro-sheet.avif"><img src="assets/current-ios/pro-sheet.jpg" width="368" height="800" alt="FreeFinder PRO und PLUS Funktionen" loading="lazy" decoding="async"></picture>
-          </div>
+          <aside class="pro-benefits" aria-labelledby="proBenefitsTitle">
+            <h3 id="proBenefitsTitle">In beiden Laufzeiten enthalten</h3>
+            <ul>
+              <li>Karte und Angebote in deiner Nähe</li>
+              <li>Persönliche Für-dich-Empfehlungen</li>
+              <li>Kuratierter Deal des Tages</li>
+              <li>Detaillierte Sparstatistiken und Jahresübersicht</li>
+            </ul>
+            <p>Favoriten, Teilen, Community und die geschätzte Gesamtersparnis bleiben kostenlos. Pro ist kein Gutschein für garantiert kostenlose Speisen; die Bedingungen des jeweiligen Anbieters gelten weiterhin.</p>
+          </aside>
         </div>
       </section>
 
@@ -2289,12 +2330,6 @@
       }
     });
 
-    document.querySelectorAll("[data-checkout-plan]").forEach((button) => {
-      button.addEventListener("click", () => {
-        startStripeCheckout(button.dataset.checkoutPlan, button);
-      });
-    });
-
     document.querySelectorAll("[data-business-plan]").forEach((button) => {
       button.addEventListener("click", () => {
         openBusinessCheckout(button.dataset.businessPlan || "businessStarter");
@@ -2496,7 +2531,7 @@
           throw new Error(payload?.error || "Status konnte nicht gelesen werden.");
         }
         if (payload.type !== "business" || !campaign) {
-          setCheckoutReturn("Zahlung abgeschlossen", "Stripe hat dich zurückgeleitet. Für PRO/PLUS ist kein Business-Draft nötig.");
+          setCheckoutReturn("Zahlung abgeschlossen", "Stripe hat dich zurückgeleitet. Zu dieser Zahlung liegt keine Business-Anzeige vor.");
           return;
         }
         if (campaign.status === "merchant_submitted") {

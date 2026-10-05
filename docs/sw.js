@@ -1,4 +1,4 @@
-const CACHE_NAME = 'freefinder-website-v6';
+const CACHE_NAME = 'freefinder-website-v7';
 const urlsToCache = [
   './',
   './index.html',
@@ -8,11 +8,10 @@ const urlsToCache = [
   './icon-192.svg',
   './icon-512.svg',
   './icon-maskable.svg',
-  './og-preview.png',
+  './assets/pro/freefinder-pro-preview.png',
   './assets/current-ios/deals-home.jpg',
   './assets/current-ios/for-you.jpg',
-  './assets/current-ios/stats-plus.jpg',
-  './assets/current-ios/pro-sheet.jpg',
+  './assets/current-ios/favorites-empty.jpg',
   './push-config.json'
 ];
 
