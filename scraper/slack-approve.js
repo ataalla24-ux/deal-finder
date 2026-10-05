@@ -748,11 +748,23 @@ async function validateApprovalCandidates(deals, options = {}) {
 }
 
 function recoverTargetedCommunityDeal(message, event, sourceDeals, botUserId) {
-  if (!botUserId || message?.user !== botUserId || message?.ts !== event?.slackTs) return null;
+  if (!botUserId || message?.user !== botUserId || message?.ts !== event?.slackTs) {
+    console.warn('Community recovery identity mismatch', {
+      messagePresent: Boolean(message), authorMatches: message?.user === botUserId,
+      timestampMatches: message?.ts === event?.slackTs, messageKeys: Object.keys(message || {}),
+    });
+    return null;
+  }
   const source = sourceDeals.find(deal => deal.id === event.dealId && isCommunitySubmission(deal));
-  if (!source) return null;
+  if (!source) {
+    console.warn(`Community recovery source missing: ${event.dealId}`);
+    return null;
+  }
   const [parsed] = extractDealsFromThreadMessages([message], { pendingQueue: [source] });
-  if (parsed?.id !== source.id || parsed.originSource !== 'community-submission') return null;
+  if (parsed?.id !== source.id || parsed.originSource !== 'community-submission') {
+    console.warn('Community recovery parse mismatch', { parsedId: parsed?.id, expectedId: source.id, origin: parsed?.originSource });
+    return null;
+  }
   return normalizePendingDeal({ ...source, ...parsed,
     pubDate: source.pubDate || '', pubDateSource: source.pubDateSource || '',
     sourcePublishedAt: source.sourcePublishedAt || '', sourcePublishedAtSource: source.sourcePublishedAtSource || '',
