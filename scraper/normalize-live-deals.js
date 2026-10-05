@@ -416,6 +416,10 @@ function buildStructuredSocialTitle(deal = {}) {
   }
 
   if (deal.type === 'bogo' && brand) {
+    // BOGO includes other bundle quantities too; its type alone is not proof
+    // of a 1+1 offer. Keep the submitted quantity instead of inventing one.
+    const oneForOne = /\b(?:1\s*\+\s*1|2\s*(?:for|für|fuer)\s*1|buy\s+one\s+get\s+one|zwei\s+zum\s+preis\s+von\s+einem)\b/i.test(signal);
+    if (!oneForOne) return cleanedTitle;
     const offerLabel = detectOfferLabel(signal);
     const channel = /\bfoodora\b/i.test(signal) && !/\bfoodora\b/i.test(brand) ? ' über Foodora' : '';
     return `1+1${offerLabel ? ` ${offerLabel}` : ''} bei ${brand}${channel}`;
@@ -523,7 +527,7 @@ function dedupeNormalizedLiveDeals(deals) {
 
 function detectOfferLabel(text = '') {
   const signal = cleanText(text).toLowerCase();
-  if (/(eis|gelato|ice cream|cone)/.test(signal)) return 'Eis';
+  if (/\b(?:eis(?:creme|kugeln?|becher|sorten?|salons?)?|gelato|ice cream|cone)\b/.test(signal)) return 'Eis';
   if (/(kaffee|coffee|espresso|latte|cappuccino|matcha)/.test(signal)) return 'Kaffee';
   if (/(pizza)/.test(signal)) return 'Pizza';
   if (/(burger)/.test(signal)) return 'Burger';

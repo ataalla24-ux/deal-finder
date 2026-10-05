@@ -8,7 +8,9 @@
     "Approval reused social scraper freshness checks even for manually approved community offers",
     "A blocked approval dropped its queue row",
     "Dispatch deduplication merged already-posted rows and lost newer Slack timestamps",
-    "Community heading could replace the deal title during fallback parsing"
+    "Community heading could replace the deal title during fallback parsing",
+    "Slack returned a flattened top-level accessibility text; original multiline fields were only available in Block Kit",
+    "Live social polishing inferred 1+1 from the generic bogo type and matched Eis inside Preis"
   ],
   "changes": [
     "Allow missing post dates only for human-approved community submissions with an explicit active calendar window",
@@ -17,11 +19,14 @@
     "Retain blocked candidates for editing; send/update one Slack explanation per failure state",
     "Keep each posted Slack message addressable and deduplicate community offers before posting",
     "Recover orphaned community rows only from a recorded bot message plus its original community source record",
-    "Already-published targeted retries leave the feed unchanged"
+    "Already-published targeted retries leave the feed unchanged",
+    "Preserve original multiline Slack blocks and links when fallback text is flattened",
+    "Do not invent 1+1 quantities from a bundle type; match Eis as a food word, not a substring of Preis",
+    "Restore and persist the user's approved Pizza Rando title through the existing reviewed-content path"
   ],
   "verification": {
-    "regressionSuites": 19,
-    "passed": 19,
+    "regressionSuites": 24,
+    "passed": 24,
     "realSourceReadOnly": {
       "url": "https://www.tiktok.com/@pizzarando",
       "httpStatus": 200,
@@ -33,5 +38,10 @@
   },
   "unchanged": ["Scraper social age policy", "TheFork exclusion", "Live removal gates", "Native app code", "Subscriptions", "QR links", "Store screenshots"],
   "localWorktree": "/tmp/freefinder-community-approval-20261005",
-  "productionRecovery": "After deployment, rerun only the target approval with the actual existing Slack reaction. Verify Pages and the public feed before claiming live."
+  "productionRecovery": {
+    "approvalRun": 37318204491,
+    "generatedCommit": "bb0f028fc8dc4d1871249d72a7f8788794346658",
+    "result": "Existing real human reaction processed; one deal added, no live IDs removed, public feed count 68 to 69",
+    "followup": "Final title correction is in this commit; verify public deployment before reporting complete"
+  }
 }

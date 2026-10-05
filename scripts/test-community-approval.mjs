@@ -3,6 +3,8 @@ import { advanceDealLifecycle } from '../scraper/deal-lifecycle.js';
 import { prepareCommunityApproval } from '../scraper/community-review-utils.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import { normalizeDealExpiry } from '../scraper/expiry-utils.js';
+import { normalizeDealRecord } from '../scraper/deal-normalization-utils.js';
+import { normalizeSocialDeal, buildStructuredSocialTitle } from '../scraper/normalize-live-deals.js';
 import { validateApprovalCandidates, recoverTargetedCommunityDeal, retainBlockedApproval, prunePendingQueue } from '../scraper/slack-approve.js';
 import { buildSlackMessage, mergePendingQueue, pruneStaleQueueDeals, revalidateRecentPostedQueue, filterDuplicateDealsInRun } from '../scraper/slack-notify.js';
 
@@ -77,6 +79,11 @@ const recoveredBlocks = recoverTargetedCommunityDeal(slackApiMessage, event, [so
 assert.equal(recoveredBlocks.id, source.id, 'recover from Block Kit when Slack flattens the fallback text');
 assert.equal(recoveredBlocks.url, source.url, 'preserve Slack angle-bracket links in blocks');
 assert.equal(recoveredBlocks.type, 'bogo', 'a conditional free third item is not a fully free offer');
+let polished = recoveredBlocks;
+for (let i = 0; i < 3; i++) polished = normalizeDealRecord(normalizeSocialDeal(polished));
+assert.equal(polished.title, source.title, 'publication polishing must not turn three-for-two into 1+1');
+assert.equal(buildStructuredSocialTitle({ brand: 'Testcafe', type: 'bogo',
+  title: '1+1 Kaffee zum kleinen Preis', description: 'Kaffee vor Ort' }), '1+1 Kaffee bei Testcafe', 'Preis must not be recognized as Eis');
 assert.equal(recoverTargetedCommunityDeal({ ...message, user: 'USER' }, event, [source], 'BOT'), null);
 assert.equal(recoverTargetedCommunityDeal(message, { ...event, dealId: 'wrong' }, [source], 'BOT'), null);
 
