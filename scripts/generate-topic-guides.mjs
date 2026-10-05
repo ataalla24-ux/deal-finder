@@ -6,29 +6,32 @@ import { fileURLToPath } from 'url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BLOG_DIR = path.join(ROOT, 'docs', 'blog');
 const dealGuides = JSON.parse(fs.readFileSync(path.join(ROOT, 'reviews/deal-guides.json'), 'utf8')).guides;
+const now = process.env.SEO_NOW ? Date.parse(process.env.SEO_NOW) : Date.now();
+if (!Number.isFinite(now)) throw new Error('SEO_NOW must be a valid timestamp.');
 
 const timelyGuides = [
   {
     slug: 'lugner-city-50-prozent-gastronomie-5-oktober-2026',
-    title: 'Heute 50 Prozent Rabatt in der Lugner City Wien',
-    meta: 'Heute, 5. Oktober 2026: 50 Prozent Rabatt auf alles in den Gastronomielokalen der Lugner City Wien. Bedingungen, teilnehmende Lokale und Quelle prüfen.',
-    eyebrow: 'Heute in Wien · Lugner City',
-    headline: 'Heute 50 Prozent Rabatt in den Lugner-City-Gastronomielokalen.',
-    intro: 'Nur heute, am 5. Oktober 2026, sind laut Dealquelle 50 Prozent Rabatt auf alles in den Gastronomielokalen der Lugner City angekündigt. Dieser Tagesdeal eignet sich besonders zum schnellen Teilen, weil Datum, Ort und Vorteil sofort klar sind.',
+    title: 'Lugner City Wien: 50 Prozent Rabatt am 5. Oktober 2026',
+    meta: 'Am 5. Oktober 2026: 50 Prozent Rabatt auf alles in den Gastronomielokalen der Lugner City Wien. Bedingungen, teilnehmende Lokale und Quelle prüfen.',
+    eyebrow: '5. Oktober 2026 · Lugner City',
+    headline: '50 Prozent Rabatt in der Lugner City am 5. Oktober 2026.',
+    intro: 'Für den 5. Oktober 2026 sind laut Dealquelle 50 Prozent Rabatt auf alles in den Gastronomielokalen der Lugner City angekündigt. Dieser Tagesdeal gilt ausschließlich am genannten Datum; prüfe vor Ort die Teilnahme und Bedingungen.',
     published: '2026-10-05', publishedLabel: '5. Oktober 2026', modified: '2026-10-05', modifiedLabel: '5. Oktober 2026',
+    expires: '2026-10-05T23:59:59+02:00',
     image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
     imageAlt: 'FreeFinder App mit aktuellen Restaurant- und Rabattangeboten in Wien',
     sections: [
-      ['deal', 'Was ist heute in der Lugner City günstiger?', `<p>Am <strong>5. Oktober 2026</strong> gibt es laut der geprüften Dealquelle <strong>50 Prozent Rabatt auf alles in allen Gastronomielokalen der Lugner City</strong>. Damit zählen potenziell mehrere Restaurants, Cafés und Food-Angebote im Einkaufszentrum zu dieser Tagesaktion.</p><p>Die konkrete Einlösung kann je nach Lokal, Kassa und Aktionsbedingungen abweichen. Prüfe vor dem Bestellen, ob das gewünschte Lokal tatsächlich teilnimmt.</p>`],
-      ['einloesen', 'So nutzt du den 50-Prozent-Deal', `<ol><li>Zur Lugner City in Wien gehen und das gewünschte Gastronomielokal auswählen.</li><li>Vor der Bestellung kurz nachfragen, ob die 50-Prozent-Aktion dort gilt.</li><li>Beim Bezahlen kontrollieren, ob der Rabatt korrekt abgezogen wurde.</li><li>Den Kassenbon oder Endbetrag vor dem Verlassen prüfen.</li></ol><div class="article-note"><strong>Nur heute</strong>Der Deal ist bis 5. Oktober 2026 gelistet. Die Aktion kann je nach Lokal, Bestand oder interner Abwicklung abweichend sein.</div>`],
-      ['teilen', 'Warum du diesen Wien-Deal heute teilen solltest', `<p>Der Vorteil ist leicht verständlich: <strong>50 Prozent Rabatt, Lugner City, nur heute</strong>. Wenn du Freunde oder Familie in Wien hast, schicke ihnen den Link am besten direkt mit dem Datum und dem Hinweis, die Teilnahme des Lokals vor der Bestellung zu bestätigen.</p><p>Teile keine abgelaufene Version als aktuellen Deal: Nach Mitternacht sollte die Angebotsseite nur noch als Archiv oder Quelle für die Tagesaktion dienen.</p>`],
+      ['deal', 'Was war für den 5. Oktober in der Lugner City angekündigt?', `<p>Am <strong>5. Oktober 2026</strong> gibt es laut der geprüften Dealquelle <strong>50 Prozent Rabatt auf alles in allen Gastronomielokalen der Lugner City</strong>. Damit zählen potenziell mehrere Restaurants, Cafés und Food-Angebote im Einkaufszentrum zu dieser Tagesaktion.</p><p>Die konkrete Einlösung kann je nach Lokal, Kassa und Aktionsbedingungen abweichen. Prüfe vor dem Bestellen, ob das gewünschte Lokal tatsächlich teilnimmt.</p>`],
+      ['einloesen', 'Einlösung am Aktionstag', `<ol><li>Am 5. Oktober 2026 zur Lugner City in Wien gehen und das gewünschte Gastronomielokal auswählen.</li><li>Vor der Bestellung kurz nachfragen, ob die 50-Prozent-Aktion dort gilt.</li><li>Beim Bezahlen kontrollieren, ob der Rabatt korrekt abgezogen wurde.</li><li>Den Kassenbon oder Endbetrag vor dem Verlassen prüfen.</li></ol><div class="article-note"><strong>Nur am 5. Oktober 2026</strong>Der Deal ist ausschließlich für diesen Tag gelistet. Die Aktion kann je nach Lokal, Bestand oder interner Abwicklung abweichend sein.</div>`],
+      ['teilen', 'Den Tagesdeal mit eindeutigem Datum teilen', `<p>Der Vorteil ist leicht verständlich: <strong>50 Prozent Rabatt, Lugner City, am 5. Oktober 2026</strong>. Wenn du Freunde oder Familie in Wien hast, schicke ihnen den Link mit dem Datum und dem Hinweis, die Teilnahme des Lokals vor der Bestellung zu bestätigen.</p><p>Teile keine abgelaufene Version als aktuellen Deal: Nach dem Aktionstag dient die Angebotsseite nur noch als Archiv oder Quelle für die Tagesaktion.</p>`],
       ['quelle', 'Quelle und Aktualität', `<p>Die Angaben stammen aus dem <a href="https://www.preisjaeger.at/gutschein/lugner-city-50-in-allen-gastronomielokalen-370071" rel="noopener">öffentlichen Dealbeitrag zur Lugner City</a>. Dort ist der 5. Oktober 2026 als Gültigkeitstag angegeben. Prüfe vor Ort die konkrete Teilnahme des gewünschten Gastronomielokals.</p><p>Weitere aktuelle Rabatte in Wien findest du in der <a href="/angebote-wien-heute.html">FreeFinder-Deals-Übersicht</a>.</p>`],
     ],
     faqs: [
-      ['Wie viel Rabatt gibt es heute in der Lugner City?', 'Laut Dealquelle 50 Prozent Rabatt auf alles in den teilnehmenden Gastronomielokalen.'],
+      ['Wie viel Rabatt war für den 5. Oktober 2026 angekündigt?', 'Laut Dealquelle 50 Prozent Rabatt auf alles in den teilnehmenden Gastronomielokalen.'],
       ['An welchem Tag gilt der Deal?', 'Am 5. Oktober 2026.'],
       ['Gilt der Rabatt in jedem Lokal?', 'Der Deal nennt alle Gastronomielokale, trotzdem solltest du die Teilnahme vor der Bestellung direkt beim gewünschten Lokal prüfen.'],
-      ['Kann ich den Deal morgen noch nutzen?', 'Das ist nicht zugesichert. Der Deal ist nur für den 5. Oktober 2026 gelistet.'],
+      ['Kann ich den Deal nach dem 5. Oktober noch nutzen?', 'Das ist nicht zugesichert. Der Deal ist nur für den 5. Oktober 2026 gelistet.'],
     ],
     related: [['Aktuelle Wien-Deals', '/angebote-wien-heute.html'], ['Restaurant-Gutscheine in Wien', 'restaurant-gutscheine-wien.html'], ['Gratis Essen in Wien', 'gratis-essen-wien.html']],
   },
@@ -103,7 +106,8 @@ const guides = [...timelyGuides, ...[
     eyebrow: '2-Euro-Burger Wien',
     headline: 'Burger mit Pommes für 2 Euro bei Interpolburger.',
     intro: 'Interpolburger Wien kündigt am 25. September 2026 ab 15 Uhr Burger mit Pommes für 2 Euro an. Die Aktion findet am Südtiroler Platz 1 statt und gilt nur, solange der Vorrat reicht.',
-    published: '2026-09-25', publishedLabel: '25. September 2026', modified: '2026-09-25', modifiedLabel: '25. September 2026',
+    published: '2026-09-25', publishedLabel: '25. September 2026', modified: '2026-10-05', modifiedLabel: '5. Oktober 2026',
+    expires: '2026-09-25T23:59:59+02:00',
     image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
     imageAlt: 'FreeFinder App mit Burger- und Food-Angeboten in Wien',
     sections: [
@@ -127,7 +131,8 @@ const guides = [...timelyGuides, ...[
     eyebrow: 'Döner-Aktion Wien',
     headline: 'Duru Döner für 3,50 Euro in der Thaliastraße.',
     intro: 'Duru bewirbt zum 15-jährigen Bestehen am 23. September 2026 einen Hühnerdöner für 3,50 Euro in der Filiale Thaliastraße 23. Die Aktion gilt laut Originalbeitrag von 09:00 bis 18:00 Uhr.',
-    published: '2026-09-23', publishedLabel: '23. September 2026', modified: '2026-09-23', modifiedLabel: '23. September 2026',
+    published: '2026-09-23', publishedLabel: '23. September 2026', modified: '2026-10-05', modifiedLabel: '5. Oktober 2026',
+    expires: '2026-09-23T18:00:00+02:00',
     image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
     imageAlt: 'FreeFinder App mit Döner- und Kebab-Angeboten in Wien',
     sections: [
@@ -149,7 +154,8 @@ const guides = [...timelyGuides, ...[
     eyebrow: 'Gratis Kebab Wien',
     headline: 'Gratis Berliner-Style Gemüse-Kebab bei H11.',
     intro: 'H11 Döner & Pizza bewirbt für den 23. September 2026 einen Berliner-Style Gemüse-Kebab gratis ab 12 Uhr. Die Aktion gilt nur, solange der Vorrat reicht.',
-    published: '2026-09-23', publishedLabel: '23. September 2026', modified: '2026-09-23', modifiedLabel: '23. September 2026',
+    published: '2026-09-23', publishedLabel: '23. September 2026', modified: '2026-10-05', modifiedLabel: '5. Oktober 2026',
+    expires: '2026-09-23T23:59:59+02:00',
     image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
     imageAlt: 'FreeFinder App mit gratis Kebab- und Food-Angeboten in Wien',
     sections: [
@@ -171,7 +177,8 @@ const guides = [...timelyGuides, ...[
     eyebrow: '1+1 Döner Wien',
     headline: '1+1 Döner bei Dahab Döner in Wien.',
     intro: 'Dahab Döner verlängert laut Originalbeitrag eine 1+1-Aktion: Beim Kauf von zwei Dönern gibt es einen dritten Döner gratis. Die Aktion ist bis 25. September 2026 angekündigt.',
-    published: '2026-09-23', publishedLabel: '23. September 2026', modified: '2026-09-23', modifiedLabel: '23. September 2026',
+    published: '2026-09-23', publishedLabel: '23. September 2026', modified: '2026-10-05', modifiedLabel: '5. Oktober 2026',
+    expires: '2026-09-25T23:59:59+02:00',
     image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414,
     imageAlt: 'FreeFinder App mit 1+1-Döner-Angeboten in Wien',
     sections: [
@@ -563,15 +570,16 @@ const guides = [...timelyGuides, ...[
     meta: 'Open House Wien 2026 kostenlos besuchen: Termine vom 25. bis 27. September, Öffnungszeiten und kostenlose Führungen im Überblick.',
     eyebrow: 'Kostenlose Freizeit Wien',
     headline: 'Open House Wien 2026: Gebäude kostenlos entdecken.',
-    intro: 'Beim Open House Wien öffnen sich Gebäude, die sonst nicht frei zugänglich sind. Die offiziellen Wien-Infos nennen kostenlose Führungen vom 25. bis 27. September 2026.',
-    published: '2026-09-13', publishedLabel: '13. September 2026', modified: '2026-09-13', modifiedLabel: '13. September 2026',
+    intro: 'Beim Open House Wien öffnen sich Gebäude, die sonst nicht frei zugänglich sind. Der Veranstalter nennt kostenlose Führungen vom 25. bis 27. September 2026.',
+    published: '2026-09-13', publishedLabel: '13. September 2026', modified: '2026-10-05', modifiedLabel: '5. Oktober 2026',
+    expires: '2026-09-27T17:00:00+02:00',
     image: '/assets/blog/wiener-feuerwehrfest-2026.png', imageWidth: 1672, imageHeight: 941,
     imageAlt: 'Markenfreies Symbolbild für kostenlose Architekturführungen in Wien',
     sections: [
-      ['termine', 'Wann findet Open House Wien statt?', `<p>Open House Wien 2026 findet laut <a href="https://www.wien.info/de/aktuell/veranstaltungen/open-house-wien-2024-1132924" rel="noopener">offizieller Wien-Info</a> von <strong>25. bis 27. September 2026</strong> jeweils von 10:00 bis 17:00 Uhr statt.</p><p>Das Programm führt durch sehenswerte Gebäude und Freiräume in Wien. Die konkrete Auswahl und eventuelle Hinweise pro Ort solltest du vor dem Besuch auf der Veranstaltungsseite prüfen.</p>`],
+      ['termine', 'Wann findet Open House Wien statt?', `<p>Open House Wien 2026 findet laut <a href="https://www.openhouse-wien.at/programm" rel="noopener">offiziellem Veranstalterprogramm</a> von <strong>25. bis 27. September 2026</strong> jeweils von 10:00 bis 17:00 Uhr statt.</p><p>Das Programm führt durch sehenswerte Gebäude und Freiräume in Wien. Die konkrete Auswahl und eventuelle Hinweise pro Ort solltest du vor dem Besuch auf der Veranstaltungsseite prüfen.</p>`],
       ['eintritt', 'Ist der Eintritt wirklich kostenlos?', `<p>Die offiziellen Informationen nennen kostenlose Besichtigungen und Führungen durch Volunteers oder Fachführer:innen. Ein Ticket oder eine Voranmeldung ist laut der Veranstaltungsbeschreibung nicht erforderlich.</p><div class="article-note"><strong>Ortsspezifische Regeln beachten</strong>Bei einzelnen Gebäuden können Kapazität, Treffpunkt oder Zugangshinweise abweichend geregelt sein. Prüfe das jeweilige Gebäude im aktuellen Programm.</div>`],
       ['planung', 'So planst du deinen Besuch', `<ol><li>Programm und teilnehmende Gebäude auswählen.</li><li>Adresse und Treffpunkt vorab speichern.</li><li>Öffnungszeit 10:00 bis 17:00 Uhr berücksichtigen.</li><li>Bei beliebten Führungen frühzeitig vor Ort sein.</li><li>Am Veranstaltungstag auf kurzfristige Hinweise achten.</li></ol><p>Weitere kostenlose Freizeitideen bündelt der <a href="kostenlose-freizeitangebote-wien.html">FreeFinder-Freizeitguide</a>.</p>`],
-      ['quelle', 'Offizielle Veranstaltungsquelle', `<p>Quelle ist die offizielle Veranstaltungskarte von <a href="https://www.wien.info/de/aktuell/veranstaltungen/open-house-wien-2024-1132924" rel="noopener">Wien Info</a>. FreeFinder übernimmt nur Termin, Uhrzeit und den dort bestätigten kostenlosen Eintritt.</p>`],
+      ['quelle', 'Offizielle Veranstaltungsquelle', `<p>Quelle ist das <a href="https://www.openhouse-wien.at/programm" rel="noopener">offizielle Programm von Open House Wien</a>. FreeFinder übernimmt nur Termin, Uhrzeit und den dort bestätigten kostenlosen Eintritt.</p>`],
     ],
     faqs: [
       ['Wann ist Open House Wien 2026?', 'Von Freitag, 25. September, bis Sonntag, 27. September 2026, jeweils von 10:00 bis 17:00 Uhr.'],
@@ -606,23 +614,24 @@ const guides = [...timelyGuides, ...[
   {
     slug: 'filmsommer-moebelmuseum-wien-gratis',
     title: 'Filmsommer im Möbelmuseum Wien: Eintritt frei',
-    meta: 'Filmsommer im Möbelmuseum Wien 2026: kostenlose Filmabende im September, Termine, Ort und Hinweise zur Veranstaltung.',
+    meta: 'Filmsommer im Möbelmuseum Wien 2026: Archiv der kostenlosen Filmabende vom 24. Juli bis 5. September. Die Veranstaltungsreihe ist beendet.',
     eyebrow: 'Gratis Filmabend Wien',
     headline: 'Kostenlose Filmabende im Möbelmuseum Wien.',
-    intro: 'Der Filmsommer im Möbelmuseum Wien bietet im September 2026 Filmabende im Innenhof. Die offizielle Wien-Info nennt freien Eintritt.',
-    published: '2026-09-13', publishedLabel: '13. September 2026', modified: '2026-09-13', modifiedLabel: '13. September 2026',
+    intro: 'Der Filmsommer im Möbelmuseum Wien war vom 24. Juli bis 5. September 2026 im Innenhof angekündigt. Das offizielle Museumsprogramm nennt freien Eintritt; die Veranstaltungsreihe ist beendet.',
+    published: '2026-09-13', publishedLabel: '13. September 2026', modified: '2026-10-05', modifiedLabel: '5. Oktober 2026',
+    expires: '2026-09-05T23:59:59+02:00',
     image: '/assets/blog/wiener-feuerwehrfest-2026.png', imageWidth: 1672, imageHeight: 941,
     imageAlt: 'Markenfreies Symbolbild für einen kostenlosen Filmabend in Wien',
     sections: [
-      ['angebot', 'Was bietet der Filmsommer?', `<p>Der Filmsommer im Möbelmuseum Wien verwandelt laut <a href="https://www.wien.info/de/kunst-kultur/museen-ausstellungen/filmsommer-im-moebelmuseum-wien-946122" rel="noopener">offizieller Wien-Info</a> den Innenhof des Museums an mehreren Septemberterminen in einen Veranstaltungsort für Filmabende.</p><p>Der Besuch ist laut Veranstaltungsbeschreibung kostenlos. Getränke, Snacks und andere Gastronomieangebote sind davon getrennt und nicht automatisch gratis.</p>`],
-      ['termine', 'Termine und Ort prüfen', `<p>Die Veranstaltung findet im September 2026 insgesamt an acht Terminen statt, jeweils Freitag und Samstag. Die genauen Filmtitel und Beginnzeiten solltest du auf der offiziellen Veranstaltungsseite kontrollieren, bevor du losfährst.</p><p>Der Veranstaltungsort ist das Möbelmuseum Wien. Bei schlechtem Wetter oder begrenzten Plätzen können kurzfristige Hinweise relevant sein.</p>`],
-      ['planung', 'So klappt der kostenlose Filmabend', `<ol><li>Aktuelle Termin- und Filminformationen öffnen.</li><li>Anreise und Einlasszeit des jeweiligen Abends prüfen.</li><li>Frühzeitig am Möbelmuseum eintreffen, falls Plätze begrenzt sind.</li><li>Für Essen und Getränke ein eigenes Budget einplanen.</li><li>Am Veranstaltungstag Wetter- und Veranstalterhinweise kontrollieren.</li></ol><p>Weitere kostenlose Kultur- und Freizeitangebote findest du unter <a href="/angebote-wien-heute.html">Aktuelle Wien-Deals</a>.</p>`],
-      ['quelle', 'Offizielle Veranstaltungsquelle', `<p>Quelle ist die <a href="https://www.wien.info/de/kunst-kultur/museen-ausstellungen/filmsommer-im-moebelmuseum-wien-946122" rel="noopener">offizielle Wien-Info-Veranstaltungsseite</a>. Sie bestätigt den Septemberzeitraum und den freien Eintritt.</p>`],
+      ['angebot', 'Was bot der Filmsommer?', `<p>Der Filmsommer im Möbelmuseum Wien war laut <a href="https://www.moebelmuseumwien.at/unser-programm/alle-termine/detail/filmsommer-im-moebelmuseum-wien" rel="noopener">offiziellem Museumsprogramm</a> eine Reihe von Filmabenden im Innenhof des Museums vom <strong>24. Juli bis 5. September 2026</strong>.</p><p>Der Besuch war laut Veranstaltungsbeschreibung kostenlos. Getränke, Snacks und andere Gastronomieangebote waren davon getrennt und nicht automatisch gratis.</p>`],
+      ['termine', 'Historische Termine und Ort', `<p>Das Museumsprogramm nennt acht geplante Filmabende zwischen <strong>24. Juli und 5. September 2026</strong>, jeweils Freitag oder Samstag um <strong>20:00 Uhr</strong>. Die Termine am 25. Juli und 21. August sind dort als abgesagt gekennzeichnet.</p><p>Die letzten angekündigten Abende waren der 4. und 5. September 2026. Der Veranstaltungsort war das Möbelmuseum Wien. Diese Termine sind bereits vorbei; die Seite dokumentiert das historische Angebot.</p>`],
+      ['planung', 'Aktuelle Filmabende finden', `<p>Die Filmabende dieser Reihe sind beendet. Prüfe für einen neuen Besuch das aktuelle Programm des Möbelmuseums und bestätige Termin, Eintritt und Einlassbedingungen beim Veranstalter.</p><p>Weitere kostenlose Kultur- und Freizeitangebote findest du unter <a href="/angebote-wien-heute.html">Aktuelle Wien-Deals</a>.</p>`],
+      ['quelle', 'Offizielle Veranstaltungsquelle', `<p>Quelle ist das <a href="https://www.moebelmuseumwien.at/unser-programm/alle-termine/detail/filmsommer-im-moebelmuseum-wien" rel="noopener">offizielle Filmsommer-Programm des Möbelmuseums Wien</a>. Es bestätigt die Termine vom 24. Juli bis 5. September 2026 und den freien Eintritt.</p>`],
     ],
     faqs: [
-      ['Ist der Filmsommer im Möbelmuseum gratis?', 'Ja. Die offizielle Wien-Info beschreibt den Eintritt als frei. Gastronomie und Zusatzangebote sind davon getrennt.'],
-      ['Wann finden die Filmabende statt?', 'Im September 2026 an insgesamt acht Terminen, jeweils Freitag und Samstag. Die aktuellen Einzeltermine stehen auf der offiziellen Veranstaltungsseite.'],
-      ['Muss ich mich anmelden?', 'Die genauen Einlass- und Platzinformationen solltest du für den jeweiligen Abend direkt beim Veranstalter prüfen.'],
+      ['War der Filmsommer im Möbelmuseum gratis?', 'Ja. Das offizielle Museumsprogramm nennt freien Eintritt für die Reihe von 2026. Gastronomie und Zusatzangebote waren davon getrennt.'],
+      ['Wann waren die Filmabende angekündigt?', 'Vom 24. Juli bis 5. September 2026 waren acht Abende jeweils Freitag oder Samstag um 20:00 Uhr geplant. Der 25. Juli und 21. August sind im Museumsprogramm als abgesagt gekennzeichnet.'],
+      ['Kann ich diese Termine noch besuchen?', 'Nein. Die Veranstaltungsreihe von 2026 ist beendet. Prüfe neue Termine und Einlassbedingungen im aktuellen Museumsprogramm.'],
     ],
     related: [['Kostenlose Freizeitangebote in Wien', 'kostenlose-freizeitangebote-wien.html'], ['Kostenlose Angebote in Wien', 'kostenlose-angebote-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
   },
@@ -636,6 +645,8 @@ function renderGuide(guide) {
   const canonical = `https://freefinder.at/blog/${guide.slug}.html`;
   const published = guide.published || PUBLISHED;
   const publishedLabel = guide.publishedLabel || PUBLISHED_LABEL;
+  const expired = Boolean(guide.expires && Date.parse(guide.expires) < now);
+  const statusBanner = guide.expires ? `<div class="deal-status-banner" data-deal-status-banner${expired ? '' : ' hidden'}><strong>Aktion beendet.</strong>Der angekündigte Aktionszeitraum ist vorbei. Dieser Artikel bleibt als Archiv online. Aktuelle Treffer findest du unter <a href="/angebote-wien-heute.html">Angebote in Wien heute</a>.</div>` : '';
   const readingMinutes = Math.max(5, Math.round(guide.sections.map((section) => section[2].replace(/<[^>]+>/g, ' ').split(/\s+/).length).reduce((a, b) => a + b, 0) / 170));
   const structuredData = {
     '@context': 'https://schema.org',
@@ -690,13 +701,13 @@ function renderGuide(guide) {
   <link rel="stylesheet" href="blog.css">
   <script defer src="/analytics-config.js"></script>
   <script defer src="/consent.js?v=7"></script>
-  <script type="application/ld+json">${JSON.stringify(structuredData)}</script>
+${guide.expires ? '  <script defer src="deal-status.js"></script>\n' : ''}  <script type="application/ld+json">${JSON.stringify(structuredData)}</script>
 </head>
-<body>
+<body${expired ? ' class="deal-is-expired"' : ''}>
   <!-- Generated by scripts/generate-topic-guides.mjs. -->
   <header class="site-header"><nav class="nav" aria-label="Hauptnavigation"><a class="brand" href="/"><img class="brand-mark" src="/icon-192.svg" alt="" width="38" height="38">FreeFinder</a><div class="nav-links"><a href="/angebote-wien-heute.html">Aktuelle Deals</a><a href="/blog/">Blog</a><a class="nav-download" href="/#download">App laden</a></div></nav></header>
-  <main>
-    <header class="article-hero"><div class="hero-inner"><p class="eyebrow">${escapeHtml(guide.eyebrow)}</p><h1>${escapeHtml(guide.headline)}</h1><p class="hero-copy">${escapeHtml(guide.intro)}</p><div class="article-meta"><span>Aktualisiert am ${guide.modifiedLabel || publishedLabel}</span><span>${readingMinutes} Minuten Lesezeit</span></div><div class="article-byline"><span>Von <a href="/about.html">FreeFinder Redaktion</a></span><span>Verantwortlich: Stefan Ataalla</span></div></div></header>
+  <main${guide.expires ? ` data-deal-page data-deal-expires="${escapeHtml(guide.expires)}"` : ''}>
+    <header class="article-hero"><div class="hero-inner"><p class="eyebrow">${expired ? 'Aktion beendet' : escapeHtml(guide.eyebrow)}</p><h1>${escapeHtml(guide.headline)}</h1><p class="hero-copy">${escapeHtml(guide.intro)}</p><div class="article-meta"><span>Aktualisiert am ${guide.modifiedLabel || publishedLabel}</span><span>${readingMinutes} Minuten Lesezeit</span></div><div class="article-byline"><span>Von <a href="/about.html">FreeFinder Redaktion</a></span><span>Verantwortlich: Stefan Ataalla</span></div>${statusBanner}</div></header>
     <div class="article-layout">
       <article class="article-body">
 ${quickDealBlock ? `        ${quickDealBlock}\n` : ''}        <picture>${guide.imageAvif ? `<source type="image/avif" srcset="${guide.imageAvif}" sizes="(max-width: 860px) 100vw, 710px">` : ''}<img class="article-image" src="${guide.image}" alt="${escapeHtml(guide.imageAlt)}" width="${guide.imageWidth}" height="${guide.imageHeight}"${guide.imagePosition ? ` style="object-position:${escapeHtml(guide.imagePosition)}"` : ''} loading="eager" decoding="async"></picture>

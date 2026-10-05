@@ -69,6 +69,40 @@ function dateOnly(value) {
   return (date || new Date()).toLocaleDateString('en-CA', { timeZone: 'Europe/Vienna' });
 }
 
+function calendarDate(value) {
+  const raw = String(value || '').trim();
+  const match = raw.match(/^(\d{4}-\d{2}-\d{2})(?:$|T)/);
+  if (!match || (raw.length > 10 && !parseDate(raw))) return '';
+  const date = parseDate(`${match[1]}T12:00:00Z`);
+  return date && date.toISOString().slice(0, 10) === match[1] ? match[1] : '';
+}
+
+function currentValidity(deal, now) {
+  const today = dateOnly(now);
+  const validOn = calendarDate(deal.validOn);
+  const validFrom = calendarDate(deal.validFrom);
+  const validUntil = calendarDate(deal.validUntil);
+  // Invalid explicit dates cannot establish a current offer or its end date.
+  if ([['validOn', validOn], ['validFrom', validFrom], ['validUntil', validUntil]]
+    .some(([field, parsed]) => String(deal[field] || '').trim() && !parsed)) return null;
+  if (validFrom && validFrom > today) return null;
+  if (validOn) {
+    if (validOn !== today) return null;
+    return { expiryDate: parseDate(`${validOn}T12:00:00Z`), expiryRaw: validOn, expiryLabel: 'Gültig am' };
+  }
+  if (validUntil) {
+    if (validUntil < today || (validFrom && validFrom > validUntil)) return null;
+    return { expiryDate: parseDate(`${validUntil}T12:00:00Z`), expiryRaw: validUntil, expiryLabel: 'Gültig bis' };
+  }
+  const expiryDate = parseDate(deal.expires);
+  if (!expiryDate || expiryDate.getTime() < now.getTime()) return null;
+  return { expiryDate, expiryRaw: String(deal.expires || ''), expiryLabel: 'Gültig bis' };
+}
+
+function isFlightDeal(deal) {
+  return /^flight-/i.test(String(deal.id || '')) || Boolean(deal.flight && typeof deal.flight === 'object');
+}
+
 function isViennaDeal(deal) {
   const signal = [deal.brand, deal.title, deal.description, deal.distance, deal.location, deal.address, deal.city]
     .filter(Boolean)
@@ -121,15 +155,18 @@ function scoreDeal(deal) {
 
 function selectDeals(feed, now) {
   return (Array.isArray(feed.deals) ? feed.deals : [])
-    .map((deal) => ({
-      ...deal,
-      sourceUrl: safeUrl(deal.url),
-      expiryDate: parseDate(deal.expires),
-      expiryRaw: String(deal.expires || ''),
-      displayTitle: cleanTitle(deal.title, deal.brand),
-      displayLocation: cleanLocation(deal.distance || deal.location || deal.address || 'Wien'),
-    }))
-    .filter((deal) => deal.sourceUrl && deal.expiryDate && deal.expiryDate.getTime() >= now.getTime())
+    .filter((deal) => !isFlightDeal(deal))
+    .flatMap((deal) => {
+      const validity = currentValidity(deal, now);
+      return validity ? [{
+        ...deal,
+        ...validity,
+        sourceUrl: safeUrl(deal.url),
+        displayTitle: cleanTitle(deal.title, deal.brand),
+        displayLocation: cleanLocation(deal.distance || deal.location || deal.address || 'Wien'),
+      }] : [];
+    })
+    .filter((deal) => deal.sourceUrl)
     .filter((deal) => !EXCLUDED_CATEGORIES.has(String(deal.category || '').toLowerCase()))
     .filter(isViennaDeal)
     .filter((deal) => !(Number(deal.qualityScore || 0) <= 0 && /:[a-z0-9_+-]+:|#[^\s#]+|\.{3,}/i.test(String(deal.title || ''))))
@@ -142,7 +179,7 @@ function renderDealCard(deal) {
   const id = `deal-${safeId(deal.id || `${deal.brand}-${deal.title}`)}`;
   return `
         <article class="live-deal-card" id="${escapeHtml(id)}">
-          <div class="live-deal-topline"><span class="topic-label">${escapeHtml(typeLabel(deal.type))}</span><span>Gültig bis ${escapeHtml(formatExpiryDate(deal.expiryRaw))}</span></div>
+          <div class="live-deal-topline"><span class="topic-label">${escapeHtml(typeLabel(deal.type))}</span><span>${escapeHtml(deal.expiryLabel)} ${escapeHtml(formatExpiryDate(deal.expiryRaw))}</span></div>
           <p class="live-deal-brand">${escapeHtml(deal.brand || 'Anbieter')}</p>
           <h2>${escapeHtml(deal.displayTitle || 'Aktuelles Angebot')}</h2>
           <p class="live-deal-location">${escapeHtml(deal.displayLocation)}</p>
