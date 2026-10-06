@@ -61,6 +61,97 @@ const timelyGuides = [
   },
 ];
 
+function makeRecentDealGuide({ slug, title, meta, eyebrow, headline, intro, modified, published, expires = '', imageAlt, offer, how, conditions, source, faqs, related }) {
+  return {
+    slug, title, meta, eyebrow, headline, intro,
+    published, publishedLabel: '6. Oktober 2026', modified, modifiedLabel: '6. Oktober 2026', expires,
+    image: '/assets/current-ios/deals-home.jpg', imageAvif: '/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w', imageWidth: 736, imageHeight: 414, imageAlt,
+    sections: [
+      ['angebot', 'Das aktuelle Angebot im Überblick', offer],
+      ['einloesen', 'So löst du den Deal ein', how],
+      ['bedingungen', 'Wichtige Bedingungen und Aktualität', conditions],
+      ['quelle', 'Quelle und weitere Deals', `${source}<p>Weitere aktuelle Angebote findest du in der <a href="/angebote-wien-heute.html">FreeFinder-Übersicht für Wien</a>.</p>`],
+    ],
+    faqs,
+    related,
+  };
+}
+
+const recentDealGuides = [
+  makeRecentDealGuide({
+    slug: 'guess-shopping-week-20-prozent-wien', title: 'GUESS Shopping Week: 20 Prozent Rabatt', meta: 'GUESS Shopping Week: 20 Prozent Rabatt auf ausgewählte Styles bis 13. Oktober 2026. Gutschein, Gültigkeit und ausgewählte Produkte prüfen.', eyebrow: 'GUESS Rabatt Österreich', headline: '20 Prozent Rabatt auf ausgewählte GUESS-Styles.', intro: 'Während der GUESS Shopping Week gibt es laut Dealquelle 20 Prozent Rabatt auf ausgewählte Styles. Der Deal ist bis 13. Oktober 2026 gelistet.', published: '2026-10-06', modified: '2026-10-06', expires: '2026-10-13T23:59:59+02:00', imageAlt: 'FreeFinder App mit aktuellen Shopping-Rabatten',
+    offer: `<p>Die aktuelle GUESS-Aktion bietet <strong>20 Prozent Rabatt auf ausgewählte Styles</strong>. Nicht jedes Produkt muss automatisch eingeschlossen sein; prüfe deshalb im Shop, ob der Rabatt am gewünschten Artikel angezeigt wird.</p>`,
+    how: `<ol><li>Die <a href="https://www.gutscheine.at/guess" rel="noopener">GUESS-Aktionsseite</a> öffnen.</li><li>Ausgewählte Styles und Teilnahmebedingungen prüfen.</li><li>Beim Checkout kontrollieren, ob 20 Prozent Rabatt abgezogen werden.</li><li>Vor dem Kauf Lieferkosten, Rückgaberegeln und Enddatum prüfen.</li></ol>`,
+    conditions: `<p>Der Deal ist bis <strong>13. Oktober 2026</strong> gelistet. Die Auswahl der teilnehmenden Styles und die konkrete Darstellung können sich ändern. Maßgeblich ist der Preis im Checkout.</p>`,
+    source: `<p>Quelle ist die <a href="https://www.gutscheine.at/guess" rel="noopener">GUESS-Übersicht bei Gutscheine.at</a>. Prüfe vor dem Kauf die Auswahl und das angezeigte Enddatum erneut.</p>`,
+    faqs: [['Wie viel Rabatt gibt es bei GUESS?', '20 Prozent auf ausgewählte Styles.'], ['Wie lange gilt die Aktion?', 'Aktuell bis 13. Oktober 2026 gelistet.'], ['Gilt der Rabatt auf alles?', 'Nein, laut Deal sind ausgewählte Styles eingeschlossen.']], related: [['Rabatte in Wien', 'rabatte-wien.html'], ['Gutscheine in Wien', 'gutscheine-wien.html']],
+  }),
+  makeRecentDealGuide({
+    slug: 'ryanair-ibiza-ab-5598-wien-oktober-2026', title: 'Ryanair Wien nach Ibiza ab 55,98 Euro', meta: 'Ryanair-Flug Wien–Ibiza hin und zurück ab 55,98 Euro für 20. bis 22. Oktober 2026. Flugpreis, Gepäck und Verfügbarkeit prüfen.', eyebrow: 'Günstig reisen ab Wien', headline: 'Hin und zurück von Wien nach Ibiza ab 55,98 Euro.', intro: 'Für eine Hin- und Rückreise von Wien nach Ibiza ist aktuell ein Ryanair-Preis ab 55,98 Euro für den 20. bis 22. Oktober 2026 gelistet. Flugpreise und Verfügbarkeit ändern sich dynamisch.', published: '2026-10-06', modified: '2026-10-06', expires: '2026-10-20T23:59:59+02:00', imageAlt: 'FreeFinder App mit günstigen Reiseangeboten ab Wien',
+    offer: `<p>Der Deal nennt einen <strong>Ryanair-Roundtrip Wien–Ibiza ab 55,98 Euro</strong> für zwei Tage: Abflug am 20. Oktober und Rückflug am 22. Oktober 2026. Der Preis gilt vorbehaltlich Verfügbarkeit und kann sich beim Öffnen ändern.</p>`,
+    how: `<ol><li>Die <a href="https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=IBZ&dateOut=2026-10-20&dateIn=2026-10-22&isReturn=true&discount=0&promoCode=" rel="noopener">Ryanair-Flugsuche</a> öffnen.</li><li>Passagiere, Gepäck und Sitzplatzwünsche prüfen.</li><li>Kontrollieren, ob der Hin- und Rückflug noch ab 55,98 Euro verfügbar ist.</li><li>Vor dem Bezahlen alle Zusatzkosten prüfen.</li></ol>`,
+    conditions: `<p>„Ab“-Preise sind nicht garantiert. Handgepäck, Sitzplatz, Priority, Zahlung und weitere Optionen können den Endpreis erhöhen. Buche nur, wenn der vollständige Endbetrag für dich passt.</p>`,
+    source: `<p>Quelle ist die <a href="https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=IBZ&dateOut=2026-10-20&dateIn=2026-10-22&isReturn=true&discount=0&promoCode=" rel="noopener">direkte Ryanair-Flugsuche</a>.`,
+    faqs: [['Wie viel kostet der Ibiza-Flug?', 'Ab 55,98 Euro hin und zurück laut aktuellem Deal.'], ['Wann geht die Reise?', '20. bis 22. Oktober 2026.'], ['Sind Gepäck und Sitzplatz enthalten?', 'Das muss im Buchungsschritt geprüft werden.']], related: [['Rabatte in Wien', 'rabatte-wien.html'], ['Aktuelle Wien-Deals', '/angebote-wien-heute.html']],
+  }),
+  makeRecentDealGuide({
+    slug: 'pizza-rando-3-doener-zum-preis-von-2-wien', title: 'Pizza Rando Wien: 3 Döner zum Preis von 2', meta: 'Pizza Rando in Wien: Am 9. und 10. Oktober 2026 drei Döner zum Preis von zwei in der Dresdnerstraße 115, 1200 Wien.', eyebrow: 'Döner-Angebot Wien', headline: 'Drei Döner zum Preis von zwei bei Pizza Rando.', intro: 'Pizza Rando kündigt für den 9. und 10. Oktober 2026 eine 3-für-2-Aktion an: Beim Kauf von zwei Dönern gibt es den dritten gratis.', published: '2026-10-06', modified: '2026-10-06', expires: '2026-10-10T23:59:59+02:00', imageAlt: 'FreeFinder App mit Döner-Angeboten in Wien',
+    offer: `<p>Bei Pizza Rando gilt laut Deal <strong>3 Döner zum Preis von 2</strong>. Die Aktion ist für <strong>9. und 10. Oktober 2026</strong> angekündigt und findet in der Dresdnerstraße 115, 1200 Wien statt.</p>`,
+    how: `<ol><li>Den <a href="https://www.tiktok.com/@pizzarando" rel="noopener">Pizza-Rando-TikTok-Account</a> und die aktuelle Aktion prüfen.</li><li>Am 9. oder 10. Oktober zur Dresdnerstraße 115 gehen.</li><li>Zwei Döner bestellen und die 3-für-2-Aktion nennen.</li><li>Vor dem Bezahlen prüfen, ob der dritte Döner gratis berücksichtigt wird.</li></ol>`,
+    conditions: `<p>Der Deal nennt zwei Aktionstage. Prüfe vor Ort, welche Dönerarten teilnehmen und ob weitere Bedingungen gelten. Social-Media-Aktionen können kurzfristig angepasst werden.</p>`,
+    source: `<p>Die Quelle ist der <a href="https://www.tiktok.com/@pizzarando" rel="noopener">TikTok-Auftritt von Pizza Rando</a>. Standort laut App-Feed: Dresdnerstraße 115, 1200 Wien.</p>`,
+    faqs: [['Wann gilt die 3-für-2-Aktion?', 'Am 9. und 10. Oktober 2026.'], ['Wo ist Pizza Rando?', 'Dresdnerstraße 115, 1200 Wien.'], ['Ist jeder Döner eingeschlossen?', 'Das sollte vor der Bestellung direkt beim Lokal geprüft werden.']], related: [['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['1+1-Aktionen in Wien', 'eins-plus-eins-wien.html']],
+  }),
+  makeRecentDealGuide({
+    slug: 'anker-winterheissgetraenk-20-prozent-wien', title: 'ANKER Wien: 20 Prozent auf Winterheißgetränke', meta: 'ANKER-Rabatt in Wien: Saisonale Winterheißgetränke aktuell um 20 Prozent günstiger. Teilnehmende Filialen und Aktionszeitraum prüfen.', eyebrow: 'Kaffee-Rabatt Wien', headline: '20 Prozent Rabatt auf saisonale Winterheißgetränke bei ANKER.', intro: 'ANKER bewirbt saisonale Winterheißgetränke um 20 Prozent günstiger. Der genaue Aktionszeitraum und die teilnehmenden Filialen sollten direkt beim Anbieter geprüft werden.', published: '2026-10-06', modified: '2026-10-06', imageAlt: 'FreeFinder App mit Kaffee- und Heißgetränke-Angeboten in Wien',
+    offer: `<p>Im Aktionszeitraum kostet jedes <strong>saisonale Winterheißgetränk bei ANKER 20 Prozent weniger</strong>. Das kann je nach Filiale und verfügbarem Sortiment unterschiedliche Getränke betreffen.</p>`,
+    how: `<ol><li>Die <a href="https://www.ankerbrot.at/aktionen" rel="noopener">ANKER-Aktionsseite</a> öffnen.</li><li>Aktionszeitraum und teilnehmende Filiale prüfen.</li><li>Ein saisonales Winterheißgetränk auswählen.</li><li>Auf dem Bon kontrollieren, ob 20 Prozent abgezogen wurden.</li></ol>`,
+    conditions: `<p>Der Feed enthält kein festes Ablaufdatum. Saison, Filiale, Größe und Verfügbarkeit können die Einlösung beeinflussen. Frage im Zweifel vor der Bestellung nach dem Aktionsgetränk.</p>`,
+    source: `<p>Quelle ist die <a href="https://www.ankerbrot.at/aktionen" rel="noopener">offizielle ANKER-Aktionsseite</a>.`,
+    faqs: [['Wie viel Rabatt gibt es bei ANKER?', '20 Prozent auf saisonale Winterheißgetränke im Aktionszeitraum.'], ['Gilt der Rabatt in jeder Filiale?', 'Teilnehmende Filialen sollten beim Anbieter geprüft werden.'], ['Wie lange läuft die Aktion?', 'Im Feed ist kein festes Ablaufdatum angegeben.']], related: [['Gratis Kaffee in Wien', 'gratis-kaffee-wien.html'], ['Rabatte in Wien', 'rabatte-wien.html']],
+  }),
+  makeRecentDealGuide({
+    slug: 'moebelix-20-prozent-teppiche-wien', title: 'Möbelix Wien: 20 Prozent Rabatt auf Teppiche', meta: 'Möbelix Rabatt: 20 Prozent auf Teppiche. Produkte, Gültigkeit, Lieferbedingungen und den finalen Preis im Shop prüfen.', eyebrow: 'Möbelix Rabatt Österreich', headline: '20 Prozent Rabatt auf Teppiche bei Möbelix.', intro: 'Möbelix listet aktuell 20 Prozent Rabatt auf Teppiche. Prüfe im Online-Shop, welche Teppiche teilnehmen und welcher Preis im Warenkorb gilt.', published: '2026-10-06', modified: '2026-10-06', imageAlt: 'FreeFinder App mit Möbelix-Rabatten',
+    offer: `<p>Der aktuelle Deal nennt <strong>20 Prozent Rabatt auf Teppiche bei Möbelix</strong>. Die Aktion kann auf ausgewählte Produkte oder Kategorien begrenzt sein.</p>`,
+    how: `<ol><li>Die <a href="https://www.moebelix.at/teppiche-C37C1" rel="noopener">Möbelix-Teppichseite</a> öffnen.</li><li>Aktionskennzeichnung und Produktbedingungen prüfen.</li><li>Den Rabatt im Warenkorb kontrollieren.</li><li>Lieferung, Montage und mögliche Zusatzkosten vor dem Kauf prüfen.</li></ol>`,
+    conditions: `<p>Der Feed enthält kein festes Ablaufdatum. Möbelix kann Produkte, Aktionszeitraum und Teilnahmebedingungen ändern. Der Preis im Warenkorb ist maßgeblich.</p>`,
+    source: `<p>Quelle ist die <a href="https://www.moebelix.at/teppiche-C37C1" rel="noopener">offizielle Möbelix-Teppichübersicht</a>.`,
+    faqs: [['Wie viel Rabatt gibt es?', '20 Prozent auf teilnehmende Teppiche.'], ['Gilt der Rabatt auf jeden Teppich?', 'Das muss am jeweiligen Produkt geprüft werden.'], ['Kann sich der Preis ändern?', 'Ja. Der aktuelle Warenkorbpreis ist maßgeblich.']], related: [['Rabatte in Wien', 'rabatte-wien.html'], ['Gutscheine in Wien', 'gutscheine-wien.html']],
+  }),
+  makeRecentDealGuide({
+    slug: 'autodoc-30-euro-gutschein', title: 'AUTODOC: 30-Euro-Gutschein für alles', meta: 'AUTODOC Gutschein: 30 Euro Rabatt auf alles laut aktueller Gutscheinübersicht. Teilnahmebedingungen, Mindestbestellwert und Einlösung prüfen.', eyebrow: 'AUTODOC Gutschein', headline: '30 Euro Gutschein bei AUTODOC.', intro: 'Für AUTODOC ist aktuell ein 30-Euro-Gutschein gelistet. Vor der Bestellung solltest du Code, Mindestbestellwert und mögliche Produkt- oder Kontobeschränkungen prüfen.', published: '2026-10-06', modified: '2026-10-06', imageAlt: 'FreeFinder App mit Online-Gutscheinen',
+    offer: `<p>Der aktuelle Eintrag nennt <strong>30 Euro Gutschein für alles bei AUTODOC</strong>. Die tatsächliche Ermäßigung hängt von den Bedingungen des Gutscheins und dem Warenkorb ab.</p>`,
+    how: `<ol><li>Die <a href="https://www.gutscheine.at/autodoc" rel="noopener">AUTODOC-Gutscheinübersicht</a> öffnen.</li><li>Gutscheincode und Bedingungen anzeigen lassen.</li><li>Passende Artikel in den AUTODOC-Warenkorb legen.</li><li>Code einlösen und prüfen, ob 30 Euro abgezogen werden.</li></ol>`,
+    conditions: `<p>Prüfe Mindestbestellwert, Neukundenstatus, Marken- oder Produktgruppen, Gültigkeitsdauer und Versandkosten. Der Gutschein ist erst bestätigt, wenn der Rabatt im Checkout sichtbar ist.</p>`,
+    source: `<p>Quelle ist die <a href="https://www.gutscheine.at/autodoc" rel="noopener">AUTODOC-Seite bei Gutscheine.at</a>.`,
+    faqs: [['Wie hoch ist der AUTODOC-Gutschein?', '30 Euro laut aktuellem Eintrag.'], ['Gilt der Gutschein wirklich für alles?', 'Das muss anhand der konkreten Bedingungen im Checkout geprüft werden.'], ['Wann läuft er ab?', 'Im aktuellen Deal ist kein verlässliches Ablaufdatum angegeben.']], related: [['Gutscheine in Wien', 'gutscheine-wien.html'], ['Rabatte in Wien', 'rabatte-wien.html']],
+  }),
+  makeRecentDealGuide({
+    slug: 'starbucks-5-euro-rabatt-kaffee5-wien', title: 'Starbucks Wien: 5 Euro Rabatt mit KAFFEE5', meta: 'Starbucks-Gutscheincode KAFFEE5: 5 Euro Rabatt bei einer Bestellung. Einlösung über Lieferando, Mindestbestellwert und Teilnahme prüfen.', eyebrow: 'Starbucks Gutschein Wien', headline: '5 Euro Rabatt bei Starbucks mit dem Code KAFFEE5.', intro: 'Der aktuelle FreeFinder-Eintrag nennt 5 Euro Rabatt mit dem Gutscheincode KAFFEE5 bei Starbucks Wien. Der Deal verweist auf eine Bestellung über Lieferando.', published: '2026-10-06', modified: '2026-10-06', imageAlt: 'FreeFinder App mit Kaffee-Gutscheinen in Wien',
+    offer: `<p>Mit dem Code <strong>KAFFEE5</strong> sind laut aktuellem Eintrag <strong>5 Euro Rabatt bei Starbucks</strong> möglich. Die Einlösung erfolgt über die verlinkte Lieferando-Bestellseite.</p>`,
+    how: `<ol><li>Die <a href="https://www.lieferando.at/speisekarte/starbucks-wien-rotenturmstrasse" rel="noopener">Starbucks-Bestellseite bei Lieferando</a> öffnen.</li><li>Artikel auswählen und den Warenkorb prüfen.</li><li><strong>KAFFEE5</strong> im Gutscheinfeld eingeben.</li><li>Kontrollieren, ob 5 Euro Rabatt abgezogen werden.</li></ol>`,
+    conditions: `<p>Prüfe Mindestbestellwert, teilnehmende Filiale, Liefergebühren und mögliche Konto- oder Neukundenbedingungen. Kein Rabatt sollte angenommen werden, bevor er im Endbetrag sichtbar ist.</p>`,
+    source: `<p>Quelle ist die verlinkte <a href="https://www.lieferando.at/speisekarte/starbucks-wien-rotenturmstrasse" rel="noopener">Starbucks-Bestellseite bei Lieferando</a>.`,
+    faqs: [['Wie lautet der Starbucks-Code?', 'KAFFEE5.'], ['Wie viel Rabatt gibt es?', '5 Euro laut aktuellem Deal.'], ['Gilt der Code bei jeder Starbucks-Filiale?', 'Die Teilnahme und Lieferbedingungen müssen auf der Bestellseite geprüft werden.']], related: [['Gratis Kaffee in Wien', 'gratis-kaffee-wien.html'], ['Foodora Rabatt', 'foodora-60-prozent-rabatt-genuss-wien.html']],
+  }),
+  makeRecentDealGuide({
+    slug: 'loving-hut-dog-1plus1-wien', title: 'Loving Hut Wien: 1+1 Loving Hut-dog', meta: 'Loving Hut Neubau in Wien: Einen Loving Hut-dog oder ein Menü bestellen und einen zweiten gratis erhalten. Gültig bis 31. Oktober 2026.', eyebrow: 'Veganes 1+1-Angebot Wien', headline: '1+1 Loving Hut-dog bei Loving Hut Neubau.', intro: 'Loving Hut Neubau bewirbt eine Herbst-Aktion: Einen Loving Hut-dog oder ein Loving Hut-dog-Menü bestellen und einen zweiten Loving Hut-dog gratis erhalten.', published: '2026-10-06', modified: '2026-10-06', expires: '2026-10-31T23:59:59+02:00', imageAlt: 'FreeFinder App mit veganen 1+1-Angeboten in Wien',
+    offer: `<p>Bei Loving Hut Neubau gibt es laut Aktion <strong>1+1 Loving Hut-dog</strong>: Du bestellst einen Loving Hut-dog oder ein Loving Hut-dog-Menü und bekommst einen zweiten Loving Hut-dog gratis. Die Aktion ist bis <strong>31. Oktober 2026</strong> gelistet.</p>`,
+    how: `<ol><li>Den <a href="https://www.tiktok.com/@lovinghut.neubau/video/7691608749642943796" rel="noopener">Originalbeitrag von Loving Hut Neubau</a> öffnen.</li><li>Loving Hut Neubau, Neubaugürtel 38/5, 1070 Wien besuchen.</li><li>Dem Account auf Instagram und TikTok folgen.</li><li>Einen Loving Hut-dog oder ein Menü bestellen.</li><li>Prüfen, ob der zweite Loving Hut-dog gratis auf dem Bon erscheint.</li></ol>`,
+    conditions: `<p>Der Deal ist bis 31. Oktober 2026 angegeben. Folgepflicht, teilnehmende Produkte und Einlösung sollten vor Ort bestätigt werden.</p>`,
+    source: `<p>Quelle ist der <a href="https://www.tiktok.com/@lovinghut.neubau/video/7691608749642943796" rel="noopener">TikTok-Beitrag von Loving Hut Neubau</a>.`,
+    faqs: [['Was ist beim Loving Hut gratis?', 'Ein zweiter Loving Hut-dog nach Bestellung eines Loving Hut-dogs oder Menüs.'], ['Wo gilt die Aktion?', 'Neubaugürtel 38/5, 1070 Wien.'], ['Wie lange läuft sie?', 'Bis 31. Oktober 2026 laut Dealquelle.']], related: [['Gratis Essen in Wien', 'gratis-essen-wien.html'], ['1+1-Aktionen in Wien', 'eins-plus-eins-wien.html']],
+  }),
+  makeRecentDealGuide({
+    slug: 'ganesha-10-euro-gutschein-50-euro-wien', title: 'Ganesha Restaurant Wien: 10 Euro Rabatt ab 50 Euro', meta: 'Ganesha Restaurant Gutschein: 10 Euro Rabatt ab 50 Euro Konsumation in Wien. Gutscheinbedingungen und Enddatum 31. Dezember 2026 prüfen.', eyebrow: 'Restaurant-Gutschein Wien', headline: '10 Euro Rabatt im Ganesha Restaurant ab 50 Euro.', intro: 'Für das Ganesha Restaurant ist ein 10-Euro-Gutschein ab 50 Euro Konsumation gelistet. Der Deal ist aktuell bis 31. Dezember 2026 angegeben.', published: '2026-10-06', modified: '2026-10-06', expires: '2026-12-31T23:59:59+01:00', imageAlt: 'FreeFinder App mit Restaurant-Gutscheinen in Wien',
+    offer: `<p>Der Gutschein bietet <strong>10 Euro Rabatt ab 50 Euro Konsumation</strong>. Das entspricht rechnerisch 20 Prozent Ersparnis, wenn der Mindestbetrag genau erreicht wird.</p><p>Als Standort ist die Eschenbachgasse 4, 1010 Wien, gelistet.</p>`,
+    how: `<ol><li>Die <a href="https://www.gutschein.at/ganesha-restaurant/10-euro-gutschein" rel="noopener">Gutscheinseite für Ganesha</a> öffnen.</li><li>Bedingungen und Gutschein anzeigen lassen.</li><li>Im Restaurant ab 50 Euro konsumieren.</li><li>Gutschein vor dem Bezahlen vorzeigen und den Abzug auf dem Bon kontrollieren.</li></ol>`,
+    conditions: `<p>Der Gutschein ist bis <strong>31. Dezember 2026</strong> gelistet. Prüfe Ausschlüsse, Gültigkeit für Menüs oder Getränke, Kombinierbarkeit und die konkrete Annahme im Restaurant.</p>`,
+    source: `<p>Quelle ist die <a href="https://www.gutschein.at/ganesha-restaurant/10-euro-gutschein" rel="noopener">Ganesha-Gutscheinseite bei Gutscheine.at</a>.`,
+    faqs: [['Wie viel Rabatt gibt es bei Ganesha?', '10 Euro ab 50 Euro Konsumation.'], ['Wo ist das Restaurant?', 'Eschenbachgasse 4, 1010 Wien.'], ['Wie lange gilt der Gutschein?', 'Bis 31. Dezember 2026 laut aktuellem Eintrag.']], related: [['Restaurant-Gutscheine in Wien', 'restaurant-gutscheine-wien.html'], ['Gutscheine in Wien', 'gutscheine-wien.html']],
+  }),
+];
+
 function quickDeal(guide) {
   const reviewed = dealGuides.find(item => item.slug === guide.slug);
   if (!reviewed) return '';
@@ -74,7 +165,7 @@ function quickDeal(guide) {
 const PUBLISHED = '2026-08-17';
 const PUBLISHED_LABEL = '17. August 2026';
 
-const guides = [...timelyGuides, ...[
+const guides = [...timelyGuides, ...recentDealGuides, ...[
   {
     slug: 'foodora-60-prozent-rabatt-genuss-wien',
     title: 'Foodora 60 Prozent Rabatt mit Gutscheincode GENUSS',
