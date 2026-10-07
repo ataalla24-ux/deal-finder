@@ -3,13 +3,16 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { selectCoverageAccounts, selectCoverageHashtags, accountCoverageSummary, accountRescanHours } from '../scraper/instagram-source-scheduler.js';
-import { buildConfig, loadAccountCatalog, runMetaInstagramCollector } from '../scraper/meta-instagram-deals.js';
+import { buildConfig, loadAccountCatalog, runMetaInstagramCollector, isGlobalMetaGraphError } from '../scraper/meta-instagram-deals.js';
 import { selectDiscoveryAccounts } from '../scraper/vienna-merchant-discovery.js';
 import { createSharedQuotaFetch } from '../scraper/instagram-shared-quota.js';
 
 const HOUR = 3600000;
 const start = new Date('2026-10-07T08:00:00Z');
 const config = { ...buildConfig({}, start), coverageMode: true, discoveryPoolLimit: 5000, maxAccountsPerRun: 180, foodAccountShare: 0.9, maxHashtagsPerRun: 8 };
+assert.equal(isGlobalMetaGraphError({ status: 400, code: 100, message: 'Object does not exist or cannot be loaded due to missing permissions' }), false);
+assert.equal(isGlobalMetaGraphError({ status: 400, code: 803, message: 'Some of the aliases you requested do not exist' }), false);
+for (const code of [10, 190, 613, 80002]) assert.equal(isGlobalMetaGraphError({ status: 400, code }), true);
 const merchants = Array.from({ length: 891 }, (_, index) => ({
   username: `new.cafe${String(index).padStart(4, '0')}`, accountType: 'merchant', category: 'food', priority: 25,
   evidenceKind: 'directory-and-website-link', discoveryEvidenceKind: 'directory-and-website-link', origins: ['vienna-directory'],
@@ -116,6 +119,17 @@ try {
   assert(result.report.accountCoverage.firstChecksThisRun > 0);
   assert(result.report.accountCoverage.directoryUnchecked < 891);
   assert.equal(Object.keys(result.state.accountPerformance).length, result.report.selectedAccounts.length);
+  let blockedUsername = '';
+  const oneUnavailable = await runMetaInstagramCollector({ config: { ...testConfig, hashtags: [], maxAccountsPerRun: 3 }, env: {}, now: start, paths, write: false, fetchImpl: async (url) => {
+    const username = new URL(url).searchParams.get('fields').match(/username\(([^)]+)\)/)[1];
+    blockedUsername ||= username;
+    if (username === blockedUsername) return Response.json({ error: { code: 100, message: 'Object cannot be loaded due to missing permissions' } }, { status: 400 });
+    return Response.json({ business_discovery: { username, media: { data: [] } } });
+  } });
+  assert.equal(oneUnavailable.shouldFail, false);
+  assert.equal(oneUnavailable.report.sources.instagramGraph.successfulAccounts, 3);
+  assert.equal(oneUnavailable.report.sources.instagramGraph.globalError, null);
+  assert(oneUnavailable.state.sourceFailures.accounts[blockedUsername].cooldownUntil);
   write('state.json', { accountPerformance: historical });
   const largeState = await runMetaInstagramCollector({ config: testConfig, env: {}, now: start, paths, write: false, fetchImpl: async (url) => {
     const parsed = new URL(url);

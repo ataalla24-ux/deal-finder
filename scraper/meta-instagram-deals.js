@@ -1226,10 +1226,13 @@ export function isGlobalMetaGraphError(error) {
   const status = Number(error?.status || 0);
   const code = Number(error?.code || 0);
   const message = cleanText(error?.message || error, 1000);
-  return error?.code === 'SCAN_BUDGET' || [401, 403, 429].includes(status)
+  if (error?.code === 'SCAN_BUDGET' || [401, 403, 429].includes(status)
     || status >= 500
-    || [4, 10, 17, 32, 190, 200, 613, 80002].includes(code)
-    || /(?:invalid|expired|malformed).{0,30}(?:oauth|access token)|rate limit|too many calls|permission/i.test(message);
+    || [4, 10, 17, 32, 190, 200, 613, 80002].includes(code)) return true;
+  // Unsupported/private/non-professional objects often say "missing
+  // permissions" in a code-100 message; this is not an app-wide outage.
+  if ([100, 803].includes(code)) return false;
+  return /(?:invalid|expired|malformed).{0,30}(?:oauth|access token)|rate limit|too many calls|permission/i.test(message);
 }
 
 function retryDelayMs(response, attempt) {
