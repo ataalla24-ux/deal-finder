@@ -4,6 +4,8 @@ The Meta collector uses an hourly, breadth-first schedule. A large catalog is
 not evidence of coverage: `meta-instagram-report.json` separately reports
 queried accounts, first checks, unqueried directory leads and seven-day coverage.
 These counts are NOT verified offers, Slack deliveries or manual approvals.
+Queued jobs check out the current main when they start, not the possibly stale
+event snapshot from before the preceding serialized job saved its scan state.
 
 ## Shared API budget
 
