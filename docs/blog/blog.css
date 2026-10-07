@@ -121,6 +121,8 @@ h3 {
   font-family: "Bricolage Grotesque", "Plus Jakarta Sans", sans-serif;
   letter-spacing: 0;
   line-height: 1.08;
+  overflow-wrap: anywhere;
+  hyphens: manual;
 }
 
 h1 {
@@ -375,6 +377,7 @@ h1 {
 .article-body h2 {
   margin: 48px 0 14px;
   font-size: 34px;
+  scroll-margin-top: 96px;
 }
 
 .article-body h3 {
@@ -401,6 +404,36 @@ h1 {
   background: #fff;
   color: #394150;
   font-size: 15px;
+}
+
+.table-scroll {
+  max-width: 100%;
+  margin: 22px 0;
+  overflow-x: auto;
+}
+
+.article-body .table-scroll table {
+  min-width: 620px;
+  margin: 0;
+  table-layout: auto;
+}
+
+.topic-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 24px 0 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.topic-nav a {
+  color: #0f4c81;
+  text-underline-offset: 4px;
+}
+
+.deal-hub > .topic-nav {
+  margin: 0 0 32px;
 }
 
 .article-body th,
@@ -615,7 +648,7 @@ h1 {
   }
 
   .article-body h2 {
-    font-size: 30px;
+    font-size: 28px;
   }
 
   .article-body table {

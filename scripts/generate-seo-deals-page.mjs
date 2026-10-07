@@ -261,6 +261,7 @@ function renderPage(feed, deals, now) {
   <main>
     <header class="article-hero"><div class="hero-inner"><p class="eyebrow">Heute in Wien</p><h1>Aktuelle Angebote in Wien: Gratis, 1+1 und Gutscheine.</h1><p class="hero-copy">${deals.length} ausgewählte Gratis-Angebote, Restaurant-Gutscheine, 1+1-Aktionen und Rabatte mit eindeutigem, noch gültigem Enddatum. Öffne vor der Einlösung immer die verlinkten Bedingungen des Anbieters.</p><div class="article-meta"><span>App-Daten aktualisiert: ${escapeHtml(formatDate(updated))}</span><span>${deals.length} aktuelle Treffer</span></div><div class="article-byline"><span>Geprüfte Datenbasis der <a href="/about.html">FreeFinder Redaktion</a></span></div></div></header>
     <section class="deal-hub" aria-labelledby="dealHubTitle">
+      <nav class="topic-nav" aria-label="Wiener Angebotsratgeber"><a href="/blog/guenstig-essen-wien.html">Günstig essen nach Bezirk</a><a href="/blog/geburtstag-gratis-wien.html">Geburtstag gratis Wien</a><a href="/blog/kinodonnerstag-wien-drei.html">KinoDonnerstag Wien</a></nav>
       <div class="deal-hub-head"><div><p class="eyebrow">Aktive Deals</p><h2 id="dealHubTitle">Angebote mit bekanntem Enddatum</h2></div><p>Die Übersicht enthält nur nicht abgelaufene Wien-Treffer mit eingetragenem Ablaufdatum. Verfügbarkeit und Teilnahme können sich kurzfristig ändern.</p></div>
       <div class="live-deal-grid">${cards}
       </div>
