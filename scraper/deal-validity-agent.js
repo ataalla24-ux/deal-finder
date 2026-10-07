@@ -2,7 +2,7 @@ import { verifyOfficialFoodDeal } from './power-food-verification.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { extractLowFoodPrice, weakFoodPromotionReason } from './food-discovery-utils.js';
+import { extractLowFoodPrice, getAdFoodBenefitRejection, weakFoodPromotionReason } from './food-discovery-utils.js';
 import { inspectDealContentQuality } from './deal-content-quality-utils.js';
 
 import { inspectDealUrlHealth, parseExpiryShape } from './expiry-utils.js';
@@ -499,6 +499,15 @@ function hasLowProductPrice(value) {
 
 function getConcreteOfferDecision(deal, health = null) {
   const offerText = getOfferText(deal, health);
+  const isMetaAd = deal.originSource === 'Meta Ad Library API' || deal.source === 'Instagram Anzeige';
+  let hasAdFoodBenefit = false;
+  if (isMetaAd && deal.evidence?.foodBenefitRequired !== false) {
+    // Use saved creative text, not a generic Ad Library page preview that could
+    // accidentally supply unrelated food words to an old pending candidate.
+    const foodRejection = getAdFoodBenefitRejection(deal.description || deal.title);
+    if (foodRejection) return { concrete: false, reason: `Food-Werbung ohne konkreten Essens-/Getraenkevorteil (${foodRejection})` };
+    hasAdFoodBenefit = true;
+  }
   const socialFallbackReason = getUnsubstantiatedSocialFallbackReason(deal, health);
   if (socialFallbackReason) return { concrete: false, reason: socialFallbackReason };
   const malformedAggregatorReason = getMalformedAggregatorReason(deal);
@@ -524,7 +533,7 @@ function getConcreteOfferDecision(deal, health = null) {
 
   const recommendationLanguage = /\b(?:favou?rite|lieblings(?:restaurant|lokal|platz|spot|ort)|summer\s+spot|things\s+to\s+do|must[-\s]?visit|guide|tipps?|vibe|empfehl\w*|recommend\w*|save\s+(?:this|and)|send\s+this)\b/i;
   const explicitPromotionBeyondGenericFree = /(?:\b\d+\s*%|\b1\s*[+&]\s*1\b|\b2\s*(?:für|fuer|for)\s*1\b|\b(?:rabatt|gutschein|coupon|deal|aktion|angebot|special|happy\s*hour)\b|\b(?:statt|nur\s+heute|today\s+only)\b|\b(?:gratis|kostenlos|free)\s+(?:zu|zum|bei|with)\b|\b(?:nur|only|um|für|fuer|for)\s+\d{1,3}(?:[,.]\d{1,2})?\s*(?:€(?!\w)|euro\b|eur\b))/i;
-  if (recommendationLanguage.test(offerText) && !explicitPromotionBeyondGenericFree.test(offerText) && !extractLowFoodPrice(offerText)) {
+  if (recommendationLanguage.test(offerText) && !explicitPromotionBeyondGenericFree.test(offerText) && !extractLowFoodPrice(offerText) && !hasAdFoodBenefit) {
     return { concrete: false, reason: 'allgemeine Empfehlung/Gratis-Event statt konkreter Aktion' };
   }
   const genericFreeEvent = /(?:\b(?:gratis|kostenlos|kostenfrei|free)\s+(?:eintritt|entry)\b[^.!?]{0,80}\b(?:festival|veranstaltung|event)\b|\b(?:festival|veranstaltung|event)\b[^.!?]{0,80}\b(?:gratis|kostenlos|kostenfrei|free)\s+(?:eintritt|entry)\b)/i;
@@ -557,6 +566,7 @@ function getConcreteOfferDecision(deal, health = null) {
     /(?:€\s*)?\d+(?:[.,]\d{1,2})?\s*(?:€|euro)?\s+statt\b/i,
   ];
   const concrete = concreteOfferPatterns.some((pattern) => pattern.test(offerEvidenceText))
+    || hasAdFoodBenefit
     || Boolean(extractLowFoodPrice(offerEvidenceText))
     || hasLowProductPrice(offerEvidenceText)
     || (isViennaOriginFlight(deal)

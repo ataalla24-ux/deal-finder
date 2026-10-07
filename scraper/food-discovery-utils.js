@@ -18,6 +18,43 @@ export function isFoodDrinkSource(value) {
   return /(?:\b(?:food|drinks?|essen|trinken|getr\u00e4nke?|getraenke?|kaffee|restaurants?|gastro|lunch|brunch|fr\u00fchst\u00fcck|fruehstueck|pizza|burger|kebab|kebap|d\u00f6ner|doener|doner|d\u00fcr\u00fcm|dueruem|sushi|ramen|pasta|cafe|caf\u00e9|coffee|espresso|cappuccino|latte|matcha|cocktails?|spritz|bier|wein|eis|gelato|desserts?|bakery|b\u00e4ckerei|baeckerei|schnitzel|falafel|wrap|sandwich|ayran|limonade|softdrink|verkostung|croissant|krapfen)\b|(?:food|gastro|kaffee|streetfood|restaurants|eats)(?:wien|vienna)|(?:wien(?:er)?|vienna)(?:food|gastro|kaffee|streetfood|restaurants|eats|essen))/i.test(text.replace(/[_.-]/g, ' '));
 }
 
+const AD_FOOD_PRODUCT_PATTERN = /\b(?:food|essen|mahlzeiten?|speisen?|gerichte?|meals?|men\u00fc|menue|brunch|buffet|fr\u00fchst\u00fcck|fruehstueck|pizza|burger|kebab|kebap|d\u00f6ner|doener|doner|d\u00fcr\u00fcm|dueruem|sushi|ramen|pasta|schnitzel|falafel|wraps?|sandwich|salate?|bowls?|kaffee|coffee|espresso|cappuccino|latte|matcha|getr\u00e4nke?|getraenke?|drinks?|cocktails?|bier|wein|spritzer|ayran|limonade|softdrink|eis|gelato|desserts?|snacks?|croissant|krapfen|waffles?|waffeln?|verkostung|tasting)\b/i;
+const AD_NON_FOOD_OFFER_PATTERN = /\b(?:zahn\w*|prothes\w*|gebiss|dentures?|implants?|kaffeemaschinen?|coffee\s+machine|k\u00fchlschrank|kuehlschrank|fridge|refrigerator|k\u00fcchenger\u00e4te?|kuechengeraete?|aufbewahrungsbox|software|saas|b2b|b\u00fcro|buero|office|kantinenpersonal|testmonat|free\s+trial|tickets?|eintritt|admission|networking|e-commerce|online-shops?|seminar|webinar|jobs?|bewerb\w*|immobilien|wohnung)\b/i;
+const AD_FOOD_SAVING_PATTERN = /(?:\d{1,2}\s*%\s*(?:rabatt|discount|off|direktrabatt|auf\b|weniger|g\u00fcnstiger|guenstiger)|\b(?:rabatt|discount|spare|save)\b.{0,24}\d{1,2}\s*%|\b(?:1\s*[+&]\s*1|2\s*(?:f\u00fcr|fuer|for)\s*1|bogo|happy\s*hour)\b|\b(?:gutschein|coupon|aktionscode|promocode)\b|\b(?:statt|instead\s+of)\s*(?:\u20ac\s*)?\d)/i;
+const AD_FREE_FOOD_PATTERN = /\b(?:gratis|kostenlos(?:e[rmns]?|en)?|kostenfrei|umsonst|free|geschenkt)\b/i;
+
+export function getAdFoodBenefitRejection(value) {
+  const text = String(value || '').replace(/#[\p{L}\p{N}_]+/gu, ' ');
+  if (!isFoodDrinkSource(text) && !AD_FOOD_PRODUCT_PATTERN.test(text)) return 'non-food-ad';
+  // An ad must discount the meal/drink itself, not a fridge, ticket or other
+  // product that happens to mention eating. Check separate offer clauses first.
+  const clauses = text.split(/[.!?](?=\s|$)|[\n;]+/).map((part) => part.replace(/\s+/g, ' ').trim());
+  const negatedBenefit = /\b(?:kein\w*|nicht|not|no)\s+(?:\d{1,2}\s*%\s*)?(?:gratis|kostenlos\w*|free|rabatt|discount)\b/i;
+  for (const clause of clauses) {
+    if (!AD_FOOD_PRODUCT_PATTERN.test(clause) || AD_NON_FOOD_OFFER_PATTERN.test(clause)) continue;
+    if (negatedBenefit.test(clause)) continue;
+    if (extractLowFoodPrice(clause) || AD_FOOD_SAVING_PATTERN.test(clause)) return '';
+    for (const free of clause.matchAll(new RegExp(AD_FREE_FOOD_PATTERN.source, 'gi'))) {
+      const before = clause.slice(Math.max(0, free.index - 80), free.index);
+      const after = clause.slice(free.index + free[0].length, free.index + free[0].length + 80);
+      if (/\b(?:gluten|zucker|sugar|alkohol|alcohol|laktose|lactose|koffein|caffeine)[-\s]*$/i.test(before)) continue;
+      if (/\b(?:lieferung|versand|zustellung|shipping|delivery|reservierung|beratung)\s*$/i.test(before)
+          || /^\s*(?:lieferung|versand|zustellung|shipping|delivery|reservierung|beratung)\b/i.test(after)) continue;
+      if (/\b\d+\s*(?:monate?|months?|tage?|days?|wochen?|weeks?)\s*$/i.test(before)
+          && !AD_FOOD_PRODUCT_PATTERN.test(after)) continue;
+      if (AD_FOOD_PRODUCT_PATTERN.test(after)
+          || (AD_FOOD_PRODUCT_PATTERN.test(before) && /^\s*(?:dazu|for\s+you|on\s+us|[.!?,]|$)/i.test(after))) return '';
+    }
+    if (/\b(?:aufs\s+haus|on\s+us|pay\s+what\s+you\s+want|zahl\w*\s+was\s+du\s+willst)\b/i.test(clause)) return '';
+  }
+  // Food-only ads often put the product and coupon in separate sentences.
+  // Do not extend that inference to trials, hardware or business/event ads.
+  if (!AD_NON_FOOD_OFFER_PATTERN.test(text)
+      && (AD_FOOD_PRODUCT_PATTERN.test(text) || /\b(?:restaurant|cafe|caf\u00e9|foodora|lieferando|wolt)\b/i.test(text))
+      && clauses.some((clause) => !negatedBenefit.test(clause) && AD_FOOD_SAVING_PATTERN.test(clause))) return '';
+  return 'no-consumer-food-benefit';
+}
+
 export function extractLowFoodPrice(value) {
   const text = String(value || '').replace(/\s+/g, ' ').trim();
   const amount = '(?<![\\d.,])(?:\\u20ac\\s*(\\d{1,2}(?:[.,]\\d{1,2})?)(?![\\d.,])|(\\d{1,2}(?:[.,]\\d{1,2})?)\\s*(?:\\u20ac|EUR\\b|Euro\\b))';

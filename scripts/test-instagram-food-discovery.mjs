@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { extractLowFoodPrice, isFoodDrinkSource } from '../scraper/food-discovery-utils.js';
+import { extractLowFoodPrice, getAdFoodBenefitRejection, isFoodDrinkSource } from '../scraper/food-discovery-utils.js';
 import { buildConfig, classifyPromotion, loadAccountCatalog, normalizeGraphMediaItem, normalizeAdLibraryItem, selectAccountShard, selectHashtagShard, runMetaInstagramCollector } from '../scraper/meta-instagram-deals.js';
 import { enrichInstagramGraphMedia, classifyInstagramOcrWithOpenAI } from '../scraper/instagram-media-evidence.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
@@ -90,6 +90,62 @@ assert.equal(normalizeAdLibraryItem({ ...ad, publisher_platforms: ['FACEBOOK'] }
 assert.equal(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Wien Beauty 20% Rabatt'] }, config, now).rejection, 'non-food-ad');
 assert.equal(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Free coffee in Berlin'], target_locations: [{ name: 'Wien' }] }, config, now).rejection, 'missing-vienna-redemption-evidence');
 assert.ok(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Gratis Getr\u00e4nke in Wien am 21.09.2026'] }, config, now).deal);
+
+for (const text of [
+  'Gratis Kebab fuer alle in Wien.',
+  'Kebab 1 EUR in Wien.',
+  'Dauerhaft Kaffee 1,50 EUR in Wien.',
+  'Gratis Getraenke in Wien am 21.09.2026.',
+  'Zum Burger gibt es einen zweiten Drink gratis dazu in Wien.',
+  'In Wien verteilen wir gratis Essen an alle.',
+  '20% Rabatt auf Pasta und Salate in Wien.',
+  '1+1 auf Pizza in Wien.',
+  'Happy Hour: Cocktails in Wien zum halben Preis.',
+  'Foodora Essen bestellen in Wien. 60% Rabatt mit Code GENUSS fuer Neukunden.',
+  'In der Foodora App Essen bestellen in Wien: 60% Rabatt mit Code GENUSS fuer Neukunden.',
+  'Restaurant in Wien: Brunch am Sonntag. Nur 9,90 EUR statt 19,90 EUR pro Person.',
+  'Buffet 9,90 EUR in Wien.',
+  'Gratis Verkostung in Wien.',
+  'E-Commerce Event in Wien. Gratis Kaffee und Snacks fuer alle Besucher.',
+  'Kaffee aufs Haus in Wien.',
+]) {
+  assert.equal(getAdFoodBenefitRejection(text), '', text);
+  const acceptedAd = normalizeAdLibraryItem({ ...ad, ad_creative_bodies: [text] }, config, now).deal;
+  assert.ok(acceptedAd, text);
+  const validatedAd = await validateDealsForSlack([normalizeDeal(acceptedAd, 'meta-instagram')], {
+    now, inspectDealUrlHealth: async (url) => ({ ok: true, status: 200, finalUrl: url, contentHints: {} }),
+  });
+  assert.equal(validatedAd.allowedDeals.length, 1, `${text}: ${JSON.stringify(validatedAd.report)}`);
+}
+for (const text of [
+  'Smarter Kuehlschrank im Buero mit Pasta, Salaten und Wraps, gekocht in Wien. 1 Monat kostenlos testen. Essen mit Bankomatkarte bezahlen.',
+  'Kuehlschrank in eurem Buero, gekocht in Wien. Testmonat gratis.',
+  '50% Rabatt auf Zahnprothesen in Wien. Wieder Kaffee, Steak und Schnitzel geniessen.',
+  'Networking fuer Online-Shops in Wien, Food & Drinks, Getraenke und Snacks inklusive. Hol dir dein kostenloses Ticket.',
+  'Wien: Kaffee trinken im neuen Buero. 1 Monat Miete gratis.',
+  'Kostenlose Software fuer Wiener Restaurants. Bestellungen verwalten.',
+  'Gratis WLAN im Cafe in Wien.',
+  'Gratis Lieferung fuer Pizza in Wien, die Pizza kostet 14 EUR.',
+  'Pizza Lieferung gratis in Wien.',
+  'Free shipping in Vienna. Coffee costs 18 EUR.',
+  'Gratis Kaffee Maschine fuer das Buero in Wien.',
+  'Gluten-free Pizza in Wien.',
+  'Kein Gratis Kaffee in Wien.',
+  'Kein 20% Rabatt auf Kaffee in Wien.',
+  'Kaffee App fuer Wien, jetzt 1 Monat gratis.',
+]) {
+  assert.ok(getAdFoodBenefitRejection(text), text);
+  assert.equal(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: [text] }, config, now).deal, null, text);
+  const legacyAd = { ...deal, id: 'meta-ad-legacy', source: 'Instagram Anzeige', originSource: 'Meta Ad Library API',
+    url: 'https://www.facebook.com/ads/library/?id=legacy', title: 'Gratis Angebot in Wien', description: text, evidence: {} };
+  const legacyValidation = await validateDealsForSlack([normalizeDeal(legacyAd, 'meta-instagram')], {
+    now, inspectDealUrlHealth: async (url) => ({ ok: true, status: 200, finalUrl: url, contentHints: { description: 'Gratis Kebab in Wien' } }),
+  });
+  assert.equal(legacyValidation.allowedDeals.length, 0, text);
+  assert.match(legacyValidation.report.blocked[0].reasons.join(' '), /Food-Werbung/, text);
+}
+assert.ok(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Wien Beauty 20% Rabatt'] }, { ...config, adLibraryFoodOnly: false }, now).deal,
+  'explicitly non-food ad collection remains possible without changing other scrapers');
 
 const success = () => Response.json({ output_text: JSON.stringify({ isDeal: true, confidence: 0.94, offerText: 'Kebab 1 EUR', locationText: 'Wien', validityText: '', exclusion: 'none' }) });
 let calls = 0;

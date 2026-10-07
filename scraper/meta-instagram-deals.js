@@ -10,7 +10,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
-import { extractLowFoodPrice, isFoodDrinkSource, weakFoodPromotionReason } from './food-discovery-utils.js';
+import { extractLowFoodPrice, getAdFoodBenefitRejection, isFoodDrinkSource, weakFoodPromotionReason } from './food-discovery-utils.js';
 import { inferPreferredBrand } from './deal-normalization-utils.js';
 import {
   canonicalInstagramPostKey,
@@ -983,7 +983,10 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
     ...(Array.isArray(raw?.ad_creative_link_captions) ? raw.ad_creative_link_captions : []),
   ].map((part) => cleanText(part, 1800)).filter(Boolean).join('\n');
   if (Array.isArray(raw?.publisher_platforms) && !raw.publisher_platforms.some((platform) => String(platform).toLowerCase() === 'instagram')) return { deal: null, rejection: 'not-instagram-ad' };
-  if (config.adLibraryFoodOnly && !isFoodDrinkSource(text)) return { deal: null, rejection: 'non-food-ad' };
+  if (config.adLibraryFoodOnly) {
+    const foodRejection = getAdFoodBenefitRejection(text);
+    if (foodRejection) return { deal: null, rejection: foodRejection };
+  }
   const promotion = classifyPromotion(text);
   if (!promotion.accepted) return { deal: null, rejection: promotion.reason };
 
@@ -1035,6 +1038,7 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
     originSource: 'Meta Ad Library API',
     evidence: {
       metaAdId: cleanText(raw?.id, 120),
+      foodBenefitRequired: config.adLibraryFoodOnly,
       pageId: cleanText(raw?.page_id, 120),
       platforms: Array.isArray(raw?.publisher_platforms) ? raw.publisher_platforms : [],
       targetLocations: raw?.target_locations || [],
