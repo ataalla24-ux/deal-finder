@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T15:24:56.850Z",
+  "generatedAt": "2026-10-07T15:44:02.612Z",
   "source": "github-live-deal-llm-review",
   "model": "gpt-4.1-mini",
   "aiEnabled": true,
@@ -14,21 +14,36 @@
   "reviewedDeals": 66,
   "totalDealsAfter": 66,
   "removedCount": 0,
-  "wouldRemoveCount": 2,
-  "flaggedCount": 10,
+  "wouldRemoveCount": 1,
+  "flaggedCount": 25,
   "policyOverrides": [
+    {
+      "dealID": "social-food-review-1xfp126",
+      "from": {
+        "decision": "flag",
+        "reason": "weak_evidence",
+        "confidence": 0.9,
+        "message": "TikTok page is generic without specific deal details or Vienna mention; no validity dates found."
+      },
+      "to": {
+        "decision": "remove",
+        "reason": "bad_source",
+        "confidence": 0.9,
+        "message": "Policy override: Zielseite liefert keinen konkreten Deal-Nachweis (TikTok page is generic without specific deal details or Vienna mention; no validity dates found.)."
+      }
+    },
     {
       "dealID": "power-07c0c42ee852",
       "from": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
-        "message": "Target URL blocked with HTTP 403, no content to verify deal details or Vienna relevance."
+        "confidence": 0.9,
+        "message": "Moebelix page blocked with HTTP 403, no deal details retrievable."
       },
       "to": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
+        "confidence": 0.8,
         "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen."
       }
     },
@@ -37,13 +52,13 @@
       "from": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
-        "message": "Target URL blocked with HTTP 403, no content to verify deal details or Vienna relevance."
+        "confidence": 0.9,
+        "message": "Lieferando page blocked with HTTP 403, no deal details retrievable."
       },
       "to": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
+        "confidence": 0.8,
         "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen."
       }
     },
@@ -51,9 +66,9 @@
       "dealID": "tiktok-1eobjkr",
       "from": {
         "decision": "remove",
-        "reason": "bad_source",
+        "reason": "weak_evidence",
         "confidence": 0.9,
-        "message": "TikTok page does not confirm any deal details, no brand or deal title mentioned, no validity or Vienna mention."
+        "message": "TikTok page does not mention Vienna, brand, or deal details; no validity dates found; insufficient evidence for deal validity."
       },
       "to": {
         "decision": "flag",
@@ -67,13 +82,13 @@
       "from": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
-        "message": "Target page is blocked (HTTP 403) and does not provide deal details. Deal info from Slack is plausible but not verifiable on target page."
+        "confidence": 0.9,
+        "message": "Target page blocked with HTTP 403, no deal details visible; deal claims validity until 31.12.2026 for Vienna but cannot verify."
       },
       "to": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
+        "confidence": 0.8,
         "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen."
       }
     },
@@ -82,13 +97,13 @@
       "from": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
-        "message": "Target page blocked (HTTP 403) with no deal details visible. Deal info from Slack but not verifiable on target page."
+        "confidence": 0.9,
+        "message": "Target page blocked with HTTP 403, no deal details visible; deal claims free dish at Pizza Service Italiano in Vienna but cannot verify."
       },
       "to": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
+        "confidence": 0.8,
         "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen."
       }
     },
@@ -97,13 +112,13 @@
       "from": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
-        "message": "Target page blocked (HTTP 403) with no deal details visible. Deal info from Slack but not verifiable on target page."
+        "confidence": 0.9,
+        "message": "Target page blocked with HTTP 403, no deal details visible; deal claims 50% Rabatt at FAT MONK Wien Schottengasse but cannot verify."
       },
       "to": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
+        "confidence": 0.8,
         "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen."
       }
     },
@@ -112,13 +127,13 @@
       "from": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
-        "message": "Target page blocked or no deal details visible. No deal title or brand confirmation on target page."
+        "confidence": 0.9,
+        "message": "Target page blocked or no deal details visible; Magenta Moments 1+1 gratis deal for Austria cannot be verified."
       },
       "to": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
+        "confidence": 0.8,
         "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen."
       }
     },
@@ -127,13 +142,13 @@
       "from": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
-        "message": "Target page returns HTTP 429 (rate limit), no deal details visible. Deal info from Slack but not verifiable on target page."
+        "confidence": 0.9,
+        "message": "Target page returns HTTP 429 (rate limit), no deal details visible; cannot verify 1+1 and 30% Rabatt at Duru Juicy Kebabs in Vienna."
       },
       "to": {
         "decision": "flag",
         "reason": "weak_evidence",
-        "confidence": 0.7,
+        "confidence": 0.8,
         "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen."
       }
     },
@@ -143,7 +158,7 @@
         "decision": "flag",
         "reason": "weak_evidence",
         "confidence": 0.7,
-        "message": "Target URL returns HTTP 429 (rate limit), no concrete deal evidence available, location is Wien but no deal details confirmed."
+        "message": "Zielseite Wolt zeigt HTTP 429 Fehler, keine verifizierbaren Deal-Details, daher nur Flag als weak evidence."
       },
       "to": {
         "decision": "flag",
@@ -165,22 +180,60 @@
       "transient": 2
     },
     "withPageText": 57,
-    "withPublicationDate": 6,
-    "withValidityDate": 20
+    "withPublicationDate": 7,
+    "withValidityDate": 19
   },
   "targetEvidenceErrors": [],
   "errors": [],
   "usage": {
-    "prompt_tokens": 36286,
-    "completion_tokens": 8557,
-    "total_tokens": 44843
+    "prompt_tokens": 36065,
+    "completion_tokens": 8043,
+    "total_tokens": 44108
   },
   "patchSanitization": {
-    "rawFieldCount": 69,
+    "rawFieldCount": 64,
     "acceptedFieldCount": 0,
-    "droppedFieldCount": 69
+    "droppedFieldCount": 64
   },
   "reviewCandidates": [
+    {
+      "id": "social-food-review-1xfp126",
+      "title": "20% Rabatt bei Wien - manuell pruefen",
+      "brand": "Wien - manuell pruefen",
+      "description": "",
+      "category": "essen",
+      "type": "rabatt",
+      "distance": "Wien - manuell pruefen",
+      "url": "https://www.tiktok.com/@blejmarkt/video/7691756568454499586",
+      "pubDate": "2026-10-06T21:45:35.000Z",
+      "expires": "2026-10-08T23:59:59.999Z",
+      "reason": "bad_source",
+      "confidence": 0.9,
+      "message": "Policy override: Zielseite liefert keinen konkreten Deal-Nachweis (TikTok page is generic without specific deal details or Vienna mention; no validity dates found.).",
+      "suggestion": "Check for more specific deal evidence or remove if none found.",
+      "proposedPatch": {},
+      "decision": "remove",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "power-food-30b718b4da84",
+      "title": "20 % Rabatt auf saisonale Winterheißgetränke",
+      "brand": "ANKER",
+      "description": "Im Aktionszeitraum gibt es jedes saisonale Winterheißgetränk um 20 % ermäßigt. Ein konkreter Gültigkeitszeitraum und die teilnehmenden Filialen sind im Angebotsblock nicht genannt. Bitte vor dem Besuch beim Anbieter prüfen.",
+      "category": "kaffee",
+      "type": "rabatt",
+      "distance": "Wien – teilnehmende Filialen laut Anbieter",
+      "url": "https://www.ankerbrot.at/aktionen",
+      "pubDate": "2026-10-05T12:27:02.624Z",
+      "expires": "",
+      "reason": "weak_evidence",
+      "confidence": 0.9,
+      "message": "Website shows general ANKER bakery offers but no specific validity dates or clear deal details for winter hot drinks discount.",
+      "suggestion": "Verify with provider or remove if no concrete deal info found.",
+      "proposedPatch": {},
+      "decision": "flag",
+      "sourceSystem": "llm-live-review-candidate"
+    },
     {
       "id": "power-07c0c42ee852",
       "title": "20% auf Teppiche",
@@ -193,9 +246,28 @@
       "pubDate": "2026-10-05T12:26:57.960Z",
       "expires": "",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Check later or verify with alternative source.",
+      "suggestion": "Flag for manual check or remove if no info found later.",
+      "proposedPatch": {},
+      "decision": "flag",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "community:9ea28b1b-63ca-4ac9-a584-6f87e302e294",
+      "title": "3 Döner zum Preis von 2",
+      "brand": "Pizza Rando",
+      "description": "Am 09.10 und 10.10 bei kauf von 2 Dönnern bekommen sie den 3. Dönner gratis",
+      "category": "essen",
+      "type": "bogo",
+      "distance": "Wien 1200 Dresdnerstrasse 115",
+      "url": "https://www.tiktok.com/@pizzarando",
+      "pubDate": "2026-10-05T11:00:58.715Z",
+      "expires": "2026-10-10",
+      "reason": "weak_evidence",
+      "confidence": 0.9,
+      "message": "TikTok page generic without deal details or Vienna mention; no validity dates found.",
+      "suggestion": "Check for more specific deal evidence or remove if none found.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -212,49 +284,220 @@
       "pubDate": "2026-10-05T06:49:44.000Z",
       "expires": "",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Check later or verify with alternative source.",
+      "suggestion": "Flag for manual check or remove if no info found later.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
     },
     {
-      "id": "gs-543429",
-      "title": "Bis zu 20% Gutschein für ausgewählte Marken bei Notino",
-      "brand": "Notino",
-      "description": "",
-      "category": "beauty",
-      "type": "rabatt",
-      "distance": "Online / Österreich",
-      "url": "https://www.gutscheine.at/notino",
-      "pubDate": "2026-09-30T12:00:00.000Z",
-      "expires": "2026-10-04T23:59:59.999Z",
-      "reason": "expired",
-      "confidence": 0.95,
-      "message": "Notino deal expired on 04.10.2026, current date 06.10.2026 is after expiry.",
-      "suggestion": "Remove expired deal.",
+      "id": "tiktok-1v5ykqd",
+      "title": "Papa Duck folgen & eine Bowl GRATIS genießen",
+      "brand": "Papa Duck",
+      "description": "folgen & eine Bowl GRATIS genießen",
+      "category": "essen",
+      "type": "gratis",
+      "distance": "1060 Wien",
+      "url": "https://www.tiktok.com/@papa.duck.at/video/7692719026811850006",
+      "pubDate": "2026-10-04T07:58:42.000Z",
+      "expires": "",
+      "reason": "weak_evidence",
+      "confidence": 0.9,
+      "message": "TikTok page generic without deal details or Vienna mention; no validity dates found.",
+      "suggestion": "Check for more specific deal evidence or remove if none found.",
       "proposedPatch": {},
-      "decision": "remove",
+      "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
     },
     {
-      "id": "g2-1frp22l",
-      "title": "Innocent Smoothie Plus, 750 ml um 2,99 € statt 4,49 €.",
-      "brand": "SPAR",
-      "description": "",
-      "category": "supermarkt",
+      "id": "flight-10yozoj",
+      "title": "Hin & zurück nach Agadir ab €65.98",
+      "brand": "Ryanair",
+      "description": "Roundtrip Wien -&gt; Agadir, Morocco • 2 Tage",
+      "category": "reisen",
       "type": "rabatt",
-      "distance": "SPAR-Gourmet, Beethovenstraße 4, Wien",
-      "url": "https://www.marktguru.at/bl/innocent/wien",
-      "pubDate": "2026-09-29T06:55:08.804Z",
-      "expires": "2026-10-31T23:59:59.999Z",
-      "reason": "expired",
+      "distance": "Agadir, Morocco",
+      "url": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=AGA&dateOut=2026-11-26&dateIn=2026-11-28&isReturn=true&discount=0&promoCode=",
+      "pubDate": "2026-09-28T12:00:00.000Z",
+      "expires": "2026-11-26T23:59:59.999Z",
+      "reason": "not_vienna",
       "confidence": 0.95,
-      "message": "SPAR Innocent Smoothie deal expired on 07.10.2026, current date 06.10.2026 is before expiry but deal ends on 07.10, still valid today, keep.",
-      "suggestion": "Deal still valid today, keep.",
+      "message": "Flight deal destination is Agadir, Morocco, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
       "proposedPatch": {},
-      "decision": "remove",
+      "decision": "flag",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "flight-5i0ef4",
+      "title": "Hin & zurück nach Banja Luka ab €29.98",
+      "brand": "Ryanair",
+      "description": "Roundtrip Wien -&gt; Banja Luka, Bosnia & Herzegovina • 6 Tage",
+      "category": "reisen",
+      "type": "rabatt",
+      "distance": "Banja Luka, Bosnia & Herzegovina",
+      "url": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=BNX&dateOut=2026-11-14&dateIn=2026-11-20&isReturn=true&discount=0&promoCode=",
+      "pubDate": "2026-09-28T12:00:00.000Z",
+      "expires": "2026-11-14T23:59:59.999Z",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Banja Luka, Bosnia & Herzegovina, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
+      "proposedPatch": {},
+      "decision": "flag",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "flight-1brn2d9",
+      "title": "Hin & zurück nach Bucharest ab €57.98",
+      "brand": "Ryanair",
+      "description": "Roundtrip Wien -&gt; Bucharest, Romania • 4 Tage",
+      "category": "reisen",
+      "type": "rabatt",
+      "distance": "Bucharest, Romania",
+      "url": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=OTP&dateOut=2026-11-03&dateIn=2026-11-07&isReturn=true&discount=0&promoCode=",
+      "pubDate": "2026-09-28T12:00:00.000Z",
+      "expires": "2026-11-03T23:59:59.999Z",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Bucharest, Romania, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
+      "proposedPatch": {},
+      "decision": "flag",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "flight-1aicckv",
+      "title": "Hin & zurück nach Catania ab €56.98",
+      "brand": "Ryanair",
+      "description": "Roundtrip Wien -&gt; Catania, Italy • 6 Tage",
+      "category": "reisen",
+      "type": "rabatt",
+      "distance": "Catania, Italy",
+      "url": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=CTA&dateOut=2026-11-05&dateIn=2026-11-11&isReturn=true&discount=0&promoCode=",
+      "pubDate": "2026-09-28T12:00:00.000Z",
+      "expires": "2026-11-05T23:59:59.999Z",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Catania, Italy, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
+      "proposedPatch": {},
+      "decision": "flag",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "flight-1qd42lm",
+      "title": "Hin & zurück nach Dublin ab €53.98",
+      "brand": "Ryanair",
+      "description": "Roundtrip Wien -&gt; Dublin, Ireland • 2 Tage",
+      "category": "reisen",
+      "type": "rabatt",
+      "distance": "Dublin, Ireland",
+      "url": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=DUB&dateOut=2026-11-04&dateIn=2026-11-06&isReturn=true&discount=0&promoCode=",
+      "pubDate": "2026-09-28T12:00:00.000Z",
+      "expires": "2026-11-04T23:59:59.999Z",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Dublin, Ireland, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
+      "proposedPatch": {},
+      "decision": "flag",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "flight-rj2ol1",
+      "title": "Hin & zurück nach Malta ab €46.31",
+      "brand": "Ryanair",
+      "description": "Roundtrip Wien -&gt; Malta, Malta • 6 Tage",
+      "category": "reisen",
+      "type": "rabatt",
+      "distance": "Malta, Malta",
+      "url": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=MLA&dateOut=2026-11-18&dateIn=2026-11-24&isReturn=true&discount=0&promoCode=",
+      "pubDate": "2026-09-28T12:00:00.000Z",
+      "expires": "2026-11-18T23:59:59.999Z",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Malta, Malta, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
+      "proposedPatch": {},
+      "decision": "flag",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "flight-120znu6",
+      "title": "Hin & zurück nach Palermo ab €53.33",
+      "brand": "Ryanair",
+      "description": "Roundtrip Wien -&gt; Palermo, Italy • 6 Tage",
+      "category": "reisen",
+      "type": "rabatt",
+      "distance": "Palermo, Italy",
+      "url": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=PMO&dateOut=2026-10-17&dateIn=2026-10-23&isReturn=true&discount=0&promoCode=",
+      "pubDate": "2026-09-28T12:00:00.000Z",
+      "expires": "2026-10-17T23:59:59.999Z",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Palermo, Italy, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
+      "proposedPatch": {},
+      "decision": "flag",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "flight-rbt5lu",
+      "title": "Hin & zurück nach Palma ab €55.98",
+      "brand": "Ryanair",
+      "description": "Roundtrip Wien -&gt; Palma, Spain • 3 Tage",
+      "category": "reisen",
+      "type": "rabatt",
+      "distance": "Palma, Spain",
+      "url": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=PMI&dateOut=2026-10-19&dateIn=2026-10-22&isReturn=true&discount=0&promoCode=",
+      "pubDate": "2026-09-28T12:00:00.000Z",
+      "expires": "2026-10-19T23:59:59.999Z",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Palma, Spain, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
+      "proposedPatch": {},
+      "decision": "flag",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "flight-1b0v2p3",
+      "title": "Hin & zurück nach Paphos ab €61.49",
+      "brand": "Ryanair",
+      "description": "Roundtrip Wien -&gt; Paphos, Cyprus • 5 Tage",
+      "category": "reisen",
+      "type": "rabatt",
+      "distance": "Paphos, Cyprus",
+      "url": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=PFO&dateOut=2026-11-25&dateIn=2026-11-30&isReturn=true&discount=0&promoCode=",
+      "pubDate": "2026-09-28T12:00:00.000Z",
+      "expires": "2026-11-25T23:59:59.999Z",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Paphos, Cyprus, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
+      "proposedPatch": {},
+      "decision": "flag",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "flight-1hk2ewt",
+      "title": "Hin & zurück nach Rome ab €39.98",
+      "brand": "Ryanair",
+      "description": "Roundtrip Wien -&gt; Rome, Italy • 4 Tage",
+      "category": "reisen",
+      "type": "rabatt",
+      "distance": "Rome, Italy",
+      "url": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=FCO&dateOut=2026-10-21&dateIn=2026-10-25&isReturn=true&discount=0&promoCode=",
+      "pubDate": "2026-09-28T12:00:00.000Z",
+      "expires": "2026-10-21T23:59:59.999Z",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Rome, Italy, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
+      "proposedPatch": {},
+      "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
     },
     {
@@ -271,7 +514,7 @@
       "reason": "weak_evidence",
       "confidence": 0.8,
       "message": "Policy override: Öffentliche Social-Seite enthält keinen auslesbaren Deal-Inhalt; Originalpost manuell prüfen.",
-      "suggestion": "Remove due to lack of deal evidence on target page.",
+      "suggestion": "Verify deal details or provide a more specific target URL with deal info.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -288,9 +531,9 @@
       "pubDate": "2026-09-27T06:36:34.017Z",
       "expires": "2026-12-31T23:59:59.999Z",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to blocked target page.",
+      "suggestion": "Check target page later or provide alternative evidence for deal validity.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -307,9 +550,28 @@
       "pubDate": "2026-09-13T05:58:50.731Z",
       "expires": "",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to blocked target page.",
+      "suggestion": "Check target page later or provide alternative evidence for deal validity.",
+      "proposedPatch": {},
+      "decision": "flag",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "instagram-ai-ce1a3b58472a",
+      "title": "Wolt: 1 kaufen. 1 gratis. Doppelt Munchy für dich: Bestell deinen Smashburger",
+      "brand": "Wolt",
+      "description": "Gratis Burger bei Wolt in Munchy am Reumannplatz, 1100 Wien",
+      "category": "essen",
+      "type": "gratis",
+      "distance": "Munchy am Reumannplatz, 1100 Wien",
+      "url": "https://www.instagram.com/accounts/login/?next=https%3A%2F%2Fwww.instagram.com%2Fp%2FDc0dqJpFguB%2F&is_from_rle",
+      "pubDate": "2026-09-06T15:34:58.000Z",
+      "expires": "",
+      "reason": "weak_evidence",
+      "confidence": 0.9,
+      "message": "Instagram login page without deal details; no direct evidence for Wolt 1+1 gratis deal at Munchy am Reumannplatz Vienna.",
+      "suggestion": "Provide direct deal page or more detailed evidence.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -326,9 +588,9 @@
       "pubDate": "2026-09-01T11:17:37.814Z",
       "expires": "2026-09-01T23:59:59.999Z",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to blocked target page.",
+      "suggestion": "Check target page later or provide alternative evidence for deal validity.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -345,9 +607,9 @@
       "pubDate": "2026-08-17T10:31:13.943Z",
       "expires": "",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to lack of deal details on target page.",
+      "suggestion": "Provide more detailed evidence or alternative source.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -364,9 +626,28 @@
       "pubDate": "2026-08-04T12:02:44.746Z",
       "expires": "",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to temporary HTTP 429 error on target page.",
+      "suggestion": "Check target page later or provide alternative evidence.",
+      "proposedPatch": {},
+      "decision": "flag",
+      "sourceSystem": "llm-live-review-candidate"
+    },
+    {
+      "id": "tiktok-du6aut",
+      "title": "1+1 bei Loving Hut Neubau, Neubaugürtel 38/5",
+      "brand": "Loving Hut Neubau, Neubaugürtel 38/5",
+      "description": "🍂 HERBST-AKTION: 1+1 Loving Hut-dog! 🌭🌭 Bestell einen Loving Hut-dog oder ein Loving Hut-dog Menü und wir schenken dir einen zweiten Loving Hut-dog dazu. 👀 So funktioniert’s: ✨ Folge uns auf Instagram & TikTok 🌭 Bestelle einen Loving Hut-dog oder ein Loving Hut-dog Menü 🎁 Du bekommst einen zweiten Loving Hut-dog gratis dazu 📅 Gültig bis 31. Oktober 📍 Loving Hut Neubau, Neubaugürtel 38/5, 1070 Wien #aktion #wienessen #veganfood #viennavegan #foodspot Quelle: TikTok @lovinghut.neubau.",
+      "category": "essen",
+      "type": "bogo",
+      "distance": "1070 Wien",
+      "url": "https://www.tiktok.com/@lovinghut.neubau/video/7691608749642943796",
+      "pubDate": "2026-10-01T08:10:15.000Z",
+      "expires": "2026-10-31T23:59:59.999Z",
+      "reason": "weak_evidence",
+      "confidence": 0.9,
+      "message": "TikTok page does not mention Vienna, brand, or deal details explicitly; no validity dates found; insufficient evidence for deal validity.",
+      "suggestion": "Verify deal details or provide a more specific target URL with deal info.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -385,7 +666,7 @@
       "reason": "weak_evidence",
       "confidence": 0.7,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for manual review due to transient HTTP 429 and missing deal details.",
+      "suggestion": "Bitte Zielseite später erneut prüfen oder bessere Evidenz liefern.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -403,8 +684,8 @@
       "expires": "",
       "reason": "weak_evidence",
       "confidence": 0.7,
-      "message": "OMV TopWash 30% Rabatt link is a PDF with no clear deal details or validity, location OMV TopWash Wien not clearly confirmed in content.",
-      "suggestion": "Flag for manual review due to insufficient deal evidence and unclear location confirmation.",
+      "message": "OMV TopWash PDF Link ist erreichbar aber keine konkreten Deal-Details auf der Seite, nur Liste, daher Flag als weak evidence.",
+      "suggestion": "Bitte bessere Deal-Evidenz liefern oder Zielseite aktualisieren.",
       "proposedPatch": {},
       "decision": "flag",
       "sourceSystem": "llm-live-review-candidate"
@@ -412,164 +693,110 @@
   ],
   "removalCandidates": [
     {
-      "id": "gs-543429",
-      "title": "Bis zu 20% Gutschein für ausgewählte Marken bei Notino",
-      "brand": "Notino",
+      "id": "social-food-review-1xfp126",
+      "title": "20% Rabatt bei Wien - manuell pruefen",
+      "brand": "Wien - manuell pruefen",
       "description": "",
-      "category": "beauty",
+      "category": "essen",
       "type": "rabatt",
-      "logo": "💄",
-      "distance": "Online / Österreich",
-      "url": "https://www.gutscheine.at/notino",
+      "logo": "🍴",
+      "distance": "Wien - manuell pruefen",
+      "url": "https://www.tiktok.com/@blejmarkt/video/7691756568454499586",
       "source": "Slack Digest",
-      "originSource": "Gutscheine.at",
-      "pubDate": "2026-09-30T12:00:00.000Z",
-      "expires": "2026-10-04T23:59:59.999Z",
-      "expiresOriginal": "Bis 04.10.2026",
+      "originSource": "TikTok Deal Scanner",
+      "pubDate": "2026-10-06T21:45:35.000Z",
+      "expires": "2026-10-08T23:59:59.999Z",
+      "expiresOriginal": "2026-10-08T17:43:59.000Z",
       "expiresPrecision": "day",
       "expiresSource": "text",
       "expiresDetectedFromUrl": false,
       "validOn": "",
       "validFrom": "",
-      "validUntil": "2026-10-04",
+      "validUntil": "2026-10-08",
       "expiryKind": "end",
-      "expiryDisplayText": "Bis 04.10.2026",
+      "expiryDisplayText": "2026-10-08T17:43:59.000Z",
       "qualityScore": 0,
       "votes": 1,
       "priority": 3,
       "hot": false,
-      "isNew": false,
-      "slackTs": "1790773186.047689",
-      "slackThreadTs": "1790773185.971379",
-      "approvedAt": "2026-09-30T14:33:24.276Z",
+      "isNew": true,
+      "slackTs": "1791323135.703429",
+      "slackThreadTs": "1791323134.180989",
+      "approvedAt": "2026-10-07T05:46:43.070Z",
       "removedAutomatically": false,
-      "reason": "expired",
-      "confidence": 0.95,
-      "message": "Notino deal expired on 04.10.2026, current date 06.10.2026 is after expiry.",
-      "sourceSystem": "llm-live-review-candidate"
-    },
-    {
-      "id": "g2-1frp22l",
-      "title": "Innocent Smoothie Plus, 750 ml um 2,99 € statt 4,49 €.",
-      "brand": "SPAR",
-      "description": "",
-      "category": "supermarkt",
-      "type": "rabatt",
-      "logo": "🛒",
-      "distance": "SPAR-Gourmet, Beethovenstraße 4, Wien",
-      "url": "https://www.marktguru.at/bl/innocent/wien",
-      "source": "Slack Digest",
-      "originSource": "Firecrawl Gastro #2",
-      "pubDate": "2026-09-29T06:55:08.804Z",
-      "expires": "2026-10-31T23:59:59.999Z",
-      "expiresOriginal": "23.09.2026–07.10.2026",
-      "expiresPrecision": "day",
-      "expiresSource": "url",
-      "expiresDetectedFromUrl": true,
-      "validOn": "",
-      "validFrom": "2026-09-23",
-      "validUntil": "2026-10-07",
-      "expiryKind": "range",
-      "expiryDisplayText": "23.09.2026–07.10.2026",
-      "qualityScore": 0,
-      "votes": 1,
-      "priority": 3,
-      "hot": false,
-      "isNew": false,
-      "slackTs": "1790664908.804489",
-      "slackThreadTs": "1790664907.942569",
-      "approvedAt": "2026-09-29T13:23:10.330Z",
-      "removedAutomatically": false,
-      "reason": "expired",
-      "confidence": 0.95,
-      "message": "SPAR Innocent Smoothie deal expired on 07.10.2026, current date 06.10.2026 is before expiry but deal ends on 07.10, still valid today, keep.",
+      "reason": "bad_source",
+      "confidence": 0.9,
+      "message": "Policy override: Zielseite liefert keinen konkreten Deal-Nachweis (TikTok page is generic without specific deal details or Vienna mention; no validity dates found.).",
       "sourceSystem": "llm-live-review-candidate"
     }
   ],
   "removedDeals": [
     {
-      "id": "gs-543429",
-      "title": "Bis zu 20% Gutschein für ausgewählte Marken bei Notino",
-      "brand": "Notino",
+      "id": "social-food-review-1xfp126",
+      "title": "20% Rabatt bei Wien - manuell pruefen",
+      "brand": "Wien - manuell pruefen",
       "description": "",
-      "category": "beauty",
+      "category": "essen",
       "type": "rabatt",
-      "logo": "💄",
-      "distance": "Online / Österreich",
-      "url": "https://www.gutscheine.at/notino",
+      "logo": "🍴",
+      "distance": "Wien - manuell pruefen",
+      "url": "https://www.tiktok.com/@blejmarkt/video/7691756568454499586",
       "source": "Slack Digest",
-      "originSource": "Gutscheine.at",
-      "pubDate": "2026-09-30T12:00:00.000Z",
-      "expires": "2026-10-04T23:59:59.999Z",
-      "expiresOriginal": "Bis 04.10.2026",
+      "originSource": "TikTok Deal Scanner",
+      "pubDate": "2026-10-06T21:45:35.000Z",
+      "expires": "2026-10-08T23:59:59.999Z",
+      "expiresOriginal": "2026-10-08T17:43:59.000Z",
       "expiresPrecision": "day",
       "expiresSource": "text",
       "expiresDetectedFromUrl": false,
       "validOn": "",
       "validFrom": "",
-      "validUntil": "2026-10-04",
+      "validUntil": "2026-10-08",
       "expiryKind": "end",
-      "expiryDisplayText": "Bis 04.10.2026",
+      "expiryDisplayText": "2026-10-08T17:43:59.000Z",
       "qualityScore": 0,
       "votes": 1,
       "priority": 3,
       "hot": false,
-      "isNew": false,
-      "slackTs": "1790773186.047689",
-      "slackThreadTs": "1790773185.971379",
-      "approvedAt": "2026-09-30T14:33:24.276Z",
+      "isNew": true,
+      "slackTs": "1791323135.703429",
+      "slackThreadTs": "1791323134.180989",
+      "approvedAt": "2026-10-07T05:46:43.070Z",
       "removedAutomatically": false,
-      "reason": "expired",
-      "confidence": 0.95,
-      "message": "Notino deal expired on 04.10.2026, current date 06.10.2026 is after expiry.",
-      "sourceSystem": "llm-live-review-candidate"
-    },
-    {
-      "id": "g2-1frp22l",
-      "title": "Innocent Smoothie Plus, 750 ml um 2,99 € statt 4,49 €.",
-      "brand": "SPAR",
-      "description": "",
-      "category": "supermarkt",
-      "type": "rabatt",
-      "logo": "🛒",
-      "distance": "SPAR-Gourmet, Beethovenstraße 4, Wien",
-      "url": "https://www.marktguru.at/bl/innocent/wien",
-      "source": "Slack Digest",
-      "originSource": "Firecrawl Gastro #2",
-      "pubDate": "2026-09-29T06:55:08.804Z",
-      "expires": "2026-10-31T23:59:59.999Z",
-      "expiresOriginal": "23.09.2026–07.10.2026",
-      "expiresPrecision": "day",
-      "expiresSource": "url",
-      "expiresDetectedFromUrl": true,
-      "validOn": "",
-      "validFrom": "2026-09-23",
-      "validUntil": "2026-10-07",
-      "expiryKind": "range",
-      "expiryDisplayText": "23.09.2026–07.10.2026",
-      "qualityScore": 0,
-      "votes": 1,
-      "priority": 3,
-      "hot": false,
-      "isNew": false,
-      "slackTs": "1790664908.804489",
-      "slackThreadTs": "1790664907.942569",
-      "approvedAt": "2026-09-29T13:23:10.330Z",
-      "removedAutomatically": false,
-      "reason": "expired",
-      "confidence": 0.95,
-      "message": "SPAR Innocent Smoothie deal expired on 07.10.2026, current date 06.10.2026 is before expiry but deal ends on 07.10, still valid today, keep.",
+      "reason": "bad_source",
+      "confidence": 0.9,
+      "message": "Policy override: Zielseite liefert keinen konkreten Deal-Nachweis (TikTok page is generic without specific deal details or Vienna mention; no validity dates found.).",
       "sourceSystem": "llm-live-review-candidate"
     }
   ],
   "reviews": [
+    {
+      "id": "llm-social-food-review-1xfp126",
+      "dealID": "social-food-review-1xfp126",
+      "decision": "remove",
+      "reason": "bad_source",
+      "confidence": 0.9,
+      "message": "Policy override: Zielseite liefert keinen konkreten Deal-Nachweis (TikTok page is generic without specific deal details or Vienna mention; no validity dates found.).",
+      "suggestion": "Check for more specific deal evidence or remove if none found.",
+      "proposedPatch": {}
+    },
     {
       "id": "llm-gs-549228",
       "dealID": "gs-549228",
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 13.10.2026, online for Austria including Vienna, brand and deal title match target evidence.",
+      "message": "Gutscheine.at page confirms 20% GUESS discount valid in October 2026, online for Austria, no Vienna-specific mention but valid for Austria.",
+      "suggestion": "",
+      "proposedPatch": {}
+    },
+    {
+      "id": "llm-food3-dmej16",
+      "dealID": "food3-dmej16",
+      "decision": "keep",
+      "reason": "ok",
+      "confidence": 0.95,
+      "message": "Instagram post confirms Fish & Chips Happy Hour in Vienna until 31 October 2026.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -578,19 +805,19 @@
       "dealID": "flight-8u61yk",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Flight deal from Vienna to Ibiza with valid URL and brand match, location is Ibiza but origin is Vienna, relevant for Vienna users.",
+      "confidence": 0.95,
+      "message": "Ryanair page confirms flight from Vienna to Ibiza with date matching deal expiry; deal is Vienna relevant.",
       "suggestion": "",
       "proposedPatch": {}
     },
     {
       "id": "llm-power-food-30b718b4da84",
       "dealID": "power-food-30b718b4da84",
-      "decision": "keep",
-      "reason": "ok",
+      "decision": "flag",
+      "reason": "weak_evidence",
       "confidence": 0.9,
-      "message": "ANKER winter hot drink discount valid in Vienna participating stores, brand and deal terms confirmed.",
-      "suggestion": "",
+      "message": "Website shows general ANKER bakery offers but no specific validity dates or clear deal details for winter hot drinks discount.",
+      "suggestion": "Verify with provider or remove if no concrete deal info found.",
       "proposedPatch": {}
     },
     {
@@ -598,19 +825,19 @@
       "dealID": "power-07c0c42ee852",
       "decision": "flag",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Check later or verify with alternative source.",
+      "suggestion": "Flag for manual check or remove if no info found later.",
       "proposedPatch": {}
     },
     {
       "id": "llm-community:9ea28b1b-63ca-4ac9-a584-6f87e302e294",
       "dealID": "community:9ea28b1b-63ca-4ac9-a584-6f87e302e294",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.95,
-      "message": "TikTok page confirms Pizza Rando in Vienna 1200 with deal on 09.10 and 10.10, deal valid and location correct.",
-      "suggestion": "",
+      "decision": "flag",
+      "reason": "weak_evidence",
+      "confidence": 0.9,
+      "message": "TikTok page generic without deal details or Vienna mention; no validity dates found.",
+      "suggestion": "Check for more specific deal evidence or remove if none found.",
       "proposedPatch": {}
     },
     {
@@ -618,9 +845,9 @@
       "dealID": "g2-1enscad",
       "decision": "flag",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Check later or verify with alternative source.",
+      "suggestion": "Flag for manual check or remove if no info found later.",
       "proposedPatch": {}
     },
     {
@@ -629,18 +856,18 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Autodoc 30€ voucher valid online Austria, deal title and brand confirmed, valid in October 2026.",
+      "message": "Gutscheine.at page confirms 30€ Autodoc voucher valid in October 2026 online for Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
     {
       "id": "llm-tiktok-1v5ykqd",
       "dealID": "tiktok-1v5ykqd",
-      "decision": "keep",
-      "reason": "ok",
+      "decision": "flag",
+      "reason": "weak_evidence",
       "confidence": 0.9,
-      "message": "TikTok video for Papa Duck in 1060 Wien confirmed, deal valid and location correct.",
-      "suggestion": "",
+      "message": "TikTok page generic without deal details or Vienna mention; no validity dates found.",
+      "suggestion": "Check for more specific deal evidence or remove if none found.",
       "proposedPatch": {}
     },
     {
@@ -649,17 +876,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Cafe Hummel Early Hummel Aktion in 1080 Wien confirmed on official site, deal valid.",
-      "suggestion": "",
-      "proposedPatch": {}
-    },
-    {
-      "id": "llm-tiktok-du6aut",
-      "dealID": "tiktok-du6aut",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "TikTok video for Loving Hut Neubau in 1070 Wien confirmed, deal valid until 31.10.2026.",
+      "message": "Cafe Hummel website confirms coffee offer in Vienna location; no expiry date but deal is valid and Vienna relevant.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -669,138 +886,118 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Ganesha Restaurant 10€ Gutschein valid until 31.12.2026 in Vienna confirmed by target evidence.",
+      "message": "Gutschein.at page confirms 10€ Ganesha Restaurant voucher valid until 31 December 2026 in Vienna.",
       "suggestion": "",
       "proposedPatch": {}
     },
     {
       "id": "llm-gs-543429",
       "dealID": "gs-543429",
-      "decision": "remove",
-      "reason": "expired",
-      "confidence": 0.95,
-      "message": "Notino deal expired on 04.10.2026, current date 06.10.2026 is after expiry.",
-      "suggestion": "Remove expired deal.",
-      "proposedPatch": {}
-    },
-    {
-      "id": "llm-g2-1frp22l",
-      "dealID": "g2-1frp22l",
-      "decision": "remove",
-      "reason": "expired",
-      "confidence": 0.95,
-      "message": "SPAR Innocent Smoothie deal expired on 07.10.2026, current date 06.10.2026 is before expiry but deal ends on 07.10, still valid today, keep.",
-      "suggestion": "Deal still valid today, keep.",
-      "proposedPatch": {}
-    },
-    {
-      "id": "llm-g2-sefele",
-      "dealID": "g2-sefele",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Subway 1+1 gratis deal valid until 06.10.2026, location in Vienna confirmed, deal valid today.",
+      "confidence": 0.95,
+      "message": "Gutscheine.at page confirms Notino discount valid until 4 October 2026 online for Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
     {
       "id": "llm-flight-10yozoj",
       "dealID": "flight-10yozoj",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "Flight deal from Vienna to Agadir valid URL and brand match, location is Agadir but origin is Vienna, relevant for Vienna users.",
-      "suggestion": "",
+      "decision": "flag",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Agadir, Morocco, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
       "proposedPatch": {}
     },
     {
       "id": "llm-flight-5i0ef4",
       "dealID": "flight-5i0ef4",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "Flight deal from Vienna to Banja Luka valid URL and brand match, location is Banja Luka but origin is Vienna, relevant for Vienna users.",
-      "suggestion": "",
+      "decision": "flag",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Banja Luka, Bosnia & Herzegovina, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
       "proposedPatch": {}
     },
     {
       "id": "llm-flight-1brn2d9",
       "dealID": "flight-1brn2d9",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "Flight deal from Vienna to Bucharest valid URL and brand match, location is Bucharest but origin is Vienna, relevant for Vienna users.",
-      "suggestion": "",
+      "decision": "flag",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Bucharest, Romania, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
       "proposedPatch": {}
     },
     {
       "id": "llm-flight-1aicckv",
       "dealID": "flight-1aicckv",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "Flight deal from Vienna to Catania valid URL and brand match, location is Catania but origin is Vienna, relevant for Vienna users.",
-      "suggestion": "",
+      "decision": "flag",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Catania, Italy, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
       "proposedPatch": {}
     },
     {
       "id": "llm-flight-1qd42lm",
       "dealID": "flight-1qd42lm",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "Flight deal from Vienna to Dublin valid URL and brand match, location is Dublin but origin is Vienna, relevant for Vienna users.",
-      "suggestion": "",
+      "decision": "flag",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Dublin, Ireland, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
       "proposedPatch": {}
     },
     {
       "id": "llm-flight-rj2ol1",
       "dealID": "flight-rj2ol1",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "Flight deal from Vienna to Malta valid URL and brand match, location is Malta but origin is Vienna, relevant for Vienna users.",
-      "suggestion": "",
+      "decision": "flag",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Malta, Malta, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
       "proposedPatch": {}
     },
     {
       "id": "llm-flight-120znu6",
       "dealID": "flight-120znu6",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "Flight deal from Vienna to Palermo valid URL and brand match, location is Palermo but origin is Vienna, relevant for Vienna users.",
-      "suggestion": "",
+      "decision": "flag",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Palermo, Italy, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
       "proposedPatch": {}
     },
     {
       "id": "llm-flight-rbt5lu",
       "dealID": "flight-rbt5lu",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "Flight deal from Vienna to Palma valid URL and brand match, location is Palma but origin is Vienna, relevant for Vienna users.",
-      "suggestion": "",
+      "decision": "flag",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Palma, Spain, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
       "proposedPatch": {}
     },
     {
       "id": "llm-flight-1b0v2p3",
       "dealID": "flight-1b0v2p3",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "Flight deal from Vienna to Paphos valid URL and brand match, location is Paphos but origin is Vienna, relevant for Vienna users.",
-      "suggestion": "",
+      "decision": "flag",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Paphos, Cyprus, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
       "proposedPatch": {}
     },
     {
       "id": "llm-flight-1hk2ewt",
       "dealID": "flight-1hk2ewt",
-      "decision": "keep",
-      "reason": "ok",
-      "confidence": 0.9,
-      "message": "Flight deal from Vienna to Rome valid URL and brand match, location is Rome but origin is Vienna, relevant for Vienna users.",
-      "suggestion": "",
+      "decision": "flag",
+      "reason": "not_vienna",
+      "confidence": 0.95,
+      "message": "Flight deal destination is Rome, Italy, not Vienna; deal is not Vienna relevant.",
+      "suggestion": "Remove as not Vienna relevant.",
       "proposedPatch": {}
     },
     {
@@ -809,7 +1006,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 15 October 2026, confirmed by target page. Deal is for Wien and matches brand and title.",
+      "message": "Preisjaeger.at page confirms Lieferando SPAR 10€ discount valid until 15 October 2026, Vienna relevant.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -820,7 +1017,7 @@
       "reason": "weak_evidence",
       "confidence": 0.8,
       "message": "Policy override: Öffentliche Social-Seite enthält keinen auslesbaren Deal-Inhalt; Originalpost manuell prüfen.",
-      "suggestion": "Remove due to lack of deal evidence on target page.",
+      "suggestion": "Verify deal details or provide a more specific target URL with deal info.",
       "proposedPatch": {}
     },
     {
@@ -829,7 +1026,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 31.12.2026, confirmed by target page. Location in Wien matches. Brand and deal terms confirmed.",
+      "message": "Deal matches target page with brand HITOMI Wok & Grill, valid until 31.12.2026, located in Vienna; deal details confirmed.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -838,9 +1035,9 @@
       "dealID": "g2-1lfynn6",
       "decision": "flag",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to blocked target page.",
+      "suggestion": "Check target page later or provide alternative evidence for deal validity.",
       "proposedPatch": {}
     },
     {
@@ -849,7 +1046,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 31.12.2026, confirmed by target page. Location in Wien matches. Brand and deal terms confirmed.",
+      "message": "Deal matches target page with brand Alleewirt, valid until 31.12.2026, located in Vienna; deal details confirmed.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -859,7 +1056,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Flight deal from Wien to Paris valid until 8 November 2026, confirmed by target page. Location is Wien as origin.",
+      "message": "Ryanair flight deal from Vienna to Paris confirmed on official site; deal valid until 2026-11-08; location Paris is destination, deal is for Vienna origin.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -868,9 +1065,9 @@
       "dealID": "g2-1ts5gqi",
       "decision": "flag",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to blocked target page.",
+      "suggestion": "Check target page later or provide alternative evidence for deal validity.",
       "proposedPatch": {}
     },
     {
@@ -879,7 +1076,27 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 31.12.2026, confirmed by target page. Location in Wien matches. Brand and deal terms confirmed.",
+      "message": "Instagram post from BIPA confirms Wohlfühlpaket Therme Wien deal, valid until 2026-11-02; deal details match.",
+      "suggestion": "",
+      "proposedPatch": {}
+    },
+    {
+      "id": "llm-instagram-ai-ce1a3b58472a",
+      "dealID": "instagram-ai-ce1a3b58472a",
+      "decision": "flag",
+      "reason": "weak_evidence",
+      "confidence": 0.9,
+      "message": "Instagram login page without deal details; no direct evidence for Wolt 1+1 gratis deal at Munchy am Reumannplatz Vienna.",
+      "suggestion": "Provide direct deal page or more detailed evidence.",
+      "proposedPatch": {}
+    },
+    {
+      "id": "llm-g2-171hxsm",
+      "dealID": "g2-171hxsm",
+      "decision": "keep",
+      "reason": "ok",
+      "confidence": 0.95,
+      "message": "Deal for Wiener Riesenrad 1+1 Fahrt confirmed on Gutschein.at, valid until 30.09.2027, located in Vienna.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -888,9 +1105,9 @@
       "dealID": "fc4g-p4bi2h",
       "decision": "flag",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to blocked target page.",
+      "suggestion": "Check target page later or provide alternative evidence for deal validity.",
       "proposedPatch": {}
     },
     {
@@ -899,7 +1116,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid for October 2026, confirmed by target page. Online deal for Österreich is valid for Wien.",
+      "message": "Oral-B 10% Gutschein deal confirmed on Gutscheine.at, valid until 2026-12-31, online for Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -909,7 +1126,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid for October 2026, confirmed by target page. Online deal for Österreich is valid for Wien.",
+      "message": "Matratzen Discount 15% Gutschein deal confirmed on Gutscheine.at, valid in October 2026, online for Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -918,9 +1135,9 @@
       "dealID": "benefit-magenta-moments-oz9vs",
       "decision": "flag",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to lack of deal details on target page.",
+      "suggestion": "Provide more detailed evidence or alternative source.",
       "proposedPatch": {}
     },
     {
@@ -929,7 +1146,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid for October 2026, confirmed by target page. Online deal for Österreich is valid for Wien.",
+      "message": "SHEIN 30% Gutschein deal confirmed on Gutscheine.at, valid in October 2026, online for Austria.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -938,9 +1155,19 @@
       "dealID": "g2-1d7308d",
       "decision": "flag",
       "reason": "weak_evidence",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for weak evidence due to temporary HTTP 429 error on target page.",
+      "suggestion": "Check target page later or provide alternative evidence.",
+      "proposedPatch": {}
+    },
+    {
+      "id": "llm-tiktok-du6aut",
+      "dealID": "tiktok-du6aut",
+      "decision": "flag",
+      "reason": "weak_evidence",
+      "confidence": 0.9,
+      "message": "TikTok page does not mention Vienna, brand, or deal details explicitly; no validity dates found; insufficient evidence for deal validity.",
+      "suggestion": "Verify deal details or provide a more specific target URL with deal info.",
       "proposedPatch": {}
     },
     {
@@ -948,8 +1175,8 @@
       "dealID": "g2-31pd49",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Target page confirms brand and location in Wien. Deal details plausible and relevant for Wien.",
+      "confidence": 0.95,
+      "message": "Wiener Laziz Food website confirms authentic cuisine in Vienna; deal for Gratis Pizza Margherita ab 20 € Bestellwert plausible and location correct.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -959,7 +1186,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 31 July 2027, confirmed by target page. Location Wien confirmed.",
+      "message": "EBI Genuss Gutschein deal confirmed on Gutschein.at, valid until 2027-07-31, located in Vienna.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -969,7 +1196,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 31 December 2026, confirmed by target page. Location in Wien confirmed.",
+      "message": "Burger King 1+1 Crispy Chicken Sandwich deal confirmed on Gutschein.at, valid until 2026-12-31, multiple locations in Vienna.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -978,8 +1205,8 @@
       "dealID": "fc4g-p6qwjy",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Deal confirmed on Drei.at page, valid every Thursday, location in Wien confirmed.",
+      "confidence": 0.95,
+      "message": "Pizzamann 2+1 Pizza gratis deal confirmed on Drei.at, valid every Thursday, locations in Vienna.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -989,7 +1216,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 31 October 2026, confirmed by target page. Location Österreich, relevant for Wien.",
+      "message": "Lieferando+ gratis 90 Tage deal confirmed on Drei.at, valid until 2026-10-31, Austria-wide.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -998,8 +1225,8 @@
       "dealID": "benefit-drei-plus-1m300u0",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Deal confirmed on Drei.at page, no explicit expiry but ongoing. Location Österreich, relevant for Wien.",
+      "confidence": 0.95,
+      "message": "Pizzamann Gratis Extra-Pizza jeden Donnerstag deal confirmed on Drei.at, Austria-wide.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1009,7 +1236,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 3 January 2027, confirmed by target page. Location Österreich, relevant for Wien.",
+      "message": "NORDSEE 1+1 Garnelen-Wrap deal confirmed on Drei.at, valid until 2027-01-03, Austria-wide except Autobahnraststätten.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1019,7 +1246,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Deal valid until 2.11.2026 as per targetEvidence, location IKEA Wien confirmed, deal matches brand and category.",
+      "message": "IKEA Frühstücksdeal ist gültig bis 2.11.2026 laut Zielseite, Deal passt zu Wien und Quelle ist seriös.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1029,7 +1256,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Deal for Therme Wien with 50% discount for Drei customers confirmed on Drei.at, location Austria includes Vienna, deal matches brand and category.",
+      "message": "50% Rabatt bei Therme Wien für Drei Kunden ist bestätigt auf der Drei.at Seite, gilt für Österreich inklusive Wien.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1040,7 +1267,7 @@
       "reason": "weak_evidence",
       "confidence": 0.7,
       "message": "Policy override: Zielseite blockiert die Prüfung oder ist vorübergehend nicht erreichbar; Deal manuell prüfen.",
-      "suggestion": "Flag for manual review due to transient HTTP 429 and missing deal details.",
+      "suggestion": "Bitte Zielseite später erneut prüfen oder bessere Evidenz liefern.",
       "proposedPatch": {}
     },
     {
@@ -1049,7 +1276,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "1+1 Ticket gratis bei Madame Tussauds Wien confirmed on Drei.at, location Austria includes Vienna, deal matches brand and category.",
+      "message": "1+1 Ticket gratis bei Madame Tussauds Wien ist bestätigt auf Drei.at, gilt für Österreich inklusive Wien.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1059,7 +1286,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "10-40% Rabatt auf Menüs bei NORDSEE confirmed on nordsee.com, location Wien (alle teilnehmenden Filialen) matches deal location.",
+      "message": "NORDSEE Rabattcoupons sind auf der offiziellen Nordsee Seite gelistet, Deal gilt für Wien Filialen.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1068,8 +1295,8 @@
       "dealID": "b1-s5vhj5",
       "decision": "keep",
       "reason": "ok",
-      "confidence": 0.9,
-      "message": "Gratis Heißgetränk bei IKEA Family confirmed on IKEA website, location IKEA Wien Westbahnhof and Nord confirmed, deal matches brand and category.",
+      "confidence": 0.95,
+      "message": "Gratis Heißgetränk bei IKEA Family in IKEA Wien ist bestätigt auf IKEA Seite, dauerhaft gültig.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1079,7 +1306,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Spotify Premium 1 Monat gratis für Neukunden confirmed on spotify.com/at, location online valid for Austria, deal matches brand and category.",
+      "message": "Spotify Premium 1 Monat gratis für Neukunden ist bestätigt auf Spotify Österreich Seite, online Angebot.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1089,7 +1316,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "Foodsharing gratis Lebensmittel abholen confirmed on foodsharing.at, location Ganz Wien matches deal location.",
+      "message": "Foodsharing Angebot ist bestätigt auf foodsharing.at, gilt dauerhaft in Wien.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1099,7 +1326,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "12 € Gutschein bei Wolt für Neukunden confirmed on gutscheine.at, valid until 30.12.2026, location Online/Österreich matches deal location.",
+      "message": "Wolt 12 € Gutschein für Neukunden ist bestätigt auf Gutscheine.at, gültig bis 30.12.2026, online für Österreich.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1109,8 +1336,8 @@
       "decision": "flag",
       "reason": "weak_evidence",
       "confidence": 0.7,
-      "message": "OMV TopWash 30% Rabatt link is a PDF with no clear deal details or validity, location OMV TopWash Wien not clearly confirmed in content.",
-      "suggestion": "Flag for manual review due to insufficient deal evidence and unclear location confirmation.",
+      "message": "OMV TopWash PDF Link ist erreichbar aber keine konkreten Deal-Details auf der Seite, nur Liste, daher Flag als weak evidence.",
+      "suggestion": "Bitte bessere Deal-Evidenz liefern oder Zielseite aktualisieren.",
       "proposedPatch": {}
     },
     {
@@ -1119,7 +1346,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.9,
-      "message": "60% Rabatt für Neukunden mit GENUSS on foodora.at confirmed, location Online · Wien matches deal location.",
+      "message": "Foodora 60% Rabatt für Neukunden mit Code GENUSS ist bestätigt auf foodora.at, online Angebot für Wien.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1129,7 +1356,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Hillsong Vienna church info confirmed on hillsong.com, location Palais Berg, Schwarzenbergplatz 3, 1010 Wien matches deal location.",
+      "message": "Hillsong Vienna Kirche ist bestätigt auf hillsong.com, Standort in Wien 1010, seriöse Quelle.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1139,7 +1366,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "Hillsong Vienna Events confirmed on hillsong.com, location Palais Berg, Schwarzenbergplatz 3, 1010 Wien matches deal location.",
+      "message": "Hillsong Vienna Events sind bestätigt auf hillsong.com, Standort Wien 1010, seriöse Quelle.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1149,7 +1376,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "CIG Wien Events confirmed on cigwien.at, location Leebgasse 34, 1100 Wien matches deal location.",
+      "message": "CIG Wien Events sind bestätigt auf cigwien.at, Standort Wien 1100, seriöse Quelle.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1159,7 +1386,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "CIG Wien church info confirmed on cigwien.at, location Leebgasse 34, 1100 Wien matches deal location.",
+      "message": "CIG Wien Kirche ist bestätigt auf cigwien.at, Standort Wien 1100, seriöse Quelle.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1169,7 +1396,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "ICF Wien church info confirmed on icf.church, location Lerchenfelder Straße 35, 1070 Wien matches deal location.",
+      "message": "ICF Wien Kirche ist bestätigt auf icf.church, Standort Wien 1070, seriöse Quelle.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1179,7 +1406,7 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "ICF Wien Events confirmed on icf.church, location Lerchenfelder Straße 35, 1070 Wien matches deal location.",
+      "message": "ICF Wien Events sind bestätigt auf icf.church, Standort Wien 1070, seriöse Quelle.",
       "suggestion": "",
       "proposedPatch": {}
     },
@@ -1189,12 +1416,50 @@
       "decision": "keep",
       "reason": "ok",
       "confidence": 0.95,
-      "message": "VCC JesusZentrum Events confirmed on jesuszentrum.at, location Guglgasse 11, 1110 Wien matches deal location.",
+      "message": "VCC JesusZentrum Events sind bestätigt auf jesuszentrum.at, Standort Wien 1110, seriöse Quelle.",
       "suggestion": "",
       "proposedPatch": {}
     }
   ],
   "targetEvidence": [
+    {
+      "dealID": "social-food-review-1xfp126",
+      "sourceUrl": "https://www.tiktok.com/@blejmarkt/video/7691756568454499586",
+      "finalUrl": "https://www.tiktok.com/@blejmarkt/video/7691756568454499586",
+      "finalHost": "www.tiktok.com",
+      "status": "ok",
+      "httpStatus": 200,
+      "invalid": false,
+      "transientError": false,
+      "blockedByProtection": false,
+      "reason": "",
+      "checkedAt": "2026-10-07T15:44:04.053Z",
+      "page": {
+        "title": "TikTok - Make Your Day",
+        "description": "",
+        "heading": "",
+        "headings": [],
+        "textSnippet": "TikTok - Make Your Day"
+      },
+      "dates": {
+        "publicationDate": "",
+        "publicationDateSource": "",
+        "targetDateSource": "",
+        "targetDateRaw": "",
+        "targetDateKind": "",
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": ""
+      },
+      "signals": {
+        "mentionsVienna": false,
+        "mentionsBrand": false,
+        "mentionsDealTitle": false,
+        "mentionsDealTerms": false,
+        "hasPublicationDate": false,
+        "hasValidityDate": false
+      }
+    },
     {
       "dealID": "gs-549228",
       "sourceUrl": "https://www.gutscheine.at/guess",
@@ -1206,7 +1471,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:57.562Z",
+      "checkedAt": "2026-10-07T15:44:03.525Z",
       "page": {
         "title": "GUESS Rabattcode ▷ 20% Rabatt + 5% Gutschein!",
         "description": "Aktuelle Top GUESS Gutscheine im Oktober 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -1218,7 +1483,7 @@
           "5% Gutscheincode für zahlreiche Artikel bei GUESS",
           "10% GUESS Rabattcode für die Anmeldung zum Newsletter"
         ],
-        "textSnippet": "GUESS Rabattcode ▷ 20% Rabatt + 5% Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 5 von 5 Sternen mit 1 Bewertung für GUESS GUESS jetzt teilen GUESS Rabattcodes Ähnliche Rabattcodes Newsletter abonnieren Oft gestellte Fragen zum GUESS Rabattcode Häufige Fragen zum GUESS Onlineshop GUESS Newsletter abonnieren und sparen GUESS Gutscheine 6 Höchster GUESS Rabatt 20 % Bestandskunden Gutscheine 6 Letztes Update 01.10.2026 Im Original-Onlineshop der Modemarke GUESS treffen Sie das ganze Jahr hindurch auf die neusten Styles. Für Damen, Herren und Kids stellt die Marke Mode bereit, mit der Sie sich Trend-konform für jede Saison einkleiden. Finden Sie darüber hinaus die passenden Accessoires, um Ihren Look zu komplett"
+        "textSnippet": "GUESS Rabattcode ▷ 20% Rabatt + 5% Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 5 von 5 Sternen mit 1 Bewertung für GUESS GUESS jetzt teilen GUESS Rabattcodes Ähnliche Rabattcodes Newsletter abonnieren Oft gestellte Fragen zum GUESS Rabattcode Häufige Fragen zum GUESS Onlineshop GUESS Newsletter abonnieren und sparen GUESS Gutscheine 6 Höchster GUESS Rabatt 20 % Bestandskunden Gutscheine 6 Letztes Update 02.10.2026 Im Original-Onlineshop der Modemarke GUESS treffen Sie das ganze Jahr hindurch auf die neusten Styles. Für Damen, Herren und Kids stellt die Marke Mode bereit, mit der Sie sich Trend-konform für jede Saison einkleiden. Finden Sie darüber hinaus die passenden Accessoires, um Ihren Look zu komplett"
       },
       "dates": {
         "publicationDate": "",
@@ -1240,6 +1505,46 @@
       }
     },
     {
+      "dealID": "food3-dmej16",
+      "sourceUrl": "https://www.instagram.com/p/DeHh9YfM_r1/",
+      "finalUrl": "https://www.instagram.com/p/DeHh9YfM_r1/",
+      "finalHost": "www.instagram.com",
+      "status": "ok",
+      "httpStatus": 200,
+      "invalid": false,
+      "transientError": false,
+      "blockedByProtection": false,
+      "reason": "",
+      "checkedAt": "2026-10-07T15:44:03.204Z",
+      "page": {
+        "title": "Die Seeteufel on Instagram: \"Happy Hour im Fish & Chips Bistro! 🐟🍟 Den ganzen Oktober bekommt ihr von Montag bis Donnerstag zwischen 19:00 und 20:00 Uhr unsere Fish & Chips um nur € 7,00. ✨ Knuspriger Fisch, goldene Po",
+        "description": "12 likes, 0 comments - dieseeteufel on October 5, 2026: \"Happy Hour im Fish & Chips Bistro! 🐟🍟 Den ganzen Oktober bekommt ihr von Montag bis Donnerstag zwischen 19:00 und 20:00 Uhr unsere Fish & Chips um nur € 7,00. ✨ Knuspriger Fisch, goldene Pommes und der perfekte Feierabend-Snack. 💙 📍 Schwarzspanierstraße 22, 1090 Wien 🗓️Aktion bis 31. Oktober Take-away Box + € 1,50 Kommt vorbei und nutzt unsere Happy Hour! ",
+        "heading": "No comments yet.",
+        "headings": [
+          "No comments yet."
+        ],
+        "textSnippet": "Instagram Log In Sign Up Never miss a post from dieseeteufel Sign up for Instagram to stay in the loop. Sign up Log in dieseeteufel • Follow Schwarzspanierstrasse dieseeteufel 2d Happy Hour im Fish & Chips Bistro! 🐟🍟 Den ganzen Oktober bekommt ihr von Montag bis Donnerstag zwischen 19:00 und 20:00 Uhr unsere Fish & Chips um nur € 7,00. ✨ Knuspriger Fisch, goldene Pommes und der perfekte Feierabend-Snack. 💙 📍 Schwarzspanierstraße 22, 1090 Wien 🗓️Aktion bis 31. Oktober Take-away Box + € 1,50 Kommt vorbei und nutzt unsere Happy Hour! 🙌 #Seeteufel #FishAndChips #HappyHour #Wien #1090Wien FishAndChipsWien FoodieVienna No comments yet. Start the conversation. 12 2 days ago Log in to like or comment. More posts from dieseeteufel See more posts Meta About Blog Jobs Help API Privacy Terms Locations Popular Instagram Lite Meta AI Muse Threads Contact Uploading & Non-Users Meta Verified Engli"
+      },
+      "dates": {
+        "publicationDate": "2026-10-05T23:59:59.999Z",
+        "publicationDateSource": "contextPublished",
+        "targetDateSource": "url",
+        "targetDateRaw": "12 likes, 0 comments - dieseeteufel on October 5, 2026: \"Happy Hour im Fish & Chips Bistro! 🐟🍟 Den ganzen Oktober bekommt ihr von Montag bis Donnerstag zwischen 19:00 und 20:00 U",
+        "targetDateKind": "end",
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": "2026-10-31"
+      },
+      "signals": {
+        "mentionsVienna": true,
+        "mentionsBrand": true,
+        "mentionsDealTitle": true,
+        "mentionsDealTerms": true,
+        "hasPublicationDate": true,
+        "hasValidityDate": true
+      }
+    },
+    {
       "dealID": "flight-8u61yk",
       "sourceUrl": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=IBZ&dateOut=2026-10-20&dateIn=2026-10-22&isReturn=true&discount=0&promoCode=",
       "finalUrl": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&tpAdults=1&teens=0&tpTeens=0&children=0&tpChildren=0&infants=0&tpInfants=0&originIata=VIE&tpOriginIata=VIE&destinationIata=IBZ&tpDestinationIata=IBZ&dateOut=2026-10-20&tpStartDate=2026-10-20&dateIn=2026-10-22&tpEndDate=2026-10-22&isReturn=true&tpIsReturn=true&discount=0&tpDiscount=0&promoCode=&tpPromoCode=",
@@ -1250,7 +1555,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:57.323Z",
+      "checkedAt": "2026-10-07T15:44:02.900Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -1288,7 +1593,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:57.836Z",
+      "checkedAt": "2026-10-07T15:44:03.848Z",
       "page": {
         "title": "Aktionen - Bäckerei ANKER",
         "description": "",
@@ -1332,7 +1637,7 @@
       "transientError": true,
       "blockedByProtection": true,
       "reason": "www.moebelix.at",
-      "checkedAt": "2026-10-06T15:24:56.850Z",
+      "checkedAt": "2026-10-07T15:44:02.612Z",
       "page": {
         "title": "",
         "description": "",
@@ -1370,15 +1675,13 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:57.381Z",
+      "checkedAt": "2026-10-07T15:44:03.645Z",
       "page": {
         "title": "TikTok - Make Your Day",
         "description": "",
-        "heading": "pizzarando",
-        "headings": [
-          "pizzarando"
-        ],
-        "textSnippet": "TikTok - Make Your Day pizzarando pizzarando 0 60 653 🍕 Pizza • 🥙 Döner • 🍗 Schnitzel • 🍔 Burger 📍 1200 Wien , Dresdnerstraße 115 🚗 Abholung & Lieferung 📞 01 603 7341"
+        "heading": "",
+        "headings": [],
+        "textSnippet": "TikTok - Make Your Day"
       },
       "dates": {
         "publicationDate": "",
@@ -1391,9 +1694,9 @@
         "validUntil": ""
       },
       "signals": {
-        "mentionsVienna": true,
-        "mentionsBrand": true,
-        "mentionsDealTitle": true,
+        "mentionsVienna": false,
+        "mentionsBrand": false,
+        "mentionsDealTitle": false,
         "mentionsDealTerms": false,
         "hasPublicationDate": false,
         "hasValidityDate": false
@@ -1410,7 +1713,7 @@
       "transientError": true,
       "blockedByProtection": true,
       "reason": "www.lieferando.at",
-      "checkedAt": "2026-10-06T15:24:56.850Z",
+      "checkedAt": "2026-10-07T15:44:02.612Z",
       "page": {
         "title": "",
         "description": "",
@@ -1448,7 +1751,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:59.345Z",
+      "checkedAt": "2026-10-07T15:44:03.927Z",
       "page": {
         "title": "AUTODOC Gutscheine ▷ 30€ Rabatt auf Alles",
         "description": "Aktuelle Top AUTODOC Gutscheine im Oktober 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -1460,7 +1763,7 @@
           "Bis zu 20 % Rabatt auf die Option „Sicher bestellen“",
           "Versandkostenfrei bestellen bei Autodoc"
         ],
-        "textSnippet": "AUTODOC Gutscheine ▷ 30€ Rabatt auf Alles Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 5 von 5 Sternen mit 1 Bewertung für Autodoc Autodoc jetzt teilen Autodoc Gutscheine Ähnliche Gutscheine Newsletter abonnieren Das müssen Sie zum Autodoc Gutschein beachten Wissenswertes zum Autodoc Service Als Stammkunde mit dem Treueprogramm von Autodoc sparen Autodoc Gutscheine 7 Höchster Autodoc Rabatt € 30,00 Bestandskunden Gutscheine 7 Letztes Update 01.10.2026 Der Online-Händler Autodoc bietet Ihnen eine große Auswahl an hochwertigen Ersatzteilen und Zubehör für diverse Pkws, Lkws und Motorräder zu einem günstigen Preis. Dazu helfen Ihnen Tipps, Video-Tutorials und Chats mit Experten auf der Plattform bei Fahrzeugreparatur und"
+        "textSnippet": "AUTODOC Gutscheine ▷ 30€ Rabatt auf Alles Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 5 von 5 Sternen mit 1 Bewertung für Autodoc Autodoc jetzt teilen Autodoc Gutscheine Ähnliche Gutscheine Newsletter abonnieren Das müssen Sie zum Autodoc Gutschein beachten Wissenswertes zum Autodoc Service Als Stammkunde mit dem Treueprogramm von Autodoc sparen Autodoc Gutscheine 7 Höchster Autodoc Rabatt € 30,00 Bestandskunden Gutscheine 7 Letztes Update 02.10.2026 Der Online-Händler Autodoc bietet Ihnen eine große Auswahl an hochwertigen Ersatzteilen und Zubehör für diverse Pkws, Lkws und Motorräder zu einem günstigen Preis. Dazu helfen Ihnen Tipps, Video-Tutorials und Chats mit Experten auf der Plattform bei Fahrzeugreparatur und"
       },
       "dates": {
         "publicationDate": "",
@@ -1492,7 +1795,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:57.497Z",
+      "checkedAt": "2026-10-07T15:44:04.232Z",
       "page": {
         "title": "TikTok - Make Your Day",
         "description": "",
@@ -1530,7 +1833,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.350Z",
+      "checkedAt": "2026-10-07T15:44:04.278Z",
       "page": {
         "title": "Startseite",
         "description": "Genießen Sie Ihren Kaffee mit sämtlichen in- und ausländischen Tageszeitungen, Bundesländer-Blättern und Journalen Ihrer Wahl. Probieren Sie unsere Kaffeehaus-Schmankerl, verbringen Sie mit Freunden einen gemütlichen Abend mit diversen Schach- und Kartenspielen in unserem Club- und Fernsehraum oder",
@@ -1564,44 +1867,6 @@
       }
     },
     {
-      "dealID": "tiktok-du6aut",
-      "sourceUrl": "https://www.tiktok.com/@lovinghut.neubau/video/7691608749642943796",
-      "finalUrl": "https://www.tiktok.com/@lovinghut.neubau/video/7691608749642943796",
-      "finalHost": "www.tiktok.com",
-      "status": "ok",
-      "httpStatus": 200,
-      "invalid": false,
-      "transientError": false,
-      "blockedByProtection": false,
-      "reason": "",
-      "checkedAt": "2026-10-06T15:24:57.676Z",
-      "page": {
-        "title": "TikTok - Make Your Day",
-        "description": "",
-        "heading": "",
-        "headings": [],
-        "textSnippet": "TikTok - Make Your Day"
-      },
-      "dates": {
-        "publicationDate": "",
-        "publicationDateSource": "",
-        "targetDateSource": "",
-        "targetDateRaw": "",
-        "targetDateKind": "",
-        "validOn": "",
-        "validFrom": "",
-        "validUntil": ""
-      },
-      "signals": {
-        "mentionsVienna": false,
-        "mentionsBrand": false,
-        "mentionsDealTitle": false,
-        "mentionsDealTerms": false,
-        "hasPublicationDate": false,
-        "hasValidityDate": false
-      }
-    },
-    {
       "dealID": "g2-a1l0vd",
       "sourceUrl": "https://www.gutschein.at/ganesha-restaurant/10-euro-gutschein",
       "finalUrl": "https://www.gutschein.at/ganesha-restaurant/10-euro-gutschein",
@@ -1612,7 +1877,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.276Z",
+      "checkedAt": "2026-10-07T15:44:04.261Z",
       "page": {
         "title": "Ganesha Restaurant 10 EUR Gutschein - Gutschein.at",
         "description": "10 EUR Gutschein für eine kulinarische Reise durch Indien. Jetzt entdecken und sparen!",
@@ -1656,7 +1921,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:57.947Z",
+      "checkedAt": "2026-10-07T15:44:04.510Z",
       "page": {
         "title": "Notino Gutscheine ▷ 25€ Rabatt + 50% Gutschein!",
         "description": "Aktuelle Top Notino Gutscheine im Oktober 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -1665,10 +1930,10 @@
           "Notino Gutscheincodes – Oktober 2026",
           "Notino Gutscheincodes & Aktionen in Österreich",
           "Notino Geschenkgutscheine ab 25€",
-          "15% Gutschein für alles bei Notino",
-          "Bis zu 50% Rabatt auf Parfum im Sale"
+          "Bis zu 50% Rabatt auf Parfum im Sale",
+          "15% Gutschein für alles bei Notino"
         ],
-        "textSnippet": "Notino Gutscheine ▷ 25€ Rabatt + 50% Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 4.7 von 5 Sternen mit 17 Bewertungen für Notino Notino jetzt teilen Notino Gutscheine Ähnliche Gutscheine Newsletter abonnieren Häufige Fragen zum Notino Gutscheincode Häufige Fragen zum Notino Service Neue Notino Produkte kennenlernen und Aktionspreise genießen Notino Sale entdecken und sparen Mit dem Notino Newsletter früher von neuen Aktionen erfahren Notino Gutscheine 8 Höchster Notino Rabatt € 25,00 Bestandskunden Gutscheine 8 Letztes Update 01.10.2026 Wer Parfüm, Kosmetik oder Drogerieartikel aus einer Hand bestellen möchte, wird im Notino Onlineshop fündig. Hier entdecken Sie laut dem Anbieter weit mehr als 80.000 Produ"
+        "textSnippet": "Notino Gutscheine ▷ 25€ Rabatt + 50% Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 4.7 von 5 Sternen mit 17 Bewertungen für Notino Notino jetzt teilen Notino Gutscheine Ähnliche Gutscheine Newsletter abonnieren Häufige Fragen zum Notino Gutscheincode Häufige Fragen zum Notino Service Neue Notino Produkte kennenlernen und Aktionspreise genießen Notino Sale entdecken und sparen Mit dem Notino Newsletter früher von neuen Aktionen erfahren Notino Gutscheine 8 Höchster Notino Rabatt € 25,00 Bestandskunden Gutscheine 8 Letztes Update 02.10.2026 Wer Parfüm, Kosmetik oder Drogerieartikel aus einer Hand bestellen möchte, wird im Notino Onlineshop fündig. Hier entdecken Sie laut dem Anbieter weit mehr als 80.000 Produ"
       },
       "dates": {
         "publicationDate": "",
@@ -1690,91 +1955,6 @@
       }
     },
     {
-      "dealID": "g2-1frp22l",
-      "sourceUrl": "https://www.marktguru.at/bl/innocent/wien",
-      "finalUrl": "https://www.marktguru.at/bl/innocent/wien",
-      "finalHost": "www.marktguru.at",
-      "status": "ok",
-      "httpStatus": 200,
-      "invalid": false,
-      "transientError": false,
-      "blockedByProtection": false,
-      "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.178Z",
-      "page": {
-        "title": "Wien: ᐅ 2x Innocent Angebote & Aktionen bis -33% - Oktober 2026 - marktguru.at",
-        "description": "Innocent Angebote in Wien und die beliebtesten ☆ Schnäppchen des Monats von Händlern wie ✅ SPAR-Gourmet, SPAR, Sutterlüty, uvm. - marktguru.at",
-        "heading": "Innocent Angebote in Wien",
-        "headings": [
-          "Innocent Angebote in Wien",
-          "2 Innocent Angebote in Wien",
-          "Smoothie Plus",
-          "Saft",
-          "Coconut Water"
-        ],
-        "textSnippet": "Wien: ᐅ 2x Innocent Angebote & Aktionen bis -33% - Oktober 2026 - marktguru.at Zum Hauptinhalt springen DIE Angebote App 3.936.584 Flugblätter & Angebote EIN KLICK - DEINE PROSPEKTE IM BLICK 1010 Wien Ort ändern Prospekte Angebote Cashback Innocent Angebote in Wien Von Innocent gibt es aktuell 2 Angebote in Wien . Innocent Angebote Supermarkt Prospekte Supermarkt Angebote 2 Innocent Angebote in Wien -33% Läuft bald ab Smoothie Plus Marke: Innocent Preis: € 2,99 € 4,49 Noch 1 Tag Gültig: 23.09. - 07.10. Händler: SPAR-Gourmet Fleischmarkt 5 € 3,99 / l - verschiedene Sorten, gekühlt, 0,75-l-Flasche -33% Läuft bald ab Smoothie Plus Marke: Innocent Preis: € 2,99 € 4,49 Noch 1 Tag Gültig: 23.09. - 07.10. Händler: SPAR Hartberger Straße 1 € 3,99 / l - gekühlt, versch. Sorten, 750 ml Verpasst! -21% Saft Marke: Innocent Preis: € 2,99 € 3,79 Leider verpasst! Gültig: 12.08. - 19.08. Händler: Sutter"
-      },
-      "dates": {
-        "publicationDate": "",
-        "publicationDateSource": "",
-        "targetDateSource": "url",
-        "targetDateRaw": "Innocent Angebote in Wien und die beliebtesten ☆ Schnäppchen des Monats von Händlern wie ✅ SPAR-Gourmet, SPAR, Sutterlüty, uvm. - marktguru.at Wien: ᐅ 2x Innocent Angebote & Aktion",
-        "targetDateKind": "month",
-        "validOn": "",
-        "validFrom": "2026-10-01",
-        "validUntil": "2026-10-31"
-      },
-      "signals": {
-        "mentionsVienna": true,
-        "mentionsBrand": true,
-        "mentionsDealTitle": true,
-        "mentionsDealTerms": true,
-        "hasPublicationDate": false,
-        "hasValidityDate": true
-      }
-    },
-    {
-      "dealID": "g2-sefele",
-      "sourceUrl": "https://www.westfield.com/en/austria/donauzentrum/restaurants/offers/grosses-jubilaum-grosses-angebot/208322",
-      "finalUrl": "https://www.westfield.com/en/austria/donauzentrum/restaurants/offers/grosses-jubilaum-grosses-angebot/208322",
-      "finalHost": "www.westfield.com",
-      "status": "ok",
-      "httpStatus": 200,
-      "invalid": false,
-      "transientError": false,
-      "blockedByProtection": false,
-      "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.987Z",
-      "page": {
-        "title": "Großes Jubiläum - großes Angebot*",
-        "description": "15 cm Sub kaufen - 15-cm Sub gratis",
-        "heading": "Großes Jubiläum - großes Angebot*",
-        "headings": [
-          "Großes Jubiläum - großes Angebot*",
-          "ABOUT Subway"
-        ],
-        "textSnippet": "Großes Jubiläum - großes Angebot* 15 cm Sub kaufen - 15-cm Sub gratis \"/> 15 cm Sub kaufen - 15-cm Sub gratis \"/> 15 cm Sub kaufen - 15-cm Sub gratis \"/> skipToContent skipToMenu Login / Sign in Open the main navigation menu Close the main navigation menu My account Login / Sign in Shops Food & Drink Entertainments Family & Kids Cinema News Services Offers Westfield Gift Card Sustainability Map of the centre Virtual Tour Getting here Parking Opening Hours Jobs Pay less, get more. Become a member German English Change center Shops Food & Drink Entertainments Family & Kids Cinema Großes Jubiläum - großes Angebot* 23 Sept 2026 — 6 Oct 2026 15 cm Sub kaufen - 15-cm Sub gratis Die 1+1 Aktion gilt vom 23.09. bis 06.10.2026. Vorübergehende Aktion. Gültig im oben genannten Zeitraum in diesem Subway® Restaurant. Nur einmal pro Tag/Person einlösbar. Ausgeschlossen sind Produkte mit inkludierten Ex"
-      },
-      "dates": {
-        "publicationDate": "",
-        "publicationDateSource": "",
-        "targetDateSource": "url",
-        "targetDateRaw": "06.10.2026",
-        "targetDateKind": "end",
-        "validOn": "",
-        "validFrom": "",
-        "validUntil": "2026-10-06"
-      },
-      "signals": {
-        "mentionsVienna": false,
-        "mentionsBrand": true,
-        "mentionsDealTitle": true,
-        "mentionsDealTerms": true,
-        "hasPublicationDate": false,
-        "hasValidityDate": true
-      }
-    },
-    {
       "dealID": "flight-10yozoj",
       "sourceUrl": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=AGA&dateOut=2026-11-26&dateIn=2026-11-28&isReturn=true&discount=0&promoCode=",
       "finalUrl": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&tpAdults=1&teens=0&tpTeens=0&children=0&tpChildren=0&infants=0&tpInfants=0&originIata=VIE&tpOriginIata=VIE&destinationIata=AGA&tpDestinationIata=AGA&dateOut=2026-11-26&tpStartDate=2026-11-26&dateIn=2026-11-28&tpEndDate=2026-11-28&isReturn=true&tpIsReturn=true&discount=0&tpDiscount=0&promoCode=&tpPromoCode=",
@@ -1785,7 +1965,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:57.863Z",
+      "checkedAt": "2026-10-07T15:44:03.804Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -1823,7 +2003,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.091Z",
+      "checkedAt": "2026-10-07T15:44:03.980Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -1861,7 +2041,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.148Z",
+      "checkedAt": "2026-10-07T15:44:04.021Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -1899,7 +2079,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.219Z",
+      "checkedAt": "2026-10-07T15:44:04.152Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -1937,7 +2117,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.321Z",
+      "checkedAt": "2026-10-07T15:44:04.161Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -1975,7 +2155,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.444Z",
+      "checkedAt": "2026-10-07T15:44:04.210Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -2013,7 +2193,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.325Z",
+      "checkedAt": "2026-10-07T15:44:04.220Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -2051,7 +2231,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.432Z",
+      "checkedAt": "2026-10-07T15:44:04.313Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -2089,7 +2269,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.420Z",
+      "checkedAt": "2026-10-07T15:44:04.319Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -2127,7 +2307,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.500Z",
+      "checkedAt": "2026-10-07T15:44:04.388Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -2165,7 +2345,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.430Z",
+      "checkedAt": "2026-10-07T15:44:04.288Z",
       "page": {
         "title": "Lieferando: -10€ bei SPAR-Bestellungen",
         "description": "Bei Lieferando Lebensmittel für mindestens 28€ bestellen und 10€ abgezogen bekommen. Dazu kommt ein 20%-Rabatt auf die Lebensmittel, wenn man über 20€",
@@ -2209,7 +2389,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.774Z",
+      "checkedAt": "2026-10-07T15:44:05.330Z",
       "page": {
         "title": "TikTok - Make Your Day",
         "description": "",
@@ -2247,7 +2427,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:59.505Z",
+      "checkedAt": "2026-10-07T15:44:05.537Z",
       "page": {
         "title": "HITOMI 10 EUR Gutschein - Gutschein.at",
         "description": "10 EUR Gutschein für feine asiatische Küche, frisch zubereitet am Wok & Grill. Jetzt schlemmen und sparen!",
@@ -2291,7 +2471,7 @@
       "transientError": true,
       "blockedByProtection": true,
       "reason": "www.lieferando.at",
-      "checkedAt": "2026-10-06T15:24:56.850Z",
+      "checkedAt": "2026-10-07T15:44:02.612Z",
       "page": {
         "title": "",
         "description": "",
@@ -2329,7 +2509,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:00.148Z",
+      "checkedAt": "2026-10-07T15:44:05.530Z",
       "page": {
         "title": "Alleewirt 1+1 Schnitzel GRATIS - Gutschein.at",
         "description": "1+1 Schnitzel GRATIS beim Alleewirt im 22. Bezirk. Jetzt geniesen und sparen!",
@@ -2373,7 +2553,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:58.648Z",
+      "checkedAt": "2026-10-07T15:44:04.493Z",
       "page": {
         "title": "Ryanair",
         "description": "Book direct at the official Ryanair.com website to guarantee that you get the best prices on Ryanair's cheap flights.",
@@ -2411,7 +2591,7 @@
       "transientError": true,
       "blockedByProtection": true,
       "reason": "www.lieferando.at",
-      "checkedAt": "2026-10-06T15:24:56.850Z",
+      "checkedAt": "2026-10-07T15:44:02.612Z",
       "page": {
         "title": "",
         "description": "",
@@ -2449,7 +2629,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:59.427Z",
+      "checkedAt": "2026-10-07T15:44:05.012Z",
       "page": {
         "title": "BIPA on Instagram: \"Zeit zum Wohlfühlen! 🧖 Hol' dir jetzt dein exklusives Wohlfühl-Paket* der Therme Wien, ein Resort der VAMED Vitality World, bestehend aus einer Tageskarte für den Eintritt von 2 Erwachsenen mit Kästc",
         "description": "30 likes, 1 comments - bipa on September 8, 2026: \"Zeit zum Wohlfühlen! 🧖 Hol' dir jetzt dein exklusives Wohlfühl-Paket* der Therme Wien, ein Resort der VAMED Vitality World, bestehend aus einer Tageskarte für den Eintritt von 2 Erwachsenen mit Kästchen plus 2x Gastrogutschein im Wert von je € 5.- um nur € 64-! 💙 Einfach an der Kassa deiner BIPA Filiale nachfragen und Entspannung genießen! . *Der Gutschein ist auss",
@@ -2487,13 +2667,13 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:59.222Z",
+      "checkedAt": "2026-10-07T15:44:05.218Z",
       "page": {
         "title": "Instagram",
         "description": "Create an account or log in to Instagram - Share what you're into with the people who get you.",
         "heading": "",
         "headings": [],
-        "textSnippet": "Instagram See everyday moments from your close friends . Log into Instagram Mobile number, username or email Password Log in Forgot password? Log in with Facebook Create new account Meta About Blog Jobs Help API Privacy Consumer Health Privacy Terms Locations Popular Instagram Lite Meta AI Muse Threads Contact Uploading & Non-Users Meta Verified English Afrikaans العربية Čeština Dansk Deutsch Ελληνικά English English (UK) Español (España) Español فارسی Suomi Français עברית Bahasa Indonesia Italiano 日本語 한국어 Bahasa Melayu Norsk Nederlands Polski Português (Brasil) Português (Portugal) Русский Svenska ภาษาไทย Filipino Türkçe 中文(简体) 中文(台灣) বাংলা ગુજરાતી हिन्दी Hrvatski Magyar ಕನ್ನಡ മലയാളം मराठी नेपाली ਪੰਜਾਬੀ සිංහල Slovenčina தமிழ் తెలుగు اردو Tiếng Việt 中文(香港) Български Français (Canada) Română Српски Українська © 2026 Instagram from Meta"
+        "textSnippet": "Instagram See everyday moments from your close friends . Log into Instagram Mobile number, username or email Password Log in Forgot password? Log in with Facebook Create new account Meta About Blog Jobs Help API Privacy Terms Locations Popular Instagram Lite Meta AI Muse Threads Contact Uploading & Non-Users Meta Verified English Afrikaans العربية Čeština Dansk Deutsch Ελληνικά English English (UK) Español (España) Español فارسی Suomi Français עברית Bahasa Indonesia Italiano 日本語 한국어 Bahasa Melayu Norsk Nederlands Polski Português (Brasil) Português (Portugal) Русский Svenska ภาษาไทย Filipino Türkçe 中文(简体) 中文(台灣) বাংলা ગુજરાતી हिन्दी Hrvatski Magyar ಕನ್ನಡ മലയാളം मराठी नेपाली ਪੰਜਾਬੀ සිංහල Slovenčina தமிழ் తెలుగు اردو Tiếng Việt 中文(香港) Български Français (Canada) Română Српски Українська © 2026 Instagram from Meta"
       },
       "dates": {
         "publicationDate": "",
@@ -2525,7 +2705,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:00.666Z",
+      "checkedAt": "2026-10-07T15:44:06.214Z",
       "page": {
         "title": "Wiener Riesenrad Gutschein: 1+1 Fahrt GRATIS mit dem Wiener Riesenrad - Gutschein.at",
         "description": "Jetzt im Wiener Prater sparen: 1+1 Fahrt mit dem Wiener Riesenrad GRATIS. Gutschein gleich unterwegs mit dem Smartphone einlösen!",
@@ -2569,7 +2749,7 @@
       "transientError": true,
       "blockedByProtection": true,
       "reason": "www.lieferando.at",
-      "checkedAt": "2026-10-06T15:24:56.850Z",
+      "checkedAt": "2026-10-07T15:44:02.612Z",
       "page": {
         "title": "",
         "description": "",
@@ -2607,7 +2787,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:59.586Z",
+      "checkedAt": "2026-10-07T15:44:05.464Z",
       "page": {
         "title": "Oral-B Gutscheincode ▷ Exklusiv 10% Rabatt + 7,99€ Gutschein!",
         "description": "Aktuelle Top Oral-B Gutscheine im Oktober 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -2619,7 +2799,7 @@
           "Gratis Versand bei Oral-B",
           "Newsletter abonnieren und 10€ Oral -B Online Shop Gutschein für den ersten Einkauf erhalten"
         ],
-        "textSnippet": "Oral-B Gutscheincode ▷ Exklusiv 10% Rabatt + 7,99€ Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 5 von 5 Sternen mit 2 Bewertungen für Oral-B Oral-B jetzt teilen Oral-B Gutscheincodes Ähnliche Gutscheincodes Newsletter abonnieren Häufig gestellte Fragen zum Oral-B Rabattcode Ohne Oral-B Rabattcode verschieden hohe Ersparnisse sichern – so funktioniert es Informationen zur Anmeldung bei Oral-B, zu Kundenvorteilen und zum Kontakt Informationen zu Bestellung, Versand und Rückgabe bei Oral-B Oral-B Gutscheine 6 Höchster Oral-B Rabatt € 10,00 Bestandskunden Gutscheine 6 Letztes Update 01.10.2026 Eine gute Zahnhygiene ist das A und O für eine Top-Gesundheit. Mit Oral-B pflegen Sie nicht nur Ihre Zähne, sondern auc"
+        "textSnippet": "Oral-B Gutscheincode ▷ Exklusiv 10% Rabatt + 7,99€ Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 5 von 5 Sternen mit 2 Bewertungen für Oral-B Oral-B jetzt teilen Oral-B Gutscheincodes Ähnliche Gutscheincodes Newsletter abonnieren Häufig gestellte Fragen zum Oral-B Rabattcode Ohne Oral-B Rabattcode verschieden hohe Ersparnisse sichern – so funktioniert es Informationen zur Anmeldung bei Oral-B, zu Kundenvorteilen und zum Kontakt Informationen zu Bestellung, Versand und Rückgabe bei Oral-B Oral-B Gutscheine 6 Höchster Oral-B Rabatt € 10,00 Bestandskunden Gutscheine 6 Letztes Update 02.10.2026 Eine gute Zahnhygiene ist das A und O für eine Top-Gesundheit. Mit Oral-B pflegen Sie nicht nur Ihre Zähne, sondern auc"
       },
       "dates": {
         "publicationDate": "",
@@ -2651,7 +2831,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:59.627Z",
+      "checkedAt": "2026-10-07T15:44:05.951Z",
       "page": {
         "title": "Matratzen Discount Gutscheine ▷ Exklusiv 15% Rabatt + 50% Gutschein!",
         "description": "Aktuelle Top Matratzen Discount Gutscheine im Oktober 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -2663,7 +2843,7 @@
           "Aktion: 50% Rabatt bei Matratzen Discount",
           "Ähnliche Gutscheine"
         ],
-        "textSnippet": "Matratzen Discount Gutscheine ▷ Exklusiv 15% Rabatt + 50% Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 5 von 5 Sternen mit 1 Bewertung für Matratzen Discount Matratzen Discount jetzt teilen Matratzen Discount Gutscheine Ähnliche Gutscheine Newsletter abonnieren Matratzen Discount Gutschein-FAQ: Wichtige Hinweise Ihre neue Matratze aus dem Matratzen Discount Angebote und Rabatte im Matratzen Discount Matratzen Discount Shop-FAQ: Auf einen Blick Matratzen Discount Gutscheine 2 Höchster Matratzen Discount Rabatt 50 % Bestandskunden Gutscheine 2 Letztes Update 01.10.2026 Sie suchen eine neue Matratze? Dann sollten Sie sich die zahlreichen Angebote im Matratzen Discount nicht entgehen lassen! Freuen Sie sich auf"
+        "textSnippet": "Matratzen Discount Gutscheine ▷ Exklusiv 15% Rabatt + 50% Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 5 von 5 Sternen mit 1 Bewertung für Matratzen Discount Matratzen Discount jetzt teilen Matratzen Discount Gutscheine Ähnliche Gutscheine Newsletter abonnieren Matratzen Discount Gutschein-FAQ: Wichtige Hinweise Ihre neue Matratze aus dem Matratzen Discount Angebote und Rabatte im Matratzen Discount Matratzen Discount Shop-FAQ: Auf einen Blick Matratzen Discount Gutscheine 2 Höchster Matratzen Discount Rabatt 50 % Bestandskunden Gutscheine 2 Letztes Update 02.10.2026 Sie suchen eine neue Matratze? Dann sollten Sie sich die zahlreichen Angebote im Matratzen Discount nicht entgehen lassen! Freuen Sie sich auf"
       },
       "dates": {
         "publicationDate": "",
@@ -2695,7 +2875,7 @@
       "transientError": true,
       "blockedByProtection": true,
       "reason": "www.magenta.at",
-      "checkedAt": "2026-10-06T15:24:56.850Z",
+      "checkedAt": "2026-10-07T15:44:02.612Z",
       "page": {
         "title": "",
         "description": "",
@@ -2733,7 +2913,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:00.284Z",
+      "checkedAt": "2026-10-07T15:44:05.869Z",
       "page": {
         "title": "SHEIN Rabattcode ▷ 30% Rabatt + 70% Gutschein!",
         "description": "Aktuelle Top SHEIN Gutscheine im Oktober 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -2745,7 +2925,7 @@
           "Mehr kaufen - mehr sparen! Bis zu 70% Rabatt",
           "30% Gutschein für Newsletter-Anmeldung + Gratis Versand"
         ],
-        "textSnippet": "SHEIN Rabattcode ▷ 30% Rabatt + 70% Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 4 von 5 Sternen mit 1 Bewertung für SHEIN SHEIN jetzt teilen SHEIN Rabattcodes Ähnliche Rabattcodes Newsletter abonnieren Häufige Fragen zum Shein Gutscheincode Häufige Fragen zum Shein Service Mit dem Shein Newsletter und den Angeboten im Sale Bares sparen SHEIN Gutscheine 9 Höchster SHEIN Rabatt 99 % Bestandskunden Gutscheine 7 Letztes Update 01.10.2026 Egal, ob Sie Kleider, Schals oder Blusen suchen. Shein bietet Bekleidung und Accessoires für Damen und Herren an. Obendrein finden Sie Beauty-Produkte sowie Dekoration für Ihr Zuhause. Vergessen Sie bei der nächsten Bestellung nicht, mit Ihrem Shein Gutscheincode zu sparen. Me"
+        "textSnippet": "SHEIN Rabattcode ▷ 30% Rabatt + 70% Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 4 von 5 Sternen mit 1 Bewertung für SHEIN SHEIN jetzt teilen SHEIN Rabattcodes Ähnliche Rabattcodes Newsletter abonnieren Häufige Fragen zum Shein Gutscheincode Häufige Fragen zum Shein Service Mit dem Shein Newsletter und den Angeboten im Sale Bares sparen SHEIN Gutscheine 9 Höchster SHEIN Rabatt 99 % Bestandskunden Gutscheine 7 Letztes Update 02.10.2026 Egal, ob Sie Kleider, Schals oder Blusen suchen. Shein bietet Bekleidung und Accessoires für Damen und Herren an. Obendrein finden Sie Beauty-Produkte sowie Dekoration für Ihr Zuhause. Vergessen Sie bei der nächsten Bestellung nicht, mit Ihrem Shein Gutscheincode zu sparen. Me"
       },
       "dates": {
         "publicationDate": "",
@@ -2777,13 +2957,51 @@
       "transientError": true,
       "blockedByProtection": false,
       "reason": "HTTP 429",
-      "checkedAt": "2026-10-06T15:24:56.850Z",
+      "checkedAt": "2026-10-07T15:44:02.612Z",
       "page": {
         "title": "",
         "description": "",
         "heading": "",
         "headings": [],
         "textSnippet": ""
+      },
+      "dates": {
+        "publicationDate": "",
+        "publicationDateSource": "",
+        "targetDateSource": "",
+        "targetDateRaw": "",
+        "targetDateKind": "",
+        "validOn": "",
+        "validFrom": "",
+        "validUntil": ""
+      },
+      "signals": {
+        "mentionsVienna": false,
+        "mentionsBrand": false,
+        "mentionsDealTitle": false,
+        "mentionsDealTerms": false,
+        "hasPublicationDate": false,
+        "hasValidityDate": false
+      }
+    },
+    {
+      "dealID": "tiktok-du6aut",
+      "sourceUrl": "https://www.tiktok.com/@lovinghut.neubau/video/7691608749642943796",
+      "finalUrl": "https://www.tiktok.com/@lovinghut.neubau/video/7691608749642943796",
+      "finalHost": "www.tiktok.com",
+      "status": "ok",
+      "httpStatus": 200,
+      "invalid": false,
+      "transientError": false,
+      "blockedByProtection": false,
+      "reason": "",
+      "checkedAt": "2026-10-07T15:44:07.374Z",
+      "page": {
+        "title": "TikTok - Make Your Day",
+        "description": "",
+        "heading": "",
+        "headings": [],
+        "textSnippet": "TikTok - Make Your Day"
       },
       "dates": {
         "publicationDate": "",
@@ -2815,7 +3033,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:24:59.705Z",
+      "checkedAt": "2026-10-07T15:44:05.629Z",
       "page": {
         "title": "Wiener Laziz Food — Echte Geschmäcker",
         "description": "Authentische Küche aus dem Herzen Wiens – Döner, Pizza, Burger, Pasta & mehr.",
@@ -2859,7 +3077,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:00.570Z",
+      "checkedAt": "2026-10-07T15:44:06.351Z",
       "page": {
         "title": "Essen & Trinken Gutscheine – Österreich sparen",
         "description": "Gutscheine für Restaurants, Cafés und Lieferdienste in Österreich. Jetzt aktuelle Angebote entdecken und beim nächsten Essen bares Geld sparen.",
@@ -2903,7 +3121,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:00.563Z",
+      "checkedAt": "2026-10-07T15:44:06.525Z",
       "page": {
         "title": "Burger King Gutschein: 1+1 Crispy Chicken GRATIS - Gutschein.at",
         "description": "Jetzt bei Burger King Österreich sparen: 2 Crispy Chicken zum Preis von einem. Gutschein online einlösen – gültig bis 31.12.2026. Jetzt sichern!",
@@ -2947,7 +3165,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:00.863Z",
+      "checkedAt": "2026-10-07T15:44:06.683Z",
       "page": {
         "title": "DreiPlus: Gewinnspiele, Ersparnisse & Vorteile | Drei",
         "description": "Gewinnspiele, Ersparnisse auf Sport, Freizeit & Kulinarik, Drei Kino Donnerstag und kostenlose Probemonate f&uuml;r Drei +Services. ≫ Jetzt DreiPlus entdecken!",
@@ -2991,7 +3209,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:00.638Z",
+      "checkedAt": "2026-10-07T15:44:06.692Z",
       "page": {
         "title": "Lieferando: Vorteil f&uuml;r alle mit Handyvertrag | Drei.at",
         "description": "Dein Plus beim Essenbestellen: 3 Monate keine Liefergeb&uuml;hren im Lieferando+ Abo.",
@@ -3034,7 +3252,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.440Z",
+      "checkedAt": "2026-10-07T15:44:06.971Z",
       "page": {
         "title": "Vorteil Pizzamann: Donnerstags 2 + 1 Pizza gratis | Drei.at",
         "description": "Jeden Donnerstag bekommen alle bei Drei bei PIZZAMANN beim Kauf von 2 Pizzen die g&uuml;nstigere gratis dazu. >> Mehr erfahren",
@@ -3077,7 +3295,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.224Z",
+      "checkedAt": "2026-10-07T15:44:08.058Z",
       "page": {
         "title": "Drei KinoDonnerstag: 2 Tickets zum Preis von 1 | Drei.at",
         "description": "F&uuml;r alle bei Drei: Zwei Kinotickets zum Preis von einem bekommen - jeden Donnerstag in jedem Cineplexx-Kino oder Constantin-Film Kino. >> Mehr erfahren",
@@ -3120,7 +3338,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.605Z",
+      "checkedAt": "2026-10-07T15:44:07.035Z",
       "page": {
         "title": "Nordsee: 1+1 Wrap | Drei.at",
         "description": "Hier erf&auml;hrst du mehr &uuml;ber deinen Vorteil bei Nordsee >> Jetzt informieren.",
@@ -3163,7 +3381,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.595Z",
+      "checkedAt": "2026-10-07T15:44:07.096Z",
       "page": {
         "title": "Angebote & Aktionen entdecken",
         "description": "Entdecke die besten Angebote bei IKEA Österreich. Spare jetzt bei Möbeln, Deko und Haushaltsgeräten – alle laufenden Aktionen auf einen Blick!",
@@ -3175,7 +3393,7 @@
           "Weitere Aktionen & Neues",
           "Im Einrichtungshaus: €25,- Gutschein pro €200,- Sofakauf für deinen nächsten Besuch ab 3.11.2026*"
         ],
-        "textSnippet": "Angebote & Aktionen entdecken - IKEA Österreich Weiter zum Inhalt DE AT Deutsch Deine PLZ Einrichtungshaus auswählen Produkte Räume Angebote & Mehr Planung & Ideen Services Sucheingabefeld leeren Suchen Suche Hej! Jetzt anmelden. Einkaufsliste Warenkorb Gratis Click & Collect bei IKEA ab € 25,- Warenwert für IKEA Family Aktuelle Angebote & Aktionen bei IKEA Überspringen Bis zu -20% günstiger: LASTARE Schranksystem* Jetzt günstiger: ausgewählte Kommoden* Bis zu -25% günstiger: VALEVÅG Matratzen* Angebote im Einrichtungshaus €100 Gutschein pro €1000 Küchenkauf ab €3000* 3+1 auf Esszimmerstühle* Jetzt doppelte Punkte holen* Neue gesenkte Preise: bis zu -50% reduziert Aktuelle Food Angebote Weitere Aktionen & Neues Gültig vom 2.10. bis 2.11.2026 für IKEA Family und IKEA Business Network Mitglieder in den IKEA Einrichtungshäusern und Planungsstudios, bei der remote Expert:innenplanung und Tel"
+        "textSnippet": "Angebote & Aktionen entdecken - IKEA Österreich Weiter zum Inhalt DE AT Deutsch Deine PLZ Einrichtungshaus auswählen Produkte Räume Angebote & Mehr Planung & Ideen Services Sucheingabefeld leeren Suchen Suche Hej! Jetzt anmelden. Einkaufsliste Warenkorb Jetzt IKEA App herunterladen! ★ ★ ★ ★ ★ Aktuelle Angebote & Aktionen bei IKEA Überspringen Bis zu -20% günstiger: LASTARE Schranksystem* Jetzt günstiger: ausgewählte Kommoden* Bis zu -25% günstiger: VALEVÅG Matratzen* Angebote im Einrichtungshaus €100 Gutschein pro €1000 Küchenkauf ab €3000* 3+1 auf Esszimmerstühle* Jetzt doppelte Punkte holen* Neue gesenkte Preise: bis zu -50% reduziert Aktuelle Food Angebote Weitere Aktionen & Neues Gültig vom 2.10. bis 2.11.2026 für IKEA Family und IKEA Business Network Mitglieder in den IKEA Einrichtungshäusern und Planungsstudios, bei der remote Expert:innenplanung und Telefonbestellung in Österreich"
       },
       "dates": {
         "publicationDate": "",
@@ -3207,7 +3425,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.330Z",
+      "checkedAt": "2026-10-07T15:44:07.109Z",
       "page": {
         "title": "Dein Plus bei der reinsten Entspannung | Drei.at",
         "description": "50 % +Ersparnis f&uuml;r die 2. Eintrittskarte in der Therme Wien.",
@@ -3250,7 +3468,7 @@
       "transientError": true,
       "blockedByProtection": false,
       "reason": "HTTP 429",
-      "checkedAt": "2026-10-06T15:24:56.850Z",
+      "checkedAt": "2026-10-07T15:44:02.612Z",
       "page": {
         "title": "",
         "description": "",
@@ -3288,7 +3506,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.137Z",
+      "checkedAt": "2026-10-07T15:44:08.031Z",
       "page": {
         "title": "Madame Tussauds Wien: 2 Karten zum Preis von 1 | Drei.at",
         "description": "Ihr Vorteil bei Drei: Hol dir deinen Gutschein f&uuml;r Madame Tussauds Wien: Mit Kaiserin Sisi ein Foto machen, mit David Alaba 11er schie&szlig;en & mit Conchita auf der B&uuml;hne stehen.",
@@ -3331,7 +3549,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.496Z",
+      "checkedAt": "2026-10-07T15:44:07.586Z",
       "page": {
         "title": "Rabattcoupons & App - Nordsee",
         "description": "Mit unseren beliebten Coupons & exklusiven Angeboten kannst Du richtig sparen! Jetzt bei NORDSEE entdecken & in der nächsten Filiale einlösen!",
@@ -3369,7 +3587,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.932Z",
+      "checkedAt": "2026-10-07T15:44:07.330Z",
       "page": {
         "title": "IKEA Family Vorteile",
         "description": "Als IKEA Family Mitglied erwarten dich viele exklusive Vorteile. Werde gleich kostenlos Mitglied und profitiere von den tollen Vorteilen.",
@@ -3413,7 +3631,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.493Z",
+      "checkedAt": "2026-10-07T15:44:07.543Z",
       "page": {
         "title": "Spotify Premium - Spotify (Österreich)",
         "description": "Spotify Premium ist ein digitaler Musikdienst, der dir Zugriff auf Millionen von Songs ohne Werbeunterbrechungen ermöglicht.",
@@ -3457,7 +3675,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.614Z",
+      "checkedAt": "2026-10-07T15:44:07.579Z",
       "page": {
         "title": "Lebensmittel teilen statt wegwerfen – foodsharing",
         "description": "Auf foodsharing.de kannst du deine Lebensmittel vor dem Verfall an soziale Einrichtungen oder andere Personen abgeben",
@@ -3495,7 +3713,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:02.201Z",
+      "checkedAt": "2026-10-07T15:44:07.845Z",
       "page": {
         "title": "Wolt Gutscheine ▷ 12€ Rabatt + 5% Gutschein!",
         "description": "Aktuelle Top Wolt Gutscheine im Oktober 2026 ✓ Brandneu ✓ frisch geprüft & kostenlos ► Jetzt sichern & sparen",
@@ -3507,7 +3725,7 @@
           "Null Liefergebühren mit Wolt+",
           "Lade deine Freund:innen ein und erhalte 4€ auf deine nächsten 3 Bestellungen"
         ],
-        "textSnippet": "Wolt Gutscheine ▷ 12€ Rabatt + 5% Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 5 von 5 Sternen mit 2 Bewertungen für Wolt Wolt jetzt teilen Wolt Gutscheine Ähnliche Gutscheine Newsletter abonnieren Wolt Gutschein einlösen: Wichtige Hinweise Clever sparen mit und ohne Wolt Gutschein! Gut zu wissen Alle wichtigen Infos zu Zahlung und Lieferung bei Wolt Wolt Gutscheine 4 Höchster Wolt Rabatt € 12,00 Bestandskunden Gutscheine 3 Letztes Update 01.10.2026 Bei Wolt können Sie eine Vielzahl an Produkten und Dienstleistungen bestellen, die bequem zu Ihnen nach Hause geliefert werden. Wolt bringt Ihnen nicht nur Essen aus unzähligen Restaurants, sondern auch Ihren Wocheneinkauf, Medikamente, Haustierbedarf und vieles"
+        "textSnippet": "Wolt Gutscheine ▷ 12€ Rabatt + 5% Gutschein! Gutscheine Neueste Gutscheine Exklusive Gutscheine Die besten Gutscheine Shops Die beliebtesten Shops Shops A-Z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Alle Shops Kategorien Geschenkgutscheine Specials 5 von 5 Sternen mit 2 Bewertungen für Wolt Wolt jetzt teilen Wolt Gutscheine Ähnliche Gutscheine Newsletter abonnieren Wolt Gutschein einlösen: Wichtige Hinweise Clever sparen mit und ohne Wolt Gutschein! Gut zu wissen Alle wichtigen Infos zu Zahlung und Lieferung bei Wolt Wolt Gutscheine 4 Höchster Wolt Rabatt € 12,00 Bestandskunden Gutscheine 3 Letztes Update 02.10.2026 Bei Wolt können Sie eine Vielzahl an Produkten und Dienstleistungen bestellen, die bequem zu Ihnen nach Hause geliefert werden. Wolt bringt Ihnen nicht nur Essen aus unzähligen Restaurants, sondern auch Ihren Wocheneinkauf, Medikamente, Haustierbedarf und vieles"
       },
       "dates": {
         "publicationDate": "",
@@ -3539,7 +3757,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.625Z",
+      "checkedAt": "2026-10-07T15:44:07.515Z",
       "page": {
         "title": "",
         "description": "",
@@ -3577,13 +3795,13 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:03.161Z",
+      "checkedAt": "2026-10-07T15:44:09.055Z",
       "page": {
         "title": "Die besten Restaurants in deiner Nähe – foodora",
         "description": "",
         "heading": "",
         "headings": [],
-        "textSnippet": "Die besten Restaurants in deiner Nähe – foodora Zum Hauptmenü springen Anmelden Für kostenlose Lieferung anmelden DE Startseite Kampagne Schnapp dir diesen Deal! Code GENUSS Code speichern Code speichern Andere Restaurants mit Angeboten Anzeige Swing Kitchen - Schwedenplatz 4.6 (5000+) Mit 4.6 von fünf Sternen bewertet, basierend auf 6622 Bewertungen Lieferzeit 10–25 min 10–25 min • Moderate price range €€ • Kategorien Vegan Vegan Kostenlos • foodora Lieferung Lieferung Bis zu -25% -14€, ab 20€: immerpink Anzeige Rembetiko Grieche 4.5 (2000+) Mit 4.5 von fünf Sternen bewertet, basierend auf 2164 Bewertungen Lieferzeit 10–25 min 10–25 min • Expensive price range €€€ • Kategorien Griechisch Griechisch Kostenlos • foodora Lieferung Lieferung Anzeige Coconut Curry 1070 4.6 (100+) Mit 4.6 von fünf Sternen bewertet, basierend auf 129 Bewertungen Lieferzeit 20–35 min 20–35 min • Expensive price"
+        "textSnippet": "Die besten Restaurants in deiner Nähe – foodora Zum Hauptmenü springen Anmelden Für kostenlose Lieferung anmelden DE Startseite Kampagne Schnapp dir diesen Deal! Code GENUSS Code speichern Code speichern Andere Restaurants mit Angeboten Anzeige Via Toledo Enopizzeria 4.6 (4000+) Mit 4.6 von fünf Sternen bewertet, basierend auf 4805 Bewertungen Lieferzeit 5–20 min 5–20 min • Moderate price range €€ • Kategorien Pizza Pizza Kostenlos • foodora Lieferung Lieferung Bis zu -20% -14€, ab 20€: immerpink Anzeige Max & Benito Rotenturmstraße 4.4 (1000+) Mit 4.4 von fünf Sternen bewertet, basierend auf 1784 Bewertungen Lieferzeit 5–20 min 5–20 min • Inexpensive price range € • Kategorien Mexikanisch Mexikanisch Kostenlos • foodora Lieferung Lieferung -14€, ab 20€: immerpink Anzeige Tancredi San Stefano Steinofen 4.6 (100+) Mit 4.6 von fünf Sternen bewertet, basierend auf 222 Bewertungen Lieferzeit"
       },
       "dates": {
         "publicationDate": "",
@@ -3596,7 +3814,7 @@
         "validUntil": ""
       },
       "signals": {
-        "mentionsVienna": true,
+        "mentionsVienna": false,
         "mentionsBrand": true,
         "mentionsDealTitle": true,
         "mentionsDealTerms": true,
@@ -3615,7 +3833,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.640Z",
+      "checkedAt": "2026-10-07T15:44:07.574Z",
       "page": {
         "title": "Hillsong Wien - Austria",
         "description": "",
@@ -3659,7 +3877,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.767Z",
+      "checkedAt": "2026-10-07T15:44:07.601Z",
       "page": {
         "title": "Events - Austria",
         "description": "",
@@ -3697,7 +3915,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:02.220Z",
+      "checkedAt": "2026-10-07T15:44:08.320Z",
       "page": {
         "title": "Veranstaltungen CIG Wien: Ein Überblick - CIG - Christliche Internationale Gemeinde Wien",
         "description": "Erfahre mehr über die Veranstaltungen CIG Wien: Live Streams, Gebetsmeetings und interessante Kurse in der CIG Wien.",
@@ -3741,7 +3959,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:02.232Z",
+      "checkedAt": "2026-10-07T15:44:08.326Z",
       "page": {
         "title": "CIG Wien - Christliche Internationale Gemeinde / Kirche - CIG - Christliche Internationale Gemeinde Wien",
         "description": "Evangelikale, zweisprachige Kirche in Wien. Erlebe lebendige Gottesdienste auf Deutsch & Englisch. Herzlich willkommen in der CIG Wien!",
@@ -3785,7 +4003,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:02.949Z",
+      "checkedAt": "2026-10-07T15:44:08.919Z",
       "page": {
         "title": "ICF Wien - Kirche erleben",
         "description": "ICF Wien ist eine christliche Freikirche auf biblischer Grundlage ✓ Jeden Sonntag Gottesdienste ✓ authentisch & relevant ► Mehr erfahren!",
@@ -3829,7 +4047,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:03.591Z",
+      "checkedAt": "2026-10-07T15:44:09.534Z",
       "page": {
         "title": "Angebote & Events im ICF Wien",
         "description": "Entdecke unsere vielseitigen Angebote & Events im ICF Wien ✓ Glauben vertiefen ✓ Neue Leute kennenlernen ► Jetzt entdecken!",
@@ -3873,7 +4091,7 @@
       "transientError": false,
       "blockedByProtection": false,
       "reason": "",
-      "checkedAt": "2026-10-06T15:25:01.845Z",
+      "checkedAt": "2026-10-07T15:44:07.916Z",
       "page": {
         "title": "Events - VCC JesusZentrum",
         "description": "Bleib im VCC Jesus Zentrum immer auf dem Laufenden! Entdecke aktuelle Events, Gottesdienste und Angebote. In unserem Infoscreen findest du alle wichtigen Termine und Neuigkeiten. Erlebe inspirierende Veranstaltungen und sei Teil unserer lebendigen Gemeinschaft.",
