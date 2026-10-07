@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { load } from 'cheerio';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const tempRoot = path.join(ROOT, 'tmp');
@@ -33,7 +34,7 @@ function generate(deals, now = '2026-10-05T10:00:00Z') {
   const ids = [...html.matchAll(/<article class="live-deal-card" id="deal-([^"]+)"/g)].map(match => match[1]);
   const schema = JSON.parse(html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)[1]);
   assert.equal(schema['@graph'][0].mainEntity.numberOfItems, ids.length, 'Schema and visible card counts must agree');
-  return { html, ids };
+  return { html, ids, $: load(html) };
 }
 
 try {
@@ -61,8 +62,19 @@ try {
   ]);
   assert.deepEqual([...current.ids].sort(), ['local-transit', 'earlier-end', 'current-single', 'current-start',
     'calendar-after-timestamp', 'fallback-active', 'iso-calendar-end'].sort());
-  assert.match(current.html, /Gültig bis 07\. Oktober 2026/, 'Explicit validUntil must supply the visible date');
-  assert.match(current.html, /Gültig am 05\. Oktober 2026/, 'A one-day deal must be labeled as a day, not an end');
+  assert.match(current.$('#deal-earlier-end .deal-facts').text(), /Gültig bis 07\. Oktober 2026/, 'Explicit validUntil must supply the visible date');
+  assert.match(current.$('#deal-current-single .deal-facts').text(), /Gültig am 05\. Oktober 2026/, 'A one-day deal must be labeled as a day, not an end');
+
+  const presentation = generate([
+    deal('multiple-districts', { distance: '1150 Wien und 1220 Wien', description: 'Ab 40 Euro. Nur Mo–Fr, 12–14 Uhr. Code A&B. <script>alert(1)</script>', logoUrl: 'https://untrusted.example/logo.png' }),
+    deal('unknown-district', { distance: 'Mehrere Standorte in Wien' }),
+    deal('non-vienna-postcode', { distance: 'Wien und 1240 Beispielort' }),
+  ]);
+  assert.equal(presentation.$('#deal-multiple-districts').attr('data-districts'), '1150 1220');
+  assert.equal(presentation.$('#deal-unknown-district').attr('data-districts'), '');
+  assert.equal(presentation.$('#deal-non-vienna-postcode').attr('data-districts'), '');
+  assert.equal(presentation.$('#deal-multiple-districts .deal-conditions p').text(), 'Ab 40 Euro. Nur Mo–Fr, 12–14 Uhr. Code A&B. <script>alert(1)</script>');
+  assert.equal(presentation.$('.live-deal-card script, .deal-brand-image img').length, 0, 'Conditions are text and untrusted remote logos are not embedded');
 
   const midnightDeals = [deal('last-day', { validUntil: '2026-10-05' }),
     deal('single-day', { validOn: '2026-10-05' }),

@@ -176,15 +176,47 @@ function selectDeals(feed, now) {
     .slice(0, MAX_DEALS);
 }
 
-function renderDealCard(deal) {
+function icon(name) {
+  return `<img class="deal-icon" src="/assets/deal-icons/${name}.svg" alt="" width="18" height="18" aria-hidden="true">`;
+}
+
+function districtCodes(deal) {
+  const location = [deal.address, deal.location, deal.distance].filter(Boolean).join(' ');
+  return [...new Set([...location.matchAll(/\b(1\d{2}0)\b/g)]
+    .map(match => match[1]).filter(code => Number(code.slice(1, 3)) >= 1 && Number(code.slice(1, 3)) <= 23))];
+}
+
+function localLogo(deal) {
+  try {
+    const url = new URL(deal.logoUrl || '', 'https://freefinder.at');
+    if (url.origin !== 'https://freefinder.at' || !/^\/assets\/brand-logos\/[a-z0-9-]+\.(png|webp|jpg|svg)$/i.test(url.pathname)) return '';
+    return fs.existsSync(path.join(ROOT, 'docs', url.pathname)) ? url.pathname : '';
+  } catch (_) {
+    return '';
+  }
+}
+
+function renderDealCard(deal, index) {
   const id = `deal-${safeId(deal.id || `${deal.brand}-${deal.title}`)}`;
+  const type = ['gratis', 'bogo', 'rabatt'].includes(deal.type) ? deal.type : 'angebot';
+  const logo = localLogo(deal);
+  const initials = String(deal.brand || 'FF').split(/\s+/).filter(Boolean).slice(0, 2).map(word => Array.from(word)[0]).join('').toLocaleUpperCase('de-AT');
+  const description = String(deal.description || '').trim();
+  const location = /^(?:k\.?\s?a\.?|n\/a|unknown)$/i.test(deal.displayLocation) ? 'Standort beim Anbieter prüfen' : deal.displayLocation;
   return `
-        <article class="live-deal-card" id="${escapeHtml(id)}">
-          <div class="live-deal-topline"><span class="topic-label">${escapeHtml(typeLabel(deal.type))}</span><span>${escapeHtml(deal.expiryLabel)} ${escapeHtml(formatExpiryDate(deal.expiryRaw))}</span></div>
+        <article class="live-deal-card" id="${escapeHtml(id)}" data-type="${type}" data-districts="${districtCodes(deal).join(' ')}" data-order="${index}" data-expiry="${deal.expiryDate.getTime()}">
+          <div class="deal-card-top">
+            <span class="deal-brand-image" aria-hidden="true">${logo ? `<img src="${escapeHtml(logo)}" alt="" width="52" height="52" loading="lazy">` : `<span>${escapeHtml(initials)}</span>`}</span>
+            <span class="deal-type">${escapeHtml(typeLabel(deal.type))}</span>
+          </div>
           <p class="live-deal-brand">${escapeHtml(deal.brand || 'Anbieter')}</p>
-          <h2>${escapeHtml(deal.displayTitle || 'Aktuelles Angebot')}</h2>
-          <p class="live-deal-location">${escapeHtml(deal.displayLocation)}</p>
-          <a class="live-deal-source" href="${escapeHtml(deal.sourceUrl)}" rel="noopener" data-track="deal_outbound" data-deal-brand="${escapeHtml(deal.brand || '')}">Bedingungen beim Anbieter prüfen</a>
+          <h3>${escapeHtml(deal.displayTitle || 'Aktuelles Angebot')}</h3>
+          <div class="deal-facts">
+            <p class="live-deal-location">${icon('map-pin')}<span>${escapeHtml(location)}</span></p>
+            <p>${icon('calendar-days')}<span>${escapeHtml(deal.expiryLabel)} <time datetime="${escapeHtml(calendarDate(deal.expiryRaw) || deal.expiryDate.toISOString())}">${escapeHtml(formatExpiryDate(deal.expiryRaw))}</time></span></p>
+          </div>
+          ${description ? `<details class="deal-conditions"><summary>Details &amp; Bedingungen</summary><p>${escapeHtml(description)}</p></details>` : ''}
+          <a class="live-deal-source" href="${escapeHtml(deal.sourceUrl)}" rel="noopener" data-track="deal_outbound" data-deal-brand="${escapeHtml(deal.brand || '')}" aria-label="Angebot und Bedingungen bei ${escapeHtml(deal.brand || 'Anbieter')} öffnen"><span>Zum Angebot</span>${icon('arrow-up-right')}</a>
         </article>`;
 }
 
@@ -227,7 +259,13 @@ function renderPage(feed, deals, now) {
       },
     ],
   };
-  const cards = deals.length ? deals.map(renderDealCard).join('') : '<p class="empty-deals">Aktuell sind keine Angebote mit eindeutig bestätigtem Enddatum verfügbar. Bitte öffne die App für weitere Hinweise.</p>';
+  const cards = deals.length ? deals.map(renderDealCard).join('') : '<p class="empty-deals">Aktuell gibt es hier keine Angebote mit bekanntem Enddatum. Weitere Wien-Tipps findest du im <a href="/blog/">Blog</a>.</p>';
+  const districts = [...new Set(deals.flatMap(districtCodes))].sort();
+  const types = [['all', 'Alle'], ['gratis', 'Gratis'], ['bogo', '1+1'], ['rabatt', 'Rabatte']];
+  const filters = types.map(([type, label]) => {
+    const count = type === 'all' ? deals.length : deals.filter(deal => deal.type === type).length;
+    return `<button type="button" data-deal-type="${type}" aria-pressed="${type === 'all'}" aria-controls="dealGrid"${!count && type !== 'all' ? ' disabled' : ''}>${label}<span>${count}</span></button>`;
+  }).join('');
 
   return `<!DOCTYPE html>
 <html lang="de-AT">
@@ -252,21 +290,33 @@ function renderPage(feed, deals, now) {
   <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="/consent.css?v=5">
   <link rel="stylesheet" href="/blog/blog.css">
+  <link rel="stylesheet" href="/deals.css?v=1">
+  <script defer src="/deals.js?v=1"></script>
   <script defer src="/analytics-config.js"></script>
   <script defer src="/consent.js?v=7"></script>
   <script type="application/ld+json">${JSON.stringify(structuredData)}</script>
 </head>
-<body>
+<body class="deals-page">
   <!-- Generated from docs/deals.json by scripts/generate-seo-deals-page.mjs. -->
-  <header class="site-header"><nav class="nav" aria-label="Hauptnavigation"><a class="brand" href="/"><img class="brand-mark" src="/icon-192.svg" alt="" width="38" height="38">FreeFinder</a><div class="nav-links"><a href="/angebote-wien-heute.html">Aktuelle Deals</a><a href="/blog/">Blog</a><a class="nav-download" href="/#download">App laden</a></div></nav></header>
+  <header class="site-header"><nav class="nav" aria-label="Hauptnavigation"><a class="brand" href="/"><img class="brand-mark" src="/icon-192.svg" alt="" width="38" height="38">FreeFinder</a><div class="nav-links"><a href="/angebote-wien-heute.html" aria-current="page">Deals</a><a href="/blog/">Blog</a><a class="nav-download" href="/#download">App laden</a></div></nav></header>
   <main>
-    <header class="article-hero"><div class="hero-inner"><p class="eyebrow">Heute in Wien</p><h1>Aktuelle Angebote in Wien: Gratis, 1+1 und Gutscheine.</h1><p class="hero-copy">${deals.length} ausgewählte Gratis-Angebote, Restaurant-Gutscheine, 1+1-Aktionen und Rabatte mit eindeutigem, noch gültigem Enddatum. Öffne vor der Einlösung immer die verlinkten Bedingungen des Anbieters.</p><div class="article-meta"><span>App-Daten aktualisiert: ${escapeHtml(formatDate(updated))}</span><span>${deals.length} aktuelle Treffer</span></div><div class="article-byline"><span>Geprüfte Datenbasis der <a href="/about.html">FreeFinder Redaktion</a></span></div></div></header>
+    <header class="deals-intro"><div class="deals-width"><p class="eyebrow">FreeFinder · Wien</p><h1>Deals in Wien.</h1><p>Gratis-Angebote, 1+1 und Rabatte für deinen Alltag.</p><div class="deals-updated">Stand der App-Daten: <time datetime="${escapeHtml(modified)}">${escapeHtml(formatDate(updated))}</time></div></div></header>
     <section class="deal-hub" aria-labelledby="dealHubTitle">
-      <nav class="topic-nav" aria-label="Wiener Angebotsratgeber"><a href="/blog/guenstig-essen-wien.html">Günstig essen nach Bezirk</a><a href="/blog/geburtstag-gratis-wien.html">Geburtstag gratis Wien</a><a href="/blog/kinodonnerstag-wien-drei.html">KinoDonnerstag Wien</a></nav>
-      <div class="deal-hub-head"><div><p class="eyebrow">Aktive Deals</p><h2 id="dealHubTitle">Angebote mit bekanntem Enddatum</h2></div><p>Die Übersicht enthält nur nicht abgelaufene Wien-Treffer mit eingetragenem Ablaufdatum. Verfügbarkeit und Teilnahme können sich kurzfristig ändern.</p></div>
-      <div class="live-deal-grid">${cards}
+      <form class="deal-filters" role="search" aria-label="Angebote filtern" hidden>
+        <div class="deal-filter-fields">
+          <label class="deal-search-label" for="dealSearch"><span class="sr-only">Angebote suchen</span><span class="deal-search-field">${icon('search')}<input id="dealSearch" type="search" placeholder="Anbieter, Deal oder Bezirk" autocomplete="off" aria-controls="dealGrid"></span></label>
+          <label for="dealDistrict"><span>Bezirk</span><select id="dealDistrict" aria-controls="dealGrid"><option value="all">Ganz Wien</option>${districts.map(code => `<option value="${code}">${code} Wien</option>`).join('')}</select></label>
+          <label for="dealSort"><span>Sortierung</span><select id="dealSort" aria-controls="dealGrid"><option value="recommended">Empfohlen</option><option value="ending">Endet zuerst</option><option value="brand">Anbieter A–Z</option></select></label>
+        </div>
+        <div class="deal-filter-bottom"><div class="deal-type-filters" role="group" aria-label="Angebotsart">${filters}</div><button class="deal-reset" type="reset" title="Filter zurücksetzen" hidden>${icon('rotate-ccw')}<span>Zurücksetzen</span></button></div>
+      </form>
+      <div class="deal-hub-head"><h2 id="dealHubTitle">Aktuelle Angebote <span id="dealCount" role="status" aria-live="polite" aria-atomic="true">${deals.length} ${deals.length === 1 ? 'Deal' : 'Deals'}</span></h2><p>Mit bekanntem Enddatum · Bedingungen beim Anbieter prüfen</p></div>
+      <div class="live-deal-grid" id="dealGrid">${cards}
       </div>
-      <div class="article-note"><strong>Warum fehlen manche App-Deals?</strong>Angebote ohne belastbares Enddatum werden hier bewusst nicht automatisch als aktuell ausgegeben. In der App können zusätzliche Hinweise sichtbar sein, die du direkt an der Originalquelle prüfen solltest.</div>
+      <div class="deal-empty" id="dealEmpty" hidden><h3>Kein passender Deal dabei.</h3><p>Für diese Auswahl gibt es gerade keine Treffer.</p><button type="button" data-reset-filters>Alle Angebote anzeigen</button></div>
+      <details class="deal-selection-note"><summary>Welche Angebote werden hier angezeigt?</summary><p>Eine Auswahl aus dem FreeFinder-App-Feed mit eingetragenem, noch nicht abgelaufenem Enddatum. Verfügbarkeit, teilnehmende Filialen und weitere Bedingungen können sich ändern. Prüfe die Originalquelle vor der Einlösung. Weitere Angebote ohne bekanntes Enddatum findest du in der App.</p></details>
+    </section>
+    <section class="deals-guides" aria-labelledby="dealsGuidesTitle"><div class="deals-width"><div class="deals-guides-heading"><p class="eyebrow">Wien entdecken</p><h2 id="dealsGuidesTitle">Noch mehr für weniger.</h2></div><nav aria-label="Wiener Angebotsratgeber"><a href="/blog/guenstig-essen-wien.html"><span>Günstig essen<strong>Lieblingsplätze nach Bezirk</strong></span>${icon('chevron-right')}</a><a href="/blog/geburtstag-gratis-wien.html"><span>Geburtstag in Wien<strong>Gratis feiern &amp; genießen</strong></span>${icon('chevron-right')}</a><a href="/blog/kinodonnerstag-wien-drei.html"><span>KinoDonnerstag<strong>Zwei Tickets, ein Preis</strong></span>${icon('chevron-right')}</a></nav></div>
     </section>
   </main>
   <section class="download-band" aria-labelledby="downloadTitle"><div class="download-inner"><div><h2 id="downloadTitle">Mehr Wien-Deals in der App öffnen.</h2><p>FreeFinder kostenlos für iPhone und Android laden.</p></div><div class="store-links"><a href="https://apps.apple.com/app/id6758958213">App Store</a><a href="https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien">Google Play</a></div></div></section>
