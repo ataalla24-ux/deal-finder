@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-07T07:30:36.207Z",
+  "generatedAt": "2026-10-07T08:29:24.501Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 279,
-    "allowed": 0,
+    "total": 281,
+    "allowed": 2,
     "blocked": 279,
-    "warnings": 0,
+    "warnings": 2,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 206,
       "älter als 7 Tage (2026-02-22)": 84,
@@ -13,6 +13,7 @@
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-09-14)": 1,
       "Gottesdienste nur im Wochenlauf": 33,
+      "älter als 7 Tage (2025-07-30)": 1,
       "URL ungültig (HTTP 404)": 12,
       "kein konkretes Angebot: Buffet-Normalpreis ohne belegte Aktion oder besonders niedrigen Preis": 1,
       "älter als 7 Tage (2025-10-08)": 2,
@@ -20,9 +21,8 @@
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)": 5,
       "älter als 7 Tage (2023-09-11)": 1,
       "abgelaufen (2026-10-02)": 2,
-      "älter als 7 Tage (2026-04-19)": 29,
+      "älter als 7 Tage (2026-04-19)": 30,
       "älter als 7 Tage (2016-10-30)": 3,
-      "älter als 7 Tage (2023-09-21)": 3,
       "kostenlose Infrastruktur statt Deal": 3,
       "älter als 7 Tage (2024-03-18)": 3,
       "abgelaufen (2026-10-05)": 1,
@@ -38,6 +38,7 @@
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-06-16)": 1,
       "relative Kurz-Aktion abgelaufen (2026-10-02)": 1,
       "abgelaufen (2026-08-01)": 2,
+      "älter als 7 Tage (2023-09-21)": 1,
       "älter als 7 Tage (2023-07-18)": 1,
       "nicht eindeutig in Wien": 10,
       "älter als 7 Tage (2009-05-01)": 1,
@@ -65,10 +66,10 @@
     },
     "sourceCounts": {
       "Firecrawl Food #2": {
-        "total": 1,
-        "allowed": 0,
+        "total": 3,
+        "allowed": 2,
         "blocked": 1,
-        "warnings": 0,
+        "warnings": 2,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 1,
           "abgelaufen": 1
@@ -195,7 +196,42 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "food3-dmej16",
+      "title": "Die Seeteufel – Fish & Chips Bistro: Fish & Chips",
+      "brand": "Die Seeteufel – Fish & Chips Bistro",
+      "source": "Firecrawl Food #2",
+      "url": "https://www.instagram.com/p/DeHh9YfM_r1/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-10-05T15:27:56.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 2,
+      "expiryDate": "2026-10-31",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "food3-1mliw4c",
+      "title": "vevi.restaurant: Restaurant / Essen (Nudeln bzw. asiatische Küche)",
+      "brand": "vevi.restaurant",
+      "source": "Firecrawl Food #2",
+      "url": "https://www.instagram.com/reel/Dd_omK6ITho/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-10-02T13:52:00.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 5,
+      "expiryDate": "2026-10-31",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "events-0-20260222",
@@ -585,18 +621,17 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2025-07-30)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
-      "sourceDate": "2026-02-22T21:13:07.698Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 227,
+      "sourceDate": "2025-07-30T05:18:47.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 434,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "extra-21-20260222",
@@ -1276,15 +1311,17 @@
       "reasons": [
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
-        "älter als 7 Tage (2023-09-21)"
+        "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
-      "sourceDate": "2023-09-21T15:18:49.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1112,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-04-19T08:59:47.145Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 171,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-16-20260419",
@@ -2948,15 +2985,17 @@
       "url": "https://www.mennoniten.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2023-09-21)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2023-09-21T15:18:49.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1112,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 227,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-20-20260222",
