@@ -82,11 +82,21 @@ function usage(headers) {
   return max;
 }
 
-export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blockSize = 5 } = {}) {
+export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blockSize = 5,
+  maxRequestsPerHour = LIMIT, usageThreshold = 85, waitForBudgetMs = 0,
+  minRequestIntervalMs = 0,
+  sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+} = {}) {
   let remaining = 0;
   let leaseUntil = 0;
   const block = Math.max(1, Math.min(5, Math.floor(blockSize) || 5));
-  const stats = { limitPerHour: LIMIT, requests: 0, reserved: 0, stopped: false, reason: '', highestUsagePercent: 0 };
+  const limit = Math.max(1, Math.min(10000, Math.floor(Number(maxRequestsPerHour)) || LIMIT));
+  const threshold = Math.max(20, Math.min(95, Number(usageThreshold) || 85));
+  const waitBudget = Math.max(0, Math.min(6 * 60000, Number(waitForBudgetMs) || 0));
+  const interval = Math.max(0, Math.min(60000, Number(minRequestIntervalMs) || 0));
+  let lastRequestAt = null;
+  const stats = { limitPerHour: limit, usageThreshold: threshold, requests: 0, reserved: 0, stopped: false,
+    reason: '', highestUsagePercent: 0, waitedMs: 0, pacingMs: 0, retryAt: '' };
   const acquire = async () => {
     for (let attempt = 0; attempt < 8; attempt += 1) {
       const { state, revision } = await store.read();
@@ -95,14 +105,23 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
       // Even a previously reserved block observes other jobs' cooldowns.
       if (remaining > 0 && now < leaseUntil) { remaining -= 1; return; }
       const reservations = state.reservations.filter((r) => r.expiresAt > now);
-      const available = LIMIT - reservations.reduce((sum, r) => sum + r.count, 0);
-      if (available <= 0) throw pause('rolling-hour budget exhausted');
+      const available = limit - reservations.reduce((sum, r) => sum + r.count, 0);
+      if (available <= 0) {
+        const retryAt = Math.min(...reservations.map((r) => r.expiresAt));
+        stats.retryAt = new Date(retryAt).toISOString();
+        const wait = Math.max(1, retryAt - now + 1);
+        if (stats.waitedMs + wait > waitBudget) throw pause('rolling-hour budget exhausted');
+        stats.waitedMs += wait;
+        await sleep(wait);
+        attempt -= 1;
+        continue;
+      }
       const count = Math.min(block, available);
       const until = now + LEASE;
       // Every call must start before the lease deadline. Keep its reservation
-      // for another full hour, so no rolling hour can exceed 150 admitted calls.
+      // for another full hour, so overlapping jobs cannot exceed the ceiling.
       reservations.push({ id: randomUUID(), count, expiresAt: until + HOUR });
-      if (await store.compareAndSwap(revision, { version: 1, pausedUntil: state.pausedUntil, reservations })) {
+      if (await store.compareAndSwap(revision, { ...state, reservations })) {
         leaseUntil = until;
         remaining = count;
         stats.reserved += count;
@@ -127,19 +146,27 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
     const task = tail.then(async () => {
       try {
         if (stats.stopped) throw pause(stats.reason);
+        if (lastRequestAt !== null) {
+          const delay = Math.max(0, lastRequestAt + interval - clock());
+          if (delay) { stats.pacingMs += delay; await sleep(delay); }
+        }
         await acquire();
+        lastRequestAt = clock();
         stats.requests += 1;
         const response = await fetchImpl(...args);
         stats.highestUsagePercent = Math.max(stats.highestUsagePercent, usage(response.headers));
         let code = 0;
         if (!response.ok) { try { code = Number((await response.clone().json())?.error?.code); } catch { /* non-JSON response */ } }
-        if (response.status === 429 || [4, 17, 32, 613, 80002].includes(code) || stats.highestUsagePercent >= 85) {
+        const throttled = response.status === 429 || [4, 17, 32, 613, 80002].includes(code);
+        if (throttled || stats.highestUsagePercent >= threshold) {
           stats.stopped = true;
-          stats.reason = 'Meta usage or rate limit';
+          stats.reason = throttled ? 'Meta rate limit' : 'Meta usage headroom';
           const retry = response.headers.get('retry-after');
           const seconds = Number(retry);
           const retryMs = Number.isFinite(seconds) ? seconds * 1000 : Date.parse(retry) - clock();
-          await cooldown(Math.max(HOUR, Number.isFinite(retryMs) ? retryMs : 0));
+          // A real throttle needs a full rolling-hour cooldown. Near-capacity
+          // usage only needs a short shared pause before the next probe.
+          await cooldown(Math.max(throttled ? HOUR : 10 * 60000, Number.isFinite(retryMs) ? retryMs : 0));
         }
         return response;
       } catch (error) {
@@ -160,7 +187,14 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
 
 export function sharedInstagramFetch(fetchImpl, env = process.env) {
   if (env.INSTAGRAM_SHARED_QUOTA_ENABLED !== '1') return fetchImpl;
-  const shared = createSharedQuotaFetch(fetchImpl, { store: githubQuotaStore(env) });
+  const shared = createSharedQuotaFetch(fetchImpl, {
+    store: githubQuotaStore(env),
+    maxRequestsPerHour: Number(env.INSTAGRAM_SHARED_MAX_REQUESTS_PER_HOUR || 190),
+    usageThreshold: Number(env.INSTAGRAM_SHARED_USAGE_THRESHOLD || 95),
+    waitForBudgetMs: Number(env.INSTAGRAM_SHARED_BUDGET_WAIT_MS || 0),
+    blockSize: Number(env.INSTAGRAM_SHARED_BLOCK_SIZE || 5),
+    minRequestIntervalMs: Number(env.INSTAGRAM_SHARED_MIN_INTERVAL_MS || 0),
+  });
   const wrapped = (url, ...args) => {
     const hostname = new URL(typeof url === 'string' ? url : url.url).hostname;
     return ['graph.facebook.com', 'graph.instagram.com'].includes(hostname) ? shared(url, ...args) : fetchImpl(url, ...args);

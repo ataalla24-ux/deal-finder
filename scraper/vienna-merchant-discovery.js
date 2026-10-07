@@ -76,7 +76,8 @@ export function discoveryAccounts(directory, websiteState, now = new Date()) {
     const checked = site?.status === 'ok' && Date.parse(site.checkedAt) >= cutoff;
     for (const username of new Set([merchant.instagram, ...(checked ? site.handles || [] : [])].filter(Boolean))) {
       const prior = accounts.get(username);
-      const evidence = { merchant: merchant.name, sourceUrl: merchant.sourceUrl, website: merchant.website, observedAt: merchant.observedAt };
+      const evidence = { merchant: merchant.name, sourceUrl: merchant.sourceUrl, website: merchant.website, observedAt: merchant.observedAt,
+        postcode: merchant.postcode, address: merchant.address, cuisine: merchant.cuisine, kind: merchant.kind };
       if (prior) { if (prior.merchants.length < 10) prior.merchants.push(evidence); continue; }
       accounts.set(username, { username, category: 'food', accountType: 'merchant', priority: 25,
         verifiedVienna: false, evidenceKind: checked && site.handles?.includes(username) ? 'directory-and-website-link' : 'directory-tag',
@@ -91,10 +92,12 @@ export function selectDiscoveryAccounts(payload, now = new Date(), limit = 200) 
   if (!(Date.parse(payload.generatedAt) >= now.getTime() - 45 * 86400000)) return [];
   const all = (Array.isArray(payload.accounts) ? payload.accounts : []).filter(a => a && instagramHandle(a.username) === a.username);
   if (!all.length) return [];
-  const count = Math.max(0, Math.min(200, limit, all.length));
+  const count = Math.max(0, Math.min(5000, limit, all.length));
   const offset = (Math.floor(now.getTime() / 86400000) * 200) % all.length;
   return Array.from({ length: count }, (_, i) => ({
     username: all[(offset + i) % all.length].username,
     category: 'food', accountType: 'merchant', priority: 25,
+    evidenceKind: all[(offset + i) % all.length].evidenceKind,
+    merchants: all[(offset + i) % all.length].merchants || [],
   }));
 }

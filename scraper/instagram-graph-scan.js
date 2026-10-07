@@ -150,7 +150,7 @@ export function createGraphScanStore({ ownPath, peerPath, scope, now = new Date(
     },
     put(key, value) { sources[key] = { ...value, updatedAt: now.toISOString() }; },
     save() {
-      const payload = { version: 1, scope, updatedAt: now.toISOString(), sources: Object.fromEntries(Object.entries(sources).filter(([, item]) => now.getTime() - Date.parse(item.updatedAt) <= 7 * DAY).slice(-300)) };
+      const payload = { version: 1, scope, updatedAt: now.toISOString(), sources: Object.fromEntries(Object.entries(sources).filter(([, item]) => now.getTime() - Date.parse(item.updatedAt) <= 7 * DAY).slice(-5000)) };
       if (write) {
         fs.mkdirSync(path.dirname(ownPath), { recursive: true });
         const tmp = `${ownPath}.tmp-${process.pid}`;
