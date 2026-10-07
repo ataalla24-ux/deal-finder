@@ -1,4 +1,5 @@
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { sanitizePublicDealText } from './public-deal-text.js';
 import { cardEditorialWhen } from './deal-card-editor.js';
 import { concreteFoodOfferTitle, isPromotionalIntro, stripSlackEmojiCodes } from './offer-title-utils.js';
 
@@ -1057,6 +1058,7 @@ function isFalsePositiveFreeDeal(deal = {}) {
 }
 
 function normalizeDealRecord(deal = {}) {
+  deal = sanitizePublicDealText(deal);
   const editedFields = new Set(Array.isArray(deal.liveEditedFields) ? deal.liveEditedFields : []);
   let title = cleanTitleForDisplay(deal.title || '');
   let description = cleanUiNoiseText(deal.description || '');
@@ -1148,7 +1150,7 @@ function normalizeDealRecord(deal = {}) {
     if (editedFields.has(field) && Object.hasOwn(deal, field)) normalized[field] = deal[field];
   }
   if (editedFields.has('logo') && deal.logo) normalized.logo = deal.logo;
-  return normalized;
+  return sanitizePublicDealText(normalized);
 }
 
 export {

@@ -21,6 +21,9 @@ on:
       - "scraper/slack-digest-utils.js"
       - "scraper/offer-title-utils.js"
       - "scripts/test-offer-title.mjs"
+      - "scraper/public-deal-text.js"
+      - "scripts/test-public-deal-text.mjs"
+      - "scripts/deals-feed-contract.mjs"
       - "scripts/live-deal-edits-lib.mjs"
       - "scripts/test-source-backed-content.mjs"
       - "scripts/apply-reviewed-content.mjs"
@@ -59,6 +62,7 @@ jobs:
           SENTRY_DISABLED: '1'
         run: |
           node scripts/test-source-backed-content.mjs
+          node scripts/test-public-deal-text.mjs
           node scripts/test-offer-title.mjs
           node scripts/test-deal-logo-normalization.mjs
           node scripts/test-live-deal-removal-safety.mjs

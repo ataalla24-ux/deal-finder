@@ -100,6 +100,28 @@ test('promo ledger integration with real SQLite Durable Object', async t => {
     assert.equal((await campaigns()).filter(item => item.id === campaign.id).length, 1);
     assert.equal((await call('/admin/revoke', { id: code.id }, admin)).status, 409);
   });
+  await t.test('offer period survives redemption and public feed without changing purchased duration', async () => {
+    const code = await create({ packageId: 'spotlight' });
+    const payload = { ...draft, code: code.code, requestId: crypto.randomUUID(), offerValidityText: '14.–18.10.2026, 12–15 Uhr' };
+    for (const bad of [42, 'x'.repeat(161), '\u0001']) {
+      assert.equal((await call('/redeem', { ...payload, offerValidityText: bad })).status, 400);
+    }
+    const first = await call('/redeem', payload);
+    assert.equal(first.status, 201);
+    assert.equal(first.body.campaign.offerValidityText, payload.offerValidityText);
+    assert.equal(first.body.campaign.endsAt - first.body.campaign.startsAt, 3 * DAY);
+    assert.equal((await campaigns()).find(item => item.id === first.body.campaign.id).offerValidityText, payload.offerValidityText);
+    assert.equal((await call('/redeem', payload)).status, 200);
+    assert.equal((await call('/redeem', { ...payload, offerValidityText: 'Anderer Zeitraum' })).status, 409);
+  });
+  await t.test('empty optional period preserves legacy retry identity', async () => {
+    const code = await create();
+    const payload = { ...draft, code: code.code, requestId: crypto.randomUUID() };
+    assert.equal((await call('/redeem', payload)).status, 201);
+    const retry = await call('/redeem', { ...payload, offerValidityText: '   ' });
+    assert.equal(retry.status, 200);
+    assert.equal(retry.body.campaign.offerValidityText, undefined);
+  });
   await t.test('same idempotency key returns same campaign without extending it; changed payload rejected', async () => {
     const code = await create();
     const payload = { ...draft, code: code.code, requestId: crypto.randomUUID() };

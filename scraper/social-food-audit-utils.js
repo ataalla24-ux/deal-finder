@@ -525,7 +525,7 @@ export function buildSocialFoodReviewDeal(row, now = new Date()) {
     expirySource,
     expiresSource: expirySource,
     dateConfidence: hasExplicitEnd ? 'high' : (validUntil ? 'low' : ''),
-    distance: 'Wien - manuell pruefen',
+    distance: 'Wien',
     location: 'Wien',
     city: 'Wien',
     viennaVerified: false,

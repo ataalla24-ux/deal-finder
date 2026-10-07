@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { sanitizePublicDealText } from '../scraper/public-deal-text.js';
 
 export const DEALS_FEED_SCHEMA_VERSION = 1;
 
@@ -23,10 +24,12 @@ export function stampDealsFeedBundle(bundle, options = {}) {
   }
 
   const nowIso = options.nowIso || new Date().toISOString();
+  const deals = bundle.deals.map(sanitizePublicDealText);
   return {
     ...bundle,
+    deals,
     schemaVersion: DEALS_FEED_SCHEMA_VERSION,
-    feedVersion: computeDealsFeedVersion(bundle.deals),
+    feedVersion: computeDealsFeedVersion(deals),
     totalDeals: bundle.deals.length,
     lastUpdated: nowIso,
   };

@@ -265,6 +265,9 @@ assert.equal(artifacts.audit.manualOutcomeMetrics.manuallyApproved, 1);
 assert.equal(artifacts.audit.costMetrics.mediaTokensPerManualApproval7d, 1200);
 
 const reviewDealWithSafetyTtl = buildSocialFoodReviewDeal(reviewable, now);
+assert.equal(reviewDealWithSafetyTtl.distance, 'Wien');
+assert.equal(reviewDealWithSafetyTtl.socialFoodReview, true);
+assert.ok(reviewDealWithSafetyTtl.socialFoodReviewReason);
 assert.equal(reviewDealWithSafetyTtl?.expiryKind, 'review-ttl');
 assert.equal(reviewDealWithSafetyTtl?.expirySource, 'short-review-ttl');
 assert.ok(Date.parse(reviewDealWithSafetyTtl?.expires) <= Date.parse(reviewable.pubDate) + 7 * 24 * 60 * 60 * 1000);

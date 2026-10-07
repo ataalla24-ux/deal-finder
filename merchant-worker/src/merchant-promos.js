@@ -55,8 +55,10 @@ function field(value, label, max, required = true) {
   return result;
 }
 function campaignDraft(payload, record) {
+  if (payload.offerValidityText != null && typeof payload.offerValidityText !== 'string') throw new PromoError('Angebotszeitraum ist ungültig.');
   if (payload.acceptedTerms !== true) throw new PromoError('Bitte die Richtigkeit der Angaben bestätigen.');
   const restaurantName = field(payload.restaurantName, 'Restaurant', 90);
+  const offerValidityText = field(payload.offerValidityText, 'Angebotszeitraum', 160, false);
   if (record.restaurantName && restaurantName.toLocaleLowerCase('de-AT') !== record.restaurantName.toLocaleLowerCase('de-AT')) {
     throw new PromoError('Dieser Code gehört zu einem anderen Restaurant.', 409);
   }
@@ -71,6 +73,8 @@ function campaignDraft(payload, record) {
     address: field(payload.address, 'Adresse', 140), ctaURL,
     oldPrice: field(payload.oldPrice, 'Normalpreis', 40, false),
     dealPrice: field(payload.dealPrice, 'Dealpreis', 40, false), category: 'essen',
+    // Omit empty values so old idempotent retries retain their original hash.
+    ...(offerValidityText ? { offerValidityText } : {}),
   };
 }
 function requireAvailable(record, now) {

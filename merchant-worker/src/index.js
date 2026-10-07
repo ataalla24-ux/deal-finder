@@ -1634,6 +1634,10 @@ function dealIssue(deal, severity, message, suggestion) {
 
 async function createCampaign(request, env) {
   const payload = await readPayload(request);
+  const offerValidityText = payload.offerValidityText == null ? '' : payload.offerValidityText;
+  if (typeof offerValidityText !== 'string' || offerValidityText.length > 160 || /[\u0000-\u0008\u000b-\u001f]/.test(offerValidityText)) {
+    return json({ ok: false, error: "Angebotszeitraum ist ungültig oder zu lang." }, 400);
+  }
   const packageId = cleanText(payload.packageId, 32);
   const config = PACKAGE_CONFIG[packageId];
   const paymentProvider = normalize(payload.paymentProvider);
@@ -1712,6 +1716,7 @@ async function createCampaign(request, env) {
     restaurantName,
     dealTitle,
     description: cleanText(payload.description, 360),
+    ...(offerValidityText.trim() ? { offerValidityText: offerValidityText.trim() } : {}),
     oldPrice: cleanText(payload.oldPrice, 40),
     dealPrice: cleanText(payload.dealPrice, 40),
     address: cleanText(payload.address, 140),
@@ -1834,6 +1839,7 @@ async function notifySlackCampaign(env, campaign) {
     `Anbieter: ${campaign.restaurantName}`,
     `Deal: ${campaign.dealTitle}`,
     campaign.address ? `Ort: ${campaign.address}` : "",
+    campaign.offerValidityText ? `Angebotszeitraum: ${campaign.offerValidityText}` : "",
     campaign.ctaURL ? `Link: ${campaign.ctaURL}` : "",
     campaign.endsAt ? `Sichtbar bis: ${new Date(campaign.endsAt).toISOString()}` : "",
     `Quelle: ${campaign.paymentProvider || campaign.platform || "unknown"}`,
