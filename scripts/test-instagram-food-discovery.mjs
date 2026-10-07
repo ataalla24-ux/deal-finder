@@ -118,6 +118,8 @@ for (const text of [
   assert.equal(validatedAd.allowedDeals.length, 1, `${text}: ${JSON.stringify(validatedAd.report)}`);
 }
 for (const text of [
+  'I built a specialty coffee shop in Vienna. FREE Business Case course to start your own coffee shop from industry experts. Join to get the free Business Case.',
+  'Gratis Kurs fuer Kaffee Shop Gruender in Wien. Lerne deinen eigenen Coffee Shop zu eroeffnen.',
   'Smarter Kuehlschrank im Buero mit Pasta, Salaten und Wraps, gekocht in Wien. 1 Monat kostenlos testen. Essen mit Bankomatkarte bezahlen.',
   'Kuehlschrank in eurem Buero, gekocht in Wien. Testmonat gratis.',
   '50% Rabatt auf Zahnprothesen in Wien. Wieder Kaffee, Steak und Schnitzel geniessen.',
