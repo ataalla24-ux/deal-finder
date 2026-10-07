@@ -4,7 +4,7 @@
 
 User requested all reachable qualifying Vienna food/drink offers and maximum
 permitted Meta capacity. Original dirty nested checkout and pending native work
-were not modified. Firecrawl scraper/workflow files, live feed, approval/removal
+were not modified. Firecrawl scraper/workflow files, live-feed contents, approval/removal
 policy, API permissions and paid AI budgets are unchanged.
 
 ## Production configuration
@@ -145,6 +145,14 @@ campaign-start date. Conditional authenticated GitHub reads use verified ETags
 and clone the last state on 304, while still checking global pause before every
 Meta request. This avoids unnecessary quota-store primary-rate consumption;
 compare-and-swap reservations and conflict handling remain authoritative.
+
+The final roundtrip change is pushed in `991498f092d1`. Its latest CI run passed
+both coverage and real read-only quota-storage jobs:
+https://github.com/ataalla24-ux/deal-finder/actions/runs/37669657754
+All local reliability, ad coverage, food discovery and Slack repair tests were
+repeated successfully after that change. The existing moderation workflow only
+updated the feed envelope's `lastUpdated`; all 67 deal rows, their order and
+`feedVersion` were unchanged from the pre-deployment baseline.
 
 Central dispatch actually delivered its messages, but run 37666519485 failed
 afterward on the pre-existing community-acknowledgement HTTP 500. This work does
