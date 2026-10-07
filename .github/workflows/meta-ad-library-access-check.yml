@@ -1,0 +1,48 @@
+name: Meta Ad Library API Access Check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: meta-ad-library-api-access-check
+  cancel-in-progress: false
+
+jobs:
+  check-access:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Test quota recovery and read-only probe
+        env:
+          SENTRY_DISABLED: '1'
+        run: |
+          node scripts/test-instagram-food-discovery.mjs
+          node scripts/test-meta-ad-library-access.mjs
+      - name: Verify actual Ad Library API access without sending Slack deals
+        env:
+          SENTRY_DISABLED: '1'
+          META_AD_LIBRARY_ACCESS_TOKEN: ${{ secrets.META_AD_LIBRARY_ACCESS_TOKEN }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          META_AD_LIBRARY_TRY_INSTAGRAM_TOKEN: '1'
+          META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
+          INSTAGRAM_SHARED_QUOTA_ENABLED: '1'
+          INSTAGRAM_SHARED_BLOCK_SIZE: '1'
+          INSTAGRAM_SHARED_BUDGET_WAIT_MS: '360000'
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check-meta-ad-library.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meta-ad-library-api-access
+          path: artifacts/meta-ad-library-access.json
+          retention-days: 7

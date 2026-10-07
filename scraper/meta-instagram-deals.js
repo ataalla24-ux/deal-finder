@@ -1387,14 +1387,14 @@ function adLibraryUrl(config, searchTerm) {
   return url.toString();
 }
 
-async function collectAdLibrary(config, now, fetchImpl, previousFailure = null) {
+export async function collectAdLibrary(config, now, fetchImpl, previousFailure = null) {
   const raw = [];
   const errors = [];
   const usage = [];
   const terms = config.adSearchTerms;
   const count = Math.min(config.maxAdTermsPerRun || 4, terms.length);
   const selectedTerms = Array.from({ length: count }, (_, index) => terms[(Number(config.shardIndex || 0) * count + index) % terms.length]);
-  if (Date.parse(previousFailure?.retryAt || '') > now.getTime()) return { raw, errors: [previousFailure], usage, selectedTerms, failure: previousFailure, cooldown: true };
+  if (previousFailure?.code !== 'SCAN_BUDGET' && Date.parse(previousFailure?.retryAt || '') > now.getTime()) return { raw, errors: [previousFailure], usage, selectedTerms, failure: previousFailure, cooldown: true };
   const seen = new Set();
   for (const term of selectedTerms) {
     let next = adLibraryUrl(config, term);
@@ -1420,6 +1420,12 @@ async function collectAdLibrary(config, now, fetchImpl, previousFailure = null) 
           }
         }
       } catch (error) {
+        if (error?.code === 'SCAN_BUDGET') {
+          // Shared quota owns this pause; do not turn a temporary interruption
+          // into a six-hour source/authentication failure.
+          errors.push({ term, status: 0, code: error.code, message: safeErrorMessage(error, config) });
+          return { raw, errors, usage, selectedTerms, failure: null, budgetDeferred: true };
+        }
         const failure = {
           term, status: Number(error?.status || 0), code: error?.code || '', message: safeErrorMessage(error, config),
           retryAt: new Date(now.getTime() + 6 * 60 * 60 * 1000).toISOString(),
@@ -2122,8 +2128,9 @@ export async function runMetaInstagramCollector(options = {}) {
     report.sources.adLibrary.errors = result.errors;
     report.sources.adLibrary.selectedTerms = result.selectedTerms;
     report.sources.adLibrary.cooldown = result.cooldown === true;
+    report.sources.adLibrary.budgetDeferred = result.budgetDeferred === true;
     report.sources.adLibrary.retryAt = result.failure?.retryAt || null;
-    report.sources.adLibrary.status = result.errors.length && !result.raw.length ? 'failed' : (result.errors.length ? 'degraded' : 'ok');
+    report.sources.adLibrary.status = result.budgetDeferred ? 'degraded' : result.errors.length && !result.raw.length ? 'failed' : (result.errors.length ? 'degraded' : 'ok');
     for (const raw of result.raw) {
       const normalized = normalizeAdLibraryItem(raw, config, now);
       if (!normalized.deal) {
@@ -2357,7 +2364,7 @@ export async function runMetaInstagramCollector(options = {}) {
     },
     deals,
   };
-  if (report.sources.instagramGraph.budgetDeferred && !report.sources.instagramGraph.fetched && !report.sources.adLibrary.fetched) {
+  if ((report.sources.instagramGraph.budgetDeferred || report.sources.adLibrary.budgetDeferred) && !report.sources.instagramGraph.fetched && !report.sources.adLibrary.fetched) {
     report.preservedDeals = lastGoodPayload?.deals?.length || 0;
     report.message = `Shared Meta budget deferred this scan after ${report.selectedAccounts.length} account attempts; preserved ${report.preservedDeals} last-good candidates.`;
     if (options.write !== false) {

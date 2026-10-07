@@ -167,6 +167,31 @@ try {
   assert.equal(available.report.sources.adLibrary.selectedTerms.length, 2);
   assert.equal(available.report.sources.adLibrary.fetched, 1, 'deduplicate across ad search terms');
   assert.equal(available.payload.deals.length, 1);
+  let quotaCalls = 0;
+  const quotaDeferred = await runMetaInstagramCollector({ env, now, paths, fetchImpl: async () => {
+    if (quotaCalls++ === 0) return Response.json({ data: [ad] });
+    throw Object.assign(new Error('shared rolling-hour quota exhausted'), { code: 'SCAN_BUDGET' });
+  } });
+  assert.equal(quotaDeferred.report.sources.adLibrary.budgetDeferred, true);
+  assert.equal(quotaDeferred.report.sources.adLibrary.status, 'degraded');
+  assert.equal(quotaDeferred.state.adLibraryFailure, null, 'shared quota must not create a six-hour authentication cooldown');
+  assert.equal(quotaDeferred.payload.deals.length, 1, 'retain candidates fetched before the budget interruption');
+  const legacy = JSON.parse(fs.readFileSync(env.META_INSTAGRAM_STATE_PATH, 'utf8'));
+  legacy.adLibraryFailure = { code: 'SCAN_BUDGET', retryAt: new Date(+now + 6 * 3600000).toISOString() };
+  fs.writeFileSync(env.META_INSTAGRAM_STATE_PATH, JSON.stringify(legacy));
+  let recoveredCalls = 0;
+  const quotaRecovered = await runMetaInstagramCollector({ env, now, paths, fetchImpl: async () => {
+    recoveredCalls += 1;
+    return Response.json({ data: [ad] });
+  } });
+  assert.equal(recoveredCalls, 3, 'legacy six-hour quota errors no longer suppress the next scheduled search');
+  assert.equal(quotaRecovered.state.adLibraryFailure, null);
+  const fullyDeferred = await runMetaInstagramCollector({ env, now, paths, fetchImpl: async () => {
+    throw Object.assign(new Error('shared cooldown'), { code: 'SCAN_BUDGET' });
+  } });
+  assert.equal(fullyDeferred.report.sources.adLibrary.status, 'degraded');
+  assert.equal(fullyDeferred.shouldFail, false, 'controlled quota exhaustion is not a credential outage');
+  assert.equal(fullyDeferred.payload.deals.length, 1, 'preserve the last good output on a complete quota deferral');
 } finally {
   fs.rmSync(tmp, { recursive: true, force: true });
 }
