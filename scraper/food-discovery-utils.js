@@ -29,6 +29,12 @@ export function getAdFoodBenefitRejection(value) {
   // An ad must discount the meal/drink itself, not a fridge, ticket or other
   // product that happens to mention eating. Check separate offer clauses first.
   const clauses = text.split(/[.!?](?=\s|$)|[\n;]+/).map((part) => part.replace(/\s+/g, ' ').trim());
+  const recruitment = /\b(?:jobs?|hiring|careers?|karriere|bewerb[\p{L}]*|stellenangebote?|mitarbeiter\w*\s+gesucht)\b/iu.test(text)
+    || /\b(?:vollzeit|teilzeit|brutto|dienstplan\w*|pflegekraft|krankenpflegekraft)\b/i.test(text)
+      && /\b(?:team|beruf|stelle|mitarbeit\w*|wiedereinsteiger\w*)\b/i.test(text);
+  const publicFoodGift = clauses.some((clause) => AD_FOOD_PRODUCT_PATTERN.test(clause) && AD_FREE_FOOD_PATTERN.test(clause)
+    && /\b(?:g\u00e4ste|gaeste|kunden|kundinnen|besucher|public)\b/i.test(clause));
+  if (recruitment && !publicFoodGift) return 'employment-only-food-benefit';
   const negatedBenefit = /\b(?:kein\w*|nicht|not|no)\s+(?:\d{1,2}\s*%\s*)?(?:gratis|kostenlos\w*|free|rabatt|discount)\b/i;
   for (const clause of clauses) {
     if (!AD_FOOD_PRODUCT_PATTERN.test(clause) || AD_NON_FOOD_OFFER_PATTERN.test(clause)) continue;
@@ -53,6 +59,17 @@ export function getAdFoodBenefitRejection(value) {
       && (AD_FOOD_PRODUCT_PATTERN.test(text) || /\b(?:restaurant|cafe|caf\u00e9|foodora|lieferando|wolt)\b/i.test(text))
       && clauses.some((clause) => !negatedBenefit.test(clause) && AD_FOOD_SAVING_PATTERN.test(clause))) return '';
   return 'no-consumer-food-benefit';
+}
+
+export function getMetaNonOfferRejection(value) {
+  const text = String(value || '').replace(/\b(?:animal|gluten|sugar|lactose|dairy|alcohol|caffeine|cruelty|plastic|smoke|tax|risk|fat|nut|gmo)[- ]free\b/gi, '')
+    .replace(/\bfree[- ]entry\s+food\s+stalls?\b/gi, 'food stalls');
+  const explicitBenefit = /\b(?:gratis|kostenlos\w*|free|rabatt\w*|discount|gutschein|coupon|voucher|bogo|happy\s*hour)\b|\b[12]\s*\+\s*1\b|\d{1,2}\s*%\s*(?:off|rabatt|discount|auf)\b|\b(?:statt|instead\s+of)\s*(?:\u20ac\s*)?\d/i.test(text);
+  if (explicitBenefit || extractLowFoodPrice(text)) return '';
+  if (/\bfree[- ]entry\s+food\s+stalls?\b/i.test(String(value || ''))) return 'food-stall-access-not-food-offer';
+  if (/\b(?:painting|canvas|malkurs\w*|workshops?|seminars?|courses?|kurse?)\b/i.test(text)
+    && /(?:\u20ac\s*\d|\d\s*(?:\u20ac|EUR\b|Euro\b))/i.test(text)) return 'regular-priced-activity';
+  return '';
 }
 
 export function extractLowFoodPrice(value) {

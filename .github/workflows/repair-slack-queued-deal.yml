@@ -4,12 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "Update from the current source file or delete one queued Slack deal"
+        description: "Update, mark validator-blocked, or delete one exact queued Slack deal"
         required: true
         default: update
         type: choice
         options:
           - update
+          - block
           - delete
       deal_url:
         description: "Exact deal URL already posted to Slack"

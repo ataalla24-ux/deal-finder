@@ -11,7 +11,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
-import { extractLowFoodPrice, getAdFoodBenefitRejection, isFoodDrinkSource, weakFoodPromotionReason } from './food-discovery-utils.js';
+import { extractLowFoodPrice, getAdFoodBenefitRejection, getMetaNonOfferRejection, isFoodDrinkSource, weakFoodPromotionReason } from './food-discovery-utils.js';
 import { inferPreferredBrand } from './deal-normalization-utils.js';
 import {
   canonicalInstagramPostKey,
@@ -763,6 +763,8 @@ export function classifyPromotion(text) {
   if (!normalized) {
     return { accepted: false, type: '', reason: 'missing-text' };
   }
+  const incidentalFood = getMetaNonOfferRejection(normalized);
+  if (incidentalFood) return { accepted: false, type: '', reason: incidentalFood };
   if (weakFoodPromotionReason(normalized)) return { accepted: false, type: '', reason: 'weak-food-offer' };
   if (getNonGuaranteedPromotionReason(normalized)
       || getEditorialRoundupPromotionReason(normalized)

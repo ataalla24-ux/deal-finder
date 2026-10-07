@@ -2,6 +2,20 @@ import assert from 'node:assert/strict';
 import { createSharedQuotaFetch, githubQuotaStore, sharedInstagramFetch } from '../scraper/instagram-shared-quota.js';
 
 const HOUR = 3600000;
+let cachedReads = 0;
+const conditionalStore = githubQuotaStore({ GITHUB_REPOSITORY: 'owner/repo', GH_TOKEN: 'test-token' }, async (url, init) => {
+  if (url.includes('/git/ref/')) return Response.json({});
+  cachedReads += 1;
+  if (init.headers['If-None-Match'] === '"verified-state"') return new Response(null, { status: 304 });
+  return Response.json({ content: Buffer.from(JSON.stringify({ version: 1, reservations: [], pausedUntil: 0 })).toString('base64'), sha: 'state-sha' },
+    { headers: { etag: '"verified-state"' } });
+});
+const conditionalFirst = await conditionalStore.read();
+conditionalFirst.state.pausedUntil = 999;
+const conditionalSecond = await conditionalStore.read();
+assert.equal(conditionalSecond.state.pausedUntil, 0, 'cached state cannot be mutated by callers');
+assert.equal(conditionalSecond.revision, 'state-sha');
+assert.equal(cachedReads, 2, 'still observe global pauses via conditional polling, not a stale local-only lease');
 let now = Date.parse('2026-09-07T20:00:00Z');
 const makeStore = () => {
   let state = { version: 1, reservations: [], pausedUntil: 0 };

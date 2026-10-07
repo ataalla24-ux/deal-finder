@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { scanAdLibraryCoverage, hasFreshActiveAdEvidence } from '../scraper/meta-ad-library-coverage.js';
 import { createSharedQuotaFetch, readMetaRateUsage } from '../scraper/instagram-shared-quota.js';
-import { buildConfig, collectAdLibrary, normalizeAdLibraryItem, runMetaInstagramCollector } from '../scraper/meta-instagram-deals.js';
+import { buildConfig, classifyPromotion, collectAdLibrary, normalizeAdLibraryItem, runMetaInstagramCollector } from '../scraper/meta-instagram-deals.js';
 import { validateDealsForSlack } from '../scraper/deal-validity-agent.js';
 import { normalizeDeal } from '../scraper/slack-notify.js';
 import { runAdLibraryAccessCheck } from './check-meta-ad-library.mjs';
@@ -166,6 +166,16 @@ const todayAd = normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Nur heute 
 assert.equal((await validate(todayAd)).allowedDeals.length, 0, 'old relative today offers still fail, even in active ads');
 const futureAd = normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Gratis Kebab in Wien am 15.10.2026'] }, config, now).deal;
 assert.equal((await validate(futureAd)).allowedDeals.length, 1);
+for (const description of [
+  'Roncalli at Vienna Rathaus. 100% animal-free. Free-entry food stalls around the tent too! Selling fast, book tickets.',
+  'Vienna Painting Event: A Feminine Pink Mood. Painting on canvas, 60 EUR per person, drinks and snacks included. A special girls afternoon.',
+]) {
+  assert.equal(classifyPromotion(description).accepted, false, description);
+  assert.equal((await validate({ ...deal, id: 'meta-ig-invalid', source: 'Instagram', originSource: 'Meta Instagram Hashtag API',
+    title: description, description, pubDate: now.toISOString(), pubDateSource: 'meta-graph-timestamp', sourcePublishedAt: now.toISOString(),
+    sourcePublishedAtSource: 'meta-graph-timestamp', url: 'https://www.instagram.com/p/DeM3C7rNkFc/' })).allowedDeals.length, 0);
+}
+assert.equal(classifyPromotion('Vienna Painting Workshop: 40 EUR statt 60 EUR, 20% Rabatt.').accepted, true);
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'meta-ad-coverage-test-'));
 try {

@@ -38,6 +38,26 @@ const correctedSoundcube = {
 };
 
 const updateCalls = [];
+const blockedCalls = [];
+const blockedMessage = await repairQueuedSlackDeal({
+  action: 'block', url: soundcubeUrl, channel: 'C123', now: NOW,
+  queuePayload: { deals: [oldSoundcube], totalDeals: 1 },
+  validate: async (deals) => ({ allowedDeals: [], blockedDeals: deals.map((deal) => ({
+    ...deal, validity: { status: 'blocked', reasons: ['Kein Verbraucher-Food-Angebot'], warnings: [] },
+  })) }),
+  slackApi: async (method, payload) => { blockedCalls.push({ method, payload }); return { ok: true }; },
+});
+assert.equal(blockedCalls.length, 1);
+assert.equal(blockedCalls[0].method, 'chat.update');
+assert.match(blockedCalls[0].payload.text, /Automatisch blockiert/);
+assert.equal(blockedMessage.queuePayload.deals.length, 1);
+assert.equal(blockedMessage.deal.slackTs, oldSoundcube.slackTs);
+assert.equal(blockedMessage.deal.description, oldSoundcube.description);
+await assert.rejects(repairQueuedSlackDeal({
+  action: 'block', url: soundcubeUrl, channel: 'C123', queuePayload: { deals: [oldSoundcube] },
+  validate: async (deals) => ({ allowedDeals: deals, blockedDeals: [] }),
+  slackApi: async () => assert.fail('never annotate an allowed deal as blocked'),
+}), /currently allowed/);
 const updated = await repairQueuedSlackDeal({
   action: 'update',
   url: soundcubeUrl,

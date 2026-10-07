@@ -14,16 +14,18 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch) {
   const token = env.GH_TOKEN || env.GITHUB_TOKEN;
   if (!/^[\w.-]+\/[\w.-]+$/.test(repo || '') || !token) throw pause('missing GitHub quota credentials');
   const base = `https://api.github.com/repos/${repo}`;
-  const request = async (route, method = 'GET', body) => {
+  const request = async (route, method = 'GET', body, etag = '') => {
     const response = await fetchImpl(`${base}${route}`, {
-      method, headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
+      method, headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28',
+        ...(etag ? { 'If-None-Match': etag } : {}) },
       ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(15000),
     });
     let data = {};
     try { data = await response.json(); } catch { /* handled by status */ }
-    return { status: response.status, data };
+    return { status: response.status, data, etag: response.headers.get('etag') || '' };
   };
   let initialized = false;
+  let cached = null;
   const initialize = async () => {
     if (initialized) return;
     const ref = await request(`/git/ref/heads/${BRANCH}`);
@@ -38,7 +40,10 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch) {
   return {
     async read() {
       await initialize();
-      const result = await request(`/contents/${FILE}?ref=${encodeURIComponent(BRANCH)}`);
+      // Still check the shared pause before each request. Authenticated 304
+      // responses reuse verified state without consuming GitHub's primary quota.
+      const result = await request(`/contents/${FILE}?ref=${encodeURIComponent(BRANCH)}`, 'GET', undefined, cached?.etag);
+      if (result.status === 304 && cached) return structuredClone(cached.entry);
       if (result.status === 404) {
         // On rollout, old runners may still spend for up to 45 minutes. Drain
         // that overlap plus a full hour before admitting untracked new calls.
@@ -53,7 +58,8 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch) {
       const state = JSON.parse(Buffer.from(result.data.content, 'base64').toString('utf8'));
       if (state.version !== 1 || !Array.isArray(state.reservations) || !Number.isFinite(state.pausedUntil)
         || state.reservations.some((r) => !Number.isFinite(r.expiresAt) || !Number.isInteger(r.count) || r.count < 1)) throw pause('invalid quota state');
-      return { state, revision: result.data.sha };
+      cached = { etag: result.etag, entry: { state, revision: result.data.sha } };
+      return structuredClone(cached.entry);
     },
     async compareAndSwap(revision, state) {
       const result = await request(`/contents/${FILE}`, 'PUT', {

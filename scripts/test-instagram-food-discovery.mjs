@@ -118,6 +118,8 @@ for (const text of [
   assert.equal(validatedAd.allowedDeals.length, 1, `${text}: ${JSON.stringify(validatedAd.report)}`);
 }
 for (const text of [
+  'Pflegekraft in Wien gesucht. Unser Team: 4.026 EUR brutto bei Vollzeit. Gratis-Fruehstueck und frisch gekochtes Mittagessen. Jetzt auf karriere.blind.at bewerben.',
+  'Krankenpflegekraft in Wien. Bei uns im Team: 37 Stunden, Vollzeit, kostenloses Fruehstueck. Wiedereinsteiger willkommen.',
   'I built a specialty coffee shop in Vienna. FREE Business Case course to start your own coffee shop from industry experts. Join to get the free Business Case.',
   'Gratis Kurs fuer Kaffee Shop Gruender in Wien. Lerne deinen eigenen Coffee Shop zu eroeffnen.',
   'Smarter Kuehlschrank im Buero mit Pasta, Salaten und Wraps, gekocht in Wien. 1 Monat kostenlos testen. Essen mit Bankomatkarte bezahlen.',

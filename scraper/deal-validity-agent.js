@@ -3,7 +3,7 @@ import { hasFreshActiveAdEvidence } from './meta-ad-library-coverage.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { extractLowFoodPrice, getAdFoodBenefitRejection, weakFoodPromotionReason } from './food-discovery-utils.js';
+import { extractLowFoodPrice, getAdFoodBenefitRejection, getMetaNonOfferRejection, weakFoodPromotionReason } from './food-discovery-utils.js';
 import { inspectDealContentQuality } from './deal-content-quality-utils.js';
 
 import { inspectDealUrlHealth, parseExpiryShape } from './expiry-utils.js';
@@ -1090,6 +1090,10 @@ async function validateDeal(deal, context) {
   let offer = getConcreteOfferDecision(deal, health);
   if (officialFood?.ok && offer.reason === 'kein konkretes Angebot erkennbar') offer = { concrete: true };
   const reasons = [];
+  if (/^Meta Instagram /i.test(String(deal.originSource || ''))) {
+    const metaNonOffer = getMetaNonOfferRejection(deal.description || deal.title);
+    if (metaNonOffer) reasons.push(`Kein konkreter Meta-Deal (${metaNonOffer})`);
+  }
   const warnings = [];
   if (freshlyActiveAd) warnings.push('Aktive Instagram-Anzeige frisch durch Meta bestätigt; Kampagnenstart bleibt unverändert, Ablauf und relative Aktionsdaten werden separat geprüft');
   if (reviewedCommunity && deal.communityApprovalIssue) reasons.push(deal.communityApprovalIssue);

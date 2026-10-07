@@ -209,7 +209,7 @@ export async function repairQueuedSlackDeal(options = {}) {
     : { deals: [] };
   const queueDeals = ensureDeals(queuePayload);
   const targetKey = exactDealKey(targetUrl);
-  if (!['update', 'delete'].includes(action)) throw new Error('Action must be update or delete');
+  if (!['update', 'block', 'delete'].includes(action)) throw new Error('Action must be update, block or delete');
   if (!targetKey) throw new Error('A valid exact deal URL is required');
   if (!channel) throw new Error('Slack channel is required');
   if (typeof options.slackApi !== 'function') throw new Error('Slack API client is required');
@@ -250,6 +250,26 @@ export async function repairQueuedSlackDeal(options = {}) {
 
   if (hasHumanSlackEdit(target)) {
     throw new Error('Queued deal has human Slack edits and will not be overwritten');
+  }
+  if (action === 'block') {
+    const validation = await (options.validate || validateDealsForSlack)([normalizeDealRecord(target)], {
+      now: options.now instanceof Date ? options.now : new Date(),
+    });
+    const blocked = validation.blockedDeals?.[0];
+    if (validation.allowedDeals?.length || blocked?.validity?.status !== 'blocked' || !blocked.validity.reasons?.length) {
+      throw new Error('A currently allowed deal cannot be marked blocked');
+    }
+    // Keep the original facts, queue entry, IDs and manual decision untouched.
+    // Only annotate the exact bot message with the current validator result.
+    const repaired = { ...target, validity: blocked.validity };
+    assertSlackResult(await options.slackApi('chat.update', {
+      channel, ts: cleanText(target.slackTs), text: buildSlackMessage(repaired, Number(target.order || targetIndex + 1)),
+    }), 'mark blocked deal message');
+    const deals = [...queueDeals]; deals[targetIndex] = repaired;
+    return { changed: true, action, deal: repaired, queuePayload: {
+      ...queuePayload, deals, totalDeals: deals.length,
+      updatedAt: (options.now instanceof Date ? options.now : new Date()).toISOString(),
+    } };
   }
   const sourceDeals = ensureDeals(options.sourceDeals)
     .filter((deal) => exactDealKey(deal) === targetKey)
