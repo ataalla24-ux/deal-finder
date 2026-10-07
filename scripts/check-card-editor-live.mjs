@@ -22,6 +22,7 @@ assert.match(results[0].title, /20\s*%/);
 assert.match(results[0].title, /saisonal/i);
 assert.equal(results[0].when, '', 'Unknown Anker offer window must remain unknown');
 assert.match(results[1].title, /2[,.]50/);
+assert.doesNotMatch(results[1].title, /08:00|09:00|Montag|Freitag|Mo-Fr/i);
 assert.match(results[1].when, /Montag bis Freitag/);
 assert.match(results[1].when, /08:00 bis 09:00/);
 console.log('Read-only live model check passed. No feed, queue or Slack messages changed.');

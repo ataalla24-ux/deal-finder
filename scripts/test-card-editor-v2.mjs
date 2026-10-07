@@ -70,7 +70,7 @@ test('no inferred dates, partial schedules or replacement of existing validity',
   assert.equal(partial.expiryDisplayText, undefined);
 });
 test('promotional or incomplete titles never leak into suggestions', () => {
-  for (const title of ['Wien, macht euch bereit für diesen Deal', '20 % Rabatt für', 'Im Aktionszeitraum gibt es 20 % Rabatt', '20 % Rabatt...']) {
+  for (const title of ['Wien, macht euch bereit für diesen Deal', '20 % Rabatt für', 'Im Aktionszeitraum gibt es 20 % Rabatt', '20 % Rabatt...', 'Kaffee nur €2,50 Mo-Fr 08:00-09:00 Uhr']) {
     const next = applyCardEditorial({ ...anker, description: title }, { ...ankerProposal, title, titleEvidence: title }, verified);
     assert.equal(next.title, anker.title);
     assert.equal(next.cardEditorial.suggestions.title, '');
@@ -96,6 +96,15 @@ test('stale cache entries require revalidation', async () => {
   const request = requestFor(ankerProposal);
   await createCardEditor({ apiKey: 'test', cache, clock: () => now.getTime(), request: (...args) => { calls++; return request(...args); } })(anker);
   assert.equal(calls, 2);
+});
+test('previously cached titles that fail current rules are regenerated', async () => {
+  let calls = 0;
+  const cachedProposal = { ...hummelProposal, title: 'Kaffee nur €2,50 Mo-Fr 08:00-09:00 Uhr' };
+  const cache = { [editorialKey(hummel)]: { version: 2, proposal: cachedProposal, titleVerified: true, checkedAt: now.toISOString() } };
+  const request = requestFor(hummelProposal);
+  const next = await createCardEditor({ apiKey: 'test', cache, clock: () => now.getTime(), request: (...args) => { calls++; return request(...args); } })(hummel);
+  assert.equal(calls, 2);
+  assert.equal(next.title, hummelProposal.title);
 });
 test('verification calls count toward budget and failures cannot poison cache', async () => {
   const cache = {};
