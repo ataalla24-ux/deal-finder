@@ -43,6 +43,7 @@ jobs:
           SENTRY_DISABLED=1 node scripts/test-instagram-max-coverage.mjs
           npm run test:instagram-shared-quota
           npm run test:meta-ad-coverage
+          npm run test:meta-recall
 
       - name: Refresh Instagram merchant registry
         run: npm run instagram:merchant-registry
@@ -129,7 +130,7 @@ jobs:
           META_INSTAGRAM_REQUIRE_SOURCE: '1'
           META_INSTAGRAM_SOURCE_FAILURE_COOLDOWN_HOURS: '720'
           META_INSTAGRAM_MEDIA_OCR_ENABLED: '1'
-          META_INSTAGRAM_MEDIA_MAX_POSTS_PER_RUN: '24'
+          META_INSTAGRAM_MEDIA_MAX_POSTS_PER_RUN: '48'
           META_INSTAGRAM_MEDIA_MAX_ASSETS_PER_POST: '4'
           META_INSTAGRAM_MEDIA_MAX_VIDEO_FRAMES: '4'
           META_INSTAGRAM_MEDIA_OCR_CONCURRENCY: '2'
@@ -138,7 +139,7 @@ jobs:
           META_INSTAGRAM_MEDIA_VISION_ENABLED: '1'
           META_INSTAGRAM_MEDIA_VISION_MAX_IMAGES_PER_POST: '2'
           META_INSTAGRAM_MEDIA_VISION_DETAIL: 'low'
-          META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_RUN: ${{ inputs.validation_scan && '2' || '6' }}
+          META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_RUN: ${{ inputs.validation_scan && '2' || '12' }}
           META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_DAY: '48'
           META_INSTAGRAM_MEDIA_LLM_CONCURRENCY: '1'
         run: node scraper/meta-instagram-deals.js

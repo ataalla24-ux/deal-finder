@@ -7,6 +7,9 @@ on:
       - 'scripts/test-instagram-graph*.mjs'
       - 'scripts/test-instagram-shared-quota.mjs'
       - 'scripts/test-meta-ad-coverage.mjs'
+      - 'scripts/test-meta-recall.mjs'
+      - 'scripts/test-discovery-watchdog.mjs'
+      - 'referrals-worker/**'
       - 'scripts/check-meta-instagram-graph.mjs'
       - '.github/workflows/daily-digest.yml'
       - 'scripts/test-meta-instagram-deals.mjs'
@@ -36,6 +39,11 @@ jobs:
         run: |
           npm run test:instagram-shared-quota
           npm run test:meta-ad-coverage
+          npm run test:meta-recall
+          npm run test:discovery-watchdog
+          npm run test:instagram-media-evidence
+          npm run test:social-food-audit
+          npm run test:social-food-slack-review
           npm run test:instagram-food-discovery
           npm run test:instagram-graph-scan
           node scripts/test-meta-instagram-deals.mjs

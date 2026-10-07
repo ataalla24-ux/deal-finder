@@ -1,5 +1,5 @@
 import { sharedInstagramFetch } from './instagram-shared-quota.js';
-import { scanAdLibraryCoverage } from './meta-ad-library-coverage.js';
+import { scanAdLibraryCoverage, hasFreshActiveAdEvidence } from './meta-ad-library-coverage.js';
 import { selectDiscoveryAccounts } from './vienna-merchant-discovery.js';
 import { selectCoverageAccounts, selectCoverageHashtags, accountCoverageSummary } from './instagram-source-scheduler.js';
 import '../sentry/instrument.mjs';
@@ -285,6 +285,7 @@ export function buildConfig(env = process.env, now = new Date()) {
     graphVersion: cleanText(env.META_GRAPH_VERSION || env.INSTAGRAM_GRAPH_VERSION || 'v26.0', 20),
     adLibraryToken: cleanText(env.META_AD_LIBRARY_ACCESS_TOKEN || (booleanEnv(env, 'META_AD_LIBRARY_TRY_INSTAGRAM_TOKEN', false) ? (env.INSTAGRAM_ACCESS_TOKEN || env.META_INSTAGRAM_ACCESS_TOKEN) : '') || '', 700),
     adLibraryFoodOnly: booleanEnv(env, 'META_AD_LIBRARY_FOOD_ONLY', true),
+    adPlatforms: ['INSTAGRAM', 'FACEBOOK'],
     maxAdTermsPerRun: numberEnv(env, 'META_AD_LIBRARY_MAX_TERMS_PER_RUN', 4, 1, 200),
     adCoverageMode: booleanEnv(env, 'META_AD_LIBRARY_MAX_COVERAGE', false),
     adSeedRequests: numberEnv(env, 'META_AD_LIBRARY_SEED_REQUESTS', 8, 1, 200),
@@ -1014,7 +1015,7 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
     ...(Array.isArray(raw?.ad_creative_link_descriptions) ? raw.ad_creative_link_descriptions : []),
     ...(Array.isArray(raw?.ad_creative_link_captions) ? raw.ad_creative_link_captions : []),
   ].map((part) => cleanText(part, 1800)).filter(Boolean).join('\n');
-  if (Array.isArray(raw?.publisher_platforms) && !raw.publisher_platforms.some((platform) => String(platform).toLowerCase() === 'instagram')) return { deal: null, rejection: 'not-instagram-ad' };
+  if (!Array.isArray(raw?.publisher_platforms) || !raw.publisher_platforms.some((platform) => ['instagram', 'facebook'].includes(String(platform).toLowerCase()))) return { deal: null, rejection: 'unsupported-ad-platform' };
   if (config.adLibraryFoodOnly) {
     const foodRejection = getAdFoodBenefitRejection(text);
     if (foodRejection) return { deal: null, rejection: foodRejection };
@@ -1050,7 +1051,7 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
   // Meta snapshot URLs may embed the API token. Persist and post only the
   // public Ad Library permalink, never the credential-bearing response URL.
   const url = `https://www.facebook.com/ads/library/?id=${encodeURIComponent(adId)}`;
-  const brand = cleanText(raw?.page_name, 100) || 'Instagram Anzeige';
+  const brand = cleanText(raw?.page_name, 100) || 'Meta Anzeige';
   const expiry = expiryFromText(text, now, raw?.ad_delivery_stop_time, config.unknownExpiryTtlHours, deliveryStart);
   const expiryRejection = explicitExpiryRejection(expiry, now);
   if (expiryRejection) return { deal: null, rejection: expiryRejection };
@@ -1069,7 +1070,7 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
     expiry,
     viennaEvidence,
     now,
-    source: 'Instagram Anzeige',
+    source: 'Meta Anzeige',
     originSource: 'Meta Ad Library API',
     evidence: {
       metaAdId: cleanText(raw?.id, 120),
@@ -1404,7 +1405,7 @@ function adLibraryUrl(config, searchTerm) {
   url.searchParams.set('ad_reached_countries', JSON.stringify(['AT']));
   url.searchParams.set('ad_active_status', 'ACTIVE');
   url.searchParams.set('ad_type', 'ALL');
-  url.searchParams.set('publisher_platforms', JSON.stringify(['INSTAGRAM']));
+  url.searchParams.set('publisher_platforms', JSON.stringify(config.adPlatforms || ['INSTAGRAM', 'FACEBOOK']));
   url.searchParams.set('search_terms', searchTerm);
   url.searchParams.set('search_type', 'KEYWORD_UNORDERED');
   url.searchParams.set('limit', String(config.adPageSize || 100));
@@ -1438,7 +1439,7 @@ export async function collectAdLibrary(config, now, fetchImpl, previousFailure =
   if (config.adCoverageMode) {
     return scanAdLibraryCoverage({
       terms: terms.slice(0, config.maxAdTermsPerRun), previous: options.previous,
-      scope: `${config.graphVersion}:AT:INSTAGRAM:ACTIVE:ALL:KEYWORD_UNORDERED`, now,
+      scope: `${config.graphVersion}:AT:${(config.adPlatforms || ['INSTAGRAM', 'FACEBOOK']).join(',')}:ACTIVE:ALL:KEYWORD_UNORDERED`, now,
       maxRequests: options.maxRequests ?? config.maxAdRequests,
       maxPagesPerTerm: config.maxAdPagesPerTerm, headsOnly: options.headsOnly,
       onItem: options.onItem, seen: options.seen, deadline: options.deadline,
@@ -2052,6 +2053,25 @@ function graphCandidateAuditRow(entry, outcome, config) {
   };
 }
 
+export function retainMetaOutbox(current, previous, now = new Date(), rejectedIds = new Set()) {
+  const retained = (Array.isArray(previous) ? previous : []).filter((deal) => {
+    if (!deal?.id || rejectedIds.has(deal.id)) return false;
+    const text = [deal.title, deal.description].filter(Boolean).join(' ');
+    if (getMetaNonOfferRejection(text)) return false;
+    const expiry = Date.parse(deal.validUntil || deal.expires || '');
+    if (Number.isFinite(expiry) && expiry < +now) return false;
+    if (deal.originSource === 'Meta Ad Library API') return hasFreshActiveAdEvidence(deal, now) && !getAdFoodBenefitRejection(text);
+    const published = Date.parse(deal.sourcePublishedAt || deal.pubDate || '');
+    return /^meta-ig-/.test(deal.id) && Number.isFinite(published)
+      && published <= +now && +now - published <= 7 * DAY_MS;
+  });
+  // New evidence wins. The dispatcher still validates every row and records
+  // successful delivery separately; merely reading a post is not delivery.
+  const byId = new Map(retained.map((deal) => [deal.id, deal]));
+  for (const deal of current) byId.set(deal.id, deal);
+  return [...byId.values()];
+}
+
 export async function runMetaInstagramCollector(options = {}) {
   const now = options.now instanceof Date ? options.now : new Date();
   const env = options.env || process.env;
@@ -2158,6 +2178,7 @@ export async function runMetaInstagramCollector(options = {}) {
   }
 
   const accepted = [];
+  const rejectedAdIds = new Set();
   const graphEvidenceEntries = [];
   const candidateAudit = [];
   const discoveredThisRun = new Set();
@@ -2168,6 +2189,7 @@ export async function runMetaInstagramCollector(options = {}) {
     seenIds: { ...previousSeenIds },
     acceptedSeenIds: { ...previousAcceptedSeenIds },
     mediaEvidence: { ...(state?.mediaEvidence || {}) },
+    mediaBacklog: Array.isArray(state?.mediaBacklog) ? state.mediaBacklog : [],
     mediaLlmUsage: [...previousLlmUsage],
     sourceFailures: pruneSourceFailures(state?.sourceFailures, now),
     accountPerformance: { ...(state?.accountPerformance || {}) },
@@ -2182,7 +2204,10 @@ export async function runMetaInstagramCollector(options = {}) {
   let adRequests = 0;
   const acceptAd = (raw) => {
     const normalized = normalizeAdLibraryItem(raw, config, now);
-    if (!normalized.deal) { incrementReason(report.rejectionReasons, normalized.rejection); return; }
+    if (!normalized.deal) {
+      if (raw?.id) rejectedAdIds.add(`meta-ad-${raw.id}`);
+      incrementReason(report.rejectionReasons, normalized.rejection); return;
+    }
     accepted.push(normalized.deal);
     report.sources.adLibrary.accepted += 1;
     if (!previousAcceptedSeenIds[normalized.deal.id]) report.sources.adLibrary.newAccepted += 1;
@@ -2272,6 +2297,7 @@ export async function runMetaInstagramCollector(options = {}) {
     await fillAds();
     const media = await (options.enrichGraphMedia || enrichInstagramGraphMedia)(result.raw, config, now, {
       cache: state?.mediaEvidence,
+      backlog: state?.mediaBacklog,
       mediaFetchImpl: options.mediaFetchImpl,
       openAiFetchImpl: options.openAiFetchImpl,
       execFileImpl: options.execFileImpl,
@@ -2284,6 +2310,7 @@ export async function runMetaInstagramCollector(options = {}) {
       },
     });
     nextState.mediaEvidence = media.cache;
+    nextState.mediaBacklog = media.backlog || nextState.mediaBacklog;
     if (Number(media.report.aiCalls) > 0) nextState.mediaLlmUsage.push({ at: now.toISOString(), calls: Number(media.report.aiCalls) });
     report.sources.instagramGraph.mediaEvidence = media.report;
     report.mediaClassificationBudget = {
@@ -2374,16 +2401,20 @@ export async function runMetaInstagramCollector(options = {}) {
     blocked: graphEvidence.blockedPosts,
   };
   report.candidateAudit = candidateAudit
-    .sort((left, right) => Date.parse(right.pubDate || '') - Date.parse(left.pubDate || ''))
-    .slice(0, 500);
+    .sort((left, right) => Date.parse(right.pubDate || '') - Date.parse(left.pubDate || ''));
   report.entityResolution = {
     scoutPosts: candidateAudit.filter((row) => row.scoutUsername).length,
     resolvedMerchants: candidateAudit.filter((row) => row.merchantUsername).length,
     unresolvedScoutPosts: candidateAudit.filter((row) => row.scoutUsername && !row.merchantUsername).length,
   };
 
-  const allVerifiedDeals = dedupeDeals(accepted);
-  for (const deal of allVerifiedDeals) nextState.acceptedSeenIds[deal.id] = now.toISOString();
+  const freshVerifiedDeals = dedupeDeals(accepted);
+  for (const deal of freshVerifiedDeals) nextState.acceptedSeenIds[deal.id] = now.toISOString();
+  const rejectedIds = new Set([...rejectedAdIds, ...candidateAudit.filter((row) => row.status === 'rejected').map((row) => `meta-ig-${row.id}`)]);
+  const allVerifiedDeals = config.outputAllVerified
+    ? retainMetaOutbox(freshVerifiedDeals, lastGoodPayload?.deals, now, rejectedIds)
+    : freshVerifiedDeals;
+  report.outbox = { freshlyVerified: freshVerifiedDeals.length, retained: allVerifiedDeals.length - freshVerifiedDeals.length };
   // Previously observed rows move behind never-observed rows, but are never
   // suppressed. This rotates batches beyond the output cap without treating
   // collection as proof of Slack delivery.
@@ -2426,7 +2457,7 @@ export async function runMetaInstagramCollector(options = {}) {
   }, {});
   report.verifiedDeals = deals.length;
   report.message = deals.length
-    ? `${deals.length} evidence-verified Vienna Instagram deals found (${newDeals.length} net-new, ${deals.length - newDeals.length} previously observed).`
+    ? `${freshVerifiedDeals.length} freshly verified Meta candidates; ${report.outbox.retained} retained for Slack delivery (${newDeals.length} newly observed).`
     : 'Collectors completed, but no new deal passed timestamp, Vienna and offer evidence.';
 
   const payload = {
@@ -2445,7 +2476,7 @@ export async function runMetaInstagramCollector(options = {}) {
     },
     deals,
   };
-  if ((report.sources.instagramGraph.budgetDeferred || report.sources.adLibrary.budgetDeferred) && !report.sources.instagramGraph.fetched && !report.sources.adLibrary.fetched) {
+  if ((report.sources.instagramGraph.budgetDeferred || report.sources.adLibrary.budgetDeferred) && !report.sources.instagramGraph.fetched && !report.sources.adLibrary.fetched && !freshVerifiedDeals.length) {
     report.preservedDeals = lastGoodPayload?.deals?.length || 0;
     report.message = `Shared Meta budget deferred this scan after ${report.selectedAccounts.length} account attempts; preserved ${report.preservedDeals} last-good candidates.`;
     if (options.write !== false) {
@@ -2455,14 +2486,18 @@ export async function runMetaInstagramCollector(options = {}) {
     }
     return { payload: lastGoodPayload || payload, report, state: nextState, graphEvidence: previousGraphEvidence, shouldFail: false };
   }
-  if (allFailed) {
+  if (allFailed && !freshVerifiedDeals.length) {
     report.preservedDeals = lastGoodPayload?.deals?.length || 0;
     report.message = `All configured Meta sources failed; preserved ${report.preservedDeals} last-good deal(s).`;
-    const sourceFailuresChanged = JSON.stringify(nextState.sourceFailures) !== JSON.stringify(pruneSourceFailures(state?.sourceFailures, now))
+    const sourceFailuresChanged = JSON.stringify(nextState.mediaBacklog) !== JSON.stringify(state?.mediaBacklog || [])
+      || JSON.stringify(nextState.mediaEvidence) !== JSON.stringify(state?.mediaEvidence || {})
+      || JSON.stringify(nextState.mediaLlmUsage) !== JSON.stringify(state?.mediaLlmUsage || [])
+      || JSON.stringify(nextState.sourceFailures) !== JSON.stringify(pruneSourceFailures(state?.sourceFailures, now))
       || JSON.stringify(nextState.adLibraryFailure) !== JSON.stringify(state?.adLibraryFailure || null)
       || JSON.stringify(nextState.adLibraryScan) !== JSON.stringify(state?.adLibraryScan || null);
     const failedState = sourceFailuresChanged
-      ? { ...state, version: 4, updatedAt: now.toISOString(), sourceFailures: nextState.sourceFailures, adLibraryFailure: nextState.adLibraryFailure, adLibraryScan: nextState.adLibraryScan }
+      ? { ...state, version: 4, updatedAt: now.toISOString(), sourceFailures: nextState.sourceFailures, adLibraryFailure: nextState.adLibraryFailure, adLibraryScan: nextState.adLibraryScan,
+        mediaBacklog: nextState.mediaBacklog, mediaEvidence: nextState.mediaEvidence, mediaLlmUsage: nextState.mediaLlmUsage }
       : state;
     if (options.write !== false) {
       writeJsonAtomic(config.reportPath, report);

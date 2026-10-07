@@ -76,6 +76,34 @@ function loadPostedSubmissionIds() {
   }
 }
 
+export async function acknowledgeCommunitySubmissions({ apiBase, token, ids, fetchImpl = fetch, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) }) {
+  let updated = 0;
+  const unique = [...new Set(ids.filter(Boolean))];
+  for (let offset = 0; offset < unique.length; offset += 10) {
+    const batch = unique.slice(offset, offset + 10);
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const res = await fetchImpl(`${apiBase}/api/deals/submissions/admin/mark-posted`, {
+          method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: batch }), signal: AbortSignal.timeout(15000),
+        });
+        const body = await res.json().catch(() => null);
+        if (!res.ok || !body?.ok) {
+          const error = new Error(`Community acknowledge failed: ${res.status}`);
+          error.retryable = res.status === 429 || res.status >= 500;
+          throw error;
+        }
+        updated += Number(body.updated || 0);
+        break;
+      } catch (error) {
+        if (attempt === 2 || error.retryable === false) throw error;
+        await sleep(1000 * (2 ** attempt));
+      }
+    }
+  }
+  return updated;
+}
+
 async function main() {
   const apiBase = getApiBase();
   const token = cleanText(process.env.COMMUNITY_SYNC_TOKEN);
@@ -89,24 +117,11 @@ async function main() {
     return;
   }
 
-  const res = await fetch(`${apiBase}/api/deals/submissions/admin/mark-posted`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ ids }),
-  });
-
-  const body = await res.json().catch(() => null);
-  if (!res.ok || !body?.ok) {
-    throw new Error((body && body.error) || `Community acknowledge failed: ${res.status}`);
-  }
-
-  console.log(`✅ community submissions marked queued: ${body.updated || 0}`);
+  const updated = await acknowledgeCommunitySubmissions({ apiBase, token, ids });
+  console.log(`✅ community submissions marked queued: ${updated}`);
 }
 
-main().catch((error) => {
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) main().catch((error) => {
   console.error('❌ ack-community-submissions failed:', error.message);
   process.exit(1);
 });

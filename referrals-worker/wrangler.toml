@@ -8,6 +8,10 @@ TIKTOK_REDIRECT_URI = "https://freefinder-referrals.freefinder-stefan.workers.de
 INSTAGRAM_EXPECTED_USERNAME = "freefinder.at"
 INSTAGRAM_REDIRECT_URI = "https://freefinder-referrals.freefinder-stefan.workers.dev/api/social/instagram/callback"
 INSTAGRAM_GRAPH_API_VERSION = "v26.0"
+META_DISCOVERY_WATCHDOG_ENABLED = "1"
+
+[triggers]
+crons = ["8,23,38,53 * * * *"]
 
 [[kv_namespaces]]
 binding = "REFERRAL_KV"

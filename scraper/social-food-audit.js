@@ -250,12 +250,13 @@ function reviewPriority(row) {
   return row.foodDrinkScore * 20 + ageBonus + mediaBonus + merchantBonus + Number(row.collectorScore || 0) * 0.1;
 }
 
-function selectReviewRows(rows, limit) {
+function selectReviewRows(rows, limit, sendAll = false) {
   const selected = [];
   const sourceCounts = new Map();
   const eligible = rows
     .filter((row) => row.reviewEligible)
     .sort((left, right) => reviewPriority(right) - reviewPriority(left) || left.key.localeCompare(right.key));
+  if (sendAll) return eligible;
   for (const row of eligible) {
     const sourceCount = sourceCounts.get(row.source) || 0;
     const sourceLimit = Math.max(4, Math.ceil(limit * 0.55));
@@ -275,7 +276,8 @@ export function buildSocialFoodArtifacts(options = {}) {
   const sampleLimit = Math.max(50, Math.min(100, Number(options.sampleLimit || 80)));
   const reviewLimit = Math.max(1, Math.min(100, Number(options.reviewLimit || 60)));
   const auditSample = buildStratifiedAuditSample(uniqueRows, sampleLimit);
-  const reviewRows = selectReviewRows(uniqueRows, reviewLimit);
+  const sendAll = options.sendAll === true;
+  const reviewRows = selectReviewRows(uniqueRows, reviewLimit, sendAll);
   const reviewDeals = reviewRows.map((row) => buildSocialFoodReviewDeal(row, now)).filter(Boolean);
   const runMetrics = Array.isArray(options.runMetrics) ? options.runMetrics : [];
   const totalTokens = runMetrics.reduce((sum, row) => (
@@ -308,7 +310,8 @@ export function buildSocialFoodArtifacts(options = {}) {
     observations: {
       total: observations.length,
       uniquePosts: uniqueRows.length,
-      reviewEligible: reviewRows.length,
+      reviewEligible: uniqueRows.filter((row) => row.reviewEligible).length,
+      reviewSelected: reviewRows.length,
     },
     auditSample,
   };
@@ -318,7 +321,7 @@ export function buildSocialFoodArtifacts(options = {}) {
     source: 'social-food-review',
     totalDeals: reviewDeals.length,
     policy: {
-      maxSlackPostsPerDay: DEFAULT_REVIEW_POSTS_PER_DAY,
+      maxSlackPostsPerDay: sendAll ? null : DEFAULT_REVIEW_POSTS_PER_DAY,
       maxPostAgeDays: 7,
       requiresFoodDrinkSignal: true,
       requiresDealSignal: true,
@@ -338,10 +341,24 @@ export function buildAndWriteSocialFoodAudit(options = {}) {
   const feedbackEvents = Array.isArray(feedback.events) ? feedback.events : [];
   const artifacts = buildSocialFoodArtifacts({
     ...options,
+    sendAll: options.sendAll ?? /^(?:1|true|yes)$/i.test(process.env.SOCIAL_FOOD_REVIEW_SEND_ALL || ''),
     ...collected,
     feedbackEvents,
     now,
   });
+  // A newer collector snapshot must not erase an unsent review candidate.
+  // Slack independently rechecks age, hard exclusions and manual decisions.
+  const previous = readJson(options.reviewPath || path.join(docsDir, path.basename(DEFAULT_REVIEW_PATH)), {});
+  const currentRows = dedupeAuditRows(collected.observations);
+  const superseded = new Set(currentRows.filter((row) => !row.reviewEligible).map((row) => row.url));
+  const retained = new Map((previous.deals || []).filter((deal) => {
+    const published = Date.parse(deal.sourcePublishedAt || deal.pubDate || '');
+    return deal.socialFoodReview === true && !superseded.has(deal.url)
+      && published <= +now && published >= +now - 7 * 86400000;
+  }).map((deal) => [deal.url || deal.id, deal]));
+  for (const deal of artifacts.review.deals) retained.set(deal.url || deal.id, deal);
+  artifacts.review.deals = [...retained.values()];
+  artifacts.review.totalDeals = retained.size;
   if (options.write !== false) {
     writeJsonAtomic(options.auditPath || path.join(docsDir, path.basename(DEFAULT_AUDIT_PATH)), artifacts.audit);
     writeJsonAtomic(options.reviewPath || path.join(docsDir, path.basename(DEFAULT_REVIEW_PATH)), artifacts.review);

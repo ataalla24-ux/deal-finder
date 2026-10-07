@@ -86,7 +86,8 @@ assert.ok(tags.every((tag) => config.hashtags.includes(tag)), 'do not expand the
 const ad = { id: 'test-ad', ad_creative_bodies: ['Kebab 2 EUR in Wien'], ad_delivery_start_time: '2026-09-19T08:00:00Z', publisher_platforms: ['INSTAGRAM'], ad_snapshot_url: 'https://facebook.com/ads/archive/render_ad/?access_token=secret', page_name: 'Test Kebab' };
 assert.ok(normalizeAdLibraryItem(ad, config, now).deal);
 assert.doesNotMatch(JSON.stringify(normalizeAdLibraryItem(ad, config, now)), /access_token|secret/);
-assert.equal(normalizeAdLibraryItem({ ...ad, publisher_platforms: ['FACEBOOK'] }, config, now).rejection, 'not-instagram-ad');
+assert.ok(normalizeAdLibraryItem({ ...ad, publisher_platforms: ['FACEBOOK'] }, config, now).deal);
+assert.equal(normalizeAdLibraryItem({ ...ad, publisher_platforms: ['AUDIENCE_NETWORK'] }, config, now).rejection, 'unsupported-ad-platform');
 assert.equal(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Wien Beauty 20% Rabatt'] }, config, now).rejection, 'non-food-ad');
 assert.equal(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Free coffee in Berlin'], target_locations: [{ name: 'Wien' }] }, config, now).rejection, 'missing-vienna-redemption-evidence');
 assert.ok(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Gratis Getr\u00e4nke in Wien am 21.09.2026'] }, config, now).deal);

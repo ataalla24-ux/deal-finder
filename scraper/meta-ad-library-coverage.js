@@ -118,6 +118,6 @@ export function hasFreshActiveAdEvidence(deal, now = new Date()) {
     const url = new URL(deal.url);
     return url.origin === 'https://www.facebook.com' && url.pathname === '/ads/library/'
       && url.searchParams.get('id') === String(evidence.metaAdId)
-      && evidence.platforms?.some((platform) => String(platform).toLowerCase() === 'instagram');
+      && evidence.platforms?.some((platform) => ['instagram', 'facebook'].includes(String(platform).toLowerCase()));
   } catch { return false; }
 }

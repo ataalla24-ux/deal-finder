@@ -11,11 +11,11 @@ event snapshot from before the preceding serialized job saved its scan state.
 
 - All Graph callers still use the atomic shared quota branch. No runner bypasses
   reservations, including health checks, retries and field fallbacks.
-- Production defaults to 190 admitted HTTP requests per rolling hour across
-  collectors, reserving headroom against the 200-call single-user planning
-  baseline. This is an operational ceiling, not a claim about the exact quota
-  of our user token. Meta may count expanded requests differently, and CPU/time
-  usage may limit throughput first.
+- Production starts at 190 admitted HTTP requests per rolling hour across
+  collectors. Fresh, valid Meta usage headers can increase shared capacity up
+  to the 1,000-request engineering guard. Missing telemetry never permits growth.
+  These are operational controls, not a claim about the exact token quota.
+  Meta may count expanded requests differently; CPU/time usage can limit first.
 - Every response checks the maximum of call-count, CPU and processing-time
   usage. At 95% the runners share a ten-minute pause before a new probe.
   Actual rate-limit errors pause for at least an hour, honoring longer
@@ -23,7 +23,7 @@ event snapshot from before the preceding serialized job saved its scan state.
 - Hourly jobs may wait up to six minutes for expiring reservations. Reservations
   remain valid for their five-minute spending lease plus a full rolling hour;
   an old runner's delayed calls cannot disappear from accounting early.
-- The main collector spaces request starts by at least fifteen seconds. Other
+- The main collector spaces request starts by at least three seconds. Other
   Graph users can claim shared slots during the scan instead of finding the
   whole hour exhausted by one burst. A dispatch-only validation mode bounds a
   short live check at 64 accounts, 80 requests and two paid AI classifications;
@@ -52,7 +52,7 @@ event snapshot from before the preceding serialized job saved its scan state.
   rejected sources: weekly. Existing source-failure/moderation blocks remain.
 - Fetch each account's newest page before deep paging. Reserve requests for
   hashtags, return unused reservations to more accounts, then use leftover
-  capacity for saved deeper-page cursors. Actual calls, not the 180-account
+  capacity for saved deeper-page cursors. Actual calls, not the 300-account
   planning target, determine how much work can complete.
 - Preserve up to 5,000 account histories/checkpoints, preventing large catalogs
   from repeatedly forgetting sources after the previous 500/300-entry caps.
@@ -73,14 +73,48 @@ ordinary tags after twelve and empty tags after twenty-four. Broad `wien` and
 `vienna` do not both consume slots in one run. Repeated queries still consume
 the hourly API budget even though they do not add a new distinct weekly tag.
 
-OCR remains bounded at 24 posts and paid media classification at six calls per
+OCR is bounded at 48 posts and paid media classification at twelve calls per
 hourly run AND 48 recorded classification calls per rolling 24 hours in this
 collector. Persisted call history prevents a new hourly job from resetting the
 daily ceiling; exhausted classification budget does not block Graph or OCR.
 Other collectors' OpenAI usage is separate. Call count is not a dollar cap;
-token lengths vary. No billing,
-automatic recharge, model, or purchase setting is changed. The output cap is
-120 candidates; central Slack deduplication/manual moderation still applies.
+token lengths vary. No billing, automatic recharge, model or purchase setting
+is changed. All verified candidates are forwarded without the old output cap;
+central Slack deduplication/manual moderation still applies.
+
+## Durable discovery and delivery (2026-10-07)
+
+- Ad Library searches now include Facebook and Instagram, deduplicated by ad ID.
+  Fresh ACTIVE evidence is bound to the exact ad ID, URL and delivery date.
+  The combined platform scope restarts query cursors once on rollout.
+- Unprocessed organic media stays in a seven-day backlog with publication time,
+  approved CDN URLs and minimal source context. Current API URLs replace older
+  ones. Images, tokens and raw model requests are never saved in that backlog.
+  Per-run/daily AI limits and transient failures leave candidates pending.
+  Eight-minute media scheduling budget leaves time to save checkpoints.
+- Older waiting media gains priority so fresh batches cannot starve it forever.
+  Expired media URLs remain a retrieval limitation, not fabricated evidence.
+- Verified source output survives successful empty scans while still valid.
+  New rejection evidence supersedes retained candidates. Retention cannot
+  extend publication time or the 24-hour ACTIVE-ad evidence window.
+- `SOCIAL_FOOD_REVIEW_SEND_ALL=1` removes the old 16/day and source-share caps
+  for eligible social food review. Recent, direct, food/deal/Vienna evidence is
+  still required; hard exclusions, deduplication and manual approval remain.
+  A new collector snapshot does not erase pending review candidates.
+- Community delivery acknowledgement uses ten-item batches and bounded retries.
+  Already queued or manually decided submissions are not rewritten/reset.
+- The referral Worker checks GitHub four times hourly. It dispatches discovery
+  only after a 60-minute scheduling gap, or central delivery after 30 minutes,
+  never alongside an active run. Explicit repository/workflow pauses are
+  respected. GitHub dispatch errors are recorded independently per workflow;
+  ambiguous outcomes cool down before retry. Both workflows retain existing
+  concurrency, quotas and validation. Protected health: `/api/discovery/watchdog`.
+
+No API exposes every local story, private profile or unindexed post. Ad image
+and Reel-only creative extraction is not added here. The discovery token's
+configured expiry is 2026-10-21; health alerts remain active, but no unsupported
+automatic renewal or new permission is claimed. Unreviewed Slack candidates
+are not quality failures and are not automatically published into the app.
 
 ## Verification
 

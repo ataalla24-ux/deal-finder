@@ -4175,6 +4175,17 @@ function redirectReferralToWebsite(code, requestUrl) {
 }
 
 export default {
+  async scheduled(_controller, env) {
+    const { runDiscoveryWatchdog } = await import('./discovery-watchdog.js');
+    try {
+      await runDiscoveryWatchdog(env);
+    } catch (error) {
+      await putJsonKV(env, 'watchdog:discovery:health', {
+        checkedAt: new Date().toISOString(), status: 'failed', error: String(error.message).slice(0, 200),
+      });
+      throw error;
+    }
+  },
   async fetch(request, env) {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '') || '/';
@@ -4185,6 +4196,11 @@ export default {
 
     if (path === '/health' || path === '/api/health') {
       return json({ ok: true, service: 'freefinder-referrals' });
+    }
+
+    if (path === '/api/discovery/watchdog' && request.method === 'GET') {
+      if (!requireCommunitySync(request, env) && !requireAdmin(request, env)) return invalid('Unauthorized', 401);
+      return json({ ok: true, watchdog: await getJsonKV(env, 'watchdog:discovery:health') });
     }
 
     if (request.method === 'GET' && path.startsWith('/d/')) {
@@ -4590,15 +4606,17 @@ export default {
         ? body.ids.map((value) => cleanShortText(value, 80)).filter(Boolean)
         : [];
       if (ids.length === 0) return invalid('Missing submission ids');
+      if (ids.length > 10) return invalid('At most 10 submission ids per request');
 
       let updated = 0;
       for (const id of ids) {
         const existing = await getJsonKV(env, dealSubmissionKey(id));
         if (!existing || !existing.id) continue;
+        if (normalizeSubmissionStatus(existing.status) !== 'pending') continue;
         const next = {
           ...existing,
           status: 'queued',
-          postedAt: Date.now(),
+          postedAt: existing.postedAt || Date.now(),
           updatedAt: Date.now(),
         };
         await putJsonKV(env, dealSubmissionKey(id), next);

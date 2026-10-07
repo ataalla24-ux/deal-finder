@@ -119,6 +119,7 @@ const KEY4_REVIEW_ARTIFACT_MAX_AGE_HOURS = boundedInteger(
   168,
 );
 const SOCIAL_FOOD_REVIEW_ENABLED = /^(?:1|true|yes)$/i.test(cleanText(process.env.SOCIAL_FOOD_REVIEW_ENABLED));
+const SOCIAL_FOOD_REVIEW_SEND_ALL = /^(?:1|true|yes)$/i.test(cleanText(process.env.SOCIAL_FOOD_REVIEW_SEND_ALL));
 const SOCIAL_FOOD_REVIEW_MAX_PER_DAY = boundedInteger(
   process.env.SOCIAL_FOOD_REVIEW_MAX_PER_DAY,
   16,
@@ -757,10 +758,10 @@ function writeSocialFoodReviewState(state) {
 }
 
 function selectSocialFoodReviewDeals(deals, state, options = {}) {
-  const maxPerDay = boundedInteger(options.maxPerDay, 16, 1, 30);
+  const maxPerDay = options.sendAll === true ? null : boundedInteger(options.maxPerDay, 16, 1, 30);
   const normalizedState = normalizeSocialFoodReviewState(state, options.now || new Date());
   const postedKeys = new Set(normalizedState.posted.map((entry) => entry.key));
-  const remaining = Math.max(0, maxPerDay - normalizedState.posted.length);
+  const remaining = maxPerDay === null ? ensureArray(deals).length : Math.max(0, maxPerDay - normalizedState.posted.length);
   const selected = ensureArray(deals)
     .filter((deal) => {
       const key = dealPostKey(deal) || cleanText(deal?.socialFoodAuditKey) || cleanText(deal?.id);
@@ -1925,7 +1926,7 @@ async function main() {
   const socialFoodReviewSelection = selectSocialFoodReviewDeals(
     socialFoodCrossLaneFilter.deals,
     socialFoodReviewState,
-    { maxPerDay: SOCIAL_FOOD_REVIEW_MAX_PER_DAY, now: runNow },
+    { maxPerDay: SOCIAL_FOOD_REVIEW_MAX_PER_DAY, sendAll: SOCIAL_FOOD_REVIEW_SEND_ALL, now: runNow },
   );
   const socialFoodReviewDeals = socialFoodReviewSelection.deals;
 
@@ -1954,7 +1955,7 @@ async function main() {
   if (SOCIAL_FOOD_REVIEW_ENABLED) {
     console.log(
       `🍽️ Social Food Review: ${socialFoodReviewDeals.length}/${queuedSocialFoodReviewDeals.length} Kandidaten, `
-      + `${socialFoodReviewSelection.remainingBeforeSelection}/${socialFoodReviewSelection.maxPerDay} Tagesplätze vor Auswahl`,
+      + (SOCIAL_FOOD_REVIEW_SEND_ALL ? 'ohne Tageslimit, mit Duplikatschutz' : `${socialFoodReviewSelection.remainingBeforeSelection}/${socialFoodReviewSelection.maxPerDay} Tagesplätze vor Auswahl`),
     );
     const duplicateReviewsRemoved = socialFoodReviewDedupe.removed + socialFoodCrossLaneFilter.removed;
     if (duplicateReviewsRemoved > 0) {
@@ -2096,7 +2097,7 @@ async function main() {
   if (socialFoodReviewDeals.length > 0) {
     const reviewHeaderTs = await postSlackMessage(
       `🍽️ *FreeFinder Wien – Social Food Review* — Versand laeuft (${socialFoodReviewDeals.length} Kandidaten vorgesehen)\n` +
-      `🧪 Maximal ${SOCIAL_FOOD_REVIEW_MAX_PER_DAY} pro Wiener Kalendertag; nur aktuelle direkte Posts mit Food-, Deal- und Wien-Signal.\n` +
+      (SOCIAL_FOOD_REVIEW_SEND_ALL ? 'Alle geeigneten neuen Prüfkandidaten, ohne Tageslimit.\n' : `🧪 Maximal ${SOCIAL_FOOD_REVIEW_MAX_PER_DAY} pro Wiener Kalendertag; nur aktuelle direkte Posts mit Food-, Deal- und Wien-Signal.\n`) +
       `_Originalpost prüfen, bei Bedarf per \`edit\` korrigieren, dann ✅ freigeben oder ❌ als unpassend markieren._`,
     );
 

@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { extractLowFoodPrice, isFoodDrinkSource } from './food-discovery-utils.js';
+import { mergeMediaBacklog, saveMediaBacklog } from './instagram-media-backlog.js';
 
 const execFileAsync = promisify(execFile);
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -663,7 +664,9 @@ async function mapWithConcurrency(items, limit, worker) {
 }
 
 export async function enrichInstagramGraphMedia(entries, config, now = new Date(), options = {}) {
-  const safeEntries = Array.isArray(entries) ? entries : [];
+  const backlog = mergeMediaBacklog(Array.isArray(entries) ? entries : [], options.backlog, now, config.maxOrganicAgeWithExpiryDays);
+  const safeEntries = backlog.entries;
+  const deadline = options.deadline ?? Date.now() + 8 * 60000;
   const cache = pruneMediaCache(options.cache, now, config.mediaCacheTtlDays);
   const llmConfigured = Boolean(config.mediaLlmEnabled && config.openAiApiKey);
   const visionConfigured = Boolean(config.mediaVisionEnabled && llmConfigured);
@@ -708,8 +711,17 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     warningCounts: {},
     llmConfigured,
     visionConfigured,
+    backlogResumed: backlog.resumed,
+    backlogExpired: backlog.expired,
+    runtimeDeferred: 0,
   };
-  if (!mediaAnalysisEnabled) return { entries: safeEntries, cache, report };
+  const finish = () => {
+    const pending = saveMediaBacklog(safeEntries, cache, now, config, options.shouldAnalyzeEntry);
+    report.backlogPending = pending.length;
+    report.backlogOldestAt = pending.map((entry) => entry.mediaQueuedAt).sort()[0] || null;
+    return { entries: safeEntries, cache: pruneMediaCache(cache, now, config.mediaCacheTtlDays), backlog: pending, report };
+  };
+  if (!mediaAnalysisEnabled) return finish();
 
   const tools = options.tools || await detectMediaTools(options);
   report.tools = tools;
@@ -717,7 +729,7 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
   if (!report.ocrAvailable && !visionConfigured) {
     report.status = 'unavailable';
     report.errors.push('tesseract-unavailable');
-    return { entries: safeEntries, cache, report };
+    return finish();
   }
 
   const maxAgeMs = config.maxOrganicAgeWithExpiryDays * DAY_MS;
@@ -757,12 +769,17 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
   }
 
   const selected = uncached
-    .sort((left, right) => entryMediaPriority(right, now) - entryMediaPriority(left, now))
+    .sort((left, right) => {
+      const score = (entry) => entryMediaPriority(entry, now)
+        + Math.max(0, (+now - (finiteDateMs(entry.mediaLastAttemptAt || entry.mediaQueuedAt) || +now)) / 3600000) * 20;
+      return score(right) - score(left);
+    })
     .slice(0, config.mediaMaxPostsPerRun);
   report.selected = selected.length;
   const analyzeItem = options.analyzeItem || analyzeInstagramMediaItem;
   const analysisStartedAt = Date.now();
   const results = await mapWithConcurrency(selected, config.mediaOcrConcurrency, async (entry) => {
+    if (Date.now() >= deadline) { report.runtimeDeferred += 1; return null; }
     const itemStartedAt = Date.now();
     try {
       return await analyzeItem(entry.item, { ...config, mediaVisionEnabled: visionConfigured }, {
@@ -789,6 +806,7 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
   const aiTasks = [];
   for (let index = 0; index < selected.length; index += 1) {
     const entry = selected[index];
+    if (!results[index]) continue;
     const result = results[index] || {};
     const visionImages = (Array.isArray(result.visionImages) ? result.visionImages : [])
       .map(safeInputImage)
@@ -851,6 +869,7 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
 
   const aiStartedAt = Date.now();
   await mapWithConcurrency(aiTasks, report.aiConcurrency, async ({ entry, evidence, visionImages }) => {
+    if (Date.now() >= deadline) { evidence.aiPending = true; report.runtimeDeferred += 1; return; }
     if (circuit) {
       report.aiSkippedCircuitOpen += 1;
       evidence.aiError = circuit.message;
@@ -893,6 +912,7 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
 
   for (const entry of selected) {
     const evidence = entry.item?._mediaEvidence;
+    if (evidence) entry.mediaLastAttemptAt = now.toISOString();
     if (evidence && !evidence.retryableFailure) cache[mediaId(entry.item)] = evidence;
   }
   for (const entry of safeEntries) {
@@ -915,5 +935,5 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
   report.errors = [...new Set(report.errors.filter(Boolean))].slice(0, 20);
   report.warnings = [...new Set(report.warnings.filter(Boolean))].slice(0, 20);
   report.status = report.errors.length || report.aiCircuit ? 'degraded' : 'ok';
-  return { entries: safeEntries, cache: pruneMediaCache(cache, now, config.mediaCacheTtlDays), report };
+  return finish();
 }

@@ -77,7 +77,7 @@ const actualAdapter = await collectAdLibrary({ ...config, adSearchTerms: ['Wien 
   assert.equal(query.searchParams.get('access_token'), 'private-token');
   assert.equal(query.searchParams.get('limit'), '5000');
   assert.equal(query.searchParams.get('ad_active_status'), 'ACTIVE');
-  assert.equal(query.searchParams.get('publisher_platforms'), '["INSTAGRAM"]');
+  assert.equal(query.searchParams.get('publisher_platforms'), '["INSTAGRAM","FACEBOOK"]');
   assert.equal(query.searchParams.get('ad_reached_countries'), '["AT"]');
   apiCalls += 1;
   return Response.json({ data: [{ id: String(apiCalls) }], ...(apiCalls < 12 ? { paging: { next: next(`cursor${apiCalls}`) } } : {}) });
@@ -193,7 +193,7 @@ try {
     META_AD_LIBRARY_MAX_PAGES_PER_TERM: '10', META_AD_LIBRARY_PAGE_SIZE: '5000', META_INSTAGRAM_MAX_RETRIES: '0',
     META_INSTAGRAM_OUTPUT_ALL_VERIFIED: '1', META_INSTAGRAM_MAX_DEALS_PER_RUN: '1',
     META_INSTAGRAM_OUTPUT_PATH: path.join(tmp, 'output.json'), META_INSTAGRAM_REPORT_PATH: path.join(tmp, 'report.json'),
-    META_INSTAGRAM_STATE_PATH: path.join(tmp, 'state.json'), INSTAGRAM_GRAPH_EVIDENCE_PATH: path.join(tmp, 'evidence.json') };
+    META_INSTAGRAM_STATE_PATH: path.join(tmp, 'state.json'), META_INSTAGRAM_GRAPH_EVIDENCE_PATH: path.join(tmp, 'evidence.json') };
   const paths = { watchlistPath: path.join(tmp, 'none'), registryPath: path.join(tmp, 'none'), candidatePaths: [] };
   const order = [];
   const collected = await runMetaInstagramCollector({ env, now, paths, fetchImpl: async (url) => {

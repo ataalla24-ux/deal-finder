@@ -198,12 +198,13 @@ function isSocialPostDeal(deal) {
     if (!/(^|\.)facebook\.com$/i.test(hostname)) return false;
     try {
       const pathname = new URL(deal.url).pathname;
-      return /\/(?:posts|videos|reel|watch)\/|\/(?:permalink|story)\.php(?:\/|$)/i.test(pathname);
+      return /\/(?:posts|videos|reel|watch)\/|\/(?:permalink|story)\.php(?:\/|$)|^\/ads\/library\/?$/i.test(pathname);
     } catch {
       return false;
     }
   })();
-  return /(^|[^\w])(tiktok|instagram)([^\w]|$)/i.test(signal)
+  return deal.originSource === 'Meta Ad Library API' || deal.source === 'Meta Anzeige'
+    || /(^|[^\w])(tiktok|instagram)([^\w]|$)/i.test(signal)
     || /(^|\.)tiktok\.com$/i.test(hostnameFromUrl(deal.url))
     || /(^|\.)instagram\.com$/i.test(hostnameFromUrl(deal.url))
     || facebookPostPath;
@@ -500,7 +501,7 @@ function hasLowProductPrice(value) {
 
 function getConcreteOfferDecision(deal, health = null) {
   const offerText = getOfferText(deal, health);
-  const isMetaAd = deal.originSource === 'Meta Ad Library API' || deal.source === 'Instagram Anzeige';
+  const isMetaAd = deal.originSource === 'Meta Ad Library API' || ['Instagram Anzeige', 'Meta Anzeige'].includes(deal.source);
   let hasAdFoodBenefit = false;
   if (isMetaAd && deal.evidence?.foodBenefitRequired !== false) {
     // Use saved creative text, not a generic Ad Library page preview that could
@@ -1096,7 +1097,7 @@ async function validateDeal(deal, context) {
     if (metaNonOffer) reasons.push(`Kein konkreter Meta-Deal (${metaNonOffer})`);
   }
   const warnings = [];
-  if (freshlyActiveAd) warnings.push('Aktive Instagram-Anzeige frisch durch Meta bestätigt; Kampagnenstart bleibt unverändert, Ablauf und relative Aktionsdaten werden separat geprüft');
+  if (freshlyActiveAd) warnings.push('Aktive Meta-Anzeige frisch durch Meta bestätigt; Kampagnenstart bleibt unverändert, Ablauf und relative Aktionsdaten werden separat geprüft');
   if (reviewedCommunity && deal.communityApprovalIssue) reasons.push(deal.communityApprovalIssue);
   if (officialFood && !officialFood.ok) reasons.push(`Offizielle Aktion nicht erneut bestätigt (${officialFood.reason})`);
   if (officialFood?.current) warnings.push('Aktueller Angebotsblock auf offizieller Anbieterseite erneut bestätigt; Abrufdatum ist kein Veröffentlichungsdatum');

@@ -46,6 +46,8 @@ const summary = [
   `- Instagram Graph: ${report.sources?.instagramGraph?.status || 'unknown'} (${report.sources?.instagramGraph?.fetched || 0} fetched)`,
   `- Media OCR: ${report.sources?.instagramGraph?.mediaEvidence?.status || 'not-run'} (${report.sources?.instagramGraph?.mediaEvidence?.withOcrText || 0} with text)`,
   `- OCR cache hits: ${report.sources?.instagramGraph?.mediaEvidence?.cached || 0}`,
+  `- Durable media backlog: ${report.sources?.instagramGraph?.mediaEvidence?.backlogPending || 0} pending, ${report.sources?.instagramGraph?.mediaEvidence?.backlogResumed || 0} resumed, ${report.sources?.instagramGraph?.mediaEvidence?.backlogExpired || 0} passed the source-age window`,
+  `- Collector outbox: ${report.outbox?.freshlyVerified || 0} freshly verified, ${report.outbox?.retained || 0} retained for delivery`,
   `- AI media classifications: ${report.sources?.instagramGraph?.mediaEvidence?.aiCalls || 0} (${report.sources?.instagramGraph?.mediaEvidence?.aiAccepted || 0} accepted)`,
   `- AI availability: ${report.sources?.instagramGraph?.mediaEvidence?.aiCircuit?.code || 'no global failure recorded'}`,
   `- Sources on cooldown: ${(report.sources?.instagramGraph?.skippedCooldown?.accounts || 0) + (report.sources?.instagramGraph?.skippedCooldown?.hashtags || 0)}`,
