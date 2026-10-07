@@ -156,6 +156,15 @@ const validate = (candidate) => validateDealsForSlack([normalizeDeal(candidate, 
   now, inspectDealUrlHealth: async (url) => ({ ok: true, status: 200, finalUrl: url, contentHints: {} }),
 });
 assert.equal((await validate(deal)).allowedDeals.length, 1, 'fresh ACTIVE evidence survives central Slack validation');
+const queuedAd = (await validate(deal)).allowedDeals[0];
+assert.equal(queuedAd.pubDateSource, 'meta-ad-delivery-start', 'validation preserves delivery provenance for the Slack queue');
+assert(hasFreshActiveAdEvidence(queuedAd, now));
+assert.equal((await validate(queuedAd)).allowedDeals.length, 1, 'a queued active offer survives repeated validation');
+const legacyQueuedAd = { ...queuedAd, pubDateSource: 'deal.meta-ad-delivery-start', sourcePublishedAtSource: 'deal.meta-ad-delivery-start' };
+assert.equal((await validate(legacyQueuedAd)).allowedDeals.length, 1, 'the exact prior validator prefix is recognized without timestamp rewriting');
+assert.equal((await validate({ ...legacyQueuedAd, pubDateSource: 'fake.meta-ad-delivery-start', sourcePublishedAtSource: 'fake.meta-ad-delivery-start' })).allowedDeals.length, 0);
+assert.equal((await validate({ ...queuedAd, evidence: { ...queuedAd.evidence, activeAdCheckedAt: '2026-10-01T09:00:00Z' } })).allowedDeals.length, 0,
+  'queue roundtrips cannot extend stale ACTIVE evidence');
 assert.equal((await validate({ ...deal, evidence: { ...deal.evidence, activeAdCheckedAt: '2026-10-01T09:00:00Z' } })).allowedDeals.length, 0);
 assert.equal((await validate({ ...deal, originSource: 'Instagram' })).allowedDeals.length, 0);
 assert.equal((await validate({ ...deal, pubDate: '', pubDateSource: '', sourcePublishedAt: '', sourcePublishedAtSource: '' })).allowedDeals.length, 0);

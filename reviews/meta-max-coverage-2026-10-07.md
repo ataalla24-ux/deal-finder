@@ -74,8 +74,82 @@ growth, missing/invalid telemetry, high-sample aging, longest recovery time,
 active/stale/mismatched ad evidence, expired prior-year offers, old relative
 offers, future offers, uncapped verified output and seed/organic/fill ordering.
 
-Live verification is recorded separately after deployment. Local stubbed URL
-checks are not proof that Facebook ad permalinks return HTTP 200 from GitHub.
+Local stubbed URL checks are not proof that Facebook ad permalinks return HTTP
+200 from GitHub. Live verification is recorded below.
+
+## Deployment and actual live results
+
+Core changes were pushed to `main` in `ce987facfc4e`, `4d049dd36dfc` and
+`593f56a40182`. Consumer-food and incidental-offer corrections followed in
+`42e482402eae` and `dd8fa6fdf110`.
+
+- Bounded collector, success:
+  https://github.com/ataalla24-ux/deal-finder/actions/runs/37665090905
+  Accepted the 5,000-row page configuration, read 210 unique ads and 1,324
+  organic posts with 96 actual wrapped requests. OCR completed 24/24 posts;
+  two successful AI calls used 4,706 tokens. Five deduplicated candidates
+  included false positives and previously known offers: this is NOT proof of
+  five new good food deals. A coffee-shop business course was blocked before
+  Slack posting after this live check.
+- One-call, read-only Ad Library diagnostic, success:
+  https://github.com/ataalla24-ux/deal-finder/actions/runs/37665465907
+  Read 52 ads without AI calls or Slack messages.
+- Normal maximum-coverage collector, success with factual degraded report:
+  https://github.com/ataalla24-ux/deal-finder/actions/runs/37666055266
+  Read 151 unique ads and 2,092 organic posts. Shared capacity increased from
+  190 to 237 rolling-hour reservations, then stopped at 95% Meta usage.
+  There were 109 actual wrapped requests and 110 local reservations; other
+  participating workers also used the shared rolling window. Meta recovery
+  was saved until 18:38:46 UTC. Sixteen unfinished ad queries and 38 due heads
+  remained persisted. These two runs overlap and must not be summed as daily
+  unique coverage. The three output rows were staff-recruitment ads mentioning
+  free breakfast, not consumer food deals; the new gate rejects all three.
+- Final correction CI, success on `dd8fa6fdf110`:
+  https://github.com/ataalla24-ux/deal-finder/actions/runs/37669061986
+  Seven coverage/integration suites and read-only real GitHub quota-storage
+  verification passed. Local 15-suite reliability, food discovery, shared
+  quota and Slack repair tests were repeated successfully.
+
+The ordinary verified Slack path has no daily count cap. The separate lane
+for uncertain social-food review candidates retains its existing 16/day cap.
+Neither model-call budgets nor manual approval requirements were removed.
+
+## Live-discovered quality defects and safe Slack correction
+
+The revised checks reject coffee-shop founder courses, employee-only meals,
+free access to food stalls (not free food), and normal-priced painting courses
+without a genuine saving. Discounted courses and explicit public food gifts
+remain covered by positive regressions. The incidental organic check applies
+to Meta Instagram origins, not to Firecrawl scraper behavior.
+
+Three exact bot messages that escaped during earlier live runs were updated
+in place with current automatic-block reasons. No messages were deleted and
+no manual rejection/approval learning signal was fabricated:
+
+- `meta-ig-18103178105573063`, circus/food-stall access:
+  https://github.com/ataalla24-ux/deal-finder/actions/runs/37669064634
+- `meta-ig-18642115168046564`, normal-priced painting activity:
+  https://github.com/ataalla24-ux/deal-finder/actions/runs/37669067536
+- `meta-ad-1059890699987314`, employee breakfast in a job advertisement:
+  https://github.com/ataalla24-ux/deal-finder/actions/runs/37669088601
+
+All three repair runs succeeded. Comparison before/after proved all 383 queue
+entries remained, with only `validity` changed on those three target rows.
+Original facts, message timestamps, other rows and human decisions were
+unchanged. The genuinely discounted SoulArtMessage candidate was left alone.
+
+An additional roundtrip regression preserves the exact ad-delivery provenance
+through validation and recognizes the prior validator's single `deal.` prefix.
+Repeated validation cannot extend a stale ACTIVE check or substitute a fake
+campaign-start date. Conditional authenticated GitHub reads use verified ETags
+and clone the last state on 304, while still checking global pause before every
+Meta request. This avoids unnecessary quota-store primary-rate consumption;
+compare-and-swap reservations and conflict handling remain authoritative.
+
+Central dispatch actually delivered its messages, but run 37666519485 failed
+afterward on the pre-existing community-acknowledgement HTTP 500. This work does
+not claim that unrelated endpoint or the entire production pipeline is green.
+https://github.com/ataalla24-ux/deal-finder/actions/runs/37666519485
 
 ## Limits
 

@@ -814,6 +814,7 @@ function getExpiryDecision(expiryCandidates, now) {
 
 function isTrustedPublicationSource(value) {
   const source = cleanText(value);
+  if (/^(?:deal\.)?meta-ad-delivery-start$/.test(source)) return true;
   return Boolean(source)
     && !SYNTHETIC_PUBLICATION_SOURCE_PATTERN.test(source)
     && TRUSTED_PUBLICATION_SOURCE_PATTERN.test(source);
