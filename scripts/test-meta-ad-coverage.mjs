@@ -130,6 +130,14 @@ await recovering('unused');
 quotaClock += 3 * 60000; reportedUsage = 3;
 for (let i = 0; i < 5; i += 1) await recovering('unused');
 assert(recovering.quotaStats.limitPerHour > 4, 'an old high sample must age out, not be perpetually refreshed by lower observations');
+assert.equal((await store.read()).state.metaUsage.highestPercent, 3);
+store = makeStore();
+const nearLimit = createSharedQuotaFetch(async () => Response.json({}, { headers: { 'x-app-usage': '{"call_count":90}' } }), {
+  store, clock: () => +now, maxRequestsPerHour: 190, blockSize: 1, adaptiveMaxRequestsPerHour: 1000, usageThreshold: 95,
+});
+for (let i = 0; i < 191; i += 1) await nearLimit('unused');
+assert(nearLimit.quotaStats.limitPerHour > 190 && nearLimit.quotaStats.limitPerHour < 200,
+  'small telemetry-based growth near capacity, not a blind 25% jump or permanent 190-call cap');
 store = makeStore();
 const throttle = createSharedQuotaFetch(async () => Response.json({}, { headers }), { store, clock: () => +now });
 await throttle('unused');

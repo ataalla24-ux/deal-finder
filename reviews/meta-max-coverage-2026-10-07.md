@@ -31,8 +31,10 @@ Meta does not publish a fixed numerical call allowance for user tokens. The
 and cannot be multiplied by our source-directory size.
 
 One shared CAS quota ledger coordinates every participating Graph collector.
-The existing 190-reservation operational base may grow by 25% steps when fresh
-Meta telemetry is below 70%. Peers adopt the committed common capacity. Missing,
+The existing 190-reservation operational base may grow by up to 25% per step
+against fresh Meta telemetry. Steps get smaller near the 95% stop threshold;
+growth targets two percentage points below that stop. Peers adopt the committed
+common capacity. Missing,
 malformed or stale usage headers do not authorize growth. Samples expire after
 two minutes rather than perpetually retaining old high readings. Production's
 1,000-request rolling-hour ceiling is an engineering runaway guard, NOT a Meta

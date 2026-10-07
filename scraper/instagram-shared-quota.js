@@ -122,11 +122,12 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
       // All jobs adopt the same committed capacity; missing headers never imply
       // unlimited quota. The upper bound is ours, not a published Meta limit.
       const sample = state.metaUsage;
+      const growthFactor = sample?.highestPercent > 0 ? Math.min(1.25, (threshold - 2) / sample.highestPercent) : 1.25;
       const canGrow = adaptiveMax > effectiveLimit && used >= effectiveLimit
-        && sample?.reported === true && Number.isFinite(sample.highestPercent) && sample.highestPercent < Math.min(70, threshold - 10)
+        && sample?.reported === true && Number.isFinite(sample.highestPercent) && sample.highestPercent < threshold - 2
         && Number.isFinite(sample.at) && sample.at <= now && now - sample.at < 2 * 60000;
       if (canGrow) {
-        effectiveLimit = Math.min(adaptiveMax, Math.max(used + block, Math.ceil(effectiveLimit * 1.25)));
+        effectiveLimit = Math.min(adaptiveMax, Math.max(used + block, Math.floor(effectiveLimit * growthFactor)));
         if (!await store.compareAndSwap(revision, { ...state, reservations, adaptiveQuota: { limit: effectiveLimit, updatedAt: now } })) continue;
         stats.adaptiveIncreases += 1;
         continue;
