@@ -6,6 +6,7 @@ on:
       - 'scraper/**'
       - 'scripts/test-instagram-graph*.mjs'
       - 'scripts/test-instagram-shared-quota.mjs'
+      - 'scripts/test-meta-ad-coverage.mjs'
       - 'scripts/check-meta-instagram-graph.mjs'
       - '.github/workflows/daily-digest.yml'
       - 'scripts/test-meta-instagram-deals.mjs'
@@ -34,6 +35,8 @@ jobs:
       - name: Test pagination and both collector integrations without network credentials
         run: |
           npm run test:instagram-shared-quota
+          npm run test:meta-ad-coverage
+          npm run test:instagram-food-discovery
           npm run test:instagram-graph-scan
           node scripts/test-meta-instagram-deals.mjs
           npm run test:wien-deals-combined

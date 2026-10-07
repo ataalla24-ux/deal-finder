@@ -108,8 +108,11 @@ export async function scanAdLibraryCoverage({ terms, previous = {}, scope, now =
 export function hasFreshActiveAdEvidence(deal, now = new Date()) {
   const evidence = deal?.evidence;
   const checkedAt = Date.parse(evidence?.activeAdCheckedAt || '');
+  const deliveryStart = Date.parse(deal?.pubDate || '');
   if (deal?.originSource !== 'Meta Ad Library API' || evidence?.activeAdStatus !== 'ACTIVE'
     || !/^\d+$/.test(String(evidence.metaAdId || '')) || deal.id !== `meta-ad-${evidence.metaAdId}`
+    || deal.pubDateSource !== 'meta-ad-delivery-start' || !Number.isFinite(deliveryStart)
+    || deliveryStart > now.getTime() + 600000 || now.getTime() - deliveryStart > 365 * 24 * HOUR
     || !Number.isFinite(checkedAt) || checkedAt > now.getTime() + 60000 || now.getTime() - checkedAt > 24 * HOUR) return false;
   try {
     const url = new URL(deal.url);

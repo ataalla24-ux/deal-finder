@@ -158,6 +158,7 @@ const validate = (candidate) => validateDealsForSlack([normalizeDeal(candidate, 
 assert.equal((await validate(deal)).allowedDeals.length, 1, 'fresh ACTIVE evidence survives central Slack validation');
 assert.equal((await validate({ ...deal, evidence: { ...deal.evidence, activeAdCheckedAt: '2026-10-01T09:00:00Z' } })).allowedDeals.length, 0);
 assert.equal((await validate({ ...deal, originSource: 'Instagram' })).allowedDeals.length, 0);
+assert.equal((await validate({ ...deal, pubDate: '', pubDateSource: '', sourcePublishedAt: '', sourcePublishedAtSource: '' })).allowedDeals.length, 0);
 assert.equal((await validate({ ...deal, url: 'https://www.facebook.com/ads/library/?id=111' })).allowedDeals.length, 0);
 assert.equal(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Gratis Kebab in Wien am 05.10.2026'] }, config, now).deal, null);
 assert.equal(normalizeAdLibraryItem({ ...ad, ad_creative_bodies: ['Gratis Kebab in Wien am 05.10.2025'] }, config, now).deal, null);
