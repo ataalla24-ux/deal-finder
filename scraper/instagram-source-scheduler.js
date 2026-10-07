@@ -104,13 +104,20 @@ export function selectCoverageHashtags(hashtags, config, state = {}, now = new D
   });
   const ranked = due.sort((a, b) => score(b) - score(a) || a.localeCompare(b));
   const limit = Math.max(0, Number(config.maxHashtagsPerRun || 0));
-  const selected = ranked.slice(0, Math.max(0, limit - 2));
   const broad = new Set(['wien', 'vienna']);
+  const selected = [];
+  const add = (tag) => {
+    if (broad.has(tag) && selected.some((item) => broad.has(item))) return;
+    selected.push(tag);
+  };
+  for (const tag of ranked) {
+    if (selected.length >= Math.max(0, limit - 2)) break;
+    add(tag);
+  }
   const remaining = due.filter((tag) => !selected.includes(tag)).sort((a, b) => time(performance[a]?.lastRunAt) - time(performance[b]?.lastRunAt) || score(b) - score(a));
   for (const tag of remaining) {
     if (selected.length >= limit) break;
-    if (broad.has(tag) && selected.some((item) => broad.has(item))) continue;
-    selected.push(tag);
+    add(tag);
   }
   return selected;
 }

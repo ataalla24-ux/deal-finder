@@ -61,6 +61,13 @@ assert(tags.includes('wienkaffee'));
 assert(!tags.includes('wienrabatt'));
 assert(tags.filter((tag) => ['wien', 'vienna'].includes(tag)).length <= 1);
 assert(tags.every((tag) => pool.includes(tag)));
+const broadLeaders = { hashtagPerformance: Object.fromEntries(['wien', 'vienna'].map((tag) => [tag, {
+  recentFetched: 100, recentNewAccepted: 80, lastRunAt: new Date(+start - 4 * HOUR).toISOString(),
+}])) };
+const broadLimited = selectCoverageHashtags(pool, config, broadLeaders, start);
+assert.equal(broadLimited.length, 8, 'skip the second broad leader without losing a food or discovery slot');
+assert.equal(broadLimited.filter((tag) => ['wien', 'vienna'].includes(tag)).length, 1);
+assert.deepEqual(selectCoverageHashtags(pool, { ...config, maxHashtagsPerRun: 0 }, broadLeaders, start), []);
 
 const makeStore = () => {
   let state = { version: 1, reservations: [], pausedUntil: 0 }; let revision = 0;
