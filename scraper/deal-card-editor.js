@@ -77,7 +77,7 @@ export function cardEditorialWhen(deal) {
   return value;
 }
 
-export function applyCardEditorial(deal, proposal, { status = 'draft', now = new Date(), titleVerified = false, whenVerified = false } = {}) {
+export function applyCardEditorial(deal, proposal, { status = 'draft', now = new Date(), titleVerified = false, whenVerified = false, reviewReason = '' } = {}) {
   if (protectedDeal(deal)) return deal;
   const evidence = editorialEvidence(deal);
   const warnings = [];
@@ -132,6 +132,7 @@ export function applyCardEditorial(deal, proposal, { status = 'draft', now = new
       originalTitle: deal.cardEditorial?.originalTitle ?? deal.title ?? '',
       originalDescription: deal.cardEditorial?.originalDescription ?? deal.description ?? '',
       titleEvidence: quotedPassage, titleApplied: Boolean(title),
+      proposedTitle: clean(proposal?.title), reviewReason: clean(reviewReason),
       titleValidation: title ? (exact ? 'quotation' : 'claims-and-model-verified') : 'not-applied',
       whenValidation: supported.when ? 'quotation-and-model-verified' : 'not-applied',
       appliedFields: [...(title ? ['title'] : []), ...(description !== deal.description ? ['description'] : []), ...(fillWhen ? ['expiryDisplayText'] : [])],
@@ -180,7 +181,7 @@ export function createCardEditor({ apiKey = process.env.OPENAI_API_KEY, request 
     const key = editorialKey(deal);
     const cached = cache[key];
     if (cached?.version === VERSION && now.getTime() - Date.parse(cached.checkedAt) < 7 * 86400000) {
-      const next = applyCardEditorial(deal, cached.proposal, { titleVerified: cached.titleVerified === true, whenVerified: cached.whenVerified === true, now });
+      const next = applyCardEditorial(deal, cached.proposal, { titleVerified: cached.titleVerified === true, whenVerified: cached.whenVerified === true, reviewReason: cached.reviewReason, now });
       if (next.cardEditorial.titleApplied) return next;
       delete cache[key];
     }
@@ -208,6 +209,7 @@ export function createCardEditor({ apiKey = process.env.OPENAI_API_KEY, request 
             ].join(' '), { merchantInDraft: deal.brand, evidence });
       let titleVerified = false;
       let whenVerified = false;
+      let reviewReason = '';
       const passage = clean(proposal.titleEvidence);
       const title = displayText(proposal.title);
       if ((titleIsUseful(title) && evidence.some(source => passage && source.includes(passage))
@@ -224,11 +226,12 @@ export function createCardEditor({ apiKey = process.env.OPENAI_API_KEY, request 
         ].join(' '), { title, passage, when: clean(proposal.when), evidence });
         titleVerified = review.supported;
         whenVerified = review.whenSupported;
+        reviewReason = review.reason;
       }
-      const next = applyCardEditorial(deal, proposal, { titleVerified, whenVerified, now });
+      const next = applyCardEditorial(deal, proposal, { titleVerified, whenVerified, reviewReason, now });
       // Rejected/outage results must not poison the cache forever.
       if (next.cardEditorial.titleApplied) {
-        cache[key] = { version: VERSION, proposal, titleVerified, whenVerified, checkedAt: now.toISOString() };
+        cache[key] = { version: VERSION, proposal, titleVerified, whenVerified, reviewReason, checkedAt: now.toISOString() };
         await onCache(cache);
       }
       return next;

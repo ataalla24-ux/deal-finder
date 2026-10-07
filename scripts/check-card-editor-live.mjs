@@ -13,6 +13,8 @@ for (const review of manifest.reviews) {
     evidence: { textSample: review.sourceQuote } };
   const result = await edit(input);
   results.push({ id: result.id, title: result.title, when: result.expiryDisplayText || '',
+    proposedTitle: result.cardEditorial?.proposedTitle, reviewReason: result.cardEditorial?.reviewReason,
+    titleEvidence: result.cardEditorial?.titleEvidence, suggestions: result.cardEditorial?.suggestions,
     titleApplied: result.cardEditorial?.titleApplied, status: result.cardEditorial?.status,
     warnings: result.cardEditorial?.warnings });
 }
