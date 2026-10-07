@@ -105,6 +105,8 @@ const manifest = { checkedAt: '2026-09-23T09:00:00Z', reviews: [{
   evidence: 'Test fixture: merchant caption', patch: { brand: 'Duru Döner' },
 }] };
 assert.equal(applyReviewedContent(bundle, { edits: [] }, manifest).bundle.deals[0].brand, 'Duru Döner');
+assert.throws(() => applyReviewedContent(bundle, { edits: [] }, { ...manifest, reviews: [{ ...manifest.reviews[0], expectedFields: { title: 'Newer human title' } }] }), /Content changed since review/);
+assert.equal(applyReviewedContent(bundle, { edits: [] }, { ...manifest, reviews: [{ ...manifest.reviews[0], expectedFields: { title: original.title, liveEditedAt: null } }] }).bundle.deals[0].brand, 'Duru Döner');
 assert.throws(() => applyReviewedContent(bundle, { edits: [] }, { ...manifest, reviews: [{ ...manifest.reviews[0], sourceUrl: 'https://wrong.example/' }] }));
 assert.throws(() => applyReviewedContent(bundle, { edits: [] }, { ...manifest, reviews: [{ ...manifest.reviews[0], patch: { hidden: 'true' } }] }));
 

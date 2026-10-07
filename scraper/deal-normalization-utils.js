@@ -1,4 +1,5 @@
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { cardEditorialWhen } from './deal-card-editor.js';
 import { concreteFoodOfferTitle, isPromotionalIntro, stripSlackEmojiCodes } from './offer-title-utils.js';
 
 const PUBLIC_BRAND_LOGO_BASE_URL = 'https://freefinder.at/assets/brand-logos';
@@ -1135,7 +1136,7 @@ function normalizeDealRecord(deal = {}) {
     category: category || currentCategory,
     expires: sanitizedExpires,
     expiresOriginal: sanitizeExpiryText(deal.expiresOriginal),
-    expiryDisplayText: sanitizeExpiryText(deal.expiryDisplayText),
+    expiryDisplayText: cardEditorialWhen(deal) || sanitizeExpiryText(deal.expiryDisplayText),
     distance: cleanLocationForDisplay(deal.distance || ''),
     location: cleanLocationForDisplay(deal.location || ''),
     logo: inferLogo({ ...deal, title, description, type, category }, brand),

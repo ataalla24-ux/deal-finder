@@ -86,7 +86,7 @@ jobs:
         # The regression test runs before any message is sent.
         run: |
           node scripts/test-slack-unicode.mjs
-          node --test scripts/test-deal-card-editor.mjs
+          node --test scripts/test-deal-card-editor.mjs scripts/test-card-editor-v2.mjs scripts/test-card-editor-retry.mjs
           node scripts/test-card-editor-approval.mjs
 
       - name: Deliver validated new deals to Slack

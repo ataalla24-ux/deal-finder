@@ -1,6 +1,7 @@
 import { officialFoodOfferKey } from './power-food-sources.js';
 import { isCommunitySubmission } from './community-review-utils.js';
 import { createCardEditor } from './deal-card-editor.js';
+import { retryQueuedEditorial } from './card-editor-retry.js';
 import fs from 'fs';
 import crypto from 'node:crypto';
 import path from 'path';
@@ -1097,6 +1098,30 @@ async function getReactions(messageTs) {
   return ensureArray(data.message?.reactions);
 }
 
+async function untouchedEditorialThread(deal) {
+  const query = new URLSearchParams({ channel: SLACK_CHANNEL_ID, ts: deal.slackThreadTs, limit: '100' });
+  const result = await slackApi(`https://slack.com/api/conversations.replies?${query}`);
+  // Partial reads, human replies and any reactions are deliberately ineligible.
+  if (!result.ok || result.has_more || result.response_metadata?.next_cursor) return false;
+  const messages = ensureArray(result.messages);
+  if (!messages.length || messages.some(message => !message.bot_id || message.reactions?.length)) return false;
+  const target = messages.find(message => message.ts === deal.slackTs);
+  return Boolean(target?.text?.includes(`Deal-ID: ${deal.id}`) && target.text.includes(deal.title));
+}
+
+async function updateEditorialMessage(deal) {
+  const build = deal.socialFoodReview ? buildSocialFoodReviewMessage
+    : deal.firecrawlReview ? buildFirecrawlReviewMessage : buildSlackMessage;
+  const text = (isCommunitySubmission(deal) ? '*Community-Einreichung – noch nicht geprüft*\n' : '')
+    + build(deal, deal.order || 1);
+  const response = await fetch('https://slack.com/api/chat.update', {
+    method: 'POST', signal: AbortSignal.timeout(10000),
+    headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ channel: SLACK_CHANNEL_ID, ts: deal.slackTs, text, blocks: pendingEditBlocks(text) }),
+  });
+  return response.ok && (await response.json()).ok === true;
+}
+
 function addSeenDealsFromThread(seenKeys, deals) {
   let added = 0;
   for (const deal of deals) {
@@ -1937,23 +1962,6 @@ async function main() {
     }
   }
 
-  if (freshDeals.length === 0 && firecrawlReviewDeals.length === 0 && socialFoodReviewDeals.length === 0) {
-    if (queueChanged) {
-      writePendingAll(existingQueue);
-      console.log(`💾 pending queue updated after moderation/prune: ${existingQueue.length} deals left`);
-    }
-    console.log('✅ Keine neuen Deals für Slack');
-    return;
-  }
-
-  freshDeals.sort((a, b) => {
-    if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
-      return (b.qualityScore || 0) - (a.qualityScore || 0);
-    }
-    return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
-  });
-
-  const postedDeals = [];
   const editorialCachePath = path.join(DOCS_DIR, 'deal-card-editor-cache.json');
   let editorialCache = {};
   try { editorialCache = JSON.parse(fs.readFileSync(editorialCachePath, 'utf8')); }
@@ -1967,6 +1975,29 @@ async function main() {
       fs.renameSync(temp, editorialCachePath);
     },
   });
+  const retryEditorial = deals => retryQueuedEditorial(deals, {
+    editCard, isUntouched: untouchedEditorialThread, updateMessage: updateEditorialMessage,
+    persist: writePendingAll, liveIds: new Set(liveDeals.map(deal => deal.id)),
+  });
+
+  if (freshDeals.length === 0 && firecrawlReviewDeals.length === 0 && socialFoodReviewDeals.length === 0) {
+    if (queueChanged) {
+      writePendingAll(existingQueue);
+      console.log(`💾 pending queue updated after moderation/prune: ${existingQueue.length} deals left`);
+    }
+    await retryEditorial(existingQueue);
+    console.log('✅ Keine neuen Deals für Slack');
+    return;
+  }
+
+  freshDeals.sort((a, b) => {
+    if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
+      return (b.qualityScore || 0) - (a.qualityScore || 0);
+    }
+    return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
+  });
+
+  const postedDeals = [];
   if (freshDeals.length > 0) {
     const freeCount = freshDeals.filter((d) => d.type === 'gratis').length;
     const headerTs = await postSlackMessage(
@@ -2107,6 +2138,7 @@ async function main() {
     [...postedDeals, ...postedReviewDeals, ...postedSocialFoodReviewDeals],
   );
   writePendingAll(mergedQueue);
+  await retryEditorial(mergedQueue);
 
   console.log(`✅ ${postedDeals.length} Deals an Slack gesendet`);
   if (FIRECRAWL_REVIEW_ENABLED) {

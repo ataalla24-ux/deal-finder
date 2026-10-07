@@ -266,6 +266,8 @@ function mergeParsedDealsWithQueue(parsedDeals, queuedDeals) {
       // Slack is a preview, not the authoritative full editorial text. Human
       // thread edits are applied afterwards; form edits below retain priority.
       ...(queued.cardEditorial ? { title: queued.title, description: queued.description, cardEditorial: queued.cardEditorial } : {}),
+      ...(queued.cardEditorial?.appliedFields?.includes('expiryDisplayText')
+        ? { expiryDisplayText: queued.expiryDisplayText } : {}),
       ...(queued.slackFormEditTs ? Object.fromEntries([
         ...ensureArray(queued.slackEditedFields), 'validOn', 'validFrom', 'validUntil',
         'expiresOriginal', 'expiryKind', 'expiryDisplayText',

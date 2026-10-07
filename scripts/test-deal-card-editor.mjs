@@ -3,17 +3,18 @@ import assert from 'node:assert/strict';
 import { applyCardEditorial, createCardEditor, editorialKey } from '../scraper/deal-card-editor.js';
 
 const deal = { id: 'a', title: 'Wien, macht euch bereit für diesen Deal', brand: 'Box 16',
-  description: 'Chicken Döner für 3,50 €. Nur für Mitglieder, maximal 1 Stück. Gutschein BOX16 erforderlich.',
+  description: 'Chicken Döner für 3,50 €. Maximal 1 Stück. Gutschein BOX16 erforderlich.',
   metaGraphCaption: 'Box 16: Chicken Döner für 3,50 €. Gültig am 26.09.2026, 12–16 Uhr. Nur vor Ort: Ottakringer Straße 1, 1160 Wien.',
   distance: '1160 Wien', expires: '2026-09-26', validOn: '2026-09-26', url: 'https://www.instagram.com/p/test/',
 };
 const proposal = { title: 'Chicken Döner für 3,50 €', merchant: 'Box 16',
   where: 'Ottakringer Straße 1, 1160 Wien', when: 'Gültig am 26.09.2026, 12–16 Uhr',
-  conditions: 'Nur für Mitglieder, maximal 1 Stück. Gutschein BOX16 erforderlich.' };
+  titleEvidence: deal.description, conditions: 'Maximal 1 Stück. Gutschein BOX16 erforderlich.' };
+const verified = { titleVerified: true, whenVerified: true };
 const reply = value => Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(value) } }] });
 
 test('short factual title, full conditions and original text preserved', () => {
-  const next = applyCardEditorial(deal, proposal);
+  const next = applyCardEditorial(deal, proposal, verified);
   assert.equal(next.title, proposal.title);
   assert.ok(next.description.includes(deal.description));
   assert.equal(next.cardEditorial.originalTitle, deal.title);
@@ -30,12 +31,12 @@ test('unsupported paraphrases, price changes and invented dates rejected', () =>
   assert.ok(next.cardEditorial.warnings.length >= 3);
 });
 test('promotional titles are not accepted as rewritten titles', () => {
-  assert.equal(applyCardEditorial(deal, { ...proposal, title: deal.title }).cardEditorial.suggestions.title, deal.title);
+  assert.equal(applyCardEditorial(deal, { ...proposal, title: deal.title }).cardEditorial.suggestions.title, '');
   assert.ok(applyCardEditorial(deal, { ...proposal, title: deal.title }).cardEditorial.warnings.some(w => w.includes('Original prüfen')));
 });
 test('all manual or published records bypass AI unchanged', async () => {
   const edit = createCardEditor({ apiKey: 'test', request: () => { throw Error('must not call'); } });
-  for (const flag of [{ editedInSlack: true }, { slackEditedAt: 'today' }, { slackEditedFields: ['title'] }, { approvedAt: 'today' }, { pipelineLifecycle: { publishedAt: 'today' } }]) {
+  for (const flag of [{ editedInSlack: true }, { slackEditedAt: 'today' }, { slackEditedFields: ['title'] }, { slackFormEditTs: '123' }, { liveEditedAt: 'today' }, { liveEditedFields: ['title'] }, { approvedAt: 'today' }, { pipelineLifecycle: { publishedAt: 'today' } }, { pipelineLifecycle: { manualDecision: 'approved' } }]) {
     const input = { ...deal, ...flag };
     assert.equal(await edit(input), input);
   }
@@ -49,14 +50,14 @@ test('cache avoids repeat API calls, changed evidence invalidates cache', async 
     const body = JSON.parse(options.body);
     assert.equal(body.store, false);
     assert.equal(body.response_format.type, 'json_schema');
-    return reply(proposal);
+    return reply(body.response_format.json_schema.name === 'deal_card_editor' ? proposal : { supported: true, whenSupported: true, reason: 'Supported' });
   }, onCache: () => { saves++; } });
   assert.equal((await edit(deal)).title, proposal.title);
   assert.equal((await edit(deal)).title, proposal.title);
-  assert.equal(calls, 1); assert.equal(saves, 1);
+  assert.equal(calls, 2); assert.equal(saves, 1);
   assert.notEqual(editorialKey(deal), editorialKey({ ...deal, description: 'different' }));
   await edit({ ...deal, description: 'different' });
-  assert.equal(calls, 2);
+  assert.equal(calls, 4);
 });
 test('API outages, absent key and budget never drop a deal', async () => {
   for (const options of [{ apiKey: '' }, { apiKey: 'test', maxCalls: 0 },

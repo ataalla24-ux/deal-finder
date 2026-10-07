@@ -21,6 +21,9 @@ export function applyReviewedContent(bundle, store, manifest) {
     assert.ok(review.evidence && review.status && review.expectedBrand, 'Missing source review');
     assert.ok([review.expectedBrand, review.patch?.brand].includes(deal.brand), `Merchant changed since review: ${review.dealId}`);
     assert.ok(review.patch && Object.keys(review.patch).length, 'Empty correction');
+    for (const [field, value] of Object.entries(review.expectedFields || {})) {
+      assert.deepEqual(deal[field] ?? null, value, `Content changed since review: ${review.dealId}.${field}`);
+    }
     for (const field of Object.keys(review.patch)) {
       assert.ok(LIVE_DEAL_EDIT_FIELDS.includes(field) && !['pubDate', 'pinnedRank'].includes(field), `Unsupported content correction: ${field}`);
       assert.equal(typeof review.patch[field], 'string', `Invalid value: ${field}`);

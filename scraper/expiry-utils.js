@@ -1,3 +1,5 @@
+import { cardEditorialWhen } from './deal-card-editor.js';
+
 const URL_CHECK_UA = 'Mozilla/5.0 (compatible; FreeFinderBot/1.0; +https://freefinder.wien)';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -1712,5 +1714,7 @@ export async function normalizeDealExpiry(deal, options = {}) {
   deal.expiresPrecision = '';
   deal.expiresSource = '';
   applyStructuredExpiryFields(deal, deal.expiresOriginal || raw || '', { now });
+  const editorialWhen = cardEditorialWhen(deal);
+  if (editorialWhen) deal.expiryDisplayText = editorialWhen;
   return deal;
 }
