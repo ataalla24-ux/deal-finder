@@ -1,4 +1,6 @@
 import { handlePromoRequest, promoLedger } from './merchant-promos.js';
+import { publicInteractionCache } from './public-interaction-cache.js';
+import { measureStorage, storageIdentity, StorageQuotaError } from './storage-usage.js';
 export { MerchantPromoLedger } from './merchant-promos.js';
 
 const PACKAGE_CONFIG = {
@@ -63,6 +65,11 @@ const INTERACTION_RATE_LIMITS = {
   rate: { windowSeconds: 60, max: 12 },
   default: { windowSeconds: 60, max: 90 },
 };
+const INTERACTION_ACTIONS = new Set([
+  'upvote', 'remove_upvote', 'favorite', 'remove_favorite',
+  'open', 'remove_open', 'redeem', 'remove_redeem', 'rate',
+  'add_comment', 'add_tip', 'report_comment', 'report_tip', 'hide_comment', 'hide_tip',
+]);
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "access-control-allow-origin": "*",
@@ -84,6 +91,23 @@ const DEFAULT_INSTAGRAM_HASHTAGS = [
 ];
 
 export default {
+  async fetch(request, env, ctx) {
+    const usage = measureStorage(request, env.MERCHANT_CAMPAIGNS);
+    let response;
+    try {
+      response = await merchantWorker.fetch(request, { ...env, MERCHANT_CAMPAIGNS: usage.storage }, ctx);
+    } catch (error) {
+      response = error instanceof StorageQuotaError
+        ? json({ ok: false, error: 'Storage temporarily unavailable', retryAfterSeconds: 60 }, 503)
+        : json({ ok: false, error: 'Internal error' }, 500);
+      if (error instanceof StorageQuotaError) response.headers.set('retry-after', '60');
+    }
+    console.log({ ...usage.report, status: response.status });
+    return response;
+  },
+};
+
+const merchantWorker = {
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: JSON_HEADERS });
@@ -424,10 +448,11 @@ async function listDealInteractions(request, env) {
     .map((id) => cleanDealId(id)))
     .slice(0, MAX_INTERACTION_DEAL_IDS);
   const interactions = {};
+  const cache = publicInteractionCache(storageIdentity(env.MERCHANT_CAMPAIGNS));
 
   await Promise.all(ids.map(async (dealId) => {
-    const record = await dealInteractionRecord(env, dealId);
-    interactions[dealId] = publicDealInteraction(record);
+    interactions[dealId] = await cache.get(dealId, async () =>
+      publicDealInteraction(await dealInteractionRecord(env, dealId)));
   }));
 
   return json({ ok: true, interactions });
@@ -444,6 +469,19 @@ async function recordDealInteraction(request, env) {
   const action = cleanText(payload.action, 40);
   if (!dealId || !deviceId) {
     return json({ ok: false, error: "Missing dealId or deviceId" }, 400);
+  }
+  if (!INTERACTION_ACTIONS.has(action)) {
+    return json({ ok: false, error: 'Unsupported action' }, 400);
+  }
+  if ((action === 'hide_comment' || action === 'hide_tip') && !isMerchantRequestAuthorized(request, env)) {
+    return json({ ok: false, error: 'Merchant API secret is invalid' }, 401);
+  }
+  if (action === 'rate' && (!Number.isFinite(Number(payload.rating)) || Number(payload.rating) < 1 || Number(payload.rating) > 5)) {
+    return json({ ok: false, error: 'Rating must be between 1 and 5' }, 400);
+  }
+  if (action === 'add_comment' || action === 'add_tip') {
+    const validationError = validateCommunityText(cleanText(payload.text, 300));
+    if (validationError) return json({ ok: false, error: validationError }, 400);
   }
 
   const rateLimit = await enforceInteractionRateLimit(request, env, action, deviceId);
@@ -515,8 +553,15 @@ async function recordDealInteraction(request, env) {
       return json({ ok: false, error: "Unsupported action" }, 400);
   }
 
-  const saved = await saveDealInteractionWithRepair(env, dealId, record, action, deviceId, payload);
-  return json({ ok: true, interaction: publicDealInteraction(saved) });
+  const cache = publicInteractionCache(storageIdentity(env.MERCHANT_CAMPAIGNS));
+  cache.invalidate(dealId);
+  try {
+    const saved = await saveDealInteractionWithRepair(env, dealId, record, action, deviceId, payload);
+    return json({ ok: true, interaction: publicDealInteraction(saved) });
+  } finally {
+    // Also invalidate on partial writes and discard reads that began mid-write.
+    cache.invalidate(dealId);
+  }
 }
 
 async function enforceInteractionRateLimit(request, env, action, deviceId) {
@@ -578,9 +623,12 @@ async function saveDealInteractionWithRepair(env, dealId, record, action, device
 
   await sleep(80);
   const latest = await dealInteractionRecord(env, dealId);
+  const before = JSON.stringify([latest.upvotes, latest.favorites, latest.opens, latest.redeems]);
   const repaired = applyInteractionIntent(latest, action, deviceId, payload);
-  repaired.updatedAt = new Date().toISOString();
-  await putDealInteractionRecord(env, dealId, repaired);
+  if (before !== JSON.stringify([repaired.upvotes, repaired.favorites, repaired.opens, repaired.redeems])) {
+    repaired.updatedAt = new Date().toISOString();
+    await putDealInteractionRecord(env, dealId, repaired);
+  }
   return repaired;
 }
 
@@ -591,9 +639,12 @@ async function saveCommunityInteractionWithRepair(env, dealId, record, action, d
 
   await sleep(80);
   const latest = await dealInteractionRecord(env, dealId);
+  const before = JSON.stringify(latest[kind]);
   const repaired = applyInteractionIntent(latest, action, deviceId, payload);
-  repaired.updatedAt = new Date().toISOString();
-  await putCommunityInteractionRecord(env, dealId, kind, repaired[kind]);
+  if (before !== JSON.stringify(repaired[kind])) {
+    repaired.updatedAt = new Date().toISOString();
+    await putCommunityInteractionRecord(env, dealId, kind, repaired[kind]);
+  }
   return repaired;
 }
 
@@ -603,9 +654,12 @@ async function saveRatingInteractionWithRepair(env, dealId, record, action, devi
 
   await sleep(80);
   const latest = await dealInteractionRecord(env, dealId);
+  const before = JSON.stringify(latest.ratings);
   const repaired = applyInteractionIntent(latest, action, deviceId, payload);
-  repaired.updatedAt = new Date().toISOString();
-  await putRatingInteractionRecord(env, dealId, repaired.ratings);
+  if (before !== JSON.stringify(repaired.ratings)) {
+    repaired.updatedAt = new Date().toISOString();
+    await putRatingInteractionRecord(env, dealId, repaired.ratings);
+  }
   return repaired;
 }
 

@@ -31,7 +31,7 @@ test('promo ledger integration with real SQLite Durable Object', async t => {
             return super.fetch(request);
           }
         }` },
-      ...await Promise.all(['index.js', 'merchant-promos.js'].map(async name => ({ type: 'ESModule', path: `src/${name}`, contents: await readFile(new URL(`../src/${name}`, import.meta.url), 'utf8') }))),
+      ...await Promise.all(['index.js', 'merchant-promos.js', 'public-interaction-cache.js', 'storage-usage.js'].map(async name => ({ type: 'ESModule', path: `src/${name}`, contents: await readFile(new URL(`../src/${name}`, import.meta.url), 'utf8') }))),
     ],
     durableObjects: { MERCHANT_PROMOS: { className: 'TestLedger', useSQLite: true } },
     kvNamespaces: ['MERCHANT_CAMPAIGNS'], bindings: { MERCHANT_PROMO_ADMIN_SECRET: 'test-only-admin-secret' },
