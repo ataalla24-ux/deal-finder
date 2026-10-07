@@ -1,17 +1,15 @@
-const CACHE_NAME = 'freefinder-website-v7';
+const CACHE_NAME = 'freefinder-website-v8';
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
   './consent.css',
   './consent.js',
+  './offline.html',
+  './blog/blog.css',
   './icon-192.svg',
   './icon-512.svg',
   './icon-maskable.svg',
-  './assets/pro/freefinder-pro-preview.png',
-  './assets/current-ios/deals-home.jpg',
-  './assets/current-ios/for-you.jpg',
-  './assets/current-ios/favorites-empty.jpg',
   './push-config.json'
 ];
 
@@ -28,7 +26,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName.startsWith('freefinder-website-') && cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })
@@ -40,38 +38,34 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
-  const isDealsJson = requestUrl.pathname.endsWith('/deals.json') || requestUrl.pathname.endsWith('deals.json');
-  const isDealOfDayJson = requestUrl.pathname.endsWith('/deal-of-the-day.json') || requestUrl.pathname.endsWith('deal-of-the-day.json');
-  const isDealOfWeekJson = requestUrl.pathname.endsWith('/deal-of-the-week.json') || requestUrl.pathname.endsWith('deal-of-the-week.json');
-  const isNetworkFirstDocument =
-    event.request.mode === 'navigate' ||
-    requestUrl.pathname === '/' ||
-    requestUrl.pathname.endsWith('/index.html') ||
-    requestUrl.pathname.endsWith('push-config.json');
+  const versionedAsset = /\.(?:css|js|png|jpg|jpeg|avif|webp|svg)$/.test(requestUrl.pathname) &&
+    [...requestUrl.searchParams.keys()].every(key => key === 'v');
+  const cacheKey = versionedAsset ? requestUrl.origin + requestUrl.pathname : event.request;
+  // Leave writes, third-party tracking and payment-return data out of the cache.
+  if (event.request.method !== 'GET' || requestUrl.origin !== self.location.origin ||
+      (requestUrl.search && !versionedAsset) || /(?:^|\/)(?:admin|checkout|live-review)/.test(requestUrl.pathname)) return;
 
-  async function networkFirst() {
+  event.respondWith((async () => {
     try {
       const response = await fetch(event.request);
-      const responseClone = response.clone();
-      caches.open(CACHE_NAME).then(cache => {
-        cache.put(event.request, responseClone);
-      });
+      if (response.ok && response.type !== 'opaque') {
+        try {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(cacheKey, response.clone());
+        } catch { /* A full cache must not turn a successful request into an error. */ }
+      }
       return response;
     } catch {
-      return caches.match(event.request);
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(cacheKey);
+      if (cached) return cached;
+      if (event.request.mode === 'navigate') {
+        const offline = await cache.match(new URL('./offline.html', self.registration.scope).href);
+        if (offline) return offline;
+      }
+      return new Response('Derzeit offline. Bitte erneut versuchen.', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
     }
-  }
-
-  if (isDealsJson || isDealOfDayJson || isDealOfWeekJson || isNetworkFirstDocument) {
-    event.respondWith(networkFirst());
-    return;
-  }
-  
-  // Cache first for other assets
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-  );
+  })());
 });
 
 self.addEventListener('push', event => {

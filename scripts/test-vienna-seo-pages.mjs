@@ -70,11 +70,12 @@ for (const href of ['lugner-city-50-prozent-gastronomie-5-oktober-2026.html', 'i
 // Targeted regeneration must not touch unrelated articles or the shared feed.
 const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'freefinder-vienna-seo-test-'));
 try {
-  for (const filename of ['scripts/generate-topic-guides.mjs', 'reviews/deal-guides.json', 'docs/sitemap.xml']) {
+  for (const filename of ['scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'reviews/deal-guides.json', 'docs/sitemap.xml']) {
     const destination = path.join(fixture, filename);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.copyFileSync(path.join(root, filename), destination);
   }
+  fs.symlinkSync(path.join(root, 'node_modules'), path.join(fixture, 'node_modules'), 'dir');
   fs.mkdirSync(path.join(fixture, 'docs/blog'));
   execFileSync(process.execPath, [path.join(fixture, 'scripts/generate-topic-guides.mjs'), ...slugs.slice(0, 2)], {
     env: { ...process.env, SEO_NOW: '2026-10-07T10:00:00+02:00' },

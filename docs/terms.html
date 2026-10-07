@@ -17,16 +17,22 @@
     p { margin-bottom: 14px; }
     a { color: #667eea; }
   </style>
-  <link rel="stylesheet" href="/consent.css?v=5">
+  <link rel="stylesheet" href="/consent.css?v=7">
   <script defer src="/analytics-config.js"></script>
-  <script defer src="/consent.js?v=7"></script>
+  <script defer src="/consent.js?v=8"></script>
+  <meta property="og:title" content="Nutzungsbedingungen | FreeFinder App">
+  <meta property="og:description" content="Nutzungsbedingungen für FreeFinder, die App für kostenlose Angebote, Rabatte und lokale Deals in Wien.">
+  <meta property="og:url" content="https://freefinder.at/terms.html">
+  <meta property="og:image" content="https://freefinder.at/og-home-20261007.jpg">
+  <meta property="og:type" content="website">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Zum Inhalt</a>
   <div class="lang-switch">
     <button id="langDe" type="button" onclick="setLanguage('de')">Deutsch</button>
     <button id="langEn" type="button" onclick="setLanguage('en')">English</button>
   </div>
-  <div class="card">
+  <main class="card" id="main-content" tabindex="-1">
     <h1 id="title">Nutzungsbedingungen</h1>
     <p id="intro"><strong>FreeFinder</strong> sammelt Hinweise zu kostenlosen Deals und Angeboten in Wien.</p>
     <h2 id="useTitle">1. Nutzung</h2>
@@ -39,7 +45,7 @@
     <p id="copyrightBody">Alle Inhalte gehören den jeweiligen Eigentümern.</p>
     <p id="updated">Stand: 16.02.2026</p>
     <p><a href="/" id="backLink">Zurück zur App</a></p>
-  </div>
+  </main>
   <script>
     const I18N = {
       de: {
@@ -73,7 +79,7 @@
     };
     function setLanguage(lang) {
       const copy = I18N[lang] || I18N.de;
-      localStorage.setItem('freefinder_language', lang);
+      try { localStorage.setItem('freefinder_language', lang); } catch (_) {}
       document.documentElement.lang = lang;
       document.getElementById('langDe').classList.toggle('active', lang === 'de');
       document.getElementById('langEn').classList.toggle('active', lang === 'en');
@@ -82,7 +88,8 @@
         if (el) el.innerHTML = value;
       });
     }
-    const saved = localStorage.getItem('freefinder_language');
+    let saved = null;
+    try { saved = localStorage.getItem('freefinder_language'); } catch (_) {}
     const detected = navigator.language && navigator.language.toLowerCase().startsWith('en') ? 'en' : 'de';
     setLanguage(saved || detected);
   </script>

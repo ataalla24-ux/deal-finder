@@ -62,12 +62,18 @@
             .lang-switch { justify-content: center; }
         }
     </style>
-    <link rel="stylesheet" href="/consent.css?v=5">
+    <link rel="stylesheet" href="/consent.css?v=7">
     <script defer src="/analytics-config.js"></script>
-    <script defer src="/consent.js?v=7"></script>
+    <script defer src="/consent.js?v=8"></script>
+  <meta property="og:title" content="FreeFinder Support &amp; Hilfe | iPhone und Android">
+  <meta property="og:description" content="FreeFinder Support für iPhone und Android: Hilfe bei Deals, FreeFinder Pro, Käufen, Abos, Business-Anzeigen und technischen Problemen.">
+  <meta property="og:url" content="https://freefinder.at/support.html">
+  <meta property="og:image" content="https://freefinder.at/og-home-20261007.jpg">
+  <meta property="og:type" content="website">
 </head>
 <body>
-    <main class="container">
+  <a class="skip-link" href="#main-content">Zum Inhalt</a>
+    <main class="container" id="main-content" tabindex="-1">
         <div class="lang-switch">
             <button id="langDe" type="button" onclick="setLanguage('de')">Deutsch</button>
             <button id="langEn" type="button" onclick="setLanguage('en')">English</button>
@@ -149,7 +155,7 @@
 
         function setLanguage(lang) {
             const copy = I18N[lang] || I18N.de;
-            localStorage.setItem('freefinder_support_language', lang);
+            try { localStorage.setItem('freefinder_support_language', lang); } catch (_) {}
             document.documentElement.lang = lang;
             document.getElementById('langDe').classList.toggle('active', lang === 'de');
             document.getElementById('langEn').classList.toggle('active', lang === 'en');
@@ -160,7 +166,8 @@
             });
         }
 
-        const saved = localStorage.getItem('freefinder_support_language');
+        let saved = null;
+        try { saved = localStorage.getItem('freefinder_support_language'); } catch (_) {}
         const detected = navigator.language && navigator.language.toLowerCase().startsWith('en') ? 'en' : 'de';
         setLanguage(saved || detected);
     </script>

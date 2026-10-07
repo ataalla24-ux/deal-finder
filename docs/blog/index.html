@@ -9,7 +9,7 @@
   <link rel="canonical" href="https://freefinder.at/blog/">
   <meta property="og:title" content="FreeFinder Blog: Gratis-Angebote in Wien">
   <meta property="og:description" content="Praktische Tipps für Gratis-Essen, Rabatte und kostenlose Angebote in Wien.">
-  <meta property="og:image" content="https://freefinder.at/og-preview-stores.png">
+  <meta property="og:image" content="https://freefinder.at/og-home-20261007.jpg">
   <meta property="og:url" content="https://freefinder.at/blog/">
   <meta property="og:type" content="website">
   <link rel="icon" href="/icon-192.svg" type="image/svg+xml">
@@ -18,10 +18,10 @@
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" as="style">
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
-  <link rel="stylesheet" href="/consent.css?v=5">
+  <link rel="stylesheet" href="/consent.css?v=7">
   <link rel="stylesheet" href="blog.css">
   <script defer src="/analytics-config.js"></script>
-  <script defer src="/consent.js?v=7"></script>
+  <script defer src="/consent.js?v=8"></script>
   <script defer src="deal-status.js"></script>
   <script type="application/ld+json">
     {
@@ -36,6 +36,7 @@
   </script>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Zum Inhalt</a>
   <header class="site-header">
     <nav class="nav" aria-label="Hauptnavigation">
       <a class="brand" href="/"><img class="brand-mark" src="/icon-192.svg" alt="" width="38" height="38">FreeFinder</a>
@@ -47,7 +48,7 @@
       </div>
     </nav>
   </header>
-  <main>
+  <main id="main-content" tabindex="-1">
     <section class="blog-hero">
       <div class="hero-inner">
         <p class="eyebrow">FreeFinder Wien</p>
@@ -57,232 +58,238 @@
       </div>
     </section>
     <section class="blog-main" aria-label="Aktuelle Beiträge und Ratgeber">
+      <form class="blog-filters" id="blogFilters" role="search" aria-label="Blog durchsuchen" hidden>
+        <label class="blog-search" for="blogSearch">Beiträge suchen<input id="blogSearch" type="search" placeholder="z. B. Geburtstag, Döner, 1080" autocomplete="off"></label>
+        <label for="blogTopic">Thema<select id="blogTopic"><option value="">Alle Themen</option><option value="essen">Essen &amp; Restaurants</option><option value="kaffee">Kaffee &amp; Getränke</option><option value="geburtstag">Geburtstag</option><option value="freizeit">Freizeit &amp; Kino</option><option value="shopping">Shopping &amp; Online</option><option value="ratgeber">Gutscheine &amp; Ratgeber</option></select></label>
+        <label class="blog-archive" for="blogArchive"><input id="blogArchive" type="checkbox">Archiv anzeigen</label>
+        <p class="blog-results" id="blogResults" role="status" aria-live="polite" aria-atomic="true"></p>
+      </form>
       <div class="post-grid">
-        <article class="post-card"><picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="Wiener Food-Angebote in der FreeFinder App" width="736" height="414" loading="eager" decoding="async"></picture><div class="post-card-body"><span class="topic-label">Wien · Essen nach Bezirk</span><h2>Günstig essen in Wien: Adressen und Angebote</h2><p>Ganesha in 1010, Kaffee um 2,50 Euro in 1080 und Watertuin in 1110: Preise und Bedingungen vergleichen.</p><a href="guenstig-essen-wien.html">Wiener Food-Guide lesen</a></div></article>
-        <article class="post-card" data-deal-expires="2026-10-13T23:59:59+02:00"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit GUESS-Rabatten" width="736" height="414" loading="eager" decoding="async"><div class="post-card-body"><span class="topic-label">Shopping · 20 Prozent</span><h2>20 Prozent Rabatt bei GUESS</h2><p>Shopping Week auf ausgewählte Styles: Gültigkeit und Teilnahme prüfen.</p><a href="guess-shopping-week-20-prozent-wien.html">Deal und Bedingungen lesen</a></div></article>
-        <article class="post-card" data-deal-expires="2026-10-20T23:59:59+02:00"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit günstigen Flügen ab Wien" width="736" height="414" loading="eager" decoding="async"><div class="post-card-body"><span class="topic-label">Reise · Ibiza ab 55,98 Euro</span><h2>Ryanair Wien–Ibiza ab 55,98 Euro</h2><p>Hin und zurück vom 20. bis 22. Oktober: Flugpreis und Zusatzkosten prüfen.</p><a href="ryanair-ibiza-ab-5598-wien-oktober-2026.html">Deal und Bedingungen lesen</a></div></article>
-        <article class="post-card" data-deal-expires="2026-10-10T23:59:59+02:00"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Döner-Angeboten in Wien" width="736" height="414" loading="eager" decoding="async"><div class="post-card-body"><span class="topic-label">9.–10. Oktober · 3 für 2</span><h2>3 Döner zum Preis von 2 bei Pizza Rando</h2><p>3-für-2-Aktion in der Dresdnerstraße 115, 1200 Wien.</p><a href="pizza-rando-3-doener-zum-preis-von-2-wien.html">Deal und Bedingungen lesen</a></div></article>
-        <article class="post-card"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Kaffee-Angeboten in Wien" width="736" height="414" loading="eager" decoding="async"><div class="post-card-body"><span class="topic-label">Kaffee · 20 Prozent</span><h2>20 Prozent auf Winterheißgetränke bei ANKER</h2><p>Saisonale Heißgetränke günstiger: Filiale und Zeitraum prüfen.</p><a href="anker-winterheissgetraenk-20-prozent-wien.html">Deal und Bedingungen lesen</a></div></article>
-        <article class="post-card"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Möbelix-Rabatten" width="736" height="414" loading="eager" decoding="async"><div class="post-card-body"><span class="topic-label">Möbel · 20 Prozent</span><h2>20 Prozent Rabatt auf Teppiche bei Möbelix</h2><p>Teppich-Angebot und finalen Warenkorbpreis prüfen.</p><a href="moebelix-20-prozent-teppiche-wien.html">Deal und Bedingungen lesen</a></div></article>
-        <article class="post-card"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Online-Gutscheinen" width="736" height="414" loading="eager" decoding="async"><div class="post-card-body"><span class="topic-label">Online · 30 Euro</span><h2>30-Euro-Gutschein bei AUTODOC</h2><p>Gutscheinbedingungen und Mindestbestellwert im Checkout prüfen.</p><a href="autodoc-30-euro-gutschein.html">Deal und Bedingungen lesen</a></div></article>
-        <article class="post-card"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Starbucks-Gutscheinen" width="736" height="414" loading="eager" decoding="async"><div class="post-card-body"><span class="topic-label">Kaffee · Code KAFFEE5</span><h2>5 Euro Rabatt bei Starbucks</h2><p>Code KAFFEE5 über Lieferando eingeben und Rabatt prüfen.</p><a href="starbucks-5-euro-rabatt-kaffee5-wien.html">Deal und Bedingungen lesen</a></div></article>
-        <article class="post-card" data-deal-expires="2026-10-31T23:59:59+02:00"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit veganen 1+1-Angeboten" width="736" height="414" loading="eager" decoding="async"><div class="post-card-body"><span class="topic-label">Vegan · 1+1 bis 31. Oktober</span><h2>1+1 Loving Hut-dog bei Loving Hut Neubau</h2><p>Einen bestellen, einen zweiten gratis erhalten.</p><a href="loving-hut-dog-1plus1-wien.html">Deal und Bedingungen lesen</a></div></article>
-        <article class="post-card" data-deal-expires="2026-12-31T23:59:59+01:00"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Restaurant-Gutscheinen" width="736" height="414" loading="eager" decoding="async"><div class="post-card-body"><span class="topic-label">Restaurant · 10 Euro Rabatt</span><h2>10 Euro Rabatt bei Ganesha ab 50 Euro</h2><p>Gutschein, Mindestkonsumation und Standort in Wien prüfen.</p><a href="ganesha-10-euro-gutschein-50-euro-wien.html">Deal und Bedingungen lesen</a></div></article>
-        <article class="post-card" data-deal-expires="2026-10-05T23:59:59+02:00">
-          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit 50 Prozent Rabatt in der Lugner City Wien" width="736" height="414" loading="eager" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">Aktion beendet · 5. Oktober 2026</span><h2>Lugner City: 50-Prozent-Aktion vom 5. Oktober</h2><p>Archiv des Gastronomie-Angebots in 1150 Wien. Die Tagesaktion ist beendet.</p><a href="lugner-city-50-prozent-gastronomie-5-oktober-2026.html">Historischen Deal lesen</a></div>
+        <article class="post-card" data-topic="essen" data-archive="false"><picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="Wiener Food-Angebote in der FreeFinder App" width="736" height="414" loading="eager" decoding="async"></picture><div class="post-card-body"><span class="topic-label">Wien · Essen nach Bezirk</span><h2><a href="guenstig-essen-wien.html">Günstig essen in Wien: Adressen und Angebote</a></h2><p>Ganesha in 1010, Kaffee um 2,50 Euro in 1080 und Watertuin in 1110: Preise und Bedingungen vergleichen.</p><a href="guenstig-essen-wien.html">Wiener Food-Guide lesen</a></div></article>
+        <article class="post-card" data-topic="geburtstag" data-archive="false">
+          <picture><source type="image/avif" srcset="/og-preview-stores-600.avif 600w, /og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 520px"><img src="/og-preview-stores.png" alt="FreeFinder App mit Wiener Angeboten" width="1200" height="630" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">Geburtstag</span><h2><a href="geburtstag-gratis-wien.html">Geburtstag gratis in Wien</a></h2><p>Essen, Eintritt und Starbucks für Gold-Mitglieder: vier geprüfte Vorteile mit Einlösebedingungen.</p><a href="geburtstag-gratis-wien.html">Geburtstags-Guide lesen</a></div>
         </article>
-        <article class="post-card" data-deal-expires="">
-          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit gratis Bowl-Angeboten in Wien" width="736" height="414" loading="eager" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">1+1 · Gratis Bowl</span><h2>Eine Bowl bestellen, eine gratis bei Papa Duck</h2><p>Account folgen, Barnabitengasse 1 in 1060 Wien und die Bedingungen vor Ort prüfen.</p><a href="papa-duck-bowl-wien-1plus1-gratis.html">Deal und Bedingungen lesen</a></div>
-        </article>
-        <article class="post-card" data-deal-expires="">
-          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Foodora-Rabatt und kostenlosen Angeboten in Wien" width="736" height="414" loading="eager" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">60 Prozent Rabatt · Code GENUSS</span><h2>60 Prozent Foodora-Rabatt mit GENUSS</h2><p>Aktueller Foodora-Gutscheincode, Einlösung, Warenkorbprüfung und wichtige Bedingungen.</p><a href="foodora-60-prozent-rabatt-genuss-wien.html">Gutschein und Bedingungen lesen</a></div>
-        </article>
-        <article class="post-card" data-deal-expires="2026-09-25T23:59:59+02:00">
-          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Burger- und Food-Angeboten in Wien" width="736" height="414" loading="eager" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">Aktion beendet · 25. September 2026</span><h2>Interpolburger: historische 2-Euro-Eröffnungsaktion</h2><p>Archiv des Burger-Angebots am Südtiroler Platz 1. Kein heute gültiger 2-Euro-Preis.</p><a href="interpolburger-2-euro-wien.html">Historischen Deal lesen</a></div>
-        </article>
-        <article class="post-card" data-deal-expires="2026-09-23T18:00:00+02:00">
-          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Döner- und Kebab-Angeboten in Wien" width="736" height="414" loading="eager" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">Aktion beendet · 23. September 2026</span><h2>Duru Döner: 3,50-Euro-Aktion vom 23. September</h2><p>Archiv des Hühnerdöner-Angebots in der Thaliastraße. Die Tagesaktion ist beendet.</p><a href="duru-doener-350-wien-2026.html">Historischen Deal lesen</a></div>
-        </article>
-        <article class="post-card" data-deal-expires="2026-09-25T23:59:59+02:00">
-          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit 1+1-Döner-Angeboten in Wien" width="736" height="414" loading="eager" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">1+1 · bis 25. September</span><h2>1+1 Döner bei Dahab in Wien</h2><p>Zwei Döner kaufen, einen weiteren gratis erhalten: Zeitraum, Filiale und Bedingungen prüfen.</p><a href="dahab-doener-1plus1-wien.html">Deal und Bedingungen lesen</a></div>
-        </article>
-        <article class="post-card" data-deal-expires="2026-09-23T23:59:59+02:00">
-          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit gratis Gemüse-Kebab in Wien" width="736" height="414" loading="eager" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">Heute · solange der Vorrat reicht</span><h2>Gratis Gemüse-Kebab bei H11</h2><p>Berliner-Style Gemüse-Kebab am 23. September ab 12 Uhr: Originalquelle und Verfügbarkeit.</p><a href="gratis-gemuese-kebab-h11-wien.html">Deal und Bedingungen lesen</a></div>
-        </article>
-        <article class="post-card" data-deal-expires="">
-          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Kebab- und Food-Angeboten in Wien" width="736" height="414" loading="eager" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">Kebab · 5 Euro Rabatt ab 20 Euro</span><h2>5 Euro Rabatt bei Duru Kebab in Wien</h2><p>Aktueller Wolt-Rabatt, Mindestbestellwert, Warenkorbprüfung und wichtige Gebührenhinweise.</p><a href="duru-kebab-wien-wolt-rabatt.html">Deal und Bedingungen lesen</a></div>
-        </article>
-        <article class="post-card" data-deal-expires="">
-          <picture><source type="image/avif" srcset="/assets/blog/omv-viva-eiskaffee-gratis-800.avif 800w, /assets/blog/omv-viva-eiskaffee-gratis-1600.avif 1600w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/blog/omv-viva-eiskaffee-gratis.jpg" alt="Frühstück und Kaffee als Beispiel für ein günstiges Frühstück in Wien" width="1600" height="900" loading="eager" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">1 Euro · Freitag und Samstag</span><h2>1-Euro-Frühstück bei IKEA in Wien</h2><p>Preis, Zeiten, teilnehmende Restaurants und die wichtigsten Bedingungen des IKEA-Frühstücks.</p><a href="ikea-1-euro-fruehstueck-wien.html">Angebot und Bedingungen lesen</a></div>
-        </article>
-        <article class="post-card" data-deal-expires="2026-09-27T17:00:00+02:00">
-          <img src="/assets/blog/wiener-feuerwehrfest-2026.png" alt="Markenfreies Symbolbild für kostenlose Architekturführungen in Wien" width="1672" height="941" loading="eager" decoding="async">
-          <div class="post-card-body"><span class="topic-label">25.–27. September · Eintritt frei</span><h2>Open House Wien 2026</h2><p>Kostenlose Führungen durch sonst nicht frei zugängliche Gebäude und Freiräume.</p><a href="open-house-wien-2026-gratis.html">Event und Details lesen</a></div>
-        </article>
-        <article class="post-card">
-          <img src="/assets/blog/wiener-feuerwehrfest-2026.png" alt="Markenfreies Symbolbild für einen kostenlosen Museumsbesuch in Wien" width="1672" height="941" loading="eager" decoding="async">
-          <div class="post-card-body"><span class="topic-label">Museum · Eintritt frei</span><h2>Wien. Meine Geschichte gratis</h2><p>Die kostenlose Ausstellung im Wien Museum, Besuchsplanung und wichtige Abgrenzungen.</p><a href="wien-meine-geschichte-gratis-eintritt.html">Ausstellung und Details lesen</a></div>
-        </article>
-        <article class="post-card" data-deal-expires="2026-09-05T23:59:59+02:00">
-          <img src="/assets/blog/wiener-feuerwehrfest-2026.png" alt="Markenfreies Symbolbild für einen kostenlosen Filmabend in Wien" width="1672" height="941" loading="eager" decoding="async">
-          <div class="post-card-body"><span class="topic-label">Aktion beendet · 24. Juli–5. September 2026</span><h2>Filmsommer im Möbelmuseum Wien</h2><p>Archiv der kostenlosen Filmabende von Juli bis September 2026 mit offiziellen Terminen.</p><a href="filmsommer-moebelmuseum-wien-gratis.html">Archiv und Details lesen</a></div>
-        </article>
-        <article class="post-card" data-deal-expires="2026-09-09T23:59:59+02:00">
-          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Wiener Food- und Rabattangeboten" width="736" height="414" loading="eager" decoding="async"></picture>
-          <div class="post-card-body">
-            <span class="topic-label">Nur am 9. September · 1030 Wien</span>
-            <h2>Kebab für 1 Euro bei Yusis x 1030</h2>
-            <p>Hühner- oder Kalbs-Kebab um 1 € zur Eröffnung in der Juchgasse 28 – solange der Vorrat reicht.</p>
-            <a href="kebab-1-euro-wien-yusis-1030.html">Deal und Bedingungen lesen</a>
-          </div>
-        </article>
-        <article class="post-card" data-deal-expires="">
-          <picture><source type="image/avif" srcset="/assets/blog/omv-viva-eiskaffee-gratis-800.avif 800w, /assets/blog/omv-viva-eiskaffee-gratis-1600.avif 1600w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/blog/omv-viva-eiskaffee-gratis.jpg" alt="Heißgetränk als Beispiel für einen kostenlosen Kaffeevorteil in Wien" width="1600" height="900" loading="eager" decoding="async"></picture>
-          <div class="post-card-body">
-            <span class="topic-label">Gratis Kaffee · IKEA Family</span>
-            <h2>Gratis Heißgetränk bei IKEA in Wien</h2>
-            <p>Kaffee, Tee oder heiße Schokolade gratis: IKEA-Family-Karte, Restaurant und regionale Bedingungen im Überblick.</p>
-            <a href="gratis-heissgetraenk-ikea-wien.html">Vorteil und Bedingungen lesen</a>
-          </div>
-        </article>
-        <article class="post-card" data-deal-expires="">
-          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Wiener Freizeit- und Rabattangeboten" width="736" height="414" loading="eager" decoding="async"></picture>
-          <div class="post-card-body">
-            <span class="topic-label">Dienstag · Magenta Moments</span>
-            <h2>1+1 Kino in Wien mit Magenta Moments</h2>
-            <p>Voraussetzungen, MeinMagenta-App, teilnehmende Kinos und Einlösung des Dienstagvorteils im Überblick.</p>
-            <a href="magenta-moments-kino-1plus1-wien.html">Deal und Bedingungen lesen</a>
-          </div>
-        </article>
-        <article class="post-card" data-deal-expires="">
-          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit kostenlosen Food-Angeboten in Wien" width="736" height="414" loading="eager" decoding="async"></picture>
-          <div class="post-card-body">
-            <span class="topic-label">Gratis Pizza · 1120 Wien</span>
-            <h2>Gratis Pizza ab 20 Euro bei Wiener Laziz Food</h2>
-            <p>Pizza Margherita gratis ab 20 Euro Bestellwert: Adresse, Öffnungszeiten und Prüfhinweise.</p>
-            <a href="gratis-pizza-wien-laziz-food.html">Deal und Bedingungen lesen</a>
-          </div>
-        </article>
-        <article class="post-card" data-deal-expires="2026-10-31T23:59:59+01:00">
-          <picture><source type="image/avif" srcset="/og-preview-stores-600.avif 600w, /og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 520px"><img src="/og-preview-stores.png" alt="FreeFinder App mit einer Auswahl an Angeboten in Wien" width="1200" height="630" loading="eager" decoding="async"></picture>
-          <div class="post-card-body">
-            <span class="topic-label">Aktuell bis 31. Oktober</span>
-            <h2>Gratis Lieferando+ mit Drei</h2>
-            <p>90 Tage Lieferando+ ohne Liefergebühr: SMS-Code, Aktivierung, Mindestbestellwert und verbleibende Gebühren im Überblick.</p>
-            <a href="lieferando-plus-drei-wien.html">Deal und Bedingungen lesen</a>
-          </div>
-        </article>
-        <article class="post-card" data-deal-expires="">
-          <img src="/assets/blog/evo-probetraining-wien-2026.jpg" alt="Markenfreies Symbolbild einer Person beim Betreten eines Fitnessstudios" width="1600" height="900" loading="eager" decoding="async">
-          <div class="post-card-body">
-            <span class="topic-label">Laufend · 7 Tage gratis</span>
-            <h2>EVO Fitness Probetraining in Wien</h2>
-            <p>Sieben Tage kostenlos trainieren: Anmeldung, Zugangscode und die Kündigung bis Ende von Tag 7 im Überblick.</p>
-            <a href="evo-probetraining-wien.html">Deal und Bedingungen lesen</a>
-          </div>
-        </article>
-        <article class="post-card" data-deal-expires="">
-          <picture><source type="image/avif" srcset="/og-preview-stores-600.avif 600w, /og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 520px"><img src="/og-preview-stores.png" alt="FreeFinder App mit einer Auswahl an Angeboten in Wien" width="1200" height="630" loading="eager" decoding="async"></picture>
+        <article class="post-card" data-deal-expires="" data-topic="freizeit" data-archive="false">
+          <picture><source type="image/avif" srcset="/og-preview-stores-600.avif 600w, /og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 520px"><img src="/og-preview-stores.png" alt="FreeFinder App mit einer Auswahl an Angeboten in Wien" width="1200" height="630" loading="lazy" decoding="async"></picture>
           <div class="post-card-body">
             <span class="topic-label">Laufend · jeden Donnerstag</span>
-            <h2>Pizza Mann 2+1 gratis mit Drei Plus</h2>
-            <p>Drei Pizzen bestellen, zwei bezahlen: SMS-Code, Lieferregeln und Sortimentsausnahmen im Überblick.</p>
-            <a href="pizzamann-drei-plus-wien.html">Deal und Bedingungen lesen</a>
-          </div>
-        </article>
-        <article class="post-card" data-deal-expires="">
-          <picture><source type="image/avif" srcset="/og-preview-stores-600.avif 600w, /og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 520px"><img src="/og-preview-stores.png" alt="FreeFinder App mit einer Auswahl an Angeboten in Wien" width="1200" height="630" loading="eager" decoding="async"></picture>
-          <div class="post-card-body">
-            <span class="topic-label">Laufend · jeden Donnerstag</span>
-            <h2>Drei KinoDonnerstag in Wien</h2>
+            <h2><a href="kinodonnerstag-wien-drei.html">Drei KinoDonnerstag in Wien</a></h2>
             <p>Zwei Kinotickets zum Preis von einem: SMS-Code, Teilnahme und mögliche Zuschläge im Überblick.</p>
             <a href="kinodonnerstag-wien-drei.html">Deal und Bedingungen lesen</a>
           </div>
         </article>
-        <article class="post-card" data-deal-expires="2026-09-13T17:00:00+02:00">
-          <img src="/assets/blog/wiener-feuerwehrfest-2026.png" alt="Markenfreies Symbolbild eines roten historischen Löschfahrzeugs in einem Wiener Innenhof" width="1672" height="941">
+        <article class="post-card" data-deal-expires="2026-10-13T23:59:59+02:00" data-topic="shopping" data-archive="false"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit GUESS-Rabatten" width="736" height="414" loading="lazy" decoding="async"><div class="post-card-body"><span class="topic-label">Shopping · 20 Prozent</span><h2><a href="guess-shopping-week-20-prozent-wien.html">20 Prozent Rabatt bei GUESS</a></h2><p>Shopping Week auf ausgewählte Styles: Gültigkeit und Teilnahme prüfen.</p><a href="guess-shopping-week-20-prozent-wien.html">Deal und Bedingungen lesen</a></div></article>
+        <article class="post-card" data-deal-expires="2026-10-20T23:59:59+02:00" data-topic="ratgeber" data-archive="false"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit günstigen Flügen ab Wien" width="736" height="414" loading="lazy" decoding="async"><div class="post-card-body"><span class="topic-label">Reise · Ibiza ab 55,98 Euro</span><h2><a href="ryanair-ibiza-ab-5598-wien-oktober-2026.html">Ryanair Wien–Ibiza ab 55,98 Euro</a></h2><p>Hin und zurück vom 20. bis 22. Oktober: Flugpreis und Zusatzkosten prüfen.</p><a href="ryanair-ibiza-ab-5598-wien-oktober-2026.html">Deal und Bedingungen lesen</a></div></article>
+        <article class="post-card" data-deal-expires="2026-10-10T23:59:59+02:00" data-topic="essen" data-archive="false"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Döner-Angeboten in Wien" width="736" height="414" loading="lazy" decoding="async"><div class="post-card-body"><span class="topic-label">9.–10. Oktober · 3 für 2</span><h2><a href="pizza-rando-3-doener-zum-preis-von-2-wien.html">3 Döner zum Preis von 2 bei Pizza Rando</a></h2><p>3-für-2-Aktion in der Dresdnerstraße 115, 1200 Wien.</p><a href="pizza-rando-3-doener-zum-preis-von-2-wien.html">Deal und Bedingungen lesen</a></div></article>
+        <article class="post-card" data-topic="kaffee" data-archive="false"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Kaffee-Angeboten in Wien" width="736" height="414" loading="lazy" decoding="async"><div class="post-card-body"><span class="topic-label">Kaffee · 20 Prozent</span><h2><a href="anker-winterheissgetraenk-20-prozent-wien.html">20 Prozent auf Winterheißgetränke bei ANKER</a></h2><p>Saisonale Heißgetränke günstiger: Filiale und Zeitraum prüfen.</p><a href="anker-winterheissgetraenk-20-prozent-wien.html">Deal und Bedingungen lesen</a></div></article>
+        <article class="post-card" data-topic="shopping" data-archive="false"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Möbelix-Rabatten" width="736" height="414" loading="lazy" decoding="async"><div class="post-card-body"><span class="topic-label">Möbel · 20 Prozent</span><h2><a href="moebelix-20-prozent-teppiche-wien.html">20 Prozent Rabatt auf Teppiche bei Möbelix</a></h2><p>Teppich-Angebot und finalen Warenkorbpreis prüfen.</p><a href="moebelix-20-prozent-teppiche-wien.html">Deal und Bedingungen lesen</a></div></article>
+        <article class="post-card" data-topic="shopping" data-archive="false"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Online-Gutscheinen" width="736" height="414" loading="lazy" decoding="async"><div class="post-card-body"><span class="topic-label">Online · 30 Euro</span><h2><a href="autodoc-30-euro-gutschein.html">30-Euro-Gutschein bei AUTODOC</a></h2><p>Gutscheinbedingungen und Mindestbestellwert im Checkout prüfen.</p><a href="autodoc-30-euro-gutschein.html">Deal und Bedingungen lesen</a></div></article>
+        <article class="post-card" data-topic="kaffee" data-archive="false"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Starbucks-Gutscheinen" width="736" height="414" loading="lazy" decoding="async"><div class="post-card-body"><span class="topic-label">Kaffee · Code KAFFEE5</span><h2><a href="starbucks-5-euro-rabatt-kaffee5-wien.html">5 Euro Rabatt bei Starbucks</a></h2><p>Code KAFFEE5 über Lieferando eingeben und Rabatt prüfen.</p><a href="starbucks-5-euro-rabatt-kaffee5-wien.html">Deal und Bedingungen lesen</a></div></article>
+        <article class="post-card" data-deal-expires="2026-10-31T23:59:59+02:00" data-topic="essen" data-archive="false"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit veganen 1+1-Angeboten" width="736" height="414" loading="lazy" decoding="async"><div class="post-card-body"><span class="topic-label">Vegan · 1+1 bis 31. Oktober</span><h2><a href="loving-hut-dog-1plus1-wien.html">1+1 Loving Hut-dog bei Loving Hut Neubau</a></h2><p>Einen bestellen, einen zweiten gratis erhalten.</p><a href="loving-hut-dog-1plus1-wien.html">Deal und Bedingungen lesen</a></div></article>
+        <article class="post-card" data-deal-expires="2026-12-31T23:59:59+01:00" data-topic="essen" data-archive="false"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Restaurant-Gutscheinen" width="736" height="414" loading="lazy" decoding="async"><div class="post-card-body"><span class="topic-label">Restaurant · 10 Euro Rabatt</span><h2><a href="ganesha-10-euro-gutschein-50-euro-wien.html">10 Euro Rabatt bei Ganesha ab 50 Euro</a></h2><p>Gutschein, Mindestkonsumation und Standort in Wien prüfen.</p><a href="ganesha-10-euro-gutschein-50-euro-wien.html">Deal und Bedingungen lesen</a></div></article>
+        <article class="post-card" data-deal-expires="" data-topic="essen" data-archive="false">
+          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit gratis Bowl-Angeboten in Wien" width="736" height="414" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">1+1 · Gratis Bowl</span><h2><a href="papa-duck-bowl-wien-1plus1-gratis.html">Eine Bowl bestellen, eine gratis bei Papa Duck</a></h2><p>Account folgen, Barnabitengasse 1 in 1060 Wien und die Bedingungen vor Ort prüfen.</p><a href="papa-duck-bowl-wien-1plus1-gratis.html">Deal und Bedingungen lesen</a></div>
+        </article>
+        <article class="post-card" data-deal-expires="" data-topic="essen" data-archive="false">
+          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Foodora-Rabatt und kostenlosen Angeboten in Wien" width="736" height="414" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">60 Prozent Rabatt · Code GENUSS</span><h2><a href="foodora-60-prozent-rabatt-genuss-wien.html">60 Prozent Foodora-Rabatt mit GENUSS</a></h2><p>Aktueller Foodora-Gutscheincode, Einlösung, Warenkorbprüfung und wichtige Bedingungen.</p><a href="foodora-60-prozent-rabatt-genuss-wien.html">Gutschein und Bedingungen lesen</a></div>
+        </article>
+        <article class="post-card" data-deal-expires="" data-topic="essen" data-archive="false">
+          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Kebab- und Food-Angeboten in Wien" width="736" height="414" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">Kebab · 5 Euro Rabatt ab 20 Euro</span><h2><a href="duru-kebab-wien-wolt-rabatt.html">5 Euro Rabatt bei Duru Kebab in Wien</a></h2><p>Aktueller Wolt-Rabatt, Mindestbestellwert, Warenkorbprüfung und wichtige Gebührenhinweise.</p><a href="duru-kebab-wien-wolt-rabatt.html">Deal und Bedingungen lesen</a></div>
+        </article>
+        <article class="post-card" data-deal-expires="" data-topic="essen" data-archive="false">
+          <picture><source type="image/avif" srcset="/assets/blog/omv-viva-eiskaffee-gratis-800.avif 800w, /assets/blog/omv-viva-eiskaffee-gratis-1600.avif 1600w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/blog/omv-viva-eiskaffee-gratis.jpg" alt="Frühstück und Kaffee als Beispiel für ein günstiges Frühstück in Wien" width="1600" height="900" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">1 Euro · Freitag und Samstag</span><h2><a href="ikea-1-euro-fruehstueck-wien.html">1-Euro-Frühstück bei IKEA in Wien</a></h2><p>Preis, Zeiten, teilnehmende Restaurants und die wichtigsten Bedingungen des IKEA-Frühstücks.</p><a href="ikea-1-euro-fruehstueck-wien.html">Angebot und Bedingungen lesen</a></div>
+        </article>
+        <article class="post-card" data-topic="freizeit" data-archive="false">
+          <img src="/assets/blog/wiener-feuerwehrfest-2026.png" alt="Markenfreies Symbolbild für einen kostenlosen Museumsbesuch in Wien" width="1672" height="941" loading="lazy" decoding="async">
+          <div class="post-card-body"><span class="topic-label">Museum · Eintritt frei</span><h2><a href="wien-meine-geschichte-gratis-eintritt.html">Wien. Meine Geschichte gratis</a></h2><p>Die kostenlose Ausstellung im Wien Museum, Besuchsplanung und wichtige Abgrenzungen.</p><a href="wien-meine-geschichte-gratis-eintritt.html">Ausstellung und Details lesen</a></div>
+        </article>
+        <article class="post-card" data-deal-expires="" data-topic="kaffee" data-archive="false">
+          <picture><source type="image/avif" srcset="/assets/blog/omv-viva-eiskaffee-gratis-800.avif 800w, /assets/blog/omv-viva-eiskaffee-gratis-1600.avif 1600w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/blog/omv-viva-eiskaffee-gratis.jpg" alt="Heißgetränk als Beispiel für einen kostenlosen Kaffeevorteil in Wien" width="1600" height="900" loading="lazy" decoding="async"></picture>
           <div class="post-card-body">
-            <span class="topic-label">Eintritt frei · 11.–13. September</span>
-            <h2>Wiener Feuerwehrfest 2026</h2>
-            <p>Gratis an der Zentralfeuerwache Am Hof: Termin, Programm und die offizielle Quelle im Überblick.</p>
-            <a href="wiener-feuerwehrfest-2026.html">Event und Details lesen</a>
+            <span class="topic-label">Gratis Kaffee · IKEA Family</span>
+            <h2><a href="gratis-heissgetraenk-ikea-wien.html">Gratis Heißgetränk bei IKEA in Wien</a></h2>
+            <p>Kaffee, Tee oder heiße Schokolade gratis: IKEA-Family-Karte, Restaurant und regionale Bedingungen im Überblick.</p>
+            <a href="gratis-heissgetraenk-ikea-wien.html">Vorteil und Bedingungen lesen</a>
           </div>
         </article>
-        <article class="post-card" data-deal-expires="2026-09-18T23:59:59+02:00">
-          <img src="/assets/blog/worship-revolution-wien-2026.jpg" alt="Markenfreies Symbolbild einer Gruppe in einer Wiener Innenstadtstraße" width="1672" height="941">
+        <article class="post-card" data-deal-expires="" data-topic="freizeit" data-archive="false">
+          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Wiener Freizeit- und Rabattangeboten" width="736" height="414" loading="lazy" decoding="async"></picture>
           <div class="post-card-body">
-            <span class="topic-label">Eintritt frei · 18. September</span>
-            <h2>Worship Revolution Wien</h2>
-            <p>Freier Eintritt im Novum Wien: Termin, Uhrzeit, Adresse und die offizielle Quelle im Überblick.</p>
-            <a href="worship-revolution-wien-2026.html">Event und Details lesen</a>
+            <span class="topic-label">Dienstag · Magenta Moments</span>
+            <h2><a href="magenta-moments-kino-1plus1-wien.html">1+1 Kino in Wien mit Magenta Moments</a></h2>
+            <p>Voraussetzungen, MeinMagenta-App, teilnehmende Kinos und Einlösung des Dienstagvorteils im Überblick.</p>
+            <a href="magenta-moments-kino-1plus1-wien.html">Deal und Bedingungen lesen</a>
           </div>
         </article>
-        <article class="post-card" data-deal-expires="2026-09-30T23:59:59+02:00">
-          <picture><source type="image/avif" srcset="/assets/blog/nordsee-wrap-1plus1-2026-800.avif 800w, /assets/blog/nordsee-wrap-1plus1-2026-1600.avif 1600w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/blog/nordsee-wrap-1plus1-2026.jpg" alt="Zwei unmarkierte Garnelen-Wraps auf einem hellblauen Tisch" width="1600" height="900"></picture>
+        <article class="post-card" data-deal-expires="" data-topic="essen" data-archive="false">
+          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit kostenlosen Food-Angeboten in Wien" width="736" height="414" loading="lazy" decoding="async"></picture>
           <div class="post-card-body">
-            <span class="topic-label">Aktuell bis 30. September</span>
-            <h2>NORDSEE 1+1 Garnelen-Wrap</h2>
-            <p>Mit Drei Plus zwei Garnelen-Wraps zum Preis von einem erhalten: Gutschein, Filialen und Ausschlüsse im Überblick.</p>
-            <a href="nordsee-wrap-1plus1-wien.html">Deal und Bedingungen lesen</a>
+            <span class="topic-label">Gratis Pizza · 1120 Wien</span>
+            <h2><a href="gratis-pizza-wien-laziz-food.html">Gratis Pizza ab 20 Euro bei Wiener Laziz Food</a></h2>
+            <p>Pizza Margherita gratis ab 20 Euro Bestellwert: Adresse, Öffnungszeiten und Prüfhinweise.</p>
+            <a href="gratis-pizza-wien-laziz-food.html">Deal und Bedingungen lesen</a>
           </div>
         </article>
-        <article class="post-card" data-deal-expires="2026-08-30T23:59:59+02:00">
-          <picture><source type="image/avif" srcset="/assets/blog/omv-viva-eiskaffee-gratis-800.avif 800w, /assets/blog/omv-viva-eiskaffee-gratis-1600.avif 1600w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/blog/omv-viva-eiskaffee-gratis.jpg" alt="Drei sommerliche Eiskaffees in Orange, Espresso-Tonic und Erdbeer-Kokos" width="1600" height="900"></picture>
+        <article class="post-card" data-deal-expires="2026-10-31T23:59:59+01:00" data-topic="ratgeber" data-archive="false">
+          <picture><source type="image/avif" srcset="/og-preview-stores-600.avif 600w, /og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 520px"><img src="/og-preview-stores.png" alt="FreeFinder App mit einer Auswahl an Angeboten in Wien" width="1200" height="630" loading="lazy" decoding="async"></picture>
           <div class="post-card-body">
-            <span class="topic-label">Aktuell bis 30. August</span>
-            <h2>Gratis OMV Eiskaffee testen</h2>
-            <p>Drei neue VIVA Eiskaffees jeweils einmal gratis: So funktionieren Vorteilsbon, jö Karte und Einlösung.</p>
-            <a href="gratis-omv-kaffee.html">Deal und Bedingungen lesen</a>
+            <span class="topic-label">Aktuell bis 31. Oktober</span>
+            <h2><a href="lieferando-plus-drei-wien.html">Gratis Lieferando+ mit Drei</a></h2>
+            <p>90 Tage Lieferando+ ohne Liefergebühr: SMS-Code, Aktivierung, Mindestbestellwert und verbleibende Gebühren im Überblick.</p>
+            <a href="lieferando-plus-drei-wien.html">Deal und Bedingungen lesen</a>
           </div>
         </article>
-        <article class="post-card">
+        <article class="post-card" data-deal-expires="" data-topic="freizeit" data-archive="false">
+          <img src="/assets/blog/evo-probetraining-wien-2026.jpg" alt="Markenfreies Symbolbild einer Person beim Betreten eines Fitnessstudios" width="1600" height="900" loading="lazy" decoding="async">
+          <div class="post-card-body">
+            <span class="topic-label">Laufend · 7 Tage gratis</span>
+            <h2><a href="evo-probetraining-wien.html">EVO Fitness Probetraining in Wien</a></h2>
+            <p>Sieben Tage kostenlos trainieren: Anmeldung, Zugangscode und die Kündigung bis Ende von Tag 7 im Überblick.</p>
+            <a href="evo-probetraining-wien.html">Deal und Bedingungen lesen</a>
+          </div>
+        </article>
+        <article class="post-card" data-deal-expires="" data-topic="essen" data-archive="false">
+          <picture><source type="image/avif" srcset="/og-preview-stores-600.avif 600w, /og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 520px"><img src="/og-preview-stores.png" alt="FreeFinder App mit einer Auswahl an Angeboten in Wien" width="1200" height="630" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body">
+            <span class="topic-label">Laufend · jeden Donnerstag</span>
+            <h2><a href="pizzamann-drei-plus-wien.html">Pizza Mann 2+1 gratis mit Drei Plus</a></h2>
+            <p>Drei Pizzen bestellen, zwei bezahlen: SMS-Code, Lieferregeln und Sortimentsausnahmen im Überblick.</p>
+            <a href="pizzamann-drei-plus-wien.html">Deal und Bedingungen lesen</a>
+          </div>
+        </article>
+        <article class="post-card" data-topic="essen" data-archive="false">
           <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit kostenlosen Food-Deals in Wien" width="736" height="414" loading="lazy" decoding="async"></picture>
           <div class="post-card-body">
             <span class="topic-label">Gratis-Essen</span>
-            <h2>Gratis Essen in Wien heute</h2>
+            <h2><a href="gratis-essen-wien.html">Gratis Essen in Wien heute</a></h2>
             <p>Food-Deals an Quelle, Enddatum, Filiale und Mindestbestellwert prüfen.</p>
             <a href="gratis-essen-wien.html">Guide lesen</a>
           </div>
         </article>
-        <article class="post-card">
+        <article class="post-card" data-topic="ratgeber" data-archive="false">
           <picture><source type="image/avif" srcset="/og-preview-stores-600.avif 600w, /og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 520px"><img src="/og-preview-stores.png" alt="FreeFinder für iPhone und Android mit kostenlosen Angeboten in Wien" width="1200" height="630" loading="lazy" decoding="async"></picture>
           <div class="post-card-body">
             <span class="topic-label">Gratis-Angebote</span>
-            <h2>Kostenlose Angebote in Wien heute</h2>
+            <h2><a href="kostenlose-angebote-wien.html">Kostenlose Angebote in Wien heute</a></h2>
             <p>Aktuelle Gratis-Aktionen an Quelle, Ablaufdatum und Filiale prüfen.</p>
             <a href="kostenlose-angebote-wien.html">Übersicht öffnen</a>
           </div>
         </article>
-        <article class="post-card">
+        <article class="post-card" data-topic="ratgeber" data-archive="false">
           <picture><img src="/assets/current-ios/for-you.jpg" alt="FreeFinder Empfehlungen mit Gutscheinen und Coupons in Wien" width="736" height="1600" style="object-position:center 41%" loading="lazy" decoding="async"></picture>
           <div class="post-card-body">
             <span class="topic-label">Gutscheine</span>
-            <h2>Gutscheine in Wien richtig nutzen</h2>
+            <h2><a href="gutscheine-wien.html">Gutscheine in Wien richtig nutzen</a></h2>
             <p>Coupons auf Gültigkeit, Filiale, Mindestumsatz und echte Ersparnis prüfen.</p>
             <a href="gutscheine-wien.html">Gutschein-Guide lesen</a>
           </div>
         </article>
-        <article class="post-card">
+        <article class="post-card" data-topic="ratgeber" data-archive="false">
           <picture><source type="image/avif" srcset="/assets/current-ios/for-you-400.avif 400w, /assets/current-ios/for-you-711.avif 711w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/for-you.jpg" alt="Personalisierte Wiener Rabatte in der FreeFinder App" width="711" height="400" loading="lazy" decoding="async"></picture>
           <div class="post-card-body">
             <span class="topic-label">Rabatte</span>
-            <h2>Rabatte und 1+1-Aktionen in Wien</h2>
+            <h2><a href="rabatte-wien.html">Rabatte und 1+1-Aktionen in Wien</a></h2>
             <p>Ein kurzer Check für Gutscheine, App-only-Deals, 1+1-Angebote und wirklich lohnende Preisnachlässe.</p>
             <a href="rabatte-wien.html">Rabatt-Guide lesen</a>
           </div>
         </article>
-        <article class="post-card">
+        <article class="post-card" data-topic="kaffee" data-archive="false">
           <picture><source type="image/avif" srcset="/assets/blog/omv-viva-eiskaffee-gratis-800.avif 800w, /assets/blog/omv-viva-eiskaffee-gratis-1600.avif 1600w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/blog/omv-viva-eiskaffee-gratis.jpg" alt="Kalte Kaffeegetränke als Beispiel für Gratis-Kaffee-Aktionen" width="1600" height="900" loading="lazy" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">Kaffee</span><h2>Gratis Kaffee in Wien</h2><p>Verkostungen, App-Gutscheine und Filialbedingungen zuverlässig prüfen.</p><a href="gratis-kaffee-wien.html">Kaffee-Guide lesen</a></div>
+          <div class="post-card-body"><span class="topic-label">Kaffee</span><h2><a href="gratis-kaffee-wien.html">Gratis Kaffee in Wien</a></h2><p>Verkostungen, App-Gutscheine und Filialbedingungen zuverlässig prüfen.</p><a href="gratis-kaffee-wien.html">Kaffee-Guide lesen</a></div>
         </article>
-        <article class="post-card">
-          <picture><source type="image/avif" srcset="/og-preview-stores-600.avif 600w, /og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 520px"><img src="/og-preview-stores.png" alt="FreeFinder App mit Wiener Angeboten" width="1200" height="630" loading="lazy" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">Geburtstag</span><h2>Geburtstag gratis in Wien</h2><p>Essen, Eintritt und Starbucks für Gold-Mitglieder: vier geprüfte Vorteile mit Einlösebedingungen.</p><a href="geburtstag-gratis-wien.html">Geburtstags-Guide lesen</a></div>
-        </article>
-        <article class="post-card">
+        <article class="post-card" data-topic="ratgeber" data-archive="false">
           <picture><source type="image/avif" srcset="/assets/current-ios/for-you-400.avif 400w, /assets/current-ios/for-you-711.avif 711w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/for-you.jpg" alt="FreeFinder Empfehlungen mit Wiener Rabatten" width="711" height="400" loading="lazy" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">Studierende</span><h2>Studentenrabatte in Wien</h2><p>Nachweise, Altersgrenzen und den tatsächlichen Gesamtpreis vergleichen.</p><a href="studentenrabatte-wien.html">Studenten-Guide lesen</a></div>
+          <div class="post-card-body"><span class="topic-label">Studierende</span><h2><a href="studentenrabatte-wien.html">Studentenrabatte in Wien</a></h2><p>Nachweise, Altersgrenzen und den tatsächlichen Gesamtpreis vergleichen.</p><a href="studentenrabatte-wien.html">Studenten-Guide lesen</a></div>
         </article>
-        <article class="post-card">
+        <article class="post-card" data-topic="shopping" data-archive="false">
           <picture><source type="image/avif" srcset="/og-preview-stores-600.avif 600w, /og-preview-stores-1200.avif 1200w" sizes="(max-width: 860px) 100vw, 520px"><img src="/og-preview-stores.png" alt="FreeFinder App mit kostenlosen Produktaktionen" width="1200" height="630" loading="lazy" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">Produktproben</span><h2>Produktproben in Wien</h2><p>Samples, Verkostungen und Cashback-Tests voneinander unterscheiden.</p><a href="produktproben-wien.html">Produktproben-Guide lesen</a></div>
+          <div class="post-card-body"><span class="topic-label">Produktproben</span><h2><a href="produktproben-wien.html">Produktproben in Wien</a></h2><p>Samples, Verkostungen und Cashback-Tests voneinander unterscheiden.</p><a href="produktproben-wien.html">Produktproben-Guide lesen</a></div>
         </article>
-        <article class="post-card">
+        <article class="post-card" data-topic="ratgeber" data-archive="false">
           <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit 1+1- und Food-Aktionen" width="736" height="414" loading="lazy" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">1+1</span><h2>1+1-Aktionen in Wien</h2><p>Stückpreis, Produktbindung und Zusatzkosten vor dem Kauf prüfen.</p><a href="eins-plus-eins-wien.html">1+1-Guide lesen</a></div>
+          <div class="post-card-body"><span class="topic-label">1+1</span><h2><a href="eins-plus-eins-wien.html">1+1-Aktionen in Wien</a></h2><p>Stückpreis, Produktbindung und Zusatzkosten vor dem Kauf prüfen.</p><a href="eins-plus-eins-wien.html">1+1-Guide lesen</a></div>
         </article>
-        <article class="post-card">
+        <article class="post-card" data-topic="freizeit" data-archive="false">
           <picture><img src="/assets/blog/evo-probetraining-wien-2026.jpg" alt="Person betritt ein helles Fitnessstudio mit Trainingsgeräten im Hintergrund" width="1600" height="900" loading="lazy" decoding="async"></picture>
-          <div class="post-card-body"><span class="topic-label">Freizeit &amp; Probetraining</span><h2>Kostenlose Freizeit in Wien</h2><p>Freie Tage, Schnupperangebote und die Kündigungsfrist beim Probetraining sinnvoll prüfen.</p><a href="kostenlose-freizeitangebote-wien.html">Freizeit-Guide lesen</a></div>
+          <div class="post-card-body"><span class="topic-label">Freizeit &amp; Probetraining</span><h2><a href="kostenlose-freizeitangebote-wien.html">Kostenlose Freizeit in Wien</a></h2><p>Freie Tage, Schnupperangebote und die Kündigungsfrist beim Probetraining sinnvoll prüfen.</p><a href="kostenlose-freizeitangebote-wien.html">Freizeit-Guide lesen</a></div>
+        </article>
+        <article class="post-card is-expired" data-deal-expires="2026-10-05T23:59:59+02:00" data-topic="essen" data-archive="true">
+          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit 50 Prozent Rabatt in der Lugner City Wien" width="736" height="414" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">Aktion beendet · Archiv</span><h2><a href="lugner-city-50-prozent-gastronomie-5-oktober-2026.html">Lugner City: 50-Prozent-Aktion vom 5. Oktober</a></h2><p>Archiv des Gastronomie-Angebots in 1150 Wien. Die Tagesaktion ist beendet.</p><a href="lugner-city-50-prozent-gastronomie-5-oktober-2026.html">Historischen Deal lesen</a></div>
+        </article>
+        <article class="post-card is-expired" data-deal-expires="2026-09-25T23:59:59+02:00" data-topic="essen" data-archive="true">
+          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Burger- und Food-Angeboten in Wien" width="736" height="414" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">Aktion beendet · Archiv</span><h2><a href="interpolburger-2-euro-wien.html">Interpolburger: historische 2-Euro-Eröffnungsaktion</a></h2><p>Archiv des Burger-Angebots am Südtiroler Platz 1. Kein heute gültiger 2-Euro-Preis.</p><a href="interpolburger-2-euro-wien.html">Historischen Deal lesen</a></div>
+        </article>
+        <article class="post-card is-expired" data-deal-expires="2026-09-23T18:00:00+02:00" data-topic="essen" data-archive="true">
+          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Döner- und Kebab-Angeboten in Wien" width="736" height="414" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">Aktion beendet · Archiv</span><h2><a href="duru-doener-350-wien-2026.html">Duru Döner: 3,50-Euro-Aktion vom 23. September</a></h2><p>Archiv des Hühnerdöner-Angebots in der Thaliastraße. Die Tagesaktion ist beendet.</p><a href="duru-doener-350-wien-2026.html">Historischen Deal lesen</a></div>
+        </article>
+        <article class="post-card is-expired" data-deal-expires="2026-09-25T23:59:59+02:00" data-topic="essen" data-archive="true">
+          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit 1+1-Döner-Angeboten in Wien" width="736" height="414" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">Aktion beendet · Archiv</span><h2><a href="dahab-doener-1plus1-wien.html">1+1 Döner bei Dahab in Wien</a></h2><p>Zwei Döner kaufen, einen weiteren gratis erhalten: Zeitraum, Filiale und Bedingungen prüfen.</p><a href="dahab-doener-1plus1-wien.html">Deal und Bedingungen lesen</a></div>
+        </article>
+        <article class="post-card is-expired" data-deal-expires="2026-09-23T23:59:59+02:00" data-topic="essen" data-archive="true">
+          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit gratis Gemüse-Kebab in Wien" width="736" height="414" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body"><span class="topic-label">Aktion beendet · Archiv</span><h2><a href="gratis-gemuese-kebab-h11-wien.html">Gratis Gemüse-Kebab bei H11</a></h2><p>Berliner-Style Gemüse-Kebab am 23. September ab 12 Uhr: Originalquelle und Verfügbarkeit.</p><a href="gratis-gemuese-kebab-h11-wien.html">Deal und Bedingungen lesen</a></div>
+        </article>
+        <article class="post-card is-expired" data-deal-expires="2026-09-27T17:00:00+02:00" data-topic="freizeit" data-archive="true">
+          <img src="/assets/blog/wiener-feuerwehrfest-2026.png" alt="Markenfreies Symbolbild für kostenlose Architekturführungen in Wien" width="1672" height="941" loading="lazy" decoding="async">
+          <div class="post-card-body"><span class="topic-label">Aktion beendet · Archiv</span><h2><a href="open-house-wien-2026-gratis.html">Open House Wien 2026</a></h2><p>Kostenlose Führungen durch sonst nicht frei zugängliche Gebäude und Freiräume.</p><a href="open-house-wien-2026-gratis.html">Event und Details lesen</a></div>
+        </article>
+        <article class="post-card is-expired" data-deal-expires="2026-09-05T23:59:59+02:00" data-topic="freizeit" data-archive="true">
+          <img src="/assets/blog/wiener-feuerwehrfest-2026.png" alt="Markenfreies Symbolbild für einen kostenlosen Filmabend in Wien" width="1672" height="941" loading="lazy" decoding="async">
+          <div class="post-card-body"><span class="topic-label">Aktion beendet · Archiv</span><h2><a href="filmsommer-moebelmuseum-wien-gratis.html">Filmsommer im Möbelmuseum Wien</a></h2><p>Archiv der kostenlosen Filmabende von Juli bis September 2026 mit offiziellen Terminen.</p><a href="filmsommer-moebelmuseum-wien-gratis.html">Archiv und Details lesen</a></div>
+        </article>
+        <article class="post-card is-expired" data-deal-expires="2026-09-09T23:59:59+02:00" data-topic="essen" data-archive="true">
+          <picture><source type="image/avif" srcset="/assets/current-ios/deals-home-400.avif 400w, /assets/current-ios/deals-home-736.avif 736w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/current-ios/deals-home.jpg" alt="FreeFinder App mit Wiener Food- und Rabattangeboten" width="736" height="414" loading="lazy" decoding="async"></picture>
+          <div class="post-card-body">
+            <span class="topic-label">Aktion beendet · Archiv</span>
+            <h2><a href="kebab-1-euro-wien-yusis-1030.html">Kebab für 1 Euro bei Yusis x 1030</a></h2>
+            <p>Hühner- oder Kalbs-Kebab um 1 € zur Eröffnung in der Juchgasse 28 – solange der Vorrat reicht.</p>
+            <a href="kebab-1-euro-wien-yusis-1030.html">Deal und Bedingungen lesen</a>
+          </div>
+        </article>
+        <article class="post-card is-expired" data-deal-expires="2026-09-13T17:00:00+02:00" data-topic="freizeit" data-archive="true">
+          <img src="/assets/blog/wiener-feuerwehrfest-2026.png" alt="Markenfreies Symbolbild eines roten historischen Löschfahrzeugs in einem Wiener Innenhof" width="1672" height="941" loading="lazy">
+          <div class="post-card-body">
+            <span class="topic-label">Aktion beendet · Archiv</span>
+            <h2><a href="wiener-feuerwehrfest-2026.html">Wiener Feuerwehrfest 2026</a></h2>
+            <p>Gratis an der Zentralfeuerwache Am Hof: Termin, Programm und die offizielle Quelle im Überblick.</p>
+            <a href="wiener-feuerwehrfest-2026.html">Event und Details lesen</a>
+          </div>
+        </article>
+        <article class="post-card is-expired" data-deal-expires="2026-09-18T23:59:59+02:00" data-topic="freizeit" data-archive="true">
+          <img src="/assets/blog/worship-revolution-wien-2026.jpg" alt="Markenfreies Symbolbild einer Gruppe in einer Wiener Innenstadtstraße" width="1672" height="941" loading="lazy">
+          <div class="post-card-body">
+            <span class="topic-label">Aktion beendet · Archiv</span>
+            <h2><a href="worship-revolution-wien-2026.html">Worship Revolution Wien</a></h2>
+            <p>Freier Eintritt im Novum Wien: Termin, Uhrzeit, Adresse und die offizielle Quelle im Überblick.</p>
+            <a href="worship-revolution-wien-2026.html">Event und Details lesen</a>
+          </div>
+        </article>
+        <article class="post-card is-expired" data-deal-expires="2026-09-30T23:59:59+02:00" data-topic="essen" data-archive="true">
+          <picture><source type="image/avif" srcset="/assets/blog/nordsee-wrap-1plus1-2026-800.avif 800w, /assets/blog/nordsee-wrap-1plus1-2026-1600.avif 1600w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/blog/nordsee-wrap-1plus1-2026.jpg" alt="Zwei unmarkierte Garnelen-Wraps auf einem hellblauen Tisch" width="1600" height="900" loading="lazy"></picture>
+          <div class="post-card-body">
+            <span class="topic-label">Aktion beendet · Archiv</span>
+            <h2><a href="nordsee-wrap-1plus1-wien.html">NORDSEE 1+1 Garnelen-Wrap</a></h2>
+            <p>Mit Drei Plus zwei Garnelen-Wraps zum Preis von einem erhalten: Gutschein, Filialen und Ausschlüsse im Überblick.</p>
+            <a href="nordsee-wrap-1plus1-wien.html">Deal und Bedingungen lesen</a>
+          </div>
+        </article>
+        <article class="post-card is-expired" data-deal-expires="2026-08-30T23:59:59+02:00" data-topic="kaffee" data-archive="true">
+          <picture><source type="image/avif" srcset="/assets/blog/omv-viva-eiskaffee-gratis-800.avif 800w, /assets/blog/omv-viva-eiskaffee-gratis-1600.avif 1600w" sizes="(max-width: 860px) 100vw, 520px"><img src="/assets/blog/omv-viva-eiskaffee-gratis.jpg" alt="Drei sommerliche Eiskaffees in Orange, Espresso-Tonic und Erdbeer-Kokos" width="1600" height="900" loading="lazy"></picture>
+          <div class="post-card-body">
+            <span class="topic-label">Aktion beendet · Archiv</span>
+            <h2><a href="gratis-omv-kaffee.html">Gratis OMV Eiskaffee testen</a></h2>
+            <p>Drei neue VIVA Eiskaffees jeweils einmal gratis: So funktionieren Vorteilsbon, jö Karte und Einlösung.</p>
+            <a href="gratis-omv-kaffee.html">Deal und Bedingungen lesen</a>
+          </div>
         </article>
       </div>
     </section>

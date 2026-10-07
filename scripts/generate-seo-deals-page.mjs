@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from 'fs';
+import { polishHtml } from './polish-website.mjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -278,7 +279,7 @@ function renderPage(feed, deals, now) {
 const feed = JSON.parse(fs.readFileSync(INPUT_PATH, 'utf8'));
 const now = parseDate(process.env.SEO_NOW) || new Date();
 const deals = selectDeals(feed, now);
-fs.writeFileSync(OUTPUT_PATH, renderPage(feed, deals, now));
+fs.writeFileSync(OUTPUT_PATH, polishHtml(renderPage(feed, deals, now), 'angebote-wien-heute.html', now.getTime()));
 const sitemap = fs.readFileSync(SITEMAP_PATH, 'utf8');
 const currentDealsUrl = 'https://freefinder.at/angebote-wien-heute.html';
 const updatedSitemap = sitemap.replace(

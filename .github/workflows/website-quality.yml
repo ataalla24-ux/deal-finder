@@ -1,0 +1,23 @@
+name: Website Quality
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**.html', 'docs/**/*.html', 'docs/**/*.css', 'docs/**/*.js', 'docs/manifest.json', 'docs/sitemap.xml', 'scripts/*website*.mjs', 'scripts/*seo*.mjs', '.github/workflows/website-quality.yml']
+  pull_request:
+    paths: ['docs/**.html', 'docs/**/*.html', 'docs/**/*.css', 'docs/**/*.js', 'docs/manifest.json', 'docs/sitemap.xml', 'scripts/*website*.mjs', 'scripts/*seo*.mjs', '.github/workflows/website-quality.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: node scripts/audit-website.mjs --summary
+      - run: node scripts/test-website-quality.mjs
+      - run: node scripts/test-pro-website.mjs
+      - run: node scripts/test-seo-deals-page.mjs

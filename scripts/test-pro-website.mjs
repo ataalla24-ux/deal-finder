@@ -45,7 +45,7 @@ assert.doesNotMatch(promo, /assets\/campaigns\/plus30-preview\.png/);
 assert.doesNotMatch(support, /Pro (?:oder|or) Plus|PRO oder PLUS/);
 assert.equal(manifest.shortcuts.find(s => s.url === '/#pro' || s.url === './#pro' || s.url === '#pro')?.description,
   'FreeFinder Pro öffnen');
-assert.match(sw, /freefinder-website-v7/);
+assert.match(sw, /freefinder-website-v8/);
 assert.doesNotMatch(sw, /stats-plus\.jpg|pro-sheet\.jpg|\.\/og-preview\.png/);
 
 let scripts = 0;

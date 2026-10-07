@@ -2,6 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { polishHtml } from './polish-website.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BLOG_DIR = path.join(ROOT, 'docs', 'blog');
@@ -851,7 +852,7 @@ ${quickDealBlock ? `        ${quickDealBlock}\n` : ''}        <picture>${guide.i
 const selectedSlugs = process.argv.slice(2);
 const selectedGuides = guides.filter(g => selectedSlugs.length === 0 || selectedSlugs.includes(g.slug));
 for (const guide of selectedGuides) {
-  fs.writeFileSync(path.join(BLOG_DIR, `${guide.slug}.html`), renderGuide(guide));
+  fs.writeFileSync(path.join(BLOG_DIR, `${guide.slug}.html`), polishHtml(renderGuide(guide), `blog/${guide.slug}.html`, now));
 }
 
 const sitemapPath = path.join(ROOT, 'docs', 'sitemap.xml');

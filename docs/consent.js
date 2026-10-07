@@ -3,6 +3,7 @@
 
   const STORAGE_KEY = "freefinder_analytics_consent_v1";
   const config = window.FreeFinderTrackingConfig || {};
+  let sessionConsent = null;
   let gtmLoaded = false;
   let clarityLoaded = false;
 
@@ -25,6 +26,7 @@
   googleConsent("denied", "default");
 
   function readConsent() {
+    if (sessionConsent !== null) return sessionConsent;
     try {
       const value = window.localStorage.getItem(STORAGE_KEY);
       return value === "granted" || value === "denied" ? value : null;
@@ -34,6 +36,7 @@
   }
 
   function saveConsent(value) {
+    sessionConsent = value;
     try {
       window.localStorage.setItem(STORAGE_KEY, value);
     } catch (_) {

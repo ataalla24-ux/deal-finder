@@ -31,12 +31,18 @@
         .local-outro { margin-top: 12px; }
         .footer-spaced { margin-top: 8px; }
     </style>
-    <link rel="stylesheet" href="/consent.css?v=5">
+    <link rel="stylesheet" href="/consent.css?v=7">
     <script defer src="/analytics-config.js"></script>
-    <script defer src="/consent.js?v=7"></script>
+    <script defer src="/consent.js?v=8"></script>
+  <meta property="og:title" content="Datenschutzerklärung | FreeFinder App">
+  <meta property="og:description" content="Datenschutzerklärung der FreeFinder App für iPhone und Android mit Informationen zu lokalen App-Daten, optionalen Funktionen und DSGVO-Rechten.">
+  <meta property="og:url" content="https://freefinder.at/privacy.html">
+  <meta property="og:image" content="https://freefinder.at/og-home-20261007.jpg">
+  <meta property="og:type" content="website">
 </head>
 <body>
-    <div class="container">
+  <a class="skip-link" href="#main-content">Zum Inhalt</a>
+    <main class="container" id="main-content" tabindex="-1">
         <div class="lang-switch">
             <button id="langDe" type="button" onclick="setLanguage('de')">Deutsch</button>
             <button id="langEn" type="button" onclick="setLanguage('en')">English</button>
@@ -129,7 +135,7 @@
                 <a href="./index.html" id="backLink">Zurück zur App</a>
             </div>
         </div>
-    </div>
+    </main>
 
     <script>
         const I18N = {
@@ -221,7 +227,7 @@
 
         function setLanguage(lang) {
             const copy = I18N[lang] || I18N.de;
-            localStorage.setItem('freefinder_language', lang);
+            try { localStorage.setItem('freefinder_language', lang); } catch (_) {}
             document.documentElement.lang = lang;
             document.getElementById('langDe').classList.toggle('active', lang === 'de');
             document.getElementById('langEn').classList.toggle('active', lang === 'en');
@@ -233,7 +239,8 @@
             });
         }
 
-        const saved = localStorage.getItem('freefinder_language');
+        let saved = null;
+        try { saved = localStorage.getItem('freefinder_language'); } catch (_) {}
         const detected = navigator.language && navigator.language.toLowerCase().startsWith('en') ? 'en' : 'de';
         setLanguage(saved || detected);
     </script>

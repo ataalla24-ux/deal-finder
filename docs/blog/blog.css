@@ -81,6 +81,9 @@ img {
   font-size: 14px;
   font-weight: 700;
   text-decoration: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .nav-links a:hover,
@@ -166,6 +169,47 @@ h1 {
 .article-layout {
   width: min(1060px, calc(100% - 36px));
   margin: 0 auto;
+}
+
+.blog-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 16px 24px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 28px;
+}
+
+.blog-filters[hidden], .post-card[hidden] { display: none; }
+.blog-filters label { font-size: 14px; font-weight: 700; }
+.blog-search { flex: 1 1 260px; }
+.blog-filters input[type="search"], .blog-filters select {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border: 1px solid #a3adba;
+  border-radius: 6px;
+  background: white;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+}
+.blog-archive { display: flex; gap: 8px; align-items: center; min-height: 44px; }
+.blog-archive input { width: 18px; height: 18px; accent-color: var(--green); }
+.blog-results { flex-basis: 100%; margin: 0; color: var(--muted); font-size: 14px; }
+.post-card h2 a { color: inherit; text-decoration: none; }
+.post-card h2 a:hover { text-decoration: underline; }
+
+:focus-visible { outline: 3px solid #087f5b; outline-offset: 4px; }
+
+.article-aside summary {
+  cursor: pointer;
+  min-height: 44px;
+  font-size: 18px;
+  font-weight: 800;
 }
 
 .blog-main {
@@ -606,6 +650,7 @@ h1 {
 
   .article-aside {
     position: static;
+    grid-row: 1;
   }
 
   .download-inner {
@@ -620,11 +665,25 @@ h1 {
 @media (max-width: 640px) {
   .nav {
     width: min(100% - 24px, 1120px);
+    flex-wrap: wrap;
+    gap: 0;
+    padding-top: 10px;
   }
 
-  .nav-links a:not(.nav-download) {
+  .nav-links {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 0;
+  }
+
+  .nav-links a[href="/"] {
     display: none;
   }
+
+  .nav-links a { font-size: 13px; }
+  .nav-download { padding: 8px 12px; }
+  .article-body h2 { scroll-margin-top: 132px; }
 
   .hero-inner {
     width: min(100% - 28px, 1060px);
@@ -671,4 +730,8 @@ h1 {
   .footer-links {
     justify-content: flex-start;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
 }

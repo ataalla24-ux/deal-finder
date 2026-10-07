@@ -11,6 +11,8 @@ const fixtureRoot = fs.mkdtempSync(path.join(tempRoot, 'seo-deals-page-'));
 fs.mkdirSync(path.join(fixtureRoot, 'scripts'));
 fs.mkdirSync(path.join(fixtureRoot, 'docs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/generate-seo-deals-page.mjs'), path.join(fixtureRoot, 'scripts/generate-seo-deals-page.mjs'));
+fs.copyFileSync(path.join(ROOT, 'scripts/polish-website.mjs'), path.join(fixtureRoot, 'scripts/polish-website.mjs'));
+fs.symlinkSync(path.join(ROOT, 'node_modules'), path.join(fixtureRoot, 'node_modules'), 'dir');
 
 function deal(id, fields = {}) {
   return { id, brand: 'Wien Anbieter', title: 'Geprüftes Angebot in Wien', url: `https://example.com/${id}`,
