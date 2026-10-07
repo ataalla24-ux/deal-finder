@@ -103,6 +103,11 @@ central Slack deduplication/manual moderation still applies.
   A new collector snapshot does not erase pending review candidates.
 - Community delivery acknowledgement uses ten-item batches and bounded retries.
   Already queued or manually decided submissions are not rewritten/reset.
+- Public app deal-state polls share a 30-second in-memory snapshot and one
+  in-flight read per Worker isolate. Local administrative writes invalidate it;
+  other isolates expire within 30 seconds. Daily validity is checked on every
+  response. Identity, subscription, moderation and token lookups are not cached.
+  This reduces reads but cannot undo an already exhausted daily KV allowance.
 - The referral Worker checks GitHub four times hourly. It dispatches discovery
   only after a 60-minute scheduling gap, or central delivery after 30 minutes,
   never alongside an active run. Explicit repository/workflow pauses are

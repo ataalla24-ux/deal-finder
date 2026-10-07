@@ -2,12 +2,15 @@ import assert from 'node:assert/strict';
 import { runDiscoveryWatchdog } from '../referrals-worker/src/discovery-watchdog.js';
 import worker from '../referrals-worker/src/index.js';
 import { acknowledgeCommunitySubmissions } from '../scraper/ack-community-submissions.js';
+import { readPublicDealRecords, invalidatePublicDealRecords } from '../referrals-worker/src/public-deal-state-cache.js';
 
 class MemoryKV {
   data = new Map();
   writes = 0;
-  async get(key, type) { const value = this.data.get(key); return value == null ? null : type === 'json' ? JSON.parse(value) : value; }
+  reads = 0;
+  async get(key, type) { this.reads += 1; const value = this.data.get(key); return value == null ? null : type === 'json' ? JSON.parse(value) : value; }
   async put(key, value) { this.writes += 1; this.data.set(key, value); }
+  async list({ prefix }) { return { keys: [...this.data.keys()].filter((key) => key.startsWith(prefix)).map((name) => ({ name })) }; }
 }
 const now = new Date('2026-10-07T18:00:00Z');
 const env = { META_DISCOVERY_WATCHDOG_ENABLED: '1', GITHUB_WORKFLOW_TOKEN: 'test', REFERRAL_KV: new MemoryKV() };
@@ -84,4 +87,46 @@ await assert.rejects(acknowledgeCommunitySubmissions({ ...options, fetchImpl: as
   forbiddenCalls += 1; return new Response('', { status: 403 });
 } }), /403/);
 assert.equal(forbiddenCalls, 1, 'permanent permission failures are not retried');
-console.log('Discovery watchdog and community delivery: pauses, schedule gaps, cooldowns, retry isolation, batching and idempotence passed');
+
+const cacheStorage = {};
+let loads = 0, clock = 0;
+const load = async () => { loads += 1; return { overrides: [], dailyDeal: null }; };
+const cached = () => readPublicDealRecords(cacheStorage, load, () => clock);
+await Promise.all(Array.from({ length: 50 }, cached));
+assert.equal(loads, 1, 'simultaneous public requests share one set of KV reads');
+await cached(); assert.equal(loads, 1);
+clock += 30001;
+await cached(); assert.equal(loads, 2);
+invalidatePublicDealRecords(cacheStorage);
+await cached(); assert.equal(loads, 3);
+let resolveOld;
+invalidatePublicDealRecords(cacheStorage);
+const old = readPublicDealRecords(cacheStorage, () => new Promise((resolve) => { resolveOld = resolve; }), () => clock);
+await Promise.resolve();
+invalidatePublicDealRecords(cacheStorage);
+const fresh = await cached();
+resolveOld({ old: true }); await old;
+assert.deepEqual(await cached(), fresh, 'late stale read cannot replace a cache invalidated by an admin write');
+invalidatePublicDealRecords(cacheStorage);
+await assert.rejects(readPublicDealRecords(cacheStorage, () => { throw new Error('KV unavailable'); }), /unavailable/);
+await cached(); assert.equal(loads, 5, 'failed loads are retried and never cached');
+const publicKV = new MemoryKV();
+await publicKV.put('deal:override:1', JSON.stringify({ dealId: '1', title: 'Public offer' }));
+const publicEnv = { REFERRAL_KV: publicKV, ADMIN_API_TOKEN: 'test-admin' };
+for (let i = 0; i < 20; i += 1) {
+  const response = await worker.fetch(new Request('https://worker.example/api/deals/state'), publicEnv);
+  assert.equal(response.status, 200);
+}
+assert.equal(publicKV.reads, 2, 'public route loads override plus daily once, not twenty times');
+const adminPost = (path, body) => worker.fetch(new Request(`https://worker.example${path}`, {
+  method: 'POST', headers: { authorization: 'Bearer test-admin', 'content-type': 'application/json' },
+  body: JSON.stringify(body),
+}), publicEnv);
+const publicState = async () => (await worker.fetch(new Request('https://worker.example/api/deals/state'), publicEnv)).json();
+assert.equal((await adminPost('/api/deals/admin/override', { dealId: '1', title: 'Updated offer', hidden: true })).status, 200);
+const updated = await publicState();
+assert.equal(updated.overrides[0].title, 'Updated offer');
+assert.equal(updated.overrides[0].hidden, true, 'manual removal is visible immediately in the writing isolate');
+assert.equal((await adminPost('/api/deals/admin/daily-deal', { dealId: '1', note: 'Current daily offer' })).status, 200);
+assert.equal((await publicState()).dailyDeal.dealId, '1', 'daily selection invalidates the same cache');
+console.log('Discovery watchdog and community delivery: pauses, schedule gaps, cooldowns, retry isolation, batching, idempotence and public cache passed');

@@ -1,4 +1,5 @@
 import { isFoodOrDrinkDeal } from '../../scraper/native-weekly-utils.js';
+import { readPublicDealRecords, invalidatePublicDealRecords } from './public-deal-state-cache.js';
 
 const JSON_HEADERS = {
   'content-type': 'application/json; charset=utf-8',
@@ -432,6 +433,7 @@ async function getJsonKV(env, key) {
 
 async function putJsonKV(env, key, value, options = undefined) {
   await env.REFERRAL_KV.put(key, JSON.stringify(value), options);
+  if (key.startsWith('deal:override:') || key === 'deal:daily') invalidatePublicDealRecords(env.REFERRAL_KV);
 }
 
 async function listApnsTokens(env, limit = 20) {
@@ -4491,8 +4493,12 @@ export default {
     }
 
     if (path === '/api/deals/state' && request.method === 'GET') {
-      const overrides = await listDealOverrides(env, 500);
-      const dailyDeal = normalizeDailyDealRecord(await getJsonKV(env, dealDailyKey()));
+      const records = await readPublicDealRecords(env.REFERRAL_KV, async () => ({
+        overrides: await listDealOverrides(env, 500),
+        dailyDeal: await getJsonKV(env, dealDailyKey()),
+      }));
+      const overrides = records.overrides;
+      const dailyDeal = normalizeDailyDealRecord(records.dailyDeal);
       return json({
         ok: true,
         overrides: overrides.map(sanitizePublicDealOverride).filter(Boolean),
