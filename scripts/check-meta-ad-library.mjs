@@ -12,6 +12,8 @@ export async function runAdLibraryAccessCheck(options = {}) {
     adSearchTerms: ['Wien gratis Kaffee'],
     maxAdTermsPerRun: 1,
     maxAdPagesPerTerm: 1,
+    adCoverageMode: false,
+    adPageSize: 100,
     maxRetries: 0,
   };
   const report = {

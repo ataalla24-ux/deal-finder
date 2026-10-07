@@ -1,4 +1,5 @@
 import { sharedInstagramFetch } from './instagram-shared-quota.js';
+import { scanAdLibraryCoverage } from './meta-ad-library-coverage.js';
 import { selectDiscoveryAccounts } from './vienna-merchant-discovery.js';
 import { selectCoverageAccounts, selectCoverageHashtags, accountCoverageSummary } from './instagram-source-scheduler.js';
 import '../sentry/instrument.mjs';
@@ -84,6 +85,20 @@ const DEFAULT_AD_SEARCH_TERMS = [
   'Wien Restaurant Eröffnung',
   'Wien Happy Hour',
   'Vienna free coffee',
+  'Wien gratis Kebab', 'Wien gratis Döner', 'Wien gratis Pizza', 'Wien gratis Burger',
+  'Wien kostenlos Essen', 'Wien kostenlos Kaffee', 'Wien gratis Frühstück', 'Wien gratis Eis',
+  'Wien gratis Getränk', 'Wien gratis Bier', 'Wien gratis Bubble Tea', 'Wien aufs Haus',
+  'Wien Döner 1 Euro', 'Wien Kebab 1 Euro', 'Wien Kebap Aktion', 'Wien Pizza 1+1',
+  'Wien Burger 1+1', 'Wien Kaffee gratis', 'Wien Coffee gratis', 'Wien Frühstück Aktion',
+  'Wien Brunch Angebot', 'Wien Buffet Angebot', 'Wien Mittagsmenü Aktion', 'Wien Restaurant Rabatt',
+  'Wien Essen Gutschein', 'Wien Getränke Aktion', 'Wien Foodora Gutschein', 'Wien Wolt Gutschein',
+  'Wien Döner Neueröffnung', 'Wien Kebap Neueröffnung', 'Wien Pizza Neueröffnung',
+  'Wien Café Neueröffnung', 'Wien Restaurant Neueröffnung', 'Wien Essen Eröffnung',
+  'Wien Verkostung gratis', 'Wien Essen verschenken', 'Wien Essen kostenlos',
+  'Vienna free food', 'Vienna free drinks', 'Vienna restaurant offer', 'Vienna buy one get one',
+  'Vienna kebab offer', 'Vienna coffee offer', 'Vienna opening food',
+  'gratis Döner', 'gratis Kebab', 'gratis Kebap', 'gratis Kaffee', 'gratis Essen',
+  'Kebab 1 Euro', 'Döner 1 Euro', 'Pizza 1+1', 'Kaffee aufs Haus',
 ];
 const DEFAULT_HASHTAGS = [
   'gratiswien',
@@ -260,14 +275,25 @@ export function buildConfig(env = process.env, now = new Date()) {
   const verifiedAccounts = new Set(
     parseList(env.META_INSTAGRAM_VERIFIED_ACCOUNTS).map((item) => item.replace(/^@/, '').toLowerCase())
   );
+  const adQueryKeys = new Set();
+  const adSearchTerms = parseList(env.META_AD_LIBRARY_SEARCH_TERMS, DEFAULT_AD_SEARCH_TERMS).filter((term) => {
+    const key = (term.toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).sort().join(' ');
+    if (!key || term.length > 100 || adQueryKeys.has(key)) return false;
+    adQueryKeys.add(key); return true;
+  }).slice(0, 200);
   return {
     graphVersion: cleanText(env.META_GRAPH_VERSION || env.INSTAGRAM_GRAPH_VERSION || 'v26.0', 20),
     adLibraryToken: cleanText(env.META_AD_LIBRARY_ACCESS_TOKEN || (booleanEnv(env, 'META_AD_LIBRARY_TRY_INSTAGRAM_TOKEN', false) ? (env.INSTAGRAM_ACCESS_TOKEN || env.META_INSTAGRAM_ACCESS_TOKEN) : '') || '', 700),
     adLibraryFoodOnly: booleanEnv(env, 'META_AD_LIBRARY_FOOD_ONLY', true),
-    maxAdTermsPerRun: numberEnv(env, 'META_AD_LIBRARY_MAX_TERMS_PER_RUN', 4, 1, 30),
+    maxAdTermsPerRun: numberEnv(env, 'META_AD_LIBRARY_MAX_TERMS_PER_RUN', 4, 1, 200),
+    adCoverageMode: booleanEnv(env, 'META_AD_LIBRARY_MAX_COVERAGE', false),
+    adSeedRequests: numberEnv(env, 'META_AD_LIBRARY_SEED_REQUESTS', 8, 1, 200),
+    maxAdRequests: numberEnv(env, 'META_AD_LIBRARY_MAX_REQUESTS', 190, 1, 1000),
+    adPageSize: numberEnv(env, 'META_AD_LIBRARY_PAGE_SIZE', 100, 1, 5000),
+    adRuntimeMinutes: numberEnv(env, 'META_AD_LIBRARY_RUNTIME_MINUTES', 50, 1, 55),
     instagramAccessToken: cleanText(env.INSTAGRAM_ACCESS_TOKEN || env.META_INSTAGRAM_ACCESS_TOKEN || '', 700),
     instagramUserId: cleanText(env.INSTAGRAM_USER_ID || env.IG_USER_ID || '', 100),
-    adSearchTerms: parseList(env.META_AD_LIBRARY_SEARCH_TERMS, DEFAULT_AD_SEARCH_TERMS).slice(0, 30),
+    adSearchTerms,
     hashtags: parseList(env.META_INSTAGRAM_HASHTAGS, DEFAULT_HASHTAGS)
       .map((item) => item.replace(/^#/, '').toLowerCase())
       .filter((item) => /^[a-z0-9_.äöüß]+$/i.test(item))
@@ -290,10 +316,11 @@ export function buildConfig(env = process.env, now = new Date()) {
     graphUsageThreshold: numberEnv(env, 'META_INSTAGRAM_GRAPH_USAGE_THRESHOLD', 85, 20, 95),
     scanCacheMinutes: numberEnv(env, 'META_INSTAGRAM_SCAN_CACHE_MINUTES', 30, 0, 60),
     scanRefreshHours: numberEnv(env, 'META_INSTAGRAM_SCAN_REFRESH_HOURS', 6, 1, 24),
-    maxAdPagesPerTerm: numberEnv(env, 'META_AD_LIBRARY_MAX_PAGES_PER_TERM', 2, 1, 10),
+    maxAdPagesPerTerm: numberEnv(env, 'META_AD_LIBRARY_MAX_PAGES_PER_TERM', 2, 1, 1000),
     maxAdAgeDays: numberEnv(env, 'META_AD_LIBRARY_MAX_AGE_DAYS', 30, 1, 365),
     seenTtlDays: numberEnv(env, 'META_INSTAGRAM_SEEN_TTL_DAYS', 7, 1, 45),
     maxDealsPerRun: numberEnv(env, 'META_INSTAGRAM_MAX_DEALS_PER_RUN', 40, 1, 200),
+    outputAllVerified: booleanEnv(env, 'META_INSTAGRAM_OUTPUT_ALL_VERIFIED', false),
     maxOrganicAgeHours: numberEnv(env, 'META_INSTAGRAM_MAX_POST_AGE_HOURS', 72, 1, 168),
     maxOrganicAgeWithExpiryDays: numberEnv(env, 'META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS', 7, 1, 7),
     unknownExpiryTtlHours: numberEnv(env, 'META_INSTAGRAM_UNKNOWN_EXPIRY_TTL_HOURS', 72, 12, 168),
@@ -757,7 +784,10 @@ export function classifyPromotion(text) {
   // Pattern order is intentional: explicit savings beat regular prices and
   // secondary free-trial language in a long social caption.
   const firstMatch = (patterns) => patterns.map((pattern) => normalized.match(pattern)).find(Boolean);
-  const strongMatch = firstMatch(PROMO_PATTERNS);
+  const priceComparison = normalized.match(/\b(\d{1,3}(?:[,.]\d{1,2})?)\s*(?:€|eur\b|euro\b)\s*(?:statt|instead\s+of)\s*(?:€\s*)?(\d{1,3}(?:[,.]\d{1,2})?)\s*(?:€|eur\b|euro\b)/i);
+  const priceReduction = priceComparison && Number(priceComparison[1].replace(',', '.')) > 0
+    && Number(priceComparison[1].replace(',', '.')) < Number(priceComparison[2].replace(',', '.')) ? priceComparison : null;
+  const strongMatch = firstMatch(PROMO_PATTERNS) || priceReduction;
   const softMatch = firstMatch(SOFT_PROMO_PATTERNS);
   const birthdayEntryOffer = extractBirthdayEntryOffer(normalized);
   const strong = Boolean(strongMatch);
@@ -994,7 +1024,10 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
   const startMs = Date.parse(deliveryStart || '');
   if (!Number.isFinite(startMs)) return { deal: null, rejection: 'missing-ad-delivery-date' };
   if (startMs > now.getTime() + 10 * 60 * 1000) return { deal: null, rejection: 'ad-not-started' };
-  if (now.getTime() - startMs > config.maxAdAgeDays * DAY_MS) return { deal: null, rejection: 'ad-too-old' };
+  const activeCheckedAt = toIso(raw?._adLibraryActiveCheckedAt);
+  const activeCheckedMs = Date.parse(activeCheckedAt || '');
+  const freshlyActive = Number.isFinite(activeCheckedMs) && activeCheckedMs <= now.getTime() + 60000 && now.getTime() - activeCheckedMs <= DAY_MS;
+  if (now.getTime() - startMs > (freshlyActive ? 365 : config.maxAdAgeDays) * DAY_MS) return { deal: null, rejection: 'ad-too-old' };
   const stopMs = Date.parse(raw?.ad_delivery_stop_time || '');
   if (Number.isFinite(stopMs) && stopMs < now.getTime()) return { deal: null, rejection: 'ad-inactive' };
 
@@ -1038,6 +1071,7 @@ export function normalizeAdLibraryItem(raw, config, now = new Date()) {
     originSource: 'Meta Ad Library API',
     evidence: {
       metaAdId: cleanText(raw?.id, 120),
+      ...(freshlyActive ? { activeAdStatus: 'ACTIVE', activeAdCheckedAt: activeCheckedAt } : {}),
       foodBenefitRequired: config.adLibraryFoodOnly,
       pageId: cleanText(raw?.page_id, 120),
       platforms: Array.isArray(raw?.publisher_platforms) ? raw.publisher_platforms : [],
@@ -1371,7 +1405,7 @@ function adLibraryUrl(config, searchTerm) {
   url.searchParams.set('publisher_platforms', JSON.stringify(['INSTAGRAM']));
   url.searchParams.set('search_terms', searchTerm);
   url.searchParams.set('search_type', 'KEYWORD_UNORDERED');
-  url.searchParams.set('limit', '100');
+  url.searchParams.set('limit', String(config.adPageSize || 100));
   url.searchParams.set('fields', [
     'id',
     'page_id',
@@ -1391,7 +1425,7 @@ function adLibraryUrl(config, searchTerm) {
   return url.toString();
 }
 
-export async function collectAdLibrary(config, now, fetchImpl, previousFailure = null) {
+export async function collectAdLibrary(config, now, fetchImpl, previousFailure = null, options = {}) {
   const raw = [];
   const errors = [];
   const usage = [];
@@ -1399,6 +1433,21 @@ export async function collectAdLibrary(config, now, fetchImpl, previousFailure =
   const count = Math.min(config.maxAdTermsPerRun || 4, terms.length);
   const selectedTerms = Array.from({ length: count }, (_, index) => terms[(Number(config.shardIndex || 0) * count + index) % terms.length]);
   if (previousFailure?.code !== 'SCAN_BUDGET' && Date.parse(previousFailure?.retryAt || '') > now.getTime()) return { raw, errors: [previousFailure], usage, selectedTerms, failure: previousFailure, cooldown: true };
+  if (config.adCoverageMode) {
+    return scanAdLibraryCoverage({
+      terms: terms.slice(0, config.maxAdTermsPerRun), previous: options.previous,
+      scope: `${config.graphVersion}:AT:INSTAGRAM:ACTIVE:ALL:KEYWORD_UNORDERED`, now,
+      maxRequests: options.maxRequests ?? config.maxAdRequests,
+      maxPagesPerTerm: config.maxAdPagesPerTerm, headsOnly: options.headsOnly,
+      onItem: options.onItem, seen: options.seen, deadline: options.deadline,
+      safeError: (error) => safeErrorMessage(error, config),
+      fetchPage: (term, after) => {
+        const url = new URL(adLibraryUrl(config, term));
+        if (after) url.searchParams.set('after', after);
+        return fetchMetaJson(url.toString(), config, fetchImpl);
+      },
+    });
+  }
   const seen = new Set();
   for (const term of selectedTerms) {
     let next = adLibraryUrl(config, term);
@@ -1409,7 +1458,7 @@ export async function collectAdLibrary(config, now, fetchImpl, previousFailure =
         for (const item of Array.isArray(response.payload?.data) ? response.payload.data : []) {
           if (item.id && seen.has(item.id)) continue;
           if (item.id) seen.add(item.id);
-          raw.push({ ...item, _searchTerm: term });
+          raw.push({ ...item, _searchTerm: term, _adLibraryActiveCheckedAt: now.toISOString() });
         }
         const nextPage = cleanText(response.payload?.paging?.next, 3000);
         next = '';
@@ -2123,28 +2172,50 @@ export async function runMetaInstagramCollector(options = {}) {
     hashtagPerformance: { ...(state?.hashtagPerformance || {}) },
     discoveredAccounts: { ...previousDiscoveredAccounts },
     adLibraryFailure: state?.adLibraryFailure || null,
+    adLibraryScan: state?.adLibraryScan || null,
   };
 
-  if (configured.adLibrary) {
-    const result = await collectAdLibrary(config, now, fetchImpl, state?.adLibraryFailure);
+  const adSeen = new Set();
+  const adDeadline = Date.now() + config.adRuntimeMinutes * 60000;
+  let adRequests = 0;
+  const acceptAd = (raw) => {
+    const normalized = normalizeAdLibraryItem(raw, config, now);
+    if (!normalized.deal) { incrementReason(report.rejectionReasons, normalized.rejection); return; }
+    accepted.push(normalized.deal);
+    report.sources.adLibrary.accepted += 1;
+    if (!previousAcceptedSeenIds[normalized.deal.id]) report.sources.adLibrary.newAccepted += 1;
+  };
+  const scanAds = async (headsOnly) => {
+    const result = await collectAdLibrary(config, now, fetchImpl, nextState.adLibraryFailure, {
+      previous: nextState.adLibraryScan, headsOnly, seen: adSeen, onItem: acceptAd, deadline: adDeadline,
+      maxRequests: headsOnly ? Math.min(config.adSeedRequests, config.maxAdRequests) : config.maxAdRequests - adRequests,
+    });
+    adRequests += result.requests || 0;
     nextState.adLibraryFailure = result.failure;
-    report.sources.adLibrary.fetched = result.raw.length;
-    report.sources.adLibrary.errors = result.errors;
-    report.sources.adLibrary.selectedTerms = result.selectedTerms;
+    if (result.state) nextState.adLibraryScan = result.state;
+    report.sources.adLibrary.fetched += result.fetched ?? result.raw.length;
+    report.sources.adLibrary.errors.push(...result.errors);
+    report.sources.adLibrary.selectedTerms = [...new Set([...(report.sources.adLibrary.selectedTerms || []), ...result.selectedTerms])];
     report.sources.adLibrary.cooldown = result.cooldown === true;
     report.sources.adLibrary.budgetDeferred = result.budgetDeferred === true;
     report.sources.adLibrary.retryAt = result.failure?.retryAt || null;
-    report.sources.adLibrary.status = result.budgetDeferred ? 'degraded' : result.errors.length && !result.raw.length ? 'failed' : (result.errors.length ? 'degraded' : 'ok');
-    for (const raw of result.raw) {
-      const normalized = normalizeAdLibraryItem(raw, config, now);
-      if (!normalized.deal) {
-        incrementReason(report.rejectionReasons, normalized.rejection);
-        continue;
-      }
-      accepted.push(normalized.deal);
-      report.sources.adLibrary.accepted += 1;
-      if (!previousAcceptedSeenIds[normalized.deal.id]) report.sources.adLibrary.newAccepted += 1;
+    report.sources.adLibrary.status = result.budgetDeferred ? 'degraded' : report.sources.adLibrary.errors.length && !report.sources.adLibrary.fetched ? 'failed' : (report.sources.adLibrary.errors.length ? 'degraded' : 'ok');
+    if (config.adCoverageMode) {
+      report.sources.adLibrary.coverage = {
+        mode: 'persistent-fair-pagination', queries: config.adSearchTerms.slice(0, config.maxAdTermsPerRun).length,
+        pageSize: config.adPageSize, requests: adRequests, pendingPages: result.pendingPages,
+        dueQueries: result.dueQueries, stopReason: result.stopReason,
+      };
+      report.sources.adLibrary.sharedQuota = fetchImpl.quotaStats || null;
     }
+    for (const raw of result.raw) acceptAd(raw);
+  };
+  const fillAds = async () => {
+    if (configured.adLibrary && config.adCoverageMode && adRequests < config.maxAdRequests
+      && !nextState.adLibraryFailure && !report.sources.adLibrary.budgetDeferred) await scanAds(false);
+  };
+  if (configured.adLibrary) {
+    await scanAds(config.adCoverageMode);
   }
 
   if (configured.instagramGraph && config.instagramUserId) {
@@ -2194,6 +2265,9 @@ export async function runMetaInstagramCollector(options = {}) {
           ? ((result.skippedAccounts || result.skippedHashtags) ? 'degraded' : 'ok')
           : (result.errors.length >= requestedSources && !result.raw.length ? 'failed' : (result.errors.length ? 'degraded' : 'ok')));
     if (result.requestBudget.stopped && report.sources.instagramGraph.status === 'ok') report.sources.instagramGraph.status = 'degraded';
+    // Only unused shared capacity is filled after organic account/hashtag scans.
+    // Do this before slow OCR so API progress can still be saved in this run.
+    await fillAds();
     const media = await (options.enrichGraphMedia || enrichInstagramGraphMedia)(result.raw, config, now, {
       cache: state?.mediaEvidence,
       mediaFetchImpl: options.mediaFetchImpl,
@@ -2283,6 +2357,7 @@ export async function runMetaInstagramCollector(options = {}) {
     };
   }
 
+  if (!configured.instagramGraph || !config.instagramUserId) await fillAds();
   const graphEvidence = buildInstagramGraphEvidencePayload(graphEvidenceEntries, {
     now,
     previous: previousGraphEvidence,
@@ -2318,7 +2393,7 @@ export async function runMetaInstagramCollector(options = {}) {
     if (Number.isFinite(leftSeen) && Number.isFinite(rightSeen) && leftSeen !== rightSeen) return leftSeen - rightSeen;
     return 0;
   });
-  const deals = rotatedDeals.slice(0, config.maxDealsPerRun);
+  const deals = config.outputAllVerified ? rotatedDeals : rotatedDeals.slice(0, config.maxDealsPerRun);
   const newDeals = deals.filter((deal) => !previousAcceptedSeenIds[deal.id]);
   // This is an observation cache only. It must never suppress output because
   // collection is not proof that Slack delivery or durable queueing succeeded.
@@ -2331,7 +2406,7 @@ export async function runMetaInstagramCollector(options = {}) {
   report.repeatedDeals = deals.length - newDeals.length;
   report.newVerifiedBeforeLimit = allVerifiedDeals.filter((deal) => !previousAcceptedSeenIds[deal.id]).length;
   report.verifiedBeforeLimit = allVerifiedDeals.length;
-  report.outputLimit = config.maxDealsPerRun;
+  report.outputLimit = config.outputAllVerified ? null : config.maxDealsPerRun;
   report.foodDiscovery = {
     selectedFoodAccounts: (report.selectedAccounts || []).filter((account) => account.foodFocused).length,
     selectedAccounts: (report.selectedAccounts || []).length,
@@ -2382,9 +2457,10 @@ export async function runMetaInstagramCollector(options = {}) {
     report.preservedDeals = lastGoodPayload?.deals?.length || 0;
     report.message = `All configured Meta sources failed; preserved ${report.preservedDeals} last-good deal(s).`;
     const sourceFailuresChanged = JSON.stringify(nextState.sourceFailures) !== JSON.stringify(pruneSourceFailures(state?.sourceFailures, now))
-      || JSON.stringify(nextState.adLibraryFailure) !== JSON.stringify(state?.adLibraryFailure || null);
+      || JSON.stringify(nextState.adLibraryFailure) !== JSON.stringify(state?.adLibraryFailure || null)
+      || JSON.stringify(nextState.adLibraryScan) !== JSON.stringify(state?.adLibraryScan || null);
     const failedState = sourceFailuresChanged
-      ? { ...state, version: 4, updatedAt: now.toISOString(), sourceFailures: nextState.sourceFailures, adLibraryFailure: nextState.adLibraryFailure }
+      ? { ...state, version: 4, updatedAt: now.toISOString(), sourceFailures: nextState.sourceFailures, adLibraryFailure: nextState.adLibraryFailure, adLibraryScan: nextState.adLibraryScan }
       : state;
     if (options.write !== false) {
       writeJsonAtomic(config.reportPath, report);

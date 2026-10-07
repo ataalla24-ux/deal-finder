@@ -1,4 +1,5 @@
 import { verifyOfficialFoodDeal } from './power-food-verification.js';
+import { hasFreshActiveAdEvidence } from './meta-ad-library-coverage.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -1057,6 +1058,7 @@ async function validateDeal(deal, context) {
   const expiry = getExpiryDecision(expiryCandidates, now);
   const recurring = hasRecurringSchedule(deal, expiryCandidates);
   const activeValidity = hasActiveExplicitValidity(deal, expiry, now);
+  const freshlyActiveAd = hasFreshActiveAdEvidence(deal, now);
   const reviewedCommunity = context.communityApproval === true && isHumanReviewedCommunity(deal);
   const publicationCandidates = getPublicationCandidates(deal, health, {
     freshnessSensitive,
@@ -1075,10 +1077,10 @@ async function validateDeal(deal, context) {
     // A human-reviewed community offer with a concrete calendar window does
     // not need a platform post timestamp. Old dated social posts stay blocked.
     activeValidity: socialPostDeal
-      ? reviewedCommunity && !publicationCandidates.length && activeValidity
+      ? freshlyActiveAd || reviewedCommunity && !publicationCandidates.length && activeValidity
       : activeValidity,
     recurring: socialPostDeal ? false : recurring,
-    extendedMaxAgeDays: context.extendedMaxAgeDays,
+    extendedMaxAgeDays: freshlyActiveAd ? 365 : context.extendedMaxAgeDays,
   });
   const relativeOffer = getRelativeOfferDecision(deal, freshness.selected, now, {
     activeValidity,
@@ -1089,6 +1091,7 @@ async function validateDeal(deal, context) {
   if (officialFood?.ok && offer.reason === 'kein konkretes Angebot erkennbar') offer = { concrete: true };
   const reasons = [];
   const warnings = [];
+  if (freshlyActiveAd) warnings.push('Aktive Instagram-Anzeige frisch durch Meta bestätigt; Kampagnenstart bleibt unverändert, Ablauf und relative Aktionsdaten werden separat geprüft');
   if (reviewedCommunity && deal.communityApprovalIssue) reasons.push(deal.communityApprovalIssue);
   if (officialFood && !officialFood.ok) reasons.push(`Offizielle Aktion nicht erneut bestätigt (${officialFood.reason})`);
   if (officialFood?.current) warnings.push('Aktueller Angebotsblock auf offizieller Anbieterseite erneut bestätigt; Abrufdatum ist kein Veröffentlichungsdatum');

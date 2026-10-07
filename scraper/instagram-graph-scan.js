@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { readMetaRateUsage } from './instagram-shared-quota.js';
 
 const HOUR = 3600000;
 const DAY = 24 * HOUR;
@@ -9,21 +10,6 @@ export const boundedInteger = (value, fallback, min, max) => Number.isFinite(Num
 // Cursors are data, never URLs or arbitrary field-expansion expressions.
 export function graphCursor(value) {
   return typeof value === 'string' && /^[A-Za-z0-9_\-=+/]{1,2048}$/.test(value) ? value : '';
-}
-
-function usagePercent(headers) {
-  let highest = 0;
-  const visit = (value) => {
-    if (!value || typeof value !== 'object') return;
-    for (const [key, item] of Object.entries(value)) {
-      if (['call_count', 'total_cputime', 'total_time'].includes(key) && Number.isFinite(Number(item))) highest = Math.max(highest, Number(item));
-      else if (typeof item === 'object') visit(item);
-    }
-  };
-  for (const header of ['x-app-usage', 'x-business-use-case-usage']) {
-    try { visit(JSON.parse(headers?.get?.(header) || '{}')); } catch { /* optional headers */ }
-  }
-  return highest;
 }
 
 export function createGraphRequestBudget(fetchImpl, { maxRequests = 120, usageThreshold = 85 } = {}) {
@@ -40,7 +26,7 @@ export function createGraphRequestBudget(fetchImpl, { maxRequests = 120, usageTh
       }
       stats.requests += 1;
       const response = await fetchImpl(...args);
-      stats.highestUsagePercent = Math.max(stats.highestUsagePercent, usagePercent(response.headers));
+      stats.highestUsagePercent = Math.max(stats.highestUsagePercent, readMetaRateUsage(response.headers).highestPercent);
       if (stats.highestUsagePercent >= boundedInteger(usageThreshold, 85, 20, 95) || response.status === 429) {
         stats.stopped = true;
         stats.reason = response.status === 429 ? 'rate-limit' : 'api-usage';

@@ -67,24 +67,30 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch) {
   };
 }
 
-function usage(headers) {
-  let max = 0;
+export function readMetaRateUsage(headers) {
+  let highestPercent = 0, recoveryMs = 0, reported = false;
   const visit = (obj) => {
     if (!obj || typeof obj !== 'object') return;
     for (const [key, value] of Object.entries(obj)) {
-      if (['call_count', 'total_time', 'total_cputime'].includes(key) && Number.isFinite(Number(value))) max = Math.max(max, Number(value));
+      if (['call_count', 'total_time', 'total_cputime', 'object_count_pct', 'acc_id_util_pct'].includes(key)
+        && (typeof value === 'number' || typeof value === 'string' && value.trim() !== '')
+        && Number.isFinite(Number(value)) && Number(value) >= 0) {
+        highestPercent = Math.max(highestPercent, Number(value)); reported = true;
+      }
+      else if (key === 'estimated_time_to_regain_access' && Number.isFinite(Number(value))) recoveryMs = Math.max(recoveryMs, Number(value) * 60000);
+      else if (key === 'reset_time_duration' && Number.isFinite(Number(value))) recoveryMs = Math.max(recoveryMs, Number(value) * 1000);
       else if (typeof value === 'object') visit(value);
     }
   };
-  for (const name of ['x-app-usage', 'x-business-use-case-usage']) {
-    try { visit(JSON.parse(headers.get(name) || '{}')); } catch { /* optional */ }
+  for (const name of ['x-app-usage', 'x-business-use-case-usage', 'x-ad-account-usage']) {
+    try { visit(JSON.parse(headers?.get?.(name) || '{}')); } catch { /* optional */ }
   }
-  return max;
+  return { highestPercent, recoveryMs, reported };
 }
 
 export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blockSize = 5,
   maxRequestsPerHour = LIMIT, usageThreshold = 85, waitForBudgetMs = 0,
-  minRequestIntervalMs = 0,
+  minRequestIntervalMs = 0, adaptiveMaxRequestsPerHour = 0,
   sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 } = {}) {
   let remaining = 0;
@@ -92,11 +98,13 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
   const block = Math.max(1, Math.min(5, Math.floor(blockSize) || 5));
   const limit = Math.max(1, Math.min(10000, Math.floor(Number(maxRequestsPerHour)) || LIMIT));
   const threshold = Math.max(20, Math.min(95, Number(usageThreshold) || 85));
+  const adaptiveMax = Math.max(limit, Math.min(10000, Math.floor(Number(adaptiveMaxRequestsPerHour)) || limit));
   const waitBudget = Math.max(0, Math.min(6 * 60000, Number(waitForBudgetMs) || 0));
   const interval = Math.max(0, Math.min(60000, Number(minRequestIntervalMs) || 0));
   let lastRequestAt = null;
   const stats = { limitPerHour: limit, usageThreshold: threshold, requests: 0, reserved: 0, stopped: false,
-    reason: '', highestUsagePercent: 0, waitedMs: 0, pacingMs: 0, retryAt: '' };
+    reason: '', highestUsagePercent: 0, waitedMs: 0, pacingMs: 0, retryAt: '',
+    adaptiveSafetyCeiling: adaptiveMax, adaptiveIncreases: 0 };
   const acquire = async () => {
     for (let attempt = 0; attempt < 8; attempt += 1) {
       const { state, revision } = await store.read();
@@ -105,7 +113,26 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
       // Even a previously reserved block observes other jobs' cooldowns.
       if (remaining > 0 && now < leaseUntil) { remaining -= 1; return; }
       const reservations = state.reservations.filter((r) => r.expiresAt > now);
-      const available = limit - reservations.reduce((sum, r) => sum + r.count, 0);
+      const capacity = state.adaptiveQuota;
+      const validCapacity = Number.isFinite(capacity?.limit) && capacity.limit >= limit && capacity.limit <= 10000
+        && Number.isFinite(capacity?.updatedAt) && now - capacity.updatedAt < HOUR && capacity.updatedAt <= now;
+      let effectiveLimit = validCapacity ? capacity.limit : limit;
+      const used = reservations.reduce((sum, r) => sum + r.count, 0);
+      // Increase only against fresh, explicit Meta telemetry, in small steps.
+      // All jobs adopt the same committed capacity; missing headers never imply
+      // unlimited quota. The upper bound is ours, not a published Meta limit.
+      const sample = state.metaUsage;
+      const canGrow = adaptiveMax > effectiveLimit && used >= effectiveLimit
+        && sample?.reported === true && Number.isFinite(sample.highestPercent) && sample.highestPercent < Math.min(70, threshold - 10)
+        && Number.isFinite(sample.at) && sample.at <= now && now - sample.at < 2 * 60000;
+      if (canGrow) {
+        effectiveLimit = Math.min(adaptiveMax, Math.max(used + block, Math.ceil(effectiveLimit * 1.25)));
+        if (!await store.compareAndSwap(revision, { ...state, reservations, adaptiveQuota: { limit: effectiveLimit, updatedAt: now } })) continue;
+        stats.adaptiveIncreases += 1;
+        continue;
+      }
+      stats.limitPerHour = effectiveLimit;
+      const available = effectiveLimit - used;
       if (available <= 0) {
         const retryAt = Math.min(...reservations.map((r) => r.expiresAt));
         stats.retryAt = new Date(retryAt).toISOString();
@@ -135,9 +162,30 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
     for (let attempt = 0; attempt < 8; attempt += 1) {
       const { state, revision } = await store.read();
       if (state.pausedUntil >= pausedUntil) return;
-      if (await store.compareAndSwap(revision, { ...state, pausedUntil })) return;
+      if (await store.compareAndSwap(revision, { ...state, pausedUntil, adaptiveQuota: null, metaUsage: null })) return;
     }
     throw pause('cannot persist shared cooldown');
+  };
+  const recordUsage = async (sample) => {
+    if (!sample.reported) return;
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      const { state, revision } = await store.read();
+      const now = clock();
+      if (state.pausedUntil > now) return;
+      const previousSamples = Array.isArray(state.metaUsage?.samples) ? state.metaUsage.samples
+        : Number.isFinite(state.metaUsage?.at) ? [{ at: state.metaUsage.at, highestPercent: state.metaUsage.highestPercent }] : [];
+      const samples = [...previousSamples.filter((row) => Number.isFinite(row.at) && row.at <= now
+        && row.at > now - 2 * 60000 && Number.isFinite(row.highestPercent)),
+      { at: now, highestPercent: sample.highestPercent }].slice(-64);
+      const capacity = state.adaptiveQuota;
+      const adaptiveQuota = Number.isFinite(capacity?.limit) && capacity.limit >= limit && capacity.limit <= 10000
+        && Number.isFinite(capacity?.updatedAt) && capacity.updatedAt <= now && now - capacity.updatedAt < HOUR
+        ? { ...capacity, updatedAt: now } : null;
+      if (await store.compareAndSwap(revision, { ...state, adaptiveQuota, metaUsage: {
+        reported: true, highestPercent: Math.max(...samples.map((row) => row.highestPercent)), at: now, samples,
+      } })) return;
+    }
+    throw pause('cannot persist Meta usage');
   };
   // Serialize this wrapper's calls so concurrent callers cannot spend the same
   // locally reserved slot. Other processes coordinate through compare-and-swap.
@@ -154,7 +202,8 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
         lastRequestAt = clock();
         stats.requests += 1;
         const response = await fetchImpl(...args);
-        stats.highestUsagePercent = Math.max(stats.highestUsagePercent, usage(response.headers));
+        const metaUsage = readMetaRateUsage(response.headers);
+        stats.highestUsagePercent = Math.max(stats.highestUsagePercent, metaUsage.highestPercent);
         let code = 0;
         if (!response.ok) { try { code = Number((await response.clone().json())?.error?.code); } catch { /* non-JSON response */ } }
         const throttled = response.status === 429 || [4, 17, 32, 613, 80002].includes(code);
@@ -166,7 +215,11 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
           const retryMs = Number.isFinite(seconds) ? seconds * 1000 : Date.parse(retry) - clock();
           // A real throttle needs a full rolling-hour cooldown. Near-capacity
           // usage only needs a short shared pause before the next probe.
-          await cooldown(Math.max(throttled ? HOUR : 10 * 60000, Number.isFinite(retryMs) ? retryMs : 0));
+          const duration = Math.max(throttled ? HOUR : 10 * 60000, Number.isFinite(retryMs) ? retryMs : 0, metaUsage.recoveryMs);
+          stats.retryAt = new Date(clock() + duration).toISOString();
+          await cooldown(duration);
+        } else if (remaining === 0 || stats.requests === 1 || stats.requests % 5 === 0) {
+          await recordUsage(metaUsage);
         }
         return response;
       } catch (error) {
@@ -194,6 +247,7 @@ export function sharedInstagramFetch(fetchImpl, env = process.env) {
     waitForBudgetMs: Number(env.INSTAGRAM_SHARED_BUDGET_WAIT_MS || 0),
     blockSize: Number(env.INSTAGRAM_SHARED_BLOCK_SIZE || 5),
     minRequestIntervalMs: Number(env.INSTAGRAM_SHARED_MIN_INTERVAL_MS || 0),
+    adaptiveMaxRequestsPerHour: Number(env.INSTAGRAM_SHARED_ADAPTIVE_MAX_REQUESTS_PER_HOUR || 0),
   });
   const wrapped = (url, ...args) => {
     const hostname = new URL(typeof url === 'string' ? url : url.url).hostname;

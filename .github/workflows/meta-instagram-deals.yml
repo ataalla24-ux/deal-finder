@@ -42,6 +42,7 @@ jobs:
           SENTRY_DISABLED=1 node scripts/test-vienna-merchant-discovery.mjs
           SENTRY_DISABLED=1 node scripts/test-instagram-max-coverage.mjs
           npm run test:instagram-shared-quota
+          npm run test:meta-ad-coverage
 
       - name: Refresh Instagram merchant registry
         run: npm run instagram:merchant-registry
@@ -54,6 +55,7 @@ jobs:
           INSTAGRAM_SHARED_QUOTA_ENABLED: '1'
           INSTAGRAM_SHARED_BUDGET_WAIT_MS: '360000'
           INSTAGRAM_SHARED_BLOCK_SIZE: '1'
+          INSTAGRAM_SHARED_ADAPTIVE_MAX_REQUESTS_PER_HOUR: ${{ inputs.validation_scan && '0' || '1000' }}
           GH_TOKEN: ${{ github.token }}
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
@@ -84,11 +86,17 @@ jobs:
           META_AD_LIBRARY_ACCESS_TOKEN: ${{ secrets.META_AD_LIBRARY_ACCESS_TOKEN }}
           META_AD_LIBRARY_TRY_INSTAGRAM_TOKEN: '1'
           META_AD_LIBRARY_FOOD_ONLY: '1'
-          META_AD_LIBRARY_MAX_TERMS_PER_RUN: '4'
-          META_AD_LIBRARY_MAX_PAGES_PER_TERM: '1'
+          META_AD_LIBRARY_MAX_COVERAGE: '1'
+          META_AD_LIBRARY_MAX_TERMS_PER_RUN: '200'
+          META_AD_LIBRARY_MAX_PAGES_PER_TERM: '1000'
+          META_AD_LIBRARY_PAGE_SIZE: '5000'
+          META_AD_LIBRARY_SEED_REQUESTS: ${{ inputs.validation_scan && '4' || '12' }}
+          META_AD_LIBRARY_MAX_REQUESTS: ${{ inputs.validation_scan && '16' || '1000' }}
+          META_AD_LIBRARY_RUNTIME_MINUTES: '50'
           INSTAGRAM_SHARED_QUOTA_ENABLED: '1'
+          INSTAGRAM_SHARED_ADAPTIVE_MAX_REQUESTS_PER_HOUR: ${{ inputs.validation_scan && '0' || '1000' }}
           INSTAGRAM_SHARED_BUDGET_WAIT_MS: '360000'
-          INSTAGRAM_SHARED_MIN_INTERVAL_MS: ${{ inputs.validation_scan && '0' || '15000' }}
+          INSTAGRAM_SHARED_MIN_INTERVAL_MS: ${{ inputs.validation_scan && '0' || '3000' }}
           GH_TOKEN: ${{ github.token }}
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
@@ -102,19 +110,20 @@ jobs:
           META_INSTAGRAM_TAGGED_MEDIA_ENABLED: ${{ vars.META_INSTAGRAM_TAGGED_MEDIA_ENABLED }}
           META_INSTAGRAM_MAX_COVERAGE: '1'
           META_INSTAGRAM_DISCOVERY_POOL_LIMIT: '5000'
-          META_INSTAGRAM_MAX_ACCOUNTS_PER_RUN: ${{ inputs.validation_scan && '64' || '180' }}
+          META_INSTAGRAM_MAX_ACCOUNTS_PER_RUN: ${{ inputs.validation_scan && '64' || '300' }}
           META_INSTAGRAM_FOOD_ACCOUNT_SHARE: '0.9'
           META_INSTAGRAM_MAX_ACCOUNT_BACKFILL: '30'
           META_INSTAGRAM_ACCOUNT_RESCAN_HOURS: '6'
           META_INSTAGRAM_MAX_HASHTAGS_PER_RUN: '8'
           META_INSTAGRAM_MEDIA_PER_ACCOUNT: '25'
           META_INSTAGRAM_MAX_PAGES_PER_SOURCE: '3'
-          META_INSTAGRAM_MAX_GRAPH_REQUESTS: ${{ inputs.validation_scan && '80' || '190' }}
+          META_INSTAGRAM_MAX_GRAPH_REQUESTS: ${{ inputs.validation_scan && '80' || '300' }}
           META_INSTAGRAM_GRAPH_USAGE_THRESHOLD: '95'
           META_INSTAGRAM_MAX_POST_AGE_HOURS: '72'
           META_INSTAGRAM_MAX_POST_AGE_WITH_EXPIRY_DAYS: '7'
           META_INSTAGRAM_UNKNOWN_EXPIRY_TTL_HOURS: '72'
           META_INSTAGRAM_MAX_DEALS_PER_RUN: '120'
+          META_INSTAGRAM_OUTPUT_ALL_VERIFIED: '1'
           META_INSTAGRAM_SEEN_TTL_DAYS: '7'
           META_INSTAGRAM_ALLOW_WATCHLIST_VIENNA: '0'
           META_INSTAGRAM_REQUIRE_SOURCE: '1'
