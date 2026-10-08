@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-08T14:06:43.258Z",
+  "generatedAt": "2026-10-08T14:34:15.743Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 288,
-    "allowed": 0,
-    "blocked": 288,
-    "warnings": 0,
+    "total": 291,
+    "allowed": 1,
+    "blocked": 290,
+    "warnings": 1,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 211,
+      "kein konkretes Angebot erkennbar": 212,
       "älter als 7 Tage (2026-02-22)": 83,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
@@ -15,6 +15,7 @@
       "Gottesdienste nur im Wochenlauf": 33,
       "älter als 7 Tage (2025-07-30)": 1,
       "URL ungültig (HTTP 404)": 11,
+      "selbst syndizierter FreeFinder-Post": 5,
       "älter als 7 Tage (2016-09-12)": 2,
       "abgelaufen (2026-09-16)": 2,
       "relative Kurz-Aktion abgelaufen (2016-09-12)": 2,
@@ -29,7 +30,6 @@
       "älter als 7 Tage (2023-09-21)": 3,
       "kostenlose Infrastruktur statt Deal": 3,
       "älter als 7 Tage (2024-03-18)": 3,
-      "selbst syndizierter FreeFinder-Post": 4,
       "abgelaufen (2026-10-05)": 1,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-12)": 1,
@@ -54,13 +54,13 @@
       "abgelaufen (2026-09-10)": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 212,
+      "kein konkreter Deal": 213,
       "älter als 7 Tage": 149,
       "ungültige URL": 14,
       "Gottesdienste außerhalb Wochenlauf": 33,
+      "selbst syndiziert": 5,
       "abgelaufen": 15,
       "sonstiges": 5,
-      "selbst syndiziert": 4,
       "ausgeschlossene Quelle": 22,
       "nicht Wien": 11,
       "kein echtes Post-Datum": 117,
@@ -92,14 +92,24 @@
         }
       },
       "Firecrawl Gastro #4": {
-        "total": 6,
-        "allowed": 0,
-        "blocked": 6,
-        "warnings": 0,
+        "total": 8,
+        "allowed": 1,
+        "blocked": 7,
+        "warnings": 1,
         "reasonCategoryCounts": {
+          "selbst syndiziert": 1,
           "älter als 7 Tage": 6,
           "abgelaufen": 4,
           "kein konkreter Deal": 2
+        }
+      },
+      "Firecrawl Gastro #4 Search": {
+        "total": 1,
+        "allowed": 0,
+        "blocked": 1,
+        "warnings": 0,
+        "reasonCategoryCounts": {
+          "kein konkreter Deal": 1
         }
       },
       "Freikirchen Wien": {
@@ -219,7 +229,26 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "fc4g-1r23lmu",
+      "title": "5 € Rabatt ab 12 € Mindestbestellwert mit Code BROT5 (mindes",
+      "brand": "Öfferl",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.lieferando.at/en/menu/offerl-praterstrasse-praterstrasse",
+      "reasons": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (www.lieferando.at)",
+        "kein Quell-/Post-Datum gefunden"
+      ],
+      "sourceDate": "",
+      "sourceDateSource": "",
+      "sourceAgeDays": null,
+      "expiryDate": "2026-10-31",
+      "expirySource": "deal.expires",
+      "urlStatus": "unklar: www.lieferando.at"
+    }
+  ],
   "blocked": [
     {
       "id": "events-0-20260222",
@@ -913,6 +942,45 @@
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "fc4g-xb1a4k",
+      "title": "pizza_biotto: Pizza-Date in Wien? Pizza Napoletana, italienischer Genuss ...",
+      "brand": "pizza_biotto",
+      "source": "Firecrawl Gastro #4 Search",
+      "url": "https://www.instagram.com/reel/DeKECsuMsAT/",
+      "reasons": [
+        "kein konkretes Angebot erkennbar"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Text wirkt abgeschnitten; vollständige Quelle prüfen; Caption-Reste oder Emoji-Codes im sichtbaren Text; Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen; Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-10-06T15:04:14.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 2,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "fc4g-1kko7on",
+      "title": "2+1 gratis: Beim Kauf von zwei Dönern gibt es einen dritten",
+      "brand": "Pizza Rando",
+      "source": "Firecrawl Gastro #4",
+      "url": "https://www.instagram.com/reel/DeKYRHnkW_4/",
+      "reasons": [
+        "selbst syndizierter FreeFinder-Post"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-10-06T18:00:58.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 2,
+      "expiryDate": "2026-10-10",
+      "expirySource": "url.dateHints",
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "fc4g-1nw9m8r",
