@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-08T20:08:52.046Z",
+  "generatedAt": "2026-10-08T20:37:43.262Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -62,7 +62,7 @@
     },
     "deals-pending-firecrawl4.json": {
       "deals": 61,
-      "candidates": 0
+      "candidates": 1
     },
     "deals-pending-firecrawl5.json": {
       "deals": 0,
@@ -74,7 +74,7 @@
     },
     "deals-pending-food3.json": {
       "deals": 4,
-      "candidates": 1
+      "candidates": 2
     },
     "deals-pending-freikirchen.json": {
       "deals": 32,
@@ -129,8 +129,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 28,
-      "candidates": 0
+      "deals": 40,
+      "candidates": 4
     },
     "deals-pending-power.json": {
       "deals": 34,
@@ -157,35 +157,66 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 1,
-  "candidateAccounts": 1,
+  "candidatePosts": 7,
+  "candidateAccounts": 7,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "vevi.restaurant",
       "candidates": 1
+    },
+    {
+      "username": "viennabyaleksa",
+      "candidates": 1
+    },
+    {
+      "username": "freefinder.at",
+      "candidates": 1
+    },
+    {
+      "username": "schwestern_bazar",
+      "candidates": 1
+    },
+    {
+      "username": "restaurant_roth",
+      "candidates": 1
+    },
+    {
+      "username": "blumencafe.wien",
+      "candidates": 1
     }
   ],
-  "fetchedPosts": 25,
+  "fetchedPosts": 0,
   "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "vevi.restaurant",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 1,
-    "reserved": 5,
+    "requests": 0,
+    "reserved": 0,
     "stopped": true,
-    "reason": "Meta usage headroom",
-    "highestUsagePercent": 97,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "2026-10-08T20:18:55.847Z",
+    "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
-  "blockedEvidencePosts": 81,
-  "unmatchedCandidatePosts": 1,
-  "message": "0/1 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "vevi.restaurant",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 80,
+  "unmatchedCandidatePosts": 7,
+  "message": "0/7 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
