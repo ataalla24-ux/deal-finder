@@ -1,5 +1,6 @@
 import { handlePromoRequest, promoLedger } from './merchant-promos.js';
 import { publicInteractionCache } from './public-interaction-cache.js';
+import { handleTrialStatus } from './subscription-trial.js';
 import { measureStorage, storageIdentity, StorageQuotaError } from './storage-usage.js';
 export { MerchantPromoLedger } from './merchant-promos.js';
 
@@ -116,6 +117,9 @@ const merchantWorker = {
     const url = new URL(request.url);
 
     try {
+      if (request.method === 'POST' && url.pathname === '/api/subscriptions/trial-status') {
+        return handleTrialStatus(request, env, googlePlayAccessToken);
+      }
       if (url.pathname.startsWith('/api/merchant/promos/')) {
         const response = await handlePromoRequest(request, env);
         if (url.pathname.endsWith('/redeem') && response.status === 201) {
