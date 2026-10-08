@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-08T11:10:29.961Z",
+  "generatedAt": "2026-10-08T11:18:19.194Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -102,7 +102,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 37,
-      "candidates": 1
+      "candidates": 0
     },
     "deals-pending-instagram-apify.json": {
       "deals": 7,
@@ -129,7 +129,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 20,
+      "deals": 21,
       "candidates": 0
     },
     "deals-pending-power.json": {
@@ -157,39 +157,46 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 2,
-  "candidateAccounts": 2,
+  "candidatePosts": 1,
+  "candidateAccounts": 1,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "vevi.restaurant",
       "candidates": 1
-    },
-    {
-      "username": "dimare.wien",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 41,
-  "exactMatches": 1,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "vevi.restaurant",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 2,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 41,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
+  "globalError": {
+    "username": "vevi.restaurant",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 84,
   "unmatchedCandidatePosts": 1,
-  "message": "1/2 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "message": "0/1 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
