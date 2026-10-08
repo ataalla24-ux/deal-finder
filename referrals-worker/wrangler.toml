@@ -9,9 +9,18 @@ INSTAGRAM_EXPECTED_USERNAME = "freefinder.at"
 INSTAGRAM_REDIRECT_URI = "https://freefinder-referrals.freefinder-stefan.workers.dev/api/social/instagram/callback"
 INSTAGRAM_GRAPH_API_VERSION = "v26.0"
 META_DISCOVERY_WATCHDOG_ENABLED = "1"
+DAILY_PUSH_ENABLED = "0"
 
 [triggers]
-crons = ["8,23,38,53 * * * *"]
+crons = ["8,23,38,53 * * * *", "0 7,8 * * *"]
+
+[[durable_objects.bindings]]
+name = "DAILY_DEAL_PUSH"
+class_name = "DailyDealPush"
+
+[[migrations]]
+tag = "daily-push-v1"
+new_sqlite_classes = ["DailyDealPush"]
 
 [[kv_namespaces]]
 binding = "REFERRAL_KV"

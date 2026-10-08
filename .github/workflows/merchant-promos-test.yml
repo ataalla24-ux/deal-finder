@@ -1,9 +1,9 @@
 name: Merchant promo tests
 on:
   push:
-    paths: ['merchant-worker/**', '.github/workflows/merchant-promos-test.yml']
+    paths: ['merchant-worker/**', 'referrals-worker/**', 'scraper/native-weekly-utils.js', '.github/workflows/merchant-promos-test.yml']
   pull_request:
-    paths: ['merchant-worker/**', '.github/workflows/merchant-promos-test.yml']
+    paths: ['merchant-worker/**', 'referrals-worker/**', 'scraper/native-weekly-utils.js', '.github/workflows/merchant-promos-test.yml']
 permissions:
   contents: read
 jobs:
@@ -21,4 +21,6 @@ jobs:
           cache-dependency-path: merchant-worker/package-lock.json
       - run: npm ci
       - run: npm test
+      - run: node --test ../referrals-worker/test/*.test.js
       - run: npx wrangler deploy --dry-run
+      - run: npx wrangler deploy --dry-run --config ../referrals-worker/wrangler.toml

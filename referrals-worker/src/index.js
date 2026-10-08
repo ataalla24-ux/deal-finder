@@ -1,5 +1,6 @@
 import { isFoodOrDrinkDeal } from '../../scraper/native-weekly-utils.js';
 import { readPublicDealRecords, invalidatePublicDealRecords } from './public-deal-state-cache.js';
+import { DailyPushService } from './daily-push.js';
 
 const JSON_HEADERS = {
   'content-type': 'application/json; charset=utf-8',
@@ -306,6 +307,7 @@ function derToJose(signature, size = 32) {
   return jose;
 }
 
+let cachedApnsJwt;
 async function buildApnsJwt(env) {
   const teamId = String(env.APNS_TEAM_ID || '').trim();
   const keyId = String(env.APNS_KEY_ID || '').trim();
@@ -314,6 +316,9 @@ async function buildApnsJwt(env) {
   if (!teamId || !keyId || !privateKeyPem) {
     throw new Error('APNS credentials are incomplete');
   }
+
+  const credentialKey = `${teamId}|${keyId}|${privateKeyPem}`;
+  if (cachedApnsJwt?.key === credentialKey && cachedApnsJwt.expires > Date.now()) return cachedApnsJwt.jwt;
 
   const privateKeyData = pemToArrayBuffer(privateKeyPem);
   if (!privateKeyData) throw new Error('APNS private key is invalid');
@@ -338,7 +343,9 @@ async function buildApnsJwt(env) {
     textEncoder.encode(signingInput),
   );
 
-  return `${signingInput}.${toBase64Url(derToJose(signature))}`;
+  const jwt = `${signingInput}.${toBase64Url(derToJose(signature))}`;
+  cachedApnsJwt = { key: credentialKey, jwt, expires: Date.now() + 20 * 60000 };
+  return jwt;
 }
 
 function requireAdmin(request, env) {
@@ -381,6 +388,8 @@ function buildApnsBody(body) {
     dealId: String(body?.dealId || '').trim() || undefined,
     url: String(body?.url || '').trim() || undefined,
     type: String(body?.type || 'deal').trim(),
+    day: body?.day,
+    expiresAt: body?.expiresAt,
     data: body?.data && typeof body.data === 'object' ? body.data : undefined,
   };
 }
@@ -393,7 +402,8 @@ async function sendApnsPush(env, payload) {
   if (!bundleId) throw new Error('Missing APNS bundle id');
 
   const jwt = await buildApnsJwt(env);
-  const host = String(env.APNS_USE_SANDBOX || '').trim().toLowerCase() === 'true'
+  const sandbox = payload.environment ? payload.environment === 'sandbox' : String(env.APNS_USE_SANDBOX || '').trim().toLowerCase() === 'true';
+  const host = sandbox
     ? 'https://api.sandbox.push.apple.com'
     : 'https://api.push.apple.com';
 
@@ -406,9 +416,11 @@ async function sendApnsPush(env, payload) {
       'apns-push-type': String(payload?.pushType || 'alert'),
       'apns-priority': String(payload?.priority || '10'),
       'apns-expiration': String(payload?.expiration || '0'),
+      ...(payload.collapseId ? { 'apns-collapse-id': payload.collapseId } : {}),
       'content-type': 'application/json',
     },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(10000),
   });
 
   let errorBody = null;
@@ -4176,8 +4188,24 @@ function redirectReferralToWebsite(code, requestUrl) {
   return Response.redirect(destination.toString(), 302);
 }
 
+export class DailyDealPush extends DailyPushService {
+  async sendApple(device, campaign, message) {
+    return sendApnsPush(this.env, { ...message, token: device.token, environment: device.environment,
+      dealId: campaign.deal.id, type: 'daily_deal', day: campaign.day, expiresAt: campaign.expires,
+      expiration: Math.floor(campaign.expires / 1000), collapseId: `daily-${campaign.day}` });
+  }
+}
+
+function dailyPushStub(env) {
+  return env.DAILY_DEAL_PUSH.get(env.DAILY_DEAL_PUSH.idFromName('daily-deals-v1'));
+}
+
 export default {
   async scheduled(_controller, env) {
+    if (env.DAILY_DEAL_PUSH && env.DAILY_PUSH_ENABLED === '1') {
+      try { await dailyPushStub(env).fetch('https://push.internal/tick', { method: 'POST' }); }
+      catch { console.warn('daily_push_schedule_failed'); }
+    }
     const { runDiscoveryWatchdog } = await import('./discovery-watchdog.js');
     try {
       await runDiscoveryWatchdog(env);
@@ -4406,6 +4434,42 @@ export default {
       const record = normalizeRecord(existing, code, inviterDeviceId);
       await putJsonKV(env, codeKey(code), record);
       return json({ ok: true, ...sanitizeInstallSummary(record) });
+    }
+
+    if (/^\/api\/push\/(apns|fcm)\/(register|unregister)$/.test(path) && request.method === 'POST') {
+      if (Number(request.headers.get('content-length') || 0) > 8192) return invalid('Payload too large', 413);
+      const raw = await request.text();
+      if (raw.length > 8192) return invalid('Payload too large', 413);
+      let body;
+      try { body = JSON.parse(raw); } catch { return invalid('Invalid JSON'); }
+      if (!body || typeof body !== 'object') return invalid('Invalid JSON');
+      const [, provider, action] = path.match(/^\/api\/push\/(apns|fcm)\/(register|unregister)$/);
+      if (action === 'unregister' && !body.revision) {
+        const token = provider === 'apns' ? normalizePushToken(body.token) : String(body.token || '').trim();
+        if (!token || token.length > 4096) return invalid('Invalid token');
+        if (env.DAILY_DEAL_PUSH) await dailyPushStub(env).fetch('https://push.internal/revoke-token', {
+          method: 'POST', body: JSON.stringify({ provider, token }),
+        });
+        if (provider === 'apns') await env.REFERRAL_KV.delete(apnsTokenKey(token));
+        return json({ ok: true, registered: false });
+      }
+      if (body.policyVersion === 1 || action === 'unregister') {
+        if (!env.DAILY_DEAL_PUSH) return invalid('Push registration temporarily unavailable', 503);
+        const response = await dailyPushStub(env).fetch(`https://push.internal/${action}`, {
+          method: 'POST', body: JSON.stringify({ provider, body }),
+        });
+        return new Response(response.body, { status: response.status, headers: JSON_HEADERS });
+      }
+      // Legacy apps have not supplied permission/environment metadata; keep them out of daily delivery.
+      if (provider === 'fcm') return invalid('Update the app to register daily notifications', 409);
+      request = new Request(request.url, { method: 'POST', headers: request.headers, body: raw });
+    }
+
+    if (/^\/api\/push\/daily\/(status|preview)$/.test(path) && request.method === 'GET') {
+      if (!requireAdmin(request, env)) return invalid('Unauthorized', 401);
+      if (!env.DAILY_DEAL_PUSH) return invalid('Push service unavailable', 503);
+      const response = await dailyPushStub(env).fetch(`https://push.internal/${path.split('/').pop()}`);
+      return new Response(response.body, { status: response.status, headers: JSON_HEADERS });
     }
 
     if (path === '/api/push/apns/register' && request.method === 'POST') {
