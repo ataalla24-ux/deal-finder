@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-08T18:39:31.995Z",
+  "generatedAt": "2026-10-08T19:17:13.336Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 679,
-    "uniqueCandidates": 650,
-    "distinctCandidates": 663,
-    "duplicateClusters": 13,
+    "totalCandidates": 646,
+    "uniqueCandidates": 626,
+    "distinctCandidates": 635,
+    "duplicateClusters": 9,
     "topHealthySources": [
       {
         "sourceKey": "joe",
@@ -22,20 +22,20 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 71,
+        "healthScore": 73,
         "totalDeals": 22
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 73,
+        "totalDeals": 4
       },
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "healthScore": 69,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "healthScore": 68,
-        "totalDeals": 7
       }
     ],
     "topMissionSources": [
@@ -81,7 +81,7 @@
       {
         "sourceKey": "vienna-promo-radar",
         "sourceLabel": "Vienna Promo Radar",
-        "coverageScore": 66,
+        "coverageScore": 65,
         "totalDeals": 118,
         "fresh1dCount": 0
       },
@@ -100,14 +100,20 @@
         "fresh1dCount": 0
       },
       {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 28,
-        "totalDeals": 37,
+        "sourceKey": "power",
+        "sourceLabel": "Power Scraper",
+        "coverageScore": 26,
+        "totalDeals": 38,
         "fresh1dCount": 0
       }
     ],
     "topPrecisionSources": [
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 74,
+        "totalDeals": 22
+      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
@@ -115,10 +121,10 @@
         "totalDeals": 12
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 73,
-        "totalDeals": 22
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 72,
+        "totalDeals": 4
       },
       {
         "sourceKey": "food3",
@@ -131,12 +137,6 @@
         "sourceLabel": "jö Bonus Club",
         "precisionScore": 68,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "precisionScore": 65,
-        "totalDeals": 7
       }
     ],
     "topWeightedSources": [
@@ -149,7 +149,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 58,
+        "sourceWeightScore": 59,
         "totalDeals": 22
       },
       {
@@ -159,16 +159,16 @@
         "totalDeals": 12
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 55,
         "totalDeals": 4
       },
       {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 55,
-        "totalDeals": 116
+        "totalDeals": 4
       }
     ],
     "topSourcesToFix": [
@@ -376,9 +376,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 22,
-      "uniqueDeals": 17,
-      "duplicateDeals": 5,
-      "duplicateAcrossSources": 5,
+      "uniqueDeals": 19,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
       "fresh1dCount": 1,
       "fresh7dCount": 18,
       "viennaCount": 22,
@@ -391,8 +391,8 @@
         "1+1 SCHNITZEL IN WIEN 🍽️🍽️ Beim Alleewirt bekommst du mit dem Smartphone-Gutschein von @gutschein.at zwei Portionen Schnitzel zum Preis ei"
       ],
       "lastRun": null,
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.2,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
       "fresh1dRate": 0,
       "fresh7dRate": 0.8,
       "viennaRate": 1,
@@ -451,11 +451,73 @@
       "issues": [
         "wenige Deals sind frischer als 1 Tag"
       ],
-      "healthScore": 71,
+      "healthScore": 73,
       "missionFitScore": 60,
-      "coverageScore": 23,
-      "precisionScore": 73,
-      "sourceWeightScore": 58
+      "coverageScore": 24,
+      "precisionScore": 74,
+      "sourceWeightScore": 59
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 4,
+      "uniqueDeals": 4,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 0,
+      "fresh7dCount": 4,
+      "viennaCount": 4,
+      "foodDrinkCount": 2,
+      "promoCount": 3,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Eröffnungsangebot: Erstes Glas Prosecco um 1 €",
+        "Lunch Deal Montag bis Freitag, 12:00 - 15:00 Uhr für 15 €",
+        "Traffic Light Party am 15. Oktober 2026 mit Happy Hour und BOGO Longdrinks"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 96,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        },
+        {
+          "value": "getränke",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 2
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "freebie",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 73,
+      "missionFitScore": 55,
+      "coverageScore": 14,
+      "precisionScore": 72,
+      "sourceWeightScore": 55
     },
     {
       "sourceKey": "food3",
@@ -591,93 +653,6 @@
       "coverageScore": 14,
       "precisionScore": 65,
       "sourceWeightScore": 54
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 37,
-      "uniqueDeals": 31,
-      "duplicateDeals": 6,
-      "duplicateAcrossSources": 4,
-      "fresh1dCount": 0,
-      "fresh7dCount": 32,
-      "viennaCount": 37,
-      "foodDrinkCount": 12,
-      "promoCount": 23,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Eröffnungsangebot: Erstes Glas Prosecco um 1 €",
-        "🌐 https://cibuz.com/events/ 📩 gutschein@cibuz.com 📞 +43 676 674 94 93",
-        "10 % Rabatt auf alle Gerichte und jede Pizza nur € 9,90 im Oktober"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.8,
-      "duplicateRate": 0.1,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.9,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.6,
-      "missingUrlRate": 0,
-      "averageQualityScore": 81,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 11
-        },
-        {
-          "value": "essen",
-          "count": 8
-        },
-        {
-          "value": "food/drink",
-          "count": 8
-        },
-        {
-          "value": "kultur",
-          "count": 3
-        },
-        {
-          "value": "event",
-          "count": 2
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 17
-        },
-        {
-          "value": "rabatt",
-          "count": 15
-        },
-        {
-          "value": "bogo",
-          "count": 2
-        },
-        {
-          "value": "freebie",
-          "count": 2
-        },
-        {
-          "value": "gutschein",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 61,
-      "missionFitScore": 42,
-      "coverageScore": 28,
-      "precisionScore": 62,
-      "sourceWeightScore": 49
     },
     {
       "sourceKey": "instagram-verified",
@@ -912,9 +887,9 @@
       "file": "deals-pending-gastro2.json",
       "sourceLabel": "Firecrawl Key 1 - Gastro",
       "totalDeals": 116,
-      "uniqueDeals": 111,
-      "duplicateDeals": 5,
-      "duplicateAcrossSources": 5,
+      "uniqueDeals": 112,
+      "duplicateDeals": 4,
+      "duplicateAcrossSources": 4,
       "fresh1dCount": 0,
       "fresh7dCount": 6,
       "viennaCount": 4,
@@ -1735,7 +1710,7 @@
       ],
       "healthScore": 39,
       "missionFitScore": 22,
-      "coverageScore": 66,
+      "coverageScore": 65,
       "precisionScore": 30,
       "sourceWeightScore": 37
     },
