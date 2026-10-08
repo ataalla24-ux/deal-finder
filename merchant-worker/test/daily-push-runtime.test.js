@@ -85,6 +85,16 @@ test('pagination delivers all recipients once, and excludes Free, opt-out and sa
   await call('/batch'); await call('/batch'); await call('/batch');
   assert.equal((await call('/sent')).length, 25);
 });
+
+test('Android development installations are never included in the production daily batch', async t => {
+  const call = await runtime(t);
+  for (const [n, pushEnvironment] of [[1, 'development'], [2, 'production'], [3, undefined]]) {
+    await call('/register', { provider: 'fcm', body: { ...device(n).body,
+      packageName: 'com.stefanataalla.freefinderwien', token: `fcm-runtime-token-${n}-`.repeat(3), pushEnvironment } });
+  }
+  await call('/batch');
+  assert.deepEqual(await call('/sent'), [{ id: device(2).body.appDeviceId, day: '2026-10-08' }]);
+});
 test('ambiguous provider outcome is not retried; rejected invalid tokens are disabled', async t => {
   const call = await runtime(t);
   await call('/register', device(1));

@@ -23,7 +23,8 @@ Before activation:
 No migration of legacy token records into the daily audience occurs. Current
 clients must register policyVersion 1, explicit enabled state, Pro/Plus plan,
 permission, language, environment, installation ID and a timestamp. APNs
-sandbox devices are deliberately excluded from automatic production sends.
+sandbox and Android development devices are excluded from automatic production
+sends. Android registrations without explicit environment metadata are disabled.
 Plan is client-reported, not independently verified by a server receipt check.
 Registrations expire for targeting after 30 days without refresh, and device
 records are purged after 60 days. Refunds/expiry while an iOS app remains closed

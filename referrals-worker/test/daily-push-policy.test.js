@@ -48,3 +48,15 @@ test('registration requires exact app, permission, plan, metadata and valid cloc
     assert.throws(() => normalizePushRegistration({ ...body, ...edit }, 'apns', now));
   }
 });
+
+test('Android registrations retain test isolation and reject missing environment metadata', () => {
+  const body = { packageName: PUSH_APP_ID, token: 'test-fcm-token-'.repeat(4), appDeviceId: 'test-installation-android',
+    subscriptionPlan: 'pro', notificationsEnabled: true, policyVersion: 1, revision: now };
+  assert.equal(normalizePushRegistration(body, 'fcm', now).enabled, false);
+  for (const pushEnvironment of ['development', 'production']) {
+    const device = normalizePushRegistration({ ...body, pushEnvironment }, 'fcm', now);
+    assert.equal(device.enabled, true);
+    assert.equal(device.environment, pushEnvironment);
+  }
+  assert.equal(normalizePushRegistration({ ...body, pushEnvironment: 'sandbox' }, 'fcm', now).enabled, false);
+});

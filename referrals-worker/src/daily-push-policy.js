@@ -63,10 +63,11 @@ export function normalizePushRegistration(body, provider, now = Date.now()) {
       !(provider === 'apns' ? /^[a-f0-9]{64}$/i : /^[a-zA-Z0-9_:\-]{32,4096}$/).test(token)) throw new Error('Invalid device registration');
   const revision = Number(body.revision);
   if (!Number.isFinite(revision) || Math.abs(revision - now) > 10 * 60000) throw new Error('Invalid registration timestamp');
+  const environments = provider === 'apns' ? ['sandbox', 'production'] : ['development', 'production'];
   const enabled = body.policyVersion === 1 && body.notificationsEnabled === true &&
     ['pro', 'plus'].includes(body.subscriptionPlan) &&
-    (provider !== 'apns' || ['sandbox', 'production'].includes(body.pushEnvironment));
+    environments.includes(body.pushEnvironment);
   return { provider, installation, token: provider === 'apns' ? token.toLowerCase() : token,
     plan: body.subscriptionPlan, enabled, revision, language: body.language === 'en' ? 'en' : 'de',
-    environment: provider === 'apns' ? body.pushEnvironment : 'production', updated: now };
+    environment: body.pushEnvironment, updated: now };
 }
