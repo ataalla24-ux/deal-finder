@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-10-08T21:38:31.770Z",
+  "generatedAt": "2026-10-08T22:13:08.366Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 290,
-    "allowed": 0,
-    "blocked": 290,
-    "warnings": 0,
+    "total": 292,
+    "allowed": 1,
+    "blocked": 291,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 211,
-      "älter als 7 Tage (2026-02-22)": 83,
+      "älter als 7 Tage (2026-02-22)": 84,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-09-14)": 1,
       "Gottesdienste nur im Wochenlauf": 33,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 11,
+      "URL ungültig (HTTP 404)": 8,
       "selbst syndizierter FreeFinder-Post": 5,
       "älter als 7 Tage (2016-09-12)": 2,
       "abgelaufen (2026-09-16)": 2,
@@ -44,9 +44,9 @@
       "nicht eindeutig in Wien": 12,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
-      "älter als 7 Tage (2025-12-30)": 1,
       "abgelaufen (2026-08-30)": 4,
       "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 1,
+      "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 1,
       "kein verlässliches Quell-/Post-Datum gefunden": 117,
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 2,
       "ausgeschlossene Quelle (gastro.news)": 20,
@@ -54,9 +54,9 @@
       "abgelaufen (2026-09-10)": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 212,
+      "kein konkreter Deal": 213,
       "älter als 7 Tage": 149,
-      "ungültige URL": 14,
+      "ungültige URL": 11,
       "Gottesdienste außerhalb Wochenlauf": 33,
       "selbst syndiziert": 5,
       "abgelaufen": 16,
@@ -109,7 +109,7 @@
         "blocked": 32,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "ungültige URL": 3,
+          "ungültige URL": 2,
           "kein konkreter Deal": 30,
           "Gottesdienste außerhalb Wochenlauf": 32,
           "älter als 7 Tage": 32,
@@ -164,7 +164,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 92,
           "älter als 7 Tage": 96,
-          "ungültige URL": 9,
+          "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "nicht Wien": 1
@@ -200,6 +200,15 @@
           "nicht Wien": 2
         }
       },
+      "tiktok-deals-scanner": {
+        "total": 2,
+        "allowed": 1,
+        "blocked": 1,
+        "warnings": 1,
+        "reasonCategoryCounts": {
+          "kein konkreter Deal": 1
+        }
+      },
       "Wien Deals Combined Graph": {
         "total": 3,
         "allowed": 0,
@@ -212,7 +221,25 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "tiktok-1ocy526",
+      "title": "Wie kann ein so schöner Tag noch besser werden",
+      "brand": "Trüfrü",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@trufru_at/video/7693910001508863264",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text; Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-10-07T13:00:17.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "events-0-20260222",
@@ -1160,18 +1187,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 172,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-7-20260419",
@@ -2146,17 +2174,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 228,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -2943,17 +2972,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 228,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-17-20260222",
@@ -3075,15 +3105,17 @@
       "url": "https://www.orthodoxie.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2025-12-30)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2025-12-30T14:00:40.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 282,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 228,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-24-20260222",
@@ -3516,6 +3548,25 @@
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "unklar: www.hervis.at"
+    },
+    {
+      "id": "tiktok-16vnls2",
+      "title": "@yamildoval Angebot",
+      "brand": "@yamildoval",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@yamildoval/video/7692748319352835361",
+      "reasons": [
+        "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-10-04T09:52:22.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 4,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "vpr-1371lsp",
