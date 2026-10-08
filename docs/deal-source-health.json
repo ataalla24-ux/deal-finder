@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-08T12:06:10.678Z",
+  "generatedAt": "2026-10-08T12:11:24.291Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 667,
-    "uniqueCandidates": 640,
-    "distinctCandidates": 652,
-    "duplicateClusters": 12,
+    "totalCandidates": 678,
+    "uniqueCandidates": 649,
+    "distinctCandidates": 662,
+    "duplicateClusters": 13,
     "topHealthySources": [
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "healthScore": 75,
+        "totalDeals": 10
+      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
@@ -30,15 +36,15 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 68,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 63,
-        "totalDeals": 37
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "missionFitScore": 79,
+        "totalDeals": 10
+      },
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
@@ -62,27 +68,21 @@
         "sourceLabel": "TikTok Scanner",
         "missionFitScore": 57,
         "totalDeals": 12
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "missionFitScore": 57,
-        "totalDeals": 10
       }
     ],
     "topCoverageSources": [
       {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "coverageScore": 70,
+        "coverageScore": 69,
         "totalDeals": 117,
         "fresh1dCount": 0
       },
       {
         "sourceKey": "vienna-promo-radar",
         "sourceLabel": "Vienna Promo Radar",
-        "coverageScore": 61,
-        "totalDeals": 110,
+        "coverageScore": 65,
+        "totalDeals": 118,
         "fresh1dCount": 0
       },
       {
@@ -127,19 +127,25 @@
         "totalDeals": 4
       },
       {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "precisionScore": 68,
+        "totalDeals": 10
+      },
+      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "precisionScore": 65,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 63,
-        "totalDeals": 37
       }
     ],
     "topWeightedSources": [
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "sourceWeightScore": 64,
+        "totalDeals": 10
+      },
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 55,
         "totalDeals": 117
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 54,
-        "totalDeals": 7
       }
     ],
     "topSourcesToFix": [
@@ -238,6 +238,68 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "joe",
+      "file": "deals-pending-joe.json",
+      "sourceLabel": "jö Bonus Club",
+      "totalDeals": 10,
+      "uniqueDeals": 10,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 10,
+      "fresh7dCount": 10,
+      "viennaCount": 0,
+      "foodDrinkCount": 10,
+      "promoCount": 8,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "jö Äpp Extrem Aktion bei BILLA",
+        "jö Rabattsammler",
+        "jö äpp Day"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 0,
+      "foodDrinkRate": 1,
+      "promoRate": 0.8,
+      "missingUrlRate": 0,
+      "averageQualityScore": 84.3,
+      "topCategories": [
+        {
+          "value": "supermarkt",
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 4
+        },
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 5
+        },
+        {
+          "value": "rabatt",
+          "count": 5
+        }
+      ],
+      "issues": [
+        "Wien-Signal ist zu schwach"
+      ],
+      "healthScore": 75,
+      "missionFitScore": 79,
+      "coverageScore": 19,
+      "precisionScore": 68,
+      "sourceWeightScore": 64
+    },
     {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
@@ -618,69 +680,6 @@
       "sourceWeightScore": 50
     },
     {
-      "sourceKey": "joe",
-      "file": "deals-pending-joe.json",
-      "sourceLabel": "jö Bonus Club",
-      "totalDeals": 10,
-      "uniqueDeals": 10,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 10,
-      "viennaCount": 0,
-      "foodDrinkCount": 10,
-      "promoCount": 8,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "jö Äpp Extrem Aktion bei BILLA",
-        "jö Rabattsammler",
-        "jö äpp Day"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0,
-      "foodDrinkRate": 1,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84.3,
-      "topCategories": [
-        {
-          "value": "supermarkt",
-          "count": 5
-        },
-        {
-          "value": "kaffee",
-          "count": 4
-        },
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 5
-        },
-        {
-          "value": "rabatt",
-          "count": 5
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 61,
-      "missionFitScore": 57,
-      "coverageScore": 14,
-      "precisionScore": 56,
-      "sourceWeightScore": 49
-    },
-    {
       "sourceKey": "instagram-verified",
       "file": "deals-pending-instagram-verified.json",
       "sourceLabel": "Instagram",
@@ -998,7 +997,7 @@
       ],
       "healthScore": 56,
       "missionFitScore": 49,
-      "coverageScore": 70,
+      "coverageScore": 69,
       "precisionScore": 49,
       "sourceWeightScore": 55
     },
@@ -1095,32 +1094,32 @@
       "sourceKey": "power",
       "file": "deals-pending-power.json",
       "sourceLabel": "Power Scraper",
-      "totalDeals": 35,
-      "uniqueDeals": 35,
+      "totalDeals": 38,
+      "uniqueDeals": 38,
       "duplicateDeals": 0,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
       "fresh7dCount": 0,
       "viennaCount": 8,
       "foodDrinkCount": 22,
-      "promoCount": 13,
+      "promoCount": 14,
       "missingUrlCount": 0,
       "sampleTitles": [
         "BILLA auf WhatsApp Nie wieder Angebote verpassen! Der BILLA WhatsApp Chat bringt",
-        "Zum Apple Music Abo für Studierende gibt's Apple TV kostenlos dazu. Fußnote ◊◊ S",
-        "Early Hummel Aktion Montag bis Freitag von 08:00 bis 09:00 Uhr kostet jeder Kaffee nur €2,50."
+        "LEGO® Magazine (KOSTENLOS)",
+        "Zum Apple Music Abo für Studierende gibt's Apple TV kostenlos dazu. Fußnote ◊◊ S"
       ],
       "lastRun": {
         "status": "completed-with-errors",
-        "startedAt": "2026-10-07T19:27:01.437Z",
-        "finishedAt": "2026-10-07T19:27:25.594Z",
-        "durationMs": 24157,
+        "startedAt": "2026-10-08T12:08:59.499Z",
+        "finishedAt": "2026-10-08T12:09:21.039Z",
+        "durationMs": 21540,
         "counts": {
-          "rawCandidates": 35,
-          "normalizedCandidates": 35,
+          "rawCandidates": 41,
+          "normalizedCandidates": 38,
           "verifiedCandidates": 0,
           "previousDeals": 0,
-          "acceptedDeals": 35,
+          "acceptedDeals": 38,
           "rejectedDeals": 0
         },
         "rejectedByReason": {},
@@ -1129,10 +1128,10 @@
           "MediaMarkt: HTTP 404",
           "Conrad: Browser HTTP 403",
           "Decathlon: Browser HTTP 403",
-          "Hervis: Browser HTTP 403",
           "XXXLutz: Browser HTTP 403",
           "Möbelix: Browser HTTP 403",
-          "Lego Store: Browser HTTP 403"
+          "Thalia: Browser HTTP 403",
+          "Libro: Browser HTTP 403"
         ],
         "reportFile": "deal-pipeline-last-run-power.json"
       },
@@ -1144,7 +1143,7 @@
       "foodDrinkRate": 0.6,
       "promoRate": 0.4,
       "missingUrlRate": 0,
-      "averageQualityScore": 56.4,
+      "averageQualityScore": 56.3,
       "topCategories": [
         {
           "value": "essen",
@@ -1164,21 +1163,21 @@
         },
         {
           "value": "sport",
-          "count": 2
+          "count": 3
         },
         {
-          "value": "supermarkt",
-          "count": 1
+          "value": "spielzeug",
+          "count": 2
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 27
+          "count": 29
         },
         {
           "value": "gratis",
-          "count": 5
+          "count": 6
         },
         {
           "value": "freebie",
@@ -1191,7 +1190,7 @@
       ],
       "healthScore": 51,
       "missionFitScore": 35,
-      "coverageScore": 25,
+      "coverageScore": 26,
       "precisionScore": 43,
       "sourceWeightScore": 39
     },
@@ -1530,9 +1529,9 @@
       ],
       "healthScore": 44,
       "missionFitScore": 28,
-      "coverageScore": 21,
+      "coverageScore": 20,
       "precisionScore": 36,
-      "sourceWeightScore": 33
+      "sourceWeightScore": 32
     },
     {
       "sourceKey": "events",
@@ -1650,51 +1649,51 @@
       "sourceKey": "vienna-promo-radar",
       "file": "deals-pending-vienna-promo-radar.json",
       "sourceLabel": "Vienna Promo Radar",
-      "totalDeals": 110,
-      "uniqueDeals": 105,
-      "duplicateDeals": 5,
+      "totalDeals": 118,
+      "uniqueDeals": 111,
+      "duplicateDeals": 7,
       "duplicateAcrossSources": 0,
       "fresh1dCount": 0,
       "fresh7dCount": 2,
       "viennaCount": 0,
-      "foodDrinkCount": 41,
-      "promoCount": 27,
+      "foodDrinkCount": 44,
+      "promoCount": 33,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "GRATIS: Große Öffi-Aktion – Klimaticket um nur 33 € und 20.000 Gratis-Tageskarten",
-        "GRATIS: Gratis-Anreise aus Wien mit der Burgenland Card ab 1. März 2026: Nächster Meilenstein für nachhaltige Gästemobilität im Burgenland",
-        "FREEBIE: Fashion and Beauty – Erste 100 Kunden bekommen hier ihr RITUALS Goodie Bag"
+        "GRATIS: Gratis-Getränk-Aktion: Starbucks eröffnet neuen Standort in Wien",
+        "GRATIS: Gratis-Getränk-Aktion: Starbucks eröffnet neuen Standort in Wien",
+        "GRATIS: Große Öffi-Aktion – Klimaticket um nur 33 € und 20.000 Gratis-Tageskarten"
       ],
       "lastRun": null,
-      "uniqueRate": 1,
+      "uniqueRate": 0.9,
       "duplicateRate": 0,
       "fresh1dRate": 0,
       "fresh7dRate": 0,
       "viennaRate": 0,
       "foodDrinkRate": 0.4,
-      "promoRate": 0.2,
+      "promoRate": 0.3,
       "missingUrlRate": 0,
-      "averageQualityScore": 41.6,
+      "averageQualityScore": 42.7,
       "topCategories": [
         {
           "value": "reisen",
-          "count": 36
-        },
-        {
-          "value": "essen",
-          "count": 21
+          "count": 39
         },
         {
           "value": "kaffee",
+          "count": 24
+        },
+        {
+          "value": "essen",
           "count": 19
         },
         {
           "value": "shopping",
-          "count": 11
+          "count": 12
         },
         {
           "value": "fitness",
-          "count": 10
+          "count": 11
         },
         {
           "value": "technik",
@@ -1704,15 +1703,15 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 83
+          "count": 87
         },
         {
           "value": "gratis",
-          "count": 25
+          "count": 28
         },
         {
           "value": "freebie",
-          "count": 2
+          "count": 3
         }
       ],
       "issues": [
@@ -1722,10 +1721,10 @@
         "Wien-Signal ist zu schwach"
       ],
       "healthScore": 39,
-      "missionFitScore": 20,
-      "coverageScore": 61,
-      "precisionScore": 28,
-      "sourceWeightScore": 35
+      "missionFitScore": 22,
+      "coverageScore": 65,
+      "precisionScore": 30,
+      "sourceWeightScore": 37
     },
     {
       "sourceKey": "flights",
