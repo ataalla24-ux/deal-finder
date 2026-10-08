@@ -2,11 +2,28 @@
 
 ## Rollout gate
 
-`DAILY_PUSH_ENABLED=0` deliberately keeps automatic sends OFF. Registration,
-unregistration, admin status and the no-send preview work independently. Do not
-enable the switch merely because the Worker deploys successfully.
+On 2026-10-08 the owner explicitly requested activation before the remaining
+end-to-end handset test: "aktiviere einfach und wenn ich die neue version vom
+app store downloade werden wir sehen ob es klappt". DAILY_PUSH_ENABLED and
+MARKETING_PUSH_ENABLED are therefore set to 1. This is an accepted rollout risk,
+NOT evidence of successful handset display/tap. The test remains outstanding.
 
-Before activation:
+Pro/Plus receives only the actual published Deal of the Day; Free receives
+marketing tips only with explicit policy-v2 marketing consent, on Monday,
+Wednesday and Friday. Both run in the existing 09:00-10:00 Europe/Vienna
+window. No eligible fresh/non-repeated offer means no message. Opening the
+updated app and granting OS permission are needed for a current registration.
+Legacy registrations remain excluded. Trial reminders are unchanged.
+
+The production store builds containing this policy are iOS 1.32 (70) and
+Android 1.35 (71), submitted but not yet verified live. iOS build 70 is also
+available to the existing internal TestFlight group.
+
+Emergency stop: set BOTH flags to 0 and deploy with --keep-vars, explicitly
+overriding the two flags if needed. Preserve all secrets, bindings and existing
+cron schedules. Registration and read-only status/preview work independently.
+
+Original verification checklist (the owner waived completion before activation):
 
 1. Configure Firebase for Android package `com.stefanataalla.freefinderwien`.
    Add its genuine `google-services.json` to the native app, and provision a
