@@ -7,15 +7,17 @@ const now = Date.parse('2026-10-08T07:05:00Z');
 const deal = { id: 'verified-pizza', title: '1+1 Pizza gratis', brand: 'Testrestaurant', category: 'essen',
   dateConfidence: 'high', expiryKind: 'range', validFrom: '2026-10-08', validUntil: '2026-10-31',
   pipelineLifecycle: { manualDecision: 'approved' } };
-const source = { feed: { lastUpdated: new Date(now).toISOString(), deals: [deal] }, state: { ok: true, overrides: [] } };
+const source = { feed: { lastUpdated: new Date(now).toISOString(), deals: [deal] }, state: { ok: true, overrides: [] },
+  featured: { date: '2026-10-08', dealId: deal.id } };
 const device = n => ({ provider: 'apns', body: { bundleId: 'com.stefanataalla.freefinderwien',
   token: n.toString(16).padStart(64, '0'), appDeviceId: `runtime-device-${String(n).padStart(10, '0')}`,
   subscriptionPlan: 'pro', policyVersion: 1, notificationsEnabled: true, pushEnvironment: 'production', revision: now } });
 
-async function runtime(t) {
+async function runtime(t, flags = { DAILY_PUSH_ENABLED: '1', MARKETING_PUSH_ENABLED: '1' }) {
   const modules = [{ type: 'ESModule', path: 'test-entry.js', contents: `
     import { DailyPushService } from './referrals-worker/src/daily-push.js';
     export class TestDailyPush extends DailyPushService {
+      async alarm() {} // Batches are explicitly driven by tests, never by wall-clock alarms.
       now() { return this.fixture?.now || ${now}; }
       ready() { return true; }
       async loadSource() { if (this.fixture?.sourceFails) throw Error('test failure'); return this.fixture.source; }
@@ -41,7 +43,7 @@ async function runtime(t) {
     modules.push({ type: 'ESModule', path, contents: await readFile(new URL(`../../${path}`, import.meta.url), 'utf8') });
   }
   const mf = new Miniflare(convertV4MiniflareOptions({ compatibilityDate: '2026-03-09', modules,
-    durableObjects: { PUSH: { className: 'TestDailyPush', useSQLite: true } }, bindings: { DAILY_PUSH_ENABLED: '0' }, log: new Log(LogLevel.NONE) }));
+    durableObjects: { PUSH: { className: 'TestDailyPush', useSQLite: true } }, bindings: flags, log: new Log(LogLevel.NONE) }));
   t.after(() => mf.dispose());
   const call = async (path, body) => {
     const response = await mf.dispatchFetch(`https://test${path}`, body ? { method: 'POST', body: JSON.stringify(body) } : {});
@@ -122,9 +124,38 @@ test('same deal is not selected again the next day', async t => {
   const call = await runtime(t);
   await call('/register', device(1)); await call('/batch');
   const tomorrow = now + 86400000;
-  await call('/fixture', { now: tomorrow, source: { ...source, feed: { ...source.feed, lastUpdated: new Date(tomorrow).toISOString() } } });
+  await call('/fixture', { now: tomorrow, source: { ...source, featured: { ...source.featured, date: '2026-10-09' }, feed: { ...source.feed, lastUpdated: new Date(tomorrow).toISOString() } } });
   await call('/batch');
   assert.equal((await call('/sent')).length, 1);
+});
+
+test('Free marketing requires consent and a delivery day; upgrading cannot double-send', async t => {
+  const call = await runtime(t);
+  const free = { ...device(1), body: { ...device(1).body, subscriptionPlan: 'free', policyVersion: 2,
+    notificationsEnabled: false, marketingEnabled: true, marketingConsentVersion: 1, marketingConsentAt: now } };
+  await call('/register', free);
+  await call('/batch');
+  assert.equal((await call('/status')).deliveries[0].state, 'not_scheduled');
+  const friday = now + 86400000;
+  await call('/fixture', { now: friday, source: { ...source, featured: { ...source.featured, date: '2026-10-09' },
+    feed: { ...source.feed, lastUpdated: new Date(friday).toISOString() } } });
+  await Promise.all([call('/batch'), call('/batch')]);
+  assert.equal((await call('/sent')).length, 1);
+  await call('/register', { ...free, body: { ...free.body, subscriptionPlan: 'pro', notificationsEnabled: true, revision: friday } });
+  await call('/batch');
+  assert.equal((await call('/sent')).length, 1, 'same installation shares the daily claim across audience changes');
+});
+
+test('marketing opt-out and disabled rollout flags stop delivery', async t => {
+  const call = await runtime(t, { DAILY_PUSH_ENABLED: '0', MARKETING_PUSH_ENABLED: '0' });
+  await call('/register', device(1));
+  await call('/batch');
+  assert.equal((await call('/status')).deliveries[0].state, 'not_scheduled');
+  const free = { ...device(2), body: { ...device(2).body, subscriptionPlan: 'free', policyVersion: 2,
+    notificationsEnabled: false, marketingEnabled: true, marketingConsentVersion: 1, marketingConsentAt: now } };
+  await call('/register', free);
+  await call('/register', { ...free, body: { ...free.body, marketingEnabled: false, revision: now + 1 } });
+  assert.ok((await call('/status')).devices.some(x => x.enabled === 0));
 });
 
 test('stale registrations, legacy opt-out and source failure fail closed', async t => {

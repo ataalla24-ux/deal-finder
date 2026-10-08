@@ -40,15 +40,34 @@ export function eligiblePushDeals(feed, state, now = Date.now()) {
   });
 }
 
-export function pickDailyPush(feed, state, recentIds, now = Date.now()) {
+export function pickDailyPush(feed, state, recentIds, now = Date.now(), featured = state?.dailyDeal) {
   const candidates = eligiblePushDeals(feed, state, now).filter(d => !recentIds.includes(d.id));
-  const selected = state?.dailyDeal?.date === viennaClock(now).day
-    ? candidates.find(d => d.id === state.dailyDeal.dealId) : null;
-  return selected || selectNativeDailyDeal(candidates, new Date(now));
+  // Match the app's published daily selection. Never rename another deal as the daily deal.
+  return featured?.date === viennaClock(now).day
+    ? candidates.find(d => d.id === featured.dealId) || null : null;
 }
 
-export function dailyMessage(deal, language = 'de') {
-  const title = language === 'en' ? 'FreeFinder top deal' : 'FreeFinder Top-Deal';
+export function pickMarketingPush(feed, state, recentIds, now = Date.now()) {
+  return selectNativeDailyDeal(eligiblePushDeals(feed, state, now).filter(d => !recentIds.includes(d.id)), new Date(now));
+}
+
+export function marketingDay(now = Date.now()) {
+  const weekday = new Date(`${viennaClock(now).day}T12:00:00Z`).getUTCDay();
+  return [1, 3, 5].includes(weekday);
+}
+
+export function pushAudience(device, env, now = Date.now()) {
+  if (['pro', 'plus'].includes(device.plan)) {
+    return device.dailyEnabled !== false && device.enabled && env.DAILY_PUSH_ENABLED === '1' ? 'daily_deal' : null;
+  }
+  return device.plan === 'free' && device.enabled && device.marketingEnabled === true &&
+    device.consentVersion === 1 && env.MARKETING_PUSH_ENABLED === '1' && marketingDay(now) ? 'marketing_deal' : null;
+}
+
+export function dailyMessage(deal, language = 'de', type = 'daily_deal') {
+  const title = type === 'marketing_deal'
+    ? (language === 'en' ? 'FreeFinder deal tip' : 'FreeFinder Deal-Tipp')
+    : (language === 'en' ? 'FreeFinder deal of the day' : 'FreeFinder Deal des Tages');
   const text = String(deal.title).trim();
   const brand = String(deal.brand || '').trim();
   const body = `${language === 'en' ? 'Today' : 'Heute'}: ${text}${brand && !text.toLowerCase().includes(brand.toLowerCase()) ? ` · ${brand}` : ''}`;
@@ -64,10 +83,16 @@ export function normalizePushRegistration(body, provider, now = Date.now()) {
   const revision = Number(body.revision);
   if (!Number.isFinite(revision) || Math.abs(revision - now) > 10 * 60000) throw new Error('Invalid registration timestamp');
   const environments = provider === 'apns' ? ['sandbox', 'production'] : ['development', 'production'];
-  const enabled = body.policyVersion === 1 && body.notificationsEnabled === true &&
-    ['pro', 'plus'].includes(body.subscriptionPlan) &&
-    environments.includes(body.pushEnvironment);
+  const compatible = [1, 2].includes(body.policyVersion) && environments.includes(body.pushEnvironment);
+  const dailyEnabled = compatible && body.notificationsEnabled === true && ['pro', 'plus'].includes(body.subscriptionPlan);
+  // Missing fields, legacy registrations and OS permission alone never count as marketing consent.
+  const marketingEnabled = body.policyVersion === 2 && compatible && body.marketingEnabled === true &&
+    body.marketingConsentVersion === 1 && Number.isFinite(body.marketingConsentAt) &&
+    body.marketingConsentAt > 0 && body.marketingConsentAt <= now + 300000;
+  const enabled = dailyEnabled || (body.subscriptionPlan === 'free' && marketingEnabled);
   return { provider, installation, token: provider === 'apns' ? token.toLowerCase() : token,
-    plan: body.subscriptionPlan, enabled, revision, language: body.language === 'en' ? 'en' : 'de',
+    plan: body.subscriptionPlan, enabled, dailyEnabled, marketingEnabled,
+    consentVersion: marketingEnabled ? 1 : 0, consentAt: marketingEnabled ? body.marketingConsentAt : null,
+    revision, language: body.language === 'en' ? 'en' : 'de',
     environment: body.pushEnvironment, updated: now };
 }

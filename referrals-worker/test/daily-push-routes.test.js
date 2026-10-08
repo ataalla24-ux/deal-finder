@@ -11,9 +11,9 @@ function environment() {
     } }) } };
 }
 test('register routes preserve metadata and forward only to the private registry', async () => {
-  for (const provider of ['apns', 'fcm']) {
+  for (const provider of ['apns', 'fcm']) for (const policyVersion of [1, 2]) {
     const env = environment();
-    const body = { token: 'test-token', policyVersion: 1, notificationsEnabled: true, language: 'en', subscriptionPlan: 'pro', revision: Date.now() };
+    const body = { token: 'test-token', policyVersion, notificationsEnabled: true, language: 'en', subscriptionPlan: 'pro', revision: Date.now() };
     const response = await worker.fetch(new Request(`https://test/api/push/${provider}/register`, {
       method: 'POST', body: JSON.stringify(body),
     }), env);

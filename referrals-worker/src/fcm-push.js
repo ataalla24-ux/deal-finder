@@ -28,7 +28,7 @@ export async function sendFcmPush(env, device, campaign, message) {
     method: 'POST', headers: { authorization: `Bearer ${cachedAccess.token}`, 'content-type': 'application/json' },
     // Data-only: the client checks permission, entitlement, expiry and duplicate receipt before displaying.
     body: JSON.stringify({ message: { token: device.token, data: { ...message,
-      type: 'daily_deal', dealId: campaign.deal.id, day: campaign.day, expiresAt: String(campaign.expires) },
+      type: campaign.type || 'daily_deal', dealId: campaign.deal.id, day: campaign.day, expiresAt: String(campaign.expires) },
       android: { priority: 'HIGH', ttl: `${ttl}s`, collapse_key: `daily-${campaign.day}` } } }), signal: AbortSignal.timeout(10000),
   });
   const result = await response.json().catch(() => ({}));

@@ -1,21 +1,56 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { dailyMessage, eligiblePushDeals, normalizePushRegistration, pickDailyPush, viennaClock, PUSH_APP_ID } from '../src/daily-push-policy.js';
+import { dailyMessage, eligiblePushDeals, normalizePushRegistration, pickDailyPush, pickMarketingPush, pushAudience, marketingDay, viennaClock, PUSH_APP_ID } from '../src/daily-push-policy.js';
 
 const now = Date.parse('2026-10-08T07:00:00Z');
 const deal = { id: 'verified-pizza', title: '1+1 Pizza gratis', brand: 'Testrestaurant', category: 'essen',
   dateConfidence: 'high', expiryKind: 'range', validFrom: '2026-10-08', validUntil: '2026-10-09',
   pipelineLifecycle: { manualDecision: 'approved' } };
 const feed = { lastUpdated: new Date(now).toISOString(), deals: [deal] };
-const state = { ok: true, overrides: [] };
+const state = { ok: true, overrides: [], dailyDeal: { date: '2026-10-08', dealId: deal.id } };
 test('Vienna delivery hour follows DST and local date, not UTC or device timezone', () => {
   for (const input of ['2026-07-08T07:00:00Z', '2026-12-08T08:00:00Z', '2026-03-29T07:00:00Z', '2026-10-25T08:00:00Z']) assert.equal(viennaClock(Date.parse(input)).hour, 9);
   assert.equal(viennaClock(Date.parse('2026-10-07T23:00:00Z')).day, '2026-10-08');
 });
 test('verified current deal is selected with UTF-8-safe localized message', () => {
   assert.equal(pickDailyPush(feed, state, [], now).id, deal.id);
-  assert.deepEqual(dailyMessage(deal), { title: 'FreeFinder Top-Deal', body: 'Heute: 1+1 Pizza gratis · Testrestaurant' });
+  assert.deepEqual(dailyMessage(deal), { title: 'FreeFinder Deal des Tages', body: 'Heute: 1+1 Pizza gratis · Testrestaurant' });
   assert.match(dailyMessage(deal, 'en').body, /^Today:/);
+});
+
+test('Pro uses the published daily feature and never substitutes an unrelated deal', () => {
+  const other = { ...deal, id: 'other', title: 'Gratis Kebap' };
+  const two = { ...feed, deals: [other, deal] };
+  assert.equal(pickDailyPush(two, state, [], now).id, deal.id);
+  for (const featured of [null, { date: '2026-10-07', dealId: deal.id }, { date: '2026-10-08', dealId: 'missing' }]) {
+    assert.equal(pickDailyPush(two, state, [], now, featured), null);
+  }
+  assert.equal(pickDailyPush(two, state, [deal.id], now), null);
+  assert.ok(pickMarketingPush(two, state, [], now));
+});
+
+test('Free requires explicit versioned marketing consent, independent of Pro and OS permission', () => {
+  const body = { packageName: PUSH_APP_ID, token: 'test-fcm-token-'.repeat(4), appDeviceId: 'test-marketing-installation',
+    subscriptionPlan: 'free', policyVersion: 2, notificationsEnabled: false, marketingEnabled: true,
+    marketingConsentVersion: 1, marketingConsentAt: now - 1000, pushEnvironment: 'production', revision: now };
+  const optedIn = normalizePushRegistration(body, 'fcm', now);
+  assert.equal(optedIn.enabled, true);
+  assert.equal(optedIn.dailyEnabled, false);
+  for (const edit of [{ policyVersion: 1 }, { marketingEnabled: false }, { marketingConsentVersion: 0 },
+    { marketingConsentAt: 0 }, { marketingConsentAt: now + 600000 }, { marketingConsentAt: undefined }]) {
+    assert.equal(normalizePushRegistration({ ...body, ...edit }, 'fcm', now).enabled, false);
+  }
+  const env = { DAILY_PUSH_ENABLED: '1', MARKETING_PUSH_ENABLED: '1' };
+  const friday = now + 86400000;
+  assert.equal(pushAudience(optedIn, env, now), null);
+  assert.equal(pushAudience(optedIn, env, friday), 'marketing_deal');
+  assert.equal(pushAudience(optedIn, { ...env, MARKETING_PUSH_ENABLED: '0' }, friday), null);
+  const pro = normalizePushRegistration({ ...body, subscriptionPlan: 'pro', notificationsEnabled: true }, 'fcm', now);
+  assert.equal(pushAudience(pro, env, friday), 'daily_deal');
+  assert.equal(pushAudience({ ...pro, dailyEnabled: false }, env, friday), null, 'Pro is never silently moved into marketing');
+  for (let offset = 0; offset < 30; offset++) {
+    assert.equal(Array.from({ length: 7 }, (_, n) => marketingDay(now + (offset + n) * 86400000)).filter(Boolean).length, 3);
+  }
 });
 test('expired, future, unknown, malformed and timed offers fail closed', () => {
   for (const edit of [{ validUntil: '2026-10-07' }, { validFrom: '2026-10-09' }, { validUntil: '2026-99-99' },

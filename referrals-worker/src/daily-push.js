@@ -1,4 +1,4 @@
-import { dailyMessage, eligiblePushDeals, normalizePushRegistration, pickDailyPush, viennaClock } from './daily-push-policy.js';
+import { dailyMessage, eligiblePushDeals, normalizePushRegistration, pickDailyPush, pickMarketingPush, pushAudience, viennaClock } from './daily-push-policy.js';
 import { sendFcmPush } from './fcm-push.js';
 
 const DAY = 86400000;
@@ -29,10 +29,11 @@ export class DailyPushService {
     };
     const feed = await get(`https://freefinder.at/deals.json?push=${Math.floor(this.now() / 60000)}`);
     const state = await get('https://freefinder-referrals.freefinder-stefan.workers.dev/api/deals/state');
-    return { feed, state };
+    const featured = await get(`https://freefinder.at/deal-of-the-day.json?push=${Math.floor(this.now() / 60000)}`);
+    return { feed, state, featured };
   }
   async send(device, campaign) {
-    const message = dailyMessage(campaign.deal, device.language);
+    const message = dailyMessage(campaign.deal, device.language, campaign.type);
     if (device.provider === 'fcm') return sendFcmPush(this.env, device, campaign, message);
     return this.sendApple(device, campaign, message);
   }
@@ -62,25 +63,29 @@ export class DailyPushService {
       return json({ ok: true, registered: path === '/register', transportReady: this.ready(provider) });
     }
     if (path === '/status') {
-      return json({ ok: true, enabled: this.env.DAILY_PUSH_ENABLED === '1', timeZone: 'Europe/Vienna', hour: 9,
+      return json({ ok: true, enabled: this.env.DAILY_PUSH_ENABLED === '1', marketingEnabled: this.env.MARKETING_PUSH_ENABLED === '1',
+        marketingDays: ['Monday', 'Wednesday', 'Friday'], timeZone: 'Europe/Vienna', hour: 9,
         apnsReady: this.ready('apns'), fcmReady: this.ready('fcm'),
         devices: this.rows('SELECT provider, enabled, COUNT(*) AS count FROM devices GROUP BY provider, enabled'),
         deliveries: this.rows('SELECT day, state, status, COUNT(*) AS count FROM deliveries GROUP BY day, state, status ORDER BY day DESC LIMIT 40') });
     }
     if (path === '/preview') {
       const source = await this.loadSource();
-      const deal = pickDailyPush(source.feed, source.state, [], this.now());
+      const deal = pickDailyPush(source.feed, source.state, [], this.now(), source.featured);
+      const marketing = pickMarketingPush(source.feed, source.state, [], this.now());
       return json({ ok: true, eligible: eligiblePushDeals(source.feed, source.state, this.now()).length,
-        dealId: deal?.id || null, message: deal ? dailyMessage(deal) : null, sends: 0 });
+        dealId: deal?.id || null, message: deal ? dailyMessage(deal) : null,
+        marketingDealId: marketing?.id || null, sends: 0 });
     }
     if (path === '/tick') {
-      if (this.env.DAILY_PUSH_ENABLED === '1' && viennaClock(this.now()).hour === 9) await this.ctx.storage.setAlarm(this.now() + 1);
+      if (this.enabled() && viennaClock(this.now()).hour === 9) await this.ctx.storage.setAlarm(this.now() + 1);
       return json({ ok: true });
     }
     return new Response('Not found', { status: 404 });
   }
+  enabled() { return this.env.DAILY_PUSH_ENABLED === '1' || this.env.MARKETING_PUSH_ENABLED === '1'; }
   async alarm() {
-    if (this.env.DAILY_PUSH_ENABLED !== '1' || viennaClock(this.now()).hour !== 9) return;
+    if (!this.enabled() || viennaClock(this.now()).hour !== 9) return;
     try { await this.deliverBatch(); }
     catch {
       // A failed source fetch never turns into a notification using stale cached content.
@@ -98,27 +103,41 @@ export class DailyPushService {
       AND NOT EXISTS (SELECT 1 FROM deliveries x WHERE x.device = d.id AND x.day = ?)
       ORDER BY id LIMIT 20`, now - 30 * DAY, day);
     if (!devices.length) return;
-    const { feed, state } = await this.loadSource();
-    let campaign = this.rows('SELECT record FROM campaigns WHERE day = ?', day)[0];
-    campaign = campaign ? JSON.parse(campaign.record) : null;
-    if (!campaign) {
-      const recent = this.rows('SELECT record FROM campaigns WHERE created > ?', now - 7 * DAY).map(x => JSON.parse(x.record).deal.id);
-      const deal = pickDailyPush(feed, state, recent, now);
-      if (!deal) return;
-      // Stop delivery by 10:00 Vienna, even when a device reconnects later.
-      const expires = now + (60 - new Date(now).getUTCMinutes()) * 60000 - new Date(now).getUTCSeconds() * 1000;
-      campaign = { day, deal, expires };
-      this.sql.exec('INSERT OR IGNORE INTO campaigns VALUES (?, ?, ?)', day, now, JSON.stringify(campaign));
-      campaign = JSON.parse(this.rows('SELECT record FROM campaigns WHERE day = ?', day)[0].record);
-    }
-    const current = eligiblePushDeals(feed, state, now).find(d => d.id === campaign.deal.id);
-    if (!current || campaign.expires <= now) return;
-    campaign.deal = current;
+    const { feed, state, featured } = await this.loadSource();
+    const eligible = eligiblePushDeals(feed, state, now);
     for (const row of devices) {
-      if (viennaClock(this.now()).hour !== 9 || this.now() >= campaign.expires) break;
+      if (viennaClock(this.now()).hour !== 9) break;
       const latest = this.rows('SELECT * FROM devices WHERE id = ?', row.id)[0];
       if (!latest?.enabled) continue;
       const device = JSON.parse(latest.record);
+      const type = pushAudience(device, this.env, this.now());
+      if (!type) {
+        this.sql.exec('INSERT OR IGNORE INTO deliveries VALUES (?, ?, ?, ?)', day, row.id, 'not_scheduled', 0);
+        continue;
+      }
+      const campaignKey = `${day}:${type}`;
+      let campaign = this.rows('SELECT record FROM campaigns WHERE day = ?', campaignKey)[0];
+      campaign = campaign ? JSON.parse(campaign.record) : null;
+      if (!campaign) {
+        const recent = this.rows('SELECT record FROM campaigns WHERE created > ?', now - 7 * DAY)
+          .map(x => JSON.parse(x.record)).filter(x => (x.type || 'daily_deal') === type).map(x => x.deal.id);
+        const deal = type === 'daily_deal' ? pickDailyPush(feed, state, recent, now, featured) : pickMarketingPush(feed, state, recent, now);
+        if (!deal) {
+          this.sql.exec('INSERT OR IGNORE INTO deliveries VALUES (?, ?, ?, ?)', day, row.id, 'no_current_deal', 0);
+          continue;
+        }
+        const expires = now + (60 - new Date(now).getUTCMinutes()) * 60000 - new Date(now).getUTCSeconds() * 1000;
+        campaign = { day, type, deal, expires };
+        this.sql.exec('INSERT OR IGNORE INTO campaigns VALUES (?, ?, ?)', campaignKey, now, JSON.stringify(campaign));
+        campaign = JSON.parse(this.rows('SELECT record FROM campaigns WHERE day = ?', campaignKey)[0].record);
+      }
+      const current = eligible.find(d => d.id === campaign.deal.id);
+      if (!current || campaign.expires <= this.now() ||
+          (type === 'daily_deal' && (featured?.date !== day || featured?.dealId !== current.id))) {
+        this.sql.exec('INSERT OR IGNORE INTO deliveries VALUES (?, ?, ?, ?)', day, row.id, 'stale_selection', 0);
+        continue;
+      }
+      campaign.deal = current;
       if (!this.ready(device.provider) || device.environment !== 'production') {
         this.sql.exec('INSERT OR IGNORE INTO deliveries VALUES (?, ?, ?, ?)', day, row.id, 'not_ready', 0);
         continue;

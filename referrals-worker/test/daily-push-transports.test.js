@@ -25,6 +25,8 @@ test('APNs uses the device environment, collapse key and real expiration', async
   await sender.sendApple({ ...device, environment: 'sandbox' }, push, { title: 'Test', body: 'Test' });
   assert.match(calls[1].url, /^https:\/\/api.sandbox.push.apple.com\//);
   assert.equal(calls[0].init.headers.authorization, calls[1].init.headers.authorization, 'reuse provider JWT');
+  await sender.sendApple(device, { ...push, type: 'marketing_deal' }, { title: 'Deal tip', body: 'Pizza' });
+  assert.equal(JSON.parse(calls[2].init.body).type, 'marketing_deal');
 });
 test('FCM sends data-only, scoped OAuth, bounded TTL and handles unregistered tokens', async t => {
   const key = await pem({ name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' });
@@ -43,4 +45,6 @@ test('FCM sends data-only, scoped OAuth, bounded TTL and handles unregistered to
   assert.equal(message.notification, undefined);
   assert.equal(message.data.type, 'daily_deal'); assert.equal(message.data.dealId, 'verified-pizza');
   assert.ok(parseInt(message.android.ttl) <= 300);
+  await sendFcmPush(env, { token: 'test-fcm-token' }, { ...campaign(), type: 'marketing_deal' }, { title: 'Deal tip', body: 'Pizza' });
+  assert.equal(JSON.parse(calls[2].init.body).message.data.type, 'marketing_deal');
 });

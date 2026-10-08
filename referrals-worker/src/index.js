@@ -4191,7 +4191,7 @@ function redirectReferralToWebsite(code, requestUrl) {
 export class DailyDealPush extends DailyPushService {
   async sendApple(device, campaign, message) {
     return sendApnsPush(this.env, { ...message, token: device.token, environment: device.environment,
-      dealId: campaign.deal.id, type: 'daily_deal', day: campaign.day, expiresAt: campaign.expires,
+      dealId: campaign.deal.id, type: campaign.type || 'daily_deal', day: campaign.day, expiresAt: campaign.expires,
       expiration: Math.floor(campaign.expires / 1000), collapseId: `daily-${campaign.day}` });
   }
 }
@@ -4202,7 +4202,7 @@ function dailyPushStub(env) {
 
 export default {
   async scheduled(_controller, env) {
-    if (env.DAILY_DEAL_PUSH && env.DAILY_PUSH_ENABLED === '1') {
+    if (env.DAILY_DEAL_PUSH && (env.DAILY_PUSH_ENABLED === '1' || env.MARKETING_PUSH_ENABLED === '1')) {
       try { await dailyPushStub(env).fetch('https://push.internal/tick', { method: 'POST' }); }
       catch { console.warn('daily_push_schedule_failed'); }
     }
@@ -4453,7 +4453,7 @@ export default {
         if (provider === 'apns') await env.REFERRAL_KV.delete(apnsTokenKey(token));
         return json({ ok: true, registered: false });
       }
-      if (body.policyVersion === 1 || action === 'unregister') {
+      if ([1, 2].includes(body.policyVersion) || action === 'unregister') {
         if (!env.DAILY_DEAL_PUSH) return invalid('Push registration temporarily unavailable', 503);
         const response = await dailyPushStub(env).fetch(`https://push.internal/${action}`, {
           method: 'POST', body: JSON.stringify({ provider, body }),
