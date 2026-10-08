@@ -1,6 +1,6 @@
 const PRODUCTS = new Set([
-  'com.stefanataalla.freefinderwien.premium.monthly',
-  'com.stefanataalla.freefinderwien.premium.yearly',
+  'freefinder.pro.monthly',
+  'freefinder.pro.yearly',
 ]);
 const headers = { 'content-type': 'application/json', 'cache-control': 'no-store' };
 const reply = (body, status = 200) => new Response(JSON.stringify(body), { status, headers });

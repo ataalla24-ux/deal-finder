@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { trialStatus, handleTrialStatus } from '../src/subscription-trial.js';
 import worker from '../src/index.js';
-const id = 'com.stefanataalla.freefinderwien.premium.monthly';
+const id = 'freefinder.pro.monthly';
 const now = Date.parse('2026-10-08T10:00:00Z');
 const item = { productId: id, expiryTime: '2026-11-08T10:00:00Z', autoRenewingPlan: { autoRenewEnabled: true }, offerPhase: { freeTrial: {} } };
 const purchase = lineItem => ({ subscriptionState: 'SUBSCRIPTION_STATE_ACTIVE', lineItems: [lineItem] });
@@ -19,6 +19,15 @@ test('returns only verified trial expiry, not account data or guessed dates', ()
     assert.equal(trialStatus({ ...purchase(item), subscriptionState: 'SUBSCRIPTION_STATE_' + state }, id, now).freeTrial, false);
   }
   assert.equal(trialStatus({ ...purchase(item), lineItems: [item, item] }, id, now).freeTrial, false);
+});
+
+test('accepts both published Android products and rejects Apple-only identifiers', () => {
+  for (const productId of ['freefinder.pro.monthly', 'freefinder.pro.yearly']) {
+    assert.equal(trialStatus(purchase({ ...item, productId }), productId, now).freeTrial, true);
+  }
+  for (const productId of ['com.stefanataalla.freefinderwien.premium.monthly', 'com.stefanataalla.freefinderwien.premium.yearly']) {
+    assert.equal(trialStatus(purchase({ ...item, productId }), productId, now).freeTrial, false);
+  }
 });
 test('endpoint bounds payload, handles Play failures and reveals only trial status', async t => {
   const request = body => new Request('https://example.test/api/subscriptions/trial-status', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
