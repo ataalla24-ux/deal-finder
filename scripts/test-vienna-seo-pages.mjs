@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -22,11 +21,12 @@ for (const slug of slugs) {
   assert.equal($('meta[property="og:url"]').attr('content'), canonical);
   const entry = sitemap('url').filter((_, element) => sitemap(element).find('loc').text() === canonical);
   assert.equal(entry.length, 1, `${slug}: one sitemap entry`);
-  assert.equal(entry.find('lastmod').text(), '2026-10-07');
+  const modified = slug === 'guenstig-essen-wien' ? '2026-10-07' : '2026-10-08';
+  assert.equal(entry.find('lastmod').text(), modified);
   const graph = JSON.parse($('script[type="application/ld+json"]').text())['@graph'];
   const article = graph.find(item => item['@type'] === 'Article');
   assert.equal(article.mainEntityOfPage, canonical);
-  assert.equal(article.dateModified, '2026-10-07');
+  assert.equal(article.dateModified, modified);
   const body = normalize($('.article-body').text());
   for (const question of graph.find(item => item['@type'] === 'FAQPage').mainEntity) {
     assert.ok(body.includes(normalize(question.name)), `${slug}: visible FAQ question`);
@@ -68,7 +68,8 @@ for (const href of ['lugner-city-50-prozent-gastronomie-5-oktober-2026.html', 'i
 }
 
 // Targeted regeneration must not touch unrelated articles or the shared feed.
-const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'freefinder-vienna-seo-test-'));
+fs.mkdirSync(path.join(root, 'tmp'), { recursive: true });
+const fixture = fs.mkdtempSync(path.join(root, 'tmp', 'freefinder-vienna-seo-test-'));
 try {
   for (const filename of ['scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'reviews/deal-guides.json', 'docs/sitemap.xml']) {
     const destination = path.join(fixture, filename);
@@ -78,7 +79,7 @@ try {
   fs.symlinkSync(path.join(root, 'node_modules'), path.join(fixture, 'node_modules'), 'dir');
   fs.mkdirSync(path.join(fixture, 'docs/blog'));
   execFileSync(process.execPath, [path.join(fixture, 'scripts/generate-topic-guides.mjs'), ...slugs.slice(0, 2)], {
-    env: { ...process.env, SEO_NOW: '2026-10-07T10:00:00+02:00' },
+    env: { ...process.env, SEO_NOW: '2026-10-08T10:00:00+02:00' },
   });
   assert.deepEqual(fs.readdirSync(path.join(fixture, 'docs/blog')).sort(), slugs.slice(0, 2).map(slug => `${slug}.html`).sort());
   for (const slug of slugs.slice(0, 2)) {
