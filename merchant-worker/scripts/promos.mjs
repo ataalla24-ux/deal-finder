@@ -6,13 +6,15 @@ const { values, positionals } = parseArgs({ allowPositionals: true, options: {
   id: { type: 'string' }, endpoint: { type: 'string', default: 'https://freefinder-merchant-backend.freefinder-stefan.workers.dev' },
   shared: { type: 'string' },
   package: { type: 'string', default: 'starter' },
+  reason: { type: 'string' },
   help: { type: 'boolean', short: 'h' },
 } });
 const command = positionals[0];
-if (values.help || !['create', 'list', 'revoke'].includes(command)) {
+if (values.help || !['create', 'list', 'revoke', 'hide-campaign'].includes(command)) {
   console.log('npm run promos -- create --restaurant "Restaurantname" [--label "Notiz"] [--days 30]\n'
     + 'npm run promos -- create --shared STARTERGRATIS [--label "Notiz"]\n'
     + 'npm run promos -- list\nnpm run promos -- revoke --id CODE_ID\n'
+    + 'npm run promos -- hide-campaign --id CAMPAIGN_ID --reason "Grund"\n'
     + '--package starter|spotlight|city: 1, 3 oder 8 Tage Anzeige, einmalig 0 EUR (Standard: starter).\n'
     + '--days: Gueltigkeit individueller Codes, nicht Anzeigenlaufzeit. Gemeinsame Codes: ohne Ablauf, einmal je Restaurant und Code.\n'
     + 'Admin-Zugang: MERCHANT_PROMO_ADMIN_SECRET oder macOS-Schluesselbund (freefinder-merchant-promo-admin).');
@@ -35,6 +37,9 @@ try {
   } else if (command === 'revoke') {
     if (!values.id) throw new Error('--id ist erforderlich.');
     path = '/revoke'; payload = { id: values.id };
+  } else if (command === 'hide-campaign') {
+    if (!values.id || !values.reason?.trim()) throw new Error('--id und --reason sind erforderlich.');
+    path = '/campaigns/hide'; payload = { id: values.id, reason: values.reason };
   }
   const response = await fetch(`${endpoint.origin}/api/merchant/promos/admin${path}`, {
     method: command === 'list' ? 'GET' : 'POST',

@@ -120,13 +120,31 @@ export class MerchantPromoLedger {
         const redemptions = await this.storage.list({ prefix: 'redemption:' });
         const now = Date.now();
         return json({ ok: true, campaigns: [...records.values(), ...redemptions.values()]
-          .map(record => record.campaign).filter(campaign => campaign && campaign.startsAt <= now && campaign.endsAt > now) });
+          .map(record => record.campaign).filter(campaign => campaign && !campaign.hiddenAt && campaign.startsAt <= now && campaign.endsAt > now) });
       }
       if (path === '/codes' && request.method === 'GET') {
         const records = await this.storage.list({ prefix: 'code:' });
         return json({ ok: true, codes: Array.from(records.values()).map(publicCode).sort((a, b) => b.createdAt - a.createdAt) });
       }
       const payload = await body(request);
+      if (path === '/campaigns/hide') {
+        const id = text(payload.id);
+        if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(id)) throw new PromoError('Ungültige Anzeigen-ID.');
+        const reason = field(payload.reason, 'Grund', 200);
+        // Keep the receipt and one-use claim; hiding an ad must not enable reuse.
+        return await this.storage.transaction(async txn => {
+          const records = await txn.list({ prefix: 'code:' });
+          const redemptions = await txn.list({ prefix: 'redemption:' });
+          const match = [...records, ...redemptions].find(([, record]) => record.campaign?.id === id);
+          if (!match) throw new PromoError('Anzeige nicht gefunden.', 404);
+          const [key, record] = match;
+          if (!record.campaign.hiddenAt) {
+            record.campaign = { ...record.campaign, hiddenAt: Date.now(), hiddenReason: reason };
+            await txn.put(key, record);
+          }
+          return json({ ok: true, campaign: record.campaign });
+        });
+      }
       if (path === '/codes') {
         const pack = packageFor(payload.packageId);
         const shared = payload.kind === 'shared';
@@ -227,7 +245,7 @@ export async function handlePromoRequest(request, env) {
   const path = url.pathname.slice(PREFIX.length);
   const admin = path.startsWith('/admin/');
   const allowedMethod = path === '/admin/codes' ? ['GET', 'POST'] : ['POST'];
-  if (!['/check', '/redeem', '/admin/codes', '/admin/revoke'].includes(path)) return json({ ok: false, error: 'Not found' }, 404);
+  if (!['/check', '/redeem', '/admin/codes', '/admin/revoke', '/admin/campaigns/hide'].includes(path)) return json({ ok: false, error: 'Not found' }, 404);
   if (!allowedMethod.includes(request.method)) return json({ ok: false, error: 'Method not allowed' }, 405);
   if (admin) {
     const secret = text(env.MERCHANT_PROMO_ADMIN_SECRET);

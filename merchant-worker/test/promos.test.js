@@ -164,6 +164,50 @@ test('promo ledger integration with real SQLite Durable Object', async t => {
     for (let i = 0; i < 31; i++) statuses.push((await call('/check', { code: 'INVALID' }, { 'cf-connecting-ip': '203.0.113.7' })).status);
     assert.equal(statuses[29], 404); assert.equal(statuses[30], 429);
   });
+  await t.test('hiding a promo ad requires admin authorization and an exact existing ID', async () => {
+    const payload = { id: crypto.randomUUID(), reason: 'Requested test cleanup' };
+    assert.equal((await call('/admin/campaigns/hide', payload)).status, 401);
+    assert.equal((await call('/admin/campaigns/hide', payload, { authorization: 'Bearer wrong' })).status, 401);
+    assert.equal((await call('/admin/campaigns/hide', undefined, admin)).status, 405);
+    assert.equal((await call('/campaigns/hide', payload)).status, 404);
+    assert.equal((await call('/admin/campaigns/hide', { ...payload, id: 'campaign:*' }, admin)).status, 400);
+    assert.equal((await call('/admin/campaigns/hide', { ...payload, reason: '' }, admin)).status, 400);
+    const before = await campaigns();
+    assert.equal((await call('/admin/campaigns/hide', payload, admin)).status, 404);
+    assert.deepEqual(await campaigns(), before);
+  });
+  await t.test('hiding individual and shared ads preserves receipts, claims, other ads and code availability', async () => {
+    for (const kind of ['individual', 'shared']) {
+      const code = await create({ kind, ...(kind === 'shared' ? { code: 'HIDESHAREDTEST' } : {}) });
+      const payload = { ...draft, code: code.code, requestId: crypto.randomUUID() };
+      const created = await call('/redeem', payload);
+      assert.equal(created.status, 201);
+      const campaign = created.body.campaign;
+      const before = await campaigns();
+      const beforeCodes = (await call('/admin/codes', undefined, admin)).body;
+      const hidden = await call('/admin/campaigns/hide', { id: campaign.id, reason: 'Requested test cleanup' }, admin);
+      assert.equal(hidden.status, 200);
+      assert.ok(hidden.body.campaign.hiddenAt > 0);
+      assert.equal(hidden.body.campaign.hiddenReason, 'Requested test cleanup');
+      const { hiddenAt, hiddenReason, ...receipt } = hidden.body.campaign;
+      assert.deepEqual(receipt, campaign);
+      assert.deepEqual(await campaigns(), before.filter(item => item.id !== campaign.id));
+      assert.deepEqual((await call('/admin/codes', undefined, admin)).body, beforeCodes);
+      const repeated = await call('/admin/campaigns/hide', { id: campaign.id, reason: 'Retry' }, admin);
+      assert.deepEqual(repeated.body, hidden.body);
+      const retry = await call('/redeem', payload);
+      assert.equal(retry.status, 200);
+      assert.deepEqual(retry.body.campaign, hidden.body.campaign);
+      assert.equal((await call('/redeem', { ...payload, requestId: crypto.randomUUID() })).status, 409);
+      assert.ok(!(await campaigns()).some(item => item.id === campaign.id));
+      assert.equal((await call('/check', { code: code.code })).status, kind === 'shared' ? 200 : 409);
+      if (kind === 'shared') {
+        const other = await call('/redeem', { ...payload, restaurantName: 'Unrelated Restaurant', requestId: crypto.randomUUID() });
+        assert.equal(other.status, 201);
+        assert.ok((await campaigns()).some(item => item.id === other.body.campaign.id));
+      }
+    }
+  });
   await t.test('shared code is evergreen, non-consuming checks and independent restaurant claims', async () => {
     const code = await create({ kind: 'shared', code: 'STARTER-GRATIS' });
     assert.equal(code.expiresAt, null);
