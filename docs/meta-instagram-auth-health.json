@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-08T14:54:20.733Z",
+  "generatedAt": "2026-10-08T15:37:32.484Z",
   "source": "meta-instagram-auth-health",
   "graphVersion": "v26.0",
-  "status": "ok",
+  "status": "meta-api-error",
   "configured": {
     "instagramGraph": true,
     "instagramUserId": true,
@@ -12,7 +12,7 @@
     {
       "name": "token-expiry",
       "status": "expiring-soon",
-      "detail": "Configured token expiry is 2026-10-21T00:00:00.000Z (12.4 days remaining)."
+      "detail": "Configured token expiry is 2026-10-21T00:00:00.000Z (12.3 days remaining)."
     },
     {
       "name": "token-basic",
@@ -21,8 +21,9 @@
     },
     {
       "name": "token-permissions",
-      "status": "ok",
-      "detail": "5 granted permission(s): pages_show_list, instagram_basic, instagram_manage_insights, pages_read_engagement, public_profile."
+      "status": "meta-api-error",
+      "detail": "Instagram shared quota paused: Meta usage headroom",
+      "code": "SCAN_BUDGET"
     },
     {
       "name": "instagram-user-id",
@@ -31,8 +32,9 @@
     },
     {
       "name": "own-media",
-      "status": "ok",
-      "detail": "Read 3 recent media row(s); timestamp/permalink fields are available."
+      "status": "meta-api-error",
+      "detail": "Instagram shared quota paused: Instagram shared quota paused: Meta usage headroom",
+      "code": "SCAN_BUDGET"
     },
     {
       "name": "tagged-media",
@@ -41,8 +43,9 @@
     },
     {
       "name": "business-discovery",
-      "status": "ok",
-      "detail": "Business Discovery works for @ciosgrill; 1 media row(s) returned."
+      "status": "meta-api-error",
+      "detail": "Instagram shared quota paused: Instagram shared quota paused: Instagram shared quota paused: Meta usage headroom",
+      "code": "SCAN_BUDGET"
     },
     {
       "name": "hashtag-search",
@@ -50,17 +53,10 @@
       "detail": "Set META_INSTAGRAM_HEALTHCHECK_HASHTAG to test hashtag access; this counts toward Meta hashtag limits."
     }
   ],
-  "nextAction": "Renew INSTAGRAM_ACCESS_TOKEN before 2026-10-21T00:00:00.000Z.",
+  "nextAction": "Fix the Meta Graph token permissions before enabling scheduled discovery.",
   "tokenExpiry": {
     "expiresAt": "2026-10-21T00:00:00.000Z",
-    "daysRemaining": 12.4,
+    "daysRemaining": 12.3,
     "status": "expiring-soon"
-  },
-  "grantedPermissions": [
-    "pages_show_list",
-    "instagram_basic",
-    "instagram_manage_insights",
-    "pages_read_engagement",
-    "public_profile"
-  ]
+  }
 }
