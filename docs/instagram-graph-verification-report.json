@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-09T09:50:07.421Z",
+  "generatedAt": "2026-10-09T10:16:14.946Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -129,7 +129,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 37,
+      "deals": 36,
       "candidates": 4
     },
     "deals-pending-power.json": {
@@ -182,26 +182,37 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 125,
-  "exactMatches": 4,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "vevi.restaurant",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 5,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 53,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
-  "blockedEvidencePosts": 83,
-  "unmatchedCandidatePosts": 1,
-  "message": "4/5 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "vevi.restaurant",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 82,
+  "unmatchedCandidatePosts": 5,
+  "message": "0/5 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
