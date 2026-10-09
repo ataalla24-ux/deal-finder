@@ -71,7 +71,7 @@ for (const href of ['lugner-city-50-prozent-gastronomie-5-oktober-2026.html', 'i
 fs.mkdirSync(path.join(root, 'tmp'), { recursive: true });
 const fixture = fs.mkdtempSync(path.join(root, 'tmp', 'freefinder-vienna-seo-test-'));
 try {
-  for (const filename of ['scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'reviews/deal-guides.json', 'docs/sitemap.xml']) {
+  for (const filename of ['scripts/generate-topic-guides.mjs', 'scripts/polish-website.mjs', 'scripts/blog-visuals.mjs', 'reviews/deal-guides.json', 'docs/sitemap.xml']) {
     const destination = path.join(fixture, filename);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.copyFileSync(path.join(root, filename), destination);

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load } from 'cheerio';
+import { blogVisual, visualPicture, polishBlogVisuals } from './blog-visuals.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const compact = value => String(value).replace(/\s+/g, ' ').trim();
@@ -14,11 +15,17 @@ export function polishHtml(source, filename, now = Date.now()) {
   const publicPage = !/noindex/i.test($('meta[name="robots"]').attr('content') || '') || ['404.html', 'offline.html'].includes(filename);
   if (!publicPage) return html;
   html = html.replace(/https:\/\/freefinder\.at\/og-preview-stores\.png/g, 'https://freefinder.at/og-home-20261007.jpg');
+  html = polishBlogVisuals(html, filename);
   if (filename === 'blog/index.html') {
     const cards = [...html.matchAll(/<article\b[^>]*class="[^\"]*\bpost-card\b[^\"]*"[\s\S]*?<\/article>/g)];
     const updated = cards.map(match => {
       const card = load(match[0]);
       const href = card('a[href]').first().attr('href');
+      const visual = blogVisual((href || '').split('/').pop().replace(/\.html$/, ''), card('img').first().attr('src'));
+      if (visual) {
+        const image = card('img').first();
+        (image.parent().is('picture') ? image.parent() : image).replaceWith(visualPicture(visual));
+      }
       const expires = card('article').attr('data-deal-expires');
       const archived = card('article').attr('data-archive') === 'true' || Boolean(expires && Date.parse(expires) < now);
       const topics = [

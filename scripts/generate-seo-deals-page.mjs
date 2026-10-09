@@ -290,7 +290,7 @@ function renderPage(feed, deals, now) {
   <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="/consent.css?v=5">
   <link rel="stylesheet" href="/blog/blog.css">
-  <link rel="stylesheet" href="/deals.css?v=1">
+  <link rel="stylesheet" href="/deals.css?v=2">
   <script defer src="/deals.js?v=1"></script>
   <script defer src="/analytics-config.js"></script>
   <script defer src="/consent.js?v=7"></script>
@@ -300,7 +300,7 @@ function renderPage(feed, deals, now) {
   <!-- Generated from docs/deals.json by scripts/generate-seo-deals-page.mjs. -->
   <header class="site-header"><nav class="nav" aria-label="Hauptnavigation"><a class="brand" href="/"><img class="brand-mark" src="/icon-192.svg" alt="" width="38" height="38">FreeFinder</a><div class="nav-links"><a href="/angebote-wien-heute.html" aria-current="page">Deals</a><a href="/blog/">Blog</a><a class="nav-download" href="/#download">App laden</a></div></nav></header>
   <main>
-    <header class="deals-intro"><div class="deals-width"><p class="eyebrow">FreeFinder · Wien</p><h1>Deals in Wien.</h1><p>Gratis-Angebote, 1+1 und Rabatte für deinen Alltag.</p><div class="deals-updated">Stand der App-Daten: <time datetime="${escapeHtml(modified)}">${escapeHtml(formatDate(updated))}</time></div></div></header>
+    <header class="deals-intro"><div class="deals-width"><p class="eyebrow">FreeFinder · Wien</p><h1>Deals in Wien.</h1><p>Gratis-Angebote, 1+1 und Rabatte für deinen Alltag.</p><div class="deals-app-note"><div><strong>Hier eine Auswahl. Alle Deals in der App.</strong><p>Auf der Website zeigen wir ausgewählte Wien-Deals mit bekanntem Enddatum. Die vollständige Deal-Übersicht findest du in der kostenlosen FreeFinder App.</p></div><nav aria-label="Vollständige Deal-Übersicht in der App"><a href="https://apps.apple.com/app/id6758958213">App Store ${icon('arrow-up-right')}</a><a href="https://play.google.com/store/apps/details?id=com.stefanataalla.freefinderwien">Google Play ${icon('arrow-up-right')}</a></nav></div><div class="deals-updated">Stand der App-Daten: <time datetime="${escapeHtml(modified)}">${escapeHtml(formatDate(updated))}</time></div></div></header>
     <section class="deal-hub" aria-labelledby="dealHubTitle">
       <form class="deal-filters" role="search" aria-label="Angebote filtern" hidden>
         <div class="deal-filter-fields">
@@ -310,10 +310,10 @@ function renderPage(feed, deals, now) {
         </div>
         <div class="deal-filter-bottom"><div class="deal-type-filters" role="group" aria-label="Angebotsart">${filters}</div><button class="deal-reset" type="reset" title="Filter zurücksetzen" hidden>${icon('rotate-ccw')}<span>Zurücksetzen</span></button></div>
       </form>
-      <div class="deal-hub-head"><h2 id="dealHubTitle">Aktuelle Angebote <span id="dealCount" role="status" aria-live="polite" aria-atomic="true">${deals.length} ${deals.length === 1 ? 'Deal' : 'Deals'}</span></h2><p>Mit bekanntem Enddatum · Bedingungen beim Anbieter prüfen</p></div>
+      <div class="deal-hub-head"><h2 id="dealHubTitle">Unsere Web-Auswahl <span id="dealCount" role="status" aria-live="polite" aria-atomic="true">${deals.length} ${deals.length === 1 ? 'Deal' : 'Deals'}</span></h2><p>Mit bekanntem Enddatum · Bedingungen beim Anbieter prüfen</p></div>
       <div class="live-deal-grid" id="dealGrid">${cards}
       </div>
-      <div class="deal-empty" id="dealEmpty" hidden><h3>Kein passender Deal dabei.</h3><p>Für diese Auswahl gibt es gerade keine Treffer.</p><button type="button" data-reset-filters>Alle Angebote anzeigen</button></div>
+      <div class="deal-empty" id="dealEmpty" hidden><h3>Kein passender Deal dabei.</h3><p>In unserer Web-Auswahl gibt es dafür gerade keine Treffer. Weitere Deals findest du <a href="/#download">in der App</a>.</p><button type="button" data-reset-filters>Web-Auswahl anzeigen</button></div>
       <details class="deal-selection-note"><summary>Welche Angebote werden hier angezeigt?</summary><p>Eine Auswahl aus dem FreeFinder-App-Feed mit eingetragenem, noch nicht abgelaufenem Enddatum. Verfügbarkeit, teilnehmende Filialen und weitere Bedingungen können sich ändern. Prüfe die Originalquelle vor der Einlösung. Weitere Angebote ohne bekanntes Enddatum findest du in der App.</p></details>
     </section>
     <section class="deals-guides" aria-labelledby="dealsGuidesTitle"><div class="deals-width"><div class="deals-guides-heading"><p class="eyebrow">Wien entdecken</p><h2 id="dealsGuidesTitle">Noch mehr für weniger.</h2></div><nav aria-label="Wiener Angebotsratgeber"><a href="/blog/guenstig-essen-wien.html"><span>Günstig essen<strong>Lieblingsplätze nach Bezirk</strong></span>${icon('chevron-right')}</a><a href="/blog/geburtstag-gratis-wien.html"><span>Geburtstag in Wien<strong>Gratis feiern &amp; genießen</strong></span>${icon('chevron-right')}</a><a href="/blog/kinodonnerstag-wien-drei.html"><span>KinoDonnerstag<strong>Zwei Tickets, ein Preis</strong></span>${icon('chevron-right')}</a></nav></div>

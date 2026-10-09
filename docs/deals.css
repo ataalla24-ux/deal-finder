@@ -10,6 +10,12 @@
 .deals-intro h1 { max-width: none; font-size: 38px; line-height: 1.12; }
 .deals-intro p:not(.eyebrow) { margin: 14px 0 12px; max-width: 720px; color: #535e58; font-size: 16px; }
 .deals-updated { font-size: 12px; color: #66726b; }
+.deals-app-note { display: flex; align-items: center; justify-content: space-between; gap: 18px 32px; margin: 22px 0 18px; padding: 18px 0; border-top: 1px solid #e3e8e5; border-bottom: 1px solid #e3e8e5; }
+.deals-app-note strong { color: #17221e; font-size: 17px; }
+.deals-intro .deals-app-note p { max-width: 660px; margin: 6px 0 0; font-size: 13px; line-height: 1.65; }
+.deals-app-note nav { display: flex; flex-wrap: wrap; flex-shrink: 0; gap: 10px; }
+.deals-app-note a { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 12px; border: 1px solid #b2c4b9; border-radius: 6px; text-decoration: none; color: #164b38; font-size: 13px; font-weight: 700; }
+.deals-app-note a:hover { background: #edf5ef; }
 .deals-page .deal-hub { padding: 20px 0 42px; }
 .deal-filters { margin-bottom: 16px; }
 .deal-filter-fields { display: grid; grid-template-columns: minmax(0, 1fr) 175px 185px; align-items: end; gap: 14px; }
@@ -75,6 +81,7 @@
 .deals-page .site-footer { background: #fff; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (max-width: 950px) {
+  .deals-app-note { align-items: flex-start; flex-direction: column; gap: 14px; }
   .deals-page .live-deal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .deal-filter-fields { grid-template-columns: minmax(0, 1fr) 160px 175px; }
   .deals-guides nav { gap: 16px; }

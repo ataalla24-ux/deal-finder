@@ -13,6 +13,7 @@ fs.mkdirSync(path.join(fixtureRoot, 'scripts'));
 fs.mkdirSync(path.join(fixtureRoot, 'docs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/generate-seo-deals-page.mjs'), path.join(fixtureRoot, 'scripts/generate-seo-deals-page.mjs'));
 fs.copyFileSync(path.join(ROOT, 'scripts/polish-website.mjs'), path.join(fixtureRoot, 'scripts/polish-website.mjs'));
+fs.copyFileSync(path.join(ROOT, 'scripts/blog-visuals.mjs'), path.join(fixtureRoot, 'scripts/blog-visuals.mjs'));
 fs.symlinkSync(path.join(ROOT, 'node_modules'), path.join(fixtureRoot, 'node_modules'), 'dir');
 
 function deal(id, fields = {}) {
@@ -33,6 +34,12 @@ function generate(deals, now = '2026-10-05T10:00:00Z') {
   const html = fs.readFileSync(path.join(fixtureRoot, 'docs/angebote-wien-heute.html'), 'utf8');
   const ids = [...html.matchAll(/<article class="live-deal-card" id="deal-([^"]+)"/g)].map(match => match[1]);
   const schema = JSON.parse(html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)[1]);
+  const $ = load(html);
+  assert.match($('.deals-app-note').text(), /Hier eine Auswahl\. Alle Deals in der App/);
+  assert.equal($('.deals-app-note[hidden], .deals-app-note details').length, 0, 'Subset disclosure is visible without interaction or JS');
+  assert.equal($('.deals-app-note a[href^="https://apps.apple.com/"]').length, 1);
+  assert.equal($('.deals-app-note a[href^="https://play.google.com/"]').length, 1);
+  assert.match($('#dealHubTitle').text(), /Web-Auswahl/);
   assert.equal(schema['@graph'][0].mainEntity.numberOfItems, ids.length, 'Schema and visible card counts must agree');
   return { html, ids, $: load(html) };
 }

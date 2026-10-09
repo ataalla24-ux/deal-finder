@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { load } from 'cheerio';
 import { polishHtml } from './polish-website.mjs';
+import { blogVisual, covers } from './blog-visuals.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
@@ -32,6 +33,41 @@ assert.equal(index('#blogArchive').length, 1);
 assert.equal(index('.post-card img[loading="eager"]').length, 1);
 assert.ok(index('.post-card[data-archive="true"]').length >= 12);
 for (const card of index('.post-card').toArray()) assert.equal(index(card).find('h2 a').length, 1);
+for (const card of index('.post-card').toArray()) {
+  const slug = index(card).find('h2 a').attr('href').split('/').pop().replace(/\.html$/, '');
+  const article = load(read(`docs/blog/${slug}.html`));
+  const image = index(card).find('img');
+  assert.doesNotMatch(image.attr('src'), /current-ios|og-preview|og-home/);
+  assert.equal(`https://freefinder.at${image.attr('src')}`, article('meta[property="og:image"]').attr('content'), `${slug}: listing and shared preview agree`);
+  const visual = blogVisual(slug);
+  if (!visual) continue;
+  assert.equal(image.attr('src'), visual.src, `${slug}: explicit subject cover`);
+  assert.equal(article('meta[name="twitter:image"]').attr('content'), `https://freefinder.at${visual.src}`);
+  assert.equal(article('meta[property="og:image:width"]').attr('content'), '1200');
+  for (const node of article('.article-image, .article-cover img').toArray()) {
+    assert.equal(article(node).attr('src'), visual.src, `${slug}: visible article cover`);
+    assert.equal(article(node).attr('alt'), visual.alt);
+    const sources = article(node).parent('picture').find('source');
+    assert.equal(sources.attr('srcset'), `${visual.thumbnail} 480w`, `${slug}: no stale AVIF source`);
+  }
+  assert.doesNotMatch(article('script[type="application/ld+json"]').text(), /current-ios|og-preview|og-home/, `${slug}: schema has no unrelated screenshot`);
+}
+for (const slug of Object.keys(covers)) {
+  const visual = blogVisual(slug);
+  const jpeg = fs.readFileSync(path.join(root, 'docs', visual.src));
+  assert.equal(jpeg.readUInt16BE(0), 0xffd8);
+  assert.ok(jpeg.length < 100000, `${slug}: compact editorial cover`);
+  const thumbnail = fs.readFileSync(path.join(root, 'docs', visual.thumbnail));
+  assert.equal(thumbnail.toString('ascii', 8, 12), 'WEBP');
+  assert.ok(thumbnail.length < 30000);
+}
+// New articles can keep genuine subject photos, but cannot resurrect shared mockups.
+assert.equal(blogVisual('new-cafe', '/assets/blog/new-cafe.jpg'), null);
+assert.equal(blogVisual('new-cafe', '/assets/current-ios/deals-home.jpg').src, blogVisual('wien-guides').src);
+const fallbackFixture = '<html><head><meta property="og:image" content="https://freefinder.at/og-preview-stores.png"></head><body><main><picture><source type="image/avif" srcset="/og-preview-stores-600.avif"><img class="article-image" src="/og-preview-stores.png" alt="old"></picture></main></body></html>';
+const fallback = polishHtml(fallbackFixture, 'blog/new-cafe.html', now);
+assert.doesNotMatch(fallback, /og-preview|og-home|current-ios/);
+assert.equal(polishHtml(fallback, 'blog/new-cafe.html', now), fallback);
 assert.match(read('docs/blog/blog.css'), /prefers-reduced-motion/);
 assert.doesNotMatch(read('docs/blog/blog.css'), /a:not\(\.nav-download\)\s*\{\s*display:\s*none/);
 const manifest = JSON.parse(read('docs/manifest.json'));
