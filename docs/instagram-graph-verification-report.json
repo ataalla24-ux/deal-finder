@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-09T12:38:21.292Z",
+  "generatedAt": "2026-10-09T12:44:18.741Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -129,8 +129,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 35,
-      "candidates": 4
+      "deals": 45,
+      "candidates": 11
     },
     "deals-pending-power.json": {
       "deals": 36,
@@ -157,10 +157,26 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 5,
-  "candidateAccounts": 5,
+  "candidatePosts": 12,
+  "candidateAccounts": 9,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
+    {
+      "username": "lisa.maria.b",
+      "candidates": 4
+    },
+    {
+      "username": "interpolburger",
+      "candidates": 1
+    },
+    {
+      "username": "megasupermarkt.at",
+      "candidates": 1
+    },
+    {
+      "username": "ams.wien",
+      "candidates": 1
+    },
     {
       "username": "limon.kebap.wien",
       "candidates": 1
@@ -168,40 +184,39 @@
     {
       "username": "vevi.restaurant",
       "candidates": 1
-    },
-    {
-      "username": "viennabyaleksa",
-      "candidates": 1
-    },
-    {
-      "username": "freefinder.at",
-      "candidates": 1
-    },
-    {
-      "username": "schwestern_bazar",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 125,
-  "exactMatches": 4,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "lisa.maria.b",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 5,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 20,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
+  "globalError": {
+    "username": "lisa.maria.b",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 80,
-  "unmatchedCandidatePosts": 1,
-  "message": "4/5 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 12,
+  "message": "0/12 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
