@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-09T15:08:22.226Z",
+  "generatedAt": "2026-10-09T15:14:30.027Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -130,7 +130,7 @@
     },
     "deals-pending-meta-instagram.json": {
       "deals": 49,
-      "candidates": 4
+      "candidates": 5
     },
     "deals-pending-power.json": {
       "deals": 36,
@@ -157,10 +157,14 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 5,
-  "candidateAccounts": 5,
+  "candidatePosts": 6,
+  "candidateAccounts": 6,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
+    {
+      "username": "viennawhispers",
+      "candidates": 1
+    },
     {
       "username": "neotaste.wien",
       "candidates": 1
@@ -182,26 +186,37 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 125,
-  "exactMatches": 5,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "viennawhispers",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 5,
-    "reserved": 5,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 88,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
+  "globalError": {
+    "username": "viennawhispers",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 83,
-  "unmatchedCandidatePosts": 0,
-  "message": "5/5 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 6,
+  "message": "0/6 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
