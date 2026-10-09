@@ -1,4 +1,5 @@
 import { handlePromoRequest, promoLedger } from './merchant-promos.js';
+import { adContentViolation, AD_POLICY_MESSAGE, validateAdRequest } from './ad-content-policy.js';
 import { publicInteractionCache } from './public-interaction-cache.js';
 import { handleTrialStatus } from './subscription-trial.js';
 import { measureStorage, storageIdentity, StorageQuotaError } from './storage-usage.js';
@@ -117,6 +118,10 @@ const merchantWorker = {
     const url = new URL(request.url);
 
     try {
+      if (request.method === 'POST' && url.pathname === '/api/merchant/validate') {
+        const result = await validateAdRequest(request);
+        return json(result.body, result.status);
+      }
       if (request.method === 'POST' && url.pathname === '/api/subscriptions/trial-status') {
         return handleTrialStatus(request, env, googlePlayAccessToken);
       }
@@ -1692,6 +1697,8 @@ async function createCampaign(request, env) {
   if (!restaurantName || !dealTitle) {
     return json({ ok: false, error: "Restaurant and deal title are required" }, 400);
   }
+
+  if (adContentViolation(payload)) return json({ ok: false, error: AD_POLICY_MESSAGE }, 422);
 
   const now = Date.now();
   const durationMs = config.durationDays * 24 * 60 * 60 * 1000;

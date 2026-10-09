@@ -6,7 +6,7 @@ export const normalize = value => String(value || '').normalize('NFD').replace(/
 
 // A street and house number are mandatory. Never geocode a city or merchant name.
 export function extractAddresses(value) {
-  const pattern = /\b((?:[A-ZÄÖÜ][\p{L}.-]*[ -]){0,2}(?:[A-ZÄÖÜ][\p{L}-]*(?:straße|strasse|gasse|platz|allee|weg|kai|ring|gürtel|markt)|Straße|Strasse|Gasse|Platz|Allee|Weg|Kai|Ring|Gürtel|Markt))\s+(\d+[a-zA-Z]?(?:[-/]\d+[a-zA-Z]?)?)(?:,?\s+(1\d{3})\s+Wien)?/gu;
+  const pattern = /\b((?:[A-ZÄÖÜ][\p{L}.-]*[ -]){0,2}(?:[A-ZÄÖÜ][\p{L}-]*(?:straße|strasse|gasse|platz|allee|weg|kai|ring|gürtel|markt|zeile|damm|ufer|steig|hof)|Straße|Strasse|Gasse|Platz|Allee|Weg|Kai|Ring|Gürtel|Markt|Hof))\s+(\d+[a-zA-Z]?(?:[-/]\d+[a-zA-Z]?)?)(?:,?\s+(1\d{3})\s+Wien)?/gu;
   return [...String(value || '').matchAll(pattern)].map(m => ({ street: m[1], number: m[2], postalCode: m[3] || '' }));
 }
 
@@ -32,16 +32,25 @@ export function candidatesFor(deal, reviewed, today) {
   const candidates = [deal.address, deal.location, deal.distance].flatMap(extractAddresses);
   const unique = [...new Map(candidates.map(x => [normalize(`${x.street} ${x.number}`), x])).values()];
   // A caption can contain different conditions per branch; it must be reviewed first.
-  const caption = [deal.description, deal.metaGraphCaption].flatMap(extractAddresses);
+  const sourceText = deal.viennaEvidence?.verified === true ? deal.viennaEvidence.detail : '';
+  const caption = [deal.brand, deal.description, deal.metaGraphCaption, sourceText].flatMap(extractAddresses);
   const allKeys = new Set([...unique, ...caption].map(x => normalize(`${x.street} ${x.number}`)));
   if (allKeys.size > 1) return { reason: 'multiple-branches-need-review', addresses: [] };
-  if (!unique.length) return { reason: caption.length ? 'address-in-caption-needs-review' : 'missing-exact-address', addresses: [] };
+  if (!unique.length) {
+    const context = [deal.address, deal.location, deal.distance, deal.description, deal.metaGraphCaption, sourceText].join(' ');
+    if (caption.length && /\b(?:Wien|Vienna|1(?:0[1-9]|1\d|2[0-3])0)\b/i.test(context)) {
+      return { reason: '', addresses: [caption[0]] };
+    }
+    return { reason: caption.length ? 'address-in-caption-needs-review' : 'missing-exact-address', addresses: [] };
+  }
   return { reason: '', addresses: unique };
 }
 
 export function selectExactFeature(features, address) {
-  const hits = features.filter(f => normalize(f.properties?.NAME_STR) === normalize(address.street)
-    && normalize(f.properties?.NAME_ONR) === normalize(address.number)
+  const streetKey = value => normalize(value).replace(/ /g, '');
+  const hits = features.filter(f => streetKey(f.properties?.NAME_STR) === streetKey(address.street)
+    && (normalize(f.properties?.NAME_ONR) === normalize(address.number)
+      || (address.number.includes('/') && normalize(f.properties?.NAME_ONR) === normalize(address.number.split('/')[0])))
     && (!address.postalCode || f.properties?.PLZ === address.postalCode)
     && f.geometry?.type === 'Point'
     && f.geometry.coordinates[0] >= 16.15 && f.geometry.coordinates[0] <= 16.60
@@ -56,10 +65,13 @@ export function selectExactFeature(features, address) {
 export async function geocode(address, fetcher = fetch) {
   const quote = text => String(text).replace(/'/g, "''");
   const url = new URL(GEO_ENDPOINT);
+  const streets = [...new Set([address.street, address.street.replace(/strasse/gi, 'straße'),
+    address.street.replace(/(?:strasse|straße)$/i, ' Straße').replace(/\s+/g, ' ').trim()])];
+  const numbers = [...new Set([address.number, address.number.split('/')[0]])];
   url.search = new URLSearchParams({ service: 'WFS', request: 'GetFeature', version: '1.1.0',
     typeName: 'ogdwien:ADRESSENOGD', outputFormat: 'json', srsName: 'EPSG:4326', maxFeatures: '100',
     propertyName: 'NAME,NAME_STR,NAME_ONR,PLZ,SHAPE',
-    cql_filter: `NAME_STR ILIKE '${quote(address.street)}' AND NAME_ONR ILIKE '${quote(address.number)}'` });
+    cql_filter: `(${streets.map(s => `NAME_STR ILIKE '${quote(s)}'`).join(' OR ')}) AND (${numbers.map(n => `NAME_ONR ILIKE '${quote(n)}'`).join(' OR ')})` });
   const response = await fetcher(url, { signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error(`Address service HTTP ${response.status}`);
   const payload = await response.json();
@@ -88,12 +100,12 @@ export async function enrichMap({ deals, map, reviewed = {}, cache = {}, now = n
       const cached = cache[key];
       const age = cached ? now - new Date(cached.checkedAt) : Infinity;
       let result = cached?.result;
-      if (!(age >= 0 && age < (result ? 180 : 1) * 86400000)) {
+      if (!(age >= 0 && age < (result ? 180 : 1) * 86400000 && (result || cached?.queryVersion === 3))) {
         if (requests >= maxRequests) { failures.push('request-budget'); continue; }
         requests++;
         try {
           result = await lookup(address);
-          cache[key] = { checkedAt: now.toISOString(), result };
+          cache[key] = { checkedAt: now.toISOString(), queryVersion: 3, result };
         } catch (error) {
           failures.push(error.message);
           // Keep a previously verified result during a temporary network outage.

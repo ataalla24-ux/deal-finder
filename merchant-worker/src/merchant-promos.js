@@ -1,3 +1,4 @@
+import { adContentViolation, AD_POLICY_MESSAGE } from './ad-content-policy.js';
 const DAY = 86400000;
 const PACKAGES = [
   { id: 'starter', name: 'Starter Boost', durationDays: 1 },
@@ -219,6 +220,7 @@ export class MerchantPromoLedger {
         const now = Date.now();
         requireAvailable(current, now);
         if (redeemed?.campaign) throw new PromoError('Dieses Restaurant hat diesen Promo-Code bereits genutzt.', 409);
+        if (adContentViolation(draft)) throw new PromoError(AD_POLICY_MESSAGE, 422);
         const pack = packageFor(current.packageId);
         const campaign = {
           ...draft, id: crypto.randomUUID(), status: 'sponsored', platform: ['ios', 'android'].includes(payload.platform) ? payload.platform : 'web', paymentProvider: 'promo',

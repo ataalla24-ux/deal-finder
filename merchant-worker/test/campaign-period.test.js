@@ -38,6 +38,11 @@ test('paid campaign preserves offer period through storage, Slack, public feed a
   for (const bad of ['x'.repeat(161), 42, '\u0001']) {
     assert.equal((await call({ ...payload, offerValidityText: bad })).status, 400);
   }
+  for (const dealTitle of ['Gratis Bier', 'Porno Angebot']) {
+    assert.equal((await call({ ...payload, dealTitle })).status, 422);
+    assert.equal(records.size, 0);
+    assert.equal(slack.length, 0);
+  }
   const first = await call(payload);
   assert.equal(first.status, 201);
   const campaign = (await first.json()).campaign;

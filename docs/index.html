@@ -2141,6 +2141,8 @@
                 <textarea id="businessDescription" name="description" placeholder="Was bekommen FreeFinder-Nutzer? Bedingungen, Zeitraum, Einlösung." required></textarea>
               </div>
             </div>
+            <p>Keine Alkoholwerbung und keine obszönen, pornografischen oder sexuell expliziten Inhalte. Verstöße werden entfernt. <a href="anzeigenrichtlinien.html" target="_blank" rel="noopener">Anzeigenrichtlinien lesen</a></p>
+            <label><input type="checkbox" name="adPolicyAccepted" required> Meine Anzeige entspricht den Anzeigenrichtlinien.</label>
             <div class="business-form-actions">
               <button class="button button-ghost" type="button" id="businessModalCancel">Abbrechen</button>
               <button class="button button-warm" type="submit" id="businessCheckoutSubmit">Mit Stripe bezahlen</button>
@@ -2407,6 +2409,7 @@
 
     function collectBusinessCampaign(form) {
       const data = Object.fromEntries(new FormData(form).entries());
+      if (!data.adPolicyAccepted) throw new Error("Bitte die Einhaltung der Anzeigenrichtlinien bestätigen.");
       const campaign = {
         restaurantName: String(data.restaurantName || "").trim(),
         contactEmail: String(data.contactEmail || "").trim(),
@@ -2517,6 +2520,14 @@
       }
 
       try {
+        if (campaign) {
+          const check = await fetch("https://freefinder-merchant-backend.freefinder-stefan.workers.dev/api/merchant/validate", {
+            method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(campaign),
+            signal: AbortSignal.timeout(20000)
+          });
+          const result = await check.json();
+          if (!check.ok || result.ok !== true) throw new Error(result.error || "Die Anzeigenprüfung ist nicht erreichbar. Es wurde kein Kauf gestartet.");
+        }
         const response = await fetch(endpoint, {
           method: "POST",
           headers: { "content-type": "application/json" },

@@ -31,7 +31,7 @@ test('promo ledger integration with real SQLite Durable Object', async t => {
             return super.fetch(request);
           }
         }` },
-      ...await Promise.all(['index.js', 'merchant-promos.js', 'public-interaction-cache.js', 'storage-usage.js', 'subscription-trial.js'].map(async name => ({ type: 'ESModule', path: `src/${name}`, contents: await readFile(new URL(`../src/${name}`, import.meta.url), 'utf8') }))),
+      ...await Promise.all(['index.js', 'ad-content-policy.js', 'merchant-promos.js', 'public-interaction-cache.js', 'storage-usage.js', 'subscription-trial.js'].map(async name => ({ type: 'ESModule', path: `src/${name}`, contents: await readFile(new URL(`../src/${name}`, import.meta.url), 'utf8') }))),
     ],
     durableObjects: { MERCHANT_PROMOS: { className: 'TestLedger', useSQLite: true } },
     kvNamespaces: ['MERCHANT_CAMPAIGNS'], bindings: { MERCHANT_PROMO_ADMIN_SECRET: 'test-only-admin-secret' },
@@ -99,6 +99,18 @@ test('promo ledger integration with real SQLite Durable Object', async t => {
     assert.equal(campaign.amount, 0); assert.equal(campaign.packageId, 'starter');
     assert.equal((await campaigns()).filter(item => item.id === campaign.id).length, 1);
     assert.equal((await call('/admin/revoke', { id: code.id }, admin)).status, 409);
+  });
+  await t.test('prohibited ads do not consume a promo or enter the feed', async () => {
+    const code = await create();
+    const requestId = crypto.randomUUID();
+    const before = await campaigns();
+    for (const dealTitle of ['Gratis Bier', 'Erotik Angebot']) {
+      const response = await call('/redeem', { ...draft, code: code.code, requestId, dealTitle });
+      assert.equal(response.status, 422);
+    }
+    assert.deepEqual(await campaigns(), before);
+    assert.equal((await call('/check', { code: code.code })).status, 200);
+    assert.equal((await call('/redeem', { ...draft, code: code.code, requestId })).status, 201);
   });
   await t.test('offer period survives redemption and public feed without changing purchased duration', async () => {
     const code = await create({ packageId: 'spotlight' });
