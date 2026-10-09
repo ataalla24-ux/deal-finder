@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-09T18:54:54.324Z",
+  "generatedAt": "2026-10-09T19:05:26.195Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -101,8 +101,8 @@
       "candidates": 0
     },
     "deals-pending-instagram-ai.json": {
-      "deals": 11,
-      "candidates": 0
+      "deals": 50,
+      "candidates": 1
     },
     "deals-pending-instagram-apify.json": {
       "deals": 7,
@@ -157,8 +157,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 5,
-  "candidateAccounts": 5,
+  "candidatePosts": 6,
+  "candidateAccounts": 6,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
@@ -180,28 +180,43 @@
     {
       "username": "limon.kebap.wien",
       "candidates": 1
+    },
+    {
+      "username": "eylulbaeckerei",
+      "candidates": 1
     }
   ],
-  "fetchedPosts": 125,
-  "exactMatches": 5,
+  "fetchedPosts": 25,
+  "exactMatches": 1,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "lugner_city",
+      "message": "Instagram shared quota paused: Meta usage headroom"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 5,
+    "requests": 1,
     "reserved": 5,
     "stopped": true,
-    "reason": "Meta usage headroom",
-    "highestUsagePercent": 96,
+    "reason": "Instagram shared quota paused: Meta usage headroom",
+    "highestUsagePercent": 95,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "2026-10-09T19:05:04.845Z",
+    "retryAt": "2026-10-09T19:15:28.801Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
+  "globalError": {
+    "username": "lugner_city",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: Meta usage headroom"
+  },
   "blockedEvidencePosts": 81,
-  "unmatchedCandidatePosts": 0,
-  "message": "5/5 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 5,
+  "message": "1/6 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
