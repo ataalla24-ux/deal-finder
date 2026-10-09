@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T08:15:25.861Z",
+  "generatedAt": "2026-10-09T08:44:00.628Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 666,
@@ -233,6 +233,7 @@
       "failedSources": [],
       "completedWithErrors": [
         "firecrawl2",
+        "food3",
         "power"
       ]
     }
@@ -527,22 +528,25 @@
         "Albertgasse 51: Restaurant / Essen (Nudeln bzw. asiatische Küche)"
       ],
       "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-10-08T08:37:18.350Z",
-        "finishedAt": "2026-10-08T08:38:17.303Z",
-        "durationMs": 58953,
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-09T08:42:43.208Z",
+        "finishedAt": "2026-10-09T08:43:22.618Z",
+        "durationMs": 39410,
         "counts": {
-          "rawCandidates": 14,
-          "normalizedCandidates": 14,
-          "verifiedCandidates": 4,
+          "rawCandidates": 2,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 3,
           "previousDeals": 3,
-          "acceptedDeals": 4,
-          "rejectedDeals": 13
+          "acceptedDeals": 3,
+          "rejectedDeals": 2
         },
         "rejectedByReason": {
-          "post-verification-rejected": 13
+          "post-verification-rejected": 2
         },
-        "errors": [],
+        "errors": [
+          "https://www.instagram.com/explore/tags/happyhourwien/: Refusal: Die angegebene Instagram-Quelle konnte in diesem Durchlauf nicht abgerufen werden (der Zugriff wurde vom Webabrufdienst ausdrücklich blockiert). Daher kann ich keine verifizierten Originalposts, Veröffentlichungsdaten oder direkten Post-Links aus der vorgeschriebenen Quelle extrahieren.",
+          "https://www.instagram.com/explore/tags/lunchdealwien/: Refusal: Die angegebene Instagram-Quelle ist in diesem Durchlauf nicht öffentlich zugänglich: Der direkte Aufruf von https://www.instagram.com/explore/tags/lunchdealwien/ wurde auf die Instagram-Loginseite umgeleitet, und der Scrape-Zugriff wurde von Instagram/Firecrawl blockiert. Ohne Zugriff auf die Hashtag-Beiträge kann ich keine aktuellen Originalposts, Daten, Handles oder direkten Post-Links verlässlich prüfen, ohne die Quellenbeschränkung zu verletzen."
+        ],
         "reportFile": "deal-pipeline-last-run-food3.json"
       },
       "uniqueRate": 0.7,
