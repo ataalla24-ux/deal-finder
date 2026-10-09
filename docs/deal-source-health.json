@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-09T13:38:31.997Z",
+  "generatedAt": "2026-10-09T14:15:25.812Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 681,
-    "uniqueCandidates": 649,
-    "distinctCandidates": 664,
+    "totalCandidates": 680,
+    "uniqueCandidates": 648,
+    "distinctCandidates": 663,
     "duplicateClusters": 15,
     "topHealthySources": [
+      {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "healthScore": 75,
+        "totalDeals": 2
+      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
@@ -26,12 +32,6 @@
         "totalDeals": 7
       },
       {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "healthScore": 68,
-        "totalDeals": 3
-      },
-      {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "healthScore": 64,
@@ -40,16 +40,16 @@
     ],
     "topMissionSources": [
       {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "missionFitScore": 78,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "missionFitScore": 78,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "missionFitScore": 65,
-        "totalDeals": 3
       },
       {
         "sourceKey": "instagram-apify",
@@ -109,16 +109,16 @@
     ],
     "topPrecisionSources": [
       {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "precisionScore": 84,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "precisionScore": 80,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "precisionScore": 71,
-        "totalDeals": 3
       },
       {
         "sourceKey": "meta-instagram",
@@ -141,6 +141,12 @@
     ],
     "topWeightedSources": [
       {
+        "sourceKey": "food3",
+        "sourceLabel": "Firecrawl Key 2 - Food",
+        "sourceWeightScore": 66,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "firecrawl5",
         "sourceLabel": "Firecrawl Key 5 - Instagram Gastro",
         "sourceWeightScore": 62,
@@ -151,12 +157,6 @@
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 58,
         "totalDeals": 45
-      },
-      {
-        "sourceKey": "food3",
-        "sourceLabel": "Firecrawl Key 2 - Food",
-        "sourceWeightScore": 57,
-        "totalDeals": 3
       },
       {
         "sourceKey": "gastro2",
@@ -232,12 +232,88 @@
       "reportedSources": 7,
       "failedSources": [],
       "completedWithErrors": [
+        "firecrawl4",
         "food3",
         "power"
       ]
     }
   },
   "sources": [
+    {
+      "sourceKey": "food3",
+      "file": "deals-pending-food3.json",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 2,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Pizza: 2für1 Pizza Slice 30% Rabatt Mit der NeoTaste App entdeckt ihr in Wien ...",
+        "Die Seeteufel – Fish & Chips Bistro: Fish & Chips"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-09T08:42:43.208Z",
+        "finishedAt": "2026-10-09T08:43:22.618Z",
+        "durationMs": 39410,
+        "counts": {
+          "rawCandidates": 2,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 3,
+          "previousDeals": 3,
+          "acceptedDeals": 3,
+          "rejectedDeals": 2
+        },
+        "rejectedByReason": {
+          "post-verification-rejected": 2
+        },
+        "errors": [
+          "https://www.instagram.com/explore/tags/happyhourwien/: Refusal: Die angegebene Instagram-Quelle konnte in diesem Durchlauf nicht abgerufen werden (der Zugriff wurde vom Webabrufdienst ausdrücklich blockiert). Daher kann ich keine verifizierten Originalposts, Veröffentlichungsdaten oder direkten Post-Links aus der vorgeschriebenen Quelle extrahieren.",
+          "https://www.instagram.com/explore/tags/lunchdealwien/: Refusal: Die angegebene Instagram-Quelle ist in diesem Durchlauf nicht öffentlich zugänglich: Der direkte Aufruf von https://www.instagram.com/explore/tags/lunchdealwien/ wurde auf die Instagram-Loginseite umgeleitet, und der Scrape-Zugriff wurde von Instagram/Firecrawl blockiert. Ohne Zugriff auf die Hashtag-Beiträge kann ich keine aktuellen Originalposts, Daten, Handles oder direkten Post-Links verlässlich prüfen, ohne die Quellenbeschränkung zu verletzen."
+        ],
+        "reportFile": "deal-pipeline-last-run-food3.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 71,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "bogo",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 75,
+      "missionFitScore": 78,
+      "coverageScore": 16,
+      "precisionScore": 84,
+      "sourceWeightScore": 66
+    },
     {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
@@ -453,82 +529,6 @@
       "coverageScore": 14,
       "precisionScore": 65,
       "sourceWeightScore": 54
-    },
-    {
-      "sourceKey": "food3",
-      "file": "deals-pending-food3.json",
-      "sourceLabel": "Firecrawl Key 2 - Food",
-      "totalDeals": 3,
-      "uniqueDeals": 2,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 2,
-      "foodDrinkCount": 3,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Pizza: 2für1 Pizza Slice 30% Rabatt Mit der NeoTaste App entdeckt ihr in Wien ...",
-        "Die Seeteufel – Fish & Chips Bistro: Fish & Chips",
-        "Albertgasse 51: Restaurant / Essen (Nudeln bzw. asiatische Küche)"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-09T08:42:43.208Z",
-        "finishedAt": "2026-10-09T08:43:22.618Z",
-        "durationMs": 39410,
-        "counts": {
-          "rawCandidates": 2,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 3,
-          "previousDeals": 3,
-          "acceptedDeals": 3,
-          "rejectedDeals": 2
-        },
-        "rejectedByReason": {
-          "post-verification-rejected": 2
-        },
-        "errors": [
-          "https://www.instagram.com/explore/tags/happyhourwien/: Refusal: Die angegebene Instagram-Quelle konnte in diesem Durchlauf nicht abgerufen werden (der Zugriff wurde vom Webabrufdienst ausdrücklich blockiert). Daher kann ich keine verifizierten Originalposts, Veröffentlichungsdaten oder direkten Post-Links aus der vorgeschriebenen Quelle extrahieren.",
-          "https://www.instagram.com/explore/tags/lunchdealwien/: Refusal: Die angegebene Instagram-Quelle ist in diesem Durchlauf nicht öffentlich zugänglich: Der direkte Aufruf von https://www.instagram.com/explore/tags/lunchdealwien/ wurde auf die Instagram-Loginseite umgeleitet, und der Scrape-Zugriff wurde von Instagram/Firecrawl blockiert. Ohne Zugriff auf die Hashtag-Beiträge kann ich keine aktuellen Originalposts, Daten, Handles oder direkten Post-Links verlässlich prüfen, ohne die Quellenbeschränkung zu verletzen."
-        ],
-        "reportFile": "deal-pipeline-last-run-food3.json"
-      },
-      "uniqueRate": 0.7,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 0.7,
-      "foodDrinkRate": 1,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 66.7,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 3
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach"
-      ],
-      "healthScore": 68,
-      "missionFitScore": 65,
-      "coverageScore": 13,
-      "precisionScore": 71,
-      "sourceWeightScore": 57
     },
     {
       "sourceKey": "firecrawl5",
@@ -1071,34 +1071,35 @@
       "duplicateDeals": 3,
       "duplicateAcrossSources": 3,
       "fresh1dCount": 0,
-      "fresh7dCount": 3,
-      "viennaCount": 1,
+      "fresh7dCount": 4,
+      "viennaCount": 2,
       "foodDrinkCount": 56,
-      "promoCount": 30,
+      "promoCount": 31,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Pizza Napoletana: Pizza-Date in Wien? Pizza Napoletana, italienischer Genuss ...",
         "Gratis Buchwochen im Kaffeehaus – über 35 Standorte in Wien, jetzt ...",
-        "Astana Ballett Theatre in Wien – 70% Rabatt, 33 € at Stadthalle - Preisjäger"
+        "Beim Kauf von zwei Dönern gibt es einen dritten Döner gratis",
+        "Prater-Montag: 50 % Rabatt sowie 1+1 gratis bei Genussangebo"
       ],
       "lastRun": {
-        "status": "completed",
-        "startedAt": "2026-10-08T14:24:15.539Z",
-        "finishedAt": "2026-10-08T14:29:17.237Z",
-        "durationMs": 301698,
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-09T14:10:09.943Z",
+        "finishedAt": "2026-10-09T14:14:55.766Z",
+        "durationMs": 285823,
         "counts": {
-          "rawCandidates": 31,
-          "normalizedCandidates": 30,
-          "verifiedCandidates": 62,
+          "rawCandidates": 27,
+          "normalizedCandidates": 27,
+          "verifiedCandidates": 60,
           "previousDeals": 60,
-          "acceptedDeals": 62,
-          "rejectedDeals": 22
+          "acceptedDeals": 60,
+          "rejectedDeals": 21
         },
         "rejectedByReason": {
-          "excluded-downstream-source:gastro.news": 1,
           "post-verification-rejected": 21
         },
-        "errors": [],
+        "errors": [
+          "#kostenlosessenwien: Refusal: Die angegebene Instagram-Hashtag-Seite ist in dieser Umgebung nicht zugänglich: Der Abruf wurde vom Dienst nicht unterstützt, und der Browser wurde auf die Instagram-Anmeldeseite umgeleitet. Dadurch konnten keine konkreten Originalposts (/p/... oder /reel/...) samt Deal-, Gültigkeits- und Veröffentlichungsdaten verlässlich geprüft werden. Ich gebe daher keine erfundenen oder nicht verifizierbaren Deals aus."
+        ],
         "reportFile": "deal-pipeline-last-run-firecrawl4.json"
       },
       "uniqueRate": 1,
@@ -1109,7 +1110,7 @@
       "foodDrinkRate": 0.9,
       "promoRate": 0.5,
       "missingUrlRate": 0,
-      "averageQualityScore": 64.3,
+      "averageQualityScore": 64.4,
       "topCategories": [
         {
           "value": "essen",
@@ -1131,7 +1132,7 @@
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 32
+          "count": 31
         },
         {
           "value": "bogo",
@@ -1139,7 +1140,7 @@
         },
         {
           "value": "gratis",
-          "count": 9
+          "count": 10
         }
       ],
       "issues": [
