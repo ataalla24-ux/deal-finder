@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-10T06:53:19.508Z",
+  "generatedAt": "2026-10-10T06:58:07.216Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -81,8 +81,8 @@
       "candidates": 0
     },
     "deals-pending-gastro2.json": {
-      "deals": 118,
-      "candidates": 2
+      "deals": 123,
+      "candidates": 3
     },
     "deals-pending-gemeinde.json": {
       "deals": 33,
@@ -157,8 +157,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 8,
-  "candidateAccounts": 7,
+  "candidatePosts": 9,
+  "candidateAccounts": 8,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
@@ -170,42 +170,53 @@
       "candidates": 1
     },
     {
+      "username": "papa.duck.at",
+      "candidates": 1
+    },
+    {
+      "username": "neotaste.wien",
+      "candidates": 1
+    },
+    {
       "username": "megasupermarkt.at",
       "candidates": 1
     },
     {
       "username": "lugner_city",
       "candidates": 1
-    },
-    {
-      "username": "travel2vienna",
-      "candidates": 1
-    },
-    {
-      "username": "neotaste.wien",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 7,
+  "fetchedPosts": 125,
+  "exactMatches": 6,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "lugner_city",
+      "message": "Instagram shared quota paused: Meta usage headroom"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 52,
+    "requests": 5,
+    "reserved": 5,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: Meta usage headroom",
+    "highestUsagePercent": 96,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-10T07:08:19.893Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
+  "globalError": {
+    "username": "lugner_city",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: Meta usage headroom"
+  },
   "blockedEvidencePosts": 97,
-  "unmatchedCandidatePosts": 1,
-  "message": "7/8 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 3,
+  "message": "6/9 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
