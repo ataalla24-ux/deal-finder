@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-10T00:08:19.366Z",
+  "generatedAt": "2026-10-10T00:45:48.166Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -129,8 +129,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 64,
-      "candidates": 3
+      "deals": 63,
+      "candidates": 4
     },
     "deals-pending-power.json": {
       "deals": 45,
@@ -157,10 +157,14 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 7,
-  "candidateAccounts": 7,
+  "candidatePosts": 8,
+  "candidateAccounts": 8,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
+    {
+      "username": "lisa.maria.b",
+      "candidates": 1
+    },
     {
       "username": "foodiewien",
       "candidates": 1
@@ -180,32 +184,39 @@
     {
       "username": "neotaste.wien",
       "candidates": 1
-    },
-    {
-      "username": "limon.kebap.wien",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 6,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "lisa.maria.b",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {},
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 88,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
-  "blockedEvidencePosts": 92,
-  "unmatchedCandidatePosts": 1,
-  "message": "6/7 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "lisa.maria.b",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 94,
+  "unmatchedCandidatePosts": 8,
+  "message": "0/8 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
