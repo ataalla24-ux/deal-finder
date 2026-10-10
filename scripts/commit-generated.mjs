@@ -11,6 +11,27 @@ const DEFAULT_BRANCH = process.env.GIT_GENERATED_BRANCH || process.env.GITHUB_RE
 const DEFAULT_RETRIES = Number(process.env.GIT_GENERATED_PUSH_RETRIES || 4);
 const DEFAULT_AUTHOR_NAME = process.env.GIT_AUTHOR_NAME || process.env.GIT_COMMITTER_NAME || 'Deal Bot';
 const DEFAULT_AUTHOR_EMAIL = process.env.GIT_AUTHOR_EMAIL || process.env.GIT_COMMITTER_EMAIL || 'bot@freefinder.wien';
+const MAP_GENERATED_FILES = [
+  'docs/deal-map-locations.json',
+  'reviews/map-geocode-cache.json',
+  'reviews/map-coverage.json',
+  'reviews/map-location-catalog.json',
+  'reviews/map-source-address-cache.json',
+  'reviews/map-business-campaigns.json',
+];
+const MAP_INPUT_FILES = [
+  'docs/deals.json',
+  'reviews/map-addresses.json',
+  // These are read/modify/write inputs as well as generated outputs.
+  ...MAP_GENERATED_FILES.filter(file => file !== 'reviews/map-coverage.json'),
+  'scripts/enrich-deal-map.mjs',
+  'scripts/deal-map-enrichment.mjs',
+  'scripts/deal-map-source-addresses.mjs',
+  'scripts/deal-map-business.mjs',
+  'scripts/sync-deal-map-references.mjs',
+  'scripts/discover-vienna-merchants.mjs',
+  'scraper/vienna-merchant-discovery.js',
+];
 
 function cleanText(value) {
   return String(value || '').trim();
@@ -23,6 +44,7 @@ function runGit(args, options = {}) {
       ...process.env,
       ...(options.env || {}),
     },
+    input: options.input,
     encoding: options.binary ? null : 'utf8',
   });
   return result;
@@ -177,6 +199,80 @@ function capturedMatchesRemote(state, ref) {
   const remoteContent = remoteFileContent(ref, state.path);
   if (!state.exists) return remoteContent === null;
   return remoteContent !== null && Buffer.compare(state.content, remoteContent) === 0;
+}
+
+function contentHash(content) {
+  return content === null ? null : cleanText(gitOutput(['hash-object', '--stdin'], { input: content }));
+}
+
+function mapInputHashes(ref) {
+  const hashes = new Map(MAP_INPUT_FILES.map(file => [file, null]));
+  const entries = gitOutput(['ls-tree', '-z', ref, '--', ...MAP_INPUT_FILES]);
+  for (const entry of entries.split('\0').filter(Boolean)) {
+    const match = entry.match(/^\d{6} blob ([0-9a-f]+)\t(.+)$/);
+    if (!match || !hashes.has(match[2])) throw new Error(`Invalid map input tree entry at ${ref}: ${entry}`);
+    hashes.set(match[2], match[1]);
+  }
+  return hashes;
+}
+
+function localFileHash(filePath) {
+  try {
+    return contentHash(fs.readFileSync(path.join(process.cwd(), filePath)));
+  } catch (error) {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
+function captureMapReadInputs() {
+  return new Map(MAP_INPUT_FILES
+    .filter(file => !MAP_GENERATED_FILES.includes(file))
+    .map(file => [file, localFileHash(file)]));
+}
+
+function captureMapConsistency(states, baseRef, readInputs) {
+  const outputs = states.filter(state => MAP_GENERATED_FILES.includes(state.path));
+  if (outputs.length === 0) return null;
+  const baseHashes = mapInputHashes(baseRef);
+  return {
+    outputs,
+    inputs: MAP_INPUT_FILES.map(file => ({
+      path: file,
+      baseHash: baseHashes.get(file),
+      hash: readInputs?.has(file) ? readInputs.get(file) : localFileHash(file),
+    })),
+  };
+}
+
+function assertMapRemoteInputs(guard, headRef) {
+  if (!guard) return;
+  const hashes = mapInputHashes(headRef);
+  const changed = guard.inputs.filter(input => hashes.get(input.path) !== input.baseHash);
+  if (changed.length > 0) {
+    throw new Error('Map input consistency check failed: remote changed ' +
+      `${changed.map(input => input.path).join(', ')}. ` +
+      'Rerun this workflow so it regenerates the feed, map and coverage on the latest main. ' +
+      '--skip-conflicts and --replace-conflicts cannot bypass this check.');
+  }
+  return hashes;
+}
+
+function assertMapInputsRetained(guard, states, remoteHashes) {
+  if (!guard) return;
+  const retained = new Map(states.map(state => [state.path, state]));
+  const dropped = guard.outputs.filter(state => !retained.has(state.path));
+  const mismatched = guard.inputs.filter(input => {
+    const state = retained.get(input.path);
+    const hash = state ? contentHash(state.exists ? state.content : null) : remoteHashes.get(input.path);
+    return hash !== input.hash;
+  });
+  if (dropped.length > 0 || mismatched.length > 0) {
+    const paths = [...new Set([...dropped, ...mismatched].map(input => input.path))];
+    throw new Error('Map input consistency check failed: the generated batch would not retain ' +
+      `${paths.join(', ')}. Rerun this workflow and include the read inputs with the map and coverage; ` +
+      'refusing a partial generated commit.');
+  }
 }
 
 function latestIso(left, right) {
@@ -358,7 +454,7 @@ function writeTempFile(state, tempDir) {
   return tempPath;
 }
 
-function commitFromCapturedFiles(states, message, remote, branch, tempDir) {
+function commitFromCapturedFiles(states, message, headRef, tempDir) {
   const indexFile = path.join(tempDir, `index-${Date.now()}-${Math.random().toString(16).slice(2)}`);
   const env = {
     GIT_INDEX_FILE: indexFile,
@@ -367,8 +463,6 @@ function commitFromCapturedFiles(states, message, remote, branch, tempDir) {
     GIT_COMMITTER_NAME: DEFAULT_AUTHOR_NAME,
     GIT_COMMITTER_EMAIL: DEFAULT_AUTHOR_EMAIL,
   };
-  const headRef = remoteRef(remote, branch);
-
   gitOutput(['read-tree', headRef], { env });
   for (const state of states) {
     if (!state.exists) {
@@ -396,6 +490,8 @@ function sleep(ms) {
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
+  const baseRef = cleanText(gitOutput(['rev-parse', 'HEAD']));
+  let mapReadInputs;
   const dealsPath = 'docs/deals.json';
   const includesDealsFeed = options.patterns
     .map(normalizeRepoPath)
@@ -406,6 +502,10 @@ async function main() {
     });
     if (guideSync.status !== 0) throw new Error(`Guide sync failed: ${cleanText(guideSync.stderr || guideSync.stdout)}`);
     options.patterns.push('reviews/deal-guide-candidates.json');
+    // Stamping also sanitizes deal text; the map must read the final feed.
+    const stamped = stampDealsFeedFile(path.join(process.cwd(), dealsPath));
+    console.log(`Stamped deals feed ${stamped.feedVersion} (${stamped.totalDeals} deals)`);
+    mapReadInputs = captureMapReadInputs();
     const mapSync = spawnSync(process.execPath, ['scripts/enrich-deal-map.mjs'], {
       cwd: process.cwd(), env: process.env, encoding: 'utf8',
     });
@@ -413,7 +513,7 @@ async function main() {
       throw new Error(`Map enrichment failed: ${cleanText(mapSync.stderr || mapSync.stdout)}`);
     }
     if (cleanText(mapSync.stdout)) console.log(cleanText(mapSync.stdout));
-    options.patterns.push('docs/deal-map-locations.json', 'reviews/map-geocode-cache.json', 'reviews/map-coverage.json');
+    options.patterns.push(...MAP_GENERATED_FILES);
     const featuredSync = spawnSync(process.execPath, ['scripts/sync-featured-deal-references.mjs'], {
       cwd: process.cwd(),
       env: process.env,
@@ -426,8 +526,6 @@ async function main() {
     options.patterns.push('docs/deal-of-the-day.json');
     options.patterns.push('docs/deal-of-the-week.json');
 
-    const stamped = stampDealsFeedFile(path.join(process.cwd(), dealsPath));
-    console.log(`Stamped deals feed ${stamped.feedVersion} (${stamped.totalDeals} deals)`);
     const generated = spawnSync(process.execPath, ['scripts/generate-seo-deals-page.mjs'], {
       cwd: process.cwd(),
       env: process.env,
@@ -446,24 +544,27 @@ async function main() {
     return;
   }
 
-  const baseRef = cleanText(gitOutput(['rev-parse', 'HEAD']));
   const states = captureFiles(changedFiles);
+  const mapConsistency = captureMapConsistency(states, baseRef, mapReadInputs);
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'commit-generated-'));
   console.log(`Preparing generated commit for ${states.length} file(s): ${states.map((state) => state.path).join(', ')}`);
 
   try {
     for (let attempt = 1; attempt <= options.retries + 1; attempt += 1) {
       fetchRemote(options.remote, options.branch);
-      const headRef = remoteRef(options.remote, options.branch);
+      const headRef = cleanText(gitOutput(['rev-parse', remoteRef(options.remote, options.branch)]));
+      // Always compare with the original checkout, including on push retries.
+      const mapRemoteHashes = assertMapRemoteInputs(mapConsistency, headRef);
       const safeStates = resolveSameFileRemoteChanges(states, baseRef, headRef, {
         skipConflicts: options.skipConflicts,
         replaceConflicts: options.replaceConflicts,
       });
+      assertMapInputsRetained(mapConsistency, safeStates, mapRemoteHashes);
       if (safeStates.length === 0) {
         console.log('All generated changes were already superseded on remote main');
         return;
       }
-      const commit = commitFromCapturedFiles(safeStates, options.message, options.remote, options.branch, tempDir);
+      const commit = commitFromCapturedFiles(safeStates, options.message, headRef, tempDir);
       if (!commit) {
         console.log('No changes versus latest remote main');
         return;

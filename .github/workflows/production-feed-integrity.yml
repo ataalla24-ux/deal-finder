@@ -14,6 +14,12 @@ on:
       - "scripts/deal-map-enrichment.mjs"
       - "scripts/enrich-deal-map.mjs"
       - "scripts/test-deal-map-enrichment.mjs"
+      - "scripts/deal-map-*.mjs"
+      - "scripts/test-map-*.mjs"
+      - "scripts/test-deal-map-*.mjs"
+      - "scripts/test-slack-business-map-review.mjs"
+      - "scripts/commit-generated.mjs"
+      - "scripts/validate-map-coverage.mjs"
       - "scraper/deal-normalization-utils.js"
       - "scraper/deal-content-quality-utils.js"
       - "scraper/deal-validity-agent.js"
@@ -84,4 +90,11 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           node scripts/test-deal-map-enrichment.mjs
+          node scripts/test-map-location-pipeline.mjs
+          node scripts/test-map-geocode-fairness.mjs
+          node scripts/test-deal-map-source-addresses.mjs
+          node scripts/test-deal-map-business.mjs
+          node scripts/test-map-commit-consistency.mjs
+          node scripts/test-deal-map-review.mjs
+          node scripts/test-slack-business-map-review.mjs
           npm run test:deal-map

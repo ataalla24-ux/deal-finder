@@ -2,6 +2,7 @@ import { officialFoodOfferKey } from './power-food-sources.js';
 import { isCommunitySubmission } from './community-review-utils.js';
 import { createCardEditor } from './deal-card-editor.js';
 import { retryQueuedEditorial } from './card-editor-retry.js';
+import { loadDealMapReviewContext, reviewDealMap } from '../scripts/deal-map-review.mjs';
 import fs from 'fs';
 import crypto from 'node:crypto';
 import path from 'path';
@@ -867,7 +868,7 @@ function slackTextPrefix(text, limit) {
   return Array.from(String(text).toWellFormed()).slice(0, limit).join('');
 }
 
-function buildSlackMessage(deal, index) {
+function buildSlackMessage(deal, index, mapContext = loadDealMapReviewContext()) {
   const validity = ensureObject(deal.validity);
   const displayedType = deal.offerKind === 'low-price' ? 'Preis-Tipp (kein Rabatt behauptet)' : deal.type;
   const displayedOfferDate = validity.status ? validity.sourceDate : deal.pubDate;
@@ -906,20 +907,21 @@ function buildSlackMessage(deal, index) {
     editorialNote,
     missingNote,
     desc,
+    reviewDealMap(deal, mapContext).text,
     `✏️ Bearbeiten: \`edit ${index} titel: Neuer Titel | datum: TT.MM.JJJJ | ablauf: TT.MM.JJJJ | ort: Adresse | link: https://... | quelle: Quelle\``,
     '_Mit ✅ freigeben_',
   ].join('\n');
 }
 
-function buildFirecrawlReviewMessage(deal, index) {
-  return buildSlackMessage(deal, index).replace(
+function buildFirecrawlReviewMessage(deal, index, mapContext) {
+  return buildSlackMessage(deal, index, mapContext).replace(
     '_Mit ✅ freigeben_',
     '_Review: Link prüfen. Wenn der Deal aktuell ist, Datum/Ablauf/Ort mit `edit` belegen und erst danach ✅ setzen._',
   );
 }
 
-function buildSocialFoodReviewMessage(deal, index) {
-  return buildSlackMessage(deal, index).replace(
+function buildSocialFoodReviewMessage(deal, index, mapContext) {
+  return buildSlackMessage(deal, index, mapContext).replace(
     '_Mit ✅ freigeben_',
     '_Food-Review: Originalpost prüfen, bei Bedarf mit `edit` korrigieren, dann ✅ freigeben oder mit ❌ als unpassend markieren._',
   );
@@ -943,17 +945,23 @@ function pendingEditBlocks(text) {
   text = String(text).toWellFormed();
   const dealId = text.match(/Deal-ID:\s*([^\s]+)/)?.[1];
   const secret = process.env.DEAL_REMOVE_LINK_SECRET;
+  const mapNotes = text.split('\n').filter(line => line.startsWith('INTERN Karte:'));
+  const body = mapNotes.length ? text.split('\n').filter(line => !line.startsWith('INTERN Karte:')).join('\n') : text;
+  const blocks = [
+    ...(body.match(/[\s\S]{1,2900}/gu) || []).map(part => ({ type: 'section', text: { type: 'mrkdwn', text: part } })),
+    ...mapNotes.map(note => ({ type: 'context', elements: [{ type: 'mrkdwn', text: note }] })),
+  ];
   if (dealId && secret) {
     const signed = Buffer.from(JSON.stringify({ dealId, scope: 'pending-edit' })).toString('base64url');
     const sig = crypto.createHmac('sha256', secret).update(signed).digest('hex');
     return [
-      ...text.match(/[\s\S]{1,2900}/gu).map(part => ({ type: 'section', text: { type: 'mrkdwn', text: part } })),
+      ...blocks,
       { type: 'actions', elements: [{ type: 'button', action_id: 'freefinder_edit_pending',
         text: { type: 'plain_text', text: 'Bearbeiten' },
         url: `https://freefinder-referrals.freefinder-stefan.workers.dev/api/deals/admin/pending-edit?payload=${signed}&sig=${sig}` }] },
     ];
   }
-  return undefined;
+  return mapNotes.length ? blocks : undefined;
 }
 
 async function postSlackMessage(text, threadTs = null, attempt = 0) {

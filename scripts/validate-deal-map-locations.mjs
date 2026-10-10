@@ -13,6 +13,10 @@ const [mapPayload, dealsPayload] = await Promise.all(
 const errors = [];
 const locations = Array.isArray(mapPayload.locations) ? mapPayload.locations : [];
 const liveDealIds = new Set((dealsPayload.deals || []).map((deal) => String(deal.id || '').trim()).filter(Boolean));
+try {
+  const business = JSON.parse(await readFile(path.join(root, 'reviews', 'map-business-campaigns.json'), 'utf8'));
+  for (const deal of business.deals || []) if (/^merchant-[a-zA-Z0-9-]+$/.test(deal.id || '')) liveDealIds.add(deal.id);
+} catch (error) { if (error.code !== 'ENOENT') throw error; }
 const locationIds = new Set();
 const coverageByDealId = new Map();
 const locationsByChainId = new Map();

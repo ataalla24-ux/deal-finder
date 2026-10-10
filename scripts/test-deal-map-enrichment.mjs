@@ -48,7 +48,8 @@ Object.values(staleCache)[0].checkedAt = '2025-01-01T00:00:00Z';
 const outage = await enrichMap({ deals: [deal], map: first.map, cache: staleCache, now,
   lookup: async () => { throw new Error('offline'); } });
 assert.deepEqual(outage.map, first.map);
-const existing = { id: 'old', dealIds: ['another'], name: 'Existing chain' };
-const preserved = await enrichMap({ deals: [deal], map: { ...map, locations: [existing] }, lookup, now });
+const existing = { id: 'old', dealIds: ['another'], name: 'Existing chain', address: 'Wagramer Straße 94, 1220 Wien',
+  latitude: 48.24, longitude: 16.43, source: 'official-store-finder', confidence: 1 };
+const preserved = await enrichMap({ deals: [deal, { id: 'another', brand: 'Existing chain', distance: 'Wien' }], map: { ...map, locations: [existing] }, lookup, now });
 assert.deepEqual(preserved.map.locations[0], existing);
 console.log('Map enrichment: exact matches, online exclusion, branch dates, ambiguity, cache, budget and idempotency passed.');

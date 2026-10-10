@@ -12,6 +12,10 @@ const write = (file, value) => fs.writeFileSync(path.join(temp, 'docs', file), J
 const read = file => JSON.parse(fs.readFileSync(path.join(temp, 'docs', file), 'utf8'));
 try {
   for (const dir of ['scraper', 'sentry']) fs.cpSync(path.join(root, dir), path.join(temp, dir), { recursive: true });
+  fs.mkdirSync(path.join(temp, 'scripts'));
+  for (const file of ['deal-map-review.mjs', 'deal-map-enrichment.mjs']) {
+    fs.copyFileSync(path.join(root, 'scripts', file), path.join(temp, 'scripts', file));
+  }
   fs.copyFileSync(path.join(root, 'package.json'), path.join(temp, 'package.json'));
   fs.symlinkSync(path.join(root, 'node_modules'), path.join(temp, 'node_modules'), 'dir');
   fs.mkdirSync(path.join(temp, 'docs'));

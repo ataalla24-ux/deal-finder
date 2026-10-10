@@ -1,0 +1,62 @@
+name: "Deal Map Reconciliation"
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'reviews/map-addresses.json'
+      - 'scripts/deal-map-*.mjs'
+      - 'scripts/enrich-deal-map.mjs'
+      - '.github/workflows/deal-map-sync.yml'
+
+concurrency:
+  group: deal-state-writer
+  cancel-in-progress: false
+  queue: max
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile-map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Verify map safeguards
+        run: |
+          node scripts/test-deal-map-enrichment.mjs
+          node scripts/test-map-location-pipeline.mjs
+          node scripts/test-map-geocode-fairness.mjs
+          node scripts/test-deal-map-source-addresses.mjs
+          node scripts/test-deal-map-business.mjs
+          node scripts/test-map-commit-consistency.mjs
+          node scripts/test-deal-map-review.mjs
+          node scripts/test-slack-business-map-review.mjs
+          SENTRY_DISABLED=1 node scripts/test-community-approval-integration.mjs
+      - name: Reconcile published deals and active business campaigns
+        env:
+          MAP_REFRESH_BUSINESS: '1'
+          MAP_SOURCE_REQUESTS: '8'
+          MAP_GEOCODE_REQUESTS: '20'
+        run: node scripts/enrich-deal-map.mjs
+      - name: Validate complete accounting and verified coordinates
+        run: |
+          node scripts/validate-deal-map-locations.mjs
+          node scripts/validate-map-coverage.mjs
+      - name: Publish only map projections and internal review state
+        run: >-
+          node scripts/commit-generated.mjs --message "Reconcile verified deal map locations"
+          --files docs/deal-map-locations.json reviews/map-location-catalog.json
+          reviews/map-geocode-cache.json reviews/map-source-address-cache.json
+          reviews/map-business-campaigns.json reviews/map-coverage.json

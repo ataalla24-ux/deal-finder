@@ -3,6 +3,8 @@ import fs from 'fs';
 import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { dealMapReviewBlock, loadDealMapReviewContext, reviewDealMap } from './deal-map-review.mjs';
+import { activeBusinessDeals } from './deal-map-business.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,10 +19,12 @@ const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || '';
 const DRY_RUN = process.env.SLACK_LIVE_REVIEW_DRY_RUN === '1';
 const MAX_DEALS = Math.max(1, Math.min(200, Number(process.env.SLACK_LIVE_REVIEW_MAX_DEALS || 120)));
 const MAX_OFFLINE_DEALS = Math.max(1, Math.min(200, Number(process.env.SLACK_LIVE_REVIEW_MAX_OFFLINE || 200)));
-const CHUNK_SIZE = Math.max(1, Math.min(15, Number(process.env.SLACK_LIVE_REVIEW_CHUNK_SIZE || 10)));
+// Reserve four blocks per live deal within Slack's 50-block message limit.
+const CHUNK_SIZE = Math.max(1, Math.min(12, Number(process.env.SLACK_LIVE_REVIEW_CHUNK_SIZE || 10)));
 const ADMIN_URL = process.env.DEAL_ADMIN_URL || 'https://freefinder.at/deal-admin.html';
 const WORKER_BASE_URL = (process.env.FREEFINDER_WORKER_BASE_URL || 'https://freefinder-referrals.freefinder-stefan.workers.dev').replace(/\/+$/, '');
 const REMOVE_LINK_SECRET = process.env.DEAL_REMOVE_LINK_SECRET || (DRY_RUN ? 'dry-run-secret' : '');
+const MAX_BUSINESS_MAP_REVIEWS = 20;
 
 function cleanText(value, max = 500) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max);
@@ -31,6 +35,41 @@ function slackEscape(value) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+function loadBusinessMapReviews({ root = ROOT, now = new Date(), mapContext = loadDealMapReviewContext({ root, now }) } = {}) {
+  let snapshot;
+  try {
+    snapshot = JSON.parse(fs.readFileSync(path.join(root, 'reviews', 'map-business-campaigns.json'), 'utf8'));
+  } catch {
+    return { total: 0, entries: [] };
+  }
+  const deals = Array.isArray(snapshot?.deals) ? snapshot.deals.filter(deal => deal && typeof deal === 'object') : [];
+  const unresolved = activeBusinessDeals({ deals }, now).map(deal => ({
+    id: deal.id,
+    brand: deal.brand,
+    title: deal.title,
+    address: deal.address,
+    review: reviewDealMap(deal, mapContext, { business: true }),
+  })).filter(entry => entry.review.reviewReason);
+  return { total: unresolved.length, entries: unresolved.slice(0, MAX_BUSINESS_MAP_REVIEWS) };
+}
+
+function businessMapReviewBlocks({ total, entries }) {
+  if (!entries.length) return [];
+  const visible = entries.slice(0, MAX_BUSINESS_MAP_REVIEWS);
+  const plain = (value, max) => Array.from(String(value || '').toWellFormed().replace(/\s+/g, ' ').trim()).slice(0, max).join('');
+  return [
+    { type: 'section', text: { type: 'mrkdwn', text: `*INTERN: Kartenprüfung für Business-Anzeigen*\n${visible.length} von ${total} offenen Kartenhinweisen. Änderungen gehören in den Business-Datensatz, nicht in den normalen Deal-Editor.` } },
+    ...visible.flatMap(entry => [
+      { type: 'section', text: { type: 'plain_text', text: [
+        `Restaurant: ${plain(entry.brand, 180) || 'Nicht angegeben'}`,
+        `Angebot: ${plain(entry.title, 240) || 'Nicht angegeben'}`,
+        `Adresse: ${plain(entry.address, 240) || 'Nicht angegeben'}`,
+      ].join('\n') } },
+      dealMapReviewBlock(entry.review),
+    ]),
+  ];
 }
 
 function loadLiveDeals() {
@@ -213,13 +252,28 @@ function reviewKey(deal = {}) {
   return url ? `url:${url}` : '';
 }
 
-function buildReviewCandidateMap(candidates = []) {
+function buildReviewCandidateMap(candidates = [], deals = [], mapContext = loadDealMapReviewContext()) {
   const map = new Map();
   for (const candidate of candidates) {
     const idKey = cleanText(candidate.id || '', 256) ? `id:${cleanText(candidate.id || '', 256)}` : '';
     const url = normalizeUrlForCompare(candidate.url || '');
     if (idKey) map.set(idKey, candidate);
     if (url) map.set(`url:${url}`, candidate);
+  }
+  for (const deal of deals) {
+    const { reviewReason } = reviewDealMap(deal, mapContext);
+    if (!reviewReason) continue;
+    const key = reviewKey(deal);
+    if (!key) continue;
+    const url = normalizeUrlForCompare(deal.url || '');
+    const existing = map.get(key) || (url ? map.get(`url:${url}`) : null);
+    const candidate = {
+      ...existing,
+      id: deal.id,
+      url: deal.url,
+      reason: [existing?.reason, reviewReason].filter(Boolean).join(' + '),
+    };
+    map.set(key, candidate);
   }
   return map;
 }
@@ -347,7 +401,7 @@ function signedRestoreUrl(deal) {
   return signedWorkerUrl('/api/deals/admin/restore-link', restoreValue(deal));
 }
 
-function dealBlocks(deal, index, reviewCandidate = null) {
+function dealBlocks(deal, index, reviewCandidate = null, mapContext = loadDealMapReviewContext()) {
   const title = slackEscape(deal.title || deal.brand || 'Deal');
   const brand = slackEscape(deal.brand || 'Unbekannt');
   const location = slackEscape(deal.distance || deal.location || deal.address || 'Wien');
@@ -425,6 +479,7 @@ function dealBlocks(deal, index, reviewCandidate = null) {
       type: 'section',
       text: { type: 'mrkdwn', text },
     },
+    dealMapReviewBlock(reviewDealMap(deal, mapContext)),
     {
       type: 'actions',
       elements,
@@ -513,7 +568,10 @@ async function postMessage(body) {
 
 async function main() {
   const live = loadLiveDeals();
-  const reviewCandidateMap = buildReviewCandidateMap(live.reviewCandidates);
+  const mapContext = loadDealMapReviewContext();
+  const businessReviews = loadBusinessMapReviews({ mapContext });
+  const reviewCandidateMap = buildReviewCandidateMap(live.reviewCandidates, live.deals, mapContext);
+  const reviewCount = live.deals.filter(deal => reviewCandidateMap.has(reviewKey(deal))).length;
   const deals = prioritizeReviewCandidates(live.deals, reviewCandidateMap).slice(0, MAX_DEALS);
 
   if (!DRY_RUN && (!SLACK_BOT_TOKEN || !SLACK_CHANNEL_ID)) {
@@ -527,7 +585,7 @@ async function main() {
     `*FreeFinder Live-Deal-Review*`,
     `${live.totalDeals} Deals sind aktuell online in iOS, Web und Android.`,
     live.offlineDeals.length > 0 ? `${live.offlineDeals.length} automatische Offline-Deals im Abschnitt *Offline*.` : '',
-    live.reviewCandidates.length > 0 ? `${live.reviewCandidates.length} Deals brauchen besondere Prüfung.` : '',
+    reviewCount > 0 ? `${reviewCount} Deals haben Prüfhinweise (inkl. interner Kartenhinweise).` : '',
     live.lastUpdated ? `Stand: ${live.lastUpdated}` : '',
     live.reviewCheckedAt ? `Review-Kandidaten: ${live.reviewCheckedAt}` : '',
     live.offlineCheckedAt ? `Offline-Stand: ${live.offlineCheckedAt}` : '',
@@ -543,6 +601,16 @@ async function main() {
     ],
   });
 
+  const businessBlocks = businessMapReviewBlocks(businessReviews);
+  if (businessBlocks.length) {
+    await postMessage({
+      channel: SLACK_CHANNEL_ID,
+      thread_ts: header.ts,
+      text: `INTERN: Business-Kartenprüfung, ${businessReviews.entries.length} von ${businessReviews.total} offenen Hinweisen`,
+      blocks: businessBlocks,
+    });
+  }
+
   if (deals.length === 0) {
     await postMessage({
       channel: SLACK_CHANNEL_ID,
@@ -555,7 +623,7 @@ async function main() {
 
   for (const [chunkIndex, group] of chunk(deals, CHUNK_SIZE).entries()) {
     const offset = chunkIndex * CHUNK_SIZE;
-    const blocks = group.flatMap((deal, index) => dealBlocks(deal, offset + index, reviewCandidateMap.get(reviewKey(deal)) || null));
+    const blocks = group.flatMap((deal, index) => dealBlocks(deal, offset + index, reviewCandidateMap.get(reviewKey(deal)) || null, mapContext));
     await postMessage({
       channel: SLACK_CHANNEL_ID,
       thread_ts: header.ts,
@@ -593,7 +661,11 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error?.stack || error?.message || error);
-  process.exit(1);
-});
+if (process.argv[1] && fs.existsSync(process.argv[1]) && fs.realpathSync(process.argv[1]) === fs.realpathSync(__filename)) {
+  main().catch((error) => {
+    console.error(error?.stack || error?.message || error);
+    process.exit(1);
+  });
+}
+
+export { buildReviewCandidateMap, dealBlocks, offlineDealBlocks, prioritizeReviewCandidates, loadBusinessMapReviews, businessMapReviewBlocks };
