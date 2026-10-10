@@ -21,7 +21,7 @@ for (const slug of slugs) {
   assert.equal($('meta[property="og:url"]').attr('content'), canonical);
   const entry = sitemap('url').filter((_, element) => sitemap(element).find('loc').text() === canonical);
   assert.equal(entry.length, 1, `${slug}: one sitemap entry`);
-  const modified = slug === 'geburtstag-gratis-wien' ? '2026-10-09' : slug === 'guenstig-essen-wien' ? '2026-10-07' : '2026-10-08';
+  const modified = slug === 'geburtstag-gratis-wien' ? '2026-10-10' : slug === 'guenstig-essen-wien' ? '2026-10-07' : '2026-10-08';
   assert.equal(entry.find('lastmod').text(), modified);
   const graph = JSON.parse($('script[type="application/ld+json"]').text())['@graph'];
   const article = graph.find(item => item['@type'] === 'Article');
@@ -51,7 +51,7 @@ for (const slug of slugs) {
 const kino = load(fs.readFileSync(path.join(docs, 'blog', `${slugs[2]}.html`), 'utf8'));
 assert.equal(kino('#wien').nextUntil('h2').find('li').length, 9);
 const birthday = load(fs.readFileSync(path.join(docs, 'blog', `${slugs[1]}.html`), 'utf8'));
-assert.equal(birthday('.table-scroll tbody tr').length, 4);
+assert.equal(birthday('.table-scroll tbody tr').length, 5);
 for (const postcode of ['1010', '1020', '1110', '1220']) assert.ok(birthday('.table-scroll').text().includes(postcode));
 const index = load(fs.readFileSync(path.join(docs, 'blog', 'index.html'), 'utf8'));
 for (const slug of slugs) {
@@ -79,7 +79,7 @@ try {
   fs.symlinkSync(path.join(root, 'node_modules'), path.join(fixture, 'node_modules'), 'dir');
   fs.mkdirSync(path.join(fixture, 'docs/blog'));
   execFileSync(process.execPath, [path.join(fixture, 'scripts/generate-topic-guides.mjs'), ...slugs.slice(0, 2)], {
-    env: { ...process.env, SEO_NOW: '2026-10-09T10:00:00+02:00' },
+    env: { ...process.env, SEO_NOW: '2026-10-10T10:00:00+02:00' },
   });
   assert.deepEqual(fs.readdirSync(path.join(fixture, 'docs/blog')).sort(), slugs.slice(0, 2).map(slug => `${slug}.html`).sort());
   for (const slug of slugs.slice(0, 2)) {
