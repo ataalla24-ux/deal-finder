@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-11T11:25:38.723Z",
+  "generatedAt": "2026-10-11T11:28:23.361Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 737,
-    "uniqueCandidates": 656,
-    "distinctCandidates": 694,
+    "totalCandidates": 735,
+    "uniqueCandidates": 654,
+    "distinctCandidates": 692,
     "duplicateClusters": 38,
     "topHealthySources": [
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "healthScore": 76,
+        "totalDeals": 8
+      },
       {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
@@ -18,12 +24,6 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 68,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "healthScore": 67,
-        "totalDeals": 10
       },
       {
         "sourceKey": "firecrawl5",
@@ -52,6 +52,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "missionFitScore": 64,
+        "totalDeals": 8
+      },
+      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 61,
@@ -62,12 +68,6 @@
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 57,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 52,
-        "totalDeals": 64
       }
     ],
     "topCoverageSources": [
@@ -123,8 +123,8 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "precisionScore": 66,
-        "totalDeals": 10
+        "precisionScore": 76,
+        "totalDeals": 8
       },
       {
         "sourceKey": "instagram-apify",
@@ -153,6 +153,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 60,
+        "totalDeals": 8
+      },
+      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 56,
@@ -163,12 +169,6 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 54,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 54,
-        "totalDeals": 64
       }
     ],
     "topSourcesToFix": [
@@ -240,6 +240,72 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "tiktok",
+      "file": "deals-pending-tiktok.json",
+      "sourceLabel": "TikTok Scanner",
+      "totalDeals": 8,
+      "uniqueDeals": 7,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 2,
+      "fresh7dCount": 8,
+      "viennaCount": 8,
+      "foodDrinkCount": 3,
+      "promoCount": 8,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🍕 ONLY PIZZA 🍕 Täglich von 16:00 bis 02:00 Uhr für euch geöffnet",
+        "1+1 ASIAN PIZZA AKTION bei Papa Duck – Urban Bistro",
+        "Save the Date 🤩 Am Montag, 12"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.9,
+      "duplicateRate": 0.1,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.4,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 70,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        },
+        {
+          "value": "kultur",
+          "count": 2
+        },
+        {
+          "value": "shopping",
+          "count": 2
+        },
+        {
+          "value": "beauty",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 7
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 76,
+      "missionFitScore": 64,
+      "coverageScore": 17,
+      "precisionScore": 76,
+      "sourceWeightScore": 60
+    },
     {
       "sourceKey": "food3",
       "file": "deals-pending-food3.json",
@@ -377,80 +443,6 @@
       "coverageScore": 14,
       "precisionScore": 65,
       "sourceWeightScore": 54
-    },
-    {
-      "sourceKey": "tiktok",
-      "file": "deals-pending-tiktok.json",
-      "sourceLabel": "TikTok Scanner",
-      "totalDeals": 10,
-      "uniqueDeals": 9,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 2,
-      "fresh7dCount": 9,
-      "viennaCount": 10,
-      "foodDrinkCount": 2,
-      "promoCount": 8,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🍕 ONLY PIZZA 🍕 Täglich von 16:00 bis 02:00 Uhr für euch geöffnet",
-        "1+1 ASIAN PIZZA AKTION bei Papa Duck – Urban Bistro",
-        "Save the Date 🤩 Am Montag, 12"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.9,
-      "duplicateRate": 0.1,
-      "fresh1dRate": 0.2,
-      "fresh7dRate": 0.9,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.2,
-      "promoRate": 0.8,
-      "missingUrlRate": 0,
-      "averageQualityScore": 68.2,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 5
-        },
-        {
-          "value": "essen",
-          "count": 2
-        },
-        {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "beauty",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 6
-        },
-        {
-          "value": "rabatt",
-          "count": 2
-        },
-        {
-          "value": "bogo",
-          "count": 1
-        },
-        {
-          "value": "freebie",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 67,
-      "missionFitScore": 49,
-      "coverageScore": 16,
-      "precisionScore": 66,
-      "sourceWeightScore": 51
     },
     {
       "sourceKey": "firecrawl5",
