@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-11T15:38:18.256Z",
+  "generatedAt": "2026-10-11T15:46:32.895Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -130,7 +130,7 @@
     },
     "deals-pending-meta-instagram.json": {
       "deals": 61,
-      "candidates": 5
+      "candidates": 8
     },
     "deals-pending-power.json": {
       "deals": 43,
@@ -157,10 +157,22 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 9,
-  "candidateAccounts": 9,
+  "candidatePosts": 12,
+  "candidateAccounts": 12,
   "skippedAccountCooldowns": 1,
   "selectedAccounts": [
+    {
+      "username": "vorteilsclub.wien",
+      "candidates": 1
+    },
+    {
+      "username": "entruempelungsservice1190",
+      "candidates": 1
+    },
+    {
+      "username": "viennawhispers",
+      "candidates": 1
+    },
     {
       "username": "popupevents.wien",
       "candidates": 1
@@ -172,24 +184,17 @@
     {
       "username": "ticketoase.at",
       "candidates": 1
-    },
-    {
-      "username": "dieseeteufel",
-      "candidates": 1
-    },
-    {
-      "username": "boca.vienna",
-      "candidates": 1
-    },
-    {
-      "username": "prater.at",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 126,
-  "exactMatches": 6,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "vorteilsclub.wien",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 1,
@@ -200,18 +205,24 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 80,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
+  "globalError": {
+    "username": "vorteilsclub.wien",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
   "blockedEvidencePosts": 94,
-  "unmatchedCandidatePosts": 3,
-  "message": "6/9 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 12,
+  "message": "0/12 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
