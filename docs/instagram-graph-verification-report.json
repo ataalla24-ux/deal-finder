@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-11T14:17:55.850Z",
+  "generatedAt": "2026-10-11T14:53:21.149Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -130,7 +130,7 @@
     },
     "deals-pending-meta-instagram.json": {
       "deals": 64,
-      "candidates": 7
+      "candidates": 5
     },
     "deals-pending-power.json": {
       "deals": 43,
@@ -157,14 +157,10 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 11,
-  "candidateAccounts": 10,
+  "candidatePosts": 9,
+  "candidateAccounts": 9,
   "skippedAccountCooldowns": 1,
   "selectedAccounts": [
-    {
-      "username": "lisa.maria.b",
-      "candidates": 2
-    },
     {
       "username": "popupevents.wien",
       "candidates": 1
@@ -184,12 +180,21 @@
     {
       "username": "boca.vienna",
       "candidates": 1
+    },
+    {
+      "username": "prater.at",
+      "candidates": 1
     }
   ],
-  "fetchedPosts": 126,
-  "exactMatches": 7,
+  "fetchedPosts": 76,
+  "exactMatches": 4,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "boca.vienna",
+      "message": "Instagram shared quota paused: request or quota unavailable"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 1,
@@ -200,18 +205,24 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
+    "requests": 5,
+    "reserved": 5,
     "stopped": false,
     "reason": "",
-    "highestUsagePercent": 63,
+    "highestUsagePercent": 29,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
+  "globalError": {
+    "username": "boca.vienna",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: request or quota unavailable"
+  },
   "blockedEvidencePosts": 94,
-  "unmatchedCandidatePosts": 4,
-  "message": "7/11 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 5,
+  "message": "4/9 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
