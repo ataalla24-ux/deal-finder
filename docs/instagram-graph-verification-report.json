@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-12T22:23:20.500Z",
+  "generatedAt": "2026-10-12T23:00:56.016Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -129,7 +129,7 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 59,
+      "deals": 60,
       "candidates": 14
     },
     "deals-pending-power.json": {
@@ -186,10 +186,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 6,
+  "fetchedPosts": 50,
+  "exactMatches": 2,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "dontcallitpizza",
+      "message": "Instagram shared quota paused: Meta usage headroom"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 1,
@@ -200,18 +205,24 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 85,
+    "requests": 2,
+    "reserved": 5,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: Meta usage headroom",
+    "highestUsagePercent": 95,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-12T23:11:05.174Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
+  "globalError": {
+    "username": "dontcallitpizza",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: Meta usage headroom"
+  },
   "blockedEvidencePosts": 91,
-  "unmatchedCandidatePosts": 12,
-  "message": "6/18 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 16,
+  "message": "2/18 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
