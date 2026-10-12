@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-12T23:43:37.758Z",
+  "generatedAt": "2026-10-12T23:48:55.938Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 306,
-    "allowed": 2,
+    "total": 304,
+    "allowed": 0,
     "blocked": 304,
-    "warnings": 2,
+    "warnings": 0,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 215,
       "älter als 7 Tage (2026-02-22)": 83,
@@ -21,6 +21,7 @@
       "abgelaufen (2026-09-16)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)": 3,
       "kein konkretes Angebot: Buffet-Normalpreis ohne belegte Aktion oder besonders niedrigen Preis": 2,
+      "älter als 7 Tage (2025-10-08)": 2,
       "abgelaufen (2026-01-06)": 2,
       "älter als 7 Tage (2026-04-19)": 29,
       "älter als 7 Tage (2016-10-30)": 3,
@@ -57,7 +58,7 @@
     },
     "reasonCategoryCounts": {
       "kein konkreter Deal": 220,
-      "älter als 7 Tage": 143,
+      "älter als 7 Tage": 145,
       "ungültige URL": 21,
       "abgelaufen": 14,
       "sonstiges": 9,
@@ -90,7 +91,7 @@
         "warnings": 0,
         "reasonCategoryCounts": {
           "ungültige URL": 4,
-          "älter als 7 Tage": 2,
+          "älter als 7 Tage": 4,
           "abgelaufen": 4,
           "kein konkreter Deal": 1
         }
@@ -218,10 +219,10 @@
         }
       },
       "tiktok-deals-scanner": {
-        "total": 6,
-        "allowed": 2,
+        "total": 4,
+        "allowed": 0,
         "blocked": 4,
-        "warnings": 2,
+        "warnings": 0,
         "reasonCategoryCounts": {
           "kein konkreter Deal": 4
         }
@@ -238,42 +239,7 @@
       }
     }
   },
-  "allowed": [
-    {
-      "id": "tiktok-1htuenb",
-      "title": "1+1 GRATIS",
-      "brand": "@lailiwienwien",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@lailiwienwien/video/7695832569903877398",
-      "reasons": [],
-      "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
-      ],
-      "sourceDate": "2026-10-12T17:20:50.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 0,
-      "expiryDate": "2026-10-17",
-      "expirySource": "deal.structured",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "tiktok-rdxkki",
-      "title": "☕️📚 BUCHWOCHEN IM WIENER KAFFEEHAUS",
-      "brand": "Wienerkaffeehaus",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@isioncampus/video/7695829897809349910",
-      "reasons": [],
-      "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text; Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
-      ],
-      "sourceDate": "2026-10-12T17:10:28.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 0,
-      "expiryDate": "2026-10-22",
-      "expirySource": "deal.structured",
-      "urlStatus": "HTTP 200"
-    }
-  ],
+  "allowed": [],
   "blocked": [
     {
       "id": "events-0-20260222",
@@ -1087,18 +1053,16 @@
       "url": "https://www.signature.at/vorteil/vienna-1st",
       "reasons": [
         "kein konkretes Angebot: Buffet-Normalpreis ohne belegte Aktion oder besonders niedrigen Preis",
+        "älter als 7 Tage (2025-10-08)",
         "abgelaufen (2026-01-06)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 503)",
-        "kein Quell-/Post-Datum gefunden"
-      ],
-      "sourceDate": "",
-      "sourceDateSource": "",
-      "sourceAgeDays": null,
+      "warnings": [],
+      "sourceDate": "2025-10-08T22:00:00.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 369,
       "expiryDate": "2026-01-06",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: HTTP 503"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "fc4g-15t7iv5",
@@ -1107,18 +1071,16 @@
       "source": "Firecrawl Gastro #4",
       "url": "https://www.signature.at/vorteil/vienna-1st",
       "reasons": [
+        "älter als 7 Tage (2025-10-08)",
         "abgelaufen (2026-01-06)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 503)",
-        "kein Quell-/Post-Datum gefunden"
-      ],
-      "sourceDate": "",
-      "sourceDateSource": "",
-      "sourceAgeDays": null,
+      "warnings": [],
+      "sourceDate": "2025-10-08T22:00:00.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 369,
       "expiryDate": "2026-01-06",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: HTTP 503"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "freikirche-1-20260419",
@@ -2776,13 +2738,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 232,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-8-20260222",
@@ -3809,6 +3773,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -3816,7 +3781,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1371lsp",
@@ -3828,6 +3793,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -3835,7 +3801,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-dt9qpd",
@@ -3847,6 +3813,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -3854,7 +3821,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-1800401",
@@ -3867,6 +3834,7 @@
       ],
       "warnings": [
         "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten",
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -3874,7 +3842,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-xv7so",
@@ -3887,6 +3855,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -3894,7 +3863,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1a0ty30",
@@ -3906,6 +3875,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -3913,7 +3883,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-98fu94",
@@ -3925,6 +3895,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -3932,7 +3903,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-139bzav",
@@ -3944,6 +3915,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -3951,7 +3923,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-rmdp0a",
@@ -3963,6 +3935,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -3970,7 +3943,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-eelvfk",
@@ -3982,6 +3955,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -3989,7 +3963,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1n6vb6x",
@@ -4001,6 +3975,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4008,7 +3983,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-1jnj7tw",
@@ -4020,6 +3995,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4027,7 +4003,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-125utiv",
@@ -4039,6 +4015,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4046,7 +4023,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-1swzguu",
@@ -4059,6 +4036,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4066,7 +4044,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1jxg791",
@@ -4078,6 +4056,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4085,7 +4064,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-1v1h4y5",
@@ -4097,6 +4076,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4104,7 +4084,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1yqclrr",
@@ -4116,6 +4096,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4123,7 +4104,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-179rcbp",
@@ -4135,6 +4116,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4142,7 +4124,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1ibj02m",
@@ -4154,6 +4136,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4161,7 +4144,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-gicwnp",
@@ -4173,6 +4156,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4180,7 +4164,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-gicwnp",
@@ -4192,6 +4176,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4199,7 +4184,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-gicwnp",
@@ -4211,6 +4196,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4218,7 +4204,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-112bulq",
@@ -4231,6 +4217,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4238,7 +4225,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-w5s6ly",
@@ -4250,6 +4237,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4257,7 +4245,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1nyuxv7",
@@ -4269,6 +4257,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4276,7 +4265,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-11hr6or",
@@ -4289,6 +4278,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4296,7 +4286,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-2edxr5",
@@ -4308,6 +4298,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4315,7 +4306,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1as404q",
@@ -4327,6 +4318,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4334,7 +4326,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-r0i9km",
@@ -4346,6 +4338,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4353,7 +4346,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-vxhqto",
@@ -4365,6 +4358,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4372,7 +4366,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-1f8y7wy",
@@ -4385,6 +4379,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4392,7 +4387,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-43inlt",
@@ -4405,6 +4400,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4412,7 +4408,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-19yxcu0",
@@ -4425,6 +4421,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4432,7 +4429,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-uriefe",
@@ -4445,6 +4442,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4452,7 +4450,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-p1o82i",
@@ -4467,6 +4465,7 @@
       ],
       "warnings": [
         "Inhalt prüfen: Titel ist eine Werbeeinleitung; konkretes Angebot mit Produkt und Vorteil benennen",
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4474,7 +4473,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-1pkpt2r",
@@ -4486,6 +4485,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4493,7 +4493,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1vkczmc",
@@ -4506,6 +4506,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4513,7 +4514,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-oyx5s9",
@@ -4526,6 +4527,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4533,7 +4535,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-wozdjf",
@@ -4546,6 +4548,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4553,7 +4556,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-113v59r",
@@ -4566,6 +4569,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4573,7 +4577,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-1lmeggc",
@@ -4586,6 +4590,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4593,7 +4598,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1lhg6e3",
@@ -4606,6 +4611,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4613,7 +4619,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1pj5qjo",
@@ -4626,6 +4632,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4633,7 +4640,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-2q2ey8",
@@ -4646,6 +4653,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4653,7 +4661,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-y5a5f4",
@@ -4667,6 +4675,7 @@
       ],
       "warnings": [
         "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten",
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4674,7 +4683,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-2yllsp",
@@ -4687,6 +4696,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4694,7 +4704,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-166c578",
@@ -4707,6 +4717,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4714,7 +4725,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-e8euc9",
@@ -4727,6 +4738,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4734,7 +4746,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-xsdzct",
@@ -4747,6 +4759,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4754,7 +4767,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-w6fljm",
@@ -4768,6 +4781,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4775,7 +4789,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1617epr",
@@ -4788,6 +4802,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4795,7 +4810,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-moi1oe",
@@ -4808,6 +4823,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4815,7 +4831,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-1tqb33s",
@@ -4828,6 +4844,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4835,7 +4852,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-zkzgir",
@@ -4849,6 +4866,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4856,7 +4874,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-54wtby",
@@ -4870,6 +4888,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4877,7 +4896,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1i8y1c7",
@@ -4890,6 +4909,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4897,7 +4917,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1ydu0u4",
@@ -4911,6 +4931,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4918,7 +4939,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1e0503m",
@@ -4931,6 +4952,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4938,7 +4960,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-bvpcal",
@@ -4951,6 +4973,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4958,7 +4981,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1d86q9s",
@@ -4972,6 +4995,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4979,7 +5003,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-5rpebk",
@@ -4992,6 +5016,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -4999,7 +5024,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-15tx74b",
@@ -5012,6 +5037,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5019,7 +5045,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1dyqr8c",
@@ -5032,6 +5058,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5039,7 +5066,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-pt4b3m",
@@ -5052,6 +5079,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5059,7 +5087,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1qlsq4m",
@@ -5072,6 +5100,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5079,7 +5108,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1k7t1h6",
@@ -5092,6 +5121,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5099,7 +5129,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-x9aeec",
@@ -5113,6 +5143,7 @@
       ],
       "warnings": [
         "Inhalt prüfen: Text wirkt abgeschnitten; vollständige Quelle prüfen",
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5120,7 +5151,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-19aqkqd",
@@ -5133,6 +5164,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5140,7 +5172,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-e5h0e4",
@@ -5153,6 +5185,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5160,7 +5193,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-uh11n3",
@@ -5173,6 +5206,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5180,7 +5214,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1yvv9g9",
@@ -5193,6 +5227,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5200,7 +5235,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-k5a9k7",
@@ -5213,6 +5248,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5220,7 +5256,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-1lmeggc",
@@ -5233,6 +5269,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5240,7 +5277,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-2quqv7",
@@ -5254,6 +5291,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5261,7 +5299,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-seaxvn",
@@ -5274,6 +5312,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5281,7 +5320,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1ungve3",
@@ -5294,6 +5333,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5301,7 +5341,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-147eloz",
@@ -5314,6 +5354,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5321,7 +5362,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-70ica4",
@@ -5334,6 +5375,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5341,7 +5383,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-15e0ij3",
@@ -5355,6 +5397,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5362,7 +5405,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1ev8gkz",
@@ -5376,6 +5419,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5383,7 +5427,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-19eb759",
@@ -5397,6 +5441,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5404,7 +5449,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1co5yz7",
@@ -5418,6 +5463,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5425,7 +5471,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-15pplwv",
@@ -5439,6 +5485,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5446,7 +5493,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-17l436d",
@@ -5460,6 +5507,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5467,7 +5515,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-egvafy",
@@ -5481,6 +5529,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5488,7 +5537,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-r4r0wd",
@@ -5501,6 +5550,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5508,7 +5558,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-raf31t",
@@ -5522,6 +5572,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5529,7 +5580,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-16cxjm",
@@ -5542,6 +5593,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5549,7 +5601,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-wb8er0",
@@ -5562,6 +5614,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5569,7 +5622,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1q9wrtn",
@@ -5582,6 +5635,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5589,7 +5643,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-i4rnr5",
@@ -5602,6 +5656,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5609,7 +5664,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-zdfrvp",
@@ -5622,6 +5677,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5629,7 +5685,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-y652b9",
@@ -5642,6 +5698,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5649,7 +5706,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-chmras",
@@ -5662,6 +5719,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5669,7 +5727,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-khyy11",
@@ -5682,6 +5740,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5689,7 +5748,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-8ft9l4",
@@ -5702,6 +5761,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5709,7 +5769,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-1dhjgr1",
@@ -5722,6 +5782,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5729,7 +5790,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-1ogyv3e",
@@ -5742,6 +5803,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5749,7 +5811,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-1nrhs2a",
@@ -5762,6 +5824,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5769,7 +5832,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1von23r",
@@ -5782,6 +5845,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5789,7 +5853,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-hqd429",
@@ -5802,6 +5866,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5809,7 +5874,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-98nw94",
@@ -5822,6 +5887,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5829,7 +5895,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-xn41h5",
@@ -5842,6 +5908,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5849,7 +5916,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-vio83g",
@@ -5863,6 +5930,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5870,7 +5938,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-uea9j2",
@@ -5884,6 +5952,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5891,7 +5960,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-hbbjmk",
@@ -5905,6 +5974,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5912,7 +5982,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-g3ar7n",
@@ -5926,6 +5996,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5933,7 +6004,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-k0k855",
@@ -5945,6 +6016,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5952,7 +6024,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1g1ha5q",
@@ -5966,6 +6038,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5973,7 +6046,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1b4c4yn",
@@ -5987,6 +6060,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -5994,7 +6068,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-1sdbjip",
@@ -6008,6 +6082,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -6015,7 +6090,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-g89y5v",
@@ -6029,6 +6104,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -6036,7 +6112,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-4bssyn",
@@ -6049,6 +6125,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -6056,7 +6133,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-18jbv7a",
@@ -6069,6 +6146,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -6076,7 +6154,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-fseyvc",
@@ -6089,6 +6167,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -6096,7 +6175,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "vpr-nm2fjj",
@@ -6109,6 +6188,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -6116,7 +6196,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "vpr-1nvnchy",
@@ -6129,6 +6209,7 @@
         "kein verlässliches Quell-/Post-Datum gefunden"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "",
@@ -6136,7 +6217,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "meta-ig-18094373936267459",
