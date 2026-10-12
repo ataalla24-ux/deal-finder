@@ -663,13 +663,13 @@ function normalizeDeal(raw, options = {}) {
     deal.expires || deal.validUntil || deal.validOn || deal.end_date || deal.validity_date || '',
   ));
   const resolvedMissingFields = new Set([
-    url && 'Ziel-URL',
+    (url || isCommunitySubmission(deal)) && 'Ziel-URL',
     distance && 'Ort',
     hasExpiry && 'Ablauf',
     cleanText(deal.source) && 'Quelle',
   ].filter(Boolean));
   const missingFields = [];
-  if (!url) missingFields.push('Ziel-URL');
+  if (!url && !isCommunitySubmission(deal)) missingFields.push('Ziel-URL');
   if (!distance) missingFields.push('Ort');
   if (!hasExpiry) missingFields.push('Ablauf');
   if (!cleanText(deal.source)) missingFields.push('Quelle');

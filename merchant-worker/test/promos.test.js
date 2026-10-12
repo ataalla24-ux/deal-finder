@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { Miniflare, convertV4MiniflareOptions } from 'miniflare';
+import { bundledAuth } from './bundled-auth.js';
 
 const DAY = 86400000;
 const API = 'https://worker.test/api/merchant/promos';
@@ -31,7 +32,8 @@ test('promo ledger integration with real SQLite Durable Object', async t => {
             return super.fetch(request);
           }
         }` },
-      ...await Promise.all(['index.js', 'ad-content-policy.js', 'merchant-promos.js', 'public-interaction-cache.js', 'storage-usage.js', 'subscription-trial.js'].map(async name => ({ type: 'ESModule', path: `src/${name}`, contents: await readFile(new URL(`../src/${name}`, import.meta.url), 'utf8') }))),
+      ...await Promise.all(['index.js', 'referral-months.js', 'ad-content-policy.js', 'merchant-promos.js', 'public-interaction-cache.js', 'storage-usage.js', 'subscription-trial.js'].map(async name => ({ type: 'ESModule', path: `src/${name}`, contents: await readFile(new URL(`../src/${name}`, import.meta.url), 'utf8') }))),
+      await bundledAuth(),
     ],
     durableObjects: { MERCHANT_PROMOS: { className: 'TestLedger', useSQLite: true } },
     kvNamespaces: ['MERCHANT_CAMPAIGNS'], bindings: { MERCHANT_PROMO_ADMIN_SECRET: 'test-only-admin-secret' },

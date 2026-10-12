@@ -56,11 +56,63 @@ export function marketingDay(now = Date.now()) {
   return [1, 3, 5].includes(weekday);
 }
 
+export const digestTypes = ['discovery_digest', 'weekly_digest'];
+export function digestType(now = Date.now()) {
+  const clock = viennaClock(now);
+  const weekday = new Date(`${clock.day}T12:00:00Z`).getUTCDay();
+  return clock.hour === 18 ? ({ 3: 'discovery_digest', 0: 'weekly_digest' }[weekday] || null) : null;
+}
+
+export function pushSlot(now = Date.now()) {
+  return viennaClock(now).hour === 9 ? 'daily' : digestType(now) ? 'digest' : null;
+}
+
+export function pickDigestDeals(feed, state, recentIds, now = Date.now(), type = digestType(now)) {
+  if (!digestTypes.includes(type)) return [];
+  const published = d => Date.parse(d.pipelineLifecycle?.publishedAt || d.approvedAt || '');
+  // The recap covers the last seven days, not expired historical offers or scraped post dates.
+  const candidates = eligiblePushDeals(feed, state, now).filter(d => {
+    const at = published(d);
+    return !recentIds.includes(d.id) && Number.isFinite(at) && at <= now && at > now - 7 * 86400000;
+  });
+  const score = d => Number.isFinite(Number(d.votes)) ? Math.max(0, Number(d.votes)) : 0;
+  candidates.sort((a, b) => (type === 'weekly_digest' ? score(b) - score(a) : 0) ||
+    published(b) - published(a) || a.id.localeCompare(b.id));
+  return candidates.slice(0, 3);
+}
+
+export function campaignMessage(campaign, language = 'de') {
+  if (!digestTypes.includes(campaign.type)) return dailyMessage(campaign.deal, language, campaign.type);
+  const english = language === 'en';
+  const recap = campaign.type === 'weekly_digest';
+  const title = recap ? (english ? 'Your Vienna weekly highlights' : 'Deine Wiener Wochen-Highlights')
+    : (english ? 'Discover new deals in Vienna' : 'Entdecke neue Angebote in Wien');
+  const offers = (campaign.deals || [campaign.deal]).map(d => {
+    const brand = String(d.brand || '').trim();
+    return `${String(d.title).trim()}${brand && brand.length <= 60 && !d.title.toLowerCase().includes(brand.toLowerCase()) ? ` (${brand})` : ''}`;
+  });
+  // Keep each offer intact: never truncate away a price qualifier or a condition.
+  const prefix = recap ? (english ? 'Still available: ' : 'Noch nutzbar: ') : '';
+  let body = prefix + offers[0];
+  for (const offer of offers.slice(1)) {
+    if (Array.from(`${body} · ${offer}`).length > 220) break;
+    body += ` · ${offer}`;
+  }
+  return { title, body };
+}
+
 export function pushAudience(device, env, now = Date.now()) {
+  if (viennaClock(now).hour === 18) {
+    return device.policyVersion === 3 && device.enabled && device.marketingEnabled === true &&
+      ['free', 'pro', 'plus'].includes(device.plan) &&
+      (device.plan === 'free' ? [1, 2].includes(device.consentVersion) : device.consentVersion === 2) &&
+      env.MARKETING_PUSH_ENABLED === '1' && env.DIGEST_PUSH_ENABLED === '1' ? digestType(now) : null;
+  }
+  if (viennaClock(now).hour !== 9) return null;
   if (['pro', 'plus'].includes(device.plan)) {
     return device.dailyEnabled !== false && device.enabled && env.DAILY_PUSH_ENABLED === '1' ? 'daily_deal' : null;
   }
-  return device.plan === 'free' && device.enabled && device.marketingEnabled === true &&
+  return device.policyVersion !== 3 && device.plan === 'free' && device.enabled && device.marketingEnabled === true &&
     device.consentVersion === 1 && env.MARKETING_PUSH_ENABLED === '1' && marketingDay(now) ? 'marketing_deal' : null;
 }
 
@@ -83,16 +135,18 @@ export function normalizePushRegistration(body, provider, now = Date.now()) {
   const revision = Number(body.revision);
   if (!Number.isFinite(revision) || Math.abs(revision - now) > 10 * 60000) throw new Error('Invalid registration timestamp');
   const environments = provider === 'apns' ? ['sandbox', 'production'] : ['development', 'production'];
-  const compatible = [1, 2].includes(body.policyVersion) && environments.includes(body.pushEnvironment);
+  const compatible = [1, 2, 3].includes(body.policyVersion) && environments.includes(body.pushEnvironment);
   const dailyEnabled = compatible && body.notificationsEnabled === true && ['pro', 'plus'].includes(body.subscriptionPlan);
   // Missing fields, legacy registrations and OS permission alone never count as marketing consent.
-  const marketingEnabled = body.policyVersion === 2 && compatible && body.marketingEnabled === true &&
-    body.marketingConsentVersion === 1 && Number.isFinite(body.marketingConsentAt) &&
+  const marketingEnabled = [2, 3].includes(body.policyVersion) && compatible && body.marketingEnabled === true &&
+    (body.policyVersion === 3 ? [1, 2].includes(body.marketingConsentVersion) : body.marketingConsentVersion === 1) && Number.isFinite(body.marketingConsentAt) &&
     body.marketingConsentAt > 0 && body.marketingConsentAt <= now + 300000;
-  const enabled = dailyEnabled || (body.subscriptionPlan === 'free' && marketingEnabled);
+  const enabled = dailyEnabled || (marketingEnabled && (body.subscriptionPlan === 'free' ||
+    (body.policyVersion === 3 && body.marketingConsentVersion === 2 && ['pro', 'plus'].includes(body.subscriptionPlan))));
   return { provider, installation, token: provider === 'apns' ? token.toLowerCase() : token,
     plan: body.subscriptionPlan, enabled, dailyEnabled, marketingEnabled,
-    consentVersion: marketingEnabled ? 1 : 0, consentAt: marketingEnabled ? body.marketingConsentAt : null,
+    policyVersion: body.policyVersion,
+    consentVersion: marketingEnabled ? body.marketingConsentVersion : 0, consentAt: marketingEnabled ? body.marketingConsentAt : null,
     revision, language: body.language === 'en' ? 'en' : 'de',
     environment: body.pushEnvironment, updated: now };
 }

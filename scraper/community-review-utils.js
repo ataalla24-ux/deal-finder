@@ -26,6 +26,32 @@ export function prepareCommunityApproval(deal, now = new Date()) {
   const fail = () => ({ ...deal, communityApprovalIssue:
     'Community-Aktionszeitraum unklar: bitte unter Bearbeiten ein eindeutiges Ablaufdatum mit Jahr eintragen' });
   const structuredEnd = String(deal.validOn || deal.validUntil || deal.expires || '').slice(0, 10);
+  const nativePeriod = raw.match(/^(\d{2})\.(\d{2})\.(20\d{2})(?:, ([0-2]\d):([0-5]\d))?(?: bis (\d{2})\.(\d{2})\.(20\d{2})(?:, ([0-2]\d):([0-5]\d))?)?(?: Uhr)?$/);
+  if (nativePeriod) {
+    const [, day, month, year, hour, minute, endDay, endMonth, endYear, endHour, endMinute] = nativePeriod;
+    const first = calendarDate(+year, +month, +day);
+    const last = endDay ? calendarDate(+endYear, +endMonth, +endDay) : first;
+    const hasTime = hour !== undefined;
+    const timeInvalid = hasTime && (+hour > 23 || (endDay && (endHour === undefined || +endHour > 23)))
+      || !hasTime && endHour !== undefined;
+    const firstStamp = `${first}T${hour || '00'}:${minute || '00'}`;
+    const lastStamp = `${last}T${endDay ? endHour || '00' : hour || '00'}:${endDay ? endMinute || '00' : minute || '00'}`;
+    if (!first || !last || timeInvalid || firstStamp > lastStamp) return fail();
+    if ([deal.validOn, deal.validUntil].filter(Boolean).some(value => value !== last)
+        || (deal.validFrom && deal.validFrom !== first)) return fail();
+    // This exact native-picker format is a submitted offer window, not a
+    // scraped publication date. Preserve its time wording for the public card.
+    return {
+      ...deal, validFrom: first, validUntil: last, validOn: '', expires: last,
+      expiryKind: 'range', expiryDisplayText: raw,
+      expirySource: 'slack.community-human-review', expiresSource: 'slack.community-human-review',
+      dateConfidence: 'high', communityApprovalIssue: '',
+      communityDateReview: { at: deal.pipelineLifecycle.manualDecisionAt,
+        user: deal.pipelineLifecycle.manualDecisionUser, literal: raw, yearAnchoredToSubmission: false },
+      missingFields: (deal.missingFields || []).filter(field => !['Ablauf', 'Aktionsdatum bestätigen', 'Gültigkeit'].includes(field)),
+    };
+  }
+  if ([...raw.matchAll(/\b(\d{1,2}):(\d{2})\b/g)].some(([, h, m]) => +h > 23 || +m > 59)) return fail();
   if (/^\d{4}-\d{2}-\d{2}$/.test(structuredEnd)) {
     const [year, month, day] = structuredEnd.split('-').map(Number);
     const start = String(deal.validFrom || '').slice(0, 10);

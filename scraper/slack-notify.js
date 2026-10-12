@@ -406,7 +406,7 @@ function normalizeDeal(rawDeal, sourceKey) {
   const id = cleanText(deal.id) || `${sourceKey}-${stableId(idSeed)}`;
   const type = inferType(deal);
   const resolvedMissingFields = new Set([
-    rawUrl && 'Ziel-URL',
+    (rawUrl || isCommunitySubmission(deal)) && 'Ziel-URL',
     rawDistance && 'Ort',
     rawExpires && 'Ablauf',
     rawSource && 'Quelle',
@@ -414,7 +414,7 @@ function normalizeDeal(rawDeal, sourceKey) {
   const missingFields = ensureArray(deal.missingFields)
     .map(cleanText)
     .filter((field) => field && !resolvedMissingFields.has(field));
-  if (!rawUrl) missingFields.push('Ziel-URL');
+  if (!rawUrl && !isCommunitySubmission(deal)) missingFields.push('Ziel-URL');
   if (!rawDistance) missingFields.push('Ort');
   if (!rawExpires) missingFields.push('Ablauf');
   if (!rawSource) missingFields.push('Quelle');
@@ -874,7 +874,7 @@ function buildSlackMessage(deal, index, mapContext = loadDealMapReviewContext())
   const displayedOfferDate = validity.status ? validity.sourceDate : deal.pubDate;
   const displayedStart = deal.validFrom || (deal.expiryKind === 'single' ? deal.validOn : '');
   const displayedExpiry = validity.expiryDate || deal.validUntil || deal.validOn || deal.expires;
-  const link = deal.url ? `<${deal.url}|Zum Angebot>` : '⚠️ FEHLT';
+  const link = deal.url ? `<${deal.url}|Zum Angebot>` : isCommunitySubmission(deal) ? 'Kein Link angegeben (optional)' : '⚠️ FEHLT';
   const desc = deal.description ? `\n📝 ${slackTextPrefix(deal.description, isCommunitySubmission(deal) ? 6000 : 180)}` : '';
   const missingNote = Array.isArray(deal.missingFields) && deal.missingFields.length > 0
     ? `\n⚠️ FEHLT: ${deal.missingFields.join(', ')}`

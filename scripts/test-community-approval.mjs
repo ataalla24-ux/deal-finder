@@ -60,6 +60,22 @@ for (const patch of [
 const invalid = await validateApprovalCandidates([approved], { ...options, inspectDealUrlHealth: async () => ({ invalid: true, reason: 'HTTP 404' }) });
 assert.match(invalid.results[0].decision.reasons.join(' '), /URL ungültig/);
 
+const linkless = { ...approved, url: '', expiresOriginal: '09.10.2026, 12:00 bis 10.10.2026, 18:00 Uhr' };
+const linklessResult = await validateApprovalCandidates([linkless], options);
+assert.equal(linklessResult.allowedDeals.length, 1, JSON.stringify(linklessResult.results));
+assert.equal(linklessResult.allowedDeals[0].validUntil, '2026-10-10');
+assert.match(buildSlackMessage(linkless, 1), /Kein Link angegeben \(optional\)/);
+assert.equal((await validateDealsForSlack([linkless], options)).blockedDeals.length, 1, 'automatic ingestion cannot approve missing links');
+for (const patch of [
+  { pipelineLifecycle: undefined }, { originSource: 'crawler' }, { submissionId: '' },
+  { brand: '' }, { title: '' }, { address: '', distance: '' }, { url: 'javascript:alert(1)' },
+  { expiresOriginal: '10.10.2026, 18:00 bis 09.10.2026, 12:00 Uhr' },
+  { expiresOriginal: '09.10.2026, 24:00 bis 10.10.2026, 18:00 Uhr' },
+  { expiresOriginal: '09.10.2026, 30:00 Uhr' },
+  { expiresOriginal: '09.10.2026, 12:99 Uhr' },
+  { validUntil: '2026-10-08' }, { validFrom: '2026-10-11' },
+]) assert.equal((await validateApprovalCandidates([{ ...linkless, ...patch }], options)).blockedDeals.length, 1, JSON.stringify(patch));
+
 const second = { ...source, id: 'community:rando-2', submissionId: 'rando-2', slackTs: '1791203011.645859' };
 assert.equal(mergePendingQueue([source], [second]).length, 2);
 assert.equal(mergePendingQueue([source], [source]).length, 1);

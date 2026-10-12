@@ -21,6 +21,11 @@ const MAP_GENERATED_FILES = [
 ];
 const MAP_INPUT_FILES = [
   'docs/deals.json',
+  // Expiry decisions must not publish over newer manual edits or recovery state.
+  'docs/live-deal-edits.json',
+  'reviews/verified-expiry-state.json',
+  'reviews/verified-expiry-archive.json',
+  'scripts/verified-expiry-apply.mjs',
   'reviews/map-addresses.json',
   // These are read/modify/write inputs as well as generated outputs.
   ...MAP_GENERATED_FILES.filter(file => file !== 'reviews/map-coverage.json'),

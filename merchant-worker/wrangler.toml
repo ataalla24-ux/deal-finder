@@ -11,7 +11,12 @@ head_sampling_rate = 1
 invocation_logs = false
 
 [vars]
+ACCOUNTS_ENABLED = "0"
+ACCOUNT_EMAIL_ENABLED = "0"
+FIREBASE_PROJECT_ID = "earnest-sandbox-487113-g8"
 APP_STORE_BUNDLE_ID = "com.stefanataalla.freefinderwien"
+REFERRAL_MONTHS_ENABLED = "0"
+REFERRAL_PLAY_DEFERRAL_ENABLED = "0"
 
 [[kv_namespaces]]
 binding = "MERCHANT_CAMPAIGNS"
@@ -24,3 +29,11 @@ class_name = "MerchantPromoLedger"
 [[migrations]]
 tag = "merchant-promos-v1"
 new_sqlite_classes = ["MerchantPromoLedger"]
+
+[[durable_objects.bindings]]
+name = "REFERRAL_MONTHS"
+class_name = "ReferralMonths"
+
+[[migrations]]
+tag = "referral-months-v1"
+new_sqlite_classes = ["ReferralMonths"]

@@ -62,7 +62,7 @@
             <h2 id="controllerTitle">1. Verantwortlicher</h2>
             <p><strong>Stefan Ataalla</strong></p>
             <p id="addressBlock">Lotte Hass Weg 2<br>1220 Wien, Österreich</p>
-            <p><span id="emailLabel">E-Mail:</span> <a href="mailto:dermarollerdesign@gmail.com" id="emailValue">dermarollerdesign@gmail.com</a></p>
+            <p><span id="emailLabel">E-Mail:</span> <a href="mailto:freefinder.at@gmail.com" id="emailValue">freefinder.at@gmail.com</a></p>
         </div>
 
         <div class="card">
@@ -80,14 +80,23 @@
         </div>
 
         <div class="card">
+            <h2 id="accountTitle">Optionale Konten</h2>
+            <p id="accountAccess">Du kannst Deals weiterhin ohne Konto ansehen. Sofern die optionale Kontoanmeldung freigeschaltet ist, nutzt FreeFinder Firebase Authentication von Google für die Anmeldung mit Apple, Google oder E-Mail und Passwort. Firebase verarbeitet dafür deine Nutzerkennung, E-Mail-Adresse, verknüpfte Anmeldemethoden und Authentifizierungsdaten. Eine weitere Anmeldemethode verknüpfst du erst nach deiner Bestätigung mit dem bestehenden Konto.</p>
+            <p id="accountData">Das Cloudflare-Backend verarbeitet eine aus der Firebase-Nutzerkennung abgeleitete Konto-ID, die bestätigte E-Mail-Adresse, Anmeldemethoden, Einladungszuordnungen, Belohnungen sowie E-Mail-Einstellungen und Zustimmungsnachweise mit Zeitpunkt und Hinweisversion. Für kontogebundene Probeabos und Belohnungen werden Transaktions-, Produkt-, Laufzeit- und Kontozuordnungsdaten anhand der Apple- beziehungsweise Google-Store-Antworten geprüft. Profil-, Einladungs- und Belohnungsfunktionen setzen eine bestätigte E-Mail-Adresse voraus.</p>
+            <p id="accountEmails">E-Mails zu Einladungen und Belohnungen, neuen Deal-Tipps und Wochen-Highlights sind getrennte, freiwillige Einstellungen und standardmäßig AUS. Der Versand dieser optionalen E-Mails ist derzeit nicht freigeschaltet. Bei Freischaltung werden Konto-ID und E-Mail-Adresse dafür nur nach deiner ausdrücklichen Aktivierung genutzt; werbliche Deal-Tipps dienen dem Marketing von FreeFinder. Die Einstellungen können unter „Mein Konto“ wieder ausgeschaltet werden und ändern keine Push-Zustimmung. Angeforderte Bestätigungs- und Passwort-zurücksetzen-E-Mails für die Anmeldung sind davon getrennt.</p>
+            <p id="accountRights">Unter „Mein Konto“ kannst du „Kontodaten exportieren“ oder „Konto löschen“ wählen. Beide Aktionen erfordern eine kürzlich bestätigte Anmeldung, aber keine bestätigte E-Mail-Adresse. Der Export enthält die gespeicherten FreeFinder-Kontodaten, sofern vorhanden. Eine erfolgreiche Kontolöschung entfernt das Firebase-Konto sowie das FreeFinder-Profil, Kontaktdaten und ungenutzte Belohnungen. Das Entfernen der App allein löscht kein serverseitiges Konto. Ein Apple- oder Google-Abo wird durch die Kontolöschung NICHT gekündigt; verwalte oder kündige es separat im jeweiligen Store.</p>
+            <p id="accountRetention">Minimale kontobezogene Löschvermerke und Transaktionszuordnungen bleiben zur Missbrauchsabwehr und zur Verhinderung mehrfacher Belohnungen für denselben Kauf erhalten. Diese verbleibenden Kennungen und Zuordnungen sind weiterhin kontobezogen.</p>
+        </div>
+
+        <div class="card">
             <h2 id="locationTitle">4. Standort und Karten</h2>
             <p id="locationBody">Mit deiner optionalen Standortfreigabe verwendet die App deinen ungefähren beziehungsweise genauen Standort, um nahe Deals anzuzeigen, Entfernungen zu berechnen und die Karte auf deine Position zu bewegen. FreeFinder speichert deinen aktuellen Standort nicht im Community-Backend. Für die Kartendarstellung wird Google Maps eingesetzt; dabei kann Google technische, Geräte-, Nutzungs- und Standortdaten nach den eigenen Datenschutzbestimmungen verarbeiten.</p>
         </div>
 
         <div class="card">
             <h2 id="diagnosticsTitle">5. Diagnosen und Dienstleister</h2>
-            <p id="diagnosticsBody">In der iOS-Produktionsapp verarbeitet Sentry Absturz-, Hänger- und Leistungsdiagnosen. Sitzungsaufzeichnungen sind deaktiviert. Cloudflare betreibt die FreeFinder-APIs und den pseudonymen Datenspeicher. Firebase beziehungsweise Apple Push Notification Service stellen Benachrichtigungen zu. Apple und Google verarbeiten In-App-Käufe; Google stellt die Karten bereit. Deal-Einreichungen können zur manuellen Prüfung an den privaten FreeFinder-Slack-Workflow übermittelt werden.</p>
-            <p id="dealPushConsent">Werbliche Deal-Tipps für Free sind freiwillig und standardmäßig ausgeschaltet. Sie benötigen deine ausdrückliche Zustimmung in den App-Einstellungen zusätzlich zur Systemfreigabe. FreeFinder speichert den Zustimmungszeitpunkt, die Version des Hinweises, Sprache und Versandpräferenzen. Du kannst Deal-Tipps dort jederzeit abschalten. Pro-Tagesdeal-Nachrichten und Testende-Erinnerungen haben getrennte Einstellungen. Es gibt keine gleichzeitigen Free-Werbenachrichten zusätzlich zum Pro-Tagesdeal.</p>
+            <p id="diagnosticsBody">In der iOS-Produktionsapp verarbeitet Sentry Absturz-, Hänger- und Leistungsdiagnosen. Sitzungsaufzeichnungen sind deaktiviert. Cloudflare betreibt die FreeFinder-APIs und Datenspeicher, einschließlich der optionalen Kontodaten. Firebase beziehungsweise Apple Push Notification Service stellen Benachrichtigungen zu. Apple und Google verarbeiten In-App-Käufe; Google stellt die Karten bereit. Deal-Einreichungen können zur manuellen Prüfung an den privaten FreeFinder-Slack-Workflow übermittelt werden.</p>
+            <p id="dealPushConsent">Werbliche Deal-Tipps sind für Free und Pro freiwillig und standardmäßig ausgeschaltet. Sie benötigen deine Zustimmung zusätzlich zur Systemfreigabe. Die neue App bietet mittwochs neue Angebote und sonntags Wochen-Highlights um 18 Uhr Wiener Zeit, höchstens zweimal pro Woche und nur mit noch nutzbaren Angeboten. Bei älteren Pro-Zustimmungen bleiben zusätzliche Deal-Tipps bis zu deiner erneuten Aktivierung ausgeschaltet. Ältere Free-App-Versionen behalten ihre bisherigen bis zu drei Tipps pro Woche. FreeFinder speichert Zustimmungszeitpunkt, Hinweisversion, Sprache und Versandpräferenzen. Du kannst Deal-Tipps jederzeit in den Einstellungen abschalten. Pro-Tagesdeal-Nachrichten und Testende-Erinnerungen bleiben getrennt.</p>
         </div>
 
         <div class="card">
@@ -124,11 +133,11 @@
             <h2 id="contactTitle">12. Kontakt</h2>
             <p id="contactBody">Bei Fragen zur Datenschutzerklärung:</p>
             <p><strong>Stefan Ataalla</strong><br><span id="contactAddress">Lotte Hass Weg 2, 1220 Wien<br>Österreich</span></p>
-            <p><strong id="supportEmailLabel">Support-E-Mail:</strong> <a href="mailto:dermarollerdesign@gmail.com">dermarollerdesign@gmail.com</a></p>
+            <p><strong id="supportEmailLabel">Support-E-Mail:</strong> <a href="mailto:freefinder.at@gmail.com">freefinder.at@gmail.com</a></p>
         </div>
 
         <div class="footer">
-            <p id="updatedText">Stand: August 2026</p>
+            <p id="updatedText">Stand: 11. Oktober 2026</p>
             <p class="footer-spaced" id="copyrightText">© 2026 FreeFinder. Alle Rechte vorbehalten.</p>
             <div class="link-row">
                 <a href="./support.html" id="supportLink">Support</a>
@@ -147,7 +156,7 @@
                 controllerTitle: '📱 1. Verantwortlicher',
                 addressBlock: 'Lotte Hass Weg 2<br>1220 Wien, Österreich',
                 emailLabel: 'E-Mail:',
-                emailValue: 'dermarollerdesign@gmail.com',
+                emailValue: 'freefinder.at@gmail.com',
                 localDataTitle: '📊 2. Welche Daten werden gespeichert?',
                 localIntro: 'FreeFinder speichert <strong>lokal auf deinem Gerät</strong> zum Beispiel:',
                 localList: ['Sprache, Filter, Benachrichtigungseinstellungen und lokaler Abostatus', 'Lokale Kopien von Favoriten, Votes, Ratings, Kommentaren, Tipps und eingelösten Deals', 'Deal-, Karten-, Referral- und technische Cache-Daten'],
@@ -156,12 +165,18 @@
                 serverDataIntro: 'Wenn du die jeweilige Funktion nutzt, verarbeitet FreeFinder folgende Daten:',
                 serverDataList: ['Eine zufällig erzeugte App-Installations-ID sowie Deal-ID und Aktion für Votes, Favoriten, Öffnungen, Einlösungen und Ratings', 'Von dir eingegebene Kommentare, Community-Tipps und Meldungen', 'Push-Token, Plattform, App-Version und Abostufe für aktivierte Benachrichtigungen', 'Referral- oder Aktionscode und App-Installations-ID für Einladungen und Gratiszeiträume', 'Transaktions- und Produktdaten, wenn ein Business-Angebot über Apple oder Google gekauft und geprüft wird'],
                 serverDataOutro: 'Diese Daten dienen ausschließlich der angeforderten App-Funktion, Missbrauchsprävention, Kaufprüfung und geräteübergreifenden Synchronisierung. Deal-Interaktionen werden regulär bis zu 180 Tage gespeichert; Push-Token bis zur Deaktivierung oder Abmeldung. Gesetzliche Aufbewahrungspflichten können für Kaufunterlagen länger gelten.',
+                accountTitle: "Optionale Konten",
+                accountAccess: "Du kannst Deals weiterhin ohne Konto ansehen. Sofern die optionale Kontoanmeldung freigeschaltet ist, nutzt FreeFinder Firebase Authentication von Google für die Anmeldung mit Apple, Google oder E-Mail und Passwort. Firebase verarbeitet dafür deine Nutzerkennung, E-Mail-Adresse, verknüpfte Anmeldemethoden und Authentifizierungsdaten. Eine weitere Anmeldemethode verknüpfst du erst nach deiner Bestätigung mit dem bestehenden Konto.",
+                accountData: "Das Cloudflare-Backend verarbeitet eine aus der Firebase-Nutzerkennung abgeleitete Konto-ID, die bestätigte E-Mail-Adresse, Anmeldemethoden, Einladungszuordnungen, Belohnungen sowie E-Mail-Einstellungen und Zustimmungsnachweise mit Zeitpunkt und Hinweisversion. Für kontogebundene Probeabos und Belohnungen werden Transaktions-, Produkt-, Laufzeit- und Kontozuordnungsdaten anhand der Apple- beziehungsweise Google-Store-Antworten geprüft. Profil-, Einladungs- und Belohnungsfunktionen setzen eine bestätigte E-Mail-Adresse voraus.",
+                accountEmails: "E-Mails zu Einladungen und Belohnungen, neuen Deal-Tipps und Wochen-Highlights sind getrennte, freiwillige Einstellungen und standardmäßig AUS. Der Versand dieser optionalen E-Mails ist derzeit nicht freigeschaltet. Bei Freischaltung werden Konto-ID und E-Mail-Adresse dafür nur nach deiner ausdrücklichen Aktivierung genutzt; werbliche Deal-Tipps dienen dem Marketing von FreeFinder. Die Einstellungen können unter „Mein Konto“ wieder ausgeschaltet werden und ändern keine Push-Zustimmung. Angeforderte Bestätigungs- und Passwort-zurücksetzen-E-Mails für die Anmeldung sind davon getrennt.",
+                accountRights: "Unter „Mein Konto“ kannst du „Kontodaten exportieren“ oder „Konto löschen“ wählen. Beide Aktionen erfordern eine kürzlich bestätigte Anmeldung, aber keine bestätigte E-Mail-Adresse. Der Export enthält die gespeicherten FreeFinder-Kontodaten, sofern vorhanden. Eine erfolgreiche Kontolöschung entfernt das Firebase-Konto sowie das FreeFinder-Profil, Kontaktdaten und ungenutzte Belohnungen. Das Entfernen der App allein löscht kein serverseitiges Konto. Ein Apple- oder Google-Abo wird durch die Kontolöschung NICHT gekündigt; verwalte oder kündige es separat im jeweiligen Store.",
+                accountRetention: "Minimale kontobezogene Löschvermerke und Transaktionszuordnungen bleiben zur Missbrauchsabwehr und zur Verhinderung mehrfacher Belohnungen für denselben Kauf erhalten. Diese verbleibenden Kennungen und Zuordnungen sind weiterhin kontobezogen.",
                 locationTitle: '📍 4. Standort und Karten',
                 locationBody: 'Mit deiner optionalen Standortfreigabe verwendet die App deinen ungefähren beziehungsweise genauen Standort, um nahe Deals anzuzeigen, Entfernungen zu berechnen und die Karte auf deine Position zu bewegen. FreeFinder speichert deinen aktuellen Standort nicht im Community-Backend. Für die Kartendarstellung wird Google Maps eingesetzt; dabei kann Google technische, Geräte-, Nutzungs- und Standortdaten nach den eigenen Datenschutzbestimmungen verarbeiten.',
                 diagnosticsTitle: '🛠️ 5. Diagnosen und Dienstleister',
-                diagnosticsBody: 'In der iOS-Produktionsapp verarbeitet Sentry Absturz-, Hänger- und Leistungsdiagnosen. Sitzungsaufzeichnungen sind deaktiviert. Cloudflare betreibt die FreeFinder-APIs und den pseudonymen Datenspeicher. Firebase beziehungsweise Apple Push Notification Service stellen Benachrichtigungen zu. Apple und Google verarbeiten In-App-Käufe; Google stellt die Karten bereit. Deal-Einreichungen können zur manuellen Prüfung an den privaten FreeFinder-Slack-Workflow übermittelt werden.',
+                diagnosticsBody: 'In der iOS-Produktionsapp verarbeitet Sentry Absturz-, Hänger- und Leistungsdiagnosen. Sitzungsaufzeichnungen sind deaktiviert. Cloudflare betreibt die FreeFinder-APIs und Datenspeicher, einschließlich der optionalen Kontodaten. Firebase beziehungsweise Apple Push Notification Service stellen Benachrichtigungen zu. Apple und Google verarbeiten In-App-Käufe; Google stellt die Karten bereit. Deal-Einreichungen können zur manuellen Prüfung an den privaten FreeFinder-Slack-Workflow übermittelt werden.',
                 notCollectedTitle: '🚫 6. Was wir NICHT sammeln',
-                dealPushConsent: 'Werbliche Deal-Tipps für Free sind freiwillig und standardmäßig ausgeschaltet. Sie benötigen deine ausdrückliche Zustimmung in den App-Einstellungen zusätzlich zur Systemfreigabe. FreeFinder speichert den Zustimmungszeitpunkt, die Version des Hinweises, Sprache und Versandpräferenzen. Du kannst Deal-Tipps dort jederzeit abschalten. Pro-Tagesdeal-Nachrichten und Testende-Erinnerungen haben getrennte Einstellungen. Es gibt keine gleichzeitigen Free-Werbenachrichten zusätzlich zum Pro-Tagesdeal.',
+                dealPushConsent: 'Werbliche Deal-Tipps sind für Free und Pro freiwillig und standardmäßig ausgeschaltet. Sie benötigen deine Zustimmung zusätzlich zur Systemfreigabe. Die neue App bietet mittwochs neue Angebote und sonntags Wochen-Highlights um 18 Uhr Wiener Zeit, höchstens zweimal pro Woche und nur mit noch nutzbaren Angeboten. Bei älteren Pro-Zustimmungen bleiben zusätzliche Deal-Tipps bis zu deiner erneuten Aktivierung ausgeschaltet. Ältere Free-App-Versionen behalten ihre bisherigen bis zu drei Tipps pro Woche. FreeFinder speichert Zustimmungszeitpunkt, Hinweisversion, Sprache und Versandpräferenzen. Du kannst Deal-Tipps jederzeit in den Einstellungen abschalten. Pro-Tagesdeal-Nachrichten und Testende-Erinnerungen bleiben getrennt.',
                 notCollectedList: ['Keine personalisierte Werbung', 'Keine Weitergabe deiner Daten an Datenhändler', 'Keine Kontaktlisten oder Fotos', 'Kein Third-Party-Tracking durch Werbenetzwerke', 'Keine sensiblen Gesundheits- oder Finanzdaten'],
                 externalLinksTitle: '🌐 7. Externe Links',
                 externalLinksBody: 'Die App enthält Links zu externen Websites (Deal-Anbieter wie IKEA, McDonalds, etc.). Für deren Datenschutzpraktiken sind die jeweiligen Anbieter verantwortlich.',
@@ -177,7 +192,7 @@
                 contactBody: 'Bei Fragen zur Datenschutzerklärung:',
                 contactAddress: 'Lotte Hass Weg 2, 1220 Wien<br>Österreich',
                 supportEmailLabel: 'Support-E-Mail:',
-                updatedText: 'Stand: August 2026',
+                updatedText: 'Stand: 11. Oktober 2026',
                 copyrightText: '© 2026 FreeFinder. Alle Rechte vorbehalten.',
                 supportLink: 'Support',
                 termsLink: 'Terms of Use (EULA)',
@@ -190,7 +205,7 @@
                 controllerTitle: '📱 1. Controller',
                 addressBlock: 'Lotte Hass Weg 2<br>1220 Vienna, Austria',
                 emailLabel: 'Email:',
-                emailValue: 'dermarollerdesign@gmail.com',
+                emailValue: 'freefinder.at@gmail.com',
                 localDataTitle: '📊 2. What data is stored?',
                 localIntro: 'FreeFinder stores the following <strong>locally on your device</strong>, for example:',
                 localList: ['Language, filters, notification settings and locally cached subscription status', 'Local copies of favorites, votes, ratings, comments, tips and redeemed deals', 'Deal, map, referral and technical cache data'],
@@ -199,12 +214,18 @@
                 serverDataIntro: 'When you use the relevant feature, FreeFinder processes:',
                 serverDataList: ['A randomly generated app-installation ID plus deal ID and action for votes, favorites, opens, redemptions and ratings', 'Comments, community tips and reports you submit', 'Push token, platform, app version and subscription tier for enabled notifications', 'Referral or promotion code and app-installation ID for invitations and free periods', 'Transaction and product data when a Business promotion purchased through Apple or Google is verified'],
                 serverDataOutro: 'This data is used only for the requested app functionality, abuse prevention, purchase verification and cross-device synchronization. Deal interactions are normally retained for up to 180 days; push tokens until notifications are disabled or unregistered. Legal retention duties may require purchase records to be kept longer.',
+                accountTitle: "Optional accounts",
+                accountAccess: "You can still browse deals without an account. Where optional account sign-in is enabled, FreeFinder uses Google's Firebase Authentication for sign-in with Apple, Google, or email and password. Firebase processes your user identifier, email address, linked sign-in methods and authentication data for this purpose. You link another sign-in method to an existing account only after confirming it.",
+                accountData: "The Cloudflare backend processes an account ID derived from the Firebase user identifier, the verified email address, sign-in methods, invitation associations, rewards, email preferences and consent records including time and notice version. For account-bound subscription trials and rewards, transaction, product, subscription-period and account-association data are checked against responses from the Apple or Google store. Profile, invitation and reward features require a verified email address.",
+                accountEmails: "Emails about invitations and rewards, new deal tips and weekly highlights are separate, optional settings and are OFF by default. Delivery of these optional emails is currently disabled. When delivery becomes available, the account ID and email address are used for it only after your explicit opt-in; promotional deal tips are FreeFinder marketing. These settings can be turned off again under “My account” and do not change push consent. Requested sign-in verification and password-reset emails are separate.",
+                accountRights: "Under “My account”, you can select “Export account data” or “Delete account”. Both actions require a recently confirmed sign-in, but not a verified email address. The export contains stored FreeFinder account data, if any. Successful account deletion removes the Firebase account and the FreeFinder profile, contact details and unused rewards. Uninstalling the app alone does not delete a server-side account. Deleting an account does NOT cancel an Apple or Google subscription; manage or cancel it separately in the relevant store.",
+                accountRetention: "Minimal account-related deletion markers and transaction associations are retained to prevent abuse and repeated rewards for the same purchase. These remaining identifiers and associations are still account-related.",
                 locationTitle: '📍 4. Location and maps',
                 locationBody: 'With your optional location permission, the app uses approximate or precise location to show nearby deals, calculate distances and move the map to your position. FreeFinder does not store your current location in the community backend. Google Maps is used to display the map and may process technical, device, usage and location data under its own privacy terms.',
                 diagnosticsTitle: '🛠️ 5. Diagnostics and service providers',
-                diagnosticsBody: 'In the production iOS app, Sentry processes crash, hang and performance diagnostics. Session replay is disabled. Cloudflare hosts the FreeFinder APIs and pseudonymous data store. Firebase or Apple Push Notification Service deliver notifications. Apple and Google process in-app purchases; Google provides maps. Deal submissions may be sent to the private FreeFinder Slack workflow for manual review.',
+                diagnosticsBody: 'In the production iOS app, Sentry processes crash, hang and performance diagnostics. Session replay is disabled. Cloudflare hosts the FreeFinder APIs and data stores, including optional account data. Firebase or Apple Push Notification Service deliver notifications. Apple and Google process in-app purchases; Google provides maps. Deal submissions may be sent to the private FreeFinder Slack workflow for manual review.',
                 notCollectedTitle: '🚫 6. What we do NOT collect',
-                dealPushConsent: 'Promotional deal tips for Free are optional and off by default. They require explicit consent in app Settings in addition to system permission. FreeFinder records the consent time, notice version, language and delivery preferences. You can turn deal tips off there anytime. Pro daily-deal notifications and trial-end reminders have separate settings. Free marketing tips are not sent in addition to the Pro daily deal.',
+                dealPushConsent: 'Promotional deal tips are optional and off by default for Free and Pro. They require your consent in addition to system permission. The new app offers new deals on Wednesdays and weekly highlights on Sundays at 6 pm Vienna time, at most twice per week and only with still-available offers. Older Pro consents remain paused until you enable deal tips again. Older Free app versions keep their existing limit of three tips per week. FreeFinder records consent time, notice version, language and delivery preferences. You can turn tips off in Settings anytime. Pro daily deals and trial-end reminders stay separate.',
                 notCollectedList: ['No personalized advertising', 'No sale of your data to data brokers', 'No contact lists or photos', 'No third-party ad-network tracking', 'No sensitive health or financial data'],
                 externalLinksTitle: '🌐 7. External links',
                 externalLinksBody: 'The app contains links to external websites (deal providers such as IKEA, McDonalds, etc.). Those providers are responsible for their own privacy practices.',
@@ -220,7 +241,7 @@
                 contactBody: 'If you have questions about this privacy policy:',
                 contactAddress: 'Lotte Hass Weg 2, 1220 Vienna<br>Austria',
                 supportEmailLabel: 'Support email:',
-                updatedText: 'Updated: August 2026',
+                updatedText: 'Updated: 11 October 2026',
                 copyrightText: '© 2026 FreeFinder. All rights reserved.',
                 supportLink: 'Support',
                 termsLink: 'Terms of Use (EULA)',

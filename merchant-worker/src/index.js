@@ -2,8 +2,38 @@ import { handlePromoRequest, promoLedger } from './merchant-promos.js';
 import { adContentViolation, AD_POLICY_MESSAGE, validateAdRequest } from './ad-content-policy.js';
 import { publicInteractionCache } from './public-interaction-cache.js';
 import { handleTrialStatus } from './subscription-trial.js';
+import { handleReferralMonths, ReferralMonthsLedger } from './referral-months.js';
+import { handleAccount } from './account-auth.js';
 import { measureStorage, storageIdentity, StorageQuotaError } from './storage-usage.js';
 export { MerchantPromoLedger } from './merchant-promos.js';
+
+export class ReferralMonths extends ReferralMonthsLedger {
+  appleTransaction(id) { return fetchAppStoreTransaction(id, this.env, AbortSignal.timeout(7000)); }
+  async playRequest(token, suffix = '', body) {
+    const signal = AbortSignal.timeout(9000);
+    const auth = await googlePlayAccessToken(this.env, signal);
+    if (!auth.ok) throw new Error('Store unavailable');
+    return fetch(`https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.stefanataalla.freefinderwien/purchases/subscriptionsv2/tokens/${encodeURIComponent(token)}${suffix}`, {
+      method: body ? 'POST' : 'GET', headers: { authorization: `Bearer ${auth.token}`, 'content-type': 'application/json' },
+      ...(body ? { body: JSON.stringify(body) } : {}), signal,
+    });
+  }
+  async playPurchase(token) {
+    const response = await this.playRequest(token);
+    if (!response.ok) throw new Error('Store unavailable');
+    return response.json();
+  }
+  async deferPlay(token, purchase, expiry) {
+    try {
+      const response = await this.playRequest(token, ':defer', { deferralContext: {
+        etag: purchase.etag, deferDuration: `${Math.floor((expiry - purchase.expires) / 1000)}s`, validateOnly: false,
+      } });
+      const body = await response.json().catch(() => ({}));
+      const expires = Date.parse(body.itemExpiryTimeDetails?.find(x => x.productId === purchase.product)?.expiryTime);
+      return { ok: response.ok && expires >= expiry, expires, definitive: [400, 401, 403, 404, 409, 412].includes(response.status) };
+    } catch { return { ok: false, definitive: false }; }
+  }
+}
 
 const PACKAGE_CONFIG = {
   starter: {
@@ -76,7 +106,7 @@ const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET,POST,OPTIONS",
-  "access-control-allow-headers": "content-type,x-freefinder-merchant-secret",
+  "access-control-allow-headers": "content-type,authorization,x-freefinder-merchant-secret",
   "cache-control": "no-store",
 };
 const INSTAGRAM_CACHE_KEY = "instagram-agent:latest";
@@ -118,6 +148,8 @@ const merchantWorker = {
     const url = new URL(request.url);
 
     try {
+      if (url.pathname.startsWith('/api/account/')) return handleAccount(request, env);
+      if (url.pathname.startsWith('/api/referral-months/')) return handleReferralMonths(request, env);
       if (request.method === 'POST' && url.pathname === '/api/merchant/validate') {
         const result = await validateAdRequest(request);
         return json(result.body, result.status);
@@ -1694,8 +1726,12 @@ async function createCampaign(request, env) {
 
   const restaurantName = cleanText(payload.restaurantName, 90);
   const dealTitle = cleanText(payload.dealTitle, 110);
-  if (!restaurantName || !dealTitle) {
-    return json({ ok: false, error: "Restaurant and deal title are required" }, 400);
+  const address = cleanText(payload.address, 140);
+  if (!restaurantName || !dealTitle || !address) {
+    return json({ ok: false, error: "Restaurant, deal title and address are required" }, 400);
+  }
+  if (payload.ctaURL != null && (typeof payload.ctaURL !== 'string' || (payload.ctaURL.trim() && !cleanURL(payload.ctaURL)))) {
+    return json({ ok: false, error: "Invalid optional link" }, 400);
   }
 
   if (adContentViolation(payload)) return json({ ok: false, error: AD_POLICY_MESSAGE }, 422);
@@ -1730,7 +1766,7 @@ async function createCampaign(request, env) {
     ...(offerValidityText.trim() ? { offerValidityText: offerValidityText.trim() } : {}),
     oldPrice: cleanText(payload.oldPrice, 40),
     dealPrice: cleanText(payload.dealPrice, 40),
-    address: cleanText(payload.address, 140),
+    address,
     ctaURL: cleanURL(payload.ctaURL),
     contactEmail: cleanText(payload.contactEmail, 120),
     category: cleanText(payload.category, 40),
@@ -2009,7 +2045,7 @@ async function verifyGooglePlayPurchase(payload, config, env) {
   };
 }
 
-async function googlePlayAccessToken(env) {
+async function googlePlayAccessToken(env, signal) {
   const directToken = cleanText(env.GOOGLE_PLAY_ACCESS_TOKEN, 3000);
   if (directToken) return { ok: true, token: directToken };
 
@@ -2034,6 +2070,7 @@ async function googlePlayAccessToken(env) {
   const now = Math.floor(Date.now() / 1000);
   const assertion = await signGoogleServiceAccountJWT(clientEmail, privateKey, now);
   const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+    signal,
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -2073,7 +2110,7 @@ async function signGoogleServiceAccountJWT(clientEmail, privateKeyPEM, issuedAt)
   return `${signingInput}.${base64URLBytes(signature)}`;
 }
 
-async function fetchAppStoreTransaction(transactionId, env) {
+async function fetchAppStoreTransaction(transactionId, env, signal) {
   const credentials = appStoreCredentials(env);
   if (!credentials.ok) {
     return credentials;
@@ -2089,6 +2126,7 @@ async function fetchAppStoreTransaction(transactionId, env) {
   let lastError = "Transaction was not accepted by Apple";
   for (const [environment, endpoint] of endpoints) {
     const response = await fetch(endpoint, {
+      signal,
       headers: {
         authorization: `Bearer ${token}`,
         accept: "application/json",

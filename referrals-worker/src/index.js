@@ -656,7 +656,13 @@ function sanitizePublicCheckoutCampaign(record) {
 
 function normalizeCommunitySubmissionInput(body, request) {
   const url = normalizeSubmissionUrl(body?.url);
-  if (!url) return null;
+  if (body?.url != null && (typeof body.url !== 'string' || (body.url.trim() && !url))) return null;
+  const submittedFrom = cleanShortText(body?.submittedFrom, 64) || 'web-app';
+  const manual = /^(ios|android)-native-free-submit$/.test(submittedFrom);
+  // Link-only social imports are enriched later. Manual offers need real fields,
+  // but no fabricated source URL just to enter the review queue.
+  if ((manual || !url) && !['brand', 'title', 'distance'].every(key =>
+    typeof body?.[key] === 'string' && body[key].trim())) return null;
 
   const host = getPreviewHost(url);
   const sourcePlatform = getSourcePlatform(host);
@@ -692,7 +698,7 @@ function normalizeCommunitySubmissionInput(body, request) {
     createdAt: Date.now(),
     postedAt: 0,
     reviewedAt: 0,
-    submittedFrom: cleanShortText(body?.submittedFrom, 64) || 'web-app',
+    submittedFrom,
     language: cleanShortText(body?.language, 12).toLowerCase(),
     userAgent: cleanLongText(body?.userAgent || request.headers.get('user-agent'), 512),
     ipHint: cleanShortText(request.headers.get('cf-connecting-ip'), 64),
@@ -4192,7 +4198,7 @@ export class DailyDealPush extends DailyPushService {
   async sendApple(device, campaign, message) {
     return sendApnsPush(this.env, { ...message, token: device.token, environment: device.environment,
       dealId: campaign.deal.id, type: campaign.type || 'daily_deal', day: campaign.day, expiresAt: campaign.expires,
-      expiration: Math.floor(campaign.expires / 1000), collapseId: `daily-${campaign.day}` });
+      expiration: Math.floor(campaign.expires / 1000), collapseId: `${campaign.type?.endsWith('_digest') ? 'digest' : 'daily'}-${campaign.day}` });
   }
 }
 

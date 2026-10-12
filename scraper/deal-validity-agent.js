@@ -1038,7 +1038,14 @@ async function validateDeal(deal, context) {
   const now = context.now;
   const checkedAt = new Date().toISOString();
   const url = normalizeUrl(deal.url);
-  const health = await inspectUrlWithCache(url, context.urlCache, context.urlOptions);
+  const reviewedCommunity = context.communityApproval === true && isHumanReviewedCommunity(deal);
+  // Only explicitly reviewed community offers may omit a link. A supplied
+  // malformed/dead link still runs through the regular validation gates.
+  const reviewedWithoutLink = reviewedCommunity && !String(deal.url || '').trim()
+    && [deal.brand, deal.title, deal.distance || deal.address].every(value => String(value || '').trim());
+  const health = reviewedWithoutLink
+    ? { reason: 'Community-Angebot ohne Link manuell freigegeben', dateHints: {}, contentHints: {} }
+    : await inspectUrlWithCache(url, context.urlCache, context.urlOptions);
   const officialFood = await verifyOfficialFoodDeal(deal, { now, cache: context.officialFoodCache, fetchPage: context.fetchOfficialFoodPage });
   if (officialFood?.ok) {
     // Restore extracted facts before checking and forwarding the candidate.
@@ -1061,7 +1068,6 @@ async function validateDeal(deal, context) {
   const recurring = hasRecurringSchedule(deal, expiryCandidates);
   const activeValidity = hasActiveExplicitValidity(deal, expiry, now);
   const freshlyActiveAd = hasFreshActiveAdEvidence(deal, now);
-  const reviewedCommunity = context.communityApproval === true && isHumanReviewedCommunity(deal);
   const publicationCandidates = getPublicationCandidates(deal, health, {
     freshnessSensitive,
     ignoreUrlPublicationDate: sharedBenefitPageDeal || officialFood?.current === true,

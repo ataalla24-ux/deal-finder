@@ -38,8 +38,8 @@ export async function validateAdRequest(request) {
   let payload;
   try { payload = JSON.parse(raw + decoder.decode()); } catch { return { status: 400, body: { ok: false, error: 'Ungültige Anfrage.' } }; }
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)
-    || !['restaurantName', 'dealTitle', 'description', 'address', 'ctaURL'].every(k => typeof payload[k] === 'string' && payload[k].trim())) {
-    return { status: 400, body: { ok: false, error: 'Bitte Anbieter, Titel, Details, Adresse und Link ausfüllen.' } };
+    || !['restaurantName', 'dealTitle', 'description', 'address'].every(k => typeof payload[k] === 'string' && payload[k].trim())) {
+    return { status: 400, body: { ok: false, error: 'Bitte Anbieter, Titel, Details und Adresse ausfüllen.' } };
   }
   const limits = { restaurantName: 90, dealTitle: 110, description: 360, address: 140,
     ctaURL: 1000, offerValidityText: 160, oldPrice: 40, dealPrice: 40 };
@@ -49,7 +49,7 @@ export async function validateAdRequest(request) {
       return { status: 400, body: { ok: false, error: 'Eine Angabe ist ungültig oder zu lang. Bitte prüfe deine Anzeige.' } };
     }
   }
-  try {
+  if (payload.ctaURL?.trim()) try {
     const url = new URL(payload.ctaURL);
     if (!['https:', 'http:'].includes(url.protocol) || !url.hostname.includes('.') || url.username || url.password) throw new Error();
   } catch {

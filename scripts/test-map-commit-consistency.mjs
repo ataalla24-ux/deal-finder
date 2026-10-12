@@ -18,6 +18,10 @@ const OPTIONAL_OUTPUTS = [
 ];
 const OUTPUTS = [MAP, COVERAGE, 'reviews/map-geocode-cache.json', ...OPTIONAL_OUTPUTS];
 const SOURCE_INPUTS = [
+  'docs/live-deal-edits.json',
+  'reviews/verified-expiry-state.json',
+  'reviews/verified-expiry-archive.json',
+  'scripts/verified-expiry-apply.mjs',
   'scripts/enrich-deal-map.mjs',
   'scripts/deal-map-enrichment.mjs',
   'scripts/deal-map-source-addresses.mjs',

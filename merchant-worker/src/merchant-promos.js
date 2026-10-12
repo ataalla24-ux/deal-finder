@@ -63,8 +63,8 @@ function campaignDraft(payload, record) {
   if (record.restaurantName && restaurantName.toLocaleLowerCase('de-AT') !== record.restaurantName.toLocaleLowerCase('de-AT')) {
     throw new PromoError('Dieser Code gehört zu einem anderen Restaurant.', 409);
   }
-  const ctaURL = field(payload.ctaURL, 'Link', 1000);
-  try {
+  const ctaURL = field(payload.ctaURL, 'Link', 1000, false);
+  if (ctaURL) try {
     const url = new URL(ctaURL);
     if (!['https:', 'http:'].includes(url.protocol) || !url.hostname.includes('.') || url.username || url.password) throw new Error();
   } catch { throw new PromoError('Bitte einen gültigen https://-Link angeben.'); }

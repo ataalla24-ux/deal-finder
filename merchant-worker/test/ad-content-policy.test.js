@@ -22,6 +22,10 @@ test('validation is read-only, rejects invalid inputs and never touches payment/
     method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload),
   }), env);
   assert.equal((await call(draft)).status, 200);
+  assert.equal((await call({ ...draft, ctaURL: '' })).status, 200);
+  assert.equal((await call({ ...draft, ctaURL: undefined })).status, 200);
+  assert.equal((await call({ ...draft, ctaURL: [], address: 'Gasse 1' })).status, 400);
+  assert.equal((await call({ ...draft, address: '' })).status, 400);
   assert.equal((await call({ ...draft, description: 'Bier gratis' })).status, 422);
   assert.equal((await call({})).status, 400);
   assert.equal((await call(null)).status, 400);

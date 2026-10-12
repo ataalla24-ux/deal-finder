@@ -44,7 +44,7 @@ jobs:
         run: node scraper/normalize-live-deals.js
 
       - name: Test conservative expiry review
-        run: node --test scripts/test-verified-expiry-review.mjs
+        run: node --test scripts/test-verified-expiry-review.mjs scripts/test-verified-expiry-apply.mjs
 
       - name: Read fresh expiry evidence (review only)
         timeout-minutes: 25
@@ -85,6 +85,19 @@ jobs:
       - name: Cache brand logos
         run: npm run logos:cache
 
+      - name: Apply strictly source-verified expiry
+        timeout-minutes: 15
+        env:
+          VERIFIED_EXPIRY_APPLY: '1'
+        run: node scripts/verified-expiry-apply.mjs
+
+      - name: Preserve automatic expiry audit and recovery records
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-expiry-application-${{ github.run_id }}
+          path: reviews/verified-expiry-*.json
+          retention-days: 90
+
       - name: Commit validated live deals
         run: |
-          node scripts/commit-generated.mjs --message "Validate live deals $(date +%Y-%m-%d)" --files docs/deals.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json docs/live-deal-llm-review.json docs/live-deal-edit-report.json docs/verified-expiry-review.json
+          node scripts/commit-generated.mjs --message "Validate live deals $(date +%Y-%m-%d)" --files docs/deals.json docs/live-deal-validation-report.json docs/live-deal-review-candidates.json docs/live-deal-llm-review.json docs/live-deal-edit-report.json docs/verified-expiry-review.json reviews/verified-expiry-state.json reviews/verified-expiry-report.json reviews/verified-expiry-archive.json
