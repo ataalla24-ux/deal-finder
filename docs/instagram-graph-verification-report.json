@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-12T06:30:10.800Z",
+  "generatedAt": "2026-10-12T06:45:39.895Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -186,10 +186,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 8,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "ticketoase.at",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 1,
@@ -200,18 +205,24 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 24,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
-  "blockedEvidencePosts": 90,
-  "unmatchedCandidatePosts": 13,
-  "message": "8/21 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "ticketoase.at",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 89,
+  "unmatchedCandidatePosts": 21,
+  "message": "0/21 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
