@@ -21,7 +21,7 @@ for (const slug of slugs) {
   assert.equal($('meta[property="og:url"]').attr('content'), canonical);
   const entry = sitemap('url').filter((_, element) => sitemap(element).find('loc').text() === canonical);
   assert.equal(entry.length, 1, `${slug}: one sitemap entry`);
-  const modified = slug === 'geburtstag-gratis-wien' ? '2026-10-11' : slug === 'guenstig-essen-wien' ? '2026-10-07' : '2026-10-08';
+  const modified = slug === 'geburtstag-gratis-wien' ? '2026-10-13' : slug === 'guenstig-essen-wien' ? '2026-10-07' : '2026-10-08';
   assert.equal(entry.find('lastmod').text(), modified);
   const graph = JSON.parse($('script[type="application/ld+json"]').text())['@graph'];
   const article = graph.find(item => item['@type'] === 'Article');
@@ -79,7 +79,7 @@ try {
   fs.symlinkSync(path.join(root, 'node_modules'), path.join(fixture, 'node_modules'), 'dir');
   fs.mkdirSync(path.join(fixture, 'docs/blog'));
   execFileSync(process.execPath, [path.join(fixture, 'scripts/generate-topic-guides.mjs'), ...slugs.slice(0, 2)], {
-    env: { ...process.env, SEO_NOW: '2026-10-11T10:00:00+02:00' },
+    env: { ...process.env, SEO_NOW: '2026-10-13T10:00:00+02:00' },
   });
   assert.deepEqual(fs.readdirSync(path.join(fixture, 'docs/blog')).sort(), slugs.slice(0, 2).map(slug => `${slug}.html`).sort());
   for (const slug of slugs.slice(0, 2)) {
