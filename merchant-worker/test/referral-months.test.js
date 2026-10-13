@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { Miniflare, convertV4MiniflareOptions, Log, LogLevel } from 'miniflare';
-import { referralPurchase, isQualifyingTrial, monthAfter } from '../src/referral-months.js';
+import { referralPurchase, isQualifyingTrial, isMatchingAppleRedemption, monthAfter } from '../src/referral-months.js';
 import worker from '../src/index.js';
 import { bundledAuth } from './bundled-auth.js';
 
@@ -47,6 +47,20 @@ test('only verified, account-bound production one-month trials qualify', () => {
 test('calendar-month credit clamps month-end, including leap years', () => {
   assert.equal(new Date(monthAfter(Date.parse('2027-01-31T10:00:00Z'))).toISOString(), '2027-02-28T10:00:00.000Z');
   assert.equal(new Date(monthAfter(Date.parse('2028-01-31T10:00:00Z'))).toISOString(), '2028-02-29T10:00:00.000Z');
+});
+test('Apple redemption requires a new matching one-month transaction after reservation', () => {
+  const purchase = referralPurchase('ios', { ...apple, offerType: 3, offerIdentifier: 'reward-month-a' }, account, now);
+  const reward = { state: 'store_confirmation', offerId: 'reward-month-a', productId: apple.productId,
+    reservedAt: now, originalPurchaseKey: purchase.key };
+  assert.equal(isMatchingAppleRedemption(purchase, reward, now), true);
+  for (const patch of [{ purchasedAt: now - 1 }, { purchasedAt: undefined }, { transactionId: undefined },
+    { purchasedAt: now + 60001 }, { product: 'other.sku' }, { offer: 'other-offer' },
+    { key: 'other-chain' }, { expires: now + 7 * DAY }, { expires: now + 365 * DAY }, { redeemedFreeOffer: false }]) {
+    assert.equal(isMatchingAppleRedemption({ ...purchase, ...patch }, reward, now), false);
+  }
+  for (const patch of [{ reservedAt: undefined }, { productId: undefined }, { state: 'redeemed' }]) {
+    assert.equal(isMatchingAppleRedemption(purchase, { ...reward, ...patch }, now), false);
+  }
 });
 test('production router exposes only a disabled config until deliberately enabled', async () => {
   const response = await worker.fetch(new Request('https://test/api/referral-months/config'), {}, {});
@@ -145,7 +159,15 @@ test('Apple links reserve once; only matching authoritative redemption marks the
   assert.match(reserved.rewards[0].redemptionURL, /^https:\/\/apps.apple.com\/redeem\?/);
   assert.deepEqual(await call('redeem', { ...a, rewardId }), reserved);
   assert.equal((await call('confirm-redemption', { ...a, transactionId: apple.transactionId })).redeemedMonths, 0);
-  await fixture({ apple: { ...apple, offerType: 3, offerIdentifier: 'reward-month-a' } });
+  // A receipt predating this reservation must not settle a new reward.
+  await fixture({ apple: { ...apple, offerType: 3, offerIdentifier: 'reward-month-a', purchaseDate: now - DAY } });
+  assert.equal((await call('confirm-redemption', { ...a, transactionId: apple.transactionId })).redeemedMonths, 0);
+  const redeemedAt = Date.now();
+  const redemption = { ...apple, offerType: 3, offerIdentifier: 'reward-month-a', purchaseDate: redeemedAt, expiresDate: redeemedAt + 30 * DAY };
+  await fixture({ apple: { ...redemption, expiresDate: redeemedAt + 7 * DAY } });
+  assert.equal((await call('confirm-redemption', { ...a, transactionId: apple.transactionId })).redeemedMonths, 0);
+  await fixture({ apple: redemption });
+  assert.equal((await call('confirm-redemption', { ...a, transactionId: apple.transactionId })).redeemedMonths, 1);
   assert.equal((await call('confirm-redemption', { ...a, transactionId: apple.transactionId })).redeemedMonths, 1);
 });
 

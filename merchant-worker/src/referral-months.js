@@ -24,7 +24,8 @@ export function referralPurchase(platform, raw, account, now = Date.now()) {
         raw.appAccountToken?.toLowerCase() !== account || raw.revocationDate != null || !raw.originalTransactionId ||
         Number(raw.expiresDate) <= now || !Number.isFinite(Number(raw.expiresDate))) fail('Kein passendes aktives App-Store-Abo.', 409);
     return { key: `ios:${raw.originalTransactionId}`, product: raw.productId, account,
-      started: Number(raw.originalPurchaseDate), expires: Number(raw.expiresDate),
+      started: Number(raw.originalPurchaseDate), purchasedAt: Number(raw.purchaseDate),
+      transactionId: raw.transactionId, expires: Number(raw.expiresDate),
       trial: raw.offerType === 1 && raw.offerDiscountType === 'FREE_TRIAL' &&
         raw.transactionId === raw.originalTransactionId && Number(raw.purchaseDate) === Number(raw.originalPurchaseDate),
       offer: raw.offerIdentifier || null, redeemedFreeOffer: raw.offerType === 3 && raw.offerDiscountType === 'FREE_TRIAL' };
@@ -46,6 +47,15 @@ export function isQualifyingTrial(purchase, acceptedAt, now = Date.now()) {
   const days = (purchase.expires - purchase.started) / DAY;
   return purchase.trial && Number.isFinite(purchase.started) && purchase.started >= acceptedAt - 30000 &&
     purchase.started <= now + 60000 && purchase.started - acceptedAt <= 7 * DAY && days >= 27 && days <= 32;
+}
+export function isMatchingAppleRedemption(purchase, reward, now = Date.now()) {
+  const days = (purchase.expires - purchase.purchasedAt) / DAY;
+  return purchase.redeemedFreeOffer && reward.state === 'store_confirmation' &&
+    reward.offerId === purchase.offer && reward.productId === purchase.product &&
+    Number.isFinite(reward.reservedAt) && Number.isFinite(purchase.purchasedAt) &&
+    purchase.purchasedAt >= reward.reservedAt && purchase.purchasedAt <= now + 60000 &&
+    days >= 27 && days <= 32 && !!purchase.transactionId &&
+    (!reward.originalPurchaseKey || reward.originalPurchaseKey === purchase.key);
 }
 export function monthAfter(timestamp) {
   const d = new Date(timestamp), day = d.getUTCDate();
@@ -190,6 +200,7 @@ export class ReferralMonthsLedger {
         if (!item) fail('Dein Monat bleibt gutgeschrieben. Ein passendes Apple-Angebot ist noch nicht verfügbar.', 409);
         const [offerKey, offer] = item;
         Object.assign(reward, { state: 'store_confirmation', offerId: offer.offerId,
+          reservedAt: now, productId,
           originalPurchaseKey: purchase?.key || null,
           redemptionURL: `https://apps.apple.com/redeem?ctx=offercodes&id=6758958213&code=${offer.code}` });
         offer.assignedTo = account.id;
@@ -218,9 +229,14 @@ export class ReferralMonthsLedger {
     }
     if (action === 'confirm-redemption') {
       const purchase = await this.verifyPurchase(body, account);
-      const reward = account.rewards.find(x => purchase.redeemedFreeOffer && x.state === 'store_confirmation' && x.offerId === purchase.offer &&
-        (!x.originalPurchaseKey || x.originalPurchaseKey === purchase.key));
-      if (reward) { reward.state = 'redeemed'; reward.redeemedAt = now; await this.storage.put(key, account); }
+      const usedKey = 'redemption:' + await referralHash(`${body.platform}:${purchase.transactionId || ''}`);
+      const reward = account.rewards.find(x => isMatchingAppleRedemption(purchase, x, now));
+      if (reward && !await this.storage.get(usedKey)) {
+        reward.state = 'redeemed'; reward.redeemedAt = now;
+        await this.storage.transaction(async tx => {
+          await tx.put({ [key]: account, [usedKey]: { accountId: account.id, rewardId: reward.id } });
+        });
+      }
       return this.status(account);
     }
     fail('Nicht gefunden.', 404);
