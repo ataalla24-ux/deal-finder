@@ -5,10 +5,11 @@ import { handleTrialStatus } from './subscription-trial.js';
 import { handleReferralMonths, ReferralMonthsLedger } from './referral-months.js';
 import { handleAccount } from './account-auth.js';
 import { handlePlayCatalog } from './store-catalog.js';
+import { accountEmailLedger, handleAccountEmail } from './account-email.js';
 import { measureStorage, storageIdentity, StorageQuotaError } from './storage-usage.js';
 export { MerchantPromoLedger } from './merchant-promos.js';
 
-export class ReferralMonths extends ReferralMonthsLedger {
+export class ReferralMonths extends accountEmailLedger(ReferralMonthsLedger) {
   appleTransaction(id) { return fetchAppStoreTransaction(id, this.env, AbortSignal.timeout(7000)); }
   async playRequest(token, suffix = '', body) {
     const signal = AbortSignal.timeout(9000);
@@ -159,6 +160,7 @@ const merchantWorker = {
     const url = new URL(request.url);
 
     try {
+      if (url.pathname.startsWith('/api/email/')) return handleAccountEmail(request, env);
       if (url.pathname.startsWith('/api/account/')) return handleAccount(request, env);
       if (url.pathname.startsWith('/api/referral-months/')) return handleReferralMonths(request, env);
       if (request.method === 'POST' && url.pathname === '/api/merchant/validate') {

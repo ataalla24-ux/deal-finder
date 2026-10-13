@@ -321,3 +321,31 @@ https://developer.apple.com/help/app-store-connect/manage-subscriptions/set-up-s
 https://developer.apple.com/videos/play/wwdc2025/249/?time=737
 https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptionsv2
 https://support.google.com/googleplay/android-developer/answer/12154973?hl=en-EN
+EMAIL DELIVERY FOUNDATION (2026-10-13)
+Provider DNS and the domain-only RESEND_API_KEY are provisioned. account-email.js
+now composes with the existing serialized account ledger. It provides bounded
+single-recipient delivery, immutable per-account logical deduplication, persisted
+pre-send attempts, current profile/address consent, deletion cleanup, 90/day and
+2700/month attempt caps. Unknown/crashed attempts are NOT automatically retried.
+GET /api/email/unsubscribe is inert; token-bound POST disables all voluntary email
+categories for that confirmed address without touching billing or push settings.
+POST /api/email/resend-webhook verifies raw bytes with pinned Svix2.8.0 and rejects
+stale/invalid signatures. Only known delivery IDs update metadata; hard failure,
+bounce, complaint or suppression prevents further sends to the hashed address.
+Delivery events mean recipient-server acceptance, not proof of inbox placement.
+
+GET /api/email/admin/owner-test is status-only and requires the EXISTING merchant
+admin bearer credential. POST additionally requires ACCOUNT_EMAIL_QA_ENABLED=1
+and TRANSPORT=1, has no accepted payload, and can send only the one immutable
+owner-delivery-test-2026-10-13 message to freefinder.at@gmail.com. Use
+node scripts/email-delivery-check.mjs for status; --send-approved-test ONLY with
+explicit owner approval for that single mail. Repeating cannot send a second mail.
+No endpoint permits arbitrary admin recipients or customer dispatch.
+
+Customer mail stays OFF (ACCOUNT_EMAIL_ENABLED=0). The new ledger is groundwork,
+NOT a completed scheduled marketing service: feed/reward template scheduling,
+mail-history export/retention and actual consent-to-inbox flow remain to finish.
+RESEND_WEBHOOK_SECRET must be provisioned before customer sending is permitted.
+QA switch must return OFF immediately after the authorized test. Existing prices,
+trials, referral gates, push cron and recipient preferences remain unchanged.
+

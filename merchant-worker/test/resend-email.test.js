@@ -46,7 +46,7 @@ test('fixed sender, reply address and immutable idempotency header; no extra rec
   const captured = [];
   const transport = async (url, options) => { captured.push({ url, options }); return Response.json({ id: providerId }); };
   const message = { ...delivery, from: 'evil@example.test', cc: 'other@example.test', bcc: 'another@example.test',
-    headers: { private: 'ignored' }, attachments: ['ignored'], unsubscribeURL: 'https://freefinder.at/email/unsubscribe?token=opaque-fixture' };
+    headers: { private: 'ignored' }, attachments: ['ignored'], unsubscribeURL: 'https://freefinder-merchant-backend.freefinder-stefan.workers.dev/api/email/unsubscribe?token=opaque-fixture' };
   for (let i = 0; i < 2; i++) {
     assert.deepEqual(await sendResendEmail(env, message, { transport, now: now + i * 1000 }),
       { outcome: 'accepted', providerId, status: 200 });

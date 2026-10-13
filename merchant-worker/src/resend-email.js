@@ -36,7 +36,7 @@ async function responseJSON(response) {
 }
 
 // Transport only. The caller must persist an immutable delivery and check current
-// consent, suppression, deletion and quota BEFORE dispatch. No public route uses it.
+// consent, suppression, deletion and quota BEFORE dispatch.
 export async function sendResendEmail(env, delivery, { transport = fetch, now = Date.now() } = {}) {
   if (env.ACCOUNT_EMAIL_TRANSPORT_ENABLED !== '1') return { outcome: 'not_sent', reason: 'disabled' };
   if (typeof env.RESEND_API_KEY !== 'string' || !/^re_[A-Za-z0-9_-]{16,200}$/.test(env.RESEND_API_KEY)) {
@@ -58,7 +58,7 @@ export async function sendResendEmail(env, delivery, { transport = fetch, now = 
   if (delivery.unsubscribeURL !== undefined) {
     let url;
     try { url = new URL(delivery.unsubscribeURL); } catch { /* rejected below */ }
-    if (!url || url.origin !== 'https://freefinder.at' || url.pathname !== '/email/unsubscribe' ||
+    if (!url || url.origin !== 'https://freefinder-merchant-backend.freefinder-stefan.workers.dev' || url.pathname !== '/api/email/unsubscribe' ||
         url.username || url.password || url.hash || delivery.unsubscribeURL.length > 2048 ||
         /[\s<>]/.test(delivery.unsubscribeURL)) {
       return { outcome: 'not_sent', reason: 'invalid_unsubscribe_url' };
