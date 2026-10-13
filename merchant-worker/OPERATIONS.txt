@@ -2,18 +2,28 @@ Resend preparation (2026-10-13; sending NOT enabled)
 
 Owner approved a free Resend account/preparation, and signed in using GitHub.
 Domain freefinder.at was created in eu-west-1 (Ireland), ID
-8d84d771-ef0e-48ee-9f1a-73790cfcfe94. DNS remains unverified. Authoritative
+8d84d771-ef0e-48ee-9f1a-73790cfcfe94. DNS VERIFIED on2026-10-13 at22:30CEST. Authoritative
 nameservers are cns1.cloudpit.de, cns2.cloudpit.com and cns3.cloudpit.io.
 The dashboard requests TXT resend._domainkey plus CNAME rsend and send.
 Read the exact values in the dashboard; never replace website/mail records or
 weaken existing DMARC. Do not enable incoming mail. Owner explicitly confirmed
-the additive DNS authorization and a sending-only domain-scoped key. WHOIS
-identifies dogado/easyname; the correct cloudpit.easyname.com login is open but
-logged out and handed to owner. The key dialog currently offers All domains only;
-cancelled without creating a broader key. Recheck after domain verification.
-No API key exists yet and no contacts were uploaded or messages sent. Tracking
-has no configured subdomain; do not create one. Reconfirm its actual OFF state
-after DNS verification and before any approved test email.
+the additive DNS authorization and a sending-only domain-scoped key. Owner signed
+into Easyname/CloudPit. Exactly three records added, TTL600; the original ten
+records retained and verified after reload. All three authoritative nameservers
+plus Cloudflare1.1.1.1 and Google8.8.8.8 resolve the exact new values. Resend now
+confirms domain/DKIM/both sending records Verified. Optional DMARC, incoming mail,
+nameservers and existing website records were not changed.
+
+Key FreeFinder Worker send-only, ID b8927c81-61e6-484f-9373-6e25470acca8, has
+Sending access restricted to freefinder.at. Stored as RESEND_API_KEY in the
+Merchant Worker; temporary mode600 local copy removed after successful upload.
+The secret-only change created live version5a10ba1e-ad04-4943-8bf7-04953bf5c75e
+from the previous deployed source; this did NOT deploy the new transport code.
+Existing secret names/vars/bindings retained. Live account config still returns
+enabled=true,emailDelivery=false. No contacts uploaded or messages sent; key
+dashboard shows0 uses. Provider Configuration still shows Enable tracking metrics
+and Configure, with no tracking subdomain configured; receiving remainsOFF.
+No paid upgrade. DNS/key setup is complete, NOT proof of actual email delivery.
 
 src/resend-email.js is an isolated transport, NOT a working email campaign
 system. It is deliberately not imported by public routes or scheduled jobs.
