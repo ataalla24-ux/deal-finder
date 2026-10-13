@@ -39,9 +39,25 @@ export function referralPurchase(platform, raw, account, now = Date.now()) {
     fail('Kein passendes aktives Google-Play-Abo.', 409);
   }
   return { product: items[0].productId, account, started: Date.parse(raw.startTime),
+    orderId: items[0].latestSuccessfulOrderId,
     expires: Date.parse(items[0].expiryTime), trial: raw.acknowledgementState === 'ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED' && !raw.linkedPurchaseToken &&
       !!items[0].offerPhase?.freeTrial && Object.keys(items[0].offerPhase).length === 1,
     etag: raw.etag };
+}
+export function referralEvidence(platform, purchase, now = Date.now()) {
+  const receiptId = platform === 'ios' ? purchase.transactionId : purchase.orderId;
+  const purchasedAt = platform === 'ios' ? purchase.purchasedAt : purchase.started;
+  if (!['ios', 'android'].includes(platform) || typeof receiptId !== 'string' ||
+      !/^[A-Za-z0-9._-]{5,200}$/.test(receiptId) || !uuid(purchase.account) ||
+      !(platform === 'ios' ? APPLE_PRODUCTS : PLAY_PRODUCTS).has(purchase.product) ||
+      typeof purchase.key !== 'string' || !(platform === 'ios' ? /^ios:\d{5,30}$/ : /^android:[a-f0-9]{64}$/).test(purchase.key) ||
+      !Number.isFinite(purchasedAt) || purchasedAt <= 0 || !Number.isFinite(purchase.expires) || purchasedAt >= purchase.expires ||
+      !Number.isFinite(now) || purchasedAt > now + 60000) {
+    fail('Der Store-Beleg ist noch nicht vollständig bestätigt. Bitte erneut prüfen.', 409);
+  }
+  // Keep only server-verified identifiers, never a Play bearer token or the friend's contact data.
+  return { version: 1, platform, accountId: purchase.account, purchaseKey: purchase.key,
+    productId: purchase.product, receiptId, purchasedAt, periodEnd: purchase.expires, verifiedAt: now };
 }
 export function isQualifyingTrial(purchase, acceptedAt, now = Date.now()) {
   const days = (purchase.expires - purchase.started) / DAY;
@@ -175,7 +191,8 @@ export class ReferralMonthsLedger {
       if (account.purchaseKey || !isQualifyingTrial(purchase, account.acceptedAt, now)) fail('Kein neuer bestätigter Gratis-Monat für diese Einladung.', 409);
       const inviter = await this.storage.get('account:' + account.referredBy);
       if (!inviter || inviter.deletedAt || inviter.purchaseKey === purchase.key) fail('Diese Einladung kann nicht bestätigt werden.', 409);
-      const reward = { id: crypto.randomUUID(), createdAt: now, state: 'earned', months: 1 };
+      const reward = { id: crypto.randomUUID(), createdAt: now, state: 'earned', months: 1,
+        sourceEvidence: referralEvidence(body.platform, purchase, now) };
       inviter.rewards.push(reward);
       account.purchaseKey = purchase.key; account.confirmedAt = now;
       await this.storage.transaction(async tx => {
@@ -251,6 +268,7 @@ export class ReferralMonthsLedger {
       const reward = account.rewards.find(x => isMatchingAppleRedemption(purchase, x, now));
       if (reward && !await this.storage.get(usedKey)) {
         reward.state = 'redeemed'; reward.redeemedAt = now;
+        reward.redemptionEvidence = referralEvidence('ios', purchase, now);
         await this.storage.transaction(async tx => {
           await tx.put({ [key]: account, [usedKey]: { accountId: account.id, rewardId: reward.id } });
         });

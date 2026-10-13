@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { Miniflare, convertV4MiniflareOptions, Log, LogLevel } from 'miniflare';
-import { referralPurchase, isQualifyingTrial, isMatchingAppleRedemption, monthAfter } from '../src/referral-months.js';
+import { referralPurchase, referralEvidence, isQualifyingTrial, isMatchingAppleRedemption, monthAfter } from '../src/referral-months.js';
 import worker from '../src/index.js';
 import { bundledAuth } from './bundled-auth.js';
 
@@ -16,6 +16,7 @@ const apple = { bundleId: 'com.stefanataalla.freefinderwien', environment: 'Prod
 const play = { subscriptionState: 'SUBSCRIPTION_STATE_ACTIVE', acknowledgementState: 'ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED', startTime: new Date(now).toISOString(),
   externalAccountIdentifiers: { obfuscatedExternalAccountId: account }, etag: 'fixture-etag',
   lineItems: [{ productId: 'freefinder.pro.monthly', expiryTime: new Date(now + 30 * DAY).toISOString(),
+    latestSuccessfulOrderId: 'GPA.1111-2222-3333-44444',
     autoRenewingPlan: { autoRenewEnabled: true }, offerPhase: { freeTrial: {} } }] };
 
 test('only verified, account-bound production one-month trials qualify', () => {
@@ -47,6 +48,35 @@ test('only verified, account-bound production one-month trials qualify', () => {
 test('calendar-month credit clamps month-end, including leap years', () => {
   assert.equal(new Date(monthAfter(Date.parse('2027-01-31T10:00:00Z'))).toISOString(), '2027-02-28T10:00:00.000Z');
   assert.equal(new Date(monthAfter(Date.parse('2028-01-31T10:00:00Z'))).toISOString(), '2028-02-29T10:00:00.000Z');
+});
+test('reconciliation evidence retains only the exact verified receipt, product, owner and funded period', () => {
+  for (const [platform, raw] of [['ios', apple], ['android', play]]) {
+    const purchase = referralPurchase(platform, raw, account, now);
+    purchase.key ||= 'android:' + 'a'.repeat(64);
+    purchase.purchaseToken = 'must-never-be-stored';
+    purchase.email = 'friend@example.test';
+    const evidence = referralEvidence(platform, purchase, now);
+    assert.deepEqual(Object.keys(evidence).sort(), ['accountId', 'periodEnd', 'platform', 'productId',
+      'purchaseKey', 'purchasedAt', 'receiptId', 'verifiedAt', 'version'].sort());
+    assert.equal(evidence.receiptId, platform === 'ios' ? apple.transactionId : play.lineItems[0].latestSuccessfulOrderId);
+    assert.equal(evidence.accountId, account);
+    assert.equal(evidence.purchasedAt, now);
+    assert.equal(evidence.periodEnd, now + 30 * DAY);
+    assert.equal(evidence.verifiedAt, now);
+    assert.doesNotMatch(JSON.stringify(evidence), /must-never-be-stored|friend@example/);
+    for (const patch of [{ product: 'another.sku' }, { account: null }, { key: 'wrong-store' }, { key: platform + ':raw-token' },
+      { expires: NaN }, { expires: now - 1 }]) {
+      assert.throws(() => referralEvidence(platform, { ...purchase, ...patch }, now), { status: 409 });
+    }
+    for (const started of [undefined, NaN, 0, -1, now + 60001]) {
+      assert.throws(() => referralEvidence(platform, { ...purchase,
+        [platform === 'ios' ? 'purchasedAt' : 'started']: started }, now), { status: 409 });
+    }
+    for (const receiptId of [undefined, null, '', {}, 'a'.repeat(201), 'not/a/receipt']) {
+      assert.throws(() => referralEvidence(platform, { ...purchase,
+        [platform === 'ios' ? 'transactionId' : 'orderId']: receiptId }, now), { status: 409 });
+    }
+  }
 });
 test('Apple redemption requires a new matching one-month transaction after reservation', () => {
   const purchase = referralPurchase('ios', { ...apple, offerType: 3, offerIdentifier: 'reward-month-a' }, account, now);
@@ -91,11 +121,15 @@ async function runtime(t, enabled = '1') {
             await this.storage.put('fixture', await request.json()); return Response.json({ok:true});
           }
           if (new URL(request.url).pathname === '/stored-rewards') {
-            const {accountId, removePlatform} = await request.json();
+            const {accountId, removePlatform, removeEvidence} = await request.json();
             const key = 'account:' + accountId;
             const account = await this.storage.get(key);
             if (removePlatform) {
               for (const reward of account.rewards) delete reward.redemptionPlatform;
+              await this.storage.put(key, account);
+            }
+            if (removeEvidence) {
+              for (const reward of account.rewards) delete reward.sourceEvidence;
               await this.storage.put(key, account);
             }
             return Response.json(account.rewards);
@@ -208,6 +242,61 @@ test('Apple confirmation rejects an Android request without settling the reserve
   assert.deepEqual(await call('status', owner), reserved);
 });
 
+test('receipt evidence is immutable on retry, ignores client claims and stays private in status/export', async t => {
+  const { call, fixture, mf } = await runtime(t);
+  const owner = identity(1), friend = identity(2);
+  const { code } = await call('register', owner);
+  await call('register', friend);
+  await call('accept', { ...friend, code });
+  await fixture({ apple: { ...apple, appAccountToken: friend.accountId } });
+  await call('confirm', { ...friend, transactionId: apple.transactionId, sourceEvidence: { receiptId: 'forged', accountId: owner.accountId } });
+  const read = async (extra = {}) => (await mf.dispatchFetch('https://test/stored-rewards', {
+    method: 'POST', body: JSON.stringify({ accountId: owner.accountId, ...extra }),
+  })).json();
+  const before = await read();
+  assert.equal(before[0].sourceEvidence.receiptId, apple.transactionId);
+  assert.equal(before[0].sourceEvidence.accountId, friend.accountId);
+  await call('confirm', { ...friend, transactionId: apple.transactionId, sourceEvidence: { receiptId: 'replace' } });
+  assert.deepEqual(await read(), before);
+  const visible = await call('status', owner);
+  assert.equal(visible.earnedMonths, 1);
+  assert.equal(visible.rewards[0].sourceEvidence, undefined);
+  const exported = await (await mf.dispatchFetch('https://test/account-export', { method: 'POST', body: JSON.stringify({
+    ...owner, principal: { id: owner.accountId, authTime: Date.now()/1000 }, trustedIP: 'local-export',
+  }) })).json();
+  assert.equal(exported.ok, true);
+  assert.equal(exported.account.rewards[0].sourceEvidence, undefined);
+  await read({ removeEvidence: true });
+  assert.deepEqual(await call('status', owner), visible, 'historical rewards stay readable and are not reconstructed');
+  await call('confirm', { ...friend, transactionId: apple.transactionId });
+  assert.equal((await read())[0].sourceEvidence, undefined, 'no speculative backfill on duplicate confirmation');
+});
+
+test('Play requires the authoritative initial order for a new credit, not an order supplied by the client', async t => {
+  const { call, fixture, mf } = await runtime(t);
+  const owner = identity(1, 'android'), friend = identity(2, 'android');
+  const { code } = await call('register', owner);
+  await call('register', friend);
+  await call('accept', { ...friend, code });
+  const raw = { ...play, externalAccountIdentifiers: { obfuscatedExternalAccountId: friend.accountId } };
+  const purchaseToken = 'friend-proof-token-never-persisted';
+  const claim = { ...friend, purchaseToken, orderId: 'CLIENT-CANNOT-CHOOSE', sourceEvidence: { receiptId: 'forged' } };
+  await fixture({ play: { ...raw, lineItems: [{ ...raw.lineItems[0], latestSuccessfulOrderId: undefined }] } });
+  await call('confirm', claim, 409);
+  assert.equal((await call('status', owner)).earnedMonths, 0);
+  assert.equal((await call('status', friend)).confirmed, false);
+  await fixture({ play: raw });
+  await call('confirm', claim);
+  const rewards = await (await mf.dispatchFetch('https://test/stored-rewards', {
+    method: 'POST', body: JSON.stringify({ accountId: owner.accountId }),
+  })).json();
+  assert.equal(rewards[0].sourceEvidence.receiptId, raw.lineItems[0].latestSuccessfulOrderId);
+  assert.match(rewards[0].sourceEvidence.purchaseKey, /^android:[a-f0-9]{64}$/);
+  assert.doesNotMatch(JSON.stringify(rewards), /friend-proof-token|CLIENT-CANNOT-CHOOSE|forged/);
+  await call('confirm', claim);
+  assert.equal((await call('status', owner)).earnedMonths, 1);
+});
+
 test('atomic attribution, authentication, self-invite, reciprocal invite, duplicates and disabled rollout', async t => {
   const { call, fixture } = await runtime(t);
   const a = identity(1), b = identity(2), c = identity(3);
@@ -233,17 +322,22 @@ test('atomic attribution, authentication, self-invite, reciprocal invite, duplic
 });
 
 test('Apple links reserve once; only matching authoritative redemption marks the credit redeemed', async t => {
-  const { call, fixture } = await runtime(t);
+  const { call, fixture, mf } = await runtime(t);
+  const stored = async accountId => (await mf.dispatchFetch('https://test/stored-rewards', {
+    method: 'POST', body: JSON.stringify({ accountId }),
+  })).json();
   const a = identity(1), b = identity(2);
   const as = await call('register', a); await call('register', b);
   await call('accept', { ...b, code: as.code });
   await fixture({ apple: { ...apple, appAccountToken: b.accountId } });
   await call('confirm', { ...b, transactionId: apple.transactionId });
+  const sourceEvidence = (await stored(a.accountId))[0].sourceEvidence;
   await call('import-apple-offers', { offers: [{ productId: apple.productId, offerId: 'reward-month-a',
     code: 'TESTCODEONLY', customerType: 'existing', freeMonths: 1, expiresAt: now + 60 * DAY }] });
   await fixture({ apple: { ...apple, offerType: null } });
   const rewardId = (await call('status', a)).rewards[0].id;
   const reserved = await call('redeem', { ...a, rewardId, transactionId: apple.transactionId });
+  assert.equal((await stored(a.accountId))[0].redemptionEvidence, undefined);
   assert.equal(reserved.redeemedMonths, 0);
   assert.match(reserved.rewards[0].redemptionURL, /^https:\/\/apps.apple.com\/redeem\?/);
   assert.deepEqual(await call('redeem', { ...a, rewardId }), reserved);
@@ -256,8 +350,24 @@ test('Apple links reserve once; only matching authoritative redemption marks the
   await fixture({ apple: { ...redemption, expiresDate: redeemedAt + 7 * DAY } });
   assert.equal((await call('confirm-redemption', { ...a, transactionId: apple.transactionId })).redeemedMonths, 0);
   await fixture({ apple: redemption });
+  const confirmed = await call('confirm-redemption', { ...a, transactionId: apple.transactionId,
+    redemptionEvidence: { receiptId: 'forged' } });
+  assert.equal(confirmed.redeemedMonths, 1);
+  assert.equal(confirmed.rewards[0].redemptionEvidence, undefined);
+  const proof = await stored(a.accountId);
+  assert.deepEqual(proof[0].sourceEvidence, sourceEvidence);
+  assert.equal(proof[0].redemptionEvidence.accountId, a.accountId);
+  assert.equal(proof[0].redemptionEvidence.receiptId, redemption.transactionId);
+  assert.equal(proof[0].redemptionEvidence.purchasedAt, redeemedAt);
+  assert.equal(proof[0].redemptionEvidence.periodEnd, redeemedAt + 30 * DAY);
   assert.equal((await call('confirm-redemption', { ...a, transactionId: apple.transactionId })).redeemedMonths, 1);
-  assert.equal((await call('confirm-redemption', { ...a, transactionId: apple.transactionId })).redeemedMonths, 1);
+  assert.deepEqual(await stored(a.accountId), proof);
+  const exported = await (await mf.dispatchFetch('https://test/account-export', { method: 'POST', body: JSON.stringify({
+    ...a, principal: { id: a.accountId, authTime: Date.now()/1000 }, trustedIP: 'apple-redeemed-export',
+  }) })).json();
+  assert.equal(exported.ok, true);
+  assert.equal(exported.account.rewards[0].redemptionEvidence, undefined);
+  assert.equal(exported.account.rewards[0].sourceEvidence, undefined);
 });
 
 test('Play deferral retries never repeat an unknown external financial operation', async t => {
