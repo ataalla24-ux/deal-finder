@@ -51,6 +51,7 @@ export function isQualifyingTrial(purchase, acceptedAt, now = Date.now()) {
 export function isMatchingAppleRedemption(purchase, reward, now = Date.now()) {
   const days = (purchase.expires - purchase.purchasedAt) / DAY;
   return purchase.redeemedFreeOffer && reward.state === 'store_confirmation' &&
+    (!reward.redemptionPlatform || reward.redemptionPlatform === 'ios') &&
     reward.offerId === purchase.offer && reward.productId === purchase.product &&
     Number.isFinite(reward.reservedAt) && Number.isFinite(purchase.purchasedAt) &&
     purchase.purchasedAt >= reward.reservedAt && purchase.purchasedAt <= now + 60000 &&
@@ -186,6 +187,18 @@ export class ReferralMonthsLedger {
       const reward = account.rewards.find(x => x.id === body.rewardId);
       if (!reward) fail('Belohnung nicht gefunden.', 404);
       if (reward.state === 'redeemed') return this.status(account);
+      if (!['earned', 'store_pending', 'store_confirmation'].includes(reward.state)) {
+        fail('Diese Gutschrift kann gerade nicht eingelöst werden.', 409);
+      }
+      // Older pending records predate the explicit platform field. Their existing store operation still owns the credit.
+      const statePlatform = reward.state === 'store_pending' ? 'android' : reward.state === 'store_confirmation' ? 'ios' : null;
+      const platform = reward.redemptionPlatform || statePlatform || (reward.redemptionURL ? 'ios' : null);
+      if (statePlatform && platform !== statePlatform || reward.redemptionURL && platform !== 'ios') {
+        fail('Die begonnene Store-Einlösung muss zuerst geprüft werden.', 409);
+      }
+      if (platform && platform !== body.platform) {
+        fail('Diese Gutschrift wird bereits im anderen Store geprüft. Bitte schließe die Einlösung dort ab.', 409);
+      }
       if (account.rewards.some(x => x.id !== reward.id && ['store_pending', 'store_confirmation'].includes(x.state))) {
         fail('Bitte zuerst die bereits gestartete Store-Einlösung bestätigen.', 409);
       }
@@ -199,7 +212,7 @@ export class ReferralMonthsLedger {
           offer.expiresAt > now + DAY && offer.customerType === (purchase ? 'existing' : 'new') && !previous.has(offer.offerId));
         if (!item) fail('Dein Monat bleibt gutgeschrieben. Ein passendes Apple-Angebot ist noch nicht verfügbar.', 409);
         const [offerKey, offer] = item;
-        Object.assign(reward, { state: 'store_confirmation', offerId: offer.offerId,
+        Object.assign(reward, { state: 'store_confirmation', redemptionPlatform: 'ios', offerId: offer.offerId,
           reservedAt: now, productId,
           originalPurchaseKey: purchase?.key || null,
           redemptionURL: `https://apps.apple.com/redeem?ctx=offercodes&id=6758958213&code=${offer.code}` });
@@ -217,17 +230,22 @@ export class ReferralMonthsLedger {
         fail('Google Play prüft die Gutschrift. Bitte nicht erneut einlösen.', 409);
       }
       if (!purchase.etag) fail('Google Play hat die Verlängerung noch nicht bestätigt.', 409);
-      reward.state = 'store_pending'; reward.expectedExpiry = monthAfter(purchase.expires); reward.purchaseKey = purchase.key;
+      reward.state = 'store_pending'; reward.redemptionPlatform = 'android';
+      reward.expectedExpiry = monthAfter(purchase.expires); reward.purchaseKey = purchase.key;
       reward.originalExpiry = purchase.expires;
       await this.storage.put(key, account);
       // Persist before sending. Unknown outcomes stay pending; never retry a financial side effect blindly.
       const result = await this.deferPlay(body.purchaseToken, purchase, reward.expectedExpiry);
       if (result.ok) { reward.state = 'redeemed'; reward.redeemedAt = now; reward.newExpiry = result.expires; }
-      else if (result.definitive) reward.state = 'earned';
+      else if (result.definitive) {
+        reward.state = 'earned';
+        for (const field of ['redemptionPlatform', 'expectedExpiry', 'purchaseKey', 'originalExpiry']) delete reward[field];
+      }
       await this.storage.put(key, account);
       return this.status(account);
     }
     if (action === 'confirm-redemption') {
+      if (body.platform !== 'ios') fail('Diese Bestätigung gilt nur für den App Store.');
       const purchase = await this.verifyPurchase(body, account);
       const usedKey = 'redemption:' + await referralHash(`${body.platform}:${purchase.transactionId || ''}`);
       const reward = account.rewards.find(x => isMatchingAppleRedemption(purchase, x, now));

@@ -16,6 +16,7 @@ const device = n => ({ provider: 'apns', body: { bundleId: 'com.stefanataalla.fr
 async function runtime(t, flags = { DAILY_PUSH_ENABLED: '1', MARKETING_PUSH_ENABLED: '1' }) {
   const modules = [{ type: 'ESModule', path: 'test-entry.js', contents: `
     import { DailyPushService } from './referrals-worker/src/daily-push.js';
+    import router from './referrals-worker/src/index.js';
     export class TestDailyPush extends DailyPushService {
       async alarm() {} // Batches are explicitly driven by tests, never by wall-clock alarms.
       now() { return this.fixture?.now || ${now}; }
@@ -40,12 +41,21 @@ async function runtime(t, flags = { DAILY_PUSH_ENABLED: '1', MARKETING_PUSH_ENAB
         return super.fetch(request);
       }
     }
-    export default { fetch(request, env) { return env.PUSH.get(env.PUSH.idFromName('test')).fetch(request); } };
+    export default { fetch(request, env) {
+      if (new URL(request.url).pathname.startsWith('/api/')) {
+        return router.fetch(request, { ...env, DAILY_DEAL_PUSH: {
+          idFromName: () => env.PUSH.idFromName('test'), get: id => env.PUSH.get(id),
+        } });
+      }
+      return env.PUSH.get(env.PUSH.idFromName('test')).fetch(request);
+    } };
   ` }];
-  for (const path of ['referrals-worker/src/daily-push.js', 'referrals-worker/src/daily-push-policy.js', 'referrals-worker/src/fcm-push.js', 'scraper/native-weekly-utils.js']) {
+  for (const path of ['referrals-worker/src/index.js', 'referrals-worker/src/public-deal-state-cache.js',
+    'referrals-worker/src/daily-push.js', 'referrals-worker/src/daily-push-policy.js', 'referrals-worker/src/fcm-push.js', 'scraper/native-weekly-utils.js']) {
     modules.push({ type: 'ESModule', path, contents: await readFile(new URL(`../../${path}`, import.meta.url), 'utf8') });
   }
   const mf = new Miniflare(convertV4MiniflareOptions({ compatibilityDate: '2026-03-09', modules,
+    kvNamespaces: { REFERRAL_KV: 'local-referral-test' },
     durableObjects: { PUSH: { className: 'TestDailyPush', useSQLite: true } }, bindings: flags, log: new Log(LogLevel.NONE) }));
   t.after(() => mf.dispose());
   const call = async (path, body) => {
@@ -56,6 +66,21 @@ async function runtime(t, flags = { DAILY_PUSH_ENABLED: '1', MARKETING_PUSH_ENAB
   await call('/fixture', { now, source });
   return call;
 }
+
+test('public v3 registrations reach durable storage; Pro daily delivery survives disabled digests', async t => {
+  const call = await runtime(t, { DAILY_PUSH_ENABLED: '1', MARKETING_PUSH_ENABLED: '1', DIGEST_PUSH_ENABLED: '0' });
+  for (const [n, provider, subscriptionPlan] of [[1, 'apns', 'free'], [2, 'apns', 'pro'], [3, 'fcm', 'free'], [4, 'fcm', 'pro']]) {
+    const body = { ...device(n).body, packageName: 'com.stefanataalla.freefinderwien',
+      ...(provider === 'fcm' ? { token: `fcm-runtime-token-${n}-`.repeat(3) } : {}),
+      policyVersion: 3, subscriptionPlan, marketingEnabled: true, marketingConsentVersion: 2, marketingConsentAt: now - 1000 };
+    assert.equal((await call(`/api/push/${provider}/register`, body)).registered, true);
+  }
+  const status = await call('/status');
+  assert.equal(status.digestEnabled, false);
+  assert.deepEqual(status.devices.map(row => [row.provider, row.enabled, row.count]), [['apns', 1, 2], ['fcm', 1, 2]]);
+  await call('/batch');
+  assert.deepEqual((await call('/sent')).map(row => row.id).sort(), [device(2).body.appDeviceId, device(4).body.appDeviceId]);
+});
 
 test('atomic daily claims survive concurrent batches and repeated invocations', async t => {
   const call = await runtime(t);

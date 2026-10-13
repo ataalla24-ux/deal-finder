@@ -11,15 +11,41 @@ function environment() {
     } }) } };
 }
 test('register routes preserve metadata and forward only to the private registry', async () => {
-  for (const provider of ['apns', 'fcm']) for (const policyVersion of [1, 2]) {
+  for (const provider of ['apns', 'fcm']) for (const policyVersion of [1, 2, 3]) {
     const env = environment();
     const body = { token: 'test-token', policyVersion, notificationsEnabled: true, language: 'en', subscriptionPlan: 'pro', revision: Date.now() };
     const response = await worker.fetch(new Request(`https://test/api/push/${provider}/register`, {
       method: 'POST', body: JSON.stringify(body),
     }), env);
     assert.equal(response.status, 200);
+    assert.equal(env.calls.length, 1);
+    assert.equal(env.calls[0].url, 'https://push.internal/register');
     assert.deepEqual(env.calls[0].body, { provider, body });
     assert.equal(response.headers.get('cache-control'), 'no-store');
+  }
+});
+test('v3 consent and both audiences survive registration even while digest delivery is off', async () => {
+  for (const provider of ['apns', 'fcm']) for (const subscriptionPlan of ['free', 'pro', 'plus']) {
+    const env = { ...environment(), DIGEST_PUSH_ENABLED: '0', DAILY_PUSH_ENABLED: '1', MARKETING_PUSH_ENABLED: '1' };
+    const body = { token: 'test-token', policyVersion: 3, subscriptionPlan, notificationsEnabled: true,
+      marketingEnabled: true, marketingConsentVersion: 2, marketingConsentAt: Date.now(),
+      pushEnvironment: 'production', revision: Date.now(), language: 'de' };
+    const response = await worker.fetch(new Request(`https://test/api/push/${provider}/register`, {
+      method: 'POST', body: JSON.stringify(body),
+    }), env);
+    assert.equal(response.status, 200);
+    assert.deepEqual(env.calls, [{ url: 'https://push.internal/register', body: { provider, body } }]);
+  }
+});
+test('unknown explicit policy versions never downgrade to the legacy registry', async () => {
+  for (const provider of ['apns', 'fcm']) for (const policyVersion of [0, 4, '3', null]) {
+    const env = environment();
+    const body = { token: 'ab'.repeat(32), platform: 'ios', bundleId: 'com.stefanataalla.freefinderwien', policyVersion };
+    const response = await worker.fetch(new Request(`https://test/api/push/${provider}/register`, {
+      method: 'POST', body: JSON.stringify(body),
+    }), env);
+    assert.equal(response.status, 409);
+    assert.equal(env.calls.length, 0);
   }
 });
 test('status and no-send preview require admin authentication', async () => {

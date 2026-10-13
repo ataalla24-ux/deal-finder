@@ -4459,13 +4459,14 @@ export default {
         if (provider === 'apns') await env.REFERRAL_KV.delete(apnsTokenKey(token));
         return json({ ok: true, registered: false });
       }
-      if ([1, 2].includes(body.policyVersion) || action === 'unregister') {
+      if ([1, 2, 3].includes(body.policyVersion) || action === 'unregister') {
         if (!env.DAILY_DEAL_PUSH) return invalid('Push registration temporarily unavailable', 503);
         const response = await dailyPushStub(env).fetch(`https://push.internal/${action}`, {
           method: 'POST', body: JSON.stringify({ provider, body }),
         });
         return new Response(response.body, { status: response.status, headers: JSON_HEADERS });
       }
+      if (Object.hasOwn(body, 'policyVersion')) return invalid('Unsupported push policy version', 409);
       // Legacy apps have not supplied permission/environment metadata; keep them out of daily delivery.
       if (provider === 'fcm') return invalid('Update the app to register daily notifications', 409);
       request = new Request(request.url, { method: 'POST', headers: request.headers, body: raw });

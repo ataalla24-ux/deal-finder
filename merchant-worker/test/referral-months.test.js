@@ -58,7 +58,7 @@ test('Apple redemption requires a new matching one-month transaction after reser
     { key: 'other-chain' }, { expires: now + 7 * DAY }, { expires: now + 365 * DAY }, { redeemedFreeOffer: false }]) {
     assert.equal(isMatchingAppleRedemption({ ...purchase, ...patch }, reward, now), false);
   }
-  for (const patch of [{ reservedAt: undefined }, { productId: undefined }, { state: 'redeemed' }]) {
+  for (const patch of [{ reservedAt: undefined }, { productId: undefined }, { state: 'redeemed' }, { redemptionPlatform: 'android' }]) {
     assert.equal(isMatchingAppleRedemption(purchase, { ...reward, ...patch }, now), false);
   }
 });
@@ -90,6 +90,16 @@ async function runtime(t, enabled = '1') {
           if (new URL(request.url).pathname === '/fixture') {
             await this.storage.put('fixture', await request.json()); return Response.json({ok:true});
           }
+          if (new URL(request.url).pathname === '/stored-rewards') {
+            const {accountId, removePlatform} = await request.json();
+            const key = 'account:' + accountId;
+            const account = await this.storage.get(key);
+            if (removePlatform) {
+              for (const reward of account.rewards) delete reward.redemptionPlatform;
+              await this.storage.put(key, account);
+            }
+            return Response.json(account.rewards);
+          }
           if (new URL(request.url).pathname === '/deferrals') return Response.json(await this.storage.get('deferrals') || 0);
           return super.fetch(request);
         }
@@ -118,6 +128,85 @@ async function runtime(t, enabled = '1') {
   return { mf, call, fixture };
 }
 const identity = (n, platform = 'ios') => ({ accountId: `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`, secret: String(n).padStart(64, '0'), platform });
+
+async function earnedReward(t) {
+  const runtimeState = await runtime(t);
+  const { call, fixture } = runtimeState;
+  const owner = identity(1), friend = identity(2);
+  const { code } = await call('register', owner);
+  await call('register', friend);
+  await call('accept', { ...friend, code });
+  const purchasedAt = Date.now();
+  await fixture({ apple: { ...apple, appAccountToken: friend.accountId, purchaseDate: purchasedAt,
+    originalPurchaseDate: purchasedAt, expiresDate: purchasedAt + 30 * DAY } });
+  await call('confirm', { ...friend, transactionId: apple.transactionId });
+  const rewardId = (await call('status', owner)).rewards[0].id;
+  await call('import-apple-offers', { offers: [{ productId: apple.productId, offerId: 'platform-lock-fixture',
+    code: 'PLATFORMTESTONLY', customerType: 'existing', freeMonths: 1, expiresAt: now + 60 * DAY }] });
+  await fixture({ apple: { ...apple, offerType: null }, play, deferResult: { ok: false, definitive: false } });
+  return { ...runtimeState, owner, rewardId };
+}
+
+test('an Apple reservation cannot also trigger a Play deferral, including older reservations', async t => {
+  const { call, mf, owner, rewardId } = await earnedReward(t);
+  const reserved = await call('redeem', { ...owner, rewardId, transactionId: apple.transactionId });
+  for (const removePlatform of [false, true]) {
+    await mf.dispatchFetch('https://test/stored-rewards', { method: 'POST', body: JSON.stringify({ accountId: owner.accountId, removePlatform }) });
+    await call('redeem', { ...owner, platform: 'android', rewardId, purchaseToken: 'cross-store-owner-token-fixture' }, 409);
+    assert.deepEqual(await call('status', owner), reserved);
+    assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 0);
+  }
+});
+
+test('an unknown Play outcome stays locked to Play and cannot reserve an Apple code', async t => {
+  const { call, fixture, mf, owner, rewardId } = await earnedReward(t);
+  const pending = await call('redeem', { ...owner, platform: 'android', rewardId, purchaseToken: 'cross-store-owner-token-fixture' });
+  for (const removePlatform of [false, true]) {
+    await mf.dispatchFetch('https://test/stored-rewards', { method: 'POST', body: JSON.stringify({ accountId: owner.accountId, removePlatform }) });
+    await call('redeem', { ...owner, rewardId, transactionId: apple.transactionId }, 409);
+    assert.deepEqual(await call('status', owner), pending);
+    assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 1);
+  }
+  await fixture({ play: { ...play, lineItems: [{ ...play.lineItems[0], expiryTime: new Date(monthAfter(now + 30 * DAY)).toISOString() }] } });
+  const settled = await call('redeem', { ...owner, platform: 'android', rewardId, purchaseToken: 'cross-store-owner-token-fixture' });
+  assert.equal(settled.redeemedMonths, 1);
+  assert.deepEqual(await call('redeem', { ...owner, rewardId, transactionId: apple.transactionId }), settled);
+  assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 1);
+});
+
+test('a definitively rejected Play deferral releases the credit for another store', async t => {
+  const { call, fixture, mf, owner, rewardId } = await earnedReward(t);
+  await fixture({ play, deferResult: { ok: false, definitive: true } });
+  const rejected = await call('redeem', { ...owner, platform: 'android', rewardId, purchaseToken: 'cross-store-owner-token-fixture' });
+  assert.equal(rejected.rewards[0].state, 'earned');
+  await fixture({ apple: { ...apple, offerType: null } });
+  const reserved = await call('redeem', { ...owner, rewardId, transactionId: apple.transactionId });
+  assert.equal(reserved.rewards[0].state, 'store_confirmation');
+  assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 1);
+});
+
+test('concurrent cross-store redemption requests can start only one store operation', async t => {
+  const { mf, owner, rewardId } = await earnedReward(t);
+  const request = async body => mf.dispatchFetch('https://test/api/referral-months/redeem', {
+    method: 'POST', headers: { 'content-type': 'application/json', 'cf-connecting-ip': owner.accountId,
+      'x-test-identity': JSON.stringify(owner) }, body: JSON.stringify(body),
+  });
+  const responses = await Promise.all([
+    request({ ...owner, rewardId, transactionId: apple.transactionId }),
+    request({ ...owner, platform: 'android', rewardId, purchaseToken: 'concurrent-cross-store-owner-fixture' }),
+  ]);
+  assert.deepEqual(responses.map(r => r.status).sort(), [200, 409]);
+  const status = await responses.find(r => r.status === 200).json();
+  const deferrals = await (await mf.dispatchFetch('https://test/deferrals')).json();
+  assert.equal(deferrals, status.rewards[0].state === 'store_pending' ? 1 : 0);
+});
+
+test('Apple confirmation rejects an Android request without settling the reserved credit', async t => {
+  const { call, owner, rewardId } = await earnedReward(t);
+  const reserved = await call('redeem', { ...owner, rewardId, transactionId: apple.transactionId });
+  await call('confirm-redemption', { ...owner, platform: 'android', purchaseToken: 'wrong-confirmation-store-fixture' }, 400);
+  assert.deepEqual(await call('status', owner), reserved);
+});
 
 test('atomic attribution, authentication, self-invite, reciprocal invite, duplicates and disabled rollout', async t => {
   const { call, fixture } = await runtime(t);
