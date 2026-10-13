@@ -4,6 +4,7 @@ import { publicInteractionCache } from './public-interaction-cache.js';
 import { handleTrialStatus } from './subscription-trial.js';
 import { handleReferralMonths, ReferralMonthsLedger } from './referral-months.js';
 import { handleAccount } from './account-auth.js';
+import { handlePlayCatalog } from './store-catalog.js';
 import { measureStorage, storageIdentity, StorageQuotaError } from './storage-usage.js';
 export { MerchantPromoLedger } from './merchant-promos.js';
 
@@ -166,6 +167,9 @@ const merchantWorker = {
       }
       if (request.method === 'POST' && url.pathname === '/api/subscriptions/trial-status') {
         return handleTrialStatus(request, env, googlePlayAccessToken);
+      }
+      if (url.pathname === '/api/subscriptions/admin/play-catalog') {
+        return handlePlayCatalog(request, env, googlePlayAccessToken);
       }
       if (url.pathname.startsWith('/api/merchant/promos/')) {
         const response = await handlePromoRequest(request, env);

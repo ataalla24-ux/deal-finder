@@ -126,3 +126,33 @@ this adds no network request. Existing prices/trials and subscriptions stay inta
 Reference fields (checked 2026-10-13):
 https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptionsv2
 https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptionsv2/defer
+
+Read-only Play offer inventory (2026-10-13):
+  node scripts/store-catalog.mjs
+
+GET /api/subscriptions/admin/play-catalog uses the EXISTING protected
+MERCHANT_PROMO_ADMIN_SECRET bearer. The CLI reads the same environment variable
+or macOS Keychain entry as promos.mjs; never print or copy it into source. The
+fixed production host cannot be overridden and redirects are rejected. No new
+credential or permission is provisioned by this check.
+
+The Worker uses the existing protected Google verifier credential for OAuth and
+four GET requests: subscription and offer inventory for freefinder.pro.monthly
+and freefinder.pro.yearly in com.stefanataalla.freefinderwien. Caller-selected
+products, URLs and query parameters are rejected. A shared 20-second timeout,
+256KiB JSON response limit and manual redirect rejection bound the transport.
+No purchase token, ledger write, customer lookup or Store mutation is involved.
+
+Only base-plan/offer state, targeting, periods and AT/DE regional terms are
+returned, with no-store caching. At most 20 offers per product are inspected;
+complete=false means pagination remains, not that other offers do not exist.
+An active offer still depends on an active base plan, regional availability and
+the actual buyer's Store eligibility. Catalog success does NOT establish purchase
+verification permissions, billing, device eligibility or referral redemption.
+Those remain separate release gates. Provider failures return a generic stage
+and HTTP status without echoing credentials or raw provider diagnostics.
+
+Reference fields:
+https://developers.google.com/android-publisher/api-ref/rest/v3/monetization.subscriptions/get
+https://developers.google.com/android-publisher/api-ref/rest/v3/monetization.subscriptions.basePlans.offers/list
+https://developers.google.com/android-publisher/api-ref/rest/v3/monetization.subscriptions.basePlans.offers
