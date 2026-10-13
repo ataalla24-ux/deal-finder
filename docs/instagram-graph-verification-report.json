@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-13T23:15:21.360Z",
+  "generatedAt": "2026-10-13T23:33:20.115Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -102,7 +102,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 23,
-      "candidates": 1
+      "candidates": 2
     },
     "deals-pending-instagram-apify.json": {
       "deals": 4,
@@ -129,8 +129,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 62,
-      "candidates": 10
+      "deals": 63,
+      "candidates": 11
     },
     "deals-pending-power.json": {
       "deals": 46,
@@ -157,13 +157,17 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 14,
-  "candidateAccounts": 13,
+  "candidatePosts": 15,
+  "candidateAccounts": 14,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "g.bar.grace.vienna",
       "candidates": 2
+    },
+    {
+      "username": "abby.am.rochusmarkt",
+      "candidates": 1
     },
     {
       "username": "ikazerestaurant",
@@ -180,16 +184,17 @@
     {
       "username": "dein.anker",
       "candidates": 1
-    },
-    {
-      "username": "freefinder.at",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 6,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "g.bar.grace.vienna",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 1,
@@ -200,18 +205,24 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 72,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
-  "blockedEvidencePosts": 92,
-  "unmatchedCandidatePosts": 8,
-  "message": "6/14 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "g.bar.grace.vienna",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 93,
+  "unmatchedCandidatePosts": 15,
+  "message": "0/15 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
