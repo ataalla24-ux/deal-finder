@@ -342,10 +342,28 @@ node scripts/email-delivery-check.mjs for status; --send-approved-test ONLY with
 explicit owner approval for that single mail. Repeating cannot send a second mail.
 No endpoint permits arbitrary admin recipients or customer dispatch.
 
-Customer mail stays OFF (ACCOUNT_EMAIL_ENABLED=0). The new ledger is groundwork,
-NOT a completed scheduled marketing service: feed/reward template scheduling,
-mail-history export/retention and actual consent-to-inbox flow remain to finish.
+Customer mail stays OFF (ACCOUNT_EMAIL_ENABLED=0). The consent-to-inbox customer
+flow has NOT been exercised live. The owner-only test bypasses customer consent
+by explicit one-message approval, not by enrolling an account or enabling marketing.
 RESEND_WEBHOOK_SECRET must be provisioned before customer sending is permitted.
 QA switch must return OFF immediately after the authorized test. Existing prices,
 trials, referral gates, push cron and recipient preferences remain unchanged.
+
+LOCAL FOLLOW-UP: Scheduled hook runs at minute5/20/35/50 and exits without storage
+or network when email flags are OFF. Each active invocation scans at most100 account
+rows and sends at most5 messages, one per serialized request. Tips Wednesday18h
+and recap Sunday18h Vienna use the existing push eligibility/publication/expiry
+policy; stale/missing feed or override state means no deal mail. Each category
+requires its own current opt-in. Reward notices require the enabled referral
+program and recent earned server-verified credit, with no private friend details.
+Limits are safety caps, not a promise that a large audience fits the free plan;
+skipped/stale campaigns do not replay the following day. No paid upgrade is made.
+Full payloads/recipient addresses are not persisted in delivery rows. Recent
+status metadata is in the authenticated export; provider references are pruned
+after90 days in bounded cursor scans. Non-contact logical dedupe and working
+unsubscribe references remain until account deletion. Suppression address hashes
+persist to prevent future unwanted mail, including after account recreation.
+Unresolved sends need manual review; no retry/new logical ID is automatic.
+Exports over10000 history entries fail explicitly rather than returning partial
+data. Deletion over1000 rows remains retryable without restoring the account.
 

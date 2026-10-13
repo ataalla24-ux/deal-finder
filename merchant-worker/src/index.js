@@ -5,7 +5,7 @@ import { handleTrialStatus } from './subscription-trial.js';
 import { handleReferralMonths, ReferralMonthsLedger } from './referral-months.js';
 import { handleAccount } from './account-auth.js';
 import { handlePlayCatalog } from './store-catalog.js';
-import { accountEmailLedger, handleAccountEmail } from './account-email.js';
+import { accountEmailLedger, handleAccountEmail, scheduledAccountEmail } from './account-email.js';
 import { measureStorage, storageIdentity, StorageQuotaError } from './storage-usage.js';
 export { MerchantPromoLedger } from './merchant-promos.js';
 
@@ -135,6 +135,7 @@ const DEFAULT_INSTAGRAM_HASHTAGS = [
 ];
 
 export default {
+  async scheduled(_controller, env) { await scheduledAccountEmail(env); },
   async fetch(request, env, ctx) {
     const usage = measureStorage(request, env.MERCHANT_CAMPAIGNS);
     let response;

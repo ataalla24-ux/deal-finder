@@ -1,5 +1,8 @@
 import { Webhook } from 'svix';
 import { sendResendEmail } from './resend-email.js';
+import { rewardEmail } from './account-email-campaigns.js';
+export { scheduledAccountEmail } from './account-email-campaigns.js';
+import { digestType, viennaClock } from '../../referrals-worker/src/daily-push-policy.js';
 
 export const EMAIL_ORIGIN = 'https://freefinder-merchant-backend.freefinder-stefan.workers.dev';
 const UUID = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/;
@@ -99,11 +102,26 @@ export function accountEmailLedger(Base) {
       if (action === 'email-owner-test') return this.ownerEmailTest();
       if (action === 'email-unsubscribe') return this.unsubscribeEmail(body.tokenHash);
       if (action === 'email-event') return this.emailEvent(body);
+      if (action === 'email-tick') return this.emailTick(body.digest);
       const result = await super.perform(action, body);
       if (action === 'account-delete' && result.ok) await this.purgeAccountEmail(body.accountId);
+      if (action === 'account-export' && result.ok) {
+        const records = []; let after;
+        for (let page = 0; page < 10; page++) {
+          const rows = await this.storage.list({ prefix: `mail:account:${body.accountId}:`, limit: 1000,
+            ...(after ? { startAfter: after } : {}) });
+          records.push(...rows.values());
+          if (rows.size < 1000) break;
+          after = [...rows.keys()].at(-1);
+          if (page === 9) throw Object.assign(Error('Bitte kontaktiere den Support für deinen vollständigen Export.'), { status: 413 });
+        }
+        result.emailHistory = records.map(row => ({ id: row.id, createdAt: row.createdAt,
+          state: row.state, preference: row.preference, delivered: row.delivered === true }));
+      }
       return result;
     }
     emailTransport(delivery) { return sendResendEmail(this.env, delivery); }
+    emailNow() { return Date.now(); }
     async emailQuota(now) {
       const day = new Date(now).toISOString().slice(0, 10), month = day.slice(0, 7);
       const current = await this.storage.get('mail:quota') || {};
@@ -121,7 +139,7 @@ export function accountEmailLedger(Base) {
         return { ok: false, state: 'disabled' };
       }
       return this.dispatchEmail('mail:owner-test', {
-        id: QA_ID, logicalId: QA_LOGICAL, createdAt: Date.now(), to: 'freefinder.at@gmail.com',
+        id: QA_ID, logicalId: QA_LOGICAL, createdAt: this.emailNow(), to: 'freefinder.at@gmail.com',
         subject: 'FreeFinder: einmaliger E-Mail-Zustelltest',
         text: 'Dies ist die von dir freigegebene einmalige Test-E-Mail von FreeFinder.\n\nDer Versand von hallo@freefinder.at funktioniert bis zu deinem Postfach, wenn du diese Nachricht dort siehst. Es wurde kein Newsletter aktiviert und keine Nachricht an andere Nutzer gesendet.\n\nDeine App-Mitteilungen, Abos und Belohnungen bleiben unverändert.\n\nDein FreeFinder Team',
       }, null);
@@ -142,13 +160,14 @@ export function accountEmailLedger(Base) {
       if (await this.storage.get('mail:suppressed:' + targetHash)) return { ok: false, state: 'suppressed' };
       const token = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x => x.toString(16).padStart(2, '0')).join('');
       const unsubscribeURL = EMAIL_ORIGIN + '/api/email/unsubscribe?token=' + token;
-      const delivery = { id: crypto.randomUUID(), logicalId, createdAt: Date.now(), to: account.email,
+      const delivery = { id: crypto.randomUUID(), logicalId, createdAt: this.emailNow(), to: account.email,
         subject: content.subject, text: content.text + '\n\nE-Mails abbestellen: ' + unsubscribeURL, unsubscribeURL };
       return this.dispatchEmail(key, delivery, { accountId, targetHash, tokenHash: await tokenHash(token), preference });
     }
     async dispatchEmail(key, delivery, owner) {
       if (!await this.emailQuota(delivery.createdAt)) return { ok: false, state: 'quota' };
-      const row = { state: 'attempting', delivery, ...(owner || {}) };
+      // No retry is automatic: retain the logical receipt, not the message body or recipient address.
+      const row = { state: 'attempting', id: delivery.id, createdAt: delivery.createdAt, ...(owner || {}) };
       const writes = { [key]: row };
       if (owner) writes['mail:token:' + owner.tokenHash] = { accountId: owner.accountId, targetHash: owner.targetHash };
       // A crash after this write leaves an immutable unresolved attempt, never a new send on restart.
@@ -160,6 +179,32 @@ export function accountEmailLedger(Base) {
         await this.storage.put({ [key]: final, ['mail:provider:' + result.providerId]: key });
       } else await this.storage.put(key, final);
       return publicStatus(final);
+    }
+    async emailTick(digest) {
+      if (this.env.ACCOUNT_EMAIL_ENABLED !== '1' || this.env.ACCOUNT_EMAIL_TRANSPORT_ENABLED !== '1' ||
+          !this.env.RESEND_WEBHOOK_SECRET) return { ok: true, complete: true, state: 'disabled' };
+      const now = this.emailNow(), clock = viennaClock(now);
+      if (clock.hour < 9 || clock.hour > 19) return { ok: true, complete: true };
+      const cursor = await this.storage.get('mail:cursor');
+      const rows = await this.storage.list({ prefix: 'account:', limit: 20, ...(cursor ? { startAfter: cursor } : {}) });
+      for (const [key, account] of rows) {
+        await this.storage.put('mail:cursor', key);
+        if (!account.recoverable || account.deletedAt || !account.email) continue;
+        await this.pruneAccountEmail(account.id, now);
+        const freshDigest = digest && now - digest.createdAt >= 0 && now - digest.createdAt < 5 * 60000 &&
+          digest.day === clock.day && digest.type === digestType(now) &&
+          digest.preference === (digest.type === 'weekly_digest' ? 'weeklyEmails' : 'dealEmails');
+        const options = [...(account.rewards || []).slice(-100).map(reward => rewardEmail({ ...account, rewards: [reward] }, this.env, now)),
+          freshDigest ? digest : null].filter(Boolean);
+        for (const option of options) {
+          if (account.preferences?.[option.preference] !== true) continue;
+          if (await this.storage.get(`mail:account:${account.id}:` + await hash(option.logicalId))) continue;
+          const result = await this.sendAccountEmail(account.id, option.logicalId, option.preference, option.content);
+          if (['accepted', 'unknown', 'attempting', 'quota'].includes(result.state)) return { ...result, complete: false };
+        }
+      }
+      if (rows.size < 20) { await this.storage.delete('mail:cursor'); return { ok: true, complete: true }; }
+      return { ok: true, complete: false };
     }
     async unsubscribeEmail(digest) {
       if (!TOKEN.test(digest || '')) return { ok: false };
@@ -192,7 +237,22 @@ export function accountEmailLedger(Base) {
       for (const [key, row] of rows) await this.storage.delete([key,
         ...(row.providerId ? ['mail:provider:' + row.providerId] : []),
         ...(row.tokenHash ? ['mail:token:' + row.tokenHash] : [])]);
+      await this.storage.delete('mail:prune:' + accountId);
       if (rows.size === 1000) throw Error('Email cleanup needs another attempt');
+    }
+    async pruneAccountEmail(accountId, now) {
+      const cursorKey = 'mail:prune:' + accountId, after = await this.storage.get(cursorKey);
+      const rows = await this.storage.list({ prefix: `mail:account:${accountId}:`, limit: 100,
+        ...(after ? { startAfter: after } : {}) });
+      for (const [key, row] of rows) {
+        if (row.state === 'retained_dedupe' || !Number.isFinite(row.createdAt) || row.createdAt > now - 90 * 86400000) continue;
+        // Keep a small non-contact dedupe tombstone, preventing any historical logical ID from replaying.
+        await this.storage.put(key, { id: row.id, createdAt: row.createdAt, state: 'retained_dedupe',
+          preference: row.preference, tokenHash: row.tokenHash });
+        if (row.providerId) await this.storage.delete('mail:provider:' + row.providerId);
+      }
+      if (rows.size === 100) await this.storage.put(cursorKey, [...rows.keys()].at(-1));
+      else await this.storage.delete(cursorKey);
     }
   };
 }

@@ -23,11 +23,14 @@ async function runtime(t, bindings = {}) {
       import { accountEmailLedger, handleAccountEmail } from './src/account-email.js';
       import { ReferralMonthsLedger } from './src/referral-months.js';
       export class Ledger extends accountEmailLedger(ReferralMonthsLedger) {
+        emailNow() { return this.env.TEST_NOW ? Number(this.env.TEST_NOW) : Date.now(); }
+        emailTransport(delivery) { return super.emailTransport({...delivery, createdAt:Date.now()}); }
         async perform(action, body) {
           if (action === 'seed') { await this.storage.put(body); return {ok:true}; }
           if (action === 'rows') return Object.fromEntries(await this.storage.list());
           if (action === 'send') return this.sendAccountEmail(body.accountId, body.logicalId, body.preference, body.content);
           if (action === 'clear') { await this.storage.delete(body.keys); return {ok:true}; }
+          if (action === 'prune') { await this.pruneAccountEmail(body.accountId,body.now); return {ok:true}; }
           return super.perform(action, body);
         }
       }
@@ -76,8 +79,8 @@ test('concurrent sends have exactly one immutable delivery and reserve provider 
   const rows = (await r.call('rows')).body;
   assert.equal(rows['mail:quota'].daily, 1); assert.equal(rows['mail:quota'].monthly, 1);
   const row = Object.entries(rows).find(([k]) => k.startsWith('mail:account:'))[1];
-  assert.equal(row.state, 'accepted'); assert.equal(row.delivery.to, account.email);
-  assert.ok(row.tokenHash); assert.equal(row.delivery.subject, content.subject);
+  assert.equal(row.state, 'accepted'); assert.equal(row.delivery, undefined);
+  assert.ok(row.tokenHash); assert.equal(r.sent[0].body.subject, content.subject);
   assert.deepEqual(r.sent[0].body.to, [account.email]);
   assert.match(r.sent[0].body.text, /E-Mails abbestellen:/);
   assert.equal((await r.send({ content: { ...content, subject: 'Changed' } })).body.state, 'accepted');
@@ -175,4 +178,50 @@ test('fixed owner-only test requires admin and independent gate; at most one mes
   assert.equal((await (await r.mf.dispatchFetch(url, { headers })).json()).state, 'accepted');
   const off = await runtime(t, { ACCOUNT_EMAIL_QA_ENABLED: '0' });
   assert.equal((await off.mf.dispatchFetch(url, { method: 'POST', headers })).status, 503); assert.equal(off.sent.length, 0);
+});
+
+test('email export excludes tokens/content; aged receipts retain working opt-out and duplicate protection', async t => {
+  const r = await runtime(t); await r.send();
+  const url = r.sent[0].body.headers['List-Unsubscribe'].slice(1, -1);
+  const auth = { accountId, principal: { id: accountId, authTime: Date.now() / 1000 }, trustedIP: 'fixture' };
+  const exported = (await r.call('account-export', auth)).body;
+  assert.equal(exported.emailHistory.length, 1);
+  assert.equal(exported.emailHistory[0].preference, 'dealEmails');
+  assert.equal(JSON.stringify(exported).includes(new URL(url).searchParams.get('token')), false);
+  assert.equal(JSON.stringify(exported).includes('tokenHash'), false);
+  await r.call('prune', { accountId, now: Date.now() + 91 * 86400000 });
+  assert.equal((await r.send()).body.state, 'retained_dedupe'); assert.equal(r.sent.length, 1);
+  await r.mf.dispatchFetch(url, { method: 'POST' });
+  assert.equal((await r.call('rows')).body['account:' + accountId].preferences.dealEmails, false);
+  await r.call('account-delete', auth);
+  assert.equal(Object.keys((await r.call('rows')).body).filter(k => k.startsWith('mail:token:')).length, 0);
+});
+
+test('bounded schedule sends fresh opted-in digest once, while stale or wrong-category jobs never send', async t => {
+  const now = Date.parse('2026-10-14T16:05:00Z');
+  const r = await runtime(t, { TEST_NOW: String(now) });
+  const digest = { createdAt: now, day: '2026-10-14', type: 'discovery_digest',
+    preference: 'dealEmails', logicalId: 'digest:discovery_digest:2026-10-14', content };
+  for (const patch of [{ createdAt: now - 300001 }, { day: '2026-10-11' }, { preference: 'weeklyEmails' }]) {
+    await r.call('email-tick', { digest: { ...digest, ...patch } });
+  }
+  assert.equal(r.sent.length, 0);
+  await r.call('email-tick', { digest });
+  for (let i = 0; i < 3; i++) await r.call('email-tick', { digest });
+  assert.equal(r.sent.length, 1);
+  const deleted = await runtime(t, { TEST_NOW: String(now) });
+  await deleted.call('seed', { ['account:' + accountId]: { ...account, deletedAt: now - 1 } });
+  await deleted.call('email-tick', { digest }); assert.equal(deleted.sent.length, 0);
+});
+
+test('multiple earned reward notices progress past previously sent rewards without revealing a friend', async t => {
+  const now = Date.parse('2026-10-14T10:05:00Z');
+  const r = await runtime(t, { TEST_NOW: String(now), REFERRAL_MONTHS_ENABLED: '1' });
+  const reward = { id: 'f6fdbd3a-ae10-45c2-b894-ef43da3a3f22', state: 'earned', months: 1,
+    createdAt: now - 1000, sourceEvidence: { version: 1, accountId: 'private-friend' } };
+  await r.call('seed', { ['account:' + accountId]: { ...account,
+    preferences: { rewardEmails: true }, rewards: [reward, { ...reward, id: '5f4982f3-8860-4674-8a6e-b5646e247290' }] } });
+  for (let i = 0; i < 6; i++) await r.call('email-tick', {});
+  assert.equal(r.sent.length, 2);
+  assert.equal(JSON.stringify(r.sent).includes('private-friend'), false);
 });
