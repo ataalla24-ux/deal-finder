@@ -156,3 +156,29 @@ Reference fields:
 https://developers.google.com/android-publisher/api-ref/rest/v3/monetization.subscriptions/get
 https://developers.google.com/android-publisher/api-ref/rest/v3/monetization.subscriptions.basePlans.offers/list
 https://developers.google.com/android-publisher/api-ref/rest/v3/monetization.subscriptions.basePlans.offers
+
+Historical Apple reward confirmation (2026-10-13):
+An already-consumed reserved code may be confirmed after its free month expires.
+ONLY confirm-redemption may accept an expired Apple FREE_TRIAL offer-code receipt.
+The authenticated Store GET, exact account/product/offer/reservation date, original
+subscription binding, one-month period, revocation and atomic deduplication checks
+still apply. New friend-trial credits and new redemption attempts still require
+active receipts. Caller-supplied flags cannot enable historical verification.
+No purchase, code redemption, billing change or local Pro grant is performed.
+
+Authenticated status includes productId/offerId/reservedAt only for the owner's
+store_confirmation reward so iOS can filter its verified Transaction.all history.
+Receipt/source/redemption evidence and the friend's identity remain private.
+The native fallback runs only after current-entitlement confirmation stays open;
+it inspects at most500 entries, only matches expired code periods and submits at
+most one receipt for server confirmation. History has no assumed ordering. This
+is a count bound, not a network/time guarantee. Very large histories, missing old
+metadata, unmatched receipts or Store failures preserve the pending credit and
+may require support. Account changes stop the scan. The app must be rebuilt before
+this fallback is available; backend support alone cannot scan a handset's history.
+Legacy migration, free/expired inviter redemption and financial/refund handling
+are not completed by this confirmation recovery. Keep unfinished rollout flags OFF.
+
+Reference APIs:
+https://developer.apple.com/documentation/storekit/transaction/all
+https://developer.apple.com/documentation/storekit/transaction/offerid

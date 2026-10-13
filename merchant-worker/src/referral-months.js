@@ -22,11 +22,15 @@ function decodeStoreJWS(value) {
   try { return JSON.parse(atob(value.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); }
   catch { fail('Store-Antwort konnte nicht gelesen werden.', 502); }
 }
-export function referralPurchase(platform, raw, account, now = Date.now()) {
+export function referralPurchase(platform, raw, account, now = Date.now(), { historicalAppleRedemption = false } = {}) {
   if (platform === 'ios') {
+    // Expired proof is only for settling a reserved, already-consumed free code, never for granting access or new trials.
+    const historicalCode = historicalAppleRedemption && raw.offerType === 3 && raw.offerDiscountType === 'FREE_TRIAL' &&
+      typeof raw.offerIdentifier === 'string' && raw.offerIdentifier.length > 0 &&
+      Number.isFinite(Number(raw.purchaseDate)) && Number(raw.purchaseDate) > 0 && Number(raw.expiresDate) > Number(raw.purchaseDate);
     if (raw.bundleId !== APP || raw.environment !== 'Production' || !APPLE_PRODUCTS.has(raw.productId) ||
         raw.appAccountToken?.toLowerCase() !== account || raw.revocationDate != null || !raw.originalTransactionId ||
-        Number(raw.expiresDate) <= now || !Number.isFinite(Number(raw.expiresDate))) fail('Kein passendes aktives App-Store-Abo.', 409);
+        (!historicalCode && Number(raw.expiresDate) <= now) || !Number.isFinite(Number(raw.expiresDate))) fail('Kein passendes aktives App-Store-Abo.', 409);
     return { key: `ios:${raw.originalTransactionId}`, product: raw.productId, account,
       started: Number(raw.originalPurchaseDate), purchasedAt: Number(raw.purchaseDate),
       transactionId: raw.transactionId, expires: Number(raw.expiresDate),
@@ -420,7 +424,7 @@ export class ReferralMonthsLedger {
     }
     if (action === 'confirm-redemption') {
       if (body.platform !== 'ios') fail('Diese Bestätigung gilt nur für den App Store.');
-      const purchase = await this.verifyPurchase(body, account);
+      const purchase = await this.verifyPurchase(body, account, { historicalAppleRedemption: true });
       const usedKey = 'redemption:' + await referralHash(`${body.platform}:${purchase.transactionId || ''}`);
       const reward = account.rewards.find(x => isMatchingAppleRedemption(purchase, x, now));
       if (reward && !await this.storage.get(usedKey)) {
@@ -439,16 +443,19 @@ export class ReferralMonthsLedger {
       accepted: !!account.referredBy, confirmed: !!account.confirmedAt,
       earnedMonths: account.rewards.reduce((n, r) => n + r.months, 0),
       redeemedMonths: account.rewards.filter(r => r.state === 'redeemed').length,
-      rewards: account.rewards.map(({ id, createdAt, state, months, redemptionURL, newExpiry }) => ({ id, createdAt, state, months, redemptionURL, newExpiry })) };
+      rewards: account.rewards.map(({ id, createdAt, state, months, redemptionURL, newExpiry, productId, offerId, reservedAt }) => ({
+        id, createdAt, state, months, redemptionURL, newExpiry,
+        ...(state === 'store_confirmation' ? { productId, offerId, reservedAt } : {}),
+      })) };
   }
-  async verifyPurchase(body, account) {
+  async verifyPurchase(body, account, { historicalAppleRedemption = false } = {}) {
     if (body.platform === 'ios') {
       if (!/^\d{5,30}$/.test(body.transactionId || '')) fail('Apple-Kaufbestätigung fehlt.');
       const result = await this.appleTransaction(body.transactionId);
       if (!result.ok || result.environment !== 'Production') fail('Apple-Kauf konnte noch nicht bestätigt werden.', 503);
       const raw = decodeStoreJWS(result.signedTransactionInfo);
       if (raw.transactionId !== body.transactionId) fail('Apple-Kauf passt nicht zur Anfrage.', 409);
-      return referralPurchase('ios', raw, account.id);
+      return referralPurchase('ios', raw, account.id, Date.now(), { historicalAppleRedemption });
     }
     if (!/^[A-Za-z0-9._~+\/=:-]{20,2048}$/.test(body.purchaseToken || '')) fail('Google-Play-Kaufbestätigung fehlt.');
     const raw = await this.playPurchase(body.purchaseToken);

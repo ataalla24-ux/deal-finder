@@ -45,6 +45,24 @@ test('only verified, account-bound production one-month trials qualify', () => {
     assert.equal(isQualifyingTrial(referralPurchase('android', { ...play, acknowledgementState }, account, now), now, now), false);
   }
 });
+test('expired Apple periods can confirm only a historical free code redemption, never a new trial', () => {
+  const raw = { ...apple, offerType: 3, offerIdentifier: 'historical-reward',
+    purchaseDate: now - 60 * DAY, originalPurchaseDate: now - 90 * DAY, expiresDate: now - 30 * DAY };
+  assert.throws(() => referralPurchase('ios', raw, account, now), { status: 409 });
+  const historical = () => referralPurchase('ios', raw, account, now, { historicalAppleRedemption: true });
+  assert.equal(historical().expires, raw.expiresDate);
+  assert.equal(isMatchingAppleRedemption(historical(), { state: 'store_confirmation',
+    offerId: raw.offerIdentifier, productId: raw.productId, reservedAt: now - 61 * DAY }, now), true);
+  for (const patch of [{ offerType: 1 }, { offerDiscountType: 'PAY_AS_YOU_GO' }, { offerIdentifier: null },
+    { environment: 'Sandbox' }, { appAccountToken: null }, { appAccountToken: identity(7).accountId },
+    { revocationDate: now - DAY }, { productId: 'other.product' }, { purchaseDate: 0 },
+    { expiresDate: null }, { expiresDate: Infinity }, { expiresDate: raw.purchaseDate }]) {
+    assert.throws(() => referralPurchase('ios', { ...raw, ...patch }, account, now,
+      { historicalAppleRedemption: true }), { status: 409 });
+  }
+  assert.throws(() => referralPurchase('android', { ...play, subscriptionState: 'SUBSCRIPTION_STATE_EXPIRED' }, account, now,
+    { historicalAppleRedemption: true }), { status: 409 });
+});
 test('calendar-month credit clamps month-end, including leap years', () => {
   assert.equal(new Date(monthAfter(Date.parse('2027-01-31T10:00:00Z'))).toISOString(), '2027-02-28T10:00:00.000Z');
   assert.equal(new Date(monthAfter(Date.parse('2028-01-31T10:00:00Z'))).toISOString(), '2028-02-29T10:00:00.000Z');
@@ -169,7 +187,7 @@ async function runtime(t, enabled = '1') {
             await this.storage.put('fixture', await request.json()); return Response.json({ok:true});
           }
           if (new URL(request.url).pathname === '/stored-rewards') {
-            const {accountId, removePlatform, removeEvidence, removeDeferralEvidence} = await request.json();
+            const {accountId, removePlatform, removeEvidence, removeDeferralEvidence, ageReservationByDays} = await request.json();
             const key = 'account:' + accountId;
             const account = await this.storage.get(key);
             if (removePlatform) {
@@ -182,6 +200,13 @@ async function runtime(t, enabled = '1') {
             }
             if (removeDeferralEvidence) {
               for (const reward of account.rewards) delete reward.deferralEvidence;
+              await this.storage.put(key, account);
+            }
+            if (ageReservationByDays) {
+              for (const reward of account.rewards) {
+                reward.reservedAt -= ageReservationByDays * 86400000;
+                reward.createdAt -= ageReservationByDays * 86400000;
+              }
               await this.storage.put(key, account);
             }
             return Response.json(account.rewards);
@@ -595,6 +620,53 @@ test('Apple links reserve once; only matching authoritative redemption marks the
   assert.equal(exported.ok, true);
   assert.equal(exported.account.rewards[0].redemptionEvidence, undefined);
   assert.equal(exported.account.rewards[0].sourceEvidence, undefined);
+});
+
+test('historical Apple reward receipt settles once after expiry without weakening owner, offer or refund checks', async t => {
+  const { call, fixture, mf, owner, rewardId } = await earnedReward(t);
+  const reserved = await call('redeem', { ...owner, rewardId, transactionId: apple.transactionId });
+  assert.equal(reserved.rewards[0].productId, apple.productId);
+  assert.equal(reserved.rewards[0].offerId, 'platform-lock-fixture');
+  assert.ok(reserved.rewards[0].reservedAt > 0);
+  const stored = async extra => (await mf.dispatchFetch('https://test/stored-rewards', {
+    method: 'POST', body: JSON.stringify({ accountId: owner.accountId, ...extra }),
+  })).json();
+  const previous = (await stored({ ageReservationByDays: 90 }))[0];
+  const purchasedAt = previous.reservedAt + DAY;
+  const raw = { ...apple, offerType: 3, offerIdentifier: 'platform-lock-fixture',
+    transactionId: '10000099', purchaseDate: purchasedAt, expiresDate: purchasedAt + 30 * DAY };
+  for (const [patch, status] of [
+    [{ revocationDate: now - DAY }, 409], [{ appAccountToken: identity(7).accountId }, 409],
+    [{ environment: 'Sandbox' }, 503], [{ offerType: 1 }, 409],
+    [{ offerIdentifier: 'other-offer' }, 200], [{ productId: apple.productId.replace('monthly', 'yearly') }, 200],
+    [{ originalTransactionId: '10000077' }, 200], [{ expiresDate: purchasedAt + 7 * DAY }, 200],
+    [{ purchaseDate: previous.reservedAt - 1, expiresDate: previous.reservedAt + 30 * DAY }, 200],
+  ]) {
+    await fixture({ apple: { ...raw, ...patch } });
+    await call('confirm-redemption', { ...owner, transactionId: raw.transactionId,
+      historicalAppleRedemption: true, reservedAt: now - 100 * DAY }, status);
+    assert.deepEqual((await stored())[0], previous, 'invalid proof must preserve pending credit and internal evidence');
+  }
+  await fixture({ apple: raw });
+  const confirmed = await call('confirm-redemption', { ...owner, transactionId: raw.transactionId });
+  assert.equal(confirmed.redeemedMonths, 1);
+  assert.equal(confirmed.rewards[0].offerId, undefined, 'recovery metadata only accompanies pending Apple rewards');
+  assert.equal(confirmed.rewards[0].reservedAt, undefined);
+  assert.doesNotMatch(JSON.stringify(confirmed), /sourceEvidence|redemptionEvidence|10000099/);
+  const settled = (await stored())[0];
+  assert.deepEqual(settled.sourceEvidence, previous.sourceEvidence);
+  assert.equal(settled.redemptionEvidence.receiptId, raw.transactionId);
+  assert.equal(settled.redemptionEvidence.periodEnd, raw.expiresDate);
+  await call('confirm-redemption', { ...owner, transactionId: raw.transactionId });
+  assert.deepEqual((await stored())[0], settled);
+  assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 0);
+
+  // A client-supplied historical flag must not authorize a new referral using an expired introductory period.
+  const late = identity(8); await call('register', late); await call('accept', { ...late, code: reserved.code });
+  await fixture({ apple: { ...raw, appAccountToken: late.accountId, transactionId: '10000888',
+    originalTransactionId: '10000888', originalPurchaseDate: purchasedAt, offerType: 1 } });
+  await call('confirm', { ...late, transactionId: '10000888', historicalAppleRedemption: true }, 409);
+  assert.equal((await call('status', owner)).earnedMonths, 1);
 });
 
 test('Play deferral retries never repeat an unknown external financial operation', async t => {
