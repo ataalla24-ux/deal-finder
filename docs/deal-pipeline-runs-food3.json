@@ -2,9 +2,122 @@
   "schemaVersion": 1,
   "sourceKey": "food3",
   "sourceLabel": "Firecrawl Key 2 - Food",
-  "updatedAt": "2026-10-12T08:53:14.066Z",
-  "runCount": 79,
+  "updatedAt": "2026-10-13T09:08:52.643Z",
+  "runCount": 80,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "food3-2026-10-13T09:08:52.643Z",
+      "sourceKey": "food3",
+      "sourceLabel": "Firecrawl Key 2 - Food",
+      "status": "completed-with-errors",
+      "startedAt": "2026-10-13T09:08:22.235Z",
+      "finishedAt": "2026-10-13T09:08:52.643Z",
+      "durationMs": 30408,
+      "outputFile": "docs/deals-pending-food3.json",
+      "counts": {
+        "rawCandidates": 3,
+        "normalizedCandidates": 3,
+        "verifiedCandidates": 2,
+        "previousDeals": 2,
+        "acceptedDeals": 2,
+        "rejectedDeals": 3
+      },
+      "rejectedByReason": {
+        "post-verification-rejected": 3
+      },
+      "rejectedSamples": [
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-12hw73l",
+            "title": "Instagram: Aperitivo geht auch ohne Alkohol. Auf unserer Karte findet ihr mehrere ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DeW3bgfis5W/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-7qws8m",
+            "title": "Instagram: Das erste Vegansl der Saison ist da! Im @zweitbester_vienna gibt es ...",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DeWt5d-iM_y/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        },
+        {
+          "reason": "post-verification-rejected",
+          "deal": {
+            "id": "food3-5asdfh",
+            "title": "Instagram: Vegan in Wien Meine Lieblingsgerichte für ... - Instagram",
+            "brand": "Instagram",
+            "url": "https://www.instagram.com/p/DeUj-gvjEon/",
+            "source": "Firecrawl Food #2",
+            "pubDate": "",
+            "expires": "",
+            "postVerificationStatus": ""
+          }
+        }
+      ],
+      "diagnostics": {
+        "agentStatus": "completed-with-errors",
+        "creditsUsed": 0,
+        "configuredSources": 6,
+        "attemptedSources": 3,
+        "completedSources": 2,
+        "targetsPerRun": 3,
+        "agentTimeoutSeconds": 120,
+        "maxCreditsPerTarget": 300,
+        "sourceStats": [
+          {
+            "url": "https://www.instagram.com/explore/tags/happyhourwien/",
+            "status": "completed-search",
+            "rawCandidates": 1,
+            "searchCandidates": 1,
+            "creditsUsed": 0
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/lunchdealwien/",
+            "status": "failed",
+            "rawCandidates": 0,
+            "searchCandidates": 0,
+            "creditsUsed": 0,
+            "error": "Die angegebene Instagram-Hashtag-Seite ist in dieser Umgebung nicht zugänglich: Der direkte Aufruf wird auf https://www.instagram.com/accounts/login/ umgeleitet, und der Scraper unterstützt diese Quelle nicht. Ohne Zugriff auf die Hashtag-Liste bzw. die direkten Originalposts kann ich die geforderten aktuellen Angebote, Veröffentlichungsdaten und Links nicht verlässlich und ausschließlich aus der vorgeschriebenen Quelle extrahieren."
+          },
+          {
+            "url": "https://www.instagram.com/explore/tags/neueröffnungwien/",
+            "status": "completed-search",
+            "rawCandidates": 2,
+            "searchCandidates": 2,
+            "creditsUsed": 0
+          }
+        ],
+        "retainedPreviousDeals": 2,
+        "prunedPreviousDeals": 0,
+        "duplicateCandidatesMerged": 0,
+        "verifier": {
+          "statusCounts": {
+            "verified-meta-graph": 2
+          },
+          "verifiedOriginalPosts": 0,
+          "timestampOnlyPosts": 0,
+          "unavailableOriginalPosts": 0,
+          "registryViennaEvidence": 1
+        }
+      },
+      "constraints": {},
+      "errors": [
+        "https://www.instagram.com/explore/tags/lunchdealwien/: Die angegebene Instagram-Hashtag-Seite ist in dieser Umgebung nicht zugänglich: Der direkte Aufruf wird auf https://www.instagram.com/accounts/login/ umgeleitet, und der Scraper unterstützt diese Quelle nicht. Ohne Zugriff auf die Hashtag-Liste bzw. die direkten Originalposts kann ich die geforderten aktuellen Angebote, Veröffentlichungsdaten und Links nicht verlässlich und ausschließlich aus der vorgeschriebenen Quelle extrahieren."
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "food3-2026-10-12T08:53:14.066Z",
