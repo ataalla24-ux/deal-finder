@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { generateKeyPair, SignJWT } from 'jose';
+import { exportJWK, generateKeyPair, SignJWT } from 'jose';
 import { Miniflare, convertV4MiniflareOptions, Log, LogLevel } from 'miniflare';
 import { accountID, authenticateAccount, boundedJSON, handleAccount } from '../src/account-auth.js';
 import { ReferralMonthsLedger, handleReferralMonths } from '../src/referral-months.js';
@@ -59,6 +59,39 @@ test('disabled, deleted, revoked and unverified Firebase users cannot access rew
 test('Firebase outage fails closed without exposing the token or upstream error', async () => {
   await assert.rejects(authenticateAccount(await request(), env, { keyResolver: publicKey, transport: async () => { throw Error('private response'); } }), { status: 503 });
   await assert.rejects(authenticateAccount(await request(), env, { keyResolver: publicKey, transport: async () => new Response('', { status: 500 }) }), { status: 503 });
+});
+test('real Workers fetch supports Firebase lookup and never follows credential-bearing redirects', async t => {
+  const jwk = await exportJWK(publicKey);
+  let lookupStatus = 200;
+  const outbound = [];
+  const mf = new Miniflare(convertV4MiniflareOptions({ compatibilityDate: '2025-12-01',
+    modules: [{ type: 'ESModule', path: 'runtime.js', contents: `
+      import { authenticateAccount } from './auth.js';
+      export default { async fetch(request, env) {
+        const key = await crypto.subtle.importKey('jwk', JSON.parse(env.TEST_KEY),
+          {name:'RSASSA-PKCS1-v1_5', hash:'SHA-256'}, false, ['verify']);
+        try { return Response.json(await authenticateAccount(request, env, {keyResolver:key})); }
+        catch (error) { return Response.json({error:error.message}, {status:error.status || 500}); }
+      } };
+    ` }, await bundledAuth('auth.js')], bindings: { ...env, TEST_KEY: JSON.stringify(jwk) },
+    log: new Log(LogLevel.NONE), outboundService: async request => {
+      outbound.push(new URL(request.url).host);
+      assert.equal(new URL(request.url).host, 'identitytoolkit.googleapis.com');
+      assert.equal(request.method, 'POST');
+      assert.ok((await request.json()).idToken);
+      return lookupStatus === 200 ? Response.json({users:[verifiedUser]}) :
+        new Response('', {status:lookupStatus, headers:{location:'https://untrusted.example.test/'}});
+    },
+  }));
+  t.after(() => mf.dispose());
+  for (const [status, expected] of [[200,200], [302,401], [307,401], [500,503]]) {
+    lookupStatus = status;
+    const before = outbound.length;
+    const response = await mf.dispatchFetch('https://test', {headers:{authorization:'Bearer ' + await token()}});
+    assert.equal(response.status, expected);
+    assert.equal(outbound.length, before + 1);
+    if (status === 200) assert.equal((await response.json()).id, await accountID(valid.sub));
+  }
 });
 test('unverified privacy access is UID-bound and always requires recent authentication', async () => {
   const privacy = { ...options({ ...verifiedUser, emailVerified: false }), requireVerifiedEmail: false };

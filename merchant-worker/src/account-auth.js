@@ -39,9 +39,10 @@ export async function authenticateAccount(request, env, { keyResolver = keys, tr
   try {
     response = await transport(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(env.FIREBASE_WEB_API_KEY)}`, {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ idToken: match[1] }),
-      signal: AbortSignal.timeout(7000), redirect: 'error',
+      signal: AbortSignal.timeout(7000), redirect: 'manual',
     });
   } catch { throw accountError('Die Anmeldung kann gerade nicht geprüft werden.', 503); }
+  // Workers supports manual redirects; reject 3xx without forwarding the ID token.
   if (!response.ok) throw accountError('Bitte melde dich erneut an.', response.status >= 500 ? 503 : 401);
   const user = (await response.json()).users?.[0];
   if (!user || user.localId !== claims.sub || user.disabled || Number(user.validSince || 0) > claims.auth_time) {
