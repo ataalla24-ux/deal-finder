@@ -200,6 +200,17 @@ function featuredFallbackDeal(deals, kind, now, dailyDeal = null) {
 function syncFeaturedDealReference(deals = [], pick = {}, options = {}) {
   const kind = options.kind === 'weekly' ? 'weekly' : 'daily';
   const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
+  // Old records may remain for manual review; never promote them as the
+  // replacement when a moderator removes the current featured deal.
+  deals = deals.filter((deal) => {
+    if (deal.validity?.status === 'invalid') return false;
+    if (kind === 'weekly' && !isFoodOrDrinkDeal(deal)) return false;
+    const start = Date.parse(cleanText(deal.validFrom || deal.validity?.startDate));
+    if (Number.isFinite(start) && start > now.getTime()) return false;
+    const expiry = [deal.expires, deal.validUntil, deal.validity?.expiryDate]
+      .map((value) => Date.parse(cleanText(value))).find(Number.isFinite);
+    return !Number.isFinite(expiry) || expiry >= now.getTime();
+  });
   const targetId = cleanText(pick?.dealId || pick?.id);
   let target = deals.find((deal) => cleanText(deal.id) === targetId) || null;
   let reason = target ? 'current_id' : '';

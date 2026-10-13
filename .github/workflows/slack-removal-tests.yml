@@ -1,0 +1,41 @@
+name: "Slack Removal Tests"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/slack-removal-tests.yml'
+      - '.github/workflows/deal-moderation.yml'
+      - 'scripts/test-moderation-feed-validation.mjs'
+      - 'scripts/validate-production-feed.mjs'
+      - 'scripts/deals-feed-contract.mjs'
+      - 'scripts/stamp-deals-feed.mjs'
+      - 'scripts/add-deal-moderation-entry.mjs'
+      - 'scripts/apply-deal-moderation.mjs'
+      - 'scripts/sync-deal-map-references.mjs'
+      - 'scripts/sync-featured-deal-references.mjs'
+      - 'scripts/test-featured-deal-reference-sync.mjs'
+      - 'scripts/test-queue-workflow-safety.mjs'
+      - 'scraper/public-deal-text.js'
+      - 'scraper/deal-moderation-utils.js'
+      - 'scraper/deal-evidence-utils.js'
+      - 'scraper/native-weekly-utils.js'
+
+permissions:
+  contents: read
+
+jobs:
+  test-removal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate isolated removal pipeline without live changes
+        run: node scripts/test-moderation-feed-validation.mjs
+      - name: Check generated-state concurrency safeguards
+        run: node scripts/test-queue-workflow-safety.mjs
+      - name: Check currently valid featured replacements
+        run: node scripts/test-featured-deal-reference-sync.mjs
