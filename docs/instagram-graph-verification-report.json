@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-13T03:53:20.997Z",
+  "generatedAt": "2026-10-13T03:58:26.808Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -186,10 +186,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 6,
+  "fetchedPosts": 50,
+  "exactMatches": 2,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "box16_kebap_more",
+      "message": "Instagram shared quota paused: Meta usage headroom"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 1,
@@ -200,18 +205,24 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 94,
+    "requests": 2,
+    "reserved": 5,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: Meta usage headroom",
+    "highestUsagePercent": 95,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-13T04:08:32.883Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
+  "globalError": {
+    "username": "box16_kebap_more",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: Meta usage headroom"
+  },
   "blockedEvidencePosts": 91,
-  "unmatchedCandidatePosts": 13,
-  "message": "6/19 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 17,
+  "message": "2/19 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
