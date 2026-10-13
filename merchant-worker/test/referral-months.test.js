@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { Miniflare, convertV4MiniflareOptions, Log, LogLevel } from 'miniflare';
-import { referralPurchase, referralEvidence, isQualifyingTrial, isMatchingAppleRedemption, isMatchingPlayDeferral, monthAfter } from '../src/referral-months.js';
+import { referralPurchase, referralEvidence, isQualifyingTrial, isMatchingAppleRedemption, isMatchingPlayDeferral, isMatchingPlayRewardSubscription, monthAfter } from '../src/referral-months.js';
 import worker from '../src/index.js';
 import { bundledAuth } from './bundled-auth.js';
 
@@ -144,7 +144,7 @@ test('production router exposes only a disabled config until deliberately enable
   assert.equal(unavailable.status, 503);
 });
 
-async function runtime(t, enabled = '1') {
+async function runtime(t, enabled = '1', bindings = {}) {
   const source = await readFile(new URL('../src/referral-months.js', import.meta.url), 'utf8');
   const mf = new Miniflare(convertV4MiniflareOptions({ compatibilityDate: '2026-03-09',
     modules: [await bundledAuth('account-auth.js'), { type: 'ESModule', path: 'ledger.js', contents: source }, { type: 'ESModule', path: 'test.js', contents: `
@@ -228,7 +228,7 @@ async function runtime(t, enabled = '1') {
         return env.REFERRAL_MONTHS.get(env.REFERRAL_MONTHS.idFromName('referral-months-v1')).fetch(request);
       } };
     ` }].reverse(), durableObjects: { REFERRAL_MONTHS: { className: 'TestLedger', useSQLite: true } },
-    bindings: { REFERRAL_MONTHS_ENABLED: enabled, REFERRAL_PLAY_DEFERRAL_ENABLED: '1', REFERRAL_ADMIN_SECRET: 'fixture-admin' },
+    bindings: { REFERRAL_MONTHS_ENABLED: enabled, REFERRAL_PLAY_DEFERRAL_ENABLED: '1', REFERRAL_ADMIN_SECRET: 'fixture-admin', ...bindings },
     log: new Log(LogLevel.NONE) }));
   t.after(() => mf.dispose());
   const call = async (action, body, expected = 200) => {
@@ -242,8 +242,8 @@ async function runtime(t, enabled = '1') {
 }
 const identity = (n, platform = 'ios') => ({ accountId: `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`, secret: String(n).padStart(64, '0'), platform });
 
-async function earnedReward(t) {
-  const runtimeState = await runtime(t);
+async function earnedReward(t, bindings = {}) {
+  const runtimeState = await runtime(t, '1', bindings);
   const { call, fixture } = runtimeState;
   const owner = identity(1), friend = identity(2);
   const { code } = await call('register', owner);
@@ -259,6 +259,115 @@ async function earnedReward(t) {
   await fixture({ apple: { ...apple, offerType: null }, play, deferResult: { ok: false, definitive: false } });
   return { ...runtimeState, owner, rewardId };
 }
+
+const rewardBindings = { REFERRAL_PLAY_REWARD_SUBSCRIPTION_ENABLED: '1', REFERRAL_PLAY_REWARD_BASE_PLAN: 'monthly' };
+function playReward(rewardId, purchasedAt = Date.now()) {
+  return { ...play, regionCode: 'AT', startTime: new Date(purchasedAt).toISOString(),
+    externalAccountIdentifiers: { ...play.externalAccountIdentifiers, obfuscatedExternalProfileId: rewardId },
+    lineItems: [{ ...play.lineItems[0], expiryTime: new Date(purchasedAt + 30 * DAY).toISOString(),
+      offerDetails: { basePlanId: 'monthly', offerId: 'referral-earned-month' } }] };
+}
+test('earned-month purchases require the reserved reward, exact Store offer and acknowledged free phase', () => {
+  const id = identity(8).accountId;
+  const raw = playReward(id, now);
+  const purchase = referralPurchase('android', raw, account, now);
+  const reward = { id, state: 'store_subscription', redemptionPlatform: 'android', reservedAt: now,
+    productId: 'freefinder.pro.monthly', offerId: 'referral-earned-month', basePlanId: 'monthly' };
+  assert.equal(isMatchingPlayRewardSubscription(purchase, reward, now), true);
+  assert.equal(isQualifyingTrial(purchase, now, now), false, 'an earned month cannot fund another referral');
+  for (const patch of [{ rewardProfile: identity(9).accountId }, { rewardProfile: null }, { freePhase: false },
+    { region: 'US' }, { product: 'freefinder.pro.yearly' }, { offer: 'flyer-month-free' }, { basePlan: 'other' },
+    { orderId: null }, { started: now - 1 }, { started: now + 60001 }, { started: NaN },
+    { expires: now + 7 * DAY }, { expires: now + 60 * DAY }]) {
+    assert.equal(isMatchingPlayRewardSubscription({ ...purchase, ...patch }, reward, now), false);
+  }
+  for (const patch of [{ state: 'earned' }, { state: 'redeemed' }, { redemptionPlatform: 'ios' },
+    { reservedAt: undefined }, { productId: null }, { offerId: 'other' }, { basePlanId: '' }, { id: 'invalid' }]) {
+    assert.equal(isMatchingPlayRewardSubscription(purchase, { ...reward, ...patch }, now), false);
+  }
+  const noProfile = referralPurchase('android', { ...raw, externalAccountIdentifiers: play.externalAccountIdentifiers }, account, now);
+  assert.equal(isQualifyingTrial(noProfile, now, now), false, 'reward offer alone excludes referral farming');
+});
+test('new reward subscriptions are disabled by default, preserving earned credit', async t => {
+  const { call, owner, rewardId } = await earnedReward(t);
+  await call('prepare-subscription', { ...owner, platform: 'android', rewardId }, 409);
+  await call('redeem', { ...owner, rewardId }, 409);
+  assert.equal((await call('status', owner)).rewards[0].state, 'earned');
+});
+test('cancelling renewal after an earned-month purchase still settles that one credit', async t => {
+  const { call, fixture, owner, rewardId } = await earnedReward(t, rewardBindings);
+  const request = { ...owner, platform: 'android', rewardId };
+  await call('prepare-subscription', request);
+  const raw = playReward(rewardId);
+  raw.subscriptionState = 'SUBSCRIPTION_STATE_CANCELED';
+  raw.lineItems[0].autoRenewingPlan = { autoRenewEnabled: false };
+  await fixture({ play: raw });
+  assert.equal((await call('confirm-subscription', { ...request, purchaseToken: 'cancelled-earned-month-token' })).redeemedMonths, 1);
+  assert.throws(() => referralPurchase('android', raw, owner.accountId), { status: 409 }, 'ordinary new-trial requirements remain unchanged');
+});
+test('Play reservation is retryable without consuming credit; exact receipt settles once without deferral', async t => {
+  const { call, fixture, mf, owner, rewardId } = await earnedReward(t, rewardBindings);
+  const request = { ...owner, platform: 'android', rewardId };
+  const reserved = await call('prepare-subscription', request);
+  assert.equal(reserved.rewards[0].state, 'store_subscription');
+  assert.equal(reserved.redeemedMonths, 0);
+  assert.deepEqual(await call('prepare-subscription', request), reserved, 'cancel/reopen keeps the same reservation');
+  await call('redeem', { ...owner, rewardId, transactionId: apple.transactionId }, 409);
+  const raw = playReward(rewardId);
+  const confirmation = { ...request, purchaseToken: 'private-reward-subscription-token' };
+  for (const patch of [
+    { acknowledgementState: 'ACKNOWLEDGEMENT_STATE_PENDING' },
+    { externalAccountIdentifiers: { ...raw.externalAccountIdentifiers, obfuscatedExternalProfileId: identity(9).accountId } },
+    { lineItems: [{ ...raw.lineItems[0], offerDetails: { basePlanId: 'monthly', offerId: 'flyer-month-free' } }] },
+    { lineItems: [{ ...raw.lineItems[0], offerPhase: { basePrice: {} } }] },
+    { regionCode: 'US' },
+  ]) {
+    await fixture({ play: { ...raw, ...patch } });
+    assert.deepEqual(await call('confirm-subscription', confirmation), reserved);
+  }
+  await fixture({ play: raw });
+  const settled = await call('confirm-subscription', confirmation);
+  assert.equal(settled.rewards[0].state, 'redeemed');
+  assert.equal(settled.redeemedMonths, 1);
+  assert.deepEqual(await call('confirm-subscription', confirmation), settled);
+  assert.deepEqual(await call('prepare-subscription', request), settled);
+  assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 0);
+  const stored = await (await mf.dispatchFetch('https://test/stored-rewards', { method: 'POST',
+    body: JSON.stringify({ accountId: owner.accountId }) })).json();
+  assert.equal(stored[0].redemptionEvidence.receiptId, raw.lineItems[0].latestSuccessfulOrderId);
+  assert.ok(stored[0].sourceEvidence, 'original qualifying friend proof preserved');
+  assert.doesNotMatch(JSON.stringify(settled), /sourceEvidence|redemptionEvidence|private-reward/);
+});
+test('Play preparation holds credit when original source is unverified and rejects wrong owner receipts', async t => {
+  const { call, fixture, owner, rewardId } = await earnedReward(t, rewardBindings);
+  const request = { ...owner, platform: 'android', rewardId };
+  await fixture({ sourceError: true });
+  await call('prepare-subscription', request, 409);
+  assert.equal((await call('status', owner)).rewards[0].state, 'earned');
+  await fixture({});
+  await call('prepare-subscription', request);
+  await fixture({ play: { ...playReward(rewardId), externalAccountIdentifiers: {
+    obfuscatedExternalAccountId: identity(7).accountId, obfuscatedExternalProfileId: rewardId } } });
+  await call('confirm-subscription', { ...request, purchaseToken: 'wrong-owner-reward-token' }, 409);
+  assert.equal((await call('status', owner)).rewards[0].state, 'store_subscription');
+});
+test('new and expired Apple inviters require an explicitly renewing non-stacked offer', async t => {
+  const { call, owner, rewardId } = await earnedReward(t, { REFERRAL_APPLE_REWARD_SUBSCRIPTION_ENABLED: '1' });
+  const offer = { productId: apple.productId, offerId: 'returning-earned-month', code: 'RETURNINGTESTONLY',
+    customerType: 'new_or_expired', freeMonths: 1, expiresAt: now + 60 * DAY,
+    autoRenew: true, combineIntroductoryOffer: false };
+  for (const patch of [{ autoRenew: false }, { autoRenew: undefined }, { combineIntroductoryOffer: true },
+    { combineIntroductoryOffer: undefined }]) {
+    await call('import-apple-offers', { offers: [{ ...offer, ...patch }] }, 400);
+  }
+  await call('redeem', { ...owner, rewardId }, 409);
+  await call('import-apple-offers', { offers: [offer] });
+  const reserved = await call('redeem', { ...owner, rewardId });
+  assert.equal(reserved.rewards[0].state, 'store_confirmation');
+  assert.equal(reserved.rewards[0].offerId, offer.offerId);
+  assert.equal(reserved.redeemedMonths, 0);
+  assert.deepEqual(await call('redeem', { ...owner, rewardId }), reserved);
+});
 
 test('an Apple reservation cannot also trigger a Play deferral, including older reservations', async t => {
   const { call, mf, owner, rewardId } = await earnedReward(t);

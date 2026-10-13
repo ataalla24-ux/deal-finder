@@ -182,3 +182,68 @@ are not completed by this confirmation recovery. Keep unfinished rollout flags O
 Reference APIs:
 https://developer.apple.com/documentation/storekit/transaction/all
 https://developer.apple.com/documentation/storekit/transaction/offerid
+
+Earned month for an inviter without active Pro (2026-10-13; NOT ENABLED):
+Owner chose a NEW automatically renewing subscription with one free month, not
+unconditional non-renewing access. The friend's existing qualifying acquisition
+trial and active subscribers' credit/deferral paths stay unchanged. Earning a
+credit alone never starts a purchase. The customer must confirm the Store terms.
+
+All new flags default OFF, independently of the overall program flag:
+  REFERRAL_PLAY_REWARD_SUBSCRIPTION_ENABLED=0
+  REFERRAL_PLAY_REWARD_BASE_PLAN=""
+  REFERRAL_APPLE_REWARD_SUBSCRIPTION_ENABLED=0
+
+Android prepare-subscription takes only the authenticated owner's reward ID,
+rechecks its original qualifying source and reserves it as store_subscription.
+It neither consumes credit nor makes a Store request that changes billing.
+Retry uses the same reservation; cancellation does not grant Pro or erase credit.
+The app requires a fresh Play query without an active or pending subscription,
+the exact monthly base plan, offer referral-earned-month, exactly one P1M free
+phase followed by positive EUR monthly auto-renewal, and a displayed Store price.
+After user confirmation it checks owner/subscription/source/offer/price again.
+No fallback to a paid base plan or new-customer acquisition offer is allowed.
+
+Billing sets obfuscatedExternalAccountId to the authenticated account UUID and
+obfuscatedExternalProfileId to the reserved reward UUID. confirm-subscription
+requires authoritative Production Play data with that exact account, reward,
+product/base-plan/offer, AT/DE region, acknowledged free phase and matching dates.
+Order and purchase-token hash deduplication settle the credit atomically once.
+Cancelling auto-renewal after purchase does not restore spent credit: this one
+confirmation endpoint also accepts an unexpired acknowledged free phase in an
+ACTIVE/CANCELED auto-renewing plan with renewal now disabled. Acquisition trials
+and the existing deferral path retain their stricter active/renewing checks.
+Store profile metadata lets the app resume after process loss without treating
+this receipt as a friend's acquisition trial. Actual completed purchases still
+get acknowledged if the activity is destroyed or the app account changes.
+No actual Store or process-loss test has been performed for this new path.
+
+Apple code imports for new_or_expired explicitly require autoRenew=true and
+combineIntroductoryOffer=false. A free/expired inviter cannot accidentally receive
+an existing-only code or a non-renewing/stacked offer. The native confirmation
+explains renewal; Apple must show the final price/date before agreement. Import
+metadata is an operator assertion, NOT independent verification of Apple setup.
+Authenticated exact appAccountToken/receipt verification remains mandatory.
+
+Activation gates still open: the real Play reward offer does not exist in the
+last complete catalog; Apple inventory/setup and account-bound code receipt
+behavior need verification. External Apple code redemption may omit the account
+token: do not trust a client receipt to reassign ownership or weaken the check.
+Developer-determined Play eligibility is app-enforced, not Play-enforced; ledger
+validation does not promise to prevent a modified client requesting that offer.
+Review this abuse boundary before activation. Do not change existing prices or
+acquisition offers to emulate rewards, and do not initiate a production purchase.
+
+Reservations are deliberately not released automatically after cancellation:
+an unseen completed Store transaction could otherwise redeem the credit twice.
+Switching Stores/plans while pending requires reconciliation, not a guessed
+unlock. A Play receipt first recovered after its free phase expires remains
+pending/manual support; this patch adds no historical Play order recovery.
+Legacy anonymous ownership, cross-platform active subscriptions, manual/financial
+reconciliation and actual provider/Store integration remain release gates.
+
+References:
+https://developer.apple.com/help/app-store-connect/manage-subscriptions/set-up-subscription-offer-codes/
+https://developer.apple.com/videos/play/wwdc2025/249/?time=737
+https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptionsv2
+https://support.google.com/googleplay/android-developer/answer/12154973?hl=en-EN
