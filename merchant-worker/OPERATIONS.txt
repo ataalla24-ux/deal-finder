@@ -67,3 +67,39 @@ Slack notification uses the existing campaign notifier, without blocking ad
 activation. Notification delivery is best effort, not publication approval.
 No fake campaign should be redeemed in production for a smoke test. Create,
 check, revoke and verify rejection instead; full redemption tests run locally.
+
+Referral source-receipt audit (disabled by default)
+
+REFERRAL_RECONCILIATION_ENABLED=0 is separate from REFERRAL_MONTHS_ENABLED.
+Both must be 1 before the existing ledger alarm performs source checks. Do not
+activate either merely to test a deployment. Real Store permission/receipt tests,
+legacy ownership migration, complete redemption and refund handling remain
+release prerequisites. Deployment must preserve existing vars and secrets.
+
+The audit rechecks only the friend's exact original qualifying trial receipt.
+Each alarm scans at most 20 account records and reads at most two Store receipts;
+unfinished scans continue after two minutes, completed cycles after 24 hours.
+This is not an exact daily guarantee: Store failures, retries and queueing may
+delay a cycle. A cursor and recoverable lease preserve progress. Account deletion,
+newer proof reviews and concurrent preferences/redemption updates are retained.
+The audit shares the existing alarm with rate cleanup and retains earlier alarms.
+Changing a flag alone does not bootstrap an idle object: a verified account
+request must first schedule its existing cleanup alarm. Confirm this deliberately
+when enabling later; do not create a production referral or consume an offer.
+
+Only private sourceReview/reconciliation metadata is added. Explicit source
+revocation or uncertain/missing proof is flagged for manual review. Account
+credit, redemption states and existing Store benefits are never automatically
+deleted, undone or replayed. In particular, an already-applied inviter benefit
+does NOT get reversed by this audit. Fresh redemption independently rechecks
+source proof and holds uncertain/revoked sources without removing credit.
+Historical missing evidence is not backfilled or guessed.
+
+POST /api/referral-months/reconciliation-status with an empty JSON object and
+x-freefinder-merchant-secret matching protected REFERRAL_ADMIN_SECRET returns
+aggregate cycle counts and scheduling state only. It rejects regular account
+authentication and has no public contact, receipt or account identifiers. No
+admin secret is automatically provisioned. Keep it out of logs and shell history.
+This status endpoint does not start a scan or financial operation. Individual
+manual-review resolution and Store-side benefit reconciliation remain separate
+work; do not treat an aggregate status as a completed referral lifecycle.

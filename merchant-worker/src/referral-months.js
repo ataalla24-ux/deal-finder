@@ -1,5 +1,8 @@
 import { authenticateAccount, boundedJSON, requireRecentAuth } from './account-auth.js';
 const DAY = 86400000;
+const SOURCE_SCAN = 'referral-source-scan:v1';
+const SOURCE_SCAN_INTERVAL = 120000;
+const SOURCE_REVIEW_COUNTS = ['checked', 'verified', 'revoked', 'unverified', 'skipped'];
 const PREFIX = '/api/referral-months/';
 const APP = 'com.stefanataalla.freefinderwien';
 const APPLE_PRODUCTS = new Set([`${APP}.premium.monthly`, `${APP}.premium.yearly`]);
@@ -128,7 +131,7 @@ export function monthAfter(timestamp) {
 export async function handleReferralMonths(request, env, authenticate = authenticateAccount) {
   const action = new URL(request.url).pathname.slice(PREFIX.length);
   if (action === 'config' && request.method === 'GET') return json({ ok: true, enabled: env.REFERRAL_MONTHS_ENABLED === '1' });
-  if (!['register', 'status', 'accept', 'confirm', 'redeem', 'confirm-redemption', 'import-apple-offers'].includes(action)) {
+  if (!['register', 'status', 'accept', 'confirm', 'redeem', 'confirm-redemption', 'import-apple-offers', 'reconciliation-status'].includes(action)) {
     return json({ ok: false, error: 'Nicht gefunden.' }, 404);
   }
   if (!env.REFERRAL_MONTHS) return json({ ok: false, error: 'Einladungen sind noch nicht verfügbar.' }, 503);
@@ -136,7 +139,7 @@ export async function handleReferralMonths(request, env, authenticate = authenti
   let body;
   try { body = await boundedJSON(request); } catch (error) { return json({ ok: false }, error.status || 400); }
   delete body.principal;
-  if (action === 'import-apple-offers') {
+  if (['import-apple-offers', 'reconciliation-status'].includes(action)) {
     if (!env.REFERRAL_ADMIN_SECRET || request.headers.get('x-freefinder-merchant-secret') !== env.REFERRAL_ADMIN_SECRET) return json({ ok: false }, 403);
   } else {
     if (!['ios', 'android'].includes(body.platform)) return json({ ok: false }, 400);
@@ -154,10 +157,81 @@ export async function handleReferralMonths(request, env, authenticate = authenti
 export class ReferralMonthsLedger {
   constructor(ctx, env) { this.ctx = ctx; this.storage = ctx.storage; this.env = env; }
   async alarm() {
+    const now = Date.now();
     const rates = await this.storage.list({ prefix: 'rate:', limit: 1000 });
-    const expired = [...rates].filter(([, value]) => Date.now() - value.at > 60000).map(([key]) => key);
+    const expired = [...rates].filter(([, value]) => now - value.at > 60000).map(([key]) => key);
     if (expired.length) await this.storage.delete(expired);
-    if (rates.size) await this.storage.setAlarm(Date.now() + 120000);
+    const review = await this.reconcileSources(now);
+    await this.storage.transaction(async tx => {
+      const scheduled = await tx.getAlarm();
+      const next = Math.min(rates.size ? now + SOURCE_SCAN_INTERVAL : Infinity, review.nextAt || Infinity,
+        scheduled > now ? scheduled : Infinity);
+      if (Number.isFinite(next)) await tx.setAlarm(next);
+    });
+  }
+  async reconcileSources(now = Date.now()) {
+    if (this.env.REFERRAL_MONTHS_ENABLED !== '1' || this.env.REFERRAL_RECONCILIATION_ENABLED !== '1') {
+      return { checked: 0, nextAt: null };
+    }
+    const runId = crypto.randomUUID();
+    const scan = await this.storage.transaction(async tx => {
+      const current = await tx.get(SOURCE_SCAN) || {};
+      const nextAt = Math.max(current.nextAt || 0, current.leaseUntil || 0);
+      if (nextAt > now) return { waitUntil: nextAt };
+      await tx.put(SOURCE_SCAN, { ...current, runId, leaseUntil: now + 60000 });
+      return current;
+    });
+    if (scan.waitUntil) return { checked: 0, nextAt: scan.waitUntil };
+
+    const rows = await this.storage.list({ prefix: 'account:', limit: 20,
+      ...(scan.accountKey ? { start: scan.accountKey } : scan.after ? { startAfter: scan.after } : {}) });
+    const targets = [];
+    let cursor = {}, stopped = false;
+    for (const [key, account] of rows) {
+      if (!account.deletedAt && account.recoverable && Array.isArray(account.rewards)) {
+        const offset = key === scan.accountKey && Number.isInteger(scan.offset) ? Math.max(0, scan.offset) : 0;
+        for (let i = offset; i < account.rewards.length; i++) {
+          const reward = account.rewards[i];
+          if (!['earned', 'store_pending', 'store_confirmation', 'redeemed'].includes(reward.state) ||
+              Number.isFinite(reward.sourceReview?.checkedAt) && reward.sourceReview.checkedAt > now - DAY) continue;
+          if (targets.length === 2) { cursor = { accountKey: key, offset: i }; stopped = true; break; }
+          targets.push({ key, rewardId: reward.id, evidence: reward.sourceEvidence });
+        }
+      }
+      if (stopped) break;
+      cursor = { after: key };
+    }
+    const more = stopped || rows.size === 20;
+    const summary = { checked: 0, verified: 0, revoked: 0, unverified: 0, skipped: 0,
+      nextAt: now + (more ? SOURCE_SCAN_INTERVAL : DAY) };
+    for (const target of targets) {
+      // Read-only Store calls run outside the global request lock. Merge only matching, still-current proof.
+      const review = await this.reviewSource(target.evidence, now);
+      const applied = await this.storage.transaction(async tx => {
+        const state = await tx.get(SOURCE_SCAN);
+        if (state?.runId !== runId) return false;
+        const account = await tx.get(target.key);
+        if (!account || account.deletedAt || !account.recoverable) return false;
+        const reward = account.rewards?.find(x => x.id === target.rewardId);
+        if (!reward || JSON.stringify(reward.sourceEvidence) !== JSON.stringify(target.evidence) ||
+            Number.isFinite(reward.sourceReview?.checkedAt) && reward.sourceReview.checkedAt >= now) return false;
+        reward.sourceReview = review;
+        reward.reconciliation = { checkedAt: now, status: review.status === 'verified' ? 'verified' : 'manual_review' };
+        // Audit only: never undo an applied Store benefit, erase credit or replay a pending financial operation.
+        await tx.put(target.key, account);
+        return true;
+      });
+      if (applied) { summary.checked++; summary[review.status]++; } else summary.skipped++;
+    }
+    await this.storage.transaction(async tx => {
+      const state = await tx.get(SOURCE_SCAN);
+      const totals = Object.fromEntries(SOURCE_REVIEW_COUNTS.map(k => [k, (scan.totals?.[k] || 0) + summary[k]]));
+      if (state?.runId === runId) await tx.put(SOURCE_SCAN, {
+        ...(more ? { ...cursor, totals } : {}), nextAt: summary.nextAt,
+        lastCompleted: more ? scan.lastCompleted || null : { at: now, ...totals },
+      });
+    });
+    return summary;
   }
   async fetch(request) {
     return this.ctx.blockConcurrencyWhile(async () => {
@@ -167,6 +241,13 @@ export class ReferralMonthsLedger {
   }
   async perform(action, body) {
     const now = Date.now();
+    if (action === 'reconciliation-status') {
+      const scan = await this.storage.get(SOURCE_SCAN) || {};
+      const counts = value => Object.fromEntries(SOURCE_REVIEW_COUNTS.map(k => [k, value?.[k] || 0]));
+      return { ok: true, enabled: this.env.REFERRAL_MONTHS_ENABLED === '1' && this.env.REFERRAL_RECONCILIATION_ENABLED === '1',
+        inProgress: scan.leaseUntil > now, nextAt: scan.nextAt || null,
+        progress: counts(scan.totals), lastCompleted: scan.lastCompleted ? { at: scan.lastCompleted.at, ...counts(scan.lastCompleted) } : null };
+    }
     if (action === 'import-apple-offers') {
       if (!Array.isArray(body.offers) || body.offers.length > 100) fail('Maximal 100 Store-Angebote.');
       for (const offer of body.offers) {
