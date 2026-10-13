@@ -349,7 +349,7 @@ RESEND_WEBHOOK_SECRET must be provisioned before customer sending is permitted.
 QA switch must return OFF immediately after the authorized test. Existing prices,
 trials, referral gates, push cron and recipient preferences remain unchanged.
 
-LOCAL FOLLOW-UP: Scheduled hook runs at minute5/20/35/50 and exits without storage
+Scheduled hook runs at minute5/20/35/50 and exits without storage
 or network when email flags are OFF. Each active invocation scans at most100 account
 rows and sends at most5 messages, one per serialized request. Tips Wednesday18h
 and recap Sunday18h Vienna use the existing push eligibility/publication/expiry
@@ -366,4 +366,49 @@ persist to prevent future unwanted mail, including after account recreation.
 Unresolved sends need manual review; no retry/new logical ID is automatic.
 Exports over10000 history entries fail explicitly rather than returning partial
 data. Deletion over1000 rows remains retryable without restoring the account.
+
+Actual owner delivery verified 2026-10-13: exactly one authorized test message
+01a13709-e26f-7463-b154-1adc86bb7273 reached the Gmail Inbox; delivered event
+msg_3Kej7LGU6KDTC0TTCq0U1uluFDj succeeded HTTP200/attempt1. Protected status GET
+confirms delivered=true. Webhook cc22f37c-1466-4016-8a69-a169b5bd2fb8 is enabled,
+signing secret protected. All three email flags returned/stayOFF. Do NOT resend
+the owner test or infer consent-to-scheduled-customer delivery from this one test.
+
+Read-only Store test-receipt diagnostic (disabled by default)
+
+POST /api/subscriptions/admin/test-receipt requires the existing protected
+MERCHANT_PROMO_ADMIN_SECRET and STORE_TEST_RECEIPTS_ENABLED=1. This is NOT a
+sandbox reward program: no account ledger/binding, credit, acknowledgment,
+deferral, purchase, code redemption or appAccountToken reassignment is invoked.
+Production reward policy still rejects all test receipts. Do not relax it to
+make a sandbox purchase appear to qualify as a real referral reward.
+
+After the owner explicitly completes a TEST Store transaction, a private600
+operator file may contain platform, accountId and either transactionId (iOS)
+or purchaseToken (Android). Use node scripts/check-test-receipt.mjs /private/path.
+Never paste the token in chat/arguments, commit it or include it in artifacts.
+The command reads the existing admin credential from Keychain, uses the fixed
+production host and outputs only sanitized diagnostic facts. Remove the private
+fixture after use. Keep the gateOFF outside an approved diagnostic session.
+
+Apple requests go only to the Sandbox GET transaction endpoint, without a
+production fallback. Google has a shared API; returned testPurchase must be an
+object or the diagnostic rejects it. Product/bundle/transaction checks remain.
+One bounded authenticated Store GET (plus Google OAuth if needed),20s shared
+timeout,256KiB JSON cap; redirects rejected. Owner identity, tokens, raw receipts
+and provider errors are never returned. Accelerated sandbox seconds are reported
+literally, never asserted to prove a P1M free offer or successful redemption.
+False/missing owner binding is a test finding, not permission to consume credit.
+
+Apple documents that a purchase outside the app, including a redeemed offer code,
+may lack appAccountToken. Set App Account Token can replace an existing token and
+affects current/future renewal transactions, not past transactions. Therefore a
+new/expired offer-code receipt may not satisfy our current exact-owner rule.
+A secure ownership proof/claim design must precede using that API. Never assign
+an owner merely from a caller-provided transaction ID or an issued generic code.
+https://developer.apple.com/documentation/appstoreserverapi/set-app-account-token
+
+Real signed-in social/provider recovery, legacy ownership and actual Store
+redemption still need verification. Owner deferred the final human sandbox test
+until independent work is complete. The diagnostic does not close those gates.
 

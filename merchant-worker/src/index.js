@@ -5,6 +5,7 @@ import { handleTrialStatus } from './subscription-trial.js';
 import { handleReferralMonths, ReferralMonthsLedger } from './referral-months.js';
 import { handleAccount } from './account-auth.js';
 import { handlePlayCatalog } from './store-catalog.js';
+import { handleTestReceipt } from './store-test-receipt.js';
 import { accountEmailLedger, handleAccountEmail, scheduledAccountEmail } from './account-email.js';
 import { measureStorage, storageIdentity, StorageQuotaError } from './storage-usage.js';
 export { MerchantPromoLedger } from './merchant-promos.js';
@@ -163,6 +164,13 @@ const merchantWorker = {
     try {
       if (url.pathname.startsWith('/api/email/')) return handleAccountEmail(request, env);
       if (url.pathname.startsWith('/api/account/')) return handleAccount(request, env);
+      if (url.pathname === '/api/subscriptions/admin/test-receipt') {
+        return handleTestReceipt(request, env, { googleToken: googlePlayAccessToken, appleToken: async env => {
+          const credentials = appStoreCredentials(env);
+          if (!credentials.ok) throw Error('Store unavailable');
+          return appStoreServerToken(credentials);
+        } });
+      }
       if (url.pathname.startsWith('/api/referral-months/')) return handleReferralMonths(request, env);
       if (request.method === 'POST' && url.pathname === '/api/merchant/validate') {
         const result = await validateAdRequest(request);

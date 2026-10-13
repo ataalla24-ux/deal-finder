@@ -33,7 +33,7 @@ test('promo ledger integration with real SQLite Durable Object', async t => {
             return super.fetch(request);
           }
         }` },
-      ...await Promise.all(['index.js', 'referral-months.js', 'ad-content-policy.js', 'merchant-promos.js', 'public-interaction-cache.js', 'storage-usage.js', 'subscription-trial.js', 'store-catalog.js'].map(async name => ({ type: 'ESModule', path: `src/${name}`, contents: await readFile(new URL(`../src/${name}`, import.meta.url), 'utf8') }))),
+      ...await Promise.all(['index.js', 'referral-months.js', 'ad-content-policy.js', 'merchant-promos.js', 'public-interaction-cache.js', 'storage-usage.js', 'subscription-trial.js', 'store-catalog.js', 'store-test-receipt.js'].map(async name => ({ type: 'ESModule', path: `src/${name}`, contents: await readFile(new URL(`../src/${name}`, import.meta.url), 'utf8') }))),
       await bundledAuth(),
       await bundledEmail(),
     ],
