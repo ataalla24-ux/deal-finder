@@ -109,9 +109,30 @@ async function runtime(t, enabled = '1') {
         async appleTransaction(id) {
           const fixture = await this.storage.get('fixture');
           const raw = fixture.apple;
+          const key = 'source:ios:' + id;
+          if (!await this.storage.get(key)) await this.storage.put(key, raw);
           return {ok:true, environment:raw.environment, signedTransactionInfo:'x.'+btoa(JSON.stringify(raw))+'.x'};
         }
-        async playPurchase(token) { return (await this.storage.get('fixture')).play; }
+        async playPurchase(token) {
+          const raw = (await this.storage.get('fixture')).play;
+          const item = raw.lineItems[0];
+          if (item.latestSuccessfulOrderId) {
+            const key = 'source:android:' + item.latestSuccessfulOrderId;
+            if (!await this.storage.get(key)) await this.storage.put(key, {
+              orderId:item.latestSuccessfulOrderId, purchaseToken:token, state:'PROCESSED',
+              lineItems:[{productId:item.productId, subscriptionDetails:{
+                offerPhaseDetails:{freeTrialDetails:{}}, servicePeriodStartTime:raw.startTime,
+                servicePeriodEndTime:item.expiryTime}}],
+            });
+          }
+          return raw;
+        }
+        async sourcePurchase(evidence) {
+          const fixture = await this.storage.get('fixture');
+          await this.storage.put('source-checks', (await this.storage.get('source-checks') || 0) + 1);
+          if (fixture.sourceError) throw Error('Mock Store outage with private details');
+          return fixture.sourceOverride || await this.storage.get('source:' + evidence.platform + ':' + evidence.receiptId);
+        }
         async deferPlay(token, purchase, expected) {
           await this.storage.put('deferrals', (await this.storage.get('deferrals') || 0) + 1);
           return (await this.storage.get('fixture')).deferResult || {ok:true, expires:expected};
@@ -135,6 +156,7 @@ async function runtime(t, enabled = '1') {
             return Response.json(account.rewards);
           }
           if (new URL(request.url).pathname === '/deferrals') return Response.json(await this.storage.get('deferrals') || 0);
+          if (new URL(request.url).pathname === '/source-checks') return Response.json(await this.storage.get('source-checks') || 0);
           return super.fetch(request);
         }
       }
@@ -240,6 +262,84 @@ test('Apple confirmation rejects an Android request without settling the reserve
   const reserved = await call('redeem', { ...owner, rewardId, transactionId: apple.transactionId });
   await call('confirm-redemption', { ...owner, platform: 'android', purchaseToken: 'wrong-confirmation-store-fixture' }, 400);
   assert.deepEqual(await call('status', owner), reserved);
+});
+
+test('revoked or unavailable source blocks new Apple/Play operations without deleting credit; a fresh verified retry succeeds', async t => {
+  for (const platform of ['ios', 'android']) {
+    const { call, fixture, mf, owner, rewardId } = await earnedReward(t);
+    const read = async () => (await mf.dispatchFetch('https://test/stored-rewards', {
+      method: 'POST', body: JSON.stringify({ accountId: owner.accountId }),
+    })).json();
+    const evidence = (await read())[0].sourceEvidence;
+    const source = { ...apple, appAccountToken: evidence.accountId, transactionId: evidence.receiptId,
+      originalTransactionId: evidence.receiptId, purchaseDate: evidence.purchasedAt,
+      originalPurchaseDate: evidence.purchasedAt, expiresDate: evidence.periodEnd };
+    const request = { ...owner, platform, rewardId, transactionId: apple.transactionId,
+      purchaseToken: 'owner-source-review-fixture-token', sourceReview: { status: 'verified' },
+      sourceEvidence: { ...evidence, accountId: owner.accountId } };
+    for (const extra of [{ sourceOverride: { ...source, revocationDate: Date.now() } }, { sourceError: true }]) {
+      await fixture({ ...extra, apple: { ...apple, offerType: null }, play });
+      await call('redeem', request, 409);
+      const stored = (await read())[0];
+      assert.equal(stored.state, 'earned');
+      assert.deepEqual(stored.sourceEvidence, evidence);
+      assert.equal(stored.sourceReview.status, extra.sourceError ? 'unverified' : 'revoked');
+      const status = await call('status', owner);
+      assert.equal(status.earnedMonths, 1);
+      assert.equal(status.redeemedMonths, 0);
+      assert.equal(status.rewards[0].redemptionURL, undefined);
+      assert.equal(status.rewards[0].sourceReview, undefined);
+      assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 0);
+    }
+    await fixture({ apple: { ...apple, offerType: null }, play, sourceOverride: source });
+    const retried = await call('redeem', request);
+    assert.equal((await read())[0].sourceReview.status, 'verified');
+    assert.equal(retried.rewards[0].state, platform === 'ios' ? 'store_confirmation' : 'redeemed');
+    assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), platform === 'ios' ? 0 : 1);
+  }
+});
+
+test('historical missing evidence preserves credit and cannot be substituted by client proof', async t => {
+  const { call, mf, owner, rewardId } = await earnedReward(t);
+  await mf.dispatchFetch('https://test/stored-rewards', {
+    method: 'POST', body: JSON.stringify({ accountId: owner.accountId, removeEvidence: true }),
+  });
+  for (const platform of ['ios', 'android']) {
+    await call('redeem', { ...owner, platform, rewardId, transactionId: apple.transactionId,
+      purchaseToken: 'legacy-owner-review-fixture-token', sourceReview: { status: 'verified' } }, 409);
+  }
+  const status = await call('status', owner);
+  assert.equal(status.earnedMonths, 1);
+  assert.equal(status.rewards[0].state, 'earned');
+  assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 0);
+  assert.equal(await (await mf.dispatchFetch('https://test/source-checks')).json(), 0);
+});
+
+test('a refunded original Play order holds the credit, while a subsequent verified lookup unlocks one deferral', async t => {
+  const { call, fixture, mf } = await runtime(t);
+  const owner = identity(1, 'android'), friend = identity(2, 'android');
+  const { code } = await call('register', owner);
+  await call('register', friend); await call('accept', { ...friend, code });
+  const token = 'original-friend-order-review-fixture';
+  await fixture({ play: { ...play, externalAccountIdentifiers: { obfuscatedExternalAccountId: friend.accountId } } });
+  await call('confirm', { ...friend, purchaseToken: token });
+  const rewardId = (await call('status', owner)).rewards[0].id;
+  const source = { orderId: play.lineItems[0].latestSuccessfulOrderId, purchaseToken: token, state: 'PROCESSED',
+    lineItems: [{ productId: play.lineItems[0].productId, subscriptionDetails: {
+      offerPhaseDetails: { freeTrialDetails: {} }, servicePeriodStartTime: play.startTime,
+      servicePeriodEndTime: play.lineItems[0].expiryTime,
+    } }] };
+  await fixture({ play, sourceOverride: { ...source, state: 'REFUNDED',
+    orderHistory: { refundEvent: { eventTime: new Date().toISOString() } } } });
+  const request = { ...owner, rewardId, purchaseToken: 'owner-order-review-fixture-token' };
+  await call('redeem', request, 409);
+  assert.equal((await call('status', owner)).earnedMonths, 1);
+  assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 0);
+  await fixture({ play, sourceOverride: source });
+  assert.equal((await call('redeem', request)).redeemedMonths, 1);
+  assert.equal((await call('redeem', request)).redeemedMonths, 1);
+  assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 1);
+  assert.equal(await (await mf.dispatchFetch('https://test/source-checks')).json(), 2);
 });
 
 test('receipt evidence is immutable on retry, ignores client claims and stays private in status/export', async t => {
@@ -383,10 +483,11 @@ test('Play deferral retries never repeat an unknown external financial operation
   assert.equal(pending.rewards[0].state, 'store_pending');
   await call('redeem', { ...a, rewardId, purchaseToken: 'inviter-token-12345678901234567890' }, 409);
   assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 1);
-  await fixture({ play: { ...play, lineItems: [{ ...play.lineItems[0], expiryTime: new Date(monthAfter(now + 30 * DAY)).toISOString() }] } });
+  await fixture({ sourceError: true, play: { ...play, lineItems: [{ ...play.lineItems[0], expiryTime: new Date(monthAfter(now + 30 * DAY)).toISOString() }] } });
   const confirmed = await call('redeem', { ...a, rewardId, purchaseToken: 'inviter-token-12345678901234567890' });
   assert.equal(confirmed.redeemedMonths, 1);
   assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 1);
+  assert.equal(await (await mf.dispatchFetch('https://test/source-checks')).json(), 1, 'settle an already-started operation without creating a new benefit');
 });
 
 test('Play trial credit waits for acknowledgement and remains retryable without a duplicate reward', async t => {

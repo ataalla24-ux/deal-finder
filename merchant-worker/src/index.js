@@ -23,6 +23,16 @@ export class ReferralMonths extends ReferralMonthsLedger {
     if (!response.ok) throw new Error('Store unavailable');
     return response.json();
   }
+  async playOrder(orderId) {
+    const signal = AbortSignal.timeout(9000);
+    const auth = await googlePlayAccessToken(this.env, signal);
+    if (!auth.ok) throw new Error('Store unavailable');
+    const response = await fetch(`https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.stefanataalla.freefinderwien/orders/${encodeURIComponent(orderId)}`, {
+      method: 'GET', headers: { authorization: `Bearer ${auth.token}` }, redirect: 'manual', signal,
+    });
+    if (!response.ok) throw new Error('Store unavailable');
+    return response.json();
+  }
   async deferPlay(token, purchase, expiry) {
     try {
       const response = await this.playRequest(token, ':defer', { deferralContext: {

@@ -59,6 +59,50 @@ export function referralEvidence(platform, purchase, now = Date.now()) {
   return { version: 1, platform, accountId: purchase.account, purchaseKey: purchase.key,
     productId: purchase.product, receiptId, purchasedAt, periodEnd: purchase.expires, verifiedAt: now };
 }
+function validSourceEvidence(evidence, now) {
+  if (!evidence || evidence.version !== 1 || !Number.isFinite(now)) return false;
+  const { platform, receiptId, purchaseKey, productId, accountId, purchasedAt, periodEnd } = evidence;
+  try {
+    referralEvidence(platform, { transactionId: receiptId, orderId: receiptId, key: purchaseKey,
+      product: productId, account: accountId, purchasedAt, started: purchasedAt, expires: periodEnd }, now);
+  } catch { return false; }
+  const days = (periodEnd - purchasedAt) / DAY;
+  return days >= 27 && days <= 32 && (platform !== 'ios' || purchaseKey === 'ios:' + receiptId);
+}
+export async function reviewReferralSource(evidence, raw, now = Date.now()) {
+  const result = status => ({ status, checkedAt: now });
+  if (!validSourceEvidence(evidence, now) || !raw || typeof raw !== 'object') return result('unverified');
+  const { platform, receiptId, purchaseKey, productId, accountId, purchasedAt, periodEnd } = evidence;
+  // Recheck the original qualifying period, not today's subscription or a later paid renewal.
+  if (platform === 'ios') {
+    if (raw.bundleId !== APP || raw.environment !== 'Production' || raw.transactionId !== receiptId ||
+        raw.originalTransactionId !== receiptId || purchaseKey !== 'ios:' + raw.originalTransactionId ||
+        raw.productId !== productId || typeof raw.appAccountToken !== 'string' || raw.appAccountToken.toLowerCase() !== accountId ||
+        raw.purchaseDate !== purchasedAt || raw.originalPurchaseDate !== purchasedAt || raw.expiresDate !== periodEnd ||
+        raw.offerType !== 1 || raw.offerDiscountType !== 'FREE_TRIAL') return result('unverified');
+    if (raw.revocationDate == null) return result('verified');
+    return result(Number.isFinite(raw.revocationDate) && raw.revocationDate >= purchasedAt &&
+      raw.revocationDate <= now + 60000 ? 'revoked' : 'unverified');
+  }
+  if (raw.orderId !== receiptId || typeof raw.purchaseToken !== 'string' ||
+      purchaseKey !== 'android:' + await referralHash(raw.purchaseToken) || !Array.isArray(raw.lineItems) ||
+      raw.lineItems.length !== 1 || !raw.lineItems[0]) {
+    return result('unverified');
+  }
+  const item = raw.lineItems[0], details = item.subscriptionDetails, phase = details?.offerPhaseDetails;
+  if (item.productId !== productId || !phase || typeof phase.freeTrialDetails !== 'object' ||
+      !phase.freeTrialDetails || Array.isArray(phase.freeTrialDetails) || Object.keys(phase).length !== 1 ||
+      Date.parse(details.servicePeriodStartTime) !== purchasedAt || Date.parse(details.servicePeriodEndTime) !== periodEnd) {
+    return result('unverified');
+  }
+  if (raw.state === 'REFUNDED') {
+    const at = Date.parse(raw.orderHistory?.refundEvent?.eventTime);
+    return result(Number.isFinite(at) && at >= purchasedAt && at <= now + 60000 ? 'revoked' : 'unverified');
+  }
+  if (raw.state === 'PROCESSED' && !raw.orderHistory?.refundEvent && !raw.orderHistory?.cancellationEvent &&
+      !(raw.orderHistory?.partialRefundEvents?.length)) return result('verified');
+  return result('unverified');
+}
 export function isQualifyingTrial(purchase, acceptedAt, now = Date.now()) {
   const days = (purchase.expires - purchase.started) / DAY;
   return purchase.trial && Number.isFinite(purchase.started) && purchase.started >= acceptedAt - 30000 &&
@@ -219,6 +263,13 @@ export class ReferralMonthsLedger {
       if (account.rewards.some(x => x.id !== reward.id && ['store_pending', 'store_confirmation'].includes(x.state))) {
         fail('Bitte zuerst die bereits gestartete Store-Einlösung bestätigen.', 409);
       }
+      if (reward.state === 'earned') {
+        reward.sourceReview = await this.reviewSource(reward.sourceEvidence, now);
+        await this.storage.put(key, account);
+        if (reward.sourceReview.status !== 'verified') {
+          fail('Die ursprüngliche Einladung muss zuerst vom Store bestätigt werden. Dein Guthaben bleibt erhalten. Bitte später erneut prüfen.', 409);
+        }
+      }
       if (body.platform === 'ios') {
         if (reward.redemptionURL) return this.status(account);
         const purchase = body.transactionId ? await this.verifyPurchase(body, account) : null;
@@ -298,6 +349,19 @@ export class ReferralMonthsLedger {
     const purchase = referralPurchase('android', raw, account.id);
     purchase.key = 'android:' + await referralHash(body.purchaseToken);
     return purchase;
+  }
+  async sourcePurchase(evidence) {
+    if (evidence.platform === 'ios') {
+      const result = await this.appleTransaction(evidence.receiptId);
+      if (!result.ok || result.environment !== 'Production') throw new Error('Store unavailable');
+      return decodeStoreJWS(result.signedTransactionInfo);
+    }
+    return this.playOrder(evidence.receiptId);
+  }
+  async reviewSource(evidence, now) {
+    if (!validSourceEvidence(evidence, now)) return { status: 'unverified', checkedAt: now };
+    try { return await reviewReferralSource(evidence, await this.sourcePurchase(evidence), now); }
+    catch { return { status: 'unverified', checkedAt: now }; }
   }
   async newAccount(body, now) {
     return { id: body.accountId, recoverable: true, createdAt: now,
