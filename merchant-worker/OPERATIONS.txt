@@ -1,3 +1,67 @@
+Resend preparation (2026-10-13; sending NOT enabled)
+
+Owner approved a free Resend account/preparation, and signed in using GitHub.
+Domain freefinder.at was created in eu-west-1 (Ireland), ID
+8d84d771-ef0e-48ee-9f1a-73790cfcfe94. DNS remains unverified. Authoritative
+nameservers are cns1.cloudpit.de, cns2.cloudpit.com and cns3.cloudpit.io.
+The dashboard requests TXT resend._domainkey plus CNAME rsend and send.
+Read the exact values in the dashboard; never replace website/mail records or
+weaken existing DMARC. Do not enable incoming mail. Owner explicitly confirmed
+the additive DNS authorization and a sending-only domain-scoped key. WHOIS
+identifies dogado/easyname; the correct cloudpit.easyname.com login is open but
+logged out and handed to owner. The key dialog currently offers All domains only;
+cancelled without creating a broader key. Recheck after domain verification.
+No API key exists yet and no contacts were uploaded or messages sent. Tracking
+has no configured subdomain; do not create one. Reconfirm its actual OFF state
+after DNS verification and before any approved test email.
+
+src/resend-email.js is an isolated transport, NOT a working email campaign
+system. It is deliberately not imported by public routes or scheduled jobs.
+ACCOUNT_EMAIL_TRANSPORT_ENABLED=0 and ACCOUNT_EMAIL_ENABLED=0 remain OFF.
+Use a sending-only RESEND_API_KEY scoped to freefinder.at, stored as a Worker
+secret, never in app code/repository/logs. Fixed sender hallo@freefinder.at and
+reply-to freefinder.at@gmail.com; GitHub login email is not the public contact.
+Provider tracking must be explicitly confirmed OFF before the first real send.
+
+Before wiring the transport into any customer flow, implement and test current
+verified email/consent checks, deletion and suppression handling, immutable
+delivery ledger and quota reservations, functioning signed unsubscribe page and
+one-click POST endpoint, bounce/complaint/delivery events and approved templates.
+The transport's optional List-Unsubscribe header alone does NOT implement the
+endpoint. Marketing eligibility/quotas must be checked for the chosen free plan;
+the transactional allowance alone is not proof that broadcasts are included.
+No account preference is automatically opted in by creating the provider.
+
+Persist delivery id/createdAt/recipient/content before send and retry only that
+unchanged record. Resend deduplication expires after24 hours; transport rejects
+records at23 hours and older. Unknown timeout/redirect/5xx/conflict outcomes must
+remain unresolved, never get a new ID to force a retry. Store accepted IDs before
+other work; accepted is not proof of inbox delivery. Redirects never receive the
+credential/recipient. Responses are bounded and provider details are not logged.
+Seven new local tests include real isolated workerd fetch with mocked outbound
+network, not a live Resend request. Full208 Merchant tests and bundle dry-run pass.
+
+Store offer configuration prepared (2026-10-13; referral rollout still OFF)
+
+Apple current monthly6810249175:
+  referral-earned-month-2026:3d07649b-ad1e-4eb9-842c-c52518f098d7
+  new/expired subscribers only, no introductory stacking, automatic renewal.
+  referral-active-monthly-2026:3f5a4d1e-eb81-40e1-9acf-b8efde5ebdcc
+  existing subscribers only, no introductory stacking, automatic renewal.
+Apple current yearly6810354972:
+  referral-active-yearly-2026:268707cb-8a4b-4fd5-9968-8429d18c9faf
+  existing subscribers only, no introductory stacking, automatic renewal.
+All three are1 free month, AT/DE, zero generated/issued codes. No legacy product
+or existing price/introductory offer was changed. Apple offer definitions alone
+do not prove actual redemption/appAccountToken behavior or billing dates.
+
+Play freefinder.pro.monthly / monthly / referral-earned-month is DRAFT, NOT
+activated: developer-determined eligibility,1 P1M free phase, AT/DE. Read-only
+live catalog independently confirmed DRAFT2026-10-13T19:47:20Z. Existing
+monthlyEUR4.99/yearlyEUR34.99 and new-to-app trial offers unchanged. App/backend
+credit checks do NOT make developer-determined eligibility Store-enforced.
+Do not activate while attribution/abuse and real receipt tests remain open.
+
 FreeFinder restaurant gift codes
 
 Scope: Starter Boost (1 day), Spotlight Boost (3 days) or City Push (8 days)
