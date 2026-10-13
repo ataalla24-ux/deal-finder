@@ -103,3 +103,26 @@ admin secret is automatically provisioned. Keep it out of logs and shell history
 This status endpoint does not start a scan or financial operation. Individual
 manual-review resolution and Store-side benefit reconciliation remain separate
 work; do not treat an aggregate status as a completed referral lifecycle.
+
+Play pending-redemption evidence (2026-10-13):
+Before a new deferral, persist the verified owner's product, latest successful
+order, hashed purchase key, original expiry and exact calendar-month target.
+Missing order proof holds the earned credit before any financial request.
+After an unknown response, readback may settle only the same owner/order/product
+and exact expiry target, still before the original expiry. A newer paid order,
+changed product, overshooting extension or missing historical proof remains
+pending with the Store lock intact. Never send the deferral again on that basis.
+Definitive rejection clears only that attempt's metadata; source proof survives.
+Direct accepted responses and matching readbacks retain separate private
+redemption evidence. No bearer token/contact data is added; public status and
+account export omit all internal evidence. Older pending records without proof
+need manual Store investigation; do not guess/backfill it or erase their credit.
+Readback is a conservative consistency check, not a Store-issued operation ID:
+an unrelated manual extension to exactly the same target cannot be distinguished
+by these fields. Keep the program/Play deferral flags OFF until real Store tests
+and operational reconciliation are complete. No native timeout change is needed:
+this adds no network request. Existing prices/trials and subscriptions stay intact.
+
+Reference fields (checked 2026-10-13):
+https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptionsv2
+https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptionsv2/defer

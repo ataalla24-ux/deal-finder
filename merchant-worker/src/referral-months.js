@@ -11,6 +11,7 @@ const json = (value, status = 200) => Response.json(value, { status, headers: {
   'cache-control': 'no-store', 'access-control-allow-origin': '*',
 } });
 const uuid = value => typeof value === 'string' && /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/.test(value);
+const receiptID = value => typeof value === 'string' && /^[A-Za-z0-9._-]{5,200}$/.test(value);
 export async function referralHash(value) {
   return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))))
     .map(x => x.toString(16).padStart(2, '0')).join('');
@@ -127,6 +128,21 @@ export function monthAfter(timestamp) {
   const last = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
   d.setUTCDate(Math.min(day, last));
   return d.getTime();
+}
+export function isMatchingPlayDeferral(purchase, reward, now = Date.now()) {
+  const proof = reward.deferralEvidence;
+  // A later paid renewal can also extend expiry. Readback must still describe the original order and exact target.
+  return !!proof && proof.version === 1 && proof.platform === 'android' && reward.state === 'store_pending' &&
+    (!reward.redemptionPlatform || reward.redemptionPlatform === 'android') &&
+    uuid(proof.accountId) && proof.accountId === purchase.account &&
+    receiptID(proof.receiptId) && proof.receiptId === purchase.orderId &&
+    PLAY_PRODUCTS.has(proof.productId) && proof.productId === purchase.product &&
+    /^android:[a-f0-9]{64}$/.test(proof.purchaseKey) && proof.purchaseKey === purchase.key &&
+    proof.purchaseKey === reward.purchaseKey && Number.isFinite(proof.requestedAt) && proof.requestedAt > 0 &&
+    Number.isFinite(now) && proof.requestedAt <= now && now < proof.originalExpiry &&
+    Number.isFinite(proof.originalExpiry) && proof.originalExpiry === reward.originalExpiry &&
+    Number.isFinite(proof.expectedExpiry) && proof.expectedExpiry === monthAfter(proof.originalExpiry) &&
+    proof.expectedExpiry === reward.expectedExpiry && purchase.expires === proof.expectedExpiry;
 }
 export async function handleReferralMonths(request, env, authenticate = authenticateAccount) {
   const action = new URL(request.url).pathname.slice(PREFIX.length);
@@ -372,23 +388,32 @@ export class ReferralMonthsLedger {
       if (this.env.REFERRAL_PLAY_DEFERRAL_ENABLED !== '1') fail('Dein Monat bleibt gutgeschrieben. Die Store-Einlösung ist noch nicht verfügbar.', 409);
       const purchase = await this.verifyPurchase(body, account);
       if (reward.state === 'store_pending') {
-        if (now < reward.originalExpiry && purchase.key === reward.purchaseKey && purchase.expires >= reward.expectedExpiry) {
+        if (isMatchingPlayDeferral(purchase, reward, now)) {
           reward.state = 'redeemed'; reward.redeemedAt = now; reward.newExpiry = purchase.expires;
+          reward.redemptionEvidence = { ...reward.deferralEvidence, confirmedAt: now,
+            newExpiry: purchase.expires, confirmation: 'subscription_readback' };
           await this.storage.put(key, account); return this.status(account);
         }
         fail('Google Play prüft die Gutschrift. Bitte nicht erneut einlösen.', 409);
       }
-      if (!purchase.etag) fail('Google Play hat die Verlängerung noch nicht bestätigt.', 409);
+      if (!purchase.etag || !receiptID(purchase.orderId)) fail('Google Play hat die Verlängerung noch nicht bestätigt.', 409);
       reward.state = 'store_pending'; reward.redemptionPlatform = 'android';
       reward.expectedExpiry = monthAfter(purchase.expires); reward.purchaseKey = purchase.key;
       reward.originalExpiry = purchase.expires;
+      reward.deferralEvidence = { version: 1, platform: 'android', accountId: account.id,
+        productId: purchase.product, receiptId: purchase.orderId, purchaseKey: purchase.key,
+        originalExpiry: purchase.expires, expectedExpiry: reward.expectedExpiry, requestedAt: now };
       await this.storage.put(key, account);
       // Persist before sending. Unknown outcomes stay pending; never retry a financial side effect blindly.
       const result = await this.deferPlay(body.purchaseToken, purchase, reward.expectedExpiry);
-      if (result.ok) { reward.state = 'redeemed'; reward.redeemedAt = now; reward.newExpiry = result.expires; }
+      if (result.ok && Number.isFinite(result.expires) && result.expires >= reward.expectedExpiry) {
+        reward.state = 'redeemed'; reward.redeemedAt = now; reward.newExpiry = result.expires;
+        reward.redemptionEvidence = { ...reward.deferralEvidence, confirmedAt: Date.now(),
+          newExpiry: result.expires, confirmation: 'deferral_response' };
+      }
       else if (result.definitive) {
         reward.state = 'earned';
-        for (const field of ['redemptionPlatform', 'expectedExpiry', 'purchaseKey', 'originalExpiry']) delete reward[field];
+        for (const field of ['redemptionPlatform', 'expectedExpiry', 'purchaseKey', 'originalExpiry', 'deferralEvidence']) delete reward[field];
       }
       await this.storage.put(key, account);
       return this.status(account);

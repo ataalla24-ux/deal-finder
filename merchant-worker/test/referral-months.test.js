@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { Miniflare, convertV4MiniflareOptions, Log, LogLevel } from 'miniflare';
-import { referralPurchase, referralEvidence, isQualifyingTrial, isMatchingAppleRedemption, monthAfter } from '../src/referral-months.js';
+import { referralPurchase, referralEvidence, isQualifyingTrial, isMatchingAppleRedemption, isMatchingPlayDeferral, monthAfter } from '../src/referral-months.js';
 import worker from '../src/index.js';
 import { bundledAuth } from './bundled-auth.js';
 
@@ -92,6 +92,32 @@ test('Apple redemption requires a new matching one-month transaction after reser
     assert.equal(isMatchingAppleRedemption(purchase, { ...reward, ...patch }, now), false);
   }
 });
+test('Play readback requires complete pre-operation proof for the same owner, order and exact month', () => {
+  const purchase = { ...referralPurchase('android', play, account, now), key: 'android:' + 'a'.repeat(64),
+    expires: monthAfter(now + 30 * DAY) };
+  const proof = { version: 1, platform: 'android', accountId: account, productId: purchase.product,
+    receiptId: purchase.orderId, purchaseKey: purchase.key, requestedAt: now,
+    originalExpiry: now + 30 * DAY, expectedExpiry: purchase.expires };
+  const reward = { state: 'store_pending', redemptionPlatform: 'android', deferralEvidence: proof,
+    purchaseKey: purchase.key, originalExpiry: proof.originalExpiry, expectedExpiry: proof.expectedExpiry };
+  assert.equal(isMatchingPlayDeferral(purchase, reward, now), true);
+  for (const patch of [{ version: 2 }, { platform: 'ios' }, { accountId: 'other-account' },
+    { productId: 'freefinder.pro.yearly' }, { receiptId: 'other-order' }, { receiptId: null },
+    { purchaseKey: 'android:' + 'b'.repeat(64) }, { originalExpiry: NaN }, { expectedExpiry: Infinity },
+    { requestedAt: undefined }, { requestedAt: 0 }, { requestedAt: now + 1 }]) {
+    assert.equal(isMatchingPlayDeferral(purchase, { ...reward, deferralEvidence: { ...proof, ...patch } }, now), false);
+  }
+  for (const patch of [{ account: 'other-account' }, { orderId: undefined }, { orderId: purchase.orderId + '..0' },
+    { product: 'freefinder.pro.yearly' }, { key: 'android:' + 'b'.repeat(64) }, { expires: purchase.expires + 1 }]) {
+    assert.equal(isMatchingPlayDeferral({ ...purchase, ...patch }, reward, now), false);
+  }
+  for (const patch of [{ state: 'earned' }, { redemptionPlatform: 'ios' }, { purchaseKey: 'another-purchase' },
+    { originalExpiry: proof.originalExpiry + 1 }, { expectedExpiry: proof.expectedExpiry + 1 }, { deferralEvidence: undefined }]) {
+    assert.equal(isMatchingPlayDeferral(purchase, { ...reward, ...patch }, now), false);
+  }
+  assert.equal(isMatchingPlayDeferral(purchase, reward, proof.originalExpiry), false);
+  assert.equal(isMatchingPlayDeferral(purchase, reward, NaN), false);
+});
 test('production router exposes only a disabled config until deliberately enabled', async () => {
   const response = await worker.fetch(new Request('https://test/api/referral-months/config'), {}, {});
   assert.equal(response.status, 200);
@@ -135,6 +161,7 @@ async function runtime(t, enabled = '1') {
         }
         async deferPlay(token, purchase, expected) {
           await this.storage.put('deferrals', (await this.storage.get('deferrals') || 0) + 1);
+          await this.storage.put('deferral-before-send', await this.storage.get('account:' + purchase.account));
           return (await this.storage.get('fixture')).deferResult || {ok:true, expires:expected};
         }
         async fetch(request) {
@@ -142,7 +169,7 @@ async function runtime(t, enabled = '1') {
             await this.storage.put('fixture', await request.json()); return Response.json({ok:true});
           }
           if (new URL(request.url).pathname === '/stored-rewards') {
-            const {accountId, removePlatform, removeEvidence} = await request.json();
+            const {accountId, removePlatform, removeEvidence, removeDeferralEvidence} = await request.json();
             const key = 'account:' + accountId;
             const account = await this.storage.get(key);
             if (removePlatform) {
@@ -153,8 +180,13 @@ async function runtime(t, enabled = '1') {
               for (const reward of account.rewards) delete reward.sourceEvidence;
               await this.storage.put(key, account);
             }
+            if (removeDeferralEvidence) {
+              for (const reward of account.rewards) delete reward.deferralEvidence;
+              await this.storage.put(key, account);
+            }
             return Response.json(account.rewards);
           }
+          if (new URL(request.url).pathname === '/deferral-before-send') return Response.json(await this.storage.get('deferral-before-send'));
           if (new URL(request.url).pathname === '/deferrals') return Response.json(await this.storage.get('deferrals') || 0);
           if (new URL(request.url).pathname === '/source-checks') return Response.json(await this.storage.get('source-checks') || 0);
           return super.fetch(request);
@@ -230,11 +262,106 @@ test('an unknown Play outcome stays locked to Play and cannot reserve an Apple c
   assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 1);
 });
 
+test('an unknown Play outcome is not settled by a later order, another product or an unrelated extension', async t => {
+  const expected = monthAfter(now + 30 * DAY);
+  for (const [name, patch] of [
+    ['paid renewal', { latestSuccessfulOrderId: play.lineItems[0].latestSuccessfulOrderId + '..0' }],
+    ['product change', { productId: 'freefinder.pro.yearly' }],
+    ['different extension', { expiryTime: new Date(expected + DAY).toISOString() }],
+    ['missing order', { latestSuccessfulOrderId: undefined }],
+  ]) {
+    await t.test(name, async t => {
+      const { call, fixture, mf, owner, rewardId } = await earnedReward(t);
+      const request = { ...owner, platform: 'android', rewardId, purchaseToken: 'pending-play-proof-fixture-token' };
+      const pending = await call('redeem', request);
+      await fixture({ play: { ...play, lineItems: [{ ...play.lineItems[0],
+        expiryTime: new Date(expected).toISOString(), ...patch }] } });
+      await call('redeem', request, 409);
+      assert.deepEqual(await call('status', owner), pending, 'uncertain evidence preserves the month and pending Store lock');
+      assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 1);
+      await fixture({ play: { ...play, lineItems: [{ ...play.lineItems[0], expiryTime: new Date(expected).toISOString() }] } });
+      assert.equal((await call('redeem', request)).redeemedMonths, 1, 'later exact evidence may settle without replay');
+      assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 1);
+    });
+  }
+});
+
+test('old pending Play credits without original-order evidence stay pending rather than guessing or replaying', async t => {
+  const { call, fixture, mf, owner, rewardId } = await earnedReward(t);
+  const request = { ...owner, platform: 'android', rewardId, purchaseToken: 'legacy-pending-play-fixture-token' };
+  const pending = await call('redeem', request);
+  await mf.dispatchFetch('https://test/stored-rewards', { method: 'POST', body: JSON.stringify({
+    accountId: owner.accountId, removeDeferralEvidence: true,
+  }) });
+  await fixture({ play: { ...play, lineItems: [{ ...play.lineItems[0],
+    expiryTime: new Date(monthAfter(now + 30 * DAY)).toISOString() }] } });
+  await call('redeem', request, 409);
+  assert.deepEqual(await call('status', owner), pending);
+  await call('redeem', { ...owner, rewardId, transactionId: apple.transactionId }, 409);
+  assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 1);
+});
+
+test('new Play deferrals require the Store order, persist private proof before sending and preserve source evidence', async t => {
+  for (const confirmation of ['deferral_response', 'subscription_readback']) {
+    await t.test(confirmation, async t => {
+      const { call, fixture, mf, owner, rewardId } = await earnedReward(t);
+      const request = { ...owner, platform: 'android', rewardId, purchaseToken: 'private-fixture-purchase-token',
+        deferralEvidence: { receiptId: 'client-forged-order' } };
+      const stored = async () => (await mf.dispatchFetch('https://test/stored-rewards', { method: 'POST',
+        body: JSON.stringify({ accountId: owner.accountId }) })).json();
+      const source = (await stored())[0].sourceEvidence;
+      for (const latestSuccessfulOrderId of [undefined, '', 'bad/order', 'a'.repeat(201)]) {
+        await fixture({ play: { ...play, lineItems: [{ ...play.lineItems[0], latestSuccessfulOrderId }] } });
+        await call('redeem', request, 409);
+        assert.equal((await call('status', owner)).rewards[0].state, 'earned');
+        assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 0);
+      }
+      const expected = monthAfter(now + 30 * DAY);
+      await fixture({ play, deferResult: confirmation === 'deferral_response' ? { ok: true, expires: expected } : { ok: false, definitive: false } });
+      let status = await call('redeem', request);
+      const sent = (await (await mf.dispatchFetch('https://test/deferral-before-send')).json()).rewards[0];
+      assert.equal(sent.state, 'store_pending');
+      assert.deepEqual(sent.deferralEvidence, { version: 1, platform: 'android', accountId: owner.accountId,
+        productId: play.lineItems[0].productId, receiptId: play.lineItems[0].latestSuccessfulOrderId,
+        purchaseKey: sent.purchaseKey, requestedAt: sent.deferralEvidence.requestedAt,
+        originalExpiry: now + 30 * DAY, expectedExpiry: expected });
+      assert.ok(sent.deferralEvidence.requestedAt <= Date.now());
+      if (confirmation === 'subscription_readback') {
+        await fixture({ play: { ...play, lineItems: [{ ...play.lineItems[0], expiryTime: new Date(expected).toISOString() }] } });
+        status = await call('redeem', request);
+      }
+      assert.equal(status.redeemedMonths, 1);
+      const records = await stored(), reward = records[0];
+      assert.deepEqual(reward.sourceEvidence, source);
+      assert.deepEqual(reward.deferralEvidence, sent.deferralEvidence);
+      assert.deepEqual(reward.redemptionEvidence, { ...sent.deferralEvidence, newExpiry: expected,
+        confirmedAt: reward.redemptionEvidence.confirmedAt, confirmation });
+      assert.ok(reward.redemptionEvidence.confirmedAt >= sent.deferralEvidence.requestedAt);
+      assert.doesNotMatch(JSON.stringify(records), /private-fixture-purchase-token|client-forged-order/);
+      assert.doesNotMatch(JSON.stringify(status), /deferralEvidence|redemptionEvidence|sourceEvidence|GPA\./);
+      assert.deepEqual(await call('redeem', request), status);
+      assert.deepEqual(await stored(), records, 'repeated confirmation must not rewrite evidence');
+      assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 1);
+      const exported = await (await mf.dispatchFetch('https://test/account-export', { method: 'POST', body: JSON.stringify({
+        ...owner, principal: { id: owner.accountId, authTime: Date.now()/1000 }, trustedIP: 'play-proof-export',
+      }) })).json();
+      assert.equal(exported.ok, true);
+      assert.doesNotMatch(JSON.stringify(exported), /deferralEvidence|redemptionEvidence|sourceEvidence|GPA\./);
+    });
+  }
+});
+
 test('a definitively rejected Play deferral releases the credit for another store', async t => {
   const { call, fixture, mf, owner, rewardId } = await earnedReward(t);
   await fixture({ play, deferResult: { ok: false, definitive: true } });
   const rejected = await call('redeem', { ...owner, platform: 'android', rewardId, purchaseToken: 'cross-store-owner-token-fixture' });
   assert.equal(rejected.rewards[0].state, 'earned');
+  const records = await (await mf.dispatchFetch('https://test/stored-rewards', { method: 'POST',
+    body: JSON.stringify({ accountId: owner.accountId }) })).json();
+  for (const field of ['deferralEvidence', 'redemptionEvidence', 'redemptionPlatform', 'purchaseKey', 'originalExpiry', 'expectedExpiry']) {
+    assert.equal(records[0][field], undefined);
+  }
+  assert.ok(records[0].sourceEvidence, 'the original invitation proof is not deferral metadata');
   await fixture({ apple: { ...apple, offerType: null } });
   const reserved = await call('redeem', { ...owner, rewardId, transactionId: apple.transactionId });
   assert.equal(reserved.rewards[0].state, 'store_confirmation');
