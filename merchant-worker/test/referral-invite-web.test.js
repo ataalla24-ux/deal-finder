@@ -48,3 +48,10 @@ test('disabled rollout offers no trial CTA and no store redirect', async () => {
   assert.equal(result.elements.get('#invitation').hidden, true);
   assert.equal(result.redirects.length, 0);
 });
+test('invitation privacy and contact links resolve to existing pages', async () => {
+  const html = await readFile(new URL('../../docs/invite.html', import.meta.url), 'utf8');
+  for (const target of ['privacy.html', 'support.html']) {
+    assert.ok(html.includes(`href="${target}"`));
+    assert.match(await readFile(new URL(`../../docs/${target}`, import.meta.url), 'utf8'), /<html\b/i);
+  }
+});

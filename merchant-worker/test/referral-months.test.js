@@ -114,7 +114,8 @@ test('atomic attribution, authentication, self-invite, reciprocal invite, duplic
   await call('accept', { ...a, code: as.code }, 409);
   await call('accept', { ...b, code: as.code });
   await call('accept', { ...a, code: bs.code }, 409);
-  await fixture({ apple: { ...apple, appAccountToken: b.accountId, purchaseDate: Date.now(), originalPurchaseDate: Date.now() } });
+  const purchasedAt = Date.now();
+  await fixture({ apple: { ...apple, appAccountToken: b.accountId, purchaseDate: purchasedAt, originalPurchaseDate: purchasedAt } });
   await Promise.all([call('confirm', { ...b, transactionId: apple.transactionId }), call('confirm', { ...b, transactionId: apple.transactionId })]);
   assert.equal((await call('status', a)).earnedMonths, 1);
   assert.equal((await call('status', b)).confirmed, true);
