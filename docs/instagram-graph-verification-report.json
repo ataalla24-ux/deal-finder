@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-13T16:38:22.345Z",
+  "generatedAt": "2026-10-13T17:19:18.554Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "degraded",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -66,7 +66,7 @@
     },
     "deals-pending-firecrawl5.json": {
       "deals": 1,
-      "candidates": 0
+      "candidates": 1
     },
     "deals-pending-flights.json": {
       "deals": 7,
@@ -74,7 +74,7 @@
     },
     "deals-pending-food3.json": {
       "deals": 1,
-      "candidates": 0
+      "candidates": 1
     },
     "deals-pending-freikirchen.json": {
       "deals": 32,
@@ -82,7 +82,7 @@
     },
     "deals-pending-gastro2.json": {
       "deals": 143,
-      "candidates": 3
+      "candidates": 4
     },
     "deals-pending-gemeinde.json": {
       "deals": 33,
@@ -157,13 +157,21 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 14,
-  "candidateAccounts": 13,
+  "candidatePosts": 15,
+  "candidateAccounts": 14,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "g.bar.grace.vienna",
       "candidates": 2
+    },
+    {
+      "username": "ams.wien",
+      "candidates": 1
+    },
+    {
+      "username": "zushimarket",
+      "candidates": 1
     },
     {
       "username": "dein.anker",
@@ -176,23 +184,15 @@
     {
       "username": "box16_kebap_more",
       "candidates": 1
-    },
-    {
-      "username": "dontcallitpizza",
-      "candidates": 1
-    },
-    {
-      "username": "an.nailandbeautystudio",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 125,
-  "exactMatches": 5,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
   "errors": [
     {
-      "username": "an.nailandbeautystudio",
-      "message": "Instagram shared quota paused: Meta usage headroom"
+      "username": "g.bar.grace.vienna",
+      "message": "Instagram shared quota paused: shared cooldown"
     }
   ],
   "accountFailures": {
@@ -205,24 +205,24 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 5,
-    "reserved": 5,
+    "requests": 0,
+    "reserved": 0,
     "stopped": true,
-    "reason": "Instagram shared quota paused: Meta usage headroom",
-    "highestUsagePercent": 95,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "2026-10-13T16:48:30.434Z",
+    "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
   "globalError": {
-    "username": "an.nailandbeautystudio",
+    "username": "g.bar.grace.vienna",
     "status": 0,
     "code": "SCAN_BUDGET",
-    "message": "Instagram shared quota paused: Meta usage headroom"
+    "message": "Instagram shared quota paused: shared cooldown"
   },
-  "blockedEvidencePosts": 94,
-  "unmatchedCandidatePosts": 9,
-  "message": "5/14 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "blockedEvidencePosts": 92,
+  "unmatchedCandidatePosts": 15,
+  "message": "0/15 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
