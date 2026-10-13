@@ -15,7 +15,7 @@ export class ReferralMonths extends ReferralMonthsLedger {
     if (!auth.ok) throw new Error('Store unavailable');
     return fetch(`https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.stefanataalla.freefinderwien/purchases/subscriptionsv2/tokens/${encodeURIComponent(token)}${suffix}`, {
       method: body ? 'POST' : 'GET', headers: { authorization: `Bearer ${auth.token}`, 'content-type': 'application/json' },
-      ...(body ? { body: JSON.stringify(body) } : {}), signal,
+      ...(body ? { body: JSON.stringify(body) } : {}), signal, redirect: 'manual',
     });
   }
   async playPurchase(token) {
@@ -2080,7 +2080,7 @@ async function googlePlayAccessToken(env, signal) {
   const now = Math.floor(Date.now() / 1000);
   const assertion = await signGoogleServiceAccountJWT(clientEmail, privateKey, now);
   const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-    signal,
+    signal, redirect: 'manual',
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -2136,7 +2136,7 @@ async function fetchAppStoreTransaction(transactionId, env, signal) {
   let lastError = "Transaction was not accepted by Apple";
   for (const [environment, endpoint] of endpoints) {
     const response = await fetch(endpoint, {
-      signal,
+      signal, redirect: 'manual',
       headers: {
         authorization: `Bearer ${token}`,
         accept: "application/json",
@@ -2151,6 +2151,9 @@ async function fetchAppStoreTransaction(transactionId, env, signal) {
       return { ok: false, status: 502, error: "App Store transaction response was incomplete" };
     }
 
+    if (response.status >= 300 && response.status < 400) {
+      return { ok: false, status: 502, error: "App Store verification redirect rejected" };
+    }
     const text = await response.text();
     lastError = cleanText(text, 220) || `App Store verification failed with HTTP ${response.status}`;
     if (response.status === 401 || response.status === 403) {
