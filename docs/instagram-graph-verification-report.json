@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-14T10:25:05.331Z",
+  "generatedAt": "2026-10-14T11:04:37.912Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -102,7 +102,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 49,
-      "candidates": 4
+      "candidates": 8
     },
     "deals-pending-instagram-apify.json": {
       "deals": 4,
@@ -130,7 +130,7 @@
     },
     "deals-pending-meta-instagram.json": {
       "deals": 58,
-      "candidates": 7
+      "candidates": 10
     },
     "deals-pending-power.json": {
       "deals": 44,
@@ -157,39 +157,44 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 11,
-  "candidateAccounts": 10,
+  "candidatePosts": 15,
+  "candidateAccounts": 12,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
+    {
+      "username": "papa.duck.at",
+      "candidates": 2
+    },
+    {
+      "username": "ikazerestaurant",
+      "candidates": 2
+    },
     {
       "username": "afrivision.austria",
       "candidates": 2
     },
     {
-      "username": "papa.duck.at",
+      "username": "restaurant_roth",
+      "candidates": 1
+    },
+    {
+      "username": "x.x.x.l_grill_restaurant",
       "candidates": 1
     },
     {
       "username": "forno_vie",
       "candidates": 1
-    },
-    {
-      "username": "abby.am.rochusmarkt",
-      "candidates": 1
-    },
-    {
-      "username": "ikazerestaurant",
-      "candidates": 1
-    },
-    {
-      "username": "ams.wien",
-      "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 6,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "papa.duck.at",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 1,
@@ -200,18 +205,24 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 94,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
-  "blockedEvidencePosts": 91,
-  "unmatchedCandidatePosts": 5,
-  "message": "6/11 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "papa.duck.at",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 84,
+  "unmatchedCandidatePosts": 15,
+  "message": "0/15 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
