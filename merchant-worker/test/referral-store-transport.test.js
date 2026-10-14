@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
+import { workerBundleOptions } from './bundled-apple-claims.js';
 import { fileURLToPath } from 'node:url';
 import { generateKeyPair, exportPKCS8 } from 'jose';
 import { Miniflare, convertV4MiniflareOptions, Log, LogLevel } from 'miniflare';
@@ -9,11 +10,11 @@ test('real Workers Store transports keep credentials on their original hosts, in
   const googleKey = await generateKeyPair('RS256', { extractable: true });
   const appleKey = await generateKeyPair('ES256', { extractable: true });
   const bundled = await build({ entryPoints: [fileURLToPath(new URL('../src/index.js', import.meta.url))],
-    bundle: true, write: false, format: 'esm', platform: 'browser', target: 'es2022' });
+    ...workerBundleOptions });
   const outbound = [];
   let redirectHost = null;
   let redirectStatus = 307;
-  const mf = new Miniflare(convertV4MiniflareOptions({ compatibilityDate: '2026-03-09',
+  const mf = new Miniflare(convertV4MiniflareOptions({ compatibilityDate: '2026-03-09', compatibilityFlags: ['nodejs_compat'],
     modules: [{ type: 'ESModule', path: 'runtime.js', contents: `
       import { ReferralMonths } from './worker.js';
       export default { async fetch(request, env) {

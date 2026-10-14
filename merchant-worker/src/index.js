@@ -7,10 +7,11 @@ import { handleAccount } from './account-auth.js';
 import { handlePlayCatalog } from './store-catalog.js';
 import { handleTestReceipt } from './store-test-receipt.js';
 import { accountEmailLedger, handleAccountEmail, scheduledAccountEmail } from './account-email.js';
+import { appleRewardClaims } from './apple-reward-claim.js';
 import { measureStorage, storageIdentity, StorageQuotaError } from './storage-usage.js';
 export { MerchantPromoLedger } from './merchant-promos.js';
 
-export class ReferralMonths extends accountEmailLedger(ReferralMonthsLedger) {
+export class ReferralMonths extends accountEmailLedger(appleRewardClaims(ReferralMonthsLedger)) {
   appleTransaction(id) { return fetchAppStoreTransaction(id, this.env, AbortSignal.timeout(7000)); }
   async playRequest(token, suffix = '', body) {
     const signal = AbortSignal.timeout(9000);

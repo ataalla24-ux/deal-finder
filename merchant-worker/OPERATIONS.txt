@@ -412,3 +412,61 @@ Real signed-in social/provider recovery, legacy ownership and actual Store
 redemption still need verification. Owner deferred the final human sandbox test
 until independent work is complete. The diagnostic does not close those gates.
 
+Apple tokenless offer-code ownership and Play historical confirmation (2026-10-14)
+
+REFERRAL_APPLE_ATTESTED_CLAIMS_ENABLED defaults OFF. The authenticated
+apple-claim-challenge/key/confirm endpoints require an existing earned/pending
+reward, exact account/reward/key/transaction fields and a five-minute one-use
+challenge. Enrollment requires recent Firebase authentication. Production-only
+Apple App Attest checks use pinned node-app-attest1.0.1/cbor10.0.12 with additional
+certificate date/curve/credential-length and strict CBOR/base64 bounds. Assertions
+must increase the stored counter; replay state is consumed BEFORE the Apple GET.
+A Store timeout requires a new assertion, never another purchase/code redemption.
+Key hashes belong to one account, ten enrollments maximum; account deletion
+removes public keys/risk receipts/challenges while retaining dedup tombstones.
+
+iOS signs only locally StoreKit-verified, PURCHASED Production receipts with
+valid SHA384 deviceVerification and no appAccountToken. The backend separately
+fetches Apple's exact transaction and requires AT/DE, the reserved free-month
+offer/product/period and no revocation. An existing foreign token, original-chain
+binding or receipt claim is never overwritten. The resulting chain association
+is IMMUTABLE LOCAL evidence; Apple's Set App Account Token API is NEVER called.
+New enrollment/counter data is not public status/export data. Pending enrollment
+is retained in device-only Keychain for lost-response retries. Explicit account
+deletion erases that local reference; late enrollments cannot recreate it.
+
+Full certificate verification and real ECDSA assertions pass in isolated Workers.
+The certificate test substitutes ONLY the public vector's application identity
+and historical validation date; it is NOT an attestation by a FreeFinder device.
+Native actual-method tests replace Apple SDK and Keychain I/O with fixtures.
+Production entitlement/provisioning, genuine device attestation and actual offer
+redemption remain unverified. Apple risk receipts are retained privately, but
+online fraud-risk receipt assessment is NOT integrated yet. Keep the new gateOFF
+until these checks and the intended fraud-risk policy are complete. Sandbox
+receipts never settle production rewards, including through this new path.
+
+Android retains the first earned-month order/token as an OWNER-SCOPED private
+recovery hint, excluded from backup/device transfer. Logout or expiry does not
+erase it; confirmed settlement or explicit deletion does. A later paid renewal
+does not overwrite it. The hint is not trusted ownership or a local Pro grant.
+confirm-subscription with initialOrderId now performs two authoritative GETs:
+subscription identity/reward profile first, then exact historical order. It
+requires acknowledged production purchase, matching token/product/offer/base
+plan, AT/DE, exact start and a27-32day free period. Refunded/cancelled/partial,
+paid, substituted, mismatched or incomplete orders retain pending credit. A
+delivered historical period is recorded literally; no access extension, purchase,
+acknowledgment or deferral is triggered. Existing acquisition/deferral rules
+are unchanged. Both GETs retain individual9s transport limits within45s client
+budget. Reinstallation loses an unsynced local hint. Google may stop serving a
+subscription more than60days after expiry; missing hints or ownership remain
+manual support, never guessed successful or automatically released cross-store.
+
+This is not activation of the full referral program. Apple code inventory is
+still empty, Play reward offer remains DRAFT and developer-determined eligibility
+is not Store-enforced. One-time Google promo codes are a potential alternative
+with explicit3-90day trial terms and outside-app ownership implications; no
+promotion/terms accepted, code generated or existing offer changed here.
+https://developer.android.com/google/play/billing/promo
+https://developers.google.com/android-publisher/api-ref/rest/v3/orders
+https://developer.apple.com/documentation/devicecheck/validating-apps-that-connect-to-your-server
+

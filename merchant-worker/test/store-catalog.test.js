@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
+import { workerBundleOptions } from './bundled-apple-claims.js';
 import { fileURLToPath } from 'node:url';
 import { generateKeyPair, exportPKCS8 } from 'jose';
 import { Miniflare, convertV4MiniflareOptions, Log, LogLevel } from 'miniflare';
@@ -73,9 +74,9 @@ test('catalog handler rejects unsupported methods, parameters and missing admin 
 test('actual Worker catalog route is authenticated, bounded and GET-only at Google with no ledger operations', async t => {
   const key = await generateKeyPair('RS256', { extractable: true });
   const bundled = await build({ entryPoints: [fileURLToPath(new URL('../src/index.js', import.meta.url))],
-    bundle: true, write: false, format: 'esm', platform: 'browser', target: 'es2022' });
+    ...workerBundleOptions });
   const outbound = []; let mode = 'success';
-  const mf = new Miniflare(convertV4MiniflareOptions({ compatibilityDate: '2026-03-09',
+  const mf = new Miniflare(convertV4MiniflareOptions({ compatibilityDate: '2026-03-09', compatibilityFlags: ['nodejs_compat'],
     modules: [{ type: 'ESModule', path: 'worker.js', contents: bundled.outputFiles[0].text }],
     bindings: { MERCHANT_PROMO_ADMIN_SECRET: 'fixture-admin', GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: JSON.stringify({
       client_email: 'fixture@example.test', private_key: await exportPKCS8(key.privateKey),

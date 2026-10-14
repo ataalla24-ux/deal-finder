@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
+import { workerBundleOptions } from './bundled-apple-claims.js';
 import { fileURLToPath } from 'node:url';
 import { generateKeyPair, exportPKCS8 } from 'jose';
 import { Miniflare, convertV4MiniflareOptions, Log, LogLevel } from 'miniflare';
@@ -76,9 +77,9 @@ test('operator auth, default-OFF gate and bounded schema reject before credentia
 test('actual Worker receipt diagnostic uses Sandbox-only Apple GET / test-marked Play GET and never touches a ledger', async t => {
   const key = await generateKeyPair('ES256', { extractable: true });
   const bundled = await build({ entryPoints: [fileURLToPath(new URL('../src/index.js', import.meta.url))],
-    bundle: true, write: false, format: 'esm', platform: 'browser', target: 'es2022' });
+    ...workerBundleOptions });
   let mode = 'success', calls = [];
-  const mf = new Miniflare(convertV4MiniflareOptions({ compatibilityDate: '2026-03-09',
+  const mf = new Miniflare(convertV4MiniflareOptions({ compatibilityDate: '2026-03-09', compatibilityFlags: ['nodejs_compat'],
     modules: [{ type: 'ESModule', path: 'worker.js', contents: bundled.outputFiles[0].text }],
     // No DO or KV bindings at all: any ledger operation fails this integration test.
     bindings: { ...env, GOOGLE_PLAY_ACCESS_TOKEN: 'fixture-google-secret', APP_STORE_CONNECT_KEY_ID: 'FIXTUREKEY',

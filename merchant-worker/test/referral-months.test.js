@@ -171,6 +171,12 @@ async function runtime(t, enabled = '1', bindings = {}) {
           }
           return raw;
         }
+        async playOrder(id) {
+          const fixture = await this.storage.get('fixture');
+          await this.storage.put('history-reads', (await this.storage.get('history-reads') || 0) + 1);
+          if (fixture.orderError) throw Error('Store unavailable');
+          return fixture.order || await this.storage.get('source:android:' + id);
+        }
         async sourcePurchase(evidence) {
           const fixture = await this.storage.get('fixture');
           await this.storage.put('source-checks', (await this.storage.get('source-checks') || 0) + 1);
@@ -214,6 +220,7 @@ async function runtime(t, enabled = '1', bindings = {}) {
           if (new URL(request.url).pathname === '/deferral-before-send') return Response.json(await this.storage.get('deferral-before-send'));
           if (new URL(request.url).pathname === '/deferrals') return Response.json(await this.storage.get('deferrals') || 0);
           if (new URL(request.url).pathname === '/source-checks') return Response.json(await this.storage.get('source-checks') || 0);
+          if (new URL(request.url).pathname === '/history-reads') return Response.json(await this.storage.get('history-reads') || 0);
           return super.fetch(request);
         }
       }
@@ -261,6 +268,80 @@ async function earnedReward(t, bindings = {}) {
 }
 
 const rewardBindings = { REFERRAL_PLAY_REWARD_SUBSCRIPTION_ENABLED: '1', REFERRAL_PLAY_REWARD_BASE_PLAN: 'monthly' };
+
+test('historical Play reward settles its original free order after renewal or expiry, never grants another month', async t => {
+  const { call, fixture, mf, owner, rewardId } = await earnedReward(t, rewardBindings);
+  await call('prepare-subscription', { ...owner, platform: 'android', rewardId });
+  await mf.dispatchFetch('https://test/stored-rewards', { method: 'POST', body: JSON.stringify({ accountId: owner.accountId, ageReservationByDays: 40 }) });
+  const start = Date.now() - 39 * DAY, token = 'private-historical-play-reward-token';
+  const raw = structuredClone(playReward(rewardId, start));
+  const order = { orderId: 'GPA.1111-2222-3333-55555', purchaseToken: token, state: 'PROCESSED',
+    lineItems: [{ productId: 'freefinder.pro.monthly', subscriptionDetails: {
+      basePlanId: 'monthly', offerId: 'referral-earned-month', offerPhaseDetails: { freeTrialDetails: {} },
+      servicePeriodStartTime: new Date(start).toISOString(), servicePeriodEndTime: new Date(start + 30 * DAY).toISOString() } }] };
+  const request = { ...owner, platform: 'android', purchaseToken: token, initialOrderId: order.orderId };
+  raw.subscriptionState = 'SUBSCRIPTION_STATE_EXPIRED';
+  raw.lineItems[0].autoRenewingPlan.autoRenewEnabled = false;
+  const baseline = await call('status', owner);
+  const stored = async () => (await (await mf.dispatchFetch('https://test/stored-rewards', {
+    method: 'POST', body: JSON.stringify({ accountId: owner.accountId }) })).json());
+  const storedBefore = await stored();
+  for (const bad of [
+    { order: { ...order, state: 'REFUNDED' } }, { order: { ...order, orderId: 'OTHER-ORDER' } },
+    { order: { ...order, purchaseToken: 'another-token' } }, { order: { ...order, orderHistory: { partialRefundEvents: [{}] } } },
+    { order: { ...order, orderHistory: { cancellationEvent: {} } } }, { order: { ...order, lineItems: [] } },
+    ...[{ offerPhaseDetails: { baseDetails: {} } }, { offerId: 'flyer-month-free' }, { basePlanId: 'yearly' },
+      { servicePeriodStartTime: new Date(start + DAY).toISOString() }, { servicePeriodEndTime: new Date(start + 60 * DAY).toISOString() }
+    ].map(patch => ({ order: { ...order, lineItems: [{ ...order.lineItems[0], subscriptionDetails: { ...order.lineItems[0].subscriptionDetails, ...patch } }] } })),
+    { play: { ...raw, testPurchase: {} } }, { play: { ...raw, linkedPurchaseToken: 'another-subscription' } },
+    { play: { ...raw, regionCode: 'US' } }, { play: { ...raw, acknowledgementState: 'ACKNOWLEDGEMENT_STATE_PENDING' } },
+    { play: { ...raw, externalAccountIdentifiers: { ...raw.externalAccountIdentifiers, obfuscatedExternalAccountId: identity(99).accountId } } },
+    { play: { ...raw, externalAccountIdentifiers: { ...raw.externalAccountIdentifiers, obfuscatedExternalProfileId: identity(98).accountId } } },
+  ]) {
+    await fixture({ play: raw, order, ...bad });
+    await call('confirm-subscription', request, 409);
+    assert.deepEqual(await stored(), storedBefore);
+  }
+  await fixture({ play: raw, order, orderError: true });
+  await call('confirm-subscription', request, 503);
+  assert.deepEqual(await call('status', owner), baseline, 'unknown order outcome preserves credit');
+  await fixture({ play: raw, order });
+  await call('confirm-subscription', { ...request, initialOrderId: undefined }, 409);
+  const settled = await call('confirm-subscription', request);
+  assert.equal(settled.redeemedMonths, 1);
+  assert.equal(settled.rewards[0].newExpiry, start + 30 * DAY, 'uses old funded period, not today plus one month');
+  assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 0, 'recovery never defers billing');
+  const reads = await (await mf.dispatchFetch('https://test/history-reads')).json();
+  assert.deepEqual(await call('confirm-subscription', request), settled);
+  assert.equal(await (await mf.dispatchFetch('https://test/history-reads')).json(), reads, 'settled retry does not replay historical lookup');
+  const exported = await (await mf.dispatchFetch('https://test/account-export', { method: 'POST', body: JSON.stringify({
+    ...owner, principal: { id: owner.accountId, authTime: Date.now() / 1000 }, trustedIP: 'local-history-export',
+  }) })).json();
+  assert.equal(exported.ok, true);
+  assert.doesNotMatch(JSON.stringify(exported), /private-historical|initialOrderId|redemptionEvidence/);
+});
+
+test('Play paid renewal cannot substitute for the initial earned free period', async t => {
+  const { call, fixture, mf, owner, rewardId } = await earnedReward(t, rewardBindings);
+  await call('prepare-subscription', { ...owner, platform: 'android', rewardId });
+  await mf.dispatchFetch('https://test/stored-rewards', { method: 'POST', body: JSON.stringify({ accountId: owner.accountId, ageReservationByDays: 40 }) });
+  const start = Date.now() - 39 * DAY, token = 'historical-renewed-play-reward-token';
+  const raw = playReward(rewardId, start);
+  raw.lineItems[0].expiryTime = new Date(start + 60 * DAY).toISOString();
+  raw.lineItems[0].offerPhase = { basePrice: {} };
+  const initial = { orderId: 'GPA.1111-2222-3333-66666', purchaseToken: token, state: 'PROCESSED',
+    lineItems: [{ productId: 'freefinder.pro.monthly', subscriptionDetails: {
+      basePlanId: 'monthly', offerId: 'referral-earned-month', offerPhaseDetails: { freeTrialDetails: {} },
+      servicePeriodStartTime: new Date(start).toISOString(), servicePeriodEndTime: new Date(start + 30 * DAY).toISOString() } }] };
+  const request = { ...owner, platform: 'android', purchaseToken: token, initialOrderId: initial.orderId };
+  await fixture({ play: raw, order: { ...initial, lineItems: [{ ...initial.lineItems[0], subscriptionDetails: {
+    ...initial.lineItems[0].subscriptionDetails, offerPhaseDetails: { baseDetails: {} },
+    servicePeriodStartTime: new Date(start + 30 * DAY).toISOString(), servicePeriodEndTime: new Date(start + 60 * DAY).toISOString() } }] } });
+  await call('confirm-subscription', request, 409);
+  await fixture({ play: raw, order: initial });
+  assert.equal((await call('confirm-subscription', request)).redeemedMonths, 1);
+});
+
 function playReward(rewardId, purchasedAt = Date.now()) {
   return { ...play, regionCode: 'AT', startTime: new Date(purchasedAt).toISOString(),
     externalAccountIdentifiers: { ...play.externalAccountIdentifiers, obfuscatedExternalProfileId: rewardId },

@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { Miniflare, convertV4MiniflareOptions, Log, LogLevel } from 'miniflare';
 import { bundledAuth } from './bundled-auth.js';
 import { bundledEmail } from './bundled-email.js';
+import { bundledAppleClaims } from './bundled-apple-claims.js';
 
 test('Workers runtime retains public cache across requests and invalidates after real KV writes', async t => {
   const modules = await Promise.all(['index.js', 'referral-months.js', 'ad-content-policy.js', 'merchant-promos.js', 'public-interaction-cache.js', 'storage-usage.js', 'subscription-trial.js', 'store-catalog.js', 'store-test-receipt.js'].map(async name => ({
@@ -11,8 +12,9 @@ test('Workers runtime retains public cache across requests and invalidates after
   })));
   modules.push(await bundledAuth());
   modules.push(await bundledEmail());
+  modules.push(await bundledAppleClaims());
   const mf = new Miniflare(convertV4MiniflareOptions({
-    compatibilityDate: '2025-12-01', modules,
+    compatibilityDate: '2025-12-01', compatibilityFlags: ['nodejs_compat'], modules,
     kvNamespaces: ['MERCHANT_CAMPAIGNS'],
     log: new Log(LogLevel.NONE),
   }));

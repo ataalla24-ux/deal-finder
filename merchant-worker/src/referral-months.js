@@ -24,14 +24,15 @@ function decodeStoreJWS(value) {
   try { return JSON.parse(atob(value.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); }
   catch { fail('Store-Antwort konnte nicht gelesen werden.', 502); }
 }
-export function referralPurchase(platform, raw, account, now = Date.now(), { historicalAppleRedemption = false, rewardSubscriptionConfirmation = false } = {}) {
+export function referralPurchase(platform, raw, account, now = Date.now(), { historicalAppleRedemption = false, rewardSubscriptionConfirmation = false, attestedAppleOwner = null } = {}) {
   if (platform === 'ios') {
     // Expired proof is only for settling a reserved, already-consumed free code, never for granting access or new trials.
     const historicalCode = historicalAppleRedemption && raw.offerType === 3 && raw.offerDiscountType === 'FREE_TRIAL' &&
       typeof raw.offerIdentifier === 'string' && raw.offerIdentifier.length > 0 &&
       Number.isFinite(Number(raw.purchaseDate)) && Number(raw.purchaseDate) > 0 && Number(raw.expiresDate) > Number(raw.purchaseDate);
     if (raw.bundleId !== APP || raw.environment !== 'Production' || !APPLE_PRODUCTS.has(raw.productId) ||
-        raw.appAccountToken?.toLowerCase() !== account || raw.revocationDate != null || !raw.originalTransactionId ||
+        !(raw.appAccountToken?.toLowerCase() === account || raw.appAccountToken == null && attestedAppleOwner === account) ||
+        raw.revocationDate != null || !raw.originalTransactionId ||
         (!historicalCode && Number(raw.expiresDate) <= now) || !Number.isFinite(Number(raw.expiresDate))) fail('Kein passendes aktives App-Store-Abo.', 409);
     return { key: `ios:${raw.originalTransactionId}`, product: raw.productId, account,
       started: Number(raw.originalPurchaseDate), purchasedAt: Number(raw.purchaseDate),
@@ -74,6 +75,32 @@ export function isMatchingPlayRewardSubscription(purchase, reward, now = Date.no
     receiptID(purchase.orderId) && Number.isFinite(reward.reservedAt) &&
     Number.isFinite(purchase.started) && purchase.started >= reward.reservedAt && purchase.started <= now + 60000 &&
     days >= 27 && days <= 32;
+}
+export async function historicalPlayReward(raw, order, token, owner, reward, now = Date.now()) {
+  const item = raw.lineItems?.[0], details = order.lineItems?.[0]?.subscriptionDetails;
+  const phase = details?.offerPhaseDetails;
+  const identifiers = raw.externalAccountIdentifiers;
+  if (raw.testPurchase || raw.linkedPurchaseToken || raw.lineItems?.length !== 1 ||
+      !['ACTIVE', 'CANCELED', 'EXPIRED', 'IN_GRACE_PERIOD', 'ON_HOLD', 'PAUSED'].some(state => raw.subscriptionState === 'SUBSCRIPTION_STATE_' + state) ||
+      raw.acknowledgementState !== 'ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED' ||
+      identifiers?.obfuscatedExternalAccountId !== owner || identifiers?.obfuscatedExternalProfileId !== reward.id ||
+      typeof item.autoRenewingPlan?.autoRenewEnabled !== 'boolean' || item.prepaidPlan ||
+      item.deferredItemReplacement || item.deferredItemRemoval || item.productId !== reward.productId ||
+      item.offerDetails?.offerId !== reward.offerId || item.offerDetails?.basePlanId !== reward.basePlanId ||
+      order.state !== 'PROCESSED' || order.purchaseToken !== token || order.lineItems?.length !== 1 ||
+      order.lineItems[0].productId !== reward.productId || details?.offerId !== reward.offerId ||
+      details.basePlanId !== reward.basePlanId || !phase || Object.keys(phase).length !== 1 ||
+      !phase.freeTrialDetails || typeof phase.freeTrialDetails !== 'object' || Array.isArray(phase.freeTrialDetails) ||
+      order.orderHistory?.refundEvent || order.orderHistory?.cancellationEvent || order.orderHistory?.partialRefundEvents?.length ||
+      Date.parse(raw.startTime) !== Date.parse(details.servicePeriodStartTime)) {
+    fail('Die ursprüngliche Google-Play-Gutschrift konnte noch nicht bestätigt werden. Dein Guthaben bleibt erhalten.', 409);
+  }
+  const purchase = { key: 'android:' + await referralHash(token), account: owner, product: item.productId,
+    started: Date.parse(details.servicePeriodStartTime), expires: Date.parse(details.servicePeriodEndTime),
+    orderId: order.orderId, rewardProfile: identifiers.obfuscatedExternalProfileId, freePhase: true,
+    offer: details.offerId, basePlan: details.basePlanId, region: raw.regionCode };
+  if (!isMatchingPlayRewardSubscription(purchase, reward, now)) fail('Kein passender bereits gelieferter Gratis-Monat.', 409);
+  return purchase;
 }
 export function referralEvidence(platform, purchase, now = Date.now()) {
   const receiptId = platform === 'ios' ? purchase.transactionId : purchase.orderId;
@@ -175,7 +202,7 @@ export async function handleReferralMonths(request, env, authenticate = authenti
   const action = new URL(request.url).pathname.slice(PREFIX.length);
   if (action === 'config' && request.method === 'GET') return json({ ok: true, enabled: env.REFERRAL_MONTHS_ENABLED === '1' });
   if (!['register', 'status', 'accept', 'confirm', 'redeem', 'confirm-redemption', 'prepare-subscription',
-    'confirm-subscription', 'import-apple-offers', 'reconciliation-status'].includes(action)) {
+    'confirm-subscription', 'import-apple-offers', 'reconciliation-status', 'apple-claim-challenge', 'apple-claim-key', 'apple-claim-confirm'].includes(action)) {
     return json({ ok: false, error: 'Nicht gefunden.' }, 404);
   }
   if (!env.REFERRAL_MONTHS) return json({ ok: false, error: 'Einladungen sind noch nicht verfügbar.' }, 503);
@@ -336,6 +363,7 @@ export class ReferralMonthsLedger {
     if (!account || !account.recoverable) fail('Einladungskonto konnte nicht bestätigt werden.', 403);
     if (action === 'status' || action === 'register') return this.status(account);
     if (this.env.REFERRAL_MONTHS_ENABLED !== '1') fail('Die Einladungsaktion ist noch nicht verfügbar.', 503);
+    if (action.startsWith('apple-claim-')) return this.appleClaim(action, body, account, key, now);
     if (action === 'accept') {
       if (!/^RM-[A-F0-9]{24}$/.test(body.code || '')) fail('Ungültiger Einladungslink.');
       const inviter = await this.storage.get('code:' + body.code);
@@ -398,7 +426,10 @@ export class ReferralMonthsLedger {
     }
     if (action === 'confirm-subscription') {
       if (body.platform !== 'android') fail('Diese Bestätigung gilt nur für Google Play.');
-      const purchase = await this.verifyPurchase(body, account, { rewardSubscriptionConfirmation: true });
+      const purchase = body.initialOrderId == null
+        ? await this.verifyPurchase(body, account, { rewardSubscriptionConfirmation: true })
+        : await this.verifyHistoricalReward(body, account, now);
+      if (!purchase) return this.status(account);
       const reward = account.rewards.find(x => isMatchingPlayRewardSubscription(purchase, x, now));
       if (!reward) return this.status(account);
       const receiptKey = 'redemption:' + await referralHash('android:' + purchase.orderId);
@@ -511,6 +542,7 @@ export class ReferralMonthsLedger {
   }
   status(account) {
     return { ok: true, enabled: this.env.REFERRAL_MONTHS_ENABLED === '1', code: account.code,
+      appleAttestedClaims: this.env.REFERRAL_APPLE_ATTESTED_CLAIMS_ENABLED === '1',
       accepted: !!account.referredBy, confirmed: !!account.confirmedAt,
       earnedMonths: account.rewards.reduce((n, r) => n + r.months, 0),
       redeemedMonths: account.rewards.filter(r => r.state === 'redeemed').length,
@@ -527,13 +559,30 @@ export class ReferralMonthsLedger {
       if (!result.ok || result.environment !== 'Production') fail('Apple-Kauf konnte noch nicht bestätigt werden.', 503);
       const raw = decodeStoreJWS(result.signedTransactionInfo);
       if (raw.transactionId !== body.transactionId) fail('Apple-Kauf passt nicht zur Anfrage.', 409);
-      return referralPurchase('ios', raw, account.id, Date.now(), { historicalAppleRedemption });
+      const attestedAppleOwner = this.appleBoundOwner ? await this.appleBoundOwner(raw, account) : null;
+      return referralPurchase('ios', raw, account.id, Date.now(), { historicalAppleRedemption, attestedAppleOwner });
     }
     if (!/^[A-Za-z0-9._~+\/=:-]{20,2048}$/.test(body.purchaseToken || '')) fail('Google-Play-Kaufbestätigung fehlt.');
     const raw = await this.playPurchase(body.purchaseToken);
     const purchase = referralPurchase('android', raw, account.id, Date.now(), { rewardSubscriptionConfirmation });
     purchase.key = 'android:' + await referralHash(body.purchaseToken);
     return purchase;
+  }
+  async verifyHistoricalReward(body, account, now) {
+    if (!receiptID(body.initialOrderId) || !/^[A-Za-z0-9._~+\/=:-]{20,2048}$/.test(body.purchaseToken || '')) {
+      fail('Google-Play-Kaufbestätigung fehlt.');
+    }
+    const raw = await this.playPurchase(body.purchaseToken);
+    const reward = account.rewards.find(r => r.id === raw.externalAccountIdentifiers?.obfuscatedExternalProfileId);
+    // Authenticate the subscription owner before querying the untrusted order hint.
+    if (raw.testPurchase || raw.externalAccountIdentifiers?.obfuscatedExternalAccountId !== account.id ||
+        !reward || !['store_subscription', 'redeemed'].includes(reward.state) || reward.redemptionPlatform !== 'android') {
+      fail('Kein passender offener Google-Play-Monat.', 409);
+    }
+    if (reward.state === 'redeemed') return null;
+    const order = await this.playOrder(body.initialOrderId);
+    if (order.orderId !== body.initialOrderId) fail('Google-Play-Bestellung passt nicht zur Anfrage.', 409);
+    return historicalPlayReward(raw, order, body.purchaseToken, account.id, reward, now);
   }
   async sourcePurchase(evidence) {
     if (evidence.platform === 'ios') {
