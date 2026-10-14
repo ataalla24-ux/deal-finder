@@ -439,11 +439,44 @@ Full certificate verification and real ECDSA assertions pass in isolated Workers
 The certificate test substitutes ONLY the public vector's application identity
 and historical validation date; it is NOT an attestation by a FreeFinder device.
 Native actual-method tests replace Apple SDK and Keychain I/O with fixtures.
-Production entitlement/provisioning, genuine device attestation and actual offer
-redemption remain unverified. Apple risk receipts are retained privately, but
-online fraud-risk receipt assessment is NOT integrated yet. Keep the new gateOFF
-until these checks and the intended fraud-risk policy are complete. Sandbox
+Production entitlement/provisioning and a genuine FreeFinder iPhone attestation
+and assertion passed on 2026-10-14. The isolated SDK probe used one QA key and
+no user account, Store purchase or production reward ledger. Its initial risk
+receipt passed signature/root/app/key/freshness checks. This is NOT actual offer
+redemption. Keep the new gateOFF until online assessment and redemption pass. Sandbox
 receipts never settle production rewards, including through this new path.
+
+Risk receipt assessment (2026-10-14)
+
+Enrollment now verifies the initial CMS/PKCS7 receipt independently. A tokenless
+claim requires a verified online risk receipt before the Store lookup. Pinned
+Apple Root CA-G3, fraud-receipt signer extension, exact app/public key, production
+environment, five-minute freshness, single fields and strict size/ASN.1 bounds.
+Dedicated APP_ATTEST_KEY_ID/APP_ATTEST_PRIVATE_KEY must have DeviceCheck capability;
+do not reuse/revoke existing APNs, sign-in or Store keys. No key is provisioned
+by source deployment. ES256 issuer78C2SA4JP3; exact production Apple endpoint,
+no redirects, base64 receipt body, Authorization JWT without Bearer. One eight-
+second total request budget, including response body; no unbounded retries.
+
+Verified receipts are cached until notBefore, then replaced only after a valid
+fresh Apple response. Invalid/expired/missing/unavailable data fails closed and
+preserves credit. No response or HTTP304 is treated as new positive proof.
+APP_ATTEST_REVIEW_KEY_COUNT defaults10. Counts at/above that threshold enter
+manual review, not a fraud accusation or automatic deletion. Reinstalls and
+device transfers can legitimately increase counts. Save the refreshed receipt
+even for review, preserving its assertion counter. Explicit deletion removes it.
+There is no background refresh yet: a key whose receipt expires before a claim
+needs support/re-enrollment; never silently accept an expired cached assessment.
+Owner approved dedicated DeviceCheck key D78QF7MX8M on2026-10-14. Key material
+is stored only as the two Worker secrets and a private600 operator backup,
+never in this repository. Existing Apple keys remained unchanged. The first
+online QA request returned an unspecified unavailable result; no credit changed.
+A second request succeeded200 with genuine production FreeFinder device metric1,
+created2026-10-14T12:41:42.246Z, refresh-after2026-10-15T12:41:42.246Z and expiry
+2027-01-12T12:41:42.246Z. Actual module verified signature/identity/key and reused
+the verified cache without another request. This isolated SDK/operator test did
+not exercise a production ledger, Store purchase or complete native redemption.
+Reference: https://developer.apple.com/documentation/devicecheck/assessing-fraud-risk
 
 Android retains the first earned-month order/token as an OWNER-SCOPED private
 recovery hint, excluded from backup/device transfer. Logout or expiry does not

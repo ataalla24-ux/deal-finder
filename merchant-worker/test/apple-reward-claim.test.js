@@ -90,6 +90,11 @@ async function runtime(t, flags = {}, rawPatch = {}) {
     export class Ledger extends appleRewardClaims(ReferralMonthsLedger) {
       async alarm() {}
       verifyAppleDeviceKey(body) { if(body.attestation !== btoa('fixture')) throw Error('bad fixture'); return {publicKey:this.env.PUBLIC_KEY,receipt:'private-risk-receipt'}; }
+      async verifyAppleRiskReceipt() { if(this.env.RISK_INITIAL_FAIL) throw Object.assign(Error('risk'),{status:503}); return {type:'ATTEST'}; }
+      async assessAppleRisk(key) {
+        if(this.env.RISK_FAIL) throw Object.assign(Error('risk'),{status:503});
+        return {...key,receipt:'updated-risk-receipt',riskReview:!!this.env.RISK_REVIEW};
+      }
       async appleTransaction(id) {
         const fixture = await this.storage.get('raw');
         await this.storage.put('store-reads',(await this.storage.get('store-reads')||0)+1);
@@ -155,6 +160,30 @@ test('unknown Store outcome consumes only replay proof; fresh assertion recovers
   await r.call('fixture', { raw: r.raw });
   const next = await r.proof(2);
   assert.equal((await r.call('apple-claim-confirm', next)).redeemedMonths, 1);
+});
+test('unavailable and elevated device risk preserve reward and stop before Store lookup', async t => {
+  for (const flags of [{ RISK_FAIL: true }, { RISK_REVIEW: true }]) {
+    await t.test(JSON.stringify(flags), async sub => {
+      const r = await runtime(sub, flags); await r.enroll();
+      await r.call('apple-claim-confirm', await r.proof(), flags.RISK_FAIL ? 503 : 409);
+      const state = await r.inspect();
+      assert.equal(state['account:' + owner].rewards[0].state, 'store_confirmation');
+      assert.equal(state['store-reads'], undefined);
+      const key = state['apple-device:' + sha(keyId).toString('hex')];
+      assert.equal(key.signCount, 1);
+      if (flags.RISK_REVIEW) {
+        assert.equal(key.receipt, 'updated-risk-receipt'); assert.equal(key.riskReview, true);
+      } else assert.equal(key.receipt, 'private-risk-receipt');
+    });
+  }
+});
+test('invalid initial risk receipt never enrolls key or consumes enrollment challenge', async t => {
+  const r = await runtime(t, { RISK_INITIAL_FAIL: true });
+  const challenge = await r.call('apple-claim-challenge', { purpose: 'enroll' });
+  await r.call('apple-claim-key', { nonce: challenge.nonce, attestation: btoa('fixture') }, 503);
+  const state = await r.inspect();
+  assert.equal(state['apple-device:' + sha(keyId).toString('hex')], undefined);
+  assert.equal(state['apple-challenge:' + owner + ':enroll'].nonce, challenge.nonce);
 });
 test('exact Store/reward/owner/region/period is mandatory even with a valid device assertion', async t => {
   for (const patch of [{ appAccountToken: other }, { appAccountToken: owner }, { appAccountToken: '' },

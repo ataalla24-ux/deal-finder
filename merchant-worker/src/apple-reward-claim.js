@@ -3,6 +3,7 @@ import { X509Certificate } from 'node:crypto';
 import cbor from 'cbor';
 import { verifyAttestation, verifyAssertion } from 'node-app-attest';
 import { requireRecentAuth } from './account-auth.js';
+import { assessAppleRisk, verifyAppleRiskReceipt } from './app-attest-risk.js';
 import { referralHash, referralPurchase, referralEvidence, isMatchingAppleRedemption } from './referral-months.js';
 
 const APP = 'com.stefanataalla.freefinderwien';
@@ -62,6 +63,8 @@ export function appleRewardClaims(Base) {
   return class extends Base {
     verifyAppleDeviceKey(body, payload, now) { return verifyAppleDeviceKey(body, payload, now); }
     verifyAppleDeviceAssertion(body, payload, key) { return verifyAppleDeviceAssertion(body, payload, key); }
+    verifyAppleRiskReceipt(receipt, publicKey, now, type) { return verifyAppleRiskReceipt(receipt, publicKey, now, type); }
+    assessAppleRisk(key, now) { return assessAppleRisk(this.env, key, now); }
     async appleClaim(action, body, account, accountKey, now) {
       if (this.env.REFERRAL_APPLE_ATTESTED_CLAIMS_ENABLED !== '1') fail('Die sichere Apple-Einlösung ist noch nicht verfügbar.', 503);
       if (body.platform !== 'ios' || !keyID(body.keyId) || !uuid(body.rewardId)) fail('Ungültige Apple-Anfrage.', 400);
@@ -102,8 +105,9 @@ export function appleRewardClaims(Base) {
         const devices = await this.storage.get(indexKey) || [];
         if (devices.length >= 10) fail('Bitte kontaktiere den Support, um ein weiteres Gerät zu verbinden.');
         const verified = this.verifyAppleDeviceKey(body, payload, now);
+        const initialReceipt = await this.verifyAppleRiskReceipt(verified.receipt, verified.publicKey, now, 'ATTEST');
         await this.storage.transaction(async tx => {
-          await tx.put({ [deviceKey]: { accountId: account.id, ...verified, signCount: 0,
+          await tx.put({ [deviceKey]: { accountId: account.id, ...verified, initialReceipt, signCount: 0,
             attestationHash: await referralHash(body.attestation), createdAt: now }, [indexKey]: [...devices, deviceKey] });
           await tx.delete(challengeKey);
         });
@@ -116,6 +120,10 @@ export function appleRewardClaims(Base) {
         await tx.put(deviceKey, { ...enrolled, signCount });
         await tx.delete(challengeKey);
       });
+      const assessed = await this.assessAppleRisk({ ...enrolled, signCount }, now);
+      // Keep the verified replacement receipt even when review is required. Never erase earned credit.
+      await this.storage.put(deviceKey, assessed);
+      if (assessed.riskReview) fail('Dieser Gerätenachweis braucht eine Nachprüfung. Bitte kontaktiere den Support. Dein Guthaben bleibt erhalten.');
       const result = await this.appleTransaction(body.transactionId);
       if (!result.ok || result.environment !== 'Production') fail('Apple ist gerade nicht erreichbar.', 503);
       let raw;
