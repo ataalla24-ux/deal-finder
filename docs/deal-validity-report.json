@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-14T09:49:48.934Z",
+  "generatedAt": "2026-10-14T10:19:17.478Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 315,
-    "allowed": 0,
-    "blocked": 315,
-    "warnings": 0,
+    "total": 317,
+    "allowed": 1,
+    "blocked": 316,
+    "warnings": 1,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 220,
+      "kein konkretes Angebot erkennbar": 223,
       "älter als 7 Tage (2026-02-22)": 83,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
@@ -38,7 +38,7 @@
       "älter als 7 Tage (2024-12-19)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-08-04)": 1,
       "kein konkretes Angebot: Buffet-Normalpreis ohne belegte Aktion oder besonders niedrigen Preis": 1,
-      "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 2,
+      "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2021-02-05)": 1,
       "abgelaufen (2026-10-05)": 1,
       "älter als 7 Tage (2023-07-18)": 1,
@@ -49,7 +49,7 @@
       "abgelaufen (2026-10-13)": 2,
       "Eröffnungs-Teaser ohne konkretes Angebot": 1,
       "abgelaufen (2026-08-30)": 4,
-      "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 1,
+      "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 3,
       "kein verlässliches Quell-/Post-Datum gefunden": 117,
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 2,
       "ausgeschlossene Quelle (gastro.news)": 20,
@@ -58,13 +58,13 @@
       "abgelaufen (2026-09-10T23:59:59.999Z)": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 222,
+      "kein konkreter Deal": 227,
       "älter als 7 Tage": 151,
       "ungültige URL": 27,
       "Gottesdienste außerhalb Wochenlauf": 33,
       "abgelaufen": 16,
       "selbst syndiziert": 5,
-      "sonstiges": 6,
+      "sonstiges": 5,
       "ausgeschlossene Quelle": 21,
       "nicht Wien": 12,
       "kein echtes Post-Datum": 117,
@@ -113,7 +113,7 @@
         "warnings": 0,
         "reasonCategoryCounts": {
           "ungültige URL": 3,
-          "kein konkreter Deal": 30,
+          "kein konkreter Deal": 31,
           "Gottesdienste außerhalb Wochenlauf": 32,
           "älter als 7 Tage": 32,
           "sonstiges": 1
@@ -166,7 +166,7 @@
         "blocked": 97,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 92,
+          "kein konkreter Deal": 94,
           "älter als 7 Tage": 96,
           "ungültige URL": 9,
           "Gottesdienste außerhalb Wochenlauf": 1,
@@ -212,13 +212,12 @@
         }
       },
       "tiktok-deals-scanner": {
-        "total": 3,
-        "allowed": 0,
-        "blocked": 3,
-        "warnings": 0,
+        "total": 5,
+        "allowed": 1,
+        "blocked": 4,
+        "warnings": 1,
         "reasonCategoryCounts": {
-          "sonstiges": 1,
-          "kein konkreter Deal": 2
+          "kein konkreter Deal": 4
         }
       },
       "Wien Deals Combined Graph": {
@@ -234,7 +233,25 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "tiktok-pl1ixm",
+      "title": "Und jetzt muss ich wohl 3D-Drucke machen, um meine Pizza gratis zu verdienen",
+      "brand": "3DDruck",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@niceprints_3d/video/7696070179452914946",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text; Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-10-13T08:42:53.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "events-0-20260222",
@@ -1160,16 +1177,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 178,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "freikirche-4-20260419",
@@ -2333,15 +2353,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 234,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "gemeinde-10-20260222",
@@ -3130,15 +3153,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 234,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "gottesdienste-18-20260222",
@@ -3908,25 +3934,6 @@
       "urlStatus": "HTTP 200"
     },
     {
-      "id": "tiktok-c2fpks",
-      "title": "coffee and free book to take home",
-      "brand": "@aloneinwien",
-      "source": "tiktok-deals-scanner",
-      "url": "https://www.tiktok.com/@aloneinwien/video/7696225390188072214",
-      "reasons": [
-        "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung"
-      ],
-      "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text; Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
-      ],
-      "sourceDate": "2026-10-13T18:45:11.000Z",
-      "sourceDateSource": "url.tiktokVideoId",
-      "sourceAgeDays": 1,
-      "expiryDate": "",
-      "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
-    },
-    {
       "id": "tiktok-163x0x1",
       "title": "@martaplore Angebot",
       "brand": "@martaplore",
@@ -3939,6 +3946,25 @@
         "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text; Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
       ],
       "sourceDate": "2026-10-11T15:03:08.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 3,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "tiktok-ne3ybl",
+      "title": "Palais Ferstel, Herrengasse 14 Angebot",
+      "brand": "Palais Ferstel, Herrengasse 14",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@annaknowsvienna/video/7695312756819365142",
+      "reasons": [
+        "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text"
+      ],
+      "sourceDate": "2026-10-11T07:43:42.000Z",
       "sourceDateSource": "url.tiktokVideoId",
       "sourceAgeDays": 3,
       "expiryDate": "",
@@ -3960,6 +3986,25 @@
       "sourceAgeDays": 4,
       "expiryDate": "2026-10-26",
       "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "tiktok-1fh81jb",
+      "title": "Gratis Eintritt bei Donauinselfest",
+      "brand": "Donauinselfest",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@kseniainvienna/video/7694889447137103126",
+      "reasons": [
+        "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Creator und tatsächlicher Anbieter noch nicht eindeutig zugeordnet; Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-10-10T04:21:02.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 4,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
     },
     {
