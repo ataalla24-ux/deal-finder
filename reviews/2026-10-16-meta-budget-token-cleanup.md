@@ -46,7 +46,7 @@ pending records; those are not 40 additional new live-deal removals.
 Plain production-feed validation, without removal-baseline exemptions: 59 deals,
 zero errors, 13 existing presentation/map warnings. All other live records kept.
 
-## Verification And Remaining Handoff
+## Verification And Token Renewal
 
 Local focused tests: media-budget rolling windows/72-hour simulation, maximum
 coverage/catalog migration, Meta collector, media evidence and token health.
@@ -123,3 +123,29 @@ https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api
   maximum-coverage, Graph pagination and Ad Library tests passed again.
 - Public feed recheck 2026-10-15T23:17:31Z: HTTP 200, 59 records, none of the four
   removed IDs. No unrelated native, Store, email, pricing or billing changes.
+
+## Final Verification
+
+- Recovery source `698a2cb93c5aca4003f3c06d7fd44dba7d75ff3d` is on main.
+  Instagram coverage CI 38823014891 and production-feed CI 38823015010 passed.
+  Pages deployment 38823016028 passed as well.
+- Third bounded live run 38823015204 completed successfully at
+  2026-10-15T23:25:52Z. Its factual collector report is still **degraded**, not
+  fully healthy: 31 Instagram posts, 439 ads, zero newly accepted deals. These
+  per-run counts must not be summed as unique daily coverage.
+- Token inspection/own media/Business Discovery passed. Both AI calls succeeded
+  (6,618 tokens). Final rolling allowance: 46 calls used, 98 remaining of 144;
+  two-hour pacing allowance: four remaining of 12. No quota or billing bypass.
+- Shared state admitted 18 reserved calls after 78 seconds of budget waiting.
+  No HTTP 500/storage failure was reported in this run. This does not establish
+  how often the reconciliation path executed, because it has no recovery counter.
+  An Ad Library request ended with the generic `request or quota unavailable`
+  message, with no recorded HTTP status and `storageFailure: null`. Its exact
+  provider/transport cause is unresolved; do not label it a confirmed rate limit.
+- Five media fetches returned 403, four URL refreshes recovered none, and one
+  OCR operation timed out. These external/media issues remain open. Successful
+  workflows and the four requested fixes do not imply every source is healthy,
+  or that any new deal reached Slack during these bounded tests.
+- Generated main commits were fast-forwarded/rebased without force; unrelated
+  feed updates preserved. Temporary node_modules symlink removed. No native
+  builds, owner-device operations, new email or payment settings were touched.
