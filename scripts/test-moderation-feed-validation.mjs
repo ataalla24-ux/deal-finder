@@ -18,7 +18,7 @@ try {
     'scripts/add-deal-moderation-entry.mjs', 'scripts/apply-deal-moderation.mjs',
     'scripts/sync-deal-map-references.mjs', 'scripts/sync-featured-deal-references.mjs',
     'scripts/stamp-deals-feed.mjs', 'scraper/public-deal-text.js',
-    'scraper/deal-moderation-utils.js', 'scraper/deal-evidence-utils.js',
+    'scraper/deal-moderation-utils.js', 'scraper/deal-evidence-utils.js', 'scraper/deal-factual-guards.js',
     'scraper/native-weekly-utils.js',
   ]) {
     fs.mkdirSync(path.dirname(path.join(temp, name)), { recursive: true });
