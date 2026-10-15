@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-15T09:57:15.713Z",
+  "generatedAt": "2026-10-15T10:02:33.394Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "failed-preserved",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -66,7 +66,7 @@
     },
     "deals-pending-firecrawl5.json": {
       "deals": 2,
-      "candidates": 2
+      "candidates": 1
     },
     "deals-pending-flights.json": {
       "deals": 7,
@@ -74,7 +74,7 @@
     },
     "deals-pending-food3.json": {
       "deals": 3,
-      "candidates": 2
+      "candidates": 1
     },
     "deals-pending-freikirchen.json": {
       "deals": 32,
@@ -82,7 +82,7 @@
     },
     "deals-pending-gastro2.json": {
       "deals": 148,
-      "candidates": 6
+      "candidates": 5
     },
     "deals-pending-gemeinde.json": {
       "deals": 33,
@@ -102,7 +102,7 @@
     },
     "deals-pending-instagram-ai.json": {
       "deals": 23,
-      "candidates": 3
+      "candidates": 2
     },
     "deals-pending-instagram-apify.json": {
       "deals": 4,
@@ -157,8 +157,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 23,
-  "candidateAccounts": 20,
+  "candidatePosts": 22,
+  "candidateAccounts": 19,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
@@ -186,10 +186,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 6,
+  "fetchedPosts": 0,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "freefinder.at",
+      "message": "Instagram shared quota paused: shared cooldown"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 1,
@@ -200,18 +205,24 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 82,
+    "requests": 0,
+    "reserved": 0,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: shared cooldown",
+    "highestUsagePercent": 0,
     "waitedMs": 0,
     "pacingMs": 0,
     "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0
   },
-  "blockedEvidencePosts": 78,
-  "unmatchedCandidatePosts": 17,
-  "message": "6/23 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "globalError": {
+    "username": "freefinder.at",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: shared cooldown"
+  },
+  "blockedEvidencePosts": 77,
+  "unmatchedCandidatePosts": 22,
+  "message": "0/22 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
