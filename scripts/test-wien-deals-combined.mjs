@@ -197,4 +197,34 @@ assert.equal(degraded.payload.totalDeals, 1, 'caption deals survive a media-anal
 assert.equal(degraded.report.status, 'degraded');
 assert.match(degraded.report.mediaEvidence.errors.join(' '), /OpenAI temporarily unavailable/);
 
+const quotaDeferred = await runWienDealsCombined({
+  now,
+  write: false,
+  env: {
+    INSTAGRAM_ACCESS_TOKEN: 'test-token',
+    INSTAGRAM_USER_ID: '17840000000000000',
+    WIEN_COMBINED_GRAPH_HASHTAGS: 'firsttag,secondtag',
+  },
+  fetchImpl: async (url) => {
+    const parsed = new URL(url);
+    if (parsed.searchParams.get('q') === 'secondtag') {
+      throw Object.assign(new Error('Shared quota paused'), { code: 'SCAN_BUDGET' });
+    }
+    if (parsed.pathname.endsWith('/ig_hashtag_search')) {
+      return Response.json({ data: [{ id: 'firsttag' }] });
+    }
+    return Response.json({ data: [{
+      id: 'partial-caption-deal',
+      caption: 'Nur in 1070 Wien: zweiter Kaffee gratis, gueltig bis 25. August 2026.',
+      permalink: 'https://www.instagram.com/p/PartialCaptionDeal/',
+      timestamp: freshTimestamp,
+    }] });
+  },
+});
+assert.equal(quotaDeferred.payload.totalDeals, 1, 'verified deals survive a later shared-quota pause');
+assert.equal(quotaDeferred.report.status, 'degraded', 'partial collection must not report healthy');
+assert.equal(quotaDeferred.report.budgetDeferred, true);
+assert.equal(quotaDeferred.payload.meta.budgetDeferred, true);
+assert.equal(quotaDeferred.report.sources.at(-1).status, 'deferred');
+
 console.log('wien deals combined tests passed');

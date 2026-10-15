@@ -261,7 +261,10 @@ export async function runWienDealsCombined(options = {}) {
   let budgetDeferred = false;
 
   for (const hashtag of hashtags) {
-    if (budget.stats.stopped) break;
+    if (budget.stats.stopped) {
+      budgetDeferred = true;
+      break;
+    }
     try {
       const search = await graphRequest('ig_hashtag_search', { user_id: userId, q: hashtag }, requestOptions);
       const hashtagId = cleanText(search?.data?.[0]?.id, 120);
@@ -453,7 +456,8 @@ export async function runWienDealsCombined(options = {}) {
       || Date.parse(right.pubDate || 0) - Date.parse(left.pubDate || 0))
     .slice(0, maxDeals);
   const mediaDegraded = rescueCandidates.length > 0 && ['degraded', 'unavailable'].includes(media.report?.status);
-  const status = failedSources.length > 0 || budget.stats.stopped || fetchedPosts === 0 || mediaDegraded ? 'degraded' : 'healthy';
+  budgetDeferred ||= budget.stats.stopped;
+  const status = failedSources.length > 0 || budgetDeferred || fetchedPosts === 0 || mediaDegraded ? 'degraded' : 'healthy';
   const payload = {
     lastUpdated: now.toISOString(),
     source: SOURCE_KEY,
@@ -464,6 +468,7 @@ export async function runWienDealsCombined(options = {}) {
       uniquePosts: uniqueEntries.length,
       successfulSources,
       failedSources: failedSources.length,
+      budgetDeferred,
       rescueEligible: rescueCandidates.length,
       rescuedDeals,
     },
@@ -481,6 +486,7 @@ export async function runWienDealsCombined(options = {}) {
     rescuedDeals,
     mediaEvidence: media.report,
     requestBudget: budget.stats,
+    budgetDeferred,
     sharedQuota: fetchImpl.quotaStats || null,
     sources: sourceResults,
     rejectionReasons: rejectionCounts(rejected),
@@ -505,8 +511,11 @@ async function main() {
   const result = await runWienDealsCombined();
   const finishedAt = new Date();
   const sourceErrors = result.report.sources
-    .filter((source) => source.status === 'error')
+    .filter((source) => ['error', 'partial', 'deferred'].includes(source.status))
     .map((source) => `#${source.hashtag}: ${source.error}`);
+  if (result.report.budgetDeferred && !sourceErrors.length) {
+    sourceErrors.push('Graph collection deferred by request or shared quota budget.');
+  }
   if (result.report.fetchedPosts === 0) {
     sourceErrors.push('Meta Graph returned zero posts across all resolved hashtags.');
   }
