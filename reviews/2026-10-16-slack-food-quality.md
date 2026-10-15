@@ -76,11 +76,20 @@ No native build, simulator, phone operation or manual Slack broadcast is require
   source-backed policy rejections from malformed data; timestamp/schema outage
   guards remain enforced. Targeted imports retain unexpired, recent pending
   output across incremental runs, without counting it as newly enriched deals.
+  Final live run 38818954696 on d99f7aa6969962c9fe390df47d18397f9c3072fe
+  succeeds: 18 visited, one actor candidate rejected for missing Vienna evidence,
+  zero newly verified deals, seven unexpired pending candidates retained.
+  Status is healthy-no-verified-deals, not a discovery success claim. Final
+  Instagram coverage CI 38818946455 is green on that same source revision.
+- Central Deal Dispatch 38817922151 succeeds and reports three actual Slack
+  deliveries from the existing queue. This proves delivery, not human approval,
+  not three newly discovered food deals, and not an increased approval rate.
 - Production Feed Integrity run 38817630882 fails on four existing records:
   gs-552149, gs-552155, gs-549228 and stream-1. These same records were already in
   baseline ef44b7585. Do not describe all repository CI as green. The separate
   source-verified expiry process and removal safeguards were not bypassed, and
   no expiry was extended to suppress this validation failure.
+  The final-source repeat, 38818946483, reports exactly the same four errors.
 
 ## External requirements and limitations
 
