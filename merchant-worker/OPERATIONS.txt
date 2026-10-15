@@ -543,6 +543,63 @@ with explicit3-90day trial terms and outside-app ownership implications; no
 promotion/terms accepted, code generated or existing offer changed here.
 https://developer.android.com/google/play/billing/promo
 https://developers.google.com/android-publisher/api-ref/rest/v3/orders
+
+Google earned offer decision and full HTTP lifecycle (2026-10-15, 16:09 CEST)
+
+The owner explicitly approved the standard developer-determined offer WITH the
+stated residual risk: Google does not enforce FreeFinder earned-credit eligibility,
+so a modified client could request the offer without earning a reward. This
+supersedes the earlier additional Store-enforced-eligibility requirement for
+new/expired inviters. It does NOT waive account/receipt checks or permit claiming
+the complete program has passed real Store tests. No generic promo-code ownership
+inference is introduced; the separate private five-code promotion stays PAUSED.
+
+Activated existing freefinder.pro.monthly / monthly / referral-earned-month.
+Play Console confirms ACTIVE; independent protected catalog GET at14:01:45UTC
+confirms exactly one P1M free phase in AT/DE, developer_determined. Comparing the
+entire returned catalog against the preceding read shows ONLY DRAFT -> ACTIVE
+for this offer. Existing monthly4.99EUR/yearly34.99EUR and acquisition trials
+are unchanged. Activation exposes this Store offer despite FreeFinder flagsOFF;
+this is the accepted risk, not Store-enforced earned-credit protection.
+
+Created and selected the one-member FreeFinder Store QA license-test list for
+the owner's existing freefinder.at@gmail.com account. Both previous lists remain
+unselected, RESPOND_NORMALLY unchanged. There is only one app in this developer
+account. Console save confirmed; no email/invitation/customer broadcast. This
+does not sign the account into Android or demonstrate a free Billing transaction.
+
+test/referral-play-lifecycle.test.js exercises the actual default HTTP router,
+RS256 Firebase token verification/JWK lookup, identity lookup, signed Google OAuth
+assertion, subscription/order/deferral HTTP transport and persistent SQLite ledger.
+External provider responses are fixtures, with no real network. Five scenarios
+cover invited trial -> reward -> new subscription, wrong-account substitution,
+outage recovery, original-order settlement when latest phase is paid, monthly/
+yearly active deferral, lost successful deferral response, dedup, disabled identity,
+and account-deletion tombstone rejection. Historical phase advancement is synthetic.
+Graceful Worker disposal/restart is tested; this is NOT abrupt process-kill or
+genuine Store/Firebase SDK integration coverage. A successful-but-lost deferral
+response recovers via GET and issues exactly one financial POST in the fixture.
+
+Miniflare5 persistence must be configured with resourcePersistencePath AFTER
+convertV4MiniflareOptions: the compatibility conversion drops the old
+durableObjectsPersist option. Initial harness runs exposed that fixture issue;
+no production workaround was needed. All336 Merchant tests pass, including the
+six new parent/subtests. Full native fixture runner and124 Android tests in28
+suites pass; lint has0 errors and144 existing warnings. No native source change.
+
+Read-only Play-enabled AVD cold boot verified Google accounts0, app1.33(68).
+This is the disk baseline, not the earlier retained73 snapshot. Snapshot load
+was unavailable due to renderer mismatch; no snapshot/userdata reset performed.
+No app install/launch, account login, purchase or phone access. Visible emulator
+window was not exposed by the available native UI controller; no alternate input
+or credential/session transfer attempted. Both launches shut down with exit0.
+
+The customer referral flags remainOFF. Actual Google license-tester sign-in and
+free Store completion, authenticated account/reward E2E, remaining Apple offer
+paths/repeated rounds and the other recorded release gates are still pending.
+Tests/docs only in this source revision: keep deployed production source unchanged.
+https://support.google.com/googleplay/android-developer/answer/12154973
+https://developer.android.com/google/play/billing/test
 https://developer.apple.com/documentation/devicecheck/validating-apps-that-connect-to-your-server
 
 Apple inventory safety and Sandbox preparation (2026-10-15)
