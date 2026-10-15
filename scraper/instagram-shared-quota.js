@@ -22,7 +22,7 @@ function storageFailure(result, operation) {
 
 // A dedicated branch keeps operational reservations out of main. Content SHA
 // compare-and-swap makes reservations safe across independent GitHub runners.
-export function githubQuotaStore(env, fetchImpl = globalThis.fetch) {
+export function githubQuotaStore(env, fetchImpl = globalThis.fetch, { sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) } = {}) {
   const repo = env.GITHUB_REPOSITORY;
   const token = env.GH_TOKEN || env.GITHUB_TOKEN;
   if (!/^[\w.-]+\/[\w.-]+$/.test(repo || '') || !token) throw pause('missing GitHub quota credentials');
@@ -77,13 +77,34 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch) {
       return structuredClone(cached.entry);
     },
     async compareAndSwap(revision, state) {
-      const result = await request(`/contents/${FILE}`, 'PUT', {
+      const serialized = `${JSON.stringify(state)}\n`;
+      const body = {
         branch: BRANCH, message: 'Update shared Instagram quota [skip ci]',
-        content: Buffer.from(`${JSON.stringify(state)}\n`).toString('base64'), ...(revision ? { sha: revision } : {}),
-      });
-      if ([200, 201].includes(result.status)) return true;
-      if ([409, 422].includes(result.status)) return false;
-      throw storageFailure(result, 'write-state');
+        content: Buffer.from(serialized).toString('base64'), ...(revision ? { sha: revision } : {}),
+      };
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        const result = await request(`/contents/${FILE}`, 'PUT', body);
+        if ([200, 201].includes(result.status)) { cached = null; return true; }
+        if ([409, 422].includes(result.status)) return false;
+        if (![500, 502, 503, 504].includes(result.status)) throw storageFailure(result, 'write-state');
+        const seconds = Number(result.retryAfter);
+        const retryMs = Number.isFinite(seconds) ? seconds * 1000 : Date.parse(result.retryAfter) - Date.now();
+        const delay = Math.max(2000, Number.isFinite(retryMs) ? retryMs : 0);
+        if (delay > 30000) throw storageFailure(result, 'write-state');
+        await sleep(delay);
+        // A 5xx does not prove the write failed. Resolve that ambiguity with a
+        // fresh read; retry once only if the original SHA is still current.
+        cached = null;
+        const current = await request(`/contents/${FILE}?ref=${encodeURIComponent(BRANCH)}`);
+        if (current.status === 200) {
+          if (typeof current.data.sha !== 'string' || typeof current.data.content !== 'string') throw pause('invalid quota reconciliation');
+          if (Buffer.from(current.data.content, 'base64').toString('utf8') === serialized) return true;
+          if (current.data.sha !== revision) return false;
+        } else if (current.status === 404) {
+          if (revision) return false;
+        } else throw storageFailure(current, 'reconcile-write');
+        if (attempt === 1) throw storageFailure(result, 'write-state');
+      }
     },
   };
 }

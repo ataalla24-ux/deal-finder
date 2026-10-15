@@ -97,3 +97,29 @@ telemetry persistence. Existing concurrent ceiling/cooldown and maximum-coverage
 tests remain green. GitHub's documented REST limits are a separate constraint
 from Meta's API limits:
 https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api
+
+## Second Live Validation And Transient Storage Recovery
+
+- Source `382caa02078486c94229a455d7f561ed662d305d`: Instagram coverage CI
+  38822321930 and production-feed CI 38822321907 both succeeded.
+- Bounded live run 38822336282 succeeded as a workflow, but reported degraded
+  collection. It read 356 Instagram posts and 250 ads, with zero newly accepted
+  deals. Both additional AI calls worked (6,609 tokens); the rolling daily ledger
+  held 44 calls afterwards, leaving 100 of 144. Old calls expired normally.
+- Diagnostics establish a GitHub Contents API **HTTP 500 write-state failure**,
+  NOT a Meta login failure or a confirmed rate limit. The shared quota state was
+  only 5,280 bytes. Meta usage peaked at 67%; the global stop remained enforced.
+  Four old media downloads still returned 403; their refresh could not complete
+  after shared storage stopped. No evidence of recovered media is claimed.
+- Added one bounded conditional-write retry for GitHub 500/502/503/504. Because
+  a server error can occur after a successful commit, first wait at least two
+  seconds and read current state without cache. Matching content means success;
+  a different revision is a conflict, never overwritten. Only an unchanged base
+  revision permits one retry. Ambiguous reads, sustained failures, rate limits,
+  permission errors and long Retry-After instructions still stop safely.
+- New fixtures failed on the prior source, then passed for failures before/after
+  commit, a committed second attempt, concurrent writers, persistent failures,
+  failed/malformed reconciliation, 429 and long Retry-After. Existing quota,
+  maximum-coverage, Graph pagination and Ad Library tests passed again.
+- Public feed recheck 2026-10-15T23:17:31Z: HTTP 200, 59 records, none of the four
+  removed IDs. No unrelated native, Store, email, pricing or billing changes.

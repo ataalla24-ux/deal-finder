@@ -138,4 +138,39 @@ await assert.rejects(preserveResponse('unused'), { code: 'SCAN_BUDGET' });
 await assert.rejects(preserveResponse('unused'), { code: 'SCAN_BUDGET' });
 assert.equal(calls, 1);
 assert((preserveResponse.quotaStats.reason.match(/Instagram shared quota paused:/g) || []).length <= 1);
+
+// A server error can arrive before OR after the conditional write commits.
+// Reconcile without a cached response before retrying the same SHA once.
+const originalQuota = { version: 1, reservations: [], pausedUntil: 0 };
+const intendedQuota = { ...originalQuota, pausedUntil: 1234 };
+for (const scenario of ['before-commit', 'after-commit', 'second-commit', 'persistent', 'concurrent', 'read-failed', 'malformed-read', 'rate-limit', 'long-retry']) {
+  let writes = 0, reads = 0;
+  const waits = [];
+  const resilientStore = githubQuotaStore({ GITHUB_REPOSITORY: 'owner/repo', GH_TOKEN: 'secret-fixture' }, async (url, init) => {
+    if (init.method === 'PUT') {
+      writes += 1;
+      const body = JSON.parse(init.body);
+      assert.equal(body.sha, 'original-sha', 'never overwrite a concurrent revision');
+      assert.deepEqual(JSON.parse(Buffer.from(body.content, 'base64').toString()), intendedQuota);
+      if (scenario === 'before-commit' && writes === 2) return Response.json({}, { status: 200 });
+      if (scenario === 'rate-limit') return Response.json({}, { status: 429 });
+      return Response.json({}, { status: 500, headers: scenario === 'long-retry' ? { 'retry-after': '120' } : {} });
+    }
+    reads += 1;
+    assert(!init.headers['If-None-Match'], 'uncertain writes require an uncached reconciliation');
+    if (scenario === 'read-failed') return Response.json({}, { status: 503 });
+    if (scenario === 'malformed-read') return Response.json({});
+    const committed = scenario === 'after-commit' || scenario === 'second-commit' && writes === 2;
+    return Response.json({ sha: committed ? 'committed-sha' : scenario === 'concurrent' ? 'other-sha' : 'original-sha',
+      content: Buffer.from(JSON.stringify(committed ? intendedQuota : originalQuota) + '\n').toString('base64') });
+  }, { sleep: async (ms) => waits.push(ms) });
+  if (['persistent', 'read-failed', 'malformed-read', 'rate-limit', 'long-retry'].includes(scenario)) {
+    await assert.rejects(resilientStore.compareAndSwap('original-sha', intendedQuota), { code: 'SCAN_BUDGET' });
+  } else {
+    assert.equal(await resilientStore.compareAndSwap('original-sha', intendedQuota), scenario !== 'concurrent');
+  }
+  assert.equal(writes, ['before-commit', 'second-commit', 'persistent'].includes(scenario) ? 2 : 1, `${scenario}: bounded writes`);
+  assert.equal(reads, ['rate-limit', 'long-retry'].includes(scenario) ? 0 : ['persistent', 'second-commit'].includes(scenario) ? 2 : 1);
+  assert(waits.every((ms) => ms >= 2000));
+}
 console.log('Shared Instagram quota: concurrent collectors, rolling window, cooldowns, failure safety and GitHub CAS tests passed');
