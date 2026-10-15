@@ -631,9 +631,10 @@ function entryMediaPriority(entry, now) {
   const caption = cleanText(item.caption, 4000);
   let score = Math.max(0, 72 - ageHours);
   if (foodDrinkText(`${caption} ${entry?.context?.account?.category || ''}`)) score += 55;
-  if (obviousDealText(caption)) score += 30;
+  if (obviousDealText(caption)) score += 150;
   else if (foodDrinkText(caption)) score += 20;
   if (entry?.context?.account?.verifiedVienna) score += 30;
+  if (entry?.context?.account?.accountType === 'merchant') score += 20;
   if (/\b(?:wien|vienna|1\d{3})\b/i.test(caption)) score += 20;
   if (cleanText(item.media_type, 40).toUpperCase() === 'CAROUSEL_ALBUM') score += 12;
   const sourceBoost = Number(entry?.context?.mediaPriorityBoost || 0);
@@ -714,6 +715,8 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     backlogResumed: backlog.resumed,
     backlogExpired: backlog.expired,
     runtimeDeferred: 0,
+    mediaRefreshAttempts: 0,
+    mediaRefreshRecovered: 0,
   };
   const finish = () => {
     const pending = saveMediaBacklog(safeEntries, cache, now, config, options.shouldAnalyzeEntry);
@@ -768,13 +771,17 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     uncached.push(entry);
   }
 
-  const selected = uncached
+  const ranked = uncached
     .sort((left, right) => {
       const score = (entry) => entryMediaPriority(entry, now)
-        + Math.max(0, (+now - (finiteDateMs(entry.mediaLastAttemptAt || entry.mediaQueuedAt) || +now)) / 3600000) * 20;
+        + Math.min(20, Math.max(0, (+now - (finiteDateMs(entry.mediaLastAttemptAt || entry.mediaQueuedAt) || +now)) / 3600000));
       return score(right) - score(left);
-    })
-    .slice(0, config.mediaMaxPostsPerRun);
+    });
+  const explorationSlots = config.mediaMaxPostsPerRun >= 10 ? Math.max(1, Math.floor(config.mediaMaxPostsPerRun * 0.1)) : 0;
+  const selected = ranked.slice(0, config.mediaMaxPostsPerRun - explorationSlots);
+  selected.push(...ranked.filter(entry => !selected.includes(entry))
+    .sort((a, b) => finiteDateMs(a.mediaLastAttemptAt || a.mediaQueuedAt) - finiteDateMs(b.mediaLastAttemptAt || b.mediaQueuedAt))
+    .slice(0, explorationSlots));
   report.selected = selected.length;
   const analyzeItem = options.analyzeItem || analyzeInstagramMediaItem;
   const analysisStartedAt = Date.now();
@@ -782,11 +789,28 @@ export async function enrichInstagramGraphMedia(entries, config, now = new Date(
     if (Date.now() >= deadline) { report.runtimeDeferred += 1; return null; }
     const itemStartedAt = Date.now();
     try {
-      return await analyzeItem(entry.item, { ...config, mediaVisionEnabled: visionConfigured }, {
+      const analyze = () => analyzeItem(entry.item, { ...config, mediaVisionEnabled: visionConfigured }, {
         tools,
         fetchImpl: options.mediaFetchImpl,
         execFileImpl: options.execFileImpl,
       });
+      let result = await analyze();
+      if (options.refreshMediaItem && report.mediaRefreshAttempts < 4 && Date.now() < deadline
+        && (result.errors || []).some(error => /media HTTP (?:401|403)/i.test(error))) {
+        report.mediaRefreshAttempts += 1;
+        try {
+          const refreshed = await options.refreshMediaItem(entry);
+          if (refreshed && String(refreshed.id) === String(entry.item.id)) {
+            for (const key of ['media_url', 'thumbnail_url', 'children', 'media_type']) {
+              if (refreshed[key]) entry.item[key] = refreshed[key];
+            }
+            result = await analyze();
+            if ((result.imageCount || result.videoFrameCount || result.ocrText)
+              && !(result.errors || []).some(error => /media HTTP (?:401|403)/i.test(error))) report.mediaRefreshRecovered += 1;
+          }
+        } catch { report.warnings.push('media-url-refresh-unavailable'); }
+      }
+      return result;
     } catch (error) {
       return {
         ocrText: '', visionImages: [], assetCount: 0, availableAssetCount: 0, imageCount: 0,

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { canonicalSocialPostKey } from './deal-evidence-utils.js';
+import { canonicalSocialPostKey, semanticCrossPlatformOfferKey } from './deal-evidence-utils.js';
 
 export const APPROVAL_REACTIONS = new Set(['white_check_mark', 'heavy_check_mark', 'check']);
 export const REJECTION_REACTIONS = new Set([
@@ -115,6 +115,7 @@ export function upsertReviewFeedback(store, deal, update = {}) {
   const event = {
     ...previous,
     key,
+    offerKey: semanticCrossPlatformOfferKey(deal) || cleanText(previous.offerKey, 1000) || key,
     dealId: cleanText(deal.id, 240) || cleanText(previous.dealId, 240),
     postKey: canonicalSocialPostKey(deal.url) || cleanText(previous.postKey, 300),
     url: cleanText(deal.url, 1500) || cleanText(previous.url, 1500),
@@ -123,6 +124,8 @@ export function upsertReviewFeedback(store, deal, update = {}) {
     category: cleanText(deal.category, 80) || cleanText(previous.category, 80),
     source: cleanText(deal.source, 160) || cleanText(previous.source, 160),
     originSource: cleanText(deal.originSource, 160) || cleanText(previous.originSource, 160),
+    discoverySourceType: cleanText(deal.evidence?.sourceType, 80) || cleanText(previous.discoverySourceType, 80),
+    discoverySourceName: cleanText(deal.evidence?.sourceName, 120) || cleanText(previous.discoverySourceName, 120),
     ownerUsername: cleanText(deal.ownerUsername, 100) || cleanText(previous.ownerUsername, 100),
     sourceAccountType: cleanText(deal.sourceAccountType, 40) || cleanText(previous.sourceAccountType, 40),
     scoutUsername: cleanText(deal.scoutUsername, 100) || cleanText(previous.scoutUsername, 100),

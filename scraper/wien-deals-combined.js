@@ -258,6 +258,7 @@ export async function runWienDealsCombined(options = {}) {
   const sourceResults = [];
   const graphEntries = new Map();
   let fetchedPosts = 0;
+  let budgetDeferred = false;
 
   for (const hashtag of hashtags) {
     if (budget.stats.stopped) break;
@@ -309,16 +310,18 @@ export async function runWienDealsCombined(options = {}) {
         mediaLimit: mediaResponse.appliedLimit,
       });
     } catch (error) {
+      budgetDeferred = error?.code === 'SCAN_BUDGET';
       const notFound = Number(error?.code || 0) === 24;
       sourceResults.push({
         hashtag,
-        status: notFound ? 'not-found' : 'error',
+        status: budgetDeferred ? 'deferred' : notFound ? 'not-found' : 'error',
         fetched: 0,
         accepted: 0,
         ...(notFound
           ? { detail: cleanText(error?.message || error, 500) }
           : { error: cleanText(error?.message || error, 500) }),
       });
+      if (budgetDeferred) break;
     }
   }
 
@@ -327,16 +330,19 @@ export async function runWienDealsCombined(options = {}) {
   if (successfulSources === 0) {
     const report = {
       generatedAt: now.toISOString(),
-      status: 'failed',
+      status: budgetDeferred ? 'deferred' : 'failed',
       message: 'No Graph hashtag source completed successfully; last-good output was preserved.',
       hashtags,
       fetchedPosts,
       totalDeals: 0,
       sources: sourceResults,
       rejectionReasons: {},
+      budgetDeferred,
+      sharedQuota: fetchImpl.quotaStats || null,
     };
     if (options.write !== false) writeJsonAtomic(reportPath, report);
-    throw new Error(report.message);
+    const details = sourceResults.map((source) => `#${source.hashtag}: ${source.error || source.detail || source.status}`).join('; ');
+    throw new Error(`${report.message} ${details}`);
   }
 
   const uniqueEntries = [...graphEntries.values()];

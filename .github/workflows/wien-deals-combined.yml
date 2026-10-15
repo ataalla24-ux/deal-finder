@@ -38,6 +38,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends ffmpeg tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng
 
       - name: Run Graph hashtag fallback
+        id: collector
         env:
           INSTAGRAM_SHARED_QUOTA_ENABLED: '1'
           GH_TOKEN: ${{ github.token }}
@@ -60,5 +61,6 @@ jobs:
         run: node scraper/wien-deals-combined.js
 
       - name: Commit deals
+        if: ${{ always() && steps.collector.outcome != 'skipped' }}
         run: |
           node scripts/commit-generated.mjs --message "Wien combined Graph deals $(date +%Y-%m-%d)" --files docs/deals-pending-wien-combined.json docs/wien-deals-combined-report.json docs/wien-deals-combined-media-cache.json docs/wien-combined-scan-state.json docs/deal-pipeline-last-run-wien-combined.json docs/deal-pipeline-runs-wien-combined.json

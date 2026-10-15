@@ -257,7 +257,7 @@ export function sharedInstagramFetch(fetchImpl, env = process.env) {
     adaptiveMaxRequestsPerHour: Number(env.INSTAGRAM_SHARED_ADAPTIVE_MAX_REQUESTS_PER_HOUR || 0),
   });
   const wrapped = (url, ...args) => {
-    const hostname = new URL(typeof url === 'string' ? url : url.url).hostname;
+    const hostname = new URL(url instanceof URL || typeof url === 'string' ? url : url.url).hostname;
     return ['graph.facebook.com', 'graph.instagram.com'].includes(hostname) ? shared(url, ...args) : fetchImpl(url, ...args);
   };
   wrapped.quotaStats = shared.quotaStats;

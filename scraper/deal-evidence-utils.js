@@ -1,3 +1,5 @@
+import { locationConflictReason, normalizeDealFacts } from './deal-factual-guards.js';
+
 const VIENNA_POSTCODE_PATTERN = /(?:^|\D)(1(?:0[1-9]|1\d|2[0-3])0)(?!\d)/;
 const VIENNA_CITY_PATTERN = /\b(?:wien|vienna)\b/i;
 const STREET_PATTERN = /\b(?:stra(?:ß|ss)e|gasse|platz|weg|ring|allee|kai|markt|zeile|promenade)\b/i;
@@ -19,7 +21,7 @@ const OFFER_PRODUCT_PATTERNS = [
   ['burger', /\bburger\b/],
   ['kebab', /\b(?:kebab|kebap|doener|doner|dueruem|durum)\b/],
   ['coffee', /\b(?:kaffee|coffee|espresso|cappuccino|latte|matcha)\b/],
-  ['drink', /\b(?:drink|drinks|getraenk|getrank|cocktail|bier|spritzer|limonade|cola)\b/],
+  ['drink', /\b(?:drinks?|getraenke?|getranke?|cocktails?|mocktails?|bier|spritzer|limonade|cola)\b/],
   ['lunch', /\b(?:lunch|mittag(?:essen|smenue|smenu))\b/],
   ['brunch', /\bbrunch\b/],
   ['breakfast', /\b(?:fruehstueck|breakfast)\b/],
@@ -65,6 +67,7 @@ function compactMerchantFingerprint(value) {
 const GENERIC_MERCHANT_KEYS = new Set([...GENERIC_SOCIAL_BRANDS].map(compactMerchantFingerprint));
 
 function semanticBrandKey(deal = {}) {
+  deal = normalizeDealFacts(deal);
   const candidates = [
     deal.brand || deal.merchant || deal.provider,
     extractStructuredOwnerUsername(deal),
@@ -144,8 +147,14 @@ function semanticPromotionOfferKey(deal = {}, options = {}) {
 
   if (!concreteMarker && !(freeMarker && products.length > 0 && dateMarkers.length > 0)) return '';
   if (products.length === 0) return '';
-  const campaignDate = concreteMarker ? '' : dateMarkers.slice(0, 2).sort().join('+');
-  return `offer:${brand}|${markers.join('+') || 'free'}|${products.sort().join('+')}|${campaignDate}`;
+  const campaignDate = !concreteMarker ? dateMarkers.slice(0, 2).sort().join('+')
+    : [deal.validOn, deal.validFrom, deal.expiryEstimated === true || /ttl|fallback|unknown/i.test(deal.expirySource || '') ? '' : deal.validUntil].filter(Boolean).join('+');
+  const conditions = [
+    /\b(?:neukunden?|erstbestellung|new customers?)\b/.test(context) ? 'new-customer' : '',
+    /\b(?:nachsten einkauf|next purchase)\b/.test(context) ? 'next-purchase' : '',
+    ...uniqueMatches(context, /\b(?:ab|uber|mindestbestellwert|minimum spend)\s*(?:€\s*)?(\d+(?:[.,]\d+)?)\s*(?:€|eur\b|euro\b)/g, m => `minimum-${m[1]}`),
+  ].filter(Boolean).sort().join('+');
+  return `offer:${brand}|${markers.join('+') || 'free'}|${products.sort().join('+')}|${campaignDate}|${conditions}`;
 }
 
 export function semanticSocialOfferKey(deal = {}) {
@@ -371,6 +380,7 @@ function coordinatesFromDeal(deal = {}) {
 }
 
 export function getViennaEvidence(deal = {}, options = {}) {
+  if (locationConflictReason(deal)) return { hasViennaEvidence: false, type: 'conflict', value: '' };
   const declaredViennaEvidence = deal.viennaEvidence || deal.evidence?.viennaEvidence;
   if (declaredViennaEvidence && typeof declaredViennaEvidence === 'object' && !Array.isArray(declaredViennaEvidence)
       && declaredViennaEvidence.verified === true

@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { extractLowFoodPrice, getAdFoodBenefitRejection, getMetaNonOfferRejection, weakFoodPromotionReason } from './food-discovery-utils.js';
+import { normalizeDealFacts, locationConflictReason } from './deal-factual-guards.js';
 import { inspectDealContentQuality } from './deal-content-quality-utils.js';
 
 import { inspectDealUrlHealth, parseExpiryShape } from './expiry-utils.js';
@@ -1035,6 +1036,7 @@ function buildPublicValidationMeta(decision) {
 }
 
 async function validateDeal(deal, context) {
+  deal = normalizeDealFacts(deal);
   const now = context.now;
   const checkedAt = new Date().toISOString();
   const url = normalizeUrl(deal.url);
@@ -1098,6 +1100,8 @@ async function validateDeal(deal, context) {
   let offer = getConcreteOfferDecision(deal, health);
   if (officialFood?.ok && offer.reason === 'kein konkretes Angebot erkennbar') offer = { concrete: true };
   const reasons = [];
+  const locationConflict = locationConflictReason(deal);
+  if (locationConflict) reasons.push(locationConflict);
   if (/^Meta Instagram /i.test(String(deal.originSource || ''))) {
     const metaNonOffer = getMetaNonOfferRejection(deal.description || deal.title);
     if (metaNonOffer) reasons.push(`Kein konkreter Meta-Deal (${metaNonOffer})`);

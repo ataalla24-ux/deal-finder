@@ -1,5 +1,5 @@
 import { sharedInstagramFetch } from './instagram-shared-quota.js';
-import { scanAdLibraryCoverage, hasFreshActiveAdEvidence } from './meta-ad-library-coverage.js';
+import { scanAdLibraryCoverage, hasFreshActiveAdEvidence, isAdPayloadTooLarge, smallerAdPageSize } from './meta-ad-library-coverage.js';
 import { selectDiscoveryAccounts } from './vienna-merchant-discovery.js';
 import { selectCoverageAccounts, selectCoverageHashtags, accountCoverageSummary } from './instagram-source-scheduler.js';
 import '../sentry/instrument.mjs';
@@ -1318,11 +1318,12 @@ async function fetchMetaJson(url, config, fetchImpl = fetch) {
       error.code = payload?.error?.code;
       error.retryAfter = response.headers.get('retry-after') || '';
       lastError = error;
+      if (isAdPayloadTooLarge(error)) throw error;
       if (![429, 500, 502, 503, 504].includes(response.status) || attempt >= config.maxRetries) throw error;
       await sleep(retryDelayMs(response, attempt));
     } catch (error) {
       lastError = error;
-      if (error?.code === 'SCAN_BUDGET' || attempt >= config.maxRetries || (error?.status && ![429, 500, 502, 503, 504].includes(error.status))) throw error;
+      if (isAdPayloadTooLarge(error) || error?.code === 'SCAN_BUDGET' || attempt >= config.maxRetries || (error?.status && ![429, 500, 502, 503, 504].includes(error.status))) throw error;
       await sleep(Math.min(30000, 1000 * (2 ** attempt)) + Math.floor(Math.random() * 500));
     }
   }
@@ -1435,17 +1436,19 @@ export async function collectAdLibrary(config, now, fetchImpl, previousFailure =
   const terms = config.adSearchTerms;
   const count = Math.min(config.maxAdTermsPerRun || 4, terms.length);
   const selectedTerms = Array.from({ length: count }, (_, index) => terms[(Number(config.shardIndex || 0) * count + index) % terms.length]);
-  if (previousFailure?.code !== 'SCAN_BUDGET' && Date.parse(previousFailure?.retryAt || '') > now.getTime()) return { raw, errors: [previousFailure], usage, selectedTerms, failure: previousFailure, cooldown: true };
+  if (!isAdPayloadTooLarge(previousFailure) && previousFailure?.code !== 'SCAN_BUDGET' && Date.parse(previousFailure?.retryAt || '') > now.getTime()) return { raw, errors: [previousFailure], usage, selectedTerms, failure: previousFailure, cooldown: true };
   if (config.adCoverageMode) {
     return scanAdLibraryCoverage({
       terms: terms.slice(0, config.maxAdTermsPerRun), previous: options.previous,
       scope: `${config.graphVersion}:AT:${(config.adPlatforms || ['INSTAGRAM', 'FACEBOOK']).join(',')}:ACTIVE:ALL:KEYWORD_UNORDERED`, now,
       maxRequests: options.maxRequests ?? config.maxAdRequests,
       maxPagesPerTerm: config.maxAdPagesPerTerm, headsOnly: options.headsOnly,
+      pageSize: config.adPageSize,
       onItem: options.onItem, seen: options.seen, deadline: options.deadline,
       safeError: (error) => safeErrorMessage(error, config),
-      fetchPage: (term, after) => {
+      fetchPage: (term, after, pageSize) => {
         const url = new URL(adLibraryUrl(config, term));
+        url.searchParams.set('limit', String(pageSize));
         if (after) url.searchParams.set('after', after);
         return fetchMetaJson(url.toString(), config, fetchImpl);
       },
@@ -1476,6 +1479,18 @@ export async function collectAdLibrary(config, now, fetchImpl, previousFailure =
           }
         }
       } catch (error) {
+        if (isAdPayloadTooLarge(error)) {
+          const url = new URL(next);
+          const smaller = smallerAdPageSize(Number(url.searchParams.get('limit')));
+          if (smaller) {
+            url.searchParams.set('limit', String(smaller));
+            next = url.toString();
+            page -= 1;
+            continue;
+          }
+          errors.push({ term, status: error.status, code: error.code, message: safeErrorMessage(error, config) });
+          break;
+        }
         if (error?.code === 'SCAN_BUDGET') {
           // Shared quota owns this pause; do not turn a temporary interruption
           // into a six-hour source/authentication failure.
@@ -2078,6 +2093,8 @@ export async function runMetaInstagramCollector(options = {}) {
   const config = { ...(options.config || buildConfig(env, now)) };
   const fetchImpl = sharedInstagramFetch(options.fetchImpl || fetch, env);
   config.scanNow = now;
+  config.hashtagReviewFeedback = options.hashtagReviewFeedback
+    || readJson(path.join(path.dirname(config.statePath), 'deal-review-feedback.json'), {}).events || [];
   const state = readJson(config.statePath, {
     version: 4,
     hashtagIds: {},
@@ -2303,6 +2320,14 @@ export async function runMetaInstagramCollector(options = {}) {
       execFileImpl: options.execFileImpl,
       tools: options.mediaTools,
       analyzeItem: options.analyzeMediaItem,
+      refreshMediaItem: async (entry) => {
+        if (!/^\d+$/.test(String(entry.item?.id || ''))) return null;
+        const url = new URL(`https://graph.facebook.com/${config.graphVersion}/${entry.item.id}`);
+        url.searchParams.set('access_token', config.instagramAccessToken);
+        url.searchParams.set('fields', 'id,media_type,media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}');
+        const response = await fetchMetaJson(url.toString(), { ...config, maxRetries: 0 }, fetchImpl);
+        return response.payload;
+      },
       classifyOcr: options.classifyOcr,
       shouldAnalyzeEntry: (entry) => {
         const decision = normalizeGraphMediaItem(entry.item, entry.context, config, now);

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { semanticCrossPlatformOfferKey } from './deal-evidence-utils.js';
 
 import {
   buildSocialFoodFunnel,
@@ -208,19 +209,31 @@ export function collectSocialFoodObservations(options = {}) {
   return { observations, runMetrics };
 }
 
-function recentFeedbackMetrics(events, now) {
+export function recentFeedbackMetrics(events, now) {
   const cutoff = now.getTime() - 7 * 24 * 60 * 60 * 1000;
   const recent = events.filter((event) => {
     const category = cleanText(event.category, 80).toLowerCase();
     const foodDrinkEvent = event.socialFoodReview === true
-      || ['essen', 'kaffee', 'food', 'food & drink', 'restaurant'].includes(category);
+      || ['essen', 'trinken', 'kaffee', 'food', 'food & drink', 'restaurant'].includes(category);
     if (!foodDrinkEvent) return false;
     const timestamp = Date.parse(event.decidedAt || event.manualDecisionAt || '');
-    return Number.isFinite(timestamp) && timestamp >= cutoff;
+    return Number.isFinite(timestamp) && timestamp >= cutoff && timestamp <= +now;
   });
   const approvals = recent.filter((event) => event.decision === 'approved');
   const rejections = recent.filter((event) => event.decision === 'rejected');
   const published = recent.filter((event) => event.publicationStatus === 'published');
+  const sent = events.filter(event => Date.parse(event.slackSentAt) >= cutoff && Date.parse(event.slackSentAt) <= +now
+    && (event.socialFoodReview || ['essen', 'trinken', 'kaffee', 'food', 'food & drink', 'restaurant'].includes(cleanText(event.category, 80).toLowerCase())));
+  const uniqueApprovals = new Set(approvals.map((event, index) => event.offerKey || semanticCrossPlatformOfferKey(event) || event.postKey || event.key || `unknown:${index}`));
+  const bySource = Object.create(null);
+  for (const event of sent) {
+    const source = event.originSource || event.source || 'unknown';
+    const row = bySource[source] ||= { sent: 0, approved: 0, rejected: 0, unreviewed: 0 };
+    row.sent += 1;
+    if (event.decision === 'approved') row.approved += 1;
+    else if (event.decision === 'rejected') row.rejected += 1;
+    else row.unreviewed += 1;
+  }
   const reviewMinutes = approvals.map((event) => {
     const sent = Date.parse(event.slackSentAt || '');
     const decided = Date.parse(event.decidedAt || event.manualDecisionAt || '');
@@ -232,12 +245,20 @@ function recentFeedbackMetrics(events, now) {
     windowDays: 7,
     manuallyApproved: approvals.length,
     manuallyRejected: rejections.length,
+    uniqueApprovedOffers: uniqueApprovals.size,
+    sent: sent.length,
+    unreviewed: sent.filter(event => !['approved', 'rejected'].includes(event.decision)).length,
+    reviewed: approvals.length + rejections.length,
+    bySource,
+    qualityRate: null,
+    denominatorNote: 'Approval rate covers explicit decisions only; pending is not rejected. Unique means deduplicated within this decision window, not first-ever discovery.',
     published: published.length,
     approvalRate: approvals.length + rejections.length > 0
       ? Number((approvals.length / (approvals.length + rejections.length)).toFixed(3))
       : null,
-    approvedPerDay: Number((approvals.length / 7).toFixed(2)),
-    averageReviewMinutesPerApproval: reviewMinutes.length
+    approvedPerDay: Number((uniqueApprovals.size / 7).toFixed(2)),
+    averageReviewMinutesPerApproval: null,
+    averageDecisionLatencyMinutes: reviewMinutes.length
       ? Number((reviewMinutes.reduce((sum, value) => sum + value, 0) / reviewMinutes.length).toFixed(1))
       : null,
   };
@@ -289,7 +310,7 @@ export function buildSocialFoodArtifacts(options = {}) {
     version: 1,
     generatedAt: now.toISOString(),
     objective: 'Maximize manually approved, current Vienna food and drink deals per review minute.',
-    primaryMetric: 'manuallyApprovedNewFoodDealsPerDay',
+    primaryMetric: 'uniqueManuallyApprovedFoodOffersPerDay',
     guardrails: {
       ordinarySocialPostMaxAgeDays: 7,
       futureOfferException: 'Only with an explicit, evidenced future validity window.',
@@ -300,11 +321,9 @@ export function buildSocialFoodArtifacts(options = {}) {
     manualOutcomeMetrics: manualMetrics,
     costMetrics: {
       mediaTokensThisSnapshot: totalTokens,
-      mediaTokensPerManualApproval7d: manualMetrics.manuallyApproved > 0
-        ? Math.round(totalTokens / manualMetrics.manuallyApproved)
-        : null,
+      mediaTokensPerManualApproval7d: null,
       apiCurrencyCostPerApproval: null,
-      note: 'Currency cost remains null until provider billing data is persisted per run.',
+      note: 'Snapshot tokens and seven-day approvals have different windows; no cost ratio is inferred. Actual review effort is not measured by Slack decision latency.',
     },
     sourceRuns: runMetrics,
     observations: {

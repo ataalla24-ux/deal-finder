@@ -2,10 +2,18 @@ import { graphCursor } from './instagram-graph-scan.js';
 
 const HOUR = 3600000;
 
+export function isAdPayloadTooLarge(error) {
+  return /reduce the amount of data/i.test(String(error?.message || ''));
+}
+
+export function smallerAdPageSize(size) {
+  return [1000, 250, 100, 25].find((limit) => limit < size) || 0;
+}
+
 // A refreshed head must not overwrite an unfinished backfill. Meta does not
 // promise chronological order, so every result page is eventually visited.
 export async function scanAdLibraryCoverage({ terms, previous = {}, scope, now = new Date(),
-  maxRequests = 190, maxPagesPerTerm = 190, headsOnly = false, fetchPage,
+  maxRequests = 190, maxPagesPerTerm = 190, headsOnly = false, fetchPage, pageSize = 1000,
   onItem, seen = new Set(), deadline = Infinity, clock = Date.now, safeError = (error) => String(error.message),
 }) {
   const state = { version: 1, scope, queries: {} };
@@ -16,6 +24,8 @@ export async function scanAdLibraryCoverage({ terms, previous = {}, scope, now =
       lastPageAt: old?.lastPageAt || '',
       resumeAfter: graphCursor(old?.resumeAfter), pagesSinceHead: Number(old?.pagesSinceHead || 0),
       emptyHead: old?.emptyHead === true,
+      pageSize: Math.min(pageSize, Math.max(25, Number(old?.pageSize) || pageSize)),
+      retryAt: old?.retryAt || '',
     };
   }
   const raw = [], errors = [], usage = [], selectedTerms = new Set();
@@ -24,10 +34,11 @@ export async function scanAdLibraryCoverage({ terms, previous = {}, scope, now =
   const visits = new Map();
   const heads = terms.filter((term) => {
     const query = state.queries[term];
-    return now.getTime() - (Date.parse(query.lastHeadAt) || 0) >= (query.emptyHead ? 3 : 1) * HOUR;
+    return Date.parse(query.retryAt || '') > now.getTime() ? false
+      : now.getTime() - (Date.parse(query.lastHeadAt) || 0) >= (query.emptyHead ? 3 : 1) * HOUR;
   }).sort((a, b) => (Date.parse(state.queries[a].lastHeadAt) || 0) - (Date.parse(state.queries[b].lastHeadAt) || 0));
   const queue = heads.map((term) => ({ term, head: true }));
-  const backfill = terms.filter((term) => state.queries[term].resumeAfter)
+  const backfill = terms.filter((term) => state.queries[term].resumeAfter && !(Date.parse(state.queries[term].retryAt || '') > now.getTime()))
     .sort((a, b) => (Date.parse(state.queries[a].lastPageAt) || 0) - (Date.parse(state.queries[b].lastPageAt) || 0))
     .map((term) => ({ term, head: false }));
   // The seed reserves a small share for unfinished pages even if organic
@@ -43,13 +54,14 @@ export async function scanAdLibraryCoverage({ terms, previous = {}, scope, now =
     const after = head ? '' : query.resumeAfter;
     if (!head && !after) continue;
     if ((visits.get(term) || 0) >= maxPagesPerTerm) continue;
-    const key = `${term}:${after}`;
+    const key = `${term}:${after}:${query.pageSize}`;
     if (attempted.has(key)) continue;
     attempted.add(key);
     selectedTerms.add(term);
     try {
       result.requests += 1;
-      const response = await fetchPage(term, after);
+      const response = await fetchPage(term, after, query.pageSize);
+      query.retryAt = '';
       usage.push(response.usage);
       const rows = Array.isArray(response.payload?.data) ? response.payload.data : [];
       // Empty data is terminal, even when Meta still includes paging hints.
@@ -85,6 +97,18 @@ export async function scanAdLibraryCoverage({ terms, previous = {}, scope, now =
       if (!headsOnly && query.resumeAfter) queue.push({ term, head: false });
     } catch (error) {
       const failure = { term, status: Number(error.status || 0), code: error.code || '', message: safeError(error) };
+      if (isAdPayloadTooLarge(error)) {
+        const smaller = smallerAdPageSize(query.pageSize);
+        if (smaller) {
+          query.pageSize = smaller;
+          queue.unshift({ term, head });
+          continue;
+        }
+        // A heavy query must not stop the other independent searches.
+        query.retryAt = new Date(now.getTime() + HOUR).toISOString();
+        errors.push({ ...failure, retryAt: query.retryAt });
+        continue;
+      }
       errors.push(failure);
       if (error.code === 'SCAN_BUDGET' || [4, 17, 32, 613, 80002].includes(Number(error.code)) || error.status === 429) {
         result.budgetDeferred = true; result.stopReason = 'shared-quota'; break;

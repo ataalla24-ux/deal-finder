@@ -262,7 +262,9 @@ const artifacts = buildSocialFoodArtifacts({
 assert.equal(artifacts.audit.auditSample.length, 80);
 assert.equal(artifacts.review.totalDeals, 10);
 assert.equal(artifacts.audit.manualOutcomeMetrics.manuallyApproved, 1);
-assert.equal(artifacts.audit.costMetrics.mediaTokensPerManualApproval7d, 1200);
+assert.equal(artifacts.audit.costMetrics.mediaTokensPerManualApproval7d, null);
+assert.equal(artifacts.audit.manualOutcomeMetrics.averageReviewMinutesPerApproval, null);
+assert.equal(artifacts.audit.manualOutcomeMetrics.averageDecisionLatencyMinutes, 60);
 
 const reviewDealWithSafetyTtl = buildSocialFoodReviewDeal(reviewable, now);
 assert.equal(reviewDealWithSafetyTtl.distance, 'Wien');

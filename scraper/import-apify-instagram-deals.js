@@ -122,21 +122,34 @@ function normalizePostUrl(value) {
   }
 }
 
-export function collectDirectPostSeedUrls({ output = {}, report = {}, limit = 32 } = {}) {
+export function collectDirectPostSeedUrls({ output = {}, report = {}, limit = 32, targeted = false, now = new Date(), excludeUrls = [] } = {}) {
   const rows = [
     ...(Array.isArray(output?.deals) ? output.deals : []),
     ...(Array.isArray(report?.freshRejected) ? report.freshRejected : []),
   ];
   const urls = [];
   const seen = new Set();
-  for (const row of rows) {
+  const excluded = new Set(excludeUrls.map(normalizePostUrl).filter(Boolean));
+  const candidates = targeted ? rows.filter(row => {
+    const published = Date.parse(row?.pubDate || row?.sourcePublishedAt || row?.timestamp || '');
+    const signal = `${row?.title || ''} ${row?.description || row?.caption || ''}`;
+    return published <= +now && +now - published <= 7 * 86400000
+      && !/expired|post-too-old|giveaway|contest|non-vienna|outside-vienna|excluded/i.test(row.reason || row.rejectionReason || '')
+      && /kebab|kebap|döner|doener|kaffee|coffee|pizza|burger|essen|drink|getränk|brunch|bowl|buffet|waffel/i.test(signal);
+  }).sort((a, b) => Number(/gratis|1\s*\+\s*1|rabatt|aktion|\d\s*%/i.test(`${b.title} ${b.description}`))
+    - Number(/gratis|1\s*\+\s*1|rabatt|aktion|\d\s*%/i.test(`${a.title} ${a.description}`))) : rows;
+  for (const row of candidates) {
     const url = normalizePostUrl(row?.url || row?.postUrl || row);
-    if (!url || seen.has(url)) continue;
+    if (!url || seen.has(url) || targeted && excluded.has(url)) continue;
     seen.add(url);
     urls.push(url);
     if (urls.length >= toBoundedInt(limit, 32, 1, 100)) break;
   }
   return urls;
+}
+
+function ensureArray(value) {
+  return Array.isArray(value) ? value : [];
 }
 
 function postShortcode(postUrl) {
@@ -270,9 +283,9 @@ export function buildShardedActorInput(baseInput, options = {}) {
   return {
     input: {
       ...baseInput,
-      seedAccounts: selection.accounts,
+      seedAccounts: options.directOnly ? [] : selection.accounts,
       verifiedViennaAccounts: selection.verifiedAccounts,
-      seedHashtags: selectedHashtags,
+      seedHashtags: options.directOnly ? [] : selectedHashtags,
       maxPostsPerSource: toBoundedInt(options.maxPostsPerSource, 6, 1, 12),
       maxPostsToInspect: toBoundedInt(options.maxPostsToInspect, 100, 1, 500),
       maxPostAgeDays: toBoundedInt(options.maxPostAgeDays, 7, 1, 30),
@@ -285,7 +298,9 @@ export function buildShardedActorInput(baseInput, options = {}) {
     },
     shard: {
       ...selection,
-      selectedHashtags,
+      accounts: options.directOnly ? [] : selection.accounts,
+      selectedHashtags: options.directOnly ? [] : selectedHashtags,
+      mode: options.directOnly ? 'targeted-post-enrichment' : 'discovery',
     },
   };
 }
@@ -809,11 +824,16 @@ export async function main() {
     output: readJsonIfExists(INSTAGRAM_AI_OUTPUT_PATH, {}),
     report: readJsonIfExists(INSTAGRAM_AI_REPORT_PATH, {}),
     limit: process.env.APIFY_INSTAGRAM_MAX_DIRECT_POSTS || 32,
+    targeted: process.env.APIFY_INSTAGRAM_DIRECT_ONLY === '1',
+    excludeUrls: [
+      ...ensureArray(readJsonIfExists(path.join(DOCS_DIR, 'deals.json'), {}).deals),
+      ...ensureArray(readJsonIfExists(OUTPUT_PATH, {}).deals),
+    ].map(deal => deal.url),
   });
   const baseInput = {
     ...storedBaseInput,
     seedPostUrls: [...new Set([
-      ...(Array.isArray(storedBaseInput.seedPostUrls) ? storedBaseInput.seedPostUrls : []),
+      ...(process.env.APIFY_INSTAGRAM_DIRECT_ONLY !== '1' && Array.isArray(storedBaseInput.seedPostUrls) ? storedBaseInput.seedPostUrls : []),
       ...directPostSeeds,
     ])],
   };
@@ -833,6 +853,7 @@ export async function main() {
     maxPostsToInspect: process.env.APIFY_INSTAGRAM_MAX_POSTS_TO_INSPECT,
     maxPostAgeDays: MAX_POST_AGE_DAYS,
     maxAgeDaysWithoutExplicitValidity: MAX_AGE_WITHOUT_EXPLICIT_VALIDITY_DAYS,
+    directOnly: process.env.APIFY_INSTAGRAM_DIRECT_ONLY === '1',
   });
   const input = {
     ...shardedInput,
@@ -845,6 +866,12 @@ export async function main() {
   console.log(`Shard: ${shard.shardIndex + 1}/${shard.shardCount}; accounts=${shard.accounts.length}/${shard.totalAccounts}; hashtags=${shard.selectedHashtags.length}`);
   console.log(`Direct recent post candidates: ${input.seedPostUrls.length}`);
   console.log(`Posts per source: ${input.maxPostsPerSource}; max age: ${input.maxPostAgeDays} days`);
+
+  if (process.env.APIFY_INSTAGRAM_DIRECT_ONLY === '1' && !input.seedPostUrls.length) {
+    writeJson(REPORT_PATH, { updatedAt: new Date().toISOString(), status: 'SKIPPED', operationalStatus: 'no-targeted-posts', usable: false,
+      reason: 'No recent food post requires targeted enrichment; no paid Actor run started.', shard });
+    return;
+  }
 
   const run = await triggerActorRun(input);
   console.log(`▶️ Started Apify run ${run.id}`);
@@ -906,6 +933,9 @@ export async function main() {
     inspectedPosts: health.inspectedPosts,
     acceptedDeals: normalizedDeals.length,
     rejectedItems,
+    discoveryMode: shard.mode,
+    newDiscoveredPosts: normalizedDeals.filter(deal => !input.seedPostUrls.includes(normalizePostUrl(deal.url))).length,
+    enrichedSeedPosts: normalizedDeals.filter(deal => input.seedPostUrls.includes(normalizePostUrl(deal.url))).length,
     sourceStates: health.sourceStates,
     reason: health.reason || '',
     shard,

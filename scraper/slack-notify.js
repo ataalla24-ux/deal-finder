@@ -1,4 +1,5 @@
 import { officialFoodOfferKey } from './power-food-sources.js';
+import { normalizeDealFacts, locationConflictReason, materialOfferConditions } from './deal-factual-guards.js';
 import { isCommunitySubmission } from './community-review-utils.js';
 import { createCardEditor } from './deal-card-editor.js';
 import { retryQueuedEditorial } from './card-editor-retry.js';
@@ -371,7 +372,7 @@ function stableId(seed) {
 }
 
 function normalizeDeal(rawDeal, sourceKey) {
-  const deal = ensureObject(rawDeal);
+  const deal = normalizeDealFacts(ensureObject(rawDeal));
   const rawUrl = normalizeUrl(deal.url || deal.post_url || deal.postUrl);
   const inferredBrand = inferBrand(deal, sourceKey);
   const inferredTitle = inferTitle(deal, inferredBrand);
@@ -649,6 +650,7 @@ function prepareSocialFoodReviewDeals(deals, options = {}) {
     ].filter(Boolean).join(' '), 8000);
     let reason = '';
     if (deal?.socialFoodReview !== true) reason = 'not-social-food-review';
+    else if (locationConflictReason(deal)) reason = 'outside-vienna';
     else if (!isSocialPostKey(postKey)) reason = 'not-direct-social-post';
     else if (ageDays === null) reason = 'missing-post-date';
     else if (ageDays < -0.05) reason = 'future-post-date';
@@ -890,6 +892,7 @@ function buildSlackMessage(deal, index, mapContext = loadDealMapReviewContext())
   ].filter(Boolean).join('\n') : '';
   return [
     `*${index}. ${deal.title}*`,
+    ...(materialOfferConditions(deal) ? [`*Wichtige Bedingungen:* ${slackTextPrefix(materialOfferConditions(deal), 900)}`] : []),
     `🏷️ Marke/Restaurant: ${deal.brand || 'k.A.'}`,
     `📍 Ort: ${deal.distance || 'k.A.'}`,
     isCommunitySubmission(deal)

@@ -4,8 +4,8 @@ import { inferInstagramAccountRole } from './instagram-entity-resolution.js';
 const HOUR = 3600000;
 const time = (value) => Number.isFinite(Date.parse(value)) ? Date.parse(value) : 0;
 const manual = (account, scout = false) => ({
-  approved: Number((scout ? account.scoutApprovedDeals : account.manualApprovedDeals) || 0),
-  rejected: Number((scout ? account.scoutRejectedDeals : account.manualRejectedDeals) || 0),
+  approved: Number((scout ? account.scoutManualApprovedDeals : account.manualApprovedDeals) || 0),
+  rejected: Number((scout ? account.scoutManualRejectedDeals : account.manualRejectedDeals) || 0),
 });
 
 export function accountRescanHours(account, stats = {}, now = new Date()) {
@@ -14,7 +14,8 @@ export function accountRescanHours(account, stats = {}, now = new Date()) {
   const opening = time(account.nextOpeningAt);
   if (isFoodDrinkSource(account) && opening >= +now - 24 * HOUR && opening <= +now + 7 * 24 * HOUR) return 1;
   if (feedback.rejected >= 3 && feedback.approved === 0) return 7 * 24;
-  if (feedback.approved > 0) return scout ? 6 : Number(stats.recentNewAccepted || 0) > 0.1 ? 2 : 4;
+  if (feedback.approved >= 3) return scout ? 6 : Number(stats.recentNewAccepted || 0) > 0.1 ? 2 : 4;
+  if (feedback.approved > 0) return scout ? 12 : 6;
   if (Number(stats.recentNewAccepted || 0) > 0.1) return scout ? 6 : 4;
   if (Number(stats.runs || 0) >= 8 && !Number(stats.accepted || 0)) return 72;
   if (Number(stats.runs || 0) >= 3 && !Number(stats.newAccepted || 0)) return 24;
@@ -64,8 +65,8 @@ export function selectCoverageAccounts(accounts, config, state = {}, now = new D
   const proven = food.filter((account) => !first(account) && !isScout(account)
     && (manual(account).approved > 0 || Number(stats(account).recentNewAccepted || 0) > 0.1)).sort(compareQuality);
   const scouts = food.filter(isScout).sort(oldest);
-  const coldSlots = Math.min(cold.length, Math.ceil(foodTarget * 0.55));
-  const provenSlots = Math.min(proven.length, Math.floor(foodTarget * 0.30));
+  const coldSlots = Math.min(cold.length, Math.ceil(foodTarget * 0.10));
+  const provenSlots = Math.min(proven.length, Math.floor(foodTarget * 0.70));
   const scoutSlots = Math.min(scouts.length, Math.floor(foodTarget * 0.10));
   const lanes = [cold.slice(0, coldSlots), proven.slice(0, provenSlots), scouts.slice(0, scoutSlots)];
   const selected = [];
@@ -90,11 +91,23 @@ export function selectCoverageAccounts(accounts, config, state = {}, now = new D
 
 export function selectCoverageHashtags(hashtags, config, state = {}, now = new Date()) {
   const performance = state.hashtagPerformance || {};
+  const feedback = new Map();
+  for (const event of config.hashtagReviewFeedback || []) {
+    if (event.discoverySourceType !== 'hashtag' || !['approved', 'rejected'].includes(event.decision)
+      || time(event.decidedAt) < +now - 90 * 24 * HOUR || time(event.decidedAt) > +now) continue;
+    const tag = String(event.discoverySourceName || '').replace(/^#/, '').toLowerCase();
+    const counts = feedback.get(tag) || { approved: new Set(), rejected: new Set() };
+    counts[event.decision].add(event.offerKey || event.key || event.postKey);
+    feedback.set(tag, counts);
+  }
   const score = (tag) => {
     const stats = performance[tag] || {};
     const sample = Number(stats.recentFetched || 0);
     const yieldRate = (Number(stats.recentNewAccepted || 0) + 1) / (sample + 25);
-    return yieldRate * Math.min(1, sample / 25) * 100
+    const reviewed = feedback.get(tag);
+    const yes = reviewed?.approved.size || 0, no = reviewed?.rejected.size || 0;
+    const learned = ((yes + 2) / (yes + no + 4) - 0.5) * ((yes + no) / (yes + no + 5)) * 60;
+    return learned + yieldRate * Math.min(1, sample / 25) * 100
       + (isFoodDrinkSource(tag) ? 8 : 0) + (/gratis|aktion|rabatt|gutschein|angebot|deal|happyhour|er[o\u00f6]ffnung/i.test(tag) ? 5 : 0);
   };
   const due = [...new Set(hashtags)].filter((tag) => {

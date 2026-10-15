@@ -135,6 +135,8 @@ function ensureEntry(registry, username) {
       scoutSentPostKeys: new Set(),
       scoutApprovedPostKeys: new Set(),
       scoutRejectedPostKeys: new Set(),
+      scoutManualApprovedPostKeys: new Set(),
+      scoutManualRejectedPostKeys: new Set(),
       legacyApprovedDeals: 0,
       legacyPostedDeals: 0,
       legacyRejectedDeals: 0,
@@ -188,11 +190,11 @@ function incrementMap(map, key) {
 function scoreEntry(entry) {
   const accountRole = inferAccountType({ username: entry.username, accountType: entry.accountType });
   const qualityApprovals = accountRole === 'merchant'
-    ? approvedDealCount(entry)
-    : entry.scoutApprovedPostKeys.size;
+    ? entry.manualApprovedPostKeys.size
+    : entry.scoutManualApprovedPostKeys.size;
   const qualityRejections = accountRole === 'merchant'
-    ? rejectedDealCount(entry)
-    : entry.scoutRejectedPostKeys.size;
+    ? entry.manualRejectedPostKeys.size
+    : entry.scoutManualRejectedPostKeys.size;
   const countScore = Math.min(entry.occurrences * 10, 40);
   const liveScore = Math.min(entry.liveOccurrences * 12, 24);
   const promoScore = Math.min(entry.promoHits * 8, 16);
@@ -226,16 +228,16 @@ function priorityScore(entry) {
   const liveRate = entry.liveOccurrences / entry.occurrences;
   const accountRole = inferAccountType({ username: entry.username, accountType: entry.accountType });
   const approvedDeals = accountRole === 'merchant'
-    ? approvedDealCount(entry)
-    : entry.scoutApprovedPostKeys.size;
+    ? entry.manualApprovedPostKeys.size
+    : entry.scoutManualApprovedPostKeys.size;
   const rejectedDeals = accountRole === 'merchant'
-    ? rejectedDealCount(entry)
-    : entry.scoutRejectedPostKeys.size;
+    ? entry.manualRejectedPostKeys.size
+    : entry.scoutManualRejectedPostKeys.size;
   const feedbackTotal = approvedDeals + rejectedDeals;
   const approvalRate = smoothedRate(approvedDeals, rejectedDeals);
   const feedbackStrength = feedbackTotal / (feedbackTotal + 4);
-  const scoutApproved = entry.scoutApprovedPostKeys.size;
-  const scoutRejected = entry.scoutRejectedPostKeys.size;
+  const scoutApproved = entry.scoutManualApprovedPostKeys.size;
+  const scoutRejected = entry.scoutManualRejectedPostKeys.size;
   const scoutRate = smoothedRate(scoutApproved, scoutRejected);
   const scoutStrength = (scoutApproved + scoutRejected) / (scoutApproved + scoutRejected + 4);
   const learnedFeedbackScore = accountRole === 'merchant'
@@ -316,6 +318,8 @@ function applyManualReviewFeedback(registry, options = {}) {
       if (event?.slackSentAt) scout.scoutSentPostKeys.add(postKey);
       if (decision === 'approved') scout.scoutApprovedPostKeys.add(postKey);
       if (decision === 'rejected') scout.scoutRejectedPostKeys.add(postKey);
+      if (decision === 'approved') scout.scoutManualApprovedPostKeys.add(postKey);
+      if (decision === 'rejected') scout.scoutManualRejectedPostKeys.add(postKey);
     }
 
     if (merchantUsername) {
@@ -707,6 +711,8 @@ export function buildInstagramMerchantRegistry(options = {}) {
         scoutSentDeals: entry.scoutSentPostKeys.size,
         scoutApprovedDeals,
         scoutRejectedDeals,
+        scoutManualApprovedDeals: entry.scoutManualApprovedPostKeys.size,
+        scoutManualRejectedDeals: entry.scoutManualRejectedPostKeys.size,
         scoutFeedbackSampleSize,
         scoutApprovalRate: scoutFeedbackSampleSize > 0
           ? Math.round((scoutApprovedDeals / scoutFeedbackSampleSize) * 1000) / 1000

@@ -1,4 +1,5 @@
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { explicitFoodMerchant, isDirectMessageInstruction } from './deal-factual-guards.js';
 import { sanitizePublicDealText } from './public-deal-text.js';
 import { cardEditorialWhen } from './deal-card-editor.js';
 import { concreteFoodOfferTitle, isPromotionalIntro, stripSlackEmojiCodes } from './offer-title-utils.js';
@@ -310,7 +311,7 @@ function normalizeAscii(value) {
 
 function findBrandRule(signal) {
   const normalized = normalizeAscii(signal);
-  const directMessageInstruction = /\bdm\s+(?:me|us|to\b|for\b|your\b|zur\b|fuer\b|für\b|anmeldung|register|details?|info|infos|booking|reserv)/i.test(normalized);
+  const directMessageInstruction = isDirectMessageInstruction(normalized);
   const escapedWordMatch = (key) => {
     const escaped = normalizeAscii(key).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
     return new RegExp(`(?:^|[^\\p{L}\\p{N}])${escaped}(?:$|[^\\p{L}\\p{N}])`, 'iu');
@@ -574,6 +575,9 @@ function replaceBrandMention(text, fromBrand, toBrand) {
 }
 
 function inferPreferredBrand(deal = {}) {
+  const namedFoodMerchant = explicitFoodMerchant(deal);
+  if (namedFoodMerchant && isDirectMessageInstruction(deal.description || deal.evidence?.textSample)
+    && (!deal.brand || /^dm$|^@|instagram/i.test(deal.brand))) return namedFoodMerchant;
   const explicitBrand = cleanUiNoiseText(deal.brand || '');
   const idSignal = cleanUiNoiseText(deal.id || '');
   const logoSignal = cleanUiNoiseText(deal.logoUrl || '');

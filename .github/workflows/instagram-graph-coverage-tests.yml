@@ -1,6 +1,12 @@
 name: Instagram Graph Coverage Tests
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'scraper/**'
+      - 'scripts/test-slack-food-improvements.mjs'
+      - '.github/workflows/instagram-graph-coverage-tests.yml'
   pull_request:
     paths:
       - 'scraper/**'
@@ -37,6 +43,14 @@ jobs:
       - run: npm ci
       - name: Test pagination and both collector integrations without network credentials
         run: |
+          node scripts/test-slack-food-improvements.mjs
+          node scripts/test-deal-evidence.mjs
+          node scripts/test-slack-deal-quality.mjs
+          node scripts/test-deal-review-feedback.mjs
+          node scripts/test-apify-instagram-reliability.mjs
+          node scripts/test-instagram-max-coverage.mjs
+          node scripts/test-instagram-entity-resolution.mjs
+          node scripts/test-slack-approval-validation.mjs
           npm run test:instagram-shared-quota
           npm run test:meta-ad-coverage
           npm run test:meta-recall
