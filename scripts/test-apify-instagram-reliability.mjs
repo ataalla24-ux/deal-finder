@@ -7,6 +7,7 @@ import {
   classifyApifyApiFailure,
   classifyApifyRunHealth,
   collectDirectPostSeedUrls,
+  mergeTargetedApifyOutbox,
   normalizeApifyItem,
   selectAccountShard,
   shouldSkipBudgetBlockedRetry,
@@ -321,6 +322,28 @@ assert.deepEqual(
   },
   'actor/importer schema mismatches must preserve the last-good output instead of writing an empty success',
 );
+
+const policyRejectedRecord = { ...currentItem, caption: 'Kaffee zum Aktionspreis', description: 'Kaffee zum Aktionspreis' };
+const pendingSeed = { id: 'pending', url: 'https://www.instagram.com/p/PendingCoffee/', pubDate: now.toISOString(), expires: '2026-07-18T12:00:00Z' };
+assert.deepEqual(mergeTargetedApifyOutbox([], [pendingSeed], now), [pendingSeed], 'zero-result enrichment must retain fresh pending deals');
+assert.equal(mergeTargetedApifyOutbox([], [{ ...pendingSeed, expires: '2026-07-16T12:00:00Z' }], now).length, 0);
+assert.equal(mergeTargetedApifyOutbox([], [{ ...pendingSeed, pubDate: '2025-07-17T12:00:00Z' }], now).length, 0);
+assert.equal(mergeTargetedApifyOutbox([], [{ ...pendingSeed, expires: null }], now).length, 0);
+assert.equal(mergeTargetedApifyOutbox([pendingSeed], [pendingSeed], now).length, 1, 'retained outbox cannot duplicate newly enriched posts');
+assert.equal(classifyApifyRunHealth({
+  summary: { inspectedPosts: 18, acceptedDeals: 1, sources: { direct: { state: 'ok' } } },
+  rawDatasetItems: 1,
+  acceptedDeals: 0,
+  datasetRecords: [policyRejectedRecord],
+  normalizedResults: [{ deal: null, rejectReason: 'missingViennaEvidence' }],
+}).operationalStatus, 'healthy-no-verified-deals', 'a source-backed policy rejection is not a missing dataset');
+assert.equal(classifyApifyRunHealth({
+  summary: { inspectedPosts: 18, acceptedDeals: 1, sources: { direct: { state: 'ok' } } },
+  rawDatasetItems: 1,
+  acceptedDeals: 0,
+  datasetRecords: [{}],
+  normalizedResults: [{ deal: null, rejectReason: 'missingViennaEvidence' }],
+}).usable, false, 'malformed rows must not be disguised as successful quality filtering');
 
 assert.deepEqual(
   classifyApifyRunHealth({

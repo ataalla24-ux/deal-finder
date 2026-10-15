@@ -726,7 +726,19 @@ function countRejections(results) {
   return counts;
 }
 
-export function classifyApifyRunHealth({ summary, rawDatasetItems, acceptedDeals }) {
+export function mergeTargetedApifyOutbox(freshDeals, previousDeals, now = new Date()) {
+  const retained = ensureArray(previousDeals).filter((deal) => {
+    if (!deal || typeof deal !== 'object') return false;
+    const published = Date.parse(deal.pubDate || '');
+    const expires = Date.parse(deal.validUntil || deal.expires || '');
+    return normalizePostUrl(deal.url) && Number.isFinite(published) && published <= now.getTime()
+      && published >= now.getTime() - MAX_POST_AGE_DAYS * 86400000
+      && Number.isFinite(expires) && expires > now.getTime();
+  });
+  return dedupeDeals([...freshDeals, ...retained]);
+}
+
+export function classifyApifyRunHealth({ summary, rawDatasetItems, acceptedDeals, datasetRecords = [], normalizedResults = [] }) {
   const inspectedPosts = Math.max(0, Number(summary?.inspectedPosts || 0));
   const sourceEntries = Object.values(summary?.sources || {}).filter((entry) => entry && typeof entry === 'object');
   const sourceStates = sourceEntries.reduce((counts, entry) => {
@@ -745,7 +757,20 @@ export function classifyApifyRunHealth({ summary, rawDatasetItems, acceptedDeals
   const allInspectedPostsLostMetadata = inspectedPosts > 0
     && acceptedDeals === 0
     && timestampFailures >= inspectedPosts;
-  const acceptedDatasetMissing = actorAcceptedDeals > 0 && acceptedDeals === 0;
+  const policyRejections = new Set([
+    'missingViennaEvidence', 'postTooOld', 'postTooOldWithoutExplicitValidity',
+    'expiredOrTooOld', 'giveaway', 'noConcreteOfferSignal', 'freeInfrastructure',
+    'freeMembershipOnly', 'editorialRoundup', 'inboundForeignTravel', 'freeLeadGenerationOnly',
+  ]);
+  const policyRejectedRows = normalizedResults.filter((result, index) => {
+    const item = datasetRecords[index];
+    return policyRejections.has(result.rejectReason) && item
+      && normalizePostUrl(item.postUrl || item.url || item.postURL)
+      && realPostTimestamp(item).iso
+      && normalizeText(item.caption || item.description);
+  }).length;
+  const acceptedDatasetMissing = actorAcceptedDeals > 0 && acceptedDeals === 0
+    && !(rawDatasetItems > 0 && policyRejectedRows > 0);
   const usable = !allInspectedPostsLostMetadata
     && !acceptedDatasetMissing
     && (rawDatasetItems > 0 || (inspectedPosts > 0 && healthySourceCount > 0));
@@ -900,12 +925,17 @@ export async function main() {
     summary,
     rawDatasetItems: datasetRecords.length,
     acceptedDeals: normalizedDeals.length,
+    datasetRecords,
+    normalizedResults,
   });
+  const outputDeals = shard.mode === 'targeted-post-enrichment'
+    ? mergeTargetedApifyOutbox(normalizedDeals, readJsonIfExists(OUTPUT_PATH, {}).deals)
+    : normalizedDeals;
 
   const payload = {
     lastUpdated: new Date().toISOString(),
     source: 'instagram-apify',
-    totalDeals: normalizedDeals.length,
+    totalDeals: outputDeals.length,
     meta: {
       actorId: APIFY_ACTOR_ID,
       runId: finishedRun.id,
@@ -915,7 +945,7 @@ export async function main() {
       shardIndex: shard.shardIndex,
       shardCount: shard.shardCount,
     },
-    deals: normalizedDeals,
+    deals: outputDeals,
   };
 
   const report = {
@@ -932,6 +962,7 @@ export async function main() {
     rawDatasetItems: datasetRecords.length,
     inspectedPosts: health.inspectedPosts,
     acceptedDeals: normalizedDeals.length,
+    outbox: { freshlyVerified: normalizedDeals.length, retained: outputDeals.length - normalizedDeals.length },
     rejectedItems,
     discoveryMode: shard.mode,
     newDiscoveredPosts: normalizedDeals.filter(deal => !input.seedPostUrls.includes(normalizePostUrl(deal.url))).length,
@@ -946,7 +977,7 @@ export async function main() {
   writeJson(REPORT_PATH, report);
   writeGithubImportStatus(report);
 
-  if (health.usable) console.log(`💾 ${normalizedDeals.length} deals -> ${path.relative(ROOT, OUTPUT_PATH)}`);
+  if (health.usable) console.log(`💾 ${normalizedDeals.length} freshly verified, ${outputDeals.length} pending deals -> ${path.relative(ROOT, OUTPUT_PATH)}`);
   else console.log(`🛑 Existing ${path.relative(ROOT, OUTPUT_PATH)} kept because the scan produced no usable source data`);
   console.log(`📝 report -> ${path.relative(ROOT, REPORT_PATH)}`);
   console.log(`📊 operational status: ${health.operationalStatus}`);
