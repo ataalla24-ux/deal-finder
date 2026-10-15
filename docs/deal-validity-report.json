@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-10-15T12:41:20.353Z",
+  "generatedAt": "2026-10-15T13:01:56.539Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 318,
-    "allowed": 0,
-    "blocked": 318,
-    "warnings": 0,
+    "total": 321,
+    "allowed": 2,
+    "blocked": 319,
+    "warnings": 1,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 224,
-      "älter als 7 Tage (2026-02-22)": 82,
+      "älter als 7 Tage (2026-02-22)": 81,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-09-14)": 1,
@@ -42,10 +42,11 @@
       "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
+      "älter als 7 Tage (2025-12-30)": 1,
+      "Quell-/Post-Datum liegt in der Zukunft (2026-10-16)": 2,
       "abgelaufen (2026-08-30)": 4,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 5,
       "Engagement-Aktion ohne garantierte Gegenleistung": 1,
-      "Quell-/Post-Datum liegt in der Zukunft (2026-10-16)": 1,
       "kein verlässliches Quell-/Post-Datum gefunden": 117,
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 2,
       "ausgeschlossene Quelle (gastro.news)": 20,
@@ -63,7 +64,7 @@
       "nicht Wien": 13,
       "ausgeschlossene Quelle": 21,
       "sonstiges": 2,
-      "Post-Datum in Zukunft": 1,
+      "Post-Datum in Zukunft": 2,
       "kein echtes Post-Datum": 117,
       "Gewinnspiel": 2
     },
@@ -145,6 +146,15 @@
         "warnings": 0,
         "reasonCategoryCounts": {
           "ungültige URL": 3
+        }
+      },
+      "instagram-ai-agent": {
+        "total": 3,
+        "allowed": 2,
+        "blocked": 1,
+        "warnings": 1,
+        "reasonCategoryCounts": {
+          "Post-Datum in Zukunft": 1
         }
       },
       "jö Bonus Club": {
@@ -230,7 +240,40 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "instagram-ai-fe6bca4a71ea",
+      "title": "Kürbisfest: Gratis-Aktion in Wien",
+      "brand": "Kürbisfest",
+      "source": "instagram-ai-agent",
+      "url": "https://www.instagram.com/reel/Degzk64OWx9/",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-10-15T11:02:54.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-26",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "instagram-ai-bdeb79fe363d",
+      "title": "Sie berät kostenlos zu Möglichkeiten, Voraussetzungen, Kosten und Vorbereitung.",
+      "brand": "Wiener Jugend",
+      "source": "instagram-ai-agent",
+      "url": "https://www.instagram.com/p/DeRTD_wiDAr/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen"
+      ],
+      "sourceDate": "2026-10-09T10:30:10.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 6,
+      "expiryDate": "2026-10-15",
+      "expirySource": "url.contentHints.title",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "events-0-20260222",
@@ -397,15 +440,13 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 235,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "events-9-20260222",
@@ -3252,17 +3293,15 @@
       "url": "https://www.orthodoxie.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2026-02-22)"
+        "älter als 7 Tage (2025-12-30)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
-      "sourceDate": "2026-02-22T21:12:35.964Z",
-      "sourceDateSource": "deal.pubDate",
-      "sourceAgeDays": 235,
+      "warnings": [],
+      "sourceDate": "2025-12-30T14:00:40.000Z",
+      "sourceDateSource": "url.publicationDate",
+      "sourceAgeDays": 289,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gottesdienste-24-20260222",
@@ -3429,6 +3468,26 @@
       "expiryDate": "2026-10-29",
       "expirySource": "deal.expires",
       "urlStatus": "ungültig: HTTP 404"
+    },
+    {
+      "id": "instagram-ai-53d639e87764",
+      "title": "Vienna Memories 🇦🇹 Süße Mini-Prints aus Wien für nur 1 €! 🎀 POSTYBOX",
+      "brand": "Viennamemories",
+      "source": "instagram-ai-agent",
+      "url": "https://www.instagram.com/p/Dei3clJDc4Z/",
+      "reasons": [
+        "Quell-/Post-Datum liegt in der Zukunft (2026-10-16)"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen; Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-10-16T06:15:11.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": null,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "joe-omv-viva-free-taste-19nkk2p",
