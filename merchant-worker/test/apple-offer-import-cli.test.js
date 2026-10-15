@@ -47,6 +47,26 @@ test('malformed duplicate foreign-app and mismatched-code rows fail closed witho
   }
 });
 
+test('second-round inventory requires its own inspected Store offer and preserves customer/product boundaries', () => {
+  const data = bytes(500);
+  const definitions = [
+    ['referral-active-monthly-2026-r2', '9947151e-1f9b-49bb-ab44-21e48a23951e', '6810249175', 'monthly', 'existing'],
+    ['referral-earned-month-2026-r2', '938442b7-eec5-468c-a115-3633121ac360', '6810249175', 'monthly', 'new_or_expired'],
+    ['referral-active-yearly-2026-r2', 'f422214a-e757-4a1e-a7df-1623a8dd65b6', '6810354972', 'yearly', 'existing'],
+  ];
+  for (const [offerId, uuid, product, period, customerType] of definitions) {
+    const sourceURL = `https://appstoreconnect.apple.com/apps/6758958213/distribution/subscriptions/${product}/pricing/offer-codes/${uuid}`;
+    const meta = {...manifest(data), offerId, sourceURL};
+    const offers = prepareOffers(data, meta, now);
+    assert.equal(offers.length, 500);
+    assert.ok(offers.every(row => row.offerId === offerId && row.productId === `com.stefanataalla.freefinderwien.premium.${period}` &&
+      row.customerType === customerType && row.freeMonths === 1 && row.autoRenew === true && row.combineIntroductoryOffer === false));
+    assert.throws(() => prepareOffers(data, {...meta, sourceURL: manifest(data).sourceURL}, now));
+    assert.throws(() => prepareOffers(data, {...meta, environment: 'Sandbox'}, now));
+    assert.throws(() => prepareOffers(data, {...meta, offerId: offerId.replace('-r2', '-r3')}, now));
+  }
+});
+
 test('bounded sequential import sends exact batches to fixed host and sanitized success only',async()=>{
   const data=bytes(500),offers=prepareOffers(data,manifest(data),now); let calls=0, offset=0;
   const result=await importOffers(offers,'fixture-secret',async(url,options)=>{

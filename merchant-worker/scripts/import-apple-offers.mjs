@@ -8,8 +8,11 @@ const host = 'https://freefinder-merchant-backend.freefinder-stefan.workers.dev'
 const prefix = 'com.stefanataalla.freefinderwien.premium.';
 const definitions = {
   'referral-active-monthly-2026': ['monthly', 'existing', '3f5a4d1e-eb81-40e1-9acf-b8efde5ebdcc', '6810249175'],
+  'referral-active-monthly-2026-r2': ['monthly', 'existing', '9947151e-1f9b-49bb-ab44-21e48a23951e', '6810249175'],
   'referral-active-yearly-2026': ['yearly', 'existing', '268707cb-8a4b-4fd5-9968-8429d18c9faf', '6810354972'],
+  'referral-active-yearly-2026-r2': ['yearly', 'existing', 'f422214a-e757-4a1e-a7df-1623a8dd65b6', '6810354972'],
   'referral-earned-month-2026': ['monthly', 'new_or_expired', '3d07649b-ad1e-4eb9-842c-c52518f098d7', '6810249175'],
+  'referral-earned-month-2026-r2': ['monthly', 'new_or_expired', '938442b7-eec5-468c-a115-3633121ac360', '6810249175'],
 };
 
 export function readPrivateCodes(path) {

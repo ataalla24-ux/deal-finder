@@ -1,3 +1,38 @@
+Apple second-round inventory and owner-waived Google device step (2026-10-15)
+
+Created three distinct Apple offers with the existing terms: P1M free, AT/DE,
+automatic renewal, no introductory-offer stacking. Monthly existing subscribers:
+referral-active-monthly-2026-r2, Production batch618699. Monthly new/expired:
+referral-earned-month-2026-r2, batch618811. Yearly existing subscribers:
+referral-active-yearly-2026-r2, batch618882. Each has500 codes, expiry31Dec2026.
+Each exact private file/manifest passed validation and all three serial imports
+confirmed500 rows. Existing1500 original codes and Sandbox batches were retained.
+The importer allowlist now binds each new offer to its inspected Apple UUID and
+product/customer category. Seven focused importer tests pass, including rejection
+of an original-offer URL substitution, unknown third round and Sandbox labeling.
+Only CLI/tests/docs changed; no production Worker source or deployment change.
+
+This supplies a second eligible offer, not unlimited repeats or proof of delivered
+benefits. Used offer IDs remain excluded and credit is retained when no offer
+qualifies. No agent code reservation, redemption, purchase or customer mail was
+triggered by import. The program is already ON, so ordinary authorized customer
+requests can use eligible inventory. Private CSVs/manifests remain outside Git.
+
+Owner confirmed Google license-tester sign-in, independently observed on the
+read-only Play emulator. Installed app was1.33(68), installer null. Owner then
+explicitly waived the Play update/redemption step because the laptop was overloaded.
+Record real Google checkout/account-reward E2E as NOT RUN/OWNER WAIVED, never PASS.
+No free or paid checkout was attempted. Emulator ended; no further heavy builds
+or simulators should start until resource constraints are addressed. Login was in
+a read-only instance; persistence after shutdown was not established.
+
+Referral and consent-only email activations below remain ON; QA/test-receipt/
+support gates remain OFF. Apple yearly/new-expired/account-bound lifecycle, social
+recovery, real customer campaign/unsubscribe and digest-device QA are unverified.
+Apple Paid Apps agreement is now ACTIVE, but DAC7 self-classification remains an
+owner-only open form. Public74 release is retained; fresh client changes require
+new build numbers and are not published by this inventory import.
+
 Owner-requested consent-only email activation (2026-10-15, evening)
 
 After the remaining real-campaign QA gap was disclosed, the owner explicitly
