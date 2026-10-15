@@ -1,3 +1,36 @@
+Owner-requested referral activation (2026-10-15, evening)
+
+After being told that genuine Google and complete Apple/account Store tests
+remain missing, the owner explicitly requested: "aktiviere empfehlungsmonate".
+This supersedes the earlier hold on referral rollout, NOT the receipt/identity
+rules or an assertion that those tests passed. The deployment config now enables
+the program, Google active deferral/new subscription (base plan monthly), Apple
+new/expired subscription, attested/legacy claims and read-only source audit.
+Actual live deployment and smoke-test evidence are recorded separately; editing
+this config alone is not proof that production is enabled.
+
+Unchanged: existing subscriptions/prices/trials, Firebase authentication, exact
+Production receipt/owner/source checks, immutable ledger/deduplication, Store
+confirmation and App Attest risk checks. Unknown or legacy-conflicting evidence
+still holds credit for support. No test receipts become production rewards.
+Email/transport/QA/test-receipt/support gates stay OFF. No purchase, deferral,
+customer message, automatic ledger merge or code distribution is an activation
+smoke test. No native binary is modified or reuploaded.
+
+Known limits remain: genuine Google and account-to-reward Store E2E are unproven;
+Apple first-round inventory is finite and a customer's used offer cannot repeat.
+Further rounds require new eligible inventory and retain credit until available.
+Current published Apple1.33 predates the latest account integration; submitted
+1.34(74) is pending the last-known review, and local77 legacy/price fixes are not
+public. Activation does not make those client changes downloadable. Other social,
+email and digest tests remain separate work, not evidence of referral readiness.
+
+For an emergency stop, turn REFERRAL_MONTHS_ENABLED back to0 without deleting
+accounts, reservations, codes or receipt ownership. The previous full deployment
+was112ab31e-9feb-4d0b-a5fa-800d7077a1b2. Never repeat an ambiguous financial call.
+The source-audit alarm starts after a verified account request schedules it;
+turning flags on does not by itself prove the audit has run.
+
 Referral support review (2026-10-15; default OFF)
 
 The three POST routes support-cases, support-case and support-review require the
