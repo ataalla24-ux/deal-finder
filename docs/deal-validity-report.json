@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-15T10:59:27.347Z",
+  "generatedAt": "2026-10-15T11:20:00.838Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 318,
-    "allowed": 0,
-    "blocked": 318,
-    "warnings": 0,
+    "total": 320,
+    "allowed": 1,
+    "blocked": 319,
+    "warnings": 1,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 222,
+      "kein konkretes Angebot erkennbar": 225,
       "älter als 7 Tage (2026-02-22)": 81,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
@@ -27,7 +27,6 @@
       "älter als 7 Tage (2016-10-30)": 3,
       "älter als 7 Tage (2023-09-21)": 3,
       "älter als 7 Tage (2026-10-07)": 3,
-      "kostenlose Infrastruktur statt Deal": 3,
       "älter als 7 Tage (2024-03-18)": 3,
       "nicht eindeutig in Wien": 13,
       "älter als 7 Tage (2026-05-06)": 1,
@@ -47,9 +46,9 @@
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-30)": 1,
       "abgelaufen (2026-08-30)": 4,
+      "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 5,
       "Engagement-Aktion ohne garantierte Gegenleistung": 1,
       "Quell-/Post-Datum liegt in der Zukunft (2026-10-16)": 1,
-      "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 4,
       "kein verlässliches Quell-/Post-Datum gefunden": 117,
       "Gewinnspiel/Verlosung statt direkt nutzbarem Deal": 2,
       "ausgeschlossene Quelle (gastro.news)": 20,
@@ -58,15 +57,15 @@
       "abgelaufen (2026-09-10T23:59:59.999Z)": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 227,
+      "kein konkreter Deal": 231,
       "älter als 7 Tage": 152,
       "ungültige URL": 25,
       "Gottesdienste außerhalb Wochenlauf": 33,
       "abgelaufen": 13,
       "selbst syndiziert": 5,
-      "sonstiges": 5,
       "nicht Wien": 13,
       "ausgeschlossene Quelle": 21,
+      "sonstiges": 2,
       "Post-Datum in Zukunft": 1,
       "kein echtes Post-Datum": 117,
       "Gewinnspiel": 2
@@ -124,10 +123,9 @@
         "warnings": 0,
         "reasonCategoryCounts": {
           "ungültige URL": 3,
-          "kein konkreter Deal": 30,
+          "kein konkreter Deal": 31,
           "Gottesdienste außerhalb Wochenlauf": 32,
-          "älter als 7 Tage": 32,
-          "sonstiges": 1
+          "älter als 7 Tage": 32
         }
       },
       "Google News RSS": {
@@ -168,11 +166,10 @@
         "blocked": 97,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 92,
+          "kein konkreter Deal": 94,
           "älter als 7 Tage": 96,
           "ungültige URL": 9,
           "Gottesdienste außerhalb Wochenlauf": 1,
-          "sonstiges": 2,
           "nicht Wien": 1
         }
       },
@@ -196,14 +193,14 @@
         }
       },
       "Meta Instagram Hashtag API": {
-        "total": 8,
-        "allowed": 0,
-        "blocked": 8,
-        "warnings": 0,
+        "total": 10,
+        "allowed": 1,
+        "blocked": 9,
+        "warnings": 1,
         "reasonCategoryCounts": {
+          "kein konkreter Deal": 7,
           "sonstiges": 1,
-          "Post-Datum in Zukunft": 1,
-          "kein konkreter Deal": 6
+          "Post-Datum in Zukunft": 1
         }
       },
       "power-official-food": {
@@ -237,7 +234,26 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ig-18104825687198218",
+      "title": "19:30 Uhr 📍 Badeschiff Wien 🎟️ EINTRITT FREI – ANMELDUNG PFLICHT!",
+      "brand": "Krimi Unter Sternen",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/reel/DegfSC0kSUx/",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text",
+        "startet am 2026-10-22T00:00:00.000Z"
+      ],
+      "sourceDate": "2026-10-15T08:05:33.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-22T23:59:59.999Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "events-0-20260222",
@@ -1486,13 +1502,15 @@
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 179,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-19-20260419",
@@ -1562,7 +1580,7 @@
       "source": "Freikirchen Wien",
       "url": "https://www.gasometer.at",
       "reasons": [
-        "kostenlose Infrastruktur statt Deal",
+        "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2024-03-18)"
       ],
@@ -2181,7 +2199,7 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.gasometer.at",
       "reasons": [
-        "kostenlose Infrastruktur statt Deal",
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2024-03-18)"
       ],
       "warnings": [],
@@ -2829,7 +2847,7 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.gasometer.at",
       "reasons": [
-        "kostenlose Infrastruktur statt Deal",
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2024-03-18)"
       ],
       "warnings": [],
@@ -3095,13 +3113,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 235,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-16-20260222",
@@ -3577,6 +3597,26 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "meta-ig-17977783743132882",
+      "title": "From 18:00 · Only €5 if you’re under 26 🗓 SATURDAY, 17 OCTOBER 4️⃣ Viennale tickets go on sale ⏰ The festival runs 22 Oct–3 Nov, and the po",
+      "brand": "WIENXTRA",
+      "source": "Meta Instagram Hashtag API",
+      "url": "https://www.instagram.com/reel/Degv1Y5xEhr/",
+      "reasons": [
+        "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten; Caption-Reste oder Emoji-Codes im sichtbaren Text",
+        "startet am 2026-10-16"
+      ],
+      "sourceDate": "2026-10-15T10:30:11.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 0,
+      "expiryDate": "2026-10-18",
+      "expirySource": "url.contentHints.title",
       "urlStatus": "HTTP 200"
     },
     {
