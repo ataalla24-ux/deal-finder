@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-10-15T16:28:46.756Z",
+  "generatedAt": "2026-10-15T16:30:23.908Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 320,
-    "allowed": 0,
+    "total": 321,
+    "allowed": 1,
     "blocked": 320,
-    "warnings": 0,
+    "warnings": 1,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 225,
-      "älter als 7 Tage (2026-02-22)": 81,
+      "kein konkretes Angebot erkennbar": 226,
+      "älter als 7 Tage (2026-02-22)": 82,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-09-14)": 1,
@@ -42,7 +42,6 @@
       "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
-      "älter als 7 Tage (2025-12-30)": 1,
       "Quell-/Post-Datum liegt in der Zukunft (2026-10-16)": 2,
       "abgelaufen (2026-08-30)": 4,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 5,
@@ -55,7 +54,7 @@
       "abgelaufen (2026-09-10T23:59:59.999Z)": 1
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 231,
+      "kein konkreter Deal": 232,
       "älter als 7 Tage": 154,
       "ungültige URL": 22,
       "Gottesdienste außerhalb Wochenlauf": 33,
@@ -172,7 +171,7 @@
         "blocked": 97,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 94,
+          "kein konkreter Deal": 95,
           "älter als 7 Tage": 96,
           "ungültige URL": 9,
           "Gottesdienste außerhalb Wochenlauf": 1,
@@ -188,23 +187,30 @@
           "nicht Wien": 3
         }
       },
+      "Meta Ad Library API": {
+        "total": 1,
+        "allowed": 1,
+        "blocked": 0,
+        "warnings": 1,
+        "reasonCategoryCounts": {}
+      },
       "Meta Instagram Business Discovery": {
-        "total": 7,
+        "total": 8,
         "allowed": 0,
-        "blocked": 7,
+        "blocked": 8,
         "warnings": 0,
         "reasonCategoryCounts": {
           "selbst syndiziert": 3,
-          "kein konkreter Deal": 4
+          "kein konkreter Deal": 5
         }
       },
       "Meta Instagram Hashtag API": {
-        "total": 11,
+        "total": 10,
         "allowed": 0,
-        "blocked": 11,
+        "blocked": 10,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 9,
+          "kein konkreter Deal": 8,
           "sonstiges": 1,
           "Post-Datum in Zukunft": 1
         }
@@ -240,7 +246,27 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "meta-ad-1110887824818940",
+      "title": "20 % Rabatt",
+      "brand": "Der Fleischer am Eck",
+      "source": "Meta Ad Library API",
+      "url": "https://www.facebook.com/ads/library/?id=1110887824818940",
+      "reasons": [],
+      "warnings": [
+        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text",
+        "Aktive Meta-Anzeige frisch durch Meta bestätigt; Kampagnenstart bleibt unverändert, Ablauf und relative Aktionsdaten werden separat geprüft",
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
+      "sourceDate": "2026-10-10T00:00:00.000Z",
+      "sourceDateSource": "deal.meta-ad-delivery-start",
+      "sourceAgeDays": 5,
+      "expiryDate": "2026-10-18T16:10:21.759Z",
+      "expirySource": "deal.structured",
+      "urlStatus": "unklar: HTTP 403"
+    }
+  ],
   "blocked": [
     {
       "id": "events-0-20260222",
@@ -289,15 +315,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.donauinselfest.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 235,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "events-3-20260222",
@@ -3260,15 +3289,17 @@
       "url": "https://www.orthodoxie.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2025-12-30)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2025-12-30T14:00:40.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 289,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 235,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-24-20260222",
@@ -3656,7 +3687,7 @@
       "sourceDate": "2026-10-16T06:15:11.000Z",
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": null,
-      "expiryDate": "2026-10-18T12:25:07.181Z",
+      "expiryDate": "2026-10-18T16:10:21.759Z",
       "expirySource": "deal.structured",
       "urlStatus": "HTTP 200"
     },
@@ -3682,8 +3713,8 @@
     {
       "id": "meta-ig-18049900199814151",
       "title": "The first drink is on us.",
-      "brand": "Apple",
-      "source": "Meta Instagram Hashtag API",
+      "brand": "AfriVision Austria",
+      "source": "Meta Instagram Business Discovery",
       "url": "https://www.instagram.com/p/DefB9lOCLqq/",
       "reasons": [
         "kein konkretes Angebot erkennbar"
