@@ -87,6 +87,63 @@ test('concurrent sends have exactly one immutable delivery and reserve provider 
   assert.equal(r.sent.length, 1);
 });
 
+test('enabled delivery never enrolls users; real account choices govern each send and unsubscribe', async t => {
+  const r = await runtime(t);
+  await r.call('clear', { keys: ['account:' + accountId] });
+  const auth = { accountId, principal: { id: accountId, email: account.email,
+    providers: ['password'], authTime: Date.now() / 1000 }, trustedIP: 'consent-lifecycle' };
+  const off = { rewardEmails: false, dealEmails: false, weeklyEmails: false };
+  const profile = await r.call('account-profile', auth);
+  assert.equal(profile.status, 200);
+  assert.equal(profile.body.emailDelivery, true);
+  assert.deepEqual(profile.body.preferences, off);
+  for (const preference of Object.keys(off)) {
+    assert.equal((await r.send({ preference, logicalId: 'before:' + preference })).body.state, 'no_consent');
+  }
+  for (const patch of [{ consentVersion: 0, preferences: { dealEmails: true } },
+    { consentVersion: 1, preferences: { dealEmails: 'true' } }]) {
+    assert.equal((await r.call('account-preferences', { ...auth, ...patch })).status, 400);
+  }
+  const consent = await r.call('account-preferences', { ...auth, consentVersion: 1, preferences: { dealEmails: true } });
+  assert.equal(consent.status, 200);
+  assert.deepEqual(consent.body.preferences, { ...off, dealEmails: true });
+  for (const preference of ['rewardEmails', 'weeklyEmails']) {
+    assert.equal((await r.send({ preference, logicalId: 'after:' + preference })).body.state, 'no_consent');
+  }
+  assert.equal((await r.send()).body.state, 'accepted');
+  assert.equal(r.sent.length, 1);
+  const saved = (await r.call('rows')).body['account:' + accountId];
+  assert.equal(saved.consentEvents.at(-1).source, 'account');
+  assert.equal(saved.consentEvents.at(-1).version, 1);
+  assert.deepEqual(saved.consentEvents.at(-1).preferences, { ...off, dealEmails: true });
+  const url = r.sent[0].body.headers['List-Unsubscribe'].slice(1, -1);
+  assert.equal((await r.mf.dispatchFetch(url, { method: 'POST', body: 'List-Unsubscribe=One-Click' })).status, 200);
+  assert.deepEqual((await r.call('account-profile', auth)).body.preferences, off);
+  for (const preference of Object.keys(off)) {
+    assert.equal((await r.send({ preference, logicalId: 'unsubscribed:' + preference })).body.state, 'no_consent');
+  }
+  assert.equal(r.sent.length, 1);
+});
+
+test('verified address replacement clears all mail consent before subsequent delivery', async t => {
+  const r = await runtime(t);
+  const auth = { accountId, principal: { id: accountId, email: 'replacement@example.test',
+    providers: ['password'], authTime: Date.now() / 1000 }, trustedIP: 'consent-address-change' };
+  const changed = await r.call('account-profile', auth);
+  assert.equal(changed.status, 200);
+  assert.deepEqual(changed.body.preferences, { rewardEmails: false, dealEmails: false, weeklyEmails: false });
+  assert.equal((await r.send()).body.state, 'no_consent');
+  assert.equal(r.sent.length, 0);
+  const consent = await r.call('account-preferences', { ...auth, consentVersion: 1, preferences: { weeklyEmails: true } });
+  assert.equal(consent.status, 200);
+  assert.equal((await r.send()).body.state, 'no_consent');
+  assert.equal((await r.send({ preference: 'weeklyEmails', logicalId: 'new-address-weekly' })).body.state, 'accepted');
+  assert.deepEqual(r.sent[0].body.to, ['replacement@example.test']);
+  const saved = (await r.call('rows')).body['account:' + accountId];
+  assert.equal(saved.consentEvents[0].reason, 'email_changed');
+  assert.deepEqual(saved.consentEvents[0].preferences, { rewardEmails: false, dealEmails: false, weeklyEmails: false });
+});
+
 test('unknown responses and persisted pre-send attempts never replay, even with a changed body', async t => {
   const r = await runtime(t); r.failProvider(503);
   assert.equal((await r.send()).body.state, 'unknown');

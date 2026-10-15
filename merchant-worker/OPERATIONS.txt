@@ -1,4 +1,34 @@
-Owner-requested referral activation (2026-10-15, evening)
+Owner-requested consent-only email activation (2026-10-15, evening)
+
+After the remaining real-campaign QA gap was disclosed, the owner explicitly
+requested: "aktiviere sie fuer nutzer die zugestimmt haben". This supersedes the
+previous customer-mail hold only for recipients with an existing explicit true
+preference for the relevant category. ACCOUNT_EMAIL_ENABLED and
+ACCOUNT_EMAIL_TRANSPORT_ENABLED are now1 in deployment config. Live evidence is
+recorded separately; config edits alone do not prove production activation.
+
+No preferences, accounts, address lists or subscriptions are changed or imported.
+New accounts remain opted out of every category. Authenticated preference changes
+require a currently verified address and consentVersion1. Address changes reset
+all choices. Each send rechecks the current category, account/deletion status and
+address suppression. Unsubscribe GET remains inert; POST turns all email choices
+off. Signed bounce/complaint suppression, immutable logical-message deduplication,
+unknown-outcome no-retry behavior and90/day,2700/month attempt caps remain intact.
+
+Existing Vienna daytime schedule and fresh/approved digest rules are unchanged.
+No manual broadcast, QA resend, clock override or paid service upgrade. The
+QA/test-receipt/support gates remain0; referral settings stay enabled. Sender is
+FreeFinder <hallo@freefinder.at>, reply-to freefinder.at@gmail.com. Tracking stays
+off. Production source, storage bindings and protected credentials are unchanged.
+
+Real Workers/SQLite tests cover account choice -> category-specific send -> HTTP
+unsubscribe and verified-address replacement; Resend responses are fixtures.
+The earlier single owner test has a genuine delivered receipt. Neither is proof
+that a real customer campaign has reached an inbox. Do not claim full campaign,
+social recovery, digest-device or Store E2E completion. Emergency email stop:
+set both email flags to0, preserving all user preferences, ledgers and referrals.
+
+Owner-requested referral activation (2026-10-15, evening; email hold superseded above)
 
 After being told that genuine Google and complete Apple/account Store tests
 remain missing, the owner explicitly requested: "aktiviere empfehlungsmonate".
