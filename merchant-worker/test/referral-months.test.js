@@ -262,7 +262,7 @@ async function earnedReward(t, bindings = {}) {
   await call('confirm', { ...friend, transactionId: apple.transactionId });
   const rewardId = (await call('status', owner)).rewards[0].id;
   await call('import-apple-offers', { offers: [{ productId: apple.productId, offerId: 'platform-lock-fixture',
-    code: 'PLATFORMTESTONLY', customerType: 'existing', freeMonths: 1, expiresAt: now + 60 * DAY }] });
+    code: 'PLATFORMTESTONLY', customerType: 'existing', environment: 'Production', freeMonths: 1, expiresAt: now + 60 * DAY }] });
   await fixture({ apple: { ...apple, offerType: null }, play, deferResult: { ok: false, definitive: false } });
   return { ...runtimeState, owner, rewardId };
 }
@@ -436,7 +436,7 @@ test('new and expired Apple inviters require an explicitly renewing non-stacked 
   const { call, owner, rewardId } = await earnedReward(t, { REFERRAL_APPLE_REWARD_SUBSCRIPTION_ENABLED: '1' });
   const offer = { productId: apple.productId, offerId: 'returning-earned-month', code: 'RETURNINGTESTONLY',
     customerType: 'new_or_expired', freeMonths: 1, expiresAt: now + 60 * DAY,
-    autoRenew: true, combineIntroductoryOffer: false };
+    autoRenew: true, combineIntroductoryOffer: false, environment: 'Production' };
   for (const patch of [{ autoRenew: false }, { autoRenew: undefined }, { combineIntroductoryOffer: true },
     { combineIntroductoryOffer: undefined }]) {
     await call('import-apple-offers', { offers: [{ ...offer, ...patch }] }, 400);
@@ -775,7 +775,7 @@ test('Apple links reserve once; only matching authoritative redemption marks the
   await call('confirm', { ...b, transactionId: apple.transactionId });
   const sourceEvidence = (await stored(a.accountId))[0].sourceEvidence;
   await call('import-apple-offers', { offers: [{ productId: apple.productId, offerId: 'reward-month-a',
-    code: 'TESTCODEONLY', customerType: 'existing', freeMonths: 1, expiresAt: now + 60 * DAY }] });
+    code: 'TESTCODEONLY', customerType: 'existing', environment: 'Production', freeMonths: 1, expiresAt: now + 60 * DAY }] });
   await fixture({ apple: { ...apple, offerType: null } });
   const rewardId = (await call('status', a)).rewards[0].id;
   const reserved = await call('redeem', { ...a, rewardId, transactionId: apple.transactionId });

@@ -536,7 +536,7 @@ budget. Reinstallation loses an unsynced local hint. Google may stop serving a
 subscription more than60days after expiry; missing hints or ownership remain
 manual support, never guessed successful or automatically released cross-store.
 
-This is not activation of the full referral program. Apple code inventory is
+This is not activation of the full referral program. Apple production code inventory is
 still empty, Play reward offer remains DRAFT and developer-determined eligibility
 is not Store-enforced. One-time Google promo codes are a potential alternative
 with explicit3-90day trial terms and outside-app ownership implications; no
@@ -544,4 +544,30 @@ promotion/terms accepted, code generated or existing offer changed here.
 https://developer.android.com/google/play/billing/promo
 https://developers.google.com/android-publisher/api-ref/rest/v3/orders
 https://developer.apple.com/documentation/devicecheck/validating-apps-that-connect-to-your-server
+
+Apple inventory safety and Sandbox preparation (2026-10-15)
+
+Each of the three existing referral offers now has ten Sandbox-only codes,
+expiring2026-12-31. These are private operator downloads, NOT in this repository
+or the production reward ledger. No redemption, purchase, code distribution or
+production-code creation occurred. Sandbox testing never settles live rewards.
+
+import-apple-offers requires an explicit environment:"Production" on every row.
+It rejects Sandbox/unknown environment and fields outside the documented offer
+metadata; it accepts at most100 rows. The environment is an authenticated operator
+assertion, NOT independent Apple verification of an opaque code. Check the Store
+batch type and terms before import; never label Sandbox codes as Production.
+Code re-import is idempotent, preserves assignedTo and rejects changed metadata.
+An entire conflicting batch rolls back. Old unclassified rows remain preserved
+but cannot be newly reserved until an operator reimports identical metadata with
+the verified environment. Existing pending redemption URLs remain unchanged.
+
+Reservation scans at most2000 rows in ten200-row pages. A private reward cursor
+continues on the next explicit attempt, without consuming credit. Exhaustion or
+success clears it; product, customer type or prior-used offer changes reset it.
+No client-supplied cursor is accepted, and it is omitted from status/export and
+removed with the account. New rows inserted before a cursor are visible on the
+next full pass. Used/expired/wrong-product/Sandbox/unclassified codes are skipped.
+This corrects the former first1000-row cutoff without an unbounded ledger scan.
+Reference: https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/
 

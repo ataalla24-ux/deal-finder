@@ -325,17 +325,29 @@ export class ReferralMonthsLedger {
     }
     if (action === 'import-apple-offers') {
       if (!Array.isArray(body.offers) || body.offers.length > 100) fail('Maximal 100 Store-Angebote.');
+      const fields = ['productId', 'offerId', 'code', 'freeMonths', 'customerType', 'expiresAt',
+        'autoRenew', 'combineIntroductoryOffer', 'environment'];
       for (const offer of body.offers) {
-        if (!APPLE_PRODUCTS.has(offer.productId) || !/^[A-Za-z0-9_-]{3,100}$/.test(offer.offerId || '') ||
+        if (!offer || Object.keys(offer).some(field => !fields.includes(field)) ||
+            offer.environment !== 'Production' || !APPLE_PRODUCTS.has(offer.productId) || !/^[A-Za-z0-9_-]{3,100}$/.test(offer.offerId || '') ||
             !/^[A-Z0-9]{6,64}$/.test(offer.code || '') || offer.freeMonths !== 1 ||
             !['new', 'existing', 'expired', 'new_or_expired'].includes(offer.customerType) ||
             (offer.customerType === 'new_or_expired' && (offer.autoRenew !== true || offer.combineIntroductoryOffer !== false)) ||
             !Number.isFinite(offer.expiresAt) || offer.expiresAt <= now) fail('Ungültiges Store-Angebot.');
       }
-      for (const offer of body.offers) {
-        const key = 'offer:' + await referralHash(offer.code);
-        if (!await this.storage.get(key)) await this.storage.put(key, offer);
-      }
+      const rows = [];
+      for (const offer of body.offers) rows.push(['offer:' + await referralHash(offer.code), offer]);
+      await this.storage.transaction(async tx => {
+        for (const [offerKey, offer] of rows) {
+          const previous = await tx.get(offerKey);
+          if (previous && fields.some(field => field !== 'environment' && previous[field] !== offer[field]) ||
+              previous?.environment && previous.environment !== 'Production') {
+            fail('Dieser Code wurde bereits mit anderen Angebotsdaten hinterlegt.', 409);
+          }
+          // Re-import may classify an old record, but must never clear its reservation.
+          await tx.put(offerKey, previous ? { ...previous, environment: 'Production' } : offer);
+        }
+      });
       return { ok: true };
     }
     const bucketKey = `rate:${body.trustedIP}`;
@@ -480,11 +492,28 @@ export class ReferralMonthsLedger {
           fail('Dein Monat bleibt gutgeschrieben. Das passende Abo-Angebot ist noch nicht verfügbar.', 409);
         }
         const productId = purchase?.product || `${APP}.premium.monthly`;
-        const offers = await this.storage.list({ prefix: 'offer:', limit: 1000 });
         const previous = new Set(account.rewards.map(x => x.offerId).filter(Boolean));
-        const item = [...offers].find(([, offer]) => !offer.assignedTo && offer.productId === productId &&
-          offer.expiresAt > now + DAY && offer.customerType === (purchase ? 'existing' : 'new_or_expired') &&
-          (purchase || offer.autoRenew === true && offer.combineIntroductoryOffer === false) && !previous.has(offer.offerId));
+        const customerType = purchase ? 'existing' : 'new_or_expired';
+        const scope = await referralHash(JSON.stringify([productId, customerType, [...previous].sort()]));
+        let after = reward.appleOfferSearch?.scope === scope ? reward.appleOfferSearch.after : undefined;
+        let item, more = false;
+        // Bounded pages keep large/used inventories from hiding later codes or blocking the ledger.
+        for (let page = 0; page < 10; page++) {
+          const offers = await this.storage.list({ prefix: 'offer:', limit: 200, ...(after ? { startAfter: after } : {}) });
+          item = [...offers].find(([, offer]) => offer.environment === 'Production' && !offer.assignedTo &&
+            offer.productId === productId && offer.expiresAt > now + DAY && offer.customerType === customerType &&
+            (purchase || offer.autoRenew === true && offer.combineIntroductoryOffer === false) && !previous.has(offer.offerId));
+          more = offers.size === 200;
+          if (item || !more) break;
+          after = [...offers.keys()].at(-1);
+        }
+        delete reward.appleOfferSearch;
+        if (!item && more) {
+          reward.appleOfferSearch = { scope, after };
+          await this.storage.put(key, account);
+          fail('Apple-Angebote werden noch geprüft. Dein Monat bleibt erhalten. Bitte erneut prüfen.', 409);
+        }
+        if (!item) await this.storage.put(key, account);
         if (!item) fail('Dein Monat bleibt gutgeschrieben. Ein passendes Apple-Angebot ist noch nicht verfügbar.', 409);
         const [offerKey, offer] = item;
         Object.assign(reward, { state: 'store_confirmation', redemptionPlatform: 'ios', offerId: offer.offerId,
