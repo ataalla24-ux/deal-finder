@@ -571,3 +571,62 @@ next full pass. Used/expired/wrong-product/Sandbox/unclassified codes are skippe
 This corrects the former first1000-row cutoff without an unbounded ledger scan.
 Reference: https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/
 
+Apple legacy association and production inventory (2026-10-15)
+
+REFERRAL_APPLE_LEGACY_BINDING_ENABLED defaults OFF. Together with the existing
+program/attested-claims gates it permits purpose=legacy on the existing Apple
+challenge/confirm routes. Recent verified-account authentication, earned credit,
+owned enrolled App Attest key, production risk assessment and a five-minute
+single-use assertion bind the exact account/reward/key/transaction/old UUIDv4.
+Its signature domain is FreeFinder:apple-legacy:v1, separate from tokenless claims.
+The native app independently checks production PURCHASED/no-revocation/active
+premium entitlement, exact pre-existing Keychain UUID and StoreKit device proof.
+The server fetches the exact Production receipt and checks identity/product/
+expiry/AT-DE. It stores only immutable chain ownership and a legacy-token hash.
+It NEVER calls Set App Account Token, merges old rewards, grants Pro, buys,
+acknowledges, defers, or deletes an old account. Any existing old-account record
+or deletion tombstone blocks automatic association for explicit support review.
+Fresh assertions may recover a lost response; counters never reset. Binding and
+dedup tombstones survive deletion, while private keys/receipts/challenges do not.
+This handles old purchase identity, not migration of an existing legacy ledger.
+
+Production Apple inventory now exists: 500 codes each in batches618085 (active
+monthly),617955 (new/expired earned month),618050 (active yearly). Existing offer
+definitions/Store prices/subscriptions are unchanged. Apple UI confirmed each
+Production batch separately from its10 Sandbox codes. Expiry31Dec2026; the ledger
+uses conservative00:00UTC that day. All1500 imports returned confirmed success.
+No code was distributed/reserved/redeemed and the customer program remainsOFF.
+These three offers are not an unlimited repeat-redemption solution: one offer
+ID cannot be reused by the same customer. More rounds require separate verified
+offer definitions and inventory. Existing selection preserves credit when none
+qualify; never reuse a consumed offer or pretend inventory is a delivered month.
+
+scripts/import-apple-offers.mjs --check|--import PRIVATE_MANIFEST.json PRIVATE_CODES.csv
+uses fixed host, existing Keychain service freefinder-referral-admin/account
+freefinder, no secrets in argv/output, private regular no-symlink input, bounded
+file/response sizes, exact SHA256/count/known-offer/AT-DE/renewal metadata and
+headerless Apple CODE,URL validation. The manifest is operator evidence, NOT an
+Apple signature or automatic validation of opaque code terms. Verify batch type
+and terms in App Store Connect before creating it. Sandbox files must never be
+reclassified. All rows validate before any request; serial batches obey BOTH
+100-row and16000-byte endpoint limits. Redirects/uncertain results stop without
+automatic retry; only identical data may be reimported. Server idempotence keeps
+all existing assignments and rejects changed metadata atomically per batch.
+
+Missing referral admin credential was provisioned as a separate random secret,
+stored in owner Keychain and protected existing Worker binding. Previous14secret
+names and all customer flags preserved. Secret-only version3c4d1a7d-77e2-42a7-
+8dda-ee843ed6dc98 retained previous source. No secret is in repository/output.
+Code files/manifests are private outside the checkout; only counts/batch IDs and
+file hashes appear in operator reports. No new user, purchase, billing change,
+customer email or public release was created by provisioning or inventory import.
+
+Actual Workers/SQLite lifecycle test covers invitation confirmation, duplicate
+acquisition, legacy assertion, code reservation, exact30-day settlement, duplicate
+settlement and preservation after source revocation. Store/risk I/O is controlled
+fixture data, not genuine customer E2E. Native fixture/build/simulator proof is
+also separate from hardware attestation and final Store redemption. Keep rollout
+gatesOFF until the actual account/reward receipt lifecycle and supported Store
+paths are verified. Play private test promotion remainsPAUSED, earned offerDRAFT;
+its eligibility/ownership path and real tester completion are still outstanding.
+

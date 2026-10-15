@@ -25,14 +25,15 @@ function decodeStoreJWS(value) {
   try { return JSON.parse(atob(value.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); }
   catch { fail('Store-Antwort konnte nicht gelesen werden.', 502); }
 }
-export function referralPurchase(platform, raw, account, now = Date.now(), { historicalAppleRedemption = false, rewardSubscriptionConfirmation = false, attestedAppleOwner = null } = {}) {
+export function referralPurchase(platform, raw, account, now = Date.now(), { historicalAppleRedemption = false, rewardSubscriptionConfirmation = false, attestedAppleOwner = null, attestedLegacyToken = null } = {}) {
   if (platform === 'ios') {
     // Expired proof is only for settling a reserved, already-consumed free code, never for granting access or new trials.
     const historicalCode = historicalAppleRedemption && raw.offerType === 3 && raw.offerDiscountType === 'FREE_TRIAL' &&
       typeof raw.offerIdentifier === 'string' && raw.offerIdentifier.length > 0 &&
       Number.isFinite(Number(raw.purchaseDate)) && Number(raw.purchaseDate) > 0 && Number(raw.expiresDate) > Number(raw.purchaseDate);
     if (raw.bundleId !== APP || raw.environment !== 'Production' || !APPLE_PRODUCTS.has(raw.productId) ||
-        !(raw.appAccountToken?.toLowerCase() === account || raw.appAccountToken == null && attestedAppleOwner === account) ||
+        !(raw.appAccountToken?.toLowerCase() === account || attestedAppleOwner === account &&
+          (raw.appAccountToken == null || attestedLegacyToken != null && raw.appAccountToken?.toLowerCase() === attestedLegacyToken)) ||
         raw.revocationDate != null || !raw.originalTransactionId ||
         (!historicalCode && Number(raw.expiresDate) <= now) || !Number.isFinite(Number(raw.expiresDate))) fail('Kein passendes aktives App-Store-Abo.', 409);
     return { key: `ios:${raw.originalTransactionId}`, product: raw.productId, account,
@@ -693,6 +694,7 @@ export class ReferralMonthsLedger {
   status(account) {
     return { ok: true, enabled: this.env.REFERRAL_MONTHS_ENABLED === '1', code: account.code,
       appleAttestedClaims: this.env.REFERRAL_APPLE_ATTESTED_CLAIMS_ENABLED === '1',
+      appleLegacyBinding: this.env.REFERRAL_APPLE_ATTESTED_CLAIMS_ENABLED === '1' && this.env.REFERRAL_APPLE_LEGACY_BINDING_ENABLED === '1',
       accepted: !!account.referredBy, confirmed: !!account.confirmedAt,
       earnedMonths: account.rewards.reduce((n, r) => n + r.months, 0),
       redeemedMonths: account.rewards.filter(r => r.state === 'redeemed').length,
@@ -710,7 +712,8 @@ export class ReferralMonthsLedger {
       const raw = decodeStoreJWS(result.signedTransactionInfo);
       if (raw.transactionId !== body.transactionId) fail('Apple-Kauf passt nicht zur Anfrage.', 409);
       const attestedAppleOwner = this.appleBoundOwner ? await this.appleBoundOwner(raw, account) : null;
-      return referralPurchase('ios', raw, account.id, Date.now(), { historicalAppleRedemption, attestedAppleOwner });
+      return referralPurchase('ios', raw, account.id, Date.now(), { historicalAppleRedemption, attestedAppleOwner,
+        attestedLegacyToken: attestedAppleOwner === account.id ? raw.appAccountToken?.toLowerCase() : null });
     }
     if (!/^[A-Za-z0-9._~+\/=:-]{20,2048}$/.test(body.purchaseToken || '')) fail('Google-Play-Kaufbestätigung fehlt.');
     const raw = await this.playPurchase(body.purchaseToken);

@@ -55,7 +55,8 @@ export function verifyAppleDeviceAssertion(body, payload, key) {
     return result.signCount;
   } catch { fail('Gerätenachweis abgelaufen. Bitte erneut prüfen.'); }
 }
-export function appleClaimPayload({ purpose, accountId, keyId, rewardId, transactionId = '', nonce }) {
+export function appleClaimPayload({ purpose, accountId, keyId, rewardId, transactionId = '', nonce, legacyAccountId = '' }) {
+  if (purpose === 'legacy') return ['FreeFinder:apple-legacy:v1', accountId, keyId, rewardId, transactionId, legacyAccountId, nonce].join('\n');
   return ['FreeFinder:apple-reward:v1', purpose, accountId, keyId, rewardId, transactionId, nonce].join('\n');
 }
 
@@ -75,17 +76,26 @@ export function appleRewardClaims(Base) {
       const enrolled = await this.storage.get(deviceKey);
       if (enrolled && (enrolled.accountId !== account.id || enrolled.deletedAt)) fail('Dieses Gerät ist bereits einem anderen Konto zugeordnet.');
       const indexKey = 'apple-devices:' + account.id;
-      const purpose = action === 'apple-claim-key' ? 'enroll' : action === 'apple-claim-confirm' ? 'claim' : body.purpose;
-      if (!['enroll', 'claim'].includes(purpose) || purpose === 'claim' && !/^\d{5,30}$/.test(body.transactionId || '')) fail('Ungültige Apple-Anfrage.', 400);
+      const purpose = action === 'apple-claim-key' ? 'enroll' : action === 'apple-claim-confirm' && body.purpose !== 'legacy' ? 'claim' : body.purpose;
+      const legacy = purpose === 'legacy';
+      if (!['enroll', 'claim', 'legacy'].includes(purpose) || purpose !== 'enroll' && !/^\d{5,30}$/.test(body.transactionId || '')) fail('Ungültige Apple-Anfrage.', 400);
+      if (legacy) {
+        if (this.env.REFERRAL_APPLE_LEGACY_BINDING_ENABLED !== '1') fail('Die Zuordnung älterer Abos ist noch nicht verfügbar.', 503);
+        requireRecentAuth(body.principal.authTime, now / 1000);
+        // Old installations generated v4 UUIDs; authenticated IDs occupy a separate v8 namespace.
+        if (!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(body.legacyAccountId || '') ||
+            body.legacyAccountId === account.id || reward.state !== 'earned') fail('Keine passende ältere Abo-Kennung.');
+      }
       const challengeKey = `apple-challenge:${account.id}:${purpose}`;
       if (action === 'apple-claim-challenge') {
         if (purpose === 'enroll' && enrolled) return { ok: true, enrolled: true };
         if (purpose === 'enroll') {
           requireRecentAuth(body.principal.authTime, now / 1000);
           if ((await this.storage.get(indexKey) || []).length >= 10) fail('Bitte kontaktiere den Support, um ein weiteres Gerät zu verbinden.');
-        } else if (!enrolled || reward.state !== 'store_confirmation') fail('Bitte zuerst das Gerät und die Gutschrift bestätigen.');
+        } else if (!enrolled || !legacy && reward.state !== 'store_confirmation') fail('Bitte zuerst das Gerät und die Gutschrift bestätigen.');
         const challenge = { purpose, accountId: account.id, keyId: body.keyId, rewardId: reward.id,
-          transactionId: purpose === 'claim' ? body.transactionId : '', nonce: crypto.randomUUID(), expiresAt: now + TTL };
+          transactionId: purpose !== 'enroll' ? body.transactionId : '', nonce: crypto.randomUUID(), expiresAt: now + TTL,
+          ...(legacy ? { legacyAccountId: body.legacyAccountId } : {}) };
         await this.storage.put(challengeKey, challenge);
         return { ok: true, enrolled: false, nonce: challenge.nonce, expiresAt: challenge.expiresAt };
       }
@@ -96,7 +106,8 @@ export function appleRewardClaims(Base) {
       const challenge = await this.storage.get(challengeKey);
       if (!challenge || challenge.expiresAt <= now || challenge.expiresAt > now + TTL || challenge.nonce !== body.nonce ||
           challenge.accountId !== account.id || challenge.keyId !== body.keyId || challenge.rewardId !== reward.id ||
-          challenge.purpose !== purpose || challenge.transactionId !== (purpose === 'claim' ? body.transactionId : '')) {
+          challenge.purpose !== purpose || challenge.transactionId !== (purpose !== 'enroll' ? body.transactionId : '') ||
+          legacy && challenge.legacyAccountId !== body.legacyAccountId) {
         fail('Gerätenachweis abgelaufen. Bitte erneut prüfen.');
       }
       const payload = appleClaimPayload(challenge);
@@ -113,7 +124,7 @@ export function appleRewardClaims(Base) {
         });
         return { ok: true, enrolled: true };
       }
-      if (!enrolled || reward.state !== 'store_confirmation') fail('Keine offene Apple-Bestätigung.');
+      if (!enrolled || !legacy && reward.state !== 'store_confirmation') fail('Keine offene Apple-Bestätigung.');
       const signCount = this.verifyAppleDeviceAssertion(body, payload, enrolled);
       // Consume replay protection before network I/O. A timeout requires a fresh assertion, never another purchase.
       await this.storage.transaction(async tx => {
@@ -129,6 +140,7 @@ export function appleRewardClaims(Base) {
       let raw;
       try { raw = JSON.parse(atob(result.signedTransactionInfo.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); }
       catch { fail('Apple-Antwort konnte nicht bestätigt werden.', 503); }
+      if (legacy) return this.bindLegacyApplePurchase(raw, body, account, now);
       if (raw.transactionId !== body.transactionId || !/^\d{5,30}$/.test(raw.originalTransactionId || '') ||
           raw.appAccountToken != null || raw.inAppOwnershipType !== 'PURCHASED' || !['AUT', 'DEU'].includes(raw.storefront)) {
         fail('Diese Apple-Bestätigung passt nicht zur Gutschrift.');
@@ -155,10 +167,38 @@ export function appleRewardClaims(Base) {
       return this.status(account);
     }
     async appleBoundOwner(raw, account) {
-      if (this.env.REFERRAL_APPLE_ATTESTED_CLAIMS_ENABLED !== '1' || raw.appAccountToken != null ||
+      if (this.env.REFERRAL_APPLE_ATTESTED_CLAIMS_ENABLED !== '1' ||
           !/^\d{5,30}$/.test(raw.originalTransactionId || '')) return null;
       const binding = await this.storage.get('apple-owner:' + await referralHash('ios:' + raw.originalTransactionId));
-      return binding?.method === 'app_attest' && binding.accountId === account.id ? account.id : null;
+      if (binding?.accountId !== account.id) return null;
+      if (binding.method === 'app_attest' && raw.appAccountToken == null) return account.id;
+      if (this.env.REFERRAL_APPLE_LEGACY_BINDING_ENABLED === '1' && binding.method === 'legacy_app_attest' &&
+          typeof raw.appAccountToken === 'string' && binding.legacyTokenHash === await referralHash(raw.appAccountToken.toLowerCase())) return account.id;
+      return null;
+    }
+    async bindLegacyApplePurchase(raw, body, account, now) {
+      if (raw.transactionId !== body.transactionId || !/^\d{5,30}$/.test(raw.originalTransactionId || '') ||
+          raw.appAccountToken?.toLowerCase() !== body.legacyAccountId || raw.inAppOwnershipType !== 'PURCHASED' ||
+          !['AUT', 'DEU'].includes(raw.storefront)) fail('Dieses ältere Abo gehört nicht zum Gerätenachweis.');
+      const purchase = referralPurchase('ios', raw, account.id, now,
+        { attestedAppleOwner: account.id, attestedLegacyToken: body.legacyAccountId });
+      const legacyTokenHash = await referralHash(body.legacyAccountId);
+      const chainKey = 'apple-owner:' + await referralHash(purchase.key);
+      const identityKey = 'apple-legacy-owner:' + legacyTokenHash;
+      const previous = await this.storage.get(chainKey);
+      const previousIdentity = await this.storage.get(identityKey);
+      const usedPurchase = await this.storage.get('purchase:' + await referralHash(purchase.key));
+      // Never merge an old reward ledger, reassign a chain, or clear deletion/deduplication evidence.
+      if (await this.storage.get('account:' + body.legacyAccountId) ||
+          previousIdentity && previousIdentity.accountId !== account.id ||
+          previous && (previous.accountId !== account.id || previous.method !== 'legacy_app_attest' || previous.legacyTokenHash !== legacyTokenHash) ||
+          usedPurchase && usedPurchase !== account.id) fail('Dieses Abo benötigt eine Zuordnungsprüfung durch den Support.');
+      await this.storage.transaction(async tx => {
+        await tx.put({ [chainKey]: previous || { accountId: account.id, method: 'legacy_app_attest',
+          legacyTokenHash, establishedAt: now, receiptId: purchase.transactionId },
+          [identityKey]: previousIdentity || { accountId: account.id, establishedAt: now } });
+      });
+      return { ok: true, linked: true };
     }
     async accountAction(action, body, account, key, now) {
       // Remove public keys and Apple risk receipts before the account tombstone makes retries a no-op.
@@ -167,7 +207,8 @@ export function appleRewardClaims(Base) {
         for (const device of await this.storage.get(indexKey) || []) {
           await this.storage.put(device, { accountId: body.accountId, deletedAt: now });
         }
-        await this.storage.delete([indexKey, `apple-challenge:${body.accountId}:enroll`, `apple-challenge:${body.accountId}:claim`]);
+        await this.storage.delete([indexKey, `apple-challenge:${body.accountId}:enroll`, `apple-challenge:${body.accountId}:claim`,
+          `apple-challenge:${body.accountId}:legacy`]);
       }
       return super.accountAction(action, body, account, key, now);
     }
