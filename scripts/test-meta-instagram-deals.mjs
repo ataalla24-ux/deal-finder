@@ -173,6 +173,10 @@ assert.deepEqual(
   ['chastudio.vienna', 'urbans.wien'],
   'untagged Vienna-style merchant handles are learned, while ordinary URLs are ignored',
 );
+assert.deepEqual(extractMentionedUsernames({ caption: 'Mehr auf wien.orf.at, oesterreich.orf.at und cafe.co.at. Kaffee bei cafe.at und chastudio.vienna.' }),
+  ['cafe.at', 'chastudio.vienna'], 'known website namespaces must not become Business Discovery accounts');
+assert.deepEqual(extractMentionedUsernames({ caption: 'Direkt markiert: @cafe.co.at und @second_cafe. Kontakt mail@example.at.' }),
+  ['cafe.co.at', 'second_cafe'], 'explicit Instagram mentions remain supported even when the name resembles a domain');
 
 assert.deepEqual(
   findViennaEvidence({ targetLocations: [{ name: 'Vienna' }] }, null, config),

@@ -6,12 +6,20 @@ on:
     paths:
       - 'scraper/**'
       - 'scripts/test-slack-food-improvements.mjs'
+      - 'scripts/test-instagram-media-budget.mjs'
+      - 'scripts/test-instagram-max-coverage.mjs'
+      - 'scripts/test-meta-instagram-deals.mjs'
+      - 'scripts/check-meta-instagram-graph.mjs'
+      - 'scripts/test-meta-token-health.mjs'
       - '.github/workflows/instagram-graph-coverage-tests.yml'
   pull_request:
     paths:
       - 'scraper/**'
       - 'scripts/test-instagram-graph*.mjs'
       - 'scripts/test-instagram-shared-quota.mjs'
+      - 'scripts/test-instagram-media-budget.mjs'
+      - 'scripts/test-instagram-max-coverage.mjs'
+      - 'scripts/test-meta-token-health.mjs'
       - 'scripts/test-meta-ad-coverage.mjs'
       - 'scripts/test-meta-recall.mjs'
       - 'scripts/test-discovery-watchdog.mjs'
@@ -49,6 +57,8 @@ jobs:
           node scripts/test-deal-review-feedback.mjs
           node scripts/test-apify-instagram-reliability.mjs
           node scripts/test-instagram-max-coverage.mjs
+          node scripts/test-instagram-media-budget.mjs
+          node scripts/test-meta-token-health.mjs
           node scripts/test-instagram-entity-resolution.mjs
           node scripts/test-slack-approval-validation.mjs
           npm run test:instagram-shared-quota

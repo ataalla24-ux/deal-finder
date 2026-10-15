@@ -41,6 +41,8 @@ jobs:
           npm run test:instagram-food-discovery
           SENTRY_DISABLED=1 node scripts/test-vienna-merchant-discovery.mjs
           SENTRY_DISABLED=1 node scripts/test-instagram-max-coverage.mjs
+          node scripts/test-instagram-media-budget.mjs
+          node scripts/test-meta-token-health.mjs
           npm run test:instagram-shared-quota
           npm run test:meta-ad-coverage
           npm run test:meta-recall
@@ -62,6 +64,7 @@ jobs:
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
           META_GRAPH_VERSION: ${{ vars.META_GRAPH_VERSION }}
           META_INSTAGRAM_TOKEN_EXPIRES_AT: ${{ vars.META_INSTAGRAM_TOKEN_EXPIRES_AT }}
+          META_INSTAGRAM_APP_ID: ${{ vars.META_INSTAGRAM_APP_ID }}
           META_INSTAGRAM_TAGGED_MEDIA_ENABLED: ${{ vars.META_INSTAGRAM_TAGGED_MEDIA_ENABLED }}
           META_INSTAGRAM_REQUIRE_SOURCE: '1'
         run: npm run instagram:meta:check
@@ -140,7 +143,8 @@ jobs:
           META_INSTAGRAM_MEDIA_VISION_MAX_IMAGES_PER_POST: '2'
           META_INSTAGRAM_MEDIA_VISION_DETAIL: 'low'
           META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_RUN: ${{ inputs.validation_scan && '2' || '12' }}
-          META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_DAY: '48'
+          META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_DAY: ${{ vars.META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_DAY || '48' }}
+          META_INSTAGRAM_MEDIA_LLM_PACING_HOURS: '2'
           META_INSTAGRAM_MEDIA_LLM_CONCURRENCY: '1'
         run: node scraper/meta-instagram-deals.js
 

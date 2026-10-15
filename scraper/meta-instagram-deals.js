@@ -29,6 +29,7 @@ import {
   writeInstagramGraphEvidence,
 } from './instagram-graph-evidence.js';
 import { enrichInstagramGraphMedia } from './instagram-media-evidence.js';
+import { assessInstagramMediaBudget } from './instagram-media-budget.js';
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import {
   buildInstagramRoleIndex,
@@ -335,6 +336,7 @@ export function buildConfig(env = process.env, now = new Date()) {
     mediaOcrEnabled: booleanEnv(env, 'META_INSTAGRAM_MEDIA_OCR_ENABLED', true),
     mediaMaxPostsPerRun: numberEnv(env, 'META_INSTAGRAM_MEDIA_MAX_POSTS_PER_RUN', 18, 0, 60),
     mediaLlmMaxCallsPerDay: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_MAX_CALLS_PER_DAY', 48, 0, 1000),
+    mediaLlmPacingHours: numberEnv(env, 'META_INSTAGRAM_MEDIA_LLM_PACING_HOURS', 2, 1, 24),
     mediaMaxAssetsPerPost: numberEnv(env, 'META_INSTAGRAM_MEDIA_MAX_ASSETS_PER_POST', 3, 1, 10),
     mediaMaxVideoFrames: numberEnv(env, 'META_INSTAGRAM_MEDIA_MAX_VIDEO_FRAMES', 4, 1, 12),
     mediaMaxBytes: numberEnv(env, 'META_INSTAGRAM_MEDIA_MAX_BYTES', 25 * 1024 * 1024, 1024 * 1024, 100 * 1024 * 1024),
@@ -367,6 +369,15 @@ export function buildConfig(env = process.env, now = new Date()) {
 
 function normalizedUsername(value) {
   return cleanText(value, 80).replace(/^@/, '').toLowerCase();
+}
+
+function isWebsiteHostname(value) {
+  return /(?:^|\.)(?:orf|gv|ac|co)\.at$/i.test(value);
+}
+
+function isWebsiteOnlyDiscovery(username, account) {
+  return isWebsiteHostname(username)
+    && !(account?.origins || []).some((origin) => /^(?:owner|tagged-mention):/.test(origin));
 }
 
 function hasViennaText(value) {
@@ -511,7 +522,9 @@ export function loadAccountCatalog(config, paths = {}, state = {}) {
       }
     }
   }
-  for (const account of Object.values(state?.discoveredAccounts || {})) add(account, 'graph-discovery');
+  for (const account of Object.values(state?.discoveredAccounts || {})) {
+    if (!isWebsiteOnlyDiscovery(account?.username, account)) add(account, 'graph-discovery');
+  }
   const candidatePaths = Array.isArray(paths.candidatePaths) ? paths.candidatePaths : CANDIDATE_ACCOUNT_PATHS;
   for (const candidatePath of candidatePaths) {
     const payload = readJson(candidatePath, {});
@@ -574,7 +587,7 @@ export function extractMentionedUsernames(deal = {}) {
     .replace(/\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\b/gi, ' ');
   for (const match of withoutLinks.matchAll(/(^|[^a-z0-9._])([a-z0-9_][a-z0-9._]{1,27}\.(?:wien|vienna|at))\b/gi)) {
     const username = normalizedUsername(match[2]);
-    if (!username || /^(?:wien|vienna)\.(?:wien|vienna|at)$/.test(username)) continue;
+    if (!username || isWebsiteHostname(username) || /^(?:wien|vienna)\.(?:wien|vienna|at)$/.test(username)) continue;
     usernames.add(username);
     if (usernames.size >= 6) break;
   }
@@ -1919,7 +1932,8 @@ function pruneDiscoveredAccounts(discoveredAccounts, now, ttlDays = 90) {
   const entries = Object.entries(discoveredAccounts || {})
     .filter(([username, account]) => {
       const timestamp = Date.parse(account?.lastCandidateAt || account?.lastSeenAt || '');
-      return /^[a-z0-9._]{1,30}$/i.test(username) && Number.isFinite(timestamp) && timestamp >= cutoff;
+      return /^[a-z0-9._]{1,30}$/i.test(username) && !isWebsiteOnlyDiscovery(username, account)
+        && Number.isFinite(timestamp) && timestamp >= cutoff;
     })
     .sort(([, left], [, right]) => (
       (Date.parse(right?.lastCandidateAt || right?.lastSeenAt || '') || 0)
@@ -1966,7 +1980,8 @@ function learnGraphAccounts(discoveredAccounts, entry, outcome, now, observedThi
   if (owner && owner !== selectedAccount) remember(owner, outcome?.deal ? 98 : 62, 'owner');
   for (const username of extractMentionedUsernames({ caption })) {
     if (username === owner || username === selectedAccount) continue;
-    remember(username, outcome?.deal ? 88 : 68, 'mention');
+    const explicitlyTagged = new RegExp(`(^|[^a-z0-9._])@${username.replace(/\./g, '\\.')}\\b`, 'i').test(caption);
+    remember(username, outcome?.deal ? 88 : 68, explicitlyTagged ? 'tagged-mention' : 'mention');
   }
 }
 
@@ -2112,13 +2127,9 @@ export async function runMetaInstagramCollector(options = {}) {
     ...(state?.acceptedSeenIds || {}),
   }, now, config.seenTtlDays);
   const previousDiscoveredAccounts = pruneDiscoveredAccounts(state?.discoveredAccounts, now);
-  const previousLlmUsage = (Array.isArray(state.mediaLlmUsage) ? state.mediaLlmUsage : []).filter((row) => {
-    const at = Date.parse(row.at);
-    return at > +now - DAY_MS && at <= +now && Number.isInteger(row.calls) && row.calls > 0;
-  });
-  const usedLlmCalls = previousLlmUsage.reduce((sum, row) => sum + row.calls, 0);
-  config.mediaLlmMaxCallsPerRun = Math.min(config.mediaLlmMaxCallsPerRun,
-    Math.max(0, Number(config.mediaLlmMaxCallsPerDay ?? 48) - usedLlmCalls));
+  const mediaBudget = assessInstagramMediaBudget(state.mediaLlmUsage, config, now);
+  const previousLlmUsage = mediaBudget.retainedUsage;
+  config.mediaLlmMaxCallsPerRun = mediaBudget.report.allowedThisRun;
   const previousPayload = readJson(config.outputPath, null);
   const previousGraphEvidence = loadInstagramGraphEvidence(config.graphEvidencePath).payload;
   const lastGoodPayload = previousPayload && Array.isArray(previousPayload.deals)
@@ -2160,6 +2171,8 @@ export async function runMetaInstagramCollector(options = {}) {
     rejectionReasons: {},
     graphEvidence: { status: configured.instagramGraph ? 'pending' : 'not-configured', observed: 0, retained: 0, blocked: 0 },
     accountDiscovery: { stored: Object.keys(previousDiscoveredAccounts).length, observedThisRun: 0, newThisRun: 0 },
+    discardedWebsiteLeads: Object.entries(state.discoveredAccounts || {})
+      .filter(([username, account]) => isWebsiteOnlyDiscovery(username, account)).map(([username]) => username),
     totalDeals: 0,
   };
 
@@ -2336,12 +2349,18 @@ export async function runMetaInstagramCollector(options = {}) {
     });
     nextState.mediaEvidence = media.cache;
     nextState.mediaBacklog = media.backlog || nextState.mediaBacklog;
-    if (Number(media.report.aiCalls) > 0) nextState.mediaLlmUsage.push({ at: now.toISOString(), calls: Number(media.report.aiCalls) });
+    if (Number(media.report.aiCalls) > 0) {
+      // Ads/OCR can take most of an hour. Charge at completion, not at scan
+      // start, so slow runs cannot release paid calls from the window early.
+      const usageAt = options.now instanceof Date ? now : new Date();
+      nextState.mediaLlmUsage.push({ at: usageAt.toISOString(), calls: Number(media.report.aiCalls) });
+    }
     report.sources.instagramGraph.mediaEvidence = media.report;
     report.mediaClassificationBudget = {
-      maxPer24Hours: config.mediaLlmMaxCallsPerDay ?? 48, usedBeforeRun: usedLlmCalls,
-      allowedThisRun: config.mediaLlmMaxCallsPerRun, callsThisRun: Number(media.report.aiCalls || 0),
-      remaining: Math.max(0, Number(config.mediaLlmMaxCallsPerDay ?? 48) - usedLlmCalls - Number(media.report.aiCalls || 0)),
+      ...mediaBudget.report,
+      callsThisRun: Number(media.report.aiCalls || 0),
+      remaining: Math.max(0, mediaBudget.report.dailyRemaining - Number(media.report.aiCalls || 0)),
+      pacingRemainingAfterRun: Math.max(0, mediaBudget.report.pacingRemaining - Number(media.report.aiCalls || 0)),
     };
     const accountOutcomes = new Map(result.selectedAccounts.map((account) => [account.username, { fetched: 0, accepted: 0, newAccepted: 0 }]));
     const hashtagOutcomes = new Map(result.selectedHashtags.map((tag) => [tag, { fetched: 0, accepted: 0, newAccepted: 0 }]));

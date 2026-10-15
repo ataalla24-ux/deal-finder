@@ -63,13 +63,13 @@ function redact(value, secrets) {
       // Raw replacement above still protects non-URL messages.
     }
   }
-  return out.replace(/([?&](?:access_token|token|client_secret)=)[^&\s"']+/gi, '$1[redacted]');
+  return out.replace(/([?&](?:access_token|input_token|token|client_secret)=)[^&\s"']+/gi, '$1[redacted]');
 }
 
 function safeUrl(value, secrets) {
   try {
     const url = new URL(value);
-    for (const key of ['access_token', 'token', 'client_secret']) {
+    for (const key of ['access_token', 'input_token', 'token', 'client_secret']) {
       if (url.searchParams.has(key)) url.searchParams.set(key, '[redacted]');
     }
     return redact(url.toString(), secrets);
@@ -163,6 +163,7 @@ async function runCheck(options = {}) {
     hashtagTest: cleanText(env.META_INSTAGRAM_HEALTHCHECK_HASHTAG || '', 100).replace(/^#/, '').toLowerCase(),
     taggedMediaEnabled: booleanEnv(env, 'META_INSTAGRAM_TAGGED_MEDIA_ENABLED', false),
     tokenExpiresAt: cleanText(env.META_INSTAGRAM_TOKEN_EXPIRES_AT || '', 100),
+    expectedAppId: cleanText(env.META_INSTAGRAM_APP_ID || '', 100),
   };
   const secrets = [config.instagramAccessToken, config.adLibraryToken];
   const report = {
@@ -184,8 +185,9 @@ async function runCheck(options = {}) {
     const daysRemaining = Number(((tokenExpiryTimestamp - now.getTime()) / (24 * 60 * 60 * 1000)).toFixed(1));
     report.tokenExpiry = {
       expiresAt: new Date(tokenExpiryTimestamp).toISOString(),
+      source: 'configured-metadata',
       daysRemaining,
-      status: daysRemaining < 0 ? 'expired' : (daysRemaining <= 14 ? 'expiring-soon' : 'ok'),
+      status: tokenExpiryTimestamp <= +now ? 'expired' : (daysRemaining <= 14 ? 'expiring-soon' : 'ok'),
     };
     addCheck(report, {
       name: 'token-expiry',
@@ -193,7 +195,7 @@ async function runCheck(options = {}) {
       detail: `Configured token expiry is ${report.tokenExpiry.expiresAt} (${daysRemaining} days remaining).`,
     });
   } else {
-    report.tokenExpiry = { expiresAt: '', daysRemaining: null, status: 'unknown' };
+    report.tokenExpiry = { expiresAt: '', daysRemaining: null, status: 'unknown', source: 'configured-metadata' };
     addCheck(report, {
       name: 'token-expiry',
       status: 'unknown',
@@ -248,6 +250,44 @@ async function runCheck(options = {}) {
     });
     if (options.write !== false) writeJsonAtomic(config.reportPath, report);
     return { report, ok: false };
+  }
+
+  // Meta permits an app developer's user token to inspect tokens for that app.
+  // Inspection is read-only; it cannot renew a Facebook Login user token.
+  try {
+    const inspection = await fetchMetaJson(graphUrl(config, '/debug_token', {
+      input_token: config.instagramAccessToken,
+    }), config, 'instagram', fetchImpl);
+    const data = inspection.payload?.data;
+    if (typeof data?.is_valid !== 'boolean') throw new Error('Meta returned no token validity metadata.');
+    const appId = cleanText(data.app_id, 100);
+    report.tokenInspection = { source: 'meta-debug-token', valid: data.is_valid, appId, type: cleanText(data.type, 40) };
+    if (!data.is_valid || (config.expectedAppId && appId !== config.expectedAppId)) {
+      report.status = !data.is_valid ? 'invalid-token' : 'wrong-token-app';
+      report.nextAction = 'Generate a valid token for the configured Meta app before replacing INSTAGRAM_ACCESS_TOKEN.';
+      addCheck(report, { name: 'token-inspection', status: report.status, detail: report.nextAction });
+      if (options.write !== false) writeJsonAtomic(config.reportPath, report);
+      return { report, ok: false };
+    }
+    const expiryIso = (value) => Number.isFinite(Number(value)) && Number(value) > 0 && Number(value) < 8640000000000
+      ? new Date(Number(value) * 1000).toISOString() : '';
+    const accessTokenExpiresAt = expiryIso(data.expires_at);
+    const dataAccessExpiresAt = expiryIso(data.data_access_expires_at);
+    const expiresAt = [accessTokenExpiresAt, dataAccessExpiresAt].filter(Boolean).sort()[0] || '';
+    const daysRemaining = expiresAt ? Number(((Date.parse(expiresAt) - +now) / 86400000).toFixed(1)) : null;
+    report.tokenExpiry = {
+      source: 'meta-debug-token', expiresAt, accessTokenExpiresAt, dataAccessExpiresAt, daysRemaining,
+      status: expiresAt ? (Date.parse(expiresAt) <= +now ? 'expired' : daysRemaining <= 14 ? 'expiring-soon' : 'ok') : 'unknown',
+      configuredExpiresAt: config.tokenExpiresAt,
+    };
+    report.checks = report.checks.filter((check) => check.name !== 'token-expiry');
+    addCheck(report, { name: 'token-inspection', status: 'ok', detail: `Meta confirmed a valid ${report.tokenInspection.type || 'access'} token for app ${appId}.` });
+    addCheck(report, { name: 'token-expiry', status: report.tokenExpiry.status,
+      detail: expiresAt ? `Provider-verified access expires at ${expiresAt} (${daysRemaining} days remaining).` : 'Meta reports no finite expiry; no renewal date is assumed.' });
+  } catch (error) {
+    addCheck(report, { name: 'token-inspection', status: 'unavailable',
+      detail: `Provider expiry could not be verified; configured metadata is the fallback. ${redact(error?.message || error, secrets)}`,
+      code: error?.code, httpStatus: error?.status });
   }
 
   try {
@@ -447,8 +487,8 @@ async function runCheck(options = {}) {
   ]);
   const requiredFailures = failedChecks.filter((check) => requiredChecks.has(check.name));
   if (report.tokenExpiry?.status === 'expired') {
-    report.status = 'expired-token-metadata';
-    report.nextAction = `Renew INSTAGRAM_ACCESS_TOKEN and update META_INSTAGRAM_TOKEN_EXPIRES_AT; configured expiry was ${report.tokenExpiry.expiresAt}.`;
+    report.status = report.tokenExpiry.source === 'meta-debug-token' ? 'expired-token' : 'expired-token-metadata';
+    report.nextAction = `Renew INSTAGRAM_ACCESS_TOKEN and update META_INSTAGRAM_TOKEN_EXPIRES_AT; ${report.tokenExpiry.source} expiry was ${report.tokenExpiry.expiresAt}.`;
   } else if (requiredFailures.length) {
     report.status = requiredFailures[0].status;
     report.nextAction = 'Fix the Meta Graph token permissions before enabling scheduled discovery.';

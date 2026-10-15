@@ -12,6 +12,7 @@ const start = new Date('2026-10-07T08:00:00Z');
 const config = { ...buildConfig({}, start), coverageMode: true, discoveryPoolLimit: 5000, maxAccountsPerRun: 180, foodAccountShare: 0.9, maxHashtagsPerRun: 8 };
 assert.equal(isGlobalMetaGraphError({ status: 400, code: 100, message: 'Object does not exist or cannot be loaded due to missing permissions' }), false);
 assert.equal(isGlobalMetaGraphError({ status: 400, code: 803, message: 'Some of the aliases you requested do not exist' }), false);
+assert.equal(isGlobalMetaGraphError({ status: 400, code: 110, message: 'Invalid user id' }), false);
 for (const code of [10, 190, 613, 80002]) assert.equal(isGlobalMetaGraphError({ status: 400, code }), true);
 const merchants = Array.from({ length: 891 }, (_, index) => ({
   username: `new.cafe${String(index).padStart(4, '0')}`, accountType: 'merchant', category: 'food', priority: 25,
@@ -182,5 +183,27 @@ try {
       return { entries, cache: {}, report: { aiCalls: 0 } };
     },
   });
+  const discoveredAccounts = Object.fromEntries(['wien.orf.at', 'cafe.vienna', 'tagged.co.at', 'owner.ac.at'].map((username) => [username, {
+    username, lastSeenAt: start.toISOString(), origins: [username.startsWith('tagged.') ? 'tagged-mention:#wien' : username.startsWith('owner.') ? 'owner:#wien' : 'mention:#wien'],
+  }]));
+  const migrationPaths = { ...paths, discoveryPath: write('empty-directory.json', {}) };
+  assert.deepEqual(loadAccountCatalog(config, migrationPaths, { discoveredAccounts }).map((row) => row.username).sort(),
+    ['cafe.vienna', 'owner.ac.at', 'tagged.co.at'], 'legacy website-only discovery is excluded without blocking proven owners/tags');
+  write('state.json', { discoveredAccounts, mediaLlmUsage: [{ at: start.toISOString(), calls: 4 }] });
+  const migrated = await runMetaInstagramCollector({ config: { ...testConfig, maxAccountsPerRun: 3, hashtags: [] }, env: {}, now: start, paths: migrationPaths, write: false,
+    fetchImpl: async (url) => {
+      assert(!String(url).includes('wien.orf.at'));
+      return Response.json({ business_discovery: { media: { data: [] } } });
+    },
+    enrichGraphMedia: async (entries, config) => {
+      assert.equal(config.mediaLlmMaxCallsPerRun, 0, 'pacing is enforced by the actual collector, not just the helper');
+      return { entries, cache: {}, report: { aiCalls: 0 } };
+    },
+  });
+  assert.equal(migrated.state.discoveredAccounts['wien.orf.at'], undefined);
+  assert(migrated.state.discoveredAccounts['cafe.vienna']);
+  assert.deepEqual(migrated.report.discardedWebsiteLeads, ['wien.orf.at']);
+  assert.equal(migrated.report.mediaClassificationBudget.limitReason, 'pacing-window');
+  assert.equal(migrated.report.sources.instagramGraph.successfulAccounts, 3);
 } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 console.log('Maximum Instagram coverage: 891-account starvation simulation, fair lanes, hashtag rotation, shared 190-call ceiling, CPU headroom, budget waiting and collector integration passed');
