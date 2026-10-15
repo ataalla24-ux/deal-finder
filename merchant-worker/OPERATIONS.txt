@@ -1,4 +1,46 @@
-Resend preparation (2026-10-13; sending NOT enabled)
+Referral support review (2026-10-15; default OFF)
+
+The three POST routes support-cases, support-case and support-review require the
+existing REFERRAL_ADMIN_SECRET header AND REFERRAL_SUPPORT_ENABLED=1. They do
+not require the public program to be ON. No new credential is provisioned.
+Queue scans at most5 account records/100 rewards per call and returns a resumable
+cursor. Cases omit contact data, friend identity, receipt identifiers and codes.
+Treat even these owner/reward UUIDs as private. Do not paste them in public logs.
+
+node scripts/referral-support.mjs ACTION PRIVATE_INPUT.json NEW_PRIVATE_OUTPUT.json
+Input is owner-held regular mode600 JSON, no symlinks/max16KB. Output is a NEW
+mode600 file, never overwritten. Credential is REFERRAL_ADMIN_SECRET or existing
+Keychain service freefinder-referral-admin/account freefinder. The fixed production
+host, manual redirects,25s timeout and256KiB bound prevent arbitrary destinations.
+Only sanitized status errors go to console. No automatic retries.
+
+support-cases accepts {} or the returned cursor. support-case requires exact
+accountId/rewardId. support-review additionally requires current revision,
+requestId (fresh UUID for a new decision) and decision recheck_source or
+retain_delivered_benefit. Lost responses retry the EXACT request ID/body. A reused
+ID with different intent or changed revision fails409. Reload after genuine
+concurrent changes, never invent success or automatically retry a billing call.
+
+recheck_source performs only the original authoritative Store GET and records
+verified/revoked/unverified. Missing proof/outages remain unverified. Credit and
+pending Store reservations remain intact. retain_delivered_benefit can close a
+case only for an ALREADY redeemed, evidenced benefit and a fresh exact source
+revocation. It records the explicit operator decision to leave that delivered
+benefit in place, not a refund, clawback, new credit or false positive Store result.
+Changed source/effect evidence reopens review. No operation releases ambiguous
+pending codes, migrates legacy identities, grants Pro, calls Set App Account
+Token, purchases, acknowledges, defers or repeats a financial action.
+
+The last100 decision records remain private on the reward; native status/export
+omit them and account deletion removes them. Revision protection includes history,
+so a pruned old request cannot replay against its old revision. Store responses
+are merged transactionally only if owner/reward/revision still match. Deletion,
+new proof and concurrent preferences are preserved. Unresolved pending outcomes
+still require real Store proof through existing confirmation/recovery endpoints.
+This support workflow is not proof that reward billing, legacy migration or
+the full program is operational. Customer/referral flags remain OFF.
+
+Resend preparation (2026-10-13; historical foundation, see later verified delivery)
 
 Owner approved a free Resend account/preparation, and signed in using GitHub.
 Domain freefinder.at was created in eu-west-1 (Ireland), ID

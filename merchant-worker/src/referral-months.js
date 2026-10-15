@@ -9,6 +9,7 @@ const APPLE_PRODUCTS = new Set([`${APP}.premium.monthly`, `${APP}.premium.yearly
 const PLAY_PRODUCTS = new Set(['freefinder.pro.monthly', 'freefinder.pro.yearly']);
 const PLAY_REWARD_OFFER = 'referral-earned-month';
 const PENDING_REWARDS = ['store_pending', 'store_confirmation', 'store_subscription'];
+const SUPPORT_ACTIONS = ['support-cases', 'support-case', 'support-review'];
 const json = (value, status = 200) => Response.json(value, { status, headers: {
   'cache-control': 'no-store', 'access-control-allow-origin': '*',
 } });
@@ -202,7 +203,8 @@ export async function handleReferralMonths(request, env, authenticate = authenti
   const action = new URL(request.url).pathname.slice(PREFIX.length);
   if (action === 'config' && request.method === 'GET') return json({ ok: true, enabled: env.REFERRAL_MONTHS_ENABLED === '1' });
   if (!['register', 'status', 'accept', 'confirm', 'redeem', 'confirm-redemption', 'prepare-subscription',
-    'confirm-subscription', 'import-apple-offers', 'reconciliation-status', 'apple-claim-challenge', 'apple-claim-key', 'apple-claim-confirm'].includes(action)) {
+    'confirm-subscription', 'import-apple-offers', 'reconciliation-status', ...SUPPORT_ACTIONS,
+    'apple-claim-challenge', 'apple-claim-key', 'apple-claim-confirm'].includes(action)) {
     return json({ ok: false, error: 'Nicht gefunden.' }, 404);
   }
   if (!env.REFERRAL_MONTHS) return json({ ok: false, error: 'Einladungen sind noch nicht verfügbar.' }, 503);
@@ -210,8 +212,9 @@ export async function handleReferralMonths(request, env, authenticate = authenti
   let body;
   try { body = await boundedJSON(request); } catch (error) { return json({ ok: false }, error.status || 400); }
   delete body.principal;
-  if (['import-apple-offers', 'reconciliation-status'].includes(action)) {
+  if (['import-apple-offers', 'reconciliation-status', ...SUPPORT_ACTIONS].includes(action)) {
     if (!env.REFERRAL_ADMIN_SECRET || request.headers.get('x-freefinder-merchant-secret') !== env.REFERRAL_ADMIN_SECRET) return json({ ok: false }, 403);
+    if (SUPPORT_ACTIONS.includes(action) && env.REFERRAL_SUPPORT_ENABLED !== '1') return json({ ok: false }, 503);
   } else {
     if (!['ios', 'android'].includes(body.platform)) return json({ ok: false }, 400);
     try {
@@ -312,6 +315,7 @@ export class ReferralMonthsLedger {
   }
   async perform(action, body) {
     const now = Date.now();
+    if (SUPPORT_ACTIONS.includes(action)) return this.supportAction(action, body, now);
     if (action === 'reconciliation-status') {
       const scan = await this.storage.get(SOURCE_SCAN) || {};
       const counts = value => Object.fromEntries(SOURCE_REVIEW_COUNTS.map(k => [k, value?.[k] || 0]));
@@ -539,6 +543,123 @@ export class ReferralMonthsLedger {
       return this.status(account);
     }
     fail('Nicht gefunden.', 404);
+  }
+  async supportRevision(reward) {
+    return referralHash(JSON.stringify([reward.id, reward.state, reward.months, reward.sourceEvidence,
+      reward.sourceReview, reward.redemptionPlatform, reward.reservedAt, reward.deferralEvidence,
+      reward.redemptionEvidence, reward.redeemedAt, reward.newExpiry, reward.supportHistory]));
+  }
+  async supportSourceFingerprint(reward, status = reward.sourceReview?.status) {
+    return referralHash(JSON.stringify([reward.sourceEvidence, status, reward.state, reward.redemptionEvidence]));
+  }
+  supportDeliveredEvidence(account, reward, now) {
+    const proof = reward.redemptionEvidence;
+    if (reward.state !== 'redeemed' || !proof || proof.version !== 1 || proof.accountId !== account.id ||
+        !Number.isFinite(reward.redeemedAt) || reward.redeemedAt > now ||
+        !receiptID(proof.receiptId) || !['ios', 'android'].includes(proof.platform) ||
+        reward.redemptionPlatform && proof.platform !== reward.redemptionPlatform) return false;
+    if (proof.confirmation) {
+      return proof.platform === 'android' && PLAY_PRODUCTS.has(proof.productId) &&
+        /^android:[a-f0-9]{64}$/.test(proof.purchaseKey || '') &&
+        ['deferral_response', 'subscription_readback'].includes(proof.confirmation) &&
+        Number.isFinite(proof.originalExpiry) && Number.isFinite(proof.confirmedAt) && proof.confirmedAt <= now &&
+        proof.expectedExpiry === monthAfter(proof.originalExpiry) && proof.newExpiry >= proof.expectedExpiry &&
+        reward.newExpiry === proof.newExpiry;
+    }
+    try {
+      referralEvidence(proof.platform, { account: proof.accountId, key: proof.purchaseKey,
+        product: proof.productId, transactionId: proof.receiptId, orderId: proof.receiptId,
+        started: proof.purchasedAt, purchasedAt: proof.purchasedAt, expires: proof.periodEnd }, now);
+      return true;
+    } catch { return false; }
+  }
+  async supportCase(account, reward) {
+    const history = reward.supportHistory || [];
+    const last = history.at(-1);
+    const resolved = last?.decision === 'retain_delivered_benefit' && reward.state === 'redeemed' &&
+      last.sourceFingerprint === await this.supportSourceFingerprint(reward);
+    return { accountId: account.id, rewardId: reward.id, state: reward.state, months: reward.months,
+      platform: reward.redemptionPlatform || null, reservedAt: reward.reservedAt || null,
+      sourceStatus: reward.sourceReview?.status || 'unverified', sourceCheckedAt: reward.sourceReview?.checkedAt || null,
+      hasSourceEvidence: validSourceEvidence(reward.sourceEvidence, Date.now()),
+      hasRedemptionEvidence: !!reward.redemptionEvidence, resolved: !!resolved,
+      revision: await this.supportRevision(reward),
+      history: history.map(({ id, decision, at, sourceStatus }) => ({ id, decision, at, sourceStatus })) };
+  }
+  async supportAction(action, body, now) {
+    if (this.env.REFERRAL_SUPPORT_ENABLED !== '1') fail('Support-Prüfung ist nicht aktiviert.', 503);
+    const allowed = action === 'support-cases' ? ['cursor'] : action === 'support-case'
+      ? ['accountId', 'rewardId'] : ['accountId', 'rewardId', 'revision', 'requestId', 'decision'];
+    if (Object.keys(body).some(k => ![...allowed, 'trustedIP'].includes(k))) fail('Ungültige Support-Anfrage.');
+    if (action === 'support-cases') {
+      const cursor = body.cursor;
+      if (cursor != null && (typeof cursor !== 'object' || Array.isArray(cursor) ||
+          Object.keys(cursor).some(k => !['accountId', 'offset'].includes(k)) || !uuid(cursor.accountId) ||
+          !Number.isSafeInteger(cursor.offset) || cursor.offset < 0)) fail('Ungültiger Cursor.');
+      const rows = await this.storage.list({ prefix: 'account:', limit: 5,
+        ...(cursor ? { start: 'account:' + cursor.accountId } : {}) });
+      const cases = [];
+      let scanned = 0, last = null;
+      for (const [, account] of rows) {
+        if (!uuid(account.id)) continue;
+        const rewards = account.recoverable && !account.deletedAt && Array.isArray(account.rewards) ? account.rewards : [];
+        const start = account.id === cursor?.accountId ? cursor.offset : 0;
+        for (let i = start; i < rewards.length; i++) {
+          if (scanned === 100) return { ok: true, cases, cursor: { accountId: account.id, offset: i } };
+          scanned++;
+          const reward = rewards[i];
+          if (!uuid(reward.id) || !['earned', 'redeemed', ...PENDING_REWARDS].includes(reward.state)) continue;
+          if (PENDING_REWARDS.includes(reward.state) || !validSourceEvidence(reward.sourceEvidence, now) ||
+              ['revoked', 'unverified'].includes(reward.sourceReview?.status)) {
+            const item = await this.supportCase(account, reward);
+            if (!item.resolved) cases.push(item);
+          }
+        }
+        last = { accountId: account.id, offset: rewards.length };
+      }
+      // Inclusive cursors also remain valid if the account/reward was deleted between pages.
+      if (rows.size === 5 && last) {
+        const next = await this.storage.list({ prefix: 'account:', startAfter: 'account:' + last.accountId, limit: 1 });
+        const entry = [...next.values()][0];
+        if (entry && uuid(entry.id)) return { ok: true, cases, cursor: { accountId: entry.id, offset: 0 } };
+      }
+      return { ok: true, cases, cursor: null };
+    }
+    if (!uuid(body.accountId) || !uuid(body.rewardId)) fail('Ungültige Support-Anfrage.');
+    const key = 'account:' + body.accountId;
+    const account = await this.storage.get(key);
+    const reward = account?.recoverable && !account.deletedAt && account.rewards?.find(r => r.id === body.rewardId);
+    if (!reward) fail('Fall nicht gefunden.', 404);
+    if (action === 'support-case') return { ok: true, case: await this.supportCase(account, reward) };
+    if (!uuid(body.requestId) || !/^[a-f0-9]{64}$/.test(body.revision || '') ||
+        !['recheck_source', 'retain_delivered_benefit'].includes(body.decision)) fail('Ungültige Prüfentscheidung.');
+    const previous = reward.supportHistory?.find(event => event.id === body.requestId);
+    if (previous) {
+      if (previous.decision !== body.decision || previous.revision !== body.revision) fail('Prüfauftrag wurde bereits anders verwendet.', 409);
+      return { ok: true, replay: true, case: await this.supportCase(account, reward) };
+    }
+    if (await this.supportRevision(reward) !== body.revision) fail('Der Fall hat sich geändert. Bitte erneut laden.', 409);
+    if (body.decision === 'retain_delivered_benefit' && !this.supportDeliveredEvidence(account, reward, now)) {
+      fail('Nur eine bereits bestätigte Store-Gutschrift kann so abgeschlossen werden.', 409);
+    }
+    // The only external operation is an authoritative GET for the original source, never billing or code redemption.
+    const review = await this.reviewSource(reward.sourceEvidence, now);
+    if (body.decision === 'retain_delivered_benefit' && review.status !== 'revoked') {
+      fail('Eine eindeutige Store-Rücknahme fehlt. Guthaben und Prüfstatus bleiben erhalten.', 409);
+    }
+    const event = { id: body.requestId, revision: body.revision, decision: body.decision, at: now,
+      sourceStatus: review.status, sourceFingerprint: await this.supportSourceFingerprint(reward, review.status) };
+    const updated = await this.storage.transaction(async tx => {
+      const current = await tx.get(key);
+      const target = current?.recoverable && !current.deletedAt && current.rewards?.find(r => r.id === body.rewardId);
+      if (!target || await this.supportRevision(target) !== body.revision) fail('Der Fall hat sich geändert. Bitte erneut laden.', 409);
+      target.sourceReview = review;
+      target.reconciliation = { checkedAt: now, status: review.status === 'verified' ? 'verified' : 'manual_review' };
+      target.supportHistory = [...(target.supportHistory || []), event].slice(-100);
+      await tx.put(key, current);
+      return { current, target };
+    });
+    return { ok: true, replay: false, case: await this.supportCase(updated.current, updated.target) };
   }
   status(account) {
     return { ok: true, enabled: this.env.REFERRAL_MONTHS_ENABLED === '1', code: account.code,
