@@ -101,6 +101,7 @@ test('background audit uses exact Google order evidence and leaves redeemed Play
   const order = {orderId:google.sourceEvidence.receiptId,purchaseToken:token,state:'REFUNDED',
     orderHistory:{refundEvent:{eventTime:new Date(now-DAY).toISOString()}},
     lineItems:[{productId:'freefinder.pro.monthly',subscriptionDetails:{
+      basePlanId:'monthly',offerId:'flyer-month-free',
       servicePeriodStartTime:new Date(start).toISOString(),servicePeriodEndTime:new Date(start+30*DAY).toISOString(),
       offerPhaseDetails:{freeTrialDetails:{}},
     }}]};

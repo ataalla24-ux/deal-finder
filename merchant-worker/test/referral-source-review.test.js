@@ -17,6 +17,7 @@ const android = { ...ios, platform: 'android', productId: 'freefinder.pro.monthl
   receiptId: 'GPA.1111-2222-3333-44444', purchaseKey: 'android:' + await referralHash(token) };
 const play = { orderId: android.receiptId, purchaseToken: token, state: 'PROCESSED',
   lineItems: [{ productId: android.productId, subscriptionDetails: {
+    basePlanId: 'monthly', offerId: 'flyer-month-free',
     servicePeriodStartTime: new Date(start).toISOString(), servicePeriodEndTime: new Date(end).toISOString(),
     offerPhaseDetails: { freeTrialDetails: {} },
   } }] };
@@ -81,6 +82,21 @@ test('missing, legacy or malformed evidence and Store outages never mean confirm
     { ...play, lineItems: [{ ...play.lineItems[0], subscriptionDetails: {} }] }]) {
     assert.equal((await reviewReferralSource(android, raw, now)).status, 'unverified');
   }
+});
+
+test('Play source review requires the configured acquisition offer even when the period is free', async () => {
+  for (const patch of [{ offerId: undefined }, { offerId: 'referral-earned-month' },
+    { offerId: 'unrelated-free-month' }, { basePlanId: undefined }, { basePlanId: 'yearly' }]) {
+    const raw = { ...play, lineItems: [{ ...play.lineItems[0], subscriptionDetails: {
+      ...play.lineItems[0].subscriptionDetails, ...patch,
+    } }] };
+    assert.equal((await reviewReferralSource(android, raw, now)).status, 'unverified');
+  }
+  const annualEvidence = { ...android, productId: 'freefinder.pro.yearly' };
+  const annualOrder = { ...play, lineItems: [{ productId: annualEvidence.productId, subscriptionDetails: {
+    ...play.lineItems[0].subscriptionDetails, basePlanId: 'yearly', offerId: 'yearly-month-free',
+  } }] };
+  assert.equal((await reviewReferralSource(annualEvidence, annualOrder, now)).status, 'verified');
 });
 
 test('source transport reads the exact Apple transaction without requiring an active subscription', async () => {

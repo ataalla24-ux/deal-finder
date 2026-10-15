@@ -190,7 +190,7 @@ test('Google refunded source can be reviewed without a deferral or token disclos
     productId:'freefinder.pro.monthly',purchaseKey:'android:'+await referralHash(token)};
   const raw={orderId:r.sourceEvidence.receiptId,purchaseToken:token,state:'REFUNDED',
     orderHistory:{refundEvent:{eventTime:new Date(now-1).toISOString()}},lineItems:[{
-      productId:'freefinder.pro.monthly',subscriptionDetails:{servicePeriodStartTime:new Date(start).toISOString(),
+      productId:'freefinder.pro.monthly',subscriptionDetails:{basePlanId:'monthly',offerId:'flyer-month-free',servicePeriodStartTime:new Date(start).toISOString(),
         servicePeriodEndTime:new Date(start+30*DAY).toISOString(),offerPhaseDetails:{freeTrialDetails:{}}}}]};
   await call('/seed',{['account:'+id(1)]:account(1,[r]),fixture:{receipt:raw}});
   const result=await call('/api/referral-months/support-review',{

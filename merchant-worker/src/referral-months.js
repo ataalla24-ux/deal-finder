@@ -8,6 +8,10 @@ const APP = 'com.stefanataalla.freefinderwien';
 const APPLE_PRODUCTS = new Set([`${APP}.premium.monthly`, `${APP}.premium.yearly`]);
 const PLAY_PRODUCTS = new Set(['freefinder.pro.monthly', 'freefinder.pro.yearly']);
 const PLAY_REWARD_OFFER = 'referral-earned-month';
+const PLAY_ACQUISITION_OFFERS = new Map([
+  ['freefinder.pro.monthly', ['monthly', 'flyer-month-free']],
+  ['freefinder.pro.yearly', ['yearly', 'yearly-month-free']],
+]);
 const PENDING_REWARDS = ['store_pending', 'store_confirmation', 'store_subscription'];
 const SUPPORT_ACTIONS = ['support-cases', 'support-case', 'support-review'];
 const json = (value, status = 200) => Response.json(value, { status, headers: {
@@ -20,6 +24,10 @@ export async function referralHash(value) {
     .map(x => x.toString(16).padStart(2, '0')).join('');
 }
 function fail(message, status = 400) { throw Object.assign(new Error(message), { status }); }
+function isPlayAcquisitionOffer(product, details) {
+  const expected = PLAY_ACQUISITION_OFFERS.get(product);
+  return !!expected && details?.basePlanId === expected[0] && details?.offerId === expected[1];
+}
 function decodeStoreJWS(value) {
   // Called ONLY with the response from Apple's authenticated server API, never a client JWS.
   try { return JSON.parse(atob(value.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); }
@@ -55,15 +63,19 @@ export function referralPurchase(platform, raw, account, now = Date.now(), { his
       items[0].deferredItemRemoval || Date.parse(items[0].expiryTime) <= now || !Number.isFinite(Date.parse(items[0].expiryTime))) {
     fail('Kein passendes aktives Google-Play-Abo.', 409);
   }
+  // Code promotions and replacement purchases are not the configured referral trial or earned-month offer.
+  const phase = items[0].offerPhase;
+  const freePhase = raw.acknowledgementState === 'ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED' &&
+    raw.linkedPurchaseToken == null && items[0].signupPromotion == null && items[0].prepaidPlan == null &&
+    items[0].itemReplacement == null && phase && Object.keys(phase).length === 1 &&
+    phase.freeTrial != null && typeof phase.freeTrial === 'object' && !Array.isArray(phase.freeTrial);
   return { product: items[0].productId, account, started: Date.parse(raw.startTime),
     orderId: items[0].latestSuccessfulOrderId,
-    expires: Date.parse(items[0].expiryTime), trial: raw.acknowledgementState === 'ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED' && !raw.linkedPurchaseToken &&
-      !raw.externalAccountIdentifiers?.obfuscatedExternalProfileId && items[0].offerDetails?.offerId !== PLAY_REWARD_OFFER &&
-      !!items[0].offerPhase?.freeTrial && Object.keys(items[0].offerPhase).length === 1,
+    expires: Date.parse(items[0].expiryTime), trial: !!freePhase &&
+      !raw.externalAccountIdentifiers?.obfuscatedExternalProfileId && isPlayAcquisitionOffer(items[0].productId, items[0].offerDetails),
     rewardProfile: raw.externalAccountIdentifiers?.obfuscatedExternalProfileId,
     offer: items[0].offerDetails?.offerId, basePlan: items[0].offerDetails?.basePlanId,
-    freePhase: raw.acknowledgementState === 'ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED' &&
-      !!items[0].offerPhase?.freeTrial && Object.keys(items[0].offerPhase).length === 1,
+    freePhase: !!freePhase,
     region: raw.regionCode,
     etag: raw.etag };
 }
@@ -86,7 +98,8 @@ export async function historicalPlayReward(raw, order, token, owner, reward, now
       !['ACTIVE', 'CANCELED', 'EXPIRED', 'IN_GRACE_PERIOD', 'ON_HOLD', 'PAUSED'].some(state => raw.subscriptionState === 'SUBSCRIPTION_STATE_' + state) ||
       raw.acknowledgementState !== 'ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED' ||
       identifiers?.obfuscatedExternalAccountId !== owner || identifiers?.obfuscatedExternalProfileId !== reward.id ||
-      typeof item.autoRenewingPlan?.autoRenewEnabled !== 'boolean' || item.prepaidPlan ||
+      typeof item.autoRenewingPlan?.autoRenewEnabled !== 'boolean' || item.prepaidPlan != null ||
+      item.signupPromotion != null || item.itemReplacement != null ||
       item.deferredItemReplacement || item.deferredItemRemoval || item.productId !== reward.productId ||
       item.offerDetails?.offerId !== reward.offerId || item.offerDetails?.basePlanId !== reward.basePlanId ||
       order.state !== 'PROCESSED' || order.purchaseToken !== token || order.lineItems?.length !== 1 ||
@@ -150,7 +163,7 @@ export async function reviewReferralSource(evidence, raw, now = Date.now()) {
     return result('unverified');
   }
   const item = raw.lineItems[0], details = item.subscriptionDetails, phase = details?.offerPhaseDetails;
-  if (item.productId !== productId || !phase || typeof phase.freeTrialDetails !== 'object' ||
+  if (item.productId !== productId || !isPlayAcquisitionOffer(productId, details) || !phase || typeof phase.freeTrialDetails !== 'object' ||
       !phase.freeTrialDetails || Array.isArray(phase.freeTrialDetails) || Object.keys(phase).length !== 1 ||
       Date.parse(details.servicePeriodStartTime) !== purchasedAt || Date.parse(details.servicePeriodEndTime) !== periodEnd) {
     return result('unverified');

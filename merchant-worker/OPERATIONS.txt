@@ -630,3 +630,30 @@ gatesOFF until the actual account/reward receipt lifecycle and supported Store
 paths are verified. Play private test promotion remainsPAUSED, earned offerDRAFT;
 its eligibility/ownership path and real tester completion are still outstanding.
 
+Play acquisition and promotion separation (2026-10-15)
+
+Referral qualification now requires the exact configured product/base-plan/offer:
+freefinder.pro.monthly / monthly / flyer-month-free or
+freefinder.pro.yearly / yearly / yearly-month-free. These match the native
+acquisition policy and the read-only live catalog checked15Oct2026. Existing
+account, acknowledgment, free-period, region and immutable-order checks remain.
+Any signupPromotion (oneTimeCode, vanityCode or malformed marker), replacement,
+linked purchase, prepaid plan or malformed/mixed free phase cannot qualify as a
+new invited trial or settle the separate earned-subscription reservation. Valid
+active subscriptions still parse normally; this does not revoke access or alter
+an existing subscription. Historical earned confirmation rejects promo markers
+too. Original-order source review also requires the exact acquisition offer;
+missing/wrong offer metadata is unverified, never guessed valid or revoked.
+Existing earned credit and pending reservations survive rejected substitutions.
+
+The Google oneTimeCode marker has no identifying fields. It does NOT establish
+which reserved single-use code was redeemed; this change is a rejection guard,
+not a completed promo-code ownership/eligibility integration. Keep all referral
+rollout gates OFF. The earned offer remains DRAFT/developer-determined; no offer,
+promotion, subscription, consent or customer data was changed by this patch.
+Regression tests first reproduced four failures, then passed actual isolated
+Workers/SQLite flows with controlled Store responses. These are not real Google
+transactions or an end-to-end Store redemption test.
+https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptionsv2
+https://developers.google.com/android-publisher/api-ref/rest/v3/orders
+

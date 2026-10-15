@@ -17,7 +17,30 @@ const play = { subscriptionState: 'SUBSCRIPTION_STATE_ACTIVE', acknowledgementSt
   externalAccountIdentifiers: { obfuscatedExternalAccountId: account }, etag: 'fixture-etag',
   lineItems: [{ productId: 'freefinder.pro.monthly', expiryTime: new Date(now + 30 * DAY).toISOString(),
     latestSuccessfulOrderId: 'GPA.1111-2222-3333-44444',
-    autoRenewingPlan: { autoRenewEnabled: true }, offerPhase: { freeTrial: {} } }] };
+    autoRenewingPlan: { autoRenewEnabled: true }, offerPhase: { freeTrial: {} },
+    offerDetails: { basePlanId: 'monthly', offerId: 'flyer-month-free' } }] };
+
+test('Play acquisition requires the exact configured trial, never a promotional code or malformed free phase', () => {
+  for (const [productId, basePlanId, offerId] of [
+    ['freefinder.pro.monthly', 'monthly', 'flyer-month-free'],
+    ['freefinder.pro.yearly', 'yearly', 'yearly-month-free'],
+  ]) {
+    const item = { ...play.lineItems[0], productId, offerDetails: { basePlanId, offerId } };
+    const qualify = patch => isQualifyingTrial(referralPurchase('android',
+      { ...play, lineItems: [{ ...item, ...patch }] }, account, now), now, now);
+    assert.equal(qualify({}), true);
+    for (const patch of [
+      { signupPromotion: { oneTimeCode: {} } }, { signupPromotion: { vanityCode: { promotionCode: 'FIXTUREONLY' } } },
+      { signupPromotion: {} }, { signupPromotion: false }, { itemReplacement: {} },
+      { prepaidPlan: {} }, { offerDetails: undefined },
+      { offerDetails: { basePlanId, offerId: 'referral-earned-month' } },
+      { offerDetails: { basePlanId, offerId: 'unrelated-free-month' } },
+      { offerDetails: { basePlanId: 'different', offerId } },
+      { offerPhase: { freeTrial: [] } }, { offerPhase: { freeTrial: true } },
+      { offerPhase: { freeTrial: 'FREE_TRIAL' } }, { offerPhase: { freeTrial: {}, basePrice: {} } },
+    ]) assert.equal(qualify(patch), false, JSON.stringify(patch));
+  }
+});
 
 test('only verified, account-bound production one-month trials qualify', () => {
   for (const [platform, raw] of [['ios', apple], ['android', play]]) {
@@ -165,6 +188,7 @@ async function runtime(t, enabled = '1', bindings = {}) {
             if (!await this.storage.get(key)) await this.storage.put(key, {
               orderId:item.latestSuccessfulOrderId, purchaseToken:token, state:'PROCESSED',
               lineItems:[{productId:item.productId, subscriptionDetails:{
+                basePlanId:item.offerDetails?.basePlanId, offerId:item.offerDetails?.offerId,
                 offerPhaseDetails:{freeTrialDetails:{}}, servicePeriodStartTime:raw.startTime,
                 servicePeriodEndTime:item.expiryTime}}],
             });
@@ -668,6 +692,7 @@ test('a refunded original Play order holds the credit, while a subsequent verifi
   const rewardId = (await call('status', owner)).rewards[0].id;
   const source = { orderId: play.lineItems[0].latestSuccessfulOrderId, purchaseToken: token, state: 'PROCESSED',
     lineItems: [{ productId: play.lineItems[0].productId, subscriptionDetails: {
+      ...play.lineItems[0].offerDetails,
       offerPhaseDetails: { freeTrialDetails: {} }, servicePeriodStartTime: play.startTime,
       servicePeriodEndTime: play.lineItems[0].expiryTime,
     } }] };
@@ -895,4 +920,60 @@ test('Play trial credit waits for acknowledgement and remains retryable without 
   await call('confirm', claim);
   assert.equal((await call('status', a)).earnedMonths, 1);
   assert.equal((await call('status', b)).confirmed, true);
+});
+
+test('Play promo rejection preserves invitation and earned balances; later qualifying trial credits once', async t => {
+  const { call, fixture, mf, owner, rewardId } = await earnedReward(t);
+  const friend = identity(3, 'android');
+  const before = await call('status', owner);
+  await call('register', friend);
+  await call('accept', { ...friend, code: before.code });
+  const started = Date.now();
+  const raw = { ...play, startTime: new Date(started).toISOString(),
+    externalAccountIdentifiers: { obfuscatedExternalAccountId: friend.accountId },
+    lineItems: [{ ...play.lineItems[0], latestSuccessfulOrderId: 'GPA.9999-8888-7777-66666',
+      expiryTime: new Date(started + 30 * DAY).toISOString() }] };
+  const claim = { ...friend, purchaseToken: 'promo-rejection-friend-token',
+    trial: true, freePhase: true, signupPromotion: null, offerId: 'flyer-month-free' };
+  for (const patch of [{ signupPromotion: { oneTimeCode: {} } },
+    { signupPromotion: { vanityCode: { promotionCode: 'FIXTUREONLY' } } },
+    { offerDetails: { basePlanId: 'monthly', offerId: 'unrelated-free-month' } },
+    { offerPhase: { freeTrial: [] } }]) {
+    await fixture({ play: { ...raw, lineItems: [{ ...raw.lineItems[0], ...patch }] } });
+    await call('confirm', claim, 409);
+    assert.deepEqual(await call('status', owner), before, 'previous reward remains unchanged');
+  }
+  const pending = await call('status', friend);
+  assert.equal(pending.accepted, true);
+  assert.equal(pending.confirmed, false);
+  await fixture({ play: raw });
+  await call('confirm', claim);
+  await call('confirm', claim);
+  const after = await call('status', owner);
+  assert.equal(after.earnedMonths, before.earnedMonths + 1);
+  assert.deepEqual(after.rewards.find(x => x.id === rewardId), before.rewards.find(x => x.id === rewardId));
+  assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 0);
+});
+
+test('Play earned-month live and historical confirmation reject promo substitution without consuming credit', async t => {
+  const { call, fixture, mf, owner, rewardId } = await earnedReward(t, rewardBindings);
+  const reserved = await call('prepare-subscription', { ...owner, platform: 'android', rewardId });
+  const raw = playReward(rewardId), token = 'promo-substitution-earned-month-token';
+  const item = raw.lineItems[0];
+  const order = { orderId: item.latestSuccessfulOrderId, purchaseToken: token, state: 'PROCESSED',
+    lineItems: [{ productId: item.productId, subscriptionDetails: {
+      ...item.offerDetails, servicePeriodStartTime: raw.startTime, servicePeriodEndTime: item.expiryTime,
+      offerPhaseDetails: { freeTrialDetails: {} },
+    } }] };
+  for (const signupPromotion of [{ oneTimeCode: {} }, { vanityCode: { promotionCode: 'FIXTUREONLY' } }, {}]) {
+    await fixture({ play: { ...raw, lineItems: [{ ...item, signupPromotion }] }, order });
+    const result = await call('confirm-subscription', { ...owner, platform: 'android', purchaseToken: token });
+    assert.deepEqual(result, reserved);
+    await call('confirm-subscription', { ...owner, platform: 'android', purchaseToken: token,
+      initialOrderId: order.orderId }, 409);
+    assert.deepEqual(await call('status', owner), reserved);
+  }
+  await fixture({ play: raw, order });
+  assert.equal((await call('confirm-subscription', { ...owner, platform: 'android', purchaseToken: token })).redeemedMonths, 1);
+  assert.equal(await (await mf.dispatchFetch('https://test/deferrals')).json(), 0);
 });
