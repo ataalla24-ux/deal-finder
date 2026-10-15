@@ -5,7 +5,20 @@ const LEASE = 5 * 60000;
 const LIMIT = 150;
 const BRANCH = 'automation/instagram-quota';
 const FILE = 'instagram-quota.json';
-const pause = (reason) => Object.assign(new Error(`Instagram shared quota paused: ${reason}`), { code: 'SCAN_BUDGET' });
+const pause = (reason) => Object.assign(new Error(`Instagram shared quota paused: ${String(reason).replace(/^(?:Instagram shared quota paused: )+/, '')}`), { code: 'SCAN_BUDGET' });
+
+function storageFailure(result, operation) {
+  const rateLimited = [403, 429].includes(result.status)
+    && (result.remaining === '0' || result.status === 429 || result.retryAfter || /rate limit/i.test(result.data?.message || ''));
+  const retrySeconds = Number(result.retryAfter);
+  const resetSeconds = Number(result.reset);
+  const retryMs = result.retryAfter && Number.isFinite(retrySeconds) ? Date.now() + retrySeconds * 1000 : 0;
+  const resetMs = result.remaining === '0' && Number.isFinite(resetSeconds) ? resetSeconds * 1000 : 0;
+  const retryAt = rateLimited ? new Date(Math.max(Date.now() + 60000, retryMs, resetMs)).toISOString() : '';
+  return Object.assign(pause(`GitHub quota storage ${operation}: HTTP ${result.status}${rateLimited ? ' (rate limit)' : ''}`), {
+    storage: { provider: 'github', operation, httpStatus: result.status, rateLimited: Boolean(rateLimited), retryAt },
+  });
+}
 
 // A dedicated branch keeps operational reservations out of main. Content SHA
 // compare-and-swap makes reservations safe across independent GitHub runners.
@@ -22,7 +35,9 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch) {
     });
     let data = {};
     try { data = await response.json(); } catch { /* handled by status */ }
-    return { status: response.status, data, etag: response.headers.get('etag') || '' };
+    return { status: response.status, data, etag: response.headers.get('etag') || '',
+      remaining: response.headers.get('x-ratelimit-remaining'), reset: response.headers.get('x-ratelimit-reset'),
+      retryAfter: response.headers.get('retry-after') };
   };
   let initialized = false;
   let cached = null;
@@ -31,10 +46,10 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch) {
     const ref = await request(`/git/ref/heads/${BRANCH}`);
     if (ref.status === 404) {
       const main = await request('/git/ref/heads/main');
-      if (main.status !== 200) throw pause('cannot initialize quota branch');
+      if (main.status !== 200) throw storageFailure(main, 'read-main');
       const created = await request('/git/refs', 'POST', { ref: `refs/heads/${BRANCH}`, sha: main.data.object.sha });
-      if (![201, 422].includes(created.status)) throw pause('cannot create quota branch');
-    } else if (ref.status !== 200) throw pause('quota branch unavailable');
+      if (![201, 422].includes(created.status)) throw storageFailure(created, 'create-branch');
+    } else if (ref.status !== 200) throw storageFailure(ref, 'read-branch');
     initialized = true;
   };
   return {
@@ -49,12 +64,12 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch) {
         // that overlap plus a full hour before admitting untracked new calls.
         await this.compareAndSwap(null, { version: 1, reservations: [], pausedUntil: Date.now() + HOUR + 45 * 60000 });
         const initialized = await request(`/contents/${FILE}?ref=${encodeURIComponent(BRANCH)}`);
-        if (initialized.status !== 200) throw pause('quota initialization unavailable');
+        if (initialized.status !== 200) throw storageFailure(initialized, 'read-initial-state');
         const state = JSON.parse(Buffer.from(initialized.data.content, 'base64').toString('utf8'));
         if (state.version !== 1 || !Array.isArray(state.reservations) || !Number.isFinite(state.pausedUntil)) throw pause('invalid initialized quota');
         return { state, revision: initialized.data.sha };
       }
-      if (result.status !== 200) throw pause('quota state unavailable');
+      if (result.status !== 200) throw storageFailure(result, 'read-state');
       const state = JSON.parse(Buffer.from(result.data.content, 'base64').toString('utf8'));
       if (state.version !== 1 || !Array.isArray(state.reservations) || !Number.isFinite(state.pausedUntil)
         || state.reservations.some((r) => !Number.isFinite(r.expiresAt) || !Number.isInteger(r.count) || r.count < 1)) throw pause('invalid quota state');
@@ -68,7 +83,7 @@ export function githubQuotaStore(env, fetchImpl = globalThis.fetch) {
       });
       if ([200, 201].includes(result.status)) return true;
       if ([409, 422].includes(result.status)) return false;
-      throw pause('quota reservation unavailable');
+      throw storageFailure(result, 'write-state');
     },
   };
 }
@@ -110,7 +125,13 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
   let lastRequestAt = null;
   const stats = { limitPerHour: limit, usageThreshold: threshold, requests: 0, reserved: 0, stopped: false,
     reason: '', highestUsagePercent: 0, waitedMs: 0, pacingMs: 0, retryAt: '',
-    adaptiveSafetyCeiling: adaptiveMax, adaptiveIncreases: 0 };
+    adaptiveSafetyCeiling: adaptiveMax, adaptiveIncreases: 0, storageFailure: null };
+  const stopForStorage = (error) => {
+    stats.stopped = true;
+    stats.reason = error?.code === 'SCAN_BUDGET' ? error.message : 'quota storage unavailable';
+    stats.storageFailure = error?.storage || { provider: 'github', operation: 'persist-telemetry', httpStatus: null, rateLimited: false, retryAt: '' };
+    if (stats.storageFailure.retryAt) stats.retryAt = stats.storageFailure.retryAt;
+  };
   const acquire = async () => {
     for (let attempt = 0; attempt < 8; attempt += 1) {
       const { state, revision } = await store.read();
@@ -224,9 +245,11 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
           // usage only needs a short shared pause before the next probe.
           const duration = Math.max(throttled ? HOUR : 10 * 60000, Number.isFinite(retryMs) ? retryMs : 0, metaUsage.recoveryMs);
           stats.retryAt = new Date(clock() + duration).toISOString();
-          await cooldown(duration);
+          try { await cooldown(duration); } catch (error) { stopForStorage(error); }
         } else if (remaining === 0 || stats.requests === 1 || stats.requests % 5 === 0) {
-          await recordUsage(metaUsage);
+          // The Graph call already has a committed reservation. Keep its
+          // response if telemetry storage fails, but admit no further calls.
+          try { await recordUsage(metaUsage); } catch (error) { stopForStorage(error); }
         }
         return response;
       } catch (error) {
@@ -234,6 +257,10 @@ export function createSharedQuotaFetch(fetchImpl, { store, clock = Date.now, blo
         if (error?.code === 'SCAN_BUDGET' || stats.requests === 0) {
           stats.stopped = true;
           stats.reason = error?.code === 'SCAN_BUDGET' ? error.message : 'quota unavailable';
+          if (error?.storage) {
+            stats.storageFailure = error.storage;
+            if (error.storage.retryAt) stats.retryAt = error.storage.retryAt;
+          }
         }
         throw error?.code === 'SCAN_BUDGET' ? error : pause('request or quota unavailable');
       }

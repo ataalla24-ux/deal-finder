@@ -96,4 +96,46 @@ assert.equal(await github.compareAndSwap('current', empty.state), true);
 assert.equal((await github.read()).revision, 'current');
 assert.equal(await github.compareAndSwap('stale', empty.state), false);
 assert(requests.every((r) => r.url.startsWith('https://api.github.com/repos/owner/repo/')));
+
+const limited = githubQuotaStore({ GITHUB_REPOSITORY: 'owner/repo', GH_TOKEN: 'secret-fixture' }, async () =>
+  Response.json({ message: 'API rate limit exceeded secret-fixture' }, { status: 403, headers: {
+    'x-ratelimit-remaining': '0', 'x-ratelimit-reset': String(Math.ceil(Date.now() / 1000) + 120),
+  } }));
+await assert.rejects(limited.read(), (error) => {
+  assert.equal(error.code, 'SCAN_BUDGET');
+  assert.equal(error.storage.provider, 'github');
+  assert.equal(error.storage.httpStatus, 403);
+  assert.equal(error.storage.rateLimited, true);
+  assert(Date.parse(error.storage.retryAt) >= Date.now() + 119000);
+  assert(!error.message.includes('secret-fixture'));
+  return true;
+});
+const forbidden = githubQuotaStore({ GITHUB_REPOSITORY: 'owner/repo', GH_TOKEN: 'secret-fixture' }, async () =>
+  Response.json({ message: 'Resource not accessible by integration' }, { status: 403 }));
+await assert.rejects(forbidden.compareAndSwap('revision', {}), (error) => {
+  assert.equal(error.storage.rateLimited, false, 'permission failure is not mislabeled as exhausted quota');
+  assert.equal(error.storage.operation, 'write-state');
+  return true;
+});
+
+// A paid-for/reserved successful Graph response must not be discarded merely
+// because the subsequent telemetry write failed. No later call may slip through.
+store = makeStore(); calls = 0;
+const telemetryStore = { read: store.read, compareAndSwap: async (revision, next) => {
+  if (next.metaUsage) throw Object.assign(new Error('GitHub unavailable'), { code: 'SCAN_BUDGET', storage: {
+    provider: 'github', operation: 'write-state', httpStatus: 503, rateLimited: false, retryAt: '',
+  } });
+  return store.compareAndSwap(revision, next);
+} };
+const preserveResponse = worker(telemetryStore, async () => {
+  calls += 1;
+  return Response.json({ data: [{ id: 'fresh-post' }] }, { headers: { 'x-app-usage': '{"call_count":20}' } });
+});
+assert.equal((await (await preserveResponse('unused')).json()).data[0].id, 'fresh-post');
+assert.equal(preserveResponse.quotaStats.stopped, true);
+assert.equal(preserveResponse.quotaStats.storageFailure.httpStatus, 503);
+await assert.rejects(preserveResponse('unused'), { code: 'SCAN_BUDGET' });
+await assert.rejects(preserveResponse('unused'), { code: 'SCAN_BUDGET' });
+assert.equal(calls, 1);
+assert((preserveResponse.quotaStats.reason.match(/Instagram shared quota paused:/g) || []).length <= 1);
 console.log('Shared Instagram quota: concurrent collectors, rolling window, cooldowns, failure safety and GitHub CAS tests passed');

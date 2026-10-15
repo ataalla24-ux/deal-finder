@@ -52,8 +52,48 @@ Local focused tests: media-budget rolling windows/72-hour simulation, maximum
 coverage/catalog migration, Meta collector, media evidence and token health.
 Provider responses in unit tests are fixtures, not live token-renewal proof.
 
-The owner-generated short-lived token was inspected in Meta: valid, correct app,
-existing five permissions, approximately one hour of validity. It was not stored
-as a production replacement. Owner must complete Meta's extension and the secure
-GitHub secret update; no token content belongs in this report or the repository.
-Live validation and final renewal evidence will be recorded below after completion.
+The owner extended the token in Meta, then explicitly authorized storing it in
+the existing GitHub secret. GitHub required reauthentication, completed by the
+owner. `INSTAGRAM_ACCESS_TOKEN` updated at 2026-10-15T23:06:58Z. Configured expiry
+is 2026-12-14T22:55:36Z (14 December, 23:55 Vienna). No permission expansion.
+The user posted the credentials in chat despite the secret-entry handoff; they
+were not copied to source or shell commands. A later rotation is recommended
+because the active credential has appeared in the conversation.
+
+## Live Results
+
+- Source commit `a288faa09721298adaea5f5728674736b6517dd7` pushed main.
+- Instagram Graph Coverage Tests 38821322828: success.
+- Production Feed Integrity 38821322809: success, including map contracts.
+- Public https://freefinder.at/deals.json returned HTTP 200 at 23:08:20Z:
+  59 live deals, none of the four removed IDs, feed `ff1-a75b6e1251a4d56056af`.
+- Bounded Meta run 38821620497: workflow success, factual collector degraded.
+  Provider inspection confirmed the renewed USER token, correct app and five
+  existing scopes; exact expiry matches configured metadata. Own-media and
+  Business Discovery both work from GitHub. Data access ends 2027-01-13T23:01:23Z.
+- Ten due accounts, 237 posts, zero account errors. Five false website leads
+  pruned, including `wien.orf.at`; existing source-failure history is not erased.
+- Both AI calls succeeded, one AI-positive candidate, two collector-accepted
+  existing candidates, zero new deals. 96 retained candidates are NOT 96 newly
+  found or Slack-approved deals. Budget: 48 prior calls, 2 validation calls,
+  144 rolling-day maximum, 94 remaining; two-hour allowance 12.
+- Four old media fetches still returned 403 and refresh recovered none. Ad
+  scanning stopped after five requests when GitHub quota storage could not
+  reserve/persist capacity. No Meta auth error was recorded. The old generic
+  message does not establish which GitHub HTTP status caused this stop.
+
+## Storage Failure Follow-up
+
+The shared quota adapter now reports GitHub HTTP status, operation, rate-limit
+classification and retry time without logging response bodies or credentials.
+If telemetry persistence fails AFTER an already-reserved Graph call succeeds,
+the downloaded response is retained while all subsequent local Graph calls stop.
+No unreserved requests, retry storm, higher cap or credential bypass is added.
+The pacing/budget reason is included in the GitHub step summary.
+
+Focused shared-quota regressions cover HTTP 403 rate limit versus missing access,
+secret-free errors, preserved downloaded posts, and no request after failed
+telemetry persistence. Existing concurrent ceiling/cooldown and maximum-coverage
+tests remain green. GitHub's documented REST limits are a separate constraint
+from Meta's API limits:
+https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api

@@ -2321,7 +2321,8 @@ export async function runMetaInstagramCollector(options = {}) {
       : (requestedSources === 0
           ? ((result.skippedAccounts || result.skippedHashtags) ? 'degraded' : 'ok')
           : (result.errors.length >= requestedSources && !result.raw.length ? 'failed' : (result.errors.length ? 'degraded' : 'ok')));
-    if (result.requestBudget.stopped && report.sources.instagramGraph.status === 'ok') report.sources.instagramGraph.status = 'degraded';
+    if ((result.requestBudget.stopped || fetchImpl.quotaStats?.stopped)
+      && report.sources.instagramGraph.status === 'ok') report.sources.instagramGraph.status = 'degraded';
     // Only unused shared capacity is filled after organic account/hashtag scans.
     // Do this before slow OCR so API progress can still be saved in this run.
     await fillAds();
