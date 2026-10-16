@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-16T21:35:38.633Z",
+  "generatedAt": "2026-10-16T21:45:28.396Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 798,
-    "uniqueCandidates": 715,
-    "distinctCandidates": 751,
+    "totalCandidates": 797,
+    "uniqueCandidates": 714,
+    "distinctCandidates": 750,
     "duplicateClusters": 36,
     "topHealthySources": [
       {
@@ -230,10 +230,11 @@
     ],
     "pipelineRuns": {
       "reportedSources": 7,
-      "failedSources": [],
-      "completedWithErrors": [
-        "power",
+      "failedSources": [
         "wien-combined"
+      ],
+      "completedWithErrors": [
+        "power"
       ]
     }
   },
@@ -328,26 +329,21 @@
         "Soul Mate Tickets um 7 € erhältlich bis 22.10."
       ],
       "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-16T16:54:05.170Z",
-        "finishedAt": "2026-10-16T16:55:54.648Z",
-        "durationMs": 109478,
+        "status": "failed",
+        "startedAt": "2026-10-16T21:38:08.478Z",
+        "finishedAt": "2026-10-16T21:38:12.371Z",
+        "durationMs": 3893,
         "counts": {
-          "rawCandidates": 96,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
+          "rawCandidates": 0,
+          "normalizedCandidates": 0,
+          "verifiedCandidates": 0,
           "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 90
+          "acceptedDeals": 0,
+          "rejectedDeals": 0
         },
-        "rejectedByReason": {
-          "general-recommendation": 6,
-          "no-concrete-offer": 69,
-          "excluded-promotion-type": 9,
-          "missing-text": 6
-        },
+        "rejectedByReason": {},
         "errors": [
-          "#wientipps: Instagram scan paused: request-budget"
+          "No Graph hashtag source completed successfully; last-good output was preserved. #wien: Instagram scan paused: api-usage"
         ],
         "reportFile": "deal-pipeline-last-run-wien-combined.json"
       },
@@ -377,6 +373,7 @@
         }
       ],
       "issues": [
+        "letzter Pipeline-Lauf ist fehlgeschlagen",
         "wenige klare Gratis-/Promo-Signale",
         "hohe Überschneidung mit anderen Quellen"
       ],
@@ -1076,70 +1073,6 @@
       "sourceWeightScore": 42
     },
     {
-      "sourceKey": "instagram-apify",
-      "file": "deals-pending-instagram-apify.json",
-      "sourceLabel": "Apify Instagram",
-      "totalDeals": 7,
-      "uniqueDeals": 4,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 0,
-      "fresh7dCount": 6,
-      "viennaCount": 2,
-      "foodDrinkCount": 6,
-      "promoCount": 3,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🧡 Manchmal sind es die kleinen Extras, die den Alltag besonders machen. Ein Lieblingsprodukt günstiger. Ein s",
-        "VIENNA, LET’S RUN 🏃‍♀️🏃‍♂️🔥 The HOS Run Club is officially here — and we’re kicking things off with our ver",
-        "🚨 +3:14 Stunden: BZ 316 Tel Aviv → Wien ist heute erst um 16:09 statt 12:55 Uhr gelandet! Warst du an Bord"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.9,
-      "viennaRate": 0.3,
-      "foodDrinkRate": 0.9,
-      "promoRate": 0.4,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88.1,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 4
-        },
-        {
-          "value": "kaffee",
-          "count": 2
-        },
-        {
-          "value": "freizeit",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 4
-        },
-        {
-          "value": "gratis",
-          "count": 3
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "Wien-Signal ist zu schwach",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 50,
-      "missionFitScore": 47,
-      "coverageScore": 10,
-      "precisionScore": 50,
-      "sourceWeightScore": 41
-    },
-    {
       "sourceKey": "church-gemeinde",
       "file": "deals-pending-church-gemeinde.json",
       "sourceLabel": "Freikirchen Wien",
@@ -1630,6 +1563,71 @@
       "coverageScore": 26,
       "precisionScore": 26,
       "sourceWeightScore": 29
+    },
+    {
+      "sourceKey": "instagram-apify",
+      "file": "deals-pending-instagram-apify.json",
+      "sourceLabel": "Apify Instagram",
+      "totalDeals": 6,
+      "uniqueDeals": 3,
+      "duplicateDeals": 3,
+      "duplicateAcrossSources": 3,
+      "fresh1dCount": 0,
+      "fresh7dCount": 6,
+      "viennaCount": 1,
+      "foodDrinkCount": 5,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "🧡 Manchmal sind es die kleinen Extras, die den Alltag besonders machen. Ein Lieblingsprodukt günstiger. Ein s",
+        "VIENNA, LET’S RUN 🏃‍♀️🏃‍♂️🔥 The HOS Run Club is officially here — and we’re kicking things off with our ver",
+        "🎃 Kürbis sonst gibt’s Saures! 🎨🍬 Pumpkins, Burgers & Good Vibes! 🍔🧡 Schnapp dir deine Lieblingsmenschen u"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0,
+      "fresh7dRate": 1,
+      "viennaRate": 0.2,
+      "foodDrinkRate": 0.8,
+      "promoRate": 0.3,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 3
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "freizeit",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 4
+        },
+        {
+          "value": "gratis",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
+        "Wien-Signal ist zu schwach",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 42,
+      "missionFitScore": 39,
+      "coverageScore": 8,
+      "precisionScore": 41,
+      "sourceWeightScore": 34
     },
     {
       "sourceKey": "vienna-promo-radar",
