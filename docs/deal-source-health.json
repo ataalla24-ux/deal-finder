@@ -1,23 +1,23 @@
 {
-  "generatedAt": "2026-10-16T19:39:30.204Z",
+  "generatedAt": "2026-10-16T20:01:08.659Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 791,
-    "uniqueCandidates": 708,
-    "distinctCandidates": 744,
+    "totalCandidates": 795,
+    "uniqueCandidates": 712,
+    "distinctCandidates": 748,
     "duplicateClusters": 36,
     "topHealthySources": [
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "healthScore": 73,
+        "totalDeals": 16
+      },
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "healthScore": 73,
         "totalDeals": 2
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "healthScore": 69,
-        "totalDeals": 12
       },
       {
         "sourceKey": "food3",
@@ -58,15 +58,15 @@
         "totalDeals": 10
       },
       {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "missionFitScore": 56,
+        "totalDeals": 16
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "missionFitScore": 54,
-        "totalDeals": 50
-      },
-      {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "missionFitScore": 52,
         "totalDeals": 50
       }
     ],
@@ -123,8 +123,8 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "precisionScore": 68,
-        "totalDeals": 12
+        "precisionScore": 72,
+        "totalDeals": 16
       },
       {
         "sourceKey": "instagram-ai",
@@ -153,6 +153,12 @@
         "totalDeals": 95
       },
       {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 57,
+        "totalDeals": 16
+      },
+      {
         "sourceKey": "food3",
         "sourceLabel": "Firecrawl Key 2 - Food",
         "sourceWeightScore": 56,
@@ -163,12 +169,6 @@
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 54,
         "totalDeals": 50
-      },
-      {
-        "sourceKey": "gastro2",
-        "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "sourceWeightScore": 54,
-        "totalDeals": 153
       }
     ],
     "topSourcesToFix": [
@@ -238,6 +238,77 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "tiktok",
+      "file": "deals-pending-tiktok.json",
+      "sourceLabel": "TikTok Scanner",
+      "totalDeals": 16,
+      "uniqueDeals": 16,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 2,
+      "fresh7dCount": 16,
+      "viennaCount": 16,
+      "foodDrinkCount": 5,
+      "promoCount": 16,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis Coffee bei Nespresso",
+        "coffee and free book to take home",
+        "Gratis Probetraining bei Kenny"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 67.6,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 5
+        },
+        {
+          "value": "kaffee",
+          "count": 4
+        },
+        {
+          "value": "kultur",
+          "count": 3
+        },
+        {
+          "value": "technik",
+          "count": 2
+        },
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 16
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 73,
+      "missionFitScore": 56,
+      "coverageScore": 19,
+      "precisionScore": 72,
+      "sourceWeightScore": 57
+    },
     {
       "sourceKey": "wien-combined",
       "file": "deals-pending-wien-combined.json",
@@ -314,73 +385,6 @@
       "coverageScore": 12,
       "precisionScore": 74,
       "sourceWeightScore": 61
-    },
-    {
-      "sourceKey": "tiktok",
-      "file": "deals-pending-tiktok.json",
-      "sourceLabel": "TikTok Scanner",
-      "totalDeals": 12,
-      "uniqueDeals": 12,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
-      "fresh7dCount": 12,
-      "viennaCount": 12,
-      "foodDrinkCount": 1,
-      "promoCount": 12,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis Getränk, Nutella-Pizza oder Margherita",
-        "Gratis Probetraining bei Kenny",
-        "☕️📚 BUCHWOCHEN IM WIENER KAFFEEHAUS"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 65.2,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 5
-        },
-        {
-          "value": "kultur",
-          "count": 3
-        },
-        {
-          "value": "technik",
-          "count": 2
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 12
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 69,
-      "missionFitScore": 49,
-      "coverageScore": 16,
-      "precisionScore": 68,
-      "sourceWeightScore": 52
     },
     {
       "sourceKey": "food3",
