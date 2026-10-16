@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-16T17:43:45.976Z",
+  "generatedAt": "2026-10-16T18:24:15.121Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "failed-preserved",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -62,11 +62,11 @@
     },
     "deals-pending-firecrawl4.json": {
       "deals": 51,
-      "candidates": 2
+      "candidates": 1
     },
     "deals-pending-firecrawl5.json": {
       "deals": 1,
-      "candidates": 1
+      "candidates": 0
     },
     "deals-pending-flights.json": {
       "deals": 7,
@@ -130,7 +130,7 @@
     },
     "deals-pending-meta-instagram.json": {
       "deals": 94,
-      "candidates": 11
+      "candidates": 10
     },
     "deals-pending-power.json": {
       "deals": 49,
@@ -157,16 +157,12 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 19,
-  "candidateAccounts": 17,
+  "candidatePosts": 17,
+  "candidateAccounts": 16,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
       "username": "entruempelungsservice1190",
-      "candidates": 2
-    },
-    {
-      "username": "freefinder.at",
       "candidates": 2
     },
     {
@@ -184,15 +180,19 @@
     {
       "username": "memoryheroes_dmc",
       "candidates": 1
+    },
+    {
+      "username": "santamaria_at",
+      "candidates": 1
     }
   ],
-  "fetchedPosts": 0,
-  "exactMatches": 0,
+  "fetchedPosts": 125,
+  "exactMatches": 6,
   "retainedEvidencePosts": 2000,
   "errors": [
     {
-      "username": "entruempelungsservice1190",
-      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+      "username": "unsal_media.32",
+      "message": "Meta API 400: Invalid user id for https://graph.facebook.com/v26.0/17841438552673858?fields=business_discovery.username%28unsal_media.32%29%7Busername%2Cname%2Cmedia.limit%2825%29%7Bid%2Ccaption%2Cmedia_type%2Cpermalink%2Ctimestamp%2Clike_count%2Ccomments_count%2Cmedia_product_type%2Cmedia_url%2Cthumbnail_url%2Cchildren%7Bmedia_type%2Cmedia_url%2Cthumbnail_url%7D%7D%7D&access_token=[redacted]"
     }
   ],
   "accountFailures": {
@@ -200,30 +200,29 @@
       "count": 1,
       "lastAt": "2026-10-10T22:48:47.423Z",
       "cooldownUntil": "2026-10-11T22:48:47.423Z"
+    },
+    "unsal_media.32": {
+      "count": 1,
+      "lastAt": "2026-10-16T18:24:15.121Z",
+      "cooldownUntil": "2026-10-17T18:24:15.121Z"
     }
   },
   "sharedQuota": {
     "limitPerHour": 296,
     "usageThreshold": 95,
-    "requests": 0,
-    "reserved": 0,
-    "stopped": true,
-    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
-    "highestUsagePercent": 0,
+    "requests": 6,
+    "reserved": 10,
+    "stopped": false,
+    "reason": "",
+    "highestUsagePercent": 72,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "2026-10-16T17:59:05.774Z",
+    "retryAt": "",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "globalError": {
-    "username": "entruempelungsservice1190",
-    "status": 0,
-    "code": "SCAN_BUDGET",
-    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
-  },
   "blockedEvidencePosts": 101,
-  "unmatchedCandidatePosts": 19,
-  "message": "0/19 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 11,
+  "message": "6/17 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
