@@ -1,0 +1,40 @@
+# Täglicher Deal-Blog: Kinderfeier im Museum der Illusionen
+
+Am Wiener Kalendertag 17. Oktober 2026 genau eine substanzielle Erweiterung des bestehenden Guides https://freefinder.at/blog/geburtstag-gratis-wien.html . Hauptkeyword **geburtstag gratis wien**, ergänzend **geburtstagskind gratis eintritt**. Kein neuer Slug oder Suchintent-Duplikat. Bestehende Artikel und alle 60 Einträge in docs/deals.json geprüft; kein Geburtstagsangebot im Feed, Museum der Illusionen bisher nicht im Guide. Geburtstagspriorität durch Evergreen-Erweiterung umgesetzt, statt eine weitere befristete Deal-Seite zu erzeugen. Ein Donis-Kindergeburtstags-Suchtreffer wurde wegen nicht mehr abrufbarer offizieller Zielseiten nicht übernommen. Feed unverändert.
+
+## Neue offizielle Primärquelle
+
+https://museumderillusionen.at/museum-kinder-wien/kindergeburtstag/ am 17. Oktober direkt per HTTPS HTTP 200 und als lesbare offizielle Webseite geprüft. Wallnerstraße 4, 1010 Wien. Die Kindergeburtstagsseite nennt das Geburtstagskind gratis im bezahlten Deluxe-Paket für 490 Euro für bis zu zehn eingeladene Kinder, keinen allgemeinen freien regulären Geburtstagseintritt. Raum für zehn Freunde und zwei Begleitpersonen, Partyhost, Zaubershow, Spiele, Schokoladentorte, Bio-Säfte/Snacks; ein Elternteil soll in der Nähe bleiben. Zwei Pizzen auf Anfrage plus 40 Euro, rechnerisch 530 Euro vor weiteren vereinbarten Extras. Allergien vorher besprechen.
+
+Zusätzliches Kind 39 Euro und zugleich maximal 13 Personen: keine freie Interpretation dieser Gruppengrenze, genaue Zusammensetzung und Gesamtpreis ausdrücklich vor Buchung bestätigen. Täglich angebotene Startzeiten 11/15 Uhr, maximal drei Stunden; Anfrageformular erfordert Antwort des Museums. Kein bestimmter Buchungsvorlauf, Altersgrenze, Geburtstags-Zeitfenster oder kalendarisches Angebotsende genannt; diese offenen Punkte vor Buchung klären. Laufend ohne festes Enddatum, nicht dauerhaft garantiert. Kein Formular abgeschickt, keine Buchung/Registrierung/Kontaktaufnahme.
+
+Substanz: neuer eigener Abschnitt mit Kostenentscheidung und Planungsfragen, Eintrag in Adresstabelle und Schnellvergleich, zwei sichtbare/strukturierte FAQs. Jetzt elf Kernvorteile, acht feste Adressen und 32 identische FAQ-Paare. Title/Meta/H1/OG/Twitter/Article, Blogindex, Startseitenbeschreibung und Sitemap konsistent. Bestehendes lokales FreeFinder-Cover beibehalten, kein fremdes Bild importiert. Querverweise zu PicArt/Madame Tussauds helfen beim einzelnen Gratisbesuch; bestehende Links zu aktuellen Angeboten, Gutschein-/Restaurant-/App-Guides und Bezirksguide erhalten und geprüft.
+
+## Bisherige Vorteile heute erneut geprüft
+
+Alle zehn kommerziellen Kernvorteile anhand offizieller Quellen erneut gelesen, Bedingungen unverändert:
+
+- https://www.watertuin.at/aktionen — Geburtstag, Reservierung, vollzahlende erwachsene Begleitung und Dienstag-Ausnahme, bis auf Widerruf.
+- https://www.donauturm.at/public/de/events-news-and-kulinarik/events/geburtstag-am-donauturm-wien/ — Eintritt und eine Rutschenfahrt, ±2 Tage, Ausweis, Front Desk vor Ticketkauf. Gabelgeld-Konflikt der Restaurant-/Feierseiten pro Torte vs. pro Person bleibt ausdrücklich offen.
+- https://www.madametussauds.com/wien/plane-deinen-besuch/vor-deinem-besuch/informationen-zum-besuch/ — jedes Alter genau am Geburtstag gegen amtlichen Lichtbildausweis.
+- https://www.3dpicart-museum.at/happy-birthday/ , https://www.3dpicart-museum.at/Oeffnungszeiten-Preise/ und https://www.3dpicart-museum.at/kontakt/ — drei direkte HTTP-200-Abrufe trotz Webextraktionsfehler, Geburtstagsvorteil und Begleitpreise unverändert.
+- https://www.starbucks.at/de/faq-rewards und https://www.starbucks.at/de/rewards/rewards-terms-and-conditions — Gold, hinterlegter Geburtstag, Reward 30 Tage und Standortausnahmen.
+- https://cineplexx.at/info/family-film-club — frische gerenderte Headless-Chrome-Quelle, vier zusätzliche Freunde, acht Euro/Freund und übrige Bedingungen; Grenzfall am 13. Geburtstag nicht wegerklärt.
+- https://www.nowayout-escape.at/de/special-offers/ und https://www.nowayout-escape.at/de/birthday-parties/ — ±7 Tage, mindestens vier insgesamt; zusätzliche Zeile 7 Jan–14 Feb weiterhin ungeklärt, Termin ausdrücklich bestätigen. Bestehende abweichende Altersregeln erhalten.
+- https://www.ballsandclubs.at/special-offers/ , https://www.ballsandclubs.at/birthday-parties/ und https://www.ballsandclubs.at/minigolf/ — Mindestgruppe, Zeitfenster, reguläre Begleitpreise unverändert.
+- https://thermewien.at/bereich/erlebnisstein-und-wildnis/ und aktuell verlinktes https://thermewien.at/wp-content/uploads/2025/10/Formular-Kindergeburtstag-1025.pdf — bezahltes Paket, Gratiseintritt fürs Geburtstagskind, fünf Kinder, vier Wochen Vorlauf und Ausschlüsse unverändert.
+- https://www.oebb.at/de/tickets-kundenkarten/kundenkarten/vorteilscard/vorteilscard-geburtstagsaktion.html und https://www.oebb.at/de/fragen-und-antworten/kundenkarten/vorteilscard/geburtstagsaktion — gültige Vorteilscard, Ausweis, genau Geburtstag und separate Reservierungs-/Stadtverkehrskosten.
+
+Unveränderte nichtkommerzielle Sonderfälle Stadtjubiläum/Wiener-Linien-Regeln werden nicht als neu geprüfter Geburtstagsdeal ausgegeben.
+
+## Suchdaten und SEO-Chance
+
+Keine aktuellen Search-Console-/Analytics-Exporte im Repository und kein direkter verbundener Daten-Connector. Heute vorhandenen Chrome-Zugang rein lesend geprüft: Analytics zeigt Einrichtungsseite statt der historischen Property 550142791; Search Console verweigert Zugriff auf die Domain-Property freefinder.at auch im bereits angemeldeten FreeFinder-Konto. Keine Inhaberschaft angefordert, keine Berechtigungs- oder Kontoeinstellungen verändert. Eigene Registerkarten geschlossen und ursprüngliche Ansicht wiederhergestellt. Daher keine heutigen Impressionen/Klicks/CTR und keine empirische heutige High-Impression/Low-CTR-Auswahl behauptet.
+
+Historische Berichte (13. Oktober, Zeitraum 15. September–12. Oktober) enthalten „gratis essen geburtstag wien“ und schwächere CTR bei Foodora/Interpol/Kino. Sie sind keine heutigen Messdaten. Der neue Inhalt adressiert die ausdrücklich vorgegebenen Geburtstagsintentionen und die wichtige Unterscheidung zwischen freiem Einzeleintritt und kostenpflichtiger Feier. Präziser Titel, Meta-Description und H1 nennen elf beschriebene Vorteile; sichtbare und strukturierte FAQs erklären genau die neue Paketbedingung. Keine pauschalen Gratis-Gruppenversprechen oder neue dünne Keyword-Seite.
+
+## Technik und Verifikation
+
+Eigener mktemp-detached-Worktree von origin/main unter .daily-blog-run.EWykHd/worktree. Fremder schmutziger Hauptcheckout und fremde Worktrees unverändert. Gezieltes seo:guides und vorgeschriebenes seo:deals ausgeführt. Nicht zugehörige automatische Angebotsübersichts-Drift nur im eigenen Worktree auf HEAD zurückgesetzt; kein Deal-Fakt mitveröffentlicht. Birthday-Datum und Adressenzahl im bestehenden SEO-Regressionstest angepasst.
+
+Vienna SEO, SEO Deals, Website Quality, Pro Website und Deal Guide Routing bestanden. Website-Audit: 64 HTML-Seiten, 57 indexierbar, null Fehler; vorbestehende plus-gratis-Orphan-Warnung. Canonical/OG/Bild/JSON-LD, sichtbare FAQs, Sitemap, lokale Links/Anker und App-Store-Ziele geprüft; git diff --check bestanden. Headless Chrome via Playwright: Guide, Startseite und Blogindex bei 1440, 390 und 320 Pixeln, neun Ansichten mit HTTP 200, kein horizontaler Seitenüberlauf, alle sichtbaren Bilder geladen, null Seiten-/Konsolenfehler. Screenshots der neuen Passage auf Mobil und der Desktopüberschrift visuell geprüft. 57 eindeutige Sitemap-URLs und 161 lokale HTTP-Ziele mit Status 200. Eine anfängliche Node-25/Undici-Assertion im HTTP-Prüfharness wurde durch konsumierte Antworten mit node:http behoben; kein Produktfehler. Keine Browser-Einschränkung bei der Layoutprüfung; Analytics-Zugriff wie oben begrenzt. Zwei unabhängige Quellen-/SEO-Diffprüfungen ohne Blocker. Push, GitHub Pages, Live-HTTP und IndexNow werden nach tatsächlichem Abschluss in der Automationsmemory dokumentiert.
