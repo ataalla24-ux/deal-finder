@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-17T20:19:51.514Z",
+  "generatedAt": "2026-10-17T20:26:11.757Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -186,10 +186,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 6,
+  "fetchedPosts": 50,
+  "exactMatches": 3,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "ams.wien",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 1,
@@ -205,19 +210,25 @@
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 34,
+    "requests": 2,
+    "reserved": 2,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 26,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-17T20:29:37.727Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "ams.wien",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 91,
-  "unmatchedCandidatePosts": 15,
-  "message": "6/21 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 18,
+  "message": "3/21 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
