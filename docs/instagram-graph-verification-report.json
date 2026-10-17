@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-17T10:09:14.843Z",
+  "generatedAt": "2026-10-17T10:39:02.993Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -129,8 +129,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 100,
-      "candidates": 16
+      "deals": 98,
+      "candidates": 15
     },
     "deals-pending-power.json": {
       "deals": 45,
@@ -157,8 +157,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 24,
-  "candidateAccounts": 21,
+  "candidatePosts": 23,
+  "candidateAccounts": 20,
   "skippedAccountCooldowns": 0,
   "selectedAccounts": [
     {
@@ -186,10 +186,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 9,
+  "fetchedPosts": 125,
+  "exactMatches": 8,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "thechase_game",
+      "message": "Instagram shared quota paused: Meta usage headroom"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 1,
@@ -205,19 +210,25 @@
   "sharedQuota": {
     "limitPerHour": 237,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 31,
+    "requests": 5,
+    "reserved": 5,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: Meta usage headroom",
+    "highestUsagePercent": 96,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-17T10:49:12.469Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
-  "blockedEvidencePosts": 95,
+  "globalError": {
+    "username": "thechase_game",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: Meta usage headroom"
+  },
+  "blockedEvidencePosts": 96,
   "unmatchedCandidatePosts": 15,
-  "message": "9/24 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "message": "8/23 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
