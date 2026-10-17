@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-17T12:27:02.304Z",
+  "generatedAt": "2026-10-17T13:09:27.205Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 785,
@@ -20,15 +20,9 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 66,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 64,
+        "healthScore": 63,
         "totalDeals": 97
       },
       {
@@ -36,6 +30,12 @@
         "sourceLabel": "jö Bonus Club",
         "healthScore": 61,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "instagram-verified",
+        "sourceLabel": "Instagram",
+        "healthScore": 61,
+        "totalDeals": 6
       }
     ],
     "topMissionSources": [
@@ -52,12 +52,6 @@
         "totalDeals": 17
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 61,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "joe",
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 57,
@@ -66,8 +60,14 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 54,
+        "missionFitScore": 52,
         "totalDeals": 97
+      },
+      {
+        "sourceKey": "firecrawl4",
+        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
+        "missionFitScore": 52,
+        "totalDeals": 54
       }
     ],
     "topCoverageSources": [
@@ -81,9 +81,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 55,
+        "coverageScore": 51,
         "totalDeals": 97,
-        "fresh1dCount": 15
+        "fresh1dCount": 11
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -102,9 +102,9 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 32,
+        "coverageScore": 30,
         "totalDeals": 49,
-        "fresh1dCount": 10
+        "fresh1dCount": 7
       }
     ],
     "topPrecisionSources": [
@@ -121,21 +121,21 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 68,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 67,
+        "precisionScore": 66,
         "totalDeals": 97
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 62,
+        "totalDeals": 2
       },
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 60,
+        "precisionScore": 59,
         "totalDeals": 49
       }
     ],
@@ -149,7 +149,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 60,
+        "sourceWeightScore": 58,
         "totalDeals": 97
       },
       {
@@ -159,16 +159,16 @@
         "totalDeals": 2
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 54,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 54,
         "totalDeals": 163
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "sourceWeightScore": 49,
+        "totalDeals": 10
       }
     ],
     "topSourcesToFix": [
@@ -386,79 +386,6 @@
       "sourceWeightScore": 56
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 1,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 2,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "SCHÜLER-ANGEBOT",
-        "Soul Mate Tickets um 7 € erhältlich bis 22.10."
-      ],
-      "lastRun": {
-        "status": "failed",
-        "startedAt": "2026-10-17T11:07:35.948Z",
-        "finishedAt": "2026-10-17T11:07:36.721Z",
-        "durationMs": 773,
-        "counts": {
-          "rawCandidates": 0,
-          "normalizedCandidates": 0,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 0,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "No Graph hashtag source completed successfully; last-good output was preserved. #wien: Instagram shared quota paused: rolling-hour budget exhausted"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0.5,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "letzter Pipeline-Lauf ist fehlgeschlagen",
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 66,
-      "missionFitScore": 61,
-      "coverageScore": 11,
-      "precisionScore": 68,
-      "sourceWeightScore": 54
-    },
-    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
@@ -466,7 +393,7 @@
       "uniqueDeals": 60,
       "duplicateDeals": 37,
       "duplicateAcrossSources": 28,
-      "fresh1dCount": 15,
+      "fresh1dCount": 11,
       "fresh7dCount": 95,
       "viennaCount": 96,
       "foodDrinkCount": 54,
@@ -480,7 +407,7 @@
       "lastRun": null,
       "uniqueRate": 0.6,
       "duplicateRate": 0.3,
-      "fresh1dRate": 0.2,
+      "fresh1dRate": 0.1,
       "fresh7dRate": 1,
       "viennaRate": 1,
       "foodDrinkRate": 0.6,
@@ -527,12 +454,14 @@
           "count": 3
         }
       ],
-      "issues": [],
-      "healthScore": 64,
-      "missionFitScore": 54,
-      "coverageScore": 55,
-      "precisionScore": 67,
-      "sourceWeightScore": 60
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 63,
+      "missionFitScore": 52,
+      "coverageScore": 51,
+      "precisionScore": 66,
+      "sourceWeightScore": 58
     },
     {
       "sourceKey": "joe",
@@ -740,83 +669,78 @@
       "sourceWeightScore": 48
     },
     {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 49,
-      "uniqueDeals": 20,
-      "duplicateDeals": 29,
-      "duplicateAcrossSources": 27,
-      "fresh1dCount": 10,
-      "fresh7dCount": 49,
-      "viennaCount": 49,
-      "foodDrinkCount": 21,
-      "promoCount": 23,
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 0,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 2,
+      "promoCount": 0,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Crew-Ticket für 4 Personen für 150 € statt 180 € mit Welcome Drink und Snacks am 7. November 2026",
-        "Willkommensdrink gratis bei AfriVision Gala am 7. November 2026",
-        "Kostenlose Teilnahme am HOS Community Run am 25. Oktober 2026 mit optionalem Brunch für 10,90 €"
+        "SCHÜLER-ANGEBOT",
+        "Soul Mate Tickets um 7 € erhältlich bis 22.10."
       ],
-      "lastRun": null,
-      "uniqueRate": 0.4,
-      "duplicateRate": 0.6,
-      "fresh1dRate": 0.2,
+      "lastRun": {
+        "status": "failed",
+        "startedAt": "2026-10-17T11:07:35.948Z",
+        "finishedAt": "2026-10-17T11:07:36.721Z",
+        "durationMs": 773,
+        "counts": {
+          "rawCandidates": 0,
+          "normalizedCandidates": 0,
+          "verifiedCandidates": 0,
+          "previousDeals": 0,
+          "acceptedDeals": 0,
+          "rejectedDeals": 0
+        },
+        "rejectedByReason": {},
+        "errors": [
+          "No Graph hashtag source completed successfully; last-good output was preserved. #wien: Instagram shared quota paused: rolling-hour budget exhausted"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 0,
       "fresh7dRate": 1,
       "viennaRate": 1,
-      "foodDrinkRate": 0.4,
-      "promoRate": 0.5,
+      "foodDrinkRate": 1,
+      "promoRate": 0,
       "missingUrlRate": 0,
-      "averageQualityScore": 82.6,
+      "averageQualityScore": 88,
       "topCategories": [
         {
-          "value": "shopping",
-          "count": 14
-        },
-        {
           "value": "essen",
-          "count": 13
+          "count": 1
         },
         {
-          "value": "event",
-          "count": 8
-        },
-        {
-          "value": "drink",
-          "count": 4
-        },
-        {
-          "value": "merchandise",
-          "count": 2
-        },
-        {
-          "value": "reisen",
-          "count": 2
+          "value": "kaffee",
+          "count": 1
         }
       ],
       "topTypes": [
         {
           "value": "rabatt",
-          "count": 29
-        },
-        {
-          "value": "gratis",
-          "count": 19
-        },
-        {
-          "value": "bogo",
-          "count": 1
+          "count": 2
         }
       ],
       "issues": [
-        "geringe Food-/Drink-Relevanz",
+        "letzter Pipeline-Lauf ist fehlgeschlagen",
+        "wenige Deals sind frischer als 1 Tag",
+        "wenige klare Gratis-/Promo-Signale",
         "hohe Überschneidung mit anderen Quellen"
       ],
-      "healthScore": 56,
-      "missionFitScore": 47,
-      "coverageScore": 32,
-      "precisionScore": 60,
-      "sourceWeightScore": 49
+      "healthScore": 59,
+      "missionFitScore": 50,
+      "coverageScore": 11,
+      "precisionScore": 62,
+      "sourceWeightScore": 47
     },
     {
       "sourceKey": "firecrawl4",
@@ -991,6 +915,86 @@
       "coverageScore": 70,
       "precisionScore": 48,
       "sourceWeightScore": 54
+    },
+    {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 49,
+      "uniqueDeals": 20,
+      "duplicateDeals": 29,
+      "duplicateAcrossSources": 27,
+      "fresh1dCount": 7,
+      "fresh7dCount": 49,
+      "viennaCount": 49,
+      "foodDrinkCount": 21,
+      "promoCount": 23,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Crew-Ticket für 4 Personen für 150 € statt 180 € mit Welcome Drink und Snacks am 7. November 2026",
+        "Willkommensdrink gratis bei AfriVision Gala am 7. November 2026",
+        "Kostenlose Teilnahme am HOS Community Run am 25. Oktober 2026 mit optionalem Brunch für 10,90 €"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.4,
+      "duplicateRate": 0.6,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.4,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 82.6,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 14
+        },
+        {
+          "value": "essen",
+          "count": 13
+        },
+        {
+          "value": "event",
+          "count": 8
+        },
+        {
+          "value": "drink",
+          "count": 4
+        },
+        {
+          "value": "merchandise",
+          "count": 2
+        },
+        {
+          "value": "reisen",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 29
+        },
+        {
+          "value": "gratis",
+          "count": 19
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag",
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 54,
+      "missionFitScore": 45,
+      "coverageScore": 30,
+      "precisionScore": 59,
+      "sourceWeightScore": 47
     },
     {
       "sourceKey": "member-benefits",
