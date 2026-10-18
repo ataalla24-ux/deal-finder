@@ -77,12 +77,20 @@ export async function handleAccountEmail(request, env) {
     // Do not retain subjects, recipient addresses or diagnostic payloads from provider events.
     return internal(env, 'email-event', { type: event.type, providerId: event.data.email_id });
   }
-  if (url.pathname === '/api/email/admin/owner-test') {
+  if (['/api/email/admin/owner-test', '/api/email/admin/launch-test'].includes(url.pathname)) {
     if (!['GET', 'POST'].includes(request.method)) return json({ ok: false }, 405);
     if (url.search) return json({ ok: false }, 400);
     const secret = env.MERCHANT_PROMO_ADMIN_SECRET?.trim();
     if (!secret || await hash(request.headers.get('authorization') || '') !== await hash(`Bearer ${secret}`)) {
       return json({ ok: false }, 401);
+    }
+    if (url.pathname.endsWith('/launch-test')) {
+      if (request.method === 'GET') return internal(env, 'email-launch-status', {});
+      if (env.ACCOUNT_EMAIL_QA_ENABLED !== '1' || Date.now() > Date.parse('2026-10-19T20:00:00Z')) return json({ ok: false }, 503);
+      let body;
+      try { body = JSON.parse(await limitedText(request, 32)); } catch { return json({ ok: false }, 400); }
+      if (!body || ![1, 2].includes(body.slot) || Object.keys(body).some(k => k !== 'slot')) return json({ ok: false }, 400);
+      return internal(env, 'email-launch-test', body);
     }
     if (request.method === 'POST') {
       if (env.ACCOUNT_EMAIL_QA_ENABLED !== '1') return json({ ok: false }, 503);
@@ -98,6 +106,9 @@ export async function handleAccountEmail(request, env) {
 export function accountEmailLedger(Base) {
   return class extends Base {
     async perform(action, body) {
+      if (action === 'email-launch-status') return { ok: true, tests: await Promise.all([1, 2].map(async slot =>
+        ({ slot, ...publicStatus(await this.storage.get('mail:launch-test:2026-10-18:' + slot)) }))) };
+      if (action === 'email-launch-test') return this.launchEmailTest(body.slot);
       if (action === 'email-owner-status') return publicStatus(await this.storage.get('mail:owner-test'));
       if (action === 'email-owner-test') return this.ownerEmailTest();
       if (action === 'email-unsubscribe') return this.unsubscribeEmail(body.tokenHash);
@@ -122,6 +133,22 @@ export function accountEmailLedger(Base) {
     }
     emailTransport(delivery) { return sendResendEmail(this.env, delivery); }
     emailNow() { return Date.now(); }
+    async launchEmailTest(slot) {
+      if (![1, 2].includes(slot)) return { ok: false, state: 'invalid' };
+      const key = 'mail:launch-test:2026-10-18:' + slot;
+      const prior = await this.storage.get(key);
+      if (prior) return publicStatus(prior);
+      if (this.env.ACCOUNT_EMAIL_QA_ENABLED !== '1' || this.env.ACCOUNT_EMAIL_TRANSPORT_ENABLED !== '1' ||
+        !this.env.RESEND_WEBHOOK_SECRET || this.emailNow() > Date.parse('2026-10-19T20:00:00Z')) return { ok: false, state: 'disabled' };
+      return this.dispatchEmail(key, { id: slot === 1 ? '78b495ab-5fb3-4dbd-9465-3f564070c454' : '228bd358-66ad-4690-9ff4-72b91fbe833b',
+        logicalId: 'owner-launch-test-2026-10-18-' + slot, createdAt: this.emailNow(), to: 'freefinder.at@gmail.com',
+        subject: `FreeFinder TEST ${slot}/2: Zustellung vor dem Flyerstart`,
+        text: 'Dies ist eine von dir freigegebene Testnachricht, kein echtes Angebot und keine Belohnung.\n\n' +
+          (slot === 1 ? 'Geprueft wird der Versandweg fuer freiwillige Deal- und Wochen-E-Mails.' :
+            'Geprueft wird der Versandweg fuer Benachrichtigungen zu Einladungen und Belohnungen. Es wurde kein Gratis-Monat gutgeschrieben.') +
+          '\n\nEs werden hoechstens zwei Testnachrichten ausschliesslich an diese Adresse gesendet. Andere Nutzer und deren Einwilligungen bleiben unveraendert.',
+      }, null);
+    }
     async emailQuota(now) {
       const day = new Date(now).toISOString().slice(0, 10), month = day.slice(0, 7);
       const current = await this.storage.get('mail:quota') || {};

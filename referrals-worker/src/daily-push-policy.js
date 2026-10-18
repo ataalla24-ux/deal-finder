@@ -33,7 +33,7 @@ export function eligiblePushDeals(feed, state, now = Date.now()) {
     const end = isoDay(deal.validUntil || deal.validOn || deal.expires);
     // Only explicit, source-grounded calendar dates. Unknown/recurring/time-limited offers need review.
     if ((deal.validFrom || deal.validOn) && !start) return [];
-    if (!end || end < day || (start && (start > day || start > end)) || !['range', 'date', 'fixed', 'single', 'single_date'].includes(deal.expiryKind)) return [];
+    if (!end || end < day || (start && (start > day || start > end)) || !['range', 'end', 'date', 'fixed', 'single', 'single_date'].includes(deal.expiryKind)) return [];
     const timing = [deal.expiryDisplayText, deal.description, deal.title].join(' ');
     if (/\b\d{1,2}[:.]\d{2}\s*(?:uhr|[-–]|bis)|\b(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|happy hour)\b/i.test(timing)) return [];
     return [deal];

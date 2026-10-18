@@ -217,7 +217,7 @@ export async function handleReferralMonths(request, env, authenticate = authenti
   const action = new URL(request.url).pathname.slice(PREFIX.length);
   if (action === 'config' && request.method === 'GET') return json({ ok: true, enabled: env.REFERRAL_MONTHS_ENABLED === '1' });
   if (!['register', 'status', 'accept', 'confirm', 'redeem', 'confirm-redemption', 'prepare-subscription',
-    'confirm-subscription', 'import-apple-offers', 'reconciliation-status', ...SUPPORT_ACTIONS,
+    'confirm-subscription', 'import-apple-offers', 'reconciliation-status', 'operations-status', 'push-status', 'push-preview', ...SUPPORT_ACTIONS,
     'apple-claim-challenge', 'apple-claim-key', 'apple-claim-confirm'].includes(action)) {
     return json({ ok: false, error: 'Nicht gefunden.' }, 404);
   }
@@ -226,9 +226,14 @@ export async function handleReferralMonths(request, env, authenticate = authenti
   let body;
   try { body = await boundedJSON(request); } catch (error) { return json({ ok: false }, error.status || 400); }
   delete body.principal;
-  if (['import-apple-offers', 'reconciliation-status', ...SUPPORT_ACTIONS].includes(action)) {
+  if (['import-apple-offers', 'reconciliation-status', 'operations-status', 'push-status', 'push-preview', ...SUPPORT_ACTIONS].includes(action)) {
     if (!env.REFERRAL_ADMIN_SECRET || request.headers.get('x-freefinder-merchant-secret') !== env.REFERRAL_ADMIN_SECRET) return json({ ok: false }, 403);
     if (SUPPORT_ACTIONS.includes(action) && env.REFERRAL_SUPPORT_ENABLED !== '1') return json({ ok: false }, 503);
+    if (['push-status', 'push-preview'].includes(action)) {
+      if (!env.DAILY_DEAL_PUSH) return json({ ok: false }, 503);
+      return env.DAILY_DEAL_PUSH.get(env.DAILY_DEAL_PUSH.idFromName('daily-deals-v1'))
+        .fetch('https://push.internal/' + action.slice(5));
+    }
   } else {
     if (!['ios', 'android'].includes(body.platform)) return json({ ok: false }, 400);
     try {
@@ -329,6 +334,7 @@ export class ReferralMonthsLedger {
   }
   async perform(action, body) {
     const now = Date.now();
+    if (action === 'operations-status') return this.operationsStatus(body, now);
     if (SUPPORT_ACTIONS.includes(action)) return this.supportAction(action, body, now);
     if (action === 'reconciliation-status') {
       const scan = await this.storage.get(SOURCE_SCAN) || {};
@@ -586,6 +592,52 @@ export class ReferralMonthsLedger {
       return this.status(account);
     }
     fail('Nicht gefunden.', 404);
+  }
+  async operationsStatus(body, now) {
+    const prefixes = { offers: 'offer:', accounts: 'account:', deliveries: 'mail:account:' };
+    if (!Object.hasOwn(prefixes, body.section) || Object.keys(body).some(k =>
+      !['section', 'cursor', 'trustedIP'].includes(k))) fail('Invalid operations query.');
+    const prefix = prefixes[body.section];
+    if (body.cursor != null && (typeof body.cursor !== 'string' || !body.cursor.startsWith(prefix) ||
+      body.cursor.length > 200 || !/^[a-zA-Z0-9:-]+$/.test(body.cursor))) fail('Invalid operations cursor.');
+    const rows = await this.storage.list({ prefix, limit: 200,
+      ...(body.cursor ? { startAfter: body.cursor } : {}) });
+    const groups = new Map();
+    const count = (key, increment = 1) => groups.set(key, (groups.get(key) || 0) + increment);
+    for (const row of rows.values()) {
+      if (body.section === 'offers') {
+        const state = row.environment !== 'Production' ? 'non_production' :
+          !Number.isFinite(row.expiresAt) || row.expiresAt <= now ? 'expired' : row.assignedTo ? 'assigned' : 'available';
+        const product = APPLE_PRODUCTS.has(row.productId) ? row.productId : 'unknown';
+        const customer = ['new', 'existing', 'expired', 'new_or_expired'].includes(row.customerType) ? row.customerType : 'unknown';
+        count(`${product}|${customer}|${state}`);
+      } else if (body.section === 'accounts') {
+        count(row.deletedAt ? 'deleted' : row.recoverable ? 'recoverable' : 'unrecoverable');
+        if (!row.deletedAt && row.recoverable) {
+          for (const preference of ['rewardEmails', 'dealEmails', 'weeklyEmails']) {
+            if (row.email && row.preferences?.[preference] === true) count(preference);
+          }
+          for (const reward of row.rewards || []) {
+            const state = ['earned', ...PENDING_REWARDS, 'redeemed'].includes(reward.state) ? reward.state : 'other';
+            count('reward:' + state);
+          }
+        }
+      } else {
+        const state = ['attempting', 'accepted', 'unknown', 'rejected', 'bounced', 'complained', 'suppressed', 'failed'].includes(row.state) ? row.state : 'other';
+        count(state);
+        if (row.delivered === true) count('delivered');
+      }
+    }
+    const quota = await this.storage.get('mail:quota') || {};
+    const day = new Date(now).toISOString().slice(0, 10), month = day.slice(0, 7);
+    return { ok: true, checkedAt: now, section: body.section, scanned: rows.size,
+      complete: rows.size < 200, cursor: rows.size === 200 ? [...rows.keys()].at(-1) : null,
+      counts: Object.fromEntries(groups),
+      email: { enabled: this.env.ACCOUNT_EMAIL_ENABLED === '1', transportEnabled: this.env.ACCOUNT_EMAIL_TRANSPORT_ENABLED === '1',
+        transportConfigured: !!(this.env.RESEND_API_KEY && this.env.RESEND_WEBHOOK_SECRET),
+        day, month, dailyUsed: quota.day === day ? quota.daily || 0 : 0,
+        monthlyUsed: quota.month === month ? quota.monthly || 0 : 0, dailyLimit: 90, monthlyLimit: 2700 },
+      referralEnabled: this.env.REFERRAL_MONTHS_ENABLED === '1' };
   }
   async supportRevision(reward) {
     return referralHash(JSON.stringify([reward.id, reward.state, reward.months, reward.sourceEvidence,

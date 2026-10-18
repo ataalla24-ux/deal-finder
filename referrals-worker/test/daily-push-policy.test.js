@@ -18,6 +18,16 @@ test('verified current deal is selected with UTF-8-safe localized message', () =
   assert.match(dailyMessage(deal, 'en').body, /^Today:/);
 });
 
+test('feed end-date classification is accepted only with an explicit current verified end date', () => {
+  const end = { ...deal, expiryKind: 'end', validFrom: undefined, validUntil: '2026-10-31' };
+  assert.equal(pickDailyPush({ ...feed, deals: [end] }, state, [], now)?.id, deal.id);
+  for (const edit of [{ validUntil: undefined }, { validUntil: '2026-10-07' }, { validUntil: '2026-02-30' },
+    { dateConfidence: 'low' }, { expiryKind: 'start' }, { description: 'Nur Freitag' },
+    { pipelineLifecycle: { manualDecision: 'pending' } }]) {
+    assert.equal(eligiblePushDeals({ ...feed, deals: [{ ...end, ...edit }] }, state, now).length, 0);
+  }
+});
+
 test('Pro uses the published daily feature and never substitutes an unrelated deal', () => {
   const other = { ...deal, id: 'other', title: 'Gratis Kebap' };
   const two = { ...feed, deals: [other, deal] };

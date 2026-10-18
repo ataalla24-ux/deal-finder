@@ -87,6 +87,21 @@ test('concurrent sends have exactly one immutable delivery and reserve provider 
   assert.equal(r.sent.length, 1);
 });
 
+test('owner-authorized launch tests are fixed-recipient, bounded to two, gated and never reenroll accounts', async t => {
+  const r = await runtime(t, { TEST_NOW: String(Date.parse('2026-10-18T14:00:00Z')) });
+  for (const slot of [1, 1, 2, 2]) assert.equal((await r.call('email-launch-test', { slot })).body.state, 'accepted');
+  assert.equal((await r.call('email-launch-test', { slot: 3 })).body.state, 'invalid');
+  assert.equal(r.sent.length, 2);
+  assert.ok(r.sent.every(x => x.body.to[0] === 'freefinder.at@gmail.com' && /TEST/.test(x.body.subject)));
+  assert.equal((await r.call('rows')).body['account:' + accountId].preferences.weeklyEmails, false);
+  for (const patch of [{ ACCOUNT_EMAIL_QA_ENABLED: '0' }, { RESEND_WEBHOOK_SECRET: '' },
+    { TEST_NOW: String(Date.parse('2026-10-20T00:00:00Z')) }]) {
+    const disabled = await runtime(t, patch);
+    assert.equal((await disabled.call('email-launch-test', { slot: 1 })).body.state, 'disabled');
+    assert.equal(disabled.sent.length, 0);
+  }
+});
+
 test('enabled delivery never enrolls users; real account choices govern each send and unsubscribe', async t => {
   const r = await runtime(t);
   await r.call('clear', { keys: ['account:' + accountId] });
