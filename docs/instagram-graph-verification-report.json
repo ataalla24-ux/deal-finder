@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-18T16:30:55.463Z",
+  "generatedAt": "2026-10-18T16:36:55.641Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -186,10 +186,15 @@
       "candidates": 1
     }
   ],
-  "fetchedPosts": 150,
-  "exactMatches": 7,
+  "fetchedPosts": 25,
+  "exactMatches": 0,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "santamaria_at",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 1,
@@ -205,19 +210,25 @@
   "sharedQuota": {
     "limitPerHour": 296,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 93,
+    "requests": 1,
+    "reserved": 1,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 92,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-18T16:44:26.218Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "santamaria_at",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 95,
-  "unmatchedCandidatePosts": 13,
-  "message": "7/20 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 20,
+  "message": "0/20 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
