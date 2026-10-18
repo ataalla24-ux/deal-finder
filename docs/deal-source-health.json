@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-18T11:36:04.104Z",
+  "generatedAt": "2026-10-18T11:42:10.693Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 763,
-    "uniqueCandidates": 669,
-    "distinctCandidates": 711,
-    "duplicateClusters": 42,
+    "uniqueCandidates": 671,
+    "distinctCandidates": 712,
+    "duplicateClusters": 41,
     "topHealthySources": [
       {
         "sourceKey": "tiktok",
@@ -14,9 +14,15 @@
         "totalDeals": 14
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 71,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 62,
+        "healthScore": 64,
         "totalDeals": 98
       },
       {
@@ -30,15 +36,15 @@
         "sourceLabel": "jö Bonus Club",
         "healthScore": 61,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "instagram-verified",
-        "sourceLabel": "Instagram",
-        "healthScore": 61,
-        "totalDeals": 6
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 69,
+        "totalDeals": 2
+      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
@@ -62,12 +68,6 @@
         "sourceLabel": "Meta Instagram Graph",
         "missionFitScore": 52,
         "totalDeals": 98
-      },
-      {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "missionFitScore": 52,
-        "totalDeals": 51
       }
     ],
     "topCoverageSources": [
@@ -115,6 +115,12 @@
         "totalDeals": 14
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 73,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 67,
@@ -131,12 +137,6 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 58,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 57,
-        "totalDeals": 2
       }
     ],
     "topWeightedSources": [
@@ -145,6 +145,12 @@
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 59,
         "totalDeals": 14
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 59,
+        "totalDeals": 2
       },
       {
         "sourceKey": "meta-instagram",
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 52,
         "totalDeals": 156
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "sourceWeightScore": 49,
-        "totalDeals": 10
       }
     ],
     "topSourcesToFix": [
@@ -304,13 +304,95 @@
       "sourceWeightScore": 59
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 2,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "25 % RABATT AUF EURE TICKETS",
+        "Donaukanal 🎟️ EINTRITT FREI – ANMELDUNG PFLICHT!"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-18T11:37:59.133Z",
+        "finishedAt": "2026-10-18T11:39:52.064Z",
+        "durationMs": 112931,
+        "counts": {
+          "rawCandidates": 90,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 84
+        },
+        "rejectedByReason": {
+          "missing-text": 4,
+          "general-recommendation": 4,
+          "no-concrete-offer": 71,
+          "weak-food-offer": 1,
+          "excluded-promotion-type": 3,
+          "missing-vienna-evidence": 1
+        },
+        "errors": [
+          "#wientipps: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 71,
+      "missionFitScore": 69,
+      "coverageScore": 12,
+      "precisionScore": 73,
+      "sourceWeightScore": 59
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 98,
-      "uniqueDeals": 63,
-      "duplicateDeals": 35,
-      "duplicateAcrossSources": 24,
+      "uniqueDeals": 64,
+      "duplicateDeals": 34,
+      "duplicateAcrossSources": 23,
       "fresh1dCount": 14,
       "fresh7dCount": 97,
       "viennaCount": 98,
@@ -323,7 +405,7 @@
         "5% 1 Liter for 1,19 € (-25% billiger); Red Bull Energy Drink 250 ml for 1,19 € (-37%"
       ],
       "lastRun": null,
-      "uniqueRate": 0.6,
+      "uniqueRate": 0.7,
       "duplicateRate": 0.2,
       "fresh1dRate": 0.1,
       "fresh7dRate": 1,
@@ -375,7 +457,7 @@
       "issues": [
         "wenige Deals sind frischer als 1 Tag"
       ],
-      "healthScore": 62,
+      "healthScore": 64,
       "missionFitScore": 52,
       "coverageScore": 56,
       "precisionScore": 67,
@@ -886,88 +968,6 @@
       "coverageScore": 6,
       "precisionScore": 42,
       "sourceWeightScore": 28
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 0,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 2,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Oktober 🎟️ Eintritt frei 👉 Schickt den Beitrag an jemanden, der gerne besondere Kunstorte in Wien entdeckt!",
-        "🔥📱 SUPER ANGEBOT BEI PAKHTONMOBILE VIENNA!"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-18T05:03:15.504Z",
-        "finishedAt": "2026-10-18T05:05:25.131Z",
-        "durationMs": 129627,
-        "counts": {
-          "rawCandidates": 86,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 78
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 62,
-          "missing-text": 2,
-          "missing-vienna-evidence": 1,
-          "general-recommendation": 9,
-          "excluded-promotion-type": 4
-        },
-        "errors": [
-          "#wientipps: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 1
-        },
-        {
-          "value": "technik",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 50,
-      "missionFitScore": 51,
-      "coverageScore": 10,
-      "precisionScore": 57,
-      "sourceWeightScore": 44
     },
     {
       "sourceKey": "church-events",
