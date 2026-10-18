@@ -1,17 +1,23 @@
 {
-  "generatedAt": "2026-10-18T04:59:46.570Z",
+  "generatedAt": "2026-10-18T05:06:02.332Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 782,
-    "uniqueCandidates": 689,
-    "distinctCandidates": 730,
-    "duplicateClusters": 41,
+    "uniqueCandidates": 691,
+    "distinctCandidates": 731,
+    "duplicateClusters": 40,
     "topHealthySources": [
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "healthScore": 75,
         "totalDeals": 16
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 72,
+        "totalDeals": 2
       },
       {
         "sourceKey": "meta-instagram",
@@ -30,12 +36,6 @@
         "sourceLabel": "Instagram",
         "healthScore": 61,
         "totalDeals": 6
-      },
-      {
-        "sourceKey": "community",
-        "sourceLabel": "Community Submission",
-        "healthScore": 59,
-        "totalDeals": 22
       }
     ],
     "topMissionSources": [
@@ -123,7 +123,7 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 62,
+        "precisionScore": 65,
         "totalDeals": 2
       },
       {
@@ -159,16 +159,16 @@
         "totalDeals": 161
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 51,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 50,
         "totalDeals": 49
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "sourceWeightScore": 49,
-        "totalDeals": 10
       }
     ],
     "topSourcesToFix": [
@@ -231,12 +231,11 @@
     ],
     "pipelineRuns": {
       "reportedSources": 7,
-      "failedSources": [
-        "wien-combined"
-      ],
+      "failedSources": [],
       "completedWithErrors": [
         "food3",
-        "power"
+        "power",
+        "wien-combined"
       ]
     }
   },
@@ -313,13 +312,94 @@
       "sourceWeightScore": 59
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 2,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 2,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 0,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Oktober 🎟️ Eintritt frei 👉 Schickt den Beitrag an jemanden, der gerne besondere Kunstorte in Wien entdeckt!",
+        "🔥📱 SUPER ANGEBOT BEI PAKHTONMOBILE VIENNA!"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-18T05:03:15.504Z",
+        "finishedAt": "2026-10-18T05:05:25.131Z",
+        "durationMs": 129627,
+        "counts": {
+          "rawCandidates": 86,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 78
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 62,
+          "missing-text": 2,
+          "missing-vienna-evidence": 1,
+          "general-recommendation": 9,
+          "excluded-promotion-type": 4
+        },
+        "errors": [
+          "#wientipps: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 1
+        },
+        {
+          "value": "technik",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 72,
+      "missionFitScore": 51,
+      "coverageScore": 10,
+      "precisionScore": 65,
+      "sourceWeightScore": 51
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 93,
-      "uniqueDeals": 59,
-      "duplicateDeals": 34,
-      "duplicateAcrossSources": 23,
+      "uniqueDeals": 60,
+      "duplicateDeals": 33,
+      "duplicateAcrossSources": 22,
       "fresh1dCount": 13,
       "fresh7dCount": 92,
       "viennaCount": 93,
@@ -594,80 +674,6 @@
       "coverageScore": 17,
       "precisionScore": 57,
       "sourceWeightScore": 48
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 1,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 0,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 2,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "SCHÜLER-ANGEBOT",
-        "Soul Mate Tickets um 7 € erhältlich bis 22.10."
-      ],
-      "lastRun": {
-        "status": "failed",
-        "startedAt": "2026-10-17T20:53:50.978Z",
-        "finishedAt": "2026-10-17T20:53:51.838Z",
-        "durationMs": 860,
-        "counts": {
-          "rawCandidates": 0,
-          "normalizedCandidates": 0,
-          "verifiedCandidates": 0,
-          "previousDeals": 0,
-          "acceptedDeals": 0,
-          "rejectedDeals": 0
-        },
-        "rejectedByReason": {},
-        "errors": [
-          "No Graph hashtag source completed successfully; last-good output was preserved. #wien: Instagram shared quota paused: rolling-hour budget exhausted"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0.5,
-      "duplicateRate": 0.5,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "kaffee",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "letzter Pipeline-Lauf ist fehlgeschlagen",
-        "wenige Deals sind frischer als 1 Tag",
-        "wenige klare Gratis-/Promo-Signale",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 59,
-      "missionFitScore": 50,
-      "coverageScore": 11,
-      "precisionScore": 62,
-      "sourceWeightScore": 47
     },
     {
       "sourceKey": "instagram-ai",
