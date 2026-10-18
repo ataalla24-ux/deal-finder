@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-18T05:38:14.029Z",
+  "generatedAt": "2026-10-18T06:05:45.378Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 777,
-    "uniqueCandidates": 684,
+    "totalCandidates": 778,
+    "uniqueCandidates": 683,
     "distinctCandidates": 725,
-    "duplicateClusters": 41,
+    "duplicateClusters": 42,
     "topHealthySources": [
       {
         "sourceKey": "tiktok",
@@ -14,16 +14,10 @@
         "totalDeals": 16
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 72,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "healthScore": 62,
-        "totalDeals": 93
+        "healthScore": 64,
+        "totalDeals": 94
       },
       {
         "sourceKey": "joe",
@@ -36,6 +30,12 @@
         "sourceLabel": "Instagram",
         "healthScore": 61,
         "totalDeals": 6
+      },
+      {
+        "sourceKey": "community",
+        "sourceLabel": "Community Submission",
+        "healthScore": 59,
+        "totalDeals": 22
       }
     ],
     "topMissionSources": [
@@ -54,8 +54,8 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 52,
-        "totalDeals": 93
+        "missionFitScore": 54,
+        "totalDeals": 94
       },
       {
         "sourceKey": "firecrawl4",
@@ -81,9 +81,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 53,
-        "totalDeals": 93,
-        "fresh1dCount": 13
+        "coverageScore": 55,
+        "totalDeals": 94,
+        "fresh1dCount": 15
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -118,13 +118,7 @@
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 67,
-        "totalDeals": 93
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 65,
-        "totalDeals": 2
+        "totalDeals": 94
       },
       {
         "sourceKey": "instagram-ai",
@@ -137,20 +131,26 @@
         "sourceLabel": "Firecrawl Key 2 - Food",
         "precisionScore": 58,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "community",
+        "sourceLabel": "Community Submission",
+        "precisionScore": 57,
+        "totalDeals": 22
       }
     ],
     "topWeightedSources": [
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 60,
+        "totalDeals": 94
+      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 59,
         "totalDeals": 16
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 58,
-        "totalDeals": 93
       },
       {
         "sourceKey": "gastro2",
@@ -159,16 +159,16 @@
         "totalDeals": 156
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 51,
-        "totalDeals": 2
-      },
-      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 50,
         "totalDeals": 49
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "sourceWeightScore": 49,
+        "totalDeals": 10
       }
     ],
     "topSourcesToFix": [
@@ -312,115 +312,34 @@
       "sourceWeightScore": 59
     },
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 2,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 2,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Oktober 🎟️ Eintritt frei 👉 Schickt den Beitrag an jemanden, der gerne besondere Kunstorte in Wien entdeckt!",
-        "🔥📱 SUPER ANGEBOT BEI PAKHTONMOBILE VIENNA!"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-18T05:03:15.504Z",
-        "finishedAt": "2026-10-18T05:05:25.131Z",
-        "durationMs": 129627,
-        "counts": {
-          "rawCandidates": 86,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 78
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 62,
-          "missing-text": 2,
-          "missing-vienna-evidence": 1,
-          "general-recommendation": 9,
-          "excluded-promotion-type": 4
-        },
-        "errors": [
-          "#wientipps: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88,
-      "topCategories": [
-        {
-          "value": "kultur",
-          "count": 1
-        },
-        {
-          "value": "technik",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 72,
-      "missionFitScore": 51,
-      "coverageScore": 10,
-      "precisionScore": 65,
-      "sourceWeightScore": 51
-    },
-    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
-      "totalDeals": 93,
-      "uniqueDeals": 59,
+      "totalDeals": 94,
+      "uniqueDeals": 60,
       "duplicateDeals": 34,
-      "duplicateAcrossSources": 23,
-      "fresh1dCount": 13,
-      "fresh7dCount": 92,
-      "viennaCount": 93,
-      "foodDrinkCount": 51,
-      "promoCount": 53,
+      "duplicateAcrossSources": 25,
+      "fresh1dCount": 15,
+      "fresh7dCount": 93,
+      "viennaCount": 94,
+      "foodDrinkCount": 50,
+      "promoCount": 54,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Gratis Spritzer & Bier",
-        "🇦🇹 Deinen Wien-Mini-Print gibt’s für nur 1 € bei Leporello, nahe dem Stephansdom.",
-        "🥐 MORGEN BRUNCH FÜR 9,90 €!"
+        "Oktober 🎟️ Eintritt frei 👉 Schickt den Beitrag an jemanden, der gerne besondere Kunstorte in Wien entdeckt!",
+        "🔥📱 SUPER ANGEBOT BEI PAKHTONMOBILE VIENNA!",
+        "Gratis Spritzer & Bier"
       ],
       "lastRun": null,
       "uniqueRate": 0.6,
-      "duplicateRate": 0.2,
-      "fresh1dRate": 0.1,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 1,
       "foodDrinkRate": 0.5,
       "promoRate": 0.6,
       "missingUrlRate": 0,
-      "averageQualityScore": 86.1,
+      "averageQualityScore": 86.2,
       "topCategories": [
         {
           "value": "essen",
@@ -440,7 +359,7 @@
         },
         {
           "value": "kultur",
-          "count": 5
+          "count": 6
         },
         {
           "value": "technik",
@@ -454,21 +373,19 @@
         },
         {
           "value": "gratis",
-          "count": 42
+          "count": 43
         },
         {
           "value": "bogo",
           "count": 2
         }
       ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 62,
-      "missionFitScore": 52,
-      "coverageScore": 53,
+      "issues": [],
+      "healthScore": 64,
+      "missionFitScore": 54,
+      "coverageScore": 55,
       "precisionScore": 67,
-      "sourceWeightScore": 58
+      "sourceWeightScore": 60
     },
     {
       "sourceKey": "joe",
@@ -1055,6 +972,88 @@
       "coverageScore": 6,
       "precisionScore": 42,
       "sourceWeightScore": 28
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 0,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 2,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 0,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Oktober 🎟️ Eintritt frei 👉 Schickt den Beitrag an jemanden, der gerne besondere Kunstorte in Wien entdeckt!",
+        "🔥📱 SUPER ANGEBOT BEI PAKHTONMOBILE VIENNA!"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-18T05:03:15.504Z",
+        "finishedAt": "2026-10-18T05:05:25.131Z",
+        "durationMs": 129627,
+        "counts": {
+          "rawCandidates": 86,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 78
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 62,
+          "missing-text": 2,
+          "missing-vienna-evidence": 1,
+          "general-recommendation": 9,
+          "excluded-promotion-type": 4
+        },
+        "errors": [
+          "#wientipps: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88,
+      "topCategories": [
+        {
+          "value": "kultur",
+          "count": 1
+        },
+        {
+          "value": "technik",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 50,
+      "missionFitScore": 51,
+      "coverageScore": 10,
+      "precisionScore": 57,
+      "sourceWeightScore": 44
     },
     {
       "sourceKey": "church-events",
