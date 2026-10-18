@@ -27,6 +27,16 @@ for (const file of fs.readdirSync(path.join(root, 'docs'), { recursive: true }).
   }
 }
 const index = load(read('docs/blog/index.html'));
+const privacyHtml = read('docs/privacy.html');
+const privacy = load(privacyHtml);
+assert.match(privacy('#accountEmails').text(), /standardmäßig AUS/);
+assert.match(privacy('#accountEmails').text(), /für ausdrücklich aktivierte Kategorien freigeschaltet/);
+assert.match(privacy('#accountEmails').text(), /ändern keine Push-Zustimmung/);
+assert.match(privacy('#emailProvider').text(), /Abmeldelink ohne Anmeldepflicht/);
+assert.match(privacyHtml, /Delivery is enabled for categories you explicitly opt into/);
+assert.match(privacyHtml, /OFF by default/);
+assert.doesNotMatch(privacyHtml, /Der Versand dieser optionalen E-Mails ist derzeit nicht freigeschaltet/);
+assert.doesNotMatch(privacyHtml, /Delivery of these optional emails is currently disabled/);
 assert.equal(index('#blogSearch').length, 1);
 assert.equal(index('#blogTopic').length, 1);
 assert.equal(index('#blogArchive').length, 1);
