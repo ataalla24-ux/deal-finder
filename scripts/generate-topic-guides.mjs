@@ -2,7 +2,9 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { load } from 'cheerio';
 import { polishHtml } from './polish-website.mjs';
+import { backfillGuides } from './blog-backfill-20261018.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BLOG_DIR = path.join(ROOT, 'docs', 'blog');
@@ -166,7 +168,7 @@ function quickDeal(guide) {
 const PUBLISHED = '2026-08-17';
 const PUBLISHED_LABEL = '17. August 2026';
 
-const guides = [...timelyGuides, ...recentDealGuides, ...[
+const guides = [...backfillGuides, ...timelyGuides, ...recentDealGuides, ...[
   {
     slug: 'guenstig-essen-wien',
     title: 'Günstig essen in Wien: Angebote nach Bezirk',
@@ -795,7 +797,8 @@ function renderGuide(guide) {
   const expired = Boolean(guide.expires && Date.parse(guide.expires) < now);
   const isDealPage = Boolean(guide.expires || guide.dealPage);
   const statusBanner = isDealPage ? `<div class="deal-status-banner" data-deal-status-banner${expired ? '' : ' hidden'}><strong>Aktion beendet.</strong>Der angekündigte Aktionszeitraum ist vorbei. Dieser Artikel bleibt als Archiv online. Aktuelle Treffer findest du unter <a href="/angebote-wien-heute.html">Angebote in Wien heute</a>.</div>` : '';
-  const readingMinutes = Math.max(5, Math.round(guide.sections.map((section) => section[2].replace(/<[^>]+>/g, ' ').split(/\s+/).length).reduce((a, b) => a + b, 0) / 170));
+  const wordCount = guide.sections.map((section) => section[2].replace(/<[^>]+>/g, ' ').split(/\s+/).length).reduce((a, b) => a + b, 0);
+  const readingMinutes = backfillGuides.includes(guide) ? Math.max(1, Math.ceil(wordCount / 170)) : Math.max(5, Math.round(wordCount / 170));
   const structuredData = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -876,6 +879,8 @@ ${quickDealBlock ? `        ${quickDealBlock}\n` : ''}        <picture>${guide.i
 }
 
 const selectedSlugs = process.argv.slice(2);
+const unknownSlugs = selectedSlugs.filter(slug => !guides.some(guide => guide.slug === slug));
+if (unknownSlugs.length) throw new Error(`Unknown guides: ${unknownSlugs.join(', ')}`);
 const selectedGuides = guides.filter(g => selectedSlugs.length === 0 || selectedSlugs.includes(g.slug));
 for (const guide of selectedGuides) {
   fs.writeFileSync(path.join(BLOG_DIR, `${guide.slug}.html`), polishHtml(renderGuide(guide), `blog/${guide.slug}.html`, now));
@@ -886,9 +891,35 @@ let sitemap = fs.readFileSync(sitemapPath, 'utf8');
 for (const guide of selectedGuides.filter((guide) => guide.modified)) {
   const url = `https://freefinder.at/blog/${guide.slug}.html`;
   const entryPattern = new RegExp(`(<loc>${url}</loc>\\s*<lastmod>)[^<]+(</lastmod>)`);
-  if (!entryPattern.test(sitemap)) throw new Error(`Sitemap entry missing for ${guide.slug}`);
-  sitemap = sitemap.replace(entryPattern, `$1${guide.modified}$2`);
+  if (entryPattern.test(sitemap)) {
+    sitemap = sitemap.replace(entryPattern, `$1${guide.modified}$2`);
+  } else if (backfillGuides.includes(guide)) {
+    const xml = load(sitemap, { xml: true });
+    if (xml('loc').toArray().some(node => xml(node).text() === url)) throw new Error(`Unexpected sitemap format: ${url}`);
+    if (xml('urlset').length !== 1) throw new Error('Invalid sitemap root');
+    sitemap = sitemap.replace('</urlset>', `  <url><loc>${url}</loc><lastmod>${guide.modified}</lastmod></url>\n</urlset>`);
+  } else {
+    throw new Error(`Sitemap entry missing for ${guide.slug}`);
+  }
 }
 fs.writeFileSync(sitemapPath, sitemap);
 
-console.log(`Generated ${guides.length} SEO topic guides in docs/blog`);
+const selectedBackfill = selectedGuides.filter(guide => backfillGuides.includes(guide));
+if (selectedBackfill.length) {
+  const indexPath = path.join(BLOG_DIR, 'index.html');
+  let index = fs.readFileSync(indexPath, 'utf8');
+  const pending = new Map(selectedBackfill.map(guide => [`${guide.slug}.html`, guide]));
+  const card = guide => `<article class="post-card" data-deal-expires="${escapeHtml(guide.expires || '')}" data-topic="${guide.topic}" data-archive="false"><img src="${guide.image}" alt="${escapeHtml(guide.imageAlt)}" width="1200" height="630" loading="lazy" decoding="async"><div class="post-card-body"><span class="topic-label">${escapeHtml(guide.eyebrow)}</span><h2><a href="${guide.slug}.html">${escapeHtml(guide.title)}</a></h2><p>${escapeHtml(guide.meta)}</p><a href="${guide.slug}.html">Angebot und Bedingungen lesen</a></div></article>`;
+  index = index.replace(/<article\b[^>]*class="[^"]*\bpost-card\b[^"]*"[\s\S]*?<\/article>/g, original => {
+    const $ = load(original);
+    const href = $('h2 a').attr('href') || $('a').first().attr('href');
+    const guide = pending.get(href);
+    if (!guide) return original;
+    pending.delete(href);
+    return card(guide);
+  });
+  if (!index.includes('<div class="post-grid">')) throw new Error('Blog index grid missing');
+  if (pending.size) index = index.replace('<div class="post-grid">', `<div class="post-grid">\n        ${[...pending.values()].map(card).join('\n        ')}`);
+  fs.writeFileSync(indexPath, polishHtml(index, 'blog/index.html', now));
+}
+console.log(`Generated ${selectedGuides.length} selected SEO guides in docs/blog`);

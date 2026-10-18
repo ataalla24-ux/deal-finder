@@ -1,8 +1,10 @@
 import { load } from 'cheerio';
+import { backfillCovers } from './blog-backfill-20261018.mjs';
 
 // Editorial covers name the subject, never assert a price or current availability.
 // Merchant identities are explicit: a delivery platform must not select a restaurant logo.
 export const covers = {
+  ...backfillCovers,
   'wien-guides': { lines: ['Deals & Gutscheine', 'in Wien.'], topic: 'FreeFinder Blog', tone: 'green' },
   'guenstig-essen-wien': { lines: ['Günstig essen', 'in Wien.'], topic: 'Essen nach Bezirk', tone: 'green' },
   'geburtstag-gratis-wien': { lines: ['Geburtstag', 'in Wien.'], topic: 'Essen, Eintritt & Erlebnisse', tone: 'rose' },

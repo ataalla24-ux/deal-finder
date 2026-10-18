@@ -10,7 +10,10 @@ const destination = path.join(root, 'docs/assets/blog/covers');
 const escape = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const tones = { green: ['#e7f1eb', '#164b38'], rose: ['#f9e8ed', '#7b2947'], blue: ['#e9f0fa', '#234d79'], yellow: ['#fff4cf', '#60501b'] };
 fs.mkdirSync(destination, { recursive: true });
-for (const [slug, cover] of Object.entries(covers)) {
+const selected = process.argv.slice(2);
+for (const slug of selected) if (!Object.hasOwn(covers, slug)) throw new Error(`Unknown cover: ${slug}`);
+const entries = Object.entries(covers).filter(([slug]) => !selected.length || selected.includes(slug));
+for (const [slug, cover] of entries) {
   const [background, ink] = tones[cover.tone];
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
     <rect width="1200" height="630" fill="${background}"/><rect x="840" width="360" height="630" fill="#ffffff"/>
@@ -27,4 +30,4 @@ for (const [slug, cover] of Object.entries(covers)) {
   fs.writeFileSync(path.join(destination, `${slug}.jpg`), buffer);
   await sharp(buffer).resize(480).webp({ quality: 82 }).toFile(path.join(destination, `${slug}-480.webp`));
 }
-console.log(`Rendered ${Object.keys(covers).length} editorial covers and mobile thumbnails.`);
+console.log(`Rendered ${entries.length} editorial covers and mobile thumbnails.`);

@@ -34,7 +34,9 @@ export function polishHtml(source, filename, now = Date.now()) {
         ['shopping', /shopping|guess|moebelix|autodoc|produktproben/],
         ['essen', /essen|restaurant|food|pizza|kebab|doener|duru|burger|dahab|duck|ganesha|nordsee|hut|lugner|fruehstueck/],
       ];
-      card('article').attr('data-topic', topics.find(([, pattern]) => pattern.test(href || ''))?.[0] || 'ratgeber');
+      const assignedTopic = card('article').attr('data-topic');
+      const allowedTopics = ['ratgeber', ...topics.map(([topic]) => topic)];
+      card('article').attr('data-topic', allowedTopics.includes(assignedTopic) ? assignedTopic : topics.find(([, pattern]) => pattern.test(href || ''))?.[0] || 'ratgeber');
       card('article').attr('data-archive', String(archived));
       if (!card('h2 a').length && href) card('h2').html(`<a href="${escape(href)}">${escape(card('h2').text())}</a>`);
       if (archived) {

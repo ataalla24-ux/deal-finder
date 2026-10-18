@@ -19,5 +19,6 @@ jobs:
       - run: npm ci
       - run: node scripts/audit-website.mjs --summary
       - run: node scripts/test-website-quality.mjs
+      - run: node scripts/test-blog-backfill.mjs
       - run: node scripts/test-pro-website.mjs
       - run: node scripts/test-seo-deals-page.mjs
