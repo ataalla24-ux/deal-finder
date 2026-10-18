@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-18T15:56:24.045Z",
+  "generatedAt": "2026-10-18T16:07:37.806Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 771,
-    "uniqueCandidates": 673,
-    "distinctCandidates": 718,
-    "duplicateClusters": 45,
+    "totalCandidates": 770,
+    "uniqueCandidates": 676,
+    "distinctCandidates": 719,
+    "duplicateClusters": 43,
     "topHealthySources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 80,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
@@ -30,20 +36,14 @@
         "sourceLabel": "Instagram",
         "healthScore": 61,
         "totalDeals": 6
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 60,
-        "totalDeals": 2
       }
     ],
     "topMissionSources": [
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 69,
-        "totalDeals": 2
+        "missionFitScore": 65,
+        "totalDeals": 1
       },
       {
         "sourceKey": "meta-instagram",
@@ -74,16 +74,16 @@
       {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
-        "coverageScore": 70,
+        "coverageScore": 69,
         "totalDeals": 155,
-        "fresh1dCount": 1
+        "fresh1dCount": 0
       },
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 63,
+        "coverageScore": 62,
         "totalDeals": 101,
-        "fresh1dCount": 21
+        "fresh1dCount": 19
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -109,6 +109,12 @@
     ],
     "topPrecisionSources": [
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 76,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "precisionScore": 74,
@@ -119,12 +125,6 @@
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 70,
         "totalDeals": 101
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 69,
-        "totalDeals": 2
       },
       {
         "sourceKey": "instagram-ai",
@@ -147,16 +147,16 @@
         "totalDeals": 101
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 61,
+        "totalDeals": 1
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 57,
         "totalDeals": 14
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 55,
-        "totalDeals": 2
       },
       {
         "sourceKey": "gastro2",
@@ -241,6 +241,78 @@
   },
   "sources": [
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 1,
+      "uniqueDeals": 1,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 0,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Zum Einstieg: Der kostenlose Website-, Social-Media- oder Google-Check zeigt Ihnen in 1 bis 3 Minuten, wo Sie stehen: digtatur.com (Link in"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-18T16:06:20.386Z",
+        "finishedAt": "2026-10-18T16:06:59.148Z",
+        "durationMs": 38762,
+        "counts": {
+          "rawCandidates": 25,
+          "normalizedCandidates": 1,
+          "verifiedCandidates": 1,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 24
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 20,
+          "excluded-promotion-type": 1,
+          "missing-vienna-evidence": 1,
+          "missing-text": 1,
+          "general-recommendation": 1
+        },
+        "errors": [
+          "#vienna: Instagram scan paused: api-usage"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 81,
+      "topCategories": [
+        {
+          "value": "shopping",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz"
+      ],
+      "healthScore": 80,
+      "missionFitScore": 65,
+      "coverageScore": 11,
+      "precisionScore": 76,
+      "sourceWeightScore": 61
+    },
+    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -308,10 +380,10 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 101,
-      "uniqueDeals": 62,
-      "duplicateDeals": 39,
-      "duplicateAcrossSources": 26,
-      "fresh1dCount": 21,
+      "uniqueDeals": 64,
+      "duplicateDeals": 37,
+      "duplicateAcrossSources": 24,
+      "fresh1dCount": 19,
       "fresh7dCount": 100,
       "viennaCount": 101,
       "foodDrinkCount": 56,
@@ -324,7 +396,7 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.6,
-      "duplicateRate": 0.3,
+      "duplicateRate": 0.2,
       "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -375,7 +447,7 @@
       "issues": [],
       "healthScore": 66,
       "missionFitScore": 57,
-      "coverageScore": 63,
+      "coverageScore": 62,
       "precisionScore": 70,
       "sourceWeightScore": 63
     },
@@ -504,88 +576,6 @@
       "coverageScore": 11,
       "precisionScore": 56,
       "sourceWeightScore": 45
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 2,
-      "uniqueDeals": 0,
-      "duplicateDeals": 2,
-      "duplicateAcrossSources": 2,
-      "fresh1dCount": 2,
-      "fresh7dCount": 2,
-      "viennaCount": 2,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "25 % RABATT AUF EURE TICKETS",
-        "Donaukanal 🎟️ EINTRITT FREI – ANMELDUNG PFLICHT!"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-18T11:37:59.133Z",
-        "finishedAt": "2026-10-18T11:39:52.064Z",
-        "durationMs": 112931,
-        "counts": {
-          "rawCandidates": 90,
-          "normalizedCandidates": 2,
-          "verifiedCandidates": 2,
-          "previousDeals": 0,
-          "acceptedDeals": 2,
-          "rejectedDeals": 84
-        },
-        "rejectedByReason": {
-          "missing-text": 4,
-          "general-recommendation": 4,
-          "no-concrete-offer": 71,
-          "weak-food-offer": 1,
-          "excluded-promotion-type": 3,
-          "missing-vienna-evidence": 1
-        },
-        "errors": [
-          "#wientipps: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.5,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "reisen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 60,
-      "missionFitScore": 69,
-      "coverageScore": 12,
-      "precisionScore": 69,
-      "sourceWeightScore": 55
     },
     {
       "sourceKey": "instagram-ai",
@@ -830,7 +820,7 @@
       "uniqueDeals": 143,
       "duplicateDeals": 12,
       "duplicateAcrossSources": 10,
-      "fresh1dCount": 1,
+      "fresh1dCount": 0,
       "fresh7dCount": 6,
       "viennaCount": 6,
       "foodDrinkCount": 147,
@@ -911,7 +901,7 @@
       ],
       "healthScore": 52,
       "missionFitScore": 46,
-      "coverageScore": 70,
+      "coverageScore": 69,
       "precisionScore": 46,
       "sourceWeightScore": 52
     },
