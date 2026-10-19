@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-10-19T14:19:19.666Z",
+  "generatedAt": "2026-10-19T14:20:20.697Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 308,
-    "allowed": 0,
+    "total": 310,
+    "allowed": 2,
     "blocked": 308,
-    "warnings": 0,
+    "warnings": 2,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 218,
-      "älter als 7 Tage (2026-02-22)": 81,
+      "kein konkretes Angebot erkennbar": 221,
+      "älter als 7 Tage (2026-02-22)": 83,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "älter als 7 Tage (2026-09-14)": 1,
@@ -21,8 +21,7 @@
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2021-02-05)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)": 1,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 10,
-      "älter als 7 Tage (2026-04-19)": 28,
-      "älter als 7 Tage (2016-10-30)": 3,
+      "älter als 7 Tage (2026-04-19)": 29,
       "älter als 7 Tage (2023-09-21)": 3,
       "kostenlose Infrastruktur statt Deal": 3,
       "älter als 7 Tage (2024-03-18)": 3,
@@ -55,7 +54,7 @@
       "ausgeschlossene Quelle (gastro.news)": 20
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 220,
+      "kein konkreter Deal": 223,
       "älter als 7 Tage": 148,
       "ungültige URL": 25,
       "abgelaufen": 13,
@@ -102,6 +101,13 @@
           "ungültige URL": 3
         }
       },
+      "Flights Vienna": {
+        "total": 2,
+        "allowed": 2,
+        "blocked": 0,
+        "warnings": 2,
+        "reasonCategoryCounts": {}
+      },
       "Freikirchen Wien": {
         "total": 32,
         "allowed": 0,
@@ -109,7 +115,7 @@
         "warnings": 0,
         "reasonCategoryCounts": {
           "ungültige URL": 3,
-          "kein konkreter Deal": 30,
+          "kein konkreter Deal": 31,
           "älter als 7 Tage": 31,
           "sonstiges": 1
         }
@@ -162,7 +168,7 @@
         "blocked": 97,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 92,
+          "kein konkreter Deal": 94,
           "älter als 7 Tage": 94,
           "ungültige URL": 9,
           "sonstiges": 2,
@@ -230,7 +236,42 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "flight-1gr0pjq",
+      "title": "Hin & zurück nach Cologne ab €46.98",
+      "brand": "Ryanair",
+      "source": "Flights Vienna",
+      "url": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=CGN&dateOut=2026-12-10&dateIn=2026-12-16&isReturn=true&discount=0&promoCode=",
+      "reasons": [],
+      "warnings": [
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-10-19T14:13:05.912Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "flight-1xgdqsg",
+      "title": "Hin & zurück nach Stockholm ab €89.98",
+      "brand": "Ryanair",
+      "source": "Flights Vienna",
+      "url": "https://www.ryanair.com/gb/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&originIata=VIE&destinationIata=ARN&dateOut=2026-11-15&dateIn=2026-11-20&isReturn=true&discount=0&promoCode=",
+      "reasons": [],
+      "warnings": [
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-10-19T14:13:05.912Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 0,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "events-0-20260222",
@@ -512,13 +553,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 239,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "events-15-20260222",
@@ -1132,15 +1175,18 @@
       "source": "Freikirchen Wien",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 183,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "freikirche-4-20260419",
@@ -1150,15 +1196,17 @@
       "url": "https://www.feg.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2016-10-30)"
+        "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
-      "sourceDate": "2016-10-30T12:40:41.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 3641,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-04-19T08:59:47.145Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 183,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-5-20260419",
@@ -2332,15 +2380,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 239,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "gemeinde-10-20260222",
@@ -2466,15 +2517,17 @@
       "url": "https://www.feg.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2016-10-30)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2016-10-30T12:40:41.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 3641,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 239,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-17-20260222",
@@ -3128,15 +3181,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 239,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "gottesdienste-18-20260222",
@@ -3318,15 +3374,17 @@
       "url": "https://www.feg.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2016-10-30)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2016-10-30T12:40:41.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 3641,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 239,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-28-20260222",
