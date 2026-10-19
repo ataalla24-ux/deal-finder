@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-19T21:29:41.934Z",
+  "generatedAt": "2026-10-19T21:41:54.305Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 308,
-    "allowed": 0,
+    "total": 309,
+    "allowed": 1,
     "blocked": 308,
     "warnings": 0,
     "reasonCounts": {
@@ -218,8 +218,8 @@
         }
       },
       "tiktok-deals-scanner": {
-        "total": 3,
-        "allowed": 0,
+        "total": 4,
+        "allowed": 1,
         "blocked": 3,
         "warnings": 0,
         "reasonCategoryCounts": {
@@ -229,7 +229,23 @@
       }
     }
   },
-  "allowed": [],
+  "allowed": [
+    {
+      "id": "tiktok-toj36c",
+      "title": "Apple Angebot",
+      "brand": "Apple",
+      "source": "tiktok-deals-scanner",
+      "url": "https://www.tiktok.com/@simplyviktoria_/video/7697613025833930006",
+      "reasons": [],
+      "warnings": [],
+      "sourceDate": "2026-10-17T12:29:55.000Z",
+      "sourceDateSource": "url.tiktokVideoId",
+      "sourceAgeDays": 2,
+      "expiryDate": "",
+      "expirySource": "deal.expires",
+      "urlStatus": "HTTP 200"
+    }
+  ],
   "blocked": [
     {
       "id": "events-0-20260222",
@@ -2905,13 +2921,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 239,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-6-20260222",
