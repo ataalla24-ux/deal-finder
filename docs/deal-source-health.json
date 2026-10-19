@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-19T22:24:28.654Z",
+  "generatedAt": "2026-10-19T22:39:10.711Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 811,
+    "totalCandidates": 813,
     "uniqueCandidates": 738,
-    "distinctCandidates": 769,
-    "duplicateClusters": 31,
+    "distinctCandidates": 770,
+    "duplicateClusters": 32,
     "topHealthySources": [
       {
         "sourceKey": "tiktok",
@@ -26,13 +26,13 @@
         "totalDeals": 109
       },
       {
-        "sourceKey": "church-events",
-        "sourceLabel": "Freikirchen Wien",
-        "healthScore": 64,
-        "totalDeals": 4
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 66,
+        "totalDeals": 3
       },
       {
-        "sourceKey": "church-gemeinde",
+        "sourceKey": "church-events",
         "sourceLabel": "Freikirchen Wien",
         "healthScore": 64,
         "totalDeals": 4
@@ -42,8 +42,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 65,
-        "totalDeals": 1
+        "missionFitScore": 67,
+        "totalDeals": 3
       },
       {
         "sourceKey": "tiktok",
@@ -121,16 +121,16 @@
         "totalDeals": 50
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 71,
-        "totalDeals": 109
-      },
-      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 68,
-        "totalDeals": 1
+        "precisionScore": 71,
+        "totalDeals": 3
+      },
+      {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "precisionScore": 70,
+        "totalDeals": 109
       },
       {
         "sourceKey": "instagram-apify",
@@ -159,16 +159,16 @@
         "totalDeals": 50
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 57,
+        "totalDeals": 3
+      },
+      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 54,
         "totalDeals": 155
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 53,
-        "totalDeals": 1
       }
     ],
     "topSourcesToFix": [
@@ -389,9 +389,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 109,
-      "uniqueDeals": 80,
-      "duplicateDeals": 29,
-      "duplicateAcrossSources": 16,
+      "uniqueDeals": 79,
+      "duplicateDeals": 30,
+      "duplicateAcrossSources": 17,
       "fresh1dCount": 23,
       "fresh7dCount": 108,
       "viennaCount": 109,
@@ -405,7 +405,7 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.7,
-      "duplicateRate": 0.1,
+      "duplicateRate": 0.2,
       "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -457,8 +457,95 @@
       "healthScore": 68,
       "missionFitScore": 57,
       "coverageScore": 62,
-      "precisionScore": 71,
+      "precisionScore": 70,
       "sourceWeightScore": 64
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 3,
+      "uniqueDeals": 1,
+      "duplicateDeals": 2,
+      "duplicateAcrossSources": 2,
+      "fresh1dCount": 3,
+      "fresh7dCount": 3,
+      "viennaCount": 3,
+      "foodDrinkCount": 1,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Top-Events diese Woche in Wien – Mo 19.10.",
+        "November 2026 🎟️ Eintritt frei!",
+        "Unbezahlte Werbung donmono_wien What makes it special?"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-19T22:36:06.867Z",
+        "finishedAt": "2026-10-19T22:38:34.506Z",
+        "durationMs": 147639,
+        "counts": {
+          "rawCandidates": 86,
+          "normalizedCandidates": 3,
+          "verifiedCandidates": 3,
+          "previousDeals": 0,
+          "acceptedDeals": 3,
+          "rejectedDeals": 81
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 67,
+          "excluded-promotion-type": 4,
+          "general-recommendation": 4,
+          "missing-text": 5,
+          "regular-priced-activity": 1
+        },
+        "errors": [
+          "#wientipps: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.3,
+      "duplicateRate": 0.7,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.3,
+      "promoRate": 0.7,
+      "missingUrlRate": 0,
+      "averageQualityScore": 85.7,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "shopping",
+          "count": 1
+        },
+        {
+          "value": "technik",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 2
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 66,
+      "missionFitScore": 67,
+      "coverageScore": 12,
+      "precisionScore": 71,
+      "sourceWeightScore": 57
     },
     {
       "sourceKey": "church-events",
@@ -876,80 +963,6 @@
       "coverageScore": 18,
       "precisionScore": 57,
       "sourceWeightScore": 48
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Top-Events diese Woche in Wien – Mo 19.10."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-19T13:51:54.500Z",
-        "finishedAt": "2026-10-19T13:54:40.458Z",
-        "durationMs": 165958,
-        "counts": {
-          "rawCandidates": 84,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 1,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 79
-        },
-        "rejectedByReason": {
-          "excluded-promotion-type": 5,
-          "no-concrete-offer": 64,
-          "general-recommendation": 5,
-          "missing-vienna-evidence": 1,
-          "missing-text": 3,
-          "weak-food-offer": 1
-        },
-        "errors": [
-          "#wientipps: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 91,
-      "topCategories": [
-        {
-          "value": "technik",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 58,
-      "missionFitScore": 65,
-      "coverageScore": 11,
-      "precisionScore": 68,
-      "sourceWeightScore": 53
     },
     {
       "sourceKey": "firecrawl4",
