@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-19T13:24:39.640Z",
+  "generatedAt": "2026-10-19T13:40:04.157Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 806,
@@ -8,16 +8,16 @@
     "duplicateClusters": 37,
     "topHealthySources": [
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "healthScore": 81,
-        "totalDeals": 12
-      },
-      {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "healthScore": 80,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "healthScore": 79,
+        "totalDeals": 12
       },
       {
         "sourceKey": "instagram-apify",
@@ -48,7 +48,7 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "missionFitScore": 68,
+        "missionFitScore": 66,
         "totalDeals": 12
       },
       {
@@ -81,9 +81,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 61,
+        "coverageScore": 62,
         "totalDeals": 108,
-        "fresh1dCount": 24
+        "fresh1dCount": 25
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -111,7 +111,7 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "precisionScore": 81,
+        "precisionScore": 80,
         "totalDeals": 12
       },
       {
@@ -141,16 +141,16 @@
     ],
     "topWeightedSources": [
       {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 64,
-        "totalDeals": 12
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 63,
+        "sourceWeightScore": 64,
         "totalDeals": 108
+      },
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 63,
+        "totalDeals": 12
       },
       {
         "sourceKey": "wien-combined",
@@ -239,70 +239,6 @@
   },
   "sources": [
     {
-      "sourceKey": "tiktok",
-      "file": "deals-pending-tiktok.json",
-      "sourceLabel": "TikTok Scanner",
-      "totalDeals": 12,
-      "uniqueDeals": 12,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 2,
-      "fresh7dCount": 12,
-      "viennaCount": 12,
-      "foodDrinkCount": 7,
-      "promoCount": 12,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis Eintritt bei 1100 Wien",
-        "Gratis Coffee bei Nespresso",
-        "coffee and free book to take home"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0.2,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 70,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 4
-        },
-        {
-          "value": "kaffee",
-          "count": 3
-        },
-        {
-          "value": "shopping",
-          "count": 3
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        },
-        {
-          "value": "kultur",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 12
-        }
-      ],
-      "issues": [],
-      "healthScore": 81,
-      "missionFitScore": 68,
-      "coverageScore": 19,
-      "precisionScore": 81,
-      "sourceWeightScore": 64
-    },
-    {
       "sourceKey": "wien-combined",
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
@@ -373,6 +309,72 @@
       "sourceWeightScore": 61
     },
     {
+      "sourceKey": "tiktok",
+      "file": "deals-pending-tiktok.json",
+      "sourceLabel": "TikTok Scanner",
+      "totalDeals": 12,
+      "uniqueDeals": 12,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 1,
+      "fresh7dCount": 12,
+      "viennaCount": 12,
+      "foodDrinkCount": 7,
+      "promoCount": 12,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis Eintritt bei 1100 Wien",
+        "Gratis Coffee bei Nespresso",
+        "coffee and free book to take home"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.6,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 70,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 4
+        },
+        {
+          "value": "kaffee",
+          "count": 3
+        },
+        {
+          "value": "shopping",
+          "count": 3
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 12
+        }
+      ],
+      "issues": [
+        "wenige Deals sind frischer als 1 Tag"
+      ],
+      "healthScore": 79,
+      "missionFitScore": 66,
+      "coverageScore": 18,
+      "precisionScore": 80,
+      "sourceWeightScore": 63
+    },
+    {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
@@ -433,16 +435,16 @@
       "uniqueDeals": 73,
       "duplicateDeals": 35,
       "duplicateAcrossSources": 22,
-      "fresh1dCount": 24,
+      "fresh1dCount": 25,
       "fresh7dCount": 107,
       "viennaCount": 108,
       "foodDrinkCount": 61,
-      "promoCount": 63,
+      "promoCount": 62,
       "missingUrlCount": 0,
       "sampleTitles": [
-        "Preis-Tipp: Pizza um 2,9 € bei Papa Duck Vienna",
-        "Begrünter Innenhof und Spielplatz inklusive.🛝 Jetzt gratis Ticket sichern über den Link in der Bio!",
-        "The first drink is on us."
+        "16 % Rabatt, gültig bis 2",
+        "Preis-Tipp: Pizza um 2,9 € bei dm",
+        "Begrünter Innenhof und Spielplatz inklusive.🛝 Jetzt gratis Ticket sichern über den Link in der Bio!"
       ],
       "lastRun": null,
       "uniqueRate": 0.7,
@@ -453,11 +455,11 @@
       "foodDrinkRate": 0.6,
       "promoRate": 0.6,
       "missingUrlRate": 0,
-      "averageQualityScore": 86.7,
+      "averageQualityScore": 86.8,
       "topCategories": [
         {
           "value": "essen",
-          "count": 53
+          "count": 52
         },
         {
           "value": "shopping",
@@ -469,7 +471,7 @@
         },
         {
           "value": "kaffee",
-          "count": 5
+          "count": 6
         },
         {
           "value": "kultur",
@@ -482,11 +484,11 @@
       ],
       "topTypes": [
         {
-          "value": "gratis",
+          "value": "rabatt",
           "count": 53
         },
         {
-          "value": "rabatt",
+          "value": "gratis",
           "count": 52
         },
         {
@@ -497,9 +499,9 @@
       "issues": [],
       "healthScore": 68,
       "missionFitScore": 57,
-      "coverageScore": 61,
+      "coverageScore": 62,
       "precisionScore": 70,
-      "sourceWeightScore": 63
+      "sourceWeightScore": 64
     },
     {
       "sourceKey": "instagram-ai",
