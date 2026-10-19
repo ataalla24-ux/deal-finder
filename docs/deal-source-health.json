@@ -1,18 +1,12 @@
 {
-  "generatedAt": "2026-10-19T13:50:08.061Z",
+  "generatedAt": "2026-10-19T13:55:18.162Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 814,
-    "uniqueCandidates": 731,
-    "distinctCandidates": 768,
-    "duplicateClusters": 37,
+    "uniqueCandidates": 729,
+    "distinctCandidates": 767,
+    "duplicateClusters": 38,
     "topHealthySources": [
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 80,
-        "totalDeals": 1
-      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
@@ -36,6 +30,12 @@
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 61,
         "totalDeals": 50
+      },
+      {
+        "sourceKey": "joe",
+        "sourceLabel": "jö Bonus Club",
+        "healthScore": 61,
+        "totalDeals": 10
       }
     ],
     "topMissionSources": [
@@ -115,16 +115,16 @@
         "totalDeals": 12
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 76,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 70,
         "totalDeals": 108
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 68,
+        "totalDeals": 1
       },
       {
         "sourceKey": "instagram-ai",
@@ -153,16 +153,16 @@
         "totalDeals": 108
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 61,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "gastro2",
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 54,
         "totalDeals": 155
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 53,
+        "totalDeals": 1
       },
       {
         "sourceKey": "instagram-apify",
@@ -239,76 +239,6 @@
   },
   "sources": [
     {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 0,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "💶 INGRESSO & COSTI • Ingresso libero (Eintritt frei) all'area e agli stand, senza prenotazione."
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-19T05:13:02.467Z",
-        "finishedAt": "2026-10-19T05:13:54.101Z",
-        "durationMs": 51634,
-        "counts": {
-          "rawCandidates": 25,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 1,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 24
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 19,
-          "missing-text": 4,
-          "excluded-promotion-type": 1
-        },
-        "errors": [
-          "#vienna: Instagram shared quota paused: request or quota unavailable"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 80,
-      "missionFitScore": 65,
-      "coverageScore": 11,
-      "precisionScore": 76,
-      "sourceWeightScore": 61
-    },
-    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -379,9 +309,9 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 108,
-      "uniqueDeals": 73,
-      "duplicateDeals": 35,
-      "duplicateAcrossSources": 22,
+      "uniqueDeals": 72,
+      "duplicateDeals": 36,
+      "duplicateAcrossSources": 23,
       "fresh1dCount": 23,
       "fresh7dCount": 107,
       "viennaCount": 108,
@@ -787,6 +717,80 @@
       "coverageScore": 18,
       "precisionScore": 57,
       "sourceWeightScore": 48
+    },
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 1,
+      "uniqueDeals": 0,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 1,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 0,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Top-Events diese Woche in Wien – Mo 19.10."
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-19T13:51:54.500Z",
+        "finishedAt": "2026-10-19T13:54:40.458Z",
+        "durationMs": 165958,
+        "counts": {
+          "rawCandidates": 84,
+          "normalizedCandidates": 1,
+          "verifiedCandidates": 1,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 79
+        },
+        "rejectedByReason": {
+          "excluded-promotion-type": 5,
+          "no-concrete-offer": 64,
+          "general-recommendation": 5,
+          "missing-vienna-evidence": 1,
+          "missing-text": 3,
+          "weak-food-offer": 1
+        },
+        "errors": [
+          "#wientipps: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 91,
+      "topCategories": [
+        {
+          "value": "technik",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "geringe Food-/Drink-Relevanz",
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 58,
+      "missionFitScore": 65,
+      "coverageScore": 11,
+      "precisionScore": 68,
+      "sourceWeightScore": 53
     },
     {
       "sourceKey": "firecrawl4",
