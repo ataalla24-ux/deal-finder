@@ -2,9 +2,48 @@
   "schemaVersion": 1,
   "sourceKey": "power",
   "sourceLabel": "Power Scraper",
-  "updatedAt": "2026-10-18T16:39:45.414Z",
-  "runCount": 89,
+  "updatedAt": "2026-10-19T11:00:59.473Z",
+  "runCount": 90,
   "runs": [
+    {
+      "schemaVersion": 1,
+      "runId": "power-2026-10-19T11:00:59.473Z",
+      "sourceKey": "power",
+      "sourceLabel": "Power Scraper",
+      "status": "completed-with-errors",
+      "startedAt": "2026-10-19T11:00:31.880Z",
+      "finishedAt": "2026-10-19T11:00:59.473Z",
+      "durationMs": 27593,
+      "outputFile": "docs/deals-pending-power.json",
+      "counts": {
+        "rawCandidates": 54,
+        "normalizedCandidates": 52,
+        "verifiedCandidates": 0,
+        "previousDeals": 0,
+        "acceptedDeals": 52,
+        "rejectedDeals": 0
+      },
+      "rejectedByReason": {},
+      "rejectedSamples": [],
+      "diagnostics": {
+        "healthySources": 46,
+        "failedSources": 8,
+        "sourceCount": 53,
+        "concurrency": 4,
+        "timeoutMs": 8000
+      },
+      "constraints": {},
+      "errors": [
+        "Too Good To Go: HTTP 429",
+        "MediaMarkt: HTTP 404",
+        "Gutscheine.at: page.goto: Timeout 8000ms exceeded. Call log: - navigating to \"https://www.gutscheine.at/\", waiting until \"domcontentloaded\"",
+        "Decathlon: Browser HTTP 403",
+        "Thalia: Browser HTTP 403",
+        "Libro: Browser HTTP 521",
+        "NORDSEE: Not HTML",
+        "KFC: Untrusted official-food URL"
+      ]
+    },
     {
       "schemaVersion": 1,
       "runId": "power-2026-10-18T16:39:45.414Z",
