@@ -1,17 +1,23 @@
 {
-  "generatedAt": "2026-10-19T14:56:37.528Z",
+  "generatedAt": "2026-10-19T14:57:55.384Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 819,
-    "uniqueCandidates": 733,
-    "distinctCandidates": 771,
-    "duplicateClusters": 38,
+    "uniqueCandidates": 746,
+    "distinctCandidates": 777,
+    "duplicateClusters": 31,
     "topHealthySources": [
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "healthScore": 79,
         "totalDeals": 12
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 71,
+        "totalDeals": 50
       },
       {
         "sourceKey": "meta-instagram",
@@ -27,12 +33,6 @@
       },
       {
         "sourceKey": "church-gemeinde",
-        "sourceLabel": "Freikirchen Wien",
-        "healthScore": 64,
-        "totalDeals": 4
-      },
-      {
-        "sourceKey": "church-gottesdienste",
         "sourceLabel": "Freikirchen Wien",
         "healthScore": 64,
         "totalDeals": 4
@@ -52,6 +52,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "missionFitScore": 63,
+        "totalDeals": 50
+      },
+      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 62,
@@ -62,12 +68,6 @@
         "sourceLabel": "Meta Instagram Graph",
         "missionFitScore": 57,
         "totalDeals": 107
-      },
-      {
-        "sourceKey": "joe",
-        "sourceLabel": "jö Bonus Club",
-        "missionFitScore": 57,
-        "totalDeals": 10
       }
     ],
     "topCoverageSources": [
@@ -81,7 +81,7 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 60,
+        "coverageScore": 61,
         "totalDeals": 107,
         "fresh1dCount": 22
       },
@@ -100,11 +100,11 @@
         "fresh1dCount": 47
       },
       {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "coverageScore": 31,
-        "totalDeals": 58,
-        "fresh1dCount": 0
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "coverageScore": 37,
+        "totalDeals": 50,
+        "fresh1dCount": 14
       }
     ],
     "topPrecisionSources": [
@@ -115,9 +115,15 @@
         "totalDeals": 12
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 73,
+        "totalDeals": 50
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "precisionScore": 70,
+        "precisionScore": 71,
         "totalDeals": 107
       },
       {
@@ -125,12 +131,6 @@
         "sourceLabel": "Wien Deals Combined Graph",
         "precisionScore": 68,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 64,
-        "totalDeals": 50
       },
       {
         "sourceKey": "instagram-apify",
@@ -141,16 +141,22 @@
     ],
     "topWeightedSources": [
       {
+        "sourceKey": "meta-instagram",
+        "sourceLabel": "Meta Instagram Graph",
+        "sourceWeightScore": 64,
+        "totalDeals": 107
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 63,
         "totalDeals": 12
       },
       {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "sourceWeightScore": 63,
-        "totalDeals": 107
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 62,
+        "totalDeals": 50
       },
       {
         "sourceKey": "gastro2",
@@ -163,12 +169,6 @@
         "sourceLabel": "Wien Deals Combined Graph",
         "sourceWeightScore": 53,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 52,
-        "totalDeals": 4
       }
     ],
     "topSourcesToFix": [
@@ -305,13 +305,89 @@
       "sourceWeightScore": 63
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 50,
+      "uniqueDeals": 36,
+      "duplicateDeals": 14,
+      "duplicateAcrossSources": 14,
+      "fresh1dCount": 14,
+      "fresh7dCount": 50,
+      "viennaCount": 50,
+      "foodDrinkCount": 37,
+      "promoCount": 31,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Gratis Limo bei Online-Bestellung und Rabatt",
+        "Gratis Willkommensdrink bei AfriVision Gala am 7. November 2026",
+        "2+1 Döner gratis Aktion vom 19. bis 25. Oktober 2026"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.7,
+      "duplicateRate": 0.3,
+      "fresh1dRate": 0.3,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 89.3,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 28
+        },
+        {
+          "value": "kaffee",
+          "count": 7
+        },
+        {
+          "value": "reisen",
+          "count": 5
+        },
+        {
+          "value": "drink",
+          "count": 3
+        },
+        {
+          "value": "shopping",
+          "count": 3
+        },
+        {
+          "value": "beauty",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 24
+        },
+        {
+          "value": "rabatt",
+          "count": 24
+        },
+        {
+          "value": "bogo",
+          "count": 2
+        }
+      ],
+      "issues": [],
+      "healthScore": 71,
+      "missionFitScore": 63,
+      "coverageScore": 37,
+      "precisionScore": 73,
+      "sourceWeightScore": 62
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 107,
-      "uniqueDeals": 71,
-      "duplicateDeals": 36,
-      "duplicateAcrossSources": 23,
+      "uniqueDeals": 78,
+      "duplicateDeals": 29,
+      "duplicateAcrossSources": 16,
       "fresh1dCount": 22,
       "fresh7dCount": 106,
       "viennaCount": 107,
@@ -325,7 +401,7 @@
       ],
       "lastRun": null,
       "uniqueRate": 0.7,
-      "duplicateRate": 0.2,
+      "duplicateRate": 0.1,
       "fresh1dRate": 0.2,
       "fresh7dRate": 1,
       "viennaRate": 1,
@@ -376,9 +452,9 @@
       "issues": [],
       "healthScore": 68,
       "missionFitScore": 57,
-      "coverageScore": 60,
-      "precisionScore": 70,
-      "sourceWeightScore": 63
+      "coverageScore": 61,
+      "precisionScore": 71,
+      "sourceWeightScore": 64
     },
     {
       "sourceKey": "church-events",
@@ -590,85 +666,6 @@
       "missionFitScore": 62,
       "coverageScore": 12,
       "precisionScore": 62,
-      "sourceWeightScore": 52
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 50,
-      "uniqueDeals": 30,
-      "duplicateDeals": 20,
-      "duplicateAcrossSources": 20,
-      "fresh1dCount": 2,
-      "fresh7dCount": 49,
-      "viennaCount": 50,
-      "foodDrinkCount": 29,
-      "promoCount": 26,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis Limo bei Online-Bestellung und Rabatt",
-        "3-Gänge-Ganslmenü Early Bird für 39,50 € mit unbegrenzten Beilagen",
-        "2+1 Döner gratis Aktion vom 19. bis 25. Oktober 2026"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 87.8,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 24
-        },
-        {
-          "value": "event",
-          "count": 8
-        },
-        {
-          "value": "shopping",
-          "count": 7
-        },
-        {
-          "value": "fooddrink",
-          "count": 3
-        },
-        {
-          "value": "reisen",
-          "count": 3
-        },
-        {
-          "value": "freizeit",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 29
-        },
-        {
-          "value": "gratis",
-          "count": 19
-        },
-        {
-          "value": "bogo",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 61,
-      "missionFitScore": 50,
-      "coverageScore": 29,
-      "precisionScore": 64,
       "sourceWeightScore": 52
     },
     {
