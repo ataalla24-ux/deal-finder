@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-20T17:19:53.655Z",
+  "generatedAt": "2026-10-20T17:31:49.191Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 803,
-    "uniqueCandidates": 715,
-    "distinctCandidates": 753,
-    "duplicateClusters": 38,
+    "uniqueCandidates": 713,
+    "distinctCandidates": 752,
+    "duplicateClusters": 39,
     "topHealthySources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 78,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
@@ -26,12 +32,6 @@
         "totalDeals": 110
       },
       {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 64,
-        "totalDeals": 1
-      },
-      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "healthScore": 63,
@@ -39,6 +39,12 @@
       }
     ],
     "topMissionSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "missionFitScore": 100,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
@@ -62,12 +68,6 @@
         "sourceLabel": "Meta Instagram Graph",
         "missionFitScore": 54,
         "totalDeals": 110
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "missionFitScore": 52,
-        "totalDeals": 50
       }
     ],
     "topCoverageSources": [
@@ -81,9 +81,9 @@
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
-        "coverageScore": 62,
+        "coverageScore": 61,
         "totalDeals": 110,
-        "fresh1dCount": 27
+        "fresh1dCount": 26
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -102,12 +102,18 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 31,
+        "coverageScore": 30,
         "totalDeals": 50,
-        "fresh1dCount": 6
+        "fresh1dCount": 5
       }
     ],
     "topPrecisionSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "precisionScore": 92,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
@@ -131,15 +137,15 @@
         "sourceLabel": "Apify Instagram",
         "precisionScore": 63,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "community",
-        "sourceLabel": "Community Submission",
-        "precisionScore": 57,
-        "totalDeals": 22
       }
     ],
     "topWeightedSources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 75,
+        "totalDeals": 1
+      },
       {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
@@ -163,12 +169,6 @@
         "sourceLabel": "Apify Instagram",
         "sourceWeightScore": 53,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "sourceWeightScore": 53,
-        "totalDeals": 50
       }
     ],
     "topSourcesToFix": [
@@ -239,6 +239,76 @@
     }
   },
   "sources": [
+    {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 1,
+      "uniqueDeals": 0,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 1,
+      "fresh7dCount": 1,
+      "viennaCount": 1,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "50% Aktion auf alle drei neuen Sorten, also schnell sein und testen, Peanut Rainbow"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-20T17:28:48.568Z",
+        "finishedAt": "2026-10-20T17:31:08.468Z",
+        "durationMs": 139900,
+        "counts": {
+          "rawCandidates": 35,
+          "normalizedCandidates": 1,
+          "verifiedCandidates": 1,
+          "previousDeals": 0,
+          "acceptedDeals": 1,
+          "rejectedDeals": 30
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 23,
+          "general-recommendation": 6,
+          "alcohol-offer": 1
+        },
+        "errors": [
+          "#vienna: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0,
+      "duplicateRate": 1,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 78,
+      "missionFitScore": 100,
+      "coverageScore": 16,
+      "precisionScore": 92,
+      "sourceWeightScore": 75
+    },
     {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
@@ -370,10 +440,10 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 110,
-      "uniqueDeals": 68,
-      "duplicateDeals": 42,
-      "duplicateAcrossSources": 19,
-      "fresh1dCount": 27,
+      "uniqueDeals": 67,
+      "duplicateDeals": 43,
+      "duplicateAcrossSources": 20,
+      "fresh1dCount": 26,
       "fresh7dCount": 109,
       "viennaCount": 110,
       "foodDrinkCount": 71,
@@ -437,84 +507,9 @@
       "issues": [],
       "healthScore": 64,
       "missionFitScore": 54,
-      "coverageScore": 62,
+      "coverageScore": 61,
       "precisionScore": 68,
       "sourceWeightScore": 61
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 1,
-      "uniqueDeals": 1,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 0,
-      "promoCount": 0,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "🔥 SUPER ANGEBOT BEI PAKHTONMOBILE VIENNA!"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-20T12:01:44.362Z",
-        "finishedAt": "2026-10-20T12:03:21.883Z",
-        "durationMs": 97521,
-        "counts": {
-          "rawCandidates": 50,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 1,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 46
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 34,
-          "missing-text": 6,
-          "excluded-promotion-type": 2,
-          "alcohol-offer": 1,
-          "missing-vienna-evidence": 1,
-          "offer-expired": 1,
-          "general-recommendation": 1
-        },
-        "errors": [
-          "#viennafood: Instagram shared quota paused: request or quota unavailable"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0,
-      "promoRate": 0,
-      "missingUrlRate": 0,
-      "averageQualityScore": 78,
-      "topCategories": [
-        {
-          "value": "technik",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "wenige klare Gratis-/Promo-Signale"
-      ],
-      "healthScore": 64,
-      "missionFitScore": 37,
-      "coverageScore": 6,
-      "precisionScore": 54,
-      "sourceWeightScore": 42
     },
     {
       "sourceKey": "instagram-ai",
@@ -524,7 +519,7 @@
       "uniqueDeals": 31,
       "duplicateDeals": 19,
       "duplicateAcrossSources": 19,
-      "fresh1dCount": 6,
+      "fresh1dCount": 5,
       "fresh7dCount": 50,
       "viennaCount": 50,
       "foodDrinkCount": 30,
@@ -591,7 +586,7 @@
       ],
       "healthScore": 63,
       "missionFitScore": 52,
-      "coverageScore": 31,
+      "coverageScore": 30,
       "precisionScore": 65,
       "sourceWeightScore": 53
     },
