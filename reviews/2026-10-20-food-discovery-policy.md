@@ -56,7 +56,19 @@ including history; 45 alcohol, 13 business-lead and one unrelated SEO review
 excluded. These are saved records, not 59 new offers or 59 live removals.
 
 No existing Slack messages, live deals, customer data, native binaries or Store
-metadata were edited. No extra paid crawl or AI budget was started.
+metadata were edited. No paid-plan change, budget increase or manual collector
+dispatch. Existing push-triggered collectors continue under their existing limits.
+
+Code published as `82cc99d48b031d2e3f0370bff9045d2792a8ec5d`.
+Power Food Discovery Tests 39412870702, Instagram Graph Coverage Tests
+39412870704 and Pages 39412870435 passed. The normal push-triggered Instagram AI
+run 39412870859 was still running at the final checkpoint; no result claimed.
+
+Production Feed Integrity 39412870701 remains red for six expired pre-existing
+records: `meta-ad-1110887824818940`, `g2-otf93r`, `gs-556781`,
+`social-food-review-10etoi1`, `meta-ig-18647925118035759`, `flight-rbt5lu`.
+The validator and all four input feeds are unchanged by this patch. Expiry dates
+were not extended, records were not removed and the validation was not weakened.
 
 ## Remaining Source Limits
 
