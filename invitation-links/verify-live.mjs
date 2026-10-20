@@ -35,7 +35,7 @@ for (const suffix of ['', '?deal=pizza-1']) {
   results.push({ path, status: response.status, location: target, landing: landing.status, imageMetadata: true });
 }
 
-for (const path of ['/i/not-a-valid-code', '/i/' + token + '?next=https://example.com']) {
+for (const path of ['/i/too-short', '/i/' + token + '?next=https://example.com']) {
   const response = await get(base + path);
   assert.equal(response.status, 404);
   results.push({ path, status: response.status });
