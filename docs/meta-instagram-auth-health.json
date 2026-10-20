@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-20T16:24:30.057Z",
+  "generatedAt": "2026-10-20T17:07:41.326Z",
   "source": "meta-instagram-auth-health",
   "graphVersion": "v26.0",
   "status": "ok",
@@ -10,19 +10,20 @@
   },
   "checks": [
     {
+      "name": "token-expiry",
+      "status": "ok",
+      "detail": "Configured token expiry is 2026-12-14T22:55:36.000Z (55.2 days remaining)."
+    },
+    {
       "name": "token-basic",
       "status": "ok",
       "detail": "Token resolved /me."
     },
     {
       "name": "token-inspection",
-      "status": "ok",
-      "detail": "Meta confirmed a valid USER token for app 4332170530445850."
-    },
-    {
-      "name": "token-expiry",
-      "status": "ok",
-      "detail": "Provider-verified access expires at 2026-12-14T22:55:36.000Z (55.3 days remaining)."
+      "status": "unavailable",
+      "detail": "Provider expiry could not be verified; configured metadata is the fallback. The operation was aborted.",
+      "code": "20"
     },
     {
       "name": "token-permissions",
@@ -57,19 +58,10 @@
   ],
   "nextAction": "Meta Instagram Graph is ready for the deal collector.",
   "tokenExpiry": {
-    "source": "meta-debug-token",
     "expiresAt": "2026-12-14T22:55:36.000Z",
-    "accessTokenExpiresAt": "2026-12-14T22:55:36.000Z",
-    "dataAccessExpiresAt": "2027-01-13T23:01:23.000Z",
-    "daysRemaining": 55.3,
-    "status": "ok",
-    "configuredExpiresAt": "2026-12-14T22:55:36.000Z"
-  },
-  "tokenInspection": {
-    "source": "meta-debug-token",
-    "valid": true,
-    "appId": "4332170530445850",
-    "type": "USER"
+    "source": "configured-metadata",
+    "daysRemaining": 55.2,
+    "status": "ok"
   },
   "grantedPermissions": [
     "pages_show_list",
