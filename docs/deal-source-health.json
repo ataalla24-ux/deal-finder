@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-20T17:57:00.291Z",
+  "generatedAt": "2026-10-20T18:03:37.558Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 803,
-    "uniqueCandidates": 713,
-    "distinctCandidates": 752,
-    "duplicateClusters": 39,
+    "uniqueCandidates": 708,
+    "distinctCandidates": 750,
+    "duplicateClusters": 42,
     "topHealthySources": [
       {
         "sourceKey": "wien-combined",
@@ -20,6 +20,12 @@
         "totalDeals": 14
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 68,
+        "totalDeals": 50
+      },
+      {
         "sourceKey": "instagram-apify",
         "sourceLabel": "Apify Instagram",
         "healthScore": 66,
@@ -30,12 +36,6 @@
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 64,
         "totalDeals": 110
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "healthScore": 63,
-        "totalDeals": 50
       }
     ],
     "topMissionSources": [
@@ -44,6 +44,12 @@
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 100,
         "totalDeals": 1
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "missionFitScore": 61,
+        "totalDeals": 50
       },
       {
         "sourceKey": "instagram-apify",
@@ -62,12 +68,6 @@
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 57,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 54,
-        "totalDeals": 110
       }
     ],
     "topCoverageSources": [
@@ -83,7 +83,7 @@
         "sourceLabel": "Meta Instagram Graph",
         "coverageScore": 61,
         "totalDeals": 110,
-        "fresh1dCount": 26
+        "fresh1dCount": 25
       },
       {
         "sourceKey": "vienna-promo-radar",
@@ -102,9 +102,9 @@
       {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
-        "coverageScore": 30,
+        "coverageScore": 34,
         "totalDeals": 50,
-        "fresh1dCount": 5
+        "fresh1dCount": 12
       }
     ],
     "topPrecisionSources": [
@@ -121,16 +121,16 @@
         "totalDeals": 14
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 71,
+        "totalDeals": 50
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 68,
         "totalDeals": 110
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 65,
-        "totalDeals": 50
       },
       {
         "sourceKey": "instagram-apify",
@@ -153,6 +153,12 @@
         "totalDeals": 110
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 60,
+        "totalDeals": 50
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 57,
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 54,
         "totalDeals": 155
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 53,
-        "totalDeals": 7
       }
     ],
     "topSourcesToFix": [
@@ -377,6 +377,84 @@
       "sourceWeightScore": 57
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 50,
+      "uniqueDeals": 28,
+      "duplicateDeals": 22,
+      "duplicateAcrossSources": 20,
+      "fresh1dCount": 12,
+      "fresh7dCount": 50,
+      "viennaCount": 50,
+      "foodDrinkCount": 35,
+      "promoCount": 30,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "3. Spicy Sandwich gratis bei Kauf von 2",
+        "Crew-Ticket für 4 Personen mit Welcome Drink und Snacks",
+        "Gratis Limo bei Online-Bestellung"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0.2,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 81.9,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 27
+        },
+        {
+          "value": "shopping",
+          "count": 9
+        },
+        {
+          "value": "kaffee",
+          "count": 4
+        },
+        {
+          "value": "reisen",
+          "count": 3
+        },
+        {
+          "value": "event",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 25
+        },
+        {
+          "value": "gratis",
+          "count": 23
+        },
+        {
+          "value": "bogo",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 68,
+      "missionFitScore": 61,
+      "coverageScore": 34,
+      "precisionScore": 71,
+      "sourceWeightScore": 60
+    },
+    {
       "sourceKey": "instagram-apify",
       "file": "deals-pending-instagram-apify.json",
       "sourceLabel": "Apify Instagram",
@@ -440,10 +518,10 @@
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 110,
-      "uniqueDeals": 67,
-      "duplicateDeals": 43,
-      "duplicateAcrossSources": 20,
-      "fresh1dCount": 26,
+      "uniqueDeals": 65,
+      "duplicateDeals": 45,
+      "duplicateAcrossSources": 22,
+      "fresh1dCount": 25,
       "fresh7dCount": 109,
       "viennaCount": 110,
       "foodDrinkCount": 71,
@@ -510,85 +588,6 @@
       "coverageScore": 61,
       "precisionScore": 68,
       "sourceWeightScore": 61
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 50,
-      "uniqueDeals": 31,
-      "duplicateDeals": 19,
-      "duplicateAcrossSources": 19,
-      "fresh1dCount": 5,
-      "fresh7dCount": 50,
-      "viennaCount": 50,
-      "foodDrinkCount": 30,
-      "promoCount": 27,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "3. Spicy Sandwich gratis bei Kauf von 2 am Dienstag und Mittwoch",
-        "2+1 Döner gratis Aktion vom 19. bis 25. Oktober 2026",
-        "Student Deal: 1 Dumpling, 1 Beilage, 1 Getränk für 12,50 €"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.4,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 84.9,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 24
-        },
-        {
-          "value": "shopping",
-          "count": 13
-        },
-        {
-          "value": "kaffee",
-          "count": 3
-        },
-        {
-          "value": "reisen",
-          "count": 3
-        },
-        {
-          "value": "event",
-          "count": 2
-        },
-        {
-          "value": "kultur",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 30
-        },
-        {
-          "value": "gratis",
-          "count": 18
-        },
-        {
-          "value": "bogo",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 63,
-      "missionFitScore": 52,
-      "coverageScore": 30,
-      "precisionScore": 65,
-      "sourceWeightScore": 53
     },
     {
       "sourceKey": "joe",

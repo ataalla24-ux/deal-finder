@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-20T18:02:35.125Z",
+  "generatedAt": "2026-10-20T18:04:14.604Z",
   "summary": {
     "maxAgeDays": 7,
-    "total": 307,
+    "total": 308,
     "allowed": 0,
-    "blocked": 307,
+    "blocked": 308,
     "warnings": 0,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 219,
@@ -14,7 +14,7 @@
       "älter als 7 Tage (2026-09-14)": 1,
       "Gottesdienste nur im Wochenlauf": 33,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 16,
+      "URL ungültig (HTTP 404)": 13,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-08-04)": 1,
       "älter als 7 Tage (2026-06-03)": 2,
       "älter als 7 Tage (2026-08-18)": 6,
@@ -29,7 +29,7 @@
       "älter als 7 Tage (2024-03-18)": 3,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 9,
       "nicht eindeutig in Wien": 13,
-      "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 3,
+      "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 4,
       "älter als 7 Tage (2026-05-06)": 2,
       "älter als 7 Tage (2024-10-03)": 1,
       "älter als 7 Tage (2018-03-05)": 1,
@@ -42,11 +42,11 @@
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-30)": 1,
+      "relative Kurz-Aktion abgelaufen (2026-10-19)": 2,
       "Engagement-Aktion ohne garantierte Gegenleistung": 2,
-      "Eröffnungs-Teaser ohne konkretes Angebot": 2,
       "älter als 7 Tage (2026-10-08)": 4,
       "abgelaufen (2026-08-30)": 4,
-      "relative Kurz-Aktion abgelaufen (2026-10-19)": 1,
+      "Eröffnungs-Teaser ohne konkretes Angebot": 1,
       "ausgeschlossene Quelle (TheFork)": 1,
       "Ortswiderspruch: Originalangebot nennt einen Standort ausserhalb Wiens": 2,
       "Offizielle Aktion nicht erneut bestätigt (source-unavailable)": 1,
@@ -58,9 +58,9 @@
     "reasonCategoryCounts": {
       "kein konkreter Deal": 221,
       "älter als 7 Tage": 147,
-      "ungültige URL": 27,
+      "ungültige URL": 24,
       "Gottesdienste außerhalb Wochenlauf": 33,
-      "abgelaufen": 14,
+      "abgelaufen": 15,
       "sonstiges": 13,
       "nicht Wien": 13,
       "ausgeschlossene Quelle": 21,
@@ -108,7 +108,7 @@
         "blocked": 32,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "ungültige URL": 3,
+          "ungültige URL": 2,
           "kein konkreter Deal": 30,
           "Gottesdienste außerhalb Wochenlauf": 32,
           "älter als 7 Tage": 31,
@@ -140,12 +140,13 @@
         }
       },
       "instagram-ai-agent": {
-        "total": 2,
+        "total": 3,
         "allowed": 0,
-        "blocked": 2,
+        "blocked": 3,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "sonstiges": 2
+          "sonstiges": 2,
+          "abgelaufen": 1
         }
       },
       "jö Bonus Club": {
@@ -166,7 +167,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 92,
           "älter als 7 Tage": 94,
-          "ungültige URL": 9,
+          "ungültige URL": 7,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "nicht Wien": 1
@@ -1139,18 +1140,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 184,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "freikirche-7-20260419",
@@ -1204,15 +1206,13 @@
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 184,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "freikirche-10-20260419",
@@ -2276,17 +2276,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 240,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gemeinde-9-20260222",
@@ -2469,15 +2470,13 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 240,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gemeinde-19-20260222",
@@ -3074,17 +3073,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.baptisten.at/wien",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 240,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-17-20260222",
@@ -3323,15 +3323,13 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (temporärer Fehler)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 240,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: temporärer URL-Fehler"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "gs-16701",
@@ -3420,6 +3418,46 @@
       "urlStatus": "ungültig: HTTP 404"
     },
     {
+      "id": "instagram-ai-0d966bb13872",
+      "title": "Das Beste: Der Free-Tarif hat kein Ablaufdatum und es fällt keine Gebühr pro Gast an.",
+      "brand": "Reservierung",
+      "source": "instagram-ai-agent",
+      "url": "https://www.instagram.com/reel/DeqrY3gIn2z/",
+      "reasons": [
+        "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen; Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-10-19T07:03:45.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
+      "id": "instagram-ai-9afeb497190d",
+      "title": "10 % Rabatt auf alle Escape Rooms",
+      "brand": "Gameover Vienna",
+      "source": "instagram-ai-agent",
+      "url": "https://www.instagram.com/reel/DerTJdooQkG/",
+      "reasons": [
+        "relative Kurz-Aktion abgelaufen (2026-10-19)"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-10-19T12:51:10.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 1,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "instagram-ai-6fc546bf8e1a",
       "title": "Vienna Whispers: Gratis-Aktion in Wien",
       "brand": "Vienna Whispers",
@@ -3429,32 +3467,12 @@
         "Engagement-Aktion ohne garantierte Gegenleistung"
       ],
       "warnings": [
-        "Inhalt prüfen: Caption-Reste oder Emoji-Codes im sichtbaren Text; Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen; Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
+        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen; Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-10-19T07:00:58.000Z",
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 1,
-      "expiryDate": "",
-      "expirySource": "",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "instagram-ai-a574211de877",
-      "title": "PART 3 — MEHMOONI The third part of the evening: Free Dance Floor! A little glimpse into our Iranian Social Da",
-      "brand": "Iranian Social Dance",
-      "source": "instagram-ai-agent",
-      "url": "https://www.instagram.com/reel/Del9tVUMtoQ/",
-      "reasons": [
-        "Eröffnungs-Teaser ohne konkretes Angebot"
-      ],
-      "warnings": [
-        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen; Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
-        "kein Ablaufdatum gefunden"
-      ],
-      "sourceDate": "2026-10-17T11:07:38.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 3,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
