@@ -1,7 +1,7 @@
 {
-  "startedAt": "2026-10-20T10:14:35.667Z",
-  "finishedAt": "2026-10-20T10:15:02.979Z",
-  "durationMs": 27312,
+  "startedAt": "2026-10-20T18:03:23.297Z",
+  "finishedAt": "2026-10-20T18:03:43.804Z",
+  "durationMs": 20507,
   "config": {
     "includeBaseDeals": false,
     "sourceCount": 53,
@@ -11,43 +11,31 @@
     "maxDealsPerSource": 25
   },
   "summary": {
-    "healthySources": 43,
-    "failedSources": 10,
-    "rawDeals": 44,
-    "acceptedDeals": 44,
+    "healthySources": 42,
+    "failedSources": 3,
+    "deferredSources": 8,
+    "rawDeals": 27,
+    "acceptedDeals": 27,
     "officialFoodSources": 19,
-    "productiveFoodSources": 13,
-    "degradedSources": 2,
+    "productiveFoodSources": 8,
+    "degradedSources": 1,
     "note": "Collector candidates only; publication still requires central validation and manual approval."
   },
   "sources": [
     {
-      "source": "Wien Events",
-      "url": "https://events.wien.info/de/",
-      "finalUrl": "https://www.wien.info/de/aktuell/veranstaltungen",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 94777,
-      "browserFallback": false,
-      "durationMs": 1810
-    },
-    {
-      "source": "Museumsquartier",
-      "url": "https://www.mqw.at/programm/",
-      "finalUrl": "https://www.mqw.at/de/programm/events/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 175164,
-      "browserFallback": false,
-      "durationMs": 3881
-    },
-    {
       "source": "Too Good To Go",
       "url": "https://www.toogoodtogo.com/at",
-      "status": "error",
+      "status": "deferred",
+      "operationalStatus": "cooldown",
       "deals": 0,
-      "durationMs": 258,
-      "error": "HTTP 429"
+      "durationMs": 0,
+      "cooldown": {
+        "consecutiveFailures": 1,
+        "lastAttemptAt": "2026-10-20T10:15:02.979Z",
+        "nextRetryAt": "2026-10-21T10:15:02.979Z",
+        "reason": "rate-limited",
+        "lastError": "HTTP 429"
+      }
     },
     {
       "source": "Foodsharing AT",
@@ -57,291 +45,8 @@
       "deals": 0,
       "bytes": 21133,
       "browserFallback": false,
-      "durationMs": 1033
-    },
-    {
-      "source": "HOFER Aktionen",
-      "url": "https://www.hofer.at/de/angebote.html",
-      "finalUrl": "https://www.hofer.at/angebote",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 765590,
-      "browserFallback": false,
-      "durationMs": 1564
-    },
-    {
-      "source": "BILLA Plus",
-      "url": "https://www.billa.at/aktionen",
-      "finalUrl": "https://www.billa.at/unsere-aktionen/aktionen",
-      "status": "ok",
-      "deals": 1,
-      "bytes": 1253474,
-      "browserFallback": false,
-      "durationMs": 2115
-    },
-    {
-      "source": "FitInn",
-      "url": "https://www.fitinn.at/",
-      "finalUrl": "https://fitinn.at/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 36794,
-      "browserFallback": false,
-      "durationMs": 3596
-    },
-    {
-      "source": "John Harris",
-      "url": "https://www.johnharris.at/",
-      "finalUrl": "https://www.johnharris.at/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 621851,
-      "browserFallback": false,
-      "durationMs": 1532
-    },
-    {
-      "source": "MediaMarkt",
-      "url": "https://www.mediamarkt.at/de/campaign/angebote",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 1127,
-      "error": "HTTP 404"
-    },
-    {
-      "source": "Saturn",
-      "url": "https://www.saturn.at/de/campaign/angebote",
-      "finalUrl": "https://www.mediamarkt.at/?ref=saturn",
-      "status": "ok",
-      "deals": 3,
-      "bytes": 805303,
-      "browserFallback": true,
-      "durationMs": 6567
-    },
-    {
-      "source": "Gutscheine.at",
-      "url": "https://www.gutscheine.at/",
-      "finalUrl": "https://www.gutscheine.at/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 909688,
-      "browserFallback": false,
-      "durationMs": 1277
-    },
-    {
-      "source": "Coupons.at",
-      "url": "https://www.coupons.at/",
-      "finalUrl": "https://www.coupons.at/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 6286,
-      "browserFallback": false,
-      "durationMs": 974
-    },
-    {
-      "source": "Spar",
-      "url": "https://www.spar.at/aktionen/",
-      "finalUrl": "https://www.spar.at/aktionen/salzburg",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 842399,
-      "browserFallback": true,
-      "durationMs": 4217
-    },
-    {
-      "source": "dm",
-      "url": "https://www.dm.at/aktionen",
-      "finalUrl": "https://www.dm.at/aktionen",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 11384,
-      "browserFallback": false,
-      "durationMs": 963
-    },
-    {
-      "source": "Müller",
-      "url": "https://www.mueller.at/aktionen/",
-      "finalUrl": "https://www.mueller.at/aktuelles/aktionen/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 357093,
-      "browserFallback": false,
-      "durationMs": 1241
-    },
-    {
-      "source": "New Yorker",
-      "url": "https://www.newyorker.at/aktionen/",
-      "finalUrl": "https://www.newyorker.de/at/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 13740,
-      "browserFallback": false,
-      "durationMs": 1361
-    },
-    {
-      "source": "Deichmann",
-      "url": "https://www.deichmann.at/aktionen/",
-      "finalUrl": "https://www.deichmann.com/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 21851,
-      "browserFallback": false,
-      "durationMs": 1212
-    },
-    {
-      "source": "Conrad",
-      "url": "https://www.conrad.at/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 998,
-      "error": "Browser HTTP 403"
-    },
-    {
-      "source": "Apple Store",
-      "url": "https://www.apple.com/at-edu/shop/",
-      "finalUrl": "https://www.apple.com/at-edu/store",
-      "status": "ok",
-      "deals": 3,
-      "bytes": 573342,
-      "browserFallback": false,
-      "durationMs": 3130
-    },
-    {
-      "source": "Decathlon",
-      "url": "https://www.decathlon.at/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 383,
-      "error": "Browser HTTP 403"
-    },
-    {
-      "source": "Hervis",
-      "url": "https://www.hervis.at/",
-      "finalUrl": "https://www.hervis.com/",
-      "status": "ok",
-      "deals": 1,
-      "bytes": 321882,
-      "browserFallback": false,
-      "durationMs": 773
-    },
-    {
-      "source": "Sportscheck",
-      "url": "https://www.sportscheck.at/",
-      "finalUrl": "https://www.sportscheck.at/",
-      "status": "ok",
-      "deals": 1,
-      "bytes": 540644,
-      "browserFallback": false,
-      "durationMs": 4223
-    },
-    {
-      "source": "Intersport",
-      "url": "https://www.intersport.at/",
-      "finalUrl": "https://www.intersport.at/",
-      "status": "ok",
-      "deals": 1,
-      "bytes": 389936,
-      "browserFallback": false,
-      "durationMs": 1179
-    },
-    {
-      "source": "XXXLutz",
-      "url": "https://www.xxxlutz.at/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 293,
-      "error": "Browser HTTP 403"
-    },
-    {
-      "source": "Möbelix",
-      "url": "https://www.moebelix.at/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 173,
-      "error": "Browser HTTP 403"
-    },
-    {
-      "source": "Lego Store",
-      "url": "https://www.lego.com/at-de/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 165,
-      "error": "Browser HTTP 403"
-    },
-    {
-      "source": "Thalia",
-      "url": "https://www.thalia.at/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 309,
-      "error": "Browser HTTP 403"
-    },
-    {
-      "source": "Libro",
-      "url": "https://www.libro.at/",
-      "status": "error",
-      "deals": 0,
-      "durationMs": 641,
-      "error": "Browser HTTP 521"
-    },
-    {
-      "source": "City Bike",
-      "url": "https://www.citybikewien.at/",
-      "finalUrl": "https://citybikewien.at/de",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 107649,
-      "browserFallback": false,
-      "durationMs": 1307
-    },
-    {
-      "source": "WienMobil",
-      "url": "https://www.wienmobil.at/",
-      "finalUrl": "https://www.wienmobil.at/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 59224,
-      "browserFallback": false,
-      "durationMs": 1292
-    },
-    {
-      "source": "Therme Wien",
-      "url": "https://www.thermewien.at/",
-      "finalUrl": "https://thermewien.at/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 140364,
-      "browserFallback": false,
-      "durationMs": 2540
-    },
-    {
-      "source": "Erlebniswelt",
-      "url": "https://www.erlebniswelt.at/",
-      "finalUrl": "https://www.erlebniswelt.at/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 396571,
-      "browserFallback": false,
-      "durationMs": 955
-    },
-    {
-      "source": "Tiergarten Schönbrunn",
-      "url": "https://www.zoovienna.at/",
-      "finalUrl": "https://www.zoovienna.at/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 106051,
-      "browserFallback": false,
-      "durationMs": 2076
-    },
-    {
-      "source": "Schloss Schönbrunn",
-      "url": "https://www.schoenbrunn.at/",
-      "finalUrl": "https://www.schoenbrunn.at/",
-      "status": "ok",
-      "deals": 0,
-      "bytes": 662779,
-      "browserFallback": false,
-      "durationMs": 2929
+      "durationMs": 737,
+      "cooldown": null
     },
     {
       "source": "Cafe Hummel",
@@ -407,20 +112,21 @@
       ],
       "rejectedCount": 9,
       "sourceKind": "official-food",
-      "durationMs": 1686
+      "durationMs": 1610,
+      "cooldown": null
     },
     {
       "source": "Wunderkammer Wien",
       "url": "https://www.marriott.com/de/hotels/viehw-renaissance-vienna-schonbrunn-hotel/dining/wunderkammer-restaurant/",
       "status": "ok",
-      "operationalStatus": "candidates-found",
-      "deals": 1,
+      "operationalStatus": "no-offers",
+      "deals": 0,
       "pages": [
         {
           "url": "https://www.marriott.com/de/hotels/viehw-renaissance-vienna-schonbrunn-hotel/dining/wunderkammer-restaurant/",
           "finalUrl": "https://www.marriott.com/de/hotels/viehw-renaissance-vienna-schonbrunn-hotel/dining/wunderkammer-restaurant/",
           "status": "ok",
-          "candidates": 1,
+          "candidates": 0,
           "bytes": 137917
         }
       ],
@@ -431,14 +137,20 @@
           "text": "Starten Sie in der Wunderkammer perfekt in den Tag. Genießen Sie unser tägliches Frühstück, eine Reservierung ist nicht erforderlich. Frisch zubereitete, köstliche Speisen, die Ihnen Energie für den Morgen geben und Ihre"
         },
         {
-          "reason": "no-concrete-benefit",
+          "reason": "alcohol-offer",
           "title": "ORIENT-EXPRESS @ RENAISSANCE",
           "text": "ORIENT-EXPRESS @ RENAISSANCE Erleben Sie jeden zweiten Donnerstag im Monat die Magie des legendären Orient-Express – mit wechselnden Reisezielen, kulinarischen Highlights und hauseigenen Cocktails in einem wahrhaft einzi"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour in der Wunderkammer",
+          "text": "Happy Hour in der Wunderkammer Täglich von 17.00 bis 20.00 Uhr: Beim Kauf eines ausgewählten Cocktails erhalten Sie einen zweiten gratis dazu. Die Preise liegen zwischen 7,50 und 12,00 EUR. Perfekt für einen Feierabenddr"
         }
       ],
-      "rejectedCount": 2,
+      "rejectedCount": 3,
       "sourceKind": "official-food",
-      "durationMs": 240
+      "durationMs": 1381,
+      "cooldown": null
     },
     {
       "source": "IKEA Food",
@@ -452,35 +164,35 @@
           "finalUrl": "https://www.ikea.com/at/de/food/",
           "status": "ok",
           "candidates": 2,
-          "bytes": 1004870
+          "bytes": 1004865
         },
         {
           "url": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
           "finalUrl": "https://www.ikea.com/at/de/food/salesareas/restaurant/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1287481
+          "bytes": 1297358
         },
         {
           "url": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
           "finalUrl": "https://www.ikea.com/at/de/food/salesareas/swedish-food-market/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1457428
+          "bytes": 1447541
         },
         {
           "url": "https://www.ikea.com/at/de/food/salesareas/bistro/",
           "finalUrl": "https://www.ikea.com/at/de/food/salesareas/bistro/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1159308
+          "bytes": 1149421
         },
         {
           "url": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
           "finalUrl": "https://www.ikea.com/at/de/food/salesareas/swedish-cafe/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1143274
+          "bytes": 1133387
         }
       ],
       "rejected": [
@@ -497,7 +209,8 @@
       ],
       "rejectedCount": 2,
       "sourceKind": "official-food",
-      "durationMs": 4354
+      "durationMs": 4709,
+      "cooldown": null
     },
     {
       "source": "Ströck",
@@ -511,13 +224,14 @@
           "finalUrl": "https://stroeck.at/",
           "status": "ok",
           "candidates": 8,
-          "bytes": 579931
+          "bytes": 579776
         }
       ],
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1921
+      "durationMs": 1607,
+      "cooldown": null
     },
     {
       "source": "Der Mann",
@@ -557,7 +271,8 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 5135
+      "durationMs": 5512,
+      "cooldown": null
     },
     {
       "source": "ANKER",
@@ -583,41 +298,57 @@
       ],
       "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 1598
+      "durationMs": 1315,
+      "cooldown": null
     },
     {
       "source": "Vapiano",
       "url": "https://www.vapiano.at/news/",
       "status": "ok",
-      "operationalStatus": "candidates-found",
-      "deals": 2,
+      "operationalStatus": "degraded",
+      "deals": 0,
       "pages": [
         {
           "url": "https://www.vapiano.at/news/",
           "finalUrl": "https://www.vapiano.at/news/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 19102
+          "bytes": 18855
         },
         {
           "url": "https://www.vapiano.at/vapiano-happy-hour/",
           "finalUrl": "https://www.vapiano.at/vapiano-happy-hour/",
           "status": "ok",
-          "candidates": 1,
+          "candidates": 0,
           "bytes": 16792
         },
         {
           "url": "https://www.vapiano.at/aufgepassta-jeder-tag-ist-pasta-tag/",
-          "finalUrl": "https://www.vapiano.at/aufgepassta-jeder-tag-ist-pasta-tag/",
-          "status": "ok",
-          "candidates": 1,
-          "bytes": 33349
+          "status": "error",
+          "candidates": 0,
+          "error": "HTTP 404",
+          "httpStatus": 404,
+          "retryAt": ""
         }
       ],
-      "rejected": [],
-      "rejectedCount": 0,
+      "rejected": [
+        {
+          "reason": "alcohol-offer",
+          "title": "VAPIANO VAPPY HOUR",
+          "text": "VAPIANO VAPPY HOUR Zwei Drinks sind besser als einer, oder? 1 + 1 gratis Spritzgetränke ❤ Immer von Montag bis Donnerstag von 16:00 bis 19:00 Uhr Die Auswahl ist bunt, die Drinks gekühlt und die Aktion unwiderstehlich - "
+        }
+      ],
+      "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 1665
+      "durationMs": 2597,
+      "error": "HTTP 404",
+      "cooldown": {
+        "consecutiveFailures": 1,
+        "lastAttemptAt": "2026-10-20T18:03:25.645Z",
+        "nextRetryAt": "2026-10-23T18:03:25.645Z",
+        "reason": "missing-endpoint",
+        "lastError": "HTTP 404"
+      }
     },
     {
       "source": "Bäckerei Schwarz",
@@ -631,7 +362,7 @@
           "finalUrl": "https://www.bswien.at/aktionen",
           "status": "ok",
           "candidates": 4,
-          "bytes": 789723
+          "bytes": 791123
         }
       ],
       "rejected": [
@@ -653,13 +384,14 @@
       ],
       "rejectedCount": 3,
       "sourceKind": "official-food",
-      "durationMs": 535
+      "durationMs": 547,
+      "cooldown": null
     },
     {
       "source": "NORDSEE",
       "url": "https://www.nordsee.com/at/coupons",
       "status": "ok",
-      "operationalStatus": "degraded",
+      "operationalStatus": "no-offers",
       "deals": 0,
       "pages": [
         {
@@ -668,19 +400,13 @@
           "status": "ok",
           "candidates": 0,
           "bytes": 46711
-        },
-        {
-          "url": "https://www.nordsee.com/at/coupons/pdf",
-          "status": "error",
-          "candidates": 0,
-          "error": "Not HTML"
         }
       ],
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 2949,
-      "error": "Not HTML"
+      "durationMs": 736,
+      "cooldown": null
     },
     {
       "source": "McDonald's",
@@ -694,7 +420,7 @@
           "finalUrl": "https://www.mcdonalds.at/mymcdonalds",
           "status": "ok",
           "candidates": 0,
-          "bytes": 1430324
+          "bytes": 1430325
         }
       ],
       "rejected": [
@@ -716,7 +442,8 @@
       ],
       "rejectedCount": 3,
       "sourceKind": "official-food",
-      "durationMs": 1221
+      "durationMs": 2069,
+      "cooldown": null
     },
     {
       "source": "Burger King",
@@ -736,27 +463,29 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1898
+      "durationMs": 3015,
+      "cooldown": null
     },
     {
       "source": "KFC",
-      "url": "https://www.kfc.co.at/",
-      "status": "error",
-      "operationalStatus": "degraded",
-      "deals": 0,
+      "url": "https://kfc.co.at/",
+      "status": "ok",
+      "operationalStatus": "candidates-found",
+      "deals": 1,
       "pages": [
         {
-          "url": "https://www.kfc.co.at/",
-          "status": "error",
-          "candidates": 0,
-          "error": "Untrusted official-food URL"
+          "url": "https://kfc.co.at/",
+          "finalUrl": "https://kfc.co.at/",
+          "status": "ok",
+          "candidates": 1,
+          "bytes": 320910
         }
       ],
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1039,
-      "error": "Untrusted official-food URL"
+      "durationMs": 1518,
+      "cooldown": null
     },
     {
       "source": "BackWerk",
@@ -804,94 +533,148 @@
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1815
+      "durationMs": 1727,
+      "cooldown": null
     },
     {
       "source": "Shibuya",
       "url": "https://www.shibuya.at/",
       "status": "ok",
-      "operationalStatus": "candidates-found",
-      "deals": 1,
+      "operationalStatus": "no-offers",
+      "deals": 0,
       "pages": [
         {
           "url": "https://www.shibuya.at/",
           "finalUrl": "https://www.shibuya.at/",
           "status": "ok",
-          "candidates": 1,
+          "candidates": 0,
           "bytes": 24762
         }
       ],
-      "rejected": [],
-      "rejectedCount": 0,
+      "rejected": [
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy hour",
+          "text": "Happy hour Everyday Opening TILL 18:00 All Cocktails 8€ All Cocktails 8€ All Cocktails 8€ All Cocktails 8€ All Cocktails 8€ All Cocktails 8€ All Cocktails 8€ All Cocktails 8€ All Cocktails 8€"
+        }
+      ],
+      "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 248
+      "durationMs": 321,
+      "cooldown": null
     },
     {
       "source": "Santos",
       "url": "https://www.santos-bar.com/en/dirty-drinks/behind-the-scenes.html",
       "status": "ok",
-      "operationalStatus": "candidates-found",
-      "deals": 1,
+      "operationalStatus": "no-offers",
+      "deals": 0,
       "pages": [
         {
           "url": "https://www.santos-bar.com/en/dirty-drinks/behind-the-scenes.html",
           "finalUrl": "https://www.santos-bar.com/en/dirty-drinks/behind-the-scenes.html",
           "status": "ok",
-          "candidates": 1,
+          "candidates": 0,
           "bytes": 127247
         }
       ],
-      "rejected": [],
-      "rejectedCount": 0,
+      "rejected": [
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour",
+          "text": "Happy Hour Daily from 4–8 pm & 11–12 pm all cocktails €9.9"
+        }
+      ],
+      "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 1265
+      "durationMs": 1129,
+      "cooldown": null
     },
     {
       "source": "Bùi Viện Street",
       "url": "https://buivien-restaurant.at/",
       "status": "ok",
-      "operationalStatus": "candidates-found",
-      "deals": 1,
+      "operationalStatus": "no-offers",
+      "deals": 0,
       "pages": [
         {
           "url": "https://buivien-restaurant.at/",
           "finalUrl": "https://buivien-restaurant.at/",
           "status": "ok",
-          "candidates": 1,
+          "candidates": 0,
           "bytes": 123907
         }
       ],
-      "rejected": [],
-      "rejectedCount": 0,
+      "rejected": [
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour",
+          "text": "Happy Hour Täglich 17:00 - 19:00 Uhr Cocktails € 8,50 · Longdrinks € 7,50"
+        }
+      ],
+      "rejectedCount": 1,
       "sourceKind": "official-food",
-      "durationMs": 1220
+      "durationMs": 901,
+      "cooldown": null
     },
     {
       "source": "Eva & Adam",
       "url": "https://evaundadam.bar/",
       "status": "ok",
-      "operationalStatus": "candidates-found",
-      "deals": 1,
+      "operationalStatus": "no-offers",
+      "deals": 0,
       "pages": [
         {
           "url": "https://evaundadam.bar/",
           "finalUrl": "https://evaundadam.bar/",
           "status": "ok",
-          "candidates": 1,
+          "candidates": 0,
           "bytes": 235346
         },
         {
           "url": "https://evaundadam.bar/happy-hour-cocktailbar-wien/",
           "finalUrl": "https://evaundadam.bar/happy-hour-cocktailbar-wien/",
           "status": "ok",
-          "candidates": 1,
+          "candidates": 0,
           "bytes": 171546
         }
       ],
-      "rejected": [],
-      "rejectedCount": 0,
+      "rejected": [
+        {
+          "reason": "alcohol-offer",
+          "title": "Cocktail Happy Hour",
+          "text": "Jeden Tag von 16 bis 20 Uhr Cocktail Happy Hour Happy Hour – die beste Zeit des Tages Drei Stunden, in denen der Alltag Pause macht. Täglich von 16:00 bis 20:00 wird jeder Drink zum Statement: alle Cocktails & Mocktails "
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Cocktail Happy Hour",
+          "text": "Jeden Tag von 16 bis 20 Uhr Cocktail Happy Hour Happy Hour – die beste Zeit des Tages Drei Stunden, in denen der Alltag Pause macht. Täglich von 16:00 bis 20:00 wird jeder Drink zum Statement: alle Cocktails & Mocktails "
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour – die beste Zeit des Tages",
+          "text": "Happy Hour – die beste Zeit des Tages Drei Stunden, in denen der Alltag Pause macht. Täglich von 16:00 bis 20:00 wird jeder Drink zum Statement: alle Cocktails & Mocktails um € 9,50. Egal ob klassisch, kreativ oder alkoh"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Cocktial Happy Hour",
+          "text": "Jeden Tag von 16 bis 20 Uhr Cocktial Happy Hour Happy Hour – die beste Zeit des Tages Drei Stunden, in denen der Alltag Pause macht. Täglich von 16:00 bis 20:00 wird jeder Drink zum Statement: alle Cocktails & Mocktails "
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Cocktial Happy Hour",
+          "text": "Jeden Tag von 16 bis 20 Uhr Cocktial Happy Hour Happy Hour – die beste Zeit des Tages Drei Stunden, in denen der Alltag Pause macht. Täglich von 16:00 bis 20:00 wird jeder Drink zum Statement: alle Cocktails & Mocktails "
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour – die beste Zeit des Tages",
+          "text": "Happy Hour – die beste Zeit des Tages Drei Stunden, in denen der Alltag Pause macht. Täglich von 16:00 bis 20:00 wird jeder Drink zum Statement: alle Cocktails & Mocktails um € 9,50. Egal ob klassisch, kreativ oder alkoh"
+        }
+      ],
+      "rejectedCount": 6,
       "sourceKind": "official-food",
-      "durationMs": 6397
+      "durationMs": 5345,
+      "cooldown": null
     },
     {
       "source": "Cuadro",
@@ -905,47 +688,493 @@
           "finalUrl": "https://cuadro.at/",
           "status": "ok",
           "candidates": 0,
-          "bytes": 21951
+          "bytes": 21952
         }
       ],
       "rejected": [],
       "rejectedCount": 0,
       "sourceKind": "official-food",
-      "durationMs": 1108
+      "durationMs": 2286,
+      "cooldown": null
     },
     {
       "source": "MABEL'S No90",
       "url": "https://mabels.at/",
       "status": "ok",
       "operationalStatus": "candidates-found",
-      "deals": 9,
+      "deals": 1,
       "pages": [
         {
           "url": "https://mabels.at/",
           "finalUrl": "https://mabels.at/",
           "status": "ok",
-          "candidates": 2,
+          "candidates": 1,
           "bytes": 107659
         },
         {
           "url": "https://mabels.at/cocktails.html",
           "finalUrl": "https://mabels.at/cocktails.html",
           "status": "ok",
-          "candidates": 4,
+          "candidates": 0,
           "bytes": 204289
         },
         {
           "url": "https://mabels.at/cocktails-en.html",
           "finalUrl": "https://mabels.at/cocktails-en.html",
           "status": "ok",
-          "candidates": 3,
+          "candidates": 0,
           "bytes": 203859
         }
       ],
-      "rejected": [],
-      "rejectedCount": 0,
+      "rejected": [
+        {
+          "reason": "alcohol-offer",
+          "title": "Aus unserer BarTägliche Happy Hour von 18–20 Uhr: Cocktails 4 € und Mocktails 2 € billiger.",
+          "text": "Aus unserer Bar Tägliche Happy Hour von 18–20 Uhr: Cocktails 4 € und Mocktails 2 € billiger."
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Tägliche Happy Hour von 18–20 Uhr: Cocktails 4 € und Mocktails 2 € billiger.",
+          "text": "Tägliche Happy Hour von 18–20 Uhr: Cocktails 4 € und Mocktails 2 € billiger."
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour · täglich 18–20 Uhr · Cocktails −4 €Mocktails −2 €",
+          "text": "Happy Hour · täglich 18–20 Uhr · Cocktails −4 €Mocktails −2 €"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "MABEL'S Special",
+          "text": "House Cocktails MABEL'S Special Absolut Vodka · Bailey's · Banane · Cocos · Obers · Ananassaft · Orangensaft 12,90 € Happy Hour 8,90 €Täglich 18–20 Uhr"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Havana Club Especial 3Y · Heidelbeeren · Limette · Minzeblätter · Schweppes Wildberry",
+          "text": "Herbst-Special 2026 Rum Blueberry Mosquito Havana Club Especial 3Y · Heidelbeeren · Limette · Minzeblätter · Schweppes Wildberry 11,90 € Happy Hour 7,90 €Täglich 18–20 Uhr"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour",
+          "text": "Happy Hour Täglich 18–20 Uhr: Cocktails 4 € günstiger, Mocktails 2 € günstiger."
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour · daily 6–8 PM · cocktails −€4Mocktails −€2",
+          "text": "Happy Hour · daily 6–8 PM · cocktails −€4Mocktails −€2"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "MABEL'S Special",
+          "text": "House Cocktails MABEL'S Special Absolut Vodka · Bailey's · Banana · Coconut · Cream · Pineapple juice · Orange juice 12.90 € Happy Hour 8.90 €Daily, 6–8 PM"
+        },
+        {
+          "reason": "alcohol-offer",
+          "title": "Happy Hour",
+          "text": "Happy Hour Daily, 6–8 PM: €4 off cocktails and €2 off mocktails."
+        }
+      ],
+      "rejectedCount": 9,
       "sourceKind": "official-food",
-      "durationMs": 1568
+      "durationMs": 1433,
+      "cooldown": null
+    },
+    {
+      "source": "Wien Events",
+      "url": "https://events.wien.info/de/",
+      "finalUrl": "https://www.wien.info/de/aktuell/veranstaltungen",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 94777,
+      "browserFallback": false,
+      "durationMs": 1785,
+      "cooldown": null
+    },
+    {
+      "source": "Museumsquartier",
+      "url": "https://www.mqw.at/programm/",
+      "finalUrl": "https://www.mqw.at/de/programm/events/",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 176039,
+      "browserFallback": false,
+      "durationMs": 4204,
+      "cooldown": null
+    },
+    {
+      "source": "HOFER Aktionen",
+      "url": "https://www.hofer.at/de/angebote.html",
+      "finalUrl": "https://www.hofer.at/angebote",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 765682,
+      "browserFallback": false,
+      "durationMs": 1189,
+      "cooldown": null
+    },
+    {
+      "source": "BILLA Plus",
+      "url": "https://www.billa.at/aktionen",
+      "finalUrl": "https://www.billa.at/unsere-aktionen/aktionen",
+      "status": "ok",
+      "deals": 1,
+      "bytes": 1253474,
+      "browserFallback": false,
+      "durationMs": 1923,
+      "cooldown": null
+    },
+    {
+      "source": "FitInn",
+      "url": "https://www.fitinn.at/",
+      "finalUrl": "https://fitinn.at/",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 36794,
+      "browserFallback": false,
+      "durationMs": 3005,
+      "cooldown": null
+    },
+    {
+      "source": "John Harris",
+      "url": "https://www.johnharris.at/",
+      "finalUrl": "https://www.johnharris.at/",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 621851,
+      "browserFallback": false,
+      "durationMs": 1258,
+      "cooldown": null
+    },
+    {
+      "source": "MediaMarkt",
+      "url": "https://www.mediamarkt.at/de/campaign/angebote",
+      "status": "deferred",
+      "operationalStatus": "cooldown",
+      "deals": 0,
+      "durationMs": 0,
+      "cooldown": {
+        "consecutiveFailures": 1,
+        "lastAttemptAt": "2026-10-20T10:15:02.979Z",
+        "nextRetryAt": "2026-10-23T10:15:02.979Z",
+        "reason": "missing-endpoint",
+        "lastError": "HTTP 404"
+      }
+    },
+    {
+      "source": "Saturn",
+      "url": "https://www.saturn.at/de/campaign/angebote",
+      "status": "error",
+      "deals": 0,
+      "durationMs": 1010,
+      "error": "HTTP 403",
+      "httpStatus": 403,
+      "retryAt": "",
+      "cooldown": {
+        "consecutiveFailures": 1,
+        "lastAttemptAt": "2026-10-20T18:03:36.392Z",
+        "nextRetryAt": "2026-10-23T18:03:36.392Z",
+        "reason": "access-denied",
+        "lastError": "HTTP 403"
+      }
+    },
+    {
+      "source": "Gutscheine.at",
+      "url": "https://www.gutscheine.at/",
+      "finalUrl": "https://www.gutscheine.at/",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 909749,
+      "browserFallback": false,
+      "durationMs": 1545,
+      "cooldown": null
+    },
+    {
+      "source": "Coupons.at",
+      "url": "https://www.coupons.at/",
+      "finalUrl": "https://www.coupons.at/",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 6286,
+      "browserFallback": false,
+      "durationMs": 749,
+      "cooldown": null
+    },
+    {
+      "source": "Spar",
+      "url": "https://www.spar.at/aktionen/",
+      "status": "error",
+      "deals": 0,
+      "durationMs": 190,
+      "error": "HTTP 403",
+      "httpStatus": 403,
+      "retryAt": "",
+      "cooldown": {
+        "consecutiveFailures": 1,
+        "lastAttemptAt": "2026-10-20T18:03:37.303Z",
+        "nextRetryAt": "2026-10-23T18:03:37.303Z",
+        "reason": "access-denied",
+        "lastError": "HTTP 403"
+      }
+    },
+    {
+      "source": "dm",
+      "url": "https://www.dm.at/aktionen",
+      "finalUrl": "https://www.dm.at/aktionen",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 11384,
+      "browserFallback": false,
+      "durationMs": 865,
+      "cooldown": null
+    },
+    {
+      "source": "Müller",
+      "url": "https://www.mueller.at/aktionen/",
+      "finalUrl": "https://www.mueller.at/aktuelles/aktionen/",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 357089,
+      "browserFallback": false,
+      "durationMs": 1819,
+      "cooldown": null
+    },
+    {
+      "source": "New Yorker",
+      "url": "https://www.newyorker.at/aktionen/",
+      "finalUrl": "https://www.newyorker.de/at/",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 13740,
+      "browserFallback": false,
+      "durationMs": 1245,
+      "cooldown": null
+    },
+    {
+      "source": "Deichmann",
+      "url": "https://www.deichmann.at/aktionen/",
+      "finalUrl": "https://www.deichmann.com/",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 21851,
+      "browserFallback": false,
+      "durationMs": 1178,
+      "cooldown": null
+    },
+    {
+      "source": "Conrad",
+      "url": "https://www.conrad.at/",
+      "status": "deferred",
+      "operationalStatus": "cooldown",
+      "deals": 0,
+      "durationMs": 0,
+      "cooldown": {
+        "consecutiveFailures": 1,
+        "lastAttemptAt": "2026-10-20T10:15:02.979Z",
+        "nextRetryAt": "2026-10-23T10:15:02.979Z",
+        "reason": "access-denied",
+        "lastError": "Browser HTTP 403"
+      }
+    },
+    {
+      "source": "Apple Store",
+      "url": "https://www.apple.com/at-edu/shop/",
+      "finalUrl": "https://www.apple.com/at-edu/store",
+      "status": "ok",
+      "deals": 3,
+      "bytes": 573365,
+      "browserFallback": false,
+      "durationMs": 1033,
+      "cooldown": null
+    },
+    {
+      "source": "Decathlon",
+      "url": "https://www.decathlon.at/",
+      "status": "deferred",
+      "operationalStatus": "cooldown",
+      "deals": 0,
+      "durationMs": 0,
+      "cooldown": {
+        "consecutiveFailures": 1,
+        "lastAttemptAt": "2026-10-20T10:15:02.979Z",
+        "nextRetryAt": "2026-10-23T10:15:02.979Z",
+        "reason": "access-denied",
+        "lastError": "Browser HTTP 403"
+      }
+    },
+    {
+      "source": "Hervis",
+      "url": "https://www.hervis.at/",
+      "finalUrl": "https://www.hervis.com/",
+      "status": "ok",
+      "deals": 1,
+      "bytes": 320910,
+      "browserFallback": false,
+      "durationMs": 1249,
+      "cooldown": null
+    },
+    {
+      "source": "Sportscheck",
+      "url": "https://www.sportscheck.at/",
+      "finalUrl": "https://www.sportscheck.at/",
+      "status": "ok",
+      "deals": 1,
+      "bytes": 540644,
+      "browserFallback": false,
+      "durationMs": 2475,
+      "cooldown": null
+    },
+    {
+      "source": "Intersport",
+      "url": "https://www.intersport.at/",
+      "finalUrl": "https://www.intersport.at/",
+      "status": "ok",
+      "deals": 1,
+      "bytes": 389912,
+      "browserFallback": false,
+      "durationMs": 1509,
+      "cooldown": null
+    },
+    {
+      "source": "XXXLutz",
+      "url": "https://www.xxxlutz.at/",
+      "status": "deferred",
+      "operationalStatus": "cooldown",
+      "deals": 0,
+      "durationMs": 0,
+      "cooldown": {
+        "consecutiveFailures": 1,
+        "lastAttemptAt": "2026-10-20T10:15:02.979Z",
+        "nextRetryAt": "2026-10-23T10:15:02.979Z",
+        "reason": "access-denied",
+        "lastError": "Browser HTTP 403"
+      }
+    },
+    {
+      "source": "Möbelix",
+      "url": "https://www.moebelix.at/",
+      "status": "deferred",
+      "operationalStatus": "cooldown",
+      "deals": 0,
+      "durationMs": 0,
+      "cooldown": {
+        "consecutiveFailures": 1,
+        "lastAttemptAt": "2026-10-20T10:15:02.979Z",
+        "nextRetryAt": "2026-10-23T10:15:02.979Z",
+        "reason": "access-denied",
+        "lastError": "Browser HTTP 403"
+      }
+    },
+    {
+      "source": "Lego Store",
+      "url": "https://www.lego.com/at-de/",
+      "status": "deferred",
+      "operationalStatus": "cooldown",
+      "deals": 0,
+      "durationMs": 0,
+      "cooldown": {
+        "consecutiveFailures": 1,
+        "lastAttemptAt": "2026-10-20T10:15:02.979Z",
+        "nextRetryAt": "2026-10-23T10:15:02.979Z",
+        "reason": "access-denied",
+        "lastError": "Browser HTTP 403"
+      }
+    },
+    {
+      "source": "Thalia",
+      "url": "https://www.thalia.at/",
+      "status": "deferred",
+      "operationalStatus": "cooldown",
+      "deals": 0,
+      "durationMs": 0,
+      "cooldown": {
+        "consecutiveFailures": 1,
+        "lastAttemptAt": "2026-10-20T10:15:02.979Z",
+        "nextRetryAt": "2026-10-23T10:15:02.979Z",
+        "reason": "access-denied",
+        "lastError": "Browser HTTP 403"
+      }
+    },
+    {
+      "source": "Libro",
+      "url": "https://www.libro.at/",
+      "status": "error",
+      "deals": 0,
+      "durationMs": 401,
+      "error": "HTTP 403",
+      "httpStatus": 403,
+      "retryAt": "",
+      "cooldown": {
+        "consecutiveFailures": 2,
+        "lastAttemptAt": "2026-10-20T18:03:39.312Z",
+        "nextRetryAt": "2026-10-26T18:03:39.312Z",
+        "reason": "access-denied",
+        "lastError": "HTTP 403"
+      }
+    },
+    {
+      "source": "City Bike",
+      "url": "https://www.citybikewien.at/",
+      "finalUrl": "https://citybikewien.at/de",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 107649,
+      "browserFallback": false,
+      "durationMs": 1971,
+      "cooldown": null
+    },
+    {
+      "source": "WienMobil",
+      "url": "https://www.wienmobil.at/",
+      "finalUrl": "https://www.wienmobil.at/",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 59225,
+      "browserFallback": false,
+      "durationMs": 973,
+      "cooldown": null
+    },
+    {
+      "source": "Therme Wien",
+      "url": "https://www.thermewien.at/",
+      "finalUrl": "https://thermewien.at/",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 140523,
+      "browserFallback": false,
+      "durationMs": 1699,
+      "cooldown": null
+    },
+    {
+      "source": "Erlebniswelt",
+      "url": "https://www.erlebniswelt.at/",
+      "finalUrl": "https://www.erlebniswelt.at/",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 396560,
+      "browserFallback": false,
+      "durationMs": 767,
+      "cooldown": null
+    },
+    {
+      "source": "Tiergarten Schönbrunn",
+      "url": "https://www.zoovienna.at/",
+      "finalUrl": "https://www.zoovienna.at/",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 105955,
+      "browserFallback": false,
+      "durationMs": 1739,
+      "cooldown": null
+    },
+    {
+      "source": "Schloss Schönbrunn",
+      "url": "https://www.schoenbrunn.at/",
+      "finalUrl": "https://www.schoenbrunn.at/",
+      "status": "ok",
+      "deals": 0,
+      "bytes": 662779,
+      "browserFallback": false,
+      "durationMs": 2007,
+      "cooldown": null
     }
   ]
 }
