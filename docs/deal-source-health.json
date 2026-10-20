@@ -1,23 +1,23 @@
 {
-  "generatedAt": "2026-10-20T20:24:47.276Z",
+  "generatedAt": "2026-10-20T20:39:18.457Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 789,
-    "uniqueCandidates": 694,
-    "distinctCandidates": 736,
+    "totalCandidates": 794,
+    "uniqueCandidates": 699,
+    "distinctCandidates": 741,
     "duplicateClusters": 42,
     "topHealthySources": [
+      {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "healthScore": 79,
+        "totalDeals": 19
+      },
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "healthScore": 78,
         "totalDeals": 1
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "healthScore": 74,
-        "totalDeals": 14
       },
       {
         "sourceKey": "instagram-ai",
@@ -46,6 +46,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "missionFitScore": 65,
+        "totalDeals": 19
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "missionFitScore": 61,
@@ -56,12 +62,6 @@
         "sourceLabel": "Apify Instagram",
         "missionFitScore": 60,
         "totalDeals": 7
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "missionFitScore": 57,
-        "totalDeals": 14
       },
       {
         "sourceKey": "joe",
@@ -117,8 +117,8 @@
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
-        "precisionScore": 74,
-        "totalDeals": 14
+        "precisionScore": 78,
+        "totalDeals": 19
       },
       {
         "sourceKey": "instagram-ai",
@@ -147,6 +147,12 @@
         "totalDeals": 1
       },
       {
+        "sourceKey": "tiktok",
+        "sourceLabel": "TikTok Scanner",
+        "sourceWeightScore": 63,
+        "totalDeals": 19
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "sourceWeightScore": 61,
@@ -157,12 +163,6 @@
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 60,
         "totalDeals": 50
-      },
-      {
-        "sourceKey": "tiktok",
-        "sourceLabel": "TikTok Scanner",
-        "sourceWeightScore": 57,
-        "totalDeals": 14
       },
       {
         "sourceKey": "gastro2",
@@ -240,6 +240,82 @@
   },
   "sources": [
     {
+      "sourceKey": "tiktok",
+      "file": "deals-pending-tiktok.json",
+      "sourceLabel": "TikTok Scanner",
+      "totalDeals": 19,
+      "uniqueDeals": 19,
+      "duplicateDeals": 0,
+      "duplicateAcrossSources": 0,
+      "fresh1dCount": 4,
+      "fresh7dCount": 19,
+      "viennaCount": 19,
+      "foodDrinkCount": 9,
+      "promoCount": 19,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "1+1 GRATIS BIANG BIANG NOODLES",
+        "20% when booking online: €11",
+        "Gratis Eintritt bei 1100 Wien"
+      ],
+      "lastRun": null,
+      "uniqueRate": 1,
+      "duplicateRate": 0,
+      "fresh1dRate": 0.2,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 66.6,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 7
+        },
+        {
+          "value": "shopping",
+          "count": 6
+        },
+        {
+          "value": "kaffee",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 16
+        },
+        {
+          "value": "rabatt",
+          "count": 2
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [],
+      "healthScore": 79,
+      "missionFitScore": 65,
+      "coverageScore": 22,
+      "precisionScore": 78,
+      "sourceWeightScore": 63
+    },
+    {
       "sourceKey": "wien-combined",
       "file": "deals-pending-wien-combined.json",
       "sourceLabel": "Wien Deals Combined Graph",
@@ -308,73 +384,6 @@
       "coverageScore": 16,
       "precisionScore": 92,
       "sourceWeightScore": 75
-    },
-    {
-      "sourceKey": "tiktok",
-      "file": "deals-pending-tiktok.json",
-      "sourceLabel": "TikTok Scanner",
-      "totalDeals": 14,
-      "uniqueDeals": 14,
-      "duplicateDeals": 0,
-      "duplicateAcrossSources": 0,
-      "fresh1dCount": 0,
-      "fresh7dCount": 13,
-      "viennaCount": 14,
-      "foodDrinkCount": 6,
-      "promoCount": 14,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis Eintritt bei 1100 Wien",
-        "Gratis Coffee bei Nespresso",
-        "coffee and free book to take home"
-      ],
-      "lastRun": null,
-      "uniqueRate": 1,
-      "duplicateRate": 0,
-      "fresh1dRate": 0,
-      "fresh7dRate": 0.9,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.4,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 67.3,
-      "topCategories": [
-        {
-          "value": "shopping",
-          "count": 5
-        },
-        {
-          "value": "essen",
-          "count": 3
-        },
-        {
-          "value": "kaffee",
-          "count": 3
-        },
-        {
-          "value": "kultur",
-          "count": 2
-        },
-        {
-          "value": "fitness",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 14
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag",
-        "geringe Food-/Drink-Relevanz"
-      ],
-      "healthScore": 74,
-      "missionFitScore": 57,
-      "coverageScore": 18,
-      "precisionScore": 74,
-      "sourceWeightScore": 57
     },
     {
       "sourceKey": "instagram-ai",
