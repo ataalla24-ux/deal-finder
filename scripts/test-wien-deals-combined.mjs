@@ -1,6 +1,16 @@
 import assert from 'node:assert/strict';
 
-import { runWienDealsCombined } from '../scraper/wien-deals-combined.js';
+import { runWienDealsCombined, orderCombinedHashtags } from '../scraper/wien-deals-combined.js';
+
+const tags = ['wien', 'vienna', 'viennafood', 'wienevents', 'wienergastro', 'essenwien', 'viennaeats'];
+const emptyStore = { get: () => ({}) };
+const ordered = orderCombinedHashtags(tags, emptyStore);
+assert.deepEqual(ordered.slice(0, 3), ['viennafood', 'wienergastro', 'wien']);
+assert.deepEqual(new Set(ordered), new Set(tags), 'keep broader discovery tags');
+assert.equal(ordered.length, tags.length);
+const recentStore = { get: key => ['hashtag:viennafood', 'hashtag:wienergastro', 'hashtag:wien'].includes(key)
+  ? { checkpoint: { lastAttemptAt: '2026-10-20T12:00:00Z' } } : {} };
+assert.deepEqual(orderCombinedHashtags(tags, recentStore).slice(0, 3), ['essenwien', 'viennaeats', 'vienna']);
 
 const now = new Date('2026-08-22T12:00:00.000Z');
 const freshTimestamp = '2026-08-21T10:00:00.000Z';
@@ -226,5 +236,20 @@ assert.equal(quotaDeferred.report.status, 'degraded', 'partial collection must n
 assert.equal(quotaDeferred.report.budgetDeferred, true);
 assert.equal(quotaDeferred.payload.meta.budgetDeferred, true);
 assert.equal(quotaDeferred.report.sources.at(-1).status, 'deferred');
+
+const requestedTags = [];
+await assert.rejects(() => runWienDealsCombined({
+  now, write: false,
+  env: {
+    INSTAGRAM_ACCESS_TOKEN: 'test-token', INSTAGRAM_USER_ID: '17840000000000000',
+    WIEN_COMBINED_GRAPH_HASHTAGS: tags.join(','), WIEN_COMBINED_MAX_GRAPH_REQUESTS: '1',
+  },
+  fetchImpl: async url => {
+    const parsed = new URL(url);
+    requestedTags.push(parsed.searchParams.get('q'));
+    return Response.json({ data: [{ id: 'food' }] });
+  },
+}), /request-budget/);
+assert.deepEqual(requestedTags, ['viennafood'], 'actual collector uses food-first order without raising the budget');
 
 console.log('wien deals combined tests passed');

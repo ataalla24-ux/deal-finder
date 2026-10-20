@@ -3,6 +3,11 @@ on:
   pull_request:
     paths:
       - "scraper/power-*.js"
+      - "scraper/source-http-policy.js"
+      - "scraper/instagram-search-discovery.js"
+      - "scripts/test-instagram-search-discovery.mjs"
+      - "scraper/wien-deals-combined.js"
+      - "scripts/test-wien-deals-combined.mjs"
       - "scraper/deal-discovery-policy.js"
       - "scraper/food-discovery-utils.js"
       - "scraper/meta-instagram-deals.js"
@@ -22,6 +27,11 @@ on:
     branches: [main]
     paths:
       - "scraper/power-*.js"
+      - "scraper/source-http-policy.js"
+      - "scraper/instagram-search-discovery.js"
+      - "scripts/test-instagram-search-discovery.mjs"
+      - "scraper/wien-deals-combined.js"
+      - "scripts/test-wien-deals-combined.mjs"
       - "scraper/deal-discovery-policy.js"
       - "scraper/food-discovery-utils.js"
       - "scraper/meta-instagram-deals.js"
@@ -56,6 +66,10 @@ jobs:
           node scripts/test-instagram-food-discovery.mjs
           node scripts/test-food-source-expansion.mjs
           node scripts/test-power-scraper.mjs
+          node scripts/test-power-source-scheduling.mjs
+          node scripts/test-instagram-search-discovery.mjs
+          node scripts/test-instagram-ai-agent.mjs
+          node scripts/test-wien-deals-combined.mjs
           node scripts/test-power-food.mjs
           node scripts/test-deal-validity-evidence.mjs
           node scripts/test-slack-approval-validation.mjs

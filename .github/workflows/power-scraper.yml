@@ -33,6 +33,7 @@ jobs:
           SENTRY_DISABLED: '1'
         run: |
           node scripts/test-power-scraper.mjs
+          node scripts/test-power-source-scheduling.mjs
           node scripts/test-power-food.mjs
           node scripts/test-food-source-expansion.mjs
 

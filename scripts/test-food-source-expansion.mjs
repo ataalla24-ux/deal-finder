@@ -4,6 +4,31 @@ import { POWER_FOOD_SOURCES, isAllowedFoodUrl } from '../scraper/power-food-sour
 import { extractFoodOffers } from '../scraper/power-food-extraction.js';
 import { inferInstagramAccountRole } from '../scraper/instagram-entity-resolution.js';
 
+const kfc = POWER_FOOD_SOURCES.find(source => source.name === 'KFC');
+assert.equal(isAllowedFoodUrl('https://kfc.co.at/', kfc), true);
+assert.equal(isAllowedFoodUrl('https://www.kfc.co.at/', kfc), true);
+assert.equal(isAllowedFoodUrl('https://kfc.co.at.evil.test/', kfc), false);
+assert.equal(isAllowedFoodUrl('https://kfc.com/', kfc), false);
+const nordsee = POWER_FOOD_SOURCES.find(source => source.name === 'NORDSEE');
+assert.equal(isAllowedFoodUrl('https://www.nordsee.com/at/coupons/pdf', nordsee), false);
+const caption = 'Unser Preiskracher: Crispy Cheese Burger mit Käse, Gurkerl und Ketchup um 1,70 Euro';
+const banner = `<main><section><img alt="${caption}">
+  <img alt="Aktion: Burger und Bier um 4 Euro">
+  <a href="/karriere"><img alt="Aktion: Burger um 1 Euro"></a>
+  <img alt="Aktion: Burger um 1 Euro, nur in Linz">
+  <img alt="Aktion: Burger um 1 Euro, bis 01.01.2020"></section></main>`;
+const imageOffers = extractFoodOffers(banner, kfc);
+assert.equal(imageOffers.deals.length, 1);
+assert.equal(imageOffers.deals[0].title, caption);
+assert.equal(imageOffers.deals[0].description, caption);
+assert.equal(imageOffers.deals[0].evidence.extractionMethod, 'official-image-alt');
+assert.equal(imageOffers.deals[0].reviewRequired, true);
+assert.equal(imageOffers.deals[0].evidence.locationScope, '');
+assert.deepEqual(imageOffers.deals[0].missingFields, ['Ort', 'Ablauf']);
+assert.equal(imageOffers.deals[0].validUntil, undefined, 'do not invent an expiry');
+assert.equal(extractFoodOffers(banner, { ...kfc, imageOfferSelector: undefined }).deals.length, 0,
+  'image captions are opt-in per verified merchant');
+
 const watchlist = JSON.parse(fs.readFileSync(new URL('../docs/instagram-watchlist.json', import.meta.url)));
 assert.equal(new Set(watchlist.accounts.map(a => a.username)).size, watchlist.accounts.length);
 const additions = watchlist.accounts.filter(a => a.evidenceUrl);

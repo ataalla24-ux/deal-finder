@@ -3,6 +3,7 @@ import {
   discoverFoodLinks,
 } from "./power-food-extraction.js";
 import { isAllowedFoodUrl } from "./power-food-sources.js";
+import { sourceFailureFields } from "./source-http-policy.js";
 
 export async function crawlFoodSource(source, options) {
   const now = options.now || new Date();
@@ -13,7 +14,7 @@ export async function crawlFoodSource(source, options) {
   const pages = [];
   const candidates = [];
   const rejected = [];
-  while (queue.length && seen.size < maxPages) {
+  while (queue.length && pages.length < maxPages) {
     const url = queue.shift();
     if (seen.has(url) || !isAllowedFoodUrl(url, source)) continue;
     seen.add(url);
@@ -21,6 +22,7 @@ export async function crawlFoodSource(source, options) {
       let response = await options.fetchPage(url);
       if (!isAllowedFoodUrl(response.finalUrl || url, source))
         throw new Error("foreign-redirect");
+      seen.add(response.finalUrl || url);
       if (
         /enable javascript|javascript.{0,20}(?:required|aktivieren)/i.test(
           response.html,
@@ -61,9 +63,10 @@ export async function crawlFoodSource(source, options) {
         status: /429/.test(error.message) ? "rate-limited" : "error",
         candidates: 0,
         error: error.message,
+        ...sourceFailureFields(error),
       });
-      // Do not retry a rate-limited merchant through another transport or page.
-      if (/429/.test(error.message)) break;
+      // Do not retry a blocked merchant through another transport or page.
+      if ([401, 403, 429].includes(sourceFailureFields(error).httpStatus)) break;
     }
   }
   const byOffer = new Map();

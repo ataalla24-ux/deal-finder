@@ -1,6 +1,7 @@
 import { load } from "cheerio";
 import { POWER_FOOD_SOURCES, isAllowedFoodUrl } from "./power-food-sources.js";
 import { extractFoodOffers } from "./power-food-extraction.js";
+import { sourceHttpError } from "./source-http-policy.js";
 
 export async function fetchOfficialFoodPage(url, source) {
   // Check every redirect before requesting it; a merchant must not redirect
@@ -20,7 +21,10 @@ export async function fetchOfficialFoodPage(url, source) {
       url = new URL(response.headers.get("location"), url).href;
       continue;
     }
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+      await response.body?.cancel();
+      throw sourceHttpError(response.status, response.headers.get("retry-after"));
+    }
     if (!/html/i.test(response.headers.get("content-type") || ""))
       throw new Error("Not HTML");
     const reader = response.body.getReader();

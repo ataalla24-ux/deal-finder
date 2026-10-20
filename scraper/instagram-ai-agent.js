@@ -13,6 +13,8 @@ import {
 } from './deal-moderation-utils.js';
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { discoveryRejection } from './deal-discovery-policy.js';
+import { sourceHttpError } from './source-http-policy.js';
+import { runInstagramSearchQueries } from './instagram-search-discovery.js';
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { parseExpiryShape } from './expiry-utils.js';
@@ -666,13 +668,17 @@ function parseDuckDuckGoResults(html, query) {
 async function searchDuckDuckGo(query) {
   const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
   const response = await fetch(url, {
+    signal: AbortSignal.timeout(12000),
     headers: {
       'user-agent': USER_AGENT,
       'accept-language': 'de-AT,de;q=0.9,en;q=0.8',
     },
   });
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw sourceHttpError(response.status, response.headers.get('retry-after'));
+  }
   const html = await response.text();
-  if (!response.ok) throw new Error(`HTTP ${response.status}: ${unicodeSafeTruncate(html, 160)}`);
   return parseDuckDuckGoResults(html, query);
 }
 
@@ -2393,16 +2399,16 @@ async function discoverCandidates(accounts) {
 
   const queries = buildSearchQueries(accounts);
   stats.searchQueries = queries;
-  for (const query of queries) {
-    try {
-      const found = await searchDuckDuckGo(query);
-      for (const candidate of found) addCandidate(map, candidate);
-      stats.searchDiscovered += found.length;
-    } catch (error) {
-      stats.searchErrors.push({ query, error: error.message });
-    }
-    await sleep(250);
-  }
+  const searched = await runInstagramSearchQueries(queries, {
+    search: searchDuckDuckGo, sleep, previousReport: readJson(REPORT_PATH, {}),
+  });
+  for (const candidate of searched.candidates) addCandidate(map, candidate);
+  stats.searchDiscovered = searched.candidates.length;
+  stats.searchErrors = searched.errors;
+  stats.searchSchedule = {
+    attemptedQueries: searched.attemptedQueries, stoppedReason: searched.stoppedReason,
+    nextRetryAt: searched.nextRetryAt, lastAttemptAt: searched.lastAttemptAt,
+  };
   return { candidates: rankCandidatesForScan([...map.values()]).slice(0, CONFIG.maxCandidates), stats };
 }
 
@@ -2543,6 +2549,7 @@ async function main() {
       removedDeals: moderationFilter.removed.slice(0, 40),
     },
     search: {
+      ...stats.searchSchedule,
       enabled: CONFIG.searchEnabled,
       queries: stats.searchQueries,
       discovered: stats.searchDiscovered,

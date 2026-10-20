@@ -7,6 +7,8 @@ import '../sentry/instrument.mjs';
 import { POWER_FOOD_SOURCES } from './power-food-sources.js';
 import { crawlFoodSource } from './power-food-crawler.js';
 import { fetchOfficialFoodPage } from './power-food-verification.js';
+import { prioritizePowerSources, runScheduledPowerSource } from './power-source-scheduling.js';
+import { sourceHttpError, sourceFailureFields } from './source-http-policy.js';
 import crypto from 'crypto';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -417,10 +419,10 @@ const DISABLED_SOURCE_NAMES = new Set([
 ]);
 
 const replacedFoodNames = new Set(['Burger King', 'Nordsee', 'Ströck', 'Der Mann']);
-const ACTIVE_SOURCES = [
+const ACTIVE_SOURCES = prioritizePowerSources([
   ...SOURCES.filter(source => !DISABLED_SOURCE_NAMES.has(source.name) && !replacedFoodNames.has(source.name) && source.name !== 'Billa'),
   ...POWER_FOOD_SOURCES.map(source => ({ ...source, officialFood: true })),
-].filter(source => process.env.POWER_FOOD_ONLY !== '1' || source.officialFood);
+].filter(source => process.env.POWER_FOOD_ONLY !== '1' || source.officialFood));
 
 // ============================================
 // HELPER: Fetch HTML
@@ -459,7 +461,10 @@ async function fetchHTML(url, options = {}) {
         accept: 'text/html,application/xhtml+xml',
       },
     });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+      await response.body?.cancel();
+      throw sourceHttpError(response.status, response.headers.get('retry-after'));
+    }
     const contentType = response.headers.get('content-type') || '';
     if (contentType && !/(?:text\/html|application\/xhtml\+xml)/i.test(contentType)) {
       throw new Error(`Unsupported content type: ${contentType}`);
@@ -475,7 +480,8 @@ async function fetchHTML(url, options = {}) {
 }
 
 function shouldUseBrowserFallback(error) {
-  return String(error?.message || error || '').match(/HTTP 403|fetch failed|Timeout after/i) !== null;
+  if ([401, 403, 429].includes(sourceFailureFields(error).httpStatus)) return false;
+  return String(error?.message || error || '').match(/fetch failed|Timeout after/i) !== null;
 }
 
 async function fetchHTMLWithBrowser(url, options = {}) {
@@ -490,7 +496,7 @@ async function fetchHTMLWithBrowser(url, options = {}) {
   try {
     const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
     const status = response?.status() || 0;
-    if (status >= 400) throw new Error(`Browser HTTP ${status}`);
+    if (status >= 400) throw sourceHttpError(status, response.headers()['retry-after']);
     const html = await page.content();
     const maxBytes = Number(options.maxBytes || MAX_HTML_BYTES);
     const buffer = Buffer.from(html);
@@ -650,6 +656,14 @@ function dedupeDeals(deals) {
 // ============================================
 async function main() {
   const startedAt = RUN_STARTED_AT;
+  const outputDir = process.env.POWER_OUTPUT_DIR || path.join(__dirname, '..', 'docs');
+  const reportPath = path.join(outputDir, 'power-scraper-report.json');
+  let previousReport = {};
+  try {
+    previousReport = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
   console.log('🚀 POWER SCRAPER V5 - AKTUALISIERT');
   console.log('📅', new Date().toLocaleDateString('de-AT'));
   console.log('='.repeat(40));
@@ -663,7 +677,7 @@ async function main() {
   // Scrape dynamic sources
   console.log(`\n📡 Scraping ${ACTIVE_SOURCES.length} Quellen...\n`);
   
-  const sourceResults = await mapWithConcurrency(ACTIVE_SOURCES, FETCH_CONCURRENCY, async (source) => {
+  const collectSource = async (source) => {
     const sourceStartedAt = Date.now();
     if (source.officialFood) {
       const result = await crawlFoodSource(source, {
@@ -708,10 +722,13 @@ async function main() {
         deals: 0,
         durationMs: Date.now() - sourceStartedAt,
         error: error.message,
+        ...sourceFailureFields(error),
         rows: [],
       };
     }
-  });
+  };
+  const sourceResults = await mapWithConcurrency(ACTIVE_SOURCES, FETCH_CONCURRENCY,
+    source => runScheduledPowerSource(source, previousReport, collectSource));
   if (browserInstance) {
     await browserInstance.close();
     browserInstance = null;
@@ -750,11 +767,9 @@ async function main() {
     deals: finalDeals
   };
   
-  const outputDir = process.env.POWER_OUTPUT_DIR || path.join(__dirname, '..', 'docs');
   fs.mkdirSync(outputDir, { recursive: true });
   const outputPath = path.join(outputDir, 'deals-pending-power.json');
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
-  const reportPath = path.join(outputDir, 'power-scraper-report.json');
   const sourceReport = sourceResults.map(({ rows, ...result }) => result);
   const report = {
     startedAt: startedAt.toISOString(),
@@ -771,6 +786,7 @@ async function main() {
     summary: {
       healthySources: sourceReport.filter((result) => result.status === 'ok').length,
       failedSources: sourceReport.filter((result) => result.status === 'error').length,
+      deferredSources: sourceReport.filter(result => result.status === 'deferred').length,
       rawDeals: scrapedDeals.length,
       acceptedDeals: finalDeals.length,
       officialFoodSources: sourceReport.filter(result => result.sourceKind === 'official-food').length,
@@ -781,7 +797,8 @@ async function main() {
     sources: sourceReport,
   };
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-  const failedSources = sourceReport.filter((result) => result.status === 'error' || result.operationalStatus === 'degraded');
+  const failedSources = sourceReport.filter((result) => result.status === 'error'
+    || ['degraded', 'rate-limited', 'cooldown'].includes(result.operationalStatus));
   if (!process.env.POWER_OUTPUT_DIR) writePipelineRunReport(buildPipelineRunReport({
     sourceKey: SOURCE_KEY,
     sourceLabel: SOURCE_LABEL,
@@ -793,7 +810,7 @@ async function main() {
     normalizedCandidates: finalDeals.length,
     verifiedCandidates: 0,
     acceptedDeals: finalDeals.length,
-    errors: failedSources.map((result) => `${result.source}: ${result.error}`),
+    errors: failedSources.map((result) => `${result.source}: ${result.error || `deferred until ${result.cooldown.nextRetryAt}`}`),
     diagnostics: {
       healthySources: sourceReport.filter((result) => result.status === 'ok').length,
       failedSources: failedSources.length,

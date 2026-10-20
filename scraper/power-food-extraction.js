@@ -16,7 +16,7 @@ const PRICE =
 const BENEFIT =
   /(?:-\s*\d+\s*%|\d+\s*%\s*(?:rabatt|sparen|günstiger|off|discount))|\d+\s*\+\s*\d+|\b2\s*(?:für|for)\s*1\b|\b(?:gratis|kostenlos|geschenkt|statt|rabatt|discount)\b/i;
 const PROMO =
-  /aktion|angebot|special|happy\s*hour|vappy\s*hour|sonderpreis|vorteilspreis|aktionspreis|deal[- ]preis|kombiaktion|kaffeejause|bäckerjause/i;
+  /aktion|angebot|special|happy\s*hour|vappy\s*hour|sonderpreis|vorteilspreis|aktionspreis|preiskracher|deal[- ]preis|kombiaktion|kaffeejause|bäckerjause/i;
 const VIENNA = /\bwien\b|\bvienna\b|\b1(?:0[1-9]|1[0-9]|2[0-3])0\b/i;
 const NEGATIVE =
   /(?:nicht|außer|ausser|ausgenommen)\s+(?:in\s+)?wien\b|wien\s+(?:ausgenommen|ausgeschlossen)|nur\s+(?:in\s+)?(?:graz|linz|salzburg|innsbruck)\b/i;
@@ -129,6 +129,18 @@ export function extractFoodOffers(html, source, options = {}) {
   const bodyText = textOf($, $("body"));
   const blocks = [];
   const rejected = [];
+  // Only opt-in merchants with verified promotional image captions. Keep the
+  // exact source text; this neither performs OCR nor establishes Vienna scope.
+  if (source.imageOfferSelector) {
+    $(source.imageOfferSelector).each((i, el) => {
+      const text = foodText($(el).attr("alt"));
+      const link = $(el).closest("a").attr("href") || "";
+      if (text.length < 18 || text.length > 1600 || /jobs|karriere|gewinnspiel/i.test(link)) return;
+      if (FOOD.test(text) && ((PROMO.test(text) && PRICE.test(text)) || BENEFIT.test(text))) {
+        blocks.push({ text, title: text, method: "official-image-alt" });
+      }
+    });
+  }
   const add = (el, method, title) => {
     const text = textOf($, el);
     if (text.length >= 18 && text.length <= 16000)

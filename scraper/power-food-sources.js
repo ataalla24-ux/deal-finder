@@ -113,9 +113,10 @@ export const POWER_FOOD_SOURCES = [
   },
   {
     name: "KFC",
-    url: "https://www.kfc.co.at/",
+    url: "https://kfc.co.at/",
     category: "essen",
-    allowedHosts: ["www.kfc.co.at"],
+    allowedHosts: ["www.kfc.co.at", "kfc.co.at"],
+    imageOfferSelector: "main > section img[alt]",
     linkPattern: /coupon|angebot|deal|aktion/i,
   },
   {
@@ -186,7 +187,7 @@ export function isAllowedFoodUrl(value, source) {
       !u.port &&
       source.allowedHosts.includes(u.hostname) &&
       (!source.pathPrefix || u.pathname.startsWith(source.pathPrefix)) &&
-      !/\.(?:pdf|jpe?g|png|webp|svg|mp4|zip)$/i.test(u.pathname)
+      !/(?:\.|\/)(?:pdf|jpe?g|png|webp|svg|mp4|zip)\/?$/i.test(u.pathname)
     );
   } catch {
     return false;

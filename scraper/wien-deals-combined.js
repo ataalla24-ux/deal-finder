@@ -8,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
+import { isFoodDrinkSource } from './food-discovery-utils.js';
 import {
   buildConfig,
   normalizeGraphMediaItem,
@@ -74,6 +75,21 @@ function parseHashtags(value) {
     .map((entry) => entry.replace(/^#/, '').trim().toLowerCase())
     .filter((entry) => /^[a-z0-9_.äöüß-]{2,80}$/i.test(entry));
   return [...new Set(hashtags.length > 0 ? hashtags : DEFAULT_HASHTAGS)].slice(0, 20);
+}
+
+export function orderCombinedHashtags(hashtags, scanStore) {
+  const lastAttempt = tag => Date.parse(scanStore.get(`hashtag:${tag}`).checkpoint?.lastAttemptAt || '') || 0;
+  const oldestFirst = [...hashtags].sort((a, b) => lastAttempt(a) - lastAttempt(b));
+  const isFood = tag => isFoodDrinkSource(tag) || tag === 'essenwien';
+  const food = oldestFirst.filter(isFood);
+  const other = oldestFirst.filter(tag => !isFood(tag));
+  const ordered = [];
+  // Two food searches before one broader discovery search, rotating within
+  // both lanes so a short quota does not always revisit the same hashtags.
+  while (food.length || other.length) {
+    ordered.push(...food.splice(0, 2), ...other.splice(0, 1));
+  }
+  return ordered;
 }
 
 function writeJsonAtomic(filePath, value) {
@@ -221,7 +237,7 @@ export async function runWienDealsCombined(options = {}) {
   const graphVersion = cleanText(env.META_GRAPH_VERSION || 'v26.0', 20);
   // This is intentionally a separate discovery surface from the high-intent
   // hashtag pool used by the main Meta collector.
-  const hashtags = parseHashtags(env.WIEN_COMBINED_GRAPH_HASHTAGS);
+  let hashtags = parseHashtags(env.WIEN_COMBINED_GRAPH_HASHTAGS);
   const maxMediaPerHashtag = Math.max(5, Math.min(50, Number(env.WIEN_COMBINED_MEDIA_PER_HASHTAG || 30)));
   const maxDeals = Math.max(1, Math.min(80, Number(env.WIEN_COMBINED_MAX_DEALS || 40)));
   const timeoutMs = Math.max(3000, Number(env.WIEN_COMBINED_GRAPH_TIMEOUT_MS || 12000));
@@ -254,6 +270,7 @@ export async function runWienDealsCombined(options = {}) {
     peerPath: options.peerScanStatePath || path.join(DOCS_DIR, 'meta-instagram-scan-state.json'),
     scope: `${graphVersion}:${userId}`, now, write: options.write !== false, state: options.scanState,
   });
+  hashtags = orderCombinedHashtags(hashtags, scanStore);
   const requestOptions = { accessToken, graphVersion, fetchImpl: budget.fetch, timeoutMs };
   const sourceResults = [];
   const graphEntries = new Map();
