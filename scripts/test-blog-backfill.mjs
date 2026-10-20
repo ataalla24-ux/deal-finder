@@ -69,11 +69,18 @@ try {
   fs.symlinkSync(path.join(root, 'node_modules'), path.join(fixture, 'node_modules'), 'dir');
   fs.writeFileSync(path.join(fixture, 'docs/blog/unrelated.html'), 'preserve');
   const args = [path.join(fixture, 'scripts/generate-topic-guides.mjs'), ...backfillGuides.map(g => g.slug)];
-  const env = { ...process.env, SEO_NOW: '2026-10-18T12:00:00+02:00' };
+  // Normalize both sides after the last curated expiry: regeneration remains an
+  // exact content comparison independent of the wall clock or stored archive state.
+  const comparisonTime = Math.max(...backfillGuides.flatMap(guide =>
+    [guide.published, guide.expires].filter(Boolean).map(value => Date.parse(value)))) + 1000;
+  assert.ok(Number.isFinite(comparisonTime), 'Curated guide dates must be valid');
+  const env = { ...process.env, SEO_NOW: new Date(comparisonTime).toISOString() };
   for (let attempt = 0; attempt < 2; attempt++) {
     execFileSync(process.execPath, args, { env });
-    for (const guide of backfillGuides) assert.equal(fs.readFileSync(path.join(fixture, 'docs/blog', `${guide.slug}.html`), 'utf8'), read(`docs/blog/${guide.slug}.html`));
-    assert.equal(fs.readFileSync(path.join(fixture, 'docs/blog/index.html'), 'utf8'), read('docs/blog/index.html'));
+    for (const guide of backfillGuides) assert.equal(fs.readFileSync(path.join(fixture, 'docs/blog', `${guide.slug}.html`), 'utf8'),
+      polishHtml(read(`docs/blog/${guide.slug}.html`), `blog/${guide.slug}.html`, comparisonTime));
+    assert.equal(fs.readFileSync(path.join(fixture, 'docs/blog/index.html'), 'utf8'),
+      polishHtml(read('docs/blog/index.html'), 'blog/index.html', comparisonTime));
     assert.equal(fs.readFileSync(path.join(fixture, 'docs/sitemap.xml'), 'utf8'), read('docs/sitemap.xml'));
   }
   const invalid = spawnSync(process.execPath, [args[0], 'unknown-typo-slug'], { env });

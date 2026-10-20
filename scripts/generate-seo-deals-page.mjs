@@ -87,6 +87,15 @@ function currentValidity(deal, now) {
   if ([['validOn', validOn], ['validFrom', validFrom], ['validUntil', validUntil]]
     .some(([field, parsed]) => String(deal[field] || '').trim() && !parsed)) return null;
   if (validFrom && validFrom > today) return null;
+  // Some approved feeds retain the source-validated start in the validity
+  // result without copying it to validFrom. Respect that exact machine hint.
+  if (!validFrom && Array.isArray(deal.validity?.warnings)) {
+    const starts = deal.validity.warnings.map(warning => {
+      const match = String(warning).match(/^startet am (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)$/);
+      return match ? calendarDate(match[1]) : '';
+    });
+    if (starts.some(start => start > today)) return null;
+  }
   if (validOn) {
     if (validOn !== today) return null;
     return { expiryDate: parseDate(`${validOn}T12:00:00Z`), expiryRaw: validOn, expiryLabel: 'Gültig am' };
@@ -196,12 +205,24 @@ function localLogo(deal) {
   }
 }
 
+function displayDescription(deal) {
+  const description = String(deal.description || '').trim();
+  const caption = String(deal.metaGraphCaption || '').trim();
+  const mojibake = /Ã[\u0080-\u00bf]|â[\u0080-\u00bf]|ð[\u0080-\u00bf]/;
+  const verification = deal.postVerification;
+  return mojibake.test(description) && caption && !mojibake.test(caption)
+    && deal.metaGraphVerified === true && deal.metaGraphAccepted === true
+    && verification?.status === 'verified-meta-graph'
+    && safeUrl(verification.originalPostUrl) === deal.sourceUrl
+    ? caption : description;
+}
+
 function renderDealCard(deal, index) {
   const id = `deal-${safeId(deal.id || `${deal.brand}-${deal.title}`)}`;
   const type = ['gratis', 'bogo', 'rabatt'].includes(deal.type) ? deal.type : 'angebot';
   const logo = localLogo(deal);
   const initials = String(deal.brand || 'FF').split(/\s+/).filter(Boolean).slice(0, 2).map(word => Array.from(word)[0]).join('').toLocaleUpperCase('de-AT');
-  const description = String(deal.description || '').trim();
+  const description = displayDescription(deal);
   const location = /^(?:k\.?\s?a\.?|n\/a|unknown)$/i.test(deal.displayLocation) ? 'Standort beim Anbieter prüfen' : deal.displayLocation;
   return `
         <article class="live-deal-card" id="${escapeHtml(id)}" data-type="${type}" data-districts="${districtCodes(deal).join(' ')}" data-order="${index}" data-expiry="${deal.expiryDate.getTime()}">
@@ -216,7 +237,7 @@ function renderDealCard(deal, index) {
             <p>${icon('calendar-days')}<span>${escapeHtml(deal.expiryLabel)} <time datetime="${escapeHtml(calendarDate(deal.expiryRaw) || deal.expiryDate.toISOString())}">${escapeHtml(formatExpiryDate(deal.expiryRaw))}</time></span></p>
           </div>
           ${description ? `<details class="deal-conditions"><summary>Details &amp; Bedingungen</summary><p>${escapeHtml(description)}</p></details>` : ''}
-          <a class="live-deal-source" href="${escapeHtml(deal.sourceUrl)}" rel="noopener" data-track="deal_outbound" data-deal-brand="${escapeHtml(deal.brand || '')}" aria-label="Angebot und Bedingungen bei ${escapeHtml(deal.brand || 'Anbieter')} öffnen"><span>Zum Angebot</span>${icon('arrow-up-right')}</a>
+          <a class="live-deal-source" href="${escapeHtml(deal.sourceUrl)}" rel="noopener" data-track="deal_outbound" data-deal-brand="${escapeHtml(deal.brand || '')}" aria-label="Zum Angebot und zu den Bedingungen bei ${escapeHtml(deal.brand || 'Anbieter')}"><span>Zum Angebot</span>${icon('arrow-up-right')}</a>
         </article>`;
 }
 

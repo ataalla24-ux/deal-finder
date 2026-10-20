@@ -92,7 +92,44 @@ try {
   assert.deepEqual(generate(midnightDeals, '2026-10-05T22:00:31Z').ids, [], 'Timestamp-only fallback retains its exact expiration');
   assert.deepEqual(generate([deal('leap-day', { validOn: '2028-02-29' })], '2028-02-29T10:00:00Z').ids, ['leap-day']);
   assert.deepEqual(generate([deal('not-leap-day', { validOn: '2026-02-29' })], '2026-03-01T10:00:00Z').ids, []);
-  console.log('SEO deals page regression tests passed (flight scope, explicit dates, Vienna midnight, malformed dates, schema and feed preservation).');
+  const validatedStarts = [
+    deal('validated-future-start', { validity: { warnings: ['startet am 2026-10-21T12:00:00.000Z'] } }),
+    deal('validated-opening-day', { validUntil: '2026-10-22', validity: { warnings: ['startet am 2026-10-22T12:00:00.000Z'] } }),
+    deal('invalid-start-warning', { validity: { warnings: ['startet am not-a-date'] } }),
+    deal('invalid-calendar-warning', { validity: { warnings: ['startet am 2026-02-30T12:00:00.000Z'] } }),
+    deal('free-text-start-warning', { validity: { warnings: ['Aktion startet am 2026-10-21T12:00:00.000Z'] } }),
+    deal('missing-start-warning', { validity: {} }),
+  ];
+  assert.deepEqual(generate(validatedStarts, '2026-10-20T10:00:00Z').ids,
+    ['invalid-start-warning', 'invalid-calendar-warning', 'free-text-start-warning', 'missing-start-warning'],
+    'A source-validated future start must prevent an offer from appearing as current');
+  assert.ok(generate(validatedStarts, '2026-10-20T22:00:00Z').ids.includes('validated-future-start'),
+    'A validated calendar start becomes eligible at Vienna midnight');
+  assert.deepEqual(generate([validatedStarts[1]], '2026-10-22T10:00:00Z').ids, ['validated-opening-day']);
+  assert.deepEqual(generate([validatedStarts[1]], '2026-10-22T22:00:00Z').ids, []);
+
+  const caption = 'Wohlfühl-Paket für 64 €: gültig bis 02.11.2026. <script>alert(1)</script>';
+  const descriptions = generate([
+    deal('verified-caption', { description: 'WohlfÃ¼hl-Paket fÃ¼r 64 â\u0082¬', metaGraphVerified: true, metaGraphAccepted: true, metaGraphCaption: caption,
+      postVerification: { status: 'verified-meta-graph', originalPostUrl: 'https://example.com/verified-caption' } }),
+    deal('unverified-caption', { description: 'WohlfÃ¼hl-Paket', metaGraphVerified: false, metaGraphAccepted: true, metaGraphCaption: caption }),
+    deal('rejected-caption', { description: 'WohlfÃ¼hl-Paket', metaGraphVerified: true, metaGraphAccepted: false, metaGraphCaption: caption }),
+    deal('clean-editorial-description', { description: 'Korrekt redigierte Bedingungen.', metaGraphVerified: true, metaGraphAccepted: true, metaGraphCaption: caption }),
+    deal('different-source-caption', { description: 'WohlfÃ¼hl-Paket', metaGraphVerified: true, metaGraphAccepted: true, metaGraphCaption: caption,
+      postVerification: { status: 'verified-meta-graph', originalPostUrl: 'https://example.com/different-post' } }),
+  ]);
+  assert.equal(descriptions.$('#deal-verified-caption .deal-conditions p').text(), caption,
+    'A corrupted description may use the same record’s accepted Graph caption');
+  assert.equal(descriptions.$('#deal-unverified-caption .deal-conditions p').text(), 'WohlfÃ¼hl-Paket');
+  assert.equal(descriptions.$('#deal-rejected-caption .deal-conditions p').text(), 'WohlfÃ¼hl-Paket');
+  assert.equal(descriptions.$('#deal-clean-editorial-description .deal-conditions p').text(), 'Korrekt redigierte Bedingungen.');
+  assert.equal(descriptions.$('#deal-different-source-caption .deal-conditions p').text(), 'WohlfÃ¼hl-Paket');
+  assert.equal(descriptions.$('.live-deal-card script').length, 0, 'Source captions remain escaped plain text');
+  for (const source of descriptions.$('.live-deal-source').toArray()) {
+    assert.ok(descriptions.$(source).attr('aria-label').startsWith(descriptions.$(source).text().trim()),
+      'Accessible source-link name must include its visible label at the start');
+  }
+  console.log('SEO deals page regression tests passed (flight scope, explicit dates, validated starts, Vienna midnight, malformed dates, verified captions, source link names, schema and feed preservation).');
 } finally {
   fs.rmSync(fixtureRoot, { recursive: true, force: true });
 }
