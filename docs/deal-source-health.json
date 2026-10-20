@@ -1,17 +1,23 @@
 {
-  "generatedAt": "2026-10-20T04:39:28.460Z",
+  "generatedAt": "2026-10-20T05:15:31.551Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 811,
-    "uniqueCandidates": 718,
-    "distinctCandidates": 759,
-    "duplicateClusters": 41,
+    "totalCandidates": 810,
+    "uniqueCandidates": 720,
+    "distinctCandidates": 760,
+    "duplicateClusters": 40,
     "topHealthySources": [
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "healthScore": 78,
         "totalDeals": 10
+      },
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 71,
+        "totalDeals": 2
       },
       {
         "sourceKey": "meta-instagram",
@@ -30,20 +36,14 @@
         "sourceLabel": "Freikirchen Wien",
         "healthScore": 64,
         "totalDeals": 4
-      },
-      {
-        "sourceKey": "church-gemeinde",
-        "sourceLabel": "Freikirchen Wien",
-        "healthScore": 64,
-        "totalDeals": 4
       }
     ],
     "topMissionSources": [
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "missionFitScore": 67,
-        "totalDeals": 3
+        "missionFitScore": 69,
+        "totalDeals": 2
       },
       {
         "sourceKey": "tiktok",
@@ -117,8 +117,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 69,
-        "totalDeals": 3
+        "precisionScore": 73,
+        "totalDeals": 2
       },
       {
         "sourceKey": "meta-instagram",
@@ -153,16 +153,16 @@
         "totalDeals": 106
       },
       {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "sourceWeightScore": 59,
+        "totalDeals": 2
+      },
+      {
         "sourceKey": "instagram-ai",
         "sourceLabel": "Instagram AI Agent",
         "sourceWeightScore": 55,
         "totalDeals": 50
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 54,
-        "totalDeals": 3
       },
       {
         "sourceKey": "gastro2",
@@ -309,13 +309,94 @@
       "sourceWeightScore": 61
     },
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 2,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 1,
+      "promoCount": 1,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "📞 Contact Details KLM Vienna Airport Service Desk: +43 1 360 277 3460 (German & English) KLM Austria Toll-Free Line: +43 800 560 085 Vienna",
+        "Unbezahlte Werbung donmono_wien What makes it special?"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-20T05:11:54.912Z",
+        "finishedAt": "2026-10-20T05:14:54.516Z",
+        "durationMs": 179604,
+        "counts": {
+          "rawCandidates": 110,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 99
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 81,
+          "missing-text": 9,
+          "excluded-promotion-type": 3,
+          "general-recommendation": 5,
+          "weak-food-offer": 1
+        },
+        "errors": [
+          "#wienevents: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.5,
+      "promoRate": 0.5,
+      "missingUrlRate": 0,
+      "averageQualityScore": 79.5,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 1
+        },
+        {
+          "value": "reisen",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "gratis",
+          "count": 1
+        },
+        {
+          "value": "rabatt",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 71,
+      "missionFitScore": 69,
+      "coverageScore": 12,
+      "precisionScore": 73,
+      "sourceWeightScore": 59
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 106,
-      "uniqueDeals": 67,
-      "duplicateDeals": 39,
-      "duplicateAcrossSources": 26,
+      "uniqueDeals": 68,
+      "duplicateDeals": 38,
+      "duplicateAcrossSources": 25,
       "fresh1dCount": 21,
       "fresh7dCount": 105,
       "viennaCount": 106,
@@ -882,93 +963,6 @@
       "coverageScore": 18,
       "precisionScore": 57,
       "sourceWeightScore": 48
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 3,
-      "uniqueDeals": 0,
-      "duplicateDeals": 3,
-      "duplicateAcrossSources": 3,
-      "fresh1dCount": 3,
-      "fresh7dCount": 3,
-      "viennaCount": 3,
-      "foodDrinkCount": 1,
-      "promoCount": 2,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Top-Events diese Woche in Wien – Mo 19.10.",
-        "November 2026 🎟️ Eintritt frei!",
-        "Unbezahlte Werbung donmono_wien What makes it special?"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-19T22:36:06.867Z",
-        "finishedAt": "2026-10-19T22:38:34.506Z",
-        "durationMs": 147639,
-        "counts": {
-          "rawCandidates": 86,
-          "normalizedCandidates": 3,
-          "verifiedCandidates": 3,
-          "previousDeals": 0,
-          "acceptedDeals": 3,
-          "rejectedDeals": 81
-        },
-        "rejectedByReason": {
-          "no-concrete-offer": 67,
-          "excluded-promotion-type": 4,
-          "general-recommendation": 4,
-          "missing-text": 5,
-          "regular-priced-activity": 1
-        },
-        "errors": [
-          "#wientipps: Instagram scan paused: request-budget"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.3,
-      "promoRate": 0.7,
-      "missingUrlRate": 0,
-      "averageQualityScore": 85.7,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        },
-        {
-          "value": "shopping",
-          "count": 1
-        },
-        {
-          "value": "technik",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "gratis",
-          "count": 2
-        },
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "geringe Food-/Drink-Relevanz",
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 59,
-      "missionFitScore": 67,
-      "coverageScore": 12,
-      "precisionScore": 69,
-      "sourceWeightScore": 54
     },
     {
       "sourceKey": "firecrawl4",
