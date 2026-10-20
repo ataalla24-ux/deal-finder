@@ -20,6 +20,13 @@ for (const [file, source] of workflows) {
   if (source.includes('group: deal-state-writer')) {
     assert.match(source, /cancel-in-progress: false\s+queue: max/, `${file} must retain pending manual actions`);
   }
+  const liveCommit = source.search(/node scripts\/commit-generated\.mjs[^\n]*docs\/deals\.json/);
+  if (liveCommit >= 0) {
+    // Live-feed commits also generate SEO HTML, which imports package dependencies.
+    const install = source.search(/^\s*(?:-\s+)?run:\s*npm ci(?:\s|$)/m);
+    assert.ok(install >= 0 && install < liveCommit,
+      `${file} must install locked dependencies before publishing live feed changes`);
+  }
 }
 const removalWorkflow = workflows.get('deal-moderation.yml');
 assert.ok(removalWorkflow.indexOf('node scripts/sync-featured-deal-references.mjs') >= 0);
