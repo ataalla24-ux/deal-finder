@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-20T13:54:21.462Z",
+  "generatedAt": "2026-10-20T14:07:53.376Z",
   "source": "instagram-graph-cross-source-verification",
-  "status": "ok",
+  "status": "degraded",
   "configured": true,
   "scannedFiles": [
     "deals-pending-church-events.json",
@@ -129,8 +129,8 @@
       "candidates": 0
     },
     "deals-pending-meta-instagram.json": {
-      "deals": 97,
-      "candidates": 15
+      "deals": 106,
+      "candidates": 19
     },
     "deals-pending-power.json": {
       "deals": 44,
@@ -157,8 +157,8 @@
       "candidates": 0
     }
   },
-  "candidatePosts": 25,
-  "candidateAccounts": 21,
+  "candidatePosts": 29,
+  "candidateAccounts": 25,
   "skippedAccountCooldowns": 2,
   "selectedAccounts": [
     {
@@ -174,22 +174,27 @@
       "candidates": 2
     },
     {
-      "username": "mamaliuandsons_burger",
+      "username": "onlynoodle_",
       "candidates": 1
     },
     {
-      "username": "nuomiboba",
+      "username": "badeschiff_no.1",
       "candidates": 1
     },
     {
-      "username": "avusturyagundem",
+      "username": "duruvienna",
       "candidates": 1
     }
   ],
-  "fetchedPosts": 131,
-  "exactMatches": 7,
+  "fetchedPosts": 125,
+  "exactMatches": 5,
   "retainedEvidencePosts": 2000,
-  "errors": [],
+  "errors": [
+    {
+      "username": "duruvienna",
+      "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+    }
+  ],
   "accountFailures": {
     "tantisaluti.wien": {
       "count": 2,
@@ -220,19 +225,25 @@
   "sharedQuota": {
     "limitPerHour": 190,
     "usageThreshold": 95,
-    "requests": 6,
-    "reserved": 10,
-    "stopped": false,
-    "reason": "",
-    "highestUsagePercent": 38,
+    "requests": 5,
+    "reserved": 5,
+    "stopped": true,
+    "reason": "Instagram shared quota paused: rolling-hour budget exhausted",
+    "highestUsagePercent": 56,
     "waitedMs": 0,
     "pacingMs": 0,
-    "retryAt": "",
+    "retryAt": "2026-10-20T14:21:29.743Z",
     "adaptiveSafetyCeiling": 190,
     "adaptiveIncreases": 0,
     "storageFailure": null
   },
+  "globalError": {
+    "username": "duruvienna",
+    "status": 0,
+    "code": "SCAN_BUDGET",
+    "message": "Instagram shared quota paused: rolling-hour budget exhausted"
+  },
   "blockedEvidencePosts": 82,
-  "unmatchedCandidatePosts": 18,
-  "message": "7/25 fresh cross-source Instagram candidates matched exactly via Graph API."
+  "unmatchedCandidatePosts": 24,
+  "message": "5/29 fresh cross-source Instagram candidates matched exactly via Graph API."
 }
