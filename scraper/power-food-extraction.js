@@ -1,6 +1,7 @@
 import { load } from "cheerio";
 import crypto from "node:crypto";
 import { extractLowFoodPrice } from "./food-discovery-utils.js";
+import { discoveryRejection } from "./deal-discovery-policy.js";
 import {
   getNonGuaranteedPromotionReason,
   getInfrastructureOnlyPromotionReason,
@@ -9,7 +10,7 @@ import {
 import { isAllowedFoodUrl } from "./power-food-sources.js";
 
 const FOOD =
-  /weckerl|laugenring|mohnschnecke|baguette|dinkel|kornspitz|kaffee|coffee|cappuccino|espresso|melange|matcha|tee\b|kakao|heißgetränk|heissgetraenk|cocktail|drink|spritz|bier|beer|wein|limonade|getränk|burger|pizza|pasta|pommes|fries|kebab|kebap|döner|doener|schnitzel|hot.?dog|frühstück|breakfast|jause|brot|br[eö]t|breze|gebäck|semmel|knopferl|topfini|croissant|kuchen|strudel|dessert|eis\b|menü|menu|gericht|hauptspeise|teller|bällchen|waffel|sandwich|falafel|sushi|ramen|fish|fisch|backfisch|garnelen|chicken|snack|minis\s*xxl|schoko/i;
+  /weckerl|laugenring|mohnschnecke|baguette|dinkel|kornspitz|kaffee|coffee|cappuccino|espresso|melange|matcha|tee\b|kakao|heißgetränk|heissgetraenk|mocktail|cocktail|drink|spritz|bier|beer|wein|limonade|getränk|burger|pizza|pasta|pommes|fries|kebab|kebap|döner|doener|schnitzel|hot.?dog|frühstück|breakfast|jause|brot|br[eö]t|breze|gebäck|semmel|knopferl|topfini|croissant|kuchen|strudel|dessert|eis\b|menü|menu|gericht|hauptspeise|teller|bällchen|waffel|sandwich|falafel|sushi|ramen|fish|fisch|backfisch|garnelen|chicken|snack|minis\s*xxl|schoko/i;
 const PRICE =
   /(?:€\s*\d{1,3}(?:[,.]\d{1,2})?|\d{1,3}(?:[,.]\d{1,2})?\s*(?:€|EUR\b|Euro\b))/i;
 const BENEFIT =
@@ -172,7 +173,11 @@ export function extractFoodOffers(html, source, options = {}) {
   const found = new Map();
   for (const b of blocks) {
     const t = b.text;
-    let reason = "";
+    let reason = discoveryRejection({ title: b.title, description: t });
+    if (reason) {
+      rejected.push({ reason, title: b.title, text: t.slice(0, 220) });
+      continue;
+    }
     const pricePromotion =
       (PROMO.test(t) ||
         (b.method === "merchant-card" && source.currentOffers)) &&

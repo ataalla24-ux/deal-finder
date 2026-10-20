@@ -92,6 +92,15 @@ assert.equal(
       "<h2>Happy Hour Cocktails € 8,50</h2><p>Täglich 17–19 Uhr in Wien.</p>",
     ),
   ).deals.length,
+  0,
+  "alcohol promotions are no longer discovery candidates",
+);
+assert.equal(
+  parse(
+    card(
+      "<h2>Happy Hour alkoholfreie Cocktails € 8,50</h2><p>Täglich 17–19 Uhr in Wien.</p>",
+    ),
+  ).deals.length,
   1,
 );
 assert.equal(
@@ -367,7 +376,7 @@ assert.equal(
 );
 const shortTitle = parse(
   card(
-    "<h2>Happy hour</h2><p>Everyday Opening TILL 18:00 All Cocktails 8€ All Cocktails 8€</p>",
+    "<h2>Happy hour</h2><p>Everyday Opening TILL 18:00 All Mocktails 8€ All Mocktails 8€</p>",
   ),
 ).deals[0];
-assert.match(shortTitle.title, /Cocktails 8€/);
+assert.match(shortTitle.title, /Mocktails 8€/);

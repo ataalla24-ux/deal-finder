@@ -12,6 +12,7 @@ import { fileURLToPath } from 'url';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
 import { extractLowFoodPrice, getAdFoodBenefitRejection, getMetaNonOfferRejection, isFoodDrinkSource, weakFoodPromotionReason } from './food-discovery-utils.js';
+import { discoveryRejection } from './deal-discovery-policy.js';
 import { inferPreferredBrand } from './deal-normalization-utils.js';
 import {
   canonicalInstagramPostKey,
@@ -84,11 +85,11 @@ const DEFAULT_AD_SEARCH_TERMS = [
   'Wien Pizza Angebot',
   'Wien Kaffee 1+1',
   'Wien Restaurant Eröffnung',
-  'Wien Happy Hour',
+  'Wien Pizza Happy Hour',
   'Vienna free coffee',
   'Wien gratis Kebab', 'Wien gratis Döner', 'Wien gratis Pizza', 'Wien gratis Burger',
   'Wien kostenlos Essen', 'Wien kostenlos Kaffee', 'Wien gratis Frühstück', 'Wien gratis Eis',
-  'Wien gratis Getränk', 'Wien gratis Bier', 'Wien gratis Bubble Tea', 'Wien aufs Haus',
+  'Wien gratis Getränk', 'Wien gratis Ayran', 'Wien gratis Bubble Tea', 'Wien aufs Haus',
   'Wien Döner 1 Euro', 'Wien Kebab 1 Euro', 'Wien Kebap Aktion', 'Wien Pizza 1+1',
   'Wien Burger 1+1', 'Wien Kaffee gratis', 'Wien Coffee gratis', 'Wien Frühstück Aktion',
   'Wien Brunch Angebot', 'Wien Buffet Angebot', 'Wien Mittagsmenü Aktion', 'Wien Restaurant Rabatt',
@@ -278,6 +279,7 @@ export function buildConfig(env = process.env, now = new Date()) {
   );
   const adQueryKeys = new Set();
   const adSearchTerms = parseList(env.META_AD_LIBRARY_SEARCH_TERMS, DEFAULT_AD_SEARCH_TERMS).filter((term) => {
+    if (discoveryRejection(term)) return false;
     const key = (term.toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).sort().join(' ');
     if (!key || term.length > 100 || adQueryKeys.has(key)) return false;
     adQueryKeys.add(key); return true;
@@ -777,6 +779,8 @@ export function classifyPromotion(text) {
   if (!normalized) {
     return { accepted: false, type: '', reason: 'missing-text' };
   }
+  const discoveryPolicy = discoveryRejection(normalized);
+  if (discoveryPolicy) return { accepted: false, type: '', reason: discoveryPolicy };
   const incidentalFood = getMetaNonOfferRejection(normalized);
   if (incidentalFood) return { accepted: false, type: '', reason: incidentalFood };
   if (weakFoodPromotionReason(normalized)) return { accepted: false, type: '', reason: 'weak-food-offer' };
@@ -2086,6 +2090,7 @@ function graphCandidateAuditRow(entry, outcome, config) {
 export function retainMetaOutbox(current, previous, now = new Date(), rejectedIds = new Set()) {
   const retained = (Array.isArray(previous) ? previous : []).filter((deal) => {
     if (!deal?.id || rejectedIds.has(deal.id)) return false;
+    if (discoveryRejection(deal)) return false;
     const text = [deal.title, deal.description].filter(Boolean).join(' ');
     if (getMetaNonOfferRejection(text)) return false;
     const expiry = Date.parse(deal.validUntil || deal.expires || '');

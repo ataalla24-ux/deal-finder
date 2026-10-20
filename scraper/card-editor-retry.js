@@ -1,4 +1,5 @@
 import { needsCardEditorial } from './deal-card-editor.js';
+import { discoveryRejection } from './deal-discovery-policy.js';
 
 // Update only untouched, unapproved Slack cards, never create another message.
 export async function retryQueuedEditorial(deals, { editCard, isUntouched, updateMessage,
@@ -8,7 +9,7 @@ export async function retryQueuedEditorial(deals, { editCard, isUntouched, updat
   let checks = 0;
   for (let i = 0; i < next.length && attempts < maxDeals && checks < maxChecks; i++) {
     const deal = next[i];
-    if (!deal.cardEditorial || !deal.slackTs || !deal.slackThreadTs || deal.approvalBlock
+    if (discoveryRejection(deal) || !deal.cardEditorial || !deal.slackTs || !deal.slackThreadTs || deal.approvalBlock
       || liveIds.has(deal.id) || !needsCardEditorial(deal, now)) continue;
     checks++;
     let edited;

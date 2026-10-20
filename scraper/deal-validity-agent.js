@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { extractLowFoodPrice, getAdFoodBenefitRejection, getMetaNonOfferRejection, weakFoodPromotionReason } from './food-discovery-utils.js';
+import { discoveryRejection } from './deal-discovery-policy.js';
 import { normalizeDealFacts, locationConflictReason } from './deal-factual-guards.js';
 import { inspectDealContentQuality } from './deal-content-quality-utils.js';
 
@@ -1100,6 +1101,8 @@ async function validateDeal(deal, context) {
   let offer = getConcreteOfferDecision(deal, health);
   if (officialFood?.ok && offer.reason === 'kein konkretes Angebot erkennbar') offer = { concrete: true };
   const reasons = [];
+  const discoveryPolicy = discoveryRejection(deal);
+  if (discoveryPolicy) reasons.push(`Entdeckungsfilter (${discoveryPolicy})`);
   const locationConflict = locationConflictReason(deal);
   if (locationConflict) reasons.push(locationConflict);
   if (/^Meta Instagram /i.test(String(deal.originSource || ''))) {
@@ -1272,6 +1275,7 @@ function buildSummary(results, maxAgeDays) {
 
 function classifyBlockReason(reason) {
   const text = cleanText(reason).toLowerCase();
+  if (text.startsWith('entdeckungsfilter')) return 'Entdeckungsfilter';
   if (text.startsWith('meta-graph-widerspruch')) return 'Meta-Graph-Widerspruch';
   if (text.startsWith('älter') || text.startsWith('aelter')) return 'älter als 7 Tage';
   if (text.startsWith('abgelaufen')) return 'abgelaufen';

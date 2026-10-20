@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
 
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { discoveryRejection } from './deal-discovery-policy.js';
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { inferPreferredBrand } from './deal-normalization-utils.js';
 import { concreteFoodOfferTitle } from './offer-title-utils.js';
@@ -517,6 +518,8 @@ function hasStrongDealSignal(text) {
 
 function getTikTokContentQualityReason(text) {
   const signal = cleanText(text, 2600);
+  const policy = discoveryRejection(signal);
+  if (policy) return policy;
   const signalWithoutNonOfferFreeTerms = withoutNonOfferFreeTerms(signal);
   const hasShippingBenefit = /\b(?:(?:gratis|kostenlos(?:e[rmns]?|en)?|free)\s+(?:lieferung|versand|zustellung|shipping|delivery)|(?:lieferung|versand|zustellung|shipping|delivery)\s+(?:gratis|kostenlos|free))\b/i.test(signal);
   if (hasShippingBenefit

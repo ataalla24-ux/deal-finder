@@ -32,8 +32,12 @@ const wunder = POWER_FOOD_SOURCES.find(s => s.name === 'Wunderkammer Wien');
 assert.equal(isAllowedFoodUrl('https://www.marriott.com/de/hotels/other/dining/', wunder), false);
 assert.equal(isAllowedFoodUrl('https://www.marriott.com.evil.test/de/hotels/viehw-renaissance-vienna-schonbrunn-hotel/dining/', wunder), false);
 const cocktail = extractFoodOffers('<div class="cd-cl__heading"><h3>Happy Hour</h3><p>Täglich von 17.00 bis 20.00 Uhr: Beim Kauf eines ausgewählten Cocktails erhalten Sie einen zweiten gratis dazu. Preise 7,50 bis 12,00 EUR.</p></div>', wunder, { now });
-assert.equal(cocktail.deals.length, 1);
-assert.notEqual(cocktail.deals[0].type, 'gratis', 'paid first drink must not become unconditional free drink');
-assert.match(cocktail.deals[0].description, /Beim Kauf/);
-assert.equal(cocktail.deals[0].evidence.offerTiming.kind, 'recurring');
+assert.equal(cocktail.deals.length, 0, 'alcohol is excluded from discovery');
+assert.equal(cocktail.rejected[0].reason, 'alcohol-offer');
+// Synthetic non-alcoholic counterpart retains the original billing/timing checks.
+const mocktail = extractFoodOffers('<div class="cd-cl__heading"><h3>Happy Hour</h3><p>Täglich von 17.00 bis 20.00 Uhr: Beim Kauf eines ausgewählten Mocktails erhalten Sie einen zweiten gratis dazu. Preise 7,50 bis 12,00 EUR.</p></div>', wunder, { now });
+assert.equal(mocktail.deals.length, 1);
+assert.notEqual(mocktail.deals[0].type, 'gratis', 'paid first drink must not become unconditional free drink');
+assert.match(mocktail.deals[0].description, /Beim Kauf/);
+assert.equal(mocktail.deals[0].evidence.offerTiming.kind, 'recurring');
 console.log('Food source expansion checks passed');

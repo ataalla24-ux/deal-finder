@@ -1,4 +1,5 @@
 import { officialFoodOfferKey } from './power-food-sources.js';
+import { filterDiscoveryDeals, foodDiscoveryPriority } from './deal-discovery-policy.js';
 import { normalizeDealFacts, locationConflictReason, materialOfferConditions } from './deal-factual-guards.js';
 import { isCommunitySubmission } from './community-review-utils.js';
 import { createCardEditor } from './deal-card-editor.js';
@@ -1404,6 +1405,8 @@ function directOfferUrlRank(deal) {
 }
 
 function compareSlackDeals(left, right) {
+  const foodDifference = foodDiscoveryPriority(right) - foodDiscoveryPriority(left);
+  if (foodDifference) return foodDifference;
   const validityDifference = explicitValidityRank(right) - explicitValidityRank(left);
   if (validityDifference) return validityDifference;
   const directUrlDifference = directOfferUrlRank(right) - directOfferUrlRank(left);
@@ -1861,9 +1864,13 @@ async function main() {
     queueChanged = true;
   }
 
+  const discoveryFilter = filterDiscoveryDeals(
+    [...pendingDeals, ...key4ReviewDeals, ...socialFoodArtifactDeals],
+  );
+  console.log(`Discovery policy: ${discoveryFilter.deals.length} candidates retained; excluded ${JSON.stringify(discoveryFilter.reasonCounts)}`);
   const seenPostKeys = await loadRecentlySeenPostKeys();
   const preSlackSeenFilter = filterRecentlySeenDeals(
-    [...pendingDeals, ...key4ReviewDeals, ...socialFoodArtifactDeals],
+    discoveryFilter.deals,
     seenPostKeys,
   );
   if (preSlackSeenFilter.removed > 0) {
@@ -2002,12 +2009,7 @@ async function main() {
     return;
   }
 
-  freshDeals.sort((a, b) => {
-    if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
-      return (b.qualityScore || 0) - (a.qualityScore || 0);
-    }
-    return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
-  });
+  freshDeals.sort(compareSlackDeals);
 
   const postedDeals = [];
   if (freshDeals.length > 0) {

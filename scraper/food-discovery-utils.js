@@ -1,3 +1,5 @@
+import { discoveryRejection } from './deal-discovery-policy.js';
+
 // Conservative review thresholds, not claims about market prices or savings.
 export const FOOD_PRICE_LIMITS = [
   { product: 'kebab', pattern: /\b(?:kebab|kebap|d\u00f6ner|doener|doner|d\u00fcr\u00fcm|dueruem)\b/gi, max: 4 },
@@ -6,7 +8,7 @@ export const FOOD_PRICE_LIMITS = [
   { product: 'meal', pattern: /\b(?:mittagsmen\u00fc|mittagsmenue|mittagsteller|hauptspeise|lunch\s+menu|bowl|ramen)\b/gi, max: 6 },
   { product: 'buffet', pattern: /\b(?:buffet|all[ -]you[ -]can[ -]eat)\b/gi, max: 10 },
   { product: 'coffee', pattern: /\b(?:kaffee|coffee|espresso|cappuccino|latte|matcha)\b/gi, max: 2 },
-  { product: 'drink', pattern: /\b(?:limonade|lemonade|softdrink|ayran|spritzer|bier)\b/gi, max: 2 },
+  { product: 'drink', pattern: /\b(?:limonade|lemonade|softdrink|ayran|saft|smoothie)\b/gi, max: 2 },
   { product: 'snack', pattern: /\b(?:croissant|baklava|cannoli|eiskugel|kugel\s+eis)\b/gi, max: 1.5 },
 ];
 
@@ -18,12 +20,14 @@ export function isFoodDrinkSource(value) {
   return /(?:\b(?:food|drinks?|essen|trinken|getr\u00e4nke?|getraenke?|kaffee|restaurants?|gastro|lunch|brunch|fr\u00fchst\u00fcck|fruehstueck|pizza|burger|kebab|kebap|d\u00f6ner|doener|doner|d\u00fcr\u00fcm|dueruem|sushi|ramen|pasta|cafe|caf\u00e9|coffee|espresso|cappuccino|latte|matcha|cocktails?|spritz|bier|wein|eis|gelato|desserts?|bakery|b\u00e4ckerei|baeckerei|schnitzel|falafel|wrap|sandwich|ayran|limonade|softdrink|verkostung|croissant|krapfen)\b|(?:food|gastro|kaffee|streetfood|restaurants|eats)(?:wien|vienna)|(?:wien(?:er)?|vienna)(?:food|gastro|kaffee|streetfood|restaurants|eats|essen))/i.test(text.replace(/[_.-]/g, ' '));
 }
 
-const AD_FOOD_PRODUCT_PATTERN = /\b(?:food|essen|mahlzeiten?|speisen?|gerichte?|meals?|men\u00fc|menue|(?:sonntags|samstags|wochenend)?brunch|(?:fr\u00fchst\u00fccks|fruehstuecks)?buffet|fr\u00fchst\u00fcck|fruehstueck|pizza|burger|kebab|kebap|d\u00f6ner|doener|doner|d\u00fcr\u00fcm|dueruem|sushi|ramen|pasta|schnitzel|falafel|wraps?|sandwich|salate?|bowls?|kaffee|coffee|espresso|cappuccino|latte|matcha|getr\u00e4nke?|getraenke?|drinks?|cocktails?|bier|wein|spritzer|ayran|limonade|softdrink|eis|gelato|desserts?|snacks?|croissant|krapfen|waffles?|waffeln?|verkostung|tasting)\b/i;
+const AD_FOOD_PRODUCT_PATTERN = /\b(?:food|essen|mahlzeiten?|speisen?|gerichte?|meals?|men\u00fc|menue|(?:sonntags|samstags|wochenend)?brunch|(?:fr\u00fchst\u00fccks|fruehstuecks)?buffet|fr\u00fchst\u00fcck|fruehstueck|pizza|burger|kebab|kebap|d\u00f6ner|doener|doner|d\u00fcr\u00fcm|dueruem|sushi|ramen|pasta|schnitzel|falafel|wraps?|sandwich|salate?|bowls?|kaffee|coffee|espresso|cappuccino|latte|matcha|getr\u00e4nke?|getraenke?|drinks?|mocktails?|cocktails?|bier|wein|spritzer|ayran|limonade|softdrink|eis|gelato|desserts?|snacks?|croissant|krapfen|waffles?|waffeln?|verkostung|tasting)\b/i;
 const AD_NON_FOOD_OFFER_PATTERN = /\b(?:zahn\w*|prothes\w*|gebiss|dentures?|implants?|kaffeemaschinen?|coffee\s+machine|k\u00fchlschrank|kuehlschrank|fridge|refrigerator|k\u00fcchenger\u00e4te?|kuechengeraete?|aufbewahrungsbox|software|saas|b2b|b\u00fcro|buero|office|kantinenpersonal|testmonat|free\s+trial|tickets?|eintritt|admission|networking|e-commerce|online-shops?|seminar|webinar|courses?|kurse?|business\s+case|coffee\s+shop\s+owners?|caf[e\u00e9][-\s]?gr\u00fcnder|jobs?|bewerb\w*|immobilien|wohnung)\b/i;
 const AD_FOOD_SAVING_PATTERN = /(?:\d{1,2}\s*%\s*(?:rabatt|discount|off|direktrabatt|auf\b|weniger|g\u00fcnstiger|guenstiger)|\b(?:rabatt|discount|spare|save)\b.{0,24}\d{1,2}\s*%|\b(?:1\s*[+&]\s*1|2\s*(?:f\u00fcr|fuer|for)\s*1|bogo|happy\s*hour)\b|\b(?:gutschein|coupon|aktionscode|promocode)\b|\b(?:statt|instead\s+of)\s*(?:\u20ac\s*)?\d)/i;
 const AD_FREE_FOOD_PATTERN = /\b(?:gratis|kostenlos(?:e[rmns]?|en)?|kostenfrei|umsonst|free|geschenkt)\b/i;
 
 export function getAdFoodBenefitRejection(value) {
+  const policy = discoveryRejection(value);
+  if (policy) return policy;
   const text = String(value || '').replace(/#[\p{L}\p{N}_]+/gu, ' ');
   if (!isFoodDrinkSource(text) && !AD_FOOD_PRODUCT_PATTERN.test(text)) return 'non-food-ad';
   // An ad must discount the meal/drink itself, not a fridge, ticket or other

@@ -101,7 +101,7 @@ for (const text of [
   'In Wien verteilen wir gratis Essen an alle.',
   '20% Rabatt auf Pasta und Salate in Wien.',
   '1+1 auf Pizza in Wien.',
-  'Happy Hour: Cocktails in Wien zum halben Preis.',
+  'Happy Hour: Mocktails in Wien zum halben Preis.',
   'Foodora Essen bestellen in Wien. 60% Rabatt mit Code GENUSS fuer Neukunden.',
   'In der Foodora App Essen bestellen in Wien: 60% Rabatt mit Code GENUSS fuer Neukunden.',
   'Restaurant in Wien: Brunch am Sonntag. Nur 9,90 EUR statt 19,90 EUR pro Person.',

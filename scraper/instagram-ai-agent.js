@@ -12,6 +12,7 @@ import {
   moderationCounts,
 } from './deal-moderation-utils.js';
 import { normalizeCategoryForScraper } from './category-utils.js';
+import { discoveryRejection } from './deal-discovery-policy.js';
 import { canonicalInstagramPostKey } from './deal-evidence-utils.js';
 import { advanceDealLifecycle } from './deal-lifecycle.js';
 import { parseExpiryShape } from './expiry-utils.js';
@@ -1830,6 +1831,8 @@ function buildQualityScore(candidate, signal) {
 
 function getRejectionReason(candidate, signal, score) {
   const primarySignal = postSignal(candidate) || signal;
+  const policy = discoveryRejection(primarySignal);
+  if (policy) return policy;
   if (!signal) return 'kein Textsignal zum Post';
   if (hasPattern(BLOCKED_SOURCE_PATTERNS, signal)) return 'NeoTaste blockiert';
   if (isSelfSyndicatedPost(candidate, primarySignal)) return 'selbst syndizierter FreeFinder-Post';
