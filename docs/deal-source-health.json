@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-20T11:23:29.799Z",
+  "generatedAt": "2026-10-20T11:29:10.342Z",
   "summary": {
     "filesConsidered": 30,
     "totalCandidates": 817,
@@ -20,6 +20,12 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "healthScore": 68,
+        "totalDeals": 50
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "healthScore": 65,
@@ -30,12 +36,6 @@
         "sourceLabel": "Apify Instagram",
         "healthScore": 65,
         "totalDeals": 6
-      },
-      {
-        "sourceKey": "church-events",
-        "sourceLabel": "Freikirchen Wien",
-        "healthScore": 64,
-        "totalDeals": 4
       }
     ],
     "topMissionSources": [
@@ -44,6 +44,12 @@
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 69,
         "totalDeals": 2
+      },
+      {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "missionFitScore": 61,
+        "totalDeals": 50
       },
       {
         "sourceKey": "instagram-apify",
@@ -62,12 +68,6 @@
         "sourceLabel": "jö Bonus Club",
         "missionFitScore": 57,
         "totalDeals": 10
-      },
-      {
-        "sourceKey": "meta-instagram",
-        "sourceLabel": "Meta Instagram Graph",
-        "missionFitScore": 52,
-        "totalDeals": 108
       }
     ],
     "topCoverageSources": [
@@ -100,11 +100,11 @@
         "fresh1dCount": 47
       },
       {
-        "sourceKey": "firecrawl4",
-        "sourceLabel": "Firecrawl Key 4 - Instagram Direct",
-        "coverageScore": 31,
-        "totalDeals": 58,
-        "fresh1dCount": 0
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "coverageScore": 33,
+        "totalDeals": 50,
+        "fresh1dCount": 8
       }
     ],
     "topPrecisionSources": [
@@ -121,16 +121,16 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "precisionScore": 71,
+        "totalDeals": 50
+      },
+      {
         "sourceKey": "meta-instagram",
         "sourceLabel": "Meta Instagram Graph",
         "precisionScore": 67,
         "totalDeals": 108
-      },
-      {
-        "sourceKey": "instagram-ai",
-        "sourceLabel": "Instagram AI Agent",
-        "precisionScore": 66,
-        "totalDeals": 50
       },
       {
         "sourceKey": "instagram-apify",
@@ -153,6 +153,12 @@
         "totalDeals": 2
       },
       {
+        "sourceKey": "instagram-ai",
+        "sourceLabel": "Instagram AI Agent",
+        "sourceWeightScore": 59,
+        "totalDeals": 50
+      },
+      {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "sourceWeightScore": 57,
@@ -163,12 +169,6 @@
         "sourceLabel": "Firecrawl Key 1 - Gastro",
         "sourceWeightScore": 54,
         "totalDeals": 155
-      },
-      {
-        "sourceKey": "instagram-apify",
-        "sourceLabel": "Apify Instagram",
-        "sourceWeightScore": 53,
-        "totalDeals": 6
       }
     ],
     "topSourcesToFix": [
@@ -387,13 +387,91 @@
       "sourceWeightScore": 59
     },
     {
+      "sourceKey": "instagram-ai",
+      "file": "deals-pending-instagram-ai.json",
+      "sourceLabel": "Instagram AI Agent",
+      "totalDeals": 50,
+      "uniqueDeals": 32,
+      "duplicateDeals": 18,
+      "duplicateAcrossSources": 18,
+      "fresh1dCount": 8,
+      "fresh7dCount": 50,
+      "viennaCount": 50,
+      "foodDrinkCount": 36,
+      "promoCount": 29,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "3. Spicy Sandwich gratis bei Kauf von 2 am Dienstag und Mittwoch",
+        "Duru-Döner für 3 € am Eröffnungstag",
+        "Gratis Pepsi bei direkter Bestellung und Selbstabholung"
+      ],
+      "lastRun": null,
+      "uniqueRate": 0.6,
+      "duplicateRate": 0.4,
+      "fresh1dRate": 0.2,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 0.7,
+      "promoRate": 0.6,
+      "missingUrlRate": 0,
+      "averageQualityScore": 87.9,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 28
+        },
+        {
+          "value": "shopping",
+          "count": 8
+        },
+        {
+          "value": "kaffee",
+          "count": 7
+        },
+        {
+          "value": "reisen",
+          "count": 2
+        },
+        {
+          "value": "fitness",
+          "count": 1
+        },
+        {
+          "value": "kultur",
+          "count": 1
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 26
+        },
+        {
+          "value": "gratis",
+          "count": 23
+        },
+        {
+          "value": "bogo",
+          "count": 1
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 68,
+      "missionFitScore": 61,
+      "coverageScore": 33,
+      "precisionScore": 71,
+      "sourceWeightScore": 59
+    },
+    {
       "sourceKey": "meta-instagram",
       "file": "deals-pending-meta-instagram.json",
       "sourceLabel": "Meta Instagram Graph",
       "totalDeals": 108,
-      "uniqueDeals": 77,
-      "duplicateDeals": 31,
-      "duplicateAcrossSources": 20,
+      "uniqueDeals": 76,
+      "duplicateDeals": 32,
+      "duplicateAcrossSources": 21,
       "fresh1dCount": 15,
       "fresh7dCount": 106,
       "viennaCount": 108,
@@ -674,84 +752,6 @@
       "coverageScore": 9,
       "precisionScore": 54,
       "sourceWeightScore": 42
-    },
-    {
-      "sourceKey": "instagram-ai",
-      "file": "deals-pending-instagram-ai.json",
-      "sourceLabel": "Instagram AI Agent",
-      "totalDeals": 50,
-      "uniqueDeals": 31,
-      "duplicateDeals": 19,
-      "duplicateAcrossSources": 17,
-      "fresh1dCount": 5,
-      "fresh7dCount": 50,
-      "viennaCount": 50,
-      "foodDrinkCount": 32,
-      "promoCount": 27,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "Gratis Limo bei Online-Bestellung und Rabatt",
-        "Eröffnungstag: Duru-Döner für 3 €",
-        "Gratis Pepsi bei direkter Bestellung und Selbstabholung"
-      ],
-      "lastRun": null,
-      "uniqueRate": 0.6,
-      "duplicateRate": 0.3,
-      "fresh1dRate": 0.1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 0.6,
-      "promoRate": 0.5,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88.1,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 22
-        },
-        {
-          "value": "shopping",
-          "count": 9
-        },
-        {
-          "value": "veranstaltung",
-          "count": 7
-        },
-        {
-          "value": "kaffee",
-          "count": 4
-        },
-        {
-          "value": "reisen",
-          "count": 2
-        },
-        {
-          "value": "sport",
-          "count": 2
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 28
-        },
-        {
-          "value": "gratis",
-          "count": 20
-        },
-        {
-          "value": "bogo",
-          "count": 2
-        }
-      ],
-      "issues": [
-        "wenige Deals sind frischer als 1 Tag"
-      ],
-      "healthScore": 63,
-      "missionFitScore": 52,
-      "coverageScore": 30,
-      "precisionScore": 66,
-      "sourceWeightScore": 53
     },
     {
       "sourceKey": "joe",
