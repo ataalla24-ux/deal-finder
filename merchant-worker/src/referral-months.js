@@ -408,9 +408,13 @@ export class ReferralMonthsLedger {
       const other = await this.storage.get('account:' + inviter);
       if (!other || other.deletedAt) fail('Diese Einladung ist nicht mehr verfügbar.', 410);
       if (other?.referredBy === account.id) fail('Gegenseitige Eigen-Einladungen sind nicht möglich.', 409);
+      const firstAcceptance = account.acceptedAt == null;
       account.referredBy = inviter; account.acceptedAt ??= now;
       if (now - account.acceptedAt > 7 * DAY) fail('Die Einladung ist abgelaufen.', 410);
-      await this.storage.put(key, account);
+      await this.storage.transaction(async tx => {
+        await tx.put(key, account);
+        if (firstAcceptance && this.queueInvitationPush) await this.queueInvitationPush(tx, account, now);
+      });
       return this.status(account);
     }
     if (action === 'confirm') {

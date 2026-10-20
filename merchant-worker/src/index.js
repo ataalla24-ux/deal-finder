@@ -8,10 +8,23 @@ import { handlePlayCatalog } from './store-catalog.js';
 import { handleTestReceipt } from './store-test-receipt.js';
 import { accountEmailLedger, handleAccountEmail, scheduledAccountEmail } from './account-email.js';
 import { appleRewardClaims } from './apple-reward-claim.js';
+import { invitationPushLedger, handleInvitationPushAdmin } from './invitation-push.js';
+import { HotDataStorage } from './hot-data-storage.js';
 import { measureStorage, storageIdentity, StorageQuotaError } from './storage-usage.js';
 export { MerchantPromoLedger } from './merchant-promos.js';
 
-export class ReferralMonths extends accountEmailLedger(appleRewardClaims(ReferralMonthsLedger)) {
+export class HotDataLedger extends HotDataStorage {
+  async handle(request, env) {
+    const path = new URL(request.url).pathname;
+    if (path === '/api/deals/interactions' && request.method === 'GET') return listDealInteractions(request, env);
+    if (path === '/api/deals/interactions' && request.method === 'POST') return recordDealInteraction(request, env);
+    if (path === '/api/analytics/events' && request.method === 'POST') return recordProductAnalyticsEvents(request, env);
+    if (path === '/api/analytics/summary' && request.method === 'GET') return productAnalyticsSummary(request, env);
+    return json({ ok: false }, 404);
+  }
+}
+
+export class ReferralMonths extends invitationPushLedger(accountEmailLedger(appleRewardClaims(ReferralMonthsLedger))) {
   appleTransaction(id) { return fetchAppStoreTransaction(id, this.env, AbortSignal.timeout(7000)); }
   async playRequest(token, suffix = '', body) {
     const signal = AbortSignal.timeout(9000);
@@ -142,7 +155,10 @@ export default {
     const usage = measureStorage(request, env.MERCHANT_CAMPAIGNS);
     let response;
     try {
-      response = await merchantWorker.fetch(request, { ...env, MERCHANT_CAMPAIGNS: usage.storage }, ctx);
+      const hotRoute = ['/api/deals/interactions', '/api/analytics/events', '/api/analytics/summary'].includes(new URL(request.url).pathname);
+      response = env.HOT_DATA && hotRoute && request.method !== 'OPTIONS'
+        ? await env.HOT_DATA.get(env.HOT_DATA.idFromName('app-data-v1')).fetch(request)
+        : await merchantWorker.fetch(request, { ...env, MERCHANT_CAMPAIGNS: usage.storage }, ctx);
     } catch (error) {
       response = error instanceof StorageQuotaError
         ? json({ ok: false, error: 'Storage temporarily unavailable', retryAfterSeconds: 60 }, 503)
@@ -163,6 +179,7 @@ const merchantWorker = {
     const url = new URL(request.url);
 
     try {
+      if (url.pathname === '/api/invitations/admin/owner-test') return handleInvitationPushAdmin(request, env);
       if (url.pathname.startsWith('/api/email/')) return handleAccountEmail(request, env);
       if (url.pathname.startsWith('/api/account/')) return handleAccount(request, env);
       if (url.pathname === '/api/subscriptions/admin/test-receipt') {
@@ -384,6 +401,7 @@ function sanitizeAnalyticsEvent(value, now = Date.now()) {
   const occurredAt = sanitizedAnalyticsTimestamp(value.occurredAt, now);
   return {
     eventId,
+    anonymousId,
     name,
     occurredAt,
     platform,
@@ -478,12 +496,17 @@ function analyticsDays(count, now = new Date()) {
 async function readProductAnalyticsDay(env, day, maximum) {
   const prefix = `${PRODUCT_ANALYTICS_EVENT_PREFIX}${day}:`;
   const events = [];
+  const seen = new Set();
   let cursor;
   let truncated = false;
   do {
     const page = await env.MERCHANT_CAMPAIGNS.list({ prefix, cursor, limit: Math.min(1000, maximum - events.length) });
     const values = await Promise.all(page.keys.map((key) => env.MERCHANT_CAMPAIGNS.get(key.name, "json")));
-    events.push(...values.filter((value) => value && PRODUCT_ANALYTICS_EVENTS.has(value.name)));
+    for (const value of values) {
+      if (!value || !PRODUCT_ANALYTICS_EVENTS.has(value.name) || seen.has(value.eventId)) continue;
+      seen.add(value.eventId);
+      events.push(value);
+    }
     cursor = page.list_complete ? undefined : page.cursor;
     if (events.length >= maximum && cursor) {
       truncated = true;

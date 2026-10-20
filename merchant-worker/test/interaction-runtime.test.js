@@ -7,7 +7,7 @@ import { bundledEmail } from './bundled-email.js';
 import { bundledAppleClaims } from './bundled-apple-claims.js';
 
 test('Workers runtime retains public cache across requests and invalidates after real KV writes', async t => {
-  const modules = await Promise.all(['index.js', 'referral-months.js', 'ad-content-policy.js', 'merchant-promos.js', 'public-interaction-cache.js', 'storage-usage.js', 'subscription-trial.js', 'store-catalog.js', 'store-test-receipt.js'].map(async name => ({
+  const modules = await Promise.all(['index.js', 'invitation-push.js', 'hot-data-storage.js', 'referral-months.js', 'ad-content-policy.js', 'merchant-promos.js', 'public-interaction-cache.js', 'storage-usage.js', 'subscription-trial.js', 'store-catalog.js', 'store-test-receipt.js'].map(async name => ({
     type: 'ESModule', path: `src/${name}`, contents: await readFile(new URL(`../src/${name}`, import.meta.url), 'utf8'),
   })));
   modules.push(await bundledAuth());

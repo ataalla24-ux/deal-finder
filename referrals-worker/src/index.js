@@ -390,6 +390,8 @@ function buildApnsBody(body) {
     type: String(body?.type || 'deal').trim(),
     day: body?.day,
     expiresAt: body?.expiresAt,
+    eventId: body?.eventId,
+    accountId: body?.accountId,
     data: body?.data && typeof body.data === 'object' ? body.data : undefined,
   };
 }
@@ -4197,8 +4199,10 @@ function redirectReferralToWebsite(code, requestUrl) {
 export class DailyDealPush extends DailyPushService {
   async sendApple(device, campaign, message) {
     return sendApnsPush(this.env, { ...message, token: device.token, environment: device.environment,
-      dealId: campaign.deal.id, type: campaign.type || 'daily_deal', day: campaign.day, expiresAt: campaign.expires,
-      expiration: Math.floor(campaign.expires / 1000), collapseId: `${campaign.type?.endsWith('_digest') ? 'digest' : 'daily'}-${campaign.day}` });
+      dealId: campaign.deal?.id, type: campaign.type || 'daily_deal', day: campaign.day, expiresAt: campaign.expires,
+      eventId: campaign.eventId, accountId: campaign.accountId,
+      expiration: Math.floor(campaign.expires / 1000), collapseId: campaign.eventId ||
+        `${campaign.type?.endsWith('_digest') ? 'digest' : 'daily'}-${campaign.day}` });
   }
 }
 

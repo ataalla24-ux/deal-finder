@@ -19,6 +19,8 @@ ACCOUNTS_ENABLED = "1"
 ACCOUNT_EMAIL_ENABLED = "1"
 ACCOUNT_EMAIL_TRANSPORT_ENABLED = "1"
 ACCOUNT_EMAIL_QA_ENABLED = "0"
+INVITATION_PUSH_ENABLED = "1"
+INVITATION_PUSH_QA_ENABLED = "0"
 STORE_TEST_RECEIPTS_ENABLED = "0"
 FIREBASE_PROJECT_ID = "earnest-sandbox-487113-g8"
 APP_STORE_BUNDLE_ID = "com.stefanataalla.freefinderwien"
@@ -36,6 +38,10 @@ REFERRAL_SUPPORT_ENABLED = "0"
 [[kv_namespaces]]
 binding = "MERCHANT_CAMPAIGNS"
 id = "2c6156c0bb9a41c7afd5e87b199904ec"
+
+[[durable_objects.bindings]]
+name = "HOT_DATA"
+class_name = "HotDataLedger"
 
 [[durable_objects.bindings]]
 name = "DAILY_DEAL_PUSH"
@@ -57,3 +63,7 @@ class_name = "ReferralMonths"
 [[migrations]]
 tag = "referral-months-v1"
 new_sqlite_classes = ["ReferralMonths"]
+
+[[migrations]]
+tag = "hot-app-data-v1"
+new_sqlite_classes = ["HotDataLedger"]

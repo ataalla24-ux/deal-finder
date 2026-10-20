@@ -79,7 +79,7 @@ export async function handleAccount(request, env, authenticate = authenticateAcc
   const action = new URL(request.url).pathname.slice('/api/account/'.length);
   const json = (value, status = 200) => Response.json(value, { status, headers: { 'cache-control': 'no-store', 'access-control-allow-origin': '*' } });
   if (action === 'config' && request.method === 'GET') return json({ enabled: env.ACCOUNTS_ENABLED === '1', emailDelivery: env.ACCOUNT_EMAIL_ENABLED === '1' });
-  if (!['profile', 'preferences', 'delete', 'export'].includes(action)) return json({ error: 'Nicht gefunden.' }, 404);
+  if (!['profile', 'preferences', 'delete', 'export', 'push-device'].includes(action)) return json({ error: 'Nicht gefunden.' }, 404);
   if (request.method !== 'POST') return json({ error: 'POST erforderlich.' }, 405);
   try {
     const body = await boundedJSON(request);

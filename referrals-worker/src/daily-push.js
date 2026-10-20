@@ -39,6 +39,48 @@ export class DailyPushService {
   }
   async fetch(request) {
     const path = new URL(request.url).pathname;
+    // Private DO binding only. No public registration or push route forwards to this action.
+    if (path === '/invitation' || path === '/invitation-owner-test') {
+      const { device, eventId, accountId, expires } = await request.json();
+      const qa = path === '/invitation-owner-test';
+      if (qa && (this.env.INVITATION_PUSH_QA_ENABLED !== '1' || this.now() >= Date.parse('2026-10-21T20:00:00Z') ||
+          accountId !== this.env.INVITATION_PUSH_QA_ACCOUNT || eventId !== await hash('invitation-owner-test:2026-10-20'))) {
+        return Response.json({ ok: false, status: 403 }, { status: 403 });
+      }
+      if (!/^[a-f0-9]{64}$/.test(eventId || '') || !/^[a-f0-9-]{36}$/.test(accountId || '') ||
+          !Number.isFinite(expires) || expires <= this.now() || expires > this.now() + DAY ||
+          !['apns', 'fcm'].includes(device?.provider) ||
+          (qa ? device.provider !== 'apns' || !['sandbox', 'production'].includes(device.environment) : device.environment !== 'production')) {
+        return Response.json({ ok: false, status: 400 }, { status: 400 });
+      }
+      if (!this.ready(device.provider)) return Response.json({ ok: false, status: 503 }, { status: 503 });
+      const message = qa ? {
+        title: 'TEST: FreeFinder Einladungs-Mitteilung',
+        body: 'Dein Push-Test ist angekommen. Dies ist nur ein Test, keine echte Einladung oder Belohnung.',
+      } : device.language === 'en' ? {
+        title: 'Your invitation was accepted',
+        body: 'Someone joined FreeFinder with your invitation. See the status under Invite friends.',
+      } : {
+        title: 'Deine Einladung wurde angenommen',
+        body: 'Jemand ist deiner Einladung zu FreeFinder gefolgt. Den Status findest du unter Freunde einladen.',
+      };
+      const campaign = { type: 'invitation_accepted', eventId, accountId, day: eventId, expires };
+      if (qa) {
+        return this.ctx.blockConcurrencyWhile(async () => {
+          const key = 'owner-push-test-2026-10-20';
+          const prior = await this.ctx.storage.get(key);
+          if (prior) return json(prior);
+          await this.ctx.storage.put(key, { ok: false, status: 0, claimed: true });
+          let result;
+          try { result = await this.sendApple(device, campaign, message); }
+          catch { result = { ok: false, status: 0 }; }
+          await this.ctx.storage.put(key, result);
+          return json(result);
+        });
+      }
+      return json(device.provider === 'fcm' ? await sendFcmPush(this.env, device, campaign, message)
+        : await this.sendApple(device, campaign, message));
+    }
     if (path === '/revoke-token') {
       const { provider, token } = await request.json();
       const tokenHash = await hash(`${provider}:${token}`);

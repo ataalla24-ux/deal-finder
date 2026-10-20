@@ -31,6 +31,12 @@ test('APNs uses the device environment, collapse key and real expiration', async
   assert.equal(calls[3].init.headers['apns-collapse-id'], 'digest-2026-10-08');
   assert.equal(JSON.parse(calls[3].init.body).type, 'weekly_digest');
   assert.equal(JSON.parse(calls[3].init.body).dealId, 'verified-pizza');
+  await sender.sendApple(device, { type: 'invitation_accepted', eventId: 'a'.repeat(64), accountId: 'owner',
+    day: 'a'.repeat(64), expires: push.expires }, { title: 'Einladung', body: 'Angenommen' });
+  const invite = JSON.parse(calls[4].init.body);
+  assert.equal(invite.eventId, 'a'.repeat(64));
+  assert.equal(invite.accountId, 'owner');
+  assert.equal(calls[4].init.headers['apns-collapse-id'], 'a'.repeat(64));
 });
 test('FCM sends data-only, scoped OAuth, bounded TTL and handles unregistered tokens', async t => {
   const key = await pem({ name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' });
@@ -57,4 +63,36 @@ test('FCM sends data-only, scoped OAuth, bounded TTL and handles unregistered to
   assert.equal(digest.data.dealId, 'verified-pizza');
   assert.equal(digest.notification, undefined);
   assert.equal(digest.android.collapse_key, 'digest-2026-10-08');
+  await sendFcmPush(env, { token: 'test-fcm-token' }, { type: 'invitation_accepted', eventId: 'a'.repeat(64),
+    accountId: 'owner', day: 'a'.repeat(64), expires: Date.now() + 300000 }, { title: 'Einladung', body: 'Angenommen' });
+  const invitation = JSON.parse(calls[4].init.body).message;
+  assert.equal(invitation.data.eventId, 'a'.repeat(64));
+  assert.equal(invitation.data.accountId, 'owner');
+  assert.equal(invitation.notification, undefined);
+});
+
+test('invitation QA permits one owner sandbox send only; real campaigns keep production restriction', async () => {
+  const sender = Object.create(DailyDealPush.prototype);
+  const data = new Map(), sends = [];
+  sender.env = {};
+  sender.now = () => Date.parse('2026-10-20T10:00:00Z');
+  sender.ready = () => true;
+  sender.ctx = { storage: { get: async k => data.get(k), put: async (k, v) => data.set(k, v) },
+    blockConcurrencyWhile: fn => fn() };
+  sender.sendApple = async (...args) => { sends.push(args); return { ok: true, status: 200 }; };
+  const body = { device: { provider: 'apns', environment: 'sandbox', token: 'a'.repeat(64) },
+    accountId: '00000000-0000-4000-8000-000000000001',
+    eventId: Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('invitation-owner-test:2026-10-20'))).toString('hex'),
+    expires: sender.now() + 60000 };
+  const request = (path, value = body) => new Request('https://push.internal/' + path, { method: 'POST', body: JSON.stringify(value) });
+  assert.equal((await sender.fetch(request('invitation'))).status, 400);
+  assert.equal((await sender.fetch(request('invitation-owner-test'))).status, 403);
+  sender.env.INVITATION_PUSH_QA_ENABLED = '1'; sender.env.INVITATION_PUSH_QA_ACCOUNT = body.accountId;
+  assert.equal((await sender.fetch(request('invitation-owner-test', { ...body, accountId: 'someone-else' }))).status, 403);
+  assert.equal((await sender.fetch(request('invitation-owner-test'))).status, 200);
+  await sender.fetch(request('invitation-owner-test'));
+  assert.equal(sends.length, 1);
+  assert.match(sends[0][2].title, /^TEST:/);
+  sender.now = () => Date.parse('2026-10-22T00:00:00Z');
+  assert.equal((await sender.fetch(request('invitation-owner-test'))).status, 403);
 });
