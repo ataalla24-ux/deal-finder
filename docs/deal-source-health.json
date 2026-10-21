@@ -1,23 +1,23 @@
 {
-  "generatedAt": "2026-10-21T17:09:30.745Z",
+  "generatedAt": "2026-10-21T17:39:27.444Z",
   "summary": {
     "filesConsidered": 30,
-    "totalCandidates": 735,
-    "uniqueCandidates": 639,
-    "distinctCandidates": 681,
+    "totalCandidates": 736,
+    "uniqueCandidates": 640,
+    "distinctCandidates": 682,
     "duplicateClusters": 42,
     "topHealthySources": [
+      {
+        "sourceKey": "wien-combined",
+        "sourceLabel": "Wien Deals Combined Graph",
+        "healthScore": 89,
+        "totalDeals": 2
+      },
       {
         "sourceKey": "tiktok",
         "sourceLabel": "TikTok Scanner",
         "healthScore": 79,
         "totalDeals": 15
-      },
-      {
-        "sourceKey": "wien-combined",
-        "sourceLabel": "Wien Deals Combined Graph",
-        "healthScore": 78,
-        "totalDeals": 1
       },
       {
         "sourceKey": "meta-instagram",
@@ -43,7 +43,7 @@
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
         "missionFitScore": 100,
-        "totalDeals": 1
+        "totalDeals": 2
       },
       {
         "sourceKey": "tiktok",
@@ -111,8 +111,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "precisionScore": 92,
-        "totalDeals": 1
+        "precisionScore": 96,
+        "totalDeals": 2
       },
       {
         "sourceKey": "tiktok",
@@ -143,8 +143,8 @@
       {
         "sourceKey": "wien-combined",
         "sourceLabel": "Wien Deals Combined Graph",
-        "sourceWeightScore": 75,
-        "totalDeals": 1
+        "sourceWeightScore": 80,
+        "totalDeals": 2
       },
       {
         "sourceKey": "tiktok",
@@ -239,6 +239,80 @@
   },
   "sources": [
     {
+      "sourceKey": "wien-combined",
+      "file": "deals-pending-wien-combined.json",
+      "sourceLabel": "Wien Deals Combined Graph",
+      "totalDeals": 2,
+      "uniqueDeals": 1,
+      "duplicateDeals": 1,
+      "duplicateAcrossSources": 1,
+      "fresh1dCount": 2,
+      "fresh7dCount": 2,
+      "viennaCount": 2,
+      "foodDrinkCount": 2,
+      "promoCount": 2,
+      "missingUrlCount": 0,
+      "sampleTitles": [
+        "Bei haikky.wien in Floridsdorf gibt’s aktuell All You Can Eat & Drink für 19,90 €.",
+        "35 % SPAREN"
+      ],
+      "lastRun": {
+        "status": "completed-with-errors",
+        "startedAt": "2026-10-21T17:36:40.321Z",
+        "finishedAt": "2026-10-21T17:38:49.985Z",
+        "durationMs": 129664,
+        "counts": {
+          "rawCandidates": 74,
+          "normalizedCandidates": 2,
+          "verifiedCandidates": 2,
+          "previousDeals": 0,
+          "acceptedDeals": 2,
+          "rejectedDeals": 68
+        },
+        "rejectedByReason": {
+          "no-concrete-offer": 56,
+          "non-vienna-location": 1,
+          "general-recommendation": 6,
+          "missing-text": 2,
+          "excluded-promotion-type": 1,
+          "alcohol-offer": 2
+        },
+        "errors": [
+          "#vienna: Instagram scan paused: request-budget"
+        ],
+        "reportFile": "deal-pipeline-last-run-wien-combined.json"
+      },
+      "uniqueRate": 0.5,
+      "duplicateRate": 0.5,
+      "fresh1dRate": 1,
+      "fresh7dRate": 1,
+      "viennaRate": 1,
+      "foodDrinkRate": 1,
+      "promoRate": 1,
+      "missingUrlRate": 0,
+      "averageQualityScore": 88,
+      "topCategories": [
+        {
+          "value": "essen",
+          "count": 2
+        }
+      ],
+      "topTypes": [
+        {
+          "value": "rabatt",
+          "count": 2
+        }
+      ],
+      "issues": [
+        "hohe Überschneidung mit anderen Quellen"
+      ],
+      "healthScore": 89,
+      "missionFitScore": 100,
+      "coverageScore": 17,
+      "precisionScore": 96,
+      "sourceWeightScore": 80
+    },
+    {
       "sourceKey": "tiktok",
       "file": "deals-pending-tiktok.json",
       "sourceLabel": "TikTok Scanner",
@@ -311,77 +385,6 @@
       "coverageScore": 21,
       "precisionScore": 80,
       "sourceWeightScore": 63
-    },
-    {
-      "sourceKey": "wien-combined",
-      "file": "deals-pending-wien-combined.json",
-      "sourceLabel": "Wien Deals Combined Graph",
-      "totalDeals": 1,
-      "uniqueDeals": 0,
-      "duplicateDeals": 1,
-      "duplicateAcrossSources": 1,
-      "fresh1dCount": 1,
-      "fresh7dCount": 1,
-      "viennaCount": 1,
-      "foodDrinkCount": 1,
-      "promoCount": 1,
-      "missingUrlCount": 0,
-      "sampleTitles": [
-        "35 % SPAREN"
-      ],
-      "lastRun": {
-        "status": "completed-with-errors",
-        "startedAt": "2026-10-21T12:16:52.098Z",
-        "finishedAt": "2026-10-21T12:19:06.391Z",
-        "durationMs": 134293,
-        "counts": {
-          "rawCandidates": 54,
-          "normalizedCandidates": 1,
-          "verifiedCandidates": 1,
-          "previousDeals": 0,
-          "acceptedDeals": 1,
-          "rejectedDeals": 49
-        },
-        "rejectedByReason": {
-          "general-recommendation": 5,
-          "no-concrete-offer": 42,
-          "missing-vienna-evidence": 1,
-          "alcohol-offer": 1
-        },
-        "errors": [
-          "#wien: Instagram shared quota paused: request or quota unavailable"
-        ],
-        "reportFile": "deal-pipeline-last-run-wien-combined.json"
-      },
-      "uniqueRate": 0,
-      "duplicateRate": 1,
-      "fresh1dRate": 1,
-      "fresh7dRate": 1,
-      "viennaRate": 1,
-      "foodDrinkRate": 1,
-      "promoRate": 1,
-      "missingUrlRate": 0,
-      "averageQualityScore": 88,
-      "topCategories": [
-        {
-          "value": "essen",
-          "count": 1
-        }
-      ],
-      "topTypes": [
-        {
-          "value": "rabatt",
-          "count": 1
-        }
-      ],
-      "issues": [
-        "hohe Überschneidung mit anderen Quellen"
-      ],
-      "healthScore": 78,
-      "missionFitScore": 100,
-      "coverageScore": 16,
-      "precisionScore": 92,
-      "sourceWeightScore": 75
     },
     {
       "sourceKey": "meta-instagram",
