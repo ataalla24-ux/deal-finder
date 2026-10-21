@@ -186,6 +186,48 @@ test('consents are explicit, independently reversible and reset on verified addr
   const changed = await service.perform('account-profile', { ...body, principal: { ...principal, email: 'new@example.test' } });
   assert.deepEqual(changed.preferences, { rewardEmails: false, dealEmails: false, weeklyEmails: false });
 });
+test('first-launch email consent is capability-gated, address-bound and cannot override a prior choice', async () => {
+  const { service, data } = ledger('1');
+  const all = { rewardEmails: true, dealEmails: true, weeklyEmails: true };
+  const profile = await service.perform('account-profile', body);
+  assert.equal(profile.welcomeEmailConsentVersion, 1);
+  const consent = { ...body, consentVersion: 1, preferences: all,
+    welcomeConsent: { version: 1, acceptedAt: Date.now(), expectedEmail: principal.email } };
+  const accepted = await service.perform('account-preferences', consent);
+  assert.deepEqual(accepted.preferences, all);
+  const events = () => data.get('account:' + principal.id).consentEvents;
+  assert.equal(events().at(-1).source, 'first_launch');
+  assert.equal(events().at(-1).acceptedAt, consent.welcomeConsent.acceptedAt);
+  await service.perform('account-preferences', consent);
+  assert.equal(events().length, 1, 'lost response retry cannot duplicate consent');
+  await service.perform('account-preferences', { ...body, consentVersion: 1, preferences: { dealEmails: false } });
+  assert.equal((await service.perform('account-preferences', consent)).preferences.dealEmails, false);
+  assert.equal(events().length, 2, 'welcome replay must not undo explicit opt-out');
+  const { service: existing } = ledger('1');
+  await existing.perform('account-preferences', { ...body, consentVersion: 1, preferences: { weeklyEmails: false } });
+  assert.deepEqual((await existing.perform('account-preferences', consent)).preferences,
+    { rewardEmails: false, dealEmails: false, weeklyEmails: false });
+  const changed = { ...consent, principal: { ...principal, email: 'changed@example.test' } };
+  await assert.rejects(service.perform('account-preferences', changed), { status: 409 });
+});
+test('malformed, expired or partial first-launch email consent never enrolls', async () => {
+  const all = { rewardEmails: true, dealEmails: true, weeklyEmails: true };
+  const validWelcome = { version: 1, acceptedAt: Date.now(), expectedEmail: principal.email };
+  for (const welcomeConsent of [null, {}, { ...validWelcome, version: 2 }, { ...validWelcome, acceptedAt: 'now' },
+    { ...validWelcome, acceptedAt: Date.now() + 3600000 },
+    { ...validWelcome, acceptedAt: Date.now() - 31 * 86400000 }]) {
+    const { service } = ledger('1');
+    await assert.rejects(service.perform('account-preferences', { ...body, consentVersion: 1, preferences: all, welcomeConsent }));
+    assert.deepEqual((await service.perform('account-profile', body)).preferences,
+      { rewardEmails: false, dealEmails: false, weeklyEmails: false });
+  }
+  const { service } = ledger('1');
+  await assert.rejects(service.perform('account-preferences', { ...body, consentVersion: 1,
+    preferences: { dealEmails: true }, welcomeConsent: validWelcome }), { status: 400 });
+  const { service: disabled } = ledger();
+  await assert.rejects(disabled.perform('account-preferences', { ...body, consentVersion: 1,
+    preferences: all, welcomeConsent: validWelcome }), { status: 409 });
+});
 test('delete removes contact data/code but keeps purchase dedupe; repeated delete is safe', async () => {
   const { service, data } = ledger();
   const profile = await service.perform('account-profile', body);

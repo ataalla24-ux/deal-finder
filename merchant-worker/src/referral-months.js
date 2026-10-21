@@ -851,16 +851,32 @@ export class ReferralMonthsLedger {
       const allowed = ['rewardEmails', 'dealEmails', 'weeklyEmails'];
       if (!body.preferences || Object.keys(body.preferences).some(k => !allowed.includes(k) || typeof body.preferences[k] !== 'boolean') ||
           body.consentVersion !== 1) fail('Ungültige Mitteilungseinstellungen.');
+      const welcome = body.welcomeConsent;
+      if (welcome !== undefined) {
+        if (!welcome || welcome.version !== 1 || !Number.isFinite(welcome.acceptedAt) ||
+            welcome.acceptedAt > now + 300000 || now - welcome.acceptedAt > 30 * 86400000 ||
+            Object.keys(body.preferences).length !== allowed.length || !allowed.every(k => body.preferences[k] === true)) {
+          fail('Ungültige Start-Einwilligung.');
+        }
+        if (welcome.expectedEmail !== body.principal.email) fail('Die bestätigte E-Mail-Adresse hat sich geändert.', 409);
+      }
       if (Object.values(body.preferences).some(Boolean) && this.env.ACCOUNT_EMAIL_ENABLED !== '1') {
         fail('E-Mail-Mitteilungen sind noch nicht verfügbar. Es wurde nichts aktiviert.', 409);
       }
-      account.preferences = { ...account.preferences, ...body.preferences };
-      account.consentEvents.push({ at: now, version: 1, source: 'account', preferences: { ...account.preferences } });
-      account.consentEvents = account.consentEvents.slice(-100);
+      // The serialized account ledger prevents delayed welcome consent from undoing
+      // a previous choice, an unsubscribe, an address change or a lost-response retry.
+      const preserveChoice = welcome !== undefined &&
+        ((account.consentEvents || []).length > 0 || Object.values(account.preferences || {}).some(Boolean));
+      if (!preserveChoice) {
+        account.preferences = { ...account.preferences, ...body.preferences };
+        account.consentEvents.push({ at: now, version: 1, source: welcome ? 'first_launch' : 'account',
+          ...(welcome ? { acceptedAt: welcome.acceptedAt } : {}), preferences: { ...account.preferences } });
+        account.consentEvents = account.consentEvents.slice(-100);
+      }
     }
     await this.storage.put({ [key]: account, ['code:' + account.code]: account.id });
     return { ok: true, accountId: account.id, email: account.email, providers: account.providers,
-      preferences: account.preferences, emailDelivery: this.env.ACCOUNT_EMAIL_ENABLED === '1',
+      preferences: account.preferences, emailDelivery: this.env.ACCOUNT_EMAIL_ENABLED === '1', welcomeEmailConsentVersion: 1,
       referral: this.status(account) };
   }
 }
