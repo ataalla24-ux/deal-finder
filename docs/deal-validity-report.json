@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-21T10:19:48.739Z",
+  "generatedAt": "2026-10-21T10:29:47.806Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 302,
@@ -14,7 +14,6 @@
       "älter als 7 Tage (2026-09-14)": 1,
       "Gottesdienste nur im Wochenlauf": 33,
       "älter als 7 Tage (2025-07-30)": 1,
-      "URL ungültig (HTTP 404)": 15,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2026-08-04)": 1,
       "älter als 7 Tage (2026-06-03)": 2,
       "älter als 7 Tage (2026-08-18)": 5,
@@ -22,6 +21,7 @@
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2021-02-05)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)": 1,
       "abgelaufen (2026-10-19)": 2,
+      "URL ungültig (HTTP 404)": 14,
       "älter als 7 Tage (2026-04-19)": 28,
       "älter als 7 Tage (2016-10-30)": 3,
       "älter als 7 Tage (2023-09-21)": 3,
@@ -57,7 +57,7 @@
     "reasonCategoryCounts": {
       "kein konkreter Deal": 222,
       "älter als 7 Tage": 145,
-      "ungültige URL": 23,
+      "ungültige URL": 22,
       "Gottesdienste außerhalb Wochenlauf": 33,
       "abgelaufen": 16,
       "sonstiges": 9,
@@ -168,7 +168,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 92,
           "älter als 7 Tage": 94,
-          "ungültige URL": 9,
+          "ungültige URL": 8,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "nicht Wien": 1
@@ -438,13 +438,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 241,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "events-11-20260222",
@@ -914,11 +916,11 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.caritas-wien.at/concerts",
       "reasons": [
-        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
@@ -926,7 +928,7 @@
       "sourceAgeDays": 241,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "ungültig: HTTP 404"
+      "urlStatus": "unklar: HTTP 503"
     },
     {
       "id": "fc4g-1rmt7tq",
@@ -3750,9 +3752,9 @@
         "nicht eindeutig in Wien"
       ],
       "warnings": [],
-      "sourceDate": "2026-10-20T18:03:29.596Z",
+      "sourceDate": "2026-10-21T10:23:37.365Z",
       "sourceDateSource": "deal.discoveredAt",
-      "sourceAgeDays": 1,
+      "sourceAgeDays": 0,
       "expiryDate": "",
       "expirySource": "deal.expires",
       "urlStatus": "HTTP 200"
