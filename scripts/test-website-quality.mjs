@@ -29,7 +29,8 @@ for (const file of fs.readdirSync(path.join(root, 'docs'), { recursive: true }).
 const index = load(read('docs/blog/index.html'));
 const privacyHtml = read('docs/privacy.html');
 const privacy = load(privacyHtml);
-assert.match(privacy('#pushWelcome').text(), /beiden Kanälen, nur einem oder keinem/);
+assert.match(privacy('#pushWelcome').text(), /beiden Kanälen zustimmen oder ablehnen/);
+assert.match(privacy('#pushWelcome').text(), /Einzelne Arten.*Einstellungen und Mein Konto wählen/);
 assert.match(privacy('#pushWelcome').text(), /Systemfreigabe allein aktiviert keine E-Mails/);
 assert.match(privacy('#pushWelcome').text(), /Bestehende E-Mail-Auswahlen und Abmeldungen werden nicht überschrieben/);
 assert.match(privacyHtml, /Existing email choices and opt-outs are not overwritten/);

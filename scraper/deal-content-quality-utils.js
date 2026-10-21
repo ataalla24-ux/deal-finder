@@ -1,5 +1,5 @@
 import { cleanText } from './deal-normalization-utils.js';
-import { isPromotionalIntro } from './offer-title-utils.js';
+import { isPromotionalIntro, isSocialInstructionTitle } from './offer-title-utils.js';
 
 function key(value) {
   return cleanText(value).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -21,7 +21,8 @@ export function inspectDealContentQuality(deal = {}) {
   const copy = key([title, description, deal.address, deal.location, deal.distance, deal.expiryDisplayText].filter(Boolean).join(' '));
   const social = /^https?:\/\/(?:www\.)?(?:instagram\.com|tiktok\.com)\//i.test(deal.url || '');
   if (isPromotionalIntro(title)) add('promotional-title', 'Titel ist eine Werbeeinleitung; konkretes Angebot mit Produkt und Vorteil benennen');
-  if (/^\d{4}\s+(?:wien|vienna)$/i.test(brand)) add('location-as-merchant', 'Postleitzahl/Stadt ist kein Anbieter; Händler aus der Quelle übernehmen');
+  if (isSocialInstructionTitle(title)) add('social-instruction-title', 'Einlöseanleitung gehört in die Details; Produkt und Vorteil als Titel verwenden');
+  if (/^\d{4}\s+(?:wien|vienna)$|^(?:wo\??|adresse)\s*:/i.test(brand)) add('location-as-merchant', 'Adresse/Postleitzahl ist kein Anbieter; Händler aus der Quelle übernehmen');
   if (title.length > 110) add('long-title', 'Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten');
   if ([title, description].some((text) => /(?:\.\.\.|…)$/.test(text)
       || (text.length >= 50 && /\b(?:und|oder|für|zum|zur|mit|beim|der|den|einem|einer)$/i.test(text)))) {

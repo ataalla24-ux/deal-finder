@@ -2,7 +2,7 @@ import { normalizeCategoryForScraper } from './category-utils.js';
 import { explicitFoodMerchant, isDirectMessageInstruction } from './deal-factual-guards.js';
 import { sanitizePublicDealText } from './public-deal-text.js';
 import { cardEditorialWhen } from './deal-card-editor.js';
-import { concreteFoodOfferTitle, isPromotionalIntro, stripSlackEmojiCodes } from './offer-title-utils.js';
+import { concreteFoodOfferTitle, isPromotionalIntro, polishOfferTitle, stripSlackEmojiCodes } from './offer-title-utils.js';
 
 const PUBLIC_BRAND_LOGO_BASE_URL = 'https://freefinder.at/assets/brand-logos';
 
@@ -1069,6 +1069,10 @@ function normalizeDealRecord(deal = {}) {
   if (!editedFields.has('title') && isPromotionalIntro(title)) {
     title = concreteFoodOfferTitle(description) || title;
   }
+  const originalTitle = cleanTitleForDisplay(deal.title || '');
+  const polishedTitle = editedFields.has('title') ? title : polishOfferTitle(title, description);
+  const titleWasPolished = polishedTitle !== title;
+  title = polishedTitle;
   const auxiliaryEvidenceSignal = cleanUiNoiseText([
     deal.viennaEvidence?.detail,
     deal.evidence?.textSample,
@@ -1129,6 +1133,11 @@ function normalizeDealRecord(deal = {}) {
     type,
     category,
   });
+
+  // A short heading never discards conditions that existed only in the old title.
+  if (titleWasPolished && !editedFields.has('description') && !description.includes(originalTitle)) {
+    description = [description, originalTitle].filter(Boolean).join(' ');
+  }
 
   if (!description) {
     description = '';
