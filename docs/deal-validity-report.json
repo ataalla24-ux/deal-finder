@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-21T06:05:09.766Z",
+  "generatedAt": "2026-10-21T06:22:42.694Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 303,
@@ -7,7 +7,7 @@
     "blocked": 303,
     "warnings": 0,
     "reasonCounts": {
-      "kein konkretes Angebot erkennbar": 220,
+      "kein konkretes Angebot erkennbar": 223,
       "älter als 7 Tage (2026-02-22)": 82,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
@@ -32,7 +32,7 @@
       "abgelaufen (2026-07-01)": 1,
       "URL ungültig (404-Seite)": 2,
       "URL ungültig (Inhalt nicht mehr verfügbar)": 4,
-      "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 2,
+      "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung": 3,
       "älter als 7 Tage (2026-05-06)": 2,
       "älter als 7 Tage (2024-10-03)": 1,
       "älter als 7 Tage (2018-03-05)": 1,
@@ -45,9 +45,9 @@
       "abgelaufen (2026-10-20)": 1,
       "relative Kurz-Aktion abgelaufen (2026-10-19)": 2,
       "Engagement-Aktion ohne garantierte Gegenleistung": 2,
-      "Eröffnungs-Teaser ohne konkretes Angebot": 2,
       "älter als 7 Tage (2026-10-08)": 4,
       "abgelaufen (2026-08-30)": 4,
+      "Eröffnungs-Teaser ohne konkretes Angebot": 1,
       "ausgeschlossene Quelle (TheFork)": 1,
       "allgemeine Empfehlung/Gratis-Event statt konkreter Aktion": 2,
       "kein verlässliches Quell-/Post-Datum gefunden": 117,
@@ -56,7 +56,7 @@
       "ausgeschlossene Quelle (gastro.news)": 20
     },
     "reasonCategoryCounts": {
-      "kein konkreter Deal": 222,
+      "kein konkreter Deal": 225,
       "älter als 7 Tage": 145,
       "ungültige URL": 23,
       "Gottesdienste außerhalb Wochenlauf": 33,
@@ -110,7 +110,7 @@
         "warnings": 0,
         "reasonCategoryCounts": {
           "ungültige URL": 3,
-          "kein konkreter Deal": 30,
+          "kein konkreter Deal": 31,
           "Gottesdienste außerhalb Wochenlauf": 32,
           "älter als 7 Tage": 31,
           "sonstiges": 1
@@ -147,8 +147,8 @@
         "blocked": 3,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "abgelaufen": 1,
-          "sonstiges": 2
+          "sonstiges": 2,
+          "abgelaufen": 1
         }
       },
       "jö Bonus Club": {
@@ -167,7 +167,7 @@
         "blocked": 97,
         "warnings": 0,
         "reasonCategoryCounts": {
-          "kein konkreter Deal": 92,
+          "kein konkreter Deal": 94,
           "älter als 7 Tage": 94,
           "ungültige URL": 9,
           "Gottesdienste außerhalb Wochenlauf": 1,
@@ -1082,16 +1082,19 @@
       "source": "Freikirchen Wien",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "Gottesdienste nur im Wochenlauf",
         "älter als 7 Tage (2026-04-19)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-04-19T08:59:47.145Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 185,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "freikirche-4-20260419",
@@ -2219,15 +2222,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 241,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "gemeinde-10-20260222",
@@ -3015,15 +3021,18 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.fcgwien.at",
       "reasons": [
+        "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (HTTP 403)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 241,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: HTTP 403"
     },
     {
       "id": "gottesdienste-18-20260222",
@@ -3341,6 +3350,26 @@
       "urlStatus": "ungültig: HTTP 404"
     },
     {
+      "id": "instagram-ai-0d966bb13872",
+      "title": "Das Beste: Der Free-Tarif hat kein Ablaufdatum und es fällt keine Gebühr pro Gast an.",
+      "brand": "Reservierung",
+      "source": "instagram-ai-agent",
+      "url": "https://www.instagram.com/reel/DeqrY3gIn2z/",
+      "reasons": [
+        "kostenlose Buchung/Kontaktaufnahme statt kostenloser Leistung"
+      ],
+      "warnings": [
+        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen; Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
+        "kein Ablaufdatum gefunden"
+      ],
+      "sourceDate": "2026-10-19T07:03:45.000Z",
+      "sourceDateSource": "url.instagramShortcode",
+      "sourceAgeDays": 2,
+      "expiryDate": "",
+      "expirySource": "",
+      "urlStatus": "HTTP 200"
+    },
+    {
       "id": "instagram-ai-ef607f73f139",
       "title": "10 % Rabatt auf alle Escape Rooms Bankausrauben in Wien 💰🕵️ Bank ausrauben im Escape Room „La Misión del Pro",
       "brand": "Gameover Vienna",
@@ -3376,26 +3405,6 @@
       "sourceDate": "2026-10-19T07:00:58.000Z",
       "sourceDateSource": "url.instagramShortcode",
       "sourceAgeDays": 2,
-      "expiryDate": "",
-      "expirySource": "",
-      "urlStatus": "HTTP 200"
-    },
-    {
-      "id": "instagram-ai-a574211de877",
-      "title": "PART 3 — MEHMOONI The third part of the evening: Free Dance Floor! A little glimpse into our Iranian Social Da",
-      "brand": "Iranian Social Dance",
-      "source": "instagram-ai-agent",
-      "url": "https://www.instagram.com/reel/Del9tVUMtoQ/",
-      "reasons": [
-        "Eröffnungs-Teaser ohne konkretes Angebot"
-      ],
-      "warnings": [
-        "Inhalt prüfen: Nur Stadt/Region angegeben; Filiale oder teilnehmende Standorte prüfen; Gültigkeitszeitraum nicht belegt; nicht als unbegrenzt gültig behandeln",
-        "kein Ablaufdatum gefunden"
-      ],
-      "sourceDate": "2026-10-17T11:07:38.000Z",
-      "sourceDateSource": "url.instagramShortcode",
-      "sourceAgeDays": 4,
       "expiryDate": "",
       "expirySource": "",
       "urlStatus": "HTTP 200"
