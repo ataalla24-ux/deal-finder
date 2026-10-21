@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-21T13:57:57.283Z",
+  "generatedAt": "2026-10-21T14:29:46.025Z",
   "summary": {
     "maxAgeDays": 7,
     "total": 303,
@@ -8,11 +8,12 @@
     "warnings": 0,
     "reasonCounts": {
       "kein konkretes Angebot erkennbar": 220,
-      "älter als 7 Tage (2026-02-22)": 83,
+      "älter als 7 Tage (2026-02-22)": 84,
       "URL ungültig (fehlende Ziel-URL)": 2,
       "älter als 7 Tage (2017-04-20)": 1,
       "Gottesdienste nur im Wochenlauf": 33,
       "älter als 7 Tage (2025-07-30)": 1,
+      "URL ungültig (HTTP 404)": 13,
       "redaktioneller Mehrfach-Roundup statt eindeutigem Einzelangebot": 1,
       "älter als 7 Tage (2025-11-09)": 1,
       "URL ungültig (HTTP 410)": 2,
@@ -24,7 +25,6 @@
       "abgelaufen (2026-03-16)": 4,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2021-02-05)": 1,
       "älter als 45 Tage trotz ausdrücklich noch aktive Gültigkeit (2016-09-01)": 1,
-      "URL ungültig (HTTP 404)": 12,
       "älter als 7 Tage (2026-04-19)": 28,
       "älter als 7 Tage (2016-10-30)": 3,
       "älter als 7 Tage (2023-09-21)": 3,
@@ -40,7 +40,6 @@
       "älter als 7 Tage (2018-03-05)": 1,
       "älter als 7 Tage (2025-10-08)": 1,
       "abgelaufen (2026-01-02)": 1,
-      "älter als 7 Tage (2023-07-18)": 1,
       "älter als 7 Tage (2009-05-01)": 1,
       "älter als 7 Tage (2014-06-07)": 1,
       "älter als 7 Tage (2025-12-30)": 1,
@@ -58,7 +57,7 @@
     "reasonCategoryCounts": {
       "kein konkreter Deal": 222,
       "älter als 7 Tage": 147,
-      "ungültige URL": 22,
+      "ungültige URL": 23,
       "Gottesdienste außerhalb Wochenlauf": 33,
       "sonstiges": 10,
       "abgelaufen": 14,
@@ -176,7 +175,7 @@
         "reasonCategoryCounts": {
           "kein konkreter Deal": 93,
           "älter als 7 Tage": 95,
-          "ungültige URL": 8,
+          "ungültige URL": 9,
           "Gottesdienste außerhalb Wochenlauf": 1,
           "sonstiges": 2,
           "nicht Wien": 1
@@ -449,15 +448,13 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 503)"
-      ],
+      "warnings": [],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 241,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "unklar: HTTP 503"
+      "urlStatus": "HTTP 200"
     },
     {
       "id": "events-11-20260222",
@@ -932,11 +929,11 @@
       "source": "Kirchen Verzeichnis",
       "url": "https://www.caritas-wien.at/concerts",
       "reasons": [
+        "URL ungültig (HTTP 404)",
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
-        "URL nicht eindeutig prüfbar (HTTP 503)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.698Z",
@@ -944,7 +941,7 @@
       "sourceAgeDays": 241,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "unklar: HTTP 503"
+      "urlStatus": "ungültig: HTTP 404"
     },
     {
       "id": "fc4g-18oearu",
@@ -2648,6 +2645,7 @@
         "älter als 7 Tage (2026-02-22)"
       ],
       "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Ablaufdatum gefunden"
       ],
       "sourceDate": "2026-02-22T21:13:07.696Z",
@@ -2655,7 +2653,7 @@
       "sourceAgeDays": 241,
       "expiryDate": "",
       "expirySource": "",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "extra-28-20260222",
@@ -2808,15 +2806,17 @@
       "url": "https://www.stephansdom.at",
       "reasons": [
         "kein konkretes Angebot erkennbar",
-        "älter als 7 Tage (2023-07-18)"
+        "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
-      "sourceDate": "2023-07-18T09:23:42.000Z",
-      "sourceDateSource": "url.publicationDate",
-      "sourceAgeDays": 1191,
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
+      "sourceDate": "2026-02-22T21:12:35.964Z",
+      "sourceDateSource": "deal.pubDate",
+      "sourceAgeDays": 241,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-3-20260222",
@@ -3165,13 +3165,15 @@
         "kein konkretes Angebot erkennbar",
         "älter als 7 Tage (2026-02-22)"
       ],
-      "warnings": [],
+      "warnings": [
+        "URL nicht eindeutig prüfbar (temporärer Fehler)"
+      ],
       "sourceDate": "2026-02-22T21:12:35.964Z",
       "sourceDateSource": "deal.pubDate",
       "sourceAgeDays": 241,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "gottesdienste-22-20260222",
@@ -3558,6 +3560,7 @@
       ],
       "warnings": [
         "Inhalt prüfen: Titel zu lang; Angebot kurz benennen, Bedingungen in den Details behalten",
+        "URL nicht eindeutig prüfbar (temporärer Fehler)",
         "kein Quell-/Post-Datum gefunden"
       ],
       "sourceDate": "",
@@ -3565,7 +3568,7 @@
       "sourceAgeDays": null,
       "expiryDate": "",
       "expirySource": "deal.expires",
-      "urlStatus": "HTTP 200"
+      "urlStatus": "unklar: temporärer URL-Fehler"
     },
     {
       "id": "meta-ig-18168155875488208",
