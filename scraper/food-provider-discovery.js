@@ -4,7 +4,7 @@ import { load } from 'cheerio';
 import { FoodProviderClient, ProviderError } from './food-provider-client.js';
 import { CAPS, DAY, freeBudget, planRequests, validateLedger, sourceAvailable } from './food-provider-policy.js';
 import { POWER_FOOD_SOURCES } from './power-food-sources.js';
-import { extractFoodOffers } from './power-food-extraction.js';
+import { extractFoodOffers, discoverFoodLinks } from './power-food-extraction.js';
 import { fetchOfficialFoodPage, verifyOfficialFoodDeal } from './power-food-verification.js';
 
 const FILES = { state: 'docs/food-provider-state.json', report: 'docs/food-provider-report.json',
@@ -16,6 +16,31 @@ async function write(file, data) {
   await fs.rename(`${file}.tmp`, file);
 }
 const reason = error => error instanceof ProviderError ? error.message : 'source-or-processing-error';
+export function applyYieldCooldown(state, results, now) {
+  for (const source of new Set(results.map(row => row.source))) {
+    const rows = results.filter(row => row.source === source);
+    if (rows.some(row => row.status === 'failed' || row.status === 'source-paused')) continue;
+    const examined = rows.filter(row => ['fetched', 'direct-sufficient'].includes(row.status));
+    if (!examined.length) continue;
+    if (examined.some(row => row.verifiedIncrementalCandidates > 0)) {
+      state.sources[source] = { attemptedAt: now.toISOString(), noGainCount: 0 };
+    } else {
+      const noGainCount = Math.min(3, (state.sources[source]?.noGainCount || 0) + 1);
+      state.sources[source] = { attemptedAt: now.toISOString(), noGainCount,
+        retryAt: new Date(+now + Math.min(30, 7 * 2 ** (noGainCount - 1)) * DAY).toISOString(), reason: 'no-incremental-offers' };
+    }
+  }
+}
+
+export function mergeProviderPending(previous, fresh, known, now) {
+  const combined = new Map();
+  for (const d of [...previous, ...fresh]) {
+    if (known.has(d.id) || Date.parse(d.providerDiscovery?.checkedAt || '') < +now - 2 * DAY
+        || !Number.isFinite(Date.parse(d.providerDiscovery?.checkedAt || ''))) continue;
+    combined.set(d.id, d);
+  }
+  return [...combined.values()].slice(-50);
+}
 async function usages(providers) {
   const result = {};
   for (const provider of providers) {
@@ -44,7 +69,7 @@ export async function collectPlan(plan, state, powerReport, {
       if (!direct.has(source.name)) direct.set(source.name, await fetchPage(source.url, source));
       const baseline = direct.get(source.name);
       const parsedDirect = extractFoodOffers(baseline.html, source, { now, pageUrl: baseline.finalUrl });
-      state.sources[source.name] = { attemptedAt: now.toISOString() };
+      state.sources[source.name] = { ...state.sources[source.name], attemptedAt: now.toISOString() };
       if (plan.mode === 'scan' && parsedDirect.deals.length) {
         results.push({ ...row, status: 'direct-sufficient', directCandidates: parsedDirect.deals.length });
         continue;
@@ -67,8 +92,11 @@ export async function collectPlan(plan, state, powerReport, {
       row.reportedCredits = page.cost;
       row.directCandidates = parsedDirect.deals.length;
       row.extractedCandidates = parsed.deals.length;
+      row.incrementalCandidates = parsed.deals.filter(d => !parsedDirect.deals.some(existing => existing.id === d.id)).length;
+      row.offerLinks = discoverFoodLinks(page.html, source, page.finalUrl, 10);
       row.rejected = parsed.rejected;
       row.verifiedCandidates = 0;
+      row.verifiedIncrementalCandidates = 0;
       row.unverifiedCandidates = 0;
       row.candidates = [];
       for (const deal of parsed.deals) {
@@ -77,6 +105,7 @@ export async function collectPlan(plan, state, powerReport, {
           reason: confirmation?.ok ? '' : confirmation?.reason || 'verification-unavailable' });
         if (!confirmation?.ok) { row.unverifiedCandidates++; continue; }
         row.verifiedCandidates++;
+        if (!parsedDirect.deals.some(existing => existing.id === deal.id)) row.verifiedIncrementalCandidates++;
         candidates.push({ ...confirmation.deal, votes: 0, approved: false, reviewRequired: true,
           providerDiscovery: { provider: task.provider, checkedAt: now.toISOString() } });
       }
@@ -92,6 +121,9 @@ export async function collectPlan(plan, state, powerReport, {
     }
     await save();
   }
+  applyYieldCooldown(state, results, now);
+  if (plan.mode === 'benchmark') state.benchmarkYieldApplied = true;
+  await save();
   return { results, candidates: [...new Map(candidates.map(d => [d.id, d])).values()] };
 }
 
@@ -106,6 +138,14 @@ export async function main(command = '--reserve') {
   const mode = process.env.FOOD_PROVIDER_MODE || 'scan';
   if (mode === 'benchmark' && process.env.GITHUB_EVENT_NAME !== 'workflow_dispatch') throw new Error('manual-benchmark-only');
   if (command === '--reserve') {
+    // Adopt the first benchmark's yield before scheduling another scan.
+    try {
+      const previous = await read(FILES.report);
+      if (previous.mode === 'benchmark' && previous.finishedAt && !state.benchmarkYieldApplied) {
+        applyYieldCooldown(state, previous.results || [], new Date(previous.finishedAt));
+        state.benchmarkYieldApplied = true;
+      }
+    } catch (error) { if (error.code !== 'ENOENT') throw error; }
     const usage = await usages(mode === 'benchmark' ? ['scraperapi', 'scrapingbee', 'zyte'] : ['scraperapi']);
     const plan = { runId, mode, createdAt: now.toISOString(), usage, ...planRequests(state, powerReport, usage, mode, now, runId) };
     if (plan.tasks.length) state.reservations.push({ runId, mode, at: now.toISOString(), tasks: plan.tasks });
@@ -127,11 +167,16 @@ export async function main(command = '--reserve') {
       for (const d of Array.isArray(value) ? value : value.deals || []) if (d.id) known.add(d.id);
     }
   }
-  const deals = output.candidates.filter(d => !known.has(d.id));
+  let previous = [];
+  try { previous = (await read(FILES.pending)).deals || []; }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
+  const deals = mergeProviderPending(previous, output.candidates, known, now);
   await write(FILES.pending, { updatedAt: now.toISOString(), deals, totalDeals: deals.length });
   const report = { ...plan, finishedAt: new Date().toISOString(), status: output.results.some(r => r.status === 'failed') ? 'partial' : 'completed',
     results: output.results, uniqueVerifiedCandidates: output.candidates.length,
-    alreadyKnown: output.candidates.length - deals.length, newPendingCandidates: deals.length,
+    alreadyKnown: output.candidates.filter(d => known.has(d.id)).length,
+    newPendingCandidates: output.candidates.filter(d => !known.has(d.id) && !previous.some(old => old.id === d.id)).length,
+    pendingCandidates: deals.length,
     slackMessagesSent: 0, note: 'New pending candidates still require central Slack validation and human approval.' };
   await write(FILES.report, report);
   console.log(JSON.stringify(report, null, 2));

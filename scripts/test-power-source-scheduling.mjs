@@ -61,7 +61,7 @@ assert.equal(new Set(ACTIVE_SOURCES.map(s => s.url)).size, ACTIVE_SOURCES.length
 
 for (const status of [403, 429]) {
   let calls = 0;
-  const row = await crawlFoodSource({ ...source, seeds: ['https://example.test/angebote'] }, {
+  const row = await crawlFoodSource({ ...source, render: true, seeds: ['https://example.test/angebote'] }, {
     now, fetchPage: async () => { calls++; throw sourceHttpError(status, '172800', now); },
     renderPage: neverFetch,
   });
@@ -70,6 +70,18 @@ for (const status of [403, 429]) {
   const scheduled = await runScheduledPowerSource(source, {}, async () => row, now);
   assert.ok(Date.parse(scheduled.cooldown.nextRetryAt) >= +now + 48 * hour);
 }
+let rendered = 0;
+const jsSource = { ...source, render: true };
+const jsPage = await crawlFoodSource(jsSource, {
+  now, maxPages: 1, fetchPage: async () => ({ html: '<html><body><div id="root"></div></body></html>' }),
+  renderPage: async () => { rendered++; return { html: '<html><body>No offers today</body></html>', finalUrl: source.url }; },
+});
+assert.equal(rendered, 1, 'explicit JavaScript source must render even without a noscript warning');
+assert.equal(jsPage.status, 'ok');
+const noBrowser = await crawlFoodSource(jsSource, { now, maxPages: 1,
+  fetchPage: async () => ({ html: '<html><body><div id="root"></div></body></html>' }) });
+assert.equal(noBrowser.pages[0].status, 'needs-browser');
+assert.equal(noBrowser.status, 'error', 'an unrendered shell is not a healthy no-offers result');
 let aliasCalls = 0;
 await crawlFoodSource({ ...source, seeds: ['https://example.test/angebote'] }, {
   now, fetchPage: async () => {

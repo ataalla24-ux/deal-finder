@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { FoodProviderClient, usageSummary } from '../scraper/food-provider-client.js';
 import { freeBudget, planRequests, sourceAvailable, DAY } from '../scraper/food-provider-policy.js';
-import { collectPlan } from '../scraper/food-provider-discovery.js';
+import { collectPlan, applyYieldCooldown, mergeProviderPending } from '../scraper/food-provider-discovery.js';
 import { POWER_FOOD_SOURCES } from '../scraper/power-food-sources.js';
 const now = new Date('2026-10-22T21:00:00Z');
 const empty = () => ({ version: 1, reservations: [], sources: {}, providerPauses: {} });
@@ -94,6 +94,7 @@ test('daily and rolling caps count failed/uncertain reservations and reject corr
   const state = empty();
   state.reservations.push({ runId: '1', at: now.toISOString(), mode: 'scan', tasks: [{ provider: 'scraperapi', source: 'KFC', cap: 10 }] });
   assert.notEqual(freeBudget('scraperapi', usages.scraperapi, state, 20, now), '');
+  assert.equal(freeBudget('scraperapi', usages.scraperapi, state, 20, new Date('2026-10-23T08:00:00Z')), '');
   state.reservations = Array.from({ length: 90 }, (_, i) => ({ runId: String(i), at: new Date(+now - 2 * DAY).toISOString(),
     mode: 'scan', tasks: [{ provider: 'scraperapi', source: 'KFC', cap: 10 }] }));
   assert.notEqual(freeBudget('scraperapi', usages.scraperapi, state, 10, now), '');
@@ -144,4 +145,36 @@ test('reservation saved before request; no replay or unverified candidate enters
   assert.equal(output.candidates.length, 0);
   assert.equal(output.results[0].unverifiedCandidates, 1);
   await assert.rejects(collectPlan(plan, state, power(), options), /reservation-mismatch-or-started/);
+});
+test('empty or duplicate pages pause for 7/14/28 days, verified incremental offers reset', () => {
+  const state = empty();
+  const rows = [{ source: 'KFC', status: 'fetched', verifiedIncrementalCandidates: 0 }];
+  for (const days of [7, 14, 28]) {
+    applyYieldCooldown(state, rows, now);
+    assert.equal(Date.parse(state.sources.KFC.retryAt), +now + days * DAY);
+  }
+  const before = JSON.stringify(state);
+  applyYieldCooldown(state, [{ source: 'KFC', status: 'source-paused' }], now);
+  assert.equal(JSON.stringify(state), before, 'skips cannot extend cooldowns');
+  applyYieldCooldown(state, [{ source: 'KFC', status: 'fetched', verifiedIncrementalCandidates: 1 }], now);
+  assert.equal(state.sources.KFC.noGainCount, 0);
+  assert.equal(state.sources.KFC.retryAt, undefined);
+});
+test('rotating sources cannot erase fresh unsent pending offers or replay old offers', () => {
+  const d = (id, age = 0) => ({ id, providerDiscovery: { checkedAt: new Date(+now - age * DAY).toISOString() } });
+  const merged = mergeProviderPending([d('keep'), d('old', 3), d('sent')], [d('new'), d('keep')], new Set(['sent']), now);
+  assert.deepEqual(merged.map(d => d.id), ['keep', 'new']);
+});
+test('JavaScript sources wait for content, preserving the same fixed price cap', async () => {
+  const s = POWER_FOOD_SOURCES.find(s => s.name === 'Burger King');
+  for (const provider of ['scraperapi', 'scrapingbee']) {
+    const client = new FoodProviderClient(provider, { env: { SCRAPINGAPI: 'private', SCRAPINGBEE: 'private' },
+      fetchImpl: async (input) => {
+        const url = new URL(input);
+        assert.equal(url.searchParams.get(provider === 'scraperapi' ? 'wait_for_selector' : 'wait_for'), 'h1,h2,h3');
+        return new Response('<html><h1>Coupons</h1></html>', { headers: { 'sa-final-url': s.url, 'spb-resolved-url': s.url,
+          'sa-credit-cost': '10', 'spb-cost': '5' } });
+      } });
+    await client.scrape(s);
+  }
 });

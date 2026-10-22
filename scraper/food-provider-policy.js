@@ -36,7 +36,8 @@ export function freeBudget(provider, usage, state, amount, now = new Date(), mod
       || usage.used < 0 || usage.maximum - usage.used < amount + 100 || usage.concurrency !== 0) return 'free-credit-unverified-or-low';
   if (provider === 'scraperapi') {
     if (![1000, 5000].includes(usage.maximum) || usage.payAsYouGoEnabled !== false || usage.autoUpgradeEnabled !== false) return 'not-confirmed-free-plan';
-    if (spent(+now - DAY) + amount > 25 || spent(+now - 31 * DAY) + amount > 900) return 'scraperapi-local-credit-cap';
+    const dayStart = Math.floor(+now / DAY) * DAY;
+    if (spent(dayStart - 1) + amount > 25 || spent(+now - 31 * DAY) + amount > 900) return 'scraperapi-local-credit-cap';
   } else {
     if (mode !== 'benchmark' || usage.maximum !== 1000 || +now >= Date.parse(BEE_TRIAL_END) || spent(0) + amount > 100) return 'scrapingbee-trial-only';
   }

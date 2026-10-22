@@ -61,6 +61,7 @@ export class FoodProviderClient {
     if (this.provider === 'scraperapi') {
       const url = new URL('https://api.scraperapi.com/');
       url.search = new URLSearchParams({ api_key: this.key || '', url: target, render: 'true', max_cost: '10' });
+      if (source.render) url.searchParams.set('wait_for_selector', 'h1,h2,h3');
       result = await this.request(url);
       html = result.text;
       finalUrl = result.headers.get('sa-final-url');
@@ -69,6 +70,7 @@ export class FoodProviderClient {
       const url = new URL('https://app.scrapingbee.com/api/v1/');
       url.search = new URLSearchParams({ url: target, render_js: 'true', premium_proxy: 'false',
         stealth_proxy: 'false', block_resources: 'true', transparent_status_code: 'true' });
+      if (source.render) url.searchParams.set('wait_for', 'h1,h2,h3');
       result = await this.request(url, { headers: { Authorization: `Bearer ${this.key || ''}` } });
       html = result.text;
       finalUrl = result.headers.get('spb-resolved-url');

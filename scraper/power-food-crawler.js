@@ -24,10 +24,10 @@ export async function crawlFoodSource(source, options) {
         throw new Error("foreign-redirect");
       seen.add(response.finalUrl || url);
       if (
-        /enable javascript|javascript.{0,20}(?:required|aktivieren)/i.test(
+        source.render === true || (/enable javascript|javascript.{0,20}(?:required|aktivieren)/i.test(
           response.html,
         ) &&
-        response.html.length < 30000
+        response.html.length < 30000)
       ) {
         if (options.renderPage) response = await options.renderPage(url);
         else {

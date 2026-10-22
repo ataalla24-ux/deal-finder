@@ -3,6 +3,9 @@ on:
   pull_request:
     paths:
       - "scraper/power-*.js"
+      - "scraper/food-provider-*.js"
+      - "scripts/test-food-provider-discovery.mjs"
+      - ".github/workflows/food-provider-discovery.yml"
       - "scraper/source-http-policy.js"
       - "scraper/instagram-search-discovery.js"
       - "scripts/test-instagram-search-discovery.mjs"
@@ -27,6 +30,9 @@ on:
     branches: [main]
     paths:
       - "scraper/power-*.js"
+      - "scraper/food-provider-*.js"
+      - "scripts/test-food-provider-discovery.mjs"
+      - ".github/workflows/food-provider-discovery.yml"
       - "scraper/source-http-policy.js"
       - "scraper/instagram-search-discovery.js"
       - "scripts/test-instagram-search-discovery.mjs"
@@ -62,6 +68,7 @@ jobs:
           node-version: "22"
       - run: npm ci
       - run: |
+          node --test scripts/test-food-provider-discovery.mjs
           node scripts/test-food-discovery-policy.mjs
           node scripts/test-instagram-food-discovery.mjs
           node scripts/test-food-source-expansion.mjs
