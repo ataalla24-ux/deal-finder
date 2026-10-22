@@ -17,7 +17,7 @@
     "paidOcrOrProviderCalls": 0,
     "limits": {"assetBytes":8388608,"pdfPages":2,"couponImages":12,"imagePixels":6000000,"totalPdfImagePixels":24000000,"ocrBudgetSeconds":180,"childTimeoutSeconds":20},
     "sourcePolicy": "Direct allowlisted official links only. No redirect/proxy retry after refusal. PDF preferred; at most six individual images when no PDF is linked.",
-    "verification": "Current page link plus a fresh download, re-extraction, exact coupon-byte hash and exact OCR-derived facts. PDF container hash retained for audit but not equality because the official endpoint regenerates CreationDate on every request.",
+    "verification": "Current page link plus a fresh download, re-extraction, exact coupon-byte hash and exact OCR-derived facts. Titles also allow case/ss normalization and the single lossless Product: Mehr als N % Rabatt -> Mehr als N % Rabatt auf Product editorial inversion; no changed quantity, benefit or conditions. PDF container hash retained for audit but not equality because the official endpoint regenerates CreationDate on every request.",
     "publication": "Existing Slack manual approval remains required. No automatic public offers.",
     "schedule": "Existing Power Scraper twice daily; no new schedule or API budget increase.",
     "localRealPdf": {"cards":11,"eligible":4,"withheld":7},
@@ -27,8 +27,20 @@
       "2 Fish & Chips normal: Mehr als 22 % Rabatt",
       "2 Backfisch-Baguettes Kalt oder heiss: 1+1 gratis"
     ],
-    "limitsNotClaimed": ["Not a universal PDF layout parser", "Superscript prices are not guessed", "Illegible quantities/conditions remain withheld", "Participating Vienna branch requires review", "Production Slack receipt must be checked separately"]
+    "limitsNotClaimed": ["Not a universal PDF layout parser", "Superscript prices are not guessed", "Illegible quantities/conditions remain withheld", "Participating Vienna branch requires review"]
   },
-  "tests": "Ten new offline cases plus existing Power, source scheduling, food discovery, official verification, source-backed content, approval and provider-budget suites passed locally.",
+  "production": {
+    "sourceCommit": "f5726df052a9791e1460d56c0731b998c51b851e",
+    "powerRun": 39864167557,
+    "dispatchRun": 39864326324,
+    "bothResults": "success",
+    "sourceResult": {"couponCards":11,"candidates":4,"withheld":7,"durationMs":17482},
+    "actualSlackThreadRead": "https://freefinder.slack.com/archives/C0AF8TXN2KW/p1792707774045619",
+    "deliveredIds": ["power-food-9b26ff9591c7","power-food-eca409ce31f3","power-food-95f20390bfdc","power-food-fea2efd7d1c2"],
+    "deliveredMessages": ["1792707777.229439","1792707780.605299","1792707783.552409","1792707786.873959"],
+    "postEditorialReverification": "All four actual queued cards passed a fresh official PDF download and OCR after the bounded title-compatibility correction. No approval reaction or public publication performed.",
+    "existingAiEditorialBudget": "Unchanged; the normal central pipeline used its existing editorial model. No claim of zero model calls."
+  },
+  "tests": "Eleven new offline media cases plus retirement tests and existing suites: all 17 local suites passed. Post-editor regression failed before and passed after the scoped correction. Power Food, Graph Coverage, Production Feed and Pages CI passed for the media source commit.",
   "evidenceDirectory": "output/food-media-2026-10-23/"
 }

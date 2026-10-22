@@ -8,6 +8,7 @@ import {
 import {POWER_FOOD_SOURCES,isAllowedFoodUrl} from '../scraper/power-food-sources.js';
 import {verifyOfficialFoodDeal} from '../scraper/power-food-verification.js';
 import {crawlFoodSource} from '../scraper/power-food-crawler.js';
+import {applyCardEditorial} from '../scraper/deal-card-editor.js';
 const source = POWER_FOOD_SOURCES.find(s=>s.name==='NORDSEE');
 const now = new Date('2026-10-23T12:00:00Z');
 const url = source.url+'/pdf';
@@ -104,4 +105,24 @@ test('unlinked documents, changed bytes, forged text, hash and dates do not gain
   assert.equal((await verifyOfficialFoodDeal(d,{now,fetchPage,couponMedia:{...mocks,readAsset:async()=>[{...card,sha256:'b'.repeat(64)}]}})).ok,false);
   const verified=await verifyOfficialFoodDeal({...d,validUntil:'2030-01-01'},{now,fetchPage,couponMedia:mocks});
   assert.equal(verified.deal.validUntil,'2026-11-30');
+});
+test('editorial coupon titles survive approval only with the same complete offer facts',async()=>{
+  const c={...card,benefit:'nur 7 49',discount:'MEHR ALS 19% RABATT'};
+  const {deal}=couponCardOffer(c,asset,source,now);
+  const title='Mehr als 19 % Rabatt auf 2 Alaska-Seelachsfilets gebacken & Beilage';
+  const edited=applyCardEditorial(deal,{title,titleEvidence:deal.description},{titleVerified:true,now});
+  assert.equal(edited.title,title);
+  const options={now,fetchPage:async()=>({html,finalUrl:source.url}),couponMedia:{...mocks,readAsset:async()=>[c]}};
+  assert.equal((await verifyOfficialFoodDeal(edited,options)).ok,true);
+  for(const altered of [
+    {...edited,title:title.replace('19','29')},
+    {...edited,title:title.replace('Mehr als ','')},
+    {...edited,title:title.replace('2 Alaska','3 Alaska')},
+    {...edited,title:title.replace(' & Beilage','')},
+    {...edited,title:title+' ohne Gutschein'},
+    {...edited,description:edited.description.replace('Nicht gültig an Autobahnraststätten.','')},
+  ]) assert.equal((await verifyOfficialFoodDeal(altered,options)).ok,false);
+  const baguette={...card,footer:card.footer.replace('2 Alaska-Seelachsfilets\ngebacken & Beilage','2 Backfisch-Baguettes\nKalt oder heiss')};
+  const {deal:b}=couponCardOffer(baguette,asset,source,now);
+  assert.equal((await verifyOfficialFoodDeal({...b,title:b.title.replace('Kalt oder heiss','kalt oder heiß')},{...options,couponMedia:{...mocks,readAsset:async()=>[baguette]}})).ok,true);
 });

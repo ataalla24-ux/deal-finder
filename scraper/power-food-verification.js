@@ -4,6 +4,18 @@ import { extractFoodOffers } from "./power-food-extraction.js";
 import { sourceHttpError } from "./source-http-policy.js";
 import { extractCouponMediaOffers } from './official-coupon-media.js';
 
+function couponTitleMatches(extracted, displayed) {
+  const normalize = value => String(value).normalize('NFC').toLowerCase()
+    .replace(/ß/g, 'ss').replace(/\s+/g, ' ').trim();
+  const original = normalize(extracted);
+  const current = normalize(displayed);
+  if (original === current) return true;
+  // Permit only this lossless editorial inversion, not arbitrary paraphrases
+  // or a caller's claim that its title has already been verified.
+  const discount = original.match(/^(.+): (mehr als \d{1,2} % rabatt)$/);
+  return Boolean(discount && current === `${discount[2]} auf ${discount[1]}`);
+}
+
 export async function fetchOfficialFoodPage(url, source) {
   // Check every redirect before requesting it; a merchant must not redirect
   // this evidence verifier to an arbitrary host or a non-Austrian market.
@@ -83,7 +95,7 @@ export async function verifyOfficialFoodDeal(deal, options = {}) {
   const match = parsed.deals.find(
     (d) =>
       d.description === deal.description &&
-      d.title === deal.title &&
+      (deal.evidence?.media ? couponTitleMatches(d.title, deal.title) : d.title === deal.title) &&
       d.brand === deal.brand &&
       d.evidence.contentHash === deal.evidence?.contentHash &&
       (!deal.evidence?.media || /^[a-f0-9]{64}$/.test(deal.evidence.media.cardSha256 || '')
